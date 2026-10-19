@@ -1,0 +1,17 @@
+{
+  "architecture": "x64",
+  "build_log_sha256": "4a8d373d8095f00ecf013218c62d798c7009b6bc3bd70067a4fbadbcd9c52fee",
+  "cmake_options": {
+    "BUILD_TESTING": "OFF",
+    "CSL_BUILD_EXP04_REPORT": "ON",
+    "CSL_ENABLE_HIGHS": "OFF",
+    "CSL_ENABLE_QHULL": "OFF"
+  },
+  "command": "python -m cmake -S . -B <fresh-build> -DBUILD_TESTING=OFF -DCSL_ENABLE_HIGHS=OFF -DCSL_ENABLE_QHULL=OFF -DCSL_BUILD_EXP04_REPORT=ON; python -m cmake --build <fresh-build> --config Release --target csl_exp04_replay_report",
+  "compiler": "MSVC 19.44 / Visual Studio 2022",
+  "configuration": "Release",
+  "configure_log_sha256": "21a673253987e9a9d98af8e77cfb1054d099e644dc404ff1fe1654137cbe52d2",
+  "driver_source_sha256": "8d50a7831f19629d18364edf58706eede5e93f0defe33a432be507e04571da23",
+  "executable_sha256": "5d28b9d4d8712fc73c0f6aa9a9534d1a870c0af1e7db97d5c9a4e3079abe3e40",
+  "raw_logs": "Build logs were retained in the local capture; hashes identify those exact bytes."
+}

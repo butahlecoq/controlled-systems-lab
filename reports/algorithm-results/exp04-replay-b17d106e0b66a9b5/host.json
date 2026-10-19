@@ -1,0 +1,16 @@
+{
+  "cpu": {
+    "Name": "12th Gen Intel(R) Core(TM) i5-12400F",
+    "NumberOfCores": 6,
+    "NumberOfLogicalProcessors": 12
+  },
+  "os": "Windows 11 Home",
+  "os_version": "10.0.22631",
+  "os_build": "22631",
+  "architecture": "AMD64",
+  "powershell": "7.6.7",
+  "source_commit": "eb4497e08f1532c732163e677d5d7aa03697c7de",
+  "source_tree": "b68a51f8d46cb59c69d4c0add81e1e54d218f19b",
+  "source_status": [],
+  "collected_utc": "2026-10-19T05:36:55.9082880Z"
+}

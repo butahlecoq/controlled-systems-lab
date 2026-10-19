@@ -1,0 +1,727 @@
+{
+  "build": {
+    "architecture": "x64",
+    "build_log_sha256": "4a8d373d8095f00ecf013218c62d798c7009b6bc3bd70067a4fbadbcd9c52fee",
+    "cmake_options": {
+      "BUILD_TESTING": "OFF",
+      "CSL_BUILD_EXP04_REPORT": "ON",
+      "CSL_ENABLE_HIGHS": "OFF",
+      "CSL_ENABLE_QHULL": "OFF"
+    },
+    "command": "python -m cmake -S . -B <fresh-build> -DBUILD_TESTING=OFF -DCSL_ENABLE_HIGHS=OFF -DCSL_ENABLE_QHULL=OFF -DCSL_BUILD_EXP04_REPORT=ON; python -m cmake --build <fresh-build> --config Release --target csl_exp04_replay_report",
+    "compiler": "MSVC 19.44 / Visual Studio 2022",
+    "configuration": "Release",
+    "configure_log_sha256": "21a673253987e9a9d98af8e77cfb1054d099e644dc404ff1fe1654137cbe52d2",
+    "driver_source_sha256": "8d50a7831f19629d18364edf58706eede5e93f0defe33a432be507e04571da23",
+    "executable_sha256": "5d28b9d4d8712fc73c0f6aa9a9534d1a870c0af1e7db97d5c9a4e3079abe3e40",
+    "raw_logs": "Build logs were retained in the local capture; hashes identify those exact bytes."
+  },
+  "environment": {
+    "architecture": "AMD64",
+    "collected_utc": "2026-10-19T05:36:55.9082880Z",
+    "cpu": {
+      "Name": "12th Gen Intel(R) Core(TM) i5-12400F",
+      "NumberOfCores": 6,
+      "NumberOfLogicalProcessors": 12
+    },
+    "os": "Windows 11 Home",
+    "os_build": "22631",
+    "os_version": "10.0.22631",
+    "powershell": "7.6.7",
+    "source_commit": "eb4497e08f1532c732163e677d5d7aa03697c7de",
+    "source_status": [],
+    "source_tree": "b68a51f8d46cb59c69d4c0add81e1e54d218f19b"
+  },
+  "fixtures": {
+    "plane-forward": {
+      "controls": [
+        [
+          0.0
+        ],
+        [
+          1.0
+        ]
+      ],
+      "expected_objective": 3.0,
+      "expected_states": [
+        [
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0
+        ],
+        [
+          3.0,
+          1.0
+        ]
+      ],
+      "input_sha256": "8294b400f4e8d43d66f0fef45f4e8b0a8f919ad308f3e0de165965fd1aab9602",
+      "plant": {
+        "absolute_tolerance": 1e-12,
+        "control_units": [
+          "dimensionless"
+        ],
+        "hold": "constant_on_interval",
+        "initial_state": [
+          0.0,
+          0.0
+        ],
+        "integration": "exact_discrete_map",
+        "objective": "terminal length",
+        "objective_unit": "length",
+        "parameter": {
+          "name": "quadratic_gain",
+          "unit": "dimensionless",
+          "value": 1.0
+        },
+        "physical_times": [
+          0.0,
+          1.0,
+          3.0
+        ],
+        "plant": "analytic.interval-plane",
+        "relative_tolerance": 1e-12,
+        "source": "EXP-04 declared two-state toy",
+        "state_dimension": 2,
+        "state_units": [
+          "length",
+          "action"
+        ],
+        "transition": "x[k+1] = x[k] + (t[k+1]-t[k])*u[k] + u[k]^2; y[k+1] = y[k] + u[k]",
+        "version": "1"
+      }
+    },
+    "plane-reverse": {
+      "controls": [
+        [
+          1.0
+        ],
+        [
+          0.0
+        ]
+      ],
+      "expected_objective": 2.0,
+      "expected_states": [
+        [
+          0.0,
+          0.0
+        ],
+        [
+          2.0,
+          1.0
+        ],
+        [
+          2.0,
+          1.0
+        ]
+      ],
+      "input_sha256": "43fe2160ee6b83be4ca8c23e6dd672a702d462901a32e9d7b77520cbddc5919f",
+      "plant": {
+        "absolute_tolerance": 1e-12,
+        "control_units": [
+          "dimensionless"
+        ],
+        "hold": "constant_on_interval",
+        "initial_state": [
+          0.0,
+          0.0
+        ],
+        "integration": "exact_discrete_map",
+        "objective": "terminal length",
+        "objective_unit": "length",
+        "parameter": {
+          "name": "quadratic_gain",
+          "unit": "dimensionless",
+          "value": 1.0
+        },
+        "physical_times": [
+          0.0,
+          1.0,
+          3.0
+        ],
+        "plant": "analytic.interval-plane",
+        "relative_tolerance": 1e-12,
+        "source": "EXP-04 declared two-state toy",
+        "state_dimension": 2,
+        "state_units": [
+          "length",
+          "action"
+        ],
+        "transition": "x[k+1] = x[k] + (t[k+1]-t[k])*u[k] + u[k]^2; y[k+1] = y[k] + u[k]",
+        "version": "1"
+      }
+    },
+    "scalar-endpoint": {
+      "controls": [
+        [
+          0.0
+        ],
+        [
+          1.0
+        ]
+      ],
+      "expected_objective": 2.0,
+      "expected_states": [
+        [
+          0.0
+        ],
+        [
+          0.0
+        ],
+        [
+          2.0
+        ]
+      ],
+      "input_sha256": "9eaf4b7bbaa0948389db2a53648ae571aa20c8b0daf2810103b957650f78f59d",
+      "plant": {
+        "absolute_tolerance": 1e-12,
+        "control_units": [
+          "dimensionless"
+        ],
+        "hold": "constant_on_interval",
+        "initial_state": [
+          0.0
+        ],
+        "integration": "exact_discrete_map",
+        "objective": "terminal state",
+        "objective_unit": "dimensionless",
+        "parameter": {
+          "name": "quadratic_gain",
+          "unit": "dimensionless",
+          "value": 1.0
+        },
+        "physical_times": [
+          0.0,
+          1.0,
+          2.0
+        ],
+        "plant": "analytic.quadratic-step",
+        "relative_tolerance": 1e-12,
+        "source": "EXP-04 declared analytic toy",
+        "state_dimension": 1,
+        "state_units": [
+          "dimensionless"
+        ],
+        "transition": "x[k+1] = x[k] + u[k] + u[k]^2",
+        "version": "1"
+      }
+    },
+    "scalar-even": {
+      "controls": [
+        [
+          0.5
+        ],
+        [
+          0.5
+        ]
+      ],
+      "expected_objective": 1.5,
+      "expected_states": [
+        [
+          0.0
+        ],
+        [
+          0.75
+        ],
+        [
+          1.5
+        ]
+      ],
+      "input_sha256": "cc91c9a7ddda9bd4ad02a9eae7e6630681dbbd1abe382805503b48b9818c8122",
+      "plant": {
+        "absolute_tolerance": 1e-12,
+        "control_units": [
+          "dimensionless"
+        ],
+        "hold": "constant_on_interval",
+        "initial_state": [
+          0.0
+        ],
+        "integration": "exact_discrete_map",
+        "objective": "terminal state",
+        "objective_unit": "dimensionless",
+        "parameter": {
+          "name": "quadratic_gain",
+          "unit": "dimensionless",
+          "value": 1.0
+        },
+        "physical_times": [
+          0.0,
+          1.0,
+          2.0
+        ],
+        "plant": "analytic.quadratic-step",
+        "relative_tolerance": 1e-12,
+        "source": "EXP-04 declared analytic toy",
+        "state_dimension": 1,
+        "state_units": [
+          "dimensionless"
+        ],
+        "transition": "x[k+1] = x[k] + u[k] + u[k]^2",
+        "version": "1"
+      }
+    }
+  },
+  "limits": [
+    "No historical B04 plant or complete B04 control history is claimed.",
+    "No nonlinear optimization, feasibility certificate, or optimal family is claimed.",
+    "Descriptive single-adapter timings only; no comparator, speedup, limiter profile, or broad performance inference."
+  ],
+  "measurement": {
+    "clock": "std::chrono::steady_clock",
+    "excludes": [
+      "driver fixture construction",
+      "post-call literal oracle checks",
+      "CSV serialization",
+      "process launch",
+      "HTML rendering"
+    ],
+    "failures": 0,
+    "internal_counters": "unavailable",
+    "interval": "ReplayRecord.replay_time from entry of public replay to return; per-call durations summed within each 1000-call batch",
+    "measured_order": "seven rotated four-case rounds; 1000 fresh public replay calls per case per round",
+    "native_threads_actual": 1,
+    "native_threads_requested": 1,
+    "raw_measure_sha256": "abdf18e3b6675a7e1d7a4822ba31c32b1c07295b02058c3b14e6feec3b30bf48",
+    "raw_smoke_sha256": "d5d9b08845faceb54c6c7b03bd7383629e6702d9a3360ca6f5e4d799d47463e6",
+    "summary": [
+      {
+        "batches": 7,
+        "calls_per_batch": 1000,
+        "case": "scalar-endpoint",
+        "failures": 0,
+        "max_batch_ns": 882900,
+        "median_batch_ns": 786900,
+        "min_batch_ns": 541100,
+        "successes": 7000
+      },
+      {
+        "batches": 7,
+        "calls_per_batch": 1000,
+        "case": "scalar-even",
+        "failures": 0,
+        "max_batch_ns": 962000,
+        "median_batch_ns": 625200,
+        "min_batch_ns": 525000,
+        "successes": 7000
+      },
+      {
+        "batches": 7,
+        "calls_per_batch": 1000,
+        "case": "plane-forward",
+        "failures": 0,
+        "max_batch_ns": 939400,
+        "median_batch_ns": 546800,
+        "min_batch_ns": 538400,
+        "successes": 7000
+      },
+      {
+        "batches": 7,
+        "calls_per_batch": 1000,
+        "case": "plane-reverse",
+        "failures": 0,
+        "max_batch_ns": 967600,
+        "median_batch_ns": 717600,
+        "min_batch_ns": 549000,
+        "successes": 7000
+      }
+    ],
+    "trials": [
+      {
+        "calls": "1000",
+        "case": "scalar-endpoint",
+        "elapsed_ns": "741300",
+        "objective": "2",
+        "phase": "warmup",
+        "repetition": "0",
+        "status": "complete",
+        "terminal_x": "2",
+        "terminal_y": "0",
+        "verified": "true"
+      },
+      {
+        "calls": "1000",
+        "case": "scalar-even",
+        "elapsed_ns": "535700",
+        "objective": "1.5",
+        "phase": "warmup",
+        "repetition": "0",
+        "status": "complete",
+        "terminal_x": "1.5",
+        "terminal_y": "0",
+        "verified": "true"
+      },
+      {
+        "calls": "1000",
+        "case": "plane-forward",
+        "elapsed_ns": "753300",
+        "objective": "3",
+        "phase": "warmup",
+        "repetition": "0",
+        "status": "complete",
+        "terminal_x": "3",
+        "terminal_y": "1",
+        "verified": "true"
+      },
+      {
+        "calls": "1000",
+        "case": "plane-reverse",
+        "elapsed_ns": "562900",
+        "objective": "2",
+        "phase": "warmup",
+        "repetition": "0",
+        "status": "complete",
+        "terminal_x": "2",
+        "terminal_y": "1",
+        "verified": "true"
+      },
+      {
+        "calls": "1000",
+        "case": "scalar-endpoint",
+        "elapsed_ns": "867500",
+        "objective": "2",
+        "phase": "trial",
+        "repetition": "0",
+        "status": "complete",
+        "terminal_x": "2",
+        "terminal_y": "0",
+        "verified": "true"
+      },
+      {
+        "calls": "1000",
+        "case": "scalar-even",
+        "elapsed_ns": "525000",
+        "objective": "1.5",
+        "phase": "trial",
+        "repetition": "0",
+        "status": "complete",
+        "terminal_x": "1.5",
+        "terminal_y": "0",
+        "verified": "true"
+      },
+      {
+        "calls": "1000",
+        "case": "plane-forward",
+        "elapsed_ns": "544800",
+        "objective": "3",
+        "phase": "trial",
+        "repetition": "0",
+        "status": "complete",
+        "terminal_x": "3",
+        "terminal_y": "1",
+        "verified": "true"
+      },
+      {
+        "calls": "1000",
+        "case": "plane-reverse",
+        "elapsed_ns": "554400",
+        "objective": "2",
+        "phase": "trial",
+        "repetition": "0",
+        "status": "complete",
+        "terminal_x": "2",
+        "terminal_y": "1",
+        "verified": "true"
+      },
+      {
+        "calls": "1000",
+        "case": "scalar-even",
+        "elapsed_ns": "671200",
+        "objective": "1.5",
+        "phase": "trial",
+        "repetition": "1",
+        "status": "complete",
+        "terminal_x": "1.5",
+        "terminal_y": "0",
+        "verified": "true"
+      },
+      {
+        "calls": "1000",
+        "case": "plane-forward",
+        "elapsed_ns": "538400",
+        "objective": "3",
+        "phase": "trial",
+        "repetition": "1",
+        "status": "complete",
+        "terminal_x": "3",
+        "terminal_y": "1",
+        "verified": "true"
+      },
+      {
+        "calls": "1000",
+        "case": "plane-reverse",
+        "elapsed_ns": "799900",
+        "objective": "2",
+        "phase": "trial",
+        "repetition": "1",
+        "status": "complete",
+        "terminal_x": "2",
+        "terminal_y": "1",
+        "verified": "true"
+      },
+      {
+        "calls": "1000",
+        "case": "scalar-endpoint",
+        "elapsed_ns": "786900",
+        "objective": "2",
+        "phase": "trial",
+        "repetition": "1",
+        "status": "complete",
+        "terminal_x": "2",
+        "terminal_y": "0",
+        "verified": "true"
+      },
+      {
+        "calls": "1000",
+        "case": "plane-forward",
+        "elapsed_ns": "538800",
+        "objective": "3",
+        "phase": "trial",
+        "repetition": "2",
+        "status": "complete",
+        "terminal_x": "3",
+        "terminal_y": "1",
+        "verified": "true"
+      },
+      {
+        "calls": "1000",
+        "case": "plane-reverse",
+        "elapsed_ns": "717600",
+        "objective": "2",
+        "phase": "trial",
+        "repetition": "2",
+        "status": "complete",
+        "terminal_x": "2",
+        "terminal_y": "1",
+        "verified": "true"
+      },
+      {
+        "calls": "1000",
+        "case": "scalar-endpoint",
+        "elapsed_ns": "882900",
+        "objective": "2",
+        "phase": "trial",
+        "repetition": "2",
+        "status": "complete",
+        "terminal_x": "2",
+        "terminal_y": "0",
+        "verified": "true"
+      },
+      {
+        "calls": "1000",
+        "case": "scalar-even",
+        "elapsed_ns": "813300",
+        "objective": "1.5",
+        "phase": "trial",
+        "repetition": "2",
+        "status": "complete",
+        "terminal_x": "1.5",
+        "terminal_y": "0",
+        "verified": "true"
+      },
+      {
+        "calls": "1000",
+        "case": "plane-reverse",
+        "elapsed_ns": "751500",
+        "objective": "2",
+        "phase": "trial",
+        "repetition": "3",
+        "status": "complete",
+        "terminal_x": "2",
+        "terminal_y": "1",
+        "verified": "true"
+      },
+      {
+        "calls": "1000",
+        "case": "scalar-endpoint",
+        "elapsed_ns": "841400",
+        "objective": "2",
+        "phase": "trial",
+        "repetition": "3",
+        "status": "complete",
+        "terminal_x": "2",
+        "terminal_y": "0",
+        "verified": "true"
+      },
+      {
+        "calls": "1000",
+        "case": "scalar-even",
+        "elapsed_ns": "962000",
+        "objective": "1.5",
+        "phase": "trial",
+        "repetition": "3",
+        "status": "complete",
+        "terminal_x": "1.5",
+        "terminal_y": "0",
+        "verified": "true"
+      },
+      {
+        "calls": "1000",
+        "case": "plane-forward",
+        "elapsed_ns": "939400",
+        "objective": "3",
+        "phase": "trial",
+        "repetition": "3",
+        "status": "complete",
+        "terminal_x": "3",
+        "terminal_y": "1",
+        "verified": "true"
+      },
+      {
+        "calls": "1000",
+        "case": "scalar-endpoint",
+        "elapsed_ns": "563100",
+        "objective": "2",
+        "phase": "trial",
+        "repetition": "4",
+        "status": "complete",
+        "terminal_x": "2",
+        "terminal_y": "0",
+        "verified": "true"
+      },
+      {
+        "calls": "1000",
+        "case": "scalar-even",
+        "elapsed_ns": "546600",
+        "objective": "1.5",
+        "phase": "trial",
+        "repetition": "4",
+        "status": "complete",
+        "terminal_x": "1.5",
+        "terminal_y": "0",
+        "verified": "true"
+      },
+      {
+        "calls": "1000",
+        "case": "plane-forward",
+        "elapsed_ns": "546800",
+        "objective": "3",
+        "phase": "trial",
+        "repetition": "4",
+        "status": "complete",
+        "terminal_x": "3",
+        "terminal_y": "1",
+        "verified": "true"
+      },
+      {
+        "calls": "1000",
+        "case": "plane-reverse",
+        "elapsed_ns": "554100",
+        "objective": "2",
+        "phase": "trial",
+        "repetition": "4",
+        "status": "complete",
+        "terminal_x": "2",
+        "terminal_y": "1",
+        "verified": "true"
+      },
+      {
+        "calls": "1000",
+        "case": "scalar-even",
+        "elapsed_ns": "625200",
+        "objective": "1.5",
+        "phase": "trial",
+        "repetition": "5",
+        "status": "complete",
+        "terminal_x": "1.5",
+        "terminal_y": "0",
+        "verified": "true"
+      },
+      {
+        "calls": "1000",
+        "case": "plane-forward",
+        "elapsed_ns": "769400",
+        "objective": "3",
+        "phase": "trial",
+        "repetition": "5",
+        "status": "complete",
+        "terminal_x": "3",
+        "terminal_y": "1",
+        "verified": "true"
+      },
+      {
+        "calls": "1000",
+        "case": "plane-reverse",
+        "elapsed_ns": "967600",
+        "objective": "2",
+        "phase": "trial",
+        "repetition": "5",
+        "status": "complete",
+        "terminal_x": "2",
+        "terminal_y": "1",
+        "verified": "true"
+      },
+      {
+        "calls": "1000",
+        "case": "scalar-endpoint",
+        "elapsed_ns": "551700",
+        "objective": "2",
+        "phase": "trial",
+        "repetition": "5",
+        "status": "complete",
+        "terminal_x": "2",
+        "terminal_y": "0",
+        "verified": "true"
+      },
+      {
+        "calls": "1000",
+        "case": "plane-forward",
+        "elapsed_ns": "557700",
+        "objective": "3",
+        "phase": "trial",
+        "repetition": "6",
+        "status": "complete",
+        "terminal_x": "3",
+        "terminal_y": "1",
+        "verified": "true"
+      },
+      {
+        "calls": "1000",
+        "case": "plane-reverse",
+        "elapsed_ns": "549000",
+        "objective": "2",
+        "phase": "trial",
+        "repetition": "6",
+        "status": "complete",
+        "terminal_x": "2",
+        "terminal_y": "1",
+        "verified": "true"
+      },
+      {
+        "calls": "1000",
+        "case": "scalar-endpoint",
+        "elapsed_ns": "541100",
+        "objective": "2",
+        "phase": "trial",
+        "repetition": "6",
+        "status": "complete",
+        "terminal_x": "2",
+        "terminal_y": "0",
+        "verified": "true"
+      },
+      {
+        "calls": "1000",
+        "case": "scalar-even",
+        "elapsed_ns": "558100",
+        "objective": "1.5",
+        "phase": "trial",
+        "repetition": "6",
+        "status": "complete",
+        "terminal_x": "1.5",
+        "terminal_y": "0",
+        "verified": "true"
+      }
+    ],
+    "warmup": "one excluded 1000-call batch per case",
+    "workers_actual": 1,
+    "workers_requested": 1,
+    "workspace_reuse": "fresh ReplayRecord for each call; immutable plant and control declarations reused"
+  },
+  "report_id": "exp04-replay-b17d106e0b66a9b5",
+  "schema": "csl.exp04-independent-replay/1",
+  "scope": "Independent exact-discrete plant replay for four authored analytic histories",
+  "source_commit": "eb4497e08f1532c732163e677d5d7aa03697c7de",
+  "source_tree": "b68a51f8d46cb59c69d4c0add81e1e54d218f19b"
+}
