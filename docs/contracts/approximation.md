@@ -102,7 +102,9 @@ column can still participate in factor equalities.
 
 `make_axis_cover_registration` uses `ApproximationPort` for an outer native
 zonotope. It retains the largest-magnitude source columns that fit with axis
-replacement factors under the requested generator-column budget. Every omitted
+replacement factors under the requested generator-column budget. Replacement
+factor IDs include the complete request and source identities, so separate
+requests through one registration do not accidentally synchronize. Every omitted
 column contributes its absolute stored coefficient to a coordinate radius;
 each radius is rounded outward from an exact dyadic sum. Retained IDs stay
 unchanged. Removed IDs are relaxed into independent axes, and source factor

@@ -129,13 +129,16 @@ registry::Capability cover_capability(const ApproximationRequest& request,
     return registry::Offer{output};
 }
 std::optional<double> radius(const sets::GeneratorSet& source,
-                             const std::vector<bool>& retained,std::size_t row) {
+                             const std::vector<bool>& retained,std::size_t row,
+                             const ExecutionContext& context,bool& interrupted) {
     using namespace detail::exact_detail;
     Integer sum;
     const auto count=source.factor_ids().size();
-    for(std::size_t factor=0;factor<count;++factor)
+    for(std::size_t factor=0;factor<count;++factor) {
+        if(stopped(context)) { interrupted=true; return std::nullopt; }
         if(!retained[factor] && !add_dyadic(sum,
             decode(std::abs(source.generators().values[row*count+factor]))))return std::nullopt;
+    }
     return outward_binary64(sum);
 }
 class CoverWorkspace final : public SetApproximatorWorkspace {
@@ -151,15 +154,22 @@ public:
         const auto dimension=source.center().size(),count=source.factor_ids().size();
         std::vector<std::size_t> order(count);
         std::iota(order.begin(),order.end(),0);
-        const auto magnitude=[&](std::size_t factor) {
+        std::vector<double> magnitudes(count);
+        for(std::size_t factor=0;factor<count;++factor) {
             double largest=0;
-            for(std::size_t row=0;row<dimension;++row)
+            for(std::size_t row=0;row<dimension;++row) {
+                if(stopped(context))return stop(context);
                 largest=std::max(largest,std::abs(source.generators().values[row*count+factor]));
-            return largest;
-        };
-        std::stable_sort(order.begin(),order.end(),[&](std::size_t a,std::size_t b) {
-            return magnitude(a)>magnitude(b);
-        });
+            }
+            magnitudes[factor]=largest;
+        }
+        struct SortStopped {};
+        try {
+            std::stable_sort(order.begin(),order.end(),[&](std::size_t a,std::size_t b) {
+                if(stopped(context))throw SortStopped{};
+                return magnitudes[a]>magnitudes[b];
+            });
+        } catch(const SortStopped&) {return stop(context);}
         std::vector<bool> keep(count,false);
         std::vector<double> radii(dimension);
         std::size_t retained_count=0,axis_count=0;
@@ -172,7 +182,9 @@ public:
             bool finite=true;
             for(std::size_t row=0;row<dimension;++row) {
                 if(stopped(context))return stop(context);
-                const auto bound=radius(source,keep,row);
+                bool interrupted=false;
+                const auto bound=radius(source,keep,row,context,interrupted);
+                if(interrupted)return stop(context);
                 if(!bound) { finite=false; break; }
                 radii[row]=*bound;
                 axis_count+=*bound!=0;
@@ -203,10 +215,18 @@ public:
         }
         std::unordered_set<std::string> names;
         for(const auto& factor:source.factor_ids())names.insert(factor.value);
+        const auto component=[](const std::string& value) {
+            return std::to_string(value.size())+":"+value;
+        };
+        const auto axis_scope="app03-axis/"+
+            component(request.identity.problem.value)+
+            component(request.identity.request.value)+
+            component(request.input.id.value)+
+            component(output_id_.value)+"/";
         std::size_t axis_column=retained_count;
         for(std::size_t row=0;row<dimension;++row) {
             if(radii[row]==0)continue;
-            std::string name="app03-axis/"+output_id_.value+"/"+std::to_string(row);
+            std::string name=axis_scope+std::to_string(row);
             while(names.contains(name))name.push_back('_');
             names.insert(name);
             output.factor_ids.push_back({std::move(name)});

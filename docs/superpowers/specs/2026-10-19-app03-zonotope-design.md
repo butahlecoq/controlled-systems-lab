@@ -34,7 +34,8 @@ source `FactorId` and exact stored coefficients. Axis factors have fresh IDs
 and one nonzero coefficient each, rounded outward from the exact sum of
 absolute removed coefficients. If no admissible budget exists, the method
 returns unsupported. Constraints in the source are relaxed; the output has
-none. New factor IDs cannot collide with source IDs.
+none. New factor IDs are scoped by the complete request and source identity,
+with length-prefixed components, and cannot collide with source IDs.
 
 The approximation policy reconstructs the claim independently from immutable
 native handles. It requires matching centers and coordinate labels, no output

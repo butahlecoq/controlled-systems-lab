@@ -130,13 +130,25 @@ bool generator_axis_cover(const sets::GeneratorSet& source,const sets::Generator
         const auto found=source_positions.find(output.factor_ids()[factor].value);
         if(found!=source_positions.end()) {
             retained[found->second]=true;
-            for(std::size_t row=0;row<dimension;++row)
+            for(std::size_t row=0;row<dimension;++row) {
+                if(context.cancellation.stop_requested() ||
+                   (context.deadline && std::chrono::steady_clock::now()>=*context.deadline)) {
+                    interrupted=true;
+                    return false;
+                }
                 if(output.generators().values[row*output_count+factor]!=
                    source.generators().values[row*source_count+found->second])return false;
+            }
         } else {
             std::size_t nonzero=0;
-            for(std::size_t row=0;row<dimension;++row)
+            for(std::size_t row=0;row<dimension;++row) {
+                if(context.cancellation.stop_requested() ||
+                   (context.deadline && std::chrono::steady_clock::now()>=*context.deadline)) {
+                    interrupted=true;
+                    return false;
+                }
                 nonzero+=output.generators().values[row*output_count+factor]!=0;
+            }
             if(nonzero>1)return false;
             new_axis[factor]=true;
         }
@@ -148,12 +160,24 @@ bool generator_axis_cover(const sets::GeneratorSet& source,const sets::Generator
             return false;
         }
         Integer required,available;
-        for(std::size_t factor=0;factor<source_count;++factor)
+        for(std::size_t factor=0;factor<source_count;++factor) {
+            if(context.cancellation.stop_requested() ||
+               (context.deadline && std::chrono::steady_clock::now()>=*context.deadline)) {
+                interrupted=true;
+                return false;
+            }
             if(!retained[factor] && !add_dyadic(required,
                 decode(std::abs(source.generators().values[row*source_count+factor]))))return false;
-        for(std::size_t factor=0;factor<output_count;++factor)
+        }
+        for(std::size_t factor=0;factor<output_count;++factor) {
+            if(context.cancellation.stop_requested() ||
+               (context.deadline && std::chrono::steady_clock::now()>=*context.deadline)) {
+                interrupted=true;
+                return false;
+            }
             if(new_axis[factor] && !add_dyadic(available,
                 decode(std::abs(output.generators().values[row*output_count+factor]))))return false;
+        }
         if(compare_magnitude(required,available)>0)return false;
     }
     return true;

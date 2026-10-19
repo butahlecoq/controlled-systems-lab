@@ -2,6 +2,7 @@
 #include <doctest/doctest.h>
 #include <csl/geometry/zonotope_reduction.hpp>
 #include <csl/geometry/approximation.hpp>
+#include <csl/geometry/generators.hpp>
 #include <csl/registry/provider.hpp>
 #include <csl/sets/generator_sets.hpp>
 #include <algorithm>
@@ -151,4 +152,32 @@ TEST_CASE("zero-factor and stopped reductions retain explicit outcomes") {
     outcome=run_registered(entries,method,query,context);
     REQUIRE(std::holds_alternative<OperationStopped>(outcome));
     CHECK(std::get<OperationStopped>(outcome).reason==StopReason::deadline_expired);
+}
+
+TEST_CASE("separate reduction requests produce independent replacement factors") {
+    const auto first=generator("first-source",{0,0},{2,2,{1,1,0,0}},
+        {{"first-a"},{"first-b"}});
+    const auto second=generator("second-source",{0,0},{2,2,{1,1,0,0}},
+        {{"second-a"},{"second-b"}});
+    auto registration=make_axis_cover_registration({"shared-registration-output"});
+    registry::Registry<registry::ApproximationPort> entries;
+    const registry::Method method{registration.identity.id,registration.identity.version};
+    REQUIRE_FALSE(entries.add(std::move(registration)).has_value());
+    auto query=ApproximationRequest{{{"app03"},{"first-reduction"},{"first-reference"}},
+        first.as_handle(),{"csl.zonotope"},SetRelation::outer,1,Assurance::numerical};
+    auto first_run=run_registered(entries,method,query,ExecutionContext{});
+    REQUIRE(std::holds_alternative<EnclosedApproximation>(first_run));
+    query.identity.request={"second-reduction"};
+    query.identity.ideal_output={"second-reference"};
+    query.input=second.as_handle();
+    auto second_run=run_registered(entries,method,query,ExecutionContext{});
+    REQUIRE(std::holds_alternative<EnclosedApproximation>(second_run));
+    auto first_set=take(sets::from_generator_handle(
+        std::get<EnclosedApproximation>(first_run).result.output));
+    auto second_set=take(sets::from_generator_handle(
+        std::get<EnclosedApproximation>(second_run).result.output));
+    CHECK(first_set.factor_ids()[0]!=second_set.factor_ids()[0]);
+    auto sum=geometry::generators::minkowski_sum(first_set,second_set,{"independent-sum"});
+    REQUIRE(std::holds_alternative<sets::GeneratorSet>(sum));
+    CHECK(std::get<sets::GeneratorSet>(sum).generators().values==Vector{2,2,0,0});
 }
