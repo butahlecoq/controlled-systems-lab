@@ -1,0 +1,4 @@
+phase,case,repetition,calls,status,verified,elapsed_ns,basis,output_generators
+smoke,diamond-axis-cover,0,1,completed,true,50800,generator-axis-cover,2
+smoke,constrained-axis-cover,0,1,completed,true,18200,generator-axis-cover,3
+smoke,zero-column-exact,0,1,completed,true,9800,physical-equivalence,2

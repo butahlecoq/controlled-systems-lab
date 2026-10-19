@@ -57,6 +57,9 @@ jobs:
             if test -f reports/algorithm-results/app02-publications.json; then
               python scripts/reports/stage_app02.py --catalog reports/algorithm-results/app02-publications.json --site build/report-site
             fi
+            if test -f reports/algorithm-results/app03-publications.json; then
+              python scripts/reports/stage_app03.py --catalog reports/algorithm-results/app03-publications.json --site build/report-site
+            fi
             if test -f reports/algorithm-results/ext01-publications.json; then
               python scripts/reports/stage_ext01.py --catalog reports/algorithm-results/ext01-publications.json --site build/report-site
             fi

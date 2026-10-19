@@ -110,6 +110,22 @@ comparator, source-mapped limiter, speedup, finite approximation error bound or
 validated real-arithmetic claim. Independent saved-result review, main-only
 Pages deployment and live-byte verification remain publication gates.
 
+## APP-03 zonotope reduction and enclosure
+
+Issue [APP-03 #42](https://github.com/butahlecoq/controlled-systems-lab/issues/42)
+has a saved [three-case bundle](../../reports/algorithm-results/app03-zonotope-4522855018fa9b0b/)
+from frozen public adapter source `e105a86b8e2ab7d09b1e7042fc5f0d5bc0ce5c40`.
+Two planar outer covers and one exact zero-column conversion check literal
+generator matrices, relations, factor counts and evidence identities after
+every public call. The independent approximation policy checks stored-binary64
+outer inclusion. One excluded warmup and seven rotated 100-call batches per
+case yielded 2,100 verified measured calls with zero recorded failures. The
+labelled 2D example is derived from the same saved fixture. These are
+descriptive single-adapter durations; no comparator, speedup, source-mapped
+limiter, finite approximation error bound or validated real-arithmetic claim
+is supported. Independent saved-result review, main-only Pages deployment and
+live-byte verification remain publication gates.
+
 ## EXP-04 independent nonlinear plant replay
 
 Issue [EXP-04 #56](https://github.com/butahlecoq/controlled-systems-lab/issues/56)
