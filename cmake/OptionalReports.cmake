@@ -46,12 +46,24 @@ target_compile_options(csl_app04_ellipsoid_report PRIVATE /W4 /WX /permissive-)
 else()
 target_compile_options(csl_app04_ellipsoid_report PRIVATE -Wall -Wextra -Wpedantic -Werror)
 endif()
+
 if(BUILD_TESTING)
 find_package(Python3 3.11 REQUIRED COMPONENTS Interpreter)
 add_test(NAME app04_report_smoke COMMAND Python3::Interpreter
   ${CMAKE_CURRENT_SOURCE_DIR}/scripts/reports/app04/check_smoke.py
   $<TARGET_FILE:csl_app04_ellipsoid_report>)
 set_tests_properties(app04_report_smoke PROPERTIES LABELS reporting)
+endif()
+endif()
+
+if(CSL_BUILD_EXT05_REPORT)
+add_executable(csl_ext05_discretization_report benchmarks/reporting/ext05/driver.cpp)
+target_link_libraries(csl_ext05_discretization_report PRIVATE CSL::model)
+target_compile_features(csl_ext05_discretization_report PRIVATE cxx_std_20)
+if(MSVC)
+target_compile_options(csl_ext05_discretization_report PRIVATE /W4 /WX /permissive-)
+else()
+target_compile_options(csl_ext05_discretization_report PRIVATE -Wall -Wextra -Wpedantic -Werror)
 endif()
 endif()
 
