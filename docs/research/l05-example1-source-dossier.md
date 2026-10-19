@@ -27,6 +27,8 @@ A strong **candidate companion**, not a Table 1 source identity, is the private 
 
 The bounded search covered the parallel `PhD/` and `Дисcертация/Дисcертация/` archive trees' likely publication/code names, DOCX text and exact-title web results. A different local 2D `main.m` (SHA-256 `4e41442776147df705d30f6fb25aeb2ff817a5c0b31285f6d5b9d227a6ea468e`) uses 48 steps, and L26/W12 use the unrelated backward fuel example; neither supplies the missing Table 1 run. Duplicate files and similarly named papers were not counted as independent source confirmation. Compressed or unnamed material outside this search could still exist.
 
+A subsequent [saved-figure audit](l05-saved-figure-audit.md) found hash-identified MATLAB FIG polygons in the Buryatia directory whose three terminal counts and areas match the reported Table 1 Example 1 rows. Their stored polygon containment is checked exactly; the historical generating revision, nonlinear all-history coverage and model-error certificate remain unresolved.
+
 The [source-to-experiment comparison](reachability-source-correspondence.md#direct-source-comparison) rules out treating the inspected L26 active four-state/T16 backward fuel example or its W12 near-copy as the L05 two-dimensional/T60 Table 1 run. A later check must identify a versioned Table 1 driver, full inputs and saved outputs before historical run correspondence can be asserted. This bounded inspection does not prove no such generator exists elsewhere.
 
 ## Next evidence gate

@@ -1,0 +1,31 @@
+{
+  "schema": "l05-saved-figure-audit-v1",
+  "figure_sha256": "95b9d6a500361a832e6067163e2262fb0e04e2b17f88b83a1af13293c4c728c5",
+  "companion_figure_sha256": "5a6aeb8a43bf1af1a40c60e34072ce3df3e01cdac1ce4119e76e52cbe83eaf43",
+  "patch_count": 240,
+  "paired_stages": 60,
+  "nonlinear_plots_match_at_every_stage": true,
+  "terminal_patches_zero_based": {
+    "nonlinear_plot_first": 118,
+    "linear_16": 119,
+    "nonlinear_plot_second": 238,
+    "linear_120": 239
+  },
+  "vertex_counts": {
+    "nonlinear_plot_first": 120,
+    "linear_16": 16,
+    "linear_120": 120
+  },
+  "areas_of_stored_binary64_hulls": {
+    "nonlinear_plot_first": "4.681997342186923031539712877857677718062",
+    "linear_16": "4.342896662341959819486066277374381698560",
+    "linear_120": "4.619042908487410099253865845138698634063"
+  },
+  "hull_vertex_violations": {
+    "linear_16_outside_linear_120": 0,
+    "linear_120_outside_linear_16": 119,
+    "linear_120_outside_nonlinear_plot": 0,
+    "nonlinear_plot_outside_linear_120": 120
+  },
+  "scope": "exact for saved binary64 plotted convex polygons; no all-history nonlinear enclosure claim"
+}
