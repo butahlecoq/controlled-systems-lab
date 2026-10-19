@@ -10,6 +10,24 @@ endif()
 
 # Non-installed measurement targets; each option requires the declared adapters.
 
+if(CSL_BUILD_EXP04_REPORT)
+add_executable(csl_exp04_replay_report benchmarks/reporting/exp04/driver.cpp)
+target_link_libraries(csl_exp04_replay_report PRIVATE CSL::simulation)
+target_compile_features(csl_exp04_replay_report PRIVATE cxx_std_20)
+if(MSVC)
+target_compile_options(csl_exp04_replay_report PRIVATE /W4 /WX /permissive-)
+else()
+target_compile_options(csl_exp04_replay_report PRIVATE -Wall -Wextra -Wpedantic -Werror)
+endif()
+if(BUILD_TESTING)
+find_package(Python3 3.11 REQUIRED COMPONENTS Interpreter)
+add_test(NAME exp04_report_smoke COMMAND Python3::Interpreter
+  ${CMAKE_CURRENT_SOURCE_DIR}/scripts/reports/exp04/check_smoke.py
+  $<TARGET_FILE:csl_exp04_replay_report>)
+set_tests_properties(exp04_report_smoke PROPERTIES LABELS reporting)
+endif()
+endif()
+
 if(CSL_BUILD_ISSUE3_REPORT)
 include(cmake/JsonDependencies.cmake)
 file(SHA256 ${CMAKE_CURRENT_SOURCE_DIR}/benchmarks/reporting/issue3/finite_catalogue_driver.cpp
