@@ -36,6 +36,8 @@ The [B04 parameter cross-check](../b04-parameter-crosswalk.md) uses `check_b04_p
 
 The verification utility checks document links, original hashes where originals exist, inventory coverage, Python syntax, and reference JSON consistency. It is documentation/research verification, not a product test suite.
 
+The [L05 saved-figure checker](check_l05_saved_figures.py) requires SciPy only to read two hash-identified private MATLAB FIG files. Its hull, area and inclusion calculations are exact for the stored binary64 vertices. Run `python -B -O docs/research/tools/check_l05_saved_figures.py --figure "$privateL05/4.fig" --companion "$privateL05/1.fig"` and `python -B -O -m unittest docs.research.tools.test_l05_saved_figures -v`. The checked-in [summary record](../evidence/l05-saved-figures.json) contains no private plot coordinates or historical timing claim.
+
 ## B04 saved-witness reference check
 
 [check_b04_saved_witnesses.py](check_b04_saved_witnesses.py) reproduces the [curated B04 witness/replay checks](../b04-saved-witnesses.md). It requires Python 3, NumPy and SciPy (`loadmat` with `simplify_cells`); the recorded run used Python 3.13.5, NumPy 2.3.2 and SciPy 1.16.3. PyMuPDF, MATLAB, a solver and archived executable code are not required. These are documented dependencies and observed versions, not new project dependency pins.
