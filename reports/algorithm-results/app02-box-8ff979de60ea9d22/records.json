@@ -1,0 +1,866 @@
+{
+  "backend": "native exact stored-binary64 containment check; no external solver",
+  "build": {
+    "architecture": "x64",
+    "build_log_sha256": "0e80be7827f6be2215f18e4e866614858154f0d003698a22a9baf298e128ab25",
+    "cmake_cache_sha256": "e740fb3b010f2931549b43b6c164919d7287d2f42db1eee6dd4f2e4103e46641",
+    "cmake_compiler_sha256": "33bebcb486c4fc42c67f633fb5ff363392744fda1fcfed6ccf6230a10ed09cbf",
+    "cmake_options": {
+      "BUILD_TESTING": "OFF",
+      "CSL_BUILD_APP02_REPORT": "ON",
+      "CSL_ENABLE_HIGHS": "OFF",
+      "CSL_ENABLE_QHULL": "OFF"
+    },
+    "compiler": "MSVC 19.44 / Visual Studio 2022",
+    "configuration": "Release",
+    "configure_log_sha256": "b8172e04be2178106b69a434ec132b6129c2d8add66b3cb3ed586791dbee21bb",
+    "driver_source_sha256": "dc04bff45f56fe6c0533e90df3d35cd0f3833e5c1ef14c3f849425945126afaa",
+    "executable_sha256": "d266071b3968166ef6d1599fcaaa9551a05d1b9c75d9bf239e348149da4e84eb"
+  },
+  "environment": {
+    "architecture": "AMD64",
+    "collected_utc": "2026-10-19T06:54:37.512682+00:00",
+    "host": "DESKTOP-S9O3F6S",
+    "logical_processors": 12,
+    "os": "Windows-11-10.0.22631-SP0",
+    "processor": "Intel64 Family 6 Model 151 Stepping 5, GenuineIntel",
+    "python": "3.13.5",
+    "source_commit": "8fecba49e34c37e5e01c40218a8f014a179818fd",
+    "source_status": [],
+    "source_tree": "7754b4c088566225b007c58531a74aae0024d5a1"
+  },
+  "fixtures": {
+    "diamond-axis-inner": {
+      "budget": 4,
+      "direction": "inner",
+      "expected_basis": "h_v",
+      "expected_v_vertices": [
+        [
+          1,
+          1
+        ],
+        [
+          1,
+          -1
+        ],
+        [
+          -1,
+          -1
+        ],
+        [
+          -1,
+          1
+        ]
+      ],
+      "input_h_bounds": [
+        2,
+        2,
+        2,
+        2
+      ],
+      "input_h_rows": [
+        [
+          1,
+          1
+        ],
+        [
+          1,
+          -1
+        ],
+        [
+          -1,
+          1
+        ],
+        [
+          -1,
+          -1
+        ]
+      ],
+      "input_representation": "H",
+      "input_sha256": "8f02cd4721aa6956dbff0e25042e37466ed0864f6c0f61ed7ac36b301dda8f5b",
+      "ordered_corners": [
+        [
+          1,
+          1
+        ],
+        [
+          1,
+          -1
+        ],
+        [
+          -1,
+          -1
+        ],
+        [
+          -1,
+          1
+        ]
+      ]
+    },
+    "diamond-axis-outer": {
+      "budget": 4,
+      "direction": "outer",
+      "expected_basis": "v_h",
+      "expected_h_bounds": [
+        2,
+        2,
+        2,
+        2
+      ],
+      "expected_h_rows": [
+        [
+          1,
+          0
+        ],
+        [
+          -1,
+          0
+        ],
+        [
+          0,
+          1
+        ],
+        [
+          0,
+          -1
+        ]
+      ],
+      "input_representation": "V",
+      "input_sha256": "9d4a1cbf33afc92fed90a8a7422960510b86dbc6cdf75b81e744aa9098a6cdf5",
+      "input_vertices": [
+        [
+          0,
+          2
+        ],
+        [
+          2,
+          0
+        ],
+        [
+          0,
+          -2
+        ],
+        [
+          -2,
+          0
+        ]
+      ],
+      "orientation_rows": [
+        [
+          1,
+          0
+        ],
+        [
+          0,
+          1
+        ]
+      ]
+    },
+    "diamond-rotated-outer": {
+      "budget": 4,
+      "direction": "outer",
+      "expected_basis": "v_h",
+      "expected_h_bounds": [
+        2,
+        2,
+        2,
+        2
+      ],
+      "expected_h_rows": [
+        [
+          1,
+          1
+        ],
+        [
+          -1,
+          -1
+        ],
+        [
+          1,
+          -1
+        ],
+        [
+          -1,
+          1
+        ]
+      ],
+      "input_representation": "V",
+      "input_sha256": "11b8102b02aea498a60b8848a328e2240fbb0764773564c3e2b673d318ae9e20",
+      "input_vertices": [
+        [
+          0,
+          2
+        ],
+        [
+          2,
+          0
+        ],
+        [
+          0,
+          -2
+        ],
+        [
+          -2,
+          0
+        ]
+      ],
+      "orientation_rows": [
+        [
+          1,
+          1
+        ],
+        [
+          1,
+          -1
+        ]
+      ]
+    },
+    "interval-box": {
+      "budget": 2,
+      "direction": "outer",
+      "expected_basis": "v_h",
+      "expected_h_bounds": [
+        2.25,
+        1.5
+      ],
+      "expected_h_rows": [
+        [
+          1
+        ],
+        [
+          -1
+        ]
+      ],
+      "input_representation": "V",
+      "input_sha256": "a76c3e5c755b0dbe6e68df4306a803e7a3121c49e932cfc9e0ad13f3840f5b42",
+      "input_vertices": [
+        [
+          -1.5
+        ],
+        [
+          2.25
+        ]
+      ],
+      "orientation_rows": [
+        [
+          1
+        ]
+      ]
+    },
+    "square-rotated-inner": {
+      "budget": 4,
+      "direction": "inner",
+      "expected_basis": "h_v",
+      "expected_v_vertices": [
+        [
+          0,
+          1
+        ],
+        [
+          1,
+          0
+        ],
+        [
+          0,
+          -1
+        ],
+        [
+          -1,
+          0
+        ]
+      ],
+      "input_h_bounds": [
+        2,
+        2,
+        2,
+        2
+      ],
+      "input_h_rows": [
+        [
+          1,
+          0
+        ],
+        [
+          -1,
+          0
+        ],
+        [
+          0,
+          1
+        ],
+        [
+          0,
+          -1
+        ]
+      ],
+      "input_representation": "H",
+      "input_sha256": "8174fde67616c10553272a1fbcf8afeb51efe91ec11288caf5599f1cb276fb3a",
+      "ordered_corners": [
+        [
+          0,
+          1
+        ],
+        [
+          1,
+          0
+        ],
+        [
+          0,
+          -1
+        ],
+        [
+          -1,
+          0
+        ]
+      ]
+    }
+  },
+  "limits": [
+    "Exact containment applies to stored binary64 vertices, rays and H rows.",
+    "No finite Hausdorff or support-function error bound is claimed.",
+    "No optimizer result, validated real-arithmetic enclosure, comparator, speedup, limiter profile or scalability claim is supported."
+  ],
+  "measurement": {
+    "clock": "std::chrono::steady_clock",
+    "excludes": [
+      "fixture and registry construction",
+      "post-call literal oracle check",
+      "CSV serialization",
+      "process launch",
+      "HTML rendering"
+    ],
+    "failures": 0,
+    "internal_counters": "unavailable",
+    "interval": "Each run_registered public call, including registry selection, provider execution and independent enclosure check; per-call intervals summed into each 100-call batch",
+    "measured_order": "seven rotated five-case rounds, 100 calls per case per round",
+    "native_threads_actual": 1,
+    "native_threads_requested": 1,
+    "raw_measure_sha256": "1b0350d742ff7a4375c9d142340bdbe2f339e9f93204d3dfdf7ad82cf8dfe020",
+    "raw_smoke_sha256": "309bca59b280fefe0c11b130ff5db5386460255d90cb2dbcfcd77818f8179535",
+    "summary": [
+      {
+        "batches": 7,
+        "calls_per_batch": 100,
+        "case": "interval-box",
+        "failures": 0,
+        "max_batch_ns": 635500,
+        "median_batch_ns": 607100,
+        "min_batch_ns": 590000,
+        "successes": 700
+      },
+      {
+        "batches": 7,
+        "calls_per_batch": 100,
+        "case": "diamond-axis-outer",
+        "failures": 0,
+        "max_batch_ns": 839300,
+        "median_batch_ns": 793200,
+        "min_batch_ns": 778400,
+        "successes": 700
+      },
+      {
+        "batches": 7,
+        "calls_per_batch": 100,
+        "case": "diamond-rotated-outer",
+        "failures": 0,
+        "max_batch_ns": 1469200,
+        "median_batch_ns": 1460200,
+        "min_batch_ns": 1386100,
+        "successes": 700
+      },
+      {
+        "batches": 7,
+        "calls_per_batch": 100,
+        "case": "diamond-axis-inner",
+        "failures": 0,
+        "max_batch_ns": 1692100,
+        "median_batch_ns": 1654900,
+        "min_batch_ns": 1569200,
+        "successes": 700
+      },
+      {
+        "batches": 7,
+        "calls_per_batch": 100,
+        "case": "square-rotated-inner",
+        "failures": 0,
+        "max_batch_ns": 1292500,
+        "median_batch_ns": 1230800,
+        "min_batch_ns": 1208900,
+        "successes": 700
+      }
+    ],
+    "trials": [
+      {
+        "basis": "v_h",
+        "calls": "100",
+        "case": "interval-box",
+        "elapsed_ns": "660600",
+        "output_primitives": "2",
+        "phase": "warmup",
+        "repetition": "0",
+        "status": "enclosed",
+        "verified": "true"
+      },
+      {
+        "basis": "v_h",
+        "calls": "100",
+        "case": "diamond-axis-outer",
+        "elapsed_ns": "835500",
+        "output_primitives": "4",
+        "phase": "warmup",
+        "repetition": "0",
+        "status": "enclosed",
+        "verified": "true"
+      },
+      {
+        "basis": "v_h",
+        "calls": "100",
+        "case": "diamond-rotated-outer",
+        "elapsed_ns": "1491400",
+        "output_primitives": "4",
+        "phase": "warmup",
+        "repetition": "0",
+        "status": "enclosed",
+        "verified": "true"
+      },
+      {
+        "basis": "h_v",
+        "calls": "100",
+        "case": "diamond-axis-inner",
+        "elapsed_ns": "1688300",
+        "output_primitives": "4",
+        "phase": "warmup",
+        "repetition": "0",
+        "status": "enclosed",
+        "verified": "true"
+      },
+      {
+        "basis": "h_v",
+        "calls": "100",
+        "case": "square-rotated-inner",
+        "elapsed_ns": "1289400",
+        "output_primitives": "4",
+        "phase": "warmup",
+        "repetition": "0",
+        "status": "enclosed",
+        "verified": "true"
+      },
+      {
+        "basis": "v_h",
+        "calls": "100",
+        "case": "interval-box",
+        "elapsed_ns": "629400",
+        "output_primitives": "2",
+        "phase": "trial",
+        "repetition": "0",
+        "status": "enclosed",
+        "verified": "true"
+      },
+      {
+        "basis": "v_h",
+        "calls": "100",
+        "case": "diamond-axis-outer",
+        "elapsed_ns": "834400",
+        "output_primitives": "4",
+        "phase": "trial",
+        "repetition": "0",
+        "status": "enclosed",
+        "verified": "true"
+      },
+      {
+        "basis": "v_h",
+        "calls": "100",
+        "case": "diamond-rotated-outer",
+        "elapsed_ns": "1466600",
+        "output_primitives": "4",
+        "phase": "trial",
+        "repetition": "0",
+        "status": "enclosed",
+        "verified": "true"
+      },
+      {
+        "basis": "h_v",
+        "calls": "100",
+        "case": "diamond-axis-inner",
+        "elapsed_ns": "1654900",
+        "output_primitives": "4",
+        "phase": "trial",
+        "repetition": "0",
+        "status": "enclosed",
+        "verified": "true"
+      },
+      {
+        "basis": "h_v",
+        "calls": "100",
+        "case": "square-rotated-inner",
+        "elapsed_ns": "1292500",
+        "output_primitives": "4",
+        "phase": "trial",
+        "repetition": "0",
+        "status": "enclosed",
+        "verified": "true"
+      },
+      {
+        "basis": "v_h",
+        "calls": "100",
+        "case": "diamond-axis-outer",
+        "elapsed_ns": "839300",
+        "output_primitives": "4",
+        "phase": "trial",
+        "repetition": "1",
+        "status": "enclosed",
+        "verified": "true"
+      },
+      {
+        "basis": "v_h",
+        "calls": "100",
+        "case": "diamond-rotated-outer",
+        "elapsed_ns": "1463800",
+        "output_primitives": "4",
+        "phase": "trial",
+        "repetition": "1",
+        "status": "enclosed",
+        "verified": "true"
+      },
+      {
+        "basis": "h_v",
+        "calls": "100",
+        "case": "diamond-axis-inner",
+        "elapsed_ns": "1655900",
+        "output_primitives": "4",
+        "phase": "trial",
+        "repetition": "1",
+        "status": "enclosed",
+        "verified": "true"
+      },
+      {
+        "basis": "h_v",
+        "calls": "100",
+        "case": "square-rotated-inner",
+        "elapsed_ns": "1287100",
+        "output_primitives": "4",
+        "phase": "trial",
+        "repetition": "1",
+        "status": "enclosed",
+        "verified": "true"
+      },
+      {
+        "basis": "v_h",
+        "calls": "100",
+        "case": "interval-box",
+        "elapsed_ns": "635500",
+        "output_primitives": "2",
+        "phase": "trial",
+        "repetition": "1",
+        "status": "enclosed",
+        "verified": "true"
+      },
+      {
+        "basis": "v_h",
+        "calls": "100",
+        "case": "diamond-rotated-outer",
+        "elapsed_ns": "1469200",
+        "output_primitives": "4",
+        "phase": "trial",
+        "repetition": "2",
+        "status": "enclosed",
+        "verified": "true"
+      },
+      {
+        "basis": "h_v",
+        "calls": "100",
+        "case": "diamond-axis-inner",
+        "elapsed_ns": "1692100",
+        "output_primitives": "4",
+        "phase": "trial",
+        "repetition": "2",
+        "status": "enclosed",
+        "verified": "true"
+      },
+      {
+        "basis": "h_v",
+        "calls": "100",
+        "case": "square-rotated-inner",
+        "elapsed_ns": "1230800",
+        "output_primitives": "4",
+        "phase": "trial",
+        "repetition": "2",
+        "status": "enclosed",
+        "verified": "true"
+      },
+      {
+        "basis": "v_h",
+        "calls": "100",
+        "case": "interval-box",
+        "elapsed_ns": "607100",
+        "output_primitives": "2",
+        "phase": "trial",
+        "repetition": "2",
+        "status": "enclosed",
+        "verified": "true"
+      },
+      {
+        "basis": "v_h",
+        "calls": "100",
+        "case": "diamond-axis-outer",
+        "elapsed_ns": "793200",
+        "output_primitives": "4",
+        "phase": "trial",
+        "repetition": "2",
+        "status": "enclosed",
+        "verified": "true"
+      },
+      {
+        "basis": "h_v",
+        "calls": "100",
+        "case": "diamond-axis-inner",
+        "elapsed_ns": "1592200",
+        "output_primitives": "4",
+        "phase": "trial",
+        "repetition": "3",
+        "status": "enclosed",
+        "verified": "true"
+      },
+      {
+        "basis": "h_v",
+        "calls": "100",
+        "case": "square-rotated-inner",
+        "elapsed_ns": "1208900",
+        "output_primitives": "4",
+        "phase": "trial",
+        "repetition": "3",
+        "status": "enclosed",
+        "verified": "true"
+      },
+      {
+        "basis": "v_h",
+        "calls": "100",
+        "case": "interval-box",
+        "elapsed_ns": "594800",
+        "output_primitives": "2",
+        "phase": "trial",
+        "repetition": "3",
+        "status": "enclosed",
+        "verified": "true"
+      },
+      {
+        "basis": "v_h",
+        "calls": "100",
+        "case": "diamond-axis-outer",
+        "elapsed_ns": "785700",
+        "output_primitives": "4",
+        "phase": "trial",
+        "repetition": "3",
+        "status": "enclosed",
+        "verified": "true"
+      },
+      {
+        "basis": "v_h",
+        "calls": "100",
+        "case": "diamond-rotated-outer",
+        "elapsed_ns": "1390200",
+        "output_primitives": "4",
+        "phase": "trial",
+        "repetition": "3",
+        "status": "enclosed",
+        "verified": "true"
+      },
+      {
+        "basis": "h_v",
+        "calls": "100",
+        "case": "square-rotated-inner",
+        "elapsed_ns": "1209500",
+        "output_primitives": "4",
+        "phase": "trial",
+        "repetition": "4",
+        "status": "enclosed",
+        "verified": "true"
+      },
+      {
+        "basis": "v_h",
+        "calls": "100",
+        "case": "interval-box",
+        "elapsed_ns": "590000",
+        "output_primitives": "2",
+        "phase": "trial",
+        "repetition": "4",
+        "status": "enclosed",
+        "verified": "true"
+      },
+      {
+        "basis": "v_h",
+        "calls": "100",
+        "case": "diamond-axis-outer",
+        "elapsed_ns": "778400",
+        "output_primitives": "4",
+        "phase": "trial",
+        "repetition": "4",
+        "status": "enclosed",
+        "verified": "true"
+      },
+      {
+        "basis": "v_h",
+        "calls": "100",
+        "case": "diamond-rotated-outer",
+        "elapsed_ns": "1386100",
+        "output_primitives": "4",
+        "phase": "trial",
+        "repetition": "4",
+        "status": "enclosed",
+        "verified": "true"
+      },
+      {
+        "basis": "h_v",
+        "calls": "100",
+        "case": "diamond-axis-inner",
+        "elapsed_ns": "1688500",
+        "output_primitives": "4",
+        "phase": "trial",
+        "repetition": "4",
+        "status": "enclosed",
+        "verified": "true"
+      },
+      {
+        "basis": "v_h",
+        "calls": "100",
+        "case": "interval-box",
+        "elapsed_ns": "626900",
+        "output_primitives": "2",
+        "phase": "trial",
+        "repetition": "5",
+        "status": "enclosed",
+        "verified": "true"
+      },
+      {
+        "basis": "v_h",
+        "calls": "100",
+        "case": "diamond-axis-outer",
+        "elapsed_ns": "818200",
+        "output_primitives": "4",
+        "phase": "trial",
+        "repetition": "5",
+        "status": "enclosed",
+        "verified": "true"
+      },
+      {
+        "basis": "v_h",
+        "calls": "100",
+        "case": "diamond-rotated-outer",
+        "elapsed_ns": "1460200",
+        "output_primitives": "4",
+        "phase": "trial",
+        "repetition": "5",
+        "status": "enclosed",
+        "verified": "true"
+      },
+      {
+        "basis": "h_v",
+        "calls": "100",
+        "case": "diamond-axis-inner",
+        "elapsed_ns": "1574800",
+        "output_primitives": "4",
+        "phase": "trial",
+        "repetition": "5",
+        "status": "enclosed",
+        "verified": "true"
+      },
+      {
+        "basis": "h_v",
+        "calls": "100",
+        "case": "square-rotated-inner",
+        "elapsed_ns": "1232800",
+        "output_primitives": "4",
+        "phase": "trial",
+        "repetition": "5",
+        "status": "enclosed",
+        "verified": "true"
+      },
+      {
+        "basis": "v_h",
+        "calls": "100",
+        "case": "diamond-axis-outer",
+        "elapsed_ns": "786000",
+        "output_primitives": "4",
+        "phase": "trial",
+        "repetition": "6",
+        "status": "enclosed",
+        "verified": "true"
+      },
+      {
+        "basis": "v_h",
+        "calls": "100",
+        "case": "diamond-rotated-outer",
+        "elapsed_ns": "1393600",
+        "output_primitives": "4",
+        "phase": "trial",
+        "repetition": "6",
+        "status": "enclosed",
+        "verified": "true"
+      },
+      {
+        "basis": "h_v",
+        "calls": "100",
+        "case": "diamond-axis-inner",
+        "elapsed_ns": "1569200",
+        "output_primitives": "4",
+        "phase": "trial",
+        "repetition": "6",
+        "status": "enclosed",
+        "verified": "true"
+      },
+      {
+        "basis": "h_v",
+        "calls": "100",
+        "case": "square-rotated-inner",
+        "elapsed_ns": "1219100",
+        "output_primitives": "4",
+        "phase": "trial",
+        "repetition": "6",
+        "status": "enclosed",
+        "verified": "true"
+      },
+      {
+        "basis": "v_h",
+        "calls": "100",
+        "case": "interval-box",
+        "elapsed_ns": "594500",
+        "output_primitives": "2",
+        "phase": "trial",
+        "repetition": "6",
+        "status": "enclosed",
+        "verified": "true"
+      }
+    ],
+    "warmup": "one excluded 100-call batch per case",
+    "workers_actual": 1,
+    "workers_requested": 1,
+    "workspace_reuse": "fresh provider workspace per public call; authored input and registry reused"
+  },
+  "module": "CSL::approximation registered box and parallelotope adapters",
+  "report_id": "app02-box-8ff979de60ea9d22",
+  "schema": "csl.app02-box-parallelotope/1",
+  "scope": "Five authored interval and 2D polygon fixtures",
+  "source_commit": "8fecba49e34c37e5e01c40218a8f014a179818fd",
+  "source_receipts": {
+    "postrun": {
+      "commit": "8fecba49e34c37e5e01c40218a8f014a179818fd",
+      "executable_sha256": "d266071b3968166ef6d1599fcaaa9551a05d1b9c75d9bf239e348149da4e84eb",
+      "observed_utc": "2026-10-19T06:54:37.423072+00:00",
+      "phase": "postrun",
+      "schema": "csl.app02-source-receipt/1",
+      "status": [],
+      "tracked_count": 1853,
+      "tree": "7754b4c088566225b007c58531a74aae0024d5a1"
+    },
+    "prebuild": {
+      "commit": "8fecba49e34c37e5e01c40218a8f014a179818fd",
+      "observed_utc": "2026-10-19T06:53:57.537697+00:00",
+      "phase": "prebuild",
+      "schema": "csl.app02-source-receipt/1",
+      "status": [],
+      "tracked_count": 1853,
+      "tree": "7754b4c088566225b007c58531a74aae0024d5a1"
+    }
+  },
+  "source_tree": "7754b4c088566225b007c58531a74aae0024d5a1"
+}

@@ -1,0 +1,10 @@
+{
+  "commit": "8fecba49e34c37e5e01c40218a8f014a179818fd",
+  "executable_sha256": "d266071b3968166ef6d1599fcaaa9551a05d1b9c75d9bf239e348149da4e84eb",
+  "observed_utc": "2026-10-19T06:54:37.423072+00:00",
+  "phase": "postrun",
+  "schema": "csl.app02-source-receipt/1",
+  "status": [],
+  "tracked_count": 1853,
+  "tree": "7754b4c088566225b007c58531a74aae0024d5a1"
+}

@@ -1,0 +1,6 @@
+case,batches,calls_per_batch,successes,failures,median_batch_ns,min_batch_ns,max_batch_ns
+interval-box,7,100,700,0,607100,590000,635500
+diamond-axis-outer,7,100,700,0,793200,778400,839300
+diamond-rotated-outer,7,100,700,0,1460200,1386100,1469200
+diamond-axis-inner,7,100,700,0,1654900,1569200,1692100
+square-rotated-inner,7,100,700,0,1230800,1208900,1292500

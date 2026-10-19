@@ -94,6 +94,22 @@ binary64 coordinates and does not establish general geometric correctness.
 Independent report review, main-only deployment and verified live links remain
 publication gates.
 
+## APP-02 box and parallelotope approximations
+
+Issue [APP-02 #33](https://github.com/butahlecoq/controlled-systems-lab/issues/33)
+has a saved [five-case bundle](../../reports/algorithm-results/app02-box-8ff979de60ea9d22/)
+from frozen public adapter source `8fecba49e34c37e5e01c40218a8f014a179818fd`.
+The fixtures cover a 1D interval, two outer 2D diamond bounds, an inscribed
+axis box and an inscribed rotated parallelogram. Every public call checks its
+literal H rows/bounds or V corners after timing; the approximation policy
+independently checks stored-binary64 containment. The capture retains one
+excluded warmup and seven rotated 100-call batches per case: 3,500 measured
+calls, zero recorded failures. The standalone 2D example is generated from the
+same saved record. These are descriptive single-adapter observations, with no
+comparator, source-mapped limiter, speedup, finite approximation error bound or
+validated real-arithmetic claim. Independent saved-result review, main-only
+Pages deployment and live-byte verification remain publication gates.
+
 ## EXP-04 independent nonlinear plant replay
 
 Issue [EXP-04 #56](https://github.com/butahlecoq/controlled-systems-lab/issues/56)

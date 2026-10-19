@@ -3,6 +3,8 @@
 #include <csl/geometry/approximation.hpp>
 #include <csl/sets/data.hpp>
 #include <limits>
+#include <chrono>
+#include <stop_token>
 
 using namespace csl;
 using namespace csl::geometry::approximation;
@@ -114,6 +116,26 @@ TEST_CASE("registered outer approximation admits a universal superset") {
     CHECK(admitted.result.evidence.reference.inputs==std::vector<SetId>{input.id});
 }
 
+TEST_CASE("native V to H verification observes cancellation and deadline") {
+    auto input=two_points("reference");
+    auto output=h_set("outer",{1.0,-1.0},{1.0,0.0});
+    auto query=request(input,SetRelation::outer,output.metadata.representation);
+    auto methods=provider(query,output,SetRelation::outer,SetRelation::outer);
+    std::stop_source source;
+    source.request_stop();
+    ExecutionContext context;
+    context.cancellation=source.get_token();
+    auto cancelled=run_registered(methods,{{"fixture.approximation"},std::nullopt},query,context);
+    REQUIRE(std::holds_alternative<OperationStopped>(cancelled));
+    CHECK(std::get<OperationStopped>(cancelled).reason==StopReason::cancelled);
+
+    context={};
+    context.deadline=std::chrono::steady_clock::now()-std::chrono::seconds(1);
+    auto expired=run_registered(methods,{{"fixture.approximation"},std::nullopt},query,context);
+    REQUIRE(std::holds_alternative<OperationStopped>(expired));
+    CHECK(std::get<OperationStopped>(expired).reason==StopReason::deadline_expired);
+}
+
 TEST_CASE("dropping a native H constraint admits a nontrivial outer enclosure") {
     auto input=h_set("reference",{1.0,-1.0},{2.0,1.0}); // [-1,2]
     auto output=h_set("outer",{-1.0},{1.0}); // [-1,+infinity)
@@ -209,6 +231,102 @@ TEST_CASE("H point containment uses exact stored binary64 values and ordered coo
     outcome=execute(provider(query,output,SetRelation::outer,SetRelation::outer),query);
     REQUIRE(std::holds_alternative<Unsupported>(outcome));
     CHECK(std::get<Unsupported>(outcome).diagnostics[0].field=="approximation.inclusion");
+}
+
+TEST_CASE("outer H slabs independently contain every vertex and recession ray of a V polygon") {
+    const auto vertices=numeric::snapshot(Matrix{4,2,{0.0,2.0,2.0,0.0,0.0,-2.0,-2.0,0.0}});
+    const auto rays=numeric::snapshot(Matrix{0,2,{}});
+    REQUIRE(std::holds_alternative<numeric::MatrixView>(vertices));
+    REQUIRE(std::holds_alternative<numeric::MatrixView>(rays));
+    const auto source=take(sets::make_v({{"diamond"},2,{"x","y"}},
+        {std::get<numeric::MatrixView>(vertices),std::get<numeric::MatrixView>(rays)})).as_handle();
+    const auto rows=numeric::snapshot(Matrix{4,2,{1,0,-1,0,0,1,0,-1}});
+    const auto bounds=numeric::snapshot_vector(Vector{2,2,2,2});
+    const auto no_rows=numeric::snapshot(Matrix{0,2,{}});
+    const auto no_values=numeric::snapshot_vector(Vector{});
+    REQUIRE(std::holds_alternative<numeric::MatrixView>(rows));
+    REQUIRE(std::holds_alternative<numeric::VectorView>(bounds));
+    REQUIRE(std::holds_alternative<numeric::MatrixView>(no_rows));
+    REQUIRE(std::holds_alternative<numeric::VectorView>(no_values));
+    const auto outer=take(sets::make_h({{"box"},2,{"x","y"}},
+        {std::get<numeric::MatrixView>(rows),std::get<numeric::VectorView>(bounds),
+         std::get<numeric::MatrixView>(no_rows),std::get<numeric::VectorView>(no_values)})).as_handle();
+    auto query=request(source,SetRelation::outer,outer.metadata.representation);
+    query.size_budget=4;
+    const auto admitted=execute(provider(query,outer,SetRelation::outer,SetRelation::outer),query);
+    REQUIRE(std::holds_alternative<EnclosedApproximation>(admitted));
+    CHECK(std::get<EnclosedApproximation>(admitted).basis==StructuralBasis::v_h_containment);
+
+    const auto tight_bounds=numeric::snapshot_vector(Vector{1.5,2,2,2});
+    REQUIRE(std::holds_alternative<numeric::VectorView>(tight_bounds));
+    const auto tight=take(sets::make_h({{"too-tight"},2,{"x","y"}},
+        {std::get<numeric::MatrixView>(rows),std::get<numeric::VectorView>(tight_bounds),
+         std::get<numeric::MatrixView>(no_rows),std::get<numeric::VectorView>(no_values)})).as_handle();
+    CHECK(std::holds_alternative<Unsupported>(execute(
+        provider(query,tight,SetRelation::outer,SetRelation::outer),query)));
+}
+
+TEST_CASE("inner V polygon checks every corner against the native H reference") {
+    const auto rows=numeric::snapshot(Matrix{4,2,{1,1,1,-1,-1,1,-1,-1}});
+    const auto bounds=numeric::snapshot_vector(Vector{2,2,2,2});
+    const auto no_rows=numeric::snapshot(Matrix{0,2,{}});
+    const auto no_values=numeric::snapshot_vector(Vector{});
+    REQUIRE(std::holds_alternative<numeric::MatrixView>(rows));
+    REQUIRE(std::holds_alternative<numeric::VectorView>(bounds));
+    REQUIRE(std::holds_alternative<numeric::MatrixView>(no_rows));
+    REQUIRE(std::holds_alternative<numeric::VectorView>(no_values));
+    const auto source=take(sets::make_h({{"diamond"},2,{"x","y"}},
+        {std::get<numeric::MatrixView>(rows),std::get<numeric::VectorView>(bounds),
+         std::get<numeric::MatrixView>(no_rows),std::get<numeric::VectorView>(no_values)})).as_handle();
+    const auto corners=numeric::snapshot(Matrix{4,2,{1,1,1,-1,-1,-1,-1,1}});
+    const auto no_rays=numeric::snapshot(Matrix{0,2,{}});
+    REQUIRE(std::holds_alternative<numeric::MatrixView>(corners));
+    REQUIRE(std::holds_alternative<numeric::MatrixView>(no_rays));
+    const auto inner=take(sets::make_v({{"inner-box"},2,{"x","y"}},
+        {std::get<numeric::MatrixView>(corners),std::get<numeric::MatrixView>(no_rays)})).as_handle();
+    auto query=request(source,SetRelation::inner,inner.metadata.representation);
+    query.size_budget=4;
+    const auto admitted=execute(provider(query,inner,SetRelation::inner,SetRelation::inner),query);
+    REQUIRE(std::holds_alternative<EnclosedApproximation>(admitted));
+    CHECK(std::get<EnclosedApproximation>(admitted).basis==StructuralBasis::h_v_containment);
+
+    const auto bad_corners=numeric::snapshot(Matrix{4,2,{1,1,1,-1,-1,-1,2,2}});
+    REQUIRE(std::holds_alternative<numeric::MatrixView>(bad_corners));
+    const auto outside=take(sets::make_v({{"outside"},2,{"x","y"}},
+        {std::get<numeric::MatrixView>(bad_corners),std::get<numeric::MatrixView>(no_rays)})).as_handle();
+    CHECK(std::holds_alternative<Unsupported>(execute(
+        provider(query,outside,SetRelation::inner,SetRelation::inner),query)));
+}
+
+TEST_CASE("V recession rays must satisfy every proposed outer H row") {
+    const auto vertices=numeric::snapshot(Matrix{1,2,{0,0}});
+    const auto positive_ray=numeric::snapshot(Matrix{1,2,{1,0}});
+    const auto negative_ray=numeric::snapshot(Matrix{1,2,{-1,0}});
+    const auto row=numeric::snapshot(Matrix{1,2,{1,0}});
+    const auto bound=numeric::snapshot_vector(Vector{1});
+    const auto no_rows=numeric::snapshot(Matrix{0,2,{}});
+    const auto no_values=numeric::snapshot_vector(Vector{});
+    REQUIRE(std::holds_alternative<numeric::MatrixView>(vertices));
+    REQUIRE(std::holds_alternative<numeric::MatrixView>(positive_ray));
+    REQUIRE(std::holds_alternative<numeric::MatrixView>(negative_ray));
+    REQUIRE(std::holds_alternative<numeric::MatrixView>(row));
+    REQUIRE(std::holds_alternative<numeric::VectorView>(bound));
+    REQUIRE(std::holds_alternative<numeric::MatrixView>(no_rows));
+    REQUIRE(std::holds_alternative<numeric::VectorView>(no_values));
+    const auto output=take(sets::make_h({{"outer"},2,{"x","y"}},
+        {std::get<numeric::MatrixView>(row),std::get<numeric::VectorView>(bound),
+         std::get<numeric::MatrixView>(no_rows),std::get<numeric::VectorView>(no_values)})).as_handle();
+    const auto source_bad=take(sets::make_v({{"positive"},2,{"x","y"}},
+        {std::get<numeric::MatrixView>(vertices),std::get<numeric::MatrixView>(positive_ray)})).as_handle();
+    auto query=request(source_bad,SetRelation::outer,output.metadata.representation);
+    CHECK(std::holds_alternative<Unsupported>(execute(
+        provider(query,output,SetRelation::outer,SetRelation::outer),query)));
+    const auto source_good=take(sets::make_v({{"negative"},2,{"x","y"}},
+        {std::get<numeric::MatrixView>(vertices),std::get<numeric::MatrixView>(negative_ray)})).as_handle();
+    query=request(source_good,SetRelation::outer,output.metadata.representation);
+    const auto admitted=execute(provider(query,output,SetRelation::outer,SetRelation::outer),query);
+    REQUIRE(std::holds_alternative<EnclosedApproximation>(admitted));
+    CHECK(std::get<EnclosedApproximation>(admitted).basis==StructuralBasis::v_h_containment);
 }
 
 TEST_CASE("exact H point check survives cancellation beyond floating point range") {

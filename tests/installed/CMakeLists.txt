@@ -25,6 +25,13 @@ target_link_libraries(installed_input_client PRIVATE CSL::input)
 set_target_properties(installed_input_client PROPERTIES CXX_EXTENSIONS OFF)
 add_test(NAME installed_input_client COMMAND installed_input_client)
 
+add_executable(installed_box_parallelotope_client box_parallelotope_client.cpp)
+target_link_libraries(installed_box_parallelotope_client PRIVATE CSL::approximation)
+set_target_properties(installed_box_parallelotope_client PROPERTIES CXX_EXTENSIONS OFF)
+add_test(NAME installed_box_parallelotope_client COMMAND installed_box_parallelotope_client)
+set_tests_properties(installed_box_parallelotope_client PROPERTIES
+  PASS_REGULAR_EXPRESSION "Installed box/parallelotope client: rotated diamond bounds passed")
+
 if(TARGET CSL::highs_lp AND TARGET CSL::qhull_conversion)
 add_executable(installed_conversion_client conversion_client.cpp)
 target_link_libraries(installed_conversion_client PRIVATE CSL::qhull_conversion CSL::highs_lp)

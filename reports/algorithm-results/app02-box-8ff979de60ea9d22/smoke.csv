@@ -1,0 +1,6 @@
+phase,case,repetition,calls,status,verified,elapsed_ns,basis,output_primitives
+smoke,interval-box,0,1,enclosed,true,40000,v_h,2
+smoke,diamond-axis-outer,0,1,enclosed,true,10000,v_h,4
+smoke,diamond-rotated-outer,0,1,enclosed,true,36200,v_h,4
+smoke,diamond-axis-inner,0,1,enclosed,true,18800,h_v,4
+smoke,square-rotated-inner,0,1,enclosed,true,13600,h_v,4

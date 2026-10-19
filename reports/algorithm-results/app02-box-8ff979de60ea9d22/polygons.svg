@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="650" height="590" viewBox="0 0 650 590" role="img" aria-label="Diamond input, axis aligned outer box, rotated outer diamond, and inner box in x and y coordinates">
+<rect width="650" height="590" fill="#272822"/>
+<line x1="50" y1="270" x2="500" y2="270" stroke="#f8f8f2"/>
+<line x1="270" y1="50" x2="270" y2="490" stroke="#f8f8f2"/>
+<text x="505" y="275" fill="#f8f8f2">x</text><text x="275" y="45" fill="#f8f8f2">y</text>
+<polygon points="90,450 450,450 450,90 90,90" fill="none" stroke="#fd971f" stroke-width="3"/>
+<polygon points="270,90 450,270 270,450 90,270" fill="none" stroke="#66d9ef" stroke-width="3"/>
+<polygon points="360,180 360,360 180,360 180,180" fill="none" stroke="#a6e22e" stroke-width="3"/>
+<circle cx="270" cy="90" r="5" fill="#f8f8f2"/><circle cx="450" cy="270" r="5" fill="#f8f8f2"/><circle cx="270" cy="450" r="5" fill="#f8f8f2"/><circle cx="90" cy="270" r="5" fill="#f8f8f2"/>
+<text x="45" y="525" fill="#fd971f">Orange: outer axis box [-2,2] × [-2,2]</text>
+<text x="45" y="548" fill="#66d9ef">Blue: input diamond and rotated outer bound |x|+|y| ≤ 2</text>
+<text x="45" y="571" fill="#a6e22e">Green: inner axis box [-1,1] × [-1,1]</text></svg>

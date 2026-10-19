@@ -71,6 +71,11 @@ target_link_libraries(approximation_policy_tests PRIVATE CSL::approximation CSL:
 add_test(NAME approximation_policy_tests COMMAND approximation_policy_tests)
 csl_test_target(approximation_policy_tests geometry)
 
+add_executable(box_parallelotope_tests tests/contract/geometry/box_parallelotope_tests.cpp)
+target_link_libraries(box_parallelotope_tests PRIVATE CSL::approximation CSL::sets doctest::doctest)
+add_test(NAME box_parallelotope_tests COMMAND box_parallelotope_tests)
+csl_test_target(box_parallelotope_tests geometry)
+
 add_executable(approximation_reachable_plan_tests tests/contract/geometry/approximation_reachable_plan_tests.cpp)
 target_link_libraries(approximation_reachable_plan_tests PRIVATE CSL::approximation doctest::doctest)
 add_test(NAME approximation_reachable_plan_tests COMMAND approximation_reachable_plan_tests)

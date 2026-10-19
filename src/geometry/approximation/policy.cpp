@@ -3,6 +3,7 @@
 #include "../exact_dyadic.hpp"
 
 #include <cmath>
+#include <chrono>
 
 namespace csl::geometry::approximation {
 namespace {
@@ -64,8 +65,49 @@ bool h_contains_point(const sets::HRepresentation& h,const sets::SingletonRepres
     return h_rows_contain_point(h.inequalities,h.upper_bounds,point.point,false) &&
            h_rows_contain_point(h.equalities,h.equality_values,point.point,true);
 }
+bool h_rows_contain_v(const numeric::MatrixView& rows,const numeric::VectorView& values,
+                      const sets::VRepresentation& v,bool equality,
+                      const ExecutionContext& context,bool& interrupted) {
+    using namespace detail::exact_detail;
+    for(std::size_t row=0;row<rows.rows();++row) {
+        for(std::size_t member=0;member<v.vertices.rows()+v.rays.rows();++member) {
+            if(context.cancellation.stop_requested() ||
+               (context.deadline && std::chrono::steady_clock::now()>=*context.deadline)) {
+                interrupted=true;
+                return false;
+            }
+            const bool ray=member>=v.vertices.rows();
+            const auto& points=ray?v.rays:v.vertices;
+            const auto index=ray?member-v.vertices.rows():member;
+            Integer difference;
+            for(std::size_t column=0;column<rows.cols();++column) {
+                if(context.cancellation.stop_requested() ||
+                   (context.deadline && std::chrono::steady_clock::now()>=*context.deadline)) {
+                    interrupted=true;
+                    return false;
+                }
+                const double coefficient=rows(row,column),coordinate=points(index,column);
+                if(!std::isfinite(coefficient)||!std::isfinite(coordinate)||
+                   !add_product(difference,decode(coefficient),decode(coordinate)))return false;
+            }
+            if(!ray) {
+                if(!std::isfinite(values[row]))return false;
+                auto bound=decode(values[row]);bound.negative=!bound.negative;
+                if(!add_dyadic(difference,bound))return false;
+            }
+            if(equality?!is_zero(difference):(!difference.negative&&!is_zero(difference)))return false;
+        }
+    }
+    return true;
+}
+bool h_contains_v(const sets::HRepresentation& h,const sets::VRepresentation& v,
+                  const ExecutionContext& context,bool& interrupted) {
+    return h_rows_contain_v(h.inequalities,h.upper_bounds,v,false,context,interrupted) &&
+           h_rows_contain_v(h.equalities,h.equality_values,v,true,context,interrupted);
+}
 std::optional<StructuralBasis> structural_basis(const ApproximationRequest& request,
-                                                 const OperationResult& result) {
+                                                 const OperationResult& result,
+                                                 const ExecutionContext& context,bool& interrupted) {
     if(request.input.id==result.output.id && request.input.payload==result.output.payload &&
        same_metadata(request.input.metadata,result.output.metadata))
         return StructuralBasis::identical_set;
@@ -95,6 +137,16 @@ std::optional<StructuralBasis> structural_basis(const ApproximationRequest& requ
                 if(h_constraints_contained(required,available))
                     return StructuralBasis::h_constraint_containment;
             }
+        if(request.direction==SetRelation::outer)
+            if(const auto* reference_v=std::get_if<sets::VRepresentation>(&reference_representation))
+                if(const auto* output_h=std::get_if<sets::HRepresentation>(&representation))
+                    if(h_contains_v(*output_h,*reference_v,context,interrupted))
+                        return StructuralBasis::v_h_containment;
+        if(request.direction==SetRelation::inner)
+            if(const auto* reference_h=std::get_if<sets::HRepresentation>(&reference_representation))
+                if(const auto* output_v=std::get_if<sets::VRepresentation>(&representation))
+                    if(h_contains_v(*reference_h,*output_v,context,interrupted))
+                        return StructuralBasis::h_v_containment;
         if(request.direction==SetRelation::inner &&
             (std::holds_alternative<sets::EmptyRepresentation>(representation) ||
              (std::holds_alternative<sets::VRepresentation>(representation) &&
@@ -161,9 +213,15 @@ RunOutcome run_registered(const registry::Registry<registry::ApproximationPort>&
         return Unsupported{error(DiagnosticCode::unsupported,"approximation.budget",
             "Native output exceeds the requested primitive budget, or output size is unavailable.")};
     if(request.direction==SetRelation::heuristic)return HeuristicApproximation{std::move(result)};
-    if(const auto basis=structural_basis(request,result)) {
+    bool interrupted=false;
+    const auto basis=structural_basis(request,result,context,interrupted);
+    if(interrupted || context.cancellation.stop_requested() ||
+       (context.deadline && std::chrono::steady_clock::now()>=*context.deadline))
+        return OperationStopped{context.cancellation.stop_requested()?StopReason::cancelled:
+            StopReason::deadline_expired,"Approximation policy stopped before publishing an enclosure."};
+    if(basis) {
         result.evidence.support=SymbolicArgument{"CSL native structural set-inclusion check",
-            "Same immutable set, empty subset, universal superset, exact H constraint retention, or exact binary64 H point containment over the same ambient coordinates."};
+            "Same immutable set, empty subset, universal superset, exact H constraint retention, or exact binary64 H containment of native points and recession rays over the same ambient coordinates."};
         return EnclosedApproximation{std::move(result),*basis};
     }
     return Unsupported{error(DiagnosticCode::unsupported,"approximation.inclusion",
