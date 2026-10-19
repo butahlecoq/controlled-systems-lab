@@ -258,10 +258,10 @@ public:
         std::stop_token cancellation) const override;
 };
 
-// Independent numerical verifier for two-stage scalar paths with exactly one
-// bounded interval control parameter, singleton controls at other stages, and
-// deterministic exactly representable scalar affine resets.
-class TwoStageScalarIntervalHybridFamilyVerifier final : public HybridFamilyVerificationAdapter {
+// Independent numerical verifier for scalar paths at any finite horizon with
+// exactly one bounded interval control parameter, singleton controls at other
+// stages, and deterministic exactly representable scalar affine resets.
+class SingleParameterScalarIntervalHybridFamilyVerifier final : public HybridFamilyVerificationAdapter {
 public:
     HybridFamilyVerificationCapabilities capabilities() const noexcept override;
     HybridFamilyVerificationResult verify(const model::HybridSystem&,
@@ -269,6 +269,17 @@ public:
         std::span<const HybridPathProgram>,
         std::span<const HybridPathOptimalFaceCandidate>, NumericalPolicy,
         std::stop_token cancellation) const override;
+};
+
+// Compatibility adapter retained for callers that depend on the two-stage
+// verifier domain and its report identifier.
+class TwoStageScalarIntervalHybridFamilyVerifier final : public HybridFamilyVerificationAdapter {
+public:
+    HybridFamilyVerificationCapabilities capabilities() const noexcept override;
+    HybridFamilyVerificationResult verify(const model::HybridSystem&,
+        const model::HybridRequest&,std::span<const model::HybridPath>,
+        std::span<const HybridPathProgram>,std::span<const HybridPathOptimalFaceCandidate>,
+        NumericalPolicy,std::stop_token cancellation) const override;
 };
 
 // Enumerates the full permitted path inventory and validates that programs and
