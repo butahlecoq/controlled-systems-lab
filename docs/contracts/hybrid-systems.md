@@ -200,6 +200,23 @@ candidate intervals are rejected instead of expanded by tolerance. It is
 limited to this domain; it does not establish general continuous-polytope
 family coverage or validated assurance.
 
+`TwoStageScalarIntervalHybridFamilyVerifier` adds a bounded two-stage numerical
+domain with scalar states and controls, exactly one bounded non-singleton
+control interval across the two stages, singleton controls at the other stage,
+interval invariants and guards, deterministic exactly representable scalar
+affine H-relation resets, and a scalar linear terminal objective. It
+independently propagates the shared control parameter through both flows and
+resets, reconstructs each path's feasible parameter interval and objective,
+checks the complete seven-coordinate path relation, and checks every optimal
+candidate against that path's minimizing subset. Distinct continuous families
+on globally tied paths are retained. The verifier rejects unsupported
+dimensions, horizons, relation forms, resource limits, and arithmetic whose
+exactness it cannot establish. An independently infeasible path is certified
+only when its supplied relation is explicitly represented as empty; otherwise
+the portfolio result is unsupported. It does not cover multiple continuous
+control parameters, general continuous multi-stage families, or validated
+assurance.
+
 ## Initial supported profile and rejection boundary
 
 The first profile is finite-horizon and discrete-time, with mode-specific
@@ -217,11 +234,11 @@ must use an exact polyhedral relation operation supported by the selected provid
 cross-branch convexification is introduced. It does not promise validated
 arithmetic or prove a numerical provider's result. Provider assurance is
 recorded separately. The implementation includes an exact integral singleton
-verifier and a numerical one-step scalar interval verifier. The latter supports
-bounded scalar interval controls/sets and deterministic scalar affine resets;
-it does not verify continuous multi-stage families or general-dimensional
-relations. These bounded verifiers do not establish the full EXT-07 acceptance
-contract.
+verifier and numerical one-stage and two-stage scalar interval verifiers. Their
+bounded profiles support only scalar interval sets and deterministic scalar
+affine resets; they do not verify general continuous multi-stage families or
+general-dimensional relations. These bounded verifiers do not establish the
+full EXT-07 acceptance contract.
 
 ## Required request-admission contract
 
@@ -291,11 +308,13 @@ portfolio builders propagate those failure reports without dropping the path
 identity. Solver-provider provenance remains attached to each branch
 execution. The default reachability adapter wraps this same direct joint-H
 composer; an independently implemented projected-set reachability algorithm
-is not yet available. The compiled verifiers currently cover integral
-singleton paths and one-step scalar interval families only; no compiled
-verifier covers general continuous multi-stage hybrid families. Their
-capability admission is request-scoped and does not currently reject every
-unsupported verifier plan before branch program construction.
+is not yet available. The compiled verifiers cover integral singleton paths,
+one-step scalar interval families, and the bounded two-stage scalar interval
+profile described above. No compiled verifier covers general continuous
+multi-stage hybrid families. These verifier domains reject unsupported input
+when verification runs, but portfolio construction does not yet reject every
+unsupported verifier plan before building branch programs, including for the
+bounded two-stage verifier.
 
 ## Independent test oracle requirements
 
