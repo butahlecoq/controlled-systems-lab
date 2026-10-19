@@ -129,6 +129,18 @@ TEST_CASE("unrepresentable radii refuse and tiny nonzero width stays nonzero") {
     CHECK(std::get<EllipsoidSet>(imported).radii()[1]==0);
 }
 
+TEST_CASE("directional radius chooses the least sufficient binary64 value") {
+    const auto registry=methods();
+    constexpr double bound=5.0917663780381025e-12;
+    const auto input=polygon("rounding-boundary",Matrix{2,2,{-bound,0,bound,0}});
+    const auto result=run_registered(registry,method,outer(input),ExecutionContext{});
+    REQUIRE(std::holds_alternative<EnclosedApproximation>(result));
+    const auto imported=from_ellipsoid_handle(
+        std::get<EnclosedApproximation>(result).result.output);
+    REQUIRE(std::holds_alternative<EllipsoidSet>(imported));
+    CHECK(std::get<EllipsoidSet>(imported).radii()[0]==7.200845068256816e-12);
+}
+
 TEST_CASE("cancellation and forged provider bounds cannot publish an enclosure") {
     const auto input=polygon("square",Matrix{4,2,{-1,-1,1,-1,1,1,-1,1}});
     const auto registry=methods();

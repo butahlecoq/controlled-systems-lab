@@ -46,6 +46,11 @@ std::optional<double> radius_for(double bound) {
         radius=std::nextafter(radius,std::numeric_limits<double>::infinity());
         if(!std::isfinite(radius))return std::nullopt;
     }
+    while(radius>0) {
+        const double predecessor=std::nextafter(radius,0.0);
+        if(!radius_sufficient(bound,predecessor))break;
+        radius=predecessor;
+    }
     return radius;
 }
 registry::Capability capability(const ApproximationRequest& request,
