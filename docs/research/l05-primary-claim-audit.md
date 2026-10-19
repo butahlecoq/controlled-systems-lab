@@ -8,6 +8,8 @@ On PDF pp. 3-4 (printed pp. 54-55), L05 starts with a continuously differentiabl
 
 Definition 1, equation (6), defines the reachable set using complete histories of that **linear model**, with the stated state and control constraints. Equation (7) gives its one-step recurrence. The general algorithm on PDF pp. 5-6 forms pairwise affine images, takes their convex hull, converts to halfspaces, clips by the stage constraint, and converts back. The conclusion on PDF p. 11 calls this general method exact for the constrained linear system and cites prior works [2-4]; L05 does not reproduce those proofs.
 
+The printed pseudocode initializes its reachable set with the single point `{x0}`. It therefore directly covers a fixed initial state. Although the surrounding assumptions allow an initial-state polytope, applying the recurrence to a general initial polytope requires initializing from all of its vertices (or an equivalent exact representation); the printed initialization does not show that extension. See the [reachability proof audit](reachability-proof-audit.md) for this distinction.
+
 Thus the paper's exact mathematical reference is the history-defined affine set `R_t^lin`. Under exact set operations, independent convex controls, affine dynamics, and exact stage clipping, the stated recurrence computes `R_t^lin`. The [reachability proof audit](reachability-proof-audit.md) supplies the detailed induction and distinguishes it from the floating implementation.
 
 ## Modified vertex selection
