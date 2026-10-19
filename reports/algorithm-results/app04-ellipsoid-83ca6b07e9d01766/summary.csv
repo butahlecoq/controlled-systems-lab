@@ -1,4 +1,0 @@
-case,batches,calls_per_batch,successes,failures,median_batch_ns,min_batch_ns,max_batch_ns
-square-axis,7,100,700,0,900000,887200,995200
-square-diagonal,7,100,700,0,1093600,1079800,1119500
-horizontal-segment,7,100,700,0,636900,625000,640300

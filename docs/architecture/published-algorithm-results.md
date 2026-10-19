@@ -129,8 +129,8 @@ live-byte verification remain publication gates.
 ## APP-04 directional ellipsoidal approximation
 
 Issue [APP-04 #34](https://github.com/butahlecoq/controlled-systems-lab/issues/34)
-has a saved [three-case bundle](../../reports/algorithm-results/app04-ellipsoid-83ca6b07e9d01766/)
-from frozen public adapter source `86f8b257cc2f8dc535917645c62b5b206b994e25`.
+has a saved [three-case bundle](../../reports/algorithm-results/app04-ellipsoid-fd302c34092f8b19/)
+from frozen public adapter source `5c11288e436f41ae832ab6ac89e180f6cf00a43d`.
 Two planar square orientations and a degenerate segment check literal center,
 orientation, projected bounds, PSD radii and complete vertex inclusion after
 every public call. The approximation policy independently admits exact
