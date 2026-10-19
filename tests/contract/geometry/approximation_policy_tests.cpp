@@ -3,6 +3,8 @@
 #include <csl/geometry/approximation.hpp>
 #include <csl/sets/data.hpp>
 #include <limits>
+#include <chrono>
+#include <stop_token>
 
 using namespace csl;
 using namespace csl::geometry::approximation;
@@ -112,6 +114,26 @@ TEST_CASE("registered outer approximation admits a universal superset") {
     CHECK(admitted.basis==StructuralBasis::universal_superset);
     CHECK(admitted.result.evidence.reference.identity==query.identity);
     CHECK(admitted.result.evidence.reference.inputs==std::vector<SetId>{input.id});
+}
+
+TEST_CASE("native V to H verification observes cancellation and deadline") {
+    auto input=two_points("reference");
+    auto output=h_set("outer",{1.0,-1.0},{1.0,0.0});
+    auto query=request(input,SetRelation::outer,output.metadata.representation);
+    auto methods=provider(query,output,SetRelation::outer,SetRelation::outer);
+    std::stop_source source;
+    source.request_stop();
+    ExecutionContext context;
+    context.cancellation=source.get_token();
+    auto cancelled=run_registered(methods,{{"fixture.approximation"},std::nullopt},query,context);
+    REQUIRE(std::holds_alternative<OperationStopped>(cancelled));
+    CHECK(std::get<OperationStopped>(cancelled).reason==StopReason::cancelled);
+
+    context={};
+    context.deadline=std::chrono::steady_clock::now()-std::chrono::seconds(1);
+    auto expired=run_registered(methods,{{"fixture.approximation"},std::nullopt},query,context);
+    REQUIRE(std::holds_alternative<OperationStopped>(expired));
+    CHECK(std::get<OperationStopped>(expired).reason==StopReason::deadline_expired);
 }
 
 TEST_CASE("dropping a native H constraint admits a nontrivial outer enclosure") {
