@@ -40,6 +40,8 @@ Reproduction tooling is in [tools](tools/README.md). It performs extraction, iso
 
 The [L05 saved-figure audit](l05-saved-figure-audit.md) recovers terminal polygons whose counts and areas match all three reported Example 1 rows, then checks exact containment of the stored binary64 hulls. It does not certify nonlinear reachability or identify the historical generator.
 
+The [L05 linear zonotope reconstruction](l05-linear-zonotope-reconstruction.md) independently reconstructs the candidate's 60-stage affine-control reachable polygons and matches all saved general-linear stages to floating-point precision. Exact checks of saved polygons show modified-in-general inclusion at every plotted stage, while the linear and nonlinear plotted hulls cross at stages 2–54; historical generator identity and nonlinear enclosure remain open.
+
 The [issue #5 feedback contract follow-up](feedback-contract-followup.md) turns the reviewed policy distinctions into a bounded robust predecessor and evidence handoff without claiming an implemented feedback solver.
 
 The [exact finite policy-class reference](finite-policy-class-reference.md) independently enumerates an authored two-step counterexample's fixed plans, executed replanning selector and globally causal value. Its three-point disturbance catalogue checks decision order but does not certify L13's continuous model or historical program.
