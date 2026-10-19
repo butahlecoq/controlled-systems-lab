@@ -75,9 +75,9 @@ jobs:
             if test -f reports/algorithm-results/opt10-publications.json; then
               python scripts/reports/stage_opt10.py --catalog reports/algorithm-results/opt10-publications.json --site build/report-site
             fi
-            if test -d reports/algorithm-results/issue4-volterra-4cb35c7e9efbf2e8; then
+            if test -d reports/algorithm-results/issue4-volterra-7dce05b47c50c27a; then
               python scripts/reports/stage_issue4_volterra.py \
-                --source reports/algorithm-results/issue4-volterra-4cb35c7e9efbf2e8 \
+                --source reports/algorithm-results/issue4-volterra-7dce05b47c50c27a \
                 --site build/report-site
             fi
             if test -f reports/algorithm-results/exp04-publications.json; then

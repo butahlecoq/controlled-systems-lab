@@ -2,7 +2,7 @@
 
 2026-10-19. This is a corrected-track calculation for the candidate described
 in the [source check](issue4-volterra-source-check.md). The versioned
-[saved report](../../reports/algorithm-results/issue4-volterra-4cb35c7e9efbf2e8/index.html)
+[saved report](../../reports/algorithm-results/issue4-volterra-7dce05b47c50c27a/index.html)
 contains all 60 interval rows, a labelled 2D figure, CSV, raw JSON, exact-byte
 manifest and offline ZIP. Its frozen checker commit is
 `9286b5ffa9313650ceea0fc033c1410395db22fe`.
@@ -53,7 +53,7 @@ mistakes; the induction with outward intervals supplies the all-history claim.
 
 ```sh
 python scripts/research/issue4_volterra_enclosure.py --output /tmp/issue4-records.json
-python scripts/reports/issue4_volterra/render.py --record reports/algorithm-results/issue4-volterra-4cb35c7e9efbf2e8/records.json --out-root reports/algorithm-results --check
+python scripts/reports/issue4_volterra/render.py --record reports/algorithm-results/issue4-volterra-7dce05b47c50c27a/records.json --out-root reports/algorithm-results --check
 python -m unittest discover -s tests/reporting -p test_issue4_volterra_enclosure.py
 ```
 

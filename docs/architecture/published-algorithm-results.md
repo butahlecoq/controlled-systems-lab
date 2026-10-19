@@ -228,7 +228,7 @@ and live URL byte verification are separate publication gates.
 
 ## Issue 4 candidate Volterra enclosure
 
-The [saved candidate certificate](../../reports/algorithm-results/issue4-volterra-4cb35c7e9efbf2e8/)
+The [saved candidate certificate](../../reports/algorithm-results/issue4-volterra-7dce05b47c50c27a/)
 uses frozen checker source `9286b5ffa9313650ceea0fc033c1410395db22fe`.
 It records outward-rounded integer boxes for all 60 stages and a labelled 2D
 terminal-error illustration. Under identical control histories in the

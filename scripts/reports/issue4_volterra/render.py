@@ -118,10 +118,13 @@ def render(record_bytes: bytes, renderer_bytes: bytes) -> tuple[str, dict[str, b
     }
     files["manifest.json"] = (json.dumps(manifest, indent=2, sort_keys=True) + "\n").encode()
     archive = io.BytesIO()
-    with zipfile.ZipFile(archive, "w", compression=zipfile.ZIP_DEFLATED) as output:
+    # Stored members and fixed ZIP metadata make the archive byte-identical
+    # across Python/zlib versions and Windows/Linux hosts.
+    with zipfile.ZipFile(archive, "w", compression=zipfile.ZIP_STORED) as output:
         for name in FILES:
             info = zipfile.ZipInfo(report_id + "/" + name, date_time=(2026, 1, 1, 0, 0, 0))
-            info.compress_type = zipfile.ZIP_DEFLATED
+            info.compress_type = zipfile.ZIP_STORED
+            info.create_system = 3
             info.external_attr = 0o100644 << 16
             output.writestr(info, files[name])
     files[report_id + ".zip"] = archive.getvalue()
