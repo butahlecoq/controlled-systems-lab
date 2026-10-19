@@ -286,10 +286,9 @@ registry::Capability inner_capability(const ApproximationRequest& request,
 class InnerWorkspace final : public SetApproximatorWorkspace {
     SetId output_id_;
     Matrix corners_;
-    bool axis_aligned_;
 public:
-    InnerWorkspace(SetId output_id,Matrix corners,bool axis_aligned)
-        :output_id_(std::move(output_id)),corners_(std::move(corners)),axis_aligned_(axis_aligned){}
+    InnerWorkspace(SetId output_id,Matrix corners)
+        :output_id_(std::move(output_id)),corners_(std::move(corners)){}
     SetTransformOutcome approximate(const ApproximationRequest& request,
                                      const ExecutionContext& context) override {
         if(stopped(context))return stop(context);
@@ -330,9 +329,9 @@ registry::Registration<registry::ApproximationPort> inner_registration(
                                const registry::Requirements& requirements) -> registry::Capability {
             return inner_capability(request,requirements,corners,axis_aligned);
         },
-        [output_id=std::move(output_id),corners=std::move(corners),axis_aligned](
+        [output_id=std::move(output_id),corners=std::move(corners)](
             const ApproximationRequest&) {
-            return std::make_unique<InnerWorkspace>(output_id,corners,axis_aligned);
+            return std::make_unique<InnerWorkspace>(output_id,corners);
         }};
 }
 }
