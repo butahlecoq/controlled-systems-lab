@@ -62,6 +62,13 @@ struct FeasibilityResult {
     std::string reason;
 };
 
+enum class InclusionState { included, not_included, unsupported, cancelled };
+
+struct InclusionResult {
+    InclusionState state{InclusionState::unsupported};
+    std::string reason;
+};
+
 namespace exact_detail {
 
 inline void trim(Integer& value) {
@@ -585,6 +592,73 @@ inline FeasibilityResult feasible(std::vector<Row> rows,
     }
     result.state = FeasibilityState::feasible;
     return result;
+}
+
+// Prove source ⊆ target by checking whether source intersects the strict
+// complement of each target half-space. Equality rows must be represented by
+// both opposing non-strict inequalities, as produced by append_equality.
+inline InclusionResult included_in(std::span<const Row> source,
+                                   std::span<const Row> target,
+                                   std::size_t variables,
+                                   Limits limits = {},
+                                   std::stop_token cancellation = {}) {
+    const auto unsupported = [](const char* reason) {
+        return InclusionResult{InclusionState::unsupported, reason};
+    };
+    if (cancellation.stop_requested())
+        return {InclusionState::cancelled,
+                "Exact relation inclusion was cancelled"};
+    if (variables > limits.max_variables || target.size() > limits.max_rows ||
+        source.size() > limits.max_rows ||
+        (!target.empty() && source.size() == limits.max_rows))
+        return unsupported("Relation dimensions exceed exact inclusion limits");
+    const auto valid_rows = [&](std::span<const Row> rows) {
+        for (const auto& row : rows) {
+            if (row.coefficients.size() != variables ||
+                exact_detail::bit_length(row.bound) > limits.max_integer_bits)
+                return false;
+            for (const auto& coefficient : row.coefficients)
+                if (exact_detail::bit_length(coefficient) > limits.max_integer_bits)
+                    return false;
+        }
+        return true;
+    };
+    if (!valid_rows(source) || !valid_rows(target))
+        return unsupported("Relation rows exceed exact inclusion limits");
+    if (target.size() > limits.max_generated_rows ||
+        (!target.empty() && limits.max_operations / target.size() == 0))
+        return unsupported("Relation inclusion exceeds the exact operation limit");
+    Limits per_check = limits;
+    if (!target.empty()) {
+        per_check.max_operations /= target.size();
+        per_check.max_generated_rows /= target.size();
+    }
+    for (const auto& constraint : target) {
+        if (cancellation.stop_requested())
+            return {InclusionState::cancelled,
+                    "Exact relation inclusion was cancelled"};
+        if (constraint.coefficients.size() != variables)
+            return unsupported("Target relation row dimensions do not match");
+        std::vector<Row> counterexample(source.begin(), source.end());
+        Row violation = constraint;
+        for (auto& coefficient : violation.coefficients)
+            coefficient.negative = !exact_detail::is_zero(coefficient) &&
+                                   !coefficient.negative;
+        violation.bound.negative = !exact_detail::is_zero(violation.bound) &&
+                                   !violation.bound.negative;
+        violation.strict = !constraint.strict;
+        counterexample.push_back(std::move(violation));
+        auto result = feasible(std::move(counterexample), variables, per_check,
+                               cancellation);
+        if (result.state == FeasibilityState::feasible)
+            return {InclusionState::not_included,
+                    "Source relation contains a target-half-space violation"};
+        if (result.state == FeasibilityState::unsupported)
+            return unsupported("Exact feasibility could not decide relation inclusion");
+        if (result.state == FeasibilityState::cancelled)
+            return {InclusionState::cancelled, result.reason};
+    }
+    return {InclusionState::included, {}};
 }
 
 } // namespace csl::synthesis::detail::hybrid_exact
