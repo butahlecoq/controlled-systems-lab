@@ -175,6 +175,8 @@ resource summary groups per-operation maxima and aggregates projection-provider
 input/output row totals and maxima by requested/actual provider identity. The
 per-path operation traces, projection sets, and provider evidence remain
 authoritative; a failed preflight or execution returns no partial portfolio.
+Provider-reported resource totals use checked accumulation; overflow rejects
+the portfolio with a scoped diagnostic instead of publishing wrapped totals.
 This wrapper aggregates reported relation and provider row counts, not
 unreported provider-internal memory or time observations.
 Each reachability adapter must preflight its supported operations and limits

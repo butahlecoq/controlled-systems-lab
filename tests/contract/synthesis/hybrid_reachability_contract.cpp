@@ -6,6 +6,7 @@
 #include <csl/sets/data.hpp>
 
 #include <algorithm>
+#include <limits>
 #include <memory>
 #include <optional>
 #include <string>
@@ -645,6 +646,67 @@ TEST_CASE("hybrid reachability portfolio preserves projected branches and aggreg
     CHECK(half_guard->max_rows_added==2);
     CHECK(full_guard->branch_count==1);
     CHECK(full_guard->max_rows_added==0);
+}
+
+TEST_CASE("hybrid reachability resource aggregation rejects provider counter overflow") {
+    class ObservationWorkspace final : public SetOperatorWorkspace {
+        SetHandle output_;
+        GeometryResourceObservation observation_;
+    public:
+        ObservationWorkspace(SetHandle output,GeometryResourceObservation observation)
+            :output_(std::move(output)),observation_(observation) {}
+        OperationOutcome apply(const OperationRequest& request,const ExecutionContext&) override {
+            const auto* projection=std::get_if<Projection>(&request.operation);
+            if(!projection)
+                return Unsupported{{{DiagnosticCode::unsupported,
+                    "contract.provider_counter.operation","Expected a projection request"}}};
+            GeometryEvidence evidence{geometry_reference(request),
+                GeometryClaimScope::set_relation,Unestablished{}, {}, {}};
+            return OperationResult{output_,SetRelation::equivalent,std::move(evidence),observation_};
+        }
+    };
+
+    for(const bool overflow_generated_rows:{true,false}) {
+        auto [system,request]=parallel_interval_system();
+        auto output=interval("contract.provider-counter-output",0,1);
+        std::size_t workspace_creations{};
+        std::size_t execution_count{};
+        registry::Registry<registry::GeometryPort> providers;
+        registry::Registration<registry::GeometryPort> registration{
+            {ModuleId{"contract.provider-counter-overflow"},"1"},
+            [](const OperationRequest&,const registry::Requirements& requirements)
+                -> registry::Capability { return registry::Offer{requirements.output}; },
+            [&workspace_creations,&execution_count,output,overflow_generated_rows](
+                const OperationRequest&) {
+                ++workspace_creations;
+                const bool first=execution_count++==0;
+                const auto maximum=std::numeric_limits<std::size_t>::max();
+                GeometryResourceObservation observation{};
+                if(overflow_generated_rows)
+                    observation.generated_rows=first?maximum:1;
+                else
+                    observation.charged_elimination_operations=first?maximum:1;
+                return std::make_unique<ObservationWorkspace>(output,observation);
+            }};
+        REQUIRE_FALSE(providers.add(std::move(registration)).has_value());
+        registry::Requirements requirements;
+        requirements.output.representation={"csl.polyhedron.h"};
+        requirements.output.relation=SetRelation::equivalent;
+        const auto prepared=registry::prepare_provider(registry::select_provider(providers,
+            {ModuleId{"contract.provider-counter-overflow"},std::string{"1"}},requirements));
+        REQUIRE(std::holds_alternative<registry::PreparedProvider<registry::GeometryPort>>(prepared));
+        GeneralProjectedStateHybridReachabilityAdapter adapter{
+            std::get<registry::PreparedProvider<registry::GeometryPort>>(prepared),16};
+
+        const auto result=compute_hybrid_reachability_portfolio(adapter,system,request,
+            {1,2},{4,16,128});
+        REQUIRE(std::holds_alternative<Diagnostics>(result));
+        const auto& diagnostics=std::get<Diagnostics>(result);
+        REQUIRE_FALSE(diagnostics.empty());
+        CHECK(diagnostics.front().field=="hybrid.reachability.aggregate_provider_resources");
+        CHECK(workspace_creations==2);
+        CHECK(execution_count==2);
+    }
 }
 
 TEST_CASE("hybrid reachability portfolio preflights every provider operation before workspace creation") {

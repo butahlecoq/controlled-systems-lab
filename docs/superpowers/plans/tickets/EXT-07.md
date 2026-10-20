@@ -279,3 +279,9 @@ simplex oracle through an existential reset. It checks the full five-dimensional
 optimal family and refutes a feasible candidate that adds a `u0 <= 0.25` facet.
 The fixture extends continuous-family evidence to five free controls; it is not
 exhaustive coverage of the verifier's admitted domain.
+
+The projected-reachability contract suite now exercises checked aggregation of
+replaceable provider resource observations. Two valid branch results whose
+generated-row totals or charged-operation totals overflow are rejected with
+`hybrid.reachability.aggregate_provider_resources`; the portfolio is not
+returned with wrapped totals.
