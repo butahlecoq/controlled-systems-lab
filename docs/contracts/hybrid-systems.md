@@ -145,8 +145,19 @@ creation. The fixed-path reachability API is replaceable through
 configured limits and ordered operation trace. Its default implementation,
 `JointHReachabilityAdapter`, currently wraps the same full joint-H composer; it
 does not project intermediate coordinates or merge paths. This provides a
-replaceable reachability contract, but not yet an independent projected-set
-reachability algorithm. Each reachability adapter must preflight its supported
+replaceable reachability contract. A separate
+`ProjectedStateHybridReachabilityAdapter` independently assembles the full
+one-transition relation and projects its terminal state through a registered
+geometry provider. It currently admits scalar source and target states, one
+scalar bounded non-singleton source-control interval, scalar interval or
+universal invariants and guard (including equally scaled opposite H normals),
+and a deterministic scalar affine reset encoded
+by one H equality. It returns the labelled joint relation alongside the H
+terminal set, provider provenance, and input/output row counts. Its row limit
+is configured into the registered projection provider and bounds input,
+intermediate, and terminal H rows. This narrow implementation does not establish general
+horizon projected reachability or general-dimensional continuous coverage.
+Each reachability adapter must preflight its supported
 operations and limits for the fixed path before the wrapper queries capabilities
 or starts composition. The default preflight fails closed; the built-in joint-H
 adapter uses the structural set-representation and joint-relation-limit checks.

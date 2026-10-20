@@ -72,6 +72,10 @@ add_executable(installed_polyhedral_intersection_client polyhedral_intersection_
 target_link_libraries(installed_polyhedral_intersection_client PRIVATE CSL::polyhedral)
 set_target_properties(installed_polyhedral_intersection_client PROPERTIES CXX_EXTENSIONS OFF)
 add_test(NAME installed_polyhedral_intersection_client COMMAND installed_polyhedral_intersection_client)
+add_executable(installed_hybrid_reachability_client hybrid_reachability_client.cpp)
+target_link_libraries(installed_hybrid_reachability_client PRIVATE CSL::hybrid_path_program)
+set_target_properties(installed_hybrid_reachability_client PROPERTIES CXX_EXTENSIONS OFF)
+add_test(NAME installed_hybrid_reachability_client COMMAND installed_hybrid_reachability_client)
 set_tests_properties(installed_input_client PROPERTIES
   PASS_REGULAR_EXPRESSION "Installed input client: owning scenario, literal identity and original cost passed")
 if(TARGET CSL::highs_convex)
