@@ -299,15 +299,17 @@ cross-branch convexification is introduced. It does not promise validated
 arithmetic or prove a numerical provider's result. Provider assurance is
 recorded separately. The implementation includes an exact integral singleton
 verifier, a one-step scalar interval verifier, and a finite-horizon
- single-parameter scalar interval verifier. A separate
+single-parameter scalar interval verifier. A separate
 `TwoParameterScalarPolytopeHybridFamilyVerifier` supports exactly two free
-controls in a bounded two-stage scalar profile: each stage has a bounded
-non-singleton scalar control interval, scalar states and controls, interval
-invariants and guards, and deterministic exactly representable scalar affine
-resets. These bounded profiles do not verify general continuous polytope
-families or general-dimensional relations, and do not establish the full
-EXT-07 acceptance contract.
-## Required request-admission contract
+controls in a bounded two-stage scalar profile. The exact singleton verifier
+has the checked-integral domain described above. The continuous scalar
+interval and polygon verifiers require their documented scalar interval or
+two-dimensional polygon domains: each stage has one bounded non-singleton
+scalar control interval, scalar states and controls, interval invariants and
+guards, and deterministic exactly representable scalar affine resets. They do
+not cover more than two free controls, general continuous polytope families,
+or general-dimensional continuous relations. These bounded implementations
+do not establish the full EXT-07 acceptance contract.## Required request-admission contract
 
 A conforming implementation must admit the complete requested operation before
 creating a provider workspace or running an algorithm:
@@ -422,4 +424,5 @@ continuous open-loop controls, and no temporal or observation coupling in its
 first executable profile. Integrations with those
 extensions require a separately reviewed contract revision and capability
 combination; their semantics must not be guessed from hybrid mode paths.
+
 
