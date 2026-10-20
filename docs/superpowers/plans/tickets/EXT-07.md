@@ -2,6 +2,8 @@
 
 GitHub: [#156](https://github.com/butahlecoq/controlled-systems-lab/issues/156).
 
+Test oracle: T-EXT07 (defined in the [master test specification](../../specs/2026-10-11-controlled-systems-master-design.md)).
+
 ## Purpose and scope
 
 Track the future hybrid-system extension explicitly. Hybrid systems are reserved as a future model class in the architecture, but their discrete mode semantics are not covered by the finite/mixed-action or observation-feedback tickets. This is a later profile, not part of the initial nominal affine discrete comparison.

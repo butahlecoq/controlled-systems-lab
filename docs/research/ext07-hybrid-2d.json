@@ -1,0 +1,14 @@
+{
+  "schema": "csl.ext07-hybrid-illustration/1",
+  "purpose": "exact illustrative hybrid path; not a performance measurement",
+  "horizon": 1,
+  "initial": {"mode": "source", "state_xy": [-1, 0]},
+  "source_flow": {"x_pre": "x + u", "y_pre": "y"},
+  "control": {"u": 1},
+  "edge": {"id": "switch", "source": "source", "target": "target", "guard": "R^2", "reset": "identity"},
+  "target_invariant": "R^2",
+  "joint_coordinate_order": ["x0", "y0", "u0", "x_pre1", "y_pre1", "x1", "y1"],
+  "literal_joint_tuple": [-1, 0, 1, 0, 0, 0, 0],
+  "terminal_state_xy": [0, 0],
+  "terminal_objective": {"quantity": "x", "sense": "minimize", "value": 0}
+}

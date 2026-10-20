@@ -113,6 +113,13 @@ target_link_libraries(installed_model_client PRIVATE CSL::model)
 set_target_properties(installed_model_client PROPERTIES CXX_EXTENSIONS OFF)
 add_test(NAME installed_model_client COMMAND installed_model_client)
 
+add_executable(installed_hybrid_path_program_client hybrid_path_program_client.cpp)
+target_link_libraries(installed_hybrid_path_program_client PRIVATE CSL::hybrid_path_program)
+set_target_properties(installed_hybrid_path_program_client PROPERTIES CXX_EXTENSIONS OFF)
+add_test(NAME installed_hybrid_path_program_client COMMAND installed_hybrid_path_program_client)
+set_tests_properties(installed_hybrid_path_program_client PROPERTIES
+  PASS_REGULAR_EXPRESSION "Installed hybrid path program client: exact 2D branch program passed")
+
 add_executable(installed_simulation_client simulation_client.cpp)
 target_link_libraries(installed_simulation_client PRIVATE CSL::simulation)
 set_target_properties(installed_simulation_client PROPERTIES CXX_EXTENSIONS OFF)
