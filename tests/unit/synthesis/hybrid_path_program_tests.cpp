@@ -1679,6 +1679,37 @@ TEST_CASE("hybrid family verification adapter receives the exhaustive path inven
     CHECK(verifier.calls==1);
 }
 
+TEST_CASE("hybrid family verification rejects a duplicated edge path in the inventory") {
+    auto system=example_system();
+    auto parallel=system.edges.front();
+    parallel.id={"switch-parallel"};
+    system.edges.push_back(std::move(parallel));
+    const auto request=example_request();
+    auto built=build_hybrid_portfolio_programs(system,request,{"hybrid-problem"},
+        {1,8},{16,64,1024});
+    REQUIRE(std::holds_alternative<std::vector<HybridPathProgram>>(built));
+    auto programs=std::get<std::vector<HybridPathProgram>>(std::move(built));
+    REQUIRE(programs.size()==2);
+    CHECK(programs[0].path.modes==programs[1].path.modes);
+    CHECK(programs[0].path.edges!=programs[1].path.edges);
+    const std::vector<model::HybridPath> raw_graph_oracle{
+        example_path(),{{{"source"},{"target"}},{{"switch-parallel"}}}};
+    std::vector<model::HybridPath> actual_paths;
+    for(const auto& program:programs) actual_paths.push_back(program.path);
+    CHECK(actual_paths==raw_graph_oracle);
+
+    // The raw graph has two parallel edge paths with the same mode sequence.
+    // Duplicating one edge identity must not be accepted as coverage of both.
+    programs[1].path=programs[0].path;
+    FixtureHybridFamilyVerifier verifier;
+    const auto result=verify_hybrid_portfolio_family(verifier,system,request,programs,{},
+        {1,8},{1e-8,1e-8});
+    REQUIRE(std::holds_alternative<Diagnostics>(result));
+    CHECK(std::get<Diagnostics>(result).front().field=="hybrid.verification.program_path");
+    CHECK(programs[0].path==programs[1].path);
+    CHECK(verifier.calls==0);
+}
+
 TEST_CASE("hybrid family verification report only retains candidate providers from supplied faces") {
     auto system=example_system();
     auto parallel=system.edges.front();
