@@ -580,6 +580,25 @@ TwoParameterScalarPolytopeHybridFamilyVerifier::preflight(
     std::span<const HybridPath> paths,
     std::span<const HybridPlannedOperation> operation_plan,
     std::stop_token stop) const {
+  for (const auto &terminal_mode : r.allowed_terminal_modes) {
+    if (stop.stop_requested())
+      return OperationStopped{StopReason::cancelled,
+                              "Two-parameter admission cancelled while checking terminal objectives"};
+    const auto objective = std::find_if(r.terminal_objectives.begin(),
+        r.terminal_objectives.end(), [&](const auto &candidate) {
+          return candidate.mode == terminal_mode;
+        });
+    const auto mode = std::find_if(s.modes.begin(), s.modes.end(),
+        [&](const auto &candidate) { return candidate.id == terminal_mode; });
+    const auto *linear = objective == r.terminal_objectives.end()
+        ? nullptr : std::get_if<LinearTerminal>(&objective->objective);
+    if (!linear || mode == s.modes.end() ||
+        linear->coefficients.size() != mode->state_dimension)
+      return Diagnostics{{DiagnosticCode::unsupported,
+                          "hybrid.verification.two_parameter_objective",
+                          "Terminal mode " + terminal_mode.value +
+                              ": two-parameter verification requires a scalar linear objective matching the terminal state dimension"}};
+  }
   for (const auto &p : paths) {
     if (stop.stop_requested())
       return OperationStopped{StopReason::cancelled,

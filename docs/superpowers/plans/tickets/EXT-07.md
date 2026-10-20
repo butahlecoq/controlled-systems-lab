@@ -296,3 +296,10 @@ replaceable provider resource observations. Two valid branch results whose
 generated-row totals or charged-operation totals overflow are rejected with
 `hybrid.reachability.aggregate_provider_resources`; the portfolio is not
 returned with wrapped totals.
+
+The two-parameter scalar-polytope verifier now validates the objective class
+and terminal-state dimension for every allowed terminal mode before evaluating
+any enumerated path. This prevents an unsupported or dimension-mismatched
+objective from bypassing admission when its mode is unreachable or every path
+to it is infeasible. Regressions cover both cases; broader verifier-domain,
+resource-scale, and publication evidence remains open.

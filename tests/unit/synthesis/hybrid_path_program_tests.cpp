@@ -3125,9 +3125,34 @@ TEST_CASE("scalar interval verifiers preflight objectives for every allowed term
     OneStepScalarIntervalHybridFamilyVerifier one_step;
     SingleParameterScalarIntervalHybridFamilyVerifier single_parameter;
     TwoStageScalarIntervalHybridFamilyVerifier two_stage;
+    TwoParameterScalarPolytopeHybridFamilyVerifier two_parameter;
     check_rejection(one_step,1);
     check_rejection(single_parameter,1);
     check_rejection(two_stage,2);
+    const auto two_parameter_system=make_scalar_system(2);
+    const auto two_parameter_request=make_request();
+    const std::vector<model::HybridPath> no_paths;
+    const std::vector<model::HybridPlannedOperation> no_operations;
+    const auto two_parameter_result=two_parameter.preflight(two_parameter_system,
+        two_parameter_request,no_paths,no_operations,{});
+    REQUIRE(std::holds_alternative<Diagnostics>(two_parameter_result));
+    REQUIRE_FALSE(std::get<Diagnostics>(two_parameter_result).empty());
+    CHECK(std::get<Diagnostics>(two_parameter_result).front().code==
+        DiagnosticCode::unsupported);
+    CHECK(std::get<Diagnostics>(two_parameter_result).front().field==
+        "hybrid.verification.two_parameter_objective");
+    CHECK(std::get<Diagnostics>(two_parameter_result).front().explanation.find(
+        "unreachable-terminal")!=std::string::npos);
+    auto wrong_dimension_request=two_parameter_request;
+    wrong_dimension_request.terminal_objectives.back().objective=
+        LinearTerminal{{1,0},0};
+    const auto wrong_dimension=two_parameter.preflight(two_parameter_system,
+        wrong_dimension_request,no_paths,no_operations,{});
+    REQUIRE(std::holds_alternative<Diagnostics>(wrong_dimension));
+    CHECK(std::get<Diagnostics>(wrong_dimension).front().code==
+        DiagnosticCode::unsupported);
+    CHECK(std::get<Diagnostics>(wrong_dimension).front().field==
+        "hybrid.verification.two_parameter_objective");
 }
 
 TEST_CASE("hybrid portfolio capability preflight honors cancellation before scanning paths") {
@@ -6336,6 +6361,28 @@ TEST_CASE("two parameter scalar verifier certifies a coupled polygon and "
   REQUIRE(std::holds_alternative<std::vector<HybridPathProgram>>(built));
   auto programs = std::get<std::vector<HybridPathProgram>>(built);
   REQUIRE(programs.size() == 2);
+  auto unsupported_objective_request=request;
+  unsupported_objective_request.terminal_objectives.front().objective=
+      QuadraticTerminal{Matrix{1,1,{1}},Vector{0},0};
+  auto infeasible_path_system=system;
+  for(auto& edge:infeasible_path_system.edges)
+    if(edge.target==model::HybridModeId{"two-parameter-middle"})
+      edge.guards[0]=EmptySet{1};
+  const std::array<model::HybridPath,2> admitted_paths{
+      programs[0].path,programs[1].path};
+  const auto admission_plan=model::plan_hybrid_operations(admitted_paths);
+  TwoParameterScalarPolytopeHybridFamilyVerifier admission_verifier;
+  const auto unsupported_admission=admission_verifier.preflight(
+      infeasible_path_system,unsupported_objective_request,admitted_paths,
+      admission_plan,{});
+  REQUIRE(std::holds_alternative<Diagnostics>(unsupported_admission));
+  REQUIRE_FALSE(std::get<Diagnostics>(unsupported_admission).empty());
+  CHECK(std::get<Diagnostics>(unsupported_admission).front().code==
+      DiagnosticCode::unsupported);
+  CHECK(std::get<Diagnostics>(unsupported_admission).front().field==
+      "hybrid.verification.two_parameter_objective");
+  CHECK(std::get<Diagnostics>(unsupported_admission).front().explanation.find(
+      "two-parameter-terminal")!=std::string::npos);
   // Independent raw-graph oracle: enumerate two-edge histories directly from
   // the model catalogue instead of using the production path enumerator.
   std::vector<model::HybridPath> oracle_paths;
