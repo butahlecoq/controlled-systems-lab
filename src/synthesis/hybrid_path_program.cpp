@@ -302,36 +302,38 @@ HybridPathReachabilityResult JointHReachabilityAdapter::compose_path(
         std::move(relation.operations),Assurance::numerical,{}};
 }
 
-HybridPathReachabilityResult compute_hybrid_path_reachability(
+namespace {
+HybridReachabilityPreflightResult checked_hybrid_reachability_preflight(
     const HybridReachabilityAdapter& adapter,const model::HybridSystem& system,
     const model::HybridRequest& request,const model::HybridPath& path,
     model::HybridRelationLimits limits,std::stop_token cancellation) {
-    if(cancellation.stop_requested())
-        return OperationStopped{StopReason::cancelled,"Hybrid reachability was cancelled before profile admission"};
-    const auto admission=hybrid_path_admission_errors(system,request,path);
-    if(!admission.empty()) return admission;
-    const auto path_preflight=adapter.preflight(system,request,path,limits,cancellation);
-    if(const auto* failure=std::get_if<model::HybridPathCompositionFailureReport>(&path_preflight)) {
+    auto result=adapter.preflight(system,request,path,limits,cancellation);
+    if(const auto* failure=std::get_if<model::HybridPathCompositionFailureReport>(&result)) {
         if(failure->path!=path)
             return one({DiagnosticCode::evidence_mismatch,"hybrid.reachability.preflight_path",
                 "Reachability preflight returned a failure report for a different path"});
         if(!same_limits(failure->limits,limits))
             return one({DiagnosticCode::evidence_mismatch,"hybrid.reachability.preflight_limits",
                 "Reachability preflight failure report lost the configured relation limits"});
-        return *failure;
     }
-    if(const auto* errors=std::get_if<Diagnostics>(&path_preflight)) return *errors;
-    if(const auto* stopped=std::get_if<OperationStopped>(&path_preflight)) return *stopped;
-    if(cancellation.stop_requested())
-        return OperationStopped{StopReason::cancelled,
-            "Hybrid reachability was cancelled after adapter preflight"};
-    const auto capability=adapter.capabilities();
+    return result;
+}
+
+Diagnostics hybrid_reachability_capability_errors(HybridReachabilityCapabilities capability) {
     if(capability.assurance!=Assurance::numerical)
         return one({DiagnosticCode::unsupported,"hybrid.reachability.assurance",
             "Validated reachability assurance is unsupported until its evidence is carried in the result"});
     if(!capability.retains_branch_labelled_joint_relation)
         return one({DiagnosticCode::unsupported,"hybrid.reachability.branch_relation",
             "Reachability adapter does not declare full branch-labelled joint-relation support"});
+    return {};
+}
+
+HybridPathReachabilityResult execute_preflighted_hybrid_reachability(
+    const HybridReachabilityAdapter& adapter,const model::HybridSystem& system,
+    const model::HybridRequest& request,const model::HybridPath& path,
+    model::HybridRelationLimits limits,HybridReachabilityCapabilities capability,
+    std::stop_token cancellation) {
     if(cancellation.stop_requested())
         return OperationStopped{StopReason::cancelled,
             "Hybrid reachability was cancelled after capability admission"};
@@ -371,8 +373,7 @@ HybridPathReachabilityResult compute_hybrid_path_reachability(
                     "Projected terminal-set row count does not match its retained H representation"});
         }
     }
-    if(const auto* failure=std::get_if<model::HybridPathCompositionFailureReport>(&result);
-       failure) {
+    if(const auto* failure=std::get_if<model::HybridPathCompositionFailureReport>(&result)) {
         if(failure->path!=path)
             return one({DiagnosticCode::evidence_mismatch,"hybrid.reachability.failure_path",
                 "Reachability adapter returned a failure report for a different path"});
@@ -383,6 +384,156 @@ HybridPathReachabilityResult compute_hybrid_path_reachability(
         if(!trace_errors.empty()) return trace_errors;
     }
     return result;
+}
+
+bool same_projection_provider(const HybridProjectionResourceSummary& summary,
+    const registry::Provenance& provider) {
+    return summary.port==provider.port&&
+        summary.requested_method_id==provider.requested.id.value&&
+        summary.requested_version==provider.requested.version&&
+        summary.actual_provider_id==(provider.actual
+            ?std::optional<std::string>{provider.actual->id.value}:std::nullopt)&&
+        summary.actual_provider_version==(provider.actual
+            ?std::optional<std::string>{provider.actual->version}:std::nullopt);
+}
+
+Diagnostics aggregate_hybrid_reachability_resources(HybridReachabilityPortfolio& portfolio) {
+    const auto checked_sum=[](std::size_t& total,std::size_t value) {
+        if(total>std::numeric_limits<std::size_t>::max()-value) return false;
+        total+=value;
+        return true;
+    };
+    for(const auto& branch:portfolio.branches) {
+        for(const auto& operation:branch.relation_operations) {
+            auto found=std::find_if(portfolio.operation_resources.begin(),
+                portfolio.operation_resources.end(),[&](const auto& summary) {
+                    return summary.operation==operation.operation&&summary.stage==operation.stage&&
+                        summary.mode==operation.mode&&summary.edge==operation.edge&&
+                        summary.implementation_id==operation.implementation_id&&
+                        summary.implementation_version==operation.implementation_version;
+                });
+            if(found==portfolio.operation_resources.end()) {
+                portfolio.operation_resources.push_back({operation.operation,operation.stage,
+                    operation.mode,operation.edge,operation.implementation_id,
+                    operation.implementation_version,1,operation.joint_variables,
+                    operation.rows_added,operation.cumulative_rows,
+                    operation.cumulative_matrix_elements});
+            } else {
+                if(!checked_sum(found->branch_count,1))
+                    return one({DiagnosticCode::unsupported,"hybrid.reachability.aggregate_count",
+                        "Reachability operation branch count overflows size_t"});
+                found->max_joint_variables=std::max(found->max_joint_variables,operation.joint_variables);
+                found->max_rows_added=std::max(found->max_rows_added,operation.rows_added);
+                found->max_cumulative_rows=std::max(found->max_cumulative_rows,operation.cumulative_rows);
+                found->max_cumulative_matrix_elements=std::max(found->max_cumulative_matrix_elements,
+                    operation.cumulative_matrix_elements);
+            }
+        }
+        if(!branch.projected_state) continue;
+        const auto& projected=*branch.projected_state;
+        auto found=std::find_if(portfolio.projection_resources.begin(),
+            portfolio.projection_resources.end(),[&](const auto& summary) {
+                return same_projection_provider(summary,projected.projection_provider);
+            });
+        if(found==portfolio.projection_resources.end()) {
+            portfolio.projection_resources.push_back({projected.projection_provider.port,
+                projected.projection_provider.requested.id.value,
+                projected.projection_provider.requested.version,
+                projected.projection_provider.actual
+                    ?std::optional<std::string>{projected.projection_provider.actual->id.value}:std::nullopt,
+                projected.projection_provider.actual
+                    ?std::optional<std::string>{projected.projection_provider.actual->version}:std::nullopt,
+                1,projected.input_rows,projected.input_rows,projected.output_rows,
+                projected.output_rows,projected.maximum_projection_rows});
+        } else {
+            if(!checked_sum(found->branch_count,1)||
+               !checked_sum(found->total_input_rows,projected.input_rows)||
+               !checked_sum(found->total_output_rows,projected.output_rows))
+                return one({DiagnosticCode::unsupported,"hybrid.reachability.aggregate_rows",
+                    "Reachability projection row totals overflow size_t"});
+            found->max_input_rows=std::max(found->max_input_rows,projected.input_rows);
+            found->max_output_rows=std::max(found->max_output_rows,projected.output_rows);
+            found->maximum_projection_rows=std::min(found->maximum_projection_rows,
+                projected.maximum_projection_rows);
+        }
+    }
+    return {};
+}
+}
+
+HybridPathReachabilityResult compute_hybrid_path_reachability(
+    const HybridReachabilityAdapter& adapter,const model::HybridSystem& system,
+    const model::HybridRequest& request,const model::HybridPath& path,
+    model::HybridRelationLimits limits,std::stop_token cancellation) {
+    if(cancellation.stop_requested())
+        return OperationStopped{StopReason::cancelled,"Hybrid reachability was cancelled before profile admission"};
+    const auto admission=hybrid_path_admission_errors(system,request,path);
+    if(!admission.empty()) return admission;
+    const auto path_preflight=checked_hybrid_reachability_preflight(
+        adapter,system,request,path,limits,cancellation);
+    if(const auto* failure=std::get_if<model::HybridPathCompositionFailureReport>(&path_preflight)) return *failure;
+    if(const auto* errors=std::get_if<Diagnostics>(&path_preflight)) return *errors;
+    if(const auto* stopped=std::get_if<OperationStopped>(&path_preflight)) return *stopped;
+    if(cancellation.stop_requested())
+        return OperationStopped{StopReason::cancelled,
+            "Hybrid reachability was cancelled after adapter preflight"};
+    const auto capability=adapter.capabilities();
+    const auto capability_errors=hybrid_reachability_capability_errors(capability);
+    if(!capability_errors.empty()) return capability_errors;
+    return execute_preflighted_hybrid_reachability(adapter,system,request,path,limits,
+        capability,cancellation);
+}
+
+HybridReachabilityPortfolioResult compute_hybrid_reachability_portfolio(
+    const HybridReachabilityAdapter& adapter,const model::HybridSystem& system,
+    const model::HybridRequest& request,model::HybridEnumerationLimits enumeration_limits,
+    model::HybridRelationLimits relation_limits,std::stop_token cancellation) {
+    if(cancellation.stop_requested())
+        return OperationStopped{StopReason::cancelled,
+            "Hybrid reachability portfolio was cancelled before profile admission"};
+    const auto profile_errors=model::check_hybrid_profile(system,request);
+    if(!profile_errors.empty()) return profile_errors;
+    auto enumeration=model::enumerate_hybrid_paths(system,request.initial.mode,
+        request.allowed_terminal_modes,enumeration_limits,cancellation);
+    if(const auto* diagnostic=std::get_if<Diagnostic>(&enumeration)) return one(*diagnostic);
+    if(const auto* stopped=std::get_if<OperationStopped>(&enumeration)) return *stopped;
+    auto paths=std::get<std::vector<model::HybridPath>>(std::move(enumeration));
+
+    // Complete operation admission for every path before the first adapter
+    // execution can create a provider workspace.
+    for(const auto& path:paths) {
+        if(cancellation.stop_requested())
+            return OperationStopped{StopReason::cancelled,
+                "Hybrid reachability portfolio was cancelled during path preflight"};
+        const auto admission=hybrid_path_admission_errors(system,request,path);
+        if(!admission.empty()) return admission;
+        const auto preflight=checked_hybrid_reachability_preflight(
+            adapter,system,request,path,relation_limits,cancellation);
+        if(const auto* failure=std::get_if<model::HybridPathCompositionFailureReport>(&preflight)) return *failure;
+        if(const auto* diagnostics=std::get_if<Diagnostics>(&preflight)) return *diagnostics;
+        if(const auto* stopped=std::get_if<OperationStopped>(&preflight)) return *stopped;
+    }
+    if(cancellation.stop_requested())
+        return OperationStopped{StopReason::cancelled,
+            "Hybrid reachability portfolio was cancelled after path preflight"};
+    const auto capability=adapter.capabilities();
+    const auto capability_errors=hybrid_reachability_capability_errors(capability);
+    if(!capability_errors.empty()) return capability_errors;
+
+    HybridReachabilityPortfolio portfolio;
+    portfolio.branches.reserve(paths.size());
+    for(const auto& path:paths) {
+        auto result=execute_preflighted_hybrid_reachability(adapter,system,request,path,
+            relation_limits,capability,cancellation);
+        if(const auto* reachable=std::get_if<HybridPathReachability>(&result))
+            portfolio.branches.push_back(std::move(*reachable));
+        else if(const auto* diagnostics=std::get_if<Diagnostics>(&result)) return *diagnostics;
+        else if(const auto* stopped=std::get_if<OperationStopped>(&result)) return *stopped;
+        else return std::get<model::HybridPathCompositionFailureReport>(std::move(result));
+    }
+    const auto aggregation_errors=aggregate_hybrid_reachability_resources(portfolio);
+    if(!aggregation_errors.empty()) return aggregation_errors;
+    return portfolio;
 }
 
 HybridPathProgramResult JointHDirectTrajectoryAdapter::build_path(

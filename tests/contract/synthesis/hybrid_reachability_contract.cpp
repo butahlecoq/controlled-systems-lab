@@ -5,7 +5,9 @@
 #include <csl/synthesis/hybrid_path_program.hpp>
 #include <csl/sets/data.hpp>
 
+#include <algorithm>
 #include <memory>
+#include <optional>
 #include <string>
 #include <utility>
 #include <variant>
@@ -138,6 +140,13 @@ std::pair<model::HybridSystem,model::HybridRequest> two_stage_scalar_interval_sy
     }};
     model::HybridRequest request{{{"source"},{0}},{{"target"}},
         {{{"target"},LinearTerminal{{1},0},"terminal value","unit"}}};
+    return {std::move(system),std::move(request)};
+}
+
+std::pair<model::HybridSystem,model::HybridRequest> parallel_interval_system() {
+    auto [system,request]=interval_system();
+    system.edges.push_back({{"full-transition"},{"source"},{"target"},
+        {UniversalSet{1}},{identity_reset()}});
     return {std::move(system),std::move(request)};
 }
 
@@ -366,6 +375,112 @@ TEST_CASE("general projected hybrid reachability matches an independent two-stag
     CHECK(final_operation.cumulative_rows==input.inequalities.rows()+input.equalities.rows());
     CHECK(final_operation.cumulative_matrix_elements==final_operation.cumulative_rows*
         final_operation.joint_variables);
+}
+
+TEST_CASE("hybrid reachability portfolio preserves projected branches and aggregates provider resources") {
+    auto [system,request]=parallel_interval_system();
+    GeneralProjectedStateHybridReachabilityAdapter adapter{16};
+    const auto result=compute_hybrid_reachability_portfolio(adapter,system,request,
+        {1,2},{4,16,128});
+    REQUIRE(std::holds_alternative<HybridReachabilityPortfolio>(result));
+    const auto& portfolio=std::get<HybridReachabilityPortfolio>(result);
+    REQUIRE(portfolio.branches.size()==2);
+
+    const model::HybridPath half_path{{{"source"},{"target"}},{{"transition"}}};
+    const model::HybridPath full_path{{{"source"},{"target"}},{{"full-transition"}}};
+    const auto branch_for=[&](const model::HybridPath& path) -> const HybridPathReachability& {
+        const auto found=std::find_if(portfolio.branches.begin(),portfolio.branches.end(),
+            [&](const auto& branch) { return branch.path==path; });
+        REQUIRE(found!=portfolio.branches.end());
+        return *found;
+    };
+    const auto& half=branch_for(half_path);
+    const auto& full=branch_for(full_path);
+    REQUIRE(half.projected_state.has_value());
+    REQUIRE(full.projected_state.has_value());
+    const auto half_h=std::get<sets::HRepresentation>(
+        half.projected_state->terminal_state_set.representation());
+    const auto full_h=std::get<sets::HRepresentation>(
+        full.projected_state->terminal_state_set.representation());
+    CHECK(contains(half_h,0.0));
+    CHECK(contains(half_h,0.25));
+    CHECK(contains(half_h,0.5));
+    CHECK_FALSE(contains(half_h,0.75));
+    CHECK(contains(full_h,0.0));
+    CHECK(contains(full_h,0.5));
+    CHECK(contains(full_h,1.0));
+    CHECK_FALSE(contains(full_h,1.25));
+
+    REQUIRE(portfolio.projection_resources.size()==1);
+    const auto& projection=portfolio.projection_resources.front();
+    CHECK(projection.port=="geometry");
+    CHECK(projection.actual_provider_id==std::optional<std::string>{"csl.geometry.polyhedral-projection"});
+    CHECK(projection.branch_count==2);
+    CHECK(projection.total_input_rows==12);
+    CHECK(projection.max_input_rows==7);
+    CHECK(projection.total_output_rows==6);
+    CHECK(projection.max_output_rows==4);
+    CHECK(projection.maximum_projection_rows==16);
+
+    const auto shared_initial=std::find_if(portfolio.operation_resources.begin(),
+        portfolio.operation_resources.end(),[](const auto& item) {
+            return item.operation==model::HybridRelationOperationKind::initial_state;
+        });
+    REQUIRE(shared_initial!=portfolio.operation_resources.end());
+    CHECK(shared_initial->branch_count==2);
+    CHECK(shared_initial->max_joint_variables==4);
+    const auto half_guard=std::find_if(portfolio.operation_resources.begin(),
+        portfolio.operation_resources.end(),[&](const auto& item) {
+            return item.operation==model::HybridRelationOperationKind::transition_guard&&
+                item.edge==std::optional<model::HybridEdgeId>{{"transition"}};
+        });
+    const auto full_guard=std::find_if(portfolio.operation_resources.begin(),
+        portfolio.operation_resources.end(),[&](const auto& item) {
+            return item.operation==model::HybridRelationOperationKind::transition_guard&&
+                item.edge==std::optional<model::HybridEdgeId>{{"full-transition"}};
+        });
+    REQUIRE(half_guard!=portfolio.operation_resources.end());
+    REQUIRE(full_guard!=portfolio.operation_resources.end());
+    CHECK(half_guard->branch_count==1);
+    CHECK(half_guard->max_rows_added==2);
+    CHECK(full_guard->branch_count==1);
+    CHECK(full_guard->max_rows_added==0);
+}
+
+TEST_CASE("hybrid reachability portfolio preflights every provider operation before workspace creation") {
+    auto [system,request]=parallel_interval_system();
+    int admissions=0;
+    int workspace_creations=0;
+    registry::Registry<registry::GeometryPort> registry;
+    registry::Registration<registry::GeometryPort> registration{
+        {ModuleId{"contract.portfolio-reject-second-projection"},"1"},
+        [&admissions](const OperationRequest&,const registry::Requirements& requirements) -> registry::Capability {
+            ++admissions;
+            if(admissions==2)
+                return Diagnostics{{DiagnosticCode::unsupported,"contract.portfolio.second_rejected",
+                    "The second path projection is rejected during portfolio preflight"}};
+            return registry::Offer{requirements.output};
+        },
+        [&workspace_creations](const OperationRequest&) -> std::unique_ptr<SetOperatorWorkspace> {
+            ++workspace_creations;
+            return {};
+        }};
+    REQUIRE_FALSE(registry.add(std::move(registration)).has_value());
+    registry::Requirements requirements;
+    requirements.output.representation={"csl.polyhedron.h"};
+    requirements.output.relation=SetRelation::equivalent;
+    const auto prepared=registry::prepare_provider(registry::select_provider(registry,
+        {ModuleId{"contract.portfolio-reject-second-projection"},std::string{"1"}},requirements));
+    REQUIRE(std::holds_alternative<registry::PreparedProvider<registry::GeometryPort>>(prepared));
+    GeneralProjectedStateHybridReachabilityAdapter adapter{
+        std::get<registry::PreparedProvider<registry::GeometryPort>>(prepared),16};
+
+    const auto result=compute_hybrid_reachability_portfolio(adapter,system,request,
+        {1,2},{4,16,128});
+    REQUIRE(std::holds_alternative<Diagnostics>(result));
+    CHECK(std::get<Diagnostics>(result).front().field=="contract.portfolio.second_rejected");
+    CHECK(admissions==2);
+    CHECK(workspace_creations==0);
 }
 
 TEST_CASE("public general projected preflight admits the exact joint relation before workspace creation") {

@@ -168,6 +168,15 @@ and provider evidence. This adapter shares the joint-H relation composer and
 does not independently verify family completeness or extend the supported
 continuous-family verifier domains. Projection intermediate-row growth can
 still cause a resource rejection within the configured provider limit.
+`compute_hybrid_reachability_portfolio` enumerates the complete allowed path
+inventory under caller limits, preflights every path before executing any
+provider workspace, and returns each path-labelled relation separately. Its
+resource summary groups per-operation maxima and aggregates projection-provider
+input/output row totals and maxima by requested/actual provider identity. The
+per-path operation traces, projection sets, and provider evidence remain
+authoritative; a failed preflight or execution returns no partial portfolio.
+This wrapper aggregates reported relation and provider row counts, not
+unreported provider-internal memory or time observations.
 Each reachability adapter must preflight its supported
 operations and limits for the fixed path before the wrapper queries capabilities
 or starts composition. The default preflight fails closed; the built-in joint-H

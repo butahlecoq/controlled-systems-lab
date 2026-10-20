@@ -55,7 +55,14 @@ independently assembles and projects its path relation, and a general projected
 adapter that composes and projects the full joint-H relation for admitted finite
 horizons and dimensions. Both projected adapters retain the full branch relation
 and provider/row evidence; the general adapter preflights the complete path row
-inventory. Full provider/resource aggregation remains open.
+inventory. The new portfolio wrapper enumerates and preflights all allowed paths
+before any provider workspace is created, returns each projected branch
+separately, and aggregates per-operation resource maxima plus projection-provider
+input/output row totals and maxima by provider identity. A two-edge contract
+fixture independently checks projections `[0, 0.5]` and `[0, 1]`, aggregate row
+counts, and rejection of the second provider admission with zero workspace
+creation. Per-path traces remain authoritative; provider-internal resource use
+not reported by the provider and broader resource-scale evidence remain open.
 
 Independent continuous-oracle coverage now includes a guarded two-control
 two-stage fixture whose two tied paths are each checked against literal
@@ -102,8 +109,8 @@ case against the raw-model identity `y = u + v`, with both stage controls in
 endpoint membership, tight lower and upper bounds, rejection outside the
 interval, and projection input/output row evidence against the retained
 relation and operation trace. This adds an independent projected-set oracle;
-it does not close full provider/resource aggregation or resource-scale
-coverage.
+it does not establish higher-dimensional continuous projection coverage or
+resource-scale behavior.
 
 The [EXT-07 capability profile and fixture report](../../../research/ext07-capability-profile.md)
 records the declared adapter/verifier domains and named dimensions, horizons,

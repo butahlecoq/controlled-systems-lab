@@ -46,6 +46,46 @@ struct HybridPathReachability {
 using HybridPathReachabilityResult = std::variant<HybridPathReachability, Diagnostics,
     OperationStopped, model::HybridPathCompositionFailureReport>;
 
+// Cross-branch resource maxima grouped by operation location and implementation.
+// Per-path operation records remain the authoritative trace.
+struct HybridOperationResourceSummary {
+    model::HybridRelationOperationKind operation{};
+    std::size_t stage{};
+    std::optional<model::HybridModeId> mode;
+    std::optional<model::HybridEdgeId> edge;
+    std::string implementation_id;
+    std::string implementation_version;
+    std::size_t branch_count{};
+    std::size_t max_joint_variables{};
+    std::size_t max_rows_added{};
+    std::size_t max_cumulative_rows{};
+    std::size_t max_cumulative_matrix_elements{};
+};
+
+// Aggregated registered projection-provider row accounting. Totals sum the
+// work represented by each branch record; maxima retain the largest branch.
+struct HybridProjectionResourceSummary {
+    std::string port;
+    std::string requested_method_id;
+    std::optional<std::string> requested_version;
+    std::optional<std::string> actual_provider_id;
+    std::optional<std::string> actual_provider_version;
+    std::size_t branch_count{};
+    std::size_t total_input_rows{};
+    std::size_t max_input_rows{};
+    std::size_t total_output_rows{};
+    std::size_t max_output_rows{};
+    std::size_t maximum_projection_rows{};
+};
+
+struct HybridReachabilityPortfolio {
+    std::vector<HybridPathReachability> branches;
+    std::vector<HybridOperationResourceSummary> operation_resources;
+    std::vector<HybridProjectionResourceSummary> projection_resources;
+};
+using HybridReachabilityPortfolioResult = std::variant<HybridReachabilityPortfolio,
+    Diagnostics, OperationStopped, model::HybridPathCompositionFailureReport>;
+
 struct HybridReachabilityCapabilities {
     bool retains_branch_labelled_joint_relation{};
     Assurance assurance{Assurance::numerical};
@@ -128,6 +168,14 @@ private:
 HybridPathReachabilityResult compute_hybrid_path_reachability(
     const HybridReachabilityAdapter&, const model::HybridSystem&,
     const model::HybridRequest&, const model::HybridPath&,
+    model::HybridRelationLimits, std::stop_token cancellation = {});
+
+// Enumerates all allowed paths and preflights their complete projection plans
+// before composing any branch. The result retains each path-labelled joint
+// relation and aggregates the resource/provider evidence without merging paths.
+HybridReachabilityPortfolioResult compute_hybrid_reachability_portfolio(
+    const HybridReachabilityAdapter&, const model::HybridSystem&,
+    const model::HybridRequest&, model::HybridEnumerationLimits,
     model::HybridRelationLimits, std::stop_token cancellation = {});
 
 struct HybridDirectTrajectoryCapabilities {
@@ -284,21 +332,6 @@ struct HybridPathVerificationRecord {
     std::vector<model::HybridRelationOperationRecord> relation_operations;
     std::vector<registry::Provenance> candidate_providers;
     model::HybridRelationLimits relation_limits{};
-};
-// Cross-branch resource maxima grouped by the operation's semantic location
-// and implementation. Per-path records above remain the authoritative trace.
-struct HybridOperationResourceSummary {
-    model::HybridRelationOperationKind operation{};
-    std::size_t stage{};
-    std::optional<model::HybridModeId> mode;
-    std::optional<model::HybridEdgeId> edge;
-    std::string implementation_id;
-    std::string implementation_version;
-    std::size_t branch_count{};
-    std::size_t max_joint_variables{};
-    std::size_t max_rows_added{};
-    std::size_t max_cumulative_rows{};
-    std::size_t max_cumulative_matrix_elements{};
 };
 // Branch coverage of candidate solver-provider provenance. This counts
 // submitted lineage records, not runtime provider invocations.
