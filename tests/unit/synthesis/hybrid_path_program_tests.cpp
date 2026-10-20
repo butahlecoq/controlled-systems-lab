@@ -1293,6 +1293,102 @@ TEST_CASE("exact linear H verifier preserves a four-control simplex through an e
     CHECK(rejected_report.branches.front().continuous_coverage==HybridVerificationStatus::refuted);
 }
 
+TEST_CASE("exact linear H verifier checks a five-control simplex optimal family") {
+    std::vector<double> control_rows(6*5,0.0);
+    std::vector<double> control_bounds(6,0.0);
+    for(std::size_t control=0;control<5;++control) {
+        control_rows[control*5+control]=-1;
+        control_rows[5*5+control]=1;
+    }
+    control_bounds[5]=1;
+    const auto control=h_set("oracle-five-control-simplex",5,
+        Matrix{6,5,std::move(control_rows)},std::move(control_bounds),
+        Matrix{0,5,{}},Vector{});
+    const auto reset=h_set("oracle-five-control-reset",2,
+        Matrix{2,2,{0,-1,-1,1}},Vector{0,0},Matrix{0,2,{}},Vector{});
+    model::HybridMode source{{"oracle-five-simplex-source"},1,5,{"x"},
+        {"u0","u1","u2","u3","u4"}};
+    source.flow=LinearStage{Matrix{1,1,{0}},Matrix{1,5,{1,1,1,1,1}},
+        Matrix{1,0,{}},Vector{0}};
+    source.control_sets={control};
+    source.invariants={UniversalSet{1},UniversalSet{1}};
+    model::HybridMode target{{"oracle-five-simplex-target"},1,0,{"y"},{}};
+    target.flow=LinearStage{Matrix{1,1,{1}},Matrix{1,0,{}},
+        Matrix{1,0,{}},Vector{0}};
+    target.control_sets={UniversalSet{0}};
+    target.invariants={UniversalSet{1},UniversalSet{1}};
+    model::HybridSystem system{1,{source,target},
+        {{{"oracle-five-simplex-edge"},source.id,target.id,
+          {UniversalSet{1}},{reset}}}};
+    model::HybridRequest request{{source.id,{0}},{target.id},
+        {{target.id,LinearTerminal{{1},0},"terminal state","units"}}};
+
+    const auto built=build_hybrid_portfolio_programs(system,request,
+        {"oracle-five-control-simplex"},{1,2},{10,64,1024});
+    REQUIRE(std::holds_alternative<std::vector<HybridPathProgram>>(built));
+    const auto& programs=std::get<std::vector<HybridPathProgram>>(built);
+    REQUIRE(programs.size()==1);
+    CHECK(programs.front().joint_relation.metadata()->set.dimension==8);
+
+    // [x0,u0..u4,x_pre,y] has u_i>=0, sum(u)<=1, x_pre=sum(u),
+    // and 0<=y<=x_pre. The minimum y=0 leaves the complete simplex free.
+    const auto make_face=[](bool narrow) {
+        const std::size_t inequality_count=narrow?9:8;
+        std::vector<double> inequalities(inequality_count*8,0.0);
+        std::vector<double> upper_bounds(inequality_count,0.0);
+        for(std::size_t control=0;control<5;++control)
+            inequalities[control*8+1+control]=-1;
+        for(std::size_t control=0;control<5;++control)
+            inequalities[5*8+1+control]=1;
+        upper_bounds[5]=1;
+        inequalities[6*8+7]=-1;
+        inequalities[7*8+6]=-1;
+        inequalities[7*8+7]=1;
+        if(narrow) {
+            inequalities[8*8+1]=1;
+            upper_bounds[8]=0.25;
+        }
+        const Matrix equalities{3,8,{1,0,0,0,0,0,0,0,
+            0,-1,-1,-1,-1,-1,1,0, 0,0,0,0,0,0,0,1}};
+        const Vector equality_values{0,0,0};
+        return sets::from_handle(h_set(narrow?"oracle-five-simplex-narrow":"oracle-five-simplex-full",
+            8,Matrix{inequality_count,8,std::move(inequalities)},std::move(upper_bounds),
+            equalities,equality_values));
+    };
+    const auto full_face=make_face(false);
+    REQUIRE(std::holds_alternative<sets::SetData>(full_face));
+    auto complete=exact_candidate(programs.front(),{0,0.125,0.125,0.125,0.125,0.125,0.625,0});
+    complete.relation=std::get<sets::SetData>(full_face);
+    ExactLinearHHybridFamilyVerifier verifier;
+    const std::array<HybridPathOptimalFaceCandidate,1> complete_candidates{std::move(complete)};
+    const auto verified=verify_hybrid_portfolio_family(verifier,system,request,
+        programs,complete_candidates,{1,2},{0,0});
+    REQUIRE(std::holds_alternative<HybridFamilyVerificationReport>(verified));
+    const auto& report=std::get<HybridFamilyVerificationReport>(verified);
+    CHECK(report.global_objective_optimality==HybridVerificationStatus::established);
+    CHECK(report.complete_family_coverage==HybridVerificationStatus::established);
+    REQUIRE(report.branches.size()==1);
+    CHECK(report.branches.front().feasibility==HybridVerificationStatus::established);
+    CHECK(report.branches.front().objective_optimality==HybridVerificationStatus::established);
+    CHECK(report.branches.front().continuous_coverage==HybridVerificationStatus::established);
+
+    const auto narrow_face=make_face(true);
+    REQUIRE(std::holds_alternative<sets::SetData>(narrow_face));
+    auto incomplete=exact_candidate(programs.front(),{0,0.125,0.125,0.125,0.125,0.125,0.625,0});
+    incomplete.relation=std::get<sets::SetData>(narrow_face);
+    const std::array<HybridPathOptimalFaceCandidate,1> incomplete_candidates{std::move(incomplete)};
+    const auto rejected=verify_hybrid_portfolio_family(verifier,system,request,
+        programs,incomplete_candidates,{1,2},{0,0});
+    REQUIRE(std::holds_alternative<HybridFamilyVerificationReport>(rejected));
+    const auto& rejected_report=std::get<HybridFamilyVerificationReport>(rejected);
+    CHECK(rejected_report.global_objective_optimality==HybridVerificationStatus::established);
+    CHECK(rejected_report.complete_family_coverage==HybridVerificationStatus::refuted);
+    REQUIRE(rejected_report.branches.size()==1);
+    CHECK(rejected_report.branches.front().feasibility==HybridVerificationStatus::established);
+    CHECK(rejected_report.branches.front().objective_optimality==HybridVerificationStatus::established);
+    CHECK(rejected_report.branches.front().continuous_coverage==HybridVerificationStatus::refuted);
+}
+
 TEST_CASE("exact linear H verifier checks tied two-stage continuous branches with four controls") {
     const auto interval=[](std::string id,double lower,double upper) {
         return h_set(std::move(id),1,Matrix{2,1,{-1,1}},

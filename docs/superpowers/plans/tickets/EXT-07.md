@@ -273,3 +273,9 @@ unreachable is rejected before trajectory or verifier preflight, capability,
 or build/verify dispatch. Existing model-level tests cover `T=0` admission;
 this adds the synthesis and family-verification boundary. Broader model-wide
 admission, verifier-domain, resource-scale, and publication gates remain open.
+
+The exact linear-H verifier now has an independent one-step five-control
+simplex oracle through an existential reset. It checks the full five-dimensional
+optimal family and refutes a feasible candidate that adds a `u0 <= 0.25` facet.
+The fixture extends continuous-family evidence to five free controls; it is not
+exhaustive coverage of the verifier's admitted domain.

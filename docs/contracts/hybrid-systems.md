@@ -397,7 +397,7 @@ provider operations and broader terminal-policy semantics remain EXT-07
 acceptance work; the new generalized verifier does not provide validated
 assurance or the required exhaustive oracle coverage by itself.
 Independent exact-H family oracles now include one-step three-control simplex,
-three-control truncated-cube, and four-control simplex optimal faces through
+three-control truncated-cube, four-control simplex, and five-control simplex optimal faces through
 existential resets. These finite fixtures exercise distinct 3D/4D polytope
 shapes but do not establish exhaustive coverage of the admitted verifier
 domain.
