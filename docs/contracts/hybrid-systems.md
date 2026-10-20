@@ -402,10 +402,12 @@ acceptance work; the new generalized verifier does not provide validated
 assurance or the required exhaustive oracle coverage by itself.
 Independent exact-H family oracles now include one-step three-control simplex,
 three-control truncated-cube, four-control simplex, and five-control simplex
-optimal faces through existential resets. These finite fixtures include
-simplex faces in dimensions three through five and a truncated-cube face in
-three dimensions; they do not establish exhaustive coverage of the admitted
-verifier domain.
+optimal faces through existential resets, plus a two-stage coupled control
+polygon through a dimension-changing set-valued reset. The latter checks the
+full first-stage triangle face and refutes a narrowed feasible optimal face.
+These finite fixtures include simplex faces in dimensions three through five
+and a truncated-cube face in three dimensions; they do not establish
+exhaustive coverage of the admitted verifier domain.
 
 The initial profile does not infer support from the presence of lower-level
 types. It rejects, before workspace creation, nonempty temporal couplings until

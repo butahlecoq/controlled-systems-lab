@@ -5803,6 +5803,210 @@ TEST_CASE("independent two-stage continuous oracle ties terminal modes after a g
     }
 }
 
+TEST_CASE("exact linear H verifier covers a two-stage coupled control polygon through a set-valued reset") {
+    const auto triangle=[](const std::string& id) {
+        return h_set(id,2,Matrix{3,2,{-1,0,0,-1,1,1}},Vector{0,0,1},
+            Matrix{0,2,{}},Vector{});
+    };
+    const auto source_reset=h_set("two-stage-coupled-reset",3,
+        Matrix{2,3,{0,0,-1,0,0,1}},Vector{0,1},
+        Matrix{1,3,{-1,1,0}},Vector{0});
+    const auto terminal_reset=h_set("two-stage-coupled-terminal-reset",3,
+        Matrix{0,3,{}},Vector{},Matrix{1,3,{-1,0,1}},Vector{0});
+    const LinearStage source_flow{Matrix{1,1,{0}},Matrix{1,2,{1,1}},
+        Matrix{1,0,{}},Vector{0}};
+    const LinearStage middle_flow{Matrix{2,2,{0,1,0,0}},Matrix{2,2,{1,1,0,0}},
+        Matrix{2,0,{}},Vector{0,0}};
+    const auto identity_flow=[](std::size_t dimension) {
+        Matrix A{dimension,dimension,Vector(dimension*dimension)};
+        for(std::size_t i=0;i<dimension;++i) A.values[i*dimension+i]=1;
+        return LinearStage{std::move(A),Matrix{dimension,0,{}},Matrix{dimension,0,{}},
+            Vector(dimension,0)};
+    };
+    model::HybridMode source{{"two-stage-coupled-source"},1,2,{"x"},{"u","v"}};
+    source.flow=std::vector<LinearStage>{source_flow,source_flow};
+    source.control_sets={triangle("two-stage-coupled-source-control-0"),
+        triangle("two-stage-coupled-source-control-1")};
+    source.invariants={UniversalSet{1},UniversalSet{1},UniversalSet{1}};
+    model::HybridMode middle{{"two-stage-coupled-middle"},2,2,{"p","q"},{"r","s"}};
+    middle.flow=std::vector<LinearStage>{middle_flow,middle_flow};
+    middle.control_sets={triangle("two-stage-coupled-middle-control-0"),
+        triangle("two-stage-coupled-middle-control-1")};
+    middle.invariants={UniversalSet{2},UniversalSet{2},UniversalSet{2}};
+    model::HybridMode terminal{{"two-stage-coupled-terminal"},1,0,{"y"},{}};
+    terminal.flow=std::vector<LinearStage>{identity_flow(1),identity_flow(1)};
+    terminal.control_sets={UniversalSet{0},UniversalSet{0}};
+    terminal.invariants={UniversalSet{1},UniversalSet{1},UniversalSet{1}};
+    model::HybridSystem system{2,{source,middle,terminal},
+        {{{"two-stage-coupled-enter"},source.id,middle.id,
+            {UniversalSet{1},UniversalSet{1}},{source_reset,source_reset}},
+         {{"two-stage-coupled-finish"},middle.id,terminal.id,
+            {UniversalSet{2},UniversalSet{2}},{terminal_reset,terminal_reset}}}};
+    model::HybridRequest request{{source.id,{0}},{terminal.id},
+        {{terminal.id,LinearTerminal{{1},0},"terminal value","units"}}};
+    const model::HybridPath path{{source.id,middle.id,terminal.id},
+        {{"two-stage-coupled-enter"},{"two-stage-coupled-finish"}}};
+    const auto built=build_hybrid_portfolio_programs(system,request,
+        {"two-stage-coupled-polygon"},{2,8},{64,512,32768});
+    std::string build_errors;
+    if(const auto* diagnostics=std::get_if<Diagnostics>(&built))
+        for(const auto& diagnostic:*diagnostics)
+            build_errors+=diagnostic.field+": "+diagnostic.explanation+"; ";
+    if(const auto* failure=std::get_if<model::HybridPathCompositionFailureReport>(&built))
+        if(const auto* diagnostic=std::get_if<Diagnostic>(&failure->failure))
+            build_errors+=diagnostic->field+": "+diagnostic->explanation;
+    CAPTURE(build_errors);
+    REQUIRE(std::holds_alternative<std::vector<HybridPathProgram>>(built));
+    const auto& programs=std::get<std::vector<HybridPathProgram>>(built);
+    REQUIRE(programs.size()==1);
+    CHECK(programs.front().path==path);
+    REQUIRE(programs.front().joint_relation.metadata()->set.dimension==11);
+    const auto& authored_objective=std::get<LinearTerminal>(request.terminal_objectives[0].objective);
+    CHECK(authored_objective.coefficients==Vector{1});
+    CHECK(authored_objective.offset==0);
+    const auto& lifted_objective=std::get<LinearTerminal>(programs.front().lifted_objective);
+    CHECK(lifted_objective.coefficients==Vector{0,0,0,0,0,0,0,0,0,0,1});
+
+    // Joint coordinates are ordered as x0, (u0,v0), x_pre1, (p1,q1),
+    // (r1,s1), (p_pre2,q_pre2), y2. Independently read every authored raw
+    // equation used below: x_pre1=u0+v0, p1=x_pre1, q1 in [0,1],
+    // p_pre2=q1+r1+s1, q_pre2=0, and y2=p_pre2. Since q1,r1,s1 are
+    // nonnegative, minimizing y2 fixes q1=r1=s1=y2=0 while leaving the
+    // entire first-stage control triangle free.
+    const auto raw_control=sets::from_handle(std::get<SetHandle>(source.control_sets[0]));
+    REQUIRE(std::holds_alternative<sets::SetData>(raw_control));
+    const auto control_h=std::get<sets::HRepresentation>(
+        std::get<sets::SetData>(raw_control).representation());
+    REQUIRE(control_h.inequalities.rows()==3);
+    CHECK(control_h.inequalities(0,0)==-1);
+    CHECK(control_h.inequalities(1,1)==-1);
+    CHECK(control_h.inequalities(2,0)==1);
+    CHECK(control_h.inequalities(2,1)==1);
+    const auto raw_middle_control=sets::from_handle(
+        std::get<SetHandle>(middle.control_sets[1]));
+    REQUIRE(std::holds_alternative<sets::SetData>(raw_middle_control));
+    const auto middle_control_h=std::get<sets::HRepresentation>(
+        std::get<sets::SetData>(raw_middle_control).representation());
+    REQUIRE(middle_control_h.inequalities.rows()==3);
+    CHECK(middle_control_h.inequalities(0,0)==-1);
+    CHECK(middle_control_h.inequalities(1,1)==-1);
+    CHECK(middle_control_h.inequalities(2,0)==1);
+    CHECK(middle_control_h.inequalities(2,1)==1);
+    const auto reset_h=std::get<sets::HRepresentation>(
+        std::get<sets::SetData>(sets::from_handle(source_reset)).representation());
+    REQUIRE(reset_h.inequalities.rows()==2);
+    CHECK(reset_h.inequalities(0,2)==-1);
+    CHECK(reset_h.upper_bounds[0]==0);
+    CHECK(reset_h.inequalities(1,2)==1);
+    CHECK(reset_h.upper_bounds[1]==1);
+    CHECK(reset_h.equalities(0,0)==-1);
+    CHECK(reset_h.equalities(0,1)==1);
+    const auto& raw_source_flows=std::get<std::vector<LinearStage>>(source.flow);
+    REQUIRE(raw_source_flows.size()==2);
+    for(const auto& flow:raw_source_flows) {
+        CHECK(flow.A.values==Vector{0});
+        CHECK(flow.B.values==Vector{1,1});
+        CHECK(flow.E.values.empty());
+        CHECK(flow.offset==Vector{0});
+    }
+    const auto& raw_middle_flows=std::get<std::vector<LinearStage>>(middle.flow);
+    REQUIRE(raw_middle_flows.size()==2);
+    CHECK(raw_middle_flows[1].A.values==Vector{0,1,0,0});
+    CHECK(raw_middle_flows[1].B.values==Vector{1,1,0,0});
+    CHECK(raw_middle_flows[1].E.values.empty());
+    CHECK(raw_middle_flows[1].offset==Vector{0,0});
+    const auto terminal_reset_h=std::get<sets::HRepresentation>(
+        std::get<sets::SetData>(sets::from_handle(terminal_reset)).representation());
+    REQUIRE(terminal_reset_h.equalities.rows()==1);
+    CHECK(terminal_reset_h.equalities(0,0)==-1);
+    CHECK(terminal_reset_h.equalities(0,1)==0);
+    CHECK(terminal_reset_h.equalities(0,2)==1);
+    CHECK(terminal_reset_h.equality_values[0]==0);
+
+    constexpr std::size_t joint_width=11;
+    constexpr std::size_t initial_x=0,first_u=1,first_v=2,first_pre=3;
+    constexpr std::size_t middle_p=4,middle_q=5,second_r=6,second_s=7;
+    constexpr std::size_t second_pre_p=8,second_pre_q=9,terminal_y=10;
+    std::vector<Vector> inequalities;
+    Vector upper_bounds;
+    const auto add_le=[&](std::initializer_list<std::pair<std::size_t,double>> terms,double rhs) {
+        Vector row(joint_width);
+        for(const auto [coordinate,value]:terms) row[coordinate]=value;
+        inequalities.push_back(std::move(row));
+        upper_bounds.push_back(rhs);
+    };
+    add_le({{first_u,-1}},0); add_le({{first_v,-1}},0);
+    add_le({{first_u,1},{first_v,1}},1);
+    add_le({{second_r,-1}},0); add_le({{second_s,-1}},0);
+    add_le({{second_r,1},{second_s,1}},1);
+    add_le({{middle_q,-1}},0); add_le({{middle_q,1}},1);
+    std::vector<Vector> equalities;
+    Vector equality_values;
+    const auto add_eq=[&](std::initializer_list<std::pair<std::size_t,double>> terms,double rhs) {
+        Vector row(joint_width);
+        for(const auto [coordinate,value]:terms) row[coordinate]=value;
+        equalities.push_back(std::move(row));
+        equality_values.push_back(rhs);
+    };
+    add_eq({{initial_x,1}},0);
+    add_eq({{first_pre,1},{first_u,-1},{first_v,-1}},0);
+    add_eq({{middle_p,1},{first_pre,-1}},0);
+    add_eq({{second_pre_p,1},{middle_q,-1},{second_r,-1},{second_s,-1}},0);
+    add_eq({{second_pre_q,1}},0);
+    add_eq({{terminal_y,1},{second_pre_p,-1}},0);
+    add_eq({{terminal_y,1}},0);
+    const auto flatten=[](const std::vector<Vector>& rows) {
+        Vector values;
+        values.reserve(rows.size()*joint_width);
+        for(const auto& row:rows) values.insert(values.end(),row.begin(),row.end());
+        return values;
+    };
+    const auto full_face=h_set("two-stage-coupled-full-face",joint_width,
+        Matrix{inequalities.size(),joint_width,flatten(inequalities)},upper_bounds,
+        Matrix{equalities.size(),joint_width,flatten(equalities)},equality_values);
+    auto complete=exact_candidate(programs.front(),{0,0.25,0.25,0.5,0.5,0,0,0,0,0,0});
+    complete.relation=std::get<sets::SetData>(sets::from_handle(full_face));
+    ExactLinearHHybridFamilyVerifier verifier;
+    const std::array<HybridPathOptimalFaceCandidate,1> candidates{std::move(complete)};
+    const auto verified=verify_hybrid_portfolio_family(verifier,system,request,
+        programs,candidates,{2,8},{0,0});
+    std::string verification_errors;
+    if(const auto* diagnostics=std::get_if<Diagnostics>(&verified))
+        for(const auto& diagnostic:*diagnostics)
+            verification_errors+=diagnostic.field+": "+diagnostic.explanation+"; ";
+    CAPTURE(verification_errors);
+    REQUIRE(std::holds_alternative<HybridFamilyVerificationReport>(verified));
+    const auto& report=std::get<HybridFamilyVerificationReport>(verified);
+    CHECK(report.global_objective_optimality==HybridVerificationStatus::established);
+    CHECK(report.complete_family_coverage==HybridVerificationStatus::established);
+    REQUIRE(report.branches.size()==1);
+    CHECK(report.branches.front().feasibility==HybridVerificationStatus::established);
+    CHECK(report.branches.front().objective_optimality==HybridVerificationStatus::established);
+    CHECK(report.branches.front().continuous_coverage==HybridVerificationStatus::established);
+
+    auto narrowed_inequalities=inequalities;
+    Vector cut(11);
+    cut[first_u]=1;
+    narrowed_inequalities.push_back(std::move(cut));
+    auto narrow_face=h_set("two-stage-coupled-narrow-face",joint_width,
+        Matrix{narrowed_inequalities.size(),joint_width,flatten(narrowed_inequalities)},
+        [&] { auto bounds=upper_bounds; bounds.push_back(0.125); return bounds; }(),
+        Matrix{equalities.size(),joint_width,flatten(equalities)},equality_values);
+    auto narrowed=exact_candidate(programs.front(),{0,0.125,0,0.125,0.125,0,0,0,0,0,0});
+    narrowed.relation=std::get<sets::SetData>(sets::from_handle(narrow_face));
+    const std::array<HybridPathOptimalFaceCandidate,1> narrowed_candidates{std::move(narrowed)};
+    const auto rejected=verify_hybrid_portfolio_family(verifier,system,request,
+        programs,narrowed_candidates,{2,8},{0,0});
+    REQUIRE(std::holds_alternative<HybridFamilyVerificationReport>(rejected));
+    const auto& rejected_report=std::get<HybridFamilyVerificationReport>(rejected);
+    CHECK(rejected_report.global_objective_optimality==HybridVerificationStatus::established);
+    CHECK(rejected_report.complete_family_coverage==HybridVerificationStatus::refuted);
+    REQUIRE(rejected_report.branches.size()==1);
+    CHECK(rejected_report.branches.front().feasibility==HybridVerificationStatus::established);
+    CHECK(rejected_report.branches.front().objective_optimality==HybridVerificationStatus::established);
+    CHECK(rejected_report.branches.front().continuous_coverage==HybridVerificationStatus::refuted);
+}
+
 TEST_CASE("single-parameter scalar interval verifier covers arbitrary finite horizons") {
     const auto make_reset=[](const std::string& id,double pre,double post,double rhs) {
         auto inequalities=numeric::snapshot(Matrix{0,2,{}});

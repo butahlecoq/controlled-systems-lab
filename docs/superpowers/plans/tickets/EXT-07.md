@@ -88,6 +88,11 @@ leaving two tied control directions free. These are named finite cases, not
 complete exhaustive coverage across the supported general H profile; broader
 independent continuous cases and resource-scale evidence remain open.
 
+A separate exact linear-H oracle covers two stages with coupled non-axis-
+aligned control polygons and a dimension-changing set-valued reset. It checks an
+independently authored eleven-coordinate optimal face and refutes a narrowed
+feasible face; it remains a finite case rather than an exhaustive domain oracle.
+
 A two-stage independent continuous oracle now joins two semantics previously
 covered separately: a set-valued 1D-to-2D reset and a global objective tie across
 1D and 2D terminal modes. Its raw graph walk enumerates both histories; direct
