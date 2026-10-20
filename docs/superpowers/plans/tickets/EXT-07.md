@@ -52,11 +52,13 @@ closed until they implement preflight. The fixed-path reachability adapter
 currently uses the direct joint-H composer; a separate projected-set
 implementation is not yet supplied.
 
-The EXT-07 report exercises one supported one-step scalar interval case through
-path construction, HiGHS optimization, and family verification. Its 2D plot
-shows control against terminal state for that scalar system; it does not measure
-the finite-horizon verifier. The visual gallery also contains an analytic
-two-control polygon illustration linked to its raw input/answer record; it is
-not measured output. These bounded examples are not scalability results or a
-completion claim. The main-only Pages URL and live hashes remain pending until
-publication succeeds.
+The EXT-07 report set now includes a measured one-step scalar interval case and
+a measured bounded two-control case, each with saved raw rows and an offline
+bundle. The one-step report's 2D plot shows control against terminal state; it
+does not measure the finite-horizon verifier. The two-control report measures
+two labelled feasible polygons and the complete minimizing faces for a scalar
+linear objective. The visual gallery also contains an analytic constant-zero
+objective illustration of the same feasible polygons; it is linked to the
+measured report but clearly distinguished from its objective and timed output.
+These bounded examples are not scalability results or a completion claim. The
+main-only Pages URL and live hashes remain pending until publication succeeds.

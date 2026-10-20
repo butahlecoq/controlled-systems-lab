@@ -71,12 +71,20 @@ def load_examples(catalog):
 
     ext07_catalog = json.loads((catalog.parent / "ext07-publications.json").read_text(encoding="utf-8"))
     require(ext07_catalog.get("schema") == "csl.ext07-publications/1" and
-            isinstance(ext07_catalog.get("reports"), list) and len(ext07_catalog["reports"]) == 1,
-            "gallery needs one reviewed EXT-07 report")
-    entry = ext07_catalog["reports"][0]
-    bundle = catalog.parent / entry["report_id"]
-    require(ext07_reports.catalog_entry(bundle) == entry, "EXT-07 publication identity differs")
-    report_record = json.loads((bundle / "records.json").read_text(encoding="utf-8"))
+            isinstance(ext07_catalog.get("reports"), list),
+            "gallery needs reviewed EXT-07 reports")
+    reports_by_schema = {}
+    for entry in ext07_catalog["reports"]:
+        bundle = catalog.parent / entry["report_id"]
+        require(ext07_reports.catalog_entry(bundle) == entry,
+                "EXT-07 publication identity differs")
+        reports_by_schema.setdefault(entry["schema"], []).append((entry, bundle))
+    one_step = reports_by_schema.get("csl.ext07-hybrid-profile-report/1", [])
+    two_parameter = reports_by_schema.get("csl.ext07-hybrid-two-parameter-report/1", [])
+    require(len(one_step) == 1 and len(two_parameter) == 1,
+            "gallery needs one reviewed report for each EXT-07 profile")
+    one_step_entry, one_step_bundle = one_step[0]
+    two_parameter_entry, two_parameter_bundle = two_parameter[0]
     inputs = {
         "initial": {"mode": "start", "state": [0]},
         "horizon": 2,
@@ -121,7 +129,7 @@ def load_examples(catalog):
         slug="two_stage_scalar_family", title="A two-stage scalar family",
         vertices=[[0, 0], [0.5, 0.5]], points=[[0, 0], [0.5, 0.5]], indices=[0, 1],
         domain=(0, 0.5), inputs=inputs, analytic=analytic,
-        report_id=entry["report_id"], records_path=bundle / "records.json",
+        report_id=one_step_entry["report_id"], records_path=one_step_bundle / "records.json",
         source="c6d135c94ee0fe4fece074b455dae18bee0d22b2",
         harness="451d0157109b03ef8fab5a656b487c248b7f29a4", kind="hybrid"))
     two_parameter_inputs = {
@@ -188,7 +196,8 @@ def load_examples(catalog):
             "complete_optimal_family": "every point in each labelled feasible polygon; both paths are retained",
             "minimum_objective": 0,
         },
-        report_id=entry["report_id"], records_path=bundle / "records.json",
+        report_id=two_parameter_entry["report_id"],
+        records_path=two_parameter_bundle / "records.json",
         source="eb0645f522c78007e8ffc8a1dab6bff16840e64a",
         harness="eb0645f522c78007e8ffc8a1dab6bff16840e64a", kind="two_parameter"))
     return examples
@@ -415,9 +424,10 @@ def section(example, number):
                     f'<a href="../{example["report_id"]}/records.json">one-step raw record ↗</a>. '
                     'This two-stage illustration is not part of that measured fixture.</p>'
                     if example["kind"] == "hybrid" else
-                    f'<p>Related one-step report: <a href="../{example["report_id"]}/index.html">saved numerical evidence ↗</a> · '
-                    f'<a href="../{example["report_id"]}/records.json">one-step raw record ↗</a>. '
-                    'This two-control illustration is not part of that measured fixture.</p>'
+                    f'<p>Related two-control report: <a href="../{example["report_id"]}/index.html">saved numerical evidence ↗</a> · '
+                    f'<a href="../{example["report_id"]}/records.json">two-control raw record ↗</a>. '
+                    'This constant-zero analytic illustration is not part of that measured fixture: '
+                    'the feasible polygons match, but the measured objective is x_terminal=u0.</p>'
                     if example["kind"] == "two_parameter" else
                     f'<p><a href="../{example["report_id"]}/index.html">Reviewed numerical report ↗</a> · '
                     f'<a href="../{example["report_id"]}/records.json">Full saved native records ↗</a></p>')

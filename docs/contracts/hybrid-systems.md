@@ -309,7 +309,9 @@ scalar control interval, scalar states and controls, interval invariants and
 guards, and deterministic exactly representable scalar affine resets. They do
 not cover more than two free controls, general continuous polytope families,
 or general-dimensional continuous relations. These bounded implementations
-do not establish the full EXT-07 acceptance contract.## Required request-admission contract
+do not establish the full EXT-07 acceptance contract.
+
+## Required request-admission contract
 
 A conforming implementation must admit the complete requested operation before
 creating a provider workspace or running an algorithm:
@@ -424,5 +426,3 @@ continuous open-loop controls, and no temporal or observation coupling in its
 first executable profile. Integrations with those
 extensions require a separately reviewed contract revision and capability
 combination; their semantics must not be guessed from hybrid mode paths.
-
-
