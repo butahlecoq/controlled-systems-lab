@@ -5,6 +5,7 @@
 #include <csl/sets/data.hpp>
 #include <csl/registry/provider.hpp>
 #include "hybrid_family_verifier_internal.hpp"
+#include "hybrid_exact_polytope.hpp"
 #include <algorithm>
 #include <array>
 #include <limits>
@@ -222,6 +223,81 @@ model::HybridRequest example_request() {
 
 model::HybridPath example_path() {
     return {{{"source"},{"target"}},{{"switch"}}};
+}
+
+TEST_CASE("hybrid exact polytope rows preserve binary64 dyadics") {
+    using namespace detail::hybrid_exact;
+    const std::array<double,2> coefficients{0.5,-1.25};
+    Row row;
+    REQUIRE(make_row(coefficients,0.125,false,default_max_integer_bits,row));
+    CHECK(exact_detail::compare(row.coefficients[0],exact_detail::from_u64(4))==0);
+    CHECK(exact_detail::compare(row.coefficients[1],exact_detail::from_u64(10,true))==0);
+    CHECK(exact_detail::compare(row.bound,exact_detail::from_u64(1))==0);
+
+    const std::array<double,1> subnormal{std::numeric_limits<double>::denorm_min()};
+    REQUIRE(make_row(subnormal,0,false,default_max_integer_bits,row));
+    CHECK(exact_detail::compare(row.coefficients[0],exact_detail::from_u64(1))==0);
+    CHECK_FALSE(make_row(coefficients,0.125,false,3,row));
+}
+
+TEST_CASE("hybrid exact polytope feasibility retains strict and closed bounds") {
+    using namespace detail::hybrid_exact;
+    const std::array<double,1> positive{1}, negative{-1};
+    std::vector<Row> strict_conflict;
+    REQUIRE(append_inequality(positive,0,true,default_max_integer_bits,strict_conflict));
+    REQUIRE(append_inequality(negative,0,false,default_max_integer_bits,strict_conflict));
+    CHECK(feasible(std::move(strict_conflict),1).state==FeasibilityState::infeasible);
+
+    std::vector<Row> open_interval;
+    REQUIRE(append_inequality(positive,1,true,default_max_integer_bits,open_interval));
+    REQUIRE(append_inequality(negative,0,true,default_max_integer_bits,open_interval));
+    CHECK(feasible(std::move(open_interval),1).state==FeasibilityState::feasible);
+
+    std::vector<Row> closed_point;
+    REQUIRE(append_inequality(positive,0,false,default_max_integer_bits,closed_point));
+    REQUIRE(append_inequality(negative,0,false,default_max_integer_bits,closed_point));
+    CHECK(feasible(std::move(closed_point),1).state==FeasibilityState::feasible);
+
+    const std::array<double,2> coupled_upper{2,1}, coupled_lower{-3,2}, y_lower{0,-1};
+    std::vector<Row> coupled_conflict;
+    REQUIRE(append_inequality(coupled_upper,0,false,default_max_integer_bits,coupled_conflict));
+    REQUIRE(append_inequality(coupled_lower,-1,false,default_max_integer_bits,coupled_conflict));
+    REQUIRE(append_inequality(y_lower,0,false,default_max_integer_bits,coupled_conflict));
+    CHECK(feasible(std::move(coupled_conflict),2).state==FeasibilityState::infeasible);
+}
+
+TEST_CASE("hybrid exact polytope feasibility handles inconsistent equalities and lower dimension") {
+    using namespace detail::hybrid_exact;
+    const std::array<double,1> x{1};
+    std::vector<Row> inconsistent;
+    REQUIRE(append_equality(x,0,default_max_integer_bits,inconsistent));
+    REQUIRE(append_equality(x,1,default_max_integer_bits,inconsistent));
+    CHECK(feasible(std::move(inconsistent),1).state==FeasibilityState::infeasible);
+
+    const std::array<double,2> x_only{1,0}, y_upper{0,1}, y_lower{0,-1};
+    std::vector<Row> lower_dimensional;
+    REQUIRE(append_equality(x_only,0,default_max_integer_bits,lower_dimensional));
+    REQUIRE(append_inequality(y_upper,1,false,default_max_integer_bits,lower_dimensional));
+    REQUIRE(append_inequality(y_lower,0,false,default_max_integer_bits,lower_dimensional));
+    CHECK(feasible(std::move(lower_dimensional),2).state==FeasibilityState::feasible);
+}
+
+TEST_CASE("hybrid exact polytope feasibility stops at resource and cancellation limits") {
+    using namespace detail::hybrid_exact;
+    const std::array<double,1> x{1}, negative_x{-1};
+    std::vector<Row> rows;
+    REQUIRE(append_inequality(x,1,false,default_max_integer_bits,rows));
+    REQUIRE(append_inequality(negative_x,2,false,default_max_integer_bits,rows));
+    Limits limits;
+    limits.max_rows=1;
+    CHECK(feasible(rows,1,limits).state==FeasibilityState::unsupported);
+    limits.max_rows=default_max_rows;
+    limits.max_operations=1;
+    CHECK(feasible(rows,1,limits).state==FeasibilityState::unsupported);
+
+    std::stop_source cancelled;
+    cancelled.request_stop();
+    CHECK(feasible({},0,{},cancelled.get_token()).state==FeasibilityState::cancelled);
 }
 
 class RejectingTrajectoryAdapter final : public HybridDirectTrajectoryAdapter {
