@@ -155,6 +155,31 @@ class Ext07SavedReportTests(unittest.TestCase):
             self.assertIn("two-control-example.html", index)
             self.assertIn("example-2d.html", index)
 
+    def test_stager_validates_all_catalog_entries_before_writing(self) -> None:
+        if self.two_parameter_bundle is None:
+            self.skipTest("Two-parameter bundle is created from a frozen Release capture")
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            copied = []
+            for source in (self.bundle, self.two_parameter_bundle):
+                destination = root / source.name
+                shutil.copytree(source, destination)
+                copied.append(destination)
+            entries = [stage_ext07.catalog_entry(bundle) for bundle in copied]
+            entries[1]["zip_sha256"] = "0" * 64
+            catalog = root / "ext07-publications.json"
+            catalog.write_text(json.dumps({"schema": "csl.ext07-publications/1",
+                                           "reports": entries}), encoding="utf-8")
+            site = root / "site"
+            site.mkdir()
+            original_index = "<!doctype html><html lang=\"en\"><body><ul></ul></body></html>"
+            (site / "index.html").write_text(original_index, encoding="utf-8")
+            with self.assertRaises(ValueError):
+                stage_ext07.stage(catalog, site)
+            self.assertFalse((site / copied[0].name).exists())
+            self.assertFalse((site / copied[1].name).exists())
+            self.assertEqual((site / "index.html").read_text(encoding="utf-8"), original_index)
+
 
 if __name__ == "__main__":
     unittest.main()

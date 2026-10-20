@@ -73,7 +73,8 @@ def stage(catalog: Path, site_dir: Path) -> str:
                            index.count("</ul>") == 1,
                            "EXT-07 Pages index insertion point differs")
     report_ids = []
-    links = []
+    routes = []
+    staged_bundles = []
     for entry in data["reports"]:
         report_id = entry["report_id"]
         if report_id.startswith("ext07-hybrid-two-parameter-"):
@@ -107,14 +108,21 @@ def stage(catalog: Path, site_dir: Path) -> str:
         for name in ("index.html", example):
             site.OfflineHTML(allowed).feed(
                 (bundle / name).read_text(encoding="utf-8"))
-        destination.mkdir()
-        for path in bundle.iterdir():
-            (destination / path.name).write_bytes(path.read_bytes())
+        staged_bundles.append((report_id, bundle,
+                               {path.name: path.read_bytes() for path in bundle.iterdir()}))
         report_ids.append(report_id)
-        links.append(route)
+        routes.append(route)
+    # Do not leave earlier routes behind when a later catalog entry is invalid.
+    for report_id, bundle, files in staged_bundles:
+        destination = site_dir / report_id
+        report.collect.require(not destination.exists(),
+                               "EXT-07 Pages route must be fresh")
+        destination.mkdir()
+        for name, content in files.items():
+            (destination / name).write_bytes(content)
     report.collect.require(index.count("</ul>") == 1,
                            "EXT-07 Pages index insertion point differs")
-    index_path.write_text(index.replace("</ul>", "".join(links) + "</ul>"),
+    index_path.write_text(index.replace("</ul>", "".join(routes) + "</ul>"),
                           encoding="utf-8")
     return report_ids[0] if len(report_ids) == 1 else ",".join(report_ids)
 

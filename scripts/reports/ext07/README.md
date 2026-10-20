@@ -66,7 +66,7 @@ python scripts/reports/ext07/two_parameter_capture.py --source <frozen-source> -
 python scripts/reports/ext07/two_parameter_collect.py --capture <fresh-capture> --source <frozen-source> --out reports/algorithm-results
 python scripts/reports/ext07/two_parameter_render_saved.py --bundle reports/algorithm-results/<report-id>
 python scripts/reports/ext07/two_parameter_render_saved.py --bundle reports/algorithm-results/<report-id> --check
-python scripts/reports/stage_ext07.py --source reports/algorithm-results/ext07-hybrid-2cba9c13b79afd2b --source reports/algorithm-results/<report-id>
+python scripts/reports/stage_ext07.py --source reports/algorithm-results/ext07-hybrid-51d9ee2e89d240eb --source reports/algorithm-results/<report-id>
 ```
 
 The final command emits the publication catalogue with both profile-specific
