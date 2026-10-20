@@ -71,6 +71,13 @@ SetHandle reset_one_to_two(std::string id) {
         Matrix{2,3,{-1,1,0,0,0,1}},Vector{0,0});
 }
 
+SetHandle set_valued_reset_one_to_two(std::string id) {
+    // p=pre and q is an existential reset coordinate in [0,1].
+    return h_relation(std::move(id),3,{"pre","post.p","post.q"},
+        Matrix{2,3,{0,0,-1,0,0,1}},Vector{0,1},
+        Matrix{1,3,{-1,1,0}},Vector{0});
+}
+
 SetHandle reset_two_to_one(std::string id) {
     return h_relation(std::move(id),3,{"pre.p","pre.q","post"},Matrix{0,3,{}},{},
         Matrix{1,3,{-1,-1,1}},Vector{0});
@@ -321,6 +328,89 @@ TEST_CASE("public general projected hybrid reachability retains a dimension-chan
     CHECK(reachability.projected_state->terminal_state_set.metadata()->set.dimension==1);
     CHECK(contains(terminal,0.0));
     CHECK_FALSE(contains(terminal,0.25));
+}
+
+TEST_CASE("general projected reachability independently checks an existential dimension-changing reset") {
+    auto [system,request]=two_stage_dimension_change_system();
+    system.edges.front().reset_relations.front()=
+        set_valued_reset_one_to_two("contract.expand.existential-reset");
+    const auto path=two_stage_dimension_change_path();
+    GeneralProjectedStateHybridReachabilityAdapter adapter{64};
+
+    const auto result=compute_hybrid_path_reachability(adapter,system,request,path,{16,128,1024});
+    REQUIRE(std::holds_alternative<HybridPathReachability>(result));
+    const auto& reachability=std::get<HybridPathReachability>(result);
+    CHECK(reachability.path==path);
+    REQUIRE(reachability.joint_relation.metadata()!=nullptr);
+    CHECK(reachability.joint_relation.metadata()->set.dimension==8);
+    CHECK(reachability.joint_relation.metadata()->coordinate_labels==std::vector<std::string>{
+        "post:0:6:source:1:x","control:0:6:source:1:u","pre:1:6:source:1:x",
+        "post:1:6:middle:1:p","post:1:6:middle:1:q",
+        "pre:2:6:middle:1:p","pre:2:6:middle:1:q","post:2:6:target:1:y"});
+
+    const auto joint=reachability.joint_relation.representation();
+    REQUIRE(std::holds_alternative<sets::HRepresentation>(joint));
+    const auto& relation=std::get<sets::HRepresentation>(joint);
+    // The raw model gives x0=u0=0, p=x_pre=0, and existential q in [0,1].
+    // Identity middle flow and y=p+q therefore give exactly y in [0,1].
+    // Check the reset relation itself in its local coordinate order (pre,p,q).
+    const auto reset_data=sets::from_handle(system.edges.front().reset_relations.front());
+    REQUIRE(std::holds_alternative<sets::SetData>(reset_data));
+    const auto reset_representation=std::get<sets::SetData>(reset_data).representation();
+    REQUIRE(std::holds_alternative<sets::HRepresentation>(reset_representation));
+    const auto& reset=std::get<sets::HRepresentation>(reset_representation);
+    REQUIRE(reset.inequalities.rows()==2);
+    REQUIRE(reset.equalities.rows()==1);
+    CHECK(reset.inequalities(0,0)==0.0);
+    CHECK(reset.inequalities(0,1)==0.0);
+    CHECK(reset.inequalities(0,2)==-1.0);
+    CHECK(reset.upper_bounds[0]==0.0);
+    CHECK(reset.inequalities(1,0)==0.0);
+    CHECK(reset.inequalities(1,1)==0.0);
+    CHECK(reset.inequalities(1,2)==1.0);
+    CHECK(reset.upper_bounds[1]==1.0);
+    CHECK(reset.equalities(0,0)==-1.0);
+    CHECK(reset.equalities(0,1)==1.0);
+    CHECK(reset.equalities(0,2)==0.0);
+    CHECK(reset.equality_values[0]==0.0);
+
+    REQUIRE(reachability.projected_state.has_value());
+    const auto& evidence=*reachability.projected_state;
+    const auto projected=evidence.terminal_state_set.representation();
+    REQUIRE(std::holds_alternative<sets::HRepresentation>(projected));
+    const auto& terminal=std::get<sets::HRepresentation>(projected);
+    CHECK(evidence.terminal_state_set.metadata()->set.dimension==1);
+    CHECK(contains(terminal,0.0));
+    CHECK(contains(terminal,0.5));
+    CHECK(contains(terminal,1.0));
+    CHECK_FALSE(contains(terminal,-0.01));
+    CHECK_FALSE(contains(terminal,1.01));
+    bool lower_is_tight=false;
+    bool upper_is_tight=false;
+    for(std::size_t row=0;row<terminal.inequalities.rows();++row) {
+        const auto coefficient=terminal.inequalities(row,0);
+        const auto bound=terminal.upper_bounds[row];
+        if(coefficient<0.0) lower_is_tight=lower_is_tight || bound/(-coefficient)==0.0;
+        if(coefficient>0.0) upper_is_tight=upper_is_tight || bound/coefficient==1.0;
+    }
+    CHECK(lower_is_tight);
+    CHECK(upper_is_tight);
+
+    REQUIRE(reachability.relation_operations.size()==14);
+    const auto reset_operation=std::find_if(reachability.relation_operations.begin(),
+        reachability.relation_operations.end(),[](const auto& operation) {
+            return operation.operation==model::HybridRelationOperationKind::reset_relation&&
+                operation.edge==std::optional<model::HybridEdgeId>{{"expand"}};
+        });
+    REQUIRE(reset_operation!=reachability.relation_operations.end());
+    CHECK(reset_operation->rows_added==3);
+    CHECK(reset_operation->joint_variables==8);
+    const auto total_relation_rows=relation.inequalities.rows()+relation.equalities.rows();
+    CHECK(evidence.input_rows==total_relation_rows);
+    CHECK(evidence.output_rows==terminal.inequalities.rows()+terminal.equalities.rows());
+    CHECK(evidence.maximum_projection_rows==64);
+    CHECK(evidence.input_rows<=evidence.maximum_projection_rows);
+    CHECK(evidence.output_rows<=evidence.maximum_projection_rows);
 }
 
 TEST_CASE("general projected hybrid reachability matches an independent two-stage interval oracle") {
