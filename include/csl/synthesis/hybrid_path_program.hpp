@@ -102,7 +102,12 @@ struct HybridReachabilityCapabilities {
     bool retains_branch_labelled_joint_relation{};
     Assurance assurance{Assurance::numerical};
 };
-using HybridReachabilityPreflightResult = model::HybridRelationPreflightResult;
+struct HybridOperationAdmissionSuccess {
+    std::vector<model::HybridPlannedOperation> admitted_operations;
+};
+using HybridOperationAdmissionResult = std::variant<HybridOperationAdmissionSuccess,
+    model::HybridPathCompositionFailureReport, Diagnostics, OperationStopped>;
+using HybridReachabilityPreflightResult = HybridOperationAdmissionResult;
 
 // Replaceable reachability boundary for one fixed mode/edge path. The result
 // retains controls and all pre/post-reset coordinates in the joint relation.
@@ -110,12 +115,14 @@ class HybridReachabilityAdapter {
 public:
     virtual ~HybridReachabilityAdapter() = default;
     virtual HybridReachabilityCapabilities capabilities() const noexcept = 0;
-    // Adapters must admit their supported operations and limits before the
-    // wrapper queries capabilities or starts path composition. The default
-    // fails closed for adapters that have not declared an admission plan.
+    // Adapters receive the complete ordered path inventory and framework
+    // operation plan. They must return the complete operation receipt after
+    // admitting all paths, before the wrapper queries capabilities or starts
+    // path composition. The default fails closed for undeclared plans.
     virtual HybridReachabilityPreflightResult preflight(const model::HybridSystem&,
-        const model::HybridRequest&, const model::HybridPath&,
-        model::HybridRelationLimits, std::stop_token cancellation) const;
+        const model::HybridRequest&, std::span<const model::HybridPath>,
+        model::HybridRelationLimits, std::span<const model::HybridPlannedOperation>,
+        std::stop_token cancellation) const;
     virtual HybridPathReachabilityResult compose_path(const model::HybridSystem&,
         const model::HybridRequest&, const model::HybridPath&,
         model::HybridRelationLimits, std::stop_token cancellation) const = 0;
@@ -127,8 +134,9 @@ class JointHReachabilityAdapter final : public HybridReachabilityAdapter {
 public:
     HybridReachabilityCapabilities capabilities() const noexcept override;
     HybridReachabilityPreflightResult preflight(const model::HybridSystem&,
-        const model::HybridRequest&, const model::HybridPath&,
-        model::HybridRelationLimits, std::stop_token cancellation) const override;
+        const model::HybridRequest&, std::span<const model::HybridPath>,
+        model::HybridRelationLimits, std::span<const model::HybridPlannedOperation>,
+        std::stop_token cancellation) const override;
     HybridPathReachabilityResult compose_path(const model::HybridSystem&,
         const model::HybridRequest&, const model::HybridPath&,
         model::HybridRelationLimits, std::stop_token cancellation) const override;
@@ -146,8 +154,9 @@ public:
         std::size_t maximum_projection_rows);
     HybridReachabilityCapabilities capabilities() const noexcept override;
     HybridReachabilityPreflightResult preflight(const model::HybridSystem&,
-        const model::HybridRequest&, const model::HybridPath&,
-        model::HybridRelationLimits, std::stop_token cancellation) const override;
+        const model::HybridRequest&, std::span<const model::HybridPath>,
+        model::HybridRelationLimits, std::span<const model::HybridPlannedOperation>,
+        std::stop_token cancellation) const override;
     HybridPathReachabilityResult compose_path(const model::HybridSystem&,
         const model::HybridRequest&, const model::HybridPath&,
         model::HybridRelationLimits, std::stop_token cancellation) const override;
@@ -167,8 +176,9 @@ public:
         std::size_t maximum_projection_rows);
     HybridReachabilityCapabilities capabilities() const noexcept override;
     HybridReachabilityPreflightResult preflight(const model::HybridSystem&,
-        const model::HybridRequest&, const model::HybridPath&,
-        model::HybridRelationLimits, std::stop_token cancellation) const override;
+        const model::HybridRequest&, std::span<const model::HybridPath>,
+        model::HybridRelationLimits, std::span<const model::HybridPlannedOperation>,
+        std::stop_token cancellation) const override;
     HybridPathReachabilityResult compose_path(const model::HybridSystem&,
         const model::HybridRequest&, const model::HybridPath&,
         model::HybridRelationLimits, std::stop_token cancellation) const override;
@@ -403,7 +413,7 @@ struct HybridFamilyVerificationReport {
 using HybridFamilyVerificationResult = std::variant<HybridFamilyVerificationReport,
     Diagnostics, OperationStopped>;
 using HybridFamilyVerificationPreflightResult =
-    std::variant<std::monostate, Diagnostics, OperationStopped>;
+    std::variant<HybridOperationAdmissionSuccess, Diagnostics, OperationStopped>;
 
 struct HybridFamilyVerificationCapabilities {
     bool checks_original_hybrid_feasibility{};
@@ -418,10 +428,12 @@ class HybridFamilyVerificationAdapter {
 public:
     virtual ~HybridFamilyVerificationAdapter() = default;
     virtual HybridFamilyVerificationCapabilities capabilities() const noexcept = 0;
-    // Bounded adapters override this to reject unsupported model domains
-    // before branch relation construction. The default fails closed.
+    // Bounded adapters receive the complete ordered operation plan and return
+    // its receipt only after admitting their full request domain. The default
+    // fails closed.
     virtual HybridFamilyVerificationPreflightResult preflight(const model::HybridSystem&,
         const model::HybridRequest&, std::span<const model::HybridPath>,
+        std::span<const model::HybridPlannedOperation>,
         std::stop_token cancellation) const;
     virtual HybridFamilyVerificationResult verify(const model::HybridSystem&,
         const model::HybridRequest&, std::span<const model::HybridPath>,
@@ -437,6 +449,7 @@ public:
     HybridFamilyVerificationCapabilities capabilities() const noexcept override;
     HybridFamilyVerificationPreflightResult preflight(const model::HybridSystem&,
         const model::HybridRequest&, std::span<const model::HybridPath>,
+        std::span<const model::HybridPlannedOperation>,
         std::stop_token cancellation) const override;
     HybridFamilyVerificationResult verify(const model::HybridSystem&,
         const model::HybridRequest&, std::span<const model::HybridPath>,
@@ -454,6 +467,7 @@ public:
     HybridFamilyVerificationCapabilities capabilities() const noexcept override;
     HybridFamilyVerificationPreflightResult preflight(const model::HybridSystem&,
         const model::HybridRequest&, std::span<const model::HybridPath>,
+        std::span<const model::HybridPlannedOperation>,
         std::stop_token cancellation) const override;
     HybridFamilyVerificationResult verify(const model::HybridSystem&,
         const model::HybridRequest&, std::span<const model::HybridPath>,
@@ -471,6 +485,7 @@ public:
     HybridFamilyVerificationCapabilities capabilities() const noexcept override;
     HybridFamilyVerificationPreflightResult preflight(const model::HybridSystem&,
         const model::HybridRequest&, std::span<const model::HybridPath>,
+        std::span<const model::HybridPlannedOperation>,
         std::stop_token cancellation) const override;
     HybridFamilyVerificationResult verify(const model::HybridSystem&,
         const model::HybridRequest&, std::span<const model::HybridPath>,
@@ -487,6 +502,7 @@ public:
     HybridFamilyVerificationCapabilities capabilities() const noexcept override;
     HybridFamilyVerificationPreflightResult preflight(const model::HybridSystem&,
         const model::HybridRequest&, std::span<const model::HybridPath>,
+        std::span<const model::HybridPlannedOperation>,
         std::stop_token cancellation) const override;
     HybridFamilyVerificationResult verify(const model::HybridSystem&,
         const model::HybridRequest&, std::span<const model::HybridPath>,
@@ -505,6 +521,7 @@ public:
     HybridFamilyVerificationCapabilities capabilities() const noexcept override;
     HybridFamilyVerificationPreflightResult preflight(const model::HybridSystem&,
         const model::HybridRequest&, std::span<const model::HybridPath>,
+        std::span<const model::HybridPlannedOperation>,
         std::stop_token cancellation) const override;
     HybridFamilyVerificationResult verify(const model::HybridSystem&,
         const model::HybridRequest&, std::span<const model::HybridPath>,
@@ -520,6 +537,7 @@ public:
     HybridFamilyVerificationCapabilities capabilities() const noexcept override;
     HybridFamilyVerificationPreflightResult preflight(const model::HybridSystem&,
         const model::HybridRequest&, std::span<const model::HybridPath>,
+        std::span<const model::HybridPlannedOperation>,
         std::stop_token cancellation) const override;
     HybridFamilyVerificationResult verify(const model::HybridSystem&,
         const model::HybridRequest&,std::span<const model::HybridPath>,

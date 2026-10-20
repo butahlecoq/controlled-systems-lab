@@ -177,23 +177,24 @@ per-path operation traces, projection sets, and provider evidence remain
 authoritative; a failed preflight or execution returns no partial portfolio.
 This wrapper aggregates reported relation and provider row counts, not
 unreported provider-internal memory or time observations.
-Each reachability adapter must preflight its supported
-operations and limits for the fixed path before the wrapper queries capabilities
+Each reachability adapter must preflight its supported operations and limits
+for the complete ordered path inventory before the wrapper queries capabilities
 or starts composition. The default preflight fails closed; the built-in joint-H
 adapter uses the structural set-representation and joint-relation-limit checks.
 Built-in joint-H structural failures retain path and stage context. The
 reachability, direct-trajectory, and family-verification preflight hooks have
 default implementations. Derived adapters that do not override a hook remain
 source compatible; adapters that override a preflight must match its declared
-signature and result type. Direct-trajectory overrides must accept the
-framework operation plan and return it in the success receipt along with the
-complete ordered path inventory and relation limits; overrides using the old
-signature require a source migration. A reachability adapter must override
-its fail-closed default to be usable; a direct-trajectory adapter using a
-representation other than joint-H must override the structural joint-H
-default. These public virtual additions change adapter vtables; downstream
-prebuilt adapters must be rebuilt. CSL does not promise a stable C++
-binary/plugin ABI.
+signature and result type. Reachability, direct-trajectory, and verifier
+overrides must receive the framework operation plan and return the exact
+ordered plan in their success receipt. Direct-trajectory receipts also bind
+the complete ordered path inventory and relation limits. Overrides using the
+old signatures require a source migration. A reachability adapter must
+override its fail-closed default to be usable; a direct-trajectory adapter
+using a representation other than joint-H must override the structural
+joint-H default. These public virtual changes update adapter vtables;
+downstream prebuilt adapters must be rebuilt. CSL does not promise a stable
+C++ binary/plugin ABI.
 The direct-trajectory API is replaceable through
 `HybridDirectTrajectoryAdapter`; each adapter preflights its complete fixed-path
 inventory and relation limits before capability queries or branch builds.
@@ -486,18 +487,15 @@ reject an unsupported policy before capability queries or program building.
 Validated objective assurance remains unsupported. Solver execution prepares
 all branch programs before creating any solver workspace; direct-trajectory,
 projected-reachability, and family-verification adapters preflight their
-declared path or request inventories before dispatch. Successful direct-
-trajectory preflight returns an ordered path-inventory receipt with the
-configured relation limits. The framework rejects an incomplete, reordered,
-or mismatched receipt before querying capabilities or building any branch.
-The receipt now also contains the framework-generated operation plan, and the
-wrapper rejects an incomplete, reordered, or foreign plan before capability
-queries. The plan preserves duplicate paths as distinct indexed obligations.
-The receipt remains an adapter attestation; it does not independently prove
-semantic support for those operations. Reachability and verifier adapters do
-not yet exchange the same model-wide operation-admission receipt. Complete
-support accounting for every requested operation across all three adapter
-boundaries,
+complete path inventory before dispatch. Each receives the framework-generated
+ordered operation plan and must return an exact receipt. The direct-trajectory
+receipt also binds the ordered path inventory and configured relation limits.
+The framework rejects incomplete, reordered, extra, or foreign plan entries
+before capability queries, branch construction, or verification. The plan
+preserves duplicate paths as distinct indexed obligations. These receipts are
+adapter attestations; they do not independently prove semantic support or
+mathematical correctness. Complete support accounting for every requested
+operation across all three adapter boundaries,
 complete terminal-policy semantics
 beyond the declared objective-class/assurance/tolerance checks, and broader
 multiple-parameter verifier coverage remain EXT-07 work.

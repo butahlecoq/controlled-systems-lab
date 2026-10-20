@@ -200,7 +200,9 @@ HybridFamilyVerificationCapabilities ExactLinearHHybridFamilyVerifier::capabilit
 
 HybridFamilyVerificationPreflightResult ExactLinearHHybridFamilyVerifier::preflight(
     const HybridSystem& system, const HybridRequest& request,
-    std::span<const HybridPath> paths, std::stop_token cancellation) const {
+    std::span<const HybridPath> paths,
+    std::span<const HybridPlannedOperation> operation_plan,
+    std::stop_token cancellation) const {
     hx::Limits limits;
     constexpr HybridRelationLimits relation_limits{
         hx::default_max_variables, hx::default_max_rows,
@@ -240,7 +242,8 @@ HybridFamilyVerificationPreflightResult ExactLinearHHybridFamilyVerifier::prefli
                 detail::describe_hybrid_path(path) +
                 ": terminal objective exceeds exact integer limits"}};
     }
-    return std::monostate{};
+    return HybridOperationAdmissionSuccess{
+        std::vector<HybridPlannedOperation>(operation_plan.begin(),operation_plan.end())};
 }
 
 HybridFamilyVerificationResult ExactLinearHHybridFamilyVerifier::verify(

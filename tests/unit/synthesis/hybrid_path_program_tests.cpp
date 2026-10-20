@@ -2256,10 +2256,15 @@ public:
         return {true,Assurance::numerical};
     }
     HybridReachabilityPreflightResult preflight(const model::HybridSystem& system,
-        const model::HybridRequest& request,const model::HybridPath& path,
-        model::HybridRelationLimits limits,std::stop_token cancellation) const override {
-        return model::preflight_hybrid_path_relations(system,request,
-            std::span<const model::HybridPath>(&path,1),limits,cancellation);
+        const model::HybridRequest& request,std::span<const model::HybridPath> paths,
+        model::HybridRelationLimits limits,std::span<const model::HybridPlannedOperation> plan,
+        std::stop_token cancellation) const override {
+        const auto result=model::preflight_hybrid_path_relations(system,request,paths,limits,cancellation);
+        if(const auto* failure=std::get_if<model::HybridPathCompositionFailureReport>(&result)) return *failure;
+        if(const auto* diagnostics=std::get_if<Diagnostics>(&result)) return *diagnostics;
+        if(const auto* stopped=std::get_if<OperationStopped>(&result)) return *stopped;
+        return HybridOperationAdmissionSuccess{
+            std::vector<model::HybridPlannedOperation>(plan.begin(),plan.end())};
     }
     HybridPathReachabilityResult compose_path(const model::HybridSystem&,
         const model::HybridRequest&,const model::HybridPath& path,
@@ -2297,9 +2302,10 @@ public:
         return {true,Assurance::numerical};
     }
     HybridReachabilityPreflightResult preflight(const model::HybridSystem&,
-        const model::HybridRequest&,const model::HybridPath& path,
-        model::HybridRelationLimits limits,std::stop_token) const override {
-        auto reported_path=path;
+        const model::HybridRequest&,std::span<const model::HybridPath> paths,
+        model::HybridRelationLimits limits,std::span<const model::HybridPlannedOperation>,
+        std::stop_token) const override {
+        auto reported_path=paths.back();
         auto reported_limits=limits;
         if(corruption==0) reported_path.edges.front().value+="-wrong";
         else ++reported_limits.max_rows;
@@ -2327,10 +2333,11 @@ public:
         return {true,Assurance::numerical};
     }
     HybridReachabilityPreflightResult preflight(const model::HybridSystem&,
-        const model::HybridRequest&,const model::HybridPath&,
-        model::HybridRelationLimits,std::stop_token) const override {
+        const model::HybridRequest&,std::span<const model::HybridPath>,
+        model::HybridRelationLimits,std::span<const model::HybridPlannedOperation>,
+        std::stop_token) const override {
         cancellation_->request_stop();
-        return std::monostate{};
+        return OperationStopped{StopReason::cancelled,"fixture cancelled reachability preflight"};
     }
     HybridPathReachabilityResult compose_path(const model::HybridSystem&,
         const model::HybridRequest&,const model::HybridPath& path,
@@ -2414,16 +2421,37 @@ registry::PreparedProvider<registry::GeometryPort> row_limited_projection_provid
 class MisreportingReachabilityAdapter final : public HybridReachabilityAdapter {
 public:
     int corruption{};
-    HybridReachabilityCapabilities capabilities() const noexcept override { return {true,Assurance::numerical}; }
+    int admission_corruption{};
+    mutable int calls{};
+    mutable int capability_calls{};
+    mutable int preflight_calls{};
+    mutable std::size_t preflight_path_count{};
+    mutable std::size_t preflight_plan_count{};
+    HybridReachabilityCapabilities capabilities() const noexcept override {
+        ++capability_calls;
+        return {true,Assurance::numerical};
+    }
     HybridReachabilityPreflightResult preflight(const model::HybridSystem& system,
-        const model::HybridRequest& request,const model::HybridPath& path,
-        model::HybridRelationLimits limits,std::stop_token cancellation) const override {
-        return model::preflight_hybrid_path_relations(system,request,
-            std::span<const model::HybridPath>(&path,1),limits,cancellation);
+        const model::HybridRequest& request,std::span<const model::HybridPath> paths,
+        model::HybridRelationLimits limits,std::span<const model::HybridPlannedOperation> plan,
+        std::stop_token cancellation) const override {
+        ++preflight_calls;
+        preflight_path_count=paths.size();
+        preflight_plan_count=plan.size();
+        const auto result=model::preflight_hybrid_path_relations(system,request,paths,limits,cancellation);
+        if(const auto* failure=std::get_if<model::HybridPathCompositionFailureReport>(&result)) return *failure;
+        if(const auto* diagnostics=std::get_if<Diagnostics>(&result)) return *diagnostics;
+        if(const auto* stopped=std::get_if<OperationStopped>(&result)) return *stopped;
+        std::vector<model::HybridPlannedOperation> receipt(plan.begin(),plan.end());
+        if(admission_corruption==1&&!receipt.empty()) receipt.pop_back();
+        if(admission_corruption==2&&receipt.size()>1) std::swap(receipt[0],receipt[1]);
+        if(admission_corruption==3&&!receipt.empty()) receipt.push_back(receipt.front());
+        return HybridOperationAdmissionSuccess{std::move(receipt)};
     }
     HybridPathReachabilityResult compose_path(const model::HybridSystem& system,
         const model::HybridRequest& request,const model::HybridPath& path,
         model::HybridRelationLimits limits,std::stop_token cancellation) const override {
+        ++calls;
         JointHReachabilityAdapter delegate;
         auto result=delegate.compose_path(system,request,path,limits,cancellation);
         if(auto* reachable=std::get_if<HybridPathReachability>(&result)) {
@@ -2431,7 +2459,7 @@ public:
             else if(corruption==1) ++reachable->relation_limits.max_rows;
             else if(corruption==2) ++reachable->relation_operations.front().rows_added;
             else if(corruption==3) reachable->relation_operations.front().stage=1;
-            else {
+            else if(corruption==4) {
                 for(auto& operation:reachable->relation_operations) {
                     operation.joint_variables=0;
                     operation.cumulative_matrix_elements=0;
@@ -2447,26 +2475,37 @@ public:
     mutable int calls{};
     mutable int preflight_calls{};
     mutable int capability_calls{};
+    mutable std::size_t preflight_path_count{};
+    mutable std::size_t preflight_plan_count{};
     bool omit_last_branch{};
     bool claim_established_aggregates{};
     bool claim_coverage_only{};
     bool mark_all_branches_refuted{};
     bool inject_candidate_providers{};
     bool reject_preflight{};
+    bool partial_operation_receipt{};
+    std::stop_source* request_cancellation_after_preflight{};
     HybridFamilyVerificationCapabilities capabilities() const noexcept override {
         ++capability_calls;
         return {true,true,true,Assurance::numerical};
     }
     HybridFamilyVerificationPreflightResult preflight(const model::HybridSystem&,
-        const model::HybridRequest&,std::span<const model::HybridPath>,
+        const model::HybridRequest&,std::span<const model::HybridPath> paths,
+        std::span<const model::HybridPlannedOperation> plan,
         std::stop_token cancellation) const override {
         ++preflight_calls;
+        preflight_path_count=paths.size();
+        preflight_plan_count=plan.size();
         if(cancellation.stop_requested())
             return OperationStopped{StopReason::cancelled,"fixture preflight cancelled"};
         if(reject_preflight)
             return Diagnostics{{DiagnosticCode::unsupported,"fixture.verifier.preflight",
                 "fixture rejects this verification request"}};
-        return std::monostate{};
+        std::vector<model::HybridPlannedOperation> admitted(plan.begin(),plan.end());
+        if(partial_operation_receipt&&!admitted.empty()) admitted.resize(1);
+        if(request_cancellation_after_preflight)
+            request_cancellation_after_preflight->request_stop();
+        return HybridOperationAdmissionSuccess{std::move(admitted)};
     }
     HybridFamilyVerificationResult verify(const model::HybridSystem&,
         const model::HybridRequest&,std::span<const model::HybridPath> paths,
@@ -3234,8 +3273,10 @@ TEST_CASE("general projected preflight admits the actual labelled joint relation
         row_limited_projection_provider(64,admissions,workspace_creations,nullptr,
             observed_actual_relation,true),16);
 
-    const auto admitted=adapter.preflight(system,request,path,{8,32,256},{});
-    REQUIRE(std::holds_alternative<std::monostate>(admitted));
+    const std::array<model::HybridPath,1> paths{path};
+    const auto operation_plan=model::plan_hybrid_operations(paths);
+    const auto admitted=adapter.preflight(system,request,paths,{8,32,256},operation_plan,{});
+    REQUIRE(std::holds_alternative<HybridOperationAdmissionSuccess>(admitted));
     REQUIRE(admissions->size()==1);
     CHECK(*observed_actual_relation);
     CHECK(admissions->front().first.starts_with("terminal-state:"));
@@ -3269,8 +3310,10 @@ TEST_CASE("one-step projected preflight admits the actual labelled joint relatio
         row_limited_projection_provider(64,admissions,workspace_creations,nullptr,
             observed_actual_relation,true),16);
 
-    const auto admitted=adapter.preflight(system,request,path,{8,32,256},{});
-    REQUIRE(std::holds_alternative<std::monostate>(admitted));
+    const std::array<model::HybridPath,1> paths{path};
+    const auto operation_plan=model::plan_hybrid_operations(paths);
+    const auto admitted=adapter.preflight(system,request,paths,{8,32,256},operation_plan,{});
+    REQUIRE(std::holds_alternative<HybridOperationAdmissionSuccess>(admitted));
     REQUIRE(admissions->size()==1);
     CHECK(*observed_actual_relation);
     CHECK(admissions->front().first.starts_with("terminal-state:"));
@@ -3393,6 +3436,36 @@ TEST_CASE("reachability boundary validates preflight failure path and limits") {
     }
 }
 
+TEST_CASE("reachability boundary rejects incomplete or reordered operation admission receipts") {
+    for(const int corruption:{1,2,3}) {
+        MisreportingReachabilityAdapter adapter;
+        adapter.admission_corruption=corruption;
+        const auto result=compute_hybrid_path_reachability(adapter,example_system(),
+            example_request(),example_path(),{16,64,1024});
+        REQUIRE(std::holds_alternative<Diagnostics>(result));
+        CHECK(std::get<Diagnostics>(result).front().field==
+            "hybrid.reachability.preflight_operations");
+        CHECK(adapter.capability_calls==0);
+        CHECK(adapter.calls==0);
+    }
+}
+
+TEST_CASE("reachability portfolio admits one complete model-wide operation plan") {
+    auto [system,request]=variable_size_parallel_profile();
+    MisreportingReachabilityAdapter adapter;
+    adapter.corruption=5;
+    const auto result=compute_hybrid_reachability_portfolio(adapter,system,request,
+        {1,8},{16,64,1024});
+    REQUIRE(std::holds_alternative<HybridReachabilityPortfolio>(result));
+    const auto& portfolio=std::get<HybridReachabilityPortfolio>(result);
+    REQUIRE(portfolio.branches.size()==3);
+    CHECK(adapter.preflight_calls==1);
+    CHECK(adapter.preflight_path_count==3);
+    CHECK(adapter.preflight_plan_count==24);
+    CHECK(adapter.capability_calls==1);
+    CHECK(adapter.calls==3);
+}
+
 TEST_CASE("reachability boundary stops after a cancelling successful preflight") {
     std::stop_source cancellation;
     CancellingReachabilityPreflightAdapter adapter{cancellation};
@@ -3493,9 +3566,66 @@ TEST_CASE("standalone family verification admits the verifier before dispatch") 
         std::get<std::vector<HybridPathProgram>>(built),{}, {1,8},{1e-10,1e-10});
     REQUIRE(std::holds_alternative<Diagnostics>(result));
     CHECK(std::get<Diagnostics>(result).front().field=="fixture.verifier.preflight");
-    CHECK(verifier.capability_calls==1);
+    CHECK(verifier.capability_calls==0);
     CHECK(verifier.preflight_calls==1);
     CHECK(verifier.calls==0);
+
+    FixtureHybridFamilyVerifier partial_receipt;
+    partial_receipt.partial_operation_receipt=true;
+    const auto receipt_rejected=verify_hybrid_portfolio_family(partial_receipt,system,request,
+        std::get<std::vector<HybridPathProgram>>(built),{}, {1,8},{1e-10,1e-10});
+    REQUIRE(std::holds_alternative<Diagnostics>(receipt_rejected));
+    CHECK(std::get<Diagnostics>(receipt_rejected).front().field==
+        "hybrid.verification.preflight_operations");
+    CHECK(partial_receipt.capability_calls==0);
+    CHECK(partial_receipt.preflight_calls==1);
+    CHECK(partial_receipt.calls==0);
+}
+
+TEST_CASE("verifier preflight cancellation skips capabilities and dispatch") {
+    auto [system,request]=exact_singleton_portfolio();
+    const auto built=build_hybrid_portfolio_programs(system,request,{"verifier-cancel-preflight"},
+        {1,8},{32,128,4096});
+    REQUIRE(std::holds_alternative<std::vector<HybridPathProgram>>(built));
+
+    std::stop_source cancellation;
+    FixtureHybridFamilyVerifier standalone;
+    standalone.request_cancellation_after_preflight=&cancellation;
+    const auto verified=verify_hybrid_portfolio_family(standalone,system,request,
+        std::get<std::vector<HybridPathProgram>>(built),{}, {1,8},{1e-10,1e-10},
+        cancellation.get_token());
+    REQUIRE(std::holds_alternative<OperationStopped>(verified));
+    CHECK(standalone.capability_calls==0);
+    CHECK(standalone.calls==0);
+
+    std::stop_source build_cancellation;
+    FixtureHybridFamilyVerifier portfolio;
+    portfolio.request_cancellation_after_preflight=&build_cancellation;
+    RejectingTrajectoryAdapter trajectory;
+    const auto constructed=build_hybrid_portfolio_programs_with_verifier(portfolio,trajectory,
+        system,request,{"verifier-cancel-build"},{1,8},{32,128,4096},{},
+        build_cancellation.get_token());
+    REQUIRE(std::holds_alternative<OperationStopped>(constructed));
+    CHECK(portfolio.capability_calls==0);
+    CHECK(portfolio.calls==0);
+    CHECK(trajectory.calls==0);
+}
+
+TEST_CASE("family verifier receives one complete model-wide operation plan") {
+    auto [system,request]=variable_size_parallel_profile();
+    const auto built=build_hybrid_portfolio_programs(system,request,{"verifier-plan-inventory"},
+        {1,8},{16,64,1024});
+    REQUIRE(std::holds_alternative<std::vector<HybridPathProgram>>(built));
+
+    FixtureHybridFamilyVerifier verifier;
+    const auto verified=verify_hybrid_portfolio_family(verifier,system,request,
+        std::get<std::vector<HybridPathProgram>>(built),{}, {1,8},{0,0});
+    REQUIRE(std::holds_alternative<HybridFamilyVerificationReport>(verified));
+    CHECK(verifier.preflight_calls==1);
+    CHECK(verifier.preflight_path_count==3);
+    CHECK(verifier.preflight_plan_count==24);
+    CHECK(verifier.capability_calls==1);
+    CHECK(verifier.calls==1);
 }
 
 TEST_CASE("portfolio preflights every path before constructing the first relation") {
@@ -5437,7 +5567,8 @@ TEST_CASE("two parameter scalar verifier supports free controls at separated sta
   auto three_free_controls = system;
   three_free_controls.modes.front().control_sets[1] =
       interval("three-stage-extra-free-control", 0, 1);
-  const auto rejected = verifier.preflight(three_free_controls, request, paths, {});
+  const auto operation_plan=model::plan_hybrid_operations(paths);
+  const auto rejected = verifier.preflight(three_free_controls, request, paths, operation_plan, {});
   CHECK(std::holds_alternative<Diagnostics>(rejected));
 }
 
@@ -5747,8 +5878,9 @@ TEST_CASE("two parameter scalar verifier certifies a coupled polygon and "
     for (const auto &program :
          std::get<std::vector<HybridPathProgram>>(degenerate_programs))
       degenerate_paths.push_back(program.path);
+    const auto degenerate_plan=model::plan_hybrid_operations(degenerate_paths);
     CHECK(std::holds_alternative<Diagnostics>(verifier.preflight(
-        degenerate_system, request, degenerate_paths, {})));
+        degenerate_system, request, degenerate_paths, degenerate_plan, {})));
     auto degenerate_report = verify_hybrid_portfolio_family(
         verifier, degenerate_system, request,
         std::get<std::vector<HybridPathProgram>>(degenerate_programs), {},

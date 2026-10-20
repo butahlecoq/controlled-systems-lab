@@ -363,7 +363,7 @@ HybridFamilyVerificationCapabilities ExactSingletonHybridFamilyVerifier::capabil
 
 HybridFamilyVerificationPreflightResult ExactSingletonHybridFamilyVerifier::preflight(
     const HybridSystem& system,const HybridRequest& request,std::span<const HybridPath> paths,
-    std::stop_token cancellation) const {
+    std::span<const HybridPlannedOperation> operation_plan,std::stop_token cancellation) const {
     for(const auto& path:paths) {
         if(cancellation.stop_requested())
             return OperationStopped{StopReason::cancelled,
@@ -376,7 +376,8 @@ HybridFamilyVerificationPreflightResult ExactSingletonHybridFamilyVerifier::pref
             return Diagnostics{{DiagnosticCode::unsupported,"hybrid.verification.exact_singleton_domain",
                 detail::describe_hybrid_path(path)+": "+branch.reason}};
     }
-    return std::monostate{};
+    return HybridOperationAdmissionSuccess{
+        std::vector<HybridPlannedOperation>(operation_plan.begin(),operation_plan.end())};
 }
 
 HybridFamilyVerificationResult ExactSingletonHybridFamilyVerifier::verify(

@@ -287,8 +287,9 @@ HybridDirectTrajectoryCapabilities JointHDirectTrajectoryAdapter::capabilities()
 }
 
 HybridReachabilityPreflightResult HybridReachabilityAdapter::preflight(
-    const model::HybridSystem&,const model::HybridRequest&,const model::HybridPath&,
-    model::HybridRelationLimits,std::stop_token cancellation) const {
+    const model::HybridSystem&,const model::HybridRequest&,
+    std::span<const model::HybridPath>,model::HybridRelationLimits,
+    std::span<const model::HybridPlannedOperation>,std::stop_token cancellation) const {
     if(cancellation.stop_requested())
         return OperationStopped{StopReason::cancelled,
             "Hybrid reachability preflight was cancelled before adapter admission"};
@@ -302,10 +303,15 @@ HybridReachabilityCapabilities JointHReachabilityAdapter::capabilities() const n
 
 HybridReachabilityPreflightResult JointHReachabilityAdapter::preflight(
     const model::HybridSystem& system,const model::HybridRequest& request,
-    const model::HybridPath& path,model::HybridRelationLimits limits,
+    std::span<const model::HybridPath> paths,model::HybridRelationLimits limits,
+    std::span<const model::HybridPlannedOperation> operation_plan,
     std::stop_token cancellation) const {
-    return model::preflight_hybrid_path_relations(system,request,
-        std::span<const model::HybridPath>(&path,1),limits,cancellation);
+    const auto result=model::preflight_hybrid_path_relations(system,request,paths,limits,cancellation);
+    if(const auto* failure=std::get_if<model::HybridPathCompositionFailureReport>(&result)) return *failure;
+    if(const auto* errors=std::get_if<Diagnostics>(&result)) return *errors;
+    if(const auto* stopped=std::get_if<OperationStopped>(&result)) return *stopped;
+    return HybridOperationAdmissionSuccess{
+        std::vector<model::HybridPlannedOperation>(operation_plan.begin(),operation_plan.end())};
 }
 
 HybridPathReachabilityResult JointHReachabilityAdapter::compose_path(
@@ -322,16 +328,26 @@ HybridPathReachabilityResult JointHReachabilityAdapter::compose_path(
 namespace {
 HybridReachabilityPreflightResult checked_hybrid_reachability_preflight(
     const HybridReachabilityAdapter& adapter,const model::HybridSystem& system,
-    const model::HybridRequest& request,const model::HybridPath& path,
-    model::HybridRelationLimits limits,std::stop_token cancellation) {
-    auto result=adapter.preflight(system,request,path,limits,cancellation);
+    const model::HybridRequest& request,std::span<const model::HybridPath> paths,
+    model::HybridRelationLimits limits,
+    std::span<const model::HybridPlannedOperation> operation_plan,
+    std::stop_token cancellation) {
+    auto result=adapter.preflight(system,request,paths,limits,operation_plan,cancellation);
     if(const auto* failure=std::get_if<model::HybridPathCompositionFailureReport>(&result)) {
-        if(failure->path!=path)
+        if(std::find(paths.begin(),paths.end(),failure->path)==paths.end())
             return one({DiagnosticCode::evidence_mismatch,"hybrid.reachability.preflight_path",
                 "Reachability preflight returned a failure report for a different path"});
         if(!same_limits(failure->limits,limits))
             return one({DiagnosticCode::evidence_mismatch,"hybrid.reachability.preflight_limits",
                 "Reachability preflight failure report lost the configured relation limits"});
+    }
+    if(const auto* success=std::get_if<HybridOperationAdmissionSuccess>(&result)) {
+        const auto expected=model::plan_hybrid_operations(paths);
+        if(!std::equal(expected.begin(),expected.end(),operation_plan.begin(),operation_plan.end())||
+           !std::equal(expected.begin(),expected.end(),success->admitted_operations.begin(),
+               success->admitted_operations.end()))
+            return one({DiagnosticCode::evidence_mismatch,"hybrid.reachability.preflight_operations",
+                "Reachability preflight receipt does not match the complete framework operation plan"});
     }
     return result;
 }
@@ -505,8 +521,10 @@ HybridPathReachabilityResult compute_hybrid_path_reachability(
         return OperationStopped{StopReason::cancelled,"Hybrid reachability was cancelled before profile admission"};
     const auto admission=hybrid_path_admission_errors(system,request,path);
     if(!admission.empty()) return admission;
+    const std::array<model::HybridPath,1> paths{path};
+    const auto operation_plan=model::plan_hybrid_operations(paths);
     const auto path_preflight=checked_hybrid_reachability_preflight(
-        adapter,system,request,path,limits,cancellation);
+        adapter,system,request,paths,limits,operation_plan,cancellation);
     if(const auto* failure=std::get_if<model::HybridPathCompositionFailureReport>(&path_preflight)) return *failure;
     if(const auto* errors=std::get_if<Diagnostics>(&path_preflight)) return *errors;
     if(const auto* stopped=std::get_if<OperationStopped>(&path_preflight)) return *stopped;
@@ -535,20 +553,20 @@ HybridReachabilityPortfolioResult compute_hybrid_reachability_portfolio(
     if(const auto* stopped=std::get_if<OperationStopped>(&enumeration)) return *stopped;
     auto paths=std::get<std::vector<model::HybridPath>>(std::move(enumeration));
 
-    // Complete operation admission for every path before the first adapter
-    // execution can create a provider workspace.
+    // Validate paths and the complete operation plan before adapter admission.
     for(const auto& path:paths) {
         if(cancellation.stop_requested())
             return OperationStopped{StopReason::cancelled,
                 "Hybrid reachability portfolio was cancelled during path preflight"};
         const auto admission=hybrid_path_admission_errors(system,request,path);
         if(!admission.empty()) return admission;
-        const auto preflight=checked_hybrid_reachability_preflight(
-            adapter,system,request,path,relation_limits,cancellation);
-        if(const auto* failure=std::get_if<model::HybridPathCompositionFailureReport>(&preflight)) return *failure;
-        if(const auto* diagnostics=std::get_if<Diagnostics>(&preflight)) return *diagnostics;
-        if(const auto* stopped=std::get_if<OperationStopped>(&preflight)) return *stopped;
     }
+    const auto operation_plan=model::plan_hybrid_operations(paths);
+    const auto preflight=checked_hybrid_reachability_preflight(
+        adapter,system,request,paths,relation_limits,operation_plan,cancellation);
+    if(const auto* failure=std::get_if<model::HybridPathCompositionFailureReport>(&preflight)) return *failure;
+    if(const auto* diagnostics=std::get_if<Diagnostics>(&preflight)) return *diagnostics;
+    if(const auto* stopped=std::get_if<OperationStopped>(&preflight)) return *stopped;
     if(cancellation.stop_requested())
         return OperationStopped{StopReason::cancelled,
             "Hybrid reachability portfolio was cancelled after path preflight"};
@@ -779,13 +797,6 @@ HybridPortfolioProgramResult build_hybrid_portfolio_programs_with_verifier(
     if(!profile_errors.empty()) return profile_errors;
     if(const auto policy_error=hybrid_objective_policy_error(policy); policy_error)
         return one(*policy_error);
-    const auto capability=verifier.capabilities();
-    if(capability.assurance!=Assurance::numerical||
-       !capability.checks_original_hybrid_feasibility||
-       !capability.checks_global_objective_optimality||
-       !capability.checks_continuous_branch_coverage)
-        return one({DiagnosticCode::unsupported,"hybrid.verification.capabilities",
-            "Verifier must declare numerical feasibility, global objective, and continuous coverage checks"});
     const auto enumerated=model::enumerate_hybrid_paths(system,request.initial.mode,
         request.allowed_terminal_modes,enumeration_limits,cancellation);
     if(const auto* diagnostic=std::get_if<Diagnostic>(&enumerated)) return one(*diagnostic);
@@ -794,15 +805,32 @@ HybridPortfolioProgramResult build_hybrid_portfolio_programs_with_verifier(
     if(paths.empty())
         return one({DiagnosticCode::invalid_claim,"hybrid.verification.paths",
             "No allowed hybrid path exists for the requested verifier plan"});
+    const auto operation_plan=model::plan_hybrid_operations(paths);
     const auto operation_preflight=preflight_hybrid_trajectory_operations(
         trajectory,system,request,paths,relation_limits,policy,cancellation);
     if(const auto* failure=std::get_if<model::HybridPathCompositionFailureReport>(&operation_preflight))
         return *failure;
     if(const auto* errors=std::get_if<Diagnostics>(&operation_preflight)) return *errors;
     if(const auto* stopped=std::get_if<OperationStopped>(&operation_preflight)) return *stopped;
-    const auto admission=verifier.preflight(system,request,paths,cancellation);
+    const auto admission=verifier.preflight(system,request,paths,operation_plan,cancellation);
     if(const auto* errors=std::get_if<Diagnostics>(&admission)) return *errors;
     if(const auto* stopped=std::get_if<OperationStopped>(&admission)) return *stopped;
+    if(const auto* success=std::get_if<HybridOperationAdmissionSuccess>(&admission)) {
+        if(!std::equal(operation_plan.begin(),operation_plan.end(),
+                       success->admitted_operations.begin(),success->admitted_operations.end()))
+            return one({DiagnosticCode::evidence_mismatch,"hybrid.verification.preflight_operations",
+                "Verifier preflight receipt does not match the complete framework operation plan"});
+    }
+    if(cancellation.stop_requested())
+        return OperationStopped{StopReason::cancelled,
+            "Hybrid verified portfolio construction was cancelled after verifier preflight"};
+    const auto capability=verifier.capabilities();
+    if(capability.assurance!=Assurance::numerical||
+       !capability.checks_original_hybrid_feasibility||
+       !capability.checks_global_objective_optimality||
+       !capability.checks_continuous_branch_coverage)
+        return one({DiagnosticCode::unsupported,"hybrid.verification.capabilities",
+            "Verifier must declare numerical feasibility, global objective, and continuous coverage checks"});
     const auto trajectory_preflight=preflight_hybrid_trajectory_capabilities(
         trajectory,request,policy,cancellation);
     if(const auto* errors=std::get_if<Diagnostics>(&trajectory_preflight)) return *errors;
@@ -1112,6 +1140,7 @@ HybridPortfolioOptimalFaceAnalysis assemble_hybrid_portfolio_optimal_face_candid
 
 HybridFamilyVerificationPreflightResult HybridFamilyVerificationAdapter::preflight(
     const model::HybridSystem&,const model::HybridRequest&,std::span<const model::HybridPath>,
+    std::span<const model::HybridPlannedOperation>,
     std::stop_token cancellation) const {
     if(cancellation.stop_requested())
         return OperationStopped{StopReason::cancelled,
@@ -1165,6 +1194,19 @@ HybridFamilyVerificationResult verify_hybrid_portfolio_family(
                 return one({DiagnosticCode::evidence_mismatch,"hybrid.verification.candidate_duplicate",
                     "Duplicate candidate paths make family coverage ambiguous"});
     }
+    const auto operation_plan=model::plan_hybrid_operations(paths);
+    const auto admission=adapter.preflight(system,request,paths,operation_plan,cancellation);
+    if(const auto* errors=std::get_if<Diagnostics>(&admission)) return *errors;
+    if(const auto* stopped=std::get_if<OperationStopped>(&admission)) return *stopped;
+    if(const auto* success=std::get_if<HybridOperationAdmissionSuccess>(&admission)) {
+        if(!std::equal(operation_plan.begin(),operation_plan.end(),
+                       success->admitted_operations.begin(),success->admitted_operations.end()))
+            return one({DiagnosticCode::evidence_mismatch,"hybrid.verification.preflight_operations",
+                "Verifier preflight receipt does not match the complete framework operation plan"});
+    }
+    if(cancellation.stop_requested())
+        return OperationStopped{StopReason::cancelled,
+            "Hybrid family verification was cancelled after verifier preflight"};
     const auto capability=adapter.capabilities();
     if(capability.assurance!=Assurance::numerical)
         return one({DiagnosticCode::unsupported,"hybrid.verification.assurance",
@@ -1174,9 +1216,6 @@ HybridFamilyVerificationResult verify_hybrid_portfolio_family(
        !capability.checks_continuous_branch_coverage)
         return one({DiagnosticCode::unsupported,"hybrid.verification.capabilities",
             "Verifier must declare original feasibility, global objective, and continuous coverage checks"});
-    const auto admission=adapter.preflight(system,request,paths,cancellation);
-    if(const auto* errors=std::get_if<Diagnostics>(&admission)) return *errors;
-    if(const auto* stopped=std::get_if<OperationStopped>(&admission)) return *stopped;
     if(cancellation.stop_requested())
         return OperationStopped{StopReason::cancelled,"Hybrid family verification was cancelled before verifier dispatch"};
     auto result=adapter.verify(system,request,paths,programs,candidates,numerical_policy,cancellation);

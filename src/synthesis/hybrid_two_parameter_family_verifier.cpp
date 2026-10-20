@@ -577,7 +577,9 @@ TwoParameterScalarPolytopeHybridFamilyVerifier::capabilities() const noexcept {
 HybridFamilyVerificationPreflightResult
 TwoParameterScalarPolytopeHybridFamilyVerifier::preflight(
     const HybridSystem &s, const HybridRequest &r,
-    std::span<const HybridPath> paths, std::stop_token stop) const {
+    std::span<const HybridPath> paths,
+    std::span<const HybridPlannedOperation> operation_plan,
+    std::stop_token stop) const {
   for (const auto &p : paths) {
     if (stop.stop_requested())
       return OperationStopped{StopReason::cancelled,
@@ -591,7 +593,8 @@ TwoParameterScalarPolytopeHybridFamilyVerifier::preflight(
                           "hybrid.verification.two_parameter_domain",
                           detail::describe_hybrid_path(p) + ": " + b.why}};
   }
-  return std::monostate{};
+  return HybridOperationAdmissionSuccess{
+      std::vector<HybridPlannedOperation>(operation_plan.begin(),operation_plan.end())};
 }
 HybridFamilyVerificationResult
 TwoParameterScalarPolytopeHybridFamilyVerifier::verify(

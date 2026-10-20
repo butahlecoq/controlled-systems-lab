@@ -1,6 +1,7 @@
 #include <csl/synthesis/hybrid_path_program.hpp>
 
 #include <algorithm>
+#include <array>
 #include <cmath>
 #include <iomanip>
 #include <limits>
@@ -286,10 +287,15 @@ HybridReachabilityCapabilities ProjectedStateHybridReachabilityAdapter::capabili
 }
 
 HybridReachabilityPreflightResult ProjectedStateHybridReachabilityAdapter::preflight(
-    const model::HybridSystem& system,const model::HybridRequest& request,const model::HybridPath& path,
-    model::HybridRelationLimits limits,std::stop_token cancellation) const {
+    const model::HybridSystem& system,const model::HybridRequest& request,
+    std::span<const model::HybridPath> paths,model::HybridRelationLimits limits,
+    std::span<const model::HybridPlannedOperation> operation_plan,
+    std::stop_token cancellation) const {
     if(cancellation.stop_requested())
         return OperationStopped{StopReason::cancelled,"Projected-state reachability preflight was cancelled"};
+    if(paths.empty()) return Diagnostics{{DiagnosticCode::invalid_input,"hybrid.projected.paths",
+        "Projected reachability requires at least one path"}};
+    for(const auto& path:paths) {
     const auto profile=profile_errors(system,request,path);
     if(!profile.empty()) return profile;
     if(maximum_projection_rows_==0)
@@ -339,7 +345,9 @@ HybridReachabilityPreflightResult ProjectedStateHybridReachabilityAdapter::prefl
             "Projected-state reachability preflight was cancelled during provider admission"};
     if(const auto* rejection=std::get_if<registry::Rejection>(&provider_admission))
         return rejection->diagnostics;
-    return std::monostate{};
+    }
+    return HybridOperationAdmissionSuccess{
+        std::vector<model::HybridPlannedOperation>(operation_plan.begin(),operation_plan.end())};
 }
 
 HybridPathReachabilityResult ProjectedStateHybridReachabilityAdapter::compose_path(
@@ -347,7 +355,9 @@ HybridPathReachabilityResult ProjectedStateHybridReachabilityAdapter::compose_pa
     model::HybridRelationLimits limits,std::stop_token cancellation) const {
     if(cancellation.stop_requested())
         return OperationStopped{StopReason::cancelled,"Projected-state reachability was cancelled before relation construction"};
-    const auto admitted=preflight(system,request,path,limits,cancellation);
+    const std::array<model::HybridPath,1> paths{path};
+    const auto operation_plan=model::plan_hybrid_operations(paths);
+    const auto admitted=preflight(system,request,paths,limits,operation_plan,cancellation);
     if(const auto* failure=std::get_if<model::HybridPathCompositionFailureReport>(&admitted)) return *failure;
     if(const auto* diagnostics=std::get_if<Diagnostics>(&admitted)) return *diagnostics;
     if(const auto* stopped=std::get_if<OperationStopped>(&admitted)) return *stopped;
@@ -413,10 +423,15 @@ HybridReachabilityCapabilities GeneralProjectedStateHybridReachabilityAdapter::c
 }
 
 HybridReachabilityPreflightResult GeneralProjectedStateHybridReachabilityAdapter::preflight(
-    const model::HybridSystem& system,const model::HybridRequest& request,const model::HybridPath& path,
-    model::HybridRelationLimits limits,std::stop_token cancellation) const {
+    const model::HybridSystem& system,const model::HybridRequest& request,
+    std::span<const model::HybridPath> paths,model::HybridRelationLimits limits,
+    std::span<const model::HybridPlannedOperation> operation_plan,
+    std::stop_token cancellation) const {
     if(cancellation.stop_requested())
         return OperationStopped{StopReason::cancelled,"General projected reachability preflight was cancelled"};
+    if(paths.empty()) return Diagnostics{{DiagnosticCode::invalid_input,"hybrid.projected.paths",
+        "General projected reachability requires at least one path"}};
+    for(const auto& path:paths) {
     if(maximum_projection_rows_==0)
         return Diagnostics{{DiagnosticCode::invalid_input,"hybrid.projected.row_limit",
             "Projection row limit must be positive"}};
@@ -528,7 +543,9 @@ HybridReachabilityPreflightResult GeneralProjectedStateHybridReachabilityAdapter
         return OperationStopped{StopReason::cancelled,"General projected reachability preflight was cancelled during provider admission"};
     if(const auto* rejection=std::get_if<registry::Rejection>(&provider_admission))
         return rejection->diagnostics;
-    return std::monostate{};
+    }
+    return HybridOperationAdmissionSuccess{
+        std::vector<model::HybridPlannedOperation>(operation_plan.begin(),operation_plan.end())};
 }
 
 HybridPathReachabilityResult GeneralProjectedStateHybridReachabilityAdapter::compose_path(
@@ -536,7 +553,9 @@ HybridPathReachabilityResult GeneralProjectedStateHybridReachabilityAdapter::com
     model::HybridRelationLimits limits,std::stop_token cancellation) const {
     if(cancellation.stop_requested())
         return OperationStopped{StopReason::cancelled,"General projected reachability was cancelled before relation construction"};
-    const auto admitted=preflight(system,request,path,limits,cancellation);
+    const std::array<model::HybridPath,1> paths{path};
+    const auto operation_plan=model::plan_hybrid_operations(paths);
+    const auto admitted=preflight(system,request,paths,limits,operation_plan,cancellation);
     if(const auto* failure=std::get_if<model::HybridPathCompositionFailureReport>(&admitted)) return *failure;
     if(const auto* diagnostics=std::get_if<Diagnostics>(&admitted)) return *diagnostics;
     if(const auto* stopped=std::get_if<OperationStopped>(&admitted)) return *stopped;
