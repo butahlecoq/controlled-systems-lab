@@ -168,6 +168,14 @@ verifier establishes the full literal face and refutes its feasible `u≤0.5`
 subset. This checks a non-simplex three-control polytope, while broader
 polytope/oracle coverage and resource-scale evidence remain open.
 
+A third one-step family oracle has four free controls in the simplex
+`u,v,w,z≥0`, `u+v+w+z≤1`, flow `x_pre=u+v+w+z`, and existential reset
+`0≤y≤x_pre`. The exact H verifier establishes the full 4D simplex optimal face
+at `y=0` and refutes its feasible `u≤0.125` subset. The candidate uses dyadic
+witness coordinates so the flow equality is exact. This advances the free-
+control dimension evidence to four while broader verifier-domain and
+resource-scale coverage remain open.
+
 The [EXT-07 capability profile and fixture report](../../../research/ext07-capability-profile.md)
 records the declared adapter/verifier domains and named dimensions, horizons,
 mode counts, edge counts, path counts, and relation widths. It separates saved
