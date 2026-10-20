@@ -72,6 +72,7 @@ class OfflineHTML(HTMLParser):
                 data.require(re.search(r"@import|url\s*\(|expression\s*\(",local,re.I) is None,"external/active inline style")
             if key in {"href","src","xlink:href"} and value:
                 if value.startswith("#"): continue
+                if re.fullmatch(r"https://github.com/butahlecoq/controlled-systems-lab/commit/[0-9a-f]{40}", value): continue
                 if re.fullmatch(r"https://github.com/butahlecoq/controlled-systems-lab/(?:tree/(?:main|[0-9a-f]{40})/reports/algorithm-results/geo06-[0-9a-f]{16}|blob/(?:main|[0-9a-f]{40})/reports/algorithm-results/geo06-[0-9a-f]{64}\.zip)", value): continue
                 if re.fullmatch(r"https://github.com/butahlecoq/controlled-systems-lab/(?:tree/(?:main|[0-9a-f]{40})/reports/algorithm-results/opt07-[0-9a-f]{16}|blob/(?:main|[0-9a-f]{40})/reports/algorithm-results/opt07-[0-9a-f]{64}\.zip)", value): continue
                 if re.fullmatch(r"https://github.com/butahlecoq/controlled-systems-lab/(?:tree/(?:main|[0-9a-f]{40})/reports/algorithm-results/b08-exact-[0-9a-f]{16}|blob/(?:main|[0-9a-f]{40})/reports/algorithm-results/b08-displayed-exact-[0-9a-f]{64}\.zip)", value): continue

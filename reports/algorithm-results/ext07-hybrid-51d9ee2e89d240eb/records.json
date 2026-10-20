@@ -1,0 +1,437 @@
+{
+  "analytic": {
+    "expected_path_count": 1,
+    "feasible_relation": "x0=0, x_pre1=u0, x1=u0, 0<=u0<=0.5",
+    "minimum_objective": 0,
+    "optimal_family": "x0=u0=x_pre1=x1=0"
+  },
+  "capability_profile": {
+    "assurance": "numerical binary64; this report does not establish validated arithmetic or broader scalability",
+    "dimensions_and_counts": {
+      "control_dimension": 1,
+      "edges": 1,
+      "horizon": 1,
+      "joint_variables": 4,
+      "modes": 2,
+      "paths": 1,
+      "state_dimension": 1
+    },
+    "supported_case": "one-step scalar linear dynamics, bounded interval control/guard, deterministic scalar affine reset, linear objective"
+  },
+  "environment": {
+    "absolute_tolerance": 1e-08,
+    "architecture": "AMD64",
+    "cmake": "cmake version 3.31.6-msvc6",
+    "collected_utc": "2026-10-19T18:38:29.050996+00:00",
+    "compiler_id": "MSVC",
+    "compiler_receipt": "CMakeCXXCompiler.raw.cmake",
+    "compiler_version": "19.44.35215.0",
+    "configuration": "Release",
+    "cxx_standard": 20,
+    "host": "Windows measurement workstation",
+    "host_name_sha256": "88554329c62353e4f98e5742ba8c9b088094f4793b47e7abefc0528d302f7bf9",
+    "logical_processors": 12,
+    "native_threads_configured": 1,
+    "native_threads_observed": null,
+    "native_threads_requested": 1,
+    "os": "Windows-11-10.0.22631-SP0",
+    "outer_workers_observed": 1,
+    "outer_workers_requested": 1,
+    "processor": "Intel64 Family 6 Model 151 Stepping 5, GenuineIntel",
+    "python": "3.13.5",
+    "raw_build_log_sha256": "5f9d0ec7d76eb6012b6b50d21f9e1aef1ef59e4774c85c2c62bb2ef6df4c408e",
+    "raw_configure_log_sha256": "69e1363067fe29d2aeb6c54354dcc3dee42cff16ba4a3a05f8fa221d9a91a185",
+    "relation_limits": {
+      "max_matrix_elements": 2048,
+      "max_rows": 128,
+      "max_variables": 16
+    },
+    "relative_tolerance": 1e-08,
+    "seed": 0,
+    "source_commit": "2965baafa325550ad60ec91d44f5e3f86a832178",
+    "source_tree": "5192bdbdcbaa7efa178ae014afee3bcf7ecc8f02",
+    "timing_scope": "Setup constructs the fixture and registered providers; assembly builds the complete path portfolio and H relation; solve executes the registered branch optimizer; verify rebuilds the candidate face and checks the complete path family; end-to-end begins before fixture construction and ends after verification. CSV/JSONL output, rendering and build are excluded.",
+    "warmup_policy": "One excluded 10-call batch followed by seven measured 20-call batches",
+    "workspace_reuse": "none; fresh registered provider/workspace per call"
+  },
+  "evidence_limits": [
+    "One host, one MSVC Release configuration, one fixture, and a numerical binary64 verifier.",
+    "No comparator, speedup, source-mapped bottleneck, application-scale result, or general scalability claim.",
+    "The supported verifier domain is one-step scalar interval systems; continuous multi-stage verification is outside this report."
+  ],
+  "evidence_scope": "140 successful measured public hybrid portfolio calls over one fixed analytic one-step scalar fixture; each call constructs the path H relation, solves the branch with HiGHS LP and independently verifies its complete interval minimizer family",
+  "measurement": {
+    "comparison": "single adapter; descriptive measurements only; no comparator or speedup claim",
+    "failures": 0,
+    "max_batch_end_to_end_ns": 9158900,
+    "measured_calls": 140,
+    "median_batch_end_to_end_ns": 6288700,
+    "median_phase_total_ns": {
+      "assembly": 518800,
+      "end_to_end": 6288700,
+      "setup": 285400,
+      "solve": 4994600,
+      "verify": 507900
+    },
+    "min_batch_end_to_end_ns": 5492300,
+    "raw_measure_sha256": "058d040df5b2fb725cf1e775db82e36a041d9f8917a3e684454a9d421ef60f5a",
+    "raw_smoke_sha256": "4e80e90408bd2385b3e1534ff2fe3bcb7e9a40377f26b1c60fb00e7b08f86dac",
+    "trials": [
+      {
+        "assembly_total_ns": 505000,
+        "calls": 20,
+        "control": 0,
+        "coverage": "established",
+        "end_to_end_total_ns": 6288700,
+        "error": "",
+        "failures": 0,
+        "feasibility": "established",
+        "objective": 0,
+        "objective_lower": null,
+        "objective_upper": null,
+        "optimality": "established",
+        "outcome": "optimal",
+        "path_count": 1,
+        "phase": "trial",
+        "primal_row_violation": 0,
+        "primal_variable_violation": 0,
+        "provider": "csl.lp.highs@1.1.0+highs.1.11.0",
+        "relation_matrix_elements": 28,
+        "relation_rows": 7,
+        "repetition": 0,
+        "setup_total_ns": 271100,
+        "solve_total_ns": 4994600,
+        "status": "passed",
+        "termination": "completed",
+        "verifier": "csl.hybrid.one-step-scalar-interval",
+        "verifier_version": "1",
+        "verify_total_ns": 507000
+      },
+      {
+        "assembly_total_ns": 530300,
+        "calls": 20,
+        "control": 0,
+        "coverage": "established",
+        "end_to_end_total_ns": 6385100,
+        "error": "",
+        "failures": 0,
+        "feasibility": "established",
+        "objective": 0,
+        "objective_lower": null,
+        "objective_upper": null,
+        "optimality": "established",
+        "outcome": "optimal",
+        "path_count": 1,
+        "phase": "trial",
+        "primal_row_violation": 0,
+        "primal_variable_violation": 0,
+        "provider": "csl.lp.highs@1.1.0+highs.1.11.0",
+        "relation_matrix_elements": 28,
+        "relation_rows": 7,
+        "repetition": 1,
+        "setup_total_ns": 285400,
+        "solve_total_ns": 5036300,
+        "status": "passed",
+        "termination": "completed",
+        "verifier": "csl.hybrid.one-step-scalar-interval",
+        "verifier_version": "1",
+        "verify_total_ns": 522300
+      },
+      {
+        "assembly_total_ns": 537200,
+        "calls": 20,
+        "control": 0,
+        "coverage": "established",
+        "end_to_end_total_ns": 6666600,
+        "error": "",
+        "failures": 0,
+        "feasibility": "established",
+        "objective": 0,
+        "objective_lower": null,
+        "objective_upper": null,
+        "optimality": "established",
+        "outcome": "optimal",
+        "path_count": 1,
+        "phase": "trial",
+        "primal_row_violation": 0,
+        "primal_variable_violation": 0,
+        "provider": "csl.lp.highs@1.1.0+highs.1.11.0",
+        "relation_matrix_elements": 28,
+        "relation_rows": 7,
+        "repetition": 2,
+        "setup_total_ns": 302400,
+        "solve_total_ns": 5239200,
+        "status": "passed",
+        "termination": "completed",
+        "verifier": "csl.hybrid.one-step-scalar-interval",
+        "verifier_version": "1",
+        "verify_total_ns": 577900
+      },
+      {
+        "assembly_total_ns": 813700,
+        "calls": 20,
+        "control": 0,
+        "coverage": "established",
+        "end_to_end_total_ns": 9158900,
+        "error": "",
+        "failures": 0,
+        "feasibility": "established",
+        "objective": 0,
+        "objective_lower": null,
+        "objective_upper": null,
+        "optimality": "established",
+        "outcome": "optimal",
+        "path_count": 1,
+        "phase": "trial",
+        "primal_row_violation": 0,
+        "primal_variable_violation": 0,
+        "provider": "csl.lp.highs@1.1.0+highs.1.11.0",
+        "relation_matrix_elements": 28,
+        "relation_rows": 7,
+        "repetition": 3,
+        "setup_total_ns": 452000,
+        "solve_total_ns": 7100400,
+        "status": "passed",
+        "termination": "completed",
+        "verifier": "csl.hybrid.one-step-scalar-interval",
+        "verifier_version": "1",
+        "verify_total_ns": 778600
+      },
+      {
+        "assembly_total_ns": 518800,
+        "calls": 20,
+        "control": 0,
+        "coverage": "established",
+        "end_to_end_total_ns": 6018100,
+        "error": "",
+        "failures": 0,
+        "feasibility": "established",
+        "objective": 0,
+        "objective_lower": null,
+        "objective_upper": null,
+        "optimality": "established",
+        "outcome": "optimal",
+        "path_count": 1,
+        "phase": "trial",
+        "primal_row_violation": 0,
+        "primal_variable_violation": 0,
+        "provider": "csl.lp.highs@1.1.0+highs.1.11.0",
+        "relation_matrix_elements": 28,
+        "relation_rows": 7,
+        "repetition": 4,
+        "setup_total_ns": 299800,
+        "solve_total_ns": 4681400,
+        "status": "passed",
+        "termination": "completed",
+        "verifier": "csl.hybrid.one-step-scalar-interval",
+        "verifier_version": "1",
+        "verify_total_ns": 507900
+      },
+      {
+        "assembly_total_ns": 488500,
+        "calls": 20,
+        "control": 0,
+        "coverage": "established",
+        "end_to_end_total_ns": 5916300,
+        "error": "",
+        "failures": 0,
+        "feasibility": "established",
+        "objective": 0,
+        "objective_lower": null,
+        "objective_upper": null,
+        "optimality": "established",
+        "outcome": "optimal",
+        "path_count": 1,
+        "phase": "trial",
+        "primal_row_violation": 0,
+        "primal_variable_violation": 0,
+        "provider": "csl.lp.highs@1.1.0+highs.1.11.0",
+        "relation_matrix_elements": 28,
+        "relation_rows": 7,
+        "repetition": 5,
+        "setup_total_ns": 282800,
+        "solve_total_ns": 4660100,
+        "status": "passed",
+        "termination": "completed",
+        "verifier": "csl.hybrid.one-step-scalar-interval",
+        "verifier_version": "1",
+        "verify_total_ns": 475500
+      },
+      {
+        "assembly_total_ns": 463400,
+        "calls": 20,
+        "control": 0,
+        "coverage": "established",
+        "end_to_end_total_ns": 5492300,
+        "error": "",
+        "failures": 0,
+        "feasibility": "established",
+        "objective": 0,
+        "objective_lower": null,
+        "objective_upper": null,
+        "optimality": "established",
+        "outcome": "optimal",
+        "path_count": 1,
+        "phase": "trial",
+        "primal_row_violation": 0,
+        "primal_variable_violation": 0,
+        "provider": "csl.lp.highs@1.1.0+highs.1.11.0",
+        "relation_matrix_elements": 28,
+        "relation_rows": 7,
+        "repetition": 6,
+        "setup_total_ns": 279500,
+        "solve_total_ns": 4302100,
+        "status": "passed",
+        "termination": "completed",
+        "verifier": "csl.hybrid.one-step-scalar-interval",
+        "verifier_version": "1",
+        "verify_total_ns": 437900
+      }
+    ],
+    "warmup": {
+      "assembly_total_ns": 310700,
+      "calls": 10,
+      "control": 0,
+      "coverage": "established",
+      "end_to_end_total_ns": 3635100,
+      "error": "",
+      "failures": 0,
+      "feasibility": "established",
+      "objective": 0,
+      "objective_lower": null,
+      "objective_upper": null,
+      "optimality": "established",
+      "outcome": "optimal",
+      "path_count": 1,
+      "phase": "warmup",
+      "primal_row_violation": 0,
+      "primal_variable_violation": 0,
+      "provider": "csl.lp.highs@1.1.0+highs.1.11.0",
+      "relation_matrix_elements": 28,
+      "relation_rows": 7,
+      "repetition": 0,
+      "setup_total_ns": 162300,
+      "solve_total_ns": 2876400,
+      "status": "passed",
+      "termination": "completed",
+      "verifier": "csl.hybrid.one-step-scalar-interval",
+      "verifier_version": "1",
+      "verify_total_ns": 279200
+    }
+  },
+  "report_id": "ext07-hybrid-51d9ee2e89d240eb",
+  "scenario": {
+    "allowed_terminal_modes": [
+      "terminal"
+    ],
+    "control_dimension": 1,
+    "control_interval": [
+      0,
+      1
+    ],
+    "dynamics": {
+      "A": [
+        [
+          1
+        ]
+      ],
+      "B": [
+        [
+          1
+        ]
+      ],
+      "offset": [
+        0
+      ]
+    },
+    "edges": [
+      {
+        "id": "coast-to-terminal",
+        "source": "coast",
+        "target": "terminal"
+      }
+    ],
+    "horizon": 1,
+    "initial_mode": "coast",
+    "initial_state": [
+      0
+    ],
+    "modes": [
+      "coast",
+      "terminal"
+    ],
+    "relation_coordinates": [
+      "x0",
+      "u0",
+      "x_pre1",
+      "x1"
+    ],
+    "reset": {
+      "type": "identity"
+    },
+    "source_invariants": "universal",
+    "state_dimension": 1,
+    "terminal_invariant": "universal",
+    "terminal_mode_data": {
+      "active_stages": [
+        1
+      ],
+      "control_set": "universal",
+      "flow": {
+        "A": [
+          [
+            1
+          ]
+        ],
+        "B": [
+          [
+            1
+          ]
+        ],
+        "offset": [
+          0
+        ]
+      },
+      "flow_used_by_horizon": false
+    },
+    "terminal_objective": "minimize x_terminal",
+    "transition_guard": [
+      0,
+      0.5
+    ]
+  },
+  "scenario_sha256": "8a9d78192023db0a4116e4ec3b947cb7d06d22d436447c8a11edaf61fe2bf335",
+  "schema": "csl.ext07-hybrid-profile-report/1",
+  "source_commit": "2965baafa325550ad60ec91d44f5e3f86a832178",
+  "source_receipts": {
+    "postrun": {
+      "commit": "2965baafa325550ad60ec91d44f5e3f86a832178",
+      "executable_sha256": "d285d95bfe11569b59a13aa2d37bf0b2d065832358a7abf08d48751293f3496c",
+      "observed_utc": "2026-10-19T18:38:29.022687+00:00",
+      "phase": "postrun",
+      "status": [],
+      "tree": "5192bdbdcbaa7efa178ae014afee3bcf7ecc8f02"
+    },
+    "prebuild": {
+      "commit": "2965baafa325550ad60ec91d44f5e3f86a832178",
+      "observed_utc": "2026-10-19T18:36:48.007031+00:00",
+      "phase": "prebuild",
+      "status": [],
+      "tree": "5192bdbdcbaa7efa178ae014afee3bcf7ecc8f02"
+    }
+  },
+  "source_sha256": {
+    "CMakeCXXCompiler.raw.cmake": "33bebcb486c4fc42c67f633fb5ff363392744fda1fcfed6ccf6230a10ed09cbf",
+    "build.log": "5f9d0ec7d76eb6012b6b50d21f9e1aef1ef59e4774c85c2c62bb2ef6df4c408e",
+    "configure.log": "93aca1340cdd5456286d120c7d2a97c4a80e36ab99f5015f991964aed2258908",
+    "driver.cpp": "85463feb734f8d4624c7375aa2867e811457cf64d06b5d709a31a3c5a019e562",
+    "host.json": "a48fd3882ead63592c1dfad74bf9ea839b854b81bcba42c8bda05997101f4693",
+    "measure.jsonl": "058d040df5b2fb725cf1e775db82e36a041d9f8917a3e684454a9d421ef60f5a",
+    "measure.stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "postrun.json": "4c3eb0a05dfd05c21e343c27a4e1f8b19e30743dbfb05f775aa1f1656a58084f",
+    "prebuild.json": "6a72b0f970695b1c4838b6f4e853d77894eb4dc25d9fac1b4960862f2c9a4317",
+    "smoke.jsonl": "4e80e90408bd2385b3e1534ff2fe3bcb7e9a40377f26b1c60fb00e7b08f86dac",
+    "smoke.stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "source_tree": "5192bdbdcbaa7efa178ae014afee3bcf7ecc8f02"
+}

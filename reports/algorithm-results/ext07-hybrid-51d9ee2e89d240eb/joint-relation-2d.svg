@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 440" role="img" aria-labelledby="title desc">
+<title id="title">One-step scalar hybrid feasible relation and minimizer</title>
+<desc id="desc">The horizontal axis is the scalar control u0 from zero to one half. The vertical axis is terminal state x1. The feasible joint relation is x1 equals u0 on the interval from zero to one half. The unique minimum of x1 is at u0 equals zero and x1 equals zero.</desc>
+<rect width="720" height="440" fill="#16161e"/>
+<g font-family="system-ui,sans-serif" fill="#e0def4">
+<text x="70" y="38" font-size="20">EXT-07 · one-step scalar hybrid profile</text>
+<text x="350" y="405" font-size="16">continuous control u₀</text>
+<text x="19" y="85" font-size="16" transform="rotate(-90 19,85)">terminal state x₁</text>
+</g>
+<path d="M90 350 H650 M90 350 V65" stroke="#908caa" stroke-width="2"/>
+<g stroke="#6e6a86" stroke-dasharray="4 5"><path d="M90 350 V65"/><path d="M370 350 V65"/><path d="M90 65 H650"/></g>
+<path d="M90 350 L370 65" fill="none" stroke="#9ccfd8" stroke-width="5"/>
+<circle cx="90" cy="350" r="9" fill="#f6c177" stroke="#16161e" stroke-width="3"/>
+<g font-family="system-ui,sans-serif" fill="#e0def4" font-size="14">
+<text x="82" y="375">0</text><text x="362" y="375">0.5</text><text x="636" y="375">1</text>
+<text x="62" y="355">0</text><text x="52" y="70">0.5</text>
+<text x="110" y="320">global minimum (u₀,x₁)=(0,0)</text>
+<text x="405" y="135">feasible: x₁=u₀, 0≤u₀≤0.5</text>
+</g>
+</svg>

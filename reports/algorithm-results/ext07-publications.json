@@ -1,0 +1,16 @@
+{
+  "reports": [
+    {
+      "collector_sha256": "02091eeca10f9cb20c776cef71f4b78a6ce413b0405c0797843e003719b39617",
+      "index_sha256": "9b914e6355ab9b0ca480b3b50712d2d9182f0c81985cc411bf140f8015359496",
+      "manifest_sha256": "4699fb473b04daa04f35141489ba39914bc91cf0870f88cf1b774977dcd429df",
+      "renderer_sha256": "0769946a77183adc5ec85acdb5b1183b70b32b074def3aa033ea7387a32af03e",
+      "report_id": "ext07-hybrid-51d9ee2e89d240eb",
+      "schema": "csl.ext07-hybrid-profile-report/1",
+      "source_commit": "2965baafa325550ad60ec91d44f5e3f86a832178",
+      "stager_sha256": "95b4fb6aa61bf9100373554ee161ba9648efbafc64a0ab36bc5c5b525e3afdd1",
+      "zip_sha256": "9d4cf7eb42fe60e3f2e38241ea14fdf6e4484a4b7591286f41f3beafc6c89731"
+    }
+  ],
+  "schema": "csl.ext07-publications/1"
+}

@@ -31,3 +31,18 @@ The proposed contract is [hybrid-systems.md](../../../contracts/hybrid-systems.m
 ## Delivery and review
 
 Ship meaningful unit/contract tests with the implementation, using the named independent oracle. Return commits, tests and commands run, supported assumptions, numerical/evidence limitations and unresolved findings. Shared contract changes require an explicit specification revision and integration review.
+
+The implementation now has profile admission, bounded path enumeration, direct
+joint-H path programs, branch optimization, solver provenance, and numerical
+family verifiers for integral singleton paths and one-step scalar interval
+families. The latter scope is deliberately narrow. There is not yet a continuous
+multi-stage family verifier or independent continuous multi-stage oracle, so
+the continuous-family acceptance requirement remains open. The fixed-path
+reachability adapter currently uses the direct joint-H composer; a separate
+projected-set implementation is not yet supplied.
+
+The EXT-07 report exercises one supported one-step scalar interval case through
+path construction, HiGHS optimization, and family verification. Its 2D plot
+shows control against terminal state for that scalar system. It is a bounded
+numerical example, not a scalability result or completion claim. The main-only
+Pages URL and live hashes remain pending until publication succeeds.

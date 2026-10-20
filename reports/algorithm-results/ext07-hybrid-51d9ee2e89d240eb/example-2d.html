@@ -1,0 +1,58 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>EXT-07 · 2D joint-relation example</title><style>
+body{background:#16161e;color:#e0def4;font:16px/1.55 system-ui,sans-serif;margin:0}
+header,main,footer{max-width:980px;margin:auto;padding:1.3rem}a{color:#9ccfd8}
+.section{background:#23212c;border:1px solid #524f67;border-radius:12px;padding:1rem;margin:1rem 0}
+table{border-collapse:collapse;width:100%;display:block;overflow-x:auto}td,th{border:1px solid #524f67;padding:.45rem;text-align:left;white-space:nowrap}
+img{width:100%;height:auto}code{overflow-wrap:anywhere}
+</style></head><body><div><p>Controlled Systems Lab · EXT-07</p><h1>2D joint-relation example</h1><p>The axes show the joint relation between one scalar control and the terminal state.</p></div><div>
+<div class="section"><h2>Input and analytic result</h2>
+<p>The state dimension is one and the horizon is one stage, from time 0 to time 1.
+The initial mode is <code>coast</code> at stage 0, with scalar state <code>x₀=0</code>.
+There are two modes (<code>coast</code> and <code>terminal</code>) and one permitted edge
+<code>coast-to-terminal</code> from <code>coast</code> to <code>terminal</code> at the boundary
+between stages 0 and 1. The allowed terminal set is the singleton <code>{terminal}</code>, active at
+stage 1. Both mode invariants are universal sets (they impose no additional state restrictions).
+The source-mode flow is <code>x_pre=x₀+u₀</code>, with control <code>u₀∈[0,1]</code>. The stored
+terminal-mode flow has <code>A=1, B=1, offset=0</code> and a universal control set; it is inactive
+because the horizon ends at stage 1. There are no external channels, observations, or temporal constraints.
+The transition guard requires <code>x_pre∈[0,0.5]</code>; the one-dimensional identity reset sets
+<code>x₁=x_pre</code>. The terminal objective is <code>minimize x₁</code>.
+The full joint relation is <code>x₀=0, x_pre=u₀, x₁=u₀, 0≤u₀≤0.5</code>.
+Its complete minimizer family is the point <code>(x₀,u₀,x_pre,x₁)=(0,0,0,0)</code>.</p>
+<img src="joint-relation-2d.svg" alt="Control versus terminal state for the feasible one-step hybrid relation, with its unique minimum marked"></div>
+<div class="section"><h2>Reproduce</h2>
+<p>From a clean report-tools checkout with CMake 3.31.6, fetch the frozen implementation commit and create a separate source worktree:</p>
+<pre><code>git fetch origin pull/472/head:refs/remotes/origin/ext07-source
+git worktree add --detach &lt;frozen-source&gt; 2965baafa325550ad60ec91d44f5e3f86a832178
+python scripts/reports/ext07/capture.py --source &lt;frozen-source&gt; --capture &lt;fresh-capture&gt; --commit 2965baafa325550ad60ec91d44f5e3f86a832178 --cmake cmake
+python scripts/reports/ext07/ext07_collect.py --capture &lt;fresh-capture&gt; --source &lt;frozen-source&gt; --out &lt;fresh-output&gt;
+python scripts/reports/ext07/render_saved.py --bundle &lt;fresh-output&gt;/&lt;report-id&gt;
+python scripts/reports/ext07/render_saved.py --bundle &lt;fresh-output&gt;/&lt;report-id&gt; --check</code></pre>
+<p>Frozen source: <a href="https://github.com/butahlecoq/controlled-systems-lab/commit/2965baafa325550ad60ec91d44f5e3f86a832178">commit 2965baafa325550ad60ec91d44f5e3f86a832178</a>.
+The <a href="records.json">raw scenario and report record</a> and <a href="measure.jsonl">raw measured trials</a> are available beside this page.</p></div>
+<div class="section"><h2>Observed branch and verification</h2>
+<table><thead><tr><th>Paths</th><th>H rows</th><th>Dense row entries</th><th>Provider</th><th>Outcome</th><th>Feasibility</th><th>Optimality</th><th>Family coverage</th></tr></thead>
+<tbody><tr><td>1</td><td>7</td><td>28</td><td>csl.lp.highs@1.1.0+highs.1.11.0</td><td>completed / optimal</td>
+<td>established</td><td>established</td><td>established</td></tr></tbody></table>
+<p>Every measured repetition matched objective 0 and control 0 within <code>1e-8</code>.
+The verifier uses numerical binary64 checks; this is not validated arithmetic. The LP adapter returned no objective interval bounds; the bounded independent scalar family verifier checked the global minimum and complete minimizer set.
+Maximum reported primal row residual: 0; variable residual: 0.</p></div>
+<div class="section"><h2>Measurements</h2>
+<p>One excluded 10-call warmup preceded seven measured 20-call batches: 140 measured calls and
+zero observed failures. Median total batch duration: 6,288,700 ns
+(range 5,492,300–9,158,900 ns).
+Median accumulated phase durations: setup 285,400 ns, relation assembly 518,800 ns,
+solve 4,994,600 ns, verify 507,900 ns, and end-to-end 6,288,700 ns.
+End-to-end includes fixture/provider setup, path enumeration, relation construction, solve and family verification.
+Phase medians are calculated separately across batches and are not additive to the end-to-end median;
+output serialization and rendering are excluded.</p>
+<p>One host and one fixed profile are measured. There is no comparator, speedup, source-mapped bottleneck,
+or scalability claim. Thread and backend details, all raw repetitions, source/build receipts, and failures
+are retained in the <a href="records.json">versioned record</a>,
+<a href="measure.jsonl">raw trials</a>, <a href="smoke.jsonl">smoke row</a>,
+<a href="summary.csv">summary CSV</a>, <a href="manifest.json">manifest</a>, and
+<a href="ext07-hybrid-51d9ee2e89d240eb.zip">offline ZIP</a>. Frozen source: <a href="https://github.com/butahlecoq/controlled-systems-lab/commit/2965baafa325550ad60ec91d44f5e3f86a832178">2965baafa325550ad60ec91d44f5e3f86a832178</a>.</p></div>
+<p><a href="index.html">Full report</a></p>
+</div><div>EXT-07 · one-step scalar interval evidence only</div></body></html>
