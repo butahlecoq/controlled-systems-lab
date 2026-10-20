@@ -297,6 +297,7 @@ and fails closed when exact binary64 arithmetic cannot be established. This
 profile does not cover arbitrary horizons, more than two free controls,
 non-interval admissible sets, nondeterministic resets, or validated assurance.
 
+`ExactLinearHHybridFamilyVerifier` independently enumerates allowed mode/edge paths and reconstructs each path's joint H-relation from the raw model. It supports finite horizons and admitted state/control dimensions when the relevant relations are H-representations, singletons, empty sets, or universal sets and the terminal objective is linear. It minimizes each branch objective with exact dyadic arithmetic, compares path minima as exact rationals, and verifies supplied optimal-face relations in both inclusion directions, including candidate anchors. Variable, row, integer-bit, generated-row, and operation budgets apply; unsupported arithmetic, unbounded-below branches, and nonattained infima fail closed. The verifier reports numerical assurance only. Its Fourier-Motzkin resource growth limits practical scale, and this bounded implementation does not replace the independent exhaustive oracle required by EXT-07.
 ## Initial supported profile and rejection boundary
 
 The first profile is finite-horizon and discrete-time, with mode-specific
@@ -313,19 +314,7 @@ must use an exact polyhedral relation operation supported by the selected provid
 "Exact" describes the set operation: no geometric approximation or
 cross-branch convexification is introduced. It does not promise validated
 arithmetic or prove a numerical provider's result. Provider assurance is
-recorded separately. The implementation includes an exact integral singleton
-verifier, a one-step scalar interval verifier, and a finite-horizon
-single-parameter scalar interval verifier. A separate
-`TwoParameterScalarPolytopeHybridFamilyVerifier` supports exactly two free
-controls in a bounded two-stage scalar profile. The exact singleton verifier
-has the checked-integral domain described above. The continuous scalar
-interval and polygon verifiers require their documented scalar interval or
-two-dimensional polygon domains: each stage has one bounded non-singleton
-scalar control interval, scalar states and controls, interval invariants and
-guards, and deterministic exactly representable scalar affine resets. They do
-not cover more than two free controls, general continuous polytope families,
-or general-dimensional continuous relations. These bounded implementations
-do not establish the full EXT-07 acceptance contract.
+recorded separately. The implementation includes an exact integral singleton verifier, one-step and finite-horizon scalar interval verifiers, the bounded two-stage `TwoParameterScalarPolytopeHybridFamilyVerifier`, and the bounded `ExactLinearHHybridFamilyVerifier` described above. The scalar verifiers retain their documented interval/polygon domains; the exact H verifier admits broader relation dimensions and forms only within its exact arithmetic and resource limits. None of these finite profiles establishes the full EXT-07 acceptance contract.
 
 ## Required request-admission contract
 
@@ -443,3 +432,4 @@ continuous open-loop controls, and no temporal or observation coupling in its
 first executable profile. Integrations with those
 extensions require a separately reviewed contract revision and capability
 combination; their semantics must not be guessed from hybrid mode paths.
+

@@ -55,6 +55,8 @@ the registered geometry provider, and retains provider/row evidence. General
 horizon projected reachability and full provider/resource aggregation remain
 open.
 
+
+`ExactLinearHHybridFamilyVerifier` now independently reconstructs bounded, finite-horizon joint H-relations, minimizes linear objectives using exact dyadic arithmetic, and checks complete continuous optimal-face relations under Fourier-Motzkin resource budgets. Tests cover feasible and flat objectives, unbounded branches, forged faces, ties across mode paths and objective scales, and higher-dimensional continuous families. The verifier is a bounded numerical profile; exhaustive independent continuous-family oracles and resource-scale evidence remain open.
 The EXT-07 report set now includes a measured one-step scalar interval case and
 a measured bounded two-control case, each with saved raw rows and an offline
 bundle. The one-step report's 2D plot shows control against terminal state; it
@@ -66,3 +68,4 @@ sets. It links to the measured report while describing the distinct geometry
 and objective.
 These bounded examples are not scalability results or a completion claim. The
 main-only Pages URL and live hashes remain pending until publication succeeds.
+

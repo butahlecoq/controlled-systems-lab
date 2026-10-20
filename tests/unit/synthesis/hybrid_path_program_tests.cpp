@@ -455,6 +455,142 @@ TEST_CASE("hybrid exact polytope projects linear objective bounds") {
                                          default_max_integer_bits,order));
 }
 
+TEST_CASE("exact linear H verifier proves complete continuous optimal faces") {
+    model::HybridMode source{{"source"},1,1,{"x"},{"u"}};
+    source.flow=LinearStage{Matrix{1,1,{1}},Matrix{1,1,{1}},
+        Matrix{1,0,{}},Vector{0}};
+    source.control_sets={h_set("exact-linear-control",1,
+        Matrix{2,1,{1,-1}},Vector{2,0},Matrix{0,1,{}},Vector{})};
+    source.invariants={UniversalSet{1},UniversalSet{1}};
+    model::HybridMode target{{"target"},1,0,{"y"},{}};
+    target.flow=LinearStage{Matrix{1,1,{1}},Matrix{1,0,{}},
+        Matrix{1,0,{}},Vector{0}};
+    target.control_sets={UniversalSet{0}};
+    target.invariants={UniversalSet{1},UniversalSet{1}};
+    model::HybridSystem system{1,{source,target},
+        {{{"switch"},{"source"},{"target"},{UniversalSet{1}},
+          {h_set("exact-linear-reset",2,Matrix{0,2,{}},Vector{},
+              Matrix{1,2,{-1,1}},Vector{0})}}}};
+    model::HybridRequest request{{{"source"},{0}},{{"target"}},
+        {{{"target"},LinearTerminal{{1},0},"terminal cost","units"}}};
+    const auto built=build_hybrid_portfolio_programs(system,request,{"exact-linear"},
+        {1,8},{16,64,4096});
+    REQUIRE(std::holds_alternative<std::vector<HybridPathProgram>>(built));
+    const auto& programs=std::get<std::vector<HybridPathProgram>>(built);
+    REQUIRE(programs.size()==1);
+    auto candidate=exact_candidate(programs.front(),{0,0,0,0});
+    candidate.relation=singleton_data({0,0,0,0});
+    ExactLinearHHybridFamilyVerifier verifier;
+    const auto result=verify_hybrid_portfolio_family(verifier,system,request,
+        programs,std::span<const HybridPathOptimalFaceCandidate>(&candidate,1),
+        {1,8},{1e-9,1e-9});
+    REQUIRE(std::holds_alternative<HybridFamilyVerificationReport>(result));
+    const auto& report=std::get<HybridFamilyVerificationReport>(result);
+    CHECK(report.verifier_id=="csl.hybrid.exact-linear-h");
+    CHECK(report.global_objective_optimality==HybridVerificationStatus::established);
+    CHECK(report.complete_family_coverage==HybridVerificationStatus::established);
+    REQUIRE(report.branches.size()==1);
+    CHECK(report.branches[0].feasibility==HybridVerificationStatus::established);
+    CHECK(report.branches[0].objective_optimality==HybridVerificationStatus::established);
+    CHECK(report.branches[0].continuous_coverage==HybridVerificationStatus::established);
+
+    auto mixed_system=system;
+    mixed_system.edges.push_back({{"free-reset"},{"source"},{"target"},
+        {UniversalSet{1}},{universal("free-terminal-reset",2)}});
+    const auto mixed_built=build_hybrid_portfolio_programs(mixed_system,request,
+        {"exact-linear-mixed"},{1,8},{16,64,4096});
+    REQUIRE(std::holds_alternative<std::vector<HybridPathProgram>>(mixed_built));
+    const auto& mixed_programs=std::get<std::vector<HybridPathProgram>>(mixed_built);
+    REQUIRE(mixed_programs.size()==2);
+    auto finite_face=exact_candidate(mixed_programs[0],{0,0,0,0});
+    finite_face.relation=singleton_data({0,0,0,0});
+    const auto mixed_result=verify_hybrid_portfolio_family(verifier,mixed_system,
+        request,mixed_programs,
+        std::span<const HybridPathOptimalFaceCandidate>(&finite_face,1),
+        {1,8},{1e-9,1e-9});
+    REQUIRE(std::holds_alternative<HybridFamilyVerificationReport>(mixed_result));
+    const auto& mixed_report=std::get<HybridFamilyVerificationReport>(mixed_result);
+    CHECK(mixed_report.global_objective_optimality==HybridVerificationStatus::refuted);
+    CHECK(mixed_report.complete_family_coverage==HybridVerificationStatus::refuted);
+    CHECK(mixed_report.branches[0].objective_optimality==HybridVerificationStatus::refuted);
+    CHECK(mixed_report.branches[1].objective_optimality==HybridVerificationStatus::refuted);
+
+    auto forged_face=exact_candidate(programs.front(),{0,1,1,1});
+    const auto forged=verify_hybrid_portfolio_family(verifier,system,request,
+        programs,std::span<const HybridPathOptimalFaceCandidate>(&forged_face,1),
+        {1,8},{1e-9,1e-9});
+    REQUIRE(std::holds_alternative<HybridFamilyVerificationReport>(forged));
+    CHECK(std::get<HybridFamilyVerificationReport>(forged).complete_family_coverage==
+          HybridVerificationStatus::refuted);
+
+    auto flat_request=request;
+    flat_request.terminal_objectives[0].objective=LinearTerminal{{0},0};
+    const auto flat_built=build_hybrid_portfolio_programs(system,flat_request,
+        {"exact-linear-flat"},{1,8},{16,64,4096});
+    REQUIRE(std::holds_alternative<std::vector<HybridPathProgram>>(flat_built));
+    const auto& flat_programs=std::get<std::vector<HybridPathProgram>>(flat_built);
+    auto flat_candidate=exact_candidate(flat_programs.front(),{0,1,1,1});
+    flat_candidate.relation=flat_programs.front().joint_relation;
+    const auto flat_result=verify_hybrid_portfolio_family(verifier,system,
+        flat_request,flat_programs,
+        std::span<const HybridPathOptimalFaceCandidate>(&flat_candidate,1),
+        {1,8},{1e-9,1e-9});
+    REQUIRE(std::holds_alternative<HybridFamilyVerificationReport>(flat_result));
+    CHECK(std::get<HybridFamilyVerificationReport>(flat_result).complete_family_coverage==
+          HybridVerificationStatus::established);
+}
+
+TEST_CASE("exact linear H verifier retains tied paths across objective scales") {
+    model::HybridMode source{{"source"},1,1,{"x"},{"u"}};
+    source.flow=LinearStage{Matrix{1,1,{1}},Matrix{1,1,{1}},
+        Matrix{1,0,{}},Vector{0}};
+    source.control_sets={h_set("scaled-tie-control",1,
+        Matrix{2,1,{1,-1}},Vector{1,0},Matrix{0,1,{}},Vector{})};
+    source.invariants={UniversalSet{1},UniversalSet{1}};
+    model::HybridMode target_a{{"target-a"},1,0,{"y"},{}};
+    target_a.flow=LinearStage{Matrix{1,1,{1}},Matrix{1,0,{}},
+        Matrix{1,0,{}},Vector{0}};
+    target_a.control_sets={UniversalSet{0}};
+    target_a.invariants={UniversalSet{1},UniversalSet{1}};
+    model::HybridMode target_b=target_a;
+    target_b.id={"target-b"};
+    model::HybridSystem system{1,{source,target_a,target_b},
+        {{{"tie-a"},{"source"},{"target-a"},{UniversalSet{1}},
+          {h_set("scaled-tie-reset-a",2,Matrix{0,2,{}},Vector{},
+              Matrix{1,2,{0,1}},Vector{0})}},
+         {{"tie-b"},{"source"},{"target-b"},{UniversalSet{1}},
+          {h_set("scaled-tie-reset-b",2,Matrix{0,2,{}},Vector{},
+              Matrix{1,2,{0,1}},Vector{0.25})}},
+         {{"worse"},{"source"},{"target-b"},{UniversalSet{1}},
+          {h_set("scaled-worse-reset",2,Matrix{0,2,{}},Vector{},
+              Matrix{1,2,{0,1}},Vector{1})}}}};
+    model::HybridRequest request{{{"source"},{0}},{{"target-a"},{"target-b"}},
+        {{{"target-a"},LinearTerminal{{0.5},0.25},"cost","units"},
+         {{"target-b"},LinearTerminal{{1},0},"cost","units"}}};
+    const auto built=build_hybrid_portfolio_programs(system,request,{"scaled-tie"},
+        {1,8},{16,64,4096});
+    REQUIRE(std::holds_alternative<std::vector<HybridPathProgram>>(built));
+    const auto& programs=std::get<std::vector<HybridPathProgram>>(built);
+    REQUIRE(programs.size()==3);
+    std::vector<HybridPathOptimalFaceCandidate> candidates{
+        exact_candidate(programs[0],{0,0.5,0.5,0}),
+        exact_candidate(programs[1],{0,0.5,0.5,0.25})};
+    ExactLinearHHybridFamilyVerifier verifier;
+    const auto result=verify_hybrid_portfolio_family(verifier,system,request,
+        programs,candidates,{1,8},{1e-9,1e-9});
+    REQUIRE(std::holds_alternative<HybridFamilyVerificationReport>(result));
+    const auto& report=std::get<HybridFamilyVerificationReport>(result);
+    CHECK(report.global_objective_optimality==HybridVerificationStatus::established);
+    CHECK(report.complete_family_coverage==HybridVerificationStatus::established);
+    REQUIRE(report.branches.size()==3);
+    CHECK(report.branches[0].objective_optimality==HybridVerificationStatus::established);
+    CHECK(report.branches[0].continuous_coverage==HybridVerificationStatus::established);
+    CHECK(report.branches[1].objective_optimality==HybridVerificationStatus::established);
+    CHECK(report.branches[1].continuous_coverage==HybridVerificationStatus::established);
+    CHECK(report.branches[2].objective_optimality==HybridVerificationStatus::refuted);
+    CHECK(report.branches[2].continuous_coverage==HybridVerificationStatus::established);
+}
+
 TEST_CASE("hybrid exact raw path relation matches the joint H composer") {
     using namespace detail::hybrid_exact;
     const auto system=example_system();

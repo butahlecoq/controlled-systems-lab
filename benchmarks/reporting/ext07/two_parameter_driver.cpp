@@ -183,12 +183,12 @@ Observation run_once() {
         std::move(candidate)));
   }
 
-  synthesis::TwoParameterScalarPolytopeHybridFamilyVerifier verifier;
+  synthesis::ExactLinearHHybridFamilyVerifier verifier;
   auto verified = synthesis::verify_hybrid_portfolio_family(
       verifier, system, request, programs, candidates, {2, 8}, {1e-8, 1e-8});
   if (!std::holds_alternative<synthesis::HybridFamilyVerificationReport>(
           verified))
-    throw std::runtime_error("Two-parameter verifier rejected the fixture");
+    throw std::runtime_error("Exact linear H verifier rejected the fixture");
   const auto &report =
       std::get<synthesis::HybridFamilyVerificationReport>(verified);
   if (report.branches.size() != 2 ||
