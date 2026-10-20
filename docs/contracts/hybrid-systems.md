@@ -152,17 +152,24 @@ or starts composition. The default preflight fails closed; the built-in joint-H
 adapter uses the structural set-representation and joint-relation-limit checks.
 Built-in joint-H structural failures retain path and stage context. The
 reachability, direct-trajectory, and family-verification preflight hooks have
-default implementations, so derived adapters remain source compatible. A
-reachability adapter must override its fail-closed default to be usable; a
-direct-trajectory adapter using a representation other than joint-H must
-override the structural joint-H default. These public virtual additions change
-adapter vtables; downstream prebuilt adapters must be rebuilt. CSL does not
-promise a stable C++ binary/plugin ABI.
+default implementations. Derived adapters that do not override a hook remain
+source compatible; adapters that override a preflight must match its declared
+result type. A reachability adapter must override its fail-closed default to be
+usable; a direct-trajectory adapter using a representation other than joint-H
+must override the structural joint-H default. These public virtual additions
+change adapter vtables; downstream prebuilt adapters must be rebuilt. CSL does
+not promise a stable C++ binary/plugin ABI.
 The direct-trajectory API is replaceable through
 `HybridDirectTrajectoryAdapter`; each adapter preflights its complete fixed-path
 inventory and relation limits before capability queries or branch builds.
-Preflight failures must identify a requested path and preserve the configured
-limits. The default adapter, `JointHDirectTrajectoryAdapter`, builds a
+Every adapter preflight rejection carries a requested path, the configured
+relation limits, and one diagnostic for the first unsupported operation; the
+wrapper checks that evidence before returning the rejection. Empty path
+inventories are rejected before adapter preflight because they have no branch
+to identify. A malformed adapter report is replaced with a
+request-scoped evidence-mismatch failure. The failure may also retain built-in
+relation-operation records. Request-wide validation errors remain diagnostics.
+The default adapter, `JointHDirectTrajectoryAdapter`, builds a
 branch-labelled joint H relation and optimization program. Each direct adapter
 declares whether it preserves the
 branch-labelled relation, which objective classes it supports, and its

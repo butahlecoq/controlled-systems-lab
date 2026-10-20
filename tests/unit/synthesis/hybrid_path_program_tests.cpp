@@ -258,7 +258,7 @@ public:
 
 class RejectingTrajectoryPreflightAdapter final : public HybridDirectTrajectoryAdapter {
 public:
-    int corruption{2};
+    int corruption{3};
     mutable int preflight_calls{};
     mutable int capability_calls{};
     mutable int build_calls{};
@@ -271,9 +271,11 @@ public:
         auto reported_limits=limits;
         if(corruption==0) path.edges.front().value+="-wrong";
         if(corruption==1) ++reported_limits.max_rows;
-        return model::HybridPathCompositionFailureReport{std::move(path),reported_limits,{},
-            Diagnostic{DiagnosticCode::unsupported,"fixture.trajectory.preflight",
-                "fixture rejects a later path operation"}};
+        Diagnostic diagnostic{DiagnosticCode::unsupported,"fixture.trajectory.preflight",
+            "fixture rejects a later path operation"};
+        if(corruption==2) diagnostic={DiagnosticCode::unsupported,"",""};
+        return HybridDirectTrajectoryPreflightFailure{std::move(path),reported_limits,{},
+            std::move(diagnostic)};
     }
     HybridDirectTrajectoryCapabilities capabilities() const noexcept override {
         ++capability_calls;
@@ -349,11 +351,13 @@ public:
     mutable int build_calls{};
     HybridDirectTrajectoryPreflightResult preflight(const model::HybridSystem&,
         const model::HybridRequest&,std::span<const model::HybridPath> paths,
-        model::HybridRelationLimits,optimization::ObjectivePolicy,
+        model::HybridRelationLimits limits,optimization::ObjectivePolicy,
         std::stop_token) const override {
         ++preflight_calls;
         if(paths.size()==2) return std::monostate{};
-        return Diagnostics{{DiagnosticCode::unsupported,"fixture.inventory_only",
+        const auto path=paths.empty()?model::HybridPath{}:paths.front();
+        return HybridDirectTrajectoryPreflightFailure{path,limits,{},Diagnostic{
+            DiagnosticCode::unsupported,"fixture.inventory_only",
             "preflight requires the complete path inventory"}};
     }
     HybridDirectTrajectoryCapabilities capabilities() const noexcept override {
@@ -3108,16 +3112,24 @@ TEST_CASE("direct trajectory adapters may admit a representation outside the joi
 }
 
 TEST_CASE("direct trajectory preflight failures must retain requested path and limits") {
-    for(const int corruption : {0,1}) {
+    for(const int corruption : {0,1,2}) {
         RejectingTrajectoryPreflightAdapter adapter;
         adapter.corruption=corruption;
+        const model::HybridRelationLimits limits{16,64,1024};
         const auto result=build_hybrid_path_program(adapter,example_system(),
-            example_request(),example_path(),{"hybrid-problem"},{16,64,1024});
-        REQUIRE(std::holds_alternative<Diagnostics>(result));
-        const auto& diagnostic=std::get<Diagnostics>(result).front();
-        CHECK(diagnostic.code==DiagnosticCode::evidence_mismatch);
-        CHECK(diagnostic.field==(corruption==0?"hybrid.adapter.preflight_path":
-            "hybrid.adapter.preflight_limits"));
+            example_request(),example_path(),{"hybrid-problem"},limits);
+        REQUIRE(std::holds_alternative<model::HybridPathCompositionFailureReport>(result));
+        const auto& failure=std::get<model::HybridPathCompositionFailureReport>(result);
+        CHECK(failure.path==example_path());
+        CHECK(failure.limits.max_variables==limits.max_variables);
+        CHECK(failure.limits.max_rows==limits.max_rows);
+        CHECK(failure.limits.max_matrix_elements==limits.max_matrix_elements);
+        const auto* diagnostic=std::get_if<Diagnostic>(&failure.failure);
+        REQUIRE(diagnostic);
+        CHECK(diagnostic->code==DiagnosticCode::evidence_mismatch);
+        const auto expected=corruption==0?"hybrid.adapter.preflight_path":
+            (corruption==1?"hybrid.adapter.preflight_limits":"hybrid.adapter.preflight_diagnostics");
+        CHECK(diagnostic->field==expected);
         CHECK(adapter.capability_calls==0);
         CHECK(adapter.build_calls==0);
     }
@@ -3133,6 +3145,19 @@ TEST_CASE("portfolio uses one inventory-wide trajectory preflight before branch 
     CHECK(adapter.preflight_calls==1);
     CHECK(adapter.capability_calls==1);
     CHECK(adapter.build_calls==1);
+}
+
+TEST_CASE("hybrid portfolio rejects an empty path inventory before adapter preflight") {
+    auto system=example_system();
+    system.edges.clear();
+    RejectingTrajectoryPreflightAdapter adapter;
+    const auto result=build_hybrid_portfolio_programs(adapter,system,example_request(),
+        {"hybrid-problem"},{1,8},{16,64,1024});
+    REQUIRE(std::holds_alternative<Diagnostics>(result));
+    CHECK(std::get<Diagnostics>(result).front().field=="hybrid.portfolio.paths");
+    CHECK(adapter.preflight_calls==0);
+    CHECK(adapter.capability_calls==0);
+    CHECK(adapter.build_calls==0);
 }
 
 TEST_CASE("direct trajectory preflight observes cancellation before capabilities and builds") {

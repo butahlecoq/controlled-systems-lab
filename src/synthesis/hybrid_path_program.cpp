@@ -56,8 +56,10 @@ Diagnostics hybrid_path_admission_errors(const model::HybridSystem& system,
 }
 using HybridTrajectoryPortfolioPreflightResult =
     std::variant<std::monostate,Diagnostics,OperationStopped>;
+using HybridTrajectoryOperationPreflightResult = std::variant<std::monostate,
+    model::HybridPathCompositionFailureReport,Diagnostics,OperationStopped>;
 
-HybridDirectTrajectoryPreflightResult preflight_hybrid_trajectory_operations(
+HybridTrajectoryOperationPreflightResult preflight_hybrid_trajectory_operations(
     const HybridDirectTrajectoryAdapter& adapter,const model::HybridSystem& system,
     const model::HybridRequest& request,std::span<const model::HybridPath> paths,
     model::HybridRelationLimits limits,optimization::ObjectivePolicy policy,
@@ -67,21 +69,33 @@ HybridDirectTrajectoryPreflightResult preflight_hybrid_trajectory_operations(
             "Hybrid trajectory operation preflight was cancelled before adapter admission"};
     if(const auto policy_error=hybrid_objective_policy_error(policy); policy_error)
         return Diagnostics{*policy_error};
+    const auto evidence_rejection=[&](const model::HybridPath& path,Diagnostic diagnostic) {
+        return HybridTrajectoryOperationPreflightResult{model::HybridPathCompositionFailureReport{
+            path,limits,{},std::move(diagnostic)}};
+    };
     const auto result=adapter.preflight(system,request,paths,limits,policy,cancellation);
-    if(const auto* failure=std::get_if<model::HybridPathCompositionFailureReport>(&result)) {
-        if(std::find(paths.begin(),paths.end(),failure->path)==paths.end())
+    if(const auto* failure=std::get_if<HybridDirectTrajectoryPreflightFailure>(&result)) {
+        if(paths.empty())
             return Diagnostics{{DiagnosticCode::evidence_mismatch,
+                "hybrid.adapter.preflight_inventory",
+                "Direct-trajectory preflight was invoked without a requested path"}};
+        if(std::find(paths.begin(),paths.end(),failure->path)==paths.end())
+            return evidence_rejection(paths.front(),Diagnostic{DiagnosticCode::evidence_mismatch,
                 "hybrid.adapter.preflight_path",
-                "Direct-trajectory preflight returned a failure for a path outside the request"}};
+                "Direct-trajectory preflight returned a failure for a path outside the request"});
         if(failure->limits.max_variables!=limits.max_variables||
            failure->limits.max_rows!=limits.max_rows||
            failure->limits.max_matrix_elements!=limits.max_matrix_elements)
-            return Diagnostics{{DiagnosticCode::evidence_mismatch,
+            return evidence_rejection(failure->path,Diagnostic{DiagnosticCode::evidence_mismatch,
                 "hybrid.adapter.preflight_limits",
-                "Direct-trajectory preflight failure report lost the configured relation limits"}};
-        return *failure;
+                "Direct-trajectory preflight failure report lost the configured relation limits"});
+        if(failure->diagnostic.field.empty()||failure->diagnostic.explanation.empty())
+            return evidence_rejection(failure->path,Diagnostic{DiagnosticCode::evidence_mismatch,
+                "hybrid.adapter.preflight_diagnostics",
+                "Direct-trajectory preflight failure did not include a complete primary diagnostic"});
+        return model::HybridPathCompositionFailureReport{failure->path,failure->limits,
+            failure->relation_operations,failure->diagnostic};
     }
-    if(const auto* errors=std::get_if<Diagnostics>(&result)) return *errors;
     if(const auto* stopped=std::get_if<OperationStopped>(&result)) return *stopped;
     if(cancellation.stop_requested())
         return OperationStopped{StopReason::cancelled,
@@ -369,7 +383,23 @@ HybridDirectTrajectoryPreflightResult HybridDirectTrajectoryAdapter::preflight(
     const model::HybridSystem& system,const model::HybridRequest& request,
     std::span<const model::HybridPath> paths,model::HybridRelationLimits limits,
     optimization::ObjectivePolicy,std::stop_token cancellation) const {
-    return model::preflight_hybrid_path_relations(system,request,paths,limits,cancellation);
+    const auto result=model::preflight_hybrid_path_relations(system,request,paths,limits,cancellation);
+    if(const auto* failure=std::get_if<model::HybridPathCompositionFailureReport>(&result)) {
+        if(const auto* diagnostic=std::get_if<Diagnostic>(&failure->failure))
+            return HybridDirectTrajectoryPreflightFailure{failure->path,failure->limits,
+                failure->operations,*diagnostic};
+        return std::get<OperationStopped>(failure->failure);
+    }
+    if(const auto* diagnostics=std::get_if<Diagnostics>(&result)) {
+        const auto path=paths.empty()?model::HybridPath{}:paths.front();
+        if(diagnostics->empty())
+            return HybridDirectTrajectoryPreflightFailure{path,limits,{},Diagnostic{
+                DiagnosticCode::evidence_mismatch,"hybrid.adapter.preflight_diagnostics",
+                "Built-in direct-trajectory preflight returned an empty diagnostic list"}};
+        return HybridDirectTrajectoryPreflightFailure{path,limits,{},diagnostics->front()};
+    }
+    if(const auto* stopped=std::get_if<OperationStopped>(&result)) return *stopped;
+    return std::monostate{};
 }
 
 namespace {
@@ -505,6 +535,9 @@ HybridPortfolioProgramResult build_hybrid_portfolio_programs(const HybridDirectT
     if(const auto* diagnostic=std::get_if<Diagnostic>(&enumerated)) return one(*diagnostic);
     if(const auto* stopped=std::get_if<OperationStopped>(&enumerated)) return *stopped;
     const auto& paths=std::get<std::vector<model::HybridPath>>(enumerated);
+    if(paths.empty())
+        return one({DiagnosticCode::invalid_claim,"hybrid.portfolio.paths",
+            "No allowed hybrid path exists for the requested terminal modes"});
     const auto operation_preflight=preflight_hybrid_trajectory_operations(
         adapter,system,request,paths,relation_limits,policy,cancellation);
     if(const auto* failure=std::get_if<model::HybridPathCompositionFailureReport>(&operation_preflight))

@@ -81,7 +81,18 @@ struct HybridDirectTrajectoryCapabilities {
     bool convex_objectives{};
     Assurance assurance{Assurance::numerical};
 };
-using HybridDirectTrajectoryPreflightResult = model::HybridRelationPreflightResult;
+struct HybridDirectTrajectoryPreflightFailure {
+    model::HybridPath path;
+    model::HybridRelationLimits limits;
+    // Present for adapters that can expose the built-in relation-operation
+    // trace. Other exact representations may leave this empty.
+    std::vector<model::HybridRelationOperationRecord> relation_operations;
+    // The first unsupported operation is reported so admission fails at one
+    // deterministic, request-scoped boundary.
+    Diagnostic diagnostic;
+};
+using HybridDirectTrajectoryPreflightResult = std::variant<std::monostate,
+    HybridDirectTrajectoryPreflightFailure, OperationStopped>;
 
 // Replaceable direct-trajectory boundary. Implementations return the same
 // branch-labelled joint relation, lifted objective, and optimization program.
