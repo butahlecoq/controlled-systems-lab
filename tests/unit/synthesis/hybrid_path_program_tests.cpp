@@ -4985,6 +4985,196 @@ TEST_CASE("two-stage scalar interval verifier checks tied continuous families in
     CHECK(infeasible_record->continuous_coverage==HybridVerificationStatus::unsupported);
 }
 
+TEST_CASE("independent continuous oracle retains ties across differently sized terminal modes") {
+    const auto interval=[](std::string id,double lower,double upper) {
+        return h_set(std::move(id),1,Matrix{2,1,{-1,1}},Vector{-lower,upper},
+            Matrix{0,1,{}},Vector{});
+    };
+    model::HybridMode source{{"oracle-source"},1,1,{"x"},{"u"}};
+    source.flow=LinearStage{Matrix{1,1,{1}},Matrix{1,1,{0}},Matrix{1,0,{}},Vector{0}};
+    source.control_sets={interval("oracle-continuous-control",0,1)};
+    source.invariants={UniversalSet{1},UniversalSet{1}};
+    const auto terminal_mode=[](std::string id,std::size_t dimension) {
+        std::vector<std::string> labels;
+        for(std::size_t i=0;i<dimension;++i) labels.push_back("terminal-"+std::to_string(i));
+        model::HybridMode mode{{std::move(id)},dimension,0,std::move(labels),{}};
+        mode.flow=LinearStage{Matrix{dimension,dimension,std::vector<double>(dimension*dimension,0)},
+            Matrix{dimension,0,{}},Matrix{dimension,0,{}},Vector(dimension,0)};
+        mode.control_sets={UniversalSet{0}};
+        mode.invariants={UniversalSet{dimension},UniversalSet{dimension}};
+        return mode;
+    };
+    auto terminal_a=terminal_mode("terminal-a",1);
+    auto terminal_b=terminal_mode("terminal-b",2);
+    auto terminal_c=terminal_mode("terminal-c",1);
+    model::HybridSystem system{1,{source,terminal_a,terminal_b,terminal_c},
+        {{{"to-a"},source.id,terminal_a.id,{UniversalSet{1}},
+            {singleton_relation("oracle-reset-a",{0,0})}},
+         {{"to-b"},source.id,terminal_b.id,{UniversalSet{1}},
+            {singleton_relation("oracle-reset-b",{0,0,0})}},
+         {{"to-c"},source.id,terminal_c.id,{UniversalSet{1}},
+            {singleton_relation("oracle-reset-c",{0,0})}}}};
+    model::HybridRequest request{{source.id,{0}},
+        {terminal_a.id,terminal_b.id,terminal_c.id},
+        {{terminal_a.id,LinearTerminal{{0},5},"cost","units"},
+         {terminal_b.id,LinearTerminal{{0,0},5},"cost","units"},
+         {terminal_c.id,LinearTerminal{{0},7},"cost","units"}}};
+
+    struct OracleBranch { model::HybridPath path; Vector terminal; double objective{}; };
+    std::vector<OracleBranch> oracle;
+    // Interpret the raw one-step graph independently: the source flow leaves
+    // the pre-transition state at zero, each reset is a literal singleton,
+    // and u remains free on [0,1]. No production enumerator, composer,
+    // objective lift, or verifier participates in this calculation.
+    for(const auto& edge:system.edges) {
+        if(edge.source!=request.initial.mode ||
+           std::find(request.allowed_terminal_modes.begin(),request.allowed_terminal_modes.end(),
+               edge.target)==request.allowed_terminal_modes.end()) continue;
+        const auto* flow=std::get_if<LinearStage>(&source.flow);
+        REQUIRE(flow!=nullptr);
+        const double pre=flow->A.values[0]*request.initial.state[0]+
+            flow->offset[0];
+        const auto target=std::find_if(system.modes.begin(),system.modes.end(),
+            [&](const auto& mode){return mode.id==edge.target;});
+        REQUIRE(target!=system.modes.end());
+        const auto reset=sets::from_handle(edge.reset_relations[0]);
+        REQUIRE(std::holds_alternative<sets::SetData>(reset));
+        const auto reset_rep=std::get<sets::SetData>(reset).representation();
+        REQUIRE(std::holds_alternative<sets::SingletonRepresentation>(reset_rep));
+        const auto& point=std::get<sets::SingletonRepresentation>(reset_rep).point;
+        REQUIRE(point.size()==1+target->state_dimension);
+        REQUIRE(point[0]==pre);
+        Vector terminal(target->state_dimension);
+        for(std::size_t i=0;i<terminal.size();++i) terminal[i]=point[1+i];
+        const auto objective=std::find_if(request.terminal_objectives.begin(),
+            request.terminal_objectives.end(),[&](const auto& item){return item.mode==edge.target;});
+        REQUIRE(objective!=request.terminal_objectives.end());
+        const auto* linear=std::get_if<LinearTerminal>(&objective->objective);
+        REQUIRE(linear!=nullptr);
+        REQUIRE(linear->coefficients.size()==terminal.size());
+        double cost=linear->offset;
+        for(std::size_t i=0;i<terminal.size();++i) cost+=linear->coefficients[i]*terminal[i];
+        oracle.push_back({{{source.id,edge.target},{edge.id}},std::move(terminal),cost});
+    }
+    REQUIRE(oracle.size()==3);
+    CHECK(oracle[0].objective==5);
+    CHECK(oracle[1].objective==5);
+    CHECK(oracle[2].objective==7);
+
+    const auto literal_optimal_face=[](std::string id,std::size_t terminal_dimension) {
+        const std::size_t variables=3+terminal_dimension;
+        std::vector<double> inequalities(2*variables,0);
+        inequalities[1]=-1;
+        inequalities[variables+1]=1;
+        std::vector<double> equalities((2+terminal_dimension)*variables,0);
+        equalities[0]=1;
+        equalities[variables+2]=1;
+        for(std::size_t i=0;i<terminal_dimension;++i)
+            equalities[(2+i)*variables+3+i]=1;
+        return h_set(std::move(id),variables,
+            Matrix{2,variables,std::move(inequalities)},Vector{0,1},
+            Matrix{2+terminal_dimension,variables,std::move(equalities)},
+            Vector(2+terminal_dimension,0));
+    };
+    const auto evaluate=[&](const model::HybridRequest& current_request,
+        const std::string& problem) {
+        const auto built=build_hybrid_portfolio_programs(system,current_request,{problem},
+            {1,8},{16,128,2048});
+        REQUIRE(std::holds_alternative<std::vector<HybridPathProgram>>(built));
+        const auto& programs=std::get<std::vector<HybridPathProgram>>(built);
+        REQUIRE(programs.size()==oracle.size());
+        std::vector<HybridPathOptimalFaceCandidate> candidates;
+        std::vector<double> costs;
+        for(const auto& expected:oracle) {
+            const auto objective=std::find_if(current_request.terminal_objectives.begin(),
+                current_request.terminal_objectives.end(),[&](const auto& item) {
+                    return item.mode==expected.path.modes.back();
+                });
+            REQUIRE(objective!=current_request.terminal_objectives.end());
+            const auto& linear=std::get<LinearTerminal>(objective->objective);
+            double cost=linear.offset;
+            for(std::size_t i=0;i<expected.terminal.size();++i)
+                cost+=linear.coefficients[i]*expected.terminal[i];
+            costs.push_back(cost);
+        }
+        const auto global_minimum=*std::min_element(costs.begin(),costs.end());
+        for(std::size_t branch_index=0;branch_index<oracle.size();++branch_index) {
+            const auto& expected=oracle[branch_index];
+            const auto found=std::find_if(programs.begin(),programs.end(),[&](const auto& program) {
+                return program.path==expected.path;
+            });
+            REQUIRE(found!=programs.end());
+            const auto expected_dimension=3+expected.terminal.size();
+            CHECK(found->joint_relation.metadata()->set.dimension==expected_dimension);
+            const auto representation=found->joint_relation.representation();
+            REQUIRE(std::holds_alternative<sets::HRepresentation>(representation));
+            const auto& relation=std::get<sets::HRepresentation>(representation);
+            for(const double u:{0.0,0.5,1.0}) {
+                Vector joint{0,u,0};
+                joint.insert(joint.end(),expected.terminal.begin(),expected.terminal.end());
+                CHECK(satisfies(relation,joint));
+            }
+            for(const double u:{-0.125,1.125}) {
+                Vector joint{0,u,0};
+                joint.insert(joint.end(),expected.terminal.begin(),expected.terminal.end());
+                CHECK_FALSE(satisfies(relation,joint));
+            }
+            if(costs[branch_index]==global_minimum) {
+                Vector witness{0,0,0};
+                witness.insert(witness.end(),expected.terminal.begin(),expected.terminal.end());
+                auto candidate=exact_candidate(*found,std::move(witness));
+                const auto face=sets::from_handle(literal_optimal_face(
+                    "literal-cross-mode-face-"+expected.path.edges.front().value,
+                    expected.terminal.size()));
+                REQUIRE(std::holds_alternative<sets::SetData>(face));
+                candidate.relation=std::get<sets::SetData>(face);
+                candidates.push_back(std::move(candidate));
+            }
+        }
+        ExactLinearHHybridFamilyVerifier verifier;
+        return verify_hybrid_portfolio_family(verifier,system,current_request,programs,
+            candidates,{1,8},{0,0});
+    };
+
+    const auto tied=evaluate(request,"cross-terminal-mode-tie");
+    REQUIRE(std::holds_alternative<HybridFamilyVerificationReport>(tied));
+    const auto& tied_report=std::get<HybridFamilyVerificationReport>(tied);
+    CHECK(tied_report.global_objective_optimality==HybridVerificationStatus::established);
+    CHECK(tied_report.complete_family_coverage==HybridVerificationStatus::established);
+    REQUIRE(tied_report.branches.size()==3);
+    const auto status_for=[&](const HybridFamilyVerificationReport& report,const std::string& id) {
+        return std::find_if(report.branches.begin(),report.branches.end(),[&](const auto& branch) {
+            return branch.path.edges.front().value==id;
+        });
+    };
+    for(const auto& id:{"to-a","to-b"}) {
+        const auto branch=status_for(tied_report,id);
+        REQUIRE(branch!=tied_report.branches.end());
+        CHECK(branch->objective_optimality==HybridVerificationStatus::established);
+        CHECK(branch->continuous_coverage==HybridVerificationStatus::established);
+    }
+    const auto worse=status_for(tied_report,"to-c");
+    REQUIRE(worse!=tied_report.branches.end());
+    CHECK(worse->objective_optimality==HybridVerificationStatus::refuted);
+
+    auto separated=request;
+    separated.terminal_objectives[1].objective=LinearTerminal{{0,0},5.25};
+    const auto broken_tie=evaluate(separated,"cross-terminal-mode-offset-change");
+    REQUIRE(std::holds_alternative<HybridFamilyVerificationReport>(broken_tie));
+    const auto& separated_report=std::get<HybridFamilyVerificationReport>(broken_tie);
+    CHECK(separated_report.global_objective_optimality==HybridVerificationStatus::established);
+    CHECK(separated_report.complete_family_coverage==HybridVerificationStatus::established);
+    const auto separated_a=status_for(separated_report,"to-a");
+    const auto separated_b=status_for(separated_report,"to-b");
+    const auto separated_c=status_for(separated_report,"to-c");
+    REQUIRE(separated_a!=separated_report.branches.end());
+    REQUIRE(separated_b!=separated_report.branches.end());
+    REQUIRE(separated_c!=separated_report.branches.end());
+    CHECK(separated_a->objective_optimality==HybridVerificationStatus::established);
+    CHECK(separated_b->objective_optimality==HybridVerificationStatus::refuted);
+    CHECK(separated_c->objective_optimality==HybridVerificationStatus::refuted);
+}
+
 TEST_CASE("single-parameter scalar interval verifier covers arbitrary finite horizons") {
     const auto make_reset=[](const std::string& id,double pre,double post,double rhs) {
         auto inequalities=numeric::snapshot(Matrix{0,2,{}});
