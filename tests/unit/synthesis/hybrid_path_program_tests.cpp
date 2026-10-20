@@ -3143,6 +3143,18 @@ TEST_CASE("two parameter scalar verifier certifies a coupled polygon and "
                                  LinearTerminal{{0}, 0},
                                  "constant",
                                  "units"}}};
+  const auto capability = report_hybrid_capability(system, request, {2, 8});
+  REQUIRE(std::holds_alternative<model::HybridCapabilityReport>(capability));
+  const auto &profile = std::get<model::HybridCapabilityReport>(capability);
+  CHECK(profile.profile_admitted);
+  CHECK(profile.path_enumeration_completed);
+  CHECK(profile.horizon == 2);
+  CHECK(profile.mode_count == 3);
+  CHECK(profile.edge_count == 3);
+  CHECK(profile.maximum_state_dimension == 1);
+  CHECK(profile.maximum_control_dimension == 1);
+  REQUIRE(profile.complete_allowed_path_count);
+  CHECK(*profile.complete_allowed_path_count == 2);
   auto built = build_hybrid_portfolio_programs(
       system, request, {"two-parameter-test"}, {2, 8}, {64, 4096, 65536});
   REQUIRE(std::holds_alternative<std::vector<HybridPathProgram>>(built));
