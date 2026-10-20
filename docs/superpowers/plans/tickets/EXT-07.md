@@ -98,10 +98,13 @@ framework checks numerical assurance and finite nonnegative tolerances, while
 each adapter must admit or reject its additional tolerance policy before
 capability queries or program construction. A custom-adapter regression checks
 both accepted and rejected policies at that boundary. Validated objective
-assurance remains unsupported, and provider-operation admission at other seams
-remains open. General continuous-family verification now has a bounded exact
-H-relation implementation, but its independent exhaustive oracle acceptance
-work remains open.
+assurance remains unsupported. Solver, trajectory, reachability, and verifier
+boundaries now preflight their declared inventories; complete model-wide
+admission beyond those inventories remains open. General continuous-family
+verification now has a bounded exact H-relation implementation, but its
+independent exhaustive oracle acceptance work remains open. Full terminal-
+policy semantics beyond declared objective-class, assurance, and tolerance
+checks remain incomplete.
 
 The direct-trajectory full-inventory regression now covers three allowed
 terminal paths with target dimensions 1, 2, and 3. It checks the ordered
@@ -117,8 +120,12 @@ composes its complete joint-H relation; each request includes coefficients,
 labels, equality/inequality partition, metadata, and terminal-coordinate
 indices. Provider preparation creates no workspace. Each adapter assembles or
 composes the relation again for execution and prepares the request before
-workspace creation. Provider admission at other adapter seams and runtime
-resource rejection remain open work.
+workspace creation. Solver execution prepares the complete branch inventory
+before creating workspaces, direct-trajectory construction preflights the
+complete path inventory, and family verification preflights its complete path
+set. The remaining admission gap is full model-wide support accounting beyond
+these selected adapter inventories; broader provider resource guarantees also
+remain open.
 
 The public API contract tests at
 `tests/contract/synthesis/hybrid_reachability_contract.cpp` exercise both the
@@ -208,8 +215,8 @@ have distinct full-dimensional optimal faces at the same global objective;
 the exact linear-H verifier establishes both complete faces and refutes a
 feasible narrowed candidate on the wider branch. This adds multi-path,
 multi-stage continuous evidence at four controls. It remains one finite
-fixture and does not close the broader verifier-domain, provider-operation,
-resource-scale, or publication gates.
+fixture and does not close the broader verifier-domain, model-wide operation-
+admission, resource-scale, or publication gates.
 
 The [EXT-07 capability profile and fixture report](../../../research/ext07-capability-profile.md)
 records the declared adapter/verifier domains and named dimensions, horizons,

@@ -479,9 +479,15 @@ numerical objective assurance and finite nonnegative tolerances. Each direct
 trajectory adapter receives the complete policy in preflight and owns any
 additional supported range or interpretation for those tolerances; it must
 reject an unsupported policy before capability queries or program building.
-Validated objective assurance remains unsupported. Provider-operation
-admission at other seams and broader multiple-parameter verifier coverage
-remain incomplete.
+Validated objective assurance remains unsupported. Solver execution prepares
+all branch programs before creating any solver workspace; direct-trajectory,
+projected-reachability, and family-verification adapters preflight their
+declared path or request inventories before dispatch. These checks do not yet
+meet the full model-wide admission contract above: complete support accounting
+for every requested operation across the mode/edge structure, beyond each
+selected adapter's declared inventory, complete terminal-policy semantics
+beyond the declared objective-class/assurance/tolerance checks, and broader
+multiple-parameter verifier coverage remain EXT-07 work.
 
 The synthesis unit suite checks literal one-step relation coefficients and
 provider admission details. A public API contract test also runs projected

@@ -64,9 +64,12 @@ the unit-test cases are correctness evidence and are not timing samples.
 | Two-parameter scalar polygon verifier | Scalar state, scalar interval controls, invariants and guards, deterministic exactly representable scalar affine resets; exactly two bounded non-singleton interval controls at distinct stages, all other controls singleton, finite horizon, scalar linear terminal objective | Exact representability, bounded polygon geometry and row/vertex limits | The saved fixture has horizon 2; tests also place the two free controls at separated stages in a horizon-3 case |
 
 All family verifiers provide numerical assurance only. Validated objective
-assurance and validated family coverage remain unsupported. Adapter preflight
-does not imply that every possible provider operation or objective policy is
-admitted; those gaps remain tracked in EXT-07.
+assurance and validated family coverage remain unsupported. Solver, trajectory,
+reachability, and family-verification boundaries preflight their declared
+inventories. This does not establish model-wide admission for every requested
+operation across the complete mode/edge structure, or complete terminal-policy
+semantics beyond the declared objective-class/assurance/tolerance checks; those
+gaps remain tracked in EXT-07.
 
 Exact-verifier resource counters cover Fourier-Motzkin elimination in both
 minimization and inclusion checks. Charged operations use the verifier's
