@@ -209,6 +209,21 @@ HybridFamilyVerificationPreflightResult ExactLinearHHybridFamilyVerifier::prefli
         hx::default_max_variables * hx::default_max_rows};
     limits.max_variables = relation_limits.max_variables;
     limits.max_rows = relation_limits.max_rows;
+    for (const auto& terminal_mode : request.allowed_terminal_modes) {
+        if(cancellation.stop_requested())
+            return OperationStopped{StopReason::cancelled,
+                "Exact linear H verifier preflight was cancelled while checking terminal objectives"};
+        const auto objective = std::find_if(request.terminal_objectives.begin(),
+            request.terminal_objectives.end(), [&](const auto& candidate) {
+                return candidate.mode==terminal_mode;
+            });
+        if(objective==request.terminal_objectives.end()||
+           !std::holds_alternative<LinearTerminal>(objective->objective))
+            return Diagnostics{{DiagnosticCode::unsupported,
+                "hybrid.verification.exact_linear_h_objective",
+                "Terminal mode "+terminal_mode.value+
+                ": exact H verification currently supports linear terminal objectives"}};
+    }
     for (const auto& path : paths) {
         if (cancellation.stop_requested())
             return OperationStopped{StopReason::cancelled,
