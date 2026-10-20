@@ -70,6 +70,14 @@ discards its result if cancellation arrives during admission; runtime resource
 rejection and provider admission at other adapter seams remain possible and are
 still tracked as open work.
 
+The public API contract test at
+`tests/contract/synthesis/hybrid_reachability_contract.cpp` checks one-step
+projected reachability against the guarded terminal interval and verifies that
+an injected provider rejection occurs before workspace creation. Detailed
+coefficient, guard-entry/exit, relation, cancellation, and resource assertions
+remain in the hybrid unit suites; this contract case does not replace the
+independent mode-sequence oracle.
+
 The EXT-07 report set now contains a one-step scalar interval case and a
 two-stage/two-control scalar polygon case, each exercised through path
 construction, HiGHS optimization, and family verification. The published
