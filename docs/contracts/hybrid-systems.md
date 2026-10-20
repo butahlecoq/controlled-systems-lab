@@ -299,11 +299,14 @@ cross-branch convexification is introduced. It does not promise validated
 arithmetic or prove a numerical provider's result. Provider assurance is
 recorded separately. The implementation includes an exact integral singleton
 verifier, a one-step scalar interval verifier, and a finite-horizon
-single-parameter scalar interval verifier. Their bounded profiles support only
-scalar interval sets and deterministic scalar affine resets; they do not verify
-multiple free control parameters, general continuous polytope families, or
-general-dimensional relations. These bounded verifiers do not establish the
-full EXT-07 acceptance contract.
+single-parameter scalar interval verifier. A separate
+`TwoParameterScalarPolytopeHybridFamilyVerifier` supports exactly two free
+controls in a bounded two-stage scalar profile. These implementations require
+their documented scalar interval or two-dimensional polygon domains and
+deterministic scalar affine resets; they do not cover more than two free
+controls, general continuous polytope families, or general-dimensional
+relations. The bounded implementations do not establish the full EXT-07
+acceptance contract.
 
 ## Required request-admission contract
 
