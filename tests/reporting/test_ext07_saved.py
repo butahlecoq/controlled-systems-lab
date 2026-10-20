@@ -122,8 +122,8 @@ class Ext07SavedReportTests(unittest.TestCase):
         self.assertEqual(record["measurement"]["measured_calls"], 140)
         example = (self.two_parameter_bundle / "two-control-example.html").read_text(
             encoding="utf-8")
-        self.assertIn("[0,0.5]×[0,1]", example)
-        self.assertIn("u₀=0, 0≤u₁≤1", example)
+        self.assertIn("u0 &lt;= 0.5", example)
+        self.assertIn("u0 = 0, 0 &lt;= u1 &lt;= 1", example)
         self.assertIn("two_parameter_driver.cpp", example)
 
     def test_stager_publishes_both_ext07_report_profiles(self) -> None:

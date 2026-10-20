@@ -35,16 +35,25 @@ was 6,288,700 ns (range 5,492,300–9,158,900 ns); all seven batches matched the
 analytic result with no failures. These timings are descriptive for this one
 fixture and do not establish a performance winner, scalability, general
 polyhedral coverage, or validated arithmetic. The measured report covers the
-one-step scalar interval profile; the implementation also has a bounded
-finite-horizon verifier for exactly one free scalar control parameter, but the
-report does not measure that domain. A separate verifier now covers exactly
-two scalar control parameters for two-stage paths, but the report does not
-measure that domain either. General continuous-polytope verification and broad
-multiple-parameter coverage remain open EXT-07 acceptance items.
-The report and 2D control-versus-terminal-state example are versioned with raw
-rows and an offline ZIP. Main-only Pages
-publication and live URL/hash verification remain pending.
-
+The measured report covers the one-step scalar interval profile; the implementation also has a bounded finite-horizon verifier for exactly one free scalar control parameter, but the first bundle does not measure that domain. A second frozen bundle,
+[`ext07-hybrid-two-parameter-00ac6fb75d7cab95`](../../reports/algorithm-results/ext07-hybrid-two-parameter-00ac6fb75d7cab95/),
+measures a fixed two-stage, two-control fixture with `enter-half` and
+`enter-full` branches. Its feasible sets are `[0,0.5] x [0,1]` and
+`[0,1] x [0,1]`; both retain the complete minimizing family
+`u0=0, 0<=u1<=1` for the objective `x_terminal=u0`. The registered HiGHS LP
+provider and two-parameter polytope verifier completed 140 measured calls after
+an excluded warmup. On the recorded Windows 11 / MSVC Release host, median
+end-to-end batch time was 13,080,500 ns (range 12,699,800-15,674,900 ns), and
+median individual call time was 658,250 ns; all calls matched the analytic
+answer with no failures. Both reports are descriptive evidence for their
+specific fixtures, not performance comparisons, scalability claims, general
+continuous-polytope coverage, or validated arithmetic. The two-parameter
+bundle includes a standalone feasible-set plot, raw rows, and an offline ZIP.
+The report does not measure the one-parameter verifier. Higher-dimensional
+free-control domains and general continuous-polytope verification remain open
+EXT-07 acceptance items. The reports and their illustrations are versioned
+with raw rows and offline ZIPs. Main-only Pages publication and live URL/hash
+verification remain pending.
 ## OPT-07 ordered hull membership report
 
 The reviewed native bundle
@@ -297,3 +306,4 @@ claim. Native submodule counters and timings are retained as unavailable where
 the runtime does not expose them. See the [reproduction notes](../../reports/algorithm-results/tooling/syn03_ts02/README.md).
 Publication through main-only Pages and live URL verification remain separate
 gates; SYN-03 #66 remains open.
+

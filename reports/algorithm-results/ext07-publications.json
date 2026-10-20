@@ -8,9 +8,22 @@
       "report_id": "ext07-hybrid-51d9ee2e89d240eb",
       "schema": "csl.ext07-hybrid-profile-report/1",
       "source_commit": "2965baafa325550ad60ec91d44f5e3f86a832178",
-      "stager_sha256": "95b4fb6aa61bf9100373554ee161ba9648efbafc64a0ab36bc5c5b525e3afdd1",
+      "stager_sha256": "6981f8558bf9f7f1c2dcab7851bb544d97278b862e58731ec4ef031ac04f383e",
       "zip_sha256": "9d4cf7eb42fe60e3f2e38241ea14fdf6e4484a4b7591286f41f3beafc6c89731"
-    }
+    },
+    {
+      "collector_sha256": "b0b1e4fcc26ce36a3356c17f236adc820f5a829db6b293d932692179eddbe43a",
+      "example_sha256": "e64ac6c9c9d32e44fb18fb5ea1985fcf08c5f73f9c62aa02d9c89ad806aee5b4",
+      "index_sha256": "9e018f9eb94221f4c17ea735bae5f9231f0a4a5c969def27847114c872caa59c",
+      "manifest_sha256": "1dd3339beb01b8915a06a30b32d9f68450561bddfa7a569ced4563767a7e2f28",
+      "renderer_sha256": "c257a20ab10cc12e6beb8322620f58b90f9e93fd057ce0fa90f0d8969808d9af",
+      "report_id": "ext07-hybrid-two-parameter-00ac6fb75d7cab95",
+      "schema": "csl.ext07-hybrid-two-parameter-report/1",
+      "source_commit": "7d2f1ad480229bbc0e3d1596701b6b523a48ae9a",
+      "stager_sha256": "6981f8558bf9f7f1c2dcab7851bb544d97278b862e58731ec4ef031ac04f383e",
+      "zip_sha256": "91ab7543c094103ac259210d554f41479857e2fbfc4f987572f8a320ede7fda1"    }
   ],
   "schema": "csl.ext07-publications/1"
 }
+
+
