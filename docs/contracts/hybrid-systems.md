@@ -388,6 +388,10 @@ construction. The verified builder additionally preflights the verifier domain.
 Other provider operations and broader terminal-policy semantics remain EXT-07
 acceptance work; the new generalized verifier does not provide validated
 assurance or the required exhaustive oracle coverage by itself.
+Independent exact-H family oracles now include one-step three-control simplex
+and truncated-cube optimal faces through existential resets. These finite
+fixtures exercise distinct 3D polytope shapes but do not establish exhaustive
+coverage of the admitted verifier domain.
 
 The initial profile does not infer support from the presence of lower-level
 types. It rejects, before workspace creation, nonempty temporal couplings until

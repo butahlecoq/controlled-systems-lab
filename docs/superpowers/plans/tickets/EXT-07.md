@@ -154,6 +154,13 @@ facet `u≤0.5` is refuted for incomplete continuous coverage. This directly
 exercises a three-free-control optimal family, but does not exhaustively
 validate the general finite-horizon H domain.
 
+A second one-step oracle uses the non-simplex control polytope `[0,1]^3` clipped
+by `u+v+w≤2`, with the same existential reset and objective. Its complete
+optimal family is the three-dimensional truncated cube at `y=0`; the exact H
+verifier establishes the full literal face and refutes its feasible `u≤0.5`
+subset. This checks a non-simplex three-control polytope, while broader
+polytope/oracle coverage and resource-scale evidence remain open.
+
 The [EXT-07 capability profile and fixture report](../../../research/ext07-capability-profile.md)
 records the declared adapter/verifier domains and named dimensions, horizons,
 mode counts, edge counts, path counts, and relation widths. It separates saved
