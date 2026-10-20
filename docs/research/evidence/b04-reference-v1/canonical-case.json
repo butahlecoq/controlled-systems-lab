@@ -1,0 +1,54 @@
+{
+  "case_id": "b04-reference-v1",
+  "source_scenario_id": "B04-historical",
+  "variant_status": "separate owner-authorized research reference; does not resolve or replace B04-historical",
+  "owner_authorized_control_interval": {
+    "date": "2026-10-19",
+    "lower": "-1",
+    "upper": "1",
+    "stages": "0 through 15",
+    "authority": "Owner affirmed this continuous interval for the reference variant; not recovered as canonical historical B04 data."
+  },
+  "source_evidence": {
+    "article_source_id": "L11",
+    "article_sha256": "e04c2f1609e2580c8878ab7fb91bc41151ccc8e0cf1f5deac4cef9fd860ce147",
+    "counterpart_source_id": "R40",
+    "source_accessed": "2026-10-11",
+    "case_authority": "Displayed linear model and initial state; published objective/result conflict remains unresolved."
+  },
+  "horizon": 16,
+  "state_dimension": 4,
+  "control_dimension": 1,
+  "state_coordinates": ["oxidizer_flow", "oxidizer_working_stock", "fuel_flow", "fuel_working_stock"],
+  "state_units": ["kg/s", "kg", "kg/s", "kg"],
+  "state_indices": [0, 16],
+  "control_indices": [0, 15],
+  "step_seconds": "25/4",
+  "initial_state": ["1216.904", "119500", "438.787", "45300"],
+  "dynamics": {
+    "A_row_major": ["1", "0", "0", "0", "-25/4", "1", "0", "0", "0", "0", "1", "0", "0", "0", "-25/4", "1"],
+    "B": ["17", "0", "-12", "0"],
+    "affine": ["0", "0", "0", "0"]
+  },
+  "control_bounds_each_stage": {"lower": "-1", "upper": "1"},
+  "state_bounds_each_stage": [
+    {"coordinate": 0, "lower": "1176", "upper": "1224"},
+    {"coordinate": 2, "lower": "432", "upper": "468"}
+  ],
+  "state_bound_stages": [0, 16],
+  "terminal_objective": {
+    "kind": "affine_residual_euclidean_norm",
+    "matrix_rows": 5,
+    "matrix_cols": 4,
+    "W_row_major": ["1", "0", "0", "0", "0", "1", "0", "0", "0", "0", "8/3", "0", "0", "0", "0", "8/3", "0", "1", "0", "-8/3"],
+    "target": ["1200", "0", "1200", "0", "0"],
+    "reported_value_convention": "euclidean_norm_not_squared_norm",
+    "reported_published_objective": "30.899",
+    "acceptance_rule": "Do not use the published 30.899 as an acceptance value. It conflicts with the displayed model."
+  },
+  "explicit_exclusions": [
+    "No additional stock constraints are added because the source does not specify their numerical values.",
+    "No fixed first action is added; the owner-authorized variant uses the continuous control interval on all sixteen stages.",
+    "This case makes no reproduction claim for the published terminal state, objective, runtime, or historical optimizer."
+  ]
+}
