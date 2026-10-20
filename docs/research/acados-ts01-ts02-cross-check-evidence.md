@@ -20,6 +20,12 @@ Both calls used `FULL_CONDENSING_HPIPM`; each returned acados status `0` and pro
 | T-S01 | `−1.3234086980704929e−16`, `0.49999999999203265`, `1.0000000000006328` | `0.49999999999203276`, `0.50000000000860023` | `1.5053735771646659e−14`, `0`, `2.3234086980704929e−16`, `6.6420395522627675e−13` | `6.3282712403633923e−13` |
 | T-S02 | `0`, `0.098925751144616922`, `0.19785150228923384` | `0.098925751144616922`, `0.098925751144616922` | `0`, `0`, `9.9999999999999998e−17`, `1.2000359477832567e−15` | `0` |
 
+## Reproducibility limits and review disposition
+
+Exact-head review found that the one-time harness encoded its inputs directly and the checker does not consume every field in the canonical JSON. That JSON was assembled after the solver calls; it did not drive either the run or the exact check. The bundle therefore records the observed case values but does **not** satisfy parent #513's requirement that canonical case data drive both execution and checking. Each case has already used its one permitted solver run, so this record does not present a rerun as a correction. #515 remains open for this unresolved acceptance item.
+
+The local `bundle-manifest.json` records SHA-256 hashes and sizes for the canonical JSON, compiled harness and source, raw outputs, checker, and checker report. Its SHA-256 is `DBC77A3140894DD2F820CEC0E7F83FDE8809674248507C4A822E24FCC054A3FD`. The manifest and the exact files it covers remain at the local scratch path above.
+
 ## Independent exact-arithmetic check
 
 The separate checker parses each 17-digit solver value to its exact IEEE-754 binary rational, then evaluates the initial condition, both dynamics equations, both control bounds, the terminal objective, and T-S01's optimal-family equality without using acados or repository solver/checker code.
@@ -27,7 +33,6 @@ The separate checker parses each 17-digit solver value to its exact IEEE-754 bin
 - **T-S01:** the raw floating-point tuple is not a literal exact member of the optimal family: `x[2]−1 = 1425/2251799813685248 ≈ 6.3282712403633923e−13`. The exact dynamics residuals are `51545133/2417851639229258349412352` and `−1/18014398509481984`; `x[0]` also differs from zero by `−319980589/2417851639229258349412352`. Controls are exactly inside `[0,1]`. The checker therefore records numerical agreement with a nonzero exact optimal-family violation, rather than claiming exact membership.
 - **T-S02:** all initial, dynamics, and control constraints hold exactly for the captured binary values. The constant objective is exactly `3`; every feasible history is optimal. The zero-variable objective representation was accepted by acados.
 
-The local scratch bundle contains the canonical JSON, harness source, compiled executable, per-case raw logs and exit codes, and exact checker source/output under `D:\work\PhD\builds\acados-v0.6.0-build\smoke\` (`canonical-cases.json`, `ts01_ts02_crosscheck.c`, `ts01_ts02_crosscheck.exe`, `T-S01.log`, `T-S02.log`, `T-S01.exit`, `T-S02.exit`, `check_ts01_ts02.py`, and `exact-check-report.json`). The artifacts remain local as required by the parent specification.
+The local scratch bundle contains the canonical JSON, harness source, compiled executable, per-case raw logs and exit codes, and exact checker source/output under `D:\work\PhD\builds\acados-v0.6.0-build\smoke\` (`canonical-cases.json`, `ts01_ts02_crosscheck.c`, `ts01_ts02_crosscheck.exe`, `ts01_ts02_crosscheck.obj`, `compile-crosscheck.log`, `T-S01.log`, `T-S02.log`, `T-S01.exit`, `T-S02.exit`, `check_ts01_ts02.py`, `exact-check-report.json`, and `bundle-manifest.json`). The artifacts remain local as required by the parent specification.
 
 No solver run was repeated. There is no timing or performance claim.
-
