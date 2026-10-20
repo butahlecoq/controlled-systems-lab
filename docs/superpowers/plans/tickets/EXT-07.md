@@ -76,9 +76,13 @@ independent continuous cases and resource-scale evidence remain open.
 
 Trajectory-adapter objective-type support is checked for every allowed
 terminal mode, including modes with no enumerated path, before any branch
-program is built. Adapter-specific objective-policy semantics beyond
-assurance/tolerance validation and provider-operation admission at other seams
-remain open. General continuous-family verification now has a bounded exact
+program is built. The direct-trajectory preflight contract now states that the
+framework checks numerical assurance and finite nonnegative tolerances, while
+each adapter must admit or reject its additional tolerance policy before
+capability queries or program construction. A custom-adapter regression checks
+both accepted and rejected policies at that boundary. Validated objective
+assurance remains unsupported, and provider-operation admission at other seams
+remains open. General continuous-family verification now has a bounded exact
 H-relation implementation, but its independent exhaustive oracle acceptance
 work remains open.
 

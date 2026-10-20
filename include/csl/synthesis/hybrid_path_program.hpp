@@ -202,10 +202,13 @@ using HybridDirectTrajectoryPreflightResult = std::variant<std::monostate,
 class HybridDirectTrajectoryAdapter {
 public:
     virtual ~HybridDirectTrajectoryAdapter() = default;
-    // Adapters admit their exact operation plan and resource needs for the
-    // complete fixed-path inventory before capability queries or branch builds.
-    // The default declares the built-in joint-H representation boundary; adapters
-    // using another representation must override it.
+    // Adapters admit their exact operation plan, resource needs, and any
+    // adapter-specific ObjectivePolicy constraints for the complete fixed-path
+    // inventory before capability queries or branch builds. The framework
+    // validates assurance and tolerance shape; adapters own the meaning and
+    // accepted ranges of otherwise valid numerical tolerances. The default
+    // declares the built-in joint-H representation boundary; adapters using
+    // another representation must override it.
     virtual HybridDirectTrajectoryPreflightResult preflight(const model::HybridSystem&,
         const model::HybridRequest&, std::span<const model::HybridPath>,
         model::HybridRelationLimits, optimization::ObjectivePolicy,

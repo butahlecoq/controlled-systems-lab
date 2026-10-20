@@ -1556,6 +1556,44 @@ public:
     }
 };
 
+class PolicyAwareTrajectoryAdapter final : public HybridDirectTrajectoryAdapter {
+public:
+    explicit PolicyAwareTrajectoryAdapter(optimization::ObjectivePolicy accepted)
+        : accepted_(accepted) {}
+    mutable int preflight_calls{};
+    mutable int capability_calls{};
+    mutable int build_calls{};
+    mutable std::optional<optimization::ObjectivePolicy> observed_policy;
+    HybridDirectTrajectoryPreflightResult preflight(const model::HybridSystem&,
+        const model::HybridRequest&,std::span<const model::HybridPath> paths,
+        model::HybridRelationLimits limits,optimization::ObjectivePolicy policy,
+        std::stop_token) const override {
+        ++preflight_calls;
+        observed_policy=policy;
+        if(policy.assurance!=accepted_.assurance||
+           policy.numerical.absolute_tolerance!=accepted_.numerical.absolute_tolerance||
+           policy.numerical.relative_tolerance!=accepted_.numerical.relative_tolerance)
+            return HybridDirectTrajectoryPreflightFailure{paths.front(),limits,{},
+                {DiagnosticCode::unsupported,"fixture.trajectory.objective_policy",
+                 "Adapter does not admit this numerical tolerance policy"}};
+        return std::monostate{};
+    }
+    HybridDirectTrajectoryCapabilities capabilities() const noexcept override {
+        ++capability_calls;
+        return {true,true,true,Assurance::numerical};
+    }
+    HybridPathProgramResult build_path(const model::HybridSystem&,
+        const model::HybridRequest&,const model::HybridPath&,ProblemId,
+        model::HybridRelationLimits,optimization::ObjectivePolicy,
+        std::stop_token) const override {
+        ++build_calls;
+        return Diagnostics{{DiagnosticCode::unsupported,"fixture.trajectory.policy_adapter",
+            "fixture stopped after policy admission"}};
+    }
+private:
+    optimization::ObjectivePolicy accepted_;
+};
+
 class InventoryOnlyTrajectoryPreflightAdapter final : public HybridDirectTrajectoryAdapter {
 public:
     mutable int preflight_calls{};
@@ -5288,6 +5326,37 @@ TEST_CASE("direct trajectory adapters may admit a representation outside the joi
     CHECK(adapter.preflight_calls==1);
     CHECK(adapter.capability_calls==1);
     CHECK(adapter.build_calls==1);
+}
+
+TEST_CASE("direct trajectory preflight admits adapter-specific numerical tolerance policies") {
+    const optimization::ObjectivePolicy accepted_policy{
+        Assurance::numerical,{0.125,0.25}};
+    PolicyAwareTrajectoryAdapter accepting(accepted_policy);
+    const auto accepted=build_hybrid_path_program(accepting,example_system(),
+        example_request(),example_path(),{"hybrid-problem"},{16,64,1024},accepted_policy);
+    REQUIRE(std::holds_alternative<Diagnostics>(accepted));
+    CHECK(std::get<Diagnostics>(accepted).front().field=="fixture.trajectory.policy_adapter");
+    REQUIRE(accepting.observed_policy.has_value());
+    CHECK(accepting.observed_policy->assurance==accepted_policy.assurance);
+    CHECK(accepting.observed_policy->numerical.absolute_tolerance==0.125);
+    CHECK(accepting.observed_policy->numerical.relative_tolerance==0.25);
+    CHECK(accepting.preflight_calls==1);
+    CHECK(accepting.capability_calls==1);
+    CHECK(accepting.build_calls==1);
+
+    PolicyAwareTrajectoryAdapter rejecting(accepted_policy);
+    const auto rejected=build_hybrid_path_program(rejecting,example_system(),
+        example_request(),example_path(),{"hybrid-problem"},{16,64,1024});
+    REQUIRE(std::holds_alternative<model::HybridPathCompositionFailureReport>(rejected));
+    const auto& failure=std::get<model::HybridPathCompositionFailureReport>(rejected);
+    REQUIRE(std::holds_alternative<Diagnostic>(failure.failure));
+    CHECK(std::get<Diagnostic>(failure.failure).field=="fixture.trajectory.objective_policy");
+    REQUIRE(rejecting.observed_policy.has_value());
+    CHECK(rejecting.observed_policy->numerical.absolute_tolerance==1e-8);
+    CHECK(rejecting.observed_policy->numerical.relative_tolerance==1e-8);
+    CHECK(rejecting.preflight_calls==1);
+    CHECK(rejecting.capability_calls==0);
+    CHECK(rejecting.build_calls==0);
 }
 
 TEST_CASE("direct trajectory preflight failures must retain requested path and limits") {

@@ -448,10 +448,14 @@ request carries the relation coefficients, labels, equality/inequality
 partition, metadata, and terminal coordinate indices. Provider preparation
 creates no workspace. Each adapter assembles or composes the relation again for
 execution and prepares the request before workspace creation; cancellation
-during admission discards the preflight result. Validated
-objective assurance remains unsupported; adapter-specific objective-policy
-semantics, provider-operation admission at other seams, and broader
-multiple-parameter verifier coverage remain incomplete.
+during admission discards the preflight result. The framework accepts only
+numerical objective assurance and finite nonnegative tolerances. Each direct
+trajectory adapter receives the complete policy in preflight and owns any
+additional supported range or interpretation for those tolerances; it must
+reject an unsupported policy before capability queries or program building.
+Validated objective assurance remains unsupported. Provider-operation
+admission at other seams and broader multiple-parameter verifier coverage
+remain incomplete.
 
 The synthesis unit suite checks literal one-step relation coefficients and
 provider admission details. A public API contract test also runs projected
