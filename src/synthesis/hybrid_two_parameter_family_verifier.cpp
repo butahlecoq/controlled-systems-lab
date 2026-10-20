@@ -265,30 +265,45 @@ bool constrain(Poly &p, const I &in, const Aff &v, std::stop_token stop,
   }
   return true;
 }
-std::optional<std::size_t> exact_rank(std::vector<std::vector<double>> a) {
+std::optional<std::size_t> exact_rank(std::vector<std::vector<double>> a,
+                                      std::stop_token stop) {
+  if (stop.stop_requested())
+    return {};
   if (a.empty())
     return std::size_t{0};
   const std::size_t columns = a.front().size();
-  if (std::any_of(a.begin(), a.end(), [&](const auto &row) {
-        return row.size() != columns;
-      }))
-    return {};
+  for (const auto &values : a) {
+    if (stop.stop_requested() || values.size() != columns)
+      return {};
+  }
   std::size_t row = 0;
   for (std::size_t col = 0; col < columns && row < a.size(); ++col) {
+    if (stop.stop_requested())
+      return {};
     std::size_t pivot = row;
-    while (pivot < a.size() && a[pivot][col] == 0)
+    while (pivot < a.size() && a[pivot][col] == 0) {
+      if (stop.stop_requested())
+        return {};
       ++pivot;
+    }
     if (pivot == a.size())
       continue;
     std::swap(a[row], a[pivot]);
     const double d = a[row][col];
-    for (std::size_t j = col; j < columns; ++j)
+    for (std::size_t j = col; j < columns; ++j) {
+      if (stop.stop_requested())
+        return {};
       if (!divi(a[row][j], d, a[row][j]))
         return {};
+    }
     for (std::size_t i = 0; i < a.size(); ++i)
       if (i != row && a[i][col] != 0) {
+        if (stop.stop_requested())
+          return {};
         const double factor = a[i][col];
         for (std::size_t j = col; j < columns; ++j) {
+          if (stop.stop_requested())
+            return {};
           double p = 0, n = 0;
           if (!prod(factor, a[row][j], p) || !sum(a[i][j], -p, n))
             return {};
@@ -712,12 +727,22 @@ TwoParameterScalarPolytopeHybridFamilyVerifier::verify(
     if (valid) {
       std::vector<std::vector<double>> eq;
       for (std::size_t row = 0; row < h->equalities.rows(); ++row) {
+        if ((row & 127U) == 0 && stop.stop_requested())
+          return OperationStopped{StopReason::cancelled,
+                                  "Two-parameter relation rank input cancelled"};
         std::vector<double> eqrow(tuple_size);
-        for (std::size_t col = 0; col < tuple_size; ++col)
+        for (std::size_t col = 0; col < tuple_size; ++col) {
+          if ((col & 255U) == 0 && stop.stop_requested())
+            return OperationStopped{StopReason::cancelled,
+                                    "Two-parameter relation rank input cancelled"};
           eqrow[col] = h->equalities(row, col);
+        }
         eq.push_back(eqrow);
       }
-      const auto rank = exact_rank(std::move(eq));
+      const auto rank = exact_rank(std::move(eq), stop);
+      if (stop.stop_requested())
+        return OperationStopped{StopReason::cancelled,
+                                "Two-parameter relation rank check cancelled"};
       rank_exact = rank.has_value();
       valid = rank && *rank == tuple_size - 2;
     }
@@ -839,12 +864,22 @@ TwoParameterScalarPolytopeHybridFamilyVerifier::verify(
       if (cv) {
         std::vector<std::vector<double>> eq;
         for (std::size_t row = 0; row < ch->equalities.rows(); ++row) {
+          if ((row & 127U) == 0 && stop.stop_requested())
+            return OperationStopped{StopReason::cancelled,
+                                    "Two-parameter face rank input cancelled"};
           std::vector<double> eqrow(tuple_size);
-          for (std::size_t j = 0; j < tuple_size; ++j)
+          for (std::size_t j = 0; j < tuple_size; ++j) {
+            if ((j & 255U) == 0 && stop.stop_requested())
+              return OperationStopped{StopReason::cancelled,
+                                      "Two-parameter face rank input cancelled"};
             eqrow[j] = ch->equalities(row, j);
+          }
           eq.push_back(eqrow);
         }
-        const auto rank = exact_rank(std::move(eq));
+        const auto rank = exact_rank(std::move(eq), stop);
+        if (stop.stop_requested())
+          return OperationStopped{StopReason::cancelled,
+                                  "Two-parameter face rank check cancelled"};
         const auto face_dim = dimension(face);
         if (!rank || !face_dim)
           coverage_unsupported = true;

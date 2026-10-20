@@ -3227,6 +3227,12 @@ TEST_CASE("two parameter scalar verifier supports free controls at separated sta
   CHECK(report.branches.front().continuous_coverage ==
         HybridVerificationStatus::established);
   CHECK(report.complete_family_coverage == HybridVerificationStatus::established);
+
+  auto three_free_controls = system;
+  three_free_controls.modes.front().control_sets[1] =
+      interval("three-stage-extra-free-control", 0, 1);
+  const auto rejected = verifier.preflight(three_free_controls, request, paths, {});
+  CHECK(std::holds_alternative<Diagnostics>(rejected));
 }
 
 TEST_CASE("two parameter scalar verifier certifies a coupled polygon and "

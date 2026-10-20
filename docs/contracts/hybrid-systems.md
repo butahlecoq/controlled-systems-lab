@@ -406,9 +406,9 @@ its admitted relation, while the general finite-horizon projected-state adapter
 reuses the joint-H composer before projection; neither independently verifies
 family completeness. The compiled verifiers cover integral singleton paths,
 one-step scalar interval families, the bounded finite-horizon single-parameter
-scalar interval profile, and the two-stage scalar polygon profile with two free
-controls described above. The latter does not extend to higher-dimensional
-continuous polytopes or arbitrary horizons with multiple free controls. These
+scalar interval profile, and the finite-horizon two-parameter scalar polygon
+profile described above. These profiles do not extend to higher-dimensional
+continuous polytopes or horizons with more than two free controls. These
 verifier domains reject unsupported input when verification runs;
 `build_hybrid_portfolio_programs_with_verifier` also rejects unsupported
 verifier domains and declared trajectory objective capabilities before building
