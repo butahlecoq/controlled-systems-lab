@@ -5873,6 +5873,39 @@ TEST_CASE("direct trajectory adapters preflight the full path inventory before c
     CHECK(single_adapter.build_calls==0);
 }
 
+TEST_CASE("later unsupported guard and reset operations reject the full inventory before branch builds") {
+    for(const bool unsupported_reset:{false,true}) {
+        auto [system,request]=variable_size_parallel_profile();
+        const std::size_t dimension=unsupported_reset?4:1;
+        auto vertices=numeric::snapshot(Matrix{1,dimension,Vector(dimension,0.0)});
+        auto rays=numeric::snapshot(Matrix{0,dimension,{}});
+        REQUIRE(std::holds_alternative<numeric::MatrixView>(vertices));
+        REQUIRE(std::holds_alternative<numeric::MatrixView>(rays));
+        auto representation=sets::make_v({SetId{unsupported_reset?
+            "later-branch-v-reset":"later-branch-v-guard"},dimension,{}},
+            {std::get<numeric::MatrixView>(vertices),std::get<numeric::MatrixView>(rays)});
+        REQUIRE(std::holds_alternative<sets::SetData>(representation));
+        if(unsupported_reset)
+            system.edges.back().reset_relations[0]=
+                std::get<sets::SetData>(std::move(representation)).as_handle();
+        else
+            system.edges.back().guards[0]=
+                std::get<sets::SetData>(std::move(representation)).as_handle();
+
+        const auto result=build_hybrid_portfolio_programs(system,request,
+            {"complete-operation-inventory"},{1,8},{16,64,1024});
+        REQUIRE(std::holds_alternative<model::HybridPathCompositionFailureReport>(result));
+        const auto& failure=std::get<model::HybridPathCompositionFailureReport>(result);
+        CHECK(failure.path.edges==std::vector<model::HybridEdgeId>{{"to-wide"}});
+        CHECK(failure.operations.empty());
+        const auto* diagnostic=std::get_if<Diagnostic>(&failure.failure);
+        REQUIRE(diagnostic);
+        CHECK(diagnostic->field==(unsupported_reset?
+            "hybrid.reset.representation":"hybrid.guard.representation"));
+        CHECK(diagnostic->explanation.find("stage 0 edge to-wide")!=std::string::npos);
+    }
+}
+
 TEST_CASE("direct trajectory adapters may admit a representation outside the joint-H default") {
     auto system=example_system();
     system.edges.front().guards.front()=vertex_guard("alternate-guard");
