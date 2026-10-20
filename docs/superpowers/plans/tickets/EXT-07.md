@@ -67,13 +67,16 @@ composes the relation again for execution and prepares the request before
 workspace creation. Provider admission at other adapter seams and runtime
 resource rejection remain open work.
 
-The public API contract test at
-`tests/contract/synthesis/hybrid_reachability_contract.cpp` checks one-step
-projected reachability against the guarded terminal interval and verifies that
-an injected provider rejection occurs before workspace creation. Detailed
-coefficient, guard-entry/exit, relation, cancellation, and resource assertions
-remain in the hybrid unit suites; this contract case does not replace the
-independent mode-sequence oracle.
+The public API contract tests at
+`tests/contract/synthesis/hybrid_reachability_contract.cpp` exercise both the
+one-step and general finite-horizon projected adapters. They check one-step
+reachability against the guarded terminal interval and verify that an injected
+provider rejection occurs before workspace creation. A two-stage 1→2→1 case
+checks the complete eight-coordinate joint H relation, terminal projection,
+and per-operation stage, mode/edge, implementation, and row/matrix resource
+trace. Its injected provider also checks the exact joint relation during
+preflight. These public contract cases complement, but do not replace, the
+independent raw-graph mode-sequence oracle in the hybrid unit suites.
 
 The EXT-07 report set now contains a one-step scalar interval case and a
 two-stage/two-control scalar polygon case, each exercised through path
