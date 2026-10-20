@@ -96,19 +96,6 @@ RowsState append_rows(const sets::SetData& data, std::size_t variables,
     return RowsState::built;
 }
 
-RowsState append_rows(const SetHandle& handle, std::size_t variables,
-    hx::Limits limits, std::vector<hx::Row>& rows, std::string& reason,
-    std::stop_token cancellation) {
-    if (cancellation.stop_requested()) return RowsState::cancelled;
-    const auto decoded = sets::from_handle(handle);
-    if (!std::holds_alternative<sets::SetData>(decoded)) {
-        reason = "Set handle could not be decoded";
-        return RowsState::unsupported;
-    }
-    return append_rows(std::get<sets::SetData>(decoded), variables, limits,
-                       rows, reason, cancellation);
-}
-
 std::optional<LinearTerminal> path_objective(const HybridSystem& system,
     const HybridRequest& request, const HybridPath& path,
     const hx::RawRelationResult& raw) {
