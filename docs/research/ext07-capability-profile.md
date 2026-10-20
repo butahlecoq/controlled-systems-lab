@@ -38,10 +38,11 @@ oracle enumerates all 256 histories, the production enumerator agrees at a
 partial count. This exercises enumeration admission only; it does not compose
 256 relations or measure scaling. The four-mode graph remains the largest
 composed-resource check: its 5-variable relations fit the configured 3-row,
-15-matrix-element budget and reject a 2-row budget. The 3D control-box case is
-the largest named independent continuous oracle by state and control
-dimension. The coupled 2-control reset case adds a non-axis-aligned control
-polytope and a proper-subset rejection. The reports measure their own fixtures;
+15-matrix-element budget and reject a 2-row budget. The 3D control-box case
+remains the largest named independent continuous oracle by state dimension;
+the four-control simplex now has the largest control dimension. The coupled
+2-control reset case adds a non-axis-aligned control polytope and a
+proper-subset rejection. The reports measure their own fixtures;
 the unit-test cases are correctness evidence and are not timing samples.
 
 ## Declared adapter and verifier domains
