@@ -1159,6 +1159,7 @@ TEST_CASE("projected hybrid reachability returns the literal terminal interval a
         system,shifted_request,path,{4,16,128});
     REQUIRE(std::holds_alternative<HybridPathReachability>(shifted_result));
     const auto& shifted=std::get<HybridPathReachability>(shifted_result);
+    REQUIRE(shifted.projected_state.has_value());
     CHECK(shifted.joint_relation.metadata()->id!=reachable.joint_relation.metadata()->id);
     CHECK(shifted.projected_state->terminal_state_set.metadata()->id!=
         reachable.projected_state->terminal_state_set.metadata()->id);
