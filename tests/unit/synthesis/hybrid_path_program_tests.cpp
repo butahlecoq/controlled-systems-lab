@@ -6541,7 +6541,9 @@ TEST_CASE("zero-horizon synthesis and verification use the initial terminal sing
         trajectory,unreachable_system,unreachable_request,{"zero-horizon-no-terminal"},
         {0,8},{4,64,1024});
     REQUIRE(std::holds_alternative<Diagnostics>(rejected));
-    CHECK(std::get<Diagnostics>(rejected).front().field=="hybrid.verification.paths");
+    const auto& rejection_diagnostics=std::get<Diagnostics>(rejected);
+    REQUIRE_FALSE(rejection_diagnostics.empty());
+    CHECK(rejection_diagnostics.front().field=="hybrid.verification.paths");
     CHECK(trajectory.preflight_calls==0);
     CHECK(trajectory.capability_calls==0);
     CHECK(trajectory.build_calls==0);
