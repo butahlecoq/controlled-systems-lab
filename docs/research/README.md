@@ -32,7 +32,7 @@ Literature selection focused on reachability, robust controllable sets, robust/a
 
 Reproduction tooling is in [tools](tools/README.md). It performs extraction, isolated characterization and an independent small discrete baseline check. The English curated documents summarize the archive; the extraction files intentionally preserve original language.
 
-The [missing-input dossier](missing-inputs.md) consolidates the primary data that is still absent for B01-B09, the L05 examples and R29, with the exact handover that would unblock each case. It is written for the archive owner/human reviewer, distinguishes recovered artifacts from candidates, and records the bounded search limits rather than claiming proof of absence. The reviewer disposition is tracked in [#521](https://github.com/butahlecoq/controlled-systems-lab/issues/521).
+The [missing-input dossier](missing-inputs.md) consolidates the primary data that is still absent for B01-B09, the L05 examples and R29, with the exact handover that would unblock each case. It is written for the archive owner/human reviewer, distinguishes recovered artifacts from candidates, and records the bounded search limits rather than claiming proof of absence. The reviewer disposition is tracked in [#521](https://github.com/butahlecoq/controlled-systems-lab/issues/521). B03 is the first artifact closed as `Not required` (owner, 2026-10-20): its historical replay inputs stay unrecovered, and the comparison proceeds as C++ translations of the archived hull algorithms on shared synthetic fixtures, with no reproduction claim.
 
 ## Follow-up proof notes
 

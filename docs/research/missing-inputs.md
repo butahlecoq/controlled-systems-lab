@@ -30,7 +30,8 @@ This document is that inventory. It is deliberately conservative: a value is cal
 | Absent | No matching artifact was found in the searched corpus; not a proof of non-existence |
 | Not printed | The publication itself does not specify the value |
 | Declared unavailable | The owner states that no accessible copy exists or that it cannot be released |
-| Not required | The owner narrows the comparison goal so the historical artifact is unnecessary; no reproduction claim is made and the algorithmic comparison proceeds on corrected-track fixtures |
+| Not required | The owner narrows the comparison goal so the historical artifact is unnecessary; no reproduction claim is made and the algorithmic comparison proceeds on shared synthetic fixtures |
+| Historical replay | Executing a historical baseline with its historical inputs and original software to reproduce a published row; declared not required for B03, whose comparison uses C++ translations on shared fixtures |
 | Corrected track | A new, separately identified experiment that repairs a demonstrable source inconsistency; never labelled a reproduction |
 
 ## 3. Highest-leverage requests
@@ -128,7 +129,7 @@ B03 is no longer an input-recovery priority. The owner directed that B03 compare
 - [ ] The generating revision of the baseline and modified algorithm rows, and the exact machine/library configuration beyond "MATLAB R2014a, i7 2.7 GHz".
 - [ ] The full result arrays behind the 158399/116497 iteration counts.
 
-**Owner disposition (2026-10-20):** the comparison program does **not** seek the exact historical point sets, a replay in the original MATLAB/Python software, or the published runtime/iteration row. B03 is an **algorithm comparison**: translate the baseline and modified hull algorithms from the archived MATLAB/Python sources into C++, run them with the modern algorithms on bit-identical shared fixtures, and compare quality and performance. The missing items above remain missing for a future historical replay, but they do not block this comparison.
+**Owner disposition (2026-10-20):** the comparison program does **not** seek the exact historical point sets, a replay in the original MATLAB/Python software, or the published runtime/iteration row. B03 is an **algorithm comparison**: translate the baseline and modified hull algorithms from the archived MATLAB/Python sources into C++, run them with the modern algorithms on bit-identical shared fixtures, and compare quality and performance. The exact artifact pair behind the L07 baseline and modified rows is not yet named; selecting it is the first port step. The missing items above remain missing for a future historical replay, but they do not block this comparison.
 
 **Historical replay:** not reproducible from the current evidence and not required for B03's algorithm comparison. The published row remains immutable reported context; no B03 reproduction is claimed.
 
@@ -329,7 +330,7 @@ Even where the numbers are transcribed, the following fields are usually absent.
 | Timing scope | End-to-end, solve-only and simulation-only durations are not comparable | Missing for B02, B03, B05, B06 |
 | Provenance and permission | Source identity, authorship and redistribution rights | Missing for every private artifact |
 
-For B03, the fields above are needed only for a historical replay. The algorithm comparison uses shared synthetic fixtures and C++ translations, so their absence does not block B03 work.
+For B03, the run-recovery fields above (original clouds and arrays, seeds, historical solver versions, timing scope, and the generating revision of the reported row) are needed only for a historical replay, which is not required. The algorithm comparison does not use them. Source identity and provenance for the translated algorithm files, plus the model and fixture semantics the port implements, are still required for a faithful C++ port.
 
 ## 6. What is already recovered and should not be requested again
 
@@ -401,7 +402,7 @@ This dossier can close when every artifact in section 4 has one of these disposi
 1. **Supplied** - a hash-identified file or owner-authenticated package is registered and linked to the relevant issue.
 2. **Declared unavailable** - the owner states that no accessible copy exists; the baseline is recorded as unrecoverable and a corrected track may proceed separately.
 3. **Deeper search authorized** - the reviewer names the additional scope and a target date; the item stays open with that scope.
-4. **Not required** - the owner narrows the comparison goal and the historical artifact is unnecessary; the algorithmic comparison proceeds on shared corrected-track fixtures without a reproduction claim.
+4. **Not required** - the owner narrows the comparison goal and the historical artifact is unnecessary; the algorithmic comparison proceeds on shared synthetic fixtures without a reproduction claim.
 
 Closing this review does not close #2, #4, #6, #10 or #8. Those issues retain their own scientific acceptance criteria. It only establishes which inputs exist and which do not.
 

@@ -41,9 +41,9 @@ Example 2's nonlinear initial coordinates are written all equal to one, while th
 
 L07, Table 3.1, PDF p. 53: at t=15, baseline runtime 5.466993 s and modified runtime 3.583817 s; simplex iterations 158399 and 116497 respectively. The report also compares hull construction for 5000 points from Normal, Uniform and Sphere sampling in dimensions 2–5 (PDF p. 54).
 
-Hardware/report context: MATLAB R2014a, Intel Core i7 at 2.7 GHz (PDF p. 55). This differs from the 3.4 GHz computer quoted in several fuel articles. Identify whether runtime includes vertex generation, conversion, plotting, and repeated solves. Seeds and full numerical arrays are absent.
+Hardware/report context: MATLAB R2014a, Intel Core i7 at 2.7 GHz (PDF p. 55). This differs from the 3.4 GHz computer quoted in several fuel articles. Identify whether runtime includes vertex generation, conversion, plotting, and repeated solves (historical-replay question only; the algorithm comparison defines its own timing scope). Seeds and full numerical arrays are absent.
 
-Owner disposition, 2026-10-20: exact historical sets, execution in the original MATLAB/Python software, and the published runtime/iteration row are **not** goals. B03 is an algorithm comparison: translate the baseline and modified hull algorithms into C++, run them on bit-identical shared fixtures, and compare quality and performance with each other and with the modern algorithms. Historical values remain reported context; no B03 reproduction is claimed. See the [missing-inputs dossier](missing-inputs.md).
+Owner disposition, 2026-10-20: exact historical sets, execution in the original MATLAB/Python software, and the published runtime/iteration row are **not** goals. B03 is an algorithm comparison: translate the baseline and modified hull algorithms into C++, run them on bit-identical shared fixtures, and compare quality and performance with each other and with the modern algorithms. Historical values remain reported context; no B03 reproduction is claimed. The exact L07 artifact pair behind the baseline and modified rows is not yet named; selecting it is the first port step. See the [missing-inputs dossier](missing-inputs.md).
 
 ## B04: nominal terminal fuel control
 
