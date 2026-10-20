@@ -1,0 +1,33 @@
+# T-S01 and T-S02 acados cross-check evidence
+
+Status: one native acados OCP-QP solve per canonical case, using the pinned v0.6.0 build recorded in the [MSVC recipe](tools/acados-v0.6.0-native-msvc-build.md). These are single-witness cross-checks, not paired comparisons, benchmarks, or reproduction claims. No timing values are used.
+
+## Canonical inputs
+
+Both cases use horizon 2, scalar dynamics `x[k+1] = x[k] + u[k]`, initial state `x[0] = 0`, unrestricted states, and independent stage controls `u[0], u[1] ∈ [0, 1]`.
+
+| Case | Canonical terminal objective | acados OCP-QP variable terms | Constant term handling |
+|---|---|---|---|
+| T-S01 | `(x[2] − 1)^2`, represented by `Q=2`, `q=−2`, offset `1` | `0.5 Q x² + q x = x² − 2x` | The additive `1` is absent from the acados OCP-QP interface; it does not change the minimizer. Add it back when evaluating the canonical objective. The exact optimal family has `x[2]=1`, equivalently `u[0]+u[1]=1` within the control box. |
+| T-S02 | Constant `3`, represented by a zero residual map and offset `3` | All variable quadratic and linear terms are zero | The zero-cost OCP-QP was accepted as-is. acados reports variable objective `0`; the independent checker evaluates the canonical objective as exactly `3`. No exact-composition fallback was used. |
+
+## Solver results
+
+Both calls used `FULL_CONDENSING_HPIPM`; each returned acados status `0` and process exit code `0`.
+
+| Case | `x[0], x[1], x[2]` | `u[0], u[1]` | acados residuals: stationarity, dynamics, inequality, complementarity | Largest exact violation |
+|---|---|---|---|---|
+| T-S01 | `−1.3234086980704929e−16`, `0.49999999999203265`, `1.0000000000006328` | `0.49999999999203276`, `0.50000000000860023` | `1.5053735771646659e−14`, `0`, `2.3234086980704929e−16`, `6.6420395522627675e−13` | `6.3282712403633923e−13` |
+| T-S02 | `0`, `0.098925751144616922`, `0.19785150228923384` | `0.098925751144616922`, `0.098925751144616922` | `0`, `0`, `9.9999999999999998e−17`, `1.2000359477832567e−15` | `0` |
+
+## Independent exact-arithmetic check
+
+The separate checker parses each 17-digit solver value to its exact IEEE-754 binary rational, then evaluates the initial condition, both dynamics equations, both control bounds, the terminal objective, and T-S01's optimal-family equality without using acados or repository solver/checker code.
+
+- **T-S01:** the raw floating-point tuple is not a literal exact member of the optimal family: `x[2]−1 = 1425/2251799813685248 ≈ 6.3282712403633923e−13`. The exact dynamics residuals are `51545133/2417851639229258349412352` and `−1/18014398509481984`; `x[0]` also differs from zero by `−319980589/2417851639229258349412352`. Controls are exactly inside `[0,1]`. The checker therefore records numerical agreement with a nonzero exact optimal-family violation, rather than claiming exact membership.
+- **T-S02:** all initial, dynamics, and control constraints hold exactly for the captured binary values. The constant objective is exactly `3`; every feasible history is optimal. The zero-variable objective representation was accepted by acados.
+
+The local scratch bundle contains the canonical JSON, harness source, compiled executable, per-case raw logs and exit codes, and exact checker source/output under `D:\work\PhD\builds\acados-v0.6.0-build\smoke\` (`canonical-cases.json`, `ts01_ts02_crosscheck.c`, `ts01_ts02_crosscheck.exe`, `T-S01.log`, `T-S02.log`, `T-S01.exit`, `T-S02.exit`, `check_ts01_ts02.py`, and `exact-check-report.json`). The artifacts remain local as required by the parent specification.
+
+No solver run was repeated. There is no timing or performance claim.
+
