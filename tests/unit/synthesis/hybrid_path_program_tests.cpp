@@ -290,6 +290,49 @@ TEST_CASE("hybrid exact polytope feasibility retains strict and closed bounds") 
     CHECK(feasible(std::move(coupled_conflict),2).state==FeasibilityState::infeasible);
 }
 
+TEST_CASE("hybrid exact polytope proves half-space relation inclusion") {
+    using namespace detail::hybrid_exact;
+    const std::array<double,1> x{1};
+    std::vector<Row> source;
+    REQUIRE(append_equality(x,0,default_max_integer_bits,source));
+
+    std::vector<Row> containing_target;
+    REQUIRE(append_inequality(x,1,false,default_max_integer_bits,containing_target));
+    CHECK(included_in(source,containing_target,1).state==InclusionState::included);
+
+    std::vector<Row> excluding_target;
+    REQUIRE(append_inequality(x,-1,false,default_max_integer_bits,excluding_target));
+    CHECK(included_in(source,excluding_target,1).state==InclusionState::not_included);
+
+    // The strict complement must catch a source point on a closed boundary.
+    std::vector<Row> boundary_target;
+    REQUIRE(append_inequality(x,0,false,default_max_integer_bits,boundary_target));
+    CHECK(included_in(source,boundary_target,1).state==InclusionState::included);
+    boundary_target.front().strict=true;
+    CHECK(included_in(source,boundary_target,1).state==InclusionState::not_included);
+    CHECK(included_in(source,std::span<const Row>{},1).state==
+          InclusionState::included);
+    const std::vector<Row> malformed_source{Row{}};
+    CHECK(included_in(malformed_source,std::span<const Row>{},1).state==
+          InclusionState::unsupported);
+
+    Limits limits;
+    limits.max_operations=0;
+    CHECK(included_in(source,containing_target,1,limits).state==
+          InclusionState::unsupported);
+
+    limits.max_operations=default_max_operations;
+    limits.max_variables=0;
+    CHECK(included_in(source,std::span<const Row>{},1,limits).state==
+          InclusionState::unsupported);
+
+    limits={};
+    std::stop_source cancelled;
+    cancelled.request_stop();
+    CHECK(included_in(source,std::span<const Row>{},1,limits,
+                      cancelled.get_token()).state==InclusionState::cancelled);
+}
+
 TEST_CASE("hybrid exact polytope feasibility handles inconsistent equalities and lower dimension") {
     using namespace detail::hybrid_exact;
     const std::array<double,1> x{1};
