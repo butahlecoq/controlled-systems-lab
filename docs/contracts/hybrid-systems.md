@@ -288,11 +288,17 @@ family coverage or validated assurance.
 numerical domain with scalar states and controls, exactly one bounded
 non-singleton control interval across the horizon, singleton controls at every
 other stage, interval invariants and guards, deterministic exactly representable
-scalar affine H-relation resets, and finite scalar linear or convex quadratic
-terminal objectives. For quadratics, the verifier composes the terminal cost
-into an exact univariate quadratic and checks the point or full interval of
-minimizers, including the lifted convex-program coefficients. Residual-norm
-objectives remain outside this verifier's domain. It
+scalar affine H-relation resets, and finite scalar linear, convex quadratic,
+or bounded residual-norm terminal objectives. For quadratics, the verifier
+composes the terminal cost into an exact univariate quadratic and checks the
+point or full interval of minimizers, including the lifted convex-program
+coefficients. For residual norms, it pulls the rectangular residual map back
+through each independently reconstructed scalar path and checks the squared
+norm polynomial with exact binary floating-point arithmetic. Cross-mode
+comparisons use squared values only where monotonicity preserves the original
+norm ordering; mixed norm/non-norm comparisons that cannot be proved exactly
+are unsupported. Residual maps are limited to 100,000 rows, and every pullback
+operation must be exactly representable. It
 independently propagates the shared control parameter through every flow and
 reset, reconstructs each path's feasible parameter interval and objective,
 checks the complete `(1 + 3H)`-coordinate path relation, and checks every
@@ -308,6 +314,14 @@ controls at distinct stages over any finite scalar horizon; profiles with more
 free controls or higher-dimensional continuous relations remain unsupported. The
 `TwoStageScalarIntervalHybridFamilyVerifier` remains as a two-stage adapter and
 preserves its existing report identifier.
+
+For a reproducible residual-norm example, the test model has `x=1+2u` for
+`0<=u<=1` and objective `||[1;1]x-[2;3]||₂`. Its squared objective is
+`(x-2)²+(x-3)²`, so the exact minimizer is `u=3/4`, `x=5/2`, with residual
+norm `sqrt(1/2)`. The [cost-versus-control illustration](../examples/hybrid-residual-norm.svg)
+shows this analytic case; it is not a timing measurement. The unit fixture and
+independent candidate-face checks are in
+[`hybrid_path_program_tests.cpp`](../../tests/unit/synthesis/hybrid_path_program_tests.cpp).
 
 `TwoParameterScalarPolytopeHybridFamilyVerifier` adds a separate finite-horizon
 slice for scalar states and controls with exactly two bounded non-singleton

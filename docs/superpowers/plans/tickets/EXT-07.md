@@ -317,3 +317,17 @@ row count below the projection's input H-row count. The provider observes its
 working copy before elimination, including when it later returns an empty
 projection. A contract regression for a self-consistent but understated peak
 now complements the over-cap and inconsistent-matrix evidence cases.
+
+The finite-horizon single-parameter scalar verifier now admits bounded
+residual-norm terminal objectives. It independently pulls the rectangular map
+back through each reconstructed path, minimizes the squared residual with
+exact binary64 operations, validates the lifted original and squared solver
+objectives, and checks the complete minimizing interval. Cross-mode comparisons
+preserve the original norm ordering and fail closed when an exact comparison
+cannot be established. Tests cover an interior minimum, a flat full interval
+and rejection of its narrowed subset, a tied residual/linear optimum, a nearby
+strictly worse branch, and inexact pullback/comparison cases. A labelled
+cost-versus-control illustration is linked from the hybrid contract. This adds
+one bounded verifier profile; general residual-norm family verification,
+broader verifier-domain coverage, resource-scale evidence, and publication
+gates remain open.

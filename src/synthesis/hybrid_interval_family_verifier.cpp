@@ -46,10 +46,18 @@ std::optional<Diagnostic> scalar_parameter_terminal_objective_admission_diagnost
             return {};
     } else if(const auto* quadratic=std::get_if<QuadraticTerminal>(&objective->objective)) {
         if(well_formed_scalar_quadratic(*quadratic)) return {};
+    } else if(const auto* residual=std::get_if<ResidualNormTerminal>(&objective->objective)) {
+        if(residual->map.cols==1&&residual->map.rows==residual->target.size()&&
+           residual->map.rows<=kMaximumAdmissibleRows&&
+           residual->map.values.size()==residual->map.rows&&
+           std::all_of(residual->map.values.begin(),residual->map.values.end(),
+               [](double value){return std::isfinite(value);})&&
+           std::all_of(residual->target.begin(),residual->target.end(),
+               [](double value){return std::isfinite(value);})) return {};
     }
     return Diagnostic{DiagnosticCode::unsupported,"hybrid.verification.scalar_parameter_objective",
         "Terminal mode "+terminal_mode.value+
-        ": scalar parameter verification supports finite scalar linear and convex quadratic objectives"};
+        ": scalar parameter verification supports finite scalar linear, convex quadratic, and bounded residual-norm objectives"};
 }
 
 struct Interval {
@@ -562,8 +570,24 @@ struct ScalarParameterBranch {
     double objective_curvature{};
     double objective_offset{};
     double minimum{};
+    bool minimum_is_squared_residual_norm{};
     std::string reason;
 };
+
+std::optional<int> compare_scalar_parameter_minima(double left,bool left_is_squared_residual_norm,
+    double right,bool right_is_squared_residual_norm) {
+    if(left_is_squared_residual_norm==right_is_squared_residual_norm)
+        return left<right?-1:(left>right?1:0);
+    double ordinary_squared=0;
+    if(left_is_squared_residual_norm) {
+        if(right<0) return 1;
+        if(!exact_product(right,right,ordinary_squared)) return {};
+        return left<ordinary_squared?-1:(left>ordinary_squared?1:0);
+    }
+    if(left<0) return -1;
+    if(!exact_product(left,left,ordinary_squared)) return {};
+    return ordinary_squared<right?-1:(ordinary_squared>right?1:0);
+}
 
 Interval scalar_parameter_minimizers(const ScalarParameterBranch& branch) {
     auto result=branch.parameter_interval;
@@ -702,10 +726,50 @@ bool scalar_parameter_program_objective_matches(const HybridPathProgram& program
         }
         return same(linear->offset(),terminal->offset,policy);
     }
-    const auto* terminal=std::get_if<QuadraticTerminal>(&terminal_objective);
     const auto* convex=std::get_if<ConvexProgram>(&program.program);
-    if(!terminal||!convex||!well_formed_scalar_quadratic(*terminal)||
-       terminal->linear.size()!=1||convex->original_objective().dimension()!=width) return false;
+    if(!convex||convex->original_objective().dimension()!=width) return false;
+    if(const auto* residual=std::get_if<ResidualNormTerminal>(&terminal_objective)) {
+        const auto coefficients=convex->original_objective().coefficients();
+        const auto* actual=std::get_if<optimization::ResidualCoefficients>(&coefficients);
+        const auto* reformulation=convex->reformulation();
+        if(!actual||!reformulation||
+           reformulation->transformation()!=optimization::ObjectiveTransformation::residual_norm_squared)
+            return false;
+        const auto reformulated_original=reformulation->original().coefficients();
+        const auto* reformulated_residual=std::get_if<optimization::ResidualCoefficients>(&reformulated_original);
+        if(!reformulated_residual||
+           actual->map.rows()!=residual->map.rows||actual->map.cols()!=width||
+           actual->target.size()!=residual->target.size()||
+           reformulated_residual->map.rows()!=actual->map.rows()||
+           reformulated_residual->map.cols()!=actual->map.cols()||
+           reformulated_residual->target.size()!=actual->target.size()||
+           residual->map.cols!=1||residual->map.rows!=residual->target.size()) return false;
+        const auto squared_coefficients=reformulation->squared().coefficients();
+        const auto solver_coefficients=convex->quadratic_program().objective().coefficients();
+        const auto* squared=std::get_if<optimization::QuadraticCoefficients>(&squared_coefficients);
+        const auto* solver=std::get_if<optimization::QuadraticCoefficients>(&solver_coefficients);
+        if(!squared||!solver||squared->Q.rows()!=width||squared->Q.cols()!=width||
+           solver->Q.rows()!=width||solver->Q.cols()!=width||
+           squared->linear.size()!=width||solver->linear.size()!=width) return false;
+        for(std::size_t row=0;row<residual->map.rows;++row) {
+            if(!same(actual->target[row],residual->target[row],policy)||
+               !same(reformulated_residual->target[row],residual->target[row],policy)) return false;
+            for(std::size_t column=0;column<width;++column) {
+                const double expected=column+1==width?residual->map.values[row]:0;
+                if(!same(actual->map(row,column),expected,policy)||
+                   !same(reformulated_residual->map(row,column),expected,policy)) return false;
+            }
+        }
+        if(!same(squared->offset,solver->offset,policy)) return false;
+        for(std::size_t row=0;row<width;++row) {
+            if(!same(squared->linear[row],solver->linear[row],policy)) return false;
+            for(std::size_t column=0;column<width;++column)
+                if(!same(squared->Q(row,column),solver->Q(row,column),policy)) return false;
+        }
+        return true;
+    }
+    const auto* terminal=std::get_if<QuadraticTerminal>(&terminal_objective);
+    if(!terminal||!well_formed_scalar_quadratic(*terminal)||terminal->linear.size()!=1) return false;
     const auto coefficients=convex->original_objective().coefficients();
     const auto* quadratic=std::get_if<optimization::QuadraticCoefficients>(&coefficients);
     if(!quadratic||quadratic->Q.rows()!=width||quadratic->Q.cols()!=width||
@@ -903,7 +967,40 @@ ScalarParameterBranch evaluate_scalar_parameter_path(const HybridSystem& system,
            !exact_sum(objective_base,objective_linear,objective_base)||
            !exact_sum(objective_base,quadratic->offset,result.objective_offset))
             return unsupported("Quadratic objective composition is not exactly representable");
-    } else return unsupported("Residual-norm terminal objectives are outside the scalar interval verifier domain");
+    } else if(const auto* residual=std::get_if<ResidualNormTerminal>(&objective->objective)) {
+        if(residual->map.cols!=1||residual->map.rows!=residual->target.size()||
+           residual->map.rows>kMaximumAdmissibleRows||residual->map.values.size()!=residual->map.rows)
+            return unsupported("Residual-norm objective shape exceeds the bounded scalar verifier domain");
+        double curvature=0,slope=0,offset=0;
+        for(std::size_t row=0;row<residual->map.rows;++row) {
+            if((row&255U)==0&&cancellation.stop_requested())
+                return unsupported("Verification cancelled while pulling back the residual objective");
+            const double coefficient=residual->map.values[row],target=residual->target[row];
+            if(!std::isfinite(coefficient)||!std::isfinite(target))
+                return unsupported("Residual-norm objective contains a non-finite coefficient");
+            double residual_offset=0,direction=0,offset_product=0,direction_product=0,
+                next=0,product=0;
+            if(!exact_product(coefficient,state_offset,offset_product)||
+               !exact_sum(offset_product,-target,residual_offset)||
+               !exact_product(coefficient,state_gain,direction)||
+               !exact_product(residual_offset,residual_offset,product)||
+               !exact_sum(offset,product,next))
+                return unsupported("Residual-norm offset pullback is not exactly representable");
+            offset=next;
+            if(!exact_product(direction,direction,product)||!exact_sum(curvature,product,next))
+                return unsupported("Residual-norm curvature pullback is not exactly representable");
+            curvature=next;
+            if(!exact_product(residual_offset,direction,product)||
+               !exact_product(2,product,direction_product)||
+               !exact_sum(slope,direction_product,next))
+                return unsupported("Residual-norm linear pullback is not exactly representable");
+            slope=next;
+        }
+        result.objective_curvature=curvature;
+        result.objective_slope=slope;
+        result.objective_offset=offset;
+        result.minimum_is_squared_residual_norm=true;
+    } else return unsupported("Terminal objective is outside the scalar interval verifier domain");
     result.parameter_interval=parameters;
     auto minimizing=scalar_parameter_minimizers(result);
     if(minimizing.empty) return unsupported("Quadratic minimizer is not exactly representable");
@@ -1185,6 +1282,7 @@ HybridFamilyVerificationPreflightResult SingleParameterScalarIntervalHybridFamil
         if(const auto diagnostic=scalar_parameter_terminal_objective_admission_diagnostic(request,terminal_mode))
             return Diagnostics{{*diagnostic}};
     }
+    std::optional<ScalarParameterBranch> global_minimum;
     for(const auto& path:paths) {
         if(cancellation.stop_requested())
             return OperationStopped{StopReason::cancelled,
@@ -1196,6 +1294,19 @@ HybridFamilyVerificationPreflightResult SingleParameterScalarIntervalHybridFamil
         if(branch.state==ScalarParameterBranch::State::unsupported)
             return Diagnostics{{DiagnosticCode::unsupported,"hybrid.verification.scalar_parameter_domain",
                 detail::describe_hybrid_path(path)+": "+branch.reason}};
+        if(branch.state==ScalarParameterBranch::State::feasible) {
+            if(!global_minimum) global_minimum=branch;
+            else {
+                const auto order=compare_scalar_parameter_minima(branch.minimum,
+                    branch.minimum_is_squared_residual_norm,global_minimum->minimum,
+                    global_minimum->minimum_is_squared_residual_norm);
+                if(!order)
+                    return Diagnostics{{DiagnosticCode::unsupported,
+                        "hybrid.verification.scalar_parameter_objective_comparison",
+                        "A cross-branch objective comparison is not exactly representable"}};
+                if(*order<0) global_minimum=branch;
+            }
+        }
     }
     return HybridOperationAdmissionSuccess{
         std::vector<HybridPlannedOperation>(operation_plan.begin(),operation_plan.end())};
@@ -1238,6 +1349,8 @@ HybridFamilyVerificationResult SingleParameterScalarIntervalHybridFamilyVerifier
     std::vector<ScalarParameterBranch> evaluated;
     evaluated.reserve(paths.size());
     std::optional<double> global_minimum;
+    bool global_minimum_is_squared_residual_norm=false;
+    bool objective_comparison_unsupported=false;
     bool unsupported=false;
     for(const auto& path:paths) {
         if(cancellation.stop_requested())
@@ -1248,8 +1361,21 @@ HybridFamilyVerificationResult SingleParameterScalarIntervalHybridFamilyVerifier
             return OperationStopped{StopReason::cancelled,
                 "Scalar interval verification cancelled during branch reconstruction"};
         if(branch.state==ScalarParameterBranch::State::unsupported) unsupported=true;
-        if(branch.state==ScalarParameterBranch::State::feasible&&
-           (!global_minimum||branch.minimum<*global_minimum)) global_minimum=branch.minimum;
+        if(branch.state==ScalarParameterBranch::State::feasible) {
+            if(!global_minimum) {
+                global_minimum=branch.minimum;
+                global_minimum_is_squared_residual_norm=branch.minimum_is_squared_residual_norm;
+            } else {
+                const auto order=compare_scalar_parameter_minima(branch.minimum,
+                    branch.minimum_is_squared_residual_norm,*global_minimum,
+                    global_minimum_is_squared_residual_norm);
+                if(!order) objective_comparison_unsupported=true;
+                else if(*order<0) {
+                    global_minimum=branch.minimum;
+                    global_minimum_is_squared_residual_norm=branch.minimum_is_squared_residual_norm;
+                }
+            }
+        }
         evaluated.push_back(std::move(branch));
     }
 
@@ -1307,7 +1433,12 @@ HybridFamilyVerificationResult SingleParameterScalarIntervalHybridFamilyVerifier
             }
         } else {
             record.feasibility=HybridVerificationStatus::established;
-            const bool optimal=global_minimum&&branch.minimum==*global_minimum;
+            const auto objective_order=global_minimum?compare_scalar_parameter_minima(
+                branch.minimum,branch.minimum_is_squared_residual_norm,*global_minimum,
+                global_minimum_is_squared_residual_norm):std::optional<int>{};
+            const bool comparison_known=objective_order.has_value()&&!objective_comparison_unsupported;
+            const bool optimal=comparison_known&&*objective_order==0;
+            const bool suboptimal=comparison_known&&*objective_order>0;
             const auto objective=std::find_if(request.terminal_objectives.begin(),
                 request.terminal_objectives.end(),[&](const auto& item){
                     return item.mode==paths[i].modes.back();
@@ -1339,16 +1470,23 @@ HybridFamilyVerificationResult SingleParameterScalarIntervalHybridFamilyVerifier
                         "Program relation is outside the verifier's supported representation, exact arithmetic, or resource limits"});
                 }
             }
-            record.objective_optimality=unsupported&&!optimal?HybridVerificationStatus::unsupported:
+            record.objective_optimality=(unsupported||!comparison_known)?HybridVerificationStatus::unsupported:
                 (optimal?HybridVerificationStatus::established:HybridVerificationStatus::refuted);
+            if(!comparison_known) {
+                record.diagnostics.push_back({DiagnosticCode::unsupported,
+                    "hybrid.verification.scalar_parameter_objective_comparison",
+                    "A cross-branch objective comparison is not exactly representable"});
+                coverage_unsupported=true;
+                family_covered=false;
+            }
             if(optimal&&unsupported) {
                 record.objective_optimality=HybridVerificationStatus::unsupported;
                 record.diagnostics.push_back({DiagnosticCode::unsupported,
                     "hybrid.verification.scalar_parameter_global_optimum",
                     "An unsupported branch could change the global optimum"});
             }
-            bool covered=program_valid&&!optimal;
-            if(optimal&&candidate!=candidates.end()&&terminal_objective) {
+            bool covered=program_valid&&suboptimal;
+            if(comparison_known&&optimal&&candidate!=candidates.end()&&terminal_objective) {
                 const auto parameter_coordinate=branch.parameter_control_coordinate;
                 const double parameter=parameter_coordinate<candidate->anchor.size()?
                     candidate->anchor[parameter_coordinate]:std::numeric_limits<double>::quiet_NaN();
@@ -1399,12 +1537,12 @@ HybridFamilyVerificationResult SingleParameterScalarIntervalHybridFamilyVerifier
                 } else record.diagnostics.push_back({DiagnosticCode::evidence_mismatch,
                     "hybrid.verification.scalar_parameter_face",
                     "Optimal candidate does not equal the independently reconstructed minimizer family"});
-            } else if(optimal) {
+            } else if(comparison_known&&optimal) {
                 covered=false;
                 record.diagnostics.push_back({DiagnosticCode::evidence_mismatch,
                     "hybrid.verification.scalar_parameter_missing_face",
                     "An optimal edge path has no candidate continuous minimizer relation"});
-            } else if(candidate!=candidates.end()) {
+            } else if(comparison_known&&candidate!=candidates.end()) {
                 covered=false;
                 record.diagnostics.push_back({DiagnosticCode::evidence_mismatch,
                     "hybrid.verification.scalar_parameter_suboptimal_face",
@@ -1424,7 +1562,7 @@ HybridFamilyVerificationResult SingleParameterScalarIntervalHybridFamilyVerifier
         }
         report.branches.push_back(std::move(record));
     }
-    if(unsupported) {
+    if(unsupported||objective_comparison_unsupported) {
         report.global_objective_optimality=HybridVerificationStatus::unsupported;
         report.complete_family_coverage=HybridVerificationStatus::unsupported;
     } else if(!global_minimum) {

@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="680" height="430" viewBox="0 0 680 430" role="img" aria-labelledby="title description">
+  <title id="title">Residual norm along a scalar hybrid path</title>
+  <desc id="description">For x equals 1 plus 2u and u from 0 to 1, the residual norm has its minimum at u equals three quarters and x equals two and one half.</desc>
+  <rect width="680" height="430" fill="#fff"/>
+  <text x="340" y="30" text-anchor="middle" font-family="Arial, sans-serif" font-size="18" font-weight="700" fill="#18212b">Residual norm along the feasible path</text>
+  <text x="340" y="53" text-anchor="middle" font-family="Arial, sans-serif" font-size="13" fill="#475569">x = 1 + 2u, 0 ≤ u ≤ 1;  ||[1; 1]x − [2; 3]||₂</text>
+  <g stroke="#d9e0e7" stroke-width="1">
+    <path d="M72 320H622 M72 270H622 M72 220H622 M72 170H622 M72 120H622 M72 70H622"/>
+    <path d="M72 70V320 M209.5 70V320 M347 70V320 M484.5 70V320 M622 70V320"/>
+  </g>
+  <g font-family="Arial, sans-serif" font-size="12" fill="#475569" text-anchor="end">
+    <text x="63" y="324">0</text><text x="63" y="274">0.5</text><text x="63" y="224">1.0</text>
+    <text x="63" y="174">1.5</text><text x="63" y="124">2.0</text><text x="63" y="74">2.5</text>
+  </g>
+  <g font-family="Arial, sans-serif" font-size="12" fill="#475569" text-anchor="middle">
+    <text x="72" y="340">0</text><text x="209.5" y="340">0.25</text><text x="347" y="340">0.5</text>
+    <text x="484.5" y="340">0.75</text><text x="622" y="340">1</text>
+  </g>
+  <path d="M72 96.4 L127 123 L182 149.1 L237 174.4 L292 198.3 L347 220 L402 237.5 L457 247.9 L484.5 249.3 L512 247.9 L567 237.5 L622 220" fill="none" stroke="#2369a8" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M484.5 70V320" stroke="#c04436" stroke-width="1.5" stroke-dasharray="5 5"/>
+  <circle cx="484.5" cy="249.3" r="6" fill="#c04436" stroke="#fff" stroke-width="2"/>
+  <path d="M490 244 L520 213" fill="none" stroke="#c04436" stroke-width="1.5"/>
+  <rect x="516" y="180" width="127" height="42" rx="4" fill="#fff" stroke="#c04436"/>
+  <text x="579.5" y="197" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" font-weight="700" fill="#8f2f26">u = 3/4, x = 5/2</text>
+  <text x="579.5" y="213" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" fill="#8f2f26">minimum = √(1/2)</text>
+  <path d="M72 70V320H622" fill="none" stroke="#334155" stroke-width="1.5"/>
+  <text x="347" y="381" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" fill="#18212b">Control parameter u</text>
+  <text x="19" y="195" transform="rotate(-90 19 195)" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" fill="#18212b">Residual norm</text>
+  <text x="340" y="414" text-anchor="middle" font-family="Arial, sans-serif" font-size="11" fill="#64748b">Analytic illustration from the unit fixture; no timing or scalability claim.</text>
+</svg>

@@ -13,6 +13,8 @@
 #include <memory>
 #include <stdexcept>
 #include <string_view>
+#include <type_traits>
+#include <utility>
 
 using namespace csl;
 using namespace csl::synthesis;
@@ -6292,6 +6294,172 @@ TEST_CASE("single-parameter verifier certifies quadratic interior and full optim
     REQUIRE(std::holds_alternative<HybridFamilyVerificationReport>(narrowed_result));
     CHECK(std::get<HybridFamilyVerificationReport>(narrowed_result).complete_family_coverage==
         HybridVerificationStatus::refuted);
+}
+
+TEST_CASE("single-parameter verifier certifies residual-norm optimal faces") {
+    model::HybridMode mode{{"residual-mode"},1,1,{"x"},{"u"}};
+    mode.flow=LinearStage{Matrix{1,1,{1}},Matrix{1,1,{2}},Matrix{1,0,{}},Vector{1}};
+    mode.control_sets={interval("residual-control",0,1)};
+    mode.invariants={UniversalSet{1},UniversalSet{1}};
+    const auto reset=h_set("residual-identity-reset",2,Matrix{0,2,{}},Vector{},
+        Matrix{1,2,{-1,1}},Vector{0});
+    model::HybridSystem system{1,{mode},{{{"residual-loop"},{"residual-mode"},
+        {"residual-mode"},{UniversalSet{1}},{reset}}}};
+    model::HybridRequest request{{{"residual-mode"},{0}},{{"residual-mode"}},
+        {{{"residual-mode"},ResidualNormTerminal{Matrix{2,1,{1,1}},Vector{2,3}},
+            "residual magnitude","units"}}};
+    auto built=build_hybrid_portfolio_programs(system,request,{"residual-interval"},
+        {1,8},{16,64,4096});
+    REQUIRE(std::holds_alternative<std::vector<HybridPathProgram>>(built));
+    auto programs=std::get<std::vector<HybridPathProgram>>(std::move(built));
+    REQUIRE(programs.size()==1);
+    SingleParameterScalarIntervalHybridFamilyVerifier verifier;
+    const auto paths=std::vector<model::HybridPath>{programs.front().path};
+    const auto operation_plan=model::plan_hybrid_operations(paths);
+    const auto preflight=verifier.preflight(system,request,paths,operation_plan,{});
+    REQUIRE(std::holds_alternative<HybridOperationAdmissionSuccess>(preflight));
+    auto& convex=std::get<ConvexProgram>(programs.front().program);
+    const Vector optimum{0,0.75,2.5,2.5};
+    ProgramResult solver{Termination::completed,
+        {convex.quadratic_program().identity(),MathematicalOutcome::optimal,
+            SymbolicArgument{"raw residual-norm oracle","minimum at x=2.5"},{}},
+        optimum,{},"independent residual-norm optimum"};
+    HybridPathOptimalFaceCandidate candidate{programs.front().path,singleton_data(optimum),
+        optimum,std::move(solver),{},"independent singleton residual minimizer",{}};
+    const auto result=verify_hybrid_portfolio_family(verifier,system,request,programs,
+        std::span<const HybridPathOptimalFaceCandidate>(&candidate,1),{1,8},{0,0});
+    REQUIRE(std::holds_alternative<HybridFamilyVerificationReport>(result));
+    const auto& report=std::get<HybridFamilyVerificationReport>(result);
+    CHECK(report.global_objective_optimality==HybridVerificationStatus::established);
+    CHECK(report.complete_family_coverage==HybridVerificationStatus::established);
+
+    request.terminal_objectives.front().objective=ResidualNormTerminal{Matrix{1,1,{0}},Vector{2}};
+    built=build_hybrid_portfolio_programs(system,request,{"flat-residual-interval"},
+        {1,8},{16,64,4096});
+    REQUIRE(std::holds_alternative<std::vector<HybridPathProgram>>(built));
+    programs=std::get<std::vector<HybridPathProgram>>(std::move(built));
+    auto& flat_convex=std::get<ConvexProgram>(programs.front().program);
+    const Vector flat_anchor{0,0.5,2,2};
+    ProgramResult flat_solver{Termination::completed,
+        {flat_convex.quadratic_program().identity(),MathematicalOutcome::optimal,
+            SymbolicArgument{"raw flat residual-norm oracle","every control u in [0,1] minimizes"},{}},
+        flat_anchor,{},"independent flat residual-norm optimum"};
+    HybridPathOptimalFaceCandidate full_flat{programs.front().path,programs.front().joint_relation,
+        flat_anchor,std::move(flat_solver),{},"independent full residual minimizer interval",{}};
+    const auto full_flat_result=verify_hybrid_portfolio_family(verifier,system,request,programs,
+        std::span<const HybridPathOptimalFaceCandidate>(&full_flat,1),{1,8},{0,0});
+    REQUIRE(std::holds_alternative<HybridFamilyVerificationReport>(full_flat_result));
+    CHECK(std::get<HybridFamilyVerificationReport>(full_flat_result).complete_family_coverage==
+        HybridVerificationStatus::established);
+
+    ProgramResult narrowed_solver{Termination::completed,
+        {flat_convex.quadratic_program().identity(),MathematicalOutcome::optimal,
+            SymbolicArgument{"raw flat residual-norm oracle","every control u in [0,1] minimizes"},{}},
+        flat_anchor,{},"independent flat residual-norm optimum"};
+    HybridPathOptimalFaceCandidate narrowed{programs.front().path,singleton_data(flat_anchor),
+        flat_anchor,std::move(narrowed_solver),{},"deliberately narrowed residual minimizers",{}};
+    const auto narrowed_result=verify_hybrid_portfolio_family(verifier,system,request,programs,
+        std::span<const HybridPathOptimalFaceCandidate>(&narrowed,1),{1,8},{0,0});
+    REQUIRE(std::holds_alternative<HybridFamilyVerificationReport>(narrowed_result));
+    CHECK(std::get<HybridFamilyVerificationReport>(narrowed_result).complete_family_coverage==
+        HybridVerificationStatus::refuted);
+}
+
+TEST_CASE("single-parameter residual norms compare with other terminal modes without false ties") {
+    const auto make_mode=[](model::HybridModeId id) {
+        model::HybridMode mode{std::move(id),1,1,{"x"},{"u"}};
+        mode.flow=LinearStage{Matrix{1,1,{1}},Matrix{1,1,{2}},Matrix{1,0,{}},Vector{1}};
+        mode.control_sets={interval("mode-control",0,1)};
+        mode.invariants={UniversalSet{1},UniversalSet{1}};
+        return mode;
+    };
+    const auto reset=h_set("shared-identity-reset",2,Matrix{0,2,{}},Vector{},
+        Matrix{1,2,{-1,1}},Vector{0});
+    model::HybridSystem system{1,
+        {make_mode({"source"}),make_mode({"residual-target"}),make_mode({"linear-target"}),
+         make_mode({"near-target"})},
+        {{{"to-residual"},{"source"},{"residual-target"},{UniversalSet{1}},{reset}},
+         {{"to-linear"},{"source"},{"linear-target"},{UniversalSet{1}},{reset}},
+         {{"to-near"},{"source"},{"near-target"},{UniversalSet{1}},{reset}}}};
+    model::HybridRequest request{{{"source"},{0}},
+        {{"residual-target"},{"linear-target"},{"near-target"}},
+        {{{"residual-target"},ResidualNormTerminal{Matrix{1,1,{1}},Vector{0}},"cost","units"},
+         {{"linear-target"},LinearTerminal{Vector{1},0},"cost","units"},
+         {{"near-target"},LinearTerminal{Vector{1},0x1p-26},"cost","units"}}};
+    auto built=build_hybrid_portfolio_programs(system,request,{"mixed-terminal-objectives"},
+        {3,8},{32,128,4096});
+    REQUIRE(std::holds_alternative<std::vector<HybridPathProgram>>(built));
+    auto programs=std::get<std::vector<HybridPathProgram>>(std::move(built));
+    REQUIRE(programs.size()==3);
+    std::vector<HybridPathOptimalFaceCandidate> candidates;
+    const Vector optimum{0,0,1,1};
+    for(const auto& program:programs) {
+        if(program.path.modes.back().value=="near-target") continue;
+        const auto& identity=std::visit([](const auto& value) -> const ProgramIdentity& {
+            if constexpr(std::is_same_v<std::decay_t<decltype(value)>,LinearProgram>) return value.identity();
+            else return value.quadratic_program().identity();
+        },program.program);
+        ProgramResult solver{Termination::completed,
+            {identity,MathematicalOutcome::optimal,
+                SymbolicArgument{"raw mixed-mode oracle","both exact minima equal one"},{}},
+            optimum,{},"independent mixed-mode optimum"};
+        candidates.push_back({program.path,singleton_data(optimum),optimum,std::move(solver),{},
+            "independent mixed-mode minimizer",{}});
+    }
+    SingleParameterScalarIntervalHybridFamilyVerifier verifier;
+    const auto result=verify_hybrid_portfolio_family(verifier,system,request,programs,candidates,
+        {3,8},{0,0});
+    REQUIRE(std::holds_alternative<HybridFamilyVerificationReport>(result));
+    const auto& report=std::get<HybridFamilyVerificationReport>(result);
+    CHECK(report.global_objective_optimality==HybridVerificationStatus::established);
+    CHECK(report.complete_family_coverage==HybridVerificationStatus::established);
+    REQUIRE(report.branches.size()==3);
+    CHECK(report.branches[0].objective_optimality==HybridVerificationStatus::established);
+    CHECK(report.branches[1].objective_optimality==HybridVerificationStatus::established);
+    CHECK(report.branches[2].objective_optimality==HybridVerificationStatus::refuted);
+
+    request.terminal_objectives.back().objective=LinearTerminal{Vector{1},0x1p-27};
+    built=build_hybrid_portfolio_programs(system,request,{"inexact-cross-objective-comparison"},
+        {3,8},{32,128,4096});
+    REQUIRE(std::holds_alternative<std::vector<HybridPathProgram>>(built));
+    programs=std::get<std::vector<HybridPathProgram>>(std::move(built));
+    const auto inexact_paths=std::vector<model::HybridPath>{
+        programs[0].path,programs[1].path,programs[2].path};
+    const auto inexact_plan=model::plan_hybrid_operations(inexact_paths);
+    const auto inexact_preflight=verifier.preflight(system,request,inexact_paths,inexact_plan,{});
+    REQUIRE(std::holds_alternative<Diagnostics>(inexact_preflight));
+    CHECK(std::get<Diagnostics>(inexact_preflight).front().field==
+        "hybrid.verification.scalar_parameter_objective_comparison");
+    const auto inexact_comparison=verify_hybrid_portfolio_family(verifier,system,request,programs,{},
+        {3,8},{0,0});
+    REQUIRE(std::holds_alternative<Diagnostics>(inexact_comparison));
+    CHECK(std::get<Diagnostics>(inexact_comparison).front().field==
+        "hybrid.verification.scalar_parameter_objective_comparison");
+}
+
+TEST_CASE("single-parameter residual-norm verifier rejects inexact objective pullbacks") {
+    model::HybridMode mode{{"inexact-residual-mode"},1,1,{"x"},{"u"}};
+    mode.flow=LinearStage{Matrix{1,1,{1}},Matrix{1,1,{0.2}},Matrix{1,0,{}},Vector{0}};
+    mode.control_sets={interval("inexact-residual-control",0,1)};
+    mode.invariants={UniversalSet{1},UniversalSet{1}};
+    const auto reset=h_set("inexact-residual-identity",2,Matrix{0,2,{}},Vector{},
+        Matrix{1,2,{-1,1}},Vector{0});
+    model::HybridSystem system{1,{mode},{{{"inexact-residual-loop"},{"inexact-residual-mode"},
+        {"inexact-residual-mode"},{UniversalSet{1}},{reset}}}};
+    model::HybridRequest request{{{"inexact-residual-mode"},{0}},{{"inexact-residual-mode"}},
+        {{{"inexact-residual-mode"},ResidualNormTerminal{Matrix{1,1,{0.1}},Vector{0}},
+            "residual magnitude","units"}}};
+    auto built=build_hybrid_portfolio_programs(system,request,{"inexact-residual-pullback"},
+        {1,8},{16,64,4096});
+    REQUIRE(std::holds_alternative<std::vector<HybridPathProgram>>(built));
+    const auto& programs=std::get<std::vector<HybridPathProgram>>(built);
+    const auto paths=std::vector<model::HybridPath>{programs.front().path};
+    const auto operation_plan=model::plan_hybrid_operations(paths);
+    SingleParameterScalarIntervalHybridFamilyVerifier verifier;
+    const auto preflight=verifier.preflight(system,request,paths,operation_plan,{});
+    REQUIRE(std::holds_alternative<Diagnostics>(preflight));
+    CHECK(std::get<Diagnostics>(preflight).front().field==
+        "hybrid.verification.scalar_parameter_domain");
 }
 
 TEST_CASE("exact singleton hybrid verifier handles empty branches and rejects continuous domains") {
