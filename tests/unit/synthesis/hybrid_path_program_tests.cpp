@@ -1174,8 +1174,9 @@ TEST_CASE("projected hybrid reachability returns the literal terminal interval a
     const auto negative_result=compute_hybrid_path_reachability(negative_adapter,
         negative_control.first,negative_control.second,path,{4,16,128});
     REQUIRE(std::holds_alternative<HybridPathReachability>(negative_result));
-    const auto& negative_relation=std::get<sets::HRepresentation>(
-        std::get<HybridPathReachability>(negative_result).joint_relation.representation());
+    const auto negative_representation=
+        std::get<HybridPathReachability>(negative_result).joint_relation.representation();
+    const auto& negative_relation=std::get<sets::HRepresentation>(negative_representation);
     CHECK(satisfies(negative_relation,{0.0,-0.25,-0.25,-0.25}));
 
     auto scaled=projected_interval_fixture();
@@ -1185,8 +1186,9 @@ TEST_CASE("projected hybrid reachability returns the literal terminal interval a
     const auto scaled_result=compute_hybrid_path_reachability(scaled_adapter,
         scaled.first,scaled.second,path,{4,16,128});
     REQUIRE(std::holds_alternative<HybridPathReachability>(scaled_result));
-    const auto& scaled_terminal=std::get<sets::HRepresentation>(
-        std::get<HybridPathReachability>(scaled_result).projected_state->terminal_state_set.representation());
+    const auto scaled_representation=
+        std::get<HybridPathReachability>(scaled_result).projected_state->terminal_state_set.representation();
+    const auto& scaled_terminal=std::get<sets::HRepresentation>(scaled_representation);
     CHECK(satisfies(scaled_terminal,{0.0}));
     CHECK(satisfies(scaled_terminal,{0.5}));
     CHECK_FALSE(satisfies(scaled_terminal,{0.625}));
