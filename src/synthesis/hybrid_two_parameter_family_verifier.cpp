@@ -637,6 +637,7 @@ TwoParameterScalarPolytopeHybridFamilyVerifier::verify(
       {},
       HybridVerificationStatus::not_checked,
       HybridVerificationStatus::not_checked,
+      {},
       {}};
   report.branches.reserve(paths.size());
   bool all = true, any_unsupported = false;

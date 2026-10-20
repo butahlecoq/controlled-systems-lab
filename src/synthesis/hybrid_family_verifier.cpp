@@ -433,7 +433,7 @@ HybridFamilyVerificationResult ExactSingletonHybridFamilyVerifier::verify(
 
     HybridFamilyVerificationReport report{"csl.hybrid.exact-singleton","1",policy,
         Assurance::numerical,std::vector<HybridPath>(paths.begin(),paths.end()),{},
-        HybridVerificationStatus::not_checked,HybridVerificationStatus::not_checked,{}};
+        HybridVerificationStatus::not_checked,HybridVerificationStatus::not_checked,{}, {}};
     report.branches.reserve(paths.size());
     bool coverage=true;
     bool coverage_unsupported=false;

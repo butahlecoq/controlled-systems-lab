@@ -5,8 +5,11 @@
 #include <csl/optimization/convex_backend.hpp>
 #include <csl/optimization/linear_program.hpp>
 #include <csl/registry/provider.hpp>
+#include <optional>
 #include <span>
+#include <string>
 #include <variant>
+#include <vector>
 
 namespace csl::synthesis {
 
@@ -291,6 +294,17 @@ struct HybridOperationResourceSummary {
     std::size_t max_cumulative_rows{};
     std::size_t max_cumulative_matrix_elements{};
 };
+// Branch coverage of candidate solver-provider provenance. This counts
+// submitted lineage records, not runtime provider invocations.
+struct HybridCandidateProviderSummary {
+    std::string port;
+    std::string requested_method_id;
+    std::optional<std::string> requested_version;
+    std::optional<std::string> actual_provider_id;
+    std::optional<std::string> actual_provider_version;
+    std::size_t branch_count{};
+    std::size_t provenance_record_count{};
+};
 struct HybridFamilyVerificationReport {
     std::string verifier_id;
     std::string verifier_version;
@@ -302,6 +316,8 @@ struct HybridFamilyVerificationReport {
     HybridVerificationStatus complete_family_coverage{HybridVerificationStatus::not_checked};
     // Derived from the validated per-path traces by the portfolio wrapper.
     std::vector<HybridOperationResourceSummary> operation_resources{};
+    // Grouped candidate lineage coverage; branch records remain authoritative.
+    std::vector<HybridCandidateProviderSummary> candidate_provider_coverage{};
 };
 using HybridFamilyVerificationResult = std::variant<HybridFamilyVerificationReport,
     Diagnostics, OperationStopped>;

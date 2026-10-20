@@ -584,7 +584,7 @@ public:
         const auto coverage=claim_coverage_only?HybridVerificationStatus::established:aggregate;
         return HybridFamilyVerificationReport{"fixture.hybrid.verifier","1",policy,
             Assurance::numerical,std::move(inventory),std::move(branches),
-            global,coverage,{}};
+            global,coverage,{}, {}};
     }
 };
 
@@ -3196,6 +3196,11 @@ TEST_CASE("two parameter scalar verifier certifies a coupled polygon and "
   std::vector<HybridPathOptimalFaceCandidate> faces;
   for (const auto &program : programs)
     faces.push_back(exact_candidate(program, Vector(7, 0)));
+  for (auto &face : faces)
+    face.providers.push_back({"linear_program",
+                             {"fixture.lp", std::string{"1.0"}},
+                             registry::Identity{{"fixture.lp"}, "1.0"}});
+  faces.front().providers.push_back(faces.front().providers.back());
   const auto tuple = [](double u0, double u1) {
     return Vector{0, u0, u0, u0, u1, u0 + u1, u0 + u1};
   };
@@ -3301,6 +3306,16 @@ TEST_CASE("two parameter scalar verifier certifies a coupled polygon and "
   CHECK(shared_mode_flow->max_rows_added == 1);
   CHECK(shared_mode_flow->max_cumulative_rows == 8);
   CHECK(shared_mode_flow->max_cumulative_matrix_elements == 56);
+  REQUIRE(report.candidate_provider_coverage.size() == 1);
+  const auto &provider_coverage = report.candidate_provider_coverage.front();
+  CHECK(provider_coverage.port == "linear_program");
+  CHECK(provider_coverage.requested_method_id == "fixture.lp");
+  CHECK(provider_coverage.requested_version == std::optional<std::string>{"1.0"});
+  CHECK(provider_coverage.actual_provider_id == std::optional<std::string>{"fixture.lp"});
+  CHECK(provider_coverage.actual_provider_version == std::optional<std::string>{"1.0"});
+  CHECK(provider_coverage.branch_count == 2);
+  CHECK(provider_coverage.provenance_record_count == 3);
+  CHECK(report.branches.front().candidate_providers.size() == 2);
   CHECK(report.branches.front().path.edges.front().value ==
         "two-parameter-enter-full");
   const auto full_path_record = std::find_if(

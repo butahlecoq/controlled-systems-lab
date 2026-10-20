@@ -64,9 +64,11 @@ dimensions, catalogue counts, request limits, profile admission, and a complete
 allowed-path count when enumeration finishes; its unit contract is exercised
 for both scalar and dimension-changing mode catalogues. Verified family reports
 retain each admitted path's ordered operation/resource trace and candidate
-provider lineage, and include cross-branch operation maxima grouped by stage,
-mode/edge and composer implementation. These request-scoped summaries do not
-imply provider capacity or larger-profile scalability.
+provider lineage. They include cross-branch operation maxima grouped by stage,
+mode/edge and composer implementation, plus candidate-provider coverage grouped
+by requested/actual identity. Provider coverage counts attributed candidate
+records, not runtime invocations. These request-scoped summaries do not imply
+provider capacity or larger-profile scalability.
 Higher-dimensional free-control domains and general continuous-polytope
 verification remain open EXT-07 acceptance items. Main-only Pages publication
 and live URL/hash verification remain pending.

@@ -1047,6 +1047,43 @@ HybridFamilyVerificationResult verify_hybrid_portfolio_family(
                 operation.cumulative_matrix_elements);
         }
     }
+    report.candidate_provider_coverage.clear();
+    for(const auto& branch:report.branches) {
+        std::vector<std::size_t> summaries_in_branch;
+        for(const auto& provenance:branch.candidate_providers) {
+            const auto summary=std::find_if(report.candidate_provider_coverage.begin(),
+                report.candidate_provider_coverage.end(),[&](const auto& item) {
+                    return item.port==provenance.port&&
+                        item.requested_method_id==provenance.requested.id.value&&
+                        item.requested_version==provenance.requested.version&&
+                        item.actual_provider_id==(provenance.actual
+                            ?std::optional<std::string>{provenance.actual->id.value}:std::nullopt)&&
+                        item.actual_provider_version==(provenance.actual
+                            ?std::optional<std::string>{provenance.actual->version}:std::nullopt);
+                });
+            std::size_t index{};
+            if(summary==report.candidate_provider_coverage.end()) {
+                index=report.candidate_provider_coverage.size();
+                report.candidate_provider_coverage.push_back({provenance.port,
+                    provenance.requested.id.value,provenance.requested.version,
+                    provenance.actual
+                        ?std::optional<std::string>{provenance.actual->id.value}:std::nullopt,
+                    provenance.actual
+                        ?std::optional<std::string>{provenance.actual->version}:std::nullopt,
+                    0,0});
+            } else {
+                index=static_cast<std::size_t>(std::distance(
+                    report.candidate_provider_coverage.begin(),summary));
+            }
+            auto& aggregate=report.candidate_provider_coverage[index];
+            ++aggregate.provenance_record_count;
+            if(std::find(summaries_in_branch.begin(),summaries_in_branch.end(),index)==
+               summaries_in_branch.end()) {
+                ++aggregate.branch_count;
+                summaries_in_branch.push_back(index);
+            }
+        }
+    }
     const auto adjudicated=[](HybridVerificationStatus status) {
         return status==HybridVerificationStatus::established||
             status==HybridVerificationStatus::refuted;
