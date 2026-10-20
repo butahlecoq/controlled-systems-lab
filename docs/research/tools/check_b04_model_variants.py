@@ -14,7 +14,7 @@ functionals of their own plane.
 
 The model structure that the plane argument needs is read from the manifest
 and asserted, not assumed: the transition matrix, the horizon, the stage
-length and the printed control-interval status.
+length and the physical time window.
 """
 
 import argparse
@@ -27,7 +27,6 @@ ROOT = Path(__file__).resolve().parents[3]
 MANIFEST = ROOT / "benchmarks/scenarios/b04-historical.json"
 SAVED = ROOT / "docs/research/evidence/b04-saved-witnesses.json"
 
-EXPECTED_A = [[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]]
 EXPECTED_STOCK_COUPLING = Fraction(-25, 4)  # N[1,0] = N[3,2] = -6.25 per stage
 NOMINAL_OXIDIZER_FLOW = Fraction(1200)
 NOMINAL_FUEL_FLOW = Fraction(450)
@@ -85,12 +84,15 @@ def model_structure(manifest):
     horizon = int(problem["horizon"])
     step_seconds = rational(problem["step_seconds"])
     total_seconds = horizon * step_seconds
-    require(step_seconds * horizon == total_seconds, "inconsistent stage length")
+    window = problem["physical_time_seconds"]
+    require(total_seconds == rational(window[1]) - rational(window[0]),
+            "the derived stage window does not match the printed physical time")
     return {
         "A": matrix,
         "horizon": horizon,
         "step_seconds": fraction_text(step_seconds),
         "total_seconds": fraction_text(total_seconds),
+        "physical_time_seconds": [fraction_text(rational(value)) for value in window],
         "stock_coupling": fraction_text(EXPECTED_STOCK_COUPLING),
     }
 
@@ -119,10 +121,11 @@ def plane_weights(variant):
     """Return coprime integer weights (w1, w3) with w1*B1 + w3*B3 = 0.
 
     A and B act on the four coordinates (oxidizer flow, oxidizer working
-    stock, fuel flow, fuel working stock). The stock rows of the transition
-    matrix are the proportional rows (-25/4)*(B1, 0, 0, B3) of N*B, so a
-    weight pair that annihilates the control direction also annihilates the
-    stock direction and defines a control-invariant functional.
+    stock, fuel flow, fuel working stock). The stock rows of N*B are
+    (-25/4) times the corresponding rows of B, that is row 2 is
+    (-25/4)*(B1, 0, 0, 0) and row 4 is (-25/4)*(0, 0, B3, 0), so a weight
+    pair that annihilates the control direction also annihilates the stock
+    direction and defines a control-invariant functional.
     """
     b1, b3 = variant["B"][0], variant["B"][2]
     require(b1 > 0 and b3 < 0, "unexpected control sign pattern")
@@ -419,22 +422,36 @@ def initial_mixture_ratios(manifest, variants):
 
 
 def source_identities(manifest, saved):
-    """Public source identities of the two transcriptions, without private paths."""
+    """Public source identities of the two transcriptions, without private paths.
+
+    A source without a byte hash keeps its DOI or URL instead, so that no
+    entry carries a null digest.
+    """
     entries = []
     for entry in manifest["sources"]:
-        entries.append({
+        item = {
             "id": entry["id"],
-            "sha256": entry.get("sha256"),
             "role": entry.get("role", "printed article behind the transcribed model"),
-            "pdf_pages": entry.get("pdf_pages"),
-        })
+        }
+        if entry.get("sha256"):
+            item["sha256"] = entry["sha256"]
+        if entry.get("doi"):
+            item["doi"] = entry["doi"]
+        if entry.get("url"):
+            item["url"] = entry["url"]
+        if entry.get("pdf_pages"):
+            item["pdf_pages"] = entry["pdf_pages"]
+        entries.append(item)
     for entry in saved["sources"]:
-        entries.append({
+        item = {
             "id": entry["id"],
-            "sha256": entry.get("sha256"),
             "role": entry.get("role"),
-            "bytes": entry.get("bytes"),
-        })
+        }
+        if entry.get("sha256"):
+            item["sha256"] = entry["sha256"]
+        if entry.get("bytes"):
+            item["bytes"] = entry["bytes"]
+        entries.append(item)
     return entries
 
 

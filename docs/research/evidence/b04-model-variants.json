@@ -31,6 +31,10 @@
     "horizon": 16,
     "step_seconds": "25/4",
     "total_seconds": "100/1",
+    "physical_time_seconds": [
+      "0/1",
+      "100/1"
+    ],
     "stock_coupling": "-25/4"
   },
   "published_terminal_state": [
@@ -332,8 +336,8 @@
   "sources": [
     {
       "id": "L11",
-      "sha256": "e04c2f1609e2580c8878ab7fb91bc41151ccc8e0cf1f5deac4cef9fd860ce147",
       "role": "printed article behind the transcribed model",
+      "sha256": "e04c2f1609e2580c8878ab7fb91bc41151ccc8e0cf1f5deac4cef9fd860ce147",
       "pdf_pages": [
         12,
         13,
@@ -342,38 +346,38 @@
     },
     {
       "id": "R40",
-      "sha256": null,
       "role": "published_counterpart_with_tables",
-      "pdf_pages": null
+      "doi": "10.1134/S0002338819020094",
+      "url": "https://sciencejournals.ru/view-article/?a=TeorSist1902009Kalev&j=teorsist&n=1&v=0&y=2019"
     },
     {
       "id": "A01",
-      "sha256": "e7010e0a830595029b9876b1511558514cec8398d2ffa290313a566ba6997558",
       "role": "Nominal terminal-control example, T=12, different X0 and B",
+      "sha256": "e7010e0a830595029b9876b1511558514cec8398d2ffa290313a566ba6997558",
       "bytes": 8645
     },
     {
       "id": "A39",
-      "sha256": "1120e70dbf3a300d1f8c9ee19d1082632c3adbb24f5ac445802954b164181f38",
       "role": "B04 saved nominal/nonlinear witnesses and frozen coordinates; inert MAT graphics",
+      "sha256": "1120e70dbf3a300d1f8c9ee19d1082632c3adbb24f5ac445802954b164181f38",
       "bytes": 1131239
     },
     {
       "id": "A40",
-      "sha256": "581a91dbb1041973f9559a6cac07657279a5e3f40091f04606216be0f97bac46",
       "role": "B04 nonlinear replay kernel; original U workspace unavailable",
+      "sha256": "581a91dbb1041973f9559a6cac07657279a5e3f40091f04606216be0f97bac46",
       "bytes": 3819
     },
     {
       "id": "A41",
-      "sha256": "db1f29e55e9e3558b4f9eb4bd52c86931f210233d746a986610dab08102b3891",
       "role": "B04 article with Table 2 and matching figures; private visual audit anchors",
+      "sha256": "db1f29e55e9e3558b4f9eb4bd52c86931f210233d746a986610dab08102b3891",
       "bytes": 858237
     },
     {
       "id": "A42",
-      "sha256": "ccbe6aac3e9d265999b135a780cbd4fff060d8db574bc747f27e8216c824692d",
       "role": "Companion first-witness phase plot; privately inspected",
+      "sha256": "ccbe6aac3e9d265999b135a780cbd4fff060d8db574bc747f27e8216c824692d",
       "bytes": 106169
     }
   ],
