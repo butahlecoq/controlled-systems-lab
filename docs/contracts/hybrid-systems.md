@@ -301,12 +301,13 @@ recorded separately. The implementation includes an exact integral singleton
 verifier, a one-step scalar interval verifier, and a finite-horizon
 single-parameter scalar interval verifier. A separate
 `TwoParameterScalarPolytopeHybridFamilyVerifier` supports exactly two free
-controls in a bounded two-stage scalar profile. These implementations require
-their documented scalar interval or two-dimensional polygon domains and
-deterministic scalar affine resets; they do not cover more than two free
-controls, general continuous polytope families, or general-dimensional
-relations. The bounded implementations do not establish the full EXT-07
-acceptance contract.
+controls in a bounded two-stage scalar profile. The exact singleton verifier
+has the checked-integral domain described above. The continuous scalar
+interval and polygon verifiers require their documented scalar interval or
+two-dimensional polygon domains and deterministic scalar affine resets. They
+do not cover more than two free controls, general continuous polytope families,
+or general-dimensional continuous relations. These bounded implementations do
+not establish the full EXT-07 acceptance contract.
 
 ## Required request-admission contract
 
