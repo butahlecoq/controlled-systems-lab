@@ -141,6 +141,14 @@ and exterior rejection, and provider/operation row evidence. This single
 bounded fixture strengthens continuous projection coverage for rectangular
 set-valued resets; it does not establish broader polytope or resource scaling.
 
+A second public contract oracle makes both consecutive reset relations
+set-valued on the same 1→2→1 path. The first admits an existential `q ∈ [0,1]`;
+the second admits terminal `y ∈ [0,q]`. Direct inspection of both local H
+relations and the raw equations gives terminal projection `[0,1]`. The test
+checks endpoint/interior membership, exterior rejection, and retained relation
+row evidence. This is one finite composition case, not general reset-resource
+scaling evidence.
+
 The exact linear-H family-verifier tests now also include a one-step scalar
 continuous reset family. With `u ∈ [0, 1]`, `x_pre = x0 = 0`, and existential
 reset constraint `0 ≤ y - x_pre ≤ 1`, minimizing `y` leaves the full optimal

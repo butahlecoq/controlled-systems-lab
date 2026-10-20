@@ -83,6 +83,12 @@ SetHandle reset_two_to_one(std::string id) {
         Matrix{1,3,{-1,-1,1}},Vector{0});
 }
 
+SetHandle set_valued_reset_two_to_one(std::string id) {
+    // Given pre-state (p,q), the post-state y ranges over [0,q].
+    return h_relation(std::move(id),3,{"pre.p","pre.q","post.y"},
+        Matrix{2,3,{0,0,-1,0,-1,1}},Vector{0,0},Matrix{0,3,{}},{});
+}
+
 std::pair<model::HybridSystem,model::HybridRequest> interval_system() {
     model::HybridMode source{{"source"},1,1,{"x"},{"u"}};
     source.flow=LinearStage{Matrix{1,1,{1}},Matrix{1,1,{1}},Matrix{1,0,{}},Vector{0}};
@@ -411,6 +417,77 @@ TEST_CASE("general projected reachability independently checks an existential di
     CHECK(evidence.maximum_projection_rows==64);
     CHECK(evidence.input_rows<=evidence.maximum_projection_rows);
     CHECK(evidence.output_rows<=evidence.maximum_projection_rows);
+}
+
+TEST_CASE("general projected reachability composes two successive existential resets") {
+    auto [system,request]=two_stage_dimension_change_system();
+    system.edges.front().reset_relations.front()=
+        set_valued_reset_one_to_two("contract.first.existential-reset");
+    system.edges.back().reset_relations[1]=
+        set_valued_reset_two_to_one("contract.second.existential-reset");
+    const auto path=two_stage_dimension_change_path();
+    GeneralProjectedStateHybridReachabilityAdapter adapter{64};
+
+    const auto result=compute_hybrid_path_reachability(adapter,system,request,path,{16,128,1024});
+    REQUIRE(std::holds_alternative<HybridPathReachability>(result));
+    const auto& reachability=std::get<HybridPathReachability>(result);
+    CHECK(reachability.path==path);
+    CHECK(reachability.joint_relation.metadata()->set.dimension==8);
+    REQUIRE(reachability.projected_state.has_value());
+    const auto projected=reachability.projected_state->terminal_state_set.representation();
+    REQUIRE(std::holds_alternative<sets::HRepresentation>(projected));
+    const auto& terminal=std::get<sets::HRepresentation>(projected);
+
+    // The first reset gives p=0 and existential q in [0,1]. The second reset
+    // gives y in [0,q], so eliminating both reset witnesses yields [0,1].
+    CHECK(contains(terminal,0.0));
+    CHECK(contains(terminal,0.25));
+    CHECK(contains(terminal,1.0));
+    CHECK_FALSE(contains(terminal,-0.01));
+    CHECK_FALSE(contains(terminal,1.01));
+    bool lower_is_tight=false;
+    bool upper_is_tight=false;
+    for(std::size_t row=0;row<terminal.inequalities.rows();++row) {
+        const auto coefficient=terminal.inequalities(row,0);
+        const auto bound=terminal.upper_bounds[row];
+        if(coefficient<0.0) lower_is_tight=lower_is_tight || bound/(-coefficient)==0.0;
+        if(coefficient>0.0) upper_is_tight=upper_is_tight || bound/coefficient==1.0;
+    }
+    CHECK(lower_is_tight);
+    CHECK(upper_is_tight);
+
+    const auto first_reset=sets::from_handle(system.edges.front().reset_relations.front());
+    const auto second_reset=sets::from_handle(system.edges.back().reset_relations[1]);
+    REQUIRE(std::holds_alternative<sets::SetData>(first_reset));
+    REQUIRE(std::holds_alternative<sets::SetData>(second_reset));
+    const auto first_rep=std::get<sets::SetData>(first_reset).representation();
+    const auto second_rep=std::get<sets::SetData>(second_reset).representation();
+    REQUIRE(std::holds_alternative<sets::HRepresentation>(first_rep));
+    REQUIRE(std::holds_alternative<sets::HRepresentation>(second_rep));
+    const auto& first_h=std::get<sets::HRepresentation>(first_rep);
+    const auto& second_h=std::get<sets::HRepresentation>(second_rep);
+    REQUIRE(first_h.equalities.rows()==1);
+    REQUIRE(first_h.inequalities.rows()==2);
+    CHECK(first_h.equalities(0,0)==-1.0);
+    CHECK(first_h.equalities(0,1)==1.0);
+    CHECK(first_h.inequalities(0,2)==-1.0);
+    CHECK(first_h.inequalities(1,2)==1.0);
+    REQUIRE(second_h.equalities.rows()==0);
+    REQUIRE(second_h.inequalities.rows()==2);
+    CHECK(second_h.inequalities(0,2)==-1.0);
+    CHECK(second_h.inequalities(1,1)==-1.0);
+    CHECK(second_h.inequalities(1,2)==1.0);
+
+    const auto reset_operations=std::count_if(reachability.relation_operations.begin(),
+        reachability.relation_operations.end(),[](const auto& operation) {
+            return operation.operation==model::HybridRelationOperationKind::reset_relation;
+        });
+    CHECK(reset_operations==2);
+    const auto joint=reachability.joint_relation.representation();
+    REQUIRE(std::holds_alternative<sets::HRepresentation>(joint));
+    const auto& relation=std::get<sets::HRepresentation>(joint);
+    CHECK(reachability.projected_state->input_rows==
+        relation.inequalities.rows()+relation.equalities.rows());
 }
 
 TEST_CASE("general projected hybrid reachability matches an independent two-stage interval oracle") {

@@ -26,6 +26,7 @@ fixtures.
 | Three-branch heterogeneous terminal preflight inventory | 1→{1,2,3} | 0 | 1 | 4 | 3 | 3 | 3, 4, and 5 per path | [Full-inventory preflight and relation-dimension test](../../tests/unit/synthesis/hybrid_path_program_tests.cpp) |
 | Two-stage scalar projected interval | 1 | 1 | 2 | 3 | 2 | 1 | 7 | [Independent projected-set contract oracle](../../tests/contract/synthesis/hybrid_reachability_contract.cpp) |
 | Two-stage existential 1→2→1 reset projection | 1→2→1 | 1→0 | 2 | 3 | 2 | 1 | 8 | [Set-valued reset contract oracle](../../tests/contract/synthesis/hybrid_reachability_contract.cpp) |
+| Two successive existential 1→2→1 reset projection | 1→2→1 | 1→0 | 2 | 3 | 2 | 1 | 8 | [Two-reset contract oracle](../../tests/contract/synthesis/hybrid_reachability_contract.cpp) |
 | One-step existential reset optimal face | 1 | 1 | 1 | 2 | 1 | 1 | 4 | [Independent continuous-family verifier oracle](../../tests/unit/synthesis/hybrid_path_program_tests.cpp) |
 | One-step coupled 2-control polytope with existential reset | 1 | 2 | 1 | 2 | 1 | 1 | 5 | [Independent slanted optimal-face oracle](../../tests/unit/synthesis/hybrid_path_program_tests.cpp) |
 | Four-mode branching resource-bound check | 1 | 0 | 2 | 4 | 4 | 2 | 5 per path | [Capability, raw-graph, and row-limit test](../../tests/unit/model/hybrid_system_test.cpp) |
