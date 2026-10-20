@@ -2881,124 +2881,413 @@ TEST_CASE("exact singleton hybrid verifier handles empty branches and rejects co
     CHECK(std::holds_alternative<OperationStopped>(adapter_cancelled));
 }
 
-TEST_CASE("hybrid portfolio objective bounds retain tied possible branches") {
-    auto system=example_system();
-    auto second=system.edges.front(); second.id={"switch-second"};
-    auto third=system.edges.front(); third.id={"switch-third"};
-    system.edges.push_back(std::move(second));
-    system.edges.push_back(std::move(third));
-    const auto built=build_hybrid_portfolio_programs(system,example_request(),{"hybrid-problem"},
-        {1,8},{16,64,1024});
-    REQUIRE(std::holds_alternative<std::vector<HybridPathProgram>>(built));
-    const auto& programs=std::get<std::vector<HybridPathProgram>>(built);
-    REQUIRE(programs.size()==3);
+TEST_CASE("two parameter scalar verifier certifies a coupled polygon and "
+          "rejects off-image extensions") {
+  const auto reset = [](std::string id) {
+    auto a = numeric::snapshot(Matrix{0, 2, {}});
+    auto b = numeric::snapshot_vector(Vector{});
+    auto e = numeric::snapshot(Matrix{1, 2, {-1, 1}});
+    auto v = numeric::snapshot_vector(Vector{0});
+    REQUIRE(std::holds_alternative<numeric::MatrixView>(a));
+    REQUIRE(std::holds_alternative<numeric::VectorView>(b));
+    REQUIRE(std::holds_alternative<numeric::MatrixView>(e));
+    REQUIRE(std::holds_alternative<numeric::VectorView>(v));
+    auto d = sets::make_h(
+        {SetId{std::move(id)}, 2, {}},
+        {std::get<numeric::MatrixView>(a), std::get<numeric::VectorView>(b),
+         std::get<numeric::MatrixView>(e), std::get<numeric::VectorView>(v)});
+    REQUIRE(std::holds_alternative<sets::SetData>(d));
+    return std::get<sets::SetData>(d).as_handle();
+  };
+  const auto mode = [](std::string id, AdmissibleSet u0, AdmissibleSet u1,
+                       AdmissibleSet final) {
+    model::HybridMode m{{std::move(id)}, 1, 1, {"x"}, {"u"}};
+    const LinearStage f0{Matrix{1, 1, {0}}, Matrix{1, 1, {1}}, Matrix{1, 0, {}},
+                         Vector{0}};
+    const LinearStage f1{Matrix{1, 1, {1}}, Matrix{1, 1, {1}}, Matrix{1, 0, {}},
+                         Vector{0}};
+    m.flow = std::vector<LinearStage>{f0, f1};
+    m.control_sets = {std::move(u0), std::move(u1)};
+    m.invariants = {UniversalSet{1}, UniversalSet{1}, std::move(final)};
+    return m;
+  };
+  auto start = mode("two-parameter-start", interval("two-parameter-u0", 0, 1),
+                    Singleton{{0}}, UniversalSet{1});
+  auto middle = mode("two-parameter-middle", Singleton{{0}},
+                     interval("two-parameter-u1", 0, 1), UniversalSet{1});
+  auto terminal = mode("two-parameter-terminal", Singleton{{0}}, Singleton{{0}},
+                       interval("two-parameter-coupled-terminal", 0, 1));
+  const auto identity = reset("two-parameter-identity");
+  model::HybridSystem system{
+      2,
+      {start, middle, terminal},
+      {{{"two-parameter-enter-half"},
+        {"two-parameter-start"},
+        {"two-parameter-middle"},
+        {interval("two-parameter-guard-half", 0, 0.5), UniversalSet{1}},
+        {identity, universal("two-parameter-unused-a", 2)}},
+       {{"two-parameter-enter-full"},
+        {"two-parameter-start"},
+        {"two-parameter-middle"},
+        {UniversalSet{1}, UniversalSet{1}},
+        {identity, universal("two-parameter-unused-full", 2)}},
+       {{"two-parameter-finish"},
+        {"two-parameter-middle"},
+        {"two-parameter-terminal"},
+        {UniversalSet{1}, UniversalSet{1}},
+        {universal("two-parameter-unused-b", 2), identity}}}};
+  model::HybridRequest request{{{"two-parameter-start"}, {0}},
+                               {{"two-parameter-terminal"}},
+                               {{{"two-parameter-terminal"},
+                                 LinearTerminal{{0}, 0},
+                                 "constant",
+                                 "units"}}};
+  auto built = build_hybrid_portfolio_programs(
+      system, request, {"two-parameter-test"}, {2, 8}, {64, 4096, 65536});
+  REQUIRE(std::holds_alternative<std::vector<HybridPathProgram>>(built));
+  auto programs = std::get<std::vector<HybridPathProgram>>(built);
+  REQUIRE(programs.size() == 2);
+  std::vector<HybridPathOptimalFaceCandidate> faces;
+  for (const auto &program : programs)
+    faces.push_back(exact_candidate(program, Vector(7, 0)));
+  const auto tuple = [](double u0, double u1) {
+    return Vector{0, u0, u0, u0, u1, u0 + u1, u0 + u1};
+  };
+  const std::array<std::array<double, 2>, 4> half_polygon{
+      {{0, 0}, {0.5, 0}, {0.5, 0.5}, {0, 1}}};
+  const std::array<std::array<double, 2>, 3> full_polygon{
+      {{0, 0}, {1, 0}, {0, 1}}};
+  const auto half =
+      std::find_if(programs.begin(), programs.end(), [](const auto &p) {
+        return p.path.edges[0].value == "two-parameter-enter-half";
+      });
+  const auto full =
+      std::find_if(programs.begin(), programs.end(), [](const auto &p) {
+        return p.path.edges[0].value == "two-parameter-enter-full";
+      });
+  REQUIRE(half != programs.end());
+  REQUIRE(full != programs.end());
+  const auto half_h =
+      std::get<sets::HRepresentation>(half->joint_relation.representation());
+  const auto full_h =
+      std::get<sets::HRepresentation>(full->joint_relation.representation());
+  for (const auto &vertex : half_polygon)
+    CHECK(satisfies(half_h, tuple(vertex[0], vertex[1])));
+  for (const auto &vertex : full_polygon)
+    CHECK(satisfies(full_h, tuple(vertex[0], vertex[1])));
+  CHECK_FALSE(satisfies(half_h, tuple(0.75, 0.1)));
+  CHECK(satisfies(full_h, tuple(0.75, 0.1)));
+  TwoParameterScalarPolytopeHybridFamilyVerifier verifier;
+  auto valid = verify_hybrid_portfolio_family(verifier, system, request,
+                                              programs, faces, {2, 8}, {0, 0});
+  REQUIRE(std::holds_alternative<HybridFamilyVerificationReport>(valid));
+  const auto &report = std::get<HybridFamilyVerificationReport>(valid);
+  CHECK(report.verifier_id == "csl.hybrid.scalar-two-parameter-polytope");
+  CHECK(report.global_objective_optimality ==
+        HybridVerificationStatus::established);
+  REQUIRE(report.branches.size() == 2);
+  for (const auto &branch : report.branches) {
+    CHECK(branch.feasibility == HybridVerificationStatus::established);
+    CHECK(branch.objective_optimality == HybridVerificationStatus::established);
+    CHECK(branch.continuous_coverage == HybridVerificationStatus::established);
+  }
+  CHECK(report.complete_family_coverage ==
+        HybridVerificationStatus::established);
 
-    HybridPortfolioExecution execution;
-    execution.all_supplied_branches_completed=true;
-    const std::array<double,3> values{5,5,7};
-    for(std::size_t i=0;i<programs.size();++i) {
-        const auto& program=std::get<LinearProgram>(programs[i].program);
-        const auto evidence=ProgramBoundEvidence{program.identity(),
-            SymbolicArgument{"literal fixture bounds","synthetic test result"},{}};
-        ProgramResult result{Termination::completed,
-            {program.identity(),MathematicalOutcome::optimal,
-                SymbolicArgument{"literal fixture optimum","synthetic test result"},{}},
-            {},{ProgramObjectiveBound{values[i],evidence},ProgramObjectiveBound{values[i],evidence}},
-            "literal fixture result"};
-        execution.branches.push_back({programs[i].path,Termination::completed,
-            MathematicalOutcome::optimal,std::move(result),{}, {}});
+  auto missing_face = verify_hybrid_portfolio_family(
+      verifier, system, request, programs,
+      std::span<const HybridPathOptimalFaceCandidate>(faces.data(), 1), {2, 8},
+      {0, 0});
+  CHECK(std::holds_alternative<Diagnostics>(missing_face));
+  auto duplicate_faces = faces;
+  duplicate_faces.push_back(faces.front());
+  auto duplicate_face = verify_hybrid_portfolio_family(
+      verifier, system, request, programs, duplicate_faces, {2, 8}, {0, 0});
+  CHECK(std::holds_alternative<Diagnostics>(duplicate_face));
+
+  auto shared_flow_system = system;
+  const LinearStage shared_flow{Matrix{1, 1, {1}}, Matrix{1, 1, {1}},
+                                Matrix{1, 0, {}}, Vector{0}};
+  for (auto &shared_mode : shared_flow_system.modes)
+    shared_mode.flow = shared_flow;
+  auto shared_program_result = build_hybrid_portfolio_programs(
+      shared_flow_system, request, {"two-parameter-shared-flow"}, {2, 8},
+      {64, 4096, 65536});
+  REQUIRE(std::holds_alternative<std::vector<HybridPathProgram>>(
+      shared_program_result));
+  const auto &shared_programs =
+      std::get<std::vector<HybridPathProgram>>(shared_program_result);
+  std::vector<HybridPathOptimalFaceCandidate> shared_faces;
+  for (const auto &program : shared_programs)
+    shared_faces.push_back(exact_candidate(program, Vector(7, 0)));
+  auto shared_report = verify_hybrid_portfolio_family(
+      verifier, shared_flow_system, request, shared_programs, shared_faces,
+      {2, 8}, {0, 0});
+  REQUIRE(
+      std::holds_alternative<HybridFamilyVerificationReport>(shared_report));
+  CHECK(std::get<HybridFamilyVerificationReport>(shared_report)
+            .complete_family_coverage == HybridVerificationStatus::established);
+
+  auto inexact_anchor_system = system;
+  auto &inexact_middle = inexact_anchor_system.modes[1];
+  std::get<std::vector<LinearStage>>(inexact_middle.flow)[1] =
+      LinearStage{Matrix{1, 1, {0.1}}, Matrix{1, 1, {1}}, Matrix{1, 0, {}},
+                  Vector{0}};
+  inexact_anchor_system.modes[2].invariants[2] = UniversalSet{1};
+  auto inexact_program_result = build_hybrid_portfolio_programs(
+      inexact_anchor_system, request, {"two-parameter-inexact-anchor"},
+      {2, 8}, {64, 4096, 65536});
+  REQUIRE(std::holds_alternative<std::vector<HybridPathProgram>>(
+      inexact_program_result));
+  const auto &inexact_programs =
+      std::get<std::vector<HybridPathProgram>>(inexact_program_result);
+  std::vector<HybridPathOptimalFaceCandidate> inexact_faces;
+  for (const auto &program : inexact_programs) {
+    auto candidate = exact_candidate(program, Vector(7, 0));
+    candidate.anchor = Vector{0, 0.1, 0.1, 0.1, 0,
+                              0.1 * 0.1, 0.1 * 0.1};
+    candidate.solver_result.primal = candidate.anchor;
+    inexact_faces.push_back(std::move(candidate));
+  }
+  auto inexact_anchor_report = verify_hybrid_portfolio_family(
+      verifier, inexact_anchor_system, request, inexact_programs,
+      inexact_faces, {2, 8}, {0, 0});
+  std::string inexact_error =
+      "hybrid verifier result variant: " +
+      std::to_string(inexact_anchor_report.index());
+  if (const auto *errors = std::get_if<Diagnostics>(&inexact_anchor_report);
+      errors && !errors->empty())
+    inexact_error += ": " + (*errors)[0].field + ": " +
+                     (*errors)[0].explanation;
+  INFO(inexact_error);
+  REQUIRE(std::holds_alternative<HybridFamilyVerificationReport>(
+      inexact_anchor_report));
+  const auto &inexact_report =
+      std::get<HybridFamilyVerificationReport>(inexact_anchor_report);
+  CHECK(inexact_report.branches[0].continuous_coverage ==
+        HybridVerificationStatus::unsupported);
+  CHECK(inexact_report.branches[1].continuous_coverage ==
+        HybridVerificationStatus::unsupported);
+
+  const auto drop_coordinate_zero_equality = [](const sets::SetData &data,
+                                                std::string id) {
+    const auto repr = data.representation();
+    REQUIRE(std::holds_alternative<sets::HRepresentation>(repr));
+    const auto &h = std::get<sets::HRepresentation>(repr);
+    REQUIRE(h.equalities.cols() == 7);
+    std::vector<double> eq, rhs;
+    bool dropped = false;
+    for (std::size_t row = 0; row < h.equalities.rows(); ++row) {
+      bool only_zero_coordinate = h.equalities(row, 0) != 0;
+      for (std::size_t col = 1; col < 7; ++col)
+        only_zero_coordinate =
+            only_zero_coordinate && h.equalities(row, col) == 0;
+      if (only_zero_coordinate && !dropped) {
+        dropped = true;
+        continue;
+      }
+      for (std::size_t col = 0; col < 7; ++col)
+        eq.push_back(h.equalities(row, col));
+      rhs.push_back(h.equality_values[row]);
     }
-
-    const auto comparison=compare_hybrid_portfolio_objective_bounds(programs,execution,{0,0});
-    REQUIRE(std::holds_alternative<HybridPortfolioObjectiveBounds>(comparison));
-    const auto& bounds=std::get<HybridPortfolioObjectiveBounds>(comparison);
-    CHECK(bounds.global_lower_bound==5);
-    CHECK(bounds.global_upper_bound==5);
-    REQUIRE(bounds.potentially_optimal_paths.size()==2);
-    CHECK(bounds.potentially_optimal_paths[0]==programs[0].path);
-    CHECK(bounds.potentially_optimal_paths[1]==programs[1].path);
-    REQUIRE(bounds.global_lower_bound_sources.size()==2);
-    REQUIRE(bounds.global_upper_bound_sources.size()==2);
-    CHECK(bounds.global_lower_bound_sources[0].path==programs[0].path);
-    CHECK(bounds.global_lower_bound_sources[0].bound.evidence.subject==
-        std::get<LinearProgram>(programs[0].program).identity());
-
-    auto incomplete=execution;
-    incomplete.branches[2].result->objective.lower.reset();
-    const auto partial=compare_hybrid_portfolio_objective_bounds(programs,incomplete,{0,0});
-    REQUIRE(std::holds_alternative<HybridPortfolioObjectiveIncomplete>(partial));
-    CHECK(std::get<HybridPortfolioObjectiveIncomplete>(partial).
-        branches_without_comparable_bounds==std::vector<std::size_t>{2});
-
-    auto unsupported=execution;
-    unsupported.branches[2].result->objective.lower->evidence.support=Unestablished{};
-    const auto unestablished=compare_hybrid_portfolio_objective_bounds(programs,unsupported,{0,0});
-    REQUIRE(std::holds_alternative<HybridPortfolioObjectiveIncomplete>(unestablished));
-    CHECK(std::get<HybridPortfolioObjectiveIncomplete>(unestablished).
-        branches_without_comparable_bounds==std::vector<std::size_t>{2});
-
-    auto inconsistent=execution;
-    inconsistent.branches[1].result->termination=Termination::cancelled;
-    const auto interrupted=compare_hybrid_portfolio_objective_bounds(programs,inconsistent,{0,0});
-    REQUIRE(std::holds_alternative<HybridPortfolioObjectiveIncomplete>(interrupted));
-    CHECK(std::get<HybridPortfolioObjectiveIncomplete>(interrupted).
-        branches_without_comparable_bounds==std::vector<std::size_t>{1});
+    REQUIRE(dropped);
+    std::vector<double> ineq, bounds;
+    for (std::size_t row = 0; row < h.inequalities.rows(); ++row) {
+      for (std::size_t col = 0; col < 7; ++col)
+        ineq.push_back(h.inequalities(row, col));
+      bounds.push_back(h.upper_bounds[row]);
+    }
+    auto im = numeric::snapshot(Matrix{bounds.size(), 7, std::move(ineq)});
+    auto bv = numeric::snapshot_vector(std::move(bounds));
+    auto em = numeric::snapshot(Matrix{rhs.size(), 7, std::move(eq)});
+    auto rv = numeric::snapshot_vector(std::move(rhs));
+    REQUIRE(std::holds_alternative<numeric::MatrixView>(im));
+    REQUIRE(std::holds_alternative<numeric::VectorView>(bv));
+    REQUIRE(std::holds_alternative<numeric::MatrixView>(em));
+    REQUIRE(std::holds_alternative<numeric::VectorView>(rv));
+    auto forged = sets::make_h(
+        {SetId{std::move(id)}, 7, {}},
+        {std::get<numeric::MatrixView>(im), std::get<numeric::VectorView>(bv),
+         std::get<numeric::MatrixView>(em), std::get<numeric::VectorView>(rv)});
+    REQUIRE(std::holds_alternative<sets::SetData>(forged));
+    return std::get<sets::SetData>(forged);
+  };
+  auto forged_program = programs;
+  forged_program[0].joint_relation = drop_coordinate_zero_equality(
+      forged_program[0].joint_relation, "forged-program-extra-state");
+  auto forged_program_report = verify_hybrid_portfolio_family(
+      verifier, system, request, forged_program, faces, {2, 8}, {0, 0});
+  REQUIRE(std::holds_alternative<HybridFamilyVerificationReport>(
+      forged_program_report));
+  CHECK(std::get<HybridFamilyVerificationReport>(forged_program_report)
+            .branches[0]
+            .continuous_coverage == HybridVerificationStatus::refuted);
+  auto forged_faces = faces;
+  const auto decoded_face = forged_faces[0].relation;
+  forged_faces[0].relation =
+      drop_coordinate_zero_equality(decoded_face, "forged-face-extra-state");
+  auto forged_face_report = verify_hybrid_portfolio_family(
+      verifier, system, request, programs, forged_faces, {2, 8}, {0, 0});
+  REQUIRE(std::holds_alternative<HybridFamilyVerificationReport>(
+      forged_face_report));
+  CHECK(std::get<HybridFamilyVerificationReport>(forged_face_report)
+            .branches[0]
+            .continuous_coverage == HybridVerificationStatus::refuted);
 }
 
-TEST_CASE("hybrid path optimal-face candidates preserve the full minimizer equations") {
-    auto check_face=[&](TerminalObjective objective,double objective_value) {
-        auto system=example_system();
-        system.modes[0].control_sets[0]=interval("bounded-control",-1,1);
-        system.edges[0].reset_relations[0]=affine_reset();
-        auto request=example_request();
-        request.terminal_objectives[0].objective=std::move(objective);
-        auto built=build_hybrid_path_program(system,request,example_path(),{"hybrid-face"},{16,64,1024});
-        REQUIRE(std::holds_alternative<HybridPathProgram>(built));
-        const auto& branch=std::get<HybridPathProgram>(built);
-        const ProgramIdentity identity=std::visit([](const auto& program){return program.identity();},branch.program);
-        const auto support=SymbolicArgument{"literal face fixture","synthetic global optimum"};
-        const ProgramBoundEvidence bound{identity,support,{}};
-        ProgramResult solved{Termination::completed,{identity,MathematicalOutcome::optimal,support,{}},
-            Vector{2,-1,1,1,0},
-            {ProgramObjectiveBound{objective_value,bound},ProgramObjectiveBound{objective_value,bound}},
-            "literal feasible optimizer"};
-        const auto face=build_hybrid_path_optimal_face_candidate(branch,solved,{1e-10,1e-10});
-        REQUIRE(std::holds_alternative<HybridPathOptimalFaceCandidate>(face));
-        const auto& candidate=std::get<HybridPathOptimalFaceCandidate>(face);
-        CHECK(candidate.path==example_path());
-        CHECK(candidate.anchor==Vector{2,-1,1,1,0});
-        CHECK(candidate.solver_result.objective.upper->value==objective_value);
-        const auto representation=candidate.relation.representation();
-        REQUIRE(std::holds_alternative<sets::HRepresentation>(representation));
-        const auto& h=std::get<sets::HRepresentation>(representation);
-        CHECK(satisfies(h,{2,-1,1,1,0}));
-        CHECK(satisfies(h,{2,-1,1,1,1}));
-        CHECK_FALSE(satisfies(h,{2,0,2,2,0}));
-        CHECK(candidate.assumptions.size()==3);
-    };
+TEST_CASE("hybrid portfolio objective bounds retain tied possible branches") {
+  auto system = example_system();
+  auto second = system.edges.front();
+  second.id = {"switch-second"};
+  auto third = system.edges.front();
+  third.id = {"switch-third"};
+  system.edges.push_back(std::move(second));
+  system.edges.push_back(std::move(third));
+  const auto built = build_hybrid_portfolio_programs(
+      system, example_request(), {"hybrid-problem"}, {1, 8}, {16, 64, 1024});
+  REQUIRE(std::holds_alternative<std::vector<HybridPathProgram>>(built));
+  const auto &programs = std::get<std::vector<HybridPathProgram>>(built);
+  REQUIRE(programs.size() == 3);
 
-    check_face(LinearTerminal{{1,0},0},1);
-    check_face(QuadraticTerminal{Matrix{2,2,{2,0,0,0}},Vector{0,0},0},1);
-    check_face(ResidualNormTerminal{Matrix{1,2,{1,0}},Vector{1}},0);
+  HybridPortfolioExecution execution;
+  execution.all_supplied_branches_completed = true;
+  const std::array<double, 3> values{5, 5, 7};
+  for (std::size_t i = 0; i < programs.size(); ++i) {
+    const auto &program = std::get<LinearProgram>(programs[i].program);
+    const auto evidence = ProgramBoundEvidence{
+        program.identity(),
+        SymbolicArgument{"literal fixture bounds", "synthetic test result"},
+        {}};
+    ProgramResult result{
+        Termination::completed,
+        {program.identity(),
+         MathematicalOutcome::optimal,
+         SymbolicArgument{"literal fixture optimum", "synthetic test result"},
+         {}},
+        {},
+        {ProgramObjectiveBound{values[i], evidence},
+         ProgramObjectiveBound{values[i], evidence}},
+        "literal fixture result"};
+    execution.branches.push_back({programs[i].path,
+                                  Termination::completed,
+                                  MathematicalOutcome::optimal,
+                                  std::move(result),
+                                  {},
+                                  {}});
+  }
 
-    auto system=example_system();
-    system.modes[0].control_sets[0]=interval("bounded-control-mismatch",-1,1);
-    system.edges[0].reset_relations[0]=affine_reset();
-    auto request=example_request();
-    request.terminal_objectives[0].objective=LinearTerminal{{1,0},0};
-    auto built=build_hybrid_path_program(system,request,example_path(),{"hybrid-face-mismatch"},{16,64,1024});
+  const auto comparison =
+      compare_hybrid_portfolio_objective_bounds(programs, execution, {0, 0});
+  REQUIRE(std::holds_alternative<HybridPortfolioObjectiveBounds>(comparison));
+  const auto &bounds = std::get<HybridPortfolioObjectiveBounds>(comparison);
+  CHECK(bounds.global_lower_bound == 5);
+  CHECK(bounds.global_upper_bound == 5);
+  REQUIRE(bounds.potentially_optimal_paths.size() == 2);
+  CHECK(bounds.potentially_optimal_paths[0] == programs[0].path);
+  CHECK(bounds.potentially_optimal_paths[1] == programs[1].path);
+  REQUIRE(bounds.global_lower_bound_sources.size() == 2);
+  REQUIRE(bounds.global_upper_bound_sources.size() == 2);
+  CHECK(bounds.global_lower_bound_sources[0].path == programs[0].path);
+  CHECK(bounds.global_lower_bound_sources[0].bound.evidence.subject ==
+        std::get<LinearProgram>(programs[0].program).identity());
+
+  auto incomplete = execution;
+  incomplete.branches[2].result->objective.lower.reset();
+  const auto partial =
+      compare_hybrid_portfolio_objective_bounds(programs, incomplete, {0, 0});
+  REQUIRE(std::holds_alternative<HybridPortfolioObjectiveIncomplete>(partial));
+  CHECK(std::get<HybridPortfolioObjectiveIncomplete>(partial)
+            .branches_without_comparable_bounds == std::vector<std::size_t>{2});
+
+  auto unsupported = execution;
+  unsupported.branches[2].result->objective.lower->evidence.support =
+      Unestablished{};
+  const auto unestablished =
+      compare_hybrid_portfolio_objective_bounds(programs, unsupported, {0, 0});
+  REQUIRE(std::holds_alternative<HybridPortfolioObjectiveIncomplete>(
+      unestablished));
+  CHECK(std::get<HybridPortfolioObjectiveIncomplete>(unestablished)
+            .branches_without_comparable_bounds == std::vector<std::size_t>{2});
+
+  auto inconsistent = execution;
+  inconsistent.branches[1].result->termination = Termination::cancelled;
+  const auto interrupted =
+      compare_hybrid_portfolio_objective_bounds(programs, inconsistent, {0, 0});
+  REQUIRE(
+      std::holds_alternative<HybridPortfolioObjectiveIncomplete>(interrupted));
+  CHECK(std::get<HybridPortfolioObjectiveIncomplete>(interrupted)
+            .branches_without_comparable_bounds == std::vector<std::size_t>{1});
+}
+
+TEST_CASE("hybrid path optimal-face candidates preserve the full minimizer "
+          "equations") {
+  auto check_face = [&](TerminalObjective objective, double objective_value) {
+    auto system = example_system();
+    system.modes[0].control_sets[0] = interval("bounded-control", -1, 1);
+    system.edges[0].reset_relations[0] = affine_reset();
+    auto request = example_request();
+    request.terminal_objectives[0].objective = std::move(objective);
+    auto built = build_hybrid_path_program(system, request, example_path(),
+                                           {"hybrid-face"}, {16, 64, 1024});
     REQUIRE(std::holds_alternative<HybridPathProgram>(built));
-    auto mismatched=std::get<HybridPathProgram>(std::move(built));
-    const auto& program=std::get<LinearProgram>(mismatched.program);
-    const auto support=SymbolicArgument{"literal mismatch fixture","synthetic global optimum"};
-    const ProgramBoundEvidence bound{program.identity(),support,{}};
-    ProgramResult solved{Termination::completed,{program.identity(),MathematicalOutcome::optimal,support,{}},
-        Vector{2,-1,1,1,0},
-        {ProgramObjectiveBound{1,bound},ProgramObjectiveBound{1,bound}},"literal feasible optimizer"};
-    mismatched.joint_relation=relation_excluding_anchor();
-    const auto rejected=build_hybrid_path_optimal_face_candidate(mismatched,solved,{1e-10,1e-10});
-    REQUIRE(std::holds_alternative<Diagnostics>(rejected));
-    CHECK(std::get<Diagnostics>(rejected)[0].field=="hybrid.optimal_face.source_relation");
+    const auto &branch = std::get<HybridPathProgram>(built);
+    const ProgramIdentity identity = std::visit(
+        [](const auto &program) { return program.identity(); }, branch.program);
+    const auto support =
+        SymbolicArgument{"literal face fixture", "synthetic global optimum"};
+    const ProgramBoundEvidence bound{identity, support, {}};
+    ProgramResult solved{Termination::completed,
+                         {identity, MathematicalOutcome::optimal, support, {}},
+                         Vector{2, -1, 1, 1, 0},
+                         {ProgramObjectiveBound{objective_value, bound},
+                          ProgramObjectiveBound{objective_value, bound}},
+                         "literal feasible optimizer"};
+    const auto face = build_hybrid_path_optimal_face_candidate(branch, solved,
+                                                               {1e-10, 1e-10});
+    REQUIRE(std::holds_alternative<HybridPathOptimalFaceCandidate>(face));
+    const auto &candidate = std::get<HybridPathOptimalFaceCandidate>(face);
+    CHECK(candidate.path == example_path());
+    CHECK(candidate.anchor == Vector{2, -1, 1, 1, 0});
+    CHECK(candidate.solver_result.objective.upper->value == objective_value);
+    const auto representation = candidate.relation.representation();
+    REQUIRE(std::holds_alternative<sets::HRepresentation>(representation));
+    const auto &h = std::get<sets::HRepresentation>(representation);
+    CHECK(satisfies(h, {2, -1, 1, 1, 0}));
+    CHECK(satisfies(h, {2, -1, 1, 1, 1}));
+    CHECK_FALSE(satisfies(h, {2, 0, 2, 2, 0}));
+    CHECK(candidate.assumptions.size() == 3);
+  };
+
+  check_face(LinearTerminal{{1, 0}, 0}, 1);
+  check_face(QuadraticTerminal{Matrix{2, 2, {2, 0, 0, 0}}, Vector{0, 0}, 0}, 1);
+  check_face(ResidualNormTerminal{Matrix{1, 2, {1, 0}}, Vector{1}}, 0);
+
+  auto system = example_system();
+  system.modes[0].control_sets[0] = interval("bounded-control-mismatch", -1, 1);
+  system.edges[0].reset_relations[0] = affine_reset();
+  auto request = example_request();
+  request.terminal_objectives[0].objective = LinearTerminal{{1, 0}, 0};
+  auto built =
+      build_hybrid_path_program(system, request, example_path(),
+                                {"hybrid-face-mismatch"}, {16, 64, 1024});
+  REQUIRE(std::holds_alternative<HybridPathProgram>(built));
+  auto mismatched = std::get<HybridPathProgram>(std::move(built));
+  const auto &program = std::get<LinearProgram>(mismatched.program);
+  const auto support =
+      SymbolicArgument{"literal mismatch fixture", "synthetic global optimum"};
+  const ProgramBoundEvidence bound{program.identity(), support, {}};
+  ProgramResult solved{
+      Termination::completed,
+      {program.identity(), MathematicalOutcome::optimal, support, {}},
+      Vector{2, -1, 1, 1, 0},
+      {ProgramObjectiveBound{1, bound}, ProgramObjectiveBound{1, bound}},
+      "literal feasible optimizer"};
+  mismatched.joint_relation = relation_excluding_anchor();
+  const auto rejected = build_hybrid_path_optimal_face_candidate(
+      mismatched, solved, {1e-10, 1e-10});
+  REQUIRE(std::holds_alternative<Diagnostics>(rejected));
+  CHECK(std::get<Diagnostics>(rejected)[0].field ==
+        "hybrid.optimal_face.source_relation");
 }
 
 TEST_CASE("hybrid portfolio assembly retains every tied branch face transactionally") {

@@ -34,7 +34,8 @@ target_link_libraries(csl_witness_selector PUBLIC CSL::registry CSL::optimizatio
 csl_add_library(csl_hybrid_path_program STATIC
   src/synthesis/hybrid_path_program.cpp
   src/synthesis/hybrid_family_verifier.cpp
-  src/synthesis/hybrid_interval_family_verifier.cpp)
+  src/synthesis/hybrid_interval_family_verifier.cpp
+  src/synthesis/hybrid_two_parameter_family_verifier.cpp)
 
 target_link_libraries(csl_hybrid_path_program PUBLIC CSL::model CSL::sets CSL::optimization CSL::convex CSL::registry)
 
