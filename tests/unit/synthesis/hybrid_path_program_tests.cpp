@@ -1637,6 +1637,7 @@ class RejectingTrajectoryPreflightAdapter final : public HybridDirectTrajectoryA
 public:
     int corruption{3};
     mutable int preflight_calls{};
+    mutable std::size_t preflight_path_count{};
     mutable int capability_calls{};
     mutable int build_calls{};
     HybridDirectTrajectoryPreflightResult preflight(const model::HybridSystem&,
@@ -1644,6 +1645,7 @@ public:
         model::HybridRelationLimits limits,optimization::ObjectivePolicy,
         std::stop_token) const override {
         ++preflight_calls;
+        preflight_path_count=paths.size();
         auto path=paths.back();
         auto reported_limits=limits;
         if(corruption==0) path.edges.front().value+="-wrong";
@@ -1769,7 +1771,7 @@ public:
         model::HybridRelationLimits limits,optimization::ObjectivePolicy,
         std::stop_token) const override {
         ++preflight_calls;
-        if(paths.size()==2) return std::monostate{};
+        if(paths.size()==3) return std::monostate{};
         const auto path=paths.empty()?model::HybridPath{}:paths.front();
         return HybridDirectTrajectoryPreflightFailure{path,limits,{},Diagnostic{
             DiagnosticCode::unsupported,"fixture.inventory_only",
@@ -2097,12 +2099,18 @@ std::pair<model::HybridSystem,model::HybridRequest> variable_size_parallel_profi
     large.flow=LinearStage{Matrix{2,2,{1,0,0,1}},Matrix{2,0,{}},Matrix{2,0,{}},Vector{0,0}};
     large.control_sets={UniversalSet{0}};
     large.invariants={UniversalSet{2},UniversalSet{2}};
-    model::HybridSystem system{1,{source,small,large},
+    auto wide=model::HybridMode{{"wide"},3,0,{"x","y","z"},{}};
+    wide.flow=LinearStage{Matrix{3,3,{1,0,0,0,1,0,0,0,1}},Matrix{3,0,{}},Matrix{3,0,{}},Vector{0,0,0}};
+    wide.control_sets={UniversalSet{0}};
+    wide.invariants={UniversalSet{3},UniversalSet{3}};
+    model::HybridSystem system{1,{source,small,large,wide},
         {{{"to-small"},{"source"},{"small"},{UniversalSet{1}},{universal("small-reset",2)}},
-         {{"to-large"},{"source"},{"large"},{UniversalSet{1}},{universal("large-reset",3)}}}};
-    model::HybridRequest request{{{"source"},{0}},{{"small"},{"large"}},
+         {{"to-large"},{"source"},{"large"},{UniversalSet{1}},{universal("large-reset",3)}},
+         {{"to-wide"},{"source"},{"wide"},{UniversalSet{1}},{universal("wide-reset",4)}}}};
+    model::HybridRequest request{{{"source"},{0}},{{"small"},{"large"},{"wide"}},
         {{{"small"},LinearTerminal{{1},0},"cost","u"},
-         {{"large"},LinearTerminal{{1,0},0},"cost","u"}}};
+         {{"large"},LinearTerminal{{1,0},0},"cost","u"},
+         {{"wide"},LinearTerminal{{1,0,0},0},"cost","u"}}};
     return {std::move(system),std::move(request)};
 }
 
@@ -5464,11 +5472,24 @@ TEST_CASE("direct trajectory adapters preflight the full path inventory before c
         request,{"hybrid-problem"},{1,8},{16,64,1024});
     REQUIRE(std::holds_alternative<model::HybridPathCompositionFailureReport>(portfolio));
     const auto& failure=std::get<model::HybridPathCompositionFailureReport>(portfolio);
-    CHECK(failure.path.edges==std::vector<model::HybridEdgeId>{{"to-large"}});
+    CHECK(failure.path.edges==std::vector<model::HybridEdgeId>{{"to-wide"}});
     CHECK(std::get<Diagnostic>(failure.failure).field=="fixture.trajectory.preflight");
     CHECK(adapter.preflight_calls==1);
+    CHECK(adapter.preflight_path_count==3);
     CHECK(adapter.capability_calls==0);
     CHECK(adapter.build_calls==0);
+
+    const auto composed=build_hybrid_portfolio_programs(system,request,
+        {"three-branch-inventory"},{1,8},{8,64,4096});
+    REQUIRE(std::holds_alternative<std::vector<HybridPathProgram>>(composed));
+    const auto& programs=std::get<std::vector<HybridPathProgram>>(composed);
+    REQUIRE(programs.size()==3);
+    CHECK(programs[0].path.edges==std::vector<model::HybridEdgeId>{{"to-small"}});
+    CHECK(programs[1].path.edges==std::vector<model::HybridEdgeId>{{"to-large"}});
+    CHECK(programs[2].path.edges==std::vector<model::HybridEdgeId>{{"to-wide"}});
+    CHECK(programs[0].joint_relation.metadata()->set.dimension==3);
+    CHECK(programs[1].joint_relation.metadata()->set.dimension==4);
+    CHECK(programs[2].joint_relation.metadata()->set.dimension==5);
 
     RejectingTrajectoryPreflightAdapter single_adapter;
     const auto single=build_hybrid_path_program(single_adapter,example_system(),
@@ -5476,6 +5497,7 @@ TEST_CASE("direct trajectory adapters preflight the full path inventory before c
     REQUIRE(std::holds_alternative<model::HybridPathCompositionFailureReport>(single));
     CHECK(std::get<model::HybridPathCompositionFailureReport>(single).path==example_path());
     CHECK(single_adapter.preflight_calls==1);
+    CHECK(single_adapter.preflight_path_count==1);
     CHECK(single_adapter.capability_calls==0);
     CHECK(single_adapter.build_calls==0);
 }

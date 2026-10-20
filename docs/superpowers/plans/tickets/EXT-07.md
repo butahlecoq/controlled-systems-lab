@@ -86,6 +86,13 @@ remains open. General continuous-family verification now has a bounded exact
 H-relation implementation, but its independent exhaustive oracle acceptance
 work remains open.
 
+The direct-trajectory full-inventory regression now covers three allowed
+terminal paths with target dimensions 1, 2, and 3. It checks the ordered
+joint-relation dimensions 3, 4, and 5, and verifies that an adapter rejecting
+the third path receives the complete inventory before any capability query or
+branch build. This remains a small admission fixture, not resource-scale
+evidence.
+
 Both projected-state adapters ask their selected geometry provider to admit the
 actual terminal projection request during preflight. The one-transition adapter
 assembles its independent four-coordinate relation and the general adapter
