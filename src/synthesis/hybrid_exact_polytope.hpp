@@ -891,7 +891,9 @@ inline InclusionResult included_in(std::span<const Row> source,
             return {InclusionState::not_included,
                     "Source relation contains a target-half-space violation"};
         if (result.state == FeasibilityState::unsupported)
-            return unsupported("Exact feasibility could not decide relation inclusion");
+            return {InclusionState::unsupported,
+                "Exact feasibility could not decide relation inclusion: " +
+                    result.reason};
         if (result.state == FeasibilityState::cancelled)
             return {InclusionState::cancelled, result.reason};
     }

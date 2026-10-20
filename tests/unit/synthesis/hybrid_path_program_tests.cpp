@@ -1548,11 +1548,15 @@ TEST_CASE("exact linear H verifier checks tied two-stage continuous branches wit
     const auto& bounded_report=std::get<HybridFamilyVerificationReport>(bounded);
     CHECK(bounded_report.global_objective_optimality==HybridVerificationStatus::established);
     REQUIRE_FALSE(bounded_report.branches[1].diagnostics.empty());
-    CHECK(std::any_of(bounded_report.branches[1].diagnostics.begin(),
+    const auto resource_diagnostic=std::find_if(
+        bounded_report.branches[1].diagnostics.begin(),
         bounded_report.branches[1].diagnostics.end(),[](const auto& diagnostic) {
             return diagnostic.code==DiagnosticCode::unsupported &&
                 diagnostic.field=="hybrid.verification.exact_linear_h_face_mismatch";
-        }));
+        });
+    REQUIRE(resource_diagnostic!=bounded_report.branches[1].diagnostics.end());
+    CHECK(resource_diagnostic->explanation.find(
+        "Fourier-Motzkin resource limit would be exceeded")!=std::string::npos);
     REQUIRE_FALSE(bounded_report.branches[1].diagnostics.empty());
     CHECK(bounded_report.complete_family_coverage==HybridVerificationStatus::unsupported);
     REQUIRE(bounded_report.branches.size()==2);
