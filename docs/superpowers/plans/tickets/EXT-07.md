@@ -59,9 +59,10 @@ inventory. Full provider/resource aggregation remains open.
 
 The EXT-07 report set now contains a one-step scalar interval case and a
 two-stage/two-control scalar polygon case, each exercised through path
-construction, HiGHS optimization, and family verification. Their saved
-capability profiles record respectively `(state, control, horizon, modes, edges,
-paths) = (1, 1, 1, 2, 1, 1)` and `(1, 1, 2, 3, 3, 2)`. The first report plots
+construction, HiGHS optimization, and family verification. The published
+profile summary lists respectively `(state, control, horizon, modes, edges,
+paths) = (1, 1, 1, 2, 1, 1)` and `(1, 1, 2, 3, 3, 2)`, using each report's
+supported-case description for the scalar dimensions. The first report plots
 control against terminal state; the second plots both feasible control
 polygons and their tied minimizing faces. These fixed numerical examples do
 not establish higher-dimensional scalability or complete the capability-report

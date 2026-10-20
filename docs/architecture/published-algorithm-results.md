@@ -49,7 +49,9 @@ answer with no failures. Both reports are descriptive evidence for their
 specific fixtures, not performance comparisons, scalability claims, general
 continuous-polytope coverage, or validated arithmetic. The two-parameter
 bundle includes a standalone feasible-set plot, raw rows, and an offline ZIP.
-The saved records expose these fixed-fixture capability profiles:
+The capability profiles for the saved fixtures are summarized below. State and
+control dimensions follow each record's supported-case description; the other
+counts come from its `dimensions_and_counts` object:
 
 | Report | State/control dimensions | Horizon | Modes | Edges | Allowed paths | Joint variables |
 | --- | --- | ---: | ---: | ---: | ---: | ---: |
