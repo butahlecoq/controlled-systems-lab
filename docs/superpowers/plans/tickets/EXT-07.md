@@ -333,3 +333,13 @@ residual-specific oracle exercises two stages with one fixed control and one
 free control. This adds one bounded verifier profile. General residual-norm
 family verification, broader verifier-domain coverage, resource-scale evidence,
 and publication gates remain open.
+
+Direct-trajectory operation preflight now runs before adapter capability
+queries in single-path, portfolio, and verified-portfolio construction. A
+polyhedral V-representation reset is profile-valid but unsupported by the
+built-in joint-H composer; the regression confirms it is rejected with the
+stage-scoped reset diagnostic before capability queries or branch builds.
+Adapter operation preflight is explicitly admission-only and must not create
+provider workspaces or run algorithms. Broader model-wide capability accounting,
+independent exhaustive continuous-family coverage, resource-scale evidence,
+and publication gates remain open.

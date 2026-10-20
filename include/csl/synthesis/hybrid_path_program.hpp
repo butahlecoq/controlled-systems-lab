@@ -218,8 +218,10 @@ struct HybridDirectTrajectoryPreflightFailure {
 };
 // A successful adapter admission must attest to the exact ordered request
 // inventory, framework operation plan, and limits it checked. The wrapper
-// validates this receipt before any branch build. Request-wide capability
-// checks happen before adapter preflight.
+// validates this receipt before any branch build. Operation preflight is an
+// admission-only call: it must reject unsupported operations without creating
+// provider workspaces or running algorithms. It runs before capability queries
+// so an unsupported operation is rejected at the earliest request boundary.
 struct HybridDirectTrajectoryPreflightSuccess {
     std::vector<model::HybridPath> admitted_paths;
     model::HybridRelationLimits limits;
@@ -234,11 +236,12 @@ using HybridDirectTrajectoryPreflightResult = std::variant<
 class HybridDirectTrajectoryAdapter {
 public:
     virtual ~HybridDirectTrajectoryAdapter() = default;
-    // The framework checks lifted-objective resource limits, then request-wide
-    // objective and relation capabilities, before adapter preflight. Adapters
-    // admit their exact operation plan, resource needs, and any adapter-specific
-    // ObjectivePolicy constraints for the complete fixed-path inventory before
-    // branch builds. The framework validates assurance and tolerance shape;
+    // The framework checks lifted-objective resource limits before adapter
+    // operation preflight. Adapters admit their exact operation plan, resource
+    // needs, and any adapter-specific ObjectivePolicy constraints for the
+    // complete fixed-path inventory before capability queries or branch builds.
+    // Preflight must not create provider workspaces or run algorithms. The
+    // framework validates assurance and tolerance shape;
     // adapters own the meaning and accepted ranges of otherwise valid numerical
     // tolerances. The default
     // declares the built-in joint-H representation boundary; adapters using

@@ -199,8 +199,10 @@ downstream prebuilt adapters must be rebuilt. CSL does not promise a stable
 C++ binary/plugin ABI.
 The direct-trajectory API is replaceable through
 `HybridDirectTrajectoryAdapter`; the framework first checks lifted-objective
-resources and request-wide objective capabilities. Each adapter then preflights
-its complete fixed-path inventory and relation limits before branch builds.
+resources. Each adapter then preflights its complete fixed-path inventory and
+relation limits before capability queries or branch builds. This admission-only
+preflight must not create provider workspaces or run algorithms. After operation
+admission, the framework checks request-wide objective and relation capabilities.
 Every adapter preflight rejection carries a requested path, the configured
 relation limits, and one primary diagnostic for the preflight failure; the
 wrapper checks that evidence before returning the rejection. Empty path
@@ -224,21 +226,25 @@ record. The report carries per-path feasibility, objective, and continuous-
 coverage statuses, but it is inspection data and cannot publish a
 `synthesis::OptimalFamily`.
 Portfolio construction enumerates the complete path inventory, preflights
-lifted-objective dimensions and matrix storage, checks request-wide adapter
-capabilities, and then calls the trajectory adapter's exact-operation and
-resource preflight before any branch build. The default joint-H adapter checks
+lifted-objective dimensions and matrix storage, then calls the trajectory
+adapter's exact-operation and resource preflight. After operation admission it
+checks request-wide adapter capabilities, before any branch build. The default
+joint-H adapter checks
 structural set representations and joint variable, row, or matrix-element
 limits across every path; unsupported operations and limits are reported with
 affected path and stage before any branch relation is constructed. Adapters
 using another exact representation may implement their own operation preflight
-within the same result contract. It also checks the adapter's
+within the same result contract. Operation preflight is admission-only: it must
+not create provider workspaces or run algorithms, and it runs before capability
+queries so unsupported operations are rejected at the earliest request
+boundary. After operation preflight, the framework checks the adapter's
 declared assurance, branch-relation support, and linear/convex terminal-objective
-support for every path before dispatching any path. Unsupported objective
-support identifies the candidate path and terminal stage. When a verifier is
+support for every allowed terminal mode before dispatching any path. Unsupported
+objective support identifies the affected terminal mode. When a verifier is
 requested during construction, use `build_hybrid_portfolio_programs_with_verifier`;
-after lifted-objective resource and trajectory capability checks, it runs the
-verifier's admission-only preflight and checks verifier capabilities, then
-preflights trajectory operations before any branch build. Verifier preflight
+after lifted-objective resource checks, it preflights trajectory operations,
+checks trajectory capabilities, runs the verifier's admission-only preflight,
+and checks verifier capabilities before any branch build. Verifier preflight
 must not create provider workspaces or run the verification algorithm. The built-in
 path and portfolio builders reject unknown assurance values and non-finite or
 negative tolerances before calling injected adapter methods. Validated objective

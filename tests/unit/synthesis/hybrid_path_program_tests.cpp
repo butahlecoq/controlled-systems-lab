@@ -2184,8 +2184,17 @@ public:
 
 class RecordingDefaultPreflightTrajectoryAdapter final : public HybridDirectTrajectoryAdapter {
 public:
+    mutable int preflight_calls{};
     mutable int capability_calls{};
     mutable int build_calls{};
+    HybridDirectTrajectoryPreflightResult preflight(const model::HybridSystem& system,
+        const model::HybridRequest& request,std::span<const model::HybridPath> paths,
+        model::HybridRelationLimits limits,std::span<const model::HybridPlannedOperation> operations,
+        optimization::ObjectivePolicy policy,std::stop_token cancellation) const override {
+        ++preflight_calls;
+        return HybridDirectTrajectoryAdapter::preflight(system,request,paths,limits,
+            operations,policy,cancellation);
+    }
     HybridDirectTrajectoryCapabilities capabilities() const noexcept override {
         ++capability_calls;
         return {true,true,true,Assurance::numerical};
@@ -3054,7 +3063,7 @@ TEST_CASE("hybrid portfolio preflights all terminal objective capabilities befor
     CHECK(std::get<Diagnostics>(result).front().code==DiagnosticCode::unsupported);
     CHECK(std::get<Diagnostics>(result).front().field=="hybrid.adapter.objective");
     CHECK(adapter.calls==0);
-    CHECK(adapter.preflight_calls==0);
+    CHECK(adapter.preflight_calls==1);
     CHECK(adapter.capability_calls==1);
 
     FixtureHybridFamilyVerifier verifier;
@@ -3065,7 +3074,7 @@ TEST_CASE("hybrid portfolio preflights all terminal objective capabilities befor
     CHECK(std::get<Diagnostics>(verified).front().code==DiagnosticCode::unsupported);
     CHECK(std::get<Diagnostics>(verified).front().field=="hybrid.adapter.objective");
     CHECK(verified_adapter.calls==0);
-    CHECK(verified_adapter.preflight_calls==0);
+    CHECK(verified_adapter.preflight_calls==1);
 }
 
 TEST_CASE("hybrid portfolio validates objectives for unreachable allowed terminal modes") {
@@ -3088,7 +3097,7 @@ TEST_CASE("hybrid portfolio validates objectives for unreachable allowed termina
     CHECK(std::get<Diagnostics>(result).front().explanation.find("unreachable-terminal")!=
         std::string::npos);
     CHECK(adapter.capability_calls==1);
-    CHECK(adapter.preflight_calls==0);
+    CHECK(adapter.preflight_calls==1);
     CHECK(adapter.calls==0);
 
     FixtureHybridFamilyVerifier verifier;
@@ -3100,7 +3109,7 @@ TEST_CASE("hybrid portfolio validates objectives for unreachable allowed termina
     CHECK(std::get<Diagnostics>(verified).front().explanation.find("unreachable-terminal")!=
         std::string::npos);
     CHECK(verified_adapter.capability_calls==1);
-    CHECK(verified_adapter.preflight_calls==0);
+    CHECK(verified_adapter.preflight_calls==1);
     CHECK(verified_adapter.calls==0);
 }
 
@@ -3124,7 +3133,7 @@ TEST_CASE("single hybrid path admission checks objectives for every allowed term
     CHECK(std::get<Diagnostics>(result).front().explanation.find("unreachable-terminal")!=
         std::string::npos);
     CHECK(adapter.capability_calls==1);
-    CHECK(adapter.preflight_calls==0);
+    CHECK(adapter.preflight_calls==1);
     CHECK(adapter.calls==0);
 }
 
@@ -7454,7 +7463,7 @@ TEST_CASE("direct trajectory adapters preflight the full path inventory before b
     CHECK(std::get<Diagnostic>(failure.failure).field=="fixture.trajectory.preflight");
     CHECK(adapter.preflight_calls==1);
     CHECK(adapter.preflight_path_count==3);
-    CHECK(adapter.capability_calls==1);
+    CHECK(adapter.capability_calls==0);
     CHECK(adapter.build_calls==0);
 
     const auto composed=build_hybrid_portfolio_programs(system,request,
@@ -7476,7 +7485,7 @@ TEST_CASE("direct trajectory adapters preflight the full path inventory before b
     CHECK(std::get<model::HybridPathCompositionFailureReport>(single).path==example_path());
     CHECK(single_adapter.preflight_calls==1);
     CHECK(single_adapter.preflight_path_count==1);
-    CHECK(single_adapter.capability_calls==1);
+    CHECK(single_adapter.capability_calls==0);
     CHECK(single_adapter.build_calls==0);
 }
 
@@ -7491,7 +7500,7 @@ TEST_CASE("direct trajectory preflight rejects a partial success receipt before 
     const auto* diagnostic=std::get_if<Diagnostic>(&failure.failure);
     REQUIRE(diagnostic);
     CHECK(diagnostic->field=="hybrid.adapter.preflight_success_inventory");
-    CHECK(adapter.capability_calls==1);
+    CHECK(adapter.capability_calls==0);
     CHECK(adapter.build_calls==0);
 }
 
@@ -7506,7 +7515,7 @@ TEST_CASE("direct trajectory preflight rejects incomplete operation admission be
     const auto* diagnostic=std::get_if<Diagnostic>(&failure.failure);
     REQUIRE(diagnostic);
     CHECK(diagnostic->field=="hybrid.adapter.preflight_success_operations");
-    CHECK(adapter.capability_calls==1);
+    CHECK(adapter.capability_calls==0);
     CHECK(adapter.build_calls==0);
 }
 
@@ -7521,7 +7530,7 @@ TEST_CASE("direct trajectory preflight rejects reordered or extra operation rece
         const auto* diagnostic=std::get_if<Diagnostic>(&failure.failure);
         REQUIRE(diagnostic);
         CHECK(diagnostic->field=="hybrid.adapter.preflight_success_operations");
-        CHECK(adapter.capability_calls==1);
+        CHECK(adapter.capability_calls==0);
         CHECK(adapter.build_calls==0);
     }
 }
@@ -7557,9 +7566,35 @@ TEST_CASE("later unsupported guard and reset operations reject the full inventor
         CHECK(diagnostic->field==(unsupported_reset?
             "hybrid.reset.representation":"hybrid.guard.representation"));
         CHECK(diagnostic->explanation.find("stage 0 edge to-wide")!=std::string::npos);
-        CHECK(adapter.capability_calls==1);
+        CHECK(adapter.capability_calls==0);
         CHECK(adapter.build_calls==0);
     }
+}
+
+TEST_CASE("single-path unsupported reset is rejected before adapter capability queries") {
+    auto system=example_system();
+    auto vertices=numeric::snapshot(Matrix{2,3,{0,0,0,1,1,1}});
+    auto rays=numeric::snapshot(Matrix{0,3,{}});
+    REQUIRE(std::holds_alternative<numeric::MatrixView>(vertices));
+    REQUIRE(std::holds_alternative<numeric::MatrixView>(rays));
+    auto reset=sets::make_v({SetId{"unsupported-reset-v"},3,{"source","target","extra"}},
+        {std::get<numeric::MatrixView>(vertices),std::get<numeric::MatrixView>(rays)});
+    REQUIRE(std::holds_alternative<sets::SetData>(reset));
+    system.edges.front().reset_relations.front()=
+        std::get<sets::SetData>(std::move(reset)).as_handle();
+
+    RecordingDefaultPreflightTrajectoryAdapter adapter;
+    const auto result=build_hybrid_path_program(adapter,system,example_request(),
+        example_path(),{"unsupported-reset"},{16,64,1024});
+    REQUIRE(std::holds_alternative<model::HybridPathCompositionFailureReport>(result));
+    const auto& failure=std::get<model::HybridPathCompositionFailureReport>(result);
+    const auto* diagnostic=std::get_if<Diagnostic>(&failure.failure);
+    REQUIRE(diagnostic);
+    CHECK(diagnostic->code==DiagnosticCode::unsupported);
+    CHECK(diagnostic->field=="hybrid.reset.representation");
+    CHECK(adapter.preflight_calls==1);
+    CHECK(adapter.capability_calls==0);
+    CHECK(adapter.build_calls==0);
 }
 
 TEST_CASE("direct trajectory adapters may admit a representation outside the joint-H default") {
@@ -7602,7 +7637,7 @@ TEST_CASE("direct trajectory operation preflight admits adapter-specific numeric
     CHECK(rejecting.observed_policy->numerical.absolute_tolerance==1e-8);
     CHECK(rejecting.observed_policy->numerical.relative_tolerance==1e-8);
     CHECK(rejecting.preflight_calls==1);
-    CHECK(rejecting.capability_calls==1);
+    CHECK(rejecting.capability_calls==0);
     CHECK(rejecting.build_calls==0);
 }
 
@@ -7625,7 +7660,7 @@ TEST_CASE("direct trajectory preflight failures must retain requested path and l
         const auto expected=corruption==0?"hybrid.adapter.preflight_path":
             (corruption==1?"hybrid.adapter.preflight_limits":"hybrid.adapter.preflight_diagnostics");
         CHECK(diagnostic->field==expected);
-        CHECK(adapter.capability_calls==1);
+        CHECK(adapter.capability_calls==0);
         CHECK(adapter.build_calls==0);
     }
 }
@@ -7663,7 +7698,7 @@ TEST_CASE("direct trajectory preflight observes cancellation before branch build
         {},cancellation.get_token());
     REQUIRE(std::holds_alternative<OperationStopped>(result));
     CHECK(std::get<OperationStopped>(result).reason==StopReason::cancelled);
-    CHECK(adapter.capability_calls==1);
+    CHECK(adapter.capability_calls==0);
     CHECK(adapter.build_calls==0);
 }
 
