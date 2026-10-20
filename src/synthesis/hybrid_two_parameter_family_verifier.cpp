@@ -497,6 +497,11 @@ Branch eval(const HybridSystem &sys, const HybridRequest &req,
     b.state = Branch::State::infeasible;
     return b;
   }
+  const auto feasible_dimension = dimension(b.feasible);
+  if (!feasible_dimension)
+    return unsupported("Feasible polygon dimension is not exactly representable");
+  if (*feasible_dimension != 2)
+    return unsupported("Degenerate feasible control polygons are unsupported");
   auto obj = std::find_if(
       req.terminal_objectives.begin(), req.terminal_objectives.end(),
       [&](const auto &o) { return o.mode == modes[2]->id; });
