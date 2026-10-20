@@ -962,6 +962,88 @@ TEST_CASE("exact linear H verifier preserves a continuous optimum across an exis
     CHECK(rejected_report.branches.front().continuous_coverage==HybridVerificationStatus::refuted);
 }
 
+TEST_CASE("exact linear H verifier checks a coupled two-control polytope through an existential reset") {
+    const auto control=h_set("oracle-coupled-control-polytope",2,
+        Matrix{4,2,{-1,0,0,-1,1,1,-1,-1}},Vector{0,0,2,-1},
+        Matrix{0,2,{}},Vector{});
+    const auto reset=h_set("oracle-coupled-existential-reset",2,
+        Matrix{2,2,{1,-1,-1,1}},Vector{0,1},Matrix{0,2,{}},Vector{});
+    model::HybridMode source{{"oracle-coupled-source"},1,2,{"x"},{"u","v"}};
+    source.flow=LinearStage{Matrix{1,1,{0}},Matrix{1,2,{1,1}},
+        Matrix{1,0,{}},Vector{0}};
+    source.control_sets={control};
+    source.invariants={UniversalSet{1},UniversalSet{1}};
+    model::HybridMode target{{"oracle-coupled-target"},1,0,{"y"},{}};
+    target.flow=LinearStage{Matrix{1,1,{1}},Matrix{1,0,{}},
+        Matrix{1,0,{}},Vector{0}};
+    target.control_sets={UniversalSet{0}};
+    target.invariants={UniversalSet{1},UniversalSet{1}};
+    model::HybridSystem system{1,{source,target},
+        {{{"oracle-coupled-edge"},source.id,target.id,
+          {UniversalSet{1}},{reset}}}};
+    model::HybridRequest request{{source.id,{0}},{target.id},
+        {{target.id,LinearTerminal{{1},0},"terminal state","units"}}};
+
+    const auto built=build_hybrid_portfolio_programs(system,request,
+        {"oracle-coupled-polytope"},{1,2},{8,32,512});
+    REQUIRE(std::holds_alternative<std::vector<HybridPathProgram>>(built));
+    const auto& programs=std::get<std::vector<HybridPathProgram>>(built);
+    REQUIRE(programs.size()==1);
+    CHECK(programs.front().joint_relation.metadata()->set.dimension==5);
+    CHECK(std::get<LinearTerminal>(programs.front().lifted_objective).coefficients==
+        Vector{0,0,0,0,1});
+
+    // Raw constraints are u,v>=0, 1<=u+v<=2, x_pre=u+v, and
+    // x_pre<=y<=x_pre+1. Minimizing y gives y=x_pre=1 and the full
+    // slanted optimal segment u+v=1, u,v>=0.
+    const auto full_face=sets::from_handle(h_set("oracle-coupled-full-face",5,
+        Matrix{6,5,{0,-1,0,0,0, 0,0,-1,0,0, 0,1,1,0,0,
+                    0,-1,-1,0,0, 0,0,0,1,-1, 0,0,0,-1,1}},
+        Vector{0,0,2,-1,0,1},
+        Matrix{4,5,{1,0,0,0,0, 0,-1,-1,1,0,
+                    0,1,1,0,0, 0,0,0,0,1}},
+        Vector{0,0,1,1}));
+    REQUIRE(std::holds_alternative<sets::SetData>(full_face));
+    auto complete=exact_candidate(programs.front(),{0,0.5,0.5,1,1});
+    complete.relation=std::get<sets::SetData>(full_face);
+    ExactLinearHHybridFamilyVerifier verifier;
+    const std::array<HybridPathOptimalFaceCandidate,1> complete_candidates{std::move(complete)};
+    const auto verified=verify_hybrid_portfolio_family(verifier,system,request,
+        programs,complete_candidates,{1,2},{0,0});
+    REQUIRE(std::holds_alternative<HybridFamilyVerificationReport>(verified));
+    const auto& report=std::get<HybridFamilyVerificationReport>(verified);
+    CHECK(report.global_objective_optimality==HybridVerificationStatus::established);
+    CHECK(report.complete_family_coverage==HybridVerificationStatus::established);
+    REQUIRE(report.branches.size()==1);
+    CHECK(report.branches.front().feasibility==HybridVerificationStatus::established);
+    CHECK(report.branches.front().objective_optimality==HybridVerificationStatus::established);
+    CHECK(report.branches.front().continuous_coverage==HybridVerificationStatus::established);
+
+    // This proper subset still has feasible points with the optimal objective.
+    const auto narrow_face=sets::from_handle(h_set("oracle-coupled-narrow-face",5,
+        Matrix{7,5,{0,-1,0,0,0, 0,0,-1,0,0, 0,1,1,0,0,
+                    0,-1,-1,0,0, 0,0,0,1,-1, 0,0,0,-1,1,
+                    0,1,0,0,0}},
+        Vector{0,0,2,-1,0,1,0.5},
+        Matrix{4,5,{1,0,0,0,0, 0,-1,-1,1,0,
+                    0,1,1,0,0, 0,0,0,0,1}},
+        Vector{0,0,1,1}));
+    REQUIRE(std::holds_alternative<sets::SetData>(narrow_face));
+    auto incomplete=exact_candidate(programs.front(),{0,0.25,0.75,1,1});
+    incomplete.relation=std::get<sets::SetData>(narrow_face);
+    const std::array<HybridPathOptimalFaceCandidate,1> incomplete_candidates{std::move(incomplete)};
+    const auto rejected=verify_hybrid_portfolio_family(verifier,system,request,
+        programs,incomplete_candidates,{1,2},{0,0});
+    REQUIRE(std::holds_alternative<HybridFamilyVerificationReport>(rejected));
+    const auto& rejected_report=std::get<HybridFamilyVerificationReport>(rejected);
+    CHECK(rejected_report.global_objective_optimality==HybridVerificationStatus::established);
+    CHECK(rejected_report.complete_family_coverage==HybridVerificationStatus::refuted);
+    REQUIRE(rejected_report.branches.size()==1);
+    CHECK(rejected_report.branches.front().feasibility==HybridVerificationStatus::established);
+    CHECK(rejected_report.branches.front().objective_optimality==HybridVerificationStatus::established);
+    CHECK(rejected_report.branches.front().continuous_coverage==HybridVerificationStatus::refuted);
+}
+
 TEST_CASE("exact linear H verifier matches independent 3D control-box oracle") {
     using namespace model;
     const auto control_box=h_set("oracle-control-box-3d",3,

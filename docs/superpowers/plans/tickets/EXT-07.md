@@ -130,6 +130,17 @@ and refutes a feasible candidate that incorrectly fixes `u = 0`, exercising
 continuous completeness across a nonfunctional reset. This remains a bounded
 one-step oracle rather than exhaustive coverage of the admitted H domain.
 
+A second bounded continuous oracle combines a two-dimensional coupled control
+polytope with an existential reset. The raw constraints are `u,v ≥ 0`,
+`1 ≤ u+v ≤ 2`, `x_pre = u+v`, and `x_pre ≤ y ≤ x_pre+1`. Minimizing `y`
+gives the complete slanted face `u+v=1`, `u,v ≥ 0`, with `x_pre=y=1`.
+The exact verifier establishes a literal H representation of that segment and
+refutes the feasible optimal subset that adds `u ≤ 0.5`, while retaining
+established branch feasibility and objective optimality. This exercises a
+coupled two-control polytope and nonfunctional reset together, but remains a
+single small oracle rather than exhaustive validation over the admitted H
+domain.
+
 The [EXT-07 capability profile and fixture report](../../../research/ext07-capability-profile.md)
 records the declared adapter/verifier domains and named dimensions, horizons,
 mode counts, edge counts, path counts, and relation widths. It separates saved

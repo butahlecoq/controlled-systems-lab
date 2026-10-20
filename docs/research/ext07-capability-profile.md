@@ -22,6 +22,7 @@ fixtures.
 | Two-stage scalar projected interval | 1 | 1 | 2 | 3 | 2 | 1 | 7 | [Independent projected-set contract oracle](../../tests/contract/synthesis/hybrid_reachability_contract.cpp) |
 | Two-stage existential 1→2→1 reset projection | 1→2→1 | 1→0 | 2 | 3 | 2 | 1 | 8 | [Set-valued reset contract oracle](../../tests/contract/synthesis/hybrid_reachability_contract.cpp) |
 | One-step existential reset optimal face | 1 | 1 | 1 | 2 | 1 | 1 | 4 | [Independent continuous-family verifier oracle](../../tests/unit/synthesis/hybrid_path_program_tests.cpp) |
+| One-step coupled 2-control polytope with existential reset | 1 | 2 | 1 | 2 | 1 | 1 | 5 | [Independent slanted optimal-face oracle](../../tests/unit/synthesis/hybrid_path_program_tests.cpp) |
 | Four-mode branching resource-bound check | 1 | 0 | 2 | 4 | 4 | 2 | 5 per path | [Capability, raw-graph, and row-limit test](../../tests/unit/model/hybrid_system_test.cpp) |
 
 The scalar two-stage report is the largest saved measurement by horizon and
@@ -29,7 +30,9 @@ path count. The four-mode graph is the largest named capability-count fixture
 by mode and edge count. Its 5-variable relations fit the configured 3-row,
 15-matrix-element budget and reject a 2-row budget. The 3D control-box case is
 the largest named independent continuous oracle by state and control
-dimension. The reports measure their own fixtures; the unit-test cases are
+dimension. The coupled 2-control reset case adds a non-axis-aligned control
+polytope and a proper-subset rejection. The reports measure their own fixtures;
+the unit-test cases are
 correctness evidence and are not timing samples.
 
 ## Declared adapter and verifier domains
