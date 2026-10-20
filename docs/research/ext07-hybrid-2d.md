@@ -27,4 +27,4 @@ ctest --test-dir build/ext07-hybrid -C Release -R installed_public_client --outp
 ```
 
 The public API boundary and its current implementation limits are documented in [the hybrid systems contract](../contracts/hybrid-systems.md). The implementation is still in progress under [issue #156](https://github.com/butahlecoq/controlled-systems-lab/issues/156).
-The foundational implementation is in [commit 2519fb5c](https://github.com/butahlecoq/controlled-systems-lab/commit/2519fb5c63a032eee6c225b90c2f5c50f543698e); the raw input/output record is linked above.
+The foundational implementation is in [commit 2519fb5c](https://github.com/butahlecoq/controlled-systems-lab/commit/2614dd203081dc9248d6124bf9999edd90073547); the raw input/output record is linked above.
