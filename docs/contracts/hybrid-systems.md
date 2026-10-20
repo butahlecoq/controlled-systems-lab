@@ -185,11 +185,15 @@ Built-in joint-H structural failures retain path and stage context. The
 reachability, direct-trajectory, and family-verification preflight hooks have
 default implementations. Derived adapters that do not override a hook remain
 source compatible; adapters that override a preflight must match its declared
-result type. A reachability adapter must override its fail-closed default to be
-usable; a direct-trajectory adapter using a representation other than joint-H
-must override the structural joint-H default. These public virtual additions
-change adapter vtables; downstream prebuilt adapters must be rebuilt. CSL does
-not promise a stable C++ binary/plugin ABI.
+signature and result type. Direct-trajectory overrides must accept the
+framework operation plan and return it in the success receipt along with the
+complete ordered path inventory and relation limits; overrides using the old
+signature require a source migration. A reachability adapter must override
+its fail-closed default to be usable; a direct-trajectory adapter using a
+representation other than joint-H must override the structural joint-H
+default. These public virtual additions change adapter vtables; downstream
+prebuilt adapters must be rebuilt. CSL does not promise a stable C++
+binary/plugin ABI.
 The direct-trajectory API is replaceable through
 `HybridDirectTrajectoryAdapter`; each adapter preflights its complete fixed-path
 inventory and relation limits before capability queries or branch builds.
@@ -486,14 +490,14 @@ declared path or request inventories before dispatch. Successful direct-
 trajectory preflight returns an ordered path-inventory receipt with the
 configured relation limits. The framework rejects an incomplete, reordered,
 or mismatched receipt before querying capabilities or building any branch.
-This makes path-inventory coverage observable at that adapter boundary. The
-receipt is still an adapter attestation: it does not independently prove that
-every operation within each path was supported. The framework now generates
-deterministic operation identities per supplied path, preserving duplicate
-paths as distinct indexed obligations, and uses those identities when checking
-execution traces. Reachability, trajectory, and verifier adapters do not yet
-exchange a shared model-wide operation-admission receipt. Complete support
-accounting for every requested operation across the mode/edge structure,
+The receipt now also contains the framework-generated operation plan, and the
+wrapper rejects an incomplete, reordered, or foreign plan before capability
+queries. The plan preserves duplicate paths as distinct indexed obligations.
+The receipt remains an adapter attestation; it does not independently prove
+semantic support for those operations. Reachability and verifier adapters do
+not yet exchange the same model-wide operation-admission receipt. Complete
+support accounting for every requested operation across all three adapter
+boundaries,
 complete terminal-policy semantics
 beyond the declared objective-class/assurance/tolerance checks, and broader
 multiple-parameter verifier coverage remain EXT-07 work.

@@ -207,11 +207,12 @@ struct HybridDirectTrajectoryPreflightFailure {
     Diagnostic diagnostic;
 };
 // A successful adapter admission must attest to the exact ordered request
-// inventory and limits it checked. The wrapper validates this receipt before
-// it queries capabilities or starts any path build.
+// inventory, framework operation plan, and limits it checked. The wrapper
+// validates this receipt before it queries capabilities or starts any build.
 struct HybridDirectTrajectoryPreflightSuccess {
     std::vector<model::HybridPath> admitted_paths;
     model::HybridRelationLimits limits;
+    std::vector<model::HybridPlannedOperation> admitted_operations;
 };
 using HybridDirectTrajectoryPreflightResult = std::variant<
     HybridDirectTrajectoryPreflightSuccess, HybridDirectTrajectoryPreflightFailure,
@@ -229,11 +230,12 @@ public:
     // accepted ranges of otherwise valid numerical tolerances. The default
     // declares the built-in joint-H representation boundary; adapters using
     // another representation must override it. A successful override returns
-    // every supplied path in the same order and the exact configured relation
-    // limits in HybridDirectTrajectoryPreflightSuccess.
+    // every supplied path and planned operation in the same order, and the
+    // exact configured relation limits in HybridDirectTrajectoryPreflightSuccess.
     virtual HybridDirectTrajectoryPreflightResult preflight(const model::HybridSystem&,
         const model::HybridRequest&, std::span<const model::HybridPath>,
-        model::HybridRelationLimits, optimization::ObjectivePolicy,
+        model::HybridRelationLimits, std::span<const model::HybridPlannedOperation>,
+        optimization::ObjectivePolicy,
         std::stop_token cancellation) const;
     virtual HybridDirectTrajectoryCapabilities capabilities() const noexcept = 0;
     virtual HybridPathProgramResult build_path(const model::HybridSystem&,

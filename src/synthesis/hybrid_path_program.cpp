@@ -65,18 +65,20 @@ bool same_limits(model::HybridRelationLimits left,model::HybridRelationLimits ri
 HybridTrajectoryOperationPreflightResult preflight_hybrid_trajectory_operations(
     const HybridDirectTrajectoryAdapter& adapter,const model::HybridSystem& system,
     const model::HybridRequest& request,std::span<const model::HybridPath> paths,
-    model::HybridRelationLimits limits,optimization::ObjectivePolicy policy,
+    model::HybridRelationLimits limits,
+    optimization::ObjectivePolicy policy,
     std::stop_token cancellation) {
     if(cancellation.stop_requested())
         return OperationStopped{StopReason::cancelled,
             "Hybrid trajectory operation preflight was cancelled before adapter admission"};
     if(const auto policy_error=hybrid_objective_policy_error(policy); policy_error)
         return Diagnostics{*policy_error};
+    const auto operation_plan=model::plan_hybrid_operations(paths);
     const auto evidence_rejection=[&](const model::HybridPath& path,Diagnostic diagnostic) {
         return HybridTrajectoryOperationPreflightResult{model::HybridPathCompositionFailureReport{
             path,limits,{},std::move(diagnostic)}};
     };
-    const auto result=adapter.preflight(system,request,paths,limits,policy,cancellation);
+    const auto result=adapter.preflight(system,request,paths,limits,operation_plan,policy,cancellation);
     if(const auto* failure=std::get_if<HybridDirectTrajectoryPreflightFailure>(&result)) {
         if(paths.empty())
             return Diagnostics{{DiagnosticCode::evidence_mismatch,
@@ -115,6 +117,13 @@ HybridTrajectoryOperationPreflightResult preflight_hybrid_trajectory_operations(
                 "hybrid.adapter.preflight_success_inventory",
                 "Direct-trajectory preflight success receipt does not match the complete ordered path inventory"});
         }
+        if(!std::equal(operation_plan.begin(),operation_plan.end(),
+                       success->admitted_operations.begin(),success->admitted_operations.end())) {
+            const auto path=paths.empty()?model::HybridPath{}:paths.front();
+            return evidence_rejection(path,Diagnostic{DiagnosticCode::evidence_mismatch,
+                "hybrid.adapter.preflight_success_operations",
+                "Direct-trajectory preflight success receipt does not match the framework operation plan"});
+        }
         return *success;
     }
     if(const auto* stopped=std::get_if<OperationStopped>(&result)) return *stopped;
@@ -122,7 +131,8 @@ HybridTrajectoryOperationPreflightResult preflight_hybrid_trajectory_operations(
         return OperationStopped{StopReason::cancelled,
             "Hybrid trajectory construction was cancelled after adapter preflight"};
     return HybridDirectTrajectoryPreflightSuccess{
-        std::vector<model::HybridPath>(paths.begin(),paths.end()),limits};
+        std::vector<model::HybridPath>(paths.begin(),paths.end()),limits,
+        std::vector<model::HybridPlannedOperation>(operation_plan.begin(),operation_plan.end())};
 }
 
 HybridTrajectoryPortfolioPreflightResult preflight_hybrid_trajectory_capabilities(
@@ -573,6 +583,7 @@ HybridPathProgramResult JointHDirectTrajectoryAdapter::build_path(
 HybridDirectTrajectoryPreflightResult HybridDirectTrajectoryAdapter::preflight(
     const model::HybridSystem& system,const model::HybridRequest& request,
     std::span<const model::HybridPath> paths,model::HybridRelationLimits limits,
+    std::span<const model::HybridPlannedOperation> operation_plan,
     optimization::ObjectivePolicy,std::stop_token cancellation) const {
     const auto result=model::preflight_hybrid_path_relations(system,request,paths,limits,cancellation);
     if(const auto* failure=std::get_if<model::HybridPathCompositionFailureReport>(&result)) {
@@ -591,7 +602,8 @@ HybridDirectTrajectoryPreflightResult HybridDirectTrajectoryAdapter::preflight(
     }
     if(const auto* stopped=std::get_if<OperationStopped>(&result)) return *stopped;
     return HybridDirectTrajectoryPreflightSuccess{
-        std::vector<model::HybridPath>(paths.begin(),paths.end()),limits};
+        std::vector<model::HybridPath>(paths.begin(),paths.end()),limits,
+        std::vector<model::HybridPlannedOperation>(operation_plan.begin(),operation_plan.end())};
 }
 
 namespace {
