@@ -2,6 +2,7 @@
 #include "hybrid_family_verifier_internal.hpp"
 
 #include <algorithm>
+#include <array>
 #include <cmath>
 #include <limits>
 #include <optional>
@@ -511,6 +512,317 @@ bool program_objective_matches(const HybridPathProgram& program,const ScalarBran
         same(branch.objective_offset,terminal_coefficient*branch.post_offset+terminal_offset,policy);
 }
 
+struct TwoStageScalarBranch {
+    enum class State { feasible, infeasible, unsupported } state{State::unsupported};
+    Interval parameter_interval;
+    Vector base;
+    Vector direction;
+    std::size_t parameter_control_coordinate{};
+    double objective_slope{};
+    double objective_offset{};
+    double minimum{};
+    std::string reason;
+};
+
+bool relation_domain_supported_for_width(const sets::SetData& data,std::size_t width,
+    HybridRelationLimits limits) {
+    if(data.metadata()->set.dimension!=width||limits.max_variables<width) return false;
+    const auto representation=data.representation();
+    if(const auto* singleton=std::get_if<sets::SingletonRepresentation>(&representation))
+        return singleton->point.size()==width;
+    const auto* h=std::get_if<sets::HRepresentation>(&representation);
+    if(!h||h->inequalities.rows()>std::numeric_limits<std::size_t>::max()-h->equalities.rows())
+        return false;
+    const auto total_rows=h->equalities.rows()+h->inequalities.rows();
+    return h->equalities.cols()==width&&h->inequalities.cols()==width&&
+        h->equalities.rows()<=limits.max_rows&&h->inequalities.rows()<=limits.max_rows&&
+        total_rows<=limits.max_rows&&total_rows<=kMaximumAdmissibleRows&&
+        (width==0||total_rows<=limits.max_matrix_elements/width)&&
+        h->equality_values.size()==h->equalities.rows()&&
+        h->upper_bounds.size()==h->inequalities.rows();
+}
+
+bool relation_is_parameter_interval(const sets::SetData& data,const Vector& base,
+    const Vector& direction,Interval interval,HybridRelationLimits limits,
+    std::stop_token cancellation,bool& cancelled,bool& exactness_established) {
+    const auto width=base.size();
+    if(interval.empty||direction.size()!=width||!relation_domain_supported_for_width(data,width,limits))
+        return false;
+    const auto representation=data.representation();
+    const auto point_at=[&](double parameter,Vector& point) {
+        point.assign(base.begin(),base.end());
+        for(std::size_t column=0;column<width;++column) {
+            double increment=0;
+            if(!exact_product(direction[column],parameter,increment)||
+               !exact_sum(point[column],increment,point[column])) {
+                exactness_established=false;
+                return false;
+            }
+        }
+        return true;
+    };
+    if(const auto* singleton=std::get_if<sets::SingletonRepresentation>(&representation)) {
+        if(interval.lower!=interval.upper) return false;
+        Vector expected;
+        if(!point_at(interval.lower,expected)) return false;
+        return std::equal(expected.begin(),expected.end(),singleton->point.values().begin());
+    }
+    const auto* h=std::get_if<sets::HRepresentation>(&representation);
+    if(!h) return false;
+    Vector lower_point,upper_point;
+    if(!point_at(interval.lower,lower_point)||!point_at(interval.upper,upper_point)) return false;
+    for(std::size_t row=0;row<h->equalities.rows();++row) {
+        if((row&255U)==0&&cancellation.stop_requested()) { cancelled=true; return false; }
+        double lower_value=0,upper_value=0;
+        if(!exact_dot(h->equalities,row,lower_point,lower_value)||
+           !exact_dot(h->equalities,row,upper_point,upper_value)) {
+            exactness_established=false;
+            return false;
+        }
+        if(!std::isfinite(h->equality_values[row])||
+           lower_value!=h->equality_values[row]||upper_value!=h->equality_values[row]) return false;
+    }
+    const auto rank=exact_rank(h->equalities,cancellation,cancelled);
+    if(cancelled) return false;
+    if(!rank) { exactness_established=false; return false; }
+    if(interval.lower==interval.upper) {
+        if(*rank==width) {
+            for(std::size_t row=0;row<h->inequalities.rows();++row) {
+                if((row&255U)==0&&cancellation.stop_requested()) { cancelled=true; return false; }
+                double value=0;
+                if(!exact_dot(h->inequalities,row,lower_point,value)) {
+                    exactness_established=false;
+                    return false;
+                }
+                if(!std::isfinite(h->upper_bounds[row])||value>h->upper_bounds[row]) return false;
+            }
+            return true;
+        }
+        if(*rank!=width-1) return false;
+        for(std::size_t row=0;row<h->equalities.rows();++row) {
+            if((row&255U)==0&&cancellation.stop_requested()) { cancelled=true; return false; }
+            double direction_value=0;
+            if(!exact_dot(h->equalities,row,direction,direction_value)) {
+                exactness_established=false;
+                return false;
+            }
+            if(direction_value!=0) return false;
+        }
+    } else if(*rank!=width-1) return false;
+    double lower=-std::numeric_limits<double>::infinity();
+    double upper=std::numeric_limits<double>::infinity();
+    for(std::size_t row=0;row<h->inequalities.rows();++row) {
+        if((row&255U)==0&&cancellation.stop_requested()) { cancelled=true; return false; }
+        double constant=0,slope=0;
+        if(!exact_dot(h->inequalities,row,base,constant)||
+           !exact_dot(h->inequalities,row,direction,slope)) {
+            exactness_established=false;
+            return false;
+        }
+        const double bound=h->upper_bounds[row];
+        if(!std::isfinite(bound)||!std::isfinite(constant)||!std::isfinite(slope)) return false;
+        if(slope!=0) {
+            double difference=0,parameter=0;
+            if(!exact_sum(bound,-constant,difference)||!exact_division(difference,slope,parameter)) {
+                exactness_established=false;
+                return false;
+            }
+            if(slope>0) upper=std::min(upper,parameter);
+            else lower=std::max(lower,parameter);
+        } else if(constant>bound) return false;
+    }
+    return lower==interval.lower&&upper==interval.upper;
+}
+
+bool two_stage_program_objective_matches(const HybridPathProgram& program,std::size_t width,
+    double terminal_coefficient,double terminal_offset,NumericalPolicy policy) {
+    const auto* linear=std::get_if<LinearProgram>(&program.program);
+    if(!linear||linear->objective().size()!=width||width!=7) return false;
+    for(std::size_t i=0;i<width;++i) {
+        const double expected=i==6?terminal_coefficient:0;
+        if(!same(linear->objective()[i],expected,policy)) return false;
+    }
+    return same(linear->offset(),terminal_offset,policy);
+}
+
+TwoStageScalarBranch evaluate_two_stage_scalar(const HybridSystem& system,const HybridRequest& request,
+    const HybridPath& path,std::stop_token cancellation) {
+    TwoStageScalarBranch result;
+    const auto unsupported=[&](const char* reason) {
+        result.reason=reason;
+        result.state=TwoStageScalarBranch::State::unsupported;
+        return result;
+    };
+    const auto infeasible=[&]() {
+        result.state=TwoStageScalarBranch::State::infeasible;
+        result.parameter_interval.empty=true;
+        return result;
+    };
+    if(cancellation.stop_requested()) return unsupported("Verification cancelled");
+    if(system.horizon!=2||path.modes.size()!=3||path.edges.size()!=2||
+       request.initial.state.size()!=1||!std::isfinite(request.initial.state[0]))
+        return unsupported("Verifier supports two-stage paths with one-dimensional states");
+    std::array<const HybridMode*,3> modes{};
+    std::array<const HybridTransitionEdge*,2> edges{};
+    for(std::size_t i=0;i<modes.size();++i) {
+        modes[i]=find_mode(system,path.modes[i]);
+        if(!modes[i]||modes[i]->state_dimension!=1||modes[i]->control_dimension!=1||
+           modes[i]->invariants.size()!=3||modes[i]->control_sets.size()!=2)
+            return unsupported("Verifier supports scalar modes with two stage-indexed interval controls and invariants");
+    }
+    for(std::size_t i=0;i<edges.size();++i) {
+        edges[i]=find_edge(system,path.edges[i]);
+        if(!edges[i]||edges[i]->source!=modes[i]->id||edges[i]->target!=modes[i+1]->id||
+           edges[i]->guards.size()!=2||edges[i]->reset_relations.size()!=2)
+            return unsupported("Transition edges are outside the two-stage scalar verifier domain");
+    }
+    bool set_supported=true,cancelled=false;
+    if(!contains_value(modes[0]->invariants[0],request.initial.state[0],{},set_supported,
+        cancellation,cancelled)) {
+        if(cancelled) return unsupported("Verification cancelled while reading initial invariant");
+        return set_supported?infeasible():unsupported("Initial invariant representation is unsupported");
+    }
+    if(!set_supported) return unsupported("Initial invariant representation is unsupported");
+
+    std::array<Interval,2> control_intervals{};
+    std::size_t free_control_stage=2;
+    for(std::size_t stage=0;stage<2;++stage) {
+        auto parsed=set_interval(modes[stage]->control_sets[stage],cancellation,cancelled);
+        if(cancelled) return unsupported("Verification cancelled while reading scalar control intervals");
+        if(!parsed) return unsupported("Control set is outside the scalar interval verifier domain");
+        control_intervals[stage]=*parsed;
+        if(parsed->empty) return infeasible();
+        if(!std::isfinite(parsed->lower)||!std::isfinite(parsed->upper))
+            return unsupported("Verifier requires bounded scalar control intervals");
+        if(parsed->lower<parsed->upper) {
+            if(free_control_stage!=2)
+                return unsupported("Verifier supports exactly one non-singleton interval control");
+            free_control_stage=stage;
+        }
+    }
+    if(free_control_stage==2)
+        return unsupported("Verifier requires one continuous scalar interval control parameter");
+    Interval parameters=control_intervals[free_control_stage];
+    result.parameter_control_coordinate=free_control_stage==0?1:4;
+    result.base.assign(7,0);
+    result.direction.assign(7,0);
+    result.base[0]=request.initial.state[0];
+    double state_offset=request.initial.state[0],state_gain=0;
+    std::size_t coordinate=1;
+    for(std::size_t stage=0;stage<2;++stage) {
+        if(cancellation.stop_requested()) return unsupported("Verification cancelled between scalar stages");
+        const auto& mode=*modes[stage];
+        const auto& flow_value=mode.flow;
+        const LinearStage* flow=nullptr;
+        if(const auto* stages=std::get_if<std::vector<LinearStage>>(&flow_value)) {
+            if(stages->size()!=2) return unsupported("Verifier requires two explicit scalar flow stages");
+            flow=&(*stages)[stage];
+        } else if(stage==0) flow=std::get_if<LinearStage>(&flow_value);
+        if(!flow||flow->A.rows!=1||flow->A.cols!=1||flow->B.rows!=1||flow->B.cols!=1||
+           flow->E.rows!=1||flow->E.cols!=0||flow->offset.size()!=1||
+           !std::isfinite(flow->A.values[0])||!std::isfinite(flow->B.values[0])||
+           !std::isfinite(flow->offset[0]))
+            return unsupported("Flow shape is outside the scalar verifier domain");
+        double control_offset=control_intervals[stage].lower;
+        double control_gain=0;
+        if(stage==free_control_stage) { control_offset=0; control_gain=1; }
+        result.base[coordinate]=control_offset;
+        result.direction[coordinate]=control_gain;
+        ++coordinate;
+
+        auto current_parsed=set_interval(mode.invariants[stage],cancellation,cancelled);
+        if(cancelled) return unsupported("Verification cancelled while reading stage invariants");
+        if(!current_parsed) return unsupported("Stage invariant representation is unsupported");
+        const Interval current_invariant=*current_parsed;
+        if(current_invariant.empty) return infeasible();
+        if(!constrain_affine_preimage(parameters,current_invariant,state_offset,state_gain))
+            return unsupported("Stage invariant preimage is not exactly representable");
+        if(parameters.empty) return infeasible();
+
+        double state_product=0,control_product=0,pre_offset=0,pre_gain=0;
+        if(!exact_product(flow->A.values[0],state_offset,state_product)||
+           !exact_product(flow->B.values[0],control_offset,control_product)||
+           !exact_sum(state_product,control_product,pre_offset)||
+           !exact_sum(pre_offset,flow->offset[0],pre_offset)||
+           !exact_product(flow->A.values[0],state_gain,pre_gain))
+            return unsupported("Flow composition is not exactly representable");
+        double control_gain_product=0;
+        if(!exact_product(flow->B.values[0],control_gain,control_gain_product)||
+           !exact_sum(pre_gain,control_gain_product,pre_gain))
+            return unsupported("Flow parameter gain is not exactly representable");
+
+        result.base[coordinate]=pre_offset;
+        result.direction[coordinate]=pre_gain;
+        ++coordinate;
+        auto constrain_set=[&](const AdmissibleSet& set,double offset,double gain,
+            const char* unsupported_reason)->bool {
+            auto interval=set_interval(set,cancellation,cancelled);
+            if(cancelled) return false;
+            if(!interval) { result.reason=unsupported_reason; return false; }
+            if(interval->empty) { parameters.empty=true; return true; }
+            return constrain_affine_preimage(parameters,*interval,offset,gain);
+        };
+        if(!constrain_set(mode.invariants[stage+1],pre_offset,pre_gain,
+            "Pre-reset invariant representation is unsupported")) {
+            if(result.reason.empty()) return unsupported("Pre-reset invariant preimage is not exactly representable");
+            else { const auto reason=result.reason; return unsupported(reason.c_str()); }
+        }
+        if(parameters.empty) return infeasible();
+        if(!constrain_set(edges[stage]->guards[stage],pre_offset,pre_gain,
+            "Transition guard representation is unsupported")) {
+            if(result.reason.empty()) return unsupported("Transition guard preimage is not exactly representable");
+            else { const auto reason=result.reason; return unsupported(reason.c_str()); }
+        }
+        if(parameters.empty) return infeasible();
+
+        double reset_offset=0,reset_gain=0;
+        if(!scalar_affine_reset(edges[stage]->reset_relations[stage],reset_offset,reset_gain))
+            return unsupported("Verifier supports exactly representable deterministic scalar affine resets");
+        double reset_increment=0,post_offset=0,post_gain=0;
+        if(!exact_product(reset_gain,pre_offset,reset_increment)||
+           !exact_sum(reset_offset,reset_increment,post_offset)||
+           !exact_product(reset_gain,pre_gain,post_gain))
+            return unsupported("Reset composition is not exactly representable");
+        result.base[coordinate]=post_offset;
+        result.direction[coordinate]=post_gain;
+        ++coordinate;
+        state_offset=post_offset;
+        state_gain=post_gain;
+        if(parameters.empty) return infeasible();
+    }
+    auto terminal_set=set_interval(modes[2]->invariants[2],cancellation,cancelled);
+    if(cancelled) return unsupported("Verification cancelled while reading terminal invariant");
+    if(!terminal_set) return unsupported("Terminal invariant representation is unsupported");
+    if(terminal_set->empty) return infeasible();
+    if(!constrain_affine_preimage(parameters,*terminal_set,state_offset,state_gain))
+        return unsupported("Terminal invariant preimage is not exactly representable");
+    if(parameters.empty) return infeasible();
+    if(!std::isfinite(parameters.lower)||!std::isfinite(parameters.upper))
+        return unsupported("Verifier requires a bounded feasible control parameter interval");
+
+    const auto objective=std::find_if(request.terminal_objectives.begin(),request.terminal_objectives.end(),
+        [&](const auto& item){return item.mode==modes[2]->id;});
+    if(objective==request.terminal_objectives.end()) return unsupported("Missing terminal objective");
+    const auto* linear=std::get_if<LinearTerminal>(&objective->objective);
+    if(!linear||linear->coefficients.size()!=1||!std::isfinite(linear->coefficients[0])||
+       !std::isfinite(linear->offset)) return unsupported("Only scalar linear terminal objectives are supported");
+    double objective_base=0,objective_offset=0;
+    if(!exact_product(linear->coefficients[0],state_gain,result.objective_slope)||
+       !exact_product(linear->coefficients[0],state_offset,objective_base)||
+       !exact_sum(objective_base,linear->offset,objective_offset))
+        return unsupported("Objective composition is not exactly representable");
+    result.objective_offset=objective_offset;
+    const double minimizing_parameter=result.objective_slope>0?parameters.lower:
+        (result.objective_slope<0?parameters.upper:parameters.lower);
+    double objective_increment=0;
+    if(!exact_product(result.objective_slope,minimizing_parameter,objective_increment)||
+       !exact_sum(result.objective_offset,objective_increment,result.minimum))
+        return unsupported("Minimum objective arithmetic is not exactly representable");
+    result.parameter_interval=parameters;
+    result.state=TwoStageScalarBranch::State::feasible;
+    return result;
+}
+
 } // namespace
 
 HybridFamilyVerificationCapabilities OneStepScalarIntervalHybridFamilyVerifier::capabilities() const noexcept {
@@ -707,6 +1019,252 @@ HybridFamilyVerificationResult OneStepScalarIntervalHybridFamilyVerifier::verify
     }
     if(cancellation.stop_requested())
         return OperationStopped{StopReason::cancelled,"Scalar interval hybrid verification cancelled before report publication"};
+    return report;
+}
+
+HybridFamilyVerificationCapabilities TwoStageScalarIntervalHybridFamilyVerifier::capabilities() const noexcept {
+    return {true,true,true,Assurance::numerical};
+}
+
+HybridFamilyVerificationResult TwoStageScalarIntervalHybridFamilyVerifier::verify(
+    const HybridSystem& system,const HybridRequest& request,std::span<const HybridPath> paths,
+    std::span<const HybridPathProgram> programs,
+    std::span<const HybridPathOptimalFaceCandidate> candidates,NumericalPolicy policy,
+    std::stop_token cancellation) const {
+    if(cancellation.stop_requested())
+        return OperationStopped{StopReason::cancelled,
+            "Two-stage scalar interval verification cancelled before traversal"};
+    if(!std::isfinite(policy.absolute_tolerance)||!std::isfinite(policy.relative_tolerance)||
+       policy.absolute_tolerance<0||policy.relative_tolerance<0)
+        return Diagnostics{{DiagnosticCode::invalid_input,"hybrid.verification.two_stage_policy",
+            "Numerical tolerances must be finite and nonnegative"}};
+    const auto profile_diagnostics=check_hybrid_profile(system,request);
+    if(!profile_diagnostics.empty()) return profile_diagnostics;
+    if(system.horizon!=2)
+        return Diagnostics{{DiagnosticCode::unsupported,"hybrid.verification.two_stage_horizon",
+            "TwoStageScalarIntervalHybridFamilyVerifier supports horizon two only"}};
+    auto inventory=detail::independently_enumerate_paths(system,request,paths.size(),
+        std::max<std::size_t>(64,(system.edges.size()+1)*16),
+        [&]{return cancellation.stop_requested();});
+    if(cancellation.stop_requested()||inventory.cancelled)
+        return OperationStopped{StopReason::cancelled,
+            "Two-stage scalar interval verification cancelled during path traversal"};
+    if(inventory.resource_limit)
+        return Diagnostics{{DiagnosticCode::unsupported,"hybrid.verification.two_stage_path_limit",
+            "Independent path inventory exceeded its bounded traversal"}};
+    if(inventory.paths!=std::vector<HybridPath>(paths.begin(),paths.end()))
+        return Diagnostics{{DiagnosticCode::evidence_mismatch,"hybrid.verification.two_stage_paths",
+            "Independent path traversal disagrees with the supplied path inventory"}};
+    if(programs.size()!=paths.size())
+        return Diagnostics{{DiagnosticCode::evidence_mismatch,"hybrid.verification.two_stage_programs",
+            "A branch program is required for every enumerated path"}};
+
+    std::vector<TwoStageScalarBranch> evaluated;
+    evaluated.reserve(paths.size());
+    std::optional<double> global_minimum;
+    bool unsupported=false;
+    for(const auto& path:paths) {
+        if(cancellation.stop_requested())
+            return OperationStopped{StopReason::cancelled,
+                "Two-stage scalar interval verification cancelled between branches"};
+        auto branch=evaluate_two_stage_scalar(system,request,path,cancellation);
+        if(cancellation.stop_requested())
+            return OperationStopped{StopReason::cancelled,
+                "Two-stage scalar interval verification cancelled during branch reconstruction"};
+        if(branch.state==TwoStageScalarBranch::State::unsupported) unsupported=true;
+        if(branch.state==TwoStageScalarBranch::State::feasible&&
+           (!global_minimum||branch.minimum<*global_minimum)) global_minimum=branch.minimum;
+        evaluated.push_back(std::move(branch));
+    }
+
+    HybridFamilyVerificationReport report{"csl.hybrid.two-stage-scalar-interval","1",policy,
+        Assurance::numerical,std::vector<HybridPath>(paths.begin(),paths.end()),{},
+        HybridVerificationStatus::not_checked,HybridVerificationStatus::not_checked};
+    report.branches.reserve(paths.size());
+    bool family_covered=true;
+    bool coverage_unsupported=false;
+    for(std::size_t i=0;i<paths.size();++i) {
+        if(cancellation.stop_requested())
+            return OperationStopped{StopReason::cancelled,
+                "Two-stage scalar interval verification cancelled while checking branch evidence"};
+        const auto& branch=evaluated[i];
+        HybridPathVerificationRecord record{};
+        record.path=paths[i];
+        const auto candidate=std::find_if(candidates.begin(),candidates.end(),
+            [&](const auto& item){return item.path==paths[i];});
+        if(branch.state==TwoStageScalarBranch::State::unsupported) {
+            record.feasibility=HybridVerificationStatus::unsupported;
+            record.objective_optimality=HybridVerificationStatus::unsupported;
+            record.continuous_coverage=HybridVerificationStatus::unsupported;
+            record.diagnostics.push_back({DiagnosticCode::unsupported,
+                "hybrid.verification.two_stage_domain",branch.reason});
+            family_covered=false;
+            coverage_unsupported=true;
+        } else if(branch.state==TwoStageScalarBranch::State::infeasible) {
+            const auto program_representation=programs[i].joint_relation.representation();
+            const bool explicitly_empty=programs[i].joint_relation.metadata()->set.dimension==7&&
+                std::holds_alternative<sets::EmptyRepresentation>(program_representation);
+            if(explicitly_empty) {
+                record.feasibility=HybridVerificationStatus::refuted;
+                record.objective_optimality=HybridVerificationStatus::refuted;
+                record.continuous_coverage=candidate==candidates.end()?HybridVerificationStatus::established:
+                    HybridVerificationStatus::refuted;
+            } else {
+                // A contradiction in the independently reconstructed interval is
+                // not enough to certify that the supplied joint relation is empty.
+                // H-relation emptiness needs its own exact feasibility check.
+                record.feasibility=HybridVerificationStatus::unsupported;
+                record.objective_optimality=HybridVerificationStatus::unsupported;
+                record.continuous_coverage=HybridVerificationStatus::unsupported;
+                unsupported=true;
+                coverage_unsupported=true;
+                family_covered=false;
+                record.diagnostics.push_back({DiagnosticCode::unsupported,
+                    "hybrid.verification.two_stage_empty_relation",
+                    "Infeasible scalar branch is not represented by an explicit empty relation"});
+            }
+            if(candidate!=candidates.end()) {
+                family_covered=false;
+                record.diagnostics.push_back({DiagnosticCode::evidence_mismatch,
+                    "hybrid.verification.two_stage_infeasible_face",
+                    "A candidate face is supplied for an independently infeasible edge path"});
+            }
+        } else {
+            record.feasibility=HybridVerificationStatus::established;
+            const bool optimal=global_minimum&&branch.minimum==*global_minimum;
+            const auto objective=std::find_if(request.terminal_objectives.begin(),
+                request.terminal_objectives.end(),[&](const auto& item){
+                    return item.mode==paths[i].modes.back();
+                });
+            const auto* linear=objective==request.terminal_objectives.end()?nullptr:
+                std::get_if<LinearTerminal>(&objective->objective);
+            bool relation_cancelled=false,relation_exactness=true;
+            const bool program_domain=relation_domain_supported_for_width(
+                programs[i].joint_relation,7,programs[i].relation_limits);
+            const bool program_valid=program_domain&&linear&&programs[i].path==paths[i]&&
+                relation_is_parameter_interval(programs[i].joint_relation,branch.base,
+                    branch.direction,branch.parameter_interval,programs[i].relation_limits,
+                    cancellation,relation_cancelled,relation_exactness)&&
+                two_stage_program_objective_matches(programs[i],7,linear->coefficients[0],
+                    linear->offset,policy);
+            if(cancellation.stop_requested())
+                return OperationStopped{StopReason::cancelled,
+                    "Two-stage scalar interval verification cancelled while checking a program relation"};
+            if(!program_valid) {
+                family_covered=false;
+                if(program_domain&&relation_exactness) {
+                    record.diagnostics.push_back({DiagnosticCode::evidence_mismatch,
+                        "hybrid.verification.two_stage_program",
+                        "Program relation or lifted objective disagrees with the independent reconstruction"});
+                } else {
+                    record.continuous_coverage=HybridVerificationStatus::unsupported;
+                    coverage_unsupported=true;
+                    record.diagnostics.push_back({DiagnosticCode::unsupported,
+                        "hybrid.verification.two_stage_program_domain",
+                        "Program relation is outside the verifier's supported representation, exact arithmetic, or resource limits"});
+                }
+            }
+            record.objective_optimality=unsupported&&!optimal?HybridVerificationStatus::unsupported:
+                (optimal?HybridVerificationStatus::established:HybridVerificationStatus::refuted);
+            if(optimal&&unsupported) {
+                record.objective_optimality=HybridVerificationStatus::unsupported;
+                record.diagnostics.push_back({DiagnosticCode::unsupported,
+                    "hybrid.verification.two_stage_global_optimum",
+                    "An unsupported branch could change the global optimum"});
+            }
+            bool covered=program_valid&&!optimal;
+            if(optimal&&candidate!=candidates.end()&&linear) {
+                const auto parameter_coordinate=branch.parameter_control_coordinate;
+                const double parameter=parameter_coordinate<candidate->anchor.size()?
+                    candidate->anchor[parameter_coordinate]:std::numeric_limits<double>::quiet_NaN();
+                Interval minimizing_interval=branch.parameter_interval;
+                if(branch.objective_slope>0) minimizing_interval.upper=minimizing_interval.lower;
+                else if(branch.objective_slope<0) minimizing_interval.lower=minimizing_interval.upper;
+                Vector expected_anchor=branch.base;
+                bool anchor_exact=true;
+                for(std::size_t j=0;j<expected_anchor.size();++j) {
+                    double increment=0;
+                    if(!exact_product(branch.direction[j],parameter,increment)||
+                       !exact_sum(expected_anchor[j],increment,expected_anchor[j])) {
+                        anchor_exact=false;
+                        relation_exactness=false;
+                        break;
+                    }
+                }
+                const auto& solver=candidate->solver_result;
+                bool solver_matches=solver.termination==Termination::completed&&
+                    solver.outcome.value==MathematicalOutcome::optimal&&solver.primal&&
+                    solver.primal->size()==candidate->anchor.size()&&
+                    candidate->anchor.size()==expected_anchor.size();
+                if(solver_matches) {
+                    for(std::size_t j=0;j<candidate->anchor.size();++j)
+                        solver_matches=solver_matches&&same((*solver.primal)[j],candidate->anchor[j],policy);
+                }
+                bool anchor_matches=anchor_exact&&std::isfinite(parameter)&&
+                    parameter>=minimizing_interval.lower-tolerance(policy,parameter)&&
+                    parameter<=minimizing_interval.upper+tolerance(policy,parameter);
+                if(anchor_matches) {
+                    for(std::size_t j=0;j<candidate->anchor.size();++j)
+                        anchor_matches=anchor_matches&&same(candidate->anchor[j],expected_anchor[j],policy);
+                }
+                const bool face_domain=relation_domain_supported_for_width(
+                    candidate->relation,7,programs[i].relation_limits);
+                covered=program_valid&&solver_matches&&anchor_matches&&face_domain&&
+                    relation_is_parameter_interval(candidate->relation,branch.base,
+                        branch.direction,minimizing_interval,programs[i].relation_limits,
+                        cancellation,relation_cancelled,relation_exactness);
+                if(cancellation.stop_requested())
+                    return OperationStopped{StopReason::cancelled,
+                        "Two-stage scalar interval verification cancelled while checking a candidate face"};
+                if(covered) record.continuous_coverage=HybridVerificationStatus::established;
+                else if(!face_domain||!relation_exactness) {
+                    record.continuous_coverage=HybridVerificationStatus::unsupported;
+                    coverage_unsupported=true;
+                    record.diagnostics.push_back({DiagnosticCode::unsupported,
+                        "hybrid.verification.two_stage_face_domain",
+                        "Candidate relation is outside the supported representation, exact arithmetic, or resource limits"});
+                } else record.diagnostics.push_back({DiagnosticCode::evidence_mismatch,
+                    "hybrid.verification.two_stage_face",
+                    "Optimal candidate does not equal the independently reconstructed minimizer family"});
+            } else if(optimal) {
+                covered=false;
+                record.diagnostics.push_back({DiagnosticCode::evidence_mismatch,
+                    "hybrid.verification.two_stage_missing_face",
+                    "An optimal edge path has no candidate continuous minimizer relation"});
+            } else if(candidate!=candidates.end()) {
+                covered=false;
+                record.diagnostics.push_back({DiagnosticCode::evidence_mismatch,
+                    "hybrid.verification.two_stage_suboptimal_face",
+                    "A candidate face is supplied for a globally suboptimal edge path"});
+            }
+            if(record.objective_optimality==HybridVerificationStatus::unsupported) {
+                record.continuous_coverage=HybridVerificationStatus::unsupported;
+                covered=false;
+                coverage_unsupported=true;
+            } else if(record.continuous_coverage==HybridVerificationStatus::unsupported) {
+                covered=false;
+            } else if(record.continuous_coverage==HybridVerificationStatus::not_checked) {
+                record.continuous_coverage=covered?HybridVerificationStatus::established:
+                    HybridVerificationStatus::refuted;
+            }
+            family_covered=family_covered&&covered;
+        }
+        report.branches.push_back(std::move(record));
+    }
+    if(unsupported) {
+        report.global_objective_optimality=HybridVerificationStatus::unsupported;
+        report.complete_family_coverage=HybridVerificationStatus::unsupported;
+    } else if(!global_minimum) {
+        report.global_objective_optimality=HybridVerificationStatus::refuted;
+        report.complete_family_coverage=HybridVerificationStatus::refuted;
+    } else {
+        report.global_objective_optimality=HybridVerificationStatus::established;
+        report.complete_family_coverage=family_covered?HybridVerificationStatus::established:
+            (coverage_unsupported?HybridVerificationStatus::unsupported:HybridVerificationStatus::refuted);
+    }
+    if(cancellation.stop_requested())
+        return OperationStopped{StopReason::cancelled,
+            "Two-stage scalar interval verification cancelled before report publication"};
     return report;
 }
 

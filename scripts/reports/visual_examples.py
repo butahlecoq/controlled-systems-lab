@@ -12,6 +12,7 @@ import shutil
 import geo04_registered_reports as intersection_reports
 import geo06_registered_reports as hull_reports
 import report_data
+import stage_ext07 as ext07_reports
 
 
 def require(condition, message):
@@ -67,6 +68,62 @@ def load_examples(catalog):
                          report_id=entry["report_id"], records_path=records_path,
                          source=record["algorithm"]["source_commit"],
                          harness=record["algorithm"]["harness_commit"], kind="intersection"))
+
+    ext07_catalog = json.loads((catalog.parent / "ext07-publications.json").read_text(encoding="utf-8"))
+    require(ext07_catalog.get("schema") == "csl.ext07-publications/1" and
+            isinstance(ext07_catalog.get("reports"), list) and len(ext07_catalog["reports"]) == 1,
+            "gallery needs one reviewed EXT-07 report")
+    entry = ext07_catalog["reports"][0]
+    bundle = catalog.parent / entry["report_id"]
+    require(ext07_reports.catalog_entry(bundle) == entry, "EXT-07 publication identity differs")
+    report_record = json.loads((bundle / "records.json").read_text(encoding="utf-8"))
+    inputs = {
+        "initial": {"mode": "start", "state": [0]},
+        "horizon": 2,
+        "state_dimension": 1,
+        "control_dimension": 1,
+        "allowed_terminal_modes": ["terminal"],
+        "modes": [
+            {"id": "start", "active_stages_on_path": [0],
+             "flow_by_stage": [{"A": 1, "B": 1, "offset": 0}, {"A": 1, "B": 1, "offset": 0}],
+             "controls_by_stage": [{"interval": [0, 1]}, {"singleton": 0}],
+             "invariants_by_boundary": ["universal"] * 3},
+            {"id": "middle", "active_stages_on_path": [1],
+             "flow_by_stage": [{"A": 1, "B": 1, "offset": 0}, {"A": 1, "B": 1, "offset": 0}],
+             "controls_by_stage": [{"singleton": 0}, {"singleton": 0}],
+             "invariants_by_boundary": ["universal"] * 3},
+            {"id": "terminal", "active_stages_on_path": [2],
+             "flow_by_stage": [{"A": 1, "B": 1, "offset": 0}, {"A": 1, "B": 1, "offset": 0}],
+             "controls_by_stage": [{"singleton": 0}, {"singleton": 0}],
+             "invariants_by_boundary": ["universal"] * 3},
+        ],
+        "edges": [
+            {"id": "enter", "source": "start", "target": "middle",
+             "guards_by_stage": [{"interval": [0, 1]}, {"type": "universal", "dimension": 1}],
+             "reset_by_stage": [{"type": "identity", "dimension": 1},
+                                {"type": "universal", "dimension": 2}]},
+            {"id": "to-terminal", "source": "middle", "target": "terminal",
+             "guards_by_stage": [{"type": "universal", "dimension": 1}, {"interval": [0, 0.5]}],
+             "reset_by_stage": [{"type": "universal", "dimension": 2},
+                                {"type": "identity", "dimension": 1}]},
+        ],
+        "edge_timing": "guards constrain the stage pre-reset state; reset relations map pre-reset to the next state",
+        "terminal_objective": "minimize x[2]",
+    }
+    analytic = {
+        "fixed_path": ["enter", "to-terminal"],
+        "joint_relation": "x[0]=0; u[0]=x_pre[0]=x[1]=x_pre[1]=x[2]; u[1]=0; 0<=u[0]<=0.5",
+        "feasible_projection": "(u[0], x[2]) = (s, s), 0<=s<=0.5",
+        "complete_minimizer": "all joint coordinates are zero",
+        "minimum_objective": 0,
+    }
+    examples.append(dict(
+        slug="two_stage_scalar_family", title="A two-stage scalar family",
+        vertices=[[0, 0], [0.5, 0.5]], points=[[0, 0], [0.5, 0.5]], indices=[0, 1],
+        domain=(0, 0.5), inputs=inputs, analytic=analytic,
+        report_id=entry["report_id"], records_path=bundle / "records.json",
+        source="c6d135c94ee0fe4fece074b455dae18bee0d22b2",
+        harness="451d0157109b03ef8fab5a656b487c248b7f29a4", kind="hybrid"))
     return examples
 
 
@@ -99,25 +156,36 @@ def plot(example):
     else:
         vertices = example["vertices"]
     elements.append(boundary(vertices, "#b4cda3", "#b4cda31c" if len(vertices) > 2 else "none"))
-    groups = {}
-    for index, p in enumerate(example["points"]):
-        groups.setdefault(tuple(p), []).append(index)
-    for p, ids in groups.items():
-        x, y = point(p)
-        retained = any(index in example["indices"] for index in ids)
-        color = "#b4cda3" if retained else "#d6af75"
-        label = "/".join(str(index) for index in ids)
-        elements.append(f'<circle cx="{x}" cy="{y}" r="5" fill="{color}"/>')
-        elements.append(f'<text x="{x+9}" y="{y-10}">{label}</text>')
+    if example["kind"] == "hybrid":
+        for index, (p, label, color) in enumerate(zip(example["points"],
+                ("unique minimum", "feasible endpoint"), ("#d6af75", "#b4cda3"))):
+            x, y = point(p)
+            elements.append(f'<circle cx="{x}" cy="{y}" r="6" fill="{color}"/>')
+            elements.append(f'<text x="{x+9}" y="{y-10}">{label}</text>')
+    else:
+        groups = {}
+        for index, p in enumerate(example["points"]):
+            groups.setdefault(tuple(p), []).append(index)
+        for p, ids in groups.items():
+            x, y = point(p)
+            retained = any(index in example["indices"] for index in ids)
+            color = "#b4cda3" if retained else "#d6af75"
+            label = "/".join(str(index) for index in ids)
+            elements.append(f'<circle cx="{x}" cy="{y}" r="5" fill="{color}"/>')
+            elements.append(f'<text x="{x+9}" y="{y-10}">{label}</text>')
     description = ("Original point IDs label each location; slash-separated IDs coincide. Green points are hull vertices."
                    if example["kind"] == "hull" else
-                   "Blue dashed square and amber dashed diamond overlap in the green eight-vertex intersection. Labels are saved output row IDs.")
+                   "Blue dashed square and amber dashed diamond overlap in the green eight-vertex intersection. Labels are saved output row IDs."
+                   if example["kind"] == "intersection" else
+                   "The feasible two-stage relation is the green segment x2 equals u0 from zero to one half; the gold point is its unique minimum.")
+    x_label, y_label = (("u₀ (free control)", "x₂ (terminal state)") if example["kind"] == "hybrid"
+                        else ("x (dimensionless)", "y (dimensionless)"))
     return ('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 580 510" role="img" '
             'aria-labelledby="title desc"><title id="title">' + escape(example["title"]) + '</title>'
             '<desc id="desc">' + description + '</desc><rect width="580" height="510" fill="#172019"/>'
             '<g font-family="monospace" font-size="14" fill="#d1d9cc">' + "".join(elements) +
-            '<text x="285" y="502" text-anchor="middle">x (dimensionless)</text>'
-            '<text x="18" y="245" transform="rotate(-90 18 245)" text-anchor="middle">y (dimensionless)</text>'
+            '<text x="285" y="502" text-anchor="middle">' + escape(x_label) + '</text>'
+            '<text x="18" y="245" transform="rotate(-90 18 245)" text-anchor="middle">' + escape(y_label) + '</text>'
             '</g></svg>')
 
 
@@ -125,7 +193,9 @@ def point_table(example):
     rows = []
     seen = {}
     for index, p in enumerate(example["points"]):
-        if example["kind"] == "intersection":
+        if example["kind"] == "hybrid":
+            role = "unique minimum" if index == 0 else "feasible interval endpoint"
+        elif example["kind"] == "intersection":
             role = "intersection vertex"
         elif tuple(p) in seen:
             role = "duplicate of point " + str(seen[tuple(p)])
@@ -133,10 +203,15 @@ def point_table(example):
             role = "hull vertex" if index in example["indices"] else "interior / omitted"
         seen.setdefault(tuple(p), index)
         rows.append(f'<tr><td>{index}</td><td>{p[0]:.6g}</td><td>{p[1]:.6g}</td><td>{role}</td></tr>')
-    heading = "Original point ID" if example["kind"] == "hull" else "Saved output row ID"
+    heading = ("Original point ID" if example["kind"] == "hull" else
+               "Fixture point" if example["kind"] == "hybrid" else "Saved output row ID")
+    caption = ("Exact illustrative values; the continuous feasible set is the full segment."
+               if example["kind"] == "hybrid" else
+               "Coordinates (rounded to six significant digits; raw JSON retains binary64 values)")
+    x_label, y_label = (("u₀", "x₂") if example["kind"] == "hybrid" else ("x", "y"))
     return ('<div class="scroll" tabindex="0" role="region" aria-label="Point coordinates"><table>'
-            f'<caption>Coordinates (rounded to six significant digits; raw JSON retains binary64 values)</caption>'
-            f'<thead><tr><th scope="col">{heading}</th><th scope="col">x</th><th scope="col">y</th>'
+            f'<caption>{caption}</caption>'
+            f'<thead><tr><th scope="col">{heading}</th><th scope="col">{x_label}</th><th scope="col">{y_label}</th>'
             '<th scope="col">Role</th></tr></thead><tbody>' + "".join(rows) + '</tbody></table></div>')
 
 
@@ -163,7 +238,7 @@ def section(example, number):
             '    if (!hull) return 1;\n'
             '    for (auto id : hull->vertex_indices) std::cout << id << " ";\n}\n'
             '// Link the installed target CSL::quickhull_2d (C++20).\n') + '</code></pre></details>')
-    else:
+    elif example["kind"] == "intersection":
         explanation = ("Keep points that satisfy both shapes: the square −1 ≤ x,y ≤ 1 and the diamond "
                        "|x| + |y| ≤ 1.5. Each shape cuts off four corners of the other. The shared region is an octagon.")
         result = "Expected vertices: (±1, ±0.5) and (±0.5, ±1), all sign combinations."
@@ -176,30 +251,63 @@ def section(example, number):
         flags = ""
         driver = "reports/algorithm-results/tooling/geo04/polyhedral_intersection_driver.cpp"
         extra = "<p>The complete inputs below use A·[x,y] ≤ b for each shape. The driver links CSL::polyhedral, CSL::qhull_conversion and CSL::highs_lp.</p>"
-    command = (f'cmake -S . -B build/visual-{option.lower()} -DCMAKE_BUILD_TYPE=Release '
-               f'-DBUILD_TESTING=OFF -DCSL_BUILD_{option}_REPORT=ON{flags}\n'
-               f'cmake --build build/visual-{option.lower()} --config Release --target {target} --parallel 2\n'
-               f'./build/visual-{option.lower()}/{target} --smoke')
+    else:
+        explanation = ("Two scalar stages follow the fixed path start → middle → terminal. The first control is "
+                       "free in [0,1] and the second is fixed at zero. The second transition requires its "
+                       "pre-reset state x_pre[1] in [0,0.5], then its identity reset sets x[2]=x_pre[1].")
+        result = ("Complete feasible family: (u₀, x₂) = (s, s), 0 ≤ s ≤ 0.5. "
+                  "The unique minimum of x₂ is (u₀, x₂) = (0, 0).")
+        notes = ("This is an exact rational illustration of a supported input, not a saved solver run or a timing "
+                 "result. The independent test oracle derives the interval and checks both endpoints and an outside point.")
+        option, target = "", "hybrid_path_program_tests"
+        flags = ""
+        driver = "tests/unit/synthesis/hybrid_path_program_tests.cpp"
+        extra = ('<p>The fixture record contains all mode, flow, control, invariant, transition, guard, reset and objective inputs.</p>')
+    command = ("cmake --preset dev\n"
+               f"cmake --build --preset dev --target {target}\n"
+               f"ctest --preset dev -R '^{target}$'") if example["kind"] == "hybrid" else (
+        f'cmake -S . -B build/visual-{option.lower()} -DCMAKE_BUILD_TYPE=Release '
+        f'-DBUILD_TESTING=OFF -DCSL_BUILD_{option}_REPORT=ON{flags}\n'
+        f'cmake --build build/visual-{option.lower()} --config Release --target {target} --parallel 2\n'
+        f'./build/visual-{option.lower()}/{target} --smoke')
     source_url = "https://github.com/butahlecoq/controlled-systems-lab/blob/" + example["harness"] + "/" + driver
     caption = ("Green: hull boundary; amber: omitted points. Slash-separated original IDs coincide. Equal x/y scale."
                if example["kind"] == "hull" else
-               "Green: returned intersection. Blue: input square; amber: input diamond. Labels are saved output row IDs. Equal x/y scale.")
-    return (f'<section id="{example["slug"]}"><p class="eyebrow">Example {number:02d} / 2D geometry</p>'
+               "Green: returned intersection. Blue: input square; amber: input diamond. Labels are saved output row IDs. Equal x/y scale."
+               if example["kind"] == "intersection" else
+               "Green: complete feasible relation. Gold: unique minimizer. Both axes show the same scalar system in control and terminal-state coordinates.")
+    example_type = "2D control family" if example["kind"] == "hybrid" else "2D geometry"
+    reproduction = ('<p>From the repository checkout at the linked fixture commit, configure the development preset and run:</p>'
+                    if example["kind"] == "hybrid" else
+                    f'<p>From a checkout of harness commit <code>{example["harness"]}</code>, using CMake 3.31+ and a C++20 compiler:</p>')
+    platform_note = ("This runs the functional two-stage oracle test; it creates no timing evidence."
+                     if example["kind"] == "hybrid" else
+                     'For Visual Studio, use its developer shell, configure with its generator, and run '
+                     '<code>Release/' + target + '.exe --smoke</code> in the build directory. '
+                     'This is a functional smoke, not a new benchmark; discard smoke timing values.')
+    report_links = (f'<p>Related one-step report: <a href="../{example["report_id"]}/index.html">saved numerical evidence ↗</a> · '
+                    f'<a href="../{example["report_id"]}/records.json">one-step raw record ↗</a>. '
+                    'This two-stage illustration is not part of that measured fixture.</p>'
+                    if example["kind"] == "hybrid" else
+                    f'<p><a href="../{example["report_id"]}/index.html">Reviewed numerical report ↗</a> · '
+                    f'<a href="../{example["report_id"]}/records.json">Full saved native records ↗</a></p>')
+    raw_record_link = ('<p><a href="two_stage_scalar_family.json">Two-stage fixture and analytic raw record ↗</a></p>'
+                       if example["kind"] == "hybrid" else "")
+    source_provenance = (f'<p class="provenance">Algorithm source <a href="https://github.com/butahlecoq/controlled-systems-lab/commit/{example["source"]}"><code>{example["source"]}</code></a></p>'
+                         if example["kind"] == "hybrid" else
+                         f'<p class="provenance">Algorithm source <code>{example["source"]}</code></p>')
+    return (f'<section id="{example["slug"]}"><p class="eyebrow">Example {number:02d} / {example_type}</p>'
             f'<h2>{example["title"]}</h2><p>{explanation}</p>'
             f'<figure><img src="{example["slug"]}.svg" alt="{escape(explanation, quote=True)}">'
             f'<figcaption>{caption}</figcaption></figure>'
             f'<p class="answer">{result}</p>{point_table(example)}'
             '<details><summary>Complete minimal input</summary><pre><code>' + escape(json.dumps(example["inputs"], indent=2)) + '</code></pre></details>'
-            + extra + '<details><summary>Reproduce the native functional example</summary>'
-            f'<p>From a checkout of harness commit <code>{example["harness"]}</code>, using CMake 3.31+ and a C++20 compiler:</p>'
+            + extra + '<details><summary>Reproduce the functional example</summary>' + reproduction +
             '<pre><code>' + escape(command) + '</code></pre>'
-            '<p>For Visual Studio, use its developer shell, configure with its generator, and run '
-            '<code>Release/' + target + '.exe --smoke</code> in the build directory. '
-            'This is a functional smoke, not a new benchmark; discard smoke timing values.</p>'
+            '<p>' + platform_note + '</p>'
             f'<p><a href="{source_url}">Complete native fixture/driver ↗</a></p></details>'
-            f'<p class="limits">{notes}</p><p class="provenance">Algorithm source <code>{example["source"]}</code></p>'
-            f'<p><a href="../{example["report_id"]}/index.html">Reviewed numerical report ↗</a> · '
-            f'<a href="../{example["report_id"]}/records.json">Full saved native records ↗</a></p></section>')
+            f'<p class="limits">{notes}</p>' + source_provenance +
+            raw_record_link + report_links + '</section>')
 
 
 def build(catalog, site):
@@ -230,18 +338,24 @@ def build(catalog, site):
             '<p class="eyebrow">Learn by looking</p><nav aria-label="Examples">' + navigation +
             '<a href="../index.html">All numerical reports ↗</a></nav></aside><main id="main">'
             '<header><p class="eyebrow">Small inputs / visible answers</p><h1>Algorithms,<br><em>in two dimensions.</em></h1>'
-            '<p>See what goes in, what comes out, and why. Start with hull vertices, then intersect two simple sets.</p>'
-            '<p class="limits">These are educational illustrations of reviewed saved outputs, not an execution trace '
-            'or new performance measurements. All configurations are complete and every result links back to native records.</p>'
+            '<p>See what goes in, what comes out, and why. Explore hull vertices, set intersections, and a two-stage control family.</p>'
+            '<p class="limits">These educational pages show reviewed saved outputs or explicit analytic constructions; '
+            'they are not new performance measurements. Each page states whether it replays saved output or illustrates a literal fixture.</p>'
             '<p><a href="minimal-inputs.json" download>Download inputs and displayed outputs (JSON)</a></p></header>'
             + "".join(section(e, i+1) for i, e in enumerate(examples)) +
-            '<section><h2>Next: control in the plane</h2><p>Position/velocity trajectories and reachable sets are a planned extension. '
-            'The true two-state scenario is tracked in <a href="https://github.com/butahlecoq/controlled-systems-lab/issues/421">#421</a>; '
-            'current scalar integrator examples do not establish a two-state demonstration.</p></section>'
             '<footer>Controlled Systems Lab · Saved evidence, visible geometry.</footer></main></div></body></html>')
     outputs["index.html"] = body
     export = [{key: value for key, value in e.items() if key not in {"records_path", "domain"}} for e in examples]
     outputs["minimal-inputs.json"] = json.dumps({"schema": "csl.visual-examples/1", "examples": export}, indent=2) + "\n"
+    hybrid = next(example for example in examples if example["kind"] == "hybrid")
+    outputs["two_stage_scalar_family.json"] = json.dumps({
+        "schema": "csl.visual-example/ext07-two-stage-scalar/1",
+        "illustration_only": True,
+        "algorithm_source_commit": hybrid["source"],
+        "oracle_harness_commit": hybrid["harness"],
+        "inputs": hybrid["inputs"],
+        "analytic": hybrid["analytic"],
+    }, indent=2) + "\n"
     for name, content in outputs.items():
         require(not (out / name).is_symlink(), "gallery file must not be a symlink")
         (out / name).write_text(content, encoding="utf-8")

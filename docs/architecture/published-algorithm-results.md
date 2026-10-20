@@ -34,10 +34,12 @@ On the recorded Windows 11 / MSVC Release host, median end-to-end batch time
 was 6,288,700 ns (range 5,492,300–9,158,900 ns); all seven batches matched the
 analytic result with no failures. These timings are descriptive for this one
 fixture and do not establish a performance winner, scalability, general
-polyhedral coverage, or validated arithmetic. The verifier supports one-step
-scalar interval systems only; continuous multi-stage verification remains an
-open EXT-07 acceptance item. The report and 2D control-versus-terminal-state
-example are versioned with raw rows and an offline ZIP. Main-only Pages
+polyhedral coverage, or validated arithmetic. The measured report covers the
+one-step scalar interval profile; the implementation also has a bounded
+two-stage scalar verifier, but the report does not measure that domain. General
+continuous multi-stage verification remains an open EXT-07 acceptance item.
+The report and 2D control-versus-terminal-state example are versioned with raw
+rows and an offline ZIP. Main-only Pages
 publication and live URL/hash verification remain pending.
 
 ## OPT-07 ordered hull membership report

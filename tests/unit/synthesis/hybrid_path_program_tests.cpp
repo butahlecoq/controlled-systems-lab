@@ -1838,6 +1838,308 @@ TEST_CASE("exact singleton hybrid verifier reports missing or altered optimal fa
         HybridVerificationStatus::refuted);
 }
 
+TEST_CASE("independent two-stage singleton oracle matches every mode branch and objective") {
+    const auto reset_point=[](double pre,double post) {
+        return singleton_relation("two-stage-reset",{pre,post});
+    };
+    const auto scalar_mode=[](std::string id,double stage_zero_control,double stage_one_control) {
+        model::HybridMode mode{{std::move(id)},1,1,{"x"},{"u"}};
+        const LinearStage flow{Matrix{1,1,{1}},Matrix{1,1,{1}},Matrix{1,0,{}},Vector{0}};
+        mode.flow=std::vector<LinearStage>{flow,flow};
+        mode.control_sets={Singleton{{stage_zero_control}},Singleton{{stage_one_control}}};
+        mode.invariants={UniversalSet{1},UniversalSet{1},UniversalSet{1}};
+        return mode;
+    };
+    auto start=scalar_mode("start",1,0);
+    auto middle=scalar_mode("middle",0,2);
+    auto terminal=scalar_mode("terminal",0,0);
+    model::HybridSystem system{2,{start,middle,terminal},
+        {{{"enter"},{"start"},{"middle"},{Singleton{{1}},UniversalSet{1}},
+            {reset_point(1,2),universal("unused-enter-reset",2)}},
+         {{"tie-a"},{"middle"},{"terminal"},{UniversalSet{1},Singleton{{4}}},
+            {universal("unused-tie-a-reset",2),reset_point(4,5)}},
+         {{"tie-b"},{"middle"},{"terminal"},{UniversalSet{1},Singleton{{4}}},
+            {universal("unused-tie-b-reset",2),reset_point(4,5)}},
+         {{"worse"},{"middle"},{"terminal"},{UniversalSet{1},Singleton{{4}}},
+            {universal("unused-worse-reset",2),reset_point(4,7)}}}};
+    model::HybridRequest request{{{"start"},{0}},{{"terminal"}},
+        {{{"terminal"},LinearTerminal{{1},0},"terminal-state","units"}}};
+
+    struct OracleBranch {
+        model::HybridPath path;
+        Vector tuple;
+        double objective;
+    };
+    std::vector<OracleBranch> oracle;
+    // Exhaustively interpret this two-stage graph from raw input data. This
+    // deliberately does not call production path enumeration, composition,
+    // objective lifting, or verification.
+    const auto find_mode_raw=[&](const model::HybridModeId& id)->const model::HybridMode* {
+        const auto found=std::find_if(system.modes.begin(),system.modes.end(),
+            [&](const auto& mode){return mode.id==id;});
+        return found==system.modes.end()?nullptr:&*found;
+    };
+    const auto singleton_set=[](const AdmissibleSet& set)->const Singleton* {
+        return std::get_if<Singleton>(&set);
+    };
+    const auto reset_target=[&](const SetHandle& handle,double pre,double& post) {
+        const auto decoded=sets::from_handle(handle);
+        if(std::holds_alternative<Diagnostic>(decoded)) return false;
+        const auto representation=std::get<sets::SetData>(decoded).representation();
+        const auto* point=std::get_if<sets::SingletonRepresentation>(&representation);
+        if(!point||point->point.size()!=2||point->point[0]!=pre) return false;
+        post=point->point[1];
+        return true;
+    };
+    for(const auto& first:system.edges) {
+        if(first.source!=request.initial.mode) continue;
+        const auto* first_mode=find_mode_raw(first.source);
+        const auto* first_control=singleton_set(first_mode->control_sets[0]);
+        REQUIRE(first_control!=nullptr);
+        REQUIRE(first_control->point.size()==1);
+        const auto& first_flow=std::get<std::vector<LinearStage>>(first_mode->flow)[0];
+        const double first_pre=first_flow.A.values[0]*request.initial.state[0]+
+            first_flow.B.values[0]*first_control->point[0];
+        const auto* first_guard=singleton_set(first.guards[0]);
+        if(!first_guard||first_guard->point!=Vector{first_pre}) continue;
+        double middle_state=0;
+        if(!reset_target(first.reset_relations[0],first_pre,middle_state)) continue;
+        for(const auto& second:system.edges) {
+            if(second.source!=first.target) continue;
+            const auto* second_mode=find_mode_raw(second.source);
+            const auto* second_control=singleton_set(second_mode->control_sets[1]);
+            REQUIRE(second_control!=nullptr);
+            REQUIRE(second_control->point.size()==1);
+            const auto& second_flow=std::get<std::vector<LinearStage>>(second_mode->flow)[1];
+            const double second_pre=second_flow.A.values[0]*middle_state+
+                second_flow.B.values[0]*second_control->point[0];
+            const auto* second_guard=singleton_set(second.guards[1]);
+            if(!second_guard||second_guard->point!=Vector{second_pre}) continue;
+            const auto decoded=sets::from_handle(second.reset_relations[1]);
+            REQUIRE(std::holds_alternative<sets::SetData>(decoded));
+            const auto rep=std::get<sets::SetData>(decoded).representation();
+            const auto* point=std::get_if<sets::SingletonRepresentation>(&rep);
+            REQUIRE(point!=nullptr);
+            REQUIRE(point->point.size()==2);
+            REQUIRE(point->point[0]==second_pre);
+            const double terminal_state=point->point[1];
+            oracle.push_back({{{first.source,first.target,second.target},{first.id,second.id}},
+                {request.initial.state[0],first_control->point[0],first_pre,middle_state,
+                 second_control->point[0],second_pre,terminal_state},terminal_state});
+        }
+    }
+    REQUIRE(oracle.size()==3);
+
+    const auto built=build_hybrid_portfolio_programs(system,request,{"two-stage-independent-oracle"},
+        {2,16},{32,256,4096});
+    REQUIRE(std::holds_alternative<std::vector<HybridPathProgram>>(built));
+    const auto& programs=std::get<std::vector<HybridPathProgram>>(built);
+    REQUIRE(programs.size()==oracle.size());
+    for(const auto& expected:oracle) {
+        const auto found=std::find_if(programs.begin(),programs.end(),[&](const auto& program) {
+            return program.path==expected.path;
+        });
+        REQUIRE(found!=programs.end());
+        const auto relation_representation=found->joint_relation.representation();
+        REQUIRE(std::holds_alternative<sets::HRepresentation>(relation_representation));
+        const auto& relation=std::get<sets::HRepresentation>(relation_representation);
+        CHECK(satisfies(relation,expected.tuple));
+        CHECK(equality_rank(relation.equalities)==expected.tuple.size());
+        const auto& linear=std::get<LinearProgram>(found->program);
+        REQUIRE(linear.objective().size()==expected.tuple.size());
+        double objective=linear.offset();
+        for(std::size_t i=0;i<expected.tuple.size();++i)
+            objective+=linear.objective()[i]*expected.tuple[i];
+        CHECK(objective==expected.objective);
+    }
+    CHECK(oracle[0].objective==5);
+    CHECK(oracle[1].objective==5);
+    CHECK(oracle[2].objective==7);
+
+    std::vector<HybridPathOptimalFaceCandidate> optimal_candidates;
+    for(const auto& expected:oracle) {
+        if(expected.objective!=5) continue;
+        const auto found=std::find_if(programs.begin(),programs.end(),[&](const auto& program) {
+            return program.path==expected.path;
+        });
+        REQUIRE(found!=programs.end());
+        optimal_candidates.push_back(exact_candidate(*found,expected.tuple));
+    }
+    REQUIRE(optimal_candidates.size()==2);
+    ExactSingletonHybridFamilyVerifier verifier;
+    const auto verified=verify_hybrid_portfolio_family(verifier,system,request,programs,
+        optimal_candidates,{2,16},{0,0});
+    REQUIRE(std::holds_alternative<HybridFamilyVerificationReport>(verified));
+    const auto& report=std::get<HybridFamilyVerificationReport>(verified);
+    CHECK(report.global_objective_optimality==HybridVerificationStatus::established);
+    CHECK(report.complete_family_coverage==HybridVerificationStatus::established);
+    REQUIRE(report.branches.size()==3);
+    const auto branch_record=[&](const std::string& edge_id) {
+        return std::find_if(report.branches.begin(),report.branches.end(),[&](const auto& branch) {
+            return branch.path.edges.size()==2&&branch.path.edges[1].value==edge_id;
+        });
+    };
+    const auto tie_a=branch_record("tie-a");
+    const auto tie_b=branch_record("tie-b");
+    const auto worse=branch_record("worse");
+    REQUIRE(tie_a!=report.branches.end());
+    REQUIRE(tie_b!=report.branches.end());
+    REQUIRE(worse!=report.branches.end());
+    CHECK(tie_a->feasibility==HybridVerificationStatus::established);
+    CHECK(tie_a->objective_optimality==HybridVerificationStatus::established);
+    CHECK(tie_b->feasibility==HybridVerificationStatus::established);
+    CHECK(tie_b->objective_optimality==HybridVerificationStatus::established);
+    CHECK(worse->feasibility==HybridVerificationStatus::established);
+    CHECK(worse->objective_optimality==HybridVerificationStatus::refuted);
+}
+
+TEST_CASE("two-stage scalar interval verifier checks tied continuous families independently") {
+    const auto interval_reset=[](std::string id,double pre,double post,double rhs) {
+        auto inequalities=numeric::snapshot(Matrix{0,2,{}});
+        auto upper=numeric::snapshot_vector(Vector{});
+        auto equalities=numeric::snapshot(Matrix{1,2,{pre,post}});
+        auto values=numeric::snapshot_vector(Vector{rhs});
+        REQUIRE(std::holds_alternative<numeric::MatrixView>(inequalities));
+        REQUIRE(std::holds_alternative<numeric::VectorView>(upper));
+        REQUIRE(std::holds_alternative<numeric::MatrixView>(equalities));
+        REQUIRE(std::holds_alternative<numeric::VectorView>(values));
+        auto data=sets::make_h({SetId{std::move(id)},2,{"pre","post"}},
+            {std::get<numeric::MatrixView>(inequalities),std::get<numeric::VectorView>(upper),
+             std::get<numeric::MatrixView>(equalities),std::get<numeric::VectorView>(values)});
+        REQUIRE(std::holds_alternative<sets::SetData>(data));
+        return std::get<sets::SetData>(std::move(data)).as_handle();
+    };
+    const auto scalar_mode=[](std::string id,AdmissibleSet first_control,
+        AdmissibleSet second_control) {
+        model::HybridMode mode{{std::move(id)},1,1,{"x"},{"u"}};
+        const LinearStage flow{Matrix{1,1,{1}},Matrix{1,1,{1}},Matrix{1,0,{}},Vector{0}};
+        mode.flow=std::vector<LinearStage>{flow,flow};
+        mode.control_sets={std::move(first_control),std::move(second_control)};
+        mode.invariants={UniversalSet{1},UniversalSet{1},UniversalSet{1}};
+        return mode;
+    };
+    auto start=scalar_mode("start",interval("two-stage-free-control",0,1),Singleton{{0}});
+    auto middle=scalar_mode("middle",Singleton{{0}},Singleton{{0}});
+    auto terminal=scalar_mode("terminal",Singleton{{0}},Singleton{{0}});
+    struct OracleEdge { std::string id; double lower; double upper; double terminal_value; };
+    const std::vector<OracleEdge> second_stage_edges{
+        {"tie-a",0,0.5,0},{"tie-b",0,1,0},{"worse",1,1,1}};
+    const auto identity=interval_reset("two-stage-identity-reset",-1,1,0);
+    std::vector<model::HybridTransitionEdge> edges{
+        {{"enter"},{"start"},{"middle"},{interval("two-stage-entry-guard",0,1),UniversalSet{1}},
+            {identity,universal("two-stage-unused-entry-reset",2)}}};
+    for(const auto& spec:second_stage_edges) {
+        edges.push_back({{spec.id},{"middle"},{"terminal"},
+            {UniversalSet{1},interval("two-stage-guard-"+spec.id,spec.lower,spec.upper)},
+            {universal("two-stage-unused-reset-"+spec.id,2),
+             interval_reset("two-stage-terminal-reset-"+spec.id,0,1,spec.terminal_value)}});
+    }
+    model::HybridSystem system{2,{start,middle,terminal},std::move(edges)};
+    model::HybridRequest request{{{"start"},{0}},{{"terminal"}},
+        {{{"terminal"},LinearTerminal{{1},0},"terminal-state","units"}}};
+
+    struct OracleBranch { model::HybridPath path; double lower; double upper; double cost; };
+    std::vector<OracleBranch> oracle;
+    for(const auto& spec:second_stage_edges) {
+        // Raw rational fixture equations: x_pre[0]=u[0], x_post[1]=x_pre[0],
+        // x_pre[1]=x_post[1], and the selected edge clips u[0] to its guard.
+        const double lower=std::max(0.0,spec.lower);
+        const double upper=std::min(1.0,spec.upper);
+        if(lower<=upper)
+            oracle.push_back({model::HybridPath{{model::HybridModeId{"start"},
+                    model::HybridModeId{"middle"},model::HybridModeId{"terminal"}},
+                {model::HybridEdgeId{"enter"},model::HybridEdgeId{spec.id}}},
+                lower,upper,spec.terminal_value});
+    }
+    REQUIRE(oracle.size()==3);
+    CHECK(oracle[0].lower==0);
+    CHECK(oracle[0].upper==0.5);
+    CHECK(oracle[1].lower==0);
+    CHECK(oracle[1].upper==1);
+    CHECK(oracle[2].lower==1);
+    CHECK(oracle[2].upper==1);
+    CHECK(oracle[0].cost==0);
+    CHECK(oracle[1].cost==0);
+    CHECK(oracle[2].cost==1);
+
+    const auto built=build_hybrid_portfolio_programs(system,request,{"two-stage-continuous-verifier"},
+        {2,16},{64,512,8192});
+    REQUIRE(std::holds_alternative<std::vector<HybridPathProgram>>(built));
+    const auto& programs=std::get<std::vector<HybridPathProgram>>(built);
+    REQUIRE(programs.size()==oracle.size());
+    std::vector<HybridPathOptimalFaceCandidate> candidates;
+    for(std::size_t i=0;i<2;++i) {
+        const auto found=std::find_if(programs.begin(),programs.end(),[&](const auto& program) {
+            return program.path.edges.back().value==oracle[i].path.edges.back().value;
+        });
+        REQUIRE(found!=programs.end());
+        candidates.push_back(exact_candidate(*found,{0,0,0,0,0,0,0}));
+    }
+    TwoStageScalarIntervalHybridFamilyVerifier verifier;
+    const auto result=verify_hybrid_portfolio_family(verifier,system,request,programs,candidates,
+        {2,16},{0,0});
+    REQUIRE(std::holds_alternative<HybridFamilyVerificationReport>(result));
+    const auto& report=std::get<HybridFamilyVerificationReport>(result);
+    CHECK(report.verifier_id=="csl.hybrid.two-stage-scalar-interval");
+    CHECK(report.global_objective_optimality==HybridVerificationStatus::established);
+    CHECK(report.complete_family_coverage==HybridVerificationStatus::established);
+    const auto record_for=[&](const std::string& edge_id) {
+        return std::find_if(report.branches.begin(),report.branches.end(),[&](const auto& branch) {
+            return branch.path.edges.back().value==edge_id;
+        });
+    };
+    for(const auto& expected:oracle) {
+        const auto program=std::find_if(programs.begin(),programs.end(),[&](const auto& value) {
+            return value.path.edges.back().value==expected.path.edges.back().value;
+        });
+        REQUIRE(program!=programs.end());
+        const auto relation_representation=program->joint_relation.representation();
+        REQUIRE(std::holds_alternative<sets::HRepresentation>(relation_representation));
+        const auto& relation=std::get<sets::HRepresentation>(relation_representation);
+        REQUIRE(relation.inequalities.cols()==7);
+        const auto joint_at=[&](double parameter) {
+            return Vector{0,parameter,parameter,parameter,0,parameter,expected.cost};
+        };
+        CHECK(satisfies(relation,joint_at(expected.lower)));
+        CHECK(satisfies(relation,joint_at(expected.upper)));
+        const double excluded=expected.lower>0 ? expected.lower-0.25 :
+            (expected.upper<1 ? expected.upper+0.25 : -0.25);
+        CHECK_FALSE(satisfies(relation,joint_at(excluded)));
+
+        const auto record=record_for(expected.path.edges.back().value);
+        REQUIRE(record!=report.branches.end());
+        INFO("branch " << expected.path.edges.back().value << " coverage " <<
+            static_cast<int>(record->continuous_coverage));
+        for(const auto& diagnostic:record->diagnostics)
+            INFO("diagnostic " << diagnostic.field << ": " << diagnostic.explanation);
+        CHECK(record->feasibility==HybridVerificationStatus::established);
+        CHECK(record->objective_optimality==(expected.cost==0?HybridVerificationStatus::established:
+            HybridVerificationStatus::refuted));
+        CHECK(record->continuous_coverage==HybridVerificationStatus::established);
+    }
+
+    auto disjoint_system=system;
+    disjoint_system.edges.push_back({{"infeasible"},{"middle"},{"terminal"},
+        {UniversalSet{1},interval("two-stage-disjoint-guard",2,3)},
+        {universal("two-stage-disjoint-unused-reset",2),identity}});
+    const auto disjoint_built=build_hybrid_portfolio_programs(disjoint_system,request,
+        {"two-stage-infeasible-relation"},{2,16},{64,512,8192});
+    REQUIRE(std::holds_alternative<std::vector<HybridPathProgram>>(disjoint_built));
+    const auto& disjoint_programs=std::get<std::vector<HybridPathProgram>>(disjoint_built);
+    const auto disjoint_result=verify_hybrid_portfolio_family(verifier,disjoint_system,request,
+        disjoint_programs,{}, {2,16},{0,0});
+    REQUIRE(std::holds_alternative<HybridFamilyVerificationReport>(disjoint_result));
+    const auto& disjoint_report=std::get<HybridFamilyVerificationReport>(disjoint_result);
+    CHECK(disjoint_report.global_objective_optimality==HybridVerificationStatus::unsupported);
+    const auto infeasible_record=std::find_if(disjoint_report.branches.begin(),
+        disjoint_report.branches.end(),[](const auto& branch) {
+            return branch.path.edges.back().value=="infeasible";
+        });
+    REQUIRE(infeasible_record!=disjoint_report.branches.end());
+    CHECK(infeasible_record->feasibility==HybridVerificationStatus::unsupported);
+    CHECK(infeasible_record->continuous_coverage==HybridVerificationStatus::unsupported);
+}
+
 TEST_CASE("exact singleton hybrid verifier handles empty branches and rejects continuous domains") {
     auto [system,request]=exact_singleton_portfolio();
     system.edges[0].guards[0]=EmptySet{1};

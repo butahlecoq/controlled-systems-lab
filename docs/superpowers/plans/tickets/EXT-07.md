@@ -34,15 +34,20 @@ Ship meaningful unit/contract tests with the implementation, using the named ind
 
 The implementation now has profile admission, bounded path enumeration, direct
 joint-H path programs, branch optimization, solver provenance, and numerical
-family verifiers for integral singleton paths and one-step scalar interval
-families. The latter scope is deliberately narrow. There is not yet a continuous
-multi-stage family verifier or independent continuous multi-stage oracle, so
-the continuous-family acceptance requirement remains open. The fixed-path
-reachability adapter currently uses the direct joint-H composer; a separate
-projected-set implementation is not yet supplied.
+family verifiers for integral singleton paths, one-step scalar interval
+families, and a bounded two-stage scalar interval profile. The latter supports
+one non-singleton bounded control interval, singleton controls at the other
+stage, interval invariants/guards, exact scalar affine resets, and exact
+represented relations. A separate raw-graph oracle covers tied two-stage
+continuous families. This does not establish general continuous multi-stage
+coverage, multiple free control parameters, or a broad continuous polytope
+oracle; those acceptance requirements remain open. The fixed-path reachability
+adapter currently uses the direct joint-H composer; a separate projected-set
+implementation is not yet supplied.
 
 The EXT-07 report exercises one supported one-step scalar interval case through
 path construction, HiGHS optimization, and family verification. Its 2D plot
-shows control against terminal state for that scalar system. It is a bounded
-numerical example, not a scalability result or completion claim. The main-only
-Pages URL and live hashes remain pending until publication succeeds.
+shows control against terminal state for that scalar system; it does not measure
+the new two-stage verifier. This is a bounded numerical example, not a
+scalability result or completion claim. The main-only Pages URL and live hashes
+remain pending until publication succeeds.
