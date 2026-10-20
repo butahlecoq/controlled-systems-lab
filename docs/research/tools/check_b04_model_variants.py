@@ -8,9 +8,13 @@ replaced.
 
 The audit asks one question: which of the two model variants can contain the
 published terminal point inside the printed rounding? The terminal map of
-this model has rank two, so the reachable terminal set is a plane; both
-variants are tested against the two control-invariant functionals of their
-own plane.
+this model has rank two, so the reachable terminal set lies in an affine
+plane; both variants are tested against the two control-invariant
+functionals of their own plane.
+
+The model structure that the plane argument needs is read from the manifest
+and asserted, not assumed: the transition matrix, the horizon, the stage
+length and the printed control-interval status.
 """
 
 import argparse
@@ -23,12 +27,10 @@ ROOT = Path(__file__).resolve().parents[3]
 MANIFEST = ROOT / "benchmarks/scenarios/b04-historical.json"
 SAVED = ROOT / "docs/research/evidence/b04-saved-witnesses.json"
 
-TRANSITIONS = 16
-STAGE_SECONDS = Fraction(100)  # 16 transitions of 25/4 s
+EXPECTED_A = [[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]]
+EXPECTED_STOCK_COUPLING = Fraction(-25, 4)  # N[1,0] = N[3,2] = -6.25 per stage
 NOMINAL_OXIDIZER_FLOW = Fraction(1200)
 NOMINAL_FUEL_FLOW = Fraction(450)
-FLOW_RADIUS = Fraction(1, 20)  # published flows carry one decimal
-STOCK_RADIUS = Fraction(1, 2000)  # published stocks carry three decimals
 
 
 def rational(value):
@@ -44,20 +46,9 @@ def fraction_text(value):
     return f"{value.numerator}/{value.denominator}"
 
 
-def decimal_text(value, digits=12):
-    return f"{float(value):.{digits}g}"
-
-
-def compatibility_summary(variants, point):
-    """Name the variants whose terminal plane contains the published point."""
-    compatible, incompatible = [], []
-    for variant in variants:
-        residuals = plane_residuals(variant, point)
-        (compatible if residuals["compatible"] else incompatible).append(variant["id"])
-    return {
-        "published_row_compatible_variants": compatible,
-        "published_row_incompatible_variants": incompatible,
-    }
+def decimal_places(text):
+    text = str(text)
+    return len(text.split(".")[1]) if "." in text else 0
 
 
 def flow_and_slope(parameters, delta):
@@ -76,6 +67,32 @@ def flow_and_slope(parameters, delta):
     oxidizer = (p["K"] + delta) * fuel
     oxidizer_prime = fuel + (p["K"] + delta) * fuel_prime
     return (oxidizer, fuel), (oxidizer_prime, fuel_prime)
+
+
+def model_structure(manifest):
+    """Read and assert the transition structure the plane argument needs."""
+    problem = manifest["problem"]
+    matrix = problem["dynamics"]["A"]
+    require(len(matrix) == 4 and all(len(row) == 4 for row in matrix), "unexpected A shape")
+    for i, row in enumerate(matrix):
+        for j, value in enumerate(row):
+            if i == j:
+                require(rational(value) == 1, "diagonal of A is not one")
+            elif (i, j) in ((1, 0), (3, 2)):
+                require(rational(value) == EXPECTED_STOCK_COUPLING, "unexpected stock coupling")
+            else:
+                require(rational(value) == 0, "unexpected non-zero entry in A")
+    horizon = int(problem["horizon"])
+    step_seconds = rational(problem["step_seconds"])
+    total_seconds = horizon * step_seconds
+    require(step_seconds * horizon == total_seconds, "inconsistent stage length")
+    return {
+        "A": matrix,
+        "horizon": horizon,
+        "step_seconds": fraction_text(step_seconds),
+        "total_seconds": fraction_text(total_seconds),
+        "stock_coupling": fraction_text(EXPECTED_STOCK_COUPLING),
+    }
 
 
 def printed_variant(manifest):
@@ -102,10 +119,10 @@ def plane_weights(variant):
     """Return coprime integer weights (w1, w3) with w1*B1 + w3*B3 = 0.
 
     A and B act on the four coordinates (oxidizer flow, oxidizer working
-    stock, fuel flow, fuel working stock). The stock rows integrate the
-    previous flows, so a weight pair that annihilates the control direction
-    also annihilates the stock direction and defines a control-invariant
-    functional of the terminal state.
+    stock, fuel flow, fuel working stock). The stock rows of the transition
+    matrix are the proportional rows (-25/4)*(B1, 0, 0, B3) of N*B, so a
+    weight pair that annihilates the control direction also annihilates the
+    stock direction and defines a control-invariant functional.
     """
     b1, b3 = variant["B"][0], variant["B"][2]
     require(b1 > 0 and b3 < 0, "unexpected control sign pattern")
@@ -114,12 +131,13 @@ def plane_weights(variant):
     return ratio.numerator, ratio.denominator
 
 
-def plane_values(variant):
+def plane_values(variant, structure):
     """Return the two control-invariant terminal-plane functionals."""
     x1, x2, x3, x4 = variant["x0"]
     w1, w3 = plane_weights(variant)
+    total_seconds = rational(structure["total_seconds"])
     flow_plane = w1 * x1 + w3 * x3
-    stock_plane = w1 * (x2 - STAGE_SECONDS * x1) + w3 * (x4 - STAGE_SECONDS * x3)
+    stock_plane = w1 * (x2 - total_seconds * x1) + w3 * (x4 - total_seconds * x3)
     return (w1, w3), flow_plane, stock_plane
 
 
@@ -127,13 +145,28 @@ def published_point(manifest):
     return tuple(rational(value) for value in manifest["reported"]["terminal_state"])
 
 
-def plane_residuals(variant, point):
+def rounding_radii(manifest):
+    """Derive the rounding radii from the printed decimals of the published row."""
+    printed = [str(value) for value in manifest["reported"]["terminal_state"]]
+    flow_radius = max(Fraction(1, 10 ** decimal_places(value)) for value in (printed[0], printed[2])) / 2
+    stock_radius = max(Fraction(1, 10 ** decimal_places(value)) for value in (printed[1], printed[3])) / 2
+    return {"flow_radius": flow_radius, "stock_radius": stock_radius,
+            "printed_decimals": [decimal_places(value) for value in printed]}
+
+
+def plane_residuals(variant, point, structure, radii):
     """Residuals of the published point against the variant's terminal plane."""
-    (w1, w3), flow_plane, stock_plane = plane_values(variant)
+    (w1, w3), flow_plane, stock_plane = plane_values(variant, structure)
     flow_residual = w1 * point[0] + w3 * point[2] - flow_plane
     stock_residual = w1 * point[1] + w3 * point[3] - stock_plane
-    flow_radius = (abs(w1) + abs(w3)) * FLOW_RADIUS
-    stock_radius = (abs(w1) + abs(w3)) * STOCK_RADIUS
+    flow_radius = (abs(w1) + abs(w3)) * radii["flow_radius"]
+    stock_radius = (abs(w1) + abs(w3)) * radii["stock_radius"]
+    total_seconds = rational(structure["total_seconds"])
+    # How far an initial-flow error would have to be to move the verdict. A
+    # positive margin is the error the verdict tolerates; a negative margin
+    # is the error that would overturn it.
+    flow_sensitivity = abs(total_seconds * w1)
+    stock_sensitivity = abs(total_seconds * w3)
     return {
         "weights": [w1, w3],
         "flow_plane_required": fraction_text(flow_plane),
@@ -145,6 +178,16 @@ def plane_residuals(variant, point):
         "flow_compatible": abs(flow_residual) <= flow_radius,
         "stock_compatible": abs(stock_residual) <= stock_radius,
         "compatible": abs(flow_residual) <= flow_radius and abs(stock_residual) <= stock_radius,
+        "stock_verdict_margin_per_initial_fuel_flow_error": fraction_text(
+            (stock_radius - abs(stock_residual)) / stock_sensitivity
+        ),
+        "flow_verdict_margin_per_initial_fuel_flow_error": fraction_text(
+            (flow_radius - abs(flow_residual)) / flow_sensitivity
+        ),
+        "stock_plane_sensitivity_to_initial_flows": {
+            "x1": fraction_text(total_seconds * w1),
+            "x3": fraction_text(total_seconds * w3),
+        },
     }
 
 
@@ -204,6 +247,7 @@ def law_versus_state_table(manifest, saved, variants):
     """Compare the nonlinear law at d = dK with both transcribed initial states."""
     printed = manifest["reported"]["nonlinear_parameters"]
     delta_initial = rational(printed["initial_mixture_ratio_perturbation"])
+    c1 = rational(printed["coefficients"]["c1"])
     laws = {
         "printed-c2-c3": law_parameters(manifest, saved, False),
         "scaled-c2-c3": law_parameters(manifest, saved, True),
@@ -230,14 +274,52 @@ def law_versus_state_table(manifest, saved, variants):
     return table
 
 
+def input_slope_table(manifest, saved, variants):
+    """Compare the law's reference input slope with each variant's input matrix.
+
+    The comparison is conditional in the same sense as the parameter
+    cross-check: it identifies the scalar u of equation (1.1) with the
+    incremental control of the linear recurrence and differentiates at the
+    law's reference d = 0. The article does not print a generating
+    control-unit map for its numerical run.
+    """
+    printed = manifest["reported"]["nonlinear_parameters"]
+    c1 = rational(printed["coefficients"]["c1"])
+    delta_initial = rational(printed["initial_mixture_ratio_perturbation"])
+    laws = {
+        "printed-c2-c3": law_parameters(manifest, saved, False),
+        "scaled-c2-c3": law_parameters(manifest, saved, True),
+    }
+    table = {}
+    for law_name, parameters in laws.items():
+        _, derivative = flow_and_slope(parameters, Fraction(0))
+        slope = tuple(c1 * value for value in derivative)
+        _, operating_slope = flow_and_slope(parameters, delta_initial)
+        operating = tuple(c1 * value for value in operating_slope)
+        table[law_name] = {
+            "reference_input_slope_at_d_zero": [fraction_text(value) for value in slope],
+            "input_slope_at_d_initial": [fraction_text(value) for value in operating],
+            "matches_input_matrix_per_variant": {
+                variant["id"]: (slope[0] == variant["B"][0] and slope[1] == variant["B"][2])
+                for variant in variants
+            },
+        }
+    return table
+
+
 def mixture_sensitivity(variant):
     """Exact d(oxidizer flow / fuel flow)/du at the nominal flows."""
     b1, b3 = variant["B"][0], variant["B"][2]
     return (b1 * NOMINAL_FUEL_FLOW - NOMINAL_OXIDIZER_FLOW * b3) / NOMINAL_FUEL_FLOW ** 2
 
 
-def mixture_band(manifest, saved, variants):
-    """Reconcile the throttle authority, the phase box and the printed c1."""
+def mixture_band(manifest, variants, structure):
+    """Reconcile the throttle authority, the phase box and the printed c1.
+
+    Two conventions are reported because the archive uses both: the law's
+    accumulated action (a single scalar per run) and a per-step control in
+    the unit interval (which the saved variant's inferred actions use).
+    """
     printed = manifest["reported"]["nonlinear_parameters"]
     coefficients = printed["coefficients"]
     k = rational(printed["K"])
@@ -247,19 +329,23 @@ def mixture_band(manifest, saved, variants):
     require(constraints["h"] == [1224, -1176, 468, -432], "unexpected phase box")
     upper_face = Fraction(1224, 432)
     lower_face = Fraction(1176, 468)
-    band = (delta_initial - c1, delta_initial + c1)
+    horizon = structure["horizon"]
     return {
         "nominal_mixture_ratio": fraction_text(k),
         "nominal_ratio_identity_1200_over_450": k == NOMINAL_OXIDIZER_FLOW / NOMINAL_FUEL_FLOW,
         "initial_mixture_perturbation": fraction_text(delta_initial),
         "initial_perturbation_relative_to_K": fraction_text(delta_initial / k),
         "throttle_sensitivity_c1": fraction_text(c1),
-        "reachable_mixture_band_for_u_in_unit_interval": [fraction_text(band[0]), fraction_text(band[1])],
+        "reachable_mixture_band_accumulated_action_in_unit_interval": [
+            fraction_text(delta_initial - c1), fraction_text(delta_initial + c1)
+        ],
+        "reachable_mixture_band_per_step_control_in_unit_interval": [
+            fraction_text(delta_initial - horizon * c1), fraction_text(delta_initial + horizon * c1)
+        ],
         "phase_box_upper_mixture_face": fraction_text(upper_face),
         "phase_box_upper_face_excess_over_K": fraction_text(upper_face - k),
         "phase_box_lower_mixture_face": fraction_text(lower_face),
         "phase_box_lower_face_excess_over_K": fraction_text(lower_face - k),
-        "phase_box_binds_above_reachable_band": upper_face - k < band[1],
         "mixture_sensitivity_per_variant": {
             variant["id"]: fraction_text(mixture_sensitivity(variant)) for variant in variants
         },
@@ -269,32 +355,147 @@ def mixture_band(manifest, saved, variants):
     }
 
 
+def linear_flow_box(manifest, variants, structure):
+    """Exact phase-box analysis of the linear model, with the tied flows.
+
+    In the linear model the two flows are tied by the input matrix, so the
+    reachable flow pair is a line segment. The box is intersected with the
+    segment and the mixture ratio is reported at the segment ends.
+    """
+    constraints = manifest["problem"]["state_constraints"]
+    box_x1 = (Fraction(1176), Fraction(1224))
+    box_x3 = (Fraction(432), Fraction(468))
+    horizon = structure["horizon"]
+    report = {}
+    for variant in variants:
+        b1, b3 = variant["B"][0], variant["B"][2]
+        x1_0, _, x3_0, _ = variant["x0"]
+        ratio = b3 / b1  # x3 - x3(0) = (B3/B1) * (x1 - x1(0))
+        def x3_at(x1):
+            return x3_0 + ratio * (x1 - x1_0)
+        ends = {}
+        for x1 in box_x1:
+            ends[fraction_text(x1)] = {
+                "x3": fraction_text(x3_at(x1)),
+                "mixture_ratio": fraction_text(x1 / x3_at(x1)),
+            }
+        control_x1 = (x1_0 - horizon * abs(b1), x1_0 + horizon * abs(b1))
+        control_x3 = (x3_0 - horizon * abs(b3), x3_0 + horizon * abs(b3))
+        tie_x3 = [x3_at(box_x1[0]), x3_at(box_x1[1])]
+        x3_inside = all(box_x3[0] <= value <= box_x3[1] for value in tie_x3)
+        report[variant["id"]] = {
+            "flow_tie": f"x3 = x3(0) + ({fraction_text(ratio)})*(x1 - x1(0))",
+            "box_x1": [fraction_text(box_x1[0]), fraction_text(box_x1[1])],
+            "box_x3": [fraction_text(box_x3[0]), fraction_text(box_x3[1])],
+            "terminal_x1_range_from_unit_step_controls": [
+                fraction_text(control_x1[0]), fraction_text(control_x1[1])
+            ],
+            "terminal_x3_range_from_unit_step_controls": [
+                fraction_text(control_x3[0]), fraction_text(control_x3[1])
+            ],
+            "x1_control_range_exceeds_box": control_x1[0] < box_x1[0] or control_x1[1] > box_x1[1],
+            "x3_control_range_exceeds_box": control_x3[0] < box_x3[0] or control_x3[1] > box_x3[1],
+            "x3_inside_box_along_tie_line": x3_inside,
+            "binding_flow_box_faces": ["x1"] if x3_inside else ["x1", "x3"],
+            "tie_line_at_box_x1_ends": ends,
+        }
+    return report
+
+
+def initial_mixture_ratios(manifest, variants):
+    """The mixture ratio of each transcribed initial state."""
+    printed = manifest["reported"]["nonlinear_parameters"]
+    k = rational(printed["K"])
+    delta_initial = rational(printed["initial_mixture_ratio_perturbation"])
+    target = k + delta_initial
+    return {
+        variant["id"]: {
+            "ratio": fraction_text(variant["x0"][0] / variant["x0"][2]),
+            "target_K_plus_dK": fraction_text(target),
+            "difference": fraction_text(variant["x0"][0] / variant["x0"][2] - target),
+        }
+        for variant in variants
+    }
+
+
+def source_identities(manifest, saved):
+    """Public source identities of the two transcriptions, without private paths."""
+    entries = []
+    for entry in manifest["sources"]:
+        entries.append({
+            "id": entry["id"],
+            "sha256": entry.get("sha256"),
+            "role": entry.get("role", "printed article behind the transcribed model"),
+            "pdf_pages": entry.get("pdf_pages"),
+        })
+    for entry in saved["sources"]:
+        entries.append({
+            "id": entry["id"],
+            "sha256": entry.get("sha256"),
+            "role": entry.get("role"),
+            "bytes": entry.get("bytes"),
+        })
+    return entries
+
+
+def compatibility_summary(variants, point, structure, radii):
+    """Name the variants whose terminal plane contains the published point."""
+    compatible, incompatible = [], []
+    for variant in variants:
+        residuals = plane_residuals(variant, point, structure, radii)
+        (compatible if residuals["compatible"] else incompatible).append(variant["id"])
+    return {
+        "published_row_compatible_variants": compatible,
+        "published_row_incompatible_variants": incompatible,
+    }
+
+
 def audit():
     manifest = json.loads(MANIFEST.read_text(encoding="utf-8"))
     saved = json.loads(SAVED.read_text(encoding="utf-8"))
+    structure = model_structure(manifest)
     variants = [printed_variant(manifest), saved_variant(saved)]
     point = published_point(manifest)
     require(len(point) == 4, "unexpected published terminal point")
+    radii = rounding_radii(manifest)
     return {
+        "scope": (
+            "Exact rational comparison of two published B04 transcriptions against the published row; "
+            "no optimizer, no private source, no nonlinear simulation and no historical run"
+        ),
         "scenario_id": manifest["id"],
+        "model_structure": structure,
         "published_terminal_state": [fraction_text(value) for value in point],
+        "published_rounding": {
+            "printed_decimals": radii["printed_decimals"],
+            "flow_radius": fraction_text(radii["flow_radius"]),
+            "stock_radius": fraction_text(radii["stock_radius"]),
+        },
         "variants": {
             variant["id"]: {
                 "source": variant["source"],
                 "initial_state": [fraction_text(value) for value in variant["x0"]],
                 "B": [fraction_text(value) for value in variant["B"]],
-                "plane": plane_residuals(variant, point),
+                "initial_mixture_ratio": initial_mixture_ratios(manifest, variants)[variant["id"]],
+                "plane": plane_residuals(variant, point, structure, radii),
             }
             for variant in variants
         },
         "criterion": criterion_rounding_verdict(manifest, point),
-        "compatibility": compatibility_summary(variants, point),
+        "compatibility": compatibility_summary(variants, point, structure, radii),
         "law_versus_initial_state": law_versus_state_table(manifest, saved, variants),
-        "mixture": mixture_band(manifest, saved, variants),
-        "scope": (
-            "Exact rational comparison of two published B04 transcriptions against the published row; "
-            "no optimizer, no private source, no nonlinear simulation and no historical run"
-        ),
+        "law_input_slope": input_slope_table(manifest, saved, variants),
+        "mixture": mixture_band(manifest, variants, structure),
+        "linear_phase_box": linear_flow_box(manifest, variants, structure),
+        "sources": source_identities(manifest, saved),
+        "limitations": [
+            "No optimizer was run: the audit tests membership of a terminal plane, not optimality.",
+            "No private original was read or executed; only public transcriptions were used.",
+            "Generator identity is not established for either variant.",
+            "The canonical U rows, the first-action convention and the stagewise control domain stay open.",
+            "The unit control interval is a provisional owner recollection and is not imported into the historical manifest.",
+            "The execution gate of the historical manifest is unchanged.",
+        ],
     }
 
 
@@ -305,7 +506,8 @@ def main():
     arguments = parser.parse_args()
     record = audit()
     if arguments.output is not None:
-        arguments.output.write_text(json.dumps(record, indent=2) + "\n", encoding="utf-8")
+        with arguments.output.open("w", encoding="utf-8", newline="\n") as handle:
+            handle.write(json.dumps(record, indent=2) + "\n")
     if arguments.verify_record is not None:
         stored = json.loads(arguments.verify_record.read_text(encoding="utf-8"))
         if stored != record:
