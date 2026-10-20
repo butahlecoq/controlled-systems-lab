@@ -198,8 +198,9 @@ joint-H default. These public virtual changes update adapter vtables;
 downstream prebuilt adapters must be rebuilt. CSL does not promise a stable
 C++ binary/plugin ABI.
 The direct-trajectory API is replaceable through
-`HybridDirectTrajectoryAdapter`; each adapter preflights its complete fixed-path
-inventory and relation limits before capability queries or branch builds.
+`HybridDirectTrajectoryAdapter`; the framework first checks lifted-objective
+resources and request-wide objective capabilities. Each adapter then preflights
+its complete fixed-path inventory and relation limits before branch builds.
 Every adapter preflight rejection carries a requested path, the configured
 relation limits, and one primary diagnostic for the preflight failure; the
 wrapper checks that evidence before returning the rejection. Empty path
@@ -222,20 +223,23 @@ any candidate face's solver-provider provenance, to that path's verification
 record. The report carries per-path feasibility, objective, and continuous-
 coverage statuses, but it is inspection data and cannot publish a
 `synthesis::OptimalFamily`.
-Portfolio construction enumerates the complete path inventory and calls the
-trajectory adapter's exact-operation and resource preflight before its
-capabilities or any branch build. The default joint-H adapter checks structural
-set representations and joint variable, row, or matrix-element limits across
-every path; unsupported operations and limits are reported with affected path
-and stage before any branch relation is constructed. Adapters using another
-exact representation may implement their own operation preflight within the
-same result contract. It also checks the adapter's
+Portfolio construction enumerates the complete path inventory, preflights
+lifted-objective dimensions and matrix storage, checks request-wide adapter
+capabilities, and then calls the trajectory adapter's exact-operation and
+resource preflight before any branch build. The default joint-H adapter checks
+structural set representations and joint variable, row, or matrix-element
+limits across every path; unsupported operations and limits are reported with
+affected path and stage before any branch relation is constructed. Adapters
+using another exact representation may implement their own operation preflight
+within the same result contract. It also checks the adapter's
 declared assurance, branch-relation support, and linear/convex terminal-objective
 support for every path before dispatching any path. Unsupported objective
 support identifies the candidate path and terminal stage. When a verifier is
 requested during construction, use `build_hybrid_portfolio_programs_with_verifier`;
-after trajectory operation preflight it calls the verifier adapter's `preflight`,
-then checks trajectory-adapter capabilities across the same inventory. The built-in
+after lifted-objective resource and trajectory capability checks, it runs the
+verifier's admission-only preflight and checks verifier capabilities, then
+preflights trajectory operations before any branch build. Verifier preflight
+must not create provider workspaces or run the verification algorithm. The built-in
 path and portfolio builders reject unknown assurance values and non-finite or
 negative tolerances before calling injected adapter methods. Validated objective
 assurance is unsupported because the hybrid objective path currently supports
@@ -410,10 +414,12 @@ creating a provider workspace or running an algorithm:
 The current implementation does not yet satisfy this full admission contract.
 Portfolio builders preflight the complete enumerated path set for supported
 direct joint-H representations and relation resource limits before branch
-construction. Direct-trajectory preflight also checks every enumerated
-terminal objective's lifted variable count and dense matrix storage, without
-allocating the lifted matrices, before capability queries or branch builds.
-The verified builder additionally preflights the verifier domain. Built-in
+construction. Direct-trajectory construction checks every enumerated terminal
+objective's lifted variable count and dense matrix storage, without allocating
+the lifted matrices, before capability queries. It checks adapter support for
+every objective in `Q_T`, including modes without an enumerated path, before
+adapter operation preflight or branch builds. The verified builder additionally
+preflights the verifier domain before trajectory provider admission. Built-in
 linear-only verifiers check objective support for every mode in `Q_T`, including
 modes with no enumerated path, before verifier dispatch. Other
 provider operations and broader terminal-policy semantics remain EXT-07
@@ -525,7 +531,8 @@ during admission discards the preflight result. The framework accepts only
 numerical objective assurance and finite nonnegative tolerances. Each direct
 trajectory adapter receives the complete policy in preflight and owns any
 additional supported range or interpretation for those tolerances; it must
-reject an unsupported policy before capability queries or program building.
+reject an unsupported policy before provider workspace creation or program
+building.
 Validated objective assurance remains unsupported. Solver execution prepares
 all branch programs before creating any solver workspace; direct-trajectory,
 projected-reachability, and family-verification adapters preflight their
@@ -533,7 +540,7 @@ complete path inventory before dispatch. Each receives the framework-generated
 ordered operation plan and must return an exact receipt. The direct-trajectory
 receipt also binds the ordered path inventory and configured relation limits.
 The framework rejects incomplete, reordered, extra, or foreign plan entries
-before capability queries, branch construction, or verification. The plan
+before branch construction or verification. The plan
 preserves duplicate paths as distinct indexed obligations. These receipts are
 adapter attestations; they do not independently prove semantic support or
 mathematical correctness. Complete support accounting for every requested

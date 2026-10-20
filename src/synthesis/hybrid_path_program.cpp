@@ -56,11 +56,30 @@ Diagnostics hybrid_path_admission_errors(const model::HybridSystem& system,
     return {};
 }
 using HybridTrajectoryPortfolioPreflightResult =
-    std::variant<std::monostate,Diagnostics,OperationStopped>;
+    std::variant<HybridDirectTrajectoryCapabilities,Diagnostics,OperationStopped>;
 using HybridTrajectoryOperationPreflightResult = std::variant<
     HybridDirectTrajectoryPreflightSuccess,
     model::HybridPathCompositionFailureReport,Diagnostics,OperationStopped>;
+using HybridTrajectoryObjectivePreflightResult = std::variant<
+    std::monostate,model::HybridPathCompositionFailureReport,Diagnostics,OperationStopped>;
 bool same_limits(model::HybridRelationLimits left,model::HybridRelationLimits right);
+
+HybridTrajectoryObjectivePreflightResult preflight_hybrid_trajectory_objectives(
+    const model::HybridSystem& system,const model::HybridRequest& request,
+    std::span<const model::HybridPath> paths,model::HybridRelationLimits limits,
+    std::stop_token cancellation) {
+    for(const auto& path:paths) {
+        if(cancellation.stop_requested())
+            return OperationStopped{StopReason::cancelled,
+                "Hybrid trajectory objective preflight was cancelled before capability admission"};
+        const auto preflight=model::preflight_hybrid_terminal_objective_lift(
+            system,request,path,limits,cancellation);
+        if(const auto* stopped=std::get_if<OperationStopped>(&preflight)) return *stopped;
+        if(const auto* diagnostic=std::get_if<Diagnostic>(&preflight))
+            return model::HybridPathCompositionFailureReport{path,limits,{},*diagnostic};
+    }
+    return std::monostate{};
+}
 
 HybridTrajectoryOperationPreflightResult preflight_hybrid_trajectory_operations(
     const HybridDirectTrajectoryAdapter& adapter,const model::HybridSystem& system,
@@ -129,17 +148,6 @@ HybridTrajectoryOperationPreflightResult preflight_hybrid_trajectory_operations(
     if(cancellation.stop_requested())
         return OperationStopped{StopReason::cancelled,
             "Hybrid trajectory construction was cancelled after adapter preflight"};
-    for(const auto& path:paths) {
-        if(cancellation.stop_requested())
-            return OperationStopped{StopReason::cancelled,
-                "Hybrid trajectory objective preflight was cancelled before capability admission"};
-        const auto objective_preflight=model::preflight_hybrid_terminal_objective_lift(
-            system,request,path,limits,cancellation);
-        if(const auto* stopped=std::get_if<OperationStopped>(&objective_preflight))
-            return *stopped;
-        if(const auto* diagnostic=std::get_if<Diagnostic>(&objective_preflight))
-            return model::HybridPathCompositionFailureReport{path,limits,{},*diagnostic};
-    }
     if(const auto* success=std::get_if<HybridDirectTrajectoryPreflightSuccess>(&result))
         return *success;
     return HybridDirectTrajectoryPreflightSuccess{
@@ -179,11 +187,11 @@ HybridTrajectoryPortfolioPreflightResult preflight_hybrid_trajectory_capabilitie
             else return capability.convex_objectives;
         },objective->objective);
         if(!supported)
-            return one({DiagnosticCode::unsupported,"hybrid.portfolio.objective",
+            return one({DiagnosticCode::unsupported,"hybrid.adapter.objective",
                 "Direct-trajectory adapter does not support the terminal objective for allowed terminal mode "+
                 terminal_mode.value});
     }
-    return std::monostate{};
+    return capability;
 }
 bool same_limits(model::HybridRelationLimits left,model::HybridRelationLimits right) {
     return left.max_variables==right.max_variables && left.max_rows==right.max_rows &&
@@ -730,34 +738,22 @@ HybridPathProgramResult build_hybrid_path_program(const HybridDirectTrajectoryAd
     if(const auto policy_error=hybrid_objective_policy_error(policy); policy_error)
         return one(*policy_error);
     const std::array<model::HybridPath,1> paths{path};
+    const auto objective_preflight=preflight_hybrid_trajectory_objectives(
+        system,request,paths,limits,cancellation);
+    if(const auto* failure=std::get_if<model::HybridPathCompositionFailureReport>(&objective_preflight))
+        return *failure;
+    if(const auto* errors=std::get_if<Diagnostics>(&objective_preflight)) return *errors;
+    if(const auto* stopped=std::get_if<OperationStopped>(&objective_preflight)) return *stopped;
+    const auto capability_preflight=preflight_hybrid_trajectory_capabilities(
+        adapter,request,policy,cancellation);
+    if(const auto* errors=std::get_if<Diagnostics>(&capability_preflight)) return *errors;
+    if(const auto* stopped=std::get_if<OperationStopped>(&capability_preflight)) return *stopped;
     const auto operation_preflight=preflight_hybrid_trajectory_operations(
         adapter,system,request,paths,limits,policy,cancellation);
     if(const auto* failure=std::get_if<model::HybridPathCompositionFailureReport>(&operation_preflight))
         return *failure;
     if(const auto* errors=std::get_if<Diagnostics>(&operation_preflight)) return *errors;
     if(const auto* stopped=std::get_if<OperationStopped>(&operation_preflight)) return *stopped;
-    const auto capability=adapter.capabilities();
-    if(capability.assurance!=Assurance::numerical)
-        return one({DiagnosticCode::unsupported,"hybrid.adapter.assurance",
-            "Validated adapter assurance is unsupported until its evidence is carried in the result"});
-    if(!capability.preserves_branch_labelled_joint_relation)
-        return one({DiagnosticCode::unsupported,"hybrid.adapter.branch_relation",
-            "Direct-trajectory adapter does not declare branch-labelled joint-relation support"});
-    if(!path.modes.empty()) {
-        const auto objective=std::find_if(request.terminal_objectives.begin(),request.terminal_objectives.end(),
-            [&](const auto& candidate) { return candidate.mode==path.modes.back(); });
-        if(objective==request.terminal_objectives.end())
-            return one({DiagnosticCode::invalid_input,"hybrid.adapter.objective",
-                "No terminal objective is defined for the requested path's final mode"});
-        const bool supported=std::visit([&](const auto& value) {
-            using T=std::decay_t<decltype(value)>;
-            if constexpr(std::is_same_v<T,LinearTerminal>) return capability.linear_objectives;
-            else return capability.convex_objectives;
-        },objective->objective);
-        if(!supported)
-            return one({DiagnosticCode::unsupported,"hybrid.adapter.objective",
-                "Direct-trajectory adapter does not declare support for this terminal objective"});
-    }
     if(cancellation.stop_requested())
         return OperationStopped{StopReason::cancelled,
             "Hybrid path program construction was cancelled after capability admission"};
@@ -818,16 +814,22 @@ HybridPortfolioProgramResult build_hybrid_portfolio_programs(const HybridDirectT
     if(paths.empty())
         return one({DiagnosticCode::invalid_claim,"hybrid.portfolio.paths",
             "No allowed hybrid path exists for the requested terminal modes"});
+    const auto objective_preflight=preflight_hybrid_trajectory_objectives(
+        system,request,paths,relation_limits,cancellation);
+    if(const auto* failure=std::get_if<model::HybridPathCompositionFailureReport>(&objective_preflight))
+        return *failure;
+    if(const auto* errors=std::get_if<Diagnostics>(&objective_preflight)) return *errors;
+    if(const auto* stopped=std::get_if<OperationStopped>(&objective_preflight)) return *stopped;
+    const auto trajectory_preflight=preflight_hybrid_trajectory_capabilities(
+        adapter,request,policy,cancellation);
+    if(const auto* errors=std::get_if<Diagnostics>(&trajectory_preflight)) return *errors;
+    if(const auto* stopped=std::get_if<OperationStopped>(&trajectory_preflight)) return *stopped;
     const auto operation_preflight=preflight_hybrid_trajectory_operations(
         adapter,system,request,paths,relation_limits,policy,cancellation);
     if(const auto* failure=std::get_if<model::HybridPathCompositionFailureReport>(&operation_preflight))
         return *failure;
     if(const auto* errors=std::get_if<Diagnostics>(&operation_preflight)) return *errors;
     if(const auto* stopped=std::get_if<OperationStopped>(&operation_preflight)) return *stopped;
-    const auto trajectory_preflight=preflight_hybrid_trajectory_capabilities(
-        adapter,request,policy,cancellation);
-    if(const auto* errors=std::get_if<Diagnostics>(&trajectory_preflight)) return *errors;
-    if(const auto* stopped=std::get_if<OperationStopped>(&trajectory_preflight)) return *stopped;
     return build_hybrid_portfolio_programs_for_paths(adapter,system,request,
         std::move(problem),paths,relation_limits,policy,cancellation);
 }
@@ -864,12 +866,16 @@ HybridPortfolioProgramResult build_hybrid_portfolio_programs_with_verifier(
         return one({DiagnosticCode::invalid_claim,"hybrid.verification.paths",
             "No allowed hybrid path exists for the requested verifier plan"});
     const auto operation_plan=model::plan_hybrid_operations(paths);
-    const auto operation_preflight=preflight_hybrid_trajectory_operations(
-        trajectory,system,request,paths,relation_limits,policy,cancellation);
-    if(const auto* failure=std::get_if<model::HybridPathCompositionFailureReport>(&operation_preflight))
+    const auto objective_preflight=preflight_hybrid_trajectory_objectives(
+        system,request,paths,relation_limits,cancellation);
+    if(const auto* failure=std::get_if<model::HybridPathCompositionFailureReport>(&objective_preflight))
         return *failure;
-    if(const auto* errors=std::get_if<Diagnostics>(&operation_preflight)) return *errors;
-    if(const auto* stopped=std::get_if<OperationStopped>(&operation_preflight)) return *stopped;
+    if(const auto* errors=std::get_if<Diagnostics>(&objective_preflight)) return *errors;
+    if(const auto* stopped=std::get_if<OperationStopped>(&objective_preflight)) return *stopped;
+    const auto trajectory_preflight=preflight_hybrid_trajectory_capabilities(
+        trajectory,request,policy,cancellation);
+    if(const auto* errors=std::get_if<Diagnostics>(&trajectory_preflight)) return *errors;
+    if(const auto* stopped=std::get_if<OperationStopped>(&trajectory_preflight)) return *stopped;
     const auto admission=verifier.preflight(system,request,paths,operation_plan,cancellation);
     if(const auto* errors=std::get_if<Diagnostics>(&admission)) return *errors;
     if(const auto* stopped=std::get_if<OperationStopped>(&admission)) return *stopped;
@@ -889,10 +895,12 @@ HybridPortfolioProgramResult build_hybrid_portfolio_programs_with_verifier(
        !capability.checks_continuous_branch_coverage)
         return one({DiagnosticCode::unsupported,"hybrid.verification.capabilities",
             "Verifier must declare numerical feasibility, global objective, and continuous coverage checks"});
-    const auto trajectory_preflight=preflight_hybrid_trajectory_capabilities(
-        trajectory,request,policy,cancellation);
-    if(const auto* errors=std::get_if<Diagnostics>(&trajectory_preflight)) return *errors;
-    if(const auto* stopped=std::get_if<OperationStopped>(&trajectory_preflight)) return *stopped;
+    const auto operation_preflight=preflight_hybrid_trajectory_operations(
+        trajectory,system,request,paths,relation_limits,policy,cancellation);
+    if(const auto* failure=std::get_if<model::HybridPathCompositionFailureReport>(&operation_preflight))
+        return *failure;
+    if(const auto* errors=std::get_if<Diagnostics>(&operation_preflight)) return *errors;
+    if(const auto* stopped=std::get_if<OperationStopped>(&operation_preflight)) return *stopped;
     if(cancellation.stop_requested())
         return OperationStopped{StopReason::cancelled,
             "Hybrid verified portfolio construction was cancelled after verifier preflight"};

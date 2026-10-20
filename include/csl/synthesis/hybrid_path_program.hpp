@@ -218,7 +218,8 @@ struct HybridDirectTrajectoryPreflightFailure {
 };
 // A successful adapter admission must attest to the exact ordered request
 // inventory, framework operation plan, and limits it checked. The wrapper
-// validates this receipt before it queries capabilities or starts any build.
+// validates this receipt before any branch build. Request-wide capability
+// checks happen before adapter preflight.
 struct HybridDirectTrajectoryPreflightSuccess {
     std::vector<model::HybridPath> admitted_paths;
     model::HybridRelationLimits limits;
@@ -233,11 +234,13 @@ using HybridDirectTrajectoryPreflightResult = std::variant<
 class HybridDirectTrajectoryAdapter {
 public:
     virtual ~HybridDirectTrajectoryAdapter() = default;
-    // Adapters admit their exact operation plan, resource needs, and any
-    // adapter-specific ObjectivePolicy constraints for the complete fixed-path
-    // inventory before capability queries or branch builds. The framework
-    // validates assurance and tolerance shape; adapters own the meaning and
-    // accepted ranges of otherwise valid numerical tolerances. The default
+    // The framework checks lifted-objective resource limits, then request-wide
+    // objective and relation capabilities, before adapter preflight. Adapters
+    // admit their exact operation plan, resource needs, and any adapter-specific
+    // ObjectivePolicy constraints for the complete fixed-path inventory before
+    // branch builds. The framework validates assurance and tolerance shape;
+    // adapters own the meaning and accepted ranges of otherwise valid numerical
+    // tolerances. The default
     // declares the built-in joint-H representation boundary; adapters using
     // another representation must override it. A successful override returns
     // every supplied path and planned operation in the same order, and the
@@ -429,8 +432,9 @@ public:
     virtual ~HybridFamilyVerificationAdapter() = default;
     virtual HybridFamilyVerificationCapabilities capabilities() const noexcept = 0;
     // Bounded adapters receive the complete ordered operation plan and return
-    // its receipt only after admitting their full request domain. The default
-    // fails closed.
+    // its receipt only after admitting their full request domain. This is an
+    // admission-only check: it must not create provider workspaces or run the
+    // family verification algorithm. The default fails closed.
     virtual HybridFamilyVerificationPreflightResult preflight(const model::HybridSystem&,
         const model::HybridRequest&, std::span<const model::HybridPath>,
         std::span<const model::HybridPlannedOperation>,

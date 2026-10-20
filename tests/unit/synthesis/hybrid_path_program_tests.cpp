@@ -2121,7 +2121,17 @@ public:
 class LinearOnlyRejectingTrajectoryAdapter final : public HybridDirectTrajectoryAdapter {
 public:
     mutable int calls{};
+    mutable int preflight_calls{};
     mutable int capability_calls{};
+    HybridDirectTrajectoryPreflightResult preflight(const model::HybridSystem&,
+        const model::HybridRequest&,std::span<const model::HybridPath> paths,
+        model::HybridRelationLimits limits,std::span<const model::HybridPlannedOperation> operations,
+        optimization::ObjectivePolicy,std::stop_token) const override {
+        ++preflight_calls;
+        return HybridDirectTrajectoryPreflightSuccess{
+            std::vector<model::HybridPath>(paths.begin(),paths.end()),limits,
+            std::vector<model::HybridPlannedOperation>(operations.begin(),operations.end())};
+    }
     HybridDirectTrajectoryCapabilities capabilities() const noexcept override {
         ++capability_calls;
         return {true,true,false,Assurance::numerical};
@@ -3006,7 +3016,7 @@ TEST_CASE("hybrid portfolio builder returns every parallel edge branch transacti
     CHECK(failure.path==example_path());
     const auto* diagnostic=std::get_if<Diagnostic>(&failure.failure);
     REQUIRE(diagnostic);
-    CHECK(diagnostic->field=="hybrid.relation.variables");
+    CHECK(diagnostic->field=="hybrid.objective.variables");
 }
 
 TEST_CASE("hybrid portfolio builder dispatches through the injected direct trajectory adapter") {
@@ -3042,8 +3052,9 @@ TEST_CASE("hybrid portfolio preflights all terminal objective capabilities befor
         {"hybrid-problem"},{1,8},{16,64,1024});
     REQUIRE(std::holds_alternative<Diagnostics>(result));
     CHECK(std::get<Diagnostics>(result).front().code==DiagnosticCode::unsupported);
-    CHECK(std::get<Diagnostics>(result).front().field=="hybrid.portfolio.objective");
+    CHECK(std::get<Diagnostics>(result).front().field=="hybrid.adapter.objective");
     CHECK(adapter.calls==0);
+    CHECK(adapter.preflight_calls==0);
     CHECK(adapter.capability_calls==1);
 
     FixtureHybridFamilyVerifier verifier;
@@ -3052,8 +3063,9 @@ TEST_CASE("hybrid portfolio preflights all terminal objective capabilities befor
         system,request,{"hybrid-problem"},{1,8},{16,64,1024});
     REQUIRE(std::holds_alternative<Diagnostics>(verified));
     CHECK(std::get<Diagnostics>(verified).front().code==DiagnosticCode::unsupported);
-    CHECK(std::get<Diagnostics>(verified).front().field=="hybrid.portfolio.objective");
+    CHECK(std::get<Diagnostics>(verified).front().field=="hybrid.adapter.objective");
     CHECK(verified_adapter.calls==0);
+    CHECK(verified_adapter.preflight_calls==0);
 }
 
 TEST_CASE("hybrid portfolio validates objectives for unreachable allowed terminal modes") {
@@ -3072,10 +3084,11 @@ TEST_CASE("hybrid portfolio validates objectives for unreachable allowed termina
         {"hybrid-problem"},{1,8},{16,64,1024});
     REQUIRE(std::holds_alternative<Diagnostics>(result));
     CHECK(std::get<Diagnostics>(result).front().code==DiagnosticCode::unsupported);
-    CHECK(std::get<Diagnostics>(result).front().field=="hybrid.portfolio.objective");
+    CHECK(std::get<Diagnostics>(result).front().field=="hybrid.adapter.objective");
     CHECK(std::get<Diagnostics>(result).front().explanation.find("unreachable-terminal")!=
         std::string::npos);
     CHECK(adapter.capability_calls==1);
+    CHECK(adapter.preflight_calls==0);
     CHECK(adapter.calls==0);
 
     FixtureHybridFamilyVerifier verifier;
@@ -3083,11 +3096,36 @@ TEST_CASE("hybrid portfolio validates objectives for unreachable allowed termina
     const auto verified=build_hybrid_portfolio_programs_with_verifier(verifier,
         verified_adapter,system,request,{"hybrid-problem"},{1,8},{16,64,1024});
     REQUIRE(std::holds_alternative<Diagnostics>(verified));
-    CHECK(std::get<Diagnostics>(verified).front().field=="hybrid.portfolio.objective");
+    CHECK(std::get<Diagnostics>(verified).front().field=="hybrid.adapter.objective");
     CHECK(std::get<Diagnostics>(verified).front().explanation.find("unreachable-terminal")!=
         std::string::npos);
     CHECK(verified_adapter.capability_calls==1);
+    CHECK(verified_adapter.preflight_calls==0);
     CHECK(verified_adapter.calls==0);
+}
+
+TEST_CASE("single hybrid path admission checks objectives for every allowed terminal mode") {
+    auto system=example_system();
+    auto unreachable_terminal=system.modes.back();
+    unreachable_terminal.id={"unreachable-terminal"};
+    system.modes.push_back(std::move(unreachable_terminal));
+
+    auto request=example_request();
+    request.allowed_terminal_modes.push_back({"unreachable-terminal"});
+    request.terminal_objectives.push_back({{"unreachable-terminal"},
+        QuadraticTerminal{Matrix{2,2,{1,0,0,1}},Vector{0,0},0},"energy","J"});
+
+    LinearOnlyRejectingTrajectoryAdapter adapter;
+    const auto result=build_hybrid_path_program(adapter,system,request,example_path(),
+        {"hybrid-problem"},{16,64,1024});
+    REQUIRE(std::holds_alternative<Diagnostics>(result));
+    CHECK(std::get<Diagnostics>(result).front().code==DiagnosticCode::unsupported);
+    CHECK(std::get<Diagnostics>(result).front().field=="hybrid.adapter.objective");
+    CHECK(std::get<Diagnostics>(result).front().explanation.find("unreachable-terminal")!=
+        std::string::npos);
+    CHECK(adapter.capability_calls==1);
+    CHECK(adapter.preflight_calls==0);
+    CHECK(adapter.calls==0);
 }
 
 TEST_CASE("exact linear H verifier rejects unreachable unsupported terminal objectives before dispatch") {
@@ -3112,7 +3150,7 @@ TEST_CASE("exact linear H verifier rejects unreachable unsupported terminal obje
     CHECK(diagnostics.front().field=="hybrid.verification.exact_linear_h_objective");
     CHECK(diagnostics.front().explanation.find("unreachable-terminal")!=std::string::npos);
     CHECK(trajectory.calls==0);
-    CHECK(trajectory.capability_calls==0);
+    CHECK(trajectory.capability_calls==1);
 }
 
 TEST_CASE("exact singleton verifier rejects unreachable unsupported terminal objectives before dispatch") {
@@ -3137,7 +3175,7 @@ TEST_CASE("exact singleton verifier rejects unreachable unsupported terminal obj
     CHECK(diagnostics.front().field=="hybrid.verification.exact_singleton_objective");
     CHECK(diagnostics.front().explanation.find("unreachable-terminal")!=std::string::npos);
     CHECK(trajectory.calls==0);
-    CHECK(trajectory.capability_calls==0);
+    CHECK(trajectory.capability_calls==1);
 }
 
 TEST_CASE("scalar interval verifiers preflight objectives for every allowed terminal mode") {
@@ -7362,7 +7400,7 @@ TEST_CASE("hybrid portfolio builder rolls back after a later dimension limit fai
     CHECK(failure.limits.max_variables==3);
     const auto* diagnostic=std::get_if<Diagnostic>(&failure.failure);
     REQUIRE(diagnostic);
-    CHECK(diagnostic->field=="hybrid.relation.variables");
+    CHECK(diagnostic->field=="hybrid.objective.variables");
 }
 
 TEST_CASE("hybrid portfolio preflights lifted objective storage before any adapter build") {
@@ -7405,7 +7443,7 @@ TEST_CASE("hybrid portfolio preflights lifted objective storage before any adapt
     }
 }
 
-TEST_CASE("direct trajectory adapters preflight the full path inventory before capabilities or builds") {
+TEST_CASE("direct trajectory adapters preflight the full path inventory before branch builds") {
     auto [system,request]=variable_size_parallel_profile();
     RejectingTrajectoryPreflightAdapter adapter;
     const auto portfolio=build_hybrid_portfolio_programs(adapter,system,
@@ -7416,7 +7454,7 @@ TEST_CASE("direct trajectory adapters preflight the full path inventory before c
     CHECK(std::get<Diagnostic>(failure.failure).field=="fixture.trajectory.preflight");
     CHECK(adapter.preflight_calls==1);
     CHECK(adapter.preflight_path_count==3);
-    CHECK(adapter.capability_calls==0);
+    CHECK(adapter.capability_calls==1);
     CHECK(adapter.build_calls==0);
 
     const auto composed=build_hybrid_portfolio_programs(system,request,
@@ -7438,11 +7476,11 @@ TEST_CASE("direct trajectory adapters preflight the full path inventory before c
     CHECK(std::get<model::HybridPathCompositionFailureReport>(single).path==example_path());
     CHECK(single_adapter.preflight_calls==1);
     CHECK(single_adapter.preflight_path_count==1);
-    CHECK(single_adapter.capability_calls==0);
+    CHECK(single_adapter.capability_calls==1);
     CHECK(single_adapter.build_calls==0);
 }
 
-TEST_CASE("direct trajectory preflight rejects a partial success receipt before capabilities or builds") {
+TEST_CASE("direct trajectory preflight rejects a partial success receipt before branch builds") {
     auto [system,request]=variable_size_parallel_profile();
     PartialReceiptTrajectoryPreflightAdapter adapter;
     const auto result=build_hybrid_portfolio_programs(adapter,system,request,
@@ -7453,11 +7491,11 @@ TEST_CASE("direct trajectory preflight rejects a partial success receipt before 
     const auto* diagnostic=std::get_if<Diagnostic>(&failure.failure);
     REQUIRE(diagnostic);
     CHECK(diagnostic->field=="hybrid.adapter.preflight_success_inventory");
-    CHECK(adapter.capability_calls==0);
+    CHECK(adapter.capability_calls==1);
     CHECK(adapter.build_calls==0);
 }
 
-TEST_CASE("direct trajectory preflight rejects incomplete operation admission before capabilities or builds") {
+TEST_CASE("direct trajectory preflight rejects incomplete operation admission before branch builds") {
     auto [system,request]=variable_size_parallel_profile();
     PartialReceiptTrajectoryPreflightAdapter adapter(1);
     const auto result=build_hybrid_portfolio_programs(adapter,system,request,
@@ -7468,7 +7506,7 @@ TEST_CASE("direct trajectory preflight rejects incomplete operation admission be
     const auto* diagnostic=std::get_if<Diagnostic>(&failure.failure);
     REQUIRE(diagnostic);
     CHECK(diagnostic->field=="hybrid.adapter.preflight_success_operations");
-    CHECK(adapter.capability_calls==0);
+    CHECK(adapter.capability_calls==1);
     CHECK(adapter.build_calls==0);
 }
 
@@ -7483,7 +7521,7 @@ TEST_CASE("direct trajectory preflight rejects reordered or extra operation rece
         const auto* diagnostic=std::get_if<Diagnostic>(&failure.failure);
         REQUIRE(diagnostic);
         CHECK(diagnostic->field=="hybrid.adapter.preflight_success_operations");
-        CHECK(adapter.capability_calls==0);
+        CHECK(adapter.capability_calls==1);
         CHECK(adapter.build_calls==0);
     }
 }
@@ -7519,7 +7557,7 @@ TEST_CASE("later unsupported guard and reset operations reject the full inventor
         CHECK(diagnostic->field==(unsupported_reset?
             "hybrid.reset.representation":"hybrid.guard.representation"));
         CHECK(diagnostic->explanation.find("stage 0 edge to-wide")!=std::string::npos);
-        CHECK(adapter.capability_calls==0);
+        CHECK(adapter.capability_calls==1);
         CHECK(adapter.build_calls==0);
     }
 }
@@ -7537,7 +7575,7 @@ TEST_CASE("direct trajectory adapters may admit a representation outside the joi
     CHECK(adapter.build_calls==1);
 }
 
-TEST_CASE("direct trajectory preflight admits adapter-specific numerical tolerance policies") {
+TEST_CASE("direct trajectory operation preflight admits adapter-specific numerical tolerance policies") {
     const optimization::ObjectivePolicy accepted_policy{
         Assurance::numerical,{0.125,0.25}};
     PolicyAwareTrajectoryAdapter accepting(accepted_policy);
@@ -7564,7 +7602,7 @@ TEST_CASE("direct trajectory preflight admits adapter-specific numerical toleran
     CHECK(rejecting.observed_policy->numerical.absolute_tolerance==1e-8);
     CHECK(rejecting.observed_policy->numerical.relative_tolerance==1e-8);
     CHECK(rejecting.preflight_calls==1);
-    CHECK(rejecting.capability_calls==0);
+    CHECK(rejecting.capability_calls==1);
     CHECK(rejecting.build_calls==0);
 }
 
@@ -7587,7 +7625,7 @@ TEST_CASE("direct trajectory preflight failures must retain requested path and l
         const auto expected=corruption==0?"hybrid.adapter.preflight_path":
             (corruption==1?"hybrid.adapter.preflight_limits":"hybrid.adapter.preflight_diagnostics");
         CHECK(diagnostic->field==expected);
-        CHECK(adapter.capability_calls==0);
+        CHECK(adapter.capability_calls==1);
         CHECK(adapter.build_calls==0);
     }
 }
@@ -7617,7 +7655,7 @@ TEST_CASE("hybrid portfolio rejects an empty path inventory before adapter prefl
     CHECK(adapter.build_calls==0);
 }
 
-TEST_CASE("direct trajectory preflight observes cancellation before capabilities and builds") {
+TEST_CASE("direct trajectory preflight observes cancellation before branch builds") {
     std::stop_source cancellation;
     CancellingTrajectoryPreflightAdapter adapter{cancellation};
     const auto result=build_hybrid_path_program(adapter,example_system(),
@@ -7625,7 +7663,7 @@ TEST_CASE("direct trajectory preflight observes cancellation before capabilities
         {},cancellation.get_token());
     REQUIRE(std::holds_alternative<OperationStopped>(result));
     CHECK(std::get<OperationStopped>(result).reason==StopReason::cancelled);
-    CHECK(adapter.capability_calls==0);
+    CHECK(adapter.capability_calls==1);
     CHECK(adapter.build_calls==0);
 }
 
