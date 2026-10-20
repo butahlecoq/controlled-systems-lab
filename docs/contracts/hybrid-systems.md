@@ -434,8 +434,8 @@ multiple-parameter verifier coverage remain incomplete.
 The synthesis unit suite checks literal one-step relation coefficients and
 provider admission details. A public API contract test also runs projected
 reachability through the adapter boundary, checks the guarded terminal interval
-at included and excluded points, and verifies that injected-provider rejection
-is returned before workspace creation.
+against both literal endpoints and interior/exterior points, and verifies that
+injected-provider rejection is returned before workspace creation.
 
 ## Independent test oracle requirements
 

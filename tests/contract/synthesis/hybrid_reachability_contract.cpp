@@ -8,6 +8,7 @@
 #include <memory>
 #include <string>
 #include <utility>
+#include <variant>
 
 using namespace csl;
 using namespace csl::synthesis;
@@ -85,6 +86,17 @@ TEST_CASE("public projected hybrid reachability returns the guarded terminal int
     const auto projected=reachability.projected_state->terminal_state_set.representation();
     REQUIRE(std::holds_alternative<sets::HRepresentation>(projected));
     const auto& interval=std::get<sets::HRepresentation>(projected);
+    bool lower_is_tight=false;
+    bool upper_is_tight=false;
+    for(std::size_t row=0;row<interval.inequalities.rows();++row) {
+        const auto coefficient=interval.inequalities(row,0);
+        const auto bound=interval.upper_bounds[row];
+        CHECK((coefficient<0.0?0.0:0.5*coefficient)<=bound);
+        if(coefficient<0.0) lower_is_tight=lower_is_tight || bound/(-coefficient)==0.0;
+        if(coefficient>0.0) upper_is_tight=upper_is_tight || bound/coefficient==0.5;
+    }
+    CHECK(lower_is_tight);
+    CHECK(upper_is_tight);
     CHECK(contains(interval,0.0));
     CHECK(contains(interval,0.25));
     CHECK(contains(interval,0.5));
