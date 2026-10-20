@@ -96,6 +96,15 @@ trace. Its injected provider also checks the exact joint relation during
 preflight. These public contract cases complement, but do not replace, the
 independent raw-graph mode-sequence oracle in the hybrid unit suites.
 
+The public general-projection contract suite now also checks a two-stage scalar
+case against the raw-model identity `y = u + v`, with both stage controls in
+`[0, 1]`, so the exact terminal set is `[0, 2]`. The test checks interior and
+endpoint membership, tight lower and upper bounds, rejection outside the
+interval, and projection input/output row evidence against the retained
+relation and operation trace. This adds an independent projected-set oracle;
+it does not close full provider/resource aggregation or resource-scale
+coverage.
+
 The [EXT-07 capability profile and fixture report](../../../research/ext07-capability-profile.md)
 records the declared adapter/verifier domains and named dimensions, horizons,
 mode counts, edge counts, path counts, and relation widths. It separates saved

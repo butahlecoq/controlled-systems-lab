@@ -115,6 +115,32 @@ std::pair<model::HybridSystem,model::HybridRequest> two_stage_dimension_change_s
     return {std::move(system),std::move(request)};
 }
 
+std::pair<model::HybridSystem,model::HybridRequest> two_stage_scalar_interval_system() {
+    model::HybridMode source{{"source"},1,1,{"x"},{"u"}};
+    source.flow=LinearStage{Matrix{1,1,{1}},Matrix{1,1,{1}},Matrix{1,0,{}},Vector{0}};
+    source.control_sets={interval("contract.two-stage.source-control.0",0,1),
+        interval("contract.two-stage.source-control.1",0,1)};
+    source.invariants={UniversalSet{1},UniversalSet{1},UniversalSet{1}};
+    model::HybridMode middle{{"middle"},1,1,{"z"},{"v"}};
+    middle.flow=LinearStage{Matrix{1,1,{1}},Matrix{1,1,{1}},Matrix{1,0,{}},Vector{0}};
+    middle.control_sets={interval("contract.two-stage.middle-control.0",0,1),
+        interval("contract.two-stage.middle-control.1",0,1)};
+    middle.invariants={UniversalSet{1},UniversalSet{1},UniversalSet{1}};
+    model::HybridMode target{{"target"},1,0,{"y"},{}};
+    target.flow=LinearStage{Matrix{1,1,{1}},Matrix{1,0,{}},Matrix{1,0,{}},Vector{0}};
+    target.control_sets={UniversalSet{0},UniversalSet{0}};
+    target.invariants={UniversalSet{1},UniversalSet{1},UniversalSet{1}};
+    model::HybridSystem system{2,{source,middle,target},{
+        {{"first"},{"source"},{"middle"},{UniversalSet{1},UniversalSet{1}},
+            {identity_reset(),identity_reset()}},
+        {{"second"},{"middle"},{"target"},{UniversalSet{1},UniversalSet{1}},
+            {identity_reset(),identity_reset()}}
+    }};
+    model::HybridRequest request{{{"source"},{0}},{{"target"}},
+        {{{"target"},LinearTerminal{{1},0},"terminal value","unit"}}};
+    return {std::move(system),std::move(request)};
+}
+
 model::HybridPath two_stage_dimension_change_path() {
     return {{{"source"},{"middle"},{"target"}},{{"expand"},{"finish"}}};
 }
@@ -286,6 +312,60 @@ TEST_CASE("public general projected hybrid reachability retains a dimension-chan
     CHECK(reachability.projected_state->terminal_state_set.metadata()->set.dimension==1);
     CHECK(contains(terminal,0.0));
     CHECK_FALSE(contains(terminal,0.25));
+}
+
+TEST_CASE("general projected hybrid reachability matches an independent two-stage interval oracle") {
+    auto [system,request]=two_stage_scalar_interval_system();
+    const model::HybridPath path{{{"source"},{"middle"},{"target"}},{{"first"},{"second"}}};
+    GeneralProjectedStateHybridReachabilityAdapter adapter{64};
+
+    const auto result=compute_hybrid_path_reachability(adapter,system,request,path,{8,64,512});
+    REQUIRE(std::holds_alternative<HybridPathReachability>(result));
+    const auto& reachability=std::get<HybridPathReachability>(result);
+    REQUIRE(reachability.projected_state.has_value());
+    const auto& evidence=*reachability.projected_state;
+    CHECK(reachability.path==path);
+    CHECK(evidence.terminal_state_set.metadata()->set.dimension==1);
+    const auto projected=evidence.terminal_state_set.representation();
+    REQUIRE(std::holds_alternative<sets::HRepresentation>(projected));
+    const auto& terminal=std::get<sets::HRepresentation>(projected);
+
+    // From x0=0, u and v in [0,1], identity resets, and x+=control, the raw
+    // two-stage model gives y=u+v. Thus the exact terminal projection is
+    // [0,2], independently of the production relation composer and projector.
+    CHECK(contains(terminal,0.0));
+    CHECK(contains(terminal,0.5));
+    CHECK(contains(terminal,1.0));
+    CHECK(contains(terminal,1.5));
+    CHECK(contains(terminal,2.0));
+    CHECK_FALSE(contains(terminal,-0.01));
+    CHECK_FALSE(contains(terminal,2.01));
+    bool lower_is_tight=false;
+    bool upper_is_tight=false;
+    for(std::size_t row=0;row<terminal.inequalities.rows();++row) {
+        const auto coefficient=terminal.inequalities(row,0);
+        const auto bound=terminal.upper_bounds[row];
+        CHECK(coefficient*0.0<=bound);
+        CHECK(coefficient*2.0<=bound);
+        if(coefficient<0.0) lower_is_tight=lower_is_tight || bound/(-coefficient)==0.0;
+        if(coefficient>0.0) upper_is_tight=upper_is_tight || bound/coefficient==2.0;
+    }
+    CHECK(lower_is_tight);
+    CHECK(upper_is_tight);
+    const auto input_representation=reachability.joint_relation.representation();
+    REQUIRE(std::holds_alternative<sets::HRepresentation>(input_representation));
+    const auto& input=std::get<sets::HRepresentation>(input_representation);
+    REQUIRE_FALSE(reachability.relation_operations.empty());
+    const auto& final_operation=reachability.relation_operations.back();
+    CHECK(reachability.joint_relation.metadata()->set.dimension==7);
+    CHECK(final_operation.joint_variables==7);
+    CHECK(evidence.input_rows==input.inequalities.rows()+input.equalities.rows());
+    CHECK(evidence.input_rows<=evidence.maximum_projection_rows);
+    CHECK(evidence.output_rows==terminal.inequalities.rows()+terminal.equalities.rows());
+    CHECK(evidence.output_rows<=evidence.maximum_projection_rows);
+    CHECK(final_operation.cumulative_rows==input.inequalities.rows()+input.equalities.rows());
+    CHECK(final_operation.cumulative_matrix_elements==final_operation.cumulative_rows*
+        final_operation.joint_variables);
 }
 
 TEST_CASE("public general projected preflight admits the exact joint relation before workspace creation") {
