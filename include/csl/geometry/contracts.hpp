@@ -46,7 +46,13 @@ struct MinkowskiSum { SetHandle left, right; };
 // Admission requires factor-bearing representations; this is not MinkowskiSum.
 struct DependentSum { SetHandle left, right; };
 struct Intersection { SetHandle left, right; };
-struct Projection { SetHandle input; std::vector<std::size_t> coordinates; }; // ordered zero-based indices
+struct Projection {
+    SetHandle input;
+    std::vector<std::size_t> coordinates; // ordered zero-based indices
+    // Required H-projection peak-row budget when the caller has an internal-
+    // work cap. An accepted provider must enforce it or reject admission.
+    std::optional<std::size_t> maximum_peak_rows{};
+};
 struct AffinePreimage { SetHandle target; Matrix map; Vector offset; }; // {x: Mx+b in target}
 struct SupportQuery { SetHandle input; Vector direction; }; // sup d'x
 struct ContainmentQuery { SetHandle subset, superset; };

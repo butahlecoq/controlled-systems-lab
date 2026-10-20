@@ -374,6 +374,28 @@ TEST_CASE("projection fails explicitly at caller row limit without publishing a 
     CHECK(has_upper);
 }
 
+TEST_CASE("projection enforces the per-request H peak-row budget") {
+    auto joint=h("joint-request-budget",2,{6,2,{0,1,1,1,2,1,0,-1,1,-1,2,-1}},
+        {1,1,1,1,1,1},{0,2,{}},{});
+    auto selected=provider(geometry::polyhedral::make_projection_registration(),"csl.polyhedron.h");
+    auto request=projection(joint.as_handle(),{0});
+    std::get<Projection>(request.operation).maximum_peak_rows=7;
+    const auto prepared=selected.prepare(request);
+    REQUIRE(std::holds_alternative<PreparedPipeline<GeometryPort>>(prepared));
+    auto pipeline=std::get<PreparedPipeline<GeometryPort>>(prepared);
+    auto workspace=std::get<0>(pipeline.create());
+    const auto result=workspace->run({});
+    CHECK(std::holds_alternative<Unsupported>(result));
+}
+
+TEST_CASE("projection provider rejects H-row budgets for non-H output") {
+    auto selected=provider(geometry::polyhedral::make_projection_registration(
+        {geometry::polyhedral::ProjectionOutput::v,{}}),"csl.polyhedron.v");
+    auto request=projection(interval("budget-v",0,1).as_handle(),{0});
+    std::get<Projection>(request.operation).maximum_peak_rows=8;
+    CHECK(std::holds_alternative<Rejection>(selected.prepare(request)));
+}
+
 TEST_CASE("zero-control predecessor preserves a lower-dimensional equality set") {
     // x+=(2*x0,x1), no controls, S={x0=4}; predecessor x0=2, x1 arbitrary.
     auto x=take(sets::make_universal({{"X"},2,{}}));

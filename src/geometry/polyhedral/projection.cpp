@@ -291,10 +291,16 @@ public:
     explicit ProjectionWorkspace(ProjectionOptions options):options_(options) {}
     OperationOutcome apply(const OperationRequest& request,const ExecutionContext& context) override {
         if(auto failures=shape(request);!failures.empty()) return Unsupported{std::move(failures)};
-        const auto& projection=std::get<Projection>(request.operation);auto description=native_projection(projection);
+        const auto& projection=std::get<Projection>(request.operation);
+        auto description=native_projection(projection);
         if(auto* failure=std::get_if<Diagnostics>(&description)) return Unsupported{*failure};
+        auto options=options_;
+        if(projection.maximum_peak_rows)
+            options.max_rows=options.max_rows
+                ?std::min(*options.max_rows,*projection.maximum_peak_rows)
+                :projection.maximum_peak_rows;
         return execute(std::get<LazyProjectionDescription>(std::move(description)),{request.identity,{projection.input.id}},
-            {request.identity.ideal_output.value},options_,context);
+            {request.identity.ideal_output.value},options,context);
     }
 };
 class MaterializerWorkspace final : public RepresentationConverterWorkspace {
@@ -331,6 +337,9 @@ registry::Registration<registry::GeometryPort> make_projection_registration(Proj
     return {{{module},"1.0.0"},
         [options](const OperationRequest& request,const registry::Requirements& requirements) -> registry::Capability {
             if(auto failures=shape(request);!failures.empty()) return failures;
+            const auto& projection=std::get<Projection>(request.operation);
+            if(projection.maximum_peak_rows&&options.output!=ProjectionOutput::h)
+                return error("projection.capacity","Peak H-row budgets require H projection output.");
             if(request.assurance!=Assurance::numerical || requirements.output.assurance!=Assurance::numerical)
                 return error("projection.assurance","Validated projection assurance is not implemented.");
             if(request.required_relation!=SetRelation::equivalent || (requirements.output.relation && *requirements.output.relation!=SetRelation::equivalent))

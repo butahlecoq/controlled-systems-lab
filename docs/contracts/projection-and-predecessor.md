@@ -36,6 +36,12 @@ implementation, required relation and assurance. The selected provider's
 frozen `Requirements` names the output representation. Coordinate indices
 must be distinct and in range; both named and unnamed coordinate systems
 retain their ordering. Supplied affine-dimension claims are not transferred.
+Hybrid H-projection requests also carry `maximum_peak_rows`. Accepting provider
+admission commits the provider to enforce that cap during H elimination or
+reject it before workspace creation; providers unable to enforce the cap must
+reject admission. The built-in H provider combines it with any stricter
+provider-configured `ProjectionOptions::max_rows`. The field is unsupported for
+V and lazy outputs.
 
 `ProjectionOptions.output` selects one concrete capability:
 

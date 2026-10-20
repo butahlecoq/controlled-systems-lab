@@ -454,6 +454,9 @@ exclude allocator overhead and bytes, are not whole-operation memory or runtime
 measurements, and do not establish scaling. The reachability boundary rejects
 a missing observation, a reported peak above that branch's configured
 projection row limit, or inconsistent matrix-element evidence.
+The selected provider receives the configured peak-row budget during
+preflight; providers must enforce that budget during execution or reject
+admission when they cannot.
 
 The direct joint composer exposes an operation trace, and every
 `HybridPathProgram` retains that trace with the relation limits used. Each

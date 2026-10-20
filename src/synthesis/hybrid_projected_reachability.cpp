@@ -338,7 +338,8 @@ HybridReachabilityPreflightResult ProjectedStateHybridReachabilityAdapter::prefl
         RequestId{"terminal-state:"+relation.identity},
         ReferenceId{"terminal-state:"+relation.identity}};
     OperationRequest projection_request{identity,implementation,
-        Projection{relation.relation.as_handle(),{3}},SetRelation::equivalent,Assurance::numerical};
+        Projection{relation.relation.as_handle(),{3},maximum_projection_rows_},
+        SetRelation::equivalent,Assurance::numerical};
     const auto provider_admission=projection_.prepare(projection_request);
     if(cancellation.stop_requested())
         return OperationStopped{StopReason::cancelled,
@@ -377,7 +378,8 @@ HybridPathReachabilityResult ProjectedStateHybridReachabilityAdapter::compose_pa
     const auto provenance=projection_.provenance();
     const auto implementation=provenance.actual?provenance.actual->id:provenance.requested.id;
     OperationRequest projection_request{identity,implementation,
-        Projection{relation.as_handle(),{3}},SetRelation::equivalent,Assurance::numerical};
+        Projection{relation.as_handle(),{3},maximum_projection_rows_},
+        SetRelation::equivalent,Assurance::numerical};
     auto prepared_result=projection_.prepare(projection_request);
     if(const auto* rejected=std::get_if<registry::Rejection>(&prepared_result))
         return rejected->diagnostics;
@@ -536,7 +538,7 @@ HybridReachabilityPreflightResult GeneralProjectedStateHybridReachabilityAdapter
     const auto selected=projection_.provenance();
     const auto implementation=selected.actual?selected.actual->id:selected.requested.id;
     OperationRequest projection_request{identity,implementation,
-        Projection{composed_relation.relation.as_handle(),std::move(coordinates)},
+        Projection{composed_relation.relation.as_handle(),std::move(coordinates),maximum_projection_rows_},
         SetRelation::equivalent,Assurance::numerical};
     const auto provider_admission=projection_.prepare(projection_request);
     if(cancellation.stop_requested())
@@ -582,7 +584,8 @@ HybridPathReachabilityResult GeneralProjectedStateHybridReachabilityAdapter::com
     const auto provenance=projection_.provenance();
     const auto implementation=provenance.actual?provenance.actual->id:provenance.requested.id;
     OperationRequest projection_request{identity,implementation,
-        Projection{composed.relation.as_handle(),coordinates},SetRelation::equivalent,Assurance::numerical};
+        Projection{composed.relation.as_handle(),coordinates,maximum_projection_rows_},
+        SetRelation::equivalent,Assurance::numerical};
     auto prepared_result=projection_.prepare(projection_request);
     if(const auto* rejected=std::get_if<registry::Rejection>(&prepared_result)) return rejected->diagnostics;
     const auto pipeline=std::get<registry::PreparedPipeline<registry::GeometryPort>>(std::move(prepared_result));

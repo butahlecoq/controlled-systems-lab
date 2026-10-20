@@ -2453,18 +2453,22 @@ registry::PreparedProvider<registry::GeometryPort> row_limited_projection_provid
     const std::shared_ptr<int>& workspace_creations,
     std::stop_source* cancel_during_admission=nullptr,
     const std::shared_ptr<bool>& observed_actual_relation=nullptr,
-    bool require_actual_relation=false) {
+    bool require_actual_relation=false,
+    std::size_t estimated_peak_rows=0) {
     registry::Registry<registry::GeometryPort> providers;
     registry::Registration<registry::GeometryPort> registration{
         {ModuleId{"fixture.row-limited-projection"},"1.0"},
         [maximum_rows,admissions,cancel_during_admission,observed_actual_relation,
-            require_actual_relation](const OperationRequest& request,
+            require_actual_relation,estimated_peak_rows](const OperationRequest& request,
             const registry::Requirements&) -> registry::Capability {
             if(cancel_during_admission) cancel_during_admission->request_stop();
             const auto* projection=std::get_if<Projection>(&request.operation);
             if(!projection)
                 return Diagnostics{{DiagnosticCode::invalid_input,"fixture.projection.operation",
                     "fixture expected a projection request"}};
+            if(!projection->maximum_peak_rows)
+                return Diagnostics{{DiagnosticCode::unsupported,"fixture.projection.unbounded",
+                    "fixture requires the caller's peak-row budget during provider admission"}};
             const auto imported=sets::from_handle(projection->input);
             if(!std::holds_alternative<sets::SetData>(imported))
                 return Diagnostics{{DiagnosticCode::invalid_input,"fixture.projection.input",
@@ -2493,9 +2497,10 @@ registry::PreparedProvider<registry::GeometryPort> row_limited_projection_provid
                         "fixture requires the exact labelled joint H relation and terminal coordinate"}};
                 if(observed_actual_relation) *observed_actual_relation=true;
             }
-            if(rows>maximum_rows)
+            if(rows>maximum_rows || estimated_peak_rows>maximum_rows ||
+               estimated_peak_rows>*projection->maximum_peak_rows)
                 return Diagnostics{{DiagnosticCode::unsupported,"fixture.projection.preflight",
-                    "fixture projection row cap rejected admission"}};
+                    "fixture projection admission cannot honor the requested row budget"}};
             registry::Output output;
             output.representation={"csl.polyhedron.h"};
             output.relation=SetRelation::equivalent;
@@ -3455,6 +3460,23 @@ TEST_CASE("general projected reachability preflights the geometry provider befor
     REQUIRE(admissions->size()==1);
     CHECK(admissions->front().first.starts_with("terminal-state:"));
     CHECK(admissions->front().second>1);
+    CHECK(*workspace_creations==0);
+}
+
+TEST_CASE("general projected preflight passes the peak-row cap to provider admission") {
+    auto [system,request]=projected_interval_fixture();
+    const model::HybridPath path{{{"source"},{"target"}},{{"transition"}}};
+    auto admissions=std::make_shared<std::vector<std::pair<std::string,std::size_t>>>();
+    auto workspace_creations=std::make_shared<int>(0);
+    GeneralProjectedStateHybridReachabilityAdapter adapter(
+        row_limited_projection_provider(64,admissions,workspace_creations,nullptr,
+            nullptr,false,17),16);
+
+    const auto result=compute_hybrid_path_reachability(adapter,system,request,path,{8,32,256});
+    REQUIRE(std::holds_alternative<Diagnostics>(result));
+    CHECK(std::get<Diagnostics>(result).front().field=="fixture.projection.preflight");
+    REQUIRE(admissions->size()==1);
+    CHECK(admissions->front().second<16);
     CHECK(*workspace_creations==0);
 }
 
