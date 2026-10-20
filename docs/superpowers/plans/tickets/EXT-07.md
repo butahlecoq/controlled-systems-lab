@@ -96,6 +96,12 @@ trace. Its injected provider also checks the exact joint relation during
 preflight. These public contract cases complement, but do not replace, the
 independent raw-graph mode-sequence oracle in the hybrid unit suites.
 
+The [EXT-07 capability profile and fixture report](../../../research/ext07-capability-profile.md)
+records the declared adapter/verifier domains and named dimensions, horizons,
+mode counts, edge counts, path counts, and relation widths. It separates saved
+measurements from correctness-only oracle fixtures and makes no scalability
+claim. Broader resource-scale and higher-mode-count evidence remains open.
+
 The EXT-07 report set now contains a one-step scalar interval case and a
 two-stage/two-control scalar polygon case, each exercised through path
 construction, HiGHS optimization, and family verification. The published
@@ -104,6 +110,6 @@ paths) = (1, 1, 1, 2, 1, 1)` and `(1, 1, 2, 3, 3, 2)`, using each report's
 supported-case description for the scalar dimensions. The first report plots
 control against terminal state; the second plots both feasible control
 polygons and their tied minimizing faces. These fixed numerical examples do
-not establish higher-dimensional scalability or complete the capability-report
-acceptance across broader dimensions and mode counts. Main-only Pages URLs and
-live hashes remain pending until publication succeeds.
+not establish higher-dimensional scalability or complete the capability and
+resource evidence across broader mode counts. Main-only Pages URLs and live
+hashes remain pending until publication succeeds.
