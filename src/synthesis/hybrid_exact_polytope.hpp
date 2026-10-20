@@ -1,0 +1,588 @@
+#pragma once
+
+// Exact, bounded arithmetic used by the independent hybrid-polytope verifier.
+// This header is private to synthesis: it is not a geometry-provider contract.
+
+#include <algorithm>
+#include <bit>
+#include <cmath>
+#include <cstddef>
+#include <cstdint>
+#include <limits>
+#include <span>
+#include <stop_token>
+#include <string>
+#include <utility>
+#include <vector>
+
+namespace csl::synthesis::detail::hybrid_exact {
+
+static_assert(std::numeric_limits<double>::is_iec559 &&
+              std::numeric_limits<double>::digits == 53 &&
+              std::numeric_limits<double>::max_exponent == 1024 &&
+              std::numeric_limits<double>::min_exponent == -1021,
+              "Hybrid exact arithmetic requires IEEE-754 binary64 doubles");
+
+inline constexpr std::size_t default_max_integer_bits = 8192;
+inline constexpr std::size_t default_max_rows = 4096;
+inline constexpr std::size_t default_max_generated_rows = 100000;
+inline constexpr std::size_t default_max_operations = 5000000;
+inline constexpr std::size_t default_max_variables = 32;
+
+struct Integer {
+    std::vector<std::uint32_t> words;
+    bool negative{};
+
+    friend bool operator==(const Integer&, const Integer&) = default;
+};
+
+struct Row {
+    std::vector<Integer> coefficients;
+    Integer bound;
+    bool strict{};
+
+    friend bool operator==(const Row&, const Row&) = default;
+};
+
+struct Limits {
+    std::size_t max_variables{default_max_variables};
+    std::size_t max_rows{default_max_rows};
+    std::size_t max_generated_rows{default_max_generated_rows};
+    std::size_t max_integer_bits{default_max_integer_bits};
+    std::size_t max_operations{default_max_operations};
+};
+
+enum class FeasibilityState { feasible, infeasible, unsupported, cancelled };
+
+struct FeasibilityResult {
+    FeasibilityState state{FeasibilityState::unsupported};
+    std::size_t peak_rows{};
+    std::size_t generated_rows{};
+    std::size_t maximum_integer_bits{};
+    std::string reason;
+};
+
+namespace exact_detail {
+
+inline void trim(Integer& value) {
+    while (!value.words.empty() && value.words.back() == 0)
+        value.words.pop_back();
+    if (value.words.empty())
+        value.negative = false;
+}
+
+inline bool is_zero(const Integer& value) noexcept {
+    return value.words.empty();
+}
+
+inline std::size_t bit_length(const Integer& value) noexcept {
+    if (value.words.empty())
+        return 0;
+    const auto top = value.words.back();
+    return (value.words.size() - 1) * 32 +
+           (32U - static_cast<unsigned>(std::countl_zero(top)));
+}
+
+inline unsigned trailing_zero_bits(const Integer& value) noexcept {
+    for (std::size_t i = 0; i < value.words.size(); ++i) {
+        if (value.words[i])
+            return static_cast<unsigned>(i * 32) +
+                   static_cast<unsigned>(std::countr_zero(value.words[i]));
+    }
+    return 0;
+}
+
+inline void shift_right(Integer& value, unsigned bits) {
+    if (bits == 0 || is_zero(value))
+        return;
+    const std::size_t whole = bits / 32;
+    const unsigned partial = bits % 32;
+    if (whole >= value.words.size()) {
+        value = {};
+        return;
+    }
+    std::vector<std::uint32_t> shifted(value.words.size() - whole, 0);
+    for (std::size_t i = whole; i < value.words.size(); ++i) {
+        const std::size_t at = i - whole;
+        shifted[at] = value.words[i] >> partial;
+        if (partial && i + 1 < value.words.size())
+            shifted[at] |= value.words[i + 1] << (32U - partial);
+    }
+    value.words = std::move(shifted);
+    trim(value);
+}
+
+inline void normalize_power_of_two(Row& row) {
+    unsigned common = std::numeric_limits<unsigned>::max();
+    for (const auto& coefficient : row.coefficients)
+        if (!is_zero(coefficient))
+            common = std::min(common, trailing_zero_bits(coefficient));
+    if (!is_zero(row.bound))
+        common = std::min(common, trailing_zero_bits(row.bound));
+    if (common == std::numeric_limits<unsigned>::max() || common == 0)
+        return;
+    for (auto& coefficient : row.coefficients)
+        shift_right(coefficient, common);
+    shift_right(row.bound, common);
+}
+
+inline int compare_magnitude(const Integer& lhs, const Integer& rhs) noexcept {
+    if (lhs.words.size() != rhs.words.size())
+        return lhs.words.size() < rhs.words.size() ? -1 : 1;
+    for (std::size_t i = lhs.words.size(); i-- > 0;)
+        if (lhs.words[i] != rhs.words[i])
+            return lhs.words[i] < rhs.words[i] ? -1 : 1;
+    return 0;
+}
+
+inline int compare(const Integer& lhs, const Integer& rhs) noexcept {
+    if (lhs.negative != rhs.negative)
+        return lhs.negative ? -1 : 1;
+    const int magnitude = compare_magnitude(lhs, rhs);
+    return lhs.negative ? -magnitude : magnitude;
+}
+
+inline bool add_magnitude(Integer& lhs, const Integer& rhs,
+                          std::size_t max_bits) {
+    const auto size = std::max(lhs.words.size(), rhs.words.size());
+    lhs.words.resize(size, 0);
+    std::uint64_t carry = 0;
+    for (std::size_t i = 0; i < size; ++i) {
+        const std::uint64_t a = lhs.words[i];
+        const std::uint64_t b = i < rhs.words.size() ? rhs.words[i] : 0;
+        const std::uint64_t sum = a + b + carry;
+        lhs.words[i] = static_cast<std::uint32_t>(sum);
+        carry = sum >> 32;
+    }
+    if (carry)
+        lhs.words.push_back(static_cast<std::uint32_t>(carry));
+    trim(lhs);
+    return bit_length(lhs) <= max_bits;
+}
+
+inline void subtract_magnitude(Integer& lhs, const Integer& rhs) {
+    std::uint64_t borrow = 0;
+    for (std::size_t i = 0; i < lhs.words.size(); ++i) {
+        const std::uint64_t a = lhs.words[i];
+        const std::uint64_t b =
+            (i < rhs.words.size() ? rhs.words[i] : 0) + borrow;
+        lhs.words[i] = static_cast<std::uint32_t>(a - b);
+        borrow = a < b ? 1 : 0;
+    }
+    trim(lhs);
+}
+
+inline bool add(Integer& lhs, const Integer& rhs, std::size_t max_bits) {
+    if (is_zero(rhs))
+        return true;
+    if (is_zero(lhs)) {
+        lhs = rhs;
+        return bit_length(lhs) <= max_bits;
+    }
+    if (lhs.negative == rhs.negative)
+        return add_magnitude(lhs, rhs, max_bits);
+    const int order = compare_magnitude(lhs, rhs);
+    if (order == 0) {
+        lhs = {};
+    } else if (order > 0) {
+        subtract_magnitude(lhs, rhs);
+    } else {
+        Integer result = rhs;
+        subtract_magnitude(result, lhs);
+        lhs = std::move(result);
+    }
+    return bit_length(lhs) <= max_bits;
+}
+
+inline bool multiply_magnitude(const Integer& lhs, const Integer& rhs,
+                               std::size_t max_bits, Integer& result) {
+    result = {};
+    if (is_zero(lhs) || is_zero(rhs))
+        return true;
+    if (lhs.words.size() > std::numeric_limits<std::size_t>::max() -
+                               rhs.words.size())
+        return false;
+    const std::size_t result_words = lhs.words.size() + rhs.words.size();
+    const std::size_t max_words = max_bits / 32 + (max_bits % 32 != 0);
+    if (result_words > max_words && result_words - max_words > 1)
+        return false;
+    result.words.assign(result_words, 0);
+    for (std::size_t i = 0; i < lhs.words.size(); ++i) {
+        std::uint64_t carry = 0;
+        for (std::size_t j = 0; j < rhs.words.size(); ++j) {
+            const std::size_t at = i + j;
+            const std::uint64_t product =
+                static_cast<std::uint64_t>(lhs.words[i]) * rhs.words[j] +
+                result.words[at] + carry;
+            result.words[at] = static_cast<std::uint32_t>(product);
+            carry = product >> 32;
+        }
+        std::size_t at = i + rhs.words.size();
+        while (carry) {
+            if (at >= result.words.size())
+                return false;
+            const std::uint64_t sum = result.words[at] + carry;
+            result.words[at] = static_cast<std::uint32_t>(sum);
+            carry = sum >> 32;
+            ++at;
+        }
+    }
+    trim(result);
+    return bit_length(result) <= max_bits;
+}
+
+inline bool multiply(const Integer& lhs, const Integer& rhs,
+                     std::size_t max_bits, Integer& result) {
+    if (!multiply_magnitude(lhs, rhs, max_bits, result))
+        return false;
+    result.negative = !is_zero(result) && lhs.negative != rhs.negative;
+    return true;
+}
+
+inline bool shift_left(Integer& value, std::size_t bits,
+                       std::size_t max_bits) {
+    if (is_zero(value) || bits == 0)
+        return true;
+    if (bit_length(value) > max_bits || bits > max_bits - bit_length(value))
+        return false;
+    const std::size_t whole = bits / 32;
+    const unsigned partial = static_cast<unsigned>(bits % 32);
+    std::vector<std::uint32_t> shifted(value.words.size() + whole +
+                                       (partial ? 1U : 0U), 0);
+    std::uint64_t carry = 0;
+    for (std::size_t i = 0; i < value.words.size(); ++i) {
+        const std::uint64_t current =
+            (static_cast<std::uint64_t>(value.words[i]) << partial) | carry;
+        shifted[i + whole] = static_cast<std::uint32_t>(current);
+        carry = current >> 32;
+    }
+    if (carry)
+        shifted[value.words.size() + whole] =
+            static_cast<std::uint32_t>(carry);
+    value.words = std::move(shifted);
+    trim(value);
+    return bit_length(value) <= max_bits;
+}
+
+inline Integer from_u64(std::uint64_t value, bool negative = false) {
+    Integer result;
+    if (value) {
+        result.words.push_back(static_cast<std::uint32_t>(value));
+        const auto high = static_cast<std::uint32_t>(value >> 32);
+        if (high)
+            result.words.push_back(high);
+        result.negative = negative;
+    }
+    return result;
+}
+
+struct Dyadic {
+    std::uint64_t significand{};
+    int exponent{};
+    bool negative{};
+};
+
+inline Dyadic decode(double value) noexcept {
+    const auto bits = std::bit_cast<std::uint64_t>(value);
+    const auto exponent_bits = static_cast<unsigned>((bits >> 52) & 0x7ffU);
+    const auto fraction = bits & ((std::uint64_t{1} << 52) - 1);
+    if (exponent_bits == 0)
+        return {fraction, -1074, (bits >> 63) != 0};
+    return {(std::uint64_t{1} << 52) | fraction,
+            static_cast<int>(exponent_bits) - 1075, (bits >> 63) != 0};
+}
+
+inline bool exact_integer(double value, int common_exponent,
+                          std::size_t max_bits, Integer& result) {
+    const auto dyadic = decode(value);
+    result = from_u64(dyadic.significand, dyadic.negative);
+    if (!dyadic.significand)
+        return true;
+    const int shift = dyadic.exponent - common_exponent;
+    if (shift < 0)
+        return false;
+    return shift_left(result, static_cast<std::size_t>(shift), max_bits);
+}
+
+inline bool make_row(std::span<const double> coefficients, double bound,
+                     bool strict, std::size_t max_bits, Row& result) {
+    if (!std::isfinite(bound))
+        return false;
+    int common_exponent = std::numeric_limits<int>::max();
+    const auto consider = [&](double value) {
+        if (!std::isfinite(value))
+            return false;
+        const auto dyadic = decode(value);
+        if (dyadic.significand)
+            common_exponent = std::min(common_exponent, dyadic.exponent);
+        return true;
+    };
+    for (double coefficient : coefficients)
+        if (!consider(coefficient))
+            return false;
+    if (!consider(bound))
+        return false;
+    if (common_exponent == std::numeric_limits<int>::max())
+        common_exponent = 0;
+    result = {};
+    result.coefficients.reserve(coefficients.size());
+    for (double coefficient : coefficients) {
+        Integer integer;
+        if (!exact_integer(coefficient, common_exponent, max_bits, integer))
+            return false;
+        result.coefficients.push_back(std::move(integer));
+    }
+    if (!exact_integer(bound, common_exponent, max_bits, result.bound))
+        return false;
+    result.strict = strict;
+    normalize_power_of_two(result);
+    return true;
+}
+
+inline bool row_is_constant(const Row& row) noexcept {
+    return std::all_of(row.coefficients.begin(), row.coefficients.end(),
+                       is_zero);
+}
+
+inline bool normalize_rows(std::vector<Row>& rows, std::size_t max_rows) {
+    std::vector<Row> nonconstant;
+    nonconstant.reserve(rows.size());
+    for (auto& row : rows) {
+        if (row_is_constant(row)) {
+            const int bound_order = compare(row.bound, {});
+            if (bound_order < 0 || (bound_order == 0 && row.strict))
+                return false;
+            continue;
+        }
+        nonconstant.push_back(std::move(row));
+    }
+    const auto less_integer = [](const Integer& lhs, const Integer& rhs) {
+        return compare(lhs, rhs) < 0;
+    };
+    std::sort(nonconstant.begin(), nonconstant.end(), [&](const Row& lhs,
+                                                           const Row& rhs) {
+        for (std::size_t i = 0; i < lhs.coefficients.size(); ++i) {
+            if (lhs.coefficients[i] == rhs.coefficients[i])
+                continue;
+            return less_integer(lhs.coefficients[i], rhs.coefficients[i]);
+        }
+        if (lhs.bound != rhs.bound)
+            return less_integer(lhs.bound, rhs.bound);
+        return lhs.strict < rhs.strict;
+    });
+    nonconstant.erase(std::unique(nonconstant.begin(), nonconstant.end()),
+                      nonconstant.end());
+    if (nonconstant.size() > max_rows)
+        return false;
+    rows = std::move(nonconstant);
+    return true;
+}
+
+} // namespace exact_detail
+
+inline bool make_row(std::span<const double> coefficients, double bound,
+                     bool strict, std::size_t max_integer_bits, Row& result) {
+    return exact_detail::make_row(coefficients, bound, strict,
+                                  max_integer_bits, result);
+}
+
+inline bool append_equality(std::span<const double> coefficients, double value,
+                            std::size_t max_integer_bits,
+                            std::vector<Row>& rows) {
+    Row positive;
+    if (!make_row(coefficients, value, false, max_integer_bits, positive))
+        return false;
+    Row negative = positive;
+    for (auto& coefficient : negative.coefficients)
+        coefficient.negative = !exact_detail::is_zero(coefficient) &&
+                                !coefficient.negative;
+    negative.bound.negative = !exact_detail::is_zero(negative.bound) &&
+                              !negative.bound.negative;
+    rows.push_back(std::move(positive));
+    rows.push_back(std::move(negative));
+    return true;
+}
+
+inline bool append_inequality(std::span<const double> coefficients,
+                             double bound, bool strict,
+                             std::size_t max_integer_bits,
+                             std::vector<Row>& rows) {
+    Row row;
+    if (!make_row(coefficients, bound, strict, max_integer_bits, row))
+        return false;
+    rows.push_back(std::move(row));
+    return true;
+}
+
+inline FeasibilityResult feasible(std::vector<Row> rows,
+                                  std::size_t variables,
+                                  Limits limits = {},
+                                  std::stop_token cancellation = {}) {
+    FeasibilityResult result;
+    const auto unsupported = [&](const char* reason) {
+        result.state = FeasibilityState::unsupported;
+        result.reason = reason;
+        return result;
+    };
+    if (variables > limits.max_variables)
+        return unsupported("Variable count exceeds the exact feasibility limit");
+    if (rows.size() > limits.max_rows)
+        return unsupported("Initial row count exceeds the exact feasibility limit");
+    if (cancellation.stop_requested()) {
+        result.state = FeasibilityState::cancelled;
+        result.reason = "Exact feasibility was cancelled";
+        return result;
+    }
+    for (auto& row : rows) {
+        if (row.coefficients.size() != variables)
+            return unsupported("Constraint row dimensions do not match");
+        exact_detail::trim(row.bound);
+        result.maximum_integer_bits = std::max(
+            result.maximum_integer_bits, exact_detail::bit_length(row.bound));
+        for (auto& coefficient : row.coefficients) {
+            exact_detail::trim(coefficient);
+            result.maximum_integer_bits = std::max(
+                result.maximum_integer_bits,
+                exact_detail::bit_length(coefficient));
+        }
+        if (result.maximum_integer_bits > limits.max_integer_bits)
+            return unsupported("Input integer bit limit exceeded");
+    }
+    if (!exact_detail::normalize_rows(rows, limits.max_rows)) {
+        result.state = FeasibilityState::infeasible;
+        result.peak_rows = rows.size();
+        return result;
+    }
+    result.peak_rows = rows.size();
+    std::size_t operations = 0;
+    for (std::size_t eliminated = 0; eliminated < variables; ++eliminated) {
+        if (cancellation.stop_requested()) {
+            result.state = FeasibilityState::cancelled;
+            result.reason = "Exact feasibility was cancelled";
+            return result;
+        }
+        constexpr std::size_t variable = 0;
+        std::vector<const Row*> positive, negative, zero;
+        for (const auto& row : rows) {
+            const int sign = exact_detail::compare(row.coefficients[variable], {});
+            if (sign > 0)
+                positive.push_back(&row);
+            else if (sign < 0)
+                negative.push_back(&row);
+            else
+                zero.push_back(&row);
+        }
+        if (!positive.empty() && !negative.empty() &&
+            positive.size() > (limits.max_rows -
+                               std::min(limits.max_rows, zero.size())) /
+                                  negative.size())
+            return unsupported("Fourier-Motzkin row limit would be exceeded");
+        const std::size_t pair_count = positive.size() * negative.size();
+        if (zero.size() > limits.max_rows ||
+            pair_count > limits.max_rows - zero.size() ||
+            pair_count > limits.max_generated_rows -
+                             std::min(limits.max_generated_rows,
+                                      result.generated_rows))
+            return unsupported("Fourier-Motzkin resource limit would be exceeded");
+        const std::size_t remaining_variables = variables - eliminated;
+        if (remaining_variables >
+            std::numeric_limits<std::size_t>::max() / 3)
+            return unsupported("Exact operation count overflows size_t");
+        const std::size_t operations_per_pair = 3 * remaining_variables;
+        if (operations_per_pair > limits.max_operations ||
+            (operations_per_pair != 0 &&
+             pair_count >
+                 (limits.max_operations - operations) / operations_per_pair))
+            return unsupported("Exact arithmetic operation limit exceeded");
+        operations += pair_count * operations_per_pair;
+        std::vector<Row> next;
+        next.reserve(zero.size() + pair_count);
+        for (const Row* row : zero) {
+            Row copy = *row;
+            copy.coefficients.erase(copy.coefficients.begin() +
+                                    static_cast<std::ptrdiff_t>(variable));
+            next.push_back(std::move(copy));
+        }
+        std::size_t pair_visits = 0;
+        for (const Row* upper : positive) {
+            for (const Row* lower : negative) {
+                if ((pair_visits++ & 255U) == 0 && cancellation.stop_requested()) {
+                    result.state = FeasibilityState::cancelled;
+                    result.reason = "Exact feasibility was cancelled";
+                    return result;
+                }
+                const Integer upper_scale = upper->coefficients[variable];
+                Integer lower_scale = lower->coefficients[variable];
+                lower_scale.negative = false;
+                Row combined;
+                combined.strict = upper->strict || lower->strict;
+                combined.coefficients.reserve(variables - eliminated - 1);
+                for (std::size_t column = 0;
+                     column < variables - eliminated; ++column) {
+                    if (column == variable)
+                        continue;
+                    Integer left, right;
+                    if (!exact_detail::multiply(lower_scale,
+                                                upper->coefficients[column],
+                                                limits.max_integer_bits, left) ||
+                        !exact_detail::multiply(upper_scale,
+                                                lower->coefficients[column],
+                                                limits.max_integer_bits, right) ||
+                        exact_detail::bit_length(left) >
+                            limits.max_integer_bits ||
+                        exact_detail::bit_length(right) >
+                            limits.max_integer_bits)
+                        return unsupported("Exact integer bit limit exceeded");
+                    result.maximum_integer_bits = std::max(
+                        result.maximum_integer_bits,
+                        exact_detail::bit_length(left));
+                    result.maximum_integer_bits = std::max(
+                        result.maximum_integer_bits,
+                        exact_detail::bit_length(right));
+                    if (!exact_detail::add(left, right,
+                                           limits.max_integer_bits))
+                        return unsupported("Exact integer bit limit exceeded");
+                    result.maximum_integer_bits = std::max(
+                        result.maximum_integer_bits,
+                        exact_detail::bit_length(left));
+                    combined.coefficients.push_back(std::move(left));
+                }
+                Integer left_bound, right_bound;
+                if (!exact_detail::multiply(lower_scale, upper->bound,
+                                            limits.max_integer_bits,
+                                            left_bound) ||
+                    !exact_detail::multiply(upper_scale, lower->bound,
+                                            limits.max_integer_bits,
+                                            right_bound))
+                    return unsupported("Exact integer bit limit exceeded");
+                result.maximum_integer_bits = std::max(
+                    result.maximum_integer_bits,
+                    exact_detail::bit_length(left_bound));
+                result.maximum_integer_bits = std::max(
+                    result.maximum_integer_bits,
+                    exact_detail::bit_length(right_bound));
+                if (!exact_detail::add(left_bound, right_bound,
+                                       limits.max_integer_bits))
+                    return unsupported("Exact integer bit limit exceeded");
+                combined.bound = std::move(left_bound);
+                exact_detail::normalize_power_of_two(combined);
+                result.maximum_integer_bits = std::max(
+                    result.maximum_integer_bits,
+                    exact_detail::bit_length(combined.bound));
+                next.push_back(std::move(combined));
+            }
+        }
+        result.generated_rows += pair_count;
+        if (!exact_detail::normalize_rows(next, limits.max_rows)) {
+            result.state = FeasibilityState::infeasible;
+            result.peak_rows = std::max(result.peak_rows, next.size());
+            return result;
+        }
+        result.peak_rows = std::max(result.peak_rows, next.size());
+        rows = std::move(next);
+    }
+    result.state = FeasibilityState::feasible;
+    return result;
+}
+
+} // namespace csl::synthesis::detail::hybrid_exact
