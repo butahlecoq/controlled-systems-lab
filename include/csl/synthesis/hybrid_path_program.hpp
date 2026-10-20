@@ -87,7 +87,7 @@ struct HybridDirectTrajectoryPreflightFailure {
     // Present for adapters that can expose the built-in relation-operation
     // trace. Other exact representations may leave this empty.
     std::vector<model::HybridRelationOperationRecord> relation_operations;
-    // The first unsupported operation is reported so admission fails at one
+    // The primary preflight diagnostic explains the rejection at one
     // deterministic, request-scoped boundary.
     Diagnostic diagnostic;
 };
