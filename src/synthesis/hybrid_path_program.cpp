@@ -1135,6 +1135,9 @@ HybridFamilyVerificationResult verify_hybrid_portfolio_family(
        !capability.checks_continuous_branch_coverage)
         return one({DiagnosticCode::unsupported,"hybrid.verification.capabilities",
             "Verifier must declare original feasibility, global objective, and continuous coverage checks"});
+    const auto admission=adapter.preflight(system,request,paths,cancellation);
+    if(const auto* errors=std::get_if<Diagnostics>(&admission)) return *errors;
+    if(const auto* stopped=std::get_if<OperationStopped>(&admission)) return *stopped;
     if(cancellation.stop_requested())
         return OperationStopped{StopReason::cancelled,"Hybrid family verification was cancelled before verifier dispatch"};
     auto result=adapter.verify(system,request,paths,programs,candidates,numerical_policy,cancellation);

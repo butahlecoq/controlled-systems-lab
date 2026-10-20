@@ -2386,6 +2386,7 @@ public:
     bool claim_coverage_only{};
     bool mark_all_branches_refuted{};
     bool inject_candidate_providers{};
+    bool reject_preflight{};
     HybridFamilyVerificationCapabilities capabilities() const noexcept override {
         ++capability_calls;
         return {true,true,true,Assurance::numerical};
@@ -2396,6 +2397,9 @@ public:
         ++preflight_calls;
         if(cancellation.stop_requested())
             return OperationStopped{StopReason::cancelled,"fixture preflight cancelled"};
+        if(reject_preflight)
+            return Diagnostics{{DiagnosticCode::unsupported,"fixture.verifier.preflight",
+                "fixture rejects this verification request"}};
         return std::monostate{};
     }
     HybridFamilyVerificationResult verify(const model::HybridSystem&,
@@ -3411,6 +3415,23 @@ TEST_CASE("verifier preflight rejects an unsupported domain before relation cons
     CHECK(default_trajectory.calls==0);
 }
 
+TEST_CASE("standalone family verification admits the verifier before dispatch") {
+    auto [system,request]=exact_singleton_portfolio();
+    const auto built=build_hybrid_portfolio_programs(system,request,{"standalone-verifier-preflight"},
+        {1,8},{32,128,4096});
+    REQUIRE(std::holds_alternative<std::vector<HybridPathProgram>>(built));
+
+    FixtureHybridFamilyVerifier verifier;
+    verifier.reject_preflight=true;
+    const auto result=verify_hybrid_portfolio_family(verifier,system,request,
+        std::get<std::vector<HybridPathProgram>>(built),{}, {1,8},{1e-10,1e-10});
+    REQUIRE(std::holds_alternative<Diagnostics>(result));
+    CHECK(std::get<Diagnostics>(result).front().field=="fixture.verifier.preflight");
+    CHECK(verifier.capability_calls==1);
+    CHECK(verifier.preflight_calls==1);
+    CHECK(verifier.calls==0);
+}
+
 TEST_CASE("portfolio preflights every path before constructing the first relation") {
     auto system=example_system();
     auto unsupported=system.edges.front();
@@ -4061,9 +4082,9 @@ TEST_CASE("one-step scalar interval verifier certifies distinct tied continuous 
         exact_candidate(inexact_reset_programs[1],{0,0,0,0})};
     const auto inexact_reset_result=verify_hybrid_portfolio_family(verifier,inexact_reset_system,
         request,inexact_reset_programs,inexact_reset_candidates,{1,8},{1e-10,1e-10});
-    REQUIRE(std::holds_alternative<HybridFamilyVerificationReport>(inexact_reset_result));
-    CHECK(std::get<HybridFamilyVerificationReport>(inexact_reset_result).branches[0].continuous_coverage==
-        HybridVerificationStatus::unsupported);
+    REQUIRE(std::holds_alternative<Diagnostics>(inexact_reset_result));
+    CHECK(std::get<Diagnostics>(inexact_reset_result).front().field==
+        "hybrid.verification.scalar_interval_domain");
 
     const double maximum=std::numeric_limits<double>::max();
     auto overflow_reset_equalities=numeric::snapshot(Matrix{1,2,{-maximum,1}});
@@ -4198,10 +4219,9 @@ TEST_CASE("one-step scalar interval verifier certifies distinct tied continuous 
         exact_candidate(underflow_programs[1],{0,0,0,0})};
     const auto underflow_result=verify_hybrid_portfolio_family(verifier,underflow_system,underflow_request,
         underflow_programs,underflow_candidates,{1,8},{1e-10,1e-10});
-    REQUIRE(std::holds_alternative<HybridFamilyVerificationReport>(underflow_result));
-    const auto& underflow_report=std::get<HybridFamilyVerificationReport>(underflow_result);
-    CHECK(underflow_report.global_objective_optimality==HybridVerificationStatus::unsupported);
-    CHECK(underflow_report.complete_family_coverage==HybridVerificationStatus::unsupported);
+    REQUIRE(std::holds_alternative<Diagnostics>(underflow_result));
+    CHECK(std::get<Diagnostics>(underflow_result).front().field==
+        "hybrid.verification.scalar_interval_domain");
 
     auto subnormal_residual_system=system;
     subnormal_residual_system.modes[0].flow=LinearStage{Matrix{1,1,{1}},Matrix{1,1,{0x1p-511}},
@@ -4219,9 +4239,9 @@ TEST_CASE("one-step scalar interval verifier certifies distinct tied continuous 
     const auto subnormal_residual_result=verify_hybrid_portfolio_family(verifier,
         subnormal_residual_system,subnormal_residual_request,subnormal_residual_programs,
         subnormal_residual_candidates,{1,8},{1e-10,1e-10});
-    REQUIRE(std::holds_alternative<HybridFamilyVerificationReport>(subnormal_residual_result));
-    CHECK(std::get<HybridFamilyVerificationReport>(subnormal_residual_result).global_objective_optimality==
-        HybridVerificationStatus::unsupported);
+    REQUIRE(std::holds_alternative<Diagnostics>(subnormal_residual_result));
+    CHECK(std::get<Diagnostics>(subnormal_residual_result).front().field==
+        "hybrid.verification.scalar_interval_domain");
 
     auto inexact_flow_system=system;
     inexact_flow_system.edges.resize(1);
@@ -4237,9 +4257,9 @@ TEST_CASE("one-step scalar interval verifier certifies distinct tied continuous 
         exact_candidate(inexact_flow_programs[0],{0,0.3,0.03,0.03})};
     const auto inexact_flow_result=verify_hybrid_portfolio_family(verifier,inexact_flow_system,
         inexact_flow_request,inexact_flow_programs,inexact_flow_candidates,{1,8},{1e-10,1e-10});
-    REQUIRE(std::holds_alternative<HybridFamilyVerificationReport>(inexact_flow_result));
-    CHECK(std::get<HybridFamilyVerificationReport>(inexact_flow_result).global_objective_optimality==
-        HybridVerificationStatus::unsupported);
+    REQUIRE(std::holds_alternative<Diagnostics>(inexact_flow_result));
+    CHECK(std::get<Diagnostics>(inexact_flow_result).front().field==
+        "hybrid.verification.scalar_interval_domain");
 
     auto sub_ulp_system=system;
     sub_ulp_system.edges[0].guards[0]=interval("verifier-sub-ulp-zero",0,0.5);
@@ -4257,9 +4277,9 @@ TEST_CASE("one-step scalar interval verifier certifies distinct tied continuous 
             2.7755575615628914e-17})};
     const auto sub_ulp_result=verify_hybrid_portfolio_family(verifier,sub_ulp_system,sub_ulp_request,
         sub_ulp_programs,sub_ulp_candidates,{1,8},{1e-10,1e-10});
-    REQUIRE(std::holds_alternative<HybridFamilyVerificationReport>(sub_ulp_result));
-    CHECK(std::get<HybridFamilyVerificationReport>(sub_ulp_result).global_objective_optimality==
-        HybridVerificationStatus::unsupported);
+    REQUIRE(std::holds_alternative<Diagnostics>(sub_ulp_result));
+    CHECK(std::get<Diagnostics>(sub_ulp_result).front().field==
+        "hybrid.verification.scalar_interval_domain");
 
     candidates.pop_back();
     const auto missing_tie=verify_hybrid_portfolio_family(verifier,system,request,programs,candidates,
@@ -5057,9 +5077,9 @@ TEST_CASE("exact singleton hybrid verifier handles empty branches and rejects co
     REQUIRE(std::holds_alternative<std::vector<HybridPathProgram>>(continuous_built));
     const auto unsupported=verify_hybrid_portfolio_family(verifier,continuous_system,example_request(),
         std::get<std::vector<HybridPathProgram>>(continuous_built),{}, {1,8},{1e-10,1e-10});
-    REQUIRE(std::holds_alternative<HybridFamilyVerificationReport>(unsupported));
-    CHECK(std::get<HybridFamilyVerificationReport>(unsupported).global_objective_optimality==
-        HybridVerificationStatus::unsupported);
+    REQUIRE(std::holds_alternative<Diagnostics>(unsupported));
+    CHECK(std::get<Diagnostics>(unsupported).front().field==
+        "hybrid.verification.exact_singleton_domain");
 
     auto [mixed_system,mixed_request]=exact_singleton_portfolio();
     mixed_system.edges[0].reset_relations[0]=affine_reset();
@@ -5068,13 +5088,9 @@ TEST_CASE("exact singleton hybrid verifier handles empty branches and rejects co
     REQUIRE(std::holds_alternative<std::vector<HybridPathProgram>>(mixed_programs));
     const auto mixed=verify_hybrid_portfolio_family(verifier,mixed_system,mixed_request,
         std::get<std::vector<HybridPathProgram>>(mixed_programs),{}, {1,8},{1e-10,1e-10});
-    REQUIRE(std::holds_alternative<HybridFamilyVerificationReport>(mixed));
-    const auto& mixed_report=std::get<HybridFamilyVerificationReport>(mixed);
-    CHECK(mixed_report.branches[0].feasibility==HybridVerificationStatus::unsupported);
-    CHECK(mixed_report.branches[1].objective_optimality==HybridVerificationStatus::unsupported);
-    CHECK(mixed_report.branches[1].continuous_coverage==HybridVerificationStatus::unsupported);
-    CHECK(mixed_report.branches[2].objective_optimality==HybridVerificationStatus::refuted);
-    CHECK(mixed_report.global_objective_optimality==HybridVerificationStatus::unsupported);
+    REQUIRE(std::holds_alternative<Diagnostics>(mixed));
+    CHECK(std::get<Diagnostics>(mixed).front().field==
+        "hybrid.verification.exact_singleton_domain");
 
     auto [limited_system,limited_request]=exact_singleton_portfolio();
     const auto limited_programs=build_hybrid_portfolio_programs(limited_system,limited_request,

@@ -447,12 +447,14 @@ horizons with more than two free controls. `ExactLinearHHybridFamilyVerifier`
 has a separate general finite-horizon H-relation domain with bounded exact
 arithmetic resources. Its independent continuous-family tests now include a
 three-control simplex with a three-dimensional optimal family; this finite
-oracle case is not exhaustive coverage of the general domain. These verifier
-domains reject unsupported input when verification runs;
-`build_hybrid_portfolio_programs_with_verifier` also rejects unsupported
-verifier domains and declared trajectory objective capabilities before building
-branch programs. Both projected-state adapters prepare their selected geometry
-provider against the actual terminal projection request during preflight. The
+oracle case is not exhaustive coverage of the general domain. The standalone
+`verify_hybrid_portfolio_family` entry point preflights the complete path
+inventory before invoking the verifier, and returns its request-scoped
+diagnostic without dispatch when the domain is unsupported. The verified
+portfolio builder also rejects unsupported verifier domains and declared
+trajectory objective capabilities before building branch programs. Both
+projected-state adapters prepare their selected geometry provider against the
+actual terminal projection request during preflight. The
 one-transition adapter independently assembles its four-coordinate relation;
 the general adapter composes the full finite-horizon joint-H relation. Each
 request carries the relation coefficients, labels, equality/inequality
