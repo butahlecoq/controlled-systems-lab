@@ -22,6 +22,7 @@ fixtures.
 | One-step three-control simplex with existential reset | 1 | 3 | 1 | 2 | 1 | 1 | 6 | [Independent three-dimensional optimal-family oracle](../../tests/unit/synthesis/hybrid_path_program_tests.cpp) |
 | One-step truncated three-control box with existential reset | 1 | 3 | 1 | 2 | 1 | 1 | 6 | [Independent non-simplex optimal-family oracle](../../tests/unit/synthesis/hybrid_path_program_tests.cpp) |
 | One-step four-control simplex with existential reset | 1 | 4 | 1 | 2 | 1 | 1 | 7 | [Independent four-dimensional optimal-family oracle](../../tests/unit/synthesis/hybrid_path_program_tests.cpp) |
+| Two-stage tied four-control branches with set-valued reset | 1→2→2 | 2→2→0 | 2 | 3 | 3 | 2 | 12 per path | [Independent continuous branch-family oracle](../../tests/unit/synthesis/hybrid_path_program_tests.cpp) |
 | Three-branch heterogeneous terminal preflight inventory | 1→{1,2,3} | 0 | 1 | 4 | 3 | 3 | 3, 4, and 5 per path | [Full-inventory preflight and relation-dimension test](../../tests/unit/synthesis/hybrid_path_program_tests.cpp) |
 | Two-stage scalar projected interval | 1 | 1 | 2 | 3 | 2 | 1 | 7 | [Independent projected-set contract oracle](../../tests/contract/synthesis/hybrid_reachability_contract.cpp) |
 | Two-stage existential 1→2→1 reset projection | 1→2→1 | 1→0 | 2 | 3 | 2 | 1 | 8 | [Set-valued reset contract oracle](../../tests/contract/synthesis/hybrid_reachability_contract.cpp) |
@@ -42,7 +43,13 @@ composed-resource check: its 5-variable relations fit the configured 3-row,
 remains the largest named independent continuous oracle by state dimension;
 the four-control simplex now has the largest control dimension. The coupled
 2-control reset case adds a non-axis-aligned control polytope and a
-proper-subset rejection. The reports measure their own fixtures;
+proper-subset rejection. A two-stage case now checks two distinct tied
+four-control optimal faces through an existential set-valued reset; the raw
+graph oracle independently enumerates both parallel-edge histories, and a
+feasible narrowed face is refuted on the wide branch. This raises the named
+multi-path continuous-family evidence to four controls, three modes, three
+edges, horizon two, and 12 joint variables per branch. The reports measure
+their own fixtures;
 the unit-test cases are correctness evidence and are not timing samples.
 
 ## Declared adapter and verifier domains
@@ -51,7 +58,7 @@ the unit-test cases are correctness evidence and are not timing samples.
 | --- | --- | --- | --- |
 | Joint-H path construction and direct-trajectory adapter | Admitted finite hybrid profiles whose mode flows, controls, invariants, guards, and resets can be represented in the joint H relation; terminal objectives are supplied separately and must be admitted by the selected adapter | Configured maximum variables, rows, and matrix elements; complete path inventory is preflighted before branch construction | Named reports cover at most 3 modes, 3 edges, 2 paths, and horizon 2 |
 | General projected-state reachability adapter and portfolio wrapper | Finite-horizon, any-dimension paths admitted by the joint-H composer and selected geometry provider; portfolio retains every allowed path as a separate result | Complete path preflight plus relation limits and provider row caps; portfolio reports operation maxima and provider input/output row totals/maxima | Public contract cases cover one-step scalar, two-stage scalar projection `[0, 2]`, two-stage 1→2→1 deterministic and existential set-valued resets, and two parallel projected branches with resource aggregation |
-| Exact linear-H family verifier | Finite-horizon H relations with linear terminal objectives and supported exactly representable binary64 inputs | Exact row, integer-bit, cancellation, and Fourier-Motzkin intermediate limits | Literal continuous oracles cover joint dimensions 4, 5, 6, 7, 8, and 12; set-valued-reset cases verify complete 1D, slanted 1D, 3D simplex, 3D truncated-cube, and 4D simplex optimal faces and reject narrowed candidates; the named 3D box oracle has one path |
+| Exact linear-H family verifier | Finite-horizon H relations with linear terminal objectives and supported exactly representable binary64 inputs | Exact row, integer-bit, cancellation, and Fourier-Motzkin intermediate limits | Literal continuous oracles cover joint dimensions 4, 5, 6, 7, 8, and 12; set-valued-reset cases verify complete 1D, slanted 1D, 3D simplex, 3D truncated-cube, 4D simplex, and two distinct multi-stage four-control branch faces, and reject narrowed candidates; the named 3D box oracle has one path |
 | One-step and single-parameter scalar interval verifiers | One-step: horizon 1, scalar states/control, scalar interval, singleton, empty, or universal set representations; feasible branches require a bounded control interval; deterministic exactly representable scalar affine reset; scalar linear terminal objective. Single-parameter: finite horizon, scalar stage-indexed interval controls/invariants/guards, exactly one bounded non-singleton control and singleton controls elsewhere, deterministic exactly representable scalar affine resets, scalar linear terminal objective | Exact arithmetic and interval row limits | One-step and finite-horizon cases; no higher-dimensional state claim |
 | Two-parameter scalar polygon verifier | Scalar state, scalar interval controls, invariants and guards, deterministic exactly representable scalar affine resets; exactly two bounded non-singleton interval controls at distinct stages, all other controls singleton, finite horizon, scalar linear terminal objective | Exact representability, bounded polygon geometry and row/vertex limits | The saved fixture has horizon 2; tests also place the two free controls at separated stages in a horizon-3 case |
 

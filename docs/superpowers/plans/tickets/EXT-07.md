@@ -176,6 +176,16 @@ witness coordinates so the flow equality is exact. This advances the free-
 control dimension evidence to four while broader verifier-domain and
 resource-scale coverage remain open.
 
+A two-stage continuous-family oracle now combines parallel guarded paths,
+four free controls, and an existential set-valued reset. An independent raw-
+graph traversal finds both histories. The two 12-coordinate branch relations
+have distinct full-dimensional optimal faces at the same global objective;
+the exact linear-H verifier establishes both complete faces and refutes a
+feasible narrowed candidate on the wider branch. This adds multi-path,
+multi-stage continuous evidence at four controls. It remains one finite
+fixture and does not close the broader verifier-domain, provider-operation,
+resource-scale, or publication gates.
+
 The [EXT-07 capability profile and fixture report](../../../research/ext07-capability-profile.md)
 records the declared adapter/verifier domains and named dimensions, horizons,
 mode counts, edge counts, path counts, and relation widths. It separates saved
