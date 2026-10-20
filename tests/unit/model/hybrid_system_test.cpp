@@ -442,6 +442,66 @@ TEST_CASE("four-mode capability report matches an independent branching graph an
     }
 }
 
+TEST_CASE("higher-mode path enumeration reports the exact limit without a partial family") {
+    constexpr std::size_t horizon=8;
+    std::vector<HybridMode> modes{mode("resource-start",1,0,horizon)};
+    std::vector<HybridModeId> previous{{"resource-start"}};
+    std::vector<HybridTransitionEdge> edges;
+    for(std::size_t stage=1;stage<=horizon;++stage) {
+        const std::vector<HybridModeId> current{
+            {"resource-"+std::to_string(stage)+"-a"},
+            {"resource-"+std::to_string(stage)+"-b"}};
+        for(const auto& id:current)
+            modes.push_back(mode(id.value,1,0,horizon));
+        for(const auto& source:previous) {
+            for(const auto& target:current) {
+                const auto edge_id="resource-edge-"+std::to_string(edges.size());
+                std::vector<AdmissibleSet> guards(horizon,UniversalSet{1});
+                std::vector<SetHandle> resets;
+                resets.reserve(horizon);
+                for(std::size_t step=0;step<horizon;++step)
+                    resets.push_back(universal_relation(edge_id+"-reset-"+
+                        std::to_string(step),2));
+                edges.push_back({{edge_id},source,target,std::move(guards),std::move(resets)});
+            }
+        }
+        previous=current;
+    }
+    HybridSystem system{horizon,std::move(modes),std::move(edges)};
+    HybridRequest request{{{"resource-start"},{0}},previous,
+        {{previous[0],LinearTerminal{{1},0},"terminal-state","units"},
+         {previous[1],LinearTerminal{{1},0},"terminal-state","units"}}};
+
+    const auto oracle=exhaustive_path_oracle(system,request.initial.mode,
+        request.allowed_terminal_modes);
+    REQUIRE(oracle.size()==256);
+    const auto complete=enumerate_hybrid_paths(system,request.initial.mode,
+        request.allowed_terminal_modes,{horizon,256});
+    REQUIRE(std::holds_alternative<std::vector<HybridPath>>(complete));
+    CHECK(std::get<std::vector<HybridPath>>(complete)==oracle);
+
+    const auto exact_cap=report_hybrid_capability(system,request,{horizon,256});
+    REQUIRE(std::holds_alternative<HybridCapabilityReport>(exact_cap));
+    const auto& admitted=std::get<HybridCapabilityReport>(exact_cap);
+    CHECK(admitted.profile_admitted);
+    CHECK(admitted.path_enumeration_completed);
+    CHECK(admitted.mode_count==17);
+    CHECK(admitted.edge_count==30);
+    REQUIRE(admitted.complete_allowed_path_count);
+    CHECK(*admitted.complete_allowed_path_count==256);
+
+    const auto below_cap=report_hybrid_capability(system,request,{horizon,255});
+    REQUIRE(std::holds_alternative<HybridCapabilityReport>(below_cap));
+    const auto& rejected=std::get<HybridCapabilityReport>(below_cap);
+    CHECK(rejected.profile_admitted);
+    CHECK_FALSE(rejected.path_enumeration_completed);
+    CHECK(rejected.mode_count==17);
+    CHECK(rejected.edge_count==30);
+    CHECK_FALSE(rejected.complete_allowed_path_count.has_value());
+    REQUIRE(rejected.diagnostics.size()==1);
+    CHECK(rejected.diagnostics.front().field=="hybrid.paths.limit");
+}
+
 TEST_CASE("hybrid capability report preserves profile rejection and cancellation") {
     auto [system,request]=dimension_changing_example();
     system.modes[0].control_sets.clear();

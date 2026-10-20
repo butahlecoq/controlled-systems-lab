@@ -28,16 +28,21 @@ fixtures.
 | One-step existential reset optimal face | 1 | 1 | 1 | 2 | 1 | 1 | 4 | [Independent continuous-family verifier oracle](../../tests/unit/synthesis/hybrid_path_program_tests.cpp) |
 | One-step coupled 2-control polytope with existential reset | 1 | 2 | 1 | 2 | 1 | 1 | 5 | [Independent slanted optimal-face oracle](../../tests/unit/synthesis/hybrid_path_program_tests.cpp) |
 | Four-mode branching resource-bound check | 1 | 0 | 2 | 4 | 4 | 2 | 5 per path | [Capability, raw-graph, and row-limit test](../../tests/unit/model/hybrid_system_test.cpp) |
+| Eight-stage path-enumeration cap | 1 | 0 | 8 | 17 | 30 | 256 at cap | 17 planned per path; not composed | [Independent raw-graph and exact-cap test](../../tests/unit/model/hybrid_system_test.cpp) |
 
 The scalar two-stage report is the largest saved measurement by horizon and
-path count. The four-mode graph is the largest named capability-count fixture
-by mode and edge count. Its 5-variable relations fit the configured 3-row,
+path count. The eight-stage graph is the largest named capability-count
+fixture by mode, edge, horizon, and path count: its independent raw-graph
+oracle enumerates all 256 histories, the production enumerator agrees at a
+256-path cap, and the capability report rejects a 255-path cap without a
+partial count. This exercises enumeration admission only; it does not compose
+256 relations or measure scaling. The four-mode graph remains the largest
+composed-resource check: its 5-variable relations fit the configured 3-row,
 15-matrix-element budget and reject a 2-row budget. The 3D control-box case is
 the largest named independent continuous oracle by state and control
 dimension. The coupled 2-control reset case adds a non-axis-aligned control
 polytope and a proper-subset rejection. The reports measure their own fixtures;
-the unit-test cases are
-correctness evidence and are not timing samples.
+the unit-test cases are correctness evidence and are not timing samples.
 
 ## Declared adapter and verifier domains
 

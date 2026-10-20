@@ -180,10 +180,14 @@ The [EXT-07 capability profile and fixture report](../../../research/ext07-capab
 records the declared adapter/verifier domains and named dimensions, horizons,
 mode counts, edge counts, path counts, and relation widths. It separates saved
 measurements from correctness-only oracle fixtures and makes no scalability
-claim. A four-mode, four-edge branching fixture now independently checks its
-two allowed paths and exercises a five-variable joint relation at the exact
-three-row/fifteen-matrix-element budget, plus rejection at a two-row cap.
-Broader resource-scale and higher-mode-count evidence remains open.
+claim. The four-mode, four-edge branching fixture independently checks its two
+allowed paths and exercises a five-variable joint relation at the exact
+three-row/fifteen-matrix-element budget, plus rejection at a two-row cap. A
+separate eight-stage graph has 17 modes, 30 edges, and 256 allowed histories;
+the independent raw-graph oracle and production enumerator agree at the exact
+path cap, while the capability report rejects a 255-path cap without returning
+a partial count. This increases bounded enumeration evidence, but does not
+measure relation-composition or provider scaling.
 
 The EXT-07 report set now contains a one-step scalar interval case and a
 two-stage/two-control scalar polygon case, each exercised through path
