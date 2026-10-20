@@ -1372,8 +1372,26 @@ TEST_CASE("one-step projected reachability preflights the geometry provider befo
     REQUIRE(std::holds_alternative<Diagnostics>(result));
     CHECK(std::get<Diagnostics>(result).front().field=="fixture.projection.preflight");
     REQUIRE(admissions->size()==1);
-    CHECK(admissions->front().first.starts_with("preflight:"));
+    CHECK(admissions->front().first.starts_with("terminal-state:"));
     CHECK(admissions->front().second==7);
+    CHECK(*workspace_creations==0);
+}
+
+TEST_CASE("one-step projected preflight admits the actual labelled joint relation") {
+    auto [system,request]=projected_interval_fixture();
+    const model::HybridPath path{{{"source"},{"target"}},{{"transition"}}};
+    auto admissions=std::make_shared<std::vector<std::pair<std::string,std::size_t>>>();
+    auto workspace_creations=std::make_shared<int>(0);
+    auto observed_actual_relation=std::make_shared<bool>(false);
+    ProjectedStateHybridReachabilityAdapter adapter(
+        row_limited_projection_provider(64,admissions,workspace_creations,nullptr,
+            observed_actual_relation,true),16);
+
+    const auto admitted=adapter.preflight(system,request,path,{8,32,256},{});
+    REQUIRE(std::holds_alternative<std::monostate>(admitted));
+    REQUIRE(admissions->size()==1);
+    CHECK(*observed_actual_relation);
+    CHECK(admissions->front().first.starts_with("terminal-state:"));
     CHECK(*workspace_creations==0);
 }
 
@@ -1391,7 +1409,7 @@ TEST_CASE("one-step projected reachability honors cancellation during provider a
     REQUIRE(std::holds_alternative<OperationStopped>(result));
     CHECK(std::get<OperationStopped>(result).reason==StopReason::cancelled);
     REQUIRE(admissions->size()==1);
-    CHECK(admissions->front().first.starts_with("preflight:"));
+    CHECK(admissions->front().first.starts_with("terminal-state:"));
     CHECK(*workspace_creations==0);
 }
 

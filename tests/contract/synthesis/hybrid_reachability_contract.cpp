@@ -115,9 +115,9 @@ TEST_CASE("public projected hybrid reachability rejects provider admission befor
         [&admissions](const OperationRequest& operation,const registry::Requirements&)
             -> registry::Capability {
             ++admissions;
-            if(!operation.identity.request.value.starts_with("preflight:"))
+            if(!operation.identity.request.value.starts_with("terminal-state:"))
                 return Diagnostics{{DiagnosticCode::evidence_mismatch,"contract.projection.identity",
-                    "The provider expected its preflight request"}};
+                    "The provider expected the terminal projection request"}};
             return Diagnostics{{DiagnosticCode::unsupported,"contract.projection.limit",
                 "The provider rejects projection admission"}};
         },

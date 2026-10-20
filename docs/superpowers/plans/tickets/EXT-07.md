@@ -57,15 +57,15 @@ horizons and dimensions. Both projected adapters retain the full branch relation
 and provider/row evidence; the general adapter preflights the complete path row
 inventory. Full provider/resource aggregation remains open.
 
-The one-transition projected-state adapter asks its selected geometry
-provider to admit a dimension-, coordinate-, and row-count-matched H probe
-during preflight, before independently assembling its relation. The general
-projected-state adapter composes the complete joint-H relation without creating
-a workspace, then preflights the exact terminal projection request, including
-coefficients, labels, equality/inequality partition, metadata, and terminal
-coordinate indices. Provider preparation creates no workspace; composition
-prepares that request again for execution. Provider admission at other adapter
-seams and runtime resource rejection remain open work.
+Both projected-state adapters ask their selected geometry provider to admit the
+actual terminal projection request during preflight. The one-transition adapter
+assembles its independent four-coordinate relation and the general adapter
+composes its complete joint-H relation; each request includes coefficients,
+labels, equality/inequality partition, metadata, and terminal-coordinate
+indices. Provider preparation creates no workspace. Each adapter assembles or
+composes the relation again for execution and prepares the request before
+workspace creation. Provider admission at other adapter seams and runtime
+resource rejection remain open work.
 
 The public API contract test at
 `tests/contract/synthesis/hybrid_reachability_contract.cpp` checks one-step

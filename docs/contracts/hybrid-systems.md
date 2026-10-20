@@ -412,18 +412,15 @@ continuous polytopes or horizons with more than two free controls. These
 verifier domains reject unsupported input when verification runs;
 `build_hybrid_portfolio_programs_with_verifier` also rejects unsupported
 verifier domains and declared trajectory objective capabilities before building
-branch programs. The one-transition projected-state adapter prepares the
-selected geometry provider against a four-coordinate H-relation probe during
-preflight, before its independent relation assembly. Probe rows have zero
-coefficients, use only the inequality partition, and describe the universal
-set; the probe does not reproduce actual coefficients, coordinate labels, or
-metadata. The general projected-state adapter first composes the full joint-H
-relation without creating a workspace, then asks the selected provider to
-prepare the exact terminal projection request over that relation. That request
-includes its coefficients, labels, equality/inequality partition, metadata,
-and terminal coordinate indices. Provider preparation creates no workspace.
-Composition prepares the actual projection request again for execution, and
-cancellation during admission discards the preflight result. Validated
+branch programs. Both projected-state adapters prepare their selected geometry
+provider against the actual terminal projection request during preflight. The
+one-transition adapter independently assembles its four-coordinate relation;
+the general adapter composes the full finite-horizon joint-H relation. Each
+request carries the relation coefficients, labels, equality/inequality
+partition, metadata, and terminal coordinate indices. Provider preparation
+creates no workspace. Each adapter assembles or composes the relation again for
+execution and prepares the request before workspace creation; cancellation
+during admission discards the preflight result. Validated
 objective assurance remains unsupported; adapter-specific objective-policy
 semantics, provider-operation admission at other seams, and broader
 multiple-parameter verifier coverage remain incomplete.

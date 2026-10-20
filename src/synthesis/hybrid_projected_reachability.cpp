@@ -5,7 +5,6 @@
 #include <iomanip>
 #include <limits>
 #include <locale>
-#include <numeric>
 #include <optional>
 #include <sstream>
 #include <stdexcept>
@@ -123,29 +122,6 @@ registry::PreparedProvider<registry::GeometryPort> make_projection_provider(std:
     return std::get<registry::PreparedProvider<registry::GeometryPort>>(std::move(prepared));
 }
 
-std::optional<sets::SetData> make_projection_admission_probe(
-    std::size_t dimension,std::size_t row_count) {
-    if(dimension!=0 && row_count>std::numeric_limits<std::size_t>::max()/dimension)
-        return std::nullopt;
-    Matrix inequalities{row_count,dimension,
-        std::vector<double>(row_count*dimension,0.0)};
-    Matrix equalities{0,dimension,{}};
-    const auto a=numeric::snapshot(inequalities);
-    const auto b=numeric::snapshot_vector(Vector(row_count,0.0));
-    const auto e=numeric::snapshot(equalities);
-    const auto f=numeric::snapshot_vector({});
-    if(!std::holds_alternative<numeric::MatrixView>(a) ||
-       !std::holds_alternative<numeric::VectorView>(b) ||
-       !std::holds_alternative<numeric::MatrixView>(e) ||
-       !std::holds_alternative<numeric::VectorView>(f))
-        return std::nullopt;
-    auto relation=sets::make_h({SetId{"hybrid-projection-admission-probe"},dimension,{}},
-        {std::get<numeric::MatrixView>(a),std::get<numeric::VectorView>(b),
-         std::get<numeric::MatrixView>(e),std::get<numeric::VectorView>(f)});
-    if(!std::holds_alternative<sets::SetData>(relation)) return std::nullopt;
-    return std::get<sets::SetData>(std::move(relation));
-}
-
 std::string exact_input_identity(const model::HybridPath& path,const sets::HRepresentation& relation,
     const std::vector<std::string>& coordinate_labels) {
     std::ostringstream identity;
@@ -169,14 +145,129 @@ std::string exact_input_identity(const model::HybridPath& path,const sets::HRepr
     return identity.str();
 }
 
-std::string encoded_path_identity(const model::HybridPath& path) {
+struct OneStepProjectedRelationPlan {
+    sets::SetData relation;
+    std::vector<model::HybridRelationOperationRecord> operations;
+    std::size_t input_rows{};
     std::string identity;
-    for(const auto& id:path.modes)
-        identity+=std::to_string(id.value.size())+":"+id.value+";";
-    identity+="/";
-    for(const auto& id:path.edges)
-        identity+=std::to_string(id.value.size())+":"+id.value+";";
-    return identity;
+};
+using OneStepProjectedRelationResult=std::variant<OneStepProjectedRelationPlan,Diagnostics,OperationStopped>;
+
+OneStepProjectedRelationResult assemble_one_step_projected_relation(
+    const model::HybridSystem& system,const model::HybridRequest& request,
+    const model::HybridPath& path,model::HybridRelationLimits limits,std::stop_token cancellation) {
+    // Coordinate order matches the one-step public relation contract:
+    // [x0, u0, x_pre1, x1]. Keep this independent assembler so its evidence
+    // does not depend on the general model relation composer.
+    std::vector<Vector> inequalities,equalities;
+    Vector bounds,equality_values;
+    constexpr std::size_t width=4;
+    const auto append=[&](Vector row,double rhs,bool equality) {
+        if(cancellation.stop_requested()) return false;
+        const auto count=inequalities.size()+equalities.size();
+        if(count>=limits.max_rows || width==0 || count+1>limits.max_matrix_elements/width) return false;
+        (equality?equalities:inequalities).push_back(std::move(row));
+        (equality?equality_values:bounds).push_back(rhs);
+        return true;
+    };
+    const auto append_failure=[&](std::string field,std::string explanation)->OneStepProjectedRelationResult {
+        if(cancellation.stop_requested())
+            return OperationStopped{StopReason::cancelled,"Projected-state relation assembly was cancelled"};
+        return unsupported(std::move(field),std::move(explanation));
+    };
+    std::vector<model::HybridRelationOperationRecord> operations;
+    const auto record=[&](model::HybridRelationOperationKind kind,std::size_t stage,
+        std::optional<model::HybridModeId> mode_id,std::optional<model::HybridEdgeId> edge_id,
+        std::size_t before) {
+        const auto rows=inequalities.size()+equalities.size();
+        operations.push_back({kind,stage,std::move(mode_id),std::move(edge_id),
+            "csl.hybrid.projected-scalar-reachability","1",width,rows-before,rows,rows*width});
+    };
+    const auto* source=mode(system,path.modes[0]);
+    const auto* target=mode(system,path.modes[1]);
+    const auto* transition=edge(system,path.edges[0]);
+    auto before=inequalities.size()+equalities.size();
+    Vector initial(width);initial[0]=1.0;
+    if(!append(std::move(initial),request.initial.state[0],true))
+        return append_failure("hybrid.projected.rows","Relation row or matrix limit exceeded");
+    record(model::HybridRelationOperationKind::initial_state,0,source->id,{},before);
+
+    const auto add_interval=[&](const AdmissibleSet& set,std::size_t coordinate)->bool {
+        if(std::holds_alternative<UniversalSet>(set)) return true;
+        const auto interval=scalar_interval(set,false);
+        if(!interval) return false;
+        Vector upper(width);upper[coordinate]=1.0;
+        Vector lower(width);lower[coordinate]=-1.0;
+        return append(std::move(upper),interval->second,false)&&append(std::move(lower),-interval->first,false);
+    };
+    before=inequalities.size()+equalities.size();
+    if(!add_interval(source->invariants[0],0))
+        return append_failure("hybrid.projected.invariant","Unsupported source invariant or relation limit exceeded");
+    record(model::HybridRelationOperationKind::post_state_invariant,0,source->id,{},before);
+
+    const auto& flow=std::get<LinearStage>(source->flow);
+    before=inequalities.size()+equalities.size();
+    Vector flow_row(width);flow_row[2]=1.0;flow_row[0]-=flow.A.values[0];flow_row[1]-=flow.B.values[0];
+    if(!append(std::move(flow_row),flow.offset[0],true))
+        return append_failure("hybrid.projected.rows","Relation row or matrix limit exceeded");
+    record(model::HybridRelationOperationKind::mode_flow,0,source->id,{},before);
+
+    before=inequalities.size()+equalities.size();
+    if(!add_interval(source->control_sets[0],1))
+        return append_failure("hybrid.projected.control","Unsupported source control interval or relation limit exceeded");
+    record(model::HybridRelationOperationKind::continuous_control,0,source->id,{},before);
+
+    before=inequalities.size()+equalities.size();
+    if(!add_interval(source->invariants[1],2))
+        return append_failure("hybrid.projected.invariant","Unsupported pre-reset invariant or relation limit exceeded");
+    record(model::HybridRelationOperationKind::pre_reset_invariant,1,source->id,{},before);
+
+    before=inequalities.size()+equalities.size();
+    if(!add_interval(transition->guards[0],2))
+        return append_failure("hybrid.projected.guard","Unsupported transition guard or relation limit exceeded");
+    record(model::HybridRelationOperationKind::transition_guard,0,{},transition->id,before);
+
+    const auto reset_data=std::get<sets::SetData>(sets::from_handle(transition->reset_relations[0]));
+    const auto reset=std::get<sets::HRepresentation>(reset_data.representation());
+    before=inequalities.size()+equalities.size();
+    Vector reset_row(width);reset_row[2]=reset.equalities(0,0);reset_row[3]=reset.equalities(0,1);
+    if(!append(std::move(reset_row),reset.equality_values[0],true))
+        return append_failure("hybrid.projected.rows","Relation row or matrix limit exceeded");
+    record(model::HybridRelationOperationKind::reset_relation,0,{},transition->id,before);
+
+    before=inequalities.size()+equalities.size();
+    if(!add_interval(target->invariants[1],3))
+        return append_failure("hybrid.projected.invariant","Unsupported target invariant or relation limit exceeded");
+    record(model::HybridRelationOperationKind::post_state_invariant,1,target->id,{},before);
+    if(cancellation.stop_requested())
+        return OperationStopped{StopReason::cancelled,"Projected-state reachability stopped before relation publication"};
+
+    Matrix a{inequalities.size(),width,{}};Matrix e{equalities.size(),width,{}};
+    for(const auto& row:inequalities)a.values.insert(a.values.end(),row.begin(),row.end());
+    for(const auto& row:equalities)e.values.insert(e.values.end(),row.begin(),row.end());
+    auto av=numeric::snapshot(a),ev=numeric::snapshot(e);
+    auto bv=numeric::snapshot_vector(bounds),fv=numeric::snapshot_vector(equality_values);
+    if(!std::holds_alternative<numeric::MatrixView>(av)||!std::holds_alternative<numeric::MatrixView>(ev)||
+       !std::holds_alternative<numeric::VectorView>(bv)||!std::holds_alternative<numeric::VectorView>(fv))
+        return unsupported("hybrid.projected.storage","Relation data failed numeric validation");
+    std::vector<std::string> labels{
+        "post:0:"+std::to_string(source->id.value.size())+":"+source->id.value+":"+
+            std::to_string(source->state_coordinate_labels[0].size())+":"+source->state_coordinate_labels[0],
+        "control:0:"+std::to_string(source->id.value.size())+":"+source->id.value+":"+
+            std::to_string(source->control_coordinate_labels[0].size())+":"+source->control_coordinate_labels[0],
+        "pre:1:"+std::to_string(source->id.value.size())+":"+source->id.value+":"+
+            std::to_string(source->state_coordinate_labels[0].size())+":"+source->state_coordinate_labels[0],
+        "post:1:"+std::to_string(target->id.value.size())+":"+target->id.value+":"+
+            std::to_string(target->state_coordinate_labels[0].size())+":"+target->state_coordinate_labels[0]};
+    const sets::HRepresentation relation_data{std::get<numeric::MatrixView>(av),
+        std::get<numeric::VectorView>(bv),std::get<numeric::MatrixView>(ev),
+        std::get<numeric::VectorView>(fv)};
+    const auto identity=exact_input_identity(path,relation_data,labels);
+    auto relation_result=sets::make_h({SetId{"hybrid-projected:"+identity},width,std::move(labels)},relation_data);
+    if(const auto* diagnostic=std::get_if<Diagnostic>(&relation_result)) return Diagnostics{*diagnostic};
+    auto relation=std::get<sets::SetData>(std::move(relation_result));
+    return OneStepProjectedRelationPlan{std::move(relation),std::move(operations),
+        inequalities.size()+equalities.size(),identity};
 }
 }
 
@@ -224,22 +315,24 @@ HybridReachabilityPreflightResult ProjectedStateHybridReachabilityAdapter::prefl
     if(cancellation.stop_requested())
         return OperationStopped{StopReason::cancelled,
             "Projected-state reachability preflight was cancelled before provider admission"};
-    auto probe=make_projection_admission_probe(4,required_rows);
-    if(!probe)
+    auto relation_result=assemble_one_step_projected_relation(system,request,path,limits,cancellation);
+    if(const auto* diagnostics=std::get_if<Diagnostics>(&relation_result)) return *diagnostics;
+    if(const auto* stopped=std::get_if<OperationStopped>(&relation_result)) return *stopped;
+    auto relation=std::get<OneStepProjectedRelationPlan>(std::move(relation_result));
+    if(relation.input_rows!=required_rows)
         return unsupported("hybrid.projected.preflight",
-            "Could not create projection provider admission probe");
+            "Projected relation assembly did not match its preflighted row inventory");
     if(cancellation.stop_requested())
         return OperationStopped{StopReason::cancelled,
-            "Projected-state reachability preflight was cancelled after probe construction"};
+            "Projected-state reachability preflight was cancelled after relation assembly"};
     const auto selected=projection_.provenance();
     const auto implementation=selected.actual?selected.actual->id:selected.requested.id;
-    const auto path_identity=encoded_path_identity(path);
     const GeometryRequestIdentity identity{
         ProblemId{"hybrid-projected-reachability"},
-        RequestId{"preflight:"+path_identity+":"+std::to_string(required_rows)},
-        ReferenceId{"preflight:"+path_identity+":"+std::to_string(required_rows)}};
+        RequestId{"terminal-state:"+relation.identity},
+        ReferenceId{"terminal-state:"+relation.identity}};
     OperationRequest projection_request{identity,implementation,
-        Projection{probe->as_handle(),{3}},SetRelation::equivalent,Assurance::numerical};
+        Projection{relation.relation.as_handle(),{3}},SetRelation::equivalent,Assurance::numerical};
     const auto provider_admission=projection_.prepare(projection_request);
     if(cancellation.stop_requested())
         return OperationStopped{StopReason::cancelled,
@@ -259,117 +352,18 @@ HybridPathReachabilityResult ProjectedStateHybridReachabilityAdapter::compose_pa
     if(const auto* diagnostics=std::get_if<Diagnostics>(&admitted)) return *diagnostics;
     if(const auto* stopped=std::get_if<OperationStopped>(&admitted)) return *stopped;
 
-    // Coordinate order matches the one-step public relation contract:
-    // [x0, u0, x_pre1, x1]. Assemble each factor here so projection evidence
-    // does not depend on the model relation composer.
-    std::vector<Vector> inequalities,equalities;
-    Vector bounds,equality_values;
-    constexpr std::size_t width=4;
-    auto append=[&](Vector row,double rhs,bool equality) {
-        if(cancellation.stop_requested()) return false;
-        const auto count=inequalities.size()+equalities.size();
-        if(count>=limits.max_rows || width==0 || count+1>limits.max_matrix_elements/width) return false;
-        (equality?equalities:inequalities).push_back(std::move(row));
-        (equality?equality_values:bounds).push_back(rhs);
-        return true;
-    };
-    const auto append_failure=[&](std::string field,std::string explanation)->HybridPathReachabilityResult {
-        if(cancellation.stop_requested())
-            return OperationStopped{StopReason::cancelled,"Projected-state relation assembly was cancelled"};
-        return unsupported(std::move(field),std::move(explanation));
-    };
-    std::vector<model::HybridRelationOperationRecord> operations;
-    const auto record=[&](model::HybridRelationOperationKind kind,std::size_t stage,
-        std::optional<model::HybridModeId> mode_id,std::optional<model::HybridEdgeId> edge_id,
-        std::size_t before) {
-        const auto rows=inequalities.size()+equalities.size();
-        operations.push_back({kind,stage,std::move(mode_id),std::move(edge_id),
-            "csl.hybrid.projected-scalar-reachability","1",width,rows-before,rows,rows*width});
-    };
-    const auto* source=mode(system,path.modes[0]);
-    const auto* target=mode(system,path.modes[1]);
-    const auto* transition=edge(system,path.edges[0]);
-    auto before=inequalities.size()+equalities.size();
-    Vector initial(width);initial[0]=1.0;
-    if(!append(std::move(initial),request.initial.state[0],true))
-        return append_failure("hybrid.projected.rows","Relation row or matrix limit exceeded");
-    record(model::HybridRelationOperationKind::initial_state,0,source->id,{},before);
-
-    const auto add_interval=[&](const AdmissibleSet& set,std::size_t coordinate)->bool {
-        if(std::holds_alternative<UniversalSet>(set)) return true;
-        const auto interval=scalar_interval(set,false);
-        if(!interval) return false;
-        Vector upper(width);upper[coordinate]=1.0;
-        Vector lower(width);lower[coordinate]=-1.0;
-        return append(std::move(upper),interval->second,false)&&append(std::move(lower),-interval->first,false);
-    };
-    before=inequalities.size()+equalities.size();
-    if(!add_interval(source->invariants[0],0)) return append_failure("hybrid.projected.invariant","Unsupported source invariant or relation limit exceeded");
-    record(model::HybridRelationOperationKind::post_state_invariant,0,source->id,{},before);
-
-    const auto& flow=std::get<LinearStage>(source->flow);
-    before=inequalities.size()+equalities.size();
-    Vector flow_row(width);flow_row[2]=1.0;flow_row[0]-=flow.A.values[0];flow_row[1]-=flow.B.values[0];
-    if(!append(std::move(flow_row),flow.offset[0],true))
-        return append_failure("hybrid.projected.rows","Relation row or matrix limit exceeded");
-    record(model::HybridRelationOperationKind::mode_flow,0,source->id,{},before);
-
-    before=inequalities.size()+equalities.size();
-    if(!add_interval(source->control_sets[0],1)) return append_failure("hybrid.projected.control","Unsupported source control interval or relation limit exceeded");
-    record(model::HybridRelationOperationKind::continuous_control,0,source->id,{},before);
-
-    before=inequalities.size()+equalities.size();
-    if(!add_interval(source->invariants[1],2)) return append_failure("hybrid.projected.invariant","Unsupported pre-reset invariant or relation limit exceeded");
-    record(model::HybridRelationOperationKind::pre_reset_invariant,1,source->id,{},before);
-
-    before=inequalities.size()+equalities.size();
-    if(!add_interval(transition->guards[0],2)) return append_failure("hybrid.projected.guard","Unsupported transition guard or relation limit exceeded");
-    record(model::HybridRelationOperationKind::transition_guard,0,{},transition->id,before);
-
-    const auto reset_data=std::get<sets::SetData>(sets::from_handle(transition->reset_relations[0]));
-    const auto reset=std::get<sets::HRepresentation>(reset_data.representation());
-    before=inequalities.size()+equalities.size();
-    Vector reset_row(width);reset_row[2]=reset.equalities(0,0);reset_row[3]=reset.equalities(0,1);
-    if(!append(std::move(reset_row),reset.equality_values[0],true))
-        return append_failure("hybrid.projected.rows","Relation row or matrix limit exceeded");
-    record(model::HybridRelationOperationKind::reset_relation,0,{},transition->id,before);
-
-    before=inequalities.size()+equalities.size();
-    if(!add_interval(target->invariants[1],3)) return append_failure("hybrid.projected.invariant","Unsupported target invariant or relation limit exceeded");
-    record(model::HybridRelationOperationKind::post_state_invariant,1,target->id,{},before);
-    if(cancellation.stop_requested())
-        return OperationStopped{StopReason::cancelled,"Projected-state reachability stopped before relation publication"};
-
-    Matrix a{inequalities.size(),width,{}};Matrix e{equalities.size(),width,{}};
-    for(const auto& row:inequalities)a.values.insert(a.values.end(),row.begin(),row.end());
-    for(const auto& row:equalities)e.values.insert(e.values.end(),row.begin(),row.end());
-    auto av=numeric::snapshot(a),ev=numeric::snapshot(e);
-    auto bv=numeric::snapshot_vector(bounds),fv=numeric::snapshot_vector(equality_values);
-    if(!std::holds_alternative<numeric::MatrixView>(av)||!std::holds_alternative<numeric::MatrixView>(ev)||
-       !std::holds_alternative<numeric::VectorView>(bv)||!std::holds_alternative<numeric::VectorView>(fv))
-        return unsupported("hybrid.projected.storage","Relation data failed numeric validation");
-    std::vector<std::string> labels{
-        "post:0:"+std::to_string(source->id.value.size())+":"+source->id.value+":"+
-            std::to_string(source->state_coordinate_labels[0].size())+":"+source->state_coordinate_labels[0],
-        "control:0:"+std::to_string(source->id.value.size())+":"+source->id.value+":"+
-            std::to_string(source->control_coordinate_labels[0].size())+":"+source->control_coordinate_labels[0],
-        "pre:1:"+std::to_string(source->id.value.size())+":"+source->id.value+":"+
-            std::to_string(source->state_coordinate_labels[0].size())+":"+source->state_coordinate_labels[0],
-        "post:1:"+std::to_string(target->id.value.size())+":"+target->id.value+":"+
-            std::to_string(target->state_coordinate_labels[0].size())+":"+target->state_coordinate_labels[0]};
-    const sets::HRepresentation relation_data{std::get<numeric::MatrixView>(av),
-        std::get<numeric::VectorView>(bv),std::get<numeric::MatrixView>(ev),
-        std::get<numeric::VectorView>(fv)};
-    const auto request_identity=exact_input_identity(path,relation_data,labels);
-    auto relation_result=sets::make_h({SetId{"hybrid-projected:"+request_identity},width,std::move(labels)},
-        relation_data);
-    if(const auto* diagnostic=std::get_if<Diagnostic>(&relation_result))return Diagnostics{*diagnostic};
-    auto relation=std::get<sets::SetData>(std::move(relation_result));
+    auto relation_result=assemble_one_step_projected_relation(system,request,path,limits,cancellation);
+    if(const auto* diagnostics=std::get_if<Diagnostics>(&relation_result)) return *diagnostics;
+    if(const auto* stopped=std::get_if<OperationStopped>(&relation_result)) return *stopped;
+    auto plan=std::get<OneStepProjectedRelationPlan>(std::move(relation_result));
+    auto relation=std::move(plan.relation);
+    auto operations=std::move(plan.operations);
+    const auto input_rows=plan.input_rows;
     if(cancellation.stop_requested())
         return OperationStopped{StopReason::cancelled,"Projected-state reachability stopped before provider admission"};
 
     const auto identity=GeometryRequestIdentity{ProblemId{"hybrid-projected-reachability"},
-        RequestId{"terminal-state:"+request_identity},ReferenceId{"terminal-state:"+request_identity}};
+        RequestId{"terminal-state:"+plan.identity},ReferenceId{"terminal-state:"+plan.identity}};
     const auto provenance=projection_.provenance();
     const auto implementation=provenance.actual?provenance.actual->id:provenance.requested.id;
     OperationRequest projection_request{identity,implementation,
@@ -399,7 +393,6 @@ HybridPathReachabilityResult ProjectedStateHybridReachabilityAdapter::compose_pa
         return unsupported("hybrid.projected.row_limit","Projected terminal H set exceeds the adapter's declared output-row limit");
     if(cancellation.stop_requested())
         return OperationStopped{StopReason::cancelled,"Projected-state reachability stopped before result publication"};
-    const auto input_rows=inequalities.size()+equalities.size();
     return HybridPathReachability{path,std::move(relation),limits,std::move(operations),Assurance::numerical,
         HybridPathReachability::ProjectedStateEvidence{std::move(projected),selected,input_rows,
             output_rows,maximum_projection_rows_}};
