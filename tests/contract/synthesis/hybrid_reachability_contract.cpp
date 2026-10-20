@@ -239,6 +239,46 @@ TEST_CASE("public general projected hybrid reachability retains a dimension-chan
         "post:1:6:middle:1:p","post:1:6:middle:1:q",
         "pre:2:6:middle:1:p","pre:2:6:middle:1:q","post:2:6:target:1:y"};
     CHECK(reachability.joint_relation.metadata()->coordinate_labels==expected_labels);
+    const std::vector<model::HybridRelationOperationKind> expected_operations{
+        model::HybridRelationOperationKind::initial_state,
+        model::HybridRelationOperationKind::post_state_invariant,
+        model::HybridRelationOperationKind::mode_flow,
+        model::HybridRelationOperationKind::continuous_control,
+        model::HybridRelationOperationKind::pre_reset_invariant,
+        model::HybridRelationOperationKind::transition_guard,
+        model::HybridRelationOperationKind::reset_relation,
+        model::HybridRelationOperationKind::post_state_invariant,
+        model::HybridRelationOperationKind::mode_flow,
+        model::HybridRelationOperationKind::continuous_control,
+        model::HybridRelationOperationKind::pre_reset_invariant,
+        model::HybridRelationOperationKind::transition_guard,
+        model::HybridRelationOperationKind::reset_relation,
+        model::HybridRelationOperationKind::post_state_invariant};
+    const std::vector<std::size_t> expected_rows_added{1,0,1,1,0,0,2,0,2,0,0,0,1,0};
+    const std::vector<std::size_t> expected_stages{0,0,0,0,1,0,0,1,1,1,2,1,1,2};
+    const std::vector<std::string> expected_modes{
+        "source","source","source","source","source","","","middle",
+        "middle","middle","middle","","","target"};
+    const std::vector<std::string> expected_edges{
+        "","","","","","expand","expand","","","","","finish","finish",""};
+    REQUIRE(reachability.relation_operations.size()==expected_operations.size());
+    for(std::size_t index=0;index<expected_operations.size();++index) {
+        const auto& operation=reachability.relation_operations[index];
+        CHECK(operation.operation==expected_operations[index]);
+        CHECK(operation.stage==expected_stages[index]);
+        CHECK(operation.mode.has_value()==!expected_modes[index].empty());
+        if(operation.mode) CHECK(operation.mode->value==expected_modes[index]);
+        CHECK(operation.edge.has_value()==!expected_edges[index].empty());
+        if(operation.edge) CHECK(operation.edge->value==expected_edges[index]);
+        CHECK(operation.implementation_id=="csl.model.hybrid.joint-h-composer");
+        CHECK(operation.implementation_version=="1");
+        CHECK(operation.joint_variables==8);
+        CHECK(operation.rows_added==expected_rows_added[index]);
+        const auto cumulative_rows=index==0?expected_rows_added[index]:
+            reachability.relation_operations[index-1].cumulative_rows+expected_rows_added[index];
+        CHECK(operation.cumulative_rows==cumulative_rows);
+        CHECK(operation.cumulative_matrix_elements==cumulative_rows*8);
+    }
     REQUIRE(reachability.projected_state.has_value());
     const auto projected=reachability.projected_state->terminal_state_set.representation();
     REQUIRE(std::holds_alternative<sets::HRepresentation>(projected));
