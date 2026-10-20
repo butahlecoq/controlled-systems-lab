@@ -357,6 +357,104 @@ TEST_CASE("hybrid exact polytope proves half-space relation inclusion") {
                       cancelled.get_token()).state==InclusionState::cancelled);
 }
 
+TEST_CASE("hybrid exact polytope projects linear objective bounds") {
+    using namespace detail::hybrid_exact;
+    const std::array<double,1> x{1}, negative_x{-1};
+    std::vector<Row> interval_rows;
+    REQUIRE(append_inequality(x,2,false,default_max_integer_bits,interval_rows));
+    REQUIRE(append_inequality(negative_x,0,false,default_max_integer_bits,interval_rows));
+
+    const auto minimum_x=minimize_linear(interval_rows,1,x,0);
+    REQUIRE(minimum_x.state==LinearMinimumState::minimum);
+    CHECK(minimum_x.attained);
+    CHECK(exact_detail::compare(minimum_x.value.numerator,{})==0);
+    CHECK(exact_detail::compare(minimum_x.value.denominator,
+                                exact_detail::from_u64(1))==0);
+
+    const std::array<double,1> negative_objective{-1};
+    const auto minimum_negative_x=minimize_linear(interval_rows,1,
+                                                   negative_objective,3);
+    REQUIRE(minimum_negative_x.state==LinearMinimumState::minimum);
+    CHECK(minimum_negative_x.attained);
+    CHECK(exact_detail::compare(minimum_negative_x.value.numerator,
+                                exact_detail::from_u64(1))==0);
+
+    const std::array<double,1> scaled_objective{0.5};
+    const auto scaled_minimum=minimize_linear(interval_rows,1,
+                                               scaled_objective,0.25);
+    REQUIRE(scaled_minimum.state==LinearMinimumState::minimum);
+    CHECK(scaled_minimum.value.binary_exponent==-2);
+    CHECK(exact_detail::compare(scaled_minimum.value.numerator,
+                                exact_detail::from_u64(1))==0);
+    int order=0;
+    REQUIRE(compare_scaled_rationals(scaled_minimum.value,
+        minimum_negative_x.value,default_max_integer_bits,order));
+    CHECK(order<0);
+
+    std::vector<Row> open_interval;
+    REQUIRE(append_inequality(x,2,true,default_max_integer_bits,open_interval));
+    REQUIRE(append_inequality(negative_x,0,true,default_max_integer_bits,open_interval));
+    const auto open_minimum=minimize_linear(open_interval,1,x,0);
+    REQUIRE(open_minimum.state==LinearMinimumState::minimum);
+    CHECK_FALSE(open_minimum.attained);
+    CHECK(exact_detail::compare(open_minimum.value.numerator,{})==0);
+
+    const auto unbounded=minimize_linear(std::span<const Row>{},1,x,0);
+    CHECK(unbounded.state==LinearMinimumState::unbounded_below);
+    const auto constant=minimize_linear(interval_rows,1,
+                                         std::array<double,1>{0},-2.5);
+    REQUIRE(constant.state==LinearMinimumState::minimum);
+    CHECK(constant.attained);
+    CHECK(constant.value.binary_exponent==-1);
+    CHECK(exact_detail::compare(constant.value.numerator,
+                                exact_detail::from_u64(5,true))==0);
+
+    std::vector<Row> thirds_lower_bound;
+    const std::array<double,1> negative_three{-3};
+    REQUIRE(append_inequality(negative_three,-1,false,
+                              default_max_integer_bits,thirds_lower_bound));
+    const auto one_third=minimize_linear(thirds_lower_bound,1,x,0);
+    REQUIRE(one_third.state==LinearMinimumState::minimum);
+    CHECK(one_third.attained);
+    CHECK(exact_detail::compare(one_third.value.numerator,
+                                exact_detail::from_u64(1))==0);
+    CHECK(exact_detail::compare(one_third.value.denominator,
+                                exact_detail::from_u64(3))==0);
+
+    std::vector<Row> positive_open_domain;
+    REQUIRE(append_inequality(negative_x,0,true,
+                              default_max_integer_bits,positive_open_domain));
+    REQUIRE(append_inequality(negative_x,0,false,
+                              default_max_integer_bits,positive_open_domain));
+    const auto strict_tied_bound=minimize_linear(positive_open_domain,1,x,0);
+    REQUIRE(strict_tied_bound.state==LinearMinimumState::minimum);
+    CHECK_FALSE(strict_tied_bound.attained);
+
+    const std::array<double,1> shifted_domain{-1};
+    std::vector<Row> x_at_least_one;
+    REQUIRE(append_inequality(shifted_domain,-1,false,
+                              default_max_integer_bits,x_at_least_one));
+    const auto shifted_objective=minimize_linear(x_at_least_one,1,
+                                                  scaled_objective,0.25);
+    REQUIRE(shifted_objective.state==LinearMinimumState::minimum);
+    CHECK(shifted_objective.value.binary_exponent==-2);
+    CHECK(exact_detail::compare(shifted_objective.value.numerator,
+                                exact_detail::from_u64(3))==0);
+    ExactRational same_value{exact_detail::from_u64(3),
+                             exact_detail::from_u64(4),0};
+    REQUIRE(compare_scaled_rationals(shifted_objective.value,same_value,
+                                     default_max_integer_bits,order));
+    CHECK(order==0);
+    ExactRational extreme_low{exact_detail::from_u64(1),
+                              exact_detail::from_u64(1),
+                              std::numeric_limits<int>::min()};
+    ExactRational extreme_high{exact_detail::from_u64(1),
+                               exact_detail::from_u64(1),
+                               std::numeric_limits<int>::max()};
+    CHECK_FALSE(compare_scaled_rationals(extreme_high,extreme_low,
+                                         default_max_integer_bits,order));
+}
+
 TEST_CASE("hybrid exact raw path relation matches the joint H composer") {
     using namespace detail::hybrid_exact;
     const auto system=example_system();
