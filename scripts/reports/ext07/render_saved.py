@@ -131,12 +131,27 @@ table{{border-collapse:collapse;width:100%;display:block;overflow-x:auto}}td,th{
 img{{width:100%;height:auto}}code{{overflow-wrap:anywhere}}
 </style></head><body><div><p>Controlled Systems Lab · EXT-07</p><h1>{title}</h1><p>{intro}</p></div><div>
 <div class="section"><h2>Input and analytic result</h2>
-<p>There are two modes (<code>coast</code> and <code>terminal</code>) and one permitted edge.
-The scalar flow is <code>x_pre=x₀+u₀</code>, with <code>x₀=0</code>, <code>u₀∈[0,1]</code>,
-guard <code>x_pre∈[0,0.5]</code>, identity reset and terminal objective <code>minimize x₁</code>.
+<p>The state dimension is one and the horizon is one stage, from time 0 to time 1.
+The initial mode is <code>coast</code> at stage 0, with scalar state <code>x₀=0</code>.
+There are two modes (<code>coast</code> and <code>terminal</code>) and one permitted edge
+<code>coast-to-terminal</code> from <code>coast</code> to <code>terminal</code> at the boundary
+between stages 0 and 1. The terminal mode is active at stage 1. Both mode invariants are universal
+sets (they impose no additional state restrictions). There are no external channels, observations,
+or temporal constraints. The source-mode scalar flow is <code>x_pre=x₀+u₀</code>, with control <code>u₀∈[0,1]</code>.
+The transition guard requires <code>x_pre∈[0,0.5]</code>; the one-dimensional identity reset sets
+<code>x₁=x_pre</code>. The terminal objective is <code>minimize x₁</code>.
 The full joint relation is <code>x₀=0, x_pre=u₀, x₁=u₀, 0≤u₀≤0.5</code>.
 Its complete minimizer family is the point <code>(x₀,u₀,x_pre,x₁)=(0,0,0,0)</code>.</p>
 <img src="joint-relation-2d.svg" alt="Control versus terminal state for the feasible one-step hybrid relation, with its unique minimum marked"></div>
+<div class="section"><h2>Reproduce</h2>
+<p>From a clean report-tools checkout with CMake 3.31.6, fetch the frozen implementation commit and create a separate source worktree:</p>
+<pre><code>git fetch origin pull/472/head:refs/remotes/origin/ext07-source
+git worktree add --detach &lt;frozen-source&gt; {source}
+python scripts/reports/ext07/capture.py --source &lt;frozen-source&gt; --capture &lt;fresh-capture&gt; --commit {source} --cmake cmake
+python scripts/reports/ext07/ext07_collect.py --capture &lt;fresh-capture&gt; --source &lt;frozen-source&gt; --out &lt;fresh-output&gt;
+python scripts/reports/ext07/render_saved.py --bundle &lt;fresh-output&gt;/&lt;report-id&gt; --check</code></pre>
+<p>Frozen source: <a href="https://github.com/butahlecoq/controlled-systems-lab/commit/{source}">commit {source}</a>.
+The <a href="records.json">raw scenario and report record</a> and <a href="measure.jsonl">raw measured trials</a> are available beside this page.</p></div>
 <div class="section"><h2>Observed branch and verification</h2>
 <table><thead><tr><th>Paths</th><th>H rows</th><th>Dense row entries</th><th>Provider</th><th>Outcome</th><th>Feasibility</th><th>Optimality</th><th>Family coverage</th></tr></thead>
 <tbody><tr><td>1</td><td>7</td><td>28</td><td>{provider}</td><td>completed / optimal</td>
@@ -158,7 +173,7 @@ or scalability claim. Thread and backend details, all raw repetitions, source/bu
 are retained in the <a href="records.json">versioned record</a>,
 <a href="measure.jsonl">raw trials</a>, <a href="smoke.jsonl">smoke row</a>,
 <a href="summary.csv">summary CSV</a>, <a href="manifest.json">manifest</a>, and
-<a href="{report_id}.zip">offline ZIP</a>. Source commit: <code>{source}</code>.</p></div>
+<a href="{report_id}.zip">offline ZIP</a>. Frozen source: <a href="https://github.com/butahlecoq/controlled-systems-lab/commit/{source}">{source}</a>.</p></div>
 <p><a href="{'index.html' if example else 'example-2d.html'}">{'Full report' if example else 'Open the 2D example'}</a></p>
 </div><div>EXT-07 · one-step scalar interval evidence only</div></body></html>'''
     return html.encode()

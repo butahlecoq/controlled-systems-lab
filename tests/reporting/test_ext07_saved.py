@@ -57,6 +57,30 @@ class Ext07SavedReportTests(unittest.TestCase):
             self.assertTrue((site / self.bundle.name / "example-2d.html").is_file())
             self.assertIn("example-2d.html", (site / "index.html").read_text(encoding="utf-8"))
 
+    def test_published_example_has_complete_inputs_reproduction_and_provenance(self) -> None:
+        record = collect.read_json(self.bundle / "records.json")
+        source = record["source_commit"]
+        page = (self.bundle / "example-2d.html").read_text(encoding="utf-8")
+        for phrase in ("state dimension is one", "one stage", "initial mode is", "coast-to-terminal",
+                       "terminal mode is active at stage 1", "mode invariants are universal",
+                       "sets (they impose no additional state restrictions)", "no external channels",
+                       "x₀=0", "u₀∈[0,1]", "x_pre∈[0,0.5]", "identity reset", "minimize x₁",
+                       "scripts/reports/ext07/capture.py", "scripts/reports/ext07/ext07_collect.py"):
+            self.assertIn(phrase, page)
+        self.assertIn('href="records.json"', page)
+        self.assertIn(f'href="https://github.com/butahlecoq/controlled-systems-lab/commit/{source}"', page)
+        self.assertIn(f'commit {source}', page)
+
+    def test_offline_html_allows_only_repository_commit_links(self) -> None:
+        source = collect.read_json(self.bundle / "records.json")["source_commit"]
+        source_url = f"https://github.com/butahlecoq/controlled-systems-lab/commit/{source}"
+        stage_ext07.site.OfflineHTML(set()).feed(f'<a href="{source_url}">source</a>')
+        for url in (f"https://github.com/another/repository/commit/{source}",
+                    "https://github.com/butahlecoq/controlled-systems-lab/commit/not-a-hash",
+                    f"http://github.com/butahlecoq/controlled-systems-lab/commit/{source}"):
+            with self.subTest(url=url), self.assertRaises(ValueError):
+                stage_ext07.site.OfflineHTML(set()).feed(f'<a href="{url}">source</a>')
+
     def test_report_identity_rejects_tampered_raw_trial(self) -> None:
         with tempfile.TemporaryDirectory() as temporary:
             copied = Path(temporary) / self.bundle.name

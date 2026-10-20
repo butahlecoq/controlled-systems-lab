@@ -2,14 +2,14 @@
   "reports": [
     {
       "collector_sha256": "5748eed4f379a15f386feee169f28836857f5766c863443ef3c4586d597e4500",
-      "index_sha256": "04ed7e14c1b197e4d474c036763bce5c2c76b472ae809d3a0f8997450c6838b5",
-      "manifest_sha256": "2aae41690f642b2825253666e67c6bcef4526a67c0b18ead12ae5687c18066df",
-      "renderer_sha256": "48cd590a85455671d135efaf55c442f4d61e82d19a21d038908043057e023d02",
+      "index_sha256": "7ef98ea0a49b8b138c8368d052a1787ce67b32f9c05f125582fc329d27f0006c",
+      "manifest_sha256": "1b55d6dd12037eecb9c56eb6cea9c36550c2694b7a66d6b68dec1c7cfbb6e7b4",
+      "renderer_sha256": "bbb885ffa7ef0276e7ec551b15d289aece3ca01e5bf062d03510b3cdc36c11f2",
       "report_id": "ext07-hybrid-2cba9c13b79afd2b",
       "schema": "csl.ext07-hybrid-profile-report/1",
       "source_commit": "2965baafa325550ad60ec91d44f5e3f86a832178",
       "stager_sha256": "95b4fb6aa61bf9100373554ee161ba9648efbafc64a0ab36bc5c5b525e3afdd1",
-      "zip_sha256": "d5a8f3783c580f0b1b3c72a4d7173e608c0a0b9c59ce463a385dc5fddf1ba86c"
+      "zip_sha256": "794eacdd3e8f3418505b83f0656f5223f982effe6c82d8de51c241474528741f"
     }
   ],
   "schema": "csl.ext07-publications/1"
