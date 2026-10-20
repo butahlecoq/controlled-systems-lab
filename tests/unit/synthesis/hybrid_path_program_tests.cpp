@@ -239,6 +239,30 @@ TEST_CASE("hybrid exact polytope rows preserve binary64 dyadics") {
     REQUIRE(make_row(subnormal,0,false,default_max_integer_bits,row));
     CHECK(exact_detail::compare(row.coefficients[0],exact_detail::from_u64(1))==0);
     CHECK_FALSE(make_row(coefficients,0.125,false,3,row));
+
+    // The unshifted significand exceeds this cap before row normalization.
+    const std::array<double,1> odd_significand{1.1};
+    CHECK_FALSE(make_row(odd_significand,0,false,52,row));
+}
+
+TEST_CASE("hybrid exact integer arithmetic handles multiword carries") {
+    using namespace detail::hybrid_exact;
+    using exact_detail::add;
+    using exact_detail::compare;
+    using exact_detail::from_u64;
+    using exact_detail::multiply;
+
+    Integer sum=from_u64(0xffffffffULL);
+    REQUIRE(add(sum,from_u64(1),64));
+    CHECK(compare(sum,from_u64(0x100000000ULL))==0);
+
+    Integer product;
+    REQUIRE(multiply(from_u64(0x100000001ULL),
+                     from_u64(0x100000003ULL),128,product));
+    const Integer expected_product{{3U,4U,1U},false};
+    CHECK(compare(product,expected_product)==0);
+    CHECK_FALSE(multiply(from_u64(0x100000001ULL),
+                         from_u64(0x100000003ULL),63,product));
 }
 
 TEST_CASE("hybrid exact polytope feasibility retains strict and closed bounds") {

@@ -241,9 +241,11 @@ inline bool multiply(const Integer& lhs, const Integer& rhs,
 
 inline bool shift_left(Integer& value, std::size_t bits,
                        std::size_t max_bits) {
+    if (bit_length(value) > max_bits)
+        return false;
     if (is_zero(value) || bits == 0)
         return true;
-    if (bit_length(value) > max_bits || bits > max_bits - bit_length(value))
+    if (bits > max_bits - bit_length(value))
         return false;
     const std::size_t whole = bits / 32;
     const unsigned partial = static_cast<unsigned>(bits % 32);
