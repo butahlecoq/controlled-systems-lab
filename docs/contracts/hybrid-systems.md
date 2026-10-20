@@ -447,11 +447,13 @@ positive/negative row-pair operations. Peak fields exclude the retained input,
 input-copy overlap, coordinate-selection scratch, and final output matrices.
 Its portfolio summary sums emitted rows and charged operations and reports
 branch maxima for those counts and peak values. Other providers may omit the
-optional observation or define a different scope. These logical counters
+optional observation or define a different scope. For this provider, peak
+matrix elements equal the maximum of peak rows times source dimension and the
+empty-output encoding dimension. These logical counters
 exclude allocator overhead and bytes, are not whole-operation memory or runtime
 measurements, and do not establish scaling. The reachability boundary rejects
-a missing observation or a reported polyhedral-provider peak above that
-branch's configured projection row limit.
+a missing observation, a reported peak above that branch's configured
+projection row limit, or inconsistent matrix-element evidence.
 
 The direct joint composer exposes an operation trace, and every
 `HybridPathProgram` retains that trace with the relation limits used. Each

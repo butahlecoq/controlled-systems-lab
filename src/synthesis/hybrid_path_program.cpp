@@ -427,6 +427,18 @@ HybridPathReachabilityResult execute_preflighted_hybrid_reachability(
                     return one({DiagnosticCode::evidence_mismatch,
                         "hybrid.reachability.provider_resources",
                         "Polyhedral projection provider reported a peak row count above its configured limit"});
+                const auto dimension=reachable->joint_relation.metadata()->set.dimension;
+                const auto peak_rows=projected.provider_resource_observation->peak_rows;
+                if(dimension!=0&&peak_rows>std::numeric_limits<std::size_t>::max()/dimension)
+                    return one({DiagnosticCode::evidence_mismatch,
+                        "hybrid.reachability.provider_resources",
+                        "Polyhedral projection provider resource dimensions overflow size accounting"});
+                const auto output_dimension=projected.terminal_state_set.metadata()->set.dimension;
+                const auto expected_peak_elements=std::max(peak_rows*dimension,output_dimension);
+                if(projected.provider_resource_observation->peak_matrix_elements!=expected_peak_elements)
+                    return one({DiagnosticCode::evidence_mismatch,
+                        "hybrid.reachability.provider_resources",
+                        "Polyhedral projection provider matrix-element peak does not match its row and empty-output evidence"});
             }
         }
     }

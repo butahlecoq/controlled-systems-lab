@@ -201,9 +201,11 @@ bool contains(const sets::HRepresentation& h,double value) {
 
 class OverReportingPolyhedralProjectionAdapter final : public HybridReachabilityAdapter {
 public:
+    enum class EvidenceMutation { over_report_rows, omit_observation, inconsistent_matrix_elements };
+
     explicit OverReportingPolyhedralProjectionAdapter(std::size_t row_limit,
-        bool omit_observation=false)
-        : row_limit_(row_limit),omit_observation_(omit_observation),delegate_(row_limit) {}
+        EvidenceMutation mutation=EvidenceMutation::over_report_rows)
+        : row_limit_(row_limit),mutation_(mutation),delegate_(row_limit) {}
 
     HybridReachabilityCapabilities capabilities() const noexcept override {
         return delegate_.capabilities();
@@ -224,15 +226,20 @@ public:
         auto* reachable=std::get_if<HybridPathReachability>(&result);
         if(!reachable||!reachable->projected_state||
            !reachable->projected_state->provider_resource_observation) return result;
-        if(omit_observation_) {
+        if(mutation_==EvidenceMutation::omit_observation) {
             reachable->projected_state->provider_resource_observation.reset();
             injected_=true;
             return result;
         }
         auto& observation=*reachable->projected_state->provider_resource_observation;
-        observation.peak_rows=row_limit_+1;
-        observation.peak_matrix_elements=observation.peak_rows*
-            reachable->joint_relation.metadata()->set.dimension;
+        if(mutation_==EvidenceMutation::over_report_rows) {
+            observation.peak_rows=row_limit_+1;
+            observation.peak_matrix_elements=observation.peak_rows*
+                reachable->joint_relation.metadata()->set.dimension;
+        } else {
+            REQUIRE(observation.peak_matrix_elements>0);
+            --observation.peak_matrix_elements;
+        }
         injected_=true;
         return result;
     }
@@ -241,7 +248,7 @@ public:
 
 private:
     std::size_t row_limit_;
-    bool omit_observation_;
+    EvidenceMutation mutation_;
     GeneralProjectedStateHybridReachabilityAdapter delegate_;
     mutable bool injected_{};
 };
@@ -757,12 +764,14 @@ TEST_CASE("hybrid reachability resource aggregation rejects provider counter ove
 }
 
 TEST_CASE("hybrid reachability validates built-in projection resource observations") {
-    for(const bool omit_observation:{false,true}) {
+    using Mutation=OverReportingPolyhedralProjectionAdapter::EvidenceMutation;
+    for(const auto mutation:{Mutation::over_report_rows,Mutation::omit_observation,
+        Mutation::inconsistent_matrix_elements}) {
         auto [system,request]=interval_system();
-        OverReportingPolyhedralProjectionAdapter adapter{16,omit_observation};
+        OverReportingPolyhedralProjectionAdapter adapter{16,mutation};
         const auto result=compute_hybrid_reachability_portfolio(adapter,system,request,
             {1,2},{4,16,128});
-        CAPTURE(omit_observation);
+        CAPTURE(mutation);
         REQUIRE(adapter.injected());
         REQUIRE(std::holds_alternative<Diagnostics>(result));
         REQUIRE_FALSE(std::get<Diagnostics>(result).empty());
@@ -770,6 +779,25 @@ TEST_CASE("hybrid reachability validates built-in projection resource observatio
         CHECK(std::get<Diagnostics>(result).front().field==
             "hybrid.reachability.provider_resources");
     }
+}
+
+TEST_CASE("hybrid reachability accepts built-in resource evidence for an empty projection") {
+    auto [system,request]=interval_system();
+    system.edges.front().guards.front()=h_relation("contract.empty_guard",1,{"guard"},
+        Matrix{1,1,{0}},{-1},Matrix{0,1,{}},{});
+    GeneralProjectedStateHybridReachabilityAdapter adapter{16};
+    const auto result=compute_hybrid_reachability_portfolio(adapter,system,request,
+        {1,2},{4,16,128});
+    REQUIRE(std::holds_alternative<HybridReachabilityPortfolio>(result));
+    const auto& portfolio=std::get<HybridReachabilityPortfolio>(result);
+    REQUIRE(portfolio.branches.size()==1);
+    REQUIRE(portfolio.branches.front().projected_state.has_value());
+    const auto& representation=portfolio.branches.front().projected_state->terminal_state_set.representation();
+    REQUIRE(std::holds_alternative<sets::HRepresentation>(representation));
+    const auto& empty_h=std::get<sets::HRepresentation>(representation);
+    REQUIRE(empty_h.inequalities.rows()==1);
+    CHECK(empty_h.upper_bounds[0]==-1.0);
+    CHECK(empty_h.inequalities(0,0)==0.0);
 }
 
 TEST_CASE("hybrid reachability portfolio preflights every provider operation before workspace creation") {
