@@ -100,7 +100,10 @@ The [EXT-07 capability profile and fixture report](../../../research/ext07-capab
 records the declared adapter/verifier domains and named dimensions, horizons,
 mode counts, edge counts, path counts, and relation widths. It separates saved
 measurements from correctness-only oracle fixtures and makes no scalability
-claim. Broader resource-scale and higher-mode-count evidence remains open.
+claim. A four-mode, four-edge branching fixture now independently checks its
+two allowed paths and exercises a five-variable joint relation at the exact
+three-row/fifteen-matrix-element budget, plus rejection at a two-row cap.
+Broader resource-scale and higher-mode-count evidence remains open.
 
 The EXT-07 report set now contains a one-step scalar interval case and a
 two-stage/two-control scalar polygon case, each exercised through path

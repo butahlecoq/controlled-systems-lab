@@ -387,6 +387,61 @@ TEST_CASE("hybrid capability report discloses path-limit failure without a parti
     CHECK(report.diagnostics[0].field=="hybrid.paths.limit");
 }
 
+TEST_CASE("four-mode capability report matches an independent branching graph and relation budget") {
+    auto modes=std::vector<HybridMode>{
+        mode("start",1,0,2),mode("upper",1,0,2),
+        mode("lower",1,0,2),mode("terminal",1,0,2)};
+    const auto make_edge=[](std::string id,std::string source,std::string target) {
+        return HybridTransitionEdge{{std::move(id)},{std::move(source)},{std::move(target)},
+            {UniversalSet{1},UniversalSet{1}},
+            {universal_relation("reset-0",2),universal_relation("reset-1",2)}};
+    };
+    HybridSystem system{2,std::move(modes),{
+        make_edge("to-upper","start","upper"),
+        make_edge("to-lower","start","lower"),
+        make_edge("upper-to-terminal","upper","terminal"),
+        make_edge("lower-to-terminal","lower","terminal")}};
+    HybridRequest request{{{"start"},{0}},{{"terminal"}},
+        {{{"terminal"},LinearTerminal{{1},0},"terminal-state","units"}}};
+
+    const std::vector<HybridPath> expected{
+        {{{"start"},{"upper"},{"terminal"}},{{"to-upper"},{"upper-to-terminal"}}},
+        {{{"start"},{"lower"},{"terminal"}},{{"to-lower"},{"lower-to-terminal"}}}};
+    const auto oracle=exhaustive_path_oracle(system,request.initial.mode,
+        request.allowed_terminal_modes);
+    CHECK(oracle==expected);
+
+    const auto reported=report_hybrid_capability(system,request,{2,2});
+    REQUIRE(std::holds_alternative<HybridCapabilityReport>(reported));
+    const auto& profile=std::get<HybridCapabilityReport>(reported);
+    CHECK(profile.profile_admitted);
+    CHECK(profile.path_enumeration_completed);
+    CHECK(profile.mode_count==4);
+    CHECK(profile.edge_count==4);
+    REQUIRE(profile.complete_allowed_path_count);
+    CHECK(*profile.complete_allowed_path_count==2);
+
+    const auto paths=enumerate_hybrid_paths(system,request.initial.mode,
+        request.allowed_terminal_modes,{2,2});
+    REQUIRE(std::holds_alternative<std::vector<HybridPath>>(paths));
+    CHECK(std::get<std::vector<HybridPath>>(paths)==oracle);
+    for(const auto& path:oracle) {
+        const auto composed=compose_hybrid_path_relation_with_report(system,request,path,{5,3,15});
+        REQUIRE(std::holds_alternative<HybridComposedPathRelation>(composed));
+        const auto& relation=std::get<HybridComposedPathRelation>(composed);
+        CHECK(relation.relation.metadata()->set.dimension==5);
+        REQUIRE_FALSE(relation.operations.empty());
+        CHECK(relation.operations.back().cumulative_rows==3);
+        CHECK(relation.operations.back().cumulative_matrix_elements==15);
+
+        const auto limited=compose_hybrid_path_relation_with_report(system,request,path,{5,2,15});
+        REQUIRE(std::holds_alternative<HybridPathCompositionFailureReport>(limited));
+        const auto& failure=std::get<HybridPathCompositionFailureReport>(limited);
+        REQUIRE(std::holds_alternative<Diagnostic>(failure.failure));
+        CHECK(std::get<Diagnostic>(failure.failure).field=="hybrid.relation.rows");
+    }
+}
+
 TEST_CASE("hybrid capability report preserves profile rejection and cancellation") {
     auto [system,request]=dimension_changing_example();
     system.modes[0].control_sets.clear();

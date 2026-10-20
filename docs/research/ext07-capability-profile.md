@@ -19,11 +19,15 @@ fixtures.
 | Two-stage scalar polygon | 1 | 1 | 2 | 3 | 3 | 2 | 7 per path | [Saved measured report](../../reports/algorithm-results/ext07-hybrid-two-parameter-00ac6fb75d7cab95/index.html), [unit oracle](../../tests/unit/synthesis/hybrid_path_program_tests.cpp) |
 | One-step 2D box | 2 | 2 | 1 | 2 | 1 | 1 | 8 | [Independent literal H oracle](../../tests/unit/synthesis/hybrid_path_program_tests.cpp) |
 | One-step 3D control box | 3 | 3 | 1 | 2 | 1 | 1 | 12 | [Independent literal H oracle](../../tests/unit/synthesis/hybrid_path_program_tests.cpp) |
+| Four-mode branching resource-bound check | 1 | 0 | 2 | 4 | 4 | 2 | 5 per path | [Capability, raw-graph, and row-limit test](../../tests/unit/model/hybrid_system_test.cpp) |
 
 The scalar two-stage report is the largest saved measurement by horizon and
-path count. The 3D control-box case is the largest named independent continuous
-oracle by state and control dimension. The reports measure their own fixtures;
-the unit-test cases are correctness evidence and are not timing samples.
+path count. The four-mode graph is the largest named capability-count fixture
+by mode and edge count. Its 5-variable relations fit the configured 3-row,
+15-matrix-element budget and reject a 2-row budget. The 3D control-box case is
+the largest named independent continuous oracle by state and control
+dimension. The reports measure their own fixtures; the unit-test cases are
+correctness evidence and are not timing samples.
 
 ## Declared adapter and verifier domains
 
