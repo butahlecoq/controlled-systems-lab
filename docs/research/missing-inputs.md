@@ -30,9 +30,10 @@ This document is that inventory. It is deliberately conservative: a value is cal
 | Absent | No matching artifact was found in the searched corpus; not a proof of non-existence |
 | Not printed | The publication itself does not specify the value |
 | Declared unavailable | The owner states that no accessible copy exists or that it cannot be released |
+| Not required | The owner narrows the comparison goal so the historical artifact is unnecessary; no reproduction claim is made and the algorithmic comparison proceeds on corrected-track fixtures |
 | Corrected track | A new, separately identified experiment that repairs a demonstrable source inconsistency; never labelled a reproduction |
 
-## 3. Five requests that unlock the most
+## 3. Highest-leverage requests
 
 If only a small number of items can be reviewed, these are the highest-leverage ones.
 
@@ -41,10 +42,11 @@ If only a small number of items can be reviewed, these are the highest-leverage 
 | 1 | B04 / L11, T=16 | Original T=16 project or complete owner-authenticated input package: `U` rows and witness mapping, first-action convention, every stage bound, generating revision, coefficient/unit authority | The owner-selected first end-to-end benchmark, the terminal-invariant contradiction and issues #10/#6 |
 | 2 | B06 / L09 and B07 / L10 | Numerical disturbance sets `W(t)` and `V1(t)` (bounds or vertices, stage dependence); for B07 also stock initialization and stage time grid | Executable finite-action minimax baselines, including the 365-feasible-plan count and reported worst cases |
 | 3 | L05 Example 2, 4D | The revision and driver that produced the modified row `153 vertices / 34764.47`, including the retention schedule and rank-tie behavior | The only unreproduced Table 1 cell in the four-state example; closes the B02 modified-construction question |
-| 4 | B03 / L07 | Seeded 5000-point clouds in dimensions 2-5, RNG identity, and the exact timing scope | The historical hull runtime/iteration comparison `5.466993 s / 158399` versus `3.583817 s / 116497` |
-| 5 | B08 / L04 and B09 / L13 | The generating MATLAB revision, original unrounded arrays, nonlinear integration and the actual criterion implementation | The `14.048` versus `16.42069149` and `22.657` versus `20.792787211` terminal-row discrepancies in issue #1 |
+| 4 | B08 / L04 and B09 / L13 | The generating MATLAB revision, original unrounded arrays, nonlinear integration and the actual criterion implementation | The `14.048` versus `16.42069149` and `22.657` versus `20.792787211` terminal-row discrepancies in issue #1 |
 
-A sixth item, specific to L05 Example 1, is the exact `T0` grouping, reference trajectory samples and coordinate map from the physical start `(410,300)` to the linear start `(1,2)`. It is lower cost than the five above but blocks every quantitative comparison in the two-dimensional example.
+A separate item, specific to L05 Example 1, is the exact `T0` grouping, reference trajectory samples and coordinate map from the physical start `(410,300)` to the linear start `(1,2)`. It is lower cost than the four above but blocks every quantitative comparison in the two-dimensional example.
+
+B03 is no longer an input-recovery priority. The owner directed that B03 compare algorithms rather than reproduce the historical sets or software run: baseline MATLAB/Python hull algorithms are translated into C++ and run with the modern algorithms on shared fixtures. The original clouds, seeds and timing scope are not required; see [section 4.3](#43-b03---l07-reachability-and-hull-comparisons).
 
 ## 4. Per-artifact register
 
@@ -126,9 +128,11 @@ A sixth item, specific to L05 Example 1, is the exact `T0` grouping, reference t
 - [ ] The generating revision of the baseline and modified algorithm rows, and the exact machine/library configuration beyond "MATLAB R2014a, i7 2.7 GHz".
 - [ ] The full result arrays behind the 158399/116497 iteration counts.
 
-**Blocked:** the historical speed/iteration comparison cannot be reproduced; only a new synthetic comparison under the published ladder can run. B03 must not be labelled a reproduction.
+**Owner disposition (2026-10-20):** the comparison program does **not** seek the exact historical point sets, a replay in the original MATLAB/Python software, or the published runtime/iteration row. B03 is an **algorithm comparison**: translate the baseline and modified hull algorithms from the archived MATLAB/Python sources into C++, run them with the modern algorithms on bit-identical shared fixtures, and compare quality and performance. The missing items above remain missing for a future historical replay, but they do not block this comparison.
 
-**Handover that counts:** the seeded input clouds and the run script/config, or a declaration that they are unavailable so B03 is recorded as unrecoverable and replaced by the synthetic ladder.
+**Historical replay:** not reproducible from the current evidence and not required for B03's algorithm comparison. The published row remains immutable reported context; no B03 reproduction is claimed.
+
+**Handover that counts:** none for the algorithm comparison. A handover would only matter if historical replay later becomes a separate goal.
 
 **Tracking:** [#6](https://github.com/butahlecoq/controlled-systems-lab/issues/6), [baselines](baselines.md), [hull/V-H coverage](comparison-hull-vhv-coverage.md), [legacy runnability](comparison-legacy-runnability.md).
 
@@ -307,7 +311,7 @@ These are not separate baselines, but they block specific evidence claims.
 | L12 draft | Selected embedded equations were checked, but not a unique original object for the full criterion | The first-action range contradiction and model/result mismatch remain |
 | A06 Pascal | `BIBTUSH`, `DIALOGS`, `term`, `funfnx` units; no Free Pascal on the host | Native execution and a faithful projection port are blocked |
 | A17 GeoCalcLib | External `libgeocalc` MEX dependency | The V/H enumeration adapter cannot run natively |
-| Native environments | MATLAB/Octave, Free Pascal and Python 2 are absent on the audit host | Native-original runs are unavailable; Python 3 ports are the default route |
+| Native environments | MATLAB/Octave, Free Pascal and Python 2 are absent on the audit host | Native-original runs are unavailable; C++ translations are the comparison route, with Python 3 usable for behavioral transcription |
 
 ## 5. Cross-cutting metadata that is missing for almost every case
 
@@ -324,6 +328,8 @@ Even where the numbers are transcribed, the following fields are usually absent.
 | Objective implementation | The printed formula and the implemented expression can differ | Contradictions in B04, B08, B09 |
 | Timing scope | End-to-end, solve-only and simulation-only durations are not comparable | Missing for B02, B03, B05, B06 |
 | Provenance and permission | Source identity, authorship and redistribution rights | Missing for every private artifact |
+
+For B03, the fields above are needed only for a historical replay. The algorithm comparison uses shared synthetic fixtures and C++ translations, so their absence does not block B03 work.
 
 ## 6. What is already recovered and should not be requested again
 
@@ -363,14 +369,14 @@ Handling rules:
 
 ## 8. Reviewer decision sheet
 
-For each row, one of `supply`, `unavailable` or `authorize deeper search` is enough to close the review item.
+For each row, one of `supply`, `unavailable`, `authorize deeper search`, or `not required` is enough to close the review item.
 
 | Artifact | Decision | Notes |
 |---|---|---|
 | B01 numerical instance |  |  |
 | B02/L05 Example 1 driver, `T0`, coordinates |  |  |
 | B02/L05 Example 2 modified driver |  |  |
-| B03 seeded clouds and run scope |  |  |
+| B03 seeded clouds and run scope (historical replay only) | Not required | Owner, 2026-10-20: compare C++ translations of the baseline and modified algorithms on shared fixtures; do not reproduce the historical sets, software run or timing row |
 | B04 T=16 project and `U` rows |  |  |
 | B05 adaptive inputs and policy schedule |  |  |
 | B06 `W(t)` disturbance set |  |  |
@@ -395,6 +401,7 @@ This dossier can close when every artifact in section 4 has one of these disposi
 1. **Supplied** - a hash-identified file or owner-authenticated package is registered and linked to the relevant issue.
 2. **Declared unavailable** - the owner states that no accessible copy exists; the baseline is recorded as unrecoverable and a corrected track may proceed separately.
 3. **Deeper search authorized** - the reviewer names the additional scope and a target date; the item stays open with that scope.
+4. **Not required** - the owner narrows the comparison goal and the historical artifact is unnecessary; the algorithmic comparison proceeds on shared corrected-track fixtures without a reproduction claim.
 
 Closing this review does not close #2, #4, #6, #10 or #8. Those issues retain their own scientific acceptance criteria. It only establishes which inputs exist and which do not.
 

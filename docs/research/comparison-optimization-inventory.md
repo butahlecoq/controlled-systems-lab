@@ -2,6 +2,8 @@
 
 Audit date: 2026-10-17. Ticket [#396](https://github.com/butahlecoq/controlled-systems-lab/issues/396), audited from `origin/main` at `80dea18`. This is a source/documentation audit, not an execution or reproduction. Source identifiers L01–L31 and A01–A38 are defined in [source-map.md](source-map.md) and [archive-selected-sources.json](archive-selected-sources.json). Archive code is local-only and was not redistributed. Evidence references below identify the existing archival audit and its source anchors; reported results remain reported, not reproduced.
 
+Owner direction (2026-10-20): the comparison harness targets algorithms in a common C++ runtime, so archived MATLAB/Python/Pascal methods are translated into C++ rather than compared through their original language runtimes. For B03, incomplete historical inputs do not block the algorithmic comparison; they only prevent a historical replay.
+
 ## Inventory
 
 | Method / source | Language and artifact | Problem class and actual use | Reported baseline | Modern counterpart or gap |
@@ -36,7 +38,7 @@ Candidates for follow-up (titles only; not created):
 1. Port archived Pascal Zoutendijk projection into a common runtime with checked feasibility and KKT evidence
 2. Add a modern projection/QP comparison adapter for Euclidean projection workloads
 3. Compare independently selected convex-QP backends under a shared objective/result contract
-4. Recover reproducible B03 hull generators, seeds and historical input data
+4. Port the B03 baseline and modified hull algorithms into the C++ comparison runtime and compare them on shared fixtures; historical generator/seed recovery is optional and only for a separate replay goal (owner direction 2026-10-20)
 5. Port and instrument the distinct MATLAB basis/ordered/grouped hull variants
 6. Derive and characterize Pascal `CHEBR` before naming its modern counterpart
 7. Add a documented interior-point mode comparison for supported LP backends
