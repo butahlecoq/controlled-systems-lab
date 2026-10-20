@@ -885,6 +885,83 @@ TEST_CASE("exact linear H verifier matches independent 2D continuous oracle") {
         "Diagnostics: "<<branch_diagnostics);
 }
 
+TEST_CASE("exact linear H verifier preserves a continuous optimum across an existential reset") {
+    const auto control=h_set("oracle-existential-reset-control",1,
+        Matrix{2,1,{-1,1}},Vector{0,1},Matrix{0,1,{}},Vector{});
+    const auto reset=h_set("oracle-existential-reset-relation",2,
+        Matrix{2,2,{1,-1,-1,1}},Vector{0,1},Matrix{0,2,{}},Vector{});
+    model::HybridMode source{{"oracle-reset-source"},1,1,{"x"},{"u"}};
+    source.flow=LinearStage{Matrix{1,1,{1}},Matrix{1,1,{0}},
+        Matrix{1,0,{}},Vector{0}};
+    source.control_sets={control};
+    source.invariants={UniversalSet{1},UniversalSet{1}};
+    model::HybridMode target{{"oracle-reset-target"},1,0,{"y"},{}};
+    target.flow=LinearStage{Matrix{1,1,{1}},Matrix{1,0,{}},
+        Matrix{1,0,{}},Vector{0}};
+    target.control_sets={UniversalSet{0}};
+    target.invariants={UniversalSet{1},UniversalSet{1}};
+    model::HybridSystem system{1,{source,target},
+        {{{"oracle-existential-reset-edge"},source.id,target.id,
+          {UniversalSet{1}},{reset}}}};
+    model::HybridRequest request{{source.id,{0}},{target.id},
+        {{target.id,LinearTerminal{{1},0},"terminal state","units"}}};
+
+    const auto built=build_hybrid_portfolio_programs(system,request,
+        {"oracle-existential-reset"},{1,2},{8,32,512});
+    REQUIRE(std::holds_alternative<std::vector<HybridPathProgram>>(built));
+    const auto& programs=std::get<std::vector<HybridPathProgram>>(built);
+    REQUIRE(programs.size()==1);
+    CHECK(programs.front().joint_relation.metadata()->set.dimension==4);
+    CHECK(std::get<LinearTerminal>(programs.front().lifted_objective).coefficients==
+        Vector{0,0,0,1});
+
+    // In tuple order (x0,u,x_pre,y), x0=0 and x_pre=x0 force x_pre=0.
+    // The reset is 0<=y-x_pre<=1, so minimizing y fixes y=0 while leaving
+    // the independent control coordinate u anywhere in [0,1].
+    const auto full_face=sets::from_handle(h_set("oracle-existential-reset-full-face",4,
+        Matrix{4,4,{0,-1,0,0, 0,1,0,0, 0,0,1,-1, 0,0,-1,1}},
+        Vector{0,1,0,1},
+        Matrix{3,4,{1,0,0,0, -1,0,1,0, 0,0,0,1}},Vector{0,0,0}));
+    REQUIRE(std::holds_alternative<sets::SetData>(full_face));
+    auto complete=exact_candidate(programs.front(),{0,0.5,0,0});
+    complete.relation=std::get<sets::SetData>(full_face);
+
+    ExactLinearHHybridFamilyVerifier verifier;
+    const std::array<HybridPathOptimalFaceCandidate,1> complete_candidates{std::move(complete)};
+    const auto verified=verify_hybrid_portfolio_family(verifier,system,request,
+        programs,complete_candidates,{1,2},{0,0});
+    REQUIRE(std::holds_alternative<HybridFamilyVerificationReport>(verified));
+    const auto& report=std::get<HybridFamilyVerificationReport>(verified);
+    CHECK(report.global_objective_optimality==HybridVerificationStatus::established);
+    CHECK(report.complete_family_coverage==HybridVerificationStatus::established);
+    REQUIRE(report.branches.size()==1);
+    CHECK(report.branches.front().feasibility==HybridVerificationStatus::established);
+    CHECK(report.branches.front().objective_optimality==HybridVerificationStatus::established);
+    CHECK(report.branches.front().continuous_coverage==HybridVerificationStatus::established);
+
+    // A face that fixes u=0 is feasible and optimal, but omits other optimal
+    // points. The verifier must refute completeness instead of accepting it.
+    const auto narrow_face=sets::from_handle(h_set("oracle-existential-reset-narrow-face",4,
+        Matrix{4,4,{0,-1,0,0, 0,1,0,0, 0,0,1,-1, 0,0,-1,1}},
+        Vector{0,1,0,1},
+        Matrix{4,4,{1,0,0,0, -1,0,1,0, 0,0,0,1, 0,1,0,0}},
+        Vector{0,0,0,0}));
+    REQUIRE(std::holds_alternative<sets::SetData>(narrow_face));
+    auto incomplete=exact_candidate(programs.front(),{0,0,0,0});
+    incomplete.relation=std::get<sets::SetData>(narrow_face);
+    const std::array<HybridPathOptimalFaceCandidate,1> incomplete_candidates{std::move(incomplete)};
+    const auto rejected=verify_hybrid_portfolio_family(verifier,system,request,
+        programs,incomplete_candidates,{1,2},{0,0});
+    REQUIRE(std::holds_alternative<HybridFamilyVerificationReport>(rejected));
+    const auto& rejected_report=std::get<HybridFamilyVerificationReport>(rejected);
+    CHECK(rejected_report.global_objective_optimality==HybridVerificationStatus::established);
+    CHECK(rejected_report.complete_family_coverage==HybridVerificationStatus::refuted);
+    REQUIRE(rejected_report.branches.size()==1);
+    CHECK(rejected_report.branches.front().feasibility==HybridVerificationStatus::established);
+    CHECK(rejected_report.branches.front().objective_optimality==HybridVerificationStatus::established);
+    CHECK(rejected_report.branches.front().continuous_coverage==HybridVerificationStatus::refuted);
+}
+
 TEST_CASE("exact linear H verifier matches independent 3D control-box oracle") {
     using namespace model;
     const auto control_box=h_set("oracle-control-box-3d",3,

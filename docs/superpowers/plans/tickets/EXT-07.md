@@ -122,6 +122,14 @@ and exterior rejection, and provider/operation row evidence. This single
 bounded fixture strengthens continuous projection coverage for rectangular
 set-valued resets; it does not establish broader polytope or resource scaling.
 
+The exact linear-H family-verifier tests now also include a one-step scalar
+continuous reset family. With `u ∈ [0, 1]`, `x_pre = x0 = 0`, and existential
+reset constraint `0 ≤ y - x_pre ≤ 1`, minimizing `y` leaves the full optimal
+face `y = 0`, `u ∈ [0, 1]`. The exact verifier establishes this literal face
+and refutes a feasible candidate that incorrectly fixes `u = 0`, exercising
+continuous completeness across a nonfunctional reset. This remains a bounded
+one-step oracle rather than exhaustive coverage of the admitted H domain.
+
 The [EXT-07 capability profile and fixture report](../../../research/ext07-capability-profile.md)
 records the declared adapter/verifier domains and named dimensions, horizons,
 mode counts, edge counts, path counts, and relation widths. It separates saved
