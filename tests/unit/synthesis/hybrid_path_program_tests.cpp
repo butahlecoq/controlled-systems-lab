@@ -8,6 +8,7 @@
 #include <algorithm>
 #include <array>
 #include <limits>
+#include <memory>
 #include <string_view>
 
 using namespace csl;
@@ -504,6 +505,54 @@ public:
 private:
     std::stop_source* cancellation_;
 };
+
+registry::PreparedProvider<registry::GeometryPort> row_limited_projection_provider(
+    std::size_t maximum_rows,
+    const std::shared_ptr<std::vector<std::pair<std::string,std::size_t>>>& admissions,
+    const std::shared_ptr<int>& workspace_creations,
+    std::stop_source* cancel_during_admission=nullptr) {
+    registry::Registry<registry::GeometryPort> providers;
+    registry::Registration<registry::GeometryPort> registration{
+        {ModuleId{"fixture.row-limited-projection"},"1.0"},
+        [maximum_rows,admissions,cancel_during_admission](const OperationRequest& request,
+            const registry::Requirements&) -> registry::Capability {
+            if(cancel_during_admission) cancel_during_admission->request_stop();
+            const auto* projection=std::get_if<Projection>(&request.operation);
+            if(!projection)
+                return Diagnostics{{DiagnosticCode::invalid_input,"fixture.projection.operation",
+                    "fixture expected a projection request"}};
+            const auto imported=sets::from_handle(projection->input);
+            if(!std::holds_alternative<sets::SetData>(imported))
+                return Diagnostics{{DiagnosticCode::invalid_input,"fixture.projection.input",
+                    "fixture expected an importable projection input"}};
+            const auto representation=std::get<sets::SetData>(imported).representation();
+            if(!std::holds_alternative<sets::HRepresentation>(representation))
+                return Diagnostics{{DiagnosticCode::unsupported,"fixture.projection.representation",
+                    "fixture expected an H projection input"}};
+            const auto& h=std::get<sets::HRepresentation>(representation);
+            const auto rows=h.inequalities.rows()+h.equalities.rows();
+            admissions->emplace_back(request.identity.request.value,rows);
+            if(rows>maximum_rows)
+                return Diagnostics{{DiagnosticCode::unsupported,"fixture.projection.preflight",
+                    "fixture projection row cap rejected admission"}};
+            registry::Output output;
+            output.representation={"csl.polyhedron.h"};
+            output.relation=SetRelation::equivalent;
+            return registry::Offer{output};
+        },
+        [workspace_creations](const OperationRequest&) -> std::unique_ptr<SetOperatorWorkspace> {
+            ++*workspace_creations;
+            return {};
+        }};
+    REQUIRE_FALSE(providers.add(std::move(registration)).has_value());
+    registry::Requirements requirements;
+    requirements.output.representation={"csl.polyhedron.h"};
+    requirements.output.relation=SetRelation::equivalent;
+    const auto prepared=registry::prepare_provider(registry::select_provider(providers,
+        {ModuleId{"fixture.row-limited-projection"},std::string{"1.0"}},requirements));
+    REQUIRE(std::holds_alternative<registry::PreparedProvider<registry::GeometryPort>>(prepared));
+    return std::get<registry::PreparedProvider<registry::GeometryPort>>(prepared);
+}
 
 class MisreportingReachabilityAdapter final : public HybridReachabilityAdapter {
 public:
@@ -1254,6 +1303,41 @@ TEST_CASE("general projected hybrid reachability projects the terminal state acr
     CHECK(satisfies(relation_h,{0.0,0.25,0.25,0.25,0.0,0.25,0.25}));
     CHECK(reachable.projected_state->input_rows==
         relation_h.inequalities.rows()+relation_h.equalities.rows());
+}
+
+TEST_CASE("general projected reachability preflights the geometry provider before workspace creation") {
+    auto [system,request]=projected_interval_fixture();
+    const model::HybridPath path{{{"source"},{"target"}},{{"transition"}}};
+    auto admissions=std::make_shared<std::vector<std::pair<std::string,std::size_t>>>();
+    auto workspace_creations=std::make_shared<int>(0);
+    GeneralProjectedStateHybridReachabilityAdapter adapter(
+        row_limited_projection_provider(1,admissions,workspace_creations),16);
+
+    const auto result=compute_hybrid_path_reachability(adapter,system,request,path,{8,32,256});
+    REQUIRE(std::holds_alternative<Diagnostics>(result));
+    CHECK(std::get<Diagnostics>(result).front().field=="fixture.projection.preflight");
+    REQUIRE(admissions->size()==1);
+    CHECK(admissions->front().first.starts_with("preflight:"));
+    CHECK(admissions->front().second>1);
+    CHECK(*workspace_creations==0);
+}
+
+TEST_CASE("general projected reachability honors cancellation during provider admission") {
+    auto [system,request]=projected_interval_fixture();
+    const model::HybridPath path{{{"source"},{"target"}},{{"transition"}}};
+    auto admissions=std::make_shared<std::vector<std::pair<std::string,std::size_t>>>();
+    auto workspace_creations=std::make_shared<int>(0);
+    std::stop_source cancellation;
+    GeneralProjectedStateHybridReachabilityAdapter adapter(
+        row_limited_projection_provider(64,admissions,workspace_creations,&cancellation),16);
+
+    const auto result=compute_hybrid_path_reachability(adapter,system,request,path,{8,32,256},
+        cancellation.get_token());
+    REQUIRE(std::holds_alternative<OperationStopped>(result));
+    CHECK(std::get<OperationStopped>(result).reason==StopReason::cancelled);
+    REQUIRE(admissions->size()==1);
+    CHECK(admissions->front().first.starts_with("preflight:"));
+    CHECK(*workspace_creations==0);
 }
 
 TEST_CASE("general projected hybrid reachability selects a dimension-changing terminal block") {

@@ -57,6 +57,17 @@ horizons and dimensions. Both projected adapters retain the full branch relation
 and provider/row evidence; the general adapter preflights the complete path row
 inventory. Full provider/resource aggregation remains open.
 
+The general projected-state adapter also asks its selected geometry provider
+to admit a dimension-, coordinate-, and row-count-matched H projection request
+during preflight, before joint relation composition. The probe uses zero
+coefficients, places all rows in the inequality matrix, and describes the
+universal set. Providers whose capability checks depend on coefficient values,
+coordinate labels, row partition, or set metadata remain outside this admission
+guarantee. This capability check creates no provider workspace and discards its
+result if cancellation arrives during admission; runtime resource rejection and
+provider admission at other adapter seams remain possible and are still tracked
+as open work.
+
 The EXT-07 report set now contains a one-step scalar interval case and a
 two-stage/two-control scalar polygon case, each exercised through path
 construction, HiGHS optimization, and family verification. The published

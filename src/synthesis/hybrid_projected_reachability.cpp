@@ -5,6 +5,7 @@
 #include <iomanip>
 #include <limits>
 #include <locale>
+#include <numeric>
 #include <optional>
 #include <sstream>
 #include <stdexcept>
@@ -120,6 +121,29 @@ registry::PreparedProvider<registry::GeometryPort> make_projection_provider(std:
             (rejection->diagnostics.empty()?std::string{"unknown registration error"}:
                 rejection->diagnostics.front().explanation));
     return std::get<registry::PreparedProvider<registry::GeometryPort>>(std::move(prepared));
+}
+
+std::optional<sets::SetData> make_projection_admission_probe(
+    std::size_t dimension,std::size_t row_count) {
+    if(dimension!=0 && row_count>std::numeric_limits<std::size_t>::max()/dimension)
+        return std::nullopt;
+    Matrix inequalities{row_count,dimension,
+        std::vector<double>(row_count*dimension,0.0)};
+    Matrix equalities{0,dimension,{}};
+    const auto a=numeric::snapshot(inequalities);
+    const auto b=numeric::snapshot_vector(Vector(row_count,0.0));
+    const auto e=numeric::snapshot(equalities);
+    const auto f=numeric::snapshot_vector({});
+    if(!std::holds_alternative<numeric::MatrixView>(a) ||
+       !std::holds_alternative<numeric::VectorView>(b) ||
+       !std::holds_alternative<numeric::MatrixView>(e) ||
+       !std::holds_alternative<numeric::VectorView>(f))
+        return std::nullopt;
+    auto relation=sets::make_h({SetId{"hybrid-projection-admission-probe"},dimension,{}},
+        {std::get<numeric::MatrixView>(a),std::get<numeric::VectorView>(b),
+         std::get<numeric::MatrixView>(e),std::get<numeric::VectorView>(f)});
+    if(!std::holds_alternative<sets::SetData>(relation)) return std::nullopt;
+    return std::get<sets::SetData>(std::move(relation));
 }
 
 std::string exact_input_identity(const model::HybridPath& path,const sets::HRepresentation& relation,
@@ -346,6 +370,11 @@ GeneralProjectedStateHybridReachabilityAdapter::GeneralProjectedStateHybridReach
     :projection_(make_projection_provider(maximum_projection_rows)),
      maximum_projection_rows_(maximum_projection_rows) {}
 
+GeneralProjectedStateHybridReachabilityAdapter::GeneralProjectedStateHybridReachabilityAdapter(
+    registry::PreparedProvider<registry::GeometryPort> projection,
+    std::size_t maximum_projection_rows)
+    :projection_(std::move(projection)),maximum_projection_rows_(maximum_projection_rows) {}
+
 HybridReachabilityCapabilities GeneralProjectedStateHybridReachabilityAdapter::capabilities() const noexcept {
     return {true,Assurance::numerical};
 }
@@ -425,6 +454,51 @@ HybridReachabilityPreflightResult GeneralProjectedStateHybridReachabilityAdapter
     const auto terminal_rows=rows_in(terminal->invariants[system.horizon]);
     if(!terminal_rows || !add(required,*terminal_rows))
         return unsupported("hybrid.projected.row_limit","Projected relation exceeds the selected provider row limit");
+
+    // Ask the selected projection provider to admit a shape-matched operation
+    // before the joint relation composer runs. The probe retains the request's
+    // ambient dimension, terminal-coordinate indices, and preflighted row
+    // count, but uses zero coefficients because no composed relation exists yet.
+    // Provider preparation creates no workspace.
+    std::size_t joint_dimension=request.initial.state.size();
+    for(std::size_t stage=0;stage<system.horizon;++stage) {
+        const auto* source=mode(system,path.modes[stage]);
+        const auto* destination=mode(system,path.modes[stage+1]);
+        if(!source||!destination ||
+           source->control_dimension>std::numeric_limits<std::size_t>::max()-joint_dimension ||
+           source->state_dimension>std::numeric_limits<std::size_t>::max()-joint_dimension-source->control_dimension ||
+           destination->state_dimension>std::numeric_limits<std::size_t>::max()-joint_dimension-
+               source->control_dimension-source->state_dimension)
+            return unsupported("hybrid.projected.dimension","Joint projection dimension overflows size_t");
+        joint_dimension+=source->control_dimension+source->state_dimension+destination->state_dimension;
+    }
+    if(cancellation.stop_requested())
+        return OperationStopped{StopReason::cancelled,"General projected reachability preflight was cancelled before projection admission"};
+    auto probe=make_projection_admission_probe(joint_dimension,required);
+    if(!probe)
+        return unsupported("hybrid.projected.preflight","Could not create projection admission probe");
+    if(cancellation.stop_requested())
+        return OperationStopped{StopReason::cancelled,"General projected reachability preflight was cancelled after probe construction"};
+    std::vector<std::size_t> coordinates(terminal->state_dimension);
+    const auto first_terminal_coordinate=joint_dimension-terminal->state_dimension;
+    std::iota(coordinates.begin(),coordinates.end(),first_terminal_coordinate);
+    std::string path_identity;
+    for(const auto& id:path.modes) path_identity+=std::to_string(id.value.size())+":"+id.value+";";
+    path_identity+="/";
+    for(const auto& id:path.edges) path_identity+=std::to_string(id.value.size())+":"+id.value+";";
+    const GeometryRequestIdentity identity{
+        ProblemId{"hybrid-general-projected-reachability"},
+        RequestId{"preflight:"+path_identity+":"+std::to_string(joint_dimension)},
+        ReferenceId{"preflight:"+path_identity+":"+std::to_string(joint_dimension)}};
+    const auto selected=projection_.provenance();
+    const auto implementation=selected.actual?selected.actual->id:selected.requested.id;
+    OperationRequest projection_request{identity,implementation,
+        Projection{probe->as_handle(),std::move(coordinates)},SetRelation::equivalent,Assurance::numerical};
+    const auto provider_admission=projection_.prepare(projection_request);
+    if(cancellation.stop_requested())
+        return OperationStopped{StopReason::cancelled,"General projected reachability preflight was cancelled during provider admission"};
+    if(const auto* rejection=std::get_if<registry::Rejection>(&provider_admission))
+        return rejection->diagnostics;
     return std::monostate{};
 }
 

@@ -107,6 +107,9 @@ private:
 class GeneralProjectedStateHybridReachabilityAdapter final : public HybridReachabilityAdapter {
 public:
     explicit GeneralProjectedStateHybridReachabilityAdapter(std::size_t maximum_projection_rows = 4096);
+    GeneralProjectedStateHybridReachabilityAdapter(
+        registry::PreparedProvider<registry::GeometryPort> projection,
+        std::size_t maximum_projection_rows);
     HybridReachabilityCapabilities capabilities() const noexcept override;
     HybridReachabilityPreflightResult preflight(const model::HybridSystem&,
         const model::HybridRequest&, const model::HybridPath&,
