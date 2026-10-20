@@ -163,7 +163,7 @@ The direct-trajectory API is replaceable through
 `HybridDirectTrajectoryAdapter`; each adapter preflights its complete fixed-path
 inventory and relation limits before capability queries or branch builds.
 Every adapter preflight rejection carries a requested path, the configured
-relation limits, and one diagnostic for the first unsupported operation; the
+relation limits, and one primary diagnostic for the preflight failure; the
 wrapper checks that evidence before returning the rejection. Empty path
 inventories are rejected before adapter preflight because they have no branch
 to identify. A malformed adapter report is replaced with a
