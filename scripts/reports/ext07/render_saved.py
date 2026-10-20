@@ -135,9 +135,11 @@ img{{width:100%;height:auto}}code{{overflow-wrap:anywhere}}
 The initial mode is <code>coast</code> at stage 0, with scalar state <code>x₀=0</code>.
 There are two modes (<code>coast</code> and <code>terminal</code>) and one permitted edge
 <code>coast-to-terminal</code> from <code>coast</code> to <code>terminal</code> at the boundary
-between stages 0 and 1. The terminal mode is active at stage 1. Both mode invariants are universal
-sets (they impose no additional state restrictions). There are no external channels, observations,
-or temporal constraints. The source-mode scalar flow is <code>x_pre=x₀+u₀</code>, with control <code>u₀∈[0,1]</code>.
+between stages 0 and 1. The allowed terminal set is the singleton <code>{{terminal}}</code>, active at
+stage 1. Both mode invariants are universal sets (they impose no additional state restrictions).
+The source-mode flow is <code>x_pre=x₀+u₀</code>, with control <code>u₀∈[0,1]</code>. The stored
+terminal-mode flow has <code>A=1, B=1, offset=0</code> and a universal control set; it is inactive
+because the horizon ends at stage 1. There are no external channels, observations, or temporal constraints.
 The transition guard requires <code>x_pre∈[0,0.5]</code>; the one-dimensional identity reset sets
 <code>x₁=x_pre</code>. The terminal objective is <code>minimize x₁</code>.
 The full joint relation is <code>x₀=0, x_pre=u₀, x₁=u₀, 0≤u₀≤0.5</code>.
@@ -149,6 +151,7 @@ Its complete minimizer family is the point <code>(x₀,u₀,x_pre,x₁)=(0,0,0,0
 git worktree add --detach &lt;frozen-source&gt; {source}
 python scripts/reports/ext07/capture.py --source &lt;frozen-source&gt; --capture &lt;fresh-capture&gt; --commit {source} --cmake cmake
 python scripts/reports/ext07/ext07_collect.py --capture &lt;fresh-capture&gt; --source &lt;frozen-source&gt; --out &lt;fresh-output&gt;
+python scripts/reports/ext07/render_saved.py --bundle &lt;fresh-output&gt;/&lt;report-id&gt;
 python scripts/reports/ext07/render_saved.py --bundle &lt;fresh-output&gt;/&lt;report-id&gt; --check</code></pre>
 <p>Frozen source: <a href="https://github.com/butahlecoq/controlled-systems-lab/commit/{source}">commit {source}</a>.
 The <a href="records.json">raw scenario and report record</a> and <a href="measure.jsonl">raw measured trials</a> are available beside this page.</p></div>

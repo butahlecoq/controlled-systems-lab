@@ -120,13 +120,21 @@ def collect(capture: Path, source: Path, output_root: Path) -> Path:
         return int(statistics.median(row[key] for row in rows))
     scenario = {
         "horizon": 1, "modes": ["coast", "terminal"],
+        "allowed_terminal_modes": ["terminal"],
         "edges": [{"id": "coast-to-terminal", "source": "coast", "target": "terminal"}],
         "state_dimension": 1, "control_dimension": 1,
         "initial_mode": "coast", "initial_state": [0],
         "dynamics": {"A": [[1]], "B": [[1]], "offset": [0]},
         "control_interval": [0, 1], "source_invariants": "universal",
         "transition_guard": [0, 0.5], "reset": {"type": "identity"},
-        "terminal_invariant": "universal", "terminal_objective": "minimize x_terminal",
+        "terminal_invariant": "universal",
+        "terminal_mode_data": {
+            "flow": {"A": [[1]], "B": [[1]], "offset": [0]},
+            "control_set": "universal",
+            "active_stages": [1],
+            "flow_used_by_horizon": False,
+        },
+        "terminal_objective": "minimize x_terminal",
         "relation_coordinates": ["x0", "u0", "x_pre1", "x1"],
     }
     unsigned = {

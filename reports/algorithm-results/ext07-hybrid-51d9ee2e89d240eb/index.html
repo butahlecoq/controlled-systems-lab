@@ -1,20 +1,22 @@
 <!doctype html><html lang="en"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>EXT-07 · 2D joint-relation example</title><style>
+<title>EXT-07 · Hybrid profile numerical report</title><style>
 body{background:#16161e;color:#e0def4;font:16px/1.55 system-ui,sans-serif;margin:0}
 header,main,footer{max-width:980px;margin:auto;padding:1.3rem}a{color:#9ccfd8}
 .section{background:#23212c;border:1px solid #524f67;border-radius:12px;padding:1rem;margin:1rem 0}
 table{border-collapse:collapse;width:100%;display:block;overflow-x:auto}td,th{border:1px solid #524f67;padding:.45rem;text-align:left;white-space:nowrap}
 img{width:100%;height:auto}code{overflow-wrap:anywhere}
-</style></head><body><div><p>Controlled Systems Lab · EXT-07</p><h1>2D joint-relation example</h1><p>The axes show the joint relation between one scalar control and the terminal state.</p></div><div>
+</style></head><body><div><p>Controlled Systems Lab · EXT-07</p><h1>Hybrid profile numerical report</h1><p>Recorded execution of the public hybrid path, optimization and family-verification route.</p></div><div>
 <div class="section"><h2>Input and analytic result</h2>
 <p>The state dimension is one and the horizon is one stage, from time 0 to time 1.
 The initial mode is <code>coast</code> at stage 0, with scalar state <code>x₀=0</code>.
 There are two modes (<code>coast</code> and <code>terminal</code>) and one permitted edge
 <code>coast-to-terminal</code> from <code>coast</code> to <code>terminal</code> at the boundary
-between stages 0 and 1. The terminal mode is active at stage 1. Both mode invariants are universal
-sets (they impose no additional state restrictions). There are no external channels, observations,
-or temporal constraints. The source-mode scalar flow is <code>x_pre=x₀+u₀</code>, with control <code>u₀∈[0,1]</code>.
+between stages 0 and 1. The allowed terminal set is the singleton <code>{terminal}</code>, active at
+stage 1. Both mode invariants are universal sets (they impose no additional state restrictions).
+The source-mode flow is <code>x_pre=x₀+u₀</code>, with control <code>u₀∈[0,1]</code>. The stored
+terminal-mode flow has <code>A=1, B=1, offset=0</code> and a universal control set; it is inactive
+because the horizon ends at stage 1. There are no external channels, observations, or temporal constraints.
 The transition guard requires <code>x_pre∈[0,0.5]</code>; the one-dimensional identity reset sets
 <code>x₁=x_pre</code>. The terminal objective is <code>minimize x₁</code>.
 The full joint relation is <code>x₀=0, x_pre=u₀, x₁=u₀, 0≤u₀≤0.5</code>.
@@ -26,6 +28,7 @@ Its complete minimizer family is the point <code>(x₀,u₀,x_pre,x₁)=(0,0,0,0
 git worktree add --detach &lt;frozen-source&gt; 2965baafa325550ad60ec91d44f5e3f86a832178
 python scripts/reports/ext07/capture.py --source &lt;frozen-source&gt; --capture &lt;fresh-capture&gt; --commit 2965baafa325550ad60ec91d44f5e3f86a832178 --cmake cmake
 python scripts/reports/ext07/ext07_collect.py --capture &lt;fresh-capture&gt; --source &lt;frozen-source&gt; --out &lt;fresh-output&gt;
+python scripts/reports/ext07/render_saved.py --bundle &lt;fresh-output&gt;/&lt;report-id&gt;
 python scripts/reports/ext07/render_saved.py --bundle &lt;fresh-output&gt;/&lt;report-id&gt; --check</code></pre>
 <p>Frozen source: <a href="https://github.com/butahlecoq/controlled-systems-lab/commit/2965baafa325550ad60ec91d44f5e3f86a832178">commit 2965baafa325550ad60ec91d44f5e3f86a832178</a>.
 The <a href="records.json">raw scenario and report record</a> and <a href="measure.jsonl">raw measured trials</a> are available beside this page.</p></div>
@@ -50,6 +53,6 @@ or scalability claim. Thread and backend details, all raw repetitions, source/bu
 are retained in the <a href="records.json">versioned record</a>,
 <a href="measure.jsonl">raw trials</a>, <a href="smoke.jsonl">smoke row</a>,
 <a href="summary.csv">summary CSV</a>, <a href="manifest.json">manifest</a>, and
-<a href="ext07-hybrid-2cba9c13b79afd2b.zip">offline ZIP</a>. Frozen source: <a href="https://github.com/butahlecoq/controlled-systems-lab/commit/2965baafa325550ad60ec91d44f5e3f86a832178">2965baafa325550ad60ec91d44f5e3f86a832178</a>.</p></div>
-<p><a href="index.html">Full report</a></p>
+<a href="ext07-hybrid-51d9ee2e89d240eb.zip">offline ZIP</a>. Frozen source: <a href="https://github.com/butahlecoq/controlled-systems-lab/commit/2965baafa325550ad60ec91d44f5e3f86a832178">2965baafa325550ad60ec91d44f5e3f86a832178</a>.</p></div>
+<p><a href="example-2d.html">Open the 2D example</a></p>
 </div><div>EXT-07 · one-step scalar interval evidence only</div></body></html>

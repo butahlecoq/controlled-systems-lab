@@ -1,15 +1,15 @@
 {
   "reports": [
     {
-      "collector_sha256": "5748eed4f379a15f386feee169f28836857f5766c863443ef3c4586d597e4500",
-      "index_sha256": "7ef98ea0a49b8b138c8368d052a1787ce67b32f9c05f125582fc329d27f0006c",
-      "manifest_sha256": "1b55d6dd12037eecb9c56eb6cea9c36550c2694b7a66d6b68dec1c7cfbb6e7b4",
-      "renderer_sha256": "bbb885ffa7ef0276e7ec551b15d289aece3ca01e5bf062d03510b3cdc36c11f2",
-      "report_id": "ext07-hybrid-2cba9c13b79afd2b",
+      "collector_sha256": "02091eeca10f9cb20c776cef71f4b78a6ce413b0405c0797843e003719b39617",
+      "index_sha256": "9b914e6355ab9b0ca480b3b50712d2d9182f0c81985cc411bf140f8015359496",
+      "manifest_sha256": "4699fb473b04daa04f35141489ba39914bc91cf0870f88cf1b774977dcd429df",
+      "renderer_sha256": "0769946a77183adc5ec85acdb5b1183b70b32b074def3aa033ea7387a32af03e",
+      "report_id": "ext07-hybrid-51d9ee2e89d240eb",
       "schema": "csl.ext07-hybrid-profile-report/1",
       "source_commit": "2965baafa325550ad60ec91d44f5e3f86a832178",
       "stager_sha256": "95b4fb6aa61bf9100373554ee161ba9648efbafc64a0ab36bc5c5b525e3afdd1",
-      "zip_sha256": "794eacdd3e8f3418505b83f0656f5223f982effe6c82d8de51c241474528741f"
+      "zip_sha256": "9d4cf7eb42fe60e3f2e38241ea14fdf6e4484a4b7591286f41f3beafc6c89731"
     }
   ],
   "schema": "csl.ext07-publications/1"

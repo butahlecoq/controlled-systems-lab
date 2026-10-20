@@ -60,13 +60,28 @@ class Ext07SavedReportTests(unittest.TestCase):
     def test_published_example_has_complete_inputs_reproduction_and_provenance(self) -> None:
         record = collect.read_json(self.bundle / "records.json")
         source = record["source_commit"]
+        scenario = record["scenario"]
         page = (self.bundle / "example-2d.html").read_text(encoding="utf-8")
+        self.assertEqual(scenario["allowed_terminal_modes"], ["terminal"])
+        self.assertEqual(scenario["terminal_mode_data"], {
+            "flow": {"A": [[1]], "B": [[1]], "offset": [0]},
+            "control_set": "universal",
+            "active_stages": [1],
+            "flow_used_by_horizon": False,
+        })
         for phrase in ("state dimension is one", "one stage", "initial mode is", "coast-to-terminal",
-                       "terminal mode is active at stage 1", "mode invariants are universal",
+                       "allowed terminal set is the singleton", "terminal-mode flow has",
+                       "universal control set", "because the horizon ends at stage 1",
+                       "mode invariants are universal",
                        "sets (they impose no additional state restrictions)", "no external channels",
                        "x₀=0", "u₀∈[0,1]", "x_pre∈[0,0.5]", "identity reset", "minimize x₁",
                        "scripts/reports/ext07/capture.py", "scripts/reports/ext07/ext07_collect.py"):
             self.assertIn(phrase, page)
+        self.assertLess(page.index("ext07_collect.py"), page.index("render_saved.py --bundle", page.index("Reproduce")))
+        render_lines = [line for line in page.splitlines() if "render_saved.py --bundle" in line]
+        self.assertEqual(len(render_lines), 2)
+        self.assertIn("--check", render_lines[1])
+        self.assertNotIn("--check", render_lines[0])
         self.assertIn('href="records.json"', page)
         self.assertIn(f'href="https://github.com/butahlecoq/controlled-systems-lab/commit/{source}"', page)
         self.assertIn(f'commit {source}', page)

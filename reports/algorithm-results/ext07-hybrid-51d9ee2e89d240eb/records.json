@@ -319,8 +319,11 @@
       "verify_total_ns": 279200
     }
   },
-  "report_id": "ext07-hybrid-2cba9c13b79afd2b",
+  "report_id": "ext07-hybrid-51d9ee2e89d240eb",
   "scenario": {
+    "allowed_terminal_modes": [
+      "terminal"
+    ],
     "control_dimension": 1,
     "control_interval": [
       0,
@@ -369,13 +372,35 @@
     "source_invariants": "universal",
     "state_dimension": 1,
     "terminal_invariant": "universal",
+    "terminal_mode_data": {
+      "active_stages": [
+        1
+      ],
+      "control_set": "universal",
+      "flow": {
+        "A": [
+          [
+            1
+          ]
+        ],
+        "B": [
+          [
+            1
+          ]
+        ],
+        "offset": [
+          0
+        ]
+      },
+      "flow_used_by_horizon": false
+    },
     "terminal_objective": "minimize x_terminal",
     "transition_guard": [
       0,
       0.5
     ]
   },
-  "scenario_sha256": "d35b9fa182ef0753d36234b056a1974f9a9c3bd01b8ddbe23bd90fc136e5ac64",
+  "scenario_sha256": "8a9d78192023db0a4116e4ec3b947cb7d06d22d436447c8a11edaf61fe2bf335",
   "schema": "csl.ext07-hybrid-profile-report/1",
   "source_commit": "2965baafa325550ad60ec91d44f5e3f86a832178",
   "source_receipts": {
