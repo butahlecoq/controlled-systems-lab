@@ -12,6 +12,20 @@ namespace {
 using namespace model;
 constexpr std::size_t kMaximumAdmissibleRows=100'000;
 
+std::optional<Diagnostic> scalar_terminal_objective_admission_diagnostic(
+    const HybridRequest& request,const HybridModeId& terminal_mode) {
+    const auto objective=std::find_if(request.terminal_objectives.begin(),request.terminal_objectives.end(),
+        [&](const auto& candidate){return candidate.mode==terminal_mode;});
+    const auto* linear=objective==request.terminal_objectives.end()?nullptr:
+        std::get_if<LinearTerminal>(&objective->objective);
+    if(!linear||linear->coefficients.size()!=1||!std::isfinite(linear->coefficients[0])||
+       !std::isfinite(linear->offset))
+        return Diagnostic{DiagnosticCode::unsupported,"hybrid.verification.scalar_interval_objective",
+            "Terminal mode "+terminal_mode.value+
+            ": scalar interval verification currently supports scalar linear terminal objectives"};
+    return {};
+}
+
 struct Interval {
     double lower{-std::numeric_limits<double>::infinity()};
     double upper{std::numeric_limits<double>::infinity()};
@@ -837,6 +851,24 @@ HybridFamilyVerificationPreflightResult OneStepScalarIntervalHybridFamilyVerifie
     if(system.horizon!=1)
         return Diagnostics{{DiagnosticCode::unsupported,"hybrid.verification.scalar_interval_horizon",
             "OneStepScalarIntervalHybridFamilyVerifier supports horizon one only"}};
+    for(const auto& terminal_mode:request.allowed_terminal_modes) {
+        if(cancellation.stop_requested())
+            return OperationStopped{StopReason::cancelled,
+                "One-step scalar verifier admission was cancelled while checking terminal objectives"};
+        bool has_path_to_terminal=false;
+        for(const auto& path:paths) {
+            if(cancellation.stop_requested())
+                return OperationStopped{StopReason::cancelled,
+                    "One-step scalar verifier admission was cancelled while scanning terminal paths"};
+            if(!path.modes.empty()&&path.modes.back()==terminal_mode) {
+                has_path_to_terminal=true;
+                break;
+            }
+        }
+        if(has_path_to_terminal) continue;
+        if(const auto diagnostic=scalar_terminal_objective_admission_diagnostic(request,terminal_mode))
+            return Diagnostics{{*diagnostic}};
+    }
     for(const auto& path:paths) {
         if(cancellation.stop_requested())
             return OperationStopped{StopReason::cancelled,
@@ -1054,6 +1086,24 @@ HybridFamilyVerificationPreflightResult SingleParameterScalarIntervalHybridFamil
     const HybridSystem& system,const HybridRequest& request,std::span<const HybridPath> paths,
     std::span<const HybridPlannedOperation> operation_plan,
     std::stop_token cancellation) const {
+    for(const auto& terminal_mode:request.allowed_terminal_modes) {
+        if(cancellation.stop_requested())
+            return OperationStopped{StopReason::cancelled,
+                "Single-parameter scalar verifier admission was cancelled while checking terminal objectives"};
+        bool has_path_to_terminal=false;
+        for(const auto& path:paths) {
+            if(cancellation.stop_requested())
+                return OperationStopped{StopReason::cancelled,
+                    "Single-parameter scalar verifier admission was cancelled while scanning terminal paths"};
+            if(!path.modes.empty()&&path.modes.back()==terminal_mode) {
+                has_path_to_terminal=true;
+                break;
+            }
+        }
+        if(has_path_to_terminal) continue;
+        if(const auto diagnostic=scalar_terminal_objective_admission_diagnostic(request,terminal_mode))
+            return Diagnostics{{*diagnostic}};
+    }
     for(const auto& path:paths) {
         if(cancellation.stop_requested())
             return OperationStopped{StopReason::cancelled,

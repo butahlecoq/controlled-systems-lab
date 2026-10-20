@@ -213,6 +213,17 @@ HybridFamilyVerificationPreflightResult ExactLinearHHybridFamilyVerifier::prefli
         if(cancellation.stop_requested())
             return OperationStopped{StopReason::cancelled,
                 "Exact linear H verifier preflight was cancelled while checking terminal objectives"};
+        bool has_path_to_terminal=false;
+        for (const auto& path : paths) {
+            if (cancellation.stop_requested())
+                return OperationStopped{StopReason::cancelled,
+                    "Exact linear H verifier preflight was cancelled while scanning terminal paths"};
+            if (!path.modes.empty() && path.modes.back()==terminal_mode) {
+                has_path_to_terminal=true;
+                break;
+            }
+        }
+        if (has_path_to_terminal) continue;
         const auto objective = std::find_if(request.terminal_objectives.begin(),
             request.terminal_objectives.end(), [&](const auto& candidate) {
                 return candidate.mode==terminal_mode;

@@ -52,9 +52,9 @@ runs each built-in verifier's bounded-domain preflight; custom bounded verifiers
 fail closed until they implement preflight. The standalone family-verification
 entry point also performs complete-path verifier preflight before dispatch and
 returns its scoped admission diagnostic without invoking an unsupported
-verifier. The exact linear-H and exact singleton verifiers check the supported
-terminal objective class for every allowed terminal mode, including unreachable
-modes, before path-specific work. Fixed-path reachability now has both
+verifier. Built-in linear-only verifiers check the supported terminal objective
+class for every allowed terminal mode, including unreachable modes, before
+path-specific work. Fixed-path reachability now has both
 the direct joint-H adapter, a bounded one-transition scalar adapter that
 independently assembles and projects its path relation, and a general projected
 adapter that composes and projects the full joint-H relation for admitted finite

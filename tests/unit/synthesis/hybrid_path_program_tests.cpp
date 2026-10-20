@@ -3077,6 +3077,54 @@ TEST_CASE("exact singleton verifier rejects unreachable unsupported terminal obj
     CHECK(trajectory.capability_calls==0);
 }
 
+TEST_CASE("scalar interval verifiers preflight objectives for every allowed terminal mode") {
+    const auto make_scalar_system=[](std::size_t horizon) {
+        model::HybridMode source{{"source"},1,1,{"x"},{"u"}};
+        model::HybridMode target{{"target"},1,0,{"y"},{}};
+        const LinearStage source_flow{
+            Matrix{1,1,{1}},Matrix{1,1,{1}},Matrix{1,0,{}},Vector{0}};
+        const LinearStage target_flow{
+            Matrix{1,1,{1}},Matrix{1,0,{}},Matrix{1,0,{}},Vector{0}};
+        source.flow=std::vector<LinearStage>(horizon,source_flow);
+        source.control_sets.assign(horizon,UniversalSet{1});
+        source.invariants.assign(horizon+1,UniversalSet{1});
+        target.flow=std::vector<LinearStage>(horizon,target_flow);
+        target.control_sets.assign(horizon,UniversalSet{0});
+        target.invariants.assign(horizon+1,UniversalSet{1});
+        auto unreachable=target;
+        unreachable.id={"unreachable-terminal"};
+        return model::HybridSystem{horizon,
+            {std::move(source),std::move(target),std::move(unreachable)}, {}};
+    };
+    const auto make_request=[] {
+        return model::HybridRequest{{{"source"},{0}},{{"target"},{"unreachable-terminal"}},
+            {{{"target"},LinearTerminal{{1},0},"energy","J"},
+             {{"unreachable-terminal"},
+                 QuadraticTerminal{Matrix{1,1,{1}},Vector{0},0},"energy","J"}}};
+    };
+    const auto check_rejection=[&](auto& verifier,std::size_t horizon) {
+        const auto system=make_scalar_system(horizon);
+        const auto request=make_request();
+        const std::vector<model::HybridPath> paths;
+        const std::vector<model::HybridPlannedOperation> operation_plan;
+        const auto result=verifier.preflight(system,request,paths,operation_plan,{});
+        REQUIRE(std::holds_alternative<Diagnostics>(result));
+        REQUIRE_FALSE(std::get<Diagnostics>(result).empty());
+        CHECK(std::get<Diagnostics>(result).front().code==DiagnosticCode::unsupported);
+        CHECK(std::get<Diagnostics>(result).front().field==
+            "hybrid.verification.scalar_interval_objective");
+        CHECK(std::get<Diagnostics>(result).front().explanation.find("unreachable-terminal")!=
+            std::string::npos);
+    };
+
+    OneStepScalarIntervalHybridFamilyVerifier one_step;
+    SingleParameterScalarIntervalHybridFamilyVerifier single_parameter;
+    TwoStageScalarIntervalHybridFamilyVerifier two_stage;
+    check_rejection(one_step,1);
+    check_rejection(single_parameter,1);
+    check_rejection(two_stage,2);
+}
+
 TEST_CASE("hybrid portfolio capability preflight honors cancellation before scanning paths") {
     std::stop_source cancellation;
     CancellingCapabilityTrajectoryAdapter adapter{cancellation};
