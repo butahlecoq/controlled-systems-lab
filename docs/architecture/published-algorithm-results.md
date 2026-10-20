@@ -49,6 +49,18 @@ answer with no failures. Both reports are descriptive evidence for their
 specific fixtures, not performance comparisons, scalability claims, general
 continuous-polytope coverage, or validated arithmetic. The two-parameter
 bundle includes a standalone feasible-set plot, raw rows, and an offline ZIP.
+The saved records expose these fixed-fixture capability profiles:
+
+| Report | State/control dimensions | Horizon | Modes | Edges | Allowed paths | Joint variables |
+| --- | --- | ---: | ---: | ---: | ---: | ---: |
+| [One-step scalar bundle](../../reports/algorithm-results/ext07-hybrid-2cba9c13b79afd2b/) | 1 / 1 | 1 | 2 | 1 | 1 | 4 |
+| [Two-parameter bundle](../../reports/algorithm-results/ext07-hybrid-two-parameter-00ac6fb75d7cab95/) | 1 / 1 | 2 | 3 | 3 | 2 | 7 |
+
+These counts describe the named requests, not provider capacity limits or a
+scalability profile. `HybridCapabilityReport` also reports each mode's
+dimensions, catalogue counts, request limits, profile admission, and a complete
+allowed-path count when enumeration finishes; its unit contract is exercised
+for both scalar and dimension-changing mode catalogues.
 Higher-dimensional free-control domains and general continuous-polytope
 verification remain open EXT-07 acceptance items. Main-only Pages publication
 and live URL/hash verification remain pending.

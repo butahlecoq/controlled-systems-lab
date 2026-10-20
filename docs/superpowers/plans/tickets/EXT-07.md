@@ -57,9 +57,13 @@ horizons and dimensions. Both projected adapters retain the full branch relation
 and provider/row evidence; the general adapter preflights the complete path row
 inventory. Full provider/resource aggregation remains open.
 
-The EXT-07 report exercises one supported one-step scalar interval case through
-path construction, HiGHS optimization, and family verification. Its 2D plot
-shows control against terminal state for that scalar system; it does not measure
-the finite-horizon verifier. This is a bounded numerical example, not a
-scalability result or completion claim. The main-only Pages URL and live hashes
-remain pending until publication succeeds.
+The EXT-07 report set now contains a one-step scalar interval case and a
+two-stage/two-control scalar polygon case, each exercised through path
+construction, HiGHS optimization, and family verification. Their saved
+capability profiles record respectively `(state, control, horizon, modes, edges,
+paths) = (1, 1, 1, 2, 1, 1)` and `(1, 1, 2, 3, 3, 2)`. The first report plots
+control against terminal state; the second plots both feasible control
+polygons and their tied minimizing faces. These fixed numerical examples do
+not establish higher-dimensional scalability or complete the capability-report
+acceptance across broader dimensions and mode counts. Main-only Pages URLs and
+live hashes remain pending until publication succeeds.
