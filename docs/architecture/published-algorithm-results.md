@@ -24,7 +24,7 @@ Independent review checks mathematical/evidence labels, measurement validity and
 
 The frozen implementation source is `2965baafa325550ad60ec91d44f5e3f86a832178`.
 The saved bundle
-[`ext07-hybrid-2cba9c13b79afd2b`](../../reports/algorithm-results/ext07-hybrid-2cba9c13b79afd2b/)
+[`ext07-hybrid-51d9ee2e89d240eb`](../../reports/algorithm-results/ext07-hybrid-51d9ee2e89d240eb/)
 contains a one-step scalar profile with interval control and guard, identity
 reset, and a linear terminal objective. Its analytic joint relation is
 `x0=0, x_pre1=u0, x1=u0, 0<=u0<=0.5`; the complete minimizing family is the
@@ -37,8 +37,10 @@ fixture and do not establish a performance winner, scalability, general
 polyhedral coverage, or validated arithmetic. The measured report covers the
 one-step scalar interval profile; the implementation also has a bounded
 finite-horizon verifier for exactly one free scalar control parameter, but the
-report does not measure that domain. Multiple free parameters and general
-continuous polytope verification remain open EXT-07 acceptance items.
+report does not measure that domain. A separate verifier now covers exactly
+two scalar control parameters for two-stage paths, but the report does not
+measure that domain either. General continuous-polytope verification and broad
+multiple-parameter coverage remain open EXT-07 acceptance items.
 The report and 2D control-versus-terminal-state example are versioned with raw
 rows and an offline ZIP. Main-only Pages
 publication and live URL/hash verification remain pending.

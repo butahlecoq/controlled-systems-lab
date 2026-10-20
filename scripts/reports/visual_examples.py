@@ -124,10 +124,110 @@ def load_examples(catalog):
         report_id=entry["report_id"], records_path=bundle / "records.json",
         source="c6d135c94ee0fe4fece074b455dae18bee0d22b2",
         harness="451d0157109b03ef8fab5a656b487c248b7f29a4", kind="hybrid"))
+    two_parameter_inputs = {
+        "initial": {"mode": "two-parameter-start", "state": [0]},
+        "horizon": 2,
+        "state_dimension": 1,
+        "control_dimension": 1,
+        "allowed_terminal_modes": ["two-parameter-terminal"],
+        "modes": [
+            {"id": "two-parameter-start", "active_stages_on_path": [0],
+             "flow_by_stage": [{"A": 0, "B": 1, "offset": 0},
+                               {"A": 1, "B": 1, "offset": 0}],
+             "controls_by_stage": [{"interval": [0, 1]}, {"singleton": 0}],
+             "invariants_by_boundary": ["universal", "universal", "universal"]},
+            {"id": "two-parameter-middle", "active_stages_on_path": [1],
+             "flow_by_stage": [{"A": 0, "B": 1, "offset": 0},
+                               {"A": 1, "B": 1, "offset": 0}],
+             "controls_by_stage": [{"singleton": 0}, {"interval": [0, 1]}],
+             "invariants_by_boundary": ["universal", "universal", "universal"]},
+            {"id": "two-parameter-terminal", "active_stages_on_path": [2],
+             "flow_by_stage": [{"A": 0, "B": 1, "offset": 0},
+                               {"A": 1, "B": 1, "offset": 0}],
+             "controls_by_stage": [{"singleton": 0}, {"singleton": 0}],
+             "invariants_by_boundary": ["universal", "universal", {"interval": [0, 1]}]},
+        ],
+        "edges": [
+            {"id": "two-parameter-enter-half", "source": "two-parameter-start",
+             "target": "two-parameter-middle",
+             "guards_by_stage": [{"interval": [0, 0.5]}, {"type": "universal", "dimension": 1}],
+             "reset_by_stage": [{"type": "identity", "dimension": 1},
+                                {"type": "universal", "dimension": 2}]},
+            {"id": "two-parameter-enter-full", "source": "two-parameter-start",
+             "target": "two-parameter-middle",
+             "guards_by_stage": [{"type": "universal", "dimension": 1},
+                                 {"type": "universal", "dimension": 1}],
+             "reset_by_stage": [{"type": "identity", "dimension": 1},
+                                {"type": "universal", "dimension": 2}]},
+            {"id": "two-parameter-finish", "source": "two-parameter-middle",
+             "target": "two-parameter-terminal",
+             "guards_by_stage": [{"type": "universal", "dimension": 1},
+                                 {"type": "universal", "dimension": 1}],
+             "reset_by_stage": [{"type": "universal", "dimension": 2},
+                                {"type": "identity", "dimension": 1}]},
+        ],
+        "edge_timing": "guards constrain the stage pre-reset state; reset relations map pre-reset to the next state",
+        "terminal_objective": {"type": "linear", "coefficients": [0], "constant": 0},
+    }
+    two_parameter_paths = [
+        {"path": ["two-parameter-enter-half", "two-parameter-finish"],
+         "feasible_polygon_in_control_coordinates": [[0, 0], [0.5, 0], [0.5, 0.5], [0, 1]]},
+        {"path": ["two-parameter-enter-full", "two-parameter-finish"],
+         "feasible_polygon_in_control_coordinates": [[0, 0], [1, 0], [0, 1]]},
+    ]
+    examples.append(dict(
+        slug="two_parameter_scalar_polytopes", title="Two labelled optimal polygons",
+        polygons=two_parameter_paths, points=[[0, 0], [0.5, 0], [0.5, 0.5], [0, 1],
+                                               [1, 0], [0, 1]],
+        indices=[], domain=(0, 1), inputs=two_parameter_inputs,
+        analytic={
+            "joint_relation": "[x0,u0,x_pre0,x1,u1,x_pre1,x2]=[0,u0,u0,u0,u1,u0+u1,u0+u1]",
+            "feasibility": "u0>=0; u1>=0; u0+u1<=1",
+            "enter_half_guard": "u0<=0.5",
+            "enter_full_guard": "universal",
+            "complete_optimal_family": "every point in each labelled feasible polygon; both paths are retained",
+            "minimum_objective": 0,
+        },
+        report_id=entry["report_id"], records_path=bundle / "records.json",
+        source="eb0645f522c78007e8ffc8a1dab6bff16840e64a",
+        harness="eb0645f522c78007e8ffc8a1dab6bff16840e64a", kind="two_parameter"))
     return examples
 
 
 def plot(example):
+    if example["kind"] == "two_parameter":
+        def point(p):
+            return (80 + p[0] * 400, 440 - p[1] * 400)
+
+        def polygon(points, color, fill, dashed=False):
+            coords = " ".join(f"{x:.6f},{y:.6f}" for x, y in map(point, points))
+            dash = ' stroke-dasharray="8 6"' if dashed else ""
+            return (f'<polygon points="{coords}" fill="{fill}" stroke="{color}" '
+                    f'stroke-width="3"{dash}/>')
+
+        elements = []
+        for value in (0, 0.5, 1):
+            x, y = point((value, value))
+            elements += [f'<line x1="{x}" y1="40" x2="{x}" y2="440" stroke="#3c493d"/>',
+                         f'<line x1="80" y1="{y}" x2="480" y2="{y}" stroke="#3c493d"/>',
+                         f'<text x="{x}" y="470" text-anchor="middle">{value:g}</text>',
+                         f'<text x="68" y="{y+5}" text-anchor="end">{value:g}</text>']
+        full, half = example["polygons"][1], example["polygons"][0]
+        elements += [polygon(full["feasible_polygon_in_control_coordinates"], "#d6af75", "#d6af7518", True),
+                     polygon(half["feasible_polygon_in_control_coordinates"], "#b4cda3", "#b4cda333"),
+                     '<text x="92" y="132">enter-half path</text>',
+                     '<text x="335" y="388">enter-full only</text>',
+                     '<text x="290" y="72" text-anchor="middle">objective = 0 everywhere</text>']
+        description = ("The amber dashed triangle is the enter-full path. The green quadrilateral is the "
+                       "enter-half path and lies within it. Every point on both labelled paths is optimal "
+                       "for the constant zero objective.")
+        return ('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 580 510" role="img" '
+                'aria-labelledby="title desc"><title id="title">' + escape(example["title"]) + '</title>'
+                '<desc id="desc">' + description + '</desc><rect width="580" height="510" fill="#172019"/>'
+                '<g font-family="monospace" font-size="14" fill="#d1d9cc">' + "".join(elements) +
+                '<text x="285" y="502" text-anchor="middle">u₀ (first free control)</text>'
+                '<text x="18" y="245" transform="rotate(-90 18 245)" text-anchor="middle">u₁ (second free control)</text>'
+                '</g></svg>')
     low, high = example["domain"]
 
     def point(p):
@@ -195,6 +295,8 @@ def point_table(example):
     for index, p in enumerate(example["points"]):
         if example["kind"] == "hybrid":
             role = "unique minimum" if index == 0 else "feasible interval endpoint"
+        elif example["kind"] == "two_parameter":
+            role = "feasible polygon vertex; shared vertices preserve separate path labels"
         elif example["kind"] == "intersection":
             role = "intersection vertex"
         elif tuple(p) in seen:
@@ -204,11 +306,15 @@ def point_table(example):
         seen.setdefault(tuple(p), index)
         rows.append(f'<tr><td>{index}</td><td>{p[0]:.6g}</td><td>{p[1]:.6g}</td><td>{role}</td></tr>')
     heading = ("Original point ID" if example["kind"] == "hull" else
-               "Fixture point" if example["kind"] == "hybrid" else "Saved output row ID")
+               "Fixture point" if example["kind"] == "hybrid" else
+               "Polygon vertex" if example["kind"] == "two_parameter" else "Saved output row ID")
     caption = ("Exact illustrative values; the continuous feasible set is the full segment."
                if example["kind"] == "hybrid" else
+               "Exact polygon vertices; identical locations belong to separately labelled path branches."
+               if example["kind"] == "two_parameter" else
                "Coordinates (rounded to six significant digits; raw JSON retains binary64 values)")
-    x_label, y_label = (("u₀", "x₂") if example["kind"] == "hybrid" else ("x", "y"))
+    x_label, y_label = (("u₀", "x₂") if example["kind"] == "hybrid" else
+                        ("u₀", "u₁") if example["kind"] == "two_parameter" else ("x", "y"))
     return ('<div class="scroll" tabindex="0" role="region" aria-label="Point coordinates"><table>'
             f'<caption>{caption}</caption>'
             f'<thead><tr><th scope="col">{heading}</th><th scope="col">{x_label}</th><th scope="col">{y_label}</th>'
@@ -251,6 +357,21 @@ def section(example, number):
         flags = ""
         driver = "reports/algorithm-results/tooling/geo04/polyhedral_intersection_driver.cpp"
         extra = "<p>The complete inputs below use A·[x,y] ≤ b for each shape. The driver links CSL::polyhedral, CSL::qhull_conversion and CSL::highs_lp.</p>"
+    elif example["kind"] == "two_parameter":
+        explanation = ("The enter-half transition constrains the first pre-reset state to [0,0.5], while "
+                       "enter-full has a universal guard. Both labelled paths then share the terminal bound "
+                       "u₀+u₁≤1. The green quadrilateral lies inside the amber dashed triangle; their overlap "
+                       "belongs to both mode paths.")
+        result = ("Enter-half path: (0,0), (0.5,0), (0.5,0.5), (0,1). Enter-full path: "
+                  "(0,0), (1,0), (0,1). The objective is identically zero, so every point in each complete "
+                  "polygon is optimal and both labelled paths are retained.")
+        notes = ("This exact rational construction illustrates the bounded two-free-control verifier profile. "
+                 "It is an analytic illustration, not a saved solver run, timing result or measured fixture.")
+        option, target = "", "hybrid_path_program_tests"
+        flags = ""
+        driver = "tests/unit/synthesis/hybrid_path_program_tests.cpp"
+        extra = ("<p>The downloadable input record includes both free controls, all mode flows, invariants, "
+                 "transition guards and resets, terminal policy and both path polygons.</p>")
     else:
         explanation = ("Two scalar stages follow the fixed path start → middle → terminal. The first control is "
                        "free in [0,1] and the second is fixed at zero. The second transition requires its "
@@ -265,7 +386,7 @@ def section(example, number):
         extra = ('<p>The fixture record contains all mode, flow, control, invariant, transition, guard, reset and objective inputs.</p>')
     command = ("cmake --preset dev\n"
                f"cmake --build --preset dev --target {target}\n"
-               f"ctest --preset dev -R '^{target}$'") if example["kind"] == "hybrid" else (
+               f"ctest --preset dev -R '^{target}$'") if example["kind"] in {"hybrid", "two_parameter"} else (
         f'cmake -S . -B build/visual-{option.lower()} -DCMAKE_BUILD_TYPE=Release '
         f'-DBUILD_TESTING=OFF -DCSL_BUILD_{option}_REPORT=ON{flags}\n'
         f'cmake --build build/visual-{option.lower()} --config Release --target {target} --parallel 2\n'
@@ -275,13 +396,18 @@ def section(example, number):
                if example["kind"] == "hull" else
                "Green: returned intersection. Blue: input square; amber: input diamond. Labels are saved output row IDs. Equal x/y scale."
                if example["kind"] == "intersection" else
+               "Amber dashed: enter-full path. Green: enter-half path. The green polygon is contained in the triangle; both retain all optimal points."
+               if example["kind"] == "two_parameter" else
                "Green: complete feasible relation. Gold: unique minimizer. Both axes show the same scalar system in control and terminal-state coordinates.")
-    example_type = "2D control family" if example["kind"] == "hybrid" else "2D geometry"
+    example_type = ("2D two-control family" if example["kind"] == "two_parameter" else
+                    "2D control family" if example["kind"] == "hybrid" else "2D geometry")
     reproduction = ('<p>From the repository checkout at the linked fixture commit, configure the development preset and run:</p>'
-                    if example["kind"] == "hybrid" else
+                    if example["kind"] in {"hybrid", "two_parameter"} else
                     f'<p>From a checkout of harness commit <code>{example["harness"]}</code>, using CMake 3.31+ and a C++20 compiler:</p>')
     platform_note = ("This runs the functional two-stage oracle test; it creates no timing evidence."
                      if example["kind"] == "hybrid" else
+                     "This runs the functional two-parameter polygon oracle test; it creates no timing evidence."
+                     if example["kind"] == "two_parameter" else
                      'For Visual Studio, use its developer shell, configure with its generator, and run '
                      '<code>Release/' + target + '.exe --smoke</code> in the build directory. '
                      'This is a functional smoke, not a new benchmark; discard smoke timing values.')
@@ -289,12 +415,18 @@ def section(example, number):
                     f'<a href="../{example["report_id"]}/records.json">one-step raw record ↗</a>. '
                     'This two-stage illustration is not part of that measured fixture.</p>'
                     if example["kind"] == "hybrid" else
+                    f'<p>Related one-step report: <a href="../{example["report_id"]}/index.html">saved numerical evidence ↗</a> · '
+                    f'<a href="../{example["report_id"]}/records.json">one-step raw record ↗</a>. '
+                    'This two-control illustration is not part of that measured fixture.</p>'
+                    if example["kind"] == "two_parameter" else
                     f'<p><a href="../{example["report_id"]}/index.html">Reviewed numerical report ↗</a> · '
                     f'<a href="../{example["report_id"]}/records.json">Full saved native records ↗</a></p>')
     raw_record_link = ('<p><a href="two_stage_scalar_family.json">Two-stage fixture and analytic raw record ↗</a></p>'
                        if example["kind"] == "hybrid" else "")
+    if example["kind"] == "two_parameter":
+        raw_record_link = '<p><a href="two_parameter_scalar_polytopes.json">Two-control fixture and analytic raw record ↗</a></p>'
     source_provenance = (f'<p class="provenance">Algorithm source <a href="https://github.com/butahlecoq/controlled-systems-lab/commit/{example["source"]}"><code>{example["source"]}</code></a></p>'
-                         if example["kind"] == "hybrid" else
+                         if example["kind"] in {"hybrid", "two_parameter"} else
                          f'<p class="provenance">Algorithm source <code>{example["source"]}</code></p>')
     return (f'<section id="{example["slug"]}"><p class="eyebrow">Example {number:02d} / {example_type}</p>'
             f'<h2>{example["title"]}</h2><p>{explanation}</p>'
@@ -338,7 +470,7 @@ def build(catalog, site):
             '<p class="eyebrow">Learn by looking</p><nav aria-label="Examples">' + navigation +
             '<a href="../index.html">All numerical reports ↗</a></nav></aside><main id="main">'
             '<header><p class="eyebrow">Small inputs / visible answers</p><h1>Algorithms,<br><em>in two dimensions.</em></h1>'
-            '<p>See what goes in, what comes out, and why. Explore hull vertices, set intersections, and a two-stage control family.</p>'
+            '<p>See what goes in, what comes out, and why. Explore hull vertices, set intersections, and two labelled hybrid control families.</p>'
             '<p class="limits">These educational pages show reviewed saved outputs or explicit analytic constructions; '
             'they are not new performance measurements. Each page states whether it replays saved output or illustrates a literal fixture.</p>'
             '<p><a href="minimal-inputs.json" download>Download inputs and displayed outputs (JSON)</a></p></header>'
@@ -355,6 +487,15 @@ def build(catalog, site):
         "oracle_harness_commit": hybrid["harness"],
         "inputs": hybrid["inputs"],
         "analytic": hybrid["analytic"],
+    }, indent=2) + "\n"
+    two_parameter = next(example for example in examples if example["kind"] == "two_parameter")
+    outputs["two_parameter_scalar_polytopes.json"] = json.dumps({
+        "schema": "csl.visual-example/ext07-two-parameter-scalar/1",
+        "illustration_only": True,
+        "algorithm_source_commit": two_parameter["source"],
+        "oracle_harness_commit": two_parameter["harness"],
+        "inputs": two_parameter["inputs"],
+        "analytic": {"paths": two_parameter["polygons"], **two_parameter["analytic"]},
     }, indent=2) + "\n"
     for name, content in outputs.items():
         require(not (out / name).is_symlink(), "gallery file must not be a symlink")

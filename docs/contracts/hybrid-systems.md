@@ -297,11 +297,12 @@ cross-branch convexification is introduced. It does not promise validated
 arithmetic or prove a numerical provider's result. Provider assurance is
 recorded separately. The implementation includes an exact integral singleton
 verifier, a one-step scalar interval verifier, and a finite-horizon
-single-parameter scalar interval verifier. Their bounded profiles support only
-scalar interval sets and deterministic scalar affine resets; they do not verify
-multiple free control parameters, general continuous polytope families, or
-general-dimensional relations. These bounded verifiers do not establish the
-full EXT-07 acceptance contract.
+single-parameter scalar interval verifier. A separate two-stage verifier covers
+exactly two bounded non-singleton scalar control intervals, scalar states and
+controls, interval invariants and guards, and deterministic exactly
+representable scalar affine resets. These bounded profiles do not verify
+general continuous polytope families or general-dimensional relations, and do
+not establish the full EXT-07 acceptance contract.
 
 ## Required request-admission contract
 
@@ -373,15 +374,15 @@ execution. The default reachability adapter wraps this same direct joint-H
 composer; an independently implemented projected-set reachability algorithm
 is not yet available. The compiled verifiers cover integral singleton paths,
 one-step scalar interval families, and the bounded finite-horizon
-single-parameter scalar interval profile described above. No compiled verifier
-covers multiple free continuous parameters or general continuous polytope
-families. These verifier domains reject unsupported input when verification
-runs; `build_hybrid_portfolio_programs_with_verifier` also rejects unsupported
-verifier domains and declared trajectory objective capabilities before building
-branch programs. Validated objective assurance remains unsupported; adapter-
-specific objective-policy semantics, general provider-operation admission,
-independent projected-set reachability, and multiple-parameter verifier
-coverage remain incomplete.
+single-parameter scalar interval profile described above, plus the separate
+two-stage/two-parameter scalar polygon profile. They do not cover general
+continuous polytope families. These verifier domains reject unsupported input
+when verification runs; `build_hybrid_portfolio_programs_with_verifier` also
+rejects unsupported verifier domains and declared trajectory objective
+capabilities before building branch programs. Validated objective assurance
+remains unsupported; adapter-specific objective-policy semantics, general
+provider-operation admission, independent projected-set reachability, and
+broader multiple-parameter verifier coverage remain incomplete.
 
 ## Independent test oracle requirements
 
