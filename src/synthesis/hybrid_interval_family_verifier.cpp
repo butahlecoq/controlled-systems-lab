@@ -763,14 +763,16 @@ TwoStageScalarBranch evaluate_two_stage_scalar(const HybridSystem& system,const 
             return constrain_affine_preimage(parameters,*interval,offset,gain);
         };
         if(!constrain_set(mode.invariants[stage+1],pre_offset,pre_gain,
-            "Pre-reset invariant representation is unsupported"))
+            "Pre-reset invariant representation is unsupported")) {
             if(result.reason.empty()) return unsupported("Pre-reset invariant preimage is not exactly representable");
             else { const auto reason=result.reason; return unsupported(reason.c_str()); }
+        }
         if(parameters.empty) return infeasible();
         if(!constrain_set(edges[stage]->guards[stage],pre_offset,pre_gain,
-            "Transition guard representation is unsupported"))
+            "Transition guard representation is unsupported")) {
             if(result.reason.empty()) return unsupported("Transition guard preimage is not exactly representable");
             else { const auto reason=result.reason; return unsupported(reason.c_str()); }
+        }
         if(parameters.empty) return infeasible();
 
         double reset_offset=0,reset_gain=0;
