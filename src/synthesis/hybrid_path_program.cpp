@@ -105,8 +105,7 @@ HybridTrajectoryOperationPreflightResult preflight_hybrid_trajectory_operations(
 
 HybridTrajectoryPortfolioPreflightResult preflight_hybrid_trajectory_capabilities(
     const HybridDirectTrajectoryAdapter& adapter,const model::HybridRequest& request,
-    std::span<const model::HybridPath> paths,optimization::ObjectivePolicy policy,
-    std::stop_token cancellation) {
+    optimization::ObjectivePolicy policy,std::stop_token cancellation) {
     if(cancellation.stop_requested())
         return OperationStopped{StopReason::cancelled,
             "Hybrid trajectory capability preflight was cancelled before adapter admission"};
@@ -119,22 +118,17 @@ HybridTrajectoryPortfolioPreflightResult preflight_hybrid_trajectory_capabilitie
     if(!capability.preserves_branch_labelled_joint_relation)
         return one({DiagnosticCode::unsupported,"hybrid.adapter.branch_relation",
             "Direct-trajectory adapter does not declare branch-labelled joint-relation support"});
-    for(const auto& path:paths) {
+    for(const auto& terminal_mode:request.allowed_terminal_modes) {
         if(cancellation.stop_requested())
             return OperationStopped{StopReason::cancelled,
-                "Hybrid trajectory capability preflight was cancelled between edge paths"};
-        if(path.modes.empty())
-            return one({DiagnosticCode::invalid_input,"hybrid.adapter.path",
-                "Trajectory capability preflight received a path without a terminal mode"});
-        const auto& terminal_mode=path.modes.back();
+                "Hybrid trajectory capability preflight was cancelled between allowed terminal modes"};
         const auto objective=std::find_if(request.terminal_objectives.begin(),
             request.terminal_objectives.end(),[&](const auto& candidate) {
                 return candidate.mode==terminal_mode;
             });
         if(objective==request.terminal_objectives.end())
             return one({DiagnosticCode::invalid_input,"hybrid.adapter.objective",
-                "No terminal objective is defined for candidate path "+path_program_id(path).value+
-                " at terminal stage "+std::to_string(path.edges.size())});
+                "No terminal objective is defined for allowed terminal mode "+terminal_mode.value});
         const bool supported=std::visit([&](const auto& value) {
             using T=std::decay_t<decltype(value)>;
             if constexpr(std::is_same_v<T,LinearTerminal>) return capability.linear_objectives;
@@ -142,9 +136,8 @@ HybridTrajectoryPortfolioPreflightResult preflight_hybrid_trajectory_capabilitie
         },objective->objective);
         if(!supported)
             return one({DiagnosticCode::unsupported,"hybrid.portfolio.objective",
-                "Direct-trajectory adapter does not support the terminal objective for mode "+
-                terminal_mode.value+" on candidate path "+path_program_id(path).value+
-                " at terminal stage "+std::to_string(path.edges.size())});
+                "Direct-trajectory adapter does not support the terminal objective for allowed terminal mode "+
+                terminal_mode.value});
     }
     return std::monostate{};
 }
@@ -566,7 +559,7 @@ HybridPortfolioProgramResult build_hybrid_portfolio_programs(const HybridDirectT
     if(const auto* errors=std::get_if<Diagnostics>(&operation_preflight)) return *errors;
     if(const auto* stopped=std::get_if<OperationStopped>(&operation_preflight)) return *stopped;
     const auto trajectory_preflight=preflight_hybrid_trajectory_capabilities(
-        adapter,request,paths,policy,cancellation);
+        adapter,request,policy,cancellation);
     if(const auto* errors=std::get_if<Diagnostics>(&trajectory_preflight)) return *errors;
     if(const auto* stopped=std::get_if<OperationStopped>(&trajectory_preflight)) return *stopped;
     return build_hybrid_portfolio_programs_for_paths(adapter,system,request,
@@ -621,7 +614,7 @@ HybridPortfolioProgramResult build_hybrid_portfolio_programs_with_verifier(
     if(const auto* errors=std::get_if<Diagnostics>(&admission)) return *errors;
     if(const auto* stopped=std::get_if<OperationStopped>(&admission)) return *stopped;
     const auto trajectory_preflight=preflight_hybrid_trajectory_capabilities(
-        trajectory,request,paths,policy,cancellation);
+        trajectory,request,policy,cancellation);
     if(const auto* errors=std::get_if<Diagnostics>(&trajectory_preflight)) return *errors;
     if(const auto* stopped=std::get_if<OperationStopped>(&trajectory_preflight)) return *stopped;
     if(cancellation.stop_requested())

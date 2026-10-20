@@ -57,6 +57,12 @@ horizons and dimensions. Both projected adapters retain the full branch relation
 and provider/row evidence; the general adapter preflights the complete path row
 inventory. Full provider/resource aggregation remains open.
 
+Trajectory-adapter objective-type support is checked for every allowed
+terminal mode, including modes with no enumerated path, before any branch
+program is built. Adapter-specific objective-policy semantics beyond
+assurance/tolerance validation, provider-operation admission at other seams,
+and general continuous-family support remain open.
+
 Both projected-state adapters ask their selected geometry provider to admit the
 actual terminal projection request during preflight. The one-transition adapter
 assembles its independent four-coordinate relation and the general adapter

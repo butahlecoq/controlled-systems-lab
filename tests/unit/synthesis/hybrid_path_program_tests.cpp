@@ -245,7 +245,9 @@ public:
 class LinearOnlyRejectingTrajectoryAdapter final : public HybridDirectTrajectoryAdapter {
 public:
     mutable int calls{};
+    mutable int capability_calls{};
     HybridDirectTrajectoryCapabilities capabilities() const noexcept override {
+        ++capability_calls;
         return {true,true,false,Assurance::numerical};
     }
     HybridPathProgramResult build_path(const model::HybridSystem&,
@@ -998,6 +1000,7 @@ TEST_CASE("hybrid portfolio preflights all terminal objective capabilities befor
     CHECK(std::get<Diagnostics>(result).front().code==DiagnosticCode::unsupported);
     CHECK(std::get<Diagnostics>(result).front().field=="hybrid.portfolio.objective");
     CHECK(adapter.calls==0);
+    CHECK(adapter.capability_calls==1);
 
     FixtureHybridFamilyVerifier verifier;
     LinearOnlyRejectingTrajectoryAdapter verified_adapter;
@@ -1006,6 +1009,40 @@ TEST_CASE("hybrid portfolio preflights all terminal objective capabilities befor
     REQUIRE(std::holds_alternative<Diagnostics>(verified));
     CHECK(std::get<Diagnostics>(verified).front().code==DiagnosticCode::unsupported);
     CHECK(std::get<Diagnostics>(verified).front().field=="hybrid.portfolio.objective");
+    CHECK(verified_adapter.calls==0);
+}
+
+TEST_CASE("hybrid portfolio validates objectives for unreachable allowed terminal modes") {
+    auto system=example_system();
+    auto unreachable_terminal=system.modes.back();
+    unreachable_terminal.id={"unreachable-terminal"};
+    system.modes.push_back(std::move(unreachable_terminal));
+
+    auto request=example_request();
+    request.allowed_terminal_modes.push_back({"unreachable-terminal"});
+    request.terminal_objectives.push_back({{"unreachable-terminal"},
+        QuadraticTerminal{Matrix{2,2,{1,0,0,1}},Vector{0,0},0},"energy","J"});
+
+    LinearOnlyRejectingTrajectoryAdapter adapter;
+    const auto result=build_hybrid_portfolio_programs(adapter,system,request,
+        {"hybrid-problem"},{1,8},{16,64,1024});
+    REQUIRE(std::holds_alternative<Diagnostics>(result));
+    CHECK(std::get<Diagnostics>(result).front().code==DiagnosticCode::unsupported);
+    CHECK(std::get<Diagnostics>(result).front().field=="hybrid.portfolio.objective");
+    CHECK(std::get<Diagnostics>(result).front().explanation.find("unreachable-terminal")!=
+        std::string::npos);
+    CHECK(adapter.capability_calls==1);
+    CHECK(adapter.calls==0);
+
+    FixtureHybridFamilyVerifier verifier;
+    LinearOnlyRejectingTrajectoryAdapter verified_adapter;
+    const auto verified=build_hybrid_portfolio_programs_with_verifier(verifier,
+        verified_adapter,system,request,{"hybrid-problem"},{1,8},{16,64,1024});
+    REQUIRE(std::holds_alternative<Diagnostics>(verified));
+    CHECK(std::get<Diagnostics>(verified).front().field=="hybrid.portfolio.objective");
+    CHECK(std::get<Diagnostics>(verified).front().explanation.find("unreachable-terminal")!=
+        std::string::npos);
+    CHECK(verified_adapter.capability_calls==1);
     CHECK(verified_adapter.calls==0);
 }
 

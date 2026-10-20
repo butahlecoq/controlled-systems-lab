@@ -347,8 +347,10 @@ creating a provider workspace or running an algorithm:
    over the finite transition graph.
 3. Validate `Q_T` and the per-mode supported terminal objectives, including
    dimensions, objective policy, shared scalar quantity/units, and global
-   minimization semantics; confirm that a family verifier covers the complete
-   requested relation and all-optimal-branch claim.
+   minimization semantics; validate adapter support for every objective in
+   `Q_T`, including modes with no enumerated path; confirm that a family
+   verifier covers the complete requested relation and all-optimal-branch
+   claim.
 4. If any check fails, return a request-scoped unsupported/rejected result
    naming the first unsupported capability and the affected mode/edge/stage;
    do not start an algorithm, create a workspace, or publish partial family
