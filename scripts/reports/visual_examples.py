@@ -200,6 +200,47 @@ def load_examples(catalog):
         records_path=two_parameter_bundle / "records.json",
         source="eb0645f522c78007e8ffc8a1dab6bff16840e64a",
         harness="eb0645f522c78007e8ffc8a1dab6bff16840e64a", kind="two_parameter"))
+    projected_inputs = {
+        "initial": {"mode": "projected-source", "state": [0]},
+        "horizon": 1,
+        "state_dimension": 1,
+        "control_dimension": 1,
+        "allowed_terminal_modes": ["projected-target"],
+        "modes": [
+            {"id": "projected-source", "active_stages_on_path": [0],
+             "flow_by_stage": [{"A": 1, "B": 1, "offset": 0}],
+             "controls_by_stage": [{"interval": [0, 1]}],
+             "invariants_by_boundary": ["universal", "universal"]},
+            {"id": "projected-target", "active_stages_on_path": [1],
+             "flow_by_stage": [{"A": 1, "B": 0, "offset": 0}],
+             "controls_by_stage": [{"universal": 0}],
+             "invariants_by_boundary": ["universal", "universal"]},
+        ],
+        "edges": [{"id": "cap-at-half", "source": "projected-source",
+                   "target": "projected-target",
+                   "guards_by_stage": [{"interval": [0, 0.5]}],
+                   "reset_by_stage": [{"type": "identity", "dimension": 1}]}],
+        "edge_timing": "the guard constrains the post-flow, pre-reset state; the reset maps it to the next state",
+        "terminal_objectives": [{"mode": "projected-target",
+                                 "linear": {"coefficients": [1], "constant": 0},
+                                 "id": "terminal-cost", "unit": "state"}],
+    }
+    projected_analytic = {
+        "fixed_path": ["cap-at-half"],
+        "joint_relation": "x[0]=0; x_pre[0]=x[0]+u[0]; x[1]=x_pre[0]; 0<=u[0]<=1; 0<=x_pre[0]<=0.5",
+        "projected_terminal_set": "0<=x[1]<=0.5",
+        "feasible_projection": "(u[0], x[1]) = (s, s), 0<=s<=0.5",
+    }
+    examples.append(dict(
+        slug="one_step_projected_hybrid_reachability",
+        title="Project a one-step hybrid state set",
+        vertices=[[0, 0], [0.5, 0.5]], points=[[0, 0], [0.5, 0.5]],
+        indices=[0, 1], domain=(0, 0.5), inputs=projected_inputs,
+        analytic=projected_analytic, report_id=one_step_entry["report_id"],
+        records_path=one_step_bundle / "records.json",
+        source="16c1cb064e9508ee11dc23b55158702b152aeed6",
+        harness="16c1cb064e9508ee11dc23b55158702b152aeed6",
+        kind="projected_reachability"))
     return examples
 
 
@@ -265,9 +306,13 @@ def plot(example):
     else:
         vertices = example["vertices"]
     elements.append(boundary(vertices, "#b4cda3", "#b4cda31c" if len(vertices) > 2 else "none"))
-    if example["kind"] == "hybrid":
+    if example["kind"] in {"hybrid", "projected_reachability"}:
+        labels = (("unique minimum", "feasible endpoint") if example["kind"] == "hybrid"
+                  else ("projected endpoint", "projected endpoint"))
+        colors = (("#d6af75", "#b4cda3") if example["kind"] == "hybrid"
+                  else ("#b4cda3", "#b4cda3"))
         for index, (p, label, color) in enumerate(zip(example["points"],
-                ("unique minimum", "feasible endpoint"), ("#d6af75", "#b4cda3"))):
+                labels, colors)):
             x, y = point(p)
             elements.append(f'<circle cx="{x}" cy="{y}" r="6" fill="{color}"/>')
             elements.append(f'<text x="{x+9}" y="{y-10}">{label}</text>')
@@ -286,8 +331,11 @@ def plot(example):
                    if example["kind"] == "hull" else
                    "Blue dashed square and amber dashed diamond overlap in the green eight-vertex intersection. Labels are saved output row IDs."
                    if example["kind"] == "intersection" else
+                   "The green segment is the projected terminal state set x1 in [0, 0.5]; the axes show the feasible control and terminal-state relation."
+                   if example["kind"] == "projected_reachability" else
                    "The feasible two-stage relation is the green segment x2 equals u0 from zero to one half; the gold point is its unique minimum.")
     x_label, y_label = (("u₀ (free control)", "x₂ (terminal state)") if example["kind"] == "hybrid"
+                        else ("u₀ (free control)", "x₁ (terminal state)") if example["kind"] == "projected_reachability"
                         else ("x (dimensionless)", "y (dimensionless)"))
     return ('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 580 510" role="img" '
             'aria-labelledby="title desc"><title id="title">' + escape(example["title"]) + '</title>'
@@ -302,8 +350,9 @@ def point_table(example):
     rows = []
     seen = {}
     for index, p in enumerate(example["points"]):
-        if example["kind"] == "hybrid":
-            role = "unique minimum" if index == 0 else "feasible interval endpoint"
+        if example["kind"] in {"hybrid", "projected_reachability"}:
+            role = ("unique minimum" if index == 0 else "feasible interval endpoint") \
+                if example["kind"] == "hybrid" else "projected terminal endpoint"
         elif example["kind"] == "two_parameter":
             role = "feasible polygon vertex; shared vertices preserve separate path labels"
         elif example["kind"] == "intersection":
@@ -316,13 +365,17 @@ def point_table(example):
         rows.append(f'<tr><td>{index}</td><td>{p[0]:.6g}</td><td>{p[1]:.6g}</td><td>{role}</td></tr>')
     heading = ("Original point ID" if example["kind"] == "hull" else
                "Fixture point" if example["kind"] == "hybrid" else
+               "Projected endpoint" if example["kind"] == "projected_reachability" else
                "Polygon vertex" if example["kind"] == "two_parameter" else "Saved output row ID")
     caption = ("Exact illustrative values; the continuous feasible set is the full segment."
                if example["kind"] == "hybrid" else
+               "Exact endpoints of the projected terminal interval; the plotted relation is the complete line segment."
+               if example["kind"] == "projected_reachability" else
                "Exact polygon vertices; identical locations belong to separately labelled path branches."
                if example["kind"] == "two_parameter" else
                "Coordinates (rounded to six significant digits; raw JSON retains binary64 values)")
     x_label, y_label = (("u₀", "x₂") if example["kind"] == "hybrid" else
+                        ("u₀", "x₁") if example["kind"] == "projected_reachability" else
                         ("u₀", "u₁") if example["kind"] == "two_parameter" else ("x", "y"))
     return ('<div class="scroll" tabindex="0" role="region" aria-label="Point coordinates"><table>'
             f'<caption>{caption}</caption>'
@@ -381,6 +434,23 @@ def section(example, number):
         driver = "tests/unit/synthesis/hybrid_path_program_tests.cpp"
         extra = ("<p>The downloadable input record includes both free controls, all mode flows, invariants, "
                  "transition guards and resets, terminal policy and both path polygons.</p>")
+    elif example["kind"] == "projected_reachability":
+        explanation = ("Start at x₀=0, flow with x_pre₁=x₀+u₀ for u₀∈[0,1], and take the fixed "
+                       "transition only when its post-flow guard admits x_pre₁∈[0,0.5]. The identity "
+                       "reset carries that state to x₁. Projecting the full labelled relation onto x₁ "
+                       "gives the terminal interval shown.")
+        result = ("Projected terminal set: x₁∈[0,0.5]. The plotted full relation is "
+                  "(u₀,x₁)=(s,s), 0≤s≤0.5.")
+        notes = ("This exact rational construction illustrates the bounded one-transition scalar "
+                 "projected-state adapter profile. It is an analytic illustration, not a saved solver "
+                 "run or a timing result; the independent contract test checks the joint relation and "
+                 "terminal-set bounds.")
+        option, target = "", "hybrid_path_program_tests"
+        flags = ""
+        driver = "tests/unit/synthesis/hybrid_path_program_tests.cpp"
+        extra = ("<p>The adapter retains the path-labelled joint H relation and returns its terminal H "
+                 "projection. The request objective is present for contract completeness but does not "
+                 "affect reachability.</p>")
     else:
         explanation = ("Two scalar stages follow the fixed path start → middle → terminal. The first control is "
                        "free in [0,1] and the second is fixed at zero. The second transition requires its "
@@ -395,7 +465,7 @@ def section(example, number):
         extra = ('<p>The fixture record contains all mode, flow, control, invariant, transition, guard, reset and objective inputs.</p>')
     command = ("cmake --preset dev\n"
                f"cmake --build --preset dev --target {target}\n"
-               f"ctest --preset dev -R '^{target}$'") if example["kind"] in {"hybrid", "two_parameter"} else (
+               f"ctest --preset dev -R '^{target}$'") if example["kind"] in {"hybrid", "two_parameter", "projected_reachability"} else (
         f'cmake -S . -B build/visual-{option.lower()} -DCMAKE_BUILD_TYPE=Release '
         f'-DBUILD_TESTING=OFF -DCSL_BUILD_{option}_REPORT=ON{flags}\n'
         f'cmake --build build/visual-{option.lower()} --config Release --target {target} --parallel 2\n'
@@ -407,16 +477,21 @@ def section(example, number):
                if example["kind"] == "intersection" else
                "Amber dashed: enter-full path. Green: enter-half path. The green polygon is contained in the triangle; both retain all optimal points."
                if example["kind"] == "two_parameter" else
+                "Green: full feasible control/terminal-state relation. Its terminal-state projection is the interval [0,0.5]."
+                if example["kind"] == "projected_reachability" else
                "Green: complete feasible relation. Gold: unique minimizer. Both axes show the same scalar system in control and terminal-state coordinates.")
     example_type = ("2D two-control family" if example["kind"] == "two_parameter" else
+                    "2D projected reachability" if example["kind"] == "projected_reachability" else
                     "2D control family" if example["kind"] == "hybrid" else "2D geometry")
     reproduction = ('<p>From the repository checkout at the linked fixture commit, configure the development preset and run:</p>'
-                    if example["kind"] in {"hybrid", "two_parameter"} else
+                    if example["kind"] in {"hybrid", "two_parameter", "projected_reachability"} else
                     f'<p>From a checkout of harness commit <code>{example["harness"]}</code>, using CMake 3.31+ and a C++20 compiler:</p>')
     platform_note = ("This runs the functional two-stage oracle test; it creates no timing evidence."
                      if example["kind"] == "hybrid" else
                      "This runs the functional two-parameter polygon oracle test; it creates no timing evidence."
                      if example["kind"] == "two_parameter" else
+                      "This runs the functional projected-state reachability test; it creates no timing evidence."
+                      if example["kind"] == "projected_reachability" else
                      'For Visual Studio, use its developer shell, configure with its generator, and run '
                      '<code>Release/' + target + '.exe --smoke</code> in the build directory. '
                      'This is a functional smoke, not a new benchmark; discard smoke timing values.')
@@ -430,14 +505,19 @@ def section(example, number):
                     'this illustration has a coupled triangular/quadrilateral feasible set and a '
                     'constant-zero objective.</p>'
                     if example["kind"] == "two_parameter" else
+                     f'<p>Related one-step verification report (a separate algorithm): <a href="../{example["report_id"]}/index.html">saved numerical evidence ↗</a> · '
+                     f'<a href="../{example["report_id"]}/records.json">one-step raw record ↗</a>.</p>'
+                     if example["kind"] == "projected_reachability" else
                     f'<p><a href="../{example["report_id"]}/index.html">Reviewed numerical report ↗</a> · '
                     f'<a href="../{example["report_id"]}/records.json">Full saved native records ↗</a></p>')
     raw_record_link = ('<p><a href="two_stage_scalar_family.json">Two-stage fixture and analytic raw record ↗</a></p>'
                        if example["kind"] == "hybrid" else "")
     if example["kind"] == "two_parameter":
         raw_record_link = '<p><a href="two_parameter_scalar_polytopes.json">Two-control fixture and analytic raw record ↗</a></p>'
+    if example["kind"] == "projected_reachability":
+        raw_record_link = '<p><a href="projected_hybrid_reachability.json">Projected reachability fixture and analytic raw record ↗</a></p>'
     source_provenance = (f'<p class="provenance">Algorithm source <a href="https://github.com/butahlecoq/controlled-systems-lab/commit/{example["source"]}"><code>{example["source"]}</code></a></p>'
-                         if example["kind"] in {"hybrid", "two_parameter"} else
+                         if example["kind"] in {"hybrid", "two_parameter", "projected_reachability"} else
                          f'<p class="provenance">Algorithm source <code>{example["source"]}</code></p>')
     return (f'<section id="{example["slug"]}"><p class="eyebrow">Example {number:02d} / {example_type}</p>'
             f'<h2>{example["title"]}</h2><p>{explanation}</p>'
@@ -481,7 +561,7 @@ def build(catalog, site):
             '<p class="eyebrow">Learn by looking</p><nav aria-label="Examples">' + navigation +
             '<a href="../index.html">All numerical reports ↗</a></nav></aside><main id="main">'
             '<header><p class="eyebrow">Small inputs / visible answers</p><h1>Algorithms,<br><em>in two dimensions.</em></h1>'
-            '<p>See what goes in, what comes out, and why. Explore hull vertices, set intersections, and two labelled hybrid control families.</p>'
+            '<p>See what goes in, what comes out, and why. Explore hull vertices, set intersections, hybrid control families, and projected reachability.</p>'
             '<p class="limits">These educational pages show reviewed saved outputs or explicit analytic constructions; '
             'they are not new performance measurements. Each page states whether it replays saved output or illustrates a literal fixture.</p>'
             '<p><a href="minimal-inputs.json" download>Download inputs and displayed outputs (JSON)</a></p></header>'
@@ -507,6 +587,15 @@ def build(catalog, site):
         "oracle_harness_commit": two_parameter["harness"],
         "inputs": two_parameter["inputs"],
         "analytic": {"paths": two_parameter["polygons"], **two_parameter["analytic"]},
+    }, indent=2) + "\n"
+    projected = next(example for example in examples if example["kind"] == "projected_reachability")
+    outputs["projected_hybrid_reachability.json"] = json.dumps({
+        "schema": "csl.visual-example/ext07-projected-hybrid-reachability/1",
+        "illustration_only": True,
+        "algorithm_source_commit": projected["source"],
+        "oracle_harness_commit": projected["harness"],
+        "inputs": projected["inputs"],
+        "analytic": projected["analytic"],
     }, indent=2) + "\n"
     for name, content in outputs.items():
         require(not (out / name).is_symlink(), "gallery file must not be a symlink")
