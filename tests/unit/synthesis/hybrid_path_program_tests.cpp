@@ -47,6 +47,54 @@ SetHandle h_set(std::string id,std::size_t dimension,Matrix inequalities,
     return std::get<sets::SetData>(std::move(data)).as_handle();
 }
 
+sets::SetData append_redundant_zero_inequality(std::string id,
+    const sets::SetData& relation) {
+    const auto representation=relation.representation();
+    const auto& h=std::get<sets::HRepresentation>(representation);
+    Vector inequalities;
+    inequalities.reserve((h.inequalities.rows()+1)*h.inequalities.cols());
+    for(std::size_t row=0;row<h.inequalities.rows();++row)
+        for(std::size_t column=0;column<h.inequalities.cols();++column)
+            inequalities.push_back(h.inequalities(row,column));
+    inequalities.insert(inequalities.end(),h.inequalities.cols(),0);
+    Vector upper_bounds(h.upper_bounds.values().begin(),h.upper_bounds.values().end());
+    upper_bounds.push_back(0);
+    Vector equalities;
+    equalities.reserve(h.equalities.rows()*h.equalities.cols());
+    for(std::size_t row=0;row<h.equalities.rows();++row)
+        for(std::size_t column=0;column<h.equalities.cols();++column)
+            equalities.push_back(h.equalities(row,column));
+    Vector equality_values(h.equality_values.values().begin(),h.equality_values.values().end());
+    const auto handle=h_set(std::move(id),relation.metadata()->set.dimension,
+        Matrix{h.inequalities.rows()+1,h.inequalities.cols(),std::move(inequalities)},
+        std::move(upper_bounds),Matrix{h.equalities.rows(),h.equalities.cols(),
+        std::move(equalities)},std::move(equality_values));
+    return std::get<sets::SetData>(sets::from_handle(handle));
+}
+
+void set_synthetic_relation_trace_rows(HybridPathProgram& program) {
+    const auto representation=program.joint_relation.representation();
+    const auto& h=std::get<sets::HRepresentation>(representation);
+    const auto total_rows=h.inequalities.rows()+h.equalities.rows();
+    const auto dimension=program.joint_relation.metadata()->set.dimension;
+    if(dimension!=0)
+        REQUIRE(total_rows<=std::numeric_limits<std::size_t>::max()/dimension);
+    REQUIRE_FALSE(program.relation_operations.empty());
+    const auto operation_count=program.relation_operations.size();
+    const auto rows_per_operation=total_rows/operation_count;
+    const auto extra_rows=total_rows%operation_count;
+    std::size_t previous_rows=0;
+    for(std::size_t i=0;i<operation_count;++i) {
+        auto& operation=program.relation_operations[i];
+        const auto cumulative_rows=rows_per_operation*(i+1)+
+            std::min(i+1,extra_rows);
+        operation.rows_added=cumulative_rows-previous_rows;
+        operation.cumulative_rows=cumulative_rows;
+        operation.cumulative_matrix_elements=cumulative_rows*dimension;
+        previous_rows=cumulative_rows;
+    }
+}
+
 SetHandle singleton_relation(std::string id,Vector point) {
     auto snapshot=numeric::snapshot_vector(point);
     REQUIRE(std::holds_alternative<numeric::VectorView>(snapshot));
@@ -2331,6 +2379,7 @@ private:
 
 class MismatchingTrajectoryAdapter final : public HybridDirectTrajectoryAdapter {
 public:
+    bool append_redundant_row{};
     HybridDirectTrajectoryCapabilities capabilities() const noexcept override { return {true,true,true,Assurance::numerical}; }
     HybridPathProgramResult build_path(const model::HybridSystem& system,
         const model::HybridRequest& request, const model::HybridPath& path, ProblemId problem,
@@ -2338,8 +2387,13 @@ public:
         std::stop_token cancellation) const override {
         JointHDirectTrajectoryAdapter delegate;
         auto built=delegate.build_path(system,request,path,std::move(problem),limits,policy,cancellation);
-        if(auto* program=std::get_if<HybridPathProgram>(&built))
-            program->path.edges.front().value="wrong-edge";
+        if(auto* program=std::get_if<HybridPathProgram>(&built)) {
+            if(append_redundant_row)
+                program->joint_relation=append_redundant_zero_inequality(
+                    "fixture.trajectory-extra-row",program->joint_relation);
+            else
+                program->path.edges.front().value="wrong-edge";
+        }
         return built;
     }
 };
@@ -2566,7 +2620,9 @@ public:
                     operation.joint_variables=0;
                     operation.cumulative_matrix_elements=0;
                 }
-            }
+            } else if(corruption==6)
+                reachable->joint_relation=append_redundant_zero_inequality(
+                    "fixture.reachability-extra-row",reachable->joint_relation);
         }
         return result;
     }
@@ -3261,6 +3317,17 @@ TEST_CASE("hybrid path builder rejects an adapter result with mismatched branch 
     CHECK(std::get<Diagnostics>(result).front().field=="hybrid.adapter.path");
 }
 
+TEST_CASE("hybrid path builder rejects H relation rows omitted from adapter resource trace") {
+    MismatchingTrajectoryAdapter adapter;
+    adapter.append_redundant_row=true;
+    const auto result=build_hybrid_path_program(adapter,example_system(),example_request(),
+        example_path(),{"hybrid-extra-relation-row"},{16,64,1024});
+    REQUIRE(std::holds_alternative<Diagnostics>(result));
+    CHECK(std::get<Diagnostics>(result).front().code==DiagnosticCode::evidence_mismatch);
+    CHECK(std::get<Diagnostics>(result).front().field==
+        "hybrid.adapter.relation_resources");
+}
+
 TEST_CASE("hybrid path builder rejects a missing terminal objective before adapter dispatch") {
     auto request=example_request();
     request.terminal_objectives.clear();
@@ -3731,6 +3798,19 @@ TEST_CASE("hybrid reachability boundary rejects mismatched assurance and resourc
         else if(corruption==1) CHECK(field=="hybrid.reachability.limits");
         else CHECK(field=="hybrid.adapter.operations");
     }
+}
+
+TEST_CASE("hybrid reachability rejects H relation rows omitted from adapter resource trace") {
+    MisreportingReachabilityAdapter adapter;
+    adapter.corruption=6;
+    const auto result=compute_hybrid_path_reachability(adapter,example_system(),
+        example_request(),example_path(),{16,64,1024});
+    REQUIRE(std::holds_alternative<Diagnostics>(result));
+    CHECK(std::get<Diagnostics>(result).front().code==DiagnosticCode::evidence_mismatch);
+    CHECK(std::get<Diagnostics>(result).front().field==
+        "hybrid.adapter.relation_resources");
+    CHECK(adapter.capability_calls==1);
+    CHECK(adapter.calls==1);
 }
 
 TEST_CASE("verifier preflight rejects an unsupported domain before relation construction") {
@@ -4601,6 +4681,7 @@ TEST_CASE("one-step scalar interval verifier certifies distinct tied continuous 
     auto rank_overcount_candidates=std::vector<HybridPathOptimalFaceCandidate>{
         exact_candidate(programs[0],{0,0,0,0}),exact_candidate(programs[1],{0,0,0,0})};
     rank_overcount_programs[1].joint_relation=std::get<sets::SetData>(rank_overcount_relation);
+    set_synthetic_relation_trace_rows(rank_overcount_programs[1]);
     rank_overcount_candidates[1].relation=std::get<sets::SetData>(rank_overcount_relation);
     const auto rank_overcount_result=verify_hybrid_portfolio_family(verifier,rank_overcount_system,request,
         rank_overcount_programs,rank_overcount_candidates,{1,8},{1e-10,1e-10});
@@ -4620,6 +4701,7 @@ TEST_CASE("one-step scalar interval verifier certifies distinct tied continuous 
     auto inexact_rank_candidates=std::vector<HybridPathOptimalFaceCandidate>{
         exact_candidate(programs[0],{0,0,0,0}),exact_candidate(programs[1],{0,0,0,0})};
     inexact_rank_programs[1].joint_relation=std::get<sets::SetData>(inexact_rank_relation);
+    set_synthetic_relation_trace_rows(inexact_rank_programs[1]);
     inexact_rank_candidates[1].relation=std::get<sets::SetData>(inexact_rank_relation);
     const auto inexact_rank_result=verify_hybrid_portfolio_family(verifier,rank_overcount_system,request,
         inexact_rank_programs,inexact_rank_candidates,{1,8},{1e-10,1e-10});
@@ -4911,11 +4993,9 @@ TEST_CASE("one-step scalar interval verifier certifies distinct tied continuous 
     malformed_programs[0].joint_relation=std::get<sets::SetData>(free_post_data);
     const auto malformed_program_result=verify_hybrid_portfolio_family(verifier,system,increasing_request,
         malformed_programs,endpoint_candidates,{1,8},{1e-10,1e-10});
-    REQUIRE(std::holds_alternative<HybridFamilyVerificationReport>(malformed_program_result));
-    const auto& malformed_program_report=std::get<HybridFamilyVerificationReport>(malformed_program_result);
-    CHECK(malformed_program_report.branches[0].feasibility==HybridVerificationStatus::established);
-    CHECK(malformed_program_report.branches[0].continuous_coverage==HybridVerificationStatus::refuted);
-    CHECK(malformed_program_report.complete_family_coverage==HybridVerificationStatus::refuted);
+    REQUIRE(std::holds_alternative<Diagnostics>(malformed_program_result));
+    CHECK(std::get<Diagnostics>(malformed_program_result).front().code==
+        DiagnosticCode::evidence_mismatch);
 
     auto malformed_suboptimal_programs=near_tie_programs;
     malformed_suboptimal_programs[1].joint_relation=std::get<sets::SetData>(free_post_data);
@@ -4924,12 +5004,9 @@ TEST_CASE("one-step scalar interval verifier certifies distinct tied continuous 
     const auto malformed_suboptimal_result=verify_hybrid_portfolio_family(verifier,near_tie_system,
         increasing_request,malformed_suboptimal_programs,only_optimal_near_tie_candidate,
         {1,8},{1e-10,1e-10});
-    REQUIRE(std::holds_alternative<HybridFamilyVerificationReport>(malformed_suboptimal_result));
-    const auto& malformed_suboptimal_report=
-        std::get<HybridFamilyVerificationReport>(malformed_suboptimal_result);
-    CHECK(malformed_suboptimal_report.branches[1].objective_optimality==HybridVerificationStatus::refuted);
-    CHECK(malformed_suboptimal_report.branches[1].continuous_coverage==HybridVerificationStatus::refuted);
-    CHECK(malformed_suboptimal_report.complete_family_coverage==HybridVerificationStatus::refuted);
+    REQUIRE(std::holds_alternative<Diagnostics>(malformed_suboptimal_result));
+    CHECK(std::get<Diagnostics>(malformed_suboptimal_result).front().code==
+        DiagnosticCode::evidence_mismatch);
 }
 
 TEST_CASE("one-step interval verifier accepts a point face fixed by objective equality") {
@@ -6707,11 +6784,9 @@ TEST_CASE("two parameter scalar verifier certifies a coupled polygon and "
       forged_program[0].joint_relation, "forged-program-extra-state");
   auto forged_program_report = verify_hybrid_portfolio_family(
       verifier, system, request, forged_program, faces, {2, 8}, {0, 0});
-  REQUIRE(std::holds_alternative<HybridFamilyVerificationReport>(
-      forged_program_report));
-  CHECK(std::get<HybridFamilyVerificationReport>(forged_program_report)
-            .branches[0]
-            .continuous_coverage == HybridVerificationStatus::refuted);
+  REQUIRE(std::holds_alternative<Diagnostics>(forged_program_report));
+  CHECK(std::get<Diagnostics>(forged_program_report).front().code==
+      DiagnosticCode::evidence_mismatch);
   auto forged_faces = faces;
   const auto decoded_face = forged_faces[0].relation;
   forged_faces[0].relation =

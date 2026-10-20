@@ -469,7 +469,9 @@ cumulative-row, and cumulative matrix-element counts. Both successful and
 failed composition reports retain the configured limits and the operation
 records completed before a diagnostic or cancellation; path-program and
 portfolio builders propagate those failure reports without dropping the path
-identity. Solver-provider provenance remains attached to each branch
+identity. Adapter boundaries cross-check the final cumulative row and variable
+counts against returned H relations before publishing the trace as resource
+evidence. Solver-provider provenance remains attached to each branch
 execution. The default reachability adapter wraps this same direct joint-H
 composer. The one-transition projected-state adapter independently assembles
 its admitted relation, while the general finite-horizon projected-state adapter

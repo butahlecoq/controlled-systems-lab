@@ -225,6 +225,21 @@ Diagnostics hybrid_operation_trace_errors(const model::HybridPath& path,
     }
     return {};
 }
+Diagnostics hybrid_operation_relation_errors(const sets::SetData& relation,
+    std::span<const model::HybridRelationOperationRecord> operations) {
+    const auto representation=relation.representation();
+    const auto* h=std::get_if<sets::HRepresentation>(&representation);
+    if(!h) return {};
+    if(operations.empty() ||
+       h->inequalities.rows()>std::numeric_limits<std::size_t>::max()-h->equalities.rows() ||
+       h->inequalities.cols()!=h->equalities.cols() ||
+       h->inequalities.cols()!=relation.metadata()->set.dimension ||
+       operations.back().cumulative_rows!=h->inequalities.rows()+h->equalities.rows() ||
+       operations.back().joint_variables!=h->inequalities.cols())
+        return one({DiagnosticCode::evidence_mismatch,"hybrid.adapter.relation_resources",
+            "Final operation resource evidence does not match the returned H relation shape"});
+    return {};
+}
 }
 
 namespace {
@@ -396,6 +411,9 @@ HybridPathReachabilityResult execute_preflighted_hybrid_reachability(
         const auto trace_errors=hybrid_operation_trace_errors(path,limits,reachable->relation_operations,true,
             reachable->joint_relation.metadata()->set.dimension);
         if(!trace_errors.empty()) return trace_errors;
+        const auto relation_errors=hybrid_operation_relation_errors(
+            reachable->joint_relation,reachable->relation_operations);
+        if(!relation_errors.empty()) return relation_errors;
         if(reachable->projected_state) {
             const auto& projected=*reachable->projected_state;
             const auto projected_representation=projected.terminal_state_set.representation();
@@ -680,6 +698,9 @@ HybridPathProgramResult dispatch_hybrid_path_program(
         const auto trace_errors=hybrid_operation_trace_errors(path,limits,program->relation_operations,true,
             program->joint_relation.metadata()->set.dimension);
         if(!trace_errors.empty()) return trace_errors;
+        const auto relation_errors=hybrid_operation_relation_errors(
+            program->joint_relation,program->relation_operations);
+        if(!relation_errors.empty()) return relation_errors;
     }
     if(const auto* failure=std::get_if<model::HybridPathCompositionFailureReport>(&built)) {
         if(failure->path!=path)
@@ -1220,6 +1241,9 @@ HybridFamilyVerificationResult verify_hybrid_portfolio_family(
         const auto trace_errors=hybrid_operation_trace_errors(paths[i],programs[i].relation_limits,
             programs[i].relation_operations,true,programs[i].joint_relation.metadata()->set.dimension);
         if(!trace_errors.empty()) return trace_errors;
+        const auto relation_errors=hybrid_operation_relation_errors(
+            programs[i].joint_relation,programs[i].relation_operations);
+        if(!relation_errors.empty()) return relation_errors;
     }
     for(std::size_t i=0;i<candidates.size();++i) {
         if(std::find(paths.begin(),paths.end(),candidates[i].path)==paths.end())

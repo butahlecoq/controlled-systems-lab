@@ -303,3 +303,11 @@ any enumerated path. This prevents an unsupported or dimension-mismatched
 objective from bypassing admission when its mode is unreachable or every path
 to it is infeasible. Regressions cover both cases; broader verifier-domain,
 resource-scale, and publication evidence remains open.
+
+Reachability and direct-trajectory adapter boundaries now compare final
+operation-trace row and variable totals with the returned H-relation shape;
+family verification repeats the check before attaching those traces to reports.
+Malicious-adapter tests append a redundant inequality without updating the trace
+and confirm evidence-mismatch rejection. Other exact representations remain
+governed by their adapter trace contract; broader resource-scale evidence stays
+open.
