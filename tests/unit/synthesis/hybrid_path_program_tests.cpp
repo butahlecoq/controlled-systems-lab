@@ -592,6 +592,181 @@ TEST_CASE("exact linear H verifier retains tied paths across objective scales") 
     CHECK(report.branches[2].continuous_coverage==HybridVerificationStatus::established);
 }
 
+TEST_CASE("exact linear H verifier matches literal two-control tied path oracle") {
+    const auto scalar_interval=[](std::string id,double lower,double upper) {
+        return h_set(std::move(id),1,Matrix{2,1,{-1,1}},
+            Vector{-lower,upper},Matrix{0,1,{}},Vector{});
+    };
+    const LinearStage first{Matrix{1,1,{0}},Matrix{1,1,{1}},
+        Matrix{1,0,{}},Vector{0}};
+    const LinearStage second{Matrix{1,1,{1}},Matrix{1,1,{0}},
+        Matrix{1,0,{}},Vector{0}};
+    model::HybridMode source{{"source"},1,1,{"x"},{"u"}};
+    source.flow=std::vector<LinearStage>{first,second};
+    source.control_sets={scalar_interval("oracle-u0",0,1),Singleton{{0}}};
+    source.invariants={UniversalSet{1},UniversalSet{1},UniversalSet{1}};
+    model::HybridMode middle{{"middle"},1,1,{"x"},{"u"}};
+    middle.flow=std::vector<LinearStage>{first,second};
+    middle.control_sets={Singleton{{0}},scalar_interval("oracle-u1",0,1)};
+    middle.invariants={UniversalSet{1},UniversalSet{1},UniversalSet{1}};
+    model::HybridMode terminal{{"terminal"},1,1,{"x"},{"u"}};
+    terminal.flow=std::vector<LinearStage>{first,second};
+    terminal.control_sets={Singleton{{0}},Singleton{{0}}};
+    terminal.invariants={UniversalSet{1},UniversalSet{1},UniversalSet{1}};
+    const auto identity=[](std::string id) {
+        return h_set(std::move(id),2,Matrix{0,2,{}},Vector{},
+            Matrix{1,2,{1,-1}},Vector{0});
+    };
+    const auto universal_reset=[](std::string id) {
+        return h_set(std::move(id),2,Matrix{0,2,{}},Vector{},
+            Matrix{0,2,{}},Vector{});
+    };
+    model::HybridSystem system{2,{source,middle,terminal},
+        {{{"enter-half"},{"source"},{"middle"},
+          {scalar_interval("oracle-half-guard",0,0.5),UniversalSet{1}},
+          {identity("oracle-half-reset"),universal_reset("unused-half-reset")}},
+         {{"enter-full"},{"source"},{"middle"},
+          {UniversalSet{1},UniversalSet{1}},
+          {identity("oracle-full-reset"),universal_reset("unused-full-reset")}},
+         {{"finish"},{"middle"},{"terminal"},
+          {UniversalSet{1},UniversalSet{1}},
+          {universal_reset("unused-finish-reset"),identity("oracle-terminal-reset")}}}};
+    model::HybridRequest request{{{"source"},{0}},{{"terminal"}},
+        {{{"terminal"},LinearTerminal{{1},0},"terminal cost","units"}}};
+
+    // Walk the raw edge catalogue directly for horizon two; do not call the
+    // production path enumerator. Then state the exact answer directly: u0 is
+    // in [0,0.5] or [0,1], u1 is in [0,1], and both paths minimize u0 at zero
+    // with complete face u0=0, 0<=u1<=1.
+    std::vector<model::HybridPath> oracle_paths;
+    for (const auto& first_edge:system.edges) {
+        if (first_edge.source.value!="source") continue;
+        for (const auto& second_edge:system.edges) {
+            if (second_edge.source!=first_edge.target ||
+                second_edge.target.value!="terminal") continue;
+            oracle_paths.push_back({
+                {request.initial.mode,first_edge.target,second_edge.target},
+                {first_edge.id,second_edge.id}});
+        }
+    }
+    const std::vector<model::HybridPath> expected_oracle_paths{
+        {{{"source"},{"middle"},{"terminal"}},{{"enter-half"},{"finish"}}},
+        {{{"source"},{"middle"},{"terminal"}},{{"enter-full"},{"finish"}}}};
+    REQUIRE(oracle_paths==expected_oracle_paths);
+    const auto built=build_hybrid_portfolio_programs(system,request,{"literal-oracle"},
+        {2,8},{64,4096,65536});
+    REQUIRE(std::holds_alternative<std::vector<HybridPathProgram>>(built));
+    const auto& programs=std::get<std::vector<HybridPathProgram>>(built);
+    REQUIRE(programs.size()==oracle_paths.size());
+    for (std::size_t i=0;i<oracle_paths.size();++i)
+        CHECK(programs[i].path==oracle_paths[i]);
+
+    // Independently state both complete branch relations in the documented
+    // joint coordinate order (x0,u0,xpre0,x1,u1,xpre1,x2). The path guard
+    // restricts u0 on the first branch; both controls are bounded by [0,1].
+    // The flow and identity-reset equations give x2=u0. Since u0>=0 on each
+    // branch and u0=0,u1=0.5 is feasible, each branch minimum is exactly zero.
+    const auto matches_rows=[](const numeric::MatrixView& actual,
+        const numeric::VectorView& actual_rhs,const std::vector<double>& expected,
+        const std::vector<double>& expected_rhs,std::size_t columns) {
+        REQUIRE(actual.rows()==expected_rhs.size());
+        REQUIRE(actual_rhs.size()==expected_rhs.size());
+        REQUIRE(actual.cols()==columns);
+        std::vector<bool> matched(expected_rhs.size(),false);
+        for (std::size_t row=0;row<actual.rows();++row) {
+            bool found=false;
+            for (std::size_t candidate=0;candidate<expected_rhs.size()&&!found;++candidate) {
+                if (matched[candidate] || actual_rhs[row]!=expected_rhs[candidate]) continue;
+                bool same=true;
+                for (std::size_t col=0;col<columns;++col)
+                    same=same && actual(row,col)==expected[candidate*columns+col];
+                if (same) { matched[candidate]=true; found=true; }
+            }
+            CHECK_MESSAGE(found,"row "<<row<<" rhs "<<actual_rhs[row]<<" coefficients "<<
+                actual(row,0)<<","<<actual(row,1)<<","<<actual(row,2)<<","<<actual(row,3)<<","<<
+                actual(row,4)<<","<<actual(row,5)<<","<<actual(row,6));
+        }
+    };
+    const std::vector<double> literal_equalities{
+        1,0,0,0,0,0,0,
+        0,-1,1,0,0,0,0,
+        0,0,1,-1,0,0,0,
+        0,0,0,-1,0,1,0,
+        0,0,0,0,0,1,-1};
+    const std::vector<double> literal_equality_rhs{0,0,0,0,0};
+    for (std::size_t branch=0;branch<programs.size();++branch) {
+        const auto representation=programs[branch].joint_relation.representation();
+        REQUIRE(std::holds_alternative<sets::HRepresentation>(representation));
+        const auto& h=std::get<sets::HRepresentation>(representation);
+        if (branch==0) {
+            matches_rows(h.inequalities,h.upper_bounds,
+                {0,-1,0,0,0,0,0,
+                 0,1,0,0,0,0,0,
+                 0,0,-1,0,0,0,0,
+                 0,0,1,0,0,0,0,
+                 0,0,0,0,-1,0,0,
+                 0,0,0,0,1,0,0},
+                {0,1,0,0.5,0,1},7);
+        } else {
+            matches_rows(h.inequalities,h.upper_bounds,
+                {0,-1,0,0,0,0,0,
+                 0,1,0,0,0,0,0,
+                 0,0,0,0,-1,0,0,
+                 0,0,0,0,1,0,0},
+                {0,1,0,1},7);
+        }
+        matches_rows(h.equalities,h.equality_values,literal_equalities,
+            literal_equality_rhs,7);
+        CHECK(std::get<LinearTerminal>(programs[branch].lifted_objective).coefficients==
+            Vector{0,0,0,0,0,0,1});
+        CHECK(std::get<LinearTerminal>(programs[branch].lifted_objective).offset==0);
+    }
+
+    const std::vector<double> face_inequalities{
+        0,0,0,0,1,0,0,
+        0,0,0,0,-1,0,0};
+    const std::vector<double> face_equalities{
+        1,0,0,0,0,0,0,
+        0,1,0,0,0,0,0,
+        0,0,1,0,0,0,0,
+        0,0,0,1,0,0,0,
+        0,0,0,0,0,1,0,
+        0,0,0,0,0,0,1};
+    const auto literal_face=[&](std::string id) {
+        auto decoded=sets::from_handle(h_set(std::move(id),7,
+            Matrix{2,7,face_inequalities},Vector{1,0},
+            Matrix{6,7,face_equalities},Vector{0,0,0,0,0,0}));
+        REQUIRE(std::holds_alternative<sets::SetData>(decoded));
+        return std::get<sets::SetData>(std::move(decoded));
+    };
+    std::vector<HybridPathOptimalFaceCandidate> candidates;
+    candidates.push_back(exact_candidate(programs[0],{0,0,0,0,0.5,0,0}));
+    candidates.push_back(exact_candidate(programs[1],{0,0,0,0,0.5,0,0}));
+    candidates[0].relation=literal_face("oracle-half-optimal-face");
+    candidates[1].relation=literal_face("oracle-full-optimal-face");
+    for (std::size_t branch=0;branch<candidates.size();++branch) {
+        REQUIRE(candidates[branch].solver_result.primal.has_value());
+        const auto& point=*candidates[branch].solver_result.primal;
+        const auto& objective=std::get<LinearTerminal>(programs[branch].lifted_objective);
+        double literal_cost=objective.offset;
+        for (std::size_t coordinate=0;coordinate<point.size();++coordinate)
+            literal_cost+=objective.coefficients[coordinate]*point[coordinate];
+        CHECK(literal_cost==0.0);
+    }
+    ExactLinearHHybridFamilyVerifier verifier;
+    const auto result=verify_hybrid_portfolio_family(verifier,system,request,
+        programs,candidates,{2,8},{1e-9,1e-9});
+    REQUIRE(std::holds_alternative<HybridFamilyVerificationReport>(result));
+    const auto& report=std::get<HybridFamilyVerificationReport>(result);
+    CHECK(report.global_objective_optimality==HybridVerificationStatus::established);
+    CHECK(report.complete_family_coverage==HybridVerificationStatus::established);
+    REQUIRE(report.branches.size()==2);
+    CHECK(report.branches[0].objective_optimality==HybridVerificationStatus::established);
+    CHECK(report.branches[0].continuous_coverage==HybridVerificationStatus::established);
+    CHECK(report.branches[1].objective_optimality==HybridVerificationStatus::established);
+    CHECK(report.branches[1].continuous_coverage==HybridVerificationStatus::established);
+}
+
 TEST_CASE("hybrid exact raw path relation matches the joint H composer") {
     using namespace detail::hybrid_exact;
     const auto system=example_system();
