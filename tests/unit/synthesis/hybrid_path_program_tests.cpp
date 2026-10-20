@@ -3133,6 +3133,67 @@ TEST_CASE("two parameter scalar verifier certifies a coupled polygon and "
   CHECK(std::get<HybridFamilyVerificationReport>(forged_face_report)
             .branches[0]
             .continuous_coverage == HybridVerificationStatus::refuted);
+
+  std::vector<model::HybridPath> verified_paths;
+  for (const auto &program : programs)
+    verified_paths.push_back(program.path);
+  auto degenerate_system = system;
+  degenerate_system.modes[2].invariants[2] = Singleton{{0}};
+  const auto degenerate_preflight =
+      verifier.preflight(degenerate_system, request, verified_paths, {});
+  CHECK(std::holds_alternative<Diagnostics>(degenerate_preflight));
+
+  auto infeasible_system = system;
+  infeasible_system.modes[2].invariants[2] = EmptySet{1};
+  auto infeasible_built = build_hybrid_portfolio_programs(
+      infeasible_system, request, {"two-parameter-empty-branch"}, {2, 8},
+      {64, 4096, 65536});
+  REQUIRE(std::holds_alternative<std::vector<HybridPathProgram>>(
+      infeasible_built));
+  auto infeasible_programs =
+      std::get<std::vector<HybridPathProgram>>(infeasible_built);
+  for (auto &program : infeasible_programs) {
+    auto malformed_empty = sets::make_empty(
+        {SetId{"two-parameter-wrong-empty-dimension"}, 6, {}});
+    REQUIRE(std::holds_alternative<sets::SetData>(malformed_empty));
+    program.joint_relation = std::get<sets::SetData>(malformed_empty);
+  }
+  const auto malformed_empty_report = verifier.verify(
+      infeasible_system, request, verified_paths, infeasible_programs, {},
+      {0, 0}, {});
+  std::string malformed_empty_error =
+      "malformed empty result variant: " +
+      std::to_string(malformed_empty_report.index());
+  if (const auto *errors = std::get_if<Diagnostics>(&malformed_empty_report);
+      errors && !errors->empty())
+    malformed_empty_error += ": " + (*errors)[0].field + ": " +
+                             (*errors)[0].explanation;
+  INFO(malformed_empty_error);
+  REQUIRE(std::holds_alternative<HybridFamilyVerificationReport>(
+      malformed_empty_report));
+  for (const auto &branch :
+       std::get<HybridFamilyVerificationReport>(malformed_empty_report)
+           .branches)
+    CHECK(branch.feasibility == HybridVerificationStatus::unsupported);
+
+  auto wrong_path_programs =
+      std::get<std::vector<HybridPathProgram>>(infeasible_built);
+  for (auto &program : wrong_path_programs) {
+    auto explicit_empty = sets::make_empty(
+        {SetId{"two-parameter-matching-empty-dimension"}, 7, {}});
+    REQUIRE(std::holds_alternative<sets::SetData>(explicit_empty));
+    program.joint_relation = std::get<sets::SetData>(explicit_empty);
+  }
+  wrong_path_programs.front().path.edges.front().value =
+      "two-parameter-wrong-empty-path";
+  const auto wrong_path_empty_report = verifier.verify(
+      infeasible_system, request, verified_paths, wrong_path_programs, {},
+      {0, 0}, {});
+  REQUIRE(std::holds_alternative<HybridFamilyVerificationReport>(
+      wrong_path_empty_report));
+  CHECK(std::get<HybridFamilyVerificationReport>(wrong_path_empty_report)
+            .branches.front()
+            .feasibility == HybridVerificationStatus::unsupported);
 }
 
 TEST_CASE("hybrid portfolio objective bounds retain tied possible branches") {

@@ -520,6 +520,9 @@ Branch eval(const HybridSystem &sys, const HybridRequest &req,
       return unsupported("Objective vertex arithmetic is not exact");
     b.minimum = std::min(b.minimum, z);
   }
+  const auto feasible_dimension = dimension(b.feasible);
+  if (!feasible_dimension || *feasible_dimension != 2)
+    return unsupported("Requires a nondegenerate two-dimensional control polygon");
   b.state = Branch::State::feasible;
   return b;
 }
@@ -640,12 +643,22 @@ TwoParameterScalarPolytopeHybridFamilyVerifier::verify(
     rec.path = paths[i];
     if (b.state == Branch::State::infeasible) {
       auto repr = programs[i].joint_relation.representation();
-      bool empty = std::holds_alternative<sets::EmptyRepresentation>(repr);
-      rec.feasibility = empty ? HybridVerificationStatus::refuted
-                              : HybridVerificationStatus::unsupported;
+      const auto metadata = programs[i].joint_relation.metadata();
+      const bool valid_empty =
+          std::holds_alternative<sets::EmptyRepresentation>(repr) &&
+          metadata && metadata->set.dimension == 7 &&
+          programs[i].path == paths[i] &&
+          programs[i].relation_limits.max_variables >= 7;
+      rec.feasibility = valid_empty ? HybridVerificationStatus::refuted
+                                    : HybridVerificationStatus::unsupported;
       rec.objective_optimality = rec.feasibility;
       rec.continuous_coverage = rec.feasibility;
-      all = all && empty;
+      all = all && valid_empty;
+      if (!valid_empty)
+        rec.diagnostics.push_back(
+            {DiagnosticCode::evidence_mismatch,
+             "hybrid.verification.two_parameter_empty_relation",
+             "An infeasible branch requires a seven-coordinate explicit empty relation with matching path identity"});
       report.branches.push_back(std::move(rec));
       continue;
     }
