@@ -156,7 +156,18 @@ by one H equality. It returns the labelled joint relation alongside the H
 terminal set, provider provenance, and input/output row counts. Its row limit
 is configured into the registered projection provider and bounds input,
 intermediate, and terminal H rows. This narrow implementation does not establish general
-horizon projected reachability or general-dimensional continuous coverage.
+horizon projected reachability or general-dimensional continuous coverage. The
+`GeneralProjectedStateHybridReachabilityAdapter` composes the admitted full
+finite-horizon joint-H relation, then projects all terminal-state coordinates
+through the registered H-projection provider. It supports every state and
+control dimension admitted by the joint-H model profile, subject to caller
+relation limits and its projection-row limit; preflight counts the complete
+path's joint-relation rows before composition. It retains the complete labelled
+joint relation and per-stage operation trace beside the projected terminal set
+and provider evidence. This adapter shares the joint-H relation composer and
+does not independently verify family completeness or extend the supported
+continuous-family verifier domains. Projection intermediate-row growth can
+still cause a resource rejection within the configured provider limit.
 Each reachability adapter must preflight its supported
 operations and limits for the fixed path before the wrapper queries capabilities
 or starts composition. The default preflight fails closed; the built-in joint-H

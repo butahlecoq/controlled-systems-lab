@@ -359,7 +359,10 @@ HybridPathReachabilityResult compute_hybrid_path_reachability(
         if(reachable->projected_state) {
             const auto& projected=*reachable->projected_state;
             const auto projected_representation=projected.terminal_state_set.representation();
-            if(projected.terminal_state_set.metadata()->set.dimension!=1 ||
+            const auto terminal_mode=std::find_if(system.modes.begin(),system.modes.end(),
+                [&](const auto& candidate) { return candidate.id==path.modes.back(); });
+            if(terminal_mode==system.modes.end() ||
+               projected.terminal_state_set.metadata()->set.dimension!=terminal_mode->state_dimension ||
                !std::holds_alternative<sets::HRepresentation>(projected_representation) ||
                projected.maximum_projection_rows==0 ||
                projected.output_rows>projected.maximum_projection_rows ||

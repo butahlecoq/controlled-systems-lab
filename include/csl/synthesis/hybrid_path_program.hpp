@@ -98,6 +98,24 @@ private:
     std::size_t maximum_projection_rows_;
 };
 
+// Projects the terminal state for any admitted finite-horizon joint-H path.
+// The complete branch-labelled relation is retained alongside the projected
+// set. Projection resource limits are checked before relation construction.
+class GeneralProjectedStateHybridReachabilityAdapter final : public HybridReachabilityAdapter {
+public:
+    explicit GeneralProjectedStateHybridReachabilityAdapter(std::size_t maximum_projection_rows = 4096);
+    HybridReachabilityCapabilities capabilities() const noexcept override;
+    HybridReachabilityPreflightResult preflight(const model::HybridSystem&,
+        const model::HybridRequest&, const model::HybridPath&,
+        model::HybridRelationLimits, std::stop_token cancellation) const override;
+    HybridPathReachabilityResult compose_path(const model::HybridSystem&,
+        const model::HybridRequest&, const model::HybridPath&,
+        model::HybridRelationLimits, std::stop_token cancellation) const override;
+private:
+    registry::PreparedProvider<registry::GeometryPort> projection_;
+    std::size_t maximum_projection_rows_;
+};
+
 HybridPathReachabilityResult compute_hybrid_path_reachability(
     const HybridReachabilityAdapter&, const model::HybridSystem&,
     const model::HybridRequest&, const model::HybridPath&,

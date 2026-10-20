@@ -340,4 +340,158 @@ HybridPathReachabilityResult ProjectedStateHybridReachabilityAdapter::compose_pa
         HybridPathReachability::ProjectedStateEvidence{std::move(projected),selected,input_rows,
             output_rows,maximum_projection_rows_}};
 }
+
+GeneralProjectedStateHybridReachabilityAdapter::GeneralProjectedStateHybridReachabilityAdapter(
+    std::size_t maximum_projection_rows)
+    :projection_(make_projection_provider(maximum_projection_rows)),
+     maximum_projection_rows_(maximum_projection_rows) {}
+
+HybridReachabilityCapabilities GeneralProjectedStateHybridReachabilityAdapter::capabilities() const noexcept {
+    return {true,Assurance::numerical};
+}
+
+HybridReachabilityPreflightResult GeneralProjectedStateHybridReachabilityAdapter::preflight(
+    const model::HybridSystem& system,const model::HybridRequest& request,const model::HybridPath& path,
+    model::HybridRelationLimits limits,std::stop_token cancellation) const {
+    if(cancellation.stop_requested())
+        return OperationStopped{StopReason::cancelled,"General projected reachability preflight was cancelled"};
+    if(maximum_projection_rows_==0)
+        return Diagnostics{{DiagnosticCode::invalid_input,"hybrid.projected.row_limit",
+            "Projection row limit must be positive"}};
+
+    const auto composed=model::preflight_hybrid_path_relations(system,request,
+        std::span<const model::HybridPath>(&path,1),limits,cancellation);
+    if(const auto* failure=std::get_if<model::HybridPathCompositionFailureReport>(&composed)) return *failure;
+    if(const auto* diagnostics=std::get_if<Diagnostics>(&composed)) return *diagnostics;
+    if(const auto* stopped=std::get_if<OperationStopped>(&composed)) return *stopped;
+
+    // Count the exact H rows the joint composer will submit to projection.
+    // This is a preflight-only inventory; no relation or provider workspace is
+    // created until the configured projection budget admits the complete path.
+    const auto rows_in=[&](const AdmissibleSet& set)->std::optional<std::size_t> {
+        if(std::holds_alternative<UniversalSet>(set)) return 0;
+        if(std::holds_alternative<EmptySet>(set)) return 1;
+        if(const auto* point=std::get_if<Singleton>(&set)) return point->point.size();
+        const auto imported=sets::from_handle(std::get<SetHandle>(set));
+        const auto* data=std::get_if<sets::SetData>(&imported);
+        if(!data) return std::nullopt;
+        const auto representation=data->representation();
+        if(const auto* h=std::get_if<sets::HRepresentation>(&representation))
+            return h->inequalities.rows()+h->equalities.rows();
+        if(std::holds_alternative<sets::EmptyRepresentation>(representation)) return 1;
+        if(std::holds_alternative<sets::UniversalRepresentation>(representation)) return 0;
+        if(const auto* point=std::get_if<sets::SingletonRepresentation>(&representation))
+            return point->point.size();
+        return std::nullopt;
+    };
+    const auto add=[&](std::size_t& total,std::size_t amount) {
+        if(total>std::numeric_limits<std::size_t>::max()-amount) return false;
+        total+=amount;
+        return total<=maximum_projection_rows_;
+    };
+    std::size_t required=0;
+    if(!add(required,request.initial.state.size()))
+        return unsupported("hybrid.projected.row_limit","Projected relation exceeds the selected provider row limit");
+    for(std::size_t stage=0;stage<system.horizon;++stage) {
+        if(cancellation.stop_requested())
+            return OperationStopped{StopReason::cancelled,"General projected reachability preflight was cancelled"};
+        const auto* source=mode(system,path.modes[stage]);
+        const auto* transition=edge(system,path.edges[stage]);
+        if(!source||!transition)
+            return unsupported("hybrid.projected.path","Path references an unknown mode or transition");
+        const auto add_set=[&](const AdmissibleSet& set) {
+            const auto rows=rows_in(set);
+            return rows&&add(required,*rows);
+        };
+        const auto reset=sets::from_handle(transition->reset_relations[stage]);
+        const auto* reset_data=std::get_if<sets::SetData>(&reset);
+        if(!reset_data)
+            return unsupported("hybrid.projected.preflight","Could not inspect the complete projected relation inventory");
+        const auto reset_representation=reset_data->representation();
+        std::optional<std::size_t> reset_rows;
+        if(const auto* h=std::get_if<sets::HRepresentation>(&reset_representation))
+            reset_rows=h->inequalities.rows()+h->equalities.rows();
+        else if(std::holds_alternative<sets::EmptyRepresentation>(reset_representation)) reset_rows=1;
+        else if(std::holds_alternative<sets::UniversalRepresentation>(reset_representation)) reset_rows=0;
+        else if(const auto* point=std::get_if<sets::SingletonRepresentation>(&reset_representation))
+            reset_rows=point->point.size();
+        if(!add_set(source->invariants[stage]) || !add(required,source->state_dimension) ||
+           !add_set(source->control_sets[stage]) || !add_set(source->invariants[stage+1]) ||
+           !add_set(transition->guards[stage]) || !reset_rows || !add(required,*reset_rows))
+            return unsupported("hybrid.projected.row_limit","Projected relation exceeds the selected provider row limit");
+    }
+    const auto* terminal=mode(system,path.modes.back());
+    if(!terminal) return unsupported("hybrid.projected.path","Terminal mode is absent from the admitted system");
+    const auto terminal_rows=rows_in(terminal->invariants[system.horizon]);
+    if(!terminal_rows || !add(required,*terminal_rows))
+        return unsupported("hybrid.projected.row_limit","Projected relation exceeds the selected provider row limit");
+    return std::monostate{};
+}
+
+HybridPathReachabilityResult GeneralProjectedStateHybridReachabilityAdapter::compose_path(
+    const model::HybridSystem& system,const model::HybridRequest& request,const model::HybridPath& path,
+    model::HybridRelationLimits limits,std::stop_token cancellation) const {
+    if(cancellation.stop_requested())
+        return OperationStopped{StopReason::cancelled,"General projected reachability was cancelled before relation construction"};
+    const auto admitted=preflight(system,request,path,limits,cancellation);
+    if(const auto* failure=std::get_if<model::HybridPathCompositionFailureReport>(&admitted)) return *failure;
+    if(const auto* diagnostics=std::get_if<Diagnostics>(&admitted)) return *diagnostics;
+    if(const auto* stopped=std::get_if<OperationStopped>(&admitted)) return *stopped;
+
+    auto composition=model::compose_hybrid_path_relation_with_report(system,request,path,limits,cancellation);
+    if(const auto* failure=std::get_if<model::HybridPathCompositionFailureReport>(&composition)) return *failure;
+    auto composed=std::get<model::HybridComposedPathRelation>(std::move(composition));
+    if(cancellation.stop_requested())
+        return OperationStopped{StopReason::cancelled,"General projected reachability stopped before provider admission"};
+    const auto relation_representation=composed.relation.representation();
+    const auto* h=std::get_if<sets::HRepresentation>(&relation_representation);
+    if(!h) return unsupported("hybrid.projected.relation","Joint composer did not return an H relation");
+    const auto* terminal=mode(system,path.modes.back());
+    if(!terminal || terminal->state_dimension>composed.relation.metadata()->set.dimension)
+        return unsupported("hybrid.projected.path","Terminal state coordinates are missing from the joint relation");
+    const auto width=composed.relation.metadata()->set.dimension;
+    std::vector<std::size_t> coordinates(terminal->state_dimension);
+    for(std::size_t i=0;i<coordinates.size();++i)
+        coordinates[i]=width-terminal->state_dimension+i;
+    const auto input_rows=h->inequalities.rows()+h->equalities.rows();
+    const auto request_identity=exact_input_identity(path,*h,composed.relation.metadata()->coordinate_labels);
+    const GeometryRequestIdentity identity{ProblemId{"hybrid-general-projected-reachability"},
+        RequestId{"terminal-state:"+request_identity},ReferenceId{"terminal-state:"+request_identity}};
+    const auto provenance=projection_.provenance();
+    const auto implementation=provenance.actual?provenance.actual->id:provenance.requested.id;
+    OperationRequest projection_request{identity,implementation,
+        Projection{composed.relation.as_handle(),coordinates},SetRelation::equivalent,Assurance::numerical};
+    auto prepared_result=projection_.prepare(projection_request);
+    if(const auto* rejected=std::get_if<registry::Rejection>(&prepared_result)) return rejected->diagnostics;
+    const auto pipeline=std::get<registry::PreparedPipeline<registry::GeometryPort>>(std::move(prepared_result));
+    const auto selected=pipeline.provenance()[0];
+    if(cancellation.stop_requested())
+        return OperationStopped{StopReason::cancelled,"General projected reachability stopped before projection workspace creation"};
+    auto workers=pipeline.create();
+    ExecutionContext context;context.cancellation=cancellation;
+    const auto outcome=std::get<0>(workers)->run(context);
+    if(const auto* stopped=std::get_if<OperationStopped>(&outcome)) return *stopped;
+    if(const auto* rejected=std::get_if<Unsupported>(&outcome)) return rejected->diagnostics;
+    const auto* projected_result=std::get_if<OperationResult>(&outcome);
+    if(!projected_result || projected_result->relation!=SetRelation::equivalent)
+        return unsupported("hybrid.projected.provider_result","Projection provider did not return an equivalent terminal set");
+    const auto imported=sets::from_handle(projected_result->output);
+    if(const auto* diagnostic=std::get_if<Diagnostic>(&imported)) return Diagnostics{*diagnostic};
+    auto projected=std::get<sets::SetData>(imported);
+    const auto output_rows=std::visit([](const auto& rep)->std::size_t {
+        using T=std::decay_t<decltype(rep)>;
+        if constexpr(std::is_same_v<T,sets::HRepresentation>)
+            return rep.inequalities.rows()+rep.equalities.rows();
+        else return 0;
+    },projected.representation());
+    if(projected.metadata()->set.dimension!=terminal->state_dimension ||
+       !std::holds_alternative<sets::HRepresentation>(projected.representation()) ||
+       output_rows>maximum_projection_rows_)
+        return unsupported("hybrid.projected.provider_shape","Projection provider returned an unsupported terminal-set representation or dimension");
+    if(cancellation.stop_requested())
+        return OperationStopped{StopReason::cancelled,"General projected reachability stopped before result publication"};
+    return HybridPathReachability{path,std::move(composed.relation),limits,std::move(composed.operations),
+        Assurance::numerical,HybridPathReachability::ProjectedStateEvidence{std::move(projected),selected,
+            input_rows,output_rows,maximum_projection_rows_}};
+}
 }

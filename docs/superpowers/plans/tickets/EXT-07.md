@@ -47,11 +47,12 @@ joint-H representations and variable/row/matrix resource limits before
 constructing any branch relation. The combined verified-program builder also
 runs each built-in verifier's bounded-domain preflight; custom bounded verifiers
 fail closed until they implement preflight. Fixed-path reachability now has both
-the direct joint-H adapter and a bounded one-transition scalar adapter that
-independently assembles the path relation, projects the terminal state through
-the registered geometry provider, and retains provider/row evidence. General
-horizon projected reachability and full provider/resource aggregation remain
-open.
+the direct joint-H adapter, a bounded one-transition scalar adapter that
+independently assembles and projects its path relation, and a general projected
+adapter that composes and projects the full joint-H relation for admitted finite
+horizons and dimensions. Both projected adapters retain the full branch relation
+and provider/row evidence; the general adapter preflights the complete path row
+inventory. Full provider/resource aggregation remains open.
 
 The EXT-07 report exercises one supported one-step scalar interval case through
 path construction, HiGHS optimization, and family verification. Its 2D plot

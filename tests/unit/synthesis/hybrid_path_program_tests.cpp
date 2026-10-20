@@ -1203,6 +1203,77 @@ TEST_CASE("projected hybrid reachability preflights a projection input exceeding
     CHECK(std::get<Diagnostics>(result).front().field=="hybrid.projected.row_limit");
 }
 
+TEST_CASE("general projected hybrid reachability projects the terminal state across a finite horizon") {
+    auto [system,request]=projected_interval_fixture();
+    auto reset=system.edges.front().reset_relations.front();
+    auto first_guard=system.edges.front().guards.front();
+    auto source=system.modes.front();
+    auto target=system.modes.back();
+    source.control_sets={interval("general-source-u0",0,1),UniversalSet{1}};
+    source.invariants={UniversalSet{1},UniversalSet{1},UniversalSet{1}};
+    auto middle=source;
+    middle.id={"middle"};
+    middle.control_coordinate_labels={"v"};
+    middle.control_sets={UniversalSet{1},interval("general-middle-u1",0,0)};
+    middle.flow=LinearStage{Matrix{1,1,{1}},Matrix{1,1,{1}},Matrix{1,0,{}},Vector{0}};
+    target.control_sets={UniversalSet{0},UniversalSet{0}};
+    target.invariants={UniversalSet{1},UniversalSet{1},UniversalSet{1}};
+    system.horizon=2;
+    system.modes={source,middle,target};
+    system.edges={
+        {{"first"},{"source"},{"middle"},{first_guard,UniversalSet{1}},{reset,reset}},
+        {{"second"},{"middle"},{"target"},{UniversalSet{1},UniversalSet{1}},{reset,reset}}
+    };
+    request.allowed_terminal_modes={{"target"}};
+    request.terminal_objectives={{{"target"},LinearTerminal{{1},0},"cost","u"}};
+    const model::HybridPath path{{{"source"},{"middle"},{"target"}},{{"first"},{"second"}}};
+    GeneralProjectedStateHybridReachabilityAdapter limited_adapter(1);
+    const auto limited=compute_hybrid_path_reachability(limited_adapter,system,request,path,{16,64,1024});
+    REQUIRE(std::holds_alternative<Diagnostics>(limited));
+    CHECK(std::get<Diagnostics>(limited).front().field=="hybrid.projected.row_limit");
+
+    GeneralProjectedStateHybridReachabilityAdapter adapter(64);
+    const auto result=compute_hybrid_path_reachability(adapter,system,request,path,{16,64,1024});
+    REQUIRE(std::holds_alternative<HybridPathReachability>(result));
+    const auto& reachable=std::get<HybridPathReachability>(result);
+    REQUIRE(reachable.projected_state.has_value());
+    CHECK(reachable.path==path);
+    CHECK(reachable.relation_operations.size()>=10);
+    const auto terminal=reachable.projected_state->terminal_state_set.representation();
+    REQUIRE(std::holds_alternative<sets::HRepresentation>(terminal));
+    const auto& terminal_h=std::get<sets::HRepresentation>(terminal);
+    CHECK(reachable.projected_state->terminal_state_set.metadata()->set.dimension==1);
+    CHECK(satisfies(terminal_h,{0.0}));
+    CHECK(satisfies(terminal_h,{0.25}));
+    CHECK(satisfies(terminal_h,{0.5}));
+    CHECK_FALSE(satisfies(terminal_h,{0.625}));
+    const auto relation=reachable.joint_relation.representation();
+    REQUIRE(std::holds_alternative<sets::HRepresentation>(relation));
+    const auto& relation_h=std::get<sets::HRepresentation>(relation);
+    CHECK(relation_h.equalities.rows()>=5);
+    CHECK(satisfies(relation_h,{0.0,0.25,0.25,0.25,0.0,0.25,0.25}));
+    CHECK(reachable.projected_state->input_rows==
+        relation_h.inequalities.rows()+relation_h.equalities.rows());
+}
+
+TEST_CASE("general projected hybrid reachability selects a dimension-changing terminal block") {
+    const auto system=example_system();
+    const auto request=example_request();
+    const auto path=example_path();
+    GeneralProjectedStateHybridReachabilityAdapter adapter(16);
+    const auto result=compute_hybrid_path_reachability(adapter,system,request,path,{16,32,512});
+    REQUIRE(std::holds_alternative<HybridPathReachability>(result));
+    const auto& reachable=std::get<HybridPathReachability>(result);
+    REQUIRE(reachable.projected_state.has_value());
+    CHECK(reachable.joint_relation.metadata()->set.dimension==5);
+    CHECK(reachable.projected_state->terminal_state_set.metadata()->set.dimension==2);
+    const auto representation=reachable.projected_state->terminal_state_set.representation();
+    REQUIRE(std::holds_alternative<sets::HRepresentation>(representation));
+    const auto& projected=std::get<sets::HRepresentation>(representation);
+    CHECK(satisfies(projected,{0.0,0.0}));
+    CHECK(satisfies(projected,{11.0,-7.0}));
+}
+
 TEST_CASE("hybrid reachability boundary dispatches injected adapters and propagates rejection") {
     RejectingReachabilityAdapter adapter;
     const auto result=compute_hybrid_path_reachability(adapter,example_system(),example_request(),
