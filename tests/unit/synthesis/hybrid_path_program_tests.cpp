@@ -1322,6 +1322,41 @@ TEST_CASE("general projected reachability preflights the geometry provider befor
     CHECK(*workspace_creations==0);
 }
 
+TEST_CASE("one-step projected reachability preflights the geometry provider before workspace creation") {
+    auto [system,request]=projected_interval_fixture();
+    const model::HybridPath path{{{"source"},{"target"}},{{"transition"}}};
+    auto admissions=std::make_shared<std::vector<std::pair<std::string,std::size_t>>>();
+    auto workspace_creations=std::make_shared<int>(0);
+    ProjectedStateHybridReachabilityAdapter adapter(
+        row_limited_projection_provider(1,admissions,workspace_creations),16);
+
+    const auto result=compute_hybrid_path_reachability(adapter,system,request,path,{8,32,256});
+    REQUIRE(std::holds_alternative<Diagnostics>(result));
+    CHECK(std::get<Diagnostics>(result).front().field=="fixture.projection.preflight");
+    REQUIRE(admissions->size()==1);
+    CHECK(admissions->front().first.starts_with("preflight:"));
+    CHECK(admissions->front().second==7);
+    CHECK(*workspace_creations==0);
+}
+
+TEST_CASE("one-step projected reachability honors cancellation during provider admission") {
+    auto [system,request]=projected_interval_fixture();
+    const model::HybridPath path{{{"source"},{"target"}},{{"transition"}}};
+    auto admissions=std::make_shared<std::vector<std::pair<std::string,std::size_t>>>();
+    auto workspace_creations=std::make_shared<int>(0);
+    std::stop_source cancellation;
+    ProjectedStateHybridReachabilityAdapter adapter(
+        row_limited_projection_provider(64,admissions,workspace_creations,&cancellation),16);
+
+    const auto result=compute_hybrid_path_reachability(adapter,system,request,path,{8,32,256},
+        cancellation.get_token());
+    REQUIRE(std::holds_alternative<OperationStopped>(result));
+    CHECK(std::get<OperationStopped>(result).reason==StopReason::cancelled);
+    REQUIRE(admissions->size()==1);
+    CHECK(admissions->front().first.starts_with("preflight:"));
+    CHECK(*workspace_creations==0);
+}
+
 TEST_CASE("general projected reachability honors cancellation during provider admission") {
     auto [system,request]=projected_interval_fixture();
     const model::HybridPath path{{{"source"},{"target"}},{{"transition"}}};

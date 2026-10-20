@@ -168,12 +168,27 @@ std::string exact_input_identity(const model::HybridPath& path,const sets::HRepr
     }
     return identity.str();
 }
+
+std::string encoded_path_identity(const model::HybridPath& path) {
+    std::string identity;
+    for(const auto& id:path.modes)
+        identity+=std::to_string(id.value.size())+":"+id.value+";";
+    identity+="/";
+    for(const auto& id:path.edges)
+        identity+=std::to_string(id.value.size())+":"+id.value+";";
+    return identity;
+}
 }
 
 ProjectedStateHybridReachabilityAdapter::ProjectedStateHybridReachabilityAdapter(
     std::size_t maximum_projection_rows)
     :projection_(make_projection_provider(maximum_projection_rows)),
      maximum_projection_rows_(maximum_projection_rows) {}
+
+ProjectedStateHybridReachabilityAdapter::ProjectedStateHybridReachabilityAdapter(
+    registry::PreparedProvider<registry::GeometryPort> projection,
+    std::size_t maximum_projection_rows)
+    :projection_(std::move(projection)),maximum_projection_rows_(maximum_projection_rows) {}
 
 HybridReachabilityCapabilities ProjectedStateHybridReachabilityAdapter::capabilities() const noexcept {
     return {true,Assurance::numerical};
@@ -206,6 +221,31 @@ HybridReachabilityPreflightResult ProjectedStateHybridReachabilityAdapter::prefl
     }
     if(required_rows>maximum_projection_rows_)
         return unsupported("hybrid.projected.row_limit","Projection input relation exceeds the selected provider row limit");
+    if(cancellation.stop_requested())
+        return OperationStopped{StopReason::cancelled,
+            "Projected-state reachability preflight was cancelled before provider admission"};
+    auto probe=make_projection_admission_probe(4,required_rows);
+    if(!probe)
+        return unsupported("hybrid.projected.preflight",
+            "Could not create projection provider admission probe");
+    if(cancellation.stop_requested())
+        return OperationStopped{StopReason::cancelled,
+            "Projected-state reachability preflight was cancelled after probe construction"};
+    const auto selected=projection_.provenance();
+    const auto implementation=selected.actual?selected.actual->id:selected.requested.id;
+    const auto path_identity=encoded_path_identity(path);
+    const GeometryRequestIdentity identity{
+        ProblemId{"hybrid-projected-reachability"},
+        RequestId{"preflight:"+path_identity+":"+std::to_string(required_rows)},
+        ReferenceId{"preflight:"+path_identity+":"+std::to_string(required_rows)}};
+    OperationRequest projection_request{identity,implementation,
+        Projection{probe->as_handle(),{3}},SetRelation::equivalent,Assurance::numerical};
+    const auto provider_admission=projection_.prepare(projection_request);
+    if(cancellation.stop_requested())
+        return OperationStopped{StopReason::cancelled,
+            "Projected-state reachability preflight was cancelled during provider admission"};
+    if(const auto* rejection=std::get_if<registry::Rejection>(&provider_admission))
+        return rejection->diagnostics;
     return std::monostate{};
 }
 
