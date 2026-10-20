@@ -57,7 +57,7 @@ class GalleryTests(unittest.TestCase):
         two_parameter = loaded[4]
         self.assertEqual(two_parameter["kind"], "two_parameter")
         self.assertEqual(two_parameter["report_id"],
-                         "ext07-hybrid-two-parameter-00ac6fb75d7cab95")
+                         "ext07-hybrid-two-parameter-df7acc27de65930b")
         self.assertEqual([path["feasible_polygon_in_control_coordinates"]
                           for path in two_parameter["polygons"]],
                          [[[0, 0], [0.5, 0], [0.5, 0.5], [0, 1]],

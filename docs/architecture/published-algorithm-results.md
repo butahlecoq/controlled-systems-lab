@@ -38,7 +38,7 @@ polyhedral coverage, or validated arithmetic. The first bundle covers the
 one-step scalar interval profile; the implementation also has a bounded
 finite-horizon verifier for exactly one free scalar control parameter, but the
 first bundle does not measure that domain. A second frozen bundle,
-[`ext07-hybrid-two-parameter-00ac6fb75d7cab95`](../../reports/algorithm-results/ext07-hybrid-two-parameter-00ac6fb75d7cab95/),
+[`ext07-hybrid-two-parameter-df7acc27de65930b`](../../reports/algorithm-results/ext07-hybrid-two-parameter-df7acc27de65930b/),
 measures a fixed two-stage, two-control fixture with `enter-half` and
 `enter-full` branches. Its feasible sets are `[0,0.5] x [0,1]` and
 `[0,1] x [0,1]`; both retain the complete minimizing family

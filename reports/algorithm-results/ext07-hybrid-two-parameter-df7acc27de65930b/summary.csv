@@ -1,0 +1,8 @@
+repetition,calls,failures,paths,relation_rows,relation_matrix_elements,end_to_end_total_ns,minimum_call_ns,maximum_call_ns,provider,verifier
+0,20,0,2,20,140,13718000,648200,859300,csl.lp.highs@1.1.0+highs.1.11.0,csl.hybrid.scalar-two-parameter-polytope
+1,20,0,2,20,140,13633700,609700,934700,csl.lp.highs@1.1.0+highs.1.11.0,csl.hybrid.scalar-two-parameter-polytope
+2,20,0,2,20,140,12562100,582600,759300,csl.lp.highs@1.1.0+highs.1.11.0,csl.hybrid.scalar-two-parameter-polytope
+3,20,0,2,20,140,12917600,610300,720100,csl.lp.highs@1.1.0+highs.1.11.0,csl.hybrid.scalar-two-parameter-polytope
+4,20,0,2,20,140,12918500,608900,756900,csl.lp.highs@1.1.0+highs.1.11.0,csl.hybrid.scalar-two-parameter-polytope
+5,20,0,2,20,140,12725100,592300,759800,csl.lp.highs@1.1.0+highs.1.11.0,csl.hybrid.scalar-two-parameter-polytope
+6,20,0,2,20,140,12418400,589500,673400,csl.lp.highs@1.1.0+highs.1.11.0,csl.hybrid.scalar-two-parameter-polytope

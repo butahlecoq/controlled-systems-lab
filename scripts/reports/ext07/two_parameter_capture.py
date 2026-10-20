@@ -23,14 +23,15 @@ def capture(source: Path, destination: Path, commit: str, cmake: str) -> None:
     destination.mkdir(parents=True)
     save(destination / "prebuild.json", before)
     build = destination / "build"
-    env = dict(os.environ, VSLANG="1033", PreferredUILang="en-US")
+    env = dict(os.environ, VSLANG="1033", PreferredUILang="en-US",
+               DOTNET_CLI_UI_LANGUAGE="en-US")
     run([cmake, "-S", str(source), "-B", str(build), "-DBUILD_TESTING=OFF",
          "-DCSL_ENABLE_HIGHS=ON", "-DCSL_ENABLE_QHULL=OFF",
          "-DCSL_BUILD_EXT07_REPORT=ON"], source,
         destination / "configure.log", env)
     run([cmake, "--build", str(build), "--config", "Release", "--target",
          "csl_ext07_two_parameter_report", "--parallel", "4", "--",
-         "/p:PreferredUILang=en-US", "/clp:ErrorsOnly"], source,
+         "/nologo", "/p:PreferredUILang=en-US", "/clp:ErrorsOnly"], source,
         destination / "build.log", env)
     executable = build / ("Release/csl_ext07_two_parameter_report.exe" if os.name == "nt"
                           else "csl_ext07_two_parameter_report")
