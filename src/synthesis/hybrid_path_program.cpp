@@ -435,7 +435,8 @@ Diagnostics aggregate_hybrid_reachability_resources(HybridReachabilityPortfolio&
             portfolio.projection_resources.end(),[&](const auto& summary) {
                 return same_projection_provider(summary,projected.projection_provider);
             });
-        if(found==portfolio.projection_resources.end()) {
+        const bool new_summary=found==portfolio.projection_resources.end();
+        if(new_summary) {
             portfolio.projection_resources.push_back({projected.projection_provider.port,
                 projected.projection_provider.requested.id.value,
                 projected.projection_provider.requested.version,
@@ -455,6 +456,24 @@ Diagnostics aggregate_hybrid_reachability_resources(HybridReachabilityPortfolio&
             found->max_output_rows=std::max(found->max_output_rows,projected.output_rows);
             found->maximum_projection_rows=std::min(found->maximum_projection_rows,
                 projected.maximum_projection_rows);
+        }
+        auto& summary=new_summary?portfolio.projection_resources.back():*found;
+        if(projected.provider_resource_observation) {
+            const auto& observation=*projected.provider_resource_observation;
+            if(!checked_sum(summary.resource_observation_count,1)||
+               !checked_sum(summary.total_generated_rows,observation.generated_rows)||
+               !checked_sum(summary.total_charged_elimination_operations,
+                   observation.charged_elimination_operations))
+                return one({DiagnosticCode::unsupported,"hybrid.reachability.aggregate_provider_resources",
+                    "Projection-provider resource totals overflow size_t"});
+            summary.max_generated_rows=std::max(summary.max_generated_rows,
+                observation.generated_rows);
+            summary.max_charged_elimination_operations=std::max(
+                summary.max_charged_elimination_operations,
+                observation.charged_elimination_operations);
+            summary.max_peak_rows=std::max(summary.max_peak_rows,observation.peak_rows);
+            summary.max_peak_matrix_elements=std::max(summary.max_peak_matrix_elements,
+                observation.peak_matrix_elements);
         }
     }
     return {};

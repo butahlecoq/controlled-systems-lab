@@ -395,7 +395,7 @@ HybridPathReachabilityResult ProjectedStateHybridReachabilityAdapter::compose_pa
         return OperationStopped{StopReason::cancelled,"Projected-state reachability stopped before result publication"};
     return HybridPathReachability{path,std::move(relation),limits,std::move(operations),Assurance::numerical,
         HybridPathReachability::ProjectedStateEvidence{std::move(projected),selected,input_rows,
-            output_rows,maximum_projection_rows_}};
+            output_rows,maximum_projection_rows_,result->resource_observation}};
 }
 
 GeneralProjectedStateHybridReachabilityAdapter::GeneralProjectedStateHybridReachabilityAdapter(
@@ -595,6 +595,6 @@ HybridPathReachabilityResult GeneralProjectedStateHybridReachabilityAdapter::com
         return OperationStopped{StopReason::cancelled,"General projected reachability stopped before result publication"};
     return HybridPathReachability{path,std::move(composed.relation),limits,std::move(composed.operations),
         Assurance::numerical,HybridPathReachability::ProjectedStateEvidence{std::move(projected),selected,
-            input_rows,output_rows,maximum_projection_rows_}};
+            input_rows,output_rows,maximum_projection_rows_,projected_result->resource_observation}};
 }
 }

@@ -75,6 +75,19 @@ validated coverage or rounding certificate. Callers needing H output or a
 stronger guarantee must select a separate admitted route and check its own
 evidence.
 
+Materializing a lazy projection to H through the polyhedral projection provider
+also attaches an optional `GeometryResourceObservation` to `OperationResult`.
+Its peak row and matrix-element fields cover only the provider's active H-row
+elimination buffers at the source dimension, including the current and pending
+Fourier-Motzkin row buffers. They exclude the retained input payload and its
+copy overlap, coordinate-selection scratch, and the final flattened output
+matrices. It also reports rows in successive elimination outputs and charged
+positive/negative row-pair combinations. Matrix-element counts exclude bounds,
+container overhead, and allocator bytes. The observation is absent for lazy and
+V projection and may be absent from other providers; these counters are not
+whole-operation memory or runtime measurements and do not establish resource
+scaling.
+
 ## Installed consumer
 
 `tests/installed/lazy_geometry_client.cpp` uses only installed headers and

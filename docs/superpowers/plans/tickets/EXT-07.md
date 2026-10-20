@@ -64,8 +64,13 @@ separately, and aggregates per-operation resource maxima plus projection-provide
 input/output row totals and maxima by provider identity. A two-edge contract
 fixture independently checks projections `[0, 0.5]` and `[0, 1]`, aggregate row
 counts, and rejection of the second provider admission with zero workspace
-creation. Per-path traces remain authoritative; provider-internal resource use
-not reported by the provider and broader resource-scale evidence remain open.
+creation. Per-path traces remain authoritative. The selected polyhedral H
+projection provider now reports per-branch peak active elimination-buffer
+rows/elements (including current and pending Fourier-Motzkin buffers), rows
+emitted across elimination steps, and charged row-pair operations; the portfolio
+aggregates totals and maxima. Peak fields exclude retained input/copy overlap,
+coordinate-selection scratch, and final output matrices. Other providers may
+omit internal observations, and broader resource-scale evidence remains open.
 
 Independent continuous-oracle coverage now includes a guarded two-control
 two-stage fixture whose two tied paths are each checked against literal
@@ -82,8 +87,9 @@ Fourier-Motzkin observations across minimization and inclusion checks: peak
 rows, generated rows, charged elimination operations, and maximum integer bits.
 These counters exclude relation parsing, rational comparisons, runtime, and
 memory, and are finite-fixture diagnostics rather than scalability evidence.
-Provider-internal resource observations and broader resource-scale evidence
-remain open.
+The projected-state H provider also reports its logical elimination row work;
+these provider observations are optional and do not establish general resource
+scaling.
 
 Trajectory-adapter objective-type support is checked for every allowed
 terminal mode, including modes with no enumerated path, before any branch

@@ -26,6 +26,20 @@ struct GeometryEvidence {
     std::vector<std::string> assumptions;
     std::optional<GeometryErrorBound> error_bound; // justified only by this claim's support
 };
+// Optional provider-reported work for operations that expose bounded internal
+// counters. Projection peak fields cover only the provider's active H-row
+// elimination buffers at the source dimension, including current and pending
+// Fourier-Motzkin rows. They exclude the retained input payload, input-copy
+// overlap, coordinate-selection scratch, and final output materialization.
+// Matrix elements count logical coefficient slots, not allocator overhead or
+// bytes. Other providers define their own observation scope.
+struct GeometryResourceObservation {
+    std::size_t peak_rows{};
+    std::size_t peak_matrix_elements{};
+    std::size_t generated_rows{};
+    std::size_t charged_elimination_operations{};
+    bool operator==(const GeometryResourceObservation&) const = default;
+};
 struct AffineImage { SetHandle input; Matrix map; Vector offset; }; // y=Mx+b
 struct MinkowskiSum { SetHandle left, right; };
 // Shared generator FactorIds denote one common scalar across both operands.
@@ -46,7 +60,12 @@ struct OperationRequest {
     Assurance assurance;
 };
 GeometryReference geometry_reference(const OperationRequest&);
-struct OperationResult { SetHandle output; SetRelation relation; GeometryEvidence evidence; };
+struct OperationResult {
+    SetHandle output;
+    SetRelation relation;
+    GeometryEvidence evidence;
+    std::optional<GeometryResourceObservation> resource_observation{};
+};
 struct EmptySupport {};
 struct UnboundedSupport {};
 struct SupportResult { std::variant<double, EmptySupport, UnboundedSupport> value; std::optional<Vector> maximizer; GeometryEvidence evidence; };

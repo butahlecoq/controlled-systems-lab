@@ -41,6 +41,7 @@ struct HybridPathReachability {
         std::size_t input_rows{};
         std::size_t output_rows{};
         std::size_t maximum_projection_rows{};
+        std::optional<GeometryResourceObservation> provider_resource_observation;
     };
     std::optional<ProjectedStateEvidence> projected_state;
 };
@@ -63,8 +64,11 @@ struct HybridOperationResourceSummary {
     std::size_t max_cumulative_matrix_elements{};
 };
 
-// Aggregated registered projection-provider row accounting. Totals sum the
-// work represented by each branch record; maxima retain the largest branch.
+// Aggregated registered projection-provider row accounting and optional
+// provider observations. Work totals sum branch records; peak fields retain the
+// largest branch, while resource_observation_count identifies providers that
+// returned internal counters. Peak scope follows each provider's observation
+// contract; the polyhedral H provider reports its elimination buffers only.
 struct HybridProjectionResourceSummary {
     std::string port;
     std::string requested_method_id;
@@ -77,6 +81,13 @@ struct HybridProjectionResourceSummary {
     std::size_t total_output_rows{};
     std::size_t max_output_rows{};
     std::size_t maximum_projection_rows{};
+    std::size_t resource_observation_count{};
+    std::size_t total_generated_rows{};
+    std::size_t max_generated_rows{};
+    std::size_t total_charged_elimination_operations{};
+    std::size_t max_charged_elimination_operations{};
+    std::size_t max_peak_rows{};
+    std::size_t max_peak_matrix_elements{};
 };
 
 struct HybridReachabilityPortfolio {

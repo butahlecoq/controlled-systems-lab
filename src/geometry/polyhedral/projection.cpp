@@ -115,7 +115,8 @@ bool capacity(std::size_t a,std::size_t e,std::size_t dimension,std::optional<st
 }
 using Materialized=std::variant<SetHandle,Unsupported,OperationStopped>;
 Materialized materialize_h(const LazyProjectionDescription& data,SetId id,
-        std::optional<std::size_t> limit,const ExecutionContext& context) {
+        std::optional<std::size_t> limit,const ExecutionContext& context,
+        GeometryResourceObservation& observation) {
     const auto source=std::get<sets::SetData>(sets::from_handle(data.source));
     const std::size_t n=source.metadata()->set.dimension;
     const auto rep=source.representation();
@@ -123,6 +124,9 @@ Materialized materialize_h(const LazyProjectionDescription& data,SetId id,
     const auto empty=[&]() -> Materialized {
         if(!capacity(1,0,output.ambient_dimension,limit))
             return Unsupported{error("projection.capacity","Empty H encoding exceeds capacity or caller row limit.")};
+        observation.peak_rows=std::max<std::size_t>(observation.peak_rows,1);
+        observation.peak_matrix_elements=std::max(observation.peak_matrix_elements,
+            output.ambient_dimension);
         return make_h(output,{Vector(output.ambient_dimension,0.0)},{-1.0},{},{});
     };
     if(std::holds_alternative<sets::EmptyRepresentation>(rep)) return empty();
@@ -143,6 +147,19 @@ Materialized materialize_h(const LazyProjectionDescription& data,SetId id,
         if(!capacity(0,n,n,limit)) return Unsupported{error("projection.capacity","Singleton equality storage exceeds capacity or caller limit.")};
         for(std::size_t c=0;c<n;++c) {Vector row(n,0.0);row[c]=1;rows.e.push_back(std::move(row));rows.f.push_back(singleton->point[c]);}
     }
+    const auto observe_rows=[&](std::size_t additional_rows) {
+        const auto maximum=std::numeric_limits<std::size_t>::max();
+        if(rows.a.size()>maximum-rows.e.size()) return false;
+        const auto live_rows=rows.a.size()+rows.e.size();
+        if(live_rows>maximum-additional_rows) return false;
+        const auto peak_rows=live_rows+additional_rows;
+        if(n!=0&&peak_rows>maximum/n) return false;
+        observation.peak_rows=std::max(observation.peak_rows,peak_rows);
+        observation.peak_matrix_elements=std::max(observation.peak_matrix_elements,peak_rows*n);
+        return true;
+    };
+    if(!observe_rows(0))
+        return Unsupported{error("projection.capacity","Projection resource observation overflows size_t.")};
     if(contradiction(rows)) return empty();
     std::vector<bool> keep(n,false);
     for(auto index:data.coordinates) keep[index]=true;
@@ -153,6 +170,8 @@ Materialized materialize_h(const LazyProjectionDescription& data,SetId id,
         for(std::size_t r=0;r<rows.e.size();++r)
             if(rows.e[r][k]!=0.0 && (!pivot || std::abs(rows.e[r][k])>std::abs(rows.e[*pivot][k]))) pivot=r;
         if(pivot) {
+            if(!observe_rows(1))
+                return Unsupported{error("projection.capacity","Projection resource observation overflows size_t.")};
             const auto equation=rows.e[*pivot];const double value=rows.f[*pivot];
             rows.e.erase(rows.e.begin()+static_cast<std::ptrdiff_t>(*pivot));rows.f.erase(rows.f.begin()+static_cast<std::ptrdiff_t>(*pivot));
             const auto substitute=[&](std::vector<Vector>& matrix,Vector& bounds) {
@@ -177,6 +196,13 @@ Materialized materialize_h(const LazyProjectionDescription& data,SetId id,
             const auto count=zero.size()+positive.size()*negative.size();
             if(!capacity(count,rows.e.size(),n,limit))
                 return Unsupported{error("projection.capacity","Fourier--Motzkin intermediate rows exceed capacity or caller limit.")};
+            if(observation.generated_rows>maximum-count||
+               (!negative.empty()&&positive.size()>maximum/negative.size())||
+               observation.charged_elimination_operations>maximum-positive.size()*negative.size()||
+               !observe_rows(count))
+                return Unsupported{error("projection.capacity","Projection resource observation overflows size_t.")};
+            observation.generated_rows+=count;
+            observation.charged_elimination_operations+=positive.size()*negative.size();
             std::vector<Vector> combined;Vector bounds;combined.reserve(count);bounds.reserve(count);
             for(auto r:zero) {combined.push_back(rows.a[r]);bounds.push_back(rows.b[r]);}
             for(auto p:positive) for(auto m:negative) {
@@ -189,6 +215,8 @@ Materialized materialize_h(const LazyProjectionDescription& data,SetId id,
                 combined.push_back(std::move(row));bounds.push_back(bound);
             }
             rows.a=std::move(combined);rows.b=std::move(bounds);
+            if(!observe_rows(0))
+                return Unsupported{error("projection.capacity","Projection resource observation overflows size_t.")};
         }
         if(contradiction(rows)) return empty();
     }
@@ -242,11 +270,20 @@ OperationOutcome execute(LazyProjectionDescription data,GeometryReference refere
         data.creation_evidence=claim;auto payload=std::make_shared<const LazyPayload>(info,id,std::move(data));
         return OperationResult{{info,payload,std::move(id)},SetRelation::equivalent,std::move(claim)};
     }
-    auto materialized=options.output==ProjectionOutput::h?materialize_h(data,std::move(id),options.max_rows,context):materialize_v(data,std::move(id),context);
+    std::optional<GeometryResourceObservation> resource_observation;
+    Materialized materialized;
+    if(options.output==ProjectionOutput::h) {
+        resource_observation.emplace();
+        materialized=materialize_h(data,std::move(id),options.max_rows,context,
+            *resource_observation);
+    } else {
+        materialized=materialize_v(data,std::move(id),context);
+    }
     if(auto* failure=std::get_if<Unsupported>(&materialized)) return *failure;
     if(auto* failure=std::get_if<OperationStopped>(&materialized)) return *failure;
     if(stopped(context)) return stop(context);
-    return OperationResult{std::get<SetHandle>(std::move(materialized)),SetRelation::equivalent,std::move(claim)};
+    return OperationResult{std::get<SetHandle>(std::move(materialized)),SetRelation::equivalent,
+        std::move(claim),std::move(resource_observation)};
 }
 class ProjectionWorkspace final : public SetOperatorWorkspace {
     ProjectionOptions options_;

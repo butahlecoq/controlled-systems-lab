@@ -434,6 +434,12 @@ TEST_CASE("general projected reachability composes two successive existential re
     CHECK(reachability.path==path);
     CHECK(reachability.joint_relation.metadata()->set.dimension==8);
     REQUIRE(reachability.projected_state.has_value());
+    REQUIRE(reachability.projected_state->provider_resource_observation.has_value());
+    const auto& provider_resources=*reachability.projected_state->provider_resource_observation;
+    CHECK(provider_resources.peak_rows>=reachability.projected_state->input_rows);
+    CHECK(provider_resources.peak_matrix_elements==provider_resources.peak_rows*8);
+    CHECK(provider_resources.generated_rows>0);
+    CHECK(provider_resources.charged_elimination_operations>0);
     const auto projected=reachability.projected_state->terminal_state_set.representation();
     REQUIRE(std::holds_alternative<sets::HRepresentation>(projected));
     const auto& terminal=std::get<sets::HRepresentation>(projected);
@@ -588,6 +594,33 @@ TEST_CASE("hybrid reachability portfolio preserves projected branches and aggreg
     CHECK(projection.total_output_rows==6);
     CHECK(projection.max_output_rows==4);
     CHECK(projection.maximum_projection_rows==16);
+    std::size_t total_generated_rows{};
+    std::size_t total_charged_operations{};
+    std::size_t maximum_peak_rows{};
+    std::size_t maximum_peak_matrix_elements{};
+    for(const auto* branch : {&half,&full}) {
+        REQUIRE(branch->projected_state->provider_resource_observation.has_value());
+        const auto& observation=*branch->projected_state->provider_resource_observation;
+        CHECK(observation.peak_rows>=branch->projected_state->input_rows);
+        CHECK(observation.peak_matrix_elements==observation.peak_rows*
+            branch->joint_relation.metadata()->set.dimension);
+        total_generated_rows+=observation.generated_rows;
+        total_charged_operations+=observation.charged_elimination_operations;
+        maximum_peak_rows=std::max(maximum_peak_rows,observation.peak_rows);
+        maximum_peak_matrix_elements=std::max(maximum_peak_matrix_elements,
+            observation.peak_matrix_elements);
+    }
+    CHECK(projection.resource_observation_count==2);
+    CHECK(projection.total_generated_rows==total_generated_rows);
+    CHECK(projection.max_generated_rows==std::max(
+        half.projected_state->provider_resource_observation->generated_rows,
+        full.projected_state->provider_resource_observation->generated_rows));
+    CHECK(projection.total_charged_elimination_operations==total_charged_operations);
+    CHECK(projection.max_charged_elimination_operations==std::max(
+        half.projected_state->provider_resource_observation->charged_elimination_operations,
+        full.projected_state->provider_resource_observation->charged_elimination_operations));
+    CHECK(projection.max_peak_rows==maximum_peak_rows);
+    CHECK(projection.max_peak_matrix_elements==maximum_peak_matrix_elements);
 
     const auto shared_initial=std::find_if(portfolio.operation_resources.begin(),
         portfolio.operation_resources.end(),[](const auto& item) {
