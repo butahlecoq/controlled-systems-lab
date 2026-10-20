@@ -752,19 +752,19 @@ bool scalar_parameter_program_objective_matches(const HybridPathProgram& program
            solver->Q.rows()!=width||solver->Q.cols()!=width||
            squared->linear.size()!=width||solver->linear.size()!=width) return false;
         for(std::size_t row=0;row<residual->map.rows;++row) {
-            if(!same(actual->target[row],residual->target[row],policy)||
-               !same(reformulated_residual->target[row],residual->target[row],policy)) return false;
+            if(actual->target[row]!=residual->target[row]||
+               reformulated_residual->target[row]!=residual->target[row]) return false;
             for(std::size_t column=0;column<width;++column) {
                 const double expected=column+1==width?residual->map.values[row]:0;
-                if(!same(actual->map(row,column),expected,policy)||
-                   !same(reformulated_residual->map(row,column),expected,policy)) return false;
+                if(actual->map(row,column)!=expected||
+                   reformulated_residual->map(row,column)!=expected) return false;
             }
         }
-        if(!same(squared->offset,solver->offset,policy)) return false;
+        if(squared->offset!=solver->offset) return false;
         for(std::size_t row=0;row<width;++row) {
-            if(!same(squared->linear[row],solver->linear[row],policy)) return false;
+            if(squared->linear[row]!=solver->linear[row]) return false;
             for(std::size_t column=0;column<width;++column)
-                if(!same(squared->Q(row,column),solver->Q(row,column),policy)) return false;
+                if(squared->Q(row,column)!=solver->Q(row,column)) return false;
         }
         return true;
     }

@@ -6333,6 +6333,18 @@ TEST_CASE("single-parameter verifier certifies residual-norm optimal faces") {
     CHECK(report.global_objective_optimality==HybridVerificationStatus::established);
     CHECK(report.complete_family_coverage==HybridVerificationStatus::established);
 
+    auto perturbed_request=request;
+    std::get<ResidualNormTerminal>(perturbed_request.terminal_objectives.front().objective).target[0]+=0.125;
+    const auto perturbed_paths=std::vector<model::HybridPath>{programs.front().path};
+    const auto perturbed_result=verifier.verify(system,perturbed_request,perturbed_paths,programs,
+        std::span<const HybridPathOptimalFaceCandidate>(&candidate,1),{0.2,0.2},{});
+    REQUIRE(std::holds_alternative<HybridFamilyVerificationReport>(perturbed_result));
+    const auto& perturbed_report=std::get<HybridFamilyVerificationReport>(perturbed_result);
+    CHECK(perturbed_report.complete_family_coverage==HybridVerificationStatus::refuted);
+    REQUIRE(!perturbed_report.branches.front().diagnostics.empty());
+    CHECK(perturbed_report.branches.front().diagnostics.front().field==
+        "hybrid.verification.scalar_parameter_program");
+
     request.terminal_objectives.front().objective=ResidualNormTerminal{Matrix{1,1,{0}},Vector{2}};
     built=build_hybrid_portfolio_programs(system,request,{"flat-residual-interval"},
         {1,8},{16,64,4096});
