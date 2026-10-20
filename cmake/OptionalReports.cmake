@@ -84,6 +84,21 @@ if(BUILD_TESTING)
 add_test(NAME ext07_report_smoke COMMAND csl_ext07_hybrid_report smoke)
 set_tests_properties(ext07_report_smoke PROPERTIES LABELS reporting)
 endif()
+add_executable(csl_ext07_two_parameter_report
+  benchmarks/reporting/ext07/two_parameter_driver.cpp)
+target_link_libraries(csl_ext07_two_parameter_report PRIVATE
+  CSL::hybrid_path_program CSL::highs_lp CSL::highs_convex)
+target_compile_features(csl_ext07_two_parameter_report PRIVATE cxx_std_20)
+if(MSVC)
+target_compile_options(csl_ext07_two_parameter_report PRIVATE /W4 /WX /permissive-)
+else()
+target_compile_options(csl_ext07_two_parameter_report PRIVATE -Wall -Wextra -Wpedantic -Werror)
+endif()
+if(BUILD_TESTING)
+add_test(NAME ext07_two_parameter_report_smoke
+  COMMAND csl_ext07_two_parameter_report smoke)
+set_tests_properties(ext07_two_parameter_report_smoke PROPERTIES LABELS reporting)
+endif()
 endif()
 
 if(CSL_BUILD_OPT10_REPORT)
