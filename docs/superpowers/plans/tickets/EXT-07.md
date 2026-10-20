@@ -145,6 +145,15 @@ coupled two-control polytope and nonfunctional reset together, but remains a
 single small oracle rather than exhaustive validation over the admitted H
 domain.
 
+The exact H verifier now also has a one-step three-control simplex oracle with
+an existential reset. The controls satisfy `u,v,w ≥ 0` and `u+v+w ≤ 1`,
+`x_pre=u+v+w`, and `0 ≤ y ≤ x_pre`. Minimizing `y` leaves the full
+three-dimensional simplex optimal, with `y=0`. The literal six-coordinate H
+candidate is established, while a feasible optimal candidate with the added
+facet `u≤0.5` is refuted for incomplete continuous coverage. This directly
+exercises a three-free-control optimal family, but does not exhaustively
+validate the general finite-horizon H domain.
+
 The [EXT-07 capability profile and fixture report](../../../research/ext07-capability-profile.md)
 records the declared adapter/verifier domains and named dimensions, horizons,
 mode counts, edge counts, path counts, and relation widths. It separates saved

@@ -435,9 +435,15 @@ reuses the joint-H composer before projection; neither independently verifies
 family completeness. The compiled verifiers cover integral singleton paths,
 one-step scalar interval families, the bounded finite-horizon single-parameter
 scalar interval profile, and the finite-horizon two-parameter scalar polygon
-profile described above. These profiles do not extend to higher-dimensional
-continuous polytopes or horizons with more than two free controls. These
-verifier domains reject unsupported input when verification runs;
+profile described above. The scalar interval and polygon profiles are limited
+to the dimensions and free-control counts stated in their respective sections;
+they do not extend to general higher-dimensional continuous polytopes or
+horizons with more than two free controls. `ExactLinearHHybridFamilyVerifier`
+has a separate general finite-horizon H-relation domain with bounded exact
+arithmetic resources. Its independent continuous-family tests now include a
+three-control simplex with a three-dimensional optimal family; this finite
+oracle case is not exhaustive coverage of the general domain. These verifier
+domains reject unsupported input when verification runs;
 `build_hybrid_portfolio_programs_with_verifier` also rejects unsupported
 verifier domains and declared trajectory objective capabilities before building
 branch programs. Both projected-state adapters prepare their selected geometry
