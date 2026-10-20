@@ -320,9 +320,9 @@ Even where the numbers are transcribed, the following fields are usually absent.
 
 | Field | Why it is required | Typical state |
 |---|---|---|
-| Generating revision | A hash-identified article is not a hash-identified executable; the report must name the code revision that produced the row | Missing for B02-B09 |
+| Generating revision | A hash-identified article is not a hash-identified executable; the report must name the code revision that produced the row | Missing for B02-B09 (B03 historical replay only) |
 | Original unrounded arrays | Printed decimals are not enough to reproduce a solver run or a terminal row | Missing for B03 (historical replay only), B04, B08, B09 |
-| Seeds and PRNG identity | Seed alone does not promise replay across languages; algorithm, version, draw order and dtype are needed | Missing for B03; absent for W05/W06 demonstrations and W13 |
+| Seeds and PRNG identity | Seed alone does not promise replay across languages; algorithm, version, draw order and dtype are needed | Missing for B03 (historical replay only); absent for W05/W06 demonstrations and W13 |
 | Solver/backend versions and tolerances | A reported optimum or timing depends on them | Missing for all baselines |
 | Time grid, units, index convention | Zero- versus one-based control indexing and physical intervals change the model | Missing or contradictory for B04, B05, B07, B09 |
 | Coordinate map | Physical and deviation/linear coordinates are not interchangeable | Missing for L05; ambiguous for B04/B09 |
