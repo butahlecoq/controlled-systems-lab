@@ -412,21 +412,18 @@ continuous polytopes or horizons with more than two free controls. These
 verifier domains reject unsupported input when verification runs;
 `build_hybrid_portfolio_programs_with_verifier` also rejects unsupported
 verifier domains and declared trajectory objective capabilities before building
-branch programs. Both projected-state adapters now prepare the selected
-geometry provider against an H-relation probe during preflight, before relation
-composition. The one-transition adapter matches its four-coordinate relation,
-terminal coordinate, and total preflighted row count; the general adapter
-matches the joint relation's ambient dimension, terminal coordinates, and
-total preflighted row count. Probe rows all have zero coefficients, are
-represented as inequalities, and describe the universal set; actual
-coefficients, coordinate labels, equality/inequality partition, and set
-metadata are not reproduced. No provider workspace is created by this
-admission check. The actual relation request is prepared again before workspace
-creation, and cancellation after the probe or provider callback discards the
-preflight result. Providers that base admission on the omitted request details
-may still reject the actual request. This closes provider admission only for
-providers whose capability checks are covered by the matched dimensions,
-coordinates, and row count. Validated
+branch programs. The one-transition projected-state adapter prepares the
+selected geometry provider against a four-coordinate H-relation probe during
+preflight, before its independent relation assembly. Probe rows have zero
+coefficients, use only the inequality partition, and describe the universal
+set; the probe does not reproduce actual coefficients, coordinate labels, or
+metadata. The general projected-state adapter first composes the full joint-H
+relation without creating a workspace, then asks the selected provider to
+prepare the exact terminal projection request over that relation. That request
+includes its coefficients, labels, equality/inequality partition, metadata,
+and terminal coordinate indices. Provider preparation creates no workspace.
+Composition prepares the actual projection request again for execution, and
+cancellation during admission discards the preflight result. Validated
 objective assurance remains unsupported; adapter-specific objective-policy
 semantics, provider-operation admission at other seams, and broader
 multiple-parameter verifier coverage remain incomplete.

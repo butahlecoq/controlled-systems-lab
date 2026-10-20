@@ -510,11 +510,14 @@ registry::PreparedProvider<registry::GeometryPort> row_limited_projection_provid
     std::size_t maximum_rows,
     const std::shared_ptr<std::vector<std::pair<std::string,std::size_t>>>& admissions,
     const std::shared_ptr<int>& workspace_creations,
-    std::stop_source* cancel_during_admission=nullptr) {
+    std::stop_source* cancel_during_admission=nullptr,
+    const std::shared_ptr<bool>& observed_actual_relation=nullptr,
+    bool require_actual_relation=false) {
     registry::Registry<registry::GeometryPort> providers;
     registry::Registration<registry::GeometryPort> registration{
         {ModuleId{"fixture.row-limited-projection"},"1.0"},
-        [maximum_rows,admissions,cancel_during_admission](const OperationRequest& request,
+        [maximum_rows,admissions,cancel_during_admission,observed_actual_relation,
+            require_actual_relation](const OperationRequest& request,
             const registry::Requirements&) -> registry::Capability {
             if(cancel_during_admission) cancel_during_admission->request_stop();
             const auto* projection=std::get_if<Projection>(&request.operation);
@@ -532,6 +535,23 @@ registry::PreparedProvider<registry::GeometryPort> row_limited_projection_provid
             const auto& h=std::get<sets::HRepresentation>(representation);
             const auto rows=h.inequalities.rows()+h.equalities.rows();
             admissions->emplace_back(request.identity.request.value,rows);
+            if(require_actual_relation) {
+                const auto& data=std::get<sets::SetData>(imported);
+                const auto has_nonzero_coefficient=[](const numeric::MatrixView& matrix) {
+                    for(std::size_t row=0;row<matrix.rows();++row)
+                        for(std::size_t col=0;col<matrix.cols();++col)
+                            if(matrix(row,col)!=0.0) return true;
+                    return false;
+                };
+                if(!request.identity.request.value.starts_with("terminal-state:") ||
+                   projection->coordinates!=std::vector<std::size_t>{3} ||
+                   h.equalities.rows()==0 ||
+                   (!has_nonzero_coefficient(h.inequalities)&&!has_nonzero_coefficient(h.equalities)) ||
+                   data.metadata()->coordinate_labels.size()!=4)
+                    return Diagnostics{{DiagnosticCode::unsupported,"fixture.projection.actual_relation",
+                        "fixture requires the exact labelled joint H relation and terminal coordinate"}};
+                if(observed_actual_relation) *observed_actual_relation=true;
+            }
             if(rows>maximum_rows)
                 return Diagnostics{{DiagnosticCode::unsupported,"fixture.projection.preflight",
                     "fixture projection row cap rejected admission"}};
@@ -1317,8 +1337,26 @@ TEST_CASE("general projected reachability preflights the geometry provider befor
     REQUIRE(std::holds_alternative<Diagnostics>(result));
     CHECK(std::get<Diagnostics>(result).front().field=="fixture.projection.preflight");
     REQUIRE(admissions->size()==1);
-    CHECK(admissions->front().first.starts_with("preflight:"));
+    CHECK(admissions->front().first.starts_with("terminal-state:"));
     CHECK(admissions->front().second>1);
+    CHECK(*workspace_creations==0);
+}
+
+TEST_CASE("general projected preflight admits the actual labelled joint relation") {
+    auto [system,request]=projected_interval_fixture();
+    const model::HybridPath path{{{"source"},{"target"}},{{"transition"}}};
+    auto admissions=std::make_shared<std::vector<std::pair<std::string,std::size_t>>>();
+    auto workspace_creations=std::make_shared<int>(0);
+    auto observed_actual_relation=std::make_shared<bool>(false);
+    GeneralProjectedStateHybridReachabilityAdapter adapter(
+        row_limited_projection_provider(64,admissions,workspace_creations,nullptr,
+            observed_actual_relation,true),16);
+
+    const auto admitted=adapter.preflight(system,request,path,{8,32,256},{});
+    REQUIRE(std::holds_alternative<std::monostate>(admitted));
+    REQUIRE(admissions->size()==1);
+    CHECK(*observed_actual_relation);
+    CHECK(admissions->front().first.starts_with("terminal-state:"));
     CHECK(*workspace_creations==0);
 }
 
@@ -1371,7 +1409,7 @@ TEST_CASE("general projected reachability honors cancellation during provider ad
     REQUIRE(std::holds_alternative<OperationStopped>(result));
     CHECK(std::get<OperationStopped>(result).reason==StopReason::cancelled);
     REQUIRE(admissions->size()==1);
-    CHECK(admissions->front().first.starts_with("preflight:"));
+    CHECK(admissions->front().first.starts_with("terminal-state:"));
     CHECK(*workspace_creations==0);
 }
 

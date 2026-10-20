@@ -495,45 +495,41 @@ HybridReachabilityPreflightResult GeneralProjectedStateHybridReachabilityAdapter
     if(!terminal_rows || !add(required,*terminal_rows))
         return unsupported("hybrid.projected.row_limit","Projected relation exceeds the selected provider row limit");
 
-    // Ask the selected projection provider to admit a shape-matched operation
-    // before the joint relation composer runs. The probe retains the request's
-    // ambient dimension, terminal-coordinate indices, and preflighted row
-    // count, but uses zero coefficients because no composed relation exists yet.
-    // Provider preparation creates no workspace.
-    std::size_t joint_dimension=request.initial.state.size();
-    for(std::size_t stage=0;stage<system.horizon;++stage) {
-        const auto* source=mode(system,path.modes[stage]);
-        const auto* destination=mode(system,path.modes[stage+1]);
-        if(!source||!destination ||
-           source->control_dimension>std::numeric_limits<std::size_t>::max()-joint_dimension ||
-           source->state_dimension>std::numeric_limits<std::size_t>::max()-joint_dimension-source->control_dimension ||
-           destination->state_dimension>std::numeric_limits<std::size_t>::max()-joint_dimension-
-               source->control_dimension-source->state_dimension)
-            return unsupported("hybrid.projected.dimension","Joint projection dimension overflows size_t");
-        joint_dimension+=source->control_dimension+source->state_dimension+destination->state_dimension;
-    }
+    // Compose the exact relation and ask the selected provider to admit the
+    // operation it will execute. Preparation creates no workspace; synthetic
+    // probes cannot establish support for the relation's coefficients,
+    // equality partition, labels, metadata, or coordinate selection.
     if(cancellation.stop_requested())
-        return OperationStopped{StopReason::cancelled,"General projected reachability preflight was cancelled before projection admission"};
-    auto probe=make_projection_admission_probe(joint_dimension,required);
-    if(!probe)
-        return unsupported("hybrid.projected.preflight","Could not create projection admission probe");
+        return OperationStopped{StopReason::cancelled,
+            "General projected reachability preflight was cancelled before relation composition"};
+    auto relation_composition=model::compose_hybrid_path_relation_with_report(
+        system,request,path,limits,cancellation);
+    if(const auto* failure=std::get_if<model::HybridPathCompositionFailureReport>(&relation_composition))
+        return *failure;
+    auto composed_relation=std::get<model::HybridComposedPathRelation>(std::move(relation_composition));
     if(cancellation.stop_requested())
-        return OperationStopped{StopReason::cancelled,"General projected reachability preflight was cancelled after probe construction"};
+        return OperationStopped{StopReason::cancelled,
+            "General projected reachability preflight was cancelled after relation composition"};
+    const auto representation=composed_relation.relation.representation();
+    const auto* relation=std::get_if<sets::HRepresentation>(&representation);
+    if(!relation)
+        return unsupported("hybrid.projected.relation","Joint composer did not return an H relation");
+    if(terminal->state_dimension>composed_relation.relation.metadata()->set.dimension)
+        return unsupported("hybrid.projected.path","Terminal state coordinates are missing from the joint relation");
+    const auto width=composed_relation.relation.metadata()->set.dimension;
     std::vector<std::size_t> coordinates(terminal->state_dimension);
-    const auto first_terminal_coordinate=joint_dimension-terminal->state_dimension;
-    std::iota(coordinates.begin(),coordinates.end(),first_terminal_coordinate);
-    std::string path_identity;
-    for(const auto& id:path.modes) path_identity+=std::to_string(id.value.size())+":"+id.value+";";
-    path_identity+="/";
-    for(const auto& id:path.edges) path_identity+=std::to_string(id.value.size())+":"+id.value+";";
+    for(std::size_t i=0;i<coordinates.size();++i)
+        coordinates[i]=width-terminal->state_dimension+i;
+    const auto request_identity=exact_input_identity(path,*relation,
+        composed_relation.relation.metadata()->coordinate_labels);
     const GeometryRequestIdentity identity{
         ProblemId{"hybrid-general-projected-reachability"},
-        RequestId{"preflight:"+path_identity+":"+std::to_string(joint_dimension)},
-        ReferenceId{"preflight:"+path_identity+":"+std::to_string(joint_dimension)}};
+        RequestId{"terminal-state:"+request_identity},ReferenceId{"terminal-state:"+request_identity}};
     const auto selected=projection_.provenance();
     const auto implementation=selected.actual?selected.actual->id:selected.requested.id;
     OperationRequest projection_request{identity,implementation,
-        Projection{probe->as_handle(),std::move(coordinates)},SetRelation::equivalent,Assurance::numerical};
+        Projection{composed_relation.relation.as_handle(),std::move(coordinates)},
+        SetRelation::equivalent,Assurance::numerical};
     const auto provider_admission=projection_.prepare(projection_request);
     if(cancellation.stop_requested())
         return OperationStopped{StopReason::cancelled,"General projected reachability preflight was cancelled during provider admission"};
