@@ -3148,6 +3148,36 @@ TEST_CASE("two parameter scalar verifier certifies a coupled polygon and "
   REQUIRE(std::holds_alternative<std::vector<HybridPathProgram>>(built));
   auto programs = std::get<std::vector<HybridPathProgram>>(built);
   REQUIRE(programs.size() == 2);
+  // Independent raw-graph oracle: enumerate two-edge histories directly from
+  // the model catalogue instead of using the production path enumerator.
+  std::vector<model::HybridPath> oracle_paths;
+  for (const auto &first : system.edges) {
+    if (first.source != request.initial.mode)
+      continue;
+    for (const auto &second : system.edges) {
+      if (second.source != first.target ||
+          std::find(request.allowed_terminal_modes.begin(),
+                    request.allowed_terminal_modes.end(), second.target) ==
+              request.allowed_terminal_modes.end())
+        continue;
+      oracle_paths.push_back(
+          {{request.initial.mode, first.target, second.target},
+           {first.id, second.id}});
+    }
+  }
+  REQUIRE(oracle_paths.size() == 2);
+  std::vector<bool> matched_oracle(oracle_paths.size(), false);
+  for (const auto &program : programs) {
+    const auto expected =
+        std::find(oracle_paths.begin(), oracle_paths.end(), program.path);
+    REQUIRE(expected != oracle_paths.end());
+    const auto index = static_cast<std::size_t>(
+        std::distance(oracle_paths.begin(), expected));
+    REQUIRE_FALSE(matched_oracle[index]);
+    matched_oracle[index] = true;
+  }
+  CHECK(std::all_of(matched_oracle.begin(), matched_oracle.end(),
+                    [](bool matched) { return matched; }));
   std::vector<HybridPathOptimalFaceCandidate> faces;
   for (const auto &program : programs)
     faces.push_back(exact_candidate(program, Vector(7, 0)));
