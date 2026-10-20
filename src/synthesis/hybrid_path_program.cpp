@@ -306,7 +306,7 @@ HybridPathReachabilityResult JointHReachabilityAdapter::compose_path(
     if(const auto* failure=std::get_if<model::HybridPathCompositionFailureReport>(&composed)) return *failure;
     auto relation=std::get<model::HybridComposedPathRelation>(std::move(composed));
     return HybridPathReachability{path,std::move(relation.relation),relation.limits,
-        std::move(relation.operations),Assurance::numerical};
+        std::move(relation.operations),Assurance::numerical,{}};
 }
 
 HybridPathReachabilityResult compute_hybrid_path_reachability(
