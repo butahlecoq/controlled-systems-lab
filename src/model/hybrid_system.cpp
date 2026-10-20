@@ -757,8 +757,22 @@ HybridComposedPathRelationResult compose_hybrid_path_relation_with_report(
     return HybridComposedPathRelation{std::get<sets::SetData>(std::move(result)),limits,std::move(operations)};
 }
 
-HybridObjectiveLiftResult lift_hybrid_terminal_objective(const HybridSystem& system,
-    const HybridRequest& request, const HybridPath& path, HybridRelationLimits limits) {
+namespace {
+struct HybridObjectiveLiftLayout {
+    std::vector<const HybridMode*> modes;
+    std::size_t width{};
+    std::size_t terminal_offset{};
+    const HybridModeObjective* objective{};
+};
+using HybridObjectiveLiftLayoutResult =
+    std::variant<HybridObjectiveLiftLayout, Diagnostic, OperationStopped>;
+
+HybridObjectiveLiftLayoutResult hybrid_objective_lift_layout(const HybridSystem& system,
+    const HybridRequest& request, const HybridPath& path, HybridRelationLimits limits,
+    std::stop_token cancellation = {}) {
+    if(cancellation.stop_requested())
+        return OperationStopped{StopReason::cancelled,
+            "Hybrid objective lift preflight was cancelled before profile validation"};
     const auto errors=check_hybrid_profile(system,request);
     if(!errors.empty()) return errors.front();
     if(path.modes.size()!=system.horizon+1 || path.edges.size()!=system.horizon ||
@@ -768,12 +782,18 @@ HybridObjectiveLiftResult lift_hybrid_terminal_objective(const HybridSystem& sys
     std::vector<const HybridMode*> modes;
     modes.reserve(path.modes.size());
     for(const auto& id:path.modes) {
+        if(cancellation.stop_requested())
+            return OperationStopped{StopReason::cancelled,
+                "Hybrid objective lift preflight was cancelled while resolving path modes"};
         const auto* mode=find_mode(system,id);
         if(!mode) return invalid("hybrid.path.modes","Path references an unknown mode");
         modes.push_back(mode);
     }
     std::size_t width=modes.front()->state_dimension;
     for(std::size_t t=0;t<system.horizon;++t) {
+        if(cancellation.stop_requested())
+            return OperationStopped{StopReason::cancelled,
+                "Hybrid objective lift preflight was cancelled while checking the path width"};
         const auto edge=std::find_if(system.edges.begin(),system.edges.end(),[&](const auto& candidate){return candidate.id==path.edges[t];});
         if(edge==system.edges.end() || edge->source!=path.modes[t] || edge->target!=path.modes[t+1])
             return invalid("hybrid.path.edges","Each path edge must connect its adjacent modes");
@@ -791,6 +811,52 @@ HybridObjectiveLiftResult lift_hybrid_terminal_objective(const HybridSystem& sys
         [&](const HybridModeObjective& entry){return entry.mode==path.modes.back();});
     if(objective==request.terminal_objectives.end())
         return invalid("hybrid.terminal_objectives","Path terminal mode has no admitted objective");
+    return HybridObjectiveLiftLayout{std::move(modes),width,terminal_offset,&*objective};
+}
+
+HybridObjectiveLiftPreflightResult hybrid_objective_lift_storage_preflight(
+    const HybridObjectiveLiftLayout& layout, HybridRelationLimits limits) {
+    return std::visit([&](const auto& value)->HybridObjectiveLiftPreflightResult {
+        using T=std::decay_t<decltype(value)>;
+        if constexpr(std::is_same_v<T,QuadraticTerminal>) {
+            if((layout.width!=0 && layout.width>std::numeric_limits<std::size_t>::max()/layout.width) ||
+               layout.width*layout.width>limits.max_matrix_elements)
+                return Diagnostic{DiagnosticCode::unsupported,"hybrid.objective.storage",
+                    "Lifted quadratic objective exceeds its storage limit"};
+        } else if constexpr(std::is_same_v<T,ResidualNormTerminal>) {
+            if((layout.width!=0 && value.map.rows>std::numeric_limits<std::size_t>::max()/layout.width) ||
+               value.map.rows*layout.width>limits.max_matrix_elements)
+                return Diagnostic{DiagnosticCode::unsupported,"hybrid.objective.storage",
+                    "Lifted residual map exceeds its storage limit"};
+        }
+        return std::monostate{};
+    },layout.objective->objective);
+}
+}
+
+HybridObjectiveLiftPreflightResult preflight_hybrid_terminal_objective_lift(
+    const HybridSystem& system,const HybridRequest& request,const HybridPath& path,
+    HybridRelationLimits limits,std::stop_token cancellation) {
+    auto layout=hybrid_objective_lift_layout(system,request,path,limits,cancellation);
+    if(const auto* diagnostic=std::get_if<Diagnostic>(&layout)) return *diagnostic;
+    if(const auto* stopped=std::get_if<OperationStopped>(&layout)) return *stopped;
+    return hybrid_objective_lift_storage_preflight(std::get<HybridObjectiveLiftLayout>(layout),limits);
+}
+
+HybridObjectiveLiftResult lift_hybrid_terminal_objective(const HybridSystem& system,
+    const HybridRequest& request, const HybridPath& path, HybridRelationLimits limits) {
+    auto planned=hybrid_objective_lift_layout(system,request,path,limits);
+    if(const auto* diagnostic=std::get_if<Diagnostic>(&planned)) return *diagnostic;
+    if(const auto* stopped=std::get_if<OperationStopped>(&planned))
+        return Diagnostic{DiagnosticCode::unsupported,"hybrid.objective.preflight_stop",stopped->diagnostics};
+    const auto& layout=std::get<HybridObjectiveLiftLayout>(planned);
+    const auto storage=hybrid_objective_lift_storage_preflight(layout,limits);
+    if(const auto* diagnostic=std::get_if<Diagnostic>(&storage)) return *diagnostic;
+    const auto& modes=layout.modes;
+    const auto width=layout.width;
+    const auto terminal_offset=layout.terminal_offset;
+    const auto* objective=layout.objective;
+    const auto terminal_dimension=modes.back()->state_dimension;
     return std::visit([&](const auto& value)->HybridObjectiveLiftResult {
         using T=std::decay_t<decltype(value)>;
         if constexpr(std::is_same_v<T,LinearTerminal>) {
@@ -798,9 +864,6 @@ HybridObjectiveLiftResult lift_hybrid_terminal_objective(const HybridSystem& sys
             std::copy(value.coefficients.begin(),value.coefficients.end(),coefficients.begin()+static_cast<std::ptrdiff_t>(terminal_offset));
             return TerminalObjective{LinearTerminal{std::move(coefficients),value.offset}};
         } else if constexpr(std::is_same_v<T,QuadraticTerminal>) {
-            if((width!=0 && width>std::numeric_limits<std::size_t>::max()/width) ||
-               width*width>limits.max_matrix_elements)
-                return Diagnostic{DiagnosticCode::unsupported,"hybrid.objective.storage","Lifted quadratic objective exceeds its storage limit"};
             Matrix q{width,width,Vector(width*width)};
             Vector linear(width);
             for(std::size_t i=0;i<terminal_dimension;++i) {
@@ -810,9 +873,6 @@ HybridObjectiveLiftResult lift_hybrid_terminal_objective(const HybridSystem& sys
             }
             return TerminalObjective{QuadraticTerminal{std::move(q),std::move(linear),value.offset}};
         } else {
-            if((width!=0 && value.map.rows>std::numeric_limits<std::size_t>::max()/width) ||
-               value.map.rows*width>limits.max_matrix_elements)
-                return Diagnostic{DiagnosticCode::unsupported,"hybrid.objective.storage","Lifted residual map exceeds its storage limit"};
             Matrix map{value.map.rows,width,Vector(value.map.rows*width)};
             for(std::size_t i=0;i<value.map.rows;++i)
                 for(std::size_t j=0;j<terminal_dimension;++j)

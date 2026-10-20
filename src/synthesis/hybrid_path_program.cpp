@@ -124,12 +124,24 @@ HybridTrajectoryOperationPreflightResult preflight_hybrid_trajectory_operations(
                 "hybrid.adapter.preflight_success_operations",
                 "Direct-trajectory preflight success receipt does not match the framework operation plan"});
         }
-        return *success;
     }
     if(const auto* stopped=std::get_if<OperationStopped>(&result)) return *stopped;
     if(cancellation.stop_requested())
         return OperationStopped{StopReason::cancelled,
             "Hybrid trajectory construction was cancelled after adapter preflight"};
+    for(const auto& path:paths) {
+        if(cancellation.stop_requested())
+            return OperationStopped{StopReason::cancelled,
+                "Hybrid trajectory objective preflight was cancelled before capability admission"};
+        const auto objective_preflight=model::preflight_hybrid_terminal_objective_lift(
+            system,request,path,limits,cancellation);
+        if(const auto* stopped=std::get_if<OperationStopped>(&objective_preflight))
+            return *stopped;
+        if(const auto* diagnostic=std::get_if<Diagnostic>(&objective_preflight))
+            return model::HybridPathCompositionFailureReport{path,limits,{},*diagnostic};
+    }
+    if(const auto* success=std::get_if<HybridDirectTrajectoryPreflightSuccess>(&result))
+        return *success;
     return HybridDirectTrajectoryPreflightSuccess{
         std::vector<model::HybridPath>(paths.begin(),paths.end()),limits,
         std::vector<model::HybridPlannedOperation>(operation_plan.begin(),operation_plan.end())};

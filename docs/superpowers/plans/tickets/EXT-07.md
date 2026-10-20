@@ -252,3 +252,14 @@ polygons and their tied minimizing faces. These fixed numerical examples do
 not establish higher-dimensional scalability or complete the capability and
 resource evidence across broader mode counts. Main-only Pages URLs and live
 hashes remain pending until publication succeeds.
+
+Direct-trajectory admission now preflights lifted terminal-objective dimensions
+and dense matrix storage for the complete enumerated path inventory after the
+adapter operation receipt is validated and before capability queries or branch
+builds. The storage check shares layout and overflow logic with objective
+lifting without allocating the lifted matrices. A two-path test covers both
+quadratic and residual objectives that exceed the cap on the later path while
+relation admission succeeds; both reject with zero capability or build calls.
+This closes the lifted-objective storage admission gap for enumerated direct-
+trajectory paths. Broader provider admission/resource accounting, verifier-
+domain coverage, and main-only Pages URL/hash verification remain open.

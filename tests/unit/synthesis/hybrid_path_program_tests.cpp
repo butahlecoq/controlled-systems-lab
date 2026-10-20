@@ -6487,6 +6487,46 @@ TEST_CASE("hybrid portfolio builder rolls back after a later dimension limit fai
     CHECK(diagnostic->field=="hybrid.relation.variables");
 }
 
+TEST_CASE("hybrid portfolio preflights lifted objective storage before any adapter build") {
+    for(const bool residual:{false,true}) {
+        auto [system,request]=variable_size_parallel_profile();
+        request.allowed_terminal_modes={{"small"},{"large"}};
+        request.terminal_objectives.resize(2);
+        request.terminal_objectives[0]={{"small"},LinearTerminal{{0},0},"cost","u"};
+        request.terminal_objectives[1].mode={"large"};
+        request.terminal_objectives[1].units="u";
+        if(residual) {
+            request.terminal_objectives[1].objective=
+                ResidualNormTerminal{Matrix{4,2,{1,0,0,1,1,1,-1,1}},Vector{0,0,0,0}};
+        } else {
+            request.terminal_objectives[1].objective=
+                QuadraticTerminal{Matrix{2,2,{1,0,0,1}},Vector{0,0},0};
+        }
+
+        constexpr model::HybridRelationLimits limits{8,16,15};
+        const auto enumeration=model::enumerate_hybrid_paths(system,request.initial.mode,
+            request.allowed_terminal_modes,{1,8});
+        REQUIRE(std::holds_alternative<std::vector<model::HybridPath>>(enumeration));
+        const auto& paths=std::get<std::vector<model::HybridPath>>(enumeration);
+        REQUIRE(paths.size()==2);
+        const auto relation_preflight=model::preflight_hybrid_path_relations(
+            system,request,paths,limits);
+        CHECK(std::holds_alternative<std::monostate>(relation_preflight));
+        RecordingDefaultPreflightTrajectoryAdapter adapter;
+        const auto result=build_hybrid_portfolio_programs(adapter,system,request,
+            {"objective-storage-admission"},{1,8},limits);
+        REQUIRE(std::holds_alternative<model::HybridPathCompositionFailureReport>(result));
+        const auto& failure=std::get<model::HybridPathCompositionFailureReport>(result);
+        CHECK(failure.path.edges==std::vector<model::HybridEdgeId>{{"to-large"}});
+        CHECK(failure.limits.max_matrix_elements==15);
+        const auto* diagnostic=std::get_if<Diagnostic>(&failure.failure);
+        REQUIRE(diagnostic);
+        CHECK(diagnostic->field=="hybrid.objective.storage");
+        CHECK(adapter.capability_calls==0);
+        CHECK(adapter.build_calls==0);
+    }
+}
+
 TEST_CASE("direct trajectory adapters preflight the full path inventory before capabilities or builds") {
     auto [system,request]=variable_size_parallel_profile();
     RejectingTrajectoryPreflightAdapter adapter;

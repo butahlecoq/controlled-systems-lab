@@ -795,3 +795,14 @@ TEST_CASE("hybrid quadratic and residual objectives lift onto rectangular termin
     CHECK(r.map.cols==5);
     CHECK(r.map.values==Vector{0,0,0,1,2});
 }
+
+TEST_CASE("hybrid objective lift preflight observes cancellation") {
+    auto [system,request]=dimension_changing_example();
+    const HybridPath path{{{"source"},{"target"}},{{"switch"}}};
+    std::stop_source cancellation;
+    cancellation.request_stop();
+    const auto result=preflight_hybrid_terminal_objective_lift(
+        system,request,path,{16,64,1024},cancellation.get_token());
+    REQUIRE(std::holds_alternative<OperationStopped>(result));
+    CHECK(std::get<OperationStopped>(result).reason==StopReason::cancelled);
+}

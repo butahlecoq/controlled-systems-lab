@@ -195,6 +195,11 @@ HybridComposedPathRelationResult compose_hybrid_path_relation_with_report(
     std::stop_token cancellation = {});
 
 using HybridObjectiveLiftResult = std::variant<TerminalObjective, Diagnostic>;
+using HybridObjectiveLiftPreflightResult = std::variant<std::monostate, Diagnostic, OperationStopped>;
+// Checks lifted objective dimensions and dense storage without allocating the lift.
+HybridObjectiveLiftPreflightResult preflight_hybrid_terminal_objective_lift(
+    const HybridSystem&, const HybridRequest&, const HybridPath&, HybridRelationLimits,
+    std::stop_token cancellation = {});
 HybridObjectiveLiftResult lift_hybrid_terminal_objective(const HybridSystem&, const HybridRequest&,
     const HybridPath&, HybridRelationLimits);
 

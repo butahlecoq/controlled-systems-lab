@@ -389,8 +389,11 @@ creating a provider workspace or running an algorithm:
 The current implementation does not yet satisfy this full admission contract.
 Portfolio builders preflight the complete enumerated path set for supported
 direct joint-H representations and relation resource limits before branch
-construction. The verified builder additionally preflights the verifier domain.
-Other provider operations and broader terminal-policy semantics remain EXT-07
+construction. Direct-trajectory preflight also checks every enumerated
+terminal objective's lifted variable count and dense matrix storage, without
+allocating the lifted matrices, before capability queries or branch builds.
+The verified builder additionally preflights the verifier domain. Other
+provider operations and broader terminal-policy semantics remain EXT-07
 acceptance work; the new generalized verifier does not provide validated
 assurance or the required exhaustive oracle coverage by itself.
 Independent exact-H family oracles now include one-step three-control simplex,
