@@ -2,7 +2,7 @@
 
 Date: 2026-10-20. Status: reviewer handoff, not a reproduction claim. This dossier does not change any baseline, manifest or published value.
 
-Scope: the primary data and source identity that are still absent for the historical experiments B01-B09, the L05 reachability examples, the R29 zonotope example and the optional ellipsoidal comparison. It is addressed to the archive owner or another reviewer who can supply a file, confirm that it no longer exists, or authorize a deeper search. Original files remain private; only hashes and derived, non-source facts are recorded here.
+Scope: the primary data and source identity that are still absent for the historical experiments B01-B09, the L05 reachability examples, the R29 zonotope example and the optional ellipsoidal comparison. It is addressed to the archive owner or another reviewer who can supply a file, confirm that it no longer exists, authorize a deeper search, or narrow the goal so the artifact is not required. Original files remain private; only hashes and derived, non-source facts are recorded here.
 
 Related live issues: [#1](https://github.com/butahlecoq/controlled-systems-lab/issues/1) (L04/L13 terminal criteria), [#2](https://github.com/butahlecoq/controlled-systems-lab/issues/2) (canonical inputs and missing implementations), [#4](https://github.com/butahlecoq/controlled-systems-lab/issues/4) (L05 inclusion and nonlinear error), [#6](https://github.com/butahlecoq/controlled-systems-lab/issues/6) (published baselines), [#8](https://github.com/butahlecoq/controlled-systems-lab/issues/8) (replaceable algorithms and R29), [#10](https://github.com/butahlecoq/controlled-systems-lab/issues/10) (B04 canonical model).
 
@@ -16,7 +16,7 @@ The repository already records each gap in a dedicated audit. What it did not ha
 
 1. What exactly is missing?
 2. What is already in hand, so it does not need to be sent again?
-3. What is the smallest handover that would unblock the case, or the statement that would let the project close it as declared-unavailable?
+3. What is the smallest handover that would unblock the case, or the statement that would let the project close it as declared-unavailable or not required?
 
 This document is that inventory. It is deliberately conservative: a value is called missing only when the hash-identified source does not print it and no recovered artifact supplies it. "Absent" always means "absent from the bounded searches described in section 10", not "proved not to exist".
 
@@ -47,7 +47,7 @@ If only a small number of items can be reviewed, these are the highest-leverage 
 
 A separate item, specific to L05 Example 1, is the exact `T0` grouping, reference trajectory samples and coordinate map from the physical start `(410,300)` to the linear start `(1,2)`. It is lower cost than the four above but blocks every quantitative comparison in the two-dimensional example.
 
-B03 is no longer an input-recovery priority. The owner directed that B03 compare algorithms rather than reproduce the historical sets or software run: baseline MATLAB/Python hull algorithms are translated into C++ and run with the modern algorithms on shared fixtures. The original clouds, seeds and timing scope are not required; see [section 4.3](#43-b03---l07-reachability-and-hull-comparisons).
+B03 is no longer an input-recovery priority. The owner directed that B03 compare algorithms rather than reproduce the historical sets or software run: baseline MATLAB/Python hull algorithms are to be translated into C++, then compared with each other and with the modern algorithms on shared fixtures. The original clouds, seeds and timing scope are not required; see [section 4.3](#43-b03---l07-reachability-and-hull-comparisons).
 
 ## 4. Per-artifact register
 
@@ -321,16 +321,16 @@ Even where the numbers are transcribed, the following fields are usually absent.
 | Field | Why it is required | Typical state |
 |---|---|---|
 | Generating revision | A hash-identified article is not a hash-identified executable; the report must name the code revision that produced the row | Missing for B02-B09 |
-| Original unrounded arrays | Printed decimals are not enough to reproduce a solver run or a terminal row | Missing for B03, B04, B08, B09 |
+| Original unrounded arrays | Printed decimals are not enough to reproduce a solver run or a terminal row | Missing for B03 (historical replay only), B04, B08, B09 |
 | Seeds and PRNG identity | Seed alone does not promise replay across languages; algorithm, version, draw order and dtype are needed | Missing for B03; absent for W05/W06 demonstrations and W13 |
 | Solver/backend versions and tolerances | A reported optimum or timing depends on them | Missing for all baselines |
 | Time grid, units, index convention | Zero- versus one-based control indexing and physical intervals change the model | Missing or contradictory for B04, B05, B07, B09 |
 | Coordinate map | Physical and deviation/linear coordinates are not interchangeable | Missing for L05; ambiguous for B04/B09 |
 | Objective implementation | The printed formula and the implemented expression can differ | Contradictions in B04, B08, B09 |
-| Timing scope | End-to-end, solve-only and simulation-only durations are not comparable | Missing for B02, B03, B05, B06 |
+| Timing scope | End-to-end, solve-only and simulation-only durations are not comparable | Missing for B02, B03 (historical replay only), B05, B06 |
 | Provenance and permission | Source identity, authorship and redistribution rights | Missing for every private artifact |
 
-For B03, the run-recovery fields above (original clouds and arrays, seeds, historical solver versions, timing scope, and the generating revision of the reported row) are needed only for a historical replay, which is not required. The algorithm comparison does not use them. Source identity and provenance for the translated algorithm files, plus the model and fixture semantics the port implements, are still required for a faithful C++ port.
+For B03, the run-recovery fields above (original clouds and arrays, seeds, historical solver versions, timing scope, and the generating revision of the reported row) are needed only for a historical replay, which is not required. The algorithm comparison does not use them. Source identity and provenance for the translated algorithm files, the source algorithm's constants, tolerances, stopping rules and instrumentation definitions, plus the model and fixture semantics the port implements, are still required for a faithful C++ port.
 
 ## 6. What is already recovered and should not be requested again
 
@@ -366,11 +366,12 @@ Handling rules:
 - A screenshot or transcription is useful, but it is labelled as a transcription, not as the generating executable.
 - The project verifies hashes and byte counts before reading, records only derived non-source facts, adds regression tests, and never silently "repairs" a historical value.
 - If an item is unavailable, one sentence is a valid outcome. The case then moves to the corrected track under a new ID, and the historical row remains unchanged.
+- If the owner narrows the comparison goal, record `Not required`, proceed on shared synthetic fixtures under a new comparison ID, and do not request a handover.
 - If a deeper search is possible, authorize the scope explicitly: containers (`.rar/.zip/.7z`), MEX/binaries, Simulink `.slx` internals, MAT/MCOS objects, or unregistered archive neighbours.
 
 ## 8. Reviewer decision sheet
 
-For each row, one of `supply`, `unavailable`, `authorize deeper search`, or `not required` is enough to close the review item.
+For each row, one of `supply`, `unavailable`, `authorize deeper search`, or `Not required` is enough to close the review item.
 
 | Artifact | Decision | Notes |
 |---|---|---|
