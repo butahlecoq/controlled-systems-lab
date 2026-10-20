@@ -199,6 +199,53 @@ bool contains(const sets::HRepresentation& h,double value) {
     return true;
 }
 
+class OverReportingPolyhedralProjectionAdapter final : public HybridReachabilityAdapter {
+public:
+    explicit OverReportingPolyhedralProjectionAdapter(std::size_t row_limit,
+        bool omit_observation=false)
+        : row_limit_(row_limit),omit_observation_(omit_observation),delegate_(row_limit) {}
+
+    HybridReachabilityCapabilities capabilities() const noexcept override {
+        return delegate_.capabilities();
+    }
+
+    HybridReachabilityPreflightResult preflight(const model::HybridSystem& system,
+        const model::HybridRequest& request,std::span<const model::HybridPath> paths,
+        model::HybridRelationLimits limits,
+        std::span<const model::HybridPlannedOperation> operation_plan,
+        std::stop_token cancellation) const override {
+        return delegate_.preflight(system,request,paths,limits,operation_plan,cancellation);
+    }
+
+    HybridPathReachabilityResult compose_path(const model::HybridSystem& system,
+        const model::HybridRequest& request,const model::HybridPath& path,
+        model::HybridRelationLimits limits,std::stop_token cancellation) const override {
+        auto result=delegate_.compose_path(system,request,path,limits,cancellation);
+        auto* reachable=std::get_if<HybridPathReachability>(&result);
+        if(!reachable||!reachable->projected_state||
+           !reachable->projected_state->provider_resource_observation) return result;
+        if(omit_observation_) {
+            reachable->projected_state->provider_resource_observation.reset();
+            injected_=true;
+            return result;
+        }
+        auto& observation=*reachable->projected_state->provider_resource_observation;
+        observation.peak_rows=row_limit_+1;
+        observation.peak_matrix_elements=observation.peak_rows*
+            reachable->joint_relation.metadata()->set.dimension;
+        injected_=true;
+        return result;
+    }
+
+    bool injected() const noexcept { return injected_; }
+
+private:
+    std::size_t row_limit_;
+    bool omit_observation_;
+    GeneralProjectedStateHybridReachabilityAdapter delegate_;
+    mutable bool injected_{};
+};
+
 }
 
 TEST_CASE("public projected hybrid reachability returns the guarded terminal interval") {
@@ -706,6 +753,22 @@ TEST_CASE("hybrid reachability resource aggregation rejects provider counter ove
         CHECK(diagnostics.front().field=="hybrid.reachability.aggregate_provider_resources");
         CHECK(workspace_creations==2);
         CHECK(execution_count==2);
+    }
+}
+
+TEST_CASE("hybrid reachability validates built-in projection resource observations") {
+    for(const bool omit_observation:{false,true}) {
+        auto [system,request]=interval_system();
+        OverReportingPolyhedralProjectionAdapter adapter{16,omit_observation};
+        const auto result=compute_hybrid_reachability_portfolio(adapter,system,request,
+            {1,2},{4,16,128});
+        CAPTURE(omit_observation);
+        REQUIRE(adapter.injected());
+        REQUIRE(std::holds_alternative<Diagnostics>(result));
+        REQUIRE_FALSE(std::get<Diagnostics>(result).empty());
+        CHECK(std::get<Diagnostics>(result).front().code==DiagnosticCode::evidence_mismatch);
+        CHECK(std::get<Diagnostics>(result).front().field==
+            "hybrid.reachability.provider_resources");
     }
 }
 

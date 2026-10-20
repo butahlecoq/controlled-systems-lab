@@ -72,7 +72,9 @@ rows/elements (including current and pending Fourier-Motzkin buffers), rows
 emitted across elimination steps, and charged row-pair operations; the portfolio
 aggregates totals and maxima. Peak fields exclude retained input/copy overlap,
 coordinate-selection scratch, and final output matrices. Other providers may
-omit internal observations, and broader resource-scale evidence remains open.
+omit internal observations. The built-in provider must return its observation;
+the reachability boundary rejects a missing observation or a peak above the
+configured row limit. Broader resource-scale evidence remains open.
 
 Independent continuous-oracle coverage now includes a guarded two-control
 two-stage fixture whose two tied paths are each checked against literal

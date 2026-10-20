@@ -416,6 +416,18 @@ HybridPathReachabilityResult execute_preflighted_hybrid_reachability(
             if(terminal.inequalities.rows()+terminal.equalities.rows()!=projected.output_rows)
                 return one({DiagnosticCode::evidence_mismatch,"hybrid.reachability.projected_rows",
                     "Projected terminal-set row count does not match its retained H representation"});
+            const auto& provider=projected.projection_provider.actual->id.value;
+            if(provider=="csl.geometry.polyhedral-projection") {
+                if(!projected.provider_resource_observation)
+                    return one({DiagnosticCode::evidence_mismatch,
+                        "hybrid.reachability.provider_resources",
+                        "Polyhedral projection provider omitted its required resource observation"});
+                if(projected.provider_resource_observation->peak_rows>
+                   projected.maximum_projection_rows)
+                    return one({DiagnosticCode::evidence_mismatch,
+                        "hybrid.reachability.provider_resources",
+                        "Polyhedral projection provider reported a peak row count above its configured limit"});
+            }
         }
     }
     if(const auto* failure=std::get_if<model::HybridPathCompositionFailureReport>(&result)) {

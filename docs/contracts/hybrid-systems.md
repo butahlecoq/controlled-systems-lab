@@ -436,8 +436,10 @@ execution, or family verification is supported or scalable. Per-operation
 provider/resource observations and generated/retained branch counts remain
 responsibilities of the synthesis and adapter reports.
 
-Projected-state reachability retains an optional provider resource observation
-per branch when its geometry provider supplies one. The polyhedral provider's H
+Projected-state reachability retains a provider resource observation per
+branch when its geometry provider supplies one. The built-in polyhedral H
+provider always supplies the observation; other providers may omit it. The
+polyhedral provider's H
 projection reports peak active H-row elimination buffers at the source
 dimension, including current and pending Fourier-Motzkin rows, total rows
 emitted by successive elimination steps, and charged Fourier-Motzkin
@@ -447,7 +449,9 @@ Its portfolio summary sums emitted rows and charged operations and reports
 branch maxima for those counts and peak values. Other providers may omit the
 optional observation or define a different scope. These logical counters
 exclude allocator overhead and bytes, are not whole-operation memory or runtime
-measurements, and do not establish scaling.
+measurements, and do not establish scaling. The reachability boundary rejects
+a missing observation or a reported polyhedral-provider peak above that
+branch's configured projection row limit.
 
 The direct joint composer exposes an operation trace, and every
 `HybridPathProgram` retains that trace with the relation limits used. Each
