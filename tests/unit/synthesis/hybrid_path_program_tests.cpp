@@ -1561,6 +1561,154 @@ TEST_CASE("hybrid portfolio preflights all terminal objective capabilities befor
     CHECK(verified_adapter.calls==0);
 }
 
+TEST_CASE("hybrid portfolio validates objectives for unreachable allowed terminal modes") {
+    auto system=example_system();
+    auto unreachable_terminal=system.modes.back();
+    unreachable_terminal.id={"unreachable-terminal"};
+    system.modes.push_back(std::move(unreachable_terminal));
+
+    auto request=example_request();
+    request.allowed_terminal_modes.push_back({"unreachable-terminal"});
+    request.terminal_objectives.push_back({{"unreachable-terminal"},
+        QuadraticTerminal{Matrix{2,2,{1,0,0,1}},Vector{0,0},0},"energy","J"});
+
+    LinearOnlyRejectingTrajectoryAdapter adapter;
+    const auto result=build_hybrid_portfolio_programs(adapter,system,request,
+        {"hybrid-problem"},{1,8},{16,64,1024});
+    REQUIRE(std::holds_alternative<Diagnostics>(result));
+    CHECK(std::get<Diagnostics>(result).front().code==DiagnosticCode::unsupported);
+    CHECK(std::get<Diagnostics>(result).front().field=="hybrid.portfolio.objective");
+    CHECK(std::get<Diagnostics>(result).front().explanation.find("unreachable-terminal")!=
+        std::string::npos);
+    CHECK(adapter.capability_calls==1);
+    CHECK(adapter.calls==0);
+
+    FixtureHybridFamilyVerifier verifier;
+    LinearOnlyRejectingTrajectoryAdapter verified_adapter;
+    const auto verified=build_hybrid_portfolio_programs_with_verifier(verifier,
+        verified_adapter,system,request,{"hybrid-problem"},{1,8},{16,64,1024});
+    REQUIRE(std::holds_alternative<Diagnostics>(verified));
+    CHECK(std::get<Diagnostics>(verified).front().field=="hybrid.portfolio.objective");
+    CHECK(std::get<Diagnostics>(verified).front().explanation.find("unreachable-terminal")!=
+        std::string::npos);
+    CHECK(verified_adapter.capability_calls==1);
+    CHECK(verified_adapter.calls==0);
+}
+
+TEST_CASE("exact linear H verifier rejects unreachable unsupported terminal objectives before dispatch") {
+    auto system=example_system();
+    auto unreachable_terminal=system.modes.back();
+    unreachable_terminal.id={"unreachable-terminal"};
+    system.modes.push_back(std::move(unreachable_terminal));
+
+    auto request=example_request();
+    request.allowed_terminal_modes.push_back({"unreachable-terminal"});
+    request.terminal_objectives.push_back({{"unreachable-terminal"},
+        QuadraticTerminal{Matrix{2,2,{1,0,0,1}},Vector{0,0},0},"energy","J"});
+
+    ExactLinearHHybridFamilyVerifier verifier;
+    RejectingTrajectoryAdapter trajectory;
+    const auto result=build_hybrid_portfolio_programs_with_verifier(verifier,trajectory,
+        system,request,{"unreachable-terminal-objective"},{1,8},{16,64,1024});
+    REQUIRE(std::holds_alternative<Diagnostics>(result));
+    const auto& diagnostics=std::get<Diagnostics>(result);
+    REQUIRE_FALSE(diagnostics.empty());
+    CHECK(diagnostics.front().code==DiagnosticCode::unsupported);
+    CHECK(diagnostics.front().field=="hybrid.verification.exact_linear_h_objective");
+    CHECK(diagnostics.front().explanation.find("unreachable-terminal")!=std::string::npos);
+    CHECK(trajectory.calls==0);
+    CHECK(trajectory.capability_calls==0);
+}
+
+TEST_CASE("exact singleton verifier rejects unreachable unsupported terminal objectives before dispatch") {
+    auto system=example_system();
+    auto unreachable_terminal=system.modes.back();
+    unreachable_terminal.id={"unreachable-terminal"};
+    system.modes.push_back(std::move(unreachable_terminal));
+
+    auto request=example_request();
+    request.allowed_terminal_modes.push_back({"unreachable-terminal"});
+    request.terminal_objectives.push_back({{"unreachable-terminal"},
+        QuadraticTerminal{Matrix{2,2,{1,0,0,1}},Vector{0,0},0},"energy","J"});
+
+    ExactSingletonHybridFamilyVerifier verifier;
+    RejectingTrajectoryAdapter trajectory;
+    const auto result=build_hybrid_portfolio_programs_with_verifier(verifier,trajectory,
+        system,request,{"unreachable-singleton-terminal-objective"},{1,8},{16,64,1024});
+    REQUIRE(std::holds_alternative<Diagnostics>(result));
+    const auto& diagnostics=std::get<Diagnostics>(result);
+    REQUIRE_FALSE(diagnostics.empty());
+    CHECK(diagnostics.front().code==DiagnosticCode::unsupported);
+    CHECK(diagnostics.front().field=="hybrid.verification.exact_singleton_objective");
+    CHECK(diagnostics.front().explanation.find("unreachable-terminal")!=std::string::npos);
+    CHECK(trajectory.calls==0);
+    CHECK(trajectory.capability_calls==0);
+}
+
+TEST_CASE("scalar interval verifiers preflight objectives for every allowed terminal mode") {
+    const auto make_scalar_system=[](std::size_t horizon) {
+        model::HybridMode source{{"source"},1,1,{"x"},{"u"}};
+        model::HybridMode target{{"target"},1,0,{"y"},{}};
+        const LinearStage source_flow{
+            Matrix{1,1,{1}},Matrix{1,1,{1}},Matrix{1,0,{}},Vector{0}};
+        const LinearStage target_flow{
+            Matrix{1,1,{1}},Matrix{1,0,{}},Matrix{1,0,{}},Vector{0}};
+        source.flow=std::vector<LinearStage>(horizon,source_flow);
+        source.control_sets.assign(horizon,UniversalSet{1});
+        source.invariants.assign(horizon+1,UniversalSet{1});
+        target.flow=std::vector<LinearStage>(horizon,target_flow);
+        target.control_sets.assign(horizon,UniversalSet{0});
+        target.invariants.assign(horizon+1,UniversalSet{1});
+        auto unreachable=target;
+        unreachable.id={"unreachable-terminal"};
+        return model::HybridSystem{horizon,
+            {std::move(source),std::move(target),std::move(unreachable)}, {}};
+    };
+    const auto make_request=[] {
+        return model::HybridRequest{{{"source"},{0}},{{"target"},{"unreachable-terminal"}},
+            {{{"target"},LinearTerminal{{1},0},"energy","J"},
+             {{"unreachable-terminal"},
+                 QuadraticTerminal{Matrix{1,1,{1}},Vector{0},0},"energy","J"}}};
+    };
+    SingleParameterScalarIntervalHybridFamilyVerifier single_parameter;
+    const auto single_parameter_system=make_scalar_system(1);
+    const auto single_parameter_request=make_request();
+    const std::vector<model::HybridPath> no_single_parameter_paths;
+    const auto single_parameter_preflight=single_parameter.preflight(single_parameter_system,
+        single_parameter_request,no_single_parameter_paths,{});
+    CHECK(std::holds_alternative<std::monostate>(single_parameter_preflight));
+    auto malformed_request=single_parameter_request;
+    malformed_request.terminal_objectives.back().objective=
+        QuadraticTerminal{Matrix{1,1,{}},Vector{0},0};
+    const auto malformed_preflight=single_parameter.preflight(single_parameter_system,
+        malformed_request,no_single_parameter_paths,{});
+    REQUIRE(std::holds_alternative<Diagnostics>(malformed_preflight));
+    CHECK(std::get<Diagnostics>(malformed_preflight).front().code==DiagnosticCode::unsupported);
+    TwoParameterScalarPolytopeHybridFamilyVerifier two_parameter;
+    const auto two_parameter_system=make_scalar_system(2);
+    const auto two_parameter_request=make_request();
+    const std::vector<model::HybridPath> no_paths;
+    const auto two_parameter_result=two_parameter.preflight(two_parameter_system,
+        two_parameter_request,no_paths,{});
+    REQUIRE(std::holds_alternative<Diagnostics>(two_parameter_result));
+    REQUIRE_FALSE(std::get<Diagnostics>(two_parameter_result).empty());
+    CHECK(std::get<Diagnostics>(two_parameter_result).front().code==
+        DiagnosticCode::unsupported);
+    CHECK(std::get<Diagnostics>(two_parameter_result).front().field==
+        "hybrid.verification.two_parameter_objective");
+    CHECK(std::get<Diagnostics>(two_parameter_result).front().explanation.find(
+        "unreachable-terminal")!=std::string::npos);
+    auto wrong_dimension_request=two_parameter_request;
+    wrong_dimension_request.terminal_objectives.back().objective=
+        LinearTerminal{{1,0},0};
+    const auto wrong_dimension=two_parameter.preflight(two_parameter_system,
+        wrong_dimension_request,no_paths,{});
+    REQUIRE(std::holds_alternative<Diagnostics>(wrong_dimension));
+    CHECK(std::get<Diagnostics>(wrong_dimension).front().code==
+        DiagnosticCode::unsupported);
+    CHECK(std::get<Diagnostics>(wrong_dimension).front().field==
+        "hybrid.verification.two_parameter_objective");
+}
 TEST_CASE("hybrid portfolio capability preflight honors cancellation before scanning paths") {
     std::stop_source cancellation;
     CancellingCapabilityTrajectoryAdapter adapter{cancellation};
@@ -3581,6 +3729,63 @@ TEST_CASE("single-parameter scalar interval verifier covers arbitrary finite hor
             HybridVerificationStatus::refuted));
         CHECK(record->continuous_coverage==HybridVerificationStatus::established);
     }
+}
+
+TEST_CASE("single-parameter verifier certifies quadratic interior and full optimal faces") {
+    model::HybridMode mode{{"quadratic-mode"},1,1,{"x"},{"u"}};
+    mode.flow=LinearStage{Matrix{1,1,{1}},Matrix{1,1,{2}},Matrix{1,0,{}},Vector{1}};
+    mode.control_sets={interval("quadratic-control",0,1)};
+    mode.invariants={UniversalSet{1},UniversalSet{1}};
+    const auto reset=h_set("quadratic-identity-reset",2,Matrix{0,2,{}},Vector{},
+        Matrix{1,2,{-1,1}},Vector{0});
+    model::HybridSystem system{1,{mode},{{{"quadratic-loop"},{"quadratic-mode"},
+        {"quadratic-mode"},{UniversalSet{1}},{reset}}}};
+    model::HybridRequest request{{{"quadratic-mode"},{0}},{{"quadratic-mode"}},
+        {{{"quadratic-mode"},QuadraticTerminal{Matrix{1,1,{2}},Vector{-4},0},
+            "quadratic cost","units"}}};
+    auto built=build_hybrid_portfolio_programs(system,request,{"quadratic-interval"},
+        {1,8},{16,64,4096});
+    REQUIRE(std::holds_alternative<std::vector<HybridPathProgram>>(built));
+    auto programs=std::get<std::vector<HybridPathProgram>>(std::move(built));
+    REQUIRE(programs.size()==1);
+    SingleParameterScalarIntervalHybridFamilyVerifier verifier;
+    const auto paths=std::vector<model::HybridPath>{programs.front().path};
+    const auto operation_plan=model::plan_hybrid_operations(paths);
+    const auto preflight=verifier.preflight(system,request,paths,operation_plan,{});
+    REQUIRE(std::holds_alternative<HybridOperationAdmissionSuccess>(preflight));
+    auto& convex=std::get<ConvexProgram>(programs.front().program);
+    const Vector optimum{0,0.5,2,2};
+    ProgramResult solver{Termination::completed,
+        {convex.quadratic_program().identity(),MathematicalOutcome::optimal,
+            SymbolicArgument{"raw scalar quadratic oracle","minimum at x=2"},{}},
+        optimum,{},"independent scalar quadratic optimum"};
+    HybridPathOptimalFaceCandidate candidate{programs.front().path, singleton_data(optimum),
+        optimum,std::move(solver),{},"independent singleton quadratic minimizer",{}};
+    const auto result=verify_hybrid_portfolio_family(verifier,system,request,programs,
+        std::span<const HybridPathOptimalFaceCandidate>(&candidate,1),{1,8},{0,0});
+    REQUIRE(std::holds_alternative<HybridFamilyVerificationReport>(result));
+    const auto& report=std::get<HybridFamilyVerificationReport>(result);
+    CHECK(report.global_objective_optimality==HybridVerificationStatus::established);
+    CHECK(report.complete_family_coverage==HybridVerificationStatus::established);
+    CHECK(report.branches.front().continuous_coverage==HybridVerificationStatus::established);
+
+    request.terminal_objectives.front().objective=QuadraticTerminal{Matrix{1,1,{0}},Vector{0},0};
+    built=build_hybrid_portfolio_programs(system,request,{"flat-quadratic-interval"},
+        {1,8},{16,64,4096});
+    REQUIRE(std::holds_alternative<std::vector<HybridPathProgram>>(built));
+    programs=std::get<std::vector<HybridPathProgram>>(std::move(built));
+    auto& flat_convex=std::get<ConvexProgram>(programs.front().program);
+    ProgramResult flat_solver{Termination::completed,
+        {flat_convex.quadratic_program().identity(),MathematicalOutcome::optimal,
+            SymbolicArgument{"raw flat quadratic oracle","every control u in [0,1] minimizes"},{}},
+        optimum,{},"independent flat quadratic optimum"};
+    HybridPathOptimalFaceCandidate narrowed{programs.front().path,singleton_data(optimum),
+        optimum,std::move(flat_solver),{},"deliberately narrowed flat minimizer",{}};
+    const auto narrowed_result=verify_hybrid_portfolio_family(verifier,system,request,programs,
+        std::span<const HybridPathOptimalFaceCandidate>(&narrowed,1),{1,8},{0,0});
+    REQUIRE(std::holds_alternative<HybridFamilyVerificationReport>(narrowed_result));
+    CHECK(std::get<HybridFamilyVerificationReport>(narrowed_result).complete_family_coverage==
+        HybridVerificationStatus::refuted);
 }
 
 TEST_CASE("exact singleton hybrid verifier handles empty branches and rejects continuous domains") {
