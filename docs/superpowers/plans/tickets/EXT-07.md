@@ -34,17 +34,17 @@ Ship meaningful unit/contract tests with the implementation, using the named ind
 
 The implementation now has profile admission, bounded path enumeration, direct
 joint-H path programs, branch optimization, solver provenance, and numerical
-family verifiers for integral singleton paths, one-step scalar interval
-families, a finite-horizon scalar interval profile with exactly one free bounded
-control interval, and a finite-horizon scalar polygon profile with exactly two
-free control parameters at distinct stages. All other controls must be
-singletons. Invariants and guards are intervals and resets are exact scalar
-affine relations. Separate raw-graph and polygon-geometry checks cover tied
-two-stage continuous families; a three-stage regression places the two free
-controls at stages zero and two with a fixed-control stage between them. These
-bounded profiles do not establish a verifier
-for higher-dimensional continuous polytopes or horizons with more than two free
-controls, so those acceptance requirements remain open. Portfolio builders
+family verifiers for integral singleton paths, scalar interval families, and a
+finite-horizon scalar polygon profile with two free controls at distinct
+stages. `ExactLinearHHybridFamilyVerifier` now independently reconstructs
+general-dimensional finite-horizon H-relations, minimizes linear objectives
+with exact dyadic arithmetic, and checks complete optimal-face relations under
+bounded Fourier-Motzkin resources. Regression coverage includes a bounded
+continuous path, a flat objective, an unbounded branch, forged faces, and tied
+paths whose objective values use different binary scales. The generalized
+verifier supports broader continuous domains, but exhaustive independent
+relation/objective oracle coverage, resource-scale evidence, and publication
+gates remain open. Portfolio builders
 now preflight the complete enumerated path inventory for supported direct
 joint-H representations and variable/row/matrix resource limits before
 constructing any branch relation. The combined verified-program builder also
@@ -60,8 +60,10 @@ inventory. Full provider/resource aggregation remains open.
 Trajectory-adapter objective-type support is checked for every allowed
 terminal mode, including modes with no enumerated path, before any branch
 program is built. Adapter-specific objective-policy semantics beyond
-assurance/tolerance validation, provider-operation admission at other seams,
-and general continuous-family support remain open.
+assurance/tolerance validation and provider-operation admission at other seams
+remain open. General continuous-family verification now has a bounded exact
+H-relation implementation, but its independent exhaustive oracle acceptance
+work remains open.
 
 Both projected-state adapters ask their selected geometry provider to admit the
 actual terminal projection request during preflight. The one-transition adapter

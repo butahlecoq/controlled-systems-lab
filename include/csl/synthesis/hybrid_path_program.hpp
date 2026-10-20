@@ -370,6 +370,23 @@ public:
         std::stop_token cancellation) const override;
 };
 
+// Exact bounded verifier for linear objectives over joint H-relations. It
+// reconstructs each path from raw model data, solves the branch LP with exact
+// dyadic arithmetic, and proves that supplied program and optimal-face
+// relations match the independently reconstructed relations.
+class ExactLinearHHybridFamilyVerifier final : public HybridFamilyVerificationAdapter {
+public:
+    HybridFamilyVerificationCapabilities capabilities() const noexcept override;
+    HybridFamilyVerificationPreflightResult preflight(const model::HybridSystem&,
+        const model::HybridRequest&, std::span<const model::HybridPath>,
+        std::stop_token cancellation) const override;
+    HybridFamilyVerificationResult verify(const model::HybridSystem&,
+        const model::HybridRequest&, std::span<const model::HybridPath>,
+        std::span<const HybridPathProgram>,
+        std::span<const HybridPathOptimalFaceCandidate>, NumericalPolicy,
+        std::stop_token cancellation) const override;
+};
+
 // Independent numerical verifier for one-stage, one-dimensional hybrid
 // systems with interval admissible sets and deterministic scalar affine resets.
 // It certifies complete interval minimizer families inside this explicit domain

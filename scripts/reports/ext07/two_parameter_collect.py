@@ -28,7 +28,11 @@ SOURCE_FILES = (
     "CMakeCXXCompiler.raw.cmake",
 )
 EXPECTED_PROVIDER = "csl.lp.highs@1.1.0+highs.1.11.0"
-EXPECTED_VERIFIER = "csl.hybrid.scalar-two-parameter-polytope"
+SUPPORTED_VERIFIERS = {
+    "csl.hybrid.scalar-two-parameter-polytope",
+    "csl.hybrid.exact-linear-h",
+}
+CURRENT_VERIFIER = "csl.hybrid.exact-linear-h"
 EXPECTED_PATHS = ["enter-half", "enter-full"]
 
 
@@ -42,7 +46,7 @@ def validate_run(row: dict, phase: str, repetition: int, calls: int) -> None:
             row.get("relation_matrix_elements") == 140,
             "EXT-07 two-parameter path or relation evidence differs")
     require(row.get("provider") == EXPECTED_PROVIDER and
-            row.get("verifier") == EXPECTED_VERIFIER and
+            row.get("verifier") in SUPPORTED_VERIFIERS and
             row.get("feasibility") == row.get("optimality") ==
             row.get("coverage") == "established",
             "EXT-07 two-parameter provider or family result differs")
@@ -83,6 +87,9 @@ def collect(capture: Path, source: Path, output_root: Path) -> Path:
     validate_run(measure[0], "warmup", 0, 10)
     for repetition, row in enumerate(measure[1:]):
         validate_run(row, "trial", repetition, 20)
+    require(all(row.get("verifier") == CURRENT_VERIFIER
+                for row in (*smoke, *measure)),
+            "Current two-parameter capture did not run the exact linear H verifier")
     driver = source / "benchmarks/reporting/ext07/two_parameter_driver.cpp"
     require(driver.is_file(), "Missing two-parameter measured driver source")
     source_hashes = {
@@ -144,7 +151,7 @@ def collect(capture: Path, source: Path, output_root: Path) -> Path:
                      "complete_minimizing_families":
                      {path: value["minimizing_face"] for path, value in analytic.items()}},
         "capability_profile": {
-            "supported_case": "two-stage scalar system with two bounded non-singleton interval controls; scalar interval invariants/guards; deterministic exactly representable affine resets; scalar linear terminal objective",
+            "supported_case": "two-stage scalar system with two bounded non-singleton interval controls; scalar interval invariants/guards; deterministic exactly representable affine resets; scalar linear terminal objective; complete family checked by the exact linear H verifier",
             "dimensions_and_counts": {"horizon": 2, "modes": 3, "edges": 3,
                                       "free_controls": 2, "paths": 2,
                                       "joint_variables": 7},
@@ -168,7 +175,7 @@ def collect(capture: Path, source: Path, output_root: Path) -> Path:
                 value for row in trials for value in row["call_durations_ns"])),
             "comparison": "one backend and one fixed fixture; descriptive only, no comparator or speedup claim",
         },
-        "evidence_scope": "140 completed public hybrid portfolio calls; each call assembles both two-stage H relations, solves both branches with registered HiGHS LP, constructs both tied candidate faces, and verifies both complete two-parameter families",
+        "evidence_scope": "140 completed public hybrid portfolio calls; each call assembles both two-stage H relations, solves both branches with registered HiGHS LP, constructs both tied candidate faces, and verifies both complete two-parameter families with ExactLinearHHybridFamilyVerifier",
         "evidence_limits": [
             "One Windows MSVC Release host and one fixed analytic two-stage fixture.",
             "The controls are independent and bounded; no higher-dimensional parameter polytope is measured.",
