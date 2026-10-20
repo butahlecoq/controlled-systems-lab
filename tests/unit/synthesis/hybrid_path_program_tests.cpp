@@ -1679,6 +1679,59 @@ TEST_CASE("one-step scalar interval verifier certifies distinct tied continuous 
     CHECK(malformed_suboptimal_report.complete_family_coverage==HybridVerificationStatus::refuted);
 }
 
+TEST_CASE("one-step interval verifier accepts a point face fixed by objective equality") {
+    const auto reset_equalities = numeric::snapshot(Matrix{1, 2, {-1, 1}});
+    const auto reset_rhs = numeric::snapshot_vector(Vector{0});
+    const auto reset_inequalities = numeric::snapshot(Matrix{0, 2, {}});
+    const auto reset_bounds = numeric::snapshot_vector(Vector{});
+    REQUIRE(std::holds_alternative<numeric::MatrixView>(reset_equalities));
+    REQUIRE(std::holds_alternative<numeric::VectorView>(reset_rhs));
+    REQUIRE(std::holds_alternative<numeric::MatrixView>(reset_inequalities));
+    REQUIRE(std::holds_alternative<numeric::VectorView>(reset_bounds));
+    const auto reset = sets::make_h({{"point-face-reset"}, 2, {"pre", "post"}},
+        {std::get<numeric::MatrixView>(reset_inequalities),
+         std::get<numeric::VectorView>(reset_bounds),
+         std::get<numeric::MatrixView>(reset_equalities),
+         std::get<numeric::VectorView>(reset_rhs)});
+    REQUIRE(std::holds_alternative<sets::SetData>(reset));
+    auto system = model::HybridSystem{
+        1,
+        {{{"source"}, 1, 1, {"x"}, {"u"},
+          LinearStage{Matrix{1,1,{1}}, Matrix{1,1,{1}}, Matrix{1,0,{}}, Vector{0}},
+          {interval("point-face-control", 0, 1)}, {UniversalSet{1}, UniversalSet{1}}},
+         {{"target"}, 1, 0, {"y"}, {},
+          LinearStage{Matrix{1,1,{1}}, Matrix{1,0,{}}, Matrix{1,0,{}}, Vector{0}},
+          {UniversalSet{0}}, {UniversalSet{1}, UniversalSet{1}}}},
+        {{{"point-face-edge"}, {"source"}, {"target"}, {interval("point-face-guard", 0, 0.5)},
+          {std::get<sets::SetData>(reset).as_handle()}}}};
+    auto request = model::HybridRequest{{{"source"}, {0}}, {{"target"}},
+        {{{"target"}, LinearTerminal{{1}, 0}, "cost", "units"}}};
+    const auto built = build_hybrid_portfolio_programs(system, request, {"point-face-regression"},
+        {1, 4}, {16, 64, 1024});
+    REQUIRE(std::holds_alternative<std::vector<HybridPathProgram>>(built));
+    const auto& programs = std::get<std::vector<HybridPathProgram>>(built);
+    REQUIRE(programs.size() == 1);
+    const auto& linear = std::get<LinearProgram>(programs[0].program);
+    ProgramResult solver_result{Termination::completed,
+        {linear.identity(), MathematicalOutcome::optimal,
+         SymbolicArgument{"literal point optimum", "u=0 minimizes x_terminal=u"}, {}},
+        Vector{0, 0, 0, 0}, {}, "independent analytic fixture"};
+    const auto candidate_result = build_hybrid_path_optimal_face_candidate(
+        programs[0], solver_result, {1e-10, 1e-10});
+    REQUIRE(std::holds_alternative<HybridPathOptimalFaceCandidate>(candidate_result));
+    const std::array<HybridPathOptimalFaceCandidate, 1> candidates{
+        std::get<HybridPathOptimalFaceCandidate>(candidate_result)};
+    OneStepScalarIntervalHybridFamilyVerifier verifier;
+    const auto verified = verify_hybrid_portfolio_family(verifier, system, request, programs,
+        candidates, {1, 4}, {1e-10, 1e-10});
+    REQUIRE(std::holds_alternative<HybridFamilyVerificationReport>(verified));
+    const auto& report = std::get<HybridFamilyVerificationReport>(verified);
+    CHECK(report.global_objective_optimality == HybridVerificationStatus::established);
+    CHECK(report.complete_family_coverage == HybridVerificationStatus::established);
+    REQUIRE(report.branches.size() == 1);
+    CHECK(report.branches[0].continuous_coverage == HybridVerificationStatus::established);
+}
+
 TEST_CASE("exact singleton hybrid verifier checks guard entry and rejects forbidden mode paths") {
     auto [system,request]=exact_singleton_portfolio();
     system.edges[0].guards[0]=Singleton{{3}};

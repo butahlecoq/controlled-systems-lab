@@ -216,10 +216,17 @@ must use an exact polyhedral relation operation supported by the selected provid
 "Exact" describes the set operation: no geometric approximation or
 cross-branch convexification is introduced. It does not promise validated
 arithmetic or prove a numerical provider's result. Provider assurance is
-recorded separately, and complete-family publication requires a profile-specific
-compiled verifier; no such hybrid verifier currently exists.
+recorded separately. The implementation includes an exact integral singleton
+verifier and a numerical one-step scalar interval verifier. The latter supports
+bounded scalar interval controls/sets and deterministic scalar affine resets;
+it does not verify continuous multi-stage families or general-dimensional
+relations. These bounded verifiers do not establish the full EXT-07 acceptance
+contract.
 
-Operation admission is complete and occurs before any workspace is created:
+## Required request-admission contract
+
+A conforming implementation must admit the complete requested operation before
+creating a provider workspace or running an algorithm:
 
 1. Validate unique nonempty mode/edge IDs, stage counts, coordinate labels,
    coefficient shapes, source/target edge modes, the request-selected initial
@@ -229,12 +236,19 @@ Operation admission is complete and occurs before any workspace is created:
    over the finite transition graph.
 3. Validate `Q_T` and the per-mode supported terminal objectives, including
    dimensions, objective policy, shared scalar quantity/units, and global
-   minimization semantics; confirm a family verifier for the resulting
-   mode-indexed joint relation and all-optimal-branch claim.
+   minimization semantics; confirm that a family verifier covers the complete
+   requested relation and all-optimal-branch claim.
 4. If any check fails, return a request-scoped unsupported/rejected result
    naming the first unsupported capability and the affected mode/edge/stage;
    do not start an algorithm, create a workspace, or publish partial family
    evidence as complete.
+
+The current implementation does not yet satisfy this full admission contract.
+Model and relation-composition preflights cover their declared capabilities,
+but verifier admission is request-scoped and may occur after branch-program
+construction. Unsupported verifier plans therefore remain an EXT-07 acceptance
+gap; the bounded verifiers described above must not be treated as general
+continuous-family support.
 
 The initial profile does not infer support from the presence of lower-level
 types. It rejects, before workspace creation, nonempty temporal couplings until
@@ -275,9 +289,13 @@ failed composition reports retain the configured limits and the operation
 records completed before a diagnostic or cancellation; path-program and
 portfolio builders propagate those failure reports without dropping the path
 identity. Solver-provider provenance remains attached to each branch
-execution. The trace records work performed by the current direct composer; it
-does not imply that an independent projected-set reachability algorithm or a
-compiled hybrid family verifier has been implemented.
+execution. The default reachability adapter wraps this same direct joint-H
+composer; an independently implemented projected-set reachability algorithm
+is not yet available. The compiled verifiers currently cover integral
+singleton paths and one-step scalar interval families only; no compiled
+verifier covers general continuous multi-stage hybrid families. Their
+capability admission is request-scoped and does not currently reject every
+unsupported verifier plan before branch program construction.
 
 ## Independent test oracle requirements
 
