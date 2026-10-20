@@ -636,7 +636,8 @@ TwoParameterScalarPolytopeHybridFamilyVerifier::verify(
       std::vector<HybridPath>(paths.begin(), paths.end()),
       {},
       HybridVerificationStatus::not_checked,
-      HybridVerificationStatus::not_checked};
+      HybridVerificationStatus::not_checked,
+      {}};
   report.branches.reserve(paths.size());
   bool all = true, any_unsupported = false;
   for (std::size_t i = 0; i < paths.size(); ++i) {

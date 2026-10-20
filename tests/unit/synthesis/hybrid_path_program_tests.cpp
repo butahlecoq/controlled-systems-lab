@@ -584,7 +584,7 @@ public:
         const auto coverage=claim_coverage_only?HybridVerificationStatus::established:aggregate;
         return HybridFamilyVerificationReport{"fixture.hybrid.verifier","1",policy,
             Assurance::numerical,std::move(inventory),std::move(branches),
-            global,coverage};
+            global,coverage,{}};
     }
 };
 

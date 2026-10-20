@@ -898,7 +898,7 @@ HybridFamilyVerificationResult OneStepScalarIntervalHybridFamilyVerifier::verify
     }
     HybridFamilyVerificationReport report{"csl.hybrid.one-step-scalar-interval","1",policy,
         Assurance::numerical,std::vector<HybridPath>(paths.begin(),paths.end()),{},
-        HybridVerificationStatus::not_checked,HybridVerificationStatus::not_checked};
+        HybridVerificationStatus::not_checked,HybridVerificationStatus::not_checked,{}};
     report.branches.reserve(paths.size());
     bool family_covered=true;
     bool coverage_unsupported=false;
@@ -1120,7 +1120,7 @@ HybridFamilyVerificationResult SingleParameterScalarIntervalHybridFamilyVerifier
 
     HybridFamilyVerificationReport report{"csl.hybrid.scalar-single-parameter-interval","1",policy,
         Assurance::numerical,std::vector<HybridPath>(paths.begin(),paths.end()),{},
-        HybridVerificationStatus::not_checked,HybridVerificationStatus::not_checked};
+        HybridVerificationStatus::not_checked,HybridVerificationStatus::not_checked,{}};
     report.branches.reserve(paths.size());
     bool family_covered=true;
     bool coverage_unsupported=false;
