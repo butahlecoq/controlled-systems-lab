@@ -311,3 +311,9 @@ Malicious-adapter tests append a redundant inequality without updating the trace
 and confirm evidence-mismatch rejection. Other exact representations remain
 governed by their adapter trace contract; broader resource-scale evidence stays
 open.
+
+The built-in polyhedral projection evidence check also rejects a reported peak
+row count below the projection's input H-row count. The provider observes its
+working copy before elimination, including when it later returns an empty
+projection. A contract regression for a self-consistent but understated peak
+now complements the over-cap and inconsistent-matrix evidence cases.

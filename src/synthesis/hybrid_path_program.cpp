@@ -441,10 +441,11 @@ HybridPathReachabilityResult execute_preflighted_hybrid_reachability(
                         "hybrid.reachability.provider_resources",
                         "Polyhedral projection provider omitted its required resource observation"});
                 if(projected.provider_resource_observation->peak_rows>
-                   projected.maximum_projection_rows)
+                       projected.maximum_projection_rows ||
+                   projected.provider_resource_observation->peak_rows<projected.input_rows)
                     return one({DiagnosticCode::evidence_mismatch,
                         "hybrid.reachability.provider_resources",
-                        "Polyhedral projection provider reported a peak row count above its configured limit"});
+                        "Polyhedral projection provider reported a peak row count below its input rows or above its configured limit"});
                 const auto dimension=reachable->joint_relation.metadata()->set.dimension;
                 const auto peak_rows=projected.provider_resource_observation->peak_rows;
                 if(dimension!=0&&peak_rows>std::numeric_limits<std::size_t>::max()/dimension)

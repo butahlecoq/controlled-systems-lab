@@ -445,7 +445,9 @@ polyhedral provider's H
 projection reports peak active H-row elimination buffers at the source
 dimension, including current and pending Fourier-Motzkin rows, total rows
 emitted by successive elimination steps, and charged Fourier-Motzkin
-positive/negative row-pair operations. Peak fields exclude the retained input,
+positive/negative row-pair operations. Peak rows include the copied input rows
+observed before elimination, so the reported peak cannot be smaller than the
+projection input-row count. Peak fields exclude the retained input,
 input-copy overlap, coordinate-selection scratch, and final output matrices.
 Its portfolio summary sums emitted rows and charged operations and reports
 branch maxima for those counts and peak values. Other providers may omit the

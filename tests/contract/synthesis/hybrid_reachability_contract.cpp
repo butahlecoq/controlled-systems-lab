@@ -201,7 +201,12 @@ bool contains(const sets::HRepresentation& h,double value) {
 
 class OverReportingPolyhedralProjectionAdapter final : public HybridReachabilityAdapter {
 public:
-    enum class EvidenceMutation { over_report_rows, omit_observation, inconsistent_matrix_elements };
+    enum class EvidenceMutation {
+        over_report_rows,
+        under_report_rows,
+        omit_observation,
+        inconsistent_matrix_elements
+    };
 
     explicit OverReportingPolyhedralProjectionAdapter(std::size_t row_limit,
         EvidenceMutation mutation=EvidenceMutation::over_report_rows)
@@ -236,6 +241,12 @@ public:
             observation.peak_rows=row_limit_+1;
             observation.peak_matrix_elements=observation.peak_rows*
                 reachable->joint_relation.metadata()->set.dimension;
+        } else if(mutation_==EvidenceMutation::under_report_rows) {
+            REQUIRE(reachable->projected_state->input_rows>0);
+            observation.peak_rows=reachable->projected_state->input_rows-1;
+            observation.peak_matrix_elements=std::max(
+                observation.peak_rows*reachable->joint_relation.metadata()->set.dimension,
+                reachable->projected_state->terminal_state_set.metadata()->set.dimension);
         } else {
             REQUIRE(observation.peak_matrix_elements>0);
             --observation.peak_matrix_elements;
@@ -766,7 +777,7 @@ TEST_CASE("hybrid reachability resource aggregation rejects provider counter ove
 TEST_CASE("hybrid reachability validates built-in projection resource observations") {
     using Mutation=OverReportingPolyhedralProjectionAdapter::EvidenceMutation;
     for(const auto mutation:{Mutation::over_report_rows,Mutation::omit_observation,
-        Mutation::inconsistent_matrix_elements}) {
+        Mutation::inconsistent_matrix_elements,Mutation::under_report_rows}) {
         auto [system,request]=interval_system();
         OverReportingPolyhedralProjectionAdapter adapter{16,mutation};
         const auto result=compute_hybrid_reachability_portfolio(adapter,system,request,
