@@ -64,6 +64,8 @@ The [GEO-02 floating-model audit](geo02-floating-model-audit.md) separates exact
 
 [B04 parameter cross-check](b04-parameter-crosswalk.md) evaluates the printed nonlinear flow law with exact rational arithmetic and distinguishes it from the displayed linear input data and the separate saved-run kernel.
 
+[B04 model-variant diagnosis](b04-model-variant-diagnosis.md) compares the printed L11 model with the separate A39/A01/A40 saved-run variant in exact rational arithmetic: at the law's reference `d = 0` the saved variant's input matrix is exactly the A40 kernel's scaled-law input slope and its mixture sensitivity is exactly the article's printed `c1`, while the printed input matrix and printed initial state are neither, and the published terminal row lies inside the saved variant's terminal plane but is excluded by the printed model's stock plane by `1716.499` against a rounding radius of `0.0145`. It is a diagnosis, not a reproduction: no optimizer was run, no private source was read, and no published value is replaced.
+
 ## Larger local archive
 
 The [targeted follow-up search](archive-followup.md) records recovered MATLAB/Pascal algorithms, B04 tables, minimax adaptive run data and the local zonotope paper. Its selected-source register supplements the initial inventory.

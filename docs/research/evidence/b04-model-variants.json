@@ -1,0 +1,392 @@
+{
+  "scope": "Exact rational comparison of two published B04 transcriptions against the published row; no optimizer, no private source, no nonlinear simulation and no historical run",
+  "scenario_id": "B04-historical",
+  "model_structure": {
+    "A": [
+      [
+        1,
+        0,
+        0,
+        0
+      ],
+      [
+        "-25/4",
+        1,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        1,
+        0
+      ],
+      [
+        0,
+        0,
+        "-25/4",
+        1
+      ]
+    ],
+    "horizon": 16,
+    "step_seconds": "25/4",
+    "total_seconds": "100/1",
+    "physical_time_seconds": [
+      "0/1",
+      "100/1"
+    ],
+    "stock_coupling": "-25/4"
+  },
+  "published_terminal_state": [
+    "12007/10",
+    "-22929/1000",
+    "2251/5",
+    "-7709/1000"
+  ],
+  "published_rounding": {
+    "printed_decimals": [
+      1,
+      3,
+      1,
+      3
+    ],
+    "flow_radius": "1/20",
+    "stock_radius": "1/2000"
+  },
+  "variants": {
+    "printed-l11": {
+      "source": "L11 printed equations (1.4)-(1.6) and Table 1, as transcribed in the historical manifest",
+      "initial_state": [
+        "152113/125",
+        "119500/1",
+        "438787/1000",
+        "45300/1"
+      ],
+      "B": [
+        "17/1",
+        "0/1",
+        "-12/1",
+        "0/1"
+      ],
+      "initial_mixture_ratio": {
+        "ratio": "1216904/438787",
+        "target_K_plus_dK": "208/75",
+        "difference": "104/32909025"
+      },
+      "plane": {
+        "weights": [
+          12,
+          17
+        ],
+        "flow_plane_required": "22062227/1000",
+        "stock_plane_required": "-21227/10",
+        "flow_residual": "-427/1000",
+        "stock_residual": "1716499/1000",
+        "flow_rounding_radius": "29/20",
+        "stock_rounding_radius": "29/2000",
+        "flow_compatible": true,
+        "stock_compatible": false,
+        "compatible": false,
+        "stock_verdict_margin_per_initial_fuel_flow_error": "-3432969/3400000",
+        "flow_verdict_margin_per_initial_fuel_flow_error": "341/400000",
+        "stock_plane_sensitivity_to_initial_flows": {
+          "x1": "1200/1",
+          "x3": "1700/1"
+        }
+      }
+    },
+    "saved-a39-a01-a40": {
+      "source": "A39 saved state, A01 driver input matrix, A40 nonlinear kernel, curated in the saved-witness record",
+      "initial_state": [
+        "122028265395983/100000000000",
+        "119500/1",
+        "27500360290561/62500000000",
+        "45300/1"
+      ],
+      "B": [
+        "1104/55",
+        "0/1",
+        "-576/55",
+        "0/1"
+      ],
+      "initial_mixture_ratio": {
+        "ratio": "610141326979915/220002882324488",
+        "target_K_plus_dK": "208/75",
+        "difference": "121/16500216174336600"
+      },
+      "plane": {
+        "weights": [
+          12,
+          23
+        ],
+        "flow_plane_required": "3095440554305551/125000000000",
+        "stock_plane_required": "-565554305551/1250000000",
+        "flow_residual": "-65554305551/125000000000",
+        "stock_residual": "-14444449/1250000000",
+        "flow_rounding_radius": "7/4",
+        "stock_rounding_radius": "7/400",
+        "flow_compatible": true,
+        "stock_compatible": true,
+        "compatible": true,
+        "stock_verdict_margin_per_initial_fuel_flow_error": "7430551/2875000000000",
+        "flow_verdict_margin_per_initial_fuel_flow_error": "51065231483/50000000000000",
+        "stock_plane_sensitivity_to_initial_flows": {
+          "x1": "1200/1",
+          "x3": "2300/1"
+        }
+      }
+    }
+  },
+  "criterion": {
+    "reported_objective": "30899/1000",
+    "criterion_squared_at_published_point": "477371121/500000",
+    "rounding_interval": [
+      "61797/2000",
+      "61799/2000"
+    ],
+    "squared_interval": [
+      "3818869209/4000000",
+      "3819116401/4000000"
+    ],
+    "reported_objective_inside_rounding": true
+  },
+  "compatibility": {
+    "published_row_compatible_variants": [
+      "saved-a39-a01-a40"
+    ],
+    "published_row_incompatible_variants": [
+      "printed-l11"
+    ]
+  },
+  "law_versus_initial_state": {
+    "printed-c2-c3": {
+      "printed-l11": {
+        "state_oxidizer_flow": "152113/125",
+        "state_fuel_flow": "438787/1000",
+        "law_oxidizer_flow": "3862615640/3169317",
+        "law_fuel_flow": "928513375/2112878",
+        "oxidizer_flow_difference": "-732638179/396164625",
+        "fuel_flow_difference": "-704988007/1056439000",
+        "matches_state_exactly": false,
+        "matches_state_within_1e-6": false
+      },
+      "saved-a39-a01-a40": {
+        "state_oxidizer_flow": "122028265395983/100000000000",
+        "state_fuel_flow": "27500360290561/62500000000",
+        "law_oxidizer_flow": "3862615640/3169317",
+        "law_fuel_flow": "928513375/2112878",
+        "oxidizer_flow_difference": "484692000000653611/316931700000000000",
+        "fuel_flow_difference": "36410156249972279/66027437500000000",
+        "matches_state_exactly": false,
+        "matches_state_within_1e-6": false
+      }
+    },
+    "scaled-c2-c3": {
+      "printed-l11": {
+        "state_oxidizer_flow": "152113/125",
+        "state_fuel_flow": "438787/1000",
+        "law_oxidizer_flow": "3867462560/3169317",
+        "law_fuel_flow": "464839250/1056439",
+        "oxidizer_flow_difference": "-1338503179/396164625",
+        "fuel_flow_difference": "-1287550507/1056439000",
+        "matches_state_exactly": false,
+        "matches_state_within_1e-6": false
+      },
+      "saved-a39-a01-a40": {
+        "state_oxidizer_flow": "122028265395983/100000000000",
+        "state_fuel_flow": "27500360290561/62500000000",
+        "law_oxidizer_flow": "3867462560/3169317",
+        "law_fuel_flow": "464839250/1056439",
+        "oxidizer_flow_difference": "653611/316931700000000000",
+        "fuel_flow_difference": "-27721/66027437500000000",
+        "matches_state_exactly": false,
+        "matches_state_within_1e-6": true
+      }
+    }
+  },
+  "law_input_slope": {
+    "printed-c2-c3": {
+      "reference_input_slope_at_d_zero": [
+        "1014/55",
+        "-2439/220"
+      ],
+      "input_slope_at_d_initial": [
+        "21307523069900/1116063360721",
+        "-11180801611750/1116063360721"
+      ],
+      "matches_input_matrix_per_variant": {
+        "printed-l11": false,
+        "saved-a39-a01-a40": false
+      }
+    },
+    "scaled-c2-c3": {
+      "reference_input_slope_at_d_zero": [
+        "1104/55",
+        "-576/55"
+      ],
+      "input_slope_at_d_initial": [
+        "22893207779600/1116063360721",
+        "-10632711134500/1116063360721"
+      ],
+      "matches_input_matrix_per_variant": {
+        "printed-l11": false,
+        "saved-a39-a01-a40": true
+      }
+    }
+  },
+  "mixture": {
+    "nominal_mixture_ratio": "8/3",
+    "nominal_ratio_identity_1200_over_450": true,
+    "initial_mixture_perturbation": "8/75",
+    "initial_perturbation_relative_to_K": "1/25",
+    "throttle_sensitivity_c1": "8/75",
+    "reachable_mixture_band_accumulated_action_in_unit_interval": [
+      "0/1",
+      "16/75"
+    ],
+    "reachable_mixture_band_per_step_control_in_unit_interval": [
+      "-8/5",
+      "136/75"
+    ],
+    "phase_box_upper_mixture_face": "17/6",
+    "phase_box_upper_face_excess_over_K": "1/6",
+    "phase_box_lower_mixture_face": "98/39",
+    "phase_box_lower_face_excess_over_K": "-2/13",
+    "mixture_sensitivity_per_variant": {
+      "printed-l11": "49/450",
+      "saved-a39-a01-a40": "8/75"
+    },
+    "mixture_sensitivity_matches_c1_per_variant": {
+      "printed-l11": false,
+      "saved-a39-a01-a40": true
+    }
+  },
+  "linear_phase_box": {
+    "printed-l11": {
+      "flow_tie": "x3 = x3(0) + (-12/17)*(x1 - x1(0))",
+      "box_x1": [
+        "1176/1",
+        "1224/1"
+      ],
+      "box_x3": [
+        "432/1",
+        "468/1"
+      ],
+      "terminal_x1_range_from_unit_step_controls": [
+        "118113/125",
+        "186113/125"
+      ],
+      "terminal_x3_range_from_unit_step_controls": [
+        "246787/1000",
+        "630787/1000"
+      ],
+      "x1_control_range_exceeds_box": true,
+      "x3_control_range_exceeds_box": true,
+      "x3_inside_box_along_tie_line": true,
+      "binding_flow_box_faces": [
+        "x1"
+      ],
+      "tie_line_at_box_x1_ends": {
+        "1176/1": {
+          "x3": "7950227/17000",
+          "mixture_ratio": "19992000/7950227"
+        },
+        "1224/1": {
+          "x3": "7374227/17000",
+          "mixture_ratio": "20808000/7374227"
+        }
+      }
+    },
+    "saved-a39-a01-a40": {
+      "flow_tie": "x3 = x3(0) + (-12/23)*(x1 - x1(0))",
+      "box_x1": [
+        "1176/1",
+        "1224/1"
+      ],
+      "box_x3": [
+        "432/1",
+        "468/1"
+      ],
+      "terminal_x1_range_from_unit_step_controls": [
+        "989030919355813/1100000000000",
+        "1695590919355813/1100000000000"
+      ],
+      "terminal_x3_range_from_unit_step_controls": [
+        "187303963196171/687500000000",
+        "417703963196171/687500000000"
+      ],
+      "x1_control_range_exceeds_box": true,
+      "x3_control_range_exceeds_box": true,
+      "x3_inside_box_along_tie_line": true,
+      "binding_flow_box_faces": [
+        "x1"
+      ],
+      "tie_line_at_box_x1_ends": {
+        "1176/1": {
+          "x3": "1331440554305551/2875000000000",
+          "mixture_ratio": "3381000000000000/1331440554305551"
+        },
+        "1224/1": {
+          "x3": "1259440554305551/2875000000000",
+          "mixture_ratio": "3519000000000000/1259440554305551"
+        }
+      }
+    }
+  },
+  "sources": [
+    {
+      "id": "L11",
+      "role": "printed article behind the transcribed model",
+      "sha256": "e04c2f1609e2580c8878ab7fb91bc41151ccc8e0cf1f5deac4cef9fd860ce147",
+      "pdf_pages": [
+        12,
+        13,
+        14
+      ]
+    },
+    {
+      "id": "R40",
+      "role": "published_counterpart_with_tables",
+      "doi": "10.1134/S0002338819020094",
+      "url": "https://sciencejournals.ru/view-article/?a=TeorSist1902009Kalev&j=teorsist&n=1&v=0&y=2019"
+    },
+    {
+      "id": "A01",
+      "role": "Nominal terminal-control example, T=12, different X0 and B",
+      "sha256": "e7010e0a830595029b9876b1511558514cec8398d2ffa290313a566ba6997558",
+      "bytes": 8645
+    },
+    {
+      "id": "A39",
+      "role": "B04 saved nominal/nonlinear witnesses and frozen coordinates; inert MAT graphics",
+      "sha256": "1120e70dbf3a300d1f8c9ee19d1082632c3adbb24f5ac445802954b164181f38",
+      "bytes": 1131239
+    },
+    {
+      "id": "A40",
+      "role": "B04 nonlinear replay kernel; original U workspace unavailable",
+      "sha256": "581a91dbb1041973f9559a6cac07657279a5e3f40091f04606216be0f97bac46",
+      "bytes": 3819
+    },
+    {
+      "id": "A41",
+      "role": "B04 article with Table 2 and matching figures; private visual audit anchors",
+      "sha256": "db1f29e55e9e3558b4f9eb4bd52c86931f210233d746a986610dab08102b3891",
+      "bytes": 858237
+    },
+    {
+      "id": "A42",
+      "role": "Companion first-witness phase plot; privately inspected",
+      "sha256": "ccbe6aac3e9d265999b135a780cbd4fff060d8db574bc747f27e8216c824692d",
+      "bytes": 106169
+    }
+  ],
+  "limitations": [
+    "No optimizer was run: the audit tests membership of a terminal plane, not optimality.",
+    "No private original was read or executed; only public transcriptions were used.",
+    "Generator identity is not established for either variant.",
+    "The canonical U rows, the first-action convention and the stagewise control domain stay open.",
+    "The unit control interval is a provisional owner recollection and is not imported into the historical manifest.",
+    "The execution gate of the historical manifest is unchanged."
+  ]
+}
