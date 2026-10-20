@@ -705,10 +705,11 @@ TwoParameterScalarPolytopeHybridFamilyVerifier::verify(
                                   "Two-parameter equality check cancelled"};
         double c = 0, x = 0, y = 0;
         for (int j = 0; j < 7; ++j) {
-          valid = valid &&
-                  record_exact(prod(h->equalities(row, j), b.tuple[j].c, c),
-                               pullback_exact);
           double q = 0;
+          valid = valid &&
+                  record_exact(prod(h->equalities(row, j), b.tuple[j].c, q),
+                               pullback_exact) &&
+                  record_exact(sum(c, q, c), pullback_exact);
           valid = valid &&
                   record_exact(prod(h->equalities(row, j), b.tuple[j].x, q),
                                pullback_exact) &&

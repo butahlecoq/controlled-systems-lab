@@ -3252,6 +3252,27 @@ TEST_CASE("two parameter scalar verifier certifies a coupled polygon and "
   CHECK(std::get<HybridFamilyVerificationReport>(wrong_path_empty_report)
             .branches.front()
             .feasibility == HybridVerificationStatus::unsupported);
+
+  auto nonzero_initial_request = request;
+  nonzero_initial_request.initial.state = {1};
+  auto nonzero_initial_built = build_hybrid_portfolio_programs(
+      system, nonzero_initial_request, {"two-parameter-nonzero-initial"},
+      {2, 8}, {64, 4096, 65536});
+  REQUIRE(std::holds_alternative<std::vector<HybridPathProgram>>(
+      nonzero_initial_built));
+  const auto &nonzero_initial_programs =
+      std::get<std::vector<HybridPathProgram>>(nonzero_initial_built);
+  std::vector<HybridPathOptimalFaceCandidate> nonzero_initial_faces;
+  for (const auto &program : nonzero_initial_programs)
+    nonzero_initial_faces.push_back(
+        exact_candidate(program, Vector{1, 0, 0, 0, 0, 0, 0}));
+  const auto nonzero_initial_report = verify_hybrid_portfolio_family(
+      verifier, system, nonzero_initial_request, nonzero_initial_programs,
+      nonzero_initial_faces, {2, 8}, {0, 0});
+  REQUIRE(std::holds_alternative<HybridFamilyVerificationReport>(
+      nonzero_initial_report));
+  CHECK(std::get<HybridFamilyVerificationReport>(nonzero_initial_report)
+            .complete_family_coverage == HybridVerificationStatus::established);
 }
 
 TEST_CASE("hybrid portfolio objective bounds retain tied possible branches") {
