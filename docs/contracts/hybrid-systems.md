@@ -264,6 +264,21 @@ parameters, general continuous polytope families, or validated assurance. The
 `TwoStageScalarIntervalHybridFamilyVerifier` remains as a two-stage adapter and
 preserves its existing report identifier.
 
+`TwoParameterScalarPolytopeHybridFamilyVerifier` adds a separate finite-horizon
+slice for exactly two stages, scalar states and controls, one bounded
+non-singleton interval control at each stage, interval invariants and guards,
+and deterministic exactly representable scalar affine resets. It propagates
+both control parameters through the complete joint tuple, clips their bounded
+rectangle by exact half-planes, checks the supplied joint H-relation's affine
+hull as well as its projected polygon, and applies the same checks to each
+globally optimal face. Exact global ties retain their distinct path families.
+The implementation bounds both the cumulative interval rows and the cumulative
+half-plane clips per path (4096 each), as well as polygon vertices (4096). It
+rejects degenerate feasible control polygons and unsupported H-representations, and fails closed
+when exact binary64 arithmetic cannot be established. This profile does not
+cover arbitrary horizons, more than two free controls, non-interval admissible
+sets, nondeterministic resets, or validated assurance.
+
 ## Initial supported profile and rejection boundary
 
 The first profile is finite-horizon and discrete-time, with mode-specific
