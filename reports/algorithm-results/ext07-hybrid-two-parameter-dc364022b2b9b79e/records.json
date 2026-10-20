@@ -1,0 +1,521 @@
+{
+  "analytic": {
+    "complete_minimizing_families": {
+      "enter-full": "u0=0, 0<=u1<=1",
+      "enter-half": "u0=0, 0<=u1<=1"
+    },
+    "global_minimum": 0,
+    "paths": {
+      "enter-full": {
+        "feasible_parameter_set": "(u0,u1) in [0,1] x [0,1]",
+        "minimizing_face": "u0=0, 0<=u1<=1"
+      },
+      "enter-half": {
+        "feasible_parameter_set": "(u0,u1) in [0,0.5] x [0,1]",
+        "minimizing_face": "u0=0, 0<=u1<=1"
+      }
+    },
+    "tied_paths": [
+      "enter-half",
+      "enter-full"
+    ]
+  },
+  "capability_profile": {
+    "assurance": "numerical binary64 exactness checks; not validated arithmetic",
+    "dimensions_and_counts": {
+      "edges": 3,
+      "free_controls": 2,
+      "horizon": 2,
+      "joint_variables": 7,
+      "modes": 3,
+      "paths": 2
+    },
+    "supported_case": "two-stage scalar system with two bounded non-singleton interval controls; scalar interval invariants/guards; deterministic exactly representable affine resets; scalar linear terminal objective; complete family checked by the exact linear H verifier"
+  },
+  "environment": {
+    "absolute_tolerance": 1e-08,
+    "architecture": "AMD64",
+    "cmake": "cmake version 3.31.6-msvc6",
+    "cmake_cache_sha256": "70d57dd71ad5c875b094b6863e999774da4a8f4a224593e229f58bd2ea052b2d",
+    "collected_utc": "2026-10-20T11:34:03.246604+00:00",
+    "compiler_id": "MSVC",
+    "compiler_receipt": "CMakeCXXCompiler.raw.cmake",
+    "compiler_version": "19.44.35215.0",
+    "configuration": "Release",
+    "cxx_standard": 20,
+    "enumeration_limits": {
+      "max_horizon": 2,
+      "max_paths": 8
+    },
+    "host": "Windows measurement workstation",
+    "host_name_sha256": "88554329c62353e4f98e5742ba8c9b088094f4793b47e7abefc0528d302f7bf9",
+    "logical_processors": 12,
+    "native_threads_configured": 1,
+    "native_threads_observed": null,
+    "native_threads_requested": 1,
+    "os": "Windows-11-10.0.22631-SP0",
+    "outer_workers_observed": 1,
+    "outer_workers_requested": 1,
+    "processor": "Intel64 Family 6 Model 151 Stepping 5, GenuineIntel",
+    "python": "3.13.5",
+    "raw_build_log_sha256": "5f9d0ec7d76eb6012b6b50d21f9e1aef1ef59e4774c85c2c62bb2ef6df4c408e",
+    "raw_configure_log_sha256": "2e2e9e0a5e12674028cca08f4ee9fbcb2b72a16f41a270aecc2995aaa902f793",
+    "relation_limits": {
+      "max_matrix_elements": 65536,
+      "max_rows": 4096,
+      "max_variables": 64
+    },
+    "relative_tolerance": 1e-08,
+    "source_commit": "a7d11a134f754db92016b9dec67a234f3eb4d8e6",
+    "source_tree": "16184b358daba11a20ceebe9fba2392098ecc4e0",
+    "timing_scope": "One end-to-end call includes fixture/provider setup, complete path relation assembly, LP execution, candidate-face construction, and verification of all allowed path families. Serialization, build, and rendering are excluded.",
+    "warmup_policy": "One excluded 10-call batch followed by seven measured 20-call batches",
+    "workspace_reuse": "none; fresh fixture, provider and workspace per call"
+  },
+  "evidence_limits": [
+    "One Windows MSVC Release host and one fixed analytic two-stage fixture.",
+    "The controls are independent and bounded; no higher-dimensional parameter polytope is measured.",
+    "No comparator, speedup, source-mapped bottleneck, application-scale result, or scalability claim.",
+    "Binary64 checks are numerical assurance and do not establish validated arithmetic."
+  ],
+  "evidence_scope": "140 completed public hybrid portfolio calls; each call assembles both two-stage H relations, solves both branches with registered HiGHS LP, constructs both tied candidate faces, and verifies both complete two-parameter families with ExactLinearHHybridFamilyVerifier",
+  "measurement": {
+    "comparison": "one backend and one fixed fixture; descriptive only, no comparator or speedup claim",
+    "failures": 0,
+    "max_batch_end_to_end_ns": 79483000,
+    "measured_calls": 140,
+    "median_batch_end_to_end_ns": 73965700,
+    "median_call_ns": 3667400,
+    "min_batch_end_to_end_ns": 71581400,
+    "raw_measure_sha256": "2bfabc32c15a843262dbf4bd391993e21c1525b66f010d35d7bf3b6c8968a317",
+    "raw_smoke_sha256": "8a65ab1684b0a7e840aac3206ed8cdf2c40935902d069bba4db2fb2a7f698ae6",
+    "trials": [
+      {
+        "call_durations_ns": [
+          3635200,
+          3579700,
+          3636500,
+          3510900,
+          3617100,
+          3535500,
+          3717100,
+          3569800,
+          3514100,
+          3535800,
+          3643900,
+          3553300,
+          3524300,
+          3561200,
+          3548000,
+          3695600,
+          3596800,
+          3548300,
+          3548800,
+          3509500
+        ],
+        "calls": 20,
+        "coverage": "established",
+        "edge_paths": [
+          "enter-half",
+          "enter-full"
+        ],
+        "end_to_end_total_ns": 71581400,
+        "error": "",
+        "failures": 0,
+        "feasibility": "established",
+        "optimality": "established",
+        "paths": 2,
+        "phase": "trial",
+        "provider": "csl.lp.highs@1.1.0+highs.1.11.0",
+        "relation_matrix_elements": 140,
+        "relation_rows": 20,
+        "repetition": 0,
+        "status": "passed",
+        "verifier": "csl.hybrid.exact-linear-h"
+      },
+      {
+        "call_durations_ns": [
+          3662400,
+          3695200,
+          3740100,
+          3610300,
+          3565100,
+          3590600,
+          3630900,
+          3630200,
+          3705300,
+          3580600,
+          3564800,
+          3618300,
+          3679200,
+          3625400,
+          3569700,
+          3575800,
+          3810400,
+          4050200,
+          4118500,
+          3649700
+        ],
+        "calls": 20,
+        "coverage": "established",
+        "edge_paths": [
+          "enter-half",
+          "enter-full"
+        ],
+        "end_to_end_total_ns": 73672700,
+        "error": "",
+        "failures": 0,
+        "feasibility": "established",
+        "optimality": "established",
+        "paths": 2,
+        "phase": "trial",
+        "provider": "csl.lp.highs@1.1.0+highs.1.11.0",
+        "relation_matrix_elements": 140,
+        "relation_rows": 20,
+        "repetition": 1,
+        "status": "passed",
+        "verifier": "csl.hybrid.exact-linear-h"
+      },
+      {
+        "call_durations_ns": [
+          3859200,
+          3691000,
+          3611200,
+          3611200,
+          3584500,
+          3785500,
+          3635100,
+          3627900,
+          3731500,
+          3695600,
+          3653100,
+          3626300,
+          3656100,
+          3698300,
+          3532800,
+          3602200,
+          3563500,
+          3715600,
+          3606600,
+          3577400
+        ],
+        "calls": 20,
+        "coverage": "established",
+        "edge_paths": [
+          "enter-half",
+          "enter-full"
+        ],
+        "end_to_end_total_ns": 73064600,
+        "error": "",
+        "failures": 0,
+        "feasibility": "established",
+        "optimality": "established",
+        "paths": 2,
+        "phase": "trial",
+        "provider": "csl.lp.highs@1.1.0+highs.1.11.0",
+        "relation_matrix_elements": 140,
+        "relation_rows": 20,
+        "repetition": 2,
+        "status": "passed",
+        "verifier": "csl.hybrid.exact-linear-h"
+      },
+      {
+        "call_durations_ns": [
+          3561900,
+          3657000,
+          3583000,
+          3570700,
+          3634800,
+          3572800,
+          3722500,
+          3593700,
+          3634300,
+          3636400,
+          3651100,
+          3567900,
+          3651200,
+          3682000,
+          3741700,
+          3641600,
+          3684400,
+          3583800,
+          3635900,
+          4959000
+        ],
+        "calls": 20,
+        "coverage": "established",
+        "edge_paths": [
+          "enter-half",
+          "enter-full"
+        ],
+        "end_to_end_total_ns": 73965700,
+        "error": "",
+        "failures": 0,
+        "feasibility": "established",
+        "optimality": "established",
+        "paths": 2,
+        "phase": "trial",
+        "provider": "csl.lp.highs@1.1.0+highs.1.11.0",
+        "relation_matrix_elements": 140,
+        "relation_rows": 20,
+        "repetition": 3,
+        "status": "passed",
+        "verifier": "csl.hybrid.exact-linear-h"
+      },
+      {
+        "call_durations_ns": [
+          5369100,
+          5729700,
+          3803300,
+          3701100,
+          3619500,
+          3600700,
+          3778500,
+          3559600,
+          3689400,
+          3736600,
+          3894000,
+          3755500,
+          3865500,
+          4306200,
+          4031400,
+          3830000,
+          3860500,
+          3960700,
+          3685600,
+          3706100
+        ],
+        "calls": 20,
+        "coverage": "established",
+        "edge_paths": [
+          "enter-half",
+          "enter-full"
+        ],
+        "end_to_end_total_ns": 79483000,
+        "error": "",
+        "failures": 0,
+        "feasibility": "established",
+        "optimality": "established",
+        "paths": 2,
+        "phase": "trial",
+        "provider": "csl.lp.highs@1.1.0+highs.1.11.0",
+        "relation_matrix_elements": 140,
+        "relation_rows": 20,
+        "repetition": 4,
+        "status": "passed",
+        "verifier": "csl.hybrid.exact-linear-h"
+      },
+      {
+        "call_durations_ns": [
+          3825900,
+          3824900,
+          3710700,
+          3686700,
+          3746100,
+          3805100,
+          4586100,
+          5806700,
+          4494500,
+          3829400,
+          3751700,
+          3779100,
+          3830600,
+          3932700,
+          3757500,
+          3733600,
+          3760600,
+          3879800,
+          3653400,
+          3613700
+        ],
+        "calls": 20,
+        "coverage": "established",
+        "edge_paths": [
+          "enter-half",
+          "enter-full"
+        ],
+        "end_to_end_total_ns": 79008800,
+        "error": "",
+        "failures": 0,
+        "feasibility": "established",
+        "optimality": "established",
+        "paths": 2,
+        "phase": "trial",
+        "provider": "csl.lp.highs@1.1.0+highs.1.11.0",
+        "relation_matrix_elements": 140,
+        "relation_rows": 20,
+        "repetition": 5,
+        "status": "passed",
+        "verifier": "csl.hybrid.exact-linear-h"
+      },
+      {
+        "call_durations_ns": [
+          3574600,
+          3863300,
+          4421100,
+          3954100,
+          3991700,
+          3874400,
+          3748200,
+          3692700,
+          3672400,
+          3764700,
+          3724100,
+          3987900,
+          3737300,
+          3756000,
+          3631500,
+          3584500,
+          3560400,
+          4197000,
+          3643600,
+          3570700
+        ],
+        "calls": 20,
+        "coverage": "established",
+        "edge_paths": [
+          "enter-half",
+          "enter-full"
+        ],
+        "end_to_end_total_ns": 75950200,
+        "error": "",
+        "failures": 0,
+        "feasibility": "established",
+        "optimality": "established",
+        "paths": 2,
+        "phase": "trial",
+        "provider": "csl.lp.highs@1.1.0+highs.1.11.0",
+        "relation_matrix_elements": 140,
+        "relation_rows": 20,
+        "repetition": 6,
+        "status": "passed",
+        "verifier": "csl.hybrid.exact-linear-h"
+      }
+    ],
+    "warmup": {
+      "call_durations_ns": [
+        4328700,
+        3745100,
+        3789500,
+        3781000,
+        3656200,
+        3520400,
+        3514400,
+        3583600,
+        3608200,
+        3637200
+      ],
+      "calls": 10,
+      "coverage": "established",
+      "edge_paths": [
+        "enter-half",
+        "enter-full"
+      ],
+      "end_to_end_total_ns": 37164300,
+      "error": "",
+      "failures": 0,
+      "feasibility": "established",
+      "optimality": "established",
+      "paths": 2,
+      "phase": "warmup",
+      "provider": "csl.lp.highs@1.1.0+highs.1.11.0",
+      "relation_matrix_elements": 140,
+      "relation_rows": 20,
+      "repetition": 0,
+      "status": "passed",
+      "verifier": "csl.hybrid.exact-linear-h"
+    }
+  },
+  "report_id": "ext07-hybrid-two-parameter-dc364022b2b9b79e",
+  "scenario": {
+    "control_dimension": 1,
+    "controls": {
+      "u0": [
+        0,
+        1
+      ],
+      "u1": [
+        0,
+        1
+      ]
+    },
+    "dynamics": [
+      "x_pre1 = u0",
+      "x_pre2 = x_post1 + 0*u1",
+      "x_terminal = x_pre2"
+    ],
+    "edges": [
+      {
+        "guard": "0 <= x_pre1 <= 0.5",
+        "id": "enter-half",
+        "source": "source",
+        "target": "middle"
+      },
+      {
+        "guard": "universal",
+        "id": "enter-full",
+        "source": "source",
+        "target": "middle"
+      },
+      {
+        "guard": "universal",
+        "id": "finish",
+        "source": "middle",
+        "target": "terminal"
+      }
+    ],
+    "horizon": 2,
+    "initial_state": 0,
+    "modes": [
+      "source",
+      "middle",
+      "terminal"
+    ],
+    "relation_coordinates": [
+      "x0",
+      "u0",
+      "x_pre1",
+      "x_post1",
+      "u1",
+      "x_pre2",
+      "x_terminal"
+    ],
+    "resets": "identity on both transitions",
+    "state_dimension": 1,
+    "terminal_objective": "minimize x_terminal = u0"
+  },
+  "scenario_sha256": "c21572e86d499534eef32156f0e1a77dfcbd4d21f84aa8de3cd88f93e3d532bd",
+  "schema": "csl.ext07-hybrid-two-parameter-report/1",
+  "source_commit": "a7d11a134f754db92016b9dec67a234f3eb4d8e6",
+  "source_receipts": {
+    "postrun": {
+      "commit": "a7d11a134f754db92016b9dec67a234f3eb4d8e6",
+      "executable_sha256": "9d0f1db82c43f5801cc2ac770d314e198205ec142423b4160bc8bf3b1c328879",
+      "observed_utc": "2026-10-20T11:34:03.241757+00:00",
+      "phase": "postrun",
+      "status": [],
+      "tree": "16184b358daba11a20ceebe9fba2392098ecc4e0"
+    },
+    "prebuild": {
+      "commit": "a7d11a134f754db92016b9dec67a234f3eb4d8e6",
+      "observed_utc": "2026-10-20T11:32:36.817838+00:00",
+      "phase": "prebuild",
+      "status": [],
+      "tree": "16184b358daba11a20ceebe9fba2392098ecc4e0"
+    }
+  },
+  "source_sha256": {
+    "CMakeCXXCompiler.raw.cmake": "33bebcb486c4fc42c67f633fb5ff363392744fda1fcfed6ccf6230a10ed09cbf",
+    "build.log": "5f9d0ec7d76eb6012b6b50d21f9e1aef1ef59e4774c85c2c62bb2ef6df4c408e",
+    "configure.log": "ae473783eca6945d18d99e72fc1026409d5aa56042cd5f88e3fbac7a7d708426",
+    "host.json": "6a8c0835671e2439f2d2ed68f55a97b79962d3ef64abdd5d97d8cb96bc9b6dde",
+    "measure.jsonl": "2bfabc32c15a843262dbf4bd391993e21c1525b66f010d35d7bf3b6c8968a317",
+    "measure.stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "postrun.json": "ad2471dae701ea358fb563dc74c569e97879615c4d87690a6fc30e8c5bc36384",
+    "prebuild.json": "39995e835d318445266a186f742f373e94b8b88102fe4ddaead2beef5c874d34",
+    "smoke.jsonl": "8a65ab1684b0a7e840aac3206ed8cdf2c40935902d069bba4db2fb2a7f698ae6",
+    "smoke.stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "two_parameter_driver.cpp": "32429b03250cdb5a8383b886b7682b3afd04054cdf6cdf9baeb5567858dc9e97"
+  },
+  "source_tree": "16184b358daba11a20ceebe9fba2392098ecc4e0"
+}

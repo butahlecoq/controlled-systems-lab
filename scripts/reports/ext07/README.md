@@ -48,18 +48,20 @@ and live file hashes remain pending until that workflow runs on `main`.
 
 ## Two-parameter verifier evidence
 
-The separate two-parameter bundle measures the bounded two-stage verifier on
-two tied paths. Its fixture has controls `(u0,u1)` in `[0,1] x [0,1]`; one
-guard restricts the first control to `[0,0.5]`, while a parallel path leaves
-it in `[0,1]`. The objective is `minimize x_terminal=u0`, so both complete
-minimizer families are `u0=0, 0<=u1<=1`. The standalone visual page plots the
-two feasible rectangles and their shared minimizing segment.
+The legacy two-parameter bundle measures the scalar polygon verifier on two
+tied paths. The current driver runs the same analytic fixture through
+`ExactLinearHHybridFamilyVerifier`. Its controls `(u0,u1)` range over
+`[0,1] x [0,1]`; one guard restricts the first control to `[0,0.5]`, while a
+parallel path leaves it in `[0,1]`. The objective is
+`minimize x_terminal=u0`, so both complete minimizer families are
+`u0=0, 0<=u1<=1`. The standalone visual page plots the two feasible rectangles
+and their shared minimizing segment.
 
-The two-parameter driver measures full public path construction, both HiGHS
-LP branches, tied face construction, and verification of both families. It
-uses one excluded 10-call warmup followed by seven measured 20-call batches.
-It makes no comparator or speedup claim. The source commit and every raw
-per-call duration are recorded separately from the existing one-step report.
+The current two-parameter driver measures full public path construction, both
+HiGHS LP branches, tied face construction, and exact linear H verification of
+both families. It uses one excluded 10-call warmup followed by seven measured
+20-call batches. It makes no comparator or speedup claim. The source commit and
+every raw per-call duration are recorded separately from the existing reports.
 
 ```sh
 python scripts/reports/ext07/two_parameter_capture.py --source <frozen-source> --capture <fresh-capture> --commit <source-commit> --cmake <cmake-executable>

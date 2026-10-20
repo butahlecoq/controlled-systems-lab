@@ -32,6 +32,9 @@ class Ext07SavedReportTests(unittest.TestCase):
         cls.two_parameter_bundle = next(
             (path for path in bundles if path.is_dir() and
              path.name.startswith("ext07-hybrid-two-parameter-")), None)
+        cls.two_parameter_bundles = [
+            path for path in bundles if path.is_dir() and
+            path.name.startswith("ext07-hybrid-two-parameter-")]
         if cls.bundle is None:
             raise unittest.SkipTest("EXT-07 report bundle is created from a frozen measured source")
 
@@ -87,12 +90,31 @@ class Ext07SavedReportTests(unittest.TestCase):
         self.assertIn("u0 = 0, 0 &lt;= u1 &lt;= 1", example)
         self.assertIn("two_parameter_driver.cpp", example)
 
+    def test_exact_linear_h_report_rebuilds_and_names_its_verifier(self) -> None:
+        renderer = load_module(
+            "csl_ext07_exact_linear_h_test_renderer",
+            ROOT / "scripts/reports/ext07/two_parameter_render_saved.py")
+        exact_reports = []
+        for bundle in self.two_parameter_bundles:
+            renderer.render(bundle, check=True)
+            record = renderer.validate(bundle)
+            verifier = record["measurement"]["trials"][0]["verifier"]
+            if verifier == "csl.hybrid.exact-linear-h":
+                exact_reports.append((bundle, record))
+        self.assertEqual(len(exact_reports), 1)
+        bundle, record = exact_reports[0]
+        self.assertEqual(record["measurement"]["measured_calls"], 140)
+        self.assertIn("ExactLinearHHybridFamilyVerifier", record["evidence_scope"])
+        self.assertEqual(record["measurement"]["failures"], 0)
+        self.assertIn("csl.hybrid.exact-linear-h",
+                      (bundle / "index.html").read_text(encoding="utf-8"))
+
     def test_stager_publishes_both_ext07_report_profiles(self) -> None:
-        if self.two_parameter_bundle is None:
+        if not self.two_parameter_bundles:
             self.skipTest("Two-parameter bundle is created from a frozen Release capture")
         with tempfile.TemporaryDirectory() as temporary:
             root = Path(temporary)
-            bundles = (self.bundle, self.two_parameter_bundle)
+            bundles = (self.bundle, *self.two_parameter_bundles)
             copied = []
             for source in bundles:
                 destination = root / source.name
@@ -111,7 +133,8 @@ class Ext07SavedReportTests(unittest.TestCase):
             staged = stage_ext07.stage(catalog, site)
             self.assertEqual(staged, ",".join(bundle.name for bundle in copied))
             self.assertTrue((site / copied[0].name / "example-2d.html").is_file())
-            self.assertTrue((site / copied[1].name / "two-control-example.html").is_file())
+            for bundle in copied[1:]:
+                self.assertTrue((site / bundle.name / "two-control-example.html").is_file())
             index = (site / "index.html").read_text(encoding="utf-8")
             self.assertIn("two-control-example.html", index)
             self.assertIn("example-2d.html", index)

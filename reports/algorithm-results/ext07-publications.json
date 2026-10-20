@@ -12,16 +12,28 @@
       "zip_sha256": "d5a8f3783c580f0b1b3c72a4d7173e608c0a0b9c59ce463a385dc5fddf1ba86c"
     },
     {
-      "collector_sha256": "b0b1e4fcc26ce36a3356c17f236adc820f5a829db6b293d932692179eddbe43a",
+      "collector_sha256": "297b773f2d461a3a093d7e2ff133f3dabafbc6cdf06109654e9a547bcc984290",
       "example_sha256": "e64ac6c9c9d32e44fb18fb5ea1985fcf08c5f73f9c62aa02d9c89ad806aee5b4",
       "index_sha256": "9e018f9eb94221f4c17ea735bae5f9231f0a4a5c969def27847114c872caa59c",
       "manifest_sha256": "1dd3339beb01b8915a06a30b32d9f68450561bddfa7a569ced4563767a7e2f28",
-      "renderer_sha256": "c257a20ab10cc12e6beb8322620f58b90f9e93fd057ce0fa90f0d8969808d9af",
+      "renderer_sha256": "961dc46141b494055bbe36a6753092da0c77479e7b94c70c6628511f88e6afde",
       "report_id": "ext07-hybrid-two-parameter-00ac6fb75d7cab95",
       "schema": "csl.ext07-hybrid-two-parameter-report/1",
       "source_commit": "7d2f1ad480229bbc0e3d1596701b6b523a48ae9a",
       "stager_sha256": "6981f8558bf9f7f1c2dcab7851bb544d97278b862e58731ec4ef031ac04f383e",
       "zip_sha256": "91ab7543c094103ac259210d554f41479857e2fbfc4f987572f8a320ede7fda1"
+    },
+    {
+      "collector_sha256": "297b773f2d461a3a093d7e2ff133f3dabafbc6cdf06109654e9a547bcc984290",
+      "example_sha256": "40f54ec5eca80278a340c32ea64199c339c5c54574353238c6f8f7e11eaba465",
+      "index_sha256": "f8127d378170e65897eb86475f8aac4726073caf1cbd9fb39969cbc7eea319a9",
+      "manifest_sha256": "72af5eb2cee96f4e321c590af21f02775a6224e8a8b42380a2e31a35eef0be69",
+      "renderer_sha256": "961dc46141b494055bbe36a6753092da0c77479e7b94c70c6628511f88e6afde",
+      "report_id": "ext07-hybrid-two-parameter-dc364022b2b9b79e",
+      "schema": "csl.ext07-hybrid-two-parameter-report/1",
+      "source_commit": "a7d11a134f754db92016b9dec67a234f3eb4d8e6",
+      "stager_sha256": "6981f8558bf9f7f1c2dcab7851bb544d97278b862e58731ec4ef031ac04f383e",
+      "zip_sha256": "bff4a9b4efcd10094d155007b77b85458a5529d759fc2b5f5200c0b41c634c1a"
     }
   ],
   "schema": "csl.ext07-publications/1"

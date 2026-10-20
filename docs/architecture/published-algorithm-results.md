@@ -45,11 +45,18 @@ provider and two-parameter polytope verifier completed 140 measured calls after
 an excluded warmup. On the recorded Windows 11 / MSVC Release host, median
 end-to-end batch time was 13,080,500 ns (range 12,699,800-15,674,900 ns), and
 median individual call time was 658,250 ns; all calls matched the analytic
-answer with no failures. Both reports are descriptive evidence for their
-specific fixtures, not performance comparisons, scalability claims, general
-continuous-polytope coverage, or validated arithmetic. The two-parameter
-bundle includes a standalone feasible-set plot, raw rows, and an offline ZIP.
-The capability profiles for the saved fixtures are summarized below. State and
+answer with no failures. A third saved bundle,
+[`ext07-hybrid-two-parameter-dc364022b2b9b79e`](../../reports/algorithm-results/ext07-hybrid-two-parameter-dc364022b2b9b79e/),
+runs the same two-control fixture through `ExactLinearHHybridFamilyVerifier`.
+It completed 140 measured calls with no failures; median end-to-end batch time
+was 73,965,700 ns (range 71,581,400-79,483,000 ns), and median individual call
+time was 3,667,400 ns. The measured call includes fixture/provider setup, both
+path relation builds, both HiGHS LP solves, candidate-face construction, and
+exact complete-family verification. Its standalone plot shows both feasible
+control sets and their shared optimal face. These reports are descriptive
+evidence for their named fixtures, not performance comparisons, scalability
+claims, high-dimensional performance evidence, or validated arithmetic. The
+capability profiles for the saved fixtures are summarized below. State and
 control dimensions follow each record's supported-case description; the other
 counts come from its `dimensions_and_counts` object:
 
@@ -57,6 +64,7 @@ counts come from its `dimensions_and_counts` object:
 | --- | --- | ---: | ---: | ---: | ---: | ---: |
 | [One-step scalar bundle](../../reports/algorithm-results/ext07-hybrid-2cba9c13b79afd2b/) | 1 / 1 | 1 | 2 | 1 | 1 | 4 |
 | [Two-parameter bundle](../../reports/algorithm-results/ext07-hybrid-two-parameter-00ac6fb75d7cab95/) | 1 / 1 | 2 | 3 | 3 | 2 | 7 |
+| [Exact linear H bundle](../../reports/algorithm-results/ext07-hybrid-two-parameter-dc364022b2b9b79e/) | 1 / 1 | 2 | 3 | 3 | 2 | 7 |
 
 These counts describe the named requests, not provider capacity limits or a
 scalability profile. `HybridCapabilityReport` also reports each mode's
@@ -69,9 +77,11 @@ mode/edge and composer implementation, plus candidate-provider coverage grouped
 by requested/actual identity. Provider coverage counts attributed candidate
 records, not runtime invocations. These request-scoped summaries do not imply
 provider capacity or larger-profile scalability.
-Higher-dimensional free-control domains and general continuous-polytope
-verification remain open EXT-07 acceptance items. Main-only Pages publication
-and live URL/hash verification remain pending.
+`ExactLinearHHybridFamilyVerifier` supports general-dimensional H-relations
+within its exact variable, row, integer-bit, generated-row, and operation
+budgets. Higher-dimensional independent oracle coverage, broader provider
+admission, and objective-policy semantics remain open EXT-07 acceptance items.
+Main-only Pages publication and live URL/hash verification remain pending.
 
 ## OPT-07 ordered hull membership report
 
