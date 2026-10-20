@@ -201,8 +201,9 @@ approval.
 | 2 | Prove the algebraic mapping for one matched affine/polytope Stage 3 case (terminal quadratic, zero stage cost, unit steps); build a throwaway adapter and check the witness with CSL's verifier. Pass only if objective and constraints match independently. | 3–5 days |
 | 3 | Separate future benchmark/comparison scope, outside this research spike: only after #83/#94/#402, a new scope decision and explicit authorization, consider a comparison record with five alternating repetitions and all outcomes. | Not authorized or estimated by this review |
 
-The research spike is roughly **6–10 engineering days**, with the largest uncertainty
-in the MSVC build and the objective/constraint mapping. Stop if the native build
+The research-only Steps 0–2 total roughly **4.5–7.5 engineering days**, with the
+largest uncertainty in the MSVC build and objective/constraint mapping. The
+separate future comparison is not included in this estimate. Stop if the native build
 fails, if objective equivalence cannot be proven, or if only a single witness is
 available while the question requires a family.
 
