@@ -57,6 +57,14 @@ horizons and dimensions. Both projected adapters retain the full branch relation
 and provider/row evidence; the general adapter preflights the complete path row
 inventory. Full provider/resource aggregation remains open.
 
+Independent continuous-oracle coverage now includes a guarded two-control
+two-stage fixture whose two tied paths are each checked against literal
+seven-coordinate feasible H-relations, and a one-step two-dimensional-state,
+two-dimensional-control box fixture checked against a literal eight-coordinate
+relation and complete optimal face. These are named finite cases, not complete
+exhaustive coverage across the supported general H profile; broader independent
+continuous cases and resource-scale evidence remain open.
+
 Trajectory-adapter objective-type support is checked for every allowed
 terminal mode, including modes with no enumerated path, before any branch
 program is built. Adapter-specific objective-policy semantics beyond
