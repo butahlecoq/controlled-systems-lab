@@ -74,6 +74,14 @@ leaving two tied control directions free. These are named finite cases, not
 complete exhaustive coverage across the supported general H profile; broader
 independent continuous cases and resource-scale evidence remain open.
 
+The exact linear-H family verifier now reports per-branch configured limits and
+Fourier-Motzkin observations across minimization and inclusion checks: peak
+rows, generated rows, charged elimination operations, and maximum integer bits.
+These counters exclude relation parsing, rational comparisons, runtime, and
+memory, and are finite-fixture diagnostics rather than scalability evidence.
+Provider-internal resource observations and broader resource-scale evidence
+remain open.
+
 Trajectory-adapter objective-type support is checked for every allowed
 terminal mode, including modes with no enumerated path, before any branch
 program is built. The direct-trajectory preflight contract now states that the

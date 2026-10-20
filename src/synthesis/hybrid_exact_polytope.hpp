@@ -45,6 +45,15 @@ struct Row {
     friend bool operator==(const Row&, const Row&) = default;
 };
 
+// Counts only Fourier-Motzkin elimination work. These counters intentionally
+// exclude row construction, rational comparisons, and allocator/CPU usage.
+struct ResourceUsage {
+    std::size_t peak_rows{};
+    std::size_t generated_rows{};
+    std::size_t charged_operations{};
+    std::size_t maximum_integer_bits{};
+};
+
 struct Limits {
     std::size_t max_variables{default_max_variables};
     std::size_t max_stages{default_max_stages};
@@ -52,6 +61,7 @@ struct Limits {
     std::size_t max_generated_rows{default_max_generated_rows};
     std::size_t max_integer_bits{default_max_integer_bits};
     std::size_t max_operations{default_max_operations};
+    ResourceUsage* usage{};
 };
 
 enum class FeasibilityState { feasible, infeasible, unsupported, cancelled };
@@ -448,6 +458,12 @@ inline FeasibilityResult feasible(std::vector<Row> rows,
     if (projected_rows)
         projected_rows->clear();
     FeasibilityResult result;
+    const auto observe_bits = [&](std::size_t bits) {
+        result.maximum_integer_bits = std::max(result.maximum_integer_bits, bits);
+        if (limits.usage)
+            limits.usage->maximum_integer_bits = std::max(
+                limits.usage->maximum_integer_bits, bits);
+    };
     const auto unsupported = [&](const char* reason) {
         result.state = FeasibilityState::unsupported;
         result.reason = reason;
@@ -468,17 +484,16 @@ inline FeasibilityResult feasible(std::vector<Row> rows,
         if (row.coefficients.size() != variables)
             return unsupported("Constraint row dimensions do not match");
         exact_detail::trim(row.bound);
-        result.maximum_integer_bits = std::max(
-            result.maximum_integer_bits, exact_detail::bit_length(row.bound));
+        observe_bits(exact_detail::bit_length(row.bound));
         for (auto& coefficient : row.coefficients) {
             exact_detail::trim(coefficient);
-            result.maximum_integer_bits = std::max(
-                result.maximum_integer_bits,
-                exact_detail::bit_length(coefficient));
+            observe_bits(exact_detail::bit_length(coefficient));
         }
         if (result.maximum_integer_bits > limits.max_integer_bits)
             return unsupported("Input integer bit limit exceeded");
     }
+    if (limits.usage)
+        limits.usage->peak_rows = std::max(limits.usage->peak_rows, rows.size());
     if (!exact_detail::normalize_rows(rows, limits.max_rows)) {
         result.state = FeasibilityState::infeasible;
         result.peak_rows = rows.size();
@@ -527,6 +542,14 @@ inline FeasibilityResult feasible(std::vector<Row> rows,
                  (limits.max_operations - operations) / operations_per_pair))
             return unsupported("Exact arithmetic operation limit exceeded");
         operations += pair_count * operations_per_pair;
+        if (limits.usage) {
+            const auto charged = pair_count * operations_per_pair;
+            limits.usage->charged_operations = charged >
+                    std::numeric_limits<std::size_t>::max() -
+                        limits.usage->charged_operations
+                ? std::numeric_limits<std::size_t>::max()
+                : limits.usage->charged_operations + charged;
+        }
         std::vector<Row> next;
         next.reserve(zero.size() + pair_count);
         for (const Row* row : zero) {
@@ -555,55 +578,46 @@ inline FeasibilityResult feasible(std::vector<Row> rows,
                         continue;
                     Integer left, right;
                     if (!exact_detail::multiply(lower_scale,
-                                                upper->coefficients[column],
-                                                limits.max_integer_bits, left) ||
-                        !exact_detail::multiply(upper_scale,
-                                                lower->coefficients[column],
-                                                limits.max_integer_bits, right) ||
-                        exact_detail::bit_length(left) >
-                            limits.max_integer_bits ||
-                        exact_detail::bit_length(right) >
-                            limits.max_integer_bits)
+                            upper->coefficients[column], limits.max_integer_bits, left))
                         return unsupported("Exact integer bit limit exceeded");
-                    result.maximum_integer_bits = std::max(
-                        result.maximum_integer_bits,
-                        exact_detail::bit_length(left));
-                    result.maximum_integer_bits = std::max(
-                        result.maximum_integer_bits,
-                        exact_detail::bit_length(right));
-                    if (!exact_detail::add(left, right,
-                                           limits.max_integer_bits))
+                    if (!exact_detail::multiply(upper_scale,
+                            lower->coefficients[column], limits.max_integer_bits, right))
                         return unsupported("Exact integer bit limit exceeded");
-                    result.maximum_integer_bits = std::max(
-                        result.maximum_integer_bits,
-                        exact_detail::bit_length(left));
+                    observe_bits(exact_detail::bit_length(left));
+                    observe_bits(exact_detail::bit_length(right));
+                    if (result.maximum_integer_bits > limits.max_integer_bits)
+                        return unsupported("Exact integer bit limit exceeded");
+                    if (!exact_detail::add(left, right, limits.max_integer_bits))
+                        return unsupported("Exact integer bit limit exceeded");
+                    observe_bits(exact_detail::bit_length(left));
                     combined.coefficients.push_back(std::move(left));
                 }
                 Integer left_bound, right_bound;
                 if (!exact_detail::multiply(lower_scale, upper->bound,
-                                            limits.max_integer_bits,
-                                            left_bound) ||
-                    !exact_detail::multiply(upper_scale, lower->bound,
-                                            limits.max_integer_bits,
-                                            right_bound))
+                        limits.max_integer_bits, left_bound))
                     return unsupported("Exact integer bit limit exceeded");
-                result.maximum_integer_bits = std::max(
-                    result.maximum_integer_bits,
-                    exact_detail::bit_length(left_bound));
-                result.maximum_integer_bits = std::max(
-                    result.maximum_integer_bits,
-                    exact_detail::bit_length(right_bound));
+                if (!exact_detail::multiply(upper_scale, lower->bound,
+                        limits.max_integer_bits, right_bound))
+                    return unsupported("Exact integer bit limit exceeded");
+                observe_bits(exact_detail::bit_length(left_bound));
+                observe_bits(exact_detail::bit_length(right_bound));
+                if (result.maximum_integer_bits > limits.max_integer_bits)
+                    return unsupported("Exact integer bit limit exceeded");
                 if (!exact_detail::add(left_bound, right_bound,
                                        limits.max_integer_bits))
                     return unsupported("Exact integer bit limit exceeded");
+                observe_bits(exact_detail::bit_length(left_bound));
                 combined.bound = std::move(left_bound);
                 exact_detail::normalize_power_of_two(combined);
-                result.maximum_integer_bits = std::max(
-                    result.maximum_integer_bits,
-                    exact_detail::bit_length(combined.bound));
+                observe_bits(exact_detail::bit_length(combined.bound));
                 next.push_back(std::move(combined));
+                if (limits.usage)
+                    ++limits.usage->generated_rows;
             }
         }
+        if (limits.usage)
+            limits.usage->peak_rows = std::max(limits.usage->peak_rows,
+                                                next.size());
         result.generated_rows += pair_count;
         if (!exact_detail::normalize_rows(next, limits.max_rows)) {
             result.state = FeasibilityState::infeasible;
@@ -611,6 +625,9 @@ inline FeasibilityResult feasible(std::vector<Row> rows,
             return result;
         }
         result.peak_rows = std::max(result.peak_rows, next.size());
+        if (limits.usage)
+            limits.usage->peak_rows = std::max(limits.usage->peak_rows,
+                                                next.size());
         rows = std::move(next);
     }
     result.state = FeasibilityState::feasible;

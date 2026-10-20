@@ -5,6 +5,7 @@
 #include <csl/optimization/convex_backend.hpp>
 #include <csl/optimization/linear_program.hpp>
 #include <csl/registry/provider.hpp>
+#include <cstddef>
 #include <optional>
 #include <span>
 #include <string>
@@ -324,6 +325,20 @@ using HybridPortfolioOptimalFaceAnalysis = std::variant<HybridPortfolioOptimalFa
     HybridPortfolioObjectiveIncomplete, Diagnostics, OperationStopped>;
 
 enum class HybridVerificationStatus { not_checked, established, refuted, unsupported };
+// Exact verifier observations cover Fourier-Motzkin elimination only. Limits
+// are per-feasibility-call caps; usage totals aggregate calls for this path.
+// They do not measure row parsing, rational comparisons, wall time, or memory.
+struct HybridExactVerifierResourceRecord {
+    std::size_t max_variables{};
+    std::size_t max_rows{};
+    std::size_t max_generated_rows{};
+    std::size_t max_integer_bits{};
+    std::size_t max_charged_operations{};
+    std::size_t peak_rows{};
+    std::size_t generated_rows{};
+    std::size_t charged_operations{};
+    std::size_t maximum_integer_bits{};
+};
 struct HybridPathVerificationRecord {
     model::HybridPath path;
     HybridVerificationStatus feasibility{HybridVerificationStatus::not_checked};
@@ -335,6 +350,7 @@ struct HybridPathVerificationRecord {
     std::vector<model::HybridRelationOperationRecord> relation_operations;
     std::vector<registry::Provenance> candidate_providers;
     model::HybridRelationLimits relation_limits{};
+    std::optional<HybridExactVerifierResourceRecord> exact_verifier_resources;
 };
 // Branch coverage of candidate solver-provider provenance. This counts
 // submitted lineage records, not runtime provider invocations.

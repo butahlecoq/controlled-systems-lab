@@ -1383,7 +1383,7 @@ TEST_CASE("exact linear H verifier checks tied two-stage continuous branches wit
         {{source.id,middle.id,target.id},{{"branch-narrow"},{"branch-finish"}}}};
     REQUIRE(oracle_paths==expected_paths);
     const auto built=build_hybrid_portfolio_programs(system,request,
-        {"oracle-two-stage-four-control"},{2,2},{13,64,2048});
+        {"oracle-two-stage-four-control"},{2,2},{13,4096,131072});
     REQUIRE(std::holds_alternative<std::vector<HybridPathProgram>>(built));
     const auto& programs=std::get<std::vector<HybridPathProgram>>(built);
     REQUIRE(programs.size()==oracle_paths.size());
@@ -1460,6 +1460,18 @@ TEST_CASE("exact linear H verifier checks tied two-stage continuous branches wit
         CHECK(branch.feasibility==HybridVerificationStatus::established);
         CHECK(branch.objective_optimality==HybridVerificationStatus::established);
         CHECK(branch.continuous_coverage==HybridVerificationStatus::established);
+        REQUIRE(branch.exact_verifier_resources.has_value());
+        const auto& resources=*branch.exact_verifier_resources;
+        CHECK(resources.max_variables==13);
+        CHECK(resources.max_rows==4096);
+        CHECK(resources.max_generated_rows>0);
+        CHECK(resources.max_integer_bits==8192);
+        CHECK(resources.max_charged_operations>0);
+        CHECK(resources.peak_rows>0);
+        CHECK(resources.generated_rows>0);
+        CHECK(resources.charged_operations>0);
+        CHECK(resources.maximum_integer_bits>0);
+        CHECK(resources.maximum_integer_bits<=resources.max_integer_bits);
     }
 
     // The clipped wide face retains its literal witness but excludes another
@@ -1489,6 +1501,63 @@ TEST_CASE("exact linear H verifier checks tied two-stage continuous branches wit
         CHECK(branch.continuous_coverage==(branch.path.edges.front().value=="branch-wide"
             ?HybridVerificationStatus::refuted:HybridVerificationStatus::established));
     }
+
+    // The second branch's equivalent H-face is padded with redundant zero
+    // inequalities to exercise the per-check inclusion budget. The first path
+    // remains fully verified; exhaustion on the later path cannot claim full
+    // family coverage.
+    auto bounded_candidates=complete_candidates;
+    auto& bounded_face=bounded_candidates[1].relation;
+    const auto bounded_representation=bounded_face.representation();
+    REQUIRE(std::holds_alternative<sets::HRepresentation>(bounded_representation));
+    const auto& base_face=std::get<sets::HRepresentation>(bounded_representation);
+    constexpr std::size_t exact_row_cap=4096;
+    const auto inequality_rows=exact_row_cap-2*base_face.equalities.rows();
+    REQUIRE(inequality_rows>=base_face.inequalities.rows());
+    std::vector<double> bounded_inequalities;
+    bounded_inequalities.reserve(inequality_rows*12);
+    std::vector<double> bounded_upper_bounds;
+    bounded_upper_bounds.reserve(inequality_rows);
+    for(std::size_t row=0;row<base_face.inequalities.rows();++row) {
+        for(std::size_t column=0;column<12;++column)
+            bounded_inequalities.push_back(base_face.inequalities(row,column));
+        bounded_upper_bounds.push_back(base_face.upper_bounds[row]);
+    }
+    bounded_inequalities.resize(inequality_rows*12,0.0);
+    bounded_upper_bounds.resize(inequality_rows,1.0);
+    std::vector<double> equality_coefficients;
+    equality_coefficients.reserve(base_face.equalities.rows()*12);
+    for(std::size_t row=0;row<base_face.equalities.rows();++row)
+        for(std::size_t column=0;column<12;++column)
+            equality_coefficients.push_back(base_face.equalities(row,column));
+    std::vector<double> equality_values;
+    equality_values.reserve(base_face.equality_values.size());
+    for(std::size_t row=0;row<base_face.equality_values.size();++row)
+        equality_values.push_back(base_face.equality_values[row]);
+    const auto padded_face=h_set("oracle-two-stage-bounded-narrow-face",12,
+        Matrix{inequality_rows,12,std::move(bounded_inequalities)},
+        std::move(bounded_upper_bounds),
+        Matrix{base_face.equalities.rows(),12,std::move(equality_coefficients)},
+        std::move(equality_values));
+    const auto padded_data=sets::from_handle(padded_face);
+    REQUIRE(std::holds_alternative<sets::SetData>(padded_data));
+    bounded_candidates[1].relation=std::get<sets::SetData>(padded_data);
+    const auto bounded=verify_hybrid_portfolio_family(verifier,system,request,programs,
+        bounded_candidates,{2,2},{0,0});
+    REQUIRE(std::holds_alternative<HybridFamilyVerificationReport>(bounded));
+    const auto& bounded_report=std::get<HybridFamilyVerificationReport>(bounded);
+    CHECK(bounded_report.global_objective_optimality==HybridVerificationStatus::established);
+    REQUIRE_FALSE(bounded_report.branches[1].diagnostics.empty());
+    CHECK(std::any_of(bounded_report.branches[1].diagnostics.begin(),
+        bounded_report.branches[1].diagnostics.end(),[](const auto& diagnostic) {
+            return diagnostic.code==DiagnosticCode::unsupported &&
+                diagnostic.field=="hybrid.verification.exact_linear_h_face_mismatch";
+        }));
+    REQUIRE_FALSE(bounded_report.branches[1].diagnostics.empty());
+    CHECK(bounded_report.complete_family_coverage==HybridVerificationStatus::unsupported);
+    REQUIRE(bounded_report.branches.size()==2);
+    CHECK(bounded_report.branches[0].continuous_coverage==HybridVerificationStatus::established);
+    CHECK(bounded_report.branches[1].continuous_coverage==HybridVerificationStatus::unsupported);
 }
 
 TEST_CASE("exact linear H verifier matches independent 3D control-box oracle") {

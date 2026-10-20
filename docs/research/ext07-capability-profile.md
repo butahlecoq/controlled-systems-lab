@@ -58,7 +58,7 @@ the unit-test cases are correctness evidence and are not timing samples.
 | --- | --- | --- | --- |
 | Joint-H path construction and direct-trajectory adapter | Admitted finite hybrid profiles whose mode flows, controls, invariants, guards, and resets can be represented in the joint H relation; terminal objectives are supplied separately and must be admitted by the selected adapter | Configured maximum variables, rows, and matrix elements; complete path inventory is preflighted before branch construction | Named reports cover at most 3 modes, 3 edges, 2 paths, and horizon 2 |
 | General projected-state reachability adapter and portfolio wrapper | Finite-horizon, any-dimension paths admitted by the joint-H composer and selected geometry provider; portfolio retains every allowed path as a separate result | Complete path preflight plus relation limits and provider row caps; portfolio reports operation maxima and provider input/output row totals/maxima | Public contract cases cover one-step scalar, two-stage scalar projection `[0, 2]`, two-stage 1→2→1 deterministic and existential set-valued resets, and two parallel projected branches with resource aggregation |
-| Exact linear-H family verifier | Finite-horizon H relations with linear terminal objectives and supported exactly representable binary64 inputs | Exact row, integer-bit, cancellation, and Fourier-Motzkin intermediate limits | Literal continuous oracles cover joint dimensions 4, 5, 6, 7, 8, and 12; set-valued-reset cases verify complete 1D, slanted 1D, 3D simplex, 3D truncated-cube, 4D simplex, and two distinct multi-stage four-control branch faces, and reject narrowed candidates; the named 3D box oracle has one path |
+| Exact linear-H family verifier | Finite-horizon H relations with linear terminal objectives and supported exactly representable binary64 inputs | Exact row, integer-bit, cancellation, and Fourier-Motzkin intermediate limits; branch reports expose configured caps and measured peak rows, generated rows, charged elimination operations, and maximum observed integer bits | Literal continuous oracles cover joint dimensions 4, 5, 6, 7, 8, and 12; set-valued-reset cases verify complete 1D, slanted 1D, 3D simplex, 3D truncated-cube, 4D simplex, and two distinct multi-stage four-control branch faces, and reject narrowed candidates; the named 3D box oracle has one path |
 | One-step and single-parameter scalar interval verifiers | One-step: horizon 1, scalar states/control, scalar interval, singleton, empty, or universal set representations; feasible branches require a bounded control interval; deterministic exactly representable scalar affine reset; scalar linear terminal objective. Single-parameter: finite horizon, scalar stage-indexed interval controls/invariants/guards, exactly one bounded non-singleton control and singleton controls elsewhere, deterministic exactly representable scalar affine resets, scalar linear terminal objective | Exact arithmetic and interval row limits | One-step and finite-horizon cases; no higher-dimensional state claim |
 | Two-parameter scalar polygon verifier | Scalar state, scalar interval controls, invariants and guards, deterministic exactly representable scalar affine resets; exactly two bounded non-singleton interval controls at distinct stages, all other controls singleton, finite horizon, scalar linear terminal objective | Exact representability, bounded polygon geometry and row/vertex limits | The saved fixture has horizon 2; tests also place the two free controls at separated stages in a horizon-3 case |
 
@@ -66,6 +66,12 @@ All family verifiers provide numerical assurance only. Validated objective
 assurance and validated family coverage remain unsupported. Adapter preflight
 does not imply that every possible provider operation or objective policy is
 admitted; those gaps remain tracked in EXT-07.
+
+Exact-verifier resource counters cover Fourier-Motzkin elimination in both
+minimization and inclusion checks. Charged operations use the verifier's
+existing per-call budget accounting; generated rows and peak rows are observed
+across branch elimination calls. These values exclude relation parsing,
+rational comparisons, wall time, and memory use, and do not establish scaling.
 
 ## Interpretation
 

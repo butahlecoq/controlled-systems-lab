@@ -276,6 +276,7 @@ HybridFamilyVerificationResult ExactLinearHHybridFamilyVerifier::verify(
         LinearTerminal objective;
         hx::LinearMinimumResult minimum;
         hx::Limits limits;
+        hx::ResourceUsage usage;
         bool raw_built{};
         bool supported{};
         bool program_matches{};
@@ -298,6 +299,7 @@ HybridFamilyVerificationResult ExactLinearHHybridFamilyVerifier::verify(
         branch.limits.max_operations = hx::default_max_operations / per_path_phases;
         branch.limits.max_generated_rows =
             hx::default_max_generated_rows / per_path_phases;
+        branch.limits.usage = &branch.usage;
         auto raw = hx::reconstruct_path_relation(system, request, paths[i],
             programs[i].relation_limits, branch.limits, cancellation);
         if (raw.state == hx::RawRelationState::cancelled) return cancelled();
@@ -305,6 +307,7 @@ HybridFamilyVerificationResult ExactLinearHHybridFamilyVerifier::verify(
             branch.reason = raw.reason;
             unsupported_path = true;
             branches.push_back(std::move(branch));
+            branches.back().limits.usage = &branches.back().usage;
             continue;
         }
         branch.raw_built = true;
@@ -313,6 +316,7 @@ HybridFamilyVerificationResult ExactLinearHHybridFamilyVerifier::verify(
             branch.reason = "Path objective or augmented relation exceeds the exact linear H limits";
             unsupported_path = true;
             branches.push_back(std::move(branch));
+            branches.back().limits.usage = &branches.back().usage;
             continue;
         }
         branch.objective = *objective;
@@ -362,6 +366,7 @@ HybridFamilyVerificationResult ExactLinearHHybridFamilyVerifier::verify(
         branch.supported = branch.minimum.state == hx::LinearMinimumState::minimum &&
                            branch.minimum.attained;
         branches.push_back(std::move(branch));
+        branches.back().limits.usage = &branches.back().usage;
     }
 
     HybridFamilyVerificationReport report{
@@ -377,6 +382,12 @@ HybridFamilyVerificationResult ExactLinearHHybridFamilyVerifier::verify(
         record.path = paths[i];
         record.relation_limits = programs[i].relation_limits;
         record.relation_operations = programs[i].relation_operations;
+        record.exact_verifier_resources = HybridExactVerifierResourceRecord{
+            branch.limits.max_variables, branch.limits.max_rows,
+            branch.limits.max_generated_rows, branch.limits.max_integer_bits,
+            branch.limits.max_operations, branch.usage.peak_rows,
+            branch.usage.generated_rows, branch.usage.charged_operations,
+            branch.usage.maximum_integer_bits};
         if (!branch.program_matches) {
             coverage = false;
             record.diagnostics.push_back({DiagnosticCode::evidence_mismatch,
@@ -575,8 +586,25 @@ HybridFamilyVerificationResult ExactLinearHHybridFamilyVerifier::verify(
         report.complete_family_coverage = HybridVerificationStatus::refuted;
     } else {
         report.global_objective_optimality = HybridVerificationStatus::established;
+        const bool refuted_coverage = std::any_of(report.branches.begin(),
+            report.branches.end(), [](const auto& branch) {
+                return branch.continuous_coverage == HybridVerificationStatus::refuted ||
+                    std::any_of(branch.diagnostics.begin(), branch.diagnostics.end(),
+                        [](const auto& diagnostic) {
+                            return diagnostic.code == DiagnosticCode::evidence_mismatch;
+                        });
+            });
+        const bool unsupported_coverage = std::any_of(report.branches.begin(),
+            report.branches.end(), [](const auto& branch) {
+                return branch.continuous_coverage == HybridVerificationStatus::unsupported ||
+                    branch.continuous_coverage == HybridVerificationStatus::not_checked;
+            });
         report.complete_family_coverage = coverage
-            ? HybridVerificationStatus::established : HybridVerificationStatus::refuted;
+            ? HybridVerificationStatus::established
+            : (refuted_coverage ? HybridVerificationStatus::refuted
+                                : (unsupported_coverage
+                                    ? HybridVerificationStatus::unsupported
+                                    : HybridVerificationStatus::refuted));
     }
     return report;
 }
