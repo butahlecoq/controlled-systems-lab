@@ -398,18 +398,20 @@ records completed before a diagnostic or cancellation; path-program and
 portfolio builders propagate those failure reports without dropping the path
 identity. Solver-provider provenance remains attached to each branch
 execution. The default reachability adapter wraps this same direct joint-H
-composer; an independently implemented projected-set reachability algorithm
-is not yet available. The compiled verifiers cover integral singleton paths,
-one-step scalar interval families, and the bounded finite-horizon
-single-parameter scalar interval profile described above. No compiled verifier
-covers multiple free continuous parameters or general continuous polytope
-families. These verifier domains reject unsupported input when verification
-runs; `build_hybrid_portfolio_programs_with_verifier` also rejects unsupported
+composer. The one-transition projected-state adapter independently assembles
+its admitted relation, while the general finite-horizon projected-state adapter
+reuses the joint-H composer before projection; neither independently verifies
+family completeness. The compiled verifiers cover integral singleton paths,
+one-step scalar interval families, the bounded finite-horizon single-parameter
+scalar interval profile, and the two-stage scalar polygon profile with two free
+controls described above. The latter does not extend to higher-dimensional
+continuous polytopes or arbitrary horizons with multiple free controls. These
+verifier domains reject unsupported input when verification runs;
+`build_hybrid_portfolio_programs_with_verifier` also rejects unsupported
 verifier domains and declared trajectory objective capabilities before building
 branch programs. Validated objective assurance remains unsupported; adapter-
-specific objective-policy semantics, general provider-operation admission,
-independent projected-set reachability, and multiple-parameter verifier
-coverage remain incomplete.
+specific objective-policy semantics, general provider-operation admission, and
+broader multiple-parameter verifier coverage remain incomplete.
 
 ## Independent test oracle requirements
 
