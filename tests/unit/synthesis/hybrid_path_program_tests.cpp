@@ -885,6 +885,142 @@ TEST_CASE("exact linear H verifier matches independent 2D continuous oracle") {
         "Diagnostics: "<<branch_diagnostics);
 }
 
+TEST_CASE("exact linear H verifier matches independent 3D control-box oracle") {
+    using namespace model;
+    const auto control_box=h_set("oracle-control-box-3d",3,
+        Matrix{6,3,{-1,0,0,1,0,0,0,-1,0,0,1,0,0,0,-1,0,0,1}},
+        Vector{0,1,0,1,0,1},Matrix{0,3,{}},Vector{});
+    const auto identity_reset=h_set("oracle-3d-identity-reset",6,
+        Matrix{0,6,{}},Vector{},
+        Matrix{3,6,{1,0,0,-1,0,0,0,1,0,0,-1,0,0,0,1,0,0,-1}},
+        Vector{0,0,0});
+    HybridMode source{{"oracle-source-3d"},3,3,{"x0","x1","x2"},
+        {"u0","u1","u2"}};
+    source.flow=LinearStage{Matrix{3,3,{0,0,0,0,0,0,0,0,0}},
+        Matrix{3,3,{1,0,0,0,1,0,0,0,1}},Matrix{3,0,{}},Vector{0,0,0}};
+    source.control_sets={control_box};
+    source.invariants={UniversalSet{3},UniversalSet{3}};
+    HybridMode terminal{{"oracle-terminal-3d"},3,0,{"y0","y1","y2"},{}};
+    terminal.flow=LinearStage{Matrix{3,3,{1,0,0,0,1,0,0,0,1}},
+        Matrix{3,0,{}},Matrix{3,0,{}},Vector{0,0,0}};
+    terminal.control_sets={UniversalSet{0}};
+    terminal.invariants={UniversalSet{3},UniversalSet{3}};
+    HybridSystem system{1,{source,terminal},
+        {{{"oracle-edge-3d"},source.id,terminal.id,{UniversalSet{3}},
+            {identity_reset}}}};
+    HybridRequest request{{source.id,{0,0,0}},{terminal.id},
+        {{terminal.id,LinearTerminal{{1,0,0},0},"first terminal coordinate","units"}}};
+
+    // Independently traverse the raw graph and specify all twelve joint
+    // coordinates (x0[0..2], u0[0..2], xpre[0..2], xpost[0..2]).
+    std::vector<HybridPath> oracle_paths;
+    for(const auto& edge:system.edges)
+        if(edge.source==request.initial.mode && edge.target==terminal.id)
+            oracle_paths.push_back({{request.initial.mode,edge.target},{edge.id}});
+    const std::vector<HybridPath> expected_paths{
+        {{source.id,terminal.id},{{"oracle-edge-3d"}}}};
+    REQUIRE(oracle_paths==expected_paths);
+    const auto built=build_hybrid_portfolio_programs(system,request,{"literal-3d-oracle"},
+        {1,4},{48,256,8192});
+    REQUIRE(std::holds_alternative<std::vector<HybridPathProgram>>(built));
+    const auto& programs=std::get<std::vector<HybridPathProgram>>(built);
+    REQUIRE(programs.size()==1);
+    CHECK(programs[0].path==oracle_paths[0]);
+    const auto representation=programs[0].joint_relation.representation();
+    REQUIRE(std::holds_alternative<sets::HRepresentation>(representation));
+    const auto& h=std::get<sets::HRepresentation>(representation);
+
+    const auto matches_literal_rows=[](const numeric::MatrixView& actual,
+        const numeric::VectorView& rhs,const std::vector<double>& expected,
+        const std::vector<double>& expected_rhs,std::size_t width) {
+        REQUIRE(actual.rows()==expected_rhs.size());
+        REQUIRE(rhs.size()==expected_rhs.size());
+        REQUIRE(actual.cols()==width);
+        std::vector<bool> matched(expected_rhs.size(),false);
+        for(std::size_t row=0;row<actual.rows();++row) {
+            bool found=false;
+            for(std::size_t candidate=0;candidate<expected_rhs.size()&&!found;++candidate) {
+                if(matched[candidate]||rhs[row]!=expected_rhs[candidate])continue;
+                bool equal=true;
+                for(std::size_t column=0;column<width;++column)
+                    equal=equal&&actual(row,column)==expected[candidate*width+column];
+                if(equal){matched[candidate]=true;found=true;}
+            }
+            CHECK(found);
+        }
+    };
+    matches_literal_rows(h.inequalities,h.upper_bounds,
+        {0,0,0,-1,0,0,0,0,0,0,0,0,
+         0,0,0,1,0,0,0,0,0,0,0,0,
+         0,0,0,0,-1,0,0,0,0,0,0,0,
+         0,0,0,0,1,0,0,0,0,0,0,0,
+         0,0,0,0,0,-1,0,0,0,0,0,0,
+         0,0,0,0,0,1,0,0,0,0,0,0},
+        {0,1,0,1,0,1},12);
+    matches_literal_rows(h.equalities,h.equality_values,
+        {1,0,0,0,0,0,0,0,0,0,0,0,
+         0,1,0,0,0,0,0,0,0,0,0,0,
+         0,0,1,0,0,0,0,0,0,0,0,0,
+         0,0,0,-1,0,0,1,0,0,0,0,0,
+         0,0,0,0,-1,0,0,1,0,0,0,0,
+         0,0,0,0,0,-1,0,0,1,0,0,0,
+         0,0,0,0,0,0,1,0,0,-1,0,0,
+         0,0,0,0,0,0,0,1,0,0,-1,0,
+         0,0,0,0,0,0,0,0,1,0,0,-1},
+        {0,0,0,0,0,0,0,0,0},12);
+    CHECK(std::get<LinearTerminal>(programs[0].lifted_objective).coefficients==
+        Vector{0,0,0,0,0,0,0,0,0,1,0,0});
+
+    // The literal objective is u0 in [0,1]. Its zero face fixes u0=0 and
+    // leaves the other two controls independently free in [0,1].
+    const auto face=sets::from_handle(h_set("oracle-3d-optimal-face",12,
+        Matrix{6,12,{0,0,0,-1,0,0,0,0,0,0,0,0,
+                      0,0,0,1,0,0,0,0,0,0,0,0,
+                      0,0,0,0,-1,0,0,0,0,0,0,0,
+                      0,0,0,0,1,0,0,0,0,0,0,0,
+                      0,0,0,0,0,-1,0,0,0,0,0,0,
+                      0,0,0,0,0,1,0,0,0,0,0,0}},
+        Vector{0,0,0,1,0,1},
+        Matrix{10,12,{1,0,0,0,0,0,0,0,0,0,0,0,
+                       0,1,0,0,0,0,0,0,0,0,0,0,
+                       0,0,1,0,0,0,0,0,0,0,0,0,
+                       0,0,0,-1,0,0,1,0,0,0,0,0,
+                       0,0,0,0,-1,0,0,1,0,0,0,0,
+                       0,0,0,0,0,-1,0,0,1,0,0,0,
+                       0,0,0,0,0,0,1,0,0,-1,0,0,
+                       0,0,0,0,0,0,0,1,0,0,-1,0,
+                       0,0,0,0,0,0,0,0,1,0,0,-1,
+                       0,0,0,1,0,0,0,0,0,0,0,0}},
+        Vector{0,0,0,0,0,0,0,0,0,0}));
+    REQUIRE(std::holds_alternative<sets::SetData>(face));
+    auto candidate=exact_candidate(programs[0],{0,0,0,0,0.5,0.5,0,0.5,0.5,0,0.5,0.5});
+    candidate.relation=std::get<sets::SetData>(face);
+    REQUIRE(candidate.solver_result.primal.has_value());
+    const auto& point=*candidate.solver_result.primal;
+    const auto& objective=std::get<LinearTerminal>(programs[0].lifted_objective);
+    double literal_cost=objective.offset;
+    for(std::size_t i=0;i<point.size();++i)
+        literal_cost+=objective.coefficients[i]*point[i];
+    CHECK(literal_cost==0.0);
+
+    ExactLinearHHybridFamilyVerifier verifier;
+    const std::array<HybridPathOptimalFaceCandidate,1> candidates{std::move(candidate)};
+    const auto verified=verify_hybrid_portfolio_family(verifier,system,request,
+        programs,candidates,{1,4},{0,0});
+    REQUIRE(std::holds_alternative<HybridFamilyVerificationReport>(verified));
+    const auto& report=std::get<HybridFamilyVerificationReport>(verified);
+    REQUIRE(report.branches.size()==1);
+    std::string branch_diagnostics;
+    for(const auto& diagnostic:report.branches[0].diagnostics)
+        branch_diagnostics+=diagnostic.field+": "+diagnostic.explanation+"; ";
+    CHECK(report.global_objective_optimality==HybridVerificationStatus::established);
+    CHECK_MESSAGE(report.complete_family_coverage==HybridVerificationStatus::established,
+        "Diagnostics: "<<branch_diagnostics);
+    CHECK(report.branches[0].objective_optimality==HybridVerificationStatus::established);
+    CHECK_MESSAGE(report.branches[0].continuous_coverage==HybridVerificationStatus::established,
+        "Diagnostics: "<<branch_diagnostics);
+}
+
 TEST_CASE("hybrid exact raw path relation matches the joint H composer") {
     using namespace detail::hybrid_exact;
     const auto system=example_system();
