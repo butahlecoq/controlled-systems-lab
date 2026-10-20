@@ -145,8 +145,19 @@ creation. The fixed-path reachability API is replaceable through
 configured limits and ordered operation trace. Its default implementation,
 `JointHReachabilityAdapter`, currently wraps the same full joint-H composer; it
 does not project intermediate coordinates or merge paths. This provides a
-replaceable reachability contract, but not yet an independent projected-set
-reachability algorithm. Each reachability adapter must preflight its supported
+replaceable reachability contract. A separate
+`ProjectedStateHybridReachabilityAdapter` independently assembles the full
+one-transition relation and projects its terminal state through a registered
+geometry provider. It currently admits scalar source and target states, one
+scalar bounded non-singleton source-control interval, scalar interval or
+universal invariants and guard (including equally scaled opposite H normals),
+and a deterministic scalar affine reset encoded
+by one H equality. It returns the labelled joint relation alongside the H
+terminal set, provider provenance, and input/output row counts. Its row limit
+is configured into the registered projection provider and bounds input,
+intermediate, and terminal H rows. This narrow implementation does not establish
+multi-stage projected reachability or general-dimensional continuous coverage.
+Each reachability adapter must preflight its supported
 operations and limits for the fixed path before the wrapper queries capabilities
 or starts composition. The default preflight fails closed; the built-in joint-H
 adapter uses the structural set-representation and joint-relation-limit checks.
@@ -378,8 +389,9 @@ records completed before a diagnostic or cancellation; path-program and
 portfolio builders propagate those failure reports without dropping the path
 identity. Solver-provider provenance remains attached to each branch
 execution. The default reachability adapter wraps this same direct joint-H
-composer; an independently implemented projected-set reachability algorithm
-is not yet available. The compiled verifiers cover integral singleton paths,
+composer. The separate projected-state adapter independently builds and
+projects a one-transition scalar relation; multi-stage and general-dimensional
+projected reachability remain unsupported. The compiled verifiers cover integral singleton paths,
 one-step scalar interval families, and the bounded finite-horizon
 single-parameter scalar interval profile described above, plus the separate
 two-stage/two-parameter scalar polygon profile. They do not cover general
@@ -387,9 +399,9 @@ continuous polytope families. These verifier domains reject unsupported input
 when verification runs; `build_hybrid_portfolio_programs_with_verifier` also
 rejects unsupported verifier domains and declared trajectory objective
 capabilities before building branch programs. Validated objective assurance
-remains unsupported; adapter-specific objective-policy semantics, general
-provider-operation admission, independent projected-set reachability, and
-broader multiple-parameter verifier coverage remain incomplete.
+remains unsupported; adapter-specific objective-policy semantics, broader
+provider-operation admission, general projected-set reachability, and broader
+multiple-parameter verifier coverage remain incomplete.
 
 ## Independent test oracle requirements
 

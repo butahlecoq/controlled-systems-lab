@@ -1,6 +1,7 @@
 #pragma once
 
 #include <csl/model/hybrid_system.hpp>
+#include <csl/geometry/polyhedral_projection.hpp>
 #include <csl/optimization/convex_backend.hpp>
 #include <csl/optimization/linear_program.hpp>
 #include <csl/registry/provider.hpp>
@@ -30,6 +31,14 @@ struct HybridPathReachability {
     model::HybridRelationLimits relation_limits;
     std::vector<model::HybridRelationOperationRecord> relation_operations;
     Assurance assurance{Assurance::numerical};
+    struct ProjectedStateEvidence {
+        sets::SetData terminal_state_set;
+        registry::Provenance projection_provider;
+        std::size_t input_rows{};
+        std::size_t output_rows{};
+        std::size_t maximum_projection_rows{};
+    };
+    std::optional<ProjectedStateEvidence> projected_state;
 };
 using HybridPathReachabilityResult = std::variant<HybridPathReachability, Diagnostics,
     OperationStopped, model::HybridPathCompositionFailureReport>;
@@ -68,6 +77,25 @@ public:
     HybridPathReachabilityResult compose_path(const model::HybridSystem&,
         const model::HybridRequest&, const model::HybridPath&,
         model::HybridRelationLimits, std::stop_token cancellation) const override;
+};
+
+// One-step scalar reachability adapter. It independently builds the full
+// labelled relation, then projects the terminal state through a registered
+// geometry provider. The row cap configures that provider's input and
+// intermediate H-row limit. Its admitted profile is intentionally narrow.
+class ProjectedStateHybridReachabilityAdapter final : public HybridReachabilityAdapter {
+public:
+    explicit ProjectedStateHybridReachabilityAdapter(std::size_t maximum_projection_rows = 4096);
+    HybridReachabilityCapabilities capabilities() const noexcept override;
+    HybridReachabilityPreflightResult preflight(const model::HybridSystem&,
+        const model::HybridRequest&, const model::HybridPath&,
+        model::HybridRelationLimits, std::stop_token cancellation) const override;
+    HybridPathReachabilityResult compose_path(const model::HybridSystem&,
+        const model::HybridRequest&, const model::HybridPath&,
+        model::HybridRelationLimits, std::stop_token cancellation) const override;
+private:
+    registry::PreparedProvider<registry::GeometryPort> projection_;
+    std::size_t maximum_projection_rows_;
 };
 
 HybridPathReachabilityResult compute_hybrid_path_reachability(

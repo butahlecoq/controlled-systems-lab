@@ -639,6 +639,45 @@ SetHandle interval(std::string id,double lower,double upper) {
     return std::get<sets::SetData>(std::move(data)).as_handle();
 }
 
+SetHandle scaled_interval(std::string id,double lower,double upper,double scale) {
+    auto inequalities=numeric::snapshot(Matrix{2,1,{-scale,scale}});
+    auto bounds=numeric::snapshot_vector(Vector{-scale*lower,scale*upper});
+    auto equalities=numeric::snapshot(Matrix{0,1,{}});
+    auto equality_values=numeric::snapshot_vector(Vector{});
+    REQUIRE(std::holds_alternative<numeric::MatrixView>(inequalities));
+    REQUIRE(std::holds_alternative<numeric::VectorView>(bounds));
+    REQUIRE(std::holds_alternative<numeric::MatrixView>(equalities));
+    REQUIRE(std::holds_alternative<numeric::VectorView>(equality_values));
+    auto data=sets::make_h({SetId{std::move(id)},1,{"scaled-coordinate"}},
+        {std::get<numeric::MatrixView>(inequalities),std::get<numeric::VectorView>(bounds),
+         std::get<numeric::MatrixView>(equalities),std::get<numeric::VectorView>(equality_values)});
+    REQUIRE(std::holds_alternative<sets::SetData>(data));
+    return std::get<sets::SetData>(std::move(data)).as_handle();
+}
+
+std::pair<model::HybridSystem,model::HybridRequest> projected_interval_fixture() {
+    model::HybridMode source{{"source"},1,1,{"x"},{"u"}};
+    source.flow=LinearStage{Matrix{1,1,{1}},Matrix{1,1,{1}},Matrix{1,0,{}},Vector{0}};
+    source.control_sets={interval("projected-control",0,1)};
+    source.invariants={UniversalSet{1},UniversalSet{1}};
+    model::HybridMode target{{"target"},1,0,{"y"},{}};
+    target.flow=LinearStage{Matrix{1,1,{1}},Matrix{1,0,{}},Matrix{1,0,{}},Vector{0}};
+    target.control_sets={UniversalSet{0}};
+    target.invariants={UniversalSet{1},UniversalSet{1}};
+    auto reset=sets::make_h({{"projected-identity-reset"},2,{"pre","post"}},
+        {std::get<numeric::MatrixView>(numeric::snapshot(Matrix{0,2,{}})),
+         std::get<numeric::VectorView>(numeric::snapshot_vector(Vector{})),
+         std::get<numeric::MatrixView>(numeric::snapshot(Matrix{1,2,{1,-1}})),
+         std::get<numeric::VectorView>(numeric::snapshot_vector(Vector{0}))});
+    REQUIRE(std::holds_alternative<sets::SetData>(reset));
+    model::HybridSystem system{1,{source,target},
+        {{{"transition"},{"source"},{"target"},{interval("projected-guard",0,0.5)},
+            {std::get<sets::SetData>(std::move(reset)).as_handle()}}}};
+    model::HybridRequest request{{{"source"},{0}},{{"target"}},
+        {{{"target"},LinearTerminal{{1},0},"cost","u"}}};
+    return {std::move(system),std::move(request)};
+}
+
 SetHandle vertex_guard(std::string id) {
     const auto vertices=numeric::snapshot(Matrix{1,1,{0}});
     const auto rays=numeric::snapshot(Matrix{0,1,{}});
@@ -1054,6 +1093,112 @@ TEST_CASE("hybrid reachability boundary retains a branch-labelled joint relation
     CHECK(reachable.assurance==Assurance::numerical);
     CHECK_FALSE(reachable.relation_operations.empty());
     CHECK(reachable.relation_limits.max_variables==16);
+}
+
+TEST_CASE("projected hybrid reachability returns the literal terminal interval and path relation") {
+    auto [system,request]=projected_interval_fixture();
+    const model::HybridPath path{{{"source"},{"target"}},{{"transition"}}};
+    ProjectedStateHybridReachabilityAdapter adapter(16);
+    const auto result=compute_hybrid_path_reachability(adapter,system,request,path,{4,16,128});
+    REQUIRE(std::holds_alternative<HybridPathReachability>(result));
+    const auto& reachable=std::get<HybridPathReachability>(result);
+    REQUIRE(reachable.projected_state.has_value());
+    const auto terminal=reachable.projected_state->terminal_state_set.representation();
+    REQUIRE(std::holds_alternative<sets::HRepresentation>(terminal));
+    const auto& terminal_h=std::get<sets::HRepresentation>(terminal);
+    REQUIRE(terminal_h.inequalities.rows()>=2);
+    bool has_upper=false,has_lower=false;
+    for(std::size_t row=0;row<terminal_h.inequalities.rows();++row) {
+        const auto coefficient=terminal_h.inequalities(row,0);
+        const auto bound=terminal_h.upper_bounds[row];
+        CHECK(bound>=0.5*coefficient);
+        has_upper=has_upper || (coefficient>0.0 && bound/coefficient==0.5);
+        if(coefficient<0.0) {
+            CHECK(bound>=0.0);
+            has_lower=has_lower || (bound/(-coefficient)==0.0);
+        } else if(coefficient==0.0) CHECK(bound>=0.0);
+    }
+    CHECK(has_upper);
+    CHECK(has_lower);
+    CHECK(satisfies(terminal_h,{0.0}));
+    CHECK(satisfies(terminal_h,{0.25}));
+    CHECK(satisfies(terminal_h,{0.5}));
+    CHECK_FALSE(satisfies(terminal_h,{-0.125}));
+    CHECK_FALSE(satisfies(terminal_h,{0.625}));
+
+    const auto relation=reachable.joint_relation.representation();
+    REQUIRE(std::holds_alternative<sets::HRepresentation>(relation));
+    const auto& relation_h=std::get<sets::HRepresentation>(relation);
+    REQUIRE(relation_h.equalities.rows()==3);
+    REQUIRE(relation_h.inequalities.rows()==4);
+    const Matrix expected_equalities{3,4,{1,0,0,0,-1,-1,1,0,0,0,1,-1}};
+    const Vector expected_equality_values{0,0,0};
+    const Matrix expected_inequalities{4,4,{0,1,0,0,0,-1,0,0,0,0,1,0,0,0,-1,0}};
+    const Vector expected_upper_bounds{1,0,0.5,0};
+    for(std::size_t row=0;row<expected_equalities.rows;++row) {
+        CHECK(relation_h.equality_values[row]==expected_equality_values[row]);
+        for(std::size_t col=0;col<expected_equalities.cols;++col)
+            CHECK(relation_h.equalities(row,col)==expected_equalities.values[row*expected_equalities.cols+col]);
+    }
+    for(std::size_t row=0;row<expected_inequalities.rows;++row) {
+        CHECK(relation_h.upper_bounds[row]==expected_upper_bounds[row]);
+        for(std::size_t col=0;col<expected_inequalities.cols;++col)
+            CHECK(relation_h.inequalities(row,col)==expected_inequalities.values[row*expected_inequalities.cols+col]);
+    }
+    CHECK(satisfies(relation_h,{0.0,0.25,0.25,0.25}));
+    CHECK_FALSE(satisfies(relation_h,{0.0,0.25,0.25,0.375}));
+    CHECK(reachable.projected_state->input_rows==relation_h.inequalities.rows()+relation_h.equalities.rows());
+    CHECK(reachable.projected_state->output_rows==terminal_h.inequalities.rows()+terminal_h.equalities.rows());
+    CHECK(reachable.projected_state->maximum_projection_rows==16);
+    CHECK(reachable.projected_state->projection_provider.actual->id.value=="csl.geometry.polyhedral-projection");
+
+    auto shifted_request=request;
+    shifted_request.initial.state[0]=0.25;
+    ProjectedStateHybridReachabilityAdapter shifted_adapter(16);
+    const auto shifted_result=compute_hybrid_path_reachability(shifted_adapter,
+        system,shifted_request,path,{4,16,128});
+    REQUIRE(std::holds_alternative<HybridPathReachability>(shifted_result));
+    const auto& shifted=std::get<HybridPathReachability>(shifted_result);
+    CHECK(shifted.joint_relation.metadata()->id!=reachable.joint_relation.metadata()->id);
+    CHECK(shifted.projected_state->terminal_state_set.metadata()->id!=
+        reachable.projected_state->terminal_state_set.metadata()->id);
+    const auto shifted_h=std::get<sets::HRepresentation>(shifted.projected_state->terminal_state_set.representation());
+    CHECK(satisfies(shifted_h,{0.25}));
+    CHECK_FALSE(satisfies(shifted_h,{0.125}));
+
+    auto negative_control=projected_interval_fixture();
+    negative_control.first.modes[0].control_sets[0]=
+        interval("projected-negative-control",-1.0,1.0);
+    negative_control.first.edges[0].guards[0]=interval("projected-negative-guard",-0.5,0.5);
+    ProjectedStateHybridReachabilityAdapter negative_adapter(16);
+    const auto negative_result=compute_hybrid_path_reachability(negative_adapter,
+        negative_control.first,negative_control.second,path,{4,16,128});
+    REQUIRE(std::holds_alternative<HybridPathReachability>(negative_result));
+    const auto& negative_relation=std::get<sets::HRepresentation>(
+        std::get<HybridPathReachability>(negative_result).joint_relation.representation());
+    CHECK(satisfies(negative_relation,{0.0,-0.25,-0.25,-0.25}));
+
+    auto scaled=projected_interval_fixture();
+    scaled.first.modes[0].control_sets[0]=scaled_interval("projected-scaled-control",0.0,1.0,2.0);
+    scaled.first.edges[0].guards[0]=scaled_interval("projected-scaled-guard",0.0,0.5,3.0);
+    ProjectedStateHybridReachabilityAdapter scaled_adapter(16);
+    const auto scaled_result=compute_hybrid_path_reachability(scaled_adapter,
+        scaled.first,scaled.second,path,{4,16,128});
+    REQUIRE(std::holds_alternative<HybridPathReachability>(scaled_result));
+    const auto& scaled_terminal=std::get<sets::HRepresentation>(
+        std::get<HybridPathReachability>(scaled_result).projected_state->terminal_state_set.representation());
+    CHECK(satisfies(scaled_terminal,{0.0}));
+    CHECK(satisfies(scaled_terminal,{0.5}));
+    CHECK_FALSE(satisfies(scaled_terminal,{0.625}));
+}
+
+TEST_CASE("projected hybrid reachability preflights a projection input exceeding its provider row limit") {
+    auto [system,request]=projected_interval_fixture();
+    const model::HybridPath path{{{"source"},{"target"}},{{"transition"}}};
+    ProjectedStateHybridReachabilityAdapter adapter(1);
+    const auto result=compute_hybrid_path_reachability(adapter,system,request,path,{4,16,128});
+    REQUIRE(std::holds_alternative<Diagnostics>(result));
+    CHECK(std::get<Diagnostics>(result).front().field=="hybrid.projected.row_limit");
 }
 
 TEST_CASE("hybrid reachability boundary dispatches injected adapters and propagates rejection") {

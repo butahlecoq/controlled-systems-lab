@@ -50,6 +50,11 @@ target_include_directories(hybrid_path_program_tests PRIVATE ${CMAKE_CURRENT_SOU
 add_test(NAME hybrid_path_program_tests COMMAND hybrid_path_program_tests)
 csl_test_target(hybrid_path_program_tests synthesis)
 
+add_executable(hybrid_reachability_public_client tests/installed/hybrid_reachability_client.cpp)
+target_link_libraries(hybrid_reachability_public_client PRIVATE CSL::hybrid_path_program)
+add_test(NAME hybrid_reachability_public_client COMMAND hybrid_reachability_public_client)
+csl_test_target(hybrid_reachability_public_client synthesis)
+
 if(TARGET CSL::highs_convex AND TARGET CSL::highs_lp AND TARGET CSL::strategy_a AND TARGET CSL::affine_sum AND TARGET CSL::qhull_conversion)
   add_executable(direct_joint_strategy_tests tests/synthesis/strategy_b/direct_joint_tests.cpp)
   target_link_libraries(direct_joint_strategy_tests PRIVATE CSL::strategy_b CSL::strategy_a CSL::affine_sum CSL::qhull_conversion CSL::highs_lp CSL::highs_convex CSL::artifacts doctest::doctest)
