@@ -22,11 +22,11 @@ Read the [class-level system architecture](../../specs/2026-10-12-class-level-sy
 
 ## Dependencies and review
 
-This ticket is intentionally later than the nominal v1 comparison and may refine model, geometry, strategy, and result contracts. Coordinate with model tickets and the shared outcome contract [SYN-07](https://github.com/butahlecoq/controlled-systems-lab/issues/155) once created. Resolve semantics and capability/evidence claims in a reviewed design update before implementation. Do not silently infer hybrid meaning from finite controls or stage-varying matrices.
+This ticket is intentionally later than the nominal v1 comparison and may refine model, geometry, strategy, and result contracts. Coordinate with model tickets and the shared outcome contract [SYN-07](https://github.com/butahlecoq/controlled-systems-lab/issues/155) once created. Follow the accepted contract for semantics and capability/evidence claims; any refinement requires a reviewed design update. Do not silently infer hybrid meaning from finite controls or stage-varying matrices.
 
 ## Design gate
 
-The proposed contract is [hybrid-systems.md](../../../contracts/hybrid-systems.md). It defines a known request-selected initial mode/state, stage-indexed invariants and transition timing, existential reset witnesses (without universal physical guarantees), global minimization over explicitly allowed terminal modes, branch-labelled all-optimal families, replaceable reachability/direct-trajectory/verification adapter seams, admission checks, independent oracle requirements, and the unsupported capability boundary. Implementation remains separate until this design gate is reviewed and accepted.
+The accepted contract is [hybrid-systems.md](../../../contracts/hybrid-systems.md), reviewed and merged in [PR #471](https://github.com/butahlecoq/controlled-systems-lab/pull/471). It defines a known request-selected initial mode/state, stage-indexed invariants and transition timing, existential reset witnesses (without universal physical guarantees), global minimization over explicitly allowed terminal modes, branch-labelled all-optimal families, replaceable reachability/direct-trajectory/verification adapter seams, admission checks, independent oracle requirements, and the unsupported capability boundary. Implementation is tracked separately in this ticket and remains subject to its full acceptance criteria.
 
 ## Delivery and review
 
