@@ -82,6 +82,16 @@ leaving two tied control directions free. These are named finite cases, not
 complete exhaustive coverage across the supported general H profile; broader
 independent continuous cases and resource-scale evidence remain open.
 
+A two-stage independent continuous oracle now joins two semantics previously
+covered separately: a set-valued 1D-to-2D reset and a global objective tie across
+1D and 2D terminal modes. Its raw graph walk enumerates both histories; direct
+inspection of the flow equations, reset H-rows, guard bounds, and mode-indexed
+linear objectives derives the minimizing controls and tied value without using
+the production enumerator, composer, objective lift, or verifier. Separately
+authored 8- and 9-coordinate H faces retain the free reset coordinate and are
+checked by the exact linear-H family verifier. This remains a small fixture,
+not exhaustive coverage of the admitted continuous profile.
+
 The exact linear-H family verifier now reports per-branch configured limits and
 Fourier-Motzkin observations across minimization and inclusion checks: peak
 rows, generated rows, charged elimination operations, and maximum integer bits.

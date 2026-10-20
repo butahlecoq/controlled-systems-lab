@@ -11,6 +11,7 @@
 #include <array>
 #include <limits>
 #include <memory>
+#include <stdexcept>
 #include <string_view>
 
 using namespace csl;
@@ -5322,6 +5323,268 @@ TEST_CASE("independent continuous oracle retains ties across differently sized t
     CHECK(separated_a->objective_optimality==HybridVerificationStatus::established);
     CHECK(separated_b->objective_optimality==HybridVerificationStatus::refuted);
     CHECK(separated_c->objective_optimality==HybridVerificationStatus::refuted);
+}
+
+TEST_CASE("independent two-stage continuous oracle ties terminal modes after a guarded set-valued reset") {
+    const auto interval=[](std::string id,double lower,double upper) {
+        return h_set(std::move(id),1,Matrix{2,1,{-1,1}},Vector{-lower,upper},
+            Matrix{0,1,{}},Vector{});
+    };
+    const auto first_coordinate_interval=[](std::string id,double lower,double upper) {
+        return h_set(std::move(id),2,Matrix{2,2,{-1,0,1,0}},Vector{-lower,upper},
+            Matrix{0,2,{}},Vector{});
+    };
+    const auto identity_flow=[](std::size_t dimension) {
+        Matrix A{dimension,dimension,Vector(dimension*dimension)};
+        for(std::size_t i=0;i<dimension;++i) A.values[i*dimension+i]=1;
+        return LinearStage{std::move(A),Matrix{dimension,0,{}},Matrix{dimension,0,{}},Vector(dimension,0)};
+    };
+    auto source_control=interval("oracle-guarded-reset-control",0,1);
+    model::HybridMode source{{"oracle-guarded-reset-source"},1,1,{"x"},{"u"}};
+    const LinearStage source_flow{Matrix{1,1,{0}},Matrix{1,1,{1}},Matrix{1,0,{}},Vector{0}};
+    source.flow=std::vector<LinearStage>{source_flow,source_flow};
+    source.control_sets={source_control,source_control};
+    source.invariants={UniversalSet{1},UniversalSet{1},UniversalSet{1}};
+
+    model::HybridMode middle{{"oracle-guarded-reset-middle"},2,0,{"p","q"},{}};
+    middle.flow=std::vector<LinearStage>{identity_flow(2),identity_flow(2)};
+    middle.control_sets={UniversalSet{0},UniversalSet{0}};
+    middle.invariants={UniversalSet{2},UniversalSet{2},UniversalSet{2}};
+
+    model::HybridMode terminal_a{{"oracle-guarded-reset-terminal-a"},1,0,{"a"},{}};
+    terminal_a.flow=std::vector<LinearStage>{identity_flow(1),identity_flow(1)};
+    terminal_a.control_sets={UniversalSet{0},UniversalSet{0}};
+    terminal_a.invariants={UniversalSet{1},UniversalSet{1},UniversalSet{1}};
+    model::HybridMode terminal_b{{"oracle-guarded-reset-terminal-b"},2,0,{"b0","b1"},{}};
+    terminal_b.flow=std::vector<LinearStage>{identity_flow(2),identity_flow(2)};
+    terminal_b.control_sets={UniversalSet{0},UniversalSet{0}};
+    terminal_b.invariants={UniversalSet{2},UniversalSet{2},UniversalSet{2}};
+
+    const auto source_to_middle=h_set("oracle-guarded-reset-set-valued",3,
+        Matrix{2,3,{0,0,-1, 0,0,1}},Vector{0,1},
+        Matrix{1,3,{-1,1,0}},Vector{0});
+    const auto middle_to_a=h_set("oracle-guarded-reset-drop-q",3,
+        Matrix{0,3,{}},Vector{},Matrix{1,3,{-1,0,1}},Vector{0});
+    const auto middle_to_b=h_set("oracle-guarded-reset-preserve-q",4,
+        Matrix{0,4,{}},Vector{},Matrix{2,4,{-1,0,1,0, 0,-1,0,1}},Vector{0,0});
+    model::HybridSystem system{2,{source,middle,terminal_a,terminal_b},
+        {{{"oracle-enter-middle"},source.id,middle.id,
+            {UniversalSet{1},UniversalSet{1}},{source_to_middle,source_to_middle}},
+         {{"oracle-finish-a"},middle.id,terminal_a.id,
+            {first_coordinate_interval("oracle-unused-a-guard",0,1),
+             first_coordinate_interval("oracle-a-guard",0,0.5)},
+            {middle_to_a,middle_to_a}},
+         {{"oracle-finish-b"},middle.id,terminal_b.id,
+            {first_coordinate_interval("oracle-unused-b-guard",0,1),
+             first_coordinate_interval("oracle-b-guard",0.5,1)},
+            {middle_to_b,middle_to_b}}}};
+    model::HybridRequest request{{source.id,{0}},{terminal_a.id,terminal_b.id},
+        {{terminal_a.id,LinearTerminal{{1},0},"terminal cost","units"},
+         {terminal_b.id,LinearTerminal{{1,0},-0.5},"terminal cost","units"}}};
+
+    // Independent raw graph and equation oracle. It does not call the
+    // production path enumerator, relation composer, or verifier.
+    std::vector<model::HybridPath> oracle_paths{{{source.id},{}}};
+    for(std::size_t stage=0;stage<system.horizon;++stage) {
+        std::vector<model::HybridPath> next;
+        for(const auto& prefix:oracle_paths) for(const auto& edge:system.edges) {
+            if(edge.source!=prefix.modes.back()) continue;
+            auto extended=prefix;
+            extended.edges.push_back(edge.id);
+            extended.modes.push_back(edge.target);
+            next.push_back(std::move(extended));
+        }
+        oracle_paths=std::move(next);
+    }
+    oracle_paths.erase(std::remove_if(oracle_paths.begin(),oracle_paths.end(),[&](const auto& path) {
+        return std::find(request.allowed_terminal_modes.begin(),request.allowed_terminal_modes.end(),
+            path.modes.back())==request.allowed_terminal_modes.end();
+    }),oracle_paths.end());
+    const std::vector<model::HybridPath> expected_paths{
+        {{source.id,middle.id,terminal_a.id},{{"oracle-enter-middle"},{"oracle-finish-a"}}},
+        {{source.id,middle.id,terminal_b.id},{{"oracle-enter-middle"},{"oracle-finish-b"}}}};
+    REQUIRE(oracle_paths==expected_paths);
+
+    // Read the small raw H data and affine equations directly. The source flow
+    // gives pre1=u, the first reset gives p=pre1 and 0<=q<=1, and the middle
+    // flow is identity. Each second-edge guard therefore clips u directly;
+    // its reset maps the first terminal coordinate to p. No composed relation
+    // or production objective lift is used to derive these bounds or costs.
+    const auto coordinate_interval=[](const sets::HRepresentation& h,std::size_t coordinate) {
+        std::pair<double,double> bounds{-std::numeric_limits<double>::infinity(),
+            std::numeric_limits<double>::infinity()};
+        for(std::size_t row=0;row<h.inequalities.rows();++row) {
+            double coefficient=h.inequalities(row,coordinate);
+            for(std::size_t col=0;col<h.inequalities.cols();++col)
+                if(col!=coordinate&&h.inequalities(row,col)!=0)
+                    throw std::runtime_error("Oracle expects axis-aligned raw constraints");
+            if(coefficient<0) bounds.first=std::max(bounds.first,h.upper_bounds[row]/coefficient);
+            else if(coefficient>0) bounds.second=std::min(bounds.second,h.upper_bounds[row]/coefficient);
+            else if(h.upper_bounds[row]<0) return std::pair{1.0,0.0};
+        }
+        return bounds;
+    };
+    const auto h_rep=[](const SetHandle& handle) -> sets::HRepresentation {
+        const auto data=sets::from_handle(handle);
+        if(!std::holds_alternative<sets::SetData>(data)) throw std::runtime_error("Oracle H input is invalid");
+        const auto representation=std::get<sets::SetData>(data).representation();
+        if(!std::holds_alternative<sets::HRepresentation>(representation))
+            throw std::runtime_error("Oracle expects literal raw H input");
+        return std::get<sets::HRepresentation>(representation);
+    };
+    const auto raw_reset=h_rep(system.edges.front().reset_relations[0]);
+    REQUIRE(raw_reset.equalities.rows()==1);
+    CHECK(raw_reset.equalities(0,0)==-1);
+    CHECK(raw_reset.equalities(0,1)==1);
+    const auto existential_q=coordinate_interval(raw_reset,2);
+    CHECK(existential_q.first==0);
+    CHECK(existential_q.second==1);
+    const auto& raw_middle_flow=std::get<std::vector<LinearStage>>(middle.flow)[1];
+    CHECK(raw_middle_flow.A.values==std::vector<double>{1,0,0,1});
+    const auto input_bounds=coordinate_interval(h_rep(std::get<SetHandle>(source.control_sets[0])),0);
+
+    struct OracleResult { model::HybridPath path; double minimizing_u; double objective; };
+    std::vector<OracleResult> oracle;
+    for(const auto& path:oracle_paths) {
+        const auto second_edge=std::find_if(system.edges.begin(),system.edges.end(),[&](const auto& edge) {
+            return edge.id==path.edges[1];
+        });
+        REQUIRE(second_edge!=system.edges.end());
+        const auto guard_bounds=coordinate_interval(h_rep(std::get<SetHandle>(second_edge->guards[1])),0);
+        const auto target_reset=h_rep(second_edge->reset_relations[1]);
+        if(path.modes.back()==terminal_a.id) {
+            REQUIRE(target_reset.equalities.rows()==1);
+            CHECK(target_reset.equalities(0,0)==-1);
+            CHECK(target_reset.equalities(0,2)==1);
+        } else {
+            REQUIRE(target_reset.equalities.rows()==2);
+            CHECK(target_reset.equalities(0,0)==-1);
+            CHECK(target_reset.equalities(0,2)==1);
+            CHECK(target_reset.equalities(1,1)==-1);
+            CHECK(target_reset.equalities(1,3)==1);
+        }
+        const double slope=source_flow.B.values[0];
+        REQUIRE(slope==1);
+        const double flow_offset=source_flow.offset[0];
+        double lower_u=std::max(input_bounds.first,(guard_bounds.first-flow_offset)/slope);
+        double upper_u=std::min(input_bounds.second,(guard_bounds.second-flow_offset)/slope);
+        REQUIRE(lower_u<=upper_u);
+        const auto objective=std::find_if(request.terminal_objectives.begin(),request.terminal_objectives.end(),
+            [&](const auto& item){return item.mode==path.modes.back();});
+        REQUIRE(objective!=request.terminal_objectives.end());
+        const auto& linear=std::get<LinearTerminal>(objective->objective);
+        const double terminal_slope=linear.coefficients[0]*slope;
+        const double lower_cost=terminal_slope*lower_u+linear.offset+linear.coefficients[0]*flow_offset;
+        const double upper_cost=terminal_slope*upper_u+linear.offset+linear.coefficients[0]*flow_offset;
+        const double minimum=std::min(lower_cost,upper_cost);
+        const double minimizing_u=lower_cost<=upper_cost?lower_u:upper_u;
+        oracle.push_back({path,minimizing_u,minimum});
+    }
+    REQUIRE(oracle.size()==2);
+    CHECK(oracle[0].minimizing_u==0);
+    CHECK(oracle[1].minimizing_u==0.5);
+    CHECK(oracle[0].objective==0);
+    CHECK(oracle[1].objective==0);
+    CHECK(oracle[0].objective==oracle[1].objective);
+
+    const auto built=build_hybrid_portfolio_programs(system,request,
+        {"oracle-guarded-reset-cross-mode-tie"},{2,8},{32,256,8192});
+    std::string admission_debug="variant "+std::to_string(built.index());
+    if(const auto* errors=std::get_if<Diagnostics>(&built))
+        for(const auto& diagnostic:*errors)
+            admission_debug+="; "+diagnostic.field+": "+diagnostic.explanation;
+    if(const auto* failure=std::get_if<model::HybridPathCompositionFailureReport>(&built)) {
+        if(const auto* diagnostic=std::get_if<Diagnostic>(&failure->failure))
+            admission_debug+="; "+diagnostic->field+": "+diagnostic->explanation;
+        else if(const auto* stopped=std::get_if<OperationStopped>(&failure->failure))
+            admission_debug+="; stopped: "+stopped->diagnostics;
+    }
+    CAPTURE(admission_debug);
+    REQUIRE(std::holds_alternative<std::vector<HybridPathProgram>>(built));
+    const auto& programs=std::get<std::vector<HybridPathProgram>>(built);
+    REQUIRE(programs.size()==oracle.size());
+    for(std::size_t i=0;i<oracle.size();++i) CHECK(programs[i].path==oracle[i].path);
+
+    const auto literal_face=[&](std::size_t width,std::size_t pre_middle,
+        std::size_t q_middle,std::size_t terminal,double optimal_u,bool preserve_q) {
+        std::vector<Vector> inequalities;
+        Vector bounds;
+        const auto add_le=[&](std::initializer_list<std::pair<std::size_t,double>> terms,double rhs) {
+            Vector row(width);
+            for(const auto [column,value]:terms) row[column]=value;
+            inequalities.push_back(std::move(row));
+            bounds.push_back(rhs);
+        };
+        std::vector<Vector> equalities;
+        Vector values;
+        const auto add_eq=[&](std::initializer_list<std::pair<std::size_t,double>> terms,double rhs) {
+            Vector row(width);
+            for(const auto [column,value]:terms) row[column]=value;
+            equalities.push_back(std::move(row));
+            values.push_back(rhs);
+        };
+        add_le({{1,-1}},0); add_le({{1,1}},1);
+        add_le({{4,-1}},0); add_le({{4,1}},1);
+        if(optimal_u==0) { add_le({{pre_middle,-1}},0); add_le({{pre_middle,1}},0.5); }
+        else { add_le({{pre_middle,-1}},-0.5); add_le({{pre_middle,1}},1); }
+        add_eq({{0,1}},0);
+        add_eq({{2,1},{1,-1}},0);
+        add_eq({{3,1},{2,-1}},0);
+        add_eq({{5,1},{3,-1}},0);
+        add_eq({{6,1},{4,-1}},0);
+        add_eq({{1,1}},optimal_u);
+        add_eq({{terminal,1},{5,-1}},0);
+        if(preserve_q) add_eq({{terminal+1,1},{6,-1}},0);
+        const auto flatten=[&](const std::vector<Vector>& rows) {
+            Vector flat;
+            flat.reserve(rows.size()*width);
+            for(const auto& row:rows) flat.insert(flat.end(),row.begin(),row.end());
+            return flat;
+        };
+        return h_set("literal-guarded-reset-face",width,
+            Matrix{inequalities.size(),width,flatten(inequalities)},std::move(bounds),
+            Matrix{equalities.size(),width,flatten(equalities)},std::move(values));
+    };
+
+    std::vector<HybridPathOptimalFaceCandidate> candidates;
+    for(const auto& expected:oracle) {
+        const auto program=std::find_if(programs.begin(),programs.end(),[&](const auto& item) {
+            return item.path==expected.path;
+        });
+        REQUIRE(program!=programs.end());
+        const bool preserve_q=expected.path.modes.back()==terminal_b.id;
+        const std::size_t width=preserve_q?9:8;
+        CHECK(program->joint_relation.metadata()->set.dimension==width);
+        const std::size_t terminal=width-(preserve_q?2:1);
+        Vector witness(width);
+        witness[1]=expected.minimizing_u;
+        witness[2]=expected.minimizing_u;
+        witness[3]=expected.minimizing_u;
+        witness[4]=0.25;
+        witness[5]=expected.minimizing_u;
+        witness[6]=0.25;
+        witness[terminal]=expected.minimizing_u;
+        if(preserve_q) witness[terminal+1]=0.25;
+        auto candidate=exact_candidate(*program,std::move(witness));
+        const auto face=sets::from_handle(literal_face(width,5,6,terminal,
+            expected.minimizing_u,preserve_q));
+        REQUIRE(std::holds_alternative<sets::SetData>(face));
+        candidate.relation=std::get<sets::SetData>(face);
+        candidates.push_back(std::move(candidate));
+    }
+    ExactLinearHHybridFamilyVerifier verifier;
+    const auto verified=verify_hybrid_portfolio_family(verifier,system,request,programs,
+        candidates,{2,8},{0,0});
+    REQUIRE(std::holds_alternative<HybridFamilyVerificationReport>(verified));
+    const auto& report=std::get<HybridFamilyVerificationReport>(verified);
+    CHECK(report.global_objective_optimality==HybridVerificationStatus::established);
+    CHECK(report.complete_family_coverage==HybridVerificationStatus::established);
+    REQUIRE(report.branches.size()==2);
+    for(const auto& branch:report.branches) {
+        CHECK(branch.feasibility==HybridVerificationStatus::established);
+        CHECK(branch.objective_optimality==HybridVerificationStatus::established);
+        CHECK(branch.continuous_coverage==HybridVerificationStatus::established);
+    }
 }
 
 TEST_CASE("single-parameter scalar interval verifier covers arbitrary finite horizons") {
