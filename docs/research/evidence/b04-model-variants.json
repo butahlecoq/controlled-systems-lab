@@ -1,0 +1,163 @@
+{
+  "scenario_id": "B04-historical",
+  "published_terminal_state": [
+    "12007/10",
+    "-22929/1000",
+    "2251/5",
+    "-7709/1000"
+  ],
+  "variants": {
+    "printed-l11": {
+      "source": "L11 printed equations (1.4)-(1.6) and Table 1, as transcribed in the historical manifest",
+      "initial_state": [
+        "152113/125",
+        "119500/1",
+        "438787/1000",
+        "45300/1"
+      ],
+      "B": [
+        "17/1",
+        "0/1",
+        "-12/1",
+        "0/1"
+      ],
+      "plane": {
+        "weights": [
+          12,
+          17
+        ],
+        "flow_plane_required": "22062227/1000",
+        "stock_plane_required": "-21227/10",
+        "flow_residual": "-427/1000",
+        "stock_residual": "1716499/1000",
+        "flow_rounding_radius": "29/20",
+        "stock_rounding_radius": "29/2000",
+        "flow_compatible": true,
+        "stock_compatible": false,
+        "compatible": false
+      }
+    },
+    "saved-a39-a01-a40": {
+      "source": "A39 saved state, A01 driver input matrix, A40 nonlinear kernel, curated in the saved-witness record",
+      "initial_state": [
+        "122028265395983/100000000000",
+        "119500/1",
+        "27500360290561/62500000000",
+        "45300/1"
+      ],
+      "B": [
+        "1104/55",
+        "0/1",
+        "-576/55",
+        "0/1"
+      ],
+      "plane": {
+        "weights": [
+          12,
+          23
+        ],
+        "flow_plane_required": "3095440554305551/125000000000",
+        "stock_plane_required": "-565554305551/1250000000",
+        "flow_residual": "-65554305551/125000000000",
+        "stock_residual": "-14444449/1250000000",
+        "flow_rounding_radius": "7/4",
+        "stock_rounding_radius": "7/400",
+        "flow_compatible": true,
+        "stock_compatible": true,
+        "compatible": true
+      }
+    }
+  },
+  "criterion": {
+    "reported_objective": "30899/1000",
+    "criterion_squared_at_published_point": "477371121/500000",
+    "rounding_interval": [
+      "61797/2000",
+      "61799/2000"
+    ],
+    "squared_interval": [
+      "3818869209/4000000",
+      "3819116401/4000000"
+    ],
+    "reported_objective_inside_rounding": true
+  },
+  "compatibility": {
+    "published_row_compatible_variants": [
+      "saved-a39-a01-a40"
+    ],
+    "published_row_incompatible_variants": [
+      "printed-l11"
+    ]
+  },
+  "law_versus_initial_state": {
+    "printed-c2-c3": {
+      "printed-l11": {
+        "state_oxidizer_flow": "152113/125",
+        "state_fuel_flow": "438787/1000",
+        "law_oxidizer_flow": "3862615640/3169317",
+        "law_fuel_flow": "928513375/2112878",
+        "oxidizer_flow_difference": "-732638179/396164625",
+        "fuel_flow_difference": "-704988007/1056439000",
+        "matches_state_exactly": false,
+        "matches_state_within_1e-6": false
+      },
+      "saved-a39-a01-a40": {
+        "state_oxidizer_flow": "122028265395983/100000000000",
+        "state_fuel_flow": "27500360290561/62500000000",
+        "law_oxidizer_flow": "3862615640/3169317",
+        "law_fuel_flow": "928513375/2112878",
+        "oxidizer_flow_difference": "484692000000653611/316931700000000000",
+        "fuel_flow_difference": "36410156249972279/66027437500000000",
+        "matches_state_exactly": false,
+        "matches_state_within_1e-6": false
+      }
+    },
+    "scaled-c2-c3": {
+      "printed-l11": {
+        "state_oxidizer_flow": "152113/125",
+        "state_fuel_flow": "438787/1000",
+        "law_oxidizer_flow": "3867462560/3169317",
+        "law_fuel_flow": "464839250/1056439",
+        "oxidizer_flow_difference": "-1338503179/396164625",
+        "fuel_flow_difference": "-1287550507/1056439000",
+        "matches_state_exactly": false,
+        "matches_state_within_1e-6": false
+      },
+      "saved-a39-a01-a40": {
+        "state_oxidizer_flow": "122028265395983/100000000000",
+        "state_fuel_flow": "27500360290561/62500000000",
+        "law_oxidizer_flow": "3867462560/3169317",
+        "law_fuel_flow": "464839250/1056439",
+        "oxidizer_flow_difference": "653611/316931700000000000",
+        "fuel_flow_difference": "-27721/66027437500000000",
+        "matches_state_exactly": false,
+        "matches_state_within_1e-6": true
+      }
+    }
+  },
+  "mixture": {
+    "nominal_mixture_ratio": "8/3",
+    "nominal_ratio_identity_1200_over_450": true,
+    "initial_mixture_perturbation": "8/75",
+    "initial_perturbation_relative_to_K": "1/25",
+    "throttle_sensitivity_c1": "8/75",
+    "reachable_mixture_band_for_u_in_unit_interval": [
+      "0/1",
+      "16/75"
+    ],
+    "phase_box_upper_mixture_face": "17/6",
+    "phase_box_upper_face_excess_over_K": "1/6",
+    "phase_box_lower_mixture_face": "98/39",
+    "phase_box_lower_face_excess_over_K": "-2/13",
+    "phase_box_binds_above_reachable_band": true,
+    "mixture_sensitivity_per_variant": {
+      "printed-l11": "49/450",
+      "saved-a39-a01-a40": "8/75"
+    },
+    "mixture_sensitivity_matches_c1_per_variant": {
+      "printed-l11": false,
+      "saved-a39-a01-a40": true
+    }
+  },
+  "scope": "Exact rational comparison of two published B04 transcriptions against the published row; no optimizer, no private source, no nonlinear simulation and no historical run"
+}
