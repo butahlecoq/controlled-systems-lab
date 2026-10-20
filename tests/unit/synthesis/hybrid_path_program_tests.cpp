@@ -2053,7 +2053,7 @@ public:
         model::HybridRelationLimits,optimization::ObjectivePolicy,
         std::stop_token) const override {
         cancellation_->request_stop();
-        return std::monostate{};
+        return OperationStopped{StopReason::cancelled,"fixture requested cancellation"};
     }
     HybridDirectTrajectoryCapabilities capabilities() const noexcept override {
         ++capability_calls;
@@ -2076,11 +2076,12 @@ public:
     mutable int capability_calls{};
     mutable int build_calls{};
     HybridDirectTrajectoryPreflightResult preflight(const model::HybridSystem&,
-        const model::HybridRequest&,std::span<const model::HybridPath>,
-        model::HybridRelationLimits,optimization::ObjectivePolicy,
+        const model::HybridRequest&,std::span<const model::HybridPath> paths,
+        model::HybridRelationLimits limits,optimization::ObjectivePolicy,
         std::stop_token) const override {
         ++preflight_calls;
-        return std::monostate{};
+        return HybridDirectTrajectoryPreflightSuccess{
+            std::vector<model::HybridPath>(paths.begin(),paths.end()),limits};
     }
     HybridDirectTrajectoryCapabilities capabilities() const noexcept override {
         ++capability_calls;
@@ -2116,7 +2117,8 @@ public:
             return HybridDirectTrajectoryPreflightFailure{paths.front(),limits,{},
                 {DiagnosticCode::unsupported,"fixture.trajectory.objective_policy",
                  "Adapter does not admit this numerical tolerance policy"}};
-        return std::monostate{};
+        return HybridDirectTrajectoryPreflightSuccess{
+            std::vector<model::HybridPath>(paths.begin(),paths.end()),limits};
     }
     HybridDirectTrajectoryCapabilities capabilities() const noexcept override {
         ++capability_calls;
@@ -2144,7 +2146,8 @@ public:
         model::HybridRelationLimits limits,optimization::ObjectivePolicy,
         std::stop_token) const override {
         ++preflight_calls;
-        if(paths.size()==3) return std::monostate{};
+        if(paths.size()==3) return HybridDirectTrajectoryPreflightSuccess{
+            std::vector<model::HybridPath>(paths.begin(),paths.end()),limits};
         const auto path=paths.empty()?model::HybridPath{}:paths.front();
         return HybridDirectTrajectoryPreflightFailure{path,limits,{},Diagnostic{
             DiagnosticCode::unsupported,"fixture.inventory_only",
@@ -2161,6 +2164,32 @@ public:
         ++build_calls;
         return Diagnostics{{DiagnosticCode::unsupported,"fixture.inventory_build",
             "fixture stopped after full inventory admission"}};
+    }
+};
+
+class PartialReceiptTrajectoryPreflightAdapter final : public HybridDirectTrajectoryAdapter {
+public:
+    mutable int capability_calls{};
+    mutable int build_calls{};
+    HybridDirectTrajectoryPreflightResult preflight(const model::HybridSystem&,
+        const model::HybridRequest&,std::span<const model::HybridPath> paths,
+        model::HybridRelationLimits limits,optimization::ObjectivePolicy,
+        std::stop_token) const override {
+        std::vector<model::HybridPath> admitted;
+        if(!paths.empty()) admitted.push_back(paths.front());
+        return HybridDirectTrajectoryPreflightSuccess{std::move(admitted),limits};
+    }
+    HybridDirectTrajectoryCapabilities capabilities() const noexcept override {
+        ++capability_calls;
+        return {true,true,true,Assurance::numerical};
+    }
+    HybridPathProgramResult build_path(const model::HybridSystem&,
+        const model::HybridRequest&,const model::HybridPath&,ProblemId,
+        model::HybridRelationLimits,optimization::ObjectivePolicy,
+        std::stop_token) const override {
+        ++build_calls;
+        return Diagnostics{{DiagnosticCode::unsupported,"fixture.partial_receipt",
+            "unexpected build after partial admission receipt"}};
     }
 };
 
@@ -5889,6 +5918,21 @@ TEST_CASE("direct trajectory adapters preflight the full path inventory before c
     CHECK(single_adapter.preflight_path_count==1);
     CHECK(single_adapter.capability_calls==0);
     CHECK(single_adapter.build_calls==0);
+}
+
+TEST_CASE("direct trajectory preflight rejects a partial success receipt before capabilities or builds") {
+    auto [system,request]=variable_size_parallel_profile();
+    PartialReceiptTrajectoryPreflightAdapter adapter;
+    const auto result=build_hybrid_portfolio_programs(adapter,system,request,
+        {"partial-preflight-receipt"},{1,8},{16,64,1024});
+    REQUIRE(std::holds_alternative<model::HybridPathCompositionFailureReport>(result));
+    const auto& failure=std::get<model::HybridPathCompositionFailureReport>(result);
+    CHECK(failure.path.edges==std::vector<model::HybridEdgeId>{{"to-large"}});
+    const auto* diagnostic=std::get_if<Diagnostic>(&failure.failure);
+    REQUIRE(diagnostic);
+    CHECK(diagnostic->field=="hybrid.adapter.preflight_success_inventory");
+    CHECK(adapter.capability_calls==0);
+    CHECK(adapter.build_calls==0);
 }
 
 TEST_CASE("later unsupported guard and reset operations reject the full inventory before branch builds") {

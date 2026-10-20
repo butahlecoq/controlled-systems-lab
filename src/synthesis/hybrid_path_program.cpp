@@ -56,8 +56,10 @@ Diagnostics hybrid_path_admission_errors(const model::HybridSystem& system,
 }
 using HybridTrajectoryPortfolioPreflightResult =
     std::variant<std::monostate,Diagnostics,OperationStopped>;
-using HybridTrajectoryOperationPreflightResult = std::variant<std::monostate,
+using HybridTrajectoryOperationPreflightResult = std::variant<
+    HybridDirectTrajectoryPreflightSuccess,
     model::HybridPathCompositionFailureReport,Diagnostics,OperationStopped>;
+bool same_limits(model::HybridRelationLimits left,model::HybridRelationLimits right);
 
 HybridTrajectoryOperationPreflightResult preflight_hybrid_trajectory_operations(
     const HybridDirectTrajectoryAdapter& adapter,const model::HybridSystem& system,
@@ -96,11 +98,30 @@ HybridTrajectoryOperationPreflightResult preflight_hybrid_trajectory_operations(
         return model::HybridPathCompositionFailureReport{failure->path,failure->limits,
             failure->relation_operations,failure->diagnostic};
     }
+    if(const auto* success=std::get_if<HybridDirectTrajectoryPreflightSuccess>(&result)) {
+        if(!same_limits(success->limits,limits)) {
+            const auto path=paths.empty()?model::HybridPath{}:paths.front();
+            return evidence_rejection(path,Diagnostic{DiagnosticCode::evidence_mismatch,
+                "hybrid.adapter.preflight_success_limits",
+                "Direct-trajectory preflight success receipt lost the configured relation limits"});
+        }
+        const auto shared=std::mismatch(paths.begin(),paths.end(),
+            success->admitted_paths.begin(),success->admitted_paths.end());
+        if(shared.first!=paths.end()||shared.second!=success->admitted_paths.end()) {
+            const auto index=static_cast<std::size_t>(std::distance(paths.begin(),shared.first));
+            const auto path=paths.empty()?model::HybridPath{}:paths[std::min(index,paths.size()-1)];
+            return evidence_rejection(path,Diagnostic{DiagnosticCode::evidence_mismatch,
+                "hybrid.adapter.preflight_success_inventory",
+                "Direct-trajectory preflight success receipt does not match the complete ordered path inventory"});
+        }
+        return *success;
+    }
     if(const auto* stopped=std::get_if<OperationStopped>(&result)) return *stopped;
     if(cancellation.stop_requested())
         return OperationStopped{StopReason::cancelled,
             "Hybrid trajectory construction was cancelled after adapter preflight"};
-    return std::monostate{};
+    return HybridDirectTrajectoryPreflightSuccess{
+        std::vector<model::HybridPath>(paths.begin(),paths.end()),limits};
 }
 
 HybridTrajectoryPortfolioPreflightResult preflight_hybrid_trajectory_capabilities(
@@ -583,7 +604,8 @@ HybridDirectTrajectoryPreflightResult HybridDirectTrajectoryAdapter::preflight(
         return HybridDirectTrajectoryPreflightFailure{path,limits,{},diagnostics->front()};
     }
     if(const auto* stopped=std::get_if<OperationStopped>(&result)) return *stopped;
-    return std::monostate{};
+    return HybridDirectTrajectoryPreflightSuccess{
+        std::vector<model::HybridPath>(paths.begin(),paths.end()),limits};
 }
 
 namespace {

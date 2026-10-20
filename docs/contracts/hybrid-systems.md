@@ -482,10 +482,16 @@ reject an unsupported policy before capability queries or program building.
 Validated objective assurance remains unsupported. Solver execution prepares
 all branch programs before creating any solver workspace; direct-trajectory,
 projected-reachability, and family-verification adapters preflight their
-declared path or request inventories before dispatch. These checks do not yet
-meet the full model-wide admission contract above: complete support accounting
-for every requested operation across the mode/edge structure, beyond each
-selected adapter's declared inventory, complete terminal-policy semantics
+declared path or request inventories before dispatch. Successful direct-
+trajectory preflight returns an ordered path-inventory receipt with the
+configured relation limits. The framework rejects an incomplete, reordered,
+or mismatched receipt before querying capabilities or building any branch.
+This makes path-inventory coverage observable at that adapter boundary. The
+receipt is still an adapter attestation: it does not independently prove that
+every operation within each path was supported, and the reachability,
+trajectory, and verifier adapters do not yet share a framework-generated
+model-wide operation plan. Complete support accounting for every requested
+operation across the mode/edge structure, complete terminal-policy semantics
 beyond the declared objective-class/assurance/tolerance checks, and broader
 multiple-parameter verifier coverage remain EXT-07 work.
 

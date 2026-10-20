@@ -206,8 +206,16 @@ struct HybridDirectTrajectoryPreflightFailure {
     // deterministic, request-scoped boundary.
     Diagnostic diagnostic;
 };
-using HybridDirectTrajectoryPreflightResult = std::variant<std::monostate,
-    HybridDirectTrajectoryPreflightFailure, OperationStopped>;
+// A successful adapter admission must attest to the exact ordered request
+// inventory and limits it checked. The wrapper validates this receipt before
+// it queries capabilities or starts any path build.
+struct HybridDirectTrajectoryPreflightSuccess {
+    std::vector<model::HybridPath> admitted_paths;
+    model::HybridRelationLimits limits;
+};
+using HybridDirectTrajectoryPreflightResult = std::variant<
+    HybridDirectTrajectoryPreflightSuccess, HybridDirectTrajectoryPreflightFailure,
+    OperationStopped>;
 
 // Replaceable direct-trajectory boundary. Implementations return the same
 // branch-labelled joint relation, lifted objective, and optimization program.
@@ -220,7 +228,9 @@ public:
     // validates assurance and tolerance shape; adapters own the meaning and
     // accepted ranges of otherwise valid numerical tolerances. The default
     // declares the built-in joint-H representation boundary; adapters using
-    // another representation must override it.
+    // another representation must override it. A successful override returns
+    // every supplied path in the same order and the exact configured relation
+    // limits in HybridDirectTrajectoryPreflightSuccess.
     virtual HybridDirectTrajectoryPreflightResult preflight(const model::HybridSystem&,
         const model::HybridRequest&, std::span<const model::HybridPath>,
         model::HybridRelationLimits, optimization::ObjectivePolicy,
