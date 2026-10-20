@@ -2024,6 +2024,24 @@ public:
     }
 };
 
+class RecordingDefaultPreflightTrajectoryAdapter final : public HybridDirectTrajectoryAdapter {
+public:
+    mutable int capability_calls{};
+    mutable int build_calls{};
+    HybridDirectTrajectoryCapabilities capabilities() const noexcept override {
+        ++capability_calls;
+        return {true,true,true,Assurance::numerical};
+    }
+    HybridPathProgramResult build_path(const model::HybridSystem&,
+        const model::HybridRequest&,const model::HybridPath&,ProblemId,
+        model::HybridRelationLimits,optimization::ObjectivePolicy,
+        std::stop_token) const override {
+        ++build_calls;
+        return Diagnostics{{DiagnosticCode::unsupported,"fixture.default_preflight",
+            "unexpected build after default operation preflight"}};
+    }
+};
+
 class CancellingTrajectoryPreflightAdapter final : public HybridDirectTrajectoryAdapter {
 public:
     explicit CancellingTrajectoryPreflightAdapter(std::stop_source& cancellation)
@@ -5892,7 +5910,8 @@ TEST_CASE("later unsupported guard and reset operations reject the full inventor
             system.edges.back().guards[0]=
                 std::get<sets::SetData>(std::move(representation)).as_handle();
 
-        const auto result=build_hybrid_portfolio_programs(system,request,
+        RecordingDefaultPreflightTrajectoryAdapter adapter;
+        const auto result=build_hybrid_portfolio_programs(adapter,system,request,
             {"complete-operation-inventory"},{1,8},{16,64,1024});
         REQUIRE(std::holds_alternative<model::HybridPathCompositionFailureReport>(result));
         const auto& failure=std::get<model::HybridPathCompositionFailureReport>(result);
@@ -5903,6 +5922,8 @@ TEST_CASE("later unsupported guard and reset operations reject the full inventor
         CHECK(diagnostic->field==(unsupported_reset?
             "hybrid.reset.representation":"hybrid.guard.representation"));
         CHECK(diagnostic->explanation.find("stage 0 edge to-wide")!=std::string::npos);
+        CHECK(adapter.capability_calls==0);
+        CHECK(adapter.build_calls==0);
     }
 }
 
