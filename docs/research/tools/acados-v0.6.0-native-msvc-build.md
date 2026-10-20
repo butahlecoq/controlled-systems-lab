@@ -42,9 +42,16 @@ $buildDir = 'D:\work\PhD\builds\acados-v0.6.0-build'
 $installDir = 'D:\work\PhD\builds\acados-v0.6.0-install'
 $cmake = 'C:\Program Files\Microsoft Visual Studio\2022\Community\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\bin\cmake.exe'
 
+foreach ($path in @($acadosRoot, $buildDir, $installDir)) {
+  if (Test-Path -LiteralPath $path) { throw "Refusing to reuse existing path: $path" }
+}
+
 git clone https://github.com/acados/acados.git $acadosRoot
+if ($LASTEXITCODE -ne 0) { throw 'acados clone failed' }
 git -C $acadosRoot checkout --detach 503364817c872d474ab5bed219c26760ac267769
+if ($LASTEXITCODE -ne 0) { throw 'pinned acados checkout failed' }
 git -C $acadosRoot submodule update --init --recursive
+if ($LASTEXITCODE -ne 0) { throw 'acados submodule checkout failed' }
 
 & $cmake -S $acadosRoot -B $buildDir -G 'Visual Studio 17 2022' -A x64 `
   "-DACADOS_INSTALL_DIR=$installDir" `
