@@ -3052,6 +3052,31 @@ TEST_CASE("exact linear H verifier rejects unreachable unsupported terminal obje
     CHECK(trajectory.capability_calls==0);
 }
 
+TEST_CASE("exact singleton verifier rejects unreachable unsupported terminal objectives before dispatch") {
+    auto system=example_system();
+    auto unreachable_terminal=system.modes.back();
+    unreachable_terminal.id={"unreachable-terminal"};
+    system.modes.push_back(std::move(unreachable_terminal));
+
+    auto request=example_request();
+    request.allowed_terminal_modes.push_back({"unreachable-terminal"});
+    request.terminal_objectives.push_back({{"unreachable-terminal"},
+        QuadraticTerminal{Matrix{2,2,{1,0,0,1}},Vector{0,0},0},"energy","J"});
+
+    ExactSingletonHybridFamilyVerifier verifier;
+    RejectingTrajectoryAdapter trajectory;
+    const auto result=build_hybrid_portfolio_programs_with_verifier(verifier,trajectory,
+        system,request,{"unreachable-singleton-terminal-objective"},{1,8},{16,64,1024});
+    REQUIRE(std::holds_alternative<Diagnostics>(result));
+    const auto& diagnostics=std::get<Diagnostics>(result);
+    REQUIRE_FALSE(diagnostics.empty());
+    CHECK(diagnostics.front().code==DiagnosticCode::unsupported);
+    CHECK(diagnostics.front().field=="hybrid.verification.exact_singleton_objective");
+    CHECK(diagnostics.front().explanation.find("unreachable-terminal")!=std::string::npos);
+    CHECK(trajectory.calls==0);
+    CHECK(trajectory.capability_calls==0);
+}
+
 TEST_CASE("hybrid portfolio capability preflight honors cancellation before scanning paths") {
     std::stop_source cancellation;
     CancellingCapabilityTrajectoryAdapter adapter{cancellation};

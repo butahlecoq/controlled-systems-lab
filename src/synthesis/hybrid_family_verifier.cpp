@@ -364,6 +364,21 @@ HybridFamilyVerificationCapabilities ExactSingletonHybridFamilyVerifier::capabil
 HybridFamilyVerificationPreflightResult ExactSingletonHybridFamilyVerifier::preflight(
     const HybridSystem& system,const HybridRequest& request,std::span<const HybridPath> paths,
     std::span<const HybridPlannedOperation> operation_plan,std::stop_token cancellation) const {
+    for (const auto& terminal_mode : request.allowed_terminal_modes) {
+        if (cancellation.stop_requested())
+            return OperationStopped{StopReason::cancelled,
+                "Exact singleton verifier admission was cancelled while checking terminal objectives"};
+        const auto objective = std::find_if(request.terminal_objectives.begin(),
+            request.terminal_objectives.end(), [&](const auto& candidate) {
+                return candidate.mode == terminal_mode;
+            });
+        if (objective == request.terminal_objectives.end() ||
+            !std::holds_alternative<LinearTerminal>(objective->objective))
+            return Diagnostics{{DiagnosticCode::unsupported,
+                "hybrid.verification.exact_singleton_objective",
+                "Terminal mode " + terminal_mode.value +
+                ": exact singleton verification currently supports linear terminal objectives"}};
+    }
     for(const auto& path:paths) {
         if(cancellation.stop_requested())
             return OperationStopped{StopReason::cancelled,

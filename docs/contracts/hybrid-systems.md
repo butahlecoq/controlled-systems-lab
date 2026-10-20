@@ -395,8 +395,9 @@ construction. Direct-trajectory preflight also checks every enumerated
 terminal objective's lifted variable count and dense matrix storage, without
 allocating the lifted matrices, before capability queries or branch builds.
 The verified builder additionally preflights the verifier domain. The built-in
-exact linear-H verifier checks objective support for every mode in `Q_T`,
-including modes with no enumerated path, before verifier dispatch. Other
+exact linear-H and exact singleton verifiers check objective support for every
+mode in `Q_T`, including modes with no enumerated path, before verifier
+dispatch. Other
 provider operations and broader terminal-policy semantics remain EXT-07
 acceptance work; the new generalized verifier does not provide validated
 assurance or the required exhaustive oracle coverage by itself.
