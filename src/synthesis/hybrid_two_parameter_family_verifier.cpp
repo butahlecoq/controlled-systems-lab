@@ -31,7 +31,8 @@ struct Branch {
     unsupported
   } state{State::unsupported};
   std::string why;
-  std::array<Aff, 7> tuple{};
+  std::vector<Aff> tuple;
+  std::array<std::size_t, 2> parameter_stages{};
   Poly parameter_box;
   Poly feasible;
   double ox{}, oy{}, oc{}, minimum{};
@@ -264,9 +265,16 @@ bool constrain(Poly &p, const I &in, const Aff &v, std::stop_token stop,
   }
   return true;
 }
-std::optional<std::size_t> exact_rank(std::vector<std::array<double, 7>> a) {
+std::optional<std::size_t> exact_rank(std::vector<std::vector<double>> a) {
+  if (a.empty())
+    return std::size_t{0};
+  const std::size_t columns = a.front().size();
+  if (std::any_of(a.begin(), a.end(), [&](const auto &row) {
+        return row.size() != columns;
+      }))
+    return {};
   std::size_t row = 0;
-  for (std::size_t col = 0; col < 7 && row < a.size(); ++col) {
+  for (std::size_t col = 0; col < columns && row < a.size(); ++col) {
     std::size_t pivot = row;
     while (pivot < a.size() && a[pivot][col] == 0)
       ++pivot;
@@ -274,13 +282,13 @@ std::optional<std::size_t> exact_rank(std::vector<std::array<double, 7>> a) {
       continue;
     std::swap(a[row], a[pivot]);
     const double d = a[row][col];
-    for (std::size_t j = col; j < 7; ++j)
+    for (std::size_t j = col; j < columns; ++j)
       if (!divi(a[row][j], d, a[row][j]))
         return {};
     for (std::size_t i = 0; i < a.size(); ++i)
       if (i != row && a[i][col] != 0) {
         const double factor = a[i][col];
-        for (std::size_t j = col; j < 7; ++j) {
+        for (std::size_t j = col; j < columns; ++j) {
           double p = 0, n = 0;
           if (!prod(factor, a[row][j], p) || !sum(a[i][j], -p, n))
             return {};
@@ -397,68 +405,92 @@ Branch eval(const HybridSystem &sys, const HybridRequest &req,
     b.why = s;
     return b;
   };
-  if (sys.horizon != 2 || path.modes.size() != 3 || path.edges.size() != 2 ||
-      req.initial.state.size() != 1 || !std::isfinite(req.initial.state[0]))
-    return unsupported("Supports two-stage scalar paths only");
-  const HybridMode *modes[3]{mode(sys, path.modes[0]), mode(sys, path.modes[1]),
-                             mode(sys, path.modes[2])};
-  const HybridTransitionEdge *edges[2]{edge(sys, path.edges[0]),
-                                       edge(sys, path.edges[1])};
-  for (int i = 0; i < 3; ++i)
-    if (!modes[i] || modes[i]->state_dimension != 1 ||
-        modes[i]->control_dimension != 1 || modes[i]->invariants.size() != 3 ||
-        modes[i]->control_sets.size() != 2)
-      return unsupported("Requires scalar modes with two stage-indexed "
-                         "controls and invariants");
-  for (int i = 0; i < 2; ++i)
-    if (!edges[i] || edges[i]->source != modes[i]->id ||
-        edges[i]->target != modes[i + 1]->id || edges[i]->guards.size() != 2 ||
-        edges[i]->reset_relations.size() != 2)
-      return unsupported("Path edges are outside the two-stage scalar profile");
+  const std::size_t horizon = sys.horizon;
+  if (horizon < 2 ||
+      horizon > (std::numeric_limits<std::size_t>::max() - 1) / 3 ||
+      path.modes.size() != horizon + 1 ||
+      path.edges.size() != horizon || req.initial.state.size() != 1 ||
+      !std::isfinite(req.initial.state[0]))
+    return unsupported("Requires at least two scalar stages");
+  std::vector<const HybridMode *> modes(horizon + 1);
+  std::vector<const HybridTransitionEdge *> edges(horizon);
+  for (std::size_t s = 0; s <= horizon; ++s) {
+    modes[s] = mode(sys, path.modes[s]);
+    if (!modes[s] || modes[s]->state_dimension != 1 ||
+        modes[s]->control_dimension != 1 ||
+        modes[s]->invariants.size() != horizon + 1 ||
+        modes[s]->control_sets.size() != horizon)
+      return unsupported("Requires scalar modes with stage-indexed controls and invariants");
+  }
+  for (std::size_t s = 0; s < horizon; ++s) {
+    edges[s] = edge(sys, path.edges[s]);
+    if (!edges[s] || edges[s]->source != modes[s]->id ||
+        edges[s]->target != modes[s + 1]->id ||
+        edges[s]->guards.size() != horizon ||
+        edges[s]->reset_relations.size() != horizon)
+      return unsupported("Path edges are outside the scalar profile");
+  }
   bool cancelled = false, exact = true;
   std::size_t rows_used = 0, clips_used = 0;
-  std::array<I, 2> controls{};
-  for (int s = 0; s < 2; ++s) {
-    auto i = interval(modes[s]->control_sets[s], stop, cancelled, rows_used);
-    if (!i)
+  std::array<std::size_t, 2> parameter_stages{};
+  std::array<I, 2> parameter_intervals{};
+  std::size_t parameter_count = 0;
+  std::vector<I> controls(horizon);
+  for (std::size_t s = 0; s < horizon; ++s) {
+    auto control = interval(modes[s]->control_sets[s], stop, cancelled, rows_used);
+    if (!control)
       return unsupported("Control set is unsupported");
-    controls[s] = *i;
-    if (i->empty) {
+    controls[s] = *control;
+    if (control->empty) {
       b.state = Branch::State::infeasible;
       return b;
     }
-    if (!std::isfinite(i->lo) || !std::isfinite(i->hi) || i->lo >= i->hi)
-      return unsupported(
-          "Requires two bounded non-singleton interval controls");
+    if (!std::isfinite(control->lo) || !std::isfinite(control->hi))
+      return unsupported("Requires bounded control intervals");
+    if (control->lo < control->hi) {
+      if (parameter_count == parameter_stages.size())
+        return unsupported("Requires exactly two non-singleton control intervals");
+      parameter_stages[parameter_count] = s;
+      parameter_intervals[parameter_count] = *control;
+      ++parameter_count;
+    }
   }
-  b.feasible = {{controls[0].lo, controls[1].lo},
-                {controls[0].hi, controls[1].lo},
-                {controls[0].hi, controls[1].hi},
-                {controls[0].lo, controls[1].hi}};
+  if (parameter_count != 2)
+    return unsupported("Requires exactly two non-singleton control intervals");
+  b.parameter_stages = parameter_stages;
+  b.feasible = {{parameter_intervals[0].lo, parameter_intervals[1].lo},
+                {parameter_intervals[0].hi, parameter_intervals[1].lo},
+                {parameter_intervals[0].hi, parameter_intervals[1].hi},
+                {parameter_intervals[0].lo, parameter_intervals[1].hi}};
   b.parameter_box = b.feasible;
+  const std::size_t tuple_size = 1 + 3 * horizon;
+  b.tuple.resize(tuple_size);
   b.tuple[0].c = req.initial.state[0];
   Aff state = b.tuple[0];
-  for (int s = 0; s < 2; ++s) {
+  for (std::size_t s = 0; s < horizon; ++s) {
     auto inv = interval(modes[s]->invariants[s], stop, cancelled, rows_used);
     if (!inv)
       return unsupported("Invariant set is unsupported");
     if (!constrain(b.feasible, *inv, state, stop, exact, clips_used))
       return unsupported("Polygon clipping cancelled or exceeded exactness");
     Aff u{};
-    if (s == 0)
+    if (s == parameter_stages[0])
       u = {0, 1, 0};
-    else
+    else if (s == parameter_stages[1])
       u = {0, 0, 1};
-    b.tuple[1 + 3 * s] = s == 0 ? Aff{0, 1, 0} : Aff{0, 0, 1};
+    else
+      u.c = controls[s].lo;
+    b.tuple[1 + 3 * s] = u;
+    if (!constrain(b.feasible, controls[s], u, stop, exact, clips_used))
+      return unsupported("Control interval clipping failed");
     const auto *flows = std::get_if<std::vector<LinearStage>>(&modes[s]->flow);
-    const LinearStage *f = flows && flows->size() == 2
+    const LinearStage *f = flows && flows->size() == horizon
                                ? &(*flows)[s]
                                : std::get_if<LinearStage>(&modes[s]->flow);
     if (!f || !affine_flow(*f, state, u, b.tuple[2 + 3 * s]))
       return unsupported("Flow arithmetic or shape is unsupported");
     Aff pre = b.tuple[2 + 3 * s];
-    auto preinv =
-        interval(modes[s]->invariants[s + 1], stop, cancelled, rows_used);
+    auto preinv = interval(modes[s]->invariants[s + 1], stop, cancelled, rows_used);
     auto guard = interval(edges[s]->guards[s], stop, cancelled, rows_used);
     if (!preinv || !guard)
       return unsupported("Pre-reset invariant or guard is unsupported");
@@ -470,15 +502,13 @@ Branch eval(const HybridSystem &sys, const HybridRequest &req,
     ++rows_used;
     double ro = 0, rg = 0;
     if (!reset_affine(edges[s]->reset_relations[s], ro, rg))
-      return unsupported(
-          "Requires deterministic exactly representable scalar affine resets");
+      return unsupported("Requires deterministic exactly representable scalar affine resets");
     Aff post{ro, 0, 0};
     if (!addmul(post.c, post.x, post.y, pre, rg))
       return unsupported("Reset arithmetic is not exact");
     b.tuple[3 + 3 * s] = post;
     state = post;
-    auto postinv =
-        interval(modes[s + 1]->invariants[s + 1], stop, cancelled, rows_used);
+    auto postinv = interval(modes[s + 1]->invariants[s + 1], stop, cancelled, rows_used);
     if (!postinv)
       return unsupported("Post-reset invariant is unsupported");
     if (!constrain(b.feasible, *postinv, post, stop, exact, clips_used))
@@ -488,7 +518,7 @@ Branch eval(const HybridSystem &sys, const HybridRequest &req,
       return b;
     }
   }
-  auto finalinv = interval(modes[2]->invariants[2], stop, cancelled, rows_used);
+  auto finalinv = interval(modes.back()->invariants[horizon], stop, cancelled, rows_used);
   if (!finalinv)
     return unsupported("Terminal invariant is unsupported");
   if (!constrain(b.feasible, *finalinv, state, stop, exact, clips_used))
@@ -502,26 +532,21 @@ Branch eval(const HybridSystem &sys, const HybridRequest &req,
     return unsupported("Feasible polygon dimension is not exactly representable");
   if (*feasible_dimension != 2)
     return unsupported("Degenerate feasible control polygons are unsupported");
-  auto obj = std::find_if(
-      req.terminal_objectives.begin(), req.terminal_objectives.end(),
-      [&](const auto &o) { return o.mode == modes[2]->id; });
+  auto obj = std::find_if(req.terminal_objectives.begin(), req.terminal_objectives.end(),
+      [&](const auto &o) { return o.mode == modes.back()->id; });
   if (obj == req.terminal_objectives.end())
     return unsupported("Missing terminal objective");
   const auto *l = std::get_if<LinearTerminal>(&obj->objective);
   if (!l || l->coefficients.size() != 1)
     return unsupported("Requires scalar linear terminal objective");
-  double px = 0, py = 0;
-  if (!prod(l->coefficients[0], state.x, px) ||
-      !prod(l->coefficients[0], state.y, py) ||
+  if (!prod(l->coefficients[0], state.x, b.ox) ||
+      !prod(l->coefficients[0], state.y, b.oy) ||
       !prod(l->coefficients[0], state.c, b.oc) || !sum(b.oc, l->offset, b.oc))
     return unsupported("Objective arithmetic is not exact");
-  b.ox = px;
-  b.oy = py;
   b.minimum = std::numeric_limits<double>::infinity();
   for (auto p : b.feasible) {
     double x = 0, y = 0, z = 0;
-    if (!prod(px, p.x, x) || !prod(py, p.y, y) || !sum(x, y, z) ||
-        !sum(z, b.oc, z))
+    if (!prod(b.ox, p.x, x) || !prod(b.oy, p.y, y) || !sum(x, y, z) || !sum(z, b.oc, z))
       return unsupported("Objective vertex arithmetic is not exact");
     b.minimum = std::min(b.minimum, z);
   }
@@ -572,6 +597,11 @@ TwoParameterScalarPolytopeHybridFamilyVerifier::verify(
   const auto profile_diagnostics = model::check_hybrid_profile(s, r);
   if (!profile_diagnostics.empty())
     return profile_diagnostics;
+  if (s.horizon > (std::numeric_limits<std::size_t>::max() - 1) / 3)
+    return Diagnostics{{DiagnosticCode::unsupported,
+                        "hybrid.verification.two_parameter_dimension",
+                        "Joint relation dimension overflows size_t"}};
+  const std::size_t tuple_size = 1 + 3 * s.horizon;
   auto inv = detail::independently_enumerate_paths(
       s, r, paths.size(), std::max<std::size_t>(64, (s.edges.size() + 1) * 16),
       [&] { return stop.stop_requested(); });
@@ -665,31 +695,31 @@ TwoParameterScalarPolytopeHybridFamilyVerifier::verify(
     const auto hull_dimension = dimension(b.feasible);
     const bool program_domain =
         h && programs[i].path == paths[i] &&
-        programs[i].relation_limits.max_variables >= 7 &&
-        programs[i].joint_relation.metadata()->set.dimension == 7 &&
-        h->equalities.cols() == 7 && h->inequalities.cols() == 7 &&
+        programs[i].relation_limits.max_variables >= tuple_size &&
+        programs[i].joint_relation.metadata()->set.dimension == tuple_size &&
+        h->equalities.cols() == tuple_size && h->inequalities.cols() == tuple_size &&
         h->equalities.rows() + h->inequalities.rows() <= 4096 &&
         h->equalities.rows() <= programs[i].relation_limits.max_rows &&
         h->inequalities.rows() <= programs[i].relation_limits.max_rows &&
         h->equality_values.size() == h->equalities.rows() &&
         h->upper_bounds.size() == h->inequalities.rows() &&
         (h->equalities.rows() + h->inequalities.rows()) <=
-            programs[i].relation_limits.max_matrix_elements / 7 &&
+            programs[i].relation_limits.max_matrix_elements / tuple_size &&
         hull_dimension && *hull_dimension == 2;
     bool valid = program_domain;
     bool pullback_exact = true;
     bool rank_exact = true;
     if (valid) {
-      std::vector<std::array<double, 7>> eq;
+      std::vector<std::vector<double>> eq;
       for (std::size_t row = 0; row < h->equalities.rows(); ++row) {
-        std::array<double, 7> eqrow{};
-        for (std::size_t col = 0; col < 7; ++col)
+        std::vector<double> eqrow(tuple_size);
+        for (std::size_t col = 0; col < tuple_size; ++col)
           eqrow[col] = h->equalities(row, col);
         eq.push_back(eqrow);
       }
       const auto rank = exact_rank(std::move(eq));
       rank_exact = rank.has_value();
-      valid = rank && *rank == 5;
+      valid = rank && *rank == tuple_size - 2;
     }
     auto relation_poly = b.parameter_box;
     if (valid) {
@@ -698,7 +728,7 @@ TwoParameterScalarPolytopeHybridFamilyVerifier::verify(
           return OperationStopped{StopReason::cancelled,
                                   "Two-parameter equality check cancelled"};
         double c = 0, x = 0, y = 0;
-        for (int j = 0; j < 7; ++j) {
+        for (std::size_t j = 0; j < tuple_size; ++j) {
           valid = valid &&
                   record_exact(prod(h->equalities(row, j), b.tuple[j].c, c),
                                pullback_exact);
@@ -722,7 +752,7 @@ TwoParameterScalarPolytopeHybridFamilyVerifier::verify(
           return OperationStopped{StopReason::cancelled,
                                   "Two-parameter inequality check cancelled"};
         double c = 0, x = 0, y = 0, bound = 0;
-        for (int j = 0; j < 7; ++j) {
+        for (std::size_t j = 0; j < tuple_size; ++j) {
           double q = 0;
           valid = valid &&
                   record_exact(prod(h->inequalities(row, j), b.tuple[j].c, q),
@@ -762,12 +792,12 @@ TwoParameterScalarPolytopeHybridFamilyVerifier::verify(
             ? nullptr
             : std::get_if<LinearTerminal>(&objective->objective);
     if (!program_linear || !terminal_linear ||
-        program_linear->objective().size() != 7 ||
+        program_linear->objective().size() != tuple_size ||
         terminal_linear->coefficients.size() != 1)
       valid = false;
     else
-      for (std::size_t j = 0; j < 7; ++j) {
-        const double expected = j == 6 ? terminal_linear->coefficients[0] : 0;
+      for (std::size_t j = 0; j < tuple_size; ++j) {
+        const double expected = j + 1 == tuple_size ? terminal_linear->coefficients[0] : 0;
         if (program_linear->objective()[j] != expected)
           valid = false;
       }
@@ -791,26 +821,26 @@ TwoParameterScalarPolytopeHybridFamilyVerifier::verify(
       const auto *ch = std::get_if<sets::HRepresentation>(&cr);
       Poly cp = b.parameter_box;
       bool face_pullback_exact = true;
-      bool cv = ch && cand->relation.metadata()->set.dimension == 7 &&
-                ch->equalities.cols() == 7 && ch->inequalities.cols() == 7;
+      bool cv = ch && cand->relation.metadata()->set.dimension == tuple_size &&
+                ch->equalities.cols() == tuple_size && ch->inequalities.cols() == tuple_size;
       const bool candidate_domain =
-          cv && cand->relation.metadata()->set.dimension == 7 &&
-          programs[i].relation_limits.max_variables >= 7 &&
+          cv && cand->relation.metadata()->set.dimension == tuple_size &&
+          programs[i].relation_limits.max_variables >= tuple_size &&
           ch->equalities.rows() + ch->inequalities.rows() <= 4096 &&
           ch->equalities.rows() <= programs[i].relation_limits.max_rows &&
           ch->inequalities.rows() <= programs[i].relation_limits.max_rows &&
           ch->equality_values.size() == ch->equalities.rows() &&
           ch->upper_bounds.size() == ch->inequalities.rows() &&
           (ch->equalities.rows() + ch->inequalities.rows()) <=
-              programs[i].relation_limits.max_matrix_elements / 7;
+              programs[i].relation_limits.max_matrix_elements / tuple_size;
       if (!candidate_domain)
         coverage_unsupported = true;
       cv = candidate_domain;
       if (cv) {
-        std::vector<std::array<double, 7>> eq;
+        std::vector<std::vector<double>> eq;
         for (std::size_t row = 0; row < ch->equalities.rows(); ++row) {
-          std::array<double, 7> eqrow{};
-          for (int j = 0; j < 7; ++j)
+          std::vector<double> eqrow(tuple_size);
+          for (std::size_t j = 0; j < tuple_size; ++j)
             eqrow[j] = ch->equalities(row, j);
           eq.push_back(eqrow);
         }
@@ -818,7 +848,7 @@ TwoParameterScalarPolytopeHybridFamilyVerifier::verify(
         const auto face_dim = dimension(face);
         if (!rank || !face_dim)
           coverage_unsupported = true;
-        cv = rank && face_dim && *rank == 7 - *face_dim;
+        cv = rank && face_dim && *rank == tuple_size - *face_dim;
       }
       if (cv) {
         for (std::size_t row = 0; row < ch->equalities.rows() && cv; ++row) {
@@ -827,7 +857,7 @@ TwoParameterScalarPolytopeHybridFamilyVerifier::verify(
                 StopReason::cancelled,
                 "Two-parameter face equality check cancelled"};
           double c = 0, x = 0, y = 0;
-          for (int j = 0; j < 7; ++j) {
+          for (std::size_t j = 0; j < tuple_size; ++j) {
             double q = 0;
             cv = cv &&
                  record_exact(prod(ch->equalities(row, j), b.tuple[j].c, q),
@@ -854,7 +884,7 @@ TwoParameterScalarPolytopeHybridFamilyVerifier::verify(
                 StopReason::cancelled,
                 "Two-parameter face inequality check cancelled"};
           double c = 0, x = 0, y = 0;
-          for (int j = 0; j < 7; ++j) {
+          for (std::size_t j = 0; j < tuple_size; ++j) {
             double q = 0;
             cv = cv &&
                  record_exact(prod(ch->inequalities(row, j), b.tuple[j].c, q),
@@ -887,13 +917,13 @@ TwoParameterScalarPolytopeHybridFamilyVerifier::verify(
         coverage_unsupported = true;
       covered =
           cv && ex && face_hull && candidate_hull &&
-          *face_hull == *candidate_hull && cand->anchor.size() == 7 &&
+          *face_hull == *candidate_hull && cand->anchor.size() == tuple_size &&
           cand->solver_result.termination == Termination::completed &&
           cand->solver_result.outcome.value == MathematicalOutcome::optimal &&
-          cand->solver_result.primal && cand->solver_result.primal->size() == 7;
+          cand->solver_result.primal && cand->solver_result.primal->size() == tuple_size;
       if (covered) {
         bool candidate_tuple_exact = true;
-        for (std::size_t j = 0; j < 7; ++j)
+        for (std::size_t j = 0; j < tuple_size; ++j)
           covered = covered &&
                     std::isfinite((*cand->solver_result.primal)[j]) &&
                     std::isfinite(cand->anchor[j]) &&
@@ -902,9 +932,10 @@ TwoParameterScalarPolytopeHybridFamilyVerifier::verify(
                         policy.absolute_tolerance +
                             policy.relative_tolerance *
                                 std::max(1.0, std::abs(cand->anchor[j]));
-        const P anchor{cand->anchor[1], cand->anchor[4]};
+        const P anchor{cand->anchor[1 + 3 * b.parameter_stages[0]],
+                       cand->anchor[1 + 3 * b.parameter_stages[1]]};
         covered = covered && point_in_poly(*face_hull, anchor);
-        for (std::size_t j = 0; j < 7 && covered; ++j) {
+        for (std::size_t j = 0; j < tuple_size && covered; ++j) {
           double x = 0, y = 0, v = 0;
           const bool exact =
               prod(b.tuple[j].x, anchor.x, x) &&

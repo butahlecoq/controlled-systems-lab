@@ -36,15 +36,15 @@ The implementation now has profile admission, bounded path enumeration, direct
 joint-H path programs, branch optimization, solver provenance, and numerical
 family verifiers for integral singleton paths, one-step scalar interval
 families, a finite-horizon scalar interval profile with exactly one free bounded
-control interval, and a separate two-stage scalar polygon profile with two free
-control parameters. All other controls in the single-parameter profile must be
-singleton; the two-parameter profile requires one bounded interval control at
-each of two stages. Invariants and guards are intervals and resets are exact
-scalar affine relations. Separate raw-graph and polygon-geometry checks cover
-tied two-stage continuous families; a three-stage regression fixture covers the
-generalized horizon path. These bounded profiles do not establish a verifier
-for higher-dimensional continuous polytopes or arbitrary horizons with multiple
-free controls, so those acceptance requirements remain open. Portfolio builders
+control interval, and a finite-horizon scalar polygon profile with exactly two
+free control parameters at distinct stages. All other controls must be
+singletons. Invariants and guards are intervals and resets are exact scalar
+affine relations. Separate raw-graph and polygon-geometry checks cover tied
+two-stage continuous families; a three-stage regression places the two free
+controls at stages zero and two with a fixed-control stage between them. These
+bounded profiles do not establish a verifier
+for higher-dimensional continuous polytopes or horizons with more than two free
+controls, so those acceptance requirements remain open. Portfolio builders
 now preflight the complete enumerated path inventory for supported direct
 joint-H representations and variable/row/matrix resource limits before
 constructing any branch relation. The combined verified-program builder also

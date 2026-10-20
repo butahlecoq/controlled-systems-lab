@@ -3166,6 +3166,69 @@ TEST_CASE("exact singleton hybrid verifier handles empty branches and rejects co
     CHECK(std::holds_alternative<OperationStopped>(adapter_cancelled));
 }
 
+TEST_CASE("two parameter scalar verifier supports free controls at separated stages") {
+  auto identity_reset = [] {
+    auto equalities = numeric::snapshot(Matrix{1, 2, {-1, 1}});
+    auto equality_values = numeric::snapshot_vector(Vector{0});
+    auto inequalities = numeric::snapshot(Matrix{0, 2, {}});
+    auto upper_bounds = numeric::snapshot_vector(Vector{});
+    REQUIRE(std::holds_alternative<numeric::MatrixView>(equalities));
+    REQUIRE(std::holds_alternative<numeric::VectorView>(equality_values));
+    REQUIRE(std::holds_alternative<numeric::MatrixView>(inequalities));
+    REQUIRE(std::holds_alternative<numeric::VectorView>(upper_bounds));
+    auto set = sets::make_h(
+        {SetId{"three-stage-identity"}, 2, {}},
+        {std::get<numeric::MatrixView>(inequalities),
+         std::get<numeric::VectorView>(upper_bounds),
+         std::get<numeric::MatrixView>(equalities),
+         std::get<numeric::VectorView>(equality_values)});
+    REQUIRE(std::holds_alternative<sets::SetData>(set));
+    return std::get<sets::SetData>(set).as_handle();
+  };
+  const auto free_a = interval("three-stage-u0", 0, 1);
+  const auto fixed = singleton_relation("three-stage-u1", {0});
+  const auto free_b = interval("three-stage-u2", 0, 1);
+  const auto universal_state = UniversalSet{1};
+  const auto zero_flow = LinearStage{Matrix{1, 1, {0}}, Matrix{1, 1, {1}},
+                                     Matrix{1, 0, {}}, Vector{0}};
+  model::HybridMode mode{{"three-stage-mode"}, 1, 1, {"x"}, {"u"}};
+  mode.flow = std::vector<LinearStage>{zero_flow, zero_flow, zero_flow};
+  mode.control_sets = {free_a, fixed, free_b};
+  mode.invariants = {universal_state, universal_state, universal_state,
+                     universal_state};
+  const auto reset = identity_reset();
+  model::HybridTransitionEdge edge{{"three-stage-loop"}, {"three-stage-mode"},
+      {"three-stage-mode"}, {universal_state, universal_state, universal_state},
+      {reset, reset, reset}};
+  model::HybridSystem system{3, {mode}, {edge}};
+  model::HybridRequest request{{{"three-stage-mode"}, {0}},
+      {{"three-stage-mode"}},
+      {{{"three-stage-mode"}, LinearTerminal{{0}, 0}, "constant", "units"}}};
+  auto built = build_hybrid_portfolio_programs(
+      system, request, {"three-stage-two-parameter"}, {3, 8},
+      {32, 128, 1280});
+  REQUIRE(std::holds_alternative<std::vector<HybridPathProgram>>(built));
+  auto programs = std::get<std::vector<HybridPathProgram>>(std::move(built));
+  REQUIRE(programs.size() == 1);
+  CHECK(programs.front().path.modes ==
+        std::vector<model::HybridModeId>(4, {"three-stage-mode"}));
+  CHECK(programs.front().path.edges ==
+        std::vector<model::HybridEdgeId>(3, {"three-stage-loop"}));
+  CHECK(programs.front().joint_relation.metadata()->set.dimension == 10);
+  auto face = exact_candidate(programs.front(), Vector(10, 0));
+  TwoParameterScalarPolytopeHybridFamilyVerifier verifier;
+  const std::array<model::HybridPath, 1> paths{programs.front().path};
+  auto result = verifier.verify(system, request, paths, programs,
+                                std::span<const HybridPathOptimalFaceCandidate>(&face, 1),
+                                {3, 8}, {});
+  REQUIRE(std::holds_alternative<HybridFamilyVerificationReport>(result));
+  const auto &report = std::get<HybridFamilyVerificationReport>(result);
+  CHECK(report.branches.size() == 1);
+  CHECK(report.branches.front().continuous_coverage ==
+        HybridVerificationStatus::established);
+  CHECK(report.complete_family_coverage == HybridVerificationStatus::established);
+}
+
 TEST_CASE("two parameter scalar verifier certifies a coupled polygon and "
           "rejects off-image extensions") {
   const auto reset = [](std::string id) {

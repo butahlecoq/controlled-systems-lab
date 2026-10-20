@@ -400,10 +400,11 @@ public:
         std::stop_token cancellation) const override;
 };
 
-// Independent exact-domain verifier for two-stage scalar trajectories with
-// one bounded interval control at each stage. It reconstructs the feasible
-// control polygon by exact half-plane clipping and checks full joint-relation
-// and optimal-face equality. Unsupported arithmetic or geometry fails closed.
+// Independent numerical verifier for any finite scalar horizon with exactly
+// two bounded non-singleton interval controls at distinct stages; all other
+// controls must be singletons. It reconstructs feasible polygons and checks
+// complete joint-relation and optimal-face coverage; unsupported arithmetic or
+// geometry fails closed.
 class TwoParameterScalarPolytopeHybridFamilyVerifier final : public HybridFamilyVerificationAdapter {
 public:
     HybridFamilyVerificationCapabilities capabilities() const noexcept override;

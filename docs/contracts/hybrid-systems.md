@@ -283,25 +283,27 @@ cannot establish. An independently infeasible path is certified only when its
 supplied relation is explicitly represented as empty; otherwise the portfolio
 result is unsupported. This verifier supports exactly one free control
 parameter; it does not cover general continuous polytope families or validated
-assurance. The two-parameter verifier below covers one bounded two-stage case
-with two free controls; broader multivariate domains remain unsupported. The
+assurance. The two-parameter verifier below covers exactly two bounded free
+controls at distinct stages over any finite scalar horizon; profiles with more
+free controls or higher-dimensional continuous relations remain unsupported. The
 `TwoStageScalarIntervalHybridFamilyVerifier` remains as a two-stage adapter and
 preserves its existing report identifier.
 
 `TwoParameterScalarPolytopeHybridFamilyVerifier` adds a separate finite-horizon
-slice for exactly two stages, scalar states and controls, one bounded
-non-singleton interval control at each stage, interval invariants and guards,
-and deterministic exactly representable scalar affine resets. It propagates
-both control parameters through the complete joint tuple, clips their bounded
-rectangle by exact half-planes, checks the supplied joint H-relation's affine
-hull as well as its projected polygon, and applies the same checks to each
-globally optimal face. Exact global ties retain their distinct path families.
-The implementation bounds both the cumulative interval rows and cumulative
-half-plane clips per path (4096 each), as well as polygon vertices (4096). It
-rejects degenerate feasible control polygons and unsupported H-representations,
-and fails closed when exact binary64 arithmetic cannot be established. This
-profile does not cover arbitrary horizons, more than two free controls,
-non-interval admissible sets, nondeterministic resets, or validated assurance.
+slice for scalar states and controls with exactly two bounded non-singleton
+interval controls at distinct stages; all other stage controls must be
+singletons. It accepts interval invariants and guards and deterministic exactly
+representable scalar affine resets. It propagates both control parameters
+through the complete joint tuple, clips their bounded rectangle by exact
+half-planes, checks the supplied joint H-relation's affine hull as well as its
+projected polygon, and applies the same checks to each globally optimal face.
+Exact global ties retain their distinct path families. The implementation
+bounds both the cumulative interval rows and cumulative half-plane clips per
+path (4096 each), as well as polygon vertices (4096). It rejects degenerate
+feasible control polygons and unsupported H-representations, and fails closed
+when exact binary64 arithmetic cannot be established. This profile does not
+cover more than two free controls, non-interval admissible sets,
+nondeterministic resets, or validated assurance.
 
 ## Initial supported profile and rejection boundary
 
@@ -323,7 +325,8 @@ recorded separately. The implementation includes an exact integral singleton
 verifier, a one-step scalar interval verifier, and a finite-horizon
 single-parameter scalar interval verifier. A separate
 `TwoParameterScalarPolytopeHybridFamilyVerifier` supports exactly two free
-controls in a bounded two-stage scalar profile. The exact singleton verifier
+controls at distinct stages in a bounded scalar profile with any finite
+horizon. The exact singleton verifier
 has the checked-integral domain described above. The continuous scalar
 interval and polygon verifiers require their documented scalar interval or
 two-dimensional polygon domains and deterministic scalar affine resets. They
