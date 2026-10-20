@@ -2971,6 +2971,58 @@ TEST_CASE("two parameter scalar verifier certifies a coupled polygon and "
       std::get<sets::HRepresentation>(half->joint_relation.representation());
   const auto full_h =
       std::get<sets::HRepresentation>(full->joint_relation.representation());
+  const auto literal_parameter_vertices = [](const sets::HRepresentation &h) {
+    constexpr std::array<double, 7> u0_weight{0, 1, 1, 1, 0, 1, 1};
+    constexpr std::array<double, 7> u1_weight{0, 0, 0, 0, 1, 1, 1};
+    using Constraint = std::array<double, 3>;
+    std::vector<Constraint> constraints;
+    for (std::size_t row = 0; row < h.equalities.rows(); ++row) {
+      double u0 = 0, u1 = 0;
+      for (std::size_t col = 0; col < 7; ++col) {
+        u0 += h.equalities(row, col) * u0_weight[col];
+        u1 += h.equalities(row, col) * u1_weight[col];
+      }
+      if (u0 != 0 || u1 != 0 || h.equality_values[row] != 0)
+        return std::vector<std::array<double, 2>>{};
+    }
+    for (std::size_t row = 0; row < h.inequalities.rows(); ++row) {
+      double u0 = 0, u1 = 0;
+      for (std::size_t col = 0; col < 7; ++col) {
+        u0 += h.inequalities(row, col) * u0_weight[col];
+        u1 += h.inequalities(row, col) * u1_weight[col];
+      }
+      constraints.push_back({u0, u1, h.upper_bounds[row]});
+    }
+    std::vector<std::array<double, 2>> vertices;
+    for (std::size_t i = 0; i < constraints.size(); ++i) {
+      for (std::size_t j = i + 1; j < constraints.size(); ++j) {
+        const auto &a = constraints[i];
+        const auto &b = constraints[j];
+        const double det = a[0] * b[1] - b[0] * a[1];
+        if (det == 0)
+          continue;
+        const std::array<double, 2> point{
+            (a[2] * b[1] - b[2] * a[1]) / det,
+            (a[0] * b[2] - b[0] * a[2]) / det};
+        if (std::all_of(constraints.begin(), constraints.end(),
+                        [&](const auto &constraint) {
+                          return constraint[0] * point[0] +
+                                     constraint[1] * point[1] <=
+                                 constraint[2];
+                        }))
+          vertices.push_back(point);
+      }
+    }
+    std::sort(vertices.begin(), vertices.end());
+    vertices.erase(std::unique(vertices.begin(), vertices.end()),
+                   vertices.end());
+    return vertices;
+  };
+  CHECK((literal_parameter_vertices(half_h) ==
+         std::vector<std::array<double, 2>>{{0, 0}, {0, 1}, {0.5, 0},
+                                            {0.5, 0.5}}));
+  CHECK((literal_parameter_vertices(full_h) ==
+         std::vector<std::array<double, 2>>{{0, 0}, {0, 1}, {1, 0}}));
   for (const auto &vertex : half_polygon)
     CHECK(satisfies(half_h, tuple(vertex[0], vertex[1])));
   for (const auto &vertex : full_polygon)
@@ -3137,11 +3189,17 @@ TEST_CASE("two parameter scalar verifier certifies a coupled polygon and "
   std::vector<model::HybridPath> verified_paths;
   for (const auto &program : programs)
     verified_paths.push_back(program.path);
-  auto degenerate_system = system;
-  degenerate_system.modes[2].invariants[2] = Singleton{{0}};
-  const auto degenerate_preflight =
-      verifier.preflight(degenerate_system, request, verified_paths, {});
-  CHECK(std::holds_alternative<Diagnostics>(degenerate_preflight));
+  for (const auto &terminal_set :
+       std::array<AdmissibleSet, 2>{Singleton{{0.5}}, Singleton{{0}}}) {
+    auto degenerate_system = system;
+    degenerate_system.modes[2].invariants[2] = terminal_set;
+    const auto degenerate_preflight =
+        verifier.preflight(degenerate_system, request, verified_paths, {});
+    CHECK(std::holds_alternative<Diagnostics>(degenerate_preflight));
+    const auto degenerate_report = verifier.verify(
+        degenerate_system, request, verified_paths, programs, {}, {0, 0}, {});
+    CHECK(std::holds_alternative<Diagnostics>(degenerate_report));
+  }
 
   auto infeasible_system = system;
   infeasible_system.modes[2].invariants[2] = EmptySet{1};
