@@ -2089,6 +2089,23 @@ TEST_CASE("two-stage scalar interval verifier checks tied continuous families in
         });
     };
     for(const auto& expected:oracle) {
+        const auto program=std::find_if(programs.begin(),programs.end(),[&](const auto& value) {
+            return value.path.edges.back().value==expected.path.edges.back().value;
+        });
+        REQUIRE(program!=programs.end());
+        const auto relation_representation=program->joint_relation.representation();
+        REQUIRE(std::holds_alternative<sets::HRepresentation>(relation_representation));
+        const auto& relation=std::get<sets::HRepresentation>(relation_representation);
+        REQUIRE(relation.inequalities.cols()==7);
+        const auto joint_at=[&](double parameter) {
+            return Vector{0,parameter,parameter,parameter,0,parameter,expected.cost};
+        };
+        CHECK(satisfies(relation,joint_at(expected.lower)));
+        CHECK(satisfies(relation,joint_at(expected.upper)));
+        const double excluded=expected.lower>0 ? expected.lower-0.25 :
+            (expected.upper<1 ? expected.upper+0.25 : -0.25);
+        CHECK_FALSE(satisfies(relation,joint_at(excluded)));
+
         const auto record=record_for(expected.path.edges.back().value);
         REQUIRE(record!=report.branches.end());
         INFO("branch " << expected.path.edges.back().value << " coverage " <<
