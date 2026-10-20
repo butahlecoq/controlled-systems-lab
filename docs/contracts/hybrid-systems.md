@@ -1,9 +1,12 @@
-# Hybrid system profile (proposed)
+# Hybrid system profile
 
-Status: proposed for review under EXT-07 #156. This document defines a
-finite-horizon, discrete-time hybrid profile and its admission boundary. It
-does not claim that the current model, synthesis, geometry, or verification
-modules implement the profile. The profile is deliberately distinct from the
+Status: accepted design contract. Exact-head specification and standards
+reviews cleared this contract in [PR #471](https://github.com/butahlecoq/controlled-systems-lab/pull/471)
+at `7632a4c`; it merged as `5e4f174`. Implementation is tracked separately in
+[EXT-07 #156](https://github.com/butahlecoq/controlled-systems-lab/issues/156)
+and [PR #472](https://github.com/butahlecoq/controlled-systems-lab/pull/472)
+and remains incomplete. The implementation-status notes below identify the
+supported subset and gaps. The profile is deliberately distinct from the
 finite/mixed control domains and observation-based policy profiles.
 
 ## Hybrid automaton data
@@ -137,7 +140,65 @@ implementations can differ in representation and algorithms, but must preserve
 this logical payload and the same existential trajectory semantics. Operation
 capabilities and assurance remain explicit per adapter; a missing composition,
 reconstruction, or completeness capability is rejected before workspace
-creation. No adapter seam or implementation is claimed to exist yet.
+creation. The fixed-path reachability API is replaceable through
+`HybridReachabilityAdapter` and returns a path-labelled joint relation with the
+configured limits and ordered operation trace. Its default implementation,
+`JointHReachabilityAdapter`, currently wraps the same full joint-H composer; it
+does not project intermediate coordinates or merge paths. This provides a
+replaceable reachability contract, but not yet an independent projected-set
+reachability algorithm. The direct-trajectory API is replaceable through
+`HybridDirectTrajectoryAdapter`; its default implementation,
+`JointHDirectTrajectoryAdapter`, builds a branch-labelled joint H relation and
+optimization program. Each direct adapter declares whether it preserves the
+branch-labelled relation, which objective classes it supports, and its
+assurance level; the wrapper rejects missing branch or objective capabilities
+before dispatch. Injected adapters must preserve that result contract and
+return diagnostics or cancellation without publishing a partial portfolio.
+The `HybridFamilyVerificationAdapter` boundary consumes the original model,
+request, exhaustive path inventory, branch programs, and candidate faces. Its
+wrapper checks complete path and report identity coverage and attaches each
+program's relation limits and ordered relation-operation/resource trace, plus
+any candidate face's solver-provider provenance, to that path's verification
+record. The report carries per-path feasibility, objective, and continuous-
+coverage statuses, but it is inspection data and cannot publish a
+`synthesis::OptimalFamily`.
+`ExactSingletonHybridFamilyVerifier` independently enumerates edge paths and
+reconstructs trajectories using checked integer arithmetic. It supports only
+integral initial states, singleton controls, singleton-representation resets,
+universal/singleton/empty invariants and guards, and linear terminal
+objectives. For optimal branches it checks that the supplied program and
+candidate relations are the same singleton, using exact full-rank integer
+equality checks for H representations. Continuous, nonintegral, overflowing,
+or otherwise unsupported cases return unsupported status. Independent path
+enumeration is bounded by the admitted inventory and a one-million-node
+traversal ceiling; exceeding either returns unsupported. This bounded
+numerical verifier is not a compiled proof authority and does not certify
+general continuous branch coverage.
+
+`OneStepScalarIntervalHybridFamilyVerifier` adds a separate numerical domain for
+one-stage paths with scalar source/target states, a scalar control, bounded
+feasible control intervals, scalar interval guards/invariants, deterministic
+scalar affine H-relation resets, and a linear terminal objective. It independently
+reconstructs each path's feasible control interval and objective, checks the
+full program relation against the reconstructed affine line, and checks each
+optimal-face candidate against the complete minimizing interval. It can certify
+ties whose continuous intervals differ. It rejects other horizons, dimensions,
+nondeterministic or non-scalar reset relations, unbounded feasible intervals,
+and unsupported set forms; H
+relation row and matrix limits are enforced. The verifier uses floating-point
+policy tolerances for candidate anchors, while equality rank is established
+using only exact binary floating-point row operations; if those operations
+cannot establish rank exactly, coverage is unsupported. It requires represented
+relation equalities and projected interval endpoints to match exactly as
+computed, and checks represented inequalities without tolerance expansion.
+Flow, reset-map, and objective arithmetic must be exactly representable in
+binary floating point. Inexact sums, overflow, and products whose exactness cannot be
+established (including possible underflow of the product residual) return
+unsupported. Global objective ties therefore require exact equality of exactly
+represented values. Near ties, contradictory relations, and near-equal
+candidate intervals are rejected instead of expanded by tolerance. It is
+limited to this domain; it does not establish general continuous-polytope
+family coverage or validated assurance.
 
 ## Initial supported profile and rejection boundary
 
@@ -193,6 +254,30 @@ must disclose dimensions, mode/edge counts, reachable path counts, generated
 and retained branch counts, provider identities, resource limits/observations,
 and rejected capabilities. Any pruning requires a reviewed proof that it
 preserves all optimal branches and their continuous relations.
+
+The current model-level `HybridCapabilityReport` reports the requested horizon,
+mode and transition counts, each mode's state/control dimensions, maxima across
+the mode catalogue, profile-admission diagnostics, caller path/horizon limits,
+and a complete allowed-path count only when enumeration finishes within those
+limits. A missing count means path enumeration did not complete; a reported
+count is request-scoped and does not imply that relation composition, solver
+execution, or family verification is supported or scalable. Per-operation
+provider/resource observations and generated/retained branch counts remain
+responsibilities of the synthesis and adapter reports.
+
+The direct joint composer exposes an operation trace, and every
+`HybridPathProgram` retains that trace with the relation limits used. Each
+record binds an initial-state, mode invariant, flow, control set, transition
+guard, or reset relation to its stage and mode/edge identity, identifies the
+composer implementation and version, and records joint-variable, added-row,
+cumulative-row, and cumulative matrix-element counts. Both successful and
+failed composition reports retain the configured limits and the operation
+records completed before a diagnostic or cancellation; path-program and
+portfolio builders propagate those failure reports without dropping the path
+identity. Solver-provider provenance remains attached to each branch
+execution. The trace records work performed by the current direct composer; it
+does not imply that an independent projected-set reachability algorithm or a
+compiled hybrid family verifier has been implemented.
 
 ## Independent test oracle requirements
 

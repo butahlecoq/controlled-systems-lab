@@ -162,6 +162,7 @@ Module unit tests are a required deliverable. Use mathematical answers, invarian
 | T-M01 | Unit | Reject wrong dimensions/stage counts; constant and stagewise providers produce the same model behavior | MOD-01/02 |
 | T-M02 | Unit | No external/control port, singleton/universal/empty sets and full/partial/no observations retain their semantics | MOD-03/04 |
 | T-M03 | Contract | Singular dynamics accepted by model; inverse-only strategy rejects; unsupported temporal/domain/information/continuous-time request distinguished from infeasible | MOD-05/06/07/08/09, ALG-05 |
+| T-EXT07 | Contract + mathematical integration | Exhaustive tiny hybrid mode/edge paths match literal joint-relation fixtures across guards, rectangular resets, empty/forbidden branches, ties, cancellation and limits; all optimal branches retain their continuous families | EXT-07 |
 | T-O01 | Unit + analytic | Evaluate all three objective conventions; rectangular L; valid/invalid quadratic properties under documented validation policy | OPT-01 |
 | T-O02 | Mathematical | Norm versus norm-square has the same minimizers and different correctly reported costs; no unreviewed sum-of-terms reformulation | OPT-02 |
 | T-G01 | Unit + analytic | Hand-derived affine image, sum, intersection, support and preimage cases, including lower-dimensional/empty inputs where supported | ALG-03/05 |

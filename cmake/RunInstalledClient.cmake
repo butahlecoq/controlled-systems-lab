@@ -16,6 +16,7 @@ file(COPY "${CSL_SOURCE_DIR}/tests/contract/public_client.cpp" DESTINATION "${wo
 file(COPY "${CSL_SOURCE_DIR}/tests/contract/public_headers_client.cpp" DESTINATION "${work}/source")
 file(COPY "${CSL_SOURCE_DIR}/tests/installed/numeric_client.cpp" DESTINATION "${work}/source")
 file(COPY "${CSL_SOURCE_DIR}/tests/installed/model_client.cpp" DESTINATION "${work}/source")
+file(COPY "${CSL_SOURCE_DIR}/tests/installed/hybrid_path_program_client.cpp" DESTINATION "${work}/source")
 file(COPY "${CSL_SOURCE_DIR}/tests/installed/simulation_client.cpp" DESTINATION "${work}/source")
 file(COPY "${CSL_SOURCE_DIR}/tests/installed/box_parallelotope_client.cpp" DESTINATION "${work}/source")
 file(COPY "${CSL_SOURCE_DIR}/tests/installed/ellipsoidal_client.cpp" DESTINATION "${work}/source")
@@ -56,6 +57,10 @@ file(COPY "${CSL_SOURCE_DIR}/tests/installed/ts01_relation_factory_forge_client.
 file(COPY "${CSL_SOURCE_DIR}/tests/installed/farkas_factory_forge_client.cpp" DESTINATION "${work}/source")
 execute_process(COMMAND "${CMAKE_COMMAND}" --install "${CSL_BUILD_DIR}"
   --config "${CSL_CONFIG}" --prefix "${prefix}" COMMAND_ERROR_IS_FATAL ANY)
+set(hybrid_contract "${prefix}/${CSL_INSTALL_DATADIR}/CSL/docs/contracts/hybrid-systems.md")
+if(NOT EXISTS "${hybrid_contract}")
+  message(FATAL_ERROR "Installed hybrid API contract is missing: ${hybrid_contract}")
+endif()
 # Inspect the installed artifacts, ignoring comments that discuss dependency names.
 set(notices_root "${prefix}/${CSL_INSTALL_DATADIR}/CSL/notices")
 if(NOT EXISTS "${notices_root}/nlohmann-json-3.11.3/LICENSE.MIT")

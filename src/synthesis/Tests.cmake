@@ -44,6 +44,12 @@ target_link_libraries(control_recovery_public_client PRIVATE CSL::control_recove
 add_test(NAME control_recovery_public_client COMMAND control_recovery_public_client)
 csl_test_target(control_recovery_public_client synthesis)
 
+add_executable(hybrid_path_program_tests tests/unit/synthesis/hybrid_path_program_tests.cpp)
+target_link_libraries(hybrid_path_program_tests PRIVATE CSL::hybrid_path_program doctest::doctest)
+target_include_directories(hybrid_path_program_tests PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src/synthesis)
+add_test(NAME hybrid_path_program_tests COMMAND hybrid_path_program_tests)
+csl_test_target(hybrid_path_program_tests synthesis)
+
 if(TARGET CSL::highs_convex AND TARGET CSL::highs_lp AND TARGET CSL::strategy_a AND TARGET CSL::affine_sum AND TARGET CSL::qhull_conversion)
   add_executable(direct_joint_strategy_tests tests/synthesis/strategy_b/direct_joint_tests.cpp)
   target_link_libraries(direct_joint_strategy_tests PRIVATE CSL::strategy_b CSL::strategy_a CSL::affine_sum CSL::qhull_conversion CSL::highs_lp CSL::highs_convex CSL::artifacts doctest::doctest)
