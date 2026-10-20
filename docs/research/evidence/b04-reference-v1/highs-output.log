@@ -1,0 +1,94 @@
+case=b04-reference-v1
+termination=completed
+outcome=optimal
+x0=-0.94760903782685968
+x1=-19.453621970920839
+certified_squared_value=12941.292406970297
+converted_norm=160.88065394552757
+primal_rows_violation=0
+primal_variables_violation=0
+dual_stationarity_violation=2.2737367544323206e-13
+dual_signs_violation=0
+dual_complementarity_violation=0
+raw_diagnostics_begin
+adapter.version=1.0.0+highs.1.11.0
+native.version=1.11.0
+native.archive_sha256=2b44b074cf41439325ce4d0bbdac2d51379f56faf17ba15320a410d3c1f07275
+native.downstream.hvectorbase_sha256=f0f4f4f4a4b33088c3b30e63bbe5796c7c2fd498600a7e2acc8002bc4e7eace3
+program.original=terminal-plane-squared
+program.solver=terminal-plane-squared
+profile.maximum_variables=4096
+profile.highs_int_bits=32
+options.qp_nullspace_limit=4096
+options.qp_regularization_value=0
+options.use_warm_start=true
+options.presolve=off
+options.threads=1
+options.parallel=off
+options.small_matrix_value=1e-12
+options.infinite_bound=inf
+options.infinite_cost=inf
+options.large_matrix_value=inf
+options.native_tolerance=1e-08
+options.feasibility_iteration_limit=2147483647
+options.qp_iteration_limit=2147483647
+model.private_free_row=true
+model.original_rows=0
+model.native_rows=1
+phase.feasibility.time_limit=inf
+phase.feasibility.api_status=0
+phase.feasibility.model_status=7
+phase.feasibility.iterations=0
+start.valid=true
+start.default_fallback=false
+phase.qp.time_limit=inf
+phase.qp.api_status=0
+phase.qp.model_status=7
+phase.qp.iterations=1
+objective.original=12941.292406976223
+objective.solver=12941.292406976223
+dual.private_free_row=0
+check.rows.violation=0
+check.rows.scale=1
+check.variables.violation=0
+check.variables.scale=19.453621970920839
+check.stationarity.violation=2.2737367544323206e-13
+check.stationarity.scale=1
+check.signs.violation=0
+check.signs.scale=1
+check.complementarity.violation=0
+check.complementarity.scale=1
+certificates=unavailable
+bounds=unavailable
+basis=unavailable
+families=unavailable
+native.log:
+Running HiGHS 1.11.0 (git hash: n/a): Copyright (c) 2025 HiGHS under MIT licence terms
+LP   has 1 rows; 2 cols; 1 nonzeros
+Coefficient ranges:
+  Matrix [1e+00, 1e+00]
+  Cost   [0e+00, 0e+00]
+  Bound  [0e+00, 0e+00]
+  RHS    [0e+00, 0e+00]
+Solving LP without presolve, or with basis, or unconstrained
+Model status        : Optimal
+Objective value     :  0.0000000000e+00
+P-D objective error :  0.0000000000e+00
+HiGHS run time      :          0.00
+Running HiGHS 1.11.0 (git hash: n/a): Copyright (c) 2025 HiGHS under MIT licence terms
+QP   has 1 rows; 2 cols; 1 matrix nonzeros; 2 Hessian nonzeros
+Coefficient ranges:
+  Matrix [1e+00, 1e+00]
+  Cost   [1e+03, 3e+06]
+  Bound  [0e+00, 0e+00]
+  RHS    [0e+00, 0e+00]
+  Iteration        Objective     NullspaceDim
+          0         27465461                2      0.00s
+          1        12941.292                2      0.00s
+Model status        : Optimal
+QP ASM    iterations: 1
+Objective value     :  1.2941292407e+04
+P-D objective error :  1.4392482051e-13
+HiGHS run time      :          0.00
+
+raw_diagnostics_end
