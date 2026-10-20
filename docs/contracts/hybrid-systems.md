@@ -488,10 +488,13 @@ configured relation limits. The framework rejects an incomplete, reordered,
 or mismatched receipt before querying capabilities or building any branch.
 This makes path-inventory coverage observable at that adapter boundary. The
 receipt is still an adapter attestation: it does not independently prove that
-every operation within each path was supported, and the reachability,
-trajectory, and verifier adapters do not yet share a framework-generated
-model-wide operation plan. Complete support accounting for every requested
-operation across the mode/edge structure, complete terminal-policy semantics
+every operation within each path was supported. The framework now generates
+deterministic operation identities per supplied path, preserving duplicate
+paths as distinct indexed obligations, and uses those identities when checking
+execution traces. Reachability, trajectory, and verifier adapters do not yet
+exchange a shared model-wide operation-admission receipt. Complete support
+accounting for every requested operation across the mode/edge structure,
+complete terminal-policy semantics
 beyond the declared objective-class/assurance/tolerance checks, and broader
 multiple-parameter verifier coverage remain EXT-07 work.
 

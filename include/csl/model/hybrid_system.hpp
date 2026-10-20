@@ -108,6 +108,25 @@ struct HybridRelationOperationRecord {
     std::size_t cumulative_matrix_elements{};
 };
 
+// Framework-owned structural operation identity for trace validation. The
+// path index preserves duplicate branches as distinct ordered obligations;
+// adapters do not yet receive a shared operation-admission receipt.
+struct HybridPlannedOperation {
+    std::size_t path_index{};
+    HybridRelationOperationKind operation{};
+    std::size_t stage{};
+    std::optional<HybridModeId> mode;
+    std::optional<HybridEdgeId> edge;
+    bool operator==(const HybridPlannedOperation&) const = default;
+};
+
+// Generates deterministic operation identities without executing a provider
+// or constructing a relation. Each path contributes initial state, every
+// post-state invariant, and the flow/control/pre-reset/guard/reset operations
+// for each edge in path order.
+std::vector<HybridPlannedOperation> plan_hybrid_operations(
+    std::span<const HybridPath> paths);
+
 struct HybridComposedPathRelation {
     sets::SetData relation;
     HybridRelationLimits limits;

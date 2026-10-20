@@ -14,6 +14,34 @@
 #include <unordered_set>
 
 namespace csl::model {
+
+std::vector<HybridPlannedOperation> plan_hybrid_operations(
+    std::span<const HybridPath> paths) {
+    std::vector<HybridPlannedOperation> plan;
+    for(std::size_t path_index=0;path_index<paths.size();++path_index) {
+        const auto& path=paths[path_index];
+        plan.push_back({path_index,HybridRelationOperationKind::initial_state,0,
+            path.modes.empty()?std::optional<HybridModeId>{}:path.modes.front(),{}});
+        for(std::size_t stage=0;stage<=path.edges.size();++stage) {
+            const auto mode=stage<path.modes.size()
+                ?std::optional<HybridModeId>{path.modes[stage]}:std::optional<HybridModeId>{};
+            plan.push_back({path_index,HybridRelationOperationKind::post_state_invariant,
+                stage,mode,{}});
+            if(stage==path.edges.size()) continue;
+            plan.push_back({path_index,HybridRelationOperationKind::mode_flow,stage,mode,{}});
+            plan.push_back({path_index,HybridRelationOperationKind::continuous_control,stage,mode,{}});
+            plan.push_back({path_index,HybridRelationOperationKind::pre_reset_invariant,
+                stage+1,mode,{}});
+            const auto edge=stage<path.edges.size()
+                ?std::optional<HybridEdgeId>{path.edges[stage]}:std::optional<HybridEdgeId>{};
+            plan.push_back({path_index,HybridRelationOperationKind::transition_guard,
+                stage,{},edge});
+            plan.push_back({path_index,HybridRelationOperationKind::reset_relation,
+                stage,{},edge});
+        }
+    }
+    return plan;
+}
 namespace {
 Diagnostic invalid(const char* field, const char* message) {
     return {DiagnosticCode::invalid_input, field, message};

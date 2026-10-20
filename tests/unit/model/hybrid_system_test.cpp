@@ -5,6 +5,7 @@
 #include <csl/sets/data.hpp>
 
 #include <algorithm>
+#include <array>
 #include <type_traits>
 #include <utility>
 
@@ -63,6 +64,33 @@ bool literal_relation_contains(const sets::SetData& relation,const Vector& point
         return true;
     }
     return std::holds_alternative<sets::UniversalRepresentation>(representation);
+}
+
+TEST_CASE("framework operation plans preserve ordered duplicate path obligations") {
+    const HybridPath path{{{"idle"},{"active"}},{{"start-a"}}};
+    const std::array<HybridPath,2> paths{path,path};
+    const auto plan=plan_hybrid_operations(paths);
+
+    REQUIRE(plan.size()==16);
+    const auto idle=std::optional<HybridModeId>{HybridModeId{"idle"}};
+    const auto active=std::optional<HybridModeId>{HybridModeId{"active"}};
+    const auto edge=std::optional<HybridEdgeId>{HybridEdgeId{"start-a"}};
+    const std::array<HybridPlannedOperation,8> expected{{
+        {0,HybridRelationOperationKind::initial_state,0,idle,{}},
+        {0,HybridRelationOperationKind::post_state_invariant,0,idle,{}},
+        {0,HybridRelationOperationKind::mode_flow,0,idle,{}},
+        {0,HybridRelationOperationKind::continuous_control,0,idle,{}},
+        {0,HybridRelationOperationKind::pre_reset_invariant,1,idle,{}},
+        {0,HybridRelationOperationKind::transition_guard,0,{},edge},
+        {0,HybridRelationOperationKind::reset_relation,0,{},edge},
+        {0,HybridRelationOperationKind::post_state_invariant,1,active,{}}
+    }};
+    for(std::size_t i=0;i<expected.size();++i) {
+        CHECK(plan[i]==expected[i]);
+        auto duplicate=expected[i];
+        duplicate.path_index=1;
+        CHECK(plan[i+expected.size()]==duplicate);
+    }
 }
 
 std::pair<bool,std::size_t> equality_consistency_and_rank(const sets::HRepresentation& h) {
