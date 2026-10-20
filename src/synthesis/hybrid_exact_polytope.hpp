@@ -28,6 +28,7 @@ inline constexpr std::size_t default_max_rows = 4096;
 inline constexpr std::size_t default_max_generated_rows = 100000;
 inline constexpr std::size_t default_max_operations = 5000000;
 inline constexpr std::size_t default_max_variables = 32;
+inline constexpr std::size_t default_max_stages = 4096;
 
 struct Integer {
     std::vector<std::uint32_t> words;
@@ -46,6 +47,7 @@ struct Row {
 
 struct Limits {
     std::size_t max_variables{default_max_variables};
+    std::size_t max_stages{default_max_stages};
     std::size_t max_rows{default_max_rows};
     std::size_t max_generated_rows{default_max_generated_rows};
     std::size_t max_integer_bits{default_max_integer_bits};

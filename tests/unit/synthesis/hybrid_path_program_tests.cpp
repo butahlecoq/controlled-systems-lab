@@ -6,6 +6,7 @@
 #include <csl/registry/provider.hpp>
 #include "hybrid_family_verifier_internal.hpp"
 #include "hybrid_exact_polytope.hpp"
+#include "hybrid_exact_model_relation.hpp"
 #include <algorithm>
 #include <array>
 #include <limits>
@@ -17,6 +18,29 @@ using namespace csl::synthesis;
 namespace {
 SetHandle universal(std::string id,std::size_t dimension) {
     auto data=sets::make_universal({SetId{std::move(id)},dimension,{}});
+    REQUIRE(std::holds_alternative<sets::SetData>(data));
+    return std::get<sets::SetData>(std::move(data)).as_handle();
+}
+
+SetHandle empty_handle(std::string id,std::size_t dimension) {
+    auto data=sets::make_empty({SetId{std::move(id)},dimension,{}});
+    REQUIRE(std::holds_alternative<sets::SetData>(data));
+    return std::get<sets::SetData>(std::move(data)).as_handle();
+}
+
+SetHandle h_set(std::string id,std::size_t dimension,Matrix inequalities,
+                Vector upper_bounds,Matrix equalities,Vector equality_values) {
+    auto a=numeric::snapshot(inequalities);
+    auto b=numeric::snapshot_vector(upper_bounds);
+    auto e=numeric::snapshot(equalities);
+    auto f=numeric::snapshot_vector(equality_values);
+    REQUIRE(std::holds_alternative<numeric::MatrixView>(a));
+    REQUIRE(std::holds_alternative<numeric::VectorView>(b));
+    REQUIRE(std::holds_alternative<numeric::MatrixView>(e));
+    REQUIRE(std::holds_alternative<numeric::VectorView>(f));
+    auto data=sets::make_h({SetId{std::move(id)},dimension,{}},
+        {std::get<numeric::MatrixView>(a),std::get<numeric::VectorView>(b),
+         std::get<numeric::MatrixView>(e),std::get<numeric::VectorView>(f)});
     REQUIRE(std::holds_alternative<sets::SetData>(data));
     return std::get<sets::SetData>(std::move(data)).as_handle();
 }
@@ -331,6 +355,226 @@ TEST_CASE("hybrid exact polytope proves half-space relation inclusion") {
     cancelled.request_stop();
     CHECK(included_in(source,std::span<const Row>{},1,limits,
                       cancelled.get_token()).state==InclusionState::cancelled);
+}
+
+TEST_CASE("hybrid exact raw path relation matches the joint H composer") {
+    using namespace detail::hybrid_exact;
+    const auto system=example_system();
+    const auto request=example_request();
+    const auto path=example_path();
+    const model::HybridRelationLimits relation_limits{32,4096,100000};
+    const auto raw=reconstruct_path_relation(system,request,path,relation_limits);
+    REQUIRE(raw.state==RawRelationState::built);
+
+    const auto composed=model::compose_hybrid_path_relation(
+        system,request,path,relation_limits);
+    REQUIRE(std::holds_alternative<sets::SetData>(composed));
+    const auto representation=std::get<sets::SetData>(composed).representation();
+    REQUIRE(std::holds_alternative<sets::HRepresentation>(representation));
+    const auto& h=std::get<sets::HRepresentation>(representation);
+    std::vector<Row> composed_rows;
+    for(std::size_t row=0;row<h.inequalities.rows();++row) {
+        Vector coefficients(h.inequalities.cols());
+        for(std::size_t column=0;column<coefficients.size();++column)
+            coefficients[column]=h.inequalities(row,column);
+        REQUIRE(append_inequality(coefficients,h.upper_bounds[row],false,
+                                  default_max_integer_bits,composed_rows));
+    }
+    for(std::size_t row=0;row<h.equalities.rows();++row) {
+        Vector coefficients(h.equalities.cols());
+        for(std::size_t column=0;column<coefficients.size();++column)
+            coefficients[column]=h.equalities(row,column);
+        REQUIRE(append_equality(coefficients,h.equality_values[row],
+                                default_max_integer_bits,composed_rows));
+    }
+    REQUIRE(h.inequalities.cols()==raw.variables);
+    CHECK(included_in(raw.rows,composed_rows,raw.variables).state==
+          InclusionState::included);
+    CHECK(included_in(composed_rows,raw.rows,raw.variables).state==
+          InclusionState::included);
+
+    auto mutated_system=system;
+    std::get<LinearStage>(mutated_system.modes[0].flow).A.values[0]=2.0;
+    const auto mutated=reconstruct_path_relation(mutated_system,request,path,
+                                                 relation_limits);
+    REQUIRE(mutated.state==RawRelationState::built);
+    CHECK(included_in(mutated.rows,composed_rows,mutated.variables).state==
+          InclusionState::not_included);
+
+    auto small_limits=relation_limits;
+    small_limits.max_rows=1;
+    CHECK(reconstruct_path_relation(system,request,path,small_limits).state==
+          RawRelationState::unsupported);
+    std::stop_source cancelled;
+    cancelled.request_stop();
+    CHECK(reconstruct_path_relation(system,request,path,relation_limits,{},
+                                    cancelled.get_token()).state==
+          RawRelationState::cancelled);
+}
+
+TEST_CASE("hybrid exact raw relation preserves H sets and heterogeneous reset timing") {
+    using namespace detail::hybrid_exact;
+    const auto source_interval=h_set("raw-source-interval",1,
+        Matrix{2,1,{-1,1}},Vector{0,3},Matrix{0,1,{}},Vector{});
+    const auto pre_invariant=h_set("raw-pre-invariant",1,
+        Matrix{2,1,{-1,1}},Vector{0,2},Matrix{0,1,{}},Vector{});
+    const auto transition_guard=h_set("raw-transition-guard",1,
+        Matrix{2,1,{-1,1}},Vector{0,1.25},Matrix{0,1,{}},Vector{});
+    const auto target_interval=h_set("raw-target-interval",1,
+        Matrix{2,1,{-1,1}},Vector{0,4},Matrix{0,1,{}},Vector{});
+    const auto box2=h_set("raw-box2",2,
+        Matrix{4,2,{-1,0,0,-1,1,0,0,1}},Vector{0,0,3,3},
+        Matrix{0,2,{}},Vector{});
+    const auto reset_source=h_set("raw-reset-source",3,
+        Matrix{1,3,{0,1,0}},Vector{1},
+        Matrix{2,3,{1,-1,0,0,0,1}},Vector{0,0});
+    const auto reset_target=h_set("raw-reset-target",3,
+        Matrix{1,3,{0,1,0}},Vector{2},
+        Matrix{1,3,{1,1,-1}},Vector{0});
+
+    const LinearStage source_flow{Matrix{1,1,{1}},Matrix{1,1,{1}},
+        Matrix{1,0,{}},Vector{0}};
+    const LinearStage middle_flow{Matrix{2,2,{1,0,0,1}},
+        Matrix{2,1,{1,0}},Matrix{2,0,{}},Vector{0,0}};
+    auto source=model::HybridMode{{"raw-source"},1,1,{"x"},{"u"}};
+    source.flow=std::vector<LinearStage>{source_flow,source_flow};
+    source.control_sets={source_interval,source_interval};
+    source.invariants={source_interval,pre_invariant,source_interval};
+    auto middle=model::HybridMode{{"raw-middle"},2,1,{"y","z"},{"v"}};
+    middle.flow=std::vector<LinearStage>{middle_flow,middle_flow};
+    middle.control_sets={source_interval,source_interval};
+    middle.invariants={box2,box2,box2};
+    auto target=model::HybridMode{{"raw-target"},1,0,{"w"},{}};
+    target.flow=std::vector<LinearStage>{
+        LinearStage{Matrix{1,1,{1}},Matrix{1,0,{}},Matrix{1,0,{}},Vector{0}},
+        LinearStage{Matrix{1,1,{1}},Matrix{1,0,{}},Matrix{1,0,{}},Vector{0}}};
+    target.control_sets={UniversalSet{0},UniversalSet{0}};
+    target.invariants={target_interval,target_interval,target_interval};
+    model::HybridSystem system{2,{source,middle,target},
+        {{{"raw-edge-a"},{"raw-source"},{"raw-middle"},
+            {transition_guard,transition_guard},{reset_source,reset_source}},
+         {{"raw-edge-b"},{"raw-middle"},{"raw-target"},
+            {box2,box2},{reset_target,reset_target}}}};
+    model::HybridRequest request{{{"raw-source"},{1}},{{"raw-target"}},
+        {{{"raw-target"},LinearTerminal{{1},0},"cost","u"}}};
+    const model::HybridPath path{{{"raw-source"},{"raw-middle"},{"raw-target"}},
+        {{"raw-edge-a"},{"raw-edge-b"}}};
+    const model::HybridRelationLimits limits{32,4096,100000};
+
+    const auto raw=reconstruct_path_relation(system,request,path,limits);
+    REQUIRE(raw.state==RawRelationState::built);
+    const auto tuple_state=[&](const Vector& tuple) {
+        auto rows=raw.rows;
+        REQUIRE(tuple.size()==raw.variables);
+        for(std::size_t column=0;column<tuple.size();++column) {
+            Vector coefficient(tuple.size(),0.0);
+            coefficient[column]=1.0;
+            REQUIRE(append_equality(coefficient,tuple[column],
+                                    default_max_integer_bits,rows));
+        }
+        return feasible(std::move(rows),raw.variables).state;
+    };
+    CHECK(tuple_state({1,0,1,1,0,0,1,0,1})==FeasibilityState::feasible);
+    CHECK(tuple_state({1,0.5,1.5,1.5,0,0,1.5,0,1.5})==
+          FeasibilityState::infeasible);
+    const auto composed=model::compose_hybrid_path_relation(system,request,path,limits);
+    REQUIRE(std::holds_alternative<sets::SetData>(composed));
+    const auto representation=std::get<sets::SetData>(composed).representation();
+    REQUIRE(std::holds_alternative<sets::HRepresentation>(representation));
+    const auto& h=std::get<sets::HRepresentation>(representation);
+    std::vector<Row> composed_rows;
+    for(std::size_t row=0;row<h.inequalities.rows();++row) {
+        Vector coefficients(h.inequalities.cols());
+        for(std::size_t column=0;column<coefficients.size();++column)
+            coefficients[column]=h.inequalities(row,column);
+        REQUIRE(append_inequality(coefficients,h.upper_bounds[row],false,
+                                  default_max_integer_bits,composed_rows));
+    }
+    for(std::size_t row=0;row<h.equalities.rows();++row) {
+        Vector coefficients(h.equalities.cols());
+        for(std::size_t column=0;column<coefficients.size();++column)
+            coefficients[column]=h.equalities(row,column);
+        REQUIRE(append_equality(coefficients,h.equality_values[row],
+                                default_max_integer_bits,composed_rows));
+    }
+    REQUIRE(h.inequalities.cols()==raw.variables);
+    CHECK(included_in(raw.rows,composed_rows,raw.variables).state==
+          InclusionState::included);
+    CHECK(included_in(composed_rows,raw.rows,raw.variables).state==
+          InclusionState::included);
+}
+
+TEST_CASE("hybrid exact raw relation handles singleton and empty representations") {
+    using namespace detail::hybrid_exact;
+    const model::HybridRelationLimits limits{32,4096,100000};
+    auto [singleton_system,singleton_request]=exact_singleton_portfolio();
+    const model::HybridPath singleton_path{{{"source"},{"target"}},{{"tie-a"}}};
+    const auto singleton_raw=reconstruct_path_relation(
+        singleton_system,singleton_request,singleton_path,limits);
+    REQUIRE(singleton_raw.state==RawRelationState::built);
+    const auto singleton_composed=model::compose_hybrid_path_relation(
+        singleton_system,singleton_request,singleton_path,limits);
+    REQUIRE(std::holds_alternative<sets::SetData>(singleton_composed));
+    const auto singleton_rep=std::get<sets::SetData>(singleton_composed).representation();
+    REQUIRE(std::holds_alternative<sets::HRepresentation>(singleton_rep));
+    const auto& singleton_h=std::get<sets::HRepresentation>(singleton_rep);
+    std::vector<Row> singleton_composed_rows;
+    for(std::size_t row=0;row<singleton_h.inequalities.rows();++row) {
+        Vector coefficients(singleton_h.inequalities.cols());
+        for(std::size_t column=0;column<coefficients.size();++column)
+            coefficients[column]=singleton_h.inequalities(row,column);
+        REQUIRE(append_inequality(coefficients,singleton_h.upper_bounds[row],false,
+                                  default_max_integer_bits,singleton_composed_rows));
+    }
+    for(std::size_t row=0;row<singleton_h.equalities.rows();++row) {
+        Vector coefficients(singleton_h.equalities.cols());
+        for(std::size_t column=0;column<coefficients.size();++column)
+            coefficients[column]=singleton_h.equalities(row,column);
+        REQUIRE(append_equality(coefficients,singleton_h.equality_values[row],
+                                default_max_integer_bits,singleton_composed_rows));
+    }
+    CHECK(included_in(singleton_raw.rows,singleton_composed_rows,
+                      singleton_raw.variables).state==InclusionState::included);
+    CHECK(included_in(singleton_composed_rows,singleton_raw.rows,
+                      singleton_raw.variables).state==InclusionState::included);
+
+    auto [empty_system,empty_request]=std::make_pair(example_system(),example_request());
+    empty_system.edges[0].reset_relations[0]=empty_handle("raw-empty-reset",3);
+    const auto empty_path=example_path();
+    const auto empty_raw=reconstruct_path_relation(empty_system,empty_request,
+                                                    empty_path,limits);
+    REQUIRE(empty_raw.state==RawRelationState::built);
+    const auto empty_composed=model::compose_hybrid_path_relation(
+        empty_system,empty_request,empty_path,limits);
+    REQUIRE(std::holds_alternative<sets::SetData>(empty_composed));
+    const auto empty_rep=std::get<sets::SetData>(empty_composed).representation();
+    REQUIRE(std::holds_alternative<sets::HRepresentation>(empty_rep));
+    const auto& h=std::get<sets::HRepresentation>(empty_rep);
+    std::vector<Row> empty_composed_rows;
+    for(std::size_t row=0;row<h.inequalities.rows();++row) {
+        Vector coefficients(h.inequalities.cols());
+        for(std::size_t column=0;column<coefficients.size();++column)
+            coefficients[column]=h.inequalities(row,column);
+        REQUIRE(append_inequality(coefficients,h.upper_bounds[row],false,
+                                  default_max_integer_bits,empty_composed_rows));
+    }
+    for(std::size_t row=0;row<h.equalities.rows();++row) {
+        Vector coefficients(h.equalities.cols());
+        for(std::size_t column=0;column<coefficients.size();++column)
+            coefficients[column]=h.equalities(row,column);
+        REQUIRE(append_equality(coefficients,h.equality_values[row],
+                                default_max_integer_bits,empty_composed_rows));
+    }
+    CHECK(included_in(empty_raw.rows,empty_composed_rows,empty_raw.variables).state==
+          InclusionState::included);
+    CHECK(included_in(empty_composed_rows,empty_raw.rows,empty_raw.variables).state==
+          InclusionState::included);
+
+    Limits exact_limits;
+    exact_limits.max_stages=0;
+    CHECK(reconstruct_path_relation(singleton_system,singleton_request,
+                                    singleton_path,limits,exact_limits).state==
+          RawRelationState::unsupported);
 }
 
 TEST_CASE("hybrid exact polytope feasibility handles inconsistent equalities and lower dimension") {
