@@ -56,9 +56,10 @@ The EXT-07 report set now includes a measured one-step scalar interval case and
 a measured bounded two-control case, each with saved raw rows and an offline
 bundle. The one-step report's 2D plot shows control against terminal state; it
 does not measure the finite-horizon verifier. The two-control report measures
-two labelled feasible polygons and the complete minimizing faces for a scalar
+rectangular parameter sets and the complete minimizing faces for a scalar
 linear objective. The visual gallery also contains an analytic constant-zero
-objective illustration of the same feasible polygons; it is linked to the
-measured report but clearly distinguished from its objective and timed output.
+objective illustration with coupled triangular and quadrilateral feasible
+sets. It links to the measured report while describing the distinct geometry
+and objective.
 These bounded examples are not scalability results or a completion claim. The
 main-only Pages URL and live hashes remain pending until publication succeeds.

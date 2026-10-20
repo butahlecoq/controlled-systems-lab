@@ -426,8 +426,9 @@ def section(example, number):
                     if example["kind"] == "hybrid" else
                     f'<p>Related two-control report: <a href="../{example["report_id"]}/index.html">saved numerical evidence ↗</a> · '
                     f'<a href="../{example["report_id"]}/records.json">two-control raw record ↗</a>. '
-                    'This constant-zero analytic illustration is not part of that measured fixture: '
-                    'the feasible polygons match, but the measured objective is x_terminal=u0.</p>'
+                    'The measured report uses rectangular parameter sets and minimizes x_terminal=u0; '
+                    'this illustration has a coupled triangular/quadrilateral feasible set and a '
+                    'constant-zero objective.</p>'
                     if example["kind"] == "two_parameter" else
                     f'<p><a href="../{example["report_id"]}/index.html">Reviewed numerical report ↗</a> · '
                     f'<a href="../{example["report_id"]}/records.json">Full saved native records ↗</a></p>')
