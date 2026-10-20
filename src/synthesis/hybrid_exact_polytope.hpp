@@ -464,6 +464,10 @@ inline FeasibilityResult feasible(std::vector<Row> rows,
             limits.usage->maximum_integer_bits = std::max(
                 limits.usage->maximum_integer_bits, bits);
     };
+    const auto observe_rows = [&](std::size_t count) {
+        if (limits.usage)
+            limits.usage->peak_rows = std::max(limits.usage->peak_rows, count);
+    };
     const auto unsupported = [&](const char* reason) {
         result.state = FeasibilityState::unsupported;
         result.reason = reason;
@@ -492,8 +496,7 @@ inline FeasibilityResult feasible(std::vector<Row> rows,
         if (result.maximum_integer_bits > limits.max_integer_bits)
             return unsupported("Input integer bit limit exceeded");
     }
-    if (limits.usage)
-        limits.usage->peak_rows = std::max(limits.usage->peak_rows, rows.size());
+    observe_rows(rows.size());
     if (!exact_detail::normalize_rows(rows, limits.max_rows)) {
         result.state = FeasibilityState::infeasible;
         result.peak_rows = rows.size();
@@ -558,6 +561,7 @@ inline FeasibilityResult feasible(std::vector<Row> rows,
                                     static_cast<std::ptrdiff_t>(variable));
             next.push_back(std::move(copy));
         }
+        observe_rows(next.size());
         std::size_t pair_visits = 0;
         for (const Row* upper : positive) {
             for (const Row* lower : negative) {
@@ -611,13 +615,12 @@ inline FeasibilityResult feasible(std::vector<Row> rows,
                 exact_detail::normalize_power_of_two(combined);
                 observe_bits(exact_detail::bit_length(combined.bound));
                 next.push_back(std::move(combined));
+                observe_rows(next.size());
                 if (limits.usage)
                     ++limits.usage->generated_rows;
             }
         }
-        if (limits.usage)
-            limits.usage->peak_rows = std::max(limits.usage->peak_rows,
-                                                next.size());
+        observe_rows(next.size());
         result.generated_rows += pair_count;
         if (!exact_detail::normalize_rows(next, limits.max_rows)) {
             result.state = FeasibilityState::infeasible;
