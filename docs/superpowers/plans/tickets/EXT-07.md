@@ -327,7 +327,8 @@ preserve the original norm ordering and fail closed when an exact comparison
 cannot be established. Tests cover an interior minimum, a flat full interval
 and rejection of its narrowed subset, a tied residual/linear optimum, a nearby
 strictly worse branch, and inexact pullback/comparison cases. A labelled
-cost-versus-control illustration is linked from the hybrid contract. This adds
-one bounded verifier profile; general residual-norm family verification,
-broader verifier-domain coverage, resource-scale evidence, and publication
-gates remain open.
+cost-versus-control illustration is linked from the hybrid contract. The
+residual-specific oracle exercises two stages with one fixed control and one
+free control. This adds one bounded verifier profile. General residual-norm
+family verification, broader verifier-domain coverage, resource-scale evidence,
+and publication gates remain open.

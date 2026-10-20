@@ -315,12 +315,13 @@ free controls or higher-dimensional continuous relations remain unsupported. The
 `TwoStageScalarIntervalHybridFamilyVerifier` remains as a two-stage adapter and
 preserves its existing report identifier.
 
-For a reproducible residual-norm example, the test model has `x=1+2u` for
-`0<=u<=1` and objective `||[1;1]x-[2;3]||₂`. Its squared objective is
+For a reproducible residual-norm example, a two-stage test path fixes the
+first control at zero to reach `x₁=1`, then uses `x₂=x₁+2u` for `0<=u<=1`.
+The terminal objective is `||[1;1]x₂-[2;3]||₂`. Its squared objective is
 `(x-2)²+(x-3)²`, so the exact minimizer is `u=3/4`, `x=5/2`, with residual
 norm `sqrt(1/2)`. The [cost-versus-control illustration](../examples/hybrid-residual-norm.svg)
 shows this analytic case; it is not a timing measurement. The unit fixture and
-independent candidate-face checks are in
+independent candidate-face checks, including the full flat interval, are in
 [`hybrid_path_program_tests.cpp`](../../tests/unit/synthesis/hybrid_path_program_tests.cpp).
 
 `TwoParameterScalarPolytopeHybridFamilyVerifier` adds a separate finite-horizon
