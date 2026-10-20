@@ -1018,6 +1018,35 @@ HybridFamilyVerificationResult verify_hybrid_portfolio_family(
         report.branches[i].candidate_providers=candidate==candidates.end()
             ?std::vector<registry::Provenance>{}:candidate->providers;
     }
+    report.operation_resources.clear();
+    for(const auto& branch:report.branches) {
+        for(const auto& operation:branch.relation_operations) {
+            auto summary=std::find_if(report.operation_resources.begin(),
+                report.operation_resources.end(),[&](const auto& item) {
+                    return item.operation==operation.operation&&item.stage==operation.stage&&
+                        item.mode==operation.mode&&item.edge==operation.edge&&
+                        item.implementation_id==operation.implementation_id&&
+                        item.implementation_version==operation.implementation_version;
+                });
+            if(summary==report.operation_resources.end()) {
+                report.operation_resources.push_back({operation.operation,operation.stage,
+                    operation.mode,operation.edge,operation.implementation_id,
+                    operation.implementation_version,1,operation.joint_variables,
+                    operation.rows_added,operation.cumulative_rows,
+                    operation.cumulative_matrix_elements});
+                continue;
+            }
+            ++summary->branch_count;
+            summary->max_joint_variables=std::max(summary->max_joint_variables,
+                operation.joint_variables);
+            summary->max_rows_added=std::max(summary->max_rows_added,operation.rows_added);
+            summary->max_cumulative_rows=std::max(summary->max_cumulative_rows,
+                operation.cumulative_rows);
+            summary->max_cumulative_matrix_elements=std::max(
+                summary->max_cumulative_matrix_elements,
+                operation.cumulative_matrix_elements);
+        }
+    }
     const auto adjudicated=[](HybridVerificationStatus status) {
         return status==HybridVerificationStatus::established||
             status==HybridVerificationStatus::refuted;

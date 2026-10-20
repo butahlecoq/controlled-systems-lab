@@ -3137,6 +3137,9 @@ TEST_CASE("two parameter scalar verifier certifies a coupled polygon and "
         {"two-parameter-terminal"},
         {UniversalSet{1}, UniversalSet{1}},
         {universal("two-parameter-unused-b", 2), identity}}}};
+  // Put the lower-resource complete path first so the family summary must
+  // compute maxima instead of retaining the first path's measurements.
+  std::reverse(system.edges.begin(), system.edges.end());
   model::HybridRequest request{{{"two-parameter-start"}, {0}},
                                {{"two-parameter-terminal"}},
                                {{{"two-parameter-terminal"},
@@ -3281,6 +3284,40 @@ TEST_CASE("two parameter scalar verifier certifies a coupled polygon and "
   CHECK(report.global_objective_optimality ==
         HybridVerificationStatus::established);
   REQUIRE(report.branches.size() == 2);
+  const auto shared_mode_flow = std::find_if(
+      report.operation_resources.begin(), report.operation_resources.end(),
+      [](const auto &resource) {
+        return resource.operation ==
+                   model::HybridRelationOperationKind::mode_flow &&
+               resource.stage == 1 && resource.mode &&
+               resource.mode->value == "two-parameter-middle";
+      });
+  REQUIRE(shared_mode_flow != report.operation_resources.end());
+  CHECK(shared_mode_flow->implementation_id ==
+        "csl.model.hybrid.joint-h-composer");
+  CHECK(shared_mode_flow->implementation_version == "1");
+  CHECK(shared_mode_flow->branch_count == 2);
+  CHECK(shared_mode_flow->max_joint_variables == 7);
+  CHECK(shared_mode_flow->max_rows_added == 1);
+  CHECK(shared_mode_flow->max_cumulative_rows == 8);
+  CHECK(shared_mode_flow->max_cumulative_matrix_elements == 56);
+  CHECK(report.branches.front().path.edges.front().value ==
+        "two-parameter-enter-full");
+  const auto full_path_record = std::find_if(
+      report.branches.begin(), report.branches.end(), [](const auto &branch) {
+        return branch.path.edges.front().value == "two-parameter-enter-full";
+      });
+  REQUIRE(full_path_record != report.branches.end());
+  const auto full_path_flow = std::find_if(
+      full_path_record->relation_operations.begin(),
+      full_path_record->relation_operations.end(), [](const auto &operation) {
+        return operation.operation ==
+                   model::HybridRelationOperationKind::mode_flow &&
+               operation.stage == 1;
+      });
+  REQUIRE(full_path_flow != full_path_record->relation_operations.end());
+  CHECK(full_path_flow->cumulative_rows == 6);
+  CHECK(full_path_flow->cumulative_matrix_elements == 42);
   for (const auto &branch : report.branches) {
     CHECK(branch.feasibility == HybridVerificationStatus::established);
     CHECK(branch.objective_optimality == HybridVerificationStatus::established);

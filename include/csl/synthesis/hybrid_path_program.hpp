@@ -276,6 +276,21 @@ struct HybridPathVerificationRecord {
     std::vector<registry::Provenance> candidate_providers;
     model::HybridRelationLimits relation_limits{};
 };
+// Cross-branch resource maxima grouped by the operation's semantic location
+// and implementation. Per-path records above remain the authoritative trace.
+struct HybridOperationResourceSummary {
+    model::HybridRelationOperationKind operation{};
+    std::size_t stage{};
+    std::optional<model::HybridModeId> mode;
+    std::optional<model::HybridEdgeId> edge;
+    std::string implementation_id;
+    std::string implementation_version;
+    std::size_t branch_count{};
+    std::size_t max_joint_variables{};
+    std::size_t max_rows_added{};
+    std::size_t max_cumulative_rows{};
+    std::size_t max_cumulative_matrix_elements{};
+};
 struct HybridFamilyVerificationReport {
     std::string verifier_id;
     std::string verifier_version;
@@ -285,6 +300,8 @@ struct HybridFamilyVerificationReport {
     std::vector<HybridPathVerificationRecord> branches;
     HybridVerificationStatus global_objective_optimality{HybridVerificationStatus::not_checked};
     HybridVerificationStatus complete_family_coverage{HybridVerificationStatus::not_checked};
+    // Derived from the validated per-path traces by the portfolio wrapper.
+    std::vector<HybridOperationResourceSummary> operation_resources;
 };
 using HybridFamilyVerificationResult = std::variant<HybridFamilyVerificationReport,
     Diagnostics, OperationStopped>;
