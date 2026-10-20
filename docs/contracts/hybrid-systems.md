@@ -259,8 +259,10 @@ families on globally tied paths are retained. The verifier rejects unsupported
 dimensions, relation forms, resource limits, and arithmetic whose exactness it
 cannot establish. An independently infeasible path is certified only when its
 supplied relation is explicitly represented as empty; otherwise the portfolio
-result is unsupported. It does not cover multiple continuous control
-parameters, general continuous polytope families, or validated assurance. The
+result is unsupported. This verifier supports exactly one free control
+parameter; it does not cover general continuous polytope families or validated
+assurance. The two-parameter verifier below covers one bounded two-stage case
+with two free controls; broader multivariate domains remain unsupported. The
 `TwoStageScalarIntervalHybridFamilyVerifier` remains as a two-stage adapter and
 preserves its existing report identifier.
 
@@ -272,12 +274,12 @@ both control parameters through the complete joint tuple, clips their bounded
 rectangle by exact half-planes, checks the supplied joint H-relation's affine
 hull as well as its projected polygon, and applies the same checks to each
 globally optimal face. Exact global ties retain their distinct path families.
-The implementation bounds both the cumulative interval rows and the cumulative
+The implementation bounds both the cumulative interval rows and cumulative
 half-plane clips per path (4096 each), as well as polygon vertices (4096). It
-rejects degenerate feasible control polygons and unsupported H-representations, and fails closed
-when exact binary64 arithmetic cannot be established. This profile does not
-cover arbitrary horizons, more than two free controls, non-interval admissible
-sets, nondeterministic resets, or validated assurance.
+rejects degenerate feasible control polygons and unsupported H-representations,
+and fails closed when exact binary64 arithmetic cannot be established. This
+profile does not cover arbitrary horizons, more than two free controls,
+non-interval admissible sets, nondeterministic resets, or validated assurance.
 
 ## Initial supported profile and rejection boundary
 
