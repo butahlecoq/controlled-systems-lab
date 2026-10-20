@@ -56,7 +56,7 @@ Sizes **[measured 2026-10-17]** (`Get-Content` line counts; bytes from `inventor
 - **Runnability today**: does not parse under Python 3.13 (line 17); no Python 2 interpreter on host. The module has no `__main__` guard: the top-level demo (lines 146–162) is part of import. Not executed in this audit; the repo's executed check was parse-only (`legacy-characterization.json:63–69`).
 - **Defects forcing corrected-track treatment**: backward branch inverts `A` and mutates the caller's `B` in place (`ReachableSet.py:12–13`, `legacy-audit.md:24`); `U` is read as a hidden module-level global despite the `U1` argument (`ReachableSet.py:22`; `legacy-audit.md:24`); custom simplex/double-description with fixed tolerances and randomized basis selection (`ReachableSet.py:62,79,102`; `legacy-audit.md:25`); the demo itself is a B04-neighbour configuration — `T=16`, `B=(2208/110,0,−1152/110,0)`, `U=[−1,1]`, `X0=(1192.5,119500,454,45300)` (lines 154–158), matching the B04 saved-witness family rather than the printed B04 model (`publication-source-matrix.md:28`).
 - **Port effort (estimate)**: small for the file (one 164-line NumPy module, no external solver), but the backward-branch semantics and global dependencies require a correctness pass before comparison.
-- **Baseline gate**: reachable-set construction seams (B02/B03 evidence class; `baselines.md:23–44`) and B04-neighbour backward construction; no canonical baseline input is recovered by this file.
+- **Baseline gate**: reachable-set construction seams (B02/B03 evidence class; `baselines.md:23–46`) and B04-neighbour backward construction; no canonical baseline input is recovered by this file. This gates historical replay, not the B03 algorithm comparison, which uses shared fixtures and C++ translations.
 
 ### 1.2 L28/W04 `LinearSystem.py` — fuel-plant model builder
 
@@ -72,7 +72,7 @@ Sizes **[measured 2026-10-17]** (`Get-Content` line counts; bytes from `inventor
 - **Runnability today**: parses under 3.13; on this host `import` fails first at line 2 (matplotlib absent **[measured 2026-10-17]**). With matplotlib present, the module body still reaches `LinearSystem(...)` at line 68 with no such name defined (only imports are numpy/matplotlib/SciPy, lines 1–3), and `ClosedLoopControl` depends on global `T` and undefined `OpenLoopControl` (lines 7–8; `legacy-audit.md:15,31`). The isolated-definition check in `legacy-characterization.json:71–74` records the `NameError` for `T`.
 - **Defects forcing corrected-track treatment**: hidden globals (`T`, `mo/mg/Mo/Mg`, `X`) and a missing standalone `OpenLoopControl` (`legacy-audit.md:31`; `source-map.md:51`); the cost at line 70 reproduces the B04-shaped weighted norm, but the demo is not the printed B04 model.
 - **Port effort (estimate)**: small file, medium context: it only becomes executable with the W09/W01/W03 helper family (`works-followup.md:25`), which itself has Python 2 statements.
-- **Baseline gate**: B05 optimal-adaptive evidence class (`baselines.md:70–87`); the byte-identical minimax-adaptive folder gated the missing B09 implementation until MATLAB A08 was recovered (`archive-followup.md:34`).
+- **Baseline gate**: B05 optimal-adaptive evidence class (`baselines.md:72–89`); the byte-identical minimax-adaptive folder gated the missing B09 implementation until MATLAB A08 was recovered (`archive-followup.md:34`).
 
 ### 1.4 L19/W08 `MinimaxOpenLoopControl.py` — finite-action minimax
 
@@ -80,7 +80,7 @@ Sizes **[measured 2026-10-17]** (`Get-Content` line counts; bytes from `inventor
 - **Runnability today**: parses and is importable under 3.13 (module body is imports and definitions only; W08 reorders the same definitions, `works-followup.md:11`). No demo is present, so importability is not a run.
 - **Defects forcing corrected-track treatment**: `optimize_on_rs` minimizes the supplied convex cost locally with SLSQP over the H-representation and returns its negation, which is not the worst-case maximum — the positive convex check `(x−1)^2` on `[0,2]` returns `-0.0` against a true vertex maximum of 1 (`MinimaxOpenLoopControl.py:246–253`; `legacy-audit.md:13,18`; `legacy-characterization.json:55–61`); the internal simplex casts to `float32` (`:228`; `legacy-audit.md:25`); NaN scoring/`nanargmin` has no explicit infeasible contract (`:14–15`; `legacy-audit.md:29`); `feasible_actions` materializes the full Cartesian product (`:18–33`) — 2^16 = 65,536 and 9^16 = 1,853,020,188,851,841 for the audited counts (`legacy-audit.md:16,26`); the disturbance set is supplied as a single `V1` vertex set, not an explicit time-dependent uncertainty (`:39`; `legacy-audit.md:27`). The corrected replacement is an exhaustive terminal-vertex oracle (`algorithm-module-inventory.md:119`).
 - **Port effort (estimate)**: small for the language port; medium for a corrected comparator (replace the local solver by a justified vertex oracle and keep the enumeration contract).
-- **Baseline gate**: B06/B07/B08 minimax evidence class (`baselines.md:89–123`); with the B08 displayed-data references (section 4) a corrected minimax comparator can be validated without archive recovery.
+- **Baseline gate**: B06/B07/B08 minimax evidence class (`baselines.md:91–127`); with the B08 displayed-data references (section 4) a corrected minimax comparator can be validated without archive recovery.
 
 ### 1.5 L14 PDF listing (no standalone source)
 
@@ -169,22 +169,22 @@ Port effort (estimate): W01/W03/W09 are medium (350/354/282-line multi-module co
 
 ## 4. What the repository already provides for oracle-based validation
 
-- The comparison protocol requires exact source identity, the full model/input record, three tracks (historical transcription, corrected reference, improved method), listed measurements and explicit non-comparisons (`baselines.md:141–155`).
-- **B08 is the only finite-action minimax baseline with two independent, runnable references today**: a floating enumeration of 625 plans × 256 disturbance corners with minimum 67.150601101407 and three plans tied at 1e-8 (`reference-b08.json`; `baselines.md:159`), and an exact standard-library rational enumeration proving squared norm `112730080707/25000000`, whose square root (the norm) is approximately 67.15060110140489 with the same three exact minimizers (`b08-displayed-exact-audit.md:25–33`). Both use only the printed decimals in `baselines.md:115–117`; neither executes archived code (`tools/README.md:19,21`).
+- The comparison protocol requires exact source identity, the full model/input record, three tracks (historical transcription, corrected reference, improved method), listed measurements and explicit non-comparisons (`baselines.md:145–157`).
+- **B08 is the only finite-action minimax baseline with two independent, runnable references today**: a floating enumeration of 625 plans × 256 disturbance corners with minimum 67.150601101407 and three plans tied at 1e-8 (`reference-b08.json`; `baselines.md:163`), and an exact standard-library rational enumeration proving squared norm `112730080707/25000000`, whose square root (the norm) is approximately 67.15060110140489 with the same three exact minimizers (`b08-displayed-exact-audit.md:25–33`). Both use only the printed decimals in `baselines.md:117–121`; neither executes archived code (`tools/README.md:19,21`).
 - Isolated characterization of archived definitions through AST loading is established practice (`tools/characterize_legacy.py:4–5`; `legacy-audit.md:7`; `tools/README.md:19`), with results in `legacy-characterization.json`.
 - Arithmetic-only audits of printed rows exist for B08 rounding (`b08-reported-rounding-audit.md`), L13/B09 criteria and rounding boxes (`l13-displayed-criterion-audit.md`, `l13-rounding-box-audit.md`, `check_l13_displayed_criteria.py`, `check_l13_rounding_boxes.py`) and the A10 saved workspace (`l13-a10-saved-criterion-trace.md`).
 - The B04 saved-witness replay is a scoped reference, not a canonical run: the historical scenario remains non-executable, the frozen row prints 368.45 while the saved objective is 368.609780868, and the replay ends at 99.99 s (`b04-saved-witnesses.md`; `README.md:59`; issue #10 comments).
-- B08's and B09's printed nonlinear rows already disagree with their own displayed data: L04 nonlinear norm 16.42069149 vs reported 14.048; L13 original-adaptive norm 20.792787211 vs reported 22.657 (`baselines.md:121,139,163`). These are ready-made deviation records for corrected-track comparisons.
+- B08's and B09's printed nonlinear rows already disagree with their own displayed data: L04 nonlinear norm 16.42069149 vs reported 14.048; L13 original-adaptive norm 20.792787211 vs reported 22.657 (`baselines.md:125,143,167`). These are ready-made deviation records for corrected-track comparisons.
 
 ## 5. Blocked-versus-ready split
 
 ### Comparisons that can start now, without any further source recovery
 
-1. **Corrected finite-action minimax oracle/comparator** validated against the two existing B08 references (`reference-b08.json`, `b08-displayed-exact-audit.md`), on the printed displayed model only. This is the readiest end-to-end comparison target (`baselines.md:159`; `algorithm-module-inventory.md:119`).
-2. **B06/B07 displayed-data references** built the same way as the B08 audit: the shared model, actions, disturbance columns and both criteria are fully transcribed (`baselines.md:91–109`). Caveats bound the claims: the B06 extracted control sequence has ambiguous sign placement and B07 still lacks full physical parameters, so this track can fix a displayed-data reference but not a canonical reproduction (`baselines.md:16–17,100`).
+1. **Corrected finite-action minimax oracle/comparator** validated against the two existing B08 references (`reference-b08.json`, `b08-displayed-exact-audit.md`), on the printed displayed model only. This is the readiest end-to-end comparison target (`baselines.md:163`; `algorithm-module-inventory.md:119`).
+2. **B06/B07 displayed-data references** built the same way as the B08 audit: the shared model, actions, disturbance columns and both criteria are fully transcribed (`baselines.md:93–111`). Caveats bound the claims: the B06 extracted control sequence has ambiguous sign placement and B07 still lacks full physical parameters, so this track can fix a displayed-data reference but not a canonical reproduction (`baselines.md:16–17,102`).
 3. **Isolated characterization of the supplied listings** under the host Python 3.13 + NumPy 2.3.2/SciPy 1.16.3 environment: L16, L19, L28 parse, L26/W12 need the documented `print` fix to parse; the AST-loading method already runs definitions in isolation (`legacy-audit.md:7`; `legacy-characterization.json`). Hooks that fail on this host today: L16/W01/W03/W09 import matplotlib (absent), W02 imports pandas/sklearn (absent).
 4. **Source-variant differential checks** among files already in hand: W08 vs L19, W12 vs L26, W04 vs L28, W01/W03/W09 vs L16, W05/W06 vs A15/A16/A24/A25 (`works-followup.md:11–15,25`).
-5. **Hull- and V↔H-strategy comparisons on synthetic fixtures** against the documented contracts, which need no baseline input (`algorithm-module-inventory.md:29,53,69,86,130–136`); B03's historical runtime/iteration reproduction itself is blocked (below).
+5. **Hull- and V↔H-strategy comparisons on synthetic fixtures** against the documented contracts, which need no baseline input (`algorithm-module-inventory.md:29,53,69,86,130–136`); B03's historical replay is blocked (below), but its algorithm comparison proceeds with C++ translations on shared fixtures.
 6. **Static transcription of A06** projection/ZODENTEK semantics can begin from the file in hand (`algorithm-module-inventory.md:110`), while native execution stays blocked.
 7. **B09 criterion-candidate arithmetic** already exists (L13 audits); a corrected-criterion comparison can use it, while the published B09 run stays blocked.
 
@@ -194,9 +194,9 @@ Port effort (estimate): W01/W03/W09 are medium (350/354/282-line multi-module co
 |---|---|
 | B04 canonical inputs (T16 `U` rows, stage constraints, generating revision, first-action convention) | issues #10 and #2; `publication-source-matrix.md:28,36`; historical scenario remains non-executable (`README.md:59`) |
 | B09 canonical row (criterion/table mismatch; A08–A10 not matched to printed run) | issue #2; `publication-source-matrix.md:30` |
-| B05 adaptive-optimal rows (L08 Table 2 policy labels mapped; historical run inputs/provenance unresolved) | `baselines.md:15,72`; `source-map.md:18`; `l08-embedded-equations.md` |
+| B05 adaptive-optimal rows (L08 Table 2 policy labels mapped; historical run inputs/provenance unresolved) | `baselines.md:15,74`; `source-map.md:18`; `l08-embedded-equations.md` |
 | B02 nonlinear-approximation semantics (initial-state/coordinate convention) | `baselines.md:12,38` |
-| B03 complete model/input generation and seeds | `baselines.md:13,44` |
+| B03 historical replay inputs (historical point-cloud generation and seeds) | `baselines.md:13,44–46`; not required for the B03 algorithm comparison |
 | B06/B07 canonical reproduction (control sign; disturbance set and full physical parameters) | `baselines.md:16–17` |
 | Native MATLAB-family execution | no MATLAB/Octave on host **[measured 2026-10-17]**; toolbox/Simulink/MEX dependencies (A17 external `libgeocalc`, `algorithm-module-inventory.md:130`) |
 | Native Pascal execution | no `fpc` on host; `BIBTUSH`, `DIALOGS`, `term`, `funfnx` absent from the archive (`btulshor.pas:5,26`; `archive-followup.md:19`) **[measured 2026-10-17]** |
@@ -204,23 +204,23 @@ Port effort (estimate): W01/W03/W09 are medium (350/354/282-line multi-module co
 
 ## 6. Deviation-log requirements for corrected-track ports
 
-The repository has no existing deviation-log artifact or schema **[searched `docs/` for "deviation log" variants: no matches]**. The requirements below assemble the documented protocol and the audited pitfalls; a port's deviation log should state at least:
+The repository has no shared comparison-program deviation-log schema, but the A29/A33 Python ports under `tools/legacy-ports/` each carry a port-level `DEVIATIONS.md` (outside the earlier `docs/` search for "deviation log" variants). The requirements below assemble the documented protocol and the audited pitfalls for the C++ ports; a port's deviation log should state at least:
 
-1. **Identity**: source ID, archive-relative path, byte count and SHA-256 of the original, and the port's own version/hash (`baselines.md:143`; `publication-source-matrix.md:5`).
-2. **Complete scenario record**: time grid, every `A/B/D` array, coordinate convention and order, units, constraints, uncertainty set and its time dependence, policy class, objective expression, initial conditions, solver tolerances, and reported originals (`baselines.md:143`).
+1. **Identity**: source ID, archive-relative path, byte count and SHA-256 of the original, and the port's own version/hash (`baselines.md:147`; `publication-source-matrix.md:5`).
+2. **Complete scenario record**: time grid, every `A/B/D` array, coordinate convention and order, units, constraints, uncertainty set and its time dependence, policy class, objective expression, initial conditions, solver tolerances, and reported originals (`baselines.md:147`).
 3. **Recovered vs inferred inputs**: mark each field recovered from a hash-identified source or inferred/rounded — e.g., A39's effective 16-action histories were recovered algebraically with different first actions, and the frozen controller is unmatched (issue #10 comments; `publication-source-matrix.md:28`); W07's notebook configuration has no saved outputs and is not a B08 run (`works-followup.md:29–31`).
 4. **Float precision and representation**: legacy `float32` simplex (`MinimaxOpenLoopControl.py:228`; `legacy-audit.md:25`), fixed tolerances (`ReachableSet.py:62,79`), the characterization's NumPy/SciPy versions (`legacy-audit.md:7`), and the exact-rational route used where decimals are the authority (`b08-displayed-exact-audit.md:25`).
-5. **Randomness and seeds**: state whether the legacy path used randomized basis selection (`ReachableSet.py:102`; `MinimaxOpenLoopControl.py:161–168`), and that B03 seeds and full arrays are absent (`baselines.md:44`), W05/W06 demonstrations are unseeded (`works-followup.md:35`) and W13 has no fixed seed (`works-followup.md:50`), plus the port's own seeds/seed policy (`works-followup.md:56`).
+5. **Randomness and seeds**: state whether the legacy path used randomized basis selection (`ReachableSet.py:102`; `MinimaxOpenLoopControl.py:161–168`), and that B03 seeds and full arrays are absent (`baselines.md:44–46`; B03's algorithm comparison uses its own shared fixtures and seeds), W05/W06 demonstrations are unseeded (`works-followup.md:35`) and W13 has no fixed seed (`works-followup.md:50`), plus the port's own seeds/seed policy (`works-followup.md:56`).
 6. **Changed behavior**: for every correction, the source equation or statement, the changed behavior, the resulting baseline difference and the verification evidence (`legacy-audit.md:45`).
-7. **Track labeling and immutability**: historical numbers stay immutable; corrected/assumed variants get distinct IDs; runtime is context, not an acceptance threshold (`baselines.md:5,145–149`; `publication-source-matrix.md:36`; issue #10 acceptance list).
-8. **Comparison semantics guards**: do not compare sampled trajectories against complete worst-case certificates, approximate sets against exact output without error, continuous controls against discrete actions, or one open-loop solve against an adaptive run (`baselines.md:153`).
+7. **Track labeling and immutability**: historical numbers stay immutable; corrected/assumed variants get distinct IDs; runtime is context, not an acceptance threshold (`baselines.md:5,145–153`; `publication-source-matrix.md:36`; issue #10 acceptance list).
+8. **Comparison semantics guards**: do not compare sampled trajectories against complete worst-case certificates, approximate sets against exact output without error, continuous controls against discrete actions, or one open-loop solve against an adaptive run (`baselines.md:157`).
 9. **Environment**: host toolchain and package versions actually used for the executed comparison (the table in the Host section is the kind of record required; `tools/README.md:5`).
 
 ## 7. Candidate new backlog items (titles only)
 
 1. Build the corrected finite-action minimax reference validated against both B08 references.
 2. Produce exact and floating displayed-data references for B06 and B07.
-3. Port the supplied Python listings to Python 3 with per-file deviation logs.
+3. Translate the supplied Python listings and Works variants into the C++ comparison runtime with per-file deviation logs; a Python 3 transcription may remain a behavioral oracle.
 4. Transcribe A06 ZODENTEK/VERLIM projection semantics with regression fixtures.
 5. Recover or stub the four missing Pascal units (`BIBTUSH`, `DIALOGS`, `term`, `funfnx`).
 6. Hash-classify unregistered archive neighbours (`Constrained/Unconstrained` Minmax/ReachableSets variants, `CDD.m`, `SMO.m`, `Spirel_Solver.m`, `.asv`, Simulink models).
