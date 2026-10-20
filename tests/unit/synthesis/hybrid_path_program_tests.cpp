@@ -6474,6 +6474,82 @@ TEST_CASE("hybrid portfolio builder rejects a pre-cancelled request") {
     CHECK(std::get<OperationStopped>(built).reason==StopReason::cancelled);
 }
 
+TEST_CASE("zero-horizon synthesis and verification use the initial terminal singleton") {
+    auto parked=[](model::HybridModeId id) {
+        model::HybridMode mode{std::move(id),1,0,{"x"},{}};
+        mode.flow=LinearStage{Matrix{1,1,{1}},Matrix{1,0,{}},Matrix{1,0,{}},Vector{0}};
+        mode.invariants={interval("zero-horizon-"+mode.id.value,1,3)};
+        return mode;
+    };
+    model::HybridSystem system{0,{parked({"parked"})},{}};
+    model::HybridRequest request{{{"parked"},{2}},{{"parked"}},
+        {{{"parked"},LinearTerminal{{2},3},"energy","J"}}};
+
+    const auto built=build_hybrid_portfolio_programs(system,request,{"zero-horizon"},
+        {0,8},{4,64,1024});
+    REQUIRE(std::holds_alternative<std::vector<HybridPathProgram>>(built));
+    const auto& programs=std::get<std::vector<HybridPathProgram>>(built);
+    REQUIRE(programs.size()==1);
+    CHECK(programs[0].path.modes==std::vector<model::HybridModeId>{{"parked"}});
+    CHECK(programs[0].path.edges.empty());
+    CHECK(programs[0].joint_relation.metadata()->set.dimension==1);
+    const auto representation=programs[0].joint_relation.representation();
+    REQUIRE(std::holds_alternative<sets::HRepresentation>(representation));
+    const auto& relation=std::get<sets::HRepresentation>(representation);
+    REQUIRE(relation.equalities.rows()==1);
+    CHECK(relation.equalities.cols()==1);
+    CHECK(relation.equalities(0,0)==1);
+    CHECK(relation.equality_values[0]==2);
+    REQUIRE(relation.inequalities.rows()==2);
+    CHECK(relation.inequalities(0,0)==-1);
+    CHECK(relation.upper_bounds[0]==-1);
+    CHECK(relation.inequalities(1,0)==1);
+    CHECK(relation.upper_bounds[1]==3);
+
+    const auto& linear=std::get<LinearProgram>(programs[0].program);
+    REQUIRE(linear.objective().size()==1);
+    CHECK(linear.objective()[0]==2);
+    CHECK(linear.offset()==3);
+    CHECK(linear.objective()[0]*2+linear.offset()==7);
+    CHECK(std::get<LinearTerminal>(programs[0].lifted_objective).offset==3);
+
+    auto candidate=exact_candidate(programs[0],{2});
+    candidate.relation=singleton_data({2});
+    ExactLinearHHybridFamilyVerifier verifier;
+    const auto verified=verify_hybrid_portfolio_family(verifier,system,request,
+        programs,std::span<const HybridPathOptimalFaceCandidate>(&candidate,1),
+        {0,8},{0,0});
+    REQUIRE(std::holds_alternative<HybridFamilyVerificationReport>(verified));
+    const auto& report=std::get<HybridFamilyVerificationReport>(verified);
+    REQUIRE(report.branches.size()==1);
+    for(const auto& diagnostic:report.branches.front().diagnostics)
+        MESSAGE(diagnostic.field << ": " << diagnostic.explanation);
+    CHECK(report.global_objective_optimality==HybridVerificationStatus::established);
+    CHECK(report.complete_family_coverage==HybridVerificationStatus::established);
+    CHECK(report.branches[0].path.edges.empty());
+    CHECK(report.branches[0].feasibility==HybridVerificationStatus::established);
+    CHECK(report.branches[0].objective_optimality==HybridVerificationStatus::established);
+    CHECK(report.branches[0].continuous_coverage==HybridVerificationStatus::established);
+
+    model::HybridSystem unreachable_system{0,
+        {parked({"parked"}),parked({"elsewhere"})},{}};
+    model::HybridRequest unreachable_request{{{"parked"},{2}},{{"elsewhere"}},
+        {{{"elsewhere"},LinearTerminal{{1},0},"energy","J"}}};
+    RejectingTrajectoryPreflightAdapter trajectory;
+    FixtureHybridFamilyVerifier unreachable_verifier;
+    const auto rejected=build_hybrid_portfolio_programs_with_verifier(unreachable_verifier,
+        trajectory,unreachable_system,unreachable_request,{"zero-horizon-no-terminal"},
+        {0,8},{4,64,1024});
+    REQUIRE(std::holds_alternative<Diagnostics>(rejected));
+    CHECK(std::get<Diagnostics>(rejected).front().field=="hybrid.verification.paths");
+    CHECK(trajectory.preflight_calls==0);
+    CHECK(trajectory.capability_calls==0);
+    CHECK(trajectory.build_calls==0);
+    CHECK(unreachable_verifier.preflight_calls==0);
+    CHECK(unreachable_verifier.capability_calls==0);
+    CHECK(unreachable_verifier.calls==0);
+}
+
 TEST_CASE("hybrid portfolio builder rolls back after a later dimension limit failure") {
     auto [system,request]=variable_size_parallel_profile();
     const auto built=build_hybrid_portfolio_programs(system,request,{"hybrid-problem"},

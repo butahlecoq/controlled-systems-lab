@@ -263,3 +263,13 @@ relation admission succeeds; both reject with zero capability or build calls.
 This closes the lifted-objective storage admission gap for enumerated direct-
 trajectory paths. Broader provider admission/resource accounting, verifier-
 domain coverage, and main-only Pages URL/hash verification remain open.
+
+Zero-horizon semantics now have an end-to-end synthesis and verification test.
+For one allowed mode, construction retains the edge-free path and the fixed
+initial state as its one-coordinate terminal relation; the lifted linear cost
+preserves its nonzero offset, and the exact linear-H verifier establishes the
+singleton optimal family. A paired request whose only allowed terminal mode is
+unreachable is rejected before trajectory or verifier preflight, capability,
+or build/verify dispatch. Existing model-level tests cover `T=0` admission;
+this adds the synthesis and family-verification boundary. Broader model-wide
+admission, verifier-domain, resource-scale, and publication gates remain open.
