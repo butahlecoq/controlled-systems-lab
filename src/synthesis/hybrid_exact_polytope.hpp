@@ -316,7 +316,8 @@ inline bool exact_integer(double value, int common_exponent,
 }
 
 inline bool make_row(std::span<const double> coefficients, double bound,
-                     bool strict, std::size_t max_bits, Row& result) {
+                     bool strict, std::size_t max_bits, Row& result,
+                     int* binary_exponent = nullptr) {
     if (!std::isfinite(bound))
         return false;
     int common_exponent = std::numeric_limits<int>::max();
@@ -346,7 +347,19 @@ inline bool make_row(std::span<const double> coefficients, double bound,
     if (!exact_integer(bound, common_exponent, max_bits, result.bound))
         return false;
     result.strict = strict;
+    unsigned common_power = std::numeric_limits<unsigned>::max();
+    for (const auto& coefficient : result.coefficients)
+        if (!is_zero(coefficient))
+            common_power = std::min(common_power,
+                                    trailing_zero_bits(coefficient));
+    if (!is_zero(result.bound))
+        common_power = std::min(common_power,
+                                trailing_zero_bits(result.bound));
+    if (common_power == std::numeric_limits<unsigned>::max())
+        common_power = 0;
     normalize_power_of_two(result);
+    if (binary_exponent)
+        *binary_exponent = common_exponent + static_cast<int>(common_power);
     return true;
 }
 
@@ -392,9 +405,10 @@ inline bool normalize_rows(std::vector<Row>& rows, std::size_t max_rows) {
 } // namespace exact_detail
 
 inline bool make_row(std::span<const double> coefficients, double bound,
-                     bool strict, std::size_t max_integer_bits, Row& result) {
+                     bool strict, std::size_t max_integer_bits, Row& result,
+                     int* binary_exponent = nullptr) {
     return exact_detail::make_row(coefficients, bound, strict,
-                                  max_integer_bits, result);
+                                  max_integer_bits, result, binary_exponent);
 }
 
 inline bool append_equality(std::span<const double> coefficients, double value,
@@ -428,7 +442,11 @@ inline bool append_inequality(std::span<const double> coefficients,
 inline FeasibilityResult feasible(std::vector<Row> rows,
                                   std::size_t variables,
                                   Limits limits = {},
-                                  std::stop_token cancellation = {}) {
+                                  std::stop_token cancellation = {},
+                                  std::size_t retained_variables = 0,
+                                  std::vector<Row>* projected_rows = nullptr) {
+    if (projected_rows)
+        projected_rows->clear();
     FeasibilityResult result;
     const auto unsupported = [&](const char* reason) {
         result.state = FeasibilityState::unsupported;
@@ -437,6 +455,8 @@ inline FeasibilityResult feasible(std::vector<Row> rows,
     };
     if (variables > limits.max_variables)
         return unsupported("Variable count exceeds the exact feasibility limit");
+    if (retained_variables > variables)
+        return unsupported("Retained variable count exceeds the relation dimension");
     if (rows.size() > limits.max_rows)
         return unsupported("Initial row count exceeds the exact feasibility limit");
     if (cancellation.stop_requested()) {
@@ -466,13 +486,14 @@ inline FeasibilityResult feasible(std::vector<Row> rows,
     }
     result.peak_rows = rows.size();
     std::size_t operations = 0;
-    for (std::size_t eliminated = 0; eliminated < variables; ++eliminated) {
+    for (std::size_t eliminated = 0;
+         eliminated < variables - retained_variables; ++eliminated) {
         if (cancellation.stop_requested()) {
             result.state = FeasibilityState::cancelled;
             result.reason = "Exact feasibility was cancelled";
             return result;
         }
-        constexpr std::size_t variable = 0;
+        const std::size_t variable = retained_variables;
         std::vector<const Row*> positive, negative, zero;
         for (const auto& row : rows) {
             const int sign = exact_detail::compare(row.coefficients[variable], {});
@@ -593,6 +614,203 @@ inline FeasibilityResult feasible(std::vector<Row> rows,
         rows = std::move(next);
     }
     result.state = FeasibilityState::feasible;
+    if (projected_rows)
+        *projected_rows = std::move(rows);
+    return result;
+}
+
+struct ExactRational {
+    Integer numerator;
+    Integer denominator{exact_detail::from_u64(1)};
+    int binary_exponent{};
+};
+
+enum class LinearMinimumState {
+    minimum,
+    infeasible,
+    unbounded_below,
+    unsupported,
+    cancelled
+};
+
+struct LinearMinimumResult {
+    LinearMinimumState state{LinearMinimumState::unsupported};
+    ExactRational value;
+    bool attained{};
+    std::size_t peak_rows{};
+    std::size_t generated_rows{};
+    std::size_t maximum_integer_bits{};
+    std::string reason;
+};
+
+inline bool compare_rationals(const ExactRational& lhs,
+                              const ExactRational& rhs,
+                              std::size_t max_bits, int& order) {
+    if (lhs.denominator.negative || rhs.denominator.negative ||
+        exact_detail::is_zero(lhs.denominator) ||
+        exact_detail::is_zero(rhs.denominator))
+        return false;
+    Integer left, right;
+    if (!exact_detail::multiply(lhs.numerator, rhs.denominator, max_bits, left) ||
+        !exact_detail::multiply(rhs.numerator, lhs.denominator, max_bits, right))
+        return false;
+    order = exact_detail::compare(left, right);
+    return true;
+}
+
+inline bool compare_scaled_rationals(const ExactRational& lhs,
+                                     const ExactRational& rhs,
+                                     std::size_t max_bits, int& order) {
+    if (lhs.denominator.negative || rhs.denominator.negative ||
+        exact_detail::is_zero(lhs.denominator) ||
+        exact_detail::is_zero(rhs.denominator))
+        return false;
+    Integer left, right;
+    if (!exact_detail::multiply(lhs.numerator, rhs.denominator, max_bits, left) ||
+        !exact_detail::multiply(rhs.numerator, lhs.denominator, max_bits, right))
+        return false;
+    const auto lhs_shift = static_cast<std::int64_t>(lhs.binary_exponent) -
+                           static_cast<std::int64_t>(rhs.binary_exponent);
+    if (lhs_shift > 0) {
+        if (static_cast<std::uint64_t>(lhs_shift) > max_bits)
+            return false;
+        const auto shift = static_cast<std::size_t>(lhs_shift);
+        if (!exact_detail::shift_left(left, shift, max_bits))
+            return false;
+    } else if (lhs_shift < 0) {
+        const auto rhs_shift = static_cast<std::uint64_t>(-lhs_shift);
+        if (rhs_shift > max_bits)
+            return false;
+        const auto shift = static_cast<std::size_t>(rhs_shift);
+        if (!exact_detail::shift_left(right, shift, max_bits))
+            return false;
+    }
+    order = exact_detail::compare(left, right);
+    return true;
+}
+
+// Project an exact H-relation onto the integer-scaled value of a binary64
+// linear objective. The objective scale is retained so values from paths with
+// different coefficient exponents can be compared without floating point.
+inline LinearMinimumResult minimize_linear(
+    std::span<const Row> relation, std::size_t variables,
+    std::span<const double> objective, double offset, Limits limits = {},
+    std::stop_token cancellation = {}) {
+    const auto unsupported = [](const char* reason) {
+        LinearMinimumResult result;
+        result.reason = reason;
+        return result;
+    };
+    if (cancellation.stop_requested())
+        return {LinearMinimumState::cancelled, {}, false, 0, 0, 0,
+                "Exact linear minimization was cancelled"};
+    if (objective.size() != variables || variables >= limits.max_variables ||
+        variables == std::numeric_limits<std::size_t>::max() ||
+        relation.size() > limits.max_rows ||
+        relation.size() > limits.max_operations /
+                              std::max<std::size_t>(variables + 1, 1))
+        return unsupported("Linear objective or augmented relation exceeds exact limits");
+    Row objective_row;
+    int objective_exponent = 0;
+    if (!make_row(objective, offset, false, limits.max_integer_bits,
+                  objective_row, &objective_exponent))
+        return unsupported("Linear objective is non-finite or exceeds exact limits");
+    if (relation.size() > limits.max_rows -
+                              std::min<std::size_t>(2, limits.max_rows))
+        return unsupported("Objective equation exceeds the exact row limit");
+
+    std::vector<Row> augmented;
+    augmented.reserve(relation.size() + 2);
+    for (const auto& row : relation) {
+        if (cancellation.stop_requested())
+            return {LinearMinimumState::cancelled, {}, false, 0, 0, 0,
+                    "Exact linear minimization was cancelled"};
+        if (row.coefficients.size() != variables)
+            return unsupported("Relation row dimensions do not match the objective");
+        Row expanded = row;
+        expanded.coefficients.insert(expanded.coefficients.begin(), Integer{});
+        augmented.push_back(std::move(expanded));
+    }
+    Row objective_equality;
+    objective_equality.coefficients.reserve(variables + 1);
+    objective_equality.coefficients.push_back(exact_detail::from_u64(1));
+    for (const auto& coefficient : objective_row.coefficients) {
+        Integer negated = coefficient;
+        negated.negative = !exact_detail::is_zero(negated) && !negated.negative;
+        objective_equality.coefficients.push_back(std::move(negated));
+    }
+    objective_equality.bound = objective_row.bound;
+    Row inverse_equality = objective_equality;
+    for (auto& coefficient : inverse_equality.coefficients)
+        coefficient.negative = !exact_detail::is_zero(coefficient) &&
+                               !coefficient.negative;
+    inverse_equality.bound.negative = !exact_detail::is_zero(inverse_equality.bound) &&
+                                      !inverse_equality.bound.negative;
+    augmented.push_back(std::move(objective_equality));
+    augmented.push_back(std::move(inverse_equality));
+
+    std::vector<Row> projection;
+    const auto projected = feasible(std::move(augmented), variables + 1,
+                                    limits, cancellation, 1, &projection);
+    LinearMinimumResult result;
+    result.peak_rows = projected.peak_rows;
+    result.generated_rows = projected.generated_rows;
+    result.maximum_integer_bits = projected.maximum_integer_bits;
+    if (projected.state == FeasibilityState::cancelled) {
+        result.state = LinearMinimumState::cancelled;
+        result.reason = projected.reason;
+        return result;
+    }
+    if (projected.state == FeasibilityState::unsupported) {
+        result.state = LinearMinimumState::unsupported;
+        result.reason = projected.reason;
+        return result;
+    }
+    if (projected.state == FeasibilityState::infeasible) {
+        result.state = LinearMinimumState::infeasible;
+        return result;
+    }
+
+    bool have_lower_bound = false;
+    ExactRational minimum;
+    bool attained = false;
+    for (const auto& row : projection) {
+        if (cancellation.stop_requested())
+            return {LinearMinimumState::cancelled, {}, false,
+                    result.peak_rows, result.generated_rows,
+                    result.maximum_integer_bits,
+                    "Exact linear minimization was cancelled"};
+        if (row.coefficients.size() != 1)
+            return unsupported("Objective projection did not retain one variable");
+        const int coefficient_order = exact_detail::compare(row.coefficients[0], {});
+        if (coefficient_order >= 0)
+            continue;
+        ExactRational candidate;
+        candidate.numerator = row.bound;
+        candidate.numerator.negative = !exact_detail::is_zero(candidate.numerator) &&
+                                       !candidate.numerator.negative;
+        candidate.denominator = row.coefficients[0];
+        candidate.denominator.negative = false;
+        candidate.binary_exponent = objective_exponent;
+        int order = 1;
+        if (have_lower_bound &&
+            !compare_rationals(candidate, minimum, limits.max_integer_bits, order))
+            return unsupported("Rational objective comparison exceeds exact limits");
+        if (!have_lower_bound || order > 0) {
+            minimum = std::move(candidate);
+            have_lower_bound = true;
+            attained = !row.strict;
+        } else if (order == 0 && row.strict) {
+            attained = false;
+        }
+    }
+    if (!have_lower_bound) {
+        result.state = LinearMinimumState::unbounded_below;
+        return result;
+    }
+    result.state = LinearMinimumState::minimum;
+    result.value = std::move(minimum);
+    result.attained = attained;
     return result;
 }
 
