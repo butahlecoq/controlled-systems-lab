@@ -301,7 +301,7 @@ struct HybridFamilyVerificationReport {
     HybridVerificationStatus global_objective_optimality{HybridVerificationStatus::not_checked};
     HybridVerificationStatus complete_family_coverage{HybridVerificationStatus::not_checked};
     // Derived from the validated per-path traces by the portfolio wrapper.
-    std::vector<HybridOperationResourceSummary> operation_resources;
+    std::vector<HybridOperationResourceSummary> operation_resources{};
 };
 using HybridFamilyVerificationResult = std::variant<HybridFamilyVerificationReport,
     Diagnostics, OperationStopped>;
