@@ -3183,8 +3183,27 @@ TEST_CASE("scalar interval verifiers preflight objectives for every allowed term
     TwoStageScalarIntervalHybridFamilyVerifier two_stage;
     TwoParameterScalarPolytopeHybridFamilyVerifier two_parameter;
     check_rejection(one_step,1);
-    check_rejection(single_parameter,1);
-    check_rejection(two_stage,2);
+    const auto single_parameter_system=make_scalar_system(1);
+    const auto single_parameter_request=make_request();
+    const std::vector<model::HybridPath> no_single_parameter_paths;
+    const std::vector<model::HybridPlannedOperation> no_single_parameter_operations;
+    const auto single_parameter_preflight=single_parameter.preflight(single_parameter_system,
+        single_parameter_request,no_single_parameter_paths,no_single_parameter_operations,{});
+    CHECK(std::holds_alternative<HybridOperationAdmissionSuccess>(single_parameter_preflight));
+    auto malformed_request=single_parameter_request;
+    malformed_request.terminal_objectives.back().objective=
+        QuadraticTerminal{Matrix{1,1,{}},Vector{0},0};
+    const auto malformed_preflight=single_parameter.preflight(single_parameter_system,
+        malformed_request,no_single_parameter_paths,no_single_parameter_operations,{});
+    REQUIRE(std::holds_alternative<Diagnostics>(malformed_preflight));
+    CHECK(std::get<Diagnostics>(malformed_preflight).front().code==DiagnosticCode::unsupported);
+    const auto two_stage_system=make_scalar_system(2);
+    const auto two_stage_request=make_request();
+    const std::vector<model::HybridPath> no_two_stage_paths;
+    const std::vector<model::HybridPlannedOperation> no_two_stage_operations;
+    const auto two_stage_preflight=two_stage.preflight(two_stage_system,two_stage_request,
+        no_two_stage_paths,no_two_stage_operations,{});
+    CHECK(std::holds_alternative<HybridOperationAdmissionSuccess>(two_stage_preflight));
     const auto two_parameter_system=make_scalar_system(2);
     const auto two_parameter_request=make_request();
     const std::vector<model::HybridPath> no_paths;
@@ -6216,6 +6235,63 @@ TEST_CASE("single-parameter scalar interval verifier covers arbitrary finite hor
             HybridVerificationStatus::refuted));
         CHECK(record->continuous_coverage==HybridVerificationStatus::established);
     }
+}
+
+TEST_CASE("single-parameter verifier certifies quadratic interior and full optimal faces") {
+    model::HybridMode mode{{"quadratic-mode"},1,1,{"x"},{"u"}};
+    mode.flow=LinearStage{Matrix{1,1,{1}},Matrix{1,1,{2}},Matrix{1,0,{}},Vector{1}};
+    mode.control_sets={interval("quadratic-control",0,1)};
+    mode.invariants={UniversalSet{1},UniversalSet{1}};
+    const auto reset=h_set("quadratic-identity-reset",2,Matrix{0,2,{}},Vector{},
+        Matrix{1,2,{-1,1}},Vector{0});
+    model::HybridSystem system{1,{mode},{{{"quadratic-loop"},{"quadratic-mode"},
+        {"quadratic-mode"},{UniversalSet{1}},{reset}}}};
+    model::HybridRequest request{{{"quadratic-mode"},{0}},{{"quadratic-mode"}},
+        {{{"quadratic-mode"},QuadraticTerminal{Matrix{1,1,{2}},Vector{-4},0},
+            "quadratic cost","units"}}};
+    auto built=build_hybrid_portfolio_programs(system,request,{"quadratic-interval"},
+        {1,8},{16,64,4096});
+    REQUIRE(std::holds_alternative<std::vector<HybridPathProgram>>(built));
+    auto programs=std::get<std::vector<HybridPathProgram>>(std::move(built));
+    REQUIRE(programs.size()==1);
+    SingleParameterScalarIntervalHybridFamilyVerifier verifier;
+    const auto paths=std::vector<model::HybridPath>{programs.front().path};
+    const auto operation_plan=model::plan_hybrid_operations(paths);
+    const auto preflight=verifier.preflight(system,request,paths,operation_plan,{});
+    REQUIRE(std::holds_alternative<HybridOperationAdmissionSuccess>(preflight));
+    auto& convex=std::get<ConvexProgram>(programs.front().program);
+    const Vector optimum{0,0.5,2,2};
+    ProgramResult solver{Termination::completed,
+        {convex.quadratic_program().identity(),MathematicalOutcome::optimal,
+            SymbolicArgument{"raw scalar quadratic oracle","minimum at x=2"},{}},
+        optimum,{},"independent scalar quadratic optimum"};
+    HybridPathOptimalFaceCandidate candidate{programs.front().path, singleton_data(optimum),
+        optimum,std::move(solver),{},"independent singleton quadratic minimizer",{}};
+    const auto result=verify_hybrid_portfolio_family(verifier,system,request,programs,
+        std::span<const HybridPathOptimalFaceCandidate>(&candidate,1),{1,8},{0,0});
+    REQUIRE(std::holds_alternative<HybridFamilyVerificationReport>(result));
+    const auto& report=std::get<HybridFamilyVerificationReport>(result);
+    CHECK(report.global_objective_optimality==HybridVerificationStatus::established);
+    CHECK(report.complete_family_coverage==HybridVerificationStatus::established);
+    CHECK(report.branches.front().continuous_coverage==HybridVerificationStatus::established);
+
+    request.terminal_objectives.front().objective=QuadraticTerminal{Matrix{1,1,{0}},Vector{0},0};
+    built=build_hybrid_portfolio_programs(system,request,{"flat-quadratic-interval"},
+        {1,8},{16,64,4096});
+    REQUIRE(std::holds_alternative<std::vector<HybridPathProgram>>(built));
+    programs=std::get<std::vector<HybridPathProgram>>(std::move(built));
+    auto& flat_convex=std::get<ConvexProgram>(programs.front().program);
+    ProgramResult flat_solver{Termination::completed,
+        {flat_convex.quadratic_program().identity(),MathematicalOutcome::optimal,
+            SymbolicArgument{"raw flat quadratic oracle","every control u in [0,1] minimizes"},{}},
+        optimum,{},"independent flat quadratic optimum"};
+    HybridPathOptimalFaceCandidate narrowed{programs.front().path,singleton_data(optimum),
+        optimum,std::move(flat_solver),{},"deliberately narrowed flat minimizer",{}};
+    const auto narrowed_result=verify_hybrid_portfolio_family(verifier,system,request,programs,
+        std::span<const HybridPathOptimalFaceCandidate>(&narrowed,1),{1,8},{0,0});
+    REQUIRE(std::holds_alternative<HybridFamilyVerificationReport>(narrowed_result));
+    CHECK(std::get<HybridFamilyVerificationReport>(narrowed_result).complete_family_coverage==
+        HybridVerificationStatus::refuted);
 }
 
 TEST_CASE("exact singleton hybrid verifier handles empty branches and rejects continuous domains") {

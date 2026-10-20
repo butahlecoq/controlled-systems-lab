@@ -288,7 +288,11 @@ family coverage or validated assurance.
 numerical domain with scalar states and controls, exactly one bounded
 non-singleton control interval across the horizon, singleton controls at every
 other stage, interval invariants and guards, deterministic exactly representable
-scalar affine H-relation resets, and a scalar linear terminal objective. It
+scalar affine H-relation resets, and finite scalar linear or convex quadratic
+terminal objectives. For quadratics, the verifier composes the terminal cost
+into an exact univariate quadratic and checks the point or full interval of
+minimizers, including the lifted convex-program coefficients. Residual-norm
+objectives remain outside this verifier's domain. It
 independently propagates the shared control parameter through every flow and
 reset, reconstructs each path's feasible parameter interval and objective,
 checks the complete `(1 + 3H)`-coordinate path relation, and checks every
