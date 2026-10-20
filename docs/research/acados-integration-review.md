@@ -186,8 +186,10 @@ from acados's solver status alone.
    Require a native Windows x64 MSVC build and smoke test, or record WSL as a
    different platform.
 
-No gate here authorizes benchmark execution. Stage 3 runs still require the
-comparison-record and fixture prerequisites (#83/#94/#402) and separate owner
+No gate here authorizes benchmark execution. The five-run comparison is a
+separate possible future effort, not a continuation or deliverable of this
+research spike. Any Stage-3 comparison still requires the comparison-record and
+fixture prerequisites (#83/#94/#402), a new scope decision and separate owner
 approval.
 
 ## Recommended next steps and scope
@@ -197,7 +199,7 @@ approval.
 | 0 | Record release/tag/submodule/license identity and the exact build recipe; no code changes. | 0.5 day |
 | 1 | Build v0.6.0 natively on Windows x64 MSVC in the static one-thread profile; run an upstream minimal OCP example and a C API smoke solve. Pass only if reproducible, with logs and notices captured. | 1–2 days; high risk |
 | 2 | Prove the algebraic mapping for one matched affine/polytope Stage 3 case (terminal quadratic, zero stage cost, unit steps); build a throwaway adapter and check the witness with CSL's verifier. Pass only if objective and constraints match independently. | 3–5 days |
-| 3 | After #83/#94/#402 and separate authorization, save a comparison record with five alternating repetitions and all outcomes. | 2–3 days; not authorized here |
+| 3 | Separate future benchmark/comparison scope, outside this research spike: only after #83/#94/#402, a new scope decision and explicit authorization, consider a comparison record with five alternating repetitions and all outcomes. | Not authorized or estimated by this review |
 
 The research spike is roughly **6–10 engineering days**, with the largest uncertainty
 in the MSVC build and the objective/constraint mapping. Stop if the native build
