@@ -35,13 +35,23 @@ was 6,288,700 ns (range 5,492,300–9,158,900 ns); all seven batches matched the
 analytic result with no failures. These timings are descriptive for this one
 fixture and do not establish a performance winner, scalability, general
 polyhedral coverage, or validated arithmetic. The measured report covers the
-one-step scalar interval profile; the implementation also has a bounded
-finite-horizon verifier for exactly one free scalar control parameter, but the
-report does not measure that domain. Multiple free parameters and general
-continuous polytope verification remain open EXT-07 acceptance items.
-The report and 2D control-versus-terminal-state example are versioned with raw
-rows and an offline ZIP. Main-only Pages
-publication and live URL/hash verification remain pending.
+one-step scalar interval profile. A second frozen bundle,
+[`ext07-hybrid-two-parameter-00ac6fb75d7cab95`](../../reports/algorithm-results/ext07-hybrid-two-parameter-00ac6fb75d7cab95/),
+measures a fixed two-stage, two-control fixture with `enter-half` and
+`enter-full` branches. Its feasible sets are `[0,0.5] x [0,1]` and
+`[0,1] x [0,1]`; both retain the complete minimizing family
+`u0=0, 0<=u1<=1` for the objective `x_terminal=u0`. The registered HiGHS LP
+provider and two-parameter polytope verifier completed 140 measured calls after
+an excluded warmup. On the recorded Windows 11 / MSVC Release host, median
+end-to-end batch time was 13,080,500 ns (range 12,699,800-15,674,900 ns), and
+median individual call time was 658,250 ns; all calls matched the analytic
+answer with no failures. Both reports are descriptive evidence for their
+specific fixtures, not performance comparisons, scalability claims, general
+continuous-polytope coverage, or validated arithmetic. The two-parameter
+bundle includes a standalone feasible-set plot, raw rows, and an offline ZIP.
+Higher-dimensional free-control domains and general continuous-polytope
+verification remain open EXT-07 acceptance items. Main-only Pages publication
+and live URL/hash verification remain pending.
 
 ## OPT-07 ordered hull membership report
 

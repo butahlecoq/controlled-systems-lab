@@ -1,0 +1,40 @@
+{
+  "absolute_tolerance": 1e-08,
+  "architecture": "AMD64",
+  "cmake": "cmake version 3.31.6-msvc6",
+  "cmake_cache_sha256": "bf9d684a4359ab0117bf1253cbc649f42176505e7dbadbf6eeb295ebf0eebaec",
+  "collected_utc": "2026-10-20T05:20:09.923020+00:00",
+  "compiler_id": "MSVC",
+  "compiler_receipt": "CMakeCXXCompiler.raw.cmake",
+  "compiler_version": "19.44.35215.0",
+  "configuration": "Release",
+  "cxx_standard": 20,
+  "enumeration_limits": {
+    "max_horizon": 2,
+    "max_paths": 8
+  },
+  "host": "Windows measurement workstation",
+  "host_name_sha256": "88554329c62353e4f98e5742ba8c9b088094f4793b47e7abefc0528d302f7bf9",
+  "logical_processors": 12,
+  "native_threads_configured": 1,
+  "native_threads_observed": null,
+  "native_threads_requested": 1,
+  "os": "Windows-11-10.0.22631-SP0",
+  "outer_workers_observed": 1,
+  "outer_workers_requested": 1,
+  "processor": "Intel64 Family 6 Model 151 Stepping 5, GenuineIntel",
+  "python": "3.13.5",
+  "raw_build_log_sha256": "5f9d0ec7d76eb6012b6b50d21f9e1aef1ef59e4774c85c2c62bb2ef6df4c408e",
+  "raw_configure_log_sha256": "6f9a458ec8998edd908b4eb918f938ecff43bd4cd9fc0d2cab583bb33be4f853",
+  "relation_limits": {
+    "max_matrix_elements": 65536,
+    "max_rows": 4096,
+    "max_variables": 64
+  },
+  "relative_tolerance": 1e-08,
+  "source_commit": "7d2f1ad480229bbc0e3d1596701b6b523a48ae9a",
+  "source_tree": "14528e5e25520a494ebac8f7eb534d182bd902a5",
+  "timing_scope": "One end-to-end call includes fixture/provider setup, complete path relation assembly, LP execution, candidate-face construction, and verification of all allowed path families. Serialization, build, and rendering are excluded.",
+  "warmup_policy": "One excluded 10-call batch followed by seven measured 20-call batches",
+  "workspace_reuse": "none; fresh fixture, provider and workspace per call"
+}
