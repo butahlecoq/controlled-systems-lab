@@ -217,7 +217,7 @@ def catalogue_index(catalogue):
         links.append(("Offline bundle",rid+".zip"))
         links.append(("Repository copy ("+label+")",tree))
         links.append(("Repository bundle",archive))
-        entries.append({"report_id":rid,"scope":scope,"limits":limits,"commit":str(report["source_commit"]),"links":links})
+        entries.append(landing.Entry(report_id=rid,scope=scope,limits=limits,commit=str(report["source_commit"]),links=tuple(links)))
     return landing.page(entries)
 
 

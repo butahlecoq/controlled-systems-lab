@@ -1,6 +1,5 @@
-/* Published report appearance: dark Gruvbox palette, system sans-serif.
-   The landing page reuses the look of the saved report pages so the archive
-   index and the reports read as one site. No remote fonts, scripts or images. */
+/* Dark Gruvbox palette and system sans-serif, as used by the saved APP-02,
+   APP-03, EXP-04 and GEO-08 report pages. No remote fonts, scripts or images. */
 body{background:#272822;color:#f8f8f2;font:16px/1.55 system-ui,sans-serif;max-width:1120px;margin:2rem auto;padding:0 1.5rem}
 a{color:#66d9ef;text-underline-offset:.2em}
 a:hover{color:#8be9fd}

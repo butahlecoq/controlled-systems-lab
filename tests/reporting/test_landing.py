@@ -33,7 +33,7 @@ class LandingTests(unittest.TestCase):
         self.assertEqual(self.page.count("</ul>"), 1)
         self.assertIn("<h1>Algorithm reports</h1>", self.page)
         self.assertIn("How to read this archive", self.page)
-        published = {landing.FAMILIES[landing.family_for(report["report_id"])][0]
+        published = {landing.FAMILIES[landing.family_for(report["report_id"])].group
                      for report in self.catalogue["reports"]}
         for key, heading, _ in landing.GROUPS:
             if key in published:
@@ -45,11 +45,11 @@ class LandingTests(unittest.TestCase):
         for report in self.catalogue["reports"]:
             report_id = report["report_id"]
             family = landing.FAMILIES[landing.family_for(report_id)]
-            self.assertTrue(family[1], report_id)
-            self.assertGreater(len(family[2]), 60, report_id)
+            self.assertTrue(family.title, report_id)
+            self.assertGreater(len(family.summary), 60, report_id)
             self.assertIn('href="' + report_id + '/index.html"', self.page)
-            self.assertIn(family[1], self.page)
-            self.assertIn(family[2], self.page)
+            self.assertIn(family.title, self.page)
+            self.assertIn(family.summary, self.page)
 
     def test_reports_keep_their_own_measured_scope_and_evidence_limits(self):
         for report in self.catalogue["reports"]:
@@ -63,15 +63,17 @@ class LandingTests(unittest.TestCase):
         self.assertNotIn("<script", self.page)
         self.assertNotIn("javascript:", self.page)
 
-    def test_unknown_report_family_is_rejected(self):
+    def test_an_unregistered_route_is_rejected(self):
         with self.assertRaisesRegex(ValueError, "no landing description"):
             landing.family_for("mystery-report-0123456789abcdef")
+        with self.assertRaisesRegex(ValueError, "no landing description"):
+            landing.family_for("geo07-generator-sets-fast-0123456789abcdef")
 
     def test_every_registered_family_has_a_group_and_a_summary(self):
-        for family, (group, title, summary) in landing.FAMILIES.items():
-            self.assertIn(group, {key for key, _, _ in landing.GROUPS}, family)
-            self.assertTrue(title, family)
-            self.assertTrue(summary.endswith("."), family)
+        for family, description in landing.FAMILIES.items():
+            self.assertIn(description.group, {key for key, _, _ in landing.GROUPS}, family)
+            self.assertTrue(description.title, family)
+            self.assertTrue(description.summary.endswith("."), family)
 
 
 class AssembledIndexTests(unittest.TestCase):
@@ -82,10 +84,14 @@ class AssembledIndexTests(unittest.TestCase):
         self.addCleanup(self.temp.cleanup)
         self.site = Path(self.temp.name)
         self.report_id = "app02-box-8ff979de60ea9d22"
-        for name in ("records.json", "bundle.zip"):
-            (self.site / self.report_id / name).parent.mkdir(parents=True, exist_ok=True)
-            (self.site / self.report_id / name).write_text("{}", encoding="utf-8")
+        (self.site / self.report_id).mkdir(parents=True)
+        (self.site / self.report_id / "records.json").write_text(json.dumps({
+            "scope": "Five authored interval and 2D polygon fixtures",
+            "limits": ["Exact containment applies to stored binary64 vertices.",
+                       "No comparator or speedup claim is supported."],
+            "source_commit": "8fecba49e34c37e5e01c40218a8f014a179818fd"}), encoding="utf-8")
         (self.site / self.report_id / "index.html").write_text("<html><body>Report</body></html>", encoding="utf-8")
+        (self.site / self.report_id / "bundle.zip").write_text("{}", encoding="utf-8")
         (self.site / "app02-example").mkdir()
         (self.site / "app02-example" / "index.html").write_text("<html><body>Example</body></html>", encoding="utf-8")
         (self.site / "examples").mkdir()
@@ -102,11 +108,14 @@ class AssembledIndexTests(unittest.TestCase):
             '<a href="examples/index.html">Visual examples</a></p>', 1)
         (self.site / "index.html").write_text(assembled, encoding="utf-8")
 
-    def test_staged_items_become_cards_with_their_own_scope(self):
+    def test_staged_items_become_cards_with_the_scope_recorded_with_the_report(self):
         landing.build(self.site)
         page = (self.site / "index.html").read_text(encoding="utf-8")
         self.assertIn("Box and parallelotope approximations", page)
-        self.assertIn("five exact stored-binary64 examples and 3,500 verified measured calls", page)
+        self.assertIn("Five authored interval and 2D polygon fixtures", page)
+        self.assertIn("Exact containment applies to stored binary64 vertices.", page)
+        self.assertIn("8fecba49e34c37e5e01c40218a8f014a179818fd", page)
+        self.assertNotIn("3,500 verified measured calls", page)
         self.assertIn('href="' + self.report_id + '/index.html"', page)
         self.assertIn('href="examples/index.html"', page)
         self.assertNotIn("APP-02 box and parallelotope report", page)
@@ -127,6 +136,23 @@ class AssembledIndexTests(unittest.TestCase):
                 '<a href="https://example.com/page">Elsewhere</a></p></body></html>')
         with self.assertRaisesRegex(ValueError, "outside the staged site"):
             landing.validate(page, self.site)
+
+
+class StagedCatalogueTests(unittest.TestCase):
+    """The landing page is rendered over the real staged catalogue."""
+
+    def test_real_staged_catalogue_renders_a_card_for_every_report(self):
+        with tempfile.TemporaryDirectory() as temp:
+            staged = Path(temp) / "site"
+            site.stage(REPORTS / "catalog.json", staged, check=True)
+            landing.build(staged)
+            page = (staged / "index.html").read_text(encoding="utf-8")
+            for report in catalogue()["reports"]:
+                report_id = report["report_id"]
+                self.assertIn('href="' + report_id + '/index.html"', page)
+                self.assertIn(escape(report["measured_scope"]), page)
+                self.assertIn(escape(report["evidence_limits"]), page)
+            self.assertEqual(page.count("</ul>"), 1)
 
 
 if __name__ == "__main__":
