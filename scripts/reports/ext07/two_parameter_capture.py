@@ -31,8 +31,10 @@ def capture(source: Path, destination: Path, commit: str, cmake: str) -> None:
         destination / "configure.log", env)
     run([cmake, "--build", str(build), "--config", "Release", "--target",
          "csl_ext07_two_parameter_report", "--parallel", "4", "--",
-         "/nologo", "/p:PreferredUILang=en-US", "/clp:ErrorsOnly"], source,
+         "/nologo", "/p:PreferredUILang=en-US"], source,
         destination / "build.log", env)
+    if not (destination / "build.log").read_bytes().strip():
+        raise ValueError("Release build produced no retained build output")
     executable = build / ("Release/csl_ext07_two_parameter_report.exe" if os.name == "nt"
                           else "csl_ext07_two_parameter_report")
     if not executable.is_file():
