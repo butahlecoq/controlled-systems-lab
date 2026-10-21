@@ -2,6 +2,8 @@
 
 Date: 2026-10-20. Status: reviewer handoff, not a reproduction claim. This dossier does not change any baseline, manifest or published value.
 
+Owner direction (2026-10-21): one-to-one replay of the runs behind the articles is not required for the algorithm program. Article-stated models and parameter values are useful inputs for our algorithms even when a reported result conflicts with the displayed model. The reported result remains a claim to check, not a required answer. A separately identified article-derived case records its source, every printed value used, and any selected input that the article does not state. Recovery of the original generating project is a separate historical question; it is not a prerequisite for work on a fully specified article-derived case. This direction does not supply missing disturbance sets, resolve ambiguous equations, or authorize a benchmark run.
+
 Scope: the primary data and source identity that are still absent for the historical experiments B01-B09, the L05 reachability examples, the R29 zonotope example and the optional ellipsoidal comparison. It is addressed to the archive owner or another reviewer who can supply a file, confirm that it no longer exists, authorize a deeper search, or narrow the goal so the artifact is not required. Original files remain private; only hashes and derived, non-source facts are recorded here.
 
 Related live issues: [#1](https://github.com/butahlecoq/controlled-systems-lab/issues/1) (L04/L13 terminal criteria), [#2](https://github.com/butahlecoq/controlled-systems-lab/issues/2) (canonical inputs and missing implementations), [#4](https://github.com/butahlecoq/controlled-systems-lab/issues/4) (L05 inclusion and nonlinear error), [#6](https://github.com/butahlecoq/controlled-systems-lab/issues/6) (published baselines), [#8](https://github.com/butahlecoq/controlled-systems-lab/issues/8) (replaceable algorithms and R29), [#10](https://github.com/butahlecoq/controlled-systems-lab/issues/10) (B04 canonical model).
@@ -10,7 +12,7 @@ This dossier is not a duplicate of #2. #2 remains the canonical recovery ticket 
 
 ## 1. Why this dossier exists
 
-The implementation backlog has moved quickly: the last thirty pull requests delivered native box, parallelotope, zonotope and ellipsoid approximations, lazy support functions, continuous-model discretization, nonlinear replay, smooth-convex feasible directions and a large CI/documentation cleanup. Historical reproduction is now the slower side of the program, not the code.
+The implementation backlog has moved quickly: the last thirty pull requests delivered native box, parallelotope, zonotope and ellipsoid approximations, lazy support functions, continuous-model discretization, nonlinear replay, smooth-convex feasible directions and a large CI/documentation cleanup. Historical source-to-row restoration is a separate research task, not a gate on the code.
 
 The repository already records each gap in a dedicated audit. What it did not have is one reviewer-facing inventory that answers three practical questions for every baseline:
 
@@ -30,24 +32,27 @@ This document is that inventory. It is deliberately conservative: a value is cal
 | Absent | No matching artifact was found in the searched corpus; not a proof of non-existence |
 | Not printed | The publication itself does not specify the value |
 | Declared unavailable | The owner states that no accessible copy exists or that it cannot be released |
-| Not required | The owner narrows the comparison goal so the historical artifact is unnecessary; no reproduction claim is made and the algorithmic comparison proceeds on shared synthetic fixtures |
-| Historical replay | Executing a historical baseline with its historical inputs and original software to reproduce a published row; declared not required for B03, whose comparison uses C++ translations on shared fixtures |
+| Not required | The owner does not require the historical run artifact for algorithm work; no reproduction claim is made and the algorithms use shared synthetic or separately identified article-derived cases |
+| Article-derived case | A separately identified case using a publication's stated model and values, with unprinted inputs or corrections declared; its result tests the defined model, not the provenance of a published row |
+| Historical replay | Executing a historical baseline with its historical inputs and original software to reproduce a published row; not required for the algorithm program |
 | Corrected track | A new, separately identified experiment that repairs a demonstrable source inconsistency; never labelled a reproduction |
 
-## 3. Highest-leverage requests
+## 3. Remaining input requests
 
-If only a small number of items can be reviewed, these are the highest-leverage ones.
+These requests concern historical source-to-row attribution or mathematical inputs missing from the articles. They are not prerequisites for algorithm work on already defined cases.
 
 | Priority | Artifact | Exact missing input | What it unlocks |
 |---:|---|---|---|
-| 1 | B04 / L11, T=16 | Original T=16 project or complete owner-authenticated input package: `U` rows and witness mapping, first-action convention, every stage bound, generating revision, coefficient/unit authority | The owner-selected first end-to-end benchmark, the terminal-invariant contradiction and issues #10/#6 |
-| 2 | B06 / L09 and B07 / L10 | Numerical disturbance sets `W(t)` and `V1(t)` (bounds or vertices, stage dependence); for B07 also stock initialization and stage time grid | Executable finite-action minimax baselines, including the 365-feasible-plan count and reported worst cases |
-| 3 | L05 Example 2, 4D | The revision and driver that produced the modified row `153 vertices / 34764.47`, including the retention schedule and rank-tie behavior | The only unreproduced Table 1 cell in the four-state example; closes the B02 modified-construction question |
-| 4 | B08 / L04 and B09 / L13 | The generating MATLAB revision, original unrounded arrays, nonlinear integration and the actual criterion implementation | The `14.048` versus `16.42069149` and `22.657` versus `20.792787211` terminal-row discrepancies in issue #1 |
+| 1 | B06 / L09 and B07 / L10 | Numerical disturbance sets `W(t)` and `V1(t)` (bounds or vertices, stage dependence); for B07 also stock initialization and stage time grid | Executable finite-action minimax baselines, including the 365-feasible-plan count and reported worst cases |
+| 2 | L05 Example 2, 4D | The revision and driver that produced the modified row `153 vertices / 34764.47`, including the retention schedule and rank-tie behavior | The only unreproduced Table 1 cell in the four-state example; closes the B02 modified-construction question |
+| 3 | B08 / L04 and B09 / L13 | The generating MATLAB revision, original unrounded arrays, nonlinear integration and the actual criterion implementation | The `14.048` versus `16.42069149` and `22.657` versus `20.792787211` terminal-row discrepancies in issue #1 |
+| Optional | B04 / L11, T=16 | Original T=16 project or complete owner-authenticated input package: `U` rows and witness mapping, first-action convention, every stage bound, generating revision, coefficient/unit authority | Historical source-to-row diagnosis in #10; not needed to exercise the separately identified article-derived model |
 
-A separate item, specific to L05 Example 1, is the exact `T0` grouping, reference trajectory samples and coordinate map from the physical start `(410,300)` to the linear start `(1,2)`. It is lower cost than the four above but blocks every quantitative comparison in the two-dimensional example.
+A separate item, specific to L05 Example 1, is the exact `T0` grouping, reference trajectory samples and coordinate map from the physical start `(410,300)` to the linear start `(1,2)`. It blocks quantitative comparison against the paper's two-dimensional example, but a new case can state its own coordinates and run independently.
 
 B03 is no longer an input-recovery priority. The owner directed that B03 compare algorithms rather than reproduce the historical sets or software run: baseline MATLAB/Python hull algorithms are to be translated into C++, then compared with each other and with the modern algorithms on shared fixtures. The original clouds, seeds and timing scope are not required; see [section 4.3](#43-b03---l07-reachability-and-hull-comparisons).
+
+These requests concern optional historical source-to-row questions or values the article itself omits. The latter still matter to any paper-specific case: for example, a B06 or B07 minimax run needs a declared numerical disturbance set. Choosing a new set creates a separately identified case and cannot validate the article's reported worst case.
 
 ## 4. Per-artifact register
 
@@ -141,7 +146,7 @@ B03 is no longer an input-recovery priority. The owner directed that B03 compare
 
 **Reported evidence:** terminal point `(1200.7, -22.929, 450.2, -7.709)`, objective `30.899`, runtime `0.4 s`; three nonlinear witness rows in the published counterpart.
 
-**Already in hand:** L11/A14, A41 and R40 tables; three saved witness histories A39; nonlinear replay kernel A40; a public replay check with 120000 paired samples; inferred effective actions under the sourced `B`; the exact terminal-invariant audit and the unrestricted terminal-plane lower bound `160.880653946`.
+**Already in hand:** L11/A14, A41 and R40 tables; three saved witness histories A39; nonlinear replay kernel A40; a public replay check with 120000 paired samples; inferred effective actions under the sourced `B`; the exact terminal-invariant audit and the unrestricted terminal-plane lower bound `160.880653946`. The separate [b04-reference-v1 case](evidence/b04-reference-v1/canonical-case.json) uses the article's displayed model and values with the owner-affirmed `[-1,1]` control interval, and its [exact check](b04-reference-cross-check.md) establishes that norm for the defined case. It does not establish the model that produced the published `30.899`.
 
 **Missing:**
 
@@ -154,9 +159,9 @@ B03 is no longer an input-recovery priority. The owner directed that B03 compare
 - [ ] A source-backed reconciliation of the displayed model with the reported optimum. The printed model requires `12*x2 + 17*x4 = -2122.7` at the terminal point, but the reported point gives `-406.201`; the unrestricted terminal-plane minimum is `160.880653946`, above the reported `30.899`.
 - [ ] Permission/provenance for any release of the original project or arrays.
 
-**Blocked:** B04 remains non-executable and cannot be the first end-to-end reproduction. The three saved witnesses are scoped evidence, not a canonical run.
+**Status:** the `B04-historical` transcription remains non-executable as a historical-run manifest. That does not block algorithm work on `b04-reference-v1` or another fully specified article-derived case. The three saved witnesses are scoped evidence, not proof of the generating model; the publication's `30.899` is not an acceptance target for the printed model.
 
-**Handover that counts:** any one of (a) the original T=16 MATLAB project/configuration with `U` rows, stage bounds and revision identity; (b) a complete owner-authenticated model/input package that names the generated row and its deviations; (c) a declaration that no such artifact exists, which permits a corrected-track B04 variant under a new ID while preserving the historical record.
+**Handover for optional historical restoration:** any one of (a) the original T=16 MATLAB project/configuration with `U` rows, stage bounds and revision identity; (b) a complete owner-authenticated model/input package that names the generated row and its deviations; (c) a declaration that no such artifact exists. No such handover is required to study the article's stated model as a separately identified case.
 
 **Tracking:** [#10](https://github.com/butahlecoq/controlled-systems-lab/issues/10), [#2](https://github.com/butahlecoq/controlled-systems-lab/issues/2), [restoration](b04-restoration.md), [T=16 source audit](b04-t16-source-audit.md), [saved witnesses](b04-saved-witnesses.md), [parameter cross-check](b04-parameter-crosswalk.md), [version matrix](publication-source-matrix.md).
 
@@ -330,7 +335,7 @@ Even where the numbers are transcribed, the following fields are usually absent.
 | Timing scope | End-to-end, solve-only and simulation-only durations are not comparable | Missing for B02, B03 (historical replay only), B05, B06 |
 | Provenance and permission | Source identity, authorship and redistribution rights | Missing for every private artifact |
 
-For B03, the run-recovery fields above (original clouds and arrays, seeds, historical solver versions, timing scope, and the generating revision of the reported row) are needed only for a historical replay, which is not required. The algorithm comparison does not use them. Source identity and provenance for the translated algorithm files, the source algorithm's constants, tolerances, stopping rules and instrumentation definitions, plus the model and fixture semantics the port implements, are still required for a faithful C++ port.
+The run-recovery fields above (original arrays, seeds, historical solver versions, timing scope, and the generating revision of a reported row) are needed to attribute or replay that row, not to run an independently identified article-derived case. Such a case still needs every input required by its mathematical problem, a source identity for the stated values, and an explicit choice for any unprinted value. A faithful archived-algorithm port also needs the source algorithm's constants, tolerances, stopping rules and instrumentation definitions. B03's old-side comparison uses shared fixtures rather than its unrecovered historical clouds.
 
 ## 6. What is already recovered and should not be requested again
 
@@ -338,7 +343,7 @@ For B03, the run-recovery fields above (original clouds and arrays, seeds, histo
 - A distinct minimax-adaptive MATLAB implementation is recovered as A08/A09, with a saved workspace A10. The gap is source-to-row matching, not availability.
 - The B08 displayed-data reference is complete and independently checked, including the three exact ties. The missing part is the unrounded generator and nonlinear row.
 - The L05 saved figures and the general/nonlinear rows of both examples are reconstructed and checked. The missing part is the versioned driver and the modified four-dimensional construction.
-- The B04 three saved witnesses, their replay kernel and the terminal-invariant audit are complete. The missing part is the canonical T=16 optimizer input.
+- The B04 three saved witnesses, their replay kernel and the terminal-invariant audit are complete. The missing part for historical row attribution is the generating T=16 optimizer input.
 - The published counterparts R40 (B04) and the Part II PDF (B05) supply tables absent from the local drafts.
 - The B06 control signs and printed cost centers are resolved. The missing part is the disturbance set.
 
@@ -366,7 +371,7 @@ Handling rules:
 - A screenshot or transcription is useful, but it is labelled as a transcription, not as the generating executable.
 - The project verifies hashes and byte counts before reading, records only derived non-source facts, adds regression tests, and never silently "repairs" a historical value.
 - If an item is unavailable, one sentence is a valid outcome. The case then moves to the corrected track under a new ID, and the historical row remains unchanged.
-- If the owner narrows the comparison goal, record `Not required`, proceed on shared synthetic fixtures under a new comparison ID, and do not request a handover.
+- If the owner does not require historical replay, record `Not required` for the run artifact and proceed on shared synthetic or separately identified article-derived cases. Keep missing mathematical inputs visible and do not request a generating-project handover as a precondition.
 - If a deeper search is possible, authorize the scope explicitly: containers (`.rar/.zip/.7z`), MEX/binaries, Simulink `.slx` internals, MAT/MCOS objects, or unregistered archive neighbours.
 
 ## 8. Reviewer decision sheet
@@ -379,7 +384,7 @@ For each row, one of `supply`, `unavailable`, `authorize deeper search`, or `Not
 | B02/L05 Example 1 driver, `T0`, coordinates |  |  |
 | B02/L05 Example 2 modified driver |  |  |
 | B03 seeded clouds and run scope (historical replay only) | Not required | Owner, 2026-10-20: compare C++ translations of the baseline and modified algorithms on shared fixtures; do not reproduce the historical sets, software run or timing row |
-| B04 T=16 project and `U` rows |  |  |
+| B04 T=16 project and `U` rows (historical replay only) | Not required for algorithm work | Owner, 2026-10-21: use the article's model and values for our algorithms; the separate `b04-reference-v1` case states its owner-affirmed control interval. The generating project remains relevant only to the optional published-row provenance question in #10. |
 | B05 adaptive inputs and policy schedule |  |  |
 | B06 `W(t)` disturbance set |  |  |
 | B07 `V1(t)`, stock and time conventions |  |  |
@@ -403,7 +408,7 @@ This dossier can close when every artifact in section 4 has one of these disposi
 1. **Supplied** - a hash-identified file or owner-authenticated package is registered and linked to the relevant issue.
 2. **Declared unavailable** - the owner states that no accessible copy exists; the baseline is recorded as unrecoverable and a corrected track may proceed separately.
 3. **Deeper search authorized** - the reviewer names the additional scope and a target date; the item stays open with that scope.
-4. **Not required** - the owner narrows the comparison goal and the historical artifact is unnecessary; the algorithmic comparison proceeds on shared synthetic fixtures without a reproduction claim.
+4. **Not required** - the owner does not require the historical run artifact; algorithm work proceeds on shared synthetic fixtures or separately identified article-derived cases, with unprinted inputs declared and no reproduction claim.
 
 Closing this review does not close #2, #4, #6, #10 or #8. Those issues retain their own scientific acceptance criteria. It only establishes which inputs exist and which do not.
 
