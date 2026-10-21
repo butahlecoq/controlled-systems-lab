@@ -4168,6 +4168,92 @@ TEST_CASE("two parameter scalar verifier certifies a coupled polygon and "
             .complete_family_coverage == HybridVerificationStatus::established);
 }
 
+TEST_CASE("hybrid portfolio minimizes per-mode terminal objectives globally with offsets") {
+  model::HybridMode source{{"source"}, 1, 0, {"x"}, {}};
+  source.flow = LinearStage{Matrix{1, 1, {1}}, Matrix{1, 0, {}},
+                            Matrix{1, 0, {}}, Vector{0}};
+  source.control_sets = {UniversalSet{0}};
+  source.invariants = {UniversalSet{1}, UniversalSet{1}};
+
+  const auto terminal_mode = [](std::string id, std::size_t dimension) {
+    model::HybridMode terminal{{std::move(id)}, dimension, 0, {}, {}};
+    Matrix transition{dimension, dimension, Vector(dimension * dimension)};
+    for (std::size_t i = 0; i < dimension; ++i) {
+      terminal.state_coordinate_labels.push_back("x" + std::to_string(i));
+      transition.values[i * dimension + i] = 1;
+    }
+    terminal.flow = LinearStage{std::move(transition), Matrix{dimension, 0, {}},
+                                Matrix{dimension, 0, {}}, Vector(dimension)};
+    terminal.control_sets = {UniversalSet{0}};
+    terminal.invariants = {UniversalSet{dimension}, UniversalSet{dimension}};
+    return terminal;
+  };
+  auto low = terminal_mode("low", 1);
+  auto tied = terminal_mode("tied", 2);
+  auto worse = terminal_mode("worse", 3);
+  const auto edge = [](std::string id, std::string target, Vector reset) {
+    const auto reset_id = "reset-" + target;
+    return model::HybridTransitionEdge{
+        {std::move(id)}, {"source"}, {std::move(target)}, {UniversalSet{1}},
+        {singleton_relation(reset_id, std::move(reset))}};
+  };
+  model::HybridSystem system{1, {source, low, tied, worse},
+      {edge("to-low", "low", {0, 2}),
+       edge("to-tied", "tied", {0, 3, 0}),
+       edge("to-worse", "worse", {0, 5, 0, 0})}};
+  model::HybridRequest request{{{"source"}, {0}},
+      {{"low"}, {"tied"}, {"worse"}},
+      {{{"low"}, LinearTerminal{{1}, -1}, "energy", "J"},
+       {{"tied"}, LinearTerminal{{1, 0}, -2}, "energy", "J"},
+       {{"worse"}, LinearTerminal{{1, 0, 0}, 0}, "energy", "J"}}};
+
+  const auto built = build_hybrid_portfolio_programs(
+      system, request, {"cross-mode-terminal-policy"}, {1, 8}, {16, 64, 1024});
+  REQUIRE(std::holds_alternative<std::vector<HybridPathProgram>>(built));
+  const auto &programs = std::get<std::vector<HybridPathProgram>>(built);
+  REQUIRE(programs.size() == 3);
+  const std::array<std::string_view, 3> terminal_modes{"low", "tied", "worse"};
+  const std::array<double, 3> objective_offsets{-1, -2, 0};
+  const std::array<double, 3> literal_objective_values{1, 1, 5};
+  const std::array<Vector, 3> literal_points{{
+      {0, 0, 2}, {0, 0, 3, 0}, {0, 0, 5, 0, 0}}};
+  HybridPortfolioExecution execution;
+  execution.all_supplied_branches_completed = true;
+  for (std::size_t i = 0; i < programs.size(); ++i) {
+    CHECK(programs[i].path.modes.back().value == terminal_modes[i]);
+    const auto &program = std::get<LinearProgram>(programs[i].program);
+    CHECK(program.offset() == objective_offsets[i]);
+    REQUIRE(program.objective().size() == literal_points[i].size());
+    double literal_cost = program.offset();
+    for (std::size_t coordinate = 0; coordinate < literal_points[i].size(); ++coordinate)
+      literal_cost += program.objective()[coordinate] * literal_points[i][coordinate];
+    CHECK(literal_cost == literal_objective_values[i]);
+    const auto evidence = ProgramBoundEvidence{
+        program.identity(),
+        SymbolicArgument{"literal mode objective", "independent terminal costs"}, {}};
+    ProgramResult result{
+        Termination::completed,
+        {program.identity(), MathematicalOutcome::optimal,
+         SymbolicArgument{"literal mode objective", "independent terminal costs"}, {}},
+        {},
+        {ProgramObjectiveBound{literal_objective_values[i], evidence},
+         ProgramObjectiveBound{literal_objective_values[i], evidence}},
+        "literal per-mode terminal objective"};
+    execution.branches.push_back({programs[i].path, Termination::completed,
+        MathematicalOutcome::optimal, std::move(result), {}, {}});
+  }
+
+  const auto comparison =
+      compare_hybrid_portfolio_objective_bounds(programs, execution, {0, 0});
+  REQUIRE(std::holds_alternative<HybridPortfolioObjectiveBounds>(comparison));
+  const auto &bounds = std::get<HybridPortfolioObjectiveBounds>(comparison);
+  CHECK(bounds.global_lower_bound == 1);
+  CHECK(bounds.global_upper_bound == 1);
+  REQUIRE(bounds.potentially_optimal_paths.size() == 2);
+  CHECK(bounds.potentially_optimal_paths[0].modes.back().value == "low");
+  CHECK(bounds.potentially_optimal_paths[1].modes.back().value == "tied");
+}
+
 TEST_CASE("hybrid portfolio objective bounds retain tied possible branches") {
   auto system = example_system();
   auto second = system.edges.front();
