@@ -377,10 +377,12 @@ HybridFamilyVerificationResult ExactLinearHHybridFamilyVerifier::verify(
         branches.push_back(std::move(branch));
     }
 
-    HybridFamilyVerificationReport report{
-        "csl.hybrid.exact-linear-h", "1", policy, Assurance::numerical,
-        std::vector<HybridPath>(paths.begin(), paths.end()), {},
-        HybridVerificationStatus::not_checked, HybridVerificationStatus::not_checked, {}, {}};
+    HybridFamilyVerificationReport report;
+    report.verifier_id = "csl.hybrid.exact-linear-h";
+    report.verifier_version = "1";
+    report.numerical_policy = policy;
+    report.assurance = Assurance::numerical;
+    report.enumerated_paths.assign(paths.begin(), paths.end());
     report.branches.reserve(paths.size());
     bool coverage = !unsupported_path && !unbounded_path && best.has_value();
     for (std::size_t i = 0; i < paths.size(); ++i) {
