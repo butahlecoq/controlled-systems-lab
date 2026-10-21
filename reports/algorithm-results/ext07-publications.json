@@ -36,6 +36,19 @@
       "stager_sha256": "f8c2b6b0c968b331c7316df80b74eedb080775dc6d3fad1f17d9639d23c83b12",
       "verifier_id": "csl.hybrid.exact-linear-h",
       "zip_sha256": "3537ad2cec2f7c76cdbc19079704ae8b9894ee787621a451035a9722d9600f4c"
+    },
+    {
+      "collector_sha256": "297b773f2d461a3a093d7e2ff133f3dabafbc6cdf06109654e9a547bcc984290",
+      "example_sha256": "a84346df299a62fdb131a2bc2ea58da65c03fa823c4bb7faa14c2e6b0d31c3c7",
+      "index_sha256": "8a68ed07ff8b49750fc3d56cb21e20a3c3dbd01bd869251af7768b47a9dfae10",
+      "manifest_sha256": "0f07aee507bd028410fe1b37c51bf7c2dc32baf8b7bd0b7cd80c2b2b61076dea",
+      "renderer_sha256": "2185508af5a44172552ad08c5e4d6b746c40abedb0177a8756983daae51b8e39",
+      "report_id": "ext07-hybrid-two-parameter-8ad871b5ea29fc7b",
+      "schema": "csl.ext07-hybrid-two-parameter-report/1",
+      "source_commit": "8f7ea777621c337680b092ba6a15dd09a9d00a88",
+      "stager_sha256": "f8c2b6b0c968b331c7316df80b74eedb080775dc6d3fad1f17d9639d23c83b12",
+      "verifier_id": "csl.hybrid.exact-linear-h",
+      "zip_sha256": "4e8e1ba69f8816e05a0bf6a198f7a89bb1733f00bcf0df8ac5b69227f1981347"
     }
   ],
   "schema": "csl.ext07-publications/1"

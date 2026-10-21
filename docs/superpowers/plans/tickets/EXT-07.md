@@ -62,9 +62,10 @@ Fourier-Motzkin resource budgets. Tests cover feasible and flat objectives,
 unbounded branches, forged faces, ties across mode paths and objective scales,
 and higher-dimensional continuous families. The refreshed two-control report
 uses this verifier at source commit
-`22758dadda8421f2c75ea3403dadc33dda682253`; 140 measured calls completed with
-zero failures. Its report and standalone 2D example are saved in
-`ext07-hybrid-two-parameter-26f402289a309403`. Exhaustive independent
+`8f7ea777621c337680b092ba6a15dd09a9d00a88`; 140 measured calls completed with
+zero failures and the clean Release build output is retained. Its report and
+standalone 2D example are saved in
+`ext07-hybrid-two-parameter-8ad871b5ea29fc7b`. Exhaustive independent
 continuous-family oracle coverage, resource-scale evidence, and main-only Pages
 URL/hash verification remain open.
 The EXT-07 report set includes a measured one-step scalar interval case, an
