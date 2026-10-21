@@ -68,4 +68,3 @@ sets. It links to the measured report while describing the distinct geometry
 and objective.
 These bounded examples are not scalability results or a completion claim. The
 main-only Pages URL and live hashes remain pending until publication succeeds.
-

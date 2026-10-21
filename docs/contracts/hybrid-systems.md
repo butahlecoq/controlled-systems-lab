@@ -432,4 +432,3 @@ continuous open-loop controls, and no temporal or observation coupling in its
 first executable profile. Integrations with those
 extensions require a separately reviewed contract revision and capability
 combination; their semantics must not be guessed from hybrid mode paths.
-
