@@ -306,7 +306,7 @@ HybridPathReachabilityResult JointHReachabilityAdapter::compose_path(
     if(const auto* failure=std::get_if<model::HybridPathCompositionFailureReport>(&composed)) return *failure;
     auto relation=std::get<model::HybridComposedPathRelation>(std::move(composed));
     return HybridPathReachability{path,std::move(relation.relation),relation.limits,
-        std::move(relation.operations),Assurance::numerical};
+        std::move(relation.operations),Assurance::numerical,std::nullopt};
 }
 
 HybridPathReachabilityResult compute_hybrid_path_reachability(
@@ -356,6 +356,25 @@ HybridPathReachabilityResult compute_hybrid_path_reachability(
         const auto trace_errors=hybrid_operation_trace_errors(path,limits,reachable->relation_operations,true,
             reachable->joint_relation.metadata()->set.dimension);
         if(!trace_errors.empty()) return trace_errors;
+        if(reachable->projected_state) {
+            const auto& projected=*reachable->projected_state;
+            const auto projected_representation=projected.terminal_state_set.representation();
+            if(projected.terminal_state_set.metadata()->set.dimension!=1 ||
+               !std::holds_alternative<sets::HRepresentation>(projected_representation) ||
+               projected.maximum_projection_rows==0 ||
+               projected.output_rows>projected.maximum_projection_rows ||
+               projected.projection_provider.port!="geometry" ||
+               !projected.projection_provider.actual ||
+               projected.projection_provider.actual->id.value.empty() ||
+               projected.projection_evidence.scope!=GeometryClaimScope::set_relation ||
+               projected.input_rows!=reachable->relation_operations.back().cumulative_rows)
+                return one({DiagnosticCode::evidence_mismatch,"hybrid.reachability.projected_state",
+                    "Projected terminal-set evidence has an invalid shape, provider, or row accounting"});
+            const auto& terminal=std::get<sets::HRepresentation>(projected_representation);
+            if(terminal.inequalities.rows()+terminal.equalities.rows()!=projected.output_rows)
+                return one({DiagnosticCode::evidence_mismatch,"hybrid.reachability.projected_rows",
+                    "Projected terminal-set row count does not match its retained H representation"});
+        }
     }
     if(const auto* failure=std::get_if<model::HybridPathCompositionFailureReport>(&result);
        failure) {

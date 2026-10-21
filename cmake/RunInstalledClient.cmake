@@ -48,6 +48,7 @@ file(COPY "${CSL_SOURCE_DIR}/tests/installed/input_client.cpp" DESTINATION "${wo
 file(COPY "${CSL_SOURCE_DIR}/tests/installed/continuous_discretization_client.cpp" DESTINATION "${work}/source")
 file(COPY "${CSL_SOURCE_DIR}/tests/installed/conversion_client.cpp" DESTINATION "${work}/source")
 file(COPY "${CSL_SOURCE_DIR}/tests/installed/polyhedral_intersection_client.cpp" DESTINATION "${work}/source")
+file(COPY "${CSL_SOURCE_DIR}/tests/installed/hybrid_reachability_client.cpp" DESTINATION "${work}/source")
 file(COPY "${CSL_SOURCE_DIR}/tests/installed/projection_predecessor_client.cpp" DESTINATION "${work}/source")
 file(COPY "${CSL_SOURCE_DIR}/tests/installed/nominal_forward_client.cpp" DESTINATION "${work}/source")
 file(COPY "${CSL_SOURCE_DIR}/tests/installed/ts01_evidence_client.cpp" DESTINATION "${work}/source")

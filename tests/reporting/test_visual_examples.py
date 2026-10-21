@@ -42,7 +42,7 @@ class GalleryTests(unittest.TestCase):
             (target / "index.html").write_text("<html><body>Reviewed report</body></html>")
 
     def test_saved_outputs_match_literal_geometry(self):
-        square, line, intersection, hybrid, _ = self.examples
+        square, line, intersection, hybrid = self.examples[:4]
         self.assertEqual(square["points"], [[0,0],[1,0],[1,1],[0,1],[.5,.5],[0,0],[1,0]])
         self.assertEqual(square["indices"], [0,1,2,3])
         self.assertEqual(line["indices"], [1,3])
@@ -54,7 +54,8 @@ class GalleryTests(unittest.TestCase):
         self.assertEqual(hybrid["analytic"]["complete_minimizer"], "all joint coordinates are zero")
         self.assertEqual(hybrid["inputs"]["horizon"], 2)
         loaded = gallery.load_examples(self.catalog)
-        two_parameter = loaded[4]
+        two_parameter = next(example for example in loaded if example["kind"] == "two_parameter")
+        projected = next(example for example in loaded if example["kind"] == "projected_reachability")
         self.assertEqual(two_parameter["kind"], "two_parameter")
         self.assertEqual(two_parameter["report_id"],
                          "ext07-hybrid-two-parameter-df7acc27de65930b")
@@ -65,6 +66,15 @@ class GalleryTests(unittest.TestCase):
         self.assertEqual(two_parameter["analytic"]["minimum_objective"], 0)
         self.assertEqual(two_parameter["analytic"]["complete_optimal_family"],
                          "every point in each labelled feasible polygon; both paths are retained")
+        self.assertEqual(projected["analytic"]["projected_terminal_set"], "0<=x[1]<=0.5")
+        self.assertEqual(projected["analytic"]["feasible_projection"],
+                         "(u[0], x[1]) = (s, s), 0<=s<=0.5")
+        self.assertEqual(projected["inputs"]["modes"][0]["flow_by_stage"],
+                         [{"A": 1, "B": 1, "offset": 0}])
+        self.assertEqual(projected["inputs"]["edges"][0]["guards_by_stage"],
+                         [{"interval": [0, 0.5]}])
+        self.assertEqual(projected["inputs"]["terminal_objectives"][0]["linear"],
+                         {"coefficients": [1], "constant": 0})
 
     def test_build_preserves_reports_and_has_resolvable_links(self):
         before = {p.relative_to(self.site): hashlib.sha256(p.read_bytes()).hexdigest()
@@ -95,6 +105,10 @@ class GalleryTests(unittest.TestCase):
         self.assertIn("includes both free controls", page)
         self.assertIn('href="https://github.com/butahlecoq/controlled-systems-lab/commit/c6d135c94ee0fe4fece074b455dae18bee0d22b2"', page)
         self.assertIn('href="two_stage_scalar_family.json"', page)
+        self.assertIn("Project a one-step hybrid state set", page)
+        self.assertIn("Projected terminal set: x₁∈[0,0.5]", page)
+        self.assertIn('href="projected_hybrid_reachability.json"', page)
+        self.assertIn("065de5e45d295dfa099e25265c4014c0c46673f8", page)
         self.assertIn("blob/b83b8dc415dbe5811371b8446931ae4c6f3d2e28/reports/algorithm-results/tooling/geo04/polyhedral_intersection_driver.cpp", page)
         parser = Links()
         parser.feed(page)
@@ -102,7 +116,7 @@ class GalleryTests(unittest.TestCase):
             if not urlsplit(link).scheme and not link.startswith("#"):
                 self.assertTrue((self.site / "examples" / link.split("#")[0]).is_file(), link)
         figures = list((self.site / "examples").glob("*.svg"))
-        self.assertEqual(len(figures), 5)
+        self.assertEqual(len(figures), 6)
         for figure in figures:
             tree = ET.fromstring(figure.read_text())
             self.assertEqual(tree.attrib["role"], "img")
@@ -135,6 +149,16 @@ class GalleryTests(unittest.TestCase):
         self.assertEqual(two_record["inputs"]["terminal_objective"],
                          {"type": "linear", "coefficients": [0], "constant": 0})
         self.assertEqual(len(two_record["analytic"]["paths"]), 2)
+        projected_svg = ET.parse(self.site / "examples/one_step_projected_hybrid_reachability.svg")
+        projected_text = "".join(projected_svg.getroot().itertext())
+        self.assertIn("u₀ (free control)", projected_text)
+        self.assertIn("x₁ (terminal state)", projected_text)
+        self.assertEqual(len(projected_svg.findall(".//{http://www.w3.org/2000/svg}polyline")), 1)
+        self.assertEqual([point.attrib["fill"] for point in projected_svg.findall(".//{http://www.w3.org/2000/svg}circle")],
+                         ["#b4cda3", "#b4cda3"])
+        projected_record = json.loads((self.site / "examples/projected_hybrid_reachability.json").read_text())
+        self.assertTrue(projected_record["illustration_only"])
+        self.assertEqual(projected_record["analytic"]["projected_terminal_set"], "0<=x[1]<=0.5")
         first = {p.name: p.read_bytes() for p in (self.site / "examples").iterdir()}
         gallery.build(self.catalog, self.site)
         self.assertEqual({p.name: p.read_bytes() for p in (self.site / "examples").iterdir()}, first)

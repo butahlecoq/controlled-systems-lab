@@ -48,9 +48,12 @@ the complete enumerated path inventory for supported direct joint-H
 representations and variable/row/matrix resource limits before constructing
 any branch relation. The combined verified-program builder also runs each
 built-in verifier's bounded-domain preflight; custom bounded verifiers fail
-closed until they implement preflight. The fixed-path reachability adapter
-currently uses the direct joint-H composer; a separate projected-set
-implementation is not yet supplied.
+closed until they implement preflight. Fixed-path reachability now has both
+the direct joint-H adapter and a bounded one-transition scalar adapter that
+independently assembles the path relation, projects the terminal state through
+the registered geometry provider, and retains provider/row evidence. General
+horizon projected reachability and full provider/resource aggregation remain
+open.
 
 The EXT-07 report set now includes a measured one-step scalar interval case and
 a measured bounded two-control case, each with saved raw rows and an offline
