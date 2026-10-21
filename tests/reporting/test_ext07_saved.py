@@ -31,7 +31,7 @@ class Ext07SavedReportTests(unittest.TestCase):
         cls.bundle = next((path for path in bundles if path.is_dir()), None)
         cls.two_parameter_bundle = next(
             (path for path in bundles if path.is_dir() and
-             path.name.startswith("ext07-hybrid-two-parameter-")), None)
+             path.name == "ext07-hybrid-two-parameter-8ad871b5ea29fc7b"), None)
         if cls.bundle is None:
             raise unittest.SkipTest("EXT-07 report bundle is created from a frozen measured source")
 

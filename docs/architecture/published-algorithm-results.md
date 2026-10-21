@@ -45,9 +45,12 @@ preserves the fixed two-stage, two-control fixture with `enter-half` and
 `u0=0, 0<=u1<=1` for the objective `x_terminal=u0`. The registered HiGHS LP
 provider and `TwoParameterScalarPolytopeHybridFamilyVerifier` completed 140
 measured calls after an excluded warmup. Its timing remains historical evidence
-for that verifier. The earlier exact-verifier bundle
+for that verifier. Its saved bundle remains in the repository as historical
+evidence and is excluded from Pages publication because its build log is empty.
+The earlier exact-verifier bundle
 [`ext07-hybrid-two-parameter-26f402289a309403`](../../reports/algorithm-results/ext07-hybrid-two-parameter-26f402289a309403/)
-remains immutable. The current
+remains in the repository as historical evidence and is excluded from Pages
+publication because its build log is empty. The current
 [`ext07-hybrid-two-parameter-8ad871b5ea29fc7b`](../../reports/algorithm-results/ext07-hybrid-two-parameter-8ad871b5ea29fc7b/)
 bundle replays the fixture with `ExactLinearHHybridFamilyVerifier`, preserving
 both complete minimizing faces `u0=0, 0<=u1<=1`. At source commit
