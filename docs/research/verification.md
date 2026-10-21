@@ -1,6 +1,6 @@
 # Verification record
 
-Date: 2026-10-11. This records checks of the research artifacts, not product readiness.
+Initial assessment date: 2026-10-11. This records the original checks of the research artifacts, not product readiness; the current verifier run is recorded in the machine-readable snapshot.
 
 Commands executed:
 
