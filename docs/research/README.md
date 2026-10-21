@@ -44,6 +44,8 @@ The [L05 saved-figure audit](l05-saved-figure-audit.md) recovers terminal polygo
 
 The [L05 linear zonotope reconstruction](l05-linear-zonotope-reconstruction.md) independently reconstructs the candidate's 60-stage affine-control reachable polygons and matches all saved general-linear stages to floating-point precision. Exact checks of saved polygons show modified-in-general inclusion at every plotted stage, while the linear and nonlinear plotted hulls cross at stages 2–54; historical generator identity and nonlinear enclosure remain open.
 
+The [L05 T0 grouping audit](l05-t0-grouping.md) compares both readings of the printed `T0` against all 60 saved general-linear stage polygons. The candidate grouping matches within the stated floating-point tolerance; the alternative does not. This identifies the grouping consistent with the saved plots under the candidate recurrence, not the article's own Table 1 driver.
+
 The [L05 four-state candidate reconstruction](l05-example2-candidate-reconstruction.md) independently enumerates the archived seven-transition, two-control model. Its full linear and nonlinear corner-history hulls match the printed Example 2 general and nonlinear count/volume rows and three saved 3D projections; the modified 4D row and historical generator remain unresolved.
 
 The [L05 four-state active-filter audit](l05-example2-retention-audit.md) translates the archived `ConvSM_mod` path in source column order. It matches the complete general linear 4D hull, while the saved 3D linear patches are strict subsets of its projections; the modified 4D construction remains unidentified.
