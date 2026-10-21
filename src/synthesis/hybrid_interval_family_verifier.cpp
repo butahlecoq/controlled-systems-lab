@@ -1,4 +1,5 @@
 #include <csl/synthesis/hybrid_path_program.hpp>
+#include <csl/optimization/objectives.hpp>
 #include "hybrid_family_verifier_internal.hpp"
 
 #include <algorithm>
@@ -11,6 +12,31 @@ namespace csl::synthesis {
 namespace {
 using namespace model;
 constexpr std::size_t kMaximumAdmissibleRows=100'000;
+
+bool well_formed_scalar_quadratic(const QuadraticTerminal& quadratic) {
+    return quadratic.Q.rows==1&&quadratic.Q.cols==1&&quadratic.Q.values.size()==1&&
+        quadratic.linear.size()==1&&std::isfinite(quadratic.Q.values[0])&&
+        quadratic.Q.values[0]>=0&&std::isfinite(quadratic.linear[0])&&
+        std::isfinite(quadratic.offset);
+}
+
+std::optional<Diagnostic> scalar_parameter_terminal_objective_admission_diagnostic(
+    const HybridRequest& request,const HybridModeId& terminal_mode) {
+    const auto objective=std::find_if(request.terminal_objectives.begin(),request.terminal_objectives.end(),
+        [&](const auto& candidate){return candidate.mode==terminal_mode;});
+    if(objective==request.terminal_objectives.end())
+        return Diagnostic{DiagnosticCode::unsupported,"hybrid.verification.scalar_parameter_objective",
+            "Terminal mode "+terminal_mode.value+": terminal objective is missing"};
+    if(const auto* linear=std::get_if<LinearTerminal>(&objective->objective)) {
+        if(linear->coefficients.size()==1&&std::isfinite(linear->coefficients[0])&&std::isfinite(linear->offset))
+            return {};
+    } else if(const auto* quadratic=std::get_if<QuadraticTerminal>(&objective->objective)) {
+        if(well_formed_scalar_quadratic(*quadratic)) return {};
+    }
+    return Diagnostic{DiagnosticCode::unsupported,"hybrid.verification.scalar_parameter_objective",
+        "Terminal mode "+terminal_mode.value+
+        ": scalar parameter verification supports finite scalar linear and convex quadratic objectives"};
+}
 
 struct Interval {
     double lower{-std::numeric_limits<double>::infinity()};
@@ -519,10 +545,26 @@ struct ScalarParameterBranch {
     Vector direction;
     std::size_t parameter_control_coordinate{};
     double objective_slope{};
+    double objective_curvature{};
     double objective_offset{};
     double minimum{};
     std::string reason;
 };
+
+Interval scalar_parameter_minimizers(const ScalarParameterBranch& branch) {
+    auto result=branch.parameter_interval;
+    if(branch.objective_curvature>0) {
+        double denominator=0,negative_slope=0,vertex=0;
+        if(!exact_product(2,branch.objective_curvature,denominator)||
+           !exact_product(-1,branch.objective_slope,negative_slope)||
+           !exact_division(negative_slope,denominator,vertex)) return {0,0,true};
+        vertex=std::clamp(vertex,branch.parameter_interval.lower,branch.parameter_interval.upper);
+        return {vertex,vertex,false};
+    }
+    if(branch.objective_slope>0) result.upper=result.lower;
+    else if(branch.objective_slope<0) result.lower=result.upper;
+    return result;
+}
 
 bool relation_domain_supported_for_width(const sets::SetData& data,std::size_t width,
     HybridRelationLimits limits) {
@@ -635,14 +677,34 @@ bool relation_is_parameter_interval(const sets::SetData& data,const Vector& base
 }
 
 bool scalar_parameter_program_objective_matches(const HybridPathProgram& program,std::size_t width,
-    double terminal_coefficient,double terminal_offset,NumericalPolicy policy) {
-    const auto* linear=std::get_if<LinearProgram>(&program.program);
-    if(!linear||linear->objective().size()!=width||width==0) return false;
-    for(std::size_t i=0;i<width;++i) {
-        const double expected=i+1==width?terminal_coefficient:0;
-        if(!same(linear->objective()[i],expected,policy)) return false;
+    const TerminalObjective& terminal_objective,NumericalPolicy policy) {
+    if(width==0) return false;
+    if(const auto* terminal=std::get_if<LinearTerminal>(&terminal_objective)) {
+        const auto* linear=std::get_if<LinearProgram>(&program.program);
+        if(!linear||linear->objective().size()!=width||terminal->coefficients.size()!=1) return false;
+        for(std::size_t i=0;i<width;++i) {
+            const double expected=i+1==width?terminal->coefficients[0]:0;
+            if(!same(linear->objective()[i],expected,policy)) return false;
+        }
+        return same(linear->offset(),terminal->offset,policy);
     }
-    return same(linear->offset(),terminal_offset,policy);
+    const auto* terminal=std::get_if<QuadraticTerminal>(&terminal_objective);
+    const auto* convex=std::get_if<ConvexProgram>(&program.program);
+    if(!terminal||!convex||!well_formed_scalar_quadratic(*terminal)||
+       terminal->linear.size()!=1||convex->original_objective().dimension()!=width) return false;
+    const auto coefficients=convex->original_objective().coefficients();
+    const auto* quadratic=std::get_if<optimization::QuadraticCoefficients>(&coefficients);
+    if(!quadratic||quadratic->Q.rows()!=width||quadratic->Q.cols()!=width||
+       quadratic->linear.size()!=width) return false;
+    for(std::size_t row=0;row<width;++row) {
+        const double expected_linear=row+1==width?terminal->linear[0]:0;
+        if(!same(quadratic->linear[row],expected_linear,policy)) return false;
+        for(std::size_t column=0;column<width;++column) {
+            const double expected=row+1==width&&column+1==width?terminal->Q.values[0]:0;
+            if(!same(quadratic->Q(row,column),expected,policy)) return false;
+        }
+    }
+    return same(quadratic->offset,terminal->offset,policy);
 }
 
 ScalarParameterBranch evaluate_scalar_parameter_path(const HybridSystem& system,const HybridRequest& request,
@@ -804,22 +866,41 @@ ScalarParameterBranch evaluate_scalar_parameter_path(const HybridSystem& system,
     const auto objective=std::find_if(request.terminal_objectives.begin(),request.terminal_objectives.end(),
         [&](const auto& item){return item.mode==modes[horizon]->id;});
     if(objective==request.terminal_objectives.end()) return unsupported("Missing terminal objective");
-    const auto* linear=std::get_if<LinearTerminal>(&objective->objective);
-    if(!linear||linear->coefficients.size()!=1||!std::isfinite(linear->coefficients[0])||
-       !std::isfinite(linear->offset)) return unsupported("Only scalar linear terminal objectives are supported");
-    double objective_base=0,objective_offset=0;
-    if(!exact_product(linear->coefficients[0],state_gain,result.objective_slope)||
-       !exact_product(linear->coefficients[0],state_offset,objective_base)||
-       !exact_sum(objective_base,linear->offset,objective_offset))
-        return unsupported("Objective composition is not exactly representable");
-    result.objective_offset=objective_offset;
-    const double minimizing_parameter=result.objective_slope>0?parameters.lower:
-        (result.objective_slope<0?parameters.upper:parameters.lower);
-    double objective_increment=0;
-    if(!exact_product(result.objective_slope,minimizing_parameter,objective_increment)||
-       !exact_sum(result.objective_offset,objective_increment,result.minimum))
-        return unsupported("Minimum objective arithmetic is not exactly representable");
+    if(const auto* linear=std::get_if<LinearTerminal>(&objective->objective)) {
+        if(linear->coefficients.size()!=1||!std::isfinite(linear->coefficients[0])||
+           !std::isfinite(linear->offset)) return unsupported("Malformed scalar linear terminal objective");
+        double objective_base=0;
+        if(!exact_product(linear->coefficients[0],state_gain,result.objective_slope)||
+           !exact_product(linear->coefficients[0],state_offset,objective_base)||
+           !exact_sum(objective_base,linear->offset,result.objective_offset))
+            return unsupported("Objective composition is not exactly representable");
+    } else if(const auto* quadratic=std::get_if<QuadraticTerminal>(&objective->objective)) {
+        if(!well_formed_scalar_quadratic(*quadratic))
+            return unsupported("Verifier requires a finite convex scalar quadratic terminal objective");
+        const double q=quadratic->Q.values[0],quadratic_linear=quadratic->linear[0];
+        double qg=0,qo=0,curvature=0,slope_left=0,slope_right=0,
+            objective_base=0,objective_linear=0;
+        if(!exact_product(q,state_gain,qg)||!exact_product(q,state_offset,qo)||
+           !exact_product(qg,state_gain,curvature)||!exact_product(0.5,curvature,result.objective_curvature)||
+           !exact_product(qo,state_gain,slope_left)||!exact_product(quadratic_linear,state_gain,slope_right)||
+           !exact_sum(slope_left,slope_right,result.objective_slope)||
+           !exact_product(qo,state_offset,objective_base)||!exact_product(0.5,objective_base,objective_base)||
+           !exact_product(quadratic_linear,state_offset,objective_linear)||
+           !exact_sum(objective_base,objective_linear,objective_base)||
+           !exact_sum(objective_base,quadratic->offset,result.objective_offset))
+            return unsupported("Quadratic objective composition is not exactly representable");
+    } else return unsupported("Residual-norm terminal objectives are outside the scalar interval verifier domain");
     result.parameter_interval=parameters;
+    auto minimizing=scalar_parameter_minimizers(result);
+    if(minimizing.empty) return unsupported("Quadratic minimizer is not exactly representable");
+    const double minimizing_parameter=minimizing.lower;
+    double parameter_squared=0,quadratic_term=0,linear_term=0,partial=0;
+    if(!exact_product(minimizing_parameter,minimizing_parameter,parameter_squared)||
+       !exact_product(result.objective_curvature,parameter_squared,quadratic_term)||
+       !exact_product(result.objective_slope,minimizing_parameter,linear_term)||
+       !exact_sum(quadratic_term,linear_term,partial)||
+       !exact_sum(partial,result.objective_offset,result.minimum))
+        return unsupported("Minimum objective arithmetic is not exactly representable");
     result.state=ScalarParameterBranch::State::feasible;
     return result;
 }
@@ -1051,6 +1132,13 @@ HybridFamilyVerificationCapabilities SingleParameterScalarIntervalHybridFamilyVe
 HybridFamilyVerificationPreflightResult SingleParameterScalarIntervalHybridFamilyVerifier::preflight(
     const HybridSystem& system,const HybridRequest& request,std::span<const HybridPath> paths,
     std::stop_token cancellation) const {
+    for(const auto& terminal_mode:request.allowed_terminal_modes) {
+        if(cancellation.stop_requested())
+            return OperationStopped{StopReason::cancelled,
+                "Single-parameter scalar verifier admission was cancelled while checking terminal objectives"};
+        if(const auto diagnostic=scalar_parameter_terminal_objective_admission_diagnostic(request,terminal_mode))
+            return Diagnostics{{*diagnostic}};
+    }
     for(const auto& path:paths) {
         if(cancellation.stop_requested())
             return OperationStopped{StopReason::cancelled,
@@ -1177,17 +1265,16 @@ HybridFamilyVerificationResult SingleParameterScalarIntervalHybridFamilyVerifier
                 request.terminal_objectives.end(),[&](const auto& item){
                     return item.mode==paths[i].modes.back();
                 });
-            const auto* linear=objective==request.terminal_objectives.end()?nullptr:
-                std::get_if<LinearTerminal>(&objective->objective);
+            const auto* terminal_objective=objective==request.terminal_objectives.end()?nullptr:
+                &objective->objective;
             bool relation_cancelled=false,relation_exactness=true;
             const bool program_domain=relation_domain_supported_for_width(
                 programs[i].joint_relation,relation_width,programs[i].relation_limits);
-            const bool program_valid=program_domain&&linear&&programs[i].path==paths[i]&&
+            const bool program_valid=program_domain&&terminal_objective&&programs[i].path==paths[i]&&
                 relation_is_parameter_interval(programs[i].joint_relation,branch.base,
                     branch.direction,branch.parameter_interval,programs[i].relation_limits,
                     cancellation,relation_cancelled,relation_exactness)&&
-                scalar_parameter_program_objective_matches(programs[i],relation_width,linear->coefficients[0],
-                    linear->offset,policy);
+                scalar_parameter_program_objective_matches(programs[i],relation_width,*terminal_objective,policy);
             if(cancellation.stop_requested())
                 return OperationStopped{StopReason::cancelled,
                     "Scalar interval verification cancelled while checking a program relation"};
@@ -1214,13 +1301,11 @@ HybridFamilyVerificationResult SingleParameterScalarIntervalHybridFamilyVerifier
                     "An unsupported branch could change the global optimum"});
             }
             bool covered=program_valid&&!optimal;
-            if(optimal&&candidate!=candidates.end()&&linear) {
+            if(optimal&&candidate!=candidates.end()&&terminal_objective) {
                 const auto parameter_coordinate=branch.parameter_control_coordinate;
                 const double parameter=parameter_coordinate<candidate->anchor.size()?
                     candidate->anchor[parameter_coordinate]:std::numeric_limits<double>::quiet_NaN();
-                Interval minimizing_interval=branch.parameter_interval;
-                if(branch.objective_slope>0) minimizing_interval.upper=minimizing_interval.lower;
-                else if(branch.objective_slope<0) minimizing_interval.lower=minimizing_interval.upper;
+                const Interval minimizing_interval=scalar_parameter_minimizers(branch);
                 Vector expected_anchor=branch.base;
                 bool anchor_exact=true;
                 for(std::size_t j=0;j<expected_anchor.size();++j) {

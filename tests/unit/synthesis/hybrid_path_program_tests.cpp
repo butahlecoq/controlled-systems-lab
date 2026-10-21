@@ -1561,6 +1561,67 @@ TEST_CASE("hybrid portfolio preflights all terminal objective capabilities befor
     CHECK(verified_adapter.calls==0);
 }
 
+TEST_CASE("scalar interval verifiers preflight objectives for every allowed terminal mode") {
+    const auto make_scalar_system=[](std::size_t horizon) {
+        model::HybridMode source{{"source"},1,1,{"x"},{"u"}};
+        model::HybridMode target{{"target"},1,0,{"y"},{}};
+        const LinearStage source_flow{
+            Matrix{1,1,{1}},Matrix{1,1,{1}},Matrix{1,0,{}},Vector{0}};
+        const LinearStage target_flow{
+            Matrix{1,1,{1}},Matrix{1,0,{}},Matrix{1,0,{}},Vector{0}};
+        source.flow=std::vector<LinearStage>(horizon,source_flow);
+        source.control_sets.assign(horizon,UniversalSet{1});
+        source.invariants.assign(horizon+1,UniversalSet{1});
+        target.flow=std::vector<LinearStage>(horizon,target_flow);
+        target.control_sets.assign(horizon,UniversalSet{0});
+        target.invariants.assign(horizon+1,UniversalSet{1});
+        auto unreachable=target;
+        unreachable.id={"unreachable-terminal"};
+        return model::HybridSystem{horizon,
+            {std::move(source),std::move(target),std::move(unreachable)}, {}};
+    };
+    const auto make_request=[] {
+        return model::HybridRequest{{{"source"},{0}},{{"target"},{"unreachable-terminal"}},
+            {{{"target"},LinearTerminal{{1},0},"energy","J"},
+             {{"unreachable-terminal"},
+                 QuadraticTerminal{Matrix{1,1,{1}},Vector{0},0},"energy","J"}}};
+    };
+    SingleParameterScalarIntervalHybridFamilyVerifier single_parameter;
+    const auto single_parameter_system=make_scalar_system(1);
+    const auto single_parameter_request=make_request();
+    const std::vector<model::HybridPath> no_single_parameter_paths;
+    const auto single_parameter_preflight=single_parameter.preflight(single_parameter_system,
+        single_parameter_request,no_single_parameter_paths,{});
+    CHECK(std::holds_alternative<std::monostate>(single_parameter_preflight));
+    auto malformed_request=single_parameter_request;
+    malformed_request.terminal_objectives.back().objective=
+        QuadraticTerminal{Matrix{1,1,{}},Vector{0},0};
+    const auto malformed_preflight=single_parameter.preflight(single_parameter_system,
+        malformed_request,no_single_parameter_paths,{});
+    REQUIRE(std::holds_alternative<Diagnostics>(malformed_preflight));
+    CHECK(std::get<Diagnostics>(malformed_preflight).front().code==DiagnosticCode::unsupported);
+}
+
+TEST_CASE("single-parameter verifier preflights objectives for infeasible reachable terminal paths") {
+    model::HybridMode mode{{"mode"},1,1,{"x"},{"u"}};
+    mode.flow=LinearStage{Matrix{1,1,{1}},Matrix{1,1,{1}},Matrix{1,0,{}},Vector{0}};
+    mode.control_sets={interval("infeasible-terminal-control",0,1)};
+    mode.invariants={UniversalSet{1},empty_handle("infeasible-terminal-invariant",1)};
+    const auto identity_reset=h_set("infeasible-terminal-reset",2,Matrix{0,2,{}},Vector{},
+        Matrix{1,2,{-1,1}},Vector{0});
+    model::HybridSystem system{1,{mode},{{{"loop"},{"mode"},{"mode"},
+        {UniversalSet{1}},{identity_reset}}}};
+    model::HybridRequest request{{{"mode"},{0}},{{"mode"}},
+        {{{"mode"},QuadraticTerminal{Matrix{1,1,{}},Vector{0},0},"cost","units"}}};
+    const std::vector<model::HybridPath> paths{{{{"mode"},{"mode"}},{{"loop"}}}};
+
+    SingleParameterScalarIntervalHybridFamilyVerifier verifier;
+    const auto result=verifier.preflight(system,request,paths,{});
+    REQUIRE(std::holds_alternative<Diagnostics>(result));
+    CHECK(std::get<Diagnostics>(result).front().field==
+        "hybrid.verification.scalar_parameter_objective");
+}
+
 TEST_CASE("hybrid portfolio capability preflight honors cancellation before scanning paths") {
     std::stop_source cancellation;
     CancellingCapabilityTrajectoryAdapter adapter{cancellation};
@@ -3581,6 +3642,62 @@ TEST_CASE("single-parameter scalar interval verifier covers arbitrary finite hor
             HybridVerificationStatus::refuted));
         CHECK(record->continuous_coverage==HybridVerificationStatus::established);
     }
+}
+
+TEST_CASE("single-parameter verifier certifies quadratic interior and full optimal faces") {
+    model::HybridMode mode{{"quadratic-mode"},1,1,{"x"},{"u"}};
+    mode.flow=LinearStage{Matrix{1,1,{1}},Matrix{1,1,{2}},Matrix{1,0,{}},Vector{1}};
+    mode.control_sets={interval("quadratic-control",0,1)};
+    mode.invariants={UniversalSet{1},UniversalSet{1}};
+    const auto reset=h_set("quadratic-identity-reset",2,Matrix{0,2,{}},Vector{},
+        Matrix{1,2,{-1,1}},Vector{0});
+    model::HybridSystem system{1,{mode},{{{"quadratic-loop"},{"quadratic-mode"},
+        {"quadratic-mode"},{UniversalSet{1}},{reset}}}};
+    model::HybridRequest request{{{"quadratic-mode"},{0}},{{"quadratic-mode"}},
+        {{{"quadratic-mode"},QuadraticTerminal{Matrix{1,1,{2}},Vector{-4},0},
+            "quadratic cost","units"}}};
+    auto built=build_hybrid_portfolio_programs(system,request,{"quadratic-interval"},
+        {1,8},{16,64,4096});
+    REQUIRE(std::holds_alternative<std::vector<HybridPathProgram>>(built));
+    auto programs=std::get<std::vector<HybridPathProgram>>(std::move(built));
+    REQUIRE(programs.size()==1);
+    SingleParameterScalarIntervalHybridFamilyVerifier verifier;
+    const auto paths=std::vector<model::HybridPath>{programs.front().path};
+    const auto preflight=verifier.preflight(system,request,paths,{});
+    CHECK(std::holds_alternative<std::monostate>(preflight));
+    auto& convex=std::get<ConvexProgram>(programs.front().program);
+    const Vector optimum{0,0.5,2,2};
+    ProgramResult solver{Termination::completed,
+        {convex.quadratic_program().identity(),MathematicalOutcome::optimal,
+            SymbolicArgument{"raw scalar quadratic oracle","minimum at x=2"},{}},
+        optimum,{},"independent scalar quadratic optimum"};
+    HybridPathOptimalFaceCandidate candidate{programs.front().path, singleton_data(optimum),
+        optimum,std::move(solver),{},"independent singleton quadratic minimizer",{}};
+    const auto result=verify_hybrid_portfolio_family(verifier,system,request,programs,
+        std::span<const HybridPathOptimalFaceCandidate>(&candidate,1),{1,8},{0,0});
+    REQUIRE(std::holds_alternative<HybridFamilyVerificationReport>(result));
+    const auto& report=std::get<HybridFamilyVerificationReport>(result);
+    CHECK(report.global_objective_optimality==HybridVerificationStatus::established);
+    CHECK(report.complete_family_coverage==HybridVerificationStatus::established);
+    CHECK(report.branches.front().continuous_coverage==HybridVerificationStatus::established);
+
+    request.terminal_objectives.front().objective=QuadraticTerminal{Matrix{1,1,{0}},Vector{0},0};
+    built=build_hybrid_portfolio_programs(system,request,{"flat-quadratic-interval"},
+        {1,8},{16,64,4096});
+    REQUIRE(std::holds_alternative<std::vector<HybridPathProgram>>(built));
+    programs=std::get<std::vector<HybridPathProgram>>(std::move(built));
+    auto& flat_convex=std::get<ConvexProgram>(programs.front().program);
+    ProgramResult flat_solver{Termination::completed,
+        {flat_convex.quadratic_program().identity(),MathematicalOutcome::optimal,
+            SymbolicArgument{"raw flat quadratic oracle","every control u in [0,1] minimizes"},{}},
+        optimum,{},"independent flat quadratic optimum"};
+    HybridPathOptimalFaceCandidate narrowed{programs.front().path,singleton_data(optimum),
+        optimum,std::move(flat_solver),{},"deliberately narrowed flat minimizer",{}};
+    const auto narrowed_result=verify_hybrid_portfolio_family(verifier,system,request,programs,
+        std::span<const HybridPathOptimalFaceCandidate>(&narrowed,1),{1,8},{0,0});
+    REQUIRE(std::holds_alternative<HybridFamilyVerificationReport>(narrowed_result));
+    CHECK(std::get<HybridFamilyVerificationReport>(narrowed_result).complete_family_coverage==
+        HybridVerificationStatus::refuted);
 }
 
 TEST_CASE("exact singleton hybrid verifier handles empty branches and rejects continuous domains") {
