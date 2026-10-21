@@ -4,6 +4,7 @@ import hashlib
 import json
 import math
 import re
+from datetime import datetime, timezone
 from pathlib import Path
 
 from check_proof_counterexamples import check_counterexamples
@@ -244,7 +245,8 @@ try:
 except (KeyError, TypeError, ValueError, OSError) as exc:
     errors.append("Proof provenance: " + str(exc))
 result = {
-    "date":"2026-10-11", "status":"passed" if not errors else "failed",
+    "date":datetime.now(timezone.utc).date().isoformat(),
+    "status":"passed" if not errors else "failed",
     "originals_checked":originals_checked, "inventory_entries":len(inventory),
     "pdf_pages":226, "duplicate_groups":duplicate_groups,
     "markdown_documents":len(docs), "local_links_checked":local_links,
