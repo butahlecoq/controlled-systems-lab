@@ -108,7 +108,7 @@ class GalleryTests(unittest.TestCase):
         self.assertIn("Project a one-step hybrid state set", page)
         self.assertIn("Projected terminal set: x₁∈[0,0.5]", page)
         self.assertIn('href="projected_hybrid_reachability.json"', page)
-        self.assertIn("16c1cb064e9508ee11dc23b55158702b152aeed6", page)
+        self.assertIn("065de5e45d295dfa099e25265c4014c0c46673f8", page)
         self.assertIn("blob/b83b8dc415dbe5811371b8446931ae4c6f3d2e28/reports/algorithm-results/tooling/geo04/polyhedral_intersection_driver.cpp", page)
         parser = Links()
         parser.feed(page)

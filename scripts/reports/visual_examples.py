@@ -238,8 +238,8 @@ def load_examples(catalog):
         indices=[0, 1], domain=(0, 0.5), inputs=projected_inputs,
         analytic=projected_analytic, report_id=one_step_entry["report_id"],
         records_path=one_step_bundle / "records.json",
-        source="16c1cb064e9508ee11dc23b55158702b152aeed6",
-        harness="16c1cb064e9508ee11dc23b55158702b152aeed6",
+        source="065de5e45d295dfa099e25265c4014c0c46673f8",
+        harness="065de5e45d295dfa099e25265c4014c0c46673f8",
         kind="projected_reachability"))
     return examples
 
