@@ -34,6 +34,7 @@ struct HybridPathReachability {
     struct ProjectedStateEvidence {
         sets::SetData terminal_state_set;
         registry::Provenance projection_provider;
+        geometry::GeometryEvidence projection_evidence;
         std::size_t input_rows{};
         std::size_t output_rows{};
         std::size_t maximum_projection_rows{};

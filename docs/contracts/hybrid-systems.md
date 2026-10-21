@@ -157,6 +157,11 @@ terminal set, provider provenance, and input/output row counts. Its row limit
 is configured into the registered projection provider and bounds input,
 intermediate, and terminal H rows. This narrow implementation does not establish
 multi-stage projected reachability or general-dimensional continuous coverage.
+The result also retains the provider's complete projection `GeometryEvidence`.
+For the registered binary64 H-projection implementation, set-relation support
+is `Unestablished`; the projected terminal set is not coverage-certified and
+has no numerical error-bound certificate. Consumers must preserve and inspect
+that evidence when interpreting the terminal set.
 Each reachability adapter must preflight its supported
 operations and limits for the fixed path before the wrapper queries capabilities
 or starts composition. The default preflight fails closed; the built-in joint-H

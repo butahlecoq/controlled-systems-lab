@@ -337,7 +337,7 @@ HybridPathReachabilityResult ProjectedStateHybridReachabilityAdapter::compose_pa
         return OperationStopped{StopReason::cancelled,"Projected-state reachability stopped before result publication"};
     const auto input_rows=inequalities.size()+equalities.size();
     return HybridPathReachability{path,std::move(relation),limits,std::move(operations),Assurance::numerical,
-        HybridPathReachability::ProjectedStateEvidence{std::move(projected),selected,input_rows,
+        HybridPathReachability::ProjectedStateEvidence{std::move(projected),selected,result->evidence,input_rows,
             output_rows,maximum_projection_rows_}};
 }
 }
