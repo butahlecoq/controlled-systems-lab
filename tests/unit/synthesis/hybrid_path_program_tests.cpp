@@ -1151,7 +1151,7 @@ TEST_CASE("projected hybrid reachability returns the literal terminal interval a
     CHECK(reachable.projected_state->output_rows==terminal_h.inequalities.rows()+terminal_h.equalities.rows());
     CHECK(reachable.projected_state->maximum_projection_rows==16);
     CHECK(reachable.projected_state->projection_provider.actual->id.value=="csl.geometry.polyhedral-projection");
-    CHECK(reachable.projected_state->projection_evidence.scope==geometry::GeometryClaimScope::set_relation);
+    CHECK(reachable.projected_state->projection_evidence.scope==GeometryClaimScope::set_relation);
     CHECK(std::holds_alternative<Unestablished>(reachable.projected_state->projection_evidence.support));
     CHECK_FALSE(reachable.projected_state->projection_evidence.error_bound.has_value());
 

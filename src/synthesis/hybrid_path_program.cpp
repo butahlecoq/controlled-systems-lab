@@ -366,7 +366,7 @@ HybridPathReachabilityResult compute_hybrid_path_reachability(
                projected.projection_provider.port!="geometry" ||
                !projected.projection_provider.actual ||
                projected.projection_provider.actual->id.value.empty() ||
-               projected.projection_evidence.scope!=geometry::GeometryClaimScope::set_relation ||
+               projected.projection_evidence.scope!=GeometryClaimScope::set_relation ||
                projected.input_rows!=reachable->relation_operations.back().cumulative_rows)
                 return one({DiagnosticCode::evidence_mismatch,"hybrid.reachability.projected_state",
                     "Projected terminal-set evidence has an invalid shape, provider, or row accounting"});
