@@ -53,11 +53,11 @@ def zonotope_vertices(center: Vector, generators: list[Vector]) -> list[Vector]:
     return vertices
 
 
-def candidate_stages() -> list[list[Vector]]:
+def candidate_stages(time_step: float | None = None) -> list[list[Vector]]:
     """Reconstruct the hash-gated Volterra candidate's frozen linear maps."""
     a, c, e = 0.9, 0.8, 0.85
     b, d = a / 300, c / 400
-    step = (2 * math.pi / math.sqrt(a * c)) / 60
+    step = (2 * math.pi / math.sqrt(a * c)) / 60 if time_step is None else time_step
     reference: Vector = (410, 300)
     center: Vector = (1, 2)
     generators: list[Vector] = []
