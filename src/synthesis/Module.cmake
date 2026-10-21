@@ -35,6 +35,7 @@ csl_add_library(csl_hybrid_path_program STATIC
   src/synthesis/hybrid_path_program.cpp
   src/synthesis/hybrid_projected_reachability.cpp
   src/synthesis/hybrid_family_verifier.cpp
+  src/synthesis/hybrid_linear_h_family_verifier.cpp
   src/synthesis/hybrid_interval_family_verifier.cpp
   src/synthesis/hybrid_two_parameter_family_verifier.cpp)
 

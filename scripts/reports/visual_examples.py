@@ -14,6 +14,8 @@ import geo06_registered_reports as hull_reports
 import report_data
 import stage_ext07 as ext07_reports
 
+CURRENT_EXT07_TWO_PARAMETER_REPORT = "ext07-hybrid-two-parameter-8ad871b5ea29fc7b"
+
 
 def require(condition, message):
     if not condition:
@@ -80,9 +82,12 @@ def load_examples(catalog):
                 "EXT-07 publication identity differs")
         reports_by_schema.setdefault(entry["schema"], []).append((entry, bundle))
     one_step = reports_by_schema.get("csl.ext07-hybrid-profile-report/1", [])
-    two_parameter = reports_by_schema.get("csl.ext07-hybrid-two-parameter-report/1", [])
+    two_parameter = [item for item in reports_by_schema.get(
+        "csl.ext07-hybrid-two-parameter-report/1", [])
+        if item[0].get("verifier_id") == "csl.hybrid.exact-linear-h" and
+        item[0].get("report_id") == CURRENT_EXT07_TWO_PARAMETER_REPORT]
     require(len(one_step) == 1 and len(two_parameter) == 1,
-            "gallery needs one reviewed report for each EXT-07 profile")
+            "gallery needs one one-step report and one exact-H two-control report")
     one_step_entry, one_step_bundle = one_step[0]
     two_parameter_entry, two_parameter_bundle = two_parameter[0]
     inputs = {

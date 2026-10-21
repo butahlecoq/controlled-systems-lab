@@ -55,14 +55,28 @@ the registered geometry provider, and retains provider/row evidence. General
 horizon projected reachability and full provider/resource aggregation remain
 open.
 
-The EXT-07 report set now includes a measured one-step scalar interval case and
-a measured bounded two-control case, each with saved raw rows and an offline
-bundle. The one-step report's 2D plot shows control against terminal state; it
-does not measure the finite-horizon verifier. The two-control report measures
-rectangular parameter sets and the complete minimizing faces for a scalar
-linear objective. The visual gallery also contains an analytic constant-zero
-objective illustration with coupled triangular and quadrilateral feasible
-sets. It links to the measured report while describing the distinct geometry
-and objective.
-These bounded examples are not scalability results or a completion claim. The
-main-only Pages URL and live hashes remain pending until publication succeeds.
+`ExactLinearHHybridFamilyVerifier` independently reconstructs bounded,
+finite-horizon joint H-relations, minimizes linear objectives using exact
+dyadic arithmetic, and checks complete continuous optimal-face relations under
+Fourier-Motzkin resource budgets. Tests cover feasible and flat objectives,
+unbounded branches, forged faces, ties across mode paths and objective scales,
+and higher-dimensional continuous families. The refreshed two-control report
+uses this verifier at source commit
+`8f7ea777621c337680b092ba6a15dd09a9d00a88`; 140 measured calls completed with
+zero failures and the clean Release build output is retained. Its report and
+standalone 2D example are saved in
+`ext07-hybrid-two-parameter-8ad871b5ea29fc7b`. Exhaustive independent
+continuous-family oracle coverage, resource-scale evidence, and main-only Pages
+URL/hash verification remain open.
+The EXT-07 report set includes a measured one-step scalar interval case, an
+earlier two-control polygon-verifier bundle, and a current two-control bundle
+using `ExactLinearHHybridFamilyVerifier`. Each bundle retains raw rows and an
+offline ZIP. The one-step report's 2D plot shows control against terminal
+state; it does not measure the finite-horizon verifier. The current two-control
+report covers rectangular parameter sets and their complete minimizing faces
+for a scalar linear objective. The visual gallery also contains an analytic
+constant-zero objective illustration with coupled triangular and quadrilateral
+feasible sets. It links to the measured report while describing the distinct
+geometry and objective. These bounded examples are not scalability results or
+a completion claim. The main-only Pages URL and live hashes remain pending
+until publication succeeds.

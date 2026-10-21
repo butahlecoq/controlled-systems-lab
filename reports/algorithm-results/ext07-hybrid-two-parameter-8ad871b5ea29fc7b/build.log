@@ -1,0 +1,320 @@
+
+  1>Checking Build System
+  Building Custom Rule <SOURCE>/CMakeLists.txt
+  Scanning sources for module dependencies...
+  Building Custom Rule <CAPTURE>/build/_deps/csl_highs-src/highs/CMakeLists.txt
+  geometry.cpp
+  execution.cpp
+  synthesis.cpp
+  model.cpp
+  problem.cpp
+  outcomes.cpp
+  reader.cpp
+  highs_c_api.cpp
+  Filereader.cpp
+  FilereaderEms.cpp
+  FilereaderLp.cpp
+  FilereaderMps.cpp
+  HighsIO.cpp
+  HMpsFF.cpp
+  HMPSIO.cpp
+  LoadOptions.cpp
+  IpxWrapper.cpp
+  Highs.cpp
+  Compiling...
+  outcomes.cpp
+  problem.cpp
+  model.cpp
+  geometry.cpp
+  execution.cpp
+  synthesis.cpp
+  HighsCallback.cpp
+  HighsDebug.cpp
+  HighsIis.cpp
+  HighsInfo.cpp
+  HighsInfoDebug.cpp
+  HighsDeprecated.cpp
+  HighsInterface.cpp
+  HighsLp.cpp
+  HighsLpUtils.cpp
+  HighsModelUtils.cpp
+  HighsOptions.cpp
+  HighsRanging.cpp
+  HighsSolution.cpp
+  HighsSolutionDebug.cpp
+  HighsSolve.cpp
+  HighsStatus.cpp
+  HighsCliqueTable.cpp
+  HighsConflictPool.cpp
+  HighsCutGeneration.cpp
+  HighsCutPool.cpp
+  HighsDebugSol.cpp
+  HighsDomain.cpp
+  HighsDynamicRowMatrix.cpp
+  HighsFeasibilityJump.cpp
+  HighsGFkSolve.cpp
+  HighsImplications.cpp
+  HighsLpAggregator.cpp
+  HighsLpRelaxation.cpp
+  csl_contracts.vcxproj -> <CAPTURE>\build\Release\csl_contracts.lib
+  HighsMipAnalysis.cpp
+  HighsMipSolver.cpp
+  Building Custom Rule <SOURCE>/CMakeLists.txt
+  HighsMipSolverData.cpp
+  HighsModkSeparator.cpp
+  Scanning sources for module dependencies...
+  HighsNodeQueue.cpp
+  data.cpp
+  HighsObjectiveFunction.cpp
+  HighsPathSeparator.cpp
+  Compiling...
+  HighsPrimalHeuristics.cpp
+  HighsPseudocost.cpp
+  HighsRedcostFixing.cpp
+  data.cpp
+  HighsSearch.cpp
+  HighsSeparation.cpp
+  HighsSeparator.cpp
+  HighsTableauSeparator.cpp
+  HighsTransformedLp.cpp
+  HighsHessian.cpp
+  HighsHessianUtils.cpp
+  HighsModel.cpp
+  HighsTaskExecutor.cpp
+  CupdlpWrapper.cpp
+  HighsPostsolveStack.cpp
+  HighsSymmetry.cpp
+  HPresolve.cpp
+  HPresolveAnalysis.cpp
+  ICrash.cpp
+  ICrashUtil.cpp
+  ICrashX.cpp
+  PresolveComponent.cpp
+  a_asm.cpp
+  csl_numeric.vcxproj -> <CAPTURE>\build\Release\csl_numeric.lib
+  a_quass.cpp
+  perturbation.cpp
+  Building Custom Rule <SOURCE>/CMakeLists.txt
+  Building Custom Rule <SOURCE>/CMakeLists.txt
+  Building Custom Rule <SOURCE>/CMakeLists.txt
+  quass.cpp
+  ratiotest.cpp
+  scaling.cpp
+  HEkk.cpp
+  HEkkControl.cpp
+  HEkkDebug.cpp
+  HEkkDual.cpp
+  Scanning sources for module dependencies...
+  Scanning sources for module dependencies...
+  Scanning sources for module dependencies...
+  HEkkDualMulti.cpp
+  HEkkDualRHS.cpp
+  HEkkDualRow.cpp
+  objective_reformulation.cpp
+  linear_program.cpp
+  linear_infeasibility_certificate.cpp
+  HEkkInterface.cpp
+  lp_backend.cpp
+  HEkkPrimal.cpp
+  HighsSimplexAnalysis.cpp
+  data.cpp
+  HSimplex.cpp
+  Compiling...
+  Compiling...
+  HSimplexDebug.cpp
+  HSimplexNla.cpp
+  Compiling...
+  HSimplexNlaDebug.cpp
+  HSimplexNlaFreeze.cpp
+  HSimplexNlaProductForm.cpp
+  HSimplexReport.cpp
+  KktCh2.cpp
+  DevKkt.cpp
+  data.cpp
+  linear_program.cpp
+  HFactor.cpp
+  lp_backend.cpp
+  linear_infeasibility_certificate.cpp
+  objective_reformulation.cpp
+  HFactorDebug.cpp
+  HFactorExtend.cpp
+  HFactorRefactor.cpp
+  HFactorUtils.cpp
+  HighsHash.cpp
+  HighsLinearSumBounds.cpp
+  HighsMatrixPic.cpp
+  HighsMatrixUtils.cpp
+  HighsSort.cpp
+  HighsSparseMatrix.cpp
+  HighsUtils.cpp
+  HSet.cpp
+  HVectorBase.cpp
+  stringutil.cpp
+  basiclu_kernel.cc
+  basiclu_wrapper.cc
+  conjugate_residuals.cc
+  control.cc
+  crossover.cc
+  diagonal_precond.cc
+  forrest_tomlin.cc
+  guess_basis.cc
+  indexed_vector.cc
+  info.cc
+  ipm.cc
+  ipx_c.cc
+  iterate.cc
+  kkt_solver_basis.cc
+  kkt_solver_diag.cc
+  kkt_solver.cc
+  linear_operator.cc
+  lp_solver.cc
+  lu_factorization.cc
+  maxvolume.cc
+  model.cc
+  normal_matrix.cc
+  sparse_matrix.cc
+  sparse_utils.cc
+  splitted_normal_matrix.cc
+  csl_sets.vcxproj -> <CAPTURE>\build\Release\csl_sets.lib
+  starting_basis.cc
+  symbolic_invert.cc
+  timer.cc
+  utils.cc
+  csl_optimization.vcxproj -> <CAPTURE>\build\Release\csl_optimization.lib
+  basis.cpp
+  cupdlp_cs.c
+  cupdlp_linalg.c
+  cupdlp_proj.c
+  cupdlp_restart.c
+  cupdlp_scaling.c
+  cupdlp_solver.c
+  cupdlp_step.c
+  cupdlp_utils.c
+  basiclu_factorize.c
+  basiclu_get_factors.c
+  basiclu_initialize.c
+  basiclu_object.c
+  basiclu_solve_dense.c
+  basiclu_solve_for_update.c
+  basiclu_solve_sparse.c
+  basiclu_update.c
+  lu_build_factors.c
+  lu_condest.c
+  lu_dfs.c
+  lu_factorize_bump.c
+  lu_file.c
+  lu_garbage_perm.c
+  lu_initialize.c
+  lu_internal.c
+  lu_markowitz.c
+  lu_matrix_norm.c
+  lu_pivot.c
+  lu_residual_test.c
+  lu_setup_bump.c
+  lu_singletons.c
+  lu_solve_dense.c
+  lu_solve_for_update.c
+  lu_solve_sparse.c
+  lu_solve_symbolic.c
+  lu_solve_triangular.c
+  basis.cc
+  lu_update.cc
+  csl_objectives.vcxproj -> <CAPTURE>\build\Release\csl_objectives.lib
+  Building Custom Rule <SOURCE>/CMakeLists.txt
+  Building Custom Rule <SOURCE>/CMakeLists.txt
+  Scanning sources for module dependencies...
+  Scanning sources for module dependencies...
+  convex_backend.cpp
+  adapter.cpp
+  linear_system.cpp
+  rk4.cpp
+  hybrid_system.cpp
+  Compiling...
+  Compiling...
+  convex_backend.cpp
+  adapter.cpp
+  hybrid_system.cpp
+  rk4.cpp
+  linear_system.cpp
+  lu_update.c
+  highs.vcxproj -> <CAPTURE>\build\Release\bin\highs.lib
+  csl_convex.vcxproj -> <CAPTURE>\build\Release\csl_convex.lib
+  csl_model.vcxproj -> <CAPTURE>\build\Release\csl_model.lib
+  Building Custom Rule <SOURCE>/CMakeLists.txt
+  Scanning sources for module dependencies...
+  domains.cpp
+  initial_information.cpp
+  constraints.cpp
+  Compiling...
+  initial_information.cpp
+  domains.cpp
+  constraints.cpp
+  csl_problem.vcxproj -> <CAPTURE>\build\Release\csl_problem.lib
+  Building Custom Rule <SOURCE>/CMakeLists.txt
+  Scanning sources for module dependencies...
+  identity.cpp
+  resolved.cpp
+  Compiling...
+  resolved.cpp
+  identity.cpp
+  csl_resolved_core.vcxproj -> <CAPTURE>\build\Release\csl_resolved_core.lib
+  Building Custom Rule <SOURCE>/CMakeLists.txt
+  Scanning sources for module dependencies...
+  compiled_verifiers.cpp
+  Compiling...
+  compiled_verifiers.cpp
+  csl_verifiers.vcxproj -> <CAPTURE>\build\Release\csl_verifiers.lib
+  Building Custom Rule <SOURCE>/CMakeLists.txt
+  Scanning sources for module dependencies...
+  registry.cpp
+  Compiling...
+  registry.cpp
+  csl_registry.vcxproj -> <CAPTURE>\build\Release\csl_registry.lib
+  Building Custom Rule <SOURCE>/CMakeLists.txt
+  Building Custom Rule <SOURCE>/CMakeLists.txt
+  Scanning sources for module dependencies...
+  highs.cpp
+  Compiling...
+  highs.cpp
+  Scanning sources for module dependencies...
+  intersection.cpp
+  Building Custom Rule <SOURCE>/CMakeLists.txt
+  halfspace_reducer.cpp
+  projection.cpp
+  support.cpp
+  nominal_predecessor.cpp
+  Scanning sources for module dependencies...
+  highs.cpp
+  Compiling...
+  halfspace_reducer.cpp
+  nominal_predecessor.cpp
+  intersection.cpp
+  support.cpp
+  projection.cpp
+  Compiling...
+  highs.cpp
+  csl_highs_convex.vcxproj -> <CAPTURE>\build\Release\csl_highs_convex.lib
+  csl_highs_lp.vcxproj -> <CAPTURE>\build\Release\csl_highs_lp.lib
+  csl_polyhedral.vcxproj -> <CAPTURE>\build\Release\csl_polyhedral.lib
+  Building Custom Rule <SOURCE>/CMakeLists.txt
+  Scanning sources for module dependencies...
+  hybrid_projected_reachability.cpp
+  hybrid_two_parameter_family_verifier.cpp
+  hybrid_linear_h_family_verifier.cpp
+  hybrid_path_program.cpp
+  hybrid_family_verifier.cpp
+  hybrid_interval_family_verifier.cpp
+  Compiling...
+  hybrid_projected_reachability.cpp
+  hybrid_path_program.cpp
+  hybrid_interval_family_verifier.cpp
+  hybrid_family_verifier.cpp
+  hybrid_two_parameter_family_verifier.cpp
+  hybrid_linear_h_family_verifier.cpp
+  csl_hybrid_path_program.vcxproj -> <CAPTURE>\build\Release\csl_hybrid_path_program.lib
+  Building Custom Rule <SOURCE>/CMakeLists.txt
+  Scanning sources for module dependencies...
+  two_parameter_driver.cpp
+  Compiling...
+  two_parameter_driver.cpp
+  csl_ext07_two_parameter_report.vcxproj -> <CAPTURE>\build\Release\csl_ext07_two_parameter_report.exe

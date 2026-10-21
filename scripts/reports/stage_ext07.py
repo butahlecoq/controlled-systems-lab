@@ -29,6 +29,7 @@ two_spec.loader.exec_module(two_parameter_report)
 def catalog_entry(bundle: Path) -> dict:
     if bundle.name.startswith("ext07-hybrid-two-parameter-"):
         details = two_parameter_report.render(bundle, check=True)
+        record = two_parameter_report.validate(bundle)
         allowed = set((*two_parameter_report.collect.SOURCE_FILES, "records.json",
                        *two_parameter_report.RENDERED, "manifest.json",
                        bundle.name + ".zip"))
@@ -40,6 +41,7 @@ def catalog_entry(bundle: Path) -> dict:
                 (bundle / name).read_text(encoding="utf-8"))
         return {**details,
                 "schema": "csl.ext07-hybrid-two-parameter-report/1",
+                "verifier_id": record["measurement"]["trials"][0]["verifier"],
                 "collector_sha256": two_parameter_report.collect.sha(
                     (ROOT / "scripts/reports/ext07/two_parameter_collect.py").read_bytes()),
                 "renderer_sha256": two_parameter_report.collect.sha(
@@ -80,7 +82,7 @@ def stage(catalog: Path, site_dir: Path) -> str:
         if report_id.startswith("ext07-hybrid-two-parameter-"):
             prefix = "ext07-hybrid-two-parameter-"
             example = "two-control-example.html"
-            label = "EXT-07 two-parameter verifier; 140 measured calls"
+            label = "EXT-07 " + entry["verifier_id"] + "; 140 measured calls"
         else:
             prefix = "ext07-hybrid-"
             example = "example-2d.html"

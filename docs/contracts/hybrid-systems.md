@@ -276,11 +276,11 @@ dimensions, relation forms, resource limits, and arithmetic whose exactness it
 cannot establish. An independently infeasible path is certified only when its
 supplied relation is explicitly represented as empty; otherwise the portfolio
 result is unsupported. This verifier supports exactly one free control
-parameter; it does not cover general continuous polytope families or validated
-assurance. The two-parameter verifier below covers one bounded two-stage case
-with two free controls; broader multivariate domains remain unsupported. The
-`TwoStageScalarIntervalHybridFamilyVerifier` remains as a two-stage adapter and
-preserves its existing report identifier.
+parameter and does not provide validated assurance. The two-parameter verifier
+below covers one bounded two-stage case with two free controls. Broader admitted
+H-relation dimensions are handled by `ExactLinearHHybridFamilyVerifier`, subject
+to the limits described below. The `TwoStageScalarIntervalHybridFamilyVerifier`
+remains as a two-stage adapter and preserves its existing report identifier.
 
 `TwoParameterScalarPolytopeHybridFamilyVerifier` adds a separate finite-horizon
 slice for exactly two stages, scalar states and controls, one bounded
@@ -296,6 +296,20 @@ rejects degenerate feasible control polygons and unsupported H-representations,
 and fails closed when exact binary64 arithmetic cannot be established. This
 profile does not cover arbitrary horizons, more than two free controls,
 non-interval admissible sets, nondeterministic resets, or validated assurance.
+
+`ExactLinearHHybridFamilyVerifier` independently enumerates allowed mode/edge
+paths and reconstructs each path's joint H-relation from the raw model. It
+supports finite horizons and admitted state/control dimensions when the
+relevant relations are H-representations, singletons, empty sets, or universal
+sets and the terminal objective is linear. It minimizes each branch objective
+with exact dyadic arithmetic, compares path minima as exact rationals, and
+verifies supplied optimal-face relations in both inclusion directions,
+including candidate anchors. Variable, row, integer-bit, generated-row, and
+operation budgets apply; unsupported arithmetic, unbounded-below branches, and
+nonattained infima fail closed. The verifier reports numerical assurance only.
+Its Fourier-Motzkin resource growth limits practical scale, and this bounded
+implementation does not replace the independent exhaustive oracle required by
+EXT-07.
 
 ## Initial supported profile and rejection boundary
 
@@ -314,18 +328,13 @@ must use an exact polyhedral relation operation supported by the selected provid
 cross-branch convexification is introduced. It does not promise validated
 arithmetic or prove a numerical provider's result. Provider assurance is
 recorded separately. The implementation includes an exact integral singleton
-verifier, a one-step scalar interval verifier, and a finite-horizon
-single-parameter scalar interval verifier. A separate
-`TwoParameterScalarPolytopeHybridFamilyVerifier` supports exactly two free
-controls in a bounded two-stage scalar profile. The exact singleton verifier
-has the checked-integral domain described above. The continuous scalar
-interval and polygon verifiers require their documented scalar interval or
-two-dimensional polygon domains: each stage has one bounded non-singleton
-scalar control interval, scalar states and controls, interval invariants and
-guards, and deterministic exactly representable scalar affine resets. They do
-not cover more than two free controls, general continuous polytope families,
-or general-dimensional continuous relations. These bounded implementations
-do not establish the full EXT-07 acceptance contract.
+verifier, one-step and finite-horizon scalar interval verifiers, the bounded
+two-stage `TwoParameterScalarPolytopeHybridFamilyVerifier`, and the bounded
+`ExactLinearHHybridFamilyVerifier` described above. The scalar verifiers retain
+their documented interval/polygon domains; the exact H verifier admits broader
+relation dimensions and forms only within its exact arithmetic and resource
+limits. None of these finite profiles establishes the full EXT-07 acceptance
+contract.
 
 ## Required request-admission contract
 
@@ -396,17 +405,20 @@ identity. Solver-provider provenance remains attached to each branch
 execution. The default reachability adapter wraps this same direct joint-H
 composer. The separate projected-state adapter independently builds and
 projects a one-transition scalar relation; multi-stage and general-dimensional
-projected reachability remain unsupported. The compiled verifiers cover integral singleton paths,
-one-step scalar interval families, and the bounded finite-horizon
-single-parameter scalar interval profile described above, plus the separate
-two-stage/two-parameter scalar polygon profile. They do not cover general
-continuous polytope families. These verifier domains reject unsupported input
-when verification runs; `build_hybrid_portfolio_programs_with_verifier` also
-rejects unsupported verifier domains and declared trajectory objective
-capabilities before building branch programs. Validated objective assurance
-remains unsupported; adapter-specific objective-policy semantics, broader
-provider-operation admission, general projected-set reachability, and broader
-multiple-parameter verifier coverage remain incomplete.
+projected reachability remain unsupported. The compiled verifiers cover exact
+singleton paths, one-step scalar interval families, the bounded finite-horizon
+single-parameter scalar interval profile, the separate two-stage/two-parameter
+scalar polygon profile, and the bounded `ExactLinearHHybridFamilyVerifier`.
+The interval and polygon profiles retain their narrow domains; the exact H
+profile supports broader finite-dimensional continuous relations under its
+declared arithmetic and resource limits. Exhaustive independent continuous-
+family oracle coverage and resource-scale evidence remain incomplete. These
+verifier domains reject unsupported input when verification runs;
+`build_hybrid_portfolio_programs_with_verifier` also rejects unsupported
+verifier domains and declared trajectory objective capabilities before
+building branch programs. Validated objective assurance remains unsupported;
+adapter-specific objective-policy semantics, broader provider-operation
+admission, and general projected-set reachability remain incomplete.
 
 ## Independent test oracle requirements
 

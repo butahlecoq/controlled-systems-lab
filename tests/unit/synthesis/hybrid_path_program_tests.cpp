@@ -5,6 +5,8 @@
 #include <csl/sets/data.hpp>
 #include <csl/registry/provider.hpp>
 #include "hybrid_family_verifier_internal.hpp"
+#include "hybrid_exact_polytope.hpp"
+#include "hybrid_exact_model_relation.hpp"
 #include <algorithm>
 #include <array>
 #include <limits>
@@ -16,6 +18,29 @@ using namespace csl::synthesis;
 namespace {
 SetHandle universal(std::string id,std::size_t dimension) {
     auto data=sets::make_universal({SetId{std::move(id)},dimension,{}});
+    REQUIRE(std::holds_alternative<sets::SetData>(data));
+    return std::get<sets::SetData>(std::move(data)).as_handle();
+}
+
+SetHandle empty_handle(std::string id,std::size_t dimension) {
+    auto data=sets::make_empty({SetId{std::move(id)},dimension,{}});
+    REQUIRE(std::holds_alternative<sets::SetData>(data));
+    return std::get<sets::SetData>(std::move(data)).as_handle();
+}
+
+SetHandle h_set(std::string id,std::size_t dimension,Matrix inequalities,
+                Vector upper_bounds,Matrix equalities,Vector equality_values) {
+    auto a=numeric::snapshot(inequalities);
+    auto b=numeric::snapshot_vector(upper_bounds);
+    auto e=numeric::snapshot(equalities);
+    auto f=numeric::snapshot_vector(equality_values);
+    REQUIRE(std::holds_alternative<numeric::MatrixView>(a));
+    REQUIRE(std::holds_alternative<numeric::VectorView>(b));
+    REQUIRE(std::holds_alternative<numeric::MatrixView>(e));
+    REQUIRE(std::holds_alternative<numeric::VectorView>(f));
+    auto data=sets::make_h({SetId{std::move(id)},dimension,{}},
+        {std::get<numeric::MatrixView>(a),std::get<numeric::VectorView>(b),
+         std::get<numeric::MatrixView>(e),std::get<numeric::VectorView>(f)});
     REQUIRE(std::holds_alternative<sets::SetData>(data));
     return std::get<sets::SetData>(std::move(data)).as_handle();
 }
@@ -222,6 +247,602 @@ model::HybridRequest example_request() {
 
 model::HybridPath example_path() {
     return {{{"source"},{"target"}},{{"switch"}}};
+}
+
+TEST_CASE("hybrid exact polytope rows preserve binary64 dyadics") {
+    using namespace detail::hybrid_exact;
+    const std::array<double,2> coefficients{0.5,-1.25};
+    Row row;
+    REQUIRE(make_row(coefficients,0.125,false,default_max_integer_bits,row));
+    CHECK(exact_detail::compare(row.coefficients[0],exact_detail::from_u64(4))==0);
+    CHECK(exact_detail::compare(row.coefficients[1],exact_detail::from_u64(10,true))==0);
+    CHECK(exact_detail::compare(row.bound,exact_detail::from_u64(1))==0);
+
+    const std::array<double,1> subnormal{std::numeric_limits<double>::denorm_min()};
+    REQUIRE(make_row(subnormal,0,false,default_max_integer_bits,row));
+    CHECK(exact_detail::compare(row.coefficients[0],exact_detail::from_u64(1))==0);
+    CHECK_FALSE(make_row(coefficients,0.125,false,3,row));
+
+    // The unshifted significand exceeds this cap before row normalization.
+    const std::array<double,1> odd_significand{1.1};
+    CHECK_FALSE(make_row(odd_significand,0,false,52,row));
+}
+
+TEST_CASE("hybrid exact integer arithmetic handles multiword carries") {
+    using namespace detail::hybrid_exact;
+    using exact_detail::add;
+    using exact_detail::compare;
+    using exact_detail::from_u64;
+    using exact_detail::multiply;
+
+    Integer sum=from_u64(0xffffffffULL);
+    REQUIRE(add(sum,from_u64(1),64));
+    CHECK(compare(sum,from_u64(0x100000000ULL))==0);
+
+    Integer product;
+    REQUIRE(multiply(from_u64(0x100000001ULL),
+                     from_u64(0x100000003ULL),128,product));
+    const Integer expected_product{{3U,4U,1U},false};
+    CHECK(compare(product,expected_product)==0);
+    CHECK_FALSE(multiply(from_u64(0x100000001ULL),
+                         from_u64(0x100000003ULL),63,product));
+}
+
+TEST_CASE("hybrid exact polytope feasibility retains strict and closed bounds") {
+    using namespace detail::hybrid_exact;
+    const std::array<double,1> positive{1}, negative{-1};
+    std::vector<Row> strict_conflict;
+    REQUIRE(append_inequality(positive,0,true,default_max_integer_bits,strict_conflict));
+    REQUIRE(append_inequality(negative,0,false,default_max_integer_bits,strict_conflict));
+    CHECK(feasible(std::move(strict_conflict),1).state==FeasibilityState::infeasible);
+
+    std::vector<Row> open_interval;
+    REQUIRE(append_inequality(positive,1,true,default_max_integer_bits,open_interval));
+    REQUIRE(append_inequality(negative,0,true,default_max_integer_bits,open_interval));
+    CHECK(feasible(std::move(open_interval),1).state==FeasibilityState::feasible);
+
+    std::vector<Row> closed_point;
+    REQUIRE(append_inequality(positive,0,false,default_max_integer_bits,closed_point));
+    REQUIRE(append_inequality(negative,0,false,default_max_integer_bits,closed_point));
+    CHECK(feasible(std::move(closed_point),1).state==FeasibilityState::feasible);
+
+    const std::array<double,2> coupled_upper{2,1}, coupled_lower{-3,2}, y_lower{0,-1};
+    std::vector<Row> coupled_conflict;
+    REQUIRE(append_inequality(coupled_upper,0,false,default_max_integer_bits,coupled_conflict));
+    REQUIRE(append_inequality(coupled_lower,-1,false,default_max_integer_bits,coupled_conflict));
+    REQUIRE(append_inequality(y_lower,0,false,default_max_integer_bits,coupled_conflict));
+    CHECK(feasible(std::move(coupled_conflict),2).state==FeasibilityState::infeasible);
+}
+
+TEST_CASE("hybrid exact polytope proves half-space relation inclusion") {
+    using namespace detail::hybrid_exact;
+    const std::array<double,1> x{1};
+    std::vector<Row> source;
+    REQUIRE(append_equality(x,0,default_max_integer_bits,source));
+
+    std::vector<Row> containing_target;
+    REQUIRE(append_inequality(x,1,false,default_max_integer_bits,containing_target));
+    CHECK(included_in(source,containing_target,1).state==InclusionState::included);
+
+    std::vector<Row> excluding_target;
+    REQUIRE(append_inequality(x,-1,false,default_max_integer_bits,excluding_target));
+    CHECK(included_in(source,excluding_target,1).state==InclusionState::not_included);
+
+    // The strict complement must catch a source point on a closed boundary.
+    std::vector<Row> boundary_target;
+    REQUIRE(append_inequality(x,0,false,default_max_integer_bits,boundary_target));
+    CHECK(included_in(source,boundary_target,1).state==InclusionState::included);
+    boundary_target.front().strict=true;
+    CHECK(included_in(source,boundary_target,1).state==InclusionState::not_included);
+    CHECK(included_in(source,std::span<const Row>{},1).state==
+          InclusionState::included);
+    const std::vector<Row> malformed_source{Row{}};
+    CHECK(included_in(malformed_source,std::span<const Row>{},1).state==
+          InclusionState::unsupported);
+
+    Limits limits;
+    limits.max_operations=0;
+    CHECK(included_in(source,containing_target,1,limits).state==
+          InclusionState::unsupported);
+
+    limits.max_operations=default_max_operations;
+    limits.max_variables=0;
+    CHECK(included_in(source,std::span<const Row>{},1,limits).state==
+          InclusionState::unsupported);
+
+    limits={};
+    std::stop_source cancelled;
+    cancelled.request_stop();
+    CHECK(included_in(source,std::span<const Row>{},1,limits,
+                      cancelled.get_token()).state==InclusionState::cancelled);
+}
+
+TEST_CASE("hybrid exact polytope projects linear objective bounds") {
+    using namespace detail::hybrid_exact;
+    const std::array<double,1> x{1}, negative_x{-1};
+    std::vector<Row> interval_rows;
+    REQUIRE(append_inequality(x,2,false,default_max_integer_bits,interval_rows));
+    REQUIRE(append_inequality(negative_x,0,false,default_max_integer_bits,interval_rows));
+
+    const auto minimum_x=minimize_linear(interval_rows,1,x,0);
+    REQUIRE(minimum_x.state==LinearMinimumState::minimum);
+    CHECK(minimum_x.attained);
+    CHECK(exact_detail::compare(minimum_x.value.numerator,{})==0);
+    CHECK(exact_detail::compare(minimum_x.value.denominator,
+                                exact_detail::from_u64(1))==0);
+
+    const std::array<double,1> negative_objective{-1};
+    const auto minimum_negative_x=minimize_linear(interval_rows,1,
+                                                   negative_objective,3);
+    REQUIRE(minimum_negative_x.state==LinearMinimumState::minimum);
+    CHECK(minimum_negative_x.attained);
+    CHECK(exact_detail::compare(minimum_negative_x.value.numerator,
+                                exact_detail::from_u64(1))==0);
+
+    const std::array<double,1> scaled_objective{0.5};
+    const auto scaled_minimum=minimize_linear(interval_rows,1,
+                                               scaled_objective,0.25);
+    REQUIRE(scaled_minimum.state==LinearMinimumState::minimum);
+    CHECK(scaled_minimum.value.binary_exponent==-2);
+    CHECK(exact_detail::compare(scaled_minimum.value.numerator,
+                                exact_detail::from_u64(1))==0);
+    int order=0;
+    REQUIRE(compare_scaled_rationals(scaled_minimum.value,
+        minimum_negative_x.value,default_max_integer_bits,order));
+    CHECK(order<0);
+
+    std::vector<Row> open_interval;
+    REQUIRE(append_inequality(x,2,true,default_max_integer_bits,open_interval));
+    REQUIRE(append_inequality(negative_x,0,true,default_max_integer_bits,open_interval));
+    const auto open_minimum=minimize_linear(open_interval,1,x,0);
+    REQUIRE(open_minimum.state==LinearMinimumState::minimum);
+    CHECK_FALSE(open_minimum.attained);
+    CHECK(exact_detail::compare(open_minimum.value.numerator,{})==0);
+
+    const auto unbounded=minimize_linear(std::span<const Row>{},1,x,0);
+    CHECK(unbounded.state==LinearMinimumState::unbounded_below);
+    const auto constant=minimize_linear(interval_rows,1,
+                                         std::array<double,1>{0},-2.5);
+    REQUIRE(constant.state==LinearMinimumState::minimum);
+    CHECK(constant.attained);
+    CHECK(constant.value.binary_exponent==-1);
+    CHECK(exact_detail::compare(constant.value.numerator,
+                                exact_detail::from_u64(5,true))==0);
+
+    std::vector<Row> thirds_lower_bound;
+    const std::array<double,1> negative_three{-3};
+    REQUIRE(append_inequality(negative_three,-1,false,
+                              default_max_integer_bits,thirds_lower_bound));
+    const auto one_third=minimize_linear(thirds_lower_bound,1,x,0);
+    REQUIRE(one_third.state==LinearMinimumState::minimum);
+    CHECK(one_third.attained);
+    CHECK(exact_detail::compare(one_third.value.numerator,
+                                exact_detail::from_u64(1))==0);
+    CHECK(exact_detail::compare(one_third.value.denominator,
+                                exact_detail::from_u64(3))==0);
+
+    std::vector<Row> positive_open_domain;
+    REQUIRE(append_inequality(negative_x,0,true,
+                              default_max_integer_bits,positive_open_domain));
+    REQUIRE(append_inequality(negative_x,0,false,
+                              default_max_integer_bits,positive_open_domain));
+    const auto strict_tied_bound=minimize_linear(positive_open_domain,1,x,0);
+    REQUIRE(strict_tied_bound.state==LinearMinimumState::minimum);
+    CHECK_FALSE(strict_tied_bound.attained);
+
+    const std::array<double,1> shifted_domain{-1};
+    std::vector<Row> x_at_least_one;
+    REQUIRE(append_inequality(shifted_domain,-1,false,
+                              default_max_integer_bits,x_at_least_one));
+    const auto shifted_objective=minimize_linear(x_at_least_one,1,
+                                                  scaled_objective,0.25);
+    REQUIRE(shifted_objective.state==LinearMinimumState::minimum);
+    CHECK(shifted_objective.value.binary_exponent==-2);
+    CHECK(exact_detail::compare(shifted_objective.value.numerator,
+                                exact_detail::from_u64(3))==0);
+    ExactRational same_value{exact_detail::from_u64(3),
+                             exact_detail::from_u64(4),0};
+    REQUIRE(compare_scaled_rationals(shifted_objective.value,same_value,
+                                     default_max_integer_bits,order));
+    CHECK(order==0);
+    ExactRational extreme_low{exact_detail::from_u64(1),
+                              exact_detail::from_u64(1),
+                              std::numeric_limits<int>::min()};
+    ExactRational extreme_high{exact_detail::from_u64(1),
+                               exact_detail::from_u64(1),
+                               std::numeric_limits<int>::max()};
+    CHECK_FALSE(compare_scaled_rationals(extreme_high,extreme_low,
+                                         default_max_integer_bits,order));
+}
+
+TEST_CASE("exact linear H verifier proves complete continuous optimal faces") {
+    model::HybridMode source{{"source"},1,1,{"x"},{"u"}};
+    source.flow=LinearStage{Matrix{1,1,{1}},Matrix{1,1,{1}},
+        Matrix{1,0,{}},Vector{0}};
+    source.control_sets={h_set("exact-linear-control",1,
+        Matrix{2,1,{1,-1}},Vector{2,0},Matrix{0,1,{}},Vector{})};
+    source.invariants={UniversalSet{1},UniversalSet{1}};
+    model::HybridMode target{{"target"},1,0,{"y"},{}};
+    target.flow=LinearStage{Matrix{1,1,{1}},Matrix{1,0,{}},
+        Matrix{1,0,{}},Vector{0}};
+    target.control_sets={UniversalSet{0}};
+    target.invariants={UniversalSet{1},UniversalSet{1}};
+    model::HybridSystem system{1,{source,target},
+        {{{"switch"},{"source"},{"target"},{UniversalSet{1}},
+          {h_set("exact-linear-reset",2,Matrix{0,2,{}},Vector{},
+              Matrix{1,2,{-1,1}},Vector{0})}}}};
+    model::HybridRequest request{{{"source"},{0}},{{"target"}},
+        {{{"target"},LinearTerminal{{1},0},"terminal cost","units"}}};
+    const auto built=build_hybrid_portfolio_programs(system,request,{"exact-linear"},
+        {1,8},{16,64,4096});
+    REQUIRE(std::holds_alternative<std::vector<HybridPathProgram>>(built));
+    const auto& programs=std::get<std::vector<HybridPathProgram>>(built);
+    REQUIRE(programs.size()==1);
+    auto candidate=exact_candidate(programs.front(),{0,0,0,0});
+    candidate.relation=singleton_data({0,0,0,0});
+    ExactLinearHHybridFamilyVerifier verifier;
+    const auto result=verify_hybrid_portfolio_family(verifier,system,request,
+        programs,std::span<const HybridPathOptimalFaceCandidate>(&candidate,1),
+        {1,8},{1e-9,1e-9});
+    REQUIRE(std::holds_alternative<HybridFamilyVerificationReport>(result));
+    const auto& report=std::get<HybridFamilyVerificationReport>(result);
+    CHECK(report.verifier_id=="csl.hybrid.exact-linear-h");
+    CHECK(report.global_objective_optimality==HybridVerificationStatus::established);
+    CHECK(report.complete_family_coverage==HybridVerificationStatus::established);
+    REQUIRE(report.branches.size()==1);
+    CHECK(report.branches[0].feasibility==HybridVerificationStatus::established);
+    CHECK(report.branches[0].objective_optimality==HybridVerificationStatus::established);
+    CHECK(report.branches[0].continuous_coverage==HybridVerificationStatus::established);
+
+    auto mixed_system=system;
+    mixed_system.edges.push_back({{"free-reset"},{"source"},{"target"},
+        {UniversalSet{1}},{universal("free-terminal-reset",2)}});
+    const auto mixed_built=build_hybrid_portfolio_programs(mixed_system,request,
+        {"exact-linear-mixed"},{1,8},{16,64,4096});
+    REQUIRE(std::holds_alternative<std::vector<HybridPathProgram>>(mixed_built));
+    const auto& mixed_programs=std::get<std::vector<HybridPathProgram>>(mixed_built);
+    REQUIRE(mixed_programs.size()==2);
+    auto finite_face=exact_candidate(mixed_programs[0],{0,0,0,0});
+    finite_face.relation=singleton_data({0,0,0,0});
+    const auto mixed_result=verify_hybrid_portfolio_family(verifier,mixed_system,
+        request,mixed_programs,
+        std::span<const HybridPathOptimalFaceCandidate>(&finite_face,1),
+        {1,8},{1e-9,1e-9});
+    REQUIRE(std::holds_alternative<HybridFamilyVerificationReport>(mixed_result));
+    const auto& mixed_report=std::get<HybridFamilyVerificationReport>(mixed_result);
+    CHECK(mixed_report.global_objective_optimality==HybridVerificationStatus::refuted);
+    CHECK(mixed_report.complete_family_coverage==HybridVerificationStatus::refuted);
+    CHECK(mixed_report.branches[0].objective_optimality==HybridVerificationStatus::refuted);
+    CHECK(mixed_report.branches[1].objective_optimality==HybridVerificationStatus::refuted);
+
+    auto forged_face=exact_candidate(programs.front(),{0,1,1,1});
+    const auto forged=verify_hybrid_portfolio_family(verifier,system,request,
+        programs,std::span<const HybridPathOptimalFaceCandidate>(&forged_face,1),
+        {1,8},{1e-9,1e-9});
+    REQUIRE(std::holds_alternative<HybridFamilyVerificationReport>(forged));
+    CHECK(std::get<HybridFamilyVerificationReport>(forged).complete_family_coverage==
+          HybridVerificationStatus::refuted);
+
+    auto flat_request=request;
+    flat_request.terminal_objectives[0].objective=LinearTerminal{{0},0};
+    const auto flat_built=build_hybrid_portfolio_programs(system,flat_request,
+        {"exact-linear-flat"},{1,8},{16,64,4096});
+    REQUIRE(std::holds_alternative<std::vector<HybridPathProgram>>(flat_built));
+    const auto& flat_programs=std::get<std::vector<HybridPathProgram>>(flat_built);
+    auto flat_candidate=exact_candidate(flat_programs.front(),{0,1,1,1});
+    flat_candidate.relation=flat_programs.front().joint_relation;
+    const auto flat_result=verify_hybrid_portfolio_family(verifier,system,
+        flat_request,flat_programs,
+        std::span<const HybridPathOptimalFaceCandidate>(&flat_candidate,1),
+        {1,8},{1e-9,1e-9});
+    REQUIRE(std::holds_alternative<HybridFamilyVerificationReport>(flat_result));
+    CHECK(std::get<HybridFamilyVerificationReport>(flat_result).complete_family_coverage==
+          HybridVerificationStatus::established);
+}
+
+TEST_CASE("exact linear H verifier retains tied paths across objective scales") {
+    model::HybridMode source{{"source"},1,1,{"x"},{"u"}};
+    source.flow=LinearStage{Matrix{1,1,{1}},Matrix{1,1,{1}},
+        Matrix{1,0,{}},Vector{0}};
+    source.control_sets={h_set("scaled-tie-control",1,
+        Matrix{2,1,{1,-1}},Vector{1,0},Matrix{0,1,{}},Vector{})};
+    source.invariants={UniversalSet{1},UniversalSet{1}};
+    model::HybridMode target_a{{"target-a"},1,0,{"y"},{}};
+    target_a.flow=LinearStage{Matrix{1,1,{1}},Matrix{1,0,{}},
+        Matrix{1,0,{}},Vector{0}};
+    target_a.control_sets={UniversalSet{0}};
+    target_a.invariants={UniversalSet{1},UniversalSet{1}};
+    model::HybridMode target_b=target_a;
+    target_b.id={"target-b"};
+    model::HybridSystem system{1,{source,target_a,target_b},
+        {{{"tie-a"},{"source"},{"target-a"},{UniversalSet{1}},
+          {h_set("scaled-tie-reset-a",2,Matrix{0,2,{}},Vector{},
+              Matrix{1,2,{0,1}},Vector{0})}},
+         {{"tie-b"},{"source"},{"target-b"},{UniversalSet{1}},
+          {h_set("scaled-tie-reset-b",2,Matrix{0,2,{}},Vector{},
+              Matrix{1,2,{0,1}},Vector{0.25})}},
+         {{"worse"},{"source"},{"target-b"},{UniversalSet{1}},
+          {h_set("scaled-worse-reset",2,Matrix{0,2,{}},Vector{},
+              Matrix{1,2,{0,1}},Vector{1})}}}};
+    model::HybridRequest request{{{"source"},{0}},{{"target-a"},{"target-b"}},
+        {{{"target-a"},LinearTerminal{{0.5},0.25},"cost","units"},
+         {{"target-b"},LinearTerminal{{1},0},"cost","units"}}};
+    const auto built=build_hybrid_portfolio_programs(system,request,{"scaled-tie"},
+        {1,8},{16,64,4096});
+    REQUIRE(std::holds_alternative<std::vector<HybridPathProgram>>(built));
+    const auto& programs=std::get<std::vector<HybridPathProgram>>(built);
+    REQUIRE(programs.size()==3);
+    std::vector<HybridPathOptimalFaceCandidate> candidates{
+        exact_candidate(programs[0],{0,0.5,0.5,0}),
+        exact_candidate(programs[1],{0,0.5,0.5,0.25})};
+    ExactLinearHHybridFamilyVerifier verifier;
+    const auto result=verify_hybrid_portfolio_family(verifier,system,request,
+        programs,candidates,{1,8},{1e-9,1e-9});
+    REQUIRE(std::holds_alternative<HybridFamilyVerificationReport>(result));
+    const auto& report=std::get<HybridFamilyVerificationReport>(result);
+    CHECK(report.global_objective_optimality==HybridVerificationStatus::established);
+    CHECK(report.complete_family_coverage==HybridVerificationStatus::established);
+    REQUIRE(report.branches.size()==3);
+    CHECK(report.branches[0].objective_optimality==HybridVerificationStatus::established);
+    CHECK(report.branches[0].continuous_coverage==HybridVerificationStatus::established);
+    CHECK(report.branches[1].objective_optimality==HybridVerificationStatus::established);
+    CHECK(report.branches[1].continuous_coverage==HybridVerificationStatus::established);
+    CHECK(report.branches[2].objective_optimality==HybridVerificationStatus::refuted);
+    CHECK(report.branches[2].continuous_coverage==HybridVerificationStatus::established);
+}
+
+TEST_CASE("hybrid exact raw path relation matches the joint H composer") {
+    using namespace detail::hybrid_exact;
+    const auto system=example_system();
+    const auto request=example_request();
+    const auto path=example_path();
+    const model::HybridRelationLimits relation_limits{32,4096,100000};
+    const auto raw=reconstruct_path_relation(system,request,path,relation_limits);
+    REQUIRE(raw.state==RawRelationState::built);
+
+    const auto composed=model::compose_hybrid_path_relation(
+        system,request,path,relation_limits);
+    REQUIRE(std::holds_alternative<sets::SetData>(composed));
+    const auto representation=std::get<sets::SetData>(composed).representation();
+    REQUIRE(std::holds_alternative<sets::HRepresentation>(representation));
+    const auto& h=std::get<sets::HRepresentation>(representation);
+    std::vector<Row> composed_rows;
+    for(std::size_t row=0;row<h.inequalities.rows();++row) {
+        Vector coefficients(h.inequalities.cols());
+        for(std::size_t column=0;column<coefficients.size();++column)
+            coefficients[column]=h.inequalities(row,column);
+        REQUIRE(append_inequality(coefficients,h.upper_bounds[row],false,
+                                  default_max_integer_bits,composed_rows));
+    }
+    for(std::size_t row=0;row<h.equalities.rows();++row) {
+        Vector coefficients(h.equalities.cols());
+        for(std::size_t column=0;column<coefficients.size();++column)
+            coefficients[column]=h.equalities(row,column);
+        REQUIRE(append_equality(coefficients,h.equality_values[row],
+                                default_max_integer_bits,composed_rows));
+    }
+    REQUIRE(h.inequalities.cols()==raw.variables);
+    CHECK(included_in(raw.rows,composed_rows,raw.variables).state==
+          InclusionState::included);
+    CHECK(included_in(composed_rows,raw.rows,raw.variables).state==
+          InclusionState::included);
+
+    auto mutated_system=system;
+    std::get<LinearStage>(mutated_system.modes[0].flow).A.values[0]=2.0;
+    const auto mutated=reconstruct_path_relation(mutated_system,request,path,
+                                                 relation_limits);
+    REQUIRE(mutated.state==RawRelationState::built);
+    CHECK(included_in(mutated.rows,composed_rows,mutated.variables).state==
+          InclusionState::not_included);
+
+    auto small_limits=relation_limits;
+    small_limits.max_rows=1;
+    CHECK(reconstruct_path_relation(system,request,path,small_limits).state==
+          RawRelationState::unsupported);
+    std::stop_source cancelled;
+    cancelled.request_stop();
+    CHECK(reconstruct_path_relation(system,request,path,relation_limits,{},
+                                    cancelled.get_token()).state==
+          RawRelationState::cancelled);
+}
+
+TEST_CASE("hybrid exact raw relation preserves H sets and heterogeneous reset timing") {
+    using namespace detail::hybrid_exact;
+    const auto source_interval=h_set("raw-source-interval",1,
+        Matrix{2,1,{-1,1}},Vector{0,3},Matrix{0,1,{}},Vector{});
+    const auto pre_invariant=h_set("raw-pre-invariant",1,
+        Matrix{2,1,{-1,1}},Vector{0,2},Matrix{0,1,{}},Vector{});
+    const auto transition_guard=h_set("raw-transition-guard",1,
+        Matrix{2,1,{-1,1}},Vector{0,1.25},Matrix{0,1,{}},Vector{});
+    const auto target_interval=h_set("raw-target-interval",1,
+        Matrix{2,1,{-1,1}},Vector{0,4},Matrix{0,1,{}},Vector{});
+    const auto box2=h_set("raw-box2",2,
+        Matrix{4,2,{-1,0,0,-1,1,0,0,1}},Vector{0,0,3,3},
+        Matrix{0,2,{}},Vector{});
+    const auto reset_source=h_set("raw-reset-source",3,
+        Matrix{1,3,{0,1,0}},Vector{1},
+        Matrix{2,3,{1,-1,0,0,0,1}},Vector{0,0});
+    const auto reset_target=h_set("raw-reset-target",3,
+        Matrix{1,3,{0,1,0}},Vector{2},
+        Matrix{1,3,{1,1,-1}},Vector{0});
+
+    const LinearStage source_flow{Matrix{1,1,{1}},Matrix{1,1,{1}},
+        Matrix{1,0,{}},Vector{0}};
+    const LinearStage middle_flow{Matrix{2,2,{1,0,0,1}},
+        Matrix{2,1,{1,0}},Matrix{2,0,{}},Vector{0,0}};
+    auto source=model::HybridMode{{"raw-source"},1,1,{"x"},{"u"}};
+    source.flow=std::vector<LinearStage>{source_flow,source_flow};
+    source.control_sets={source_interval,source_interval};
+    source.invariants={source_interval,pre_invariant,source_interval};
+    auto middle=model::HybridMode{{"raw-middle"},2,1,{"y","z"},{"v"}};
+    middle.flow=std::vector<LinearStage>{middle_flow,middle_flow};
+    middle.control_sets={source_interval,source_interval};
+    middle.invariants={box2,box2,box2};
+    auto target=model::HybridMode{{"raw-target"},1,0,{"w"},{}};
+    target.flow=std::vector<LinearStage>{
+        LinearStage{Matrix{1,1,{1}},Matrix{1,0,{}},Matrix{1,0,{}},Vector{0}},
+        LinearStage{Matrix{1,1,{1}},Matrix{1,0,{}},Matrix{1,0,{}},Vector{0}}};
+    target.control_sets={UniversalSet{0},UniversalSet{0}};
+    target.invariants={target_interval,target_interval,target_interval};
+    model::HybridSystem system{2,{source,middle,target},
+        {{{"raw-edge-a"},{"raw-source"},{"raw-middle"},
+            {transition_guard,transition_guard},{reset_source,reset_source}},
+         {{"raw-edge-b"},{"raw-middle"},{"raw-target"},
+            {box2,box2},{reset_target,reset_target}}}};
+    model::HybridRequest request{{{"raw-source"},{1}},{{"raw-target"}},
+        {{{"raw-target"},LinearTerminal{{1},0},"cost","u"}}};
+    const model::HybridPath path{{{"raw-source"},{"raw-middle"},{"raw-target"}},
+        {{"raw-edge-a"},{"raw-edge-b"}}};
+    const model::HybridRelationLimits limits{32,4096,100000};
+
+    const auto raw=reconstruct_path_relation(system,request,path,limits);
+    REQUIRE(raw.state==RawRelationState::built);
+    const auto tuple_state=[&](const Vector& tuple) {
+        auto rows=raw.rows;
+        REQUIRE(tuple.size()==raw.variables);
+        for(std::size_t column=0;column<tuple.size();++column) {
+            Vector coefficient(tuple.size(),0.0);
+            coefficient[column]=1.0;
+            REQUIRE(append_equality(coefficient,tuple[column],
+                                    default_max_integer_bits,rows));
+        }
+        return feasible(std::move(rows),raw.variables).state;
+    };
+    CHECK(tuple_state({1,0,1,1,0,0,1,0,1})==FeasibilityState::feasible);
+    CHECK(tuple_state({1,0.5,1.5,1.5,0,0,1.5,0,1.5})==
+          FeasibilityState::infeasible);
+    const auto composed=model::compose_hybrid_path_relation(system,request,path,limits);
+    REQUIRE(std::holds_alternative<sets::SetData>(composed));
+    const auto representation=std::get<sets::SetData>(composed).representation();
+    REQUIRE(std::holds_alternative<sets::HRepresentation>(representation));
+    const auto& h=std::get<sets::HRepresentation>(representation);
+    std::vector<Row> composed_rows;
+    for(std::size_t row=0;row<h.inequalities.rows();++row) {
+        Vector coefficients(h.inequalities.cols());
+        for(std::size_t column=0;column<coefficients.size();++column)
+            coefficients[column]=h.inequalities(row,column);
+        REQUIRE(append_inequality(coefficients,h.upper_bounds[row],false,
+                                  default_max_integer_bits,composed_rows));
+    }
+    for(std::size_t row=0;row<h.equalities.rows();++row) {
+        Vector coefficients(h.equalities.cols());
+        for(std::size_t column=0;column<coefficients.size();++column)
+            coefficients[column]=h.equalities(row,column);
+        REQUIRE(append_equality(coefficients,h.equality_values[row],
+                                default_max_integer_bits,composed_rows));
+    }
+    REQUIRE(h.inequalities.cols()==raw.variables);
+    CHECK(included_in(raw.rows,composed_rows,raw.variables).state==
+          InclusionState::included);
+    CHECK(included_in(composed_rows,raw.rows,raw.variables).state==
+          InclusionState::included);
+}
+
+TEST_CASE("hybrid exact raw relation handles singleton and empty representations") {
+    using namespace detail::hybrid_exact;
+    const model::HybridRelationLimits limits{32,4096,100000};
+    auto [singleton_system,singleton_request]=exact_singleton_portfolio();
+    const model::HybridPath singleton_path{{{"source"},{"target"}},{{"tie-a"}}};
+    const auto singleton_raw=reconstruct_path_relation(
+        singleton_system,singleton_request,singleton_path,limits);
+    REQUIRE(singleton_raw.state==RawRelationState::built);
+    const auto singleton_composed=model::compose_hybrid_path_relation(
+        singleton_system,singleton_request,singleton_path,limits);
+    REQUIRE(std::holds_alternative<sets::SetData>(singleton_composed));
+    const auto singleton_rep=std::get<sets::SetData>(singleton_composed).representation();
+    REQUIRE(std::holds_alternative<sets::HRepresentation>(singleton_rep));
+    const auto& singleton_h=std::get<sets::HRepresentation>(singleton_rep);
+    std::vector<Row> singleton_composed_rows;
+    for(std::size_t row=0;row<singleton_h.inequalities.rows();++row) {
+        Vector coefficients(singleton_h.inequalities.cols());
+        for(std::size_t column=0;column<coefficients.size();++column)
+            coefficients[column]=singleton_h.inequalities(row,column);
+        REQUIRE(append_inequality(coefficients,singleton_h.upper_bounds[row],false,
+                                  default_max_integer_bits,singleton_composed_rows));
+    }
+    for(std::size_t row=0;row<singleton_h.equalities.rows();++row) {
+        Vector coefficients(singleton_h.equalities.cols());
+        for(std::size_t column=0;column<coefficients.size();++column)
+            coefficients[column]=singleton_h.equalities(row,column);
+        REQUIRE(append_equality(coefficients,singleton_h.equality_values[row],
+                                default_max_integer_bits,singleton_composed_rows));
+    }
+    CHECK(included_in(singleton_raw.rows,singleton_composed_rows,
+                      singleton_raw.variables).state==InclusionState::included);
+    CHECK(included_in(singleton_composed_rows,singleton_raw.rows,
+                      singleton_raw.variables).state==InclusionState::included);
+
+    auto [empty_system,empty_request]=std::make_pair(example_system(),example_request());
+    empty_system.edges[0].reset_relations[0]=empty_handle("raw-empty-reset",3);
+    const auto empty_path=example_path();
+    const auto empty_raw=reconstruct_path_relation(empty_system,empty_request,
+                                                    empty_path,limits);
+    REQUIRE(empty_raw.state==RawRelationState::built);
+    const auto empty_composed=model::compose_hybrid_path_relation(
+        empty_system,empty_request,empty_path,limits);
+    REQUIRE(std::holds_alternative<sets::SetData>(empty_composed));
+    const auto empty_rep=std::get<sets::SetData>(empty_composed).representation();
+    REQUIRE(std::holds_alternative<sets::HRepresentation>(empty_rep));
+    const auto& h=std::get<sets::HRepresentation>(empty_rep);
+    std::vector<Row> empty_composed_rows;
+    for(std::size_t row=0;row<h.inequalities.rows();++row) {
+        Vector coefficients(h.inequalities.cols());
+        for(std::size_t column=0;column<coefficients.size();++column)
+            coefficients[column]=h.inequalities(row,column);
+        REQUIRE(append_inequality(coefficients,h.upper_bounds[row],false,
+                                  default_max_integer_bits,empty_composed_rows));
+    }
+    for(std::size_t row=0;row<h.equalities.rows();++row) {
+        Vector coefficients(h.equalities.cols());
+        for(std::size_t column=0;column<coefficients.size();++column)
+            coefficients[column]=h.equalities(row,column);
+        REQUIRE(append_equality(coefficients,h.equality_values[row],
+                                default_max_integer_bits,empty_composed_rows));
+    }
+    CHECK(included_in(empty_raw.rows,empty_composed_rows,empty_raw.variables).state==
+          InclusionState::included);
+    CHECK(included_in(empty_composed_rows,empty_raw.rows,empty_raw.variables).state==
+          InclusionState::included);
+
+    Limits exact_limits;
+    exact_limits.max_stages=0;
+    CHECK(reconstruct_path_relation(singleton_system,singleton_request,
+                                    singleton_path,limits,exact_limits).state==
+          RawRelationState::unsupported);
+}
+
+TEST_CASE("hybrid exact polytope feasibility handles inconsistent equalities and lower dimension") {
+    using namespace detail::hybrid_exact;
+    const std::array<double,1> x{1};
+    std::vector<Row> inconsistent;
+    REQUIRE(append_equality(x,0,default_max_integer_bits,inconsistent));
+    REQUIRE(append_equality(x,1,default_max_integer_bits,inconsistent));
+    CHECK(feasible(std::move(inconsistent),1).state==FeasibilityState::infeasible);
+
+    const std::array<double,2> x_only{1,0}, y_upper{0,1}, y_lower{0,-1};
+    std::vector<Row> lower_dimensional;
+    REQUIRE(append_equality(x_only,0,default_max_integer_bits,lower_dimensional));
+    REQUIRE(append_inequality(y_upper,1,false,default_max_integer_bits,lower_dimensional));
+    REQUIRE(append_inequality(y_lower,0,false,default_max_integer_bits,lower_dimensional));
+    CHECK(feasible(std::move(lower_dimensional),2).state==FeasibilityState::feasible);
+}
+
+TEST_CASE("hybrid exact polytope feasibility stops at resource and cancellation limits") {
+    using namespace detail::hybrid_exact;
+    const std::array<double,1> x{1}, negative_x{-1};
+    std::vector<Row> rows;
+    REQUIRE(append_inequality(x,1,false,default_max_integer_bits,rows));
+    REQUIRE(append_inequality(negative_x,2,false,default_max_integer_bits,rows));
+    Limits limits;
+    limits.max_rows=1;
+    CHECK(feasible(rows,1,limits).state==FeasibilityState::unsupported);
+    limits.max_rows=default_max_rows;
+    limits.max_operations=1;
+    CHECK(feasible(rows,1,limits).state==FeasibilityState::unsupported);
+
+    std::stop_source cancelled;
+    cancelled.request_stop();
+    CHECK(feasible({},0,{},cancelled.get_token()).state==FeasibilityState::cancelled);
 }
 
 class RejectingTrajectoryAdapter final : public HybridDirectTrajectoryAdapter {
