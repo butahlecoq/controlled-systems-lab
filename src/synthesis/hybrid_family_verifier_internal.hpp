@@ -3,6 +3,7 @@
 #include <csl/synthesis/hybrid_path_program.hpp>
 
 #include <cstddef>
+#include <string>
 #include <utility>
 #include <vector>
 
@@ -13,6 +14,19 @@ struct IndependentPathEnumeration {
     bool resource_limit{};
     bool cancelled{};
 };
+
+inline std::string describe_hybrid_path(const model::HybridPath& path) {
+    std::string description;
+    for(std::size_t stage=0;stage<path.edges.size();++stage) {
+        if(stage==0)
+            description=path.modes.empty()?"<missing source mode>":"mode "+path.modes[stage].value;
+        description+=" --stage "+std::to_string(stage)+" edge "+path.edges[stage].value+"--> ";
+        if(stage+1<path.modes.size()) description+="mode "+path.modes[stage+1].value;
+        else description+="<missing target mode>";
+    }
+    if(path.edges.empty()&&!path.modes.empty()) description="mode "+path.modes.front().value;
+    return description;
+}
 
 template<class IsCancelled>
 IndependentPathEnumeration independently_enumerate_paths(

@@ -512,7 +512,7 @@ bool program_objective_matches(const HybridPathProgram& program,const ScalarBran
         same(branch.objective_offset,terminal_coefficient*branch.post_offset+terminal_offset,policy);
 }
 
-struct TwoStageScalarBranch {
+struct ScalarParameterBranch {
     enum class State { feasible, infeasible, unsupported } state{State::unsupported};
     Interval parameter_interval;
     Vector base;
@@ -634,47 +634,50 @@ bool relation_is_parameter_interval(const sets::SetData& data,const Vector& base
     return lower==interval.lower&&upper==interval.upper;
 }
 
-bool two_stage_program_objective_matches(const HybridPathProgram& program,std::size_t width,
+bool scalar_parameter_program_objective_matches(const HybridPathProgram& program,std::size_t width,
     double terminal_coefficient,double terminal_offset,NumericalPolicy policy) {
     const auto* linear=std::get_if<LinearProgram>(&program.program);
-    if(!linear||linear->objective().size()!=width||width!=7) return false;
+    if(!linear||linear->objective().size()!=width||width==0) return false;
     for(std::size_t i=0;i<width;++i) {
-        const double expected=i==6?terminal_coefficient:0;
+        const double expected=i+1==width?terminal_coefficient:0;
         if(!same(linear->objective()[i],expected,policy)) return false;
     }
     return same(linear->offset(),terminal_offset,policy);
 }
 
-TwoStageScalarBranch evaluate_two_stage_scalar(const HybridSystem& system,const HybridRequest& request,
+ScalarParameterBranch evaluate_scalar_parameter_path(const HybridSystem& system,const HybridRequest& request,
     const HybridPath& path,std::stop_token cancellation) {
-    TwoStageScalarBranch result;
+    ScalarParameterBranch result;
     const auto unsupported=[&](const char* reason) {
         result.reason=reason;
-        result.state=TwoStageScalarBranch::State::unsupported;
+        result.state=ScalarParameterBranch::State::unsupported;
         return result;
     };
     const auto infeasible=[&]() {
-        result.state=TwoStageScalarBranch::State::infeasible;
+        result.state=ScalarParameterBranch::State::infeasible;
         result.parameter_interval.empty=true;
         return result;
     };
     if(cancellation.stop_requested()) return unsupported("Verification cancelled");
-    if(system.horizon!=2||path.modes.size()!=3||path.edges.size()!=2||
+    const auto horizon=system.horizon;
+    if(horizon==0||horizon>(std::numeric_limits<std::size_t>::max()-1)/3||
+       path.modes.size()!=horizon+1||path.edges.size()!=horizon||
        request.initial.state.size()!=1||!std::isfinite(request.initial.state[0]))
-        return unsupported("Verifier supports two-stage paths with one-dimensional states");
-    std::array<const HybridMode*,3> modes{};
-    std::array<const HybridTransitionEdge*,2> edges{};
+        return unsupported("Verifier supports finite-horizon paths with one-dimensional states");
+    std::vector<const HybridMode*> modes(horizon+1);
+    std::vector<const HybridTransitionEdge*> edges(horizon);
     for(std::size_t i=0;i<modes.size();++i) {
         modes[i]=find_mode(system,path.modes[i]);
         if(!modes[i]||modes[i]->state_dimension!=1||modes[i]->control_dimension!=1||
-           modes[i]->invariants.size()!=3||modes[i]->control_sets.size()!=2)
-            return unsupported("Verifier supports scalar modes with two stage-indexed interval controls and invariants");
+           modes[i]->invariants.size()!=horizon+1||modes[i]->control_sets.size()!=horizon)
+            return unsupported("Verifier requires scalar modes with stage-indexed interval controls and invariants");
     }
-    for(std::size_t i=0;i<edges.size();++i) {
-        edges[i]=find_edge(system,path.edges[i]);
-        if(!edges[i]||edges[i]->source!=modes[i]->id||edges[i]->target!=modes[i+1]->id||
-           edges[i]->guards.size()!=2||edges[i]->reset_relations.size()!=2)
-            return unsupported("Transition edges are outside the two-stage scalar verifier domain");
+    for(std::size_t stage=0;stage<horizon;++stage) {
+        edges[stage]=find_edge(system,path.edges[stage]);
+        if(!edges[stage]||edges[stage]->source!=modes[stage]->id||
+           edges[stage]->target!=modes[stage+1]->id||
+           edges[stage]->guards.size()!=horizon||edges[stage]->reset_relations.size()!=horizon)
+            return unsupported("Transition edges are outside the scalar verifier domain");
     }
     bool set_supported=true,cancelled=false;
     if(!contains_value(modes[0]->invariants[0],request.initial.state[0],{},set_supported,
@@ -684,9 +687,9 @@ TwoStageScalarBranch evaluate_two_stage_scalar(const HybridSystem& system,const 
     }
     if(!set_supported) return unsupported("Initial invariant representation is unsupported");
 
-    std::array<Interval,2> control_intervals{};
-    std::size_t free_control_stage=2;
-    for(std::size_t stage=0;stage<2;++stage) {
+    std::vector<Interval> control_intervals(horizon);
+    std::size_t free_control_stage=horizon;
+    for(std::size_t stage=0;stage<horizon;++stage) {
         auto parsed=set_interval(modes[stage]->control_sets[stage],cancellation,cancelled);
         if(cancelled) return unsupported("Verification cancelled while reading scalar control intervals");
         if(!parsed) return unsupported("Control set is outside the scalar interval verifier domain");
@@ -695,29 +698,29 @@ TwoStageScalarBranch evaluate_two_stage_scalar(const HybridSystem& system,const 
         if(!std::isfinite(parsed->lower)||!std::isfinite(parsed->upper))
             return unsupported("Verifier requires bounded scalar control intervals");
         if(parsed->lower<parsed->upper) {
-            if(free_control_stage!=2)
+            if(free_control_stage!=horizon)
                 return unsupported("Verifier supports exactly one non-singleton interval control");
             free_control_stage=stage;
         }
     }
-    if(free_control_stage==2)
+    if(free_control_stage==horizon)
         return unsupported("Verifier requires one continuous scalar interval control parameter");
     Interval parameters=control_intervals[free_control_stage];
-    result.parameter_control_coordinate=free_control_stage==0?1:4;
-    result.base.assign(7,0);
-    result.direction.assign(7,0);
+    result.parameter_control_coordinate=1+3*free_control_stage;
+    const auto relation_width=1+3*horizon;
+    result.base.assign(relation_width,0);
+    result.direction.assign(relation_width,0);
     result.base[0]=request.initial.state[0];
     double state_offset=request.initial.state[0],state_gain=0;
-    std::size_t coordinate=1;
-    for(std::size_t stage=0;stage<2;++stage) {
+    for(std::size_t stage=0;stage<horizon;++stage) {
         if(cancellation.stop_requested()) return unsupported("Verification cancelled between scalar stages");
         const auto& mode=*modes[stage];
         const auto& flow_value=mode.flow;
         const LinearStage* flow=nullptr;
         if(const auto* stages=std::get_if<std::vector<LinearStage>>(&flow_value)) {
-            if(stages->size()!=2) return unsupported("Verifier requires two explicit scalar flow stages");
+            if(stages->size()!=horizon) return unsupported("Verifier requires one scalar flow per stage");
             flow=&(*stages)[stage];
-        } else if(stage==0) flow=std::get_if<LinearStage>(&flow_value);
+        } else flow=std::get_if<LinearStage>(&flow_value);
         if(!flow||flow->A.rows!=1||flow->A.cols!=1||flow->B.rows!=1||flow->B.cols!=1||
            flow->E.rows!=1||flow->E.cols!=0||flow->offset.size()!=1||
            !std::isfinite(flow->A.values[0])||!std::isfinite(flow->B.values[0])||
@@ -726,9 +729,9 @@ TwoStageScalarBranch evaluate_two_stage_scalar(const HybridSystem& system,const 
         double control_offset=control_intervals[stage].lower;
         double control_gain=0;
         if(stage==free_control_stage) { control_offset=0; control_gain=1; }
+        const std::size_t coordinate=1+3*stage;
         result.base[coordinate]=control_offset;
         result.direction[coordinate]=control_gain;
-        ++coordinate;
 
         auto current_parsed=set_interval(mode.invariants[stage],cancellation,cancelled);
         if(cancelled) return unsupported("Verification cancelled while reading stage invariants");
@@ -751,9 +754,8 @@ TwoStageScalarBranch evaluate_two_stage_scalar(const HybridSystem& system,const 
            !exact_sum(pre_gain,control_gain_product,pre_gain))
             return unsupported("Flow parameter gain is not exactly representable");
 
-        result.base[coordinate]=pre_offset;
-        result.direction[coordinate]=pre_gain;
-        ++coordinate;
+        result.base[coordinate+1]=pre_offset;
+        result.direction[coordinate+1]=pre_gain;
         auto constrain_set=[&](const AdmissibleSet& set,double offset,double gain,
             const char* unsupported_reason)->bool {
             auto interval=set_interval(set,cancellation,cancelled);
@@ -783,14 +785,13 @@ TwoStageScalarBranch evaluate_two_stage_scalar(const HybridSystem& system,const 
            !exact_sum(reset_offset,reset_increment,post_offset)||
            !exact_product(reset_gain,pre_gain,post_gain))
             return unsupported("Reset composition is not exactly representable");
-        result.base[coordinate]=post_offset;
-        result.direction[coordinate]=post_gain;
-        ++coordinate;
+        result.base[coordinate+2]=post_offset;
+        result.direction[coordinate+2]=post_gain;
         state_offset=post_offset;
         state_gain=post_gain;
         if(parameters.empty) return infeasible();
     }
-    auto terminal_set=set_interval(modes[2]->invariants[2],cancellation,cancelled);
+    auto terminal_set=set_interval(modes[horizon]->invariants[horizon],cancellation,cancelled);
     if(cancelled) return unsupported("Verification cancelled while reading terminal invariant");
     if(!terminal_set) return unsupported("Terminal invariant representation is unsupported");
     if(terminal_set->empty) return infeasible();
@@ -801,7 +802,7 @@ TwoStageScalarBranch evaluate_two_stage_scalar(const HybridSystem& system,const 
         return unsupported("Verifier requires a bounded feasible control parameter interval");
 
     const auto objective=std::find_if(request.terminal_objectives.begin(),request.terminal_objectives.end(),
-        [&](const auto& item){return item.mode==modes[2]->id;});
+        [&](const auto& item){return item.mode==modes[horizon]->id;});
     if(objective==request.terminal_objectives.end()) return unsupported("Missing terminal objective");
     const auto* linear=std::get_if<LinearTerminal>(&objective->objective);
     if(!linear||linear->coefficients.size()!=1||!std::isfinite(linear->coefficients[0])||
@@ -819,7 +820,7 @@ TwoStageScalarBranch evaluate_two_stage_scalar(const HybridSystem& system,const 
        !exact_sum(result.objective_offset,objective_increment,result.minimum))
         return unsupported("Minimum objective arithmetic is not exactly representable");
     result.parameter_interval=parameters;
-    result.state=TwoStageScalarBranch::State::feasible;
+    result.state=ScalarParameterBranch::State::feasible;
     return result;
 }
 
@@ -827,6 +828,27 @@ TwoStageScalarBranch evaluate_two_stage_scalar(const HybridSystem& system,const 
 
 HybridFamilyVerificationCapabilities OneStepScalarIntervalHybridFamilyVerifier::capabilities() const noexcept {
     return {true,true,true,Assurance::numerical};
+}
+
+HybridFamilyVerificationPreflightResult OneStepScalarIntervalHybridFamilyVerifier::preflight(
+    const HybridSystem& system,const HybridRequest& request,std::span<const HybridPath> paths,
+    std::stop_token cancellation) const {
+    if(system.horizon!=1)
+        return Diagnostics{{DiagnosticCode::unsupported,"hybrid.verification.scalar_interval_horizon",
+            "OneStepScalarIntervalHybridFamilyVerifier supports horizon one only"}};
+    for(const auto& path:paths) {
+        if(cancellation.stop_requested())
+            return OperationStopped{StopReason::cancelled,
+                "One-step scalar verifier admission was cancelled between paths"};
+        const auto branch=evaluate(system,request,path,{},cancellation);
+        if(cancellation.stop_requested())
+            return OperationStopped{StopReason::cancelled,
+                "One-step scalar verifier admission was cancelled during reconstruction"};
+        if(branch.state==ScalarBranch::State::unsupported)
+            return Diagnostics{{DiagnosticCode::unsupported,"hybrid.verification.scalar_interval_domain",
+                detail::describe_hybrid_path(path)+": "+branch.reason}};
+    }
+    return std::monostate{};
 }
 
 HybridFamilyVerificationResult OneStepScalarIntervalHybridFamilyVerifier::verify(
@@ -1022,62 +1044,81 @@ HybridFamilyVerificationResult OneStepScalarIntervalHybridFamilyVerifier::verify
     return report;
 }
 
-HybridFamilyVerificationCapabilities TwoStageScalarIntervalHybridFamilyVerifier::capabilities() const noexcept {
+HybridFamilyVerificationCapabilities SingleParameterScalarIntervalHybridFamilyVerifier::capabilities() const noexcept {
     return {true,true,true,Assurance::numerical};
 }
 
-HybridFamilyVerificationResult TwoStageScalarIntervalHybridFamilyVerifier::verify(
+HybridFamilyVerificationPreflightResult SingleParameterScalarIntervalHybridFamilyVerifier::preflight(
+    const HybridSystem& system,const HybridRequest& request,std::span<const HybridPath> paths,
+    std::stop_token cancellation) const {
+    for(const auto& path:paths) {
+        if(cancellation.stop_requested())
+            return OperationStopped{StopReason::cancelled,
+                "Single-parameter scalar verifier admission was cancelled between paths"};
+        const auto branch=evaluate_scalar_parameter_path(system,request,path,cancellation);
+        if(cancellation.stop_requested())
+            return OperationStopped{StopReason::cancelled,
+                "Single-parameter scalar verifier admission was cancelled during reconstruction"};
+        if(branch.state==ScalarParameterBranch::State::unsupported)
+            return Diagnostics{{DiagnosticCode::unsupported,"hybrid.verification.scalar_parameter_domain",
+                detail::describe_hybrid_path(path)+": "+branch.reason}};
+    }
+    return std::monostate{};
+}
+
+HybridFamilyVerificationResult SingleParameterScalarIntervalHybridFamilyVerifier::verify(
     const HybridSystem& system,const HybridRequest& request,std::span<const HybridPath> paths,
     std::span<const HybridPathProgram> programs,
     std::span<const HybridPathOptimalFaceCandidate> candidates,NumericalPolicy policy,
     std::stop_token cancellation) const {
     if(cancellation.stop_requested())
         return OperationStopped{StopReason::cancelled,
-            "Two-stage scalar interval verification cancelled before traversal"};
+            "Scalar interval verification cancelled before traversal"};
     if(!std::isfinite(policy.absolute_tolerance)||!std::isfinite(policy.relative_tolerance)||
        policy.absolute_tolerance<0||policy.relative_tolerance<0)
-        return Diagnostics{{DiagnosticCode::invalid_input,"hybrid.verification.two_stage_policy",
+        return Diagnostics{{DiagnosticCode::invalid_input,"hybrid.verification.scalar_parameter_policy",
             "Numerical tolerances must be finite and nonnegative"}};
     const auto profile_diagnostics=check_hybrid_profile(system,request);
     if(!profile_diagnostics.empty()) return profile_diagnostics;
-    if(system.horizon!=2)
-        return Diagnostics{{DiagnosticCode::unsupported,"hybrid.verification.two_stage_horizon",
-            "TwoStageScalarIntervalHybridFamilyVerifier supports horizon two only"}};
+    if(system.horizon==0||system.horizon>(std::numeric_limits<std::size_t>::max()-1)/3)
+        return Diagnostics{{DiagnosticCode::unsupported,"hybrid.verification.scalar_parameter_horizon",
+            "SingleParameterScalarIntervalHybridFamilyVerifier requires a representable positive horizon"}};
+    const std::size_t relation_width=1+3*system.horizon;
     auto inventory=detail::independently_enumerate_paths(system,request,paths.size(),
         std::max<std::size_t>(64,(system.edges.size()+1)*16),
         [&]{return cancellation.stop_requested();});
     if(cancellation.stop_requested()||inventory.cancelled)
         return OperationStopped{StopReason::cancelled,
-            "Two-stage scalar interval verification cancelled during path traversal"};
+            "Scalar interval verification cancelled during path traversal"};
     if(inventory.resource_limit)
-        return Diagnostics{{DiagnosticCode::unsupported,"hybrid.verification.two_stage_path_limit",
+        return Diagnostics{{DiagnosticCode::unsupported,"hybrid.verification.scalar_parameter_path_limit",
             "Independent path inventory exceeded its bounded traversal"}};
     if(inventory.paths!=std::vector<HybridPath>(paths.begin(),paths.end()))
-        return Diagnostics{{DiagnosticCode::evidence_mismatch,"hybrid.verification.two_stage_paths",
+        return Diagnostics{{DiagnosticCode::evidence_mismatch,"hybrid.verification.scalar_parameter_paths",
             "Independent path traversal disagrees with the supplied path inventory"}};
     if(programs.size()!=paths.size())
-        return Diagnostics{{DiagnosticCode::evidence_mismatch,"hybrid.verification.two_stage_programs",
+        return Diagnostics{{DiagnosticCode::evidence_mismatch,"hybrid.verification.scalar_parameter_programs",
             "A branch program is required for every enumerated path"}};
 
-    std::vector<TwoStageScalarBranch> evaluated;
+    std::vector<ScalarParameterBranch> evaluated;
     evaluated.reserve(paths.size());
     std::optional<double> global_minimum;
     bool unsupported=false;
     for(const auto& path:paths) {
         if(cancellation.stop_requested())
             return OperationStopped{StopReason::cancelled,
-                "Two-stage scalar interval verification cancelled between branches"};
-        auto branch=evaluate_two_stage_scalar(system,request,path,cancellation);
+                "Scalar interval verification cancelled between branches"};
+        auto branch=evaluate_scalar_parameter_path(system,request,path,cancellation);
         if(cancellation.stop_requested())
             return OperationStopped{StopReason::cancelled,
-                "Two-stage scalar interval verification cancelled during branch reconstruction"};
-        if(branch.state==TwoStageScalarBranch::State::unsupported) unsupported=true;
-        if(branch.state==TwoStageScalarBranch::State::feasible&&
+                "Scalar interval verification cancelled during branch reconstruction"};
+        if(branch.state==ScalarParameterBranch::State::unsupported) unsupported=true;
+        if(branch.state==ScalarParameterBranch::State::feasible&&
            (!global_minimum||branch.minimum<*global_minimum)) global_minimum=branch.minimum;
         evaluated.push_back(std::move(branch));
     }
 
-    HybridFamilyVerificationReport report{"csl.hybrid.two-stage-scalar-interval","1",policy,
+    HybridFamilyVerificationReport report{"csl.hybrid.scalar-single-parameter-interval","1",policy,
         Assurance::numerical,std::vector<HybridPath>(paths.begin(),paths.end()),{},
         HybridVerificationStatus::not_checked,HybridVerificationStatus::not_checked};
     report.branches.reserve(paths.size());
@@ -1086,23 +1127,23 @@ HybridFamilyVerificationResult TwoStageScalarIntervalHybridFamilyVerifier::verif
     for(std::size_t i=0;i<paths.size();++i) {
         if(cancellation.stop_requested())
             return OperationStopped{StopReason::cancelled,
-                "Two-stage scalar interval verification cancelled while checking branch evidence"};
+                "Scalar interval verification cancelled while checking branch evidence"};
         const auto& branch=evaluated[i];
         HybridPathVerificationRecord record{};
         record.path=paths[i];
         const auto candidate=std::find_if(candidates.begin(),candidates.end(),
             [&](const auto& item){return item.path==paths[i];});
-        if(branch.state==TwoStageScalarBranch::State::unsupported) {
+        if(branch.state==ScalarParameterBranch::State::unsupported) {
             record.feasibility=HybridVerificationStatus::unsupported;
             record.objective_optimality=HybridVerificationStatus::unsupported;
             record.continuous_coverage=HybridVerificationStatus::unsupported;
             record.diagnostics.push_back({DiagnosticCode::unsupported,
-                "hybrid.verification.two_stage_domain",branch.reason});
+                "hybrid.verification.scalar_parameter_domain",branch.reason});
             family_covered=false;
             coverage_unsupported=true;
-        } else if(branch.state==TwoStageScalarBranch::State::infeasible) {
+        } else if(branch.state==ScalarParameterBranch::State::infeasible) {
             const auto program_representation=programs[i].joint_relation.representation();
-            const bool explicitly_empty=programs[i].joint_relation.metadata()->set.dimension==7&&
+            const bool explicitly_empty=programs[i].joint_relation.metadata()->set.dimension==relation_width&&
                 std::holds_alternative<sets::EmptyRepresentation>(program_representation);
             if(explicitly_empty) {
                 record.feasibility=HybridVerificationStatus::refuted;
@@ -1120,13 +1161,13 @@ HybridFamilyVerificationResult TwoStageScalarIntervalHybridFamilyVerifier::verif
                 coverage_unsupported=true;
                 family_covered=false;
                 record.diagnostics.push_back({DiagnosticCode::unsupported,
-                    "hybrid.verification.two_stage_empty_relation",
+                    "hybrid.verification.scalar_parameter_empty_relation",
                     "Infeasible scalar branch is not represented by an explicit empty relation"});
             }
             if(candidate!=candidates.end()) {
                 family_covered=false;
                 record.diagnostics.push_back({DiagnosticCode::evidence_mismatch,
-                    "hybrid.verification.two_stage_infeasible_face",
+                    "hybrid.verification.scalar_parameter_infeasible_face",
                     "A candidate face is supplied for an independently infeasible edge path"});
             }
         } else {
@@ -1140,27 +1181,27 @@ HybridFamilyVerificationResult TwoStageScalarIntervalHybridFamilyVerifier::verif
                 std::get_if<LinearTerminal>(&objective->objective);
             bool relation_cancelled=false,relation_exactness=true;
             const bool program_domain=relation_domain_supported_for_width(
-                programs[i].joint_relation,7,programs[i].relation_limits);
+                programs[i].joint_relation,relation_width,programs[i].relation_limits);
             const bool program_valid=program_domain&&linear&&programs[i].path==paths[i]&&
                 relation_is_parameter_interval(programs[i].joint_relation,branch.base,
                     branch.direction,branch.parameter_interval,programs[i].relation_limits,
                     cancellation,relation_cancelled,relation_exactness)&&
-                two_stage_program_objective_matches(programs[i],7,linear->coefficients[0],
+                scalar_parameter_program_objective_matches(programs[i],relation_width,linear->coefficients[0],
                     linear->offset,policy);
             if(cancellation.stop_requested())
                 return OperationStopped{StopReason::cancelled,
-                    "Two-stage scalar interval verification cancelled while checking a program relation"};
+                    "Scalar interval verification cancelled while checking a program relation"};
             if(!program_valid) {
                 family_covered=false;
                 if(program_domain&&relation_exactness) {
                     record.diagnostics.push_back({DiagnosticCode::evidence_mismatch,
-                        "hybrid.verification.two_stage_program",
+                        "hybrid.verification.scalar_parameter_program",
                         "Program relation or lifted objective disagrees with the independent reconstruction"});
                 } else {
                     record.continuous_coverage=HybridVerificationStatus::unsupported;
                     coverage_unsupported=true;
                     record.diagnostics.push_back({DiagnosticCode::unsupported,
-                        "hybrid.verification.two_stage_program_domain",
+                        "hybrid.verification.scalar_parameter_program_domain",
                         "Program relation is outside the verifier's supported representation, exact arithmetic, or resource limits"});
                 }
             }
@@ -1169,7 +1210,7 @@ HybridFamilyVerificationResult TwoStageScalarIntervalHybridFamilyVerifier::verif
             if(optimal&&unsupported) {
                 record.objective_optimality=HybridVerificationStatus::unsupported;
                 record.diagnostics.push_back({DiagnosticCode::unsupported,
-                    "hybrid.verification.two_stage_global_optimum",
+                    "hybrid.verification.scalar_parameter_global_optimum",
                     "An unsupported branch could change the global optimum"});
             }
             bool covered=program_valid&&!optimal;
@@ -1208,33 +1249,33 @@ HybridFamilyVerificationResult TwoStageScalarIntervalHybridFamilyVerifier::verif
                         anchor_matches=anchor_matches&&same(candidate->anchor[j],expected_anchor[j],policy);
                 }
                 const bool face_domain=relation_domain_supported_for_width(
-                    candidate->relation,7,programs[i].relation_limits);
+                    candidate->relation,relation_width,programs[i].relation_limits);
                 covered=program_valid&&solver_matches&&anchor_matches&&face_domain&&
                     relation_is_parameter_interval(candidate->relation,branch.base,
                         branch.direction,minimizing_interval,programs[i].relation_limits,
                         cancellation,relation_cancelled,relation_exactness);
                 if(cancellation.stop_requested())
                     return OperationStopped{StopReason::cancelled,
-                        "Two-stage scalar interval verification cancelled while checking a candidate face"};
+                        "Scalar interval verification cancelled while checking a candidate face"};
                 if(covered) record.continuous_coverage=HybridVerificationStatus::established;
                 else if(!face_domain||!relation_exactness) {
                     record.continuous_coverage=HybridVerificationStatus::unsupported;
                     coverage_unsupported=true;
                     record.diagnostics.push_back({DiagnosticCode::unsupported,
-                        "hybrid.verification.two_stage_face_domain",
+                        "hybrid.verification.scalar_parameter_face_domain",
                         "Candidate relation is outside the supported representation, exact arithmetic, or resource limits"});
                 } else record.diagnostics.push_back({DiagnosticCode::evidence_mismatch,
-                    "hybrid.verification.two_stage_face",
+                    "hybrid.verification.scalar_parameter_face",
                     "Optimal candidate does not equal the independently reconstructed minimizer family"});
             } else if(optimal) {
                 covered=false;
                 record.diagnostics.push_back({DiagnosticCode::evidence_mismatch,
-                    "hybrid.verification.two_stage_missing_face",
+                    "hybrid.verification.scalar_parameter_missing_face",
                     "An optimal edge path has no candidate continuous minimizer relation"});
             } else if(candidate!=candidates.end()) {
                 covered=false;
                 record.diagnostics.push_back({DiagnosticCode::evidence_mismatch,
-                    "hybrid.verification.two_stage_suboptimal_face",
+                    "hybrid.verification.scalar_parameter_suboptimal_face",
                     "A candidate face is supplied for a globally suboptimal edge path"});
             }
             if(record.objective_optimality==HybridVerificationStatus::unsupported) {
@@ -1264,8 +1305,37 @@ HybridFamilyVerificationResult TwoStageScalarIntervalHybridFamilyVerifier::verif
     }
     if(cancellation.stop_requested())
         return OperationStopped{StopReason::cancelled,
-            "Two-stage scalar interval verification cancelled before report publication"};
+            "Scalar interval verification cancelled before report publication"};
     return report;
+}
+
+HybridFamilyVerificationCapabilities TwoStageScalarIntervalHybridFamilyVerifier::capabilities() const noexcept {
+    return SingleParameterScalarIntervalHybridFamilyVerifier{}.capabilities();
+}
+
+HybridFamilyVerificationPreflightResult TwoStageScalarIntervalHybridFamilyVerifier::preflight(
+    const HybridSystem& system,const HybridRequest& request,std::span<const HybridPath> paths,
+    std::stop_token cancellation) const {
+    if(system.horizon!=2)
+        return Diagnostics{{DiagnosticCode::unsupported,"hybrid.verification.two_stage_horizon",
+            "TwoStageScalarIntervalHybridFamilyVerifier requires a two-stage system"}};
+    return SingleParameterScalarIntervalHybridFamilyVerifier{}.preflight(
+        system,request,paths,cancellation);
+}
+
+HybridFamilyVerificationResult TwoStageScalarIntervalHybridFamilyVerifier::verify(
+    const HybridSystem& system,const HybridRequest& request,std::span<const HybridPath> paths,
+    std::span<const HybridPathProgram> programs,
+    std::span<const HybridPathOptimalFaceCandidate> candidates,NumericalPolicy policy,
+    std::stop_token cancellation) const {
+    if(system.horizon!=2)
+        return Diagnostics{{DiagnosticCode::unsupported,"hybrid.verification.two_stage_horizon",
+            "TwoStageScalarIntervalHybridFamilyVerifier requires a two-stage system"}};
+    auto result=SingleParameterScalarIntervalHybridFamilyVerifier{}.verify(system,request,paths,
+        programs,candidates,policy,cancellation);
+    if(auto* report=std::get_if<HybridFamilyVerificationReport>(&result))
+        report->verifier_id="csl.hybrid.two-stage-scalar-interval";
+    return result;
 }
 
 } // namespace csl::synthesis

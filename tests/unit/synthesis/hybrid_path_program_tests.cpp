@@ -8,6 +8,7 @@
 #include <algorithm>
 #include <array>
 #include <limits>
+#include <string_view>
 
 using namespace csl;
 using namespace csl::synthesis;
@@ -226,7 +227,11 @@ model::HybridPath example_path() {
 class RejectingTrajectoryAdapter final : public HybridDirectTrajectoryAdapter {
 public:
     mutable int calls{};
-    HybridDirectTrajectoryCapabilities capabilities() const noexcept override { return {true,true,true,Assurance::numerical}; }
+    mutable int capability_calls{};
+    HybridDirectTrajectoryCapabilities capabilities() const noexcept override {
+        ++capability_calls;
+        return {true,true,true,Assurance::numerical};
+    }
     HybridPathProgramResult build_path(const model::HybridSystem&,
         const model::HybridRequest&, const model::HybridPath&, ProblemId,
         model::HybridRelationLimits, optimization::ObjectivePolicy,
@@ -234,6 +239,159 @@ public:
         ++calls;
         return Diagnostics{{DiagnosticCode::unsupported,"fixture.hybrid_adapter","fixture rejection"}};
     }
+};
+
+class LinearOnlyRejectingTrajectoryAdapter final : public HybridDirectTrajectoryAdapter {
+public:
+    mutable int calls{};
+    HybridDirectTrajectoryCapabilities capabilities() const noexcept override {
+        return {true,true,false,Assurance::numerical};
+    }
+    HybridPathProgramResult build_path(const model::HybridSystem&,
+        const model::HybridRequest&, const model::HybridPath&, ProblemId,
+        model::HybridRelationLimits, optimization::ObjectivePolicy,
+        std::stop_token) const override {
+        ++calls;
+        return Diagnostics{{DiagnosticCode::unsupported,"fixture.hybrid_adapter","fixture rejection"}};
+    }
+};
+
+class RejectingTrajectoryPreflightAdapter final : public HybridDirectTrajectoryAdapter {
+public:
+    int corruption{3};
+    mutable int preflight_calls{};
+    mutable int capability_calls{};
+    mutable int build_calls{};
+    HybridDirectTrajectoryPreflightResult preflight(const model::HybridSystem&,
+        const model::HybridRequest&,std::span<const model::HybridPath> paths,
+        model::HybridRelationLimits limits,optimization::ObjectivePolicy,
+        std::stop_token) const override {
+        ++preflight_calls;
+        auto path=paths.back();
+        auto reported_limits=limits;
+        if(corruption==0) path.edges.front().value+="-wrong";
+        if(corruption==1) ++reported_limits.max_rows;
+        Diagnostic diagnostic{DiagnosticCode::unsupported,"fixture.trajectory.preflight",
+            "fixture rejects a later path operation"};
+        if(corruption==2) diagnostic={DiagnosticCode::unsupported,"",""};
+        return HybridDirectTrajectoryPreflightFailure{std::move(path),reported_limits,{},
+            std::move(diagnostic)};
+    }
+    HybridDirectTrajectoryCapabilities capabilities() const noexcept override {
+        ++capability_calls;
+        return {true,true,true,Assurance::numerical};
+    }
+    HybridPathProgramResult build_path(const model::HybridSystem&,
+        const model::HybridRequest&,const model::HybridPath&,ProblemId,
+        model::HybridRelationLimits,optimization::ObjectivePolicy,
+        std::stop_token) const override {
+        ++build_calls;
+        return Diagnostics{{DiagnosticCode::unsupported,"fixture.trajectory","unexpected build"}};
+    }
+};
+
+class CancellingTrajectoryPreflightAdapter final : public HybridDirectTrajectoryAdapter {
+public:
+    explicit CancellingTrajectoryPreflightAdapter(std::stop_source& cancellation)
+        : cancellation_(&cancellation) {}
+    mutable int capability_calls{};
+    mutable int build_calls{};
+    HybridDirectTrajectoryPreflightResult preflight(const model::HybridSystem&,
+        const model::HybridRequest&,std::span<const model::HybridPath>,
+        model::HybridRelationLimits,optimization::ObjectivePolicy,
+        std::stop_token) const override {
+        cancellation_->request_stop();
+        return std::monostate{};
+    }
+    HybridDirectTrajectoryCapabilities capabilities() const noexcept override {
+        ++capability_calls;
+        return {true,true,true,Assurance::numerical};
+    }
+    HybridPathProgramResult build_path(const model::HybridSystem&,
+        const model::HybridRequest&,const model::HybridPath&,ProblemId,
+        model::HybridRelationLimits,optimization::ObjectivePolicy,
+        std::stop_token) const override {
+        ++build_calls;
+        return Diagnostics{{DiagnosticCode::unsupported,"fixture.trajectory","unexpected build"}};
+    }
+private:
+    std::stop_source* cancellation_;
+};
+
+class AdmittingTrajectoryPreflightAdapter final : public HybridDirectTrajectoryAdapter {
+public:
+    mutable int preflight_calls{};
+    mutable int capability_calls{};
+    mutable int build_calls{};
+    HybridDirectTrajectoryPreflightResult preflight(const model::HybridSystem&,
+        const model::HybridRequest&,std::span<const model::HybridPath>,
+        model::HybridRelationLimits,optimization::ObjectivePolicy,
+        std::stop_token) const override {
+        ++preflight_calls;
+        return std::monostate{};
+    }
+    HybridDirectTrajectoryCapabilities capabilities() const noexcept override {
+        ++capability_calls;
+        return {true,true,true,Assurance::numerical};
+    }
+    HybridPathProgramResult build_path(const model::HybridSystem&,
+        const model::HybridRequest&,const model::HybridPath&,ProblemId,
+        model::HybridRelationLimits,optimization::ObjectivePolicy,
+        std::stop_token) const override {
+        ++build_calls;
+        return Diagnostics{{DiagnosticCode::unsupported,"fixture.alternate_representation",
+            "fixture stopped after custom operation admission"}};
+    }
+};
+
+class InventoryOnlyTrajectoryPreflightAdapter final : public HybridDirectTrajectoryAdapter {
+public:
+    mutable int preflight_calls{};
+    mutable int capability_calls{};
+    mutable int build_calls{};
+    HybridDirectTrajectoryPreflightResult preflight(const model::HybridSystem&,
+        const model::HybridRequest&,std::span<const model::HybridPath> paths,
+        model::HybridRelationLimits limits,optimization::ObjectivePolicy,
+        std::stop_token) const override {
+        ++preflight_calls;
+        if(paths.size()==2) return std::monostate{};
+        const auto path=paths.empty()?model::HybridPath{}:paths.front();
+        return HybridDirectTrajectoryPreflightFailure{path,limits,{},Diagnostic{
+            DiagnosticCode::unsupported,"fixture.inventory_only",
+            "preflight requires the complete path inventory"}};
+    }
+    HybridDirectTrajectoryCapabilities capabilities() const noexcept override {
+        ++capability_calls;
+        return {true,true,true,Assurance::numerical};
+    }
+    HybridPathProgramResult build_path(const model::HybridSystem&,
+        const model::HybridRequest&,const model::HybridPath&,ProblemId,
+        model::HybridRelationLimits,optimization::ObjectivePolicy,
+        std::stop_token) const override {
+        ++build_calls;
+        return Diagnostics{{DiagnosticCode::unsupported,"fixture.inventory_build",
+            "fixture stopped after full inventory admission"}};
+    }
+};
+
+class CancellingCapabilityTrajectoryAdapter final : public HybridDirectTrajectoryAdapter {
+public:
+    explicit CancellingCapabilityTrajectoryAdapter(std::stop_source& cancellation)
+        : cancellation_(&cancellation) {}
+    mutable int calls{};
+    HybridDirectTrajectoryCapabilities capabilities() const noexcept override {
+        cancellation_->request_stop();
+        return {true,true,true,Assurance::numerical};
+    }
+    HybridPathProgramResult build_path(const model::HybridSystem&,
+        const model::HybridRequest&, const model::HybridPath&, ProblemId,
+        model::HybridRelationLimits, optimization::ObjectivePolicy,
+        std::stop_token) const override {
+        ++calls;
+        return Diagnostics{{DiagnosticCode::unsupported,"fixture.hybrid_adapter","fixture rejection"}};
+    }
+private:
+    std::stop_source* cancellation_;
 };
 
 class MismatchingTrajectoryAdapter final : public HybridDirectTrajectoryAdapter {
@@ -254,7 +412,17 @@ public:
 class RejectingReachabilityAdapter final : public HybridReachabilityAdapter {
 public:
     mutable int calls{};
-    HybridReachabilityCapabilities capabilities() const noexcept override { return {true,Assurance::numerical}; }
+    mutable int capability_calls{};
+    HybridReachabilityCapabilities capabilities() const noexcept override {
+        ++capability_calls;
+        return {true,Assurance::numerical};
+    }
+    HybridReachabilityPreflightResult preflight(const model::HybridSystem& system,
+        const model::HybridRequest& request,const model::HybridPath& path,
+        model::HybridRelationLimits limits,std::stop_token cancellation) const override {
+        return model::preflight_hybrid_path_relations(system,request,
+            std::span<const model::HybridPath>(&path,1),limits,cancellation);
+    }
     HybridPathReachabilityResult compose_path(const model::HybridSystem&,
         const model::HybridRequest&,const model::HybridPath& path,
         model::HybridRelationLimits limits,std::stop_token) const override {
@@ -264,10 +432,89 @@ public:
     }
 };
 
+class DefaultPreflightReachabilityAdapter final : public HybridReachabilityAdapter {
+public:
+    mutable int calls{};
+    mutable int capability_calls{};
+    HybridReachabilityCapabilities capabilities() const noexcept override {
+        ++capability_calls;
+        return {true,Assurance::numerical};
+    }
+    HybridPathReachabilityResult compose_path(const model::HybridSystem&,
+        const model::HybridRequest&,const model::HybridPath& path,
+        model::HybridRelationLimits limits,std::stop_token) const override {
+        ++calls;
+        return model::HybridPathCompositionFailureReport{path,limits,{},
+            Diagnostic{DiagnosticCode::unsupported,"fixture.reachability","fixture rejection"}};
+    }
+};
+
+class MisreportingReachabilityPreflightAdapter final : public HybridReachabilityAdapter {
+public:
+    int corruption{};
+    mutable int capability_calls{};
+    mutable int calls{};
+    HybridReachabilityCapabilities capabilities() const noexcept override {
+        ++capability_calls;
+        return {true,Assurance::numerical};
+    }
+    HybridReachabilityPreflightResult preflight(const model::HybridSystem&,
+        const model::HybridRequest&,const model::HybridPath& path,
+        model::HybridRelationLimits limits,std::stop_token) const override {
+        auto reported_path=path;
+        auto reported_limits=limits;
+        if(corruption==0) reported_path.edges.front().value+="-wrong";
+        else ++reported_limits.max_rows;
+        return model::HybridPathCompositionFailureReport{std::move(reported_path),
+            reported_limits,{},Diagnostic{DiagnosticCode::unsupported,
+                "fixture.reachability.preflight","fixture preflight rejection"}};
+    }
+    HybridPathReachabilityResult compose_path(const model::HybridSystem&,
+        const model::HybridRequest&,const model::HybridPath& path,
+        model::HybridRelationLimits limits,std::stop_token) const override {
+        ++calls;
+        return model::HybridPathCompositionFailureReport{path,limits,{},
+            Diagnostic{DiagnosticCode::unsupported,"fixture.reachability","not expected"}};
+    }
+};
+
+class CancellingReachabilityPreflightAdapter final : public HybridReachabilityAdapter {
+public:
+    explicit CancellingReachabilityPreflightAdapter(std::stop_source& cancellation)
+        : cancellation_(&cancellation) {}
+    mutable int capability_calls{};
+    mutable int calls{};
+    HybridReachabilityCapabilities capabilities() const noexcept override {
+        ++capability_calls;
+        return {true,Assurance::numerical};
+    }
+    HybridReachabilityPreflightResult preflight(const model::HybridSystem&,
+        const model::HybridRequest&,const model::HybridPath&,
+        model::HybridRelationLimits,std::stop_token) const override {
+        cancellation_->request_stop();
+        return std::monostate{};
+    }
+    HybridPathReachabilityResult compose_path(const model::HybridSystem&,
+        const model::HybridRequest&,const model::HybridPath& path,
+        model::HybridRelationLimits limits,std::stop_token) const override {
+        ++calls;
+        return model::HybridPathCompositionFailureReport{path,limits,{},
+            Diagnostic{DiagnosticCode::unsupported,"fixture.reachability","not expected"}};
+    }
+private:
+    std::stop_source* cancellation_;
+};
+
 class MisreportingReachabilityAdapter final : public HybridReachabilityAdapter {
 public:
     int corruption{};
     HybridReachabilityCapabilities capabilities() const noexcept override { return {true,Assurance::numerical}; }
+    HybridReachabilityPreflightResult preflight(const model::HybridSystem& system,
+        const model::HybridRequest& request,const model::HybridPath& path,
+        model::HybridRelationLimits limits,std::stop_token cancellation) const override {
+        return model::preflight_hybrid_path_relations(system,request,
+            std::span<const model::HybridPath>(&path,1),limits,cancellation);
+    }
     HybridPathReachabilityResult compose_path(const model::HybridSystem& system,
         const model::HybridRequest& request,const model::HybridPath& path,
         model::HybridRelationLimits limits,std::stop_token cancellation) const override {
@@ -292,13 +539,24 @@ public:
 class FixtureHybridFamilyVerifier final : public HybridFamilyVerificationAdapter {
 public:
     mutable int calls{};
+    mutable int preflight_calls{};
+    mutable int capability_calls{};
     bool omit_last_branch{};
     bool claim_established_aggregates{};
     bool claim_coverage_only{};
     bool mark_all_branches_refuted{};
     bool inject_candidate_providers{};
     HybridFamilyVerificationCapabilities capabilities() const noexcept override {
+        ++capability_calls;
         return {true,true,true,Assurance::numerical};
+    }
+    HybridFamilyVerificationPreflightResult preflight(const model::HybridSystem&,
+        const model::HybridRequest&,std::span<const model::HybridPath>,
+        std::stop_token cancellation) const override {
+        ++preflight_calls;
+        if(cancellation.stop_requested())
+            return OperationStopped{StopReason::cancelled,"fixture preflight cancelled"};
+        return std::monostate{};
     }
     HybridFamilyVerificationResult verify(const model::HybridSystem&,
         const model::HybridRequest&,std::span<const model::HybridPath> paths,
@@ -327,6 +585,19 @@ public:
         return HybridFamilyVerificationReport{"fixture.hybrid.verifier","1",policy,
             Assurance::numerical,std::move(inventory),std::move(branches),
             global,coverage};
+    }
+};
+
+class DefaultPreflightHybridFamilyVerifier final : public HybridFamilyVerificationAdapter {
+public:
+    HybridFamilyVerificationCapabilities capabilities() const noexcept override {
+        return {true,true,true,Assurance::numerical};
+    }
+    HybridFamilyVerificationResult verify(const model::HybridSystem&,
+        const model::HybridRequest&,std::span<const model::HybridPath>,
+        std::span<const HybridPathProgram>,std::span<const HybridPathOptimalFaceCandidate>,
+        NumericalPolicy,std::stop_token) const override {
+        return Diagnostics{{DiagnosticCode::unsupported,"fixture.hybrid.verifier","not used"}};
     }
 };
 
@@ -364,6 +635,17 @@ SetHandle interval(std::string id,double lower,double upper) {
     auto data=sets::make_h({SetId{std::move(id)},1,{"guard-coordinate"}},
         {std::get<numeric::MatrixView>(matrix),std::get<numeric::VectorView>(bounds),
          std::get<numeric::MatrixView>(equalities),std::get<numeric::VectorView>(rhs)});
+    REQUIRE(std::holds_alternative<sets::SetData>(data));
+    return std::get<sets::SetData>(std::move(data)).as_handle();
+}
+
+SetHandle vertex_guard(std::string id) {
+    const auto vertices=numeric::snapshot(Matrix{1,1,{0}});
+    const auto rays=numeric::snapshot(Matrix{0,1,{}});
+    REQUIRE(std::holds_alternative<numeric::MatrixView>(vertices));
+    REQUIRE(std::holds_alternative<numeric::MatrixView>(rays));
+    auto data=sets::make_v({SetId{std::move(id)},1,{"guard-coordinate"}},
+        {std::get<numeric::MatrixView>(vertices),std::get<numeric::MatrixView>(rays)});
     REQUIRE(std::holds_alternative<sets::SetData>(data));
     return std::get<sets::SetData>(std::move(data)).as_handle();
 }
@@ -586,6 +868,137 @@ TEST_CASE("hybrid portfolio builder dispatches through the injected direct traje
     CHECK(adapter.calls==1);
 }
 
+TEST_CASE("hybrid portfolio preflights all terminal objective capabilities before adapter dispatch") {
+    auto system=example_system();
+    auto second_terminal=system.modes.back();
+    second_terminal.id={"target-quadratic"};
+    system.modes.push_back(std::move(second_terminal));
+    auto second_edge=system.edges.front();
+    second_edge.id={"switch-quadratic"};
+    second_edge.target={"target-quadratic"};
+    system.edges.push_back(std::move(second_edge));
+
+    auto request=example_request();
+    request.allowed_terminal_modes.push_back({"target-quadratic"});
+    request.terminal_objectives.push_back({{"target-quadratic"},
+        QuadraticTerminal{Matrix{2,2,{1,0,0,1}},Vector{0,0},0},"energy","J"});
+
+    LinearOnlyRejectingTrajectoryAdapter adapter;
+    const auto result=build_hybrid_portfolio_programs(adapter,system,request,
+        {"hybrid-problem"},{1,8},{16,64,1024});
+    REQUIRE(std::holds_alternative<Diagnostics>(result));
+    CHECK(std::get<Diagnostics>(result).front().code==DiagnosticCode::unsupported);
+    CHECK(std::get<Diagnostics>(result).front().field=="hybrid.portfolio.objective");
+    CHECK(adapter.calls==0);
+
+    FixtureHybridFamilyVerifier verifier;
+    LinearOnlyRejectingTrajectoryAdapter verified_adapter;
+    const auto verified=build_hybrid_portfolio_programs_with_verifier(verifier,verified_adapter,
+        system,request,{"hybrid-problem"},{1,8},{16,64,1024});
+    REQUIRE(std::holds_alternative<Diagnostics>(verified));
+    CHECK(std::get<Diagnostics>(verified).front().code==DiagnosticCode::unsupported);
+    CHECK(std::get<Diagnostics>(verified).front().field=="hybrid.portfolio.objective");
+    CHECK(verified_adapter.calls==0);
+}
+
+TEST_CASE("hybrid portfolio capability preflight honors cancellation before scanning paths") {
+    std::stop_source cancellation;
+    CancellingCapabilityTrajectoryAdapter adapter{cancellation};
+    const auto result=build_hybrid_portfolio_programs(adapter,example_system(),example_request(),
+        {"hybrid-problem"},{1,8},{16,64,1024},{},cancellation.get_token());
+    REQUIRE(std::holds_alternative<OperationStopped>(result));
+    CHECK(std::get<OperationStopped>(result).reason==StopReason::cancelled);
+    CHECK(adapter.calls==0);
+}
+
+TEST_CASE("hybrid portfolio preflights objective policy before adapter dispatch") {
+    RejectingTrajectoryAdapter validated_adapter;
+    optimization::ObjectivePolicy validated_policy;
+    validated_policy.assurance=Assurance::validated;
+    const auto validated=build_hybrid_portfolio_programs(validated_adapter,
+        example_system(),example_request(),{"hybrid-problem"},{1,8},{16,64,1024},
+        validated_policy);
+    REQUIRE(std::holds_alternative<Diagnostics>(validated));
+    CHECK(std::get<Diagnostics>(validated).front().code==DiagnosticCode::unsupported);
+    CHECK(std::get<Diagnostics>(validated).front().field=="hybrid.adapter.objective_policy");
+    CHECK(validated_adapter.calls==0);
+    CHECK(validated_adapter.capability_calls==0);
+
+    FixtureHybridFamilyVerifier verifier;
+    RejectingTrajectoryAdapter verified_adapter;
+    const auto verified=build_hybrid_portfolio_programs_with_verifier(verifier,verified_adapter,
+        example_system(),example_request(),{"hybrid-problem"},{1,8},{16,64,1024},
+        validated_policy);
+    REQUIRE(std::holds_alternative<Diagnostics>(verified));
+    CHECK(std::get<Diagnostics>(verified).front().code==DiagnosticCode::unsupported);
+    CHECK(std::get<Diagnostics>(verified).front().field=="hybrid.adapter.objective_policy");
+    CHECK(verified_adapter.calls==0);
+    CHECK(verified_adapter.capability_calls==0);
+    CHECK(verifier.capability_calls==0);
+    CHECK(verifier.preflight_calls==0);
+
+    RejectingTrajectoryAdapter invalid_tolerance_adapter;
+    optimization::ObjectivePolicy invalid_tolerance_policy;
+    invalid_tolerance_policy.numerical.absolute_tolerance=
+        std::numeric_limits<double>::quiet_NaN();
+    const auto invalid_tolerance=build_hybrid_portfolio_programs(invalid_tolerance_adapter,
+        example_system(),example_request(),{"hybrid-problem"},{1,8},{16,64,1024},
+        invalid_tolerance_policy);
+    REQUIRE(std::holds_alternative<Diagnostics>(invalid_tolerance));
+    CHECK(std::get<Diagnostics>(invalid_tolerance).front().code==DiagnosticCode::invalid_input);
+    CHECK(std::get<Diagnostics>(invalid_tolerance).front().field=="hybrid.adapter.objective_policy");
+    CHECK(invalid_tolerance_adapter.calls==0);
+    CHECK(invalid_tolerance_adapter.capability_calls==0);
+}
+
+TEST_CASE("hybrid path builder validates objective policy before adapter dispatch") {
+    RejectingTrajectoryAdapter validated_adapter;
+    optimization::ObjectivePolicy validated_policy;
+    validated_policy.assurance=Assurance::validated;
+    const auto validated=build_hybrid_path_program(validated_adapter,example_system(),
+        example_request(),example_path(),{"hybrid-problem"},{16,64,1024},validated_policy);
+    REQUIRE(std::holds_alternative<Diagnostics>(validated));
+    CHECK(std::get<Diagnostics>(validated).front().code==DiagnosticCode::unsupported);
+    CHECK(std::get<Diagnostics>(validated).front().field=="hybrid.adapter.objective_policy");
+    CHECK(validated_adapter.calls==0);
+    CHECK(validated_adapter.capability_calls==0);
+
+    RejectingTrajectoryAdapter invalid_tolerance_adapter;
+    optimization::ObjectivePolicy invalid_tolerance_policy;
+    invalid_tolerance_policy.numerical.absolute_tolerance=
+        std::numeric_limits<double>::quiet_NaN();
+    const auto invalid_tolerance=build_hybrid_path_program(invalid_tolerance_adapter,
+        example_system(),example_request(),example_path(),{"hybrid-problem"},
+        {16,64,1024},invalid_tolerance_policy);
+    REQUIRE(std::holds_alternative<Diagnostics>(invalid_tolerance));
+    CHECK(std::get<Diagnostics>(invalid_tolerance).front().code==DiagnosticCode::invalid_input);
+    CHECK(std::get<Diagnostics>(invalid_tolerance).front().field=="hybrid.adapter.objective_policy");
+    CHECK(invalid_tolerance_adapter.calls==0);
+    CHECK(invalid_tolerance_adapter.capability_calls==0);
+
+    RejectingTrajectoryAdapter unknown_assurance_adapter;
+    optimization::ObjectivePolicy unknown_assurance_policy;
+    unknown_assurance_policy.assurance=static_cast<Assurance>(255);
+    const auto unknown_assurance=build_hybrid_path_program(unknown_assurance_adapter,
+        example_system(),example_request(),example_path(),{"hybrid-problem"},
+        {16,64,1024},unknown_assurance_policy);
+    REQUIRE(std::holds_alternative<Diagnostics>(unknown_assurance));
+    CHECK(std::get<Diagnostics>(unknown_assurance).front().code==DiagnosticCode::invalid_input);
+    CHECK(std::get<Diagnostics>(unknown_assurance).front().field=="hybrid.adapter.objective_policy");
+    CHECK(unknown_assurance_adapter.calls==0);
+    CHECK(unknown_assurance_adapter.capability_calls==0);
+}
+
+TEST_CASE("hybrid path builder stops if adapter capabilities request cancellation") {
+    std::stop_source cancellation;
+    CancellingCapabilityTrajectoryAdapter adapter{cancellation};
+    const auto result=build_hybrid_path_program(adapter,example_system(),example_request(),
+        example_path(),{"hybrid-problem"},{16,64,1024},{},cancellation.get_token());
+    REQUIRE(std::holds_alternative<OperationStopped>(result));
+    CHECK(std::get<OperationStopped>(result).reason==StopReason::cancelled);
+    CHECK(adapter.calls==0);
+}
+
 TEST_CASE("hybrid path builder rejects an adapter result with mismatched branch identity") {
     MismatchingTrajectoryAdapter adapter;
     const auto result=build_hybrid_path_program(adapter,example_system(),example_request(),
@@ -654,6 +1067,68 @@ TEST_CASE("hybrid reachability boundary dispatches injected adapters and propaga
     CHECK(adapter.calls==1);
 }
 
+TEST_CASE("hybrid reachability preflights unsupported relations and limits before adapter calls") {
+    auto unsupported_system=example_system();
+    unsupported_system.edges.front().guards.front()=vertex_guard("unsupported-reachability-guard");
+    RejectingReachabilityAdapter unsupported_adapter;
+    const auto unsupported=compute_hybrid_path_reachability(unsupported_adapter,
+        unsupported_system,example_request(),example_path(),{16,64,1024});
+    REQUIRE(std::holds_alternative<model::HybridPathCompositionFailureReport>(unsupported));
+    const auto& unsupported_failure=
+        std::get<model::HybridPathCompositionFailureReport>(unsupported);
+    REQUIRE(std::holds_alternative<Diagnostic>(unsupported_failure.failure));
+    CHECK(std::get<Diagnostic>(unsupported_failure.failure).field=="hybrid.guard.representation");
+    CHECK(unsupported_adapter.capability_calls==0);
+    CHECK(unsupported_adapter.calls==0);
+
+    RejectingReachabilityAdapter limited_adapter;
+    const auto limited=compute_hybrid_path_reachability(limited_adapter,example_system(),
+        example_request(),example_path(),{1,64,1024});
+    REQUIRE(std::holds_alternative<model::HybridPathCompositionFailureReport>(limited));
+    const auto& limited_failure=std::get<model::HybridPathCompositionFailureReport>(limited);
+    REQUIRE(std::holds_alternative<Diagnostic>(limited_failure.failure));
+    CHECK(std::get<Diagnostic>(limited_failure.failure).field=="hybrid.relation.variables");
+    CHECK(limited_adapter.capability_calls==0);
+    CHECK(limited_adapter.calls==0);
+}
+
+TEST_CASE("reachability adapter default preflight fails closed before capability queries") {
+    DefaultPreflightReachabilityAdapter adapter;
+    const auto result=compute_hybrid_path_reachability(adapter,example_system(),
+        example_request(),example_path(),{16,64,1024});
+    REQUIRE(std::holds_alternative<Diagnostics>(result));
+    CHECK(std::get<Diagnostics>(result).front().field=="hybrid.reachability.preflight");
+    CHECK(adapter.capability_calls==0);
+    CHECK(adapter.calls==0);
+}
+
+TEST_CASE("reachability boundary validates preflight failure path and limits") {
+    for(const int corruption : {0,1}) {
+        MisreportingReachabilityPreflightAdapter adapter;
+        adapter.corruption=corruption;
+        const auto result=compute_hybrid_path_reachability(adapter,example_system(),
+            example_request(),example_path(),{16,64,1024});
+        REQUIRE(std::holds_alternative<Diagnostics>(result));
+        const auto& diagnostic=std::get<Diagnostics>(result).front();
+        if(corruption==0) CHECK(diagnostic.field=="hybrid.reachability.preflight_path");
+        else CHECK(diagnostic.field=="hybrid.reachability.preflight_limits");
+        CHECK(diagnostic.code==DiagnosticCode::evidence_mismatch);
+        CHECK(adapter.capability_calls==0);
+        CHECK(adapter.calls==0);
+    }
+}
+
+TEST_CASE("reachability boundary stops after a cancelling successful preflight") {
+    std::stop_source cancellation;
+    CancellingReachabilityPreflightAdapter adapter{cancellation};
+    const auto result=compute_hybrid_path_reachability(adapter,example_system(),
+        example_request(),example_path(),{16,64,1024},cancellation.get_token());
+    REQUIRE(std::holds_alternative<OperationStopped>(result));
+    CHECK(std::get<OperationStopped>(result).reason==StopReason::cancelled);
+    CHECK(adapter.capability_calls==0);
+    CHECK(adapter.calls==0);
+}
+
 TEST_CASE("hybrid reachability boundary rejects mismatched assurance and resource reports") {
     for(const int corruption : {0,1,2,3,4}) {
         MisreportingReachabilityAdapter adapter;
@@ -666,6 +1141,90 @@ TEST_CASE("hybrid reachability boundary rejects mismatched assurance and resourc
         else if(corruption==1) CHECK(field=="hybrid.reachability.limits");
         else CHECK(field=="hybrid.adapter.operations");
     }
+}
+
+TEST_CASE("verifier preflight rejects an unsupported domain before relation construction") {
+    OneStepScalarIntervalHybridFamilyVerifier verifier;
+    RejectingTrajectoryAdapter trajectory;
+    const auto result=build_hybrid_portfolio_programs_with_verifier(verifier,trajectory,
+        example_system(),example_request(),{"preflight-rejected"},{1,8},{16,64,1024});
+    REQUIRE(std::holds_alternative<Diagnostics>(result));
+    const auto& admission_error=std::get<Diagnostics>(result).front();
+    CHECK(admission_error.field=="hybrid.verification.scalar_interval_domain");
+    CHECK(admission_error.explanation.find("stage 0 edge switch")!=std::string::npos);
+    CHECK(trajectory.calls==0);
+
+    model::HybridMode source{{"preflight-source"},1,1,{"x"},{"u"}};
+    source.flow=LinearStage{Matrix{1,1,{1}},Matrix{1,1,{1}},Matrix{1,0,{}},Vector{0}};
+    source.control_sets={interval("preflight-supported-control",0,1)};
+    source.invariants={UniversalSet{1},UniversalSet{1}};
+    model::HybridMode target{{"preflight-target"},1,1,{"x"},{"u"}};
+    target.flow=LinearStage{Matrix{1,1,{1}},Matrix{1,1,{0}},Matrix{1,0,{}},Vector{0}};
+    target.control_sets={Singleton{{0}}};
+    target.invariants={UniversalSet{1},UniversalSet{1}};
+    const auto inequalities=numeric::snapshot(Matrix{0,2,{}});
+    const auto upper_bounds=numeric::snapshot_vector(Vector{});
+    const auto equalities=numeric::snapshot(Matrix{1,2,{1,-1}});
+    const auto equality_values=numeric::snapshot_vector(Vector{0});
+    REQUIRE(std::holds_alternative<numeric::MatrixView>(inequalities));
+    REQUIRE(std::holds_alternative<numeric::VectorView>(upper_bounds));
+    REQUIRE(std::holds_alternative<numeric::MatrixView>(equalities));
+    REQUIRE(std::holds_alternative<numeric::VectorView>(equality_values));
+    const auto identity_data=sets::make_h({{"preflight-identity-reset"},2,{"pre","post"}},
+        {std::get<numeric::MatrixView>(inequalities),std::get<numeric::VectorView>(upper_bounds),
+         std::get<numeric::MatrixView>(equalities),std::get<numeric::VectorView>(equality_values)});
+    REQUIRE(std::holds_alternative<sets::SetData>(identity_data));
+    model::HybridSystem supported_system{1,{source,target},
+        {{{"preflight-edge"},{"preflight-source"},{"preflight-target"},
+          {interval("preflight-supported-guard",0,1)},
+          {std::get<sets::SetData>(identity_data).as_handle()}}}};
+    model::HybridRequest supported_request{{{"preflight-source"},{0}},{{"preflight-target"}},
+        {{{"preflight-target"},LinearTerminal{{1},0},"terminal-state","units"}}};
+    const auto accepted=build_hybrid_portfolio_programs_with_verifier(verifier,trajectory,
+        supported_system,supported_request,{"preflight-accepted"},{1,8},{16,64,1024});
+    REQUIRE(std::holds_alternative<Diagnostics>(accepted));
+    CHECK(std::get<Diagnostics>(accepted).front().field=="fixture.hybrid_adapter");
+    CHECK(trajectory.calls==1);
+
+    auto [integral_system,integral_request]=exact_singleton_portfolio();
+    ExactSingletonHybridFamilyVerifier exact_verifier;
+    RejectingTrajectoryAdapter exact_trajectory;
+    const auto exact_accepted=build_hybrid_portfolio_programs_with_verifier(exact_verifier,
+        exact_trajectory,integral_system,integral_request,{"exact-preflight-accepted"},
+        {1,8},{16,64,1024});
+    REQUIRE(std::holds_alternative<Diagnostics>(exact_accepted));
+    CHECK(std::get<Diagnostics>(exact_accepted).front().field=="fixture.hybrid_adapter");
+    CHECK(exact_trajectory.calls==1);
+
+    DefaultPreflightHybridFamilyVerifier default_verifier;
+    RejectingTrajectoryAdapter default_trajectory;
+    const auto default_rejected=build_hybrid_portfolio_programs_with_verifier(
+        default_verifier,default_trajectory,supported_system,supported_request,
+        {"default-preflight-rejected"},{1,8},{16,64,1024});
+    REQUIRE(std::holds_alternative<Diagnostics>(default_rejected));
+    CHECK(std::get<Diagnostics>(default_rejected).front().field=="hybrid.verification.preflight");
+    CHECK(default_trajectory.calls==0);
+}
+
+TEST_CASE("portfolio preflights every path before constructing the first relation") {
+    auto system=example_system();
+    auto unsupported=system.edges.front();
+    unsupported.id={"unsupported-switch"};
+    unsupported.guards[0]=vertex_guard("unsupported-portfolio-guard");
+    system.edges.push_back(std::move(unsupported));
+
+    RejectingTrajectoryAdapter trajectory;
+    const auto result=build_hybrid_portfolio_programs(trajectory,system,example_request(),
+        {"portfolio-preflight"},{1,8},{16,64,1024});
+    REQUIRE(std::holds_alternative<model::HybridPathCompositionFailureReport>(result));
+    CHECK(std::get<model::HybridPathCompositionFailureReport>(result).path.edges[0].value==
+        "unsupported-switch");
+    CHECK(std::get<model::HybridPathCompositionFailureReport>(result).failure.index()==0);
+    CHECK(std::get<Diagnostic>(std::get<model::HybridPathCompositionFailureReport>(result).failure).field==
+        "hybrid.guard.representation");
+    CHECK(std::get<Diagnostic>(std::get<model::HybridPathCompositionFailureReport>(result).failure).
+        explanation.find("stage 0 edge unsupported-switch")!=std::string::npos);
+    CHECK(trajectory.calls==0);
 }
 
 TEST_CASE("hybrid family verification adapter receives the exhaustive path inventory") {
@@ -2140,6 +2699,115 @@ TEST_CASE("two-stage scalar interval verifier checks tied continuous families in
     CHECK(infeasible_record->continuous_coverage==HybridVerificationStatus::unsupported);
 }
 
+TEST_CASE("single-parameter scalar interval verifier covers arbitrary finite horizons") {
+    const auto make_reset=[](const std::string& id,double pre,double post,double rhs) {
+        auto inequalities=numeric::snapshot(Matrix{0,2,{}});
+        auto upper=numeric::snapshot_vector(Vector{});
+        auto equalities=numeric::snapshot(Matrix{1,2,{pre,post}});
+        auto values=numeric::snapshot_vector(Vector{rhs});
+        REQUIRE(std::holds_alternative<numeric::MatrixView>(inequalities));
+        REQUIRE(std::holds_alternative<numeric::VectorView>(upper));
+        REQUIRE(std::holds_alternative<numeric::MatrixView>(equalities));
+        REQUIRE(std::holds_alternative<numeric::VectorView>(values));
+        auto data=sets::make_h({SetId{id},2,{"pre","post"}},
+            {std::get<numeric::MatrixView>(inequalities),std::get<numeric::VectorView>(upper),
+             std::get<numeric::MatrixView>(equalities),std::get<numeric::VectorView>(values)});
+        REQUIRE(std::holds_alternative<sets::SetData>(data));
+        return std::get<sets::SetData>(std::move(data)).as_handle();
+    };
+    const auto scalar_mode=[](std::string id) {
+        model::HybridMode mode{{std::move(id)},1,1,{"x"},{"u"}};
+        const LinearStage flow{Matrix{1,1,{1}},Matrix{1,1,{1}},Matrix{1,0,{}},Vector{0}};
+        mode.flow=std::vector<LinearStage>{flow,flow,flow};
+        mode.control_sets={interval("multi-horizon-free",0,1),Singleton{{0}},Singleton{{0}}};
+        mode.invariants={UniversalSet{1},UniversalSet{1},UniversalSet{1},UniversalSet{1}};
+        return mode;
+    };
+    auto start=scalar_mode("start");
+    auto middle=scalar_mode("middle");
+    auto late=scalar_mode("late");
+    auto terminal=scalar_mode("terminal");
+    const auto identity=make_reset("multi-horizon-identity",1,-1,0);
+    const auto constant_zero=make_reset("multi-horizon-zero",0,1,0);
+    const auto constant_one=make_reset("multi-horizon-one",0,1,1);
+    const std::vector<AdmissibleSet> universal_guards(3,UniversalSet{1});
+    const std::vector<SetHandle> unused_resets(3,universal("multi-horizon-unused-reset",2));
+    std::vector<model::HybridTransitionEdge> edges{
+        {{"enter"},{"start"},{"middle"},universal_guards,{identity,unused_resets[1],unused_resets[2]}},
+        {{"continue"},{"middle"},{"late"},universal_guards,{unused_resets[0],identity,unused_resets[2]}},
+        {{"tie-a"},{"late"},{"terminal"},
+            {UniversalSet{1},UniversalSet{1},interval("multi-horizon-guard-a",0,0.5)},
+            {unused_resets[0],unused_resets[1],constant_zero}},
+        {{"tie-b"},{"late"},{"terminal"},
+            {UniversalSet{1},UniversalSet{1},interval("multi-horizon-guard-b",0,1)},
+            {unused_resets[0],unused_resets[1],constant_zero}},
+        {{"worse"},{"late"},{"terminal"},
+            {UniversalSet{1},UniversalSet{1},Singleton{{1}}},
+            {unused_resets[0],unused_resets[1],constant_one}}};
+    model::HybridSystem system{3,{start,middle,late,terminal},std::move(edges)};
+    model::HybridRequest request{{{"start"},{0}},{{"terminal"}},
+        {{{"terminal"},LinearTerminal{{1},0},"terminal-state","units"}}};
+
+    struct OracleEdge { const char* id; double lower; double upper; double cost; };
+    const std::array<OracleEdge,3> oracle{{
+        {"tie-a",0,0.5,0},{"tie-b",0,1,0},{"worse",1,1,1}}};
+    for(const auto& expected:oracle) {
+        CHECK(expected.lower==(std::string_view(expected.id)=="worse"?1:0));
+        CHECK(expected.upper==(std::string_view(expected.id)=="tie-a"?0.5:1));
+        CHECK(expected.cost==(std::string_view(expected.id)=="worse"?1:0));
+    }
+    const auto built=build_hybrid_portfolio_programs(system,request,{"multi-horizon-verifier"},
+        {3,32},{64,1024,16384});
+    REQUIRE(std::holds_alternative<std::vector<HybridPathProgram>>(built));
+    const auto& programs=std::get<std::vector<HybridPathProgram>>(built);
+    REQUIRE(programs.size()==oracle.size());
+    for(const auto& expected:oracle) {
+        const auto found=std::find_if(programs.begin(),programs.end(),[&](const auto& program) {
+            return program.path.edges.back().value==expected.id;
+        });
+        REQUIRE(found!=programs.end());
+        const auto representation=found->joint_relation.representation();
+        REQUIRE(std::holds_alternative<sets::HRepresentation>(representation));
+        const auto& relation=std::get<sets::HRepresentation>(representation);
+        const auto tuple_at=[&](double free_control) {
+            return Vector{0,free_control,free_control,free_control,0,free_control,
+                free_control,0,free_control,expected.cost};
+        };
+        CHECK(satisfies(relation,tuple_at(expected.lower)));
+        CHECK(satisfies(relation,tuple_at(expected.upper)));
+        if(std::string_view(expected.id)=="tie-a")
+            CHECK_FALSE(satisfies(relation,tuple_at(0.75)));
+        if(std::string_view(expected.id)=="worse")
+            CHECK_FALSE(satisfies(relation,tuple_at(0.5)));
+    }
+    std::vector<HybridPathOptimalFaceCandidate> candidates;
+    for(std::size_t i=0;i<2;++i) {
+        const auto found=std::find_if(programs.begin(),programs.end(),[&](const auto& program) {
+            return program.path.edges.back().value==oracle[i].id;
+        });
+        REQUIRE(found!=programs.end());
+        candidates.push_back(exact_candidate(*found,Vector(10,0)));
+    }
+    SingleParameterScalarIntervalHybridFamilyVerifier verifier;
+    const auto result=verify_hybrid_portfolio_family(verifier,system,request,programs,candidates,
+        {3,32},{0,0});
+    REQUIRE(std::holds_alternative<HybridFamilyVerificationReport>(result));
+    const auto& report=std::get<HybridFamilyVerificationReport>(result);
+    CHECK(report.verifier_id=="csl.hybrid.scalar-single-parameter-interval");
+    CHECK(report.global_objective_optimality==HybridVerificationStatus::established);
+    CHECK(report.complete_family_coverage==HybridVerificationStatus::established);
+    for(const auto& expected:oracle) {
+        const auto record=std::find_if(report.branches.begin(),report.branches.end(),[&](const auto& item) {
+            return item.path.edges.back().value==expected.id;
+        });
+        REQUIRE(record!=report.branches.end());
+        CHECK(record->feasibility==HybridVerificationStatus::established);
+        CHECK(record->objective_optimality==(expected.cost==0?HybridVerificationStatus::established:
+            HybridVerificationStatus::refuted));
+        CHECK(record->continuous_coverage==HybridVerificationStatus::established);
+    }
+}
+
 TEST_CASE("exact singleton hybrid verifier handles empty branches and rejects continuous domains") {
     auto [system,request]=exact_singleton_portfolio();
     system.edges[0].guards[0]=EmptySet{1};
@@ -2213,124 +2881,553 @@ TEST_CASE("exact singleton hybrid verifier handles empty branches and rejects co
     CHECK(std::holds_alternative<OperationStopped>(adapter_cancelled));
 }
 
-TEST_CASE("hybrid portfolio objective bounds retain tied possible branches") {
-    auto system=example_system();
-    auto second=system.edges.front(); second.id={"switch-second"};
-    auto third=system.edges.front(); third.id={"switch-third"};
-    system.edges.push_back(std::move(second));
-    system.edges.push_back(std::move(third));
-    const auto built=build_hybrid_portfolio_programs(system,example_request(),{"hybrid-problem"},
-        {1,8},{16,64,1024});
-    REQUIRE(std::holds_alternative<std::vector<HybridPathProgram>>(built));
-    const auto& programs=std::get<std::vector<HybridPathProgram>>(built);
-    REQUIRE(programs.size()==3);
-
-    HybridPortfolioExecution execution;
-    execution.all_supplied_branches_completed=true;
-    const std::array<double,3> values{5,5,7};
-    for(std::size_t i=0;i<programs.size();++i) {
-        const auto& program=std::get<LinearProgram>(programs[i].program);
-        const auto evidence=ProgramBoundEvidence{program.identity(),
-            SymbolicArgument{"literal fixture bounds","synthetic test result"},{}};
-        ProgramResult result{Termination::completed,
-            {program.identity(),MathematicalOutcome::optimal,
-                SymbolicArgument{"literal fixture optimum","synthetic test result"},{}},
-            {},{ProgramObjectiveBound{values[i],evidence},ProgramObjectiveBound{values[i],evidence}},
-            "literal fixture result"};
-        execution.branches.push_back({programs[i].path,Termination::completed,
-            MathematicalOutcome::optimal,std::move(result),{}, {}});
+TEST_CASE("two parameter scalar verifier certifies a coupled polygon and "
+          "rejects off-image extensions") {
+  const auto reset = [](std::string id) {
+    auto a = numeric::snapshot(Matrix{0, 2, {}});
+    auto b = numeric::snapshot_vector(Vector{});
+    auto e = numeric::snapshot(Matrix{1, 2, {-1, 1}});
+    auto v = numeric::snapshot_vector(Vector{0});
+    REQUIRE(std::holds_alternative<numeric::MatrixView>(a));
+    REQUIRE(std::holds_alternative<numeric::VectorView>(b));
+    REQUIRE(std::holds_alternative<numeric::MatrixView>(e));
+    REQUIRE(std::holds_alternative<numeric::VectorView>(v));
+    auto d = sets::make_h(
+        {SetId{std::move(id)}, 2, {}},
+        {std::get<numeric::MatrixView>(a), std::get<numeric::VectorView>(b),
+         std::get<numeric::MatrixView>(e), std::get<numeric::VectorView>(v)});
+    REQUIRE(std::holds_alternative<sets::SetData>(d));
+    return std::get<sets::SetData>(d).as_handle();
+  };
+  const auto mode = [](std::string id, AdmissibleSet u0, AdmissibleSet u1,
+                       AdmissibleSet final) {
+    model::HybridMode m{{std::move(id)}, 1, 1, {"x"}, {"u"}};
+    const LinearStage f0{Matrix{1, 1, {0}}, Matrix{1, 1, {1}}, Matrix{1, 0, {}},
+                         Vector{0}};
+    const LinearStage f1{Matrix{1, 1, {1}}, Matrix{1, 1, {1}}, Matrix{1, 0, {}},
+                         Vector{0}};
+    m.flow = std::vector<LinearStage>{f0, f1};
+    m.control_sets = {std::move(u0), std::move(u1)};
+    m.invariants = {UniversalSet{1}, UniversalSet{1}, std::move(final)};
+    return m;
+  };
+  auto start = mode("two-parameter-start", interval("two-parameter-u0", 0, 1),
+                    Singleton{{0}}, UniversalSet{1});
+  auto middle = mode("two-parameter-middle", Singleton{{0}},
+                     interval("two-parameter-u1", 0, 1), UniversalSet{1});
+  auto terminal = mode("two-parameter-terminal", Singleton{{0}}, Singleton{{0}},
+                       interval("two-parameter-coupled-terminal", 0, 1));
+  const auto identity = reset("two-parameter-identity");
+  model::HybridSystem system{
+      2,
+      {start, middle, terminal},
+      {{{"two-parameter-enter-half"},
+        {"two-parameter-start"},
+        {"two-parameter-middle"},
+        {interval("two-parameter-guard-half", 0, 0.5), UniversalSet{1}},
+        {identity, universal("two-parameter-unused-a", 2)}},
+       {{"two-parameter-enter-full"},
+        {"two-parameter-start"},
+        {"two-parameter-middle"},
+        {UniversalSet{1}, UniversalSet{1}},
+        {identity, universal("two-parameter-unused-full", 2)}},
+       {{"two-parameter-finish"},
+        {"two-parameter-middle"},
+        {"two-parameter-terminal"},
+        {UniversalSet{1}, UniversalSet{1}},
+        {universal("two-parameter-unused-b", 2), identity}}}};
+  model::HybridRequest request{{{"two-parameter-start"}, {0}},
+                               {{"two-parameter-terminal"}},
+                               {{{"two-parameter-terminal"},
+                                 LinearTerminal{{0}, 0},
+                                 "constant",
+                                 "units"}}};
+  auto built = build_hybrid_portfolio_programs(
+      system, request, {"two-parameter-test"}, {2, 8}, {64, 4096, 65536});
+  REQUIRE(std::holds_alternative<std::vector<HybridPathProgram>>(built));
+  auto programs = std::get<std::vector<HybridPathProgram>>(built);
+  REQUIRE(programs.size() == 2);
+  std::vector<HybridPathOptimalFaceCandidate> faces;
+  for (const auto &program : programs)
+    faces.push_back(exact_candidate(program, Vector(7, 0)));
+  const auto tuple = [](double u0, double u1) {
+    return Vector{0, u0, u0, u0, u1, u0 + u1, u0 + u1};
+  };
+  const std::array<std::array<double, 2>, 4> half_polygon{
+      {{0, 0}, {0.5, 0}, {0.5, 0.5}, {0, 1}}};
+  const std::array<std::array<double, 2>, 3> full_polygon{
+      {{0, 0}, {1, 0}, {0, 1}}};
+  const auto half =
+      std::find_if(programs.begin(), programs.end(), [](const auto &p) {
+        return p.path.edges[0].value == "two-parameter-enter-half";
+      });
+  const auto full =
+      std::find_if(programs.begin(), programs.end(), [](const auto &p) {
+        return p.path.edges[0].value == "two-parameter-enter-full";
+      });
+  REQUIRE(half != programs.end());
+  REQUIRE(full != programs.end());
+  const auto half_h =
+      std::get<sets::HRepresentation>(half->joint_relation.representation());
+  const auto full_h =
+      std::get<sets::HRepresentation>(full->joint_relation.representation());
+  const auto literal_parameter_vertices = [](const sets::HRepresentation &h) {
+    constexpr std::array<double, 7> u0_weight{0, 1, 1, 1, 0, 1, 1};
+    constexpr std::array<double, 7> u1_weight{0, 0, 0, 0, 1, 1, 1};
+    using Constraint = std::array<double, 3>;
+    std::vector<Constraint> constraints;
+    for (std::size_t row = 0; row < h.equalities.rows(); ++row) {
+      double u0 = 0, u1 = 0;
+      for (std::size_t col = 0; col < 7; ++col) {
+        u0 += h.equalities(row, col) * u0_weight[col];
+        u1 += h.equalities(row, col) * u1_weight[col];
+      }
+      if (u0 != 0 || u1 != 0 || h.equality_values[row] != 0)
+        return std::vector<std::array<double, 2>>{};
     }
+    for (std::size_t row = 0; row < h.inequalities.rows(); ++row) {
+      double u0 = 0, u1 = 0;
+      for (std::size_t col = 0; col < 7; ++col) {
+        u0 += h.inequalities(row, col) * u0_weight[col];
+        u1 += h.inequalities(row, col) * u1_weight[col];
+      }
+      constraints.push_back({u0, u1, h.upper_bounds[row]});
+    }
+    std::vector<std::array<double, 2>> vertices;
+    for (std::size_t i = 0; i < constraints.size(); ++i) {
+      for (std::size_t j = i + 1; j < constraints.size(); ++j) {
+        const auto &a = constraints[i];
+        const auto &b = constraints[j];
+        const double det = a[0] * b[1] - b[0] * a[1];
+        if (det == 0)
+          continue;
+        const std::array<double, 2> point{
+            (a[2] * b[1] - b[2] * a[1]) / det,
+            (a[0] * b[2] - b[0] * a[2]) / det};
+        if (std::all_of(constraints.begin(), constraints.end(),
+                        [&](const auto &constraint) {
+                          return constraint[0] * point[0] +
+                                     constraint[1] * point[1] <=
+                                 constraint[2];
+                        }))
+          vertices.push_back(point);
+      }
+    }
+    std::sort(vertices.begin(), vertices.end());
+    vertices.erase(std::unique(vertices.begin(), vertices.end()),
+                   vertices.end());
+    return vertices;
+  };
+  CHECK((literal_parameter_vertices(half_h) ==
+         std::vector<std::array<double, 2>>{{0, 0}, {0, 1}, {0.5, 0},
+                                            {0.5, 0.5}}));
+  CHECK((literal_parameter_vertices(full_h) ==
+         std::vector<std::array<double, 2>>{{0, 0}, {0, 1}, {1, 0}}));
+  for (const auto &vertex : half_polygon)
+    CHECK(satisfies(half_h, tuple(vertex[0], vertex[1])));
+  for (const auto &vertex : full_polygon)
+    CHECK(satisfies(full_h, tuple(vertex[0], vertex[1])));
+  CHECK_FALSE(satisfies(half_h, tuple(0.75, 0.1)));
+  CHECK(satisfies(full_h, tuple(0.75, 0.1)));
+  TwoParameterScalarPolytopeHybridFamilyVerifier verifier;
+  auto valid = verify_hybrid_portfolio_family(verifier, system, request,
+                                              programs, faces, {2, 8}, {0, 0});
+  REQUIRE(std::holds_alternative<HybridFamilyVerificationReport>(valid));
+  const auto &report = std::get<HybridFamilyVerificationReport>(valid);
+  CHECK(report.verifier_id == "csl.hybrid.scalar-two-parameter-polytope");
+  CHECK(report.global_objective_optimality ==
+        HybridVerificationStatus::established);
+  REQUIRE(report.branches.size() == 2);
+  for (const auto &branch : report.branches) {
+    CHECK(branch.feasibility == HybridVerificationStatus::established);
+    CHECK(branch.objective_optimality == HybridVerificationStatus::established);
+    CHECK(branch.continuous_coverage == HybridVerificationStatus::established);
+  }
+  CHECK(report.complete_family_coverage ==
+        HybridVerificationStatus::established);
 
-    const auto comparison=compare_hybrid_portfolio_objective_bounds(programs,execution,{0,0});
-    REQUIRE(std::holds_alternative<HybridPortfolioObjectiveBounds>(comparison));
-    const auto& bounds=std::get<HybridPortfolioObjectiveBounds>(comparison);
-    CHECK(bounds.global_lower_bound==5);
-    CHECK(bounds.global_upper_bound==5);
-    REQUIRE(bounds.potentially_optimal_paths.size()==2);
-    CHECK(bounds.potentially_optimal_paths[0]==programs[0].path);
-    CHECK(bounds.potentially_optimal_paths[1]==programs[1].path);
-    REQUIRE(bounds.global_lower_bound_sources.size()==2);
-    REQUIRE(bounds.global_upper_bound_sources.size()==2);
-    CHECK(bounds.global_lower_bound_sources[0].path==programs[0].path);
-    CHECK(bounds.global_lower_bound_sources[0].bound.evidence.subject==
-        std::get<LinearProgram>(programs[0].program).identity());
+  auto missing_face = verify_hybrid_portfolio_family(
+      verifier, system, request, programs,
+      std::span<const HybridPathOptimalFaceCandidate>(faces.data(), 1), {2, 8},
+      {0, 0});
+  CHECK(std::holds_alternative<Diagnostics>(missing_face));
+  auto duplicate_faces = faces;
+  duplicate_faces.push_back(faces.front());
+  auto duplicate_face = verify_hybrid_portfolio_family(
+      verifier, system, request, programs, duplicate_faces, {2, 8}, {0, 0});
+  CHECK(std::holds_alternative<Diagnostics>(duplicate_face));
 
-    auto incomplete=execution;
-    incomplete.branches[2].result->objective.lower.reset();
-    const auto partial=compare_hybrid_portfolio_objective_bounds(programs,incomplete,{0,0});
-    REQUIRE(std::holds_alternative<HybridPortfolioObjectiveIncomplete>(partial));
-    CHECK(std::get<HybridPortfolioObjectiveIncomplete>(partial).
-        branches_without_comparable_bounds==std::vector<std::size_t>{2});
+  auto shared_flow_system = system;
+  const LinearStage shared_flow{Matrix{1, 1, {1}}, Matrix{1, 1, {1}},
+                                Matrix{1, 0, {}}, Vector{0}};
+  for (auto &shared_mode : shared_flow_system.modes)
+    shared_mode.flow = shared_flow;
+  auto shared_program_result = build_hybrid_portfolio_programs(
+      shared_flow_system, request, {"two-parameter-shared-flow"}, {2, 8},
+      {64, 4096, 65536});
+  REQUIRE(std::holds_alternative<std::vector<HybridPathProgram>>(
+      shared_program_result));
+  const auto &shared_programs =
+      std::get<std::vector<HybridPathProgram>>(shared_program_result);
+  std::vector<HybridPathOptimalFaceCandidate> shared_faces;
+  for (const auto &program : shared_programs)
+    shared_faces.push_back(exact_candidate(program, Vector(7, 0)));
+  auto shared_report = verify_hybrid_portfolio_family(
+      verifier, shared_flow_system, request, shared_programs, shared_faces,
+      {2, 8}, {0, 0});
+  REQUIRE(
+      std::holds_alternative<HybridFamilyVerificationReport>(shared_report));
+  CHECK(std::get<HybridFamilyVerificationReport>(shared_report)
+            .complete_family_coverage == HybridVerificationStatus::established);
 
-    auto unsupported=execution;
-    unsupported.branches[2].result->objective.lower->evidence.support=Unestablished{};
-    const auto unestablished=compare_hybrid_portfolio_objective_bounds(programs,unsupported,{0,0});
-    REQUIRE(std::holds_alternative<HybridPortfolioObjectiveIncomplete>(unestablished));
-    CHECK(std::get<HybridPortfolioObjectiveIncomplete>(unestablished).
-        branches_without_comparable_bounds==std::vector<std::size_t>{2});
+  auto inexact_anchor_system = system;
+  auto &inexact_middle = inexact_anchor_system.modes[1];
+  std::get<std::vector<LinearStage>>(inexact_middle.flow)[1] =
+      LinearStage{Matrix{1, 1, {0.1}}, Matrix{1, 1, {1}}, Matrix{1, 0, {}},
+                  Vector{0}};
+  inexact_anchor_system.modes[2].invariants[2] = UniversalSet{1};
+  auto inexact_program_result = build_hybrid_portfolio_programs(
+      inexact_anchor_system, request, {"two-parameter-inexact-anchor"},
+      {2, 8}, {64, 4096, 65536});
+  REQUIRE(std::holds_alternative<std::vector<HybridPathProgram>>(
+      inexact_program_result));
+  const auto &inexact_programs =
+      std::get<std::vector<HybridPathProgram>>(inexact_program_result);
+  std::vector<HybridPathOptimalFaceCandidate> inexact_faces;
+  for (const auto &program : inexact_programs) {
+    auto candidate = exact_candidate(program, Vector(7, 0));
+    candidate.anchor = Vector{0, 0.1, 0.1, 0.1, 0,
+                              0.1 * 0.1, 0.1 * 0.1};
+    candidate.solver_result.primal = candidate.anchor;
+    inexact_faces.push_back(std::move(candidate));
+  }
+  auto inexact_anchor_report = verify_hybrid_portfolio_family(
+      verifier, inexact_anchor_system, request, inexact_programs,
+      inexact_faces, {2, 8}, {0, 0});
+  std::string inexact_error =
+      "hybrid verifier result variant: " +
+      std::to_string(inexact_anchor_report.index());
+  if (const auto *errors = std::get_if<Diagnostics>(&inexact_anchor_report);
+      errors && !errors->empty())
+    inexact_error += ": " + (*errors)[0].field + ": " +
+                     (*errors)[0].explanation;
+  INFO(inexact_error);
+  REQUIRE(std::holds_alternative<HybridFamilyVerificationReport>(
+      inexact_anchor_report));
+  const auto &inexact_report =
+      std::get<HybridFamilyVerificationReport>(inexact_anchor_report);
+  CHECK(inexact_report.branches[0].continuous_coverage ==
+        HybridVerificationStatus::unsupported);
+  CHECK(inexact_report.branches[1].continuous_coverage ==
+        HybridVerificationStatus::unsupported);
 
-    auto inconsistent=execution;
-    inconsistent.branches[1].result->termination=Termination::cancelled;
-    const auto interrupted=compare_hybrid_portfolio_objective_bounds(programs,inconsistent,{0,0});
-    REQUIRE(std::holds_alternative<HybridPortfolioObjectiveIncomplete>(interrupted));
-    CHECK(std::get<HybridPortfolioObjectiveIncomplete>(interrupted).
-        branches_without_comparable_bounds==std::vector<std::size_t>{1});
+  const auto drop_coordinate_zero_equality = [](const sets::SetData &data,
+                                                std::string id) {
+    const auto repr = data.representation();
+    REQUIRE(std::holds_alternative<sets::HRepresentation>(repr));
+    const auto &h = std::get<sets::HRepresentation>(repr);
+    REQUIRE(h.equalities.cols() == 7);
+    std::vector<double> eq, rhs;
+    bool dropped = false;
+    for (std::size_t row = 0; row < h.equalities.rows(); ++row) {
+      bool only_zero_coordinate = h.equalities(row, 0) != 0;
+      for (std::size_t col = 1; col < 7; ++col)
+        only_zero_coordinate =
+            only_zero_coordinate && h.equalities(row, col) == 0;
+      if (only_zero_coordinate && !dropped) {
+        dropped = true;
+        continue;
+      }
+      for (std::size_t col = 0; col < 7; ++col)
+        eq.push_back(h.equalities(row, col));
+      rhs.push_back(h.equality_values[row]);
+    }
+    REQUIRE(dropped);
+    std::vector<double> ineq, bounds;
+    for (std::size_t row = 0; row < h.inequalities.rows(); ++row) {
+      for (std::size_t col = 0; col < 7; ++col)
+        ineq.push_back(h.inequalities(row, col));
+      bounds.push_back(h.upper_bounds[row]);
+    }
+    auto im = numeric::snapshot(Matrix{bounds.size(), 7, std::move(ineq)});
+    auto bv = numeric::snapshot_vector(std::move(bounds));
+    auto em = numeric::snapshot(Matrix{rhs.size(), 7, std::move(eq)});
+    auto rv = numeric::snapshot_vector(std::move(rhs));
+    REQUIRE(std::holds_alternative<numeric::MatrixView>(im));
+    REQUIRE(std::holds_alternative<numeric::VectorView>(bv));
+    REQUIRE(std::holds_alternative<numeric::MatrixView>(em));
+    REQUIRE(std::holds_alternative<numeric::VectorView>(rv));
+    auto forged = sets::make_h(
+        {SetId{std::move(id)}, 7, {}},
+        {std::get<numeric::MatrixView>(im), std::get<numeric::VectorView>(bv),
+         std::get<numeric::MatrixView>(em), std::get<numeric::VectorView>(rv)});
+    REQUIRE(std::holds_alternative<sets::SetData>(forged));
+    return std::get<sets::SetData>(forged);
+  };
+  auto forged_program = programs;
+  forged_program[0].joint_relation = drop_coordinate_zero_equality(
+      forged_program[0].joint_relation, "forged-program-extra-state");
+  auto forged_program_report = verify_hybrid_portfolio_family(
+      verifier, system, request, forged_program, faces, {2, 8}, {0, 0});
+  REQUIRE(std::holds_alternative<HybridFamilyVerificationReport>(
+      forged_program_report));
+  CHECK(std::get<HybridFamilyVerificationReport>(forged_program_report)
+            .branches[0]
+            .continuous_coverage == HybridVerificationStatus::refuted);
+  auto forged_faces = faces;
+  const auto decoded_face = forged_faces[0].relation;
+  forged_faces[0].relation =
+      drop_coordinate_zero_equality(decoded_face, "forged-face-extra-state");
+  auto forged_face_report = verify_hybrid_portfolio_family(
+      verifier, system, request, programs, forged_faces, {2, 8}, {0, 0});
+  REQUIRE(std::holds_alternative<HybridFamilyVerificationReport>(
+      forged_face_report));
+  CHECK(std::get<HybridFamilyVerificationReport>(forged_face_report)
+            .branches[0]
+            .continuous_coverage == HybridVerificationStatus::refuted);
+
+  std::vector<model::HybridPath> verified_paths;
+  for (const auto &program : programs)
+    verified_paths.push_back(program.path);
+  for (const auto &terminal_set :
+       std::array<AdmissibleSet, 2>{Singleton{{0.5}}, Singleton{{0}}}) {
+    auto degenerate_system = system;
+    degenerate_system.modes[2].invariants[2] = terminal_set;
+    const auto degenerate_preflight =
+        verifier.preflight(degenerate_system, request, verified_paths, {});
+    CHECK(std::holds_alternative<Diagnostics>(degenerate_preflight));
+    const auto degenerate_report = verifier.verify(
+        degenerate_system, request, verified_paths, programs, {}, {0, 0}, {});
+    CHECK(std::holds_alternative<Diagnostics>(degenerate_report));
+  }
+
+  auto infeasible_system = system;
+  infeasible_system.modes[2].invariants[2] = EmptySet{1};
+  auto infeasible_built = build_hybrid_portfolio_programs(
+      infeasible_system, request, {"two-parameter-empty-branch"}, {2, 8},
+      {64, 4096, 65536});
+  REQUIRE(std::holds_alternative<std::vector<HybridPathProgram>>(
+      infeasible_built));
+  auto infeasible_programs =
+      std::get<std::vector<HybridPathProgram>>(infeasible_built);
+  for (auto &program : infeasible_programs) {
+    auto malformed_empty = sets::make_empty(
+        {SetId{"two-parameter-wrong-empty-dimension"}, 6, {}});
+    REQUIRE(std::holds_alternative<sets::SetData>(malformed_empty));
+    program.joint_relation = std::get<sets::SetData>(malformed_empty);
+  }
+  const auto malformed_empty_report = verifier.verify(
+      infeasible_system, request, verified_paths, infeasible_programs, {},
+      {0, 0}, {});
+  std::string malformed_empty_error =
+      "malformed empty result variant: " +
+      std::to_string(malformed_empty_report.index());
+  if (const auto *errors = std::get_if<Diagnostics>(&malformed_empty_report);
+      errors && !errors->empty())
+    malformed_empty_error += ": " + (*errors)[0].field + ": " +
+                             (*errors)[0].explanation;
+  INFO(malformed_empty_error);
+  REQUIRE(std::holds_alternative<HybridFamilyVerificationReport>(
+      malformed_empty_report));
+  for (const auto &branch :
+       std::get<HybridFamilyVerificationReport>(malformed_empty_report)
+           .branches)
+    CHECK(branch.feasibility == HybridVerificationStatus::unsupported);
+
+  auto wrong_path_programs =
+      std::get<std::vector<HybridPathProgram>>(infeasible_built);
+  for (auto &program : wrong_path_programs) {
+    auto explicit_empty = sets::make_empty(
+        {SetId{"two-parameter-matching-empty-dimension"}, 7, {}});
+    REQUIRE(std::holds_alternative<sets::SetData>(explicit_empty));
+    program.joint_relation = std::get<sets::SetData>(explicit_empty);
+  }
+  wrong_path_programs.front().path.edges.front().value =
+      "two-parameter-wrong-empty-path";
+  const auto wrong_path_empty_report = verifier.verify(
+      infeasible_system, request, verified_paths, wrong_path_programs, {},
+      {0, 0}, {});
+  REQUIRE(std::holds_alternative<HybridFamilyVerificationReport>(
+      wrong_path_empty_report));
+  CHECK(std::get<HybridFamilyVerificationReport>(wrong_path_empty_report)
+            .branches.front()
+            .feasibility == HybridVerificationStatus::unsupported);
+
+  auto nonzero_initial_request = request;
+  nonzero_initial_request.initial.state = {1};
+  auto nonzero_initial_built = build_hybrid_portfolio_programs(
+      system, nonzero_initial_request, {"two-parameter-nonzero-initial"},
+      {2, 8}, {64, 4096, 65536});
+  REQUIRE(std::holds_alternative<std::vector<HybridPathProgram>>(
+      nonzero_initial_built));
+  const auto &nonzero_initial_programs =
+      std::get<std::vector<HybridPathProgram>>(nonzero_initial_built);
+  std::vector<HybridPathOptimalFaceCandidate> nonzero_initial_faces;
+  for (const auto &program : nonzero_initial_programs)
+    nonzero_initial_faces.push_back(
+        exact_candidate(program, Vector{1, 0, 0, 0, 0, 0, 0}));
+  const auto nonzero_initial_report = verify_hybrid_portfolio_family(
+      verifier, system, nonzero_initial_request, nonzero_initial_programs,
+      nonzero_initial_faces, {2, 8}, {0, 0});
+  REQUIRE(std::holds_alternative<HybridFamilyVerificationReport>(
+      nonzero_initial_report));
+  CHECK(std::get<HybridFamilyVerificationReport>(nonzero_initial_report)
+            .complete_family_coverage == HybridVerificationStatus::established);
 }
 
-TEST_CASE("hybrid path optimal-face candidates preserve the full minimizer equations") {
-    auto check_face=[&](TerminalObjective objective,double objective_value) {
-        auto system=example_system();
-        system.modes[0].control_sets[0]=interval("bounded-control",-1,1);
-        system.edges[0].reset_relations[0]=affine_reset();
-        auto request=example_request();
-        request.terminal_objectives[0].objective=std::move(objective);
-        auto built=build_hybrid_path_program(system,request,example_path(),{"hybrid-face"},{16,64,1024});
-        REQUIRE(std::holds_alternative<HybridPathProgram>(built));
-        const auto& branch=std::get<HybridPathProgram>(built);
-        const ProgramIdentity identity=std::visit([](const auto& program){return program.identity();},branch.program);
-        const auto support=SymbolicArgument{"literal face fixture","synthetic global optimum"};
-        const ProgramBoundEvidence bound{identity,support,{}};
-        ProgramResult solved{Termination::completed,{identity,MathematicalOutcome::optimal,support,{}},
-            Vector{2,-1,1,1,0},
-            {ProgramObjectiveBound{objective_value,bound},ProgramObjectiveBound{objective_value,bound}},
-            "literal feasible optimizer"};
-        const auto face=build_hybrid_path_optimal_face_candidate(branch,solved,{1e-10,1e-10});
-        REQUIRE(std::holds_alternative<HybridPathOptimalFaceCandidate>(face));
-        const auto& candidate=std::get<HybridPathOptimalFaceCandidate>(face);
-        CHECK(candidate.path==example_path());
-        CHECK(candidate.anchor==Vector{2,-1,1,1,0});
-        CHECK(candidate.solver_result.objective.upper->value==objective_value);
-        const auto representation=candidate.relation.representation();
-        REQUIRE(std::holds_alternative<sets::HRepresentation>(representation));
-        const auto& h=std::get<sets::HRepresentation>(representation);
-        CHECK(satisfies(h,{2,-1,1,1,0}));
-        CHECK(satisfies(h,{2,-1,1,1,1}));
-        CHECK_FALSE(satisfies(h,{2,0,2,2,0}));
-        CHECK(candidate.assumptions.size()==3);
-    };
+TEST_CASE("hybrid portfolio objective bounds retain tied possible branches") {
+  auto system = example_system();
+  auto second = system.edges.front();
+  second.id = {"switch-second"};
+  auto third = system.edges.front();
+  third.id = {"switch-third"};
+  system.edges.push_back(std::move(second));
+  system.edges.push_back(std::move(third));
+  const auto built = build_hybrid_portfolio_programs(
+      system, example_request(), {"hybrid-problem"}, {1, 8}, {16, 64, 1024});
+  REQUIRE(std::holds_alternative<std::vector<HybridPathProgram>>(built));
+  const auto &programs = std::get<std::vector<HybridPathProgram>>(built);
+  REQUIRE(programs.size() == 3);
 
-    check_face(LinearTerminal{{1,0},0},1);
-    check_face(QuadraticTerminal{Matrix{2,2,{2,0,0,0}},Vector{0,0},0},1);
-    check_face(ResidualNormTerminal{Matrix{1,2,{1,0}},Vector{1}},0);
+  HybridPortfolioExecution execution;
+  execution.all_supplied_branches_completed = true;
+  const std::array<double, 3> values{5, 5, 7};
+  for (std::size_t i = 0; i < programs.size(); ++i) {
+    const auto &program = std::get<LinearProgram>(programs[i].program);
+    const auto evidence = ProgramBoundEvidence{
+        program.identity(),
+        SymbolicArgument{"literal fixture bounds", "synthetic test result"},
+        {}};
+    ProgramResult result{
+        Termination::completed,
+        {program.identity(),
+         MathematicalOutcome::optimal,
+         SymbolicArgument{"literal fixture optimum", "synthetic test result"},
+         {}},
+        {},
+        {ProgramObjectiveBound{values[i], evidence},
+         ProgramObjectiveBound{values[i], evidence}},
+        "literal fixture result"};
+    execution.branches.push_back({programs[i].path,
+                                  Termination::completed,
+                                  MathematicalOutcome::optimal,
+                                  std::move(result),
+                                  {},
+                                  {}});
+  }
 
-    auto system=example_system();
-    system.modes[0].control_sets[0]=interval("bounded-control-mismatch",-1,1);
-    system.edges[0].reset_relations[0]=affine_reset();
-    auto request=example_request();
-    request.terminal_objectives[0].objective=LinearTerminal{{1,0},0};
-    auto built=build_hybrid_path_program(system,request,example_path(),{"hybrid-face-mismatch"},{16,64,1024});
+  const auto comparison =
+      compare_hybrid_portfolio_objective_bounds(programs, execution, {0, 0});
+  REQUIRE(std::holds_alternative<HybridPortfolioObjectiveBounds>(comparison));
+  const auto &bounds = std::get<HybridPortfolioObjectiveBounds>(comparison);
+  CHECK(bounds.global_lower_bound == 5);
+  CHECK(bounds.global_upper_bound == 5);
+  REQUIRE(bounds.potentially_optimal_paths.size() == 2);
+  CHECK(bounds.potentially_optimal_paths[0] == programs[0].path);
+  CHECK(bounds.potentially_optimal_paths[1] == programs[1].path);
+  REQUIRE(bounds.global_lower_bound_sources.size() == 2);
+  REQUIRE(bounds.global_upper_bound_sources.size() == 2);
+  CHECK(bounds.global_lower_bound_sources[0].path == programs[0].path);
+  CHECK(bounds.global_lower_bound_sources[0].bound.evidence.subject ==
+        std::get<LinearProgram>(programs[0].program).identity());
+
+  auto incomplete = execution;
+  incomplete.branches[2].result->objective.lower.reset();
+  const auto partial =
+      compare_hybrid_portfolio_objective_bounds(programs, incomplete, {0, 0});
+  REQUIRE(std::holds_alternative<HybridPortfolioObjectiveIncomplete>(partial));
+  CHECK(std::get<HybridPortfolioObjectiveIncomplete>(partial)
+            .branches_without_comparable_bounds == std::vector<std::size_t>{2});
+
+  auto unsupported = execution;
+  unsupported.branches[2].result->objective.lower->evidence.support =
+      Unestablished{};
+  const auto unestablished =
+      compare_hybrid_portfolio_objective_bounds(programs, unsupported, {0, 0});
+  REQUIRE(std::holds_alternative<HybridPortfolioObjectiveIncomplete>(
+      unestablished));
+  CHECK(std::get<HybridPortfolioObjectiveIncomplete>(unestablished)
+            .branches_without_comparable_bounds == std::vector<std::size_t>{2});
+
+  auto inconsistent = execution;
+  inconsistent.branches[1].result->termination = Termination::cancelled;
+  const auto interrupted =
+      compare_hybrid_portfolio_objective_bounds(programs, inconsistent, {0, 0});
+  REQUIRE(
+      std::holds_alternative<HybridPortfolioObjectiveIncomplete>(interrupted));
+  CHECK(std::get<HybridPortfolioObjectiveIncomplete>(interrupted)
+            .branches_without_comparable_bounds == std::vector<std::size_t>{1});
+}
+
+TEST_CASE("hybrid path optimal-face candidates preserve the full minimizer "
+          "equations") {
+  auto check_face = [&](TerminalObjective objective, double objective_value) {
+    auto system = example_system();
+    system.modes[0].control_sets[0] = interval("bounded-control", -1, 1);
+    system.edges[0].reset_relations[0] = affine_reset();
+    auto request = example_request();
+    request.terminal_objectives[0].objective = std::move(objective);
+    auto built = build_hybrid_path_program(system, request, example_path(),
+                                           {"hybrid-face"}, {16, 64, 1024});
     REQUIRE(std::holds_alternative<HybridPathProgram>(built));
-    auto mismatched=std::get<HybridPathProgram>(std::move(built));
-    const auto& program=std::get<LinearProgram>(mismatched.program);
-    const auto support=SymbolicArgument{"literal mismatch fixture","synthetic global optimum"};
-    const ProgramBoundEvidence bound{program.identity(),support,{}};
-    ProgramResult solved{Termination::completed,{program.identity(),MathematicalOutcome::optimal,support,{}},
-        Vector{2,-1,1,1,0},
-        {ProgramObjectiveBound{1,bound},ProgramObjectiveBound{1,bound}},"literal feasible optimizer"};
-    mismatched.joint_relation=relation_excluding_anchor();
-    const auto rejected=build_hybrid_path_optimal_face_candidate(mismatched,solved,{1e-10,1e-10});
-    REQUIRE(std::holds_alternative<Diagnostics>(rejected));
-    CHECK(std::get<Diagnostics>(rejected)[0].field=="hybrid.optimal_face.source_relation");
+    const auto &branch = std::get<HybridPathProgram>(built);
+    const ProgramIdentity identity = std::visit(
+        [](const auto &program) { return program.identity(); }, branch.program);
+    const auto support =
+        SymbolicArgument{"literal face fixture", "synthetic global optimum"};
+    const ProgramBoundEvidence bound{identity, support, {}};
+    ProgramResult solved{Termination::completed,
+                         {identity, MathematicalOutcome::optimal, support, {}},
+                         Vector{2, -1, 1, 1, 0},
+                         {ProgramObjectiveBound{objective_value, bound},
+                          ProgramObjectiveBound{objective_value, bound}},
+                         "literal feasible optimizer"};
+    const auto face = build_hybrid_path_optimal_face_candidate(branch, solved,
+                                                               {1e-10, 1e-10});
+    REQUIRE(std::holds_alternative<HybridPathOptimalFaceCandidate>(face));
+    const auto &candidate = std::get<HybridPathOptimalFaceCandidate>(face);
+    CHECK(candidate.path == example_path());
+    CHECK(candidate.anchor == Vector{2, -1, 1, 1, 0});
+    CHECK(candidate.solver_result.objective.upper->value == objective_value);
+    const auto representation = candidate.relation.representation();
+    REQUIRE(std::holds_alternative<sets::HRepresentation>(representation));
+    const auto &h = std::get<sets::HRepresentation>(representation);
+    CHECK(satisfies(h, {2, -1, 1, 1, 0}));
+    CHECK(satisfies(h, {2, -1, 1, 1, 1}));
+    CHECK_FALSE(satisfies(h, {2, 0, 2, 2, 0}));
+    CHECK(candidate.assumptions.size() == 3);
+  };
+
+  check_face(LinearTerminal{{1, 0}, 0}, 1);
+  check_face(QuadraticTerminal{Matrix{2, 2, {2, 0, 0, 0}}, Vector{0, 0}, 0}, 1);
+  check_face(ResidualNormTerminal{Matrix{1, 2, {1, 0}}, Vector{1}}, 0);
+
+  auto system = example_system();
+  system.modes[0].control_sets[0] = interval("bounded-control-mismatch", -1, 1);
+  system.edges[0].reset_relations[0] = affine_reset();
+  auto request = example_request();
+  request.terminal_objectives[0].objective = LinearTerminal{{1, 0}, 0};
+  auto built =
+      build_hybrid_path_program(system, request, example_path(),
+                                {"hybrid-face-mismatch"}, {16, 64, 1024});
+  REQUIRE(std::holds_alternative<HybridPathProgram>(built));
+  auto mismatched = std::get<HybridPathProgram>(std::move(built));
+  const auto &program = std::get<LinearProgram>(mismatched.program);
+  const auto support =
+      SymbolicArgument{"literal mismatch fixture", "synthetic global optimum"};
+  const ProgramBoundEvidence bound{program.identity(), support, {}};
+  ProgramResult solved{
+      Termination::completed,
+      {program.identity(), MathematicalOutcome::optimal, support, {}},
+      Vector{2, -1, 1, 1, 0},
+      {ProgramObjectiveBound{1, bound}, ProgramObjectiveBound{1, bound}},
+      "literal feasible optimizer"};
+  mismatched.joint_relation = relation_excluding_anchor();
+  const auto rejected = build_hybrid_path_optimal_face_candidate(
+      mismatched, solved, {1e-10, 1e-10});
+  REQUIRE(std::holds_alternative<Diagnostics>(rejected));
+  CHECK(std::get<Diagnostics>(rejected)[0].field ==
+        "hybrid.optimal_face.source_relation");
 }
 
 TEST_CASE("hybrid portfolio assembly retains every tied branch face transactionally") {
@@ -2405,6 +3502,103 @@ TEST_CASE("hybrid portfolio builder rolls back after a later dimension limit fai
     const auto* diagnostic=std::get_if<Diagnostic>(&failure.failure);
     REQUIRE(diagnostic);
     CHECK(diagnostic->field=="hybrid.relation.variables");
+}
+
+TEST_CASE("direct trajectory adapters preflight the full path inventory before capabilities or builds") {
+    auto [system,request]=variable_size_parallel_profile();
+    RejectingTrajectoryPreflightAdapter adapter;
+    const auto portfolio=build_hybrid_portfolio_programs(adapter,system,
+        request,{"hybrid-problem"},{1,8},{16,64,1024});
+    REQUIRE(std::holds_alternative<model::HybridPathCompositionFailureReport>(portfolio));
+    const auto& failure=std::get<model::HybridPathCompositionFailureReport>(portfolio);
+    CHECK(failure.path.edges==std::vector<model::HybridEdgeId>{{"to-large"}});
+    CHECK(std::get<Diagnostic>(failure.failure).field=="fixture.trajectory.preflight");
+    CHECK(adapter.preflight_calls==1);
+    CHECK(adapter.capability_calls==0);
+    CHECK(adapter.build_calls==0);
+
+    RejectingTrajectoryPreflightAdapter single_adapter;
+    const auto single=build_hybrid_path_program(single_adapter,example_system(),
+        example_request(),example_path(),{"hybrid-problem"},{16,64,1024});
+    REQUIRE(std::holds_alternative<model::HybridPathCompositionFailureReport>(single));
+    CHECK(std::get<model::HybridPathCompositionFailureReport>(single).path==example_path());
+    CHECK(single_adapter.preflight_calls==1);
+    CHECK(single_adapter.capability_calls==0);
+    CHECK(single_adapter.build_calls==0);
+}
+
+TEST_CASE("direct trajectory adapters may admit a representation outside the joint-H default") {
+    auto system=example_system();
+    system.edges.front().guards.front()=vertex_guard("alternate-guard");
+    AdmittingTrajectoryPreflightAdapter adapter;
+    const auto result=build_hybrid_path_program(adapter,system,example_request(),
+        example_path(),{"hybrid-problem"},{16,64,1024});
+    REQUIRE(std::holds_alternative<Diagnostics>(result));
+    CHECK(std::get<Diagnostics>(result).front().field=="fixture.alternate_representation");
+    CHECK(adapter.preflight_calls==1);
+    CHECK(adapter.capability_calls==1);
+    CHECK(adapter.build_calls==1);
+}
+
+TEST_CASE("direct trajectory preflight failures must retain requested path and limits") {
+    for(const int corruption : {0,1,2}) {
+        RejectingTrajectoryPreflightAdapter adapter;
+        adapter.corruption=corruption;
+        const model::HybridRelationLimits limits{16,64,1024};
+        const auto result=build_hybrid_path_program(adapter,example_system(),
+            example_request(),example_path(),{"hybrid-problem"},limits);
+        REQUIRE(std::holds_alternative<model::HybridPathCompositionFailureReport>(result));
+        const auto& failure=std::get<model::HybridPathCompositionFailureReport>(result);
+        CHECK(failure.path==example_path());
+        CHECK(failure.limits.max_variables==limits.max_variables);
+        CHECK(failure.limits.max_rows==limits.max_rows);
+        CHECK(failure.limits.max_matrix_elements==limits.max_matrix_elements);
+        const auto* diagnostic=std::get_if<Diagnostic>(&failure.failure);
+        REQUIRE(diagnostic);
+        CHECK(diagnostic->code==DiagnosticCode::evidence_mismatch);
+        const auto expected=corruption==0?"hybrid.adapter.preflight_path":
+            (corruption==1?"hybrid.adapter.preflight_limits":"hybrid.adapter.preflight_diagnostics");
+        CHECK(diagnostic->field==expected);
+        CHECK(adapter.capability_calls==0);
+        CHECK(adapter.build_calls==0);
+    }
+}
+
+TEST_CASE("portfolio uses one inventory-wide trajectory preflight before branch builds") {
+    auto [system,request]=variable_size_parallel_profile();
+    InventoryOnlyTrajectoryPreflightAdapter adapter;
+    const auto result=build_hybrid_portfolio_programs(adapter,system,request,
+        {"hybrid-problem"},{1,8},{16,64,1024});
+    REQUIRE(std::holds_alternative<Diagnostics>(result));
+    CHECK(std::get<Diagnostics>(result).front().field=="fixture.inventory_build");
+    CHECK(adapter.preflight_calls==1);
+    CHECK(adapter.capability_calls==1);
+    CHECK(adapter.build_calls==1);
+}
+
+TEST_CASE("hybrid portfolio rejects an empty path inventory before adapter preflight") {
+    auto system=example_system();
+    system.edges.clear();
+    RejectingTrajectoryPreflightAdapter adapter;
+    const auto result=build_hybrid_portfolio_programs(adapter,system,example_request(),
+        {"hybrid-problem"},{1,8},{16,64,1024});
+    REQUIRE(std::holds_alternative<Diagnostics>(result));
+    CHECK(std::get<Diagnostics>(result).front().field=="hybrid.portfolio.paths");
+    CHECK(adapter.preflight_calls==0);
+    CHECK(adapter.capability_calls==0);
+    CHECK(adapter.build_calls==0);
+}
+
+TEST_CASE("direct trajectory preflight observes cancellation before capabilities and builds") {
+    std::stop_source cancellation;
+    CancellingTrajectoryPreflightAdapter adapter{cancellation};
+    const auto result=build_hybrid_path_program(adapter,example_system(),
+        example_request(),example_path(),{"hybrid-problem"},{16,64,1024},
+        {},cancellation.get_token());
+    REQUIRE(std::holds_alternative<OperationStopped>(result));
+    CHECK(std::get<OperationStopped>(result).reason==StopReason::cancelled);
+    CHECK(adapter.capability_calls==0);
+    CHECK(adapter.build_calls==0);
 }
 
 TEST_CASE("hybrid branch execution retains path and solver provenance on rejection") {

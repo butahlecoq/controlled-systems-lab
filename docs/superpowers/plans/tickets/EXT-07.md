@@ -35,19 +35,28 @@ Ship meaningful unit/contract tests with the implementation, using the named ind
 The implementation now has profile admission, bounded path enumeration, direct
 joint-H path programs, branch optimization, solver provenance, and numerical
 family verifiers for integral singleton paths, one-step scalar interval
-families, and a bounded two-stage scalar interval profile. The latter supports
-one non-singleton bounded control interval, singleton controls at the other
-stage, interval invariants/guards, exact scalar affine resets, and exact
-represented relations. A separate raw-graph oracle covers tied two-stage
-continuous families. This does not establish general continuous multi-stage
-coverage, multiple free control parameters, or a broad continuous polytope
-oracle; those acceptance requirements remain open. The fixed-path reachability
-adapter currently uses the direct joint-H composer; a separate projected-set
+families, a finite-horizon scalar interval profile with exactly one free
+bounded control interval, and a separate exactly two-stage scalar profile with
+two free bounded control intervals. These verifier profiles require interval
+invariants/guards and deterministic exactly representable scalar affine
+resets. A raw-graph oracle covers tied two-stage continuous families and a
+three-stage regression fixture covers the generalized single-parameter horizon
+path; an independent polygon oracle covers the bounded two-parameter case.
+General continuous-polytope oracle coverage, arbitrary horizons and broader
+multiple-parameter verification remain open. Portfolio builders now preflight
+the complete enumerated path inventory for supported direct joint-H
+representations and variable/row/matrix resource limits before constructing
+any branch relation. The combined verified-program builder also runs each
+built-in verifier's bounded-domain preflight; custom bounded verifiers fail
+closed until they implement preflight. The fixed-path reachability adapter
+currently uses the direct joint-H composer; a separate projected-set
 implementation is not yet supplied.
 
 The EXT-07 report exercises one supported one-step scalar interval case through
 path construction, HiGHS optimization, and family verification. Its 2D plot
 shows control against terminal state for that scalar system; it does not measure
-the new two-stage verifier. This is a bounded numerical example, not a
-scalability result or completion claim. The main-only Pages URL and live hashes
-remain pending until publication succeeds.
+the finite-horizon verifier. The visual gallery also contains an analytic
+two-control polygon illustration linked to its raw input/answer record; it is
+not measured output. These bounded examples are not scalability results or a
+completion claim. The main-only Pages URL and live hashes remain pending until
+publication succeeds.

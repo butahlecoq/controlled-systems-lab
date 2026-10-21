@@ -42,7 +42,7 @@ class GalleryTests(unittest.TestCase):
             (target / "index.html").write_text("<html><body>Reviewed report</body></html>")
 
     def test_saved_outputs_match_literal_geometry(self):
-        square, line, intersection, hybrid = self.examples
+        square, line, intersection, hybrid, _ = self.examples
         self.assertEqual(square["points"], [[0,0],[1,0],[1,1],[0,1],[.5,.5],[0,0],[1,0]])
         self.assertEqual(square["indices"], [0,1,2,3])
         self.assertEqual(line["indices"], [1,3])
@@ -53,6 +53,16 @@ class GalleryTests(unittest.TestCase):
         self.assertEqual(hybrid["analytic"]["feasible_projection"], "(u[0], x[2]) = (s, s), 0<=s<=0.5")
         self.assertEqual(hybrid["analytic"]["complete_minimizer"], "all joint coordinates are zero")
         self.assertEqual(hybrid["inputs"]["horizon"], 2)
+        loaded = gallery.load_examples(self.catalog)
+        two_parameter = loaded[4]
+        self.assertEqual(two_parameter["kind"], "two_parameter")
+        self.assertEqual([path["feasible_polygon_in_control_coordinates"]
+                          for path in two_parameter["polygons"]],
+                         [[[0, 0], [0.5, 0], [0.5, 0.5], [0, 1]],
+                          [[0, 0], [1, 0], [0, 1]]])
+        self.assertEqual(two_parameter["analytic"]["minimum_objective"], 0)
+        self.assertEqual(two_parameter["analytic"]["complete_optimal_family"],
+                         "every point in each labelled feasible polygon; both paths are retained")
 
     def test_build_preserves_reports_and_has_resolvable_links(self):
         before = {p.relative_to(self.site): hashlib.sha256(p.read_bytes()).hexdigest()
@@ -74,6 +84,11 @@ class GalleryTests(unittest.TestCase):
         self.assertIn("not part of that measured fixture", page)
         self.assertIn("unique minimum", page)
         self.assertIn("x_pre[1] in [0,0.5]", page)
+        self.assertIn("Two labelled optimal polygons", page)
+        self.assertIn("The objective is identically zero", page)
+        self.assertIn("not part of that measured fixture", page)
+        self.assertIn('href="two_parameter_scalar_polytopes.json"', page)
+        self.assertIn("includes both free controls", page)
         self.assertIn('href="https://github.com/butahlecoq/controlled-systems-lab/commit/c6d135c94ee0fe4fece074b455dae18bee0d22b2"', page)
         self.assertIn('href="two_stage_scalar_family.json"', page)
         self.assertIn("blob/b83b8dc415dbe5811371b8446931ae4c6f3d2e28/reports/algorithm-results/tooling/geo04/polyhedral_intersection_driver.cpp", page)
@@ -83,7 +98,7 @@ class GalleryTests(unittest.TestCase):
             if not urlsplit(link).scheme and not link.startswith("#"):
                 self.assertTrue((self.site / "examples" / link.split("#")[0]).is_file(), link)
         figures = list((self.site / "examples").glob("*.svg"))
-        self.assertEqual(len(figures), 4)
+        self.assertEqual(len(figures), 5)
         for figure in figures:
             tree = ET.fromstring(figure.read_text())
             self.assertEqual(tree.attrib["role"], "img")
@@ -103,6 +118,19 @@ class GalleryTests(unittest.TestCase):
         self.assertEqual(record["inputs"]["state_dimension"], 1)
         self.assertEqual(record["inputs"]["modes"][0]["controls_by_stage"],
                          [{"interval": [0, 1]}, {"singleton": 0}])
+        two_parameter_svg = ET.parse(self.site / "examples/two_parameter_scalar_polytopes.svg")
+        two_parameter_svg_text = "".join(two_parameter_svg.getroot().itertext())
+        self.assertIn("objective = 0 everywhere", two_parameter_svg_text)
+        self.assertIn("u₁ (second free control)", two_parameter_svg_text)
+        polygons = two_parameter_svg.findall(".//{http://www.w3.org/2000/svg}polygon")
+        self.assertEqual([polygon.attrib["points"] for polygon in polygons],
+                         ["80.000000,440.000000 480.000000,440.000000 80.000000,40.000000",
+                          "80.000000,440.000000 280.000000,440.000000 280.000000,240.000000 80.000000,40.000000"])
+        two_record = json.loads((self.site / "examples/two_parameter_scalar_polytopes.json").read_text())
+        self.assertTrue(two_record["illustration_only"])
+        self.assertEqual(two_record["inputs"]["terminal_objective"],
+                         {"type": "linear", "coefficients": [0], "constant": 0})
+        self.assertEqual(len(two_record["analytic"]["paths"]), 2)
         first = {p.name: p.read_bytes() for p in (self.site / "examples").iterdir()}
         gallery.build(self.catalog, self.site)
         self.assertEqual({p.name: p.read_bytes() for p in (self.site / "examples").iterdir()}, first)
@@ -131,6 +159,7 @@ class GalleryTests(unittest.TestCase):
         self.assertEqual(result["examples"][1]["vertices"], [[0,0],[3,3]])
         self.assertEqual(result["examples"][2]["vertices"][0], [-1.0000000000000002, -.5000000000000001])
         self.assertEqual(result["examples"][3]["kind"], "hybrid")
+        self.assertEqual(result["examples"][4]["kind"], "two_parameter")
 
 
 if __name__ == "__main__":

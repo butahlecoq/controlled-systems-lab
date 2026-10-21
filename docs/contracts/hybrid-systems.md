@@ -146,10 +146,32 @@ configured limits and ordered operation trace. Its default implementation,
 `JointHReachabilityAdapter`, currently wraps the same full joint-H composer; it
 does not project intermediate coordinates or merge paths. This provides a
 replaceable reachability contract, but not yet an independent projected-set
-reachability algorithm. The direct-trajectory API is replaceable through
-`HybridDirectTrajectoryAdapter`; its default implementation,
-`JointHDirectTrajectoryAdapter`, builds a branch-labelled joint H relation and
-optimization program. Each direct adapter declares whether it preserves the
+reachability algorithm. Each reachability adapter must preflight its supported
+operations and limits for the fixed path before the wrapper queries capabilities
+or starts composition. The default preflight fails closed; the built-in joint-H
+adapter uses the structural set-representation and joint-relation-limit checks.
+Built-in joint-H structural failures retain path and stage context. The
+reachability, direct-trajectory, and family-verification preflight hooks have
+default implementations. Derived adapters that do not override a hook remain
+source compatible; adapters that override a preflight must match its declared
+result type. A reachability adapter must override its fail-closed default to be
+usable; a direct-trajectory adapter using a representation other than joint-H
+must override the structural joint-H default. These public virtual additions
+change adapter vtables; downstream prebuilt adapters must be rebuilt. CSL does
+not promise a stable C++ binary/plugin ABI.
+The direct-trajectory API is replaceable through
+`HybridDirectTrajectoryAdapter`; each adapter preflights its complete fixed-path
+inventory and relation limits before capability queries or branch builds.
+Every adapter preflight rejection carries a requested path, the configured
+relation limits, and one primary diagnostic for the preflight failure; the
+wrapper checks that evidence before returning the rejection. Empty path
+inventories are rejected before adapter preflight because they have no branch
+to identify. A malformed adapter report is replaced with a
+request-scoped evidence-mismatch failure. The failure may also retain built-in
+relation-operation records. Request-wide validation errors remain diagnostics.
+The default adapter, `JointHDirectTrajectoryAdapter`, builds a
+branch-labelled joint H relation and optimization program. Each direct adapter
+declares whether it preserves the
 branch-labelled relation, which objective classes it supports, and its
 assurance level; the wrapper rejects missing branch or objective capabilities
 before dispatch. Injected adapters must preserve that result contract and
@@ -162,6 +184,30 @@ any candidate face's solver-provider provenance, to that path's verification
 record. The report carries per-path feasibility, objective, and continuous-
 coverage statuses, but it is inspection data and cannot publish a
 `synthesis::OptimalFamily`.
+Portfolio construction enumerates the complete path inventory and calls the
+trajectory adapter's exact-operation and resource preflight before its
+capabilities or any branch build. The default joint-H adapter checks structural
+set representations and joint variable, row, or matrix-element limits across
+every path; unsupported operations and limits are reported with affected path
+and stage before any branch relation is constructed. Adapters using another
+exact representation may implement their own operation preflight within the
+same result contract. It also checks the adapter's
+declared assurance, branch-relation support, and linear/convex terminal-objective
+support for every path before dispatching any path. Unsupported objective
+support identifies the candidate path and terminal stage. When a verifier is
+requested during construction, use `build_hybrid_portfolio_programs_with_verifier`;
+after trajectory operation preflight it calls the verifier adapter's `preflight`,
+then checks trajectory-adapter capabilities across the same inventory. The built-in
+path and portfolio builders reject unknown assurance values and non-finite or
+negative tolerances before calling injected adapter methods. Validated objective
+assurance is unsupported because the hybrid objective path currently supports
+numerical assurance only. The single-path wrapper checks policy before querying
+trajectory capabilities; the verified portfolio builder checks it before
+querying verifier capabilities or running verifier preflight. The built-in
+singleton and scalar interval verifiers check each enumerated path; a custom
+bounded verifier must implement preflight, and the default implementation fails
+closed. These admission checks supplement later relation, candidate, and report
+validation.
 `ExactSingletonHybridFamilyVerifier` independently enumerates edge paths and
 reconstructs trajectories using checked integer arithmetic. It supports only
 integral initial states, singleton controls, singleton-representation resets,
@@ -200,22 +246,38 @@ candidate intervals are rejected instead of expanded by tolerance. It is
 limited to this domain; it does not establish general continuous-polytope
 family coverage or validated assurance.
 
-`TwoStageScalarIntervalHybridFamilyVerifier` adds a bounded two-stage numerical
-domain with scalar states and controls, exactly one bounded non-singleton
-control interval across the two stages, singleton controls at the other stage,
-interval invariants and guards, deterministic exactly representable scalar
-affine H-relation resets, and a scalar linear terminal objective. It
-independently propagates the shared control parameter through both flows and
-resets, reconstructs each path's feasible parameter interval and objective,
-checks the complete seven-coordinate path relation, and checks every optimal
-candidate against that path's minimizing subset. Distinct continuous families
-on globally tied paths are retained. The verifier rejects unsupported
-dimensions, horizons, relation forms, resource limits, and arithmetic whose
-exactness it cannot establish. An independently infeasible path is certified
-only when its supplied relation is explicitly represented as empty; otherwise
-the portfolio result is unsupported. It does not cover multiple continuous
-control parameters, general continuous multi-stage families, or validated
-assurance.
+`SingleParameterScalarIntervalHybridFamilyVerifier` adds a finite-horizon
+numerical domain with scalar states and controls, exactly one bounded
+non-singleton control interval across the horizon, singleton controls at every
+other stage, interval invariants and guards, deterministic exactly representable
+scalar affine H-relation resets, and a scalar linear terminal objective. It
+independently propagates the shared control parameter through every flow and
+reset, reconstructs each path's feasible parameter interval and objective,
+checks the complete `(1 + 3H)`-coordinate path relation, and checks every
+optimal candidate against that path's minimizing subset. Distinct continuous
+families on globally tied paths are retained. The verifier rejects unsupported
+dimensions, relation forms, resource limits, and arithmetic whose exactness it
+cannot establish. An independently infeasible path is certified only when its
+supplied relation is explicitly represented as empty; otherwise the portfolio
+result is unsupported. It does not cover multiple continuous control
+parameters, general continuous polytope families, or validated assurance. The
+`TwoStageScalarIntervalHybridFamilyVerifier` remains as a two-stage adapter and
+preserves its existing report identifier.
+
+`TwoParameterScalarPolytopeHybridFamilyVerifier` adds a separate finite-horizon
+slice for exactly two stages, scalar states and controls, one bounded
+non-singleton interval control at each stage, interval invariants and guards,
+and deterministic exactly representable scalar affine resets. It propagates
+both control parameters through the complete joint tuple, clips their bounded
+rectangle by exact half-planes, checks the supplied joint H-relation's affine
+hull as well as its projected polygon, and applies the same checks to each
+globally optimal face. Exact global ties retain their distinct path families.
+The implementation bounds both the cumulative interval rows and the cumulative
+half-plane clips per path (4096 each), as well as polygon vertices (4096). It
+rejects degenerate feasible control polygons and unsupported H-representations, and fails closed
+when exact binary64 arithmetic cannot be established. This profile does not
+cover arbitrary horizons, more than two free controls, non-interval admissible
+sets, nondeterministic resets, or validated assurance.
 
 ## Initial supported profile and rejection boundary
 
@@ -234,11 +296,13 @@ must use an exact polyhedral relation operation supported by the selected provid
 cross-branch convexification is introduced. It does not promise validated
 arithmetic or prove a numerical provider's result. Provider assurance is
 recorded separately. The implementation includes an exact integral singleton
-verifier and numerical one-stage and two-stage scalar interval verifiers. Their
-bounded profiles support only scalar interval sets and deterministic scalar
-affine resets; they do not verify general continuous multi-stage families or
-general-dimensional relations. These bounded verifiers do not establish the
-full EXT-07 acceptance contract.
+verifier, a one-step scalar interval verifier, and a finite-horizon
+single-parameter scalar interval verifier. A separate two-stage verifier covers
+exactly two bounded non-singleton scalar control intervals, scalar states and
+controls, interval invariants and guards, and deterministic exactly
+representable scalar affine resets. These bounded profiles do not verify
+general continuous polytope families or general-dimensional relations, and do
+not establish the full EXT-07 acceptance contract.
 
 ## Required request-admission contract
 
@@ -261,11 +325,11 @@ creating a provider workspace or running an algorithm:
    evidence as complete.
 
 The current implementation does not yet satisfy this full admission contract.
-Model and relation-composition preflights cover their declared capabilities,
-but verifier admission is request-scoped and may occur after branch-program
-construction. Unsupported verifier plans therefore remain an EXT-07 acceptance
-gap; the bounded verifiers described above must not be treated as general
-continuous-family support.
+Portfolio builders preflight the complete enumerated path set for supported
+direct joint-H representations and relation resource limits before branch
+construction. The verified builder additionally preflights the verifier domain.
+Other provider operations, terminal-policy coverage, and general
+continuous-family support remain EXT-07 acceptance work.
 
 The initial profile does not infer support from the presence of lower-level
 types. It rejects, before workspace creation, nonempty temporal couplings until
@@ -309,12 +373,16 @@ identity. Solver-provider provenance remains attached to each branch
 execution. The default reachability adapter wraps this same direct joint-H
 composer; an independently implemented projected-set reachability algorithm
 is not yet available. The compiled verifiers cover integral singleton paths,
-one-step scalar interval families, and the bounded two-stage scalar interval
-profile described above. No compiled verifier covers general continuous
-multi-stage hybrid families. These verifier domains reject unsupported input
-when verification runs, but portfolio construction does not yet reject every
-unsupported verifier plan before building branch programs, including for the
-bounded two-stage verifier.
+one-step scalar interval families, and the bounded finite-horizon
+single-parameter scalar interval profile described above, plus the separate
+two-stage/two-parameter scalar polygon profile. They do not cover general
+continuous polytope families. These verifier domains reject unsupported input
+when verification runs; `build_hybrid_portfolio_programs_with_verifier` also
+rejects unsupported verifier domains and declared trajectory objective
+capabilities before building branch programs. Validated objective assurance
+remains unsupported; adapter-specific objective-policy semantics, general
+provider-operation admission, independent projected-set reachability, and
+broader multiple-parameter verifier coverage remain incomplete.
 
 ## Independent test oracle requirements
 

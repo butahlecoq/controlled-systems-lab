@@ -5,6 +5,7 @@
 #include <csl/optimization/linear_program.hpp>
 #include <csl/registry/provider.hpp>
 #include <span>
+#include <variant>
 
 namespace csl::synthesis {
 
@@ -37,6 +38,7 @@ struct HybridReachabilityCapabilities {
     bool retains_branch_labelled_joint_relation{};
     Assurance assurance{Assurance::numerical};
 };
+using HybridReachabilityPreflightResult = model::HybridRelationPreflightResult;
 
 // Replaceable reachability boundary for one fixed mode/edge path. The result
 // retains controls and all pre/post-reset coordinates in the joint relation.
@@ -44,6 +46,12 @@ class HybridReachabilityAdapter {
 public:
     virtual ~HybridReachabilityAdapter() = default;
     virtual HybridReachabilityCapabilities capabilities() const noexcept = 0;
+    // Adapters must admit their supported operations and limits before the
+    // wrapper queries capabilities or starts path composition. The default
+    // fails closed for adapters that have not declared an admission plan.
+    virtual HybridReachabilityPreflightResult preflight(const model::HybridSystem&,
+        const model::HybridRequest&, const model::HybridPath&,
+        model::HybridRelationLimits, std::stop_token cancellation) const;
     virtual HybridPathReachabilityResult compose_path(const model::HybridSystem&,
         const model::HybridRequest&, const model::HybridPath&,
         model::HybridRelationLimits, std::stop_token cancellation) const = 0;
@@ -54,6 +62,9 @@ public:
 class JointHReachabilityAdapter final : public HybridReachabilityAdapter {
 public:
     HybridReachabilityCapabilities capabilities() const noexcept override;
+    HybridReachabilityPreflightResult preflight(const model::HybridSystem&,
+        const model::HybridRequest&, const model::HybridPath&,
+        model::HybridRelationLimits, std::stop_token cancellation) const override;
     HybridPathReachabilityResult compose_path(const model::HybridSystem&,
         const model::HybridRequest&, const model::HybridPath&,
         model::HybridRelationLimits, std::stop_token cancellation) const override;
@@ -70,12 +81,32 @@ struct HybridDirectTrajectoryCapabilities {
     bool convex_objectives{};
     Assurance assurance{Assurance::numerical};
 };
+struct HybridDirectTrajectoryPreflightFailure {
+    model::HybridPath path;
+    model::HybridRelationLimits limits;
+    // Present for adapters that can expose the built-in relation-operation
+    // trace. Other exact representations may leave this empty.
+    std::vector<model::HybridRelationOperationRecord> relation_operations;
+    // The primary preflight diagnostic explains the rejection at one
+    // deterministic, request-scoped boundary.
+    Diagnostic diagnostic;
+};
+using HybridDirectTrajectoryPreflightResult = std::variant<std::monostate,
+    HybridDirectTrajectoryPreflightFailure, OperationStopped>;
 
 // Replaceable direct-trajectory boundary. Implementations return the same
 // branch-labelled joint relation, lifted objective, and optimization program.
 class HybridDirectTrajectoryAdapter {
 public:
     virtual ~HybridDirectTrajectoryAdapter() = default;
+    // Adapters admit their exact operation plan and resource needs for the
+    // complete fixed-path inventory before capability queries or branch builds.
+    // The default declares the built-in joint-H representation boundary; adapters
+    // using another representation must override it.
+    virtual HybridDirectTrajectoryPreflightResult preflight(const model::HybridSystem&,
+        const model::HybridRequest&, std::span<const model::HybridPath>,
+        model::HybridRelationLimits, optimization::ObjectivePolicy,
+        std::stop_token cancellation) const;
     virtual HybridDirectTrajectoryCapabilities capabilities() const noexcept = 0;
     virtual HybridPathProgramResult build_path(const model::HybridSystem&,
         const model::HybridRequest&, const model::HybridPath&, ProblemId,
@@ -211,6 +242,8 @@ struct HybridFamilyVerificationReport {
 };
 using HybridFamilyVerificationResult = std::variant<HybridFamilyVerificationReport,
     Diagnostics, OperationStopped>;
+using HybridFamilyVerificationPreflightResult =
+    std::variant<std::monostate, Diagnostics, OperationStopped>;
 
 struct HybridFamilyVerificationCapabilities {
     bool checks_original_hybrid_feasibility{};
@@ -225,6 +258,11 @@ class HybridFamilyVerificationAdapter {
 public:
     virtual ~HybridFamilyVerificationAdapter() = default;
     virtual HybridFamilyVerificationCapabilities capabilities() const noexcept = 0;
+    // Bounded adapters override this to reject unsupported model domains
+    // before branch relation construction. The default fails closed.
+    virtual HybridFamilyVerificationPreflightResult preflight(const model::HybridSystem&,
+        const model::HybridRequest&, std::span<const model::HybridPath>,
+        std::stop_token cancellation) const;
     virtual HybridFamilyVerificationResult verify(const model::HybridSystem&,
         const model::HybridRequest&, std::span<const model::HybridPath>,
         std::span<const HybridPathProgram>,
@@ -237,6 +275,9 @@ public:
 class ExactSingletonHybridFamilyVerifier final : public HybridFamilyVerificationAdapter {
 public:
     HybridFamilyVerificationCapabilities capabilities() const noexcept override;
+    HybridFamilyVerificationPreflightResult preflight(const model::HybridSystem&,
+        const model::HybridRequest&, std::span<const model::HybridPath>,
+        std::stop_token cancellation) const override;
     HybridFamilyVerificationResult verify(const model::HybridSystem&,
         const model::HybridRequest&, std::span<const model::HybridPath>,
         std::span<const HybridPathProgram>,
@@ -251,6 +292,9 @@ public:
 class OneStepScalarIntervalHybridFamilyVerifier final : public HybridFamilyVerificationAdapter {
 public:
     HybridFamilyVerificationCapabilities capabilities() const noexcept override;
+    HybridFamilyVerificationPreflightResult preflight(const model::HybridSystem&,
+        const model::HybridRequest&, std::span<const model::HybridPath>,
+        std::stop_token cancellation) const override;
     HybridFamilyVerificationResult verify(const model::HybridSystem&,
         const model::HybridRequest&, std::span<const model::HybridPath>,
         std::span<const HybridPathProgram>,
@@ -258,18 +302,60 @@ public:
         std::stop_token cancellation) const override;
 };
 
-// Independent numerical verifier for two-stage scalar paths with exactly one
-// bounded interval control parameter, singleton controls at other stages, and
-// deterministic exactly representable scalar affine resets.
-class TwoStageScalarIntervalHybridFamilyVerifier final : public HybridFamilyVerificationAdapter {
+// Independent numerical verifier for scalar paths at any finite horizon with
+// exactly one bounded interval control parameter, singleton controls at other
+// stages, and deterministic exactly representable scalar affine resets.
+class SingleParameterScalarIntervalHybridFamilyVerifier final : public HybridFamilyVerificationAdapter {
 public:
     HybridFamilyVerificationCapabilities capabilities() const noexcept override;
+    HybridFamilyVerificationPreflightResult preflight(const model::HybridSystem&,
+        const model::HybridRequest&, std::span<const model::HybridPath>,
+        std::stop_token cancellation) const override;
     HybridFamilyVerificationResult verify(const model::HybridSystem&,
         const model::HybridRequest&, std::span<const model::HybridPath>,
         std::span<const HybridPathProgram>,
         std::span<const HybridPathOptimalFaceCandidate>, NumericalPolicy,
         std::stop_token cancellation) const override;
 };
+
+// Independent exact-domain verifier for two-stage scalar trajectories with
+// one bounded interval control at each stage. It reconstructs the feasible
+// control polygon by exact half-plane clipping and checks full joint-relation
+// and optimal-face equality. Unsupported arithmetic or geometry fails closed.
+class TwoParameterScalarPolytopeHybridFamilyVerifier final : public HybridFamilyVerificationAdapter {
+public:
+    HybridFamilyVerificationCapabilities capabilities() const noexcept override;
+    HybridFamilyVerificationPreflightResult preflight(const model::HybridSystem&,
+        const model::HybridRequest&, std::span<const model::HybridPath>,
+        std::stop_token cancellation) const override;
+    HybridFamilyVerificationResult verify(const model::HybridSystem&,
+        const model::HybridRequest&, std::span<const model::HybridPath>,
+        std::span<const HybridPathProgram>,
+        std::span<const HybridPathOptimalFaceCandidate>, NumericalPolicy,
+        std::stop_token cancellation) const override;
+};
+
+// Compatibility adapter retained for callers that depend on the two-stage
+// verifier domain and its report identifier.
+class TwoStageScalarIntervalHybridFamilyVerifier final : public HybridFamilyVerificationAdapter {
+public:
+    HybridFamilyVerificationCapabilities capabilities() const noexcept override;
+    HybridFamilyVerificationPreflightResult preflight(const model::HybridSystem&,
+        const model::HybridRequest&, std::span<const model::HybridPath>,
+        std::stop_token cancellation) const override;
+    HybridFamilyVerificationResult verify(const model::HybridSystem&,
+        const model::HybridRequest&,std::span<const model::HybridPath>,
+        std::span<const HybridPathProgram>,std::span<const HybridPathOptimalFaceCandidate>,
+        NumericalPolicy,std::stop_token cancellation) const override;
+};
+
+// Enumerates the request path inventory, rejects unsupported verifier plans,
+// then constructs the branch relation programs transactionally.
+HybridPortfolioProgramResult build_hybrid_portfolio_programs_with_verifier(
+    const HybridFamilyVerificationAdapter&, const HybridDirectTrajectoryAdapter&,
+    const model::HybridSystem&, const model::HybridRequest&, ProblemId,
+    model::HybridEnumerationLimits, model::HybridRelationLimits,
+    optimization::ObjectivePolicy = {}, std::stop_token cancellation = {});
 
 // Enumerates the full permitted path inventory and validates that programs and
 // reports cover it exactly once. It does not promote a report into a complete

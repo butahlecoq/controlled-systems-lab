@@ -361,6 +361,24 @@ HybridFamilyVerificationCapabilities ExactSingletonHybridFamilyVerifier::capabil
     return {true,true,true,Assurance::numerical};
 }
 
+HybridFamilyVerificationPreflightResult ExactSingletonHybridFamilyVerifier::preflight(
+    const HybridSystem& system,const HybridRequest& request,std::span<const HybridPath> paths,
+    std::stop_token cancellation) const {
+    for(const auto& path:paths) {
+        if(cancellation.stop_requested())
+            return OperationStopped{StopReason::cancelled,
+                "Exact singleton verifier admission was cancelled between paths"};
+        const auto branch=evaluate(system,request,path,cancellation);
+        if(cancellation.stop_requested())
+            return OperationStopped{StopReason::cancelled,
+                "Exact singleton verifier admission was cancelled during reconstruction"};
+        if(branch.state==BranchState::unsupported)
+            return Diagnostics{{DiagnosticCode::unsupported,"hybrid.verification.exact_singleton_domain",
+                detail::describe_hybrid_path(path)+": "+branch.reason}};
+    }
+    return std::monostate{};
+}
+
 HybridFamilyVerificationResult ExactSingletonHybridFamilyVerifier::verify(
     const HybridSystem& system,const HybridRequest& request,std::span<const HybridPath> paths,
     std::span<const HybridPathProgram> programs,

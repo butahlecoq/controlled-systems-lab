@@ -36,8 +36,11 @@ analytic result with no failures. These timings are descriptive for this one
 fixture and do not establish a performance winner, scalability, general
 polyhedral coverage, or validated arithmetic. The measured report covers the
 one-step scalar interval profile; the implementation also has a bounded
-two-stage scalar verifier, but the report does not measure that domain. General
-continuous multi-stage verification remains an open EXT-07 acceptance item.
+finite-horizon verifier for exactly one free scalar control parameter, but the
+report does not measure that domain. A separate verifier now covers exactly
+two scalar control parameters for two-stage paths, but the report does not
+measure that domain either. General continuous-polytope verification and broad
+multiple-parameter coverage remain open EXT-07 acceptance items.
 The report and 2D control-versus-terminal-state example are versioned with raw
 rows and an offline ZIP. Main-only Pages
 publication and live URL/hash verification remain pending.
