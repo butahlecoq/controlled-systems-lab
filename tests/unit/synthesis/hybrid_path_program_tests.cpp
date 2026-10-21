@@ -10,6 +10,7 @@
 #include <algorithm>
 #include <array>
 #include <limits>
+#include <memory>
 #include <string_view>
 
 using namespace csl;
@@ -4574,7 +4575,9 @@ TEST_CASE("hybrid branch execution retains a completed solver result and provena
         {"hybrid-problem"},{16,64,1024});
     REQUIRE(std::holds_alternative<HybridPathProgram>(built));
     const std::array<HybridPathProgram,1> programs{std::get<HybridPathProgram>(std::move(built))};
-    const auto report=execute_hybrid_path_programs(programs,completing_lp_provider(),convex_provider(),{});
+    const auto resource_policy=std::make_shared<const ResourcePolicy>(ResourcePolicy{8,4,2,8192});
+    const ExecutionContext context{resource_policy,{},{},{1e-8,1e-8},{},{}};
+    const auto report=execute_hybrid_path_programs(programs,completing_lp_provider(),convex_provider(),context);
     REQUIRE(report.branches.size()==1);
     CHECK(report.all_supplied_branches_completed);
     CHECK(report.branches[0].path==example_path());
@@ -4585,6 +4588,11 @@ TEST_CASE("hybrid branch execution retains a completed solver result and provena
     REQUIRE(report.branches[0].providers.size()==1);
     REQUIRE(report.branches[0].providers[0].actual);
     CHECK(report.branches[0].providers[0].actual->id.value=="completing-lp");
+    REQUIRE(report.branches[0].requested_resources);
+    CHECK(report.branches[0].requested_resources->total_threads==8);
+    CHECK(report.branches[0].requested_resources->outer_workers==4);
+    CHECK(report.branches[0].requested_resources->threads_per_worker==2);
+    CHECK(report.branches[0].requested_resources->memory_bytes==8192);
 }
 
 TEST_CASE("hybrid guard entry and exit constrain the pre-reset state") {

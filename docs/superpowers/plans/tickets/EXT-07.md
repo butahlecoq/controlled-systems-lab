@@ -53,7 +53,9 @@ the direct joint-H adapter and a bounded one-transition scalar adapter that
 independently assembles the path relation, projects the terminal state through
 the registered geometry provider, and retains provider/row evidence. General
 horizon projected reachability and full provider/resource aggregation remain
-open.
+open. Each solver branch now retains the requested `ExecutionContext`
+resource policy alongside provider lineage; this does not report measured
+consumption or prove backend enforcement.
 
 `ExactLinearHHybridFamilyVerifier` independently reconstructs bounded,
 finite-horizon joint H-relations, minimizes linear objectives using exact

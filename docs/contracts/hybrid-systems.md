@@ -405,8 +405,12 @@ cumulative-row, and cumulative matrix-element counts. Both successful and
 failed composition reports retain the configured limits and the operation
 records completed before a diagnostic or cancellation; path-program and
 portfolio builders propagate those failure reports without dropping the path
-identity. Solver-provider provenance remains attached to each branch
-execution. The default reachability adapter wraps this same direct joint-H
+identity. Solver-provider provenance and the requested `ExecutionContext`
+resource policy remain attached to each branch execution. The resource policy
+is a request record only: it does not measure backend consumption or establish
+thread or memory enforcement. Provider-level observations and resource-scale
+evidence therefore remain incomplete. The default reachability adapter wraps
+this same direct joint-H
 composer. The separate projected-state adapter independently builds and
 projects a one-transition scalar relation; multi-stage and general-dimensional
 projected reachability remain unsupported. The compiled verifiers cover exact
