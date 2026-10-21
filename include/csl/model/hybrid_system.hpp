@@ -108,6 +108,37 @@ struct HybridRelationOperationRecord {
     std::size_t cumulative_matrix_elements{};
 };
 
+enum class HybridPlannedModeOperationKind {
+    initial_state, post_state_invariant, mode_flow, continuous_control, pre_reset_invariant
+};
+enum class HybridPlannedEdgeOperationKind { transition_guard, reset_relation };
+
+// Framework-owned structural identities for validating an ordered operation
+// trace. The variant keeps mode and edge operations distinct; duplicate paths
+// remain separate obligations by their path_index.
+struct HybridPlannedModeOperation {
+    std::size_t path_index{};
+    HybridPlannedModeOperationKind operation{};
+    std::size_t stage{};
+    HybridModeId mode;
+    bool operator==(const HybridPlannedModeOperation&) const = default;
+};
+struct HybridPlannedEdgeOperation {
+    std::size_t path_index{};
+    HybridPlannedEdgeOperationKind operation{};
+    std::size_t stage{};
+    HybridEdgeId edge;
+    bool operator==(const HybridPlannedEdgeOperation&) const = default;
+};
+using HybridPlannedOperation = std::variant<HybridPlannedModeOperation,HybridPlannedEdgeOperation>;
+using HybridOperationPlanResult = std::variant<std::vector<HybridPlannedOperation>,Diagnostic>;
+
+// Produces the deterministic operation inventory for each supplied path
+// without constructing relations or invoking an adapter. Malformed path shapes
+// are rejected before an inventory is returned.
+HybridOperationPlanResult plan_hybrid_operations(
+    std::span<const HybridPath> paths);
+
 struct HybridComposedPathRelation {
     sets::SetData relation;
     HybridRelationLimits limits;

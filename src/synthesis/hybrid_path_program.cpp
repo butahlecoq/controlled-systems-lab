@@ -1,6 +1,7 @@
 #include <csl/synthesis/hybrid_path_program.hpp>
 
 #include <algorithm>
+#include <array>
 #include <cmath>
 #include <limits>
 
@@ -69,6 +70,9 @@ HybridTrajectoryOperationPreflightResult preflight_hybrid_trajectory_operations(
             "Hybrid trajectory operation preflight was cancelled before adapter admission"};
     if(const auto policy_error=hybrid_objective_policy_error(policy); policy_error)
         return Diagnostics{*policy_error};
+    const auto operation_plan=model::plan_hybrid_operations(paths);
+    if(const auto* diagnostic=std::get_if<Diagnostic>(&operation_plan))
+        return Diagnostics{*diagnostic};
     const auto evidence_rejection=[&](const model::HybridPath& path,Diagnostic diagnostic) {
         return HybridTrajectoryOperationPreflightResult{model::HybridPathCompositionFailureReport{
             path,limits,{},std::move(diagnostic)}};
@@ -152,27 +156,40 @@ bool same_limits(model::HybridRelationLimits left,model::HybridRelationLimits ri
     return left.max_variables==right.max_variables && left.max_rows==right.max_rows &&
         left.max_matrix_elements==right.max_matrix_elements;
 }
+bool planned_operation_matches(const model::HybridRelationOperationRecord& observed,
+    const model::HybridPlannedOperation& planned) {
+    if(const auto* mode=std::get_if<model::HybridPlannedModeOperation>(&planned)) {
+        model::HybridRelationOperationKind expected{};
+        switch(mode->operation) {
+        case model::HybridPlannedModeOperationKind::initial_state:
+            expected=model::HybridRelationOperationKind::initial_state; break;
+        case model::HybridPlannedModeOperationKind::post_state_invariant:
+            expected=model::HybridRelationOperationKind::post_state_invariant; break;
+        case model::HybridPlannedModeOperationKind::mode_flow:
+            expected=model::HybridRelationOperationKind::mode_flow; break;
+        case model::HybridPlannedModeOperationKind::continuous_control:
+            expected=model::HybridRelationOperationKind::continuous_control; break;
+        case model::HybridPlannedModeOperationKind::pre_reset_invariant:
+            expected=model::HybridRelationOperationKind::pre_reset_invariant; break;
+        }
+        return observed.operation==expected && observed.stage==mode->stage &&
+            observed.mode==mode->mode && !observed.edge;
+    }
+    const auto& edge=std::get<model::HybridPlannedEdgeOperation>(planned);
+    const auto expected=edge.operation==model::HybridPlannedEdgeOperationKind::transition_guard
+        ?model::HybridRelationOperationKind::transition_guard
+        :model::HybridRelationOperationKind::reset_relation;
+    return observed.operation==expected && observed.stage==edge.stage &&
+        !observed.mode && observed.edge==edge.edge;
+}
 Diagnostics hybrid_operation_trace_errors(const model::HybridPath& path,
     model::HybridRelationLimits limits,
     std::span<const model::HybridRelationOperationRecord> operations,bool require_nonempty,
     std::optional<std::size_t> relation_dimension = std::nullopt) {
-    struct ExpectedOperation {
-        model::HybridRelationOperationKind kind;
-        std::size_t stage;
-        std::optional<model::HybridModeId> mode;
-        std::optional<model::HybridEdgeId> edge;
-    };
-    std::vector<ExpectedOperation> expected;
-    expected.push_back({model::HybridRelationOperationKind::initial_state,0,path.modes.front(),{}});
-    for(std::size_t stage=0;stage<=path.edges.size();++stage) {
-        expected.push_back({model::HybridRelationOperationKind::post_state_invariant,stage,path.modes[stage],{}});
-        if(stage==path.edges.size()) continue;
-        expected.push_back({model::HybridRelationOperationKind::mode_flow,stage,path.modes[stage],{}});
-        expected.push_back({model::HybridRelationOperationKind::continuous_control,stage,path.modes[stage],{}});
-        expected.push_back({model::HybridRelationOperationKind::pre_reset_invariant,stage+1,path.modes[stage],{}});
-        expected.push_back({model::HybridRelationOperationKind::transition_guard,stage,{},path.edges[stage]});
-        expected.push_back({model::HybridRelationOperationKind::reset_relation,stage,{},path.edges[stage]});
-    }
+    const std::array<model::HybridPath,1> paths{path};
+    const auto planned=model::plan_hybrid_operations(paths);
+    if(const auto* diagnostic=std::get_if<Diagnostic>(&planned)) return one(*diagnostic);
+    const auto& expected=std::get<std::vector<model::HybridPlannedOperation>>(planned);
     if((require_nonempty && operations.empty()) || operations.size()>expected.size() ||
        (require_nonempty && operations.size()!=expected.size()))
         return one({DiagnosticCode::evidence_mismatch,"hybrid.adapter.operations",
@@ -193,8 +210,7 @@ Diagnostics hybrid_operation_trace_errors(const model::HybridPath& path,
            operation.cumulative_matrix_elements<previous_elements ||
            (joint_variables && operation.joint_variables!=*joint_variables) ||
            (relation_dimension && operation.joint_variables!=*relation_dimension) ||
-           operation.operation!=expected_operation.kind || operation.stage!=expected_operation.stage ||
-           operation.mode!=expected_operation.mode || operation.edge!=expected_operation.edge)
+           !planned_operation_matches(operation,expected_operation))
             return one({DiagnosticCode::evidence_mismatch,"hybrid.adapter.operations",
                 "Adapter operation provenance is incomplete, out of path, or exceeds configured limits"});
         joint_variables=operation.joint_variables;

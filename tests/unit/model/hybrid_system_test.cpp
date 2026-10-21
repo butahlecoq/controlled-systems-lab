@@ -5,6 +5,9 @@
 #include <csl/sets/data.hpp>
 
 #include <algorithm>
+#include <array>
+#include <optional>
+#include <span>
 #include <type_traits>
 #include <utility>
 
@@ -176,6 +179,53 @@ std::pair<HybridSystem,HybridRequest> dimension_changing_example() {
         {{{"target"},LinearTerminal{{1,0},0},"energy","J"}}};
     return {std::move(system),std::move(request)};
 }
+}
+
+TEST_CASE("framework operation plans preserve ordered duplicate path obligations") {
+    const HybridPath path{{{"idle"},{"active"}},{{"start-a"}}};
+    const std::array<HybridPath,2> paths{path,path};
+    const auto result=plan_hybrid_operations(paths);
+    REQUIRE(std::holds_alternative<std::vector<HybridPlannedOperation>>(result));
+    const auto& plan=std::get<std::vector<HybridPlannedOperation>>(result);
+
+    REQUIRE(plan.size()==16);
+    const auto idle=std::optional<HybridModeId>{HybridModeId{"idle"}};
+    const auto active=std::optional<HybridModeId>{HybridModeId{"active"}};
+    const auto edge=std::optional<HybridEdgeId>{HybridEdgeId{"start-a"}};
+    const std::array<HybridPlannedOperation,8> expected{{
+        HybridPlannedModeOperation{0,HybridPlannedModeOperationKind::initial_state,0,*idle},
+        HybridPlannedModeOperation{0,HybridPlannedModeOperationKind::post_state_invariant,0,*idle},
+        HybridPlannedModeOperation{0,HybridPlannedModeOperationKind::mode_flow,0,*idle},
+        HybridPlannedModeOperation{0,HybridPlannedModeOperationKind::continuous_control,0,*idle},
+        HybridPlannedModeOperation{0,HybridPlannedModeOperationKind::pre_reset_invariant,1,*idle},
+        HybridPlannedEdgeOperation{0,HybridPlannedEdgeOperationKind::transition_guard,0,*edge},
+        HybridPlannedEdgeOperation{0,HybridPlannedEdgeOperationKind::reset_relation,0,*edge},
+        HybridPlannedModeOperation{0,HybridPlannedModeOperationKind::post_state_invariant,1,*active}
+    }};
+    for(std::size_t i=0;i<expected.size();++i) {
+        CHECK(plan[i]==expected[i]);
+        auto duplicate=expected[i];
+        std::visit([](auto& operation) { operation.path_index=1; },duplicate);
+        CHECK(plan[i+expected.size()]==duplicate);
+    }
+
+    const std::array<HybridPath,1> zero_horizon{{HybridPath{{{"idle"}}, {}}}};
+    const auto zero_result=plan_hybrid_operations(zero_horizon);
+    REQUIRE(std::holds_alternative<std::vector<HybridPlannedOperation>>(zero_result));
+    const auto& initial_only=std::get<std::vector<HybridPlannedOperation>>(zero_result);
+    REQUIRE(initial_only.size()==2);
+    CHECK((std::get<HybridPlannedModeOperation>(initial_only[0])==
+        HybridPlannedModeOperation{0,HybridPlannedModeOperationKind::initial_state,0,*idle}));
+    CHECK((std::get<HybridPlannedModeOperation>(initial_only[1])==
+        HybridPlannedModeOperation{0,HybridPlannedModeOperationKind::post_state_invariant,0,*idle}));
+    const auto empty_result=plan_hybrid_operations(std::span<const HybridPath>{});
+    REQUIRE(std::holds_alternative<std::vector<HybridPlannedOperation>>(empty_result));
+    CHECK(std::get<std::vector<HybridPlannedOperation>>(empty_result).empty());
+
+    const std::array<HybridPath,1> malformed{{HybridPath{{{"idle"},{"active"}}, {}}}};
+    const auto rejected=plan_hybrid_operations(malformed);
+    REQUIRE(std::holds_alternative<Diagnostic>(rejected));
+    CHECK(std::get<Diagnostic>(rejected).field=="hybrid.operation_plan.path");
 }
 
 TEST_CASE("parallel transition edges remain distinct branches") {

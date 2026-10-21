@@ -14,6 +14,45 @@
 #include <unordered_set>
 
 namespace csl::model {
+
+HybridOperationPlanResult plan_hybrid_operations(
+    std::span<const HybridPath> paths) {
+    std::vector<HybridPlannedOperation> plan;
+    for(std::size_t path_index=0;path_index<paths.size();++path_index) {
+        const auto& path=paths[path_index];
+        if(path.modes.empty() || path.edges.size()==std::numeric_limits<std::size_t>::max() ||
+           path.modes.size()!=path.edges.size()+1)
+            return Diagnostic{DiagnosticCode::invalid_input,"hybrid.operation_plan.path",
+                "Operation plans require one more mode than edge and at least one mode"};
+        if(std::any_of(path.modes.begin(),path.modes.end(),[](const auto& mode) {
+               return mode.value.empty();
+           }) || std::any_of(path.edges.begin(),path.edges.end(),[](const auto& edge) {
+               return edge.value.empty();
+           }))
+            return Diagnostic{DiagnosticCode::invalid_input,"hybrid.operation_plan.identities",
+                "Operation plans require nonempty mode and edge identities"};
+        plan.push_back(HybridPlannedModeOperation{path_index,
+            HybridPlannedModeOperationKind::initial_state,0,path.modes.front()});
+        for(std::size_t stage=0;stage<path.edges.size();++stage) {
+            plan.push_back(HybridPlannedModeOperation{path_index,
+                HybridPlannedModeOperationKind::post_state_invariant,stage,path.modes[stage]});
+            plan.push_back(HybridPlannedModeOperation{path_index,
+                HybridPlannedModeOperationKind::mode_flow,stage,path.modes[stage]});
+            plan.push_back(HybridPlannedModeOperation{path_index,
+                HybridPlannedModeOperationKind::continuous_control,stage,path.modes[stage]});
+            plan.push_back(HybridPlannedModeOperation{path_index,
+                HybridPlannedModeOperationKind::pre_reset_invariant,stage+1,path.modes[stage]});
+            plan.push_back(HybridPlannedEdgeOperation{path_index,
+                HybridPlannedEdgeOperationKind::transition_guard,stage,path.edges[stage]});
+            plan.push_back(HybridPlannedEdgeOperation{path_index,
+                HybridPlannedEdgeOperationKind::reset_relation,stage,path.edges[stage]});
+        }
+        plan.push_back(HybridPlannedModeOperation{path_index,
+            HybridPlannedModeOperationKind::post_state_invariant,path.edges.size(),path.modes.back()});
+    }
+    return plan;
+}
+
 namespace {
 Diagnostic invalid(const char* field, const char* message) {
     return {DiagnosticCode::invalid_input, field, message};
