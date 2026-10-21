@@ -187,6 +187,9 @@ struct HybridBranchExecution {
     std::optional<ProgramResult> result;
     std::vector<registry::Provenance> providers;
     Diagnostics diagnostics;
+    // Resource limits supplied to this branch's provider execution. This is
+    // a requested policy, not a measurement or proof of backend enforcement.
+    std::optional<ResourcePolicy> requested_resources;
 };
 
 struct HybridPortfolioExecution {

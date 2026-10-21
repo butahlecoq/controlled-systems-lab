@@ -1081,6 +1081,7 @@ HybridPortfolioExecution execute_hybrid_path_programs(
     for(const auto& branch:programs) {
         HybridBranchExecution execution;
         execution.path=branch.path;
+        if(context.resources) execution.requested_resources=*context.resources;
         auto prepare=[&]<class Program,class Port>(const Program& program,
             const registry::PreparedProvider<Port>& provider)->std::optional<PreparedBranch> {
             if(const auto stop=interruption(context)) {
