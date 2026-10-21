@@ -30,7 +30,7 @@ The L05 wording is not enough to infer an executable operation:
 
 The four-state replay is particularly discriminating: the active candidate path yields the printed general-row count and volume, while the commented approximation hypothesis does not yield the printed modified row. That rules out attributing the modified row to those inspected active/commented paths on the checked input. It does not select a different historical implementation by elimination.
 
-The separate [T0 grouping check](evidence/l05-t0-grouping.json), merged through [issue #534](https://github.com/butahlecoq/controlled-systems-lab/issues/534), selects the grouping that matches the saved Example 1 figures for the hash-identified `Volterra.m` candidate. This is candidate-to-figure evidence only. It does not recover the article's Table 1 driver or turn the candidate's retention filter into a historical source identity.
+The separate [T0 grouping check](evidence/l05-t0-grouping.json), delivered in [PR #542](https://github.com/butahlecoq/controlled-systems-lab/pull/542) which closed [issue #534](https://github.com/butahlecoq/controlled-systems-lab/issues/534), selects the grouping that matches the saved Example 1 figures for the hash-identified `Volterra.m` candidate. This is candidate-to-figure evidence only. It does not recover the article's Table 1 driver or turn the candidate's retention filter into a historical source identity.
 
 ## Disposition for issue #4
 
