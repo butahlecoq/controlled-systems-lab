@@ -56,6 +56,8 @@ class GalleryTests(unittest.TestCase):
         loaded = gallery.load_examples(self.catalog)
         two_parameter = loaded[4]
         self.assertEqual(two_parameter["kind"], "two_parameter")
+        self.assertEqual(two_parameter["report_id"],
+                         "ext07-hybrid-two-parameter-df7acc27de65930b")
         self.assertEqual([path["feasible_polygon_in_control_coordinates"]
                           for path in two_parameter["polygons"]],
                          [[[0, 0], [0.5, 0], [0.5, 0.5], [0, 1]],
@@ -86,6 +88,8 @@ class GalleryTests(unittest.TestCase):
         self.assertIn("x_pre[1] in [0,0.5]", page)
         self.assertIn("Two labelled optimal polygons", page)
         self.assertIn("The objective is identically zero", page)
+        self.assertIn("measured report uses rectangular parameter sets", page)
+        self.assertIn("coupled triangular/quadrilateral feasible set", page)
         self.assertIn("not part of that measured fixture", page)
         self.assertIn('href="two_parameter_scalar_polytopes.json"', page)
         self.assertIn("includes both free controls", page)

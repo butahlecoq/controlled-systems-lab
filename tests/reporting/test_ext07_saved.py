@@ -29,6 +29,9 @@ class Ext07SavedReportTests(unittest.TestCase):
     def setUpClass(cls) -> None:
         bundles = sorted((ROOT / "reports/algorithm-results").glob("ext07-hybrid-*"))
         cls.bundle = next((path for path in bundles if path.is_dir()), None)
+        cls.two_parameter_bundle = next(
+            (path for path in bundles if path.is_dir() and
+             path.name.startswith("ext07-hybrid-two-parameter-")), None)
         if cls.bundle is None:
             raise unittest.SkipTest("EXT-07 report bundle is created from a frozen measured source")
 
@@ -104,6 +107,78 @@ class Ext07SavedReportTests(unittest.TestCase):
                 stream.write("{}\n")
             with self.assertRaises(ValueError):
                 render_saved.validate(copied)
+
+    def test_two_parameter_report_and_visual_example_rebuild_from_saved_rows(self) -> None:
+        if self.two_parameter_bundle is None:
+            self.skipTest("Two-parameter bundle is created from a frozen Release capture")
+        renderer = load_module(
+            "csl_ext07_two_parameter_test_renderer",
+            ROOT / "scripts/reports/ext07/two_parameter_render_saved.py")
+        self.assertEqual(renderer.render(self.two_parameter_bundle, check=True)
+                         ["report_id"], self.two_parameter_bundle.name)
+        record = renderer.validate(self.two_parameter_bundle)
+        self.assertEqual(record["analytic"]["global_minimum"], 0)
+        self.assertEqual(record["analytic"]["tied_paths"], ["enter-half", "enter-full"])
+        self.assertEqual(record["measurement"]["measured_calls"], 140)
+        example = (self.two_parameter_bundle / "two-control-example.html").read_text(
+            encoding="utf-8")
+        self.assertIn("u0 &lt;= 0.5", example)
+        self.assertIn("u0 = 0, 0 &lt;= u1 &lt;= 1", example)
+        self.assertIn("two_parameter_driver.cpp", example)
+
+    def test_stager_publishes_both_ext07_report_profiles(self) -> None:
+        if self.two_parameter_bundle is None:
+            self.skipTest("Two-parameter bundle is created from a frozen Release capture")
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            bundles = (self.bundle, self.two_parameter_bundle)
+            copied = []
+            for source in bundles:
+                destination = root / source.name
+                shutil.copytree(source, destination)
+                copied.append(destination)
+            catalog = root / "ext07-publications.json"
+            catalog.write_text(json.dumps({
+                "schema": "csl.ext07-publications/1",
+                "reports": [stage_ext07.catalog_entry(bundle) for bundle in copied],
+            }), encoding="utf-8")
+            site = root / "site"
+            site.mkdir()
+            (site / "index.html").write_text(
+                "<!doctype html><html lang=\"en\"><body><ul></ul></body></html>",
+                encoding="utf-8")
+            staged = stage_ext07.stage(catalog, site)
+            self.assertEqual(staged, ",".join(bundle.name for bundle in copied))
+            self.assertTrue((site / copied[0].name / "example-2d.html").is_file())
+            self.assertTrue((site / copied[1].name / "two-control-example.html").is_file())
+            index = (site / "index.html").read_text(encoding="utf-8")
+            self.assertIn("two-control-example.html", index)
+            self.assertIn("example-2d.html", index)
+
+    def test_stager_validates_all_catalog_entries_before_writing(self) -> None:
+        if self.two_parameter_bundle is None:
+            self.skipTest("Two-parameter bundle is created from a frozen Release capture")
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            copied = []
+            for source in (self.bundle, self.two_parameter_bundle):
+                destination = root / source.name
+                shutil.copytree(source, destination)
+                copied.append(destination)
+            entries = [stage_ext07.catalog_entry(bundle) for bundle in copied]
+            entries[1]["zip_sha256"] = "0" * 64
+            catalog = root / "ext07-publications.json"
+            catalog.write_text(json.dumps({"schema": "csl.ext07-publications/1",
+                                           "reports": entries}), encoding="utf-8")
+            site = root / "site"
+            site.mkdir()
+            original_index = "<!doctype html><html lang=\"en\"><body><ul></ul></body></html>"
+            (site / "index.html").write_text(original_index, encoding="utf-8")
+            with self.assertRaises(ValueError):
+                stage_ext07.stage(catalog, site)
+            self.assertFalse((site / copied[0].name).exists())
+            self.assertFalse((site / copied[1].name).exists())
+            self.assertEqual((site / "index.html").read_text(encoding="utf-8"), original_index)
 
 
 if __name__ == "__main__":

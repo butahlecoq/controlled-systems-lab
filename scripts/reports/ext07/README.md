@@ -45,3 +45,30 @@ The publication catalogue is `reports/algorithm-results/ext07-publications.json`
 The main-only report workflow stages only the allowlisted report bundle after
 the catalogue, hashes, HTML links, and offline ZIP validate. The deployed URL
 and live file hashes remain pending until that workflow runs on `main`.
+
+## Two-parameter verifier evidence
+
+The separate two-parameter bundle measures the bounded two-stage verifier on
+two tied paths. Its fixture has controls `(u0,u1)` in `[0,1] x [0,1]`; one
+guard restricts the first control to `[0,0.5]`, while a parallel path leaves
+it in `[0,1]`. The objective is `minimize x_terminal=u0`, so both complete
+minimizer families are `u0=0, 0<=u1<=1`. The standalone visual page plots the
+two feasible rectangles and their shared minimizing segment.
+
+The two-parameter driver measures full public path construction, both HiGHS
+LP branches, tied face construction, and verification of both families. It
+uses one excluded 10-call warmup followed by seven measured 20-call batches.
+It makes no comparator or speedup claim. The source commit and every raw
+per-call duration are recorded separately from the existing one-step report.
+
+```sh
+python scripts/reports/ext07/two_parameter_capture.py --source <frozen-source> --capture <fresh-capture> --commit <source-commit> --cmake <cmake-executable>
+python scripts/reports/ext07/two_parameter_collect.py --capture <fresh-capture> --source <frozen-source> --out reports/algorithm-results
+python scripts/reports/ext07/two_parameter_render_saved.py --bundle reports/algorithm-results/<report-id>
+python scripts/reports/ext07/two_parameter_render_saved.py --bundle reports/algorithm-results/<report-id> --check
+python scripts/reports/stage_ext07.py --source reports/algorithm-results/ext07-hybrid-51d9ee2e89d240eb --source reports/algorithm-results/<report-id>
+```
+
+The final command emits the publication catalogue with both profile-specific
+bundles. Report staging copies both immutable bundles and their distinct 2D
+examples to Pages.
