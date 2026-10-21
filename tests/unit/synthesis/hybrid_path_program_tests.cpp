@@ -1709,6 +1709,27 @@ TEST_CASE("scalar interval verifiers preflight objectives for every allowed term
     CHECK(std::get<Diagnostics>(wrong_dimension).front().field==
         "hybrid.verification.two_parameter_objective");
 }
+
+TEST_CASE("single-parameter verifier preflights objectives for infeasible reachable terminal paths") {
+    model::HybridMode mode{{"mode"},1,1,{"x"},{"u"}};
+    mode.flow=LinearStage{Matrix{1,1,{1}},Matrix{1,1,{1}},Matrix{1,0,{}},Vector{0}};
+    mode.control_sets={interval("infeasible-terminal-control",0,1)};
+    mode.invariants={UniversalSet{1},empty_handle("infeasible-terminal-invariant",1)};
+    const auto identity_reset=h_set("infeasible-terminal-reset",2,Matrix{0,2,{}},Vector{},
+        Matrix{1,2,{-1,1}},Vector{0});
+    model::HybridSystem system{1,{mode},{{{"loop"},{"mode"},{"mode"},
+        {UniversalSet{1}},{identity_reset}}}};
+    model::HybridRequest request{{{"mode"},{0}},{{"mode"}},
+        {{{"mode"},QuadraticTerminal{Matrix{1,1,{}},Vector{0},0},"cost","units"}}};
+    const std::vector<model::HybridPath> paths{{{{"mode"},{"mode"}},{{"loop"}}}};
+
+    SingleParameterScalarIntervalHybridFamilyVerifier verifier;
+    const auto result=verifier.preflight(system,request,paths,{});
+    REQUIRE(std::holds_alternative<Diagnostics>(result));
+    CHECK(std::get<Diagnostics>(result).front().field==
+        "hybrid.verification.scalar_parameter_objective");
+}
+
 TEST_CASE("hybrid portfolio capability preflight honors cancellation before scanning paths") {
     std::stop_source cancellation;
     CancellingCapabilityTrajectoryAdapter adapter{cancellation};

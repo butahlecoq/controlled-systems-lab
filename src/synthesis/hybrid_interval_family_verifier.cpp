@@ -1136,17 +1136,6 @@ HybridFamilyVerificationPreflightResult SingleParameterScalarIntervalHybridFamil
         if(cancellation.stop_requested())
             return OperationStopped{StopReason::cancelled,
                 "Single-parameter scalar verifier admission was cancelled while checking terminal objectives"};
-        bool has_path_to_terminal=false;
-        for(const auto& path:paths) {
-            if(cancellation.stop_requested())
-                return OperationStopped{StopReason::cancelled,
-                    "Single-parameter scalar verifier admission was cancelled while scanning terminal paths"};
-            if(!path.modes.empty()&&path.modes.back()==terminal_mode) {
-                has_path_to_terminal=true;
-                break;
-            }
-        }
-        if(has_path_to_terminal) continue;
         if(const auto diagnostic=scalar_parameter_terminal_objective_admission_diagnostic(request,terminal_mode))
             return Diagnostics{{*diagnostic}};
     }
