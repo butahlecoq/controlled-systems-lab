@@ -4168,7 +4168,7 @@ TEST_CASE("two parameter scalar verifier certifies a coupled polygon and "
             .complete_family_coverage == HybridVerificationStatus::established);
 }
 
-  TEST_CASE("hybrid portfolio minimizes per-mode terminal objectives globally with offsets") {
+TEST_CASE("hybrid portfolio minimizes per-mode terminal objectives globally with offsets") {
   model::HybridMode source{{"source"}, 1, 0, {"x"}, {}};
   source.flow = LinearStage{Matrix{1, 1, {1}}, Matrix{1, 0, {}},
                             Matrix{1, 0, {}}, Vector{0}};
@@ -4229,7 +4229,8 @@ TEST_CASE("two parameter scalar verifier certifies a coupled polygon and "
       literal_cost += program.objective()[coordinate] * literal_points[i][coordinate];
     CHECK(literal_cost == literal_objective_values[i]);
     const auto evidence = ProgramBoundEvidence{
-        program.identity(), SymbolicArgument{"literal mode objective", "independent terminal costs"}, {}};
+        program.identity(),
+        SymbolicArgument{"literal mode objective", "independent terminal costs"}, {}};
     ProgramResult result{
         Termination::completed,
         {program.identity(), MathematicalOutcome::optimal,
@@ -4251,7 +4252,7 @@ TEST_CASE("two parameter scalar verifier certifies a coupled polygon and "
   REQUIRE(bounds.potentially_optimal_paths.size() == 2);
   CHECK(bounds.potentially_optimal_paths[0].modes.back().value == "low");
   CHECK(bounds.potentially_optimal_paths[1].modes.back().value == "tied");
-  }
+}
 
 TEST_CASE("hybrid portfolio objective bounds retain tied possible branches") {
   auto system = example_system();
