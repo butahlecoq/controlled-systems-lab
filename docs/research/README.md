@@ -60,6 +60,8 @@ The [L05 four-state reduction hypothesis](l05-example2-approximation-hypothesis.
 
 The [L05 primary paper claim audit](l05-primary-claim-audit.md) separates its exact linear reachable-set definition, unproved modified point-pruning claim, and numerical nonlinear comparison from validated inclusion or model-error evidence.
 
+The [L05 retention-predicate crosswalk](l05-retention-predicate-crosswalk.md) maps the printed support-hyperplane wording to the hash-identified candidate filters and their replay records. It keeps candidate behavior separate from the still-unidentified Table 1 implementation.
+
 The [issue #5 feedback contract follow-up](feedback-contract-followup.md) turns the reviewed policy distinctions into a bounded robust predecessor and evidence handoff without claiming an implemented feedback solver.
 
 The [exact finite policy-class reference](finite-policy-class-reference.md) independently enumerates an authored two-step counterexample's fixed plans, executed replanning selector and globally causal value. Its three-point disturbance catalogue checks decision order but does not certify L13's continuous model or historical program.
