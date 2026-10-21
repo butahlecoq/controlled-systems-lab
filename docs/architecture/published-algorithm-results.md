@@ -37,25 +37,30 @@ fixture and do not establish a performance winner, scalability, general
 polyhedral coverage, or validated arithmetic. The first bundle covers the
 one-step scalar interval profile; the implementation also has a bounded
 finite-horizon verifier for exactly one free scalar control parameter, but the
-first bundle does not measure that domain. A second frozen bundle,
+first bundle does not measure that domain. An earlier frozen bundle,
 [`ext07-hybrid-two-parameter-df7acc27de65930b`](../../reports/algorithm-results/ext07-hybrid-two-parameter-df7acc27de65930b/),
-measures a fixed two-stage, two-control fixture with `enter-half` and
+preserves the fixed two-stage, two-control fixture with `enter-half` and
 `enter-full` branches. Its feasible sets are `[0,0.5] x [0,1]` and
 `[0,1] x [0,1]`; both retain the complete minimizing family
 `u0=0, 0<=u1<=1` for the objective `x_terminal=u0`. The registered HiGHS LP
-provider and two-parameter polytope verifier completed 140 measured calls after
-an excluded warmup. On the recorded Windows 11 / MSVC Release host, median
-end-to-end batch time was 13,080,500 ns (range 12,699,800-15,674,900 ns), and
-median individual call time was 658,250 ns; all calls matched the analytic
-answer with no failures. Both reports are descriptive evidence for their
-specific fixtures, not performance comparisons, scalability claims, general
-continuous-polytope coverage, or validated arithmetic. The two-parameter
-bundle includes a standalone feasible-set plot, raw rows, and an offline ZIP.
-Neither bundle measures the one-parameter verifier. Higher-dimensional
-free-control domains and general continuous-polytope verification remain open
-EXT-07 acceptance items. Both reports are versioned with raw rows, a plot and
-an offline ZIP. Main-only Pages publication and live URL/hash verification
-remain pending.
+provider and `TwoParameterScalarPolytopeHybridFamilyVerifier` completed 140
+measured calls after an excluded warmup. Its timing remains historical evidence
+for that verifier. The current
+[`ext07-hybrid-two-parameter-26f402289a309403`](../../reports/algorithm-results/ext07-hybrid-two-parameter-26f402289a309403/)
+bundle replays the fixture with `ExactLinearHHybridFamilyVerifier`, preserving
+both complete minimizing faces `u0=0, 0<=u1<=1`. At source commit
+`22758dadda8421f2c75ea3403dadc33dda682253`, it completed 140 measured calls
+after an excluded warmup, with zero failures; on the recorded Windows 11 / MSVC
+Release host, median end-to-end batch time was 72,596,100 ns (range
+71,067,600-74,229,000 ns) and median individual call time was 3,590,600 ns.
+This is descriptive evidence for this fixture, not a comparative benchmark,
+speedup, scalability result, or validated-arithmetic claim. The older bundle
+remains immutable; its timing is not a controlled comparison with the current
+verifier. The current bundle includes a standalone feasible-set plot, raw rows,
+and an offline ZIP. The one-parameter verifier is not measured by either
+two-control bundle. Broader independent continuous-family oracle coverage and
+resource-scale evidence remain open EXT-07 acceptance items. Main-only Pages
+publication and live URL/hash verification remain pending.
 
 ## OPT-07 ordered hull membership report
 

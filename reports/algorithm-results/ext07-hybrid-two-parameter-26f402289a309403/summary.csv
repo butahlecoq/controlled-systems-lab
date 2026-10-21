@@ -1,0 +1,8 @@
+repetition,calls,failures,paths,relation_rows,relation_matrix_elements,end_to_end_total_ns,minimum_call_ns,maximum_call_ns,provider,verifier
+0,20,0,2,20,140,71067600,3489100,3720300,csl.lp.highs@1.1.0+highs.1.11.0,csl.hybrid.exact-linear-h
+1,20,0,2,20,140,72596100,3475900,4198300,csl.lp.highs@1.1.0+highs.1.11.0,csl.hybrid.exact-linear-h
+2,20,0,2,20,140,71333400,3475300,3697100,csl.lp.highs@1.1.0+highs.1.11.0,csl.hybrid.exact-linear-h
+3,20,0,2,20,140,72624000,3533800,4077400,csl.lp.highs@1.1.0+highs.1.11.0,csl.hybrid.exact-linear-h
+4,20,0,2,20,140,73628100,3560400,4211300,csl.lp.highs@1.1.0+highs.1.11.0,csl.hybrid.exact-linear-h
+5,20,0,2,20,140,74229000,3530800,4803800,csl.lp.highs@1.1.0+highs.1.11.0,csl.hybrid.exact-linear-h
+6,20,0,2,20,140,71933200,3483300,3824800,csl.lp.highs@1.1.0+highs.1.11.0,csl.hybrid.exact-linear-h

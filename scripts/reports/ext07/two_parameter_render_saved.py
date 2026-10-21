@@ -20,6 +20,7 @@ _spec.loader.exec_module(collect)
 
 RENDERED = ("index.html", "two-control-example.html", "feasible-polygons.svg",
             "summary.csv")
+LEGACY_LAYOUT_SOURCE_COMMIT = "7d2f1ad480229bbc0e3d1596701b6b523a48ae9a"
 
 
 def validate(bundle: Path) -> dict:
@@ -70,12 +71,14 @@ def validate(bundle: Path) -> dict:
     return record
 
 
-def figure() -> bytes:
-    return '''<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 440" role="img" aria-labelledby="title desc">
+def figure(record: dict) -> bytes:
+    legacy_layout = record["source_commit"] == LEGACY_LAYOUT_SOURCE_COMMIT
+    axis_label_y = 90 if legacy_layout else 290
+    return f'''<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 440" role="img" aria-labelledby="title desc">
 <title id="title">Two-stage hybrid feasible control polygons and tied minimizing faces</title>
 <desc id="desc">The horizontal axis is u0 and the vertical axis is u1. The enter-full path allows the unit square. The enter-half path allows the rectangle from u0 zero to one half. Both have the same minimizing face u0 equals zero, with u1 anywhere from zero to one.</desc>
 <rect width="720" height="440" fill="#16161e"/>
-<g font-family="system-ui,sans-serif" fill="#e0def4"><text x="68" y="36" font-size="19">EXT-07 · two free interval controls</text><text x="328" y="408" font-size="16">stage 0 control u₀</text><text x="20" y="290" font-size="16" transform="rotate(-90 20,290)">stage 1 control u₁</text></g>
+<g font-family="system-ui,sans-serif" fill="#e0def4"><text x="68" y="36" font-size="19">EXT-07 · two free interval controls</text><text x="328" y="408" font-size="16">stage 0 control u₀</text><text x="20" y="{axis_label_y}" font-size="16" transform="rotate(-90 20,{axis_label_y})">stage 1 control u₁</text></g>
 <path d="M100 350 H620 M100 350 V72" stroke="#908caa" stroke-width="2"/>
 <g stroke="#6e6a86" stroke-dasharray="4 5"><path d="M100 350 V72"/><path d="M360 350 V72"/><path d="M620 350 V72"/><path d="M100 211 H620"/><path d="M100 72 H620"/></g>
 <path d="M100 350 L620 350 L620 72 L100 72 Z" fill="#9ccfd8" fill-opacity=".08" stroke="#9ccfd8" stroke-width="3" stroke-dasharray="9 6"/>
@@ -103,8 +106,10 @@ def summary_csv(record: dict) -> bytes:
 def example_page(record: dict) -> bytes:
     source = html.escape(record["source_commit"])
     scope = html.escape(record["report_id"])
+    layout_css = ("" if record["source_commit"] == LEGACY_LAYOUT_SOURCE_COMMIT else
+                  "pre{max-width:100%;overflow-wrap:anywhere;white-space:pre-wrap;word-break:break-word}")
     return f'''<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>EXT-07 two-control visual example</title><style>
-body{{background:#16161e;color:#e0def4;font:16px/1.55 system-ui,sans-serif;margin:0}}div{{max-width:980px;margin:auto;padding:1.2rem}}a{{color:#9ccfd8}}section{{background:#23212c;border:1px solid #524f67;border-radius:12px;padding:1rem;margin:1rem 0}}img{{width:100%;height:auto}}code{{overflow-wrap:anywhere}}pre{{max-width:100%;overflow-wrap:anywhere;white-space:pre-wrap;word-break:break-word}}
+body{{background:#16161e;color:#e0def4;font:16px/1.55 system-ui,sans-serif;margin:0}}div{{max-width:980px;margin:auto;padding:1.2rem}}a{{color:#9ccfd8}}section{{background:#23212c;border:1px solid #524f67;border-radius:12px;padding:1rem;margin:1rem 0}}img{{width:100%;height:auto}}code{{overflow-wrap:anywhere}}{layout_css}
 </style></head><body><div><p>Controlled Systems Lab - EXT-07</p><h1>Two-control feasible sets and minimizing family</h1><p>This standalone visual example accompanies a measured two-stage scalar hybrid verification fixture.</p></div><div><section><h2>Fixture and analytic answer</h2><p>This scalar-state, two-stage fixture uses joint coordinates <code>(x0,u0,x_pre1,x_post1,u1,x_pre2,x_terminal)</code>, initial state <code>x0=0</code>, flows <code>x_pre1=u0</code> and <code>x_pre2=x_post1+0*u1</code>, identity resets <code>x_post1=x_pre1</code> and <code>x_terminal=x_pre2</code>, a guarded <code>enter-half</code> edge, a parallel universal-guard <code>enter-full</code> edge, and a universal-guard <code>finish</code> edge.</p><p>Two free controls satisfy <code>0 &lt;= u0 &lt;= 1</code> and <code>0 &lt;= u1 &lt;= 1</code>. The <code>enter-half</code> branch adds <code>u0 &lt;= 0.5</code>; <code>enter-full</code> leaves the unit square unchanged. Both minimize the terminal objective <code>x_terminal = u0</code> at zero, so the complete global minimizing family is <code>u0 = 0, 0 &lt;= u1 &lt;= 1</code>.</p><img src="feasible-polygons.svg" alt="Full unit square, half-width feasible rectangle, and shared minimizing face"><p>Assurance is numerical binary64. The figure illustrates the exact fixture; it does not claim measured samples or validated arithmetic.</p></section><section><h2>Reproduce and inspect</h2><p>Build the versioned source commit <code>{source}</code> in Release and run the report capture. From a clean checkout:</p><pre>python scripts/reports/ext07/two_parameter_capture.py --source &lt;source-checkout&gt; --capture &lt;fresh-capture&gt; --commit {source} --cmake &lt;cmake-executable&gt;
 python scripts/reports/ext07/two_parameter_collect.py --capture &lt;fresh-capture&gt; --source &lt;source-checkout&gt; --out reports/algorithm-results
 python scripts/reports/ext07/two_parameter_render_saved.py --bundle reports/algorithm-results/{scope}
@@ -138,7 +143,7 @@ def render(bundle: Path, check: bool) -> dict:
     record = validate(bundle)
     files = {"index.html": index_page(record),
              "two-control-example.html": example_page(record),
-             "feasible-polygons.svg": figure(), "summary.csv": summary_csv(record)}
+             "feasible-polygons.svg": figure(record), "summary.csv": summary_csv(record)}
     for name, content in files.items():
         path = bundle / name
         if check:
