@@ -1,5 +1,11 @@
 # Delivery through GitHub
 
+When a delivery or publication uses a corrected or inferred scientific source
+variant, follow the [source-variant evidence standard](../architecture/decisions/0004-source-variant-evidence-standard.md).
+Keep historical records and published values immutable, identify the reference
+variant, and preserve owner-only decisions and run authorization as explicit
+gates.
+
 Use this guide when changing public APIs, dependency pins, installation, executable
 examples or publication workflows. In the PR, record the effect on consumers and
 choose a delivery outcome: no release needed, release candidate preparation, or

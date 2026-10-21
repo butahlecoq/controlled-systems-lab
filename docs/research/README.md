@@ -13,6 +13,12 @@ Assessment date: 2026-10-11. Rolling literature window: 2021-10-11 through 2026-
 
 ## Evidence conventions
 
+For competing source interpretations, use the [source-variant evidence
+standard](../architecture/decisions/0004-source-variant-evidence-standard.md).
+Keep source facts, exact certificates, inferred assumptions, and owner
+decisions distinct. A separately named reference variant does not establish
+historical provenance or authorize a research run.
+
 | Label | Meaning |
 |---|---|
 | Local source | Read from a supplied article, report, listing, or registration abstract; cited by L01–L31 and PDF page where applicable |
