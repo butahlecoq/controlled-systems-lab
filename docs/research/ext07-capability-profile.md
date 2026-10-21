@@ -34,6 +34,19 @@ construction, and optimal-family retention. They do not exhaust the admitted
 continuous H-relation domain. The independent exhaustive continuous-family
 oracle remains an open EXT-07 acceptance item.
 
+Additional exact linear-H tests now verify literal full optimal faces for a
+three-control box, a four-control simplex, and a five-control simplex. Each
+case also checks the verifier's completeness result; the four- and five-
+control cases reject a feasible candidate that narrows the true face. These are
+single-path verifier fixtures and complement, rather than replace, exhaustive
+multi-path continuous-family coverage.
+
+| Verifier fixture | State dimension | Control dimension | Horizon | Modes | Edges | Paths | Joint variables | Literal complete family |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | --- |
+| Three-control box | 3 | 3 | 1 | 2 | 1 | 1 | 12 | Two free controls in `[0, 1]` after minimizing the first |
+| Four-control simplex | 1 | 4 | 1 | 2 | 1 | 1 | 7 | `u_i >= 0`, `sum(u_i) <= 1` |
+| Five-control simplex | 1 | 5 | 1 | 2 | 1 | 1 | 8 | `u_i >= 0`, `sum(u_i) <= 1` |
+
 ## Saved numerical fixtures
 
 | Fixture | State dimension | Control dimension per stage | Horizon | Modes | Edges | Allowed paths | Joint variables per path | Evidence |
