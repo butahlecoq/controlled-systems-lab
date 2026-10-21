@@ -13,6 +13,7 @@ import zipfile
 
 import report_data as data
 import render
+import landing
 import geo04_registered_reports as geo04
 import geo02_registered_reports as geo02
 import geo05_registered_reports as geo05
@@ -50,7 +51,7 @@ class OfflineHTML(HTMLParser):
     def __init__(self,files):
         super().__init__(convert_charrefs=True);self.files=files;self.in_style=False;self.in_svg=False
     def handle_starttag(self,tag,attrs):
-        html={t:set() for t in ("head","title","body","header","main","footer","section","h1","h2","p","small","strong","table","caption","thead","tbody","tr","th","td","code","pre","details","summary","dl","dt","dd","figcaption","ul","li","style")}
+        html={t:set() for t in ("head","title","body","header","main","footer","section","h1","h2","h3","p","small","strong","table","caption","thead","tbody","tr","th","td","code","pre","details","summary","dl","dt","dd","figcaption","ul","li","style")}
         html.update({"html":{"lang"},"meta":{"charset","name","content"},"a":{"href"},"img":{"src","alt"},"div":{"class","role","aria-label","tabindex"},"span":{"class"},"figure":{"aria-label"}})
         html["th"]={"scope"};html["p"]={"class"}
         svg_tags={"svg","g","defs","path","clippath","use","rect","line","polyline","polygon","circle","ellipse","text","tspan","style","title","desc"}
@@ -191,30 +192,33 @@ def make_zip(bundle,path,allow_test=False):
 
 
 def catalogue_index(catalogue):
+    """Render the published landing page for the immutable catalogue."""
     artifact_ref=catalogue.get("artifact_ref","main");data.artifact_reference(artifact_ref)
-    parts=['<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>CSL algorithm reports</title></head><body><h1>Versioned algorithm reports</h1><p>Each report identifies its measured scope and evidence limits. Cross-method performance or certification claims are not implied.</p><ul>']
+    entries=[]
     for report in catalogue["reports"]:
         rid=report["report_id"]
         source_id=report.get("source_report_id",rid)
         tree,_,label=data.artifact_links(source_id,artifact_ref)
         _,archive,_=data.artifact_links(rid,artifact_ref)
-        label_kind='HiGHS reference LP, five analytic microfixtures'
+        scope='HiGHS reference LP, five analytic microfixtures';limits=""
         if catalogue.get("schema","csl.algorithm-report-catalog/1") in ("csl.algorithm-report-catalog/2","csl.algorithm-report-catalog/3"):
             if catalogue["schema"]=="csl.algorithm-report-catalog/3":
                 data.require(report["report_kind"] in ("lp","convex","opt04-phase-one","opt05-hull","opt06-basis-reuse","opt07-ordered-hull",opt11.KIND,opt12.KIND,"geo03-hv","geo04-intersection","geo02-affine-sum","geo05-projection-predecessor","geo06-quickhull",b08_exact.KIND,issue3.KIND,"syn02-terminal-minimizers","syn01-nominal-forward","syn07-ts01-analytic","syn04-strategy-b-ts01","syn04-strategy-b-ts02","syn03-strategy-a-ts01","syn03-strategy-a-ts02","syn-ts01-paired-comparison"),"unknown catalogue kind")
                 data.require(isinstance(report.get("measured_scope"),str) and isinstance(report.get("evidence_limits"),str),"schema-v3 scope/evidence metadata required")
-                label_kind=report["measured_scope"]+"; limits: "+report["evidence_limits"]
+                scope=report["measured_scope"];limits=report["evidence_limits"]
             else:
                 data.require(report["report_kind"] in ("lp","convex"),"unknown catalogue kind")
-                label_kind='HiGHS reference convex, nine analytic microfixtures' if report["report_kind"]=='convex' else label_kind
+                scope='HiGHS reference convex, nine analytic microfixtures' if report["report_kind"]=='convex' else scope
         csv_name = "stdout.jsonl" if report.get("report_kind") == opt04.KIND else "raw-driver-output.csv" if report.get("report_kind") in ("geo04-intersection", "geo02-affine-sum") else "trials.csv"
-        trial_label = "trial JSONL" if report.get("report_kind") == opt04.KIND else "CSV"
-        figure_link = (' · <a href="'+escape(rid,quote=True)+'/performance.svg">performance SVG</a>'
-                       if report.get("report_kind") in (opt04.KIND, "syn-ts01-paired-comparison") else
-                       ' · <a href="'+escape(rid,quote=True)+'/latency.svg">latency SVG</a>'
-                       if report.get("report_kind") in ("opt06-basis-reuse", opt07.KIND) else "")
-        parts.append('<li><a href="'+escape(rid,quote=True)+'/index.html">'+escape(rid)+'</a> — '+escape(label_kind)+'; source <code>'+escape(str(report["source_commit"]))+'</code> — <a href="'+escape(rid,quote=True)+'/records.json">raw JSON</a> · <a href="'+escape(rid,quote=True)+'/'+csv_name+'">'+trial_label+'</a>'+figure_link+' · <a href="'+escape(rid,quote=True)+'.zip">offline ZIP</a> · <a href="'+escape(tree,quote=True)+'">Repository artifact fallback ('+escape(label)+')</a> · <a href="'+escape(archive,quote=True)+'">Repository ZIP fallback</a></li>')
-    return ''.join(parts)+"</ul></body></html>"
+        trial_label = "Trial log" if report.get("report_kind") == opt04.KIND else "Measured tables"
+        figure_name = "performance.svg" if report.get("report_kind") in (opt04.KIND, "syn-ts01-paired-comparison") else "latency.svg" if report.get("report_kind") in ("opt06-basis-reuse", opt07.KIND) else ""
+        links=[("Raw JSON",rid+"/records.json"),(trial_label,rid+"/"+csv_name)]
+        if figure_name: links.append(("Figure",rid+"/"+figure_name))
+        links.append(("Offline bundle",rid+".zip"))
+        links.append(("Repository copy ("+label+")",tree))
+        links.append(("Repository bundle",archive))
+        entries.append({"report_id":rid,"scope":scope,"limits":limits,"commit":str(report["source_commit"]),"links":links})
+    return landing.page(entries)
 
 
 def lp_convex_publication_metadata(kind,view):

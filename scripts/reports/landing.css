@@ -1,0 +1,40 @@
+/* Published report appearance: dark Gruvbox palette, system sans-serif.
+   The landing page reuses the look of the saved report pages so the archive
+   index and the reports read as one site. No remote fonts, scripts or images. */
+body{background:#272822;color:#f8f8f2;font:16px/1.55 system-ui,sans-serif;max-width:1120px;margin:2rem auto;padding:0 1.5rem}
+a{color:#66d9ef;text-underline-offset:.2em}
+a:hover{color:#8be9fd}
+:focus-visible{outline:2px solid #66d9ef;outline-offset:3px}
+h1,h2,h3{color:#a6e22e;line-height:1.25}
+h1{font-size:2.4rem;margin:1rem 0 .6rem}
+h2{font-size:1.45rem;margin:2.6rem 0 .6rem}
+h3{font-size:1.05rem;margin:.2rem 0 .6rem}
+code{color:#fd971f;overflow-wrap:anywhere}
+.eyebrow{color:#b7b7af;text-transform:uppercase;letter-spacing:.12em;font-size:.72rem;margin:0}
+.lede{font-size:1.05rem;max-width:82ch;margin:.8rem 0}
+.meta{color:#b7b7af;font-size:.8rem;margin:.6rem 0}
+.hero-links{font-size:.85rem;margin:.6rem 0}
+.note{border-left:2px solid #a6e22e;padding:.2rem 1rem;margin:1.8rem 0}
+.note p{margin:.4rem 0;font-size:.92rem}
+.blurb{color:#d5c4a1;max-width:82ch;margin:.2rem 0 1rem}
+.cards ul{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(auto-fit,minmax(400px,1fr));gap:1rem}
+.cards li{border:1px solid #504945;background:#2d2f27;padding:1rem 1.1rem;min-width:0;display:flex;flex-direction:column}
+.cards li:has(>h2){grid-column:1/-1;background:none;border:0;padding:1.6rem 0 .2rem;display:block}
+.cards li:has(>h2) h2{margin:0;font-size:1.25rem}
+.cards h3 a{text-decoration:none}
+.cards h3 a:hover{text-decoration:underline}
+.summary{margin:.2rem 0 .9rem;color:#ebdbb2;font-size:.92rem}
+.card-scope{font-size:.86rem;margin:0 0 .7rem}
+.card-scope strong{color:#f8f8f2}
+details{border:1px solid #504945;padding:.4rem .7rem;margin:.7rem 0;font-size:.82rem}
+summary{cursor:pointer;color:#66d9ef}
+details p{margin:.5rem 0 0;color:#b7b7af}
+.card-links{font-size:.8rem;margin:.7rem 0 0}
+.card-provenance{color:#a89984;font-size:.72rem;margin:.9rem 0 0}
+.card-provenance code{color:#a89984;display:block;overflow-wrap:anywhere}
+dl{margin:0;display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:.5rem 2.5rem}
+dt{color:#a6e22e}
+dd{margin:0;color:#d5c4a1;max-width:60ch}
+.footer{margin-top:3rem;border-top:1px solid #504945;padding-top:1rem;color:#a89984;font-size:.78rem}
+@media(max-width:700px){body{padding:0 1rem}.cards ul{grid-template-columns:1fr}}
+@media print{body{background:#fff;color:#111}.cards li{border-color:#999}h1,h2,h3,dt{color:#111}a{color:#174d8c}code{color:#a04000}}

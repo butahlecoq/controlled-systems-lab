@@ -356,7 +356,8 @@ class RegisteredKindTests(unittest.TestCase):
                 self.assertEqual((out/(rid+'.zip')).read_bytes(),(repeated/(rid+'.zip')).read_bytes())
             page=(out/'index.html').read_text(encoding='utf-8')
             for report in catalogue['reports']:
-                self.assertIn(report['measured_scope']+'; limits: '+report['evidence_limits'],page)
+                self.assertIn(report['measured_scope'],page)
+                self.assertIn(report['evidence_limits'],page)
             self.assertIn('21 verified measured trials across 5x5, 9x9, and 13x13 square lattices',page)
             self.assertIn('56 measured trials across four bounded 2D fixtures in both conversion directions',page)
             self.assertIn('No comparator',page)
