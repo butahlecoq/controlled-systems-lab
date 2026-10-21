@@ -4902,6 +4902,159 @@ TEST_CASE("exact linear H verifier matches an independent tied multi-edge box or
     }
 }
 
+TEST_CASE("exact H verifier matches tied multi-edge simplex families with different guards") {
+    using namespace model;
+    const auto controls=h_set("oracle-split-simplex",4,
+        Matrix{5,4,{-1,0,0,0, 0,-1,0,0, 0,0,-1,0,
+                    0,0,0,-1, 1,1,1,1}},
+        Vector{0,0,0,0,1},Matrix{0,4,{}},Vector{});
+    const auto lower_guard=interval("oracle-split-low-guard",0,0.5);
+    const auto upper_guard=interval("oracle-split-high-guard",0.5,1);
+    const auto reset=h_set("oracle-split-reset",2,
+        Matrix{2,2,{0,-1,-1,1}},Vector{0,0},Matrix{0,2,{}},Vector{});
+    HybridMode source{{"oracle-split-source"},1,4,{"x"},{"u0","u1","u2","u3"}};
+    source.flow=LinearStage{Matrix{1,1,{0}},Matrix{1,4,{1,1,1,1}},
+        Matrix{1,0,{}},Vector{0}};
+    source.control_sets={controls};
+    source.invariants={UniversalSet{1},UniversalSet{1}};
+    HybridMode target{{"oracle-split-target"},1,0,{"y"},{}};
+    target.flow=LinearStage{Matrix{1,1,{1}},Matrix{1,0,{}},
+        Matrix{1,0,{}},Vector{0}};
+    target.control_sets={UniversalSet{0}};
+    target.invariants={UniversalSet{1},UniversalSet{1}};
+    HybridSystem system{1,{source,target},
+        {{{"oracle-split-low"},source.id,target.id,{lower_guard},{reset}},
+         {{"oracle-split-high"},source.id,target.id,{upper_guard},{reset}}}};
+    HybridRequest request{{source.id,{0}},{target.id},
+        {{target.id,LinearTerminal{{1},0},"terminal state","units"}}};
+
+    // Enumerate the vertices of the four-simplex cut by sum(u)<=1/2 and
+    // sum(u)>=1/2 directly from the raw edge identities. The complete low
+    // family has five vertices; the complete high family has eight.
+    const std::array<Vector,9> simplex_vertices{{
+        {0,0,0,0},
+        {0.5,0,0,0},{0,0.5,0,0},{0,0,0.5,0},{0,0,0,0.5},
+        {1,0,0,0},{0,1,0,0},{0,0,1,0},{0,0,0,1}}};
+    struct OracleBranch { HybridPath path; std::vector<Vector> optimal_vertices; };
+    std::vector<OracleBranch> oracle;
+    for(const auto& edge:system.edges) {
+        if(edge.source!=request.initial.mode||
+           std::find(request.allowed_terminal_modes.begin(),request.allowed_terminal_modes.end(),
+               edge.target)==request.allowed_terminal_modes.end()) continue;
+        const bool low=edge.id.value=="oracle-split-low";
+        OracleBranch branch{{{source.id,edge.target},{edge.id}},{}};
+        for(const auto& control:simplex_vertices) {
+            double pre_state=0;
+            for(const auto component:control) pre_state+=component;
+            if((low&&(pre_state<0||pre_state>0.5))||
+               (!low&&(pre_state<0.5||pre_state>1))) continue;
+            // The reset is 0<=y<=xpre and the objective minimizes y, so each
+            // listed control vertex lifts to the optimal tuple (0,u,xpre,0).
+            branch.optimal_vertices.push_back(
+                {0,control[0],control[1],control[2],control[3],pre_state,0});
+        }
+        oracle.push_back(std::move(branch));
+    }
+    REQUIRE(oracle.size()==2);
+    CHECK(oracle[0].path.edges[0].value=="oracle-split-low");
+    CHECK(oracle[0].optimal_vertices.size()==5);
+    CHECK(oracle[1].path.edges[0].value=="oracle-split-high");
+    CHECK(oracle[1].optimal_vertices.size()==8);
+    CHECK(oracle[0].optimal_vertices!=oracle[1].optimal_vertices);
+
+    // Literal full joint H relations independently describe each entire
+    // optimal family in coordinates [x0,u0,u1,u2,u3,xpre,y].
+    const auto expected_relation=[](std::string id,bool low,bool optimal) {
+        Vector equality_values{0,0};
+        Matrix equalities{2,7,{1,0,0,0,0,0,0, 0,-1,-1,-1,-1,1,0}};
+        if(optimal) {
+            equalities=Matrix{3,7,{1,0,0,0,0,0,0, 0,-1,-1,-1,-1,1,0,
+                                   0,0,0,0,0,0,1}};
+            equality_values.push_back(0);
+        }
+        return h_set(std::move(id),7,
+            Matrix{9,7,{0,-1,0,0,0,0,0, 0,0,-1,0,0,0,0,
+                        0,0,0,-1,0,0,0, 0,0,0,0,-1,0,0,
+                        0,1,1,1,1,0,0, 0,0,0,0,0,-1,0,
+                        0,0,0,0,0,1,0, 0,0,0,0,0,0,-1,
+                        0,0,0,0,0,-1,1}},
+            Vector{0,0,0,0,1,low?0.0:-0.5,low?0.5:1.0,0,0},
+            std::move(equalities),std::move(equality_values));
+    };
+    const auto same_rows=[](const numeric::MatrixView& left,const numeric::VectorView& left_rhs,
+        const numeric::MatrixView& right,const numeric::VectorView& right_rhs) {
+        if(left.rows()!=right.rows()||left.cols()!=right.cols()||
+           left_rhs.size()!=right_rhs.size()) return false;
+        std::vector<bool> used(right.rows(),false);
+        for(std::size_t row=0;row<left.rows();++row) {
+            bool matched=false;
+            for(std::size_t other=0;other<right.rows()&&!matched;++other) {
+                if(used[other]||left_rhs[row]!=right_rhs[other]) continue;
+                bool equal=true;
+                for(std::size_t column=0;column<left.cols();++column)
+                    equal=equal&&left(row,column)==right(other,column);
+                if(equal) { used[other]=true; matched=true; }
+            }
+            if(!matched) return false;
+        }
+        return true;
+    };
+    const auto built=build_hybrid_portfolio_programs(system,request,
+        {"oracle-split-families"},{1,2},{12,40,768});
+    REQUIRE(std::holds_alternative<std::vector<HybridPathProgram>>(built));
+    const auto& programs=std::get<std::vector<HybridPathProgram>>(built);
+    REQUIRE(programs.size()==oracle.size());
+    std::vector<HybridPathOptimalFaceCandidate> candidates;
+    for(std::size_t branch=0;branch<programs.size();++branch) {
+        CHECK(programs[branch].path==oracle[branch].path);
+        const auto expected_result=sets::from_handle(expected_relation(
+            "oracle-split-relation-"+std::to_string(branch),branch==0,false));
+        REQUIRE(std::holds_alternative<sets::SetData>(expected_result));
+        const auto expected_representation=std::get<sets::SetData>(expected_result).representation();
+        REQUIRE(std::holds_alternative<sets::HRepresentation>(expected_representation));
+        const auto& expected_h=std::get<sets::HRepresentation>(expected_representation);
+        const auto relation=programs[branch].joint_relation.representation();
+        REQUIRE(std::holds_alternative<sets::HRepresentation>(relation));
+        const auto& actual=std::get<sets::HRepresentation>(relation);
+        CHECK(actual.inequalities.rows()==9);
+        CHECK(actual.equalities.rows()==2);
+        CHECK(same_rows(actual.inequalities,actual.upper_bounds,
+            expected_h.inequalities,expected_h.upper_bounds));
+        CHECK(same_rows(actual.equalities,actual.equality_values,
+            expected_h.equalities,expected_h.equality_values));
+        const auto face_result=sets::from_handle(expected_relation(
+            "oracle-split-face-"+std::to_string(branch),branch==0,true));
+        REQUIRE(std::holds_alternative<sets::SetData>(face_result));
+        const auto face_representation=std::get<sets::SetData>(face_result).representation();
+        REQUIRE(std::holds_alternative<sets::HRepresentation>(face_representation));
+        const auto& face_h=std::get<sets::HRepresentation>(face_representation);
+        for(const auto& vertex:oracle[branch].optimal_vertices)
+            CHECK(satisfies(face_h,vertex));
+
+        auto candidate=exact_candidate(programs[branch],
+            branch==0?Vector{0,0.0625,0.0625,0.0625,0.0625,0.25,0}:
+                      Vector{0,0.125,0.125,0.125,0.125,0.5,0});
+        candidate.relation=std::get<sets::SetData>(face_result);
+        candidates.push_back(std::move(candidate));
+    }
+
+    ExactLinearHHybridFamilyVerifier verifier;
+    const auto verified=verify_hybrid_portfolio_family(verifier,system,request,
+        programs,candidates,{1,2},{0,0});
+    REQUIRE(std::holds_alternative<HybridFamilyVerificationReport>(verified));
+    const auto& report=std::get<HybridFamilyVerificationReport>(verified);
+    CHECK((report.enumerated_paths==std::vector<HybridPath>{oracle[0].path,oracle[1].path}));
+    CHECK(report.global_objective_optimality==HybridVerificationStatus::established);
+    CHECK(report.complete_family_coverage==HybridVerificationStatus::established);
+    REQUIRE(report.branches.size()==2);
+    for(std::size_t branch=0;branch<report.branches.size();++branch) {
+        CHECK(report.branches[branch].path==oracle[branch].path);
+        CHECK(report.branches[branch].feasibility==HybridVerificationStatus::established);
+        CHECK(report.branches[branch].objective_optimality==HybridVerificationStatus::established);
+        CHECK(report.branches[branch].continuous_coverage==HybridVerificationStatus::established);
+    }
+}
+
 TEST_CASE("exact linear H verifier preserves a four-control simplex through an existential reset") {
     const auto control=h_set("oracle-four-control-simplex",4,
         Matrix{5,4,{-1,0,0,0, 0,-1,0,0, 0,0,-1,0, 0,0,0,-1, 1,1,1,1}},
