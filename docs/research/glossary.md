@@ -148,6 +148,8 @@ Canonical English terminology for this project. Status: provisional, 2026-10-11.
 | Checkpoint | Persisted state allowing supported work to resume consistently |
 | Determinism | Declared repeatability; bitwise equality and tolerance-level agreement are different |
 | Unsupported result | Clear rejection of an incompatible operation/problem, not a numerical failure |
+| External single-witness cross-check | One independently produced feasible witness used as auxiliary evidence for a specified case; not a paired comparison, benchmark, or performance claim |
+| Owner-authorized reference variant | Separately identified case variant whose disputed or clarified inputs were explicitly affirmed by the owner; it does not alter the frozen historical scenario or establish reproduction |
 
 ## Optimal families and algorithm composition
 
