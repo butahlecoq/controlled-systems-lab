@@ -1,0 +1,5 @@
+# SYN-04 Strategy B T-S03
+
+Measured solver source `2c0c92107acd1cfc2f7e6d359e030d0bc47fb98e`; harness `f95f1545d2e16fa61d6d506de2cc30d8168e724f`. One excluded warmup and seven successful complete-family observations. The terminal objective is `(x2-1)^2` with objective bounds `[0,0]`; every run checks the complete relation `(0,s,1,s,1)`, `0<=s<=1`, and two distinct histories sharing terminal state 1. Single-profile exploratory evidence; performance conclusion inconclusive, with no speedup or native-only latency claim; #67 remains open.
+
+The separate diagnostic workload is excluded. Process counters do not establish a source-mapped limiter. Commands and compiler/build evidence use portable root placeholders. Build provenance preserves original evidence hashes separately from sanitized-file hashes; source, executable, harness and dependency hashes are unchanged. Reproduce with `tooling/syn04_ts03/collect.py` then `build_bundle.py`; schema-3 publication uses `syn04_ts03_registered_reports.py`. Rendering and staging use saved records only. Main-only deployment and live URL verification remain pending.

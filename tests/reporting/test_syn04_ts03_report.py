@@ -51,6 +51,7 @@ class Ts03ReportTests(unittest.TestCase):
         archive=publisher.offline_zip(bundle,item)
         catalogue_path=ROOT/"reports/algorithm-results/catalog.json"
         catalogue=json.loads(catalogue_path.read_text(encoding="utf-8"))
+        catalogue["reports"]=[entry for entry in catalogue["reports"] if entry.get("report_id")!=item.report_id]
         catalogue["reports"].append({"report_id":item.report_id,"payload_sha256":item.payload_sha256,
             "source_commit":item.source_commit,"zip_sha256":hashlib.sha256(archive).hexdigest(),
             "report_kind":item.kind,"measured_scope":item.measured_scope,"evidence_limits":item.evidence_limits,

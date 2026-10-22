@@ -1,0 +1,351 @@
+Версия MSBuild 17.14.19+164abd434 для .NET Framework
+
+  1>Checking Build System
+  Building Custom Rule SOURCE_ROOT/CMakeLists.txt
+  Building Custom Rule DEPENDENCY_ROOT/csl_highs-src/highs/CMakeLists.txt
+  Building Custom Rule SOURCE_ROOT/CMakeLists.txt
+  Проверка источников на наличие зависимостей модуля…
+  Проверка источников на наличие зависимостей модуля…
+  model.cpp
+  geometry.cpp
+  execution.cpp
+  problem.cpp
+  outcomes.cpp
+  synthesis.cpp
+  quickhull_2d.cpp
+  reader.cpp
+  highs_c_api.cpp
+  Filereader.cpp
+  FilereaderEms.cpp
+  FilereaderLp.cpp
+  FilereaderMps.cpp
+  HighsIO.cpp
+  HMpsFF.cpp
+  HMPSIO.cpp
+  LoadOptions.cpp
+  IpxWrapper.cpp
+  Highs.cpp
+  Компиляция…
+  Компиляция…
+  quickhull_2d.cpp
+  geometry.cpp
+  model.cpp
+  outcomes.cpp
+  execution.cpp
+  problem.cpp
+  synthesis.cpp
+  HighsCallback.cpp
+  HighsDebug.cpp
+  HighsIis.cpp
+  HighsInfo.cpp
+  HighsInfoDebug.cpp
+  HighsDeprecated.cpp
+  HighsInterface.cpp
+  HighsLp.cpp
+  HighsLpUtils.cpp
+  HighsModelUtils.cpp
+  HighsOptions.cpp
+  HighsRanging.cpp
+  HighsSolution.cpp
+  HighsSolutionDebug.cpp
+  HighsSolve.cpp
+  HighsStatus.cpp
+  HighsCliqueTable.cpp
+  HighsConflictPool.cpp
+  HighsCutGeneration.cpp
+  csl_quickhull_2d.vcxproj -> BUILD_ROOT\csl-source\Release\csl_quickhull_2d.lib
+  HighsCutPool.cpp
+  HighsDebugSol.cpp
+  HighsDomain.cpp
+  HighsDynamicRowMatrix.cpp
+  HighsFeasibilityJump.cpp
+  HighsGFkSolve.cpp
+  csl_contracts.vcxproj -> BUILD_ROOT\csl-source\Release\csl_contracts.lib
+  HighsImplications.cpp
+  HighsLpAggregator.cpp
+  HighsLpRelaxation.cpp
+  Building Custom Rule SOURCE_ROOT/CMakeLists.txt
+  Проверка источников на наличие зависимостей модуля…
+  HighsMipAnalysis.cpp
+  data.cpp
+  HighsMipSolver.cpp
+  HighsMipSolverData.cpp
+  HighsModkSeparator.cpp
+  Компиляция…
+  HighsNodeQueue.cpp
+  HighsObjectiveFunction.cpp
+  data.cpp
+  HighsPathSeparator.cpp
+  HighsPrimalHeuristics.cpp
+  HighsPseudocost.cpp
+  HighsRedcostFixing.cpp
+  HighsSearch.cpp
+  HighsSeparation.cpp
+  HighsSeparator.cpp
+  HighsTableauSeparator.cpp
+  csl_numeric.vcxproj -> BUILD_ROOT\csl-source\Release\csl_numeric.lib
+  HighsTransformedLp.cpp
+  HighsHessian.cpp
+  HighsHessianUtils.cpp
+  Building Custom Rule SOURCE_ROOT/CMakeLists.txt
+  Building Custom Rule SOURCE_ROOT/CMakeLists.txt
+  Building Custom Rule SOURCE_ROOT/CMakeLists.txt
+  HighsModel.cpp
+  HighsTaskExecutor.cpp
+  Проверка источников на наличие зависимостей модуля…
+  Проверка источников на наличие зависимостей модуля…
+  Проверка источников на наличие зависимостей модуля…
+  CupdlpWrapper.cpp
+  lp_backend.cpp
+  linear_program.cpp
+  HighsPostsolveStack.cpp
+  linear_infeasibility_certificate.cpp
+  HighsSymmetry.cpp
+  data.cpp
+  HPresolve.cpp
+  objective_reformulation.cpp
+  HPresolveAnalysis.cpp
+  ICrash.cpp
+  ICrashUtil.cpp
+  Компиляция…
+  ICrashX.cpp
+  Компиляция…
+  PresolveComponent.cpp
+  Компиляция…
+  data.cpp
+  lp_backend.cpp
+  linear_infeasibility_certificate.cpp
+  a_asm.cpp
+  linear_program.cpp
+  a_quass.cpp
+  perturbation.cpp
+  objective_reformulation.cpp
+  quass.cpp
+  ratiotest.cpp
+  scaling.cpp
+  HEkk.cpp
+  HEkkControl.cpp
+  HEkkDebug.cpp
+  HEkkDual.cpp
+  HEkkDualMulti.cpp
+  HEkkDualRHS.cpp
+  HEkkDualRow.cpp
+  HEkkInterface.cpp
+  HEkkPrimal.cpp
+  HighsSimplexAnalysis.cpp
+  HSimplex.cpp
+  HSimplexDebug.cpp
+  HSimplexNla.cpp
+  HSimplexNlaDebug.cpp
+  HSimplexNlaFreeze.cpp
+  csl_sets.vcxproj -> BUILD_ROOT\csl-source\Release\csl_sets.lib
+  HSimplexNlaProductForm.cpp
+  HSimplexReport.cpp
+  KktCh2.cpp
+  DevKkt.cpp
+  HFactor.cpp
+  HFactorDebug.cpp
+  HFactorExtend.cpp
+  HFactorRefactor.cpp
+  HFactorUtils.cpp
+  csl_optimization.vcxproj -> BUILD_ROOT\csl-source\Release\csl_optimization.lib
+  HighsHash.cpp
+  HighsLinearSumBounds.cpp
+  HighsMatrixPic.cpp
+  HighsMatrixUtils.cpp
+  HighsSort.cpp
+  HighsSparseMatrix.cpp
+  HighsUtils.cpp
+  HSet.cpp
+  HVectorBase.cpp
+  stringutil.cpp
+  basiclu_kernel.cc
+  basiclu_wrapper.cc
+  conjugate_residuals.cc
+  control.cc
+  crossover.cc
+  diagonal_precond.cc
+  forrest_tomlin.cc
+  guess_basis.cc
+  indexed_vector.cc
+  info.cc
+  ipm.cc
+  ipx_c.cc
+  iterate.cc
+  kkt_solver_basis.cc
+  kkt_solver_diag.cc
+  kkt_solver.cc
+  linear_operator.cc
+  lp_solver.cc
+  lu_factorization.cc
+  maxvolume.cc
+  model.cc
+  normal_matrix.cc
+  sparse_matrix.cc
+  sparse_utils.cc
+  splitted_normal_matrix.cc
+  starting_basis.cc
+  symbolic_invert.cc
+  timer.cc
+  utils.cc
+  basis.cpp
+  csl_objectives.vcxproj -> BUILD_ROOT\csl-source\Release\csl_objectives.lib
+  Building Custom Rule SOURCE_ROOT/CMakeLists.txt
+  Building Custom Rule SOURCE_ROOT/CMakeLists.txt
+  Проверка источников на наличие зависимостей модуля…
+  Проверка источников на наличие зависимостей модуля…
+  adapter.cpp
+  convex_backend.cpp
+  hybrid_system.cpp
+  rk4.cpp
+  linear_system.cpp
+  Компиляция…
+  Компиляция…
+  convex_backend.cpp
+  adapter.cpp
+  rk4.cpp
+  linear_system.cpp
+  hybrid_system.cpp
+  cupdlp_cs.c
+  cupdlp_linalg.c
+  cupdlp_proj.c
+  cupdlp_restart.c
+  cupdlp_scaling.c
+  cupdlp_solver.c
+  cupdlp_step.c
+  cupdlp_utils.c
+  basiclu_factorize.c
+  basiclu_get_factors.c
+  basiclu_initialize.c
+  basiclu_object.c
+  basiclu_solve_dense.c
+  basiclu_solve_for_update.c
+  basiclu_solve_sparse.c
+  basiclu_update.c
+  lu_build_factors.c
+  lu_condest.c
+  lu_dfs.c
+  lu_factorize_bump.c
+  lu_file.c
+  lu_garbage_perm.c
+  lu_initialize.c
+  lu_internal.c
+  lu_matrix_norm.c
+  lu_markowitz.c
+  lu_pivot.c
+  lu_residual_test.c
+  lu_setup_bump.c
+  lu_singletons.c
+  lu_solve_dense.c
+  lu_solve_for_update.c
+  lu_solve_sparse.c
+  lu_solve_symbolic.c
+  lu_solve_triangular.c
+  basis.cc
+  lu_update.cc
+  csl_convex.vcxproj -> BUILD_ROOT\csl-source\Release\csl_convex.lib
+  lu_update.c
+  highs.vcxproj -> BUILD_ROOT\Release\bin\highs.lib
+  csl_model.vcxproj -> BUILD_ROOT\csl-source\Release\csl_model.lib
+  Building Custom Rule SOURCE_ROOT/CMakeLists.txt
+  Проверка источников на наличие зависимостей модуля…
+  domains.cpp
+  initial_information.cpp
+  constraints.cpp
+  Компиляция…
+  domains.cpp
+  constraints.cpp
+  initial_information.cpp
+  csl_problem.vcxproj -> BUILD_ROOT\csl-source\Release\csl_problem.lib
+  Building Custom Rule SOURCE_ROOT/CMakeLists.txt
+  Проверка источников на наличие зависимостей модуля…
+  resolved.cpp
+  identity.cpp
+  Компиляция…
+  resolved.cpp
+  identity.cpp
+  csl_resolved_core.vcxproj -> BUILD_ROOT\csl-source\Release\csl_resolved_core.lib
+  Building Custom Rule SOURCE_ROOT/CMakeLists.txt
+  Проверка источников на наличие зависимостей модуля…
+  compiled_verifiers.cpp
+  Компиляция…
+  compiled_verifiers.cpp
+  csl_verifiers.vcxproj -> BUILD_ROOT\csl-source\Release\csl_verifiers.lib
+  Building Custom Rule SOURCE_ROOT/CMakeLists.txt
+  Проверка источников на наличие зависимостей модуля…
+  registry.cpp
+  Компиляция…
+  registry.cpp
+  csl_registry.vcxproj -> BUILD_ROOT\csl-source\Release\csl_registry.lib
+  Building Custom Rule SOURCE_ROOT/CMakeLists.txt
+  Building Custom Rule SOURCE_ROOT/CMakeLists.txt
+  Building Custom Rule SOURCE_ROOT/CMakeLists.txt
+  Проверка источников на наличие зависимостей модуля…
+  Проверка источников на наличие зависимостей модуля…
+  validator.cpp
+  Building Custom Rule SOURCE_ROOT/CMakeLists.txt
+  executor.cpp
+  Компиляция…
+  Компиляция…
+  validator.cpp
+  executor.cpp
+  Проверка источников на наличие зависимостей модуля…
+  Проверка источников на наличие зависимостей модуля…
+  highs.cpp
+  highs.cpp
+  Компиляция…
+  Компиляция…
+  highs.cpp
+  highs.cpp
+  csl_resolved_problem.vcxproj -> BUILD_ROOT\csl-source\Release\csl_resolved_problem.lib
+  Building Custom Rule SOURCE_ROOT/CMakeLists.txt
+  Building Custom Rule SOURCE_ROOT/CMakeLists.txt
+  Building Custom Rule SOURCE_ROOT/CMakeLists.txt
+  Проверка источников на наличие зависимостей модуля…
+  Проверка источников на наличие зависимостей модуля…
+  Проверка источников на наличие зависимостей модуля…
+  bounded_hull_checker.cpp
+  trajectory.cpp
+  analytic_profile.cpp
+  csl_execution.vcxproj -> BUILD_ROOT\csl-source\Release\csl_execution.lib
+  Компиляция…
+  Компиляция…
+  Компиляция…
+  trajectory.cpp
+  bounded_hull_checker.cpp
+  analytic_profile.cpp
+  csl_highs_lp.vcxproj -> BUILD_ROOT\csl-source\Release\csl_highs_lp.lib
+  csl_highs_convex.vcxproj -> BUILD_ROOT\csl-source\Release\csl_highs_convex.lib
+  csl_bounded_hull_checker.vcxproj -> BUILD_ROOT\csl-source\Release\csl_bounded_hull_checker.lib
+  Building Custom Rule SOURCE_ROOT/CMakeLists.txt
+  Проверка источников на наличие зависимостей модуля…
+  bounded_hull_check.cpp
+  run_statistics_json.cpp
+  timing_collector.cpp
+  observability.cpp
+  h_relation_attachment.cpp
+  run_statistics.cpp
+  comparison_manifest.cpp
+  Компиляция…
+  observability.cpp
+  run_statistics_json.cpp
+  timing_collector.cpp
+  comparison_manifest.cpp
+  bounded_hull_check.cpp
+  h_relation_attachment.cpp
+  run_statistics.cpp
+  csl_strategy_ts01.vcxproj -> BUILD_ROOT\csl-source\Release\csl_strategy_ts01.lib
+  csl_verification.vcxproj -> BUILD_ROOT\csl-source\Release\csl_verification.lib
+  csl_artifacts.vcxproj -> BUILD_ROOT\csl-source\Release\csl_artifacts.lib
+  Building Custom Rule SOURCE_ROOT/CMakeLists.txt
+  Проверка источников на наличие зависимостей модуля…
+  direct_joint.cpp
+  Компиляция…
+  direct_joint.cpp
+  csl_strategy_b.vcxproj -> BUILD_ROOT\csl-source\Release\csl_strategy_b.lib
+  Building Custom Rule HARNESS_ROOT/benchmarks/reporting/syn04_ts03/runner/CMakeLists.txt
+  Проверка источников на наличие зависимостей модуля…
+  strategy_b_measure.cpp
+  Компиляция…
+  strategy_b_measure.cpp
+  csl_syn04_ts03_report.vcxproj -> BUILD_ROOT\Release\csl_syn04_ts03_report.exe

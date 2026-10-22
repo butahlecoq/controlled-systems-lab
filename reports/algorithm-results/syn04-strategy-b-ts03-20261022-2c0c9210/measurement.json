@@ -1,0 +1,470 @@
+{
+  "algorithm_source_commit": "2c0c92107acd1cfc2f7e6d359e030d0bc47fb98e",
+  "build": {
+    "build_command": [
+      "VISUAL_STUDIO_ROOT\\Common7\\IDE\\CommonExtensions\\Microsoft\\CMake\\CMake\\bin\\cmake.exe",
+      "--build",
+      "BUILD_ROOT",
+      "--config",
+      "Release",
+      "--target",
+      "csl_syn04_ts03_report",
+      "--parallel",
+      "4"
+    ],
+    "build_log_sha256": "c2b3d2a8e004311c9d3508561258c9a5e0b7918a488fa3eb587c408e0263cba2",
+    "cache_sha256": "23239d4e78a1c2d8229b06d4bb8df2e136a823d1c56b00aecd6c82644053b166",
+    "cmake": "VISUAL_STUDIO_ROOT\\Common7\\IDE\\CommonExtensions\\Microsoft\\CMake\\CMake\\bin\\cmake.exe",
+    "cmake_version": "cmake version 3.31.6-msvc6",
+    "compiler": "MSVC",
+    "compiler_config_sha256": "eb5b10b1860b7da082a2230651976c7280df6ea4236b08258b6c9c442a393392",
+    "compiler_version": "set(CMAKE_CXX_COMPILER_VERSION \"19.44.35215.0\")",
+    "configuration": "Release",
+    "configure_command": [
+      "VISUAL_STUDIO_ROOT\\Common7\\IDE\\CommonExtensions\\Microsoft\\CMake\\CMake\\bin\\cmake.exe",
+      "-S",
+      "HARNESS_ROOT\\benchmarks\\reporting\\syn04_ts03\\runner",
+      "-B",
+      "BUILD_ROOT",
+      "-G",
+      "Visual Studio 17 2022",
+      "-A",
+      "x64",
+      "-DCSL_SOURCE_ROOT=SOURCE_ROOT",
+      "-DBUILD_TESTING=OFF",
+      "-DFETCHCONTENT_SOURCE_DIR_CSL_HIGHS=DEPENDENCY_ROOT\\csl_highs-src",
+      "-DFETCHCONTENT_SOURCE_DIR_CSL_OBJECTIVES_EIGEN=DEPENDENCY_ROOT\\csl_objectives_eigen-src",
+      "-DFETCHCONTENT_SOURCE_DIR_CSL_QHULL=DEPENDENCY_ROOT\\csl_qhull-src",
+      "-DFETCHCONTENT_SOURCE_DIR_CSL_JSON=DEPENDENCY_ROOT\\csl_json-src"
+    ],
+    "configure_log_sha256": "3f7ad0bcec38dd7d9a56175c1b2631dae759b8ccecfb18cb6e31a925327b79d4",
+    "cxx_standard": "C++20",
+    "dependencies": {
+      "highs": {
+        "adapter_version": "1.1.0+highs.1.11.0",
+        "pinned_sha256": "2b44b074cf41439325ce4d0bbdac2d51379f56faf17ba15320a410d3c1f07275"
+      },
+      "json": {
+        "pinned_sha256": "0d8ef5af7f9794e3263480193c491549b2ba6cc74bb018906202ada498a79406"
+      },
+      "objectives_eigen": {
+        "pinned_sha256": "8586084f71f9bde545ee7fa6d00288b264a2b7ac3607b974e54d13e7162c1c72"
+      },
+      "qhull": {
+        "pinned_sha256": "8774e9a12c70b0180b95d6b0b563c5aa4bea8d5960c15e18ae3b6d2521d64f8b"
+      },
+      "resolved_sources": {
+        "CSL_HIGHS": {
+          "commit": "source-archive-no-git-metadata",
+          "directory_sha256": "ffdc2fef01c491ca5bb83b501e2d349fc07e5cca385e8bee4eaa0eeb6e5e75ec",
+          "source": "DEPENDENCY_ROOT\\csl_highs-src"
+        },
+        "CSL_JSON": {
+          "commit": "source-archive-no-git-metadata",
+          "directory_sha256": "1e4e4c85a0b46c29a341514681d4e6189fd0b5fb60e94b77075540ecf17c318a",
+          "source": "DEPENDENCY_ROOT\\csl_json-src"
+        },
+        "CSL_OBJECTIVES_EIGEN": {
+          "commit": "source-archive-no-git-metadata",
+          "directory_sha256": "f062692628c933e5fe7cb6c725fc179e6073197245861e098d69516df1d2fdf4",
+          "source": "DEPENDENCY_ROOT\\csl_objectives_eigen-src"
+        },
+        "CSL_QHULL": {
+          "commit": "source-archive-no-git-metadata",
+          "directory_sha256": "d34a90ce3602cfd6685ee0de08a4852496fdadc01025214fafdd68ca5e786dae",
+          "source": "DEPENDENCY_ROOT\\csl_qhull-src"
+        }
+      }
+    },
+    "executable_bytes": 4414976,
+    "executable_sha256": "c2c8d48a5a9726ae90709309692bfe8b1ec7377f22a9fc464be0525891942b65",
+    "generator": "Visual Studio 17 2022 x64",
+    "ndebug": true,
+    "project_sha256": "28cefbe0cbb09a0c44360926e365c9110b335d1da62c8e5b4062857610994ba5",
+    "release_properties": {
+      "AdditionalIncludeDirectories": "SOURCE_ROOT\\include;%(AdditionalIncludeDirectories)",
+      "AssemblerListingLocation": "$(IntDir)",
+      "BasicRuntimeChecks": "Default",
+      "ConformanceMode": "true",
+      "DebugInformationFormat": "\n      ",
+      "ExceptionHandling": "Sync",
+      "InlineFunctionExpansion": "AnySuitable",
+      "LanguageStandard": "stdcpp20",
+      "MinimalRebuild": "",
+      "ObjectFileName": "$(IntDir)",
+      "Optimization": "MaxSpeed",
+      "PrecompiledHeader": "NotUsing",
+      "PreprocessorDefinitions": "%(PreprocessorDefinitions);WIN32;_WINDOWS;NDEBUG;CMAKE_INTDIR=\"Release\"",
+      "RuntimeLibrary": "MultiThreadedDLL",
+      "ScanSourceForModuleDependencies": "true",
+      "SupportJustMyCode": "",
+      "TreatWarningAsError": "true",
+      "UseFullPaths": "false",
+      "WarningLevel": "Level4"
+    },
+    "report_driver_sha256": "1ccfe474d5ae70b4257d6025ce3335c26c5233f01a7df297d444bb371aae4a31",
+    "runner_cmake_sha256": "ddb862abe6373155867f115af55d27c066c309c8403e467734a1dc98357f89c8",
+    "sanitization": {
+      "original_build_evidence_sha256": {
+        "CMakeCXXCompiler.cmake": "33bebcb486c4fc42c67f633fb5ff363392744fda1fcfed6ccf6230a10ed09cbf",
+        "CMakeCache.txt": "6591584a5644d7d61f697570d7c7a35dae58f9cabc765108b730ed2f9e558377",
+        "build.log": "b62a33afb590ce14b970f5fe0a6e39a30065161d563dcf2fce505ab2396c38f9",
+        "configure.log": "13dd6156c4a7ddef8a0a41998c631154bc5738a4c40879394fa5168a89ef459e",
+        "release-target.vcxproj": "677132af16bbcd5bfc75dc159710530d4ba5115cc085d84de06e5380935c3029"
+      },
+      "original_collection_sha256": "3ac449a4729bd0ad660c852d373997cf688bf4b9c12c13869aa1f6e52c05d321",
+      "original_commands_sha256": "5583e6867bc5581ff8cbb444ef28145b64b47ffbb747944f8d711770bc87866e",
+      "policy": "Replace original absolute host roots with portable placeholders; preserve versions, flags, source identities and hashes. Published build-evidence hashes bind sanitized bytes; original hashes remain available without the private source bytes.",
+      "root_placeholders": {
+        "BUILD_ROOT": "Configured Release build directory",
+        "DEPENDENCY_ROOT": "Directory holding the recorded dependency sources",
+        "HARNESS_ROOT": "Checkout of the separately versioned measurement harness",
+        "MEASUREMENT_ROOT": "Parent directory holding the solver and Release build",
+        "PROGRAM_FILES_ROOT": "Machine-specific program installation prefix",
+        "SOURCE_ROOT": "Pinned clean solver checkout",
+        "VISUAL_STUDIO_ROOT": "Installed Visual Studio root; version is retained"
+      },
+      "schema": "csl.report-public-provenance/1"
+    }
+  },
+  "counts": {
+    "all_outputs_consumed_and_validated": true,
+    "failed": 0,
+    "measured": 7,
+    "passed": 7,
+    "warmup": 1
+  },
+  "environment": {
+    "absolute_tolerance": 1e-08,
+    "assurance": "numerical",
+    "cache_policy": "One excluded in-process warmup; each repetition constructs a fresh problem, registries, provider selections, prepared strategy and exclusive workspace. Process/runtime may be warm; no cold-cache claim.",
+    "clock": "std::chrono::steady_clock, integer nanoseconds",
+    "cpu_count_physical": 6,
+    "cpu_percent_after": 0.7,
+    "cpu_percent_before": 1.0,
+    "load_note": "All processor CPU percentage samples were taken immediately before and after the accepted process, outside accepted timing; no competing benchmark side and no dedicated quiet machine guarantee.",
+    "logical_cpu_count": 12,
+    "memory_total_bytes": 34189107200,
+    "native_provider_thread_configuration": "The registered HiGHS convex provider executes the T-S03 quadratic program; requested resource policy is one thread, and actual OS thread count per trial is unavailable",
+    "os": "Windows-11-10.0.22631-SP0",
+    "processor": "Intel64 Family 6 Model 151 Stepping 5, GenuineIntel",
+    "python": "3.13.5",
+    "relative_tolerance": 1e-08,
+    "requested_resources": {
+      "memory_bytes": null,
+      "outer_workers": 1,
+      "threads_per_worker": 1,
+      "total_threads": 1
+    },
+    "seed": "No seed option is exposed/configured by this StrategyPort/HiGHS registration path"
+  },
+  "events": [
+    {
+      "assurance": "numerical",
+      "canonical_relation_checked": true,
+      "completeness_verifier": "csl.verifier.ts03-singular-integrator",
+      "completeness_verifier_version": "1",
+      "consumed_result_marker": 2784691063843559855,
+      "convex_provider": "csl.convex.highs@1.0.0+highs.1.11.0",
+      "distinct_histories_same_terminal_checked": true,
+      "elapsed_ns": 1718200,
+      "error": "",
+      "lp_provider": "csl.lp.highs@1.1.0+highs.1.11.0",
+      "objective_lower": 0,
+      "objective_upper": 0,
+      "outcome": "optimal",
+      "registry_verified": true,
+      "repetition": 0,
+      "result_disposition": "complete_optimal_family",
+      "schema": "csl.syn04-strategy-b-ts03-measurement-event/1",
+      "status": "passed",
+      "termination": "completed",
+      "warmup": true
+    },
+    {
+      "assurance": "numerical",
+      "canonical_relation_checked": true,
+      "completeness_verifier": "csl.verifier.ts03-singular-integrator",
+      "completeness_verifier_version": "1",
+      "consumed_result_marker": 2784691063843559855,
+      "convex_provider": "csl.convex.highs@1.0.0+highs.1.11.0",
+      "distinct_histories_same_terminal_checked": true,
+      "elapsed_ns": 1088900,
+      "error": "",
+      "lp_provider": "csl.lp.highs@1.1.0+highs.1.11.0",
+      "objective_lower": 0,
+      "objective_upper": 0,
+      "outcome": "optimal",
+      "registry_verified": true,
+      "repetition": 1,
+      "result_disposition": "complete_optimal_family",
+      "schema": "csl.syn04-strategy-b-ts03-measurement-event/1",
+      "status": "passed",
+      "termination": "completed",
+      "warmup": false
+    },
+    {
+      "assurance": "numerical",
+      "canonical_relation_checked": true,
+      "completeness_verifier": "csl.verifier.ts03-singular-integrator",
+      "completeness_verifier_version": "1",
+      "consumed_result_marker": 2784691063843559855,
+      "convex_provider": "csl.convex.highs@1.0.0+highs.1.11.0",
+      "distinct_histories_same_terminal_checked": true,
+      "elapsed_ns": 1053800,
+      "error": "",
+      "lp_provider": "csl.lp.highs@1.1.0+highs.1.11.0",
+      "objective_lower": 0,
+      "objective_upper": 0,
+      "outcome": "optimal",
+      "registry_verified": true,
+      "repetition": 2,
+      "result_disposition": "complete_optimal_family",
+      "schema": "csl.syn04-strategy-b-ts03-measurement-event/1",
+      "status": "passed",
+      "termination": "completed",
+      "warmup": false
+    },
+    {
+      "assurance": "numerical",
+      "canonical_relation_checked": true,
+      "completeness_verifier": "csl.verifier.ts03-singular-integrator",
+      "completeness_verifier_version": "1",
+      "consumed_result_marker": 2784691063843559855,
+      "convex_provider": "csl.convex.highs@1.0.0+highs.1.11.0",
+      "distinct_histories_same_terminal_checked": true,
+      "elapsed_ns": 1038900,
+      "error": "",
+      "lp_provider": "csl.lp.highs@1.1.0+highs.1.11.0",
+      "objective_lower": 0,
+      "objective_upper": 0,
+      "outcome": "optimal",
+      "registry_verified": true,
+      "repetition": 3,
+      "result_disposition": "complete_optimal_family",
+      "schema": "csl.syn04-strategy-b-ts03-measurement-event/1",
+      "status": "passed",
+      "termination": "completed",
+      "warmup": false
+    },
+    {
+      "assurance": "numerical",
+      "canonical_relation_checked": true,
+      "completeness_verifier": "csl.verifier.ts03-singular-integrator",
+      "completeness_verifier_version": "1",
+      "consumed_result_marker": 2784691063843559855,
+      "convex_provider": "csl.convex.highs@1.0.0+highs.1.11.0",
+      "distinct_histories_same_terminal_checked": true,
+      "elapsed_ns": 986900,
+      "error": "",
+      "lp_provider": "csl.lp.highs@1.1.0+highs.1.11.0",
+      "objective_lower": 0,
+      "objective_upper": 0,
+      "outcome": "optimal",
+      "registry_verified": true,
+      "repetition": 4,
+      "result_disposition": "complete_optimal_family",
+      "schema": "csl.syn04-strategy-b-ts03-measurement-event/1",
+      "status": "passed",
+      "termination": "completed",
+      "warmup": false
+    },
+    {
+      "assurance": "numerical",
+      "canonical_relation_checked": true,
+      "completeness_verifier": "csl.verifier.ts03-singular-integrator",
+      "completeness_verifier_version": "1",
+      "consumed_result_marker": 2784691063843559855,
+      "convex_provider": "csl.convex.highs@1.0.0+highs.1.11.0",
+      "distinct_histories_same_terminal_checked": true,
+      "elapsed_ns": 935500,
+      "error": "",
+      "lp_provider": "csl.lp.highs@1.1.0+highs.1.11.0",
+      "objective_lower": 0,
+      "objective_upper": 0,
+      "outcome": "optimal",
+      "registry_verified": true,
+      "repetition": 5,
+      "result_disposition": "complete_optimal_family",
+      "schema": "csl.syn04-strategy-b-ts03-measurement-event/1",
+      "status": "passed",
+      "termination": "completed",
+      "warmup": false
+    },
+    {
+      "assurance": "numerical",
+      "canonical_relation_checked": true,
+      "completeness_verifier": "csl.verifier.ts03-singular-integrator",
+      "completeness_verifier_version": "1",
+      "consumed_result_marker": 2784691063843559855,
+      "convex_provider": "csl.convex.highs@1.0.0+highs.1.11.0",
+      "distinct_histories_same_terminal_checked": true,
+      "elapsed_ns": 998300,
+      "error": "",
+      "lp_provider": "csl.lp.highs@1.1.0+highs.1.11.0",
+      "objective_lower": 0,
+      "objective_upper": 0,
+      "outcome": "optimal",
+      "registry_verified": true,
+      "repetition": 6,
+      "result_disposition": "complete_optimal_family",
+      "schema": "csl.syn04-strategy-b-ts03-measurement-event/1",
+      "status": "passed",
+      "termination": "completed",
+      "warmup": false
+    },
+    {
+      "assurance": "numerical",
+      "canonical_relation_checked": true,
+      "completeness_verifier": "csl.verifier.ts03-singular-integrator",
+      "completeness_verifier_version": "1",
+      "consumed_result_marker": 2784691063843559855,
+      "convex_provider": "csl.convex.highs@1.0.0+highs.1.11.0",
+      "distinct_histories_same_terminal_checked": true,
+      "elapsed_ns": 1058600,
+      "error": "",
+      "lp_provider": "csl.lp.highs@1.1.0+highs.1.11.0",
+      "objective_lower": 0,
+      "objective_upper": 0,
+      "outcome": "optimal",
+      "registry_verified": true,
+      "repetition": 7,
+      "result_disposition": "complete_optimal_family",
+      "schema": "csl.syn04-strategy-b-ts03-measurement-event/1",
+      "status": "passed",
+      "termination": "completed",
+      "warmup": false
+    }
+  ],
+  "harness_commit": "f95f1545d2e16fa61d6d506de2cc30d8168e724f",
+  "limiter": {
+    "available": false,
+    "reason": "The separate diagnostic workload and process counters do not establish a source-mapped limiter on the unprofiled T-S03 public path. Performance remains inconclusive; no latency limiter is claimed."
+  },
+  "order": "One excluded warmup followed by seven measured repetitions in one process; one strategy only, so side alternation is inapplicable.",
+  "performance_conclusion": "inconclusive",
+  "phase_counters": {
+    "available": {
+      "end_to_end": "The one timed interval described above"
+    },
+    "not_invoked": [],
+    "unavailable": [
+      "problem preparation/resolution",
+      "strategy registration/preparation",
+      "workspace creation",
+      "native QP internal timing/counters",
+      "optimal-level relation extraction",
+      "compiled verifier",
+      "relation serialization/export"
+    ]
+  },
+  "profile_attempt": {
+    "etl_path": null,
+    "process_samples": [
+      {
+        "cpu_system_seconds": 0.0,
+        "cpu_user_seconds": 0.0,
+        "host_cpu_percent": 0.0,
+        "monotonic_ns": 1391000169464400,
+        "rss_bytes": 1830912
+      },
+      {
+        "cpu_system_seconds": 0.0,
+        "cpu_user_seconds": 0.0,
+        "host_cpu_percent": 0.0,
+        "monotonic_ns": 1391000171794600,
+        "rss_bytes": 3174400
+      },
+      {
+        "cpu_system_seconds": 0.0,
+        "cpu_user_seconds": 0.0,
+        "host_cpu_percent": 0.0,
+        "monotonic_ns": 1391000174457800,
+        "rss_bytes": 6815744
+      },
+      {
+        "cpu_system_seconds": 0.0,
+        "cpu_user_seconds": 0.0,
+        "host_cpu_percent": 0.0,
+        "monotonic_ns": 1391000176711600,
+        "rss_bytes": 6709248
+      },
+      {
+        "cpu_system_seconds": 0.0,
+        "cpu_user_seconds": 0.0,
+        "host_cpu_percent": 0.0,
+        "monotonic_ns": 1391000178816100,
+        "rss_bytes": 6852608
+      },
+      {
+        "cpu_system_seconds": 0.0,
+        "cpu_user_seconds": 0.0,
+        "host_cpu_percent": 0.0,
+        "monotonic_ns": 1391000180896400,
+        "rss_bytes": 6938624
+      },
+      {
+        "cpu_system_seconds": 0.0,
+        "cpu_user_seconds": 0.0,
+        "host_cpu_percent": 0.0,
+        "monotonic_ns": 1391000183452800,
+        "rss_bytes": 6610944
+      }
+    ],
+    "sampled_process_cpu_system_seconds_max": 0.0,
+    "sampled_process_cpu_user_seconds_max": 0.0,
+    "sampled_process_peak_rss_bytes": 6938624,
+    "separate_stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "separate_stdout_sha256": "d6114fb2f3065152067e0d4640e0d91622d1d7d8361faf3853ffbea626aeeb8b",
+    "separate_wall_ns": 20253100,
+    "separate_workload_return_code": 0,
+    "separate_workload_timed_out": false,
+    "wpr": {
+      "command": [
+        "wpr",
+        "-start",
+        "CPU",
+        "-filemode"
+      ],
+      "return_code": 3310899217,
+      "stderr": "\r\n\tFailed to enable the policy to profile system performance.\r\r\n\r\n\tProfile Id: CPU.Verbose.File\r\n\t\r\n\tError code: 0xc5585011\r\n\t\r\n\tFailed to enable the policy to profile system performance.\r\r\n\t\r\n\t\r\n",
+      "stdout": ""
+    }
+  },
+  "result_observation": {
+    "assurance": "numerical",
+    "canonical_relation_checked_each_trial": true,
+    "disposition": "complete_optimal_family",
+    "distinct_histories_same_terminal_checked_each_trial": true,
+    "objective_lower": 0,
+    "objective_upper": 0,
+    "outcome": "optimal",
+    "registry_verified": true,
+    "termination": "completed"
+  },
+  "scope": "Fresh problem construction and resolution, registered Strategy B and production HiGHS LP/convex provider creation/selection, StrategyRegistry preparation, exclusive public StrategyPort workspace creation and run, the HiGHS convex solve, optimal-level extraction, compiled T-S03 verifier acceptance, objective bounds [0,0], literal canonical full joint-history H-relation and membership checks including two distinct histories with the same terminal state. Includes local owner destruction before one_run returns. Excludes process startup, JSON serialization, build, file persistence and rendering.",
+  "source": {
+    "clean_after_build": true,
+    "clean_after_run": true,
+    "clean_before_build": true,
+    "head": "2c0c92107acd1cfc2f7e6d359e030d0bc47fb98e",
+    "strategy_header_sha256": "35ce9d0fb8892d926db370a98977ec97aaa3df3ec6e7a68c15ae49e77bdce051",
+    "strategy_source_sha256": "f6b6f735b23ed022efe259094b24f21aa75b062c71d2186851d46ecc4d74e3d6",
+    "tree": "5a613d36d32007e85a1cce57fae14830c0cce93b"
+  },
+  "timing_ns": {
+    "max": 1088900,
+    "median": 1038900,
+    "min": 935500,
+    "observations": [
+      1088900,
+      1053800,
+      1038900,
+      986900,
+      935500,
+      998300,
+      1058600
+    ],
+    "range": 153400
+  }
+}

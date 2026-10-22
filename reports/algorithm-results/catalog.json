@@ -284,6 +284,18 @@
       "payload_schema": "csl.opt11-recursive-hull-report/1",
       "native_payload_sha256": "8cfbc0c65f420dfd4aa6b8887f8719207037d9a25de21a3120e03a20b895807f",
       "source_report_id": "opt11-8cfbc0c65f420dfd"
+    },
+    {
+      "report_id": "syn04-strategy-b-ts03-5f6197a02fda13363fb51ff318abc1529e494223d0fdcc11fbd2a0a5f665aaf0",
+      "payload_sha256": "9c65892c13451356a6988b34e8ffe24565bc04c7c5c7cb5697fe77d472e67b36",
+      "source_commit": "2c0c92107acd1cfc2f7e6d359e030d0bc47fb98e",
+      "zip_sha256": "45f0c926975240da952c6d9010a20ac7cd4dca9b70588aad96508ce69aaf0871",
+      "report_kind": "syn04-strategy-b-ts03",
+      "measured_scope": "Exact T-S03 profile; one registered Strategy B; seven validated measured trials; performance conclusion inconclusive",
+      "evidence_limits": "Completeness applies only to the exact admitted T-S03 singular-integrator profile and csl.verifier.ts03-singular-integrator v1.; Assurance::numerical is reported; validated arithmetic is unavailable.; Seven observations of one tiny profile are exploratory evidence only; no comparator, speedup, general performance, application-scale, throughput or scalability claim.; This report covers only the exact singular-A T-S03 request and does not establish generic Strategy B completeness; SYN-04 #67 remains open.; The registered Strategy B path builds the full-history program, invokes the registered HiGHS convex solver, extracts the optimal level, and independently verifies the exact canonical relation; the report interval includes this entire public StrategyPort path.; The separate diagnostic workload is excluded from the seven observations; process counters do not establish a source-mapped unprofiled latency limiter.; Internal preparation, native QP, optimal-level extraction, compiled verifier and export timings/counters are unavailable.",
+      "payload_schema": "csl.syn04-strategy-b-ts03-report/1",
+      "native_payload_sha256": "9c65892c13451356a6988b34e8ffe24565bc04c7c5c7cb5697fe77d472e67b36",
+      "source_report_id": "syn04-strategy-b-ts03-20261022-2c0c9210"
     }
   ]
 }

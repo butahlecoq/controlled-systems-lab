@@ -1,0 +1,28 @@
+{
+  "files": {
+    "README.md": "cd5d436fd0613073be4512fcfb94abd5a48193957990a323617d868c78ed225d",
+    "build-evidence/CMakeCXXCompiler.cmake": "eb5b10b1860b7da082a2230651976c7280df6ea4236b08258b6c9c442a393392",
+    "build-evidence/CMakeCache.txt": "23239d4e78a1c2d8229b06d4bb8df2e136a823d1c56b00aecd6c82644053b166",
+    "build-evidence/build.log": "c2b3d2a8e004311c9d3508561258c9a5e0b7918a488fa3eb587c408e0263cba2",
+    "build-evidence/configure.log": "3f7ad0bcec38dd7d9a56175c1b2631dae759b8ccecfb18cb6e31a925327b79d4",
+    "build-evidence/release-target.vcxproj": "28cefbe0cbb09a0c44360926e365c9110b335d1da62c8e5b4062857610994ba5",
+    "build-provenance.json": "b78fc74dbf493398cfc7928178c319c5fc1eac43d5cd67f5901f8078b73d0399",
+    "commands.json": "2a83434876e566255a43c7977c19a61059777902882d6a283191a74d53fbda99",
+    "control-projection.svg": "38616f70b8c9517bb6639b07b0915f585dbeadcbe97445a5ebbd89ffb8bc6015",
+    "environment.json": "a1981e4b0ad59626d2a9f5a089e8263b564e754704a204079d630805d347a5c9",
+    "index.html": "26ee1788329d707d2d11763fe9ac9852d541c2a971cef1493ff8fdd60b7d3338",
+    "measurement-events.jsonl": "8bc9480be98194279adcfbc58138e639e36e3102ddb3ae94cce74ddf13622f67",
+    "measurement.json": "03602968fe1deed48d1d41445b1682774e606260cb620eeeb6349f335091763f",
+    "process-stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "profile.json": "e65943818529bf44c87738502d80f423b3823c627964cafd7a10872f83ecdb52",
+    "records.json": "bca7935110763e1f873e2e5b89af85007abf5fd80645bb4ce7bac5f3862dd07f",
+    "scenarios.json": "6e828ac6f4156c2fc623450ab4e52a35f0c56dcc4a454fabb4f1d4397a1d1ad9",
+    "separate-profile-events.jsonl": "d6114fb2f3065152067e0d4640e0d91622d1d7d8361faf3853ffbea626aeeb8b",
+    "separate-profile-stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "trials.csv": "c81d0d4bb53a103071be89bcffc7e6e747056d6797dd3885b1aa67277cd842c7"
+  },
+  "harness_commit": "f95f1545d2e16fa61d6d506de2cc30d8168e724f",
+  "report_id": "syn04-strategy-b-ts03-20261022-2c0c9210",
+  "schema": "csl.syn04-strategy-b-ts03-manifest/1",
+  "source_commit": "2c0c92107acd1cfc2f7e6d359e030d0bc47fb98e"
+}
