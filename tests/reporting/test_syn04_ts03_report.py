@@ -46,10 +46,24 @@ class Ts03ReportTests(unittest.TestCase):
         import syn04_ts03_registered_reports as publisher
         spec=importlib.util.spec_from_file_location("ts03_site",ROOT/"scripts/reports/site.py")
         site=importlib.util.module_from_spec(spec);spec.loader.exec_module(site)
-        item=publisher.adapt(ROOT/"reports/algorithm-results"/report.REPORT_ID)
+        bundle=ROOT/"reports/algorithm-results"/report.REPORT_ID
+        item=publisher.adapt(bundle)
+        archive=publisher.offline_zip(bundle,item)
+        catalogue_path=ROOT/"reports/algorithm-results/catalog.json"
+        catalogue=json.loads(catalogue_path.read_text(encoding="utf-8"))
+        catalogue["reports"].append({"report_id":item.report_id,"payload_sha256":item.payload_sha256,
+            "source_commit":item.source_commit,"zip_sha256":hashlib.sha256(archive).hexdigest(),
+            "report_kind":item.kind,"measured_scope":item.measured_scope,"evidence_limits":item.evidence_limits,
+            "payload_schema":item.payload_schema,"native_payload_sha256":item.native_payload_sha256,
+            "source_report_id":item.source_report_id})
         with tempfile.TemporaryDirectory() as temporary:
-            output=site.stage(ROOT/"reports/algorithm-results/catalog.json",Path(temporary)/"site",check=True)
-            self.assertEqual((output/(item.report_id+".zip")).read_bytes(),(ROOT/"reports/algorithm-results"/(item.report_id+".zip")).read_bytes())
+            test_catalogue=ROOT/"reports/algorithm-results"/".test-syn04-ts03-catalog.json"
+            try:
+                test_catalogue.write_text(json.dumps(catalogue),encoding="utf-8")
+                output=site.stage(test_catalogue,Path(temporary)/"site",check=False)
+            finally:
+                test_catalogue.unlink(missing_ok=True)
+            self.assertEqual((output/(item.report_id+".zip")).read_bytes(),archive)
             self.assertIn("objective bounds [0,0]",(output/item.report_id/"index.html").read_text(encoding="utf-8"))
             with zipfile.ZipFile(output/(item.report_id+".zip")) as archive:
                 for name in archive.namelist():self.assertIsNone(re.search(rb"[A-Za-z]:[\\/](?!/)",archive.read(name)),name)

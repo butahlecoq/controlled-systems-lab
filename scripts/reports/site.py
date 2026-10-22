@@ -322,7 +322,7 @@ def stage(catalog_path,out,check=True,allow_test=False):
             if report["report_kind"] == opt12.KIND:
                 page_files.add("../" + rid + ".zip")
             OfflineHTML(page_files).feed(generated_page)
-            if report["report_kind"] not in ("geo05-projection-predecessor", "geo06-quickhull", opt12.KIND, b08_exact.KIND, "syn07-ts01-analytic", "syn04-strategy-b-ts01", "syn04-strategy-b-ts02", "syn03-strategy-a-ts01", "syn03-strategy-a-ts02", "syn-ts01-paired-comparison"):
+            if report["report_kind"] not in ("geo05-projection-predecessor", "geo06-quickhull", opt12.KIND, b08_exact.KIND, "syn07-ts01-analytic", "syn04-strategy-b-ts01", "syn04-strategy-b-ts02", "syn04-strategy-b-ts03", "syn03-strategy-a-ts01", "syn03-strategy-a-ts02", "syn-ts01-paired-comparison"):
                 if report["report_kind"] == opt04.KIND:
                     data.validate_svg(opt04.public_svg(data.parse_json((root/source_id/"records.json").read_text(encoding="utf-8"))))
                 else:
