@@ -4,7 +4,7 @@
 
 ## Decision status and recommended v1 path
 
-The owner has approved `u ∈ [-1, 1]` for the B04 fuel-management task only. It is not a shared control normalization for newly authored scenarios. The first `nominal_open_loop` profile is also confirmed: known deterministic initial point, affine discrete stages, absent/zero disturbance, and no added state or temporal coupling restrictions. Neither decision restores or verifies historical B04 inputs. Data types that represent more general systems do not imply solver support. The comparison program is intended to compare classic and minimax objectives, open- and closed-loop policies, and exact-polytope and approximate zonotope, ellipsoid, parallelotope, and box representations while preserving each problem's native domains and recording per-task capability support.
+The owner has approved `u ∈ [-1, 1]` for the B04 fuel-management task only. It is not a shared control normalization for newly authored scenarios. The first `nominal_open_loop` profile is also confirmed: known deterministic initial point, affine discrete stages, absent/zero disturbance, and no added state or temporal coupling restrictions. Neither decision restores or verifies historical B04 inputs. Data types that represent more general systems do not imply solver support. The comparison program is intended to compare classic and minimax control problems, open- and closed-loop policies, and exact-polytope and approximate zonotope, ellipsoid, parallelotope, and box representations while preserving each problem's native domains and recording per-task capability support.
 
 | Decision | Recommended v1 default | Still open / alternatives | Rationale |
 |---|---|---|---|
