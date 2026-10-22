@@ -140,11 +140,18 @@ Not established:
 - Anything about the canonical `U` rows, the first-action convention, the stagewise control domain, the unit control interval or the nonlinear replay. The saved histories remain scoped evidence, not a canonical run.
 - Nothing is repaired. The printed `x0`, `B`, `c2`, `c3`, the published `30.899` and the four nonlinear table rows keep their historical labels, and the manifest's execution gate is unchanged.
 
-## Related finding: where the "7%" constraint lives
+## Related finding: L13's "7%" constraint
 
-The "7%" of the owner's message is **not** in L11. In the extracted text layer of the supplied corpus the figure occurs exactly once, in L13 (B09, the third stage of «Союз-2-1б»), model example, PDF p. 11: *"запрещается отклонять коэффициент соотношения массовых расходов компонентов топлива больше чем на 7% от номинального значения K (ограничение (11))"*. The formula itself is an image in that PDF and is not recoverable from the text layer, so the sentence's own phrase "of the nominal value K" and the formula may disagree; the text layer also contains L13's linearized phase polytope (`57.5 <= x1 <= 62.5`, `23 <= x3 <= 25`), which is consistent with either reading and therefore does not separate them. L11 states the engine no-failure requirement in words attached to its phase constraint (1.7) and, in the numerical example, to the printed flow box, while the control-interval condition (1.8) is stated separately, and no numeric mixture bound appears in L11. L10 (B07) also refers to an engine no-failure condition, there with numeric flow bounds (`29 <= x1 <= 31`, `19.5 <= x3 <= 20.5`) but no numeric mixture bound.
-
-That makes the reading decisive for L13's own consistency: L13's Table 1 (PDF p. 11) has `K = 2.5`, `dK = -0.075`, `c1 = 0.01`, and the article's body text states a nine-position throttle catalogue, printed as `U1(t) = {1; 0.75; ...; -1}` on PDF p. 12. If the bound is `7%` in absolute mixture units, the initial state violates the article's own safety constraint by `0.005`; if it is `7%` of `K`, that is `0.175` and nothing is violated. The owner's instruction that the `7%` figure is erroneous is recorded; the corrected value and the affected cases remain an open owner decision, and no L13 constraint is used in this note. The corpus claims above are scoped to the extracted text layer; equation images were not searched.
+The earlier note below was superseded by the owner's source recheck and signed
+disposition in [issue #532](https://github.com/butahlecoq/controlled-systems-lab/issues/532#issuecomment-6334291909).
+The exact source transcription, owner-selected relative bound, state-box
+realization, Table 1 arithmetic, repository-use search, and precision limit are
+now recorded in [L13 mixture-bound recovery](l13-mixture-bound-recovery.md).
+The 7% refers to `0.07K = 0.175` for nominal `K=2.5`; the printed box is the
+operative numerical state constraint. The earlier claim that the equation was
+an image and that the corrected value remained undecided is withdrawn. No
+published value changes, and the broader B09 historical-run questions remain
+open.
 
 ## Owner direction recorded during the input-recovery review
 

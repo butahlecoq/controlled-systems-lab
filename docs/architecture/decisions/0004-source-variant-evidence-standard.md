@@ -11,9 +11,10 @@ The archive has encountered three different situations that can look like a
 damaged transcription: the displayed B04 model excludes a published endpoint;
 the printed R29 control representation is dimensionally incompatible with its
 scalar recurrence; and exact optimization of the displayed B08 data differs
-from the reported value while L13's disputed mixture constraint is unavailable
-as text. A plausible nearby artifact or a numerically close result is not, by
-itself, evidence that the source was transcribed incorrectly.
+from the reported value. When this decision was drafted, L13's disputed mixture
+constraint had not yet been checked against the identified source. A plausible
+nearby artifact or a numerically close result is not, by itself, evidence that
+the source was transcribed incorrectly.
 
 ## Decision
 
@@ -122,15 +123,20 @@ semantics are not ruled out; this evidence does not establish a damaged
 transcription or explain the published result. Keep both values and their
 evidence labels unchanged.
 
-For L13, the [variant diagnosis](../../research/b04-model-variant-diagnosis.md#related-finding-where-the-7-constraint-lives)
-records that the text layer says the mixture deviation is at most 7% of nominal
-`K`, but the constraint formula is an image not recovered in the available
-text. The initial `dK=-0.075` would violate an absolute `0.07` bound by
-`0.005`, but not a relative `0.07K=0.175` bound. Since the formula image and
-corrected value are unavailable, neither reading is a source certificate.
-Preserve the owner's statement that the printed figure is erroneous; the
-corrected value, affected cases, and any use of the constraint remain
-owner-bound and unresolved.
+For L13, the owner rechecked the hash-identified source and recorded the
+transcription, corrected interpretation, Table 1 check, and affected-case
+inventory in [issue #532](https://github.com/butahlecoq/controlled-systems-lab/issues/532#issuecomment-6334291909).
+The [bound recovery note](../../research/l13-mixture-bound-recovery.md) records
+the general Eq. (11) state-polyhedron form, the 7%-of-nominal-`K` statement,
+and its numerical state-box realization. A nominal `v=0` endpoint check against
+the printed box is recorded separately; the source's bounded model-error input
+means that check does not establish equivalence for arbitrary disturbed
+trajectories. The owner decision is
+`|Kₘ−K| ≤ 0.07K = 0.175` for `K=2.5`; it supersedes the earlier statement that
+the 7% figure was erroneous. The owner also reports that no repository scenario,
+check, or result record uses the bound. This closes the bound-interpretation
+question only. It does not resolve B09's historical program, Table 2 provenance,
+or authorize a run; no published result is changed.
 
 ## Consequences
 
