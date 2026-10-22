@@ -6,9 +6,9 @@
 
 The control set is part of a problem's definition. It is not a project-wide normalization that may be copied between unrelated models.
 
-- The B04 fuel-management task uses admissible controls `u ∈ [-1,1]`.
+- The B04 `b04-reference-v1` corrected-track fuel-management task uses admissible controls `u ∈ [-1,1]`. This does not promote the historical B04 manifest's recollection to canonical input.
 - The L05 Lotka–Volterra task uses its separate `u ∈ [-0.3,0.3]` interval. There is no conversion or inferred relationship between the intervals.
-- In B06/B07 minimax tasks, controls come from a finite action set and disturbances belong to their own polytopes. Those disturbance sets have no implied relationship to B04's interval.
+- In B06/B07 minimax tasks, controls come from a finite action set and disturbances belong to their own polytopes. The [B06 audit](b06-source-audit.md) records L09's generic polyhedral-set assumption and the absence of numerical disturbance bounds for B06; the [B07 audit](b07-source-audit.md) records the source gaps for its disturbance sets. Those disturbance sets have no implied relationship to B04's interval.
 - The historical B04 manifest remains frozen. Its recorded interval remains a recollection and is not promoted to a canonical historical input by this decision.
 
 The owner recorded this decision in [issue #535](https://github.com/butahlecoq/controlled-systems-lab/issues/535#issuecomment-6352028390). It settles the scope questions in [#4](https://github.com/butahlecoq/controlled-systems-lab/issues/4), [#6](https://github.com/butahlecoq/controlled-systems-lab/issues/6), [#10](https://github.com/butahlecoq/controlled-systems-lab/issues/10), and [#517](https://github.com/butahlecoq/controlled-systems-lab/issues/517) only as they concern these domain relationships. It does not settle their remaining source recovery, reproduction, or model-correction work.
