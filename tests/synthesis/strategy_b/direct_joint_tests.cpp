@@ -4,6 +4,7 @@
 #include <csl/synthesis/strategy_a/strategy.hpp>
 #include <csl/synthesis/strategy_ts01/analytic_profile.hpp>
 #include <csl/synthesis/ts02_constant_integrator.hpp>
+#include <csl/synthesis/ts03_singular_integrator.hpp>
 #include <csl/optimization/convex_backend.hpp>
 #include <csl/optimization/linear_infeasibility_certificate.hpp>
 #include <csl/execution/timing_collector.hpp>
@@ -624,6 +625,53 @@ TEST_CASE("T-S03 singular A preserves earlier controls at a unique terminal opti
         CHECK_FALSE(contains(relation,point));CHECK_FALSE(contains(a_relation,point,1e-7));
     }
 }
+TEST_CASE("registered Strategy B publishes the exact T-S03 singular-dynamics family") {
+    auto input=integrator();
+    auto model=*input.model;
+    std::get<LinearStage>(model.dynamics.stages).A.values={0};
+    input.model=std::make_shared<const SystemModel>(model);
+    const auto p=resolve(input);
+    auto exact=request(p);
+    exact.profile=synthesis::ts03_singular_integrator_profile;
+    exact.target=FamilyTarget::exact_optimal_relation;
+
+    const auto prepared=registered_prepared(p,exact);
+    auto workspace=prepared.create();
+    ExecutionContext context;
+    context.resources=std::make_shared<const ResourcePolicy>(ResourcePolicy{1,1,1,{}});
+    context.numerical=exact.numerical;
+    const auto result=accepted(workspace->run(context));
+
+    REQUIRE(result.termination==Termination::completed);
+    REQUIRE(result.outcome.value==MathematicalOutcome::optimal);
+    REQUIRE(result.objective.lower);
+    REQUIRE(result.objective.upper);
+    CHECK(result.objective.lower->value==0);
+    CHECK(result.objective.upper->value==0);
+    REQUIRE(result.family);
+    CHECK(result.family->target()==FamilyTarget::exact_optimal_relation);
+    CHECK(result.family->registry_verified());
+    CHECK(result.family->identity().request==exact);
+    const auto& complete=std::get<CompleteOptimalFamily>(result.family->outcome());
+    const auto* proof=std::get_if<RegisteredCompletenessEvidence>(&complete.completeness.support);
+    REQUIRE(proof);
+    CHECK(proof->verifier==ModuleId{synthesis::ts03_singular_integrator_verifier});
+    CHECK(proof->proof==synthesis::ts03_singular_integrator_proof);
+    const auto relation=std::dynamic_pointer_cast<const synthesis::Ts03SingularIntegratorRelation>(
+        complete.relation.payload);
+    REQUIRE(relation);
+    const auto& h=relation->h_polyhedron();
+    CHECK(contains(h,{0,0,1,0,1}));
+    CHECK(contains(h,{0,0.25,1,0.25,1}));
+    CHECK(contains(h,{0,1,1,1,1}));
+    CHECK_FALSE(contains(h,{0,0.25,0.75,0.25,1}));
+    CHECK_FALSE(contains(h,{0,0.25,1,0.25,0.75}));
+    const auto representation=h.representation();
+    const auto* polyhedron=std::get_if<sets::HRepresentation>(&representation);
+    REQUIRE(polyhedron);
+    CHECK(polyhedron->equalities.rows()==4);
+    CHECK(polyhedron->inequalities.rows()==2);
+}
 TEST_CASE("provider rejection retains the feasible candidate and scoped request provenance") {
     const auto p=resolve(integrator());const auto r=oracle({0,0.25,1,0.25,0.75},0,false,true).solve(p,request(p),{});
     CHECK(r.termination==Termination::operation_rejected);const auto& data=payload(r);CHECK_FALSE(data.optimization);
@@ -1116,7 +1164,7 @@ TEST_CASE("registered Strategy B rejects partial-family preparation before creat
     CHECK(rejection.diagnostics.front().code==DiagnosticCode::unsupported);
     CHECK(rejection.diagnostics.front().field=="joint.coverage");
     CHECK(rejection.diagnostics.front().explanation==
-        "Only the exact reviewed T-S01/T-S02 profiles have registered complete-family verifiers; other requests remain candidates.");
+        "Only the exact reviewed T-S01/T-S02/T-S03 profiles have registered complete-family verifiers; other requests remain candidates.");
     CHECK(lp_factory_calls==0);
     CHECK(convex_factory_calls==0);
 }

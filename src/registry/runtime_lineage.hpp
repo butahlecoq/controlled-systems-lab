@@ -13,8 +13,8 @@ namespace csl::synthesis::strategy_a::detail { class StrategyAExecutionRunner; }
 namespace csl::registry::detail {
 
 // Private, one-shot proof that Strategy B's internal direct-joint runner
-// completed the selected exact-profile path: T-S01 construction/extraction or
-// the approved T-S02 analytic relation from the retained feasible artifact.
+// completed the selected exact-profile construction/extraction path or the
+// approved T-S02 analytic relation from the retained feasible artifact.
 class StrategyBRuntimeLineageReceipt {
     StrategyRequest binding_;
     std::shared_ptr<const synthesis::strategy_b::JointProgram> build_output_;
