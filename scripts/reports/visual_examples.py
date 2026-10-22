@@ -13,6 +13,7 @@ import geo04_registered_reports as intersection_reports
 import geo06_registered_reports as hull_reports
 import report_data
 import stage_ext07 as ext07_reports
+import visual_illustrations
 
 CURRENT_EXT07_TWO_PARAMETER_REPORT = "ext07-hybrid-two-parameter-8ad871b5ea29fc7b"
 SAVED_FIGURES = (
@@ -610,22 +611,125 @@ def validate_gallery_inventory(out, entries):
     require(len(anchors) == len(re.findall(r'\bid="', page)), "duplicate/unsafe gallery anchor")
     require(len({entry["anchor"] for entry in entries}) == len(entries),
             "visual inventory anchors must be unique")
-    rendered = set(re.findall(r'<section id="([A-Za-z0-9_-]+)"', page)) - {"saved-report-figures"}
+    rendered = set(re.findall(r'<section id="([A-Za-z0-9_-]+)"', page)) - {
+        "saved-report-figures", "analytic-illustrations", "algorithm-coverage"}
     rendered.update(re.findall(r'<article id="(saved-figure-[0-9]+)"', page))
+    rendered.update(re.findall(r'<article class="saved-figure" id="(visual-[A-Za-z0-9_-]+)"', page))
     listed = {entry["anchor"] for entry in entries}
     require(rendered == listed, "every rendered gallery example must appear in the visual inventory")
     for entry in entries:
+        required = ("family", "title", "status", "anchor", "page", "figure", "source_page", "raw_record")
+        require(all(isinstance(entry.get(field), str) and entry[field] for field in required),
+                "visual inventory entry is missing required metadata or provenance")
+        require(entry["status"] in {"educational-example", "saved-report-figure", "analytic-illustration"},
+                "unknown visual inventory status")
         require(entry["anchor"] in anchors, "visual inventory target is missing from gallery")
-        for field in ("figure", "source_page", "raw_record"):
+        page_ref, _, page_anchor = entry["page"].partition("#")
+        page_target = (out / page_ref).resolve()
+        require(page_target.is_relative_to(site_root) and page_target.is_file() and
+                (not page_anchor or page_anchor in anchors),
+                "visual inventory page or anchor is missing or escaping")
+        raw_path = (out / entry["raw_record"]).resolve()
+        require(raw_path.is_relative_to(site_root) and raw_path.is_file(),
+                "visual inventory raw record is missing or escaping")
+        try:
+            raw_data = json.loads(raw_path.read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError):
+            raise ValueError("visual inventory raw record must be readable JSON") from None
+        require(isinstance(raw_data, dict), "visual inventory raw record must be a JSON object")
+        if entry["status"] == "analytic-illustration":
+            require(all(field in raw_data for field in
+                        ("inputs", "answer", "reproduction_command", "related_saved_report", "evidence")),
+                    "analytic visual record needs inputs, answer, reproduction and source provenance")
+        for field in ("figure", "source_page", "raw_record", "report_records"):
+            if field not in entry:
+                continue
             target = (out / entry[field]).resolve()
             require(target.is_relative_to(site_root) and target.is_file(),
                     "visual inventory links to a missing or escaping file: " + field)
+
+
+def algorithm_coverage(catalog, site, gallery_inventory):
+    source = Path(__file__).with_name("algorithm_visual_coverage.json")
+    result = json.loads(source.read_text(encoding="utf-8"))
+    require(result.get("schema") == "csl.algorithm-visual-coverage/1",
+            "unsupported algorithm coverage schema")
+    architecture = Path(__file__).parents[2] / result["source"]
+    require(architecture.is_file(),
+            "algorithm coverage architecture source is missing")
+    architecture_text = architecture.read_text(encoding="utf-8")
+    reports = json.loads(Path(catalog).read_text(encoding="utf-8"))["reports"]
+    require(Path(catalog).resolve() == Path(__file__).parents[2] / result["catalog_source"],
+            "algorithm coverage was built from an unexpected report catalog")
+    kinds = {entry["report_kind"] for entry in reports}
+    mapped_kinds = {kind for family in result["families"] for kind in family["catalog_kinds"]}
+    require(kinds <= mapped_kinds, "algorithm coverage omits catalog report kinds: " +
+            ", ".join(sorted(kinds - mapped_kinds)))
+    require(all(kind in kinds for family in result["families"] for kind in family["catalog_kinds"]),
+            "algorithm coverage refers to an unknown catalog report kind")
+    for report in reports:
+        route = Path(site) / report["report_id"]
+        require((route / "index.html").is_file() and (route / "records.json").is_file(),
+                "algorithm coverage catalog report is not staged: " + report["report_id"])
+    gallery = {entry["anchor"]: entry for entry in gallery_inventory}
+    for family in result["families"]:
+        require(all(module in architecture_text for module in family["modules"]),
+                "algorithm family module is absent from its architecture source: " + family["id"])
+        require(family["implementation_issues"],
+                "algorithm family needs a linked implementation issue: " + family["id"])
+        require(family["support"].startswith("supported-") or family["limit"],
+                "unsupported 2D family needs a support limit: " + family["id"])
+        require(not family["support"].startswith("supported-") or family["examples"],
+                "supported 2D family needs a gallery example: " + family["id"])
+        for example in family["examples"]:
+            require(example in gallery, "algorithm coverage points to a missing gallery example: " + example)
+        family["gallery_examples"] = [gallery[name] for name in family["examples"]]
+        family["catalog_reports"] = [
+            {"report_kind": entry["report_kind"], "report_id": entry["report_id"],
+             "page": "../" + entry["report_id"] + "/index.html",
+             "raw_record": "../" + entry["report_id"] + "/records.json"}
+            for entry in reports if entry["report_kind"] in family["catalog_kinds"]]
+        for route in family["report_routes"]:
+            target = Path(site) / route
+            require((target / "index.html").is_file() and (target / "records.json").is_file(),
+                    "algorithm coverage report route is not staged: " + route)
+        family["additional_reports"] = [
+            {"report_id": route, "page": "../" + route + "/index.html",
+             "raw_record": "../" + route + "/records.json"}
+            for route in family["report_routes"]]
+        family["implementation_issues"] = [
+            {"number": number,
+             "url": f"https://github.com/butahlecoq/controlled-systems-lab/issues/{number}"}
+            for number in family["implementation_issues"]]
+    return result
+
+
+def coverage_html(coverage):
+    rows = []
+    for family in coverage["families"]:
+        examples = " · ".join(
+            f'<a href="#{escape(entry["anchor"], quote=True)}">{escape(entry["title"])}</a>'
+            for entry in family["gallery_examples"]) or "No 2D example currently published"
+        issues = " · ".join(
+            f'<a href="{escape(issue["url"], quote=True)}">Issue #{issue["number"]}</a>'
+            for issue in family["implementation_issues"])
+        reports = family["catalog_reports"] + family["additional_reports"]
+        report_links = " · ".join(
+            f'<a href="{escape(report["page"], quote=True)}">{escape(report["report_id"])}</a>'
+            for report in reports)
+        rows.append('<article class="coverage-row"><h3>' + escape(family["name"]) + '</h3>'
+                    '<p class="eyebrow">' + escape(family["composition"]) + ' · ' +
+                    escape(family["support"]) + '</p><p>' + escape(family["limit"]) +
+                    '</p><p>Examples: ' + examples + '</p><p>Saved reports: ' +
+                    (report_links or "No saved report") + '</p><p>Related work: ' + issues + '</p></article>')
+    return ''.join(rows)
 
 
 def build(catalog, site):
     examples = load_examples(catalog)
     site = Path(site).resolve(strict=True)
     saved_figures, saved_inventory = saved_figure_sections(catalog, site)
+    analytic_files, analytic_inventory = visual_illustrations.build(Path(catalog))
     index = report_data.local_file(site, "index.html")
     original = index.read_text(encoding="utf-8")
     require(original.count("</body>") == 1 and len(re.findall(r"<body\b[^>]*>", original)) == 1,
@@ -642,7 +746,35 @@ def build(catalog, site):
     require(not out.is_symlink(), "gallery output must not be a symlink")
     out.mkdir(exist_ok=True)
     outputs = {e["slug"] + ".svg": plot(e) for e in examples}
+    outputs.update(analytic_files)
+    gallery_inventory = []
+    for example in examples:
+        source_page = f"../{example['report_id']}/index.html"
+        raw_record = f"../{example['report_id']}/records.json"
+        family = {"hull": "Polytope hull construction", "intersection": "Polytope intersection",
+                  "hybrid": "Hybrid control family", "two_parameter": "Hybrid control polytopes",
+                  "projected_reachability": "Projected hybrid reachability"}[example["kind"]]
+        gallery_inventory.append({"family": family, "title": example["title"],
+                                  "status": "educational-example",
+                                  "anchor": example["slug"], "page": "index.html#" + example["slug"],
+                                  "figure": example["slug"] + ".svg", "source_page": source_page,
+                                  "raw_record": raw_record})
+    gallery_inventory.extend(analytic_inventory)
+    for figure_index, entry in enumerate(saved_inventory):
+        report_page = entry["page"]
+        report_figure = entry["figure"]
+        report_record = entry["records"]
+        entry["anchor"] = f"saved-figure-{figure_index+1}"
+        entry["page"] = "index.html#saved-report-figures"
+        entry["figure"] = f"../{entry['report_id']}/{report_figure}"
+        entry["source_page"] = f"../{entry['report_id']}/{report_page}"
+        entry["raw_record"] = f"../{entry['report_id']}/{report_record}"
+        entry["status"] = "saved-report-figure"
+        gallery_inventory.append(entry)
+    coverage_data = algorithm_coverage(catalog, site, gallery_inventory)
     navigation = "".join(f'<a href="#{e["slug"]}">{e["title"]}</a>' for e in examples)
+    navigation += '<a href="#analytic-illustrations">Analytic geometry and optimization</a>'
+    navigation += '<a href="#algorithm-coverage">Algorithm coverage map</a>'
     navigation += '<a href="#saved-report-figures">More saved algorithm figures</a>'
     body = ('<!doctype html><html lang="en"><head><meta charset="utf-8">'
             '<meta name="viewport" content="width=device-width,initial-scale=1">'
@@ -656,10 +788,18 @@ def build(catalog, site):
             '<p class="limits">These educational pages show reviewed saved outputs or explicit analytic constructions; '
             'they are not new performance measurements. Each page states whether it replays saved output or illustrates a literal fixture.</p>'
             '<p><a href="minimal-inputs.json" download>Download inputs and displayed outputs (JSON)</a> · '
-            '<a href="visual-coverage.json" download>Download current gallery inventory (JSON)</a></p>'
+            '<a href="visual-coverage.json" download>Download current gallery inventory (JSON)</a> · '
+            '<a href="algorithm-coverage.json" download>Download algorithm-family coverage (JSON)</a></p>'
             '<p class="limits">This inventory describes figures currently linked here; it does not imply that every implemented algorithm already has a 2D example. '
             'The full algorithm-coverage gap is tracked in <a href="https://github.com/butahlecoq/controlled-systems-lab/issues/563">issue #563</a>.</p></header>'
             + "".join(section(e, i+1) for i, e in enumerate(examples)) +
+            '<section id="analytic-illustrations"><p class="eyebrow">Hand-derived examples</p>'
+            '<h2>Analytic geometry and optimization</h2><p>These exact low-dimensional examples explain the operations with literal inputs and answers. They are not solver traces or performance evidence.</p>'
+            '<div class="saved-grid">' + visual_illustrations.cards(analytic_inventory) + '</div></section>' +
+            '<section id="algorithm-coverage"><p class="eyebrow">Implementation map</p>'
+            '<h2>Algorithm families and 2D limits</h2><p>This map follows the current framework composition document and published report catalog. '
+            'It separates the nominal synthesis path from installed modules outside that path and records where this gallery has no supported 2D case.</p>'
+            '<div class="coverage-grid">' + coverage_html(coverage_data) + '</div></section>' +
             '<section id="saved-report-figures"><p class="eyebrow">Reviewed report figures</p>'
             '<h2>More algorithms, from saved evidence</h2><p>These figures are published with their original reports. '
             'Open a report for its exact inputs, answers, reproduction commands, provenance and evidence limits.</p>'
@@ -668,31 +808,9 @@ def build(catalog, site):
     outputs["index.html"] = body
     export = [{key: value for key, value in e.items() if key not in {"records_path", "domain"}} for e in examples]
     outputs["minimal-inputs.json"] = json.dumps({"schema": "csl.visual-examples/1", "examples": export}, indent=2) + "\n"
-    gallery_inventory = []
-    for example in examples:
-        source_page = f"../{example['report_id']}/index.html"
-        raw_record = f"../{example['report_id']}/records.json"
-        family = {"hull": "Polytope hull construction", "intersection": "Polytope intersection",
-                  "hybrid": "Hybrid control family", "two_parameter": "Hybrid control polytopes",
-                  "projected_reachability": "Projected hybrid reachability"}[example["kind"]]
-        gallery_inventory.append({"family": family, "title": example["title"],
-                                  "status": "educational-example",
-                                  "anchor": example["slug"], "page": "index.html#" + example["slug"],
-                                  "figure": example["slug"] + ".svg", "source_page": source_page,
-                                  "raw_record": raw_record})
-    for figure_index, entry in enumerate(saved_inventory):
-        report_page = entry["page"]
-        report_figure = entry["figure"]
-        report_record = entry["records"]
-        entry["anchor"] = f"saved-figure-{figure_index+1}"
-        entry["page"] = "index.html#saved-report-figures"
-        entry["figure"] = f"../{entry['report_id']}/{report_figure}"
-        entry["source_page"] = f"../{entry['report_id']}/{report_page}"
-        entry["raw_record"] = f"../{entry['report_id']}/{report_record}"
-        entry["status"] = "saved-report-figure"
-        gallery_inventory.append(entry)
     outputs["visual-coverage.json"] = json.dumps(
         {"schema": "csl.visual-gallery-inventory/1", "entries": gallery_inventory}, indent=2) + "\n"
+    outputs["algorithm-coverage.json"] = json.dumps(coverage_data, indent=2, ensure_ascii=False) + "\n"
     hybrid = next(example for example in examples if example["kind"] == "hybrid")
     outputs["two_stage_scalar_family.json"] = json.dumps({
         "schema": "csl.visual-example/ext07-two-stage-scalar/1",

@@ -43,6 +43,9 @@ class GalleryTests(unittest.TestCase):
         catalog = json.loads(self.catalog.read_text())
         by_source = {entry["source_report_id"]: entry["report_id"]
                      for entry in catalog["reports"] if "source_report_id" in entry}
+        by_kind = {}
+        for entry in catalog["reports"]:
+            by_kind.setdefault(entry["report_kind"], entry["report_id"])
         for saved in gallery.SAVED_FIGURES:
             report_id = saved.get("route") or by_source[saved["source_report_id"]]
             target = self.site / report_id
@@ -55,6 +58,29 @@ class GalleryTests(unittest.TestCase):
                 (target / saved["page"]).write_text("<html>report fixture</html>", encoding="utf-8")
             if not (target / saved["image"]).exists():
                 shutil.copyfile(source / saved["image"], target / saved["image"])
+        for case in gallery.visual_illustrations.CASES:
+            target = self.site / by_kind[case["report_kind"]]
+            target.mkdir(exist_ok=True)
+            if not (target / "records.json").exists():
+                (target / "records.json").write_text("{}", encoding="utf-8")
+            if not (target / "index.html").exists():
+                (target / "index.html").write_text("<html>report fixture</html>", encoding="utf-8")
+        for report in catalog["reports"]:
+            target = self.site / report["report_id"]
+            target.mkdir(exist_ok=True)
+            if not (target / "records.json").exists():
+                (target / "records.json").write_text("{}", encoding="utf-8")
+            if not (target / "index.html").exists():
+                (target / "index.html").write_text("<html>report fixture</html>", encoding="utf-8")
+        coverage_source = json.loads((ROOT / "scripts/reports/algorithm_visual_coverage.json").read_text())
+        for family in coverage_source["families"]:
+            for route in family["report_routes"]:
+                target = self.site / route
+                target.mkdir(exist_ok=True)
+                if not (target / "records.json").exists():
+                    (target / "records.json").write_text("{}", encoding="utf-8")
+                if not (target / "index.html").exists():
+                    (target / "index.html").write_text("<html>report fixture</html>", encoding="utf-8")
 
     def test_saved_outputs_match_literal_geometry(self):
         square, line, intersection, hybrid = self.examples[:4]
@@ -123,6 +149,7 @@ class GalleryTests(unittest.TestCase):
         self.assertIn("Project a one-step hybrid state set", page)
         self.assertIn("Projected terminal set: x₁∈[0,0.5]", page)
         self.assertIn('href="projected_hybrid_reachability.json"', page)
+        self.assertIn('href="algorithm-coverage.json"', page)
         self.assertIn("065de5e45d295dfa099e25265c4014c0c46673f8", page)
         self.assertIn("blob/b83b8dc415dbe5811371b8446931ae4c6f3d2e28/reports/algorithm-results/tooling/geo04/polyhedral_intersection_driver.cpp", page)
         parser = Links()
@@ -131,7 +158,7 @@ class GalleryTests(unittest.TestCase):
             if not urlsplit(link).scheme and not link.startswith("#"):
                 self.assertTrue((self.site / "examples" / link.split("#")[0]).is_file(), link)
         figures = list((self.site / "examples").glob("*.svg"))
-        self.assertEqual(len(figures), 6)
+        self.assertEqual(len(figures), len(self.examples) + len(gallery.visual_illustrations.CASES))
         for figure in figures:
             tree = ET.fromstring(figure.read_text())
             self.assertEqual(tree.attrib["role"], "img")
@@ -174,6 +201,35 @@ class GalleryTests(unittest.TestCase):
         projected_record = json.loads((self.site / "examples/projected_hybrid_reachability.json").read_text())
         self.assertTrue(projected_record["illustration_only"])
         self.assertEqual(projected_record["analytic"]["projected_terminal_set"], "0<=x[1]<=0.5")
+        coverage = json.loads((self.site / "examples/algorithm-coverage.json").read_text())
+        self.assertEqual(coverage["schema"], "csl.algorithm-visual-coverage/1")
+        architecture = (ROOT / coverage["source"]).read_text(encoding="utf-8")
+        self.assertTrue(all(module in architecture for family in coverage["families"] for module in family["modules"]))
+        catalog_kinds = {report["report_kind"] for report in json.loads(self.catalog.read_text())["reports"]}
+        mapped_kinds = {kind for family in coverage["families"] for kind in family["catalog_kinds"]}
+        self.assertEqual(mapped_kinds, catalog_kinds)
+        visual_coverage = json.loads((self.site / "examples/visual-coverage.json").read_text())
+        visual_anchors = {entry["anchor"] for entry in visual_coverage["entries"]}
+        for family in coverage["families"]:
+            if family["support"].startswith("supported-"):
+                self.assertTrue(family["examples"], family["id"])
+            self.assertTrue(family["implementation_issues"], family["id"])
+            self.assertTrue(set(family["examples"]) <= visual_anchors, family["id"])
+        minkowski = json.loads((self.site / "examples/geo02-minkowski.json").read_text())
+        self.assertEqual(minkowski["answer"]["vertices_ccw"], [[0, 0], [3, 0], [2, 1], [0, 2]])
+        self.assertIn("visual_examples.py --catalog", minkowski["reproduction_command"])
+        ns = "{http://www.w3.org/2000/svg}"
+        self.assertEqual(len(ET.parse(self.site / "examples/geo02-minkowski.svg").findall(f".//{ns}polygon")), 1)
+        hv = json.loads((self.site / "examples/geo03-hv-square.json").read_text())
+        self.assertEqual(hv["answer"]["V_vertices_ccw"], [[0, 0], [1, 0], [1, 1], [0, 1]])
+        predecessor = json.loads((self.site / "examples/geo05-predecessor.json").read_text())
+        self.assertEqual(predecessor["answer"]["predecessor_X_intersect_S_minus_U"], [[0, 2], [0, 2]])
+        self.assertEqual(len(ET.parse(self.site / "examples/geo05-predecessor.svg").findall(f".//{ns}polygon")), 3)
+        lp = json.loads((self.site / "examples/lp-triangle.json").read_text())
+        self.assertEqual((lp["answer"]["optimizer"], lp["answer"]["objective_value"]), ([0, 1], -2))
+        phase_one = json.loads((self.site / "examples/opt04-phase-one.json").read_text())
+        self.assertEqual(phase_one["answer"]["lambda"], [0.5, 0.25, 0.25])
+        self.assertEqual(phase_one["answer"]["phase_one_violation"], 0)
         first = {p.name: p.read_bytes() for p in (self.site / "examples").iterdir()}
         gallery.build(self.catalog, self.site)
         self.assertEqual({p.name: p.read_bytes() for p in (self.site / "examples").iterdir()}, first)
@@ -185,6 +241,22 @@ class GalleryTests(unittest.TestCase):
         inventory = json.loads(inventory_path.read_text())
         with self.assertRaisesRegex(ValueError, "every rendered gallery example"):
             gallery.validate_gallery_inventory(self.site / "examples", inventory["entries"][:-1])
+
+    def test_inventory_requires_provenance_and_analytic_inputs(self):
+        gallery.build(self.catalog, self.site)
+        inventory = json.loads((self.site / "examples/visual-coverage.json").read_text())
+        entries = [dict(entry) for entry in inventory["entries"]]
+        entries[0].pop("raw_record")
+        with self.assertRaisesRegex(ValueError, "missing required metadata or provenance"):
+            gallery.validate_gallery_inventory(self.site / "examples", entries)
+        entries = inventory["entries"]
+        analytic = next(entry for entry in entries if entry["status"] == "analytic-illustration")
+        record_path = self.site / "examples" / analytic["raw_record"]
+        record = json.loads(record_path.read_text())
+        record.pop("reproduction_command")
+        record_path.write_text(json.dumps(record))
+        with self.assertRaisesRegex(ValueError, "needs inputs, answer, reproduction"):
+            gallery.validate_gallery_inventory(self.site / "examples", entries)
 
     def test_modified_staged_results_are_rejected_before_writes(self):
         target = self.site / self.examples[0]["report_id"] / "records.json"
