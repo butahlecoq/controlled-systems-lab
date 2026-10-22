@@ -1,0 +1,508 @@
+{
+  "schema": "csl.algorithm-visual-coverage/1",
+  "source": "docs/architecture/framework-composition.md",
+  "scope": "Implemented algorithm families in the main nominal synthesis path and installed modules outside that path. Shared data, input, registry, report-rendering, and packaging infrastructure is excluded unless it performs a geometric or control computation.",
+  "families": [
+    {
+      "id": "quickhull",
+      "name": "2D convex hull (QuickHull)",
+      "composition": "outside-main-strategy-composition",
+      "modules": [
+        "CSL::hull",
+        "CSL::quickhull_2d"
+      ],
+      "support": "supported-2d",
+      "limit": "Standalone planar hull operation; no claim about general synthesis.",
+      "catalog_kinds": [
+        "geo06-quickhull"
+      ],
+      "report_routes": [],
+      "examples": [
+        "square_duplicates",
+        "collinear_endpoints"
+      ],
+      "implementation_issues": [
+        23
+      ]
+    },
+    {
+      "id": "affine-minkowski",
+      "name": "Affine image and Minkowski sum",
+      "composition": "shared-geometry-port",
+      "modules": [
+        "CSL::affine_sum",
+        "CSL::geometry_generators"
+      ],
+      "support": "supported-2d",
+      "limit": "Planar convex polytopes; saved GEO-02 report cases are narrower than general geometry claims.",
+      "catalog_kinds": [
+        "geo02-affine-sum"
+      ],
+      "report_routes": [],
+      "examples": [
+        "visual-geo02-minkowski-triangles"
+      ],
+      "implementation_issues": [
+        40
+      ]
+    },
+    {
+      "id": "hv-conversion",
+      "name": "H/V polytope conversion",
+      "composition": "shared-geometry-port",
+      "modules": [
+        "CSL::polyhedral",
+        "CSL::qhull_conversion",
+        "ConversionPort"
+      ],
+      "support": "supported-2d",
+      "limit": "Small bounded planar fixtures; report checks are numerical and fixture-scoped.",
+      "catalog_kinds": [
+        "geo03-hv"
+      ],
+      "report_routes": [],
+      "examples": [
+        "visual-geo03-hv-square"
+      ],
+      "implementation_issues": [
+        31
+      ]
+    },
+    {
+      "id": "intersection",
+      "name": "H-polytope intersection",
+      "composition": "shared-geometry-port",
+      "modules": [
+        "CSL::polyhedral",
+        "GeometryPort"
+      ],
+      "support": "supported-2d",
+      "limit": "The gallery case is the saved crossing-square fixture and its literal vertices.",
+      "catalog_kinds": [
+        "geo04-intersection"
+      ],
+      "report_routes": [],
+      "examples": [
+        "crossing_octagon"
+      ],
+      "implementation_issues": [
+        41
+      ]
+    },
+    {
+      "id": "projection-predecessor",
+      "name": "Polytope projection and nominal predecessor",
+      "composition": "shared-geometry-port",
+      "modules": [
+        "CSL::polyhedral",
+        "GeometryPort"
+      ],
+      "support": "supported-2d",
+      "limit": "The saved GEO-05 predecessor evidence is scalar; the planar box case is a hand-derived analytic illustration.",
+      "catalog_kinds": [
+        "geo05-projection-predecessor"
+      ],
+      "report_routes": [],
+      "examples": [
+        "visual-geo05-predecessor-boxes",
+        "one_step_projected_hybrid_reachability"
+      ],
+      "implementation_issues": [
+        51
+      ]
+    },
+    {
+      "id": "lazy-geometry",
+      "name": "Lazy planar geometry",
+      "composition": "outside-exact-h-polytope-core",
+      "modules": [
+        "CSL::geometry::lazy"
+      ],
+      "support": "supported-2d",
+      "limit": "Use only the saved report's explicit predicate and queried points.",
+      "catalog_kinds": [],
+      "report_routes": [
+        "geo08-lazy-6dbdd6b2f9235837"
+      ],
+      "examples": [
+        "saved-figure-7"
+      ],
+      "implementation_issues": [
+        52
+      ]
+    },
+    {
+      "id": "set-approximation",
+      "name": "Box, zonotope and ellipsoid approximation",
+      "composition": "outside-main-exact-h-polytope-path",
+      "modules": [
+        "CSL::approximation",
+        "CSL::generator_adapter"
+      ],
+      "support": "supported-2d",
+      "limit": "Approximation figures retain their report-specific outer-enclosure and evidence limits.",
+      "catalog_kinds": [],
+      "report_routes": [
+        "app02-box-8ff979de60ea9d22",
+        "app03-zonotope-4522855018fa9b0b",
+        "app04-ellipsoid-fd302c34092f8b19"
+      ],
+      "examples": [
+        "saved-figure-1",
+        "saved-figure-2",
+        "saved-figure-3"
+      ],
+      "implementation_issues": [
+        33,
+        42,
+        34
+      ]
+    },
+    {
+      "id": "lp-convex",
+      "name": "Linear and convex optimization providers",
+      "composition": "main-synthesis-providers",
+      "modules": [
+        "CSL::optimization",
+        "CSL::convex",
+        "CSL::highs_lp",
+        "CSL::highs_convex"
+      ],
+      "support": "supported-2d",
+      "limit": "The triangle example is an exact analytic fixture; it is not a saved backend trace.",
+      "catalog_kinds": [
+        "lp",
+        "convex"
+      ],
+      "report_routes": [],
+      "examples": [
+        "visual-lp-triangle-objective",
+        "saved-figure-8"
+      ],
+      "implementation_issues": [
+        39,
+        50
+      ]
+    },
+    {
+      "id": "smooth-convex-optimization",
+      "name": "Smooth convex feasible-direction method",
+      "composition": "outside-main-synthesis-algorithm",
+      "modules": [
+        "CSL::convex"
+      ],
+      "support": "supported-2d",
+      "limit": "The published box-and-objective figure is the saved OPT-10 fixture; it does not imply general solver performance.",
+      "catalog_kinds": [],
+      "report_routes": [
+        "opt10-smooth-188130d94d7bf2de"
+      ],
+      "examples": [
+        "saved-figure-8"
+      ],
+      "implementation_issues": [
+        50
+      ]
+    },
+    {
+      "id": "phase-one",
+      "name": "Phase-I feasibility",
+      "composition": "outside-main-synthesis-path",
+      "modules": [
+        "CSL::phase_one"
+      ],
+      "support": "supported-2d-illustration",
+      "limit": "The figure is a barycentric simplex slice, not a 2D native solver trace.",
+      "catalog_kinds": [
+        "opt04-phase-one"
+      ],
+      "report_routes": [],
+      "examples": [
+        "visual-opt04-phase-one-simplex"
+      ],
+      "implementation_issues": [
+        29
+      ]
+    },
+    {
+      "id": "hull-optimization",
+      "name": "Hull reduction, basis reuse, ordered and recursive hull, warm start",
+      "composition": "optimization-support-outside-nominal-strategies",
+      "modules": [
+        "CSL::optimization",
+        "CSL::hull"
+      ],
+      "support": "supported-2d",
+      "limit": "A shared planar point-cloud figure explains the hull geometry; it does not replay ordered, recursive, basis-reuse or warm-start steps. Linked reports retain each fixed input and its own evidence limits.",
+      "catalog_kinds": [
+        "opt05-hull",
+        "opt06-basis-reuse",
+        "opt07-ordered-hull",
+        "opt11-recursive-hull",
+        "opt12-warm-start"
+      ],
+      "report_routes": [],
+      "examples": [
+        "square_duplicates",
+        "collinear_endpoints"
+      ],
+      "implementation_issues": [
+        30,
+        37,
+        38,
+        45,
+        46
+      ]
+    },
+    {
+      "id": "forward-reachability",
+      "name": "Nominal forward reachability",
+      "composition": "main-synthesis-path",
+      "modules": [
+        "CSL::nominal_forward"
+      ],
+      "support": "limited-profile-evidence",
+      "limit": "The catalog has scalar-state profile reports; a 2D state illustration does not establish complete-family or general-profile evidence.",
+      "catalog_kinds": [
+        "syn01-nominal-forward"
+      ],
+      "report_routes": [],
+      "examples": [],
+      "implementation_issues": [
+        53
+      ]
+    },
+    {
+      "id": "terminal-minimizers",
+      "name": "Terminal minimization",
+      "composition": "main-synthesis-path",
+      "modules": [
+        "CSL::terminal_minimizers"
+      ],
+      "support": "limited-profile-evidence",
+      "limit": "Published synthesis profiles are scalar-state; the gallery distinguishes geometry examples from complete-family proof.",
+      "catalog_kinds": [
+        "syn02-terminal-minimizers"
+      ],
+      "report_routes": [],
+      "examples": [],
+      "implementation_issues": [
+        61
+      ]
+    },
+    {
+      "id": "strategy-a",
+      "name": "Strategy A reachability and backward control recovery",
+      "composition": "main-synthesis-path",
+      "modules": [
+        "CSL::strategy_a",
+        "CSL::control_recovery"
+      ],
+      "support": "limited-profile-evidence",
+      "limit": "T-S01/T-S02 reports use scalar state; 2D control plots are not 2D state examples.",
+      "catalog_kinds": [
+        "syn03-strategy-a-ts01",
+        "syn03-strategy-a-ts02"
+      ],
+      "report_routes": [],
+      "examples": [],
+      "implementation_issues": [
+        66,
+        71
+      ]
+    },
+    {
+      "id": "strategy-b",
+      "name": "Strategy B direct joint optimization",
+      "composition": "main-synthesis-path",
+      "modules": [
+        "CSL::strategy_b"
+      ],
+      "support": "limited-profile-evidence",
+      "limit": "T-S01/T-S02/T-S03 evidence uses scalar state. T-S03's two-axis figure is the (u₀,u₁) projection of its optimal relation.",
+      "catalog_kinds": [
+        "syn04-strategy-b-ts01",
+        "syn04-strategy-b-ts02",
+        "syn04-strategy-b-ts03"
+      ],
+      "report_routes": [],
+      "examples": [
+        "saved-figure-9"
+      ],
+      "implementation_issues": [
+        67,
+        71
+      ]
+    },
+    {
+      "id": "analytic-ts01-selector",
+      "name": "Analytic T-S01 strategy and directional witness selector",
+      "composition": "main-profile-auxiliary",
+      "modules": [
+        "CSL::strategy_ts01",
+        "CSL::witness_selector"
+      ],
+      "support": "limited-profile-evidence",
+      "limit": "The exact profile and selected controls are scalar-state; selector directions are shown in control coordinates.",
+      "catalog_kinds": [
+        "syn07-ts01-analytic",
+        "syn-ts01-paired-comparison"
+      ],
+      "report_routes": [],
+      "examples": [],
+      "implementation_issues": [
+        155,
+        71
+      ]
+    },
+    {
+      "id": "trajectory-verification",
+      "name": "Original-problem trajectory verification",
+      "composition": "main-synthesis-path",
+      "modules": [
+        "CSL::verification",
+        "verify_trajectory"
+      ],
+      "support": "supported-2d-trajectory",
+      "limit": "The two-state trajectory figure is a witness visualization, not a robust or all-disturbance verification proof.",
+      "catalog_kinds": [],
+      "report_routes": [
+        "ext05-discretization-a40ba9647cc023dc"
+      ],
+      "examples": [
+        "saved-figure-5"
+      ],
+      "implementation_issues": [
+        54
+      ]
+    },
+    {
+      "id": "paired-application",
+      "name": "Guarded paired-strategy control application",
+      "composition": "main-synthesis-path",
+      "modules": [
+        "CSL::application",
+        "prepare_comparison",
+        "run_comparison"
+      ],
+      "support": "limited-profile-evidence",
+      "limit": "The complete paired application evidence is T-S01/T-S02 scalar-state; T-S03 visualizes two controls, not a planar state.",
+      "catalog_kinds": [
+        "syn-ts01-paired-comparison"
+      ],
+      "report_routes": [],
+      "examples": [],
+      "implementation_issues": [
+        140,
+        71
+      ]
+    },
+    {
+      "id": "continuous-discretization",
+      "name": "Continuous affine system discretization",
+      "composition": "outside-initial-paired-synthesis-flow",
+      "modules": [
+        "discretize",
+        "CSL::model::ContinuousAffineModel"
+      ],
+      "support": "supported-2d-trajectory",
+      "limit": "The report shows its analytic two-state double-integrator fixture and interval-specific trajectory.",
+      "catalog_kinds": [],
+      "report_routes": [],
+      "examples": [
+        "saved-figure-5"
+      ],
+      "implementation_issues": [
+        54
+      ]
+    },
+    {
+      "id": "hybrid-path-reachability",
+      "name": "Hybrid path family and projected reachability",
+      "composition": "extension-outside-initial-paired-flow",
+      "modules": [
+        "CSL::model::HybridSystem",
+        "CSL::polyhedral"
+      ],
+      "support": "supported-2d-control-and-state-projections",
+      "limit": "The published hybrid examples state the one-dimensional state and distinguish control projections from state geometry.",
+      "catalog_kinds": [],
+      "report_routes": [],
+      "examples": [
+        "two_stage_scalar_family",
+        "two_parameter_scalar_polytopes",
+        "one_step_projected_hybrid_reachability",
+        "saved-figure-6"
+      ],
+      "implementation_issues": [
+        156
+      ]
+    },
+    {
+      "id": "compiled-profile-verification",
+      "name": "Compiled profile verifiers and value contracts",
+      "composition": "outside-main-synthesis-path",
+      "modules": [
+        "CSL::contracts",
+        "CSL::verifiers"
+      ],
+      "support": "not-a-geometric-2d-algorithm",
+      "limit": "These modules validate typed values and profile-specific proof authority; a geometry plot cannot demonstrate their proof obligations.",
+      "catalog_kinds": [],
+      "report_routes": [
+        "syn06-verifier-20261012-7c39d67859c50ffb697ab07b1d788134ef15ac05485207d1428dbf4a2d335cbc"
+      ],
+      "examples": [],
+      "implementation_issues": [
+        67,
+        71
+      ]
+    },
+    {
+      "id": "finite-feedback-minimax",
+      "name": "Finite feedback, fixed-plan disturbance, and finite-action minimax",
+      "composition": "implemented-outside-main-synthesis-path",
+      "modules": [
+        "CSL::fixed_plan_disturbance",
+        "CSL::finite_feedback",
+        "CSL::worst_case_vertex",
+        "CSL::finite_action_minimax"
+      ],
+      "support": "finite-state-and-action-only",
+      "limit": "The APIs operate on finite state/action/disturbance tables or finite generated vertices; no continuous 2D polytope-family figure is claimed.",
+      "catalog_kinds": [
+        "b08-displayed-exact",
+        "issue3-finite-catalogue"
+      ],
+      "report_routes": [
+        "finite-feedback-registered-f874133e442eb0fb884b8813a06591cc0f077063ee75ddf627de74656fc11c0f"
+      ],
+      "examples": [],
+      "implementation_issues": [
+        3
+      ]
+    },
+    {
+      "id": "sampled-controller-replay",
+      "name": "Sampled affine dynamics and nonlinear controller replay",
+      "composition": "implemented-outside-main-synthesis-path",
+      "modules": [
+        "CSL::controllers"
+      ],
+      "support": "supported-2d-trajectory",
+      "limit": "Saved replay is sampled and callback-provided; it does not prove robust feasibility, optimality, or all-disturbance safety.",
+      "catalog_kinds": [],
+      "report_routes": [
+        "exp04-replay-93fe3b87795e1d3a"
+      ],
+      "examples": [
+        "saved-figure-4"
+      ],
+      "implementation_issues": [
+        56,
+        68
+      ]
+    }
+  ],
+  "catalog_source": "reports/algorithm-results/catalog.json"
+}
