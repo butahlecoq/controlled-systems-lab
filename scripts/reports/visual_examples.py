@@ -15,6 +15,35 @@ import report_data
 import stage_ext07 as ext07_reports
 
 CURRENT_EXT07_TWO_PARAMETER_REPORT = "ext07-hybrid-two-parameter-8ad871b5ea29fc7b"
+SAVED_FIGURES = (
+    dict(route="app02-box-8ff979de60ea9d22", image="polygons.svg", page="index.html",
+         family="Box approximation", title="Box outer approximation",
+         alt="Planar reachable-set polygons and their box approximation."),
+    dict(route="app03-zonotope-4522855018fa9b0b", image="zonotope-2d.svg", page="example-2d.html",
+         family="Zonotopes", title="A planar zonotope", alt="A planar zonotope and its generator geometry."),
+    dict(route="app04-ellipsoid-fd302c34092f8b19", image="ellipsoid-2d.svg", page="example-2d.html",
+         family="Ellipsoidal approximation", title="A planar ellipsoid", alt="A planar ellipsoidal approximation."),
+    dict(route="exp04-replay-93fe3b87795e1d3a", image="trajectory.svg", page="index.html",
+         family="Sampled replay", title="Replay a sampled trajectory",
+         alt="Saved sampled nonlinear replay trajectory."),
+    dict(route="ext05-discretization-a40ba9647cc023dc", image="trajectory-2d.svg", page="example-2d.html",
+         family="Discretization", title="A two-dimensional discretized model",
+         alt="Saved two-dimensional discretization example."),
+    dict(route="ext07-hybrid-51d9ee2e89d240eb", image="joint-relation-2d.svg", page="example-2d.html",
+         family="Hybrid reachability", title="A hybrid joint relation",
+         alt="Saved two-dimensional hybrid joint-relation example."),
+    dict(route="geo08-lazy-6dbdd6b2f9235837", image="lazy-2d.svg", page="example-2d.html",
+         family="Lazy geometry", title="Evaluate a lazy planar set",
+         alt="Planar set expression shown before and after materialization."),
+    dict(route="opt10-smooth-188130d94d7bf2de", image="feasible-box-2d.svg", page="example-2d.html",
+         family="Smooth convex optimization", title="Feasible directions in a box",
+         alt="A planar feasible box, objective direction, and selected point."),
+    dict(source_report_id="syn04-strategy-b-ts03-20261022-2c0c9210", image="control-projection.svg",
+         page="index.html", family="Strategy B control synthesis",
+         title="Strategy B on the T-S03 control projection",
+         alt="Saved T-S03 control projection from Strategy B.",
+         summary="T-S03 has a one-dimensional state, two stages and one scalar control per stage. The plotted axes are u₀ and u₁, showing a projection of the complete optimal relation. The report records exact-profile completeness with numerical assurance; it does not establish generic Strategy B completeness."),
+)
 
 
 def require(condition, message):
@@ -538,9 +567,65 @@ def section(example, number):
             raw_record_link + report_links + '</section>')
 
 
+def saved_figure_sections(catalog, site):
+    entries = json.loads(Path(catalog).read_text(encoding="utf-8"))["reports"]
+    by_source = {entry["source_report_id"]: entry for entry in entries if "source_report_id" in entry}
+    cards = []
+    inventory = []
+    for number, entry in enumerate(SAVED_FIGURES, start=1):
+        report_id = entry.get("route")
+        if "source_report_id" in entry:
+            published = by_source.get(entry["source_report_id"])
+            require(published is not None, "missing catalogued visual report: " + entry["source_report_id"])
+            report_id = published["report_id"]
+        require(re.fullmatch(r"[A-Za-z0-9-]+", report_id or "") is not None, "unsafe visual report route")
+        route = Path(site) / report_id
+        image_path = route / entry["image"]
+        require(not route.is_symlink() and image_path.is_file() and not image_path.is_symlink(),
+                "missing staged visual figure: " + report_id + "/" + entry["image"])
+        require((route / entry["page"]).is_file() and (route / "records.json").is_file(),
+                "saved visual needs a report page and raw records: " + report_id)
+        image = f"../{report_id}/{entry['image']}"
+        page = f"../{report_id}/{entry['page']}"
+        records = f"../{report_id}/records.json"
+        cards.append(
+            f'<article id="saved-figure-{number}" class="saved-figure"><p class="eyebrow">' + escape(entry["family"]) +
+            '</p><h3><a href="' + escape(page, quote=True) + '">' + escape(entry["title"]) +
+            '</a></h3><a href="' + escape(page, quote=True) + '"><img src="' +
+            escape(image, quote=True) + '" alt="' + escape(entry["alt"], quote=True) +
+            '"></a><p>' + escape(entry.get("summary", "Figure from the immutable saved report; no solver was rerun for this gallery.")) + '</p>'
+            '<p><a href="' + escape(page, quote=True) + '">Inputs, answer and reproduction details ↗</a> · '
+            '<a href="' + escape(records, quote=True) + '">Raw record ↗</a></p></article>')
+        inventory.append({"family": entry["family"], "title": entry["title"], "report_id": report_id,
+                          "figure": entry["image"], "page": entry["page"], "records": "records.json"})
+    return ''.join(cards), inventory
+
+
+def validate_gallery_inventory(out, entries):
+    page = (out / "index.html").read_text(encoding="utf-8")
+    site_root = out.parent.resolve()
+    require(page.count('id="saved-report-figures"') == 1,
+            "saved report figures need one gallery section")
+    anchors = set(re.findall(r'\bid="([A-Za-z0-9_-]+)"', page))
+    require(len(anchors) == len(re.findall(r'\bid="', page)), "duplicate/unsafe gallery anchor")
+    require(len({entry["anchor"] for entry in entries}) == len(entries),
+            "visual inventory anchors must be unique")
+    rendered = set(re.findall(r'<section id="([A-Za-z0-9_-]+)"', page)) - {"saved-report-figures"}
+    rendered.update(re.findall(r'<article id="(saved-figure-[0-9]+)"', page))
+    listed = {entry["anchor"] for entry in entries}
+    require(rendered == listed, "every rendered gallery example must appear in the visual inventory")
+    for entry in entries:
+        require(entry["anchor"] in anchors, "visual inventory target is missing from gallery")
+        for field in ("figure", "source_page", "raw_record"):
+            target = (out / entry[field]).resolve()
+            require(target.is_relative_to(site_root) and target.is_file(),
+                    "visual inventory links to a missing or escaping file: " + field)
+
+
 def build(catalog, site):
     examples = load_examples(catalog)
     site = Path(site).resolve(strict=True)
+    saved_figures, saved_inventory = saved_figure_sections(catalog, site)
     index = report_data.local_file(site, "index.html")
     original = index.read_text(encoding="utf-8")
     require(original.count("</body>") == 1 and len(re.findall(r"<body\b[^>]*>", original)) == 1,
@@ -558,6 +643,7 @@ def build(catalog, site):
     out.mkdir(exist_ok=True)
     outputs = {e["slug"] + ".svg": plot(e) for e in examples}
     navigation = "".join(f'<a href="#{e["slug"]}">{e["title"]}</a>' for e in examples)
+    navigation += '<a href="#saved-report-figures">More saved algorithm figures</a>'
     body = ('<!doctype html><html lang="en"><head><meta charset="utf-8">'
             '<meta name="viewport" content="width=device-width,initial-scale=1">'
             '<title>Visual examples · Controlled Systems Lab</title><link rel="stylesheet" href="examples.css"></head>'
@@ -569,12 +655,44 @@ def build(catalog, site):
             '<p>See what goes in, what comes out, and why. Explore hull vertices, set intersections, hybrid control families, and projected reachability.</p>'
             '<p class="limits">These educational pages show reviewed saved outputs or explicit analytic constructions; '
             'they are not new performance measurements. Each page states whether it replays saved output or illustrates a literal fixture.</p>'
-            '<p><a href="minimal-inputs.json" download>Download inputs and displayed outputs (JSON)</a></p></header>'
+            '<p><a href="minimal-inputs.json" download>Download inputs and displayed outputs (JSON)</a> · '
+            '<a href="visual-coverage.json" download>Download current gallery inventory (JSON)</a></p>'
+            '<p class="limits">This inventory describes figures currently linked here; it does not imply that every implemented algorithm already has a 2D example. '
+            'The full algorithm-coverage gap is tracked in <a href="https://github.com/butahlecoq/controlled-systems-lab/issues/563">issue #563</a>.</p></header>'
             + "".join(section(e, i+1) for i, e in enumerate(examples)) +
+            '<section id="saved-report-figures"><p class="eyebrow">Reviewed report figures</p>'
+            '<h2>More algorithms, from saved evidence</h2><p>These figures are published with their original reports. '
+            'Open a report for its exact inputs, answers, reproduction commands, provenance and evidence limits.</p>'
+            '<div class="saved-grid">' + saved_figures + '</div></section>' +
             '<footer>Controlled Systems Lab · Saved evidence, visible geometry.</footer></main></div></body></html>')
     outputs["index.html"] = body
     export = [{key: value for key, value in e.items() if key not in {"records_path", "domain"}} for e in examples]
     outputs["minimal-inputs.json"] = json.dumps({"schema": "csl.visual-examples/1", "examples": export}, indent=2) + "\n"
+    gallery_inventory = []
+    for example in examples:
+        source_page = f"../{example['report_id']}/index.html"
+        raw_record = f"../{example['report_id']}/records.json"
+        family = {"hull": "Polytope hull construction", "intersection": "Polytope intersection",
+                  "hybrid": "Hybrid control family", "two_parameter": "Hybrid control polytopes",
+                  "projected_reachability": "Projected hybrid reachability"}[example["kind"]]
+        gallery_inventory.append({"family": family, "title": example["title"],
+                                  "status": "educational-example",
+                                  "anchor": example["slug"], "page": "index.html#" + example["slug"],
+                                  "figure": example["slug"] + ".svg", "source_page": source_page,
+                                  "raw_record": raw_record})
+    for figure_index, entry in enumerate(saved_inventory):
+        report_page = entry["page"]
+        report_figure = entry["figure"]
+        report_record = entry["records"]
+        entry["anchor"] = f"saved-figure-{figure_index+1}"
+        entry["page"] = "index.html#saved-report-figures"
+        entry["figure"] = f"../{entry['report_id']}/{report_figure}"
+        entry["source_page"] = f"../{entry['report_id']}/{report_page}"
+        entry["raw_record"] = f"../{entry['report_id']}/{report_record}"
+        entry["status"] = "saved-report-figure"
+        gallery_inventory.append(entry)
+    outputs["visual-coverage.json"] = json.dumps(
+        {"schema": "csl.visual-gallery-inventory/1", "entries": gallery_inventory}, indent=2) + "\n"
     hybrid = next(example for example in examples if example["kind"] == "hybrid")
     outputs["two_stage_scalar_family.json"] = json.dumps({
         "schema": "csl.visual-example/ext07-two-stage-scalar/1",
@@ -605,6 +723,7 @@ def build(catalog, site):
     for name, content in outputs.items():
         require(not (out / name).is_symlink(), "gallery file must not be a symlink")
         (out / name).write_text(content, encoding="utf-8")
+    validate_gallery_inventory(out, gallery_inventory)
     require(not (out / "examples.css").is_symlink(), "gallery stylesheet must not be a symlink")
     shutil.copyfile(Path(__file__).with_name("visual_examples.css"), out / "examples.css")
     link = '<p id="visual-examples-link"><a href="examples/index.html">Visual examples: minimal 2D inputs, hull vertices and plots →</a></p>'

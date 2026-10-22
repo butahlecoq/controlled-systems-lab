@@ -40,6 +40,21 @@ class GalleryTests(unittest.TestCase):
             target.mkdir(exist_ok=True)
             shutil.copyfile(example["records_path"], target / "records.json")
             (target / "index.html").write_text("<html><body>Reviewed report</body></html>")
+        catalog = json.loads(self.catalog.read_text())
+        by_source = {entry["source_report_id"]: entry["report_id"]
+                     for entry in catalog["reports"] if "source_report_id" in entry}
+        for saved in gallery.SAVED_FIGURES:
+            report_id = saved.get("route") or by_source[saved["source_report_id"]]
+            target = self.site / report_id
+            target.mkdir(exist_ok=True)
+            source_id = saved.get("source_report_id", report_id)
+            source = ROOT / "reports/algorithm-results" / source_id
+            if not (target / "records.json").exists():
+                (target / "records.json").write_text("{}", encoding="utf-8")
+            if not (target / saved["page"]).exists():
+                (target / saved["page"]).write_text("<html>report fixture</html>", encoding="utf-8")
+            if not (target / saved["image"]).exists():
+                shutil.copyfile(source / saved["image"], target / saved["image"])
 
     def test_saved_outputs_match_literal_geometry(self):
         square, line, intersection, hybrid = self.examples[:4]
@@ -163,6 +178,13 @@ class GalleryTests(unittest.TestCase):
         gallery.build(self.catalog, self.site)
         self.assertEqual({p.name: p.read_bytes() for p in (self.site / "examples").iterdir()}, first)
         self.assertEqual((self.site / "index.html").read_text().count('id="visual-examples-link"'), 1)
+
+    def test_every_rendered_example_is_listed_in_inventory(self):
+        gallery.build(self.catalog, self.site)
+        inventory_path = self.site / "examples/visual-coverage.json"
+        inventory = json.loads(inventory_path.read_text())
+        with self.assertRaisesRegex(ValueError, "every rendered gallery example"):
+            gallery.validate_gallery_inventory(self.site / "examples", inventory["entries"][:-1])
 
     def test_modified_staged_results_are_rejected_before_writes(self):
         target = self.site / self.examples[0]["report_id"] / "records.json"
