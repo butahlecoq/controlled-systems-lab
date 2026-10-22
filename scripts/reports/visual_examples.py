@@ -44,6 +44,10 @@ SAVED_FIGURES = (
          title="Strategy B on the T-S03 control projection",
          alt="Saved T-S03 control projection from Strategy B.",
          summary="T-S03 has a one-dimensional state, two stages and one scalar control per stage. The plotted axes are u₀ and u₁, showing a projection of the complete optimal relation. The report records exact-profile completeness with numerical assurance; it does not establish generic Strategy B completeness."),
+    dict(route="lotka-volterra-sampled-20261023", image="geometry.svg", page="index.html",
+         family="Lotka–Volterra reachability samples", title="A sampled Lotka–Volterra orbit",
+         alt="Seeded two-state Lotka–Volterra control samples trace an orbit; local panels show sample hulls.",
+         summary="512 deterministic control histories illustrate the discrete recurrence. Dots and sample hulls do not certify the full reachable sets or reproduce the historical figure."),
 )
 
 
