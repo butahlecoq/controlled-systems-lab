@@ -251,6 +251,8 @@ These requests concern optional historical source-to-row questions or values the
 
 **Already in hand:** hash-identified L13; A08 `Minmaxclosedloop.m`, A09 `Minmaxopenloop.m`, A10 `results.mat`; a saved-workspace trace showing A10's controls and endpoint differ from the published row, while its saved `J` agrees with A08's unsquared open-loop expression.
 
+**Resolved separately:** the owner supplied the L13 Eq. (11) source transcription, selected the relative `7%·K = 0.175` interpretation, checked Table 1, and reported no repository use of the bounds. See [L13 mixture-bound recovery](l13-mixture-bound-recovery.md) and [issue #532](https://github.com/butahlecoq/controlled-systems-lab/issues/532). This does not resolve the historical program or Table 2 provenance below.
+
 **Missing:**
 
 - [ ] The exact publication-generating source revision and the saved arrays behind each Table 2 row.
