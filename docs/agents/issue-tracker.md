@@ -4,6 +4,8 @@ Use GitHub issues and pull requests in [butahlecoq/controlled-systems-lab](https
 
 Stable task keys, requirements, acceptance criteria and prerequisites are recorded in the [backlog](../superpowers/plans/backlog.json). Fetch the live issue before starting; closed dependencies and merged code are authoritative. Publication snapshots record the initial state, not current completion.
 
+For issue triage, use the five canonical labels and the category/state rules in [triage labels](triage-labels.md).
+
 ## Discover and claim work
 
 Discover open, unassigned implementation/test work from GitHub rather than relying on a local backlog snapshot. For the staged comparison program, start with:
