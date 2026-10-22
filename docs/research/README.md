@@ -78,6 +78,8 @@ The [GEO-02 floating-model audit](geo02-floating-model-audit.md) separates exact
 
 ## Larger local archive
 
+The [control-domain and comparison-scope decision](control-domain-comparison-scope.md) records the B04/L05/B06/B07 domain boundaries and the intended comparison across objectives, policy classes, and set representations.
+
 The [targeted follow-up search](archive-followup.md) records recovered MATLAB/Pascal algorithms, B04 tables, minimax adaptive run data and the local zonotope paper. Its selected-source register supplements the initial inventory.
 
 The [Works source follow-up](works-followup.md) and [supplemental W01–W14 register](works-selected-sources.json) record additional Python variants, embedded helpers, a separate minimax configuration and historical nonlinear notebook observations. Static inspection recovered no new fuel result or exact B04 configuration; original source identities and open scientific gaps remain unchanged.

@@ -29,7 +29,7 @@ The review verdict was "provisional base, not yet ticket-ready." The revisions s
 - Prepare operation plans over the existing geometry/conversion/approximation registries and owning frozen `PreparedProvider` values. Check each operation-specific guarantee transfer; no new registry or generic guarantee ranking is introduced.
 - Reuse versioned `artifacts::RunRecord` publication/encoding for every attempt. Add typed comparison spec/run/reference records and offline report projection/HTML export with explicit size-limit omissions.
 - Gate numerical completeness on a coordinated `check_family_evidence` migration and independent T-V02/#157 public-interface tests. Samples, residuals, solver status, and paired objective agreement do not establish coverage.
-- Apply the owner-approved `u ∈ [-1,1]` only to new baselines, preserve archival B04 and the existing T-S01 oracle, and correct the stale #143/#144 draft-status self-review.
+- Preserve task-specific control and disturbance sets, including B04's `u ∈ [-1,1]`, L05's `u ∈ [-0.3,0.3]`, and finite action sets distinct from disturbance polytopes. Keep archival B04 and the existing T-S01 oracle intact. The intended comparison spans classic/minimax, open-/closed-loop, and exact-polytope/approximate zonotope, ellipsoid, parallelotope, and box approaches; this does not claim every combination is implemented.
 
 ## Remaining gates and next step
 
