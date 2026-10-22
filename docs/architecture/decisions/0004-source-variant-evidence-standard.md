@@ -11,9 +11,10 @@ The archive has encountered three different situations that can look like a
 damaged transcription: the displayed B04 model excludes a published endpoint;
 the printed R29 control representation is dimensionally incompatible with its
 scalar recurrence; and exact optimization of the displayed B08 data differs
-from the reported value while L13's disputed mixture constraint is unavailable
-as text. A plausible nearby artifact or a numerically close result is not, by
-itself, evidence that the source was transcribed incorrectly.
+from the reported value. When this decision was drafted, L13's disputed mixture
+constraint had not yet been checked against the identified source. A plausible
+nearby artifact or a numerically close result is not, by itself, evidence that
+the source was transcribed incorrectly.
 
 ## Decision
 
@@ -127,7 +128,10 @@ transcription, corrected interpretation, Table 1 check, and affected-case
 inventory in [issue #532](https://github.com/butahlecoq/controlled-systems-lab/issues/532#issuecomment-6334291909).
 The [bound recovery note](../../research/l13-mixture-bound-recovery.md) records
 the general Eq. (11) state-polyhedron form, the 7%-of-nominal-`K` statement,
-and its numerical state-box realization. The owner decision is
+and its numerical state-box realization. A nominal `v=0` endpoint check against
+the printed box is recorded separately; the source's bounded model-error input
+means that check does not establish equivalence for arbitrary disturbed
+trajectories. The owner decision is
 `|Kₘ−K| ≤ 0.07K = 0.175` for `K=2.5`; it supersedes the earlier statement that
 the 7% figure was erroneous. The owner also reports that no repository scenario,
 check, or result record uses the bound. This closes the bound-interpretation

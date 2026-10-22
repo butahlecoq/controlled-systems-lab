@@ -31,28 +31,37 @@ The owner records `ΔK = −0.075`, `c₁ = 0.01`, `c₀ = 10`, and the mixture 
 −1 ≤ Σu ≤ 2.5
 ```
 
-Using the displayed dynamics `x₁ = 59.134 + 1.064 Σu` and
-`x₃ = 24.385 − 0.534 Σu`, the endpoints from literal displayed decimals are:
+The article prints the third row of `B` as `−0.534` and the initial flow as
+`x₃(0)=24.385`. For the nominal calculation (`v=0`), the displayed dynamics
+are `x₁ = 59.134 + 1.064 Σu` and `x₃ = 24.385 − 0.534 Σu`; endpoints from
+literal printed decimals are:
 
 | Quantity | `Σu = −1` | `Σu = 2.5` | Printed interval |
 | --- | ---: | ---: | ---: |
 | `x₁` | `58.070` | `61.794` | `[57.5, 62.5]` |
 | `x₃` | `24.919` | `23.050` | `[23, 25]` |
 
-The owner comment gives `x₃ = 23.051` at the second endpoint. That differs by
-`0.001` from multiplying the displayed rounded coefficient `0.534` literally;
-the source's unrounded coefficient is not in the public checkout. Either value
-is above the printed lower bound `23`, so the admissibility conclusion is
-unchanged. The owner reports the `x₃` interval as `[23.051, 24.919]`; retain the
-precision distinction if reusing that calculation.
+The owner comment gives `x₃ = 23.051` at the second endpoint, but this is an
+arithmetic error for the source's displayed coefficient:
+`24.385 − 0.534·2.5 = 23.050`. The publication supplies the coefficient only
+to three decimals; it does not establish an unrounded coefficient that would
+produce `23.051`. The printed-box verdict remains clear: `23.050 ≥ 23`, with
+`0.050` margin at that endpoint. At `Σu=−1`, the displayed calculation gives
+`24.919` as stated by the owner.
 
-Conversely, applying the printed state box to the displayed `x₃` dynamics gives
-`Σu ∈ [−1.151685…, 2.593633…]`, rounded to `[-1.152, 2.594]`. Substitution in
-`Kₘ` yields deviations of approximately `−7.61%` and `+7.37%` of `K`, consistent
-with a 7% band to the printed precision. The `x₁` interval is wider and does not
-tighten this mixture bound.
+Conversely, applying the printed state box to the nominal displayed `x₃`
+dynamics gives `Σu ∈ [−1.151685…, 2.593633…]`, rounded to `[-1.152, 2.594]`.
+Substitution in `Kₘ` yields deviations of approximately `−7.61%` and `+7.37%`
+of `K`. These continuous nominal endpoints do not equal the stated 7% band.
+The source also specifies a discrete control catalogue and a bounded model-error
+input: the third state row of `D` contributes `−v₂`, with `|v₂| ≤ 0.06` at
+each stage. Therefore this nominal endpoint check does not prove equivalence
+between the 7% statement and the state box for arbitrary disturbed trajectories.
+The box remains the source's operative numeric state constraint; any robust
+implementation must account for the model-error terms separately. The `x₁`
+interval is wider and does not tighten this nominal mixture check.
 
-For Table 1, `59.134 / 24.385 = 2.425015…`, so the initial deviation from `K`
+For the printed initial state, `59.134 / 24.385 = 2.425015…`, so the initial deviation from `K`
 is `−0.074985…`, or `−2.999%` of `K`. It satisfies the relative bound with
 `0.100015…` margin. The rejected absolute interpretation
 `|Kₘ − K| ≤ 0.07` would exclude it by `0.004985…` (about `0.005`).
