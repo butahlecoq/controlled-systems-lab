@@ -610,6 +610,10 @@ def validate_gallery_inventory(out, entries):
     require(len(anchors) == len(re.findall(r'\bid="', page)), "duplicate/unsafe gallery anchor")
     require(len({entry["anchor"] for entry in entries}) == len(entries),
             "visual inventory anchors must be unique")
+    rendered = set(re.findall(r'<section id="([A-Za-z0-9_-]+)"', page)) - {"saved-report-figures"}
+    rendered.update(re.findall(r'<article id="(saved-figure-[0-9]+)"', page))
+    listed = {entry["anchor"] for entry in entries}
+    require(rendered == listed, "every rendered gallery example must appear in the visual inventory")
     for entry in entries:
         require(entry["anchor"] in anchors, "visual inventory target is missing from gallery")
         for field in ("figure", "source_page", "raw_record"):
