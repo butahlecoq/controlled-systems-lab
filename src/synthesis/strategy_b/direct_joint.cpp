@@ -1,6 +1,7 @@
 #include <csl/synthesis/strategy_b/direct_joint.hpp>
 #include <csl/synthesis/strategy_ts01/analytic_profile.hpp>
 #include <csl/synthesis/ts02_constant_integrator.hpp>
+#include <csl/synthesis/ts03_singular_integrator.hpp>
 #include <csl/optimization/convex_backend.hpp>
 #include <csl/optimization/linear_infeasibility_certificate.hpp>
 #include <csl/verification/trajectory.hpp>
@@ -68,17 +69,38 @@ std::optional<ob::TimingScope> start_planned_program_scope(const ExecutionContex
 Diagnostic unsupported(std::string field, std::string text) {
     return {DiagnosticCode::unsupported,std::move(field),std::move(text)};
 }
+std::variant<std::shared_ptr<const synthesis::Ts03SingularIntegratorRelation>,Diagnostics>
+canonical_ts03_relation() {
+    auto inequalities=numeric::snapshot(Matrix{2,5,{0,0,0,1,0, 0,0,0,-1,0}});
+    auto upper=numeric::snapshot_vector(Vector{1,0});
+    auto equalities=numeric::snapshot(Matrix{4,5,{1,0,0,0,0, 0,1,0,-1,0,
+        0,0,1,0,0, 0,0,0,0,1}});
+    auto equality_values=numeric::snapshot_vector(Vector{0,0,1,1});
+    if(!std::holds_alternative<numeric::MatrixView>(inequalities)||
+        !std::holds_alternative<numeric::VectorView>(upper)||
+        !std::holds_alternative<numeric::MatrixView>(equalities)||
+        !std::holds_alternative<numeric::VectorView>(equality_values))
+        return Diagnostics{{DiagnosticCode::invalid_input,"strategy_b.ts03.relation","Could not construct exact canonical H-relation buffers."}};
+    auto data=sets::make_h({{"ts03-singular-optimal-histories"},5,{"x0","x1","x2","u0","u1"}},
+        {std::get<numeric::MatrixView>(inequalities),std::get<numeric::VectorView>(upper),
+         std::get<numeric::MatrixView>(equalities),std::get<numeric::VectorView>(equality_values)});
+    if(!std::holds_alternative<sets::SetData>(data))
+        return Diagnostics{{DiagnosticCode::invalid_input,"strategy_b.ts03.relation","Canonical T-S03 H-relation is not a valid polyhedron."}};
+    return std::make_shared<const synthesis::Ts03SingularIntegratorRelation>(
+        std::get<sets::SetData>(std::move(data)));
+}
 Diagnostics capabilities(const problem::ResolvedProblem& p,const FamilyRequest& request) {
     auto d=check_family_request(request,p.identity());
     const auto source=p.description();
     const bool reviewed_ts01=registry::detail::ts01_case_valid(p,request,h_polyhedron);
     const bool reviewed_ts02=registry::detail::ts02_case_valid(p,request,h_polyhedron);
-    if(request.profile!="nominal_open_loop"&&!reviewed_ts01)
-        if(!reviewed_ts02)d.push_back(unsupported("joint.profile","Supported profiles are nominal_open_loop and the exact reviewed T-S01/T-S02 cases."));
+    const bool reviewed_ts03=registry::detail::ts03_case_valid(p,request,h_polyhedron);
+    if(request.profile!="nominal_open_loop"&&!reviewed_ts01&&!reviewed_ts02&&!reviewed_ts03)
+        d.push_back(unsupported("joint.profile","Supported profiles are nominal_open_loop and the exact reviewed T-S01/T-S02/T-S03 cases."));
     if(request.representation.value!="csl.polyhedron.h") d.push_back(unsupported("joint.representation","Native joint H relation is required."));
     if(request.assurance!=Assurance::numerical) d.push_back(unsupported("joint.assurance","Validated construction is unavailable."));
-    if(request.target!=FamilyTarget::candidate_relaxation&&!reviewed_ts01&&!reviewed_ts02)
-        d.push_back(unsupported("joint.coverage","Only the exact reviewed T-S01/T-S02 profiles have registered complete-family verifiers; other requests remain candidates."));
+    if(request.target!=FamilyTarget::candidate_relaxation&&!reviewed_ts01&&!reviewed_ts02&&!reviewed_ts03)
+        d.push_back(unsupported("joint.coverage","Only the exact reviewed T-S01/T-S02/T-S03 profiles have registered complete-family verifiers; other requests remain candidates."));
     if(source->information!=InformationPattern::nominal_open_loop || source->model->dynamics.time_domain!=TimeDomain::discrete)
         d.push_back(unsupported("joint.dynamics","Discrete nominal open-loop dynamics are required."));
     if(source->external || p.model().dimensions().external!=0) d.push_back(unsupported("joint.external","External inputs require a different profile."));
@@ -335,6 +357,8 @@ SynthesisResult detail::DirectJointExecutionRunner::solve_impl(const problem::Re
     if(!d.empty()) {const bool unsupported_request=std::all_of(d.begin(),d.end(),[](const Diagnostic& error){return error.code==DiagnosticCode::unsupported;});
         reject(std::move(d),unsupported_request?Termination::operation_rejected:Termination::contract_rejected);return result;}
     const bool reviewed_ts01=registry::detail::ts01_case_valid(p,request,h_polyhedron);
+    const bool reviewed_ts02=registry::detail::ts02_case_valid(p,request,h_polyhedron);
+    const bool reviewed_ts03=registry::detail::ts03_case_valid(p,request,h_polyhedron);
     if(context.numerical!=request.numerical) {reject({{DiagnosticCode::evidence_mismatch,"joint.numerical","Execution numerical policy must equal the effective family request."}},Termination::contract_rejected);return result;}
     if(context.cancellation.stop_requested() || (context.deadline && std::chrono::steady_clock::now()>=*context.deadline)) {
         const auto reason=context.cancellation.stop_requested()?StopReason::cancelled:StopReason::deadline_expired;
@@ -363,7 +387,6 @@ SynthesisResult detail::DirectJointExecutionRunner::solve_impl(const problem::Re
     auto feasible_artifact=std::make_shared<const sets::SetData>(std::get<sets::SetData>(std::move(initial)));
     auto data=std::make_shared<DirectJointPayload>(*build_artifact,*feasible_artifact);
     std::vector<TransformStepIdentity> lineage{{{"syn04-build:"+p.identity().value},{p.identity().value},feasible_id,{strategy_id},strategy_version}};
-    const bool reviewed_ts02=registry::detail::ts02_case_valid(p,request,h_polyhedron);
     if(reviewed_ts02&&request.target==FamilyTarget::exact_optimal_relation) {
         auto canonical=rows.finish({"ts02-optimal-histories"},{"x0","x1","x2","u0","u1"});
         if(const auto* errors=std::get_if<Diagnostics>(&canonical)) {reject(*errors,Termination::contract_rejected);return result;}
@@ -584,6 +607,46 @@ SynthesisResult detail::DirectJointExecutionRunner::solve_impl(const problem::Re
                 lineage,retained(result)};
         }
     }
+    if(reviewed_ts03) {
+        const bool completed_extraction=lineage==::csl::synthesis::strategy_b::detail::expected_ts03_lineage(p.identity());
+        const bool supported_optimum=data->optimization&&data->optimization->termination==Termination::completed&&
+            data->optimization->outcome.value==MathematicalOutcome::optimal&&result.incumbents.size()==1&&
+            result.incumbents.front().witness.original_objective==0&&result.objective.upper&&result.objective.upper->value==0;
+        if(completed_extraction&&extracted_artifact&&supported_optimum&&result.termination==Termination::completed) {
+            auto relation=canonical_ts03_relation();
+            if(const auto* errors=std::get_if<Diagnostics>(&relation)) {
+                result.termination=Termination::contract_rejected;
+                result.stop=ContractValidationFailure{*errors,retained(result),std::monostate{}};
+                return result;
+            }
+            auto payload=std::get<std::shared_ptr<const synthesis::Ts03SingularIntegratorRelation>>(std::move(relation));
+            const FamilyIdentity identity{p.identity(),request,build_artifact->coordinates,{strategy_id},strategy_version,lineage};
+            const SymbolicArgument derivation{"T-S03 exact singular-integrator derivation",
+                "For x1=u0 and x2=u1, the terminal objective (x2-1)^2 is nonnegative and equals zero exactly when x2=u1=1. Thus x0=0, x1=u0, x2=1, u1=1, and 0<=u0<=1 describe the entire optimal joint-history relation."};
+            const ClaimEvidence claim{p.identity(),derivation};
+            const ObjectiveBound zero{0,claim};
+            const OptimumEvidence optimum{claim,{zero,zero}};
+            CompleteOptimalFamily complete{{build_artifact->coordinates,request.representation,payload},optimum,
+                {identity,RegisteredCompletenessEvidence{{synthesis::ts03_singular_integrator_verifier},"1",
+                    synthesis::ts03_singular_integrator_proof}},Assurance::numerical};
+            if(prepared_request_&&verifier_binding_&&prepared_request_->problem.identity()==p.identity()&&
+                prepared_request_->family==request&&prepared_request_->configuration.strategy.value==strategy_id&&
+                prepared_request_->strategy_version==strategy_version&&
+                registry::detail::strategy_b_ts03_profile_valid(p,*prepared_request_)) {
+                receipt_=registry::detail::StrategyBRuntimeLineageReceipt{*prepared_request_,build_artifact,
+                    feasible_artifact,feasible_artifact,std::move(extracted_artifact),*verifier_binding_};
+            }
+            result.outcome={p.identity(),MathematicalOutcome::optimal,derivation,{}};
+            result.objective=optimum.bounds;
+            result.complete_proposal=CompleteFamilyProposal{identity,std::move(complete)};
+        } else if(result.termination==Termination::completed) {
+            result.termination=Termination::operation_rejected;
+            result.stop=ScopedRequestRejection{{{"syn04-ts03-coverage:"+p.identity().value},"strategy",{strategy_id},
+                std::string(strategy_version),ModuleId{strategy_id},strategy_version},
+                {unsupported("joint.ts03","T-S03 requires a completed direct program, optimal-level extraction, and a verified zero-cost anchor.")},
+                lineage,retained(result)};
+        }
+    }
     return result;
 }
 registry::StrategyRegistration make_registration(const registry::Registry<registry::LPPort>& lp,const registry::Registry<registry::ConvexPort>& convex) {
@@ -603,6 +666,9 @@ registry::StrategyRegistration make_registration(const registry::Registry<regist
         if(request.family.profile==synthesis::ts02_constant_integrator_profile&&
             request.family.target==FamilyTarget::exact_optimal_relation)
             selected_verifier={{synthesis::ts02_constant_integrator_verifier},"1"};
+        if(request.family.profile==synthesis::ts03_singular_integrator_profile&&
+            request.family.target==FamilyTarget::exact_optimal_relation)
+            selected_verifier={{synthesis::ts03_singular_integrator_verifier},"1"};
         registry::Requirements program_requirements;program_requirements.output.representation={"csl.program-result.v1"};
         program_requirements.output.assurance=request.family.assurance;
         auto generated=registry::check_providers(registry::select_provider(lp,registry::Method{request.configuration.lp,{}},program_requirements),
@@ -623,6 +689,8 @@ registry::StrategyRegistration make_registration(const registry::Registry<regist
             return registry::StrategyRegistration::CompleteFamilyVerifierKey{{"csl.verifier.ts01-analytic"},"1"};
         if(request.family.profile==synthesis::ts02_constant_integrator_profile)
             return registry::StrategyRegistration::CompleteFamilyVerifierKey{{synthesis::ts02_constant_integrator_verifier},"1"};
+        if(request.family.profile==synthesis::ts03_singular_integrator_profile)
+            return registry::StrategyRegistration::CompleteFamilyVerifierKey{{synthesis::ts03_singular_integrator_verifier},"1"};
         return std::nullopt;
     };
     registration.expected_lineage=[](const registry::StrategyRequest& request) {
@@ -632,6 +700,9 @@ registry::StrategyRegistration make_registration(const registry::Registry<regist
         if(request.configuration.strategy.value==strategy_id&&
             registry::detail::ts02_case_valid(request.problem,request.family,request.configuration.representation))
             return detail::expected_ts02_lineage(request.problem.identity());
+        if(request.configuration.strategy.value==strategy_id&&
+            registry::detail::ts03_case_valid(request.problem,request.family,request.configuration.representation))
+            return detail::expected_ts03_lineage(request.problem.identity());
         return std::vector<TransformStepIdentity>{};
     };
     return registration;

@@ -306,6 +306,35 @@ performance conclusion and no speedup claim. Existing T-S01 bytes are unchanged.
 Main-only deployment and live URL verification remain separate gates; #67 stays
 open. See the [reproduction notes](../../reports/algorithm-results/tooling/syn04_ts02/README.md).
 
+## SYN-04 registered Strategy B T-S03 report
+
+The [T-S03 report bundle](../../reports/algorithm-results/syn04-strategy-b-ts03-20261022-2c0c9210/)
+uses solver source `2c0c92107acd1cfc2f7e6d359e030d0bc47fb98e` and clean report
+harness `f95f1545d2e16fa61d6d506de2cc30d8168e724f`. It covers the exact
+singular-integrator profile `x1=u0`, `x2=u1`, `u0,u1∈[0,1]`, with terminal cost
+`(x2-1)^2`. Every warmup and trial checked the complete optimal-history relation
+`(x0,x1,x2,u0,u1)=(0,s,1,s,1)`, `0≤s≤1`, objective bounds `[0,0]`, and two
+distinct histories with the same terminal state. Completeness is numerical and
+restricted to this registered profile.
+
+The seven measured public-path observations have median `1,038,900 ns`
+(`1.0389 ms`) and range `935,500–1,088,900 ns`; all seven passed and no trial
+was dropped. The interval includes problem resolution, provider selection,
+StrategyRegistry preparation, the StrategyPort run and QP solve, optimal-level
+extraction, and the compiled verifier. It excludes process startup, serialization,
+build and rendering. This is one tiny single-profile measurement with no
+comparator. The separate Windows CPU-stack profile could not start because the
+host denied profiling permission; process counters did not map a limiter to
+source. Performance interpretation is inconclusive, and the number supports no
+speedup, application-scale or general Strategy B performance claim.
+
+The [standalone HTML report](../../reports/algorithm-results/syn04-strategy-b-ts03-20261022-2c0c9210/index.html)
+links the complete inputs, raw JSONL/CSV, build provenance, profile evidence and
+labelled two-dimensional control projection. Reproduce with the
+[T-S03 report commands](../../reports/algorithm-results/tooling/syn04_ts03/README.md).
+Main-only Pages deployment and live URL/hash verification remain separate gates;
+SYN-04 issue #67 stays open.
+
 ## SYN-03 registered Strategy A T-S02 report
 
 Issue #240 records the separate registered Strategy A T-S02 profile from exact

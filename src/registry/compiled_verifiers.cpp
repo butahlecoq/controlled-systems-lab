@@ -62,6 +62,12 @@ bool StrategyBRuntimeLineageReceipt::matches(const StrategyRequest& request,cons
         return prepared.lineage==expected&&identity.lineage==expected&&
             feasible_metadata->id==SetId{"syn04-feasible:"+problem_id};
     }
+    if(verifier_binding_.id.value==synthesis::ts03_singular_integrator_verifier) {
+        const auto expected=synthesis::strategy_b::detail::expected_ts03_lineage(prepared.problem.identity());
+        return prepared.lineage==expected&&identity.lineage==expected&&
+            feasible_metadata->id==SetId{"syn04-feasible:"+problem_id}&&
+            extracted_metadata->id==SetId{"syn04-optimal-level:"+problem_id};
+    }
     const std::vector<TransformStepIdentity> observed_lineage{
         {{"syn04-build:"+problem_id},{problem_id},feasible_metadata->id,{"csl.synthesis.strategy-b"},"1"},
         {{"syn04-extract:"+problem_id},feasible_metadata->id,extracted_metadata->id,{"csl.synthesis.strategy-b"},"1"}};
@@ -268,6 +274,11 @@ bool strategy_a_ts02_profile_valid(const ::csl::problem::ResolvedProblem& proble
         request.strategy_version=="1"&&
         request.lineage==synthesis::strategy_a::detail::expected_ts02_lineage(problem.identity());
 }
+bool strategy_b_ts03_profile_valid(const ::csl::problem::ResolvedProblem& problem,const StrategyRequest& request) {
+    return ts03_case_valid(problem,request.family,request.configuration.representation)&&
+        request.configuration.strategy.value=="csl.synthesis.strategy-b"&&request.strategy_version=="1"&&
+        request.lineage==synthesis::strategy_b::detail::expected_ts03_lineage(problem.identity());
+}
 
 bool ts02_case_valid(const ::csl::problem::ResolvedProblem& problem,const FamilyRequest& family,
     const RepresentationId& representation) {
@@ -436,9 +447,11 @@ public:
     }
     const std::string& version() const noexcept override { static const std::string value{"1"};return value; }
     Diagnostics verify(const StrategyRequest& request,const CompleteFamilyProposal& proposal) const override {
-        if(!strategy_a_ts03_profile_valid(request.problem,request))
+        const bool strategy_a=strategy_a_ts03_profile_valid(request.problem,request);
+        const bool strategy_b=strategy_b_ts03_profile_valid(request.problem,request);
+        if(!strategy_a&&!strategy_b)
             return {{DiagnosticCode::unsupported,"ts03.verifier.profile",
-                "Verifier only admits the exact singular-integrator Strategy A profile and registered lineage."}};
+                "Verifier only admits the exact singular-integrator profile and a registered Strategy A or Strategy B lineage."}};
         Diagnostics diagnostics;const auto& identity=proposal.identity;const auto& complete=proposal.family;
         if(identity.problem!=request.problem.identity()||identity.request!=request.family||
             identity.coordinates!=request.problem.constraints().coordinates()||

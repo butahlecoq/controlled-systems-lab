@@ -1,0 +1,9 @@
+repetition,warmup,elapsed_ns,termination,outcome,result_disposition,registry_verified,assurance,canonical_relation_checked,completeness_verifier,completeness_verifier_version,status,consumed_result_marker,objective_lower,objective_upper,distinct_histories_same_terminal_checked,error
+0,True,1718200,completed,optimal,complete_optimal_family,True,numerical,True,csl.verifier.ts03-singular-integrator,1,passed,2784691063843559855,0,0,True,
+1,False,1088900,completed,optimal,complete_optimal_family,True,numerical,True,csl.verifier.ts03-singular-integrator,1,passed,2784691063843559855,0,0,True,
+2,False,1053800,completed,optimal,complete_optimal_family,True,numerical,True,csl.verifier.ts03-singular-integrator,1,passed,2784691063843559855,0,0,True,
+3,False,1038900,completed,optimal,complete_optimal_family,True,numerical,True,csl.verifier.ts03-singular-integrator,1,passed,2784691063843559855,0,0,True,
+4,False,986900,completed,optimal,complete_optimal_family,True,numerical,True,csl.verifier.ts03-singular-integrator,1,passed,2784691063843559855,0,0,True,
+5,False,935500,completed,optimal,complete_optimal_family,True,numerical,True,csl.verifier.ts03-singular-integrator,1,passed,2784691063843559855,0,0,True,
+6,False,998300,completed,optimal,complete_optimal_family,True,numerical,True,csl.verifier.ts03-singular-integrator,1,passed,2784691063843559855,0,0,True,
+7,False,1058600,completed,optimal,complete_optimal_family,True,numerical,True,csl.verifier.ts03-singular-integrator,1,passed,2784691063843559855,0,0,True,

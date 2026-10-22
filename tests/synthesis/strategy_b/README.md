@@ -171,8 +171,8 @@ Both Strategy A and Strategy B use the payload
 
 This is an exact-fixture result, not a general completeness procedure for
 constant objectives, arbitrary integrator dimensions, nontrivial state sets,
-other control bounds, external inputs, or temporal constraints. T-S03 and the
-remaining #67 acceptance criteria remain open. Direct focused test command:
+other control bounds, external inputs, or temporal constraints. The remaining
+#67 acceptance criteria are still open. Direct focused test command:
 
 ```powershell
 & D:/work/PhD/worktrees/syn04-ts02-direct-build/Release/syn04_tests.exe --test-case='Strategy B registers the exact T-S02 constant-objective history family'
@@ -186,3 +186,24 @@ not close #67 and does not satisfy T-X01's complete-family acceptance merely by
 matching sampled histories or objective values. Paired strategy integration and
 full-family independent verification remain for integration/review. Production
 CMake registration and top-level Release verification are now in place.
+
+### Registered T-S03 singular-integrator profile
+
+Strategy B also admits the exact T-S03 singular-integrator fixture: `x0=0`,
+`x1=u0`, `x2=u1`, controls in `[0,1]`, and objective `(x2-1)^2`. Its complete
+optimal joint-history relation is `x0=0`, `x1=u0`, `x2=1`, `u1=1`, and
+`0<=u0<=1`. The registered verifier only admits that exact source, request,
+objective, and Strategy B lineage. It requires successful direct-program
+completion, optimal-level extraction, and a zero-cost anchor before publishing
+the family. Other singular systems and request profiles remain candidates.
+
+The following figure shows the projection onto the `(u0,u1)` control plane;
+the full certified relation also includes `(x0,x1,x2)`.
+
+![T-S03 optimal relation projected onto the control plane](../../../docs/research/syn04-strategy-b-ts03-control-projection.svg)
+
+Focused test command:
+
+```powershell
+& D:/work/PhD/worktrees/syn04-ts03-profile-build/Release/syn04_tests.exe --test-case='registered Strategy B publishes the exact T-S03 singular-dynamics family'
+```

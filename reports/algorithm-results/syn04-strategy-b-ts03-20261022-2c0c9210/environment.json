@@ -1,0 +1,24 @@
+{
+  "absolute_tolerance": 1e-08,
+  "assurance": "numerical",
+  "cache_policy": "One excluded in-process warmup; each repetition constructs a fresh problem, registries, provider selections, prepared strategy and exclusive workspace. Process/runtime may be warm; no cold-cache claim.",
+  "clock": "std::chrono::steady_clock, integer nanoseconds",
+  "cpu_count_physical": 6,
+  "cpu_percent_after": 0.7,
+  "cpu_percent_before": 1.0,
+  "load_note": "All processor CPU percentage samples were taken immediately before and after the accepted process, outside accepted timing; no competing benchmark side and no dedicated quiet machine guarantee.",
+  "logical_cpu_count": 12,
+  "memory_total_bytes": 34189107200,
+  "native_provider_thread_configuration": "The registered HiGHS convex provider executes the T-S03 quadratic program; requested resource policy is one thread, and actual OS thread count per trial is unavailable",
+  "os": "Windows-11-10.0.22631-SP0",
+  "processor": "Intel64 Family 6 Model 151 Stepping 5, GenuineIntel",
+  "python": "3.13.5",
+  "relative_tolerance": 1e-08,
+  "requested_resources": {
+    "memory_bytes": null,
+    "outer_workers": 1,
+    "threads_per_worker": 1,
+    "total_threads": 1
+  },
+  "seed": "No seed option is exposed/configured by this StrategyPort/HiGHS registration path"
+}

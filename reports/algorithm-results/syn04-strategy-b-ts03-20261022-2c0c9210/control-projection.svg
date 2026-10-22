@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="640" height="420" viewBox="0 0 640 420" role="img" aria-labelledby="title desc">
+  <title id="title">T-S03 optimal relation projected onto the control plane</title>
+  <desc id="desc">The complete optimal histories project to the line u1 equals 1, with u0 ranging from 0 to 1.</desc>
+  <rect width="640" height="420" fill="#fff"/>
+  <text x="320" y="38" text-anchor="middle" font-family="sans-serif" font-size="20" font-weight="600" fill="#172554">T-S03: control-plane projection</text>
+  <path d="M100 320H540M100 320V90" fill="none" stroke="#334155" stroke-width="2"/>
+  <path d="M100 100H500" fill="none" stroke="#2563eb" stroke-width="8" stroke-linecap="round"/>
+  <circle cx="100" cy="100" r="8" fill="#fff" stroke="#1d4ed8" stroke-width="3"/>
+  <circle cx="500" cy="100" r="8" fill="#fff" stroke="#1d4ed8" stroke-width="3"/>
+  <path d="M100 320V329M500 320V329M91 100H100M91 320H100" stroke="#334155" stroke-width="2"/>
+  <text x="100" y="352" text-anchor="middle" font-family="sans-serif" font-size="16" fill="#334155">0</text>
+  <text x="500" y="352" text-anchor="middle" font-family="sans-serif" font-size="16" fill="#334155">1</text>
+  <text x="76" y="106" text-anchor="end" font-family="sans-serif" font-size="16" fill="#334155">1</text>
+  <text x="76" y="326" text-anchor="end" font-family="sans-serif" font-size="16" fill="#334155">0</text>
+  <text x="320" y="386" text-anchor="middle" font-family="sans-serif" font-size="18" fill="#172554">u₀</text>
+  <text x="45" y="205" text-anchor="middle" font-family="sans-serif" font-size="18" fill="#172554" transform="rotate(-90 45 205)">u₁</text>
+  <text x="320" y="130" text-anchor="middle" font-family="sans-serif" font-size="15" fill="#1e40af">u₁ = 1, 0 ≤ u₀ ≤ 1</text>
+  <text x="320" y="408" text-anchor="middle" font-family="sans-serif" font-size="12" fill="#64748b">Projection only; the certified family is a relation in (x₀, x₁, x₂, u₀, u₁).</text>
+</svg>

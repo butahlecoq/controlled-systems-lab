@@ -191,6 +191,11 @@ FAMILIES = {
         "Runs Strategy B on the constant-integrator profile, where the admitted path constructs "
         "and verifies the full feasible relation analytically. The registered linear and convex "
         "providers are prepared but their numerical solve operations are not invoked."),
+    "syn04-strategy-b-ts03": Family(
+        r"syn04-strategy-b-ts03-[0-9a-f]{8,64}", "synthesis", "Strategy B on the T-S03 profile",
+        "Runs the registered Strategy B path on the singular-A integrator profile, invokes the "
+        "production HiGHS convex solver, and numerically verifies the full optimal-history "
+        "relation. The report covers one fixture and makes no generic completeness or speedup claim."),
     "syn07-ts01": Family(
         r"syn07-ts01-[0-9a-f]{8,64}", "synthesis", "Exact optimal relation for the T-S01 profile",
         "Records the analytic theorem for the strict two-step scalar integrator profile: the "
