@@ -41,15 +41,18 @@ class JointRows {
 public:
     bool append(std::vector<SparseEntry> coefficients, double bound, bool equality) {
         if (!std::isfinite(bound)) return false;
-        std::stable_sort(coefficients.begin(), coefficients.end(),
-            [](const SparseEntry& left, const SparseEntry& right) { return left.column < right.column; });
+        for (const auto& entry : coefficients)
+            if (entry.column >= columns_ || !std::isfinite(entry.value)) return false;
+        std::sort(coefficients.begin(), coefficients.end(), [](const SparseEntry& left, const SparseEntry& right) {
+            if (left.column != right.column) return left.column < right.column;
+            return left.value < right.value;
+        });
 
         auto& matrix = equality ? equalities_ : inequalities_;
         auto& bounds = equality ? equality_values_ : upper_bounds_;
         std::size_t retained = 0;
         for (std::size_t index = 0; index < coefficients.size(); ++index) {
             const auto entry = coefficients[index];
-            if (entry.column >= columns_ || !std::isfinite(entry.value)) return false;
             if (entry.value == 0.0) continue;
             if (retained != 0 && coefficients[retained - 1].column == entry.column) {
                 coefficients[retained - 1].value += entry.value;
