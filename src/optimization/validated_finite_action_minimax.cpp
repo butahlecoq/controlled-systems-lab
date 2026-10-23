@@ -17,11 +17,13 @@ struct ValidatedMinimaxBuilder {
             double lo, double hi, std::vector<ValidatedPlanEvidence> plans) {
         return {p,r,lo,hi,std::move(plans)};
     }
-    static ValidatedMinimaxInfeasible infeasible(std::vector<ValidatedPlanEvidence> p) {
-        return ValidatedMinimaxInfeasible{std::move(p)};
+    static ValidatedMinimaxInfeasible infeasible(const ProblemId& problem,
+            const RequestId& request, std::vector<ValidatedPlanEvidence> plans) {
+        return ValidatedMinimaxInfeasible{problem,request,std::move(plans)};
     }
-    static ValidatedMinimaxUnresolved unresolved(std::vector<ValidatedPlanEvidence> p) {
-        return ValidatedMinimaxUnresolved{std::move(p)};
+    static ValidatedMinimaxUnresolved unresolved(const ProblemId& problem,
+            const RequestId& request, std::vector<ValidatedPlanEvidence> plans) {
+        return ValidatedMinimaxUnresolved{problem,request,std::move(plans)};
     }
 };
 namespace {
@@ -150,7 +152,7 @@ ValidatedFiniteActionMinimaxOutcome validated_finite_action_minimax(
         for(std::size_t i=T;i>0;--i){if(++choices[i-1]<q.actions.catalogue.size())break;choices[i-1]=0;}
     }
     if(any_feasible)return ValidatedMinimaxBuilder::make(q.problem,q.request,lower,upper,std::move(ledger));
-    if(any_overlap)return ValidatedMinimaxBuilder::unresolved(std::move(ledger));
-    return ValidatedMinimaxBuilder::infeasible(std::move(ledger));
+    if(any_overlap)return ValidatedMinimaxBuilder::unresolved(q.problem,q.request,std::move(ledger));
+    return ValidatedMinimaxBuilder::infeasible(q.problem,q.request,std::move(ledger));
 }
 } // namespace csl::optimization

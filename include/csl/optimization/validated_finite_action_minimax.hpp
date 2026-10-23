@@ -86,19 +86,29 @@ private:
 };
 class ValidatedMinimaxInfeasible {
 public:
+    const ProblemId& problem() const noexcept { return problem_; }
+    const RequestId& request() const noexcept { return request_; }
     const std::vector<ValidatedPlanEvidence>& plans() const noexcept { return plans_; }
 private:
-    explicit ValidatedMinimaxInfeasible(std::vector<ValidatedPlanEvidence> plans)
-        : plans_(std::move(plans)) {}
+    ValidatedMinimaxInfeasible(ProblemId problem, RequestId request,
+            std::vector<ValidatedPlanEvidence> plans)
+        : problem_(std::move(problem)), request_(std::move(request)), plans_(std::move(plans)) {}
+    ProblemId problem_;
+    RequestId request_;
     std::vector<ValidatedPlanEvidence> plans_;
     friend struct ValidatedMinimaxBuilder;
 };
 class ValidatedMinimaxUnresolved {
 public:
+    const ProblemId& problem() const noexcept { return problem_; }
+    const RequestId& request() const noexcept { return request_; }
     const std::vector<ValidatedPlanEvidence>& plans() const noexcept { return plans_; }
 private:
-    explicit ValidatedMinimaxUnresolved(std::vector<ValidatedPlanEvidence> plans)
-        : plans_(std::move(plans)) {}
+    ValidatedMinimaxUnresolved(ProblemId problem, RequestId request,
+            std::vector<ValidatedPlanEvidence> plans)
+        : problem_(std::move(problem)), request_(std::move(request)), plans_(std::move(plans)) {}
+    ProblemId problem_;
+    RequestId request_;
     std::vector<ValidatedPlanEvidence> plans_;
     friend struct ValidatedMinimaxBuilder;
 };

@@ -282,17 +282,17 @@ Diagnostics compare_output(const Output& actual, const Output& required, const s
     return {};
 }
 }
-Diagnostics check_request_policy(const Requirements& required, bool has_basis) {
+Diagnostics check_request_policy(const Requirements& required, bool has_basis, bool accepts_validated) {
     if (required.scalar != Scalar::binary64)
         return {{DiagnosticCode::unsupported,"scalar","only binary64 buffers are supported"}};
-    if (required.output.assurance == Assurance::validated)
-        return {{DiagnosticCode::unsupported,"output.assurance","revision 1.1 has no validated evidence interface"}};
+    if (required.output.assurance == Assurance::validated && !accepts_validated)
+        return {{DiagnosticCode::unsupported,"output.assurance","selected port does not admit validated assurance"}};
     if (required.basis_diagnostics && !has_basis)
         return {{DiagnosticCode::unsupported,"basis","selected method has no basis diagnostics factory"}};
     return {};
 }
-Diagnostics check_offer(const Offer& offer, const Requirements& required, bool has_basis) {
-    auto diagnostics=check_request_policy(required,has_basis);
+Diagnostics check_offer(const Offer& offer, const Requirements& required, bool has_basis, bool accepts_validated) {
+    auto diagnostics=check_request_policy(required,has_basis,accepts_validated);
     if (!diagnostics.empty()) return diagnostics;
     return compare_output(offer.output,required.output,"output.");
 }

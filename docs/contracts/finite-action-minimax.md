@@ -104,14 +104,10 @@ visual layout, then verify the live URL and record the measured source commit
 on PR #351 and issue #3. No measurements or publication URL are claimed by
 this source PR yet.
 
-The existing registry ports do not accept this result without changing its
-meaning. `StrategyPort` requires a `SynthesisOutcome` containing a joint
-optimal-family relation; this module returns a scalar value and per-plan
-numerical records. LP, convex and geometry ports have separate mathematical
-requests. [Issue #353](https://github.com/butahlecoq/controlled-systems-lab/issues/353)
-tracks a typed oracle port and registration with capability/provenance tests.
-An eventual complete finite optimal-plan family needs its own representation
-and verifier before any `StrategyPort` claim.
+This result does not imply a `SynthesisOutcome` or joint optimal family.
+`StrategyPort` requires a relation over complete trajectories, while this
+oracle returns catalogue-wide scalar bounds and per-plan evidence. LP, convex,
+and geometry ports keep their separate mathematical requests.
 
 ## Typed numerical oracle registration
 
@@ -147,6 +143,26 @@ membership and completeness claim against the admissible scenarios and
 objective. Only after that contract exists can reviewers decide whether a
 verified relation has the joint-family semantics required by `StrategyPort`.
 The scalar oracle and its near-minimizer indices do not authorize that mapping.
+
+## Validated oracle registration
+
+`CSL::validated_finite_action_minimax_port` exposes the validated oracle through
+`ValidatedFiniteActionMinimaxPort`. Its query freezes the request and all three
+caller limits. Registration advertises binary64 endpoints with
+`Assurance::validated` and the
+`csl.optimization.validated-finite-action-minimax.bounds` representation; it
+does not advertise a set relation or optimal-family completeness. Admission
+checks supported representations, dimensions, finite actions, and plan/history
+limits before workspace creation. The solver retains runtime checks for
+cancellation, deadlines, interval-operation limits, rounding mode, and
+arithmetic overflow.
+
+Bounded, all-infeasible, and unresolved complete-catalogue results carry the
+problem and request identities. The port checks those identities against the
+frozen query before returning them. Empty-catalogue, no-scenario, unsupported,
+and stopped outcomes remain status-only variants. Replacing the registered
+workspace changes the implementation but cannot downgrade its declared
+validated assurance or bypass the frozen-identity check.
 
 ## Validated finite-action minimax
 

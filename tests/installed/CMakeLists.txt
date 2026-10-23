@@ -151,6 +151,16 @@ set_target_properties(installed_validated_finite_action_minimax_client PROPERTIE
   CXX_EXTENSIONS OFF)
 add_test(NAME installed_validated_finite_action_minimax_client
   COMMAND installed_validated_finite_action_minimax_client)
+add_executable(installed_validated_finite_action_minimax_port_client
+  validated_finite_action_minimax_port_client.cpp)
+target_link_libraries(installed_validated_finite_action_minimax_port_client
+  PRIVATE CSL::validated_finite_action_minimax_port)
+set_target_properties(installed_validated_finite_action_minimax_port_client PROPERTIES
+  CXX_EXTENSIONS OFF)
+add_test(NAME installed_validated_finite_action_minimax_port_client
+  COMMAND installed_validated_finite_action_minimax_port_client)
+set_tests_properties(installed_validated_finite_action_minimax_port_client PROPERTIES
+  PASS_REGULAR_EXPRESSION "Installed validated minimax port client: selected validated bounds passed")
 set_tests_properties(installed_model_client PROPERTIES
   PASS_REGULAR_EXPRESSION "Installed model client: immutable LTI/LTV and scheduled observation literals passed")
 add_executable(installed_public_client public_client.cpp)

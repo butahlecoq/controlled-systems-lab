@@ -2,6 +2,7 @@
 #include <doctest/doctest.h>
 #include <csl/optimization/validated_finite_action_minimax.hpp>
 #include <cfenv>
+#include <chrono>
 #include <limits>
 
 TEST_CASE("validated minimax public API types are available") {
@@ -167,6 +168,41 @@ TEST_CASE("operation caps and cancellation stop without partial ledger") {
     const auto cancelled=validated_finite_action_minimax(input,{1,1,100},context);
     REQUIRE(std::holds_alternative<OperationStopped>(cancelled));
     CHECK(std::get<OperationStopped>(cancelled).reason==StopReason::cancelled);
+}
+
+TEST_CASE("plan and history limits admit the exact boundary and reject one below") {
+    const SystemModel authored{{{1,1,1},TimeDomain::discrete,
+        LinearStage{{1,1,{1}},{1,1,{0}},{1,1,{1}},{0}}}, {}};
+    const auto system=take(model::snapshot(authored,Vector{0,1}));
+    const auto initial=take(sets::make_v({{"two-initials"},1,{"x"}},
+        {take(numeric::snapshot(Matrix{2,1,{0,0}})),
+         take(numeric::snapshot(Matrix{0,1,{}}))}));
+    const auto disturbance=singleton("zero-w",0);
+    const auto universal=take(sets::make_universal({{"all"},1,{"x"}}));
+    ValidatedFiniteActionMinimaxRequest input{{"p"},{"limits"},system,initial,
+        {1,{{0},{1}}},{disturbance},{universal,universal},linear()};
+
+    const auto exact_limits=validated_finite_action_minimax(input,{2,2,1000});
+    REQUIRE(std::holds_alternative<ValidatedMinimaxBounds>(exact_limits));
+    CHECK(std::get<ValidatedMinimaxBounds>(exact_limits).plans().size()==2);
+    CHECK(std::get<ValidatedPlanFeasible>(std::get<ValidatedMinimaxBounds>(exact_limits).plans()[0])
+        .histories_examined==2);
+
+    const auto too_few_plans=validated_finite_action_minimax(input,{1,2,1000});
+    REQUIRE(std::holds_alternative<Unsupported>(too_few_plans));
+    CHECK(std::get<Unsupported>(too_few_plans).diagnostics[0].field=="validated.plans.limit");
+    const auto too_few_histories=validated_finite_action_minimax(input,{2,1,1000});
+    REQUIRE(std::holds_alternative<Unsupported>(too_few_histories));
+    CHECK(std::get<Unsupported>(too_few_histories).diagnostics[0].field=="validated.histories.limit");
+}
+
+TEST_CASE("expired deadline stops before constructing a partial catalogue") {
+    auto input=zero_horizon(singleton("x0",0),equality("safe",1,0));
+    ExecutionContext context{};
+    context.deadline=std::chrono::steady_clock::now()-std::chrono::milliseconds(1);
+    const auto result=validated_finite_action_minimax(input,{1,1,100},context);
+    REQUIRE(std::holds_alternative<OperationStopped>(result));
+    CHECK(std::get<OperationStopped>(result).reason==StopReason::deadline_expired);
 }
 
 TEST_CASE("two-dimensional finite catalogue matches a literal analytic fixture") {
