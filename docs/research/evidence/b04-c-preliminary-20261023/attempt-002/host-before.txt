@@ -1,0 +1,18 @@
+ 22:47:39 up 23:22,  1 user,  load average: 0.79, 0.40, 0.92
+8
+    PID COMMAND         %CPU %MEM
+ 453931 opencode         7.7  2.9
+  55709 codex            4.1  1.9
+ 453945 opencode.exe     3.8  4.4
+ 465438 bash             2.1  0.0
+   1090 Hyprland         1.5  0.6
+   4356 chromium         1.1  1.0
+ 326112 codex            1.1  4.3
+   4310 chromium         0.8  2.4
+   1163 quickshell       0.8  1.5
+  60365 opencode         0.7  0.1
+    765 irq/70-rtw88_pc  0.4  0.0
+   4618 chromium         0.3  3.9
+   2661 foot             0.3  0.2
+   4357 chromium         0.2  0.6
+   1164 omarchy-hyprlan  0.1  0.0
