@@ -19,9 +19,10 @@ These are not winner or scalability results. The clouds have only 5–10 points;
 there is no separate limiter profile or realistic end-to-end workload. The
 timed interval covers the reducer/QuickHull call; LP workspace construction
 and output checking are outside it. The LP reducers share injected workspace
-construction policy, while QuickHull has no LP workspace. The host was lightly
-loaded by the recorded before/after `uptime` snapshots, but that does not
-identify a source-level limiter.
+construction policy, while QuickHull has no LP workspace. The saved before
+and after `uptime` snapshots record load averages only; without core-count
+context they do not establish relative host load or identify a source-level
+limiter.
 
 ## Algorithms and paper correspondence
 
