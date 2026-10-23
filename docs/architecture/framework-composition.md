@@ -117,6 +117,9 @@ profile has a compiled complete-family verifier in both Strategy A and Strategy 
 | T-S02 | Same integrator and domains, constant terminal objective `3` in the admitted linear, zero-quadratic or zero-map residual-norm form. Every feasible joint history is optimal. |
 | T-S03 | Two-step scalar singular integrator with both state matrices zero, control matrices one, zero offsets, `x0=0`, independent `u0,u1` in `[0,1]`, unrestricted states, no external/history constraints, and terminal cost `(x2-1)^2`. Optimum zero; all optimal histories are `(x0,x1,x2,u0,u1)=(0,s,1,s,1)`, `s` in `[0,1]`. |
 
+See the [Strategy B T-S03 profile](../../tests/synthesis/strategy_b/README.md#registered-t-s03-singular-integrator-profile)
+and its [published report](published-algorithm-results.md#syn-04-registered-strategy-b-t-s03-report).
+
 Exact coverage applies only to these reviewed predicates and canonical relations.
 For T-S03, the zero state matrices make the state transitions `x1=u0` and
 `x2=u1`. The terminal objective forces `u1=1`; `u0` remains free in `[0,1]`.
