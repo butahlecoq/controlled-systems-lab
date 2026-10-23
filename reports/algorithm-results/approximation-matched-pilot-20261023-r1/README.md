@@ -63,8 +63,12 @@ The source code under `benchmarks/reporting/approximation_pilot/`, accepted
 build log, before/after host snapshots, exit status, executable SHA-256 and
 per-file checksums are retained with this bundle. Two failed driver-compilation
 attempts and their dispositions are kept under `rejected/`; they produced no
-measurement rows. `summarize.py` validates schemas, warmup/round counts, outputs
-and geometric ratios before regenerating the raw-row copy, CSV, SVG, and HTML.
+measurement rows. `source-identities.sha256` preserves the capture-time input,
+driver, build configuration, and renderer identities. The separate
+`reporting-source-identities.sha256` records the current report renderer; that
+renderer regenerates derived artifacts but did not produce the timed rows.
+`summarize.py` validates schemas, warmup/round counts, outputs and geometric
+ratios before regenerating the raw-row copy, CSV, SVG, and HTML.
 
 This preliminary bundle does not satisfy or close comparison-program issue
 #100, which still requires its configured producers and full independent
