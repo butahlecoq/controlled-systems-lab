@@ -170,6 +170,26 @@ TEST_CASE("operation caps and cancellation stop without partial ledger") {
     CHECK(std::get<OperationStopped>(cancelled).reason==StopReason::cancelled);
 }
 
+TEST_CASE("interval operation cap accumulates across infeasible catalogue plans") {
+    const SystemModel authored{{{1,1,1},TimeDomain::discrete,
+        LinearStage{{1,1,{1}},{1,1,{0}},{1,1,{1}},{0}}}, {}};
+    const auto system=take(model::snapshot(authored,Vector{0,1}));
+    const auto safe=take(sets::make_h({{"positive-residual"},1,{"x"}},
+        {take(numeric::snapshot(Matrix{1,1,{1}})),
+         take(numeric::snapshot_vector(Vector{-1})),
+         take(numeric::snapshot(Matrix{0,1,{}})),
+         take(numeric::snapshot_vector(Vector{}))}));
+    ValidatedFiniteActionMinimaxRequest input{{"p"},{"infeasible-plans"},system,
+        singleton("x0",0),{1,{{0},{1}}},{singleton("w",0)},{safe,safe},linear()};
+
+    // Each plan needs two interval operations to prove the initial state violates
+    // the safe inequality. A three-operation catalogue budget permits the first
+    // plan but must stop during the second, with no partial catalogue result.
+    const auto result=validated_finite_action_minimax(input,{2,1,3});
+    REQUIRE(std::holds_alternative<OperationStopped>(result));
+    CHECK(std::get<OperationStopped>(result).reason==StopReason::resource_limit);
+}
+
 TEST_CASE("plan and history limits admit the exact boundary and reject one below") {
     const SystemModel authored{{{1,1,1},TimeDomain::discrete,
         LinearStage{{1,1,{1}},{1,1,{0}},{1,1,{1}},{0}}}, {}};
