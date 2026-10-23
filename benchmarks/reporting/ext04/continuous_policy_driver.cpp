@@ -2,6 +2,7 @@
 #include <nlohmann/json.hpp>
 
 #include <chrono>
+#include <array>
 #include <iostream>
 #include <stdexcept>
 #include <string_view>
@@ -16,7 +17,10 @@ using Clock = std::chrono::steady_clock;
 constexpr std::string_view schema = "csl.ext04-continuous-policy-trial/1";
 constexpr std::string_view timing_scope =
     "batch of public evaluate_continuous_policy calls and literal per-generator trajectory, "
-    "action-bound, and status checks; fixture construction and JSONL serialization excluded";
+    "action-bound, and status checks; retains numeric outcomes from each batch's final call; "
+    "fixture construction and JSONL serialization excluded";
+
+using Observed = std::array<std::array<double, 6>, 4>;
 
 struct Fixture {
     LinearSystem system;
@@ -58,7 +62,7 @@ Fixture make_fixture() {
     return {std::move(system), std::move(request)};
 }
 
-void verify(const ContinuousPolicyResult& result) {
+Observed verify(const ContinuousPolicyResult& result) {
     if (!std::holds_alternative<ContinuousPolicyEvidence>(result))
         throw std::runtime_error("continuous policy evaluation did not return evidence");
     const auto& evidence = std::get<ContinuousPolicyEvidence>(result);
@@ -68,6 +72,7 @@ void verify(const ContinuousPolicyResult& result) {
         throw std::runtime_error("literal feasibility evidence differs");
     constexpr double expected[][4] = {
         {0, 0, 0, 0}, {0, 1, 1, 1}, {1, 0, 1.5, 1}, {1, 1, 2.5, 2}};
+    Observed observed{};
     for (std::size_t index = 0; index < evidence.trajectories.size(); ++index) {
         const auto& trajectory = evidence.trajectories[index].trajectory;
         if (trajectory.inputs.initial_state != Vector{expected[index][0], expected[index][1]} ||
@@ -79,7 +84,11 @@ void verify(const ContinuousPolicyResult& result) {
             evidence.trajectories[index].action_slacks[0] !=
                 Vector{1.25 - expected[index][0]})
             throw std::runtime_error("literal action safety margin differs");
+        observed[index] = {trajectory.inputs.initial_state[0], trajectory.inputs.initial_state[1],
+            trajectory.decisions[0].action[0], trajectory.states.back()[0],
+            trajectory.states.back()[1], evidence.trajectories[index].action_slacks[0][0]};
     }
+    return observed;
 }
 
 } // namespace
@@ -99,15 +108,22 @@ int main(int argc, char** argv) try {
     constexpr int repetitions = 7;
     constexpr int batch = 5000;
     for (int round = -1; round < repetitions; ++round) {
+        Observed observed{};
         const auto start = Clock::now();
         for (int call = 0; call < batch; ++call)
-            verify(evaluate_continuous_policy(fixture.system, fixture.request));
+            observed = verify(evaluate_continuous_policy(fixture.system, fixture.request));
         const auto elapsed = std::chrono::duration_cast<std::chrono::nanoseconds>(
             Clock::now() - start).count();
         json row{{"schema", schema}, {"round", round + 1}, {"warmup", round == -1},
             {"batch", batch}, {"elapsed_ns", elapsed}, {"status", "passed"},
             {"assurance", "numerical"}, {"feasibility", "within_tolerance"},
-            {"generators_per_call", 4}, {"timing_scope", timing_scope}};
+            {"generators_per_call", 4}, {"feasibility_tolerance", 1e-9},
+            {"fixture_reused", true}, {"outer_workers", 1},
+            {"timing_scope", timing_scope}, {"result", json::array()}};
+        for (const auto& generator : observed)
+            row["result"].push_back({{"initial", {generator[0], generator[1]}},
+                {"action", {generator[2]}}, {"terminal", {generator[3], generator[4]}},
+                {"action_margin", generator[5]}});
         std::cout << row.dump() << '\n';
     }
 } catch (const std::exception& error) {
