@@ -1,0 +1,143 @@
+{
+  "algorithm": "evaluate_continuous_policy",
+  "artifacts": {
+    "command": "cmake -S . -B build/ext04-continuous-report -DCMAKE_BUILD_TYPE=Release -DCSL_ENABLE_HIGHS=ON -DCSL_ENABLE_QHULL=OFF -DCSL_BUILD_EXT04_CONTINUOUS_REPORT=ON -DBUILD_TESTING=OFF; cmake --build build/ext04-continuous-report --config Release --target csl_ext04_continuous_policy_report --parallel 4; csl_ext04_continuous_policy_report measure",
+    "driver": "benchmarks/reporting/ext04/continuous_policy_driver.cpp",
+    "driver_sha256": "6b69fee134b2015e0f18f017308845941ef65f2b035e7c861a3d3b9f1d3cb41e"
+  },
+  "assurance": "numerical binary64",
+  "batch_size": 5000,
+  "collected_utc": "2026-10-23T22:19:48.909282+00:00",
+  "environment": {
+    "cmake": "3.31.6",
+    "compiler": "GCC 16.2.1",
+    "configuration": "Release, -O3, C++20",
+    "cpu": "AMD Ryzen 5 3550H with Radeon Vega Mobile Gfx",
+    "limiter": "not controlled; single process, no separate limiter profile",
+    "logical_processors": 8,
+    "native_threads": "no parallel backend used by this operation",
+    "os": "Linux x86_64 (Omarchy; kernel 7.2.5)"
+  },
+  "evidence_limits": [
+    "One analytic two-state, one-step fixture with four supplied joint generators.",
+    "Does not search for a policy or prove a universal initial/disturbance relation.",
+    "Numerical binary64 checks; no validated rounding enclosure.",
+    "Single adapter only; no comparator, speedup, scalability or application-load claim.",
+    "Timings cover repeated public evaluator calls and per-generator literal checks; fixture setup and serialization are excluded."
+  ],
+  "failures": 0,
+  "feasibility_tolerance": 1e-09,
+  "fixture": {
+    "expected_actions": [
+      [
+        0
+      ],
+      [
+        0
+      ],
+      [
+        1
+      ],
+      [
+        1
+      ]
+    ],
+    "expected_margins": [
+      1.25,
+      1.25,
+      0.25,
+      0.25
+    ],
+    "expected_states": [
+      [
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          0
+        ]
+      ],
+      [
+        [
+          0,
+          1
+        ],
+        [
+          1,
+          1
+        ]
+      ],
+      [
+        [
+          1,
+          0
+        ],
+        [
+          1.5,
+          1
+        ]
+      ],
+      [
+        [
+          1,
+          1
+        ],
+        [
+          2.5,
+          2
+        ]
+      ]
+    ],
+    "joint_initial_generators": [
+      [
+        0,
+        0
+      ],
+      [
+        0,
+        1
+      ],
+      [
+        1,
+        0
+      ],
+      [
+        1,
+        1
+      ]
+    ],
+    "observation": "y[k]=[1,0]x[k], available before decision 0",
+    "policy": "estimate=[y,0]; action=estimate[0]",
+    "safety": "u<=1.25",
+    "system": "x[k+1]=[[1,1],[0,1]]x[k]+[[0.5],[1]]u[k]"
+  },
+  "harness_sha256": "6b69fee134b2015e0f18f017308845941ef65f2b035e7c861a3d3b9f1d3cb41e",
+  "input_sha256": "5629e40935a1c2c334c6c7de37f676c6a36a38e1c6a7ff1c2c563b46d6cfe948",
+  "load_observation_before_build_and_measurement": "2026-10-23 22:18 UTC: load averages 0.43, 0.60, 1.22 across 8 CPUs; 1 logged-in user; no competing benchmark process from this session",
+  "max_batch_ns": 37847996,
+  "measured_batches": 7,
+  "median_batch_ns": 33970237,
+  "median_ns_per_call": 6794.0474,
+  "min_batch_ns": 33093233,
+  "performance_conclusion": "Inconclusive for comparisons: one adapter, no comparator or source-mapped limiter profile.",
+  "release_build_log_sha256": "137d86a057307d92e2e0f2b25c5b17390791bdbc32096737bdcc87cde3b45d5e",
+  "renderer_sha256": "71e39c3493c212e099b5daf3ac2bc14f64a16d0e66ebd025c07a901abc20a675",
+  "report_id": "ext04-continuous-ebcf879d07ee9157",
+  "schema": "csl.ext04-continuous-policy-report/1",
+  "seed": "not applicable; fixture and policy are deterministic",
+  "source_commit": "ebcf879d07ee91576a929becfc9b088b5453a327",
+  "source_tree_clean_after_commit": true,
+  "successes": 7,
+  "timing_scope": "batch of public evaluate_continuous_policy calls and literal per-generator trajectory, action-bound, and status checks; retains numeric outcomes from each batch's final call; fixture construction and JSONL serialization excluded",
+  "warmup_policy": "one excluded 5,000-call batch followed by seven sequential measured batches; same process and fixture reused",
+  "warmups_excluded": 1,
+  "workers": {
+    "native_observed": "not applicable; no parallel backend in this evaluator",
+    "native_requested": "not applicable; no parallel backend in this evaluator",
+    "outer_observed": 1,
+    "outer_requested": 1
+  },
+  "workspace_reuse": "same immutable system/domain/policy fixture reused across calls; evaluator has no cross-call workspace"
+}

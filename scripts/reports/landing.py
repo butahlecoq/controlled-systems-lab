@@ -253,6 +253,12 @@ FAMILIES = {
         "Replays sampled, explicitly observed system trajectories through the public replay path "
         "and checks the recorded outcomes. The observations are exploratory and cover one path "
         "only."),
+    "ext04-continuous": Family(
+        r"ext04-continuous-[0-9a-f]{16}", "extensions", "Continuous affine policy evaluation",
+        "Checks a caller-supplied affine observation policy over one two-state joint initial set, "
+        "retaining each supplied generator's trajectory and safety margin. This is a descriptive "
+        "single-adapter measurement; it does not synthesize policies or certify arbitrary "
+        "disturbances."),
     "ext05-discretization": Family(
         r"ext05-discretization-[0-9a-f]{16}", "extensions", "Continuous-model discretization",
         "Discretizes a continuous double integrator into a discrete model and checks the discrete "

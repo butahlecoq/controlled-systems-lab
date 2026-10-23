@@ -116,6 +116,7 @@ csl_example(scenario_cli CSL::input CSL::application CSL::strategy_a CSL::strate
 csl_example(backend_substitution CSL::highs_lp CSL::phase_one)
 csl_example(registered_synthesis_comparison CSL::input CSL::strategy_a CSL::strategy_b
   CSL::witness_selector CSL::verification CSL::highs_lp CSL::highs_convex CSL::qhull_conversion CSL::affine_sum)
+csl_example(continuous_policy CSL::controllers CSL::model)
 
 function(example_check name executable argument status output)
   if(NOT TARGET ${executable})
@@ -131,6 +132,8 @@ endfunction()
 example_check(lp_triangle registered_lp "" 0 "x=0 y=1 original_cost=5")
 example_check(convex_original_norm registered_convex "" 0 "original_cost=4.1231056.*squared_cost=17")
 example_check(resolved_history resolved_scenario "" 0 "states=0,0.25,1 controls=0.25,0.75 original_cost=0")
+example_check(continuous_policy_all_generators continuous_policy "" 0
+  "scope=all_joint_uncertainty assurance=numerical generators=4.*initial=0,0 action=0 terminal=0,0.*initial=0,1 action=0 terminal=1,1.*initial=1,0 action=1 terminal=1.5,1.*initial=1,1 action=1 terminal=2.5,2")
 example_check(scenario_cli_valid scenario_cli "--validate-only;${CMAKE_CURRENT_SOURCE_DIR}/scenarios/two-stage-integrator.json" 0
   "validation=valid.*schema=csl.scenario/1.*requested=comparison.*mode=validate_only solvers=not_invoked")
 example_check(scenario_cli_missing scenario_cli "--validate-only;${CMAKE_CURRENT_BINARY_DIR}/no-such-scenario.json" 2

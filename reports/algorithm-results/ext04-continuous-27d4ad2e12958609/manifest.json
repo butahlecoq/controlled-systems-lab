@@ -1,0 +1,13 @@
+{
+  "files": {
+    "example-2d.svg": "bd45836043f8ba4e1e2957b682a9709b1366776457c4b409098c998a670427a7",
+    "index.html": "0c0f0dce3e03705a2065e6eaf5114e5d5a6ba76d97cc1086a3ff19e268272099",
+    "records.json": "316ad5722a569ec047ec09ebe17a205fbd1bf517a353bf9786a854b5fec0e459",
+    "release-build-log.txt": "4b64dbb609f7d9b75adee64e6397765eccb830320d90c6e88c4f7abfea42b2c6",
+    "summary.csv": "e0233d63d8770002f36e9abf346770165c423b4f221f8f2e58b59079c8ec254c",
+    "trials.jsonl": "90b5dbdd5ae10365c309c0644be043c6a753909a479550a41714728d2f5738c9"
+  },
+  "report_id": "ext04-continuous-27d4ad2e12958609",
+  "schema": "csl.ext04-continuous-manifest/1",
+  "source_commit": "27d4ad2e12958609bca976786b7568adc6fe74fa"
+}
