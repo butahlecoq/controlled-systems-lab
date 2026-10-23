@@ -812,7 +812,11 @@ def build(catalog, site):
             '<h2>More algorithms, from saved evidence</h2><p>These figures are published with their original reports. '
             'Open a report for its exact inputs, answers, reproduction commands, provenance and evidence limits.</p>'
             '<div class="saved-grid">' + saved_figures + '</div></section>' +
-            '<footer>Controlled Systems Lab · Saved evidence, visible geometry.</footer></main></div></body></html>')
+            '<footer>Controlled Systems Lab · Saved evidence, visible geometry.</footer></main></div>'
+            '<script>document.querySelector(".nav-shortcut").addEventListener("click",event=>{'
+            'const target=document.querySelector(event.currentTarget.hash);if(!target)return;'
+            'event.preventDefault();history.pushState(null,"",event.currentTarget.hash);'
+            'target.scrollIntoView({behavior:"instant",block:"start"});});</script></body></html>')
     outputs["index.html"] = body
     export = [{key: value for key, value in e.items() if key not in {"records_path", "domain"}} for e in examples]
     outputs["minimal-inputs.json"] = json.dumps({"schema": "csl.visual-examples/1", "examples": export}, indent=2) + "\n"
