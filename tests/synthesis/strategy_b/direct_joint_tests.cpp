@@ -155,10 +155,56 @@ CompleteFamilyProposal exact_ts01_proposal(const problem::ResolvedProblem& probl
 TEST_CASE("initial intermediate and terminal constraints survive the sparse lift") {
     auto input=integrator(); input.states={Singleton{{0}},interval(0.5).as_handle(),Singleton{{1}}};
     const auto p=resolve(input);const auto q=accepted(build_joint_program(p,request(p)));
+    // The independent relation is x1=u0, x2=u0+u1, with x1 in [0,0.5]
+    // and x2=1. The intermediate slab therefore removes feasible histories.
     CHECK(feasible(q,{0,0.25,1,0.25,0.75}));
     CHECK_FALSE(feasible(q,{0,0.75,1,0.75,0.25}));
     CHECK_FALSE(feasible(q,{0,0.25,0.5,0.25,0.25}));
     CHECK_FALSE(feasible(q,{0.1,0.25,1,0.15,0.75}));
+}
+TEST_CASE("one-stage affine dynamics preserve neutral relation indexing and authored bounds") {
+    const auto bounded_interval=[](double lower,double upper) {
+        return accepted(sets::make_h({{"one-stage-window"},1,{}},
+            {accepted(numeric::snapshot(Matrix{2,1,{1,-1}})),
+             accepted(numeric::snapshot_vector(Vector{upper,-lower})),
+             accepted(numeric::snapshot(Matrix{0,1,{}})),
+             accepted(numeric::snapshot_vector(Vector{}))}));
+    };
+    Problem input{{"one-stage-affine"},
+        std::make_shared<const SystemModel>(SystemModel{{{1,1,0},TimeDomain::discrete,
+            LinearStage{{1,1,{2}},{1,1,{3}},{1,0,{}},{-1}}},{}}),
+        {0,1},KnownInitial{{4}},ContinuousDomain{{bounded_interval(0.25,0.75).as_handle()}},
+        {UniversalSet{1},bounded_interval(6,8).as_handle()},{},{},
+        InformationPattern::nominal_open_loop,LinearTerminal{{0},0}};
+    const auto p=resolve(input);
+    const auto q=accepted(build_joint_program(p,request(p)));
+
+    // Independent relation order is [x0,x1,u0], with x1=2*x0+3*u0-1.
+    CHECK(q.coordinates.dimensions.state==1);
+    CHECK(q.coordinates.dimensions.control==1);
+    CHECK(q.coordinates.horizon==1);
+    CHECK(feasible(q,{4,7.9,0.3}));
+    CHECK_FALSE(feasible(q,{4,8.5,0.5})); // dynamics/control valid; state bound fails
+    CHECK_FALSE(feasible(q,{4,7,0}));     // dynamics/state valid; control bound fails
+
+    const auto transition=std::find_if(q.rows.begin(),q.rows.end(),[](const auto& row) {
+        return row.source==RowSource::transition;
+    });
+    REQUIRE(transition!=q.rows.end());
+    CHECK(transition->stage==0);
+    REQUIRE(transition->program_row<q.bounds.size());
+    const auto row=transition->program_row;
+    REQUIRE(q.constraints.row_offsets[row+1]-q.constraints.row_offsets[row]==3);
+    CHECK(q.constraints.column_indices[q.constraints.row_offsets[row]]==0);
+    CHECK(q.constraints.values[q.constraints.row_offsets[row]]==-2);
+    CHECK(q.constraints.column_indices[q.constraints.row_offsets[row]+1]==1);
+    CHECK(q.constraints.values[q.constraints.row_offsets[row]+1]==1);
+    CHECK(q.constraints.column_indices[q.constraints.row_offsets[row]+2]==2);
+    CHECK(q.constraints.values[q.constraints.row_offsets[row]+2]==-3);
+    REQUIRE(q.bounds[row].lower.has_value());
+    REQUIRE(q.bounds[row].upper.has_value());
+    CHECK(*q.bounds[row].lower==-1);
+    CHECK(*q.bounds[row].upper==-1);
 }
 TEST_CASE("singular dynamics and affine stage offsets require no inverse") {
     auto input=integrator(); input.model=std::make_shared<const SystemModel>(SystemModel{
@@ -166,6 +212,7 @@ TEST_CASE("singular dynamics and affine stage offsets require no inverse") {
             {{1,1,{0}},{1,1,{1}},{1,0,{}},{2}},
             {{1,1,{0}},{1,1,{1}},{1,0,{}},{-1}}}}, {}});
     const auto p=resolve(input); const auto q=accepted(build_joint_program(p,request(p)));
+    // With A=0, the neutral transitions are x1=2+u0 and x2=-1+u1.
     CHECK(feasible(q,{0,2.5,-0.25,0.5,0.75}));
     CHECK_FALSE(feasible(q,{0,2.5,2.25,0.5,0.75}));
 }
@@ -591,18 +638,49 @@ TEST_CASE("joint program preserves the two-step integrator and original terminal
 TEST_CASE("T-S01 extracts all correlated optimal histories without claiming completeness") {
     const auto p=resolve(integrator());const auto r=oracle({0,0.25,1,0.25,0.75},0).solve(p,request(p),{});
     const auto& data=payload(r);CHECK(contains(data.relation,{0,0,1,0,1}));
-    CHECK(contains(data.relation,{0,1,1,1,0}));CHECK(contains(data.relation,{0,0.5,1,0.5,0.5}));
-    CHECK_FALSE(contains(data.relation,{0,1,2,1,1}));CHECK_FALSE(contains(data.relation,{0,0,1,1,0}));
+    CHECK(contains(data.relation,{0,1,1,1,0}));CHECK(contains(data.relation,{0,0.25,1,0.25,0.75}));
+    CHECK(contains(data.relation,{0,0.5,1,0.5,0.5}));
+    CHECK_FALSE(contains(data.relation,{0,1,2,1,1}));CHECK_FALSE(contains(data.relation,{0,0,1,0,0}));
+    CHECK_FALSE(contains(data.relation,{0,0,1,1,0}));
     REQUIRE(data.optimization);CHECK(data.optimization->objective.lower->value==0);
     CHECK(r.outcome.value==MathematicalOutcome::undetermined);CHECK_FALSE(r.objective.lower);
     REQUIRE(r.objective.upper);CHECK(r.objective.upper->value==0);REQUIRE(r.incumbents.size()==1);
     CHECK(r.incumbents[0].witness.original_objective==0);
+    CHECK_FALSE(r.family->registry_verified());
+
+    // Both strategies receive the same resolved problem and effective request.
+    const auto a_result=run_strategy_a(p,request(p));
+    CHECK(a_result.outcome.value==MathematicalOutcome::undetermined);
+    CHECK(r.family->target()==FamilyTarget::candidate_relaxation);
+    REQUIRE(a_result.family);CHECK(a_result.family->target()==FamilyTarget::candidate_relaxation);
+    CHECK_FALSE(a_result.family->registry_verified());
+    const auto& a_relation=strategy_a_relation(a_result);
+    for(const auto* relation:{&data.relation,&a_relation}) {
+        CHECK(contains(*relation,{0,0,1,0,1}));
+        CHECK(contains(*relation,{0,0.25,1,0.25,0.75}));
+        CHECK(contains(*relation,{0,1,1,1,0}));
+        CHECK_FALSE(contains(*relation,{0,0,1,0,0}));
+    }
 }
 TEST_CASE("T-S02 constant objective retains every feasible history and terminal point") {
     for(const TerminalObjective objective:std::vector<TerminalObjective>{LinearTerminal{{0},3},QuadraticTerminal{{1,1,{0}},{0},3},ResidualNormTerminal{{1,1,{0}},{3}}}) {
-        const auto p=resolve(integrator(objective));const auto r=oracle({0,0,0,0,0},3).solve(p,request(p),{});
+        const auto p=resolve(integrator(objective));const auto q=request(p);
+        const auto r=oracle({0,0,0,0,0},3).solve(p,q,{});
         const auto& data=payload(r);CHECK(contains(data.relation,{0,0,0,0,0}));CHECK(contains(data.relation,{0,1,2,1,1}));
         CHECK(contains(data.relation,{0,0.3,1.1,0.3,0.8}));CHECK_FALSE(contains(data.relation,{0,0,1,1,0}));
+        CHECK(r.outcome.value==MathematicalOutcome::undetermined);
+        CHECK_FALSE(r.family->registry_verified());
+        const auto a_result=run_strategy_a(p,q);
+        CHECK(a_result.outcome.value==MathematicalOutcome::undetermined);
+        REQUIRE(a_result.family);CHECK(a_result.family->target()==FamilyTarget::candidate_relaxation);
+        CHECK_FALSE(a_result.family->registry_verified());
+        const auto& a_relation=strategy_a_relation(a_result);
+        for(const auto* relation:{&data.relation,&a_relation}) {
+            CHECK(contains(*relation,{0,0,0,0,0}));
+            CHECK(contains(*relation,{0,1,2,1,1}));
+            CHECK(contains(*relation,{0,0.3,1.1,0.3,0.8}));
+            CHECK_FALSE(contains(*relation,{0,0,1,1,0}));
+        }
     }
 }
 TEST_CASE("T-S03 singular A preserves earlier controls at a unique terminal optimum") {
