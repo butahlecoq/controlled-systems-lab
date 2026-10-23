@@ -178,6 +178,30 @@ set_tests_properties(issue3_report_smoke PROPERTIES LABELS reporting)
 endif()
 endif()
 
+if(CSL_BUILD_ISSUE3_VALIDATED_REPORT)
+include(cmake/JsonDependencies.cmake)
+file(SHA256 ${CMAKE_CURRENT_SOURCE_DIR}/benchmarks/reporting/issue3/validated_driver.cpp
+    ISSUE3_VALIDATED_FIXTURE_SHA256)
+execute_process(COMMAND git rev-parse HEAD WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+    OUTPUT_VARIABLE ISSUE3_VALIDATED_HARNESS_COMMIT OUTPUT_STRIP_TRAILING_WHITESPACE COMMAND_ERROR_IS_FATAL ANY)
+set(ISSUE3_VALIDATED_SOURCE_COMMIT c72f3480c8fea2575ba860890502857006e9b9f4)
+add_executable(csl_issue3_validated_report benchmarks/reporting/issue3/validated_driver.cpp)
+target_link_libraries(csl_issue3_validated_report PRIVATE
+    CSL::validated_finite_action_minimax CSL::resolved_core)
+target_include_directories(csl_issue3_validated_report SYSTEM PRIVATE ${csl_json_SOURCE_DIR}/include)
+target_compile_features(csl_issue3_validated_report PRIVATE cxx_std_20)
+target_compile_definitions(csl_issue3_validated_report PRIVATE
+    $<$<CONFIG:Release>:NDEBUG>
+    CSL_ISSUE3_VALIDATED_SOURCE_COMMIT="${ISSUE3_VALIDATED_SOURCE_COMMIT}"
+    CSL_ISSUE3_VALIDATED_HARNESS_COMMIT="${ISSUE3_VALIDATED_HARNESS_COMMIT}"
+    CSL_ISSUE3_VALIDATED_FIXTURE_SHA256="${ISSUE3_VALIDATED_FIXTURE_SHA256}")
+if(MSVC)
+target_compile_options(csl_issue3_validated_report PRIVATE /W4 /WX /permissive-)
+else()
+target_compile_options(csl_issue3_validated_report PRIVATE -Wall -Wextra -Wpedantic -Werror)
+endif()
+endif()
+
 if(CSL_BUILD_FINITE_FEEDBACK_REPORT)
 add_executable(csl_finite_feedback_report benchmarks/reporting/finite_feedback/driver.cpp)
 target_link_libraries(csl_finite_feedback_report PRIVATE CSL::finite_feedback_port)
