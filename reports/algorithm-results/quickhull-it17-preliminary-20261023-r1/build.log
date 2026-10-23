@@ -1,0 +1,18 @@
+[  4%] Built target csl_contracts
+[  5%] Built target csl_quickhull_2d
+[  6%] Built target csl_numeric
+[  8%] Built target csl_objectives
+[ 84%] Built target highs
+[ 86%] Built target csl_optimization
+[ 86%] Built target csl_sets
+[ 89%] Built target csl_model
+[ 90%] Built target csl_problem
+[ 91%] Built target csl_resolved_core
+[ 93%] Built target csl_verifiers
+[ 93%] Built target csl_registry
+[ 94%] Built target csl_phase_one
+[ 95%] Built target csl_highs_lp
+[ 98%] Built target csl_hull
+[100%] Building CXX object CMakeFiles/csl_it17_hull_preliminary.dir/preliminary_driver.cpp.o
+[100%] Linking CXX executable csl_it17_hull_preliminary
+[100%] Built target csl_it17_hull_preliminary
