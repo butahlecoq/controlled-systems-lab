@@ -169,6 +169,11 @@ TEST_CASE("registered T-S01 admits an explicitly scoped partial-family request")
     const auto& singleton=std::get<sets::HRepresentation>(h);
     CHECK(singleton.inequalities.rows()==0);
     CHECK(singleton.equalities.rows()==5);
+    CHECK(std::holds_alternative<numeric::CsrInput>(singleton.inequalities.descriptor()));
+    CHECK(std::holds_alternative<numeric::CsrInput>(singleton.equalities.descriptor()));
+    const auto empty_csr=std::get<numeric::CsrInput>(singleton.inequalities.descriptor());
+    CHECK(empty_csr.row_offsets.size()==1);
+    CHECK(empty_csr.row_offsets[0]==0);
     CHECK(singleton.equality_values[1]==0.5);
     CHECK(singleton.equality_values[2]==1);
     CHECK(singleton.equality_values[3]==0.5);

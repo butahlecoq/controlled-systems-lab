@@ -305,11 +305,9 @@ bool strategy_a_ts03_profile_valid(const ::csl::problem::ResolvedProblem& proble
 }
 namespace csl::synthesis::strategy_ts01 {
 std::variant<std::shared_ptr<const ExactJointRelation>,Diagnostics> ExactJointRelation::canonical() {
-    auto inequalities=::csl::numeric::snapshot(Matrix{4,5,{0,0,0,1,0, 0,0,0,-1,0,
-        0,0,0,0,1, 0,0,0,0,-1}});
+    auto inequalities=::csl::numeric::snapshot(SparseMatrix{4,5,{0,1,2,3,4},{3,3,4,4},{1,-1,1,-1}});
     auto upper=::csl::numeric::snapshot_vector(Vector{1,0,1,0});
-    auto equalities=::csl::numeric::snapshot(Matrix{4,5,{1,0,0,0,0, 0,1,0,-1,0,
-        0,0,1,0,0, 0,0,0,1,1}});
+    auto equalities=::csl::numeric::snapshot(SparseMatrix{4,5,{0,1,3,4,6},{0,1,3,2,3,4},{1,1,-1,1,1,1}});
     auto equality_values=::csl::numeric::snapshot_vector(Vector{0,0,1,1});
     if(!std::holds_alternative<::csl::numeric::MatrixView>(inequalities)||
         !std::holds_alternative<::csl::numeric::VectorView>(upper)||
