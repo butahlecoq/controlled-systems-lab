@@ -1,0 +1,130 @@
+{
+  "algorithm": "evaluate_continuous_policy",
+  "artifacts": {
+    "command": "cmake -S . -B build/ext04-continuous-report -DCMAKE_BUILD_TYPE=Release -DCSL_ENABLE_HIGHS=ON -DCSL_ENABLE_QHULL=OFF -DCSL_BUILD_EXT04_CONTINUOUS_REPORT=ON -DBUILD_TESTING=OFF; cmake --build build/ext04-continuous-report --config Release --target csl_ext04_continuous_policy_report --parallel 4; csl_ext04_continuous_policy_report measure",
+    "driver": "benchmarks/reporting/ext04/continuous_policy_driver.cpp",
+    "driver_sha256": "64769863336079ad0395cae473656d6d451b6052a8619e9ee553cb2e86bb98ed"
+  },
+  "assurance": "numerical binary64",
+  "batch_size": 5000,
+  "collected_utc": "2026-10-23T22:15:46.782863+00:00",
+  "environment": {
+    "cmake": "3.31.6",
+    "compiler": "GCC 16.2.1",
+    "configuration": "Release, -O3, C++20",
+    "cpu": "AMD Ryzen 5 3550H with Radeon Vega Mobile Gfx",
+    "limiter": "not controlled; single process, no separate limiter profile",
+    "logical_processors": 8,
+    "native_threads": "no parallel backend used by this operation",
+    "os": "Linux x86_64 (Omarchy; kernel 7.2.5)"
+  },
+  "evidence_limits": [
+    "One analytic two-state, one-step fixture with four supplied joint generators.",
+    "Does not search for a policy or prove a universal initial/disturbance relation.",
+    "Numerical binary64 checks; no validated rounding enclosure.",
+    "Single adapter only; no comparator, speedup, scalability or application-load claim.",
+    "Timings cover repeated public evaluator calls and per-generator literal checks; fixture setup and serialization are excluded."
+  ],
+  "failures": 0,
+  "fixture": {
+    "expected_actions": [
+      [
+        0
+      ],
+      [
+        0
+      ],
+      [
+        1
+      ],
+      [
+        1
+      ]
+    ],
+    "expected_margins": [
+      1.25,
+      1.25,
+      0.25,
+      0.25
+    ],
+    "expected_states": [
+      [
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          0
+        ]
+      ],
+      [
+        [
+          0,
+          1
+        ],
+        [
+          1,
+          1
+        ]
+      ],
+      [
+        [
+          1,
+          0
+        ],
+        [
+          1.5,
+          1
+        ]
+      ],
+      [
+        [
+          1,
+          1
+        ],
+        [
+          2.5,
+          2
+        ]
+      ]
+    ],
+    "joint_initial_generators": [
+      [
+        0,
+        0
+      ],
+      [
+        0,
+        1
+      ],
+      [
+        1,
+        0
+      ],
+      [
+        1,
+        1
+      ]
+    ],
+    "observation": "y[k]=[1,0]x[k], available before decision 0",
+    "policy": "estimate=[y,0]; action=estimate[0]",
+    "safety": "u<=1.25",
+    "system": "x[k+1]=[[1,1],[0,1]]x[k]+[[0.5],[1]]u[k]"
+  },
+  "harness_sha256": "64769863336079ad0395cae473656d6d451b6052a8619e9ee553cb2e86bb98ed",
+  "input_sha256": "5629e40935a1c2c334c6c7de37f676c6a36a38e1c6a7ff1c2c563b46d6cfe948",
+  "max_batch_ns": 31361781,
+  "measured_batches": 7,
+  "median_batch_ns": 30534156,
+  "median_ns_per_call": 6106.8312,
+  "min_batch_ns": 29841324,
+  "release_build_log_sha256": "4b64dbb609f7d9b75adee64e6397765eccb830320d90c6e88c4f7abfea42b2c6",
+  "report_id": "ext04-continuous-27d4ad2e12958609",
+  "schema": "csl.ext04-continuous-policy-report/1",
+  "source_commit": "27d4ad2e12958609bca976786b7568adc6fe74fa",
+  "source_tree_clean_after_commit": true,
+  "successes": 7,
+  "timing_scope": "batch of public evaluate_continuous_policy calls and literal per-generator trajectory, action-bound, and status checks; fixture construction and JSONL serialization excluded",
+  "warmups_excluded": 1
+}

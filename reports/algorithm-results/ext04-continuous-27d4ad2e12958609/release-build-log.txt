@@ -1,0 +1,156 @@
+Change Dir: '$SOURCE_ROOT/build/ext04-continuous-report'
+
+Run Build Command(s): $HOME/.local/share/mise/installs/cmake/3.31.6/cmake-3.31.6-linux-x86_64/bin/cmake -E env VERBOSE=1 /usr/bin/make -f Makefile -j4 csl_ext04_continuous_policy_report
+$HOME/.local/share/mise/installs/cmake/3.31.6/cmake-3.31.6-linux-x86_64/bin/cmake -S$SOURCE_ROOT -B$SOURCE_ROOT/build/ext04-continuous-report --check-build-system CMakeFiles/Makefile.cmake 0
+/usr/bin/make  -f CMakeFiles/Makefile2 csl_ext04_continuous_policy_report
+make[1]: Entering directory '$SOURCE_ROOT/build/ext04-continuous-report'
+$HOME/.local/share/mise/installs/cmake/3.31.6/cmake-3.31.6-linux-x86_64/bin/cmake -S$SOURCE_ROOT -B$SOURCE_ROOT/build/ext04-continuous-report --check-build-system CMakeFiles/Makefile.cmake 0
+$HOME/.local/share/mise/installs/cmake/3.31.6/cmake-3.31.6-linux-x86_64/bin/cmake -E cmake_progress_start $SOURCE_ROOT/build/ext04-continuous-report/CMakeFiles 9
+/usr/bin/make  -f CMakeFiles/Makefile2 CMakeFiles/csl_ext04_continuous_policy_report.dir/all
+make[2]: Entering directory '$SOURCE_ROOT/build/ext04-continuous-report'
+/usr/bin/make  -f CMakeFiles/csl_contracts.dir/build.make CMakeFiles/csl_contracts.dir/depend
+make[3]: Entering directory '$SOURCE_ROOT/build/ext04-continuous-report'
+cd $SOURCE_ROOT/build/ext04-continuous-report && $HOME/.local/share/mise/installs/cmake/3.31.6/cmake-3.31.6-linux-x86_64/bin/cmake -E cmake_depends "Unix Makefiles" $SOURCE_ROOT $SOURCE_ROOT $SOURCE_ROOT/build/ext04-continuous-report $SOURCE_ROOT/build/ext04-continuous-report $SOURCE_ROOT/build/ext04-continuous-report/CMakeFiles/csl_contracts.dir/DependInfo.cmake "--color="
+make[3]: Leaving directory '$SOURCE_ROOT/build/ext04-continuous-report'
+/usr/bin/make  -f CMakeFiles/csl_contracts.dir/build.make CMakeFiles/csl_contracts.dir/build
+make[3]: Entering directory '$SOURCE_ROOT/build/ext04-continuous-report'
+[ 22%] Building CXX object CMakeFiles/csl_contracts.dir/src/contracts/model.cpp.o
+[ 22%] Building CXX object CMakeFiles/csl_contracts.dir/src/contracts/outcomes.cpp.o
+/usr/bin/c++  -I$SOURCE_ROOT/include -O3 -DNDEBUG -std=c++20 -Wall -Wextra -Wpedantic -Werror -MD -MT CMakeFiles/csl_contracts.dir/src/contracts/model.cpp.o -MF CMakeFiles/csl_contracts.dir/src/contracts/model.cpp.o.d -o CMakeFiles/csl_contracts.dir/src/contracts/model.cpp.o -c $SOURCE_ROOT/src/contracts/model.cpp
+[ 22%] Building CXX object CMakeFiles/csl_contracts.dir/src/contracts/problem.cpp.o
+/usr/bin/c++  -I$SOURCE_ROOT/include -O3 -DNDEBUG -std=c++20 -Wall -Wextra -Wpedantic -Werror -MD -MT CMakeFiles/csl_contracts.dir/src/contracts/outcomes.cpp.o -MF CMakeFiles/csl_contracts.dir/src/contracts/outcomes.cpp.o.d -o CMakeFiles/csl_contracts.dir/src/contracts/outcomes.cpp.o -c $SOURCE_ROOT/src/contracts/outcomes.cpp
+/usr/bin/c++  -I$SOURCE_ROOT/include -O3 -DNDEBUG -std=c++20 -Wall -Wextra -Wpedantic -Werror -MD -MT CMakeFiles/csl_contracts.dir/src/contracts/problem.cpp.o -MF CMakeFiles/csl_contracts.dir/src/contracts/problem.cpp.o.d -o CMakeFiles/csl_contracts.dir/src/contracts/problem.cpp.o -c $SOURCE_ROOT/src/contracts/problem.cpp
+[ 22%] Building CXX object CMakeFiles/csl_contracts.dir/src/contracts/geometry.cpp.o
+/usr/bin/c++  -I$SOURCE_ROOT/include -O3 -DNDEBUG -std=c++20 -Wall -Wextra -Wpedantic -Werror -MD -MT CMakeFiles/csl_contracts.dir/src/contracts/geometry.cpp.o -MF CMakeFiles/csl_contracts.dir/src/contracts/geometry.cpp.o.d -o CMakeFiles/csl_contracts.dir/src/contracts/geometry.cpp.o -c $SOURCE_ROOT/src/contracts/geometry.cpp
+[ 22%] Building CXX object CMakeFiles/csl_contracts.dir/src/contracts/execution.cpp.o
+/usr/bin/c++  -I$SOURCE_ROOT/include -O3 -DNDEBUG -std=c++20 -Wall -Wextra -Wpedantic -Werror -MD -MT CMakeFiles/csl_contracts.dir/src/contracts/execution.cpp.o -MF CMakeFiles/csl_contracts.dir/src/contracts/execution.cpp.o.d -o CMakeFiles/csl_contracts.dir/src/contracts/execution.cpp.o -c $SOURCE_ROOT/src/contracts/execution.cpp
+[ 22%] Building CXX object CMakeFiles/csl_contracts.dir/src/contracts/synthesis.cpp.o
+/usr/bin/c++  -I$SOURCE_ROOT/include -O3 -DNDEBUG -std=c++20 -Wall -Wextra -Wpedantic -Werror -MD -MT CMakeFiles/csl_contracts.dir/src/contracts/synthesis.cpp.o -MF CMakeFiles/csl_contracts.dir/src/contracts/synthesis.cpp.o.d -o CMakeFiles/csl_contracts.dir/src/contracts/synthesis.cpp.o -c $SOURCE_ROOT/src/contracts/synthesis.cpp
+[ 33%] Linking CXX static library libcsl_contracts.a
+$HOME/.local/share/mise/installs/cmake/3.31.6/cmake-3.31.6-linux-x86_64/bin/cmake -P CMakeFiles/csl_contracts.dir/cmake_clean_target.cmake
+$HOME/.local/share/mise/installs/cmake/3.31.6/cmake-3.31.6-linux-x86_64/bin/cmake -E cmake_link_script CMakeFiles/csl_contracts.dir/link.txt --verbose=1
+/usr/bin/ar qc libcsl_contracts.a CMakeFiles/csl_contracts.dir/src/contracts/model.cpp.o CMakeFiles/csl_contracts.dir/src/contracts/problem.cpp.o CMakeFiles/csl_contracts.dir/src/contracts/geometry.cpp.o CMakeFiles/csl_contracts.dir/src/contracts/outcomes.cpp.o CMakeFiles/csl_contracts.dir/src/contracts/execution.cpp.o CMakeFiles/csl_contracts.dir/src/contracts/synthesis.cpp.o
+/usr/bin/ranlib libcsl_contracts.a
+make[3]: Leaving directory '$SOURCE_ROOT/build/ext04-continuous-report'
+[ 33%] Built target csl_contracts
+/usr/bin/make  -f CMakeFiles/csl_numeric.dir/build.make CMakeFiles/csl_numeric.dir/depend
+make[3]: Entering directory '$SOURCE_ROOT/build/ext04-continuous-report'
+cd $SOURCE_ROOT/build/ext04-continuous-report && $HOME/.local/share/mise/installs/cmake/3.31.6/cmake-3.31.6-linux-x86_64/bin/cmake -E cmake_depends "Unix Makefiles" $SOURCE_ROOT $SOURCE_ROOT $SOURCE_ROOT/build/ext04-continuous-report $SOURCE_ROOT/build/ext04-continuous-report $SOURCE_ROOT/build/ext04-continuous-report/CMakeFiles/csl_numeric.dir/DependInfo.cmake "--color="
+make[3]: Leaving directory '$SOURCE_ROOT/build/ext04-continuous-report'
+/usr/bin/make  -f CMakeFiles/csl_numeric.dir/build.make CMakeFiles/csl_numeric.dir/build
+make[3]: Entering directory '$SOURCE_ROOT/build/ext04-continuous-report'
+[ 33%] Building CXX object CMakeFiles/csl_numeric.dir/src/numeric/data.cpp.o
+/usr/bin/c++  -I$SOURCE_ROOT/include -O3 -DNDEBUG -std=c++20 -Wall -Wextra -Wpedantic -Werror -MD -MT CMakeFiles/csl_numeric.dir/src/numeric/data.cpp.o -MF CMakeFiles/csl_numeric.dir/src/numeric/data.cpp.o.d -o CMakeFiles/csl_numeric.dir/src/numeric/data.cpp.o -c $SOURCE_ROOT/src/numeric/data.cpp
+[ 33%] Linking CXX static library libcsl_numeric.a
+$HOME/.local/share/mise/installs/cmake/3.31.6/cmake-3.31.6-linux-x86_64/bin/cmake -P CMakeFiles/csl_numeric.dir/cmake_clean_target.cmake
+$HOME/.local/share/mise/installs/cmake/3.31.6/cmake-3.31.6-linux-x86_64/bin/cmake -E cmake_link_script CMakeFiles/csl_numeric.dir/link.txt --verbose=1
+/usr/bin/ar qc libcsl_numeric.a CMakeFiles/csl_numeric.dir/src/numeric/data.cpp.o
+/usr/bin/ranlib libcsl_numeric.a
+make[3]: Leaving directory '$SOURCE_ROOT/build/ext04-continuous-report'
+[ 33%] Built target csl_numeric
+/usr/bin/make  -f CMakeFiles/csl_sets.dir/build.make CMakeFiles/csl_sets.dir/depend
+/usr/bin/make  -f CMakeFiles/csl_objectives.dir/build.make CMakeFiles/csl_objectives.dir/depend
+make[3]: Entering directory '$SOURCE_ROOT/build/ext04-continuous-report'
+cd $SOURCE_ROOT/build/ext04-continuous-report && $HOME/.local/share/mise/installs/cmake/3.31.6/cmake-3.31.6-linux-x86_64/bin/cmake -E cmake_depends "Unix Makefiles" $SOURCE_ROOT $SOURCE_ROOT $SOURCE_ROOT/build/ext04-continuous-report $SOURCE_ROOT/build/ext04-continuous-report $SOURCE_ROOT/build/ext04-continuous-report/CMakeFiles/csl_objectives.dir/DependInfo.cmake "--color="
+make[3]: Entering directory '$SOURCE_ROOT/build/ext04-continuous-report'
+cd $SOURCE_ROOT/build/ext04-continuous-report && $HOME/.local/share/mise/installs/cmake/3.31.6/cmake-3.31.6-linux-x86_64/bin/cmake -E cmake_depends "Unix Makefiles" $SOURCE_ROOT $SOURCE_ROOT $SOURCE_ROOT/build/ext04-continuous-report $SOURCE_ROOT/build/ext04-continuous-report $SOURCE_ROOT/build/ext04-continuous-report/CMakeFiles/csl_sets.dir/DependInfo.cmake "--color="
+make[3]: Leaving directory '$SOURCE_ROOT/build/ext04-continuous-report'
+make[3]: Leaving directory '$SOURCE_ROOT/build/ext04-continuous-report'
+/usr/bin/make  -f CMakeFiles/csl_sets.dir/build.make CMakeFiles/csl_sets.dir/build
+/usr/bin/make  -f CMakeFiles/csl_objectives.dir/build.make CMakeFiles/csl_objectives.dir/build
+make[3]: Entering directory '$SOURCE_ROOT/build/ext04-continuous-report'
+make[3]: Entering directory '$SOURCE_ROOT/build/ext04-continuous-report'
+[ 33%] Building CXX object CMakeFiles/csl_sets.dir/src/sets/data.cpp.o
+/usr/bin/c++  -I$SOURCE_ROOT/include -O3 -DNDEBUG -std=c++20 -Wall -Wextra -Wpedantic -Werror -MD -MT CMakeFiles/csl_sets.dir/src/sets/data.cpp.o -MF CMakeFiles/csl_sets.dir/src/sets/data.cpp.o.d -o CMakeFiles/csl_sets.dir/src/sets/data.cpp.o -c $SOURCE_ROOT/src/sets/data.cpp
+[ 33%] Building CXX object CMakeFiles/csl_objectives.dir/src/optimization/objective_reformulation.cpp.o
+/usr/bin/c++ -DEIGEN_MPL2_ONLY -I$SOURCE_ROOT/include -isystem $SOURCE_ROOT/build/ext04-continuous-report/_deps/csl_objectives_eigen-src -O3 -DNDEBUG -std=c++20 -Wall -Wextra -Wpedantic -Werror -MD -MT CMakeFiles/csl_objectives.dir/src/optimization/objective_reformulation.cpp.o -MF CMakeFiles/csl_objectives.dir/src/optimization/objective_reformulation.cpp.o.d -o CMakeFiles/csl_objectives.dir/src/optimization/objective_reformulation.cpp.o -c $SOURCE_ROOT/src/optimization/objective_reformulation.cpp
+[ 44%] Linking CXX static library libcsl_sets.a
+$HOME/.local/share/mise/installs/cmake/3.31.6/cmake-3.31.6-linux-x86_64/bin/cmake -P CMakeFiles/csl_sets.dir/cmake_clean_target.cmake
+$HOME/.local/share/mise/installs/cmake/3.31.6/cmake-3.31.6-linux-x86_64/bin/cmake -E cmake_link_script CMakeFiles/csl_sets.dir/link.txt --verbose=1
+/usr/bin/ar qc libcsl_sets.a CMakeFiles/csl_sets.dir/src/sets/data.cpp.o
+/usr/bin/ranlib libcsl_sets.a
+make[3]: Leaving directory '$SOURCE_ROOT/build/ext04-continuous-report'
+[ 44%] Built target csl_sets
+[ 55%] Linking CXX static library libcsl_objectives.a
+$HOME/.local/share/mise/installs/cmake/3.31.6/cmake-3.31.6-linux-x86_64/bin/cmake -P CMakeFiles/csl_objectives.dir/cmake_clean_target.cmake
+$HOME/.local/share/mise/installs/cmake/3.31.6/cmake-3.31.6-linux-x86_64/bin/cmake -E cmake_link_script CMakeFiles/csl_objectives.dir/link.txt --verbose=1
+/usr/bin/ar qc libcsl_objectives.a CMakeFiles/csl_objectives.dir/src/optimization/objective_reformulation.cpp.o
+/usr/bin/ranlib libcsl_objectives.a
+make[3]: Leaving directory '$SOURCE_ROOT/build/ext04-continuous-report'
+[ 55%] Built target csl_objectives
+/usr/bin/make  -f CMakeFiles/csl_model.dir/build.make CMakeFiles/csl_model.dir/depend
+make[3]: Entering directory '$SOURCE_ROOT/build/ext04-continuous-report'
+cd $SOURCE_ROOT/build/ext04-continuous-report && $HOME/.local/share/mise/installs/cmake/3.31.6/cmake-3.31.6-linux-x86_64/bin/cmake -E cmake_depends "Unix Makefiles" $SOURCE_ROOT $SOURCE_ROOT $SOURCE_ROOT/build/ext04-continuous-report $SOURCE_ROOT/build/ext04-continuous-report $SOURCE_ROOT/build/ext04-continuous-report/CMakeFiles/csl_model.dir/DependInfo.cmake "--color="
+make[3]: Leaving directory '$SOURCE_ROOT/build/ext04-continuous-report'
+/usr/bin/make  -f CMakeFiles/csl_model.dir/build.make CMakeFiles/csl_model.dir/build
+make[3]: Entering directory '$SOURCE_ROOT/build/ext04-continuous-report'
+[ 77%] Building CXX object CMakeFiles/csl_model.dir/src/model/hybrid_system.cpp.o
+[ 77%] Building CXX object CMakeFiles/csl_model.dir/src/model/linear_system.cpp.o
+/usr/bin/c++  -I$SOURCE_ROOT/include -O3 -DNDEBUG -std=c++20 -Wall -Wextra -Wpedantic -Werror -MD -MT CMakeFiles/csl_model.dir/src/model/linear_system.cpp.o -MF CMakeFiles/csl_model.dir/src/model/linear_system.cpp.o.d -o CMakeFiles/csl_model.dir/src/model/linear_system.cpp.o -c $SOURCE_ROOT/src/model/linear_system.cpp
+/usr/bin/c++  -I$SOURCE_ROOT/include -O3 -DNDEBUG -std=c++20 -Wall -Wextra -Wpedantic -Werror -MD -MT CMakeFiles/csl_model.dir/src/model/hybrid_system.cpp.o -MF CMakeFiles/csl_model.dir/src/model/hybrid_system.cpp.o.d -o CMakeFiles/csl_model.dir/src/model/hybrid_system.cpp.o -c $SOURCE_ROOT/src/model/hybrid_system.cpp
+[ 77%] Building CXX object CMakeFiles/csl_model.dir/src/model/discretization/rk4.cpp.o
+[ 77%] Building CXX object CMakeFiles/csl_model.dir/src/model/discretization/adapter.cpp.o
+/usr/bin/c++  -I$SOURCE_ROOT/include -O3 -DNDEBUG -std=c++20 -Wall -Wextra -Wpedantic -Werror -MD -MT CMakeFiles/csl_model.dir/src/model/discretization/rk4.cpp.o -MF CMakeFiles/csl_model.dir/src/model/discretization/rk4.cpp.o.d -o CMakeFiles/csl_model.dir/src/model/discretization/rk4.cpp.o -c $SOURCE_ROOT/src/model/discretization/rk4.cpp
+/usr/bin/c++  -I$SOURCE_ROOT/include -O3 -DNDEBUG -std=c++20 -Wall -Wextra -Wpedantic -Werror -MD -MT CMakeFiles/csl_model.dir/src/model/discretization/adapter.cpp.o -MF CMakeFiles/csl_model.dir/src/model/discretization/adapter.cpp.o.d -o CMakeFiles/csl_model.dir/src/model/discretization/adapter.cpp.o -c $SOURCE_ROOT/src/model/discretization/adapter.cpp
+[ 77%] Linking CXX static library libcsl_model.a
+$HOME/.local/share/mise/installs/cmake/3.31.6/cmake-3.31.6-linux-x86_64/bin/cmake -P CMakeFiles/csl_model.dir/cmake_clean_target.cmake
+$HOME/.local/share/mise/installs/cmake/3.31.6/cmake-3.31.6-linux-x86_64/bin/cmake -E cmake_link_script CMakeFiles/csl_model.dir/link.txt --verbose=1
+/usr/bin/ar qc libcsl_model.a CMakeFiles/csl_model.dir/src/model/linear_system.cpp.o CMakeFiles/csl_model.dir/src/model/discretization/adapter.cpp.o CMakeFiles/csl_model.dir/src/model/discretization/rk4.cpp.o CMakeFiles/csl_model.dir/src/model/hybrid_system.cpp.o
+/usr/bin/ranlib libcsl_model.a
+make[3]: Leaving directory '$SOURCE_ROOT/build/ext04-continuous-report'
+[ 77%] Built target csl_model
+/usr/bin/make  -f CMakeFiles/csl_problem.dir/build.make CMakeFiles/csl_problem.dir/depend
+make[3]: Entering directory '$SOURCE_ROOT/build/ext04-continuous-report'
+cd $SOURCE_ROOT/build/ext04-continuous-report && $HOME/.local/share/mise/installs/cmake/3.31.6/cmake-3.31.6-linux-x86_64/bin/cmake -E cmake_depends "Unix Makefiles" $SOURCE_ROOT $SOURCE_ROOT $SOURCE_ROOT/build/ext04-continuous-report $SOURCE_ROOT/build/ext04-continuous-report $SOURCE_ROOT/build/ext04-continuous-report/CMakeFiles/csl_problem.dir/DependInfo.cmake "--color="
+make[3]: Leaving directory '$SOURCE_ROOT/build/ext04-continuous-report'
+/usr/bin/make  -f CMakeFiles/csl_problem.dir/build.make CMakeFiles/csl_problem.dir/build
+make[3]: Entering directory '$SOURCE_ROOT/build/ext04-continuous-report'
+[ 77%] Building CXX object CMakeFiles/csl_problem.dir/src/problem/domains.cpp.o
+/usr/bin/c++  -I$SOURCE_ROOT/include -O3 -DNDEBUG -std=c++20 -Wall -Wextra -Wpedantic -Werror -MD -MT CMakeFiles/csl_problem.dir/src/problem/domains.cpp.o -MF CMakeFiles/csl_problem.dir/src/problem/domains.cpp.o.d -o CMakeFiles/csl_problem.dir/src/problem/domains.cpp.o -c $SOURCE_ROOT/src/problem/domains.cpp
+[ 77%] Building CXX object CMakeFiles/csl_problem.dir/src/problem/constraints.cpp.o
+/usr/bin/c++  -I$SOURCE_ROOT/include -O3 -DNDEBUG -std=c++20 -Wall -Wextra -Wpedantic -Werror -MD -MT CMakeFiles/csl_problem.dir/src/problem/constraints.cpp.o -MF CMakeFiles/csl_problem.dir/src/problem/constraints.cpp.o.d -o CMakeFiles/csl_problem.dir/src/problem/constraints.cpp.o -c $SOURCE_ROOT/src/problem/constraints.cpp
+[ 88%] Building CXX object CMakeFiles/csl_problem.dir/src/problem/initial_information.cpp.o
+/usr/bin/c++  -I$SOURCE_ROOT/include -O3 -DNDEBUG -std=c++20 -Wall -Wextra -Wpedantic -Werror -MD -MT CMakeFiles/csl_problem.dir/src/problem/initial_information.cpp.o -MF CMakeFiles/csl_problem.dir/src/problem/initial_information.cpp.o.d -o CMakeFiles/csl_problem.dir/src/problem/initial_information.cpp.o -c $SOURCE_ROOT/src/problem/initial_information.cpp
+[ 88%] Linking CXX static library libcsl_problem.a
+$HOME/.local/share/mise/installs/cmake/3.31.6/cmake-3.31.6-linux-x86_64/bin/cmake -P CMakeFiles/csl_problem.dir/cmake_clean_target.cmake
+$HOME/.local/share/mise/installs/cmake/3.31.6/cmake-3.31.6-linux-x86_64/bin/cmake -E cmake_link_script CMakeFiles/csl_problem.dir/link.txt --verbose=1
+/usr/bin/ar qc libcsl_problem.a CMakeFiles/csl_problem.dir/src/problem/domains.cpp.o CMakeFiles/csl_problem.dir/src/problem/constraints.cpp.o CMakeFiles/csl_problem.dir/src/problem/initial_information.cpp.o
+/usr/bin/ranlib libcsl_problem.a
+make[3]: Leaving directory '$SOURCE_ROOT/build/ext04-continuous-report'
+[ 88%] Built target csl_problem
+/usr/bin/make  -f CMakeFiles/csl_controllers.dir/build.make CMakeFiles/csl_controllers.dir/depend
+make[3]: Entering directory '$SOURCE_ROOT/build/ext04-continuous-report'
+cd $SOURCE_ROOT/build/ext04-continuous-report && $HOME/.local/share/mise/installs/cmake/3.31.6/cmake-3.31.6-linux-x86_64/bin/cmake -E cmake_depends "Unix Makefiles" $SOURCE_ROOT $SOURCE_ROOT $SOURCE_ROOT/build/ext04-continuous-report $SOURCE_ROOT/build/ext04-continuous-report $SOURCE_ROOT/build/ext04-continuous-report/CMakeFiles/csl_controllers.dir/DependInfo.cmake "--color="
+make[3]: Leaving directory '$SOURCE_ROOT/build/ext04-continuous-report'
+/usr/bin/make  -f CMakeFiles/csl_controllers.dir/build.make CMakeFiles/csl_controllers.dir/build
+make[3]: Entering directory '$SOURCE_ROOT/build/ext04-continuous-report'
+[ 88%] Building CXX object CMakeFiles/csl_controllers.dir/src/controllers/observed_replay.cpp.o
+/usr/bin/c++  -I$SOURCE_ROOT/include -O3 -DNDEBUG -std=c++20 -Wall -Wextra -Wpedantic -Werror -MD -MT CMakeFiles/csl_controllers.dir/src/controllers/observed_replay.cpp.o -MF CMakeFiles/csl_controllers.dir/src/controllers/observed_replay.cpp.o.d -o CMakeFiles/csl_controllers.dir/src/controllers/observed_replay.cpp.o -c $SOURCE_ROOT/src/controllers/observed_replay.cpp
+[100%] Building CXX object CMakeFiles/csl_controllers.dir/src/controllers/finite_policy.cpp.o
+/usr/bin/c++  -I$SOURCE_ROOT/include -O3 -DNDEBUG -std=c++20 -Wall -Wextra -Wpedantic -Werror -MD -MT CMakeFiles/csl_controllers.dir/src/controllers/finite_policy.cpp.o -MF CMakeFiles/csl_controllers.dir/src/controllers/finite_policy.cpp.o.d -o CMakeFiles/csl_controllers.dir/src/controllers/finite_policy.cpp.o -c $SOURCE_ROOT/src/controllers/finite_policy.cpp
+[100%] Building CXX object CMakeFiles/csl_controllers.dir/src/controllers/continuous_policy.cpp.o
+/usr/bin/c++  -I$SOURCE_ROOT/include -O3 -DNDEBUG -std=c++20 -Wall -Wextra -Wpedantic -Werror -MD -MT CMakeFiles/csl_controllers.dir/src/controllers/continuous_policy.cpp.o -MF CMakeFiles/csl_controllers.dir/src/controllers/continuous_policy.cpp.o.d -o CMakeFiles/csl_controllers.dir/src/controllers/continuous_policy.cpp.o -c $SOURCE_ROOT/src/controllers/continuous_policy.cpp
+[100%] Linking CXX static library libcsl_controllers.a
+$HOME/.local/share/mise/installs/cmake/3.31.6/cmake-3.31.6-linux-x86_64/bin/cmake -P CMakeFiles/csl_controllers.dir/cmake_clean_target.cmake
+$HOME/.local/share/mise/installs/cmake/3.31.6/cmake-3.31.6-linux-x86_64/bin/cmake -E cmake_link_script CMakeFiles/csl_controllers.dir/link.txt --verbose=1
+/usr/bin/ar qc libcsl_controllers.a CMakeFiles/csl_controllers.dir/src/controllers/observed_replay.cpp.o CMakeFiles/csl_controllers.dir/src/controllers/finite_policy.cpp.o CMakeFiles/csl_controllers.dir/src/controllers/continuous_policy.cpp.o
+/usr/bin/ranlib libcsl_controllers.a
+make[3]: Leaving directory '$SOURCE_ROOT/build/ext04-continuous-report'
+[100%] Built target csl_controllers
+/usr/bin/make  -f CMakeFiles/csl_ext04_continuous_policy_report.dir/build.make CMakeFiles/csl_ext04_continuous_policy_report.dir/depend
+make[3]: Entering directory '$SOURCE_ROOT/build/ext04-continuous-report'
+cd $SOURCE_ROOT/build/ext04-continuous-report && $HOME/.local/share/mise/installs/cmake/3.31.6/cmake-3.31.6-linux-x86_64/bin/cmake -E cmake_depends "Unix Makefiles" $SOURCE_ROOT $SOURCE_ROOT $SOURCE_ROOT/build/ext04-continuous-report $SOURCE_ROOT/build/ext04-continuous-report $SOURCE_ROOT/build/ext04-continuous-report/CMakeFiles/csl_ext04_continuous_policy_report.dir/DependInfo.cmake "--color="
+make[3]: Leaving directory '$SOURCE_ROOT/build/ext04-continuous-report'
+/usr/bin/make  -f CMakeFiles/csl_ext04_continuous_policy_report.dir/build.make CMakeFiles/csl_ext04_continuous_policy_report.dir/build
+make[3]: Entering directory '$SOURCE_ROOT/build/ext04-continuous-report'
+[100%] Building CXX object CMakeFiles/csl_ext04_continuous_policy_report.dir/benchmarks/reporting/ext04/continuous_policy_driver.cpp.o
+/usr/bin/c++ -DNDEBUG -I$SOURCE_ROOT/include -isystem $SOURCE_ROOT/build/ext04-continuous-report/_deps/csl_json-src/include -O3 -DNDEBUG -std=c++20 -Wall -Wextra -Wpedantic -Werror -MD -MT CMakeFiles/csl_ext04_continuous_policy_report.dir/benchmarks/reporting/ext04/continuous_policy_driver.cpp.o -MF CMakeFiles/csl_ext04_continuous_policy_report.dir/benchmarks/reporting/ext04/continuous_policy_driver.cpp.o.d -o CMakeFiles/csl_ext04_continuous_policy_report.dir/benchmarks/reporting/ext04/continuous_policy_driver.cpp.o -c $SOURCE_ROOT/benchmarks/reporting/ext04/continuous_policy_driver.cpp
+[100%] Linking CXX executable csl_ext04_continuous_policy_report
+$HOME/.local/share/mise/installs/cmake/3.31.6/cmake-3.31.6-linux-x86_64/bin/cmake -E cmake_link_script CMakeFiles/csl_ext04_continuous_policy_report.dir/link.txt --verbose=1
+/usr/bin/c++ -O3 -DNDEBUG -Wl,--dependency-file=CMakeFiles/csl_ext04_continuous_policy_report.dir/link.d CMakeFiles/csl_ext04_continuous_policy_report.dir/benchmarks/reporting/ext04/continuous_policy_driver.cpp.o -o csl_ext04_continuous_policy_report  libcsl_controllers.a libcsl_problem.a libcsl_model.a libcsl_objectives.a libcsl_sets.a libcsl_numeric.a libcsl_contracts.a
+make[3]: Leaving directory '$SOURCE_ROOT/build/ext04-continuous-report'
+[100%] Built target csl_ext04_continuous_policy_report
+make[2]: Leaving directory '$SOURCE_ROOT/build/ext04-continuous-report'
+$HOME/.local/share/mise/installs/cmake/3.31.6/cmake-3.31.6-linux-x86_64/bin/cmake -E cmake_progress_start $SOURCE_ROOT/build/ext04-continuous-report/CMakeFiles 0
+make[1]: Leaving directory '$SOURCE_ROOT/build/ext04-continuous-report'
+
