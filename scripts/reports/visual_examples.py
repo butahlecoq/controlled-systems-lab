@@ -789,7 +789,7 @@ def build(catalog, site):
             '<a class="brand" href="../index.html">[ csl ]<br>Controlled Systems Lab</a>'
             '<p class="eyebrow">Learn by looking</p>'
             f'<a class="nav-shortcut" href="#{last_topic_anchor}">Jump to final example: {escape(last_topic_title)} ↓</a>'
-            '<nav aria-label="Examples">' + navigation +
+            '<nav aria-label="Examples" tabindex="0">' + navigation +
             '<a href="../index.html">All numerical reports ↗</a></nav></aside><main id="main">'
             '<header><p class="eyebrow">Small inputs / visible answers</p><h1>Algorithms,<br><em>in two dimensions.</em></h1>'
             '<p>See what goes in, what comes out, and why. Explore hull vertices, set intersections, hybrid control families, and projected reachability.</p>'
