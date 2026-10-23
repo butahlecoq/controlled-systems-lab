@@ -668,6 +668,7 @@ TEST_CASE("T-S02 constant objective retains every feasible history and terminal 
         CHECK(contains(data.relation,{0,0.3,1.1,0.3,0.8}));CHECK_FALSE(contains(data.relation,{0,0,1,1,0}));
         CHECK(r.termination==Termination::completed);
         CHECK(r.outcome.value==MathematicalOutcome::undetermined);
+        CHECK(r.family->target()==FamilyTarget::candidate_relaxation);
         CHECK_FALSE(r.family->registry_verified());
         const auto a_result=run_strategy_a(p,q);
         CHECK(a_result.termination==Termination::completed);
