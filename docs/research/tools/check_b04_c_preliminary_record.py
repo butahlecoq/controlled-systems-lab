@@ -24,8 +24,13 @@ def main(record_path: Path) -> dict:
     data = record["input"]
     initial = [F(x) for x in data["initial"]]
     b = [F(x) for x in data["B"]]
+    control_lo, control_hi = (F(x) for x in data["control_bounds"])
+    horizon = record["input"]["horizon"]
     candidate_controls = [F.from_float(float.fromhex(x))
                           for x in record["candidate"]["controls_binary64_hex"]]
+    if len(candidate_controls) != horizon or any(
+            not control_lo <= control <= control_hi for control in candidate_controls):
+        raise ValueError("candidate violates the exact control bounds or horizon")
     candidate_states = replay(initial, b, candidate_controls)
     violations = []
     for stage, state in enumerate(candidate_states):
@@ -46,6 +51,9 @@ def main(record_path: Path) -> dict:
 
     reach = record["published_point_reachability"]
     reach_controls = [F.from_float(float.fromhex(x)) for x in reach["controls_binary64_hex"]]
+    if len(reach_controls) != horizon or any(
+            not control_lo <= control <= control_hi for control in reach_controls):
+        raise ValueError("reachability controls violate the exact control bounds or horizon")
     reach_states = replay(initial, b, reach_controls)
     point = [F(12007,10), F(-22929,1000), F(2251,5), F(-7709,1000)]
     radii = [F(1,20), F(1,2000), F(1,20), F(1,2000)]
@@ -75,7 +83,9 @@ def main(record_path: Path) -> dict:
         raise ValueError("pre-registered bands changed")
     return {"schema": "csl.b04-c-preliminary-exact-check/1",
             "candidate_exact_phase_box": "passed",
+            "candidate_exact_control_bounds": "passed",
             "candidate_exact_squared_objective": str(squared),
+            "reachability_exact_control_bounds": "passed",
             "reachability_exact_phase_box": "passed",
             "reachability_exact_rounding_box": "passed",
             "published_flow_plane_residual": str(flow),

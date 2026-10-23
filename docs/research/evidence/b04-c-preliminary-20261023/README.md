@@ -6,7 +6,7 @@ Scenario `B04-c-preliminary-numerical-20261023` uses the saved A39/A01/A40 linea
 
 SciPy SLSQP returned a feasible terminal candidate with objective `30.899136030011615`. Exact rational replay of the returned binary64 controls confirmed the stage flow box and records the exact squared objective. This candidate's value lies in the pre-registered `|J* - 30.899| <= 0.0005` band. This does **not** confirm the diagnosis: a single SLSQP result and a small gradient residual do not certify the global optimum, and the complete optimal history family was not computed. The optimum-band verdict remains inconclusive.
 
-A separate HiGHS LP found a control sequence whose exact dyadic terminal state lies inside all four published coordinate rounding intervals and satisfies the stage box exactly. The saved point's exact flow-plane and stock-plane residuals are retained in the record. Reachability and objective results are separate.
+A separate HiGHS LP found a control sequence whose exact dyadic terminal state lies inside all four published coordinate rounding intervals and satisfies the `[-1,1]` control bounds and stage box exactly. The saved point's exact flow-plane and stock-plane residuals are retained in the record. Reachability and objective results are separate. The independent replay checker verifies every reachability control against the declared bounds.
 
 The solver call took 6,180,953 ns on this one run. This is a single exploratory duration, with no comparator or limiter profile; it is not a performance claim. Host load, software versions, process output, and all returned binary64 control values are saved in `attempt-002/`.
 
