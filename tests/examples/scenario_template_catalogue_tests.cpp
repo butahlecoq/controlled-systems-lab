@@ -72,3 +72,39 @@ TEST_CASE("LTV residual-norm template evaluates every authored stage against a l
     CHECK(x2 == Vector{4});
     CHECK(cost(scenario, x2) == doctest::Approx(1));
 }
+
+TEST_CASE("double-integrator generality template has independently derived transitions and tracking cost") {
+    const auto scenario = load("double-integrator-generality.json");
+    CHECK(scenario.problem().model().horizon() == 3);
+    CHECK(scenario.problem().model().dimensions() == Dimensions{2, 1, 0});
+    CHECK(scenario.metadata()->time_unit == std::optional<std::string>{"s"});
+    CHECK(scenario.metadata()->state_labels == std::vector<std::string>{"position", "velocity"});
+    CHECK(scenario.metadata()->control_labels == std::vector<std::string>{"acceleration"});
+    CHECK(scenario.metadata()->state_units == std::vector<std::string>{"m", "m/s"});
+    CHECK(scenario.metadata()->control_units == std::vector<std::string>{"m/s^2"});
+    REQUIRE(scenario.problem().constraints().states());
+    CHECK(scenario.problem().constraints().states()->size() == 4);
+
+    const auto x1 = step(scenario, 0, {0, 0}, {0.5});
+    const auto x2 = step(scenario, 1, x1, {0});
+    const auto x3 = step(scenario, 2, x2, {-0.25});
+    CHECK(x1 == Vector{0.25, 0.5});
+    CHECK(x2 == Vector{0.75, 0.5});
+    CHECK(x3 == Vector{1.125, 0.25});
+
+    CHECK(x1[0] >= 0);
+    CHECK(x1[0] <= 0.5);
+    CHECK(x1[1] >= -1);
+    CHECK(x1[1] <= 1);
+    CHECK(x2[0] >= 0);
+    CHECK(x2[0] <= 1.5);
+    CHECK(x2[1] >= -1);
+    CHECK(x2[1] <= 1);
+    CHECK(0.5 >= -1);
+    CHECK(0.5 <= 1);
+    CHECK(0.0 >= -1);
+    CHECK(0.0 <= 1);
+    CHECK(-0.25 >= -1);
+    CHECK(-0.25 <= 1);
+    CHECK(cost(scenario, x3) == doctest::Approx(0.078125));
+}

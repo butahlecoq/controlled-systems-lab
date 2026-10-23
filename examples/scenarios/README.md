@@ -11,10 +11,12 @@ does not run an optimizer or claim that the illustrative histories are optimal.
 | `minimal-lti-linear.json` | Scalar LTI, unconstrained states | `(0.5)` | `(0, 0.5)` | `x = 0.5` |
 | `state-constrained-quadratic.json` | Scalar LTI, box state set at all three time indices | `(0.25, 0.75)` | `(0, 0.25, 1)` | `x² - 2x + 1 = 0` at `x = 1` |
 | `ltv-residual-norm.json` | Scalar two-stage LTV | `(1, 0)` | `(1, 2, 4)` | `||(x - 5, 0)||₂ = 1` at `x = 4` |
+| `double-integrator-generality.json` | Two-state position/velocity double integrator, horizon 3, bounded intermediate states | `(0.5, 0, -0.25)` | `((0,0), (0.25,0.5), (0.75,0.5), (1.125,0.25))` | `(p - 1)² + (v - 0.5)² = 0.078125` at `(p,v)=(1.125,0.25)` |
 
-Each template labels its scalar state coordinate `x` and control coordinate `u`;
-both use normalized, dimensionless units. The horizons are discrete stage
-indices, not physical times. `minimal-lti-linear` and
+The first three templates label their scalar state coordinate `x` and control
+coordinate `u`; both use normalized, dimensionless units. The double-integrator
+template labels position, velocity and acceleration in SI units. The horizons
+are discrete stage indices. `minimal-lti-linear` and
 `state-constrained-quadratic` use one constant stage `(A,B)=([1],[1])`. The
 state-constrained case applies `0 <= x[t] <= 2` at all three state indices
 `t=0,1,2`. The LTV case uses `(A[0],B[0])=([1],[1])` then
@@ -30,6 +32,22 @@ listed history within its authored bounds. In the residual-norm case, `L=[[1],
 [0]]` and target `[5,0]` produce residual `(x-5,0)`, so at the listed terminal
 state `x=4` the original unsquared norm is exactly `1`. The target is chosen for
 that easy-to-check value, not as a reference state from a physical system.
+
+The double-integrator fixture is a task-generality example, not historical
+reproduction or paired performance evidence. This template and its hand-derived
+oracle establish the reusable input; the later resolve/prepare/execute/report
+integration is tracked separately in [#421]. It uses a one-second sampling
+interval and the already-discrete zero-order-hold transition
+`p[t+1]=p[t]+v[t]+0.5*a[t]`, `v[t+1]=v[t]+a[t]`; the `times` field labels stages
+and does not rescale these coefficients. Acceleration is bounded by `[-1,1]`
+m/s². At the two constrained intermediate stages, position is in `[0,0.5]`
+then `[0,1.5]` m and velocity is in `[-1,1]` m/s. The terminal target is
+`(1 m, 0.5 m/s)`. `Q=2I`, linear coefficients `(-2,-1)` and offset `1.25`
+encode `(p-1)²+(v-0.5)²` in the documented `0.5 xᵀQx + qᵀx + c` convention.
+The listed control sequence is a hand-derived feasible example, not an optimal
+solution or a solver trace.
+
+[#421]: https://github.com/butahlecoq/controlled-systems-lab/issues/421
 
 The histories and objective values in the table are hand-derived examples used
 as independent loader/model/evaluator oracles. They are not solver output,
