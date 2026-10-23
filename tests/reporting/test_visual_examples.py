@@ -141,6 +141,7 @@ class GalleryTests(unittest.TestCase):
         self.assertIn("height:calc(100vh - 6rem);display:flex;flex-direction:column", stylesheet)
         self.assertIn("min-height:0;max-height:min(42vh,24rem);overflow-y:auto", stylesheet)
         self.assertIn("max-height:35vh;overflow-y:auto;overscroll-behavior:contain", stylesheet)
+        self.assertIn("@media(max-height:500px) and (min-width:651px)", stylesheet)
         self.assertNotIn("overflow:visible", stylesheet)
         self.assertIn("Original point ID", page)
         self.assertIn("explicit analytic constructions", page)
