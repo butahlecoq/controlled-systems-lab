@@ -1,0 +1,44 @@
+{
+  "fixture": "diamond",
+  "input_descriptor": "input.txt",
+  "input_descriptor_sha256": "bf23229be76bfeaa7bb6a9965c90a53a32580eeba6a7cdb07be905152dac3d9c",
+  "mapping_status": "proposed-migration; not registered or imported",
+  "requests": {
+    "axis-box": {
+      "assurance": "numerical",
+      "output_budget": "four H inequalities",
+      "request_identity": "approx-pilot/box/diamond",
+      "requested_relation": "outer",
+      "source_representation": "diamond-v"
+    },
+    "directional-ellipsoid": {
+      "assurance": "numerical",
+      "output_budget": "one ellipsoid",
+      "request_identity": "approx-pilot/ellipsoid/diamond",
+      "requested_relation": "outer",
+      "source_representation": "diamond-v"
+    },
+    "exact-polygon-quickhull": {
+      "assurance": "exact-literal-hull",
+      "output_budget": "four hull vertices",
+      "request_identity": "approx-pilot/quickhull/diamond/exact-polygon/v1",
+      "requested_relation": "exact",
+      "source_representation": "diamond-v"
+    },
+    "rotated-parallelotope": {
+      "assurance": "numerical",
+      "output_budget": "four H inequalities",
+      "request_identity": "approx-pilot/parallelotope/diamond",
+      "requested_relation": "outer",
+      "source_representation": "diamond-v"
+    },
+    "zonotope-axis-cover": {
+      "assurance": "numerical",
+      "output_budget": "two generators",
+      "request_identity": "approx-pilot/zonotope-cover/diamond",
+      "requested_relation": "outer",
+      "source_representation": "diamond-zonotope-equivalent"
+    }
+  },
+  "schema": "csl.approximation-pilot-request-map/1"
+}

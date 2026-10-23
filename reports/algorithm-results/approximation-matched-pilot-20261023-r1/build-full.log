@@ -1,0 +1,18 @@
+[  7%] Built target csl_quickhull_2d
+[ 21%] Built target csl_contracts
+[ 21%] Built target csl_numeric
+[ 21%] Built target csl_sets
+[ 35%] Built target csl_optimization
+[ 35%] Built target csl_objectives
+[ 50%] Built target csl_geometry_generators
+[ 50%] Built target csl_model
+[ 57%] Built target csl_problem
+[ 64%] Built target csl_resolved_core
+[ 64%] Built target csl_verifiers
+[ 64%] Built target csl_registry
+[ 71%] Built target csl_resolved_problem
+[ 78%] Built target csl_verification
+[ 92%] Built target csl_approximation
+[ 92%] Building CXX object CMakeFiles/csl_approximation_matched_pilot.dir/driver.cpp.o
+[100%] Linking CXX executable csl_approximation_matched_pilot
+[100%] Built target csl_approximation_matched_pilot

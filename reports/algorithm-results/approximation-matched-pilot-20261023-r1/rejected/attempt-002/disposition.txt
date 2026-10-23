@@ -1,0 +1,1 @@
+build failed: fixture Matrix is a value object with flat values; corrected oracle indexing before measurement

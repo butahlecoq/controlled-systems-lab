@@ -1,0 +1,12 @@
+Base source commit: 4494557aad4710fe1166b5a681057f106ef8fb91
+Build type: Release
+Compiler: GCC 16.2.1
+C++ mode: C++20, extensions disabled
+CMake: 3.31.6
+Platform: Linux x86_64, kernel 7.2.5-3-omarchy
+Workers: one serial process; solver threads not applicable
+Resource limits: none requested/enforced; no parallel jobs
+Warmup: one call per method, excluded
+Measurement: seven interleaved one-call repetitions per method
+Timer: per-method interval described in README; no performance ranking
+Limiter profile: not collected; no source-mapped limiter claim
