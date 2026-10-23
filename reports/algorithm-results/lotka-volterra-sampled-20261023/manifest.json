@@ -1,0 +1,11 @@
+{
+  "files_sha256": {
+    "geometry.svg": "3eeab2951be5fc29c196de2d15d52c6d24bceebefd242a0c6b5a6d740b943665",
+    "index.html": "63858310c070de048bfa01cb796174ba2a4fd73a3135dcf4fa80c3d57ea9c675",
+    "records.json": "1d394b3032188c4c39fad0c83a00f9307ef5f976b3e4cadd15496b680471a5b1"
+  },
+  "generator_sha256": "321ac099e8185c8b1b9a76af9859c9b818682b429ba705f1410a19d648238f1c",
+  "report_id": "lotka-volterra-sampled-20261023",
+  "schema": "csl.lotka-volterra-sampled-publication/1",
+  "source_commit": "3be2f4257eeb4d00a81b3275ba9f576fb1332e87"
+}
