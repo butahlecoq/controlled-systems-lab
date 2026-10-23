@@ -110,6 +110,30 @@ TEST_CASE("linear objective bounds enclose the maximum on a terminal segment") {
     CHECK(std::get<ValidatedMinimaxBounds>(result).upper()==1.0);
 }
 
+TEST_CASE("duplicate initial and disturbance vertices remain distinct histories") {
+    const SystemModel authored{{{1,1,1},TimeDomain::discrete,
+        LinearStage{{1,1,{1}},{1,1,{0}},{1,1,{1}},{0}}}, {}};
+    const auto system=take(model::snapshot(authored,Vector{0,1}));
+    const auto duplicate_points=[](std::string id,std::string label) {
+        return take(sets::make_v({{std::move(id)},1,{std::move(label)}},
+            {take(numeric::snapshot(Matrix{2,1,{0,0}})),
+             take(numeric::snapshot(Matrix{0,1,{}}))}));
+    };
+    const auto initial=duplicate_points("duplicate-x0","x");
+    const auto disturbance=duplicate_points("duplicate-w","w");
+    const auto universal=take(sets::make_universal({{"all"},1,{"x"}}));
+    ValidatedFiniteActionMinimaxRequest input{{"p"},{"duplicate-history"},system,
+        initial,{1,{{0}}},{disturbance},{universal,universal},linear()};
+    const auto result=validated_finite_action_minimax(input,{1,4,100});
+    REQUIRE(std::holds_alternative<ValidatedMinimaxBounds>(result));
+    const auto& bounds=std::get<ValidatedMinimaxBounds>(result);
+    CHECK(bounds.lower()==0.0);
+    CHECK(bounds.upper()==0.0);
+    REQUIRE(bounds.plans().size()==1);
+    REQUIRE(std::holds_alternative<ValidatedPlanFeasible>(bounds.plans()[0]));
+    CHECK(std::get<ValidatedPlanFeasible>(bounds.plans()[0]).histories_examined==4);
+}
+
 TEST_CASE("catalogue fold keeps feasible upper bounds and excludes proven violations") {
     const SystemModel authored{{{1,1,1},TimeDomain::discrete,
         LinearStage{{1,1,{0}},{1,1,{1}},{1,1,{0}},{0}}},{}};
