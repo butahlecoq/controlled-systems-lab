@@ -8,6 +8,7 @@ import math
 from pathlib import Path
 import re
 import shutil
+from urllib.parse import urlsplit
 
 import geo04_registered_reports as intersection_reports
 import geo06_registered_reports as hull_reports
@@ -651,10 +652,13 @@ def validate_gallery_inventory(out, entries):
         require(isinstance(raw_data, dict), "visual inventory raw record must be a JSON object")
         if entry["status"] == "analytic-illustration":
             require(all(field in raw_data for field in
-                        ("inputs", "answer", "reproduction_command", "related_saved_report", "evidence")),
+                        ("inputs", "answer", "reproduction_command", "evidence")) and
+                    ("related_saved_report" in raw_data or "source_path" in raw_data),
                     "analytic visual record needs inputs, answer, reproduction and source provenance")
         for field in ("figure", "source_page", "raw_record", "report_records"):
             if field not in entry:
+                continue
+            if field == "source_page" and urlsplit(entry[field]).scheme:
                 continue
             target = (out / entry[field]).resolve()
             require(target.is_relative_to(site_root) and target.is_file(),

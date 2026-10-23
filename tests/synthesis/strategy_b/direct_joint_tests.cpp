@@ -1,6 +1,7 @@
 #define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
 #include <doctest/doctest.h>
 #include <csl/synthesis/strategy_b/direct_joint.hpp>
+#include <csl/input/scenario_loader.hpp>
 #include <csl/synthesis/strategy_a/strategy.hpp>
 #include <csl/synthesis/strategy_ts01/analytic_profile.hpp>
 #include <csl/synthesis/ts02_constant_integrator.hpp>
@@ -270,6 +271,24 @@ TEST_CASE("authored cross-time control equation excludes a stagewise-admissible 
     CHECK(q.bounds[7].upper==0.5);
     // This only verifies the generated candidate joint relation. It establishes
     // no all-history optimal-family coverage or completeness guarantee.
+}
+TEST_CASE("v2 slew scenario compiles its 2D feasible polygon into the direct joint relation") {
+    const auto loaded=input::load_scenario_file(CSL_TEMPORAL_SCENARIO_PATH);
+    REQUIRE(std::holds_alternative<input::LoadedScenario>(loaded));
+    const auto source=std::get<input::LoadedScenario>(loaded).problem();
+    const auto program=accepted(build_joint_program(source,request(source)));
+
+    // u0,u1 lie in [-1,1]^2 and -1/4 <= u1-u0 <= 1/4. These six
+    // independently derived corners exercise the entire clipped polygon.
+    for(const Vector controls:std::vector<Vector>{{-1,-1},{-.75,-1},{1,.75},{1,1},{.75,1},{-1,-.75}})
+        CHECK(feasible(program,{0,controls[0],controls[0]+controls[1],controls[0],controls[1]}));
+    CHECK_FALSE(feasible(program,{0,1,0,1,-1}));
+
+    // The objective is x2^2. The full zero-cost family is u1=-u0 with
+    // |u0|<=1/8; these literals test both endpoints and its interior.
+    for(const double first:{-.125,0.0,.125})
+        CHECK(feasible(program,{0,first,0,first,-first}));
+    CHECK(feasible(program,{0,.1,.2,.1,.1}));
 }
 bool feasible(const JointProgram& p,const Vector& x) {
     for(std::size_t i=0;i<p.constraints.rows;++i) {

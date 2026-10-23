@@ -54,7 +54,7 @@ flowchart LR
 | Responsibility | Public targets / interface | Owning implementation | Depends on / replaceable seam |
 | --- | --- | --- | --- |
 | Immutable numeric, model and set data | `CSL::numeric`, `CSL::model`, `CSL::sets` | `src/numeric`, `src/model`, `src/sets` | Value contracts compose upward; alternative storage is not currently an exposed adapter seam. |
-| Domains, objectives and resolved identity | `CSL::problem`, `CSL::objectives`, `CSL::resolved_core`, `CSL::resolved_problem` | `src/problem`, `src/optimization` | Uses model/set values; `ResolvedProblem` is the immutable handoff to input and application callers. |
+| Domains, objectives and resolved identity | `CSL::problem`, `CSL::objectives`, `CSL::resolved_core`, `CSL::resolved_problem` | `src/problem`, `src/optimization` | Uses model/set values; `ResolvedProblem` is the immutable handoff to input and application callers. The additive EXT-03 one-step slew transform is linked through `CSL::resolved_problem`; it does not imply Strategy A admission. |
 | JSON scenario intake | `CSL::input`, `load_scenario_file` | `src/input` | Produces the same problem value consumed by examples and application code; schema-versioned loader is the input-format seam. |
 | Capability selection, compiled verifiers and retained providers | `CSL::registry`, `CSL::verifiers`, `StrategyRegistry`, provider ports | `src/registry` | Strategies declare port requirements; registered implementations are selected by identity/version and retained through prepared handles. |
 | LP / convex programs and native adapters | `CSL::optimization`, `CSL::convex`, `CSL::highs_lp`, `CSL::highs_convex`, `CSL::phase_one` | `src/optimization`, `src/adapters` | `LPPort` and `ConvexPort`; backend changes are registry selections and keep caller-owned problem requests unchanged. |
@@ -107,6 +107,17 @@ joint-history recovery. Strategy B builds and optimizes a direct joint program.
 Their general `nominal_open_loop` paths produce numerical candidate relations;
 they do not establish general complete-family coverage. See the
 [Strategy A implementation scope](../../src/synthesis/strategy_a/README.md).
+
+Scenario v2 can author nominal linear full-history interval rows. Strategy B's
+direct joint compiler consumes those rows for its admitted nominal profile. The
+EXT-03 memory transform rewrites a narrow one-step slew problem into an ordinary
+Problem with increment controls and previous-control memory; the transform's
+history maps check their defining recurrence when recovering a history. No
+claim is made that the resulting lifted problem is admitted by Strategy A.
+Robust or feedback strategies, legacy paths, and ordinary zonotopes remain
+outside this contract. Exact history correspondence follows the documented
+proof assumptions; in particular, an unbounded supplied state domain is not
+treated as a compact domain merely because the reachable tube is bounded.
 
 Both strategies admit the strictly checked `ts01_exact_integrator`,
 `ts02_constant_integrator`, and `ts03_singular_integrator` profiles. Each

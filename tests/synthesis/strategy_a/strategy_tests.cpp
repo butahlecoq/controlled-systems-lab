@@ -11,6 +11,7 @@
 #include <csl/adapters/polyhedral/qhull.hpp>
 #include <csl/execution/timing_collector.hpp>
 #include <csl/synthesis/strategy_ts01/analytic_profile.hpp>
+#include <csl/problem/temporal_lifts.hpp>
 #include "../../../src/registry/compiled_verifiers.hpp"
 #include <cmath>
 #include <iostream>
@@ -1555,6 +1556,27 @@ TEST_CASE("empty temporal constraints do not disable Strategy A capability") {
     CHECK(history.history.coordinates==JointCoordinates{{1,1,0},2});
     CHECK(contains(history.history.relation,{0,0,1,0,1}));
     CHECK(contains(history.history.relation,{0,1,1,1,0}));
+}
+
+TEST_CASE("Strategy A admits and runs a slew-memory transformed integrator") {
+    auto source=*exact_integrator().description();
+    source.id={"ext03-stage-a-slew"};
+    source.controls=ContinuousDomain{{interval("slew-u0",-1,1,"u"),interval("slew-u1",-1,1,"u")}};
+    source.states={interval("slew-x0",-2,2,"x"),interval("slew-x1",-2,2,"x"),interval("slew-x2",-2,2,"x")};
+    source.objective=QuadraticTerminal{{1,1,{2}},{0},0};
+    const auto lifted=problem::lift_one_step_slew(source,{
+        problem::RateLimitedFirstAction{{0},interval("slew-d0",-.25,.25,"du")},
+        {interval("slew-d1",-.25,.25,"du")}});
+    REQUIRE(std::holds_alternative<problem::SlewMemoryLift>(lifted));
+    const auto resolved=take(problem::resolve(std::get<problem::SlewMemoryLift>(lifted).problem,
+        {problem::UncertaintyStructure::stage_product_uncoupled,{},{}}));
+    const auto prepared=admit(request(resolved));
+    REQUIRE(std::holds_alternative<PreparedStrategy>(prepared));
+    const auto result=run(request(resolved));
+    CHECK(result.termination==Termination::completed);
+    REQUIRE(result.family);
+    CHECK(result.family->identity().coordinates==JointCoordinates{{2,1,0},2});
+    CHECK(result.outcome.value!=MathematicalOutcome::infeasible);
 }
 
 TEST_CASE("nonempty temporal coupling remains an unsupported Strategy A request") {

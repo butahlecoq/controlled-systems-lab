@@ -60,6 +60,8 @@ class GalleryTests(unittest.TestCase):
             if not (target / saved["image"]).exists():
                 shutil.copyfile(source / saved["image"], target / saved["image"])
         for case in gallery.visual_illustrations.CASES:
+            if "report_kind" not in case:
+                continue
             target = self.site / by_kind[case["report_kind"]]
             target.mkdir(exist_ok=True)
             if not (target / "records.json").exists():
@@ -263,6 +265,15 @@ class GalleryTests(unittest.TestCase):
         self.assertEqual(len(validated_svg.findall(f".//{ns}polygon")), 3)
         self.assertIn("u=(1,0): bad", "".join(validated_svg.getroot().itertext()))
         self.assertIn("gap=¼", "".join(validated_svg.getroot().itertext()))
+        slew = json.loads((self.site / "examples/ext03-slew-memory.json").read_text())
+        self.assertEqual(slew["answer"]["feasible_polygon_ccw"],
+                         [[-1,-1],[-.75,-1],[1,.75],[1,1],[.75,1],[-1,-.75]])
+        self.assertEqual(slew["answer"]["complete_minimizer_segment"], [[-.125,.125],[.125,-.125]])
+        self.assertEqual(slew["inputs"]["temporal_constraint"], "|u1-u0|<=1/4")
+        self.assertIn("not a replay or measurement", slew["evidence"])
+        self.assertIn("temporal-slew-integrator.json", slew["source_path"])
+        slew_svg = ET.parse(self.site / "examples/ext03-slew-memory.svg")
+        self.assertEqual(len(slew_svg.findall(f".//{ns}polygon")), 1)
         first = {p.name: p.read_bytes() for p in (self.site / "examples").iterdir()}
         gallery.build(self.catalog, self.site)
         self.assertEqual({p.name: p.read_bytes() for p in (self.site / "examples").iterdir()}, first)

@@ -327,7 +327,8 @@
       ],
       "report_routes": [],
       "examples": [
-        "saved-figure-9"
+        "saved-figure-9",
+        "visual-ext03-slew-memory"
       ],
       "implementation_issues": [
         67,

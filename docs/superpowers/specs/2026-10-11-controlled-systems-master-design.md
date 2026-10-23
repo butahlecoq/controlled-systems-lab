@@ -199,6 +199,37 @@ The [B04 table transcription](../../research/b04-tables.md) is available, includ
 
 The [temporal-coupling note](../../research/temporal-coupling.md) proves a specific exact slew-constraint lift under stated assumptions; it does not certify every historical algorithm or every temporal coupling. Minimax maximum-of-convex objectives need a global worst-case argument, not a generic convex minimizer with negated cost.
 
+### EXT-03 implementation amendment (2026-10-23)
+
+Scenario input revision `csl.scenario/2` adds an optional nominal linear
+full-history interval relation using the canonical state-then-control coordinate
+order. V1 inputs, defaults and first archival manifests remain unchanged. The
+problem layer now also exposes an exact one-step slew memory transformation for
+known-initial, discrete-time, nominal open-loop continuous-control problems with
+supported H-represented constraints. Recovery checks the initial-memory and
+memory recurrence with caller-supplied absolute and relative tolerances; this is
+an input-consistency check, not a feasibility or optimality certificate.
+
+The transformed model can be represented by the existing Problem contract, but
+this amendment does not assert admission by Strategy A. Strategy B consumes the
+generic full-history rows for its supported nominal linear profile. Robust,
+feedback, legacy, ordinary-zonotope, and other unsupported combinations remain
+rejected. The exact claim is limited to the history bijection in
+[temporal-coupling.md](../../research/temporal-coupling.md), with compactness
+conditions stated there; unbounded supplied state domains do not inherit the
+compact-domain argument. Integration review should reconcile this additive v2
+contract with scenario-default/source-identity policy before a later stable API
+or release. This amendment does not change the specification's proposed general
+strategy capability or publication evidence gates.
+
+The planned `src/synthesis/temporal_joint.cpp` did not need a duplicate
+compiler: full-history rows already enter Strategy B through
+`direct_joint.cpp`. The new memory-coordinate transform instead lives with
+resolved problem semantics in `src/problem/temporal_lifts.cpp` and is exported
+by `CSL::resolved_problem`. This ownership adjustment keeps the transform
+independent from a solver and preserves the existing single Strategy B row
+compiler.
+
 ## From specification to tickets and subagents
 
 The owner authorized decomposition and GitHub publication. The [implementation backlog](../plans/2026-10-11-controlled-systems-backlog.md) and [machine-readable ticket manifest](../plans/backlog.json) now define the dependency order, acceptance checklists and proposed ownership. Product implementation is a subsequent step:

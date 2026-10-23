@@ -1,0 +1,703 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://butahlecoq.github.io/controlled-systems-lab/schemas/scenario/v2.schema.json",
+  "title": "CSL executable nominal discrete scenario v2",
+  "$comment": "Authoring aid only. Native loader additionally enforces lexical, bounded-resource, dimensional, canonical and cross-field rules described in README.md. Reserved unsupported and historical formats are not executable instances.",
+  "type": "object",
+  "properties": {
+    "schema": {
+      "const": "csl.scenario/2"
+    },
+    "id": {
+      "type": "string",
+      "maxLength": 4096
+    },
+    "horizon": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 4096
+    },
+    "times": {
+      "$ref": "#/$defs/vector"
+    },
+    "dimensions": {
+      "type": "object",
+      "properties": {
+        "state": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 256
+        },
+        "control": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 256
+        },
+        "external": {
+          "const": 0
+        }
+      },
+      "required": [
+        "state",
+        "control",
+        "external"
+      ],
+      "additionalProperties": false
+    },
+    "profile": {
+      "const": "nominal_discrete_v1"
+    },
+    "model": {
+      "$ref": "#/$defs/model"
+    },
+    "initial_state": {
+      "$ref": "#/$defs/vector"
+    },
+    "controls": {
+      "$ref": "#/$defs/set_provider"
+    },
+    "states": {
+      "$ref": "#/$defs/set_provider"
+    },
+    "objective": {
+      "$ref": "#/$defs/objective"
+    },
+    "temporal": {
+      "$ref": "#/$defs/temporal"
+    },
+    "run": {
+      "$ref": "#/$defs/run"
+    },
+    "metadata": {
+      "$ref": "#/$defs/metadata"
+    }
+  },
+  "required": [
+    "schema",
+    "horizon",
+    "model",
+    "initial_state",
+    "controls",
+    "objective"
+  ],
+  "additionalProperties": false,
+  "$defs": {
+    "vector": {
+      "type": "array",
+      "items": {
+        "type": "number"
+      }
+    },
+    "temporal": {
+      "type": "object",
+      "properties": {
+        "coordinate_order": {
+          "const": "x0,...,xT,u0,...,u(T-1)"
+        },
+        "rows": {
+          "$ref": "#/$defs/matrix"
+        },
+        "bounds": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "lower": {
+                "type": ["number", "null"]
+              },
+              "upper": {
+                "type": ["number", "null"]
+              }
+            },
+            "required": ["lower", "upper"],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": ["coordinate_order", "rows", "bounds"],
+      "additionalProperties": false
+    },
+    "matrix": {
+      "oneOf": [
+        {
+          "type": "array",
+          "maxItems": 256,
+          "items": {
+            "type": "array",
+            "maxItems": 256,
+            "items": {
+              "type": "number"
+            }
+          }
+        },
+        {
+          "type": "object",
+          "properties": {
+            "rows": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 256
+            },
+            "cols": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 256
+            },
+            "values": {
+              "type": "array",
+              "items": {
+                "type": "number"
+              }
+            }
+          },
+          "required": [
+            "rows",
+            "cols",
+            "values"
+          ],
+          "additionalProperties": false
+        }
+      ]
+    },
+    "set": {
+      "oneOf": [
+        {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "empty"
+            }
+          },
+          "required": [
+            "kind"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "universal"
+            }
+          },
+          "required": [
+            "kind"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "singleton"
+            },
+            "point": {
+              "$ref": "#/$defs/vector"
+            }
+          },
+          "required": [
+            "kind",
+            "point"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "box"
+            },
+            "lower": {
+              "type": "array",
+              "items": {
+                "type": [
+                  "number",
+                  "null"
+                ]
+              }
+            },
+            "upper": {
+              "type": "array",
+              "items": {
+                "type": [
+                  "number",
+                  "null"
+                ]
+              }
+            }
+          },
+          "required": [
+            "kind",
+            "lower",
+            "upper"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "polyhedron_h"
+            },
+            "H": {
+              "$ref": "#/$defs/matrix"
+            },
+            "h": {
+              "$ref": "#/$defs/vector"
+            },
+            "E": {
+              "$ref": "#/$defs/matrix"
+            },
+            "e": {
+              "$ref": "#/$defs/vector"
+            }
+          },
+          "required": [
+            "kind",
+            "H",
+            "h",
+            "E",
+            "e"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "polyhedron_v"
+            },
+            "vertices": {
+              "$ref": "#/$defs/matrix"
+            },
+            "rays": {
+              "$ref": "#/$defs/matrix"
+            }
+          },
+          "required": [
+            "kind",
+            "vertices",
+            "rays"
+          ],
+          "additionalProperties": false
+        }
+      ]
+    },
+    "set_provider": {
+      "oneOf": [
+        {
+          "$ref": "#/$defs/set"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "stages"
+            },
+            "values": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/set"
+              }
+            }
+          },
+          "required": [
+            "kind",
+            "values"
+          ],
+          "additionalProperties": false
+        }
+      ]
+    },
+    "model": {
+      "oneOf": [
+        {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "linear_discrete"
+            },
+            "A": {
+              "$ref": "#/$defs/matrix"
+            },
+            "B": {
+              "$ref": "#/$defs/matrix"
+            }
+          },
+          "required": [
+            "kind",
+            "A",
+            "B"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "linear_discrete_ltv"
+            },
+            "stages": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "A": {
+                    "$ref": "#/$defs/matrix"
+                  },
+                  "B": {
+                    "$ref": "#/$defs/matrix"
+                  }
+                },
+                "required": [
+                  "A",
+                  "B"
+                ],
+                "additionalProperties": false
+              }
+            }
+          },
+          "required": [
+            "kind",
+            "stages"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "affine_discrete"
+            },
+            "A": {
+              "$ref": "#/$defs/matrix"
+            },
+            "B": {
+              "$ref": "#/$defs/matrix"
+            },
+            "offset": {
+              "$ref": "#/$defs/vector"
+            }
+          },
+          "required": [
+            "kind",
+            "A",
+            "B",
+            "offset"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "affine_discrete_ltv"
+            },
+            "stages": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "A": {
+                    "$ref": "#/$defs/matrix"
+                  },
+                  "B": {
+                    "$ref": "#/$defs/matrix"
+                  },
+                  "offset": {
+                    "$ref": "#/$defs/vector"
+                  }
+                },
+                "required": [
+                  "A",
+                  "B",
+                  "offset"
+                ],
+                "additionalProperties": false
+              }
+            }
+          },
+          "required": [
+            "kind",
+            "stages"
+          ],
+          "additionalProperties": false
+        }
+      ]
+    },
+    "objective": {
+      "oneOf": [
+        {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "linear"
+            },
+            "coefficients": {
+              "$ref": "#/$defs/vector"
+            },
+            "offset": {
+              "type": "number"
+            }
+          },
+          "required": [
+            "kind",
+            "coefficients"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "quadratic"
+            },
+            "Q": {
+              "$ref": "#/$defs/matrix"
+            },
+            "linear": {
+              "$ref": "#/$defs/vector"
+            },
+            "offset": {
+              "type": "number"
+            }
+          },
+          "required": [
+            "kind",
+            "Q",
+            "linear"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "residual_norm"
+            },
+            "L": {
+              "$ref": "#/$defs/matrix"
+            },
+            "target": {
+              "$ref": "#/$defs/vector"
+            }
+          },
+          "required": [
+            "kind",
+            "L",
+            "target"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "terminal_distance"
+            },
+            "target": {
+              "$ref": "#/$defs/vector"
+            }
+          },
+          "required": [
+            "kind",
+            "target"
+          ],
+          "additionalProperties": false
+        }
+      ]
+    },
+    "module": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "maxLength": 4096,
+          "minLength": 1
+        },
+        "version": {
+          "type": "string",
+          "maxLength": 4096,
+          "minLength": 1
+        }
+      },
+      "required": [
+        "id"
+      ],
+      "additionalProperties": false
+    },
+    "run": {
+      "type": "object",
+      "properties": {
+        "comparison": {
+          "const": "historical_reachability_vs_joint_trajectory"
+        },
+        "methods": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/$defs/module"
+          }
+        },
+        "backends": {
+          "type": "object",
+          "properties": {
+            "lp": {
+              "$ref": "#/$defs/module"
+            },
+            "convex": {
+              "$ref": "#/$defs/module"
+            },
+            "hull": {
+              "$ref": "#/$defs/module"
+            },
+            "geometry": {
+              "$ref": "#/$defs/module"
+            },
+            "converter": {
+              "$ref": "#/$defs/module"
+            },
+            "approximation": {
+              "$ref": "#/$defs/module"
+            },
+            "selector": {
+              "$ref": "#/$defs/module"
+            },
+            "representation": {
+              "type": "string",
+              "maxLength": 4096,
+              "minLength": 1
+            }
+          },
+          "required": [],
+          "additionalProperties": false
+        },
+        "witnesses": {
+          "type": "object",
+          "properties": {
+            "count": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "distinctness_tolerance": {
+              "type": "number",
+              "minimum": 0
+            },
+            "directions": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/vector"
+              }
+            }
+          },
+          "required": [],
+          "additionalProperties": false
+        },
+        "numerical": {
+          "type": "object",
+          "properties": {
+            "absolute_tolerance": {
+              "type": "number",
+              "minimum": 0
+            },
+            "relative_tolerance": {
+              "type": "number",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "absolute_tolerance",
+            "relative_tolerance"
+          ],
+          "additionalProperties": false
+        },
+        "resources": {
+          "type": "object",
+          "properties": {
+            "total_threads": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "outer_workers": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "threads_per_worker": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "memory_bytes": {
+              "type": "integer",
+              "minimum": 1
+            }
+          },
+          "required": [
+            "total_threads",
+            "outer_workers",
+            "threads_per_worker"
+          ],
+          "additionalProperties": false
+        },
+        "seed": {
+          "type": "integer",
+          "minimum": 0
+        }
+      },
+      "required": [],
+      "additionalProperties": false,
+      "not": {
+        "required": [
+          "comparison",
+          "methods"
+        ]
+      }
+    },
+    "metadata": {
+      "type": "object",
+      "properties": {
+        "title": {
+          "type": "string",
+          "maxLength": 4096
+        },
+        "description": {
+          "type": "string",
+          "maxLength": 16384
+        },
+        "state_labels": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "maxLength": 4096
+          }
+        },
+        "control_labels": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "maxLength": 4096
+          }
+        },
+        "state_units": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "maxLength": 4096
+          }
+        },
+        "control_units": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "maxLength": 4096
+          }
+        },
+        "time_unit": {
+          "type": "string",
+          "maxLength": 4096
+        }
+      },
+      "required": [],
+      "additionalProperties": false
+    }
+  }
+}

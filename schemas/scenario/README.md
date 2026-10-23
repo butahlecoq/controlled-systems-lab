@@ -1,11 +1,14 @@
-# Scenario JSON v1
+# Scenario JSON v1 and v2
 
-`v1.schema.json` is a JSON Schema 2020-12 authoring aid for executable
-`csl.scenario/1` documents. Its `$id` names the schema; loading a scenario does
-not fetch that URL. The native boundary is `CSL::input` and its contract is
+`v1.schema.json` and `v2.schema.json` are JSON Schema 2020-12 authoring aids for
+executable `csl.scenario/1` and `csl.scenario/2` documents. Their `$id` values
+name the schemas; loading a scenario does not fetch those URLs. The native
+boundary is `CSL::input` and its contract is
 [scenario-input.md](../../docs/contracts/scenario-input.md). The independent
 examples are [minimal integrator](../../tests/fixtures/input/minimal-integrator.json)
-and [affine LTV](../../tests/fixtures/input/affine-ltv.json).
+and [affine LTV](../../tests/fixtures/input/affine-ltv.json); the v2
+[slew-limited integrator](../../examples/scenarios/temporal-slew-integrator.json)
+demonstrates full-history rows.
 
 Required root fields are schema, horizon, model, initial_state, controls and
 objective. Other documented fields are optional. Unknown executable keys reject,
@@ -30,8 +33,10 @@ Defaults revision `csl.scenario-defaults/1` supplies index times 0..T, universal
 states, absent external/temporal structures, no observations, zero offsets for
 linear kinds or omitted objective offsets, empty display metadata, and a
 comparison *request*. Initial values, control bounds and objective targets are
-never guessed. A new grammar/default revision requires an explicit migration;
-the loader does not reinterpret unknown schema/profile versions.
+never guessed. Scenario v2 retains those defaults under
+`csl.scenario-defaults/2` and adds optional canonical full-history temporal rows.
+V1 continues to reject a present temporal field. The loader does not
+reinterpret unknown schema/profile versions.
 
 The reserved continuous model kinds, finite/mixed controls, sum/mixed objectives,
 future root structures and well-formed external matrix descriptors return

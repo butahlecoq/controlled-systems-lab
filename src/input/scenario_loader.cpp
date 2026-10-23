@@ -233,6 +233,45 @@ public:
         return ResidualNormTerminal{std::move(L),std::move(target)};
     }
 
+    TemporalConstraints temporal(const Json& value,std::size_t n,std::size_t m,std::size_t horizon) {
+        constexpr std::string_view order="x0,...,xT,u0,...,u(T-1)";
+        const std::string path="/temporal";
+        object(value,path,{"coordinate_order","rows","bounds"});
+        if(string(member(value,"coordinate_order",path),child(path,"coordinate_order"))!=order)
+            fail(child(path,"coordinate_order"),"unknown order","x0,...,xT,u0,...,u(T-1)");
+        const auto state_width=product(horizon+1,n,child(path,"rows"));
+        const auto control_width=product(horizon,m,child(path,"rows"));
+        if(state_width>std::numeric_limits<std::size_t>::max()-control_width)
+            fail(child(path,"rows"),"history width overflow","representable full-history width",InputCategory::limit);
+        const auto width=state_width+control_width;
+        auto rows=matrix(member(value,"rows",path),child(path,"rows"));
+        if(rows.cols!=width)
+            fail(child(path,"rows"),"wrong column count","columns matching canonical full-history width "+std::to_string(width));
+        const auto& authored_bounds=member(value,"bounds",path);
+        if(!authored_bounds.is_array() || authored_bounds.size()!=rows.rows)
+            fail(child(path,"bounds"),"wrong row count","one interval per temporal row");
+        std::vector<Interval> bounds;bounds.reserve(rows.rows);
+        for(std::size_t i=0;i<rows.rows;++i) {
+            const auto bound_path=child(child(path,"bounds"),std::to_string(i));
+            const auto& entry=authored_bounds[i];object(entry,bound_path,{"lower","upper"});
+            const auto endpoint=[&](const char* name) -> std::optional<double> {
+                const auto field=child(bound_path,name);const auto& item=member(entry,name,bound_path);
+                if(item.is_null()) return {};
+                return number(item,field);
+            };
+            Interval bound{endpoint("lower"),endpoint("upper")};
+            if(bound.lower && bound.upper && *bound.lower>*bound.upper)
+                fail(bound_path,"reversed endpoints","lower <= upper");
+            bounds.push_back(bound);
+        }
+        SparseMatrix sparse{rows.rows,rows.cols,{0},{},{}};
+        sparse.values=std::move(rows.values);
+        sparse.column_indices.resize(width);
+        for(std::size_t j=0;j<width;++j) sparse.column_indices[j]=j;
+        for(std::size_t i=0;i<sparse.rows;++i) sparse.row_offsets.push_back((i+1)*width);
+        return {std::move(sparse),std::move(bounds)};
+    }
+
     RequestedRun requested_run(const Json& root) {
         RequestedRun out;
         if(!root.contains("run")) return out;
@@ -305,7 +344,9 @@ public:
 };
 LoadedScenario translate(const Json& root,std::span<const std::byte> bytes,const LoadOptions& options,const std::filesystem::path& location) {
     Reader r(options);
-    if(string(member(root,"schema",""),"/schema")!="csl.scenario/1") fail("/schema","unknown version","csl.scenario/1",InputCategory::schema);
+    const auto schema=string(member(root,"schema",""),"/schema");
+    const bool version_one=schema=="csl.scenario/1",version_two=schema=="csl.scenario/2";
+    if(!version_one && !version_two) fail("/schema","unknown version","csl.scenario/1 or csl.scenario/2",InputCategory::schema);
     object(root,"",{"schema","id","horizon","times","dimensions","profile","model","initial_state","controls","states","objective","run","metadata",
         "initial_information","external","observations","information","uncertainty","temporal","hybrid"});
     for(const auto required:{"horizon","model","initial_state","controls","objective"}) (void)member(root,required,"");
@@ -313,8 +354,10 @@ LoadedScenario translate(const Json& root,std::span<const std::byte> bytes,const
     if(root.contains("profile") && (!root["profile"].is_string() || root["profile"]!="nominal_discrete_v1"))
         fail("/profile",root["profile"].is_string()?root["profile"].get<std::string>():root["profile"].type_name(),"string \"nominal_discrete_v1\"");
     r.defaults.push_back({"/profile","nominal_discrete_v1",root.contains("profile")});
-    for(const auto reserved:{"initial_information","external","observations","information","uncertainty","temporal","hybrid"})
-        if(root.contains(reserved)) throw UnsupportedInput{reserved,child("",reserved),"present","omitted unsupported structure in nominal v1"};
+    for(const auto reserved:{"initial_information","external","observations","information","uncertainty","hybrid"})
+        if(root.contains(reserved)) throw UnsupportedInput{reserved,child("",reserved),"present","omitted unsupported structure in a nominal scenario"};
+    if(version_one && root.contains("temporal"))
+        throw UnsupportedInput{"temporal","/temporal","present","omitted temporal relation in nominal v1"};
     const auto horizon=count(member(root,"horizon",""),"/horizon");
     if(horizon>options.limits.horizon) fail("/horizon","horizon exceeds quota","bounded horizon",InputCategory::limit);
     auto model=r.model(root,horizon);const auto n=model.dynamics.dimensions.state,m=model.dynamics.dimensions.control;
@@ -323,12 +366,14 @@ LoadedScenario translate(const Json& root,std::span<const std::byte> bytes,const
     const auto initial=r.vector(member(root,"initial_state",""),n,"/initial_state");
     auto controls=r.sets(member(root,"controls",""),m,horizon,"/controls",true);
     auto states=root.contains("states")?r.sets(root["states"],n,horizon+1,"/states",false):std::vector<AdmissibleSet>(horizon+1,UniversalSet{n});
+    std::optional<TemporalConstraints> temporal;
+    if(version_two && root.contains("temporal")) temporal=r.temporal(root["temporal"],n,m,horizon);
     auto objective=r.objective(member(root,"objective",""),n);
     auto run=r.requested_run(root);auto metadata=r.metadata(root,n,m);
-    for(const auto& [path,meaning]:std::initializer_list<std::pair<const char*,const char*>>{{"states","T+1 universal state sets"},{"external","absent external input"},{"observations","empty observation list"},{"temporal","absent temporal relation"},{"run","historical_reachability_vs_joint_trajectory intent"},{"id","empty display label"},{"metadata","empty display metadata"}})
+    for(const auto& [path,meaning]:std::initializer_list<std::pair<const char*,const char*>>{{"states","T+1 universal state sets"},{"external","absent external input"},{"observations","empty observation list"},{"temporal",version_one?"reserved omitted temporal relation":"omission means no temporal relation"},{"run","historical_reachability_vs_joint_trajectory intent"},{"id","empty display label"},{"metadata","empty display metadata"}})
         r.defaults.push_back({child("",path),meaning,root.contains(path)});
     Problem p{{metadata.id},std::make_shared<const SystemModel>(std::move(model)),std::move(times),KnownInitial{initial},ContinuousDomain{std::move(controls)},
-        std::move(states),{},{},InformationPattern::nominal_open_loop,std::move(objective)};
+        std::move(states),std::move(temporal),{},InformationPattern::nominal_open_loop,std::move(objective)};
     auto resolution=problem::resolve(p,{problem::UncertaintyStructure::stage_product_uncoupled,options.objective_policy,{}});
     if(const auto* d=std::get_if<Diagnostic>(&resolution)) {
         // Shape/finite checks above retain their exact authored pointers. These
@@ -341,7 +386,8 @@ LoadedScenario translate(const Json& root,std::span<const std::byte> bytes,const
     auto resolved=canonical<problem::ResolvedProblem>(std::move(resolution),"");
     auto source=canonical<problem::ResolvedContent>(problem::snapshot_content(bytes),"");
     poll(options);
-    return Access::scenario({std::move(resolved),std::move(run),std::move(r.defaults),std::move(metadata),{std::move(source),location,"csl.scenario/1","csl.scenario-defaults/1",options.objective_policy}});
+    return Access::scenario({std::move(resolved),std::move(run),std::move(r.defaults),std::move(metadata),
+        {std::move(source),location,schema,version_one?"csl.scenario-defaults/1":"csl.scenario-defaults/2",options.objective_policy}});
 }
 }
 LoadResult load_bytes(std::span<const std::byte> bytes,const LoadOptions& options,const std::filesystem::path& location) {
