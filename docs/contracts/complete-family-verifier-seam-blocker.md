@@ -12,7 +12,7 @@ The guard is exercised by the public prepared-strategy regression [“rejects co
 
 ## Remaining gap
 
-The production catalog provides profile-specific analytic verifiers for T-S01, T-S02, and T-S03 ([`compiled_verifiers.cpp`](../../src/registry/compiled_verifiers.cpp#L308-L510), catalog dispatch at [lines 592–605](../../src/registry/compiled_verifiers.cpp#L592-L605)). They validate those canonical problems, relations, optimum claims, and bounds. They are not a general numerical coverage procedure for arbitrary supported problems or Strategy A/B outputs.
+The production catalog provides profile-specific analytic verifiers for T-S01, T-S02, and T-S03 ([`compiled_verifiers.cpp`](../../src/registry/compiled_verifiers.cpp#L308-L510), catalog dispatch at [lines 592–604](../../src/registry/compiled_verifiers.cpp#L592-L604)). They validate those canonical problems, relations, optimum claims, and bounds. They are not a general numerical coverage procedure for arbitrary supported problems or Strategy A/B outputs.
 
 `NumericalCoverageEvidence` is a typed proposal payload, not proof by construction. A residual, tolerance check, solver status, or list of witnesses cannot by itself prove that the published joint relation contains every optimal history. Until a profile's coverage evidence has a reviewed procedure and a compiled verifier that checks it against the frozen request, that profile must fail closed: report the supported candidate/partial result or reject complete-family publication. This is consistent with #155's completeness-guard addendum and the scientific gates in the [class-level architecture](../superpowers/specs/2026-10-12-class-level-system-architecture.md#scientific-gates-before-complete-family-acceptance).
 
