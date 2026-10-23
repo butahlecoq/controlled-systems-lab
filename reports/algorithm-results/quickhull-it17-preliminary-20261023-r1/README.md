@@ -55,8 +55,9 @@ complete accounting of original IDs, unique/in-range retained and removed
 IDs, exact-binary64 convex-combination verifier IDs for deletions, that every
 input lies in the known rectangle, and that every expected corner remains.
 The QuickHull oracle checks exact equality of returned vertex coordinates to
-the four literal corners. Integer coordinates and the rectangle containment
-make the fixture hull checks exact for these inputs. Basis reuse may retain
+the four literal corners. All fixture coordinates are exactly representable
+dyadic rationals, and rectangle containment makes the hull checks exact for
+these inputs. Basis reuse may retain
 additional redundant points; that is allowed by hull equality and is visible
 in the raw `retained` counts.
 
