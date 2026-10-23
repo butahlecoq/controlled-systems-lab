@@ -115,13 +115,6 @@ registry::StrategyRegistration proposal_only_ts02_strategy(CompleteFamilyProposa
 template<class T, class... R> T accepted(std::variant<T,R...> value) {
     REQUIRE(std::holds_alternative<T>(value)); return std::get<T>(std::move(value));
 }
-sets::SetData interval(double upper) {
-    return accepted(sets::make_h({{"interval"},1,{}},
-        {accepted(numeric::snapshot(Matrix{2,1,{1,-1}})),
-         accepted(numeric::snapshot_vector(Vector{upper,0})),
-         accepted(numeric::snapshot(Matrix{0,1,{}})),
-         accepted(numeric::snapshot_vector(Vector{}))}));
-}
 sets::SetData bounded_interval(double lower,double upper) {
     return accepted(sets::make_h({{"bounded-interval"},1,{}},
         {accepted(numeric::snapshot(Matrix{2,1,{1,-1}})),
@@ -129,6 +122,7 @@ sets::SetData bounded_interval(double lower,double upper) {
          accepted(numeric::snapshot(Matrix{0,1,{}})),
          accepted(numeric::snapshot_vector(Vector{}))}));
 }
+sets::SetData interval(double upper) { return bounded_interval(0,upper); }
 Problem integrator(TerminalObjective objective = QuadraticTerminal{{1,1,{2}},{-2},1}) {
     const auto unit=interval(1).as_handle();
     return {{"integrator"},std::make_shared<const SystemModel>(SystemModel{{{1,1,0},TimeDomain::discrete,
@@ -636,6 +630,7 @@ TEST_CASE("T-S01 extracts all correlated optimal histories without claiming comp
     CHECK_FALSE(contains(data.relation,{0,1,2,1,1}));CHECK_FALSE(contains(data.relation,{0,0,0,0,0}));
     CHECK_FALSE(contains(data.relation,{0,0,1,1,0}));
     REQUIRE(data.optimization);CHECK(data.optimization->objective.lower->value==0);
+    CHECK(r.termination==Termination::completed);
     CHECK(r.outcome.value==MathematicalOutcome::undetermined);CHECK_FALSE(r.objective.lower);
     REQUIRE(r.objective.upper);CHECK(r.objective.upper->value==0);REQUIRE(r.incumbents.size()==1);
     CHECK(r.incumbents[0].witness.original_objective==0);
@@ -643,6 +638,7 @@ TEST_CASE("T-S01 extracts all correlated optimal histories without claiming comp
 
     // Both strategies receive the same resolved problem and effective request.
     const auto a_result=run_strategy_a(p,request(p));
+    CHECK(a_result.termination==Termination::completed);
     CHECK(a_result.outcome.value==MathematicalOutcome::undetermined);
     CHECK(r.family->target()==FamilyTarget::candidate_relaxation);
     REQUIRE(a_result.family);CHECK(a_result.family->target()==FamilyTarget::candidate_relaxation);
@@ -670,9 +666,11 @@ TEST_CASE("T-S02 constant objective retains every feasible history and terminal 
         const auto r=oracle({0,0,0,0,0},3).solve(p,q,{});
         const auto& data=payload(r);CHECK(contains(data.relation,{0,0,0,0,0}));CHECK(contains(data.relation,{0,1,2,1,1}));
         CHECK(contains(data.relation,{0,0.3,1.1,0.3,0.8}));CHECK_FALSE(contains(data.relation,{0,0,1,1,0}));
+        CHECK(r.termination==Termination::completed);
         CHECK(r.outcome.value==MathematicalOutcome::undetermined);
         CHECK_FALSE(r.family->registry_verified());
         const auto a_result=run_strategy_a(p,q);
+        CHECK(a_result.termination==Termination::completed);
         CHECK(a_result.outcome.value==MathematicalOutcome::undetermined);
         REQUIRE(a_result.family);CHECK(a_result.family->target()==FamilyTarget::candidate_relaxation);
         CHECK_FALSE(a_result.family->registry_verified());
@@ -719,6 +717,10 @@ TEST_CASE("T-S03 singular A preserves earlier controls at a unique terminal opti
     // the shared endpoints confines each convex H set to the same line;
     // intersecting every H-row with this line must yield the entire interval.
     const auto a_result=run_strategy_a(p,q);const auto& a_relation=strategy_a_relation(a_result);
+    CHECK(a_result.termination==Termination::completed);
+    CHECK(a_result.outcome.value==MathematicalOutcome::undetermined);
+    REQUIRE(a_result.family);CHECK(a_result.family->target()==FamilyTarget::candidate_relaxation);
+    CHECK_FALSE(a_result.family->registry_verified());
     const auto a_h=std::get<sets::HRepresentation>(a_relation.representation());
     CHECK(equality_rank(a_h)==4);
     CHECK(contains(relation,first));CHECK(contains(relation,last));
