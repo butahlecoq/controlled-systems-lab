@@ -59,6 +59,86 @@ Report time to first witness separately from time to complete an optimal
 family. A one-trajectory result cannot stand in for the complete-family output
 requested by CSL.
 
+### Proposed external result record (contract for review; no adapter authorized)
+
+The following versioned JSON shape is a concrete proposal to take to the
+separate #83/#84 record review. It is deliberately an evidence record, not a
+`StrategyPort` result: `comparison_id` links the paired comparison; `run_id`
+and the `problem` digest identify the external execution; `request` preserves
+what was asked and what the adapter actually sent; and `outcome` states the
+limited claim the record supports. A future adapter must not write this format
+until the #83/#84 owners approve its schema and migration/compatibility plan.
+
+```json
+{
+  "schema": "csl.external-control-result/1",
+  "run_id": "<stable unique id>",
+  "comparison_id": "<#83/#84 comparison record id>",
+  "problem": {
+    "case_id": "<fixture id>",
+    "model_sha256": "<digest of canonical model, grid, domains, costs and constraints>",
+    "information_pattern": "<open-loop | causal-full-state | other declared contract>",
+    "policy_class": "<declared policy class>",
+    "horizon": 0
+  },
+  "request": {
+    "comparison_kind": "<one of the four kinds above>",
+    "requested_output": "<witness | bound | policy | controller-run>",
+    "effective_problem_sha256": "<digest after adapter translation>",
+    "translation_notes": "<lossless mapping or each declared change>"
+  },
+  "solver": {
+    "name": "<solver/framework>",
+    "version_or_commit": "<immutable version/commit>",
+    "stack": [{"name": "<dependency>", "version_or_commit": "<pin>"}],
+    "platform": "<OS, architecture, compiler/runtime>",
+    "configuration_sha256": "<digest of effective options>",
+    "license_manifest": "<record or link for full dependency/license inventory>"
+  },
+  "execution": {
+    "status": "<completed | infeasible | unbounded | max-iterations | timeout | error | unsupported>",
+    "termination_detail": "<solver-native status and message>",
+    "started_at_utc": "<timestamp>",
+    "wall_time_seconds": 0.0,
+    "setup_time_seconds": 0.0,
+    "online_time_seconds": 0.0,
+    "resource_protocol_id": "<published budget/protocol id>",
+    "threads": 1,
+    "seed": null
+  },
+  "outcome": {
+    "claim": "<feasible-witness | objective-value | lower-bound | upper-bound | policy | trajectory | none>",
+    "objective_value": null,
+    "bound": null,
+    "bound_direction": "<lower | upper | none>",
+    "gap": null,
+    "witness_sha256": null,
+    "policy_sha256": null,
+    "complete_family_coverage": "not-provided"
+  },
+  "verification": {
+    "checker_id_and_version": "<independent checker or none>",
+    "original_data_feasibility": "<pass | fail | not-checked>",
+    "objective_recomputed": "<pass | fail | not-checked>",
+    "claim_specific_certificate": "<artifact digest/reference or none>",
+    "notes": "<limitations; never infer family coverage from a witness>"
+  },
+  "artifacts": [{"role": "<log | input | output | plot | other>", "sha256": "<digest>", "path_or_uri": "<immutable artifact reference>"}]
+}
+```
+
+Fields with `null` or `none` are explicit absence, not success. A failed,
+unsupported, timed-out, or maximum-iteration run remains a record with its
+native termination details and logs. `effective_problem_sha256` must differ
+from the canonical problem digest when translation changes the mathematical
+problem; the notes then identify the change so a relaxation or restricted
+policy cannot be mislabeled as a matched result. A `pass` in replay checks only
+the stated witness; it is not a global optimality, robust-safety, or
+complete-family certificate. `complete_family_coverage` is always
+`not-provided` for this external one-witness contract. The #83/#84 review must
+decide digest canonicalization, artifact storage, schema evolution, and whether
+any existing record should embed or reference this object.
+
 An exhaustive finite-support scenario tree is not "sampling" if it covers the entire declared finite uncertainty model. Conversely, a handful of extreme parameter choices in a nonlinear model is not automatically a sound enclosure of continuous uncertainty. Nonanticipativity ties controls with the same **available information**, not merely histories that happen to look similar in one simulation. Partial observation may merge different physical states into one information node. A tree that reveals hidden parameters too early solves an easier, different problem. [P4–P6; repository linear-system contract]
 
 For identical dynamics, uncertainty, objective and admissibility, fixed plans form a subset of causal policies; therefore \(V_{\rm causal}\leq V_{\rm fixed}\) for minimization. A restricted feedback policy class gives an upper bound on unrestricted causal cost when it is soundly feasible; an approximation of its cost may add another upper bound. With the **same policy class**, replacing a finite action catalogue by an interval containing it is a relaxation and can lower the optimum. These are mathematical inclusion arguments, not paired algorithm victories. No direction follows after simultaneously changing objective, uncertainty or information.
@@ -136,6 +216,32 @@ Campi–Garatti scenario optimization [P8] provides probabilistic feasibility re
 | **SCIP** [S8] | C/C++ MIP/MINLP engine, including mixed-integer quadratically constrained formulations. Candidate for one-hot finite-action or hybrid extensive forms; continuous robust norm/quadratic epigraph constraints need an appropriate formulation, not an ordinary OSQP QP. | Apache-2.0; official documentation identifies SCIP 10.1.0 and explains solver/build dependencies. No CSL build or adapter was tested. Numerical global bounds and termination gaps require independent interpretation; the numerical engine is not a complete-family or robust-controller implementation. |
 
 **FORCESPRO excluded:** it is not an open-source comparator in this requested shortlist. No access, license, installation or execution assumption is made for it. A free academic entitlement, if available, would not be an open-source license. The same distinction excludes silently using MOSEK/Gurobi defaults to claim an entirely open stack.
+
+### Candidate qualification register
+
+The entries below make the issue's release/commit, dependency-stack, platform,
+and maintenance questions explicit. “Documented” means an upstream source
+states it; “unknown” means this research did not establish it. No row is a
+qualified CSL dependency. Pin every transitive version and verify the exact
+target toolchain before an adapter proposal or run.
+
+| Candidate | Release/commit pin for a future review | Transitive solver stack identified by upstream evidence | Platform evidence and gap | Maintenance evidence and gap |
+|---|---|---|---|---|
+| OSQP | v1.0.0 is the inspected release candidate [S1]; not selected or installed | QDLDL is bundled with the default build; optional linear-system backends must be separately named and pinned [S1] | Official docs describe C builds/interfaces and shared-library loading for Linux, macOS, and Windows; exact compiler/architecture combinations still need CI qualification [OSQP platform docs](https://osqp.org/docs/get_started/linear_system_solvers.html) | Official release history, docs and tests are visible [S1]; exact maintenance cadence is not asserted |
+| HPIPM | No immutable release/commit chosen; resolve before integration [S2] | BLASFEO is required; any adapter language/runtime and BLASFEO target configuration add to the stack [S2] | Repository build instructions exist, but this review did not establish a versioned OS/compiler support matrix; qualify each target directly | Source, examples and changelog are available; inspected changelog ends in 2020, so current release freshness/maintenance must be established from a pinned commit's CI/history |
+| acados (literature/background only) | v0.6.0 / commit `503364817c872d474ab5bed219c26760ac267769` is the existing CSL spike pin [S3]; no execution authorized | HPIPM/BLASFEO and other configured integrators/interfaces must be captured from that exact build; the stack is not fully pinned by this dossier | Existing native MSVC evidence is host/configuration-specific; no general platform qualification is claimed | Official docs/CI and a 2026-10-22 build observation are recorded [S3]; this does not reopen the stop decision |
+| do-mpc | v5.1.2 inspected release candidate [S4] | Python + CasADi plus the selected NLP/QP solver and its native libraries; the actual solver/backend must be pinned per run [S4] | Official installation docs provide a Python package path; this review did not verify an OS/Python/solver compatibility matrix | Official releases and tests are visible [S4]; no CSL compatibility or support commitment is inferred |
+| MPT3 | No exact version/commit established by inspected pages [S5]; not ready for pinning | MATLAB and optional optimization solvers/toolboxes; exact solver/toolbox versions are task-dependent and unresolved | MATLAB release and supported OS/architecture matrix were not established here; record both for any proposed environment | Official pages provide feature and license descriptions but include 2013/2019 timestamps; current maintenance and compatibility remain unverified |
+| Drake (optional) | No immutable release selected [S7] | MathematicalProgram backend is selected from Drake's solver integrations; pin Drake, solver, and all native dependencies together [S7] | Official solver docs identify solver availability, not a qualification of every solver/platform combination; select and verify a specific tuple | Official docs/source and ongoing development are visible [S7]; no CSL adapter or support guarantee is implied |
+| Author SLS-MPC code | No release/tag; source branch is mutable [S6] | MATLAB, YALMIP, MPT3 and default MOSEK; versions and license permissions unresolved [S6] | MATLAB-dependent; no tested OS/version matrix found | No license, release, or maintenance commitment established in the inspected repository; research-code-only |
+| SCIP | 10.1.0 documented version candidate [S8]; pin source/package and build options before integration | Build/plugin dependencies and optional LP/NLP backends need an explicit manifest; they were not fully enumerated in this review [S8] | Official docs describe interfaces/examples; an exact supported OS/compiler matrix was not established here | Versioned 10.1.0 documentation was generated 2026-09-25 [S8]; this is recent documentation evidence, not CSL build qualification |
+
+The register intentionally records missing evidence instead of converting a
+repository URL into a compatibility claim. Before selecting a row, attach the
+exact upstream release/commit, lock or build manifest for the complete solver
+stack, supported OS/architecture/compiler evidence, and dated maintenance
+evidence (release, CI, or support policy). An `unknown` entry is a blocker to
+integration qualification, not a blocker to this planning issue.
 
 ### do-mpc robustness is conditional on the tree
 
