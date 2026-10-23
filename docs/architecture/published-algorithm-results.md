@@ -20,6 +20,29 @@ Keep execution, measurement collection, scientific saved records, HTML rendering
 
 Independent review checks mathematical/evidence labels, measurement validity and module boundaries. Verify raw-record/HTML consistency and regeneration, visually inspect the page, and open the deployed URL before claiming publication. The orchestrator publishes the reviewed artifact. Private historical source code and raw archives remain unchanged and are not copied into the report site.
 
+## EXT-04 continuous affine policy evaluation
+
+The saved [continuous-policy bundle](../../reports/algorithm-results/ext04-continuous-ebcf879d07ee9157/)
+uses evaluator source `ebcf879d07ee91576a929becfc9b088b5453a327`. Its analytic
+one-step fixture has a two-state initial square, a position-only observation,
+one affine action and four supplied joint generators. Every measured call
+checks the actual initial and terminal states, action, action safety margin and
+numerical feasibility status for all four generators. One excluded 5,000-call
+warmup and seven measured 5,000-call batches passed with no failures. Median
+batch duration was 33,970,237 ns (range 33,093,233–37,847,996 ns), or 6,794.0 ns
+per call at the median. The interval includes evaluator calls and literal
+checks; fixture setup and JSONL serialization are excluded. Host load was not
+controlled, and no separate limiter profile was collected. These are
+descriptive single-adapter observations, with no comparator, speedup,
+scalability, policy-synthesis or universal-disturbance claim. The report retains
+raw outcomes, driver/renderer source, clean Release build log, standalone 2D
+figure and offline ZIP. The custom publication catalogue and visual gallery
+route are staged by the Pages workflow; deployment and live URL verification
+remain pending. The earlier unregistered draft bundle
+[`ext04-continuous-27d4ad2e12958609`](../../reports/algorithm-results/ext04-continuous-27d4ad2e12958609/)
+is retained as historical evidence and is superseded by this bundle, which
+records each batch's actual generator outcomes and full measurement metadata.
+
 ## EXT-07 hybrid profile report
 
 The frozen implementation source is `2965baafa325550ad60ec91d44f5e3f86a832178`.

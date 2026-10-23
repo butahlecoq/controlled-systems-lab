@@ -42,11 +42,26 @@ python3 scripts/reports/ext04/continuous_report.py \
   --example docs/examples/continuous-policy-2d.svg \
   --out reports/algorithm-results/<report-id> \
   --source-commit <frozen-source-commit> \
-  --collected-utc <original-collection-time>
+  --collected-utc <original-collection-time> \
+  --load-observation '<recorded host-load snapshot>'
 ```
 
 The renderer rejects incomplete batches, non-passing statuses, wrong fixture
 identity, or batches shorter than 20 ms. The bundle retains the raw JSONL rows,
-derived CSV and records, a standalone HTML report and figure, the sanitized
-Release build log, a SHA-256 manifest, and an offline ZIP. Publication to
-GitHub Pages remains pending review and deployment.
+derived CSV and records, the exact C++ driver and saved-data renderer, a
+standalone HTML report and figure, the sanitized Release build log, a SHA-256
+manifest, and an offline ZIP. The publication adapter validates the raw rows
+and summary and regenerates the report byte for byte before staging. Publication
+to GitHub Pages remains pending review and deployment. Generate and stage its
+immutable publication route with:
+
+```sh
+python scripts/reports/stage_ext04_continuous.py \
+  --source reports/algorithm-results/ext04-continuous-ebcf879d07ee9157 \
+  > reports/algorithm-results/ext04-continuous-publications.json
+python scripts/reports/stage_ext04_continuous.py \
+  --catalog reports/algorithm-results/ext04-continuous-publications.json \
+  --site build/report-site
+python scripts/reports/visual_examples.py \
+  --catalog reports/algorithm-results/catalog.json --site build/report-site
+```

@@ -17,6 +17,10 @@ import visual_illustrations
 
 CURRENT_EXT07_TWO_PARAMETER_REPORT = "ext07-hybrid-two-parameter-8ad871b5ea29fc7b"
 SAVED_FIGURES = (
+    dict(route="ext04-continuous-ebcf879d07ee9157", image="example-2d.svg", page="index.html",
+         family="Continuous feedback · EXT-04", title="A partial observation policy over an initial set",
+         alt="Four initial state generators map to four terminal states under a position-only affine policy.",
+         summary="A numerical all-joint check over a four-vertex two-state set, with its raw records and reproduction details in the linked report."),
     dict(route="app02-box-8ff979de60ea9d22", image="polygons.svg", page="index.html",
          family="Box approximation", title="Box outer approximation",
          alt="Planar reachable-set polygons and their box approximation."),

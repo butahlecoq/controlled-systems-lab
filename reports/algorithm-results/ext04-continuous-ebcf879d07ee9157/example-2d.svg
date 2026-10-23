@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 410" role="img" aria-labelledby="title desc">
+  <title id="title">Affine observation policy over a two-dimensional initial set</title>
+  <desc id="desc">The initial position-velocity square maps to a terminal parallelogram under a position-only observation and affine acceleration policy. All four joint-set generators are checked.</desc>
+  <rect width="900" height="410" fill="#172019"/>
+  <g font-family="system-ui, sans-serif" fill="#dce5d5">
+    <text x="225" y="34" text-anchor="middle" font-size="20">Initial set</text>
+    <text x="675" y="34" text-anchor="middle" font-size="20">Terminal image</text>
+    <text x="225" y="62" text-anchor="middle" font-size="14">position p₀, velocity v₀</text>
+    <text x="675" y="62" text-anchor="middle" font-size="14">position p₁, velocity v₁</text>
+    <g stroke="#405045" stroke-width="1">
+      <path d="M90 330H360 M90 240H360 M90 150H360 M90 60H360 M90 60V330 M180 60V330 M270 60V330 M360 60V330"/>
+      <path d="M540 330H810 M540 240H810 M540 150H810 M540 60H810 M540 60V330 M630 60V330 M720 60V330 M810 60V330"/>
+    </g>
+    <path d="M90 330H360 M90 330V60 M540 330H810 M540 330V60" stroke="#a9b7a0" stroke-width="2"/>
+    <polygon points="90,330 180,330 180,240 90,240" fill="#76966d" fill-opacity=".38" stroke="#b4cda3" stroke-width="3"/>
+    <polygon points="540,330 630,240 765,150 675,240" fill="#e09a73" fill-opacity=".34" stroke="#e9ad8d" stroke-width="3"/>
+    <g fill="#f2f7ed" stroke="#b4cda3" stroke-width="2">
+      <circle cx="90" cy="330" r="5"/><circle cx="180" cy="330" r="5"/>
+      <circle cx="180" cy="240" r="5"/><circle cx="90" cy="240" r="5"/>
+    </g>
+    <g fill="#f2f7ed" stroke="#e9ad8d" stroke-width="2">
+      <circle cx="540" cy="330" r="5"/><circle cx="630" cy="240" r="5"/>
+      <circle cx="765" cy="150" r="5"/><circle cx="675" cy="240" r="5"/>
+    </g>
+    <text x="225" y="375" text-anchor="middle" font-size="14">u₀ = p₀ from the pre-decision position sensor</text>
+    <text x="675" y="375" text-anchor="middle" font-size="14">x₁ = A x₀ + B u₀</text>
+    <text x="225" y="397" text-anchor="middle" font-size="12">Initial square: [0,1] × [0,1]</text>
+    <text x="675" y="397" text-anchor="middle" font-size="12">All four generators checked · numerical assurance</text>
+  </g>
+</svg>

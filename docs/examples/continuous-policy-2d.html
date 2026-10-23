@@ -19,6 +19,10 @@ code{color:#b4cda3}table{border-collapse:collapse;width:100%;margin:1rem 0}th,td
 <tr><td>(1,0)</td><td>1</td><td>1</td><td>(1.5,1)</td></tr>
 <tr><td>(1,1)</td><td>1</td><td>1</td><td>(2.5,2)</td></tr></tbody></table>
 <p>The model is <code>p₁ = p₀ + v₀ + 0.5u₀</code>, <code>v₁ = v₀ + u₀</code>, with <code>u₀=p₀</code>. The example checks the action safety row <code>u₀ ≤ 1.25</code>. Because the model, policy, and displayed constraint are affine, checking the four generators covers the convex hull mathematically. The implementation reports numerical assurance because its propagation uses binary64 arithmetic. It does not call this a validated proof.</p>
-<p>Reproduce the numeric rows with <code>continuous_policy</code> from the installed example package. This illustration is separate from any benchmark timing.</p>
+<p>This illustrated fixture is also measured in the <a href="../../ext04-continuous-ebcf879d07ee9157/index.html">versioned EXT-04 continuous policy report</a>. The report includes the input record, actual raw rows, source commit, seven measured batches, and evidence limits.</p>
+<details><summary>Reproduce the numerical example</summary><pre><code>cmake -S . -B build/ext04 -DCMAKE_BUILD_TYPE=Release -DCSL_ENABLE_HIGHS=ON -DCSL_BUILD_EXT04_CONTINUOUS_REPORT=ON
+cmake --build build/ext04 --config Release --target csl_ext04_continuous_policy_report --parallel 4
+build/ext04/csl_ext04_continuous_policy_report smoke</code></pre>
+<p><a href="../../ext04-continuous-ebcf879d07ee9157/records.json">Saved values</a> · <a href="../../ext04-continuous-ebcf879d07ee9157/trials.jsonl">Raw trials</a> · <a href="https://github.com/butahlecoq/controlled-systems-lab/commit/ebcf879d07ee91576a929becfc9b088b5453a327">Measured source commit</a>.</p></details>
 </main>
 </html>

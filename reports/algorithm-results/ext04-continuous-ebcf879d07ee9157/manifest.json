@@ -1,0 +1,15 @@
+{
+  "files": {
+    "driver.cpp": "6b69fee134b2015e0f18f017308845941ef65f2b035e7c861a3d3b9f1d3cb41e",
+    "example-2d.svg": "bd45836043f8ba4e1e2957b682a9709b1366776457c4b409098c998a670427a7",
+    "index.html": "1e56a8447428fa560d4508ca41b805378d7272bb52615fb54188c2fc5075384c",
+    "records.json": "907c542bf43aaa766b6522eeb4bb9bcb45ed1e504775b10177a98c23b7b2ccd3",
+    "release-build-log.txt": "137d86a057307d92e2e0f2b25c5b17390791bdbc32096737bdcc87cde3b45d5e",
+    "renderer.py": "71e39c3493c212e099b5daf3ac2bc14f64a16d0e66ebd025c07a901abc20a675",
+    "summary.csv": "e6074d006f70f645499a8e4f48b36a1cceb3381d6996a49db7b2d61bd5480a67",
+    "trials.jsonl": "fea20cea0afbaa24b523bf8bfa58e762eca62f2c1b2072b21964a5f1ab35c31c"
+  },
+  "report_id": "ext04-continuous-ebcf879d07ee9157",
+  "schema": "csl.ext04-continuous-manifest/1",
+  "source_commit": "ebcf879d07ee91576a929becfc9b088b5453a327"
+}
