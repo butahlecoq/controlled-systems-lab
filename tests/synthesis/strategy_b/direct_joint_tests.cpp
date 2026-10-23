@@ -122,6 +122,13 @@ sets::SetData interval(double upper) {
          accepted(numeric::snapshot(Matrix{0,1,{}})),
          accepted(numeric::snapshot_vector(Vector{}))}));
 }
+sets::SetData bounded_interval(double lower,double upper) {
+    return accepted(sets::make_h({{"bounded-interval"},1,{}},
+        {accepted(numeric::snapshot(Matrix{2,1,{1,-1}})),
+         accepted(numeric::snapshot_vector(Vector{upper,-lower})),
+         accepted(numeric::snapshot(Matrix{0,1,{}})),
+         accepted(numeric::snapshot_vector(Vector{}))}));
+}
 Problem integrator(TerminalObjective objective = QuadraticTerminal{{1,1,{2}},{-2},1}) {
     const auto unit=interval(1).as_handle();
     return {{"integrator"},std::make_shared<const SystemModel>(SystemModel{{{1,1,0},TimeDomain::discrete,
@@ -163,13 +170,6 @@ TEST_CASE("initial intermediate and terminal constraints survive the sparse lift
     CHECK_FALSE(feasible(q,{0.1,0.25,1,0.15,0.75}));
 }
 TEST_CASE("one-stage affine dynamics preserve neutral relation indexing and authored bounds") {
-    const auto bounded_interval=[](double lower,double upper) {
-        return accepted(sets::make_h({{"one-stage-window"},1,{}},
-            {accepted(numeric::snapshot(Matrix{2,1,{1,-1}})),
-             accepted(numeric::snapshot_vector(Vector{upper,-lower})),
-             accepted(numeric::snapshot(Matrix{0,1,{}})),
-             accepted(numeric::snapshot_vector(Vector{}))}));
-    };
     Problem input{{"one-stage-affine"},
         std::make_shared<const SystemModel>(SystemModel{{{1,1,0},TimeDomain::discrete,
             LinearStage{{1,1,{2}},{1,1,{3}},{1,0,{}},{-1}}},{}}),
@@ -217,13 +217,6 @@ TEST_CASE("singular dynamics and affine stage offsets require no inverse") {
     CHECK_FALSE(feasible(q,{0,2.5,2.25,0.5,0.75}));
 }
 TEST_CASE("each heterogeneous transition retains its own matrices and affine offset") {
-    const auto bounded_interval=[](double lower,double upper) {
-        return accepted(sets::make_h({{"stage-window"},1,{}},
-            {accepted(numeric::snapshot(Matrix{2,1,{1,-1}})),
-             accepted(numeric::snapshot_vector(Vector{upper,-lower})),
-             accepted(numeric::snapshot(Matrix{0,1,{}})),
-             accepted(numeric::snapshot_vector(Vector{}))}));
-    };
     auto input=integrator();
     input.initial=KnownInitial{{1}};
     input.states={UniversalSet{1},UniversalSet{1},Singleton{{0.25}}};
@@ -640,7 +633,7 @@ TEST_CASE("T-S01 extracts all correlated optimal histories without claiming comp
     const auto& data=payload(r);CHECK(contains(data.relation,{0,0,1,0,1}));
     CHECK(contains(data.relation,{0,1,1,1,0}));CHECK(contains(data.relation,{0,0.25,1,0.25,0.75}));
     CHECK(contains(data.relation,{0,0.5,1,0.5,0.5}));
-    CHECK_FALSE(contains(data.relation,{0,1,2,1,1}));CHECK_FALSE(contains(data.relation,{0,0,1,0,0}));
+    CHECK_FALSE(contains(data.relation,{0,1,2,1,1}));CHECK_FALSE(contains(data.relation,{0,0,0,0,0}));
     CHECK_FALSE(contains(data.relation,{0,0,1,1,0}));
     REQUIRE(data.optimization);CHECK(data.optimization->objective.lower->value==0);
     CHECK(r.outcome.value==MathematicalOutcome::undetermined);CHECK_FALSE(r.objective.lower);
@@ -659,7 +652,16 @@ TEST_CASE("T-S01 extracts all correlated optimal histories without claiming comp
         CHECK(contains(*relation,{0,0,1,0,1}));
         CHECK(contains(*relation,{0,0.25,1,0.25,0.75}));
         CHECK(contains(*relation,{0,1,1,1,0}));
-        CHECK_FALSE(contains(*relation,{0,0,1,0,0}));
+        CHECK_FALSE(contains(*relation,{0,0,0,0,0}));
+    }
+    const Vector first{0,0,1,0,1},direction{0,1,0,1,-1};
+    const auto b_h=std::get<sets::HRepresentation>(data.relation.representation());
+    const auto a_h=std::get<sets::HRepresentation>(a_relation.representation());
+    CHECK(equality_rank(b_h)==4);CHECK(equality_rank(a_h)==4);
+    for(const auto* h:{&b_h,&a_h}) {
+        const auto interval=parameter_interval(*h,first,direction);
+        CHECK(std::isfinite(interval.first));CHECK(std::isfinite(interval.second));
+        CHECK(std::abs(interval.first)<=1e-7);CHECK(std::abs(interval.second-1)<=1e-7);
     }
 }
 TEST_CASE("T-S02 constant objective retains every feasible history and terminal point") {
@@ -677,10 +679,15 @@ TEST_CASE("T-S02 constant objective retains every feasible history and terminal 
         const auto& a_relation=strategy_a_relation(a_result);
         for(const auto* relation:{&data.relation,&a_relation}) {
             CHECK(contains(*relation,{0,0,0,0,0}));
+            CHECK(contains(*relation,{0,0,1,0,1}));
+            CHECK(contains(*relation,{0,1,1,1,0}));
             CHECK(contains(*relation,{0,1,2,1,1}));
             CHECK(contains(*relation,{0,0.3,1.1,0.3,0.8}));
             CHECK_FALSE(contains(*relation,{0,0,1,1,0}));
+            CHECK_FALSE(contains(*relation,{0,1.1,1.1,1.1,0}));
         }
+        CHECK(equality_rank(std::get<sets::HRepresentation>(data.relation.representation()))==3);
+        CHECK(equality_rank(std::get<sets::HRepresentation>(a_relation.representation()))==3);
     }
 }
 TEST_CASE("T-S03 singular A preserves earlier controls at a unique terminal optimum") {
