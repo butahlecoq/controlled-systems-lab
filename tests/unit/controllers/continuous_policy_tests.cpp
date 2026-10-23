@@ -38,6 +38,16 @@ LinearSystem partial_sensor_system() {
     return std::get<LinearSystem>(result);
 }
 
+LinearSystem multi_output_sensor_system() {
+    SystemModel authored{{{2, 1, 0}, TimeDomain::discrete,
+        LinearStage{{2,2,{1,0,0,1}}, {2,1,{0,0}}, {2,0,{}}, {0,0}}},
+        {{ObservationStage{{2,2,{1,0,0,1}}, {2,1,{0,0}}, {2,0,{}}, {2,0,{}}, {0,0}},
+            {{{0}, before(0), before(0), std::nullopt}}}}};
+    const auto result = snapshot(authored, Vector{0, 1});
+    REQUIRE(std::holds_alternative<LinearSystem>(result));
+    return std::get<LinearSystem>(result);
+}
+
 AffineStagePolicy rule(std::size_t stage, std::vector<ObservationComponentRef> inputs,
         Matrix estimate, Vector estimate_offset, Matrix action_history,
         Matrix action_estimate, Vector action_offset) {
@@ -173,6 +183,34 @@ TEST_CASE("partial observations leave hidden initial coordinates out of the poli
     CHECK(evidence.trajectories[1].trajectory.decisions[0].action == Vector{1});
     CHECK(evidence.trajectories[0].trajectory.inputs.initial_state[1] == 7);
     CHECK(evidence.trajectories[1].trajectory.inputs.initial_state[1] == 9);
+}
+
+TEST_CASE("affine policies can read two components from one released observation sample") {
+    const auto system = multi_output_sensor_system();
+    const auto built = make_affine_observation_policy(system, {
+        rule(0, {{{0}, {0}, 0}, {{0}, {0}, 1}},
+            {2,2,{1,0,0,1}}, {0,0}, {1,2,{0,0}}, {1,2,{0,1}}, {0})
+    });
+    REQUIRE(std::holds_alternative<AffineObservationPolicy>(built));
+    const auto domain_result = make_joint_v_uncertainty(system, {{1,2}, {3,4}});
+    REQUIRE(std::holds_alternative<JointVUncertainty>(domain_result));
+    const ContinuousPolicyRequest request{PolicyCoverage::all_joint_uncertainty,
+        std::get<JointVUncertainty>(domain_result),
+        std::get<AffineObservationPolicy>(built), {}, {}, std::nullopt, 1e-9};
+    const auto result = evaluate_continuous_policy(system, request);
+    REQUIRE(std::holds_alternative<ContinuousPolicyEvidence>(result));
+    const auto& trajectories = std::get<ContinuousPolicyEvidence>(result).trajectories;
+    REQUIRE(trajectories.size() == 2);
+    CHECK(trajectories[0].trajectory.decisions[0].available[0].value.values == Vector{1,2});
+    CHECK(trajectories[1].trajectory.decisions[0].available[0].value.values == Vector{3,4});
+    CHECK(trajectories[0].trajectory.decisions[0].action == Vector{2});
+    CHECK(trajectories[1].trajectory.decisions[0].action == Vector{4});
+
+    auto duplicate_component = make_affine_observation_policy(system, {
+        rule(0, {{{0}, {0}, 0}, {{0}, {0}, 0}},
+            {2,2,{1,0,0,1}}, {0,0}, {1,2,{0,0}}, {1,2,{0,1}}, {0})
+    });
+    REQUIRE(std::holds_alternative<Diagnostic>(duplicate_component));
 }
 
 TEST_CASE("constraint margins near the requested tolerance remain inconclusive") {

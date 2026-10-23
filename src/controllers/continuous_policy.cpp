@@ -5,6 +5,7 @@
 #include <limits>
 #include <numeric>
 #include <string>
+#include <tuple>
 #include <utility>
 
 namespace csl::controllers {
@@ -164,15 +165,17 @@ AffineObservationPolicyResult make_affine_observation_policy(const model::Linear
             rule.action_from_estimate.cols != dimensions.state ||
             rule.action_offset.size() != dimensions.control)
             return invalid("controllers.policy.coefficients", "Policy coefficient dimensions must match state, action, and named history dimensions.");
-        std::vector<std::pair<std::size_t, std::size_t>> seen;
+        std::vector<std::tuple<std::size_t, std::size_t, std::size_t>> seen;
         for (const auto& reference : rule.released_inputs) {
             const auto count = system.sample_count(reference.channel);
             if (const auto* error = std::get_if<Diagnostic>(&count)) return *error;
             if (reference.sample.value >= std::get<std::size_t>(count))
                 return invalid("controllers.policy.history", "Policy references an observation sample outside the schedule.");
-            if (std::find(seen.begin(), seen.end(), std::pair{reference.channel.value, reference.sample.value}) != seen.end())
-                return invalid("controllers.policy.history", "Each observation sample may appear once in a stage history map.");
-            seen.emplace_back(reference.channel.value, reference.sample.value);
+            const auto identity = std::tuple{reference.channel.value, reference.sample.value,
+                reference.component};
+            if (std::find(seen.begin(), seen.end(), identity) != seen.end())
+                return invalid("controllers.policy.history", "Each observation component may appear once in a stage history map.");
+            seen.push_back(identity);
             const auto observation = system.observation(reference.channel, reference.sample);
             if (const auto* error = std::get_if<Diagnostic>(&observation)) return *error;
             const auto record = std::get<model::ObservationRecord>(observation);
