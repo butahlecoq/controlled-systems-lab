@@ -30,6 +30,9 @@ def read_rows(path: Path):
     rows = [json.loads(line) for line in path.read_text().splitlines()]
     if len(rows) != 40 or any(row["passed"] is not True for row in rows):
         raise SystemExit("capture must contain 40 successful rows")
+    if any(row["schema"] != "csl.approximation-matched-pilot-row/1" or
+           row["fixture"] != "diamond" for row in rows):
+        raise SystemExit("capture contains an unexpected row schema or fixture")
     if sum(row["warmup"] for row in rows) != 5:
         raise SystemExit("capture must contain five excluded warmups")
     if len({row["source_commit"] for row in rows}) != 1:
@@ -45,8 +48,14 @@ def read_rows(path: Path):
     if set(groups) != set(EXPECTED):
         raise SystemExit("unexpected method set")
     for method, group in groups.items():
-        if len(group) != 8 or sum(not row["warmup"] for row in group) != 7:
+        if len(group) != 8 or sum(not row["warmup"] for row in group) != 7 or \
+           sum(row["warmup"] and row["round"] == 0 for row in group) != 1 or \
+           sorted(row["round"] for row in group if not row["warmup"]) != list(range(1, 8)):
             raise SystemExit(f"expected one warmup and seven measured rows for {method}")
+    for round_number in range(1, 8):
+        round_rows = [row for row in rows if not row["warmup"] and row["round"] == round_number]
+        if {row["method"] for row in round_rows} != set(EXPECTED) or len(round_rows) != 5:
+            raise SystemExit(f"measurement round {round_number} is incomplete")
     return rows
 
 

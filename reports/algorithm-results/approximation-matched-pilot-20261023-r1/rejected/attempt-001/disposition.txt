@@ -1,0 +1,1 @@
+Pilot completed with all 40 rows passing, but default C++ stream precision truncated area metrics. Repeated after setting max_digits10; use attempt-002 for the report.

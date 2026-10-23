@@ -1,0 +1,480 @@
+[  0%] Building CXX object csl/CMakeFiles/csl_quickhull_2d.dir/src/geometry/hull/quickhull_2d.cpp.o
+[  0%] Building CXX object csl/CMakeFiles/csl_contracts.dir/src/contracts/model.cpp.o
+[  0%] Building CXX object csl/CMakeFiles/csl_contracts.dir/src/contracts/geometry.cpp.o
+[  0%] Building CXX object csl/CMakeFiles/csl_contracts.dir/src/contracts/problem.cpp.o
+[  7%] Building CXX object csl/CMakeFiles/csl_contracts.dir/src/contracts/outcomes.cpp.o
+[ 14%] Linking CXX static library libcsl_quickhull_2d.a
+[ 14%] Built target csl_quickhull_2d
+[ 14%] Building CXX object csl/CMakeFiles/csl_contracts.dir/src/contracts/execution.cpp.o
+[ 14%] Building CXX object csl/CMakeFiles/csl_contracts.dir/src/contracts/synthesis.cpp.o
+[ 21%] Linking CXX static library libcsl_contracts.a
+[ 21%] Built target csl_contracts
+[ 21%] Building CXX object csl/CMakeFiles/csl_numeric.dir/src/numeric/data.cpp.o
+[ 21%] Linking CXX static library libcsl_numeric.a
+[ 21%] Built target csl_numeric
+[ 21%] Building CXX object csl/CMakeFiles/csl_optimization.dir/src/optimization/linear_program.cpp.o
+[ 21%] Building CXX object csl/CMakeFiles/csl_objectives.dir/src/optimization/objective_reformulation.cpp.o
+[ 21%] Building CXX object csl/CMakeFiles/csl_optimization.dir/src/optimization/lp_backend.cpp.o
+[ 21%] Building CXX object csl/CMakeFiles/csl_sets.dir/src/sets/data.cpp.o
+[ 28%] Building CXX object csl/CMakeFiles/csl_optimization.dir/src/optimization/linear_infeasibility_certificate.cpp.o
+[ 28%] Linking CXX static library libcsl_sets.a
+[ 28%] Built target csl_sets
+[ 35%] Building CXX object csl/CMakeFiles/csl_geometry_generators.dir/src/geometry/generators/generator_sets.cpp.o
+[ 35%] Linking CXX static library libcsl_optimization.a
+[ 35%] Built target csl_optimization
+[ 35%] Linking CXX static library libcsl_geometry_generators.a
+[ 35%] Built target csl_geometry_generators
+[ 42%] Linking CXX static library libcsl_objectives.a
+[ 42%] Built target csl_objectives
+[ 42%] Building CXX object csl/CMakeFiles/csl_model.dir/src/model/linear_system.cpp.o
+[ 42%] Building CXX object csl/CMakeFiles/csl_model.dir/src/model/discretization/adapter.cpp.o
+[ 42%] Building CXX object csl/CMakeFiles/csl_model.dir/src/model/discretization/rk4.cpp.o
+[ 50%] Building CXX object csl/CMakeFiles/csl_model.dir/src/model/hybrid_system.cpp.o
+[ 50%] Linking CXX static library libcsl_model.a
+[ 50%] Built target csl_model
+[ 50%] Building CXX object csl/CMakeFiles/csl_problem.dir/src/problem/domains.cpp.o
+[ 50%] Building CXX object csl/CMakeFiles/csl_problem.dir/src/problem/constraints.cpp.o
+[ 50%] Building CXX object csl/CMakeFiles/csl_problem.dir/src/problem/initial_information.cpp.o
+[ 57%] Linking CXX static library libcsl_problem.a
+[ 57%] Built target csl_problem
+[ 64%] Building CXX object csl/CMakeFiles/csl_resolved_core.dir/src/problem/resolved.cpp.o
+[ 64%] Building CXX object csl/CMakeFiles/csl_resolved_core.dir/src/problem/identity.cpp.o
+[ 64%] Linking CXX static library libcsl_resolved_core.a
+[ 64%] Built target csl_resolved_core
+[ 64%] Building CXX object csl/CMakeFiles/csl_verifiers.dir/src/registry/compiled_verifiers.cpp.o
+[ 64%] Linking CXX static library libcsl_verifiers.a
+[ 64%] Built target csl_verifiers
+[ 64%] Building CXX object csl/CMakeFiles/csl_registry.dir/src/registry/registry.cpp.o
+[ 64%] Linking CXX static library libcsl_registry.a
+[ 64%] Built target csl_registry
+[ 64%] Building CXX object csl/CMakeFiles/csl_resolved_problem.dir/src/problem/validator.cpp.o
+[ 71%] Linking CXX static library libcsl_resolved_problem.a
+[ 71%] Built target csl_resolved_problem
+[ 71%] Building CXX object csl/CMakeFiles/csl_verification.dir/src/verification/trajectory.cpp.o
+[ 78%] Linking CXX static library libcsl_verification.a
+[ 78%] Built target csl_verification
+[ 78%] Building CXX object csl/CMakeFiles/csl_approximation.dir/src/geometry/approximation/zonotope.cpp.o
+[ 78%] Building CXX object csl/CMakeFiles/csl_approximation.dir/src/geometry/approximation/policy.cpp.o
+[ 78%] Building CXX object csl/CMakeFiles/csl_approximation.dir/src/geometry/approximation/reachable_plan.cpp.o
+[ 85%] Building CXX object csl/CMakeFiles/csl_approximation.dir/src/geometry/approximation/box_parallelotope.cpp.o
+[ 85%] Building CXX object csl/CMakeFiles/csl_approximation.dir/src/geometry/approximation/ellipsoidal_set.cpp.o
+[ 85%] Building CXX object csl/CMakeFiles/csl_approximation.dir/src/geometry/approximation/ellipsoidal.cpp.o
+[ 92%] Building CXX object csl/CMakeFiles/csl_approximation.dir/src/geometry/approximation/ellipsoidal_family.cpp.o
+[ 92%] Linking CXX static library libcsl_approximation.a
+[ 92%] Built target csl_approximation
+[ 92%] Building CXX object CMakeFiles/csl_approximation_matched_pilot.dir/driver.cpp.o
+/home/butahlecoq/.local/share/codex/worktrees/approximation-matched-pilot-20261023/benchmarks/reporting/approximation_pilot/driver.cpp: In function ‘bool {anonymous}::exact_h(const csl::SetHandle&, const csl::Matrix&, const csl::Vector&)’:
+/home/butahlecoq/.local/share/codex/worktrees/approximation-matched-pilot-20261023/benchmarks/reporting/approximation_pilot/driver.cpp:59:64: error: no match for ‘operator!=’ (operand types are ‘const csl::numeric::VectorView’ and ‘const csl::Vector’ {aka ‘const std::vector<double>’})
+   59 |         h->inequalities.cols() != rows.cols || h->upper_bounds != bounds ||
+      |                                                ~~~~~~~~~~~~~~~ ^~ ~~~~~~
+      |                                                   |               |
+      |                                                   |               const csl::Vector {aka const std::vector<double>}
+      |                                                   const csl::numeric::VectorView
+  • there are 39 candidates
+    /home/butahlecoq/.local/share/codex/worktrees/approximation-matched-pilot-20261023/benchmarks/reporting/approximation_pilot/driver.cpp:59:64:
+       59 |         h->inequalities.cols() != rows.cols || h->upper_bounds != bounds ||
+          |                                                ~~~~~~~~~~~~~~~~^~~~~~~~~
+In file included from /usr/include/c++/16/x86_64-pc-linux-gnu/bits/c++allocator.h:33,
+                 from /usr/include/c++/16/bits/allocator.h:46,
+                 from /usr/include/c++/16/string:46,
+                 from /home/butahlecoq/.local/share/codex/worktrees/approximation-matched-pilot-20261023/include/csl/core/values.hpp:5,
+                 from /home/butahlecoq/.local/share/codex/worktrees/approximation-matched-pilot-20261023/include/csl/model/contracts.hpp:3,
+                 from /home/butahlecoq/.local/share/codex/worktrees/approximation-matched-pilot-20261023/include/csl/problem/contracts.hpp:3,
+                 from /home/butahlecoq/.local/share/codex/worktrees/approximation-matched-pilot-20261023/include/csl/synthesis/contracts.hpp:3,
+                 from /home/butahlecoq/.local/share/codex/worktrees/approximation-matched-pilot-20261023/include/csl/registry/registry.hpp:3,
+                 from /home/butahlecoq/.local/share/codex/worktrees/approximation-matched-pilot-20261023/include/csl/geometry/approximation.hpp:3,
+                 from /home/butahlecoq/.local/share/codex/worktrees/approximation-matched-pilot-20261023/benchmarks/reporting/approximation_pilot/driver.cpp:1:
+    • candidate 1: ‘template<class _Up> constexpr bool std::operator==(const __new_allocator<double>&, const __new_allocator<_Tp>&)’ (reversed)
+      /usr/include/c++/16/bits/new_allocator.h:227:9:
+        227 |         operator==(const __new_allocator&, const __new_allocator<_Up>&)
+            |         ^~~~~~~~
+      • template argument deduction/substitution failed:
+        •   ‘const csl::numeric::VectorView’ is not derived from ‘const std::__new_allocator<_Tp>’
+          /home/butahlecoq/.local/share/codex/worktrees/approximation-matched-pilot-20261023/benchmarks/reporting/approximation_pilot/driver.cpp:59:67:
+             59 |         h->inequalities.cols() != rows.cols || h->upper_bounds != bounds ||
+                |                                                                   ^~~~~~
+In file included from /home/butahlecoq/.local/share/codex/worktrees/approximation-matched-pilot-20261023/include/csl/core/values.hpp:4:
+    • candidate 2: ‘template<class _Tp> constexpr bool std::operator==(const optional<_Tp>&, nullopt_t)’ (reversed)
+      /usr/include/c++/16/optional:1958:5:
+       1958 |     operator==(const optional<_Tp>& __lhs, nullopt_t) noexcept
+            |     ^~~~~~~~
+      • template argument deduction/substitution failed:
+        •   ‘const csl::Vector’ {aka ‘const std::vector<double>’} is not derived from ‘const std::optional<_Tp>’
+          /home/butahlecoq/.local/share/codex/worktrees/approximation-matched-pilot-20261023/benchmarks/reporting/approximation_pilot/driver.cpp:59:67:
+             59 |         h->inequalities.cols() != rows.cols || h->upper_bounds != bounds ||
+                |                                                                   ^~~~~~
+    • candidate 3: ‘template<class _T1, class _T2> constexpr bool std::operator==(const allocator<_CharT>&, const allocator<_T2>&)’ (reversed)
+      /usr/include/c++/16/bits/allocator.h:251:5:
+        251 |     operator==(const allocator<_T1>&, const allocator<_T2>&)
+            |     ^~~~~~~~
+      • template argument deduction/substitution failed:
+        •   ‘const csl::Vector’ {aka ‘const std::vector<double>’} is not derived from ‘const std::allocator<_CharT>’
+          /home/butahlecoq/.local/share/codex/worktrees/approximation-matched-pilot-20261023/benchmarks/reporting/approximation_pilot/driver.cpp:59:67:
+             59 |         h->inequalities.cols() != rows.cols || h->upper_bounds != bounds ||
+                |                                                                   ^~~~~~
+In file included from /usr/include/c++/16/string:51:
+    • candidate 4: ‘template<class _IteratorL, class _IteratorR> constexpr bool std::operator==(const reverse_iterator<_IteratorL>&, const reverse_iterator<_IteratorR>&) requires requires{{std::operator==::__x->base() == std::operator==::__y->base()} -> decltype(auto) [requires std::convertible_to<<placeholder>, bool>];}’ (reversed)
+      /usr/include/c++/16/bits/stl_iterator.h:529:5:
+        529 |     operator==(const reverse_iterator<_IteratorL>& __x,
+            |     ^~~~~~~~
+      • template argument deduction/substitution failed:
+        •   ‘const csl::Vector’ {aka ‘const std::vector<double>’} is not derived from ‘const std::reverse_iterator<_IteratorL>’
+          /home/butahlecoq/.local/share/codex/worktrees/approximation-matched-pilot-20261023/benchmarks/reporting/approximation_pilot/driver.cpp:59:67:
+             59 |         h->inequalities.cols() != rows.cols || h->upper_bounds != bounds ||
+                |                                                                   ^~~~~~
+    • candidate 5: ‘template<class _IteratorL, class _IteratorR> constexpr bool std::operator==(const move_iterator<_IteratorL>&, const move_iterator<_IteratorR>&) requires requires{{std::operator==::__x->base() == std::operator==::__y->base()} -> decltype(auto) [requires std::convertible_to<<placeholder>, bool>];}’ (reversed)
+      /usr/include/c++/16/bits/stl_iterator.h:1675:5:
+       1675 |     operator==(const move_iterator<_IteratorL>& __x,
+            |     ^~~~~~~~
+      • template argument deduction/substitution failed:
+        •   ‘const csl::Vector’ {aka ‘const std::vector<double>’} is not derived from ‘const std::move_iterator<_IteratorL>’
+          /home/butahlecoq/.local/share/codex/worktrees/approximation-matched-pilot-20261023/benchmarks/reporting/approximation_pilot/driver.cpp:59:67:
+             59 |         h->inequalities.cols() != rows.cols || h->upper_bounds != bounds ||
+                |                                                                   ^~~~~~
+In file included from /usr/include/c++/16/bits/stl_algobase.h:63,
+                 from /usr/include/c++/16/string:55:
+    • candidate 6: ‘template<class _T1, class _T2, class _U1, class _U2> constexpr bool std::operator==(const pair<_T1, _T2>&, const pair<_U1, _U2>&) requires requires{{std::operator==::__x->first == std::operator==::__y->first} -> decltype(auto) [requires std::__detail::__boolean_testable<<placeholder>, >];{std::operator==::__x->second == std::operator==::__y->second} -> decltype(auto) [requires std::__detail::__boolean_testable<<placeholder>, >];}’ (reversed)
+      /usr/include/c++/16/bits/stl_pair.h:1034:5:
+       1034 |     operator==(const pair<_T1, _T2>& __x, const pair<_U1, _U2>& __y)
+            |     ^~~~~~~~
+      • template argument deduction/substitution failed:
+        •   ‘const csl::Vector’ {aka ‘const std::vector<double>’} is not derived from ‘const std::pair<_T1, _T2>’
+          /home/butahlecoq/.local/share/codex/worktrees/approximation-matched-pilot-20261023/benchmarks/reporting/approximation_pilot/driver.cpp:59:67:
+             59 |         h->inequalities.cols() != rows.cols || h->upper_bounds != bounds ||
+                |                                                                   ^~~~~~
+In file included from /usr/include/c++/16/bits/basic_string.h:51,
+                 from /usr/include/c++/16/string:58:
+    • candidate 7: ‘template<class _CharT, class _Traits> constexpr bool std::operator==(basic_string_view<_CharT, _Traits>, type_identity_t<basic_string_view<_CharT, _Traits> >)’ (reversed)
+      /usr/include/c++/16/string_view:627:5:
+        627 |     operator==(basic_string_view<_CharT, _Traits> __x,
+            |     ^~~~~~~~
+      • template argument deduction/substitution failed:
+        •   ‘std::vector<double>’ is not derived from ‘std::basic_string_view<_CharT, _Traits>’
+          /home/butahlecoq/.local/share/codex/worktrees/approximation-matched-pilot-20261023/benchmarks/reporting/approximation_pilot/driver.cpp:59:67:
+             59 |         h->inequalities.cols() != rows.cols || h->upper_bounds != bounds ||
+                |                                                                   ^~~~~~
+    • candidate 8: ‘template<class _CharT, class _Traits, class _Alloc> constexpr bool std::operator==(const __cxx11::basic_string<_CharT, _Traits, _Alloc>&, const _CharT*)’ (reversed)
+      /usr/include/c++/16/bits/basic_string.h:4117:5:
+       4117 |     operator==(const basic_string<_CharT, _Traits, _Alloc>& __lhs,
+            |     ^~~~~~~~
+      • template argument deduction/substitution failed:
+        •   ‘const csl::Vector’ {aka ‘const std::vector<double>’} is not derived from ‘const std::__cxx11::basic_string<_CharT, _Traits, _Alloc>’
+          /home/butahlecoq/.local/share/codex/worktrees/approximation-matched-pilot-20261023/benchmarks/reporting/approximation_pilot/driver.cpp:59:67:
+             59 |         h->inequalities.cols() != rows.cols || h->upper_bounds != bounds ||
+                |                                                                   ^~~~~~
+In file included from /usr/include/c++/16/bits/uses_allocator_args.h:41,
+                 from /usr/include/c++/16/bits/memory_resource.h:43,
+                 from /usr/include/c++/16/string:83:
+    • candidate 9: ‘template<class ... _Tps, class ... _Ups>  requires  sizeof ... (_Tps ...) == sizeof ... (_Ups ...) && ((requires(const _Tps& __t, const _Ups& __u) {{__t == __u} -> decltype(auto) [requires std::__detail::__boolean_testable<<placeholder>, >];} && ...)) constexpr bool std::operator==(const tuple<_UTypes ...>&, const tuple<_Elements ...>&)’ (reversed)
+      /usr/include/c++/16/tuple:2589:5:
+       2589 |     operator== [[nodiscard]] (const tuple<_Tps...>& __t,
+            |     ^~~~~~~~
+      • template argument deduction/substitution failed:
+        •   ‘const csl::Vector’ {aka ‘const std::vector<double>’} is not derived from ‘const std::tuple<_UTypes ...>’
+          /home/butahlecoq/.local/share/codex/worktrees/approximation-matched-pilot-20261023/benchmarks/reporting/approximation_pilot/driver.cpp:59:67:
+             59 |         h->inequalities.cols() != rows.cols || h->upper_bounds != bounds ||
+                |                                                                   ^~~~~~
+In file included from /usr/include/c++/16/memory:80,
+                 from /home/butahlecoq/.local/share/codex/worktrees/approximation-matched-pilot-20261023/include/csl/sets/contracts.hpp:4,
+                 from /home/butahlecoq/.local/share/codex/worktrees/approximation-matched-pilot-20261023/include/csl/problem/contracts.hpp:4:
+    • candidate 10: ‘template<class _Tp, class _Dp, class _Up, class _Ep> bool std::operator==(const unique_ptr<_Tp, _Dp>&, const unique_ptr<_Up, _Ep>&)’ (reversed)
+      /usr/include/c++/16/bits/unique_ptr.h:866:5:
+        866 |     operator==(const unique_ptr<_Tp, _Dp>& __x,
+            |     ^~~~~~~~
+      • template argument deduction/substitution failed:
+        •   ‘const csl::Vector’ {aka ‘const std::vector<double>’} is not derived from ‘const std::unique_ptr<_Tp, _Dp>’
+          /home/butahlecoq/.local/share/codex/worktrees/approximation-matched-pilot-20261023/benchmarks/reporting/approximation_pilot/driver.cpp:59:67:
+             59 |         h->inequalities.cols() != rows.cols || h->upper_bounds != bounds ||
+                |                                                                   ^~~~~~
+    • candidate 11: ‘template<class _Tp, class _Dp> bool std::operator==(const unique_ptr<_Tp, _Dp>&, nullptr_t)’ (reversed)
+      /usr/include/c++/16/bits/unique_ptr.h:874:5:
+        874 |     operator==(const unique_ptr<_Tp, _Dp>& __x, nullptr_t) noexcept
+            |     ^~~~~~~~
+      • template argument deduction/substitution failed:
+        •   ‘const csl::Vector’ {aka ‘const std::vector<double>’} is not derived from ‘const std::unique_ptr<_Tp, _Dp>’
+          /home/butahlecoq/.local/share/codex/worktrees/approximation-matched-pilot-20261023/benchmarks/reporting/approximation_pilot/driver.cpp:59:67:
+             59 |         h->inequalities.cols() != rows.cols || h->upper_bounds != bounds ||
+                |                                                                   ^~~~~~
+In file included from /usr/include/c++/16/bits/shared_ptr.h:53,
+                 from /usr/include/c++/16/memory:82:
+    • candidate 12: ‘template<class _Tp1, class _Tp2, __gnu_cxx::_Lock_policy _Lp> bool std::operator==(const __shared_ptr<_Tp1, _Lp>&, const __shared_ptr<_Tp2, _Lp>&)’ (reversed)
+      /usr/include/c++/16/bits/shared_ptr_base.h:1897:5:
+       1897 |     operator==(const __shared_ptr<_Tp1, _Lp>& __a,
+            |     ^~~~~~~~
+      • template argument deduction/substitution failed:
+        •   ‘const csl::Vector’ {aka ‘const std::vector<double>’} is not derived from ‘const std::__shared_ptr<_Tp1, _Lp>’
+          /home/butahlecoq/.local/share/codex/worktrees/approximation-matched-pilot-20261023/benchmarks/reporting/approximation_pilot/driver.cpp:59:67:
+             59 |         h->inequalities.cols() != rows.cols || h->upper_bounds != bounds ||
+                |                                                                   ^~~~~~
+    • candidate 13: ‘template<class _Tp, __gnu_cxx::_Lock_policy _Lp> bool std::operator==(const __shared_ptr<_Tp, _Lp>&, nullptr_t)’ (reversed)
+      /usr/include/c++/16/bits/shared_ptr_base.h:1903:5:
+       1903 |     operator==(const __shared_ptr<_Tp, _Lp>& __a, nullptr_t) noexcept
+            |     ^~~~~~~~
+      • template argument deduction/substitution failed:
+        •   ‘const csl::Vector’ {aka ‘const std::vector<double>’} is not derived from ‘const std::__shared_ptr<_Tp, _Lp>’
+          /home/butahlecoq/.local/share/codex/worktrees/approximation-matched-pilot-20261023/benchmarks/reporting/approximation_pilot/driver.cpp:59:67:
+             59 |         h->inequalities.cols() != rows.cols || h->upper_bounds != bounds ||
+                |                                                                   ^~~~~~
+    • candidate 14: ‘template<class _Tp, class _Up> bool std::operator==(const shared_ptr<_Tp>&, const shared_ptr<_Tp>&)’ (reversed)
+      /usr/include/c++/16/bits/shared_ptr.h:554:5:
+        554 |     operator==(const shared_ptr<_Tp>& __a, const shared_ptr<_Up>& __b) noexcept
+            |     ^~~~~~~~
+      • template argument deduction/substitution failed:
+        •   ‘const csl::Vector’ {aka ‘const std::vector<double>’} is not derived from ‘const std::shared_ptr<_Tp>’
+          /home/butahlecoq/.local/share/codex/worktrees/approximation-matched-pilot-20261023/benchmarks/reporting/approximation_pilot/driver.cpp:59:67:
+             59 |         h->inequalities.cols() != rows.cols || h->upper_bounds != bounds ||
+                |                                                                   ^~~~~~
+    • candidate 15: ‘template<class _Tp> bool std::operator==(const shared_ptr<_Tp>&, nullptr_t)’ (reversed)
+      /usr/include/c++/16/bits/shared_ptr.h:560:5:
+        560 |     operator==(const shared_ptr<_Tp>& __a, nullptr_t) noexcept
+            |     ^~~~~~~~
+      • template argument deduction/substitution failed:
+        •   ‘const csl::Vector’ {aka ‘const std::vector<double>’} is not derived from ‘const std::shared_ptr<_Tp>’
+          /home/butahlecoq/.local/share/codex/worktrees/approximation-matched-pilot-20261023/benchmarks/reporting/approximation_pilot/driver.cpp:59:67:
+             59 |         h->inequalities.cols() != rows.cols || h->upper_bounds != bounds ||
+                |                                                                   ^~~~~~
+In file included from /usr/include/c++/16/functional:76,
+                 from /home/butahlecoq/.local/share/codex/worktrees/approximation-matched-pilot-20261023/include/csl/registry/registry.hpp:6:
+    • candidate 16: ‘template<class _Res, class ... _Args> bool std::operator==(const function<_Res(_ArgTypes ...)>&, nullptr_t)’ (reversed)
+      /usr/include/c++/16/bits/std_function.h:734:5:
+        734 |     operator==(const function<_Res(_Args...)>& __f, nullptr_t) noexcept
+            |     ^~~~~~~~
+      • template argument deduction/substitution failed:
+        •   ‘const csl::Vector’ {aka ‘const std::vector<double>’} is not derived from ‘const std::function<_Res(_ArgTypes ...)>’
+          /home/butahlecoq/.local/share/codex/worktrees/approximation-matched-pilot-20261023/benchmarks/reporting/approximation_pilot/driver.cpp:59:67:
+             59 |         h->inequalities.cols() != rows.cols || h->upper_bounds != bounds ||
+                |                                                                   ^~~~~~
+In file included from /usr/include/c++/16/bits/ios_base.h:48,
+                 from /usr/include/c++/16/ios:46,
+                 from /usr/include/c++/16/bits/ostream.h:43,
+                 from /usr/include/c++/16/bits/unique_ptr.h:42:
+    • candidate 17: ‘bool std::operator==(const error_code&, const error_condition&)’ (reversed)
+      /usr/include/c++/16/system_error:467:3:
+        467 |   operator==(const error_code& __lhs, const error_condition& __rhs) noexcept
+            |   ^~~~~~~~
+      • no known conversion for argument 1 from ‘const csl::Vector’ {aka ‘const std::vector<double>’} to ‘const std::error_code&’
+        /usr/include/c++/16/system_error:467:32:
+          467 |   operator==(const error_code& __lhs, const error_condition& __rhs) noexcept
+              |              ~~~~~~~~~~~~~~~~~~^~~~~
+    • candidate 18: ‘template<class _Iterator> constexpr bool std::operator==(const reverse_iterator<_IteratorL>&, const reverse_iterator<_IteratorL>&) requires requires{{std::operator==::__x->base() == std::operator==::__y->base()} -> decltype(auto) [requires std::convertible_to<<placeholder>, bool>];}’ (rewritten)
+      /usr/include/c++/16/bits/stl_iterator.h:588:5:
+        588 |     operator==(const reverse_iterator<_Iterator>& __x,
+            |     ^~~~~~~~
+      • template argument deduction/substitution failed:
+        •   ‘const csl::numeric::VectorView’ is not derived from ‘const std::reverse_iterator<_IteratorL>’
+          /home/butahlecoq/.local/share/codex/worktrees/approximation-matched-pilot-20261023/benchmarks/reporting/approximation_pilot/driver.cpp:59:67:
+             59 |         h->inequalities.cols() != rows.cols || h->upper_bounds != bounds ||
+                |                                                                   ^~~~~~
+    • candidate 19: ‘template<class _Iterator> constexpr bool std::operator==(const move_iterator<_IteratorL>&, const move_iterator<_IteratorL>&)’ (rewritten)
+      /usr/include/c++/16/bits/stl_iterator.h:1745:5:
+       1745 |     operator==(const move_iterator<_Iterator>& __x,
+            |     ^~~~~~~~
+      • template argument deduction/substitution failed:
+        •   ‘const csl::numeric::VectorView’ is not derived from ‘const std::move_iterator<_IteratorL>’
+          /home/butahlecoq/.local/share/codex/worktrees/approximation-matched-pilot-20261023/benchmarks/reporting/approximation_pilot/driver.cpp:59:67:
+             59 |         h->inequalities.cols() != rows.cols || h->upper_bounds != bounds ||
+                |                                                                   ^~~~~~
+    • candidate 20: ‘template<class _CharT, class _Traits, class _Alloc> constexpr bool std::operator==(const __cxx11::basic_string<_CharT, _Traits, _Alloc>&, const __cxx11::basic_string<_CharT, _Traits, _Alloc>&)’ (rewritten)
+      /usr/include/c++/16/bits/basic_string.h:4100:5:
+       4100 |     operator==(const basic_string<_CharT, _Traits, _Alloc>& __lhs,
+            |     ^~~~~~~~
+      • template argument deduction/substitution failed:
+        •   ‘const csl::numeric::VectorView’ is not derived from ‘const std::__cxx11::basic_string<_CharT, _Traits, _Alloc>’
+          /home/butahlecoq/.local/share/codex/worktrees/approximation-matched-pilot-20261023/benchmarks/reporting/approximation_pilot/driver.cpp:59:67:
+             59 |         h->inequalities.cols() != rows.cols || h->upper_bounds != bounds ||
+                |                                                                   ^~~~~~
+In file included from /usr/include/c++/16/vector:68,
+                 from /home/butahlecoq/.local/share/codex/worktrees/approximation-matched-pilot-20261023/include/csl/core/values.hpp:6:
+    • candidate 21: ‘template<class _Tp, class _Alloc> constexpr bool std::operator==(const vector<_Tp, _Alloc>&, const vector<_Tp, _Alloc>&)’ (rewritten)
+      /usr/include/c++/16/bits/stl_vector.h:2333:5:
+       2333 |     operator==(const vector<_Tp, _Alloc>& __x, const vector<_Tp, _Alloc>& __y)
+            |     ^~~~~~~~
+      • template argument deduction/substitution failed:
+        •   ‘const csl::numeric::VectorView’ is not derived from ‘const std::vector<_Tp, _Alloc>’
+          /home/butahlecoq/.local/share/codex/worktrees/approximation-matched-pilot-20261023/benchmarks/reporting/approximation_pilot/driver.cpp:59:67:
+             59 |         h->inequalities.cols() != rows.cols || h->upper_bounds != bounds ||
+                |                                                                   ^~~~~~
+In file included from /home/butahlecoq/.local/share/codex/worktrees/approximation-matched-pilot-20261023/include/csl/model/contracts.hpp:5:
+    • candidate 22: ‘template<class ... _Types>  requires (requires(const _Types& __t) {{__t == __t} -> decltype(auto) [requires std::convertible_to<<placeholder>, bool>];} && ...) constexpr bool std::operator==(const variant<_Types ...>&, const variant<_Types ...>&)’ (rewritten)
+      /usr/include/c++/16/variant:1281:5:
+       1281 |     operator== [[nodiscard]] (const variant<_Types...>& __lhs,
+            |     ^~~~~~~~
+      • template argument deduction/substitution failed:
+        •   ‘const csl::numeric::VectorView’ is not derived from ‘const std::variant<_Types ...>’
+          /home/butahlecoq/.local/share/codex/worktrees/approximation-matched-pilot-20261023/benchmarks/reporting/approximation_pilot/driver.cpp:59:67:
+             59 |         h->inequalities.cols() != rows.cols || h->upper_bounds != bounds ||
+                |                                                                   ^~~~~~
+In file included from /usr/include/c++/16/bits/locale_facets.h:50,
+                 from /usr/include/c++/16/bits/basic_ios.h:40,
+                 from /usr/include/c++/16/ios:48:
+    • candidate 23: ‘template<class _CharT, class _Traits> bool std::operator==(const istreambuf_iterator<_CharT, _Traits>&, const istreambuf_iterator<_CharT, _Traits>&)’ (rewritten)
+      /usr/include/c++/16/bits/streambuf_iterator.h:236:5:
+        236 |     operator==(const istreambuf_iterator<_CharT, _Traits>& __a,
+            |     ^~~~~~~~
+      • template argument deduction/substitution failed:
+        •   ‘const csl::numeric::VectorView’ is not derived from ‘const std::istreambuf_iterator<_CharT, _Traits>’
+          /home/butahlecoq/.local/share/codex/worktrees/approximation-matched-pilot-20261023/benchmarks/reporting/approximation_pilot/driver.cpp:59:67:
+             59 |         h->inequalities.cols() != rows.cols || h->upper_bounds != bounds ||
+                |                                                                   ^~~~~~
+In file included from /usr/include/c++/16/format:46,
+                 from /usr/include/c++/16/bits/chrono_io.h:40,
+                 from /usr/include/c++/16/chrono:3695,
+                 from /home/butahlecoq/.local/share/codex/worktrees/approximation-matched-pilot-20261023/include/csl/execution/contracts.hpp:5,
+                 from /home/butahlecoq/.local/share/codex/worktrees/approximation-matched-pilot-20261023/include/csl/geometry/contracts.hpp:5,
+                 from /home/butahlecoq/.local/share/codex/worktrees/approximation-matched-pilot-20261023/include/csl/synthesis/contracts.hpp:4:
+    • candidate 24: ‘template<class _Tp, long unsigned int _Nm> constexpr bool std::operator==(const array<_Tp, _Nm>&, const array<_Tp, _Nm>&)’ (rewritten)
+      /usr/include/c++/16/array:305:5:
+        305 |     operator==(const array<_Tp, _Nm>& __one, const array<_Tp, _Nm>& __two)
+            |     ^~~~~~~~
+      • template argument deduction/substitution failed:
+        •   ‘const csl::numeric::VectorView’ is not derived from ‘const std::array<_Tp, _Nm>’
+          /home/butahlecoq/.local/share/codex/worktrees/approximation-matched-pilot-20261023/benchmarks/reporting/approximation_pilot/driver.cpp:59:67:
+             59 |         h->inequalities.cols() != rows.cols || h->upper_bounds != bounds ||
+                |                                                                   ^~~~~~
+In file included from /usr/include/c++/16/unordered_map:43,
+                 from /usr/include/c++/16/functional:80:
+    • candidate 25: ‘template<class _Key1, class _Tp1, class _Hash1, class _Pred1, class _Alloc1> bool std::operator==(const unordered_map<_Key1, _Tp1, _Hash1, _Pred1, _Alloc1>&, const unordered_map<_Key1, _Tp1, _Hash1, _Pred1, _Alloc1>&)’ (rewritten)
+      /usr/include/c++/16/bits/unordered_map.h:2534:5:
+       2534 |     operator==(const unordered_map<_Key, _Tp, _Hash, _Pred, _Alloc>& __x,
+            |     ^~~~~~~~
+      • template argument deduction/substitution failed:
+        •   ‘const csl::numeric::VectorView’ is not derived from ‘const std::unordered_map<_Key1, _Tp1, _Hash1, _Pred1, _Alloc1>’
+          /home/butahlecoq/.local/share/codex/worktrees/approximation-matched-pilot-20261023/benchmarks/reporting/approximation_pilot/driver.cpp:59:67:
+             59 |         h->inequalities.cols() != rows.cols || h->upper_bounds != bounds ||
+                |                                                                   ^~~~~~
+    • candidate 26: ‘template<class _Key1, class _Tp1, class _Hash1, class _Pred1, class _Alloc1> bool std::operator==(const unordered_multimap<_Key1, _Tp1, _Hash1, _Pred1, _Alloc1>&, const unordered_multimap<_Key1, _Tp1, _Hash1, _Pred1, _Alloc1>&)’ (rewritten)
+      /usr/include/c++/16/bits/unordered_map.h:2548:5:
+       2548 |     operator==(const unordered_multimap<_Key, _Tp, _Hash, _Pred, _Alloc>& __x,
+            |     ^~~~~~~~
+      • template argument deduction/substitution failed:
+        •   ‘const csl::numeric::VectorView’ is not derived from ‘const std::unordered_multimap<_Key1, _Tp1, _Hash1, _Pred1, _Alloc1>’
+          /home/butahlecoq/.local/share/codex/worktrees/approximation-matched-pilot-20261023/benchmarks/reporting/approximation_pilot/driver.cpp:59:67:
+             59 |         h->inequalities.cols() != rows.cols || h->upper_bounds != bounds ||
+                |                                                                   ^~~~~~
+In file included from /usr/include/c++/16/map:65,
+                 from /home/butahlecoq/.local/share/codex/worktrees/approximation-matched-pilot-20261023/include/csl/registry/registry.hpp:7:
+    • candidate 27: ‘template<class _Key, class _Tp, class _Compare, class _Alloc> bool std::operator==(const map<_Key, _Tp, _Compare, _Allocator>&, const map<_Key, _Tp, _Compare, _Allocator>&)’ (rewritten)
+      /usr/include/c++/16/bits/stl_map.h:1726:5:
+       1726 |     operator==(const map<_Key, _Tp, _Compare, _Alloc>& __x,
+            |     ^~~~~~~~
+      • template argument deduction/substitution failed:
+        •   ‘const csl::numeric::VectorView’ is not derived from ‘const std::map<_Key, _Tp, _Compare, _Allocator>’
+          /home/butahlecoq/.local/share/codex/worktrees/approximation-matched-pilot-20261023/benchmarks/reporting/approximation_pilot/driver.cpp:59:67:
+             59 |         h->inequalities.cols() != rows.cols || h->upper_bounds != bounds ||
+                |                                                                   ^~~~~~
+In file included from /usr/include/c++/16/map:66:
+    • candidate 28: ‘template<class _Key, class _Tp, class _Compare, class _Alloc> bool std::operator==(const multimap<_Key, _Tp, _Compare, _Allocator>&, const multimap<_Key, _Tp, _Compare, _Allocator>&)’ (rewritten)
+      /usr/include/c++/16/bits/stl_multimap.h:1209:5:
+       1209 |     operator==(const multimap<_Key, _Tp, _Compare, _Alloc>& __x,
+            |     ^~~~~~~~
+      • template argument deduction/substitution failed:
+        •   ‘const csl::numeric::VectorView’ is not derived from ‘const std::multimap<_Key, _Tp, _Compare, _Allocator>’
+          /home/butahlecoq/.local/share/codex/worktrees/approximation-matched-pilot-20261023/benchmarks/reporting/approximation_pilot/driver.cpp:59:67:
+             59 |         h->inequalities.cols() != rows.cols || h->upper_bounds != bounds ||
+                |                                                                   ^~~~~~
+    • candidate 29: ‘constexpr bool std::operator==(const allocator<double>&, const allocator<double>&)’ (rewritten)
+      /usr/include/c++/16/bits/allocator.h:230:7:
+        230 |       operator==(const allocator&, const allocator&) _GLIBCXX_NOTHROW
+            |       ^~~~~~~~
+      • no known conversion for argument 1 from ‘const csl::numeric::VectorView’ to ‘const std::allocator<double>&’
+        /usr/include/c++/16/bits/allocator.h:230:18:
+          230 |       operator==(const allocator&, const allocator&) _GLIBCXX_NOTHROW
+              |                  ^~~~~~~~~~~~~~~~
+In file included from /usr/include/c++/16/variant:49:
+    • candidate 30: ‘constexpr bool std::operator==(monostate, monostate)’ (rewritten)
+      /usr/include/c++/16/bits/monostate.h:47:18:
+         47 |   constexpr bool operator==(monostate, monostate) noexcept { return true; }
+            |                  ^~~~~~~~
+      • no known conversion for argument 1 from ‘const csl::numeric::VectorView’ to ‘std::monostate’
+        /usr/include/c++/16/bits/monostate.h:47:29:
+           47 |   constexpr bool operator==(monostate, monostate) noexcept { return true; }
+              |                             ^~~~~~~~~
+    • candidate 31: ‘bool std::operator==(const error_code&, const error_code&)’ (rewritten)
+      /usr/include/c++/16/system_error:451:3:
+        451 |   operator==(const error_code& __lhs, const error_code& __rhs) noexcept
+            |   ^~~~~~~~
+      • no known conversion for argument 1 from ‘const csl::numeric::VectorView’ to ‘const std::error_code&’
+        /usr/include/c++/16/system_error:451:32:
+          451 |   operator==(const error_code& __lhs, const error_code& __rhs) noexcept
+              |              ~~~~~~~~~~~~~~~~~~^~~~~
+    • candidate 32: ‘bool std::operator==(const error_condition&, const error_condition&)’ (rewritten)
+      /usr/include/c++/16/system_error:482:3:
+        482 |   operator==(const error_condition& __lhs,
+            |   ^~~~~~~~
+      • no known conversion for argument 1 from ‘const csl::numeric::VectorView’ to ‘const std::error_condition&’
+        /usr/include/c++/16/system_error:482:37:
+          482 |   operator==(const error_condition& __lhs,
+              |              ~~~~~~~~~~~~~~~~~~~~~~~^~~~~
+In file included from /usr/include/c++/16/stop_token:39,
+                 from /home/butahlecoq/.local/share/codex/worktrees/approximation-matched-pilot-20261023/include/csl/execution/contracts.hpp:7:
+    • candidate 33: ‘bool std::operator==(thread::id, thread::id)’ (rewritten)
+      /usr/include/c++/16/bits/std_thread.h:335:3:
+        335 |   operator==(thread::id __x, thread::id __y) noexcept
+            |   ^~~~~~~~
+      • no known conversion for argument 1 from ‘const csl::numeric::VectorView’ to ‘std::thread::id’
+        /usr/include/c++/16/bits/std_thread.h:335:25:
+          335 |   operator==(thread::id __x, thread::id __y) noexcept
+              |              ~~~~~~~~~~~^~~
+    • candidate 34: ‘template<class _Tp, class _Up> constexpr std::__optional_ne_t<_Tp, _Up> std::operator!=(const optional<_Tp>&, const optional<_Up>&)’
+      /usr/include/c++/16/optional:1886:5:
+       1886 |     operator!=(const optional<_Tp>& __lhs, const optional<_Up>& __rhs)
+            |     ^~~~~~~~
+      • template argument deduction/substitution failed:
+        •   ‘const csl::numeric::VectorView’ is not derived from ‘const std::optional<_Tp>’
+          /home/butahlecoq/.local/share/codex/worktrees/approximation-matched-pilot-20261023/benchmarks/reporting/approximation_pilot/driver.cpp:59:67:
+             59 |         h->inequalities.cols() != rows.cols || h->upper_bounds != bounds ||
+                |                                                                   ^~~~~~
+    • candidate 35: ‘template<class _Tp, class _Up>  requires !(__is_optional_v<_Up>) constexpr std::__optional_ne_t<_Tp, _Up> std::operator!=(const optional<_Tp>&, const _Up&)’
+      /usr/include/c++/16/optional:2058:5:
+       2058 |     operator!= [[nodiscard]] (const optional<_Tp>& __lhs, const _Up& __rhs)
+            |     ^~~~~~~~
+      • template argument deduction/substitution failed:
+        •   ‘const csl::numeric::VectorView’ is not derived from ‘const std::optional<_Tp>’
+          /home/butahlecoq/.local/share/codex/worktrees/approximation-matched-pilot-20261023/benchmarks/reporting/approximation_pilot/driver.cpp:59:67:
+             59 |         h->inequalities.cols() != rows.cols || h->upper_bounds != bounds ||
+                |                                                                   ^~~~~~
+    • candidate 36: ‘template<class _Tp, class _Up>  requires !(__is_optional_v<_Tp>) constexpr std::__optional_ne_t<_Tp, _Up> std::operator!=(const _Tp&, const optional<_Up>&)’
+      /usr/include/c++/16/optional:2069:5:
+       2069 |     operator!= [[nodiscard]] (const _Tp& __lhs, const optional<_Up>& __rhs)
+            |     ^~~~~~~~
+      • template argument deduction/substitution failed:
+        •   ‘const csl::Vector’ {aka ‘const std::vector<double>’} is not derived from ‘const std::optional<_Up>’
+          /home/butahlecoq/.local/share/codex/worktrees/approximation-matched-pilot-20261023/benchmarks/reporting/approximation_pilot/driver.cpp:59:67:
+             59 |         h->inequalities.cols() != rows.cols || h->upper_bounds != bounds ||
+                |                                                                   ^~~~~~
+In file included from /usr/include/c++/16/bits/char_traits.h:44,
+                 from /usr/include/c++/16/string:45:
+    • candidate 37: ‘template<class _StateT> bool std::operator!=(const fpos<_StateT>&, const fpos<_StateT>&)’
+      /usr/include/c++/16/bits/postypes.h:202:5:
+        202 |     operator!=(const fpos<_StateT>& __lhs, const fpos<_StateT>& __rhs)
+            |     ^~~~~~~~
+      • template argument deduction/substitution failed:
+        •   ‘const csl::numeric::VectorView’ is not derived from ‘const std::fpos<_StateT>’
+          /home/butahlecoq/.local/share/codex/worktrees/approximation-matched-pilot-20261023/benchmarks/reporting/approximation_pilot/driver.cpp:59:67:
+             59 |         h->inequalities.cols() != rows.cols || h->upper_bounds != bounds ||
+                |                                                                   ^~~~~~
+    • candidate 38: ‘template<class _IteratorL, class _IteratorR> constexpr bool std::operator!=(const reverse_iterator<_IteratorL>&, const reverse_iterator<_IteratorR>&) requires requires{{std::operator!=::__x->base() != std::operator!=::__y->base()} -> decltype(auto) [requires std::convertible_to<<placeholder>, bool>];}’
+      /usr/include/c++/16/bits/stl_iterator.h:537:5:
+        537 |     operator!=(const reverse_iterator<_IteratorL>& __x,
+            |     ^~~~~~~~
+      • template argument deduction/substitution failed:
+        •   ‘const csl::numeric::VectorView’ is not derived from ‘const std::reverse_iterator<_IteratorL>’
+          /home/butahlecoq/.local/share/codex/worktrees/approximation-matched-pilot-20261023/benchmarks/reporting/approximation_pilot/driver.cpp:59:67:
+             59 |         h->inequalities.cols() != rows.cols || h->upper_bounds != bounds ||
+                |                                                                   ^~~~~~
+    • candidate 39: ‘template<class ... _Types>  requires (requires(const _Types& __t) {{__t != __t} -> decltype(auto) [requires std::convertible_to<<placeholder>, bool>];} && ...) constexpr bool std::operator!=(const variant<_Types ...>&, const variant<_Types ...>&)’
+      /usr/include/c++/16/variant:1297:5:
+       1297 |     operator!= [[nodiscard]] (const variant<_Types...>& __lhs,
+            |     ^~~~~~~~
+      • template argument deduction/substitution failed:
+        •   ‘const csl::numeric::VectorView’ is not derived from ‘const std::variant<_Types ...>’
+          /home/butahlecoq/.local/share/codex/worktrees/approximation-matched-pilot-20261023/benchmarks/reporting/approximation_pilot/driver.cpp:59:67:
+             59 |         h->inequalities.cols() != rows.cols || h->upper_bounds != bounds ||
+                |                                                                   ^~~~~~
+/home/butahlecoq/.local/share/codex/worktrees/approximation-matched-pilot-20261023/benchmarks/reporting/approximation_pilot/driver.cpp:61:28: error: ‘const class csl::numeric::MatrixView’ has no member named ‘values’
+   61 |     return h->inequalities.values == rows.values;
+      |                            ^~~~~~
+make[3]: *** [CMakeFiles/csl_approximation_matched_pilot.dir/build.make:79: CMakeFiles/csl_approximation_matched_pilot.dir/driver.cpp.o] Error 1
+make[2]: *** [CMakeFiles/Makefile2:355: CMakeFiles/csl_approximation_matched_pilot.dir/all] Error 2
+make[1]: *** [CMakeFiles/Makefile2:362: CMakeFiles/csl_approximation_matched_pilot.dir/rule] Error 2
+make: *** [Makefile:196: csl_approximation_matched_pilot] Error 2

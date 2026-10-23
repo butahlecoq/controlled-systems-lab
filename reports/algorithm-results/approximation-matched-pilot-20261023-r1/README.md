@@ -52,11 +52,12 @@ outside the timed interval. Provider selection, preparation and workspace
 creation were inside each `run_registered` interval; the QuickHull interval
 covers only `quickhull_2d`. Timings therefore are not a fair speed ranking.
 
-The source code under `benchmarks/reporting/approximation_pilot/`, build log,
-before/after host snapshots, exit status, executable SHA-256 and per-file
-checksums are retained with this bundle. `summarize.py` validates row counts,
-outputs and the geometric ratios before regenerating the raw-row copy, CSV,
-SVG, and HTML.
+The source code under `benchmarks/reporting/approximation_pilot/`, accepted
+build log, before/after host snapshots, exit status, executable SHA-256 and
+per-file checksums are retained with this bundle. Two failed driver-compilation
+attempts and their dispositions are kept under `rejected/`; they produced no
+measurement rows. `summarize.py` validates schemas, warmup/round counts, outputs
+and geometric ratios before regenerating the raw-row copy, CSV, SVG, and HTML.
 
 This preliminary bundle does not satisfy or close comparison-program issue
 #100, which still requires its configured producers and full independent

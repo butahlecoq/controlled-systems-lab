@@ -1,0 +1,24 @@
+[  7%] Built target csl_quickhull_2d
+[ 21%] Built target csl_contracts
+[ 21%] Built target csl_numeric
+[ 35%] Built target csl_objectives
+[ 35%] Built target csl_optimization
+[ 35%] Built target csl_sets
+[ 42%] Built target csl_geometry_generators
+[ 50%] Built target csl_model
+[ 57%] Built target csl_problem
+[ 64%] Built target csl_resolved_core
+[ 64%] Built target csl_verifiers
+[ 64%] Built target csl_registry
+[ 71%] Built target csl_resolved_problem
+[ 78%] Built target csl_verification
+[ 92%] Built target csl_approximation
+[ 92%] Building CXX object CMakeFiles/csl_approximation_matched_pilot.dir/driver.cpp.o
+/home/butahlecoq/.local/share/codex/worktrees/approximation-matched-pilot-20261023/benchmarks/reporting/approximation_pilot/driver.cpp: In function ‘bool {anonymous}::exact_h(const csl::SetHandle&, const csl::Matrix&, const csl::Vector&)’:
+/home/butahlecoq/.local/share/codex/worktrees/approximation-matched-pilot-20261023/benchmarks/reporting/approximation_pilot/driver.cpp:64:53: error: no match for call to ‘(const csl::Matrix) (std::size_t&, std::size_t&)’
+   64 |             if (h->inequalities(row, column) != rows(row, column)) return false;
+      |                                                 ~~~~^~~~~~~~~~~~~
+make[3]: *** [CMakeFiles/csl_approximation_matched_pilot.dir/build.make:79: CMakeFiles/csl_approximation_matched_pilot.dir/driver.cpp.o] Error 1
+make[2]: *** [CMakeFiles/Makefile2:355: CMakeFiles/csl_approximation_matched_pilot.dir/all] Error 2
+make[1]: *** [CMakeFiles/Makefile2:362: CMakeFiles/csl_approximation_matched_pilot.dir/rule] Error 2
+make: *** [Makefile:196: csl_approximation_matched_pilot] Error 2
