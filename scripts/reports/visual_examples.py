@@ -733,6 +733,8 @@ def build(catalog, site):
     examples = load_examples(catalog)
     site = Path(site).resolve(strict=True)
     saved_figures, saved_inventory = saved_figure_sections(catalog, site)
+    last_topic_anchor = f"saved-figure-{len(SAVED_FIGURES)}"
+    last_topic_title = SAVED_FIGURES[-1]["title"]
     analytic_files, analytic_inventory = visual_illustrations.build(Path(catalog))
     index = report_data.local_file(site, "index.html")
     original = index.read_text(encoding="utf-8")
@@ -786,7 +788,7 @@ def build(catalog, site):
             '<body><a class="skip" href="#main">Skip to examples</a><div class="shell"><aside>'
             '<a class="brand" href="../index.html">[ csl ]<br>Controlled Systems Lab</a>'
             '<p class="eyebrow">Learn by looking</p>'
-            '<a class="nav-shortcut" href="#saved-report-figures">Jump to “More algorithms, from saved evidence” ↓</a>'
+            f'<a class="nav-shortcut" href="#{last_topic_anchor}">Jump to final example: {escape(last_topic_title)} ↓</a>'
             '<nav aria-label="Examples">' + navigation +
             '<a href="../index.html">All numerical reports ↗</a></nav></aside><main id="main">'
             '<header><p class="eyebrow">Small inputs / visible answers</p><h1>Algorithms,<br><em>in two dimensions.</em></h1>'
