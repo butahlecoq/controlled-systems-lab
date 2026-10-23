@@ -1,0 +1,11 @@
+Source commit: 4494557aad4710fe1166b5a681057f106ef8fb91
+Build type: Release
+C++ compiler: GCC 16.2.1 (/usr/bin/c++)
+C++ language mode: C++20
+HiGHS: 1.11.0 (pinned source in third_party/highs)
+OS: Linux x86_64, kernel 7.2.5-3-omarchy
+Input: three literal integer-coordinate square clouds; see fixtures() in benchmarks/reporting/it17_hull/preliminary_driver.cpp
+Timing: reducer/QuickHull function only; LP workspace creation and output oracle outside timed interval
+Repetitions: 1 excluded warmup per fixture/method; 7 interleaved measured repetitions per fixture/method
+Threads: process serial; no worker threads requested
+Limiter: no separate profile; unknown

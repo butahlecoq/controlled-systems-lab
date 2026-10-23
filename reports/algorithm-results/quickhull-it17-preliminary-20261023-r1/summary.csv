@@ -1,0 +1,13 @@
+fixture,method,repetitions,median_ns,min_ns,max_ns
+degenerate,basis-reuse-related-to-A43,7,45188,44769,48051
+degenerate,geometric-quickhull,7,8451,8032,8591
+degenerate,lp-membership-baseline,7,844811,824976,864715
+degenerate,ordered-membership-related-to-A44,7,841737,825395,852563
+interior-basis,basis-reuse-related-to-A43,7,40927,39949,54547
+interior-basis,geometric-quickhull,7,4819,4400,5099
+interior-basis,lp-membership-baseline,7,620478,608953,628789
+interior-basis,ordered-membership-related-to-A44,7,631303,613354,636053
+permuted,basis-reuse-related-to-A43,7,49657,40927,60833
+permuted,geometric-quickhull,7,15085,13759,15714
+permuted,lp-membership-baseline,7,1188713,1180891,1204008
+permuted,ordered-membership-related-to-A44,7,1189412,1180332,1200587
