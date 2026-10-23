@@ -2,6 +2,7 @@
 
 #include <algorithm>
 #include <array>
+#include <cfenv>
 #include <cmath>
 #include <limits>
 
@@ -19,28 +20,58 @@ struct Interval {
 
 inline constexpr double negative_infinity = -std::numeric_limits<double>::infinity();
 inline constexpr double positive_infinity = std::numeric_limits<double>::infinity();
+inline bool supported_rounding_mode() { return std::fegetround() == FE_TONEAREST; }
 
 inline Interval whole() { return {negative_infinity, positive_infinity}; }
 inline double down(double value) { return std::nextafter(value, negative_infinity); }
 inline double up(double value) { return std::nextafter(value, positive_infinity); }
 
+// Knuth's TwoSum decomposition proves the rounded sum exact when its error is
+// zero. For finite binary64 inputs without overflow, all intermediate exact
+// sums/differences remain integer multiples of the least subnormal, so the
+// decomposition does not lose a nonzero residual to underflow.
+inline bool exact_sum(double a, double b, double sum) {
+    if (!std::isfinite(a) || !std::isfinite(b) || !std::isfinite(sum)) return false;
+    const double b_virtual = sum - a;
+    const double a_virtual = sum - b_virtual;
+    const double b_roundoff = b - b_virtual;
+    const double a_roundoff = a - a_virtual;
+    return a_roundoff + b_roundoff == 0.0;
+}
+
 inline Interval add(Interval a, Interval b) {
     const double lower = a.lower + b.lower;
     const double upper = a.upper + b.upper;
     if (std::isnan(lower) || std::isnan(upper)) return whole();
-    return {down(lower), up(upper)};
+    return {exact_sum(a.lower, b.lower, lower) ? lower : down(lower),
+        exact_sum(a.upper, b.upper, upper) ? upper : up(upper)};
 }
 
 inline Interval multiply(Interval a, Interval b) {
-    const std::array<double, 4> products{
-        a.lower * b.lower, a.lower * b.upper, a.upper * b.lower, a.upper * b.upper};
+    struct Product { double value; bool exact; };
+    const auto product = [](double x, double y) {
+        const double value = x * y;
+        const bool exact = std::isfinite(value) &&
+            (x == 0.0 || y == 0.0 || x == 1.0 || y == 1.0 || x == -1.0 || y == -1.0);
+        return Product{value, exact};
+    };
+    const std::array<Product, 4> products{
+        product(a.lower, b.lower), product(a.lower, b.upper),
+        product(a.upper, b.lower), product(a.upper, b.upper)};
     if (std::any_of(products.begin(), products.end(),
-            [](double value) { return std::isnan(value); })) return whole();
-    const auto [minimum, maximum] = std::minmax_element(products.begin(), products.end());
-    return {down(*minimum), up(*maximum)};
+            [](const Product& value) { return std::isnan(value.value); })) return whole();
+    const auto minimum = std::min_element(products.begin(), products.end(),
+        [](const Product& x, const Product& y) { return x.value < y.value; });
+    const auto maximum = std::max_element(products.begin(), products.end(),
+        [](const Product& x, const Product& y) { return x.value < y.value; });
+    return {minimum->exact ? minimum->value : down(minimum->value),
+        maximum->exact ? maximum->value : up(maximum->value)};
 }
 
 inline Interval square(Interval value) {
+    if (value.lower == 0.0 && value.upper == 0.0) return {0.0, 0.0};
+    if (value.lower == value.upper &&
+        (value.lower == 1.0 || value.lower == -1.0)) return {1.0, 1.0};
     if (value.lower <= 0 && value.upper >= 0) {
         const double upper = std::max(value.lower * value.lower, value.upper * value.upper);
         if (std::isnan(upper)) return {0, positive_infinity};

@@ -90,6 +90,9 @@ std::variant<std::vector<Interval>,Unsupported> bounds_of(const sets::SetData& d
 
 WorstCaseIntervalOutcome worst_case_interval(const WorstCaseIntervalRequest& request,
         const ExecutionContext& context) {
+    if (!detail::supported_rounding_mode())
+        return OperationStopped{StopReason::numerical_failure,
+            "Outward interval evaluation requires FE_TONEAREST rounding."};
     if(request.problem.value.empty()||request.request.value.empty())
         return Unsupported{{{DiagnosticCode::invalid_input,"worst_case_interval.identity",
             "Nonempty problem and request identities are required."}}};
