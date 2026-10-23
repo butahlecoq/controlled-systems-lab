@@ -247,7 +247,8 @@ class GalleryTests(unittest.TestCase):
             self.assertIn(f'href="{url}"', page)
         validated_svg = ET.parse(self.site / "examples/issue3-validated-minimax.svg")
         self.assertEqual(len(validated_svg.findall(f".//{ns}polygon")), 3)
-        self.assertIn("strict violation", "".join(validated_svg.getroot().itertext()))
+        self.assertIn("u=(1,0): bad", "".join(validated_svg.getroot().itertext()))
+        self.assertIn("gap=¼", "".join(validated_svg.getroot().itertext()))
         first = {p.name: p.read_bytes() for p in (self.site / "examples").iterdir()}
         gallery.build(self.catalog, self.site)
         self.assertEqual({p.name: p.read_bytes() for p in (self.site / "examples").iterdir()}, first)

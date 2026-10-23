@@ -142,7 +142,8 @@ def svg(case):
                              -1, 2, "#e79a78", "#e79a78", "0.28")
         return _base("Validated finite-action minimax in the state plane", -1, 2,
                      [safe, feasible, violating],
-                     ("safe set: [-1/2,1/2]²", "u=(0,0): w corners stay safe", "worst norm = √(1/8)", "u=(1,0): strict violation", "w=(-1/4,-1/4), residual=1/4"))
+                     ("safe: ±1/2", "u=0: safe", "max=√(1/8)",
+                      "u=(1,0): bad", "w₀=(-¼,-¼)", "gap=¼"))
     tri = _polygon([[0, 0], [1, 0], [0, 1]], -1, 2, "#b4cda3", "#7b9b70", "0.35")
     px, py = _xy((0.25, 0.25), -1, 2)
     dot = f'<circle cx="{px:.2f}" cy="{py:.2f}" r="7" fill="#f0f7e9" stroke="#b4cda3" stroke-width="3"/>'
