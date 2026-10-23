@@ -26,31 +26,61 @@ bool finite(const Vector& values) {
         [](double value) { return std::isfinite(value); });
 }
 
+struct SparseEntry {
+    std::size_t column;
+    double value;
+};
+
 class JointRows {
     std::size_t columns_;
-    Matrix inequalities_;
+    SparseMatrix inequalities_;
     Vector upper_bounds_;
-    Matrix equalities_;
+    SparseMatrix equalities_;
     Vector equality_values_;
 
 public:
-    explicit JointRows(std::size_t columns)
-        : columns_(columns), inequalities_{0, columns, {}}, equalities_{0, columns, {}} {}
+    bool append(std::vector<SparseEntry> coefficients, double bound, bool equality) {
+        if (!std::isfinite(bound)) return false;
+        for (const auto& entry : coefficients)
+            if (entry.column >= columns_ || !std::isfinite(entry.value)) return false;
+        std::sort(coefficients.begin(), coefficients.end(), [](const SparseEntry& left, const SparseEntry& right) {
+            if (left.column != right.column) return left.column < right.column;
+            return left.value < right.value;
+        });
 
-    bool append(Vector coefficients, double bound, bool equality) {
-        if (coefficients.size() != columns_ || !finite(coefficients) || !std::isfinite(bound))
-            return false;
         auto& matrix = equality ? equalities_ : inequalities_;
         auto& bounds = equality ? equality_values_ : upper_bounds_;
+        std::size_t retained = 0;
+        for (std::size_t index = 0; index < coefficients.size(); ++index) {
+            const auto entry = coefficients[index];
+            if (entry.value == 0.0) continue;
+            if (retained != 0 && coefficients[retained - 1].column == entry.column) {
+                coefficients[retained - 1].value += entry.value;
+                if (!std::isfinite(coefficients[retained - 1].value)) return false;
+                if (coefficients[retained - 1].value == 0.0) --retained;
+            } else {
+                coefficients[retained++] = entry;
+            }
+        }
+        coefficients.resize(retained);
+
         const auto maximum = std::numeric_limits<std::size_t>::max();
-        if (matrix.rows == maximum ||
-            (columns_ != 0 && matrix.rows + 1 > maximum / columns_))
+        if (matrix.rows >= maximum - 1 || coefficients.size() > maximum - matrix.values.size())
             return false;
+        for (const auto& entry : coefficients) {
+            matrix.column_indices.push_back(entry.column);
+            matrix.values.push_back(entry.value);
+        }
+        matrix.row_offsets.push_back(matrix.values.size());
         ++matrix.rows;
-        matrix.values.insert(matrix.values.end(), coefficients.begin(), coefficients.end());
         bounds.push_back(bound);
         return true;
     }
+
+public:
+    explicit JointRows(std::size_t columns)
+        : columns_(columns), inequalities_{0, columns, {0}, {}, {}},
+          equalities_{0, columns, {0}, {}, {}} {}
 
     bool append_set(const sets::SetData& data, std::size_t offset) {
         const auto dimension = data.metadata()->set.dimension;
@@ -59,10 +89,18 @@ public:
         if (const auto* h = std::get_if<sets::HRepresentation>(&representation)) {
             const auto append_rows = [&](numeric::MatrixView matrix, numeric::VectorView bounds,
                                          bool equality) {
+                const auto descriptor = matrix.descriptor();
                 for (std::size_t row = 0; row < matrix.rows(); ++row) {
-                    Vector coefficients(columns_, 0.0);
-                    for (std::size_t column = 0; column < dimension; ++column)
-                        coefficients[offset + column] = matrix(row, column);
+                    std::vector<SparseEntry> coefficients;
+                    if (const auto* csr = std::get_if<numeric::CsrInput>(&descriptor)) {
+                        for (auto index = csr->row_offsets[row]; index < csr->row_offsets[row + 1]; ++index)
+                            coefficients.push_back({offset + csr->column_indices[index], csr->values[index]});
+                    } else {
+                        for (std::size_t column = 0; column < dimension; ++column) {
+                            const auto value = matrix(row, column);
+                            if (value != 0.0) coefficients.push_back({offset + column, value});
+                        }
+                    }
                     if (!append(std::move(coefficients), bounds[row], equality)) return false;
                 }
                 return true;
@@ -72,15 +110,14 @@ public:
         }
         if (const auto* singleton = std::get_if<sets::SingletonRepresentation>(&representation)) {
             for (std::size_t column = 0; column < dimension; ++column) {
-                Vector coefficients(columns_, 0.0);
-                coefficients[offset + column] = 1.0;
+                std::vector<SparseEntry> coefficients{{offset + column, 1.0}};
                 if (!append(std::move(coefficients), singleton->point[column], true)) return false;
             }
             return true;
         }
         if (std::holds_alternative<sets::EmptyRepresentation>(representation)) {
             // 0 <= -1 preserves emptiness in the lifted ambient space.
-            return append(Vector(columns_, 0.0), -1.0, false);
+            return append({}, -1.0, false);
         }
         if (std::holds_alternative<sets::UniversalRepresentation>(representation)) return true;
         return false;
@@ -181,8 +218,7 @@ ControlRecoveryOutcome recover_joint_history(const problem::ResolvedProblem& res
     if (initial->point.size() != n || !finite(initial->point))
         return fail(invalid("recovery.initial", "Known initial point has an invalid dimension or nonfinite value."));
     for (std::size_t column = 0; column < n; ++column) {
-        Vector coefficients(width, 0.0);
-        coefficients[column] = 1.0;
+        std::vector<SparseEntry> coefficients{{column, 1.0}};
         if (!rows.append(std::move(coefficients), initial->point[column], true))
             return fail(unsupported("recovery.arithmetic", "Could not encode the known initial point."));
     }
@@ -233,12 +269,13 @@ ControlRecoveryOutcome recover_joint_history(const problem::ResolvedProblem& res
         const auto next_offset = (stage + 1) * n;
         const auto control_offset = state_width + stage * m;
         for (std::size_t row = 0; row < n; ++row) {
-            Vector coefficients(width, 0.0);
-            coefficients[next_offset + row] = 1.0;
+            std::vector<SparseEntry> coefficients{{next_offset + row, 1.0}};
             for (std::size_t column = 0; column < n; ++column)
-                coefficients[stage * n + column] = -step.A(row, column);
+                if (step.A(row, column) != 0.0)
+                    coefficients.push_back({stage * n + column, -step.A(row, column)});
             for (std::size_t column = 0; column < m; ++column)
-                coefficients[control_offset + column] = -step.B(row, column);
+                if (step.B(row, column) != 0.0)
+                    coefficients.push_back({control_offset + column, -step.B(row, column)});
             // x_(t+1) - A_t*x_t - B_t*u_t = a_t. E is absent by profile.
             if (!rows.append(std::move(coefficients), step.offset[row], true))
                 return fail(unsupported("recovery.arithmetic", "Could not encode a finite dynamics equality."));

@@ -129,7 +129,20 @@ class GalleryTests(unittest.TestCase):
             self.assertEqual((self.site / rid / "index.html").read_bytes(), content)
         self.assertIn('href="examples/index.html"', (self.site / "index.html").read_text())
         page = (self.site / "examples/index.html").read_text(encoding="utf-8")
-        self.assertIn('<a class="nav-shortcut" href="#saved-report-figures">Jump to the last topic ↓</a>', page)
+        last_topic = gallery.SAVED_FIGURES[-1]
+        last_anchor = f"saved-figure-{len(gallery.SAVED_FIGURES)}"
+        self.assertIn(
+            f'<a class="nav-shortcut" href="#{last_anchor}">Jump to final example: '
+            f'{last_topic["title"]} ↓</a>', page)
+        self.assertIn('target.scrollIntoView({behavior:"instant",block:"start"})', page)
+        self.assertIn('<nav aria-label="Examples" tabindex="0">', page)
+        self.assertIn(f'<article id="{last_anchor}" class="saved-figure">', page)
+        stylesheet = (Path(gallery.__file__).with_name("visual_examples.css")).read_text(encoding="utf-8")
+        self.assertIn("height:calc(100vh - 6rem);display:flex;flex-direction:column", stylesheet)
+        self.assertIn("min-height:0;max-height:min(42vh,24rem);overflow-y:auto", stylesheet)
+        self.assertIn("max-height:35vh;overflow-y:auto;overscroll-behavior:contain", stylesheet)
+        self.assertIn("@media(max-height:500px) and (min-width:651px)", stylesheet)
+        self.assertNotIn("overflow:visible", stylesheet)
         self.assertIn("Original point ID", page)
         self.assertIn("explicit analytic constructions", page)
         self.assertIn("duplicate of point 0", page)

@@ -733,6 +733,8 @@ def build(catalog, site):
     examples = load_examples(catalog)
     site = Path(site).resolve(strict=True)
     saved_figures, saved_inventory = saved_figure_sections(catalog, site)
+    last_topic_anchor = f"saved-figure-{len(SAVED_FIGURES)}"
+    last_topic_title = SAVED_FIGURES[-1]["title"]
     analytic_files, analytic_inventory = visual_illustrations.build(Path(catalog))
     index = report_data.local_file(site, "index.html")
     original = index.read_text(encoding="utf-8")
@@ -786,8 +788,8 @@ def build(catalog, site):
             '<body><a class="skip" href="#main">Skip to examples</a><div class="shell"><aside>'
             '<a class="brand" href="../index.html">[ csl ]<br>Controlled Systems Lab</a>'
             '<p class="eyebrow">Learn by looking</p>'
-            '<a class="nav-shortcut" href="#saved-report-figures">Jump to the last topic ↓</a>'
-            '<nav aria-label="Examples">' + navigation +
+            f'<a class="nav-shortcut" href="#{last_topic_anchor}">Jump to final example: {escape(last_topic_title)} ↓</a>'
+            '<nav aria-label="Examples" tabindex="0">' + navigation +
             '<a href="../index.html">All numerical reports ↗</a></nav></aside><main id="main">'
             '<header><p class="eyebrow">Small inputs / visible answers</p><h1>Algorithms,<br><em>in two dimensions.</em></h1>'
             '<p>See what goes in, what comes out, and why. Explore hull vertices, set intersections, hybrid control families, and projected reachability.</p>'
@@ -810,7 +812,11 @@ def build(catalog, site):
             '<h2>More algorithms, from saved evidence</h2><p>These figures are published with their original reports. '
             'Open a report for its exact inputs, answers, reproduction commands, provenance and evidence limits.</p>'
             '<div class="saved-grid">' + saved_figures + '</div></section>' +
-            '<footer>Controlled Systems Lab · Saved evidence, visible geometry.</footer></main></div></body></html>')
+            '<footer>Controlled Systems Lab · Saved evidence, visible geometry.</footer></main></div>'
+            '<script>document.querySelector(".nav-shortcut").addEventListener("click",event=>{'
+            'const target=document.querySelector(event.currentTarget.hash);if(!target)return;'
+            'event.preventDefault();history.pushState(null,"",event.currentTarget.hash);'
+            'target.scrollIntoView({behavior:"instant",block:"start"});});</script></body></html>')
     outputs["index.html"] = body
     export = [{key: value for key, value in e.items() if key not in {"records_path", "domain"}} for e in examples]
     outputs["minimal-inputs.json"] = json.dumps({"schema": "csl.visual-examples/1", "examples": export}, indent=2) + "\n"

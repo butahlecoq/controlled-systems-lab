@@ -304,6 +304,26 @@ bool contains(const sets::SetData& set,const Vector& point) {
     }
     return true;
 }
+bool valid_csr(const numeric::MatrixView& matrix) {
+    const auto descriptor=matrix.descriptor();
+    const auto* csr=std::get_if<numeric::CsrInput>(&descriptor);
+    if(!csr||csr->rows==std::numeric_limits<std::size_t>::max()||
+        csr->row_offsets.size()!=csr->rows+1||csr->row_offsets.front()!=0||
+        csr->row_offsets.back()!=csr->values.size()||csr->values.size()!=csr->column_indices.size())return false;
+    for(std::size_t row=0;row<csr->rows;++row) {
+        const auto first=csr->row_offsets[row],last=csr->row_offsets[row+1];
+        if(first>last||last>csr->values.size())return false;
+        for(auto index=first;index<last;++index)
+            if(csr->column_indices[index]>=csr->cols||
+                (index>first&&csr->column_indices[index-1]>=csr->column_indices[index]))return false;
+    }
+    return true;
+}
+bool sparse_h(const sets::SetData& set) {
+    const auto representation=set.representation();
+    const auto* h=std::get_if<sets::HRepresentation>(&representation);
+    return h&&valid_csr(h->inequalities)&&valid_csr(h->equalities);
+}
 std::size_t equality_rank(const sets::HRepresentation& h) {
     std::vector<Vector> rows(h.equalities.rows(),Vector(h.equalities.cols()));
     for(std::size_t r=0;r<rows.size();++r)for(std::size_t c=0;c<rows[r].size();++c)rows[r][c]=h.equalities(r,c);
@@ -404,11 +424,13 @@ TEST_CASE("exact reviewed T-S01 executes registered Strategy A providers and com
     CHECK(proposal.identity.coordinates==JointCoordinates{{1,1,0},2});
     CHECK(proposal.identity.lineage==staged_result.family->identity().lineage);
     const auto& staged_history=payload(staged_result);
+    CHECK(sparse_h(staged_history.history.relation));
     entire_segment(staged_history.history.relation,{0,0,1,0,1},{0,1,0,1,-1});
     CHECK_FALSE(contains(staged_history.history.relation,{0,1,2,1,1}));
     const auto& staged_complete=proposal.family;
     const auto* staged_exact=dynamic_cast<const synthesis::strategy_ts01::ExactJointRelation*>(staged_complete.relation.payload.get());
     REQUIRE(staged_exact);
+    CHECK(sparse_h(staged_exact->h_polyhedron()));
     CHECK(staged_exact->h_polyhedron().metadata()->set.dimension==5);
     CHECK(staged_exact->contains(Vector{0,.25,1,.25,.75}));
     CHECK_FALSE(staged_exact->contains(Vector{0,1,2,1,1}));
@@ -449,6 +471,7 @@ TEST_CASE("exact reviewed T-S01 executes registered Strategy A providers and com
     CHECK(proof->proof=="TS01-analytic-v1");
     const auto* exact=dynamic_cast<const synthesis::strategy_ts01::ExactJointRelation*>(complete.relation.payload.get());
     REQUIRE(exact);
+    CHECK(sparse_h(exact->h_polyhedron()));
     CHECK(exact->h_polyhedron().metadata()->set.dimension==5);
     CHECK(exact->h_polyhedron().metadata()->coordinate_labels==std::vector<std::string>{"x0","x1","x2","u0","u1"});
     // Rank-four affine equalities and substituted H-rows reduce this public relation to
@@ -646,6 +669,7 @@ TEST_CASE("public Strategy A exact T-S02 family equals the analytic feasible-his
     // constant 3, so every point in this relation is optimal. These seven
     // rows are the whole relation, rather than a finite set of witnesses.
     const auto polyhedron=relation->h_polyhedron();
+    CHECK(sparse_h(polyhedron));
     const auto representation=polyhedron.representation();
     const auto& actual=std::get<sets::HRepresentation>(representation);
     REQUIRE(actual.inequalities.rows()==4);
@@ -676,6 +700,7 @@ TEST_CASE("public Strategy A exact T-S03 preserves every history under a unique 
     const auto* relation=dynamic_cast<const synthesis::Ts03SingularIntegratorRelation*>(complete.relation.payload.get());
     REQUIRE(relation);
     const auto polyhedron=relation->h_polyhedron();
+    CHECK(sparse_h(polyhedron));
     const auto representation=polyhedron.representation();
     const auto& actual=std::get<sets::HRepresentation>(representation);
     REQUIRE(actual.inequalities.rows()==2);

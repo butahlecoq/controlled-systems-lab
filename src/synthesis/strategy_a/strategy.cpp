@@ -71,11 +71,9 @@ std::vector<TransformStepIdentity> forward_lineage(const reachability::ForwardTu
 }
 std::variant<std::shared_ptr<const ::csl::synthesis::Ts02ConstantIntegratorRelation>,Diagnostics>
 canonical_ts02_relation() {
-    auto inequalities=numeric::snapshot(Matrix{4,5,{0,0,0,1,0, 0,0,0,-1,0,
-        0,0,0,0,1, 0,0,0,0,-1}});
+    auto inequalities=numeric::snapshot(SparseMatrix{4,5,{0,1,2,3,4},{3,3,4,4},{1,-1,1,-1}});
     auto upper=numeric::snapshot_vector(Vector{1,0,1,0});
-    auto equalities=numeric::snapshot(Matrix{3,5,{1,0,0,0,0, -1,1,0,-1,0,
-        0,-1,1,0,-1}});
+    auto equalities=numeric::snapshot(SparseMatrix{3,5,{0,1,4,7},{0,0,1,3,1,2,4},{1,-1,1,-1,-1,1,-1}});
     auto equality_values=numeric::snapshot_vector(Vector{0,0,0});
     if(!std::holds_alternative<numeric::MatrixView>(inequalities)||
         !std::holds_alternative<numeric::VectorView>(upper)||
@@ -92,10 +90,9 @@ canonical_ts02_relation() {
 }
 std::variant<std::shared_ptr<const ::csl::synthesis::Ts03SingularIntegratorRelation>,Diagnostics>
 canonical_ts03_relation() {
-    auto inequalities=numeric::snapshot(Matrix{2,5,{0,0,0,1,0, 0,0,0,-1,0}});
+    auto inequalities=numeric::snapshot(SparseMatrix{2,5,{0,1,2},{3,3},{1,-1}});
     auto upper=numeric::snapshot_vector(Vector{1,0});
-    auto equalities=numeric::snapshot(Matrix{4,5,{1,0,0,0,0, 0,1,0,-1,0,
-        0,0,1,0,0, 0,0,0,0,1}});
+    auto equalities=numeric::snapshot(SparseMatrix{4,5,{0,1,3,4,5},{0,1,3,2,4},{1,1,-1,1,1}});
     auto equality_values=numeric::snapshot_vector(Vector{0,0,1,1});
     if(!std::holds_alternative<numeric::MatrixView>(inequalities)||
         !std::holds_alternative<numeric::VectorView>(upper)||

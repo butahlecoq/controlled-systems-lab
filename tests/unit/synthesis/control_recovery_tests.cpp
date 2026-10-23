@@ -121,6 +121,13 @@ bool contains(const sets::SetData& set, const Vector& point) {
     return std::holds_alternative<sets::EmptyRepresentation>(representation) && false;
 }
 
+bool sparse_h(const sets::SetData& set) {
+    const auto representation = set.representation();
+    const auto* h = std::get_if<sets::HRepresentation>(&representation);
+    return h && std::holds_alternative<numeric::CsrInput>(h->inequalities.descriptor()) &&
+        std::holds_alternative<numeric::CsrInput>(h->equalities.descriptor());
+}
+
 Vector history(double u0, double u1) {
     return {0, u0, u0 + u1, u0, u1}; // canonical [x0,x1,x2,u0,u1]
 }
@@ -134,6 +141,7 @@ const sets::SetData& recovered(const synthesis::ControlRecoveryOutcome& outcome)
 TEST_CASE("backward recovery retains the two-step terminal fiber and rejects infeasible control histories") {
     const auto result = synthesis::recover_joint_history(integrator(), interval_data("terminal-one", 1, 1));
     const auto& relation = recovered(result);
+    CHECK(sparse_h(relation));
 
     // Every returned point is checked against the public meaning of a history:
     // x0=0, x1=u0, x2=u0+u1, 0<=u0,u1<=1, and x2=1.
@@ -146,10 +154,38 @@ TEST_CASE("backward recovery retains the two-step terminal fiber and rejects inf
     CHECK_FALSE(contains(relation, history(0.25, 0.5))); // misses terminal slice
 }
 
+TEST_CASE("recovery stores empty terminal contradictions as sparse zero rows") {
+    const auto empty_terminal = take(sets::make_empty({{"empty-terminal"}, 1, {"x"}}));
+    const auto relation = recovered(synthesis::recover_joint_history(integrator(), empty_terminal));
+    CHECK(sparse_h(relation));
+    CHECK_FALSE(contains(relation, history(0.5, 0.5)));
+
+    const auto representation = std::get<sets::HRepresentation>(relation.representation());
+    const auto rows = std::get<numeric::CsrInput>(representation.inequalities.descriptor());
+    bool has_empty_contradiction = false;
+    for (std::size_t row = 0; row < rows.rows; ++row)
+        if (rows.row_offsets[row] == rows.row_offsets[row + 1] &&
+            representation.upper_bounds[row] == -1.0)
+            has_empty_contradiction = true;
+    CHECK(has_empty_contradiction);
+}
+
+TEST_CASE("recovery embeds CSR terminal rows at the terminal-state coordinates") {
+    const auto terminal = take(sets::make_h({{"csr-terminal-one"}, 1, {"x"}},
+        {take(numeric::snapshot(SparseMatrix{2, 1, {0, 1, 2}, {0, 0}, {1, -1}})),
+         vector({1, -1}), take(numeric::snapshot(SparseMatrix{0, 1, {0}, {}, {}})), vector({})}));
+    const auto relation = recovered(synthesis::recover_joint_history(integrator(), terminal));
+
+    CHECK(sparse_h(relation));
+    CHECK(contains(relation, history(0.25, 0.75)));
+    CHECK_FALSE(contains(relation, history(0.25, 0.5)));
+}
+
 TEST_CASE("recovery handles singular transitions without inverting A") {
     const auto result = synthesis::recover_joint_history(
         singular_integrator(), interval_data("singular-terminal-one", 1, 1));
     const auto& relation = recovered(result);
+    CHECK(sparse_h(relation));
 
     // x1=u0 and x2=u1 when A=0. The terminal slice fixes u1=1 while
     // leaving every admissible first-stage control free.
@@ -164,6 +200,7 @@ TEST_CASE("recovery preserves the full feasible history when the supplied termin
     // terminal minimizer relation for a constant terminal criterion.
     const auto result = synthesis::recover_joint_history(integrator(), interval_data("terminal-full", 0, 2));
     const auto& relation = recovered(result);
+    CHECK(sparse_h(relation));
 
     for (double u0 : {0.0, 0.2, 0.5, 1.0})
         for (double u1 : {0.0, 0.3, 0.7, 1.0})

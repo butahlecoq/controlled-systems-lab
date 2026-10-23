@@ -48,9 +48,13 @@ Recovery joins transition fibers by retaining their shared state coordinates in
 one H relation. It never multiplies state/control marginals, and never inverts A.
 This uses merged PR #182's direct equation construction rather than the archived
 single-witness inverse algorithm. It does not execute separate backward marginal
-projections or implement an inverse-only fast path. The current H buffers are
-dense; a sparse relation payload and explicit per-fiber backward representation
-remain architectural follow-up work.
+projections or implement an inverse-only fast path. Recovery assembles its H
+inequalities and equalities directly in CSR form. The complete T-S01, T-S02, and
+T-S03 profile payloads also retain CSR-backed H matrices, including the full
+cross-stage relation. Matrix views let the compiled verifiers and selectors read
+those matrices without changing the relation's coordinates or coefficients.
+Recorded H attachments still serialize logical matrix coefficients in the
+existing dense format. They do not preserve CSR storage.
 
 `CandidateHistory::target` distinguishes the forward-slice fallback from the
 terminal-candidate preimage. Merely retaining a terminal optimizer result does
@@ -91,8 +95,9 @@ new shared contract. No shared interface is changed by this module.
   A direct deadline stop preserves `deadline_expired` and uses `cancelled`
   termination, as required by the current shared synthesis result guard.
 - Witness selection, independent history verification, reviewed coverage,
-  cross-strategy T-X01 comparison, artifact export, complete sparse history
-  representation, and T-L02 barycentric diagnostics are not delivered here.
+  cross-strategy T-X01 comparison, and T-L02 barycentric diagnostics are not
+  delivered here. Run export remains limited to the existing H attachment
+  format, which materializes matrix coefficients rather than preserving CSR.
 
 The T-S01 and singular T-S03 tests independently establish their complete
 optimal-history relations, including equality rank and the literal parameter

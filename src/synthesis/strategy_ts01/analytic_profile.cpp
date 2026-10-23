@@ -110,9 +110,9 @@ registry::StrategyRegistration make_registration() {
 
 MidpointJointRelation::MidpointJointRelation(sets::SetData h_polyhedron):h_polyhedron_(std::move(h_polyhedron)) {}
 std::variant<std::shared_ptr<const MidpointJointRelation>,Diagnostics> MidpointJointRelation::canonical() {
-    auto inequalities=numeric::snapshot(Matrix{0,5,{}});
+    auto inequalities=numeric::snapshot(SparseMatrix{0,5,{0},{},{}});
     auto upper=numeric::snapshot_vector(Vector{});
-    auto equalities=numeric::snapshot(Matrix{5,5,{1,0,0,0,0,0,1,0,0,0,0,0,1,0,0,0,0,0,1,0,0,0,0,0,1}});
+    auto equalities=numeric::snapshot(SparseMatrix{5,5,{0,1,2,3,4,5},{0,1,2,3,4},{1,1,1,1,1}});
     auto equality_values=numeric::snapshot_vector(Vector{0,0.5,1,0.5,0.5});
     if(!std::holds_alternative<numeric::MatrixView>(inequalities)||!std::holds_alternative<numeric::VectorView>(upper)||
         !std::holds_alternative<numeric::MatrixView>(equalities)||!std::holds_alternative<numeric::VectorView>(equality_values))
