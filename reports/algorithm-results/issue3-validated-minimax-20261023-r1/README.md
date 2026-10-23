@@ -4,4 +4,4 @@ Seven measured batches per fixture after one excluded warmup. This report measur
 
 The B08 capture uses exact-real semantics for the binary64 inputs represented by saved hexadecimal floats. It is not the separate printed-decimal rational audit, and does not establish a general solver guarantee beyond this API's documented contract.
 
-`evidence/` retains the clean Release executable, build/configure logs, raw stdout/stderr, host/platform/compiler receipts, and source status. Regenerate the checked report with `python3 scripts/reports/issue3/validated_saved.py <capture-dir> <new-output-dir>`. Rendering reads saved JSONL and does not run the solver.
+`evidence/` retains configure/build output, smoke and measurement stdout/stderr, the executable SHA-256 receipt, host/platform/compiler receipts, and source status. The executable itself is not included. Regenerate the checked report with `python3 scripts/reports/issue3/validated_saved.py <capture-dir> <new-output-dir>`. Rendering reads saved JSONL and does not run the solver.
