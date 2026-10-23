@@ -1,5 +1,8 @@
 # QuickHull and ITIS17-related LP hull pilot (preliminary)
 
+Open the [standalone result report](index.html) for the measured summary and
+labelled fixture geometry ([SVG source](fixture-geometry.svg)).
+
 ## Result
 
 This exploratory run is **inconclusive as a performance comparison**. It ran
@@ -65,6 +68,7 @@ executable hash, raw rows and summary are retained here. CMake source is under
 `benchmarks/reporting/it17_hull/`; run `summarize.py` to regenerate the raw-row
 copy and summary CSV from a capture.
 
-This is an exploratory, unregistered report bundle. It does not satisfy or
-close comparison-program issue #423, whose shared-record and other prerequisites
-remain separate gates. No result is published to Pages.
+This is an exploratory, unregistered report bundle. Its standalone HTML and
+SVG are versioned offline artifacts, not a deployed Pages report. It does not
+satisfy or close comparison-program issue #423, whose shared-record and other
+prerequisites remain separate gates.
