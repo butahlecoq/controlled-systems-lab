@@ -998,6 +998,30 @@ TEST_CASE("registered Strategy B publishes complete T-S01 evidence only through 
     unsupported.target=FamilyTarget::exact_optimal_relation;
     CHECK(std::holds_alternative<registry::Rejection>(strategies.prepare({neighboring,configuration,unsupported,"1"},requirements)));
 }
+TEST_CASE("registered Strategy B candidate respects a nonempty intermediate-state constraint") {
+    auto input=integrator();
+    input.states={UniversalSet{1},interval(0.5).as_handle(),UniversalSet{1}};
+    const auto p=resolve(input);
+    const auto q=request(p);
+    const auto prepared=registered_prepared(p,q);
+    auto workspace=prepared.create();
+    ExecutionContext context;
+    context.resources=std::make_shared<const ResourcePolicy>(ResourcePolicy{1,1,1,{}});
+
+    const auto result=accepted(workspace->run(context));
+
+    CHECK(result.termination==Termination::completed);
+    CHECK(result.outcome.subject==p.identity());
+    CHECK(result.outcome.value==MathematicalOutcome::undetermined);
+    CHECK_FALSE(result.complete_proposal);
+    CHECK_FALSE(result.partial_proposal);
+    REQUIRE(result.family);
+    CHECK(result.family->target()==FamilyTarget::candidate_relaxation);
+    CHECK_FALSE(result.family->registry_verified());
+    const auto& candidate=payload(result);
+    CHECK(contains(candidate.relation,{0,0.25,1,0.25,0.75}));
+    CHECK_FALSE(contains(candidate.relation,{0,0.75,1,0.75,0.25}));
+}
 TEST_CASE("Strategy B T-S01 rejects a matching self-reported lineage without runtime evidence") {
     const auto p=resolve(integrator());
     auto exact=request(p);exact.profile=synthesis::strategy_ts01::profile_id;exact.target=FamilyTarget::exact_optimal_relation;
