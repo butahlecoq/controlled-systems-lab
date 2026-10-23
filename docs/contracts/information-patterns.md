@@ -29,10 +29,9 @@ The replay API accepts a single concrete initial vector. It cannot be passed
 an `InitialSet` or a `Problem` and never returns a plan for a set. Existing
 nominal synthesis strategies still reject unsupported initial uncertainty and
 feedback requests. The finite replay module below provides auditable
-policy-family evidence for an explicit scenario list. General initial-set
-synthesis, continuous-set policy-family evidence, and correlated
-initial/external information beyond the supplied scenario rows remain open
-under #68.
+policy-family evidence for an explicit scenario list. A separate continuous
+affine-policy evaluator is described below. General initial-set synthesis and
+policy classes outside that supported profile remain open under #68.
 
 ## Event and callback contract
 
@@ -88,6 +87,47 @@ evidence establishes nonanticipativity and model replay only on that finite
 enumeration; it does not establish constraint feasibility, optimality, or a
 continuous all-initial-states/all-disturbances guarantee.
 
+## Continuous affine observation policies
+
+`JointVUncertainty` defines one bounded joint uncertainty set as the convex
+hull of its complete authored generator rows. The coordinate layout places the
+initial state first, then each stage's external input, then every scheduled
+measurement-error vector. Each row carries all these values together, so
+correlation across the initial state, stages, and observation errors is
+preserved. This joint set is the source of truth for its initial-state
+projection; it is not combined with a second independently supplied
+`InitialSet`.
+
+`AffineObservationPolicy` stores a state estimate and action map for each
+decision stage. Each map names the observation components it may read. The
+builder rejects a reference whose declared availability is later than
+`before_decision(k)`. A post-decision observation at stage `k` can therefore
+affect a later decision but cannot affect the action already chosen at `k`.
+The policy has no callback entry point and cannot capture hidden future data.
+
+`PolicyCoverage::all_joint_uncertainty` evaluates every authored generator of
+the complete convex domain and returns per-generator, per-step states,
+released histories, estimates, actions, and safety margins. Under the affine
+model, affine policy, and linear safety-row assumptions, each safety margin is
+affine over the domain, so generator checks cover the convex hull. The reported
+assurance is `numerical`; binary64 propagation is not a validated proof. A
+margin within the requested tolerance is `inconclusive`, and a negative
+margin retains the generator trajectory that produced it.
+
+`PolicyCoverage::selected_joint_witness` instead accepts nonnegative convex
+weights over the generators and evaluates one selected joint point. It does
+not search for a witness, establish a universal guarantee, or implement the
+quantifier order `exists initial state, for all disturbances and errors`.
+That alternation remains unsupported. Neither coverage mode searches for or
+optimizes a policy. Safety constraints must be supplied as linear rows; the
+evaluator does not verify estimator accuracy or objective optimality.
+
+This API is distinct from `replay_observed_policy`, which runs one point
+through arbitrary callbacks, and `replay_finite_policy_family`, which checks
+an explicit finite list of scenarios. The former supports callback flexibility
+without a continuous coverage claim; the latter enforces nonanticipativity
+only on its listed rows.
+
 ## Supported variants and checks
 
 The first contract test uses a two-dimensional system with a one-dimensional
@@ -115,6 +155,12 @@ verified against the reviewed artifact hashes (page SHA-256
 report covers the configured sampled replay only and does not establish an
 all-initial-states policy, universal disturbance coverage, or validated
 guarantees. This report does not measure or validate the finite policy-family
-evaluator. General initial-set synthesis, continuous-set policy-family
-evidence, and correlated initial/external information beyond the supplied
-scenario rows remain open work under #68.
+or continuous-policy evaluators. The continuous evaluator covers only the
+joint V-polytope and affine-policy profile described above. General synthesis,
+H-represented joint domains, existential-initial/universal-disturbance
+quantifier alternation, and validated arithmetic remain open work under #68.
+
+The [two-state continuous-policy example](../examples/continuous-policy-2d.html)
+shows a position-velocity rectangle and its terminal image under a
+position-only affine observation policy. The runnable source is
+`examples/continuous_policy.cpp`.

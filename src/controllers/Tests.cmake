@@ -6,3 +6,7 @@ add_executable(finite_policy_tests tests/unit/controllers/finite_policy_tests.cp
 target_link_libraries(finite_policy_tests PRIVATE CSL::controllers CSL::model doctest::doctest)
 add_test(NAME finite_policy_tests COMMAND finite_policy_tests)
 csl_test_target(finite_policy_tests controllers)
+add_executable(continuous_policy_tests tests/unit/controllers/continuous_policy_tests.cpp)
+target_link_libraries(continuous_policy_tests PRIVATE CSL::controllers CSL::model doctest::doctest)
+add_test(NAME continuous_policy_tests COMMAND continuous_policy_tests)
+csl_test_target(continuous_policy_tests controllers)

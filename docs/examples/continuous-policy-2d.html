@@ -1,0 +1,24 @@
+<!doctype html>
+<html lang="en">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width">
+<title>Continuous affine observation policy example</title>
+<style>
+body{font:16px system-ui;max-width:980px;margin:2rem auto;padding:0 1rem;background:#172019;color:#dce5d5;line-height:1.55}
+main{background:#202a22;border:1px solid #405045;border-radius:12px;padding:1.5rem}
+svg{display:block;width:100%;height:auto;margin:1rem 0}
+code{color:#b4cda3}table{border-collapse:collapse;width:100%;margin:1rem 0}th,td{border:1px solid #53634f;padding:.45rem;text-align:left}
+</style>
+<main>
+<h1>Evaluate one affine policy over a continuous set</h1>
+<p>This two-state example uses position and velocity, with one position observation available before the action. The policy sets acceleration to the observed position. The initial joint V-set is the full square <code>[0,1] × [0,1]</code>, so its four rows define a continuous convex polytope rather than four random samples.</p>
+<img src="continuous-policy-2d.svg" alt="Initial square mapped to a terminal parallelogram under the affine observation policy">
+<table><thead><tr><th>Initial state</th><th>Observed position</th><th>Action</th><th>Terminal state</th></tr></thead>
+<tbody><tr><td>(0,0)</td><td>0</td><td>0</td><td>(0,0)</td></tr>
+<tr><td>(0,1)</td><td>0</td><td>0</td><td>(1,1)</td></tr>
+<tr><td>(1,0)</td><td>1</td><td>1</td><td>(1.5,1)</td></tr>
+<tr><td>(1,1)</td><td>1</td><td>1</td><td>(2.5,2)</td></tr></tbody></table>
+<p>The model is <code>p₁ = p₀ + v₀ + 0.5u₀</code>, <code>v₁ = v₀ + u₀</code>, with <code>u₀=p₀</code>. The example checks the action safety row <code>u₀ ≤ 1.25</code>. Because the model, policy, and displayed constraint are affine, checking the four generators covers the convex hull mathematically. The implementation reports numerical assurance because its propagation uses binary64 arithmetic. It does not call this a validated proof.</p>
+<p>Reproduce the numeric rows with <code>continuous_policy</code> from the installed example package. This illustration is separate from any benchmark timing.</p>
+</main>
+</html>
