@@ -169,6 +169,30 @@ TEST_CASE("singular dynamics and affine stage offsets require no inverse") {
     CHECK(feasible(q,{0,2.5,-0.25,0.5,0.75}));
     CHECK_FALSE(feasible(q,{0,2.5,2.25,0.5,0.75}));
 }
+TEST_CASE("each heterogeneous transition retains its own matrices and affine offset") {
+    const auto bounded_interval=[](double lower,double upper) {
+        return accepted(sets::make_h({{"stage-window"},1,{}},
+            {accepted(numeric::snapshot(Matrix{2,1,{1,-1}})),
+             accepted(numeric::snapshot_vector(Vector{upper,-lower})),
+             accepted(numeric::snapshot(Matrix{0,1,{}})),
+             accepted(numeric::snapshot_vector(Vector{}))}));
+    };
+    auto input=integrator();
+    input.initial=KnownInitial{{1}};
+    input.states={UniversalSet{1},UniversalSet{1},Singleton{{0.25}}};
+    input.controls=ContinuousDomain{{bounded_interval(0,1).as_handle(),
+                                     bounded_interval(0,2).as_handle()}};
+    input.model=std::make_shared<const SystemModel>(SystemModel{
+        {{1,1,0},TimeDomain::discrete,std::vector<LinearStage>{
+            {{1,1,{2}},{1,1,{1}},{1,0,{}},{0.5}},
+            {{1,1,{-1}},{1,1,{2}},{1,0,{}},{-0.25}}}}, {}});
+    const auto p=resolve(input);
+    const auto q=accepted(build_joint_program(p,request(p)));
+
+    CHECK(feasible(q,{1,3,0.25,0.5,1.75}));
+    CHECK_FALSE(feasible(q,{1,2,0.25,0.5,1.25}));
+    CHECK_FALSE(feasible(q,{1,3,0.25,0.5,1.5}));
+}
 TEST_CASE("temporal rows keep their authored joint coordinates and row lineage") {
     auto input=integrator();input.temporal=TemporalConstraints{{1,5,{0,2},{3,4},{1,1}},{{0.5,0.5}}};
     const auto p=resolve(input);const auto q=accepted(build_joint_program(p,request(p)));
