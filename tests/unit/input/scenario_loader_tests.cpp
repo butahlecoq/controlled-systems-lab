@@ -74,6 +74,34 @@ TEST_CASE("scenario v2 distinguishes malformed temporal order, width and interva
     auto reversed=accepted<InputFailure>(load(append_temporal(R"json({"coordinate_order":"x0,...,xT,u0,...,u(T-1)","rows":[[0,0,0,0,0]],"bounds":[{"lower":2,"upper":1}]})json")));
     CHECK(reversed.path=="/temporal/bounds/0");
 }
+TEST_CASE("scenario v2 retains zero-row and multirow temporal CSR shapes") {
+    const auto base=replace(std::string(minimal),"csl.scenario/1","csl.scenario/2");
+    const auto append_temporal=[&](std::string body) {
+        return replace(base,"\"objective\":{\"kind\":\"terminal_distance\",\"target\":[1]}",
+            "\"objective\":{\"kind\":\"terminal_distance\",\"target\":[1]},\"temporal\":"+body);
+    };
+
+    const auto zero_row=accepted<LoadedScenario>(load(append_temporal(
+        R"json({"coordinate_order":"x0,...,xT,u0,...,u(T-1)","rows":{"rows":0,"cols":5,"values":[]},"bounds":[]})json")));
+    REQUIRE(zero_row.problem().constraints().temporal());
+    const auto empty=*zero_row.problem().constraints().temporal();
+    CHECK(empty.joint_map.rows()==0);
+    CHECK(empty.joint_map.cols()==5);
+    CHECK(empty.bounds->empty());
+
+    const auto two_rows=accepted<LoadedScenario>(load(append_temporal(
+        R"json({"coordinate_order":"x0,...,xT,u0,...,u(T-1)","rows":[[0,0,0,-1,1],[0,0,1,0,0]],"bounds":[{"lower":-0.25,"upper":0.25},{"lower":1,"upper":1}]})json")));
+    REQUIRE(two_rows.problem().constraints().temporal());
+    const auto relation=*two_rows.problem().constraints().temporal();
+    CHECK(relation.joint_map.rows()==2);
+    CHECK(relation.joint_map.cols()==5);
+    CHECK(relation.joint_map(0,3)==-1);
+    CHECK(relation.joint_map(0,4)==1);
+    CHECK(relation.joint_map(1,2)==1);
+    REQUIRE(relation.bounds->size()==2);
+    CHECK(relation.bounds->at(1).lower==1);
+    CHECK(relation.bounds->at(1).upper==1);
+}
 TEST_CASE("reserved kinds reject at the authored boundary and typos remain malformed") {
     constexpr std::string_view model=R"({"kind":"linear_discrete","A":[[1]],"B":[[1]]})";
     for(const auto kind:{"linear_continuous","affine_continuous","linear_continuous_ltv","affine_continuous_ltv"}) {

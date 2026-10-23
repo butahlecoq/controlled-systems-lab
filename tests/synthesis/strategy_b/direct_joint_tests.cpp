@@ -290,6 +290,30 @@ TEST_CASE("v2 slew scenario compiles its 2D feasible polygon into the direct joi
         CHECK(feasible(program,{0,first,0,first,-first}));
     CHECK(feasible(program,{0,.1,.2,.1,.1}));
 }
+TEST_CASE("temporal coupling prevents the physical-state-only false terminal optimum") {
+    auto input=integrator(QuadraticTerminal{{1,1,{2}},{0},0});
+    const auto control=bounded_interval(-1,1).as_handle();
+    input.controls=ContinuousDomain{{control,control}};
+    input.states={UniversalSet{1},Singleton{{1}},UniversalSet{1}};
+    input.temporal=TemporalConstraints{{1,5,{0,2},{3,4},{-1,1}},{{-.25,.25}}};
+    const auto p=resolve(input);
+    const auto q=accepted(build_joint_program(p,request(p)));
+
+    // x1=1 forces u0=1. The slew row then restricts u1 to [3/4,1],
+    // so x2 lies in [7/4,2] and min x2^2 is 49/16.
+    CHECK(feasible(q,{0,1,1.75,1,.75}));
+    CHECK(feasible(q,{0,1,1.875,1,.875}));
+    CHECK(feasible(q,{0,1,2,1,1}));
+    CHECK_FALSE(feasible(q,{0,1,1.5,1,.5}));
+
+    // Dropping just the history-coupling row models physical-state-only
+    // propagation with an independent u1 in [-1,1]. It admits u=(1,-1),
+    // x2=0 and cost 0, the false optimum from the #9 counterexample.
+    CHECK(feasible_without_temporal_rows(q,{0,1,0,1,-1}));
+    CHECK_FALSE(feasible(q,{0,1,0,1,-1}));
+    CHECK(1.75*1.75==49.0/16.0);
+    CHECK(0.0*0.0==0.0);
+}
 bool feasible(const JointProgram& p,const Vector& x) {
     for(std::size_t i=0;i<p.constraints.rows;++i) {
         double v=0;for(auto j=p.constraints.row_offsets[i];j<p.constraints.row_offsets[i+1];++j)

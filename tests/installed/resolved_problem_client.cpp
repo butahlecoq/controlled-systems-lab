@@ -1,3 +1,4 @@
+#include <csl/problem/temporal_lifts.hpp>
 #include <csl/problem/validator.hpp>
 #include <iostream>
 #include <stdexcept>
@@ -26,6 +27,10 @@ public:
 };
 }
 int main() try {
+    const auto missing_model=lift_one_step_slew(Problem{},SlewMemoryRequest{});
+    require(std::holds_alternative<Diagnostic>(missing_model),"public slew lift did not reject a missing model");
+    require(std::get<Diagnostic>(missing_model).field=="problem.temporal_lift.model",
+        "public slew lift diagnostic field differs");
     const auto p=[] {
         Problem input{{"display"},std::make_shared<const SystemModel>(SystemModel{{{1,1,0},TimeDomain::discrete,
             LinearStage{{1,1,{0}},{1,1,{1}},{1,0,{}},{0}}},{}}),{0,1},KnownInitial{{2}},

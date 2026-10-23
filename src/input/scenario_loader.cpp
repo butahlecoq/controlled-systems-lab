@@ -266,9 +266,11 @@ public:
         }
         SparseMatrix sparse{rows.rows,rows.cols,{0},{},{}};
         sparse.values=std::move(rows.values);
-        sparse.column_indices.resize(width);
-        for(std::size_t j=0;j<width;++j) sparse.column_indices[j]=j;
-        for(std::size_t i=0;i<sparse.rows;++i) sparse.row_offsets.push_back((i+1)*width);
+        sparse.column_indices.reserve(sparse.values.size());
+        for(std::size_t i=0;i<sparse.rows;++i) {
+            for(std::size_t j=0;j<width;++j) sparse.column_indices.push_back(j);
+            sparse.row_offsets.push_back(sparse.column_indices.size());
+        }
         return {std::move(sparse),std::move(bounds)};
     }
 
