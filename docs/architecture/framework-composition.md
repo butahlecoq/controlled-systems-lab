@@ -107,21 +107,26 @@ Their general `nominal_open_loop` paths produce numerical candidate relations;
 they do not establish general complete-family coverage. See the
 [Strategy A implementation scope](../../src/synthesis/strategy_a/README.md).
 
-Both strategies additionally admit the strictly checked `ts01_exact_integrator`
-and `ts02_constant_integrator` profiles with compiled complete-family verifiers:
+Both strategies admit the strictly checked `ts01_exact_integrator`,
+`ts02_constant_integrator`, and `ts03_singular_integrator` profiles. Each
+profile has a compiled complete-family verifier in both Strategy A and Strategy B:
 
 | Profile | Original problem and complete joint relation |
 | --- | --- |
 | T-S01 | Two-step scalar unit integrator, `x0=0`, independent `u0,u1` in `[0,1]`, unrestricted states, no external/history constraints, terminal cost `(x2-1)^2`. Optimum zero; all histories are `(x0,x1,x2,u0,u1)=(0,s,1,s,1-s)`, `s` in `[0,1]`. |
 | T-S02 | Same integrator and domains, constant terminal objective `3` in the admitted linear, zero-quadratic or zero-map residual-norm form. Every feasible joint history is optimal. |
+| T-S03 | Two-step scalar singular integrator with both state matrices zero, control matrices one, zero offsets, `x0=0`, independent `u0,u1` in `[0,1]`, unrestricted states, no external/history constraints, and terminal cost `(x2-1)^2`. Optimum zero; all optimal histories are `(x0,x1,x2,u0,u1)=(0,s,1,s,1)`, `s` in `[0,1]`. |
 
 Exact coverage applies only to these reviewed predicates and canonical relations.
-It is bound to the original problem, effective request, strategy/version and
-executed lineage. It does not extend to changed horizons, dynamics, constraints
-or objectives. Outer registry assurance remains numerical; generic validated
-numerics are unavailable. The separate `csl.synthesis.ts01-analytic` registration
-provides the narrow T-S01 analytic path; it is not a replacement for either
-composed strategy.
+For T-S03, the zero state matrices make the state transitions `x1=u0` and
+`x2=u1`. The terminal objective forces `u1=1`; `u0` remains free in `[0,1]`.
+Each verified family is the full joint-history relation, not a set of marginal
+state or control projections. Coverage binds the original problem, effective
+request, strategy version, and executed lineage. It does not extend to changed
+horizons, dynamics, constraints, or objectives. Outer registry assurance remains
+numerical, and generic validated numerics are unavailable. The separate
+`csl.synthesis.ts01-analytic` registration provides the narrow T-S01 analytic
+path; it is not a replacement for either composed strategy.
 
 The implemented `csl.selector.ts01-directions` selector minimizes supplied
 `(u0,u1)` directions over its admitted T-S01 source family using a selected LP
