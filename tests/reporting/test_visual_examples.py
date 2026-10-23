@@ -129,6 +129,7 @@ class GalleryTests(unittest.TestCase):
             self.assertEqual((self.site / rid / "index.html").read_bytes(), content)
         self.assertIn('href="examples/index.html"', (self.site / "index.html").read_text())
         page = (self.site / "examples/index.html").read_text(encoding="utf-8")
+        self.assertIn('<a class="nav-shortcut" href="#saved-report-figures">Jump to the last topic ↓</a>', page)
         self.assertIn("Original point ID", page)
         self.assertIn("explicit analytic constructions", page)
         self.assertIn("duplicate of point 0", page)

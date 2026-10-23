@@ -785,7 +785,9 @@ def build(catalog, site):
             '<title>Visual examples · Controlled Systems Lab</title><link rel="stylesheet" href="examples.css"></head>'
             '<body><a class="skip" href="#main">Skip to examples</a><div class="shell"><aside>'
             '<a class="brand" href="../index.html">[ csl ]<br>Controlled Systems Lab</a>'
-            '<p class="eyebrow">Learn by looking</p><nav aria-label="Examples">' + navigation +
+            '<p class="eyebrow">Learn by looking</p>'
+            '<a class="nav-shortcut" href="#saved-report-figures">Jump to the last topic ↓</a>'
+            '<nav aria-label="Examples">' + navigation +
             '<a href="../index.html">All numerical reports ↗</a></nav></aside><main id="main">'
             '<header><p class="eyebrow">Small inputs / visible answers</p><h1>Algorithms,<br><em>in two dimensions.</em></h1>'
             '<p>See what goes in, what comes out, and why. Explore hull vertices, set intersections, hybrid control families, and projected reachability.</p>'
