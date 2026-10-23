@@ -1022,6 +1022,38 @@ TEST_CASE("registered Strategy B candidate respects a nonempty intermediate-stat
     CHECK(contains(candidate.relation,{0,0.25,1,0.25,0.75}));
     CHECK_FALSE(contains(candidate.relation,{0,0.75,1,0.75,0.25}));
 }
+TEST_CASE("registered Strategy B candidate retains different control sets at each stage") {
+    const auto interval_between=[](double lower,double upper) {
+        return accepted(sets::make_h({{"stage-control-window"},1,{}},
+            {accepted(numeric::snapshot(Matrix{2,1,{1,-1}})),
+             accepted(numeric::snapshot_vector(Vector{upper,-lower})),
+             accepted(numeric::snapshot(Matrix{0,1,{}})),
+             accepted(numeric::snapshot_vector(Vector{}))}));
+    };
+    auto input=integrator();
+    input.controls=ContinuousDomain{{interval_between(0.25,0.75).as_handle(),
+                                     interval_between(0.6,0.8).as_handle()}};
+    const auto p=resolve(input);
+    const auto q=request(p);
+    auto workspace=registered_prepared(p,q).create();
+    ExecutionContext context;
+    context.resources=std::make_shared<const ResourcePolicy>(ResourcePolicy{1,1,1,{}});
+
+    const auto result=accepted(workspace->run(context));
+
+    CHECK(result.termination==Termination::completed);
+    CHECK(result.outcome.value==MathematicalOutcome::undetermined);
+    CHECK_FALSE(result.complete_proposal);
+    REQUIRE(result.family);
+    CHECK(result.family->target()==FamilyTarget::candidate_relaxation);
+    CHECK_FALSE(result.family->registry_verified());
+    const auto& candidate=payload(result);
+    // All histories satisfy x1=u0, x2=x1+u1, and x2=1. Only the first lies
+    // in [0.25,0.75] x [0.6,0.8]; each rejected history violates one stage.
+    CHECK(contains(candidate.relation,{0,0.4,1,0.4,0.6}));
+    CHECK_FALSE(contains(candidate.relation,{0,0.2,1,0.2,0.8}));
+    CHECK_FALSE(contains(candidate.relation,{0,0.5,1,0.5,0.5}));
+}
 TEST_CASE("Strategy B T-S01 rejects a matching self-reported lineage without runtime evidence") {
     const auto p=resolve(integrator());
     auto exact=request(p);exact.profile=synthesis::strategy_ts01::profile_id;exact.target=FamilyTarget::exact_optimal_relation;
