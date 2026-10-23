@@ -147,3 +147,65 @@ membership and completeness claim against the admissible scenarios and
 objective. Only after that contract exists can reviewers decide whether a
 verified relation has the joint-family semantics required by `StrategyPort`.
 The scalar oracle and its near-minimizer indices do not authorize that mapping.
+
+## Validated finite-action minimax
+
+`CSL::validated_finite_action_minimax` is a separate API in
+[`validated_finite_action_minimax.hpp`](../../include/csl/optimization/validated_finite_action_minimax.hpp).
+It interprets each admitted stored finite binary64 value as its exact real
+value, then encloses affine state propagation and objective evaluation with the
+shared outward interval kernel. It does not upgrade or alter the numerical
+assurance of `finite_action_minimax` or `worst_case_vertex`.
+
+Admission is limited to an ordered finite action catalogue; a complete bounded
+native V or singleton initial set; one independent complete bounded native V
+or singleton disturbance set per transition; affine discrete dynamics; and H,
+singleton, empty, or universal state-safe sets. Terminal objectives may be
+linear or residual norm. Quadratic objectives are rejected because the current
+PSD admission test is numerical. Rays, H-only initial/disturbance sets,
+correlated disturbances, nonlinear dynamics, and arbitrary H/V conversion are
+unsupported. The result speaks only about the exact-real problem defined by
+the admitted stored values; it makes no claim about model truth, historical
+reproduction, or feedback optimality.
+
+The solver enumerates every initial vertex and every independent disturbance
+vertex history in stable parent-major order. It checks every state stage. An H
+inequality is safe only when its residual upper endpoint is at most zero and is
+a violation only when its lower endpoint is strictly positive. An H equality
+or singleton coordinate is safe only for residual `[0,0]`, a violation only
+when the interval excludes zero, and unresolved otherwise. Empty safe sets
+reject every nonempty history; universal safe sets pass. Interval overlap is
+never converted to feasibility with a tolerance.
+
+Every action-index tuple has one feasible, infeasible, or unresolved ledger
+entry. Infeasible entries identify a history-indexed strict violation.
+Feasible entries contain the objective enclosure, examined-history count and
+per-stage constraint residual hulls. Unresolved entries retain their objective
+enclosure and first overlapping row. A complete bounded result requires at
+least one proven-feasible plan. Its lower endpoint is the minimum valid plan
+lower endpoint among all plans not proven infeasible; its upper endpoint is the
+minimum objective upper endpoint among proven-feasible plans. An unresolved
+plan may lower the global lower endpoint, but never supplies an upper endpoint.
+Equal endpoints establish the exact-real optimum at that representable value.
+If no plan is proven feasible, the result distinguishes all-plans-infeasible
+from unresolved-without-feasible-plan. A positive-horizon empty action
+catalogue and an empty scenario product have separate outcomes. At horizon
+zero, the catalogue contains one empty action tuple.
+
+The request limits plans, histories per plan and total interval operations.
+Overflow, cancellation, deadline, operation-limit exhaustion or unbounded
+arithmetic returns an explicit stopped/unsupported result without a partial
+catalogue. Outward endpoint refinement retains a singleton only when TwoSum
+proves a finite sum exact; multiplication retains exact zero and unit-factor
+identities and widens other products. The current implementation requires
+IEC 60559 binary64 and the hardware rounding mode `FE_TONEAREST`; other modes
+stop with a numerical-failure outcome. This requirement is checked at entry.
+
+The validated API adds the public header and separately exported
+`CSL::validated_finite_action_minimax` CMake target. It adds no dependency and
+does not change the existing numerical API or its result semantics. This is an
+additive package surface: the installed-consumer suite must compile against the
+exported target before delivery. No release is created by this source change;
+downstream distribution requires the normal reviewed release/package workflow,
+with this new target and its binary64/rounding-mode precondition included in
+the release notes.

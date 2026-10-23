@@ -82,6 +82,14 @@ target_link_libraries(finite_action_minimax_tests PRIVATE CSL::finite_action_min
 add_test(NAME finite_action_minimax_tests COMMAND finite_action_minimax_tests)
 csl_test_target(finite_action_minimax_tests optimization)
 
+add_executable(validated_finite_action_minimax_tests
+  tests/unit/optimization/validated_finite_action_minimax_tests.cpp)
+target_link_libraries(validated_finite_action_minimax_tests
+  PRIVATE CSL::validated_finite_action_minimax doctest::doctest)
+add_test(NAME validated_finite_action_minimax_tests
+  COMMAND validated_finite_action_minimax_tests)
+csl_test_target(validated_finite_action_minimax_tests optimization)
+
 add_executable(finite_action_minimax_port_tests tests/unit/optimization/finite_action_minimax_port_tests.cpp)
 target_link_libraries(finite_action_minimax_port_tests PRIVATE CSL::finite_action_minimax_port doctest::doctest)
 add_test(NAME finite_action_minimax_port_tests COMMAND finite_action_minimax_port_tests)
