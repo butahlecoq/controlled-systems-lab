@@ -1,0 +1,5 @@
+V vertices (row order), binary64: (0,2),(2,0),(0,-2),(-2,0)
+Expected exact hull: |x|+|y|<=2; area=8
+Equivalent zonotope source: center=(0,0); generators=(0.5,0.5),(0.5,0.5),(1,-1); factors are independent on [-1,1].
+Zonotope output budget: 2 generators
+All approximation inputs use the same represented diamond; input construction is outside timing.

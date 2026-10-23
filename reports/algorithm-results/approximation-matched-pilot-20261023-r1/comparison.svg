@@ -1,0 +1,96 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1250 390" role="img" aria-labelledby="title desc">
+<title id="title">Approximation areas on one exact diamond</title>
+<desc id="desc">Each panel overlays one output with the exact input diamond. Ratios are output area divided by the exact input area.</desc>
+<rect width="100%" height="100%" fill="white"/>
+<text x="625" y="30" text-anchor="middle" font-family="sans-serif" font-size="20" font-weight="bold">Same diamond input: output area and enclosure shape</text>
+<text x="125.0" y="62" text-anchor="middle" font-family="sans-serif" font-size="14" font-weight="bold">Exact polygon</text>
+<line x1="25" y1="200" x2="225" y2="200" stroke="#9ca3af"/>
+<line x1="125.0" y1="100" x2="125.0" y2="300" stroke="#9ca3af"/>
+<text x="222" y="214" font-family="sans-serif" font-size="10">x</text>
+<text x="130.0" y="106" font-family="sans-serif" font-size="10">y</text>
+<line x1="53.0" y1="196" x2="53.0" y2="204" stroke="#6b7280"/>
+<text x="53.0" y="217" text-anchor="middle" font-family="sans-serif" font-size="9">−2</text>
+<line x1="121.0" y1="272" x2="129.0" y2="272" stroke="#6b7280"/>
+<text x="133.0" y="275" font-family="sans-serif" font-size="9">−2</text>
+<line x1="197.0" y1="196" x2="197.0" y2="204" stroke="#6b7280"/>
+<text x="197.0" y="217" text-anchor="middle" font-family="sans-serif" font-size="9">2</text>
+<line x1="121.0" y1="128" x2="129.0" y2="128" stroke="#6b7280"/>
+<text x="133.0" y="131" font-family="sans-serif" font-size="9">2</text>
+<polygon points="125.0,128 197.0,200 125.0,272 53.0,200" fill="#355c7d" fill-opacity="0.10" stroke="#355c7d" stroke-width="2"/>
+<polygon points="125.0,128 197.0,200 125.0,272 53.0,200" fill="none" stroke="#355c7d" stroke-width="3"/>
+<text x="125.0" y="330" text-anchor="middle" font-family="sans-serif" font-size="13">area ratio: 1</text>
+<text x="125.0" y="350" text-anchor="middle" font-family="sans-serif" font-size="11" fill="#4b5563">blue outline/fill = exact reference</text>
+<text x="375.0" y="62" text-anchor="middle" font-family="sans-serif" font-size="14" font-weight="bold">Axis box</text>
+<line x1="275" y1="200" x2="475" y2="200" stroke="#9ca3af"/>
+<line x1="375.0" y1="100" x2="375.0" y2="300" stroke="#9ca3af"/>
+<text x="472" y="214" font-family="sans-serif" font-size="10">x</text>
+<text x="380.0" y="106" font-family="sans-serif" font-size="10">y</text>
+<line x1="303.0" y1="196" x2="303.0" y2="204" stroke="#6b7280"/>
+<text x="303.0" y="217" text-anchor="middle" font-family="sans-serif" font-size="9">−2</text>
+<line x1="371.0" y1="272" x2="379.0" y2="272" stroke="#6b7280"/>
+<text x="383.0" y="275" font-family="sans-serif" font-size="9">−2</text>
+<line x1="447.0" y1="196" x2="447.0" y2="204" stroke="#6b7280"/>
+<text x="447.0" y="217" text-anchor="middle" font-family="sans-serif" font-size="9">2</text>
+<line x1="371.0" y1="128" x2="379.0" y2="128" stroke="#6b7280"/>
+<text x="383.0" y="131" font-family="sans-serif" font-size="9">2</text>
+<polygon points="375.0,128 447.0,200 375.0,272 303.0,200" fill="#355c7d" fill-opacity="0.10" stroke="#355c7d" stroke-width="2"/>
+<polygon points="303.0,128 447.0,128 447.0,272 303.0,272" fill="none" stroke="#d95f02" stroke-width="3"/>
+<text x="375.0" y="330" text-anchor="middle" font-family="sans-serif" font-size="13">area ratio: 2</text>
+<text x="375.0" y="350" text-anchor="middle" font-family="sans-serif" font-size="11" fill="#4b5563">blue outline/fill = exact reference</text>
+<line x1="250" y1="48" x2="250" y2="366" stroke="#e5e7eb"/>
+<text x="625.0" y="62" text-anchor="middle" font-family="sans-serif" font-size="14" font-weight="bold">Rotated parallelotope</text>
+<line x1="525" y1="200" x2="725" y2="200" stroke="#9ca3af"/>
+<line x1="625.0" y1="100" x2="625.0" y2="300" stroke="#9ca3af"/>
+<text x="722" y="214" font-family="sans-serif" font-size="10">x</text>
+<text x="630.0" y="106" font-family="sans-serif" font-size="10">y</text>
+<line x1="553.0" y1="196" x2="553.0" y2="204" stroke="#6b7280"/>
+<text x="553.0" y="217" text-anchor="middle" font-family="sans-serif" font-size="9">−2</text>
+<line x1="621.0" y1="272" x2="629.0" y2="272" stroke="#6b7280"/>
+<text x="633.0" y="275" font-family="sans-serif" font-size="9">−2</text>
+<line x1="697.0" y1="196" x2="697.0" y2="204" stroke="#6b7280"/>
+<text x="697.0" y="217" text-anchor="middle" font-family="sans-serif" font-size="9">2</text>
+<line x1="621.0" y1="128" x2="629.0" y2="128" stroke="#6b7280"/>
+<text x="633.0" y="131" font-family="sans-serif" font-size="9">2</text>
+<polygon points="625.0,128 697.0,200 625.0,272 553.0,200" fill="#355c7d" fill-opacity="0.10" stroke="#355c7d" stroke-width="2"/>
+<polygon points="625.0,128 697.0,200 625.0,272 553.0,200" fill="none" stroke="#1b9e77" stroke-width="3"/>
+<text x="625.0" y="330" text-anchor="middle" font-family="sans-serif" font-size="13">area ratio: 1</text>
+<text x="625.0" y="350" text-anchor="middle" font-family="sans-serif" font-size="11" fill="#4b5563">blue outline/fill = exact reference</text>
+<line x1="500" y1="48" x2="500" y2="366" stroke="#e5e7eb"/>
+<text x="875.0" y="62" text-anchor="middle" font-family="sans-serif" font-size="14" font-weight="bold">Zonotope axis cover</text>
+<line x1="775" y1="200" x2="975" y2="200" stroke="#9ca3af"/>
+<line x1="875.0" y1="100" x2="875.0" y2="300" stroke="#9ca3af"/>
+<text x="972" y="214" font-family="sans-serif" font-size="10">x</text>
+<text x="880.0" y="106" font-family="sans-serif" font-size="10">y</text>
+<line x1="803.0" y1="196" x2="803.0" y2="204" stroke="#6b7280"/>
+<text x="803.0" y="217" text-anchor="middle" font-family="sans-serif" font-size="9">−2</text>
+<line x1="871.0" y1="272" x2="879.0" y2="272" stroke="#6b7280"/>
+<text x="883.0" y="275" font-family="sans-serif" font-size="9">−2</text>
+<line x1="947.0" y1="196" x2="947.0" y2="204" stroke="#6b7280"/>
+<text x="947.0" y="217" text-anchor="middle" font-family="sans-serif" font-size="9">2</text>
+<line x1="871.0" y1="128" x2="879.0" y2="128" stroke="#6b7280"/>
+<text x="883.0" y="131" font-family="sans-serif" font-size="9">2</text>
+<polygon points="875.0,128 947.0,200 875.0,272 803.0,200" fill="#355c7d" fill-opacity="0.10" stroke="#355c7d" stroke-width="2"/>
+<polygon points="803.0,128 947.0,128 947.0,272 803.0,272" fill="none" stroke="#7570b3" stroke-width="3"/>
+<text x="875.0" y="330" text-anchor="middle" font-family="sans-serif" font-size="13">area ratio: 2</text>
+<text x="875.0" y="350" text-anchor="middle" font-family="sans-serif" font-size="11" fill="#4b5563">blue outline/fill = exact reference</text>
+<line x1="750" y1="48" x2="750" y2="366" stroke="#e5e7eb"/>
+<text x="1125.0" y="62" text-anchor="middle" font-family="sans-serif" font-size="14" font-weight="bold">Directional ellipsoid</text>
+<line x1="1025" y1="200" x2="1225" y2="200" stroke="#9ca3af"/>
+<line x1="1125.0" y1="100" x2="1125.0" y2="300" stroke="#9ca3af"/>
+<text x="1222" y="214" font-family="sans-serif" font-size="10">x</text>
+<text x="1130.0" y="106" font-family="sans-serif" font-size="10">y</text>
+<line x1="1053.0" y1="196" x2="1053.0" y2="204" stroke="#6b7280"/>
+<text x="1053.0" y="217" text-anchor="middle" font-family="sans-serif" font-size="9">−2</text>
+<line x1="1121.0" y1="272" x2="1129.0" y2="272" stroke="#6b7280"/>
+<text x="1133.0" y="275" font-family="sans-serif" font-size="9">−2</text>
+<line x1="1197.0" y1="196" x2="1197.0" y2="204" stroke="#6b7280"/>
+<text x="1197.0" y="217" text-anchor="middle" font-family="sans-serif" font-size="9">2</text>
+<line x1="1121.0" y1="128" x2="1129.0" y2="128" stroke="#6b7280"/>
+<text x="1133.0" y="131" font-family="sans-serif" font-size="9">2</text>
+<polygon points="1125.0,128 1197.0,200 1125.0,272 1053.0,200" fill="#355c7d" fill-opacity="0.10" stroke="#355c7d" stroke-width="2"/>
+<circle cx="1125.0" cy="200" r="101.823376" fill="none" stroke="#e7298a" stroke-width="3"/>
+<text x="1125.0" y="330" text-anchor="middle" font-family="sans-serif" font-size="13">area ratio: 3.14159</text>
+<text x="1125.0" y="350" text-anchor="middle" font-family="sans-serif" font-size="11" fill="#4b5563">blue outline/fill = exact reference</text>
+<line x1="1000" y1="48" x2="1000" y2="366" stroke="#e5e7eb"/>
+<text x="625" y="378" text-anchor="middle" font-family="sans-serif" font-size="12" fill="#374151">Stored binary64 fixture; the area ratios describe this single example only.</text>
+</svg>
