@@ -1,6 +1,6 @@
-method,repetitions,median_ns,min_ns,max_ns,area,area_ratio,evidence
-exact-polygon-quickhull,7,4750,4749,4889,8,1,exact-literal-hull
-axis-box,7,12991,12083,14597,16,2,exact-v-h-containment
-rotated-parallelotope,7,21023,20883,23327,8,1,exact-v-h-containment
-zonotope-axis-cover,7,14876,13829,16273,16,2,exact-generator-axis-cover
-directional-ellipsoid,7,17042,16133,18090,25.13274122871835,3.1415926535897936,exact-dyadic-v-ellipsoid-check
+method,request_identity,requested_relation,source_representation,repetitions,median_ns,min_ns,max_ns,area,area_ratio,evidence
+exact-polygon-quickhull,approx-pilot/quickhull/diamond/exact-polygon/v1,exact,diamond-v,7,4750,4749,4889,8,1,exact-literal-hull
+axis-box,approx-pilot/box/diamond,outer,diamond-v,7,12991,12083,14597,16,2,exact-v-h-containment
+rotated-parallelotope,approx-pilot/parallelotope/diamond,outer,diamond-v,7,21023,20883,23327,8,1,exact-v-h-containment
+zonotope-axis-cover,approx-pilot/zonotope-cover/diamond,outer,diamond-zonotope-equivalent,7,14876,13829,16273,16,2,exact-generator-axis-cover
+directional-ellipsoid,approx-pilot/ellipsoid/diamond,outer,diamond-v,7,17042,16133,18090,25.13274122871835,3.1415926535897936,exact-dyadic-v-ellipsoid-check

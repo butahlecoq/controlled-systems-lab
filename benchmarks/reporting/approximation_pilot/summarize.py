@@ -2,6 +2,7 @@
 """Validate and render the saved same-input approximation pilot capture."""
 
 import csv
+import hashlib
 import html
 import json
 import math
@@ -17,6 +18,44 @@ EXPECTED = {
     "zonotope-axis-cover": (16.0, 2.0),
     "directional-ellipsoid": (8.0 * math.pi, math.pi),
 }
+INPUT_DESCRIPTOR_SHA256 = "bf23229be76bfeaa7bb6a9965c90a53a32580eeba6a7cdb07be905152dac3d9c"
+REQUEST_IDENTITIES = {
+    "exact-polygon-quickhull": {
+        "request_identity": "approx-pilot/quickhull/diamond/exact-polygon/v1",
+        "source_representation": "diamond-v",
+        "requested_relation": "exact",
+        "output_budget": "four hull vertices",
+        "assurance": "exact-literal-hull",
+    },
+    "axis-box": {
+        "request_identity": "approx-pilot/box/diamond",
+        "source_representation": "diamond-v",
+        "requested_relation": "outer",
+        "output_budget": "four H inequalities",
+        "assurance": "numerical",
+    },
+    "rotated-parallelotope": {
+        "request_identity": "approx-pilot/parallelotope/diamond",
+        "source_representation": "diamond-v",
+        "requested_relation": "outer",
+        "output_budget": "four H inequalities",
+        "assurance": "numerical",
+    },
+    "zonotope-axis-cover": {
+        "request_identity": "approx-pilot/zonotope-cover/diamond",
+        "source_representation": "diamond-zonotope-equivalent",
+        "requested_relation": "outer",
+        "output_budget": "two generators",
+        "assurance": "numerical",
+    },
+    "directional-ellipsoid": {
+        "request_identity": "approx-pilot/ellipsoid/diamond",
+        "source_representation": "diamond-v",
+        "requested_relation": "outer",
+        "output_budget": "one ellipsoid",
+        "assurance": "numerical",
+    },
+}
 COLORS = {
     "exact-polygon-quickhull": "#355c7d",
     "axis-box": "#d95f02",
@@ -27,6 +66,9 @@ COLORS = {
 
 
 def read_rows(path: Path):
+    input_path = path.parent / "input.txt"
+    if hashlib.sha256(input_path.read_bytes()).hexdigest() != INPUT_DESCRIPTOR_SHA256:
+        raise SystemExit("input descriptor hash differs from the request identity map")
     rows = [json.loads(line) for line in path.read_text().splitlines()]
     if len(rows) != 40 or any(row["passed"] is not True for row in rows):
         raise SystemExit("capture must contain 40 successful rows")
@@ -47,6 +89,8 @@ def read_rows(path: Path):
             raise SystemExit(f"unexpected area ratio for {row['method']}")
     if set(groups) != set(EXPECTED):
         raise SystemExit("unexpected method set")
+    if set(groups) != set(REQUEST_IDENTITIES):
+        raise SystemExit("request identities do not cover the captured method set")
     for method, group in groups.items():
         if len(group) != 8 or sum(not row["warmup"] for row in group) != 7 or \
            sum(row["warmup"] and row["round"] == 0 for row in group) != 1 or \
@@ -122,27 +166,43 @@ def main() -> int:
     with (target / "raw-rows.jsonl").open("w") as output:
         for row in rows:
             output.write(json.dumps(row, sort_keys=True) + "\n")
+    request_map = {
+        "schema": "csl.approximation-pilot-request-map/1",
+        "fixture": "diamond",
+        "input_descriptor": "input.txt",
+        "input_descriptor_sha256": INPUT_DESCRIPTOR_SHA256,
+        "mapping_status": "proposed-migration; not registered or imported",
+        "requests": REQUEST_IDENTITIES,
+    }
+    (target / "request-identities.json").write_text(
+        json.dumps(request_map, indent=2, sort_keys=True) + "\n")
     grouped = defaultdict(list)
     for row in rows:
         if not row["warmup"]:
             grouped[row["method"]].append(row)
     with (target / "summary.csv").open("w", newline="") as output:
         writer = csv.writer(output)
-        writer.writerow(("method", "repetitions", "median_ns", "min_ns", "max_ns", "area", "area_ratio", "evidence"))
+        writer.writerow(("method", "request_identity", "requested_relation", "source_representation", "repetitions", "median_ns", "min_ns", "max_ns", "area", "area_ratio", "evidence"))
         for method in EXPECTED:
             group = grouped[method]
             durations = [row["elapsed_ns"] for row in group]
-            writer.writerow((method, len(group), int(statistics.median(durations)), min(durations), max(durations), group[-1]["area"], group[-1]["area_ratio"], group[-1]["evidence"]))
+            identity = REQUEST_IDENTITIES[method]
+            writer.writerow((method, identity["request_identity"], identity["requested_relation"], identity["source_representation"], len(group), int(statistics.median(durations)), min(durations), max(durations), group[-1]["area"], group[-1]["area_ratio"], group[-1]["evidence"]))
     make_svg(target / "comparison.svg")
     table_rows = []
     for method in EXPECTED:
         group = grouped[method]
         durations = [row["elapsed_ns"] for row in group]
+        identity = REQUEST_IDENTITIES[method]
         table_rows.append(
-            "<tr><th scope=\"row\">{}</th><td>{:,}</td><td>{:,}–{:,}</td>"
-            "<td>{:.15g}</td><td>{:.15g}</td><td>{}</td></tr>".format(
-                html.escape(method), int(statistics.median(durations)), min(durations),
-                max(durations), group[-1]["area"], group[-1]["area_ratio"],
+            "<tr><th scope=\"row\">{}</th><td><code>{}</code></td><td>{}</td>"
+            "<td>{}</td><td>{:,}</td><td>{:,}–{:,}</td><td>{:.15g}</td>"
+            "<td>{:.15g}</td><td>{}</td></tr>".format(
+                html.escape(method), html.escape(identity["request_identity"]),
+                html.escape(identity["requested_relation"]),
+                html.escape(identity["source_representation"]),
+                int(statistics.median(durations)), min(durations), max(durations),
+                group[-1]["area"], group[-1]["area_ratio"],
                 html.escape(group[-1]["evidence"]))
         )
     document = """<!doctype html>
@@ -155,9 +215,9 @@ def main() -> int:
 <figure><img src="comparison.svg" alt="Five output outlines compared with the exact diamond reference"><figcaption>Area ratio is output area divided by the exact diamond area 8.</figcaption></figure>
 <h2>Measurements and geometric diagnostics</h2>
 <p>Times are the median and range of seven interleaved single calls per method, after one excluded warmup. Units are nanoseconds. Workspace/preparation is included inside each registered approximation call; input construction and validation are outside the timer. The QuickHull method times its public function only.</p>
-<table><thead><tr><th>Method</th><th>Median (ns)</th><th>Range (ns)</th><th>Area</th><th>Area ratio</th><th>Evidence accepted</th></tr></thead><tbody>__ROWS__</tbody></table>
+<table><thead><tr><th>Method</th><th>Request identity</th><th>Relation</th><th>Source representation</th><th>Median (ns)</th><th>Range (ns)</th><th>Area</th><th>Area ratio</th><th>Fixture check</th></tr></thead><tbody>__ROWS__</tbody></table>
 <h2>Reproduction and saved data</h2>
-<p>Release build, compiler, host snapshots, executable hash, and smoke output are in this directory. Raw per-call rows are in <a href="raw-rows.jsonl">raw-rows.jsonl</a>; the table is in <a href="summary.csv">summary.csv</a>. Rebuild with the CMake project under <code>benchmarks/reporting/approximation_pilot/</code> and regenerate with its <code>summarize.py</code>.</p>
+<p>Release build, compiler, host snapshots, executable hash, and smoke output are in this directory. Raw per-call rows are in <a href="raw-rows.jsonl">raw-rows.jsonl</a>; the table is in <a href="summary.csv">summary.csv</a>. The proposed method/request/input mapping is in <a href="request-identities.json">request-identities.json</a>, and its future-record field mapping is documented in <a href="comparison-record-migration.md">comparison-record-migration.md</a>. Rebuild with the CMake project under <code>benchmarks/reporting/approximation_pilot/</code> and regenerate with its <code>summarize.py</code>.</p>
 <p>Source commit: <code>__COMMIT__</code>. This is preliminary evidence, not a registered comparison-program result and not a Pages publication.</p>
 </html>
 """.replace("__ROWS__", "\n".join(table_rows)).replace(

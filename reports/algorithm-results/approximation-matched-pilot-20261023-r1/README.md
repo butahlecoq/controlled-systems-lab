@@ -21,6 +21,13 @@ All 40 captured rows passed: five one-call warmups and seven interleaved
 measured rounds for each of five methods. [`raw-rows.jsonl`](raw-rows.jsonl)
 preserves every call.
 
+[`request-identities.json`](request-identities.json) records the shared input
+descriptor hash and the method-specific request, relation, source
+representation and output budget. [`comparison-record-migration.md`](comparison-record-migration.md)
+maps these fields toward the future #83/#84 record while naming the missing
+fields and verification gates. The mapping is proposed only; no comparison
+record is synthesized from this pilot.
+
 ## Fixture and checks
 
 The common point input is `[(0,2),(2,0),(0,-2),(-2,0)]`, whose exact hull is
@@ -62,4 +69,5 @@ and geometric ratios before regenerating the raw-row copy, CSV, SVG, and HTML.
 This preliminary bundle does not satisfy or close comparison-program issue
 #100, which still requires its configured producers and full independent
 comparison contract. It is not registered in the publication catalogue and
-has not been deployed to Pages.
+has not been deployed to Pages. Its `passed` rows are fixture-check outcomes,
+not globally verified inclusion results.
