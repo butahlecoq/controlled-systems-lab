@@ -1,0 +1,30 @@
+{
+  "authorization_issue": 531,
+  "files": {
+    "README.md": "d253fd772cf7a351c5bf044fcfff3c2a6ba947aa85bde226f42ef2c9a01e4bd8",
+    "attempt-001/exit-code": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+    "attempt-001/host-before.txt": "12efc68ea6a07da7fc638dd78c2bff7d8d631df6b9645a3c530b47d5f2128bc6",
+    "attempt-001/platform.txt": "384aa6c37ce906d6043b86076198ecc86680bde631654ace926dba3c68743af1",
+    "attempt-001/python-version.txt": "71193ce79ac5b10d7897ca62f9cae87f687ff7436d644c7a8d6d8f8106aee7a5",
+    "attempt-001/record.json": "f78c99c76658c0bca45af9b9ad5768e01491dbf023e11005191c6b9667411139",
+    "attempt-001/requirements.txt": "983665a6331eda07ab1f4b23ef92d66f4b024c27b360ee0e7420511ef3b28c64",
+    "attempt-001/stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "attempt-001/stdout.json": "cd1df3a2d2d0c6f9689746d4b87c6b4888352bea7eeab7eccd3a10fe41989aa5",
+    "attempt-002/exit-code": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+    "attempt-002/host-before.txt": "594024b496acd87ef1bf8ae47a73353505af229a84f3e01780fe8847305e13b0",
+    "attempt-002/independent-check.json": "bda97846f2639761e3ca6a5dfcfaa4f877e6a7d8f71f8d8c2da481a183bab105",
+    "attempt-002/platform.txt": "384aa6c37ce906d6043b86076198ecc86680bde631654ace926dba3c68743af1",
+    "attempt-002/python-version.txt": "71193ce79ac5b10d7897ca62f9cae87f687ff7436d644c7a8d6d8f8106aee7a5",
+    "attempt-002/record.json": "e2fde3e404aa4f1c5c846a449c72cda109a7adaecfb64dc75a5cc1aaea9d0449",
+    "attempt-002/requirements.txt": "983665a6331eda07ab1f4b23ef92d66f4b024c27b360ee0e7420511ef3b28c64",
+    "attempt-002/stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "attempt-002/stdout.json": "a00039e225b44cf25123f03bf603fb6a1de743336b0fa587192bc2ff7d6365d0"
+  },
+  "scenario_id": "B04-c-preliminary-numerical-20261023",
+  "schema": "csl.b04-c-preliminary-manifest/1",
+  "source_commit": "4494557aad4710fe1166b5a681057f106ef8fb91",
+  "source_files": {
+    "docs/research/tools/check_b04_c_preliminary_record.py": "980dcd48f39d26ec7394a1e83d5a6c30b73e21bf1deb623ba3e11ebfaad783fc",
+    "docs/research/tools/run_b04_c_preliminary.py": "cc438c0caff05a4a5dfa405dd7bbc50c8dd1dd824604e1d7d88ef7d102b086ff"
+  }
+}

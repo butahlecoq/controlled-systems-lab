@@ -1,0 +1,168 @@
+{
+  "authorization_issue": 531,
+  "candidate": {
+    "controls_binary64_hex": [
+      "-0x1.5c7a2636dfe6fp-2",
+      "-0x1.3651f778e4f50p-2",
+      "-0x1.1029c8c25ccdcp-2",
+      "-0x1.d40334173d729p-3",
+      "-0x1.87b2d6991b500p-3",
+      "-0x1.3b62791baca92p-3",
+      "-0x1.de24377a30723p-4",
+      "-0x1.45837c805ae08p-4",
+      "-0x1.59c58309a2672p-5",
+      "-0x1.4420699e339d7p-8",
+      "0x1.08bd68a3203c4p-5",
+      "0x1.1cff6f1c8fd9dp-4",
+      "0x1.b5a02a3815136p-4",
+      "0x1.2720728da16a6p-3",
+      "0x1.7370d003599b5p-3",
+      "0x1.bfc12d7b3de6bp-3"
+    ],
+    "exact_phase_box_feasible": true,
+    "exact_squared_objective": "214520554921461980837038376036946175380900791732584920001/224686117130296519894191046656000000000000000000000000",
+    "max_control_abs": 0.34030971250465475,
+    "objective": 30.899136030011615,
+    "phase_box_violations": [],
+    "stationarity_gradient_inf_norm_unprojected": 4.129105946049094e-10,
+    "terminal_state_exact_dyadic": [
+      "46472132480167296351372283541/38702809297715200000000000",
+      "-70991928436538130656002703/3096224743817216000000000",
+      "21780020324108968338647196419/48378511622144000000000000",
+      "-29834969924838978952961977/3870280929771520000000000"
+    ],
+    "terminal_state_float": [
+      1200.743132693232,
+      -22.92854502190139,
+      450.20029748372275,
+      -7.708734964260145
+    ]
+  },
+  "evidence_limits": [
+    "exploratory numerical candidate only",
+    "no global optimality certificate",
+    "no complete optimal-family coverage",
+    "single solver and single start",
+    "not a historical reproduction"
+  ],
+  "input": {
+    "A": [
+      [
+        "1",
+        "0",
+        "0",
+        "0"
+      ],
+      [
+        "-25/4",
+        "1",
+        "0",
+        "0"
+      ],
+      [
+        "0",
+        "0",
+        "1",
+        "0"
+      ],
+      [
+        "0",
+        "0",
+        "-25/4",
+        "1"
+      ]
+    ],
+    "B": [
+      "1104/55",
+      "0",
+      "-576/55",
+      "0"
+    ],
+    "control_bounds": [
+      "-1",
+      "1"
+    ],
+    "horizon": 16,
+    "initial": [
+      "122028265395983/100000000000",
+      "119500",
+      "27500360290561/62500000000",
+      "45300"
+    ],
+    "objective": "sqrt((1200-x1)^2+x2^2+(64/9)*(450-x3)^2+(64/9)*x4^2+(x2-(8/3)*x4)^2)",
+    "phase_box": {
+      "stages": [
+        0,
+        16
+      ],
+      "x1": [
+        1176,
+        1224
+      ],
+      "x3": [
+        432,
+        468
+      ]
+    }
+  },
+  "input_authority": "A39/A01/A40 saved-family model as specified in issue #531; not B04-historical",
+  "input_canonical_sha256": "db14f3d082609cd0024c14c9fc61e25b3e7d089d512b8105b183fea1f95a5c9c",
+  "pre_registered_bands_unchanged": [
+    "|J* - 30.899| <= 0.0005",
+    "J* < 30.8985",
+    "J* > 30.8995"
+  ],
+  "published_plane_residuals_exact": {
+    "flow_12x1_plus_17x3_minus_3095440554305551_over_125000000000": "-337715554305551/125000000000",
+    "stock_12x2_plus_23x4_plus_565554305551_over_1250000000": "-14444449/1250000000"
+  },
+  "published_point_reachability": {
+    "controls_binary64_hex": [
+      "-0x1.0000000000000p+0",
+      "-0x1.a61d40156e657p-3",
+      "-0x1.0000000000000p+0",
+      "-0x0.0p+0",
+      "-0x0.0p+0",
+      "-0x0.0p+0",
+      "-0x0.0p+0",
+      "-0x0.0p+0",
+      "-0x0.0p+0",
+      "0x1.3325a797cd860p-2",
+      "0x1.0000000000000p+0",
+      "0x1.0000000000000p+0",
+      "0x1.7631baabeb4b7p-4",
+      "-0x0.0p+0",
+      "-0x1.442c8590b2148p-3",
+      "-0x1.0000000000000p+0"
+    ],
+    "phase_box_exactly_feasible": true,
+    "phase_violations": [],
+    "terminal_state_exact_dyadic": [
+      "2904524891514470436698926901/2418925581107200000000000",
+      "-8873973629826791606658541/387028092977152000000000",
+      "1361240436667235902857954659/3023656976384000000000000",
+      "-3729382604566051537821419/483785116221440000000000"
+    ],
+    "within_published_coordinate_rounding_exactly": false
+  },
+  "scenario_id": "B04-c-preliminary-numerical-20261023",
+  "schema": "csl.b04-c-preliminary/1",
+  "solver": {
+    "elapsed_ns_single_call": 5659371,
+    "ftol": 1e-12,
+    "iterations": 5,
+    "linprog_method": "HiGHS",
+    "maxiter": 4000,
+    "message": "Optimization terminated successfully",
+    "method": "SLSQP",
+    "numpy": "2.5.4",
+    "reachability_message": "Optimization terminated successfully. (HiGHS Status 7: Optimal)",
+    "reachability_status": 0,
+    "reachability_success": true,
+    "scipy": "1.18.1",
+    "start": "zero control vector",
+    "status": 0,
+    "termination_success": true
+  },
+  "source_commit": "4494557aad4710fe1166b5a681057f106ef8fb91"
+}

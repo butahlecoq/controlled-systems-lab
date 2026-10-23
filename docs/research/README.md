@@ -76,6 +76,8 @@ The [GEO-02 floating-model audit](geo02-floating-model-audit.md) separates exact
 
 [B04 model-variant diagnosis](b04-model-variant-diagnosis.md) compares the printed L11 model with the separate A39/A01/A40 saved-run variant in exact rational arithmetic: at the law's reference `d = 0` the saved variant's input matrix is exactly the A40 kernel's scaled-law input slope and its mixture sensitivity is exactly the article's printed `c1`, while the printed input matrix and printed initial state are neither, and the published terminal row lies inside the saved variant's terminal plane but is excluded by the printed model's stock plane by `1716.499` against a rounding radius of `0.0145`. It is a diagnosis, not a reproduction: no optimizer was run, no private source was read, and no published value is replaced.
 
+[B04-c preliminary numerical run](evidence/b04-c-preliminary-20261023/README.md) records a candidate-only SLSQP value and a separate exact-dyadic reachability check for the saved A39/A01/A40 family, under the owner's follow-up authorization. The candidate lies inside the pre-registered objective band, but global optimality and complete-family coverage remain unproved, so this is not the accepted #531 verification result and makes no reproduction claim. The first failed exact-rounding attempt and the corrected attempt are both retained.
+
 ## Larger local archive
 
 The [control-domain and comparison-scope decision](control-domain-comparison-scope.md) records the B04/L05/B06/B07 domain boundaries and the intended comparison across objectives, policy classes, and set representations.
