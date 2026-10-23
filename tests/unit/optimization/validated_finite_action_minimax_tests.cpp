@@ -2,6 +2,7 @@
 #include <doctest/doctest.h>
 #include <csl/optimization/validated_finite_action_minimax.hpp>
 #include <cfenv>
+#include <limits>
 
 TEST_CASE("validated minimax public API types are available") {
     CHECK(std::variant_size_v<csl::optimization::ValidatedFiniteActionMinimaxOutcome> == 7);
@@ -223,4 +224,16 @@ TEST_CASE("quadratic objective and non-nearest rounding are rejected") {
     CHECK(std::holds_alternative<OperationStopped>(result));
     CHECK(std::get<OperationStopped>(result).reason==StopReason::numerical_failure);
     CHECK(std::fesetround(previous)==0);
+}
+
+TEST_CASE("finite input overflow stops without a partial catalogue") {
+    const auto huge=std::numeric_limits<double>::max();
+    auto input=zero_horizon(singleton("x0-max",huge),
+        take(sets::make_universal({{"all"},1,{"x"}})));
+    auto cost=optimization::snapshot(LinearTerminal{{2},0});
+    REQUIRE(std::holds_alternative<optimization::Objective>(cost));
+    input.objective=std::get<optimization::Objective>(std::move(cost));
+    const auto result=validated_finite_action_minimax(input,{1,1,100});
+    REQUIRE(std::holds_alternative<OperationStopped>(result));
+    CHECK(std::get<OperationStopped>(result).reason==StopReason::numerical_failure);
 }

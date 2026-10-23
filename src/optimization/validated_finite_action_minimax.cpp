@@ -125,6 +125,7 @@ ValidatedFiniteActionMinimaxOutcome validated_finite_action_minimax(
         walk=[&](std::size_t stage,const std::vector<Interval>& x,HistoryPath path){
             if(violation||failure||arithmetic_failure||should_stop(context)||meter.exhausted||meter.stopped)return;
             const auto checks=check_safe(q.safe_sets[stage],x,meter,context);if(should_stop(context)||meter.exhausted||meter.stopped)return;for(const auto& c:checks){
+                if(!std::isfinite(c.residual.lower)||!std::isfinite(c.residual.upper)){arithmetic_failure=true;return;}
                 if(c.violation){violation=ValidatedPlanInfeasible{choices,{stage,path,c.row,c.kind,{c.residual.lower,c.residual.upper}}};return;}
                 if(c.overlap&&!overlap)overlap=SafetyOverlap{stage,path,c.row,c.kind,{c.residual.lower,c.residual.upper}};
                 auto it=std::find_if(margins.begin(),margins.end(),[&](const SafetyMargin& a){return a.stage==stage&&a.row==c.row&&a.kind==c.kind;});
