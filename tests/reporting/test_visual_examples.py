@@ -134,6 +134,7 @@ class GalleryTests(unittest.TestCase):
         self.assertIn(
             f'<a class="nav-shortcut" href="#{last_anchor}">Jump to final example: '
             f'{last_topic["title"]} ↓</a>', page)
+        self.assertIn('target.scrollIntoView({behavior:"instant",block:"start"})', page)
         self.assertIn(f'<article id="{last_anchor}" class="saved-figure">', page)
         stylesheet = (Path(gallery.__file__).with_name("visual_examples.css")).read_text(encoding="utf-8")
         self.assertIn("height:calc(100vh - 6rem);overflow-y:auto", stylesheet)
