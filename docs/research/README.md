@@ -11,6 +11,12 @@ Assessment date: 2026-10-11. Rolling literature window: 2021-10-11 through 2026-
 5. [Modular algorithms and optimal families](../architecture/modular-algorithms-and-solution-sets.md), [set representation review](../architecture/set-representations-and-ellipsoidal-toolbox.md), [architecture](../architecture/initial-architecture.md) and [performance](../architecture/performance-and-language.md): architecture before implementation.
 6. [Glossary](glossary.md) and [open questions](open-questions.md): shared vocabulary and decisions.
 
+The [MPC comparison research and task roadmap](mpc-comparison-primary-sources.md)
+maps foundational and contemporary MPC methods to the repository's control tasks,
+qualifies solver and controller candidates, and links the task-specific issues.
+It distinguishes fixed-plan minimax, causal policies, relaxation bounds, and
+closed-loop experiments. It authorizes no numerical runs.
+
 ## Evidence conventions
 
 For competing source interpretations, use the [source-variant evidence
