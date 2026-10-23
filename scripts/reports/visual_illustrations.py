@@ -69,6 +69,22 @@ CASES = (
         "answer": {"lambda": [0.5, 0.25, 0.25], "phase_one_violation": 0, "exact": True},
         "svg": "phase-one",
     },
+    {
+        "id": "issue3-validated-minimax-2d",
+        "family": "Validated finite-action minimax · issue #3",
+        "title": "Separate a feasible action from a strict violation",
+        "summary": "For x⁺=x+u+w from x₀=(0,0), the action u=(0,0) keeps all four disturbance corners inside the safe square and has worst terminal norm √(1/8). The action u=(1,0) has a strict stage-1 violation at x₁=(3/4,−1/4), with x≤1/2 residual 1/4. This is an exact analytic teaching fixture, not a replay of the API or benchmark.",
+        "figure": "issue3-validated-minimax.svg",
+        "record": "issue3-validated-minimax.json",
+        "kind": "analytic-illustration",
+        "report_kind": "issue3-finite-catalogue",
+        "source_commit": "a2c0736f43e4ff15d9a9323a51296e1b416d8809",
+        "source_files": ["include/csl/optimization/validated_finite_action_minimax.hpp",
+                         "src/optimization/validated_finite_action_minimax.cpp"],
+        "inputs": {"system": "x1 = x0 + u0 + w0", "initial": [[0, 0]], "ordered_actions": [[0, 0], [1, 0]], "disturbance_vertices": [[-0.25, -0.25], [-0.25, 0.25], [0.25, -0.25], [0.25, 0.25]], "safe_set_each_stage": ["-1/2 <= x <= 1/2", "-1/2 <= y <= 1/2"], "objective": "maximize terminal ||x||₂", "coordinates": "state coordinates (x,y), one transition"},
+        "answer": {"action_0": {"status": "proven feasible analytically", "worst_objective": "sqrt(1/8)"}, "action_1": {"status": "proven infeasible analytically", "witness": {"stage": 1, "disturbance_vertex": 0, "state": [0.75, -0.25], "constraint": "x <= 1/2", "residual": "1/4"}}, "exact": True},
+        "svg": "validated-minimax",
+    },
 )
 
 
@@ -117,6 +133,16 @@ def svg(case):
         px, py = _xy((0, 1), -1, 2)
         dot = f'<circle cx="{px:.2f}" cy="{py:.2f}" r="7" fill="#f0f7e9" stroke="#b4cda3" stroke-width="3"/>'
         return _base("Linear objective on a triangle", -1, 2, [tri, contour, dot], ("feasible triangle", "objective contours", "minimum at (0,1)", "value = −2"))
+    if kind == "validated-minimax":
+        safe = _polygon([[-0.5, -0.5], [0.5, -0.5], [0.5, 0.5], [-0.5, 0.5]],
+                        -1, 2, "#b4cda3", "#7b9b70", "0.18")
+        feasible = _polygon([[-0.25, -0.25], [0.25, -0.25], [0.25, 0.25], [-0.25, 0.25]],
+                             -1, 2, "#b4cda3", "#7b9b70", "0.34")
+        violating = _polygon([[0.75, -0.25], [1.25, -0.25], [1.25, 0.25], [0.75, 0.25]],
+                             -1, 2, "#e79a78", "#e79a78", "0.28")
+        return _base("Validated finite-action minimax in the state plane", -1, 2,
+                     [safe, feasible, violating],
+                     ("safe set: [-1/2,1/2]²", "u=(0,0): w corners stay safe", "worst norm = √(1/8)", "u=(1,0): strict violation", "w=(-1/4,-1/4), residual=1/4"))
     tri = _polygon([[0, 0], [1, 0], [0, 1]], -1, 2, "#b4cda3", "#7b9b70", "0.35")
     px, py = _xy((0.25, 0.25), -1, 2)
     dot = f'<circle cx="{px:.2f}" cy="{py:.2f}" r="7" fill="#f0f7e9" stroke="#b4cda3" stroke-width="3"/>'
@@ -151,6 +177,10 @@ def build(catalog):
                                                                     "report_id": report["report_id"],
                                                                     "page": "../" + report["report_id"] + "/index.html",
                                                                     "raw_record": "../" + report["report_id"] + "/records.json"},
+                                          **({"source_commit": case["source_commit"],
+                                             "source_urls": ["https://github.com/butahlecoq/controlled-systems-lab/blob/" + case["source_commit"] + "/" + path
+                                                             for path in case["source_files"]]}
+                                            if "source_commit" in case else {}),
                                           "evidence": "Hand-derived analytic illustration; not a replay or measurement."},
                                          indent=2, ensure_ascii=False) + "\n"
     return output, rendered
@@ -164,6 +194,9 @@ def cards(cases):
         f'<p>{escape(c["summary"])}</p><p><a href="{escape(c["record"], quote=True)}">Exact analytic inputs and answer (JSON) ↗</a> · '
         f'<a href="../{escape(c["report_id"], quote=True)}/index.html">Saved {escape(c["report_kind"])} report ↗</a> · '
         f'<a href="../{escape(c["report_id"], quote=True)}/records.json">Raw report record ↗</a></p>'
-        '<p class="provenance">Reproduce gallery from the repository root after staging the reports:<br>'
+        + (f'<p>API source at <a href="https://github.com/butahlecoq/controlled-systems-lab/blob/{escape(c["source_commit"], quote=True)}/{escape(c["source_files"][0], quote=True)}">public header</a> · '
+           f'<a href="https://github.com/butahlecoq/controlled-systems-lab/blob/{escape(c["source_commit"], quote=True)}/{escape(c["source_files"][1], quote=True)}">implementation</a></p>'
+           if "source_commit" in c else "")
+        + '<p class="provenance">Reproduce gallery from the repository root after staging the reports:<br>'
         '<code>python scripts/reports/visual_examples.py --catalog reports/algorithm-results/catalog.json --site build/report-site</code></p></article>'
         for c in cases)

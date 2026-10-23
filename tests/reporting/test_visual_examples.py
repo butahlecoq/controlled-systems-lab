@@ -231,6 +231,23 @@ class GalleryTests(unittest.TestCase):
         phase_one = json.loads((self.site / "examples/opt04-phase-one.json").read_text())
         self.assertEqual(phase_one["answer"]["lambda"], [0.5, 0.25, 0.25])
         self.assertEqual(phase_one["answer"]["phase_one_violation"], 0)
+        validated = json.loads((self.site / "examples/issue3-validated-minimax.json").read_text())
+        self.assertEqual(validated["inputs"]["ordered_actions"], [[0, 0], [1, 0]])
+        self.assertEqual(validated["answer"]["action_0"]["worst_objective"], "sqrt(1/8)")
+        self.assertEqual(validated["answer"]["action_1"]["witness"]["residual"], "1/4")
+        self.assertIn("not a replay", validated["evidence"])
+        self.assertIn("a2c0736f43e4ff15d9a9323a51296e1b416d8809", validated["source_commit"])
+        self.assertEqual(len(validated["source_urls"]), 2)
+        self.assertTrue(all(url.startswith("https://github.com/butahlecoq/controlled-systems-lab/blob/a2c0736f43e4ff15d9a9323a51296e1b416d8809/")
+                            for url in validated["source_urls"]))
+        self.assertIn("--catalog reports/algorithm-results/catalog.json --site build/report-site",
+                      validated["reproduction_command"])
+        self.assertIn("<code>python scripts/reports/visual_examples.py", page)
+        for url in validated["source_urls"]:
+            self.assertIn(f'href="{url}"', page)
+        validated_svg = ET.parse(self.site / "examples/issue3-validated-minimax.svg")
+        self.assertEqual(len(validated_svg.findall(f".//{ns}polygon")), 3)
+        self.assertIn("strict violation", "".join(validated_svg.getroot().itertext()))
         first = {p.name: p.read_bytes() for p in (self.site / "examples").iterdir()}
         gallery.build(self.catalog, self.site)
         self.assertEqual({p.name: p.read_bytes() for p in (self.site / "examples").iterdir()}, first)
