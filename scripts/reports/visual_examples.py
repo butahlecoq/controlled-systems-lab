@@ -786,7 +786,7 @@ def build(catalog, site):
             '<body><a class="skip" href="#main">Skip to examples</a><div class="shell"><aside>'
             '<a class="brand" href="../index.html">[ csl ]<br>Controlled Systems Lab</a>'
             '<p class="eyebrow">Learn by looking</p>'
-            '<a class="nav-shortcut" href="#saved-report-figures">Jump to the last topic ↓</a>'
+            '<a class="nav-shortcut" href="#saved-report-figures">Jump to “More algorithms, from saved evidence” ↓</a>'
             '<nav aria-label="Examples">' + navigation +
             '<a href="../index.html">All numerical reports ↗</a></nav></aside><main id="main">'
             '<header><p class="eyebrow">Small inputs / visible answers</p><h1>Algorithms,<br><em>in two dimensions.</em></h1>'
