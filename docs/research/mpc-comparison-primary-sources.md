@@ -96,8 +96,8 @@ until the #83/#84 owners approve its schema and migration/compatibility plan.
     "license_manifest": "<record or link for full dependency/license inventory>"
   },
   "execution": {
-    "status": "<completed | infeasible | unbounded | max-iterations | timeout | error | unsupported>",
-    "termination_detail": "<solver-native status and message>",
+    "status": "<completed | infeasible | unbounded | max-iterations | timeout | cancelled | error | unsupported>",
+    "termination_detail": "<solver-native status/message, including cancellation source when cancelled>",
     "started_at_utc": "<timestamp>",
     "wall_time_seconds": 0.0,
     "setup_time_seconds": 0.0,
