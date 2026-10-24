@@ -26,3 +26,10 @@ add_executable(bounded_hull_check_record_test tests/artifacts/bounded_hull_check
 target_link_libraries(bounded_hull_check_record_test PRIVATE CSL::artifacts doctest::doctest)
 add_test(NAME bounded_hull_check_record_test COMMAND bounded_hull_check_record_test)
 csl_test_target(bounded_hull_check_record_test artifacts)
+
+add_executable(scenario_sweep_contract tests/artifacts/scenario_sweep_contract.cpp)
+target_link_libraries(scenario_sweep_contract PRIVATE CSL::artifacts doctest::doctest)
+target_compile_definitions(scenario_sweep_contract PRIVATE CSL_SWEEP_RUN_FIXTURE="${CMAKE_CURRENT_SOURCE_DIR}/tests/artifacts/fixtures/run-statistics-v3.json")
+target_include_directories(scenario_sweep_contract SYSTEM PRIVATE ${csl_json_SOURCE_DIR}/single_include)
+add_test(NAME scenario_sweep_contract COMMAND scenario_sweep_contract)
+csl_test_target(scenario_sweep_contract artifacts)
