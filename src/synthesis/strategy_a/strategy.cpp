@@ -310,8 +310,6 @@ public:
                 strategy,version,proposal_lineage};
             auto exact_candidate_relation=history.relation;
             auto exact_candidate_coordinates=history.coordinates;
-            const auto exact_candidate_primal=minimized.optimization?
-                minimized.optimization->primal:std::optional<Vector>{};
             if((exact_ts01||exact_ts03)&&result.termination==Termination::completed) {
                 receipt_=registry::detail::StrategyARuntimeLineageReceipt{prepared_request_,
                     std::make_shared<const reachability::ForwardTube>(tube),
@@ -376,18 +374,14 @@ public:
                 result.complete_proposal=CompleteFamilyProposal{proposal_identity,std::move(family)};
             }
             if(nominal_exact&&result.termination==Termination::completed&&
-                exact_candidate_primal) {
+                minimized.optimization) {
                 const SymbolicArgument statement{"bounded nominal linear exact-H profile",
                     "The selected compiled verifier reconstructs the complete nominal feasible-history relation and checks the exact minimizing face over the stored binary64 dyadic values."};
                 const ClaimEvidence claim{problem.identity(),statement};
-                const auto coefficients=problem.objective().coefficients();
-                const auto* linear=std::get_if<optimization::LinearCoefficients>(&coefficients);
-                if(!linear||linear->coefficients.size()!=exact_candidate_primal->size())return result;
-                double proposed_value=linear->offset;
-                for(std::size_t coordinate=0;coordinate<linear->coefficients.size();++coordinate)
-                    proposed_value+=linear->coefficients[coordinate]*(*exact_candidate_primal)[coordinate];
-                if(!std::isfinite(proposed_value))return result;
-                const ObjectiveBound proposed_bound{proposed_value,claim};
+                const auto exact_optimum=registry::detail::
+                    strategy_a_nominal_linear_exact_optimum_bound(problem);
+                if(!exact_optimum)return result;
+                const ObjectiveBound proposed_bound{*exact_optimum,claim};
                 const OptimumEvidence proposed_optimum{claim,{proposed_bound,proposed_bound}};
                 auto payload=std::make_shared<const NominalExactHRelation>(std::move(exact_candidate_relation));
                 CompleteOptimalFamily family{{exact_candidate_coordinates,request.representation,payload},

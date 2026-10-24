@@ -408,6 +408,26 @@ bool strategy_a_nominal_linear_exact_profile_valid(const problem::ResolvedProble
     return true;
 }
 
+std::optional<double> strategy_a_nominal_linear_exact_optimum_bound(
+    const problem::ResolvedProblem& problem) {
+    std::vector<exact_h::Row> rows;
+    std::vector<double> objective;
+    const auto reconstructed = reconstruct(problem, {}, rows, objective);
+    if (reconstructed.state != CheckState::established) return {};
+    const auto objective_data = problem.objective().coefficients();
+    const auto* linear = std::get_if<optimization::LinearCoefficients>(&objective_data);
+    if (!linear) return {};
+    const auto optimum = exact_h::minimize_linear(rows, objective.size(), objective,
+        linear->offset);
+    if (optimum.state != exact_h::LinearMinimumState::minimum || !optimum.attained)
+        return {};
+    double represented{};
+    if (!exact_h::exact_rational_to_double(optimum.value,
+            exact_h::default_max_integer_bits, represented))
+        return {};
+    return represented;
+}
+
 std::vector<TransformStepIdentity> strategy_a_nominal_linear_exact_lineage(const ProblemId& problem,
     std::size_t horizon) {
     return synthesis::strategy_a::detail::expected_nominal_lineage(problem, horizon);
