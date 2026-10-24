@@ -703,4 +703,18 @@ TEST_CASE("rejected approximation records a no-call observation without creating
     CHECK(std::holds_alternative<artifacts::NotCalledObservation>(malformed_spans[1].execution));
     REQUIRE(std::holds_alternative<artifacts::RejectedSpan>(malformed_spans[1].status));
     CHECK(std::get<artifacts::RejectedSpan>(malformed_spans[1].status).reason.find("approximation.request")!=std::string::npos);
+
+    auto bounded_timer=approximation_timer(resolved_problem,query);
+    ExecutionContext bounded_context;bounded_context.run_id="approximation-test-run";bounded_context.timing=bounded_timer;
+    auto bounded_root=std::get<execution::observability::TimingScope>(bounded_timer->start({0},bounded_context));
+    auto bounded_child=std::get<execution::observability::TimingScope>(bounded_timer->start({1},bounded_context));
+    const std::string oversized_detail(600,'x');
+    bounded_child.close_not_called_with_detail(artifacts::NotCalledReason::capability_rejected,oversized_detail);
+    bounded_root.close(Termination::completed);
+    const auto bounded_report=bounded_timer->snapshot();
+    REQUIRE(std::holds_alternative<execution::observability::TimingReport>(bounded_report));
+    const auto& bounded_spans=std::get<execution::observability::TimingReport>(bounded_report).observations.description().spans;
+    REQUIRE(bounded_spans.size()==2);
+    REQUIRE(std::holds_alternative<artifacts::RejectedSpan>(bounded_spans[1].status));
+    CHECK(std::get<artifacts::RejectedSpan>(bounded_spans[1].status).reason=="capability_rejected");
 }

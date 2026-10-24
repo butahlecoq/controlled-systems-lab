@@ -94,6 +94,9 @@ portable live OBS-01 wire schema remains unchanged.
 Preflight no-call details become the rejected-span reason. The collector copies
 them only when they fit the span's preallocated detail capacity; oversized or
 unavailable details leave the typed `capability_rejected` reason intact.
+The timing owner and snapshot publisher each use a bounded arena sized from the
+same `detail_bytes` setting, so transient detail storage is bounded by twice
+that setting before immutable records are published.
 
 `TimingClock` is the injection port. Read methods are `noexcept`; the collector
 serializes reads within one collector so deterministic test clocks need no locking.

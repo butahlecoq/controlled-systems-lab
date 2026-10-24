@@ -7,12 +7,23 @@
 
 #include <cmath>
 #include <chrono>
+#include <array>
+#include <cstring>
 #include <unordered_map>
 
 namespace csl::geometry::approximation {
 namespace {
 namespace ar=artifacts;
 namespace ob=execution::observability;
+struct RejectionDetail {
+    std::array<char,256> bytes{};
+    std::size_t size{};
+    bool append(std::string_view value) noexcept {
+        if(value.size()>bytes.size()-size)return false;
+        std::memcpy(bytes.data()+size,value.data(),value.size());size+=value.size();return true;
+    }
+    std::string_view view() const noexcept{return {bytes.data(),size};}
+};
 template<class Outcome> Termination approximation_termination(const Outcome& outcome) noexcept {
     if(std::holds_alternative<Unsupported>(outcome))return Termination::operation_rejected;
     if(std::holds_alternative<registry::Rejection>(outcome))return Termination::operation_rejected;
@@ -371,9 +382,18 @@ RunOutcome run_registered(const registry::Registry<registry::ApproximationPort>&
     if(const auto* rejected=std::get_if<registry::Rejection>(&prepared)) {
         ob::InstrumentedOperation observation{context,
             approximation_identity(request,rejected->provenance)};
-        const auto detail=rejected->diagnostics.empty()?std::string{"capability rejected"}:
-            rejected->diagnostics.front().field+": "+rejected->diagnostics.front().explanation;
-        observation.not_called(ar::NotCalledReason::capability_rejected,detail);
+        RejectionDetail detail;
+        if(rejected->diagnostics.empty())detail.append("capability rejected");
+        else for(std::size_t i=0;i<rejected->diagnostics.size();++i) {
+            const auto& diagnostic=rejected->diagnostics[i];
+            const auto separator=i?std::string_view{"; "}:std::string_view{};
+            if(!detail.append(separator)||!detail.append(diagnostic.field)||!detail.append(": ")||
+               !detail.append(diagnostic.explanation)) {
+                detail.append("; additional diagnostics omitted");
+                break;
+            }
+        }
+        observation.not_called(ar::NotCalledReason::capability_rejected,detail.view());
         return *rejected;
     }
     auto pipeline=std::get<registry::PreparedPipeline<registry::ApproximationPort>>(std::move(prepared));
