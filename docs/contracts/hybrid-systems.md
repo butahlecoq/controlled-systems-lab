@@ -8,6 +8,9 @@ and [PR #472](https://github.com/butahlecoq/controlled-systems-lab/pull/472)
 and remains incomplete. The implementation-status notes below identify the
 supported subset and gaps. The profile is deliberately distinct from the
 finite/mixed control domains and observation-based policy profiles.
+The measured and test-only dimension/mode/path evidence is summarized in the
+[`EXT-07 implementation capability profile`](../architecture/hybrid-capability-profile.md);
+its fixture counts do not imply general scalability.
 
 ## Hybrid automaton data
 
