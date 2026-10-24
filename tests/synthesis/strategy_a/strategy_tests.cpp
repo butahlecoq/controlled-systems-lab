@@ -362,7 +362,8 @@ public:
     }
 };
 std::shared_ptr<ob::TimingCollector> strategy_timing_collector(
-    const problem::ResolvedProblem& problem,std::shared_ptr<StrategyTimingClock> clock) {
+    const problem::ResolvedProblem& problem,std::shared_ptr<StrategyTimingClock> clock,
+    std::optional<ProgramIdentity> solver_program={}) {
     ar::ConfigurationInput configuration;
     const ar::Unavailable missing{ar::MissingReason::not_instrumented,{}};
     configuration.collection={true,ar::CollectionMode::detail,16,10000,16,10000};
@@ -380,8 +381,8 @@ std::shared_ptr<ob::TimingCollector> strategy_timing_collector(
             ar::Available<std::uint64_t>{1},"test-origin"}}, {},1};
     input.tasks={"solve"};
     input.operations={"strategy-a/run","strategy-a/forward","strategy-a/feasible-preimage",
-        "strategy-a/terminal-optimization","strategy-a/terminal-preimage"};
-    const std::vector<std::string> phases=input.operations;
+        "strategy-a/terminal-optimization","strategy-a/terminal-preimage","terminal.program.solve"};
+    const std::vector<std::string> phases(input.operations.begin(),input.operations.begin()+5);
     for(std::size_t index=0;index<phases.size();++index) {
         ar::SpanDescriptor span{};span.id={index};
         if(index)span.parent=ar::SpanParent{{0},ar::ParentKind::nested};
@@ -391,6 +392,15 @@ std::shared_ptr<ob::TimingCollector> strategy_timing_collector(
         span.applied_assurance=ar::Available<Assurance>{Assurance::numerical};
         input.spans.push_back(std::move(span));
     }
+    ar::SpanDescriptor solver{};solver.id={5};solver.parent=ar::SpanParent{{3},ar::ParentKind::nested};
+    solver.shard=0;solver.bucket=0;solver.task="solve";solver.operation="terminal.program.solve";
+    solver.module={ModuleId{"csl.synthesis.terminal-minimizers"},"1",missing};
+    solver.backend=std::make_shared<const ar::ModuleIdentity>(ar::ModuleIdentity{
+        ModuleId{"csl.lp.highs"},"1.1.0+highs.1.11.0",missing});
+    if(solver_program)solver.program=std::make_shared<const ProgramIdentity>(std::move(*solver_program));
+    solver.clock={"strategy-test-wall"};solver.requested_assurance=Assurance::numerical;
+    solver.applied_assurance=ar::Available<Assurance>{Assurance::numerical};
+    input.spans.push_back(std::move(solver));
     auto plan=ob::make_collection_plan(std::move(input));
     REQUIRE(std::holds_alternative<ob::CollectionPlan>(plan));
     auto collector=ob::make_timing_collector(std::get<ob::CollectionPlan>(std::move(plan)),std::move(clock),{0},{});
@@ -1671,8 +1681,13 @@ TEST_CASE("empty reachable stage stays undetermined without authored infeasibili
 
 TEST_CASE("Strategy A publishes planned wall spans for its run and mathematical phases") {
     auto problem=exact_ts02_integrator();
+    const auto reference=run(request(problem));
+    const auto& reference_history=payload(reference);
+    REQUIRE(reference_history.terminal);
+    REQUIRE(reference_history.terminal->optimization);
+    const auto terminal_program=reference_history.terminal->optimization->outcome.subject;
     auto clock=std::make_shared<StrategyTimingClock>();
-    auto collector=strategy_timing_collector(problem,clock);
+    auto collector=strategy_timing_collector(problem,clock,terminal_program);
     ExecutionContext context;context.resources=std::make_shared<const ResourcePolicy>(ResourcePolicy{1,1,1,{}});
     context.run_id="strategy-run";context.timing=collector;
 
@@ -1682,13 +1697,42 @@ TEST_CASE("Strategy A publishes planned wall spans for its run and mathematical 
     auto report=collector->snapshot();
     REQUIRE(std::holds_alternative<ob::TimingReport>(report));
     const auto& timing=std::get<ob::TimingReport>(report);
-    REQUIRE(timing.spans.size()==5);
+    REQUIRE(timing.spans.size()==6);
     REQUIRE(std::holds_alternative<ar::Available<std::uint64_t>>(timing.run_wall_ticks));
-    CHECK(std::get<ar::Available<std::uint64_t>>(timing.run_wall_ticks).value==90);
+    CHECK(std::get<ar::Available<std::uint64_t>>(timing.run_wall_ticks).value==110);
     for(std::size_t index=1;index<5;++index) {
+        if(index==3)continue;
         REQUIRE(std::holds_alternative<ar::Available<std::uint64_t>>(timing.spans[index].inclusive_wall_ticks));
         CHECK(std::get<ar::Available<std::uint64_t>>(timing.spans[index].inclusive_wall_ticks).value==10);
     }
+    CHECK(timing.spans[5].id==ar::SpanId{5});
+    CHECK(std::get<ar::Available<std::uint64_t>>(timing.spans[3].inclusive_wall_ticks).value==30);
+    CHECK(std::get<ar::Available<std::uint64_t>>(timing.spans[5].inclusive_wall_ticks).value==10);
+    CHECK(std::get<ar::ReturnedSpan>(timing.observations.description().spans[5].status).termination==Termination::completed);
+    const auto& solver=timing.observations.description().spans[5].descriptor;
+    CHECK(solver.operation=="terminal.program.solve");
+    REQUIRE(solver.backend);
+    CHECK(solver.backend->id==ModuleId{"csl.lp.highs"});
+    CHECK(solver.backend->version=="1.1.0+highs.1.11.0");
+    REQUIRE(solver.program);
+    CHECK(*solver.program==terminal_program);
+
+    auto wrong_program=terminal_program;
+    wrong_program.program.value+="-wrong";
+    auto mismatch_clock=std::make_shared<StrategyTimingClock>();
+    auto mismatch_collector=strategy_timing_collector(problem,mismatch_clock,wrong_program);
+    ExecutionContext mismatch_context;
+    mismatch_context.resources=std::make_shared<const ResourcePolicy>(ResourcePolicy{1,1,1,{}});
+    mismatch_context.run_id="strategy-run-mismatched-program";mismatch_context.timing=mismatch_collector;
+    const auto mismatch_result=run(exact_ts02_request(problem),false,std::move(mismatch_context));
+    REQUIRE(mismatch_result.termination==Termination::completed);
+    const auto mismatch_report=mismatch_collector->snapshot();
+    REQUIRE(std::holds_alternative<ob::TimingReport>(mismatch_report));
+    const auto& mismatch_timing=std::get<ob::TimingReport>(mismatch_report);
+    REQUIRE(mismatch_timing.spans.size()==6);
+    CHECK(std::holds_alternative<ar::Unavailable>(mismatch_timing.spans[5].inclusive_wall_ticks));
+    CHECK(std::holds_alternative<ar::IncompleteSpan>(
+        mismatch_timing.observations.description().spans[5].status));
 }
 
 TEST_CASE("Strategy A timing retains a stopped root and leaves unentered phases unavailable") {
@@ -1705,7 +1749,7 @@ TEST_CASE("Strategy A timing retains a stopped root and leaves unentered phases 
     auto report=collector->snapshot();
     REQUIRE(std::holds_alternative<ob::TimingReport>(report));
     const auto& timing=std::get<ob::TimingReport>(report);
-    REQUIRE(timing.spans.size()==5);
+    REQUIRE(timing.spans.size()==6);
     REQUIRE(std::holds_alternative<ar::Available<std::uint64_t>>(timing.spans[0].inclusive_wall_ticks));
     CHECK(std::get<ar::Available<std::uint64_t>>(timing.spans[0].inclusive_wall_ticks).value==30);
     for(std::size_t index=2;index<5;++index) {
