@@ -28,11 +28,14 @@ def adapt(bundle):
     if (bundle/"index.html").read_text(encoding="utf-8")!=report.render_html(record): raise ValueError("EXT-03 HTML differs from saved record")
     raw=(bundle/"raw-events.jsonl").read_bytes()
     if hashlib.sha256(raw).hexdigest()!=record["raw_events_sha256"]: raise ValueError("EXT-03 raw event hash mismatch")
+    stderr=(bundle/"process-stderr.txt").read_bytes(); process=record.get("process",{})
+    if process!={"return_code":0,"aborted":False,"complete":True,"stdout_sha256":hashlib.sha256(raw).hexdigest(),"stderr_sha256":hashlib.sha256(stderr).hexdigest()}: raise ValueError("EXT-03 process completion evidence mismatch")
     try: events=[json.loads(line) for line in raw.decode("utf-8").splitlines()]
     except (UnicodeError,json.JSONDecodeError) as error: raise ValueError("EXT-03 raw events are malformed") from error
-    measured=[event for event in events[1:] if event.get("warmup") is False]
+    trials=events[1:]; measured=[event for event in trials if event.get("warmup") is False]
     m=record["measurement"]
     if len(events)!=9 or events[0]!={"event":"header","schema":"csl.ext03-transform-measurement/1","batch":10,"warmups":1,"repetitions":7}: raise ValueError("EXT-03 event header/count mismatch")
+    if len(trials)!=8 or any(event.get("round")!=i or event.get("fixture")!="two_step_slew_integrator" or event.get("batch")!=10 or event.get("attempted_calls")!=10 or event.get("checked_calls")!=10 or event.get("failed_calls")!=0 or event.get("missing_calls")!=0 or event.get("status")!="passed" or event.get("warmup") is not (i==0) for i,event in enumerate(trials)): raise ValueError("EXT-03 warmup or trial row failed validation")
     if [event.get("elapsed_ns") for event in measured]!=m["batch_elapsed_ns"] or [event.get("elapsed_ns",0)/event.get("batch",1)/1000 for event in measured]!=m["microseconds_per_call"]: raise ValueError("EXT-03 trial events differ from record")
     if any(event.get("status")!="passed" or event.get("checked_calls")!=10 or event.get("failed_calls")!=0 or event.get("missing_calls")!=0 for event in measured): raise ValueError("EXT-03 measurement has failed or missing calls")
     stream=io.StringIO(newline=""); writer=csv.writer(stream,lineterminator="\n"); writer.writerow(["batch","elapsed_ns","calls","microseconds_per_call"])

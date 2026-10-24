@@ -62,6 +62,13 @@
     "warmup_batches": 1
   },
   "performance_claim": "Single-fixture transform-and-recovery timing only; no solver comparison, speedup, application-scale, or scalability claim.",
+  "process": {
+    "aborted": false,
+    "complete": true,
+    "return_code": 0,
+    "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "stdout_sha256": "185d7a3157ecdcabee23de57e88d46f105c715b11225577039de60f23df729d2"
+  },
   "raw_events_sha256": "185d7a3157ecdcabee23de57e88d46f105c715b11225577039de60f23df729d2",
   "report_id": "ext03-transform-20261024-a3a3af9",
   "schema": "csl.ext03-transform-record/1",

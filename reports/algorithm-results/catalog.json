@@ -310,14 +310,14 @@
       "source_report_id": "syn04-strategy-b-ts03-20261022-2c0c9210"
     },
     {
-      "report_id": "ext03-transform-c5703646ae75c6ffa6ebd15d3d661b747e334caeef98d2e56d7862685c9de04b",
-      "payload_sha256": "3a88e45b7ceb93f8f4456f8d0f3d5e3d00019ca6ade5f2158126054a012dbc91",
+      "report_id": "ext03-transform-86d6030a627e8a95e56d01f68b113210046cfc55b00915849b533c1469f077a7",
+      "payload_sha256": "ef1259883bff1d3d784b46771b1bcc41e208f4bc8e45c31fee4cc2667cd646a3",
       "source_commit": "a3a3af9e1903d7a2a4be6116cc1669215c2bba1b",
-      "zip_sha256": "c2ee61114b88f9594444bad9b6304e26f2bf95a2c837a44da9ad445a6db22f28",
+      "zip_sha256": "ec9dbf73965fa8ef98ff8a18971c6b61eef49f0c98b60f52defc6aa62f85596e",
       "report_kind": "ext03-temporal-transform",
       "source_report_id": "ext03-transform-20261024-a3a3af9",
       "payload_schema": "csl.ext03-transform-record/1",
-      "native_payload_sha256": "3a88e45b7ceb93f8f4456f8d0f3d5e3d00019ca6ade5f2158126054a012dbc91",
+      "native_payload_sha256": "ef1259883bff1d3d784b46771b1bcc41e208f4bc8e45c31fee4cc2667cd646a3",
       "measured_scope": "One fixed two-step scalar temporal lift and history recovery; seven measured batches",
       "evidence_limits": "Transform-only microbenchmark; no solver timing, comparator, speedup, source-mapped limiter, application-scale or scalability claim"
     }
