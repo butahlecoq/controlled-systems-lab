@@ -65,6 +65,7 @@ flowchart LR
 | Directional witness selection | `CSL::witness_selector`, registered `SelectorPort` | `src/synthesis/witness_selector.cpp` | `SelectorPort` plus selected membership `LPPort`; accepts only admitted complete families and returns source-bound witnesses. |
 | Original-problem trajectory checks | `CSL::verification`, `verify_trajectory` | `src/verification` | Consumes original immutable problem and witness values, independent of the strategy's solver result. |
 | Execution and portable records | `CSL::execution`, `CSL::artifacts` | `src/execution`, `src/artifacts` | Task/executor policy is the resource and cancellation seam; versioned artifact codecs own persisted record contracts. |
+| Scenario sweeps | `CSL::experiments`, `run_sweep` | `src/experiments` | Dispatches one complete prepared strategy per scenario/configuration through one executor. Results retain IDs, selection settings, failures and executor resource observations in input order. |
 | Guarded paired application flow | `CSL::application`, `prepare_comparison`, `run_comparison` | `src/application` | Composes strategy, selector and verification interfaces; both strategy preparations must be admitted before execution. |
 | Numerical report tooling | saved-record validation and rendering | `benchmarks/reporting`, `scripts/reports` | Reads saved records and renders without solver calls; no strategy-specific serialization logic belongs in the renderer. |
 
@@ -220,15 +221,14 @@ by both sequential strategy calls, so its deadline and stop token apply across
 the invocation; these remain cooperative, and a native call can return after a
 stop request.
 
-Resource declarations and accounting made by an `Executor` apply only to that
-executor's batch. Declared compute-thread reservations and active memory
-reservations do not constrain native thread pools, the process heap, or RSS;
-they are not OS-level hard caps. Per-attempt resource observations in saved
-records must retain their accounting scope and must not be presented as a
-process-wide limit. Independent sweep scheduling and any suite-level budget
-belong to [RUN-02 #80](https://github.com/butahlecoq/controlled-systems-lab/issues/80).
-The implemented comparison flow makes no concurrent-sweep scalability claim
-until that separate resource scope is enforced and measured.
+`CSL::experiments::run_sweep` dispatches each complete prepared strategy through
+one executor. It keeps each scenario's horizon together and returns case
+identities and deterministic selection settings beside task outcomes in input
+order. It does not persist a sweep artifact or execute the later family-query
+stage. Executor thread reservations remain declarations. Memory reservations
+support admission accounting, not a hard process-memory limit. These reports do
+not constrain native thread pools, the process heap, or RSS, so they do not
+support a process-wide scalability claim.
 
 The installed `scenario_cli --run` command adapts user-authored JSON to the
 paired application API for the guarded T-S01/T-S02 profiles. T-S03 is currently

@@ -29,6 +29,7 @@ file(COPY "${CSL_SOURCE_DIR}/tests/installed/validated_finite_action_minimax_por
 file(COPY "${CSL_SOURCE_DIR}/tests/installed/problem_client.cpp" DESTINATION "${work}/source")
 file(COPY "${CSL_SOURCE_DIR}/tests/installed/resolved_problem_client.cpp" DESTINATION "${work}/source")
 file(COPY "${CSL_SOURCE_DIR}/tests/installed/execution_client.cpp" DESTINATION "${work}/source")
+file(COPY "${CSL_SOURCE_DIR}/tests/installed/experiments_client.cpp" DESTINATION "${work}/source")
 file(COPY "${CSL_SOURCE_DIR}/tests/installed/optimization_client.cpp" DESTINATION "${work}/source")
 file(COPY "${CSL_SOURCE_DIR}/tests/installed/zoutendijk_projection_client.cpp" DESTINATION "${work}/source")
 file(COPY "${CSL_SOURCE_DIR}/tests/installed/feasible_directions_client.cpp" DESTINATION "${work}/source")
