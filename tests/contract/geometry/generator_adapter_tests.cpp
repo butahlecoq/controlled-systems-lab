@@ -187,6 +187,8 @@ TEST_CASE("generator operation records its registered module span without changi
     const auto& descriptor=report.observations.description().spans[1].descriptor;
     CHECK(descriptor.task=="observed-image");CHECK(descriptor.operation=="geometry.generators.affine-image");
     CHECK(descriptor.module.id==implementation.id);CHECK_FALSE(descriptor.backend);
+    REQUIRE(descriptor.input_size);CHECK(*descriptor.input_size==1);
+    REQUIRE(descriptor.output_size);CHECK(*descriptor.output_size==1);
     REQUIRE(std::holds_alternative<ar::ReturnedSpan>(report.observations.description().spans[1].status));
     CHECK(std::get<ar::ReturnedSpan>(report.observations.description().spans[1].status).termination==Termination::completed);
 }
@@ -230,6 +232,8 @@ TEST_CASE("generator V conversion records its registered module span") {
     CHECK(descriptor.module.id==implementation.id);
     REQUIRE(descriptor.input_representation);CHECK(*descriptor.input_representation==RepresentationId{"csl.zonotope"});
     REQUIRE(descriptor.output_representation);CHECK(*descriptor.output_representation==RepresentationId{"csl.polyhedron.v"});
+    REQUIRE(descriptor.input_size);CHECK(*descriptor.input_size==1);
+    REQUIRE(descriptor.output_size);CHECK(*descriptor.output_size==2);
     CHECK(descriptor.relation==SetRelation::equivalent);
     REQUIRE(descriptor.applied_relation);CHECK(*descriptor.applied_relation==SetRelation::equivalent);
     REQUIRE(descriptor.relation_evidence);
