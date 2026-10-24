@@ -5,6 +5,7 @@
 #include <functional>
 #include <optional>
 #include <string_view>
+#include <type_traits>
 #include <utility>
 
 namespace csl::execution::observability {
@@ -32,8 +33,11 @@ public:
     }
     template<class Invoke,class TerminationOf>
     auto run(Invoke&& invoke,TerminationOf&& termination_of) {
+        using Result=std::invoke_result_t<Invoke>;
+        static_assert(std::is_nothrow_invocable_r_v<Termination,TerminationOf,const Result&>,
+            "operation termination classifiers must be noexcept and accept a const result");
         auto result=std::invoke(std::forward<Invoke>(invoke));
-        if(scope_){scope_->close(std::invoke(std::forward<TerminationOf>(termination_of),result));scope_.reset();}
+        if(scope_){scope_->close(std::invoke(std::forward<TerminationOf>(termination_of),std::as_const(result)));scope_.reset();}
         return result;
     }
 };

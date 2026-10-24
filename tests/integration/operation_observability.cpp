@@ -78,7 +78,6 @@ std::shared_ptr<ob::TimingCollector> collector(const Fixture& f,std::shared_ptr<
     return accepted(ob::make_timing_collector(f.plan,std::move(clock),{0},{}));
 }
 }
-
 TEST_CASE("instrumented operation binds timing to task, operation, stage and provider identity") {
     const auto f=fixture();auto clock=std::make_shared<Clock>();auto timer=collector(f,clock);
     ExecutionContext context;context.run_id="run";context.timing=timer;
@@ -86,7 +85,7 @@ TEST_CASE("instrumented operation binds timing to task, operation, stage and pro
     std::size_t calls{};
     const auto result=ob::run_instrumented_operation(context,f.identity,[&] {
         ++calls;return Termination::completed;
-    },[](Termination termination){return termination;});
+    },[](Termination termination) noexcept {return termination;});
     CHECK(result==Termination::completed);CHECK(calls==1);
     root.close(Termination::completed);
     const auto report=accepted(timer->snapshot());
@@ -107,31 +106,11 @@ TEST_CASE("instrumented operation leaves a different provider unmeasured") {
     std::size_t calls{};
     ob::run_instrumented_operation(context,wrong,[&] {
         ++calls;return Termination::completed;
-    },[](Termination termination){return termination;});
+    },[](Termination termination) noexcept {return termination;});
     CHECK(calls==1);
     root.close(Termination::completed);
     const auto report=accepted(timer->snapshot());
     REQUIRE(report.spans.size()==2);
     CHECK(std::holds_alternative<ar::Unavailable>(report.spans[1].inclusive_wall_ticks));
     CHECK(std::holds_alternative<ar::IncompleteSpan>(report.observations.description().spans[1].status));
-}
-
-TEST_CASE("preflight rejection records a not-called operation without entering the spy") {
-    const auto f=fixture();auto clock=std::make_shared<Clock>();auto timer=collector(f,clock);
-    ExecutionContext context;context.run_id="run";context.timing=timer;
-    auto root=accepted(timer->start({0},context));
-    auto operation=ob::start_operation_timing(context,f.identity);
-    REQUIRE(operation);
-    std::size_t calls{};
-    const bool admitted=false;
-    if(admitted)++calls;
-    operation->close_not_called(ar::NotCalledReason::capability_rejected);
-    root.close(Termination::completed);
-    const auto report=accepted(timer->snapshot());
-    CHECK(calls==0);
-    const auto& span=report.observations.description().spans[1];
-    REQUIRE(std::holds_alternative<ar::NotCalledObservation>(span.execution));
-    CHECK(std::get<ar::NotCalledObservation>(span.execution).reason==ar::NotCalledReason::capability_rejected);
-    CHECK(std::get<ar::RejectedSpan>(span.status).reason=="capability_rejected");
-    CHECK(std::get<ar::Available<Termination>>(span.termination).value==Termination::operation_rejected);
 }
