@@ -72,6 +72,12 @@ def main() -> int:
          "--profile-calls may be provided only once"),
         (["--profile-strategy", "reach-back", "--profile-calls", "0"],
          "Profile call count must be positive"),
+        (["--profile-strategy", "reach-back", "--profile-calls", "1",
+          "--record", "/tmp/obs04-invalid-mixed-mode.record"],
+         "Profile mode and comparison-record capture are separate modes"),
+        (["--record", "/tmp/obs04-invalid-first.record",
+          "--record", "/tmp/obs04-invalid-second.record"],
+         "--record may be provided only once"),
     ]
     for arguments, diagnostic in malformed_arguments:
         rejected = subprocess.run(
