@@ -121,6 +121,9 @@ the public StrategyPort path. Constant T-S02 tests preserve multiple terminal
 points and all four corner histories. T-S01 evaluates the retained primal with the
 original resolved objective and asserts literal cost zero. HiGHS withholds
 optional program bounds; their absence is checked before any value access.
+The nominal-linear exact profile also checks a stage-varying affine system with
+a nonzero initial point and offsets, an intermediate state bound, and a complete
+optimal relation that retains an independent control fiber.
 For strict T-S01, T-S02, and T-S03, the registered Strategy A paths are exercised
 end-to-end. T-S02 checks all four box corners and an interior history, rejects
 an inconsistent transition point, verifies equality rank and literal control

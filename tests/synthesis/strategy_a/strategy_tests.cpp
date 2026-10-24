@@ -124,6 +124,20 @@ problem::ResolvedProblem nominal_linear_exact_three_stage_multivariable() {
         InformationPattern::nominal_open_loop,LinearTerminal{{1,0},0}};
     return take(problem::resolve(source,{problem::UncertaintyStructure::stage_product_uncoupled,{},{}}));
 }
+problem::ResolvedProblem nominal_linear_exact_affine_offsets() {
+    Problem source{{"strategy-a-nominal-linear-exact-affine-offsets"},
+        std::make_shared<const SystemModel>(SystemModel{{{1,1,0},TimeDomain::discrete,
+            std::vector<LinearStage>{
+                {{1,1,{-1}},{1,1,{1}},{1,0,{}},{0.25}},
+                {{1,1,{2}},{1,1,{0}},{1,0,{}},{-0.5}}}}, {}}),
+        {0,1,2},KnownInitial{{0.5}},
+        ContinuousDomain{{interval("nominal-exact-offset-u0",0,1,"u"),
+            interval("nominal-exact-offset-u1",0,1,"u")}},
+        {interval("nominal-exact-offset-x0",0.5,0.5),
+            interval("nominal-exact-offset-x1",0,1),UniversalSet{1}}, {},{},
+        InformationPattern::nominal_open_loop,LinearTerminal{{1},0}};
+    return take(problem::resolve(source,{problem::UncertaintyStructure::stage_product_uncoupled,{},{}}));
+}
 problem::ResolvedProblem nominal_linear_exact_cancellation_objective() {
     Problem source{{"strategy-a-nominal-linear-exact-cancellation"},
         std::make_shared<const SystemModel>(SystemModel{
@@ -947,6 +961,31 @@ TEST_CASE("nominal linear exact profile recovers a three-stage joint optimal his
     CHECK_FALSE(contains(*relation,{0,0,0,0,0,0,0.25,0,
         0,0,0,0,0.25,0}));
     CHECK_FALSE(contains(*relation,{0,0,0,1,0,1.25,0,1.5,0,1,0,0.5,0,0}));
+}
+TEST_CASE("nominal linear exact profile preserves affine offsets and a free control fiber") {
+    const auto result=run(nominal_linear_exact_request(nominal_linear_exact_affine_offsets()));
+    CHECK(result.termination==Termination::completed);
+    REQUIRE(result.family);
+    CHECK(result.family->registry_verified());
+    CHECK(result.outcome.value==MathematicalOutcome::optimal);
+    REQUIRE(result.objective.lower);REQUIRE(result.objective.upper);
+    CHECK(result.objective.lower->value==-0.5);
+    CHECK(result.objective.upper->value==-0.5);
+
+    const auto& complete=std::get<CompleteOptimalFamily>(result.family->outcome());
+    REQUIRE(complete.relation.payload);
+    const auto* relation=complete.relation.payload->h_relation_for_recording();
+    REQUIRE(relation);
+    CHECK(relation->metadata()->set.dimension==5);
+    const auto h=std::get<sets::HRepresentation>(relation->representation());
+    CHECK(equality_rank(h)==4);
+    // x1=u0-0.25 and x2=2*u0-1. The intermediate bound gives u0>=0.25,
+    // so minimizing x2 fixes u0=0.25 while u1 remains free in [0,1].
+    CHECK(contains(*relation,{0.5,0,-0.5,0.25,0}));
+    CHECK(contains(*relation,{0.5,0,-0.5,0.25,1}));
+    CHECK(contains(*relation,{0.5,0,-0.5,0.25,0.4}));
+    CHECK_FALSE(contains(*relation,{0.5,0.25,0,0.5,0.4}));
+    CHECK_FALSE(contains(*relation,{0.5,0,-0.5,0.25,1.2}));
 }
 TEST_CASE("nominal linear exact evidence derives the dyadic optimum without rounded accumulation") {
     const auto bound=registry::detail::strategy_a_nominal_linear_exact_optimum_bound(
