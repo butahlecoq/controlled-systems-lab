@@ -129,6 +129,7 @@ static ArtifactResult<CollectedStatistics> checked_collection(CollectionRecord i
             if(d.requested_assurance!=Assurance::numerical&&d.requested_assurance!=Assurance::validated)return error("collection.spans.assurance","Unknown assurance");
             if(const auto* a=std::get_if<Available<Assurance>>(&d.applied_assurance);a&&a->value!=Assurance::numerical)return error("collection.spans.assurance","Validated application is unsupported");
             if(d.relation&&(*d.relation<SetRelation::equivalent||*d.relation>SetRelation::heuristic))return error("collection.spans.relation","Unknown relation");
+            if(d.applied_relation&&(*d.applied_relation<SetRelation::equivalent||*d.applied_relation>SetRelation::heuristic))return error("collection.spans.applied_relation","Unknown applied relation");
             if(const auto* ticks=std::get_if<TickInterval>(&s.interval)){
                 const auto* start=std::get_if<Available<std::int64_t>>(&ticks->start);const auto* end=std::get_if<Available<std::int64_t>>(&ticks->end);
                 if((start&&start->value<0)||(end&&end->value<0)||(start&&end&&end->value<start->value))return error("collection.spans.interval","Invalid measured interval");

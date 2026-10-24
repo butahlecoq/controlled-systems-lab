@@ -351,7 +351,8 @@ RunOutcome run_registered(const registry::Registry<registry::ApproximationPort>&
     if(request.direction==SetRelation::equivalent)
     {
         ob::InstrumentedOperation observation{context,requested_approximation_identity(request,method)};
-        observation.not_called(ar::NotCalledReason::capability_rejected);
+        observation.not_called(ar::NotCalledReason::capability_rejected,
+            "approximation.direction: Equivalent conversion belongs to ConversionPort.");
         return reject(method,"approximation.direction","Equivalent conversion belongs to ConversionPort.");
     }
     if(request.identity.problem.value.empty() || request.identity.request.value.empty() ||
@@ -366,7 +367,9 @@ RunOutcome run_registered(const registry::Registry<registry::ApproximationPort>&
     if(const auto* rejected=std::get_if<registry::Rejection>(&prepared)) {
         ob::InstrumentedOperation observation{context,
             approximation_identity(request,rejected->provenance)};
-        observation.not_called(ar::NotCalledReason::capability_rejected);
+        const auto detail=rejected->diagnostics.empty()?std::string{"capability rejected"}:
+            rejected->diagnostics.front().field+": "+rejected->diagnostics.front().explanation;
+        observation.not_called(ar::NotCalledReason::capability_rejected,detail);
         return *rejected;
     }
     auto pipeline=std::get<registry::PreparedPipeline<registry::ApproximationPort>>(std::move(prepared));

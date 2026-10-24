@@ -220,7 +220,8 @@ CollectionResult<ar::CollectedStatistics> merge_observations(const CollectionPla
                     ar::Metric<MathematicalOutcome> outcome=ar::Unavailable{ar::MissingReason::not_instrumented,{}};
                     if(v.has_outcome)outcome=ar::Available<MathematicalOutcome>{v.outcome};
                     record.status=ar::ReturnedSpan{v.termination,std::move(outcome)};
-                }else if(v.status==CompletionStatus::rejected)record.status=ar::RejectedSpan{"capability_rejected"};
+                }else if(v.status==CompletionStatus::rejected)record.status=ar::RejectedSpan{
+                    slot->size?std::string(owner->arena.data()+slot->offset,slot->size):"capability_rejected"};
                 else if(v.status==CompletionStatus::skipped)record.status=ar::SkippedSpan{"task_not_admitted"};
                 else if(v.status==CompletionStatus::failed){record.status=ar::FailedSpan{"unspecified","producer_reported"};increment(bucket.failed);}
                 else increment(bucket.incomplete);

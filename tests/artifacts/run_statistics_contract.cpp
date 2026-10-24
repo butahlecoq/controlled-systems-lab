@@ -881,6 +881,10 @@ TEST_CASE("canonical relation evidence and requested assurance remain independen
         const std::string archived_wire{reinterpret_cast<const char*>(archived.content().bytes().data()),archived.content().bytes().size()};
         CHECK(archived_wire.find("\"applied_relation\":\""+std::string(relation==SetRelation::equivalent?"equivalent":relation==SetRelation::inner?"inner":relation==SetRelation::outer?"outer":"heuristic")+"\"")!=std::string::npos);
         CHECK(archived_wire.find("csl.run-statistics/6")!=std::string::npos);
+        auto legacy=nlohmann::json::parse(archived_wire);legacy["schema"]="csl.run-statistics/5";
+        for(auto& span:legacy["statistics"]["spans"])span["descriptor"].erase("applied_relation");
+        const auto legacy_wire=legacy.dump();
+        CHECK(std::holds_alternative<ar::RecordedRunArtifact>(ar::decode_recorded_run(legacy_wire)));
     }
 }
 TEST_CASE("pin wire variants are closed and semantic option changes leave mathematics unchanged") {

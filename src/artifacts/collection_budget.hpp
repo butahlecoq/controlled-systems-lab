@@ -63,6 +63,7 @@ inline void descriptor(Counter& c,const SpanDescriptor& d){
     for(const auto* p:{&d.input_representation,&d.output_representation}){c.add(1);if(*p)c.text((*p)->value);}
     value(c,d.requested_assurance);metric(c,d.applied_assurance);
     c.add(1);if(d.relation)value(c,*d.relation);
+    c.add(1);if(d.applied_relation)value(c,*d.applied_relation);
     geometry(c,d.relation_evidence);summary(c,d.input_summary);summary(c,d.output_summary);c.text(d.observation_source);
 }
 inline void clock(Counter& c,const ClockDomain& d){

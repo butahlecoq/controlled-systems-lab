@@ -86,10 +86,10 @@ not called with its typed reason. Instrumentation lookup failures never change
 the provider call or its mathematical result. The serializer already supports
 not-called observations. Returned provider relation evidence and the applied
 relation are retained separately from the descriptor's requested relation in
-the in-memory observation view. Appending the applied-relation field preserves
-source compatibility for default-initialized descriptors; no stable binary ABI
-is promised. The portable OBS-01 serializer continues to persist timing and
-terminal status only, so this in-memory field does not change its schema.
+the in-memory observation view and recorded-run schema v6. Schema v5 remains
+readable. Appending the applied-relation field preserves source compatibility
+for default-initialized descriptors; no stable binary ABI is promised. The
+portable live OBS-01 wire schema remains unchanged.
 
 `TimingClock` is the injection port. Read methods are `noexcept`; the collector
 serializes reads within one collector so deterministic test clocks need no locking.

@@ -686,4 +686,5 @@ TEST_CASE("rejected approximation records a no-call observation without creating
     CHECK(std::get<artifacts::NotCalledObservation>(span.execution).reason==
         artifacts::NotCalledReason::capability_rejected);
     CHECK(std::holds_alternative<artifacts::RejectedSpan>(span.status));
+    CHECK(std::get<artifacts::RejectedSpan>(span.status).reason.find("output.relation")!=std::string::npos);
 }
