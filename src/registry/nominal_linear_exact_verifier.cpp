@@ -472,6 +472,10 @@ std::optional<sets::SetData> strategy_a_nominal_linear_exact_optimal_relation(
     const auto optimum = exact_h::minimize_linear(rows, objective.size(), objective, linear.offset, limits);
     if (optimum.state != exact_h::LinearMinimumState::minimum || !optimum.attained ||
         !append_objective_face(objective, linear.offset, optimum.value, limits, rows)) return {};
+    constexpr std::size_t max_binary64_search_steps = 63;
+    if (objective.size() == std::numeric_limits<std::size_t>::max() ||
+        rows.size() > limits.max_operations / max_binary64_search_steps / (objective.size() + 1))
+        return {};
 
     std::vector<double> inequalities;
     std::vector<double> upper_bounds;

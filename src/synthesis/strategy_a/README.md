@@ -43,7 +43,8 @@ an exact dyadic, proves nonempty boundedness, minimizes the objective exactly,
 and checks candidate equality with the complete optimal face by two exact
 inclusions. Values outside the finite binary64 range, exact faces that cannot
 be represented by finite binary64 H rows, unsupported inputs, empty relations,
-failed exact decisions and resource-limit cases fail closed. This checks the
+failed exact decisions, output-construction budgets and other resource-limit
+cases fail closed. This checks the
 represented values exactly; Strategy A's forward construction still uses
 binary64 providers, so it is not a validated-arithmetic claim. The exact
 rational optimum is published using its tight outward binary64 enclosure,
