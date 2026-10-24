@@ -80,7 +80,8 @@ bool contains_ts03(std::span<const double> point) noexcept {
 }
 bool contains_h(const sets::HRepresentation& h,std::span<const double> point,
         const NumericalPolicy& tolerance) noexcept {
-    if(point.size()!=h.inequalities.cols()||point.size()!=h.equalities.cols())return false;
+    if(point.size()!=h.inequalities.cols()||point.size()!=h.equalities.cols()||
+       std::any_of(point.begin(),point.end(),[](double value){return !std::isfinite(value);}))return false;
     const auto within=[&](double value,double bound,double scale) {
         return std::abs(value-bound)<=tolerance.absolute_tolerance+
             tolerance.relative_tolerance*std::max(1.0,scale);

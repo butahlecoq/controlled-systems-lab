@@ -231,7 +231,8 @@ The implemented comparison flow makes no concurrent-sweep scalability claim
 until that separate resource scope is enforced and measured.
 
 The installed `scenario_cli --run` command adapts user-authored JSON to the
-paired application API for the guarded T-S01/T-S02/T-S03 profiles. It accepts optional
+paired application API for the guarded T-S01/T-S02 profiles. T-S03 is currently
+available through the paired application API, not the CLI input path. The CLI accepts optional
 LP/convex IDs, a seed, thread allocation and profile overrides, and reports
 per-strategy outcomes plus independent witness checks. With `--output-dir`, it
 saves one versioned recorded artifact per strategy through the artifact API
