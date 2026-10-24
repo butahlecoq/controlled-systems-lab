@@ -8,5 +8,5 @@ CPU: AMD Ryzen 5 3550H with Radeon Vega Mobile Gfx; 8 logical CPUs, 4 cores, 2 t
 System load at run start: 0.62, 0.86, 1.77 (8 logical CPUs)
 Memory at capture: 7.6 GiB total, 3.4 GiB available
 Profiler: perf 7.2.3-1 unpacked under `/tmp` from the configured Arch package mirror; no system package was installed.
-Separate profile: see `linux-gcc16-20261024.profile-summary.md` and `.perf.data`; user-mode CPU cycles at 999 Hz, 167 samples over 145.794 ms, zero lost samples. Whole-process profile, not isolated to the timed strategy calls; no unique limiter established.
-Profile data SHA-256: f840d0b233af591aa40590e54a5618ae7aea8c50a5f9c3f34467d41f5a29fb29
+Separate profile: see `linux-gcc16-20261024.profile-summary.md` and `.perf.data`; user-mode CPU cycles at 999 Hz, 176 samples over 150.527 ms, zero lost samples. Whole-process profile, not isolated to the timed strategy calls; no unique limiter established.
+Profile data SHA-256: f3b7d29f976d10152f7359693e5218ecdbd65a8467d99dc2a39c7ad454ee487d

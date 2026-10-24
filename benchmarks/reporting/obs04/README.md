@@ -64,8 +64,8 @@ analytic and span checks (four warmups and 28 measured attempts). Measured
 | direct-joint | enabled | 972,950 | 910,094–1,042,372 |
 
 This sample is descriptive and inconclusive. A separate user-space `perf`
-profile is retained beside the raw timings. It captured 167 samples over
-145.794 ms with zero samples lost, but it covers the whole driver process,
+profile is retained beside the raw timings. It captured 176 samples over
+150.527 ms with zero samples lost, but it covers the whole driver process,
 including initialization, baselines, workspace/collector setup, strategy calls,
 and snapshots. Allocation/cleanup symbols and solver symbols appear in that
 profile, but it cannot isolate a unique limiter in the timed region. The profile
