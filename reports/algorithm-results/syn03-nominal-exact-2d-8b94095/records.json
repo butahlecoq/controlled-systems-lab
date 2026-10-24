@@ -1,6 +1,6 @@
 {
   "schema": "csl.strategy-a-profile-example/1",
-  "example_id": "syn03-nominal-exact-2d-example",
+  "example_id": "syn03-nominal-exact-2d-8b94095",
   "algorithm": {
     "strategy": "csl.synthesis.reach-back@1",
     "profile": "strategy-a.nominal-linear-exact-v1",
@@ -12,18 +12,41 @@
     "horizon": 1,
     "state_dimension": 2,
     "control_dimension": 2,
-    "initial_state": [0, 0],
+    "initial_state": [
+      0,
+      0
+    ],
     "dynamics": "x1 = u0",
     "control_set": {
       "representation": "H",
-      "constraints": ["0 <= u0_x <= 1", "0 <= u0_y <= 1"]
+      "constraints": [
+        "0 <= u0_x <= 1",
+        "0 <= u0_y <= 1"
+      ]
     },
     "state_constraints": [
-      {"stage": 0, "set": "{(0,0)}"},
-      {"stage": 1, "constraints": ["x1 + y1 >= 1", "0 <= x1 <= 1", "0 <= y1 <= 1"]}
+      {
+        "stage": 0,
+        "set": "{(0,0)}"
+      },
+      {
+        "stage": 1,
+        "constraints": [
+          "x1 + y1 >= 1",
+          "0 <= x1 <= 1",
+          "0 <= y1 <= 1"
+        ]
+      }
     ],
     "objective": "minimize x1 + y1",
-    "joint_coordinates": ["x0_x", "x0_y", "x1_x", "x1_y", "u0_x", "u0_y"]
+    "joint_coordinates": [
+      "x0_x",
+      "x0_y",
+      "x1_x",
+      "x1_y",
+      "u0_x",
+      "u0_y"
+    ]
   },
   "expected": {
     "minimum": 1,
@@ -40,7 +63,9 @@
     "stdout": "profile=strategy-a.nominal-linear-exact-v1\nstate_dimension=2 control_dimension=2 horizon=1\nterminal_constraint=x+y>=1; 0<=x,y<=1\nobjective=minimize x+y\nexact_optimum=1 optimal_face={(x,y): x+y=1, 0<=x,y<=1}\nverified_complete_family=true assurance=numerical\n"
   },
   "reproduction": {
-    "external_consumer_check": "cmake --build build/quickhull-exploratory --target strategy_a_tests hybrid_path_program_tests",
+    "focused_native_test_build": "cmake --build build/quickhull-exploratory --target strategy_a_tests hybrid_path_program_tests",
+    "installed_public_consumer_check": "ctest --test-dir build/quickhull-exploratory -R ^installed_public_client$ --output-on-failure",
+    "installed_public_consumer_result": "passed; installed package configured, built and ran external examples",
     "example_command": "./build/examples/nominal_linear_exact_2d",
     "installed_consumer_example": "build/quickhull-exploratory/installed-consumer/examples-build/nominal_linear_exact_2d"
   },

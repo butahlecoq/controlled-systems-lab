@@ -288,17 +288,17 @@ class GalleryTests(unittest.TestCase):
             gallery.build(self.catalog, self.site)
 
     def test_nominal_exact_example_stages_its_hash_checked_bundle(self):
-        source = ROOT / "reports/algorithm-results/syn03-nominal-exact-2d-example"
+        source = ROOT / "reports/algorithm-results/syn03-nominal-exact-2d-8b94095"
         stage_root = self.site / "custom-stage"
         stage_root.mkdir()
         report_id = nominal_exact_example.stage(source, stage_root)
         staged = stage_root / report_id
-        self.assertEqual(report_id, "syn03-nominal-exact-2d-example")
+        self.assertEqual(report_id, "syn03-nominal-exact-2d-8b94095")
         self.assertEqual((staged / "records.json").read_bytes(), (source / "records.json").read_bytes())
         self.assertIn("optimal-face.svg", (staged / "index.html").read_text())
 
     def test_nominal_exact_example_rejects_changed_bytes(self):
-        source = ROOT / "reports/algorithm-results/syn03-nominal-exact-2d-example"
+        source = ROOT / "reports/algorithm-results/syn03-nominal-exact-2d-8b94095"
         copied = self.site / "modified-bundle"
         shutil.copytree(source, copied)
         (copied / "optimal-face.svg").write_text("changed")

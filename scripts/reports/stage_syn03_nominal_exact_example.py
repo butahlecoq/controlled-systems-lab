@@ -13,7 +13,7 @@ assert site_spec.loader is not None
 site_spec.loader.exec_module(site)
 
 
-REPORT_ID = "syn03-nominal-exact-2d-example"
+REPORT_ID = "syn03-nominal-exact-2d-8b94095"
 FILES = {"README.md", "index.html", "optimal-face.svg", "records.json"}
 
 

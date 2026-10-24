@@ -91,9 +91,9 @@ jobs:
                 --source reports/algorithm-results/lotka-volterra-sampled-20261023 \
                 --site build/report-site
             fi
-            if test -d reports/algorithm-results/syn03-nominal-exact-2d-example; then
+            if test -d reports/algorithm-results/syn03-nominal-exact-2d-8b94095; then
               python scripts/reports/stage_syn03_nominal_exact_example.py \
-                --source reports/algorithm-results/syn03-nominal-exact-2d-example \
+                --source reports/algorithm-results/syn03-nominal-exact-2d-8b94095 \
                 --site build/report-site
             fi
             if test -f reports/algorithm-results/exp04-publications.json; then

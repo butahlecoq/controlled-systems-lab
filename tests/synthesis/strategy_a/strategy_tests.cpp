@@ -947,7 +947,7 @@ TEST_CASE("nominal linear exact profile rejects an unreviewed materialization ca
     REQUIRE(std::holds_alternative<Rejection>(admitted));
     CHECK_FALSE(std::get<Rejection>(admitted).diagnostics.empty());
 }
-TEST_CASE("nominal linear exact profile rejects a horizon beyond its verified stage cap") {
+TEST_CASE("nominal linear exact profile rejects a horizon exceeding its variable-width cap") {
     const auto query=nominal_linear_exact_request(nominal_linear_exact_over_stage_cap());
     const auto admitted=admit(query);
     REQUIRE(std::holds_alternative<Rejection>(admitted));

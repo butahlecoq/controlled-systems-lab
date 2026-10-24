@@ -52,7 +52,7 @@ SAVED_FIGURES = (
          family="Lotka–Volterra reachability samples", title="A sampled Lotka–Volterra orbit",
          alt="Seeded two-state Lotka–Volterra control samples trace an orbit; local panels show sample hulls.",
          summary="512 deterministic control histories illustrate the discrete recurrence. Dots and sample hulls do not certify the full reachable sets or reproduce the historical figure."),
-    dict(route="syn03-nominal-exact-2d-example", image="optimal-face.svg", page="index.html",
+    dict(route="syn03-nominal-exact-2d-8b94095", image="optimal-face.svg", page="index.html",
          family="Strategy A · nominal linear exact profile", title="A complete 2D optimal face",
          alt="The feasible upper triangle in the unit square and its full optimal diagonal segment from (0,1) to (1,0).",
          summary="The installed Strategy A example returned objective 1 and a registry-verified complete face x+y=1, 0<=x,y<=1. The page retains inputs, raw result and the numerical assurance limits."),
