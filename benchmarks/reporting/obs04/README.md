@@ -30,23 +30,38 @@ limiter are unavailable. Treat any timing difference as descriptive and
 inconclusive; this tiny analytic case is not representative of application
 workloads.
 
-The driver emits a commented header and one JSON event per attempt. Failed attempts must
-remain visible and make the process exit nonzero. Keep the raw output, exact
-source commit, compiler/build provenance, machine/OS capture, and separate
+The driver emits a commented header and one JSON event per attempt. It also
+writes a digest-named `csl.comparison-record/1` artifact containing all 32
+warmup and measured attempts. Each attempt binds the exact event payload to an
+immutable `RecordedRunArtifact`; the artifact is decoded and its digest checked
+before it is written. The `csl.comparison-spec/2` arms explicitly distinguish
+strategy and instrumentation mode while preserving each resolved configuration
+identity. The record declares the canonical resolved-problem hash as its shared
+input manifest and labels this synthetic pilot `new-comparison`. Returned
+unsupported, cancelled, resource-limited, incomplete, and failed outcomes retain
+their run records and event status; thrown exceptions produce a synthetic failed
+run record. Resolved arm configurations and an empty collection record are
+prepared before per-attempt collector setup, so a plan or collector setup
+exception can still be saved as a failed attempt. Errors after the strategy
+returns retain the returned terminal and available statistics; their event
+records `recording_error`. If the outcome itself cannot be serialized, a
+synthetic failed run record is saved and the event separately retains the
+returned status, termination, mathematical outcome, family summary, and
+serialization error; it states that the run artifact does not contain that
+outcome. Failed or analytically invalid attempts make the process exit nonzero.
+The default artifact path is the current directory; `--record <path>`
+selects a path, and existing files are never overwritten. Keep the exact source
+commit, compiler/build provenance, machine/OS capture, and separate
 limiter-profile result next to any retained measurement. Do not combine the
 existing synthetic OBS-02 collector loop with these solver timings.
 
-`csl.obs04-instrumentation-comparison-event/2` is a capture-only schema for
-this experiment, not the authoritative comparison artifact. Its repetition,
-strategy, instrumentation mode, and status identify an attempted
-`ComparisonAttempt`; phase durations and span timings are the raw measurement
-payload, while outcome, tolerances, and family checks provide the corresponding
-run evidence. The current driver does not yet bind these events to
-`ComparisonSpecId` or immutable `RunRecordRef` values. Preserve this schema only
-to read this saved sample; when OBS-04 writes authoritative comparison records,
-those records should own the attempts and retain these raw events as payload or
-replace them with fields in the run record. Do not treat this event stream as a
-second canonical report format.
+`csl.obs04-instrumentation-comparison-event/2` remains the raw per-attempt
+measurement payload. The comparison record binds its strategy, instrumentation
+mode, repetition, and status to the arm and attempt indices. The per-run record
+stores the resolved request, outcome/family data and collected spans. This is
+an analytic fixture increment; machine/compiler/build provenance is still kept
+in the adjacent environment capture, and phase-separated parsing, verification,
+serialization, rendering and end-to-end timings remain outside this driver.
 
 Build a clean Release source checkout and use a separate build directory:
 
@@ -54,7 +69,7 @@ Build a clean Release source checkout and use a separate build directory:
 cmake -S benchmarks/reporting/obs04 -B build/obs04 \
   -DCSL_SOURCE_ROOT="$PWD" -DCMAKE_BUILD_TYPE=Release
 cmake --build build/obs04 --parallel
-./build/obs04/csl_obs04_instrumentation_comparison
+(cd build/obs04 && ./csl_obs04_instrumentation_comparison)
 ```
 
 The output does not include process startup, parsing, artifact serialization,
@@ -101,8 +116,12 @@ The current profile driver requires both `CSL_PERF_CONTROL_FIFO` and
 with a five-second bound, and fails a capture if perf exits, rejects the command,
 or does not acknowledge. Profile output marks this scope as
 `acknowledged_perf_control_transitions` and records the number of acknowledgements.
-The acknowledgement improves control-boundary synchronization but does not make
-the small T-S01 workload representative or support a unique limiter claim.
+Invoke it separately with `--profile-strategy reach-back|direct-joint` and
+`--profile-calls N`; it performs a warmup and the requested number of profiled
+calls, then exits without comparison-record capture. The normal comparison run
+(optionally `--record <path>`) does not control `perf`. Acknowledgements improve
+control-boundary synchronization but do not make the small T-S01 workload
+representative or support a unique limiter claim.
 
 To exercise host capability, add the `run-obs04-perf-probe` label to a PR. The
 Linux job builds the Release driver, tests the FIFO protocol with a mock perf
@@ -110,7 +129,10 @@ controller, then attempts eight acknowledged cycles samples with a 120-second
 bound and 32 MiB file cap. It always uploads a machine-readable capability result
 and logs; permission or PMU denial is reported as `unavailable`, while protocol
 or capture errors are retained as `failed`. The workflow artifact is temporary
-(14-day retention). This change does not alter the installed API or package, so
-no release is needed. No capability result is claimed until the labelled job
-has actually run. OBS-04 still needs the remaining immutable attempt/resource/
+(14-day retention). The comparison record adds `measurement_payload` to the
+public `ComparisonAttempt` C++ type, changing its layout and ABI; binary
+consumers must rebuild against the updated headers and library. No package
+workflow or dependency change is required, and this PR does not prepare or
+publish a release. No capability result is claimed until the labelled job has
+actually run. OBS-04 still needs the remaining immutable attempt/resource/
 publication records and other acceptance criteria.

@@ -62,6 +62,32 @@ def main() -> int:
         raise SystemExit("usage: perf_control_mock.py /path/to/csl_obs04_instrumentation_comparison")
     binary = Path(sys.argv[1]).resolve(strict=True)
 
+    malformed_arguments = [
+        (["--profile-strategy", "reach-back", "--profile-calls", "8oops"],
+         "complete unsigned integer"),
+        (["--profile-strategy", "reach-back", "--profile-strategy", "direct-joint",
+          "--profile-calls", "1"],
+         "--profile-strategy may be provided only once"),
+        (["--profile-strategy", "reach-back", "--profile-calls", "1", "--profile-calls", "2"],
+         "--profile-calls may be provided only once"),
+        (["--profile-strategy", "reach-back", "--profile-calls", "0"],
+         "Profile call count must be positive"),
+        (["--profile-strategy", "reach-back", "--profile-calls", "1",
+          "--record", "/tmp/obs04-invalid-mixed-mode.record"],
+         "Profile mode and comparison-record capture are separate modes"),
+        (["--record", "/tmp/obs04-invalid-first.record",
+          "--record", "/tmp/obs04-invalid-second.record"],
+         "--record may be provided only once"),
+    ]
+    for arguments, diagnostic in malformed_arguments:
+        rejected = subprocess.run(
+            [str(binary), *arguments], capture_output=True, text=True, timeout=5,
+            env={key: value for key, value in os.environ.items()
+                 if key not in {"CSL_PERF_CONTROL_FIFO", "CSL_PERF_ACK_FIFO"}},
+        )
+        if rejected.returncode == 0 or rejected.stdout or diagnostic not in rejected.stderr:
+            raise RuntimeError(f"malformed profile arguments were accepted or started work: {arguments}")
+
     passed, commands = run(binary, acknowledge=True)
     if passed.returncode != 0:
         raise RuntimeError(f"acknowledged mock capture failed: {passed.stderr}")
@@ -78,6 +104,7 @@ def main() -> int:
         raise RuntimeError("driver accepted a control command without an acknowledgement")
     if "perf" not in missing.stderr.lower() and "acknowledgement" not in missing.stderr.lower():
         raise RuntimeError(f"missing-ack failure was not reported clearly: {missing.stderr}")
+    print("OBS-04 CLI checks passed: malformed/duplicate profile arguments rejected before profile setup")
     print("OBS-04 perf control mock passed: enable/disable acknowledged; missing ack rejected")
     return 0
 
