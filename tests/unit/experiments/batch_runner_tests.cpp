@@ -62,6 +62,41 @@ registry::PreparedStrategy prepare_strategy() {
     return std::get<registry::PreparedStrategy>(std::move(prepared));
 }
 
+class EchoSelector final : public WitnessSelectorWorkspace {
+public:
+    std::variant<WitnessSelection, Unsupported> select(const OptimalFamily& family,
+        const WitnessRequest& request, const ExecutionContext&) override {
+        WitnessBatch batch;
+        batch.requested=request.count;
+        batch.selector={"test.selector"};
+        batch.seed=request.seed;
+        batch.source_family=family.identity();
+        batch.directions=request.directions;
+        batch.distinctness_tolerance=request.distinctness_tolerance;
+        return WitnessSelection{std::move(batch),Termination::completed,{}};
+    }
+};
+
+registry::PreparedProvider<registry::SelectorPort> prepare_selector_provider(bool reject_seed_twenty=false) {
+    registry::Registry<registry::SelectorPort> selectors;
+    registry::Registration<registry::SelectorPort> registration{
+        {{"test.selector"},"1"},
+        [reject_seed_twenty](const registry::SelectorRequest& request, const registry::Requirements& requirements)
+            -> registry::Capability {
+            if(reject_seed_twenty&&request.selection.seed==20)
+                return Diagnostics{{DiagnosticCode::unsupported,"test.selector.seed","seed 20 rejected by fixture"}};
+            return registry::Offer{requirements.output};
+        },
+        [](const registry::SelectorRequest&) { return std::make_unique<EchoSelector>(); }};
+    REQUIRE_FALSE(selectors.add(std::move(registration)));
+    registry::Requirements requirements;
+    requirements.output.representation={"csl.witness-batch.v1"};
+    auto prepared=registry::prepare_provider(registry::select_provider(selectors,
+        registry::Method{{"test.selector"},{}},requirements));
+    REQUIRE(std::holds_alternative<registry::PreparedProvider<registry::SelectorPort>>(prepared));
+    return std::get<registry::PreparedProvider<registry::SelectorPort>>(std::move(prepared));
+}
+
 experiments::ScenarioSweepCase sweep_case(std::string scenario,std::string config,
     const registry::PreparedStrategy& strategy) {
     return {{experiments::ScenarioId{std::move(scenario)},artifacts::ConfigId{std::move(config)}},strategy,
@@ -157,4 +192,165 @@ TEST_CASE("a sweep keeps admitted and skipped scenario records together") {
     CHECK(result.cases[1].identity==experiments::ScenarioConfigurationId{{"scenario-b"},{"config-b"}});
     REQUIRE(result.cases[1].selection);
     CHECK(result.cases[1].selection->seed==19);
+}
+
+TEST_CASE("family queries preserve coarse results and map deterministic requests by case") {
+    const auto prepared=prepare_strategy();
+    std::vector<experiments::ScenarioSweepCase> cases{
+        sweep_case("scenario-a","config-a",prepared),
+        sweep_case("scenario-b","config-b",prepared)};
+    cases[1].selection.seed=20;
+    const ResourcePolicy resources{2,2,1,std::nullopt};
+    ExecutionContext context;
+    context.run_id="family-query-run";
+    auto coarse=experiments::run_sweep(cases,resources,context,execution::Mode::sequential);
+    REQUIRE(std::holds_alternative<experiments::SweepResult>(coarse));
+    auto sweep=std::get<experiments::SweepResult>(std::move(coarse));
+    const auto selector=prepare_selector_provider(true);
+    const execution::ResourceUse query_resources{1,"one selector workspace per case",std::nullopt,
+        execution::CallStopSupport::cooperative_boundaries};
+
+    auto queried=experiments::run_family_queries(std::move(sweep),selector,resources,context,
+        execution::Mode::bounded_parallel,query_resources);
+    REQUIRE(std::holds_alternative<experiments::FamilyQueryResult>(queried));
+    const auto& result=std::get<experiments::FamilyQueryResult>(queried);
+    REQUIRE(result.sweep.batch.tasks.size()==2);
+    REQUIRE(result.queries.size()==2);
+    REQUIRE(result.query_batch.tasks.size()==1);
+    CHECK(result.queries[0].identity==experiments::ScenarioConfigurationId{{"scenario-a"},{"config-a"}});
+    CHECK(result.queries[1].identity==experiments::ScenarioConfigurationId{{"scenario-b"},{"config-b"}});
+    const auto* first=std::get_if<experiments::FamilyQueryScheduled>(&result.queries[0].status);
+    REQUIRE(first);
+    CHECK(first->task_index==0);
+    const auto* rejected=std::get_if<experiments::FamilyQueryRejected>(&result.queries[1].status);
+    REQUIRE(rejected);
+    REQUIRE(rejected->diagnostics.size()==1);
+    CHECK(rejected->diagnostics[0].field=="test.selector.seed");
+    CHECK(result.query_batch.tasks[0].id.value=="family-query-0");
+    REQUIRE(result.query_batch.tasks[0].provenance.size()==1);
+    REQUIRE(result.query_batch.tasks[0].provenance[0].actual);
+    CHECK(result.query_batch.tasks[0].provenance[0].actual->id.value=="test.selector");
+    const auto* returned=std::get_if<execution::Returned<registry::SelectorPort>>(
+        &result.query_batch.tasks[0].outcome);
+    REQUIRE(returned);
+    const auto* selected=std::get_if<WitnessSelection>(&returned->value);
+    REQUIRE(selected);
+    CHECK(selected->batch.requested==2);
+    CHECK(selected->batch.seed==19);
+    CHECK(selected->batch.directions==std::vector<Vector>{{1,-1},{-1,1}});
+    CHECK(selected->batch.distinctness_tolerance==0.0);
+    CHECK(result.sweep.batch.run_id=="family-query-run");
+    CHECK(result.query_batch.run_id==result.sweep.batch.run_id);
+    CHECK(result.query_batch.timing.started_at>=result.sweep.batch.timing.completed_at);
+}
+
+TEST_CASE("family query dispositions retain cases whose coarse strategy was skipped") {
+    const auto prepared=prepare_strategy();
+    const std::vector<experiments::ScenarioSweepCase> cases{
+        sweep_case("scenario-a","config-a",prepared),
+        sweep_case("scenario-b","config-b",prepared)};
+    const ResourcePolicy resources{1,1,1,std::nullopt};
+    ExecutionContext context;
+    context.run_id="family-query-skip";
+    auto coarse=experiments::run_sweep(cases,resources,context,execution::Mode::sequential,
+        execution::AdmissionLimit{1});
+    REQUIRE(std::holds_alternative<experiments::SweepResult>(coarse));
+    auto sweep=std::get<experiments::SweepResult>(std::move(coarse));
+    const auto selector=prepare_selector_provider();
+    const execution::ResourceUse query_resources{1,"one selector workspace",std::nullopt,
+        execution::CallStopSupport::cooperative_boundaries};
+
+    auto queried=experiments::run_family_queries(std::move(sweep),selector,resources,context,
+        execution::Mode::sequential,query_resources);
+    REQUIRE(std::holds_alternative<experiments::FamilyQueryResult>(queried));
+    const auto& result=std::get<experiments::FamilyQueryResult>(queried);
+    REQUIRE(result.queries.size()==2);
+    REQUIRE(result.query_batch.tasks.size()==1);
+    CHECK(std::holds_alternative<experiments::FamilyQueryScheduled>(result.queries[0].status));
+    const auto* not_run=std::get_if<experiments::FamilyQueryNotRun>(&result.queries[1].status);
+    REQUIRE(not_run);
+    CHECK(not_run->reason==experiments::QueryNotRunReason::strategy_skipped);
+    CHECK(std::get<execution::Skipped>(result.sweep.batch.tasks[1].outcome).reason==execution::SkipReason::task_limit);
+}
+
+TEST_CASE("family query dispositions explain unavailable strategy families") {
+    const auto prepared=prepare_strategy();
+    const auto selector=prepare_selector_provider();
+    const auto item=sweep_case("scenario","config",prepared);
+    const ResourcePolicy resources{1,1,1,std::nullopt};
+    ExecutionContext context;
+    context.run_id="family-query-ineligible";
+    const execution::ResourceUse query_resources{1,"one selector workspace",std::nullopt,
+        execution::CallStopSupport::cooperative_boundaries};
+
+    auto make_sweep=[&] {
+        auto outcome=experiments::run_sweep(std::span{&item,1},resources,context,execution::Mode::sequential);
+        REQUIRE(std::holds_alternative<experiments::SweepResult>(outcome));
+        return std::get<experiments::SweepResult>(std::move(outcome));
+    };
+
+    auto no_family=make_sweep();
+    auto& no_family_result=std::get<SynthesisResult>(
+        std::get<execution::Returned<registry::StrategyPort>>(no_family.batch.tasks[0].outcome).value);
+    no_family_result.family.reset();
+    auto no_family_query=experiments::run_family_queries(std::move(no_family),selector,resources,context,
+        execution::Mode::sequential,query_resources);
+    REQUIRE(std::holds_alternative<experiments::FamilyQueryResult>(no_family_query));
+    const auto& no_family_output=std::get<experiments::FamilyQueryResult>(no_family_query);
+    CHECK(std::get<experiments::FamilyQueryNotRun>(no_family_output.queries[0].status).reason==
+        experiments::QueryNotRunReason::family_unavailable);
+    CHECK(no_family_output.query_batch.tasks.empty());
+
+    auto unsupported=make_sweep();
+    std::get<execution::Returned<registry::StrategyPort>>(unsupported.batch.tasks[0].outcome).value=
+        Unsupported{{{DiagnosticCode::unsupported,"strategy.fixture","fixture not supported"}}};
+    auto unsupported_query=experiments::run_family_queries(std::move(unsupported),selector,resources,context,
+        execution::Mode::sequential,query_resources);
+    REQUIRE(std::holds_alternative<experiments::FamilyQueryResult>(unsupported_query));
+    const auto& unsupported_output=std::get<experiments::FamilyQueryResult>(unsupported_query);
+    CHECK(std::get<experiments::FamilyQueryNotRun>(unsupported_output.queries[0].status).reason==
+        experiments::QueryNotRunReason::strategy_unsupported);
+    CHECK(unsupported_output.query_batch.tasks.empty());
+
+    auto failed=make_sweep();
+    failed.batch.tasks[0].outcome=execution::TaskFailure{execution::FailureStage::invoke,
+        execution::FailureKind::adapter_exception,std::make_exception_ptr(std::runtime_error("fixture failure"))};
+    auto failed_query=experiments::run_family_queries(std::move(failed),selector,resources,context,
+        execution::Mode::sequential,query_resources);
+    REQUIRE(std::holds_alternative<experiments::FamilyQueryResult>(failed_query));
+    const auto& failed_output=std::get<experiments::FamilyQueryResult>(failed_query);
+    CHECK(std::get<experiments::FamilyQueryNotRun>(failed_output.queries[0].status).reason==
+        experiments::QueryNotRunReason::strategy_failed);
+    CHECK(std::holds_alternative<execution::TaskFailure>(failed_output.sweep.batch.tasks[0].outcome));
+}
+
+TEST_CASE("query setup diagnostics leave the completed coarse sweep available to the caller") {
+    const auto prepared=prepare_strategy();
+    const auto item=sweep_case("scenario","config",prepared);
+    const ResourcePolicy resources{1,1,1,std::nullopt};
+    ExecutionContext context;
+    context.run_id="family-query-setup-error";
+    auto outcome=experiments::run_sweep(std::span{&item,1},resources,context,execution::Mode::sequential);
+    REQUIRE(std::holds_alternative<experiments::SweepResult>(outcome));
+    auto sweep=std::get<experiments::SweepResult>(std::move(outcome));
+    const auto selector=prepare_selector_provider();
+    const execution::ResourceUse invalid_query_resources{2,"exceeds policy lane",std::nullopt,
+        execution::CallStopSupport::cooperative_boundaries};
+
+    auto changed_context=context;
+    changed_context.run_id="different-run";
+    auto mismatched=experiments::run_family_queries(std::move(sweep),selector,resources,changed_context,
+        execution::Mode::sequential,invalid_query_resources);
+    REQUIRE(std::holds_alternative<Diagnostics>(mismatched));
+    CHECK(std::get<Diagnostics>(mismatched).front().field=="family_queries.run_id");
+    REQUIRE(sweep.batch.tasks.size()==1);
+
+    auto queried=experiments::run_family_queries(std::move(sweep),selector,resources,context,
+        execution::Mode::sequential,invalid_query_resources);
+    REQUIRE(std::holds_alternative<Diagnostics>(queried));
+    CHECK(std::get<Diagnostics>(queried).front().field=="execution.task.family-query-0.threads");
+    REQUIRE(sweep.batch.tasks.size()==1);
+    const auto* returned=std::get_if<execution::Returned<registry::StrategyPort>>(&sweep.batch.tasks[0].outcome);
+    REQUIRE(returned);
+    CHECK(std::get<SynthesisResult>(returned->value).family.has_value());
 }
