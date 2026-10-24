@@ -13,6 +13,7 @@
 #include <csl/synthesis/strategy_a/strategy.hpp>
 #include <csl/synthesis/strategy_b/direct_joint.hpp>
 #include <csl/synthesis/witness_selector.hpp>
+#include <nlohmann/json.hpp>
 
 #include <algorithm>
 #include <cmath>
@@ -251,6 +252,44 @@ csl::artifacts::RecordedRunArtifact check_complete_family_encoder_boundary(const
     CHECK(wire.find("csl.run-statistics/6")!=std::string::npos);
     CHECK(wire.find("unverified_recorded_data")!=std::string::npos);
     CHECK(wire.find("csl.h-relation-attachment/1")!=std::string::npos);
+    const auto outer = nlohmann::json::parse(wire);
+    const auto attachment = std::find_if(outer.at("attachments").begin(), outer.at("attachments").end(),
+        [](const auto& value) { return value.at("schema") == "csl.trajectory-verification-reports/1"; });
+    REQUIRE(attachment != outer.at("attachments").end());
+    const auto& hex = attachment->at("content").get_ref<const std::string&>();
+    REQUIRE(hex.size() % 2 == 0);
+    std::string report_text;
+    report_text.reserve(hex.size() / 2);
+    const auto digit = [](char value) -> unsigned {
+        if (value >= '0' && value <= '9') return static_cast<unsigned>(value - '0');
+        return static_cast<unsigned>(value - 'a' + 10);
+    };
+    for (std::size_t i = 0; i < hex.size(); i += 2)
+        report_text.push_back(static_cast<char>((digit(hex[i]) << 4) | digit(hex[i + 1])));
+    const auto report_document = nlohmann::json::parse(report_text);
+    CHECK(report_document.at("schema") == "csl.trajectory-verification-reports/1");
+    REQUIRE(report_document.at("reports").size() == strategy_execution.verification.size());
+    CHECK(report_document.at("reports").at(0).at("bindings") == "numerical_pass");
+    CHECK(report_document.at("reports").at(0).at("feasibility") == "numerical_pass");
+    CHECK(report_document.at("reports").at(0).at("objective") == "numerical_pass");
+    CHECK(report_document.at("reports").at(0).at("optimality") == "unsupported");
+    CHECK(report_document.at("reports").at(0).at("witness_index") == 0);
+    const auto& saved_request = report_document.at("reports").at(0).at("request");
+    CHECK(saved_request.at("outcome").at("value") == "optimal");
+    CHECK(saved_request.at("family_identity").at("strategy") ==
+        strategy_execution.verification.at(0).input.expected_synthesis->strategy.value);
+    CHECK(saved_request.at("expected_synthesis").at("lineage").size() > 0);
+    CHECK(saved_request.at("bounds").contains("lower"));
+    CHECK(saved_request.at("bounds").contains("upper"));
+    auto mismatched_execution = strategy_execution;
+    REQUIRE(mismatched_execution.verification.at(0).input.expected_synthesis);
+    mismatched_execution.verification.at(0).input.expected_synthesis->request.profile = "wrong-family-profile";
+    const auto mismatched_artifact = application::encode_strategy_run(problem, mismatched_execution,
+        configuration, run, statistics,
+        {uninstrumented, uninstrumented, uninstrumented, uninstrumented, true,
+            ar::MemoryAccounting::unlimited});
+    REQUIRE(std::holds_alternative<ar::ArtifactError>(mismatched_artifact));
+    CHECK(std::get<ar::ArtifactError>(mismatched_artifact).path == "run.verification[0].context");
     CHECK(wire.find("registered_verifier")!=std::string::npos);
     static_assert(!std::is_convertible_v<ar::RecordedRunArtifact,ar::RunStatistics>);
     const auto imported=take_artifact(ar::decode_recorded_run(wire,problem),"decode_recorded_run");
