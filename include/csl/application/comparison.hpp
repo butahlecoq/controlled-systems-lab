@@ -23,6 +23,8 @@ struct UnsupportedComparison {
 
 struct RejectedComparison {
     std::vector<registry::Rejection> strategies;
+    // Each entry identifies the corresponding zero-based request strategy.
+    std::vector<std::size_t> strategy_indices;
 };
 
 class PreparedComparison {
@@ -71,7 +73,7 @@ struct ComparisonExecution {
 
 using Preparation = std::variant<PreparedComparison, UnsupportedComparison, RejectedComparison>;
 
-// Admits the guarded T-S01/T-S02 pair against one immutable mathematical
+// Admits guarded T-S01/T-S02/T-S03 pairs against one immutable mathematical
 // problem and one effective request. No workspace is created on rejection.
 Preparation prepare_comparison(const ComparisonRequest&, const registry::StrategyRegistry&);
 

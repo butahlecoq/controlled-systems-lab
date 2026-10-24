@@ -9,6 +9,7 @@
 #include <cstdlib>
 #include <new>
 #include <csl/synthesis/strategy_a/strategy.hpp>
+#include <csl/synthesis/strategy_a/nominal_linear_exact_profile.hpp>
 #include <csl/synthesis/strategy_b/direct_joint.hpp>
 #include <csl/geometry/affine_sum.hpp>
 #include <csl/adapters/convex/highs.hpp>
@@ -407,6 +408,107 @@ TEST_CASE("one selector queries complete registered families from both strategie
     }
 }
 
+namespace {
+class CorruptNominalWitnessWorkspace final : public LPWorkspace {
+    std::unique_ptr<LPWorkspace> inner_;
+    Vector primal_;
+protected:
+    ProgramOutcome do_solve(const LinearProgram& program,const ExecutionContext& context) override {
+        auto result=inner_->solve(program,context);
+        if(auto* solved=std::get_if<ProgramResult>(&result);
+           solved&&solved->termination==Termination::completed&&solved->outcome.value==MathematicalOutcome::optimal)
+            solved->primal=primal_;
+        return result;
+    }
+public:
+    CorruptNominalWitnessWorkspace(std::unique_ptr<LPWorkspace> inner,Vector primal)
+        :inner_(std::move(inner)),primal_(std::move(primal)){}
+};
+}
+
+TEST_CASE("multiple selector requests from a singleton retain duplicate and optimum evidence") {
+    Problem authored;
+    authored.id = {"selector-singleton-nominal-linear-exact"};
+    authored.model = std::make_shared<const SystemModel>(SystemModel{{{1, 1, 0},
+        TimeDomain::discrete, std::vector<LinearStage>{
+            {{1, 1, {-1}}, {1, 1, {1}}, {1, 0, {}}, {0.25}},
+            {{1, 1, {2}}, {1, 1, {0}}, {1, 0, {}}, {-0.5}}}}, {}});
+    authored.times = {0, 1, 2};
+    authored.initial = KnownInitial{{0.5}};
+    authored.controls = ContinuousDomain{{interval("selector-singleton-u0", 0, 1),
+        interval("selector-singleton-u1", 0, 0)}};
+    authored.states = {interval("selector-singleton-x0", 0.5, 0.5),
+        interval("selector-singleton-x1", 0, 1), UniversalSet{1}};
+    authored.information = InformationPattern::nominal_open_loop;
+    authored.objective = LinearTerminal{{1}, 0};
+    const auto resolved = resolve(std::move(authored));
+    auto synthesis_request = request(resolved);
+    synthesis_request.family.profile = synthesis::strategy_a::nominal_linear_exact_profile;
+    synthesis_request.configuration.strategy = {"csl.synthesis.reach-back"};
+    synthesis_request.configuration.lp = {"csl.lp.highs"};
+    synthesis_request.configuration.convex = {"csl.convex.highs"};
+    auto prepared = strategy_a(synthesis_request);
+    auto workspace = prepared.create();
+    auto synthesized = take(workspace->run(make_execution_context()));
+    REQUIRE(synthesized.family);
+    REQUIRE(synthesized.family->registry_verified());
+    CHECK(synthesized.outcome.value == MathematicalOutcome::optimal);
+    REQUIRE(synthesized.objective.lower);
+    REQUIRE(synthesized.objective.upper);
+    const auto primary_identity = synthesized.family->identity();
+    const auto primary_objective = synthesized.objective.lower->value;
+    CHECK(primary_objective == doctest::Approx(-0.5));
+
+    Registry<LPPort> lp;
+    REQUIRE_FALSE(lp.add(take(adapters::lp::make_highs_registration())));
+    Requirements program;
+    program.output.representation = {"csl.program-result.v1"};
+    auto provider = take(prepare_provider(select_provider(lp, Method{{"csl.lp.highs"}, {}}, program)));
+    auto selector = synthesis::witness_selector::make_registration(provider);
+    SelectorRequest query{*synthesized.family, {2, 1e-9, {{1, -1}, {-1, 1}}, 103}};
+    auto selection = selector.factory(query);
+    auto answer = take(SelectorPort::run(*selection, query, make_execution_context()));
+
+    CHECK(answer.termination == Termination::completed);
+    CHECK(answer.batch.requested == 2);
+    CHECK(answer.batch.returned_count() == 2);
+    CHECK(answer.batch.distinct_count() == 1);
+    CHECK(answer.batch.source_family == primary_identity);
+    CHECK(answer.batch.seed == 103);
+    CHECK(answer.diagnostics.find("shortfall") != std::string::npos);
+    for (const auto& witness : answer.batch.witnesses) {
+        CHECK(witness.controls == std::vector<Vector>{{0.25}, {0}});
+        CHECK(witness.states == std::vector<Vector>{{0.5}, {0}, {-0.5}});
+        CHECK(witness.states[1][0] == doctest::Approx(-witness.states[0][0] + witness.controls[0][0] + 0.25));
+        CHECK(witness.states[2][0] == doctest::Approx(2 * witness.states[1][0] - 0.5));
+        CHECK(witness.states[1][0] >= -1e-9);
+        CHECK(witness.states[1][0] <= 1.0 + 1e-9);
+        CHECK(witness.original_objective == doctest::Approx(-0.5));
+    }
+    CHECK(synthesized.family->identity() == primary_identity);
+    CHECK(synthesized.objective.lower->value == primary_objective);
+
+    auto corrupt_backend=take(adapters::lp::make_highs_registration());
+    auto factory=corrupt_backend.factory;
+    const Vector nonfinite_primal{0.5, 0, -0.5, 0.25, std::numeric_limits<double>::quiet_NaN()};
+    corrupt_backend.factory=[factory,nonfinite_primal](const LinearProgram& program) {
+        return std::make_unique<CorruptNominalWitnessWorkspace>(factory(program),nonfinite_primal);
+    };
+    Registry<LPPort> corrupt_lp;
+    REQUIRE_FALSE(corrupt_lp.add(std::move(corrupt_backend)));
+    auto corrupt_provider=take(prepare_provider(select_provider(corrupt_lp,
+        Method{{"csl.lp.highs"},{}},program)));
+    auto corrupt_selector=synthesis::witness_selector::make_registration(corrupt_provider);
+    auto corrupt_workspace=corrupt_selector.factory(query);
+    auto corrupt_answer=take(SelectorPort::run(*corrupt_workspace,query,make_execution_context()));
+    CHECK(corrupt_answer.termination==Termination::numerical_failure);
+    CHECK(corrupt_answer.batch.returned_count()==0);
+    CHECK(corrupt_answer.batch.source_family==primary_identity);
+    CHECK(corrupt_answer.diagnostics.find("consistent")!=std::string::npos);
+    CHECK(synthesized.family->identity()==primary_identity);
+    CHECK(synthesized.objective.lower->value==primary_objective);
+}
+
 
 namespace {
 class CorruptT02PrimalWorkspace final : public LPWorkspace {
@@ -480,7 +582,7 @@ TEST_CASE("one selector queries the verified constant-objective family from both
         auto workspace=selector.factory(query);
         auto answer=take(SelectorPort::run(*workspace,query,make_execution_context()));
         REQUIRE(answer.termination==Termination::completed);
-        REQUIRE(answer.batch.returned_count()==2);CHECK(answer.batch.distinct_count()==2);
+        CHECK(answer.batch.requested==2);REQUIRE(answer.batch.returned_count()==2);CHECK(answer.batch.distinct_count()==2);
         CHECK(answer.batch.witnesses[0].controls==std::vector<Vector>{{0},{1}});
         CHECK(answer.batch.witnesses[1].controls==std::vector<Vector>{{1},{0}});
         CHECK(answer.batch.witnesses[0].states==std::vector<Vector>{{0},{0},{1}});

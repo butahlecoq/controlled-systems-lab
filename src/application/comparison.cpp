@@ -8,8 +8,8 @@
 
 namespace csl::application {
 namespace {
-constexpr std::array<std::string_view, 2> profiles{
-    "ts01_exact_integrator", "ts02_constant_integrator"};
+constexpr std::array<std::string_view, 3> profiles{
+    "ts01_exact_integrator", "ts02_constant_integrator", "ts03_singular_integrator"};
 constexpr std::array<std::string_view, 2> strategies{
     "csl.synthesis.reach-back", "csl.synthesis.strategy-b"};
 
@@ -34,7 +34,7 @@ Preparation prepare_comparison(const ComparisonRequest& request,
     const registry::StrategyRegistry& registry) {
     if (std::find(profiles.begin(), profiles.end(), request.family.profile) == profiles.end())
         return unsupported("comparison.family.profile",
-            "Only the guarded T-S01 and T-S02 complete-family profiles are admitted.");
+            "Only the guarded T-S01, T-S02 and T-S03 complete-family profiles are admitted.");
     if (request.family.objective != request.problem.identity())
         return unsupported("comparison.family.objective",
             "The common family request must name the supplied resolved problem.");
@@ -55,6 +55,7 @@ Preparation prepare_comparison(const ComparisonRequest& request,
 
     std::array<std::optional<registry::PreparedStrategy>, 2> prepared;
     std::vector<registry::Rejection> rejections;
+    std::vector<std::size_t> rejected_indices;
     for (std::size_t index = 0; index < request.strategies.size(); ++index) {
         const registry::StrategyRequest strategy_request{
             request.problem, request.strategies[index], request.family, {}, {}};
@@ -63,12 +64,15 @@ Preparation prepare_comparison(const ComparisonRequest& request,
         requirements.output.family = request.family.target;
         requirements.output.completeness = registry::Completeness::established;
         auto result = registry.prepare(strategy_request, requirements);
-        if (auto* rejection = std::get_if<registry::Rejection>(&result))
+        if (auto* rejection = std::get_if<registry::Rejection>(&result)) {
             rejections.push_back(std::move(*rejection));
+            rejected_indices.push_back(index);
+        }
         else
             prepared[index].emplace(std::get<registry::PreparedStrategy>(std::move(result)));
     }
-    if (!rejections.empty()) return RejectedComparison{std::move(rejections)};
+    if (!rejections.empty())
+        return RejectedComparison{std::move(rejections), std::move(rejected_indices)};
 
     return PreparedComparison{request.problem, request.family, request.strategies,
         {std::move(*prepared[0]), std::move(*prepared[1])}};

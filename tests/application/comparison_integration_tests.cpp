@@ -50,6 +50,7 @@ SetHandle interval(std::string id) {
 
 problem::ResolvedProblem source(std::string profile) {
     Matrix a{1, 1, {1}}, b{1, 1, {1}}, e{1, 0, {}};
+    if (profile == "ts03_singular_integrator") a.values = {0};
     const LinearStage transition{std::move(a), std::move(b), std::move(e), {0}};
     const auto model = std::make_shared<const SystemModel>(SystemModel{
         Dynamics{{1, 1, 0}, TimeDomain::discrete, transition}, {}});
@@ -61,7 +62,7 @@ problem::ResolvedProblem source(std::string profile) {
     authored.controls = ContinuousDomain{{interval("u0"), interval("u1")}};
     authored.states = {UniversalSet{1}, UniversalSet{1}, UniversalSet{1}};
     authored.information = InformationPattern::nominal_open_loop;
-    if (profile == "ts01_exact_integrator") {
+    if (profile == "ts01_exact_integrator" || profile == "ts03_singular_integrator") {
         QuadraticTerminal objective;
         objective.Q = Matrix{1, 1, {2}};
         objective.linear = {-2};
@@ -72,6 +73,28 @@ problem::ResolvedProblem source(std::string profile) {
     }
     return take(problem::resolve(authored,
         {problem::UncertaintyStructure::stage_product_uncoupled, {}, {}}));
+}
+
+void check_full_dynamics(const problem::ResolvedProblem& problem, const Witness& witness) {
+    REQUIRE(witness.states.size() == witness.controls.size() + 1);
+    const auto model = problem.model();
+    REQUIRE(witness.states.front() == std::get<KnownInitial>(*problem.initial().description()).point);
+    for (std::size_t k = 0; k < witness.controls.size(); ++k) {
+        const auto stages = take(model.stage({k}));
+        const auto& state = witness.states[k];
+        const auto& control = witness.controls[k];
+        Vector next(stages.offset.values().begin(), stages.offset.values().end());
+        REQUIRE(next.size() == state.size());
+        for (std::size_t row = 0; row < next.size(); ++row) {
+            for (std::size_t col = 0; col < state.size(); ++col)
+                next[row] += stages.A(row, col) * state[col];
+            for (std::size_t col = 0; col < control.size(); ++col)
+                next[row] += stages.B(row, col) * control[col];
+        }
+        REQUIRE(next.size() == witness.states[k + 1].size());
+        for (std::size_t row = 0; row < next.size(); ++row)
+            CHECK(next[row] == doctest::Approx(witness.states[k + 1][row]));
+    }
 }
 
 template<class Port> registry::PreparedProvider<Port> selected(
@@ -255,18 +278,27 @@ void compare_profile(const std::string& profile) {
         REQUIRE(std::holds_alternative<SynthesisResult>(strategy.outcome));
         const auto& result = std::get<SynthesisResult>(strategy.outcome);
         REQUIRE(result.family);
+        CHECK(result.family->registry_verified());
         REQUIRE(std::holds_alternative<CompleteOptimalFamily>(result.family->outcome()));
         REQUIRE(std::holds_alternative<WitnessSelection>(strategy.selection));
         const auto& selected = std::get<WitnessSelection>(strategy.selection);
         REQUIRE(selected.batch.returned_count() == 2);
         REQUIRE(selected.batch.source_family == result.family->identity());
-        CHECK(selected.batch.witnesses[0].controls == std::vector<Vector>{{0}, {1}});
-        CHECK(selected.batch.witnesses[1].controls == std::vector<Vector>{{1}, {0}});
-        CHECK(selected.batch.witnesses[0].states == std::vector<Vector>{{0}, {0}, {1}});
-        CHECK(selected.batch.witnesses[1].states == std::vector<Vector>{{0}, {1}, {1}});
-        const double expected_objective = profile == "ts01_exact_integrator" ? 0.0 : 3.0;
-        CHECK(selected.batch.witnesses[0].original_objective == expected_objective);
-        CHECK(selected.batch.witnesses[1].original_objective == expected_objective);
+        const double expected_objective = profile == "ts02_constant_integrator" ? 3.0 : 0.0;
+        for (const auto& witness : selected.batch.witnesses) {
+            check_full_dynamics(problem, witness);
+            REQUIRE(witness.controls.size() == 2);
+            REQUIRE(witness.states.size() == 3);
+            const auto u0 = witness.controls[0][0];
+            const auto u1 = witness.controls[1][0];
+            CHECK(u0 >= -1e-9); CHECK(u0 <= 1.0 + 1e-9);
+            CHECK(u1 >= -1e-9); CHECK(u1 <= 1.0 + 1e-9);
+            if (profile == "ts01_exact_integrator") CHECK(u0 + u1 == doctest::Approx(1.0));
+            if (profile == "ts03_singular_integrator") CHECK(u1 == doctest::Approx(1.0));
+            if (profile != "ts02_constant_integrator")
+                CHECK(witness.states[2][0] == doctest::Approx(1.0));
+            CHECK(witness.original_objective == doctest::Approx(expected_objective));
+        }
         REQUIRE(strategy.verification.size() == selected.batch.witnesses.size());
         const auto expected = prepared.expected_synthesis_identity(i);
         REQUIRE(expected.lineage);
@@ -351,4 +383,8 @@ TEST_CASE("application composes and verifies paired T-S01 complete families") {
 
 TEST_CASE("application composes and verifies paired T-S02 complete families") {
     compare_profile("ts02_constant_integrator");
+}
+
+TEST_CASE("application compares T-S03 families by the analytic relation and verifies each full history") {
+    compare_profile("ts03_singular_integrator");
 }
