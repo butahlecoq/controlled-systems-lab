@@ -40,6 +40,34 @@ template<class T> T take_artifact(artifacts::ArtifactResult<T> value, const char
     return std::get<T>(std::move(value));
 }
 
+nlohmann::json sample_obs04_environment() {
+    const auto digest=std::string(64,'a');
+    return {
+        {"schema","csl.obs04-environment/1"},
+        {"build",{{"schema","csl.obs04-build/1"},{"source_revision",std::string(40,'b')},
+            {"source_tree_sha256",digest},{"source_snapshot_method","git-head-tracked-diff-untracked-content-sha256/1"},
+            {"source_dirty",false},{"compiler_id","GNU"},
+            {"compiler_version","13.3.0"},{"generator","Unix Makefiles"},{"architecture","x86_64"},
+            {"build_type","Release"},{"cxx_standard","20"},{"c_flags_sha256",digest},
+            {"cxx_flags_sha256",digest},{"executable_link_flags_sha256",digest},{"target_flags_sha256",digest},
+            {"backends",{{"highs",{{"version","1.11.0"},{"archive_sha256",digest}}},
+                {"qhull",{{"version","8.0.2"},{"archive_sha256",digest}}}}}}},
+        {"runtime",{{"schema","csl.obs04-runtime/1"},
+            {"binary_sha256",{{"status","available"},{"value",digest}}},{"os_family","Linux"},
+            {"os_version",{{"status","available"},{"value","Ubuntu 24.04"}}},
+            {"kernel",{{"status","available"},{"value","6.8.0"}}},{"architecture","x86_64"},
+            {"cpu_model",{{"status","unavailable"},{"reason","not exposed by the platform adapter"}}},
+            {"logical_cpus",{{"status","available"},{"value",8}}}}},
+        {"execution",{{"requested_workers",1},{"observed_driver_workers",1},
+            {"requested_backend_threads",1},
+            {"observed_backend_threads",{{"status","unavailable"},{"reason","backend thread count is not observable"}}},
+            {"workspace_policy","fresh-workspace-per-attempt"},
+            {"cache_policy","one warm-up per arm; caches are not flushed"},{"warmup_repetitions",1},
+            {"seed_policy",{{"kind","not_applicable"},{"reason","fixed analytic fixture uses no random generator"}}},
+            {"tolerances",{{"absolute",1e-8},{"relative",1e-8}}}}}
+    };
+}
+
 SetHandle interval(std::string id) {
     const sets::Description description{SetId{std::move(id)}, 1, {"u"}};
     const sets::HRepresentation representation{
@@ -479,6 +507,53 @@ void compare_profile(const std::string& profile) {
         escaped_measurement.push_back(character);
     }
     CHECK(record_wire.find(escaped_measurement)!=std::string::npos);
+    auto version_three_spec_json=nlohmann::json::parse(record_spec_text);
+    version_three_spec_json["environment"]=sample_obs04_environment();
+    version_three_spec_json["schema"]="csl.comparison-spec/3";
+    const auto version_three_spec_text=version_three_spec_json.dump();
+    const auto version_three_spec_owner=csl::problem::snapshot_content(
+        std::span<const std::byte>{reinterpret_cast<const std::byte*>(version_three_spec_text.data()),
+            version_three_spec_text.size()});
+    REQUIRE(std::holds_alternative<csl::problem::ResolvedContent>(version_three_spec_owner));
+    const auto version_three_spec=std::get<csl::problem::ResolvedContent>(version_three_spec_owner);
+    const auto version_three=take_artifact(ar::encode_recorded_comparison(version_three_spec,measured_attempts),
+        "encode_recorded_comparison comparison-spec/3");
+    const auto version_three_wire=std::string(reinterpret_cast<const char*>(version_three.content().bytes().data()),
+        version_three.content().bytes().size());
+    const auto version_three_replay=take_artifact(ar::decode_recorded_comparison(version_three_wire),
+        "decode_recorded_comparison comparison-spec/3");
+    CHECK(version_three_replay.content().digest()==version_three.content().digest());
+    CHECK(version_three_replay.spec_id().digest==version_three_spec.digest());
+    CHECK(version_three_replay.identity().digest==version_three.identity().digest);
+    auto changed_environment_spec_json=version_three_spec_json;
+    changed_environment_spec_json["environment"]["build"]["compiler_version"]="13.3.1";
+    const auto changed_environment_text=changed_environment_spec_json.dump();
+    const auto changed_environment_owner=csl::problem::snapshot_content(
+        std::span<const std::byte>{reinterpret_cast<const std::byte*>(changed_environment_text.data()),
+            changed_environment_text.size()});
+    REQUIRE(std::holds_alternative<csl::problem::ResolvedContent>(changed_environment_owner));
+    const auto changed_environment=take_artifact(ar::encode_recorded_comparison(
+        std::get<csl::problem::ResolvedContent>(changed_environment_owner),measured_attempts),
+        "encode changed comparison environment");
+    CHECK(changed_environment.spec_id().digest!=version_three.spec_id().digest);
+    CHECK(changed_environment.identity().digest!=version_three.identity().digest);
+    auto tampered_version_three=nlohmann::json::parse(version_three_wire);
+    auto tampered_version_three_spec=nlohmann::json::parse(tampered_version_three.at("spec").get<std::string>());
+    tampered_version_three_spec["environment"]["build"]["compiler_version"]="tampered";
+    tampered_version_three["spec"]=tampered_version_three_spec.dump();
+    const auto tampered_version_three_result=ar::decode_recorded_comparison(tampered_version_three.dump());
+    REQUIRE(std::holds_alternative<ar::ArtifactError>(tampered_version_three_result));
+    auto malformed_environment_spec_json=version_three_spec_json;
+    malformed_environment_spec_json["environment"]["runtime"]["cpu_model"]=
+        {{"status","unavailable"}};
+    const auto malformed_environment_text=malformed_environment_spec_json.dump();
+    const auto malformed_environment_owner=csl::problem::snapshot_content(
+        std::span<const std::byte>{reinterpret_cast<const std::byte*>(malformed_environment_text.data()),
+            malformed_environment_text.size()});
+    REQUIRE(std::holds_alternative<csl::problem::ResolvedContent>(malformed_environment_owner));
+    const auto malformed_environment_result=ar::encode_recorded_comparison(
+        std::get<csl::problem::ResolvedContent>(malformed_environment_owner),measured_attempts);
+    REQUIRE(std::holds_alternative<ar::ArtifactError>(malformed_environment_result));
     auto wrong_measurement=measured_attempts;
     wrong_measurement.front().measurement_payload="{\"status\":\"failed\"}";
     const auto wrong_measurement_result=ar::encode_recorded_comparison(record_spec,wrong_measurement);

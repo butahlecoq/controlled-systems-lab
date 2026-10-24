@@ -34,10 +34,19 @@ The driver emits a commented header and one JSON event per attempt. It also
 writes a digest-named `csl.comparison-record/1` artifact containing all 32
 warmup and measured attempts. Each attempt binds the exact event payload to an
 immutable `RecordedRunArtifact`; the artifact is decoded and its digest checked
-before it is written. The `csl.comparison-spec/2` arms explicitly distinguish
+before it is written. The `csl.comparison-spec/3` arms explicitly distinguish
 strategy and instrumentation mode while preserving each resolved configuration
 identity. The record declares the canonical resolved-problem hash as its shared
-input manifest and labels this synthetic pilot `new-comparison`. Returned
+input manifest and labels this synthetic pilot `new-comparison`. Its immutable
+environment manifest binds the source snapshot identity, compiler/build
+configuration, pinned backend versions, binary digest, host OS/kernel/CPU
+details, worker and thread policy, workspace reuse and warmup policy, seed
+policy, and numerical tolerances. Facts the platform adapter cannot observe
+carry an explicit unavailable status and reason. The source snapshot method is
+`git-head-tracked-diff-untracked-content-sha256/1`; the dirty flag and digest
+cover tracked changes and unignored untracked files at configure time. The
+canonical spec digest binds the manifest to both comparison identities. Existing
+`/1` and `/2` specs remain readable. Returned
 unsupported, cancelled, resource-limited, incomplete, and failed outcomes retain
 their run records and event status; thrown exceptions produce a synthetic failed
 run record. Resolved arm configurations and an empty collection record are
@@ -50,17 +59,15 @@ returned status, termination, mathematical outcome, family summary, and
 serialization error; it states that the run artifact does not contain that
 outcome. Failed or analytically invalid attempts make the process exit nonzero.
 The default artifact path is the current directory; `--record <path>`
-selects a path, and existing files are never overwritten. Keep the exact source
-commit, compiler/build provenance, machine/OS capture, and separate
-limiter-profile result next to any retained measurement. Do not combine the
+selects a path, and existing files are never overwritten. Keep the separate
+limiter-profile result with any retained measurement. Do not combine the
 existing synthetic OBS-02 collector loop with these solver timings.
 
 `csl.obs04-instrumentation-comparison-event/2` remains the raw per-attempt
 measurement payload. The comparison record binds its strategy, instrumentation
 mode, repetition, and status to the arm and attempt indices. The per-run record
 stores the resolved request, outcome/family data and collected spans. This is
-an analytic fixture increment; machine/compiler/build provenance is still kept
-in the adjacent environment capture, and phase-separated parsing, verification,
+an analytic fixture increment; phase-separated parsing, verification,
 serialization, rendering and end-to-end timings remain outside this driver.
 
 Build a clean Release source checkout and use a separate build directory:
@@ -81,7 +88,8 @@ performance conclusion should be based on a timing row whose status is not
 
 `results/linux-gcc16-20261024.jsonl` records a sample run from source commit
 `e782e2fbe6b7e16339fa27c24ac3175b59aaf7bf`. Its adjacent `.environment.txt`
-file records environment details and the binary hash. All 32 events passed the
+file records environment details and the binary hash for that historical
+sample. New `--record` artifacts carry those facts in the spec. All 32 events passed the
 analytic and span checks (four warmups and 28 measured attempts). Measured
 `strategy_run_ns` medians and ranges were:
 
@@ -131,8 +139,11 @@ and logs; permission or PMU denial is reported as `unavailable`, while protocol
 or capture errors are retained as `failed`. The workflow artifact is temporary
 (14-day retention). The comparison record adds `measurement_payload` to the
 public `ComparisonAttempt` C++ type, changing its layout and ABI; binary
-consumers must rebuild against the updated headers and library. No package
-workflow or dependency change is required, and this PR does not prepare or
-publish a release. No capability result is claimed until the labelled job has
-actually run. OBS-04 still needs the remaining immutable attempt/resource/
-publication records and other acceptance criteria.
+consumers must rebuild against the updated headers and library. This
+environment-manifest increment changes the wire schema while retaining legacy
+decoding; it adds no C++ API, installed file, package workflow, or new
+dependency. It does not prepare or publish a release. No capability result is
+claimed until the labelled job has actually run. OBS-04 still needs
+phase-separated timing, requested/returned/distinct witness counts, complete
+resource policy and measurement, instrumentation overhead analysis, report
+rendering, and a usable separate limiter profile before it can close.

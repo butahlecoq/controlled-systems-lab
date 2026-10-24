@@ -1,0 +1,5 @@
+#pragma once
+
+namespace csl::benchmarks::obs04::build {
+inline constexpr char manifest[] = R"CSLENV(@OBS04_BUILD_INFO_JSON@)CSLENV";
+}
