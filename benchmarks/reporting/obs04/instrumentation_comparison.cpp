@@ -139,15 +139,16 @@ HostFacts host_facts() {
     HostFacts host;
 #ifdef _WIN32
     host.family="Windows";
-#if defined(_M_X64) || defined(_M_AMD64)
-    host.architecture="x86_64";
-#elif defined(_M_ARM64)
-    host.architecture="aarch64";
-#elif defined(_M_IX86)
-    host.architecture="x86";
-#else
-    host.architecture="unknown-target-architecture";
-#endif
+    SYSTEM_INFO system_info{};
+    GetNativeSystemInfo(&system_info);
+    switch(system_info.wProcessorArchitecture) {
+    case PROCESSOR_ARCHITECTURE_AMD64: host.architecture="x86_64"; break;
+    case PROCESSOR_ARCHITECTURE_ARM64: host.architecture="aarch64"; break;
+    case PROCESSOR_ARCHITECTURE_INTEL: host.architecture="x86"; break;
+    case PROCESSOR_ARCHITECTURE_ARM: host.architecture="arm"; break;
+    case PROCESSOR_ARCHITECTURE_IA64: host.architecture="ia64"; break;
+    default: host.architecture="unknown-native-architecture"; break;
+    }
     using RtlGetVersion = LONG (WINAPI*)(OSVERSIONINFOW*);
     const auto module=GetModuleHandleW(L"ntdll.dll");
     const auto get_version=module?reinterpret_cast<RtlGetVersion>(GetProcAddress(module,"RtlGetVersion")):nullptr;
