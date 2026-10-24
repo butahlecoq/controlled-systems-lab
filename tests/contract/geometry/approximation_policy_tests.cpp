@@ -616,10 +616,10 @@ TEST_CASE("rejected approximation records a no-call observation without creating
     REQUIRE(std::holds_alternative<problem::ResolvedProblem>(resolved));
     auto input=set("singleton","reject-reference");
     auto output=set("universal","reject-outer");
-    auto query=request(input,SetRelation::equivalent,output.metadata.representation);
+    auto query=request(input,SetRelation::outer,output.metadata.representation);
     query.identity.request={"rejected-approximation"};
     auto creations=std::make_shared<std::size_t>(0);
-    const auto methods=provider(query,output,SetRelation::outer,SetRelation::outer,
+    const auto methods=provider(query,output,SetRelation::inner,SetRelation::outer,
         Unestablished{},std::nullopt,creations);
     auto timer=approximation_timer(std::get<problem::ResolvedProblem>(std::move(resolved)),query);
     ExecutionContext context;context.run_id="approximation-test-run";context.timing=timer;
