@@ -18,6 +18,7 @@
 #include <cstdlib>
 #include <cstdint>
 #include <cerrno>
+#include <csignal>
 #include <cstring>
 #include <iostream>
 #include <memory>
@@ -26,10 +27,12 @@
 #include <string>
 #include <string_view>
 #include <type_traits>
+#include <thread>
 #include <utility>
 
 #ifndef _WIN32
 #include <fcntl.h>
+#include <poll.h>
 #include <unistd.h>
 #endif
 
@@ -276,9 +279,28 @@ public:
             throw std::runtime_error("perf FIFO control is supported only on POSIX hosts");
 #else
         const char* control_path = std::getenv("CSL_PERF_CONTROL_FIFO");
+        const char* ack_path = std::getenv("CSL_PERF_ACK_FIFO");
+        if ((control_path == nullptr) != (ack_path == nullptr))
+            throw std::runtime_error("perf control and acknowledgement FIFOs must be configured together");
         if (control_path != nullptr) {
-            control_fd_ = ::open(control_path, O_WRONLY | O_CLOEXEC);
-            if (control_fd_ < 0) throw std::runtime_error("Could not open perf control FIFO");
+            std::signal(SIGPIPE, SIG_IGN);
+            const auto open_deadline = Clock::now() + std::chrono::milliseconds(acknowledgement_timeout_ms);
+            do {
+                control_fd_ = ::open(control_path, O_WRONLY | O_NONBLOCK | O_CLOEXEC);
+                if (control_fd_ >= 0) break;
+                if (errno == EINTR) continue;
+                if (errno != ENXIO)
+                    throw std::runtime_error("Could not open perf control FIFO");
+                if (Clock::now() >= open_deadline)
+                    throw std::runtime_error("Timed out waiting for perf to open the control FIFO");
+                std::this_thread::sleep_for(std::chrono::milliseconds(10));
+            } while (true);
+            ack_fd_ = ::open(ack_path, O_RDONLY | O_NONBLOCK | O_CLOEXEC);
+            if (ack_fd_ < 0) {
+                ::close(control_fd_);
+                control_fd_ = -1;
+                throw std::runtime_error("Could not open perf acknowledgement FIFO");
+            }
             configured_ = true;
         }
 #endif
@@ -290,8 +312,9 @@ public:
     ~PerfControl() {
 #ifndef _WIN32
         if (active_) {
-            try { send("disable"); } catch (...) {}
+            try { command("disable"); } catch (...) {}
         }
+        if (ack_fd_ >= 0) ::close(ack_fd_);
         if (control_fd_ >= 0) ::close(control_fd_);
 #endif
     }
@@ -304,10 +327,12 @@ public:
 #endif
     }
 
+    std::size_t acknowledged_commands() const noexcept { return acknowledged_commands_; }
+
     void enable() {
 #ifndef _WIN32
         if (configured_) {
-            send("enable");
+            command("enable");
             active_ = true;
         }
 #endif
@@ -316,7 +341,7 @@ public:
     void disable() {
 #ifndef _WIN32
         if (configured_) {
-            send("disable");
+            command("disable");
             active_ = false;
         }
 #endif
@@ -324,22 +349,62 @@ public:
 
 private:
 #ifndef _WIN32
-    void send(std::string_view command) {
-        std::string message{command};
+    static constexpr int acknowledgement_timeout_ms = 5000;
+
+    void command(std::string_view value) {
+        const auto deadline = Clock::now() + std::chrono::milliseconds(acknowledgement_timeout_ms);
+        std::string message{value};
         message.push_back('\n');
         std::size_t written = 0;
         while (written < message.size()) {
             const auto count = ::write(control_fd_, message.data() + written, message.size() - written);
             if (count < 0 && errno == EINTR) continue;
+            if (count < 0 && errno == EAGAIN) {
+                if (Clock::now() >= deadline)
+                    throw std::runtime_error("Timed out sending perf control command");
+                std::this_thread::sleep_for(std::chrono::milliseconds(1));
+                continue;
+            }
             if (count <= 0) throw std::runtime_error("Could not send perf control command");
             written += static_cast<std::size_t>(count);
         }
+
+        std::string response;
+        response.reserve(4);
+        while (response.size() < 4) {
+            const auto remaining = std::chrono::duration_cast<std::chrono::milliseconds>(deadline - Clock::now()).count();
+            if (remaining <= 0) throw std::runtime_error("Timed out waiting for perf control acknowledgement");
+            pollfd descriptor{ack_fd_, POLLIN, 0};
+            const int ready = ::poll(&descriptor, 1, static_cast<int>(remaining));
+            if (ready < 0 && errno == EINTR) continue;
+            if (ready == 0) throw std::runtime_error("Timed out waiting for perf control acknowledgement");
+            if (ready < 0) throw std::runtime_error("Could not poll perf acknowledgement FIFO");
+            if ((descriptor.revents & (POLLERR | POLLNVAL)) != 0)
+                throw std::runtime_error("perf acknowledgement FIFO failed");
+            if ((descriptor.revents & POLLIN) == 0) {
+                if ((descriptor.revents & POLLHUP) != 0)
+                    std::this_thread::sleep_for(std::chrono::milliseconds(1));
+                continue;
+            }
+            char byte{};
+            const auto count = ::read(ack_fd_, &byte, 1);
+            if (count < 0 && (errno == EINTR || errno == EAGAIN)) continue;
+            if (count <= 0) throw std::runtime_error("perf closed the acknowledgement FIFO");
+            response.push_back(byte);
+            if (response.size() > 4) throw std::runtime_error("Malformed perf control acknowledgement");
+            if (response.size() <= 3 && response.back() != std::string_view("ack\n")[response.size() - 1])
+                throw std::runtime_error("Unexpected perf control acknowledgement");
+        }
+        if (response != "ack\n") throw std::runtime_error("Unexpected perf control acknowledgement");
+        ++acknowledged_commands_;
     }
 
     int control_fd_{-1};
+    int ack_fd_{-1};
     bool configured_{};
     bool active_{};
 #endif
+    std::size_t acknowledged_commands_{};
 };
 
 void trial_impl(const application::PreparedComparison& prepared, std::size_t strategy_index,
@@ -438,6 +503,8 @@ bool trial(const application::PreparedComparison& prepared, std::size_t strategy
 
 void profile_calls(const application::PreparedComparison& prepared, std::size_t strategy_index,
     std::size_t calls, const Signature& expected, PerfControl& perf_control) {
+    if (!perf_control.configured())
+        throw std::runtime_error("Profile mode requires acknowledged perf control and acknowledgement FIFOs");
     std::size_t passed = 0;
     for (std::size_t repetition = 0; repetition < calls; ++repetition) {
         auto workspaces = prepared.create();
@@ -462,8 +529,8 @@ void profile_calls(const application::PreparedComparison& prepared, std::size_t 
         << (strategy_index == 0 ? "csl.synthesis.reach-back" : "csl.synthesis.strategy-b")
         << "\",\"calls\":" << calls << ",\"passed\":" << passed
         << ",\"analytic_family_checked\":true,\"complete_family_verified\":true"
-        << ",\"sample_scope\":\"approximate_strategy_run_boundaries\",\"perf_controlled\":"
-        << (perf_control.configured() ? "true" : "false") << "}\n";
+        << ",\"sample_scope\":\"acknowledged_perf_control_transitions\",\"perf_controlled\":true,\"acknowledged_commands\":"
+        << perf_control.acknowledged_commands() << "}\n";
 }
 }
 

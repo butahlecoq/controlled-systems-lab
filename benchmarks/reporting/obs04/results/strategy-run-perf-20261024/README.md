@@ -40,3 +40,12 @@ The compressed raw `perf.data` files are retained beside short `perf report`
 summaries. To inspect them, decompress a copy and run
 `perf report --stdio --no-children --call-graph graph` with a compatible Linux
 perf build and the matching executable/debug symbols.
+
+## Control protocol status
+
+These retained files predate the acknowledged-control change and remain
+approximate run-boundary captures. The current driver waits for perf's `ack\n`
+response after every control command, but no new host capability or synchronized
+profile is recorded by these historical files. Run the opt-in Linux PR probe to
+produce a separate result; it reports `unavailable` when runner permissions or
+PMU access prevent collection.

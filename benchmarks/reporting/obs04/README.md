@@ -87,14 +87,30 @@ summary and raw file are in `results/`. This tiny analytic fixture does not
 represent application workloads and supports no general instrumentation
 overhead or strategy winner claim.
 
-`results/strategy-run-perf-20261024/` adds an exploratory profile that sends
-enable/disable commands around `StrategyPort::run`. It does not wait for perf
-command acknowledgements, so transitions may straddle call boundaries. The
-reach-back capture passed 500 calls and retained 1,131 samples; the direct-joint
-capture passed 2,000 calls and retained 486 samples. Both report zero lost
-samples. These counts are not a performance comparison: call counts differ and
-the small T-S01 fixture is not representative. Allocation symbols appear in
-both profiles, but the evidence does not establish a unique limiter. The
-directory contains provenance, JSON metadata, summaries, and compressed raw
-profiles. OBS-04 still needs immutable attempt/resource/publication records and
-the rest of its acceptance criteria.
+`results/strategy-run-perf-20261024/` retains the 2026-10-24 exploratory
+profiles, which were captured before control acknowledgements were added. They
+send enable/disable around `StrategyPort::run` but do not wait for perf's
+acknowledgement, so transitions may straddle call boundaries. The reach-back
+capture passed 500 calls and retained 1,131 samples; direct-joint passed 2,000
+calls and retained 486 samples. Both report zero lost samples. These counts are
+not a performance comparison and do not establish a unique limiter. Their
+original metadata and raw files remain unchanged and explicitly approximate.
+
+The current profile driver requires both `CSL_PERF_CONTROL_FIFO` and
+`CSL_PERF_ACK_FIFO`. It waits for `ack\n` after each enable/disable command,
+with a five-second bound, and fails a capture if perf exits, rejects the command,
+or does not acknowledge. Profile output marks this scope as
+`acknowledged_perf_control_transitions` and records the number of acknowledgements.
+The acknowledgement improves control-boundary synchronization but does not make
+the small T-S01 workload representative or support a unique limiter claim.
+
+To exercise host capability, add the `run-obs04-perf-probe` label to a PR. The
+Linux job builds the Release driver, tests the FIFO protocol with a mock perf
+controller, then attempts eight acknowledged cycles samples with a 120-second
+bound and 32 MiB file cap. It always uploads a machine-readable capability result
+and logs; permission or PMU denial is reported as `unavailable`, while protocol
+or capture errors are retained as `failed`. The workflow artifact is temporary
+(14-day retention). This change does not alter the installed API or package, so
+no release is needed. No capability result is claimed until the labelled job
+has actually run. OBS-04 still needs the remaining immutable attempt/resource/
+publication records and other acceptance criteria.
