@@ -295,6 +295,16 @@ void trial_impl(const application::PreparedComparison& prepared, std::size_t str
             completed_spans != observed_spans || span_timings.size() != observed_spans)
             throw std::runtime_error("Timing collector did not retain every expected completed span");
     }
+    struct SpanEvent { std::string operation; std::uint64_t inclusive, exclusive; };
+    std::vector<SpanEvent> span_events;
+    span_events.reserve(span_timings.size());
+    for (std::size_t index = 0; index < span_timings.size(); ++index) {
+        const auto inclusive = std::get_if<ar::Available<std::uint64_t>>(&span_timings[index].inclusive_wall_ticks);
+        const auto exclusive = std::get_if<ar::Available<std::uint64_t>>(&span_timings[index].exclusive_wall_ticks);
+        if (!inclusive || !exclusive || span_timings[index].id != span_records[index].descriptor.id)
+            throw std::runtime_error("Timing collector returned unavailable or misaligned span durations");
+        span_events.push_back({span_records[index].descriptor.operation, inclusive->value, exclusive->value});
+    }
     std::cout << "{\"schema\":\"csl.obs04-instrumentation-comparison-event/2\",\"repetition\":" << repetition
         << ",\"warmup\":" << (warmup ? "true" : "false") << ",\"strategy\":\""
         << (strategy_index == 0 ? "csl.synthesis.reach-back" : "csl.synthesis.strategy-b")
@@ -304,15 +314,11 @@ void trial_impl(const application::PreparedComparison& prepared, std::size_t str
         << ",\"spans_completed\":" << completed_spans << ",\"span_clock_period_num\":"
         << (enabled ? Clock::period::num : 0) << ",\"span_clock_period_den\":" << (enabled ? Clock::period::den : 0)
         << ",\"span_timings\":[";
-    for (std::size_t index = 0; index < span_timings.size(); ++index) {
-        const auto inclusive = std::get_if<ar::Available<std::uint64_t>>(&span_timings[index].inclusive_wall_ticks);
-        const auto exclusive = std::get_if<ar::Available<std::uint64_t>>(&span_timings[index].exclusive_wall_ticks);
-        if (!inclusive || !exclusive || span_timings[index].id != span_records[index].descriptor.id)
-            throw std::runtime_error("Timing collector returned unavailable or misaligned span durations");
+    for (std::size_t index = 0; index < span_events.size(); ++index) {
         if (index) std::cout << ',';
-        std::cout << "{\"operation\":\"" << span_records[index].descriptor.operation
-            << "\",\"inclusive_wall_ticks\":" << inclusive->value
-            << ",\"exclusive_wall_ticks\":" << exclusive->value << '}';
+        std::cout << "{\"operation\":\"" << span_events[index].operation
+            << "\",\"inclusive_wall_ticks\":" << span_events[index].inclusive
+            << ",\"exclusive_wall_ticks\":" << span_events[index].exclusive << '}';
     }
     std::cout << "],\"status\":\"passed\",\"outcome\":\"" << outcome_name(observed.outcome)
         << "\",\"analytic_family_checked\":true,\"complete_family_verified\":"
