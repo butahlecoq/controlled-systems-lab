@@ -112,8 +112,11 @@ Scenario v2 can author nominal linear full-history interval rows. Strategy B's
 direct joint compiler consumes those rows for its admitted nominal profile. The
 EXT-03 memory transform rewrites a narrow one-step slew problem into an ordinary
 Problem with increment controls and previous-control memory; the transform's
-history maps check their defining recurrence when recovering a history. No
-claim is made that the resulting lifted problem is admitted by Strategy A.
+history maps check their defining recurrence when recovering a history. The
+EXT-03 measurement harness demonstrates Strategy A admission and exact-family
+verification for one two-step scalar lifted fixture under its existing
+nominal-linear exact profile. This does not imply general Strategy A admission
+for temporal constraints or a general completeness claim.
 Robust or feedback strategies, legacy paths, and ordinary zonotopes remain
 outside this contract. Exact history correspondence follows the documented
 proof assumptions; in particular, an unbounded supplied state domain is not

@@ -4,10 +4,12 @@
 #include <csl/synthesis/strategy_a/nominal_linear_exact_profile.hpp>
 
 #include <algorithm>
+#include <charconv>
 #include <chrono>
 #include <cmath>
 #include <cstdint>
 #include <iostream>
+#include <limits>
 #include <memory>
 #include <stdexcept>
 #include <string>
@@ -203,10 +205,29 @@ void one_run() {
     check_original_history(recovered);
 }
 
-std::uint64_t positive_count(const char* text) {
-    const auto parsed = std::stoull(text);
-    if (parsed == 0) throw std::invalid_argument("counts must be positive");
+std::uint64_t positive_count(const char* text, std::uint64_t maximum, const char* name) {
+    const std::string value{text};
+    std::uint64_t parsed{};
+    const auto [end, error] = std::from_chars(value.data(), value.data() + value.size(), parsed);
+    if (value.empty() || error != std::errc{} || end != value.data() + value.size() ||
+        parsed == 0 || parsed > maximum)
+        throw std::invalid_argument(std::string{name} + " must be an integer in [1," +
+            std::to_string(maximum) + "]");
     return parsed;
+}
+
+std::string json_escape(const std::string& value) {
+    std::string result;
+    for (const unsigned char ch : value) {
+        if (ch == '"' || ch == '\\') {
+            result.push_back('\\');
+            result.push_back(static_cast<char>(ch));
+        } else if (ch == '\n') result += "\\n";
+        else if (ch == '\r') result += "\\r";
+        else if (ch == '\t') result += "\\t";
+        else if (ch >= 0x20) result.push_back(static_cast<char>(ch));
+    }
+    return result;
 }
 }
 
@@ -214,23 +235,47 @@ int main(int argc, char** argv) {
     try {
         if (argc != 4)
             throw std::invalid_argument("usage: csl_ext03_temporal_lift_report BATCH WARMUPS REPETITIONS");
-        const auto batch = positive_count(argv[1]);
-        const auto warmups = positive_count(argv[2]);
-        const auto repetitions = positive_count(argv[3]);
-        std::cout << "{\"event\":\"header\",\"schema\":\"csl.ext03-strategy-a-measurement/1\",\"batch\":"
+        const auto batch = positive_count(argv[1], 100, "batch");
+        const auto warmups = positive_count(argv[2], 5, "warmups");
+        const auto repetitions = positive_count(argv[3], 20, "repetitions");
+        if (warmups > std::numeric_limits<std::uint64_t>::max() - repetitions)
+            throw std::invalid_argument("warmup and repetition count overflows");
+        const auto total_rounds = warmups + repetitions;
+        std::cout << "{\"event\":\"header\",\"schema\":\"csl.ext03-strategy-a-measurement/2\",\"batch\":"
                   << batch << ",\"warmups\":" << warmups << ",\"repetitions\":" << repetitions << "}\n";
-        for (std::uint64_t round = 0; round < warmups + repetitions; ++round) {
+        bool failed = false;
+        for (std::uint64_t round = 0; round < total_rounds; ++round) {
             const auto start = std::chrono::steady_clock::now();
-            for (std::uint64_t call = 0; call < batch; ++call) one_run();
+            std::uint64_t attempted = 0;
+            std::string failure;
+            for (; attempted < batch; ++attempted) {
+                try {
+                    one_run();
+                } catch (const std::exception& error) {
+                    failure = error.what();
+                    ++attempted;
+                    break;
+                }
+            }
             const auto elapsed = std::chrono::duration_cast<std::chrono::nanoseconds>(
                 std::chrono::steady_clock::now() - start).count();
             std::cout << "{\"event\":\"trial\",\"fixture\":\"two_step_slew_integrator\",\"round\":"
                       << round << ",\"warmup\":" << (round < warmups ? "true" : "false")
                       << ",\"batch\":" << batch << ",\"elapsed_ns\":" << elapsed
-                      << ",\"checked_calls\":" << batch << ",\"failures\":0,\"status\":\"passed\"}\n";
+                      << ",\"attempted_calls\":" << attempted
+                      << ",\"checked_calls\":" << (failure.empty() ? attempted : attempted - 1)
+                      << ",\"failed_calls\":" << (failure.empty() ? 0 : 1)
+                      << ",\"missing_calls\":" << (batch - attempted)
+                      << ",\"status\":\"" << (failure.empty() ? "passed" : "failed") << "\"";
+            if (!failure.empty()) std::cout << ",\"error\":\"" << json_escape(failure) << "\"";
+            std::cout << "}\n";
             if (elapsed <= 0) throw std::runtime_error("nonpositive measured interval");
+            if (!failure.empty()) {
+                failed = true;
+                break;
+            }
         }
-        return 0;
+        return failed ? 2 : 0;
     } catch (const std::exception& error) {
         std::cerr << error.what() << '\n';
         return 1;

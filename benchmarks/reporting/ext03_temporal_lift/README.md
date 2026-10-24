@@ -30,11 +30,13 @@ report rendering. Source-mapped limiter profiling is not part of this harness;
 the report must say the limiter is unavailable rather than infer one from wall
 time.
 
-The raw event stream is retained before interpretation. A call fails the
-collection if the lift is rejected, the Strategy A result is stopped or
-nonoptimal, the complete family is not registry-verified, objective bounds or
-coordinates differ, the relation omits the analytic optimum, or independent
-original-history checks fail.
+The event stream records completed, failed, and missing calls separately. On a
+failed call, the executable writes that trial row with the attempt count,
+successful-call count, missing-call count, and failure message before exiting
+nonzero. The collector must retain those bytes and reject an incomplete run as
+a successful report. CLI counts are positive bounded integers: batch at most
+100, warmups at most 5, and measured repetitions at most 20. All arguments are
+validated before the header or any solver work is emitted.
 
 ## Reproduction
 
