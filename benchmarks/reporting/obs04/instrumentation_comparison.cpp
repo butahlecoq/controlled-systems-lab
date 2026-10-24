@@ -462,7 +462,7 @@ void profile_calls(const application::PreparedComparison& prepared, std::size_t 
         << (strategy_index == 0 ? "csl.synthesis.reach-back" : "csl.synthesis.strategy-b")
         << "\",\"calls\":" << calls << ",\"passed\":" << passed
         << ",\"analytic_family_checked\":true,\"complete_family_verified\":true"
-        << ",\"sample_scope\":\"StrategyPort::run\",\"perf_controlled\":"
+        << ",\"sample_scope\":\"approximate_strategy_run_boundaries\",\"perf_controlled\":"
         << (perf_control.configured() ? "true" : "false") << "}\n";
 }
 }
