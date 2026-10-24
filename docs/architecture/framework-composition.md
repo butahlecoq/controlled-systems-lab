@@ -87,11 +87,10 @@ Strategy A, Strategy B, or a general controller.
 
 The diagram and table describe current code, not a target microservice layout.
 Solid strategy and verifier paths are exercised by the registered synthesis
-comparison example on the exact T-S01 fixture. The dashed artifact path marks a
-specific gap: paired comparison records and registered complete-family proof
-payloads do not yet round-trip through the current run-statistics-v4 interface.
-That is why the runnable comparison example reports its result honestly but
-does not claim to save a paired proof-bearing result.
+comparison example on the exact T-S01 fixture. The artifact path records each
+strategy attempt separately as `csl.run-statistics/5` data. The current system
+does not yet publish one paired comparison record. Recorded complete-family
+claims remain unverified data and do not restore proof authority when decoded.
 
 Headers live under `include/csl`. Authoritative contracts cover
 [resolved problems](../contracts/resolved-problems.md), [registry](../contracts/registry.md),
@@ -186,11 +185,11 @@ without selection if a strategy returns them; the current caller-visible
 integration fixtures cover only successful complete-family T-S01/T-S02 flows.
 Its result exposes the artifact layer's final
 projections and the original-problem verification reports as typed in-memory
-values. It does not claim to persist the paired comparison: run-statistics-v4
-has no paired-comparison record, and its encoder rejects registered-completeness
-payloads. The `encode_strategy_run` function routes an individual final
-projection through the existing publisher and encoder and returns their actual
-typed result. It does not serialize the paired comparison or trajectory reports.
+values. The `encode_strategy_run` function routes an individual final
+projection through the existing publisher and encoder. The native
+`scenario_cli --run` command saves each strategy attempt as a separate
+`csl.run-statistics/5` recorded artifact. Those artifacts do not serialize one
+paired comparison or its trajectory reports.
 The delivered
 [registered synthesis comparison](../../examples/registered_synthesis_comparison.cpp)
 runs both strategies on the same immutable T-S01 problem, selects witness
@@ -199,6 +198,8 @@ summary identifies the shared problem/request, each strategy and outcome,
 selected witnesses and verification status/residuals. It does not serialize the
 live optimal-family relation or proof payload. This is a functional guarded
 fixture example, not general profile support or paired performance evidence.
+The [scenario CLI guide](../how-to/run-scenario.md) describes validation,
+execution, optional settings and artifact output.
 The [saved paired T-S01 report](../../reports/algorithm-results/syn-ts01-paired-20261014-b7f1ac0/index.html)
 delivers measured records and standalone HTML for this fixture, with an
 inconclusive performance conclusion and no general strategy ranking.
@@ -226,18 +227,17 @@ belong to [RUN-02 #80](https://github.com/butahlecoq/controlled-systems-lab/issu
 The implemented comparison flow makes no concurrent-sweep scalability claim
 until that separate resource scope is enforced and measured.
 
-The installed scenario_cli --run command adapts user-authored JSON to the
-paired application API for the guarded T-S01/T-S02 profiles. It carries optional
-LP/convex ID, seed, resource and profile overrides, and reports per-strategy
-outcomes plus independent witness checks. With --output-dir, it asks the
-versioned run artifact API to persist both attempts. Registered complete-family
-proof payloads still return a typed unsupported artifact error under the current
-schema, so the CLI does not publish an ad hoc comparison file. A claim-only
-family artifact and paired run bundle remain follow-up work.
-A general scenario-to-family-to-export application remains pending. General
-family proofs, broader selector profiles, CLI behavior and trusted proof
-serialization/replay retain their feature-ticket ownership. JSON run records
-preserve metadata; decoding does not mint trusted complete-family authority.
+The installed `scenario_cli --run` command adapts user-authored JSON to the
+paired application API for the guarded T-S01/T-S02 profiles. It accepts optional
+LP/convex IDs, a seed, thread allocation and profile overrides, and reports
+per-strategy outcomes plus independent witness checks. With `--output-dir`, it
+saves one versioned recorded artifact per strategy through the artifact API.
+Those `csl.run-statistics/5` artifacts retain complete-family claims as
+unverified data. They are not a paired comparison record, and decoding them
+does not mint trusted complete-family authority. See the [scenario CLI
+guide](../how-to/run-scenario.md) for commands and output details. General
+family proofs, broader selector profiles and replay of recorded claims remain
+outside this guarded CLI path.
 The synthesis-to-report adapter remains missing glue. Saved LP/convex reports and the paired T-S01 fixture report do not supply a
 general synthesis comparison.
 
