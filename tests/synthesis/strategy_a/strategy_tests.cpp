@@ -111,6 +111,18 @@ problem::ResolvedProblem nominal_linear_exact_multivariable() {
         InformationPattern::nominal_open_loop,LinearTerminal{{1,0},0}};
     return take(problem::resolve(source,{problem::UncertaintyStructure::stage_product_uncoupled,{},{}}));
 }
+problem::ResolvedProblem nominal_linear_exact_three_stage_multivariable() {
+    const auto box = unit_box_2d("nominal-exact-three-stage-box", "p", "v");
+    Problem source{{"strategy-a-nominal-linear-exact-three-stage"},
+        std::make_shared<const SystemModel>(SystemModel{{
+            {2,2,0},TimeDomain::discrete,
+            LinearStage{{2,2,{0,0,0,0}},{2,2,{1,0,0,1}},{2,0,{}},{0,0}}}, {}}),
+        {0,1,2,3},KnownInitial{{0,0}},
+        ContinuousDomain{{box,box,box}},
+        {UniversalSet{2},UniversalSet{2},UniversalSet{2},UniversalSet{2}}, {},{},
+        InformationPattern::nominal_open_loop,LinearTerminal{{1,0},0}};
+    return take(problem::resolve(source,{problem::UncertaintyStructure::stage_product_uncoupled,{},{}}));
+}
 problem::ResolvedProblem nominal_linear_exact_cancellation_objective() {
     Problem source{{"strategy-a-nominal-linear-exact-cancellation"},
         std::make_shared<const SystemModel>(SystemModel{
@@ -901,6 +913,39 @@ TEST_CASE("nominal linear exact profile verifies a multi-state multi-control opt
     CHECK(contains(*relation,{0,0,.25,.75,0,.5,.25,.75,0,.5}));
     CHECK_FALSE(contains(*relation,{0,0,1,1,.5,1,1,1,.5,1}));
     CHECK_FALSE(contains(*relation,{0,0,1,1,0,1,.5,1,0,1}));
+}
+TEST_CASE("nominal linear exact profile recovers a three-stage joint optimal history relation") {
+    const auto result=run(nominal_linear_exact_request(
+        nominal_linear_exact_three_stage_multivariable()));
+    CHECK(result.termination==Termination::completed);
+    REQUIRE(result.family);
+    CHECK(result.family->target()==FamilyTarget::exact_optimal_relation);
+    CHECK(result.family->registry_verified());
+    CHECK(result.outcome.value==MathematicalOutcome::optimal);
+    REQUIRE(result.objective.lower);REQUIRE(result.objective.upper);
+    CHECK(result.objective.lower->value==0);CHECK(result.objective.upper->value==0);
+    const auto& complete=std::get<CompleteOptimalFamily>(result.family->outcome());
+    CHECK(complete.relation.coordinates.dimensions.state==2);
+    CHECK(complete.relation.coordinates.dimensions.control==2);
+    CHECK(complete.relation.coordinates.horizon==3);
+    REQUIRE(complete.relation.payload);
+    const auto* relation=complete.relation.payload->h_relation_for_recording();
+    REQUIRE(relation);
+    CHECK(relation->metadata()->set.dimension==14);
+    const auto h=std::get<sets::HRepresentation>(relation->representation());
+    CHECK(equality_rank(h)==9);
+
+    // The terminal p objective fixes the final p control to zero. Earlier p
+    // controls and all v controls still generate multiple three-stage histories.
+    CHECK(contains(*relation,{0,0,0,1,0,0.5,0,0,0,1,0,0.5,0,0}));
+    CHECK(contains(*relation,{0,0,0,0.25,0,0.25,0,0.25,0,0.25,0,0.25,0,0.25}));
+    CHECK(contains(*relation,{0,0,0.25,0.25,0.5,0.5,0,0.75,
+        0.25,0.25,0.5,0.5,0,0.75}));
+    // This is feasible for the original problem, but has positive terminal p
+    // and therefore is outside the complete optimal relation.
+    CHECK_FALSE(contains(*relation,{0,0,0,0,0,0,0.25,0,
+        0,0,0,0,0.25,0}));
+    CHECK_FALSE(contains(*relation,{0,0,0,1,0,1.25,0,1.5,0,1,0,0.5,0,0}));
 }
 TEST_CASE("nominal linear exact evidence derives the dyadic optimum without rounded accumulation") {
     const auto bound=registry::detail::strategy_a_nominal_linear_exact_optimum_bound(
