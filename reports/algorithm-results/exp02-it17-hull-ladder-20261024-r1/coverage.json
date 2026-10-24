@@ -1,0 +1,16 @@
+{
+  "expected_rows": 144,
+  "raw_rows": 146,
+  "unique_rows": 144,
+  "duplicate_keys_preserved_by_first_observation": 2,
+  "fixture_sha256": {
+    "halton-square-n1000": "6d6dc703c057868067d2ce492993254d7d54dd3c1b0dd85de796e258af8f1363",
+    "halton-square-n250": "96777d3b257d331725466963af58c05c4301ea99b17e21adb775000eff4460e4",
+    "halton-square-n5000": "b856eac5a669d7cfd610fdb2211fd7d8a5f91f21184e7028018540841436d2cd"
+  },
+  "source_commits": [
+    "45cf065d4cf61b4a093fe28e0fcd3ed4f9c82653"
+  ],
+  "all_warmups_present": true,
+  "all_seven_repetitions_present": true
+}

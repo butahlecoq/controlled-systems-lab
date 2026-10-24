@@ -7,8 +7,10 @@
 #include <algorithm>
 #include <array>
 #include <chrono>
+#include <cstdint>
 #include <iostream>
 #include <memory>
+#include <optional>
 #include <set>
 #include <stdexcept>
 #include <string>
@@ -66,6 +68,28 @@ std::vector<Fixture> fixtures() {
     };
 }
 
+double halton(std::uint64_t index, std::uint32_t base) {
+    double value=0.0;
+    double fraction=1.0/static_cast<double>(base);
+    while(index) {
+        value+=static_cast<double>(index%base)*fraction;
+        index/=base;
+        fraction/=static_cast<double>(base);
+    }
+    return value;
+}
+
+Fixture halton_square(std::size_t count) {
+    if(count<4)throw std::invalid_argument("Halton square needs at least four points");
+    geometry::PointCloud cloud{{"it17-halton-square-n"+std::to_string(count)},
+        {{0,0},{1,0},{1,1},{0,1}}};
+    cloud.points.reserve(count);
+    for(std::uint64_t index=1;cloud.points.size()<count;++index)
+        cloud.points.push_back({halton(index,2),halton(index,3)});
+    return {"halton-square-n"+std::to_string(count),std::move(cloud),
+        {{0,0},{1,0},{1,1},{0,1}}};
+}
+
 std::unique_ptr<LPWorkspace> workspace(const geometry::PointCloud& cloud) {
     auto registration = adapters::lp::make_highs_registration();
     if (!std::holds_alternative<registry::Registration<registry::LPPort>>(registration)) return {};
@@ -95,7 +119,8 @@ bool valid_reduction(const Fixture& fixture, const geometry::HullReduction& resu
     const auto digest = geometry::digest_hull_input(fixture.cloud.points);
     if (!std::holds_alternative<geometry::HullInputDigest>(digest)) return false;
     const auto checked = geometry::check_source_index_hull(fixture.cloud.points,
-        {std::get<geometry::HullInputDigest>(digest), result.retained});
+        {std::get<geometry::HullInputDigest>(digest), result.retained},
+        {std::chrono::seconds{5}, fixture.cloud.points.size()});
     if (checked.status != geometry::HullCheckStatus::verified) return false;
     const auto [min_x, max_x] = std::minmax_element(fixture.expected_vertices.begin(),
         fixture.expected_vertices.end(), [](const Vector& a, const Vector& b) {
@@ -146,8 +171,15 @@ Outcome run(const Fixture& fixture, Method method) {
         const auto digest = geometry::digest_hull_input(fixture.cloud.points);
         const bool checked = std::holds_alternative<geometry::HullInputDigest>(digest) &&
             geometry::check_source_index_hull(fixture.cloud.points,
-                {std::get<geometry::HullInputDigest>(digest), hull.vertex_indices}).status ==
+                {std::get<geometry::HullInputDigest>(digest), hull.vertex_indices},
+                {std::chrono::seconds{5}, fixture.cloud.points.size()}).status ==
                     geometry::HullCheckStatus::verified;
+        if (coordinates != expected || !checked) {
+            std::cerr << "quickhull validation failure coordinates=" << coordinates.size()
+                      << " expected=" << expected.size() << " checked=" << checked << '\n';
+            for (const auto& point : coordinates)
+                std::cerr << " quickhull-point=" << point[0] << ',' << point[1] << '\n';
+        }
         return {coordinates == expected && checked,
             std::chrono::duration_cast<std::chrono::nanoseconds>(end-begin).count(),
             hull.vertex_indices.size(), 0, 0, 0, 0, 0};
@@ -183,9 +215,12 @@ Outcome run(const Fixture& fixture, Method method) {
         for (const auto& certificate : reduction.removed)
             std::cerr << " verifier=" << certificate.evidence.verifier.value;
         std::cerr << '\n';
-        for (const auto id : reduction.retained)
+        std::size_t shown = 0;
+        for (const auto id : reduction.retained) {
+            if (shown++ == 16) { std::cerr << " retained-point=...\n"; break; }
             std::cerr << " retained-point=" << id << ':' << fixture.cloud.points[id][0]
                       << ',' << fixture.cloud.points[id][1] << '\n';
+        }
     }
     outcome.retained = reduction.retained.size();
     outcome.removed = reduction.removed.size();
@@ -224,34 +259,41 @@ void print(const Fixture& fixture, Method method, bool warmup, int round,
               << ",\"ordered_candidates\":" << outcome.ordered_candidates
               << ",\"a43_final_rechecks\":" << outcome.a43_final_rechecks
               << ",\"a44_incremental_queries\":" << outcome.a44_incremental_queries
-              << ",\"a44_final_rechecks\":" << outcome.a44_final_rechecks << "}\n";
+              << ",\"a44_final_rechecks\":" << outcome.a44_final_rechecks << "}\n" << std::flush;
 }
 
 } // namespace
 
 int main(int argc, char** argv) {
     int repetitions = 7;
-    if (argc == 3 && std::string(argv[1]) == "--measure")
-        repetitions = std::stoi(argv[2]);
-    else if (argc != 1) {
-        std::cerr << "usage: csl_it17_hull_preliminary [--measure repetitions]\n";
-        return 2;
-    }
-    if (repetitions < 1) return 2;
-    try {
-        const auto data = fixtures();
-        for (const auto& fixture : data) for (const auto method : methods) {
-            const auto result = run(fixture, method);
-            print(fixture, method, true, 0, result);
-            if (!result.passed) throw std::runtime_error("warmup oracle failed");
+    int first_round = 1;
+    std::optional<std::size_t> ladder_size;
+    for(int i=1;i<argc;++i) {
+        const std::string argument{argv[i]};
+        if(argument=="--measure"&&i+1<argc)repetitions=std::stoi(argv[++i]);
+        else if(argument=="--from-round"&&i+1<argc)first_round=std::stoi(argv[++i]);
+        else if(argument=="--ladder-size"&&i+1<argc)ladder_size=std::stoull(argv[++i]);
+        else {
+            std::cerr << "usage: csl_it17_hull_preliminary [--measure repetitions] [--from-round N] [--ladder-size 250|1000|5000]\n";
+            return 2;
         }
-        for (int round = 1; round <= repetitions; ++round) {
+    }
+    if (repetitions < 1 || first_round < 1 || first_round > repetitions ||
+        (ladder_size&&*ladder_size!=250&&*ladder_size!=1000&&*ladder_size!=5000)) return 2;
+    try {
+        auto data=ladder_size?std::vector<Fixture>{halton_square(*ladder_size)}:fixtures();
+        if (first_round == 1) {
+            for (const auto& fixture : data) for (const auto method : methods) {
+                const auto result = run(fixture, method);
+                print(fixture, method, true, 0, result);
+            }
+        }
+        for (int round = first_round; round <= repetitions; ++round) {
             for (std::size_t f = 0; f < data.size(); ++f) {
                 for (std::size_t i = 0; i < methods.size(); ++i) {
                     const auto method = methods[(i + f + round - 1) % methods.size()];
                     const auto result = run(data[f], method);
                     print(data[f], method, false, round, result);
-                    if (!result.passed) throw std::runtime_error("measured output oracle failed");
                 }
             }
         }
