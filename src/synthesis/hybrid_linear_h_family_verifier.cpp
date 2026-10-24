@@ -1,7 +1,7 @@
 #include <csl/synthesis/hybrid_path_program.hpp>
 
 #include "hybrid_exact_model_relation.hpp"
-#include "hybrid_exact_polytope.hpp"
+#include "exact_h_polytope.hpp"
 #include "hybrid_family_verifier_internal.hpp"
 
 #include <algorithm>
@@ -10,7 +10,7 @@
 
 namespace csl::synthesis {
 namespace {
-namespace hx = detail::hybrid_exact;
+namespace hx = detail::exact_h;
 using namespace model;
 
 enum class RowsState { built, unsupported, cancelled };

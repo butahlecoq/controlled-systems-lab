@@ -1,6 +1,8 @@
 # Test-only verifier authorities. Never exported or installed.
 
-add_library(csl_verifiers_test STATIC src/registry/compiled_verifiers.cpp)
+add_library(csl_verifiers_test STATIC
+  src/registry/compiled_verifiers.cpp
+  src/registry/nominal_linear_exact_verifier.cpp)
 
 target_compile_definitions(csl_verifiers_test PRIVATE CSL_TEST_VERIFIER_CATALOG)
 

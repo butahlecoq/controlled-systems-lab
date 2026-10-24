@@ -36,5 +36,10 @@ bool strategy_b_ts02_profile_valid(const problem::ResolvedProblem&, const Strate
 bool strategy_a_ts02_profile_valid(const problem::ResolvedProblem&, const StrategyRequest&);
 bool strategy_b_ts03_profile_valid(const problem::ResolvedProblem&, const StrategyRequest&);
 bool strategy_a_ts03_profile_valid(const problem::ResolvedProblem&, const StrategyRequest&);
+bool strategy_a_nominal_linear_exact_profile_valid(const problem::ResolvedProblem&,
+    const FamilyRequest&, const RepresentationId&);
+std::vector<TransformStepIdentity> strategy_a_nominal_linear_exact_lineage(
+    const ProblemId&, std::size_t horizon);
+std::shared_ptr<const CompiledCompleteFamilyVerifier> make_nominal_linear_exact_verifier();
 std::variant<std::shared_ptr<const ::csl::synthesis::strategy_ts01::ExactJointRelation>, Diagnostics> make_ts01_relation();
 }
