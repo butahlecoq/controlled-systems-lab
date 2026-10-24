@@ -248,6 +248,25 @@ optimality, B04 reconstruction or validated rounding claim is supported.
 Independent saved-result review, main-only Pages deployment and live byte
 verification remain gates before issue closure.
 
+## Issue #3 validated finite-action minimax report
+
+The first validated-API measurement is saved in
+[`issue3-validated-minimax-20261023-r1`](../../reports/algorithm-results/issue3-validated-minimax-20261023-r1/).
+It measures three fixed fixtures with seven batches after one excluded warmup:
+the 2D analytic residual case, one infeasible plan and the displayed-data B08
+catalogue. The B08 capture checks 625 plans and 160,000 disturbance histories;
+its returned bounds are `67.15060110132285` and `67.15060110146638`. This uses
+the exact-real interpretation of saved binary64 inputs and is distinct from
+the printed-decimal rational audit. On the captured GCC 16.2.1 Release host,
+median batch times were 435,462 ns (418,910–458,161) for the analytic fixture,
+139,125 ns (133,468–142,268) for the infeasible case, and 561,272,221 ns
+(554,351,976–563,596,504) for B08. Other interactive processes were present;
+no limiter profile was collected. These are descriptive timings with no
+comparator, speedup, per-call latency or scalability claim. The report and raw
+records are registered in the schema-3 catalogue and the site generator
+validates the saved bundle. Main-only Pages publication and live URL/download
+verification remain pending.
+
 ## Reference-LP pipeline
 
 The [report-record contract](../contracts/algorithm-report-records.md) specifies the executable, saved schemas, exact timing scopes, independent literals, build/environment provenance, commands and OBS migration. `csl_lp_report --smoke` is a bounded functional test. Accepted seven-trial measurements and the separate counter profile follow review of a fixed clean Release code commit; their source identity is distinct from the later artifact commit.

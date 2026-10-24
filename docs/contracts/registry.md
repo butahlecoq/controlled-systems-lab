@@ -7,7 +7,7 @@ not redefine publication validity. The bridge preserves the pure planning,
 check-before-snapshot and dependency-before-factory contracts below.
 
 CORE-04 adds `<csl/registry/registry.hpp>` and the installed `CSL::registry`
-target. It preserves [native interface revision 1.1](core-interfaces.md).
+target. The current [native interface revision is 1.8](core-interfaces.md).
 This is a C++20 source interface for compatible in-process toolchains. It
 provides no portable C++ ABI, loader, global registry, fallback algorithm or
 production optimization implementation.
@@ -35,6 +35,14 @@ query contains the finite-action minimax request and limits, and its result
 keeps the oracle's six distinct outcome variants. The registered reference
 and its bounded scope are documented in [finite-action minimax](finite-action-minimax.md).
 It does not construct a `SynthesisOutcome` or claim a joint optimal family.
+
+`ValidatedFiniteActionMinimaxPort` is a separate validated-oracle interface
+with validated assurance and a bounds representation. Its query freezes the
+validated request and plan/history/operation limits. Complete bounds,
+infeasible-catalogue, and unresolved-catalogue results carry and are checked
+against the frozen problem/request identities; empty, no-scenario, unsupported,
+and stopped variants remain status-only. Its admitted scope and numerical
+preconditions are documented in [finite-action minimax](finite-action-minimax.md).
 
 `SelectorRequest` pairs the existing family and witness request;
 `StrategyRequest` owns an immutable `ResolvedProblem`, the effective
@@ -227,8 +235,11 @@ compatible dependency is not snapshotted when a later dependency rejects.
 `Requirements` keeps scalar arithmetic, expected output representation,
 assurance, optional set relation, family target, optional completeness and basis
 support separate. Actual buffers remain `double`; binary32, exact and interval
-requests reject. Validated requests reject because revision 1.1 has no validated
-evidence interface. Relations and family targets must match when requested.
+requests reject. Validated assurance is rejected by default. A port may opt in
+through its typed `accepts_validated_assurance` trait; admission still requires
+exact output assurance and representation matching. The validated finite-action
+minimax port is currently the only opt-in and advertises its bounds certificate
+representation. Relations and family targets must match when requested.
 An exact family target, equivalent relation or numerical assurance never
 establishes completeness. `Completeness` is a declared capability requirement,
 not proof that a result contains the complete optimal family. Result evidence
@@ -302,7 +313,7 @@ invoking the basis connection. Moved-from
 prepared handles are only suitable for destruction or assignment.
 
 Opaque `SetPayload` and `JointRelationPayload` values cannot be deep-copied
-through revision 1.1. Their publication precondition is strict: construct an
+through registry revision 1.1. Their publication precondition is strict: construct an
 owning `shared_ptr<const ConcretePayload>` with immutable transitive data, retain
 no mutable producer alias to the object or anything it references, and do not
 mutate hidden caches without the payload's explicit safe contract. Merely

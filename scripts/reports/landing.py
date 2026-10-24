@@ -213,6 +213,10 @@ FAMILIES = {
         "fixtures and records batch timings with fixture-specific call counts. All winning flags "
         "and the selected action cells are checked; the remaining cells of the action tensor are "
         "not."),
+    "issue3-validated-minimax": Family(
+        r"issue3-validated-minimax-[0-9a-f]{64}", "synthesis", "Validated finite-action minimax bounds",
+        "Measures three fixed fixtures through the validated API. The B08 row checks 625 plans and "
+        "160,000 disturbance histories for saved binary64 inputs; timings are descriptive."),
     "finite-feedback-registered": Family(
         r"finite-feedback-registered-[0-9a-f]{16,64}", "synthesis", "Finite feedback games",
         "Plays authored finite games through the registered feedback port and checks every "

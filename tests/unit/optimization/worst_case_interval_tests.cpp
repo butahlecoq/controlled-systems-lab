@@ -1,6 +1,7 @@
 #define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
 #include <doctest/doctest.h>
 #include <csl/optimization/worst_case_interval.hpp>
+#include <cfenv>
 
 using namespace csl;
 
@@ -92,4 +93,14 @@ TEST_CASE("interval bound admission preserves capacity and identity failures") {
     auto unidentified=request(domain,objective);
     unidentified.request={};
     CHECK(std::holds_alternative<Unsupported>(optimization::worst_case_interval(unidentified)));
+}
+
+TEST_CASE("interval bounds reject a non-default hardware rounding mode") {
+    const auto domain=points("rounding-mode",{0,2},2);
+    const auto objective=take_objective(optimization::snapshot(LinearTerminal{{1},0}));
+    const int previous=std::fegetround();
+    REQUIRE(std::fesetround(FE_DOWNWARD)==0);
+    const auto result=optimization::worst_case_interval(request(domain,objective));
+    CHECK(std::holds_alternative<OperationStopped>(result));
+    CHECK(std::fesetround(previous)==0);
 }

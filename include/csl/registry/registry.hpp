@@ -98,8 +98,8 @@ template<class Port> struct Registration {
 namespace detail {
 struct PipelineAccess;
 struct ProviderAccess;
-Diagnostics check_request_policy(const Requirements&, bool has_basis);
-Diagnostics check_offer(const Offer&, const Requirements&, bool has_basis);
+Diagnostics check_request_policy(const Requirements&, bool has_basis, bool accepts_validated = false);
+Diagnostics check_offer(const Offer&, const Requirements&, bool has_basis, bool accepts_validated = false);
 Diagnostics check_transition(const Output&, const Output&);
 Rejection reject(Provenance, std::string field, std::string reason);
 Rejection capability_rejection(Provenance, Diagnostics);
@@ -264,7 +264,13 @@ struct PipelineAccess {
         const auto capability = entry.capabilities(s.request,s.requirements);
         if (const auto* diagnostics = std::get_if<Diagnostics>(&capability)) return capability_rejection(provenance,*diagnostics);
         const auto offer = std::get<Offer>(capability);
-        auto diagnostics = check_offer(offer,s.requirements,static_cast<bool>(entry.basis_factory));
+        constexpr bool accepts_validated = [] {
+            if constexpr (requires { Port::accepts_validated_assurance; })
+                return Port::accepts_validated_assurance;
+            else
+                return false;
+        }();
+        auto diagnostics = check_offer(offer,s.requirements,static_cast<bool>(entry.basis_factory),accepts_validated);
         if (!diagnostics.empty()) return Rejection{provenance,std::move(diagnostics)};
         return CheckedEntry<Port>{&entry,&s.request,s.requirements,provenance,offer};
     }

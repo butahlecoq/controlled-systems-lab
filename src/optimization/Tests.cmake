@@ -71,10 +71,32 @@ target_link_libraries(worst_case_interval_tests PRIVATE CSL::worst_case_interval
 add_test(NAME worst_case_interval_tests COMMAND worst_case_interval_tests)
 csl_test_target(worst_case_interval_tests optimization)
 
+add_executable(outward_interval_kernel_tests tests/unit/optimization/outward_interval_kernel_tests.cpp)
+target_include_directories(outward_interval_kernel_tests PRIVATE ${PROJECT_SOURCE_DIR}/src)
+target_link_libraries(outward_interval_kernel_tests PRIVATE doctest::doctest)
+add_test(NAME outward_interval_kernel_tests COMMAND outward_interval_kernel_tests)
+csl_test_target(outward_interval_kernel_tests optimization)
+
 add_executable(finite_action_minimax_tests tests/unit/optimization/finite_action_minimax_tests.cpp)
 target_link_libraries(finite_action_minimax_tests PRIVATE CSL::finite_action_minimax doctest::doctest)
 add_test(NAME finite_action_minimax_tests COMMAND finite_action_minimax_tests)
 csl_test_target(finite_action_minimax_tests optimization)
+
+add_executable(validated_finite_action_minimax_tests
+  tests/unit/optimization/validated_finite_action_minimax_tests.cpp)
+target_link_libraries(validated_finite_action_minimax_tests
+  PRIVATE CSL::validated_finite_action_minimax doctest::doctest)
+add_test(NAME validated_finite_action_minimax_tests
+  COMMAND validated_finite_action_minimax_tests)
+csl_test_target(validated_finite_action_minimax_tests optimization)
+
+add_executable(validated_finite_action_minimax_port_tests
+  tests/unit/optimization/validated_finite_action_minimax_port_tests.cpp)
+target_link_libraries(validated_finite_action_minimax_port_tests
+  PRIVATE CSL::validated_finite_action_minimax_port doctest::doctest)
+add_test(NAME validated_finite_action_minimax_port_tests
+  COMMAND validated_finite_action_minimax_port_tests)
+csl_test_target(validated_finite_action_minimax_port_tests optimization)
 
 add_executable(finite_action_minimax_port_tests tests/unit/optimization/finite_action_minimax_port_tests.cpp)
 target_link_libraries(finite_action_minimax_port_tests PRIVATE CSL::finite_action_minimax_port doctest::doctest)

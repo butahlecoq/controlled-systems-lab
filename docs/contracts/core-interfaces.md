@@ -1,4 +1,11 @@
-# Native interfaces, revision 1.7
+# Native interfaces, revision 1.8
+
+Revision 1.8 extends typed registry admission with a port-specific opt-in for
+validated assurance. The default remains rejection; an opted-in port must still
+match the requested assurance and representation exactly. The validated
+finite-action minimax port uses this path for its certificate-bearing bounds
+output. This source change does not alter the mathematical interfaces or infer
+validated evidence from numerical assurance.
 
 Revision 1.7 (GEO-07, 2026-10-16) adds `DependentSum` as a distinct
 `GeometryOperation` request for factor-bearing set handles. It does not alter

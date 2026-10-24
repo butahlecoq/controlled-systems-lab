@@ -43,6 +43,17 @@ csl_add_library(csl_finite_action_minimax STATIC src/optimization/finite_action_
 
 target_link_libraries(csl_finite_action_minimax PUBLIC CSL::fixed_plan_disturbance CSL::worst_case_vertex)
 
+csl_add_library(csl_validated_finite_action_minimax STATIC
+  src/optimization/validated_finite_action_minimax.cpp)
+
+target_link_libraries(csl_validated_finite_action_minimax PUBLIC CSL::objectives CSL::sets CSL::model)
+
+csl_add_library(csl_validated_finite_action_minimax_port STATIC
+  src/optimization/validated_finite_action_minimax_port.cpp)
+
+target_link_libraries(csl_validated_finite_action_minimax_port
+  PUBLIC CSL::validated_finite_action_minimax CSL::registry)
+
 csl_add_library(csl_finite_action_minimax_port STATIC src/optimization/finite_action_minimax_port.cpp)
 
 target_link_libraries(csl_finite_action_minimax_port PUBLIC CSL::finite_action_minimax CSL::registry)

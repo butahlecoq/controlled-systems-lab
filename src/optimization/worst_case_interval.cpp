@@ -1,17 +1,13 @@
 #include <csl/optimization/worst_case_interval.hpp>
+#include "detail/outward_interval.hpp"
 
 #include <algorithm>
-#include <array>
 #include <chrono>
 #include <cmath>
 #include <limits>
 #include <type_traits>
 
 namespace csl::optimization {
-static_assert(std::numeric_limits<double>::is_iec559 &&
-    std::numeric_limits<double>::radix==2 &&
-    std::numeric_limits<double>::digits==53,
-    "worst_case_interval requires IEC 60559 binary64 arithmetic");
 struct WorstCaseIntervalBuilder {
     static WorstCaseIntervalBounds make(const WorstCaseIntervalRequest& request,
             double lower, double upper) {
@@ -20,60 +16,13 @@ struct WorstCaseIntervalBuilder {
     }
 };
 namespace {
-struct Interval {
-    double lower;
-    double upper;
-};
-constexpr double negative_infinity=-std::numeric_limits<double>::infinity();
-constexpr double positive_infinity=std::numeric_limits<double>::infinity();
-Interval whole() { return {negative_infinity,positive_infinity}; }
-double down(double value) { return std::nextafter(value,negative_infinity); }
-double up(double value) { return std::nextafter(value,positive_infinity); }
-Interval add(Interval a,Interval b) {
-    const double lower=a.lower+b.lower,upper=a.upper+b.upper;
-    if(std::isnan(lower)||std::isnan(upper)) return whole();
-    return {down(lower),up(upper)};
-}
-Interval multiply(Interval a,Interval b) {
-    const std::array<double,4> products{
-        a.lower*b.lower,a.lower*b.upper,a.upper*b.lower,a.upper*b.upper};
-    if(std::any_of(products.begin(),products.end(),
-            [](double value){return std::isnan(value);})) return whole();
-    const auto [minimum,maximum]=std::minmax_element(products.begin(),products.end());
-    return {down(*minimum),up(*maximum)};
-}
-Interval square(Interval value) {
-    if(value.lower<=0&&value.upper>=0) {
-        const double upper=std::max(value.lower*value.lower,value.upper*value.upper);
-        if(std::isnan(upper)) return {0,positive_infinity};
-        return {0,up(upper)};
-    }
-    const double first=value.lower*value.lower,second=value.upper*value.upper;
-    if(std::isnan(first)||std::isnan(second)) return {0,positive_infinity};
-    return {std::max(0.0,down(std::min(first,second))),up(std::max(first,second))};
-}
-Interval square_root(Interval value) {
-    if(value.upper<0) return whole();
-    double lower=0;
-    if(std::isfinite(value.lower)&&value.lower>0) {
-        auto candidate=std::sqrt(value.lower);
-        for(int attempt=0;attempt<4&&candidate>0;++attempt) {
-            if(square({candidate,candidate}).upper<=value.lower) {lower=candidate;break;}
-            candidate=down(candidate);
-        }
-    }
-    double upper=positive_infinity;
-    if(std::isfinite(value.upper)) {
-        auto candidate=std::sqrt(std::max(0.0,value.upper));
-        for(int attempt=0;attempt<4;++attempt) {
-            if(square({candidate,candidate}).lower>=value.upper) {upper=candidate;break;}
-            candidate=up(candidate);
-        }
-        if(!std::isfinite(upper))
-            upper=std::max(1.0,value.upper); // sqrt(x) <= max(1,x), x >= 0.
-    }
-    return {lower,upper};
-}
+using detail::Interval;
+using detail::add;
+using detail::multiply;
+using detail::square;
+using detail::square_root;
+using detail::negative_infinity;
+using detail::positive_infinity;
 Interval evaluate_box(const ObjectiveCoefficients& objective,
         const std::vector<Interval>& point) {
     return std::visit([&](const auto& coefficients)->Interval {
@@ -141,6 +90,9 @@ std::variant<std::vector<Interval>,Unsupported> bounds_of(const sets::SetData& d
 
 WorstCaseIntervalOutcome worst_case_interval(const WorstCaseIntervalRequest& request,
         const ExecutionContext& context) {
+    if (!detail::supported_rounding_mode())
+        return OperationStopped{StopReason::numerical_failure,
+            "Outward interval evaluation requires FE_TONEAREST rounding."};
     if(request.problem.value.empty()||request.request.value.empty())
         return Unsupported{{{DiagnosticCode::invalid_input,"worst_case_interval.identity",
             "Nonempty problem and request identities are required."}}};

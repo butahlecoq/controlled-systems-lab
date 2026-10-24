@@ -1,0 +1,30 @@
+{
+  "files": {
+    "README.md": "d6d91ab69f9c6b49f83aa8983dcef2ff9306d5e1dda23ecdbadc16fcee2fd385",
+    "analytic-2d.svg": "9e00c8b59b3400dc9ccd4f1788e7ae541d9460fe5f5f231fcb50b499f36ada13",
+    "evidence/CMakeCache.txt": "c8afcf74e419a9c4507e2b4572e746a0955c623f40c17e1e916f43c50e57f691",
+    "evidence/build.log": "1ef3549b8f117af77c0ea2316361cd778e8708a47ac7147878c370bc4106af32",
+    "evidence/cmake.txt": "f6e81c2559f3ce00c5fdad01d7b226c301f5d6b07ee04f65db6dbfdc1cc5970b",
+    "evidence/compiler.txt": "0b52fa36f98d1a1ff3f77256f64c13ac7e2264cf7f072ea7943756a0ef378028",
+    "evidence/configure.log": "4c19461676000f3581d7816b6b71706fbc6e4fa8664fbae69ddabc552325f37f",
+    "evidence/executable.sha256": "cf411582510762af26a19a35ef3418e6c49d86698f7d9ca03557e22d5ffea227",
+    "evidence/harness-commit.txt": "46523777b6960b462dd402f98aa7466400c5b9dd09023f4cea1b229db5cecc76",
+    "evidence/harness-tree.txt": "c40bae313540b2773324da01f4fb936445c7064fb482b256b7eb1b0bd428519d",
+    "evidence/host-before.txt": "8c54ed586ccd17764f592ee36fd5b3289bddfd93bddd79f0be19993616c05aa1",
+    "evidence/measure.exit-code": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+    "evidence/measure.stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "evidence/measure.stdout.jsonl": "1f1d76246319b9c1027d968946240e77cf677f8378fca1c645291433015f6d29",
+    "evidence/platform.txt": "384aa6c37ce906d6043b86076198ecc86680bde631654ace926dba3c68743af1",
+    "evidence/smoke.exit-code": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+    "evidence/smoke.stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "evidence/smoke.stdout.jsonl": "dfd81a0fd50a7987b20e29e84e7a16ae59fcbfc1c7d8f7e200669d64bc4959a5",
+    "evidence/source-status.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "index.html": "fc9f9920e20072dd6d4cfa04094a7235f01fb0da87e5d95ebe4cdb643ba95564",
+    "records.json": "4e61982a233ff7ecd1b9ee6afc7142ea5168c1ddd86153fb8657b86837b91fa1",
+    "trials.csv": "1b211cca3aa3fb4b4768e429087390968af4ce45f843f9b9e6cac2d127ff86d9"
+  },
+  "harness_commit": "1c606969b0d15700b61e43effdbbd545e9d0ed73",
+  "report_id": "issue3-validated-minimax-20261023-r1",
+  "schema": "csl.issue3-validated-minimax-manifest/1",
+  "source_commit": "c72f3480c8fea2575ba860890502857006e9b9f4"
+}
