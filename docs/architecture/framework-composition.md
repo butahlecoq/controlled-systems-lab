@@ -187,11 +187,12 @@ Its result exposes the artifact layer's final
 projections and the original-problem verification reports as typed in-memory
 values. The `encode_strategy_run` function routes an individual final
 projection through the existing publisher and encoder. When both strategies
-return completed optimal results and all selected witnesses pass numerical
-checks, the native `scenario_cli --run --output-dir` command saves each attempt
-as a separate `csl.run-statistics/5` recorded artifact. A strategy or witness
-check failure returns before artifact publication. The artifacts do not
-serialize one paired comparison or its trajectory reports.
+return complete-family results with completed optimal outcomes and all selected
+witnesses pass numerical checks, the native `scenario_cli --run --output-dir`
+command saves each attempt as a separate `csl.run-statistics/5` recorded
+artifact. A strategy or witness-check failure returns before artifact
+publication. The artifacts do not serialize one paired comparison or its
+trajectory reports.
 The delivered
 [registered synthesis comparison](../../examples/registered_synthesis_comparison.cpp)
 runs both strategies on the same immutable T-S01 problem, selects witness
@@ -234,9 +235,9 @@ paired application API for the guarded T-S01/T-S02 profiles. It accepts optional
 LP/convex IDs, a seed, thread allocation and profile overrides, and reports
 per-strategy outcomes plus independent witness checks. With `--output-dir`, it
 saves one versioned recorded artifact per strategy through the artifact API
-after both strategies complete with optimal outcomes and every selected
-witness passes its numerical checks. A strategy or witness-check failure
-returns before publication. The `csl.run-statistics/5` artifacts retain
+after both strategies return complete-family results with completed optimal
+outcomes and every selected witness passes its numerical checks. A strategy or
+witness-check failure returns before publication. The `csl.run-statistics/5` artifacts retain
 complete-family claims as unverified data. They are not a paired comparison
 record, and decoding them does not mint trusted complete-family authority. See
 the [scenario CLI guide](../how-to/run-scenario.md) for commands and output

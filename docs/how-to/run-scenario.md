@@ -80,8 +80,9 @@ build/examples/scenario_cli --run examples/scenarios/two-stage-integrator.json \
 
 The CLI writes `reach-back.run.json` and `strategy-b.run.json` as
 `csl.run-statistics/5` recorded artifacts only after both strategies return
-completed optimal outcomes and every selected witness passes numerical checks.
-If a strategy or witness check fails, the command returns before publication.
+complete-family results with completed optimal outcomes, and every selected
+witness passes numerical checks. If a strategy or witness check fails, the
+command returns before publication.
 Use a fresh directory because the CLI refuses to replace existing result
 files. The records preserve family claims as `unverified_recorded_data`;
 decoding does not make those claims trusted evidence. The two records are not a
