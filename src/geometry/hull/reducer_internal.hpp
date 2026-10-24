@@ -29,6 +29,6 @@ struct CandidateClassification {
 
 CandidateClassification classify_candidate(const PointCloud&,
     const std::vector<std::size_t>& support, std::size_t candidate,
-    LPWorkspace&, const ExecutionContext&);
+    LPWorkspace&, const ExecutionContext&, std::string_view query_namespace = {});
 
 } // namespace csl::geometry::detail

@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>QuickHull and ITIS17-related hull pilot — preliminary</title>
+<style>
+body{font:16px/1.55 system-ui,sans-serif;max-width:1100px;margin:2rem auto;padding:0 1.2rem;color:#172033;background:#fff}
+h1,h2{line-height:1.2}.status{padding:1rem;border-left:5px solid #b7791f;background:#fff8e8}
+figure{margin:1.5rem 0}figure img{display:block;width:min(100%,780px);height:auto}figcaption,small{color:#526174}
+table{border-collapse:collapse;width:100%;font-variant-numeric:tabular-nums}th,td{border-bottom:1px solid #dce2e9;padding:.55rem;text-align:left}th{background:#f3f6f9}
+code{overflow-wrap:anywhere}.links{display:flex;gap:1rem;flex-wrap:wrap}
+</style></head><body>
+<h1>QuickHull and ITIS17-related LP hull pilot</h1>
+<p><strong>Preliminary exploratory result · source commit <code>7de5ad294ab8831ea3bcc2907f0355c602971d63</code></strong></p>
+<div class="status"><strong>Performance conclusion: inconclusive.</strong> This run used three tiny 2D square clouds. It has no source-mapped limiter profile or representative end-to-end workload, so the measurements do not support a speed ranking or scalability claim.</div>
+<h2>Fixture geometry</h2><figure><img src="fixture-geometry.svg" alt="Three panels showing original point IDs, with distinct symbols for hull vertices, edge points, interior points, and duplicates"><figcaption>Point IDs appear in each point's SVG title. Color and symbol distinguish hull vertices, edge points, interior points, and duplicates. Exact dyadic coordinates make these fixture hull checks direct.</figcaption></figure>
+<h2>Algorithms and timing scope</h2>
+<p>QuickHull is compared with five LP reducer variants. The related OPT-06 basis-reuse and OPT-07 ordered reducers retain their original identities. The new A43 safe adaptation wraps certificate-safe basis reuse with a mandatory full recheck; it does not implement the paper's per-candidate artificial-basis sequence or largest-norm tie rule. The A44 adaptation performs farthest-first incremental LP membership using normalized Chebyshev distance, then a mandatory full LP recheck. A44's paper ordering prose is ambiguous, and this report records the farthest-first interpretation. Neither is a Pascal reproduction. Timing covers each public reducer call; LP workspace creation and output validation are outside the interval. Each row below summarizes seven interleaved measured calls per fixture and method. Values are nanoseconds; raw trials and warmups remain in the linked JSONL.</p>
+<table><thead><tr><th>Fixture</th><th>Method</th><th>Trials</th><th>Median (ns)</th><th>Range (ns)</th></tr></thead><tbody><tr><td>degenerate</td><td>A43-certificate-safe-basis-adaptation</td><td>7</td><td>688,848</td><td>666,219–776,220</td></tr>
+<tr><td>degenerate</td><td>A44-incremental-LP-paper-adaptation</td><td>7</td><td>1,138,070</td><td>1,134,508–1,277,195</td></tr>
+<tr><td>degenerate</td><td>basis-reuse-related-to-A43</td><td>7</td><td>46,724</td><td>43,512–67,677</td></tr>
+<tr><td>degenerate</td><td>geometric-quickhull</td><td>7</td><td>8,939</td><td>8,102–9,150</td></tr>
+<tr><td>degenerate</td><td>lp-membership-baseline</td><td>7</td><td>848,576</td><td>841,452–863,522</td></tr>
+<tr><td>degenerate</td><td>ordered-membership-related-to-A44</td><td>7</td><td>853,465</td><td>842,849–877,910</td></tr>
+<tr><td>interior-basis</td><td>A43-certificate-safe-basis-adaptation</td><td>7</td><td>658,676</td><td>646,664–1,180,464</td></tr>
+<tr><td>interior-basis</td><td>A44-incremental-LP-paper-adaptation</td><td>7</td><td>944,399</td><td>928,894–1,449,704</td></tr>
+<tr><td>interior-basis</td><td>basis-reuse-related-to-A43</td><td>7</td><td>45,397</td><td>37,086–65,791</td></tr>
+<tr><td>interior-basis</td><td>geometric-quickhull</td><td>7</td><td>5,168</td><td>4,679–7,613</td></tr>
+<tr><td>interior-basis</td><td>lp-membership-baseline</td><td>7</td><td>624,036</td><td>619,076–969,612</td></tr>
+<tr><td>interior-basis</td><td>ordered-membership-related-to-A44</td><td>7</td><td>632,975</td><td>614,258–716,366</td></tr>
+<tr><td>permuted</td><td>A43-certificate-safe-basis-adaptation</td><td>7</td><td>1,038,336</td><td>1,013,472–1,702,391</td></tr>
+<tr><td>permuted</td><td>A44-incremental-LP-paper-adaptation</td><td>7</td><td>1,466,116</td><td>1,449,633–1,933,636</td></tr>
+<tr><td>permuted</td><td>basis-reuse-related-to-A43</td><td>7</td><td>56,502</td><td>51,543–69,283</td></tr>
+<tr><td>permuted</td><td>geometric-quickhull</td><td>7</td><td>15,365</td><td>14,388–19,137</td></tr>
+<tr><td>permuted</td><td>lp-membership-baseline</td><td>7</td><td>1,206,724</td><td>1,188,216–1,289,556</td></tr>
+<tr><td>permuted</td><td>ordered-membership-related-to-A44</td><td>7</td><td>1,228,514</td><td>1,188,635–2,690,441</td></tr></tbody></table>
+<p>All 144 calls (18 warmups and 126 measured calls) passed the fixture checks. All coordinates are exact dyadic rationals. Passing these small cases does not establish general correctness for arbitrary point clouds. The reducers can retain different numbers of redundant points while representing the same hull.</p>
+<h2>Evidence and limits</h2>
+<ul><li>Three literal clouds contain 5–10 points each.</li><li>The bounded independent exact 2D checker establishes all-input hull coverage for every output; LP deletions also retain exact-binary64 convex-combination certificates.</li><li>All algorithms ran in Release on GCC 16.2.1, C++20, HiGHS 1.11.0, Linux x86_64.</li><li>No original Pascal source for the ITIS17 methods was found. The separate <code>btulshor.pas</code> method was not run.</li><li>This exploratory bundle does not complete the EXP-02 issue or establish faithful reproduction of either paper.</li></ul>
+<p class="links"><a href="summary.csv">Download summary CSV</a><a href="raw-rows.jsonl">Download all raw rows</a><a href="fixture-geometry.svg">Open fixture SVG</a></p>
+</body></html>

@@ -139,6 +139,12 @@ FAMILIES = {
         "Runs measured batches of a thousand QuickHull calls over three small analytic point "
         "clouds and verifies every produced hull against a literal oracle. The timed interval "
         "includes index copies and the oracle comparison itself."),
+    "it17-hull-adaptations": Family(
+        r"quickhull-it17-paper-adaptations-\d{8}-r\d+", "geometry",
+        "QuickHull and ITIS17 paper-informed LP reducers",
+        "Compares geometric QuickHull with five separately identified LP reducers on three "
+        "small exact 2D clouds. A43 and A44 are paper-informed adaptations, not faithful paper "
+        "or Pascal ports; the performance conclusion is inconclusive."),
     "geo07-generator-sets": Family(
         r"geo07-generator-sets-[0-9a-f]{16,64}", "geometry", "Generator-set evaluation",
         "Evaluates generator-set requests over three bounded public generator-set fixtures, "

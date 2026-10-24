@@ -52,6 +52,24 @@ struct OrderedReductionMetrics {
     bool used_identity_fallback{};
 };
 
+struct A43ReductionMetrics {
+    // Number of LP queries in the mandatory irredundancy recheck after the
+    // certificate-safe Phase-I basis reuse pass. The paper's largest-norm tie
+    // rule is not exposed by the current LP provider and is not applied.
+    std::size_t final_recheck_calls{};
+    bool largest_norm_tie_policy_applied{};
+};
+
+struct A44ReductionMetrics {
+    // Deterministic farthest-first order under normalized Chebyshev distance
+    // from the cloud's bounding-box center. IDs refer to the original cloud.
+    std::vector<std::size_t> processing_order;
+    std::size_t incremental_membership_calls{};
+    std::size_t final_recheck_calls{};
+    std::size_t zero_width_coordinates{};
+    bool used_identity_fallback{};
+};
+
 struct GroupedReductionMetrics {
     // Original PointCloud IDs after deterministic outer-box ordering.
     std::vector<std::size_t> processing_order;
@@ -111,6 +129,9 @@ struct HullReduction {
     std::optional<GroupedReductionMetrics> grouped{};
     // Present only for recursive split-and-merge reduction.
     std::optional<RecursiveReductionMetrics> recursive{};
+    // Present only for the paper-informed ITIS17 adaptations.
+    std::optional<A43ReductionMetrics> itis17_a43{};
+    std::optional<A44ReductionMetrics> itis17_a44{};
 };
 
 using HullReductionResult = std::variant<HullReduction, Diagnostics>;
@@ -132,6 +153,19 @@ HullReductionResult reduce_hull(const PointCloud&, LPWorkspace&,
 // candidate order, then runs the same certified LP reduction over original IDs.
 HullReductionResult reduce_ordered_hull(const PointCloud&, LPWorkspace&,
                                         const ExecutionContext&);
+
+// Paper-informed safe adaptation of A43: it uses the existing certified
+// Phase-I basis-reuse strategy and completes with a full membership recheck.
+// It does not implement the paper's per-candidate artificial-basis sequence or
+// largest-norm pivot tie rule.
+HullReductionResult reduce_itis17_a43_hull(const PointCloud&, LPWorkspace&,
+                                           const ExecutionContext&);
+
+// Paper-informed A44 incremental LP membership with the ambiguous ordering
+// interpreted as farthest-first normalized Chebyshev distance. A complete LP
+// recheck follows the incremental pass.
+HullReductionResult reduce_itis17_a44_hull(const PointCloud&, LPWorkspace&,
+                                           const ExecutionContext&);
 
 // Streams candidates in the archived Constrained QLPHULL signed max-absolute
 // box order; after ten certified redundant outcomes, filters the remainder
@@ -167,5 +201,7 @@ make_recursive_hull_reducer_registration(registry::Registration<registry::LPPort
 // behind HullReducerPort. The LP workspace remains a separate dependency.
 registry::Registration<registry::HullReducerPort> make_lp_hull_reducer_registration();
 registry::Registration<registry::HullReducerPort> make_ordered_hull_reducer_registration();
+registry::Registration<registry::HullReducerPort> make_itis17_a43_hull_reducer_registration();
+registry::Registration<registry::HullReducerPort> make_itis17_a44_hull_reducer_registration();
 registry::Registration<registry::HullReducerPort> make_grouped_hull_reducer_registration();
 } // namespace csl::geometry
