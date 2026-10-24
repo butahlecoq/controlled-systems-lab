@@ -1,4 +1,5 @@
 #include <csl/geometry/generator_adapter.hpp>
+#include <csl/execution/instrumented_operation.hpp>
 
 #include <csl/geometry/generators.hpp>
 #include <csl/numeric/data.hpp>
@@ -10,6 +11,37 @@
 
 namespace csl::geometry::generators {
 namespace {
+namespace ar=csl::artifacts;
+namespace ob=csl::execution::observability;
+template<class Outcome> Termination operation_termination(const Outcome& outcome) noexcept {
+    if(std::holds_alternative<Unsupported>(outcome))return Termination::operation_rejected;
+    if(const auto* stop=std::get_if<OperationStopped>(&outcome)) {
+        switch(stop->reason) {
+        case StopReason::cancelled:case StopReason::deadline_expired:return Termination::cancelled;
+        case StopReason::resource_limit:return Termination::resource_limit;
+        case StopReason::numerical_failure:return Termination::numerical_failure;
+        }
+        return Termination::numerical_failure;
+    }
+    return Termination::completed;
+}
+ar::ModuleIdentity module_identity(ModuleId id,std::string version) {
+    return {std::move(id),std::move(version),ar::Unavailable{ar::MissingReason::not_instrumented,{}}};
+}
+std::string_view operation_name(const GeometryOperation& operation) noexcept {
+    if(std::holds_alternative<AffineImage>(operation))return "geometry.generators.affine-image";
+    if(std::holds_alternative<MinkowskiSum>(operation))return "geometry.generators.minkowski-sum";
+    if(std::holds_alternative<DependentSum>(operation))return "geometry.generators.dependent-sum";
+    return "geometry.generators.unsupported";
+}
+ob::OperationSpanIdentity operation_identity(const OperationRequest& request) {
+    return {request.identity.request.value,operation_name(request.operation),
+        module_identity({"csl.geometry.generators.operations"},"1.1.0"),{},{},{},{}};
+}
+ob::OperationSpanIdentity conversion_identity(const ConversionRequest& request) {
+    return {request.identity.request.value,"geometry.generators.v-conversion",
+        module_identity({"csl.geometry.generators.v-conversion"},"1.0.0"),{},{},{},{}};
+}
 Diagnostics unsupported(std::string field,std::string reason,
         DiagnosticCode code=DiagnosticCode::unsupported) {
     return {{code,std::move(field),std::move(reason)}};
@@ -19,8 +51,10 @@ bool stopped(const ExecutionContext& context) {
         (context.deadline && std::chrono::steady_clock::now()>=*context.deadline);
 }
 OperationStopped stop(const ExecutionContext& context) {
-    return {context.cancellation.stop_requested() ? StopReason::cancelled : StopReason::resource_limit,
-        "Generator operation stopped before or during binary64 materialization."};
+    const auto reason=context.cancellation.stop_requested() ? StopReason::cancelled :
+        (context.deadline && std::chrono::steady_clock::now()>=*context.deadline
+            ? StopReason::deadline_expired : StopReason::resource_limit);
+    return {reason,"Generator operation stopped before or during binary64 materialization."};
 }
 std::variant<sets::GeneratorSet,Diagnostics> imported(const SetHandle& handle) {
     return sets::from_generator_handle(handle);
@@ -106,6 +140,7 @@ class OperationWorkspace final : public SetOperatorWorkspace {
 public:
     explicit OperationWorkspace(OperationRequest request):request_(std::move(request)) {}
     OperationOutcome apply(const OperationRequest&,const ExecutionContext& context) override {
+        return ob::run_instrumented_operation(context,operation_identity(request_),[&]() -> OperationOutcome {
         if(stopped(context)) return stop(context);
         sets::GeneratorResult result=Diagnostics{};
         std::vector<SetId> inputs;
@@ -137,6 +172,7 @@ public:
         if(auto errors=check_geometry_evidence(proof,request_);!errors.empty()) return Unsupported{std::move(errors)};
         return OperationResult{std::get<sets::GeneratorSet>(std::move(result)).as_handle(),
             SetRelation::equivalent,std::move(proof)};
+        },operation_termination<OperationOutcome>);
     }
 };
 
@@ -184,6 +220,7 @@ public:
     ConversionWorkspace(ConversionRequest request,std::size_t max_vertices)
         :request_(std::move(request)),max_vertices_(max_vertices) {}
     SetTransformOutcome convert(const ConversionRequest&,const ExecutionContext& context) override {
+        return ob::run_instrumented_operation(context,conversion_identity(request_),[&]() -> SetTransformOutcome {
         if(stopped(context)) return stop(context);
         auto input=imported(request_.input);
         if(const auto* errors=std::get_if<Diagnostics>(&input)) return Unsupported{*errors};
@@ -220,6 +257,7 @@ public:
         if(auto errors=check_geometry_evidence(proof,request_);!errors.empty()) return Unsupported{std::move(errors)};
         return OperationResult{std::get<sets::SetData>(std::move(output)).as_handle(),
             SetRelation::equivalent,std::move(proof)};
+        },operation_termination<SetTransformOutcome>);
     }
 };
 } // namespace

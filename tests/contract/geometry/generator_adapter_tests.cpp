@@ -2,9 +2,12 @@
 #include <doctest/doctest.h>
 
 #include <csl/geometry/generator_adapter.hpp>
+#include <csl/execution/timing_collector.hpp>
 #include <csl/registry/provider.hpp>
 #include <csl/sets/generator_sets.hpp>
 #include <algorithm>
+#include <chrono>
+#include <limits>
 #include <set>
 #include <tuple>
 #include <utility>
@@ -13,6 +16,54 @@ using namespace csl;
 
 namespace {
 class FutureRepresentationPayload final : public SetPayload {};
+class GeneratorTimingClock final:public execution::observability::TimingClock {
+    std::int64_t tick_{};
+public:
+    artifacts::ClockDomain wall_domain() const override {
+        return {{"wall"},artifacts::ClockMetric::steady_wall,"run",1,1000,
+            artifacts::Available<std::uint64_t>{1},"generator-adapter-test"};
+    }
+    std::optional<artifacts::ClockDomain> cpu_domain() const override{return {};}
+    artifacts::Metric<std::int64_t> wall_now() noexcept override {
+        const auto value=tick_;tick_+=10;return artifacts::Available<std::int64_t>{value};
+    }
+    artifacts::Metric<std::int64_t> cpu_now() noexcept override {
+        return artifacts::Unavailable{artifacts::MissingReason::not_supported,{}};
+    }
+};
+template<class T> T artifact(artifacts::ArtifactResult<T> value) {
+    REQUIRE(std::holds_alternative<T>(value));return std::get<T>(std::move(value));
+}
+std::shared_ptr<execution::observability::TimingCollector> generator_timer(
+        const problem::ResolvedProblem& problem,std::string task,std::string operation,
+        artifacts::ModuleIdentity module) {
+    namespace ar=artifacts;
+    namespace ob=execution::observability;
+    const ar::Unavailable missing{ar::MissingReason::not_instrumented,{}};
+    ar::ConfigurationInput configuration;
+    configuration.collection={true,ar::CollectionMode::detail,4,2048,4,1024};
+    configuration.modules={{"geometry",module,{}},{"strategy",{{"csl.test.strategy"},"1",missing},{}}};
+    configuration.resources={1,1,1,{}};configuration.numerical={1e-8,1e-8};
+    configuration.output={ar::OutputKind::program,Assurance::numerical,
+        FamilyTarget::candidate_relaxation,{"csl.polyhedron.v"},{1,0,{},{}}};
+    configuration.selector={{"test.selector"},"1",{}};
+    configuration.strategy={{"csl.test.strategy"},{},{},{},module.id,{},{},
+        {"test.selector"},{"csl.polyhedron.v"}};
+    const auto resolved_configuration=artifact(ar::resolve_configuration(std::move(configuration)));
+    const ar::ClockDomain clock{{"wall"},ar::ClockMetric::steady_wall,"run",1,1000,
+        ar::Available<std::uint64_t>{1},"generator-adapter-test"};
+    ob::PlanInput input{problem,resolved_configuration,{"generator-test-run"},{clock},{},1};
+    input.tasks={"generator-test-run",task};input.operations={"operation.run",operation};
+    ar::SpanDescriptor root{};root.id={0};root.task="generator-test-run";root.operation="operation.run";
+    root.module=resolved_configuration.description().modules.back().implementation;root.clock={"wall"};
+    root.requested_assurance=Assurance::numerical;root.applied_assurance=ar::Available<Assurance>{Assurance::numerical};
+    ar::SpanDescriptor span{};span.id={1};span.parent=ar::SpanParent{{0},ar::ParentKind::nested};
+    span.task=std::move(task);span.operation=std::move(operation);span.module=module;span.clock={"wall"};
+    span.requested_assurance=Assurance::numerical;span.applied_assurance=ar::Available<Assurance>{Assurance::numerical};
+    span.observation_source="src/geometry/generators/adapter.cpp";input.spans={std::move(root),std::move(span)};
+    const auto plan=artifact(ob::make_collection_plan(std::move(input)));
+    return artifact(ob::make_timing_collector(plan,std::make_shared<GeneratorTimingClock>(),{0},{}));
+}
 template<class T,class... Alternatives> T take(std::variant<T,Alternatives...> result) {
     REQUIRE(std::holds_alternative<T>(result));
     return std::get<T>(std::move(result));
@@ -92,6 +143,139 @@ TEST_CASE("prepared generator geometry preserves box factors and independent sum
     for (double x:Vector{2,10}) CHECK_FALSE(physical_sum_h(x));
     CHECK(sum.center()[0]-sum.generators().values[0]-sum.generators().values[1]==3);
     CHECK(sum.center()[0]+sum.generators().values[0]+sum.generators().values[1]==9);
+}
+
+TEST_CASE("generator operation records its registered module span without changing the result") {
+    namespace ar=artifacts;
+    namespace ob=execution::observability;
+    Problem source{{"generator-observability"},std::make_shared<const SystemModel>(SystemModel{{
+        {0,0,0},TimeDomain::discrete,LinearStage{{0,0,{}},{0,0,{}},{0,0,{}},{}}},{}}),{0},
+        KnownInitial{{}},ContinuousDomain{{}},{UniversalSet{0}},{},{},
+        InformationPattern::nominal_open_loop,LinearTerminal{{},0}};
+    auto resolved_result=problem::resolve(source,{problem::UncertaintyStructure::stage_product_uncoupled});
+    REQUIRE(std::holds_alternative<problem::ResolvedProblem>(resolved_result));
+    const auto resolved=std::get<problem::ResolvedProblem>(std::move(resolved_result));
+    const ar::Unavailable missing{ar::MissingReason::not_instrumented,{}};
+    const ar::ModuleIdentity implementation{{"csl.geometry.generators.operations"},"1.1.0",missing};
+    auto timer=generator_timer(resolved,"observed-image","geometry.generators.affine-image",implementation);
+    ExecutionContext context;context.run_id="generator-test-run";context.numerical={1e-8,1e-8};context.timing=timer;
+    auto root=artifact(timer->start({0},context));
+
+    auto selected=provider(geometry::generators::make_operation_registration(),{"csl.zonotope"});
+    const auto input=generator("timed-box",{1},{1,1,{2}},{{"factor"}},{0,1,{}},{});
+    const OperationRequest request{{resolved.identity(),{"observed-image"},{"image-result"}},
+        {"csl.geometry.generators.operations"},AffineImage{input.as_handle(),{1,1,{3}},{4}},
+        SetRelation::equivalent,Assurance::numerical};
+    auto prepared=take(selected.prepare(request));auto [workspace]=prepared.create();
+    const auto outcome=workspace->run(context);
+    REQUIRE(std::holds_alternative<OperationResult>(outcome));
+    CHECK(std::get<OperationResult>(outcome).relation==SetRelation::equivalent);
+    const auto output=take(sets::from_generator_handle(std::get<OperationResult>(outcome).output));
+    CHECK(output.center()==Vector{7});
+    root.close(Termination::completed);
+
+    const auto report=artifact(timer->snapshot());
+    REQUIRE(report.spans.size()==2);
+    REQUIRE(std::holds_alternative<ar::Available<std::uint64_t>>(report.spans[1].inclusive_wall_ticks));
+    CHECK(std::get<ar::Available<std::uint64_t>>(report.spans[1].inclusive_wall_ticks).value==10);
+    const auto& descriptor=report.observations.description().spans[1].descriptor;
+    CHECK(descriptor.task=="observed-image");CHECK(descriptor.operation=="geometry.generators.affine-image");
+    CHECK(descriptor.module.id==implementation.id);CHECK_FALSE(descriptor.backend);
+    REQUIRE(std::holds_alternative<ar::ReturnedSpan>(report.observations.description().spans[1].status));
+    CHECK(std::get<ar::ReturnedSpan>(report.observations.description().spans[1].status).termination==Termination::completed);
+}
+
+TEST_CASE("generator V conversion records its registered module span") {
+    namespace ar=artifacts;
+    namespace ob=execution::observability;
+    Problem source{{"generator-conversion-observability"},std::make_shared<const SystemModel>(SystemModel{{
+        {0,0,0},TimeDomain::discrete,LinearStage{{0,0,{}},{0,0,{}},{0,0,{}},{}}},{}}),{0},
+        KnownInitial{{}},ContinuousDomain{{}},{UniversalSet{0}},{},{},
+        InformationPattern::nominal_open_loop,LinearTerminal{{},0}};
+    auto resolved_result=problem::resolve(source,{problem::UncertaintyStructure::stage_product_uncoupled});
+    REQUIRE(std::holds_alternative<problem::ResolvedProblem>(resolved_result));
+    const auto resolved=std::get<problem::ResolvedProblem>(std::move(resolved_result));
+    const ar::Unavailable missing{ar::MissingReason::not_instrumented,{}};
+    const ar::ModuleIdentity implementation{{"csl.geometry.generators.v-conversion"},"1.0.0",missing};
+    auto timer=generator_timer(resolved,"observed-v-conversion","geometry.generators.v-conversion",implementation);
+    ExecutionContext context;context.run_id="generator-test-run";context.numerical={1e-8,1e-8};context.timing=timer;
+    auto root=artifact(timer->start({0},context));
+
+    auto selected=provider(geometry::generators::make_v_conversion_registration(4),{"csl.polyhedron.v"});
+    const auto input=generator("timed-box",{1},{1,1,{2}},{{"factor"}},{0,1,{}},{});
+    const ConversionRequest request{{resolved.identity(),{"observed-v-conversion"},{"v-result"}},
+        input.as_handle(),{"csl.polyhedron.v"},Assurance::numerical};
+    auto prepared=take(selected.prepare(request));auto [workspace]=prepared.create();
+    const auto outcome=workspace->run(context);
+    REQUIRE(std::holds_alternative<OperationResult>(outcome));
+    const auto output=take(sets::from_handle(std::get<OperationResult>(outcome).output));
+    const auto representation=output.representation();
+    REQUIRE(std::holds_alternative<sets::VRepresentation>(representation));
+    CHECK(std::get<sets::VRepresentation>(representation).vertices.rows()==2);
+    root.close(Termination::completed);
+
+    const auto report=artifact(timer->snapshot());
+    REQUIRE(report.spans.size()==2);
+    REQUIRE(std::holds_alternative<ar::Available<std::uint64_t>>(report.spans[1].inclusive_wall_ticks));
+    CHECK(std::get<ar::Available<std::uint64_t>>(report.spans[1].inclusive_wall_ticks).value==10);
+    const auto& descriptor=report.observations.description().spans[1].descriptor;
+    CHECK(descriptor.task=="observed-v-conversion");CHECK(descriptor.operation=="geometry.generators.v-conversion");
+    CHECK(descriptor.module.id==implementation.id);
+    REQUIRE(std::holds_alternative<ar::ReturnedSpan>(report.observations.description().spans[1].status));
+    CHECK(std::get<ar::ReturnedSpan>(report.observations.description().spans[1].status).termination==Termination::completed);
+}
+
+TEST_CASE("generator operation timing retains rejection and deadline outcomes") {
+    namespace ar=artifacts;
+    namespace ob=execution::observability;
+    Problem source{{"generator-operation-outcomes"},std::make_shared<const SystemModel>(SystemModel{{
+        {0,0,0},TimeDomain::discrete,LinearStage{{0,0,{}},{0,0,{}},{0,0,{}},{}}},{}}),{0},
+        KnownInitial{{}},ContinuousDomain{{}},{UniversalSet{0}},{},{},
+        InformationPattern::nominal_open_loop,LinearTerminal{{},0}};
+    auto resolved_result=problem::resolve(source,{problem::UncertaintyStructure::stage_product_uncoupled});
+    REQUIRE(std::holds_alternative<problem::ResolvedProblem>(resolved_result));
+    const auto resolved=std::get<problem::ResolvedProblem>(std::move(resolved_result));
+    const ar::Unavailable missing{ar::MissingReason::not_instrumented,{}};
+    const ar::ModuleIdentity implementation{{"csl.geometry.generators.operations"},"1.1.0",missing};
+    const auto input=generator("overflow-box",{0},{1,1,{2}},{{"factor"}},{0,1,{}},{});
+    auto selected=provider(geometry::generators::make_operation_registration(),{"csl.zonotope"});
+
+    auto rejected_timer=generator_timer(resolved,"rejected-image","geometry.generators.affine-image",implementation);
+    ExecutionContext rejected_context;rejected_context.run_id="generator-test-run";
+    rejected_context.numerical={1e-8,1e-8};rejected_context.timing=rejected_timer;
+    auto rejected_root=artifact(rejected_timer->start({0},rejected_context));
+    const OperationRequest rejected_request{{resolved.identity(),{"rejected-image"},{"overflow-result"}},
+        {"csl.geometry.generators.operations"},
+        AffineImage{input.as_handle(),{1,1,{std::numeric_limits<double>::max()}},{0}},
+        SetRelation::equivalent,Assurance::numerical};
+    auto rejected_prepared=take(selected.prepare(rejected_request));auto [rejected_workspace]=rejected_prepared.create();
+    const auto rejected=rejected_workspace->run(rejected_context);
+    REQUIRE(std::holds_alternative<Unsupported>(rejected));
+    rejected_root.close(Termination::completed);
+    const auto rejected_report=artifact(rejected_timer->snapshot());
+    REQUIRE(rejected_report.spans.size()==2);
+    REQUIRE(std::holds_alternative<ar::ReturnedSpan>(rejected_report.observations.description().spans[1].status));
+    CHECK(std::get<ar::ReturnedSpan>(rejected_report.observations.description().spans[1].status).termination==
+        Termination::operation_rejected);
+
+    auto deadline_timer=generator_timer(resolved,"deadline-image","geometry.generators.affine-image",implementation);
+    ExecutionContext deadline_context;deadline_context.run_id="generator-test-run";
+    deadline_context.numerical={1e-8,1e-8};deadline_context.timing=deadline_timer;
+    deadline_context.deadline=std::chrono::steady_clock::now()-std::chrono::milliseconds(1);
+    auto deadline_root=artifact(deadline_timer->start({0},deadline_context));
+    const OperationRequest deadline_request{{resolved.identity(),{"deadline-image"},{"deadline-result"}},
+        {"csl.geometry.generators.operations"},AffineImage{input.as_handle(),{1,1,{1}},{0}},
+        SetRelation::equivalent,Assurance::numerical};
+    auto deadline_prepared=take(selected.prepare(deadline_request));auto [deadline_workspace]=deadline_prepared.create();
+    const auto stopped=deadline_workspace->run(deadline_context);
+    REQUIRE(std::holds_alternative<OperationStopped>(stopped));
+    CHECK(std::get<OperationStopped>(stopped).reason==StopReason::deadline_expired);
+    deadline_root.close(Termination::completed);
+    const auto deadline_report=artifact(deadline_timer->snapshot());
+    REQUIRE(deadline_report.spans.size()==2);
+    REQUIRE(std::holds_alternative<ar::ReturnedSpan>(deadline_report.observations.description().spans[1].status));
+    CHECK(std::get<ar::ReturnedSpan>(deadline_report.observations.description().spans[1].status).termination==
+        Termination::cancelled);
 }
 
 TEST_CASE("generator geometry keeps equalities and rejects dependent Minkowski aliasing") {

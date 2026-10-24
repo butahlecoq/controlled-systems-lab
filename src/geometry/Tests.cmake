@@ -123,7 +123,7 @@ add_test(NAME generator_sets_test COMMAND generator_sets_test)
 csl_test_target(generator_sets_test geometry)
 
 add_executable(generator_adapter_tests tests/contract/geometry/generator_adapter_tests.cpp)
-target_link_libraries(generator_adapter_tests PRIVATE CSL::generator_adapter doctest::doctest)
+target_link_libraries(generator_adapter_tests PRIVATE CSL::generator_adapter CSL::artifacts doctest::doctest)
 add_test(NAME generator_adapter_tests COMMAND generator_adapter_tests)
 csl_test_target(generator_adapter_tests geometry)
 
