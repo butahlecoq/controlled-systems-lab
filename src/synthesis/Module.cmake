@@ -2,7 +2,7 @@
 
 csl_add_library(csl_terminal_minimizers STATIC src/synthesis/terminal_minimizers.cpp)
 
-target_link_libraries(csl_terminal_minimizers PUBLIC CSL::sets CSL::registry CSL::convex CSL::problem CSL::artifacts)
+target_link_libraries(csl_terminal_minimizers PUBLIC CSL::sets CSL::registry CSL::convex CSL::problem PRIVATE CSL::artifacts)
 
 csl_add_library(csl_control_recovery STATIC src/synthesis/control_recovery.cpp)
 
