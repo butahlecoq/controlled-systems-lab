@@ -24,6 +24,7 @@ file(COPY "${CSL_SOURCE_DIR}/tests/installed/lazy_geometry_client.cpp" DESTINATI
 file(COPY "${CSL_SOURCE_DIR}/tests/installed/zonotope_reduction_client.cpp" DESTINATION "${work}/source")
 file(COPY "${CSL_SOURCE_DIR}/tests/installed/finite_feedback_client.cpp" DESTINATION "${work}/source")
 file(COPY "${CSL_SOURCE_DIR}/tests/installed/finite_action_minimax_client.cpp" DESTINATION "${work}/source")
+file(COPY "${CSL_SOURCE_DIR}/tests/installed/finite_action_histories_client.cpp" DESTINATION "${work}/source")
 file(COPY "${CSL_SOURCE_DIR}/tests/installed/validated_finite_action_minimax_client.cpp" DESTINATION "${work}/source")
 file(COPY "${CSL_SOURCE_DIR}/tests/installed/validated_finite_action_minimax_port_client.cpp" DESTINATION "${work}/source")
 file(COPY "${CSL_SOURCE_DIR}/tests/installed/problem_client.cpp" DESTINATION "${work}/source")

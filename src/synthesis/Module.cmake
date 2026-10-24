@@ -42,4 +42,9 @@ csl_add_library(csl_hybrid_path_program STATIC
 
 target_link_libraries(csl_hybrid_path_program PUBLIC CSL::model CSL::sets CSL::optimization CSL::convex CSL::registry CSL::polyhedral)
 
+csl_add_library(csl_finite_action_histories STATIC src/synthesis/finite_search/action_histories.cpp)
+target_link_libraries(csl_finite_action_histories PUBLIC CSL::problem)
+install(FILES docs/contracts/finite-action-histories.md
+  DESTINATION ${CMAKE_INSTALL_DATADIR}/CSL/docs/contracts)
+
 csl_install_headers(synthesis)

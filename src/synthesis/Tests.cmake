@@ -39,6 +39,11 @@ target_link_libraries(control_recovery_tests PRIVATE CSL::control_recovery docte
 add_test(NAME control_recovery_tests COMMAND control_recovery_tests)
 csl_test_target(control_recovery_tests synthesis)
 
+add_executable(finite_action_histories_tests tests/unit/synthesis/finite_action_histories_tests.cpp)
+target_link_libraries(finite_action_histories_tests PRIVATE CSL::finite_action_histories doctest::doctest)
+add_test(NAME finite_action_histories_tests COMMAND finite_action_histories_tests)
+csl_test_target(finite_action_histories_tests synthesis)
+
 add_executable(control_recovery_public_client tests/installed/control_recovery_client.cpp)
 target_link_libraries(control_recovery_public_client PRIVATE CSL::control_recovery)
 add_test(NAME control_recovery_public_client COMMAND control_recovery_public_client)
