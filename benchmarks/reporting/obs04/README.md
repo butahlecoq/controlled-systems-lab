@@ -38,3 +38,23 @@ The output does not include process startup, parsing, artifact serialization,
 rendering, or the separate verification/selection path. No correctness or
 performance conclusion should be based on a timing row whose status is not
 `passed` and whose complete-family oracle is not true.
+
+## Captured analytic sample
+
+`results/linux-gcc16-20261024.jsonl` records a run from commit
+`8c1960dd6c02794cd4cb7909fe1c11dd675bb0b3`, with its environment and binary
+hash in the adjacent `.environment.txt` file. All 32 events passed (four
+warmups and 28 measured attempts). The measured `strategy_run_ns` medians and
+ranges were:
+
+| Strategy | Collection | Median (ns) | Range (ns) |
+| --- | --- | ---: | ---: |
+| reach-back | disabled | 4,863,610 | 4,750,954–5,299,216 |
+| reach-back | enabled | 7,964,329 | 7,805,787–8,244,886 |
+| direct-joint | disabled | 806,330 | 756,741–823,721 |
+| direct-joint | enabled | 962,078 | 918,846–1,107,141 |
+
+This sample is descriptive and inconclusive. `perf` was unavailable, so it has
+no limiter profile, and the tiny analytic fixture does not represent application
+workloads. It supports no general instrumentation overhead or strategy winner
+claim.
