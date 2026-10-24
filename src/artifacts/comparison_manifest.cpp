@@ -58,6 +58,17 @@ AttemptStatus parse_status(const std::string& value) {
     if (value == "incomplete") return AttemptStatus::incomplete;
     throw std::invalid_argument("Unknown attempt status");
 }
+bool measurement_status_matches(AttemptStatus status, const Json& measurement) {
+    if (!measurement.is_object() || !measurement.contains("status") || !measurement.at("status").is_string())
+        return false;
+    const auto value=measurement.at("status").get<std::string>();
+    if(value=="passed")return status==AttemptStatus::completed;
+    if(value=="failed")return status==AttemptStatus::failed;
+    if(value=="unsupported")return status==AttemptStatus::unsupported;
+    if(value=="cancelled")return status==AttemptStatus::cancelled;
+    if(value=="resource_limited")return status==AttemptStatus::resource_limited;
+    return value=="incomplete"&&status==AttemptStatus::incomplete;
+}
 bool status_matches(AttemptStatus status, const Json& run) {
     const auto& final=run.at("final");
     const auto kind=final.at("kind").get<std::string>();
@@ -89,6 +100,7 @@ ArtifactResult<problem::ResolvedContent> own(std::string_view text);
 Json common_request(const Json& run) {
     auto request=run.at("configuration").at("value");
     request.erase("modules");
+    request.at("collection").erase("enabled");
     const auto strategy=request.at("strategy");
     request["strategy"]={{"selector",strategy.at("selector")},{"representation",strategy.at("representation")}};
     return request;
@@ -99,11 +111,23 @@ problem::ContentDigest request_digest(const Json& run) {
     if(const auto* value=std::get_if<problem::ResolvedContent>(&content))return value->digest();
     throw std::bad_alloc();
 }
-std::pair<std::uint32_t,std::uint32_t> validate_spec(const Json& spec) {
-    if (!spec.is_object() || spec.size()!=5 || spec.value("schema",std::string{})!="csl.comparison-spec/1" ||
-        !spec.contains("problem_id") || !spec.contains("request_digest") ||
-        !spec.contains("strategies") || !spec.contains("repetitions"))
+struct SpecShape {
+    bool record_v1{};
+    std::vector<std::string> configurations;
+    std::vector<std::string> strategies;
+    std::vector<std::string> instrumentation;
+    std::uint32_t repetitions{};
+};
+SpecShape validate_spec(const Json& spec) {
+    if (!spec.is_object() || !spec.contains("problem_id") || !spec.contains("request_digest") ||
+        !spec.contains("repetitions"))
         throw std::invalid_argument("Comparison spec fields do not match schema");
+    const auto schema=spec.value("schema",std::string{});
+    const bool legacy=schema=="csl.comparison-spec/1"&&spec.size()==5&&spec.contains("strategies");
+    const bool record=schema=="csl.comparison-spec/2"&&spec.size()==7&&spec.contains("arms")&&
+        spec.contains("input_manifest_hash")&&spec.contains("input_manifest_source")&&
+        spec.at("input_manifest_source")=="resolved-problem-canonical-bytes";
+    if(!legacy&&!record)throw std::invalid_argument("Comparison spec fields do not match supported schema");
     const auto valid_digest=[](const Json& value){
         if(!value.is_string())return false;
         const auto& text=value.get_ref<const std::string&>();
@@ -118,15 +142,60 @@ std::pair<std::uint32_t,std::uint32_t> validate_spec(const Json& spec) {
             std::all_of(text.begin()+static_cast<std::ptrdiff_t>(prefix.size()),text.end(),
                 [](unsigned char c){return (c>='0'&&c<='9')||(c>='a'&&c<='f');});
     };
-    if(!spec.at("problem_id").is_string()||spec.at("problem_id").get<std::string>().empty()||!valid_digest(spec.at("request_digest")))
+    if(!spec.at("problem_id").is_string()||spec.at("problem_id").get<std::string>().empty()||!valid_digest(spec.at("request_digest"))||
+        (record&&!valid_digest(spec.at("input_manifest_hash"))))
         throw std::invalid_argument("Comparison spec digest is malformed");
-    const auto& strategies=spec.at("strategies");
-    if(!strategies.is_array()||strategies.empty()||strategies.size()>std::numeric_limits<std::uint32_t>::max())
-        throw std::invalid_argument("Comparison spec strategy list is invalid");
-    for(const auto& strategy:strategies)if(!valid_config_id(strategy))throw std::invalid_argument("Strategy configuration identity is malformed");
+    if(record) {
+        if(spec.at("input_manifest_source")!="resolved-problem-canonical-bytes")
+            throw std::invalid_argument("Comparison input manifest source is unsupported");
+        constexpr std::string_view prefix="csl.problem.v1.sha256:";
+        const auto& problem_id=spec.at("problem_id").get_ref<const std::string&>();
+        if(!problem_id.starts_with(prefix)||problem_id.substr(prefix.size())!=
+            spec.at("input_manifest_hash").get<std::string>())
+            throw std::invalid_argument("Comparison input manifest hash does not match the problem identity");
+    }
+    const auto& arms=spec.at(legacy?"strategies":"arms");
+    if(!arms.is_array()||arms.empty()||arms.size()>std::numeric_limits<std::uint32_t>::max())
+        throw std::invalid_argument("Comparison spec arm list is invalid");
+    std::vector<std::string> configurations;
+    std::vector<std::string> strategies;
+    std::vector<std::string> instrumentation;
+    for(const auto& arm:arms) {
+        const Json* config=nullptr;
+        if(legacy) config=&arm;
+        else {
+            if(!arm.is_object()||arm.size()!=3||!arm.contains("configuration_id")||
+                !arm.contains("strategy")||!arm.contains("instrumentation")||
+                !arm.at("strategy").is_string()||arm.at("strategy").get<std::string>().empty()||
+                !arm.at("instrumentation").is_string()||
+                (arm.at("instrumentation")!="enabled"&&arm.at("instrumentation")!="disabled"))
+                throw std::invalid_argument("Comparison spec arm fields are invalid");
+            config=&arm.at("configuration_id");
+            strategies.push_back(arm.at("strategy").get<std::string>());
+            instrumentation.push_back(arm.at("instrumentation").get<std::string>());
+        }
+        if(!valid_config_id(*config))throw std::invalid_argument("Strategy configuration identity is malformed");
+        configurations.push_back(config->get<std::string>());
+    }
     const auto repetitions=spec.at("repetitions").get<std::uint32_t>();
     if(repetitions==0)throw std::invalid_argument("Repetition count must be positive");
-    return {static_cast<std::uint32_t>(strategies.size()),repetitions};
+    return {record,std::move(configurations),std::move(strategies),std::move(instrumentation),repetitions};
+}
+bool arm_matches_run(const Json& run,const SpecShape& spec,std::size_t arm) {
+    if(spec.strategies.empty())return true;
+    const auto& config=run.at("configuration").at("value");
+    return config.at("strategy").at("strategy")==spec.strategies.at(arm) &&
+        config.at("collection").at("enabled").get<bool>()==(spec.instrumentation.at(arm)=="enabled");
+}
+bool measurement_matches_arm(AttemptStatus status,const Json& measurement,const SpecShape& spec,
+    std::size_t arm,std::uint32_t repetition) {
+    if(!measurement_status_matches(status,measurement))return false;
+    if(spec.strategies.empty())return true;
+    return measurement.value("schema",std::string{})=="csl.obs04-instrumentation-comparison-event/2" &&
+        measurement.at("strategy")==spec.strategies.at(arm) &&
+        measurement.at("instrumentation")==spec.instrumentation.at(arm) &&
+        measurement.at("repetition").get<std::uint32_t>()==repetition &&
+        measurement.at("warmup").get<bool>()==(repetition==0);
 }
 ArtifactResult<problem::ResolvedContent> own(std::string_view text) {
     std::vector<std::byte> bytes; bytes.reserve(text.size());
@@ -148,7 +217,9 @@ ArtifactResult<RecordedComparisonArtifact> encode_recorded_comparison(
         std::uint64_t payload_bytes=spec.bytes().size();
         auto spec_json = parse_bounded(spec_text, validation_limits);
         if (spec_json.dump() != spec_text) return error(ArtifactErrorCode::invalid_input, "spec", "Spec must be canonical JSON");
-        const auto [strategy_count,repetition_count]=validate_spec(spec_json);
+        const auto spec_shape=validate_spec(spec_json);
+        const auto strategy_count=static_cast<std::uint32_t>(spec_shape.configurations.size());
+        const auto repetition_count=spec_shape.repetitions;
         if (attempts.size()!=static_cast<std::uint64_t>(strategy_count)*repetition_count)
             return error(ArtifactErrorCode::invalid_input,"attempts","Attempt set is incomplete for the declared strategy and repetition counts");
         Json records = Json::array();
@@ -177,19 +248,56 @@ ArtifactResult<RecordedComparisonArtifact> encode_recorded_comparison(
                 attempt.run.content().digest() != attempt.reference.content_digest ||
                 run_json.at("problem").get<std::string>()!=spec_json.at("problem_id").get<std::string>() ||
                 run_json.at("configuration").at("id").get<std::string>()!=
-                    spec_json.at("strategies").at(attempt.strategy_index).get<std::string>() ||
+                    spec_shape.configurations.at(attempt.strategy_index) ||
                 problem::hex(request_digest(run_json))!=spec_json.at("request_digest").get<std::string>() ||
+                !arm_matches_run(run_json,spec_shape,attempt.strategy_index) ||
                 !status_matches(attempt.reported_status,run_json))
                 return error(ArtifactErrorCode::identity, "attempts[" + std::to_string(i) + "].reference", "Run reference identity or content digest mismatch");
-            records.push_back({{"strategy_index", attempt.strategy_index}, {"repetition_index", attempt.repetition_index},
-                {"reported_status", status_name(attempt.reported_status)}, {"run_id", attempt.reference.run.value},
-                {"run_digest", problem::hex(attempt.reference.content_digest)}, {"run", run_text}});
+            if(spec_shape.record_v1) {
+                if(attempt.measurement_payload.empty())
+                    return error(ArtifactErrorCode::invalid_input,"attempts["+std::to_string(i)+"].measurement_payload","A measurement payload is required by comparison-record/1");
+                if(attempt.measurement_payload.size()>limits.bytes-payload_bytes)
+                    return error(ArtifactErrorCode::limit,"attempts","Measurement payloads exceed byte budget");
+                payload_bytes+=attempt.measurement_payload.size();
+                const auto measurement=parse_bounded(attempt.measurement_payload,validation_limits);
+                if(!measurement_matches_arm(attempt.reported_status,measurement,spec_shape,
+                    attempt.strategy_index,attempt.repetition_index))
+                    return error(ArtifactErrorCode::identity,"attempts["+std::to_string(i)+"].measurement_payload.status","Measurement status disagrees with the run record");
+                records.push_back({{"arm_index", attempt.strategy_index}, {"repetition_index", attempt.repetition_index},
+                    {"reported_status", status_name(attempt.reported_status)}, {"run_id", attempt.reference.run.value},
+                    {"run_digest", problem::hex(attempt.reference.content_digest)}, {"run", run_text},
+                    {"measurement_payload",attempt.measurement_payload}});
+            } else {
+                if(!attempt.measurement_payload.empty())
+                    return error(ArtifactErrorCode::invalid_input,"attempts["+std::to_string(i)+"].measurement_payload","Legacy comparison artifacts cannot carry measurement payloads");
+                records.push_back({{"strategy_index", attempt.strategy_index}, {"repetition_index", attempt.repetition_index},
+                    {"reported_status", status_name(attempt.reported_status)}, {"run_id", attempt.reference.run.value},
+                    {"run_digest", problem::hex(attempt.reference.content_digest)}, {"run", run_text}});
+            }
         }
-        Json wire{{"schema", "csl.comparison/1"}, {"spec", spec_text}, {"spec_digest", problem::hex(spec.digest())}, {"attempts", records}};
+        problem::ContentDigest run_digest{};
+        Json wire;
+        if(spec_shape.record_v1) {
+            const auto spec_id=problem::hex(spec.digest());
+            const Json identity_material{{"attempts",records},{"comparison_spec_id",spec_id},
+                {"schema","csl.comparison-record/1"}};
+            const auto material=own(identity_material.dump());
+            if(const auto* failure=std::get_if<ArtifactError>(&material))return *failure;
+            run_digest=std::get<problem::ResolvedContent>(material).digest();
+            wire={{"schema","csl.comparison-record/1"},{"comparison_spec_id",spec_id},
+                {"comparison_run_id",problem::hex(run_digest)},{"spec",spec_text},{"attempts",records}};
+            wire["track"]="new-comparison";
+        } else {
+            wire={{"schema","csl.comparison/1"},{"spec",spec_text},
+                {"spec_digest",problem::hex(spec.digest())},{"attempts",records}};
+        }
         const auto text = wire.dump();
         if (text.size() > limits.bytes) return error(ArtifactErrorCode::limit, "comparison.bytes", "Encoded comparison exceeds byte limit");
         auto content = own(text);
-        if (auto* owned = std::get_if<problem::ResolvedContent>(&content)) return RecordedComparisonArtifact(*owned,{spec.digest()});
+        if (auto* owned = std::get_if<problem::ResolvedContent>(&content)) {
+            if(!spec_shape.record_v1)run_digest=owned->digest();
+            return RecordedComparisonArtifact(*owned,{spec.digest()},{run_digest});
+        }
         return std::get<ArtifactError>(std::move(content));
     } catch (const ArtifactError& failure) { return failure; }
       catch (const std::bad_alloc&) { return error(ArtifactErrorCode::allocation, "comparison", "Allocation failed"); }
@@ -202,17 +310,27 @@ ArtifactResult<RecordedComparisonArtifact> decode_recorded_comparison(std::strin
         auto outer_limits=limits; outer_limits.string_bytes=limits.bytes;
         auto wire = parse_bounded(text,outer_limits);
         if (wire.dump() != text) return error(ArtifactErrorCode::invalid_input, "comparison.canonical", "Comparison is not canonical JSON");
-        if (!wire.is_object() || wire.size() != 4 || !wire.contains("schema") || !wire.contains("spec") ||
-            !wire.contains("spec_digest") || !wire.contains("attempts"))
+        if (!wire.is_object() || !wire.contains("schema") || !wire.contains("spec") ||
+            !wire.contains("attempts"))
             return error(ArtifactErrorCode::invalid_input, "comparison.fields", "Comparison fields do not match schema");
-        if (wire.at("schema") != "csl.comparison/1") return error(ArtifactErrorCode::unsupported, "comparison.schema", "Unknown comparison schema");
+        const auto outer_schema=wire.at("schema").get<std::string>();
+        const bool record_v1=outer_schema=="csl.comparison-record/1";
+        if (!record_v1&&outer_schema!="csl.comparison/1") return error(ArtifactErrorCode::unsupported, "comparison.schema", "Unknown comparison schema");
+        if((record_v1&&(wire.size()!=6||!wire.contains("comparison_spec_id")||!wire.contains("comparison_run_id")||
+                !wire.contains("track")||wire.at("track")!="new-comparison"))||
+            (!record_v1&&(wire.size()!=4||!wire.contains("spec_digest"))))
+            return error(ArtifactErrorCode::invalid_input,"comparison.fields","Comparison identity fields do not match schema");
         const auto spec_text = wire.at("spec").get<std::string>();
         if (spec_text.size() > limits.string_bytes) return error(ArtifactErrorCode::limit, "comparison.spec", "Spec exceeds string capacity");
         auto spec = parse_bounded(spec_text,limits);
         if (spec.dump() != spec_text) return error(ArtifactErrorCode::invalid_input, "comparison.spec", "Spec is not canonical JSON");
-        const auto [strategy_count,repetition_count]=validate_spec(spec);
+        const auto spec_shape=validate_spec(spec);
+        if(record_v1!=spec_shape.record_v1)return error(ArtifactErrorCode::identity,"comparison.schema","Comparison and spec schemas disagree");
+        const auto strategy_count=static_cast<std::uint32_t>(spec_shape.configurations.size());
+        const auto repetition_count=spec_shape.repetitions;
         auto owned_spec = own(spec_text);
-        if (std::holds_alternative<ArtifactError>(owned_spec) || problem::hex(std::get<problem::ResolvedContent>(owned_spec).digest()) != wire.at("spec_digest").get<std::string>())
+        const auto spec_digest_field=record_v1?"comparison_spec_id":"spec_digest";
+        if (std::holds_alternative<ArtifactError>(owned_spec) || problem::hex(std::get<problem::ResolvedContent>(owned_spec).digest()) != wire.at(spec_digest_field).get<std::string>())
             return error(ArtifactErrorCode::identity, "comparison.spec_digest", "Spec digest mismatch");
         const auto& attempts = wire.at("attempts");
         if (!attempts.is_array() || attempts.empty()) return error(ArtifactErrorCode::invalid_input, "comparison.attempts", "At least one attempt is required");
@@ -223,11 +341,14 @@ ArtifactResult<RecordedComparisonArtifact> decode_recorded_comparison(std::strin
         std::optional<std::pair<std::uint32_t, std::uint32_t>> previous;
         for (std::size_t i = 0; i < attempts.size(); ++i) {
             const auto& item = attempts[i];
-            if (!item.is_object() || item.size() != 6 || !item.contains("strategy_index") ||
+            if (!item.is_object() || item.size() != (record_v1?7:6) ||
+                !(record_v1?item.contains("arm_index"):item.contains("strategy_index")) ||
                 !item.contains("repetition_index") || !item.contains("reported_status") ||
                 !item.contains("run_id") || !item.contains("run_digest") || !item.contains("run"))
                 return error(ArtifactErrorCode::invalid_input, "comparison.attempts", "Attempt fields do not match schema");
-            auto key = std::pair{item.at("strategy_index").get<std::uint32_t>(), item.at("repetition_index").get<std::uint32_t>()};
+            if(record_v1&&!item.contains("measurement_payload"))
+                return error(ArtifactErrorCode::invalid_input,"comparison.attempts","Comparison record attempt lacks measurement payload");
+            auto key = std::pair{item.at(record_v1?"arm_index":"strategy_index").get<std::uint32_t>(), item.at("repetition_index").get<std::uint32_t>()};
             if(key!=std::pair{static_cast<std::uint32_t>(i/repetition_count),static_cast<std::uint32_t>(i%repetition_count)})
                 return error(ArtifactErrorCode::invalid_input,"comparison.attempts","Attempts do not cover the complete ordered spec");
             if (previous && key <= *previous) return error(ArtifactErrorCode::invalid_input, "comparison.attempts", "Attempts are duplicated or out of order");
@@ -242,13 +363,35 @@ ArtifactResult<RecordedComparisonArtifact> decode_recorded_comparison(std::strin
                 problem::hex(content.digest())!=item.at("run_digest").get<std::string>() ||
                 run_json.at("problem").get<std::string>()!=spec.at("problem_id").get<std::string>() ||
                 run_json.at("configuration").at("id").get<std::string>()!=
-                    spec.at("strategies").at(key.first).get<std::string>() ||
+                    spec_shape.configurations.at(key.first) ||
                 problem::hex(request_digest(run_json))!=spec.at("request_digest").get<std::string>() ||
+                !arm_matches_run(run_json,spec_shape,key.first) ||
                 !status_matches(parse_status(item.at("reported_status").get<std::string>()),run_json))
                 return error(ArtifactErrorCode::identity,"comparison.attempts.reference","Run reference identity or digest mismatch");
+            if(record_v1) {
+                const auto measurement_text=item.at("measurement_payload").get<std::string>();
+                if(measurement_text.size()>limits.bytes||
+                    !measurement_matches_arm(parse_status(item.at("reported_status").get<std::string>()),
+                        parse_bounded(measurement_text,limits),spec_shape,key.first,key.second))
+                    return error(ArtifactErrorCode::identity,"comparison.attempts.measurement_payload","Measurement status disagrees with the run record");
+            }
+        }
+        problem::ContentDigest run_digest{};
+        if(record_v1) {
+            const Json identity_material{{"attempts",attempts},
+                {"comparison_spec_id",problem::hex(std::get<problem::ResolvedContent>(owned_spec).digest())},
+                {"schema","csl.comparison-record/1"}};
+            const auto material=own(identity_material.dump());
+            if(const auto* failure=std::get_if<ArtifactError>(&material))return *failure;
+            run_digest=std::get<problem::ResolvedContent>(material).digest();
+            if(problem::hex(run_digest)!=wire.at("comparison_run_id").get<std::string>())
+                return error(ArtifactErrorCode::identity,"comparison.comparison_run_id","Comparison run identity mismatch");
         }
         auto content = own(text);
-        if (auto* owned = std::get_if<problem::ResolvedContent>(&content)) return RecordedComparisonArtifact(*owned,{std::get<problem::ResolvedContent>(owned_spec).digest()});
+        if (auto* owned = std::get_if<problem::ResolvedContent>(&content)) {
+            if(!record_v1)run_digest=owned->digest();
+            return RecordedComparisonArtifact(*owned,{std::get<problem::ResolvedContent>(owned_spec).digest()},{run_digest});
+        }
         return std::get<ArtifactError>(std::move(content));
     } catch (const ArtifactError& failure) { return failure; }
       catch (const std::bad_alloc&) { return error(ArtifactErrorCode::allocation, "comparison", "Allocation failed"); }

@@ -2,6 +2,7 @@
 #include <csl/adapters/lp/highs.hpp>
 #include <csl/adapters/polyhedral/qhull.hpp>
 #include <csl/application/comparison.hpp>
+#include <csl/artifacts/comparison_manifest.hpp>
 #include <csl/execution/timing_collector.hpp>
 #include <csl/geometry/affine_sum.hpp>
 #include <csl/geometry/hull_reducer.hpp>
@@ -21,14 +22,18 @@
 #include <csignal>
 #include <cstring>
 #include <iostream>
+#include <fstream>
+#include <filesystem>
 #include <memory>
 #include <optional>
+#include <sstream>
 #include <stdexcept>
 #include <string>
 #include <string_view>
 #include <type_traits>
 #include <thread>
 #include <utility>
+#include <vector>
 
 #ifndef _WIN32
 #include <fcntl.h>
@@ -152,14 +157,20 @@ application::PreparedComparison prepare(const problem::ResolvedProblem& problem,
     return take(application::prepare_comparison({problem, family, {a, b}}, strategies));
 }
 
-std::shared_ptr<ob::TimingCollector> collector_for(const application::PreparedComparison& prepared,
-    std::size_t strategy_index, std::string run_id) {
+struct CollectionSetup {
+    ar::ResolvedConfiguration configuration;
+    std::shared_ptr<ob::TimingCollector> collector;
+    std::optional<ar::CollectedStatistics> empty_statistics;
+};
+
+CollectionSetup collector_for(const application::PreparedComparison& prepared,
+    std::size_t strategy_index, bool enabled, std::string run_id) {
     const auto clock = ob::make_steady_timing_clock();
     const auto& configuration = prepared.strategies()[strategy_index];
     const auto expected = prepared.expected_synthesis_identity(strategy_index);
     const ar::Unavailable missing{ar::MissingReason::not_instrumented, {}};
     ar::ConfigurationInput config;
-    config.collection = {true, ar::CollectionMode::summary, 5, 10000, 0, 0};
+    config.collection = {enabled, ar::CollectionMode::summary, 5, 10000, 0, 0};
     config.modules = {{"strategy", {expected.strategy, expected.strategy_version, missing}, {}},
         {"lp", {configuration.lp, "1", missing}, {}},
         {"convex", {configuration.convex, "1", missing}, {}}};
@@ -170,15 +181,18 @@ std::shared_ptr<ob::TimingCollector> collector_for(const application::PreparedCo
     config.selector = {{synthesis::witness_selector::selector_id}, "1", {}};
     config.strategy = configuration;
     config.strategy.selector = config.selector.id;
-    const auto resolved_config = take(ar::resolve_configuration(std::move(config)));
+    auto resolved_config = take(ar::resolve_configuration(std::move(config)));
 
-    ob::PlanInput plan{prepared.problem(), resolved_config, {run_id}, {clock->wall_domain()}, {}, 1};
-    const std::size_t span_count = strategy_index == 0 ? 5 : 1;
-    plan.tasks = {strategy_index == 0 ? "strategy-a" : "strategy-b"};
-    plan.operations = strategy_index == 0
-        ? std::vector<std::string>{"strategy-a/run", "strategy-a/forward", "strategy-a/feasible-preimage",
-            "strategy-a/terminal-optimization", "strategy-a/terminal-preimage"}
-        : std::vector<std::string>{"strategy-b/run"};
+    ob::PlanInput plan{prepared.problem(), resolved_config, {run_id}, {clock->wall_domain()}, {}, enabled?1u:0u};
+    const std::size_t span_count = enabled ? (strategy_index == 0 ? 5 : 1) : 0;
+    if(!enabled)plan.clocks.clear();
+    if(enabled) {
+        plan.tasks = {strategy_index == 0 ? "strategy-a" : "strategy-b"};
+        plan.operations = strategy_index == 0
+            ? std::vector<std::string>{"strategy-a/run", "strategy-a/forward", "strategy-a/feasible-preimage",
+                "strategy-a/terminal-optimization", "strategy-a/terminal-preimage"}
+            : std::vector<std::string>{"strategy-b/run"};
+    }
     plan.spans.reserve(span_count);
     for (std::size_t index = 0; index < span_count; ++index) {
         ar::SpanDescriptor span{};
@@ -193,7 +207,12 @@ std::shared_ptr<ob::TimingCollector> collector_for(const application::PreparedCo
         plan.spans.push_back(std::move(span));
     }
     auto collection_plan = take(ob::make_collection_plan(std::move(plan)));
-    return take(ob::make_timing_collector(std::move(collection_plan), clock, {0}, {}));
+    if(enabled) {
+        auto collector=take(ob::make_timing_collector(std::move(collection_plan), clock, {0}, {}));
+        return {std::move(resolved_config),std::move(collector),std::nullopt};
+    }
+    auto statistics=take(ob::merge_observations(collection_plan,{}));
+    return {std::move(resolved_config),nullptr,std::move(statistics)};
 }
 
 struct Signature {
@@ -213,6 +232,41 @@ Signature signature(const SynthesisOutcome& outcome) {
         result->objective.lower ? std::optional<double>{result->objective.lower->value} : std::nullopt,
         result->objective.upper ? std::optional<double>{result->objective.upper->value} : std::nullopt,
         result->family->identity().request.profile, complete != nullptr};
+}
+
+struct TrialRecord {
+    std::uint32_t arm_index{};
+    std::uint32_t repetition_index{};
+    ar::AttemptStatus status{ar::AttemptStatus::completed};
+    ar::RunId run_id;
+    ar::RecordedRunArtifact run;
+    std::string measurement_payload;
+    bool quality_passed{true};
+};
+
+ar::AttemptStatus attempt_status(const SynthesisOutcome& outcome) {
+    if (std::holds_alternative<Unsupported>(outcome)) return ar::AttemptStatus::unsupported;
+    switch (std::get<SynthesisResult>(outcome).termination) {
+    case Termination::completed: return ar::AttemptStatus::completed;
+    case Termination::cancelled: return ar::AttemptStatus::cancelled;
+    case Termination::resource_limit: return ar::AttemptStatus::resource_limited;
+    case Termination::operation_rejected: return ar::AttemptStatus::unsupported;
+    case Termination::numerical_failure:
+    case Termination::contract_rejected: return ar::AttemptStatus::failed;
+    }
+    return ar::AttemptStatus::incomplete;
+}
+
+const char* attempt_status_name(ar::AttemptStatus status) {
+    switch(status) {
+    case ar::AttemptStatus::completed: return "passed";
+    case ar::AttemptStatus::failed: return "failed";
+    case ar::AttemptStatus::unsupported: return "unsupported";
+    case ar::AttemptStatus::cancelled: return "cancelled";
+    case ar::AttemptStatus::resource_limited: return "resource_limited";
+    case ar::AttemptStatus::incomplete: return "incomplete";
+    }
+    return "incomplete";
 }
 
 bool close(const std::optional<double>& left, const std::optional<double>& right) {
@@ -407,11 +461,13 @@ private:
     std::size_t acknowledged_commands_{};
 };
 
-void trial_impl(const application::PreparedComparison& prepared, std::size_t strategy_index,
+TrialRecord trial_impl(const application::PreparedComparison& prepared, std::size_t strategy_index,
     bool enabled, std::size_t repetition, bool warmup, const Signature& expected) {
     const auto setup_begin = Clock::now();
-    auto collector = enabled ? collector_for(prepared, strategy_index,
-        "obs04-" + std::to_string(strategy_index) + "-" + std::to_string(repetition) + (warmup ? "-warmup" : "")) : nullptr;
+    const ar::RunId run_id{"obs04-" + std::to_string(strategy_index) + "-" +
+        (enabled ? "enabled-" : "disabled-") + std::to_string(repetition) + (warmup ? "-warmup" : "")};
+    auto setup = collector_for(prepared, strategy_index, enabled, run_id.value);
+    auto collector = setup.collector;
     auto workspaces = prepared.create();
     ExecutionContext context;
     context.resources = std::make_shared<const ResourcePolicy>(ResourcePolicy{1, 1, 1, {}});
@@ -421,27 +477,34 @@ void trial_impl(const application::PreparedComparison& prepared, std::size_t str
     const auto run_begin = Clock::now();
     const auto outcome = workspaces[strategy_index]->run(context);
     const auto run_end = Clock::now();
-    const auto observed = signature(outcome);
-    require_ts01_analytic_result(outcome, observed);
-    const bool equivalent = observed.termination == expected.termination && observed.outcome == expected.outcome &&
-        close(observed.lower, expected.lower) && close(observed.upper, expected.upper) &&
-        observed.profile == expected.profile && observed.complete == expected.complete && observed.complete;
-    if (!equivalent) throw std::runtime_error("Instrumentation changed the analytic comparison outcome");
+    const auto status=attempt_status(outcome);
+    std::optional<Signature> observed;
+    bool quality_passed=false;
+    if (std::holds_alternative<SynthesisResult>(outcome)) {
+        try {
+            observed=signature(outcome);
+            require_ts01_analytic_result(outcome,*observed);
+            quality_passed=observed->termination == expected.termination && observed->outcome == expected.outcome &&
+                close(observed->lower, expected.lower) && close(observed->upper, expected.upper) &&
+                observed->profile == expected.profile && observed->complete == expected.complete && observed->complete;
+        } catch(const std::exception&) { quality_passed=false; }
+    }
 
     std::size_t observed_spans = 0;
     std::size_t completed_spans = 0;
+    std::optional<ob::TimingReport> timing_report;
     std::vector<ob::SpanTiming> span_timings;
     std::vector<ar::SpanRecord> span_records;
     if (collector) {
-        const auto report = take(collector->snapshot());
-        observed_spans = report.observations.description().spans.size();
-        for (const auto& span : report.observations.description().spans)
+        timing_report = take(collector->snapshot());
+        observed_spans = timing_report->observations.description().spans.size();
+        for (const auto& span : timing_report->observations.description().spans)
             if (span.completion_observed) ++completed_spans;
-        span_timings = report.spans;
-        span_records = report.observations.description().spans;
-        if (!report.diagnostics.empty() || observed_spans != (strategy_index == 0 ? 5u : 1u) ||
-            completed_spans != observed_spans || span_timings.size() != observed_spans)
-            throw std::runtime_error("Timing collector did not retain every expected completed span");
+        span_timings = timing_report->spans;
+        span_records = timing_report->observations.description().spans;
+        if (status==ar::AttemptStatus::completed && (!timing_report->diagnostics.empty() ||
+            observed_spans != (strategy_index == 0 ? 5u : 1u) || completed_spans != observed_spans ||
+            span_timings.size() != observed_spans)) quality_passed=false;
     }
     struct SpanEvent { std::string operation; std::uint64_t inclusive, exclusive; };
     std::vector<SpanEvent> span_events;
@@ -449,11 +512,14 @@ void trial_impl(const application::PreparedComparison& prepared, std::size_t str
     for (std::size_t index = 0; index < span_timings.size(); ++index) {
         const auto inclusive = std::get_if<ar::Available<std::uint64_t>>(&span_timings[index].inclusive_wall_ticks);
         const auto exclusive = std::get_if<ar::Available<std::uint64_t>>(&span_timings[index].exclusive_wall_ticks);
-        if (!inclusive || !exclusive || span_timings[index].id != span_records[index].descriptor.id)
-            throw std::runtime_error("Timing collector returned unavailable or misaligned span durations");
+        if (!inclusive || !exclusive || span_timings[index].id != span_records[index].descriptor.id) {
+            quality_passed=false;
+            continue;
+        }
         span_events.push_back({span_records[index].descriptor.operation, inclusive->value, exclusive->value});
     }
-    std::cout << "{\"schema\":\"csl.obs04-instrumentation-comparison-event/2\",\"repetition\":" << repetition
+    std::ostringstream event;
+    event << "{\"schema\":\"csl.obs04-instrumentation-comparison-event/2\",\"repetition\":" << repetition
         << ",\"warmup\":" << (warmup ? "true" : "false") << ",\"strategy\":\""
         << (strategy_index == 0 ? "csl.synthesis.reach-back" : "csl.synthesis.strategy-b")
         << "\",\"instrumentation\":\"" << (enabled ? "enabled" : "disabled")
@@ -463,15 +529,33 @@ void trial_impl(const application::PreparedComparison& prepared, std::size_t str
         << (enabled ? Clock::period::num : 0) << ",\"span_clock_period_den\":" << (enabled ? Clock::period::den : 0)
         << ",\"span_timings\":[";
     for (std::size_t index = 0; index < span_events.size(); ++index) {
-        if (index) std::cout << ',';
-        std::cout << "{\"operation\":\"" << span_events[index].operation
+        if (index) event << ',';
+        event << "{\"operation\":\"" << span_events[index].operation
             << "\",\"inclusive_wall_ticks\":" << span_events[index].inclusive
             << ",\"exclusive_wall_ticks\":" << span_events[index].exclusive << '}';
     }
-    std::cout << "],\"status\":\"passed\",\"outcome\":\"" << outcome_name(observed.outcome)
-        << "\",\"analytic_family_checked\":true,\"complete_family_verified\":"
-        << (observed.complete ? "true" : "false") << ",\"absolute_tolerance\":" << absolute_tolerance
-        << ",\"relative_tolerance\":" << relative_tolerance << "}\n";
+    event << "],\"status\":\"" << attempt_status_name(status) << "\",\"outcome\":\""
+        << (observed?outcome_name(observed->outcome):"undetermined")
+        << "\",\"analytic_family_checked\":" << (quality_passed?"true":"false")
+        << ",\"complete_family_verified\":" << (observed&&observed->complete ? "true" : "false")
+        << ",\"absolute_tolerance\":" << absolute_tolerance
+        << ",\"relative_tolerance\":" << relative_tolerance << '}';
+
+    auto statistics=timing_report?timing_report->observations:std::move(*setup.empty_statistics);
+    const auto* synthesis=std::get_if<SynthesisResult>(&outcome);
+    application::StrategyExecution recorded_execution{outcome,
+        synthesis?ar::project_final(*synthesis):ar::FinalOutcome{ar::UnsupportedFinal{std::get<Unsupported>(outcome).diagnostics}},
+        std::monostate{}, {}};
+    const ar::Unavailable unavailable{ar::MissingReason::not_requested,{}};
+    const auto run_wire=take(application::encode_strategy_run(prepared.problem(),recorded_execution,
+        std::move(setup.configuration),run_id,std::move(statistics),
+        {unavailable,unavailable,unavailable,unavailable,false,ar::MemoryAccounting::unlimited}));
+    auto run=take(ar::decode_recorded_run(run_wire,prepared.problem()));
+    const auto measurement=event.str();
+    std::cout << measurement << '\n';
+    const auto arm=static_cast<std::uint32_t>(strategy_index*2+(enabled?1:0));
+    return {arm,static_cast<std::uint32_t>(repetition),status,
+        run_id,std::move(run),measurement,quality_passed};
 }
 
 std::string escaped(std::string_view value) {
@@ -485,19 +569,46 @@ std::string escaped(std::string_view value) {
     return result;
 }
 
-bool trial(const application::PreparedComparison& prepared, std::size_t strategy_index,
+TrialRecord failed_trial(const application::PreparedComparison& prepared, std::size_t strategy_index,
+    bool enabled, std::size_t repetition, bool warmup, std::string_view message) {
+    const ar::RunId run_id{"obs04-" + std::to_string(strategy_index) + "-"+
+        (enabled ? "enabled-" : "disabled-") + std::to_string(repetition) + (warmup ? "-warmup" : "")};
+    auto setup=collector_for(prepared,strategy_index,enabled,run_id.value);
+    auto statistics=setup.collector?take(setup.collector->snapshot()).observations:
+        std::move(*setup.empty_statistics);
+    const auto description=prepared.problem().description();
+    const ar::Unavailable unavailable{ar::MissingReason::not_requested,{}};
+    ar::RunRecord record{prepared.problem().identity(),description->model->dynamics.dimensions,
+        static_cast<std::uint64_t>(description->times.size()-1),std::move(setup.configuration),run_id,
+        ar::FailedFinal{ar::FailurePhase::invoke,ar::FailureReason::adapter_exception,std::string(message),{}},
+        std::move(statistics),{unavailable,unavailable,unavailable,unavailable,false,ar::MemoryAccounting::unlimited},
+        {},{},ar::ProblemProvenance::problem_revalidated,{}};
+    auto published=take(ar::publish_run({prepared.problem(),std::move(record)}));
+    auto encoded=take(ar::encode_recorded_run(published));
+    const auto bytes=encoded.content().bytes();
+    std::string wire; wire.reserve(bytes.size());
+    for(const auto byte:bytes)wire.push_back(static_cast<char>(std::to_integer<unsigned char>(byte)));
+    auto run=take(ar::decode_recorded_run(wire,prepared.problem()));
+    std::ostringstream event;
+    event << "{\"schema\":\"csl.obs04-instrumentation-comparison-event/2\",\"repetition\":" << repetition
+        << ",\"warmup\":" << (warmup?"true":"false") << ",\"strategy\":\""
+        << (strategy_index==0?"csl.synthesis.reach-back":"csl.synthesis.strategy-b")
+        << "\",\"instrumentation\":\"" << (enabled?"enabled":"disabled")
+        << "\",\"status\":\"failed\",\"analytic_family_checked\":false,\"complete_family_verified\":false,\"error\":\""
+        << escaped(message) << "\"}";
+    const auto measurement=event.str();
+    std::cout << measurement << '\n';
+    return {static_cast<std::uint32_t>(strategy_index*2+(enabled?1:0)),
+        static_cast<std::uint32_t>(repetition),ar::AttemptStatus::failed,
+        run_id,std::move(run),measurement};
+}
+
+std::optional<TrialRecord> trial(const application::PreparedComparison& prepared, std::size_t strategy_index,
     bool enabled, std::size_t repetition, bool warmup, const Signature& expected) {
     try {
-        trial_impl(prepared, strategy_index, enabled, repetition, warmup, expected);
-        return true;
+        return trial_impl(prepared, strategy_index, enabled, repetition, warmup, expected);
     } catch (const std::exception& error) {
-        std::cout << "{\"schema\":\"csl.obs04-instrumentation-comparison-event/2\",\"repetition\":" << repetition
-            << ",\"warmup\":" << (warmup ? "true" : "false") << ",\"strategy\":\""
-            << (strategy_index == 0 ? "csl.synthesis.reach-back" : "csl.synthesis.strategy-b")
-            << "\",\"instrumentation\":\"" << (enabled ? "enabled" : "disabled")
-        << "\",\"status\":\"failed\",\"analytic_family_checked\":false,\"complete_family_verified\":false,\"error\":\""
-            << escaped(error.what()) << "\"}\n";
-        return false;
+        return failed_trial(prepared,strategy_index,enabled,repetition,warmup,error.what());
     }
 }
 
@@ -538,6 +649,7 @@ int main(int argc, char** argv) {
     try {
         std::optional<std::size_t> profile_strategy;
         std::size_t profile_calls_count = 0;
+        std::optional<std::filesystem::path> requested_record_path;
         for (int argument = 1; argument < argc; ++argument) {
             const std::string_view option{argv[argument]};
             if (option == "--profile-strategy" && argument + 1 < argc) {
@@ -547,14 +659,20 @@ int main(int argc, char** argv) {
                 else throw std::invalid_argument("Profile strategy must be reach-back or direct-joint");
             } else if (option == "--profile-calls" && argument + 1 < argc) {
                 profile_calls_count = std::stoull(argv[++argument]);
+            } else if (option == "--record" && argument + 1 < argc) {
+                if (requested_record_path)
+                    throw std::invalid_argument("--record may be provided only once");
+                requested_record_path=argv[++argument];
             } else {
-                throw std::invalid_argument("usage: csl_obs04_instrumentation_comparison [--profile-strategy reach-back|direct-joint --profile-calls N]");
+                throw std::invalid_argument("usage: csl_obs04_instrumentation_comparison [--record path] | [--profile-strategy reach-back|direct-joint --profile-calls N]");
             }
         }
         if (profile_calls_count > 10000)
             throw std::invalid_argument("Profile call count must not exceed 10000");
         if (profile_strategy.has_value() != (profile_calls_count != 0))
             throw std::invalid_argument("Profile strategy and positive call count must be provided together");
+        if(profile_strategy&&requested_record_path)
+            throw std::invalid_argument("Profile mode and comparison-record capture are separate modes");
         const auto problem = source();
         auto modules = make_modules();
         const auto prepared = prepare(problem, modules.strategies);
@@ -592,15 +710,76 @@ int main(int argc, char** argv) {
             << "# alternation=strategy execution order and instrumentation mode both alternate by repetition\n"
             << "# instrumentation=Strategy A phase spans; Strategy B run span; CPU and native backend threads unavailable\n";
         std::size_t failures = 0;
+        std::vector<TrialRecord> captured;
         for (std::size_t repetition = 0; repetition <= 7; ++repetition) {
             const bool warmup = repetition == 0;
             for (std::size_t slot = 0; slot < 2; ++slot) {
                 const std::size_t strategy = (repetition + slot) % 2;
                 const bool enabled_first = ((repetition + strategy) % 2) != 0;
-                if (!trial(prepared, strategy, enabled_first, repetition, warmup, expected[strategy])) ++failures;
-                if (!trial(prepared, strategy, !enabled_first, repetition, warmup, expected[strategy])) ++failures;
+                for(const bool enabled : {enabled_first,!enabled_first}) {
+                    auto result=trial(prepared,strategy,enabled,repetition,warmup,expected[strategy]);
+                    if(!result) { ++failures; continue; }
+                    if(result->status!=ar::AttemptStatus::completed||!result->quality_passed)++failures;
+                    captured.push_back(std::move(*result));
+                }
             }
         }
+        std::sort(captured.begin(),captured.end(),[](const auto& left,const auto& right) {
+            return std::pair{left.arm_index,left.repetition_index}<std::pair{right.arm_index,right.repetition_index};
+        });
+        if(captured.size()!=32)throw std::runtime_error("The comparison record does not contain all 32 warmup and measured attempts");
+        std::array<std::string,4> config_ids{};
+        for(const auto& attempt:captured) {
+            if(attempt.repetition_index!=0)continue;
+            config_ids.at(attempt.arm_index)=take(ar::comparison_configuration_id(attempt.run)).value;
+        }
+        for(const auto& id:config_ids)if(id.empty())throw std::runtime_error("Comparison record is missing a configuration arm");
+        const auto request_digest=take(ar::comparison_request_digest(captured.front().run));
+        for(const auto& attempt:captured)
+            if(take(ar::comparison_request_digest(attempt.run))!=request_digest)
+                throw std::runtime_error("Comparison arms do not share the same mathematical request");
+        const auto canonical_problem=problem.canonical_bytes();
+        const auto manifest_bytes=std::span<const std::byte>{canonical_problem};
+        const auto input_manifest_hash=take(problem::snapshot_content(manifest_bytes)).digest();
+        std::ostringstream spec_builder;
+        spec_builder << "{\"arms\":[";
+        for(std::size_t index=0;index<config_ids.size();++index) {
+            if(index)spec_builder << ',';
+            spec_builder << "{\"configuration_id\":\"" << config_ids[index]
+                << "\",\"instrumentation\":\"" << (index%2==0?"disabled":"enabled")
+                << "\",\"strategy\":\""
+                << (index/2==0?"csl.synthesis.reach-back":"csl.synthesis.strategy-b") << "\"}";
+        }
+        spec_builder << "],\"input_manifest_hash\":\"" << problem::hex(input_manifest_hash)
+            << "\",\"input_manifest_source\":\"resolved-problem-canonical-bytes\",\"problem_id\":\""
+            << problem.identity().value << "\",\"repetitions\":8,\"request_digest\":\""
+            << problem::hex(request_digest) << "\",\"schema\":\"csl.comparison-spec/2\"}";
+        const auto spec_text=spec_builder.str();
+        const auto spec_content_result=problem::snapshot_content(std::span<const std::byte>{
+            reinterpret_cast<const std::byte*>(spec_text.data()),spec_text.size()});
+        auto spec_content=take(std::move(spec_content_result));
+        std::vector<ar::ComparisonAttempt> attempts;
+        attempts.reserve(captured.size());
+        for(auto& attempt:captured)
+            attempts.push_back({attempt.arm_index,attempt.repetition_index,attempt.status,
+                {attempt.run_id,attempt.run.content().digest()},std::move(attempt.run),
+                std::move(attempt.measurement_payload)});
+        auto comparison=take(ar::encode_recorded_comparison(spec_content,attempts));
+        std::string comparison_wire;
+        for(const auto byte:comparison.content().bytes())
+            comparison_wire.push_back(static_cast<char>(std::to_integer<unsigned char>(byte)));
+        const auto replay=take(ar::decode_recorded_comparison(comparison_wire));
+        if(replay.content().digest()!=comparison.content().digest())
+            throw std::runtime_error("Saved comparison record failed exact round-trip identity");
+        const std::filesystem::path record_path=requested_record_path?*requested_record_path:
+            std::filesystem::path{"obs04-comparison-record-"+problem::hex(comparison.content().digest())+".json"};
+        if(std::filesystem::exists(record_path))
+            throw std::runtime_error("Refusing to overwrite existing comparison record: "+record_path.string());
+        std::ofstream output(record_path,std::ios::binary|std::ios::out);
+        if(!output||!(output<<comparison_wire)||!output.flush())
+            throw std::runtime_error("Could not write comparison record: "+record_path.string());
+        std::cout << "# comparison_record_digest=" << problem::hex(comparison.content().digest())
+            << "; attempts=" << attempts.size() << "; failures=" << failures << '\n';
         if (failures != 0) return 1;
     } catch (const std::exception& error) {
         std::cerr << "OBS-04 measurement failed: " << error.what() << '\n';

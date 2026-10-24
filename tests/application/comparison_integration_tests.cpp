@@ -215,7 +215,7 @@ application::ComparisonRequest request_for(const problem::ResolvedProblem& probl
 
 csl::artifacts::RecordedRunArtifact check_complete_family_encoder_boundary(const problem::ResolvedProblem& problem,
     const application::PreparedComparison& prepared, const application::StrategyExecution& strategy_execution,
-    std::size_t strategy_index, const WitnessRequest& witnesses) {
+    std::size_t strategy_index, const WitnessRequest& witnesses, bool instrumentation_enabled=false) {
     namespace ar = artifacts;
     namespace ob = csl::execution::observability;
     const auto& synthesis_result = std::get<SynthesisResult>(strategy_execution.outcome);
@@ -224,7 +224,7 @@ csl::artifacts::RecordedRunArtifact check_complete_family_encoder_boundary(const
     const ar::Unavailable uninstrumented{ar::MissingReason::not_instrumented, {}};
     const ar::PinAvailability pin = uninstrumented;
     ar::ConfigurationInput input;
-    input.collection = {false, ar::CollectionMode::detail, 0, 0, 0, 0};
+    input.collection = {instrumentation_enabled, ar::CollectionMode::detail, 5, 10000, 0, 0};
     input.modules = {
         {"strategy", {expected.strategy, expected.strategy_version, pin}, {}},
         {"lp", {prepared.strategies()[strategy_index].lp, "1", pin}, {}},
@@ -239,7 +239,8 @@ csl::artifacts::RecordedRunArtifact check_complete_family_encoder_boundary(const
     const auto configuration = take_artifact(ar::resolve_configuration(std::move(input)),
         "resolve_configuration");
     CHECK(configuration.description().strategy.selector == configuration.description().selector.id);
-    const ar::RunId run{"application-comparison-encoder-"+std::to_string(strategy_index)};
+    const ar::RunId run{"application-comparison-encoder-"+std::to_string(strategy_index)+
+        (instrumentation_enabled?"-instrumented":"-uninstrumented")};
     const auto plan = take_artifact(ob::make_collection_plan({problem, configuration, run, {}, {}, 0}),
         "make_collection_plan");
     const auto statistics = take_artifact(ob::merge_observations(plan, {}), "merge_observations");
@@ -417,8 +418,8 @@ void compare_profile(const std::string& profile) {
         std::get<csl::Diagnostic>(spec_result).explanation);
     const auto spec=std::get<csl::problem::ResolvedContent>(spec_result);
     const std::vector<ar::ComparisonAttempt> attempts{
-        {0,0,ar::AttemptStatus::completed,{ar::RunId{"application-comparison-encoder-0"},run_a.content().digest()},run_a},
-        {1,0,ar::AttemptStatus::completed,{ar::RunId{"application-comparison-encoder-1"},run_b.content().digest()},run_b}};
+        {0,0,ar::AttemptStatus::completed,{ar::RunId{"application-comparison-encoder-0-uninstrumented"},run_a.content().digest()},run_a},
+        {1,0,ar::AttemptStatus::completed,{ar::RunId{"application-comparison-encoder-1-uninstrumented"},run_b.content().digest()},run_b}};
     const auto bundle=take_artifact(ar::encode_recorded_comparison(spec,attempts),"encode_recorded_comparison");
     auto mislabeled=attempts;
     mislabeled.front().reported_status=ar::AttemptStatus::failed;
@@ -436,6 +437,64 @@ void compare_profile(const std::string& profile) {
     CHECK(restored_bundle.identity().digest==bundle.content().digest());
     CHECK(bundle_wire.find("csl.comparison/1")!=std::string::npos);
     CHECK(bundle_wire.find("csl.run-statistics/6")!=std::string::npos);
+
+    auto run_a_enabled=check_complete_family_encoder_boundary(problem,prepared,execution.strategies[0],
+        0,witness_request,true);
+    const auto config_a_enabled=take_artifact(ar::comparison_configuration_id(run_a_enabled),
+        "comparison_configuration_id enabled A");
+    const auto request_a_enabled=take_artifact(ar::comparison_request_digest(run_a_enabled),
+        "comparison_request_digest enabled A");
+    REQUIRE(request_a_enabled==request_a);
+    const auto canonical_problem=problem.canonical_bytes();
+    const auto manifest_bytes=std::span<const std::byte>{canonical_problem};
+    const auto input_manifest_hash=csl::problem::hex(take(csl::problem::snapshot_content(manifest_bytes)).digest());
+    const std::string record_spec_text="{\"arms\":[{\"configuration_id\":\""+config_a.value+
+        "\",\"instrumentation\":\"disabled\",\"strategy\":\"csl.synthesis.reach-back\"},{\"configuration_id\":\""+
+        config_a_enabled.value+"\",\"instrumentation\":\"enabled\",\"strategy\":\"csl.synthesis.reach-back\"}],\"input_manifest_hash\":\""+input_manifest_hash+
+        "\",\"input_manifest_source\":\"resolved-problem-canonical-bytes\""+
+        ",\"problem_id\":\""+problem.identity().value+"\",\"repetitions\":1,\"request_digest\":\""+request_digest+
+        "\",\"schema\":\"csl.comparison-spec/2\"}";
+    const auto record_spec_result=csl::problem::snapshot_content(
+        std::span<const std::byte>{reinterpret_cast<const std::byte*>(record_spec_text.data()),record_spec_text.size()});
+    REQUIRE(std::holds_alternative<csl::problem::ResolvedContent>(record_spec_result));
+    const auto record_spec=std::get<csl::problem::ResolvedContent>(record_spec_result);
+    const std::vector<ar::ComparisonAttempt> measured_attempts{
+        {0,0,ar::AttemptStatus::completed,{ar::RunId{"application-comparison-encoder-0-uninstrumented"},run_a.content().digest()},run_a,
+            "{\"schema\":\"csl.obs04-instrumentation-comparison-event/2\",\"repetition\":0,\"warmup\":true,\"status\":\"passed\",\"strategy\":\"csl.synthesis.reach-back\",\"instrumentation\":\"disabled\"}"},
+        {1,0,ar::AttemptStatus::completed,{ar::RunId{"application-comparison-encoder-0-instrumented"},run_a_enabled.content().digest()},run_a_enabled,
+            "{\"schema\":\"csl.obs04-instrumentation-comparison-event/2\",\"repetition\":0,\"warmup\":true,\"status\":\"passed\",\"strategy\":\"csl.synthesis.reach-back\",\"instrumentation\":\"enabled\"}"}};
+    const auto recorded=take_artifact(ar::encode_recorded_comparison(record_spec,measured_attempts),
+        "encode_recorded_comparison comparison-record/1");
+    const auto record_wire=std::string(reinterpret_cast<const char*>(recorded.content().bytes().data()),
+        recorded.content().bytes().size());
+    CHECK(record_wire.find("csl.comparison-record/1")!=std::string::npos);
+    const auto restored_record=take_artifact(ar::decode_recorded_comparison(record_wire),
+        "decode_recorded_comparison comparison-record/1");
+    CHECK(restored_record.content().digest()==recorded.content().digest());
+    CHECK(restored_record.identity().digest==recorded.identity().digest);
+    CHECK(record_wire.find(csl::problem::hex(recorded.identity().digest))!=std::string::npos);
+    std::string escaped_measurement;
+    for(const char character:measured_attempts.front().measurement_payload) {
+        if(character=='"'||character=='\\')escaped_measurement.push_back('\\');
+        escaped_measurement.push_back(character);
+    }
+    CHECK(record_wire.find(escaped_measurement)!=std::string::npos);
+    auto wrong_measurement=measured_attempts;
+    wrong_measurement.front().measurement_payload="{\"status\":\"failed\"}";
+    const auto wrong_measurement_result=ar::encode_recorded_comparison(record_spec,wrong_measurement);
+    REQUIRE(std::holds_alternative<ar::ArtifactError>(wrong_measurement_result));
+    CHECK(std::get<ar::ArtifactError>(wrong_measurement_result).code==ar::ArtifactErrorCode::identity);
+    auto wrong_arm_text=record_spec_text;
+    const auto disabled_label=wrong_arm_text.find("disabled");
+    REQUIRE(disabled_label!=std::string::npos);
+    wrong_arm_text.replace(disabled_label,std::string_view("disabled").size(),"enabled");
+    const auto wrong_arm_owner=csl::problem::snapshot_content(std::span<const std::byte>{
+        reinterpret_cast<const std::byte*>(wrong_arm_text.data()),wrong_arm_text.size()});
+    REQUIRE(std::holds_alternative<csl::problem::ResolvedContent>(wrong_arm_owner));
+    const auto wrong_arm_result=ar::encode_recorded_comparison(
+        std::get<csl::problem::ResolvedContent>(wrong_arm_owner),measured_attempts);
+    REQUIRE(std::holds_alternative<ar::ArtifactError>(wrong_arm_result));
+    CHECK(std::get<ar::ArtifactError>(wrong_arm_result).code==ar::ArtifactErrorCode::identity);
 }
 }
 

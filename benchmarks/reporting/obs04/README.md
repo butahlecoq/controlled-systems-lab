@@ -30,23 +30,30 @@ limiter are unavailable. Treat any timing difference as descriptive and
 inconclusive; this tiny analytic case is not representative of application
 workloads.
 
-The driver emits a commented header and one JSON event per attempt. Failed attempts must
-remain visible and make the process exit nonzero. Keep the raw output, exact
-source commit, compiler/build provenance, machine/OS capture, and separate
+The driver emits a commented header and one JSON event per attempt. It also
+writes a digest-named `csl.comparison-record/1` artifact containing all 32
+warmup and measured attempts. Each attempt binds the exact event payload to an
+immutable `RecordedRunArtifact`; the artifact is decoded and its digest checked
+before it is written. The `csl.comparison-spec/2` arms explicitly distinguish
+strategy and instrumentation mode while preserving each resolved configuration
+identity. The record declares the canonical resolved-problem hash as its shared
+input manifest and labels this synthetic pilot `new-comparison`. Returned
+unsupported, cancelled, resource-limited, incomplete, and failed outcomes retain
+their run records and event status; thrown exceptions produce a synthetic failed
+run record. Failed or analytically invalid attempts make the process exit
+nonzero. The default artifact path is the current directory; `--record <path>`
+selects a path, and existing files are never overwritten. Keep the exact source
+commit, compiler/build provenance, machine/OS capture, and separate
 limiter-profile result next to any retained measurement. Do not combine the
 existing synthetic OBS-02 collector loop with these solver timings.
 
-`csl.obs04-instrumentation-comparison-event/2` is a capture-only schema for
-this experiment, not the authoritative comparison artifact. Its repetition,
-strategy, instrumentation mode, and status identify an attempted
-`ComparisonAttempt`; phase durations and span timings are the raw measurement
-payload, while outcome, tolerances, and family checks provide the corresponding
-run evidence. The current driver does not yet bind these events to
-`ComparisonSpecId` or immutable `RunRecordRef` values. Preserve this schema only
-to read this saved sample; when OBS-04 writes authoritative comparison records,
-those records should own the attempts and retain these raw events as payload or
-replace them with fields in the run record. Do not treat this event stream as a
-second canonical report format.
+`csl.obs04-instrumentation-comparison-event/2` remains the raw per-attempt
+measurement payload. The comparison record binds its strategy, instrumentation
+mode, repetition, and status to the arm and attempt indices. The per-run record
+stores the resolved request, outcome/family data and collected spans. This is
+an analytic fixture increment; machine/compiler/build provenance is still kept
+in the adjacent environment capture, and phase-separated parsing, verification,
+serialization, rendering and end-to-end timings remain outside this driver.
 
 Build a clean Release source checkout and use a separate build directory:
 
@@ -54,7 +61,7 @@ Build a clean Release source checkout and use a separate build directory:
 cmake -S benchmarks/reporting/obs04 -B build/obs04 \
   -DCSL_SOURCE_ROOT="$PWD" -DCMAKE_BUILD_TYPE=Release
 cmake --build build/obs04 --parallel
-./build/obs04/csl_obs04_instrumentation_comparison
+(cd build/obs04 && ./csl_obs04_instrumentation_comparison)
 ```
 
 The output does not include process startup, parsing, artifact serialization,
