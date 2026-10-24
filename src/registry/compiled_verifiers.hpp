@@ -1,8 +1,11 @@
 #pragma once
 #include <csl/registry/registry.hpp>
+#include <csl/sets/data.hpp>
 #include <memory>
 #include <optional>
+#include <string>
 #include <utility>
+#include <vector>
 #include "runtime_lineage.hpp"
 
 namespace csl::synthesis::strategy_ts01 { class ExactJointRelation; }
@@ -42,6 +45,8 @@ bool strategy_a_nominal_linear_exact_profile_valid(const problem::ResolvedProble
     const FamilyRequest&, const RepresentationId&);
 std::optional<std::pair<double, double>> strategy_a_nominal_linear_exact_optimum_bounds(
     const problem::ResolvedProblem&);
+std::optional<sets::SetData> strategy_a_nominal_linear_exact_optimal_relation(
+    const problem::ResolvedProblem&, SetId, std::vector<std::string> labels);
 std::vector<TransformStepIdentity> strategy_a_nominal_linear_exact_lineage(
     const ProblemId&, std::size_t horizon);
 std::shared_ptr<const CompiledCompleteFamilyVerifier> make_nominal_linear_exact_verifier();

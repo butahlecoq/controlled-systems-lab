@@ -1043,6 +1043,19 @@ TEST_CASE("nominal linear exact verifier encloses a non-dyadic optimum") {
     REQUIRE(bounds);
     CHECK(bounds->first==1.0/3.0);
     CHECK(bounds->second==std::nextafter(1.0/3.0,1.0));
+    const auto generated=run(query);
+    CHECK(generated.termination==Termination::completed);
+    REQUIRE(generated.family);
+    CHECK(generated.family->registry_verified());
+    REQUIRE(generated.objective.lower);
+    REQUIRE(generated.objective.upper);
+    CHECK(generated.objective.lower->value==bounds->first);
+    CHECK(generated.objective.upper->value==bounds->second);
+    const auto& generated_complete=std::get<CompleteOptimalFamily>(generated.family->outcome());
+    REQUIRE(generated_complete.relation.payload);
+    const auto* generated_relation=generated_complete.relation.payload->h_relation_for_recording();
+    REQUIRE(generated_relation);
+    CHECK(contains(*generated_relation,{0,1.0/3.0,1.0/3.0}));
     const JointCoordinates coordinates{query.problem.model().dimensions(),query.problem.model().horizon()};
     const FamilyIdentity identity{query.problem.identity(),query.family,coordinates,
         {"csl.synthesis.reach-back"},"1",

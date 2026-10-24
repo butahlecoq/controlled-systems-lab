@@ -460,6 +460,75 @@ std::optional<std::pair<double, double>> strategy_a_nominal_linear_exact_optimum
     return rational_to_outward_doubles(optimum.value, exact_h::default_max_integer_bits);
 }
 
+std::optional<sets::SetData> strategy_a_nominal_linear_exact_optimal_relation(
+    const problem::ResolvedProblem& problem, SetId id, std::vector<std::string> labels) {
+    exact_h::Limits limits;
+    std::vector<exact_h::Row> rows;
+    std::vector<double> objective;
+    const auto built = reconstruct(problem, limits, rows, objective);
+    if (built.state != CheckState::established) return {};
+    const auto coefficients = problem.objective().coefficients();
+    const auto& linear = std::get<optimization::LinearCoefficients>(coefficients);
+    const auto optimum = exact_h::minimize_linear(rows, objective.size(), objective, linear.offset, limits);
+    if (optimum.state != exact_h::LinearMinimumState::minimum || !optimum.attained ||
+        !append_objective_face(objective, linear.offset, optimum.value, limits, rows)) return {};
+
+    std::vector<double> inequalities;
+    std::vector<double> upper_bounds;
+    std::vector<double> equalities;
+    std::vector<double> equality_values;
+    inequalities.reserve(rows.size() * objective.size());
+    upper_bounds.reserve(rows.size());
+    auto opposites = [](const exact_h::Integer& lhs, const exact_h::Integer& rhs) {
+        return lhs.words == rhs.words && (exact_h::exact_detail::is_zero(lhs) || lhs.negative != rhs.negative);
+    };
+    auto as_exact_double = [&](const exact_h::Integer& integer, double& value) {
+        exact_h::ExactRational rational;
+        rational.numerator = integer;
+        rational.denominator = exact_h::exact_detail::from_u64(1);
+        return exact_h::exact_rational_to_double(rational, limits.max_integer_bits, value);
+    };
+    for (std::size_t row_index = 0; row_index < rows.size(); ++row_index) {
+        const auto& row = rows[row_index];
+        if (row.strict || row.coefficients.size() != objective.size()) return {};
+        const bool paired_equality = row_index + 1 < rows.size() && !rows[row_index + 1].strict &&
+            rows[row_index + 1].coefficients.size() == objective.size() &&
+            opposites(row.bound, rows[row_index + 1].bound) &&
+            std::equal(row.coefficients.begin(), row.coefficients.end(),
+                rows[row_index + 1].coefficients.begin(), opposites);
+        auto& target = paired_equality ? equalities : inequalities;
+        auto& target_bounds = paired_equality ? equality_values : upper_bounds;
+        for (const auto& coefficient : row.coefficients) {
+            double value{};
+            if (!as_exact_double(coefficient, value)) return {};
+            target.push_back(value);
+        }
+        double bound{};
+        if (!as_exact_double(row.bound, bound)) return {};
+        target_bounds.push_back(bound);
+        if (paired_equality) {
+            ++row_index;
+        }
+    }
+    auto inequality_matrix = numeric::snapshot(Matrix{
+        upper_bounds.size(), objective.size(), std::move(inequalities)});
+    auto upper_vector = numeric::snapshot_vector(Vector(std::move(upper_bounds)));
+    auto equality_matrix = numeric::snapshot(Matrix{
+        equality_values.size(), objective.size(), std::move(equalities)});
+    auto equality_vector = numeric::snapshot_vector(Vector(std::move(equality_values)));
+    if (!std::holds_alternative<numeric::MatrixView>(inequality_matrix) ||
+        !std::holds_alternative<numeric::VectorView>(upper_vector) ||
+        !std::holds_alternative<numeric::MatrixView>(equality_matrix) ||
+        !std::holds_alternative<numeric::VectorView>(equality_vector)) return {};
+    auto made = sets::make_h({std::move(id), objective.size(), std::move(labels)},
+        {std::get<numeric::MatrixView>(std::move(inequality_matrix)),
+         std::get<numeric::VectorView>(std::move(upper_vector)),
+         std::get<numeric::MatrixView>(std::move(equality_matrix)),
+         std::get<numeric::VectorView>(std::move(equality_vector))});
+    if (!std::holds_alternative<sets::SetData>(made)) return {};
+    return std::get<sets::SetData>(std::move(made));
+}
+
 std::vector<TransformStepIdentity> strategy_a_nominal_linear_exact_lineage(const ProblemId& problem,
     std::size_t horizon) {
     return synthesis::strategy_a::detail::expected_nominal_lineage(problem, horizon);
