@@ -19,6 +19,7 @@ struct RejectionDetail {
     std::array<char,256> bytes{};
     std::size_t size{};
     bool append(std::string_view value) noexcept {
+        if(value.empty())return true;
         if(value.size()>bytes.size()-size)return false;
         std::memcpy(bytes.data()+size,value.data(),value.size());size+=value.size();return true;
     }
