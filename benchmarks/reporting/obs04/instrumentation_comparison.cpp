@@ -370,11 +370,13 @@ int main() {
         }
         std::cout << "# fixture=T-S01; strategies=reach-back,direct-joint; profile=ts01_exact_integrator\n"
             << "# timed_region=exclusive workspace StrategyPort::run; setup and collection snapshot are reported separately\n"
+            << "# alternation=strategy execution order and instrumentation mode both alternate by repetition\n"
             << "# instrumentation=Strategy A phase spans; Strategy B run span; CPU and native backend threads unavailable\n";
         std::size_t failures = 0;
         for (std::size_t repetition = 0; repetition <= 7; ++repetition) {
             const bool warmup = repetition == 0;
-            for (std::size_t strategy = 0; strategy < 2; ++strategy) {
+            for (std::size_t slot = 0; slot < 2; ++slot) {
+                const std::size_t strategy = (repetition + slot) % 2;
                 const bool enabled_first = ((repetition + strategy) % 2) != 0;
                 if (!trial(prepared, strategy, enabled_first, repetition, warmup, expected[strategy])) ++failures;
                 if (!trial(prepared, strategy, !enabled_first, repetition, warmup, expected[strategy])) ++failures;

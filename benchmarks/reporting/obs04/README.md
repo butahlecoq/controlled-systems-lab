@@ -17,6 +17,8 @@ and relative tolerances for objective bounds.
 
 The output contains one excluded warmup and seven measured repetitions for
 each strategy/mode pair. The first mode alternates by repetition and strategy.
+Strategy execution order also alternates by repetition, so each repetition
+starts with the opposite strategy from the previous one.
 `strategy_run_ns` covers only the exclusive workspace's public `StrategyPort::run`;
 collector/configuration and workspace setup are reported separately, and the
 post-run observation snapshot is outside that interval. Strategy A includes its
