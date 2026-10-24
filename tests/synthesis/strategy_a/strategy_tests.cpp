@@ -1762,6 +1762,7 @@ TEST_CASE("Strategy A records the selected convex backend for a quadratic termin
     REQUIRE(timing.spans.size()==6);
     REQUIRE(std::holds_alternative<ar::Available<std::uint64_t>>(timing.spans[5].inclusive_wall_ticks));
     CHECK(std::get<ar::Available<std::uint64_t>>(timing.spans[5].inclusive_wall_ticks).value==10);
+    CHECK(std::get<ar::ReturnedSpan>(timing.observations.description().spans[5].status).termination==Termination::completed);
     const auto& solver=timing.observations.description().spans[5].descriptor;
     REQUIRE(solver.program);
     CHECK(*solver.program==terminal_program);
