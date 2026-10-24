@@ -53,6 +53,9 @@ struct EnforcementReport {
     OuterAdmissionEnforcement outer_admission{OuterAdmissionEnforcement::enforced};
     NativeThreadEnforcement native_threads{NativeThreadEnforcement::declared_only};
     MemoryEnforcement memory{MemoryEnforcement::unlimited_accounting};
+    // Exact count of executor-owned jthreads successfully started for this batch.
+    // Sequential mode uses the caller thread and reports zero here.
+    std::size_t outer_worker_threads_started{};
     std::size_t peak_active_tasks{}, peak_reserved_threads{};
     std::optional<std::size_t> peak_workspace_reservation_bytes;
 };
