@@ -297,7 +297,8 @@ CollectionResult<std::shared_ptr<TimingCollector>> make_timing_collector(Collect
             auto root=index(run);if(!root||spans[*root].parent)return error("timing.run","Run span must be a planned root");
             owner->run=*root;owner->slots.resize(spans.size());owner->children.resize(spans.size());
             const auto& settings=input.configuration.description().collection;
-            const auto retained=std::min<std::uint64_t>(settings.detail_spans,spans.size());
+            const auto retained=settings.mode==ar::CollectionMode::detail
+                ?std::min<std::uint64_t>(settings.detail_spans,spans.size()):0;
             const auto each=retained?settings.detail_bytes/retained:0;
             const auto retained_bytes=each*retained;
             if(retained_bytes>std::vector<char>{}.max_size())return error("timing.detail","Detail storage exceeds platform capacity");
