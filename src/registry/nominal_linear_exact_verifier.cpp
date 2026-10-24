@@ -10,6 +10,7 @@
 #include <csl/synthesis/strategy_a/nominal_linear_exact_profile.hpp>
 
 #include <algorithm>
+#include <bit>
 #include <cmath>
 #include <limits>
 #include <memory>
@@ -260,15 +261,48 @@ bool append_objective_face(std::span<const double> objective, double offset,
     return true;
 }
 
-bool rational_equals_double(const exact_h::ExactRational& rational, double value,
-    std::size_t max_bits) {
-    if (!finite(value)) return false;
-    const auto decoded = exact_h::exact_detail::decode(value);
-    exact_h::ExactRational dyadic;
-    dyadic.numerator = exact_h::exact_detail::from_u64(decoded.significand, decoded.negative);
-    dyadic.binary_exponent = decoded.exponent;
-    int order = 0;
-    return exact_h::compare_scaled_rationals(rational, dyadic, max_bits, order) && order == 0;
+std::optional<std::pair<double, double>> rational_to_outward_doubles(
+    const exact_h::ExactRational& rational, std::size_t max_bits) {
+    if (exact_h::exact_detail::is_zero(rational.numerator)) return std::pair{0.0, 0.0};
+    if (rational.denominator.negative || exact_h::exact_detail::is_zero(rational.denominator)) return {};
+    exact_h::ExactRational magnitude = rational;
+    const bool negative = magnitude.numerator.negative;
+    magnitude.numerator.negative = false;
+    constexpr std::uint64_t max_finite_bits = 0x7fefffffffffffffULL;
+    std::uint64_t low = 0;
+    std::uint64_t high = max_finite_bits;
+    while (low <= high) {
+        const auto bits = low + (high - low) / 2;
+        const auto dyadic = exact_h::exact_detail::decode(std::bit_cast<double>(bits));
+        exact_h::ExactRational candidate;
+        candidate.numerator = exact_h::exact_detail::from_u64(dyadic.significand);
+        candidate.binary_exponent = dyadic.exponent;
+        int order = 0;
+        if (!exact_h::compare_scaled_rationals(magnitude, candidate, max_bits, order)) return {};
+        if (order == 0) {
+            const auto signed_bits = bits | (negative ? (std::uint64_t{1} << 63) : 0);
+            const auto exact = std::bit_cast<double>(signed_bits);
+            return std::pair{exact, exact};
+        }
+        if (order > 0) {
+            if (bits == max_finite_bits) {
+                low = max_finite_bits + 1;
+                break;
+            }
+            low = bits + 1;
+        } else {
+            if (bits == 0) {
+                high = 0;
+                break;
+            }
+            high = bits - 1;
+        }
+    }
+    if (low > max_finite_bits) return {};
+    const double floor_magnitude = std::bit_cast<double>(high);
+    const double ceil_magnitude = std::bit_cast<double>(low);
+    if (negative) return std::pair{-ceil_magnitude, -floor_magnitude};
+    return std::pair{floor_magnitude, ceil_magnitude};
 }
 
 CheckResult verify_proposal(const StrategyRequest& request, const CompleteFamilyProposal& proposal) {
@@ -333,9 +367,11 @@ CheckResult verify_proposal(const StrategyRequest& request, const CompleteFamily
         return {CheckState::unsupported, "Exact objective minimization exceeded the arithmetic or operation limits"};
     if (optimum.state != exact_h::LinearMinimumState::minimum || !optimum.attained)
         return {CheckState::unsupported, "Objective must have a finite attained minimum"};
-    if (!rational_equals_double(optimum.value, family.optimum.bounds.lower->value, limits.max_integer_bits) ||
-        !rational_equals_double(optimum.value, family.optimum.bounds.upper->value, limits.max_integer_bits))
-        return {CheckState::refuted, "Published objective lower and upper bounds must equal the exact dyadic optimum"};
+    const auto exact_bounds = rational_to_outward_doubles(optimum.value, limits.max_integer_bits);
+    if (!exact_bounds || family.optimum.bounds.lower->value != exact_bounds->first ||
+        family.optimum.bounds.upper->value != exact_bounds->second)
+        return {CheckState::refuted,
+            "Published objective bounds must be the tight outward binary64 enclosure of the exact rational optimum"};
 
     auto optimal_rows = feasible_rows;
     if (!append_objective_face(objective, linear.offset, optimum.value, limits, optimal_rows))
@@ -408,7 +444,7 @@ bool strategy_a_nominal_linear_exact_profile_valid(const problem::ResolvedProble
     return true;
 }
 
-std::optional<double> strategy_a_nominal_linear_exact_optimum_bound(
+std::optional<std::pair<double, double>> strategy_a_nominal_linear_exact_optimum_bounds(
     const problem::ResolvedProblem& problem) {
     std::vector<exact_h::Row> rows;
     std::vector<double> objective;
@@ -421,11 +457,7 @@ std::optional<double> strategy_a_nominal_linear_exact_optimum_bound(
         linear->offset);
     if (optimum.state != exact_h::LinearMinimumState::minimum || !optimum.attained)
         return {};
-    double represented{};
-    if (!exact_h::exact_rational_to_double(optimum.value,
-            exact_h::default_max_integer_bits, represented))
-        return {};
-    return represented;
+    return rational_to_outward_doubles(optimum.value, exact_h::default_max_integer_bits);
 }
 
 std::vector<TransformStepIdentity> strategy_a_nominal_linear_exact_lineage(const ProblemId& problem,

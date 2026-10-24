@@ -44,7 +44,9 @@ and checks candidate equality with the complete optimal face by two exact
 inclusions. Non-dyadic optimum values, unsupported inputs, empty relations,
 failed exact decisions and resource-limit cases fail closed. This checks the
 represented values exactly; Strategy A's forward construction still uses
-binary64 providers, so it is not a validated-arithmetic claim. The profile has
+binary64 providers, so it is not a validated-arithmetic claim. The exact rational
+optimum is published using its tight outward binary64 enclosure, including for
+non-dyadic values. The profile has
 its own request and verifier identities and does not extend Strategy B
 coverage.
 

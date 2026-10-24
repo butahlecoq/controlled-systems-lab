@@ -2,6 +2,7 @@
 #include <csl/registry/registry.hpp>
 #include <memory>
 #include <optional>
+#include <utility>
 #include "runtime_lineage.hpp"
 
 namespace csl::synthesis::strategy_ts01 { class ExactJointRelation; }
@@ -39,7 +40,7 @@ bool strategy_b_ts03_profile_valid(const problem::ResolvedProblem&, const Strate
 bool strategy_a_ts03_profile_valid(const problem::ResolvedProblem&, const StrategyRequest&);
 bool strategy_a_nominal_linear_exact_profile_valid(const problem::ResolvedProblem&,
     const FamilyRequest&, const RepresentationId&);
-std::optional<double> strategy_a_nominal_linear_exact_optimum_bound(
+std::optional<std::pair<double, double>> strategy_a_nominal_linear_exact_optimum_bounds(
     const problem::ResolvedProblem&);
 std::vector<TransformStepIdentity> strategy_a_nominal_linear_exact_lineage(
     const ProblemId&, std::size_t horizon);
