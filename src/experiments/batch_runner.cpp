@@ -7,7 +7,7 @@
 namespace csl::experiments {
 namespace {
 bool valid_identity(const ScenarioConfigurationId& identity) {
-    return !identity.scenario.empty() && !identity.configuration.value.empty();
+    return !identity.scenario.value.empty() && !identity.configuration.value.empty();
 }
 
 bool valid_selection(const SelectionSettings& settings) {

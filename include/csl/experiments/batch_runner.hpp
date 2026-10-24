@@ -14,8 +14,13 @@ struct SelectionSettings {
     std::optional<std::size_t> seed;
 };
 
+struct ScenarioId {
+    std::string value;
+    bool operator==(const ScenarioId&) const = default;
+};
+
 struct ScenarioConfigurationId {
-    std::string scenario;
+    ScenarioId scenario;
     artifacts::ConfigId configuration;
     bool operator==(const ScenarioConfigurationId&) const = default;
 };

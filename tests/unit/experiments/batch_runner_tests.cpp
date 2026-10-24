@@ -64,7 +64,7 @@ registry::PreparedStrategy prepare_strategy() {
 
 experiments::ScenarioSweepCase sweep_case(std::string scenario,std::string config,
     const registry::PreparedStrategy& strategy) {
-    return {{std::move(scenario),artifacts::ConfigId{std::move(config)}},strategy,
+    return {{experiments::ScenarioId{std::move(scenario)},artifacts::ConfigId{std::move(config)}},strategy,
         {1,"analytic strategy uses one caller lane",std::nullopt,execution::CallStopSupport::cooperative_boundaries},
         {2,0.0,{{1,-1},{-1,1}},19}};
 }
@@ -91,8 +91,8 @@ TEST_CASE("a bounded sweep keeps whole scenario identities and deterministic sel
         REQUIRE(result.cases.size()==2);
         CHECK(result.batch.tasks[0].id.value=="sweep-0");
         CHECK(result.batch.tasks[1].id.value=="sweep-1");
-        CHECK(result.cases[0].identity==experiments::ScenarioConfigurationId{"scenario-a",{"config-a"}});
-        CHECK(result.cases[1].identity==experiments::ScenarioConfigurationId{"scenario-b",{"config-b"}});
+        CHECK(result.cases[0].identity==experiments::ScenarioConfigurationId{{"scenario-a"},{"config-a"}});
+        CHECK(result.cases[1].identity==experiments::ScenarioConfigurationId{{"scenario-b"},{"config-b"}});
         REQUIRE(result.cases[0].selection);
         CHECK(result.cases[0].selection->count==2);
         CHECK(result.cases[0].selection->seed==19);
@@ -128,7 +128,7 @@ TEST_CASE("a sweep rejects missing identity and invalid deterministic selection 
     REQUIRE(std::holds_alternative<Diagnostics>(outcome));
     CHECK(std::get<Diagnostics>(outcome).front().field=="sweep.cases[0].identity");
 
-    item.identity.scenario="scenario";
+    item.identity.scenario.value="scenario";
     item.selection.count=0;
     outcome=experiments::run_sweep(std::span{&item,1},resources,context,execution::Mode::sequential);
     REQUIRE(std::holds_alternative<Diagnostics>(outcome));
@@ -153,7 +153,7 @@ TEST_CASE("a sweep keeps admitted and skipped scenario records together") {
     const auto* skipped=std::get_if<execution::Skipped>(&result.batch.tasks[1].outcome);
     REQUIRE(skipped);
     CHECK(skipped->reason==execution::SkipReason::task_limit);
-    CHECK(result.cases[1].identity==experiments::ScenarioConfigurationId{"scenario-b",{"config-b"}});
+    CHECK(result.cases[1].identity==experiments::ScenarioConfigurationId{{"scenario-b"},{"config-b"}});
     REQUIRE(result.cases[1].selection);
     CHECK(result.cases[1].selection->seed==19);
 }
