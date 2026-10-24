@@ -3,12 +3,14 @@
 
 #include <csl/experiments/batch_runner.hpp>
 #include <csl/synthesis/strategy_ts01/analytic_profile.hpp>
+#include <nlohmann/json.hpp>
 
 #include <fstream>
 #include <iterator>
 
 using namespace csl;
 namespace {
+using Json = nlohmann::json;
 
 template<class T,class... R> T take(std::variant<T,R...> value) {
     if(!std::holds_alternative<T>(value))throw std::runtime_error("Unexpected fixture result");
@@ -23,6 +25,54 @@ std::string read_sweep_run_fixture() {
 artifacts::RecordedRunArtifact recorded_sweep_run() {
     auto decoded = take(artifacts::decode_run(read_sweep_run_fixture()));
     return take(artifacts::encode_recorded_run(decoded));
+}
+
+Json family_identity_json(const FamilyIdentity& identity) {
+    Json lineage=Json::array();
+    for(const auto& step:identity.lineage)
+        lineage.push_back({{"request",step.request.value},{"input",step.input.value},
+            {"output",step.output.value},{"module",step.module.value},{"version",step.version}});
+    const auto& request=identity.request;
+    const auto target=request.target==FamilyTarget::exact_optimal_relation?"exact_optimal_relation":
+        request.target==FamilyTarget::partial_relation?"partial_relation":"candidate_relaxation";
+    const auto assurance=request.assurance==Assurance::numerical?"numerical":"validated";
+    return {{"problem",identity.problem.value},
+        {"request",{{"profile",request.profile},{"objective",request.objective.value},{"target",target},
+            {"numerical",{{"absolute_tolerance",request.numerical.absolute_tolerance},
+                {"relative_tolerance",request.numerical.relative_tolerance}}},
+            {"assurance",assurance},{"representation",request.representation.value},
+            {"materialization_limit",request.materialization_limit
+                ?Json{std::to_string(*request.materialization_limit)}:Json{nullptr}}}},
+        {"coordinates",{{"dimensions",{{"state",std::to_string(identity.coordinates.dimensions.state)},
+            {"control",std::to_string(identity.coordinates.dimensions.control)},
+            {"external",std::to_string(identity.coordinates.dimensions.external)}}},
+            {"horizon",std::to_string(identity.coordinates.horizon)}}},
+        {"strategy",identity.strategy.value},{"strategy_version",identity.strategy_version},
+        {"lineage",std::move(lineage)}};
+}
+
+artifacts::RecordedRunArtifact recorded_query_run(const WitnessSelection& selection) {
+    const auto artifact=recorded_sweep_run();
+    const auto bytes=artifact.content().bytes();
+    const std::string text(reinterpret_cast<const char*>(bytes.data()),bytes.size());
+    auto wire=Json::parse(text);
+    Json witnesses=Json::array();
+    for(const auto& witness:selection.batch.witnesses)
+        witnesses.push_back({{"problem",witness.problem.value},{"states",witness.states},
+            {"controls",witness.controls},{"original_objective",witness.original_objective}});
+    const auto& batch=selection.batch;
+    const char* termination=selection.termination==Termination::completed?"completed":
+        selection.termination==Termination::cancelled?"cancelled":
+        selection.termination==Termination::resource_limit?"resource_limit":
+        selection.termination==Termination::numerical_failure?"numerical_failure":
+        selection.termination==Termination::operation_rejected?"operation_rejected":"contract_rejected";
+    wire["selection"]={{"batch",{{"witnesses",std::move(witnesses)},
+        {"requested",std::to_string(batch.requested)},{"selector",batch.selector.value},
+        {"seed",batch.seed?Json{std::to_string(*batch.seed)}:Json{nullptr}},
+        {"source_family",batch.source_family?family_identity_json(*batch.source_family):Json{nullptr}},
+        {"directions",batch.directions},{"distinctness_tolerance",batch.distinctness_tolerance}}},
+        {"termination",termination},{"diagnostics",selection.diagnostics}};
+    return take(artifacts::decode_recorded_run(wire.dump()));
 }
 
 problem::ResolvedContent sweep_spec() {
@@ -83,36 +133,44 @@ registry::PreparedStrategy prepare_strategy() {
 }
 
 class EchoSelector final : public WitnessSelectorWorkspace {
+    bool recorded_fixture_;
 public:
+    explicit EchoSelector(bool recorded_fixture) : recorded_fixture_(recorded_fixture) {}
     std::variant<WitnessSelection, Unsupported> select(const OptimalFamily& family,
         const WitnessRequest& request, const ExecutionContext&) override {
         WitnessBatch batch;
         batch.requested=request.count;
-        batch.selector={"test.selector"};
+        batch.selector={recorded_fixture_ ? "first" : "test.selector"};
         batch.seed=request.seed;
-        batch.source_family=family.identity();
+        if (recorded_fixture_) {
+            batch.witnesses.push_back({family.identity().problem,{{0},{0},{1}},{{0},{1}},0.0});
+        } else {
+            batch.source_family=family.identity();
+        }
         batch.directions=request.directions;
         batch.distinctness_tolerance=request.distinctness_tolerance;
-        return WitnessSelection{std::move(batch),Termination::completed,{}};
+        return WitnessSelection{std::move(batch),Termination::completed,
+            recorded_fixture_ ? "synthetic selector projection" : ""};
     }
 };
 
-registry::PreparedProvider<registry::SelectorPort> prepare_selector_provider(bool reject_seed_twenty=false) {
+registry::PreparedProvider<registry::SelectorPort> prepare_selector_provider(bool reject_seed_twenty=false,
+    bool recorded_fixture=false) {
     registry::Registry<registry::SelectorPort> selectors;
     registry::Registration<registry::SelectorPort> registration{
-        {{"test.selector"},"1"},
+        {{recorded_fixture ? "first" : "test.selector"},"1"},
         [reject_seed_twenty](const registry::SelectorRequest& request, const registry::Requirements& requirements)
             -> registry::Capability {
             if(reject_seed_twenty&&request.selection.seed==20)
                 return Diagnostics{{DiagnosticCode::unsupported,"test.selector.seed","seed 20 rejected by fixture"}};
             return registry::Offer{requirements.output};
         },
-        [](const registry::SelectorRequest&) { return std::make_unique<EchoSelector>(); }};
+        [recorded_fixture](const registry::SelectorRequest&) { return std::make_unique<EchoSelector>(recorded_fixture); }};
     REQUIRE_FALSE(selectors.add(std::move(registration)));
     registry::Requirements requirements;
     requirements.output.representation={"csl.witness-batch.v1"};
     auto prepared=registry::prepare_provider(registry::select_provider(selectors,
-        registry::Method{{"test.selector"},{}},requirements));
+        registry::Method{{recorded_fixture ? "first" : "test.selector"},{}},requirements));
     REQUIRE(std::holds_alternative<registry::PreparedProvider<registry::SelectorPort>>(prepared));
     return std::get<registry::PreparedProvider<registry::SelectorPort>>(std::move(prepared));
 }
@@ -389,11 +447,12 @@ TEST_CASE("a completed family query sweep records aligned runs and measured phas
         item.resources.workspace_reservation_bytes = 20;
         item.resources.retained_result_reservation_bytes = 15;
     }
+    cases[0].selection = {1,0.0,{},std::nullopt};
     cases[1].selection.seed = 20;
     const ResourcePolicy resources{2,2,1,100};
     ExecutionContext context;
     context.run_id = "recorded-sweep";
-    const auto selector = prepare_selector_provider(true);
+    const auto selector = prepare_selector_provider(true,true);
     const execution::ResourceUse query_resources{1,"one selector workspace",10,
         execution::CallStopSupport::cooperative_boundaries,5};
     auto coarse = experiments::run_sweep(cases, resources, context, execution::Mode::bounded_parallel);
@@ -405,6 +464,10 @@ TEST_CASE("a completed family query sweep records aligned runs and measured phas
     const auto recorded = recorded_sweep_run();
     const std::vector<artifacts::RecordedRunArtifact> coarse_records{recorded, recorded};
     std::vector<std::optional<artifacts::RecordedRunArtifact>> query_records{recorded, std::nullopt};
+    const auto& observed_selection=std::get<WitnessSelection>(std::get<execution::Returned<registry::SelectorPort>>(
+        std::get<experiments::FamilyQueryResult>(queried).query_batch.tasks[0].outcome).value);
+    const auto matching_query=recorded_query_run(observed_selection);
+    query_records[0]=matching_query;
     const auto archive = experiments::record_family_query_sweep(sweep_spec(),
         std::get<experiments::FamilyQueryResult>(queried), coarse_records, query_records);
     if (const auto* error = std::get_if<artifacts::ArtifactError>(&archive))
@@ -423,6 +486,22 @@ TEST_CASE("a completed family query sweep records aligned runs and measured phas
     CHECK(wire.find("\"retained_result_reservation_bytes\":35") != std::string::npos);
     CHECK(std::get<experiments::FamilyQueryResult>(queried).sweep.retained_result_reservation_bytes==30);
     CHECK(std::get<experiments::FamilyQueryResult>(queried).query_result_reservation_bytes==5);
+    auto stale_query_wire = std::string(reinterpret_cast<const char*>(recorded.content().bytes().data()),
+        recorded.content().bytes().size());
+    const auto selection_start = stale_query_wire.find("\"selection\":");
+    REQUIRE(selection_start != std::string::npos);
+    const auto witness_objective = stale_query_wire.find("\"original_objective\":0.0",selection_start);
+    REQUIRE(witness_objective != std::string::npos);
+    stale_query_wire.replace(witness_objective,std::string_view("\"original_objective\":0.0").size(),
+        "\"original_objective\":1.0");
+    const auto stale_query_result = artifacts::decode_recorded_run(stale_query_wire);
+    REQUIRE(std::holds_alternative<artifacts::RecordedRunArtifact>(stale_query_result));
+    query_records[0] = std::get<artifacts::RecordedRunArtifact>(stale_query_result);
+    const auto mismatched_query_outcome = experiments::record_family_query_sweep(sweep_spec(),
+        std::get<experiments::FamilyQueryResult>(queried), coarse_records, query_records);
+    REQUIRE(std::holds_alternative<artifacts::ArtifactError>(mismatched_query_outcome));
+    CHECK(std::get<artifacts::ArtifactError>(mismatched_query_outcome).path=="sweep.cases[0].query.outcome");
+    query_records[0] = matching_query;
     query_records[1] = recorded;
     const auto mismatched_query = experiments::record_family_query_sweep(sweep_spec(),
         std::get<experiments::FamilyQueryResult>(queried), coarse_records, query_records);
@@ -445,6 +524,51 @@ TEST_CASE("a completed family query sweep records aligned runs and measured phas
         std::get<experiments::FamilyQueryResult>(queried), mismatched_coarse_records, query_records);
     REQUIRE(std::holds_alternative<artifacts::ArtifactError>(mismatched_coarse));
     CHECK(std::get<artifacts::ArtifactError>(mismatched_coarse).path=="sweep.cases[0].coarse_run.outcome");
+}
+
+TEST_CASE("a stopped selector task rejects a recorded stale selection") {
+    const auto prepared=prepare_strategy();
+    const auto item=sweep_case("scenario-a","config-a",prepared);
+    const ResourcePolicy resources{1,1,1,std::nullopt};
+    ExecutionContext context;
+    context.run_id="stopped-selector";
+    auto coarse=experiments::run_sweep(std::span{&item,1},resources,context,execution::Mode::sequential);
+    REQUIRE(std::holds_alternative<experiments::SweepResult>(coarse));
+    auto queried=experiments::run_family_queries(std::get<experiments::SweepResult>(std::move(coarse)),
+        prepare_selector_provider(),resources,context,execution::Mode::sequential,
+        {1,"selector workspace",std::nullopt,execution::CallStopSupport::cooperative_boundaries});
+    REQUIRE(std::holds_alternative<experiments::FamilyQueryResult>(queried));
+    const auto& query_result=std::get<experiments::FamilyQueryResult>(queried);
+    REQUIRE(query_result.query_batch.tasks.size()==1);
+    REQUIRE(std::holds_alternative<execution::Returned<registry::SelectorPort>>(
+        query_result.query_batch.tasks[0].outcome));
+
+    const auto recorded=recorded_sweep_run();
+    const auto bytes=recorded.content().bytes();
+    const std::string text(reinterpret_cast<const char*>(bytes.data()),bytes.size());
+    const std::vector<artifacts::RecordedRunArtifact> coarse_runs{recorded};
+
+    for (const bool failed : {false,true}) {
+        auto stopped=query_result;
+        Json wire=Json::parse(text);
+        if (failed) {
+            wire["final"]={{"kind","failed"},{"value",{{"phase","invoke"},
+                {"reason","adapter_exception"},{"message","fixture failure"},{"raw_diagnostics",nullptr}}}};
+            stopped.query_batch.tasks[0].outcome=execution::TaskFailure{
+                execution::FailureStage::invoke,execution::FailureKind::adapter_exception,
+                std::make_exception_ptr(std::runtime_error("fixture failure"))};
+        } else {
+            wire["final"]={{"kind","skipped"},{"value",{{"reason","task_limit"}}}};
+            stopped.query_batch.tasks[0].outcome=execution::Skipped{execution::SkipReason::task_limit};
+        }
+        const auto stale=artifacts::decode_recorded_run(wire.dump());
+        REQUIRE(std::holds_alternative<artifacts::RecordedRunArtifact>(stale));
+        const std::vector<std::optional<artifacts::RecordedRunArtifact>> query_runs{
+            std::get<artifacts::RecordedRunArtifact>(stale)};
+        const auto archive=experiments::record_family_query_sweep(sweep_spec(),stopped,coarse_runs,query_runs);
+        REQUIRE(std::holds_alternative<artifacts::ArtifactError>(archive));
+        CHECK(std::get<artifacts::ArtifactError>(archive).path=="sweep.cases[0].query.outcome");
+    }
 }
 
 TEST_CASE("finite sweep budgets reserve retained coarse and query results before admission") {

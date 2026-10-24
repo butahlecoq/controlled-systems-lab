@@ -96,8 +96,9 @@ FamilyQueryOutcome run_family_queries(SweepResult&& coarse,
 // Combines live phase dispositions and measured executor facts with caller-owned
 // inert per-case run records. Coarse records must match each live task's terminal
 // status, mathematical outcome, objective bounds, and configuration identity;
-// query records are aligned with cases, with values only for cases whose selector
-// task was scheduled.
+// scheduled query records must match their live selector outcome, including the
+// complete recorded witness-selection payload. Query records are aligned with
+// cases, with values only for cases whose selector task was scheduled.
 artifacts::ArtifactResult<artifacts::RecordedSweepArtifact> record_family_query_sweep(
     const problem::ResolvedContent& canonical_spec, const FamilyQueryResult&,
     std::span<const artifacts::RecordedRunArtifact> coarse_runs,
