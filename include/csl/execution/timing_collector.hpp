@@ -1,5 +1,6 @@
 #pragma once
 #include <csl/execution/observability.hpp>
+#include <cstdint>
 #include <thread>
 
 namespace csl::execution::observability {
@@ -42,6 +43,10 @@ public:
     void close(Termination) noexcept;
     void close(Termination,std::shared_ptr<const GeometryEvidence>) noexcept;
     void close(Termination,std::shared_ptr<const GeometryEvidence>,std::optional<SetRelation>) noexcept;
+    void observe_input_size(std::uint64_t) noexcept;
+    void observe_output_size(std::uint64_t) noexcept;
+    void mark_input_size_unavailable() noexcept;
+    void mark_output_size_unavailable() noexcept;
     void close_not_called(artifacts::NotCalledReason,
         Termination=Termination::operation_rejected) noexcept;
     void close_not_called_with_detail(artifacts::NotCalledReason,std::string_view,

@@ -28,6 +28,7 @@ struct Slot {
     std::optional<ar::NotCalledReason> not_called;
     std::shared_ptr<const GeometryEvidence> relation_evidence;
     std::optional<SetRelation> applied_relation;
+    SizeObservation input_size{},output_size{};
     std::size_t detail_offset{},detail_capacity{},detail_size{};
 };
 class SteadyClock final:public TimingClock {
@@ -169,6 +170,30 @@ void TimingScope::close(Termination termination,
     if(auto owner=std::exchange(owner_,{}))
         owner->close(slot_,termination,false,{},std::move(relation_evidence),applied_relation);
 }
+void TimingScope::observe_input_size(std::uint64_t size) noexcept {
+    if(!owner_)return;
+    std::lock_guard lock{owner_->mutex};
+    auto& slot=owner_->slots[slot_];
+    if(slot.state==Slot::State::open)slot.input_size=SizeAvailable{size};
+}
+void TimingScope::observe_output_size(std::uint64_t size) noexcept {
+    if(!owner_)return;
+    std::lock_guard lock{owner_->mutex};
+    auto& slot=owner_->slots[slot_];
+    if(slot.state==Slot::State::open)slot.output_size=SizeAvailable{size};
+}
+void TimingScope::mark_input_size_unavailable() noexcept {
+    if(!owner_)return;
+    std::lock_guard lock{owner_->mutex};
+    auto& slot=owner_->slots[slot_];
+    if(slot.state==Slot::State::open)slot.input_size=SizeUnavailable{};
+}
+void TimingScope::mark_output_size_unavailable() noexcept {
+    if(!owner_)return;
+    std::lock_guard lock{owner_->mutex};
+    auto& slot=owner_->slots[slot_];
+    if(slot.state==Slot::State::open)slot.output_size=SizeUnavailable{};
+}
 void TimingScope::close_not_called_with_detail(ar::NotCalledReason reason,std::string_view detail,
         Termination termination) noexcept {
     if(auto owner=std::exchange(owner_,{}))owner->close(slot_,termination,false,reason,{}, {},detail);
@@ -181,6 +206,12 @@ void TimingScope::close() noexcept {
     const bool failed=std::uncaught_exceptions()>exceptions_;
     const bool stopped=cancellation_.stop_requested()||(deadline_&&std::chrono::steady_clock::now()>=*deadline_);
     auto owner=std::exchange(owner_,{});
+    if(failed) {
+        std::lock_guard lock{owner->mutex};
+        if(!std::holds_alternative<SizeNotObserved>(owner->slots[slot_].input_size)&&
+           std::holds_alternative<SizeNotObserved>(owner->slots[slot_].output_size))
+            owner->slots[slot_].output_size=SizeUnavailable{};
+    }
     owner->close(slot_,failed?Termination::numerical_failure:stopped?Termination::cancelled:Termination::completed,failed);
 }
 TimingCollector::TimingCollector(std::shared_ptr<TimingScope::Owner> p):owner_(std::move(p)){}
@@ -259,6 +290,8 @@ CollectionResult<TimingReport> TimingCollector::snapshot() const {
                 !slot.failed,slot.termination,{false,0,ar::MissingReason::not_instrumented},
                 slot.detail_size?std::string_view{owner_->detail_arena.data()+slot.detail_offset,slot.detail_size}:std::string_view{},
                 CompletionStatus::returned,false,MathematicalOutcome::undetermined,slot.relation_evidence,slot.applied_relation};
+            completion.input_size=slot.input_size;
+            completion.output_size=slot.output_size;
             completion.status=slot.not_called?CompletionStatus::rejected:
                 slot.failed?CompletionStatus::failed:CompletionStatus::returned;
             shards[static_cast<std::size_t>(spans[i].shard)].record(completion);

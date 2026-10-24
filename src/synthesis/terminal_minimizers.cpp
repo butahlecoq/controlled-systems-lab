@@ -8,6 +8,11 @@ namespace csl::synthesis {
 namespace {
 namespace ar = csl::artifacts;
 namespace ob = csl::execution::observability;
+template<class Program>
+std::uint64_t variable_count(const Program& program) noexcept {
+    if constexpr(requires {program.variables();})return program.variables().size();
+    else return program.quadratic_program().variables().size();
+}
 TerminalMinimizers rejected(DiagnosticCode code,std::string field,std::string message) {
     TerminalMinimizers r;r.termination=code==DiagnosticCode::unsupported?Termination::operation_rejected:Termination::contract_rejected;
     r.diagnostics={{code,std::move(field),std::move(message)}};return r;
@@ -98,13 +103,21 @@ TerminalMinimizers TerminalOptimizer::solve(const problem::ResolvedProblem& prob
         }
         auto workers=std::get<registry::PreparedPipeline<Port>>(std::move(admitted)).create();
         auto solver_scope=start_solver_scope(context,program.identity(),provider.provenance());
+        if(solver_scope)solver_scope->observe_input_size(variable_count(program));
         auto outcome=std::get<0>(workers)->run(execution);
         if(const auto* unsupported=std::get_if<Unsupported>(&outcome)) {
-            if(solver_scope)solver_scope->close(Termination::operation_rejected);
+            if(solver_scope) {
+                solver_scope->mark_output_size_unavailable();
+                solver_scope->close(Termination::operation_rejected);
+            }
             result.termination=Termination::operation_rejected;result.diagnostics=unsupported->diagnostics;return false;
         }
         const auto& solved=std::get<ProgramResult>(outcome);
-        if(solver_scope)solver_scope->close(solved.termination);
+        if(solver_scope) {
+            if(solved.primal)solver_scope->observe_output_size(solved.primal->size());
+            else solver_scope->mark_output_size_unavailable();
+            solver_scope->close(solved.termination);
+        }
         auto diagnostics=optimization::check_program_result(solved,program,request.assurance);
         if(!diagnostics.empty()){result.termination=Termination::contract_rejected;result.diagnostics=std::move(diagnostics);return false;}
         result.optimization=solved;result.termination=solved.termination;result.outcome=solved.outcome.value;result.optimum=evidence(solved,problem.identity());

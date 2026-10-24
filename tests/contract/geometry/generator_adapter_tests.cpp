@@ -163,21 +163,23 @@ TEST_CASE("generator operation records its registered module span without changi
     const auto resolved=std::get<problem::ResolvedProblem>(std::move(resolved_result));
     const ar::Unavailable missing{ar::MissingReason::not_instrumented,{}};
     const ar::ModuleIdentity implementation{{"csl.geometry.generators.operations"},"1.1.0",missing};
-    auto timer=generator_timer(resolved,"observed-image","geometry.generators.affine-image",implementation);
+    auto timer=generator_timer(resolved,"observed-sum","geometry.generators.minkowski-sum",implementation);
     ExecutionContext context;context.run_id="generator-test-run";context.numerical={1e-8,1e-8};context.timing=timer;
     auto root=artifact(timer->start({0},context));
 
     auto selected=provider(geometry::generators::make_operation_registration(),{"csl.zonotope"});
-    const auto input=generator("timed-box",{1},{1,1,{2}},{{"factor"}},{0,1,{}},{});
-    const OperationRequest request{{resolved.identity(),{"observed-image"},{"image-result"}},
-        {"csl.geometry.generators.operations"},AffineImage{input.as_handle(),{1,1,{3}},{4}},
+    const auto left=generator("timed-left",{1},{1,1,{2}},{{"left-factor"}},{0,1,{}},{});
+    const auto right=generator("timed-right",{2},{1,2,{1,3}},{{"right-factor-1"},{"right-factor-2"}},
+        {0,2,{}},{});
+    const OperationRequest request{{resolved.identity(),{"observed-sum"},{"sum-result"}},
+        {"csl.geometry.generators.operations"},MinkowskiSum{left.as_handle(),right.as_handle()},
         SetRelation::equivalent,Assurance::numerical};
     auto prepared=take(selected.prepare(request));auto [workspace]=prepared.create();
     const auto outcome=workspace->run(context);
     REQUIRE(std::holds_alternative<OperationResult>(outcome));
     CHECK(std::get<OperationResult>(outcome).relation==SetRelation::equivalent);
     const auto output=take(sets::from_generator_handle(std::get<OperationResult>(outcome).output));
-    CHECK(output.center()==Vector{7});
+    CHECK(output.center()==Vector{3});CHECK(output.factor_ids().size()==3);
     root.close(Termination::completed);
 
     const auto report=artifact(timer->snapshot());
@@ -185,8 +187,10 @@ TEST_CASE("generator operation records its registered module span without changi
     REQUIRE(std::holds_alternative<ar::Available<std::uint64_t>>(report.spans[1].inclusive_wall_ticks));
     CHECK(std::get<ar::Available<std::uint64_t>>(report.spans[1].inclusive_wall_ticks).value==10);
     const auto& descriptor=report.observations.description().spans[1].descriptor;
-    CHECK(descriptor.task=="observed-image");CHECK(descriptor.operation=="geometry.generators.affine-image");
+    CHECK(descriptor.task=="observed-sum");CHECK(descriptor.operation=="geometry.generators.minkowski-sum");
     CHECK(descriptor.module.id==implementation.id);CHECK_FALSE(descriptor.backend);
+    REQUIRE(descriptor.input_size);CHECK(*descriptor.input_size==3);
+    REQUIRE(descriptor.output_size);CHECK(*descriptor.output_size==3);
     REQUIRE(std::holds_alternative<ar::ReturnedSpan>(report.observations.description().spans[1].status));
     CHECK(std::get<ar::ReturnedSpan>(report.observations.description().spans[1].status).termination==Termination::completed);
 }
@@ -230,6 +234,8 @@ TEST_CASE("generator V conversion records its registered module span") {
     CHECK(descriptor.module.id==implementation.id);
     REQUIRE(descriptor.input_representation);CHECK(*descriptor.input_representation==RepresentationId{"csl.zonotope"});
     REQUIRE(descriptor.output_representation);CHECK(*descriptor.output_representation==RepresentationId{"csl.polyhedron.v"});
+    REQUIRE(descriptor.input_size);CHECK(*descriptor.input_size==1);
+    REQUIRE(descriptor.output_size);CHECK(*descriptor.output_size==2);
     CHECK(descriptor.relation==SetRelation::equivalent);
     REQUIRE(descriptor.applied_relation);CHECK(*descriptor.applied_relation==SetRelation::equivalent);
     REQUIRE(descriptor.relation_evidence);

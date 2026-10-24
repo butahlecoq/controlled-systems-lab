@@ -229,6 +229,8 @@ TEST_CASE("direction LP executions record their selector, backend, program, and 
         REQUIRE(record.descriptor.program);
         CHECK(*record.descriptor.program==direction_program(family,selection_request,index));
         CHECK(record.descriptor.query==index);
+        CHECK(record.descriptor.input_size==5);
+        CHECK(record.descriptor.output_size==5);
         REQUIRE(std::holds_alternative<ar::ReturnedSpan>(record.status));
         CHECK(std::get<ar::ReturnedSpan>(record.status).termination==Termination::completed);
     }

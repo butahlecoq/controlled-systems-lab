@@ -7,6 +7,7 @@
 #include <chrono>
 #include <cmath>
 #include <limits>
+#include <optional>
 #include <unordered_set>
 
 namespace csl::geometry::generators {
@@ -58,6 +59,49 @@ OperationStopped stop(const ExecutionContext& context) {
 }
 std::variant<sets::GeneratorSet,Diagnostics> imported(const SetHandle& handle) {
     return sets::from_generator_handle(handle);
+}
+std::optional<std::uint64_t> factor_count(const SetHandle& handle) noexcept {
+    try {
+        auto set=imported(handle);
+        if(const auto* value=std::get_if<sets::GeneratorSet>(&set)) {
+            if(value->factor_ids().size()<=std::numeric_limits<std::uint64_t>::max())
+                return static_cast<std::uint64_t>(value->factor_ids().size());
+        }
+    } catch(...) {}
+    return std::nullopt;
+}
+std::optional<std::uint64_t> operation_input_size(const OperationRequest& request) noexcept {
+    const auto count=[](const SetHandle& handle) {return factor_count(handle);};
+    if(const auto* image=std::get_if<AffineImage>(&request.operation)) return count(image->input);
+    const SetHandle* left=nullptr;
+    const SetHandle* right=nullptr;
+    if(const auto* sum=std::get_if<MinkowskiSum>(&request.operation)) {
+        left=&sum->left;right=&sum->right;
+    } else if(const auto* dependent=std::get_if<DependentSum>(&request.operation)) {
+        left=&dependent->left;right=&dependent->right;
+    } else return std::nullopt;
+    const auto a=count(*left),b=count(*right);
+    if(!a||!b||*b>std::numeric_limits<std::uint64_t>::max()-*a)return std::nullopt;
+    return *a+*b;
+}
+std::optional<std::uint64_t> operation_output_size(const OperationOutcome& outcome) noexcept {
+    const auto* result=std::get_if<OperationResult>(&outcome);
+    return result ? factor_count(result->output) : std::nullopt;
+}
+std::optional<std::uint64_t> conversion_output_size(const SetTransformOutcome& outcome) noexcept {
+    const auto* result=std::get_if<OperationResult>(&outcome);
+    if(!result)return std::nullopt;
+    try {
+        auto set=sets::from_handle(result->output);
+        if(const auto* value=std::get_if<sets::SetData>(&set)) {
+            const auto representation=value->representation();
+            if(const auto* v=std::get_if<sets::VRepresentation>(&representation)) {
+                if(v->vertices.rows()<=std::numeric_limits<std::uint64_t>::max())
+                    return static_cast<std::uint64_t>(v->vertices.rows());
+            }
+        }
+    } catch(...) {}
+    return std::nullopt;
 }
 bool independent(const sets::GeneratorSet& left,const sets::GeneratorSet& right) {
     std::unordered_set<std::string> ids;
@@ -172,7 +216,9 @@ public:
         if(auto errors=check_geometry_evidence(proof,request_);!errors.empty()) return Unsupported{std::move(errors)};
         return OperationResult{std::get<sets::GeneratorSet>(std::move(result)).as_handle(),
             SetRelation::equivalent,std::move(proof)};
-        },operation_termination<OperationOutcome>);
+        },operation_termination<OperationOutcome>,
+        [&]() noexcept {return operation_input_size(request_);},
+        [](const OperationOutcome& outcome) noexcept {return operation_output_size(outcome);});
     }
 };
 
@@ -257,7 +303,9 @@ public:
         if(auto errors=check_geometry_evidence(proof,request_);!errors.empty()) return Unsupported{std::move(errors)};
         return OperationResult{std::get<sets::SetData>(std::move(output)).as_handle(),
             SetRelation::equivalent,std::move(proof)};
-        },operation_termination<SetTransformOutcome>);
+        },operation_termination<SetTransformOutcome>,
+        [&]() noexcept {return factor_count(request_.input);},
+        [](const SetTransformOutcome& outcome) noexcept {return conversion_output_size(outcome);});
     }
 };
 } // namespace
