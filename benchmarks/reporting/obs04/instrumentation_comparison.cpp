@@ -164,7 +164,9 @@ struct CollectionSetup {
 };
 
 CollectionSetup collector_for(const application::PreparedComparison& prepared,
-    std::size_t strategy_index, bool enabled, std::string run_id) {
+    std::size_t strategy_index, bool enabled, std::string run_id,
+    std::optional<ar::ResolvedConfiguration>& fallback_configuration,
+    std::optional<ar::CollectedStatistics>& fallback_statistics) {
     const auto clock = ob::make_steady_timing_clock();
     const auto& configuration = prepared.strategies()[strategy_index];
     const auto expected = prepared.expected_synthesis_identity(strategy_index);
@@ -182,6 +184,7 @@ CollectionSetup collector_for(const application::PreparedComparison& prepared,
     config.strategy = configuration;
     config.strategy.selector = config.selector.id;
     auto resolved_config = take(ar::resolve_configuration(std::move(config)));
+    fallback_configuration=resolved_config;
 
     ob::PlanInput plan{prepared.problem(), resolved_config, {run_id}, {clock->wall_domain()}, {}, enabled?1u:0u};
     const std::size_t span_count = enabled ? (strategy_index == 0 ? 5 : 1) : 0;
@@ -207,12 +210,12 @@ CollectionSetup collector_for(const application::PreparedComparison& prepared,
         plan.spans.push_back(std::move(span));
     }
     auto collection_plan = take(ob::make_collection_plan(std::move(plan)));
+    fallback_statistics=take(ob::merge_observations(collection_plan,{}));
     if(enabled) {
         auto collector=take(ob::make_timing_collector(std::move(collection_plan), clock, {0}, {}));
-        return {std::move(resolved_config),std::move(collector),std::nullopt};
+        return {std::move(resolved_config),std::move(collector),*fallback_statistics};
     }
-    auto statistics=take(ob::merge_observations(collection_plan,{}));
-    return {std::move(resolved_config),nullptr,std::move(statistics)};
+    return {std::move(resolved_config),nullptr,*fallback_statistics};
 }
 
 struct Signature {
@@ -462,11 +465,14 @@ private:
 };
 
 TrialRecord trial_impl(const application::PreparedComparison& prepared, std::size_t strategy_index,
-    bool enabled, std::size_t repetition, bool warmup, const Signature& expected) {
+    bool enabled, std::size_t repetition, bool warmup, const Signature& expected,
+    std::optional<ar::ResolvedConfiguration>& fallback_configuration,
+    std::optional<ar::CollectedStatistics>& fallback_statistics) {
     const auto setup_begin = Clock::now();
     const ar::RunId run_id{"obs04-" + std::to_string(strategy_index) + "-" +
         (enabled ? "enabled-" : "disabled-") + std::to_string(repetition) + (warmup ? "-warmup" : "")};
-    auto setup = collector_for(prepared, strategy_index, enabled, run_id.value);
+    auto setup = collector_for(prepared, strategy_index, enabled, run_id.value,
+        fallback_configuration,fallback_statistics);
     auto collector = setup.collector;
     auto workspaces = prepared.create();
     ExecutionContext context;
@@ -570,16 +576,14 @@ std::string escaped(std::string_view value) {
 }
 
 TrialRecord failed_trial(const application::PreparedComparison& prepared, std::size_t strategy_index,
-    bool enabled, std::size_t repetition, bool warmup, std::string_view message) {
+    bool enabled, std::size_t repetition, bool warmup, std::string_view message,
+    ar::ResolvedConfiguration configuration, ar::CollectedStatistics statistics) {
     const ar::RunId run_id{"obs04-" + std::to_string(strategy_index) + "-"+
         (enabled ? "enabled-" : "disabled-") + std::to_string(repetition) + (warmup ? "-warmup" : "")};
-    auto setup=collector_for(prepared,strategy_index,enabled,run_id.value);
-    auto statistics=setup.collector?take(setup.collector->snapshot()).observations:
-        std::move(*setup.empty_statistics);
     const auto description=prepared.problem().description();
     const ar::Unavailable unavailable{ar::MissingReason::not_requested,{}};
     ar::RunRecord record{prepared.problem().identity(),description->model->dynamics.dimensions,
-        static_cast<std::uint64_t>(description->times.size()-1),std::move(setup.configuration),run_id,
+        static_cast<std::uint64_t>(description->times.size()-1),std::move(configuration),run_id,
         ar::FailedFinal{ar::FailurePhase::invoke,ar::FailureReason::adapter_exception,std::string(message),{}},
         std::move(statistics),{unavailable,unavailable,unavailable,unavailable,false,ar::MemoryAccounting::unlimited},
         {},{},ar::ProblemProvenance::problem_revalidated,{}};
@@ -605,10 +609,15 @@ TrialRecord failed_trial(const application::PreparedComparison& prepared, std::s
 
 std::optional<TrialRecord> trial(const application::PreparedComparison& prepared, std::size_t strategy_index,
     bool enabled, std::size_t repetition, bool warmup, const Signature& expected) {
+    std::optional<ar::ResolvedConfiguration> fallback_configuration;
+    std::optional<ar::CollectedStatistics> fallback_statistics;
     try {
-        return trial_impl(prepared, strategy_index, enabled, repetition, warmup, expected);
+        return trial_impl(prepared, strategy_index, enabled, repetition, warmup, expected,
+            fallback_configuration,fallback_statistics);
     } catch (const std::exception& error) {
-        return failed_trial(prepared,strategy_index,enabled,repetition,warmup,error.what());
+        if(!fallback_configuration||!fallback_statistics)throw;
+        return failed_trial(prepared,strategy_index,enabled,repetition,warmup,error.what(),
+            std::move(*fallback_configuration),std::move(*fallback_statistics));
     }
 }
 
