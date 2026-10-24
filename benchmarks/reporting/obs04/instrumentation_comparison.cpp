@@ -15,14 +15,26 @@
 #include <array>
 #include <chrono>
 #include <cmath>
+#include <cstdlib>
 #include <cstdint>
+#include <cerrno>
+#include <csignal>
+#include <cstring>
 #include <iostream>
 #include <memory>
+#include <optional>
 #include <stdexcept>
 #include <string>
 #include <string_view>
 #include <type_traits>
+#include <thread>
 #include <utility>
+
+#ifndef _WIN32
+#include <fcntl.h>
+#include <poll.h>
+#include <unistd.h>
+#endif
 
 #if !defined(NDEBUG) || defined(_DEBUG)
 #error "The OBS-04 measurement executable must be compiled as a Release target"
@@ -259,6 +271,142 @@ std::int64_t ns(Clock::time_point begin, Clock::time_point end) {
     return std::chrono::duration_cast<std::chrono::nanoseconds>(end - begin).count();
 }
 
+class PerfControl {
+public:
+    PerfControl() {
+#ifdef _WIN32
+        if (std::getenv("CSL_PERF_CONTROL_FIFO") || std::getenv("CSL_PERF_ACK_FIFO"))
+            throw std::runtime_error("perf FIFO control is supported only on POSIX hosts");
+#else
+        const char* control_path = std::getenv("CSL_PERF_CONTROL_FIFO");
+        const char* ack_path = std::getenv("CSL_PERF_ACK_FIFO");
+        if ((control_path == nullptr) != (ack_path == nullptr))
+            throw std::runtime_error("perf control and acknowledgement FIFOs must be configured together");
+        if (control_path != nullptr) {
+            std::signal(SIGPIPE, SIG_IGN);
+            const auto open_deadline = Clock::now() + std::chrono::milliseconds(acknowledgement_timeout_ms);
+            do {
+                control_fd_ = ::open(control_path, O_WRONLY | O_NONBLOCK | O_CLOEXEC);
+                if (control_fd_ >= 0) break;
+                if (errno == EINTR) continue;
+                if (errno != ENXIO)
+                    throw std::runtime_error("Could not open perf control FIFO");
+                if (Clock::now() >= open_deadline)
+                    throw std::runtime_error("Timed out waiting for perf to open the control FIFO");
+                std::this_thread::sleep_for(std::chrono::milliseconds(10));
+            } while (true);
+            ack_fd_ = ::open(ack_path, O_RDONLY | O_NONBLOCK | O_CLOEXEC);
+            if (ack_fd_ < 0) {
+                ::close(control_fd_);
+                control_fd_ = -1;
+                throw std::runtime_error("Could not open perf acknowledgement FIFO");
+            }
+            configured_ = true;
+        }
+#endif
+    }
+
+    PerfControl(const PerfControl&) = delete;
+    PerfControl& operator=(const PerfControl&) = delete;
+
+    ~PerfControl() {
+#ifndef _WIN32
+        if (active_) {
+            try { command("disable"); } catch (...) {}
+        }
+        if (ack_fd_ >= 0) ::close(ack_fd_);
+        if (control_fd_ >= 0) ::close(control_fd_);
+#endif
+    }
+
+    bool configured() const noexcept {
+#ifndef _WIN32
+        return configured_;
+#else
+        return false;
+#endif
+    }
+
+    std::size_t acknowledged_commands() const noexcept { return acknowledged_commands_; }
+
+    void enable() {
+#ifndef _WIN32
+        if (configured_) {
+            command("enable");
+            active_ = true;
+        }
+#endif
+    }
+
+    void disable() {
+#ifndef _WIN32
+        if (configured_) {
+            command("disable");
+            active_ = false;
+        }
+#endif
+    }
+
+private:
+#ifndef _WIN32
+    static constexpr int acknowledgement_timeout_ms = 5000;
+
+    void command(std::string_view value) {
+        const auto deadline = Clock::now() + std::chrono::milliseconds(acknowledgement_timeout_ms);
+        std::string message{value};
+        message.push_back('\n');
+        std::size_t written = 0;
+        while (written < message.size()) {
+            const auto count = ::write(control_fd_, message.data() + written, message.size() - written);
+            if (count < 0 && errno == EINTR) continue;
+            if (count < 0 && errno == EAGAIN) {
+                if (Clock::now() >= deadline)
+                    throw std::runtime_error("Timed out sending perf control command");
+                std::this_thread::sleep_for(std::chrono::milliseconds(1));
+                continue;
+            }
+            if (count <= 0) throw std::runtime_error("Could not send perf control command");
+            written += static_cast<std::size_t>(count);
+        }
+
+        std::string response;
+        response.reserve(4);
+        while (response.size() < 4) {
+            const auto remaining = std::chrono::duration_cast<std::chrono::milliseconds>(deadline - Clock::now()).count();
+            if (remaining <= 0) throw std::runtime_error("Timed out waiting for perf control acknowledgement");
+            pollfd descriptor{ack_fd_, POLLIN, 0};
+            const int ready = ::poll(&descriptor, 1, static_cast<int>(remaining));
+            if (ready < 0 && errno == EINTR) continue;
+            if (ready == 0) throw std::runtime_error("Timed out waiting for perf control acknowledgement");
+            if (ready < 0) throw std::runtime_error("Could not poll perf acknowledgement FIFO");
+            if ((descriptor.revents & (POLLERR | POLLNVAL)) != 0)
+                throw std::runtime_error("perf acknowledgement FIFO failed");
+            if ((descriptor.revents & POLLIN) == 0) {
+                if ((descriptor.revents & POLLHUP) != 0)
+                    std::this_thread::sleep_for(std::chrono::milliseconds(1));
+                continue;
+            }
+            char byte{};
+            const auto count = ::read(ack_fd_, &byte, 1);
+            if (count < 0 && (errno == EINTR || errno == EAGAIN)) continue;
+            if (count <= 0) throw std::runtime_error("perf closed the acknowledgement FIFO");
+            response.push_back(byte);
+            if (response.size() > 4) throw std::runtime_error("Malformed perf control acknowledgement");
+            if (response.size() <= 3 && response.back() != std::string_view("ack\n")[response.size() - 1])
+                throw std::runtime_error("Unexpected perf control acknowledgement");
+        }
+        if (response != "ack\n") throw std::runtime_error("Unexpected perf control acknowledgement");
+        ++acknowledged_commands_;
+    }
+
+    int control_fd_{-1};
+    int ack_fd_{-1};
+    bool configured_{};
+    bool active_{};
+#endif
+    std::size_t acknowledged_commands_{};
+};
+
 void trial_impl(const application::PreparedComparison& prepared, std::size_t strategy_index,
     bool enabled, std::size_t repetition, bool warmup, const Signature& expected) {
     const auto setup_begin = Clock::now();
@@ -352,10 +500,61 @@ bool trial(const application::PreparedComparison& prepared, std::size_t strategy
         return false;
     }
 }
+
+void profile_calls(const application::PreparedComparison& prepared, std::size_t strategy_index,
+    std::size_t calls, const Signature& expected, PerfControl& perf_control) {
+    if (!perf_control.configured())
+        throw std::runtime_error("Profile mode requires acknowledged perf control and acknowledgement FIFOs");
+    std::size_t passed = 0;
+    for (std::size_t repetition = 0; repetition < calls; ++repetition) {
+        auto workspaces = prepared.create();
+        if (strategy_index >= workspaces.size())
+            throw std::runtime_error("Profile strategy index is unavailable");
+        ExecutionContext context;
+        context.resources = std::make_shared<const ResourcePolicy>(ResourcePolicy{1, 1, 1, {}});
+        context.numerical = prepared.family().numerical;
+        perf_control.enable();
+        const auto outcome = workspaces[strategy_index]->run(context);
+        perf_control.disable();
+        const auto observed = signature(outcome);
+        require_ts01_analytic_result(outcome, observed);
+        const bool equivalent = observed.termination == expected.termination &&
+            observed.outcome == expected.outcome && close(observed.lower, expected.lower) &&
+            close(observed.upper, expected.upper) && observed.profile == expected.profile &&
+            observed.complete == expected.complete && observed.complete;
+        if (!equivalent) throw std::runtime_error("Profile call changed the analytic comparison outcome");
+        ++passed;
+    }
+    std::cout << "{\"schema\":\"csl.obs04-call-profile/1\",\"strategy\":\""
+        << (strategy_index == 0 ? "csl.synthesis.reach-back" : "csl.synthesis.strategy-b")
+        << "\",\"calls\":" << calls << ",\"passed\":" << passed
+        << ",\"analytic_family_checked\":true,\"complete_family_verified\":true"
+        << ",\"sample_scope\":\"acknowledged_perf_control_transitions\",\"perf_controlled\":true,\"acknowledged_commands\":"
+        << perf_control.acknowledged_commands() << "}\n";
+}
 }
 
-int main() {
+int main(int argc, char** argv) {
     try {
+        std::optional<std::size_t> profile_strategy;
+        std::size_t profile_calls_count = 0;
+        for (int argument = 1; argument < argc; ++argument) {
+            const std::string_view option{argv[argument]};
+            if (option == "--profile-strategy" && argument + 1 < argc) {
+                const std::string_view strategy{argv[++argument]};
+                if (strategy == "reach-back") profile_strategy = 0;
+                else if (strategy == "direct-joint") profile_strategy = 1;
+                else throw std::invalid_argument("Profile strategy must be reach-back or direct-joint");
+            } else if (option == "--profile-calls" && argument + 1 < argc) {
+                profile_calls_count = std::stoull(argv[++argument]);
+            } else {
+                throw std::invalid_argument("usage: csl_obs04_instrumentation_comparison [--profile-strategy reach-back|direct-joint --profile-calls N]");
+            }
+        }
+        if (profile_calls_count > 10000)
+            throw std::invalid_argument("Profile call count must not exceed 10000");
+        if (profile_strategy.has_value() != (profile_calls_count != 0))
+            throw std::invalid_argument("Profile strategy and positive call count must be provided together");
         const auto problem = source();
         auto modules = make_modules();
         const auto prepared = prepare(problem, modules.strategies);
@@ -367,6 +566,26 @@ int main() {
                 prepared.family().numerical, "obs04-analytic-baseline", {}});
             expected[i] = signature(baseline);
             require_ts01_analytic_result(baseline, expected[i]);
+        }
+        if (profile_strategy) {
+            auto warmup = prepared.create();
+            ExecutionContext context;
+            context.resources = std::make_shared<const ResourcePolicy>(ResourcePolicy{1, 1, 1, {}});
+            context.numerical = prepared.family().numerical;
+            const auto warmup_result = warmup[*profile_strategy]->run(context);
+            const auto warmup_signature = signature(warmup_result);
+            require_ts01_analytic_result(warmup_result, warmup_signature);
+            if (warmup_signature.termination != expected[*profile_strategy].termination ||
+                warmup_signature.outcome != expected[*profile_strategy].outcome ||
+                !close(warmup_signature.lower, expected[*profile_strategy].lower) ||
+                !close(warmup_signature.upper, expected[*profile_strategy].upper) ||
+                warmup_signature.profile != expected[*profile_strategy].profile ||
+                !warmup_signature.complete)
+                throw std::runtime_error("Profile warmup changed the analytic comparison outcome");
+            PerfControl perf_control;
+            profile_calls(prepared, *profile_strategy, profile_calls_count,
+                expected[*profile_strategy], perf_control);
+            return 0;
         }
         std::cout << "# fixture=T-S01; strategies=reach-back,direct-joint; profile=ts01_exact_integrator\n"
             << "# timed_region=exclusive workspace StrategyPort::run; setup and collection snapshot are reported separately\n"

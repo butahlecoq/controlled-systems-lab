@@ -1,0 +1,41 @@
+{
+  "schema": "csl.obs04-strategy-run-profile/1",
+  "fixture": "T-S01 exact analytic integrator",
+  "source_commit": "ffb2032b",
+  "binary_sha256": "92847337c15f54048cd0bb81672e09c04c0ee58ba0481c3e6a9940fa29c02280",
+  "build": {"configuration": "Release", "compiler": "GCC 16.2.1"},
+  "host": {
+    "cpu": "AMD Ryzen 5 3550H with Radeon Vega Mobile Gfx",
+    "logical_cpus_online": 8,
+    "logical_cpus_available": 8,
+    "os": "Linux 7.2.5-3-omarchy x86_64",
+    "load_captured": false
+  },
+  "profiler": {
+    "name": "Linux perf",
+    "version": "7.2.3-1",
+    "event": "cycles:u",
+    "requested_frequency_hz": 499,
+    "call_graph": "DWARF",
+    "user_stack_bytes": 8192,
+    "maximum_data_bytes": 33554432
+  },
+  "resource_policy": {
+    "solver_threads_configured": 1,
+    "outer_workers_configured": 1,
+    "actual_native_library_threads_instrumented": false
+  },
+  "scope": "Approximate run-boundary sampling: enable/disable commands are sent immediately around StrategyPort::run, but the driver does not await perf command acknowledgements, so transitions may straddle call boundaries.",
+  "captures": [
+    {"strategy": "reach-back", "calls": 500, "passed": 500, "samples": 1131, "lost_samples": 0, "file": "reach-back.perf.data.gz"},
+    {"strategy": "direct-joint", "calls": 2000, "passed": 2000, "samples": 486, "lost_samples": 0, "file": "direct-joint.perf.data.gz"}
+  ],
+  "limitations": [
+    "Control-command completion is not synchronized; samples may straddle strategy call boundaries.",
+    "Host load was not controlled or captured.",
+    "Call counts differ, and sample counts are not a comparable performance metric.",
+    "The analytic fixture is not representative of application workloads.",
+    "Allocator activity is visible, but no unique limiter or performance winner is established.",
+    "Some sample addresses remain unsymbolized."
+  ]
+}

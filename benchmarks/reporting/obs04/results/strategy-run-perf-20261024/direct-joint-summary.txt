@@ -1,0 +1,12 @@
+# Total Lost Samples: 0
+# Samples: 486  of event 'cycles:u'
+     1.08%  [.] HEkk::moveLp(HighsLpSolverObject&)
+     6.95%  [.] cfree
+     9.29%  [.] malloc
+     1.89%  [.] operator delete(void*)
+     2.69%  [.] operator new(unsigned long)
+     3.91%  [.] std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >::_M_assign(std::__cxx11:
+     1.96%  [.] std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >::_M_create(unsigned long
+     1.41%  [.] 0x00000000000a4f23
+     1.72%  [.] 0x00000000000a5005
+     1.31%  [.] 0x00000000000a6194
