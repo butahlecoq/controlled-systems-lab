@@ -1,0 +1,12 @@
+{
+  "os": "Linux Omarchy, kernel 7.2.5-3-omarchy, x86_64",
+  "cpu": "AMD Ryzen 5 3550H with Radeon Vega Mobile Gfx",
+  "logical_cpus": 8,
+  "compiler": "GCC 16.2.1",
+  "build_type": "Release",
+  "lp_provider": "HiGHS 1.11.0",
+  "source_commit": "f6a22739ca26480324be2b84b4f9b41da50db140",
+  "repetitions": 1,
+  "warmups": 1,
+  "host_load_before_final_runs": "0.43, 0.49, 0.53"
+}
