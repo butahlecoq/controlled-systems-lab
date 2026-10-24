@@ -908,6 +908,7 @@ TEST_CASE("nominal linear exact verifier rejects a candidate that omits optimal 
 }
 TEST_CASE("nominal linear exact verifier rejects a non-dyadic optimum") {
     const auto query=nominal_linear_exact_request(nominal_linear_exact_thirds());
+    CHECK_FALSE(registry::detail::strategy_a_nominal_linear_exact_optimum_bound(query.problem));
     const JointCoordinates coordinates{query.problem.model().dimensions(),query.problem.model().horizon()};
     const FamilyIdentity identity{query.problem.identity(),query.family,coordinates,
         {"csl.synthesis.reach-back"},"1",
