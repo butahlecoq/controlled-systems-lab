@@ -8,16 +8,25 @@ match an independently executed uninstrumented baseline for every trial. The
 driver is not expected to establish that instrumentation is free or to select a
 performance winner.
 
+Before collecting trials, the driver checks each uninstrumented baseline against
+the analytic T-S01 result: completed/optimal termination, zero objective within
+the declared tolerance, and membership of two valid boundary histories while a
+stagewise-feasible but globally nonoptimal history is rejected. Every trial must
+also pass those analytic checks. Baseline comparisons use the declared absolute
+and relative tolerances for objective bounds.
+
 The output contains one excluded warmup and seven measured repetitions for
 each strategy/mode pair. The first mode alternates by repetition and strategy.
 `strategy_run_ns` covers only the exclusive workspace's public `StrategyPort::run`;
 collector/configuration and workspace setup are reported separately, and the
 post-run observation snapshot is outside that interval. Strategy A includes its
-five documented phase scopes. Strategy B includes its run scope. There is one
-solver thread and one outer worker. Native backend thread count, CPU time, heap
-use, and a source-mapped limiter are unavailable. Treat any timing difference as
-descriptive and inconclusive; this tiny analytic case is not representative of
-application workloads.
+five documented phase scopes. Strategy B includes its run scope. Each enabled
+event stores inclusive and exclusive wall-clock ticks for every span and the
+clock period used to interpret them. There is one solver thread and one outer
+worker. Native backend thread count, CPU time, heap use, and a source-mapped
+limiter are unavailable. Treat any timing difference as descriptive and
+inconclusive; this tiny analytic case is not representative of application
+workloads.
 
 The driver emits a commented header and one JSON event per attempt. Failed attempts must
 remain visible and make the process exit nonzero. Keep the raw output, exact
@@ -41,20 +50,11 @@ performance conclusion should be based on a timing row whose status is not
 
 ## Captured analytic sample
 
-`results/linux-gcc16-20261024.jsonl` records a run from commit
-`8c1960dd6c02794cd4cb7909fe1c11dd675bb0b3`, with its environment and binary
-hash in the adjacent `.environment.txt` file. All 32 events passed (four
-warmups and 28 measured attempts). The measured `strategy_run_ns` medians and
-ranges were:
-
-| Strategy | Collection | Median (ns) | Range (ns) |
-| --- | --- | ---: | ---: |
-| reach-back | disabled | 4,863,610 | 4,750,954–5,299,216 |
-| reach-back | enabled | 7,964,329 | 7,805,787–8,244,886 |
-| direct-joint | disabled | 806,330 | 756,741–823,721 |
-| direct-joint | enabled | 962,078 | 918,846–1,107,141 |
-
-This sample is descriptive and inconclusive. `perf` was unavailable, so it has
-no limiter profile, and the tiny analytic fixture does not represent application
-workloads. It supports no general instrumentation overhead or strategy winner
-claim.
+`results/linux-gcc16-20261024.jsonl` records the sample run from the source
+commit identified in its adjacent `.environment.txt` file. The file contains
+environment details, source and binary hashes, and profiler availability.
+Summary statistics are recorded here only after rerunning the driver from the
+committed source; the result remains descriptive and inconclusive. `perf` is
+unavailable, so no limiter profile exists, and this tiny analytic fixture does
+not represent application workloads. It supports no general instrumentation
+overhead or strategy winner claim.

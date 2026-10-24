@@ -11,8 +11,10 @@
 #include <csl/synthesis/strategy_b/direct_joint.hpp>
 #include <csl/synthesis/witness_selector.hpp>
 
+#include <algorithm>
 #include <array>
 #include <chrono>
+#include <cmath>
 #include <cstdint>
 #include <iostream>
 #include <memory>
@@ -31,6 +33,8 @@ using namespace csl;
 namespace ar = artifacts;
 namespace ob = execution::observability;
 using Clock = std::chrono::steady_clock;
+constexpr double absolute_tolerance = 1e-8;
+constexpr double relative_tolerance = 1e-8;
 
 template<class T, class... Rest> T take(std::variant<T, Rest...> value) {
     if (!std::holds_alternative<T>(value)) {
@@ -199,6 +203,58 @@ Signature signature(const SynthesisOutcome& outcome) {
         result->family->identity().request.profile, complete != nullptr};
 }
 
+bool close(const std::optional<double>& left, const std::optional<double>& right) {
+    if (!left || !right) return !left && !right;
+    if (!std::isfinite(*left) || !std::isfinite(*right)) return false;
+    return std::abs(*left - *right) <= absolute_tolerance + relative_tolerance *
+        std::max(std::abs(*left), std::abs(*right));
+}
+
+bool family_contains_history(const OptimalFamily& family, const Vector& history) {
+    const auto* complete = std::get_if<CompleteOptimalFamily>(&family.outcome());
+    if (!complete || !complete->relation.payload) return false;
+    const auto* relation = complete->relation.payload->h_relation_for_recording();
+    if (!relation) return false;
+    const auto representation = relation->representation();
+    const auto* h = std::get_if<sets::HRepresentation>(&representation);
+    if (!h || history.size() != h->inequalities.cols() || history.size() != h->equalities.cols()) return false;
+    for (std::size_t row = 0; row < h->inequalities.rows(); ++row) {
+        double value = 0.0;
+        for (std::size_t col = 0; col < history.size(); ++col) value += h->inequalities(row, col) * history[col];
+        if (value > h->upper_bounds[row] + absolute_tolerance) return false;
+    }
+    for (std::size_t row = 0; row < h->equalities.rows(); ++row) {
+        double value = 0.0;
+        for (std::size_t col = 0; col < history.size(); ++col) value += h->equalities(row, col) * history[col];
+        if (std::abs(value - h->equality_values[row]) > absolute_tolerance) return false;
+    }
+    return true;
+}
+
+void require_ts01_analytic_result(const SynthesisOutcome& outcome, const Signature& observed) {
+    if (observed.termination != Termination::completed || observed.outcome != MathematicalOutcome::optimal ||
+        !observed.complete || observed.profile != "ts01_exact_integrator" || !observed.lower || !observed.upper ||
+        !std::isfinite(*observed.lower) || !std::isfinite(*observed.upper) ||
+        std::abs(*observed.lower) > absolute_tolerance || std::abs(*observed.upper) > absolute_tolerance)
+        throw std::runtime_error("T-S01 analytic baseline must be completed, optimal, complete, and have objective zero");
+    const auto* result = std::get_if<SynthesisResult>(&outcome);
+    if (!result || !result->family || !family_contains_history(*result->family, {0, 0, 1, 0, 1}) ||
+        !family_contains_history(*result->family, {0, 1, 1, 1, 0}) ||
+        family_contains_history(*result->family, {0, 0.75, 1.5, 0.75, 0.75}))
+        throw std::runtime_error("T-S01 family failed analytic membership checks");
+}
+
+const char* outcome_name(MathematicalOutcome outcome) {
+    switch (outcome) {
+    case MathematicalOutcome::optimal: return "optimal";
+    case MathematicalOutcome::infeasible: return "infeasible";
+    case MathematicalOutcome::unbounded: return "unbounded";
+    case MathematicalOutcome::infimum_not_attained: return "infimum_not_attained";
+    case MathematicalOutcome::undetermined: return "undetermined";
+    }
+    return "undetermined";
+}
+
 std::int64_t ns(Clock::time_point begin, Clock::time_point end) {
     return std::chrono::duration_cast<std::chrono::nanoseconds>(end - begin).count();
 }
@@ -218,30 +274,50 @@ void trial_impl(const application::PreparedComparison& prepared, std::size_t str
     const auto outcome = workspaces[strategy_index]->run(context);
     const auto run_end = Clock::now();
     const auto observed = signature(outcome);
+    require_ts01_analytic_result(outcome, observed);
     const bool equivalent = observed.termination == expected.termination && observed.outcome == expected.outcome &&
-        observed.lower == expected.lower && observed.upper == expected.upper && observed.profile == expected.profile &&
-        observed.complete == expected.complete && observed.complete;
+        close(observed.lower, expected.lower) && close(observed.upper, expected.upper) &&
+        observed.profile == expected.profile && observed.complete == expected.complete && observed.complete;
     if (!equivalent) throw std::runtime_error("Instrumentation changed the analytic comparison outcome");
 
     std::size_t observed_spans = 0;
     std::size_t completed_spans = 0;
+    std::vector<ob::SpanTiming> span_timings;
+    std::vector<ar::SpanRecord> span_records;
     if (collector) {
         const auto report = take(collector->snapshot());
         observed_spans = report.observations.description().spans.size();
         for (const auto& span : report.observations.description().spans)
             if (span.completion_observed) ++completed_spans;
+        span_timings = report.spans;
+        span_records = report.observations.description().spans;
         if (!report.diagnostics.empty() || observed_spans != (strategy_index == 0 ? 5u : 1u) ||
-            completed_spans != observed_spans)
+            completed_spans != observed_spans || span_timings.size() != observed_spans)
             throw std::runtime_error("Timing collector did not retain every expected completed span");
     }
-    std::cout << "{\"schema\":\"csl.obs04-instrumentation-comparison-event/1\",\"repetition\":" << repetition
+    std::cout << "{\"schema\":\"csl.obs04-instrumentation-comparison-event/2\",\"repetition\":" << repetition
         << ",\"warmup\":" << (warmup ? "true" : "false") << ",\"strategy\":\""
         << (strategy_index == 0 ? "csl.synthesis.reach-back" : "csl.synthesis.strategy-b")
         << "\",\"instrumentation\":\"" << (enabled ? "enabled" : "disabled")
         << "\",\"setup_ns\":" << ns(setup_begin, setup_end) << ",\"strategy_run_ns\":" << ns(run_begin, run_end)
         << ",\"spans_planned\":" << (enabled ? (strategy_index == 0 ? 5 : 1) : 0)
-        << ",\"spans_completed\":" << completed_spans << ",\"status\":\"passed\",\"outcome\":\"optimal\""
-        << ",\"complete_family_verified\":true,\"absolute_tolerance\":1e-8,\"relative_tolerance\":1e-8}\n";
+        << ",\"spans_completed\":" << completed_spans << ",\"span_clock_period_num\":"
+        << (enabled ? Clock::period::num : 0) << ",\"span_clock_period_den\":" << (enabled ? Clock::period::den : 0)
+        << ",\"span_timings\":[";
+    for (std::size_t index = 0; index < span_timings.size(); ++index) {
+        const auto inclusive = std::get_if<ar::Available<std::uint64_t>>(&span_timings[index].inclusive_wall_ticks);
+        const auto exclusive = std::get_if<ar::Available<std::uint64_t>>(&span_timings[index].exclusive_wall_ticks);
+        if (!inclusive || !exclusive || span_timings[index].id != span_records[index].descriptor.id)
+            throw std::runtime_error("Timing collector returned unavailable or misaligned span durations");
+        if (index) std::cout << ',';
+        std::cout << "{\"operation\":\"" << span_records[index].descriptor.operation
+            << "\",\"inclusive_wall_ticks\":" << inclusive->value
+            << ",\"exclusive_wall_ticks\":" << exclusive->value << '}';
+    }
+    std::cout << "],\"status\":\"passed\",\"outcome\":\"" << outcome_name(observed.outcome)
+        << "\",\"analytic_family_checked\":true,\"complete_family_verified\":"
+        << (observed.complete ? "true" : "false") << ",\"absolute_tolerance\":" << absolute_tolerance
+        << ",\"relative_tolerance\":" << relative_tolerance << "}\n";
 }
 
 std::string escaped(std::string_view value) {
@@ -261,11 +337,11 @@ bool trial(const application::PreparedComparison& prepared, std::size_t strategy
         trial_impl(prepared, strategy_index, enabled, repetition, warmup, expected);
         return true;
     } catch (const std::exception& error) {
-        std::cout << "{\"schema\":\"csl.obs04-instrumentation-comparison-event/1\",\"repetition\":" << repetition
+        std::cout << "{\"schema\":\"csl.obs04-instrumentation-comparison-event/2\",\"repetition\":" << repetition
             << ",\"warmup\":" << (warmup ? "true" : "false") << ",\"strategy\":\""
             << (strategy_index == 0 ? "csl.synthesis.reach-back" : "csl.synthesis.strategy-b")
             << "\",\"instrumentation\":\"" << (enabled ? "enabled" : "disabled")
-            << "\",\"status\":\"failed\",\"complete_family_verified\":false,\"error\":\""
+        << "\",\"status\":\"failed\",\"analytic_family_checked\":false,\"complete_family_verified\":false,\"error\":\""
             << escaped(error.what()) << "\"}\n";
         return false;
     }
@@ -279,10 +355,13 @@ int main() {
         const auto prepared = prepare(problem, modules.strategies);
         const auto workspaces = prepared.create();
         std::array<Signature, 2> expected;
-        for (std::size_t i = 0; i < workspaces.size(); ++i)
-            expected[i] = signature(workspaces[i]->run(ExecutionContext{
+        for (std::size_t i = 0; i < workspaces.size(); ++i) {
+            const auto baseline = workspaces[i]->run(ExecutionContext{
                 std::make_shared<const ResourcePolicy>(ResourcePolicy{1, 1, 1, {}}), {}, {},
-                prepared.family().numerical, "obs04-baseline", {}}));
+                prepared.family().numerical, "obs04-analytic-baseline", {}});
+            expected[i] = signature(baseline);
+            require_ts01_analytic_result(baseline, expected[i]);
+        }
         std::cout << "# fixture=T-S01; strategies=reach-back,direct-joint; profile=ts01_exact_integrator\n"
             << "# timed_region=exclusive workspace StrategyPort::run; setup and collection snapshot are reported separately\n"
             << "# instrumentation=Strategy A phase spans; Strategy B run span; CPU and native backend threads unavailable\n";
