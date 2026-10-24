@@ -193,9 +193,7 @@ jobs:
       - name: Verify acknowledged FIFO protocol without perf privileges
         run: python tests/obs04/perf_control_mock.py build/obs04-perf-probe/csl_obs04_instrumentation_comparison
       - name: Attempt bounded perf capture and retain capability result
-        run: python scripts/obs04_perf_probe.py \
-          --binary build/obs04-perf-probe/csl_obs04_instrumentation_comparison \
-          --output-dir build/obs04-perf-probe-result --calls 8 --timeout-seconds 120
+        run: python scripts/obs04_perf_probe.py --binary build/obs04-perf-probe/csl_obs04_instrumentation_comparison --output-dir build/obs04-perf-probe-result --calls 8 --timeout-seconds 120
       - name: Preserve probe result, logs, and profile
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
