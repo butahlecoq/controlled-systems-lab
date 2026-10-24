@@ -50,21 +50,23 @@ domain used for each remainder is inspectable.
 
 ## Result
 
-At stage 60, the error box is
+At stage 60, the nonlinear-deviation and error boxes are finite. The error box is
 
 ```text
-e1 in [-9.6994106527571269174,  9.3285165280542879823]
-e2 in [-6.4344443728111129263,  6.6605321666785428710]
+e1 in [-11.35642369690612384691, 10.94359455970740101356]
+e2 in [ -7.54084770087922333532,  7.78723809571480749722]
 ```
 
-Its corner norm gives the outward Euclidean upper bound `11.766106227387972`.
+Its corner norm gives the outward Euclidean upper bound
+`13.769874231197717604`.
 Because every nonlinear control history is paired with the affine history
 using that same control sequence (and vice versa), this bounds both directed
 distances and therefore the Hausdorff distance between the two stage-60
 reachable sets under these assumptions. It is a conservative validated
 enclosure for the stated discrete recurrences, not a measured set distance.
-The interval deviation box remains finite at every stage; the full sequence is
-in the [saved evidence](evidence/l05-corrected-track-error-tube.json).
+The interval nonlinear-deviation box remains finite at every stage; the full
+sequence, including separate affine-deviation and physical-state boxes, is in
+the [saved evidence](evidence/l05-corrected-track-error-tube.json).
 
 ![Stage-60 coordinate error enclosure and its Euclidean bound](evidence/l05-corrected-track-error-bound.svg)
 

@@ -96,6 +96,7 @@ def run():
         point("60"))
     reference = (point("410"), point("300"))
     deviation = (point("1"), point("2"))
+    affine_deviation = (point("1"), point("2"))
     error = (point("0"), point("0"))
     control = (Decimal("-0.3"), Decimal("0.3"))
     samples = {}
@@ -104,6 +105,7 @@ def run():
     for stage in range(60):
         x1, x2 = reference
         q1, q2 = deviation
+        y1, y2 = affine_deviation
         f1 = subtract(multiply(a, x1), multiply(b, multiply(x1, x2)))
         f2 = add(negate(multiply(c, x2)), multiply(d, multiply(x1, x2)))
         next_reference = (add(x1, multiply(t0, f1)),
@@ -114,29 +116,35 @@ def run():
         a21 = multiply(t0, multiply(d, x2))
         a22 = add(point("1"), multiply(t0, add(negate(c), multiply(d, x1))))
         bu = multiply(multiply(t0, gain), control)
-        next_deviation = (
-            add(add(multiply(a11, q1), multiply(a12, q2)), bu),
-            add(multiply(a21, q1), multiply(a22, q2)))
-
-        # Exact nonlinear remainder relative to the affine tangent at reference.
+        # Exact nonlinear remainder uses the nonlinear deviation q, not y.
         bilinear = multiply(t0, multiply(q1, q2))
         remainder = (negate(multiply(b, bilinear)), multiply(d, bilinear))
+        next_deviation = (
+            add(add(add(multiply(a11, q1), multiply(a12, q2)), bu), remainder[0]),
+            add(add(multiply(a21, q1), multiply(a22, q2)), remainder[1]))
+        next_affine_deviation = (
+            add(add(multiply(a11, y1), multiply(a12, y2)), bu),
+            add(multiply(a21, y1), multiply(a22, y2)))
         next_error = (
             add(add(multiply(a11, error[0]), multiply(a12, error[1])), remainder[0]),
             add(add(multiply(a21, error[0]), multiply(a22, error[1])), remainder[1]))
 
-        reference, deviation, error = next_reference, next_deviation, next_error
+        reference, deviation, affine_deviation, error = (
+            next_reference, next_deviation, next_affine_deviation, next_error)
         stage_enclosures.append({
             "stage": stage + 1,
             "reference": [show(value) for value in reference],
-            "deviation": [show(value) for value in deviation],
+            "nonlinear_deviation": [show(value) for value in deviation],
+            "affine_deviation": [show(value) for value in affine_deviation],
             "physical_state": [show(add(x, q)) for x, q in zip(reference, deviation)],
+            "affine_state": [show(add(x, y)) for x, y in zip(reference, affine_deviation)],
             "linearization_error": [show(value) for value in error],
         })
         if stage + 1 in (1, 5, 10, 20, 40, 60):
             samples[str(stage + 1)] = {
                 "reference": [show(value) for value in reference],
-                "deviation": [show(value) for value in deviation],
+                "nonlinear_deviation": [show(value) for value in deviation],
+                "affine_deviation": [show(value) for value in affine_deviation],
                 "linearization_error": [show(value) for value in error],
             }
 
@@ -166,6 +174,7 @@ def run():
             "coordinates": "physical state = zero-control reference + deviation",
             "reference_initial": ["410", "300"],
             "deviation_initial": ["1", "2"],
+            "affine_deviation_initial": ["1", "2"],
             "control_interval_each_stage": ["-0.3", "0.3"],
             "horizon": 60,
             "constraints": "none; L05 Example 1 supplies no common state-constraint set",
