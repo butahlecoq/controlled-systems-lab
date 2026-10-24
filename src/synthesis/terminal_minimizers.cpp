@@ -1,13 +1,40 @@
 #include <csl/synthesis/terminal_minimizers.hpp>
 #include <csl/optimization/linear_program.hpp>
+#include <csl/execution/timing_collector.hpp>
 #include <cmath>
 #include <type_traits>
 
 namespace csl::synthesis {
 namespace {
+namespace ar = csl::artifacts;
+namespace ob = csl::execution::observability;
 TerminalMinimizers rejected(DiagnosticCode code,std::string field,std::string message) {
     TerminalMinimizers r;r.termination=code==DiagnosticCode::unsupported?Termination::operation_rejected:Termination::contract_rejected;
     r.diagnostics={{code,std::move(field),std::move(message)}};return r;
+}
+bool same_module(const ar::ModuleIdentity& planned,const registry::Identity& actual) noexcept {
+    return planned.id==actual.id&&planned.version==actual.version;
+}
+std::optional<ob::TimingScope> start_solver_scope(const ExecutionContext& context,
+    const registry::Provenance& provider) noexcept {
+    if(!context.timing||!context.timing->enabled()||!provider.actual)return {};
+    try {
+        auto snapshot=context.timing->snapshot();
+        const auto* report=std::get_if<ob::TimingReport>(&snapshot);
+        if(!report)return {};
+        const ar::SpanDescriptor* match=nullptr;
+        for(const auto& span:report->observations.description().spans) {
+            const auto& descriptor=span.descriptor;
+            if(descriptor.operation!="terminal.program.solve"||!descriptor.backend||
+                !same_module(*descriptor.backend,*provider.actual))continue;
+            if(match)return {};
+            match=&descriptor;
+        }
+        if(!match)return {};
+        auto started=ob::start_timing(context,match->id);
+        if(auto* scope=std::get_if<ob::TimingScope>(&started))return std::move(*scope);
+    } catch(...) { return {}; }
+    return {};
 }
 TerminalObjective objective_description(const optimization::Objective& objective) {
     return std::visit([](const auto& c)->TerminalObjective {
@@ -69,11 +96,14 @@ TerminalMinimizers TerminalOptimizer::solve(const problem::ResolvedProblem& prob
             result.termination=Termination::operation_rejected;result.provider=reject->provenance;result.diagnostics=reject->diagnostics;return false;
         }
         auto workers=std::get<registry::PreparedPipeline<Port>>(std::move(admitted)).create();
+        auto solver_scope=start_solver_scope(context,provider.provenance());
         auto outcome=std::get<0>(workers)->run(execution);
         if(const auto* unsupported=std::get_if<Unsupported>(&outcome)) {
+            if(solver_scope)solver_scope->close(Termination::operation_rejected);
             result.termination=Termination::operation_rejected;result.diagnostics=unsupported->diagnostics;return false;
         }
         const auto& solved=std::get<ProgramResult>(outcome);
+        if(solver_scope)solver_scope->close(solved.termination);
         auto diagnostics=optimization::check_program_result(solved,program,request.assurance);
         if(!diagnostics.empty()){result.termination=Termination::contract_rejected;result.diagnostics=std::move(diagnostics);return false;}
         result.optimization=solved;result.termination=solved.termination;result.outcome=solved.outcome.value;result.optimum=evidence(solved,problem.identity());

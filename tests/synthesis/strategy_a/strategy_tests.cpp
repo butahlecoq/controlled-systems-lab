@@ -380,8 +380,8 @@ std::shared_ptr<ob::TimingCollector> strategy_timing_collector(
             ar::Available<std::uint64_t>{1},"test-origin"}}, {},1};
     input.tasks={"solve"};
     input.operations={"strategy-a/run","strategy-a/forward","strategy-a/feasible-preimage",
-        "strategy-a/terminal-optimization","strategy-a/terminal-preimage"};
-    const std::vector<std::string> phases=input.operations;
+        "strategy-a/terminal-optimization","strategy-a/terminal-preimage","terminal.program.solve"};
+    const std::vector<std::string> phases(input.operations.begin(),input.operations.begin()+5);
     for(std::size_t index=0;index<phases.size();++index) {
         ar::SpanDescriptor span{};span.id={index};
         if(index)span.parent=ar::SpanParent{{0},ar::ParentKind::nested};
@@ -391,6 +391,14 @@ std::shared_ptr<ob::TimingCollector> strategy_timing_collector(
         span.applied_assurance=ar::Available<Assurance>{Assurance::numerical};
         input.spans.push_back(std::move(span));
     }
+    ar::SpanDescriptor solver{};solver.id={5};solver.parent=ar::SpanParent{{3},ar::ParentKind::nested};
+    solver.shard=0;solver.bucket=0;solver.task="solve";solver.operation="terminal.program.solve";
+    solver.module={ModuleId{"csl.synthesis.terminal-minimizers"},"1",missing};
+    solver.backend=std::make_shared<const ar::ModuleIdentity>(ar::ModuleIdentity{
+        ModuleId{"csl.lp.highs"},"1.1.0+highs.1.11.0",missing});
+    solver.clock={"strategy-test-wall"};solver.requested_assurance=Assurance::numerical;
+    solver.applied_assurance=ar::Available<Assurance>{Assurance::numerical};
+    input.spans.push_back(std::move(solver));
     auto plan=ob::make_collection_plan(std::move(input));
     REQUIRE(std::holds_alternative<ob::CollectionPlan>(plan));
     auto collector=ob::make_timing_collector(std::get<ob::CollectionPlan>(std::move(plan)),std::move(clock),{0},{});
@@ -1682,13 +1690,23 @@ TEST_CASE("Strategy A publishes planned wall spans for its run and mathematical 
     auto report=collector->snapshot();
     REQUIRE(std::holds_alternative<ob::TimingReport>(report));
     const auto& timing=std::get<ob::TimingReport>(report);
-    REQUIRE(timing.spans.size()==5);
+    REQUIRE(timing.spans.size()==6);
     REQUIRE(std::holds_alternative<ar::Available<std::uint64_t>>(timing.run_wall_ticks));
-    CHECK(std::get<ar::Available<std::uint64_t>>(timing.run_wall_ticks).value==90);
+    CHECK(std::get<ar::Available<std::uint64_t>>(timing.run_wall_ticks).value==110);
     for(std::size_t index=1;index<5;++index) {
+        if(index==3)continue;
         REQUIRE(std::holds_alternative<ar::Available<std::uint64_t>>(timing.spans[index].inclusive_wall_ticks));
         CHECK(std::get<ar::Available<std::uint64_t>>(timing.spans[index].inclusive_wall_ticks).value==10);
     }
+    CHECK(timing.spans[5].id==ar::SpanId{5});
+    CHECK(std::get<ar::Available<std::uint64_t>>(timing.spans[3].inclusive_wall_ticks).value==30);
+    CHECK(std::get<ar::Available<std::uint64_t>>(timing.spans[5].inclusive_wall_ticks).value==10);
+    CHECK(std::get<ar::ReturnedSpan>(timing.observations.description().spans[5].status).termination==Termination::completed);
+    const auto& solver=timing.observations.description().spans[5].descriptor;
+    CHECK(solver.operation=="terminal.program.solve");
+    REQUIRE(solver.backend);
+    CHECK(solver.backend->id==ModuleId{"csl.lp.highs"});
+    CHECK(solver.backend->version=="1.1.0+highs.1.11.0");
 }
 
 TEST_CASE("Strategy A timing retains a stopped root and leaves unentered phases unavailable") {
@@ -1705,7 +1723,7 @@ TEST_CASE("Strategy A timing retains a stopped root and leaves unentered phases 
     auto report=collector->snapshot();
     REQUIRE(std::holds_alternative<ob::TimingReport>(report));
     const auto& timing=std::get<ob::TimingReport>(report);
-    REQUIRE(timing.spans.size()==5);
+    REQUIRE(timing.spans.size()==6);
     REQUIRE(std::holds_alternative<ar::Available<std::uint64_t>>(timing.spans[0].inclusive_wall_ticks));
     CHECK(std::get<ar::Available<std::uint64_t>>(timing.spans[0].inclusive_wall_ticks).value==30);
     for(std::size_t index=2;index<5;++index) {
