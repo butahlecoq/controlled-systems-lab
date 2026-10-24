@@ -2,7 +2,9 @@
 #include <doctest/doctest.h>
 #include <csl/execution/executor.hpp>
 #include <csl/optimization/lp_backend.hpp>
+#include <algorithm>
 #include <atomic>
+#include <chrono>
 #include <cmath>
 #include <condition_variable>
 #include <future>
@@ -60,11 +62,11 @@ public:
         : counts_(std::move(c)),action_(std::move(a)),endpoints_(e),partial_(p) { ++counts_->created; }
     ~Analytic() override { ++counts_->destroyed; if (counts_->on_destroy) counts_->on_destroy(); }
     ProgramOutcome do_solve(const LinearProgram& p,const ExecutionContext& ctx) override {
-        if (entered_.exchange(true)) throw std::logic_error("workspace entered concurrently");
-        struct Leave { std::atomic<bool>& entered; ~Leave(){entered=false;} } leave{entered_};
         ++counts_->invoked; enter(*counts_);
         struct Exit { Counts& c; ~Exit() { --c.active; } } exit{*counts_};
         if (action_) action_(ctx);
+        if (entered_.exchange(true)) throw std::logic_error("workspace entered concurrently");
+        struct Leave { std::atomic<bool>& entered; ~Leave(){entered=false;} } leave{entered_};
         if (partial_ && !ctx.cancellation.stop_requested()) throw std::logic_error("cooperative boundary did not see stop");
         double x = p.objective()[0] < 0 ? 4 : -1;
         if (endpoints_) x = std::fma(p.objective()[0],-1,p.offset()) <= std::fma(p.objective()[0],4,p.offset()) ? -1 : 4;
@@ -85,7 +87,8 @@ ex::ResourceUse use(std::optional<std::size_t> bytes = 6) {
     return {1,"fixture: caller lane only",bytes,ex::CallStopSupport::noninterruptible};
 }
 LPTask task(std::string id, double coefficient = 3, std::shared_ptr<Counts> counts = std::make_shared<Counts>(),
-    Action action = {}, std::function<void()> create = {}, ex::ResourceUse resources = use(), bool endpoints = false, bool partial = false) {
+    Action action = {}, std::function<void()> create = {}, ex::ResourceUse resources = use(), bool endpoints = false,
+    bool partial = false) {
     reg::Registry<reg::LPPort> registry;
     REQUIRE_FALSE(registry.add({{{"analytic"},"1"},[](const LinearProgram&,const reg::Requirements&) -> reg::Capability { return reg::Offer{}; },
         [counts,action,create,endpoints,partial](const LinearProgram&) {
@@ -377,7 +380,8 @@ public:
         return result;
     }
 };
-ex::Task<reg::StrategyPort> strategy_task(std::shared_ptr<StrategyAudit> audit,std::shared_ptr<Counts> counts,Action action={},std::string id="strategy",bool execute_planned_second_query_after_stop=false) {
+ex::Task<reg::StrategyPort> strategy_task(std::shared_ptr<StrategyAudit> audit,std::shared_ptr<Counts> counts,
+    Action action={},std::string id="strategy",bool execute_planned_second_query_after_stop=false) {
     reg::Registry<reg::LPPort> lp;
     REQUIRE_FALSE(lp.add({{{"analytic"},"1"},[](const auto&,const auto&)->reg::Capability{return reg::Offer{};},
         [counts,action](const LinearProgram&){return std::make_unique<Analytic>(counts,action,false,false);}}));
@@ -426,6 +430,83 @@ TEST_CASE("retained strategy owns private LP attempts and never promotes an incu
     CHECK(value.termination==Termination::cancelled);CHECK_FALSE(value.family);CHECK(value.incumbents[0].witness.original_objective==-1);
     CHECK(value.incumbents[0].witness.states==std::vector<Vector>{{0},{-1}});CHECK(value.incumbents[0].witness.controls==std::vector<Vector>{{-1}});
     CHECK(std::holds_alternative<Unestablished>(value.outcome.support));CHECK(audit->attempts.back().size()==1);
+}
+TEST_CASE("bounded concurrent strategy sweeps keep private LP workspaces across repeated runs") {
+    auto e=executor({2,2,1,{}});
+    auto counts=std::make_shared<Counts>();
+    struct Rendezvous {
+        std::mutex mutex;
+        std::condition_variable changed;
+        std::size_t arrivals{};
+        std::size_t generation{};
+        bool broken{};
+        std::atomic<std::size_t> timed_out{};
+        void arrive_and_wait() {
+            std::unique_lock lock(mutex);
+            if (broken) return;
+            const auto current_generation=generation;
+            if (++arrivals == 2) {
+                arrivals=0;
+                ++generation;
+                changed.notify_all();
+                return;
+            }
+            if (!changed.wait_for(lock,std::chrono::seconds{5},[&]{return generation!=current_generation || broken;})) {
+                ++timed_out;
+                broken=true;
+                changed.notify_all();
+            }
+        }
+    } rendezvous;
+    Action overlap=[&](const ExecutionContext&) { rendezvous.arrive_and_wait(); };
+    constexpr std::size_t sweep_count=4;
+    constexpr std::size_t tasks_per_sweep=8;
+    std::vector<WorkspaceIdentity> workspaces;
+
+    for (std::size_t sweep=0;sweep<sweep_count;++sweep) {
+        std::vector<std::shared_ptr<StrategyAudit>> audits;
+        std::vector<ex::Task<reg::StrategyPort>> tasks;
+        audits.reserve(tasks_per_sweep);
+        tasks.reserve(tasks_per_sweep);
+        for (std::size_t index=0;index<tasks_per_sweep;++index) {
+            auto audit=std::make_shared<StrategyAudit>();
+            tasks.push_back(strategy_task(audit,counts,overlap,
+                "analytic-"+std::to_string(sweep)+"-"+std::to_string(index)));
+            audits.push_back(std::move(audit));
+        }
+
+        auto batch=std::get<ex::BatchResult<reg::StrategyPort>>(
+            e->run<reg::StrategyPort>(tasks,context(*e),ex::Mode::bounded_parallel));
+        REQUIRE(batch.tasks.size()==tasks_per_sweep);
+        CHECK(rendezvous.timed_out==0);
+        CHECK(batch.enforcement.peak_active_tasks==2);
+        for (const auto& record:batch.tasks) {
+            REQUIRE(std::holds_alternative<ex::Returned<reg::StrategyPort>>(record.outcome));
+            const auto& result=std::get<SynthesisResult>(
+                std::get<ex::Returned<reg::StrategyPort>>(record.outcome).value);
+            CHECK(result.termination==Termination::completed);
+            CHECK_FALSE(result.family);
+            REQUIRE(result.incumbents.size()==1);
+            CHECK(result.incumbents[0].witness.original_objective==-1);
+        }
+        REQUIRE(audits.size()==tasks_per_sweep);
+        for (const auto& audit:audits) {
+            REQUIRE(audit->attempts.size()==1);
+            REQUIRE(audit->attempts[0].size()==2);
+            const auto& attempts=audit->attempts[0];
+            CHECK(attempts[0].workspace()==attempts[1].workspace());
+            CHECK(std::none_of(workspaces.begin(),workspaces.end(),[&](const auto& existing) {
+                return existing==attempts[0].workspace();
+            }));
+            workspaces.push_back(attempts[0].workspace());
+        }
+    }
+
+    CHECK(workspaces.size()==sweep_count*tasks_per_sweep);
+    CHECK(counts->peak==2);
+    CHECK(counts->created==sweep_count*tasks_per_sweep);
+    CHECK(counts->invoked==2*sweep_count*tasks_per_sweep);
+    CHECK(counts->destroyed==sweep_count*tasks_per_sweep);
 }
 TEST_CASE("every planned strategy LP request retains executor policy and observes cancellation") {
     auto e=executor({2,2,1,{}});
