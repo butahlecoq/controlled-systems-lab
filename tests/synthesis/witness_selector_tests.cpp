@@ -14,6 +14,8 @@
 #include <csl/geometry/affine_sum.hpp>
 #include <csl/adapters/convex/highs.hpp>
 #include <csl/adapters/polyhedral/qhull.hpp>
+#include <csl/execution/timing_collector.hpp>
+#include <bit>
 namespace selector_allocation_probe {
 thread_local std::size_t fail_small_allocation=0;
 thread_local bool injected=false;
@@ -89,6 +91,68 @@ ExecutionContext make_execution_context() {
     ExecutionContext result;result.resources=std::make_shared<const ResourcePolicy>(ResourcePolicy{1,1,1,{}});
     return result;
 }
+namespace ar=artifacts;
+namespace ob=execution::observability;
+class SelectorClock final:public ob::TimingClock {
+    std::int64_t tick_{};
+public:
+    ar::ClockDomain wall_domain() const override {
+        return {{"wall"},ar::ClockMetric::steady_wall,"run",1,1000,
+            ar::Available<std::uint64_t>{1},"selector-test"};
+    }
+    std::optional<ar::ClockDomain> cpu_domain() const override{return {};}
+    ar::Metric<std::int64_t> wall_now() noexcept override {
+        const auto result=tick_;tick_+=10;return ar::Available<std::int64_t>{result};
+    }
+    ar::Metric<std::int64_t> cpu_now() noexcept override {
+        return ar::Unavailable{ar::MissingReason::not_supported,{}};
+    }
+};
+ProgramIdentity direction_program(const OptimalFamily& family,const WitnessRequest& request,
+        std::size_t index) {
+    const auto& direction=request.directions[index];
+    const auto bits=[](double value) {return std::to_string(std::bit_cast<std::uint64_t>(value));};
+    return {family.identity().problem,{"witness-selector-direction/"+std::to_string(index)+"/"+
+        bits(direction[0])+"/"+bits(direction[1])}};
+}
+std::shared_ptr<ob::TimingCollector> selector_timing(const problem::ResolvedProblem& resolved,
+        const OptimalFamily& family,const WitnessRequest& request,const registry::Provenance& provider) {
+    REQUIRE(provider.actual);
+    const ar::Unavailable unpinned{ar::MissingReason::not_instrumented,{}};
+    const ar::ModuleIdentity strategy{family.identity().strategy,family.identity().strategy_version,unpinned};
+    const ar::ModuleIdentity lp{provider.actual->id,provider.actual->version,unpinned};
+    const ar::ModuleIdentity selector{{synthesis::witness_selector::selector_id},"1",unpinned};
+    const auto& family_request=family.identity().request;
+    ar::ConfigurationInput configuration;
+    configuration.collection={true,ar::CollectionMode::detail,8,4096,8,1024};
+    configuration.modules={{"lp",lp,{}},{"selector",selector,{}},{"strategy",strategy,{}}};
+    configuration.numerical=family_request.numerical;
+    configuration.resources={1,1,1,{}};
+    configuration.output={ar::OutputKind::synthesis,family_request.assurance,family_request.target,
+        family_request.representation,{request.count,request.distinctness_tolerance,request.directions,request.seed}};
+    configuration.selector={selector.id,selector.version,{}};
+    configuration.strategy={strategy.id,lp.id,{},{},{},{},{},selector.id,family_request.representation};
+    auto resolved_configuration=take(ar::resolve_configuration(configuration));
+    const ar::ClockDomain clock{{"wall"},ar::ClockMetric::steady_wall,"run",1,1000,
+        ar::Available<std::uint64_t>{1},"selector-test"};
+    const auto operation=std::string{"selector.lp.direction-query"};
+    ob::PlanInput input{resolved,std::move(resolved_configuration),{"run"},{clock},{},1};
+    input.tasks={"run"};input.operations={"operation.run",operation};
+    ar::SpanDescriptor root{};root.id={0};root.task="run";root.operation="operation.run";
+    root.module=strategy;root.clock=clock.id;root.requested_assurance=family_request.assurance;
+    root.applied_assurance=ar::Available<Assurance>{Assurance::numerical};
+    input.spans.push_back(root);
+    ar::SpanDescriptor query{};query.id={1};query.parent=ar::SpanParent{{0},ar::ParentKind::nested};
+    query.task="run";query.operation=operation;query.module=selector;
+    query.backend=std::make_shared<const ar::ModuleIdentity>(lp);query.clock=clock.id;
+    query.program=std::make_shared<const ProgramIdentity>(direction_program(family,request,0));
+    query.query=0;query.requested_assurance=family_request.assurance;
+    query.applied_assurance=ar::Available<Assurance>{Assurance::numerical};
+    query.observation_source="witness-selector-lp-query";
+    input.spans.push_back(std::move(query));
+    auto plan=take(ob::make_collection_plan(std::move(input)));
+    return take(ob::make_timing_collector(plan,std::make_shared<SelectorClock>(),{0},{}));
+}
 SynthesisResult run(StrategyRequest request_) {
     StrategyRegistry strategies;
     REQUIRE_FALSE(strategies.add(synthesis::strategy_ts01::make_registration()).has_value());
@@ -122,6 +186,44 @@ TEST_CASE("oriented directions minimize controls and retain complete histories")
     CHECK(selection.batch.directions==query.selection.directions); CHECK(selection.batch.distinctness_tolerance==1e-9);
     CHECK(selection.batch.seed==42); CHECK(selection.batch.source_family==synthesis.family->identity());
     CHECK(selection.diagnostics.find("shortfall")!=std::string::npos);
+}
+
+TEST_CASE("direction LP executions record their selector, backend, program, and query span") {
+    const auto resolved=resolve(source());
+    auto synthesis_result=run(request(resolved)); REQUIRE(synthesis_result.family);
+    Registry<LPPort> lp; REQUIRE_FALSE(lp.add(take(adapters::lp::make_highs_registration())).has_value());
+    Requirements lp_requirements;lp_requirements.output.representation={"csl.program-result.v1"};
+    auto provider=take(prepare_provider(select_provider(lp,Method{{"csl.lp.highs"},{}},lp_requirements)));
+    Registry<SelectorPort> selectors;
+    REQUIRE_FALSE(selectors.add(synthesis::witness_selector::make_registration(provider)).has_value());
+    const auto family=*synthesis_result.family;
+    const WitnessRequest selection_request{1,1e-9,{{1,-1}},17};
+    SelectorRequest query{family,selection_request};
+    Requirements output;output.output.representation={"csl.witness-batch.v1"};
+    auto prepared=take(prepare_pipeline(select(selectors,
+        Method{{synthesis::witness_selector::selector_id},{}},query,output)));
+    auto workspace=prepared.create();
+    const auto timer=selector_timing(resolved,family,selection_request,provider.provenance());
+    auto context=make_execution_context();context.run_id="run";context.timing=timer;
+    auto root=take(timer->start({0},context));
+    auto selection=take(std::get<0>(workspace)->run(context));
+    root.close(Termination::completed);
+    REQUIRE(selection.termination==Termination::completed);
+    REQUIRE(selection.batch.witnesses.size()==1);
+    const auto report=take(timer->snapshot());
+    REQUIRE(report.spans.size()==2);
+    const auto& timed=report.spans[1];
+    REQUIRE(std::holds_alternative<ar::Available<std::uint64_t>>(timed.inclusive_wall_ticks));
+    CHECK(std::get<ar::Available<std::uint64_t>>(timed.inclusive_wall_ticks).value==10);
+    const auto& record=report.observations.description().spans[1];
+    CHECK(record.descriptor.operation=="selector.lp.direction-query");
+    CHECK(record.descriptor.module.id==ModuleId{synthesis::witness_selector::selector_id});
+    CHECK(record.descriptor.backend->id==provider.provenance().actual->id);
+    CHECK(record.descriptor.backend->version==provider.provenance().actual->version);
+    CHECK(*record.descriptor.program==direction_program(family,selection_request,0));
+    CHECK(record.descriptor.query==0);
+    REQUIRE(std::holds_alternative<ar::ReturnedSpan>(record.status));
+    CHECK(std::get<ar::ReturnedSpan>(record.status).termination==Termination::completed);
 }
 
 TEST_CASE("reject malformed direction before provider creation and honor cancellation") {

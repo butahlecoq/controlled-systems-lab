@@ -4,6 +4,7 @@
 #include <csl/synthesis/ts03_singular_integrator.hpp>
 #include <csl/synthesis/strategy_a/nominal_linear_exact_profile.hpp>
 #include <csl/optimization/linear_program.hpp>
+#include <csl/execution/instrumented_operation.hpp>
 #include <cmath>
 #include <algorithm>
 #include <array>
@@ -12,6 +13,15 @@
 
 namespace csl::synthesis::witness_selector {
 namespace {
+namespace ar=artifacts;
+namespace ob=execution::observability;
+constexpr std::string_view lp_query_operation="selector.lp.direction-query";
+ar::ModuleIdentity selector_module_identity() {
+    return {{selector_id},"1",ar::Unavailable{ar::MissingReason::not_instrumented,{}}};
+}
+ar::ModuleIdentity backend_module_identity(const registry::Identity& identity) {
+    return {identity.id,identity.version,ar::Unavailable{ar::MissingReason::not_instrumented,{}}};
+}
 Diagnostics reject(std::string field,std::string reason) {
     return {{DiagnosticCode::unsupported,std::move(field),std::move(reason)}};
 }
@@ -184,10 +194,21 @@ public:
             const auto& complete=std::get<CompleteOptimalFamily>(family.outcome());
             const auto* ts01=dynamic_cast<const strategy_ts01::ExactJointRelation*>(complete.relation.payload.get());
             const double original_objective=complete.optimum.bounds.lower->value;
-            for(const auto& lp:programs) {
+            for(std::size_t index=0;index<programs.size();++index) {
+                const auto& lp=programs[index];
                 if(selected.batch.distinct_count()>=request.count)break;
                 if(const auto stop=stopped(context)) {selected.termination=Termination::cancelled;selected.diagnostics=stop->diagnostics;return selected;}
-                auto outcome=runner.solve(lp,context);
+                std::optional<ar::ModuleIdentity> backend;
+                if(const auto& actual=provider_.provenance().actual;actual)
+                    backend=backend_module_identity(*actual);
+                const ob::OperationSpanIdentity timing_identity{context.run_id,lp_query_operation,
+                    selector_module_identity(),std::move(backend),lp.identity(),{},index};
+                auto outcome=ob::run_instrumented_operation(context,timing_identity,
+                    [&] {return runner.solve(lp,context);},[](const auto& query_outcome) noexcept {
+                        if(std::holds_alternative<Unsupported>(query_outcome))
+                            return Termination::operation_rejected;
+                        return std::get<ProgramResult>(query_outcome).termination;
+                    });
                 if(const auto* unsupported=std::get_if<Unsupported>(&outcome)) {
                     selected.termination=Termination::operation_rejected;
                     selected.diagnostics="LP provider rejected a direction query; earlier observations retained.";
