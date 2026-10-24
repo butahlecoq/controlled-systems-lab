@@ -1,12 +1,12 @@
-Timestamp: 2026-10-24T21:52:28+03:00 (Europe/Moscow)
-Source commit: 124a0ed12b60dbbf34ee19356ff2173027f3945e
+Timestamp: 2026-10-24T22:06:38+03:00 (Europe/Moscow)
+Source commit: e782e2fbe6b7e16339fa27c24ac3175b59aaf7bf
 Tracked working tree: clean at run start
 Build: CMake Release, C++20; GCC 16.2.1 (20260810)
-Binary SHA-256: 84a028d9afaad18451a4759d7b3e75db8ac2f70ef1011298386ce856abfb5c29
+Binary SHA-256: 7f8108ac15aaae33e469a218ffe50753e51f9ebebe738d0939e6d0b6bddc4b6b
 OS/kernel: Linux omarchy 7.2.5-3-omarchy x86_64
 CPU: AMD Ryzen 5 3550H with Radeon Vega Mobile Gfx; 8 logical CPUs, 4 cores, 2 threads per core
-System load at run start: 0.62, 0.86, 1.77 (8 logical CPUs)
+System load at run start: 0.27, 0.75, 1.44 (8 logical CPUs)
 Memory at capture: 7.6 GiB total, 3.4 GiB available
 Profiler: perf 7.2.3-1 unpacked under `/tmp` from the configured Arch package mirror; no system package was installed.
-Separate profile: see `linux-gcc16-20261024.profile-summary.md` and `.perf.data`; user-mode CPU cycles at 999 Hz, 176 samples over 150.527 ms, zero lost samples. Whole-process profile, not isolated to the timed strategy calls; no unique limiter established.
-Profile data SHA-256: f3b7d29f976d10152f7359693e5218ecdbd65a8467d99dc2a39c7ad454ee487d
+Separate profile (captured 2026-10-24T22:06:56+03:00): see `linux-gcc16-20261024.profile-summary.md` and `.perf.data`; user-mode CPU cycles at 999 Hz, 170 samples over 150.872 ms, zero lost samples. Whole-process profile, not isolated to the timed strategy calls; no unique limiter established.
+Profile data SHA-256: 3072d0579862235ee5ba816eb3679189dd1d2943b288f2c1177ff634329f538b

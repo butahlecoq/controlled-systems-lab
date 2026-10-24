@@ -53,21 +53,21 @@ performance conclusion should be based on a timing row whose status is not
 ## Captured analytic sample
 
 `results/linux-gcc16-20261024.jsonl` records a sample run from source commit
-`124a0ed12b60dbbf34ee19356ff2173027f3945e`. Its adjacent `.environment.txt`
+`e782e2fbe6b7e16339fa27c24ac3175b59aaf7bf`. Its adjacent `.environment.txt`
 file records environment details and the binary hash. All 32 events passed the
 analytic and span checks (four warmups and 28 measured attempts). Measured
 `strategy_run_ns` medians and ranges were:
 
 | Strategy | Collection | Median (ns) | Range (ns) |
 | --- | --- | ---: | ---: |
-| reach-back | disabled | 5,042,985 | 4,774,517–5,586,764 |
-| reach-back | enabled | 8,155,503 | 7,849,113–8,944,912 |
-| direct-joint | disabled | 830,126 | 740,451–867,979 |
-| direct-joint | enabled | 972,950 | 910,094–1,042,372 |
+| reach-back | disabled | 5,253,857 | 4,750,087–8,113,603 |
+| reach-back | enabled | 8,029,374 | 7,712,990–8,705,164 |
+| direct-joint | disabled | 776,153 | 745,143–1,037,851 |
+| direct-joint | enabled | 960,256 | 903,684–1,096,169 |
 
 This sample is descriptive and inconclusive. A separate user-space `perf`
-profile is retained beside the raw timings. It captured 176 samples over
-150.527 ms with zero samples lost, but it covers the whole driver process,
+profile is retained beside the raw timings. It captured 170 samples over
+150.872 ms with zero samples lost, but it covers the whole driver process,
 including initialization, baselines, workspace/collector setup, strategy calls,
 and snapshots. Allocation/cleanup symbols and solver symbols appear in that
 profile, but it cannot isolate a unique limiter in the timed region. The profile
