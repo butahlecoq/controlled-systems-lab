@@ -66,6 +66,8 @@ The [L05 four-state reduction hypothesis](l05-example2-approximation-hypothesis.
 
 The [L05 primary paper claim audit](l05-primary-claim-audit.md) separates its exact linear reachable-set definition, unproved modified point-pruning claim, and numerical nonlinear comparison from validated inclusion or model-error evidence.
 
+The [L05 corrected-track error enclosure](l05-corrected-track-error-bound.md) adds an owner-authorized, explicitly assumed shared-coordinate study for the printed discrete Lotka–Volterra recurrence. Directed interval arithmetic bounds the stage-60 paired nonlinear/affine error for every control history; it is not a Table 1 reproduction or continuous-time plant certificate.
+
 The [L05 retention-predicate crosswalk](l05-retention-predicate-crosswalk.md) maps the printed support-hyperplane wording to the hash-identified candidate filters and their replay records. It keeps candidate behavior separate from the still-unidentified Table 1 implementation.
 
 The [issue #5 feedback contract follow-up](feedback-contract-followup.md) turns the reviewed policy distinctions into a bounded robust predecessor and evidence handoff without claiming an implemented feedback solver.
