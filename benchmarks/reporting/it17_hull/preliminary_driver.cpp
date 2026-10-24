@@ -90,6 +90,27 @@ Fixture halton_square(std::size_t count) {
         {{0,0},{1,0},{1,1},{0,1}}};
 }
 
+Fixture dyadic_interior_square(std::size_t count) {
+    if (count < 4 || count > 900)
+        throw std::invalid_argument("dyadic square needs 4..900 points");
+    geometry::PointCloud cloud{{"it17-dyadic-square-n" + std::to_string(count)},
+        {{0,0},{1,0},{1,1},{0,1}}};
+    cloud.points.reserve(count);
+    std::set<std::pair<std::uint32_t, std::uint32_t>> used;
+    std::uint32_t state = UINT32_C(0x6d2b79f5);
+    while (cloud.points.size() < count) {
+        state = state * UINT32_C(1664525) + UINT32_C(1013904223);
+        const auto x = UINT32_C(1) + state % UINT32_C(31);
+        state = state * UINT32_C(1664525) + UINT32_C(1013904223);
+        const auto y = UINT32_C(1) + state % UINT32_C(31);
+        if (used.emplace(x, y).second)
+            cloud.points.push_back({static_cast<double>(x) / 32.0,
+                                    static_cast<double>(y) / 32.0});
+    }
+    return {"dyadic-square-n" + std::to_string(count), std::move(cloud),
+        {{0,0},{1,0},{1,1},{0,1}}};
+}
+
 std::unique_ptr<LPWorkspace> workspace(const geometry::PointCloud& cloud) {
     auto registration = adapters::lp::make_highs_registration();
     if (!std::holds_alternative<registry::Registration<registry::LPPort>>(registration)) return {};
@@ -269,20 +290,24 @@ int main(int argc, char** argv) {
     int repetitions = 7;
     int first_round = 1;
     std::optional<std::size_t> ladder_size;
+    std::optional<std::size_t> dyadic_size;
     for(int i=1;i<argc;++i) {
         const std::string argument{argv[i]};
         if(argument=="--measure"&&i+1<argc)repetitions=std::stoi(argv[++i]);
         else if(argument=="--from-round"&&i+1<argc)first_round=std::stoi(argv[++i]);
         else if(argument=="--ladder-size"&&i+1<argc)ladder_size=std::stoull(argv[++i]);
+        else if(argument=="--dyadic-size"&&i+1<argc)dyadic_size=std::stoull(argv[++i]);
         else {
-            std::cerr << "usage: csl_it17_hull_preliminary [--measure repetitions] [--from-round N] [--ladder-size 250|1000|5000]\n";
+            std::cerr << "usage: csl_it17_hull_preliminary [--measure repetitions] [--from-round N] [--ladder-size 250|1000|5000] [--dyadic-size 4..900]\n";
             return 2;
         }
     }
     if (repetitions < 1 || first_round < 1 || first_round > repetitions ||
+        (ladder_size && dyadic_size) ||
         (ladder_size&&*ladder_size!=250&&*ladder_size!=1000&&*ladder_size!=5000)) return 2;
     try {
-        auto data=ladder_size?std::vector<Fixture>{halton_square(*ladder_size)}:fixtures();
+        auto data=ladder_size?std::vector<Fixture>{halton_square(*ladder_size)}:
+            dyadic_size?std::vector<Fixture>{dyadic_interior_square(*dyadic_size)}:fixtures();
         if (first_round == 1) {
             for (const auto& fixture : data) for (const auto method : methods) {
                 const auto result = run(fixture, method);
