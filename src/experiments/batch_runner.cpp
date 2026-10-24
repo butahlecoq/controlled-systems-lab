@@ -83,9 +83,11 @@ bool recorded_run_matches(const artifacts::RecordedRunArtifact& artifact,
         const auto& final = run.at("final");
         const auto kind = final.at("kind").get<std::string>();
         if (const auto* skipped = std::get_if<execution::Skipped>(&actual))
-            return kind == "skipped" && final.at("value").at("reason").get<std::string>() == skip_reason_name(skipped->reason);
+            return kind == "skipped" && run.at("selection").is_null() &&
+                final.at("value").at("reason").get<std::string>() == skip_reason_name(skipped->reason);
         if (const auto* failed = std::get_if<execution::TaskFailure>(&actual))
-            return kind == "failed" && final.at("value").at("phase").get<std::string>() == failure_phase_name(failed->stage) &&
+            return kind == "failed" && run.at("selection").is_null() &&
+                final.at("value").at("phase").get<std::string>() == failure_phase_name(failed->stage) &&
                 final.at("value").at("reason").get<std::string>() == failure_reason_name(failed->kind);
 
         const auto& returned = std::get<execution::Returned<registry::StrategyPort>>(actual).value;
@@ -101,6 +103,108 @@ bool recorded_run_matches(const artifacts::RecordedRunArtifact& artifact,
             !same_bound(value.at("objective").at("upper"), synthesis->objective.upper))
             return false;
         return value.at("family").is_null() == !synthesis->family.has_value();
+    } catch (const std::exception&) {
+        return false;
+    }
+}
+
+std::string_view diagnostic_name(DiagnosticCode value) {
+    switch (value) {
+    case DiagnosticCode::invalid_input: return "invalid_input";
+    case DiagnosticCode::unsupported: return "unsupported";
+    case DiagnosticCode::evidence_mismatch: return "evidence_mismatch";
+    case DiagnosticCode::invalid_claim: return "invalid_claim";
+    }
+    return {};
+}
+
+std::string_view family_target_name(FamilyTarget value) {
+    switch (value) {
+    case FamilyTarget::exact_optimal_relation: return "exact_optimal_relation";
+    case FamilyTarget::candidate_relaxation: return "candidate_relaxation";
+    case FamilyTarget::partial_relation: return "partial_relation";
+    }
+    return {};
+}
+
+std::string_view assurance_name(Assurance value) {
+    switch (value) {
+    case Assurance::numerical: return "numerical";
+    case Assurance::validated: return "validated";
+    }
+    return {};
+}
+
+Json family_identity_json(const FamilyIdentity& identity) {
+    Json lineage = Json::array();
+    for (const auto& step : identity.lineage) {
+        lineage.push_back({{"request",step.request.value},{"input",step.input.value},
+            {"output",step.output.value},{"module",step.module.value},{"version",step.version}});
+    }
+    const auto& request = identity.request;
+    return {
+        {"problem",identity.problem.value},
+        {"request",{{"profile",request.profile},{"objective",request.objective.value},
+            {"target",family_target_name(request.target)},
+            {"numerical",{{"absolute_tolerance",request.numerical.absolute_tolerance},
+                {"relative_tolerance",request.numerical.relative_tolerance}}},
+            {"assurance",assurance_name(request.assurance)},
+            {"representation",request.representation.value},
+            {"materialization_limit",request.materialization_limit
+                ? Json{std::to_string(*request.materialization_limit)} : Json{nullptr}}}},
+        {"coordinates",{{"dimensions",{{"state",std::to_string(identity.coordinates.dimensions.state)},
+            {"control",std::to_string(identity.coordinates.dimensions.control)},
+            {"external",std::to_string(identity.coordinates.dimensions.external)}}},
+            {"horizon",std::to_string(identity.coordinates.horizon)}}},
+        {"strategy",identity.strategy.value},{"strategy_version",identity.strategy_version},
+        {"lineage",std::move(lineage)}};
+}
+
+Json witness_json(const Witness& witness) {
+    return {{"problem",witness.problem.value},{"states",witness.states},
+        {"controls",witness.controls},{"original_objective",witness.original_objective}};
+}
+
+Json selection_json(const WitnessSelection& selection) {
+    const auto& batch = selection.batch;
+    Json witnesses = Json::array();
+    for (const auto& witness : batch.witnesses) witnesses.push_back(witness_json(witness));
+    return {{"batch",{{"witnesses",std::move(witnesses)},
+        {"requested",std::to_string(batch.requested)},{"selector",batch.selector.value},
+        {"seed",batch.seed ? Json{std::to_string(*batch.seed)} : Json{nullptr}},
+        {"source_family",batch.source_family ? family_identity_json(*batch.source_family) : Json{nullptr}},
+        {"directions",batch.directions},{"distinctness_tolerance",batch.distinctness_tolerance}}},
+        {"termination",termination_name(selection.termination)},{"diagnostics",selection.diagnostics}};
+}
+
+bool recorded_query_matches(const artifacts::RecordedRunArtifact& artifact,
+    const execution::TaskOutcome<registry::SelectorPort>& actual) {
+    try {
+        std::string text;
+        const auto bytes = artifact.content().bytes();
+        text.reserve(bytes.size());
+        for (const auto byte : bytes) text.push_back(static_cast<char>(std::to_integer<unsigned char>(byte)));
+        if (std::holds_alternative<artifacts::ArtifactError>(artifacts::decode_recorded_run(text))) return false;
+        const auto run = Json::parse(text);
+        const auto& final = run.at("final");
+        const auto kind = final.at("kind").get<std::string>();
+        if (const auto* skipped = std::get_if<execution::Skipped>(&actual))
+            return kind == "skipped" && final.at("value").at("reason").get<std::string>() == skip_reason_name(skipped->reason);
+        if (const auto* failed = std::get_if<execution::TaskFailure>(&actual))
+            return kind == "failed" && final.at("value").at("phase").get<std::string>() == failure_phase_name(failed->stage) &&
+                final.at("value").at("reason").get<std::string>() == failure_reason_name(failed->kind);
+
+        const auto& returned = std::get<execution::Returned<registry::SelectorPort>>(actual).value;
+        if (const auto* unsupported = std::get_if<Unsupported>(&returned)) {
+            if (kind != "unsupported" || !run.at("selection").is_null()) return false;
+            Json expected = Json::array();
+            for (const auto& diagnostic : unsupported->diagnostics)
+                expected.push_back({{"code",diagnostic_name(diagnostic.code)},
+                    {"field",diagnostic.field},{"explanation",diagnostic.explanation}});
+            return final.at("value").at("diagnostics") == expected;
+        }
+        const auto* selection = std::get_if<WitnessSelection>(&returned);
+        return selection && kind == "synthesis" && run.at("selection") == selection_json(*selection);
     } catch (const std::exception&) {
         return false;
     }
@@ -406,6 +510,10 @@ artifacts::ArtifactResult<artifacts::RecordedSweepArtifact> record_family_query_
                     "sweep.cases[" + std::to_string(i) + "].query", "Scheduled query task index is invalid or duplicated");
             if (!query_runs[i]) return artifact_error(artifacts::ArtifactErrorCode::reference,
                 "sweep.cases[" + std::to_string(i) + "].query", "A scheduled query requires its recorded outcome");
+            if (!recorded_query_matches(*query_runs[i], result.query_batch.tasks[task_index].outcome))
+                return artifact_error(artifacts::ArtifactErrorCode::identity,
+                    "sweep.cases[" + std::to_string(i) + "].query.outcome",
+                    "Recorded query outcome does not match the live selector task outcome.");
             disposition = *query_runs[i];
         }
 
