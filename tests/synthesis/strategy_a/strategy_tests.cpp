@@ -90,6 +90,27 @@ problem::ResolvedProblem nominal_linear_exact_integrator(bool constant=false) {
         constant ? TerminalObjective{LinearTerminal{{0},3}} : TerminalObjective{LinearTerminal{{1},0}}};
     return take(problem::resolve(source,{problem::UncertaintyStructure::stage_product_uncoupled,{},{}}));
 }
+SetHandle unit_box_2d(std::string id, std::string first, std::string second) {
+    return take(sets::make_h({{std::move(id)},2,{std::move(first),std::move(second)}},
+        {take(numeric::snapshot(Matrix{4,2,{1,0,-1,0,0,1,0,-1}})),
+         take(numeric::snapshot_vector(Vector{1,0,1,0})),
+         take(numeric::snapshot(Matrix{0,2,{}})),
+         take(numeric::snapshot_vector(Vector{}))})).as_handle();
+}
+problem::ResolvedProblem nominal_linear_exact_multivariable() {
+    const auto box = unit_box_2d("nominal-exact-box", "p", "v");
+    Problem source{{"strategy-a-nominal-linear-exact-multivariable"},
+        std::make_shared<const SystemModel>(SystemModel{{
+            {2,2,0},TimeDomain::discrete,
+            LinearStage{{2,2,{0,0,0,0}},{2,2,{1,0,0,1}},{2,0,{}},{0,0}}}, {}}),
+        {0,1,2},KnownInitial{{0,0}},
+        ContinuousDomain{{box,box}},
+        {unit_box_2d("nominal-exact-x0", "p", "v"),
+         unit_box_2d("nominal-exact-x1", "p", "v"),
+         unit_box_2d("nominal-exact-x2", "p", "v")}, {},{},
+        InformationPattern::nominal_open_loop,LinearTerminal{{1,0},0}};
+    return take(problem::resolve(source,{problem::UncertaintyStructure::stage_product_uncoupled,{},{}}));
+}
 problem::ResolvedProblem nominal_linear_exact_cancellation_objective() {
     Problem source{{"strategy-a-nominal-linear-exact-cancellation"},
         std::make_shared<const SystemModel>(SystemModel{
@@ -856,6 +877,30 @@ TEST_CASE("nominal linear exact profile preserves all feasible histories for a c
     CHECK(contains(*relation,{0,0,1,0,1}));
     CHECK(contains(*relation,{0,1,2,1,1}));
     CHECK(contains(*relation,{0,.4,1.2,.4,.8}));
+}
+TEST_CASE("nominal linear exact profile verifies a multi-state multi-control optimal history face") {
+    const auto result=run(nominal_linear_exact_request(nominal_linear_exact_multivariable()));
+    CHECK(result.termination==Termination::completed);
+    REQUIRE(result.family);
+    CHECK(result.family->registry_verified());
+    CHECK(result.outcome.value==MathematicalOutcome::optimal);
+    REQUIRE(result.objective.lower);REQUIRE(result.objective.upper);
+    CHECK(result.objective.lower->value==0);CHECK(result.objective.upper->value==0);
+    const auto& complete=std::get<CompleteOptimalFamily>(result.family->outcome());
+    CHECK(complete.relation.coordinates.dimensions.state==2);
+    CHECK(complete.relation.coordinates.dimensions.control==2);
+    CHECK(complete.relation.coordinates.horizon==2);
+    REQUIRE(complete.relation.payload);
+    const auto* relation=complete.relation.payload->h_relation_for_recording();
+    REQUIRE(relation);
+    CHECK(relation->metadata()->set.dimension==10);
+    const auto h=std::get<sets::HRepresentation>(relation->representation());
+    CHECK(equality_rank(h)==7);
+    CHECK(contains(*relation,{0,0,0,0,0,0,0,0,0,0}));
+    CHECK(contains(*relation,{0,0,1,1,0,1,1,1,0,1}));
+    CHECK(contains(*relation,{0,0,.25,.75,0,.5,.25,.75,0,.5}));
+    CHECK_FALSE(contains(*relation,{0,0,1,1,.5,1,1,1,.5,1}));
+    CHECK_FALSE(contains(*relation,{0,0,1,1,0,1,.5,1,0,1}));
 }
 TEST_CASE("nominal linear exact evidence derives the dyadic optimum without rounded accumulation") {
     const auto bound=registry::detail::strategy_a_nominal_linear_exact_optimum_bound(
