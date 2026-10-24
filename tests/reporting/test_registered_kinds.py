@@ -472,7 +472,7 @@ class RegisteredKindTests(unittest.TestCase):
         root=repo/'reports'/'algorithm-results'
         catalogue=json.loads((root/'catalog.json').read_text(encoding='utf-8'))
         self.assertEqual(catalogue['schema'],'csl.algorithm-report-catalog/3')
-        self.assertEqual({item['report_kind'] for item in catalogue['reports']},{'lp','convex','opt04-phase-one','opt05-hull','opt06-basis-reuse','opt07-ordered-hull','opt11-recursive-hull','geo03-hv','geo04-intersection','geo02-affine-sum','geo05-projection-predecessor','geo06-quickhull','b08-displayed-exact','issue3-finite-catalogue','issue3-validated-minimax','syn01-nominal-forward','syn02-terminal-minimizers','syn07-ts01-analytic','syn04-strategy-b-ts01','syn04-strategy-b-ts02','syn04-strategy-b-ts03','syn03-strategy-a-ts01','syn03-strategy-a-ts02','syn-ts01-paired-comparison','opt12-warm-start'})
+        self.assertEqual({item['report_kind'] for item in catalogue['reports']},{'lp','convex','opt04-phase-one','opt05-hull','opt06-basis-reuse','opt07-ordered-hull','opt11-recursive-hull','geo03-hv','geo04-intersection','geo02-affine-sum','geo05-projection-predecessor','geo06-quickhull','b08-displayed-exact','issue3-finite-catalogue','issue3-validated-minimax','syn01-nominal-forward','syn02-terminal-minimizers','syn07-ts01-analytic','syn04-strategy-b-ts01','syn04-strategy-b-ts02','syn04-strategy-b-ts03','syn03-strategy-a-ts01','syn03-strategy-a-ts02','syn-ts01-paired-comparison','opt12-warm-start','ext03-temporal-transform'})
         shared={'report_id','report_kind','payload_sha256','source_commit','zip_sha256'}
         for report in catalogue['reports']:
             self.assertTrue(shared <= set(report))

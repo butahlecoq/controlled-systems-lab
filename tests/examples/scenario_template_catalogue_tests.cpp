@@ -151,3 +151,27 @@ TEST_CASE("double-integrator generality template has independently derived trans
     CHECK(within(-0.25, -1, 1));
     CHECK(cost(scenario, x3) == doctest::Approx(0.078125));
 }
+
+TEST_CASE("temporal slew template preserves its independent two-control optimal family") {
+    const auto scenario=load("temporal-slew-integrator.json");
+    CHECK(scenario.source()->schema=="csl.scenario/2");
+    CHECK(scenario.metadata()->id=="temporal-slew-integrator");
+    CHECK(scenario.problem().model().horizon()==2);
+    const auto temporal=scenario.problem().constraints().temporal();
+    REQUIRE(temporal);
+    REQUIRE(temporal->joint_map.rows()==1);
+    REQUIRE(temporal->joint_map.cols()==5);
+    CHECK(temporal->joint_map(0,3)==-1);
+    CHECK(temporal->joint_map(0,4)==1);
+    REQUIRE(temporal->bounds->size()==1);
+    CHECK(temporal->bounds->at(0).lower==-.25);
+    CHECK(temporal->bounds->at(0).upper==.25);
+
+    const auto x1=step(scenario,0,{0},{0.125});
+    const auto x2=step(scenario,1,x1,{-0.125});
+    CHECK(x1==Vector{0.125});
+    CHECK(x2==Vector{0});
+    CHECK(cost(scenario,x2)==doctest::Approx(0));
+    CHECK(std::abs(-0.125-0.125)<=0.25);
+    CHECK(std::abs(1.0-(-1.0))>0.25);
+}

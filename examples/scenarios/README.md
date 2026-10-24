@@ -1,7 +1,8 @@
 # Editable scenario templates
 
-These executable examples use the strict `csl.scenario/1` JSON format and the
-public file loader. They demonstrate a minimal LTI model, stage-specific state
+These executable examples use the strict versioned scenario JSON formats and the
+public file loader. The original templates remain `csl.scenario/1`; the EXT-03
+example uses `csl.scenario/2` to author full-history temporal rows. They demonstrate a minimal LTI model, stage-specific state
 constraints, an LTV model, and the supported linear, quadratic and residual-norm
 terminal objective forms. The loader validates and publishes problem data; it
 does not run an optimizer or claim that the illustrative histories are optimal.
@@ -12,6 +13,7 @@ does not run an optimizer or claim that the illustrative histories are optimal.
 | `state-constrained-quadratic.json` | Scalar LTI, box state set at all three time indices | `(0.25, 0.75)` | `(0, 0.25, 1)` | `x² - 2x + 1 = 0` at `x = 1` |
 | `ltv-residual-norm.json` | Scalar two-stage LTV | `(1, 0)` | `(1, 2, 4)` | `||(x - 5, 0)||₂ = 1` at `x = 4` |
 | `double-integrator-generality.json` | Two-state position/velocity double integrator, horizon 3, bounded intermediate states | `(0.5, 0, -0.25)` | `((0,0), (0.25,0.5), (0.75,0.5), (1.125,0.25))` | `(p - 1)² + (v - 0.5)² = 0.078125` at `(p,v)=(1.125,0.25)` |
+| `temporal-slew-integrator.json` | Scalar two-step integrator with the cross-stage bound `|u1-u0| <= 1/4` | `(0, 0)` | `(0, 0, 0)` | `x2² = 0`; the hand-derived optimal control family is `u1=-u0`, `|u0|<=1/8` |
 
 The first three templates label their scalar state coordinate `x` and control
 coordinate `u`; both use normalized, dimensionless units. The double-integrator
@@ -46,6 +48,16 @@ then `[0,1.5]` m and velocity is in `[-1,1]` m/s. The terminal target is
 encode `(p-1)²+(v-0.5)²` in the documented `0.5 xᵀQx + qᵀx + c` convention.
 The listed control sequence is a hand-derived feasible example, not an optimal
 solution or a solver trace.
+
+`temporal-slew-integrator.json` uses `csl.scenario/2` because scenario v1
+reserves and rejects temporal data. Its one row is authored in canonical
+`[x0,x1,x2,u0,u1]` order and imposes `u1-u0 in [-1/4,1/4]`. The exact feasible
+control polygon and optimal segment are shown in the [temporal coupling
+illustration](../../reports/algorithm-results/index.html#visual-ext03-slew-memory).
+The illustration is derived from the authored inequalities; it is not an
+optimizer trace or a claim that every registered strategy supports temporal
+constraints. Strategy admission remains responsible for rejecting unsupported
+profiles and representations.
 
 [#421]: https://github.com/butahlecoq/controlled-systems-lab/issues/421
 

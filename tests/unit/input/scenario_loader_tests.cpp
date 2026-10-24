@@ -35,6 +35,73 @@ TEST_CASE("explicit nominal profile equals omission while malformed values never
         CHECK(error.category==InputCategory::field);CHECK(error.path=="/profile");CHECK(error.expected=="string \"nominal_discrete_v1\"");
     }
 }
+TEST_CASE("scenario v2 admits explicit canonical full-history rows and v1 keeps its reserved temporal key") {
+    const auto base=replace(std::string(minimal),"csl.scenario/1","csl.scenario/2");
+    const auto v2=replace(base,"\"objective\":{\"kind\":\"terminal_distance\",\"target\":[1]}",
+        "\"objective\":{\"kind\":\"terminal_distance\",\"target\":[1]},\"temporal\":{\"coordinate_order\":\"x0,...,xT,u0,...,u(T-1)\",\"rows\":[[0,0,0,-1,1]],\"bounds\":[{\"lower\":-0.25,\"upper\":0.25}]}");
+    const auto scenario=accepted<LoadedScenario>(load(v2));
+    REQUIRE(scenario.problem().constraints().temporal());
+    const auto temporal=*scenario.problem().constraints().temporal();
+    CHECK(temporal.joint_map.rows()==1);
+    CHECK(temporal.joint_map.cols()==5);
+    CHECK(temporal.joint_map(0,3)==-1);
+    CHECK(temporal.joint_map(0,4)==1);
+    REQUIRE(temporal.bounds->size()==1);
+    CHECK(temporal.bounds->at(0).lower==-.25);
+    CHECK(temporal.bounds->at(0).upper==.25);
+    CHECK(scenario.source()->schema=="csl.scenario/2");
+    CHECK(scenario.source()->defaults_revision=="csl.scenario-defaults/2");
+    CHECK(std::any_of(scenario.defaults()->begin(),scenario.defaults()->end(),[](const DefaultRecord& item) {
+        return item.path=="/temporal" && item.authored;
+    }));
+
+    const auto old=replace(std::string(minimal),"\"objective\":{\"kind\":\"terminal_distance\",\"target\":[1]}",
+        "\"objective\":{\"kind\":\"terminal_distance\",\"target\":[1]},\"temporal\":{\"rows\":[]}");
+    const auto rejected_v1=accepted<UnsupportedInput>(load(old));
+    CHECK(rejected_v1.path=="/temporal");
+    CHECK(rejected_v1.expected=="omitted temporal relation in nominal v1");
+}
+TEST_CASE("scenario v2 distinguishes malformed temporal order, width and interval bounds") {
+    const auto base=replace(std::string(minimal),"csl.scenario/1","csl.scenario/2");
+    const auto append_temporal=[&](std::string body) {
+        return replace(base,"\"objective\":{\"kind\":\"terminal_distance\",\"target\":[1]}",
+            "\"objective\":{\"kind\":\"terminal_distance\",\"target\":[1]},\"temporal\":"+body);
+    };
+    auto wrong_order=accepted<InputFailure>(load(append_temporal(R"({"coordinate_order":"wrong","rows":[[0,0,0,0,0]],"bounds":[{"lower":0,"upper":1}]})")));
+    CHECK(wrong_order.path=="/temporal/coordinate_order");
+    auto wrong_width=accepted<InputFailure>(load(append_temporal(R"json({"coordinate_order":"x0,...,xT,u0,...,u(T-1)","rows":[[0,0]],"bounds":[{"lower":0,"upper":1}]})json")));
+    CHECK(wrong_width.path=="/temporal/rows");
+    auto reversed=accepted<InputFailure>(load(append_temporal(R"json({"coordinate_order":"x0,...,xT,u0,...,u(T-1)","rows":[[0,0,0,0,0]],"bounds":[{"lower":2,"upper":1}]})json")));
+    CHECK(reversed.path=="/temporal/bounds/0");
+}
+TEST_CASE("scenario v2 retains zero-row and multirow temporal CSR shapes") {
+    const auto base=replace(std::string(minimal),"csl.scenario/1","csl.scenario/2");
+    const auto append_temporal=[&](std::string body) {
+        return replace(base,"\"objective\":{\"kind\":\"terminal_distance\",\"target\":[1]}",
+            "\"objective\":{\"kind\":\"terminal_distance\",\"target\":[1]},\"temporal\":"+body);
+    };
+
+    const auto zero_row=accepted<LoadedScenario>(load(append_temporal(
+        R"json({"coordinate_order":"x0,...,xT,u0,...,u(T-1)","rows":{"rows":0,"cols":5,"values":[]},"bounds":[]})json")));
+    REQUIRE(zero_row.problem().constraints().temporal());
+    const auto empty=*zero_row.problem().constraints().temporal();
+    CHECK(empty.joint_map.rows()==0);
+    CHECK(empty.joint_map.cols()==5);
+    CHECK(empty.bounds->empty());
+
+    const auto two_rows=accepted<LoadedScenario>(load(append_temporal(
+        R"json({"coordinate_order":"x0,...,xT,u0,...,u(T-1)","rows":[[0,0,0,-1,1],[0,0,1,0,0]],"bounds":[{"lower":-0.25,"upper":0.25},{"lower":1,"upper":1}]})json")));
+    REQUIRE(two_rows.problem().constraints().temporal());
+    const auto relation=*two_rows.problem().constraints().temporal();
+    CHECK(relation.joint_map.rows()==2);
+    CHECK(relation.joint_map.cols()==5);
+    CHECK(relation.joint_map(0,3)==-1);
+    CHECK(relation.joint_map(0,4)==1);
+    CHECK(relation.joint_map(1,2)==1);
+    REQUIRE(relation.bounds->size()==2);
+    CHECK(relation.bounds->at(1).lower==1);
+    CHECK(relation.bounds->at(1).upper==1);
+}
 TEST_CASE("reserved kinds reject at the authored boundary and typos remain malformed") {
     constexpr std::string_view model=R"({"kind":"linear_discrete","A":[[1]],"B":[[1]]})";
     for(const auto kind:{"linear_continuous","affine_continuous","linear_continuous_ltv","affine_continuous_ltv"}) {

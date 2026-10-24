@@ -18,6 +18,11 @@ target_link_libraries(problem_tests PRIVATE CSL::problem doctest::doctest Thread
 add_test(NAME problem_tests COMMAND problem_tests)
 csl_test_target(problem_tests problem)
 
+add_executable(temporal_lift_tests tests/unit/problem/temporal_lifts_tests.cpp)
+target_link_libraries(temporal_lift_tests PRIVATE CSL::resolved_problem CSL::problem doctest::doctest)
+add_test(NAME temporal_lift_tests COMMAND temporal_lift_tests)
+csl_test_target(temporal_lift_tests problem)
+
 add_executable(caller_example probes/core-01/caller_example.cpp)
 target_link_libraries(caller_example PRIVATE CSL::resolved_core Threads::Threads)
 add_test(NAME caller_example COMMAND caller_example)

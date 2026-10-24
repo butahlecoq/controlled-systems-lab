@@ -18,6 +18,7 @@
 #include <csl/problem/domains.hpp>
 #include <csl/problem/constraints.hpp>
 #include <csl/problem/initial_information.hpp>
+#include <csl/problem/temporal_lifts.hpp>
 #include <csl/problem/validator.hpp>
 #include <csl/execution/executor.hpp>
 #include <csl/optimization/convex_backend.hpp>

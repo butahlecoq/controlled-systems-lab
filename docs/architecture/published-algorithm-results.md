@@ -391,3 +391,16 @@ claim. Native submodule counters and timings are retained as unavailable where
 the runtime does not expose them. See the [reproduction notes](../../reports/algorithm-results/tooling/syn03_ts02/README.md).
 Publication through main-only Pages and live URL verification remain separate
 gates; SYN-03 #66 remains open.
+
+## EXT-03 temporal-memory transform microbenchmark
+
+The [saved transform report](../../reports/algorithm-results/ext03-transform-20261024-a3a3af9/)
+uses source commit `a3a3af9e1903d7a2a4be6116cc1669215c2bba1b`, GCC 16.2.1,
+CMake 3.31.6, and a Release build. Seven measured batches of ten lift-and-
+recovery calls followed one warmup batch; all 70 calls passed coordinate-map,
+recovery, and original-constraint checks. Median elapsed time was 45.63 μs per
+call, with a 43.15–56.91 μs range. This transformation microbenchmark does not
+run a solver, identify a source-mapped limiter, compare methods, or support an
+application-scale or scalability claim. The labelled control-plane figure is
+an analytic illustration, not a solver trace. Publication remains subject to
+main-only Pages deployment and live URL verification; EXT-03 #73 remains open.

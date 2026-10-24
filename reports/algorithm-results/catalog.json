@@ -308,6 +308,18 @@
       "payload_schema": "csl.syn04-strategy-b-ts03-report/1",
       "native_payload_sha256": "9c65892c13451356a6988b34e8ffe24565bc04c7c5c7cb5697fe77d472e67b36",
       "source_report_id": "syn04-strategy-b-ts03-20261022-2c0c9210"
+    },
+    {
+      "report_id": "ext03-transform-a40248163f1a8d9b8673140080d83525173af0b73737fe7f1a61e4b470ea2d1a",
+      "payload_sha256": "5c0ae99d9f86e4b7af3911e32592291cd54e0b98774e7a9653cf81447216c4aa",
+      "source_commit": "a3a3af9e1903d7a2a4be6116cc1669215c2bba1b",
+      "zip_sha256": "38f45f9252fdcc0d7be62a62214472e01c84b6b60cb4bf5637089530dfd73a6c",
+      "report_kind": "ext03-temporal-transform",
+      "source_report_id": "ext03-transform-20261024-a3a3af9",
+      "payload_schema": "csl.ext03-transform-record/1",
+      "native_payload_sha256": "5c0ae99d9f86e4b7af3911e32592291cd54e0b98774e7a9653cf81447216c4aa",
+      "measured_scope": "One fixed two-step scalar temporal lift and history recovery; seven measured batches",
+      "evidence_limits": "Transform-only microbenchmark; no solver timing, comparator, speedup, source-mapped limiter, application-scale or scalability claim"
     }
   ]
 }

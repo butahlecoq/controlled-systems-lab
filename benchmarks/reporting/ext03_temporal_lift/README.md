@@ -1,0 +1,44 @@
+# EXT-03 temporal-memory transform measurement
+
+This harness measures constructing the two-step integrator problem, applying
+the one-step slew-memory lift, recovering a known lifted history to original
+coordinates, and checking original dynamics, absolute bounds, slew bounds, and
+objective value. It does not measure a control solver.
+
+Expected analytic result: the minimum terminal state is `-1/4`. The unique
+minimizing control history is `(u0,u1)=(0,-1/4)` from initial memory `p0=1/4`
+with both slew increments in `[-1/4,1/4]`. The transformed joint history is
+`(z0,z1,z2,v0,v1)=((0,1/4),(0,0),(-1/4,-1/4),(-1/4,-1/4))`.
+Each timed call checks the coordinate identities and all three index maps, then recovers this
+literal feasible optimizer to the original coordinates. The run is a
+transformation microbenchmark, not a solver or end-to-end application result.
+
+## Measurement claim
+
+The planned report claim is the median and range of elapsed time per checked
+transform-and-recovery call for this one fixed fixture, with seven measured
+batches after one excluded warmup. There is no competing method, speedup,
+application-scale, or scalability claim. The interval includes problem
+construction, memory lift, history recovery, and the independent checks above.
+It excludes process startup, build, JSONL output, and report rendering.
+Source-mapped limiter profiling is not part of this harness; the report must
+say the limiter is unavailable rather than infer one from wall time.
+
+The event stream records completed, failed, and missing calls separately. On a
+failed call, the executable writes that trial row with the attempt count,
+successful-call count, missing-call count, and failure message before exiting
+nonzero. The collector must retain those bytes and reject an incomplete run as
+a successful report. CLI counts are positive bounded integers: batch at most
+100, warmups at most 5, and measured repetitions at most 20. All arguments are
+validated before the header or any timed work begins.
+
+## Reproduction
+
+The measurement must use a clean, reviewed source commit and a fresh Release
+build directory. Configure the runner with the repository root as
+`CSL_SOURCE_ROOT`, build `csl_ext03_temporal_lift_report` in Release, then run
+the executable with `10 1 7` to emit one excluded warmup and seven measured
+10-call batches. Save stdout as raw JSONL and stderr separately. Preserve
+configure/build logs and the CMake compiler/configuration identity with the
+collection. Rendering consumes only those saved files and must not rerun the
+solver.

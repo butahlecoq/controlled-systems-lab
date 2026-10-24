@@ -85,6 +85,24 @@ CASES = (
         "answer": {"action_0": {"status": "proven feasible analytically", "worst_objective": "sqrt(1/8)"}, "action_1": {"status": "proven infeasible analytically", "witness": {"stage": 1, "disturbance_vertex": 0, "state": [0.75, -0.25], "constraint": "x <= 1/2", "residual": "1/4"}}, "exact": True},
         "svg": "validated-minimax",
     },
+    {
+        "id": "ext03-slew-memory",
+        "family": "Temporal control constraints · EXT-03",
+        "title": "Add a slew limit to a two-stage integrator",
+        "summary": "For x[t+1]=x[t]+u[t], u₀,u₁∈[−1,1] and |u₁−u₀|≤1/4, the green hexagon is the complete feasible control relation. The exact minimum of x₂² is zero on the marked segment; this is an analytic illustration, not a Strategy A/B solver trace.",
+        "figure": "ext03-slew-memory.svg",
+        "record": "ext03-slew-memory.json",
+        "kind": "analytic-illustration",
+        "source_path": "examples/scenarios/temporal-slew-integrator.json",
+        "inputs": {"scenario": "csl.scenario/2", "state_dimension": 1, "control_dimension": 1,
+                   "horizon": 2, "dynamics": "x[t+1]=x[t]+u[t]", "initial_state": 0,
+                   "absolute_controls": "u0,u1 in [-1,1]", "temporal_constraint": "|u1-u0|<=1/4",
+                   "objective": "minimize x2^2", "coordinates": "(u0,u1)"},
+        "answer": {"feasible_polygon_ccw": [[-1,-1],[-.75,-1],[1,.75],[1,1],[.75,1],[-1,-.75]],
+                   "minimum_objective": 0, "complete_minimizer_segment": [[-.125,.125],[.125,-.125]],
+                   "exact": True},
+        "svg": "slew",
+    },
 )
 
 
@@ -144,6 +162,13 @@ def svg(case):
                      [safe, feasible, violating],
                      ("safe: ±1/2", "u=0: safe", "max=√(1/8)",
                       "u=(1,0): bad", "w₀=(-¼,-¼)", "gap=¼"))
+    if kind == "slew":
+        polygon = _polygon([[-1,-1],[-.75,-1],[1,.75],[1,1],[.75,1],[-1,-.75]],
+                           -1, 1, "#b4cda3", "#7b9b70", "0.28")
+        segment = '<line x1="214" y1="159" x2="256" y2="191" stroke="#e79a78" stroke-width="5"/><circle cx="214" cy="159" r="5" fill="#f0f7e9"/><circle cx="256" cy="191" r="5" fill="#f0f7e9"/>'
+        return _base("Slew-limited two-stage integrator", -1, 1, [polygon, segment],
+                     ("feasible controls", "|u₁−u₀| ≤ 1/4", "green: feasible set",
+                      "gold: x₂=0, cost=0"), xlabel="u₀ (stage 0)", ylabel="u₁ (stage 1)")
     tri = _polygon([[0, 0], [1, 0], [0, 1]], -1, 2, "#b4cda3", "#7b9b70", "0.35")
     px, py = _xy((0.25, 0.25), -1, 2)
     dot = f'<circle cx="{px:.2f}" cy="{py:.2f}" r="7" fill="#f0f7e9" stroke="#b4cda3" stroke-width="3"/>'
@@ -159,45 +184,59 @@ def build(catalog):
     for case in CASES:
         svg_name = case["figure"]
         record_name = case["record"]
-        report = next((r for r in reports if r["report_kind"] == case["report_kind"]), None)
-        if report is None:
+        report = next((r for r in reports if r["report_kind"] == case["report_kind"]), None) if "report_kind" in case else None
+        if "report_kind" in case and report is None:
             raise ValueError("missing catalog report for analytic illustration: " + case["report_kind"])
-        rendered.append({**{k: v for k, v in case.items() if k not in {"svg", "inputs", "answer"}},
-                         "report_id": report["report_id"], "status": "analytic-illustration",
-                         "anchor": "visual-" + case["id"], "page": "index.html#visual-" + case["id"],
-                         "figure": svg_name, "source_page": "../" + report["report_id"] + "/index.html",
-                         "report_records": "../" + report["report_id"] + "/records.json",
-                         "raw_record": record_name,
-                         "provenance": {"type": "complete-analytic-input-and-answer"}})
+        entry = {**{k: v for k, v in case.items() if k not in {"svg", "inputs", "answer"}},
+                 "status": "analytic-illustration", "anchor": "visual-" + case["id"],
+                 "page": "index.html#visual-" + case["id"], "figure": svg_name,
+                 "raw_record": record_name,
+                 "provenance": {"type": "complete-analytic-input-and-answer"}}
+        if report:
+            entry.update(report_id=report["report_id"], source_page="../" + report["report_id"] + "/index.html",
+                         report_records="../" + report["report_id"] + "/records.json")
+        else:
+            entry["source_page"] = "https://github.com/butahlecoq/controlled-systems-lab/blob/main/" + case["source_path"]
+        rendered.append(entry)
         output[svg_name] = svg(case)
-        output[record_name] = json.dumps({"schema": "csl.analytic-visual-example/1",
-                                          "id": case["id"], "kind": case["kind"],
-                                          "inputs": case["inputs"], "answer": case["answer"],
-                                          "reproduction_command": "python scripts/reports/visual_examples.py --catalog reports/algorithm-results/catalog.json --site build/report-site",
-                                          "related_saved_report": {"report_kind": report["report_kind"],
-                                                                    "report_id": report["report_id"],
-                                                                    "page": "../" + report["report_id"] + "/index.html",
-                                                                    "raw_record": "../" + report["report_id"] + "/records.json"},
-                                          **({"source_commit": case["source_commit"],
-                                             "source_urls": ["https://github.com/butahlecoq/controlled-systems-lab/blob/" + case["source_commit"] + "/" + path
-                                                             for path in case["source_files"]]}
-                                            if "source_commit" in case else {}),
-                                          "evidence": "Hand-derived analytic illustration; not a replay or measurement."},
-                                         indent=2, ensure_ascii=False) + "\n"
+        raw = {"schema": "csl.analytic-visual-example/1", "id": case["id"],
+               "kind": case["kind"], "inputs": case["inputs"], "answer": case["answer"],
+               "reproduction_command": "python scripts/reports/visual_examples.py --catalog reports/algorithm-results/catalog.json --site build/report-site",
+               "evidence": "Hand-derived analytic illustration; not a replay or measurement."}
+        if report:
+            raw["related_saved_report"] = {"report_kind": report["report_kind"],
+                                            "report_id": report["report_id"],
+                                            "page": "../" + report["report_id"] + "/index.html",
+                                            "raw_record": "../" + report["report_id"] + "/records.json"}
+        else:
+            raw["source_path"] = case["source_path"]
+            raw["source_page"] = entry["source_page"]
+        if "source_commit" in case:
+            raw["source_commit"] = case["source_commit"]
+            raw["source_urls"] = ["https://github.com/butahlecoq/controlled-systems-lab/blob/" + case["source_commit"] + "/" + path
+                                  for path in case["source_files"]]
+        output[record_name] = json.dumps(raw, indent=2, ensure_ascii=False) + "\n"
     return output, rendered
 
 
 def cards(cases):
-    return "".join(
-        f'<article class="saved-figure" id="visual-{escape(c["id"], quote=True)}">'
-        f'<p class="eyebrow">{escape(c["family"])}</p><h3>{escape(c["title"])}</h3>'
-        f'<img src="{escape(c["figure"], quote=True)}" alt="{escape(c["title"], quote=True)}">'
-        f'<p>{escape(c["summary"])}</p><p><a href="{escape(c["record"], quote=True)}">Exact analytic inputs and answer (JSON) ↗</a> · '
-        f'<a href="../{escape(c["report_id"], quote=True)}/index.html">Saved {escape(c["report_kind"])} report ↗</a> · '
-        f'<a href="../{escape(c["report_id"], quote=True)}/records.json">Raw report record ↗</a></p>'
-        + (f'<p>API source at <a href="https://github.com/butahlecoq/controlled-systems-lab/blob/{escape(c["source_commit"], quote=True)}/{escape(c["source_files"][0], quote=True)}">public header</a> · '
-           f'<a href="https://github.com/butahlecoq/controlled-systems-lab/blob/{escape(c["source_commit"], quote=True)}/{escape(c["source_files"][1], quote=True)}">implementation</a></p>'
-           if "source_commit" in c else "")
-        + '<p class="provenance">Reproduce gallery from the repository root after staging the reports:<br>'
-        '<code>python scripts/reports/visual_examples.py --catalog reports/algorithm-results/catalog.json --site build/report-site</code></p></article>'
-        for c in cases)
+    rendered = []
+    for case in cases:
+        if "report_id" in case:
+            source = (f'<a href="../{escape(case["report_id"], quote=True)}/index.html">'
+                      f'Saved {escape(case["report_kind"])} report ↗</a> · '
+                      f'<a href="../{escape(case["report_id"], quote=True)}/records.json">Raw report record ↗</a>')
+        else:
+            source = f'<a href="{escape(case["source_page"], quote=True)}">Scenario source ↗</a>'
+        rendered.append(
+            f'<article class="saved-figure" id="visual-{escape(case["id"], quote=True)}">'
+            f'<p class="eyebrow">{escape(case["family"])}</p><h3>{escape(case["title"])}</h3>'
+            f'<img src="{escape(case["figure"], quote=True)}" alt="{escape(case["title"], quote=True)}">'
+            f'<p>{escape(case["summary"])}</p><p><a href="{escape(case["record"], quote=True)}">Exact analytic inputs and answer (JSON) ↗</a> · '
+            + source + '</p>'
+            + (f'<p>API source at <a href="https://github.com/butahlecoq/controlled-systems-lab/blob/{escape(case["source_commit"], quote=True)}/{escape(case["source_files"][0], quote=True)}">public header</a> · '
+               f'<a href="https://github.com/butahlecoq/controlled-systems-lab/blob/{escape(case["source_commit"], quote=True)}/{escape(case["source_files"][1], quote=True)}">implementation</a></p>'
+               if "source_commit" in case else "")
+            + '<p class="provenance">Reproduce gallery from the repository root after staging the reports:<br>'
+            '<code>python scripts/reports/visual_examples.py --catalog reports/algorithm-results/catalog.json --site build/report-site</code></p></article>')
+    return "".join(rendered)

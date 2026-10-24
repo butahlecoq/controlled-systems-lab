@@ -77,6 +77,10 @@ consumer tree. That project resolves CSL solely with `find_package(CSL 0.1 CONFI
 REQUIRED)` and the installed prefix. It receives no source-tree, matrix-library,
 solver-library or test-library include path.
 
+The temporal-lift public header is also included by this neutral header client. Its
+callable API is exercised by the resolved-problem client, linked against
+`CSL::resolved_problem` in both the source build and isolated installed consumer.
+
 The installed test audits the actual `prefix/include/csl/*.hpp` files. It rejects
 selected Eigen, HiGHS, nlohmann JSON and doctest includes or public type references,
 after removing line and block comments. This is a targeted dependency check,

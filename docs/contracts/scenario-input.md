@@ -12,7 +12,7 @@ coefficients have a separate [loader and conversion contract](time-domains.md).
 
 ## Supported executable grammar
 
-The root schema is exactly `csl.scenario/1`. Required fields are schema, horizon,
+The supported root schemas are `csl.scenario/1` and `csl.scenario/2`. Required fields are schema, horizon,
 model, initial_state, controls and objective. Optional fields are id, times,
 dimensions, profile, states, run and metadata. The only profile is the JSON string
 `nominal_discrete_v1`; omission is equivalent mathematically. Null, other types,
@@ -66,10 +66,25 @@ from requested run tolerances.
 
 ## Explicit unsupported structures and ordering
 
-Reserved root keys are initial_information, external, observations, information,
-uncertainty, temporal and hybrid. Presence, including null or empty values,
-returns UnsupportedInput. initial_state plus initial_information is instead an
-invalid conflicting declaration. Missing required initial_state is not zero.
+In v1, reserved root keys are initial_information, external, observations,
+information, uncertainty, temporal and hybrid. Presence, including null or empty
+values, returns UnsupportedInput. V2 retains those exclusions except that
+`temporal` has the nominal linear full-history form below. initial_state plus
+initial_information is instead an invalid conflicting declaration. Missing
+required initial_state is not zero.
+
+V2 `temporal` is an object with exactly `coordinate_order`, `rows` and `bounds`.
+`coordinate_order` must be the literal
+`x0,...,xT,u0,...,u(T-1)`. `rows` is a finite dense row-major matrix with width
+`n(T+1)+mT`. `bounds` has one `{lower,upper}` interval per row; each endpoint is
+finite or null (unbounded), and a present lower endpoint cannot exceed a present
+upper endpoint. It means `lower <= rows * [x0,...,xT,u0,...,u(T-1)] <= upper`.
+For a zero-row relation with nonzero joint width, use explicit matrix extents
+`{"rows":0,"cols":n(T+1)+mT,"values":[]}`; a row-array `[]` means 0x0 and
+is accepted only when that width is zero. No state/control-only projection, robust
+quantifier, strategy support or certificate follows from parsing the relation:
+capability admission remains strategy-specific. V1 continues to reject a present
+`temporal` key, including null.
 
 The exact reserved model strings are linear_continuous, affine_continuous,
 linear_continuous_ltv and affine_continuous_ltv. They return UnsupportedInput at

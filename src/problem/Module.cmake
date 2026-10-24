@@ -8,7 +8,7 @@ csl_add_library(csl_resolved_core STATIC src/problem/identity.cpp src/problem/re
 
 target_link_libraries(csl_resolved_core PUBLIC CSL::problem CSL::objectives)
 
-csl_add_library(csl_resolved_problem STATIC src/problem/validator.cpp)
+csl_add_library(csl_resolved_problem STATIC src/problem/validator.cpp src/problem/temporal_lifts.cpp)
 
 target_link_libraries(csl_resolved_problem PUBLIC CSL::resolved_core CSL::registry)
 
