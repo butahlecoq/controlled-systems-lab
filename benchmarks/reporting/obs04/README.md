@@ -40,8 +40,12 @@ identity. The record declares the canonical resolved-problem hash as its shared
 input manifest and labels this synthetic pilot `new-comparison`. Returned
 unsupported, cancelled, resource-limited, incomplete, and failed outcomes retain
 their run records and event status; thrown exceptions produce a synthetic failed
-run record. Failed or analytically invalid attempts make the process exit
-nonzero. The default artifact path is the current directory; `--record <path>`
+run record. Resolved arm configurations and an empty collection record are
+prepared before per-attempt collector setup, so a plan or collector setup
+exception can still be saved as a failed attempt. Errors after the strategy
+returns retain the returned terminal and available statistics; their event
+records `recording_error`. Failed or analytically invalid attempts make the
+process exit nonzero. The default artifact path is the current directory; `--record <path>`
 selects a path, and existing files are never overwritten. Keep the exact source
 commit, compiler/build provenance, machine/OS capture, and separate
 limiter-profile result next to any retained measurement. Do not combine the

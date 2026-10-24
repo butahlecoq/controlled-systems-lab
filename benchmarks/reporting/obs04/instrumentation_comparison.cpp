@@ -163,28 +163,36 @@ struct CollectionSetup {
     std::optional<ar::CollectedStatistics> empty_statistics;
 };
 
+ar::ResolvedConfiguration configuration_for(const application::PreparedComparison& prepared,
+    std::size_t strategy_index, bool enabled) {
+    const auto& selected_configuration=prepared.strategies()[strategy_index];
+    const auto expected=prepared.expected_synthesis_identity(strategy_index);
+    const ar::Unavailable missing{ar::MissingReason::not_instrumented,{}};
+    ar::ConfigurationInput config;
+    config.collection={enabled,ar::CollectionMode::summary,5,10000,0,0};
+    config.modules={{"strategy",{expected.strategy,expected.strategy_version,missing},{}},
+        {"lp",{selected_configuration.lp,"1",missing},{}},
+        {"convex",{selected_configuration.convex,"1",missing},{}}};
+    config.numerical=prepared.family().numerical;
+    config.resources={1,1,1,{}};
+    config.output={ar::OutputKind::synthesis,prepared.family().assurance,
+        prepared.family().target,prepared.family().representation,{2,0,{{1,-1},{-1,1}},31}};
+    config.selector={{synthesis::witness_selector::selector_id},"1",{}};
+    config.strategy=selected_configuration;
+    config.strategy.selector=config.selector.id;
+    return take(ar::resolve_configuration(std::move(config)));
+}
+
 CollectionSetup collector_for(const application::PreparedComparison& prepared,
     std::size_t strategy_index, bool enabled, std::string run_id,
+    const ar::ResolvedConfiguration& resolved_configuration,
     std::optional<ar::ResolvedConfiguration>& fallback_configuration,
     std::optional<ar::CollectedStatistics>& fallback_statistics) {
     const auto clock = ob::make_steady_timing_clock();
-    const auto& configuration = prepared.strategies()[strategy_index];
     const auto expected = prepared.expected_synthesis_identity(strategy_index);
-    const ar::Unavailable missing{ar::MissingReason::not_instrumented, {}};
-    ar::ConfigurationInput config;
-    config.collection = {enabled, ar::CollectionMode::summary, 5, 10000, 0, 0};
-    config.modules = {{"strategy", {expected.strategy, expected.strategy_version, missing}, {}},
-        {"lp", {configuration.lp, "1", missing}, {}},
-        {"convex", {configuration.convex, "1", missing}, {}}};
-    config.numerical = prepared.family().numerical;
-    config.resources = {1, 1, 1, {}};
-    config.output = {ar::OutputKind::synthesis, prepared.family().assurance,
-        prepared.family().target, prepared.family().representation, {2, 0, {{1, -1}, {-1, 1}}, 31}};
-    config.selector = {{synthesis::witness_selector::selector_id}, "1", {}};
-    config.strategy = configuration;
-    config.strategy.selector = config.selector.id;
-    auto resolved_config = take(ar::resolve_configuration(std::move(config)));
-    fallback_configuration=resolved_config;
+    const ar::Unavailable missing{ar::MissingReason::not_instrumented,{}};
+    auto resolved_config=resolved_configuration;
+    fallback_configuration=resolved_configuration;
 
     ob::PlanInput plan{prepared.problem(), resolved_config, {run_id}, {clock->wall_domain()}, {}, enabled?1u:0u};
     const std::size_t span_count = enabled ? (strategy_index == 0 ? 5 : 1) : 0;
@@ -466,12 +474,15 @@ private:
 
 TrialRecord trial_impl(const application::PreparedComparison& prepared, std::size_t strategy_index,
     bool enabled, std::size_t repetition, bool warmup, const Signature& expected,
+    const ar::ResolvedConfiguration& resolved_configuration,
     std::optional<ar::ResolvedConfiguration>& fallback_configuration,
-    std::optional<ar::CollectedStatistics>& fallback_statistics) {
+    std::optional<ar::CollectedStatistics>& fallback_statistics,
+    std::optional<SynthesisOutcome>& returned_outcome, bool& invocation_started) {
     const auto setup_begin = Clock::now();
     const ar::RunId run_id{"obs04-" + std::to_string(strategy_index) + "-" +
         (enabled ? "enabled-" : "disabled-") + std::to_string(repetition) + (warmup ? "-warmup" : "")};
     auto setup = collector_for(prepared, strategy_index, enabled, run_id.value,
+        resolved_configuration,
         fallback_configuration,fallback_statistics);
     auto collector = setup.collector;
     auto workspaces = prepared.create();
@@ -481,7 +492,9 @@ TrialRecord trial_impl(const application::PreparedComparison& prepared, std::siz
     if (collector) context.timing = collector;
     const auto setup_end = Clock::now();
     const auto run_begin = Clock::now();
+    invocation_started=true;
     const auto outcome = workspaces[strategy_index]->run(context);
+    returned_outcome=outcome;
     const auto run_end = Clock::now();
     const auto status=attempt_status(outcome);
     std::optional<Signature> observed;
@@ -503,6 +516,7 @@ TrialRecord trial_impl(const application::PreparedComparison& prepared, std::siz
     std::vector<ar::SpanRecord> span_records;
     if (collector) {
         timing_report = take(collector->snapshot());
+        fallback_statistics=timing_report->observations;
         observed_spans = timing_report->observations.description().spans.size();
         for (const auto& span : timing_report->observations.description().spans)
             if (span.completion_observed) ++completed_spans;
@@ -577,14 +591,16 @@ std::string escaped(std::string_view value) {
 
 TrialRecord failed_trial(const application::PreparedComparison& prepared, std::size_t strategy_index,
     bool enabled, std::size_t repetition, bool warmup, std::string_view message,
-    ar::ResolvedConfiguration configuration, ar::CollectedStatistics statistics) {
+    ar::ResolvedConfiguration configuration, ar::CollectedStatistics statistics,
+    bool invocation_started) {
     const ar::RunId run_id{"obs04-" + std::to_string(strategy_index) + "-"+
         (enabled ? "enabled-" : "disabled-") + std::to_string(repetition) + (warmup ? "-warmup" : "")};
     const auto description=prepared.problem().description();
     const ar::Unavailable unavailable{ar::MissingReason::not_requested,{}};
     ar::RunRecord record{prepared.problem().identity(),description->model->dynamics.dimensions,
         static_cast<std::uint64_t>(description->times.size()-1),std::move(configuration),run_id,
-        ar::FailedFinal{ar::FailurePhase::invoke,ar::FailureReason::adapter_exception,std::string(message),{}},
+        ar::FailedFinal{invocation_started?ar::FailurePhase::invoke:ar::FailurePhase::create,
+            ar::FailureReason::adapter_exception,std::string(message),{}},
         std::move(statistics),{unavailable,unavailable,unavailable,unavailable,false,ar::MemoryAccounting::unlimited},
         {},{},ar::ProblemProvenance::problem_revalidated,{}};
     auto published=take(ar::publish_run({prepared.problem(),std::move(record)}));
@@ -607,17 +623,67 @@ TrialRecord failed_trial(const application::PreparedComparison& prepared, std::s
         run_id,std::move(run),measurement};
 }
 
+TrialRecord recording_failure_trial(const application::PreparedComparison& prepared,
+    std::size_t strategy_index, bool enabled, std::size_t repetition, bool warmup,
+    const SynthesisOutcome& outcome, ar::ResolvedConfiguration configuration,
+    ar::CollectedStatistics statistics, std::string_view message) {
+    const ar::RunId run_id{"obs04-"+std::to_string(strategy_index)+"-"+
+        (enabled?"enabled-":"disabled-")+std::to_string(repetition)+(warmup?"-warmup":"")};
+    const auto status=attempt_status(outcome);
+    const auto* synthesis=std::get_if<SynthesisResult>(&outcome);
+    application::StrategyExecution execution{outcome,
+        synthesis?ar::project_final(*synthesis):ar::FinalOutcome{
+            ar::UnsupportedFinal{std::get<Unsupported>(outcome).diagnostics}},std::monostate{}, {}};
+    const ar::Unavailable unavailable{ar::MissingReason::not_requested,{}};
+    const auto wire=take(application::encode_strategy_run(prepared.problem(),execution,
+        std::move(configuration),run_id,std::move(statistics),
+        {unavailable,unavailable,unavailable,unavailable,false,ar::MemoryAccounting::unlimited}));
+    auto run=take(ar::decode_recorded_run(wire,prepared.problem()));
+    std::ostringstream event;
+    event << "{\"schema\":\"csl.obs04-instrumentation-comparison-event/2\",\"repetition\":"
+        << repetition << ",\"warmup\":" << (warmup?"true":"false") << ",\"strategy\":\""
+        << (strategy_index==0?"csl.synthesis.reach-back":"csl.synthesis.strategy-b")
+        << "\",\"instrumentation\":\"" << (enabled?"enabled":"disabled")
+        << "\",\"status\":\"" << attempt_status_name(status)
+        << "\",\"analytic_family_checked\":false,\"complete_family_verified\":false,\"recording_error\":\""
+        << escaped(message) << "\"}";
+    const auto measurement=event.str();
+    std::cout << measurement << '\n';
+    return {static_cast<std::uint32_t>(strategy_index*2+(enabled?1:0)),
+        static_cast<std::uint32_t>(repetition),status,run_id,std::move(run),measurement,false};
+}
+
+ar::CollectedStatistics empty_fallback_statistics(const problem::ResolvedProblem& problem,
+    const ar::ResolvedConfiguration& configuration, const ar::RunId& run_id) {
+    const bool enabled=configuration.description().collection.enabled;
+    const ar::Unavailable completeness{enabled?ar::MissingReason::incomplete_span:
+        ar::MissingReason::collection_disabled,{}};
+    ar::CollectionRecord record{problem.identity(),configuration.identity(),run_id,
+        configuration.description().collection,{}, {},{},completeness,{}, {}};
+    return take(ar::publish_collection(std::move(record)));
+}
+
 std::optional<TrialRecord> trial(const application::PreparedComparison& prepared, std::size_t strategy_index,
-    bool enabled, std::size_t repetition, bool warmup, const Signature& expected) {
-    std::optional<ar::ResolvedConfiguration> fallback_configuration;
+    bool enabled, std::size_t repetition, bool warmup, const Signature& expected,
+    const ar::ResolvedConfiguration& resolved_configuration) {
+    std::optional<ar::ResolvedConfiguration> fallback_configuration{resolved_configuration};
     std::optional<ar::CollectedStatistics> fallback_statistics;
+    const ar::RunId run_id{"obs04-"+std::to_string(strategy_index)+"-"+
+        (enabled?"enabled-":"disabled-")+std::to_string(repetition)+(warmup?"-warmup":"")};
+    fallback_statistics=empty_fallback_statistics(prepared.problem(),resolved_configuration,run_id);
+    std::optional<SynthesisOutcome> returned_outcome;
+    bool invocation_started=false;
     try {
         return trial_impl(prepared, strategy_index, enabled, repetition, warmup, expected,
-            fallback_configuration,fallback_statistics);
+            resolved_configuration,
+            fallback_configuration,fallback_statistics,returned_outcome,invocation_started);
     } catch (const std::exception& error) {
         if(!fallback_configuration||!fallback_statistics)throw;
+        if(returned_outcome)
+            return recording_failure_trial(prepared,strategy_index,enabled,repetition,warmup,
+                *returned_outcome,std::move(*fallback_configuration),std::move(*fallback_statistics),error.what());
         return failed_trial(prepared,strategy_index,enabled,repetition,warmup,error.what(),
-            std::move(*fallback_configuration),std::move(*fallback_statistics));
+            std::move(*fallback_configuration),std::move(*fallback_statistics),invocation_started);
     }
 }
 
@@ -685,6 +751,9 @@ int main(int argc, char** argv) {
         const auto problem = source();
         auto modules = make_modules();
         const auto prepared = prepare(problem, modules.strategies);
+        std::array<ar::ResolvedConfiguration,4> configuration_templates{
+            configuration_for(prepared,0,false),configuration_for(prepared,0,true),
+            configuration_for(prepared,1,false),configuration_for(prepared,1,true)};
         const auto workspaces = prepared.create();
         std::array<Signature, 2> expected;
         for (std::size_t i = 0; i < workspaces.size(); ++i) {
@@ -726,7 +795,8 @@ int main(int argc, char** argv) {
                 const std::size_t strategy = (repetition + slot) % 2;
                 const bool enabled_first = ((repetition + strategy) % 2) != 0;
                 for(const bool enabled : {enabled_first,!enabled_first}) {
-                    auto result=trial(prepared,strategy,enabled,repetition,warmup,expected[strategy]);
+                    auto result=trial(prepared,strategy,enabled,repetition,warmup,expected[strategy],
+                        configuration_templates[strategy*2+(enabled?1u:0u)]);
                     if(!result) { ++failures; continue; }
                     if(result->status!=ar::AttemptStatus::completed||!result->quality_passed)++failures;
                     captured.push_back(std::move(*result));
