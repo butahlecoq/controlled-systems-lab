@@ -606,3 +606,35 @@ TEST_CASE("registered approximation times only its selected provider call") {
     REQUIRE(std::holds_alternative<artifacts::ReturnedSpan>(timing.observations.description().spans[0].status));
     CHECK(std::get<artifacts::ReturnedSpan>(timing.observations.description().spans[0].status).termination==Termination::completed);
 }
+
+TEST_CASE("rejected approximation records a no-call observation without creating a workspace") {
+    Problem source{{"approximation-rejection-observability"},std::make_shared<const SystemModel>(SystemModel{{
+        {0,0,0},TimeDomain::discrete,LinearStage{{0,0,{}},{0,0,{}},{0,0,{}},{}}},{}}),{0},
+        KnownInitial{{}},ContinuousDomain{{}},{UniversalSet{0}},{},{},
+        InformationPattern::nominal_open_loop,LinearTerminal{{},0}};
+    auto resolved=problem::resolve(source,{problem::UncertaintyStructure::stage_product_uncoupled});
+    REQUIRE(std::holds_alternative<problem::ResolvedProblem>(resolved));
+    auto input=set("singleton","reject-reference");
+    auto output=set("universal","reject-outer");
+    auto query=request(input,SetRelation::equivalent,output.metadata.representation);
+    query.identity.request={"rejected-approximation"};
+    auto creations=std::make_shared<std::size_t>(0);
+    const auto methods=provider(query,output,SetRelation::outer,SetRelation::outer,
+        Unestablished{},std::nullopt,creations);
+    auto timer=approximation_timer(std::get<problem::ResolvedProblem>(std::move(resolved)),query);
+    ExecutionContext context;context.run_id="approximation-test-run";context.timing=timer;
+    const auto outcome=run_registered(methods,{{"fixture.approximation"},std::string{"1"}},query,context);
+    REQUIRE(std::holds_alternative<registry::Rejection>(outcome));
+    CHECK(*creations==0);
+    const auto report=timer->snapshot();
+    REQUIRE(std::holds_alternative<execution::observability::TimingReport>(report));
+    const auto& timing=std::get<execution::observability::TimingReport>(report);
+    REQUIRE(timing.observations.description().spans.size()==1);
+    const auto& span=timing.observations.description().spans[0];
+    CHECK(span.descriptor.module.id==ModuleId{"fixture.approximation"});
+    CHECK(span.descriptor.module.version=="1");
+    CHECK(std::holds_alternative<artifacts::NotCalledObservation>(span.execution));
+    CHECK(std::get<artifacts::NotCalledObservation>(span.execution).reason==
+        artifacts::NotCalledReason::capability_rejected);
+    CHECK(std::holds_alternative<artifacts::RejectedSpan>(span.status));
+}

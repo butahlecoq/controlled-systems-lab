@@ -35,6 +35,11 @@ ob::OperationSpanIdentity approximation_identity(const ApproximationRequest& req
             registry::Identity{provenance.requested.id,"unknown"}),
         {},{},{},{}};
 }
+ob::OperationSpanIdentity requested_approximation_identity(const ApproximationRequest& request,
+        const registry::Method& method) {
+    return {request.identity.request.value,"geometry.approximation.provider-call",
+        provider_identity({method.id,method.version.value_or(std::string{})}),{},{},{},{}};
+}
 Diagnostics error(DiagnosticCode code, const char* field, const char* message) {
     return {{code,field,message}};
 }
@@ -335,7 +340,11 @@ RunOutcome run_registered(const registry::Registry<registry::ApproximationPort>&
                           registry::Method method,const ApproximationRequest& request,
                           const ExecutionContext& context) {
     if(request.direction==SetRelation::equivalent)
+    {
+        ob::InstrumentedOperation observation{context,requested_approximation_identity(request,method)};
+        observation.not_called(ar::NotCalledReason::capability_rejected);
         return reject(method,"approximation.direction","Equivalent conversion belongs to ConversionPort.");
+    }
     if(request.identity.problem.value.empty() || request.identity.request.value.empty() ||
        request.identity.ideal_output.value.empty() || request.input.id.value.empty() ||
        !request.input.payload || request.output.value.empty())
@@ -344,8 +353,12 @@ RunOutcome run_registered(const registry::Registry<registry::ApproximationPort>&
     requirements.output.representation=request.output;
     requirements.output.assurance=request.assurance;
     requirements.output.relation=request.direction;
-    auto prepared=registry::prepare_pipeline(registry::select(registry,std::move(method),request,requirements));
-    if(const auto* rejected=std::get_if<registry::Rejection>(&prepared))return *rejected;
+    auto prepared=registry::prepare_pipeline(registry::select(registry,method,request,requirements));
+    if(const auto* rejected=std::get_if<registry::Rejection>(&prepared)) {
+        ob::InstrumentedOperation observation{context,approximation_identity(request,rejected->provenance)};
+        observation.not_called(ar::NotCalledReason::capability_rejected);
+        return *rejected;
+    }
     auto pipeline=std::get<registry::PreparedPipeline<registry::ApproximationPort>>(std::move(prepared));
     const auto provenance=pipeline.provenance().front();
     auto workspace=pipeline.create();
