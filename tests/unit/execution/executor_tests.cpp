@@ -333,17 +333,29 @@ TEST_CASE("overlapping and recursive runs reject immediately and executor remain
 }
 
 namespace {
-struct StrategyAudit { std::mutex mutex; std::vector<std::vector<SolveStamp>> attempts; };
+struct ContextObservation {
+    std::shared_ptr<const ResourcePolicy> resources;
+    NumericalPolicy numerical;
+    std::optional<ex::TimePoint> deadline;
+    std::string run_id;
+    bool cancellation_requested{};
+};
+struct StrategyAudit {
+    std::mutex mutex;
+    std::vector<std::vector<SolveStamp>> attempts;
+    std::vector<ContextObservation> contexts;
+};
 class TwoCalls final : public SynthesisWorkspace {
     std::unique_ptr<reg::BoundWorkspace<reg::LPPort>> lp_;
     std::shared_ptr<StrategyAudit> audit_;
+    bool execute_planned_second_query_after_stop_;
 public:
-    TwoCalls(std::unique_ptr<reg::BoundWorkspace<reg::LPPort>> lp,std::shared_ptr<StrategyAudit> audit)
-        : lp_(std::move(lp)),audit_(std::move(audit)) {}
+    TwoCalls(std::unique_ptr<reg::BoundWorkspace<reg::LPPort>> lp,std::shared_ptr<StrategyAudit> audit,bool execute_planned_second_query_after_stop)
+        : lp_(std::move(lp)),audit_(std::move(audit)),execute_planned_second_query_after_stop_(execute_planned_second_query_after_stop) {}
     SynthesisResult solve(const csl::problem::ResolvedProblem& problem,const FamilyRequest&,const ExecutionContext& ctx) override {
         std::vector<SolveStamp> stamps;
         auto answer=std::get<ProgramResult>(lp_->run(ctx));stamps.push_back(lp_->last_attempt()->stamp);
-        if (!ctx.cancellation.stop_requested()) {
+        if (!ctx.cancellation.stop_requested() || execute_planned_second_query_after_stop_) {
             answer=std::get<ProgramResult>(lp_->run(ctx));stamps.push_back(lp_->last_attempt()->stamp);
         }
         { std::lock_guard lock(audit_->mutex);audit_->attempts.push_back(std::move(stamps)); }
@@ -359,7 +371,7 @@ public:
         return result;
     }
 };
-ex::Task<reg::StrategyPort> strategy_task(std::shared_ptr<StrategyAudit> audit,std::shared_ptr<Counts> counts,Action action={},std::string id="strategy") {
+ex::Task<reg::StrategyPort> strategy_task(std::shared_ptr<StrategyAudit> audit,std::shared_ptr<Counts> counts,Action action={},std::string id="strategy",bool execute_planned_second_query_after_stop=false) {
     reg::Registry<reg::LPPort> lp;
     REQUIRE_FALSE(lp.add({{{"analytic"},"1"},[](const auto&,const auto&)->reg::Capability{return reg::Offer{};},
         [counts,action](const LinearProgram&){return std::make_unique<Analytic>(counts,action,false,false);}}));
@@ -367,10 +379,10 @@ ex::Task<reg::StrategyPort> strategy_task(std::shared_ptr<StrategyAudit> audit,s
         LinearProgramInput{{{"problem"},{"interval"}},{3},2,{0,1,{0},{},{}},{{-1,4}},{}})));
     reg::StrategyRegistry strategies;
     REQUIRE_FALSE(strategies.add({{{"two-calls"},"1"},[](const auto&,const auto&)->reg::Capability{return reg::Offer{};},
-        [&lp,operand,audit](const reg::StrategyRequest&,const reg::Requirements&)->std::variant<reg::StrategyPlan,reg::Rejection> {
+        [&lp,operand,audit,execute_planned_second_query_after_stop](const reg::StrategyRequest&,const reg::Requirements&)->std::variant<reg::StrategyPlan,reg::Rejection> {
             auto checked=reg::check_pipeline(reg::select(lp,{{"analytic"},{}},*operand));
             return reg::compose_strategy(std::get<reg::CheckedPipeline<reg::LPPort>>(checked),
-                [operand,audit](auto workers,const auto&,const auto&){return std::make_unique<TwoCalls>(std::move(std::get<0>(workers)),audit);});
+                [operand,audit,execute_planned_second_query_after_stop](auto workers,const auto&,const auto&){return std::make_unique<TwoCalls>(std::move(std::get<0>(workers)),audit,execute_planned_second_query_after_stop);});
         }}));
     LinearStage stage{{1,1,{0}},{1,1,{1}},{1,0,{}},{0}};
     Problem problem{{"problem"},std::make_shared<const SystemModel>(SystemModel{{{1,1,0},TimeDomain::discrete,stage},{}}),
@@ -408,6 +420,38 @@ TEST_CASE("retained strategy owns private LP attempts and never promotes an incu
     CHECK(value.termination==Termination::cancelled);CHECK_FALSE(value.family);CHECK(value.incumbents[0].witness.original_objective==-1);
     CHECK(value.incumbents[0].witness.states==std::vector<Vector>{{0},{-1}});CHECK(value.incumbents[0].witness.controls==std::vector<Vector>{{-1}});
     CHECK(std::holds_alternative<Unestablished>(value.outcome.support));CHECK(audit->attempts.back().size()==1);
+}
+TEST_CASE("every planned strategy LP request retains executor policy and observes cancellation") {
+    auto e=executor({2,2,1,{}});
+    auto audit=std::make_shared<StrategyAudit>();auto counts=std::make_shared<Counts>();
+    auto ctx=context(*e);std::stop_source stop;ctx.cancellation=stop.get_token();
+    ctx.numerical={1e-12,1e-12};ctx.deadline=std::chrono::steady_clock::now()+std::chrono::seconds(30);ctx.run_id="test15-multiple-requests";
+    Action observe=[&](const ExecutionContext& request) {
+        bool first{};
+        {
+            std::lock_guard lock(audit->mutex);
+            first=audit->contexts.empty();
+            audit->contexts.push_back({request.resources,request.numerical,request.deadline,request.run_id,
+                request.cancellation.stop_requested()});
+        }
+        if (first) stop.request_stop();
+    };
+    std::vector<ex::Task<reg::StrategyPort>> tasks{
+        strategy_task(audit,counts,observe,"multi-request",true)};
+    auto batch=std::get<ex::BatchResult<reg::StrategyPort>>(
+        e->run<reg::StrategyPort>(tasks,ctx,ex::Mode::sequential));
+    const auto& value=std::get<SynthesisResult>(
+        std::get<ex::Returned<reg::StrategyPort>>(batch.tasks[0].outcome).value);
+    CHECK(value.termination==Termination::cancelled);CHECK_FALSE(value.family);
+    CHECK_FALSE(value.incumbents.empty());CHECK(std::holds_alternative<Unestablished>(value.outcome.support));
+    REQUIRE(audit->contexts.size()==2);
+    CHECK_FALSE(audit->contexts[0].cancellation_requested);CHECK(audit->contexts[1].cancellation_requested);
+    for (const auto& seen:audit->contexts) {
+        CHECK(seen.resources==e->resources());CHECK(seen.numerical==ctx.numerical);CHECK(seen.deadline==ctx.deadline);
+        CHECK(seen.run_id==ctx.run_id);
+    }
+    REQUIRE(audit->attempts.size()==1);REQUIRE(audit->attempts[0].size()==2);
+    CHECK(audit->attempts[0][0].workspace()==audit->attempts[0][1].workspace());
 }
 namespace {
 class Geometry final:public SetOperatorWorkspace {
