@@ -1,4 +1,5 @@
 add_executable(batch_runner_tests tests/unit/experiments/batch_runner_tests.cpp)
 target_link_libraries(batch_runner_tests PRIVATE CSL::experiments CSL::strategy_ts01 doctest::doctest)
+target_compile_definitions(batch_runner_tests PRIVATE CSL_SWEEP_RUN_FIXTURE="${CMAKE_CURRENT_SOURCE_DIR}/tests/artifacts/fixtures/run-statistics-v3.json")
 add_test(NAME batch_runner_tests COMMAND batch_runner_tests)
 csl_test_target(batch_runner_tests experiments)

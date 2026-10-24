@@ -4,12 +4,32 @@
 #include <csl/experiments/batch_runner.hpp>
 #include <csl/synthesis/strategy_ts01/analytic_profile.hpp>
 
+#include <fstream>
+#include <iterator>
+
 using namespace csl;
 namespace {
 
 template<class T,class... R> T take(std::variant<T,R...> value) {
     if(!std::holds_alternative<T>(value))throw std::runtime_error("Unexpected fixture result");
     return std::get<T>(std::move(value));
+}
+
+std::string read_sweep_run_fixture() {
+    std::ifstream input(CSL_SWEEP_RUN_FIXTURE, std::ios::binary);
+    return {std::istreambuf_iterator<char>(input), std::istreambuf_iterator<char>()};
+}
+
+artifacts::RecordedRunArtifact recorded_sweep_run() {
+    auto decoded = take(artifacts::decode_run(read_sweep_run_fixture()));
+    return take(artifacts::encode_recorded_run(decoded));
+}
+
+problem::ResolvedContent sweep_spec() {
+    constexpr std::string_view text{"{\"schema\":\"csl.scenario-sweep-spec/1\"}"};
+    std::vector<std::byte> bytes;
+    for (const unsigned char value : text) bytes.push_back(static_cast<std::byte>(value));
+    return take(problem::snapshot_content(bytes));
 }
 
 SetHandle interval(std::string id,double lower,double upper) {
@@ -357,4 +377,45 @@ TEST_CASE("query setup diagnostics leave the completed coarse sweep available to
     const auto* returned=std::get_if<execution::Returned<registry::StrategyPort>>(&sweep.batch.tasks[0].outcome);
     REQUIRE(returned);
     CHECK(std::get<SynthesisResult>(returned->value).family.has_value());
+}
+
+TEST_CASE("a completed family query sweep records aligned runs and measured phase resources") {
+    const auto prepared = prepare_strategy();
+    constexpr std::string_view configuration{"csl.config.v1.sha256:e27f771c2d04bb72827ad27eeaa4123a4df58eaea22aaac4b789ee36033e5abf"};
+    std::vector<experiments::ScenarioSweepCase> cases{
+        sweep_case("scenario-a", std::string(configuration), prepared),
+        sweep_case("scenario-b", std::string(configuration), prepared)};
+    cases[1].selection.seed = 20;
+    const ResourcePolicy resources{2,2,1,std::nullopt};
+    ExecutionContext context;
+    context.run_id = "recorded-sweep";
+    const auto selector = prepare_selector_provider(true);
+    const execution::ResourceUse query_resources{1,"one selector workspace",std::nullopt,
+        execution::CallStopSupport::cooperative_boundaries};
+    auto coarse = experiments::run_sweep(cases, resources, context, execution::Mode::bounded_parallel);
+    REQUIRE(std::holds_alternative<experiments::SweepResult>(coarse));
+    auto queried = experiments::run_family_queries(std::get<experiments::SweepResult>(std::move(coarse)),
+        selector, resources, context, execution::Mode::bounded_parallel, query_resources);
+    REQUIRE(std::holds_alternative<experiments::FamilyQueryResult>(queried));
+
+    const auto recorded = recorded_sweep_run();
+    const std::vector<artifacts::RecordedRunArtifact> coarse_records{recorded, recorded};
+    std::vector<std::optional<artifacts::RecordedRunArtifact>> query_records{recorded, std::nullopt};
+    const auto archive = experiments::record_family_query_sweep(sweep_spec(),
+        std::get<experiments::FamilyQueryResult>(queried), coarse_records, query_records);
+    REQUIRE(std::holds_alternative<artifacts::RecordedSweepArtifact>(archive));
+    const auto bytes = std::get<artifacts::RecordedSweepArtifact>(archive).content().bytes();
+    const std::string wire(reinterpret_cast<const char*>(bytes.data()), bytes.size());
+    CHECK(wire.find("\"schema\":\"csl.scenario-sweep/1\"") != std::string::npos);
+    CHECK(wire.find("\"scenario_id\":\"scenario-a\"") != std::string::npos);
+    CHECK(wire.find("\"kind\":\"rejected\"") != std::string::npos);
+    CHECK(wire.find("\"executor_worker_threads_started\":2") != std::string::npos);
+    CHECK(wire.find("\"executor_worker_threads_started\":1") != std::string::npos);
+    CHECK(wire.find("\"backend_threads\":null") != std::string::npos);
+    CHECK(wire.find("\"memory_support\":\"unlimited_accounting\"") != std::string::npos);
+    query_records[1] = recorded;
+    const auto mismatched_query = experiments::record_family_query_sweep(sweep_spec(),
+        std::get<experiments::FamilyQueryResult>(queried), coarse_records, query_records);
+    REQUIRE(std::holds_alternative<artifacts::ArtifactError>(mismatched_query));
+    CHECK(std::get<artifacts::ArtifactError>(mismatched_query).path=="sweep.cases[1].query");
 }

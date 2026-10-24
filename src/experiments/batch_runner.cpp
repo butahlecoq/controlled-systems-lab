@@ -3,6 +3,7 @@
 #include <algorithm>
 #include <cmath>
 #include <string>
+#include <unordered_set>
 
 namespace csl::experiments {
 namespace {
@@ -23,6 +24,36 @@ bool valid_selection(const SelectionSettings& settings) {
                 return std::isfinite(value);
             });
         });
+}
+
+artifacts::ArtifactError artifact_error(artifacts::ArtifactErrorCode code,
+    std::string path, std::string message) {
+    return {code, std::move(path), std::move(message)};
+}
+
+template<class Port>
+std::optional<artifacts::SweepPhaseResources> phase_resources(
+    const execution::BatchResult<Port>& batch) {
+    if (!batch.resources) return {};
+    const auto memory_support = batch.enforcement.memory == execution::MemoryEnforcement::active_reservations_only
+        ? artifacts::SweepMemorySupport::active_workspace_reservations
+        : artifacts::SweepMemorySupport::unlimited_accounting;
+    std::optional<std::uint64_t> workspace;
+    if (batch.enforcement.peak_workspace_reservation_bytes)
+        workspace = static_cast<std::uint64_t>(*batch.enforcement.peak_workspace_reservation_bytes);
+    return artifacts::SweepPhaseResources{*batch.resources,
+        static_cast<std::uint64_t>(batch.enforcement.outer_worker_threads_started),
+        static_cast<std::uint64_t>(batch.enforcement.peak_active_tasks), {}, workspace, {}, {}, memory_support, {}};
+}
+
+std::optional<artifacts::SweepNotRunReason> not_run_reason(QueryNotRunReason reason) {
+    switch (reason) {
+    case QueryNotRunReason::strategy_skipped: return artifacts::SweepNotRunReason::strategy_skipped;
+    case QueryNotRunReason::strategy_failed: return artifacts::SweepNotRunReason::strategy_failed;
+    case QueryNotRunReason::strategy_unsupported: return artifacts::SweepNotRunReason::strategy_unsupported;
+    case QueryNotRunReason::family_unavailable: return artifacts::SweepNotRunReason::family_unavailable;
+    }
+    return {};
 }
 }
 
@@ -144,6 +175,73 @@ FamilyQueryOutcome run_family_queries(SweepResult&& coarse,
 
     return FamilyQueryResult{std::move(coarse), std::move(records),
         std::get<execution::BatchResult<registry::SelectorPort>>(std::move(query_result))};
+}
+
+artifacts::ArtifactResult<artifacts::RecordedSweepArtifact> record_family_query_sweep(
+    const problem::ResolvedContent& canonical_spec, const FamilyQueryResult& result,
+    std::span<const artifacts::RecordedRunArtifact> coarse_runs,
+    std::span<const std::optional<artifacts::RecordedRunArtifact>> query_runs,
+    artifacts::EncodeLimits limits) {
+    const auto count = result.sweep.cases.size();
+    if (result.sweep.batch.tasks.size() != count || result.queries.size() != count ||
+        coarse_runs.size() != count || query_runs.size() != count)
+        return artifact_error(artifacts::ArtifactErrorCode::invalid_input, "sweep.alignment",
+            "Cases, task records, query dispositions, and run artifacts must have matching lengths");
+    if (result.query_batch.run_id != result.sweep.batch.run_id)
+        return artifact_error(artifacts::ArtifactErrorCode::identity, "sweep.run_id",
+            "Coarse and query phases must share a run ID");
+    const auto coarse_resources = phase_resources(result.sweep.batch);
+    const auto query_resources = phase_resources(result.query_batch);
+    if (!coarse_resources || !query_resources)
+        return artifact_error(artifacts::ArtifactErrorCode::invalid_input, "sweep.resources",
+            "Both execution phases must retain their requested resource policy");
+
+    std::vector<artifacts::SweepCaseInput> cases;
+    cases.reserve(count);
+    std::unordered_set<std::size_t> scheduled_tasks;
+    for (std::size_t i = 0; i < count; ++i) {
+        const auto& source = result.sweep.cases[i];
+        const auto& query_record = result.queries[i];
+        if (source.identity != query_record.identity)
+            return artifact_error(artifacts::ArtifactErrorCode::identity, "sweep.cases[" + std::to_string(i) + "]",
+                "Query identity is not aligned with its coarse case");
+        if (!source.selection)
+            return artifact_error(artifacts::ArtifactErrorCode::reference, "sweep.cases[" + std::to_string(i) + "].selection",
+                "Selection settings were not retained with the coarse case");
+
+        artifacts::SweepQueryDisposition disposition;
+        if (const auto* not_run = std::get_if<FamilyQueryNotRun>(&query_record.status)) {
+            const auto mapped = not_run_reason(not_run->reason);
+            if (!mapped) return artifact_error(artifacts::ArtifactErrorCode::invalid_input,
+                "sweep.cases[" + std::to_string(i) + "].query", "Unknown not-run reason");
+            if (query_runs[i]) return artifact_error(artifacts::ArtifactErrorCode::reference,
+                "sweep.cases[" + std::to_string(i) + "].query", "A not-run query cannot have a run artifact");
+            disposition = artifacts::SweepQueryNotRun{*mapped};
+        } else if (const auto* rejected = std::get_if<FamilyQueryRejected>(&query_record.status)) {
+            if (query_runs[i]) return artifact_error(artifacts::ArtifactErrorCode::reference,
+                "sweep.cases[" + std::to_string(i) + "].query", "A rejected query cannot have a run artifact");
+            disposition = artifacts::SweepQueryRejected{rejected->diagnostics};
+        } else {
+            const auto task_index = std::get<FamilyQueryScheduled>(query_record.status).task_index;
+            if (task_index >= result.query_batch.tasks.size() || !scheduled_tasks.insert(task_index).second)
+                return artifact_error(artifacts::ArtifactErrorCode::reference,
+                    "sweep.cases[" + std::to_string(i) + "].query", "Scheduled query task index is invalid or duplicated");
+            if (!query_runs[i]) return artifact_error(artifacts::ArtifactErrorCode::reference,
+                "sweep.cases[" + std::to_string(i) + "].query", "A scheduled query requires its recorded outcome");
+            disposition = *query_runs[i];
+        }
+
+        const auto& selection = *source.selection;
+        const auto seed = selection.seed ? std::optional<std::uint64_t>{static_cast<std::uint64_t>(*selection.seed)} : std::nullopt;
+        cases.push_back({source.identity.scenario.value, source.identity.configuration, coarse_runs[i],
+            {static_cast<std::uint64_t>(selection.count), selection.distinctness_tolerance,
+                selection.directions, seed}, std::move(disposition)});
+    }
+    if (scheduled_tasks.size() != result.query_batch.tasks.size())
+        return artifact_error(artifacts::ArtifactErrorCode::reference, "sweep.query_tasks",
+            "Every query task must be referenced by exactly one case");
+    return artifacts::encode_recorded_sweep(canonical_spec, result.sweep.batch.run_id,
+        cases, *coarse_resources, *query_resources, limits);
 }
 
 } // namespace csl::experiments
