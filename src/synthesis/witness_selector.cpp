@@ -208,6 +208,12 @@ public:
                         if(std::holds_alternative<Unsupported>(query_outcome))
                             return Termination::operation_rejected;
                         return std::get<ProgramResult>(query_outcome).termination;
+                    },[&lp]() noexcept -> std::optional<std::uint64_t> {
+                        return lp.variables().size();
+                    },[](const auto& query_outcome) noexcept -> std::optional<std::uint64_t> {
+                        const auto* result=std::get_if<ProgramResult>(&query_outcome);
+                        if(!result||!result->primal)return {};
+                        return result->primal->size();
                     });
                 if(const auto* unsupported=std::get_if<Unsupported>(&outcome)) {
                     selected.termination=Termination::operation_rejected;

@@ -2,6 +2,7 @@
 
 #include <csl/execution/timing_collector.hpp>
 
+#include <cstdint>
 #include <functional>
 #include <optional>
 #include <string_view>
@@ -45,6 +46,33 @@ public:
         }
         return result;
     }
+    template<class Invoke,class TerminationOf,class InputSizeOf,class OutputSizeOf>
+    auto run(Invoke&& invoke,TerminationOf&& termination_of,
+             InputSizeOf&& input_size_of,OutputSizeOf&& output_size_of) {
+        using Result=std::invoke_result_t<Invoke>;
+        static_assert(std::is_nothrow_invocable_r_v<Termination,TerminationOf,const Result&>,
+            "operation termination classifiers must be noexcept and accept a const result");
+        static_assert(std::is_nothrow_invocable_r_v<std::optional<std::uint64_t>,InputSizeOf>,
+            "input size observers must be noexcept and return an optional count");
+        static_assert(std::is_nothrow_invocable_r_v<std::optional<std::uint64_t>,OutputSizeOf,const Result&>,
+            "output size observers must be noexcept and accept a const result");
+        if(scope_) {
+            if(auto size=std::invoke(std::forward<InputSizeOf>(input_size_of)))
+                scope_->observe_input_size(*size);
+            else scope_->mark_input_size_unavailable();
+        }
+        auto result=std::invoke(std::forward<Invoke>(invoke));
+        if(scope_){
+            auto evidence=geometry_evidence(result);
+            if(auto size=std::invoke(std::forward<OutputSizeOf>(output_size_of),std::as_const(result)))
+                scope_->observe_output_size(*size);
+            else scope_->mark_output_size_unavailable();
+            scope_->close(std::invoke(std::forward<TerminationOf>(termination_of),std::as_const(result)),
+                std::move(evidence),applied_relation(result));
+            scope_.reset();
+        }
+        return result;
+    }
 private:
     template<class Value> static std::shared_ptr<const GeometryEvidence> copy_evidence(const Value& value) noexcept {
         if constexpr(requires{value.evidence;}) {
@@ -76,6 +104,15 @@ auto run_instrumented_operation(const ExecutionContext& context,
     const OperationSpanIdentity& identity,Invoke&& invoke,TerminationOf&& termination_of) {
     return InstrumentedOperation{context,identity}.run(
         std::forward<Invoke>(invoke),std::forward<TerminationOf>(termination_of));
+}
+
+template<class Invoke,class TerminationOf,class InputSizeOf,class OutputSizeOf>
+auto run_instrumented_operation(const ExecutionContext& context,
+    const OperationSpanIdentity& identity,Invoke&& invoke,TerminationOf&& termination_of,
+    InputSizeOf&& input_size_of,OutputSizeOf&& output_size_of) {
+    return InstrumentedOperation{context,identity}.run(
+        std::forward<Invoke>(invoke),std::forward<TerminationOf>(termination_of),
+        std::forward<InputSizeOf>(input_size_of),std::forward<OutputSizeOf>(output_size_of));
 }
 
 }

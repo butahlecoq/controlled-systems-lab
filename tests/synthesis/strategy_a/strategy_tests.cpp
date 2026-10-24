@@ -1717,6 +1717,9 @@ TEST_CASE("Strategy A publishes planned wall spans for its run and mathematical 
     CHECK(solver.backend->version=="1.1.0+highs.1.11.0");
     REQUIRE(solver.program);
     CHECK(*solver.program==terminal_program);
+    REQUIRE(reference_history.terminal->optimization->primal);
+    CHECK(solver.input_size==reference_history.terminal->optimization->primal->size());
+    CHECK(solver.output_size==reference_history.terminal->optimization->primal->size());
 
     auto wrong_program=terminal_program;
     wrong_program.program.value+="-wrong";

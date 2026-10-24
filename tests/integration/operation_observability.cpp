@@ -1,6 +1,7 @@
 #define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
 #include <doctest/doctest.h>
 #include <csl/execution/instrumented_operation.hpp>
+#include <stdexcept>
 
 using namespace csl;
 namespace ar=csl::artifacts;
@@ -30,7 +31,8 @@ struct Fixture {
     ob::CollectionPlan plan;
     ob::OperationSpanIdentity identity;
 };
-Fixture fixture(ModuleId backend={"spy.geometry"}) {
+Fixture fixture(ModuleId backend={"spy.geometry"},std::optional<std::uint64_t> input_size={},
+    std::optional<std::uint64_t> output_size={}) {
     Problem source{{"operation-test"},std::make_shared<const SystemModel>(SystemModel{{
         {0,0,0},TimeDomain::discrete,LinearStage{{0,0,{}},{0,0,{}},{0,0,{}},{}}},{}}),{0},
         KnownInitial{{}},ContinuousDomain{{}},{UniversalSet{0}},{},{},
@@ -64,7 +66,7 @@ Fixture fixture(ModuleId backend={"spy.geometry"}) {
     operation.task="projection-request";operation.operation="geometry.projection";
     operation.module=configuration.modules.back().implementation;
     operation.backend=std::make_shared<const ar::ModuleIdentity>(configuration.modules.front().implementation);
-    operation.stage=0;
+    operation.stage=0;operation.input_size=input_size;operation.output_size=output_size;
     operation.clock={"wall"};operation.requested_assurance=Assurance::numerical;
     operation.applied_assurance=ar::Available<Assurance>{Assurance::numerical};
     operation.observation_source="instrumented-operation-test";
@@ -79,13 +81,15 @@ std::shared_ptr<ob::TimingCollector> collector(const Fixture& f,std::shared_ptr<
 }
 }
 TEST_CASE("instrumented operation binds timing to task, operation, stage and provider identity") {
-    const auto f=fixture();auto clock=std::make_shared<Clock>();auto timer=collector(f,clock);
+    const auto f=fixture({"spy.geometry"},3,9);auto clock=std::make_shared<Clock>();auto timer=collector(f,clock);
     ExecutionContext context;context.run_id="run";context.timing=timer;
     auto root=accepted(timer->start({0},context));
     std::size_t calls{};
     const auto result=ob::run_instrumented_operation(context,f.identity,[&] {
         ++calls;return Termination::completed;
-    },[](Termination termination) noexcept {return termination;});
+    },[](Termination termination) noexcept {return termination;},
+        []() noexcept -> std::optional<std::uint64_t> {return 7;},
+        [](const Termination&) noexcept -> std::optional<std::uint64_t> {return 0;});
     CHECK(result==Termination::completed);CHECK(calls==1);
     root.close(Termination::completed);
     const auto report=accepted(timer->snapshot());
@@ -95,6 +99,8 @@ TEST_CASE("instrumented operation binds timing to task, operation, stage and pro
     const auto& span=report.observations.description().spans[1];
     CHECK(span.descriptor.backend->id==ModuleId{"spy.geometry"});
     CHECK(span.descriptor.operation=="geometry.projection");
+    CHECK(span.descriptor.input_size==7);
+    CHECK(span.descriptor.output_size==0);
     CHECK(std::get<ar::ReturnedSpan>(span.status).termination==Termination::completed);
 }
 
@@ -113,4 +119,21 @@ TEST_CASE("instrumented operation leaves a different provider unmeasured") {
     REQUIRE(report.spans.size()==2);
     CHECK(std::holds_alternative<ar::Unavailable>(report.spans[1].inclusive_wall_ticks));
     CHECK(std::holds_alternative<ar::IncompleteSpan>(report.observations.description().spans[1].status));
+}
+
+TEST_CASE("instrumented operation retains the input size and leaves failed output unavailable") {
+    const auto f=fixture({"spy.geometry"},3,9);auto clock=std::make_shared<Clock>();auto timer=collector(f,clock);
+    ExecutionContext context;context.run_id="run";context.timing=timer;
+    auto root=accepted(timer->start({0},context));
+    CHECK_THROWS(ob::run_instrumented_operation(context,f.identity,[]() -> int {
+        throw std::runtime_error("provider failure");
+    },[](const int&) noexcept {return Termination::completed;},
+        []() noexcept -> std::optional<std::uint64_t> {return 4;},
+        [](const int&) noexcept -> std::optional<std::uint64_t> {return 4;}));
+    root.close(Termination::completed);
+    const auto report=accepted(timer->snapshot());
+    const auto& span=report.observations.description().spans[1];
+    CHECK(span.descriptor.input_size==4);
+    CHECK_FALSE(span.descriptor.output_size);
+    CHECK(std::holds_alternative<ar::FailedSpan>(span.status));
 }

@@ -1,6 +1,7 @@
 #pragma once
 #include <csl/artifacts/run_statistics.hpp>
 #include <csl/execution/executor.hpp>
+#include <cstdint>
 
 namespace csl::execution::observability {
 template<class T> using CollectionResult=artifacts::ArtifactResult<T>;
@@ -27,6 +28,10 @@ enum class ObservationState { returned, not_called, unknown };
 enum class CompletionStatus { returned, rejected, skipped, failed, incomplete };
 struct TickValue { bool available; std::int64_t value; artifacts::MissingReason missing; };
 struct CountValue { bool available; std::uint64_t value; artifacts::MissingReason missing; };
+struct SizeNotObserved {};
+struct SizeUnavailable {};
+struct SizeAvailable { std::uint64_t value; };
+using SizeObservation=std::variant<SizeNotObserved,SizeUnavailable,SizeAvailable>;
 struct SpanCompletionView {
     artifacts::SpanId id; TickValue start,end;
     ObservationState execution; artifacts::NotCalledReason not_called_reason;
@@ -36,6 +41,7 @@ struct SpanCompletionView {
     bool has_outcome{false};MathematicalOutcome outcome{MathematicalOutcome::undetermined};
     std::shared_ptr<const GeometryEvidence> relation_evidence;
     std::optional<SetRelation> applied_relation;
+    SizeObservation input_size{},output_size{};
 };
 enum class RecordDisposition { retained, detail_dropped, detail_rejected, duplicate, wrong_shard, unknown_span };
 class ObservationShard {

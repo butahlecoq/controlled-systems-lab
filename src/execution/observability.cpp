@@ -213,6 +213,10 @@ CollectionResult<ar::CollectedStatistics> merge_observations(const CollectionPla
             if(slot&&slot->observed){
                 record.completion_observed=true;
                 const auto& v=slot->value;record.interval=ar::TickInterval{tick(v.start),tick(v.end)};
+                if(const auto* size=std::get_if<SizeAvailable>(&v.input_size))record.descriptor.input_size=size->value;
+                else if(std::holds_alternative<SizeUnavailable>(v.input_size))record.descriptor.input_size.reset();
+                if(const auto* size=std::get_if<SizeAvailable>(&v.output_size))record.descriptor.output_size=size->value;
+                else if(std::holds_alternative<SizeUnavailable>(v.output_size))record.descriptor.output_size.reset();
                 if(v.execution==ObservationState::returned)record.execution=ar::ReturnedObservation{};
                 else if(v.execution==ObservationState::not_called){record.execution=ar::NotCalledObservation{v.not_called_reason,d.observation_source,d.module.version};increment(bucket.not_called);}
                 else increment(bucket.unknown);
