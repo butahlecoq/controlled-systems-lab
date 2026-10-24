@@ -16,7 +16,7 @@ bool same_module(const ar::ModuleIdentity& planned,const registry::Identity& act
     return planned.id==actual.id&&planned.version==actual.version;
 }
 std::optional<ob::TimingScope> start_solver_scope(const ExecutionContext& context,
-    const registry::Provenance& provider) noexcept {
+    const ProgramIdentity& program,const registry::Provenance& provider) noexcept {
     if(!context.timing||!context.timing->enabled()||!provider.actual)return {};
     try {
         auto snapshot=context.timing->snapshot();
@@ -25,7 +25,8 @@ std::optional<ob::TimingScope> start_solver_scope(const ExecutionContext& contex
         const ar::SpanDescriptor* match=nullptr;
         for(const auto& span:report->observations.description().spans) {
             const auto& descriptor=span.descriptor;
-            if(descriptor.operation!="terminal.program.solve"||!descriptor.backend||
+            if(descriptor.operation!="terminal.program.solve"||!descriptor.program||
+                *descriptor.program!=program||!descriptor.backend||
                 !same_module(*descriptor.backend,*provider.actual))continue;
             if(match)return {};
             match=&descriptor;
@@ -96,7 +97,7 @@ TerminalMinimizers TerminalOptimizer::solve(const problem::ResolvedProblem& prob
             result.termination=Termination::operation_rejected;result.provider=reject->provenance;result.diagnostics=reject->diagnostics;return false;
         }
         auto workers=std::get<registry::PreparedPipeline<Port>>(std::move(admitted)).create();
-        auto solver_scope=start_solver_scope(context,provider.provenance());
+        auto solver_scope=start_solver_scope(context,program.identity(),provider.provenance());
         auto outcome=std::get<0>(workers)->run(execution);
         if(const auto* unsupported=std::get_if<Unsupported>(&outcome)) {
             if(solver_scope)solver_scope->close(Termination::operation_rejected);
