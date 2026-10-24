@@ -15,6 +15,7 @@
 #include <csl/synthesis/witness_selector.hpp>
 
 #include <algorithm>
+#include <cmath>
 #include <type_traits>
 #include <utility>
 #include <memory>
@@ -95,6 +96,27 @@ void check_full_dynamics(const problem::ResolvedProblem& problem, const Witness&
         for (std::size_t row = 0; row < next.size(); ++row)
             CHECK(next[row] == doctest::Approx(witness.states[k + 1][row]));
     }
+}
+
+bool family_contains_history(const OptimalFamily& family, const Vector& history, double tolerance = 1e-9) {
+    const auto* complete = std::get_if<CompleteOptimalFamily>(&family.outcome());
+    if (!complete || !complete->relation.payload) return false;
+    const auto* relation = complete->relation.payload->h_relation_for_recording();
+    if (!relation) return false;
+    const auto representation = relation->representation();
+    const auto* h = std::get_if<sets::HRepresentation>(&representation);
+    if (!h || history.size() != h->inequalities.cols() || history.size() != h->equalities.cols()) return false;
+    for (std::size_t row = 0; row < h->inequalities.rows(); ++row) {
+        double value = 0.0;
+        for (std::size_t col = 0; col < history.size(); ++col) value += h->inequalities(row, col) * history[col];
+        if (value > h->upper_bounds[row] + tolerance) return false;
+    }
+    for (std::size_t row = 0; row < h->equalities.rows(); ++row) {
+        double value = 0.0;
+        for (std::size_t col = 0; col < history.size(); ++col) value += h->equalities(row, col) * history[col];
+        if (std::abs(value - h->equality_values[row]) > tolerance) return false;
+    }
+    return true;
 }
 
 template<class Port> registry::PreparedProvider<Port> selected(
@@ -315,6 +337,20 @@ void compare_profile(const std::string& profile) {
             CHECK(report.optimality == verification::CheckStatus::unsupported);
             CHECK(report.completeness == verification::CheckStatus::unsupported);
             CHECK(report.validated == verification::CheckStatus::unsupported);
+        }
+    }
+    if (profile == "ts01_exact_integrator") {
+        // This history is stagewise feasible: u0=u1=0.75 obeys both control
+        // boxes and x1=u0, x2=x1+u1. It is outside the global optimum relation,
+        // which requires x2=1 and u0+u1=1. Both paired strategies must retain
+        // the coupled history set rather than a Cartesian product of stages.
+        const Vector cross_stage_cartesian_history{0, 0.75, 1.5, 0.75, 0.75};
+        for (const auto& strategy : execution.strategies) {
+            const auto& synthesis = std::get<SynthesisResult>(strategy.outcome);
+            REQUIRE(synthesis.family);
+            CHECK(family_contains_history(*synthesis.family, {0, 0, 1, 0, 1}));
+            CHECK(family_contains_history(*synthesis.family, {0, 1, 1, 1, 0}));
+            CHECK_FALSE(family_contains_history(*synthesis.family, cross_stage_cartesian_history));
         }
     }
     auto run_a=check_complete_family_encoder_boundary(problem, prepared, execution.strategies[0],
