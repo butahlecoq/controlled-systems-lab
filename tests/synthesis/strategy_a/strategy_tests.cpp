@@ -363,7 +363,8 @@ public:
 };
 std::shared_ptr<ob::TimingCollector> strategy_timing_collector(
     const problem::ResolvedProblem& problem,std::shared_ptr<StrategyTimingClock> clock,
-    std::optional<ProgramIdentity> solver_program={}) {
+    std::optional<ProgramIdentity> solver_program={},ModuleId solver_backend={"csl.lp.highs"},
+    std::string solver_backend_version="1.1.0+highs.1.11.0") {
     ar::ConfigurationInput configuration;
     const ar::Unavailable missing{ar::MissingReason::not_instrumented,{}};
     configuration.collection={true,ar::CollectionMode::detail,16,10000,16,10000};
@@ -396,7 +397,7 @@ std::shared_ptr<ob::TimingCollector> strategy_timing_collector(
     solver.shard=0;solver.bucket=0;solver.task="solve";solver.operation="terminal.program.solve";
     solver.module={ModuleId{"csl.synthesis.terminal-minimizers"},"1",missing};
     solver.backend=std::make_shared<const ar::ModuleIdentity>(ar::ModuleIdentity{
-        ModuleId{"csl.lp.highs"},"1.1.0+highs.1.11.0",missing});
+        std::move(solver_backend),std::move(solver_backend_version),missing});
     if(solver_program)solver.program=std::make_shared<const ProgramIdentity>(std::move(*solver_program));
     solver.clock={"strategy-test-wall"};solver.requested_assurance=Assurance::numerical;
     solver.applied_assurance=ar::Available<Assurance>{Assurance::numerical};
@@ -1733,6 +1734,41 @@ TEST_CASE("Strategy A publishes planned wall spans for its run and mathematical 
     CHECK(std::holds_alternative<ar::Unavailable>(mismatch_timing.spans[5].inclusive_wall_ticks));
     CHECK(std::holds_alternative<ar::IncompleteSpan>(
         mismatch_timing.observations.description().spans[5].status));
+}
+
+TEST_CASE("Strategy A records the selected convex backend for a quadratic terminal solve") {
+    auto problem=integrator();
+    const auto query=request(problem);
+    const auto reference=run(query);
+    const auto& reference_history=payload(reference);
+    REQUIRE(reference_history.terminal);
+    REQUIRE(reference_history.terminal->optimization);
+    REQUIRE(reference_history.terminal->provider);
+    REQUIRE(reference_history.terminal->provider->actual);
+    const auto terminal_program=reference_history.terminal->optimization->outcome.subject;
+    CHECK(reference_history.terminal->provider->actual->id==ModuleId{"csl.convex.highs"});
+    CHECK(reference_history.terminal->provider->actual->version=="1.0.0+highs.1.11.0");
+
+    auto clock=std::make_shared<StrategyTimingClock>();
+    auto collector=strategy_timing_collector(problem,clock,terminal_program,
+        ModuleId{"csl.convex.highs"},"1.0.0+highs.1.11.0");
+    ExecutionContext context;context.resources=std::make_shared<const ResourcePolicy>(ResourcePolicy{1,1,1,{}});
+    context.run_id="strategy-run";context.timing=collector;
+    const auto result=run(query,false,std::move(context));
+    REQUIRE(result.termination==Termination::completed);
+    const auto report=collector->snapshot();
+    REQUIRE(std::holds_alternative<ob::TimingReport>(report));
+    const auto& timing=std::get<ob::TimingReport>(report);
+    REQUIRE(timing.spans.size()==6);
+    REQUIRE(std::holds_alternative<ar::Available<std::uint64_t>>(timing.spans[5].inclusive_wall_ticks));
+    CHECK(std::get<ar::Available<std::uint64_t>>(timing.spans[5].inclusive_wall_ticks).value==10);
+    CHECK(std::get<ar::ReturnedSpan>(timing.observations.description().spans[5].status).termination==Termination::completed);
+    const auto& solver=timing.observations.description().spans[5].descriptor;
+    REQUIRE(solver.program);
+    CHECK(*solver.program==terminal_program);
+    REQUIRE(solver.backend);
+    CHECK(solver.backend->id==ModuleId{"csl.convex.highs"});
+    CHECK(solver.backend->version=="1.0.0+highs.1.11.0");
 }
 
 TEST_CASE("Strategy A timing retains a stopped root and leaves unentered phases unavailable") {
