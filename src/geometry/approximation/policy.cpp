@@ -335,6 +335,13 @@ bool within_budget(const SetHandle& output,std::size_t budget) {
 registry::Rejection reject(const registry::Method& method,const char* field,const char* message) {
     return {{registry::ApproximationPort::name,method,{}},error(DiagnosticCode::unsupported,field,message)};
 }
+struct ApproximationExecution {
+    RunOutcome outcome;
+    std::shared_ptr<const GeometryEvidence> relation_evidence;
+};
+Termination approximation_execution_termination(const ApproximationExecution& execution) noexcept {
+    return approximation_termination(execution.outcome);
+}
 }
 
 RunOutcome run_registered(const registry::Registry<registry::ApproximationPort>& registry,
@@ -364,43 +371,55 @@ RunOutcome run_registered(const registry::Registry<registry::ApproximationPort>&
     auto pipeline=std::get<registry::PreparedPipeline<registry::ApproximationPort>>(std::move(prepared));
     const auto provenance=pipeline.provenance().front();
     auto workspace=pipeline.create();
-    return ob::run_instrumented_operation(context,approximation_identity(request,provenance),
-        [&]() -> RunOutcome {
+    auto execution=ob::run_instrumented_operation(context,approximation_identity(request,provenance),
+        [&]() -> ApproximationExecution {
             auto outcome=std::get<0>(workspace)->run(context);
-            if(const auto* stopped=std::get_if<OperationStopped>(&outcome))return *stopped;
-            if(const auto* unsupported=std::get_if<Unsupported>(&outcome))return *unsupported;
+            if(const auto* stopped=std::get_if<OperationStopped>(&outcome))return {*stopped,{}};
+            if(const auto* unsupported=std::get_if<Unsupported>(&outcome))return {*unsupported,{}};
             auto result=std::get<OperationResult>(std::move(outcome));
+            const auto snapshot_evidence=[](const GeometryEvidence& evidence) {
+                try{return std::make_shared<const GeometryEvidence>(evidence);}
+                catch(...){return std::shared_ptr<const GeometryEvidence>{};}
+            };
+            const auto retain=[&](RunOutcome final) {
+                return ApproximationExecution{std::move(final),snapshot_evidence(result.evidence)};
+            };
             if(result.relation!=request.direction)
-                return Unsupported{error(DiagnosticCode::evidence_mismatch,"approximation.relation",
-                    "Provider result differs from the requested relation.")};
+                return retain(Unsupported{error(DiagnosticCode::evidence_mismatch,"approximation.relation",
+                    "Provider result differs from the requested relation.")});
             if(auto diagnostics=check_geometry_evidence(result.evidence,request);!diagnostics.empty())
-                return Unsupported{std::move(diagnostics)};
+                return retain(Unsupported{std::move(diagnostics)});
             if(result.evidence.error_bound)
-                return Unsupported{error(DiagnosticCode::unsupported,"approximation.error_bound",
-                    "No independent approximation error-bound verifier is available.")};
+                return retain(Unsupported{error(DiagnosticCode::unsupported,"approximation.error_bound",
+                    "No independent approximation error-bound verifier is available.")});
             if(result.output.id.value.empty() || !result.output.payload ||
                result.output.metadata.dimension!=request.input.metadata.dimension ||
                result.output.metadata.representation!=request.output)
-                return Unsupported{error(DiagnosticCode::evidence_mismatch,"approximation.output",
-                    "Output identity, payload, dimension or representation differs from the request.")};
+                return retain(Unsupported{error(DiagnosticCode::evidence_mismatch,"approximation.output",
+                    "Output identity, payload, dimension or representation differs from the request.")});
             if(!within_budget(result.output,request.size_budget))
-                return Unsupported{error(DiagnosticCode::unsupported,"approximation.budget",
-                    "Native output exceeds the requested primitive budget, or output size is unavailable.")};
-            if(request.direction==SetRelation::heuristic)return HeuristicApproximation{std::move(result)};
+                return retain(Unsupported{error(DiagnosticCode::unsupported,"approximation.budget",
+                    "Native output exceeds the requested primitive budget, or output size is unavailable.")});
+            if(request.direction==SetRelation::heuristic) {
+                auto evidence=snapshot_evidence(result.evidence);
+                return {HeuristicApproximation{std::move(result)},std::move(evidence)};
+            }
             bool interrupted=false;
             const auto basis=structural_basis(request,result,context,interrupted);
             if(interrupted || context.cancellation.stop_requested() ||
                (context.deadline && std::chrono::steady_clock::now()>=*context.deadline))
-                return OperationStopped{context.cancellation.stop_requested()?StopReason::cancelled:
-                    StopReason::deadline_expired,"Approximation policy stopped before publishing an enclosure."};
+                return retain(OperationStopped{context.cancellation.stop_requested()?StopReason::cancelled:
+                    StopReason::deadline_expired,"Approximation policy stopped before publishing an enclosure."});
             if(basis) {
                 result.evidence.support=SymbolicArgument{"CSL native structural set-inclusion check",
                     "Same immutable set, empty subset, universal superset, exact H constraint retention, exact binary64 H containment of native points and recession rays, exact stored-binary64 generator axis cover, or exact V vertex bounds within a directional ellipsoid over the same ambient coordinates."};
-                return EnclosedApproximation{std::move(result),*basis};
+                auto evidence=snapshot_evidence(result.evidence);
+                return {EnclosedApproximation{std::move(result),*basis},std::move(evidence)};
             }
-            return Unsupported{error(DiagnosticCode::unsupported,"approximation.inclusion",
-                "Requested enclosure has no independently checkable inclusion evidence.")};
-        },approximation_termination<RunOutcome>);
+            return retain(Unsupported{error(DiagnosticCode::unsupported,"approximation.inclusion",
+                "Requested enclosure has no independently checkable inclusion evidence.")});
+        },approximation_execution_termination);
+    return std::move(execution.outcome);
 }
 
 BoundSide objective_bound_side(SetRelation relation,ObjectiveSense sense) noexcept {

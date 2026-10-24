@@ -54,7 +54,8 @@ private:
         } else return {};
     }
     template<class Result> static std::shared_ptr<const GeometryEvidence> geometry_evidence(const Result& result) noexcept {
-        if constexpr(requires{result.evidence;}) return copy_evidence(result);
+        if constexpr(requires{result.relation_evidence;}) return result.relation_evidence;
+        else if constexpr(requires{result.evidence;}) return copy_evidence(result);
         else if constexpr(requires{std::visit([](const auto& value){return copy_evidence(value);},result);}) {
             try{return std::visit([](const auto& value){return copy_evidence(value);},result);}catch(...){return {};}
         } else return {};

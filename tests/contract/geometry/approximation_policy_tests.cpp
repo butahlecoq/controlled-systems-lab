@@ -644,6 +644,12 @@ TEST_CASE("registered approximation times only its selected provider call") {
     REQUIRE(std::holds_alternative<artifacts::ReturnedSpan>(rejected_span.status));
     CHECK(std::holds_alternative<artifacts::ReturnedObservation>(rejected_span.execution));
     CHECK(std::get<artifacts::ReturnedSpan>(rejected_span.status).termination==Termination::operation_rejected);
+    REQUIRE(rejected_span.descriptor.relation_evidence);
+    CHECK(rejected_span.descriptor.relation_evidence->reference.identity==mismatched.identity);
+    CHECK(rejected_span.descriptor.relation_evidence->reference.inputs==std::vector<SetId>{input.id});
+    CHECK(std::holds_alternative<SymbolicArgument>(rejected_span.descriptor.relation_evidence->support));
+    CHECK(std::get<SymbolicArgument>(rejected_span.descriptor.relation_evidence->support).reference==
+        "invalid relation proof");
 }
 
 TEST_CASE("rejected approximation records a no-call observation without creating a workspace") {
