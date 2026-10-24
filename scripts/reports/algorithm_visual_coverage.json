@@ -460,24 +460,29 @@
     },
     {
       "id": "finite-feedback-minimax",
-      "name": "Finite feedback, fixed-plan disturbance, and finite-action minimax",
+      "name": "Finite feedback, fixed-plan disturbance, and validated finite-action minimax",
       "composition": "implemented-outside-main-synthesis-path",
       "modules": [
         "CSL::fixed_plan_disturbance",
         "CSL::finite_feedback",
         "CSL::worst_case_vertex",
-        "CSL::finite_action_minimax"
+        "CSL::finite_action_minimax",
+        "CSL::validated_finite_action_minimax",
+        "CSL::validated_finite_action_minimax_port"
       ],
-      "support": "finite-state-and-action-only",
-      "limit": "The APIs operate on finite state/action/disturbance tables or finite generated vertices; no continuous 2D polytope-family figure is claimed.",
+      "support": "supported-2d-analytic",
+      "limit": "The validated API figure is a finite analytic fixture, not a solver replay or general continuous polytope-family claim.",
       "catalog_kinds": [
         "b08-displayed-exact",
-        "issue3-finite-catalogue"
+        "issue3-finite-catalogue",
+        "issue3-validated-minimax"
       ],
       "report_routes": [
         "finite-feedback-registered-f874133e442eb0fb884b8813a06591cc0f077063ee75ddf627de74656fc11c0f"
       ],
-      "examples": [],
+      "examples": [
+        "visual-issue3-validated-minimax-2d"
+      ],
       "implementation_issues": [
         3
       ]

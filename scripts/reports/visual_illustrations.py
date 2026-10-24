@@ -77,7 +77,7 @@ CASES = (
         "figure": "issue3-validated-minimax.svg",
         "record": "issue3-validated-minimax.json",
         "kind": "analytic-illustration",
-        "report_kind": "issue3-finite-catalogue",
+        "report_kind": "issue3-validated-minimax",
         "source_commit": "a2c0736f43e4ff15d9a9323a51296e1b416d8809",
         "source_files": ["include/csl/optimization/validated_finite_action_minimax.hpp",
                          "src/optimization/validated_finite_action_minimax.cpp"],
