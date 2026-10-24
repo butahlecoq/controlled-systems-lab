@@ -4,7 +4,7 @@
 #include <csl/optimization/lp_backend.hpp>
 #include <algorithm>
 #include <atomic>
-#include <barrier>
+#include <chrono>
 #include <cmath>
 #include <condition_variable>
 #include <future>
@@ -434,7 +434,30 @@ TEST_CASE("retained strategy owns private LP attempts and never promotes an incu
 TEST_CASE("bounded concurrent strategy sweeps keep private LP workspaces across repeated runs") {
     auto e=executor({2,2,1,{}});
     auto counts=std::make_shared<Counts>();
-    std::barrier rendezvous{2};
+    struct Rendezvous {
+        std::mutex mutex;
+        std::condition_variable changed;
+        std::size_t arrivals{};
+        std::size_t generation{};
+        bool broken{};
+        std::atomic<std::size_t> timed_out{};
+        void arrive_and_wait() {
+            std::unique_lock lock(mutex);
+            if (broken) return;
+            const auto current_generation=generation;
+            if (++arrivals == 2) {
+                arrivals=0;
+                ++generation;
+                changed.notify_all();
+                return;
+            }
+            if (!changed.wait_for(lock,std::chrono::seconds{5},[&]{return generation!=current_generation || broken;})) {
+                ++timed_out;
+                broken=true;
+                changed.notify_all();
+            }
+        }
+    } rendezvous;
     Action overlap=[&](const ExecutionContext&) { rendezvous.arrive_and_wait(); };
     constexpr std::size_t sweep_count=4;
     constexpr std::size_t tasks_per_sweep=8;
@@ -455,6 +478,7 @@ TEST_CASE("bounded concurrent strategy sweeps keep private LP workspaces across 
         auto batch=std::get<ex::BatchResult<reg::StrategyPort>>(
             e->run<reg::StrategyPort>(tasks,context(*e),ex::Mode::bounded_parallel));
         REQUIRE(batch.tasks.size()==tasks_per_sweep);
+        CHECK(rendezvous.timed_out==0);
         CHECK(batch.enforcement.peak_active_tasks==2);
         for (const auto& record:batch.tasks) {
             REQUIRE(std::holds_alternative<ex::Returned<reg::StrategyPort>>(record.outcome));
