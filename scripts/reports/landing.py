@@ -276,6 +276,10 @@ FAMILIES = {
         r"ext07-hybrid-[0-9a-f]{16}", "extensions", "Hybrid one-step verifier",
         "Checks a one-step hybrid system with switched dynamics and a piecewise linear state "
         "update, and records the measured calls of the registered hybrid path."),
+    "ext03-transform": Family(
+        r"ext03-transform-[0-9a-f]{64}", "extensions", "Temporal memory transform microbenchmark",
+        "Measures a fixed two-step scalar memory lift and history recovery. It does not run or "
+        "compare a control solver."),
     "opt10-smooth": Family(
         r"opt10-smooth-[0-9a-f]{16}", "extensions", "Declared smooth-convex adapter",
         "Runs the declared smooth-convex adapter on a two-dimensional box-quadratic problem and "

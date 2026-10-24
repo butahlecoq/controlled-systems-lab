@@ -1,0 +1,16 @@
+{
+  "files": {
+    "README.md": "576d4ad16d1a491fd09e556c318c7bd57b671bba1fde8262812c454b650e16a3",
+    "commands.txt": "cf9810bfb05add8218609b543c84db3c385ad25c507319fd313363f737c02fed",
+    "environment.json": "274b309ff0f095ae2bbcd02df367430b39cedf5b328fdd7902f87a32a02845ff",
+    "index.html": "f5d9b20d0f449a88431cb881718e44cdd576a4ed69c137f1f0db394d0fc9af77",
+    "process-stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "raw-events.jsonl": "185d7a3157ecdcabee23de57e88d46f105c715b11225577039de60f23df729d2",
+    "records.json": "1069d19e8b45aa9841ceb421ffd3034288e71bafa3d23d2e26e9af23f0ff4354",
+    "trials.csv": "bf8ebea88574244dfbe91a70e82e31eaf5bba6f056332a6ddcb9960039d19da0",
+    "visual.svg": "5e97589ecbf9f7cc22e29a4e1ba13673b4f987748f48fc3c897820c9ea3807f2"
+  },
+  "report_id": "ext03-transform-20261024-a3a3af9",
+  "schema": "csl.ext03-transform-manifest/1",
+  "source_commit": "a3a3af9e1903d7a2a4be6116cc1669215c2bba1b"
+}

@@ -1,0 +1,3 @@
+cmake -S benchmarks/reporting/ext03_temporal_lift/runner -B <BUILD_DIR> -G 'Unix Makefiles' -DCMAKE_BUILD_TYPE=Release -DCSL_SOURCE_ROOT=<CLEAN_CHECKOUT> -DCSL_ENABLE_HIGHS=ON -DCSL_ENABLE_QHULL=ON -DBUILD_TESTING=OFF -DCSL_BUILD_REPORTS=OFF
+cmake --build <BUILD_DIR> --target csl_ext03_temporal_lift_report --parallel 8
+csl_ext03_temporal_lift_report 10 1 7
