@@ -90,12 +90,14 @@ From the repository root:
 
 ```sh
 python3 docs/research/tools/check_l05_corrected_error_tube.py \
+  --svg docs/research/evidence/l05-corrected-track-error-bound.svg \
   > docs/research/evidence/l05-corrected-track-error-tube.json
 ```
 
 The checker uses only Python's standard library. Its JSON output is committed
-as the saved input-derived evidence record. The calculation is an enclosure
-study, not a runtime benchmark. Existing L05 source audits remain authoritative
+as the saved input-derived evidence record, and the same computation writes the
+SVG from its stage-60 box and norm bound. The calculation is an enclosure study,
+not a runtime benchmark. Existing L05 source audits remain authoritative
 for the historical Table 1 gaps: no generator identity, physical/deviation
 coordinate map, common state constraints, or paper-level nonlinear error
 certificate has been recovered.

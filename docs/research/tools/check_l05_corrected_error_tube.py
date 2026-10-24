@@ -4,6 +4,8 @@
 from decimal import Decimal, ROUND_CEILING, ROUND_FLOOR, localcontext
 from fractions import Fraction
 from math import isqrt
+from pathlib import Path
+import argparse
 import json
 
 PRECISION = 80
@@ -86,6 +88,60 @@ def square_root(value):
 
 def show(interval):
     return [str(interval[0]), str(interval[1])]
+
+
+def svg_number(value):
+    return str(value)
+
+
+def label_lower(value, places=4):
+    scaled = Fraction(value) * 10 ** places
+    integer = scaled.numerator // scaled.denominator
+    return format_scaled_integer(integer, places)
+
+
+def label_upper(value, places=4):
+    scaled = Fraction(value) * 10 ** places
+    integer = -((-scaled.numerator) // scaled.denominator)
+    return format_scaled_integer(integer, places)
+
+
+def format_scaled_integer(integer, places):
+    sign = "-" if integer < 0 else ""
+    digits = str(abs(integer)).zfill(places + 1)
+    return f"{sign}{digits[:-places]}.{digits[-places:]}"
+
+
+def render_svg(result):
+    e1, e2 = result["linearization_error_coordinate_bounds_at_stage_60"]
+    e1lo, e1hi = map(Decimal, e1)
+    e2lo, e2hi = map(Decimal, e2)
+    radius = Decimal(result["euclidean_hausdorff_upper_bound"])
+    radius_label = label_upper(radius, 8)
+    scale = 10
+    center_x, center_y = 220, 205
+    return f'''<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 560 390" role="img" aria-labelledby="title desc">
+  <title id="title">Stage-60 corrected-track error enclosure</title>
+  <desc id="desc">An outward coordinate box for the nonlinear-minus-affine state error lies inside a Euclidean ball of radius {radius}.</desc>
+  <rect width="560" height="390" fill="#fff"/>
+  <text x="28" y="30" font-family="sans-serif" font-size="17" font-weight="700" fill="#172554">Stage 60: paired trajectory error enclosure</text>
+  <text x="28" y="51" font-family="sans-serif" font-size="12" fill="#475569">All shared 60-stage controls in [-0.3, 0.3]; validated interval bound</text>
+  <g transform="translate({center_x} {center_y}) scale({scale} -{scale})">
+    <circle r="{svg_number(radius)}" fill="#dbeafe" fill-opacity=".45" stroke="#2563eb" stroke-width=".25" stroke-dasharray="1.2 .8"/>
+    <path d="M {svg_number(e1lo)} {svg_number(e2lo)} H {svg_number(e1hi)} V {svg_number(e2hi)} H {svg_number(e1lo)} Z" fill="#fb923c" fill-opacity=".32" stroke="#c2410c" stroke-width=".3"/>
+    <path d="M-15 0H15M0-15V15" stroke="#64748b" stroke-width=".12"/>
+  </g>
+  <g font-family="sans-serif" font-size="11" fill="#334155">
+    <text x="390" y="102">Euclidean ball</text><text x="390" y="118">radius &lt; {radius_label}</text>
+    <line x1="374" y1="112" x2="365" y2="126" stroke="#2563eb" stroke-width="2"/>
+    <text x="390" y="159">Outward error box</text><text x="390" y="175">e1: [{label_lower(e1lo)}, {label_upper(e1hi)}]</text><text x="390" y="191">e2: [{label_lower(e2lo)}, {label_upper(e2hi)}]</text>
+    <line x1="374" y1="166" x2="329" y2="144" stroke="#c2410c" stroke-width="2"/>
+    <text x="28" y="360">e1 = nonlinear deviation − affine surrogate</text>
+    <text x="28" y="378">The model, initial-coordinate mapping, and T0 grouping are explicit corrected-track assumptions.</text>
+    <text x="444" y="211">e1</text><text x="224" y="66">e2</text>
+  </g>
+</svg>
+'''
 
 
 def run():
@@ -198,8 +254,14 @@ def run():
             "No stage constraints, discretization discrepancy, or external implementation error is included; the model itself is the printed discrete recurrence.",
         ],
     }
-    print(json.dumps(result, indent=2, sort_keys=True))
+    return result
 
 
 if __name__ == "__main__":
-    run()
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--svg", type=Path, help="also write the figure from the computed evidence")
+    arguments = parser.parse_args()
+    output = run()
+    print(json.dumps(output, indent=2, sort_keys=True))
+    if arguments.svg:
+        arguments.svg.write_text(render_svg(output), encoding="utf-8")
