@@ -181,9 +181,14 @@ Neither new reducer is a faithful paper or Pascal port: A43 omits the paper's
 per-candidate artificial-basis sequence and largest-norm tie rule; A44 records
 one farthest-first interpretation of ambiguous ordering prose. Existing
 OPT-06 and OPT-07 methods remain separately named related variants. No matching
-Pascal source was found. The comparison does not complete EXP-02. The report
-route and offline bundle are staged by the Pages workflow; deployment and live
-URL verification remain pending.
+Pascal source was found. The comparison does not complete EXP-02. The
+[deployed versioned report](https://butahlecoq.github.io/controlled-systems-lab/quickhull-it17-paper-adaptations-20261024-r1/index.html)
+and [offline bundle](https://butahlecoq.github.io/controlled-systems-lab/quickhull-it17-paper-adaptations-20261024-r1.zip)
+use source commit `7de5ad294ab8831ea3bcc2907f0355c602971d63`. The live page
+SHA-256 is `9bb9a9c7f8c9d317d457e7449c9271f1317a8843c5640f921bc051789581f058`;
+the ZIP SHA-256 is `4690be18b48dd2e6ae33c75d46b2768163f9b5c54ff8cedd4875385077a0f5a0`.
+The fetched page matched the reviewed HTML bytes, and its archive entries matched
+the saved report bundle.
 
 ## APP-02 box and parallelotope approximations
 
