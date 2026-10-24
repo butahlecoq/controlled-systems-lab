@@ -9,9 +9,7 @@ add_subdirectory("${CSL_SOURCE_ROOT}" csl-source)
 
 add_executable(csl_ext03_temporal_lift_report
   "${CMAKE_CURRENT_LIST_DIR}/../temporal_lift_measure.cpp")
-target_link_libraries(csl_ext03_temporal_lift_report PRIVATE
-  CSL::strategy_a CSL::polyhedral CSL::affine_sum CSL::qhull_conversion
-  CSL::highs_lp CSL::highs_convex)
+target_link_libraries(csl_ext03_temporal_lift_report PRIVATE CSL::resolved_problem CSL::problem CSL::numeric CSL::sets)
 target_compile_features(csl_ext03_temporal_lift_report PRIVATE cxx_std_20)
 target_compile_definitions(csl_ext03_temporal_lift_report PRIVATE $<$<CONFIG:Release>:NDEBUG>)
 if(MSVC)
