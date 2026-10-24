@@ -39,14 +39,15 @@ public:
     }
     ar::Metric<std::int64_t> cpu_now() noexcept override{++cpu_reads;return ar::Available<std::int64_t>{cpu.load()};}
 };
-ob::CollectionPlan plan(bool enabled=true,std::size_t count=4,bool escaped_child=false,ar::ClockDomain wall_metadata=domain()) {
+ob::CollectionPlan plan(bool enabled=true,std::size_t count=4,bool escaped_child=false,
+        ar::ClockDomain wall_metadata=domain(),ar::CollectionMode mode=ar::CollectionMode::detail) {
     Problem z{{"zero"},std::make_shared<const SystemModel>(SystemModel{{{0,0,0},TimeDomain::discrete,
         LinearStage{{0,0,{}},{0,0,{}},{0,0,{}},{}}},{}}),{0},KnownInitial{{}},ContinuousDomain{{}},
         {UniversalSet{0}},{},{},InformationPattern::nominal_open_loop,LinearTerminal{{},0}};
     auto resolved=problem::resolve(z,{problem::UncertaintyStructure::stage_product_uncoupled});
     REQUIRE(std::holds_alternative<problem::ResolvedProblem>(resolved));
     ar::ConfigurationInput c;
-    c.collection={enabled,ar::CollectionMode::detail,100,100000,100,10000};
+    c.collection={enabled,mode,100,100000,100,10000};
     const ar::Unavailable missing{ar::MissingReason::not_instrumented,{}};
     c.modules={{"lp",{{"lp"},"1",missing},{}},{"strategy",{{"joint"},"1",missing},{}}};
     c.resources={2,2,1,{}};c.numerical={0,0};
@@ -58,6 +59,7 @@ ob::CollectionPlan plan(bool enabled=true,std::size_t count=4,bool escaped_child
         for(std::size_t i=0;i<count;++i){
             ar::SpanDescriptor d{};d.id={i};if(i)d.parent=ar::SpanParent{{i==3&&count==4?1u:0u},i==3&&count==4&&!escaped_child?ar::ParentKind::nested:ar::ParentKind::spawned};
             d.shard=i%2;d.bucket=0;d.task="task";d.operation="solve";d.module=c.modules[0].implementation;
+            d.observation_source="timing-collector-test";
             d.clock={"wall"};d.requested_assurance=Assurance::numerical;d.applied_assurance=ar::Available<Assurance>{Assurance::numerical};
             p.spans.push_back(std::move(d));
         }
@@ -176,6 +178,27 @@ TEST_CASE("disabled context keeps result evidence and explicitly omits detailed 
     CHECK(absent(report.worker_work_ticks)==ar::MissingReason::collection_disabled);
     CHECK(report.observations.description().spans.empty());CHECK(report.spans.empty());
     CHECK(clock->wall_reads==0);CHECK(clock->cpu_reads==0);
+}
+
+TEST_CASE("summary collection does not allocate or retain per-span rejection details") {
+    auto clock=std::make_shared<FakeClock>();
+    INFO("construct summary plan");
+    const auto planned=plan(true,2,false,domain(),ar::CollectionMode::summary);
+    INFO("construct summary collector");
+    auto timer=accepted(ob::make_timing_collector(planned,clock,{0},{}));
+    INFO("start summary scopes");
+    auto root=accepted(timer->start({0}));
+    auto child=accepted(timer->start({1}));
+    child.close_not_called_with_detail(ar::NotCalledReason::capability_rejected,std::string(20000,'x'));
+    root.close(Termination::completed);
+    INFO("publish summary observations");
+    const auto snapshot=timer->snapshot();
+    const auto report=accepted(snapshot);
+    REQUIRE(report.observations.description().spans.size()==2);
+    const auto& span=report.observations.description().spans[1];
+    REQUIRE(std::holds_alternative<ar::RejectedSpan>(span.status));
+    CHECK(std::get<ar::RejectedSpan>(span.status).reason=="capability_rejected");
+    CHECK(span.detail_state==ar::DetailState::not_requested);
 }
 
 

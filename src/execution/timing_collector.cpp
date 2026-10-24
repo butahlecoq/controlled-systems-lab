@@ -1,5 +1,6 @@
 #include <csl/execution/timing_collector.hpp>
 #include <algorithm>
+#include <cstring>
 #include <limits>
 #include <mutex>
 #include <utility>
@@ -25,6 +26,9 @@ struct Slot {
     Termination termination{Termination::completed};
     bool failed{},wall_regressed{},cpu_regressed{},cpu_thread_changed{};
     std::optional<ar::NotCalledReason> not_called;
+    std::shared_ptr<const GeometryEvidence> relation_evidence;
+    std::optional<SetRelation> applied_relation;
+    std::size_t detail_offset{},detail_capacity{},detail_size{};
 };
 class SteadyClock final:public TimingClock {
     std::chrono::steady_clock::time_point origin_=std::chrono::steady_clock::now();
@@ -100,6 +104,7 @@ struct TimingScope::Owner {
     std::size_t run{};
     std::vector<std::size_t> workers;
     std::vector<Slot> slots;
+    std::vector<char> detail_arena;
     std::vector<std::vector<std::size_t>> children;
     mutable std::mutex mutex;
     std::optional<std::int64_t> last_wall;
@@ -117,10 +122,16 @@ struct TimingScope::Owner {
     }
     bool cpu_applies(std::size_t index) const noexcept{return cpu&&(cpu->metric==ar::ClockMetric::thread_cpu||index==run);}
     void close(std::size_t index,Termination termination,bool failed,
-            std::optional<ar::NotCalledReason> not_called={}) noexcept {
+            std::optional<ar::NotCalledReason> not_called={},
+            std::shared_ptr<const GeometryEvidence> relation_evidence={},
+            std::optional<SetRelation> applied_relation={},std::string_view detail={}) noexcept {
         std::lock_guard lock{mutex};auto& slot=slots[index];
         slot.end=wall(index);slot.termination=termination;slot.failed=failed;
         slot.not_called=not_called;
+        slot.relation_evidence=std::move(relation_evidence);
+        slot.applied_relation=applied_relation;
+        slot.detail_size=detail.size()<=slot.detail_capacity?detail.size():0;
+        if(slot.detail_size)std::memcpy(detail_arena.data()+slot.detail_offset,detail.data(),slot.detail_size);
         if(cpu_applies(index)){
             if(cpu->metric==ar::ClockMetric::thread_cpu&&slot.thread!=std::this_thread::get_id()){
                 slot.cpu_thread_changed=true;slot.cpu_end=missing(ar::MissingReason::clock_mismatch);
@@ -146,6 +157,21 @@ TimingScope& TimingScope::operator=(TimingScope&& other) noexcept {
 TimingScope::~TimingScope(){close();}
 void TimingScope::close(Termination termination) noexcept {
     if(auto owner=std::exchange(owner_,{}))owner->close(slot_,termination,false);
+}
+void TimingScope::close(Termination termination,
+        std::shared_ptr<const GeometryEvidence> relation_evidence) noexcept {
+    if(auto owner=std::exchange(owner_,{}))
+        owner->close(slot_,termination,false,{},std::move(relation_evidence));
+}
+void TimingScope::close(Termination termination,
+        std::shared_ptr<const GeometryEvidence> relation_evidence,
+        std::optional<SetRelation> applied_relation) noexcept {
+    if(auto owner=std::exchange(owner_,{}))
+        owner->close(slot_,termination,false,{},std::move(relation_evidence),applied_relation);
+}
+void TimingScope::close_not_called_with_detail(ar::NotCalledReason reason,std::string_view detail,
+        Termination termination) noexcept {
+    if(auto owner=std::exchange(owner_,{}))owner->close(slot_,termination,false,reason,{}, {},detail);
 }
 void TimingScope::close_not_called(ar::NotCalledReason reason,Termination termination) noexcept {
     if(auto owner=std::exchange(owner_,{}))owner->close(slot_,termination,false,reason);
@@ -230,7 +256,9 @@ CollectionResult<TimingReport> TimingCollector::snapshot() const {
             SpanCompletionView completion{spans[i].id,tick(slot.start),tick(slot.end),
                 slot.not_called?ObservationState::not_called:slot.failed?ObservationState::unknown:ObservationState::returned,
                 slot.not_called.value_or(ar::NotCalledReason::task_not_admitted),
-                !slot.failed,slot.termination,{false,0,ar::MissingReason::not_instrumented},{}};
+                !slot.failed,slot.termination,{false,0,ar::MissingReason::not_instrumented},
+                slot.detail_size?std::string_view{owner_->detail_arena.data()+slot.detail_offset,slot.detail_size}:std::string_view{},
+                CompletionStatus::returned,false,MathematicalOutcome::undetermined,slot.relation_evidence,slot.applied_relation};
             completion.status=slot.not_called?CompletionStatus::rejected:
                 slot.failed?CompletionStatus::failed:CompletionStatus::returned;
             shards[static_cast<std::size_t>(spans[i].shard)].record(completion);
@@ -268,6 +296,17 @@ CollectionResult<std::shared_ptr<TimingCollector>> make_timing_collector(Collect
             };
             auto root=index(run);if(!root||spans[*root].parent)return error("timing.run","Run span must be a planned root");
             owner->run=*root;owner->slots.resize(spans.size());owner->children.resize(spans.size());
+            const auto& settings=input.configuration.description().collection;
+            const auto retained=settings.mode==ar::CollectionMode::detail
+                ?std::min<std::uint64_t>(settings.detail_spans,spans.size()):0;
+            const auto each=retained?settings.detail_bytes/retained:0;
+            const auto retained_bytes=each*retained;
+            if(retained_bytes>std::vector<char>{}.max_size())return error("timing.detail","Detail storage exceeds platform capacity");
+            owner->detail_arena.resize(static_cast<std::size_t>(retained_bytes));
+            for(std::size_t i=0;i<spans.size()&&i<retained;++i){
+                owner->slots[i].detail_offset=i*static_cast<std::size_t>(each);
+                owner->slots[i].detail_capacity=static_cast<std::size_t>(each);
+            }
             auto ancestor=[&](std::size_t candidate,std::size_t descendant){
                 auto parent=spans[descendant].parent;
                 while(parent){auto at=*index(parent->id);if(at==candidate)return true;parent=spans[at].parent;}return false;

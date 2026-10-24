@@ -84,8 +84,19 @@ provider workspace's `run` entry; preparation remains outside the measured
 interval. A pre-entry stop or capability rejection closes the planned span as
 not called with its typed reason. Instrumentation lookup failures never change
 the provider call or its mathematical result. The serializer already supports
-not-called observations, so these API additions do not change the artifact
-schema.
+not-called observations. Returned provider relation evidence and the applied
+relation are retained separately from the descriptor's requested relation in
+the in-memory observation view and recorded-run schema v6. Schema v5 remains
+readable. Appending the applied-relation field preserves source compatibility
+for default-initialized descriptors; no stable binary ABI is promised. The
+portable live OBS-01 wire schema remains unchanged.
+
+Preflight no-call details become the rejected-span reason. The collector copies
+them only when they fit the span's preallocated detail capacity; oversized or
+unavailable details leave the typed `capability_rejected` reason intact.
+The timing owner and snapshot publisher each use a bounded arena sized from the
+same `detail_bytes` setting, so transient detail storage is bounded by twice
+that setting before immutable records are published.
 
 `TimingClock` is the injection port. Read methods are `noexcept`; the collector
 serializes reads within one collector so deterministic test clocks need no locking.

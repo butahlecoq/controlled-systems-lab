@@ -20,7 +20,7 @@
           "reported_status": {"enum": ["completed", "failed", "unsupported", "cancelled", "resource_limited", "incomplete"], "description": "Must match the terminal kind/reason stored in the embedded v5 run record."},
           "run_id": {"type": "string", "minLength": 1},
           "run_digest": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
-          "run": {"type": "string", "description": "Canonical csl.run-statistics/5 JSON; always imported as unverified recorded data."}
+          "run": {"type": "string", "description": "Canonical csl.run-statistics/5 or /6 JSON; always imported as unverified recorded data."}
         }
       }
     }

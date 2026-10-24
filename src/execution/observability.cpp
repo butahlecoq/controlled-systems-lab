@@ -113,8 +113,8 @@ RecordDisposition ObservationShard::record(SpanCompletionView value)noexcept {
     if(!fixed_valid){
         slot.value={{value.id.value},{false,0,ar::MissingReason::incomplete_span},{false,0,ar::MissingReason::incomplete_span},
             ObservationState::unknown,ar::NotCalledReason::task_not_admitted,false,Termination::numerical_failure,
-            {false,0,ar::MissingReason::not_instrumented},{}};
-        slot.value.status=CompletionStatus::incomplete;
+            {false,0,ar::MissingReason::not_instrumented},{},CompletionStatus::incomplete,false,
+            MathematicalOutcome::undetermined,{}, {}};
         return slot.disposition=RecordDisposition::detail_rejected;
     }
     if(input.configuration.description().collection.mode==ar::CollectionMode::summary)return slot.disposition=RecordDisposition::detail_dropped;
@@ -220,11 +220,14 @@ CollectionResult<ar::CollectedStatistics> merge_observations(const CollectionPla
                     ar::Metric<MathematicalOutcome> outcome=ar::Unavailable{ar::MissingReason::not_instrumented,{}};
                     if(v.has_outcome)outcome=ar::Available<MathematicalOutcome>{v.outcome};
                     record.status=ar::ReturnedSpan{v.termination,std::move(outcome)};
-                }else if(v.status==CompletionStatus::rejected)record.status=ar::RejectedSpan{"capability_rejected"};
+                }else if(v.status==CompletionStatus::rejected)record.status=ar::RejectedSpan{
+                    slot->size?std::string(owner->arena.data()+slot->offset,slot->size):"capability_rejected"};
                 else if(v.status==CompletionStatus::skipped)record.status=ar::SkippedSpan{"task_not_admitted"};
                 else if(v.status==CompletionStatus::failed){record.status=ar::FailedSpan{"unspecified","producer_reported"};increment(bucket.failed);}
                 else increment(bucket.incomplete);
                 if(v.has_termination)record.termination=ar::Available<Termination>{v.termination};
+                if(v.relation_evidence)record.descriptor.relation_evidence=v.relation_evidence;
+                record.descriptor.applied_relation=v.applied_relation;
                 if(v.iterations.available)record.iterations=ar::Available<std::uint64_t>{v.iterations.value};else record.iterations=ar::Unavailable{v.iterations.missing,{}};
                 increment(bucket.observed);
                 if(slot->disposition==RecordDisposition::retained){record.detail=ar::Available<std::string>{slot->size?std::string(owner->arena.data()+slot->offset,slot->size):std::string{}};record.detail_state=ar::DetailState::retained;}

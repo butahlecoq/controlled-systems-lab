@@ -1,4 +1,5 @@
 #include <csl/geometry/approximation.hpp>
+#include <csl/execution/instrumented_operation.hpp>
 #include <csl/geometry/ellipsoidal.hpp>
 #include <csl/sets/data.hpp>
 #include <csl/sets/generator_sets.hpp>
@@ -6,10 +7,52 @@
 
 #include <cmath>
 #include <chrono>
+#include <array>
+#include <cstring>
 #include <unordered_map>
 
 namespace csl::geometry::approximation {
 namespace {
+namespace ar=artifacts;
+namespace ob=execution::observability;
+struct RejectionDetail {
+    std::array<char,256> bytes{};
+    std::size_t size{};
+    bool append(std::string_view value) noexcept {
+        if(value.empty())return true;
+        if(value.size()>bytes.size()-size)return false;
+        std::memcpy(bytes.data()+size,value.data(),value.size());size+=value.size();return true;
+    }
+    std::string_view view() const noexcept{return {bytes.data(),size};}
+};
+template<class Outcome> Termination approximation_termination(const Outcome& outcome) noexcept {
+    if(std::holds_alternative<Unsupported>(outcome))return Termination::operation_rejected;
+    if(std::holds_alternative<registry::Rejection>(outcome))return Termination::operation_rejected;
+    if(const auto* stopped=std::get_if<OperationStopped>(&outcome)) {
+        switch(stopped->reason) {
+        case StopReason::cancelled:case StopReason::deadline_expired:return Termination::cancelled;
+        case StopReason::resource_limit:return Termination::resource_limit;
+        case StopReason::numerical_failure:return Termination::numerical_failure;
+        }
+        return Termination::numerical_failure;
+    }
+    return Termination::completed;
+}
+ar::ModuleIdentity provider_identity(const registry::Identity& identity) {
+    return {identity.id,identity.version,ar::Unavailable{ar::MissingReason::not_instrumented,{}}};
+}
+ob::OperationSpanIdentity approximation_identity(const ApproximationRequest& request,
+        const registry::Provenance& provenance) {
+    return {request.identity.request.value,"geometry.approximation.execute",
+        provenance.actual?provider_identity(*provenance.actual):provider_identity(
+            registry::Identity{provenance.requested.id,"unknown"}),
+        {},{},{},{}};
+}
+ob::OperationSpanIdentity requested_approximation_identity(const ApproximationRequest& request,
+        const registry::Method& method) {
+    return {request.identity.request.value,"geometry.approximation.execute",
+        provider_identity({method.id,method.version.value_or(std::string{})}),{},{},{},{}};
+}
 Diagnostics error(DiagnosticCode code, const char* field, const char* message) {
     return {{code,field,message}};
 }
@@ -304,58 +347,108 @@ bool within_budget(const SetHandle& output,std::size_t budget) {
 registry::Rejection reject(const registry::Method& method,const char* field,const char* message) {
     return {{registry::ApproximationPort::name,method,{}},error(DiagnosticCode::unsupported,field,message)};
 }
+struct ApproximationExecution {
+    RunOutcome outcome;
+    std::shared_ptr<const GeometryEvidence> relation_evidence;
+    std::optional<SetRelation> applied_relation;
+};
+Termination approximation_execution_termination(const ApproximationExecution& execution) noexcept {
+    return approximation_termination(execution.outcome);
+}
 }
 
 RunOutcome run_registered(const registry::Registry<registry::ApproximationPort>& registry,
                           registry::Method method,const ApproximationRequest& request,
                           const ExecutionContext& context) {
     if(request.direction==SetRelation::equivalent)
+    {
+        ob::InstrumentedOperation observation{context,requested_approximation_identity(request,method)};
+        observation.not_called(ar::NotCalledReason::capability_rejected,
+            "approximation.direction: Equivalent conversion belongs to ConversionPort.");
         return reject(method,"approximation.direction","Equivalent conversion belongs to ConversionPort.");
+    }
     if(request.identity.problem.value.empty() || request.identity.request.value.empty() ||
        request.identity.ideal_output.value.empty() || request.input.id.value.empty() ||
-       !request.input.payload || request.output.value.empty())
+       !request.input.payload || request.output.value.empty()) {
+        ob::InstrumentedOperation observation{context,requested_approximation_identity(request,method)};
+        observation.not_called(ar::NotCalledReason::capability_rejected,
+            "approximation.request: A complete reference, input and output representation is required.");
         return reject(method,"approximation.request","A complete reference, input and output representation are required.");
+    }
     registry::Requirements requirements;
     requirements.output.representation=request.output;
     requirements.output.assurance=request.assurance;
     requirements.output.relation=request.direction;
-    auto prepared=registry::prepare_pipeline(registry::select(registry,std::move(method),request,requirements));
-    if(const auto* rejected=std::get_if<registry::Rejection>(&prepared))return *rejected;
-    auto workspace=std::get<registry::PreparedPipeline<registry::ApproximationPort>>(std::move(prepared)).create();
-    auto outcome=std::get<0>(workspace)->run(context);
-    if(const auto* stopped=std::get_if<OperationStopped>(&outcome))return *stopped;
-    if(const auto* unsupported=std::get_if<Unsupported>(&outcome))return *unsupported;
-    auto result=std::get<OperationResult>(std::move(outcome));
-    if(result.relation!=request.direction)
-        return Unsupported{error(DiagnosticCode::evidence_mismatch,"approximation.relation",
-            "Provider result differs from the requested relation.")};
-    if(auto diagnostics=check_geometry_evidence(result.evidence,request);!diagnostics.empty())
-        return Unsupported{std::move(diagnostics)};
-    if(result.evidence.error_bound)
-        return Unsupported{error(DiagnosticCode::unsupported,"approximation.error_bound",
-            "No independent approximation error-bound verifier is available.")};
-    if(result.output.id.value.empty() || !result.output.payload ||
-       result.output.metadata.dimension!=request.input.metadata.dimension ||
-       result.output.metadata.representation!=request.output)
-        return Unsupported{error(DiagnosticCode::evidence_mismatch,"approximation.output",
-            "Output identity, payload, dimension or representation differs from the request.")};
-    if(!within_budget(result.output,request.size_budget))
-        return Unsupported{error(DiagnosticCode::unsupported,"approximation.budget",
-            "Native output exceeds the requested primitive budget, or output size is unavailable.")};
-    if(request.direction==SetRelation::heuristic)return HeuristicApproximation{std::move(result)};
-    bool interrupted=false;
-    const auto basis=structural_basis(request,result,context,interrupted);
-    if(interrupted || context.cancellation.stop_requested() ||
-       (context.deadline && std::chrono::steady_clock::now()>=*context.deadline))
-        return OperationStopped{context.cancellation.stop_requested()?StopReason::cancelled:
-            StopReason::deadline_expired,"Approximation policy stopped before publishing an enclosure."};
-    if(basis) {
-        result.evidence.support=SymbolicArgument{"CSL native structural set-inclusion check",
-            "Same immutable set, empty subset, universal superset, exact H constraint retention, exact binary64 H containment of native points and recession rays, exact stored-binary64 generator axis cover, or exact V vertex bounds within a directional ellipsoid over the same ambient coordinates."};
-        return EnclosedApproximation{std::move(result),*basis};
+    auto prepared=registry::prepare_pipeline(registry::select(registry,method,request,requirements));
+    if(const auto* rejected=std::get_if<registry::Rejection>(&prepared)) {
+        ob::InstrumentedOperation observation{context,
+            approximation_identity(request,rejected->provenance)};
+        RejectionDetail detail;
+        if(rejected->diagnostics.empty())detail.append("capability rejected");
+        else for(std::size_t i=0;i<rejected->diagnostics.size();++i) {
+            const auto& diagnostic=rejected->diagnostics[i];
+            const auto separator=i?std::string_view{"; "}:std::string_view{};
+            if(!detail.append(separator)||!detail.append(diagnostic.field)||!detail.append(": ")||
+               !detail.append(diagnostic.explanation)) {
+                detail.append("; additional diagnostics omitted");
+                break;
+            }
+        }
+        observation.not_called(ar::NotCalledReason::capability_rejected,detail.view());
+        return *rejected;
     }
-    return Unsupported{error(DiagnosticCode::unsupported,"approximation.inclusion",
-        "Requested enclosure has no independently checkable inclusion evidence.")};
+    auto pipeline=std::get<registry::PreparedPipeline<registry::ApproximationPort>>(std::move(prepared));
+    const auto provenance=pipeline.provenance().front();
+    auto workspace=pipeline.create();
+    auto execution=ob::run_instrumented_operation(context,approximation_identity(request,provenance),
+        [&]() -> ApproximationExecution {
+            auto outcome=std::get<0>(workspace)->run(context);
+            if(const auto* stopped=std::get_if<OperationStopped>(&outcome))return {*stopped,{}, {}};
+            if(const auto* unsupported=std::get_if<Unsupported>(&outcome))return {*unsupported,{}, {}};
+            auto result=std::get<OperationResult>(std::move(outcome));
+            const auto snapshot_evidence=[](const GeometryEvidence& evidence) {
+                try{return std::make_shared<const GeometryEvidence>(evidence);}
+                catch(...){return std::shared_ptr<const GeometryEvidence>{};}
+            };
+            const auto retain=[&](RunOutcome final) {
+                return ApproximationExecution{std::move(final),snapshot_evidence(result.evidence),result.relation};
+            };
+            if(result.relation!=request.direction)
+                return retain(Unsupported{error(DiagnosticCode::evidence_mismatch,"approximation.relation",
+                    "Provider result differs from the requested relation.")});
+            if(auto diagnostics=check_geometry_evidence(result.evidence,request);!diagnostics.empty())
+                return retain(Unsupported{std::move(diagnostics)});
+            if(result.evidence.error_bound)
+                return retain(Unsupported{error(DiagnosticCode::unsupported,"approximation.error_bound",
+                    "No independent approximation error-bound verifier is available.")});
+            if(result.output.id.value.empty() || !result.output.payload ||
+               result.output.metadata.dimension!=request.input.metadata.dimension ||
+               result.output.metadata.representation!=request.output)
+                return retain(Unsupported{error(DiagnosticCode::evidence_mismatch,"approximation.output",
+                    "Output identity, payload, dimension or representation differs from the request.")});
+            if(!within_budget(result.output,request.size_budget))
+                return retain(Unsupported{error(DiagnosticCode::unsupported,"approximation.budget",
+                    "Native output exceeds the requested primitive budget, or output size is unavailable.")});
+            if(request.direction==SetRelation::heuristic) {
+                auto evidence=snapshot_evidence(result.evidence);
+                return {HeuristicApproximation{std::move(result)},std::move(evidence),result.relation};
+            }
+            bool interrupted=false;
+            const auto basis=structural_basis(request,result,context,interrupted);
+            if(interrupted || context.cancellation.stop_requested() ||
+               (context.deadline && std::chrono::steady_clock::now()>=*context.deadline))
+                return retain(OperationStopped{context.cancellation.stop_requested()?StopReason::cancelled:
+                    StopReason::deadline_expired,"Approximation policy stopped before publishing an enclosure."});
+            if(basis) {
+                result.evidence.support=SymbolicArgument{"CSL native structural set-inclusion check",
+                    "Same immutable set, empty subset, universal superset, exact H constraint retention, exact binary64 H containment of native points and recession rays, exact stored-binary64 generator axis cover, or exact V vertex bounds within a directional ellipsoid over the same ambient coordinates."};
+                auto evidence=snapshot_evidence(result.evidence);
+                return {EnclosedApproximation{std::move(result),*basis},std::move(evidence),result.relation};
+            }
+            return retain(Unsupported{error(DiagnosticCode::unsupported,"approximation.inclusion",
+                "Requested enclosure has no independently checkable inclusion evidence.")});
+        },approximation_execution_termination);
+    return std::move(execution.outcome);
 }
 
 BoundSide objective_bound_side(SetRelation relation,ObjectiveSense sense) noexcept {

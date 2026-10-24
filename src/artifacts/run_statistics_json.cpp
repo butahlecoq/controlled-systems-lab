@@ -578,7 +578,12 @@ ArtifactResult<RecordedRunArtifact> encode_recorded_run(const RunStatistics& own
         }
         auto wire=Json::parse(recorded_json(owner));
         require(wire.at("schema")=="csl.run-statistics/4","schema","Live run is not in the current v4 wire form");
-        wire["schema"]="csl.run-statistics/5";
+        wire["schema"]="csl.run-statistics/6";
+        auto& spans=wire["statistics"]["spans"];
+        const auto& source_spans=owner.description().statistics.description().spans;
+        require(spans.size()==source_spans.size(),"statistics.spans","Span count changed during serialization");
+        for(std::size_t i=0;i<source_spans.size();++i)
+            spans[i]["descriptor"]["applied_relation"]=put(source_spans[i].descriptor.applied_relation);
         wire["recorded_state"]="unverified_recorded_data";
         const auto text=wire.dump();
         if(text.size()>limits.bytes)return ArtifactError{ArtifactErrorCode::limit,"json.bytes","Encoded recorded artifact exceeds byte limit"};
@@ -597,7 +602,8 @@ static ArtifactResult<problem::ResolvedContent> decode_recorded_run_impl(std::st
     try {
         auto wire=parse_document(text,limits);
         closed(wire,{"schema","problem","dimensions","horizon","configuration","run","final","statistics","resources","execution","attachments","provenance","selection","recorded_state"});
-        require(wire.at("schema")=="csl.run-statistics/5","schema","Unsupported recorded run schema");
+        require(wire.at("schema")=="csl.run-statistics/5"||wire.at("schema")=="csl.run-statistics/6",
+            "schema","Unsupported recorded run schema");
         require(wire.at("recorded_state")=="unverified_recorded_data","recorded_state","Recorded claims are always untrusted");
         require(wire.dump()==text,"recorded.canonical","Recorded artifact is not in canonical form or contains trailing bytes");
         if(expected_problem&&get<ProblemId>(wire.at("problem"))!=*expected_problem)

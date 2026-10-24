@@ -832,6 +832,7 @@ TEST_CASE("canonical relation evidence and requested assurance remain independen
     for(const auto relation:{SetRelation::equivalent,SetRelation::inner,SetRelation::outer,SetRelation::heuristic}){
         auto record=owner.description();auto collected=record.statistics.description();auto& descriptor=collected.spans[0].descriptor;
         descriptor.relation=relation;descriptor.requested_assurance=Assurance::validated;descriptor.applied_assurance=ar::Unavailable{ar::MissingReason::not_supported,"no checked verifier"};
+        descriptor.applied_relation=relation;
         GeometryEvidence evidence{{{record.problem,{"request"},{"reference"}},{{"input/left"},{"input/right"}}},
             GeometryClaimScope::set_relation,Unestablished{},{},{}};
         if(relation!=SetRelation::equivalent) {
@@ -876,6 +877,14 @@ TEST_CASE("canonical relation evidence and requested assurance remain independen
             CHECK(actual.relation_evidence->reference.inputs==std::vector<SetId>{SetId{"input/left"},SetId{"input/right"}});
         else
             CHECK(actual.relation_evidence->reference.inputs==std::vector<SetId>{SetId{"input/source"}});
+        const auto archived=accepted(ar::encode_recorded_run(accepted(ar::publish_run({integrator_problem(),record}))));
+        const std::string archived_wire{reinterpret_cast<const char*>(archived.content().bytes().data()),archived.content().bytes().size()};
+        CHECK(archived_wire.find("\"applied_relation\":\""+std::string(relation==SetRelation::equivalent?"equivalent":relation==SetRelation::inner?"inner":relation==SetRelation::outer?"outer":"heuristic")+"\"")!=std::string::npos);
+        CHECK(archived_wire.find("csl.run-statistics/6")!=std::string::npos);
+        auto legacy=nlohmann::json::parse(archived_wire);legacy["schema"]="csl.run-statistics/5";
+        for(auto& span:legacy["statistics"]["spans"])span["descriptor"].erase("applied_relation");
+        const auto legacy_wire=legacy.dump();
+        CHECK(std::holds_alternative<ar::RecordedRunArtifact>(ar::decode_recorded_run(legacy_wire)));
     }
 }
 TEST_CASE("pin wire variants are closed and semantic option changes leave mathematics unchanged") {

@@ -1,6 +1,7 @@
 #define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
 #include <doctest/doctest.h>
 #include <csl/geometry/approximation.hpp>
+#include <csl/execution/timing_collector.hpp>
 #include <csl/sets/data.hpp>
 #include <csl/sets/generator_sets.hpp>
 #include <limits>
@@ -40,6 +41,21 @@ SetHandle two_points(const char* id) {
         {std::get<numeric::MatrixView>(vertices),std::get<numeric::MatrixView>(rays)})).as_handle();
 }
 class OpaqueFuturePayload final : public SetPayload {};
+class ApproximationTimingClock final:public execution::observability::TimingClock {
+    std::int64_t tick_{};
+public:
+    artifacts::ClockDomain wall_domain() const override {
+        return {{"wall"},artifacts::ClockMetric::steady_wall,"run",1,1000,
+            artifacts::Available<std::uint64_t>{1},"approximation-policy-test"};
+    }
+    std::optional<artifacts::ClockDomain> cpu_domain() const override{return {};}
+    artifacts::Metric<std::int64_t> wall_now() noexcept override {
+        const auto value=tick_;tick_+=10;return artifacts::Available<std::int64_t>{value};
+    }
+    artifacts::Metric<std::int64_t> cpu_now() noexcept override {
+        return artifacts::Unavailable{artifacts::MissingReason::not_supported,{}};
+    }
+};
 SetHandle h_set(const char* id, Vector inequality_rows, Vector upper_bounds,
                 Vector equality_rows = {}, Vector equality_values = {},
                 const char* coordinate = "x") {
@@ -67,10 +83,10 @@ public:
 registry::Registry<registry::ApproximationPort> provider(const ApproximationRequest& request,
     SetHandle output, SetRelation offered, SetRelation returned, EvidenceSupport support=Unestablished{},
     std::optional<GeometryErrorBound> error_bound=std::nullopt,
-    std::shared_ptr<std::size_t> factory_creations={}) {
+    std::shared_ptr<std::size_t> factory_creations={},std::vector<std::string> assumptions={}) {
     registry::Registry<registry::ApproximationPort> result;
     GeometryEvidence evidence{{request.identity,{request.input.id}},GeometryClaimScope::set_relation,
-        std::move(support),{},std::move(error_bound)};
+        std::move(support),std::move(assumptions),std::move(error_bound)};
     OperationResult fixed{std::move(output),returned,std::move(evidence)};
     auto added=result.add({{{"fixture.approximation"},"1"},
         [offered](const ApproximationRequest& query,const registry::Requirements&) -> registry::Capability {
@@ -86,6 +102,50 @@ registry::Registry<registry::ApproximationPort> provider(const ApproximationRequ
 }
 auto execute(const registry::Registry<registry::ApproximationPort>& registry,const ApproximationRequest& query) {
     return run_registered(registry,{{"fixture.approximation"},std::nullopt},query,ExecutionContext{});
+}
+std::shared_ptr<execution::observability::TimingCollector> approximation_timer(
+        const problem::ResolvedProblem& problem,const ApproximationRequest& request) {
+    namespace ar=artifacts;
+    namespace ob=execution::observability;
+    const ar::Unavailable missing{ar::MissingReason::not_instrumented,{}};
+    const ar::ModuleIdentity provider{{"fixture.approximation"},"1",missing};
+    ar::ConfigurationInput configuration;
+    configuration.collection={true,ar::CollectionMode::detail,4,2048,4,1024};
+    configuration.modules={{"geometry",provider,{}},
+        {"strategy",{{"test.strategy"},"1",missing},{}}};
+    configuration.resources={1,1,1,{}};configuration.numerical={1e-8,1e-8};
+    configuration.output={ar::OutputKind::program,Assurance::numerical,
+        FamilyTarget::candidate_relaxation,{request.output},{1,0,{},{}}};
+    configuration.selector={{"test.selector"},"1",{}};
+    configuration.strategy={{"test.strategy"},{},{},{},provider.id,{},{},
+        {"test.selector"},{request.output.value}};
+    auto resolved_configuration=ar::resolve_configuration(std::move(configuration));
+    REQUIRE(std::holds_alternative<ar::ResolvedConfiguration>(resolved_configuration));
+    const auto config=std::get<ar::ResolvedConfiguration>(std::move(resolved_configuration));
+    const ar::ClockDomain clock{{"wall"},ar::ClockMetric::steady_wall,"run",1,1000,
+        ar::Available<std::uint64_t>{1},"approximation-policy-test"};
+    ob::PlanInput input{problem,config,{"approximation-test-run"},{clock},{},1};
+    const std::string task=request.identity.request.value;
+    input.tasks={"approximation-test-run",task};
+    input.operations={"operation.run","geometry.approximation.execute"};
+    ar::SpanDescriptor root{};root.id={0};root.task="approximation-test-run";root.operation="operation.run";
+    root.module=config.description().modules.back().implementation;root.clock={"wall"};
+    root.requested_assurance=Assurance::numerical;
+    root.applied_assurance=ar::Available<Assurance>{Assurance::numerical};
+    ar::SpanDescriptor span{};span.id={1};span.parent=ar::SpanParent{{0},ar::ParentKind::nested};
+    span.task=task;span.operation="geometry.approximation.execute";span.module=provider;span.clock={"wall"};
+    span.input_representation=std::make_shared<const RepresentationId>(request.input.metadata.representation);
+    span.output_representation=std::make_shared<const RepresentationId>(request.output);
+    span.relation=request.direction;span.requested_assurance=request.assurance;
+    span.applied_assurance=ar::Available<Assurance>{request.assurance};
+    span.observation_source="src/geometry/approximation/policy.cpp";
+    input.spans={std::move(root),std::move(span)};
+    auto plan=ob::make_collection_plan(std::move(input));
+    REQUIRE(std::holds_alternative<ob::CollectionPlan>(plan));
+    auto collector=ob::make_timing_collector(std::get<ob::CollectionPlan>(std::move(plan)),
+        std::make_shared<ApproximationTimingClock>(),{0},{});
+    REQUIRE(std::holds_alternative<std::shared_ptr<ob::TimingCollector>>(collector));
+    return std::get<std::shared_ptr<ob::TimingCollector>>(std::move(collector));
 }
 SetHandle generator_set(const char* id, Vector center, Matrix columns,
                         std::vector<const char*> names, Matrix equalities = {},
@@ -516,4 +576,145 @@ TEST_CASE("set extrema have directed bounds but no optimizer-family claim") {
     CHECK(objective_bound_side(SetRelation::outer,ObjectiveSense::maximize)==BoundSide::upper);
     CHECK(objective_bound_side(SetRelation::equivalent,ObjectiveSense::maximize)==BoundSide::both);
     CHECK(objective_bound_side(SetRelation::heuristic,ObjectiveSense::minimize)==BoundSide::none);
+}
+
+TEST_CASE("registered approximation times only its selected provider call") {
+    Problem source{{"approximation-observability"},std::make_shared<const SystemModel>(SystemModel{{
+        {0,0,0},TimeDomain::discrete,LinearStage{{0,0,{}},{0,0,{}},{0,0,{}},{}}},{}}),{0},
+        KnownInitial{{}},ContinuousDomain{{}},{UniversalSet{0}},{},{},
+        InformationPattern::nominal_open_loop,LinearTerminal{{},0}};
+    auto resolved=problem::resolve(source,{problem::UncertaintyStructure::stage_product_uncoupled});
+    REQUIRE(std::holds_alternative<problem::ResolvedProblem>(resolved));
+    const auto resolved_value=std::get<problem::ResolvedProblem>(std::move(resolved));
+    const auto resolved_problem=resolved_value.identity();
+    auto input=set("singleton","approx-reference");
+    auto output=set("universal","approx-outer");
+    auto query=request(input,SetRelation::outer,output.metadata.representation);
+    query.identity.request={"timed-approximation"};
+    query.identity.problem=resolved_problem;
+    const auto methods=provider(query,output,SetRelation::outer,SetRelation::outer,
+        SymbolicArgument{"fixture inclusion proof","same-coordinate outer superset"},std::nullopt,{},
+        {"fixture assumes exact stored singleton coordinates"});
+    auto timer=approximation_timer(resolved_value,query);
+    ExecutionContext context;context.run_id="approximation-test-run";context.timing=timer;
+    auto root=std::get<execution::observability::TimingScope>(timer->start({0},context));
+    auto outcome=run_registered(methods,{{"fixture.approximation"},std::nullopt},query,context);
+    REQUIRE(std::holds_alternative<EnclosedApproximation>(outcome));
+    root.close(Termination::completed);
+    const auto report=timer->snapshot();
+    REQUIRE(std::holds_alternative<execution::observability::TimingReport>(report));
+    const auto& timing=std::get<execution::observability::TimingReport>(report);
+    REQUIRE(timing.spans.size()==2);
+    REQUIRE(std::holds_alternative<artifacts::Available<std::uint64_t>>(timing.spans[1].inclusive_wall_ticks));
+    CHECK(std::get<artifacts::Available<std::uint64_t>>(timing.spans[1].inclusive_wall_ticks).value==10);
+    const auto& descriptor=timing.observations.description().spans[1].descriptor;
+    CHECK(descriptor.task=="timed-approximation");
+    CHECK(descriptor.operation=="geometry.approximation.execute");
+    CHECK(descriptor.module.id==ModuleId{"fixture.approximation"});
+    REQUIRE(descriptor.input_representation);
+    CHECK(*descriptor.input_representation==input.metadata.representation);
+    REQUIRE(descriptor.output_representation);
+    CHECK(*descriptor.output_representation==query.output);
+    CHECK(descriptor.relation==SetRelation::outer);
+    REQUIRE(descriptor.relation_evidence);
+    CHECK(descriptor.relation_evidence->reference.identity==query.identity);
+    CHECK(descriptor.relation_evidence->reference.inputs==std::vector<SetId>{input.id});
+    CHECK(descriptor.relation_evidence->scope==GeometryClaimScope::set_relation);
+    CHECK(std::holds_alternative<SymbolicArgument>(descriptor.relation_evidence->support));
+    CHECK(descriptor.relation_evidence->assumptions==
+        std::vector<std::string>{"fixture assumes exact stored singleton coordinates"});
+    REQUIRE(std::holds_alternative<artifacts::ReturnedSpan>(timing.observations.description().spans[1].status));
+    CHECK(std::get<artifacts::ReturnedSpan>(timing.observations.description().spans[1].status).termination==Termination::completed);
+
+    auto mismatched=query;mismatched.identity.request={"mismatched-approximation"};
+    const auto mismatched_methods=provider(mismatched,output,SetRelation::outer,SetRelation::inner,
+        SymbolicArgument{"invalid relation proof","provider returns inner for outer request"});
+    auto rejected_timer=approximation_timer(resolved_value,mismatched);
+    ExecutionContext rejected_context;rejected_context.run_id="approximation-test-run";rejected_context.timing=rejected_timer;
+    auto rejected_root=std::get<execution::observability::TimingScope>(rejected_timer->start({0},rejected_context));
+    const auto rejected=run_registered(mismatched_methods,{{"fixture.approximation"},std::nullopt},
+        mismatched,rejected_context);
+    REQUIRE(std::holds_alternative<Unsupported>(rejected));
+    rejected_root.close(Termination::completed);
+    const auto rejected_report=rejected_timer->snapshot();
+    REQUIRE(std::holds_alternative<execution::observability::TimingReport>(rejected_report));
+    const auto& rejected_timing=std::get<execution::observability::TimingReport>(rejected_report);
+    REQUIRE(rejected_timing.observations.description().spans.size()==2);
+    const auto& rejected_span=rejected_timing.observations.description().spans[1];
+    REQUIRE(std::holds_alternative<artifacts::ReturnedSpan>(rejected_span.status));
+    CHECK(std::holds_alternative<artifacts::ReturnedObservation>(rejected_span.execution));
+    CHECK(std::get<artifacts::ReturnedSpan>(rejected_span.status).termination==Termination::operation_rejected);
+    REQUIRE(rejected_span.descriptor.relation_evidence);
+    CHECK(rejected_span.descriptor.relation_evidence->reference.identity==mismatched.identity);
+    CHECK(rejected_span.descriptor.relation_evidence->reference.inputs==std::vector<SetId>{input.id});
+    CHECK(std::holds_alternative<SymbolicArgument>(rejected_span.descriptor.relation_evidence->support));
+    CHECK(std::get<SymbolicArgument>(rejected_span.descriptor.relation_evidence->support).reference==
+        "invalid relation proof");
+    REQUIRE(rejected_span.descriptor.applied_relation);
+    CHECK(*rejected_span.descriptor.applied_relation==SetRelation::inner);
+}
+
+TEST_CASE("rejected approximation records a no-call observation without creating a workspace") {
+    Problem source{{"approximation-rejection-observability"},std::make_shared<const SystemModel>(SystemModel{{
+        {0,0,0},TimeDomain::discrete,LinearStage{{0,0,{}},{0,0,{}},{0,0,{}},{}}},{}}),{0},
+        KnownInitial{{}},ContinuousDomain{{}},{UniversalSet{0}},{},{},
+        InformationPattern::nominal_open_loop,LinearTerminal{{},0}};
+    auto resolved=problem::resolve(source,{problem::UncertaintyStructure::stage_product_uncoupled});
+    REQUIRE(std::holds_alternative<problem::ResolvedProblem>(resolved));
+    const auto resolved_problem=std::get<problem::ResolvedProblem>(std::move(resolved));
+    auto input=set("singleton","reject-reference");
+    auto output=set("universal","reject-outer");
+    auto query=request(input,SetRelation::outer,output.metadata.representation);
+    query.identity.request={"rejected-approximation"};
+    auto creations=std::make_shared<std::size_t>(0);
+    const auto methods=provider(query,output,SetRelation::inner,SetRelation::outer,
+        Unestablished{},std::nullopt,creations);
+    auto timer=approximation_timer(resolved_problem,query);
+    ExecutionContext context;context.run_id="approximation-test-run";context.timing=timer;
+    auto root=std::get<execution::observability::TimingScope>(timer->start({0},context));
+    const auto outcome=run_registered(methods,{{"fixture.approximation"},std::nullopt},query,context);
+    REQUIRE(std::holds_alternative<registry::Rejection>(outcome));
+    CHECK(*creations==0);
+    root.close(Termination::completed);
+    const auto report=timer->snapshot();
+    REQUIRE(std::holds_alternative<execution::observability::TimingReport>(report));
+    const auto& timing=std::get<execution::observability::TimingReport>(report);
+    REQUIRE(timing.observations.description().spans.size()==2);
+    const auto& span=timing.observations.description().spans[1];
+    CHECK(span.descriptor.module.id==ModuleId{"fixture.approximation"});
+    CHECK(span.descriptor.module.version=="1");
+    CHECK(std::holds_alternative<artifacts::NotCalledObservation>(span.execution));
+    CHECK(std::get<artifacts::NotCalledObservation>(span.execution).reason==
+        artifacts::NotCalledReason::capability_rejected);
+    CHECK(std::holds_alternative<artifacts::RejectedSpan>(span.status));
+    CHECK(std::get<artifacts::RejectedSpan>(span.status).reason.find("output.relation")!=std::string::npos);
+
+    auto malformed=query;malformed.identity.request={"malformed-approximation"};malformed.input.payload.reset();
+    auto malformed_timer=approximation_timer(resolved_problem,malformed);
+    ExecutionContext malformed_context;malformed_context.run_id="approximation-test-run";malformed_context.timing=malformed_timer;
+    auto malformed_root=std::get<execution::observability::TimingScope>(malformed_timer->start({0},malformed_context));
+    const auto malformed_outcome=run_registered(methods,{{"fixture.approximation"},std::string{"1"}},malformed,malformed_context);
+    REQUIRE(std::holds_alternative<registry::Rejection>(malformed_outcome));
+    malformed_root.close(Termination::completed);
+    const auto malformed_report=malformed_timer->snapshot();
+    REQUIRE(std::holds_alternative<execution::observability::TimingReport>(malformed_report));
+    const auto& malformed_spans=std::get<execution::observability::TimingReport>(malformed_report).observations.description().spans;
+    REQUIRE(malformed_spans.size()==2);
+    CHECK(std::holds_alternative<artifacts::NotCalledObservation>(malformed_spans[1].execution));
+    REQUIRE(std::holds_alternative<artifacts::RejectedSpan>(malformed_spans[1].status));
+    CHECK(std::get<artifacts::RejectedSpan>(malformed_spans[1].status).reason.find("approximation.request")!=std::string::npos);
+
+    auto bounded_timer=approximation_timer(resolved_problem,query);
+    ExecutionContext bounded_context;bounded_context.run_id="approximation-test-run";bounded_context.timing=bounded_timer;
+    auto bounded_root=std::get<execution::observability::TimingScope>(bounded_timer->start({0},bounded_context));
+    auto bounded_child=std::get<execution::observability::TimingScope>(bounded_timer->start({1},bounded_context));
+    const std::string oversized_detail(600,'x');
+    bounded_child.close_not_called_with_detail(artifacts::NotCalledReason::capability_rejected,oversized_detail);
+    bounded_root.close(Termination::completed);
+    const auto bounded_report=bounded_timer->snapshot();
+    REQUIRE(std::holds_alternative<execution::observability::TimingReport>(bounded_report));
+    const auto& bounded_spans=std::get<execution::observability::TimingReport>(bounded_report).observations.description().spans;
+    REQUIRE(bounded_spans.size()==2);
+    REQUIRE(std::holds_alternative<artifacts::RejectedSpan>(bounded_spans[1].status));
+    CHECK(std::get<artifacts::RejectedSpan>(bounded_spans[1].status).reason=="capability_rejected");
 }
