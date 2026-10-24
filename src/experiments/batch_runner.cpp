@@ -189,9 +189,11 @@ bool recorded_query_matches(const artifacts::RecordedRunArtifact& artifact,
         const auto& final = run.at("final");
         const auto kind = final.at("kind").get<std::string>();
         if (const auto* skipped = std::get_if<execution::Skipped>(&actual))
-            return kind == "skipped" && final.at("value").at("reason").get<std::string>() == skip_reason_name(skipped->reason);
+            return kind == "skipped" && run.at("selection").is_null() &&
+                final.at("value").at("reason").get<std::string>() == skip_reason_name(skipped->reason);
         if (const auto* failed = std::get_if<execution::TaskFailure>(&actual))
-            return kind == "failed" && final.at("value").at("phase").get<std::string>() == failure_phase_name(failed->stage) &&
+            return kind == "failed" && run.at("selection").is_null() &&
+                final.at("value").at("phase").get<std::string>() == failure_phase_name(failed->stage) &&
                 final.at("value").at("reason").get<std::string>() == failure_reason_name(failed->kind);
 
         const auto& returned = std::get<execution::Returned<registry::SelectorPort>>(actual).value;

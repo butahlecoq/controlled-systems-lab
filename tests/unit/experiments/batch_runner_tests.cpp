@@ -526,6 +526,51 @@ TEST_CASE("a completed family query sweep records aligned runs and measured phas
     CHECK(std::get<artifacts::ArtifactError>(mismatched_coarse).path=="sweep.cases[0].coarse_run.outcome");
 }
 
+TEST_CASE("a stopped selector task rejects a recorded stale selection") {
+    const auto prepared=prepare_strategy();
+    const auto item=sweep_case("scenario-a","config-a",prepared);
+    const ResourcePolicy resources{1,1,1,std::nullopt};
+    ExecutionContext context;
+    context.run_id="stopped-selector";
+    auto coarse=experiments::run_sweep(std::span{&item,1},resources,context,execution::Mode::sequential);
+    REQUIRE(std::holds_alternative<experiments::SweepResult>(coarse));
+    auto queried=experiments::run_family_queries(std::get<experiments::SweepResult>(std::move(coarse)),
+        prepare_selector_provider(),resources,context,execution::Mode::sequential,
+        {1,"selector workspace",std::nullopt,execution::CallStopSupport::cooperative_boundaries});
+    REQUIRE(std::holds_alternative<experiments::FamilyQueryResult>(queried));
+    const auto& query_result=std::get<experiments::FamilyQueryResult>(queried);
+    REQUIRE(query_result.query_batch.tasks.size()==1);
+    REQUIRE(std::holds_alternative<execution::Returned<registry::SelectorPort>>(
+        query_result.query_batch.tasks[0].outcome));
+
+    const auto recorded=recorded_sweep_run();
+    const auto bytes=recorded.content().bytes();
+    const std::string text(reinterpret_cast<const char*>(bytes.data()),bytes.size());
+    const std::vector<artifacts::RecordedRunArtifact> coarse_runs{recorded};
+
+    for (const bool failed : {false,true}) {
+        auto stopped=query_result;
+        Json wire=Json::parse(text);
+        if (failed) {
+            wire["final"]={{"kind","failed"},{"value",{{"phase","invoke"},
+                {"reason","adapter_exception"},{"message","fixture failure"},{"raw_diagnostics",nullptr}}}};
+            stopped.query_batch.tasks[0].outcome=execution::TaskFailure{
+                execution::FailureStage::invoke,execution::FailureKind::adapter_exception,
+                std::make_exception_ptr(std::runtime_error("fixture failure"))};
+        } else {
+            wire["final"]={{"kind","skipped"},{"value",{{"reason","task_limit"}}}};
+            stopped.query_batch.tasks[0].outcome=execution::Skipped{execution::SkipReason::task_limit};
+        }
+        const auto stale=artifacts::decode_recorded_run(wire.dump());
+        REQUIRE(std::holds_alternative<artifacts::RecordedRunArtifact>(stale));
+        const std::vector<std::optional<artifacts::RecordedRunArtifact>> query_runs{
+            std::get<artifacts::RecordedRunArtifact>(stale)};
+        const auto archive=experiments::record_family_query_sweep(sweep_spec(),stopped,coarse_runs,query_runs);
+        REQUIRE(std::holds_alternative<artifacts::ArtifactError>(archive));
+        CHECK(std::get<artifacts::ArtifactError>(archive).path=="sweep.cases[0].query.outcome");
+    }
+}
+
 TEST_CASE("finite sweep budgets reserve retained coarse and query results before admission") {
     const auto prepared = prepare_strategy();
     auto item = sweep_case("scenario-a","config-a",prepared);
