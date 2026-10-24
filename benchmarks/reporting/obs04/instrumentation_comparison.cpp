@@ -975,6 +975,8 @@ void profile_calls(const application::PreparedComparison& prepared, std::size_t 
 
 int main(int argc, char** argv) {
     try {
+        if (std::string_view{OBS04_BUILD_CONFIGURATION} != "Release")
+            throw std::runtime_error("OBS-04 comparison driver must be built with the Release configuration");
         std::optional<std::size_t> profile_strategy;
         std::size_t profile_calls_count = 0;
         std::optional<std::filesystem::path> requested_record_path;

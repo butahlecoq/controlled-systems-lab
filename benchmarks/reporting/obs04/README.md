@@ -75,7 +75,7 @@ Build a clean Release source checkout and use a separate build directory:
 ```sh
 cmake -S benchmarks/reporting/obs04 -B build/obs04 \
   -DCSL_SOURCE_ROOT="$PWD" -DCMAKE_BUILD_TYPE=Release
-cmake --build build/obs04 --parallel
+cmake --build build/obs04 --config Release --parallel
 (cd build/obs04 && ./csl_obs04_instrumentation_comparison)
 ```
 

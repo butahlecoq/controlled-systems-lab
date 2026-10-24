@@ -14,6 +14,39 @@ endif()
 
 add_executable(csl_obs04_instrumentation_comparison instrumentation_comparison.cpp)
 find_package(Git REQUIRED)
+execute_process(COMMAND "${GIT_EXECUTABLE}" rev-parse --git-path HEAD
+  WORKING_DIRECTORY "${CSL_SOURCE_ROOT}"
+  OUTPUT_VARIABLE OBS04_GIT_HEAD_PATH OUTPUT_STRIP_TRAILING_WHITESPACE
+  COMMAND_ERROR_IS_FATAL ANY)
+get_filename_component(OBS04_GIT_HEAD_PATH "${OBS04_GIT_HEAD_PATH}" ABSOLUTE
+  BASE_DIR "${CSL_SOURCE_ROOT}")
+if(EXISTS "${OBS04_GIT_HEAD_PATH}")
+  set_property(DIRECTORY APPEND PROPERTY CMAKE_CONFIGURE_DEPENDS "${OBS04_GIT_HEAD_PATH}")
+endif()
+execute_process(COMMAND "${GIT_EXECUTABLE}" symbolic-ref -q HEAD
+  WORKING_DIRECTORY "${CSL_SOURCE_ROOT}"
+  OUTPUT_VARIABLE OBS04_GIT_HEAD_REF OUTPUT_STRIP_TRAILING_WHITESPACE
+  RESULT_VARIABLE OBS04_GIT_HEAD_REF_RESULT)
+execute_process(COMMAND "${GIT_EXECUTABLE}" rev-parse --git-path packed-refs
+  WORKING_DIRECTORY "${CSL_SOURCE_ROOT}"
+  OUTPUT_VARIABLE OBS04_PACKED_REFS_PATH OUTPUT_STRIP_TRAILING_WHITESPACE
+  COMMAND_ERROR_IS_FATAL ANY)
+get_filename_component(OBS04_PACKED_REFS_PATH "${OBS04_PACKED_REFS_PATH}" ABSOLUTE
+  BASE_DIR "${CSL_SOURCE_ROOT}")
+if(EXISTS "${OBS04_PACKED_REFS_PATH}")
+  set_property(DIRECTORY APPEND PROPERTY CMAKE_CONFIGURE_DEPENDS "${OBS04_PACKED_REFS_PATH}")
+endif()
+if(OBS04_GIT_HEAD_REF_RESULT EQUAL 0 AND NOT OBS04_GIT_HEAD_REF STREQUAL "")
+  execute_process(COMMAND "${GIT_EXECUTABLE}" rev-parse --git-path "${OBS04_GIT_HEAD_REF}"
+    WORKING_DIRECTORY "${CSL_SOURCE_ROOT}"
+    OUTPUT_VARIABLE OBS04_BRANCH_REF_PATH OUTPUT_STRIP_TRAILING_WHITESPACE
+    COMMAND_ERROR_IS_FATAL ANY)
+  get_filename_component(OBS04_BRANCH_REF_PATH "${OBS04_BRANCH_REF_PATH}" ABSOLUTE
+    BASE_DIR "${CSL_SOURCE_ROOT}")
+  if(EXISTS "${OBS04_BRANCH_REF_PATH}")
+    set_property(DIRECTORY APPEND PROPERTY CMAKE_CONFIGURE_DEPENDS "${OBS04_BRANCH_REF_PATH}")
+  endif()
+endif()
 execute_process(COMMAND "${GIT_EXECUTABLE}" rev-parse HEAD
   WORKING_DIRECTORY "${CSL_SOURCE_ROOT}"
   OUTPUT_VARIABLE OBS04_SOURCE_REVISION OUTPUT_STRIP_TRAILING_WHITESPACE
@@ -117,7 +150,9 @@ target_link_libraries(csl_obs04_instrumentation_comparison PRIVATE
   CSL::application CSL::strategy_a CSL::strategy_b CSL::polyhedral CSL::affine_sum
   CSL::qhull_conversion CSL::highs_lp CSL::highs_convex CSL::witness_selector)
 target_compile_features(csl_obs04_instrumentation_comparison PRIVATE cxx_std_20)
-target_compile_definitions(csl_obs04_instrumentation_comparison PRIVATE $<$<CONFIG:Release>:NDEBUG>)
+target_compile_definitions(csl_obs04_instrumentation_comparison PRIVATE
+  $<$<CONFIG:Release>:NDEBUG>
+  OBS04_BUILD_CONFIGURATION=\"$<CONFIG>\")
 if(MSVC)
   target_compile_options(csl_obs04_instrumentation_comparison PRIVATE /W4 /WX /permissive-)
 else()
