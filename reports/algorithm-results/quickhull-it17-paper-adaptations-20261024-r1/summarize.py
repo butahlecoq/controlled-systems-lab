@@ -84,18 +84,27 @@ def render_geometry(path: Path) -> None:
             panels.append(f'<text x="{x}" y="{y0+18}" text-anchor="middle" class="tick">{tick}</text>')
             panels.append(f'<text x="{x0-10}" y="{y+4}" text-anchor="end" class="tick">{tick}</text>')
         panels.append(f'<polyline points="{hull}" class="hull"/>')
+        seen = set()
         for point_index, (x, y) in enumerate(points):
             px, py = x0+x*scale, y0-y*scale
-            is_corner = (x,y) in corners
-            klass = "corner" if is_corner else "redundant"
-            panels.append(f'<circle cx="{px}" cy="{py}" r="{6 if is_corner else 4.5}" class="{klass}"/>')
-            panels.append(f'<title>input point {point_index}: ({x}, {y})</title>')
+            if (x, y) in seen:
+                marker = f'<circle cx="{px}" cy="{py}" r="9" class="duplicate"/>'
+                category = "duplicate point"
+            elif (x, y) in corners:
+                marker, category = f'<circle cx="{px}" cy="{py}" r="6" class="corner"/>', "hull vertex"
+            elif x in {0, 2} or y in {0, 2}:
+                marker, category = f'<circle cx="{px}" cy="{py}" r="5" class="edge"/>', "edge point"
+            else:
+                marker, category = f'<circle cx="{px}" cy="{py}" r="5" class="interior"/>', "interior point"
+            panels.append(f'<g><title>input point {point_index}: ({x}, {y}), {category}</title>{marker}</g>')
+            seen.add((x, y))
         panels.append('</g>')
     svg = f'''<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {width} {height}" role="img" aria-labelledby="title desc">
-<title id="title">Three exact square hull fixtures</title><desc id="desc">Each panel plots its actual input points within the square from zero to two. The purple outline marks the four expected extreme corners. Teal points are redundant interior or edge points.</desc>
-<style>text{{font-family:system-ui,sans-serif;fill:#192336}}.title{{font-size:15px;font-weight:700}}.tick{{font-size:11px;fill:#586579}}.grid{{stroke:#d9e0e8;stroke-width:1}}.hull{{fill:#7869c4;fill-opacity:.08;stroke:#5848a8;stroke-width:2.5}}.corner{{fill:#5848a8;stroke:white;stroke-width:1.5}}.redundant{{fill:#1a9b8a;stroke:white;stroke-width:1.2}}</style>
+<title id="title">Three exact square hull fixtures</title><desc id="desc">Each panel plots original input point IDs in the square from zero to two. Symbols distinguish expected hull vertices, edge points, interior points, and duplicates.</desc>
+<style>text{{font-family:system-ui,sans-serif;fill:#192336}}.title{{font-size:15px;font-weight:700}}.tick{{font-size:11px;fill:#586579}}.grid{{stroke:#d9e0e8;stroke-width:1}}.hull{{fill:#7869c4;fill-opacity:.08;stroke:#5848a8;stroke-width:2.5}}.corner{{fill:#5848a8;stroke:white;stroke-width:1.5}}.edge{{fill:#e18a2d;stroke:white;stroke-width:1.2}}.interior{{fill:#1a9b8a;stroke:white;stroke-width:1.2}}.duplicate{{fill:none;stroke:#d13c4b;stroke-width:2.5}}</style>
+<rect width="100%" height="100%" fill="white"/>
 {''.join(panels)}
-<g transform="translate(74 292)"><circle cx="0" cy="0" r="5" class="corner"/><text x="10" y="4" class="tick">expected extreme corner</text><circle cx="190" cy="0" r="4.5" class="redundant"/><text x="200" y="4" class="tick">redundant input point</text></g></svg>'''
+<g transform="translate(22 292)"><circle cx="0" cy="0" r="5" class="corner"/><text x="9" y="4" class="tick">hull vertex</text><circle cx="112" cy="0" r="5" class="edge"/><text x="121" y="4" class="tick">edge</text><circle cx="185" cy="0" r="5" class="interior"/><text x="194" y="4" class="tick">interior</text><circle cx="278" cy="0" r="8" class="duplicate"/><text x="289" y="4" class="tick">duplicate</text></g></svg>'''
     path.write_text(svg + "\n")
 
 
@@ -122,7 +131,7 @@ code{{overflow-wrap:anywhere}}.links{{display:flex;gap:1rem;flex-wrap:wrap}}
 <h1>QuickHull and ITIS17-related LP hull pilot</h1>
 <p><strong>Preliminary exploratory result · source commit <code>{escape(source_commit)}</code></strong></p>
 <div class="status"><strong>Performance conclusion: inconclusive.</strong> This run used three tiny 2D square clouds. It has no source-mapped limiter profile or representative end-to-end workload, so the measurements do not support a speed ranking or scalability claim.</div>
-<h2>Fixture geometry</h2><figure><img src="fixture-geometry.svg" alt="Three panels showing the permuted, degenerate, and interior-basis point clouds and their shared square hull"><figcaption>The purple outline marks the four expected extreme corners. Teal marks redundant input points. Exact dyadic coordinates make these fixture hull checks direct.</figcaption></figure>
+<h2>Fixture geometry</h2><figure><img src="fixture-geometry.svg" alt="Three panels showing original point IDs, with distinct symbols for hull vertices, edge points, interior points, and duplicates"><figcaption>Point IDs appear in each point's SVG title. Color and symbol distinguish hull vertices, edge points, interior points, and duplicates. Exact dyadic coordinates make these fixture hull checks direct.</figcaption></figure>
 <h2>Algorithms and timing scope</h2>
 <p>QuickHull is compared with five LP reducer variants. The related OPT-06 basis-reuse and OPT-07 ordered reducers retain their original identities. The new A43 safe adaptation wraps certificate-safe basis reuse with a mandatory full recheck; it does not implement the paper's per-candidate artificial-basis sequence or largest-norm tie rule. The A44 adaptation performs farthest-first incremental LP membership using normalized Chebyshev distance, then a mandatory full LP recheck. A44's paper ordering prose is ambiguous, and this report records the farthest-first interpretation. Neither is a Pascal reproduction. Timing covers each public reducer call; LP workspace creation and output validation are outside the interval. Each row below summarizes seven interleaved measured calls per fixture and method. Values are nanoseconds; raw trials and warmups remain in the linked JSONL.</p>
 <table><thead><tr><th>Fixture</th><th>Method</th><th>Trials</th><th>Median (ns)</th><th>Range (ns)</th></tr></thead><tbody>{table}</tbody></table>

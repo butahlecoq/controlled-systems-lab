@@ -19,31 +19,31 @@ using namespace csl;
 namespace {
 
 enum class Method { quickhull, lp_baseline, basis_reuse, ordered_lp, a43_safe, a44_incremental };
-constexpr std::array<Method, 6> methods{Method::quickhull, Method::lp_baseline,
-    Method::basis_reuse, Method::ordered_lp, Method::a43_safe, Method::a44_incremental};
+struct MethodInfo {
+    Method method;
+    const char* name;
+    const char* identity;
+};
 
-const char* name(Method method) {
-    switch (method) {
-    case Method::quickhull: return "geometric-quickhull";
-    case Method::lp_baseline: return "lp-membership-baseline";
-    case Method::basis_reuse: return "basis-reuse-related-to-A43";
-    case Method::ordered_lp: return "ordered-membership-related-to-A44";
-    case Method::a43_safe: return "A43-certificate-safe-basis-adaptation";
-    case Method::a44_incremental: return "A44-incremental-LP-paper-adaptation";
-    }
-    return "invalid";
-}
+constexpr std::array<MethodInfo, 6> method_info{{
+    {Method::quickhull, "geometric-quickhull", "csl.geometry.quickhull-2d"},
+    {Method::lp_baseline, "lp-membership-baseline", "csl.hull.lp-membership"},
+    {Method::basis_reuse, "basis-reuse-related-to-A43", "csl.hull.phase-one-basis-bulk"},
+    {Method::ordered_lp, "ordered-membership-related-to-A44", "csl.hull.ordered-membership"},
+    {Method::a43_safe, "A43-certificate-safe-basis-adaptation",
+        "csl.hull.itis17.a43-certified-basis-reuse"},
+    {Method::a44_incremental, "A44-incremental-LP-paper-adaptation",
+        "csl.hull.itis17.a44-incremental-lp"},
+}};
+constexpr std::array<Method, method_info.size()> methods{
+    Method::quickhull, Method::lp_baseline, Method::basis_reuse,
+    Method::ordered_lp, Method::a43_safe, Method::a44_incremental};
 
-const char* identity(Method method) {
-    switch (method) {
-    case Method::quickhull: return "csl.geometry.quickhull-2d";
-    case Method::lp_baseline: return "csl.hull.lp-membership";
-    case Method::basis_reuse: return "csl.hull.phase-one-basis-bulk";
-    case Method::ordered_lp: return "csl.hull.ordered-membership";
-    case Method::a43_safe: return "csl.hull.itis17.a43-certified-basis-reuse";
-    case Method::a44_incremental: return "csl.hull.itis17.a44-incremental-lp";
-    }
-    return "invalid";
+const MethodInfo& info(Method method) {
+    const auto found = std::find_if(method_info.begin(), method_info.end(),
+        [method](const MethodInfo& entry) { return entry.method == method; });
+    if (found == method_info.end()) throw std::invalid_argument("unknown hull method");
+    return *found;
 }
 
 struct Fixture {
@@ -174,7 +174,7 @@ Outcome run(const Fixture& fixture, Method method) {
     const auto& reduction = std::get<geometry::HullReduction>(result);
     outcome.passed = valid_reduction(fixture, reduction);
     if (!outcome.passed) {
-        std::cerr << "validation failure method=" << name(method)
+        std::cerr << "validation failure method=" << info(method).name
                   << " status=" << static_cast<int>(reduction.status)
                   << " retained=" << reduction.retained.size()
                   << " removed=" << reduction.removed.size()
@@ -212,8 +212,8 @@ void print(const Fixture& fixture, Method method, bool warmup, int round,
     std::cout << "{\"schema\":\"csl.it17-hull-paper-adaptation-row/1\",\"source_commit\":\""
               << CSL_SOURCE_COMMIT << "\",\"fixture\":\"" << fixture.id
               << "\",\"input_sha256\":\"" << problem::hex(std::get<geometry::HullInputDigest>(digest))
-              << "\",\"method\":\"" << name(method) << "\",\"method_identity\":\""
-              << identity(method) << "\",\"method_version\":\"1.0.0\",\"lp_provider\":\"HiGHS/1.11.0\",\"warmup\":"
+              << "\",\"method\":\"" << info(method).name << "\",\"method_identity\":\""
+              << info(method).identity << "\",\"method_version\":\"1.0.0\",\"lp_provider\":\"HiGHS/1.11.0\",\"warmup\":"
               << (warmup ? "true" : "false") << ",\"round\":" << round
               << ",\"elapsed_ns\":" << outcome.elapsed_ns << ",\"passed\":"
               << (outcome.passed ? "true" : "false") << ",\"input_points\":"

@@ -320,11 +320,7 @@ target_link_libraries(csl_it17_hull_comparison_report PRIVATE
 target_compile_features(csl_it17_hull_comparison_report PRIVATE cxx_std_20)
 target_compile_definitions(csl_it17_hull_comparison_report PRIVATE
   $<$<CONFIG:Release>:NDEBUG> CSL_SOURCE_COMMIT="${IT17_HULL_SOURCE_COMMIT}")
-if(MSVC)
-  target_compile_options(csl_it17_hull_comparison_report PRIVATE /W4 /WX /permissive-)
-else()
-  target_compile_options(csl_it17_hull_comparison_report PRIVATE -Wall -Wextra -Wpedantic -Werror)
-endif()
+csl_strict_warnings(csl_it17_hull_comparison_report)
 endif()
 
 if(CSL_BUILD_GEO07_PORT_REPORT)
