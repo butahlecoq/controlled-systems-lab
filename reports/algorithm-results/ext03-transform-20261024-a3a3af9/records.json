@@ -5,10 +5,15 @@
     "cmake": "3.31.6",
     "compiler": "GCC 16.2.1",
     "harness_sha256": "9936328c8f0c285d93e691f5f9d4200f0d411b922bafc48457f5b924d6f32e13",
-    "load_average_before": [
+    "load_average_after": [
       "0.20",
       "0.53",
       "1.00"
+    ],
+    "load_average_before": [
+      "0.20",
+      "0.64",
+      "1.07"
     ],
     "logical_cores": 8,
     "machine": "x86_64",
