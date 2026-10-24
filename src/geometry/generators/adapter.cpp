@@ -77,8 +77,8 @@ std::optional<std::uint64_t> operation_input_size(const OperationRequest& reques
     const SetHandle* right=nullptr;
     if(const auto* sum=std::get_if<MinkowskiSum>(&request.operation)) {
         left=&sum->left;right=&sum->right;
-    } else if(const auto* sum=std::get_if<DependentSum>(&request.operation)) {
-        left=&sum->left;right=&sum->right;
+    } else if(const auto* dependent=std::get_if<DependentSum>(&request.operation)) {
+        left=&dependent->left;right=&dependent->right;
     } else return std::nullopt;
     const auto a=count(*left),b=count(*right);
     if(!a||!b||*b>std::numeric_limits<std::uint64_t>::max()-*a)return std::nullopt;
