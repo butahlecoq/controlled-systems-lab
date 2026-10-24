@@ -26,6 +26,7 @@ struct Slot {
     bool failed{},wall_regressed{},cpu_regressed{},cpu_thread_changed{};
     std::optional<ar::NotCalledReason> not_called;
     std::shared_ptr<const GeometryEvidence> relation_evidence;
+    std::optional<SetRelation> applied_relation;
 };
 class SteadyClock final:public TimingClock {
     std::chrono::steady_clock::time_point origin_=std::chrono::steady_clock::now();
@@ -119,11 +120,13 @@ struct TimingScope::Owner {
     bool cpu_applies(std::size_t index) const noexcept{return cpu&&(cpu->metric==ar::ClockMetric::thread_cpu||index==run);}
     void close(std::size_t index,Termination termination,bool failed,
             std::optional<ar::NotCalledReason> not_called={},
-            std::shared_ptr<const GeometryEvidence> relation_evidence={}) noexcept {
+            std::shared_ptr<const GeometryEvidence> relation_evidence={},
+            std::optional<SetRelation> applied_relation={}) noexcept {
         std::lock_guard lock{mutex};auto& slot=slots[index];
         slot.end=wall(index);slot.termination=termination;slot.failed=failed;
         slot.not_called=not_called;
         slot.relation_evidence=std::move(relation_evidence);
+        slot.applied_relation=applied_relation;
         if(cpu_applies(index)){
             if(cpu->metric==ar::ClockMetric::thread_cpu&&slot.thread!=std::this_thread::get_id()){
                 slot.cpu_thread_changed=true;slot.cpu_end=missing(ar::MissingReason::clock_mismatch);
@@ -154,6 +157,12 @@ void TimingScope::close(Termination termination,
         std::shared_ptr<const GeometryEvidence> relation_evidence) noexcept {
     if(auto owner=std::exchange(owner_,{}))
         owner->close(slot_,termination,false,{},std::move(relation_evidence));
+}
+void TimingScope::close(Termination termination,
+        std::shared_ptr<const GeometryEvidence> relation_evidence,
+        std::optional<SetRelation> applied_relation) noexcept {
+    if(auto owner=std::exchange(owner_,{}))
+        owner->close(slot_,termination,false,{},std::move(relation_evidence),applied_relation);
 }
 void TimingScope::close_not_called(ar::NotCalledReason reason,Termination termination) noexcept {
     if(auto owner=std::exchange(owner_,{}))owner->close(slot_,termination,false,reason);
@@ -239,7 +248,7 @@ CollectionResult<TimingReport> TimingCollector::snapshot() const {
                 slot.not_called?ObservationState::not_called:slot.failed?ObservationState::unknown:ObservationState::returned,
                 slot.not_called.value_or(ar::NotCalledReason::task_not_admitted),
                 !slot.failed,slot.termination,{false,0,ar::MissingReason::not_instrumented},{},
-                CompletionStatus::returned,false,MathematicalOutcome::undetermined,slot.relation_evidence};
+                CompletionStatus::returned,false,MathematicalOutcome::undetermined,slot.relation_evidence,slot.applied_relation};
             completion.status=slot.not_called?CompletionStatus::rejected:
                 slot.failed?CompletionStatus::failed:CompletionStatus::returned;
             shards[static_cast<std::size_t>(spans[i].shard)].record(completion);

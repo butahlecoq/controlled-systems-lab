@@ -650,6 +650,8 @@ TEST_CASE("registered approximation times only its selected provider call") {
     CHECK(std::holds_alternative<SymbolicArgument>(rejected_span.descriptor.relation_evidence->support));
     CHECK(std::get<SymbolicArgument>(rejected_span.descriptor.relation_evidence->support).reference==
         "invalid relation proof");
+    REQUIRE(rejected_span.descriptor.applied_relation);
+    CHECK(*rejected_span.descriptor.applied_relation==SetRelation::inner);
 }
 
 TEST_CASE("rejected approximation records a no-call observation without creating a workspace") {

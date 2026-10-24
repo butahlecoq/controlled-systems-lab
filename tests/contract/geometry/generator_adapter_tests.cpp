@@ -36,7 +36,10 @@ template<class T> T artifact(artifacts::ArtifactResult<T> value) {
 }
 std::shared_ptr<execution::observability::TimingCollector> generator_timer(
         const problem::ResolvedProblem& problem,std::string task,std::string operation,
-        artifacts::ModuleIdentity module) {
+        artifacts::ModuleIdentity module,
+        std::optional<RepresentationId> input_representation={},
+        std::optional<RepresentationId> output_representation={},
+        std::optional<SetRelation> relation={}) {
     namespace ar=artifacts;
     namespace ob=execution::observability;
     const ar::Unavailable missing{ar::MissingReason::not_instrumented,{}};
@@ -60,6 +63,9 @@ std::shared_ptr<execution::observability::TimingCollector> generator_timer(
     ar::SpanDescriptor span{};span.id={1};span.parent=ar::SpanParent{{0},ar::ParentKind::nested};
     span.task=std::move(task);span.operation=std::move(operation);span.module=module;span.clock={"wall"};
     span.requested_assurance=Assurance::numerical;span.applied_assurance=ar::Available<Assurance>{Assurance::numerical};
+    if(input_representation)span.input_representation=std::make_shared<const RepresentationId>(*input_representation);
+    if(output_representation)span.output_representation=std::make_shared<const RepresentationId>(*output_representation);
+    span.relation=relation;
     span.observation_source="src/geometry/generators/adapter.cpp";input.spans={std::move(root),std::move(span)};
     const auto plan=artifact(ob::make_collection_plan(std::move(input)));
     return artifact(ob::make_timing_collector(plan,std::make_shared<GeneratorTimingClock>(),{0},{}));
@@ -197,7 +203,8 @@ TEST_CASE("generator V conversion records its registered module span") {
     const auto resolved=std::get<problem::ResolvedProblem>(std::move(resolved_result));
     const ar::Unavailable missing{ar::MissingReason::not_instrumented,{}};
     const ar::ModuleIdentity implementation{{"csl.geometry.generators.v-conversion"},"1.0.0",missing};
-    auto timer=generator_timer(resolved,"observed-v-conversion","geometry.generators.v-conversion",implementation);
+    auto timer=generator_timer(resolved,"observed-v-conversion","geometry.generators.v-conversion",implementation,
+        RepresentationId{"csl.zonotope"},RepresentationId{"csl.polyhedron.v"},SetRelation::equivalent);
     ExecutionContext context;context.run_id="generator-test-run";context.numerical={1e-8,1e-8};context.timing=timer;
     auto root=artifact(timer->start({0},context));
 
@@ -221,6 +228,12 @@ TEST_CASE("generator V conversion records its registered module span") {
     const auto& descriptor=report.observations.description().spans[1].descriptor;
     CHECK(descriptor.task=="observed-v-conversion");CHECK(descriptor.operation=="geometry.generators.v-conversion");
     CHECK(descriptor.module.id==implementation.id);
+    REQUIRE(descriptor.input_representation);CHECK(*descriptor.input_representation==RepresentationId{"csl.zonotope"});
+    REQUIRE(descriptor.output_representation);CHECK(*descriptor.output_representation==RepresentationId{"csl.polyhedron.v"});
+    CHECK(descriptor.relation==SetRelation::equivalent);
+    REQUIRE(descriptor.applied_relation);CHECK(*descriptor.applied_relation==SetRelation::equivalent);
+    REQUIRE(descriptor.relation_evidence);
+    CHECK(descriptor.relation_evidence->reference.inputs==std::vector<SetId>{input.as_handle().id});
     REQUIRE(std::holds_alternative<ar::ReturnedSpan>(report.observations.description().spans[1].status));
     CHECK(std::get<ar::ReturnedSpan>(report.observations.description().spans[1].status).termination==Termination::completed);
 }

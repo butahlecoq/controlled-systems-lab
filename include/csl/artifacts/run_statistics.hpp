@@ -107,6 +107,7 @@ struct SpanDescriptor {
     std::shared_ptr<const GeometryEvidence> relation_evidence;
     std::shared_ptr<const RepresentationSummary> input_summary,output_summary;
     std::string observation_source;
+    std::optional<SetRelation> applied_relation;
 };
 struct IncompleteSpan {};
 struct ReturnedSpan { Termination termination; Metric<MathematicalOutcome> outcome; };

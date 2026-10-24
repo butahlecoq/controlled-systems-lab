@@ -35,6 +35,7 @@ struct SpanCompletionView {
     CompletionStatus status{CompletionStatus::returned};
     bool has_outcome{false};MathematicalOutcome outcome{MathematicalOutcome::undetermined};
     std::shared_ptr<const GeometryEvidence> relation_evidence;
+    std::optional<SetRelation> applied_relation;
 };
 enum class RecordDisposition { retained, detail_dropped, detail_rejected, duplicate, wrong_shard, unknown_span };
 class ObservationShard {

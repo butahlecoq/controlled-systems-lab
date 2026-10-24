@@ -40,7 +40,7 @@ public:
         if(scope_){
             auto evidence=geometry_evidence(result);
             scope_->close(std::invoke(std::forward<TerminationOf>(termination_of),std::as_const(result)),
-                std::move(evidence));
+                std::move(evidence),applied_relation(result));
             scope_.reset();
         }
         return result;
@@ -59,6 +59,15 @@ private:
         else if constexpr(requires{std::visit([](const auto& value){return copy_evidence(value);},result);}) {
             try{return std::visit([](const auto& value){return copy_evidence(value);},result);}catch(...){return {};}
         } else return {};
+    }
+    template<class Result> static std::optional<SetRelation> applied_relation(const Result& result) noexcept {
+        if constexpr(requires{result.applied_relation;}) return result.applied_relation;
+        else if constexpr(requires{result.relation;}) return result.relation;
+        else if constexpr(requires{result.result.relation;}) return result.result.relation;
+        else if constexpr(requires{std::visit([](const auto& value){return applied_relation(value);},result);}) {
+            try{return std::visit([](const auto& value){return applied_relation(value);},result);}catch(...){return {};}
+        }
+        else return {};
     }
 };
 

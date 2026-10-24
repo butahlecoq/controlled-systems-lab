@@ -338,6 +338,7 @@ registry::Rejection reject(const registry::Method& method,const char* field,cons
 struct ApproximationExecution {
     RunOutcome outcome;
     std::shared_ptr<const GeometryEvidence> relation_evidence;
+    std::optional<SetRelation> applied_relation;
 };
 Termination approximation_execution_termination(const ApproximationExecution& execution) noexcept {
     return approximation_termination(execution.outcome);
@@ -374,15 +375,15 @@ RunOutcome run_registered(const registry::Registry<registry::ApproximationPort>&
     auto execution=ob::run_instrumented_operation(context,approximation_identity(request,provenance),
         [&]() -> ApproximationExecution {
             auto outcome=std::get<0>(workspace)->run(context);
-            if(const auto* stopped=std::get_if<OperationStopped>(&outcome))return {*stopped,{}};
-            if(const auto* unsupported=std::get_if<Unsupported>(&outcome))return {*unsupported,{}};
+            if(const auto* stopped=std::get_if<OperationStopped>(&outcome))return {*stopped,{}, {}};
+            if(const auto* unsupported=std::get_if<Unsupported>(&outcome))return {*unsupported,{}, {}};
             auto result=std::get<OperationResult>(std::move(outcome));
             const auto snapshot_evidence=[](const GeometryEvidence& evidence) {
                 try{return std::make_shared<const GeometryEvidence>(evidence);}
                 catch(...){return std::shared_ptr<const GeometryEvidence>{};}
             };
             const auto retain=[&](RunOutcome final) {
-                return ApproximationExecution{std::move(final),snapshot_evidence(result.evidence)};
+                return ApproximationExecution{std::move(final),snapshot_evidence(result.evidence),result.relation};
             };
             if(result.relation!=request.direction)
                 return retain(Unsupported{error(DiagnosticCode::evidence_mismatch,"approximation.relation",
@@ -402,7 +403,7 @@ RunOutcome run_registered(const registry::Registry<registry::ApproximationPort>&
                     "Native output exceeds the requested primitive budget, or output size is unavailable.")});
             if(request.direction==SetRelation::heuristic) {
                 auto evidence=snapshot_evidence(result.evidence);
-                return {HeuristicApproximation{std::move(result)},std::move(evidence)};
+                return {HeuristicApproximation{std::move(result)},std::move(evidence),result.relation};
             }
             bool interrupted=false;
             const auto basis=structural_basis(request,result,context,interrupted);
@@ -414,7 +415,7 @@ RunOutcome run_registered(const registry::Registry<registry::ApproximationPort>&
                 result.evidence.support=SymbolicArgument{"CSL native structural set-inclusion check",
                     "Same immutable set, empty subset, universal superset, exact H constraint retention, exact binary64 H containment of native points and recession rays, exact stored-binary64 generator axis cover, or exact V vertex bounds within a directional ellipsoid over the same ambient coordinates."};
                 auto evidence=snapshot_evidence(result.evidence);
-                return {EnclosedApproximation{std::move(result),*basis},std::move(evidence)};
+                return {EnclosedApproximation{std::move(result),*basis},std::move(evidence),result.relation};
             }
             return retain(Unsupported{error(DiagnosticCode::unsupported,"approximation.inclusion",
                 "Requested enclosure has no independently checkable inclusion evidence.")});

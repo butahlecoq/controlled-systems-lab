@@ -84,8 +84,12 @@ provider workspace's `run` entry; preparation remains outside the measured
 interval. A pre-entry stop or capability rejection closes the planned span as
 not called with its typed reason. Instrumentation lookup failures never change
 the provider call or its mathematical result. The serializer already supports
-not-called observations, so these API additions do not change the artifact
-schema.
+not-called observations. Returned provider relation evidence and the applied
+relation are retained separately from the descriptor's requested relation in
+the in-memory observation view. Appending the applied-relation field preserves
+source compatibility for default-initialized descriptors; no stable binary ABI
+is promised. The portable OBS-01 serializer continues to persist timing and
+terminal status only, so this in-memory field does not change its schema.
 
 `TimingClock` is the injection port. Read methods are `noexcept`; the collector
 serializes reads within one collector so deterministic test clocks need no locking.

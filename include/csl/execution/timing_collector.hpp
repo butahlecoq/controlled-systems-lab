@@ -41,6 +41,7 @@ public:
     // Explicit termination wins over automatic stop classification. Repeated close is inert.
     void close(Termination) noexcept;
     void close(Termination,std::shared_ptr<const GeometryEvidence>) noexcept;
+    void close(Termination,std::shared_ptr<const GeometryEvidence>,std::optional<SetRelation>) noexcept;
     void close_not_called(artifacts::NotCalledReason,
         Termination=Termination::operation_rejected) noexcept;
     void close() noexcept;
