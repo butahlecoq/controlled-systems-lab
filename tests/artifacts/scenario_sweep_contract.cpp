@@ -40,7 +40,7 @@ SweepCaseInput one_case() {
 }
 
 SweepPhaseResources resources() {
-    SweepPhaseResources result{{4, 2, 2, 1024}, 2, 2, {}, 512, 0, {},
+    SweepPhaseResources result{{4, 2, 2, 1024}, 2, 2, {}, 512, 0, 1024, {},
         SweepMemorySupport::active_and_retained_reservations, "executor reservations"};
     return result;
 }

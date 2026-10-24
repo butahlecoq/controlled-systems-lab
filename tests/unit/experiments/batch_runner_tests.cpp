@@ -385,13 +385,17 @@ TEST_CASE("a completed family query sweep records aligned runs and measured phas
     std::vector<experiments::ScenarioSweepCase> cases{
         sweep_case("scenario-a", std::string(configuration), prepared),
         sweep_case("scenario-b", std::string(configuration), prepared)};
+    for (auto& item : cases) {
+        item.resources.workspace_reservation_bytes = 20;
+        item.resources.retained_result_reservation_bytes = 15;
+    }
     cases[1].selection.seed = 20;
-    const ResourcePolicy resources{2,2,1,std::nullopt};
+    const ResourcePolicy resources{2,2,1,100};
     ExecutionContext context;
     context.run_id = "recorded-sweep";
     const auto selector = prepare_selector_provider(true);
-    const execution::ResourceUse query_resources{1,"one selector workspace",std::nullopt,
-        execution::CallStopSupport::cooperative_boundaries};
+    const execution::ResourceUse query_resources{1,"one selector workspace",10,
+        execution::CallStopSupport::cooperative_boundaries,5};
     auto coarse = experiments::run_sweep(cases, resources, context, execution::Mode::bounded_parallel);
     REQUIRE(std::holds_alternative<experiments::SweepResult>(coarse));
     auto queried = experiments::run_family_queries(std::get<experiments::SweepResult>(std::move(coarse)),
@@ -412,10 +416,38 @@ TEST_CASE("a completed family query sweep records aligned runs and measured phas
     CHECK(wire.find("\"executor_worker_threads_started\":2") != std::string::npos);
     CHECK(wire.find("\"executor_worker_threads_started\":1") != std::string::npos);
     CHECK(wire.find("\"backend_threads\":null") != std::string::npos);
-    CHECK(wire.find("\"memory_support\":\"unlimited_accounting\"") != std::string::npos);
+    CHECK(wire.find("\"memory_support\":\"active_and_retained_reservations\"") != std::string::npos);
+    CHECK(wire.find("\"enforced_memory_reservation_budget_bytes\":100") != std::string::npos);
+    CHECK(wire.find("\"retained_result_reservation_bytes\":35") != std::string::npos);
+    CHECK(std::get<experiments::FamilyQueryResult>(queried).sweep.retained_result_reservation_bytes==30);
+    CHECK(std::get<experiments::FamilyQueryResult>(queried).query_result_reservation_bytes==5);
     query_records[1] = recorded;
     const auto mismatched_query = experiments::record_family_query_sweep(sweep_spec(),
         std::get<experiments::FamilyQueryResult>(queried), coarse_records, query_records);
     REQUIRE(std::holds_alternative<artifacts::ArtifactError>(mismatched_query));
     CHECK(std::get<artifacts::ArtifactError>(mismatched_query).path=="sweep.cases[1].query");
+}
+
+TEST_CASE("finite sweep budgets reserve retained coarse and query results before admission") {
+    const auto prepared = prepare_strategy();
+    auto item = sweep_case("scenario-a","config-a",prepared);
+    item.resources.workspace_reservation_bytes = 1;
+    const ResourcePolicy resources{1,1,1,10};
+    ExecutionContext context;
+    context.run_id = "retained-budget";
+    auto missing = experiments::run_sweep(std::span{&item,1},resources,context,execution::Mode::sequential);
+    REQUIRE(std::holds_alternative<Diagnostics>(missing));
+    CHECK(std::get<Diagnostics>(missing).front().field=="sweep.cases[0].retained_result_memory");
+
+    item.resources.retained_result_reservation_bytes = 8;
+    auto coarse = experiments::run_sweep(std::span{&item,1},resources,context,execution::Mode::sequential);
+    REQUIRE(std::holds_alternative<experiments::SweepResult>(coarse));
+    CHECK(std::get<experiments::SweepResult>(coarse).retained_result_reservation_bytes==8);
+    const auto selector = prepare_selector_provider();
+    const execution::ResourceUse query_resources{1,"selector workspace",1,
+        execution::CallStopSupport::cooperative_boundaries,3};
+    auto over_budget = experiments::run_family_queries(std::get<experiments::SweepResult>(std::move(coarse)),
+        selector,resources,context,execution::Mode::sequential,query_resources);
+    REQUIRE(std::holds_alternative<Diagnostics>(over_budget));
+    CHECK(std::get<Diagnostics>(over_budget).front().field=="family_queries.retained_result_memory");
 }

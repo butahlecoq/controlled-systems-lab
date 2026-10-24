@@ -78,13 +78,19 @@ Json resource_json(const SweepPhaseResources& resources) {
     if (memory_support_name(resources.memory_support).empty())
         throw error(ArtifactErrorCode::invalid_input, "resources", "Invalid resource observation");
     if (resources.memory_support == SweepMemorySupport::active_and_retained_reservations &&
-        (!resources.retained_result_reservation_bytes || !resources.peak_workspace_reservation_bytes))
+        (!resources.retained_result_reservation_bytes || !resources.peak_workspace_reservation_bytes ||
+         !resources.enforced_memory_reservation_budget_bytes || !resources.requested.memory_bytes))
         throw error(ArtifactErrorCode::invalid_input, "resources.retained_result_reservation_bytes",
-            "Active and retained accounting requires both reservation values, including zero");
+            "Active and retained accounting requires reservations and an enforced memory limit");
     if (resources.memory_support == SweepMemorySupport::active_workspace_reservations &&
-        !resources.peak_workspace_reservation_bytes)
+        (!resources.peak_workspace_reservation_bytes || !resources.enforced_memory_reservation_budget_bytes ||
+         !resources.requested.memory_bytes))
         throw error(ArtifactErrorCode::invalid_input, "resources.peak_workspace_reservation_bytes",
-            "Workspace accounting requires a reservation value, including zero");
+            "Workspace accounting requires a reservation and an enforced memory limit");
+    if (resources.enforced_memory_reservation_budget_bytes && (!resources.requested.memory_bytes ||
+        *resources.enforced_memory_reservation_budget_bytes > *resources.requested.memory_bytes))
+        throw error(ArtifactErrorCode::invalid_input, "resources.enforced_memory_reservation_budget_bytes",
+            "Enforced reservation budget must be present in and no larger than the requested policy");
     if ((resources.memory_support == SweepMemorySupport::process_observation ||
          resources.memory_support == SweepMemorySupport::operating_system_limit) &&
         resources.memory_observation_scope.empty())
@@ -107,16 +113,18 @@ Json resource_json(const SweepPhaseResources& resources) {
         {"backend_threads", optional_json(resources.backend_threads)},
         {"peak_workspace_reservation_bytes", optional_json(resources.peak_workspace_reservation_bytes)},
         {"retained_result_reservation_bytes", optional_json(resources.retained_result_reservation_bytes)},
+        {"enforced_memory_reservation_budget_bytes", optional_json(resources.enforced_memory_reservation_budget_bytes)},
         {"observed_process_memory_bytes", optional_json(resources.observed_process_memory_bytes)},
         {"memory_support", memory_support_name(resources.memory_support)},
         {"memory_observation_scope", resources.memory_observation_scope}};
 }
 
 SweepPhaseResources parse_resources(const Json& value) {
-    if (!value.is_object() || value.size() != 9 || !value.contains("requested") ||
+    if (!value.is_object() || value.size() != 10 || !value.contains("requested") ||
         !value.contains("executor_worker_threads_started") || !value.contains("peak_active_tasks") ||
         !value.contains("backend_threads") || !value.contains("peak_workspace_reservation_bytes") ||
-        !value.contains("retained_result_reservation_bytes") || !value.contains("observed_process_memory_bytes") ||
+        !value.contains("retained_result_reservation_bytes") || !value.contains("enforced_memory_reservation_budget_bytes") ||
+        !value.contains("observed_process_memory_bytes") ||
         !value.contains("memory_support") || !value.contains("memory_observation_scope"))
         throw error(ArtifactErrorCode::invalid_input, "resources", "Resource fields do not match sweep schema");
     const auto& requested = value.at("requested");
@@ -128,7 +136,7 @@ SweepPhaseResources parse_resources(const Json& value) {
         requested.at("threads_per_worker").get<std::size_t>(),
         requested.at("memory_bytes").is_null() ? std::nullopt :
             std::optional<std::size_t>{requested.at("memory_bytes").get<std::size_t>()},
-        }, {}, {}, {}, {}, {}, {}, SweepMemorySupport::unlimited_accounting, {}};
+        }, {}, {}, {}, {}, {}, {}, {}, SweepMemorySupport::unlimited_accounting, {}};
     const auto optional_count = [](const Json& item) -> std::optional<std::uint64_t> {
         if (item.is_null()) return {};
         return item.get<std::uint64_t>();
@@ -138,6 +146,7 @@ SweepPhaseResources parse_resources(const Json& value) {
     result.backend_threads = optional_count(value.at("backend_threads"));
     result.peak_workspace_reservation_bytes = optional_count(value.at("peak_workspace_reservation_bytes"));
     result.retained_result_reservation_bytes = optional_count(value.at("retained_result_reservation_bytes"));
+    result.enforced_memory_reservation_budget_bytes = optional_count(value.at("enforced_memory_reservation_budget_bytes"));
     result.observed_process_memory_bytes = optional_count(value.at("observed_process_memory_bytes"));
     result.memory_support = parse_memory_support(value.at("memory_support").get<std::string>());
     result.memory_observation_scope = value.at("memory_observation_scope").get<std::string>();

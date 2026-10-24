@@ -13,6 +13,8 @@ struct ResourceUse {
     std::string thread_assumptions;
     std::optional<std::size_t> workspace_reservation_bytes;
     CallStopSupport call_stop_support;
+    // Admission credit for output kept after a task finishes; caller estimate, not heap enforcement.
+    std::optional<std::size_t> retained_result_reservation_bytes{};
 };
 struct EnforcementRequest { bool require_native_thread_enforcement{false}, require_hard_memory_limit{false}; };
 struct AdmissionLimit { std::optional<std::size_t> max_admitted_tasks; };

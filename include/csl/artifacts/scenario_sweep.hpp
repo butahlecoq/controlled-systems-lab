@@ -45,6 +45,7 @@ struct SweepPhaseResources {
     std::optional<std::uint64_t> backend_threads;
     std::optional<std::uint64_t> peak_workspace_reservation_bytes;
     std::optional<std::uint64_t> retained_result_reservation_bytes;
+    std::optional<std::uint64_t> enforced_memory_reservation_budget_bytes;
     std::optional<std::uint64_t> observed_process_memory_bytes;
     SweepMemorySupport memory_support{SweepMemorySupport::unlimited_accounting};
     std::string memory_observation_scope;

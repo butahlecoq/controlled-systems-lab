@@ -45,7 +45,7 @@
   "$defs": {
     "resources": {
       "type": "object", "additionalProperties": false,
-      "required": ["requested", "executor_worker_threads_started", "peak_active_tasks", "backend_threads", "peak_workspace_reservation_bytes", "retained_result_reservation_bytes", "observed_process_memory_bytes", "memory_support", "memory_observation_scope"],
+      "required": ["requested", "executor_worker_threads_started", "peak_active_tasks", "backend_threads", "peak_workspace_reservation_bytes", "retained_result_reservation_bytes", "enforced_memory_reservation_budget_bytes", "observed_process_memory_bytes", "memory_support", "memory_observation_scope"],
       "properties": {
         "requested": {"type": "object", "additionalProperties": false, "required": ["total_threads", "outer_workers", "threads_per_worker", "memory_bytes"], "properties": {"total_threads": {"type": "integer", "minimum": 0}, "outer_workers": {"type": "integer", "minimum": 0}, "threads_per_worker": {"type": "integer", "minimum": 0}, "memory_bytes": {"type": ["integer", "null"], "minimum": 0}}},
         "executor_worker_threads_started": {"type": ["integer", "null"], "minimum": 0},
@@ -53,6 +53,7 @@
         "backend_threads": {"type": ["integer", "null"], "minimum": 0},
         "peak_workspace_reservation_bytes": {"type": ["integer", "null"], "minimum": 0},
         "retained_result_reservation_bytes": {"type": ["integer", "null"], "minimum": 0},
+        "enforced_memory_reservation_budget_bytes": {"type": ["integer", "null"], "minimum": 0, "description": "Executor admission budget for workspace and declared retained-result reservations; not a process or operating-system memory cap."},
         "observed_process_memory_bytes": {"type": ["integer", "null"], "minimum": 0},
         "memory_support": {"enum": ["unlimited_accounting", "active_workspace_reservations", "active_and_retained_reservations", "process_observation", "operating_system_limit"]},
         "memory_observation_scope": {"type": "string"}
