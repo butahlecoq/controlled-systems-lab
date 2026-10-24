@@ -14,6 +14,7 @@
 
 #include <algorithm>
 #include <array>
+#include <charconv>
 #include <chrono>
 #include <cmath>
 #include <cstdlib>
@@ -811,15 +812,27 @@ int main(int argc, char** argv) {
         std::optional<std::size_t> profile_strategy;
         std::size_t profile_calls_count = 0;
         std::optional<std::filesystem::path> requested_record_path;
+        bool profile_strategy_seen = false;
+        bool profile_calls_seen = false;
         for (int argument = 1; argument < argc; ++argument) {
             const std::string_view option{argv[argument]};
             if (option == "--profile-strategy" && argument + 1 < argc) {
+                if (profile_strategy_seen)
+                    throw std::invalid_argument("--profile-strategy may be provided only once");
+                profile_strategy_seen = true;
                 const std::string_view strategy{argv[++argument]};
                 if (strategy == "reach-back") profile_strategy = 0;
                 else if (strategy == "direct-joint") profile_strategy = 1;
                 else throw std::invalid_argument("Profile strategy must be reach-back or direct-joint");
             } else if (option == "--profile-calls" && argument + 1 < argc) {
-                profile_calls_count = std::stoull(argv[++argument]);
+                if (profile_calls_seen)
+                    throw std::invalid_argument("--profile-calls may be provided only once");
+                profile_calls_seen = true;
+                const std::string_view value{argv[++argument]};
+                const auto [end, error] = std::from_chars(
+                    value.data(), value.data() + value.size(), profile_calls_count);
+                if (error != std::errc{} || end != value.data() + value.size())
+                    throw std::invalid_argument("Profile call count must be a complete unsigned integer");
             } else if (option == "--record" && argument + 1 < argc) {
                 if (requested_record_path)
                     throw std::invalid_argument("--record may be provided only once");
@@ -830,8 +843,10 @@ int main(int argc, char** argv) {
         }
         if (profile_calls_count > 10000)
             throw std::invalid_argument("Profile call count must not exceed 10000");
-        if (profile_strategy.has_value() != (profile_calls_count != 0))
+        if (profile_strategy_seen != profile_calls_seen)
             throw std::invalid_argument("Profile strategy and positive call count must be provided together");
+        if (profile_calls_seen && profile_calls_count == 0)
+            throw std::invalid_argument("Profile call count must be positive");
         if(profile_strategy&&requested_record_path)
             throw std::invalid_argument("Profile mode and comparison-record capture are separate modes");
         const auto problem = source();
