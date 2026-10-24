@@ -11,6 +11,8 @@
 #include <csl/synthesis/strategy_a/strategy.hpp>
 #include <csl/synthesis/strategy_b/direct_joint.hpp>
 #include <csl/synthesis/witness_selector.hpp>
+#include "Obs04BuildInfo.hpp"
+#include <nlohmann/json.hpp>
 
 #include <algorithm>
 #include <array>
@@ -27,6 +29,7 @@
 #include <filesystem>
 #include <memory>
 #include <optional>
+#include <span>
 #include <sstream>
 #include <stdexcept>
 #include <string>
@@ -35,11 +38,17 @@
 #include <thread>
 #include <utility>
 #include <vector>
+#include <iterator>
 
 #ifndef _WIN32
 #include <fcntl.h>
 #include <poll.h>
+#include <sys/utsname.h>
 #include <unistd.h>
+#else
+#define NOMINMAX
+#include <windows.h>
+#include <winternl.h>
 #endif
 
 #if !defined(NDEBUG) || defined(_DEBUG)
@@ -50,6 +59,7 @@ namespace {
 using namespace csl;
 namespace ar = artifacts;
 namespace ob = execution::observability;
+using Json = nlohmann::json;
 using Clock = std::chrono::steady_clock;
 constexpr double absolute_tolerance = 1e-8;
 constexpr double relative_tolerance = 1e-8;
@@ -64,6 +74,163 @@ template<class T, class... Rest> T take(std::variant<T, Rest...> value) {
         throw std::runtime_error(message);
     }
     return std::get<T>(std::move(value));
+}
+
+Json available_fact(std::string value) {
+    if(value.empty())return {{"status","unavailable"},{"reason","platform returned an empty value"}};
+    return {{"status","available"},{"value",std::move(value)}};
+}
+
+Json unavailable_fact(std::string reason) {
+    return {{"status","unavailable"},{"reason",std::move(reason)}};
+}
+
+Json available_count(unsigned int value) {
+    if(value==0)return unavailable_fact("platform did not report a processor count");
+    return {{"status","available"},{"value",value}};
+}
+
+std::optional<std::filesystem::path> current_executable_path(std::string_view argv0) {
+#ifdef _WIN32
+    static_cast<void>(argv0);
+    std::vector<wchar_t> buffer(32768);
+    const auto length=GetModuleFileNameW(nullptr,buffer.data(),static_cast<DWORD>(buffer.size()));
+    if(length==0||length>=buffer.size())return std::nullopt;
+    return std::filesystem::path(std::wstring(buffer.data(),length));
+#elif defined(__linux__)
+    static_cast<void>(argv0);
+    std::error_code failure;
+    const auto path=std::filesystem::read_symlink("/proc/self/exe",failure);
+    if(failure)return std::nullopt;
+    return path;
+#else
+    std::error_code failure;
+    const auto path=std::filesystem::absolute(std::filesystem::path(argv0),failure);
+    if(failure)return std::nullopt;
+    return path;
+#endif
+}
+
+Json binary_digest(std::string_view argv0) {
+    const auto executable=current_executable_path(argv0);
+    if(!executable)return unavailable_fact("the running executable path is unavailable on this platform");
+    std::ifstream input(*executable,std::ios::binary);
+    if(!input)return unavailable_fact("the running executable could not be read");
+    const std::vector<char> bytes{std::istreambuf_iterator<char>{input},std::istreambuf_iterator<char>{}};
+    if(input.bad())return unavailable_fact("reading the running executable failed");
+    std::vector<std::byte> content;
+    content.reserve(bytes.size());
+    for(const auto value:bytes)content.push_back(static_cast<std::byte>(static_cast<unsigned char>(value)));
+    const auto snapshot=problem::snapshot_content(std::span<const std::byte>{content});
+    if(const auto* owned=std::get_if<problem::ResolvedContent>(&snapshot))
+        return available_fact(problem::hex(owned->digest()));
+    return unavailable_fact("the running executable digest could not be computed");
+}
+
+struct HostFacts {
+    std::string family;
+    std::string architecture;
+    Json version;
+    Json kernel;
+    Json cpu_model;
+};
+
+HostFacts host_facts() {
+    HostFacts host;
+#ifdef _WIN32
+    host.family="Windows";
+    SYSTEM_INFO system_info{};
+    GetNativeSystemInfo(&system_info);
+    switch(system_info.wProcessorArchitecture) {
+    case PROCESSOR_ARCHITECTURE_AMD64: host.architecture="x86_64"; break;
+    case PROCESSOR_ARCHITECTURE_ARM64: host.architecture="aarch64"; break;
+    case PROCESSOR_ARCHITECTURE_INTEL: host.architecture="x86"; break;
+    case PROCESSOR_ARCHITECTURE_ARM: host.architecture="arm"; break;
+    case PROCESSOR_ARCHITECTURE_IA64: host.architecture="ia64"; break;
+    default: host.architecture="unknown-native-architecture"; break;
+    }
+    using RtlGetVersion = LONG (WINAPI*)(OSVERSIONINFOW*);
+    const auto module=GetModuleHandleW(L"ntdll.dll");
+    const auto get_version=module?reinterpret_cast<RtlGetVersion>(GetProcAddress(module,"RtlGetVersion")):nullptr;
+    OSVERSIONINFOW info{};
+    info.dwOSVersionInfoSize=sizeof(info);
+    if(get_version&&get_version(&info)==0) {
+        const auto version=std::to_string(info.dwMajorVersion)+"."+
+            std::to_string(info.dwMinorVersion)+"."+std::to_string(info.dwBuildNumber);
+        host.version=available_fact(version);
+        host.kernel=available_fact(version);
+    } else {
+        host.version=unavailable_fact("RtlGetVersion is unavailable");
+        host.kernel=unavailable_fact("RtlGetVersion is unavailable");
+    }
+    host.cpu_model=unavailable_fact("CPU model capture is not implemented for Windows");
+#elif defined(__linux__)
+    utsname info{};
+    if(uname(&info)==0) {
+        host.family=info.sysname;
+        host.architecture=info.machine;
+        host.version=unavailable_fact("/etc/os-release has no PRETTY_NAME field");
+        host.kernel=available_fact(info.release);
+    } else {
+        host.family="Linux";
+        host.architecture="unknown-linux-target-architecture";
+        host.version=unavailable_fact("uname failed");
+        host.kernel=unavailable_fact("uname failed");
+    }
+    std::string line;
+    std::ifstream os_release("/etc/os-release");
+    while(std::getline(os_release,line)) {
+        constexpr std::string_view name="PRETTY_NAME=";
+        if(!line.starts_with(name))continue;
+        auto value=line.substr(name.size());
+        if(value.size()>=2&&value.front()=='"'&&value.back()=='"')
+            value=value.substr(1,value.size()-2);
+        if(value.find('\\')==std::string::npos)host.version=available_fact(std::move(value));
+        break;
+    }
+    std::ifstream cpu_info("/proc/cpuinfo");
+    host.cpu_model=unavailable_fact("/proc/cpuinfo has no model name");
+    while(std::getline(cpu_info,line)) {
+        const auto separator=line.find(':');
+        if(separator!=std::string::npos&&line.substr(0,separator).find("model name")!=std::string::npos) {
+            auto value=line.substr(separator+1);
+            const auto first=value.find_first_not_of(" \t");
+            host.cpu_model=first==std::string::npos?unavailable_fact("/proc/cpuinfo had an empty model name"):
+                available_fact(value.substr(first));
+            break;
+        }
+    }
+    if(host.family.empty())host.family="Linux";
+#else
+    host.family="unknown";
+    host.architecture="unknown";
+    host.version=unavailable_fact("platform version capture is not implemented");
+    host.kernel=unavailable_fact("kernel capture is not implemented for this platform");
+    host.cpu_model=unavailable_fact("CPU model capture is not implemented for this platform");
+#endif
+    if(host.version.is_null())host.version=unavailable_fact("platform version was not available");
+    if(host.kernel.is_null())host.kernel=unavailable_fact("kernel version was not available");
+    if(host.cpu_model.is_null())host.cpu_model=unavailable_fact("CPU model was not available");
+    return host;
+}
+
+Json environment_manifest(std::string_view argv0) {
+    const auto host=host_facts();
+    const auto backend_threads=unavailable_fact("native backend thread counts are not observable from the driver");
+    return {{"schema","csl.obs04-environment/1"},
+        {"build",Json::parse(benchmarks::obs04::build::manifest)},
+        {"runtime",{{"schema","csl.obs04-runtime/1"},{"binary_sha256",binary_digest(argv0)},
+            {"os_family",host.family},{"os_version",host.version},{"kernel",host.kernel},
+            {"architecture",host.architecture},{"cpu_model",host.cpu_model},
+            {"logical_cpus",available_count(std::thread::hardware_concurrency())}}},
+        {"execution",{{"requested_workers",1},{"observed_driver_workers",1},
+            {"requested_backend_threads",1},{"observed_backend_threads",backend_threads},
+            {"workspace_policy","fresh-workspace-per-attempt"},
+            {"cache_policy","one warm-up repetition per arm; operating-system caches are not flushed"},
+            {"warmup_repetitions",1},{"seed_policy",{{"kind","not_applicable"},
+                {"reason","fixed analytic fixture uses no random generator"}}},
+            {"tolerances",{{"absolute",absolute_tolerance},{"relative",relative_tolerance}}}}}
+    };
 }
 
 template<class Port> registry::PreparedProvider<Port> selected(
@@ -809,6 +976,8 @@ void profile_calls(const application::PreparedComparison& prepared, std::size_t 
 
 int main(int argc, char** argv) {
     try {
+        if (std::string_view{OBS04_BUILD_CONFIGURATION} != "Release")
+            throw std::runtime_error("OBS-04 comparison driver must be built with the Release configuration");
         std::optional<std::size_t> profile_strategy;
         std::size_t profile_calls_count = 0;
         std::optional<std::filesystem::path> requested_record_path;
@@ -921,20 +1090,19 @@ int main(int argc, char** argv) {
         const auto canonical_problem=problem.canonical_bytes();
         const auto manifest_bytes=std::span<const std::byte>{canonical_problem};
         const auto input_manifest_hash=take(problem::snapshot_content(manifest_bytes)).digest();
-        std::ostringstream spec_builder;
-        spec_builder << "{\"arms\":[";
+        Json arms=Json::array();
         for(std::size_t index=0;index<config_ids.size();++index) {
-            if(index)spec_builder << ',';
-            spec_builder << "{\"configuration_id\":\"" << config_ids[index]
-                << "\",\"instrumentation\":\"" << (index%2==0?"disabled":"enabled")
-                << "\",\"strategy\":\""
-                << (index/2==0?"csl.synthesis.reach-back":"csl.synthesis.strategy-b") << "\"}";
+            arms.push_back({{"configuration_id",config_ids[index]},
+                {"instrumentation",index%2==0?"disabled":"enabled"},
+                {"strategy",index/2==0?"csl.synthesis.reach-back":"csl.synthesis.strategy-b"}});
         }
-        spec_builder << "],\"input_manifest_hash\":\"" << problem::hex(input_manifest_hash)
-            << "\",\"input_manifest_source\":\"resolved-problem-canonical-bytes\",\"problem_id\":\""
-            << problem.identity().value << "\",\"repetitions\":8,\"request_digest\":\""
-            << problem::hex(request_digest) << "\",\"schema\":\"csl.comparison-spec/2\"}";
-        const auto spec_text=spec_builder.str();
+        const Json spec{{"arms",std::move(arms)},
+            {"environment",environment_manifest(argc>0?argv[0]:std::string_view{})},
+            {"input_manifest_hash",problem::hex(input_manifest_hash)},
+            {"input_manifest_source","resolved-problem-canonical-bytes"},
+            {"problem_id",problem.identity().value},{"repetitions",8},
+            {"request_digest",problem::hex(request_digest)},{"schema","csl.comparison-spec/3"}};
+        const auto spec_text=spec.dump();
         const auto spec_content_result=problem::snapshot_content(std::span<const std::byte>{
             reinterpret_cast<const std::byte*>(spec_text.data()),spec_text.size()});
         auto spec_content=take(std::move(spec_content_result));

@@ -2,6 +2,8 @@
 #include <nlohmann/json.hpp>
 #include <algorithm>
 #include <cctype>
+#include <cmath>
+#include <initializer_list>
 #include <limits>
 #include <set>
 #include <stdexcept>
@@ -118,6 +120,118 @@ struct SpecShape {
     std::vector<std::string> instrumentation;
     std::uint32_t repetitions{};
 };
+bool exact_fields(const Json& value, std::initializer_list<std::string_view> fields) {
+    if(!value.is_object()||value.size()!=fields.size())return false;
+    return std::all_of(fields.begin(),fields.end(),[&](const auto field){return value.contains(field);});
+}
+bool valid_sha256(const Json& value) {
+    if(!value.is_string())return false;
+    const auto& text=value.get_ref<const std::string&>();
+    return text.size()==64&&std::all_of(text.begin(),text.end(),
+        [](unsigned char c){return (c>='0'&&c<='9')||(c>='a'&&c<='f');});
+}
+bool valid_git_revision(const Json& value) {
+    if(!value.is_string())return false;
+    const auto& text=value.get_ref<const std::string&>();
+    return text.size()==40&&std::all_of(text.begin(),text.end(),
+        [](unsigned char c){return (c>='0'&&c<='9')||(c>='a'&&c<='f');});
+}
+bool positive_small_integer(const Json& value) {
+    if(!value.is_number_integer())return false;
+    if(value.is_number_unsigned()) {
+        const auto integer=value.get<std::uint64_t>();
+        return integer>0&&integer<=std::numeric_limits<std::uint32_t>::max();
+    }
+    const auto integer=value.get<std::int64_t>();
+    return integer>0&&integer<=std::numeric_limits<std::uint32_t>::max();
+}
+void validate_fact(const Json& fact, bool numeric, std::string_view path) {
+    if(!fact.is_object()||!fact.contains("status")||!fact.at("status").is_string())
+        throw std::invalid_argument(std::string(path)+" has no valid status");
+    const auto status=fact.at("status").get<std::string>();
+    if(status=="available") {
+        if(fact.size()!=2||!fact.contains("value")||
+            (numeric?!fact.at("value").is_number_unsigned()&&!fact.at("value").is_number_integer():!fact.at("value").is_string()))
+            throw std::invalid_argument(std::string(path)+" available value has the wrong shape");
+        if(numeric) {
+            if(!positive_small_integer(fact.at("value")))
+                throw std::invalid_argument(std::string(path)+" value must be a positive integer");
+        } else if(fact.at("value").get_ref<const std::string&>().empty())
+            throw std::invalid_argument(std::string(path)+" value must not be empty");
+    } else if(status=="unavailable") {
+        if(fact.size()!=2||!fact.contains("reason")||!fact.at("reason").is_string()||
+            fact.at("reason").get_ref<const std::string&>().empty())
+            throw std::invalid_argument(std::string(path)+" unavailable fact requires a reason");
+    } else throw std::invalid_argument(std::string(path)+" has an unknown status");
+}
+void validate_environment(const Json& environment) {
+    if(!exact_fields(environment,{"schema","build","runtime","execution"})||
+        environment.at("schema")!="csl.obs04-environment/1")
+        throw std::invalid_argument("Environment manifest schema or fields are invalid");
+    const auto& build=environment.at("build");
+    if(!exact_fields(build,{"schema","source_revision","source_tree_sha256","source_snapshot_method","source_dirty",
+        "compiler_id","compiler_version","generator","architecture","build_type","cxx_standard",
+        "c_flags_sha256","cxx_flags_sha256","executable_link_flags_sha256","target_flags_sha256","backends"})||
+        build.at("schema")!="csl.obs04-build/1"||!valid_git_revision(build.at("source_revision"))||
+        !valid_sha256(build.at("source_tree_sha256"))||
+        build.at("source_snapshot_method")!="git-head-tracked-diff-untracked-content-sha256/1"||
+        !build.at("source_dirty").is_boolean()||
+        !build.at("compiler_id").is_string()||build.at("compiler_id").get_ref<const std::string&>().empty()||
+        !build.at("compiler_version").is_string()||build.at("compiler_version").get_ref<const std::string&>().empty()||
+        !build.at("generator").is_string()||build.at("generator").get_ref<const std::string&>().empty()||
+        !build.at("architecture").is_string()||build.at("architecture").get_ref<const std::string&>().empty()||
+        build.at("build_type")!="Release"||build.at("cxx_standard")!="20"||
+        !valid_sha256(build.at("c_flags_sha256"))||!valid_sha256(build.at("cxx_flags_sha256"))||
+        !valid_sha256(build.at("executable_link_flags_sha256"))||
+        !valid_sha256(build.at("target_flags_sha256")))
+        throw std::invalid_argument("Environment build facts are invalid");
+    const auto& backends=build.at("backends");
+    if(!exact_fields(backends,{"highs","qhull"}))
+        throw std::invalid_argument("Environment backend facts are invalid");
+    for(const auto name:{"highs","qhull"}) {
+        const auto& backend=backends.at(name);
+        if(!exact_fields(backend,{"version","archive_sha256"})||
+            !backend.at("version").is_string()||backend.at("version").get_ref<const std::string&>().empty()||
+            !valid_sha256(backend.at("archive_sha256")))
+            throw std::invalid_argument(std::string("Environment backend fact is invalid: ")+name);
+    }
+    const auto& runtime=environment.at("runtime");
+    if(!exact_fields(runtime,{"schema","binary_sha256","os_family","os_version","kernel",
+        "architecture","cpu_model","logical_cpus"})||runtime.at("schema")!="csl.obs04-runtime/1"||
+        !runtime.at("os_family").is_string()||runtime.at("os_family").get_ref<const std::string&>().empty()||
+        !runtime.at("architecture").is_string()||runtime.at("architecture").get_ref<const std::string&>().empty())
+        throw std::invalid_argument("Environment runtime facts are invalid");
+    validate_fact(runtime.at("binary_sha256"),false,"runtime.binary_sha256");
+    if(runtime.at("binary_sha256").at("status")=="available"&&
+        !valid_sha256(runtime.at("binary_sha256").at("value")))
+        throw std::invalid_argument("runtime.binary_sha256 value is malformed");
+    validate_fact(runtime.at("os_version"),false,"runtime.os_version");
+    validate_fact(runtime.at("kernel"),false,"runtime.kernel");
+    validate_fact(runtime.at("cpu_model"),false,"runtime.cpu_model");
+    validate_fact(runtime.at("logical_cpus"),true,"runtime.logical_cpus");
+    const auto& execution=environment.at("execution");
+    if(!exact_fields(execution,{"requested_workers","observed_driver_workers","requested_backend_threads",
+        "observed_backend_threads","workspace_policy","cache_policy","warmup_repetitions","seed_policy","tolerances"})||
+        !positive_small_integer(execution.at("requested_workers"))||
+        execution.at("observed_driver_workers")!=1||execution.at("requested_backend_threads")!=1||
+        !execution.at("workspace_policy").is_string()||execution.at("workspace_policy")!="fresh-workspace-per-attempt"||
+        !execution.at("cache_policy").is_string()||execution.at("cache_policy").get_ref<const std::string&>().empty()||
+        !positive_small_integer(execution.at("warmup_repetitions"))||execution.at("warmup_repetitions")!=1||
+        !positive_small_integer(execution.at("requested_backend_threads"))||
+        !positive_small_integer(execution.at("observed_driver_workers")))
+        throw std::invalid_argument("Environment execution facts are invalid");
+    validate_fact(execution.at("observed_backend_threads"),true,"execution.observed_backend_threads");
+    const auto& seed=execution.at("seed_policy");
+    if(!exact_fields(seed,{"kind","reason"})||seed.at("kind")!="not_applicable"||
+        !seed.at("reason").is_string()||seed.at("reason").get_ref<const std::string&>().empty())
+        throw std::invalid_argument("Environment seed policy is invalid");
+    const auto& tolerances=execution.at("tolerances");
+    if(!exact_fields(tolerances,{"absolute","relative"})||!tolerances.at("absolute").is_number()||
+        !tolerances.at("relative").is_number()||!std::isfinite(tolerances.at("absolute").get<double>())||
+        !std::isfinite(tolerances.at("relative").get<double>())||tolerances.at("absolute").get<double>()<0||
+        tolerances.at("relative").get<double>()<0)
+        throw std::invalid_argument("Environment numerical tolerances are invalid");
+}
 SpecShape validate_spec(const Json& spec) {
     if (!spec.is_object() || !spec.contains("problem_id") || !spec.contains("request_digest") ||
         !spec.contains("repetitions"))
@@ -127,7 +241,11 @@ SpecShape validate_spec(const Json& spec) {
     const bool record=schema=="csl.comparison-spec/2"&&spec.size()==7&&spec.contains("arms")&&
         spec.contains("input_manifest_hash")&&spec.contains("input_manifest_source")&&
         spec.at("input_manifest_source")=="resolved-problem-canonical-bytes";
-    if(!legacy&&!record)throw std::invalid_argument("Comparison spec fields do not match supported schema");
+    const bool record_with_environment=schema=="csl.comparison-spec/3"&&spec.size()==8&&spec.contains("arms")&&
+        spec.contains("input_manifest_hash")&&spec.contains("input_manifest_source")&&
+        spec.at("input_manifest_source")=="resolved-problem-canonical-bytes"&&spec.contains("environment");
+    if(!legacy&&!record&&!record_with_environment)throw std::invalid_argument("Comparison spec fields do not match supported schema");
+    if(record_with_environment)validate_environment(spec.at("environment"));
     const auto valid_digest=[](const Json& value){
         if(!value.is_string())return false;
         const auto& text=value.get_ref<const std::string&>();
@@ -143,9 +261,9 @@ SpecShape validate_spec(const Json& spec) {
                 [](unsigned char c){return (c>='0'&&c<='9')||(c>='a'&&c<='f');});
     };
     if(!spec.at("problem_id").is_string()||spec.at("problem_id").get<std::string>().empty()||!valid_digest(spec.at("request_digest"))||
-        (record&&!valid_digest(spec.at("input_manifest_hash"))))
+        ((record||record_with_environment)&&!valid_digest(spec.at("input_manifest_hash"))))
         throw std::invalid_argument("Comparison spec digest is malformed");
-    if(record) {
+    if(record||record_with_environment) {
         if(spec.at("input_manifest_source")!="resolved-problem-canonical-bytes")
             throw std::invalid_argument("Comparison input manifest source is unsupported");
         constexpr std::string_view prefix="csl.problem.v1.sha256:";
@@ -179,7 +297,7 @@ SpecShape validate_spec(const Json& spec) {
     }
     const auto repetitions=spec.at("repetitions").get<std::uint32_t>();
     if(repetitions==0)throw std::invalid_argument("Repetition count must be positive");
-    return {record,std::move(configurations),std::move(strategies),std::move(instrumentation),repetitions};
+    return {record||record_with_environment,std::move(configurations),std::move(strategies),std::move(instrumentation),repetitions};
 }
 bool arm_matches_run(const Json& run,const SpecShape& spec,std::size_t arm) {
     if(spec.strategies.empty())return true;
