@@ -15,6 +15,7 @@
 #include <cmath>
 #include <iostream>
 #include <limits>
+#include <numeric>
 
 using namespace csl;
 using namespace csl::registry;
@@ -106,6 +107,18 @@ problem::ResolvedProblem nominal_linear_exact_unbounded() {
         {{1,1,0},TimeDomain::discrete,LinearStage{{1,1,{0}},{1,1,{1}},{1,0,{}},{0}}}, {}}),
         {0,1},KnownInitial{{0}},ContinuousDomain{{UniversalSet{1}}},
         {interval("nominal-exact-unbounded-x0",0,0),UniversalSet{1}}, {},{},
+        InformationPattern::nominal_open_loop,LinearTerminal{{1},0}};
+    return take(problem::resolve(source,{problem::UncertaintyStructure::stage_product_uncoupled,{},{}}));
+}
+problem::ResolvedProblem nominal_linear_exact_over_stage_cap() {
+    constexpr std::size_t horizon=1000;
+    std::vector<double> time_grid(horizon+1);
+    std::iota(time_grid.begin(),time_grid.end(),0.0);
+    std::vector<AdmissibleSet> controls(horizon,UniversalSet{1});
+    std::vector<AdmissibleSet> states(horizon+1,UniversalSet{1});
+    Problem source{{"strategy-a-nominal-linear-exact-over-cap"},std::make_shared<const SystemModel>(SystemModel{
+        {{1,1,0},TimeDomain::discrete,LinearStage{{1,1,{1}},{1,1,{1}},{1,0,{}},{0}}}, {}}),
+        std::move(time_grid),KnownInitial{{0}},ContinuousDomain{std::move(controls)},std::move(states), {},{},
         InformationPattern::nominal_open_loop,LinearTerminal{{1},0}};
     return take(problem::resolve(source,{problem::UncertaintyStructure::stage_product_uncoupled,{},{}}));
 }
@@ -930,6 +943,12 @@ TEST_CASE("nominal linear exact verifier rejects a claimed optimum for an unboun
 TEST_CASE("nominal linear exact profile rejects an unreviewed materialization cap") {
     auto query=nominal_linear_exact_request(nominal_linear_exact_integrator());
     query.family.materialization_limit=1;
+    const auto admitted=admit(query);
+    REQUIRE(std::holds_alternative<Rejection>(admitted));
+    CHECK_FALSE(std::get<Rejection>(admitted).diagnostics.empty());
+}
+TEST_CASE("nominal linear exact profile rejects a horizon beyond its verified stage cap") {
+    const auto query=nominal_linear_exact_request(nominal_linear_exact_over_stage_cap());
     const auto admitted=admit(query);
     REQUIRE(std::holds_alternative<Rejection>(admitted));
     CHECK_FALSE(std::get<Rejection>(admitted).diagnostics.empty());
