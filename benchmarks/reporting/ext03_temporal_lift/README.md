@@ -9,7 +9,7 @@ Expected analytic result: the minimum terminal state is `-1/4`. The unique
 minimizing control history is `(u0,u1)=(0,-1/4)` from initial memory `p0=1/4`
 with both slew increments in `[-1/4,1/4]`. The transformed joint history is
 `(z0,z1,z2,v0,v1)=((0,1/4),(0,0),(-1/4,-1/4),(-1/4,-1/4))`.
-Each timed call checks the transformed coordinate maps and recovers this
+Each timed call checks the coordinate identities and all three index maps, then recovers this
 literal feasible optimizer to the original coordinates. The run is a
 transformation microbenchmark, not a solver or end-to-end application result.
 
@@ -30,7 +30,7 @@ successful-call count, missing-call count, and failure message before exiting
 nonzero. The collector must retain those bytes and reject an incomplete run as
 a successful report. CLI counts are positive bounded integers: batch at most
 100, warmups at most 5, and measured repetitions at most 20. All arguments are
-validated before the header or any solver work is emitted.
+validated before the header or any timed work begins.
 
 ## Reproduction
 

@@ -113,10 +113,9 @@ direct joint compiler consumes those rows for its admitted nominal profile. The
 EXT-03 memory transform rewrites a narrow one-step slew problem into an ordinary
 Problem with increment controls and previous-control memory; the transform's
 history maps check their defining recurrence when recovering a history. The
-EXT-03 measurement harness demonstrates Strategy A admission and exact-family
-verification for one two-step scalar lifted fixture under its existing
-nominal-linear exact profile. This does not imply general Strategy A admission
-for temporal constraints or a general completeness claim.
+EXT-03's measurement harness measures the memory lift and history recovery for
+one two-step scalar fixture. It does not invoke a solver or establish Strategy
+A admission for temporal constraints.
 Robust or feedback strategies, legacy paths, and ordinary zonotopes remain
 outside this contract. Exact history correspondence follows the documented
 proof assumptions; in particular, an unbounded supplied state domain is not
