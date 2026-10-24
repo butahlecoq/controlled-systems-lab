@@ -10,6 +10,7 @@
 #include <csl/synthesis/strategy_a/nominal_linear_exact_profile.hpp>
 
 #include <algorithm>
+#include <bit>
 #include <cmath>
 #include <limits>
 #include <memory>
@@ -260,15 +261,48 @@ bool append_objective_face(std::span<const double> objective, double offset,
     return true;
 }
 
-bool rational_equals_double(const exact_h::ExactRational& rational, double value,
-    std::size_t max_bits) {
-    if (!finite(value)) return false;
-    const auto decoded = exact_h::exact_detail::decode(value);
-    exact_h::ExactRational dyadic;
-    dyadic.numerator = exact_h::exact_detail::from_u64(decoded.significand, decoded.negative);
-    dyadic.binary_exponent = decoded.exponent;
-    int order = 0;
-    return exact_h::compare_scaled_rationals(rational, dyadic, max_bits, order) && order == 0;
+std::optional<std::pair<double, double>> rational_to_outward_doubles(
+    const exact_h::ExactRational& rational, std::size_t max_bits) {
+    if (exact_h::exact_detail::is_zero(rational.numerator)) return std::pair{0.0, 0.0};
+    if (rational.denominator.negative || exact_h::exact_detail::is_zero(rational.denominator)) return {};
+    exact_h::ExactRational magnitude = rational;
+    const bool negative = magnitude.numerator.negative;
+    magnitude.numerator.negative = false;
+    constexpr std::uint64_t max_finite_bits = 0x7fefffffffffffffULL;
+    std::uint64_t low = 0;
+    std::uint64_t high = max_finite_bits;
+    while (low <= high) {
+        const auto bits = low + (high - low) / 2;
+        const auto dyadic = exact_h::exact_detail::decode(std::bit_cast<double>(bits));
+        exact_h::ExactRational candidate;
+        candidate.numerator = exact_h::exact_detail::from_u64(dyadic.significand);
+        candidate.binary_exponent = dyadic.exponent;
+        int order = 0;
+        if (!exact_h::compare_scaled_rationals(magnitude, candidate, max_bits, order)) return {};
+        if (order == 0) {
+            const auto signed_bits = bits | (negative ? (std::uint64_t{1} << 63) : 0);
+            const auto exact = std::bit_cast<double>(signed_bits);
+            return std::pair{exact, exact};
+        }
+        if (order > 0) {
+            if (bits == max_finite_bits) {
+                low = max_finite_bits + 1;
+                break;
+            }
+            low = bits + 1;
+        } else {
+            if (bits == 0) {
+                high = 0;
+                break;
+            }
+            high = bits - 1;
+        }
+    }
+    if (low > max_finite_bits) return {};
+    const double floor_magnitude = std::bit_cast<double>(high);
+    const double ceil_magnitude = std::bit_cast<double>(low);
+    if (negative) return std::pair{-ceil_magnitude, -floor_magnitude};
+    return std::pair{floor_magnitude, ceil_magnitude};
 }
 
 CheckResult verify_proposal(const StrategyRequest& request, const CompleteFamilyProposal& proposal) {
@@ -333,9 +367,11 @@ CheckResult verify_proposal(const StrategyRequest& request, const CompleteFamily
         return {CheckState::unsupported, "Exact objective minimization exceeded the arithmetic or operation limits"};
     if (optimum.state != exact_h::LinearMinimumState::minimum || !optimum.attained)
         return {CheckState::unsupported, "Objective must have a finite attained minimum"};
-    if (!rational_equals_double(optimum.value, family.optimum.bounds.lower->value, limits.max_integer_bits) ||
-        !rational_equals_double(optimum.value, family.optimum.bounds.upper->value, limits.max_integer_bits))
-        return {CheckState::refuted, "Published objective lower and upper bounds must equal the exact dyadic optimum"};
+    const auto exact_bounds = rational_to_outward_doubles(optimum.value, limits.max_integer_bits);
+    if (!exact_bounds || family.optimum.bounds.lower->value != exact_bounds->first ||
+        family.optimum.bounds.upper->value != exact_bounds->second)
+        return {CheckState::refuted,
+            "Published objective bounds must be the tight outward binary64 enclosure of the exact rational optimum"};
 
     auto optimal_rows = feasible_rows;
     if (!append_objective_face(objective, linear.offset, optimum.value, limits, optimal_rows))
@@ -408,7 +444,7 @@ bool strategy_a_nominal_linear_exact_profile_valid(const problem::ResolvedProble
     return true;
 }
 
-std::optional<double> strategy_a_nominal_linear_exact_optimum_bound(
+std::optional<std::pair<double, double>> strategy_a_nominal_linear_exact_optimum_bounds(
     const problem::ResolvedProblem& problem) {
     std::vector<exact_h::Row> rows;
     std::vector<double> objective;
@@ -421,11 +457,80 @@ std::optional<double> strategy_a_nominal_linear_exact_optimum_bound(
         linear->offset);
     if (optimum.state != exact_h::LinearMinimumState::minimum || !optimum.attained)
         return {};
-    double represented{};
-    if (!exact_h::exact_rational_to_double(optimum.value,
-            exact_h::default_max_integer_bits, represented))
+    return rational_to_outward_doubles(optimum.value, exact_h::default_max_integer_bits);
+}
+
+std::optional<sets::SetData> strategy_a_nominal_linear_exact_optimal_relation(
+    const problem::ResolvedProblem& problem, SetId id, std::vector<std::string> labels) {
+    exact_h::Limits limits;
+    std::vector<exact_h::Row> rows;
+    std::vector<double> objective;
+    const auto built = reconstruct(problem, limits, rows, objective);
+    if (built.state != CheckState::established) return {};
+    const auto coefficients = problem.objective().coefficients();
+    const auto& linear = std::get<optimization::LinearCoefficients>(coefficients);
+    const auto optimum = exact_h::minimize_linear(rows, objective.size(), objective, linear.offset, limits);
+    if (optimum.state != exact_h::LinearMinimumState::minimum || !optimum.attained ||
+        !append_objective_face(objective, linear.offset, optimum.value, limits, rows)) return {};
+    constexpr std::size_t max_binary64_search_steps = 63;
+    if (objective.size() == std::numeric_limits<std::size_t>::max() ||
+        rows.size() > limits.max_operations / max_binary64_search_steps / (objective.size() + 1))
         return {};
-    return represented;
+
+    std::vector<double> inequalities;
+    std::vector<double> upper_bounds;
+    std::vector<double> equalities;
+    std::vector<double> equality_values;
+    inequalities.reserve(rows.size() * objective.size());
+    upper_bounds.reserve(rows.size());
+    auto opposites = [](const exact_h::Integer& lhs, const exact_h::Integer& rhs) {
+        return lhs.words == rhs.words && (exact_h::exact_detail::is_zero(lhs) || lhs.negative != rhs.negative);
+    };
+    auto as_exact_double = [&](const exact_h::Integer& integer, double& value) {
+        exact_h::ExactRational rational;
+        rational.numerator = integer;
+        rational.denominator = exact_h::exact_detail::from_u64(1);
+        return exact_h::exact_rational_to_double(rational, limits.max_integer_bits, value);
+    };
+    for (std::size_t row_index = 0; row_index < rows.size(); ++row_index) {
+        const auto& row = rows[row_index];
+        if (row.strict || row.coefficients.size() != objective.size()) return {};
+        const bool paired_equality = row_index + 1 < rows.size() && !rows[row_index + 1].strict &&
+            rows[row_index + 1].coefficients.size() == objective.size() &&
+            opposites(row.bound, rows[row_index + 1].bound) &&
+            std::equal(row.coefficients.begin(), row.coefficients.end(),
+                rows[row_index + 1].coefficients.begin(), opposites);
+        auto& target = paired_equality ? equalities : inequalities;
+        auto& target_bounds = paired_equality ? equality_values : upper_bounds;
+        for (const auto& coefficient : row.coefficients) {
+            double value{};
+            if (!as_exact_double(coefficient, value)) return {};
+            target.push_back(value);
+        }
+        double bound{};
+        if (!as_exact_double(row.bound, bound)) return {};
+        target_bounds.push_back(bound);
+        if (paired_equality) {
+            ++row_index;
+        }
+    }
+    auto inequality_matrix = numeric::snapshot(Matrix{
+        upper_bounds.size(), objective.size(), std::move(inequalities)});
+    auto upper_vector = numeric::snapshot_vector(Vector(std::move(upper_bounds)));
+    auto equality_matrix = numeric::snapshot(Matrix{
+        equality_values.size(), objective.size(), std::move(equalities)});
+    auto equality_vector = numeric::snapshot_vector(Vector(std::move(equality_values)));
+    if (!std::holds_alternative<numeric::MatrixView>(inequality_matrix) ||
+        !std::holds_alternative<numeric::VectorView>(upper_vector) ||
+        !std::holds_alternative<numeric::MatrixView>(equality_matrix) ||
+        !std::holds_alternative<numeric::VectorView>(equality_vector)) return {};
+    auto made = sets::make_h({std::move(id), objective.size(), std::move(labels)},
+        {std::get<numeric::MatrixView>(std::move(inequality_matrix)),
+         std::get<numeric::VectorView>(std::move(upper_vector)),
+         std::get<numeric::MatrixView>(std::move(equality_matrix)),
+         std::get<numeric::VectorView>(std::move(equality_vector))});
+    if (!std::holds_alternative<sets::SetData>(made)) return {};
+    return std::get<sets::SetData>(std::move(made));
 }
 
 std::vector<TransformStepIdentity> strategy_a_nominal_linear_exact_lineage(const ProblemId& problem,

@@ -988,11 +988,12 @@ TEST_CASE("nominal linear exact profile preserves affine offsets and a free cont
     CHECK_FALSE(contains(*relation,{0.5,0,-0.5,0.25,1.2}));
 }
 TEST_CASE("nominal linear exact evidence derives the dyadic optimum without rounded accumulation") {
-    const auto bound=registry::detail::strategy_a_nominal_linear_exact_optimum_bound(
+    const auto bounds=registry::detail::strategy_a_nominal_linear_exact_optimum_bounds(
         nominal_linear_exact_cancellation_objective());
-    REQUIRE(bound);
-    CHECK(*bound==0.0001);
-    CHECK((1e12+0.0001)-1e12!=*bound);
+    REQUIRE(bounds);
+    CHECK(bounds->first==0.0001);
+    CHECK(bounds->second==0.0001);
+    CHECK((1e12+0.0001)-1e12!=bounds->first);
 }
 TEST_CASE("nominal linear exact verifier rejects changed optimum evidence") {
     const auto query=nominal_linear_exact_request(nominal_linear_exact_integrator());
@@ -1036,9 +1037,25 @@ TEST_CASE("nominal linear exact verifier rejects a candidate that omits optimal 
     altered.family.relation.payload=std::make_shared<const TestHRelationPayload>(std::move(omitted));
     CHECK_FALSE(verifier->verify(frozen,altered).empty());
 }
-TEST_CASE("nominal linear exact verifier rejects a non-dyadic optimum") {
+TEST_CASE("nominal linear exact verifier encloses a non-dyadic optimum") {
     const auto query=nominal_linear_exact_request(nominal_linear_exact_thirds());
-    CHECK_FALSE(registry::detail::strategy_a_nominal_linear_exact_optimum_bound(query.problem));
+    const auto bounds=registry::detail::strategy_a_nominal_linear_exact_optimum_bounds(query.problem);
+    REQUIRE(bounds);
+    CHECK(bounds->first==1.0/3.0);
+    CHECK(bounds->second==std::nextafter(1.0/3.0,1.0));
+    const auto generated=run(query);
+    CHECK(generated.termination==Termination::completed);
+    REQUIRE(generated.family);
+    CHECK(generated.family->registry_verified());
+    REQUIRE(generated.objective.lower);
+    REQUIRE(generated.objective.upper);
+    CHECK(generated.objective.lower->value==bounds->first);
+    CHECK(generated.objective.upper->value==bounds->second);
+    const auto& generated_complete=std::get<CompleteOptimalFamily>(generated.family->outcome());
+    REQUIRE(generated_complete.relation.payload);
+    const auto* generated_relation=generated_complete.relation.payload->h_relation_for_recording();
+    REQUIRE(generated_relation);
+    CHECK(contains(*generated_relation,{0,1.0/3.0,1.0/3.0}));
     const JointCoordinates coordinates{query.problem.model().dimensions(),query.problem.model().horizon()};
     const FamilyIdentity identity{query.problem.identity(),query.family,coordinates,
         {"csl.synthesis.reach-back"},"1",
@@ -1048,12 +1065,13 @@ TEST_CASE("nominal linear exact verifier rejects a non-dyadic optimum") {
          take(numeric::snapshot_vector(Vector{1,0})),
          take(numeric::snapshot(Matrix{3,3,{1,0,0,0,1,-1,0,3,0}})),
          take(numeric::snapshot_vector(Vector{0,0,1}))}));
-    const SymbolicArgument statement{"rounded dyadic objective", "A binary64 approximation of one third."};
+    const SymbolicArgument statement{"outward objective bounds", "Adjacent binary64 values enclose the exact rational optimum one third."};
     const ClaimEvidence claim{query.problem.identity(),statement};
-    const ObjectiveBound rounded_third{1.0/3.0,claim};
+    const ObjectiveBound rounded_lower{bounds->first,claim};
+    const ObjectiveBound rounded_upper{bounds->second,claim};
     CompleteOptimalFamily candidate{{coordinates,query.family.representation,
             std::make_shared<const TestHRelationPayload>(std::move(relation))},
-        {claim,{rounded_third,rounded_third}},
+        {claim,{rounded_lower,rounded_upper}},
         {identity,RegisteredCompletenessEvidence{{"csl.verifier.strategy-a.nominal-linear-exact"},
             "1","nominal-linear-exact-v1"}},Assurance::numerical};
     CompleteFamilyProposal proposal{identity,std::move(candidate)};
@@ -1061,7 +1079,7 @@ TEST_CASE("nominal linear exact verifier rejects a non-dyadic optimum") {
     const auto verifier=detail::find_compiled_verifier(
         ModuleId{"csl.verifier.strategy-a.nominal-linear-exact"},"1");
     REQUIRE(verifier);
-    CHECK_FALSE(verifier->verify(frozen,proposal).empty());
+    CHECK(verifier->verify(frozen,proposal).empty());
 }
 TEST_CASE("nominal linear exact verifier rejects a claimed optimum for an unbounded history set") {
     const auto query=nominal_linear_exact_request(nominal_linear_exact_unbounded());
