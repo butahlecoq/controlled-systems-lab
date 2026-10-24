@@ -1,7 +1,9 @@
-#include <csl/adapters/lp/highs.hpp>
 #include <csl/experiments/batch_runner.hpp>
 #include <csl/synthesis/strategy_ts01/analytic_profile.hpp>
+#if CSL_INSTALLED_EXPERIMENTS_WITH_HIGHS
+#include <csl/adapters/lp/highs.hpp>
 #include <csl/synthesis/witness_selector.hpp>
+#endif
 
 #include <iostream>
 #include <stdexcept>
@@ -58,6 +60,7 @@ registry::PreparedStrategy prepare_strategy() {
     return take(strategies.prepare({std::move(resolved),configuration,family,{},{}},requirements));
 }
 
+#if CSL_INSTALLED_EXPERIMENTS_WITH_HIGHS
 registry::PreparedProvider<registry::SelectorPort> prepare_selector() {
     registry::Registry<registry::LPPort> lp;
     if(lp.add(take(adapters::lp::make_highs_registration())))
@@ -75,6 +78,41 @@ registry::PreparedProvider<registry::SelectorPort> prepare_selector() {
     return take(registry::prepare_provider(registry::select_provider(selectors,
         registry::Method{{synthesis::witness_selector::selector_id},{}},selector_requirements)));
 }
+#else
+class InstalledEchoSelector final : public WitnessSelectorWorkspace {
+public:
+    std::variant<WitnessSelection, Unsupported> select(const OptimalFamily& family,
+        const WitnessRequest& request, const ExecutionContext&) override {
+        WitnessBatch batch;
+        batch.requested=request.count;
+        batch.selector={"installed.echo-selector"};
+        batch.seed=request.seed;
+        batch.source_family=family.identity();
+        batch.directions=request.directions;
+        batch.distinctness_tolerance=request.distinctness_tolerance;
+        batch.witnesses={
+            {family.identity().problem,{{0}},{{0}},0.0},
+            {family.identity().problem,{{0}},{{1}},0.0}};
+        return WitnessSelection{std::move(batch),Termination::completed,{}};
+    }
+};
+
+registry::PreparedProvider<registry::SelectorPort> prepare_selector() {
+    registry::Registry<registry::SelectorPort> selectors;
+    registry::Registration<registry::SelectorPort> registration{
+        {{"installed.echo-selector"},"1"},
+        [](const registry::SelectorRequest&, const registry::Requirements& requirements) -> registry::Capability {
+            return registry::Offer{requirements.output};
+        },
+        [](const registry::SelectorRequest&) { return std::make_unique<InstalledEchoSelector>(); }};
+    if(selectors.add(std::move(registration)))
+        throw std::runtime_error("Could not register the installed fixture selector");
+    registry::Requirements requirements;
+    requirements.output.representation={"csl.witness-batch.v1"};
+    return take(registry::prepare_provider(registry::select_provider(selectors,
+        registry::Method{{"installed.echo-selector"},{}},requirements)));
+}
+#endif
 }
 
 int main() {
