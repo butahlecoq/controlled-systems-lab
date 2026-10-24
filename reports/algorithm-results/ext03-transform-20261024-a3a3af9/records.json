@@ -4,6 +4,7 @@
     "build_type": "Release",
     "cmake": "3.31.6",
     "compiler": "GCC 16.2.1",
+    "cpu_cores_per_socket": 4,
     "harness_sha256": "9936328c8f0c285d93e691f5f9d4200f0d411b922bafc48457f5b924d6f32e13",
     "load_average_after": [
       "0.20",
@@ -17,6 +18,12 @@
     ],
     "logical_cores": 8,
     "machine": "x86_64",
+    "memory_available_bytes": {
+      "after": null,
+      "before": null,
+      "unavailable_reason": "available-memory values were not sampled during the benchmark run"
+    },
+    "memory_total_bytes": 8112660480,
     "options": {
       "BUILD_TESTING": "OFF",
       "CSL_BUILD_REPORTS": "OFF",
@@ -24,11 +31,12 @@
       "CSL_ENABLE_QHULL": "ON"
     },
     "platform": "Linux-7.2.5-3-omarchy-x86_64-with-glibc2.44",
-    "processor": "unspecified",
+    "processor": "AMD Ryzen 5 3550H with Radeon Vega Mobile Gfx",
     "release_flags": "-O3 -DNDEBUG",
     "schema": "csl.ext03-transform-environment/1",
     "source_commit": "a3a3af9e1903d7a2a4be6116cc1669215c2bba1b",
-    "source_tree_clean": true
+    "source_tree_clean": true,
+    "threads_per_core": 2
   },
   "harness_sha256": "9936328c8f0c285d93e691f5f9d4200f0d411b922bafc48457f5b924d6f32e13",
   "limiter": {
