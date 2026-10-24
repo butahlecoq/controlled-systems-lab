@@ -1,17 +1,306 @@
 #include <csl/application/comparison.hpp>
 #include <csl/artifacts/h_relation_attachment.hpp>
+#include <nlohmann/json.hpp>
 
 #include <algorithm>
+#include <bit>
+#include <charconv>
+#include <cstdint>
 #include <string_view>
 #include <type_traits>
 #include <utility>
 
 namespace csl::application {
 namespace {
+using Json = nlohmann::ordered_json;
 constexpr std::array<std::string_view, 3> profiles{
     "ts01_exact_integrator", "ts02_constant_integrator", "ts03_singular_integrator"};
 constexpr std::array<std::string_view, 2> strategies{
     "csl.synthesis.reach-back", "csl.synthesis.strategy-b"};
+
+std::string bits(double value) {
+    char buffer[16];
+    const auto converted = std::to_chars(buffer, buffer + sizeof(buffer),
+        std::bit_cast<std::uint64_t>(value), 16);
+    std::string result(static_cast<std::size_t>(16 - (converted.ptr - buffer)), '0');
+    result.append(buffer, converted.ptr);
+    return result;
+}
+
+std::string_view assurance_name(Assurance value) {
+    switch (value) {
+    case Assurance::numerical: return "numerical";
+    case Assurance::validated: return "validated";
+    }
+    return "unknown";
+}
+
+std::string_view termination_name(Termination value) {
+    switch (value) {
+    case Termination::completed: return "completed";
+    case Termination::cancelled: return "cancelled";
+    case Termination::resource_limit: return "resource_limit";
+    case Termination::numerical_failure: return "numerical_failure";
+    case Termination::operation_rejected: return "operation_rejected";
+    case Termination::contract_rejected: return "contract_rejected";
+    }
+    return "unknown";
+}
+
+std::string_view check_status_name(verification::CheckStatus value) {
+    switch (value) {
+    case verification::CheckStatus::not_checked: return "not_checked";
+    case verification::CheckStatus::numerical_pass: return "numerical_pass";
+    case verification::CheckStatus::violation: return "violation";
+    case verification::CheckStatus::invalid_input: return "invalid_input";
+    case verification::CheckStatus::unsupported: return "unsupported";
+    }
+    return "unknown";
+}
+
+std::string_view diagnostic_code_name(DiagnosticCode value) {
+    switch (value) {
+    case DiagnosticCode::invalid_input: return "invalid_input";
+    case DiagnosticCode::unsupported: return "unsupported";
+    case DiagnosticCode::evidence_mismatch: return "evidence_mismatch";
+    case DiagnosticCode::invalid_claim: return "invalid_claim";
+    }
+    return "unknown";
+}
+
+std::string_view family_target_name(FamilyTarget value) {
+    switch (value) {
+    case FamilyTarget::exact_optimal_relation: return "exact_optimal_relation";
+    case FamilyTarget::candidate_relaxation: return "candidate_relaxation";
+    case FamilyTarget::partial_relation: return "partial_relation";
+    }
+    return "unknown";
+}
+
+std::string_view mathematical_outcome_name(MathematicalOutcome value) {
+    switch (value) {
+    case MathematicalOutcome::optimal: return "optimal";
+    case MathematicalOutcome::infeasible: return "infeasible";
+    case MathematicalOutcome::unbounded: return "unbounded";
+    case MathematicalOutcome::infimum_not_attained: return "infimum_not_attained";
+    case MathematicalOutcome::undetermined: return "undetermined";
+    }
+    return "unknown";
+}
+
+Json diagnostics_json(const Diagnostics& diagnostics) {
+    auto result = Json::array();
+    for (const auto& diagnostic : diagnostics)
+        result.push_back({{"code", diagnostic_code_name(diagnostic.code)},
+            {"field", diagnostic.field}, {"explanation", diagnostic.explanation}});
+    return result;
+}
+
+Json provider_json(const registry::Provenance& provenance) {
+    Json requested{{"id", provenance.requested.id.value},
+        {"version", provenance.requested.version ? Json(*provenance.requested.version) : Json(nullptr)}};
+    Json actual = nullptr;
+    if (provenance.actual)
+        actual = {{"id", provenance.actual->id.value}, {"version", provenance.actual->version}};
+    return {{"port", provenance.port}, {"requested", std::move(requested)}, {"actual", std::move(actual)}};
+}
+
+Json vector_json(const Vector& vector) {
+    auto result = Json::array();
+    for (const double value : vector) result.push_back(bits(value));
+    return result;
+}
+
+Json evidence_support_json(const EvidenceSupport& support) {
+    return std::visit([](const auto& value) -> Json {
+        using T = std::decay_t<decltype(value)>;
+        if constexpr (std::is_same_v<T, Unestablished>) {
+            return {{"kind", "unestablished"}};
+        } else if constexpr (std::is_same_v<T, NumericalCheck>) {
+            return {{"kind", "numerical_check"}, {"absolute_tolerance_bits", bits(value.absolute_tolerance)},
+                {"relative_tolerance_bits", bits(value.relative_tolerance)},
+                {"max_residual_bits", bits(value.max_residual)}, {"verifier", value.verifier.value}};
+        } else if constexpr (std::is_same_v<T, SymbolicArgument>) {
+            return {{"kind", "symbolic_argument"}, {"reference", value.reference}, {"assumptions", value.assumptions}};
+        } else if constexpr (std::is_same_v<T, CertificateReference>) {
+            return {{"kind", "certificate_reference"}, {"artifact", value.artifact}, {"verifier", value.verifier}};
+        } else {
+            const auto& certificate = value.certificate();
+            return {{"kind", "exact_farkas"},
+                {"subject", {{"problem_id", value.subject().problem.value},
+                    {"program_id", value.subject().program.value}}},
+                {"row_lower", vector_json(certificate.row_lower)}, {"row_upper", vector_json(certificate.row_upper)},
+                {"variable_lower", vector_json(certificate.variable_lower)},
+                {"variable_upper", vector_json(certificate.variable_upper)}};
+        }
+    }, support);
+}
+
+Json claim_evidence_json(const ClaimEvidence& evidence) {
+    return {{"problem_id", evidence.problem.value}, {"support", evidence_support_json(evidence.support)}};
+}
+
+Json objective_evidence_json(const ObjectiveEvidence& evidence) {
+    Json result{{"lower", nullptr}, {"upper", nullptr}};
+    if (evidence.lower)
+        result["lower"] = {{"value_bits", bits(evidence.lower->value)},
+            {"evidence", claim_evidence_json(evidence.lower->evidence)}};
+    if (evidence.upper)
+        result["upper"] = {{"value_bits", bits(evidence.upper->value)},
+            {"evidence", claim_evidence_json(evidence.upper->evidence)}};
+    return result;
+}
+
+Json program_objective_evidence_json(const std::vector<ProgramObjectiveEvidence>& evidence) {
+    auto result = Json::array();
+    for (const auto& bounds : evidence) {
+        Json item{{"lower", nullptr}, {"upper", nullptr}};
+        const auto encode_bound = [](const ProgramObjectiveBound& bound) {
+            auto assumptions = Json::array();
+            for (const auto& assumption : bound.evidence.assumptions) assumptions.push_back(assumption);
+            return Json{{"subject", {{"problem_id", bound.evidence.subject.problem.value},
+                    {"program_id", bound.evidence.subject.program.value}}}, {"value_bits", bits(bound.value)},
+                {"evidence", evidence_support_json(bound.evidence.support)}, {"assumptions", std::move(assumptions)}};
+        };
+        if (bounds.lower) item["lower"] = encode_bound(*bounds.lower);
+        if (bounds.upper) item["upper"] = encode_bound(*bounds.upper);
+        result.push_back(std::move(item));
+    }
+    return result;
+}
+
+Json family_request_json(const FamilyRequest& request) {
+    return {{"profile", request.profile}, {"objective", request.objective.value},
+        {"target", family_target_name(request.target)}, {"assurance", assurance_name(request.assurance)},
+        {"representation", request.representation.value},
+        {"absolute_tolerance_bits", bits(request.numerical.absolute_tolerance)},
+        {"relative_tolerance_bits", bits(request.numerical.relative_tolerance)},
+        {"materialization_limit", request.materialization_limit
+            ? Json(*request.materialization_limit) : Json(nullptr)}};
+}
+
+Json lineage_json(const std::vector<TransformStepIdentity>& lineage) {
+    auto result = Json::array();
+    for (const auto& step : lineage)
+        result.push_back({{"request", step.request.value}, {"input", step.input.value},
+            {"output", step.output.value}, {"module", step.module.value}, {"version", step.version}});
+    return result;
+}
+
+Json witness_json(const Witness& witness) {
+    auto states = Json::array();
+    for (const auto& state : witness.states) states.push_back(vector_json(state));
+    auto controls = Json::array();
+    for (const auto& control : witness.controls) controls.push_back(vector_json(control));
+    return {{"problem_id", witness.problem.value}, {"states", std::move(states)},
+        {"controls", std::move(controls)}, {"original_objective_bits", bits(witness.original_objective)}};
+}
+
+Json report_json(const verification::TrajectoryReport& report, std::size_t witness_index) {
+    Json request{{"assurance", assurance_name(report.input.assurance)},
+        {"verification_assurance", assurance_name(report.verification.assurance)},
+        {"absolute_tolerance_bits", bits(report.verification.numerical.absolute_tolerance)},
+        {"relative_tolerance_bits", bits(report.verification.numerical.relative_tolerance)}};
+    if (report.input.expected_synthesis) {
+        const auto& binding = *report.input.expected_synthesis;
+        request["expected_synthesis"] = {{"strategy", binding.strategy.value},
+            {"strategy_version", binding.strategy_version},
+            {"family_request", family_request_json(binding.request)}, {"lineage", lineage_json(binding.lineage)}};
+    }
+    request["limits"] = {{"residuals", report.input.limits.residuals},
+        {"membership_queries", report.input.limits.membership_queries}};
+    request["bounds"] = objective_evidence_json(report.input.bounds);
+    request["backend_bounds"] = program_objective_evidence_json(report.input.backend_bounds);
+    if (report.input.family) {
+        const auto& identity = report.input.family->identity();
+        request["family_identity"] = {{"problem_id", identity.problem.value},
+            {"request", family_request_json(identity.request)},
+            {"coordinates", {{"state_dimension", identity.coordinates.dimensions.state},
+                {"control_dimension", identity.coordinates.dimensions.control},
+                {"external_dimension", identity.coordinates.dimensions.external},
+                {"horizon", identity.coordinates.horizon}}},
+            {"strategy", identity.strategy.value}, {"strategy_version", identity.strategy_version},
+            {"lineage", lineage_json(identity.lineage)}};
+    } else {
+        request["family_identity"] = nullptr;
+    }
+    auto residuals = Json::array();
+    for (const auto& residual : report.residuals)
+        residuals.push_back({{"field", residual.field}, {"violation_bits", bits(residual.measure.violation)},
+            {"scale_bits", bits(residual.measure.scale)}, {"tolerance_bits", bits(residual.tolerance)},
+            {"satisfied", residual.satisfied}});
+    auto queries = Json::array();
+    for (const auto& query : report.membership_queries) {
+        queries.push_back(std::visit([](const auto& item) -> Json {
+            using T = std::decay_t<decltype(item)>;
+            Json encoded{{"request_problem_id", item.request.problem.value},
+                {"request_program_id", item.request.program.value}};
+            if constexpr (std::is_same_v<T, registry::LPQueryNotRun>) {
+                encoded["kind"] = "not_run";
+                encoded["reason"] = item.reason == registry::LPQueryNotRunReason::cancelled ? "cancelled" : "deadline";
+                encoded["provider"] = provider_json(item.provider);
+            } else if constexpr (std::is_same_v<T, registry::LPQueryRejected>) {
+                encoded["kind"] = "rejected";
+                encoded["diagnostics"] = diagnostics_json(item.rejection.diagnostics);
+                encoded["provider"] = provider_json(item.rejection.provenance);
+            } else if constexpr (std::is_same_v<T, registry::LPQuerySolverUnsupported>) {
+                encoded["kind"] = "solver_unsupported";
+                encoded["diagnostics"] = diagnostics_json(item.diagnostics);
+                encoded["provider"] = provider_json(item.provider);
+            } else if constexpr (std::is_same_v<T, registry::LPQueryCompleted>) {
+                encoded["kind"] = "completed";
+                encoded["returned_problem_id"] = item.returned_subject.problem.value;
+                encoded["returned_program_id"] = item.returned_subject.program.value;
+                encoded["outcome"] = mathematical_outcome_name(item.outcome);
+                encoded["provider"] = provider_json(item.provider);
+            } else {
+                encoded["kind"] = "stopped";
+                switch (item.reason) {
+                case registry::LPQueryStopReason::cancelled: encoded["reason"] = "cancelled"; break;
+                case registry::LPQueryStopReason::resource_limit: encoded["reason"] = "resource_limit"; break;
+                case registry::LPQueryStopReason::numerical_failure: encoded["reason"] = "numerical_failure"; break;
+                }
+                encoded["provider"] = provider_json(item.provider);
+            }
+            return encoded;
+        }, query));
+    }
+    return {{"witness_index", witness_index}, {"problem_id", report.problem.value},
+        {"witness", witness_json(report.input.witness)}, {"verifier", {{"id", report.verifier.id.value},
+            {"version", report.verifier.version}}}, {"request", std::move(request)},
+        {"termination", termination_name(report.termination)}, {"bindings", check_status_name(report.bindings)},
+        {"feasibility", check_status_name(report.feasibility)}, {"objective", check_status_name(report.objective)},
+        {"optimality", check_status_name(report.optimality)}, {"completeness", check_status_name(report.completeness)},
+        {"validated", check_status_name(report.validated)},
+        {"recomputed_objective_bits", report.recomputed_objective ? Json(bits(*report.recomputed_objective)) : Json(nullptr)},
+        {"residuals", std::move(residuals)}, {"membership_queries", std::move(queries)},
+        {"diagnostics", diagnostics_json(report.diagnostics)}};
+}
+
+artifacts::ArtifactResult<artifacts::Attachment> verification_attachment(
+    const std::vector<verification::TrajectoryReport>& reports, const ProblemId& problem_id) {
+    constexpr std::uint64_t max_bytes = 16 * 1024 * 1024;
+    Json encoded{{"schema", "csl.trajectory-verification-reports/1"}, {"problem_id", problem_id.value}};
+    auto values = Json::array();
+    for (std::size_t i = 0; i < reports.size(); ++i) {
+        if (reports[i].problem != problem_id || reports[i].input.witness.problem != problem_id)
+            return artifacts::ArtifactError{artifacts::ArtifactErrorCode::identity,
+                "run.verification[" + std::to_string(i) + "]", "Verifier report belongs to a different problem"};
+        values.push_back(report_json(reports[i], i));
+    }
+    encoded["reports"] = std::move(values);
+    const auto text = encoded.dump();
+    if (text.size() > max_bytes)
+        return artifacts::ArtifactError{artifacts::ArtifactErrorCode::limit, "run.verification", "Verifier report attachment exceeds 16 MiB"};
+    const auto content_result = problem::snapshot_content(std::span<const std::byte>{
+        reinterpret_cast<const std::byte*>(text.data()), text.size()});
+    if (const auto* diagnostic = std::get_if<Diagnostic>(&content_result))
+        return artifacts::ArtifactError{artifacts::ArtifactErrorCode::limit, diagnostic->field, diagnostic->explanation};
+    auto content = std::get<problem::ResolvedContent>(content_result);
+    return artifacts::Attachment{{"trajectory-verification-reports"}, artifacts::AttachmentRole::certificate,
+        content.digest(), static_cast<std::uint64_t>(content.bytes().size()), "application/json",
+        "csl.trajectory-verification-reports/1", {}, std::move(content)};
+}
 
 bool admitted_representation(const RepresentationId& representation) {
     return representation.value == "csl.polyhedron.h";
@@ -155,6 +444,27 @@ artifacts::ArtifactResult<std::string> encode_strategy_run(
         selection = *selected;
     auto final=execution.final_projection;
     std::vector<artifacts::Attachment> attachments;
+    const auto* selected = std::get_if<WitnessSelection>(&execution.selection);
+    if ((selected && selected->batch.witnesses.size() != execution.verification.size()) ||
+        (!selected && !execution.verification.empty()))
+        return artifacts::ArtifactError{artifacts::ArtifactErrorCode::identity, "run.verification",
+            "Verifier reports must match the selected witness batch in order and count"};
+    for (std::size_t i = 0; selected && i < execution.verification.size(); ++i) {
+        const auto& witness = selected->batch.witnesses[i];
+        const auto& report_witness = execution.verification[i].input.witness;
+        if (report_witness.problem != witness.problem || report_witness.states != witness.states ||
+            report_witness.controls != witness.controls ||
+            std::bit_cast<std::uint64_t>(report_witness.original_objective) !=
+                std::bit_cast<std::uint64_t>(witness.original_objective))
+            return artifacts::ArtifactError{artifacts::ArtifactErrorCode::identity,
+                "run.verification[" + std::to_string(i) + "].witness",
+                "Verifier report is not bound to the selected witness at the same index"};
+    }
+    if (!execution.verification.empty()) {
+        auto attachment = verification_attachment(execution.verification, problem.identity());
+        if (const auto* error = std::get_if<artifacts::ArtifactError>(&attachment)) return *error;
+        attachments.push_back(std::get<artifacts::Attachment>(std::move(attachment)));
+    }
     if(auto* synthesis=std::get_if<artifacts::SynthesisFinal>(&final);synthesis&&synthesis->family) {
         auto& family=*synthesis->family;
         const auto* complete=std::get_if<CompleteOptimalFamily>(&family.family.outcome());

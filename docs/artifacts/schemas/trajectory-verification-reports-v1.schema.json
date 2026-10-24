@@ -1,0 +1,72 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:csl:trajectory-verification-reports:1",
+  "title": "CSL recorded trajectory verification reports",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema", "problem_id", "reports"],
+  "properties": {
+    "schema": {"const": "csl.trajectory-verification-reports/1"},
+    "problem_id": {"type": "string", "minLength": 1},
+    "reports": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["witness_index", "problem_id", "witness", "verifier", "request", "termination", "bindings", "feasibility", "objective", "optimality", "completeness", "validated", "recomputed_objective_bits", "residuals", "membership_queries", "diagnostics"],
+        "properties": {
+          "witness_index": {"type": "integer", "minimum": 0},
+          "problem_id": {"type": "string", "minLength": 1},
+          "witness": {"type": "object", "additionalProperties": false, "required": ["problem_id", "states", "controls", "original_objective_bits"], "properties": {
+            "problem_id": {"type": "string", "minLength": 1},
+            "states": {"type": "array", "items": {"$ref": "#/$defs/vector"}},
+            "controls": {"type": "array", "items": {"$ref": "#/$defs/vector"}},
+            "original_objective_bits": {"$ref": "#/$defs/bits"}
+          }},
+          "verifier": {"type": "object", "additionalProperties": false, "required": ["id", "version"], "properties": {"id": {"type": "string"}, "version": {"type": "string"}}},
+          "request": {"type": "object", "required": ["assurance", "verification_assurance", "absolute_tolerance_bits", "relative_tolerance_bits", "limits", "bounds", "backend_bounds", "family_identity"], "properties": {
+            "assurance": {"enum": ["numerical", "validated"]},
+            "verification_assurance": {"enum": ["numerical", "validated"]},
+            "absolute_tolerance_bits": {"$ref": "#/$defs/bits"},
+            "relative_tolerance_bits": {"$ref": "#/$defs/bits"},
+            "limits": {"type": "object", "additionalProperties": false, "required": ["residuals", "membership_queries"], "properties": {"residuals": {"type": "integer", "minimum": 0}, "membership_queries": {"type": "integer", "minimum": 0}}},
+            "bounds": {"type": "object", "additionalProperties": false, "required": ["lower", "upper"], "properties": {"lower": {"oneOf": [{"$ref": "#/$defs/objective_bound"}, {"type": "null"}]}, "upper": {"oneOf": [{"$ref": "#/$defs/objective_bound"}, {"type": "null"}]}}},
+            "backend_bounds": {"type": "array", "items": {"type": "object"}},
+            "family_identity": {"oneOf": [{"type": "object"}, {"type": "null"}]},
+            "expected_synthesis": {"type": "object", "additionalProperties": false, "required": ["strategy", "strategy_version", "family_request", "lineage"], "properties": {
+              "strategy": {"type": "string"}, "strategy_version": {"type": "string"},
+              "family_request": {"$ref": "#/$defs/family_request"},
+              "lineage": {"$ref": "#/$defs/lineage"}
+            }}
+          }},
+          "termination": {"enum": ["completed", "cancelled", "resource_limit", "numerical_failure", "operation_rejected", "contract_rejected"]},
+          "bindings": {"$ref": "#/$defs/check"},
+          "feasibility": {"$ref": "#/$defs/check"},
+          "objective": {"$ref": "#/$defs/check"},
+          "optimality": {"$ref": "#/$defs/check"},
+          "completeness": {"$ref": "#/$defs/check"},
+          "validated": {"$ref": "#/$defs/check"},
+          "recomputed_objective_bits": {"oneOf": [{"$ref": "#/$defs/bits"}, {"type": "null"}]},
+          "residuals": {"type": "array", "items": {"type": "object", "additionalProperties": false, "required": ["field", "violation_bits", "scale_bits", "tolerance_bits", "satisfied"], "properties": {
+            "field": {"type": "string"}, "violation_bits": {"$ref": "#/$defs/bits"}, "scale_bits": {"$ref": "#/$defs/bits"}, "tolerance_bits": {"$ref": "#/$defs/bits"}, "satisfied": {"type": "boolean"}
+          }}},
+          "membership_queries": {"type": "array", "items": {"type": "object"}},
+          "diagnostics": {"type": "array", "items": {"$ref": "#/$defs/diagnostic"}}
+        }
+      }
+    }
+  },
+  "$defs": {
+    "bits": {"type": "string", "pattern": "^[0-9a-f]{16}$"},
+    "vector": {"type": "array", "items": {"$ref": "#/$defs/bits"}},
+    "lineage": {"type": "array", "items": {"type": "object", "additionalProperties": false, "required": ["request", "input", "output", "module", "version"], "properties": {"request": {"type": "string"}, "input": {"type": "string"}, "output": {"type": "string"}, "module": {"type": "string"}, "version": {"type": "string"}}}},
+    "family_request": {"type": "object", "additionalProperties": false, "required": ["profile", "objective", "target", "assurance", "representation", "absolute_tolerance_bits", "relative_tolerance_bits", "materialization_limit"], "properties": {
+      "profile": {"type": "string"}, "objective": {"type": "string"}, "target": {"enum": ["exact_optimal_relation", "candidate_relaxation", "partial_relation"]}, "assurance": {"enum": ["numerical", "validated"]}, "representation": {"type": "string"}, "absolute_tolerance_bits": {"$ref": "#/$defs/bits"}, "relative_tolerance_bits": {"$ref": "#/$defs/bits"}, "materialization_limit": {"oneOf": [{"type": "integer", "minimum": 0}, {"type": "null"}]}
+    }},
+    "objective_bound": {"type": "object", "additionalProperties": false, "required": ["value_bits", "evidence"], "properties": {"value_bits": {"$ref": "#/$defs/bits"}, "evidence": {"type": "object", "required": ["problem_id", "support"], "properties": {"problem_id": {"type": "string"}, "support": {"type": "object"}}}}},
+    "check": {"enum": ["not_checked", "numerical_pass", "violation", "invalid_input", "unsupported"]},
+    "diagnostic": {"type": "object", "additionalProperties": false, "required": ["code", "field", "explanation"], "properties": {
+      "code": {"enum": ["invalid_input", "unsupported", "evidence_mismatch", "invalid_claim"]}, "field": {"type": "string"}, "explanation": {"type": "string"}
+    }}
+  }
+}

@@ -88,7 +88,8 @@ ComparisonExecution run_comparison(const PreparedComparison&,
     std::optional<registry::PreparedProvider<registry::LPPort>> membership_provider = std::nullopt);
 
 // Encodes one strategy final through the versioned publisher and codec. Paired
-// comparison metadata and verifier reports remain in memory.
+// comparison metadata remains in memory; trajectory results are stored as a
+// versioned certificate-role attachment bound to the saved witness selection.
 artifacts::ArtifactResult<std::string> encode_strategy_run(
     const problem::ResolvedProblem&, const StrategyExecution&,
     artifacts::ResolvedConfiguration, artifacts::RunId,
