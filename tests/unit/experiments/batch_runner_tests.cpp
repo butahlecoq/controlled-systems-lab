@@ -143,6 +143,7 @@ TEST_CASE("a sweep keeps admitted and skipped scenario records together") {
     const ResourcePolicy resources{1,1,1,std::nullopt};
     ExecutionContext context;
     context.resources=std::make_shared<const ResourcePolicy>(resources);
+    context.run_id="sweep-admission";
     const auto outcome=experiments::run_sweep(cases,resources,context,execution::Mode::sequential,
         execution::AdmissionLimit{1});
     REQUIRE(std::holds_alternative<experiments::SweepResult>(outcome));
