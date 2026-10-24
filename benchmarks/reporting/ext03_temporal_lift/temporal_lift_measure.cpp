@@ -91,11 +91,11 @@ void one_run() {
         "original coordinate identity differs");
     require(lifted.coordinates.lifted == JointCoordinates{{2, 1, 0}, 2},
         "lifted coordinate identity differs");
-    require(lifted.coordinates.original_state_to_lifted_state == std::vector<std::size_t>{0, 0, 0},
+    require(lifted.coordinates.original_state_to_lifted_state == std::vector<std::size_t>{0, 2, 4},
         "original state coordinate map differs");
-    require(lifted.coordinates.original_control_to_lifted_memory == std::vector<std::size_t>{1, 1},
+    require(lifted.coordinates.original_control_to_lifted_memory == std::vector<std::size_t>{3, 5},
         "original control memory map differs");
-    require(lifted.coordinates.lifted_increment_to_original_control == std::vector<std::size_t>{0, 0},
+    require(lifted.coordinates.lifted_increment_to_original_control == std::vector<std::size_t>{3, 4},
         "lifted increment coordinate map differs");
 
     const LiftedControlHistory auxiliary{{{0, 0.25}, {0, 0}, {-0.25, -0.25}}, {{-0.25}, {-0.25}}};
