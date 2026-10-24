@@ -355,7 +355,8 @@ RunOutcome run_registered(const registry::Registry<registry::ApproximationPort>&
     requirements.output.relation=request.direction;
     auto prepared=registry::prepare_pipeline(registry::select(registry,method,request,requirements));
     if(const auto* rejected=std::get_if<registry::Rejection>(&prepared)) {
-        ob::InstrumentedOperation observation{context,approximation_identity(request,rejected->provenance)};
+        ob::InstrumentedOperation observation{context,
+            requested_approximation_identity(request,rejected->provenance.requested)};
         observation.not_called(ar::NotCalledReason::capability_rejected);
         return *rejected;
     }
