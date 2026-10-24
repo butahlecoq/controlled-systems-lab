@@ -142,14 +142,16 @@ std::shared_ptr<ob::TimingCollector> selector_timing(const problem::ResolvedProb
     root.module=strategy;root.clock=clock.id;root.requested_assurance=family_request.assurance;
     root.applied_assurance=ar::Available<Assurance>{Assurance::numerical};
     input.spans.push_back(root);
-    ar::SpanDescriptor query{};query.id={1};query.parent=ar::SpanParent{{0},ar::ParentKind::nested};
-    query.task="run";query.operation=operation;query.module=selector;
-    query.backend=std::make_shared<const ar::ModuleIdentity>(lp);query.clock=clock.id;
-    query.program=std::make_shared<const ProgramIdentity>(direction_program(family,request,0));
-    query.query=0;query.requested_assurance=family_request.assurance;
-    query.applied_assurance=ar::Available<Assurance>{Assurance::numerical};
-    query.observation_source="witness-selector-lp-query";
-    input.spans.push_back(std::move(query));
+    for(std::size_t index=0;index<request.directions.size();++index) {
+        ar::SpanDescriptor query{};query.id={index+1};query.parent=ar::SpanParent{{0},ar::ParentKind::nested};
+        query.task="run";query.operation=operation;query.module=selector;
+        query.backend=std::make_shared<const ar::ModuleIdentity>(lp);query.clock=clock.id;
+        query.program=std::make_shared<const ProgramIdentity>(direction_program(family,request,index));
+        query.query=index;query.requested_assurance=family_request.assurance;
+        query.applied_assurance=ar::Available<Assurance>{Assurance::numerical};
+        query.observation_source="witness-selector-lp-query";
+        input.spans.push_back(std::move(query));
+    }
     auto plan=take(ob::make_collection_plan(std::move(input)));
     return take(ob::make_timing_collector(plan,std::make_shared<SelectorClock>(),{0},{}));
 }
@@ -197,7 +199,7 @@ TEST_CASE("direction LP executions record their selector, backend, program, and 
     Registry<SelectorPort> selectors;
     REQUIRE_FALSE(selectors.add(synthesis::witness_selector::make_registration(provider)).has_value());
     const auto family=*synthesis_result.family;
-    const WitnessRequest selection_request{1,1e-9,{{1,-1}},17};
+    const WitnessRequest selection_request{2,1e-9,{{1,-1},{-1,1}},17};
     SelectorRequest query{family,selection_request};
     Requirements output;output.output.representation={"csl.witness-batch.v1"};
     auto prepared=take(prepare_pipeline(select(selectors,
@@ -209,21 +211,27 @@ TEST_CASE("direction LP executions record their selector, backend, program, and 
     auto selection=take(std::get<0>(workspace)->run(context));
     root.close(Termination::completed);
     REQUIRE(selection.termination==Termination::completed);
-    REQUIRE(selection.batch.witnesses.size()==1);
+    REQUIRE(selection.batch.witnesses.size()==2);
+    CHECK(selection.batch.witnesses[0].controls==std::vector<Vector>{{0},{1}});
+    CHECK(selection.batch.witnesses[1].controls==std::vector<Vector>{{1},{0}});
     const auto report=take(timer->snapshot());
-    REQUIRE(report.spans.size()==2);
-    const auto& timed=report.spans[1];
-    REQUIRE(std::holds_alternative<ar::Available<std::uint64_t>>(timed.inclusive_wall_ticks));
-    CHECK(std::get<ar::Available<std::uint64_t>>(timed.inclusive_wall_ticks).value==10);
-    const auto& record=report.observations.description().spans[1];
-    CHECK(record.descriptor.operation=="selector.lp.direction-query");
-    CHECK(record.descriptor.module.id==ModuleId{synthesis::witness_selector::selector_id});
-    CHECK(record.descriptor.backend->id==provider.provenance().actual->id);
-    CHECK(record.descriptor.backend->version==provider.provenance().actual->version);
-    CHECK(*record.descriptor.program==direction_program(family,selection_request,0));
-    CHECK(record.descriptor.query==0);
-    REQUIRE(std::holds_alternative<ar::ReturnedSpan>(record.status));
-    CHECK(std::get<ar::ReturnedSpan>(record.status).termination==Termination::completed);
+    REQUIRE(report.spans.size()==3);
+    for(std::size_t index=0;index<selection_request.directions.size();++index) {
+        const auto& timed=report.spans[index+1];
+        REQUIRE(std::holds_alternative<ar::Available<std::uint64_t>>(timed.inclusive_wall_ticks));
+        CHECK(std::get<ar::Available<std::uint64_t>>(timed.inclusive_wall_ticks).value==10);
+        const auto& record=report.observations.description().spans[index+1];
+        CHECK(record.descriptor.operation=="selector.lp.direction-query");
+        CHECK(record.descriptor.module.id==ModuleId{synthesis::witness_selector::selector_id});
+        REQUIRE(record.descriptor.backend);
+        CHECK(record.descriptor.backend->id==provider.provenance().actual->id);
+        CHECK(record.descriptor.backend->version==provider.provenance().actual->version);
+        REQUIRE(record.descriptor.program);
+        CHECK(*record.descriptor.program==direction_program(family,selection_request,index));
+        CHECK(record.descriptor.query==index);
+        REQUIRE(std::holds_alternative<ar::ReturnedSpan>(record.status));
+        CHECK(std::get<ar::ReturnedSpan>(record.status).termination==Termination::completed);
+    }
 }
 
 TEST_CASE("reject malformed direction before provider creation and honor cancellation") {
