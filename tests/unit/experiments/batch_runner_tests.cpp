@@ -407,6 +407,8 @@ TEST_CASE("a completed family query sweep records aligned runs and measured phas
     std::vector<std::optional<artifacts::RecordedRunArtifact>> query_records{recorded, std::nullopt};
     const auto archive = experiments::record_family_query_sweep(sweep_spec(),
         std::get<experiments::FamilyQueryResult>(queried), coarse_records, query_records);
+    if (const auto* error = std::get_if<artifacts::ArtifactError>(&archive))
+        MESSAGE(error->path, ": ", error->message);
     REQUIRE(std::holds_alternative<artifacts::RecordedSweepArtifact>(archive));
     const auto bytes = std::get<artifacts::RecordedSweepArtifact>(archive).content().bytes();
     const std::string wire(reinterpret_cast<const char*>(bytes.data()), bytes.size());
@@ -426,6 +428,23 @@ TEST_CASE("a completed family query sweep records aligned runs and measured phas
         std::get<experiments::FamilyQueryResult>(queried), coarse_records, query_records);
     REQUIRE(std::holds_alternative<artifacts::ArtifactError>(mismatched_query));
     CHECK(std::get<artifacts::ArtifactError>(mismatched_query).path=="sweep.cases[1].query");
+    query_records[1] = std::nullopt;
+
+    auto cancelled_run_wire = std::string(reinterpret_cast<const char*>(recorded.content().bytes().data()),
+        recorded.content().bytes().size());
+    const auto completed_termination = cancelled_run_wire.find("\"termination\":\"completed\"");
+    REQUIRE(completed_termination != std::string::npos);
+    cancelled_run_wire.replace(completed_termination,
+        std::string_view("\"termination\":\"completed\"").size(),
+        "\"termination\":\"cancelled\"");
+    const auto cancelled_record_result = artifacts::decode_recorded_run(cancelled_run_wire);
+    REQUIRE(std::holds_alternative<artifacts::RecordedRunArtifact>(cancelled_record_result));
+    auto mismatched_coarse_records = coarse_records;
+    mismatched_coarse_records.front() = std::get<artifacts::RecordedRunArtifact>(cancelled_record_result);
+    const auto mismatched_coarse = experiments::record_family_query_sweep(sweep_spec(),
+        std::get<experiments::FamilyQueryResult>(queried), mismatched_coarse_records, query_records);
+    REQUIRE(std::holds_alternative<artifacts::ArtifactError>(mismatched_coarse));
+    CHECK(std::get<artifacts::ArtifactError>(mismatched_coarse).path=="sweep.cases[0].coarse_run.outcome");
 }
 
 TEST_CASE("finite sweep budgets reserve retained coarse and query results before admission") {
