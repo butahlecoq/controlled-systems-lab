@@ -90,10 +90,8 @@ public:
         batch.source_family=family.identity();
         batch.directions=request.directions;
         batch.distinctness_tolerance=request.distinctness_tolerance;
-        batch.witnesses={
-            {family.identity().problem,{{0}},{{0}},0.0},
-            {family.identity().problem,{{0}},{{1}},0.0}};
-        return WitnessSelection{std::move(batch),Termination::completed,{}};
+        return WitnessSelection{std::move(batch),Termination::resource_limit,
+            "core-profile fixture verifies query plumbing without fabricating trajectories"};
     }
 };
 
@@ -143,11 +141,18 @@ int main() {
         &result.query_batch.tasks[0].outcome);
     if(!returned)throw std::runtime_error("Installed family query did not return a selector outcome");
     const auto* selected=std::get_if<WitnessSelection>(&returned->value);
-    if(!selected||selected->termination!=Termination::completed||selected->batch.returned_count()!=2||
-        selected->batch.distinct_count()!=2||selected->batch.source_family!=
-            std::get<SynthesisResult>(std::get<execution::Returned<registry::StrategyPort>>(
-                result.sweep.batch.tasks[0].outcome).value).family->identity())
+    if(!selected||selected->batch.requested!=2||selected->batch.source_family!=
+        std::get<SynthesisResult>(std::get<execution::Returned<registry::StrategyPort>>(
+            result.sweep.batch.tasks[0].outcome).value).family->identity())
         throw std::runtime_error("Installed family query lost its witness result or family provenance");
+#if CSL_INSTALLED_EXPERIMENTS_WITH_HIGHS
+    if(selected->termination!=Termination::completed||selected->batch.returned_count()!=2||
+        selected->batch.distinct_count()!=2)
+        throw std::runtime_error("Installed real selector did not return the two supported witnesses");
+#else
+    if(selected->termination!=Termination::resource_limit||selected->batch.returned_count()!=0)
+        throw std::runtime_error("Core installed fixture should report no unverified witness trajectories");
+#endif
 
     std::cout<<"Installed experiments client: coarse sweep and family query passed\n";
 }
