@@ -1,6 +1,8 @@
 #include <csl/synthesis/witness_selector.hpp>
 #include <csl/synthesis/strategy_ts01/analytic_profile.hpp>
 #include <csl/synthesis/ts02_constant_integrator.hpp>
+#include <csl/synthesis/ts03_singular_integrator.hpp>
+#include <csl/synthesis/strategy_a/nominal_linear_exact_profile.hpp>
 #include <csl/optimization/linear_program.hpp>
 #include <cmath>
 #include <algorithm>
@@ -25,6 +27,13 @@ const sets::SetData* relation_set(const OptimalFamily& family) {
         const auto* relation=dynamic_cast<const Ts02ConstantIntegratorRelation*>(complete->relation.payload.get());
         return relation?&relation->h_polyhedron():nullptr;
     }
+    if(profile==ts03_singular_integrator_profile) {
+        const auto* relation=dynamic_cast<const Ts03SingularIntegratorRelation*>(complete->relation.payload.get());
+        return relation?&relation->h_polyhedron():nullptr;
+    }
+    if(profile==strategy_a::nominal_linear_exact_profile)
+        return complete->relation.payload
+            ?complete->relation.payload->h_relation_for_recording():nullptr;
     return nullptr;
 }
 
@@ -64,6 +73,37 @@ bool contains_ts02(std::span<const double> point) noexcept {
     return x0==0&&x1==u0&&u0>=0&&u0<=1&&u1>=0&&u1<=1&&x2>=0&&
         exact_nonnegative_sum_equals(x1,u1,x2);
 }
+bool contains_ts03(std::span<const double> point) noexcept {
+    if(point.size()!=5||std::any_of(point.begin(),point.end(),[](double value){return !std::isfinite(value);}))return false;
+    const auto x0=point[0],x1=point[1],x2=point[2],u0=point[3],u1=point[4];
+    return x0==0&&x1==u0&&x2==1&&u0>=0&&u0<=1&&u1==1;
+}
+bool contains_h(const sets::HRepresentation& h,std::span<const double> point,
+        const NumericalPolicy& tolerance) noexcept {
+    if(point.size()!=h.inequalities.cols()||point.size()!=h.equalities.cols())return false;
+    const auto within=[&](double value,double bound,double scale) {
+        return std::abs(value-bound)<=tolerance.absolute_tolerance+
+            tolerance.relative_tolerance*std::max(1.0,scale);
+    };
+    for(std::size_t row=0;row<h.inequalities.rows();++row) {
+        double value=0,scale=std::abs(h.upper_bounds[row]);
+        for(std::size_t col=0;col<point.size();++col) {
+            const auto term=h.inequalities(row,col)*point[col];
+            value+=term;scale+=std::abs(term);
+        }
+        if(value>h.upper_bounds[row]+tolerance.absolute_tolerance+
+                tolerance.relative_tolerance*std::max(1.0,scale))return false;
+    }
+    for(std::size_t row=0;row<h.equalities.rows();++row) {
+        double value=0,scale=std::abs(h.equality_values[row]);
+        for(std::size_t col=0;col<point.size();++col) {
+            const auto term=h.equalities(row,col)*point[col];
+            value+=term;scale+=std::abs(term);
+        }
+        if(!within(value,h.equality_values[row],scale))return false;
+    }
+    return true;
+}
 Diagnostics admission(const OptimalFamily& family,const WitnessRequest& request) {
     const auto* complete=std::get_if<CompleteOptimalFamily>(&family.outcome());
     const auto* relation=relation_set(family);
@@ -77,7 +117,7 @@ Diagnostics admission(const OptimalFamily& family,const WitnessRequest& request)
        complete->relation.coordinates!=JointCoordinates{{1,1,0},2}||!h_representation||
        !complete->optimum.bounds.lower||!complete->optimum.bounds.upper||
        complete->optimum.bounds.lower->value!=complete->optimum.bounds.upper->value)
-        return reject("selector.family","Only registered complete T-S01/T-S02 H relations with matching optimum bounds are supported.");
+        return reject("selector.family","Only registered complete T-S01/T-S02/T-S03 and nominal-linear-exact H relations with matching optimum bounds are supported.");
     if(!std::isfinite(request.distinctness_tolerance)||request.distinctness_tolerance<0)
         return reject("selector.tolerance","Distinctness tolerance must be finite and nonnegative.");
     for(const auto& direction:request.directions)
@@ -164,8 +204,19 @@ public:
                         }
                     return selected;
                 }
-                const bool member=result.primal&&result.primal->size()==5&&
-                    (ts01?ts01->contains(*result.primal):contains_ts02(*result.primal));
+                bool member=false;
+                if(result.primal&&result.primal->size()==5) {
+                    const auto& profile=family.identity().request.profile;
+                    if(ts01) member=ts01->contains(*result.primal);
+                    else if(profile==ts03_singular_integrator_profile)
+                        member=contains_ts03(*result.primal);
+                    else if(profile==strategy_a::nominal_linear_exact_profile) {
+                        const auto* relation=relation_set(family);
+                        member=relation&&contains_h(
+                            std::get<sets::HRepresentation>(relation->representation()),
+                            *result.primal,context.numerical);
+                    } else member=contains_ts02(*result.primal);
+                }
                 if(result.outcome.subject!=lp.identity()||result.outcome.value!=MathematicalOutcome::optimal||!member) {
                     selected.termination=Termination::numerical_failure;
                     selected.diagnostics="Direction query did not return a consistent registered complete-family history.";return selected;

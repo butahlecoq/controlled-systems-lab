@@ -8,8 +8,8 @@
 
 namespace csl::application {
 namespace {
-constexpr std::array<std::string_view, 2> profiles{
-    "ts01_exact_integrator", "ts02_constant_integrator"};
+constexpr std::array<std::string_view, 3> profiles{
+    "ts01_exact_integrator", "ts02_constant_integrator", "ts03_singular_integrator"};
 constexpr std::array<std::string_view, 2> strategies{
     "csl.synthesis.reach-back", "csl.synthesis.strategy-b"};
 
@@ -34,7 +34,7 @@ Preparation prepare_comparison(const ComparisonRequest& request,
     const registry::StrategyRegistry& registry) {
     if (std::find(profiles.begin(), profiles.end(), request.family.profile) == profiles.end())
         return unsupported("comparison.family.profile",
-            "Only the guarded T-S01 and T-S02 complete-family profiles are admitted.");
+            "Only the guarded T-S01, T-S02 and T-S03 complete-family profiles are admitted.");
     if (request.family.objective != request.problem.identity())
         return unsupported("comparison.family.objective",
             "The common family request must name the supplied resolved problem.");
