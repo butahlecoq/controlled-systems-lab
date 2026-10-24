@@ -177,7 +177,9 @@ TEST_CASE("pre-cancel expired deadline zero creation limit and empty batches") {
     auto capped=run(*e,tasks,context(*e),ex::Mode::bounded_parallel,{0});
     CHECK(std::get<ex::Skipped>(capped.tasks[0].outcome).reason==ex::SkipReason::task_limit);
     CHECK_FALSE(capped.tasks[0].timing.admitted_at);CHECK(counts->created==0);
-    CHECK(run(*e,{},context(*e)).tasks.empty());
+    const auto empty=run(*e,{},context(*e));
+    CHECK(empty.tasks.empty());
+    CHECK(empty.enforcement.outer_worker_threads_started==0);
 }
 TEST_CASE("reservation credits serialize six plus six under ten and skip eleven") {
     auto e=executor({2,2,1,10});auto counts=std::make_shared<Counts>();
@@ -186,10 +188,12 @@ TEST_CASE("reservation credits serialize six plus six under ten and skip eleven"
     literal(r.tasks[0],-1,-1);literal(r.tasks[1],4,-6);
     CHECK(std::get<ex::Skipped>(r.tasks[2].outcome).reason==ex::SkipReason::reservation_exceeds_budget);
     CHECK(r.enforcement.peak_workspace_reservation_bytes==6);CHECK(r.enforcement.peak_active_tasks==1);
+    CHECK(r.enforcement.outer_worker_threads_started==2);
     CHECK(r.enforcement.memory==ex::MemoryEnforcement::active_reservations_only);
     CHECK(r.enforcement.native_threads==ex::NativeThreadEnforcement::declared_only);
     CHECK(counts->created==2);CHECK(counts->destroyed==2);CHECK(counts->peak==1);
     auto capped=run(*e,tasks,context(*e),ex::Mode::sequential,{1});literal(capped.tasks[0],-1,-1);
+    CHECK(capped.enforcement.outer_worker_threads_started==0);
     CHECK(std::get<ex::Skipped>(capped.tasks[1].outcome).reason==ex::SkipReason::task_limit);
 }
 TEST_CASE("factory allocation failure retains earlier canonical answer and drains") {
@@ -224,6 +228,7 @@ TEST_CASE("parallel completion order differs while records remain in input order
     literal(r.tasks[0],-1,-1);literal(r.tasks[1],4,-6);
     CHECK(*r.tasks[1].timing.call_finished_at<=*r.tasks[0].timing.call_finished_at);
     CHECK(r.enforcement.peak_active_tasks==2);
+    CHECK(r.enforcement.outer_worker_threads_started==2);
 }
 TEST_CASE("two private lanes each with a helper honor one aggregate four-participant policy") {
     auto e=executor({4,2,2,{}});auto policy=e->resources();
@@ -242,6 +247,7 @@ TEST_CASE("two private lanes each with a helper honor one aggregate four-partici
     auto r=run(*e,tasks,context(*e),ex::Mode::bounded_parallel);
     CHECK(same->load());CHECK(actual->peak==4);CHECK(actual->active==0);
     CHECK(r.enforcement.peak_active_tasks==2);CHECK(r.enforcement.peak_reserved_threads==4);
+    CHECK(r.enforcement.outer_worker_threads_started==2);
 }
 TEST_CASE("cancellation during factory skips invocation and cleans exactly once") {
     auto e=executor();auto counts=std::make_shared<Counts>();Gate entered,release;std::stop_source stop;

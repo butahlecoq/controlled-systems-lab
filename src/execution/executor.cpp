@@ -216,7 +216,9 @@ Summary dispatch(std::span<Job> jobs,const ExecutionContext& context,Mode mode,A
         }
         batch.joined();
     } // Callback destruction waits for in-flight notification outside scheduler lock.
-    return batch.finish();
+    auto summary=batch.finish();
+    summary.enforcement.outer_worker_threads_started=workers.size();
+    return summary;
 }
 }
 }

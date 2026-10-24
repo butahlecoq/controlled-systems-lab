@@ -137,6 +137,8 @@ TEST_CASE("a bounded sweep keeps whole scenario identities and deterministic sel
         CHECK(result.batch.enforcement.memory==execution::MemoryEnforcement::unlimited_accounting);
         CHECK(result.batch.enforcement.peak_active_tasks>=1);
         CHECK(result.batch.enforcement.peak_active_tasks<=resources.outer_workers);
+        CHECK(result.batch.enforcement.outer_worker_threads_started==
+            (mode==execution::Mode::bounded_parallel ? 2U : 0U));
         for(const auto& task:result.batch.tasks) {
             REQUIRE(std::holds_alternative<execution::Returned<registry::StrategyPort>>(task.outcome));
             const auto& value=std::get<SynthesisResult>(std::get<execution::Returned<registry::StrategyPort>>(task.outcome).value);
