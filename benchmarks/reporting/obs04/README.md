@@ -51,17 +51,17 @@ performance conclusion should be based on a timing row whose status is not
 ## Captured analytic sample
 
 `results/linux-gcc16-20261024.jsonl` records a sample run from source commit
-`b01401e49841e61d87a9d4db06bb73d5fa2aa466`. Its adjacent `.environment.txt`
+`124a0ed12b60dbbf34ee19356ff2173027f3945e`. Its adjacent `.environment.txt`
 file records environment details and the binary hash. All 32 events passed the
 analytic and span checks (four warmups and 28 measured attempts). Measured
 `strategy_run_ns` medians and ranges were:
 
 | Strategy | Collection | Median (ns) | Range (ns) |
 | --- | --- | ---: | ---: |
-| reach-back | disabled | 5,004,547 | 4,772,747–5,382,942 |
-| reach-back | enabled | 8,535,882 | 7,824,000–9,960,555 |
-| direct-joint | disabled | 839,620 | 775,227–935,790 |
-| direct-joint | enabled | 980,349 | 916,724–1,319,702 |
+| reach-back | disabled | 5,042,985 | 4,774,517–5,586,764 |
+| reach-back | enabled | 8,155,503 | 7,849,113–8,944,912 |
+| direct-joint | disabled | 830,126 | 740,451–867,979 |
+| direct-joint | enabled | 972,950 | 910,094–1,042,372 |
 
 This sample is descriptive and inconclusive. `perf` is unavailable, so no
 limiter profile exists, and this tiny analytic fixture does not represent
