@@ -1,5 +1,6 @@
 #include <csl/adapters/lp/highs.hpp>
 #include <csl/geometry/basis_reuse_reducer.hpp>
+#include <csl/geometry/bounded_hull_checker.hpp>
 #include <csl/geometry/hull_reducer.hpp>
 #include <csl/geometry/quickhull_2d.hpp>
 
@@ -17,9 +18,9 @@ using namespace csl;
 
 namespace {
 
-enum class Method { quickhull, lp_baseline, basis_reuse, ordered_lp };
-constexpr std::array<Method, 4> methods{Method::quickhull, Method::lp_baseline,
-                                        Method::basis_reuse, Method::ordered_lp};
+enum class Method { quickhull, lp_baseline, basis_reuse, ordered_lp, a43_safe, a44_incremental };
+constexpr std::array<Method, 6> methods{Method::quickhull, Method::lp_baseline,
+    Method::basis_reuse, Method::ordered_lp, Method::a43_safe, Method::a44_incremental};
 
 const char* name(Method method) {
     switch (method) {
@@ -27,6 +28,20 @@ const char* name(Method method) {
     case Method::lp_baseline: return "lp-membership-baseline";
     case Method::basis_reuse: return "basis-reuse-related-to-A43";
     case Method::ordered_lp: return "ordered-membership-related-to-A44";
+    case Method::a43_safe: return "A43-certificate-safe-basis-adaptation";
+    case Method::a44_incremental: return "A44-incremental-LP-paper-adaptation";
+    }
+    return "invalid";
+}
+
+const char* identity(Method method) {
+    switch (method) {
+    case Method::quickhull: return "csl.geometry.quickhull-2d";
+    case Method::lp_baseline: return "csl.hull.lp-membership";
+    case Method::basis_reuse: return "csl.hull.phase-one-basis-bulk";
+    case Method::ordered_lp: return "csl.hull.ordered-membership";
+    case Method::a43_safe: return "csl.hull.itis17.a43-certified-basis-reuse";
+    case Method::a44_incremental: return "csl.hull.itis17.a44-incremental-lp";
     }
     return "invalid";
 }
@@ -77,6 +92,11 @@ bool valid_reduction(const Fixture& fixture, const geometry::HullReduction& resu
             return false;
     }
     if (accounted.size() != fixture.cloud.points.size()) return false;
+    const auto digest = geometry::digest_hull_input(fixture.cloud.points);
+    if (!std::holds_alternative<geometry::HullInputDigest>(digest)) return false;
+    const auto checked = geometry::check_source_index_hull(fixture.cloud.points,
+        {std::get<geometry::HullInputDigest>(digest), result.retained});
+    if (checked.status != geometry::HullCheckStatus::verified) return false;
     const auto [min_x, max_x] = std::minmax_element(fixture.expected_vertices.begin(),
         fixture.expected_vertices.end(), [](const Vector& a, const Vector& b) {
             return a[0] < b[0];
@@ -105,6 +125,7 @@ struct Outcome {
     long long elapsed_ns{};
     std::size_t retained{}, removed{}, lp_calls{}, basis_solves{}, bulk_removals{},
                 ordered_candidates{};
+    std::size_t a43_final_rechecks{}, a44_incremental_queries{}, a44_final_rechecks{};
 };
 
 Outcome run(const Fixture& fixture, Method method) {
@@ -122,7 +143,12 @@ Outcome run(const Fixture& fixture, Method method) {
         std::sort(coordinates.begin(), coordinates.end());
         auto expected = fixture.expected_vertices;
         std::sort(expected.begin(), expected.end());
-        return {coordinates == expected,
+        const auto digest = geometry::digest_hull_input(fixture.cloud.points);
+        const bool checked = std::holds_alternative<geometry::HullInputDigest>(digest) &&
+            geometry::check_source_index_hull(fixture.cloud.points,
+                {std::get<geometry::HullInputDigest>(digest), hull.vertex_indices}).status ==
+                    geometry::HullCheckStatus::verified;
+        return {coordinates == expected && checked,
             std::chrono::duration_cast<std::chrono::nanoseconds>(end-begin).count(),
             hull.vertex_indices.size(), 0, 0, 0, 0, 0};
     }
@@ -135,8 +161,12 @@ Outcome run(const Fixture& fixture, Method method) {
         result = geometry::reduce_hull(fixture.cloud, *lp, {});
     else if (method == Method::basis_reuse)
         result = geometry::reduce_hull_basis_reuse(fixture.cloud, *lp, {});
-    else
+    else if (method == Method::ordered_lp)
         result = geometry::reduce_ordered_hull(fixture.cloud, *lp, {});
+    else if (method == Method::a43_safe)
+        result = geometry::reduce_itis17_a43_hull(fixture.cloud, *lp, {});
+    else
+        result = geometry::reduce_itis17_a44_hull(fixture.cloud, *lp, {});
     const auto end = std::chrono::steady_clock::now();
     Outcome outcome;
     outcome.elapsed_ns = std::chrono::duration_cast<std::chrono::nanoseconds>(end-begin).count();
@@ -165,14 +195,25 @@ Outcome run(const Fixture& fixture, Method method) {
         outcome.bulk_removals = reduction.basis_reuse->bulk_removals;
     }
     if (reduction.ordered) outcome.ordered_candidates = reduction.ordered->ordered_candidates;
+    if (reduction.itis17_a43)
+        outcome.a43_final_rechecks = reduction.itis17_a43->final_recheck_calls;
+    if (reduction.itis17_a44) {
+        outcome.a44_incremental_queries = reduction.itis17_a44->incremental_membership_calls;
+        outcome.a44_final_rechecks = reduction.itis17_a44->final_recheck_calls;
+    }
     return outcome;
 }
 
 void print(const Fixture& fixture, Method method, bool warmup, int round,
            const Outcome& outcome) {
-    std::cout << "{\"schema\":\"csl.it17-hull-preliminary-row/1\",\"source_commit\":\""
+    const auto digest = geometry::digest_hull_input(fixture.cloud.points);
+    if (!std::holds_alternative<geometry::HullInputDigest>(digest))
+        throw std::runtime_error("input digest could not be computed");
+    std::cout << "{\"schema\":\"csl.it17-hull-paper-adaptation-row/1\",\"source_commit\":\""
               << CSL_SOURCE_COMMIT << "\",\"fixture\":\"" << fixture.id
-              << "\",\"method\":\"" << name(method) << "\",\"warmup\":"
+              << "\",\"input_sha256\":\"" << problem::hex(std::get<geometry::HullInputDigest>(digest))
+              << "\",\"method\":\"" << name(method) << "\",\"method_identity\":\""
+              << identity(method) << "\",\"method_version\":\"1.0.0\",\"lp_provider\":\"HiGHS/1.11.0\",\"warmup\":"
               << (warmup ? "true" : "false") << ",\"round\":" << round
               << ",\"elapsed_ns\":" << outcome.elapsed_ns << ",\"passed\":"
               << (outcome.passed ? "true" : "false") << ",\"input_points\":"
@@ -180,7 +221,10 @@ void print(const Fixture& fixture, Method method, bool warmup, int round,
               << ",\"removed\":" << outcome.removed << ",\"lp_calls\":"
               << outcome.lp_calls << ",\"basis_solves\":" << outcome.basis_solves
               << ",\"bulk_removals\":" << outcome.bulk_removals
-              << ",\"ordered_candidates\":" << outcome.ordered_candidates << "}\n";
+              << ",\"ordered_candidates\":" << outcome.ordered_candidates
+              << ",\"a43_final_rechecks\":" << outcome.a43_final_rechecks
+              << ",\"a44_incremental_queries\":" << outcome.a44_incremental_queries
+              << ",\"a44_final_rechecks\":" << outcome.a44_final_rechecks << "}\n";
 }
 
 } // namespace

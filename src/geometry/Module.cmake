@@ -4,6 +4,7 @@ csl_add_library(csl_hull STATIC
   src/geometry/hull_reducer.cpp
   src/geometry/basis_reuse_reducer.cpp
   src/geometry/hull/ordered_reducer.cpp
+  src/geometry/hull/itis17_reducers.cpp
   src/geometry/hull/grouped_reducer.cpp
   src/geometry/hull/recursive_reducer.cpp)
 

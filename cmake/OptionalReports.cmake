@@ -306,6 +306,27 @@ target_compile_features(csl_geo06_quickhull_report PRIVATE cxx_std_20)
 target_compile_definitions(csl_geo06_quickhull_report PRIVATE $<$<CONFIG:Release>:NDEBUG>)
 endif()
 
+if(CSL_BUILD_IT17_HULL_REPORT)
+if(NOT CSL_ENABLE_HIGHS)
+  message(FATAL_ERROR "The ITIS17 hull comparison requires the production HiGHS LP adapter")
+endif()
+add_executable(csl_it17_hull_comparison_report
+  benchmarks/reporting/it17_hull/preliminary_driver.cpp)
+execute_process(COMMAND git rev-parse HEAD WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+  OUTPUT_VARIABLE IT17_HULL_SOURCE_COMMIT OUTPUT_STRIP_TRAILING_WHITESPACE
+  COMMAND_ERROR_IS_FATAL ANY)
+target_link_libraries(csl_it17_hull_comparison_report PRIVATE
+  CSL::hull CSL::quickhull_2d CSL::bounded_hull_checker CSL::highs_lp)
+target_compile_features(csl_it17_hull_comparison_report PRIVATE cxx_std_20)
+target_compile_definitions(csl_it17_hull_comparison_report PRIVATE
+  $<$<CONFIG:Release>:NDEBUG> CSL_SOURCE_COMMIT="${IT17_HULL_SOURCE_COMMIT}")
+if(MSVC)
+  target_compile_options(csl_it17_hull_comparison_report PRIVATE /W4 /WX /permissive-)
+else()
+  target_compile_options(csl_it17_hull_comparison_report PRIVATE -Wall -Wextra -Wpedantic -Werror)
+endif()
+endif()
+
 if(CSL_BUILD_GEO07_PORT_REPORT)
 include(cmake/JsonDependencies.cmake)
 add_executable(csl_geo07_port_report benchmarks/reporting/geo07_port/adapter_driver.cpp)

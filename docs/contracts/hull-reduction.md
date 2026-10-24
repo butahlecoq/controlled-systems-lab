@@ -210,3 +210,36 @@ recursive work and verification. Any recursive-vs-baseline timing comparison
 requires alternating tuned repetitions and a separate limiter profile; small
 fixture measurements without that evidence remain descriptive, with no
 universal speedup claim.
+
+### ITIS17 paper-informed comparison adaptations
+
+`make_itis17_a43_hull_reducer_registration()` registers
+`csl.hull.itis17.a43-certified-basis-reuse`. This safe adaptation runs the
+existing Phase-I basis-reuse reducer and then a complete membership recheck
+over its retained points. It differs from Bulaev–Shorikov ITIS17: the first
+pass uses one weighted bulk Phase-I solve rather than the paper's per-candidate
+artificial-basis sequence, and the current LP provider cannot apply the
+paper's largest-norm pivot tie rule. Consequently basis membership is not
+treated as evidence of extremality, `largest_norm_tie_policy_applied` is
+always false, and the implementation does not claim faithful paper or Pascal
+reproduction. The existing OPT-06 identity remains separate.
+
+`make_itis17_a44_hull_reducer_registration()` registers
+`csl.hull.itis17.a44-incremental-lp`. It orders stable source IDs farthest-first
+by normalized Chebyshev distance from the bounding-box center, with original
+ID tie breaking and zero-width axes contributing zero. Each candidate is
+checked against the accepted set so far; only an exact convex-combination
+certificate permits removal. The chosen farthest-first interpretation
+addresses the paper's conflicting ordering prose. The implementation starts
+from the first ordered input point and ends with a complete LP recheck; these
+choices are explicit adaptations, not a claim of exact paper execution or
+Pascal correspondence. The existing OPT-07 identity remains separate.
+
+Both strategies preserve the common `HullReduction` semantics. Numerical
+residuals, LP feasibility claims without exact witnesses, ordering scores and
+basis diagnostics never authorize deletion. The A44 metrics retain processing
+order and separate incremental queries from final-recheck calls. The A43
+metrics identify the recheck count and explicitly record that the paper's tie
+policy was not applied. Small 2D comparisons additionally use the bounded
+independent source-index hull checker; that oracle does not replace the exact
+per-removal certificate gate and does not extend to higher dimensions.

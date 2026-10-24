@@ -219,8 +219,8 @@ void restore_certificates_outside_policy(const PointCloud& cloud, HullReduction&
 
 detail::CandidateClassification detail::classify_candidate(const PointCloud& cloud,
         const std::vector<std::size_t>& support, std::size_t candidate,
-        LPWorkspace& lp, const ExecutionContext& context) {
-    auto program = membership_program(cloud, support, candidate);
+        LPWorkspace& lp, const ExecutionContext& context, std::string_view query_namespace) {
+    auto program = membership_program(cloud, support, candidate, query_namespace);
     if (!program) return {{candidate, MembershipOutcome::malformed_result}, {}, 0};
     auto outcome = lp.solve(*program, context);
     if (std::holds_alternative<Unsupported>(outcome))
