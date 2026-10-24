@@ -1,12 +1,10 @@
-2026-10-24T21:47:09+03:00
-8c1960dd6c02794cd4cb7909fe1c11dd675bb0b3
-Tracked source files were clean at measurement; this result directory was the only untracked path.
-g++ (GCC) 16.2.1 20260810
-Linux omarchy 7.2.5-3-omarchy #1 SMP PREEMPT_DYNAMIC Mon, 14 Sep 2026 19:55:01 +0000 x86_64 GNU/Linux
-8
- 21:47:09 up 1 day, 22:22,  1 user,  load average: 1.00, 1.66, 2.34
-07a6a07715d3fcb29b6c47bbde5872700ad75c797fd88c349f7dd150ac551a44  build/obs04/csl_obs04_instrumentation_comparison
-CMAKE_BUILD_TYPE:STRING=Release
-Profiler availability: `perf` is not installed; no source-mapped limiter profile was captured. These timings are descriptive only and cannot support a bottleneck or winner claim.
-CPU: AMD Ryzen 5 3550H with Radeon Vega Mobile Gfx; 8 logical CPUs, 4 cores, 2 threads per core.
-Memory at capture: 7.6 GiB total, 3.4 GiB available.
+Timestamp: 2026-10-24T21:50:43+03:00 (Europe/Moscow)
+Source commit: b01401e49841e61d87a9d4db06bb73d5fa2aa466
+Tracked working tree: clean at run start
+Build: CMake Release, C++20; GCC 16.2.1 (20260810)
+Binary SHA-256: 16c1a49f2594777da50e36d097f5348e0db532350f4c35b1450683689952fb0e
+OS/kernel: Linux omarchy 7.2.5-3-omarchy x86_64
+CPU: AMD Ryzen 5 3550H with Radeon Vega Mobile Gfx; 8 logical CPUs, 4 cores, 2 threads per core
+System load at run start: 0.39, 0.99, 1.92 (8 logical CPUs)
+Memory at capture: 7.6 GiB total, 3.4 GiB available
+Profiler: `perf` is not installed; no source-mapped limiter profile was captured.
