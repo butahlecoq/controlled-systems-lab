@@ -116,6 +116,8 @@ csl_example(scenario_cli CSL::input CSL::application CSL::strategy_a CSL::strate
 csl_example(backend_substitution CSL::highs_lp CSL::phase_one)
 csl_example(registered_synthesis_comparison CSL::input CSL::strategy_a CSL::strategy_b
   CSL::witness_selector CSL::verification CSL::highs_lp CSL::highs_convex CSL::qhull_conversion CSL::affine_sum)
+csl_example(nominal_linear_exact_2d CSL::strategy_a CSL::highs_lp CSL::highs_convex
+  CSL::qhull_conversion CSL::affine_sum)
 csl_example(continuous_policy CSL::controllers CSL::model)
 
 function(example_check name executable argument status output)
@@ -178,6 +180,8 @@ example_check(file_history scenario_file "${CMAKE_CURRENT_SOURCE_DIR}/scenarios/
   "states=0,0.25,1 controls=0.25,0.75 original_cost=0")
 example_check(substitution_highs backend_substitution csl.lp.highs 0 "backend=csl.lp.highs version=1.1.0.highs.1.11.0")
 example_check(substitution_phase_one backend_substitution phase-one-bland 0 "backend=phase-one-bland version=1")
+example_check(nominal_linear_exact_2d_complete_face nominal_linear_exact_2d "" 0
+  "state_dimension=2 control_dimension=2 horizon=1.*exact_optimum=1.*verified_complete_family=true assurance=numerical")
 example_check(lp_unknown_backend registered_lp missing-backend 2 "Selection rejected.*missing-backend")
 example_check(convex_unknown_backend registered_convex missing-backend 2 "Selection rejected.*missing-backend")
 example_check(substitution_unknown_backend backend_substitution missing-backend 2 "Selection rejected.*missing-backend")

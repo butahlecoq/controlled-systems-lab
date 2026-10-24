@@ -1,6 +1,7 @@
 #define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
 #include <doctest/doctest.h>
 #include <csl/synthesis/strategy_a/strategy.hpp>
+#include <csl/synthesis/strategy_a/nominal_linear_exact_profile.hpp>
 #include <csl/contracts.hpp>
 #include <csl/synthesis/ts02_constant_integrator.hpp>
 #include <csl/synthesis/ts03_singular_integrator.hpp>
@@ -14,6 +15,7 @@
 #include <cmath>
 #include <iostream>
 #include <limits>
+#include <numeric>
 
 using namespace csl;
 using namespace csl::registry;
@@ -78,6 +80,59 @@ problem::ResolvedProblem exact_ts03_integrator() {
     QuadraticTerminal objective{};objective.Q={1,1,{2}};objective.linear={-2};objective.offset=1;
     return exact_ts02_integrator(TerminalObjective{std::move(objective)},0);
 }
+problem::ResolvedProblem nominal_linear_exact_integrator(bool constant=false) {
+    Problem source{{"strategy-a-nominal-linear-exact"},std::make_shared<const SystemModel>(SystemModel{
+        {{1,1,0},TimeDomain::discrete,LinearStage{{1,1,{1}},{1,1,{1}},{1,0,{}},{0}}}, {}}),
+        {0,1,2},KnownInitial{{0}},ContinuousDomain{{interval("nominal-exact-u0",0,1,"u"),
+        interval("nominal-exact-u1",0,1,"u")}},
+        {interval("nominal-exact-x0",0,0),interval("nominal-exact-x1",0,1),
+         interval("nominal-exact-x2",1,2)}, {},{},InformationPattern::nominal_open_loop,
+        constant ? TerminalObjective{LinearTerminal{{0},3}} : TerminalObjective{LinearTerminal{{1},0}}};
+    return take(problem::resolve(source,{problem::UncertaintyStructure::stage_product_uncoupled,{},{}}));
+}
+problem::ResolvedProblem nominal_linear_exact_cancellation_objective() {
+    Problem source{{"strategy-a-nominal-linear-exact-cancellation"},
+        std::make_shared<const SystemModel>(SystemModel{
+            {{3,1,0},TimeDomain::discrete,LinearStage{{3,3,{1,0,0,0,1,0,0,0,1}},
+                {3,1,{0,0,0}},{3,0,{}},{0,0,0}}}, {}}),
+        {0,1},KnownInitial{{1,1,1}},
+        ContinuousDomain{{interval("nominal-exact-cancellation-control",0,1,"u")}},
+        {UniversalSet{3},UniversalSet{3}}, {},{},InformationPattern::nominal_open_loop,
+        LinearTerminal{{1e12,0.0001,-1e12},0}};
+    return take(problem::resolve(source,{problem::UncertaintyStructure::stage_product_uncoupled,{},{}}));
+}
+problem::ResolvedProblem nominal_linear_exact_thirds() {
+    const auto terminal=take(sets::make_h({{"nominal-exact-third-terminal"},1,{"nominal-exact-third-state"}},
+        {take(numeric::snapshot(Matrix{2,1,{-3,1}})),
+         take(numeric::snapshot_vector(Vector{-1,1})),
+         take(numeric::snapshot(Matrix{0,1,{}})),take(numeric::snapshot_vector(Vector{}))}));
+    Problem source{{"strategy-a-nominal-linear-exact-thirds"},std::make_shared<const SystemModel>(SystemModel{
+        {{1,1,0},TimeDomain::discrete,LinearStage{{1,1,{0}},{1,1,{1}},{1,0,{}},{0}}}, {}}),
+        {0,1},KnownInitial{{0}},ContinuousDomain{{interval("nominal-exact-third-control",0,1,"u")}},
+        {interval("nominal-exact-third-state",0,0,"nominal-exact-third-state"),terminal.as_handle()}, {},{},
+        InformationPattern::nominal_open_loop,LinearTerminal{{1},0}};
+    return take(problem::resolve(source,{problem::UncertaintyStructure::stage_product_uncoupled,{},{}}));
+}
+problem::ResolvedProblem nominal_linear_exact_unbounded() {
+    Problem source{{"strategy-a-nominal-linear-exact-unbounded"},std::make_shared<const SystemModel>(SystemModel{
+        {{1,1,0},TimeDomain::discrete,LinearStage{{1,1,{0}},{1,1,{1}},{1,0,{}},{0}}}, {}}),
+        {0,1},KnownInitial{{0}},ContinuousDomain{{UniversalSet{1}}},
+        {interval("nominal-exact-unbounded-x0",0,0),UniversalSet{1}}, {},{},
+        InformationPattern::nominal_open_loop,LinearTerminal{{1},0}};
+    return take(problem::resolve(source,{problem::UncertaintyStructure::stage_product_uncoupled,{},{}}));
+}
+problem::ResolvedProblem nominal_linear_exact_over_stage_cap() {
+    constexpr std::size_t horizon=1000;
+    std::vector<double> time_grid(horizon+1);
+    std::iota(time_grid.begin(),time_grid.end(),0.0);
+    std::vector<AdmissibleSet> controls(horizon,UniversalSet{1});
+    std::vector<AdmissibleSet> states(horizon+1,UniversalSet{1});
+    Problem source{{"strategy-a-nominal-linear-exact-over-cap"},std::make_shared<const SystemModel>(SystemModel{
+        {{1,1,0},TimeDomain::discrete,LinearStage{{1,1,{1}},{1,1,{1}},{1,0,{}},{0}}}, {}}),
+        std::move(time_grid),KnownInitial{{0}},ContinuousDomain{std::move(controls)},std::move(states), {},{},
+        InformationPattern::nominal_open_loop,LinearTerminal{{1},0}};
+    return take(problem::resolve(source,{problem::UncertaintyStructure::stage_product_uncoupled,{},{}}));
+}
 StrategyRequest request(problem::ResolvedProblem problem) {
     FamilyRequest family;family.objective=problem.identity();family.profile="nominal_open_loop";
     family.representation={"csl.polyhedron.h"};
@@ -104,6 +159,15 @@ StrategyRequest exact_ts03_request(problem::ResolvedProblem problem) {
     auto request=exact_ts02_request(std::move(problem));
     request.family.profile=synthesis::ts03_singular_integrator_profile;
     return request;
+}
+StrategyRequest nominal_linear_exact_request(problem::ResolvedProblem problem) {
+    FamilyRequest family;family.objective=problem.identity();
+    family.profile=synthesis::strategy_a::nominal_linear_exact_profile;
+    family.target=FamilyTarget::exact_optimal_relation;family.assurance=Assurance::numerical;
+    family.representation={"csl.polyhedron.h"};
+    StrategyConfiguration configuration;configuration.strategy={"csl.synthesis.reach-back"};
+    configuration.representation={"csl.polyhedron.h"};
+    return {std::move(problem),configuration,family,"1",{}};
 }
 class CancelAfterTerminal final : public ConvexWorkspace {
     std::unique_ptr<ConvexWorkspace> inner_;
@@ -304,6 +368,12 @@ bool contains(const sets::SetData& set,const Vector& point) {
     }
     return true;
 }
+class TestHRelationPayload final : public JointRelationPayload {
+    sets::SetData relation_;
+public:
+    explicit TestHRelationPayload(sets::SetData relation):relation_(std::move(relation)){}
+    const sets::SetData* h_relation_for_recording() const noexcept override { return &relation_; }
+};
 bool valid_csr(const numeric::MatrixView& matrix) {
     const auto descriptor=matrix.descriptor();
     const auto* csr=std::get_if<numeric::CsrInput>(&descriptor);
@@ -747,6 +817,160 @@ TEST_CASE("T-S03 compiled verifier rejects altered completeness evidence") {
     auto* proof=std::get_if<RegisteredCompletenessEvidence>(&altered.family.completeness.support);
     REQUIRE(proof);proof->proof="altered-ts03-proof";
     CHECK_FALSE(verifier->verify(frozen,altered).empty());
+}
+TEST_CASE("nominal linear exact profile verifies the complete optimal history face") {
+    const auto query=nominal_linear_exact_request(nominal_linear_exact_integrator());
+    const auto result=run(query);
+    CHECK(result.termination==Termination::completed);
+    REQUIRE(result.family);
+    CHECK(result.family->target()==FamilyTarget::exact_optimal_relation);
+    CHECK(result.family->registry_verified());
+    CHECK(result.outcome.value==MathematicalOutcome::optimal);
+    REQUIRE(result.objective.lower);REQUIRE(result.objective.upper);
+    CHECK(result.objective.lower->value==1);CHECK(result.objective.upper->value==1);
+    const auto& complete=std::get<CompleteOptimalFamily>(result.family->outcome());
+    const auto* proof=std::get_if<RegisteredCompletenessEvidence>(&complete.completeness.support);
+    REQUIRE(proof);
+    CHECK(proof->verifier==ModuleId{"csl.verifier.strategy-a.nominal-linear-exact"});
+    CHECK(proof->verifier_version=="1");
+    CHECK(proof->proof=="nominal-linear-exact-v1");
+    REQUIRE(complete.relation.payload);
+    const auto* relation=complete.relation.payload->h_relation_for_recording();
+    REQUIRE(relation);
+    CHECK(contains(*relation,{0,0,1,0,1}));
+    CHECK(contains(*relation,{0,1,1,1,0}));
+    CHECK(contains(*relation,{0,.4,1,.4,.6}));
+    CHECK_FALSE(contains(*relation,{0,1,2,1,1}));
+    CHECK_FALSE(contains(*relation,{0,.4,1.4,.4,1}));
+}
+TEST_CASE("nominal linear exact profile preserves all feasible histories for a constant objective") {
+    const auto result=run(nominal_linear_exact_request(nominal_linear_exact_integrator(true)));
+    CHECK(result.termination==Termination::completed);
+    REQUIRE(result.family);
+    CHECK(result.family->registry_verified());
+    CHECK(result.objective.lower->value==3);CHECK(result.objective.upper->value==3);
+    const auto& complete=std::get<CompleteOptimalFamily>(result.family->outcome());
+    REQUIRE(complete.relation.payload);
+    const auto* relation=complete.relation.payload->h_relation_for_recording();
+    REQUIRE(relation);
+    CHECK(contains(*relation,{0,0,1,0,1}));
+    CHECK(contains(*relation,{0,1,2,1,1}));
+    CHECK(contains(*relation,{0,.4,1.2,.4,.8}));
+}
+TEST_CASE("nominal linear exact evidence derives the dyadic optimum without rounded accumulation") {
+    const auto bound=registry::detail::strategy_a_nominal_linear_exact_optimum_bound(
+        nominal_linear_exact_cancellation_objective());
+    REQUIRE(bound);
+    CHECK(*bound==0.0001);
+    CHECK((1e12+0.0001)-1e12!=*bound);
+}
+TEST_CASE("nominal linear exact verifier rejects changed optimum evidence") {
+    const auto query=nominal_linear_exact_request(nominal_linear_exact_integrator());
+    auto staged=take(admit(query,false,{},true)).create();
+    ExecutionContext context;context.resources=std::make_shared<const ResourcePolicy>(ResourcePolicy{1,1,1,{}});
+    auto result=take(staged->run(context));
+    REQUIRE(result.complete_proposal);
+    const auto verifier=detail::find_compiled_verifier(
+        ModuleId{"csl.verifier.strategy-a.nominal-linear-exact"},"1");
+    REQUIRE(verifier);
+    auto frozen=query;frozen.lineage=result.complete_proposal->identity.lineage;
+    const auto initial_diagnostics=verifier->verify(frozen,*result.complete_proposal);
+    CHECK(initial_diagnostics.empty());
+    auto altered=*result.complete_proposal;
+    altered.family.optimum.bounds.upper->value=2;
+    const auto diagnostics=verifier->verify(frozen,altered);
+    CHECK_FALSE(diagnostics.empty());
+}
+TEST_CASE("nominal linear exact verifier rejects a candidate that omits optimal histories") {
+    const auto query=nominal_linear_exact_request(nominal_linear_exact_integrator());
+    auto staged=take(admit(query,false,{},true)).create();
+    ExecutionContext context;context.resources=std::make_shared<const ResourcePolicy>(ResourcePolicy{1,1,1,{}});
+    auto result=take(staged->run(context));
+    REQUIRE(result.complete_proposal);
+    const auto verifier=detail::find_compiled_verifier(
+        ModuleId{"csl.verifier.strategy-a.nominal-linear-exact"},"1");
+    REQUIRE(verifier);
+    auto frozen=query;frozen.lineage=result.complete_proposal->identity.lineage;
+
+    const auto inequalities=take(numeric::snapshot(Matrix{4,5,{
+        0,0,0,1,0, 0,0,0,-1,0, 0,0,0,0,1, 0,0,0,0,-1}}));
+    const auto upper=take(numeric::snapshot_vector(Vector{0.5,0,1,0}));
+    const auto equalities=take(numeric::snapshot(Matrix{4,5,{
+        1,0,0,0,0, -1,1,0,-1,0, 0,-1,1,0,-1, 0,0,1,0,0}}));
+    const auto values=take(numeric::snapshot_vector(Vector{0,0,0,1}));
+    auto omitted=take(sets::make_h({{"nominal-exact-omits-half"},5,{"x0","x1","x2","u0","u1"}},
+        {inequalities,upper,equalities,values}));
+    CHECK(contains(omitted,{0,0,1,0,1}));
+    CHECK_FALSE(contains(omitted,{0,1,1,1,0}));
+    auto altered=*result.complete_proposal;
+    altered.family.relation.payload=std::make_shared<const TestHRelationPayload>(std::move(omitted));
+    CHECK_FALSE(verifier->verify(frozen,altered).empty());
+}
+TEST_CASE("nominal linear exact verifier rejects a non-dyadic optimum") {
+    const auto query=nominal_linear_exact_request(nominal_linear_exact_thirds());
+    CHECK_FALSE(registry::detail::strategy_a_nominal_linear_exact_optimum_bound(query.problem));
+    const JointCoordinates coordinates{query.problem.model().dimensions(),query.problem.model().horizon()};
+    const FamilyIdentity identity{query.problem.identity(),query.family,coordinates,
+        {"csl.synthesis.reach-back"},"1",
+        detail::strategy_a_nominal_linear_exact_lineage(query.problem.identity(),1)};
+    auto relation=take(sets::make_h({{"nominal-exact-third-face"},3,{"x0","x1","u0"}},
+        {take(numeric::snapshot(Matrix{2,3,{0,0,1,0,0,-1}})),
+         take(numeric::snapshot_vector(Vector{1,0})),
+         take(numeric::snapshot(Matrix{3,3,{1,0,0,0,1,-1,0,3,0}})),
+         take(numeric::snapshot_vector(Vector{0,0,1}))}));
+    const SymbolicArgument statement{"rounded dyadic objective", "A binary64 approximation of one third."};
+    const ClaimEvidence claim{query.problem.identity(),statement};
+    const ObjectiveBound rounded_third{1.0/3.0,claim};
+    CompleteOptimalFamily candidate{{coordinates,query.family.representation,
+            std::make_shared<const TestHRelationPayload>(std::move(relation))},
+        {claim,{rounded_third,rounded_third}},
+        {identity,RegisteredCompletenessEvidence{{"csl.verifier.strategy-a.nominal-linear-exact"},
+            "1","nominal-linear-exact-v1"}},Assurance::numerical};
+    CompleteFamilyProposal proposal{identity,std::move(candidate)};
+    auto frozen=query;frozen.lineage=identity.lineage;
+    const auto verifier=detail::find_compiled_verifier(
+        ModuleId{"csl.verifier.strategy-a.nominal-linear-exact"},"1");
+    REQUIRE(verifier);
+    CHECK_FALSE(verifier->verify(frozen,proposal).empty());
+}
+TEST_CASE("nominal linear exact verifier rejects a claimed optimum for an unbounded history set") {
+    const auto query=nominal_linear_exact_request(nominal_linear_exact_unbounded());
+    const JointCoordinates coordinates{query.problem.model().dimensions(),query.problem.model().horizon()};
+    const FamilyIdentity identity{query.problem.identity(),query.family,coordinates,
+        {"csl.synthesis.reach-back"},"1",
+        detail::strategy_a_nominal_linear_exact_lineage(query.problem.identity(),1)};
+    auto relation=take(sets::make_h({{"nominal-exact-fabricated-point"},3,{"x0","x1","u0"}},
+        {take(numeric::snapshot(Matrix{0,3,{}})),
+         take(numeric::snapshot_vector(Vector{})),
+         take(numeric::snapshot(Matrix{3,3,{1,0,0,0,1,-1,0,0,1}})),
+         take(numeric::snapshot_vector(Vector{0,0,0}))}));
+    const SymbolicArgument statement{"fabricated bounded point", "One feasible history does not bound the problem."};
+    const ClaimEvidence claim{query.problem.identity(),statement};
+    const ObjectiveBound bound{0,claim};
+    CompleteOptimalFamily candidate{{coordinates,query.family.representation,
+            std::make_shared<const TestHRelationPayload>(std::move(relation))},
+        {claim,{bound,bound}},
+        {identity,RegisteredCompletenessEvidence{{"csl.verifier.strategy-a.nominal-linear-exact"},
+            "1","nominal-linear-exact-v1"}},Assurance::numerical};
+    CompleteFamilyProposal proposal{identity,std::move(candidate)};
+    auto frozen=query;frozen.lineage=identity.lineage;
+    const auto verifier=detail::find_compiled_verifier(
+        ModuleId{"csl.verifier.strategy-a.nominal-linear-exact"},"1");
+    REQUIRE(verifier);
+    CHECK_FALSE(verifier->verify(frozen,proposal).empty());
+}
+TEST_CASE("nominal linear exact profile rejects an unreviewed materialization cap") {
+    auto query=nominal_linear_exact_request(nominal_linear_exact_integrator());
+    query.family.materialization_limit=1;
+    const auto admitted=admit(query);
+    REQUIRE(std::holds_alternative<Rejection>(admitted));
+    CHECK_FALSE(std::get<Rejection>(admitted).diagnostics.empty());
+}
+TEST_CASE("nominal linear exact profile rejects a horizon exceeding its variable-width cap") {
+    const auto query=nominal_linear_exact_request(nominal_linear_exact_over_stage_cap());
+    const auto admitted=admit(query);
+    REQUIRE(std::holds_alternative<Rejection>(admitted));
+    CHECK_FALSE(std::get<Rejection>(admitted).diagnostics.empty());
 }
 TEST_CASE("exact T-S02 recovered preimage contains the entire feasible control box") {
     const auto query=exact_ts02_request(exact_ts02_integrator());

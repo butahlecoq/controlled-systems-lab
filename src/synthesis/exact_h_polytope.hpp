@@ -1,6 +1,6 @@
 #pragma once
 
-// Exact, bounded arithmetic used by the independent hybrid-polytope verifier.
+// Shared bounded exact H-polytope arithmetic for synthesis verifiers.
 // This header is private to synthesis: it is not a geometry-provider contract.
 
 #include <algorithm>
@@ -15,13 +15,13 @@
 #include <utility>
 #include <vector>
 
-namespace csl::synthesis::detail::hybrid_exact {
+namespace csl::synthesis::detail::exact_h {
 
 static_assert(std::numeric_limits<double>::is_iec559 &&
               std::numeric_limits<double>::digits == 53 &&
               std::numeric_limits<double>::max_exponent == 1024 &&
               std::numeric_limits<double>::min_exponent == -1021,
-              "Hybrid exact arithmetic requires IEEE-754 binary64 doubles");
+              "Exact H-polytope arithmetic requires IEEE-754 binary64 doubles");
 
 inline constexpr std::size_t default_max_integer_bits = 8192;
 inline constexpr std::size_t default_max_rows = 4096;
@@ -689,6 +689,48 @@ inline bool compare_scaled_rationals(const ExactRational& lhs,
     return true;
 }
 
+inline bool exact_rational_to_double(const ExactRational& value,
+                                     std::size_t max_bits, double& result) {
+    if (exact_detail::is_zero(value.numerator)) {
+        result = 0.0;
+        return true;
+    }
+    if (value.denominator.negative || exact_detail::is_zero(value.denominator))
+        return false;
+
+    ExactRational magnitude = value;
+    const bool negative = magnitude.numerator.negative;
+    magnitude.numerator.negative = false;
+    constexpr std::uint64_t max_finite_bits = 0x7fefffffffffffffULL;
+    std::uint64_t low = 0;
+    std::uint64_t high = max_finite_bits;
+    while (low <= high) {
+        const auto bits = low + (high - low) / 2;
+        const auto candidate = std::bit_cast<double>(bits);
+        const auto dyadic = exact_detail::decode(candidate);
+        ExactRational candidate_rational;
+        candidate_rational.numerator = exact_detail::from_u64(dyadic.significand);
+        candidate_rational.binary_exponent = dyadic.exponent;
+        int order = 0;
+        if (!compare_scaled_rationals(magnitude, candidate_rational,
+                                      max_bits, order))
+            return false;
+        if (order == 0) {
+            const auto signed_bits = bits | (negative ? (std::uint64_t{1} << 63) : 0);
+            result = std::bit_cast<double>(signed_bits);
+            return true;
+        }
+        if (order > 0) {
+            if (bits == max_finite_bits) break;
+            low = bits + 1;
+        } else {
+            if (bits == 0) break;
+            high = bits - 1;
+        }
+    }
+    return false;
+}
+
 // Project an exact H-relation onto the integer-scaled value of a binary64
 // linear objective. The objective scale is retained so values from paths with
 // different coefficient exponents can be compared without floating point.
@@ -881,4 +923,4 @@ inline InclusionResult included_in(std::span<const Row> source,
     return {InclusionState::included, {}};
 }
 
-} // namespace csl::synthesis::detail::hybrid_exact
+} // namespace csl::synthesis::detail::exact_h

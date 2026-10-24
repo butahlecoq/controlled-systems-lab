@@ -1,6 +1,6 @@
 #pragma once
 
-#include "hybrid_exact_polytope.hpp"
+#include "exact_h_polytope.hpp"
 #include <csl/model/hybrid_system.hpp>
 
 #include <algorithm>
@@ -9,7 +9,7 @@
 #include <string>
 #include <vector>
 
-namespace csl::synthesis::detail::hybrid_exact {
+namespace csl::synthesis::detail::exact_h {
 
 enum class RawRelationState { built, unsupported, cancelled };
 
@@ -311,4 +311,4 @@ inline RawRelationResult reconstruct_path_relation(
     return result;
 }
 
-} // namespace csl::synthesis::detail::hybrid_exact
+} // namespace csl::synthesis::detail::exact_h

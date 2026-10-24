@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="en">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Nominal linear exact profile: 2D optimal face</title>
+<style>
+  body{font:16px/1.5 system-ui,sans-serif;max-width:880px;margin:2rem auto;padding:0 1rem;color:#18212b}
+  img{display:block;width:min(100%,620px);height:auto;background:#fbfcfe;border:1px solid #ccd5df}
+  code{background:#eef2f5;padding:.1rem .3rem;border-radius:3px}
+</style>
+<h1>One-step 2D nominal linear problem</h1>
+<p>Known initial state <code>x₀=(0,0)</code>, dynamics <code>x₁=u₀</code>, control box
+<code>[0,1]²</code>, terminal constraint <code>x₁+y₁ ≥ 1</code> inside the unit square,
+and objective <code>minimize x₁+y₁</code>.</p>
+<img src="optimal-face.svg" alt="The feasible upper triangle in the unit square and its full optimal diagonal segment from (0,1) to (1,0).">
+<p>The red segment is the full optimal terminal-state face. Because <code>x₁=u₀</code>, it also represents the full optimal control relation. The example executable constructs the problem, runs Strategy A, and requires a registry-verified complete-family result. Its printed objective and scope can be checked with the command below.</p>
+<pre><code>cmake --build build --target nominal_linear_exact_2d
+./build/examples/nominal_linear_exact_2d</code></pre>
+<h2>Observed result</h2>
+<pre>profile=strategy-a.nominal-linear-exact-v1
+state_dimension=2 control_dimension=2 horizon=1
+terminal_constraint=x+y&gt;=1; 0&lt;=x,y&lt;=1
+objective=minimize x+y
+exact_optimum=1 optimal_face={(x,y): x+y=1, 0&lt;=x,y&lt;=1}
+verified_complete_family=true assurance=numerical</pre>
+<p>Scope: finite binary64 inputs are interpreted as exact dyadic values by the profile verifier. Strategy A's forward geometry and optimization still use numerical providers; this example does not claim validated arithmetic or a performance result.</p>
+<p>Source commit: <a href="https://github.com/butahlecoq/controlled-systems-lab/commit/8b94095edf6b14ba6f3d35e237293e639e48f0aa">8b94095edf6b14ba6f3d35e237293e639e48f0aa</a>. <a href="records.json">Download inputs, observed result and evidence scope (JSON)</a>.</p>
+</html>

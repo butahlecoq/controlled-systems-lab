@@ -5,7 +5,7 @@
 #include <csl/sets/data.hpp>
 #include <csl/registry/provider.hpp>
 #include "hybrid_family_verifier_internal.hpp"
-#include "hybrid_exact_polytope.hpp"
+#include "exact_h_polytope.hpp"
 #include "hybrid_exact_model_relation.hpp"
 #include <algorithm>
 #include <array>
@@ -251,7 +251,7 @@ model::HybridPath example_path() {
 }
 
 TEST_CASE("hybrid exact polytope rows preserve binary64 dyadics") {
-    using namespace detail::hybrid_exact;
+    using namespace detail::exact_h;
     const std::array<double,2> coefficients{0.5,-1.25};
     Row row;
     REQUIRE(make_row(coefficients,0.125,false,default_max_integer_bits,row));
@@ -270,7 +270,7 @@ TEST_CASE("hybrid exact polytope rows preserve binary64 dyadics") {
 }
 
 TEST_CASE("hybrid exact integer arithmetic handles multiword carries") {
-    using namespace detail::hybrid_exact;
+    using namespace detail::exact_h;
     using exact_detail::add;
     using exact_detail::compare;
     using exact_detail::from_u64;
@@ -290,7 +290,7 @@ TEST_CASE("hybrid exact integer arithmetic handles multiword carries") {
 }
 
 TEST_CASE("hybrid exact polytope feasibility retains strict and closed bounds") {
-    using namespace detail::hybrid_exact;
+    using namespace detail::exact_h;
     const std::array<double,1> positive{1}, negative{-1};
     std::vector<Row> strict_conflict;
     REQUIRE(append_inequality(positive,0,true,default_max_integer_bits,strict_conflict));
@@ -316,7 +316,7 @@ TEST_CASE("hybrid exact polytope feasibility retains strict and closed bounds") 
 }
 
 TEST_CASE("hybrid exact polytope proves half-space relation inclusion") {
-    using namespace detail::hybrid_exact;
+    using namespace detail::exact_h;
     const std::array<double,1> x{1};
     std::vector<Row> source;
     REQUIRE(append_equality(x,0,default_max_integer_bits,source));
@@ -359,7 +359,7 @@ TEST_CASE("hybrid exact polytope proves half-space relation inclusion") {
 }
 
 TEST_CASE("hybrid exact polytope projects linear objective bounds") {
-    using namespace detail::hybrid_exact;
+    using namespace detail::exact_h;
     const std::array<double,1> x{1}, negative_x{-1};
     std::vector<Row> interval_rows;
     REQUIRE(append_inequality(x,2,false,default_max_integer_bits,interval_rows));
@@ -593,7 +593,7 @@ TEST_CASE("exact linear H verifier retains tied paths across objective scales") 
 }
 
 TEST_CASE("hybrid exact raw path relation matches the joint H composer") {
-    using namespace detail::hybrid_exact;
+    using namespace detail::exact_h;
     const auto system=example_system();
     const auto request=example_request();
     const auto path=example_path();
@@ -648,7 +648,7 @@ TEST_CASE("hybrid exact raw path relation matches the joint H composer") {
 }
 
 TEST_CASE("hybrid exact raw relation preserves H sets and heterogeneous reset timing") {
-    using namespace detail::hybrid_exact;
+    using namespace detail::exact_h;
     const auto source_interval=h_set("raw-source-interval",1,
         Matrix{2,1,{-1,1}},Vector{0,3},Matrix{0,1,{}},Vector{});
     const auto pre_invariant=h_set("raw-pre-invariant",1,
@@ -740,7 +740,7 @@ TEST_CASE("hybrid exact raw relation preserves H sets and heterogeneous reset ti
 }
 
 TEST_CASE("hybrid exact raw relation handles singleton and empty representations") {
-    using namespace detail::hybrid_exact;
+    using namespace detail::exact_h;
     const model::HybridRelationLimits limits{32,4096,100000};
     auto [singleton_system,singleton_request]=exact_singleton_portfolio();
     const model::HybridPath singleton_path{{{"source"},{"target"}},{{"tie-a"}}};
@@ -813,7 +813,7 @@ TEST_CASE("hybrid exact raw relation handles singleton and empty representations
 }
 
 TEST_CASE("hybrid exact polytope feasibility handles inconsistent equalities and lower dimension") {
-    using namespace detail::hybrid_exact;
+    using namespace detail::exact_h;
     const std::array<double,1> x{1};
     std::vector<Row> inconsistent;
     REQUIRE(append_equality(x,0,default_max_integer_bits,inconsistent));
@@ -829,7 +829,7 @@ TEST_CASE("hybrid exact polytope feasibility handles inconsistent equalities and
 }
 
 TEST_CASE("hybrid exact polytope feasibility stops at resource and cancellation limits") {
-    using namespace detail::hybrid_exact;
+    using namespace detail::exact_h;
     const std::array<double,1> x{1}, negative_x{-1};
     std::vector<Row> rows;
     REQUIRE(append_inequality(x,1,false,default_max_integer_bits,rows));

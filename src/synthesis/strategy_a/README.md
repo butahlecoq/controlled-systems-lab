@@ -11,8 +11,8 @@ selected provider before a request-specific workspace is created.
 
 The strategy implements the existing `StrategyPort` / `SynthesisWorkspace`
 contract. Its general path admits `nominal_open_loop`, numerical,
-`candidate_relaxation` requests with `csl.polyhedron.h` joint output. Three
-complete-family profiles are registered analytic cases. The strict
+`candidate_relaxation` requests with `csl.polyhedron.h` joint output. The
+strict
 `ts01_exact_integrator` profile is checked by the compiled T-S01 verifier. The
 `ts02_constant_integrator` profile is the scalar two-step unit integrator with
 controls in `[0,1]`, universal state factors, and constant terminal objective
@@ -32,6 +32,21 @@ bounds, proof identity, and canonical relation. Other exact or partial requests
 remain rejected. A supplied family materialization limit is rejected rather
 than assigned invented semantics. Operation-provider limits remain
 independently enforced by those providers.
+
+The Strategy A-only `strategy-a.nominal-linear-exact-v1` profile additionally
+admits finite-horizon, discrete, nominal open-loop problems with known point
+initial state, continuous control sets, native H/singleton/empty/universal
+state and control factors, no external inputs or nonempty temporal map, and a
+linear terminal objective. Its verifier reconstructs the joint history
+relation from the resolved problem, interprets every finite binary64 input as
+an exact dyadic, proves nonempty boundedness, minimizes the objective exactly,
+and checks candidate equality with the complete optimal face by two exact
+inclusions. Non-dyadic optimum values, unsupported inputs, empty relations,
+failed exact decisions and resource-limit cases fail closed. This checks the
+represented values exactly; Strategy A's forward construction still uses
+binary64 providers, so it is not a validated-arithmetic claim. The profile has
+its own request and verifier identities and does not extend Strategy B
+coverage.
 
 ## Derivation and scope
 

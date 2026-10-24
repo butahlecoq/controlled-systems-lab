@@ -1,4 +1,5 @@
 #include <csl/synthesis/strategy_a/strategy.hpp>
+#include <csl/synthesis/strategy_a/nominal_linear_exact_profile.hpp>
 #include <csl/synthesis/strategy_ts01/analytic_profile.hpp>
 #include <csl/synthesis/ts02_constant_integrator.hpp>
 #include <csl/synthesis/ts03_singular_integrator.hpp>
@@ -23,8 +24,10 @@ Diagnostics capabilities(const problem::ResolvedProblem& problem,const FamilyReq
     const bool exact_ts01=registry::detail::ts01_case_valid(problem,family,family.representation);
     const bool exact_ts02=registry::detail::ts02_case_valid(problem,family,family.representation);
     const bool exact_ts03=registry::detail::ts03_case_valid(problem,family,family.representation);
-    if(!exact_ts01&&!exact_ts02&&!exact_ts03&&family.profile!="nominal_open_loop")return unsupported("strategy_a.profile","Only nominal_open_loop candidates and the reviewed T-S01/T-S02/T-S03 exact profiles are supported.");
-    if(!exact_ts01&&!exact_ts02&&!exact_ts03&&family.target!=FamilyTarget::candidate_relaxation)
+    const bool exact_nominal=registry::detail::strategy_a_nominal_linear_exact_profile_valid(
+        problem,family,family.representation);
+    if(!exact_ts01&&!exact_ts02&&!exact_ts03&&!exact_nominal&&family.profile!="nominal_open_loop")return unsupported("strategy_a.profile","Only nominal_open_loop candidates and reviewed exact profiles are supported.");
+    if(!exact_ts01&&!exact_ts02&&!exact_ts03&&!exact_nominal&&family.target!=FamilyTarget::candidate_relaxation)
         return unsupported("strategy_a.coverage","No reviewed coverage procedure or optimal-subset verifier; request a candidate relation.");
     if(family.assurance!=Assurance::numerical)
         return unsupported("strategy_a.assurance","Only unestablished binary64 candidate construction is supported.");
@@ -175,6 +178,12 @@ bool publish(SynthesisResult& result,const problem::ResolvedProblem& problem,con
     if(auto* errors=std::get_if<Diagnostics>(&outcome)){contract_failure(result,*errors);return false;}
     result.family=std::get<OptimalFamily>(std::move(outcome));return true;
 }
+class NominalExactHRelation final : public JointRelationPayload {
+    sets::SetData relation_;
+public:
+    explicit NominalExactHRelation(sets::SetData relation):relation_(std::move(relation)){}
+    const sets::SetData* h_relation_for_recording() const noexcept override { return &relation_; }
+};
 } // namespace
 namespace detail {
 class StrategyAExecutionRunner final : public SynthesisWorkspace, public registry::detail::StrategyARuntimeReceiptSource {
@@ -288,8 +297,19 @@ public:
                 minimized.optimization&&minimized.optimization->outcome.value==MathematicalOutcome::optimal;
             const bool exact_ts03=registry::detail::ts03_case_valid(problem,request,request.representation)&&lineage==prepared_request_.lineage&&
                 minimized.optimization&&minimized.optimization->outcome.value==MathematicalOutcome::optimal;
+            const bool nominal_exact_requested=
+                request.profile==::csl::synthesis::strategy_a::nominal_linear_exact_profile&&
+                request.target==FamilyTarget::exact_optimal_relation;
+            const bool nominal_exact=nominal_exact_requested&&
+                registry::detail::strategy_a_nominal_linear_exact_profile_valid(
+                    problem,request,request.representation)&&lineage==prepared_request_.lineage&&
+                minimized.termination==Termination::completed&&minimized.optimization&&
+                minimized.optimization->outcome.value==MathematicalOutcome::optimal;
+            const auto proposal_lineage=nominal_exact_requested?prepared_request_.lineage:lineage;
             const auto proposal_identity=FamilyIdentity{problem.identity(),request,history.coordinates,
-                strategy,version,lineage};
+                strategy,version,proposal_lineage};
+            auto exact_candidate_relation=history.relation;
+            auto exact_candidate_coordinates=history.coordinates;
             if((exact_ts01||exact_ts03)&&result.termination==Termination::completed) {
                 receipt_=registry::detail::StrategyARuntimeLineageReceipt{prepared_request_,
                     std::make_shared<const reachability::ForwardTube>(tube),
@@ -353,6 +373,25 @@ public:
                 result.objective=optimum.bounds;
                 result.complete_proposal=CompleteFamilyProposal{proposal_identity,std::move(family)};
             }
+            if(nominal_exact&&result.termination==Termination::completed&&
+                minimized.optimization) {
+                const SymbolicArgument statement{"bounded nominal linear exact-H profile",
+                    "The selected compiled verifier reconstructs the complete nominal feasible-history relation and checks the exact minimizing face over the stored binary64 dyadic values."};
+                const ClaimEvidence claim{problem.identity(),statement};
+                const auto exact_optimum=registry::detail::
+                    strategy_a_nominal_linear_exact_optimum_bound(problem);
+                if(!exact_optimum)return result;
+                const ObjectiveBound proposed_bound{*exact_optimum,claim};
+                const OptimumEvidence proposed_optimum{claim,{proposed_bound,proposed_bound}};
+                auto payload=std::make_shared<const NominalExactHRelation>(std::move(exact_candidate_relation));
+                CompleteOptimalFamily family{{exact_candidate_coordinates,request.representation,payload},
+                    proposed_optimum,
+                    {proposal_identity,RegisteredCompletenessEvidence{{"csl.verifier.strategy-a.nominal-linear-exact"},"1",
+                        "nominal-linear-exact-v1"}}, Assurance::numerical};
+                result.outcome={problem.identity(),MathematicalOutcome::optimal,claim.support,{}};
+                result.objective=proposed_optimum.bounds;
+                result.complete_proposal=CompleteFamilyProposal{proposal_identity,std::move(family)};
+            }
             return result;
         } catch(const std::bad_alloc&) {
             stop(result,local({"strategy-a/storage"}),{StopReason::resource_limit,"Strategy A allocation failed; previously published evidence retained."});
@@ -385,6 +424,9 @@ registry::StrategyRegistration make_registration(Providers providers) {
                     if(prepared.family.profile==::csl::synthesis::ts03_singular_integrator_profile&&
                         prepared.family.target==FamilyTarget::exact_optimal_relation)
                         selected_verifier={{::csl::synthesis::ts03_singular_integrator_verifier},"1"};
+                    if(prepared.family.profile==::csl::synthesis::strategy_a::nominal_linear_exact_profile&&
+                        prepared.family.target==FamilyTarget::exact_optimal_relation)
+                        selected_verifier={{"csl.verifier.strategy-a.nominal-linear-exact"},"1"};
                     return std::make_unique<detail::StrategyAExecutionRunner>(reachability::ForwardDependencies{
                         std::get<0>(generated),std::get<1>(generated),std::get<2>(generated)},
                         std::get<3>(generated),std::get<4>(generated),prepared,std::move(selected_verifier));
@@ -400,10 +442,19 @@ registry::StrategyRegistration make_registration(Providers providers) {
             if(request.strategy_version==version&&request.configuration.strategy==strategy&&
                 registry::detail::ts03_case_valid(request.problem,request.family,request.configuration.representation))
                 return detail::expected_ts03_lineage(request.problem.identity());
+            if(request.strategy_version==version&&request.configuration.strategy==strategy&&
+                registry::detail::strategy_a_nominal_linear_exact_profile_valid(request.problem,
+                    request.family,request.configuration.representation))
+                return registry::detail::strategy_a_nominal_linear_exact_lineage(
+                    request.problem.identity(),request.problem.model().horizon());
             return std::vector<TransformStepIdentity>{};
         }};
     registration.complete_family_verifier_selector=[](const registry::StrategyRequest& request)
         ->std::optional<registry::StrategyRegistration::CompleteFamilyVerifierKey> {
+        if(request.configuration.strategy==strategy&&
+            registry::detail::strategy_a_nominal_linear_exact_profile_valid(request.problem,
+                request.family,request.configuration.representation))
+            return registry::StrategyRegistration::CompleteFamilyVerifierKey{{"csl.verifier.strategy-a.nominal-linear-exact"},"1"};
         if(request.configuration.strategy==strategy&&
             registry::detail::ts02_case_valid(request.problem,request.family,request.configuration.representation))
             return registry::StrategyRegistration::CompleteFamilyVerifierKey{{::csl::synthesis::ts02_constant_integrator_verifier},"1"};

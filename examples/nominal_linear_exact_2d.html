@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="en">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Nominal linear exact profile: 2D optimal face</title>
+<style>
+  body{font:16px/1.5 system-ui,sans-serif;max-width:880px;margin:2rem auto;padding:0 1rem;color:#18212b}
+  svg{display:block;width:min(100%,620px);height:auto;background:#fbfcfe;border:1px solid #ccd5df}
+  .axis{stroke:#405366;stroke-width:2}.grid{stroke:#dce3ea;stroke-width:1}
+  .face{stroke:#bc3c2e;stroke-width:7;stroke-linecap:round}.tick{font-size:15px;fill:#405366}
+  .label{font-size:17px;fill:#18212b}.point{fill:#bc3c2e}
+  code{background:#eef2f5;padding:.1rem .3rem;border-radius:3px}
+</style>
+<h1>One-step 2D nominal linear problem</h1>
+<p>Known initial state <code>x₀=(0,0)</code>, dynamics <code>x₁=u₀</code>, control box
+<code>[0,1]²</code>, terminal constraint <code>x₁+y₁ ≥ 1</code> inside the unit square,
+and objective <code>minimize x₁+y₁</code>.</p>
+<svg viewBox="0 0 560 430" role="img" aria-labelledby="title description">
+  <title id="title">Complete optimal terminal-state set</title>
+  <desc id="description">The feasible upper triangle lies inside the unit square. Every point on the diagonal segment from (0,1) to (1,0) is optimal, with objective one.</desc>
+  <path class="grid" d="M110 330H430 M110 250H430 M110 170H430 M190 90V330 M270 90V330 M350 90V330 M430 90V330"/>
+  <path fill="#dcefe7" stroke="#568a72" stroke-width="2" d="M110 90H430V330H110Z"/>
+  <path fill="#f3ddd8" d="M110 90H430V330Z"/>
+  <path class="axis" d="M110 350V70 M90 330H450"/>
+  <path class="face" d="M110 90L430 330"/>
+  <circle class="point" cx="110" cy="90" r="6"/><circle class="point" cx="430" cy="330" r="6"/>
+  <text class="tick" x="99" y="375">0</text><text class="tick" x="420" y="375">1</text>
+  <text class="tick" x="76" y="96">1</text><text class="tick" x="76" y="336">0</text>
+  <text class="label" x="456" y="336">x₁</text><text class="label" x="102" y="57">y₁</text>
+  <text class="label" x="186" y="184">optimal face: x₁+y₁=1</text>
+  <text class="label" x="213" y="407">Exact optimum = 1; every point on the red segment is optimal.</text>
+</svg>
+<p>The red segment is the full optimal terminal-state face. Because <code>x₁=u₀</code>, it also represents the full optimal control relation. The executable constructs the problem, runs Strategy A, and requires a registry-verified complete-family result; its printed objective and scope can be checked with the command below.</p>
+<pre><code>cmake --build build --target nominal_linear_exact_2d
+./build/examples/nominal_linear_exact_2d</code></pre>
+<p>Scope: finite binary64 inputs are interpreted as exact dyadic values by the profile verifier. Strategy A's forward geometry and optimization still use numerical providers; this example does not claim validated arithmetic.</p>
+</html>

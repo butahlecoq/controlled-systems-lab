@@ -117,6 +117,19 @@ profile has a compiled complete-family verifier in both Strategy A and Strategy 
 | T-S02 | Same integrator and domains, constant terminal objective `3` in the admitted linear, zero-quadratic or zero-map residual-norm form. Every feasible joint history is optimal. |
 | T-S03 | Two-step scalar singular integrator with both state matrices zero, control matrices one, zero offsets, `x0=0`, independent `u0,u1` in `[0,1]`, unrestricted states, no external/history constraints, and terminal cost `(x2-1)^2`. Optimum zero; all optimal histories are `(x0,x1,x2,u0,u1)=(0,s,1,s,1)`, `s` in `[0,1]`. |
 
+Strategy A also registers `strategy-a.nominal-linear-exact-v1` for finite
+discrete nominal open-loop horizons with known point initial state, continuous
+controls, native H/singleton/empty/universal factors, no external input or
+nonempty temporal map, and a linear terminal objective. Its compiled verifier
+reconstructs the joint history H relation, checks nonempty boundedness, exact
+dyadic objective minimization and equality with the full optimal face. It
+fails closed on empty/unbounded relations, non-dyadic optimum values, exact
+arithmetic or operation limits, and unsupported set forms. The forward
+reachability construction still uses binary64 geometry and optimization
+providers; the verifier checks the represented problem exactly but does not
+certify those producers or claim validated arithmetic. The profile is
+Strategy A-only and does not add generic Strategy A/B coverage.
+
 See the [Strategy B T-S03 profile](../../tests/synthesis/strategy_b/README.md#registered-t-s03-singular-integrator-profile)
 and its [published report](published-algorithm-results.md#syn-04-registered-strategy-b-t-s03-report).
 
