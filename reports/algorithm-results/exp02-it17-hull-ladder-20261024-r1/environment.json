@@ -1,0 +1,26 @@
+{
+  "cpu": "AMD Ryzen 5 3550H with Radeon Vega Mobile Gfx",
+  "logical_cpus": 8,
+  "os": "Omarchy Linux",
+  "build_type": "Release",
+  "compiler": "/usr/bin/c++",
+  "compiler_version": "GCC 16.2.1 20260810",
+  "cmake_version": "3.31.6",
+  "flags": "-O3 -DNDEBUG",
+  "source_commit": "5ee632d105f134fbcba3a4f50334eef8e97476ab",
+  "executable_sha256": "92b73509b007ccc6d6845388809670115137467475787d8a29ade6a210c2a20b",
+  "lp_provider": "HiGHS/1.11.0",
+  "lp_threads": 1,
+  "execution": "one serial benchmark process",
+  "external_profiling_tools": {
+    "perf": "unavailable",
+    "/usr/bin/time": "unavailable",
+    "gprof": "available; probe accumulated call counts but no timing samples"
+  },
+  "process_elapsed_seconds": {
+    "250": "2.808",
+    "1000": "23.509",
+    "5000_first_pass": "300.004 (timeout)",
+    "5000_resume_rounds_4_to_7": "261.787"
+  }
+}
