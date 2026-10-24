@@ -44,8 +44,12 @@ run record. Resolved arm configurations and an empty collection record are
 prepared before per-attempt collector setup, so a plan or collector setup
 exception can still be saved as a failed attempt. Errors after the strategy
 returns retain the returned terminal and available statistics; their event
-records `recording_error`. Failed or analytically invalid attempts make the
-process exit nonzero. The default artifact path is the current directory; `--record <path>`
+records `recording_error`. If the outcome itself cannot be serialized, a
+synthetic failed run record is saved and the event separately retains the
+returned status, termination, mathematical outcome, family summary, and
+serialization error; it states that the run artifact does not contain that
+outcome. Failed or analytically invalid attempts make the process exit nonzero.
+The default artifact path is the current directory; `--record <path>`
 selects a path, and existing files are never overwritten. Keep the exact source
 commit, compiler/build provenance, machine/OS capture, and separate
 limiter-profile result next to any retained measurement. Do not combine the

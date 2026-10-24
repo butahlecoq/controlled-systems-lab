@@ -280,6 +280,30 @@ const char* attempt_status_name(ar::AttemptStatus status) {
     return "incomplete";
 }
 
+const char* terminal_status_name(ar::AttemptStatus status) {
+    switch(status) {
+    case ar::AttemptStatus::completed: return "completed";
+    case ar::AttemptStatus::failed: return "failed";
+    case ar::AttemptStatus::unsupported: return "unsupported";
+    case ar::AttemptStatus::cancelled: return "cancelled";
+    case ar::AttemptStatus::resource_limited: return "resource_limited";
+    case ar::AttemptStatus::incomplete: return "incomplete";
+    }
+    return "incomplete";
+}
+
+const char* termination_name(Termination termination) {
+    switch(termination) {
+    case Termination::completed: return "completed";
+    case Termination::cancelled: return "cancelled";
+    case Termination::resource_limit: return "resource_limit";
+    case Termination::numerical_failure: return "numerical_failure";
+    case Termination::operation_rejected: return "operation_rejected";
+    case Termination::contract_rejected: return "contract_rejected";
+    }
+    return "unknown";
+}
+
 bool close(const std::optional<double>& left, const std::optional<double>& right) {
     if (!left || !right) return !left && !right;
     if (!std::isfinite(*left) || !std::isfinite(*right)) return false;
@@ -623,6 +647,62 @@ TrialRecord failed_trial(const application::PreparedComparison& prepared, std::s
         run_id,std::move(run),measurement};
 }
 
+TrialRecord unserializable_outcome_trial(const application::PreparedComparison& prepared,
+    std::size_t strategy_index, bool enabled, std::size_t repetition, bool warmup,
+    const SynthesisOutcome& outcome, ar::ResolvedConfiguration configuration,
+    ar::CollectedStatistics statistics, std::string_view message) {
+    const ar::RunId run_id{"obs04-"+std::to_string(strategy_index)+"-"+
+        (enabled?"enabled-":"disabled-")+std::to_string(repetition)+(warmup?"-warmup":"")};
+    const auto* synthesis=std::get_if<SynthesisResult>(&outcome);
+    const ar::Unavailable unavailable{ar::MissingReason::not_requested,{}};
+    const auto description=prepared.problem().description();
+    std::ostringstream detail;
+    detail << "Strategy returned a terminal outcome, but its run record could not be serialized. "
+        << "Returned status=" << terminal_status_name(attempt_status(outcome));
+    if(synthesis) {
+        detail << ", termination=" << termination_name(synthesis->termination)
+            << ", mathematical_outcome=" << outcome_name(synthesis->outcome.value);
+        if(synthesis->family)
+            detail << ", profile=" << synthesis->family->identity().request.profile
+                << ", complete_family="
+                << (std::holds_alternative<CompleteOptimalFamily>(synthesis->family->outcome())?"true":"false");
+    } else {
+        detail << ", mathematical_outcome=unsupported";
+    }
+    detail << ". Recording error: " << message;
+    ar::RunRecord record{prepared.problem().identity(),description->model->dynamics.dimensions,
+        static_cast<std::uint64_t>(description->times.size()-1),std::move(configuration),run_id,
+        ar::FailedFinal{ar::FailurePhase::publication,ar::FailureReason::adapter_exception,detail.str(),{}},
+        std::move(statistics),{unavailable,unavailable,unavailable,unavailable,false,ar::MemoryAccounting::unlimited},
+        {},{},ar::ProblemProvenance::problem_revalidated,{}};
+    auto published=take(ar::publish_run({prepared.problem(),std::move(record)}));
+    auto encoded=take(ar::encode_recorded_run(published));
+    const auto bytes=encoded.content().bytes();
+    std::string wire;wire.reserve(bytes.size());
+    for(const auto byte:bytes)wire.push_back(static_cast<char>(std::to_integer<unsigned char>(byte)));
+    auto run=take(ar::decode_recorded_run(wire,prepared.problem()));
+    std::ostringstream event;
+    event << "{\"schema\":\"csl.obs04-instrumentation-comparison-event/2\",\"repetition\":"
+        << repetition << ",\"warmup\":" << (warmup?"true":"false") << ",\"strategy\":\""
+        << (strategy_index==0?"csl.synthesis.reach-back":"csl.synthesis.strategy-b")
+        << "\",\"instrumentation\":\"" << (enabled?"enabled":"disabled")
+        << "\",\"status\":\"failed\",\"solver_returned\":true,"
+        << "\"solver_outcome_in_run_artifact\":false,\"solver_status\":\""
+        << terminal_status_name(attempt_status(outcome)) << "\",\"solver_termination\":\""
+        << (synthesis?termination_name(synthesis->termination):"unsupported")
+        << "\",\"solver_outcome\":\""
+        << (synthesis?outcome_name(synthesis->outcome.value):"unsupported")
+        << "\",\"complete_family_verified\":"
+        << (synthesis&&synthesis->family&&
+            std::holds_alternative<CompleteOptimalFamily>(synthesis->family->outcome())?"true":"false")
+        << ",\"recording_error\":\"" << escaped(message) << "\"}";
+    const auto measurement=event.str();
+    std::cout << measurement << '\n';
+    return {static_cast<std::uint32_t>(strategy_index*2+(enabled?1:0)),
+        static_cast<std::uint32_t>(repetition),ar::AttemptStatus::failed,
+        run_id,std::move(run),measurement,false};
+}
+
 TrialRecord recording_failure_trial(const application::PreparedComparison& prepared,
     std::size_t strategy_index, bool enabled, std::size_t repetition, bool warmup,
     const SynthesisOutcome& outcome, ar::ResolvedConfiguration configuration,
@@ -635,22 +715,28 @@ TrialRecord recording_failure_trial(const application::PreparedComparison& prepa
         synthesis?ar::project_final(*synthesis):ar::FinalOutcome{
             ar::UnsupportedFinal{std::get<Unsupported>(outcome).diagnostics}},std::monostate{}, {}};
     const ar::Unavailable unavailable{ar::MissingReason::not_requested,{}};
-    const auto wire=take(application::encode_strategy_run(prepared.problem(),execution,
-        std::move(configuration),run_id,std::move(statistics),
-        {unavailable,unavailable,unavailable,unavailable,false,ar::MemoryAccounting::unlimited}));
-    auto run=take(ar::decode_recorded_run(wire,prepared.problem()));
-    std::ostringstream event;
-    event << "{\"schema\":\"csl.obs04-instrumentation-comparison-event/2\",\"repetition\":"
-        << repetition << ",\"warmup\":" << (warmup?"true":"false") << ",\"strategy\":\""
-        << (strategy_index==0?"csl.synthesis.reach-back":"csl.synthesis.strategy-b")
-        << "\",\"instrumentation\":\"" << (enabled?"enabled":"disabled")
-        << "\",\"status\":\"" << attempt_status_name(status)
-        << "\",\"analytic_family_checked\":false,\"complete_family_verified\":false,\"recording_error\":\""
-        << escaped(message) << "\"}";
-    const auto measurement=event.str();
-    std::cout << measurement << '\n';
-    return {static_cast<std::uint32_t>(strategy_index*2+(enabled?1:0)),
-        static_cast<std::uint32_t>(repetition),status,run_id,std::move(run),measurement,false};
+    std::string wire;
+    try {
+        wire=take(application::encode_strategy_run(prepared.problem(),execution,
+            configuration,run_id,statistics,
+            {unavailable,unavailable,unavailable,unavailable,false,ar::MemoryAccounting::unlimited}));
+        auto run=take(ar::decode_recorded_run(wire,prepared.problem()));
+        std::ostringstream event;
+        event << "{\"schema\":\"csl.obs04-instrumentation-comparison-event/2\",\"repetition\":"
+            << repetition << ",\"warmup\":" << (warmup?"true":"false") << ",\"strategy\":\""
+            << (strategy_index==0?"csl.synthesis.reach-back":"csl.synthesis.strategy-b")
+            << "\",\"instrumentation\":\"" << (enabled?"enabled":"disabled")
+            << "\",\"status\":\"" << attempt_status_name(status)
+            << "\",\"analytic_family_checked\":false,\"complete_family_verified\":false,\"recording_error\":\""
+            << escaped(message) << "\"}";
+        const auto measurement=event.str();
+        std::cout << measurement << '\n';
+        return {static_cast<std::uint32_t>(strategy_index*2+(enabled?1:0)),
+            static_cast<std::uint32_t>(repetition),status,run_id,std::move(run),measurement,false};
+    } catch(const std::exception& serialization_error) {
+        return unserializable_outcome_trial(prepared,strategy_index,enabled,repetition,warmup,outcome,
+            std::move(configuration),std::move(statistics),serialization_error.what());
+    }
 }
 
 ar::CollectedStatistics empty_fallback_statistics(const problem::ResolvedProblem& problem,
