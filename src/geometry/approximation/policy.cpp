@@ -1,4 +1,5 @@
 #include <csl/geometry/approximation.hpp>
+#include <csl/execution/instrumented_operation.hpp>
 #include <csl/geometry/ellipsoidal.hpp>
 #include <csl/sets/data.hpp>
 #include <csl/sets/generator_sets.hpp>
@@ -10,6 +11,30 @@
 
 namespace csl::geometry::approximation {
 namespace {
+namespace ar=artifacts;
+namespace ob=execution::observability;
+template<class Outcome> Termination approximation_termination(const Outcome& outcome) noexcept {
+    if(std::holds_alternative<Unsupported>(outcome))return Termination::operation_rejected;
+    if(const auto* stopped=std::get_if<OperationStopped>(&outcome)) {
+        switch(stopped->reason) {
+        case StopReason::cancelled:case StopReason::deadline_expired:return Termination::cancelled;
+        case StopReason::resource_limit:return Termination::resource_limit;
+        case StopReason::numerical_failure:return Termination::numerical_failure;
+        }
+        return Termination::numerical_failure;
+    }
+    return Termination::completed;
+}
+ar::ModuleIdentity provider_identity(const registry::Identity& identity) {
+    return {identity.id,identity.version,ar::Unavailable{ar::MissingReason::not_instrumented,{}}};
+}
+ob::OperationSpanIdentity approximation_identity(const ApproximationRequest& request,
+        const registry::Provenance& provenance) {
+    return {request.identity.request.value,"geometry.approximation.provider-call",
+        provenance.actual?provider_identity(*provenance.actual):provider_identity(
+            registry::Identity{provenance.requested.id,"unknown"}),
+        {},{},{},{}};
+}
 Diagnostics error(DiagnosticCode code, const char* field, const char* message) {
     return {{code,field,message}};
 }
@@ -321,8 +346,11 @@ RunOutcome run_registered(const registry::Registry<registry::ApproximationPort>&
     requirements.output.relation=request.direction;
     auto prepared=registry::prepare_pipeline(registry::select(registry,std::move(method),request,requirements));
     if(const auto* rejected=std::get_if<registry::Rejection>(&prepared))return *rejected;
-    auto workspace=std::get<registry::PreparedPipeline<registry::ApproximationPort>>(std::move(prepared)).create();
-    auto outcome=std::get<0>(workspace)->run(context);
+    auto pipeline=std::get<registry::PreparedPipeline<registry::ApproximationPort>>(std::move(prepared));
+    const auto provenance=pipeline.provenance().front();
+    auto workspace=pipeline.create();
+    auto outcome=ob::run_instrumented_operation(context,approximation_identity(request,provenance),
+        [&]() {return std::get<0>(workspace)->run(context);},approximation_termination<SetTransformOutcome>);
     if(const auto* stopped=std::get_if<OperationStopped>(&outcome))return *stopped;
     if(const auto* unsupported=std::get_if<Unsupported>(&outcome))return *unsupported;
     auto result=std::get<OperationResult>(std::move(outcome));
