@@ -1,0 +1,40 @@
+{
+  "schema": "csl.obs04-strategy-run-profile/1",
+  "fixture": "T-S01 exact analytic integrator",
+  "source_commit": "9dbdf89d",
+  "binary_sha256": "6bafa99c946c25c3d65addb482677e5cff732ba1d71f9065f4772dbf4ef69b6b",
+  "build": {"configuration": "Release", "compiler": "GCC 16.2.1"},
+  "host": {
+    "cpu": "AMD Ryzen 5 3550H with Radeon Vega Mobile Gfx",
+    "logical_cpus_online": 8,
+    "logical_cpus_available": 8,
+    "os": "Linux 7.2.5-3-omarchy x86_64",
+    "load_captured": false
+  },
+  "profiler": {
+    "name": "Linux perf",
+    "version": "7.2.3-1",
+    "event": "cycles:u",
+    "requested_frequency_hz": 499,
+    "call_graph": "DWARF",
+    "user_stack_bytes": 8192,
+    "maximum_data_bytes": 33554432
+  },
+  "resource_policy": {
+    "solver_threads_configured": 1,
+    "outer_workers_configured": 1,
+    "actual_native_library_threads_instrumented": false
+  },
+  "scope": "Sampling enabled immediately before and disabled immediately after each StrategyPort::run invocation; setup, validation, warmup, and output are outside sampled windows.",
+  "captures": [
+    {"strategy": "reach-back", "calls": 500, "passed": 500, "samples": 1117, "lost_samples": 0, "file": "reach-back.perf.data.gz"},
+    {"strategy": "direct-joint", "calls": 2000, "passed": 2000, "samples": 485, "lost_samples": 0, "file": "direct-joint.perf.data.gz"}
+  ],
+  "limitations": [
+    "Host load was not controlled or captured.",
+    "Call counts differ, and sample counts are not a comparable performance metric.",
+    "The analytic fixture is not representative of application workloads.",
+    "Allocator activity is visible, but no unique limiter or performance winner is established.",
+    "Some sample addresses remain unsymbolized."
+  ]
+}

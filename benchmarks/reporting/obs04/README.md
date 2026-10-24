@@ -86,3 +86,14 @@ profile, but it cannot isolate a unique limiter in the timed region. The profile
 summary and raw file are in `results/`. This tiny analytic fixture does not
 represent application workloads and supports no general instrumentation
 overhead or strategy winner claim.
+
+`results/strategy-run-perf-20261024/` adds a separate user-space profile whose
+sampling window is gated around each `StrategyPort::run` invocation. The
+reach-back capture passed 500 calls and retained 1,117 samples; the direct-joint
+capture passed 2,000 calls and retained 485 samples. Both report zero lost
+samples. These counts are not a performance comparison: call counts differ and
+the small T-S01 fixture is not representative. Allocation symbols appear in
+both profiles, but the evidence does not establish a unique limiter. The
+directory contains provenance, JSON metadata, summaries, and compressed raw
+profiles. This remains an exploratory increment; OBS-04 still needs immutable
+attempt/resource/publication records and the rest of its acceptance criteria.

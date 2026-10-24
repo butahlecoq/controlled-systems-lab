@@ -1,0 +1,10 @@
+# Total Lost Samples: 0
+# Samples: 1K of event 'cycles:u'
+     7.44%  [.] cfree                                                                                                   
+     8.09%  [.] malloc                                                                                                  
+     1.68%  [.] operator delete(void*)                                                                                  
+     1.42%  [.] operator new(unsigned long)                                                                             
+     1.17%  [.] std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >::_M_assign(std::__cxx11:
+     1.60%  [.] std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >::_M_create(unsigned long
+     1.65%  [.] std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >::basic_string(char const
+     1.48%  [.] 0x00000000000a75d4                                                                                      

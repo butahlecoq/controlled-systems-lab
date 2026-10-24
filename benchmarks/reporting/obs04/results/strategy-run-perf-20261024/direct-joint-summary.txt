@@ -1,0 +1,12 @@
+# Total Lost Samples: 0
+# Samples: 485  of event 'cycles:u'
+     1.01%  [.] Highs::~Highs()                                                                                         
+     1.86%  [.] OptionRecordBool::OptionRecordBool(std::__cxx11::basic_string<char, std::char_traits<char>, std::allocat
+     6.07%  [.] cfree                                                                                                   
+    10.00%  [.] malloc                                                                                                  
+     1.29%  [.] operator delete(void*)                                                                                  
+     1.11%  [.] operator new(unsigned long)                                                                             
+     1.04%  [.] std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >::_M_assign(std::__cxx11:
+     3.24%  [.] std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >::basic_string(char const
+     1.05%  [.] 0x00000000000a4f23                                                                                      
+     1.45%  [.] 0x00000000000a7a98                                                                                      
