@@ -255,6 +255,26 @@
       ]
     },
     {
+      "id": "temporal-memory-lift",
+      "name": "Temporal memory lifting for slew constraints",
+      "composition": "extension-outside-initial-paired-flow",
+      "modules": [
+        "EXT-03"
+      ],
+      "support": "supported-2d-illustration",
+      "limit": "The saved report times the transform and history recovery for one fixed two-step scalar fixture; it does not time a solver or establish application-scale performance.",
+      "catalog_kinds": [
+        "ext03-temporal-transform"
+      ],
+      "report_routes": [],
+      "examples": [
+        "visual-ext03-slew-memory"
+      ],
+      "implementation_issues": [
+        73
+      ]
+    },
+    {
       "id": "forward-reachability",
       "name": "Nominal forward reachability",
       "composition": "main-synthesis-path",
