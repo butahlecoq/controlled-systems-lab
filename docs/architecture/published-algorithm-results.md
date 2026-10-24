@@ -165,6 +165,26 @@ binary64 coordinates and does not establish general geometric correctness.
 Independent report review, main-only deployment and verified live links remain
 publication gates.
 
+## ITIS17-informed hull reducer pilot
+
+The exploratory [QuickHull/ITIS17 bundle](../../reports/algorithm-results/quickhull-it17-paper-adaptations-20261024-r1/)
+uses source commit `7de5ad294ab8831ea3bcc2907f0355c602971d63` and compares
+geometric QuickHull with five LP reducers on three exact-dyadic 2D clouds of
+5–10 points. Seven interleaved measured calls per method/fixture pair and one
+warmup per pair produced 126 measured and 18 warmup calls; all 144 passed the
+independent bounded hull oracle. A43's certificate-safe basis adaptation had
+per-fixture medians from 658,676 to 1,038,336 ns; A44's incremental LP
+adaptation ranged from 944,399 to 1,466,116 ns. QuickHull medians ranged from
+5,168 to 15,365 ns. The run has no source-mapped limiter profile or
+representative workload, so the performance conclusion is inconclusive.
+Neither new reducer is a faithful paper or Pascal port: A43 omits the paper's
+per-candidate artificial-basis sequence and largest-norm tie rule; A44 records
+one farthest-first interpretation of ambiguous ordering prose. Existing
+OPT-06 and OPT-07 methods remain separately named related variants. No matching
+Pascal source was found. The comparison does not complete EXP-02. The report
+route and offline bundle are staged by the Pages workflow; deployment and live
+URL verification remain pending.
+
 ## APP-02 box and parallelotope approximations
 
 Issue [APP-02 #33](https://github.com/butahlecoq/controlled-systems-lab/issues/33)

@@ -1,0 +1,13 @@
+A43: Bulaev V.V., Shorikov A.F., ITIS17 PDF
+SHA-256: a90a3e404807238886122dfdfc91a5f18697949137a8d9744af7180508de848a
+C++ method identity: csl.hull.itis17.a43-certified-basis-reuse/1.0.0
+Deviation: wraps the existing one-shot Phase-I basis-reuse algorithm and adds a full LP recheck; it does not implement the paper's per-candidate artificial-basis sequence or largest-norm tie rule. This is not a faithful paper implementation or Pascal reproduction.
+
+A44: Goranov A.Yu., Shorikov A.F., ITIS17 PDF
+SHA-256: 493917da7d8ac669a470a978780a2ca269ce9da1b594365f49c6ebd572388fd7
+C++ method identity: csl.hull.itis17.a44-incremental-lp/1.0.0
+Deviation: uses a one-point initial seed, farthest-first normalized Chebyshev distance, stable input-ID ties, and a final LP recheck. The article's ordering prose is ambiguous; this run records farthest-first. This is a paper-informed adaptation, not a faithful Pascal reproduction.
+
+Pascal initial-version comparison: unavailable. The earlier filesystem, archive and Git searches found no corresponding source. The unrelated btulshor.pas routine was not run.
+
+Other measured methods keep their existing identities: csl.geometry.quickhull-2d, csl.hull.lp-membership, csl.hull.phase-one-basis-bulk (OPT-06 related), and csl.hull.ordered-membership (OPT-07 related).

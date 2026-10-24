@@ -1,0 +1,12 @@
+cmake version 3.31.6
+
+CMake suite maintained and supported by Kitware (kitware.com/cmake).
+g++ (GCC) 16.2.1 20260810
+CMAKE_BUILD_TYPE:STRING=Release
+CMAKE_CXX_FLAGS_RELEASE:STRING=-O3 -DNDEBUG
+CSL_ENABLE_HIGHS:BOOL=ON
+CSL_ENABLE_QHULL:BOOL=OFF
+Generator: Unix Makefiles
+Build jobs: 4
+HiGHS: pinned 1.11.0; native multithreading disabled
+Measurement process: one serial process; one excluded warmup per fixture/method; 7 interleaved rounds

@@ -1,0 +1,7 @@
+Command: mise exec cmake@3.31.6 -- ctest --test-dir /tmp/csl-it17-make-build -L geometry --output-on-failure --parallel 4
+Result: 27/27 geometry tests passed, including itis17_hull_reducers_test.
+
+Measurement command: /tmp/csl-it17-make-build/csl_it17_hull_comparison_report --measure 7
+Result: 144 rows retained (18 warmups, 126 measured); all 144 output checks passed. Each of the 18 method/fixture pairs has seven measured trials. The two experimental methods are adaptations with the deviations listed in paper-identities.txt.
+
+The report generator validated the row count, all success flags, shared fixture input hashes and one stable method identity per method. See raw-capture.jsonl for original interleaved output, raw-rows.jsonl for its normalized saved form and SHA256SUMS for artifact hashes.
