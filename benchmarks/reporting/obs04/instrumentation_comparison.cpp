@@ -18,6 +18,7 @@
 #include <cstdint>
 #include <iostream>
 #include <memory>
+#include <optional>
 #include <stdexcept>
 #include <string>
 #include <string_view>
@@ -352,10 +353,55 @@ bool trial(const application::PreparedComparison& prepared, std::size_t strategy
         return false;
     }
 }
+
+void profile_calls(const application::PreparedComparison& prepared, std::size_t strategy_index,
+    std::size_t calls, const Signature& expected) {
+    std::size_t passed = 0;
+    for (std::size_t repetition = 0; repetition < calls; ++repetition) {
+        auto workspaces = prepared.create();
+        if (strategy_index >= workspaces.size())
+            throw std::runtime_error("Profile strategy index is unavailable");
+        ExecutionContext context;
+        context.resources = std::make_shared<const ResourcePolicy>(ResourcePolicy{1, 1, 1, {}});
+        context.numerical = prepared.family().numerical;
+        const auto outcome = workspaces[strategy_index]->run(context);
+        const auto observed = signature(outcome);
+        require_ts01_analytic_result(outcome, observed);
+        const bool equivalent = observed.termination == expected.termination &&
+            observed.outcome == expected.outcome && close(observed.lower, expected.lower) &&
+            close(observed.upper, expected.upper) && observed.profile == expected.profile &&
+            observed.complete == expected.complete && observed.complete;
+        if (!equivalent) throw std::runtime_error("Profile call changed the analytic comparison outcome");
+        ++passed;
+    }
+    std::cout << "{\"schema\":\"csl.obs04-call-profile/1\",\"strategy\":\""
+        << (strategy_index == 0 ? "csl.synthesis.reach-back" : "csl.synthesis.strategy-b")
+        << "\",\"calls\":" << calls << ",\"passed\":" << passed
+        << ",\"analytic_family_checked\":true,\"complete_family_verified\":true}\n";
+}
 }
 
-int main() {
+int main(int argc, char** argv) {
     try {
+        std::optional<std::size_t> profile_strategy;
+        std::size_t profile_calls_count = 0;
+        for (int argument = 1; argument < argc; ++argument) {
+            const std::string_view option{argv[argument]};
+            if (option == "--profile-strategy" && argument + 1 < argc) {
+                const std::string_view strategy{argv[++argument]};
+                if (strategy == "reach-back") profile_strategy = 0;
+                else if (strategy == "direct-joint") profile_strategy = 1;
+                else throw std::invalid_argument("Profile strategy must be reach-back or direct-joint");
+            } else if (option == "--profile-calls" && argument + 1 < argc) {
+                profile_calls_count = std::stoull(argv[++argument]);
+            } else {
+                throw std::invalid_argument("usage: csl_obs04_instrumentation_comparison [--profile-strategy reach-back|direct-joint --profile-calls N]");
+            }
+        }
+        if (profile_calls_count > 10000)
+            throw std::invalid_argument("Profile call count must not exceed 10000");
+        if (profile_strategy.has_value() != (profile_calls_count != 0))
+            throw std::invalid_argument("Profile strategy and positive call count must be provided together");
         const auto problem = source();
         auto modules = make_modules();
         const auto prepared = prepare(problem, modules.strategies);
@@ -367,6 +413,24 @@ int main() {
                 prepared.family().numerical, "obs04-analytic-baseline", {}});
             expected[i] = signature(baseline);
             require_ts01_analytic_result(baseline, expected[i]);
+        }
+        if (profile_strategy) {
+            auto warmup = prepared.create();
+            ExecutionContext context;
+            context.resources = std::make_shared<const ResourcePolicy>(ResourcePolicy{1, 1, 1, {}});
+            context.numerical = prepared.family().numerical;
+            const auto warmup_result = warmup[*profile_strategy]->run(context);
+            const auto warmup_signature = signature(warmup_result);
+            require_ts01_analytic_result(warmup_result, warmup_signature);
+            if (warmup_signature.termination != expected[*profile_strategy].termination ||
+                warmup_signature.outcome != expected[*profile_strategy].outcome ||
+                !close(warmup_signature.lower, expected[*profile_strategy].lower) ||
+                !close(warmup_signature.upper, expected[*profile_strategy].upper) ||
+                warmup_signature.profile != expected[*profile_strategy].profile ||
+                !warmup_signature.complete)
+                throw std::runtime_error("Profile warmup changed the analytic comparison outcome");
+            profile_calls(prepared, *profile_strategy, profile_calls_count, expected[*profile_strategy]);
+            return 0;
         }
         std::cout << "# fixture=T-S01; strategies=reach-back,direct-joint; profile=ts01_exact_integrator\n"
             << "# timed_region=exclusive workspace StrategyPort::run; setup and collection snapshot are reported separately\n"
