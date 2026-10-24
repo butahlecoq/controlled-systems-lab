@@ -1,6 +1,6 @@
 if(TARGET CSL::highs_lp AND TARGET CSL::qhull_conversion)
   add_executable(nominal_forward_tests tests/unit/reachability/nominal_forward_tests.cpp)
-  target_link_libraries(nominal_forward_tests PRIVATE CSL::nominal_forward CSL::affine_sum CSL::qhull_conversion CSL::highs_lp doctest::doctest)
+  target_link_libraries(nominal_forward_tests PRIVATE CSL::nominal_forward CSL::affine_sum CSL::qhull_conversion CSL::highs_lp CSL::artifacts doctest::doctest)
   add_test(NAME nominal_forward_tests COMMAND nominal_forward_tests)
   csl_test_target(nominal_forward_tests reachability)
 endif()

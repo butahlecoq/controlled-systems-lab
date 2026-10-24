@@ -2,7 +2,8 @@
 
 csl_add_library(csl_nominal_forward STATIC src/reachability/nominal_forward.cpp)
 
-target_link_libraries(csl_nominal_forward PUBLIC CSL::polyhedral CSL::resolved_problem)
+target_link_libraries(csl_nominal_forward PUBLIC CSL::polyhedral CSL::resolved_problem
+  PRIVATE CSL::artifacts)
 
 csl_add_library(csl_fixed_plan_disturbance STATIC src/reachability/fixed_plan_disturbance.cpp)
 

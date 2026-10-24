@@ -74,6 +74,19 @@ in-memory metrics in the wall clock's tick unit:
   Nested spans are not selected again. It measures occupied worker wall time,
   including waits, rather than CPU use; it may exceed run latency.
 
+## Provider operation spans
+
+`execution/instrumented_operation.hpp` supplies a reusable wrapper for provider
+calls. It starts only a unique planned descriptor whose task, operation, wrapper
+module, backend, optional program, stage and query all match exactly. Missing or
+ambiguous descriptors leave the call unmeasured. The call span covers the
+provider workspace's `run` entry; preparation remains outside the measured
+interval. A pre-entry stop or capability rejection closes the planned span as
+not called with its typed reason. Instrumentation lookup failures never change
+the provider call or its mathematical result. The serializer already supports
+not-called observations, so these API additions do not change the artifact
+schema.
+
 `TimingClock` is the injection port. Read methods are `noexcept`; the collector
 serializes reads within one collector so deterministic test clocks need no locking.
 A source shared by multiple collectors must itself support concurrent reads. Its dedicated mutex

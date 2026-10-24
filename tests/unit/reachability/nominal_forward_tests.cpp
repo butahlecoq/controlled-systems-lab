@@ -1,6 +1,8 @@
 #define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
 #include <doctest/doctest.h>
 #include <csl/reachability/nominal_forward.hpp>
+#include <csl/execution/timing_collector.hpp>
+#include <csl/execution/instrumented_operation.hpp>
 #include <algorithm>
 #include <csl/geometry/affine_sum.hpp>
 #include <csl/adapters/lp/highs.hpp>
@@ -91,6 +93,21 @@ Problem integrator() {
 }
 problem::ResolvedProblem resolved(Problem p) {return take(problem::resolve(p,{problem::UncertaintyStructure::stage_product_uncoupled,{},{}}));}
 NominalForwardOutcome run(Problem p,ExecutionContext context={}) {return nominal_forward(resolved(std::move(p)),{"tube"},dependencies(),context);}
+class TimingClock final : public execution::observability::TimingClock {
+    std::int64_t tick_{};
+public:
+    artifacts::ClockDomain wall_domain() const override {
+        return {{"wall"},artifacts::ClockMetric::steady_wall,"run",1,1000,
+            artifacts::Available<std::uint64_t>{1},"nominal-forward-test"};
+    }
+    std::optional<artifacts::ClockDomain> cpu_domain() const override {return {};}
+    artifacts::Metric<std::int64_t> wall_now() noexcept override {
+        const auto result=tick_;tick_+=10;return artifacts::Available<std::int64_t>{result};
+    }
+    artifacts::Metric<std::int64_t> cpu_now() noexcept override {
+        return artifacts::Unavailable{artifacts::MissingReason::not_supported,{}};
+    }
+};
 void range(const SetHandle& set,double lo,double hi,std::vector<std::string> expected_labels={"x"}) {
     // Complete independent 1-D H oracle: every halfspace contributes an
     // endpoint, every nonzero equality fixes both endpoints. No sampled points
@@ -128,6 +145,67 @@ bool contains_h(const SetHandle& set,const Vector& point) {
     }
     return true;
 }
+}
+TEST_CASE("nominal forward records the matching projection provider span") {
+    namespace ar=artifacts;
+    namespace ob=execution::observability;
+    auto p=resolved(integrator());
+    auto selected_dependencies=dependencies();
+    const auto backend=*selected_dependencies.projection.provenance().actual;
+    const auto problem_id=p.identity().value;
+    const std::string task="nominal-forward/"+std::to_string(problem_id.size())+":"+
+        problem_id+"4:tube0/project";
+    ar::ConfigurationInput configuration;
+    const ar::Unavailable missing{ar::MissingReason::not_instrumented,{}};
+    configuration.collection={true,ar::CollectionMode::detail,8,4096,8,1024};
+    configuration.modules={{"geometry",{{backend.id},backend.version,missing},{}},
+        {"strategy",{{"csl.reachability.nominal-forward"},"0.1.0",missing},{}}};
+    configuration.resources={1,1,1,{}};configuration.numerical={0,0};
+    configuration.output={ar::OutputKind::program,Assurance::numerical,
+        FamilyTarget::candidate_relaxation,{"csl.polyhedron.h"},{1,0,{},{}}};
+    configuration.selector={{"first"},"1",{}};
+    configuration.strategy={ModuleId{"csl.reachability.nominal-forward"},ModuleId{},ModuleId{},ModuleId{},
+        backend.id,ModuleId{},ModuleId{},ModuleId{"first"},RepresentationId{"csl.polyhedron.h"}};
+    auto resolved_configuration=take(ar::resolve_configuration(std::move(configuration)));
+    const auto clock_domain=ar::ClockDomain{{"wall"},ar::ClockMetric::steady_wall,"run",1,1000,
+        ar::Available<std::uint64_t>{1},"nominal-forward-test"};
+    ob::PlanInput plan_input{p,resolved_configuration,{"instrumented-forward"},{clock_domain},{},1};
+    plan_input.tasks={"run",task};plan_input.operations={"operation.run","geometry.projection"};
+    ar::SpanDescriptor root{};root.id={0};root.task="run";root.operation="operation.run";
+    root.module=resolved_configuration.description().modules.back().implementation;
+    root.clock={"wall"};root.requested_assurance=Assurance::numerical;
+    root.applied_assurance=ar::Available<Assurance>{Assurance::numerical};
+    ar::SpanDescriptor projection{};projection.id={1};projection.parent=ar::SpanParent{{0},ar::ParentKind::nested};
+    projection.task=task;projection.operation="geometry.projection";
+    projection.module=root.module;
+    projection.backend=std::make_shared<const ar::ModuleIdentity>(
+        ar::ModuleIdentity{backend.id,backend.version,missing});
+    projection.clock={"wall"};projection.stage=0;
+    projection.requested_assurance=Assurance::numerical;
+    projection.applied_assurance=ar::Available<Assurance>{Assurance::numerical};
+    projection.observation_source="src/reachability/nominal_forward.cpp";
+    plan_input.spans={std::move(root),std::move(projection)};
+    auto plan=take(ob::make_collection_plan(std::move(plan_input)));
+    auto probe_timer=take(ob::make_timing_collector(plan,std::make_shared<TimingClock>(),{0},{{1}}));
+    ExecutionContext probe_context;probe_context.run_id="instrumented-forward";probe_context.timing=probe_timer;
+    auto probe=ob::start_operation_timing(probe_context,{task,"geometry.projection",
+        {ModuleId{"csl.reachability.nominal-forward"},"0.1.0",missing},
+        ar::ModuleIdentity{backend.id,backend.version,missing},{},0,{}});
+    REQUIRE(probe);
+    probe->close_not_called(ar::NotCalledReason::task_not_admitted);
+    auto timer=take(ob::make_timing_collector(plan,std::make_shared<TimingClock>(),{0},{{1}}));
+    ExecutionContext context;context.run_id="instrumented-forward";context.timing=timer;
+    auto root_scope=take(timer->start({0},context));
+    const auto result=nominal_forward(p,{"tube"},selected_dependencies,context);
+    REQUIRE(std::holds_alternative<ForwardTube>(result));
+    root_scope.close(Termination::completed);
+    const auto report=take(timer->snapshot());
+    REQUIRE(report.spans.size()==2);
+    REQUIRE(std::holds_alternative<ar::Available<std::uint64_t>>(report.spans[1].inclusive_wall_ticks));
+    CHECK(std::get<ar::Available<std::uint64_t>>(report.spans[1].inclusive_wall_ticks).value==10);
+    CHECK(std::holds_alternative<ar::ReturnedObservation>(report.observations.description().spans[1].execution));
+    REQUIRE(std::holds_alternative<ar::ReturnedSpan>(report.observations.description().spans[1].status));
+    CHECK(std::get<ar::ReturnedSpan>(report.observations.description().spans[1].status).termination==Termination::completed);
 }
 TEST_CASE("two step integrator returns literal reachable marginals and recovery factors") {
     auto p=resolved(integrator());auto result=nominal_forward(p,{"tube"},dependencies(),{});
