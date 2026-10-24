@@ -186,10 +186,12 @@ integration fixtures cover only successful complete-family T-S01/T-S02 flows.
 Its result exposes the artifact layer's final
 projections and the original-problem verification reports as typed in-memory
 values. The `encode_strategy_run` function routes an individual final
-projection through the existing publisher and encoder. The native
-`scenario_cli --run` command saves each strategy attempt as a separate
-`csl.run-statistics/5` recorded artifact. Those artifacts do not serialize one
-paired comparison or its trajectory reports.
+projection through the existing publisher and encoder. When both strategies
+return completed optimal results and all selected witnesses pass numerical
+checks, the native `scenario_cli --run --output-dir` command saves each attempt
+as a separate `csl.run-statistics/5` recorded artifact. A strategy or witness
+check failure returns before artifact publication. The artifacts do not
+serialize one paired comparison or its trajectory reports.
 The delivered
 [registered synthesis comparison](../../examples/registered_synthesis_comparison.cpp)
 runs both strategies on the same immutable T-S01 problem, selects witness
@@ -231,13 +233,15 @@ The installed `scenario_cli --run` command adapts user-authored JSON to the
 paired application API for the guarded T-S01/T-S02 profiles. It accepts optional
 LP/convex IDs, a seed, thread allocation and profile overrides, and reports
 per-strategy outcomes plus independent witness checks. With `--output-dir`, it
-saves one versioned recorded artifact per strategy through the artifact API.
-Those `csl.run-statistics/5` artifacts retain complete-family claims as
-unverified data. They are not a paired comparison record, and decoding them
-does not mint trusted complete-family authority. See the [scenario CLI
-guide](../how-to/run-scenario.md) for commands and output details. General
-family proofs, broader selector profiles and replay of recorded claims remain
-outside this guarded CLI path.
+saves one versioned recorded artifact per strategy through the artifact API
+after both strategies complete with optimal outcomes and every selected
+witness passes its numerical checks. A strategy or witness-check failure
+returns before publication. The `csl.run-statistics/5` artifacts retain
+complete-family claims as unverified data. They are not a paired comparison
+record, and decoding them does not mint trusted complete-family authority. See
+the [scenario CLI guide](../how-to/run-scenario.md) for commands and output
+details. General family proofs, broader selector profiles and replay of
+recorded claims remain outside this guarded CLI path.
 The synthesis-to-report adapter remains missing glue. Saved LP/convex reports and the paired T-S01 fixture report do not supply a
 general synthesis comparison.
 
