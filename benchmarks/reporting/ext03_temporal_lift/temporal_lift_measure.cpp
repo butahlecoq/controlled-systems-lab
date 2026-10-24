@@ -185,7 +185,7 @@ void one_run() {
     StrategyConfiguration configuration;
     configuration.strategy = {"csl.synthesis.reach-back"};
     configuration.representation = family.representation;
-    StrategyRequest strategy_request{std::move(resolved), configuration, family, "1"};
+    StrategyRequest strategy_request{std::move(resolved), configuration, family, "1", {}};
     Requirements output;
     output.output.representation = family.representation;
     output.output.family = family.target;
