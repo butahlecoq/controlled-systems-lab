@@ -36,6 +36,18 @@ source commit, compiler/build provenance, machine/OS capture, and separate
 limiter-profile result next to any retained measurement. Do not combine the
 existing synthetic OBS-02 collector loop with these solver timings.
 
+`csl.obs04-instrumentation-comparison-event/2` is a capture-only schema for
+this experiment, not the authoritative comparison artifact. Its repetition,
+strategy, instrumentation mode, and status identify an attempted
+`ComparisonAttempt`; phase durations and span timings are the raw measurement
+payload, while outcome, tolerances, and family checks provide the corresponding
+run evidence. The current driver does not yet bind these events to
+`ComparisonSpecId` or immutable `RunRecordRef` values. Preserve this schema only
+to read this saved sample; when OBS-04 writes authoritative comparison records,
+those records should own the attempts and retain these raw events as payload or
+replace them with fields in the run record. Do not treat this event stream as a
+second canonical report format.
+
 Build a clean Release source checkout and use a separate build directory:
 
 ```sh
