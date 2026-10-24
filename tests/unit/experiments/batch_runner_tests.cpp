@@ -4,12 +4,32 @@
 #include <csl/experiments/batch_runner.hpp>
 #include <csl/synthesis/strategy_ts01/analytic_profile.hpp>
 
+#include <fstream>
+#include <iterator>
+
 using namespace csl;
 namespace {
 
 template<class T,class... R> T take(std::variant<T,R...> value) {
     if(!std::holds_alternative<T>(value))throw std::runtime_error("Unexpected fixture result");
     return std::get<T>(std::move(value));
+}
+
+std::string read_sweep_run_fixture() {
+    std::ifstream input(CSL_SWEEP_RUN_FIXTURE, std::ios::binary);
+    return {std::istreambuf_iterator<char>(input), std::istreambuf_iterator<char>()};
+}
+
+artifacts::RecordedRunArtifact recorded_sweep_run() {
+    auto decoded = take(artifacts::decode_run(read_sweep_run_fixture()));
+    return take(artifacts::encode_recorded_run(decoded));
+}
+
+problem::ResolvedContent sweep_spec() {
+    constexpr std::string_view text{"{\"schema\":\"csl.scenario-sweep-spec/1\"}"};
+    std::vector<std::byte> bytes;
+    for (const unsigned char value : text) bytes.push_back(static_cast<std::byte>(value));
+    return take(problem::snapshot_content(bytes));
 }
 
 SetHandle interval(std::string id,double lower,double upper) {
@@ -357,4 +377,77 @@ TEST_CASE("query setup diagnostics leave the completed coarse sweep available to
     const auto* returned=std::get_if<execution::Returned<registry::StrategyPort>>(&sweep.batch.tasks[0].outcome);
     REQUIRE(returned);
     CHECK(std::get<SynthesisResult>(returned->value).family.has_value());
+}
+
+TEST_CASE("a completed family query sweep records aligned runs and measured phase resources") {
+    const auto prepared = prepare_strategy();
+    constexpr std::string_view configuration{"csl.config.v1.sha256:e27f771c2d04bb72827ad27eeaa4123a4df58eaea22aaac4b789ee36033e5abf"};
+    std::vector<experiments::ScenarioSweepCase> cases{
+        sweep_case("scenario-a", std::string(configuration), prepared),
+        sweep_case("scenario-b", std::string(configuration), prepared)};
+    for (auto& item : cases) {
+        item.resources.workspace_reservation_bytes = 20;
+        item.resources.retained_result_reservation_bytes = 15;
+    }
+    cases[1].selection.seed = 20;
+    const ResourcePolicy resources{2,2,1,100};
+    ExecutionContext context;
+    context.run_id = "recorded-sweep";
+    const auto selector = prepare_selector_provider(true);
+    const execution::ResourceUse query_resources{1,"one selector workspace",10,
+        execution::CallStopSupport::cooperative_boundaries,5};
+    auto coarse = experiments::run_sweep(cases, resources, context, execution::Mode::bounded_parallel);
+    REQUIRE(std::holds_alternative<experiments::SweepResult>(coarse));
+    auto queried = experiments::run_family_queries(std::get<experiments::SweepResult>(std::move(coarse)),
+        selector, resources, context, execution::Mode::bounded_parallel, query_resources);
+    REQUIRE(std::holds_alternative<experiments::FamilyQueryResult>(queried));
+
+    const auto recorded = recorded_sweep_run();
+    const std::vector<artifacts::RecordedRunArtifact> coarse_records{recorded, recorded};
+    std::vector<std::optional<artifacts::RecordedRunArtifact>> query_records{recorded, std::nullopt};
+    const auto archive = experiments::record_family_query_sweep(sweep_spec(),
+        std::get<experiments::FamilyQueryResult>(queried), coarse_records, query_records);
+    REQUIRE(std::holds_alternative<artifacts::RecordedSweepArtifact>(archive));
+    const auto bytes = std::get<artifacts::RecordedSweepArtifact>(archive).content().bytes();
+    const std::string wire(reinterpret_cast<const char*>(bytes.data()), bytes.size());
+    CHECK(wire.find("\"schema\":\"csl.scenario-sweep/1\"") != std::string::npos);
+    CHECK(wire.find("\"scenario_id\":\"scenario-a\"") != std::string::npos);
+    CHECK(wire.find("\"kind\":\"rejected\"") != std::string::npos);
+    CHECK(wire.find("\"executor_worker_threads_started\":2") != std::string::npos);
+    CHECK(wire.find("\"executor_worker_threads_started\":1") != std::string::npos);
+    CHECK(wire.find("\"backend_threads\":null") != std::string::npos);
+    CHECK(wire.find("\"memory_support\":\"active_and_retained_reservations\"") != std::string::npos);
+    CHECK(wire.find("\"enforced_memory_reservation_budget_bytes\":100") != std::string::npos);
+    CHECK(wire.find("\"retained_result_reservation_bytes\":35") != std::string::npos);
+    CHECK(std::get<experiments::FamilyQueryResult>(queried).sweep.retained_result_reservation_bytes==30);
+    CHECK(std::get<experiments::FamilyQueryResult>(queried).query_result_reservation_bytes==5);
+    query_records[1] = recorded;
+    const auto mismatched_query = experiments::record_family_query_sweep(sweep_spec(),
+        std::get<experiments::FamilyQueryResult>(queried), coarse_records, query_records);
+    REQUIRE(std::holds_alternative<artifacts::ArtifactError>(mismatched_query));
+    CHECK(std::get<artifacts::ArtifactError>(mismatched_query).path=="sweep.cases[1].query");
+}
+
+TEST_CASE("finite sweep budgets reserve retained coarse and query results before admission") {
+    const auto prepared = prepare_strategy();
+    auto item = sweep_case("scenario-a","config-a",prepared);
+    item.resources.workspace_reservation_bytes = 1;
+    const ResourcePolicy resources{1,1,1,10};
+    ExecutionContext context;
+    context.run_id = "retained-budget";
+    auto missing = experiments::run_sweep(std::span{&item,1},resources,context,execution::Mode::sequential);
+    REQUIRE(std::holds_alternative<Diagnostics>(missing));
+    CHECK(std::get<Diagnostics>(missing).front().field=="sweep.cases[0].retained_result_memory");
+
+    item.resources.retained_result_reservation_bytes = 8;
+    auto coarse = experiments::run_sweep(std::span{&item,1},resources,context,execution::Mode::sequential);
+    REQUIRE(std::holds_alternative<experiments::SweepResult>(coarse));
+    CHECK(std::get<experiments::SweepResult>(coarse).retained_result_reservation_bytes==8);
+    const auto selector = prepare_selector_provider();
+    const execution::ResourceUse query_resources{1,"selector workspace",1,
+        execution::CallStopSupport::cooperative_boundaries,3};
+    auto over_budget = experiments::run_family_queries(std::get<experiments::SweepResult>(std::move(coarse)),
+        selector,resources,context,execution::Mode::sequential,query_resources);
+    REQUIRE(std::holds_alternative<Diagnostics>(over_budget));
+    CHECK(std::get<Diagnostics>(over_budget).front().field=="family_queries.retained_result_memory");
 }

@@ -1,6 +1,6 @@
 #pragma once
 
-#include <csl/artifacts/run_statistics.hpp>
+#include <csl/artifacts/scenario_sweep.hpp>
 #include <csl/execution/executor.hpp>
 #include <csl/registry/provider.hpp>
 
@@ -42,6 +42,9 @@ struct SweepResult {
     // Case records and task records use the same stable input order.
     execution::BatchResult<registry::StrategyPort> batch;
     std::vector<SweepCaseRecord> cases;
+    // Original request and caller-declared output reservations retained for this sweep.
+    ResourcePolicy requested_resources{};
+    std::optional<std::size_t> retained_result_reservation_bytes;
 };
 
 enum class QueryNotRunReason {
@@ -69,6 +72,8 @@ struct FamilyQueryResult {
     // Only eligible, selector-accepted requests appear in this compact batch.
     // FamilyQueryScheduled::task_index points into query_batch.tasks.
     execution::BatchResult<registry::SelectorPort> query_batch;
+    // Caller-declared reservation for selector outputs retained by this phase.
+    std::optional<std::size_t> query_result_reservation_bytes;
 };
 
 using SweepOutcome = std::variant<SweepResult, Diagnostics>;
@@ -87,5 +92,15 @@ FamilyQueryOutcome run_family_queries(SweepResult&& coarse,
     const registry::PreparedProvider<registry::SelectorPort>& selector,
     const ResourcePolicy&, const ExecutionContext&, execution::Mode,
     const execution::ResourceUse& query_resources, execution::AdmissionLimit = {});
+
+// Combines live phase dispositions and measured executor facts with caller-owned
+// inert per-case run records. The run records must match the case configuration
+// identities; query records are aligned with cases, with values only for cases
+// whose selector task was scheduled.
+artifacts::ArtifactResult<artifacts::RecordedSweepArtifact> record_family_query_sweep(
+    const problem::ResolvedContent& canonical_spec, const FamilyQueryResult&,
+    std::span<const artifacts::RecordedRunArtifact> coarse_runs,
+    std::span<const std::optional<artifacts::RecordedRunArtifact>> query_runs,
+    artifacts::EncodeLimits limits = {});
 
 } // namespace csl::experiments
