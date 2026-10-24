@@ -188,6 +188,8 @@ jobs:
             -DCSL_SOURCE_ROOT="$GITHUB_WORKSPACE" -DCMAKE_BUILD_TYPE=Release \
             -DCMAKE_CXX_FLAGS_RELEASE="-O3 -DNDEBUG -fdebug-prefix-map=$GITHUB_WORKSPACE=/tmp/csl-src -ffile-prefix-map=$GITHUB_WORKSPACE=/tmp/csl-src"
           cmake --build build/obs04-perf-probe --config Release --target csl_obs04_instrumentation_comparison --parallel 2
+      - name: Verify perf sample validation
+        run: python tests/obs04/perf_probe_tests.py
       - name: Verify acknowledged FIFO protocol without perf privileges
         run: python tests/obs04/perf_control_mock.py build/obs04-perf-probe/csl_obs04_instrumentation_comparison
       - name: Attempt bounded perf capture and retain capability result

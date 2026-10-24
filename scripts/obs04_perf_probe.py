@@ -25,6 +25,13 @@ def sanitize(text: str, binary: Path) -> str:
     return text.replace(str(binary), "<OBS04_BINARY>")
 
 
+def count_cycles_samples(sample_output: str) -> int:
+    return sum(
+        1 for line in sample_output.splitlines()
+        if line.strip() and not line.lstrip().startswith("#") and "cycles" in line
+    )
+
+
 def permission_failure(text: str) -> bool:
     lowered = text.lower()
     return any(term in lowered for term in (
@@ -168,11 +175,30 @@ def main() -> int:
                 result["status"] = "failed"
                 result["reason"] = "perf exited successfully without a non-empty perf.data file"
             else:
-                result["status"] = "available"
-                result["capture_file"] = capture_path.name
-                result["capture_bytes"] = capture_path.stat().st_size
-                result["capture_sha256"] = hashlib.sha256(capture_path.read_bytes()).hexdigest()
-                result["reason"] = "bounded profile captured with acknowledged enable/disable commands"
+                sample_report = subprocess.run(
+                    [perf, "script", "--input", str(capture_path), "-F",
+                        "comm,pid,tid,cpu,time,event,ip,sym"],
+                    capture_output=True, text=True, timeout=15,
+                )
+                if sample_report.returncode != 0:
+                    result["status"] = "failed"
+                    result["reason"] = sanitize(
+                        (sample_report.stderr or "perf script could not read the recorded profile").strip(), args.binary
+                    )[-4000:]
+                else:
+                    sample_count = count_cycles_samples(sample_report.stdout)
+                    result["sample_count"] = sample_count
+                    result["lost_event_count"] = None
+                    result["loss_status"] = "not_counted_by_this_capability_probe"
+                    result["capture_file"] = capture_path.name
+                    result["capture_bytes"] = capture_path.stat().st_size
+                    result["capture_sha256"] = hashlib.sha256(capture_path.read_bytes()).hexdigest()
+                    if sample_count == 0:
+                        result["status"] = "no_samples"
+                        result["reason"] = "perf.data has no decoded cycles samples; this does not establish a usable profile"
+                    else:
+                        result["status"] = "available"
+                        result["reason"] = "bounded profile contains decoded cycles samples with acknowledged enable/disable commands"
         write_result(result_path, result)
         print(f"perf capability: {result['status']} ({result.get('reason', '')})")
         return 1 if result["status"] == "failed" else 0
