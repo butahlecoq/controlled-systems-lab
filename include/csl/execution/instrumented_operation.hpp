@@ -49,6 +49,8 @@ private:
     template<class Value> static std::shared_ptr<const GeometryEvidence> copy_evidence(const Value& value) noexcept {
         if constexpr(requires{value.evidence;}) {
             try{return std::make_shared<const GeometryEvidence>(value.evidence);}catch(...){return {};}
+        } else if constexpr(requires{value.result.evidence;}) {
+            try{return std::make_shared<const GeometryEvidence>(value.result.evidence);}catch(...){return {};}
         } else return {};
     }
     template<class Result> static std::shared_ptr<const GeometryEvidence> geometry_evidence(const Result& result) noexcept {

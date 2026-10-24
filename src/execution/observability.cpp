@@ -225,8 +225,7 @@ CollectionResult<ar::CollectedStatistics> merge_observations(const CollectionPla
                 else if(v.status==CompletionStatus::failed){record.status=ar::FailedSpan{"unspecified","producer_reported"};increment(bucket.failed);}
                 else increment(bucket.incomplete);
                 if(v.has_termination)record.termination=ar::Available<Termination>{v.termination};
-                if(v.relation_evidence)
-                    record.descriptor.relation_evidence=std::make_shared<const GeometryEvidence>(*v.relation_evidence);
+                if(v.relation_evidence)record.descriptor.relation_evidence=v.relation_evidence;
                 if(v.iterations.available)record.iterations=ar::Available<std::uint64_t>{v.iterations.value};else record.iterations=ar::Unavailable{v.iterations.missing,{}};
                 increment(bucket.observed);
                 if(slot->disposition==RecordDisposition::retained){record.detail=ar::Available<std::string>{slot->size?std::string(owner->arena.data()+slot->offset,slot->size):std::string{}};record.detail_state=ar::DetailState::retained;}
