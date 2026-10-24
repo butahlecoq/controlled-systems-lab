@@ -1,7 +1,16 @@
 #include <csl/problem/temporal_lifts.hpp>
 #include <csl/numeric/data.hpp>
 #include <csl/sets/data.hpp>
+#include <csl/adapters/convex/highs.hpp>
+#include <csl/adapters/lp/highs.hpp>
+#include <csl/adapters/polyhedral/qhull.hpp>
+#include <csl/geometry/affine_sum.hpp>
+#include <csl/geometry/hull_reducer.hpp>
+#include <csl/geometry/polyhedral_projection.hpp>
+#include <csl/registry/provider.hpp>
+#include <csl/registry/registry.hpp>
 #include <csl/synthesis/strategy_a/nominal_linear_exact_profile.hpp>
+#include <csl/synthesis/strategy_a/strategy.hpp>
 
 #include <algorithm>
 #include <charconv>
