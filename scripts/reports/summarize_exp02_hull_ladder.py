@@ -70,6 +70,9 @@ def main():
         hashes[row["fixture"]].add(row["input_sha256"])
         if row["input_points"] not in SIZES:
             raise SystemExit("input point count does not match workload ladder")
+        if row["method"] == "geometric-quickhull" or row["passed"]:
+            if row["retained"] + row["removed"] != row["input_points"]:
+                raise SystemExit(f"incomplete retained/removed accounting in {key(row)}")
     if any(len(values) != 1 for values in hashes.values()):
         raise SystemExit("input hash changed within a fixture")
 

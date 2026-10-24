@@ -182,7 +182,8 @@ Outcome run(const Fixture& fixture, Method method) {
         }
         return {coordinates == expected && checked,
             std::chrono::duration_cast<std::chrono::nanoseconds>(end-begin).count(),
-            hull.vertex_indices.size(), 0, 0, 0, 0, 0};
+            hull.vertex_indices.size(), fixture.cloud.points.size()-hull.vertex_indices.size(),
+            0, 0, 0, 0};
     }
 
     auto lp = workspace(fixture.cloud);
