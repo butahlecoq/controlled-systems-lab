@@ -29,7 +29,8 @@ install(FILES docs/contracts/control-recovery.md DESTINATION ${CMAKE_INSTALL_DAT
 
 csl_add_library(csl_witness_selector STATIC src/synthesis/witness_selector.cpp)
 
-target_link_libraries(csl_witness_selector PUBLIC CSL::registry CSL::optimization CSL::strategy_ts01)
+target_link_libraries(csl_witness_selector PUBLIC CSL::registry CSL::optimization CSL::strategy_ts01
+  PRIVATE CSL::artifacts)
 
 csl_add_library(csl_hybrid_path_program STATIC
   src/synthesis/hybrid_path_program.cpp
