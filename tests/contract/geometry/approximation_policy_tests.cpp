@@ -126,14 +126,20 @@ std::shared_ptr<execution::observability::TimingCollector> approximation_timer(
         ar::Available<std::uint64_t>{1},"approximation-policy-test"};
     ob::PlanInput input{problem,config,{"approximation-test-run"},{clock},{},1};
     const std::string task=request.identity.request.value;
-    input.tasks={task};input.operations={"geometry.approximation.provider-call"};
-    ar::SpanDescriptor span{};span.id={0};span.task=task;
-    span.operation="geometry.approximation.provider-call";span.module=provider;span.clock={"wall"};
+    input.tasks={"approximation-test-run",task};
+    input.operations={"operation.run","geometry.approximation.provider-call"};
+    ar::SpanDescriptor root{};root.id={0};root.task="approximation-test-run";root.operation="operation.run";
+    root.module=config.description().modules.back().implementation;root.clock={"wall"};
+    root.requested_assurance=Assurance::numerical;
+    root.applied_assurance=ar::Available<Assurance>{Assurance::numerical};
+    ar::SpanDescriptor span{};span.id={1};span.parent=ar::SpanParent{{0},ar::ParentKind::nested};
+    span.task=task;span.operation="geometry.approximation.provider-call";span.module=provider;span.clock={"wall"};
     span.input_representation=std::make_shared<const RepresentationId>(request.input.metadata.representation);
     span.output_representation=std::make_shared<const RepresentationId>(request.output);
     span.relation=request.direction;span.requested_assurance=request.assurance;
     span.applied_assurance=ar::Available<Assurance>{request.assurance};
-    span.observation_source="src/geometry/approximation/policy.cpp";input.spans={std::move(span)};
+    span.observation_source="src/geometry/approximation/policy.cpp";
+    input.spans={std::move(root),std::move(span)};
     auto plan=ob::make_collection_plan(std::move(input));
     REQUIRE(std::holds_alternative<ob::CollectionPlan>(plan));
     auto collector=ob::make_timing_collector(std::get<ob::CollectionPlan>(std::move(plan)),
@@ -586,15 +592,17 @@ TEST_CASE("registered approximation times only its selected provider call") {
     const auto methods=provider(query,output,SetRelation::outer,SetRelation::outer);
     auto timer=approximation_timer(std::get<problem::ResolvedProblem>(std::move(resolved)),query);
     ExecutionContext context;context.run_id="approximation-test-run";context.timing=timer;
+    auto root=std::get<execution::observability::TimingScope>(timer->start({0},context));
     auto outcome=run_registered(methods,{{"fixture.approximation"},std::nullopt},query,context);
     REQUIRE(std::holds_alternative<EnclosedApproximation>(outcome));
+    root.close(Termination::completed);
     const auto report=timer->snapshot();
     REQUIRE(std::holds_alternative<execution::observability::TimingReport>(report));
     const auto& timing=std::get<execution::observability::TimingReport>(report);
-    REQUIRE(timing.spans.size()==1);
-    REQUIRE(std::holds_alternative<artifacts::Available<std::uint64_t>>(timing.spans[0].inclusive_wall_ticks));
-    CHECK(std::get<artifacts::Available<std::uint64_t>>(timing.spans[0].inclusive_wall_ticks).value==10);
-    const auto& descriptor=timing.observations.description().spans[0].descriptor;
+    REQUIRE(timing.spans.size()==2);
+    REQUIRE(std::holds_alternative<artifacts::Available<std::uint64_t>>(timing.spans[1].inclusive_wall_ticks));
+    CHECK(std::get<artifacts::Available<std::uint64_t>>(timing.spans[1].inclusive_wall_ticks).value==10);
+    const auto& descriptor=timing.observations.description().spans[1].descriptor;
     CHECK(descriptor.task=="timed-approximation");
     CHECK(descriptor.operation=="geometry.approximation.provider-call");
     CHECK(descriptor.module.id==ModuleId{"fixture.approximation"});
@@ -603,8 +611,8 @@ TEST_CASE("registered approximation times only its selected provider call") {
     REQUIRE(descriptor.output_representation);
     CHECK(*descriptor.output_representation==query.output);
     CHECK(descriptor.relation==SetRelation::outer);
-    REQUIRE(std::holds_alternative<artifacts::ReturnedSpan>(timing.observations.description().spans[0].status));
-    CHECK(std::get<artifacts::ReturnedSpan>(timing.observations.description().spans[0].status).termination==Termination::completed);
+    REQUIRE(std::holds_alternative<artifacts::ReturnedSpan>(timing.observations.description().spans[1].status));
+    CHECK(std::get<artifacts::ReturnedSpan>(timing.observations.description().spans[1].status).termination==Termination::completed);
 }
 
 TEST_CASE("rejected approximation records a no-call observation without creating a workspace") {
@@ -623,14 +631,16 @@ TEST_CASE("rejected approximation records a no-call observation without creating
         Unestablished{},std::nullopt,creations);
     auto timer=approximation_timer(std::get<problem::ResolvedProblem>(std::move(resolved)),query);
     ExecutionContext context;context.run_id="approximation-test-run";context.timing=timer;
-    const auto outcome=run_registered(methods,{{"fixture.approximation"},std::string{"1"}},query,context);
+    auto root=std::get<execution::observability::TimingScope>(timer->start({0},context));
+    const auto outcome=run_registered(methods,{{"fixture.approximation"},std::nullopt},query,context);
     REQUIRE(std::holds_alternative<registry::Rejection>(outcome));
     CHECK(*creations==0);
+    root.close(Termination::completed);
     const auto report=timer->snapshot();
     REQUIRE(std::holds_alternative<execution::observability::TimingReport>(report));
     const auto& timing=std::get<execution::observability::TimingReport>(report);
-    REQUIRE(timing.observations.description().spans.size()==1);
-    const auto& span=timing.observations.description().spans[0];
+    REQUIRE(timing.observations.description().spans.size()==2);
+    const auto& span=timing.observations.description().spans[1];
     CHECK(span.descriptor.module.id==ModuleId{"fixture.approximation"});
     CHECK(span.descriptor.module.version=="1");
     CHECK(std::holds_alternative<artifacts::NotCalledObservation>(span.execution));
