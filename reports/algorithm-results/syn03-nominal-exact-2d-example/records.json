@@ -1,0 +1,54 @@
+{
+  "schema": "csl.strategy-a-profile-example/1",
+  "example_id": "syn03-nominal-exact-2d-example",
+  "algorithm": {
+    "strategy": "csl.synthesis.reach-back@1",
+    "profile": "strategy-a.nominal-linear-exact-v1",
+    "verifier": "csl.verifier.strategy-a.nominal-linear-exact@1",
+    "source_commit": "8b94095edf6b14ba6f3d35e237293e639e48f0aa"
+  },
+  "inputs": {
+    "time_domain": "discrete",
+    "horizon": 1,
+    "state_dimension": 2,
+    "control_dimension": 2,
+    "initial_state": [0, 0],
+    "dynamics": "x1 = u0",
+    "control_set": {
+      "representation": "H",
+      "constraints": ["0 <= u0_x <= 1", "0 <= u0_y <= 1"]
+    },
+    "state_constraints": [
+      {"stage": 0, "set": "{(0,0)}"},
+      {"stage": 1, "constraints": ["x1 + y1 >= 1", "0 <= x1 <= 1", "0 <= y1 <= 1"]}
+    ],
+    "objective": "minimize x1 + y1",
+    "joint_coordinates": ["x0_x", "x0_y", "x1_x", "x1_y", "u0_x", "u0_y"]
+  },
+  "expected": {
+    "minimum": 1,
+    "complete_optimal_relation": "x0=(0,0), x1=u0, x1_x+x1_y=1, 0<=x1_x,x1_y<=1",
+    "independent_check": "The terminal set requires x1_x+x1_y>=1; the objective is the same sum. The lower bound 1 is attained at both endpoints and every point on the segment between them."
+  },
+  "observed": {
+    "termination": "completed",
+    "mathematical_outcome": "optimal",
+    "objective_lower": 1,
+    "objective_upper": 1,
+    "registry_verified_complete_family": true,
+    "assurance": "numerical",
+    "stdout": "profile=strategy-a.nominal-linear-exact-v1\nstate_dimension=2 control_dimension=2 horizon=1\nterminal_constraint=x+y>=1; 0<=x,y<=1\nobjective=minimize x+y\nexact_optimum=1 optimal_face={(x,y): x+y=1, 0<=x,y<=1}\nverified_complete_family=true assurance=numerical\n"
+  },
+  "reproduction": {
+    "external_consumer_check": "cmake --build build/quickhull-exploratory --target strategy_a_tests hybrid_path_program_tests",
+    "example_command": "./build/examples/nominal_linear_exact_2d",
+    "installed_consumer_example": "build/quickhull-exploratory/installed-consumer/examples-build/nominal_linear_exact_2d"
+  },
+  "evidence_scope": {
+    "is_performance_measurement": false,
+    "represented_binary64_inputs_checked_as_exact_dyadics": true,
+    "forward_geometry_and_optimizer_certified": false,
+    "validated_arithmetic_claim": false,
+    "generic_strategy_coverage_claim": false
+  }
+}

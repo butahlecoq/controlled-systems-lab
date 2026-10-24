@@ -101,6 +101,14 @@ problem::ResolvedProblem nominal_linear_exact_thirds() {
         InformationPattern::nominal_open_loop,LinearTerminal{{1},0}};
     return take(problem::resolve(source,{problem::UncertaintyStructure::stage_product_uncoupled,{},{}}));
 }
+problem::ResolvedProblem nominal_linear_exact_unbounded() {
+    Problem source{{"strategy-a-nominal-linear-exact-unbounded"},std::make_shared<const SystemModel>(SystemModel{
+        {{1,1,0},TimeDomain::discrete,LinearStage{{1,1,{0}},{1,1,{1}},{1,0,{}},{0}}}, {}}),
+        {0,1},KnownInitial{{0}},ContinuousDomain{{UniversalSet{1}}},
+        {interval("nominal-exact-unbounded-x0",0,0),UniversalSet{1}}, {},{},
+        InformationPattern::nominal_open_loop,LinearTerminal{{1},0}};
+    return take(problem::resolve(source,{problem::UncertaintyStructure::stage_product_uncoupled,{},{}}));
+}
 StrategyRequest request(problem::ResolvedProblem problem) {
     FamilyRequest family;family.objective=problem.identity();family.profile="nominal_open_loop";
     family.representation={"csl.polyhedron.h"};
@@ -892,6 +900,39 @@ TEST_CASE("nominal linear exact verifier rejects a non-dyadic optimum") {
         ModuleId{"csl.verifier.strategy-a.nominal-linear-exact"},"1");
     REQUIRE(verifier);
     CHECK_FALSE(verifier->verify(frozen,proposal).empty());
+}
+TEST_CASE("nominal linear exact verifier rejects a claimed optimum for an unbounded history set") {
+    const auto query=nominal_linear_exact_request(nominal_linear_exact_unbounded());
+    const JointCoordinates coordinates{query.problem.model().dimensions(),query.problem.model().horizon()};
+    const FamilyIdentity identity{query.problem.identity(),query.family,coordinates,
+        {"csl.synthesis.reach-back"},"1",
+        detail::strategy_a_nominal_linear_exact_lineage(query.problem.identity(),1)};
+    auto relation=take(sets::make_h({{"nominal-exact-fabricated-point"},3,{"x0","x1","u0"}},
+        {take(numeric::snapshot(Matrix{0,3,{}})),
+         take(numeric::snapshot_vector(Vector{})),
+         take(numeric::snapshot(Matrix{3,3,{1,0,0,0,1,-1,0,0,1}})),
+         take(numeric::snapshot_vector(Vector{0,0,0}))}));
+    const SymbolicArgument statement{"fabricated bounded point", "One feasible history does not bound the problem."};
+    const ClaimEvidence claim{query.problem.identity(),statement};
+    const ObjectiveBound bound{0,claim};
+    CompleteOptimalFamily candidate{{coordinates,query.family.representation,
+            std::make_shared<const TestHRelationPayload>(std::move(relation))},
+        {claim,{bound,bound}},
+        {identity,RegisteredCompletenessEvidence{{"csl.verifier.strategy-a.nominal-linear-exact"},
+            "1","nominal-linear-exact-v1"}},Assurance::numerical};
+    CompleteFamilyProposal proposal{identity,std::move(candidate)};
+    auto frozen=query;frozen.lineage=identity.lineage;
+    const auto verifier=detail::find_compiled_verifier(
+        ModuleId{"csl.verifier.strategy-a.nominal-linear-exact"},"1");
+    REQUIRE(verifier);
+    CHECK_FALSE(verifier->verify(frozen,proposal).empty());
+}
+TEST_CASE("nominal linear exact profile rejects an unreviewed materialization cap") {
+    auto query=nominal_linear_exact_request(nominal_linear_exact_integrator());
+    query.family.materialization_limit=1;
+    const auto admitted=admit(query);
+    REQUIRE(std::holds_alternative<Rejection>(admitted));
+    CHECK_FALSE(std::get<Rejection>(admitted).diagnostics.empty());
 }
 TEST_CASE("exact T-S02 recovered preimage contains the entire feasible control box") {
     const auto query=exact_ts02_request(exact_ts02_integrator());
