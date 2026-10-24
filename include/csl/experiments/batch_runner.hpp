@@ -1,6 +1,6 @@
 #pragma once
 
-#include <csl/artifacts/run_statistics.hpp>
+#include <csl/artifacts/scenario_sweep.hpp>
 #include <csl/execution/executor.hpp>
 #include <csl/registry/provider.hpp>
 
@@ -87,5 +87,15 @@ FamilyQueryOutcome run_family_queries(SweepResult&& coarse,
     const registry::PreparedProvider<registry::SelectorPort>& selector,
     const ResourcePolicy&, const ExecutionContext&, execution::Mode,
     const execution::ResourceUse& query_resources, execution::AdmissionLimit = {});
+
+// Combines live phase dispositions and measured executor facts with caller-owned
+// inert per-case run records. The run records must match the case configuration
+// identities; query records are aligned with cases, with values only for cases
+// whose selector task was scheduled.
+artifacts::ArtifactResult<artifacts::RecordedSweepArtifact> record_family_query_sweep(
+    const problem::ResolvedContent& canonical_spec, const FamilyQueryResult&,
+    std::span<const artifacts::RecordedRunArtifact> coarse_runs,
+    std::span<const std::optional<artifacts::RecordedRunArtifact>> query_runs,
+    artifacts::EncodeLimits limits = {});
 
 } // namespace csl::experiments
