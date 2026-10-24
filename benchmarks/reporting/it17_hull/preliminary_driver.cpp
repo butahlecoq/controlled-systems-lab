@@ -266,24 +266,29 @@ void print(const Fixture& fixture, Method method, bool warmup, int round,
 
 int main(int argc, char** argv) {
     int repetitions = 7;
+    int first_round = 1;
     std::optional<std::size_t> ladder_size;
     for(int i=1;i<argc;++i) {
         const std::string argument{argv[i]};
         if(argument=="--measure"&&i+1<argc)repetitions=std::stoi(argv[++i]);
+        else if(argument=="--from-round"&&i+1<argc)first_round=std::stoi(argv[++i]);
         else if(argument=="--ladder-size"&&i+1<argc)ladder_size=std::stoull(argv[++i]);
         else {
-            std::cerr << "usage: csl_it17_hull_preliminary [--measure repetitions] [--ladder-size 250|1000|5000]\n";
+            std::cerr << "usage: csl_it17_hull_preliminary [--measure repetitions] [--from-round N] [--ladder-size 250|1000|5000]\n";
             return 2;
         }
     }
-    if (repetitions < 1 || (ladder_size&&*ladder_size!=250&&*ladder_size!=1000&&*ladder_size!=5000)) return 2;
+    if (repetitions < 1 || first_round < 1 || first_round > repetitions ||
+        (ladder_size&&*ladder_size!=250&&*ladder_size!=1000&&*ladder_size!=5000)) return 2;
     try {
         auto data=ladder_size?std::vector<Fixture>{halton_square(*ladder_size)}:fixtures();
-        for (const auto& fixture : data) for (const auto method : methods) {
-            const auto result = run(fixture, method);
-            print(fixture, method, true, 0, result);
+        if (first_round == 1) {
+            for (const auto& fixture : data) for (const auto method : methods) {
+                const auto result = run(fixture, method);
+                print(fixture, method, true, 0, result);
+            }
         }
-        for (int round = 1; round <= repetitions; ++round) {
+        for (int round = first_round; round <= repetitions; ++round) {
             for (std::size_t f = 0; f < data.size(); ++f) {
                 for (std::size_t i = 0; i < methods.size(); ++i) {
                     const auto method = methods[(i + f + round - 1) % methods.size()];
