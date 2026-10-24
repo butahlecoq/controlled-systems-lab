@@ -240,8 +240,9 @@ median batch times were 435,462 ns (418,910–458,161) for the analytic fixture,
 (554,351,976–563,596,504) for B08. Other interactive processes were present;
 no limiter profile was collected. These are descriptive timings with no
 comparator, speedup, per-call latency or scalability claim. The report and raw
-records are committed, while schema-3 catalogue registration and Pages
-publication remain pending.
+records are registered in the schema-3 catalogue and the site generator
+validates the saved bundle. Main-only Pages publication and live URL/download
+verification remain pending.
 
 ## Reference-LP pipeline
 

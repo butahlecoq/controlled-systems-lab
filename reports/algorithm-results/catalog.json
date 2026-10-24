@@ -250,6 +250,18 @@
       "zip_sha256": "9aae736df5a135fee948cf48e25685fb9901a3c9a84dd822524280091641b90e"
     },
     {
+      "report_id": "issue3-validated-minimax-aa73872236deca412e8471c2812f4e0e015f169a4f8de28d6caef450d7e26f3f",
+      "report_kind": "issue3-validated-minimax",
+      "source_report_id": "issue3-validated-minimax-20261023-r1",
+      "payload_schema": "csl.issue3-validated-minimax-record/1",
+      "payload_sha256": "817085ce5f4a6dc32cd178b9f7710c739c4f120b128dd9287f1ba6b9959144a4",
+      "native_payload_sha256": "817085ce5f4a6dc32cd178b9f7710c739c4f120b128dd9287f1ba6b9959144a4",
+      "source_commit": "c72f3480c8fea2575ba860890502857006e9b9f4",
+      "measured_scope": "Three fixed validated finite-action minimax fixtures; seven measured batches after one excluded warmup per fixture",
+      "evidence_limits": "Descriptive single-adapter batch timings with possible host contention; no comparator, speedup, source-mapped limiter, per-call latency, or scalability claim; displayed-data B08 uses exact-real semantics for saved binary64 inputs",
+      "zip_sha256": "190fde950e67439596e644b92dc86ba2529e11730522b78c20e3da636cdf92b1"
+    },
+    {
       "report_id": "opt07-6e77b298e159fa0b80d5d69ccd8c14233eb8830513a5d060f98ee76d8e414c96",
       "report_kind": "opt07-ordered-hull",
       "source_report_id": "opt07-bbb4aee749d643ff",
