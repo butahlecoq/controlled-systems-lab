@@ -91,6 +91,10 @@ readable. Appending the applied-relation field preserves source compatibility
 for default-initialized descriptors; no stable binary ABI is promised. The
 portable live OBS-01 wire schema remains unchanged.
 
+Preflight no-call details become the rejected-span reason. The collector copies
+them only when they fit the span's preallocated detail capacity; oversized or
+unavailable details leave the typed `capability_rejected` reason intact.
+
 `TimingClock` is the injection port. Read methods are `noexcept`; the collector
 serializes reads within one collector so deterministic test clocks need no locking.
 A source shared by multiple collectors must itself support concurrent reads. Its dedicated mutex

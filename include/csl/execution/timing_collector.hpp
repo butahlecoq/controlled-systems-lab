@@ -44,7 +44,7 @@ public:
     void close(Termination,std::shared_ptr<const GeometryEvidence>,std::optional<SetRelation>) noexcept;
     void close_not_called(artifacts::NotCalledReason,
         Termination=Termination::operation_rejected) noexcept;
-    void close_not_called(artifacts::NotCalledReason,std::string_view,
+    void close_not_called_with_detail(artifacts::NotCalledReason,std::string_view,
         Termination=Termination::operation_rejected) noexcept;
     void close() noexcept;
 private:

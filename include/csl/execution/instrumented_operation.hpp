@@ -29,7 +29,7 @@ public:
     InstrumentedOperation(const ExecutionContext& context,const OperationSpanIdentity& identity)
         :scope_(start_operation_timing(context,identity)){}
     void not_called(artifacts::NotCalledReason reason,std::string_view detail={}) noexcept {
-        if(scope_){scope_->close_not_called(reason,detail);scope_.reset();}
+        if(scope_){scope_->close_not_called_with_detail(reason,detail);scope_.reset();}
     }
     template<class Invoke,class TerminationOf>
     auto run(Invoke&& invoke,TerminationOf&& termination_of) {

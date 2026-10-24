@@ -661,6 +661,7 @@ TEST_CASE("rejected approximation records a no-call observation without creating
         InformationPattern::nominal_open_loop,LinearTerminal{{},0}};
     auto resolved=problem::resolve(source,{problem::UncertaintyStructure::stage_product_uncoupled});
     REQUIRE(std::holds_alternative<problem::ResolvedProblem>(resolved));
+    const auto resolved_problem=std::get<problem::ResolvedProblem>(std::move(resolved));
     auto input=set("singleton","reject-reference");
     auto output=set("universal","reject-outer");
     auto query=request(input,SetRelation::outer,output.metadata.representation);
@@ -668,7 +669,7 @@ TEST_CASE("rejected approximation records a no-call observation without creating
     auto creations=std::make_shared<std::size_t>(0);
     const auto methods=provider(query,output,SetRelation::inner,SetRelation::outer,
         Unestablished{},std::nullopt,creations);
-    auto timer=approximation_timer(std::get<problem::ResolvedProblem>(std::move(resolved)),query);
+    auto timer=approximation_timer(resolved_problem,query);
     ExecutionContext context;context.run_id="approximation-test-run";context.timing=timer;
     auto root=std::get<execution::observability::TimingScope>(timer->start({0},context));
     const auto outcome=run_registered(methods,{{"fixture.approximation"},std::nullopt},query,context);
@@ -687,4 +688,19 @@ TEST_CASE("rejected approximation records a no-call observation without creating
         artifacts::NotCalledReason::capability_rejected);
     CHECK(std::holds_alternative<artifacts::RejectedSpan>(span.status));
     CHECK(std::get<artifacts::RejectedSpan>(span.status).reason.find("output.relation")!=std::string::npos);
+
+    auto malformed=query;malformed.identity.request={"malformed-approximation"};malformed.input.payload.reset();
+    auto malformed_timer=approximation_timer(resolved_problem,malformed);
+    ExecutionContext malformed_context;malformed_context.run_id="approximation-test-run";malformed_context.timing=malformed_timer;
+    auto malformed_root=std::get<execution::observability::TimingScope>(malformed_timer->start({0},malformed_context));
+    const auto malformed_outcome=run_registered(methods,{{"fixture.approximation"},std::string{"1"}},malformed,malformed_context);
+    REQUIRE(std::holds_alternative<registry::Rejection>(malformed_outcome));
+    malformed_root.close(Termination::completed);
+    const auto malformed_report=malformed_timer->snapshot();
+    REQUIRE(std::holds_alternative<execution::observability::TimingReport>(malformed_report));
+    const auto& malformed_spans=std::get<execution::observability::TimingReport>(malformed_report).observations.description().spans;
+    REQUIRE(malformed_spans.size()==2);
+    CHECK(std::holds_alternative<artifacts::NotCalledObservation>(malformed_spans[1].execution));
+    REQUIRE(std::holds_alternative<artifacts::RejectedSpan>(malformed_spans[1].status));
+    CHECK(std::get<artifacts::RejectedSpan>(malformed_spans[1].status).reason.find("approximation.request")!=std::string::npos);
 }

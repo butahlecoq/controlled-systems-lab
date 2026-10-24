@@ -357,8 +357,12 @@ RunOutcome run_registered(const registry::Registry<registry::ApproximationPort>&
     }
     if(request.identity.problem.value.empty() || request.identity.request.value.empty() ||
        request.identity.ideal_output.value.empty() || request.input.id.value.empty() ||
-       !request.input.payload || request.output.value.empty())
+       !request.input.payload || request.output.value.empty()) {
+        ob::InstrumentedOperation observation{context,requested_approximation_identity(request,method)};
+        observation.not_called(ar::NotCalledReason::capability_rejected,
+            "approximation.request: A complete reference, input and output representation is required.");
         return reject(method,"approximation.request","A complete reference, input and output representation are required.");
+    }
     registry::Requirements requirements;
     requirements.output.representation=request.output;
     requirements.output.assurance=request.assurance;

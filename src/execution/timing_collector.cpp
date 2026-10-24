@@ -128,7 +128,13 @@ struct TimingScope::Owner {
         slot.not_called=not_called;
         slot.relation_evidence=std::move(relation_evidence);
         slot.applied_relation=applied_relation;
-        try{slot.detail.assign(detail);}catch(...){slot.detail.clear();}
+        const auto& settings=plan.description().configuration.description().collection;
+        const auto retained=std::min<std::uint64_t>(settings.detail_spans,plan.description().spans.size());
+        const auto detail_capacity=settings.mode==ar::CollectionMode::detail&&retained&&index<retained
+            ?settings.detail_bytes/retained:0;
+        if(detail.size()<=detail_capacity) {
+            try{slot.detail.assign(detail);}catch(...){slot.detail.clear();}
+        }else slot.detail.clear();
         if(cpu_applies(index)){
             if(cpu->metric==ar::ClockMetric::thread_cpu&&slot.thread!=std::this_thread::get_id()){
                 slot.cpu_thread_changed=true;slot.cpu_end=missing(ar::MissingReason::clock_mismatch);
@@ -166,7 +172,7 @@ void TimingScope::close(Termination termination,
     if(auto owner=std::exchange(owner_,{}))
         owner->close(slot_,termination,false,{},std::move(relation_evidence),applied_relation);
 }
-void TimingScope::close_not_called(ar::NotCalledReason reason,std::string_view detail,
+void TimingScope::close_not_called_with_detail(ar::NotCalledReason reason,std::string_view detail,
         Termination termination) noexcept {
     if(auto owner=std::exchange(owner_,{}))owner->close(slot_,termination,false,reason,{}, {},detail);
 }
