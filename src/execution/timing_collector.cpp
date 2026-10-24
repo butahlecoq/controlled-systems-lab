@@ -24,6 +24,7 @@ struct Slot {
     std::thread::id thread;
     Termination termination{Termination::completed};
     bool failed{},wall_regressed{},cpu_regressed{},cpu_thread_changed{};
+    std::optional<ar::NotCalledReason> not_called;
 };
 class SteadyClock final:public TimingClock {
     std::chrono::steady_clock::time_point origin_=std::chrono::steady_clock::now();
@@ -115,9 +116,11 @@ struct TimingScope::Owner {
         return reading;
     }
     bool cpu_applies(std::size_t index) const noexcept{return cpu&&(cpu->metric==ar::ClockMetric::thread_cpu||index==run);}
-    void close(std::size_t index,Termination termination,bool failed) noexcept {
+    void close(std::size_t index,Termination termination,bool failed,
+            std::optional<ar::NotCalledReason> not_called={}) noexcept {
         std::lock_guard lock{mutex};auto& slot=slots[index];
         slot.end=wall(index);slot.termination=termination;slot.failed=failed;
+        slot.not_called=not_called;
         if(cpu_applies(index)){
             if(cpu->metric==ar::ClockMetric::thread_cpu&&slot.thread!=std::this_thread::get_id()){
                 slot.cpu_thread_changed=true;slot.cpu_end=missing(ar::MissingReason::clock_mismatch);
@@ -143,6 +146,9 @@ TimingScope& TimingScope::operator=(TimingScope&& other) noexcept {
 TimingScope::~TimingScope(){close();}
 void TimingScope::close(Termination termination) noexcept {
     if(auto owner=std::exchange(owner_,{}))owner->close(slot_,termination,false);
+}
+void TimingScope::close_not_called(ar::NotCalledReason reason,Termination termination) noexcept {
+    if(auto owner=std::exchange(owner_,{}))owner->close(slot_,termination,false,reason);
 }
 void TimingScope::close() noexcept {
     if(!owner_)return;
@@ -222,9 +228,11 @@ CollectionResult<TimingReport> TimingCollector::snapshot() const {
                 owner_->cpu&&owner_->cpu->metric==ar::ClockMetric::thread_cpu&&slot.state!=Slot::State::unstarted?std::optional<std::thread::id>{slot.thread}:std::nullopt});
             if(slot.state!=Slot::State::closed)continue;
             SpanCompletionView completion{spans[i].id,tick(slot.start),tick(slot.end),
-                slot.failed?ObservationState::unknown:ObservationState::returned,ar::NotCalledReason::task_not_admitted,
+                slot.not_called?ObservationState::not_called:slot.failed?ObservationState::unknown:ObservationState::returned,
+                slot.not_called.value_or(ar::NotCalledReason::task_not_admitted),
                 !slot.failed,slot.termination,{false,0,ar::MissingReason::not_instrumented},{}};
-            completion.status=slot.failed?CompletionStatus::failed:CompletionStatus::returned;
+            completion.status=slot.not_called?CompletionStatus::rejected:
+                slot.failed?CompletionStatus::failed:CompletionStatus::returned;
             shards[static_cast<std::size_t>(spans[i].shard)].record(completion);
         }
         auto result=merge_observations(owner_->plan,std::move(shards));if(auto* e=std::get_if<ar::ArtifactError>(&result))return *e;

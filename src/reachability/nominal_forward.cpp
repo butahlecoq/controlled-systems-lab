@@ -1,4 +1,5 @@
 #include <csl/reachability/nominal_forward.hpp>
+#include <csl/execution/instrumented_operation.hpp>
 #include <algorithm>
 #include <limits>
 #include <numeric>
@@ -7,6 +8,8 @@
 
 namespace csl::reachability {
 namespace {
+namespace ar=csl::artifacts;
+namespace ob=csl::execution::observability;
 Diagnostics error(std::string field,std::string explanation,
         DiagnosticCode code=DiagnosticCode::unsupported) {
     return {{code,std::move(field),std::move(explanation)}};
@@ -25,6 +28,30 @@ std::optional<OperationStopped> stopped(const ExecutionContext& context) {
     if(context.deadline && std::chrono::steady_clock::now()>=*context.deadline)
         return OperationStopped{StopReason::deadline_expired,"Forward propagation deadline expired at a stage/operation boundary."};
     return {};
+}
+Termination operation_termination(const auto& outcome) noexcept {
+    if(std::holds_alternative<Unsupported>(outcome))return Termination::operation_rejected;
+    if(const auto* stop=std::get_if<OperationStopped>(&outcome)) {
+        switch(stop->reason) {
+        case StopReason::cancelled:case StopReason::deadline_expired:return Termination::cancelled;
+        case StopReason::resource_limit:return Termination::resource_limit;
+        case StopReason::numerical_failure:return Termination::numerical_failure;
+        }
+        return Termination::numerical_failure;
+    }
+    return Termination::completed;
+}
+ar::ModuleIdentity nominal_forward_identity() {
+    return {ModuleId{"csl.reachability.nominal-forward"},"0.1.0",
+        ar::Unavailable{ar::MissingReason::not_instrumented,{}}};
+}
+ar::ModuleIdentity backend_identity(const registry::Identity& identity) {
+    return {identity.id,identity.version,ar::Unavailable{ar::MissingReason::not_instrumented,{}}};
+}
+ob::OperationSpanIdentity operation_identity(const GeometryRequestIdentity& identity,
+        std::string_view operation,const registry::Identity& backend,std::size_t stage) {
+    return {identity.request.value,operation,nominal_forward_identity(),backend_identity(backend),
+        {},stage,{}};
 }
 std::variant<sets::SetData,Diagnostic> native(const AdmissibleSet& set,SetId id,
         const std::vector<std::string>& labels) {
@@ -177,11 +204,23 @@ NominalForwardOutcome nominal_forward(const problem::ResolvedProblem& resolved,R
         if(const auto* image=std::get_if<AffineImage>(&request_.operation))inputs={image->input.id};
         else {const auto& sum=std::get<MinkowskiSum>(request_.operation);inputs={sum.left.id,sum.right.id};}
         remember(selected,request_.identity,std::move(inputs));
-        if(auto stop=stopped(context))return *stop;
+        const auto operation_name=std::holds_alternative<AffineImage>(request_.operation)?
+            "geometry.affine-image":"geometry.minkowski-sum";
+        const auto timing_identity=operation_identity(request_.identity,operation_name,
+            *selected.provenance().actual,stage.value);
+        if(auto stop=stopped(context)) {
+            ob::InstrumentedOperation{context,timing_identity}.not_called(ar::NotCalledReason::explicit_pre_entry_stop);
+            return *stop;
+        }
         auto prepared=selected.prepare(request_);
-        if(auto* rejected=std::get_if<registry::Rejection>(&prepared))return Unsupported{rejected->diagnostics};
+        if(auto* rejected=std::get_if<registry::Rejection>(&prepared)) {
+            ob::InstrumentedOperation{context,timing_identity}.not_called(ar::NotCalledReason::capability_rejected);
+            return Unsupported{rejected->diagnostics};
+        }
         auto workspace=std::get<registry::PreparedPipeline<registry::GeometryPort>>(std::move(prepared)).create();
-        auto outcome=std::get<0>(workspace)->run(context);
+        ob::InstrumentedOperation timing{context,timing_identity};
+        auto outcome=timing.run([&]{return std::get<0>(workspace)->run(context);},
+            [](const auto& value) noexcept {return operation_termination(value);});
         if(auto* rejected=std::get_if<Unsupported>(&outcome))return *rejected;
         if(auto* stop=std::get_if<OperationStopped>(&outcome))return *stop;
         const auto* result=std::get_if<OperationResult>(&outcome);
@@ -197,11 +236,21 @@ NominalForwardOutcome nominal_forward(const problem::ResolvedProblem& resolved,R
         ConversionRequest request_{{tube.problem,{child(tube.problem,tube.request,stage.value,"/to-h")},
             {child(tube.problem,tube.request,stage.value,"/to-h/output")}},input,{"csl.polyhedron.h"},Assurance::numerical};
         remember(selected,request_.identity,{input.id});
-        if(auto stop=stopped(context))return *stop;
+        const auto timing_identity=operation_identity(request_.identity,"geometry.to-h",
+            *selected.provenance().actual,stage.value);
+        if(auto stop=stopped(context)) {
+            ob::InstrumentedOperation{context,timing_identity}.not_called(ar::NotCalledReason::explicit_pre_entry_stop);
+            return *stop;
+        }
         auto prepared=selected.prepare(request_);
-        if(auto* rejected=std::get_if<registry::Rejection>(&prepared))return Unsupported{rejected->diagnostics};
+        if(auto* rejected=std::get_if<registry::Rejection>(&prepared)) {
+            ob::InstrumentedOperation{context,timing_identity}.not_called(ar::NotCalledReason::capability_rejected);
+            return Unsupported{rejected->diagnostics};
+        }
         auto workspace=std::get<registry::PreparedPipeline<registry::ConversionPort>>(std::move(prepared)).create();
-        auto outcome=std::get<0>(workspace)->run(context);
+        ob::InstrumentedOperation timing{context,timing_identity};
+        auto outcome=timing.run([&]{return std::get<0>(workspace)->run(context);},
+            [](const auto& value) noexcept {return operation_termination(value);});
         if(auto* rejected=std::get_if<Unsupported>(&outcome))return *rejected;
         if(auto* stop=std::get_if<OperationStopped>(&outcome))return *stop;
         const auto result=std::get<OperationResult>(std::move(outcome));
@@ -220,11 +269,21 @@ NominalForwardOutcome nominal_forward(const problem::ResolvedProblem& resolved,R
         const auto& provenance=provider.provenance();
         providers.push_back({operation.identity.request,provenance.port,provenance.requested.id,provenance.requested.version,
             provenance.actual->id,provenance.actual->version});
-        if(auto stop=stopped(context))return *stop;
+        const auto timing_identity=operation_identity(operation.identity,"geometry.projection",
+            *provenance.actual,stage.value);
+        if(auto stop=stopped(context)) {
+            ob::InstrumentedOperation{context,timing_identity}.not_called(ar::NotCalledReason::explicit_pre_entry_stop);
+            return *stop;
+        }
         auto prepared=provider.prepare(operation);
-        if(auto* rejected=std::get_if<registry::Rejection>(&prepared))return Unsupported{rejected->diagnostics};
+        if(auto* rejected=std::get_if<registry::Rejection>(&prepared)) {
+            ob::InstrumentedOperation{context,timing_identity}.not_called(ar::NotCalledReason::capability_rejected);
+            return Unsupported{rejected->diagnostics};
+        }
         auto workspaces=std::get<registry::PreparedPipeline<registry::GeometryPort>>(std::move(prepared)).create();
-        auto outcome=std::get<0>(workspaces)->run(context);
+        ob::InstrumentedOperation timing{context,timing_identity};
+        auto outcome=timing.run([&]{return std::get<0>(workspaces)->run(context);},
+            [](const auto& value) noexcept {return operation_termination(value);});
         if(auto* rejected=std::get_if<Unsupported>(&outcome))return *rejected;
         if(auto* stop=std::get_if<OperationStopped>(&outcome))return *stop;
         auto* result=std::get_if<OperationResult>(&outcome);

@@ -3,6 +3,11 @@ target_link_libraries(timing_collector_tests PRIVATE CSL::artifacts doctest::doc
 add_test(NAME timing_collector_tests COMMAND timing_collector_tests)
 csl_test_target(timing_collector_tests artifacts)
 
+add_executable(operation_observability_tests tests/integration/operation_observability.cpp)
+target_link_libraries(operation_observability_tests PRIVATE CSL::artifacts doctest::doctest)
+add_test(NAME operation_observability_tests COMMAND operation_observability_tests)
+csl_test_target(operation_observability_tests artifacts)
+
 add_executable(run_statistics_contract tests/artifacts/run_statistics_contract.cpp)
 target_link_libraries(run_statistics_contract PRIVATE CSL::artifacts CSL::registry CSL::optimization CSL::approximation doctest::doctest Threads::Threads)
 target_compile_definitions(run_statistics_contract PRIVATE CSL_STATISTICS_FIXTURE="${CMAKE_CURRENT_SOURCE_DIR}/tests/artifacts/fixtures/run-statistics-v3.json")
