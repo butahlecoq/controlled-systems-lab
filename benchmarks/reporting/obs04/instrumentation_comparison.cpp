@@ -15,7 +15,10 @@
 #include <array>
 #include <chrono>
 #include <cmath>
+#include <cstdlib>
 #include <cstdint>
+#include <cerrno>
+#include <cstring>
 #include <iostream>
 #include <memory>
 #include <optional>
@@ -24,6 +27,11 @@
 #include <string_view>
 #include <type_traits>
 #include <utility>
+
+#ifndef _WIN32
+#include <fcntl.h>
+#include <unistd.h>
+#endif
 
 #if !defined(NDEBUG) || defined(_DEBUG)
 #error "The OBS-04 measurement executable must be compiled as a Release target"
@@ -260,6 +268,80 @@ std::int64_t ns(Clock::time_point begin, Clock::time_point end) {
     return std::chrono::duration_cast<std::chrono::nanoseconds>(end - begin).count();
 }
 
+class PerfControl {
+public:
+    PerfControl() {
+#ifdef _WIN32
+        if (std::getenv("CSL_PERF_CONTROL_FIFO") || std::getenv("CSL_PERF_ACK_FIFO"))
+            throw std::runtime_error("perf FIFO control is supported only on POSIX hosts");
+#else
+        const char* control_path = std::getenv("CSL_PERF_CONTROL_FIFO");
+        if (control_path != nullptr) {
+            control_fd_ = ::open(control_path, O_WRONLY | O_CLOEXEC);
+            if (control_fd_ < 0) throw std::runtime_error("Could not open perf control FIFO");
+            configured_ = true;
+        }
+#endif
+    }
+
+    PerfControl(const PerfControl&) = delete;
+    PerfControl& operator=(const PerfControl&) = delete;
+
+    ~PerfControl() {
+#ifndef _WIN32
+        if (active_) {
+            try { send("disable"); } catch (...) {}
+        }
+        if (control_fd_ >= 0) ::close(control_fd_);
+#endif
+    }
+
+    bool configured() const noexcept {
+#ifndef _WIN32
+        return configured_;
+#else
+        return false;
+#endif
+    }
+
+    void enable() {
+#ifndef _WIN32
+        if (configured_) {
+            send("enable");
+            active_ = true;
+        }
+#endif
+    }
+
+    void disable() {
+#ifndef _WIN32
+        if (configured_) {
+            send("disable");
+            active_ = false;
+        }
+#endif
+    }
+
+private:
+#ifndef _WIN32
+    void send(std::string_view command) {
+        std::string message{command};
+        message.push_back('\n');
+        std::size_t written = 0;
+        while (written < message.size()) {
+            const auto count = ::write(control_fd_, message.data() + written, message.size() - written);
+            if (count < 0 && errno == EINTR) continue;
+            if (count <= 0) throw std::runtime_error("Could not send perf control command");
+            written += static_cast<std::size_t>(count);
+        }
+    }
+
+    int control_fd_{-1};
+    bool configured_{};
+    bool active_{};
+#endif
+};
+
 void trial_impl(const application::PreparedComparison& prepared, std::size_t strategy_index,
     bool enabled, std::size_t repetition, bool warmup, const Signature& expected) {
     const auto setup_begin = Clock::now();
@@ -355,7 +437,7 @@ bool trial(const application::PreparedComparison& prepared, std::size_t strategy
 }
 
 void profile_calls(const application::PreparedComparison& prepared, std::size_t strategy_index,
-    std::size_t calls, const Signature& expected) {
+    std::size_t calls, const Signature& expected, PerfControl& perf_control) {
     std::size_t passed = 0;
     for (std::size_t repetition = 0; repetition < calls; ++repetition) {
         auto workspaces = prepared.create();
@@ -364,7 +446,9 @@ void profile_calls(const application::PreparedComparison& prepared, std::size_t 
         ExecutionContext context;
         context.resources = std::make_shared<const ResourcePolicy>(ResourcePolicy{1, 1, 1, {}});
         context.numerical = prepared.family().numerical;
+        perf_control.enable();
         const auto outcome = workspaces[strategy_index]->run(context);
+        perf_control.disable();
         const auto observed = signature(outcome);
         require_ts01_analytic_result(outcome, observed);
         const bool equivalent = observed.termination == expected.termination &&
@@ -377,7 +461,9 @@ void profile_calls(const application::PreparedComparison& prepared, std::size_t 
     std::cout << "{\"schema\":\"csl.obs04-call-profile/1\",\"strategy\":\""
         << (strategy_index == 0 ? "csl.synthesis.reach-back" : "csl.synthesis.strategy-b")
         << "\",\"calls\":" << calls << ",\"passed\":" << passed
-        << ",\"analytic_family_checked\":true,\"complete_family_verified\":true}\n";
+        << ",\"analytic_family_checked\":true,\"complete_family_verified\":true"
+        << ",\"sample_scope\":\"StrategyPort::run\",\"perf_controlled\":"
+        << (perf_control.configured() ? "true" : "false") << "}\n";
 }
 }
 
@@ -429,7 +515,9 @@ int main(int argc, char** argv) {
                 warmup_signature.profile != expected[*profile_strategy].profile ||
                 !warmup_signature.complete)
                 throw std::runtime_error("Profile warmup changed the analytic comparison outcome");
-            profile_calls(prepared, *profile_strategy, profile_calls_count, expected[*profile_strategy]);
+            PerfControl perf_control;
+            profile_calls(prepared, *profile_strategy, profile_calls_count,
+                expected[*profile_strategy], perf_control);
             return 0;
         }
         std::cout << "# fixture=T-S01; strategies=reach-back,direct-joint; profile=ts01_exact_integrator\n"
