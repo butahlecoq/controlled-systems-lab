@@ -2,6 +2,7 @@
 
 #include <csl/artifacts/run_statistics.hpp>
 #include <csl/execution/executor.hpp>
+#include <csl/registry/provider.hpp>
 
 namespace csl::experiments {
 
@@ -43,12 +44,48 @@ struct SweepResult {
     std::vector<SweepCaseRecord> cases;
 };
 
+enum class QueryNotRunReason {
+    strategy_skipped,
+    strategy_failed,
+    strategy_unsupported,
+    family_unavailable,
+};
+
+struct FamilyQueryNotRun { QueryNotRunReason reason; };
+struct FamilyQueryRejected { Diagnostics diagnostics; };
+struct FamilyQueryScheduled { std::size_t task_index; };
+using FamilyQueryStatus = std::variant<FamilyQueryNotRun, FamilyQueryRejected, FamilyQueryScheduled>;
+
+struct FamilyQueryRecord {
+    ScenarioConfigurationId identity;
+    FamilyQueryStatus status;
+};
+
+struct FamilyQueryResult {
+    // The original coarse results remain unchanged and available beside the
+    // selector batch. Each query record is aligned with sweep.cases.
+    SweepResult sweep;
+    std::vector<FamilyQueryRecord> queries;
+    // Only eligible, selector-accepted requests appear in this compact batch.
+    // FamilyQueryScheduled::task_index points into query_batch.tasks.
+    execution::BatchResult<registry::SelectorPort> query_batch;
+};
+
 using SweepOutcome = std::variant<SweepResult, Diagnostics>;
+using FamilyQueryOutcome = std::variant<FamilyQueryResult, Diagnostics>;
 
 // Each case runs one complete prepared strategy on its whole immutable
 // scenario/configuration. Horizon stages are not split into executor tasks.
 // Returned cases remain in input order in sequential and bounded-parallel mode.
 SweepOutcome run_sweep(std::span<const ScenarioSweepCase>, const ResourcePolicy&,
     const ExecutionContext&, execution::Mode, execution::AdmissionLimit = {});
+
+// Runs compatible selector requests only after the complete coarse batch has
+// joined. Ownership of `coarse` transfers on success; on diagnostics it remains
+// unchanged so callers can retain or inspect the already completed sweep.
+FamilyQueryOutcome run_family_queries(SweepResult&& coarse,
+    const registry::PreparedProvider<registry::SelectorPort>& selector,
+    const ResourcePolicy&, const ExecutionContext&, execution::Mode,
+    const execution::ResourceUse& query_resources, execution::AdmissionLimit = {});
 
 } // namespace csl::experiments
