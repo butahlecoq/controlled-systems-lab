@@ -79,7 +79,7 @@ build/examples/scenario_cli --run examples/scenarios/two-stage-integrator.json \
 ```
 
 The CLI writes `reach-back.run.json` and `strategy-b.run.json` as
-`csl.run-statistics/5` recorded artifacts only after both strategies return
+`csl.run-statistics/6` recorded artifacts only after both strategies return
 complete-family results with completed optimal outcomes, and every selected
 witness passes numerical checks. If a strategy or witness check fails, the
 command returns before publication.

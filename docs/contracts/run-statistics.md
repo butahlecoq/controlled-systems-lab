@@ -1,8 +1,9 @@
 # Portable run statistics
 
 `CSL::artifacts` publishes immutable scenario records and reads/writes the closed
-`csl.run-statistics/4` format plus the separate inert `csl.run-statistics/5`
-recorded-artifact format. Include `csl/artifacts/run_statistics.hpp` for
+`csl.run-statistics/4` format plus inert recorded-artifact formats v5 and v6.
+Version 6 retains the applied relation in each span descriptor; v5 remains
+readable for existing records. Include `csl/artifacts/run_statistics.hpp` for
 records and `csl/execution/observability.hpp` for bounded collection and RUN01
 projection. These additions preserve source contract 1.5 and mathematical identity
 version 1. No solver, estimator, mathematical verifier, timer instrumentation, or

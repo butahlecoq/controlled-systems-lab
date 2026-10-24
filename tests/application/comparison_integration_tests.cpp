@@ -226,7 +226,7 @@ csl::artifacts::RecordedRunArtifact check_complete_family_encoder_boundary(const
             ar::MemoryAccounting::unlimited});
     REQUIRE(std::holds_alternative<std::string>(encoded));
     const auto& wire=std::get<std::string>(encoded);
-    CHECK(wire.find("csl.run-statistics/5")!=std::string::npos);
+    CHECK(wire.find("csl.run-statistics/6")!=std::string::npos);
     CHECK(wire.find("unverified_recorded_data")!=std::string::npos);
     CHECK(wire.find("csl.h-relation-attachment/1")!=std::string::npos);
     CHECK(wire.find("registered_verifier")!=std::string::npos);
@@ -360,7 +360,7 @@ void compare_profile(const std::string& profile) {
     CHECK(restored_bundle.spec_id().digest==spec.digest());
     CHECK(restored_bundle.identity().digest==bundle.content().digest());
     CHECK(bundle_wire.find("csl.comparison/1")!=std::string::npos);
-    CHECK(bundle_wire.find("csl.run-statistics/5")!=std::string::npos);
+    CHECK(bundle_wire.find("csl.run-statistics/6")!=std::string::npos);
 }
 }
 
