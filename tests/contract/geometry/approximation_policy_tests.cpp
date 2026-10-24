@@ -83,10 +83,10 @@ public:
 registry::Registry<registry::ApproximationPort> provider(const ApproximationRequest& request,
     SetHandle output, SetRelation offered, SetRelation returned, EvidenceSupport support=Unestablished{},
     std::optional<GeometryErrorBound> error_bound=std::nullopt,
-    std::shared_ptr<std::size_t> factory_creations={}) {
+    std::shared_ptr<std::size_t> factory_creations={},std::vector<std::string> assumptions={}) {
     registry::Registry<registry::ApproximationPort> result;
     GeometryEvidence evidence{{request.identity,{request.input.id}},GeometryClaimScope::set_relation,
-        std::move(support),{},std::move(error_bound)};
+        std::move(support),std::move(assumptions),std::move(error_bound)};
     OperationResult fixed{std::move(output),returned,std::move(evidence)};
     auto added=result.add({{{"fixture.approximation"},"1"},
         [offered](const ApproximationRequest& query,const registry::Requirements&) -> registry::Capability {
@@ -585,11 +585,15 @@ TEST_CASE("registered approximation times only its selected provider call") {
         InformationPattern::nominal_open_loop,LinearTerminal{{},0}};
     auto resolved=problem::resolve(source,{problem::UncertaintyStructure::stage_product_uncoupled});
     REQUIRE(std::holds_alternative<problem::ResolvedProblem>(resolved));
+    const auto resolved_problem=std::get<problem::ResolvedProblem>(resolved).identity();
     auto input=set("singleton","approx-reference");
     auto output=set("universal","approx-outer");
     auto query=request(input,SetRelation::outer,output.metadata.representation);
     query.identity.request={"timed-approximation"};
-    const auto methods=provider(query,output,SetRelation::outer,SetRelation::outer);
+    query.identity.problem=resolved_problem;
+    const auto methods=provider(query,output,SetRelation::outer,SetRelation::outer,
+        SymbolicArgument{"fixture inclusion proof","same-coordinate outer superset"},std::nullopt,{},
+        {"fixture assumes exact stored singleton coordinates"});
     auto timer=approximation_timer(std::get<problem::ResolvedProblem>(std::move(resolved)),query);
     ExecutionContext context;context.run_id="approximation-test-run";context.timing=timer;
     auto root=std::get<execution::observability::TimingScope>(timer->start({0},context));
@@ -611,6 +615,13 @@ TEST_CASE("registered approximation times only its selected provider call") {
     REQUIRE(descriptor.output_representation);
     CHECK(*descriptor.output_representation==query.output);
     CHECK(descriptor.relation==SetRelation::outer);
+    REQUIRE(descriptor.relation_evidence);
+    CHECK(descriptor.relation_evidence->reference.identity==query.identity);
+    CHECK(descriptor.relation_evidence->reference.inputs==std::vector<SetId>{input.id});
+    CHECK(descriptor.relation_evidence->scope==GeometryClaimScope::set_relation);
+    CHECK(std::holds_alternative<SymbolicArgument>(descriptor.relation_evidence->support));
+    CHECK(descriptor.relation_evidence->assumptions==
+        std::vector<std::string>{"fixture assumes exact stored singleton coordinates"});
     REQUIRE(std::holds_alternative<artifacts::ReturnedSpan>(timing.observations.description().spans[1].status));
     CHECK(std::get<artifacts::ReturnedSpan>(timing.observations.description().spans[1].status).termination==Termination::completed);
 }

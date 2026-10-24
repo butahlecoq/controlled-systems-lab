@@ -37,8 +37,25 @@ public:
         static_assert(std::is_nothrow_invocable_r_v<Termination,TerminationOf,const Result&>,
             "operation termination classifiers must be noexcept and accept a const result");
         auto result=std::invoke(std::forward<Invoke>(invoke));
-        if(scope_){scope_->close(std::invoke(std::forward<TerminationOf>(termination_of),std::as_const(result)));scope_.reset();}
+        if(scope_){
+            auto evidence=geometry_evidence(result);
+            scope_->close(std::invoke(std::forward<TerminationOf>(termination_of),std::as_const(result)),
+                std::move(evidence));
+            scope_.reset();
+        }
         return result;
+    }
+private:
+    template<class Value> static std::shared_ptr<const GeometryEvidence> copy_evidence(const Value& value) noexcept {
+        if constexpr(requires{value.evidence;}) {
+            try{return std::make_shared<const GeometryEvidence>(value.evidence);}catch(...){return {};}
+        } else return {};
+    }
+    template<class Result> static std::shared_ptr<const GeometryEvidence> geometry_evidence(const Result& result) noexcept {
+        if constexpr(requires{result.evidence;}) return copy_evidence(result);
+        else if constexpr(requires{std::visit([](const auto& value){return copy_evidence(value);},result);}) {
+            try{return std::visit([](const auto& value){return copy_evidence(value);},result);}catch(...){return {};}
+        } else return {};
     }
 };
 
