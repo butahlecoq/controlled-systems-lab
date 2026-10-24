@@ -1,5 +1,6 @@
 #include <csl/experiments/batch_runner.hpp>
 
+#include <nlohmann/json.hpp>
 #include <algorithm>
 #include <cmath>
 #include <limits>
@@ -8,8 +9,101 @@
 
 namespace csl::experiments {
 namespace {
+using Json = nlohmann::json;
+
 bool valid_identity(const ScenarioConfigurationId& identity) {
     return !identity.scenario.value.empty() && !identity.configuration.value.empty();
+}
+
+std::string_view termination_name(Termination value) {
+    switch (value) {
+    case Termination::completed: return "completed";
+    case Termination::cancelled: return "cancelled";
+    case Termination::resource_limit: return "resource_limit";
+    case Termination::numerical_failure: return "numerical_failure";
+    case Termination::operation_rejected: return "operation_rejected";
+    case Termination::contract_rejected: return "contract_rejected";
+    }
+    return {};
+}
+
+std::string_view outcome_name(MathematicalOutcome value) {
+    switch (value) {
+    case MathematicalOutcome::optimal: return "optimal";
+    case MathematicalOutcome::infeasible: return "infeasible";
+    case MathematicalOutcome::unbounded: return "unbounded";
+    case MathematicalOutcome::infimum_not_attained: return "infimum_not_attained";
+    case MathematicalOutcome::undetermined: return "undetermined";
+    }
+    return {};
+}
+
+std::string_view skip_reason_name(execution::SkipReason value) {
+    switch (value) {
+    case execution::SkipReason::cancelled: return "cancelled";
+    case execution::SkipReason::deadline: return "deadline";
+    case execution::SkipReason::task_limit: return "task_limit";
+    case execution::SkipReason::reservation_exceeds_budget: return "reservation_exceeds_budget";
+    case execution::SkipReason::batch_failed: return "batch_failed";
+    }
+    return {};
+}
+
+std::string_view failure_phase_name(execution::FailureStage value) {
+    switch (value) {
+    case execution::FailureStage::create: return "create";
+    case execution::FailureStage::invoke: return "invoke";
+    }
+    return {};
+}
+
+std::string_view failure_reason_name(execution::FailureKind value) {
+    switch (value) {
+    case execution::FailureKind::allocation: return "allocation";
+    case execution::FailureKind::adapter_exception: return "adapter_exception";
+    }
+    return {};
+}
+
+bool same_bound(const Json& json, const std::optional<ObjectiveBound>& bound) {
+    if (!bound) return json.is_null();
+    return json.is_object() && json.contains("value") && json.at("value").is_number() &&
+        json.at("value").get<double>() == bound->value;
+}
+
+bool recorded_run_matches(const artifacts::RecordedRunArtifact& artifact,
+    const execution::TaskOutcome<registry::StrategyPort>& actual) {
+    try {
+        std::string text;
+        const auto bytes = artifact.content().bytes();
+        text.reserve(bytes.size());
+        for (const auto byte : bytes) text.push_back(static_cast<char>(std::to_integer<unsigned char>(byte)));
+        if (std::holds_alternative<artifacts::ArtifactError>(artifacts::decode_recorded_run(text))) return false;
+        const auto run = Json::parse(text);
+        const auto& final = run.at("final");
+        const auto kind = final.at("kind").get<std::string>();
+        if (const auto* skipped = std::get_if<execution::Skipped>(&actual))
+            return kind == "skipped" && final.at("value").at("reason").get<std::string>() == skip_reason_name(skipped->reason);
+        if (const auto* failed = std::get_if<execution::TaskFailure>(&actual))
+            return kind == "failed" && final.at("value").at("phase").get<std::string>() == failure_phase_name(failed->stage) &&
+                final.at("value").at("reason").get<std::string>() == failure_reason_name(failed->kind);
+
+        const auto& returned = std::get<execution::Returned<registry::StrategyPort>>(actual).value;
+        if (std::holds_alternative<Unsupported>(returned)) {
+            return kind == "unsupported";
+        }
+        const auto* synthesis = std::get_if<SynthesisResult>(&returned);
+        if (!synthesis || kind != "synthesis") return false;
+        const auto& value = final.at("value");
+        if (value.at("termination").get<std::string>() != termination_name(synthesis->termination) ||
+            value.at("outcome").at("value").get<std::string>() != outcome_name(synthesis->outcome.value) ||
+            !same_bound(value.at("objective").at("lower"), synthesis->objective.lower) ||
+            !same_bound(value.at("objective").at("upper"), synthesis->objective.upper))
+            return false;
+        return value.at("family").is_null() == !synthesis->family.has_value();
+    } catch (const std::exception&) {
+        return false;
+    }
 }
 
 bool same_resources(const ResourcePolicy& left, const ResourcePolicy& right) {
@@ -288,6 +382,10 @@ artifacts::ArtifactResult<artifacts::RecordedSweepArtifact> record_family_query_
         if (!source.selection)
             return artifact_error(artifacts::ArtifactErrorCode::reference, "sweep.cases[" + std::to_string(i) + "].selection",
                 "Selection settings were not retained with the coarse case");
+        if (!recorded_run_matches(coarse_runs[i], result.sweep.batch.tasks[i].outcome))
+            return artifact_error(artifacts::ArtifactErrorCode::identity,
+                "sweep.cases[" + std::to_string(i) + "].coarse_run.outcome",
+                "Recorded coarse outcome does not match the live strategy task outcome.");
 
         artifacts::SweepQueryDisposition disposition;
         if (const auto* not_run = std::get_if<FamilyQueryNotRun>(&query_record.status)) {
