@@ -274,6 +274,22 @@ csl::artifacts::RecordedRunArtifact check_complete_family_encoder_boundary(const
     CHECK(report_document.at("reports").at(0).at("objective") == "numerical_pass");
     CHECK(report_document.at("reports").at(0).at("optimality") == "unsupported");
     CHECK(report_document.at("reports").at(0).at("witness_index") == 0);
+    const auto& saved_request = report_document.at("reports").at(0).at("request");
+    CHECK(saved_request.at("outcome").at("value") == "optimal");
+    CHECK(saved_request.at("family_identity").at("strategy") ==
+        strategy_execution.verification.at(0).input.expected_synthesis->strategy.value);
+    CHECK(saved_request.at("expected_synthesis").at("lineage").size() > 0);
+    CHECK(saved_request.at("bounds").contains("lower"));
+    CHECK(saved_request.at("bounds").contains("upper"));
+    auto mismatched_execution = strategy_execution;
+    REQUIRE(mismatched_execution.verification.at(0).input.expected_synthesis);
+    mismatched_execution.verification.at(0).input.expected_synthesis->request.profile = "wrong-family-profile";
+    const auto mismatched_artifact = application::encode_strategy_run(problem, mismatched_execution,
+        configuration, run, statistics,
+        {uninstrumented, uninstrumented, uninstrumented, uninstrumented, true,
+            ar::MemoryAccounting::unlimited});
+    REQUIRE(std::holds_alternative<ar::ArtifactError>(mismatched_artifact));
+    CHECK(std::get<ar::ArtifactError>(mismatched_artifact).path == "run.verification[0].context");
     CHECK(wire.find("registered_verifier")!=std::string::npos);
     static_assert(!std::is_convertible_v<ar::RecordedRunArtifact,ar::RunStatistics>);
     const auto imported=take_artifact(ar::decode_recorded_run(wire,problem),"decode_recorded_run");

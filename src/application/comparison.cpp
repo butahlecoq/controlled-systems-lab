@@ -169,6 +169,13 @@ Json program_objective_evidence_json(const std::vector<ProgramObjectiveEvidence>
     return result;
 }
 
+Json synthesis_outcome_json(const SynthesisOutcomeClaim& outcome) {
+    auto assumptions = Json::array();
+    for (const auto& assumption : outcome.assumptions) assumptions.push_back(assumption);
+    return {{"subject", outcome.subject.value}, {"value", mathematical_outcome_name(outcome.value)},
+        {"support", evidence_support_json(outcome.support)}, {"assumptions", std::move(assumptions)}};
+}
+
 Json family_request_json(const FamilyRequest& request) {
     return {{"profile", request.profile}, {"objective", request.objective.value},
         {"target", family_target_name(request.target)}, {"assurance", assurance_name(request.assurance)},
@@ -211,6 +218,8 @@ Json report_json(const verification::TrajectoryReport& report, std::size_t witne
         {"membership_queries", report.input.limits.membership_queries}};
     request["bounds"] = objective_evidence_json(report.input.bounds);
     request["backend_bounds"] = program_objective_evidence_json(report.input.backend_bounds);
+    request["outcome"] = report.input.outcome
+        ? synthesis_outcome_json(*report.input.outcome) : Json(nullptr);
     if (report.input.family) {
         const auto& identity = report.input.family->identity();
         request["family_identity"] = {{"problem_id", identity.problem.value},
@@ -451,7 +460,8 @@ artifacts::ArtifactResult<std::string> encode_strategy_run(
             "Verifier reports must match the selected witness batch in order and count"};
     for (std::size_t i = 0; selected && i < execution.verification.size(); ++i) {
         const auto& witness = selected->batch.witnesses[i];
-        const auto& report_witness = execution.verification[i].input.witness;
+        const auto& report = execution.verification[i];
+        const auto& report_witness = report.input.witness;
         if (report_witness.problem != witness.problem || report_witness.states != witness.states ||
             report_witness.controls != witness.controls ||
             std::bit_cast<std::uint64_t>(report_witness.original_objective) !=
@@ -459,6 +469,38 @@ artifacts::ArtifactResult<std::string> encode_strategy_run(
             return artifacts::ArtifactError{artifacts::ArtifactErrorCode::identity,
                 "run.verification[" + std::to_string(i) + "].witness",
                 "Verifier report is not bound to the selected witness at the same index"};
+
+        const auto* synthesis = std::get_if<SynthesisResult>(&execution.outcome);
+        const auto* projected = std::get_if<artifacts::SynthesisFinal>(&execution.final_projection);
+        if (!synthesis || !synthesis->family || !projected || !projected->family ||
+            !report.input.family || !report.input.expected_synthesis || !report.input.outcome)
+            return artifacts::ArtifactError{artifacts::ArtifactErrorCode::identity,
+                "run.verification[" + std::to_string(i) + "].context",
+                "A selected-witness report must retain its synthesis family, expectation, and outcome"};
+
+        const auto& identity = synthesis->family->identity();
+        const auto& expectation = *report.input.expected_synthesis;
+        const auto& configuration_input = configuration.description();
+        const auto strategy_module = std::find_if(configuration_input.modules.begin(),
+            configuration_input.modules.end(), [](const auto& module) { return module.role == "strategy"; });
+        if (report.input.family->identity() != identity || projected->family->family.identity() != identity ||
+            report.input.outcome->subject != synthesis->outcome.subject ||
+            synthesis_outcome_json(*report.input.outcome) != synthesis_outcome_json(synthesis->outcome) ||
+            objective_evidence_json(report.input.bounds) != objective_evidence_json(synthesis->objective) ||
+            expectation.strategy != identity.strategy || expectation.strategy_version != identity.strategy_version ||
+            expectation.request != identity.request || expectation.lineage != identity.lineage ||
+            configuration_input.strategy.strategy != identity.strategy ||
+            strategy_module == configuration_input.modules.end() ||
+            strategy_module->implementation.id != identity.strategy ||
+            strategy_module->implementation.version != identity.strategy_version ||
+            configuration_input.output.assurance != identity.request.assurance ||
+            configuration_input.output.family != identity.request.target ||
+            configuration_input.output.representation != identity.request.representation ||
+            configuration_input.numerical != identity.request.numerical ||
+            report.input.assurance != identity.request.assurance)
+            return artifacts::ArtifactError{artifacts::ArtifactErrorCode::identity,
+                "run.verification[" + std::to_string(i) + "].context",
+                "Verifier family, outcome, bounds, or strategy configuration disagrees with the saved run"};
     }
     if (!execution.verification.empty()) {
         auto attachment = verification_attachment(execution.verification, problem.identity());

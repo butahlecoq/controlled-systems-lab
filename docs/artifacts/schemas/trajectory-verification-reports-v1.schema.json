@@ -8,65 +8,215 @@
   "properties": {
     "schema": {"const": "csl.trajectory-verification-reports/1"},
     "problem_id": {"type": "string", "minLength": 1},
-    "reports": {
-      "type": "array",
-      "items": {
-        "type": "object",
-        "additionalProperties": false,
-        "required": ["witness_index", "problem_id", "witness", "verifier", "request", "termination", "bindings", "feasibility", "objective", "optimality", "completeness", "validated", "recomputed_objective_bits", "residuals", "membership_queries", "diagnostics"],
-        "properties": {
-          "witness_index": {"type": "integer", "minimum": 0},
-          "problem_id": {"type": "string", "minLength": 1},
-          "witness": {"type": "object", "additionalProperties": false, "required": ["problem_id", "states", "controls", "original_objective_bits"], "properties": {
-            "problem_id": {"type": "string", "minLength": 1},
-            "states": {"type": "array", "items": {"$ref": "#/$defs/vector"}},
-            "controls": {"type": "array", "items": {"$ref": "#/$defs/vector"}},
-            "original_objective_bits": {"$ref": "#/$defs/bits"}
-          }},
-          "verifier": {"type": "object", "additionalProperties": false, "required": ["id", "version"], "properties": {"id": {"type": "string"}, "version": {"type": "string"}}},
-          "request": {"type": "object", "required": ["assurance", "verification_assurance", "absolute_tolerance_bits", "relative_tolerance_bits", "limits", "bounds", "backend_bounds", "family_identity"], "properties": {
-            "assurance": {"enum": ["numerical", "validated"]},
-            "verification_assurance": {"enum": ["numerical", "validated"]},
-            "absolute_tolerance_bits": {"$ref": "#/$defs/bits"},
-            "relative_tolerance_bits": {"$ref": "#/$defs/bits"},
-            "limits": {"type": "object", "additionalProperties": false, "required": ["residuals", "membership_queries"], "properties": {"residuals": {"type": "integer", "minimum": 0}, "membership_queries": {"type": "integer", "minimum": 0}}},
-            "bounds": {"type": "object", "additionalProperties": false, "required": ["lower", "upper"], "properties": {"lower": {"oneOf": [{"$ref": "#/$defs/objective_bound"}, {"type": "null"}]}, "upper": {"oneOf": [{"$ref": "#/$defs/objective_bound"}, {"type": "null"}]}}},
-            "backend_bounds": {"type": "array", "items": {"type": "object"}},
-            "family_identity": {"oneOf": [{"type": "object"}, {"type": "null"}]},
-            "expected_synthesis": {"type": "object", "additionalProperties": false, "required": ["strategy", "strategy_version", "family_request", "lineage"], "properties": {
-              "strategy": {"type": "string"}, "strategy_version": {"type": "string"},
-              "family_request": {"$ref": "#/$defs/family_request"},
-              "lineage": {"$ref": "#/$defs/lineage"}
-            }}
-          }},
-          "termination": {"enum": ["completed", "cancelled", "resource_limit", "numerical_failure", "operation_rejected", "contract_rejected"]},
-          "bindings": {"$ref": "#/$defs/check"},
-          "feasibility": {"$ref": "#/$defs/check"},
-          "objective": {"$ref": "#/$defs/check"},
-          "optimality": {"$ref": "#/$defs/check"},
-          "completeness": {"$ref": "#/$defs/check"},
-          "validated": {"$ref": "#/$defs/check"},
-          "recomputed_objective_bits": {"oneOf": [{"$ref": "#/$defs/bits"}, {"type": "null"}]},
-          "residuals": {"type": "array", "items": {"type": "object", "additionalProperties": false, "required": ["field", "violation_bits", "scale_bits", "tolerance_bits", "satisfied"], "properties": {
-            "field": {"type": "string"}, "violation_bits": {"$ref": "#/$defs/bits"}, "scale_bits": {"$ref": "#/$defs/bits"}, "tolerance_bits": {"$ref": "#/$defs/bits"}, "satisfied": {"type": "boolean"}
-          }}},
-          "membership_queries": {"type": "array", "items": {"type": "object"}},
-          "diagnostics": {"type": "array", "items": {"$ref": "#/$defs/diagnostic"}}
-        }
-      }
-    }
+    "reports": {"type": "array", "items": {"$ref": "#/$defs/report"}}
   },
   "$defs": {
     "bits": {"type": "string", "pattern": "^[0-9a-f]{16}$"},
     "vector": {"type": "array", "items": {"$ref": "#/$defs/bits"}},
-    "lineage": {"type": "array", "items": {"type": "object", "additionalProperties": false, "required": ["request", "input", "output", "module", "version"], "properties": {"request": {"type": "string"}, "input": {"type": "string"}, "output": {"type": "string"}, "module": {"type": "string"}, "version": {"type": "string"}}}},
-    "family_request": {"type": "object", "additionalProperties": false, "required": ["profile", "objective", "target", "assurance", "representation", "absolute_tolerance_bits", "relative_tolerance_bits", "materialization_limit"], "properties": {
-      "profile": {"type": "string"}, "objective": {"type": "string"}, "target": {"enum": ["exact_optimal_relation", "candidate_relaxation", "partial_relation"]}, "assurance": {"enum": ["numerical", "validated"]}, "representation": {"type": "string"}, "absolute_tolerance_bits": {"$ref": "#/$defs/bits"}, "relative_tolerance_bits": {"$ref": "#/$defs/bits"}, "materialization_limit": {"oneOf": [{"type": "integer", "minimum": 0}, {"type": "null"}]}
-    }},
-    "objective_bound": {"type": "object", "additionalProperties": false, "required": ["value_bits", "evidence"], "properties": {"value_bits": {"$ref": "#/$defs/bits"}, "evidence": {"type": "object", "required": ["problem_id", "support"], "properties": {"problem_id": {"type": "string"}, "support": {"type": "object"}}}}},
     "check": {"enum": ["not_checked", "numerical_pass", "violation", "invalid_input", "unsupported"]},
-    "diagnostic": {"type": "object", "additionalProperties": false, "required": ["code", "field", "explanation"], "properties": {
-      "code": {"enum": ["invalid_input", "unsupported", "evidence_mismatch", "invalid_claim"]}, "field": {"type": "string"}, "explanation": {"type": "string"}
-    }}
+    "assurance": {"enum": ["numerical", "validated"]},
+    "diagnostic": {
+      "type": "object", "additionalProperties": false,
+      "required": ["code", "field", "explanation"],
+      "properties": {
+        "code": {"enum": ["invalid_input", "unsupported", "evidence_mismatch", "invalid_claim"]},
+        "field": {"type": "string"}, "explanation": {"type": "string"}
+      }
+    },
+    "diagnostics": {"type": "array", "items": {"$ref": "#/$defs/diagnostic"}},
+    "lineage_step": {
+      "type": "object", "additionalProperties": false,
+      "required": ["request", "input", "output", "module", "version"],
+      "properties": {
+        "request": {"type": "string"}, "input": {"type": "string"},
+        "output": {"type": "string"}, "module": {"type": "string"}, "version": {"type": "string"}
+      }
+    },
+    "lineage": {"type": "array", "items": {"$ref": "#/$defs/lineage_step"}},
+    "family_request": {
+      "type": "object", "additionalProperties": false,
+      "required": ["profile", "objective", "target", "assurance", "representation", "absolute_tolerance_bits", "relative_tolerance_bits", "materialization_limit"],
+      "properties": {
+        "profile": {"type": "string"}, "objective": {"type": "string"},
+        "target": {"enum": ["exact_optimal_relation", "candidate_relaxation", "partial_relation"]},
+        "assurance": {"$ref": "#/$defs/assurance"}, "representation": {"type": "string"},
+        "absolute_tolerance_bits": {"$ref": "#/$defs/bits"}, "relative_tolerance_bits": {"$ref": "#/$defs/bits"},
+        "materialization_limit": {"oneOf": [{"type": "integer", "minimum": 0}, {"type": "null"}]}
+      }
+    },
+    "expected_synthesis": {
+      "type": "object", "additionalProperties": false,
+      "required": ["strategy", "strategy_version", "family_request", "lineage"],
+      "properties": {
+        "strategy": {"type": "string"}, "strategy_version": {"type": "string"},
+        "family_request": {"$ref": "#/$defs/family_request"}, "lineage": {"$ref": "#/$defs/lineage"}
+      }
+    },
+    "family_identity": {
+      "type": "object", "additionalProperties": false,
+      "required": ["problem_id", "request", "coordinates", "strategy", "strategy_version", "lineage"],
+      "properties": {
+        "problem_id": {"type": "string"}, "request": {"$ref": "#/$defs/family_request"},
+        "coordinates": {
+          "type": "object", "additionalProperties": false,
+          "required": ["state_dimension", "control_dimension", "external_dimension", "horizon"],
+          "properties": {
+            "state_dimension": {"type": "integer", "minimum": 0},
+            "control_dimension": {"type": "integer", "minimum": 0},
+            "external_dimension": {"type": "integer", "minimum": 0},
+            "horizon": {"type": "integer", "minimum": 0}
+          }
+        },
+        "strategy": {"type": "string"}, "strategy_version": {"type": "string"},
+        "lineage": {"$ref": "#/$defs/lineage"}
+      }
+    },
+    "evidence_support": {
+      "oneOf": [
+        {"type": "object", "additionalProperties": false, "required": ["kind"], "properties": {"kind": {"const": "unestablished"}}},
+        {"type": "object", "additionalProperties": false, "required": ["kind", "absolute_tolerance_bits", "relative_tolerance_bits", "max_residual_bits", "verifier"], "properties": {
+          "kind": {"const": "numerical_check"}, "absolute_tolerance_bits": {"$ref": "#/$defs/bits"},
+          "relative_tolerance_bits": {"$ref": "#/$defs/bits"}, "max_residual_bits": {"$ref": "#/$defs/bits"}, "verifier": {"type": "string"}
+        }},
+        {"type": "object", "additionalProperties": false, "required": ["kind", "reference", "assumptions"], "properties": {
+          "kind": {"const": "symbolic_argument"}, "reference": {"type": "string"}, "assumptions": {"type": "string"}
+        }},
+        {"type": "object", "additionalProperties": false, "required": ["kind", "artifact", "verifier"], "properties": {
+          "kind": {"const": "certificate_reference"}, "artifact": {"type": "string"}, "verifier": {"type": "string"}
+        }},
+        {"type": "object", "additionalProperties": false, "required": ["kind", "subject", "row_lower", "row_upper", "variable_lower", "variable_upper"], "properties": {
+          "kind": {"const": "exact_farkas"}, "subject": {"$ref": "#/$defs/program_identity"},
+          "row_lower": {"$ref": "#/$defs/vector"}, "row_upper": {"$ref": "#/$defs/vector"},
+          "variable_lower": {"$ref": "#/$defs/vector"}, "variable_upper": {"$ref": "#/$defs/vector"}
+        }}
+      ]
+    },
+    "program_identity": {
+      "type": "object", "additionalProperties": false,
+      "required": ["problem_id", "program_id"],
+      "properties": {"problem_id": {"type": "string"}, "program_id": {"type": "string"}}
+    },
+    "claim_evidence": {
+      "type": "object", "additionalProperties": false,
+      "required": ["problem_id", "support"],
+      "properties": {"problem_id": {"type": "string"}, "support": {"$ref": "#/$defs/evidence_support"}}
+    },
+    "synthesis_outcome": {
+      "type": "object", "additionalProperties": false,
+      "required": ["subject", "value", "support", "assumptions"],
+      "properties": {
+        "subject": {"type": "string"},
+        "value": {"enum": ["optimal", "infeasible", "unbounded", "infimum_not_attained", "undetermined"]},
+        "support": {"$ref": "#/$defs/evidence_support"},
+        "assumptions": {"type": "array", "items": {"type": "string"}}
+      }
+    },
+    "objective_bound": {
+      "type": "object", "additionalProperties": false,
+      "required": ["value_bits", "evidence"],
+      "properties": {"value_bits": {"$ref": "#/$defs/bits"}, "evidence": {"$ref": "#/$defs/claim_evidence"}}
+    },
+    "objective_evidence": {
+      "type": "object", "additionalProperties": false,
+      "required": ["lower", "upper"],
+      "properties": {
+        "lower": {"oneOf": [{"$ref": "#/$defs/objective_bound"}, {"type": "null"}]},
+        "upper": {"oneOf": [{"$ref": "#/$defs/objective_bound"}, {"type": "null"}]}
+      }
+    },
+    "program_bound": {
+      "type": "object", "additionalProperties": false,
+      "required": ["subject", "value_bits", "evidence", "assumptions"],
+      "properties": {
+        "subject": {"$ref": "#/$defs/program_identity"}, "value_bits": {"$ref": "#/$defs/bits"},
+        "evidence": {"$ref": "#/$defs/evidence_support"},
+        "assumptions": {"type": "array", "items": {"type": "string"}}
+      }
+    },
+    "backend_bound_pair": {
+      "type": "object", "additionalProperties": false,
+      "required": ["lower", "upper"],
+      "properties": {
+        "lower": {"oneOf": [{"$ref": "#/$defs/program_bound"}, {"type": "null"}]},
+        "upper": {"oneOf": [{"$ref": "#/$defs/program_bound"}, {"type": "null"}]}
+      }
+    },
+    "provider": {
+      "type": "object", "additionalProperties": false,
+      "required": ["port", "requested", "actual"],
+      "properties": {
+        "port": {"type": "string"},
+        "requested": {"type": "object", "additionalProperties": false, "required": ["id", "version"], "properties": {
+          "id": {"type": "string"}, "version": {"oneOf": [{"type": "string"}, {"type": "null"}]}
+        }},
+        "actual": {"oneOf": [
+          {"type": "object", "additionalProperties": false, "required": ["id", "version"], "properties": {"id": {"type": "string"}, "version": {"type": "string"}}},
+          {"type": "null"}
+        ]}
+      }
+    },
+    "query_common": {
+      "type": "object", "required": ["kind", "request_problem_id", "request_program_id"],
+      "properties": {"kind": {"type": "string"}, "request_problem_id": {"type": "string"}, "request_program_id": {"type": "string"}}
+    },
+    "membership_query": {
+      "oneOf": [
+        {"allOf": [{"$ref": "#/$defs/query_common"}, {"type": "object", "additionalProperties": false, "required": ["kind", "request_problem_id", "request_program_id", "reason", "provider"], "properties": {
+          "kind": {"const": "not_run"}, "request_problem_id": {"type": "string"}, "request_program_id": {"type": "string"},
+          "reason": {"enum": ["cancelled", "deadline"]}, "provider": {"$ref": "#/$defs/provider"}
+        }}]},
+        {"allOf": [{"$ref": "#/$defs/query_common"}, {"type": "object", "additionalProperties": false, "required": ["kind", "request_problem_id", "request_program_id", "diagnostics", "provider"], "properties": {
+          "kind": {"const": "rejected"}, "request_problem_id": {"type": "string"}, "request_program_id": {"type": "string"},
+          "diagnostics": {"$ref": "#/$defs/diagnostics"}, "provider": {"$ref": "#/$defs/provider"}
+        }}]},
+        {"allOf": [{"$ref": "#/$defs/query_common"}, {"type": "object", "additionalProperties": false, "required": ["kind", "request_problem_id", "request_program_id", "diagnostics", "provider"], "properties": {
+          "kind": {"const": "solver_unsupported"}, "request_problem_id": {"type": "string"}, "request_program_id": {"type": "string"},
+          "diagnostics": {"$ref": "#/$defs/diagnostics"}, "provider": {"$ref": "#/$defs/provider"}
+        }}]},
+        {"allOf": [{"$ref": "#/$defs/query_common"}, {"type": "object", "additionalProperties": false, "required": ["kind", "request_problem_id", "request_program_id", "returned_problem_id", "returned_program_id", "outcome", "provider"], "properties": {
+          "kind": {"const": "completed"}, "request_problem_id": {"type": "string"}, "request_program_id": {"type": "string"},
+          "returned_problem_id": {"type": "string"}, "returned_program_id": {"type": "string"},
+          "outcome": {"enum": ["optimal", "infeasible", "unbounded", "infimum_not_attained", "undetermined"]}, "provider": {"$ref": "#/$defs/provider"}
+        }}]},
+        {"allOf": [{"$ref": "#/$defs/query_common"}, {"type": "object", "additionalProperties": false, "required": ["kind", "request_problem_id", "request_program_id", "reason", "provider"], "properties": {
+          "kind": {"const": "stopped"}, "request_problem_id": {"type": "string"}, "request_program_id": {"type": "string"},
+          "reason": {"enum": ["cancelled", "resource_limit", "numerical_failure"]}, "provider": {"$ref": "#/$defs/provider"}
+        }}]}
+      ]
+    },
+    "report": {
+      "type": "object", "additionalProperties": false,
+      "required": ["witness_index", "problem_id", "witness", "verifier", "request", "termination", "bindings", "feasibility", "objective", "optimality", "completeness", "validated", "recomputed_objective_bits", "residuals", "membership_queries", "diagnostics"],
+      "properties": {
+        "witness_index": {"type": "integer", "minimum": 0}, "problem_id": {"type": "string", "minLength": 1},
+        "witness": {"type": "object", "additionalProperties": false, "required": ["problem_id", "states", "controls", "original_objective_bits"], "properties": {
+          "problem_id": {"type": "string"}, "states": {"type": "array", "items": {"$ref": "#/$defs/vector"}},
+          "controls": {"type": "array", "items": {"$ref": "#/$defs/vector"}}, "original_objective_bits": {"$ref": "#/$defs/bits"}
+        }},
+        "verifier": {"type": "object", "additionalProperties": false, "required": ["id", "version"], "properties": {"id": {"type": "string"}, "version": {"type": "string"}}},
+        "request": {"type": "object", "additionalProperties": false,
+          "required": ["assurance", "verification_assurance", "absolute_tolerance_bits", "relative_tolerance_bits", "limits", "bounds", "backend_bounds", "family_identity", "expected_synthesis", "outcome"],
+          "properties": {
+            "assurance": {"$ref": "#/$defs/assurance"}, "verification_assurance": {"$ref": "#/$defs/assurance"},
+            "absolute_tolerance_bits": {"$ref": "#/$defs/bits"}, "relative_tolerance_bits": {"$ref": "#/$defs/bits"},
+            "limits": {"type": "object", "additionalProperties": false, "required": ["residuals", "membership_queries"], "properties": {"residuals": {"type": "integer", "minimum": 0}, "membership_queries": {"type": "integer", "minimum": 0}}},
+            "bounds": {"$ref": "#/$defs/objective_evidence"}, "backend_bounds": {"type": "array", "items": {"$ref": "#/$defs/backend_bound_pair"}},
+            "family_identity": {"$ref": "#/$defs/family_identity"},
+            "outcome": {"$ref": "#/$defs/synthesis_outcome"},
+            "expected_synthesis": {"$ref": "#/$defs/expected_synthesis"}
+          }
+        },
+        "termination": {"enum": ["completed", "cancelled", "resource_limit", "numerical_failure", "operation_rejected", "contract_rejected"]},
+        "bindings": {"$ref": "#/$defs/check"}, "feasibility": {"$ref": "#/$defs/check"},
+        "objective": {"$ref": "#/$defs/check"}, "optimality": {"$ref": "#/$defs/check"},
+        "completeness": {"$ref": "#/$defs/check"}, "validated": {"$ref": "#/$defs/check"},
+        "recomputed_objective_bits": {"oneOf": [{"$ref": "#/$defs/bits"}, {"type": "null"}]},
+        "residuals": {"type": "array", "items": {"type": "object", "additionalProperties": false, "required": ["field", "violation_bits", "scale_bits", "tolerance_bits", "satisfied"], "properties": {
+          "field": {"type": "string"}, "violation_bits": {"$ref": "#/$defs/bits"}, "scale_bits": {"$ref": "#/$defs/bits"}, "tolerance_bits": {"$ref": "#/$defs/bits"}, "satisfied": {"type": "boolean"}
+        }}},
+        "membership_queries": {"type": "array", "items": {"$ref": "#/$defs/membership_query"}},
+        "diagnostics": {"$ref": "#/$defs/diagnostics"}
+      }
+    }
   }
 }
