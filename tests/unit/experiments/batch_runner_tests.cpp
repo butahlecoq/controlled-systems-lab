@@ -203,45 +203,47 @@ TEST_CASE("family queries preserve coarse results and map deterministic requests
     const ResourcePolicy resources{2,2,1,std::nullopt};
     ExecutionContext context;
     context.run_id="family-query-run";
-    auto coarse=experiments::run_sweep(cases,resources,context,execution::Mode::sequential);
-    REQUIRE(std::holds_alternative<experiments::SweepResult>(coarse));
-    auto sweep=std::get<experiments::SweepResult>(std::move(coarse));
     const auto selector=prepare_selector_provider(true);
     const execution::ResourceUse query_resources{1,"one selector workspace per case",std::nullopt,
         execution::CallStopSupport::cooperative_boundaries};
 
-    auto queried=experiments::run_family_queries(std::move(sweep),selector,resources,context,
-        execution::Mode::bounded_parallel,query_resources);
-    REQUIRE(std::holds_alternative<experiments::FamilyQueryResult>(queried));
-    const auto& result=std::get<experiments::FamilyQueryResult>(queried);
-    REQUIRE(result.sweep.batch.tasks.size()==2);
-    REQUIRE(result.queries.size()==2);
-    REQUIRE(result.query_batch.tasks.size()==1);
-    CHECK(result.queries[0].identity==experiments::ScenarioConfigurationId{{"scenario-a"},{"config-a"}});
-    CHECK(result.queries[1].identity==experiments::ScenarioConfigurationId{{"scenario-b"},{"config-b"}});
-    const auto* first=std::get_if<experiments::FamilyQueryScheduled>(&result.queries[0].status);
-    REQUIRE(first);
-    CHECK(first->task_index==0);
-    const auto* rejected=std::get_if<experiments::FamilyQueryRejected>(&result.queries[1].status);
-    REQUIRE(rejected);
-    REQUIRE(rejected->diagnostics.size()==1);
-    CHECK(rejected->diagnostics[0].field=="test.selector.seed");
-    CHECK(result.query_batch.tasks[0].id.value=="family-query-0");
-    REQUIRE(result.query_batch.tasks[0].provenance.size()==1);
-    REQUIRE(result.query_batch.tasks[0].provenance[0].actual);
-    CHECK(result.query_batch.tasks[0].provenance[0].actual->id.value=="test.selector");
-    const auto* returned=std::get_if<execution::Returned<registry::SelectorPort>>(
-        &result.query_batch.tasks[0].outcome);
-    REQUIRE(returned);
-    const auto* selected=std::get_if<WitnessSelection>(&returned->value);
-    REQUIRE(selected);
-    CHECK(selected->batch.requested==2);
-    CHECK(selected->batch.seed==19);
-    CHECK(selected->batch.directions==std::vector<Vector>{{1,-1},{-1,1}});
-    CHECK(selected->batch.distinctness_tolerance==0.0);
-    CHECK(result.sweep.batch.run_id=="family-query-run");
-    CHECK(result.query_batch.run_id==result.sweep.batch.run_id);
-    CHECK(result.query_batch.timing.started_at>=result.sweep.batch.timing.completed_at);
+    for(const auto mode:{execution::Mode::sequential,execution::Mode::bounded_parallel}) {
+        auto coarse=experiments::run_sweep(cases,resources,context,mode);
+        REQUIRE(std::holds_alternative<experiments::SweepResult>(coarse));
+        auto sweep=std::get<experiments::SweepResult>(std::move(coarse));
+        auto queried=experiments::run_family_queries(std::move(sweep),selector,resources,context,
+            mode,query_resources);
+        REQUIRE(std::holds_alternative<experiments::FamilyQueryResult>(queried));
+        const auto& result=std::get<experiments::FamilyQueryResult>(queried);
+        REQUIRE(result.sweep.batch.tasks.size()==2);
+        REQUIRE(result.queries.size()==2);
+        REQUIRE(result.query_batch.tasks.size()==1);
+        CHECK(result.queries[0].identity==experiments::ScenarioConfigurationId{{"scenario-a"},{"config-a"}});
+        CHECK(result.queries[1].identity==experiments::ScenarioConfigurationId{{"scenario-b"},{"config-b"}});
+        const auto* first=std::get_if<experiments::FamilyQueryScheduled>(&result.queries[0].status);
+        REQUIRE(first);
+        CHECK(first->task_index==0);
+        const auto* rejected=std::get_if<experiments::FamilyQueryRejected>(&result.queries[1].status);
+        REQUIRE(rejected);
+        REQUIRE(rejected->diagnostics.size()==1);
+        CHECK(rejected->diagnostics[0].field=="test.selector.seed");
+        CHECK(result.query_batch.tasks[0].id.value=="family-query-0");
+        REQUIRE(result.query_batch.tasks[0].provenance.size()==1);
+        REQUIRE(result.query_batch.tasks[0].provenance[0].actual);
+        CHECK(result.query_batch.tasks[0].provenance[0].actual->id.value=="test.selector");
+        const auto* returned=std::get_if<execution::Returned<registry::SelectorPort>>(
+            &result.query_batch.tasks[0].outcome);
+        REQUIRE(returned);
+        const auto* selected=std::get_if<WitnessSelection>(&returned->value);
+        REQUIRE(selected);
+        CHECK(selected->batch.requested==2);
+        CHECK(selected->batch.seed==19);
+        CHECK(selected->batch.directions==std::vector<Vector>{{1,-1},{-1,1}});
+        CHECK(selected->batch.distinctness_tolerance==0.0);
+        CHECK(result.sweep.batch.run_id=="family-query-run");
+        CHECK(result.query_batch.run_id==result.sweep.batch.run_id);
+        CHECK(result.query_batch.timing.started_at>=result.sweep.batch.timing.completed_at);
+    }
 }
 
 TEST_CASE("family query dispositions retain cases whose coarse strategy was skipped") {
