@@ -116,8 +116,12 @@ The current profile driver requires both `CSL_PERF_CONTROL_FIFO` and
 with a five-second bound, and fails a capture if perf exits, rejects the command,
 or does not acknowledge. Profile output marks this scope as
 `acknowledged_perf_control_transitions` and records the number of acknowledgements.
-The acknowledgement improves control-boundary synchronization but does not make
-the small T-S01 workload representative or support a unique limiter claim.
+Invoke it separately with `--profile-strategy reach-back|direct-joint` and
+`--profile-calls N`; it performs a warmup and the requested number of profiled
+calls, then exits without comparison-record capture. The normal comparison run
+(optionally `--record <path>`) does not control `perf`. Acknowledgements improve
+control-boundary synchronization but do not make the small T-S01 workload
+representative or support a unique limiter claim.
 
 To exercise host capability, add the `run-obs04-perf-probe` label to a PR. The
 Linux job builds the Release driver, tests the FIFO protocol with a mock perf
@@ -125,7 +129,10 @@ controller, then attempts eight acknowledged cycles samples with a 120-second
 bound and 32 MiB file cap. It always uploads a machine-readable capability result
 and logs; permission or PMU denial is reported as `unavailable`, while protocol
 or capture errors are retained as `failed`. The workflow artifact is temporary
-(14-day retention). This change does not alter the installed API or package, so
-no release is needed. No capability result is claimed until the labelled job
-has actually run. OBS-04 still needs the remaining immutable attempt/resource/
+(14-day retention). The comparison record adds `measurement_payload` to the
+public `ComparisonAttempt` C++ type, changing its layout and ABI; binary
+consumers must rebuild against the updated headers and library. No package
+workflow or dependency change is required, and this PR does not prepare or
+publish a release. No capability result is claimed until the labelled job has
+actually run. OBS-04 still needs the remaining immutable attempt/resource/
 publication records and other acceptance criteria.
