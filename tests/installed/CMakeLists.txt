@@ -97,6 +97,13 @@ add_executable(installed_execution_client execution_client.cpp)
 target_link_libraries(installed_execution_client PRIVATE CSL::execution)
 set_target_properties(installed_execution_client PROPERTIES CXX_EXTENSIONS OFF)
 add_test(NAME installed_execution_client COMMAND installed_execution_client)
+
+add_executable(installed_experiments_client experiments_client.cpp)
+target_link_libraries(installed_experiments_client PRIVATE CSL::experiments)
+set_target_properties(installed_experiments_client PROPERTIES CXX_EXTENSIONS OFF)
+add_test(NAME installed_experiments_client COMMAND installed_experiments_client)
+set_tests_properties(installed_experiments_client PROPERTIES
+  PASS_REGULAR_EXPRESSION "Installed experiments client: public batch runner passed")
 set_tests_properties(installed_execution_client PROPERTIES
   PASS_REGULAR_EXPRESSION "Installed execution client: retained analytic tasks, isolated modes and literal outcomes passed")
 add_executable(installed_public_headers_client public_headers_client.cpp)
