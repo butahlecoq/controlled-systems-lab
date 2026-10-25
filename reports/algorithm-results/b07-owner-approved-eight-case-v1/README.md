@@ -17,16 +17,16 @@ with `lambda` set to 0 or 1. The runner uses numerical assurance with a `1e-9` n
 
 | Initial stocks `(oxidizer,fuel)` kg | `lambda` | Disturbance coefficients `(a,b)` | Feasible plans | Minimizing plan indices | Worst-case objective | Median solver call | Range |
 |---|---:|---|---:|---|---:|---:|---:|
-| `(305,205)` | 0 | paper `(0.05,-0.04)` | 493 | `188` | 9.32109 | 414.244 ms | 410.889–415.977 ms |
-| `(305,205)` | 0 | archive `(0.06,-0.05)` | 365 | `188` | 9.68423 | 340.165 ms | 335.477–353.378 ms |
-| `(305,205)` | 1 | paper `(0.05,-0.04)` | 493 | `212, 292, 308` | 9.40619 | 410.179 ms | 409.485–418.576 ms |
-| `(305,205)` | 1 | archive `(0.06,-0.05)` | 365 | `212, 292, 308` | 9.77333 | 344.414 ms | 336.098–349.590 ms |
-| `(302,207)` | 0 | paper `(0.05,-0.04)` | 442 | `1336` | 10.01862 | 391.514 ms | 389.564–398.496 ms |
-| `(302,207)` | 0 | archive `(0.06,-0.05)` | 328 | `1336` | 10.38144 | 326.617 ms | 321.112–333.252 ms |
-| `(302,207)` | 1 | paper `(0.05,-0.04)` | 442 | `831, 911, 1407` | 10.11031 | 393.041 ms | 388.590–402.596 ms |
-| `(302,207)` | 1 | archive `(0.06,-0.05)` | 328 | `831, 911, 1407` | 10.47661 | 325.282 ms | 321.797–372.417 ms |
+| `(305,205)` | 0 | paper `(0.05,-0.04)` | 493 | `188` | 9.32109 | 411.569 ms | 403.726–413.970 ms |
+| `(305,205)` | 0 | archive `(0.06,-0.05)` | 365 | `188` | 9.68423 | 332.941 ms | 330.057–339.121 ms |
+| `(305,205)` | 1 | paper `(0.05,-0.04)` | 493 | `212, 292, 308` | 9.40619 | 410.150 ms | 403.611–418.575 ms |
+| `(305,205)` | 1 | archive `(0.06,-0.05)` | 365 | `212, 292, 308` | 9.77333 | 340.504 ms | 329.046–361.699 ms |
+| `(302,207)` | 0 | paper `(0.05,-0.04)` | 442 | `1336` | 10.01862 | 387.572 ms | 384.319–391.114 ms |
+| `(302,207)` | 0 | archive `(0.06,-0.05)` | 328 | `1336` | 10.38144 | 318.211 ms | 317.629–323.149 ms |
+| `(302,207)` | 1 | paper `(0.05,-0.04)` | 442 | `831, 911, 1407` | 10.11031 | 387.533 ms | 382.911–408.564 ms |
+| `(302,207)` | 1 | archive `(0.06,-0.05)` | 328 | `831, 911, 1407` | 10.47661 | 320.044 ms | 318.212–344.552 ms |
 
-Every row completed without solver failure. The medians and ranges are seven measured calls per case after one excluded warmup. Each timing includes request construction and one public minimax call. This is one Release build on one adapter; there is no limiter profile, resource cap, cross-adapter comparison, or speedup claim.
+Every row completed without solver failure. The medians and ranges are seven measured calls per case after one excluded warmup. Each timing includes request construction and one public minimax call. This is one Release build on one adapter; there is no limiter profile, resource cap, cross-adapter comparison, or speedup claim. Exact source, scenario, executable and build hashes are in `run-provenance.json` and each raw result row.
 
 Build host evidence: GCC 16.2.1, CMake 3.31.6, Release configuration, 4 parallel build jobs. Cases ran sequentially. The environment load average was not captured during the run; raw timings and ranges are retained so the measurements can be repeated.
 
@@ -39,12 +39,16 @@ The left column projects the winning terminal disturbance set onto `(x1,x3)` and
 ## Files and reproduction
 
 - `results.jsonl` contains the measured records and terminal vertices used for the projections.
+- `index.html` is a local English report page generated from the saved results.
+- `run-provenance.json` binds the capture to the clean source commit, compiler, Release flags, CMake cache, executable, and result-file hashes.
 - `independent-oracle-verification.json` records per-case agreement with the independent enumeration.
 - `projections.png` and `projections.svg` are the visual outputs.
 - `SHA256SUMS` lists the bundle file digests; run `sha256sum -c SHA256SUMS` from this directory.
 - Source driver: [`benchmarks/reporting/issue6/b07_reconstruction.cpp`](../../../benchmarks/reporting/issue6/b07_reconstruction.cpp).
 - Scenario: [`benchmarks/scenarios/b07-owner-approved-eight-case-v1.json`](../../../benchmarks/scenarios/b07-owner-approved-eight-case-v1.json).
 
-Configure a Release build with `CSL_BUILD_ISSUE6_B07_REPORT=ON`, then build `csl_issue6_b07_report`. Capture its eight JSON lines, save them as `results.jsonl`, run `b07_independent_oracle.py results.jsonl`, then run `b07_render_projection.py results.jsonl --output-directory <dir>`. The NumPy and Matplotlib versions are pinned in `scripts/reports/requirements.txt`.
+Configure a clean Release build with `CSL_BUILD_ISSUE6_B07_REPORT=ON`, then build `csl_issue6_b07_report`. Run `b07_capture.py --source-root <repo> --build-dir <release-build> --output-dir <capture-dir>` with the capture directory outside the source tree. Then run `b07_independent_oracle.py <capture-dir>/results.jsonl` and `b07_render_projection.py <capture-dir>/results.jsonl --output-directory <capture-dir>`. The NumPy and Matplotlib versions are pinned in `scripts/reports/requirements.txt`.
+
+This PR is a preparatory evidence bundle, not the final published report route. The English HTML is saved here for review. Registering it with the schema-3 report catalogue and verifying the main-only Pages deployment remains required follow-up work; B07 reporting is not complete until that route and its deployed bytes are checked.
 
 Historical paper outputs and the old `B07-historical` transcription remain unchanged. The article's reported results are observations to investigate, not acceptance targets for these explicitly parameterized cases.

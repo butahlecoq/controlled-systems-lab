@@ -1,5 +1,6 @@
 import itertools, json
 import argparse
+import hashlib
 from pathlib import Path
 import numpy as np
 
@@ -8,6 +9,11 @@ parser.add_argument('results',type=Path)
 args=parser.parse_args()
 root=args.results.parent
 output=root/'independent-oracle-verification.json'
+provenance=json.loads((root/'run-provenance.json').read_text())
+assert provenance['schema']=='csl.issue6-b07-capture-provenance/1'
+assert provenance['source_tree_clean'] is True
+assert provenance['build_type']=='Release'
+assert provenance['results_sha256']==hashlib.sha256(args.results.read_bytes()).hexdigest()
 rows=[json.loads(line) for line in (root/'results.jsonl').read_text().splitlines()]
 expected={}
 for stocks in range(2):
@@ -33,6 +39,9 @@ for row in rows:
     assert row['plans_total']==3125 and row['status']=='numerical_optimal'
     assert len(row['source_commit'])==40 and len(row['driver_sha256'])==64 and len(row['scenario_sha256'])==64
     assert row['build_type']=='Release' and row['compiler_id']=='GNU'
+    for key in ('source_commit','driver_sha256','scenario_sha256','executable_sha256',
+                'compiler_id','compiler_version','build_type'):
+        assert row[key]==provenance[key]
     exe=row['executable_sha256']
     assert exe=='not-supplied' or (len(exe)==64 and all(ch in '0123456789abcdef' for ch in exe))
     samples=row['measured_elapsed_ns']
