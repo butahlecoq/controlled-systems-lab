@@ -1,0 +1,63 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:csl:scenario-sweep:2",
+  "title": "CSL inert recorded scenario sweep",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema", "run_id", "spec", "spec_digest", "cases", "coarse_resources", "query_resources"],
+  "properties": {
+    "schema": {"const": "csl.scenario-sweep/2"},
+    "run_id": {"type": "string", "minLength": 1},
+    "spec": {"type": "string", "description": "Canonical JSON bytes identifying the scenario sweep input."},
+    "spec_digest": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "cases": {
+      "type": "array", "minItems": 1,
+      "items": {
+        "type": "object", "additionalProperties": false,
+        "required": ["scenario_id", "configuration_id", "coarse_run", "selection", "query"],
+        "properties": {
+          "scenario_id": {"type": "string", "minLength": 1},
+          "configuration_id": {"type": "string", "minLength": 1},
+          "coarse_run": {"type": "string", "description": "Canonical inert recorded-run JSON."},
+          "selection": {
+            "type": "object", "additionalProperties": false,
+            "required": ["requested_count", "distinctness_tolerance", "directions", "seed"],
+            "properties": {
+              "requested_count": {"type": "integer", "minimum": 1},
+              "distinctness_tolerance": {"type": "number", "minimum": 0},
+              "directions": {"type": "array", "items": {"type": "array", "items": {"type": "number"}}},
+              "seed": {"type": ["integer", "null"], "minimum": 0}
+            }
+          },
+          "query": {
+            "oneOf": [
+              {"type": "object", "additionalProperties": false, "required": ["kind", "reason"], "properties": {"kind": {"const": "not_run"}, "reason": {"enum": ["strategy_skipped", "strategy_failed", "strategy_unsupported", "family_unavailable"]}}},
+              {"type": "object", "additionalProperties": false, "required": ["kind", "diagnostics"], "properties": {"kind": {"const": "rejected"}, "diagnostics": {"type": "array", "minItems": 1, "items": {"type": "object", "additionalProperties": false, "required": ["code", "field", "explanation"], "properties": {"code": {"type": "integer", "minimum": 0, "maximum": 3}, "field": {"type": "string"}, "explanation": {"type": "string"}}}}}},
+              {"type": "object", "additionalProperties": false, "required": ["kind", "artifact"], "properties": {"kind": {"const": "run"}, "artifact": {"type": "string", "description": "Canonical inert recorded-run JSON."}}}
+            ]
+          }
+        }
+      }
+    },
+    "coarse_resources": {"$ref": "#/$defs/resources"},
+    "query_resources": {"$ref": "#/$defs/resources"}
+  },
+  "$defs": {
+    "resources": {
+      "type": "object", "additionalProperties": false,
+      "required": ["requested", "executor_worker_threads_started", "peak_active_tasks", "backend_scheduler_width", "peak_workspace_reservation_bytes", "retained_result_reservation_bytes", "enforced_memory_reservation_budget_bytes", "observed_process_memory_bytes", "memory_support", "memory_observation_scope"],
+      "properties": {
+        "requested": {"type": "object", "additionalProperties": false, "required": ["total_threads", "outer_workers", "threads_per_worker", "memory_bytes"], "properties": {"total_threads": {"type": "integer", "minimum": 0}, "outer_workers": {"type": "integer", "minimum": 0}, "threads_per_worker": {"type": "integer", "minimum": 0}, "memory_bytes": {"type": ["integer", "null"], "minimum": 0}}},
+        "executor_worker_threads_started": {"type": ["integer", "null"], "minimum": 0},
+        "peak_active_tasks": {"type": ["integer", "null"], "minimum": 0},
+        "backend_scheduler_width": {"type": ["integer", "null"], "minimum": 0, "description": "Runtime scheduler width reported by the backend, including its calling lane; not an instantaneous count of busy threads."},
+        "peak_workspace_reservation_bytes": {"type": ["integer", "null"], "minimum": 0},
+        "retained_result_reservation_bytes": {"type": ["integer", "null"], "minimum": 0},
+        "enforced_memory_reservation_budget_bytes": {"type": ["integer", "null"], "minimum": 0, "description": "Executor admission budget for workspace and declared retained-result reservations; not a process or operating-system memory cap."},
+        "observed_process_memory_bytes": {"type": ["integer", "null"], "minimum": 0},
+        "memory_support": {"enum": ["unlimited_accounting", "active_workspace_reservations", "active_and_retained_reservations", "process_observation", "operating_system_limit"]},
+        "memory_observation_scope": {"type": "string"}
+      }
+    }
+  }
+}

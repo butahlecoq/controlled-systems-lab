@@ -42,7 +42,8 @@ struct SweepPhaseResources {
     ResourcePolicy requested;
     std::optional<std::uint64_t> executor_worker_threads_started;
     std::optional<std::uint64_t> peak_active_tasks;
-    std::optional<std::uint64_t> backend_threads;
+    // Runtime scheduler width reported by an instrumented backend, including its calling lane.
+    std::optional<std::uint64_t> backend_scheduler_width;
     std::optional<std::uint64_t> peak_workspace_reservation_bytes;
     std::optional<std::uint64_t> retained_result_reservation_bytes;
     std::optional<std::uint64_t> enforced_memory_reservation_budget_bytes;

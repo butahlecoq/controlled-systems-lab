@@ -482,13 +482,13 @@ TEST_CASE("a completed family query sweep records aligned runs and measured phas
     REQUIRE(std::holds_alternative<artifacts::RecordedSweepArtifact>(archive));
     const auto bytes = std::get<artifacts::RecordedSweepArtifact>(archive).content().bytes();
     const std::string wire(reinterpret_cast<const char*>(bytes.data()), bytes.size());
-    CHECK(wire.find("\"schema\":\"csl.scenario-sweep/1\"") != std::string::npos);
+    CHECK(wire.find("\"schema\":\"csl.scenario-sweep/2\"") != std::string::npos);
     CHECK(wire.find("\"scenario_id\":\"scenario-a\"") != std::string::npos);
     CHECK(wire.find("\"kind\":\"rejected\"") != std::string::npos);
     CHECK(wire.find("\"executor_worker_threads_started\":2") != std::string::npos);
     CHECK(wire.find("\"executor_worker_threads_started\":1") != std::string::npos);
-    CHECK(wire.find("\"backend_threads\":null") != std::string::npos);
-    CHECK(wire.find("\"backend_threads\":3") != std::string::npos);
+    CHECK(wire.find("\"backend_scheduler_width\":null") != std::string::npos);
+    CHECK(wire.find("\"backend_scheduler_width\":3") != std::string::npos);
     CHECK(wire.find("\"memory_support\":\"process_observation\"") != std::string::npos);
     CHECK(wire.find("\"observed_process_memory_bytes\":null") == std::string::npos);
     CHECK(wire.find("process resident-set snapshot at phase completion") != std::string::npos);
@@ -496,6 +496,15 @@ TEST_CASE("a completed family query sweep records aligned runs and measured phas
     CHECK(wire.find("\"retained_result_reservation_bytes\":35") != std::string::npos);
     CHECK(std::get<experiments::FamilyQueryResult>(queried).sweep.retained_result_reservation_bytes==30);
     CHECK(std::get<experiments::FamilyQueryResult>(queried).query_result_reservation_bytes==5);
+    auto legacy_wire=Json::parse(wire);
+    legacy_wire["schema"]="csl.scenario-sweep/1";
+    for(const auto* phase:{"coarse_resources","query_resources"}) {
+        auto& resources=legacy_wire[phase];
+        resources["backend_threads"]=resources.at("backend_scheduler_width");
+        resources.erase("backend_scheduler_width");
+    }
+    CHECK(std::holds_alternative<artifacts::RecordedSweepArtifact>(
+        artifacts::decode_recorded_sweep(legacy_wire.dump())));
     auto stale_query_wire = std::string(reinterpret_cast<const char*>(recorded.content().bytes().data()),
         recorded.content().bytes().size());
     const auto selection_start = stale_query_wire.find("\"selection\":");
