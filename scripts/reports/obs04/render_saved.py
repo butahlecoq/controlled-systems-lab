@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import argparse
+import hashlib
 import html
 import json
 from pathlib import Path
@@ -19,24 +20,125 @@ def _json_value(value: Any, field: str) -> Any:
     return value
 
 
+def _canonical_json(value: Any) -> str:
+    return json.dumps(value, sort_keys=True, separators=(",", ":"), ensure_ascii=False)
+
+
+def _run_status(run: dict[str, Any]) -> str:
+    final = run.get("final")
+    if not isinstance(final, dict):
+        raise ValueError("recorded run final result is missing")
+    kind = final.get("kind")
+    value = final.get("value")
+    if kind in {"synthesis", "program"} and isinstance(value, dict):
+        result = value.get("result", {}) if kind == "program" else value
+        termination = result.get("termination")
+        return {
+            "completed": "completed",
+            "cancelled": "cancelled",
+            "resource_limit": "resource_limited",
+            "operation_rejected": "unsupported",
+            "contract_rejected": "failed",
+            "numerical_failure": "failed",
+        }.get(termination, "invalid")
+    if kind in {"unsupported", "failed"}:
+        return kind
+    if kind == "skipped" and isinstance(value, dict):
+        reason = value.get("reason")
+        if reason == "cancelled":
+            return "cancelled"
+        if reason in {"deadline", "task_limit", "reservation_exceeds_budget"}:
+            return "resource_limited"
+        if reason == "batch_failed":
+            return "incomplete"
+    return "invalid"
+
+
 def load_record(path: Path) -> dict[str, Any]:
     record = json.loads(path.read_text(encoding="utf-8"))
-    if not isinstance(record, dict) or record.get("schema") != "csl.comparison-record/1":
+    if not isinstance(record, dict) or set(record) != {
+        "schema", "comparison_run_id", "comparison_spec_id", "spec", "attempts", "track"
+    } or record.get("schema") != "csl.comparison-record/1":
         raise ValueError("record schema must be csl.comparison-record/1")
+    if record.get("track") != "new-comparison":
+        raise ValueError("comparison record track must be new-comparison")
     if not isinstance(record.get("attempts"), list):
         raise ValueError("record attempts must be an array")
-    spec = _json_value(record.get("spec"), "record spec")
+    spec_text = record.get("spec")
+    if not isinstance(spec_text, str):
+        raise ValueError("record spec must be a canonical JSON string")
+    spec = _json_value(spec_text, "record spec")
     if not isinstance(spec, dict) or spec.get("schema") != "csl.comparison-spec/3":
         raise ValueError("record spec must use csl.comparison-spec/3")
+    if _canonical_json(spec) != spec_text:
+        raise ValueError("record spec is not canonical JSON")
+    spec_id = hashlib.sha256(spec_text.encode("utf-8")).hexdigest()
+    if record.get("comparison_spec_id") != spec_id:
+        raise ValueError("comparison spec identity does not match its saved spec")
+    arms = spec.get("arms")
+    repetitions = spec.get("repetitions")
+    if not isinstance(arms, list) or not arms or not isinstance(repetitions, int) or repetitions < 1:
+        raise ValueError("comparison spec arms or repetition count are invalid")
+    if len(record["attempts"]) != len(arms) * repetitions:
+        raise ValueError("comparison record does not contain every ordered attempt")
     record["_parsed_spec"] = spec
     parsed_attempts = []
     for index, attempt in enumerate(record["attempts"]):
-        if not isinstance(attempt, dict):
+        if not isinstance(attempt, dict) or set(attempt) != {
+            "arm_index", "measurement_payload", "repetition_index", "reported_status", "run", "run_digest", "run_id"
+        }:
             raise ValueError(f"attempts[{index}] must be an object")
         measurement = _json_value(attempt.get("measurement_payload"), f"attempts[{index}].measurement_payload")
         if not isinstance(measurement, dict):
             raise ValueError(f"attempts[{index}].measurement_payload must be an object")
-        parsed_attempts.append({**attempt, "_measurement": measurement})
+        arm_index, repetition_index = divmod(index, repetitions)
+        if attempt.get("arm_index") != arm_index or attempt.get("repetition_index") != repetition_index:
+            raise ValueError(f"attempts[{index}] is out of comparison-spec order")
+        run_text = attempt.get("run")
+        if not isinstance(run_text, str):
+            raise ValueError(f"attempts[{index}].run must be a JSON string")
+        run = _json_value(run_text, f"attempts[{index}].run")
+        if not isinstance(run, dict) or _canonical_json(run) != run_text:
+            raise ValueError(f"attempts[{index}].run is not a canonical saved run")
+        if hashlib.sha256(run_text.encode("utf-8")).hexdigest() != attempt.get("run_digest"):
+            raise ValueError(f"attempts[{index}] run digest does not match the saved run")
+        arm = arms[arm_index]
+        config = run.get("configuration")
+        config_value = config.get("value") if isinstance(config, dict) else None
+        strategy_config = config_value.get("strategy") if isinstance(config_value, dict) else None
+        collection_config = config_value.get("collection") if isinstance(config_value, dict) else None
+        expected_status = attempt.get("reported_status")
+        measurement_to_reported = {
+            "passed": "completed", "failed": "failed", "unsupported": "unsupported",
+            "cancelled": "cancelled", "resource_limited": "resource_limited", "incomplete": "incomplete",
+        }
+        event_schema = measurement.get("schema")
+        expected_strategy = arm.get("strategy") if isinstance(arm, dict) else None
+        expected_instrumentation = arm.get("instrumentation") if isinstance(arm, dict) else None
+        if (run.get("schema") not in {"csl.run-statistics/5", "csl.run-statistics/6"} or
+                run.get("recorded_state") != "unverified_recorded_data" or
+                run.get("run") != attempt.get("run_id") or run.get("problem") != spec.get("problem_id") or
+                not isinstance(config, dict) or config.get("id") != arm.get("configuration_id") or
+                not isinstance(strategy_config, dict) or strategy_config.get("strategy") != expected_strategy or
+                not isinstance(collection_config, dict) or collection_config.get("enabled") != (expected_instrumentation == "enabled") or
+                _run_status(run) != expected_status or
+                attempt.get("reported_status") not in set(measurement_to_reported.values()) or
+                measurement_to_reported.get(measurement.get("status")) != expected_status or
+                event_schema not in {f"csl.obs04-instrumentation-comparison-event/{n}" for n in range(2, 7)} or
+                measurement.get("strategy") != expected_strategy or
+                measurement.get("instrumentation") != expected_instrumentation or
+                measurement.get("repetition") != repetition_index or
+                measurement.get("warmup") != (repetition_index == 0)):
+            raise ValueError(f"attempts[{index}] identity or status does not match the saved spec and run")
+        parsed_attempts.append({**attempt, "_measurement": measurement, "_run": run})
+    identity_material = {
+        "attempts": record["attempts"],
+        "comparison_spec_id": spec_id,
+        "schema": "csl.comparison-record/1",
+    }
+    run_id = hashlib.sha256(_canonical_json(identity_material).encode("utf-8")).hexdigest()
+    if record.get("comparison_run_id") != run_id:
+        raise ValueError("comparison run identity does not match its ordered attempts")
     record["_parsed_attempts"] = parsed_attempts
     return record
 

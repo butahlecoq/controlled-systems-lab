@@ -321,8 +321,10 @@ The renderer reads the saved JSON record. It does not run a solver or alter the
 record. The HTML lists every attempt, including warmups and failed phases. Its
 median and range summaries include only measured attempts whose solver and
 post-run phase both passed. It reports statuses and timings from the record, not
-from the adjacent JSONL event log. The saved HTML report is committed beside
-the source record.
+from the adjacent JSONL event log. Before rendering, it checks the spec and
+comparison identities, each saved run digest, attempt order, and status links
+between the run and measurement payload. The saved HTML report is committed
+beside the source record.
 
 Run the renderer contract tests with:
 

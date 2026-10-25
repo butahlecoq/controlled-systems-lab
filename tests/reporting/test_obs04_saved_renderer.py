@@ -1,5 +1,6 @@
 """Verify OBS-04 HTML is derived from and preserves saved attempts."""
 import json
+import hashlib
 from pathlib import Path
 import sys
 import tempfile
@@ -13,6 +14,9 @@ import render_saved
 def fixture_record():
     spec = {
         "schema": "csl.comparison-spec/3",
+        "arms": [{"configuration_id": "config-1", "strategy": "<script>reach-back</script>",
+                  "instrumentation": "disabled"}],
+        "repetitions": 4,
         "problem_id": "problem-1",
         "input_manifest_hash": "input-hash",
         "environment": {
@@ -34,21 +38,44 @@ def fixture_record():
             "schema": "csl.obs04-instrumentation-comparison-event/6",
             "strategy": "<script>reach-back</script>",
             "instrumentation": "disabled",
+            "repetition": index,
             "warmup": warmup,
-            "status": status,
+            "status": "passed" if status == "passed" else "failed",
             "phase_status": phase,
             "outcome": "optimal" if status == "passed" else "unknown",
             "strategy_run_ns": duration,
             "end_to_end_ns": duration,
         }
+        run_id = f"run-{index}"
+        run = {
+            "schema": "csl.run-statistics/6", "recorded_state": "unverified_recorded_data",
+            "run": run_id, "problem": "problem-1",
+            "configuration": {"id": "config-1", "value": {
+                "strategy": {"strategy": "<script>reach-back</script>"},
+                "collection": {"enabled": False},
+            }},
+            "final": {"kind": "synthesis", "value": {"termination": "completed"}}
+            if status == "passed" else {"kind": "failed", "value": {}},
+        }
+        run_text = json.dumps(run, sort_keys=True, separators=(",", ":"), ensure_ascii=False)
         attempts.append({
-            "run_id": f"run-{index}", "run_digest": f"digest-{index}",
-            "repetition_index": index, "reported_status": status,
-            "measurement_payload": json.dumps(measurement), "run": "{}",
+            "arm_index": 0, "run_id": run_id,
+            "run_digest": hashlib.sha256(run_text.encode()).hexdigest(),
+            "repetition_index": index,
+            "reported_status": "completed" if status == "passed" else "failed",
+            "measurement_payload": json.dumps(measurement), "run": run_text,
         })
-    return {"schema": "csl.comparison-record/1", "comparison_run_id": "run-id",
-            "comparison_spec_id": "spec-id", "track": "new-comparison",
-            "spec": json.dumps(spec), "attempts": attempts}
+    spec_text = json.dumps(spec, sort_keys=True, separators=(",", ":"), ensure_ascii=False)
+    spec_id = hashlib.sha256(spec_text.encode()).hexdigest()
+    record = {"schema": "csl.comparison-record/1", "comparison_run_id": "",
+              "comparison_spec_id": spec_id, "track": "new-comparison",
+              "spec": spec_text, "attempts": attempts}
+    identity_material = {"attempts": attempts, "comparison_spec_id": spec_id,
+                         "schema": "csl.comparison-record/1"}
+    record["comparison_run_id"] = hashlib.sha256(
+        json.dumps(identity_material, sort_keys=True, separators=(",", ":"), ensure_ascii=False).encode()
+    ).hexdigest()
+    return record
 
 
 class SavedRendererTests(unittest.TestCase):
@@ -80,6 +107,24 @@ class SavedRendererTests(unittest.TestCase):
             path = Path(temp) / "record.json"
             path.write_text(json.dumps(record), encoding="utf-8")
             with self.assertRaisesRegex(ValueError, "measurement_payload"):
+                render_saved.load_record(path)
+
+    def test_rejects_stale_comparison_identity(self):
+        record = fixture_record()
+        record["comparison_run_id"] = "0" * 64
+        with tempfile.TemporaryDirectory() as temp:
+            path = Path(temp) / "record.json"
+            path.write_text(json.dumps(record), encoding="utf-8")
+            with self.assertRaisesRegex(ValueError, "comparison run identity"):
+                render_saved.load_record(path)
+
+    def test_rejects_reported_status_that_disagrees_with_measurement_and_run(self):
+        record = fixture_record()
+        record["attempts"][1]["reported_status"] = "failed"
+        with tempfile.TemporaryDirectory() as temp:
+            path = Path(temp) / "record.json"
+            path.write_text(json.dumps(record), encoding="utf-8")
+            with self.assertRaisesRegex(ValueError, "identity or status"):
                 render_saved.load_record(path)
 
 
