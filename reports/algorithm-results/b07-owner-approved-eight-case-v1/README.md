@@ -17,14 +17,14 @@ with `lambda` set to 0 or 1. The runner uses numerical assurance with a `1e-9` n
 
 | Initial stocks `(oxidizer,fuel)` kg | `lambda` | Disturbance coefficients `(a,b)` | Feasible plans | Minimizing plan indices | Worst-case objective | Median solver call | Range |
 |---|---:|---|---:|---|---:|---:|---:|
-| `(305,205)` | 0 | paper `(0.05,-0.04)` | 493 | `188` | 9.32109 | 411.569 ms | 403.726–413.970 ms |
-| `(305,205)` | 0 | archive `(0.06,-0.05)` | 365 | `188` | 9.68423 | 332.941 ms | 330.057–339.121 ms |
-| `(305,205)` | 1 | paper `(0.05,-0.04)` | 493 | `212, 292, 308` | 9.40619 | 410.150 ms | 403.611–418.575 ms |
-| `(305,205)` | 1 | archive `(0.06,-0.05)` | 365 | `212, 292, 308` | 9.77333 | 340.504 ms | 329.046–361.699 ms |
-| `(302,207)` | 0 | paper `(0.05,-0.04)` | 442 | `1336` | 10.01862 | 387.572 ms | 384.319–391.114 ms |
-| `(302,207)` | 0 | archive `(0.06,-0.05)` | 328 | `1336` | 10.38144 | 318.211 ms | 317.629–323.149 ms |
-| `(302,207)` | 1 | paper `(0.05,-0.04)` | 442 | `831, 911, 1407` | 10.11031 | 387.533 ms | 382.911–408.564 ms |
-| `(302,207)` | 1 | archive `(0.06,-0.05)` | 328 | `831, 911, 1407` | 10.47661 | 320.044 ms | 318.212–344.552 ms |
+| `(305,205)` | 0 | paper `(0.05,-0.04)` | 493 | `188` | 9.32109 | 416.384 ms | 413.467–426.170 ms |
+| `(305,205)` | 0 | archive `(0.06,-0.05)` | 365 | `188` | 9.68423 | 339.471 ms | 336.433–353.205 ms |
+| `(305,205)` | 1 | paper `(0.05,-0.04)` | 493 | `212, 292, 308` | 9.40619 | 413.249 ms | 412.116–419.525 ms |
+| `(305,205)` | 1 | archive `(0.06,-0.05)` | 365 | `212, 292, 308` | 9.77333 | 339.482 ms | 336.331–351.855 ms |
+| `(302,207)` | 0 | paper `(0.05,-0.04)` | 442 | `1336` | 10.01862 | 396.968 ms | 391.056–401.456 ms |
+| `(302,207)` | 0 | archive `(0.06,-0.05)` | 328 | `1336` | 10.38144 | 325.552 ms | 323.451–329.294 ms |
+| `(302,207)` | 1 | paper `(0.05,-0.04)` | 442 | `831, 911, 1407` | 10.11031 | 400.027 ms | 391.977–417.726 ms |
+| `(302,207)` | 1 | archive `(0.06,-0.05)` | 328 | `831, 911, 1407` | 10.47661 | 327.423 ms | 326.054–343.019 ms |
 
 Every row completed without solver failure. The medians and ranges are seven measured calls per case after one excluded warmup. Each timing includes request construction and one public minimax call. This is one Release build on one adapter; there is no limiter profile, resource cap, cross-adapter comparison, or speedup claim. Exact source, scenario, executable and build hashes are in `run-provenance.json` and each raw result row.
 
