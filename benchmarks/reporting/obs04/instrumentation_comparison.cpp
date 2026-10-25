@@ -679,6 +679,7 @@ TrialRecord trial_impl(const application::PreparedComparison& prepared, std::siz
     std::optional<ar::ResolvedConfiguration>& fallback_configuration,
     std::optional<ar::CollectedStatistics>& fallback_statistics,
     std::optional<SynthesisOutcome>& returned_outcome, bool& invocation_started) {
+    const auto attempt_begin = Clock::now();
     const auto setup_begin = Clock::now();
     const ar::RunId run_id{"obs04-" + std::to_string(strategy_index) + "-" +
         (enabled ? "enabled-" : "disabled-") + std::to_string(repetition) + (warmup ? "-warmup" : "")};
@@ -744,27 +745,60 @@ TrialRecord trial_impl(const application::PreparedComparison& prepared, std::siz
     std::vector<verification::TrajectoryReport> verification_reports;
     std::uint64_t selection_setup_ns = 0;
     std::uint64_t selection_run_ns = 0;
+    std::optional<std::uint64_t> first_witness_query_ns;
+    std::optional<std::uint64_t> additional_witness_query_ns;
     std::uint64_t verification_ns = 0;
     const auto* synthesis_result = std::get_if<SynthesisResult>(&outcome);
     if (synthesis_result && synthesis_result->family &&
         std::holds_alternative<CompleteOptimalFamily>(synthesis_result->family->outcome())) {
         if (!modules.membership) throw std::runtime_error("Witness verification LP provider is unavailable");
         const WitnessRequest request{2, 0, {{1, -1}, {-1, 1}}, 31};
+        const WitnessRequest first_request{1, request.distinctness_tolerance,
+            {request.directions[0]}, request.seed};
+        const WitnessRequest additional_request{1, request.distinctness_tolerance,
+            {request.directions[1]}, request.seed};
         registry::Requirements selector_requirements;
         selector_requirements.output.representation = {"csl.witness-batch.v1"};
-        const registry::SelectorRequest selector_request{*synthesis_result->family, request};
-        auto selector = take(registry::prepare_pipeline(registry::select(modules.selectors,
-            {synthesis::witness_selector::selector_id, "1"}, selector_request, selector_requirements)));
-        auto selector_workspaces = selector.create();
+        const auto prepare_selector = [&](const WitnessRequest& selection_request) {
+            const registry::SelectorRequest selector_request{*synthesis_result->family, selection_request};
+            return take(registry::prepare_pipeline(registry::select(modules.selectors,
+                {synthesis::witness_selector::selector_id, "1"}, selector_request, selector_requirements)));
+        };
+        auto first_selector = prepare_selector(first_request);
+        auto first_workspaces = first_selector.create();
+        auto additional_selector = prepare_selector(additional_request);
+        auto additional_workspaces = additional_selector.create();
         const auto selection_setup_end = Clock::now();
         selection_setup_ns = ns(selection_setup_begin, selection_setup_end);
         const auto selection_run_begin = Clock::now();
-        const auto selection_outcome = std::get<0>(selector_workspaces)->run(context);
+        const auto first_query_begin = Clock::now();
+        const auto first_outcome = std::get<0>(first_workspaces)->run(context);
+        const auto first_query_end = Clock::now();
+        first_witness_query_ns = ns(first_query_begin, first_query_end);
+        const auto additional_query_begin = Clock::now();
+        const auto additional_outcome = std::get<0>(additional_workspaces)->run(context);
+        const auto additional_query_end = Clock::now();
+        additional_witness_query_ns = ns(additional_query_begin, additional_query_end);
         const auto selection_run_end = Clock::now();
         selection_run_ns = ns(selection_run_begin, selection_run_end);
-        if (!std::holds_alternative<WitnessSelection>(selection_outcome))
-            throw std::runtime_error("Witness selector rejected the analytic complete family");
-        selected_witnesses = std::get<WitnessSelection>(selection_outcome);
+        if (!std::holds_alternative<WitnessSelection>(first_outcome) ||
+            !std::holds_alternative<WitnessSelection>(additional_outcome))
+            throw std::runtime_error("Witness selector rejected an analytic direction query");
+        const auto& first_selection = std::get<WitnessSelection>(first_outcome);
+        const auto& additional_selection = std::get<WitnessSelection>(additional_outcome);
+        if (first_selection.termination != Termination::completed ||
+            additional_selection.termination != Termination::completed ||
+            first_selection.batch.returned_count() != 1 ||
+            additional_selection.batch.returned_count() != 1)
+            throw std::runtime_error("Witness selector did not return one history for each timed query");
+        WitnessBatch combined{{}, request.count, {synthesis::witness_selector::selector_id},
+            request.seed, synthesis_result->family->identity(), request.directions,
+            request.distinctness_tolerance};
+        combined.witnesses.reserve(request.count);
+        combined.witnesses.push_back(first_selection.batch.witnesses.front());
+        combined.witnesses.push_back(additional_selection.batch.witnesses.front());
+        selected_witnesses = WitnessSelection{std::move(combined), Termination::completed,
+            "Composed from ordered first and additional direction queries; no uniform sampling or uniqueness guarantee."};
         if (selected_witnesses->termination != Termination::completed ||
             selected_witnesses->batch.requested != request.count ||
             selected_witnesses->batch.returned_count() != request.count ||
@@ -796,15 +830,23 @@ TrialRecord trial_impl(const application::PreparedComparison& prepared, std::siz
                 quality_passed = false;
         }
     }
+    const auto attempt_end = Clock::now();
+    const auto end_to_end_ns = ns(attempt_begin, attempt_end);
 
     std::ostringstream event;
-    event << "{\"schema\":\"csl.obs04-instrumentation-comparison-event/3\",\"repetition\":" << repetition
+    event << "{\"schema\":\"csl.obs04-instrumentation-comparison-event/4\",\"repetition\":" << repetition
         << ",\"warmup\":" << (warmup ? "true" : "false") << ",\"strategy\":\""
         << (strategy_index == 0 ? "csl.synthesis.reach-back" : "csl.synthesis.strategy-b")
         << "\",\"instrumentation\":\"" << (enabled ? "enabled" : "disabled")
         << "\",\"setup_ns\":" << ns(setup_begin, setup_end) << ",\"strategy_run_ns\":" << ns(run_begin, run_end)
+        << ",\"family_construction_ns\":" << ns(run_begin, run_end)
+        << ",\"end_to_end_ns\":" << end_to_end_ns
         << ",\"selection_setup_ns\":" << selection_setup_ns
         << ",\"selection_run_ns\":" << selection_run_ns
+        << ",\"first_witness_query_ns\":"
+        << (first_witness_query_ns ? std::to_string(*first_witness_query_ns) : "null")
+        << ",\"additional_witness_query_ns\":"
+        << (additional_witness_query_ns ? std::to_string(*additional_witness_query_ns) : "null")
         << ",\"verification_ns\":" << verification_ns
         << ",\"requested_witness_count\":" << (selected_witnesses ? selected_witnesses->batch.requested : 2)
         << ",\"returned_witness_count\":"
@@ -878,11 +920,13 @@ TrialRecord failed_trial(const application::PreparedComparison& prepared, std::s
     for(const auto byte:bytes)wire.push_back(static_cast<char>(std::to_integer<unsigned char>(byte)));
     auto run=take(ar::decode_recorded_run(wire,prepared.problem()));
     std::ostringstream event;
-    event << "{\"schema\":\"csl.obs04-instrumentation-comparison-event/3\",\"repetition\":" << repetition
+    event << "{\"schema\":\"csl.obs04-instrumentation-comparison-event/4\",\"repetition\":" << repetition
         << ",\"warmup\":" << (warmup?"true":"false") << ",\"strategy\":\""
         << (strategy_index==0?"csl.synthesis.reach-back":"csl.synthesis.strategy-b")
         << "\",\"instrumentation\":\"" << (enabled?"enabled":"disabled")
-        << "\",\"selection_setup_ns\":null,\"selection_run_ns\":null,\"verification_ns\":null"
+        << "\",\"family_construction_ns\":null,\"end_to_end_ns\":null"
+        << ",\"selection_setup_ns\":null,\"selection_run_ns\":null"
+        << ",\"first_witness_query_ns\":null,\"additional_witness_query_ns\":null,\"verification_ns\":null"
         << ",\"requested_witness_count\":2,\"returned_witness_count\":null,\"distinct_witness_count\":null"
         << ",\"status\":\"failed\",\"analytic_family_checked\":false,\"complete_family_verified\":false,\"error\":\""
         << escaped(message) << "\"}";
@@ -928,11 +972,13 @@ TrialRecord unserializable_outcome_trial(const application::PreparedComparison& 
     for(const auto byte:bytes)wire.push_back(static_cast<char>(std::to_integer<unsigned char>(byte)));
     auto run=take(ar::decode_recorded_run(wire,prepared.problem()));
     std::ostringstream event;
-    event << "{\"schema\":\"csl.obs04-instrumentation-comparison-event/3\",\"repetition\":"
+    event << "{\"schema\":\"csl.obs04-instrumentation-comparison-event/4\",\"repetition\":"
         << repetition << ",\"warmup\":" << (warmup?"true":"false") << ",\"strategy\":\""
         << (strategy_index==0?"csl.synthesis.reach-back":"csl.synthesis.strategy-b")
         << "\",\"instrumentation\":\"" << (enabled?"enabled":"disabled")
-        << "\",\"selection_setup_ns\":null,\"selection_run_ns\":null,\"verification_ns\":null"
+        << "\",\"family_construction_ns\":null,\"end_to_end_ns\":null"
+        << ",\"selection_setup_ns\":null,\"selection_run_ns\":null"
+        << ",\"first_witness_query_ns\":null,\"additional_witness_query_ns\":null,\"verification_ns\":null"
         << ",\"requested_witness_count\":2,\"returned_witness_count\":null,\"distinct_witness_count\":null"
         << ",\"status\":\"failed\",\"solver_returned\":true,"
         << "\"solver_outcome_in_run_artifact\":false,\"solver_status\":\""
@@ -970,11 +1016,13 @@ TrialRecord recording_failure_trial(const application::PreparedComparison& prepa
             {unavailable,unavailable,unavailable,unavailable,false,ar::MemoryAccounting::unlimited}));
         auto run=take(ar::decode_recorded_run(wire,prepared.problem()));
         std::ostringstream event;
-        event << "{\"schema\":\"csl.obs04-instrumentation-comparison-event/3\",\"repetition\":"
+        event << "{\"schema\":\"csl.obs04-instrumentation-comparison-event/4\",\"repetition\":"
             << repetition << ",\"warmup\":" << (warmup?"true":"false") << ",\"strategy\":\""
             << (strategy_index==0?"csl.synthesis.reach-back":"csl.synthesis.strategy-b")
             << "\",\"instrumentation\":\"" << (enabled?"enabled":"disabled")
-            << "\",\"selection_setup_ns\":null,\"selection_run_ns\":null,\"verification_ns\":null"
+            << "\",\"family_construction_ns\":null,\"end_to_end_ns\":null"
+            << ",\"selection_setup_ns\":null,\"selection_run_ns\":null"
+            << ",\"first_witness_query_ns\":null,\"additional_witness_query_ns\":null,\"verification_ns\":null"
             << ",\"requested_witness_count\":2,\"returned_witness_count\":null,\"distinct_witness_count\":null"
             << ",\"status\":\"" << attempt_status_name(status)
             << "\",\"analytic_family_checked\":false,\"complete_family_verified\":false,\"recording_error\":\""

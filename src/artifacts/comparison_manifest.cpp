@@ -342,7 +342,8 @@ bool measurement_matches_arm(AttemptStatus status,const Json& measurement,const 
     if(spec.strategies.empty())return true;
     const auto schema=measurement.value("schema",std::string{});
     if(schema!="csl.obs04-instrumentation-comparison-event/2" &&
-        schema!="csl.obs04-instrumentation-comparison-event/3")return false;
+        schema!="csl.obs04-instrumentation-comparison-event/3" &&
+        schema!="csl.obs04-instrumentation-comparison-event/4")return false;
     if(measurement.at("strategy")!=spec.strategies.at(arm) ||
         measurement.at("instrumentation")!=spec.instrumentation.at(arm) ||
         measurement.at("repetition").get<std::uint32_t>()!=repetition ||
@@ -363,6 +364,16 @@ bool measurement_matches_arm(AttemptStatus status,const Json& measurement,const 
     for(const auto* field:{"selection_setup_ns","selection_run_ns","verification_ns"})
         if(!measurement.contains(field)||(!measurement.at(field).is_null()&&
             !nonnegative_integer(measurement.at(field))))return false;
+    if(schema=="csl.obs04-instrumentation-comparison-event/4") {
+        for(const auto* field:{"family_construction_ns","end_to_end_ns",
+                "first_witness_query_ns","additional_witness_query_ns"})
+            if(!measurement.contains(field)||(!measurement.at(field).is_null()&&
+                !nonnegative_integer(measurement.at(field))))return false;
+        if(status==AttemptStatus::completed &&
+            (measurement.at("family_construction_ns").is_null()||measurement.at("end_to_end_ns").is_null()||
+             !measurement.contains("strategy_run_ns")||measurement.at("strategy_run_ns").is_null()||
+             measurement.at("family_construction_ns")!=measurement.at("strategy_run_ns")))return false;
+    }
     for(const auto* field:{"requested_witness_count","returned_witness_count","distinct_witness_count"})
         if(!measurement.contains(field)||(!measurement.at(field).is_null()&&
             !nonnegative_integer(measurement.at(field))))return false;
@@ -370,11 +381,18 @@ bool measurement_matches_arm(AttemptStatus status,const Json& measurement,const 
     const auto configured_count=canonical_count(configuration.at("output").at("witness_count"));
     if(!configured_count||measurement.at("requested_witness_count").get<std::uint64_t>()!=*configured_count)return false;
     const auto& selection=run.at("selection");
-    if(selection.is_null())
+    if(selection.is_null()) {
+        if(schema=="csl.obs04-instrumentation-comparison-event/4" &&
+            (!measurement.at("first_witness_query_ns").is_null() ||
+             !measurement.at("additional_witness_query_ns").is_null()))return false;
         return measurement.at("returned_witness_count").is_null()&&
             measurement.at("distinct_witness_count").is_null();
+    }
     for(const auto* field:{"selection_setup_ns","selection_run_ns","verification_ns"})
         if(measurement.at(field).is_null())return false;
+    if(schema=="csl.obs04-instrumentation-comparison-event/4" &&
+        (measurement.at("first_witness_query_ns").is_null() ||
+         measurement.at("additional_witness_query_ns").is_null()))return false;
     const auto& batch=selection.at("batch");
     const auto returned=batch.at("witnesses").size();
     const auto batch_requested=canonical_count(batch.at("requested"));

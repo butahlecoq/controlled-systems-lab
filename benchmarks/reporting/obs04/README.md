@@ -65,15 +65,19 @@ selects a path, and existing files are never overwritten. Keep the separate
 limiter-profile result with any retained measurement. Do not combine the
 existing synthetic OBS-02 collector loop with these solver timings.
 
-`csl.obs04-instrumentation-comparison-event/3` remains the raw per-attempt
-measurement payload. It records requested, returned, and distinct witness counts,
-with selection setup, selector execution, and independent verification measured
-outside `strategy_run_ns`. The comparison record binds its strategy, instrumentation
-mode, repetition, and status to the arm and attempt indices. The per-run record
-stores the resolved request, outcome/family data and collected spans. This is
-an analytic fixture increment; phase-separated parsing/validation, capability
-checks, family construction, first/additional witness queries, serialization,
-rendering and end-to-end timings remain outside this driver.
+`csl.obs04-instrumentation-comparison-event/4` is the current raw per-attempt
+payload; the codec continues to accept event `/2` and `/3`. It records the
+complete `StrategyPort::run` interval as family-construction time, separately
+times the first and additional direction query, and records their combined
+selection interval, independent verification, and attempt end-to-end time.
+The selector runs two ordered single-direction requests and composes their
+verified witnesses into the saved batch. The comparison record binds the event
+to its arm and attempt indices; the per-run record stores the resolved request,
+outcome/family data, selection and verification evidence, and collected spans.
+Attempt end-to-end time starts before per-attempt workspace setup and ends after
+witness verification; it excludes process startup, request resolution,
+capability reporting, artifact serialization, report generation, and export.
+This analytic fixture does not separately time those excluded phases.
 
 Build a clean Release source checkout and use a separate build directory:
 
@@ -156,6 +160,28 @@ for the run limits and profile status. These fixture timings do not establish a
 general instrumentation overhead, end-to-end latency, scalability, or method
 winner.
 
+## Phase timing capture (2026-10-25)
+
+`results/linux-omarchy-gcc16-20261025-phase-timings.json` and `.jsonl` add
+first/additional query and attempt end-to-end measurements. All 32 attempts
+passed the analytic-family and independent witness checks. This exploratory
+build used the recorded dirty source snapshot at `e48fa6b225ff56e1af244574a045a98d4a35df3f`;
+the immutable record carries its source tree digest and binary hash. Each cell
+below is the median of seven measured attempts; query values are in ns.
+
+| Strategy | Collection | Strategy/family | First query | Additional query | Attempt end-to-end |
+| --- | --- | ---: | ---: | ---: | ---: |
+| reach-back | disabled | 4,996,985 | 250,174 | 225,939 | 5,607,684 |
+| reach-back | enabled | 7,822,792 | 443,566 | 438,398 | 9,382,085 |
+| direct-joint | disabled | 816,803 | 237,672 | 223,285 | 1,378,681 |
+| direct-joint | enabled | 975,762 | 322,251 | 317,292 | 1,905,569 |
+
+The strategy/family column is the complete public `StrategyPort::run` interval.
+This single run shows the added timing boundaries working on T-S01; it does not
+identify a limiter or support a general overhead, end-to-end workload, or
+strategy-winner claim. The source was dirty, so treat this as exploratory
+evidence pending a clean-source rerun.
+
 `results/strategy-run-perf-20261024/` retains the 2026-10-24 exploratory
 profiles, which were captured before control acknowledgements were added. They
 send enable/disable around `StrategyPort::run` but do not wait for perf's
@@ -189,8 +215,9 @@ consumers must rebuild against the updated headers and library. This
 environment-manifest increment changes the wire schema while retaining legacy
 decoding; it adds no C++ API, installed file, package workflow, or new
 dependency. It does not prepare or publish a release. No capability result is
-claimed until the labelled job has actually run. OBS-04 still needs
-phase-separated parsing/validation, capability, family-construction, and
-first/additional-query timing; complete resource policy and measurement;
-instrumentation overhead analysis; report rendering; and a usable separate
-limiter profile before it can close.
+claimed until the labelled job has actually run. The phase timing increment
+records family construction (as the full `StrategyPort::run` interval), first
+and additional direction queries, and attempt end-to-end time. OBS-04 still
+needs phase-separated parsing/validation and capability timing; complete
+resource policy and measurement; instrumentation overhead analysis; report
+rendering; and a usable separate limiter profile before it can close.
