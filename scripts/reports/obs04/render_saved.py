@@ -141,8 +141,9 @@ def load_record(path: Path) -> dict[str, Any]:
                 raise ValueError(f"attempts[{index}] phase status is invalid")
             if measurement.get("analytic_family_checked") is not (phase_status == "passed"):
                 raise ValueError(f"attempts[{index}] analytic-check flag disagrees with phase status")
-            if measurement.get("complete_family_verified") is not (phase_status == "passed"):
-                raise ValueError(f"attempts[{index}] complete-family flag disagrees with phase status")
+            complete_family = measurement.get("complete_family_verified")
+            if not isinstance(complete_family, bool) or (phase_status == "passed" and not complete_family):
+                raise ValueError(f"attempts[{index}] passed phase lacks complete-family evidence")
         expected_strategy = arm.get("strategy") if isinstance(arm, dict) else None
         expected_instrumentation = arm.get("instrumentation") if isinstance(arm, dict) else None
         if not isinstance(config_value, dict):

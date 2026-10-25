@@ -108,7 +108,13 @@ def reseal_spec(record, spec):
     record["spec"] = spec_text
     spec_id = hashlib.sha256(spec_text.encode()).hexdigest()
     record["comparison_spec_id"] = spec_id
-    identity_material = {"attempts": record["attempts"], "comparison_spec_id": spec_id,
+    reseal_record_identity(record)
+
+
+def reseal_record_identity(record):
+    canonical = lambda value: json.dumps(value, sort_keys=True, separators=(",", ":"), ensure_ascii=False)
+    identity_material = {"attempts": record["attempts"],
+                         "comparison_spec_id": record["comparison_spec_id"],
                          "schema": "csl.comparison-record/1"}
     record["comparison_run_id"] = hashlib.sha256(canonical(identity_material).encode()).hexdigest()
 
@@ -190,8 +196,22 @@ class SavedRendererTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as temp:
             path = Path(temp) / "record.json"
             path.write_text(json.dumps(record), encoding="utf-8")
-            with self.assertRaisesRegex(ValueError, "complete-family flag"):
+            with self.assertRaisesRegex(ValueError, "lacks complete-family evidence"):
                 render_saved.load_record(path)
+
+    def test_keeps_complete_family_evidence_on_failed_post_run_phase(self):
+        record = fixture_record()
+        measurement = json.loads(record["attempts"][3]["measurement_payload"])
+        measurement["complete_family_verified"] = True
+        record["attempts"][3]["measurement_payload"] = json.dumps(measurement)
+        reseal_record_identity(record)
+        with tempfile.TemporaryDirectory() as temp:
+            path = Path(temp) / "record.json"
+            path.write_text(json.dumps(record), encoding="utf-8")
+            loaded = render_saved.load_record(path)
+        page = render_saved.render_html(loaded)
+        self.assertIn("run-3", page)
+        self.assertIn("failed/failed", page)
 
     def test_rejects_spec_hash_not_bound_to_problem_id(self):
         record = fixture_record()
