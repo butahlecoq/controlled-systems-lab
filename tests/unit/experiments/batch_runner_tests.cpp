@@ -460,6 +460,11 @@ TEST_CASE("a completed family query sweep records aligned runs and measured phas
     auto queried = experiments::run_family_queries(std::get<experiments::SweepResult>(std::move(coarse)),
         selector, resources, context, execution::Mode::bounded_parallel, query_resources);
     REQUIRE(std::holds_alternative<experiments::FamilyQueryResult>(queried));
+    const auto& query_result = std::get<experiments::FamilyQueryResult>(queried);
+    REQUIRE(query_result.sweep.observed_process_memory_bytes.has_value());
+    CHECK(*query_result.sweep.observed_process_memory_bytes > 0);
+    REQUIRE(query_result.observed_process_memory_bytes.has_value());
+    CHECK(*query_result.observed_process_memory_bytes > 0);
 
     const auto recorded = recorded_sweep_run();
     const std::vector<artifacts::RecordedRunArtifact> coarse_records{recorded, recorded};
@@ -481,7 +486,9 @@ TEST_CASE("a completed family query sweep records aligned runs and measured phas
     CHECK(wire.find("\"executor_worker_threads_started\":2") != std::string::npos);
     CHECK(wire.find("\"executor_worker_threads_started\":1") != std::string::npos);
     CHECK(wire.find("\"backend_threads\":null") != std::string::npos);
-    CHECK(wire.find("\"memory_support\":\"active_and_retained_reservations\"") != std::string::npos);
+    CHECK(wire.find("\"memory_support\":\"process_observation\"") != std::string::npos);
+    CHECK(wire.find("\"observed_process_memory_bytes\":null") == std::string::npos);
+    CHECK(wire.find("process resident-set snapshot at phase completion") != std::string::npos);
     CHECK(wire.find("\"enforced_memory_reservation_budget_bytes\":100") != std::string::npos);
     CHECK(wire.find("\"retained_result_reservation_bytes\":35") != std::string::npos);
     CHECK(std::get<experiments::FamilyQueryResult>(queried).sweep.retained_result_reservation_bytes==30);
