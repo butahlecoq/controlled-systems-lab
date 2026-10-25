@@ -33,3 +33,8 @@ target_compile_definitions(scenario_sweep_contract PRIVATE CSL_SWEEP_RUN_FIXTURE
 target_include_directories(scenario_sweep_contract SYSTEM PRIVATE ${csl_json_SOURCE_DIR}/single_include)
 add_test(NAME scenario_sweep_contract COMMAND scenario_sweep_contract)
 csl_test_target(scenario_sweep_contract artifacts)
+
+add_executable(final_plot_data_contract tests/artifacts/final_plot_data.cpp)
+target_link_libraries(final_plot_data_contract PRIVATE CSL::artifacts doctest::doctest)
+add_test(NAME final_plot_data_contract COMMAND final_plot_data_contract)
+csl_test_target(final_plot_data_contract artifacts)

@@ -68,6 +68,10 @@ set_tests_properties(installed_conversion_client PROPERTIES
   PASS_REGULAR_EXPRESSION "Installed Qhull conversion client: registered square conversion and literal vertices passed")
 
 endif()
+add_executable(installed_plot_data_client plot_data_client.cpp)
+target_link_libraries(installed_plot_data_client PRIVATE CSL::artifacts)
+set_target_properties(installed_plot_data_client PROPERTIES CXX_EXTENSIONS OFF)
+add_test(NAME installed_plot_data_client COMMAND installed_plot_data_client)
 add_executable(installed_polyhedral_intersection_client polyhedral_intersection_client.cpp)
 target_link_libraries(installed_polyhedral_intersection_client PRIVATE CSL::polyhedral)
 set_target_properties(installed_polyhedral_intersection_client PROPERTIES CXX_EXTENSIONS OFF)
