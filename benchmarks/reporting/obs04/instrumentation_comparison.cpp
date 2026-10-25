@@ -677,8 +677,8 @@ private:
         }
 
         std::array<char, 5> response{};
-        ssize_t received = 0;
-        while (received == 0) {
+        std::size_t received = 0;
+        while (received < 4) {
             const auto remaining = std::chrono::duration_cast<std::chrono::milliseconds>(deadline - Clock::now()).count();
             if (remaining <= 0) throw std::runtime_error("Timed out waiting for perf control acknowledgement");
             pollfd descriptor{ack_fd_, POLLIN, 0};
@@ -693,16 +693,32 @@ private:
                     std::this_thread::sleep_for(std::chrono::milliseconds(1));
                 continue;
             }
-            received = ::read(ack_fd_, response.data(), response.size());
-            if (received < 0 && (errno == EINTR || errno == EAGAIN)) {
-                received = 0;
-                continue;
-            }
-            if (received <= 0) throw std::runtime_error("perf closed the acknowledgement FIFO");
+            const auto count = ::read(ack_fd_, response.data() + received, response.size() - received);
+            if (count < 0 && (errno == EINTR || errno == EAGAIN)) continue;
+            if (count <= 0) throw std::runtime_error("perf closed the acknowledgement FIFO");
+            received += static_cast<std::size_t>(count);
         }
-        const std::string_view acknowledgement{response.data(), static_cast<std::size_t>(received)};
+        const std::string_view newline_prefix{response.data(), 4};
         constexpr std::string_view newline_ack{"ack\n", 4};
         constexpr std::string_view nul_terminated_ack{"ack\n\0", 5};
+        if (newline_prefix != newline_ack)
+            throw std::runtime_error("Unexpected perf control acknowledgement frame");
+        if (received == 4) {
+            // The documented frame ends at newline; Linux perf may append NUL.
+            // Give a split optional terminator a bounded chance to arrive.
+            pollfd descriptor{ack_fd_, POLLIN, 0};
+            int ready;
+            do {
+                ready = ::poll(&descriptor, 1, 25);
+            } while (ready < 0 && errno == EINTR);
+            if (ready < 0) throw std::runtime_error("Failed while reading perf control acknowledgement");
+            if (ready > 0) {
+                const auto count = ::read(ack_fd_, response.data() + received, 1);
+                if (count != 1) throw std::runtime_error("perf closed the acknowledgement FIFO");
+                ++received;
+            }
+        }
+        const std::string_view acknowledgement{response.data(), received};
         if (acknowledgement != newline_ack && acknowledgement != nul_terminated_ack)
             throw std::runtime_error("Unexpected perf control acknowledgement frame");
         ++acknowledged_commands_;

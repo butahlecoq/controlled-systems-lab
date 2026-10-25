@@ -283,7 +283,9 @@ limiter profile before it can close.
 `da66f849c4b558c12e31a3987c5989722cb2ad72`. The fix accepts both the documented
 `ack\n` frame and Linux perf's observed `ack\n\0` frame; the mock exercises
 both forms and rejects a missing acknowledgement. Each capture ran 32 profiled
-strategy calls at 4,999 Hz with 64 acknowledged enable/disable transitions.
+strategy calls with a requested 4,999 Hz sampling frequency and 64 acknowledged
+enable/disable transitions. The effective sample frequency is not reported by
+this probe.
 Reach-back decoded 858 samples (98,332-byte capture); direct-joint decoded 209
 (32,708 bytes). `perf report` found zero lost samples for both. The binary hash
 is `8ebf6315802cf15ebdf0a72dcea60070a9dfebef811b7cf0e43341114221043d`.

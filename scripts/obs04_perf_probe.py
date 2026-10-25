@@ -88,7 +88,13 @@ def main() -> int:
         "binary_sha256": hashlib.sha256(args.binary.read_bytes()).hexdigest(),
         "host": {"platform": platform.platform(), "kernel_release": platform.release(),
             "perf_event_paranoid": perf_event_paranoid},
-        "profile": {"event": "cycles:u", "frequency_hz": args.frequency_hz, "max_bytes": 32 * 1024 * 1024},
+        "profile": {
+            "event": "cycles:u",
+            "requested_frequency_hz": args.frequency_hz,
+            "effective_frequency_hz": None,
+            "effective_frequency_status": "not_reported_by_this_probe",
+            "max_bytes": 32 * 1024 * 1024,
+        },
     }
     if perf is None:
         result["reason"] = "perf executable is not installed"
