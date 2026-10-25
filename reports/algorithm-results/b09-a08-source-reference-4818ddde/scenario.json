@@ -1,0 +1,49 @@
+{
+  "schema_version": 1,
+  "id": "b09-a08-source-revision-reference-v1",
+  "source_revision": {
+    "source_name": "Minmaxclosedloop.m",
+    "sha256": "06c2f750a2c7deb01dbc457185378b440f8ba134216d7ab0762b8b28229ba2d9",
+    "companion_planner": "Minmaxopenloop.m",
+    "companion_sha256": "59daeacc7727cb7ff5e0090368d76e401fa4d0c874ef359a97d6acb722467aa6",
+    "paper_artifact_id": "L13",
+    "paper_sha256": "4556046bb893a9a7a8c7b8489673dc95315d8ea49bf37e787a59d897c8a7a70e"
+  },
+  "variant_status": "source-revision reference; independent implementation; not historical reproduction",
+  "model": {
+    "time_domain": "discrete",
+    "horizon": 4,
+    "state_order": ["oxidizer_flow", "oxidizer_stock", "fuel_flow", "fuel_stock"],
+    "state_dimension": 4,
+    "control_dimension": 1,
+    "disturbance_dimension": 2,
+    "initial_parameters": {"K": "2.5", "P": "30240", "I": "360", "c": ["0.1", "-6700", "900", "-15", "-12"], "t1": "300", "T": "4", "dK": "-0.03*K", "u": "0"},
+    "initial_stocks": {"oxidizer": "18100", "fuel": "7150"},
+    "A_source_expression": "identity with A[1,0]=A[3,2]=-t1/T=-75",
+    "B_source_expression": "transcribed from Minmaxclosedloop.m and recorded in the driver",
+    "W_row_major": ["0.06", "0", "0", "0", "0", "-0.06", "0", "0"],
+    "disturbance_set": "[-1,1]^2 at each stage; four vertices; stagewise independent",
+    "control_catalogue_ordered": ["1", "0.75", "0.5", "0.25", "0", "-0.25", "-0.5", "-0.75", "-1"],
+    "state_constraints": ["57.5 <= x1 <= 62.5", "-30 <= x2 <= 20000", "23 <= x3 <= 25", "-30 <= x4 <= 8000"]
+  },
+  "objectives": {
+    "lambda_values": [0, 1],
+    "expression": "sqrt((x1-60)^2 + x2^2 + (x3-24)^2 + x4^2 + lambda*(x2-2.5*x4)^2)",
+    "near_optimal_plan_tolerance_squared_objective": "1e-8 absolute",
+    "owner_decision": "2026-10-25; both lambda variants are owner-selected comparison cases; neither is claimed to generate a historical table row"
+  },
+  "information_patterns": {
+    "open_loop": "enumerate one four-action sequence before disturbance history",
+    "replay_timing": "four 75-second model stages; stock update at each boundary uses the preceding flow, so the final control increment changes terminal flows but not terminal stocks",
+    "captured_control_problems": ["open-loop finite-action minimax", "deterministic nonlinear replay with finite-horizon minimax replanning at each observation"],
+    "feedback_scope": "receding-horizon replay is included as a trajectory example; it is not a globally optimal causal policy guarantee"
+  },
+  "scope": {
+    "claims_historical_reproduction": false,
+    "claims_published_row_mapping": false,
+    "claims_validated_arithmetic": false,
+    "claims_validated_numerical_guarantee": false,
+    "claims_global_feedback_optimality": false,
+    "disturbance_vertices": "the four corners of the continuous disturbance box are propagated through affine dynamics; convex quadratic maximization and linear state constraints are vertex-attained over the resulting convex polytopes, while implementation assurance remains numerical"
+  }
+}

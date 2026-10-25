@@ -230,6 +230,10 @@ FAMILIES = {
         "Compares eight owner-approved five-stage fuel reconstructions and includes 2D flow and stock "
         "projections of the computed 4D terminal sets. These are not historical reproductions; the "
         "modeled horizon is 10 seconds while the paper states 100 seconds."),
+    "issue6-b09-reference": Family(
+        r"issue6-b09-reference-[0-9a-f]{64}", "synthesis", "A08 source-reference fuel minimax",
+        "Exhaustively searches four-stage finite action plans and publishes flow and stock projections "
+        "of the four-state terminal reachable set for two objective variants."),
     "issue3-validated-minimax": Family(
         r"issue3-validated-minimax-[0-9a-f]{64}", "synthesis", "Validated finite-action minimax bounds",
         "Measures three fixed fixtures through the validated API. The B08 row checks 625 plans and "

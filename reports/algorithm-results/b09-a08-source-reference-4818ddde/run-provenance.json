@@ -1,0 +1,44 @@
+{
+  "schema": "csl.issue6-b09-capture-provenance/1",
+  "source_commit": "4818ddde4daa3f78e7f87be9f1785030159172c7",
+  "source_tree_clean_at_build": true,
+  "build_type": "Release",
+  "compiler": "GCC 16.2.1",
+  "cmake": "3.31.6",
+  "configure_options": [
+    "BUILD_TESTING=OFF",
+    "CSL_ENABLE_HIGHS=OFF",
+    "CSL_ENABLE_QHULL=OFF",
+    "CSL_BUILD_ISSUE6_B09_REPORT=ON",
+    "CMAKE_BUILD_TYPE=Release"
+  ],
+  "host": {
+    "architecture": "x86_64",
+    "cpu": "AMD Ryzen 5 3550H with Radeon Vega Mobile Gfx",
+    "logical_processors": 8,
+    "load_average_before_run": [
+      0.46,
+      0.33,
+      0.31
+    ],
+    "uptime_before_run": "2 days, 17:23"
+  },
+  "scenario_sha256": "21bbad25657ad07267b4da9c2d77ef36f961dac7c9986f2d895d61a78a74db33",
+  "driver_sha256": "ba58f1bba063ebbc058cb64b198fb8492f73cebb4793eda5597abd2dc8afb914",
+  "executable_sha256": "7dc25d212e16ec5c7c60a64db88de4e079e0420e09c0d005c0c2c99385d3479b",
+  "geometry_record_sha256": {
+    "0.0": "39aa4b47432303cf3be504c0995404ee4a6f48a592a0d0147a80b3ad438ecbe7",
+    "1.0": "84fcbcda41b89bfc5bbb9cf911cce0ea44c7ad6078308ae12f2b720b685086c1"
+  },
+  "measurements_per_objective": 7,
+  "excluded_warmups_per_objective": 7,
+  "measurement_scope": "request construction plus public finite_action_minimax call; process startup, serialization, independent oracle and figure rendering excluded",
+  "performance_claim": "descriptive single-adapter observation; no speedup, comparison winner, scalability, or source-mapped limiter claim",
+  "measurement_runner_sha256": "9bc0611afcf1416c6dace8af4d39b63fa43ae0efd6ded1ecd991f788f0f09f5e",
+  "executable_bytes": 538832,
+  "cmake_cache_sha256": "82fb88b8963b571708c3cb9f7db088c713285695ee04eb1ce01ef12ac5d9b223",
+  "measurement_order": "alternating lambda 0 and lambda 1; one process per warmup/measurement pair",
+  "memory_observation": "Linux getrusage(RUSAGE_SELF).ru_maxrss sampled after minimax result assembly and before optional geometry/replay; excludes nonlinear replay and receding-horizon replanning; not a per-stage or per-call allocation trace",
+  "terminal_representation": "Bounded V representation with 256 stored rows each; 256 distinct points for lambda 0 and 240 for lambda 1; not certified to contain only extreme points",
+  "renderer_sha256": "1eaaf7749528bc92150cc7bb65792c5c59a754f8479c10442e264a45b7967cf2"
+}

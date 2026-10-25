@@ -1,0 +1,239 @@
+{
+  "schema": "csl.issue6-b09-evidence/1",
+  "report_id": "b09-a08-source-reference-4818ddde",
+  "source_commit": "4818ddde4daa3f78e7f87be9f1785030159172c7",
+  "claim": "A08 source-revision finite-action reference; not historical reproduction",
+  "cases": [
+    {
+      "lambda": 0.0,
+      "objective_squared": 2518.0254696696175,
+      "objective_norm": 50.1799309452456,
+      "feasible_plan_count": 76,
+      "winner_count": 4,
+      "winner_action_sequences": [
+        [
+          0,
+          0,
+          6,
+          6
+        ],
+        [
+          0,
+          1,
+          4,
+          7
+        ],
+        [
+          0,
+          2,
+          2,
+          8
+        ],
+        [
+          1,
+          0,
+          3,
+          8
+        ]
+      ],
+      "closed_loop_action_indices": [
+        0,
+        0,
+        6,
+        7
+      ],
+      "median_elapsed_ns": 242332538,
+      "minimum_elapsed_ns": 234719149,
+      "maximum_elapsed_ns": 251625624,
+      "oracle_agrees": true,
+      "open_loop_replay_terminal_state": [
+        60.258434759826415,
+        5.56886057048996,
+        23.864726637555016,
+        15.663991217474631
+      ],
+      "open_loop_replay_objective_norm": 16.627023676002686,
+      "closed_loop_replay_terminal_state": [
+        60.0,
+        5.56886057048996,
+        24.0,
+        15.663991217474631
+      ],
+      "closed_loop_replay_objective_norm": 16.624464770773226,
+      "process_peak_rss_kib_max": 16340,
+      "terminal_v_row_count": 256,
+      "terminal_unique_point_count": 256
+    },
+    {
+      "lambda": 1.0,
+      "objective_squared": 13408.277178974853,
+      "objective_norm": 115.79411547645611,
+      "feasible_plan_count": 76,
+      "winner_count": 6,
+      "winner_action_sequences": [
+        [
+          0,
+          0,
+          7,
+          5
+        ],
+        [
+          0,
+          1,
+          5,
+          6
+        ],
+        [
+          0,
+          2,
+          3,
+          7
+        ],
+        [
+          0,
+          3,
+          1,
+          8
+        ],
+        [
+          1,
+          0,
+          4,
+          7
+        ],
+        [
+          1,
+          1,
+          2,
+          8
+        ]
+      ],
+      "closed_loop_action_indices": [
+        0,
+        0,
+        7,
+        6
+      ],
+      "median_elapsed_ns": 240476422,
+      "minimum_elapsed_ns": 234693029,
+      "maximum_elapsed_ns": 242918791,
+      "oracle_agrees": true,
+      "open_loop_replay_terminal_state": [
+        60.258434759826415,
+        22.64391591369713,
+        23.864726637555016,
+        5.018800353485631
+      ],
+      "open_loop_replay_objective_norm": 25.297590111018575,
+      "closed_loop_replay_terminal_state": [
+        60.0,
+        22.64391591369713,
+        24.0,
+        5.018800353485631
+      ],
+      "closed_loop_replay_objective_norm": 25.29590832560537,
+      "process_peak_rss_kib_max": 16340,
+      "terminal_v_row_count": 256,
+      "terminal_unique_point_count": 240
+    }
+  ],
+  "objective_definition": "sqrt((x1-60)^2+x2^2+(x3-24)^2+x4^2+lambda*(x2-2.5*x4)^2), lambda in {0,1}",
+  "complete_open_loop_winner_sequences": {
+    "0.0": [
+      [
+        0,
+        0,
+        6,
+        6
+      ],
+      [
+        0,
+        1,
+        4,
+        7
+      ],
+      [
+        0,
+        2,
+        2,
+        8
+      ],
+      [
+        1,
+        0,
+        3,
+        8
+      ]
+    ],
+    "1.0": [
+      [
+        0,
+        0,
+        7,
+        5
+      ],
+      [
+        0,
+        1,
+        5,
+        6
+      ],
+      [
+        0,
+        2,
+        3,
+        7
+      ],
+      [
+        0,
+        3,
+        1,
+        8
+      ],
+      [
+        1,
+        0,
+        4,
+        7
+      ],
+      [
+        1,
+        1,
+        2,
+        8
+      ]
+    ]
+  },
+  "receding_horizon_action_sequences": {
+    "0.0": [
+      0,
+      0,
+      6,
+      7
+    ],
+    "1.0": [
+      0,
+      0,
+      7,
+      6
+    ]
+  },
+  "geometry_records": [
+    "lambda0-result.json",
+    "lambda1-result.json"
+  ],
+  "visuals": [
+    "projections-lambda0.svg",
+    "projections-lambda1.svg"
+  ],
+  "independent_oracle": "independent-oracle-verification.json",
+  "raw_measurements": "raw-runs.jsonl",
+  "assurance": "numerical; independent exhaustive corner-history oracle agrees with the complete fixed-plan minimizer family",
+  "measurement_design": {
+    "measured_rounds_per_objective": 7,
+    "excluded_warmups_per_objective": 7,
+    "order": "alternating lambda 0 then lambda 1; each call in a separate process",
+    "scope": "request construction plus public finite_action_minimax call; process startup, serialization, oracle and rendering excluded"
+  },
+  "peak_rss_scope": "Linux ru_maxrss for separately launched measurement processes, sampled after minimax result assembly and before optional geometry/replay; excludes nonlinear replay and receding-horizon replanning"
+}

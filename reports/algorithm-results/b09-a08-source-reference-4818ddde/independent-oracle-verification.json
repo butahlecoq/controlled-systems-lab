@@ -1,0 +1,148 @@
+[
+  {
+    "lambda": 0.0,
+    "method": "direct enumeration of all action plans and disturbance-corner histories",
+    "plan_count": 6561,
+    "feasible_plan_count": 76,
+    "oracle_worst_squared_minimum": 2518.025469669617,
+    "oracle_worst_norm_minimum": 50.1799309452456,
+    "winning_action_indices": [
+      [
+        0,
+        0,
+        6,
+        6
+      ],
+      [
+        0,
+        1,
+        4,
+        7
+      ],
+      [
+        0,
+        2,
+        2,
+        8
+      ],
+      [
+        1,
+        0,
+        3,
+        8
+      ]
+    ],
+    "winner_count": 4,
+    "open_loop_replay": {
+      "action_indices": [
+        0,
+        0,
+        6,
+        6
+      ],
+      "terminal_state": [
+        60.258434759826415,
+        5.56886057048996,
+        23.864726637555016,
+        15.663991217474631
+      ],
+      "objective_squared": 276.45791632235387,
+      "objective_norm": 16.627023676002686
+    },
+    "closed_loop_replay": {
+      "action_indices": [
+        0,
+        0,
+        6,
+        7
+      ],
+      "terminal_state": [
+        60.0,
+        5.56886057048996,
+        24.0,
+        15.663991217474631
+      ],
+      "objective_squared": 276.37282891468016,
+      "objective_norm": 16.624464770773226
+    }
+  },
+  {
+    "lambda": 1.0,
+    "method": "direct enumeration of all action plans and disturbance-corner histories",
+    "plan_count": 6561,
+    "feasible_plan_count": 76,
+    "oracle_worst_squared_minimum": 13408.277178974853,
+    "oracle_worst_norm_minimum": 115.79411547645611,
+    "winning_action_indices": [
+      [
+        0,
+        0,
+        7,
+        5
+      ],
+      [
+        0,
+        1,
+        5,
+        6
+      ],
+      [
+        0,
+        2,
+        3,
+        7
+      ],
+      [
+        0,
+        3,
+        1,
+        8
+      ],
+      [
+        1,
+        0,
+        4,
+        7
+      ],
+      [
+        1,
+        1,
+        2,
+        8
+      ]
+    ],
+    "winner_count": 6,
+    "open_loop_replay": {
+      "action_indices": [
+        0,
+        0,
+        7,
+        5
+      ],
+      "terminal_state": [
+        60.258434759826415,
+        22.64391591369713,
+        23.864726637555016,
+        5.018800353485631
+      ],
+      "objective_squared": 639.9680654251048,
+      "objective_norm": 25.297590111018575
+    },
+    "closed_loop_replay": {
+      "action_indices": [
+        0,
+        0,
+        7,
+        6
+      ],
+      "terminal_state": [
+        60.0,
+        22.64391591369713,
+        24.0,
+        5.018800353485631
+      ],
+      "objective_squared": 639.8829780174311,
+      "objective_norm": 25.29590832560537
+    }
+  }
+]

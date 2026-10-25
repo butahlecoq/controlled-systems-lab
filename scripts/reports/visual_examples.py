@@ -61,6 +61,14 @@ SAVED_FIGURES = (
          page="index.html", family="Fuel minimax reference", title="B06 fuel terminal set: two projections",
          alt="Numerical projections of the four-state terminal reachable set onto flow and stock-balance coordinates; the stock target is outside the projected set.",
          summary="The figure uses all 1,024 disturbance-corner histories for the unique winning fixed plan. The owner-confirmed disturbance box is not printed in L09, so this is a distinct reference case rather than a historical reproduction."),
+    dict(source_report_id="b09-a08-source-reference-4818ddde", image="projections-lambda0.svg",
+         page="index.html", family="Fuel minimax reference", title="B09 fuel reachable set: lambda = 0",
+         alt="The four-state fuel model's terminal reachable set projected into flow and stock coordinates, with open-loop and receding-horizon replay paths.",
+         summary="The shaded polygons project the uncertain four-dimensional terminal set into oxidizer/fuel flow and stock planes. Red and blue paths are separate nonlinear replays; they are not set boundaries or globally optimal feedback claims."),
+    dict(source_report_id="b09-a08-source-reference-4818ddde", image="projections-lambda1.svg",
+         page="index.html", family="Fuel minimax reference", title="B09 fuel reachable set: lambda = 1",
+         alt="The four-state fuel model's terminal reachable set projected into flow and stock coordinates for the coupled objective, with open-loop and receding-horizon replay paths.",
+         summary="The shaded polygons project the uncertain four-dimensional terminal set into oxidizer/fuel flow and stock planes. Red and blue paths are separate nonlinear replays; they are not set boundaries or globally optimal feedback claims."),
 )
 
 
