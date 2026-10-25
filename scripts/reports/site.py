@@ -356,6 +356,9 @@ def stage(catalog_path,out,check=True,allow_test=False):
             if report["report_kind"] == issue3.KIND:
                 data.require(data.local_file(root, rid + ".zip").read_bytes() == archive_bytes,
                              "committed issue #3 offline ZIP differs from validated source")
+            if report["report_kind"] == issue6_b07.KIND:
+                data.require(data.local_file(root, rid + ".zip").read_bytes() == archive_bytes,
+                             "committed B07 offline ZIP differs from validated source")
             if report["report_kind"] == issue6_b09.KIND:
                 data.require(data.local_file(root, rid + ".zip").read_bytes() == archive_bytes,
                              "committed B09 offline ZIP differs from validated source")
