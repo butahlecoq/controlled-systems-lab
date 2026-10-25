@@ -358,11 +358,10 @@ decoding; it adds no C++ API, installed file, package workflow, or new
 dependency. It does not prepare or publish a release. Current `/7` records add
 family-construction timing where supported, and saved-record rendering is
 available. The five current-mainline captures report fixture-specific
-instrumentation deltas but make no general performance claim. Full resource
-policy/accounting, directly observed CPU/backend-thread data, and a valid
-source-mapped limiter profile remain outstanding; the current host's bounded
-profile attempt records `unavailable` because `perf` is not installed. Keep
-OBS-04 open until remaining acceptance criteria have evidence.
+instrumentation deltas but make no general performance claim. Full resource policy/accounting and directly observed CPU/backend-thread data
+remain outstanding. The current bounded profiles provide candidate hotspots,
+but not one unique limiter. Keep OBS-04 open until remaining acceptance
+criteria have evidence.
 
 ## Acknowledged perf capture after FIFO fix (2026-10-25)
 

@@ -121,5 +121,28 @@
     "run-04.json": "40bbf101bb8ecec3c9950b3e1cf1bae9a45f56fa5b4a83dcc955fee60699d7ef",
     "run-05.json": "77142e5f0317da575748bb6d7a1f47196428470cd0fdad6407289d71599f745e"
   },
-  "interpretation": "Fixture-specific paired instrumentation measurement only. It does not establish general overhead, end-to-end latency, a strategy winner, or a limiter. CPU use and native backend thread counts are unavailable; a separate valid limiter profile remains required."
+  "interpretation": "Five-process paired instrumentation deltas are fixture-specific. The separate profile reports candidate hotspots but does not establish a unique limiter. No general overhead, end-to-end latency, scalability, or strategy-winner claim is made.",
+  "limiter_profile": {
+    "status": "available",
+    "strategies": {
+      "reach-back": {
+        "calls_passed": 32,
+        "acknowledged_commands": 64,
+        "samples": 933,
+        "lost_samples": 0,
+        "capture_bytes": 106076
+      },
+      "direct-joint": {
+        "calls_passed": 32,
+        "acknowledged_commands": 64,
+        "samples": 180,
+        "lost_samples": 0,
+        "capture_bytes": 30220
+      }
+    },
+    "requested_frequency_hz": 4999,
+    "effective_frequency_status": "not_reported_by_this_probe",
+    "profile_summary": "limiter-profile-summary.md",
+    "interpretation": "Allocation, C++ string handling, and HiGHS setup are candidate hotspots; the small fixture and sample counts do not identify one unique limiter."
+  }
 }
