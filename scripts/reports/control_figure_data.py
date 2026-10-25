@@ -106,6 +106,8 @@ def validate(document):
             raise ValueError(f"axes.{name} needs a supported kind and points")
         for i, value in enumerate(axis["points"]):
             finite(value, f"axes.{name}.points[{i}]")
+        if any(axis["points"][i] >= axis["points"][i + 1] for i in range(len(axis["points"]) - 1)):
+            raise ValueError(f"axes.{name}.points must be strictly increasing")
         ends = axis.get("interval_ends")
         if name == "controls":
             if not isinstance(ends, list) or len(ends) != len(axis["points"]):
@@ -113,6 +115,11 @@ def validate(document):
             for i, value in enumerate(ends):
                 if finite(value, f"axes.controls.interval_ends[{i}]") <= axis["points"][i]:
                     raise ValueError("control interval ends must follow their starts")
+    if (state_axis["kind"] != control_axis["kind"] or
+            len(state_axis["points"]) != len(control_axis["points"]) + 1 or
+            control_axis["points"] != state_axis["points"][:-1] or
+            control_axis["interval_ends"] != state_axis["points"][1:]):
+        raise ValueError("control intervals must align with consecutive state-axis points")
     series = document.get("series")
     if not isinstance(series, list) or not series:
         raise ValueError("at least one figure series is required")
@@ -120,7 +127,7 @@ def validate(document):
     control_ids = {c["id"] for c in coords["controls"]}
     for i, item in enumerate(series):
         path = f"series[{i}]"
-        if not isinstance(item, dict) or item.get("kind") not in ("trajectory", "projection", "support_samples", "timing"):
+        if not isinstance(item, dict) or item.get("kind") not in ("trajectory", "trajectory_pair", "projection", "support_samples", "timing"):
             raise ValueError(f"{path}.kind is unsupported")
         kind = item["kind"]
         source = item.get("source")
@@ -141,12 +148,42 @@ def validate(document):
                         raise ValueError(f"{path}.{field}[{t}] coordinate count mismatch")
                     for c, value in enumerate(row):
                         finite(value, f"{path}.{field}[{t}][{c}]")
-            for field in ("state_coordinate_ids", "control_coordinate_ids"):
-                allowed = state_ids if field.startswith("state") else control_ids
-                if not isinstance(item.get(field), list) or any(x not in allowed for x in item[field]):
-                    raise ValueError(f"{path}.{field} must reference declared coordinates")
-            if len(item["state_coordinate_ids"]) != len(coords["states"]) or len(item["control_coordinate_ids"]) != len(coords["controls"]):
-                raise ValueError(f"{path} coordinate IDs must match the corresponding history dimensions")
+            expected_state_ids = [coordinate["id"] for coordinate in coords["states"]]
+            expected_control_ids = [coordinate["id"] for coordinate in coords["controls"]]
+            if item.get("state_coordinate_ids") != expected_state_ids:
+                raise ValueError(f"{path}.state_coordinate_ids must match the declared state coordinate order")
+            if item.get("control_coordinate_ids") != expected_control_ids:
+                raise ValueError(f"{path}.control_coordinate_ids must match the declared control coordinate order")
+        elif kind == "trajectory_pair":
+            ids=item.get("coordinate_ids")
+            if not isinstance(ids,list) or len(ids)!=2 or any(x not in state_ids for x in ids):
+                raise ValueError(f"{path}.coordinate_ids must select two declared state coordinates")
+            paths=item.get("paths")
+            if not isinstance(paths,list) or not paths: raise ValueError(f"{path}.paths must contain selected witnesses")
+            for n,trace in enumerate(paths):
+                if not isinstance(trace,dict) or not all(isinstance(trace.get(k),str) and trace[k] for k in ("run_id","witness_id","method_id","method_version","evidence","assurance")):
+                    raise ValueError(f"{path}.paths[{n}] must bind witness and evidence identities")
+                finite(trace.get("objective"),f"{path}.paths[{n}].objective")
+                points=trace.get("points")
+                if not isinstance(points,list) or len(points)!=len(state_axis["points"]):
+                    raise ValueError(f"{path}.paths[{n}] must align points to the saved state axis")
+                for j,point in enumerate(points):
+                    if not isinstance(point,list) or len(point)!=2: raise ValueError(f"{path}.paths[{n}].points[{j}] must be 2D")
+                    finite(point[0],f"{path}.paths[{n}].points[{j}][0]");finite(point[1],f"{path}.paths[{n}].points[{j}][1]")
+            if not isinstance(item.get("limitation"),str) or not item["limitation"]: raise ValueError(f"{path}.limitation is required")
+            if not isinstance(item.get("relation"),str) or not item["relation"] or not isinstance(item.get("evidence"),str) or not item["evidence"]:
+                raise ValueError(f"{path} must label the selected-path relation and evidence")
+            terminal_samples=item.get("terminal_samples")
+            if not isinstance(terminal_samples,list): raise ValueError(f"{path}.terminal_samples must be an array")
+            for n,sample in enumerate(terminal_samples):
+                if not isinstance(sample,dict) or not isinstance(sample.get("run_id"),str) or type(sample.get("source_ordinal")) is not int:
+                    raise ValueError(f"{path}.terminal_samples[{n}] must bind to a path identity")
+                point=sample.get("point")
+                if not isinstance(point,list) or len(point)!=2: raise ValueError(f"{path}.terminal_samples[{n}].point must be 2D")
+                finite(point[0],f"{path}.terminal_samples[{n}].point[0]");finite(point[1],f"{path}.terminal_samples[{n}].point[1]")
+                matching=[trace for trace in paths if trace["run_id"]==sample["run_id"] and trace["witness_id"]==f"witness-{sample['source_ordinal']}"]
+                if not matching or matching[0]["points"][-1]!=point:
+                    raise ValueError(f"{path}.terminal_samples[{n}] must match its selected path endpoint")
         elif kind in ("projection", "support_samples"):
             ids = item.get("coordinate_ids")
             if not isinstance(ids, list) or len(ids) != 2 or any(x not in state_ids for x in ids):
@@ -170,6 +207,8 @@ def validate(document):
                 elif not isinstance(item.get("objective_context"),str) or not item["objective_context"]:
                     raise ValueError(f"{path}.objective_context must state why objective data is absent")
             else:
+                if not isinstance(item.get("objective_context"),str) or not item["objective_context"]:
+                    raise ValueError(f"{path}.objective_context must state why objective data is absent")
                 samples = item.get("samples")
                 if not isinstance(samples,list) or not samples:
                     raise ValueError(f"{path}.samples must retain directional support outcomes")

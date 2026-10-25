@@ -6,12 +6,13 @@ validated by `scripts/reports/control_figure_data.py`. Rendering imports only
 saved values and the pinned Matplotlib adapter; it has no solver, selector, or
 geometry-provider path.
 
-`encode_plot_document_json` converts validated C++ `PlotData` trajectories and
-already-computed finite `PlotSetProjection` outcomes into this document. The
-projection overload accepts only bounded finite V-representations and
-singletons, and retains completed directional support-sample values and any
-finite maximizing points; it never invokes a geometry provider. Unsupported
-representations fail explicitly. Its caller supplies the source
+`encode_plot_document_json` converts validated C++ `PlotData` trajectories,
+already-selected 2D witness paths, completed finite `PlotSetProjection`
+outcomes, and directional support samples into this document. The encoder
+accepts only bounded finite V-representations and singletons for set-valued
+outcomes, and retains support values and any finite maximizing points,
+including explicit empty/unbounded outcomes. It never invokes a geometry
+provider. Unsupported representations fail explicitly. Its caller supplies the source
 record schema and SHA-256 so the encoded figure input remains bound to the
 saved run. The document binds each
 series to a source ID and method identity; projections also bind to two named
@@ -19,7 +20,8 @@ coordinates, relation/evidence text, objective context, and limitations.
 Selected trajectories carry T+1 states and T controls, with explicit axes and
 control interval ends. A trajectory is one selected witness, never a claim of
 the full feasible or optimal family. Projection points are persisted values;
-the renderer does not compute hulls or infer missing coordinates. Finite support
+the renderer does not compute hulls or infer missing coordinates. Completed
+projection and support-query durations remain separate wall-time rows. Finite support
 samples have their own series kind. Timing observations retain metric kind,
 availability, and inclusive/exclusive semantics; operation rows are drawn
 separately and are not summed.

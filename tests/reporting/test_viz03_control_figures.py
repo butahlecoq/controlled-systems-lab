@@ -39,17 +39,29 @@ class ControlFiguresTests(unittest.TestCase):
                          "states":[[3,2],[2,0],[1,-1]],"controls":[[1],[0]]},
                         {"kind":"projection","source":{"kind":"run","id":"fixture-run","method_id":"analytic fixture","method_version":"1"},"title":"projected terminal relation","coordinate_ids":["flow","stock"],"points":[[1,-1],[2,0]],"objective_context":"not applicable to a set projection",
                          "relation":"outer approximation","evidence":"analytic fixture","limitation":"two points only; not a full set"},
+                        {"kind":"trajectory_pair","source":{"kind":"run","id":"fixture-run","method_id":"analytic fixture","method_version":"1"},"title":"selected witness pair","coordinate_ids":["flow","stock"],"paths":[{"run_id":"fixture-run","witness_id":"witness-0","method_id":"analytic fixture","method_version":"1","objective":0,"evidence":"exact fixture","assurance":"validated","points":[[3,2],[2,0],[1,-1]]}],"terminal_samples":[{"run_id":"fixture-run","source_ordinal":0,"point":[1,-1]}],"relation":"selected witness trajectories","evidence":"analytic fixture","limitation":"selected paths only; not a set projection"},
                         {"kind":"support_samples","source":{"kind":"geometry","id":"fixture-set","method_id":"analytic fixture","method_version":"1"},"title":"directional support samples","coordinate_ids":["flow","stock"],"points":[[2,0]],"samples":[{"direction":[1,0],"value":{"kind":"finite","value":2},"point":[2,0],"evidence_support":"numerical_check","assumptions":[]},{"direction":[-1,0],"value":{"kind":"empty"},"evidence_support":"unestablished","assumptions":[]}],
                          "objective_context":"not applicable to support samples","relation":"directional support samples","evidence":"analytic fixture","limitation":"two directions only; not a complete boundary"},
+                        {"kind":"support_samples","source":{"kind":"geometry","id":"empty-fixture-set","method_id":"analytic fixture","method_version":"1"},"title":"empty and unbounded support outcomes","coordinate_ids":["flow","stock"],"points":[],"samples":[{"direction":[0,1],"value":{"kind":"empty"},"evidence_support":"unestablished","assumptions":[]},{"direction":[0,-1],"value":{"kind":"unbounded"},"evidence_support":"unestablished","assumptions":[]}],
+                         "objective_context":"not applicable to support samples","relation":"directional support samples","evidence":"analytic fixture","limitation":"no finite maximizing points exist"},
                         {"kind":"timing","source":{"kind":"run","id":"fixture-run","method_id":"analytic fixture","method_version":"1"},"operation":"solve","metric":"wall","values":[10,12],"availability":"available","span_semantics":"inclusive"},
                         {"kind":"timing","source":{"kind":"run","id":"fixture-run","method_id":"analytic fixture","method_version":"1"},"operation":"worker CPU","metric":"cpu","values":[],"availability":"unavailable","span_semantics":"not_applicable"}]}
         data.validate(doc)
+        reordered=json.loads(json.dumps(doc))
+        reordered["series"][0]["state_coordinate_ids"].reverse()
+        with self.assertRaisesRegex(ValueError,"state coordinate order"):
+            data.validate(reordered)
+        misaligned=json.loads(json.dumps(doc))
+        misaligned["axes"]["controls"]["interval_ends"][0]=.5
+        with self.assertRaisesRegex(ValueError,"align with consecutive state-axis points"):
+            data.validate(misaligned)
         self.assertEqual([row[1] for row in doc["series"][0]["states"]],[2,0,-1])
         with tempfile.TemporaryDirectory() as temp:
             root=Path(temp);input_path=root/"input.json";input_path.write_text(json.dumps(doc))
             output=root/"out";style=ROOT/"scripts/reports/styles/control-v1.json"
+            self.assertTrue(json.loads(style.read_text())["equal_aspect_for_matching_units"])
             receipt=control_figures.render(doc,hashlib.sha256(input_path.read_bytes()).hexdigest(),style,output)
-            for name in ("trajectories.svg","trajectories.png","projection-01.svg","projection-01.png","support-02.svg","support-02.png","timing.svg","timing.png"):
+            for name in ("trajectories.svg","trajectories.png","trajectory-pair-01.svg","trajectory-pair-01.png","projection-01.svg","projection-01.png","support-02.svg","support-02.png","support-03.svg","support-03.png","timing.svg","timing.png"):
                 self.assertTrue((output/name).is_file(),name)
                 self.assertGreater((output/name).stat().st_size,100,name)
                 self.assertIn(name,receipt["files"])
@@ -59,9 +71,13 @@ class ControlFiguresTests(unittest.TestCase):
             self.assertIn("J=0 (exact rational fixture)",svg)
             projection_svg=(output/"projection-01.svg").read_text()
             self.assertIn("not applicable to a set projection",projection_svg)
+            pair_svg=(output/"trajectory-pair-01.svg").read_text()
+            self.assertIn("selected witness trajectories",pair_svg)
             support_svg=(output/"support-02.svg").read_text()
             self.assertIn("2 directions; 1 finite",support_svg)
-            self.assertIn("maximizing point(s) plotted",support_svg)
+            no_point_svg=(output/"support-03.svg").read_text()
+            self.assertIn("No finite maximizing points",no_point_svg)
+            self.assertIn("1 empty and 1 unbounded outcomes",no_point_svg)
             saved_receipt=json.loads((output/"export.json").read_text())
             self.assertFalse(saved_receipt["solve_query_latency_included"])
 
@@ -80,7 +96,9 @@ class ControlFiguresTests(unittest.TestCase):
              "series":[{"kind":"projection","source":{"kind":"run","id":"run","method_id":"m","method_version":"1"},
                         "coordinate_ids":["x","x"],"points":[[0,0]],"relation":"sample","evidence":"fixture","limitation":"one point",
                         "objective":0,"objective_label":"fixture objective","objective_evidence":"fixture"}]}
-        with tempfile.TemporaryDirectory(dir=ROOT/"build/tmp") as temp:
+        temp_root=ROOT/"build/tmp"
+        temp_root.mkdir(parents=True,exist_ok=True)
+        with tempfile.TemporaryDirectory(dir=temp_root) as temp:
             root=Path(temp);raw=root/"comparison-record.json";raw.write_text("{}")
             manifest={"schema":"csl.obs05-export/1","comparison_run_id":"comparison-1","comparison_spec_id":"spec-1",
                       "raw_record_file":raw.name,"raw_record_sha256":hashlib.sha256(raw.read_bytes()).hexdigest()}

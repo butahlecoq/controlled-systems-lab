@@ -7,6 +7,7 @@
   "png_dpi": 180,
   "point_size": 6,
   "point_alpha": 0.36,
+  "equal_aspect_for_matching_units": true,
   "target_size": 90,
   "trajectory_size": [10, 7],
   "trajectory_height_per_axis": 3.0,

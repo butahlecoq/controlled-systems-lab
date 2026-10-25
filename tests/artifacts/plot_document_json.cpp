@@ -24,6 +24,11 @@ TEST_CASE("PlotData encodes selected trajectories into the offline figure docume
     CHECK(json.find("interval_ends")!=std::string::npos);
     CHECK(json.find("selected witness only; not the full feasible or optimal family")!=std::string::npos);
     CHECK(json.find("3.0")!=std::string::npos);
+    auto misaligned=data;
+    misaligned.control_axis.interval_ends={.5};
+    auto invalid_axis=encode_plot_document_json(misaligned,"csl.run-statistics/6",std::string(64,'a'));
+    REQUIRE(std::holds_alternative<ArtifactError>(invalid_axis));
+    CHECK(std::get<ArtifactError>(invalid_axis).path=="plot_data.control_axis");
 }
 
 TEST_CASE("PlotData figure encoding rejects an unbound source record") {
@@ -68,7 +73,52 @@ TEST_CASE("completed finite pair projections can be persisted without recomputin
     CHECK(json.find("\"relation\": \"equivalent\"")!=std::string::npos);
     CHECK(json.find("\"points\": [")!=std::string::npos);
     CHECK(json.find("geometry_operation_elapsed_ns")!=std::string::npos);
+    CHECK(json.find("2D set projection geometry query")!=std::string::npos);
     CHECK(json.find("not applicable to a set projection")!=std::string::npos);
+    CHECK(json.find("\"method_id\": \"strategy-a\"")!=std::string::npos);
+    CHECK(json.find("\"geometry_provider\"")!=std::string::npos);
+
+    FamilyRequest request{"comparison-profile",data.problem,FamilyTarget::exact_optimal_relation,
+        {1e-8,2e-8},Assurance::validated,RepresentationId{"vertices"},128};
+    FamilyIdentity family{data.problem,request,JointCoordinates{{2,1,0},1},ModuleId{"control-strategy"},"4",{}};
+    auto family_projection=projection;
+    family_projection.source=PlotSourceOwner{data.problem,family};
+    family_projection.family_evidence=FamilySourceEvidence{family,CompletenessSupport{Unestablished{}},true};
+    PlotOutcome family_outcome{family_projection};
+    auto family_document=encode_plot_document_json(data,family_outcome,"csl.run-statistics/6",std::string(64,'b'));
+    REQUIRE(std::holds_alternative<std::string>(family_document));
+    const auto& family_json=std::get<std::string>(family_document);
+    CHECK(family_json.find("\"family_identity\"")!=std::string::npos);
+    CHECK(family_json.find("comparison-profile")!=std::string::npos);
+    CHECK(family_json.find("\"registry_verified\": true")!=std::string::npos);
+
+    PlotTrajectoryPath selected_path{data.run,0,data.strategy,"2",3.0,evidence,{{0,0},{1,1}}};
+    PlotTrajectoryPair pair{data.problem,data.state_axis,{data.states.coordinates[0],data.states.coordinates[1]},
+        {selected_path},{{data.run,0,{1,1}}},PlotSampleKind::selected_witnesses};
+    PlotOutcome pair_outcome{pair};
+    auto pair_data=data;
+    auto pair_document=encode_plot_document_json(pair_data,pair_outcome,"csl.run-statistics/6",std::string(64,'b'));
+    REQUIRE(std::holds_alternative<std::string>(pair_document));
+    const auto& pair_json=std::get<std::string>(pair_document);
+    CHECK(pair_json.find("\"kind\": \"trajectory_pair\"")!=std::string::npos);
+    CHECK(pair_json.find("\"witness_id\": \"witness-0\"")!=std::string::npos);
+    CHECK(pair_json.find("selected witness trajectories")!=std::string::npos);
+    auto mismatched_path=selected_path;
+    mismatched_path.strategy=ModuleId{"different-strategy"};
+    auto mismatched_pair=pair;
+    mismatched_pair.paths={mismatched_path};
+    auto mismatched=encode_plot_document_json(pair_data,PlotOutcome{mismatched_pair},
+        "csl.run-statistics/6",std::string(64,'b'));
+    REQUIRE(std::holds_alternative<ArtifactError>(mismatched));
+    CHECK(std::get<ArtifactError>(mismatched).path=="plot_outcome.paths[0]");
+    auto mismatched_points=selected_path;
+    mismatched_points.points[0][0]=99.0;
+    auto mismatched_geometry=pair;
+    mismatched_geometry.paths={mismatched_points};
+    auto unbound_points=encode_plot_document_json(pair_data,PlotOutcome{mismatched_geometry},
+        "csl.run-statistics/6",std::string(64,'b'));
+    REQUIRE(std::holds_alternative<ArtifactError>(unbound_points));
+    CHECK(std::get<ArtifactError>(unbound_points).path=="plot_outcome.paths[0].points");
 
     PlotSupportSamples samples{data.problem,PlotSourceOwner{data.problem,SetId{"source-relation"}},StageIndex{1},
         {data.states.coordinates[0],data.states.coordinates[1]},PlotSampleKind::support_samples,

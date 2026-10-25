@@ -70,28 +70,104 @@ std::optional<std::size_t> coordinate_index(const std::vector<CoordinateAnnotati
     }
     return found;
 }
+const char* assurance(Assurance value) { return value==Assurance::validated?"validated":"numerical"; }
+const char* family_target(FamilyTarget value) {
+    switch(value) {
+    case FamilyTarget::exact_optimal_relation:return "exact_optimal_relation";
+    case FamilyTarget::candidate_relaxation:return "candidate_relaxation";
+    case FamilyTarget::partial_relation:return "partial_relation";
+    }
+    return "unknown";
+}
+Json family_identity(const FamilyIdentity& value) {
+    Json lineage=Json::array();
+    for(const auto& step:value.lineage)lineage.push_back({{"request",step.request.value},{"input",step.input.value},
+        {"output",step.output.value},{"module",step.module.value},{"version",step.version}});
+    return {{"problem",value.problem.value},
+        {"request",{{"profile",value.request.profile},{"objective",value.request.objective.value},
+            {"target",family_target(value.request.target)},
+            {"numerical",{{"absolute_tolerance",value.request.numerical.absolute_tolerance},
+                {"relative_tolerance",value.request.numerical.relative_tolerance}}},
+            {"assurance",assurance(value.request.assurance)},
+            {"representation",value.request.representation.value},
+            {"materialization_limit",value.request.materialization_limit?Json(*value.request.materialization_limit):Json(nullptr)}}},
+        {"coordinates",{{"state_dimension",value.coordinates.dimensions.state},
+            {"control_dimension",value.coordinates.dimensions.control},
+            {"external_dimension",value.coordinates.dimensions.external},
+            {"horizon",value.coordinates.horizon}}},
+        {"strategy",value.strategy.value},{"strategy_version",value.strategy_version},{"lineage",std::move(lineage)}};
+}
+Json plot_source(const PlotSourceOwner& owner,const PlotData& data) {
+    if(const auto* set=std::get_if<SetId>(&owner.identity))
+        return {{"kind","set"},{"id",set->value},{"method_id",data.strategy.value},{"method_version",data.strategy_version}};
+    const auto& family=std::get<FamilyIdentity>(owner.identity);
+    return {{"kind","optimal_family"},{"id",family.strategy.value+"@"+family.strategy_version},
+        {"method_id",family.strategy.value},{"method_version",family.strategy_version},
+        {"family_identity",family_identity(family)}};
+}
+Json family_evidence(const std::optional<FamilySourceEvidence>& evidence) {
+    if(!evidence)return nullptr;
+    Json support=std::visit([](const auto& value)->Json {
+        using T=std::decay_t<decltype(value)>;
+        if constexpr(std::is_same_v<T,NumericalCoverageEvidence>)return {{"kind","numerical_coverage"},
+            {"procedure",value.procedure},{"absolute_tolerance",value.policy.absolute_tolerance},
+            {"relative_tolerance",value.policy.relative_tolerance},{"verifier",value.verifier.value},
+            {"diagnostics",value.diagnostics}};
+        else if constexpr(std::is_same_v<T,ValidatedCoverageEvidence>)return {{"kind","validated_coverage"},
+            {"certificate",value.certificate},{"verifier",value.verifier.value},
+            {"arithmetic_profile",value.arithmetic_profile}};
+        else if constexpr(std::is_same_v<T,RegisteredCompletenessEvidence>)return {{"kind","registered_completeness_proof"},
+            {"verifier",value.verifier.value},{"verifier_version",value.verifier_version},{"proof",value.proof}};
+        else if constexpr(std::is_same_v<T,SymbolicArgument>)return {{"kind","symbolic_argument"},
+            {"reference",value.reference},{"assumptions",value.assumptions}};
+        else if constexpr(std::is_same_v<T,CertificateReference>)return {{"kind","unchecked_certificate_reference"},
+            {"artifact",value.artifact},{"verifier",value.verifier}};
+        else if constexpr(std::is_same_v<T,NumericalCheck>)return {{"kind","numerical_check"},
+            {"absolute_tolerance",value.absolute_tolerance},{"relative_tolerance",value.relative_tolerance},
+            {"max_residual",value.max_residual},{"verifier",value.verifier.value}};
+        else return {{"kind","unestablished"}};
+    },evidence->support);
+    return {{"registry_verified",evidence->registry_verified},{"completeness_support",std::move(support)}};
+}
+Json provider_identity(const registry::Provenance& provenance) {
+    const auto& actual=*provenance.actual;
+    return {{"port",provenance.port},{"method_id",actual.id.value},{"method_version",actual.version}};
+}
+Json set_ids(const std::vector<SetId>& values) {
+    Json result=Json::array();
+    for(const auto& value:values)result.push_back(value.value);
+    return result;
+}
 }
 
-ArtifactResult<std::string> encode_plot_document_json(const PlotData& data,
-    std::string_view source_record_schema,std::string_view source_record_sha256) {
+static ArtifactResult<std::string> encode_plot_document_json_base(const PlotData& data,
+    std::string_view source_record_schema,std::string_view source_record_sha256,bool require_paths) {
     if(source_record_schema.empty())return error(ArtifactErrorCode::invalid_input,"source_record_schema","Source record schema is required");
     if(!digest(source_record_sha256))return error(ArtifactErrorCode::invalid_input,"source_record_sha256","Expected lowercase SHA-256 digest");
     if(data.problem.value.empty()||data.run.value.empty()||data.strategy.value.empty()||data.strategy_version.empty())
         return error(ArtifactErrorCode::invalid_input,"plot_data.identity","Problem, run, strategy and version identities are required");
     if(data.states.coordinates.size()==0||data.state_axis.points.empty())
         return error(ArtifactErrorCode::invalid_input,"plot_data.states","State coordinates and state axis are required");
-    if(data.paths.empty())return error(ArtifactErrorCode::invalid_input,"plot_data.paths","At least one selected witness is required");
+    if(require_paths&&data.paths.empty())return error(ArtifactErrorCode::invalid_input,"plot_data.paths","At least one selected witness is required");
     if(data.state_axis.points.size()!=data.control_axis.points.size()+1||
-       data.control_axis.interval_ends.size()!=data.control_axis.points.size())
+       data.control_axis.interval_ends.size()!=data.control_axis.points.size()||
+       data.state_axis.kind!=data.control_axis.kind)
         return error(ArtifactErrorCode::invalid_input,"plot_data.axes","Expected T+1 state points and T control intervals");
-    for(double value:data.state_axis.points)if(!std::isfinite(value))return error(ArtifactErrorCode::invalid_input,"plot_data.state_axis","Nonfinite axis value");
+    for(std::size_t i=0;i<data.state_axis.points.size();++i) {
+        const double value=data.state_axis.points[i];
+        if(!std::isfinite(value)||(i>0&&value<=data.state_axis.points[i-1]))
+            return error(ArtifactErrorCode::invalid_input,"plot_data.state_axis","State axis values must be finite and strictly increasing");
+    }
     for(std::size_t i=0;i<data.control_axis.points.size();++i)
-        if(!std::isfinite(data.control_axis.points[i])||!std::isfinite(data.control_axis.interval_ends[i])||data.control_axis.interval_ends[i]<=data.control_axis.points[i])
-            return error(ArtifactErrorCode::invalid_input,"plot_data.control_axis","Control intervals must be finite and ordered");
+        if(!std::isfinite(data.control_axis.points[i])||!std::isfinite(data.control_axis.interval_ends[i])||
+           data.control_axis.points[i]!=data.state_axis.points[i]||
+           data.control_axis.interval_ends[i]!=data.state_axis.points[i+1])
+            return error(ArtifactErrorCode::invalid_input,"plot_data.control_axis","Control intervals must align with consecutive state-axis points");
     Json series=Json::array();
     for(std::size_t p=0;p<data.paths.size();++p) {
         const auto& path=data.paths[p];
-        if(path.run!=data.run||path.states.size()!=data.state_axis.points.size()||path.controls.size()!=data.control_axis.points.size())
+        if(path.run!=data.run||path.strategy!=data.strategy||path.strategy_version!=data.strategy_version||
+           path.states.size()!=data.state_axis.points.size()||path.controls.size()!=data.control_axis.points.size())
             return error(ArtifactErrorCode::reference,"plot_data.paths["+std::to_string(p)+"]","Trajectory identity or stage count does not match PlotData");
         for(std::size_t t=0;t<path.states.size();++t) {
             if(path.states[t].size()!=data.states.coordinates.size())return error(ArtifactErrorCode::invalid_input,"plot_data.states","State coordinate count mismatch");
@@ -128,8 +204,80 @@ ArtifactResult<std::string> encode_plot_document_json(const PlotData& data,
     return document.dump(2)+"\n";
 }
 
+ArtifactResult<std::string> encode_plot_document_json(const PlotData& data,
+    std::string_view source_record_schema,std::string_view source_record_sha256) {
+    return encode_plot_document_json_base(data,source_record_schema,source_record_sha256,true);
+}
+
 ArtifactResult<std::string> encode_plot_document_json(const PlotData& data,const PlotOutcome& outcome,
     std::string_view source_record_schema,std::string_view source_record_sha256) {
+    if(const auto* pair=std::get_if<PlotTrajectoryPair>(&outcome)) {
+        if(pair->kind!=PlotSampleKind::selected_witnesses||pair->problem!=data.problem||pair->state_axis.kind!=data.state_axis.kind||
+            pair->state_axis.points!=data.state_axis.points||pair->paths.empty())
+            return error(ArtifactErrorCode::reference,"plot_outcome.trajectory_pair",
+                "trajectory-pair problem, axis, and paths must match PlotData");
+        const auto first=coordinate_index(data.states.coordinates,pair->coordinates[0]);
+        const auto second=coordinate_index(data.states.coordinates,pair->coordinates[1]);
+        if(!first||!second||*first==*second)return error(ArtifactErrorCode::reference,"plot_outcome.coordinates",
+            "trajectory-pair coordinates must uniquely match two distinct PlotData state coordinates");
+        auto encoded=encode_plot_document_json_base(data,source_record_schema,source_record_sha256,false);
+        if(const auto* failure=std::get_if<ArtifactError>(&encoded))return *failure;
+        Json document=Json::parse(std::get<std::string>(encoded));
+        Json paths=Json::array(),terminal_samples=Json::array();
+        for(std::size_t i=0;i<pair->paths.size();++i) {
+            const auto& path=pair->paths[i];
+            if(path.run.value.empty()||path.strategy.value.empty()||path.strategy_version.empty()||
+                path.points.size()!=pair->state_axis.points.size()||!std::isfinite(path.objective))
+                return error(ArtifactErrorCode::reference,"plot_outcome.paths["+std::to_string(i)+"]",
+                    "trajectory-pair path identity, points, or objective is invalid");
+            if(path.run!=data.run||path.strategy!=data.strategy||path.strategy_version!=data.strategy_version)
+                return error(ArtifactErrorCode::reference,"plot_outcome.paths["+std::to_string(i)+"]",
+                    "trajectory-pair path run and method identity must match PlotData");
+            const auto selected=std::find_if(data.paths.begin(),data.paths.end(),[&](const auto& candidate){
+                return candidate.run==path.run&&candidate.source_ordinal==path.source_ordinal;});
+            if(selected==data.paths.end()||selected->strategy!=path.strategy||
+                selected->strategy_version!=path.strategy_version||selected->objective!=path.objective||
+                selected->states.size()!=path.points.size())
+                return error(ArtifactErrorCode::reference,"plot_outcome.paths["+std::to_string(i)+"]",
+                    "trajectory-pair path must match a selected PlotData witness");
+            Json points=Json::array();
+            for(std::size_t t=0;t<path.points.size();++t) {
+                const auto& point=path.points[t];
+                if(!std::isfinite(point[0])||!std::isfinite(point[1]))return error(ArtifactErrorCode::invalid_input,
+                    "plot_outcome.paths["+std::to_string(i)+"].points","trajectory-pair point must be finite");
+                if(selected->states[t][*first]!=point[0]||selected->states[t][*second]!=point[1])
+                    return error(ArtifactErrorCode::reference,"plot_outcome.paths["+std::to_string(i)+"].points",
+                        "trajectory-pair coordinates must match the selected PlotData witness");
+                points.push_back(point);
+            }
+            const auto& e=path.evidence;
+            paths.push_back({{"run_id",path.run.value},{"witness_id","witness-"+std::to_string(path.source_ordinal)},
+                {"method_id",path.strategy.value},{"method_version",path.strategy_version},{"objective",path.objective},
+                {"evidence",std::string("bindings=")+status(e.bindings)+", feasibility="+status(e.feasibility)+
+                    ", objective="+status(e.objective)+", optimality="+status(e.optimality)+
+                    ", completeness="+status(e.completeness)},
+                {"assurance",status(e.validated)},{"points",std::move(points)}});
+        }
+        for(std::size_t i=0;i<pair->terminal_samples.size();++i) {
+            const auto& sample=pair->terminal_samples[i];
+            if(!std::isfinite(sample.point[0])||!std::isfinite(sample.point[1]))return error(ArtifactErrorCode::invalid_input,
+                "plot_outcome.terminal_samples["+std::to_string(i)+"]","terminal sample must be finite");
+            const auto found=std::find_if(pair->paths.begin(),pair->paths.end(),[&](const auto& path){
+                return path.run==sample.run&&path.source_ordinal==sample.source_ordinal;});
+            if(found==pair->paths.end()||found->points.empty()||found->points.back()!=sample.point)
+                return error(ArtifactErrorCode::reference,"plot_outcome.terminal_samples["+std::to_string(i)+"]",
+                    "terminal sample must match the endpoint of its selected path");
+            terminal_samples.push_back({{"run_id",sample.run.value},{"source_ordinal",sample.source_ordinal},
+                {"point",{sample.point[0],sample.point[1]}}});
+        }
+        document["series"].push_back({{"kind","trajectory_pair"},
+            {"source",{{"kind","run"},{"id",data.run.value},{"method_id",data.strategy.value},{"method_version",data.strategy_version}}},
+            {"title","Selected witness coordinate pair"},{"coordinate_ids",{"x"+std::to_string(*first),"x"+std::to_string(*second)}},
+            {"paths",std::move(paths)},{"terminal_samples",std::move(terminal_samples)},
+            {"relation","selected witness trajectories"},{"evidence","each line is one selected path from PlotData"},
+            {"limitation","not a complete feasible or optimal family; not a mathematical set projection"}});
+        return document.dump(2)+"\n";
+    }
     const auto* projection=std::get_if<PlotSetProjection>(&outcome);
     const auto* samples=std::get_if<PlotSupportSamples>(&outcome);
     if(!projection&&!samples)return error(ArtifactErrorCode::unsupported,"plot_outcome",
@@ -139,6 +287,7 @@ ArtifactResult<std::string> encode_plot_document_json(const PlotData& data,const
     const auto stage=projection?projection->stage:samples->stage;
     const auto& selected_coordinates=projection?projection->coordinates:samples->coordinates;
     const auto& provider_provenance=projection?projection->provider:samples->provider;
+    const auto& family_claim=projection?projection->family_evidence:samples->family_evidence;
     if(problem!=data.problem)return error(ArtifactErrorCode::reference,"plot_outcome.problem",
         "plot outcome and plot data must refer to the same problem");
     const auto first=coordinate_index(data.states.coordinates,selected_coordinates[0]);
@@ -149,18 +298,25 @@ ArtifactResult<std::string> encode_plot_document_json(const PlotData& data,const
         "projection provider identity is required");
     if(source.problem!=data.problem)return error(ArtifactErrorCode::reference,"plot_outcome.source",
         "projection source must refer to the PlotData problem");
+    const auto* family_identity_value=std::get_if<FamilyIdentity>(&source.identity);
+    if((family_identity_value&&!family_claim)||(!family_identity_value&&family_claim))
+        return error(ArtifactErrorCode::reference,"plot_outcome.family_evidence",
+            "family evidence must be present exactly when the source owner is an optimal family");
+    if(family_identity_value&&family_claim&&
+        (family_claim->family.problem!=family_identity_value->problem||
+         family_claim->family.strategy!=family_identity_value->strategy||
+         family_claim->family.strategy_version!=family_identity_value->strategy_version))
+        return error(ArtifactErrorCode::reference,"plot_outcome.family_evidence",
+            "family evidence identity must match its projection source");
     if(stage.value>=data.state_axis.points.size())return error(ArtifactErrorCode::reference,
         "plot_outcome.stage","projection stage is outside the saved state axis");
 
-    auto encoded=encode_plot_document_json(data,source_record_schema,source_record_sha256);
+    auto encoded=encode_plot_document_json_base(data,source_record_schema,source_record_sha256,false);
     if(const auto* failure=std::get_if<ArtifactError>(&encoded))return *failure;
     auto document=Json::parse(std::get<std::string>(encoded));
-    const auto owner=std::visit([](const auto& identity)->std::pair<std::string,std::string> {
-        using T=std::decay_t<decltype(identity)>;
-        if constexpr(std::is_same_v<T,SetId>)return {"set",identity.value};
-        else return {"optimal_family",identity.strategy.value+"@"+identity.strategy_version};
-    },source.identity);
-    const auto& provider=*provider_provenance.actual;
+    const auto source_record=plot_source(source,data);
+    const auto provider=provider_identity(provider_provenance);
+    const auto evidence=family_evidence(family_claim);
     Json item;
     if(projection) {
         if(projection->reference.identity.problem!=data.problem)return error(ArtifactErrorCode::reference,
@@ -185,13 +341,15 @@ ArtifactResult<std::string> encode_plot_document_json(const PlotData& data,const
         } else if(const auto* singleton=std::get_if<sets::SingletonRepresentation>(&representation)) {
             if(singleton->point.size()!=2)return error(ArtifactErrorCode::unsupported,
                 "plot_outcome.projected_relation","singleton projection must have dimension two");
+            if(!std::isfinite(singleton->point[0])||!std::isfinite(singleton->point[1]))return error(ArtifactErrorCode::invalid_input,
+                "plot_outcome.projected_relation","singleton projection contains a nonfinite coordinate");
             points.push_back({singleton->point[0],singleton->point[1]});
         } else return error(ArtifactErrorCode::unsupported,"plot_outcome.projected_relation",
             "projection representation has no finite point list");
         if(points.empty())return error(ArtifactErrorCode::unsupported,"plot_outcome.projected_relation",
             "empty projection has no points to draw");
         item={{"kind","projection"},
-            {"source",{{"kind",owner.first},{"id",owner.second},{"method_id",provider.id.value},{"method_version",provider.version}}},
+            {"source",source_record},{"geometry_provider",provider},{"family_evidence",evidence},
             {"title","Saved 2D set projection at stage "+std::to_string(stage.value)},
             {"scenario_id",problem.value},{"coordinate_ids",{"x"+std::to_string(*first),"x"+std::to_string(*second)}},
             {"points",std::move(points)},{"relation",relation(projection->relation)},
@@ -199,9 +357,14 @@ ArtifactResult<std::string> encode_plot_document_json(const PlotData& data,const
             {"limitation","persisted finite projection points; rendering does not compute geometry"},
             {"objective_context","not applicable to a set projection"},
             {"geometry_reference",{{"problem",projection->reference.identity.problem.value},
-                {"request",projection->reference.identity.request.value},{"ideal_output",projection->reference.identity.ideal_output.value}}},
+                {"request",projection->reference.identity.request.value},{"inputs",set_ids(projection->reference.inputs)},
+                {"ideal_output",projection->reference.identity.ideal_output.value}}},
             {"assumptions",projection->assumptions},
             {"geometry_operation_elapsed_ns",projection->cost.geometry_operation_elapsed.count()}};
+        document["series"].push_back({{"kind","timing"},{"source",source_record},
+            {"operation","2D set projection geometry query"},{"metric","wall"},
+            {"values",{projection->cost.geometry_operation_elapsed.count()}},
+            {"availability","available"},{"span_semantics","inclusive"}});
     } else {
         Json points=Json::array(),records=Json::array();
         std::size_t without_point=0;
@@ -215,7 +378,9 @@ ArtifactResult<std::string> encode_plot_document_json(const PlotData& data,const
             Json record={{"direction",sample.direction},
                 {"evidence_support",support_kind(sample.support)},
                 {"assumptions",sample.assumptions},
-                {"geometry_reference",{{"request",sample.reference.identity.request.value},
+                {"geometry_reference",{{"problem",sample.reference.identity.problem.value},
+                    {"request",sample.reference.identity.request.value},
+                    {"inputs",set_ids(sample.reference.inputs)},
                     {"ideal_output",sample.reference.identity.ideal_output.value}}}};
             if(const auto* value=std::get_if<double>(&sample.value)) {
                 if(!std::isfinite(*value))return error(ArtifactErrorCode::invalid_input,
@@ -234,7 +399,7 @@ ArtifactResult<std::string> encode_plot_document_json(const PlotData& data,const
         if(records.empty())return error(ArtifactErrorCode::invalid_input,"plot_outcome.samples",
             "at least one support sample is required");
         item={{"kind","support_samples"},
-            {"source",{{"kind",owner.first},{"id",owner.second},{"method_id",provider.id.value},{"method_version",provider.version}}},
+            {"source",source_record},{"geometry_provider",provider},{"family_evidence",evidence},
             {"title","Support samples at stage "+std::to_string(stage.value)},
             {"scenario_id",problem.value},{"coordinate_ids",{"x"+std::to_string(*first),"x"+std::to_string(*second)}},
             {"points",std::move(points)},{"samples",std::move(records)},
@@ -244,6 +409,10 @@ ArtifactResult<std::string> encode_plot_document_json(const PlotData& data,const
             {"objective_context","not applicable to support samples"},
             {"assumptions",Json::array()},
             {"geometry_operation_elapsed_ns",samples->cost.geometry_operation_elapsed.count()}};
+        document["series"].push_back({{"kind","timing"},{"source",source_record},
+            {"operation","support sample geometry queries"},{"metric","wall"},
+            {"values",{samples->cost.geometry_operation_elapsed.count()}},
+            {"availability","available"},{"span_semantics","inclusive"}});
     }
     document["series"].push_back(std::move(item));
     return document.dump(2)+"\n";

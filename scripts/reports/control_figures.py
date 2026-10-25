@@ -35,6 +35,7 @@ def render(document, source_hash, style_path, out, additional_inputs=None):
     control_defs = {c["id"]: c for c in document["coordinates"]["controls"]}
     files = []
     trajectories = [s for s in document["series"] if s["kind"] == "trajectory"]
+    trajectory_pairs = [s for s in document["series"] if s["kind"] == "trajectory_pair"]
     projections = [s for s in document["series"] if s["kind"] == "projection"]
     samples = [s for s in document["series"] if s["kind"] == "support_samples"]
     timings = [s for s in document["series"] if s["kind"] == "timing"]
@@ -77,6 +78,26 @@ def render(document, source_hash, style_path, out, additional_inputs=None):
                 _save(fig, path, style)
                 files.extend((path.with_suffix(".svg"), path.with_suffix(".png")))
             finally: plt.close(fig)
+        for index,item in enumerate(trajectory_pairs):
+            a,b=(state_defs[k] for k in item["coordinate_ids"])
+            fig,ax=plt.subplots(figsize=tuple(style["projection_size"]))
+            try:
+                x=document["axes"]["states"]["points"]
+                for path in item["paths"]:
+                    ax.plot([point[0] for point in path["points"]],[point[1] for point in path["points"]],
+                            marker="o",label=f"{path['witness_id']} · J={path['objective']} · {path['assurance']}")
+                ax.set(xlabel=f"{a['name']} ({a.get('unit') or 'unit unavailable'})",
+                       ylabel=f"{b['name']} ({b.get('unit') or 'unit unavailable'})",
+                       title=f"{item['title']} · {document['provenance']['scenario_id']}")
+                if style.get("equal_aspect_for_matching_units") and a.get("unit") and a.get("unit")==b.get("unit"):
+                    ax.set_aspect("equal",adjustable="box")
+                ax.grid(alpha=.2);ax.legend(fontsize="small")
+                note=f"{item['relation']} · {item['evidence']} · {item['limitation']}"
+                fig.text(.12,.025,textwrap.fill(note,width=88),fontsize=8,va="bottom")
+                fig.tight_layout(rect=(0,.12,1,.92))
+                path=out/f"trajectory-pair-{index+1:02d}";_save(fig,path,style)
+                files.extend((path.with_suffix(".svg"),path.with_suffix(".png")))
+            finally: plt.close(fig)
         for index, item in enumerate(projections + samples):
             a, b = (state_defs[k] for k in item["coordinate_ids"])
             fig, ax = plt.subplots(figsize=tuple(style["projection_size"]))
@@ -93,19 +114,29 @@ def render(document, source_hash, style_path, out, additional_inputs=None):
                     lo,hi=min(values),max(values); span=hi-lo
                     margin=.08*span if span else max(abs(lo)*.08,.5)
                     return lo-margin,hi+margin
-                ax.set_xlim(limits(xr));ax.set_ylim(limits(yr))
-                if min(yr)<=0<=max(yr): ax.axhline(0,color="#777",linewidth=.7)
-                if min(xr)<=0<=max(xr): ax.axvline(0,color="#777",linewidth=.7)
+                if xr and yr:
+                    ax.set_xlim(limits(xr));ax.set_ylim(limits(yr))
+                    if min(yr)<=0<=max(yr): ax.axhline(0,color="#777",linewidth=.7)
+                    if min(xr)<=0<=max(xr): ax.axvline(0,color="#777",linewidth=.7)
+                elif item["kind"]=="support_samples":
+                    ax.set_xticks([]);ax.set_yticks([])
+                    ax.text(.5,.5,"No finite maximizing points\n(empty or unbounded support outcomes)",
+                            transform=ax.transAxes,ha="center",va="center")
                 ax.set(xlabel=f"{a['name']} ({a.get('unit') or 'unit unavailable'})",
                        ylabel=f"{b['name']} ({b.get('unit') or 'unit unavailable'})",
                        title=f"{item.get('title', item['kind'])} · {item.get('scenario_id', document['provenance']['scenario_id'])}")
+                if style.get("equal_aspect_for_matching_units") and a.get("unit") and a.get("unit")==b.get("unit"):
+                    ax.set_aspect("equal",adjustable="box")
                 ax.set_title(ax.get_title(),fontsize=10,wrap=True)
                 objective=(f"J={item['objective']} ({item['objective_label']}; {item['objective_evidence']})"
                            if "objective" in item else item["objective_context"])
                 note=f"{item['source']['method_id']} · {objective}\n{item['relation']} · {item['evidence']} · {item['limitation']}"
                 if item["kind"]=="support_samples":
                     point_count=sum(sample.get("point") is not None for sample in item["samples"])
-                    note+=f"\n{len(item['samples'])} directions; {point_count} finite maximizing point(s) plotted"
+                    outcomes={kind:sum(sample["value"]["kind"]==kind for sample in item["samples"])
+                              for kind in ("finite","empty","unbounded")}
+                    note+=(f"\n{len(item['samples'])} directions; {point_count} finite maximizing points plotted; "
+                           f"{outcomes['empty']} empty and {outcomes['unbounded']} unbounded outcomes")
                 fig.text(.12,.025,textwrap.fill(note,width=88),fontsize=8,va="bottom")
                 ax.grid(alpha=.2); ax.legend(fontsize="small")
                 fig.tight_layout(rect=(0,.15,1,.92))
