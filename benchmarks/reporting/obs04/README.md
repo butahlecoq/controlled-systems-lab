@@ -80,12 +80,30 @@ strategy remains unavailable and its field stays null.
 
 ## Clean-source preflight capture
 
-A clean-source capture will retain the structured `# shared_preflight=` JSONL
-metadata beside the comparison record. It will report one sample for each of
-the three selected preflight blocks and identify the exact comparison spec and
-run; these are not per-attempt timings. The capture will state its source and
-binary identities and disclose that configuration-template creation, workspace
-creation, and analytic baseline runs occur after the measured blocks.
+`results/linux-omarchy-gcc16-20261025-preflight-clean.json` and
+`...-preflight-repeat.json`, their JSONL logs, saved HTML renderings, and
+empty stderr logs retain two consecutive Release runs from clean source commit
+`c06d12e6d590e76f3fb7b7431f3b30b0b541f548` (source snapshot
+`2d22639e774e99816144ae208d7c6c6ccfaa53875a2086900e6b8d2702d45b14`, binary
+SHA-256 `2683da669cca974d1ba23120251ddc6bab6b1a431311b0629926b27899075726`).
+Each run completed 32 attempts: seven measured attempts per
+strategy/instrumentation arm and one warmup per arm. Every attempt passed the
+analytic and witness checks. The structured `# shared_preflight=` JSONL comment
+binds the measurements to the `ComparisonSpecId` and `ComparisonRunId` without
+putting run-specific timings into the comparison spec. Both runs produced the
+same spec ID and distinct run IDs, while the measured durations changed.
+
+Across the two samples, fixture construction and problem resolution took
+115,380–120,617 ns; provider registration took 102,109–123,482 ns; and
+comparison admission took 89,188–127,323 ns. These are two process-level
+samples of the three selected blocks, not all pre-attempt setup; the timers stop
+before configuration-template creation, workspace creation, and the two
+analytic baseline strategy runs. They do not establish a performance winner or
+general latency claim. The fixture is constructed in code, so there is no
+input-file parsing phase. Admission combines common request guards, strategy
+capability checks, and registry preparation; the current interface does not
+split these subphases. Family construction inside the strategy remains
+unavailable.
 
 `csl.obs04-instrumentation-comparison-event/6` is the current raw per-attempt
 payload; the codec continues to accept event `/2` through `/5`. It records
