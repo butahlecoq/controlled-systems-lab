@@ -35,8 +35,9 @@ values make no application-scale latency or performance-winner claim.
 | Reach-back capability callback (nested) | 7,194 ns | 5,727–10,337 ns |
 | Direct-joint capability callback (nested) | 4,749 ns | 4,331–5,239 ns |
 
-Each JSON record and stdout log retains raw results and the structured
-`csl.obs04-shared-preflight/4` timings. Record SHA-256 digests:
+Each JSON file retains the immutable comparison record; its paired stdout log
+retains the structured `csl.obs04-shared-preflight/4` timings and attempt
+summary. Record SHA-256 digests:
 
 | Run | Comparison run ID | Record SHA-256 |
 |---|---|---|
