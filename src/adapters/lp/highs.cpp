@@ -5,8 +5,10 @@
 #include "../highs_session.hpp"
 #if defined(CSL_HIGHSLP_TESTING)
 #include "highs_warm_start_test_hook.hpp"
+#include "highs_interrupt_test_hook.hpp"
 #endif
 #include <algorithm>
+#include <atomic>
 #include <chrono>
 #include <cmath>
 #include <iomanip>
@@ -18,6 +20,7 @@ namespace csl::adapters::lp {
 namespace {
 #if defined(CSL_HIGHSLP_TESTING)
 thread_local bool reject_next_warm_basis_installation_for_test{};
+std::atomic<std::stop_source*> cancel_on_simplex_interrupt_for_test{};
 #endif
 using namespace optimization;
 constexpr const char* adapter_version = "1.1.0+highs.1.11.0";
@@ -190,7 +193,16 @@ class HighsLPWorkspace final : public LPWorkspace {
             << "\nresidual.relative_tolerance=" << c.numerical.relative_tolerance
             << "\noptions.small_matrix_value=1e-12\noptions.infinite_bound=inf\noptions.infinite_cost=inf\noptions.large_matrix_value=inf"
             << "\noptions.iteration_limit=" << options_.simplex_iteration_limit.value_or(static_cast<std::size_t>(kHighsIInf));
+#if defined(CSL_HIGHSLP_TESTING)
+        CallbackState state{c,{}, {}, {}};
+#else
         CallbackState state{c,{}, {}};
+#endif
+#if defined(CSL_HIGHSLP_TESTING)
+        state.before_simplex_interrupt_for_test=[] {
+            test_support::request_stop_on_simplex_interrupt_for_test();
+        };
+#endif
         state.poll();
         if (state.stop) {
             result.termination = *state.stop;
@@ -397,6 +409,16 @@ public:
 #if defined(CSL_HIGHSLP_TESTING)
 void test_support::reject_next_warm_basis_installation() noexcept {
     reject_next_warm_basis_installation_for_test=true;
+}
+void test_support::cancel_on_next_simplex_interrupt(std::stop_source& source) noexcept {
+    cancel_on_simplex_interrupt_for_test.store(&source,std::memory_order_release);
+}
+void test_support::request_stop_on_simplex_interrupt_for_test() noexcept {
+    if (auto* source=cancel_on_simplex_interrupt_for_test.exchange(nullptr,std::memory_order_acq_rel))
+        source->request_stop();
+}
+void test_support::clear_pending_simplex_interrupt_for_test() noexcept {
+    cancel_on_simplex_interrupt_for_test.store(nullptr,std::memory_order_release);
 }
 #endif
 HighsLPRegistrationResult make_highs_registration(HighsLPOptions options) {
