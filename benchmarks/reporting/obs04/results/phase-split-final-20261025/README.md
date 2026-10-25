@@ -1,5 +1,9 @@
 # OBS-04 loader and admission phase captures
 
+Superseded by [`phase-split-schema4-20261025`](../phase-split-schema4-20261025/README.md):
+the added timing fields require schema `/4`. This `/3` set remains preserved
+with its exact source provenance and original shape.
+
 Five clean Release process captures of the fixed analytic T-S01 fixture. Each
 completed 32 attempts: one warmup and seven measured repetitions for each
 strategy/instrumentation arm. All 160 attempts passed the analytic and witness
