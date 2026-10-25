@@ -1,0 +1,10 @@
+{
+  "files": {
+    "corrected-scenario.json": "f44af9d8f867241b5150265e048c8535b411adf29dcb333a6147bc92fe2a78ae",
+    "example-2d.html": "773ab6ef2b69b2893fb3d3d82112c224f1d29a6038e0975a82ddd91925d1f6ff",
+    "index.html": "d255cc9b57444cd96fdc1d10c07e74980dabb99e856a0981310ccbfcff6f600e",
+    "manifest-correction.json": "73f3bd89d3a6c059b4d6d0e4d9184bd58b7bee99a1949f3564d6b6e5fbc69efd",
+    "terminal-projections.svg": "ac5997b750ef20fb80c90b46549a1110cf10f7ff37bbb5f9d72ab1cc44461f20"
+  },
+  "schema": "csl.issue6-b06-correction-files/1"
+}

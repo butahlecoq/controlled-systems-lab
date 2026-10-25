@@ -490,10 +490,12 @@ endif()
 
 if(CSL_BUILD_ISSUE6_B06_REPORT)
 include(cmake/JsonDependencies.cmake)
+set(ISSUE6_B06_SCENARIO "${CMAKE_CURRENT_SOURCE_DIR}/benchmarks/scenarios/b06-owner-confirmed-disturbance-v1.json")
+set_property(DIRECTORY APPEND PROPERTY CMAKE_CONFIGURE_DEPENDS "${ISSUE6_B06_SCENARIO}")
 file(SHA256 ${CMAKE_CURRENT_SOURCE_DIR}/benchmarks/reporting/issue6/b06_finite_minimax.cpp ISSUE6_B06_DRIVER_SHA256)
 file(SHA256 ${CMAKE_CURRENT_SOURCE_DIR}/benchmarks/reporting/issue6/b06_phase_timing.cpp ISSUE6_B06_PHASE_DRIVER_SHA256)
 file(SHA256 ${CMAKE_CURRENT_SOURCE_DIR}/benchmarks/reporting/issue6/b06_exact_oracle.cpp ISSUE6_B06_ORACLE_SHA256)
-file(SHA256 ${CMAKE_CURRENT_SOURCE_DIR}/benchmarks/scenarios/b06-owner-confirmed-disturbance-v1.json ISSUE6_B06_FIXTURE_SHA256)
+file(SHA256 ${ISSUE6_B06_SCENARIO} ISSUE6_B06_FIXTURE_SHA256)
 execute_process(COMMAND git rev-parse HEAD WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
     OUTPUT_VARIABLE ISSUE6_B06_SOURCE_COMMIT OUTPUT_STRIP_TRAILING_WHITESPACE COMMAND_ERROR_IS_FATAL ANY)
 add_executable(csl_issue6_b06_report benchmarks/reporting/issue6/b06_finite_minimax.cpp)

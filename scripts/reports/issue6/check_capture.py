@@ -4,18 +4,21 @@ import json
 import hashlib
 import math
 import statistics
+import subprocess
 import sys
+from copy import deepcopy
 from pathlib import Path
 from zipfile import ZipFile
+
+import scenario_contract
 
 
 def main() -> int:
     if len(sys.argv) != 2:
         raise SystemExit("usage: check_capture.py RESULT_DIRECTORY")
     root = Path(sys.argv[1])
+    repo = Path(__file__).resolve().parents[3]
     fixture = (root / "scenario.json").read_bytes()
-    driver = Path("benchmarks/reporting/issue6/b06_finite_minimax.cpp").read_bytes()
-    oracle_source = Path("benchmarks/reporting/issue6/b06_exact_oracle.cpp").read_bytes()
     oracle = json.loads((root / "exact-oracle.json").read_text())
     rows = [json.loads(line) for line in (root / "raw-runs.jsonl").read_text().splitlines()]
     if len(rows) != 8 or [r["batch"] for r in rows] != list(range(8)):
@@ -28,10 +31,33 @@ def main() -> int:
         raise SystemExit("missing executable source hashes")
     if hashlib.sha256(fixture).hexdigest() != rows[0]["fixture_sha256"]:
         raise SystemExit("captured scenario differs from the compiled fixture identity")
+    def source_at_capture(relative_path):
+        result = subprocess.run(["git", "-C", str(repo), "show",
+            f"{rows[0]['source_commit']}:{relative_path}"], capture_output=True, check=False)
+        if result.returncode != 0:
+            raise SystemExit(f"measured source commit does not contain {relative_path}")
+        return result.stdout
+    driver = source_at_capture("benchmarks/reporting/issue6/b06_finite_minimax.cpp")
+    oracle_source = source_at_capture("benchmarks/reporting/issue6/b06_exact_oracle.cpp")
     if hashlib.sha256(driver).hexdigest() != rows[0]["driver_sha256"]:
-        raise SystemExit("captured benchmark driver differs from the compiled source identity")
+        raise SystemExit("measured-commit benchmark driver differs from the compiled source identity")
     if hashlib.sha256(oracle_source).hexdigest() != oracle["oracle_sha256"]:
         raise SystemExit("captured exact oracle source hash differs")
+    canonical_path = repo / "benchmarks/scenarios/b06-owner-confirmed-disturbance-v1.json"
+    canonical = json.loads(canonical_path.read_text(encoding="utf-8"))
+    scenario_contract.validate(canonical)
+    captured = json.loads(fixture)
+    legacy_a = captured.get("model", {}).get("A_row_major")
+    corrected_a = canonical["model"]["A_row_major"]
+    if len(legacy_a) != 15 or len(corrected_a) != 16 or legacy_a != corrected_a[:13] + corrected_a[14:]:
+        raise SystemExit("saved manifest defect does not match the reviewed single-zero B06 correction")
+    corrected_capture = deepcopy(canonical)
+    corrected_capture["model"]["A_row_major"] = legacy_a.copy()
+    for name in ("offset", "control_catalogue_rows", "disturbance_box_per_stage"):
+        corrected_capture["model"].pop(name)
+    corrected_capture["objective"].pop("quadratic_terminal")
+    if captured != corrected_capture:
+        raise SystemExit("immutable capture scenario differs beyond the documented A matrix entry")
     if oracle["evaluated_pairs"] != 3_200_000:
         raise SystemExit("exact oracle pair count mismatch")
     if oracle["minimizing_plan_indices"] != [1936] or oracle["printed_l09_plan_index"] != 1936:

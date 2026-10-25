@@ -1,0 +1,64 @@
+{
+  "corrected_fixture_sha256": "f44af9d8f867241b5150265e048c8535b411adf29dcb333a6147bc92fe2a78ae",
+  "correction_id": "b06-manifest-correction-v1",
+  "defect": {
+    "captured_entries": 15,
+    "corrected_entries": 16,
+    "corrected_row_major": [
+      "1",
+      "0",
+      "0",
+      "0",
+      "-2",
+      "1",
+      "0",
+      "0",
+      "0",
+      "0",
+      "1",
+      "0",
+      "0",
+      "0",
+      "-2",
+      "1"
+    ],
+    "correction": "insert the source-verified zero at row 4, column 2 (zero-based index 13)",
+    "declared_shape": [
+      4,
+      4
+    ],
+    "field": "model.A_row_major"
+  },
+  "independent_oracle_sha256": "99b82b0065e7b1fc34cd963e218a0221170fcd3b3b09ab219d64e5c6bde1feaf",
+  "measured_driver_sha256": "b157f7259a0b0033c289ab327d57d613d43907166f58024114c2271f0652e88f",
+  "measured_source_commit": "7df01ba3af5e4c46e867e2d737aca56a8f2461af",
+  "measurement_decision": {
+    "decision": "Existing measurements may be referenced as executions of the hardcoded complete measured model, with the malformed captured manifest disclosed.",
+    "limits": "Source-level model correspondence is verified. Existing solver results retain binary64 numerical assurance and are not newly recertified; this is not a historical reproduction of the paper.",
+    "solver_rerun": false
+  },
+  "original_bundle_manifest_sha256": "81049488a2f63f89a36bc0695cbe0ce44b00081a8db240037a5e5afd8e31cdda",
+  "original_bundle_zip_sha256": "39362407b7b182bc1792153ea463ef3e1de15caa0fb8249c7b28d047671df45d",
+  "original_fixture_sha256": "27cb9d50cf8241914695f4e0706e3852de190fdec0c53e5f689e9624aa404f71",
+  "original_public_report_id": "issue6-b06-reference-761bdc6e40b93814f873f105313d1eed4f63711653aa583a16a2ddfbc67c2a82",
+  "original_source_report_id": "b06-owner-confirmed-7df01ba3af5e4c46",
+  "other_report_families_audit": {
+    "boundary": "This audit covers model-bearing input fixtures and their ingestion paths, not arbitrary matrices recorded as output data in every report family.",
+    "flat_dimension_arrays": "Only the B06 owner-confirmed fixture uses declared dimensions with flat A_row_major, B, and D_row_major arrays in the audited benchmark-scenario directory.",
+    "nested_matrix_fixtures": [
+      "b04-historical.json",
+      "b07-historical.json",
+      "b07-owner-approved-eight-case-v1.json",
+      "r29-corrected-scalar-reference.json"
+    ],
+    "scope": "Audited model-bearing input fixtures under benchmarks/scenarios and report inputs carrying a csl.scenario/1 model.",
+    "typed_scenario_loader": "The SYN-TS01 paired report input uses csl.scenario/1 and the core scenario loader; malformed A/B dimensions are covered by tests/unit/input/scenario_loader_tests.cpp and tests/contract/input/scenario_file_tests.cpp."
+  },
+  "preservation": "The original report directory, manifest, ZIP, public report ID, and public report bytes are unchanged.",
+  "schema": "csl.issue6-b06-manifest-correction/1",
+  "source_evidence": {
+    "historical_driver": "The measured source commit constructs A as a complete 4x4 matrix with final row [0, 0, -2, 1].",
+    "independent_oracle": "Its independent integer recurrence applies x4_next = x4 - 2*x3, consistent with that final row.",
+    "model_scope": "The other captured scenario fields match the corrected canonical scenario; only the original A_row_major omission differs."
+  }
+}
