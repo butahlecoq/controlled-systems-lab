@@ -347,7 +347,8 @@ bool measurement_matches_arm(AttemptStatus status,const Json& measurement,const 
         schema!="csl.obs04-instrumentation-comparison-event/5" &&
         schema!="csl.obs04-instrumentation-comparison-event/6" &&
         schema!="csl.obs04-instrumentation-comparison-event/7" &&
-        schema!="csl.obs04-instrumentation-comparison-event/8")return false;
+        schema!="csl.obs04-instrumentation-comparison-event/8" &&
+        schema!="csl.obs04-instrumentation-comparison-event/9")return false;
     if(measurement.at("strategy")!=spec.strategies.at(arm) ||
         measurement.at("instrumentation")!=spec.instrumentation.at(arm) ||
         measurement.at("repetition").get<std::uint32_t>()!=repetition ||
@@ -379,33 +380,39 @@ bool measurement_matches_arm(AttemptStatus status,const Json& measurement,const 
              measurement.at("family_construction_ns")!=measurement.at("strategy_run_ns")))return false;
     }
     if((schema=="csl.obs04-instrumentation-comparison-event/7"||
-        schema=="csl.obs04-instrumentation-comparison-event/8")&&
+        schema=="csl.obs04-instrumentation-comparison-event/8"||
+        schema=="csl.obs04-instrumentation-comparison-event/9")&&
         (!measurement.contains("family_construction_ns")||
          (!measurement.at("family_construction_ns").is_null()&&
           !nonnegative_integer(measurement.at("family_construction_ns")))))return false;
     if((schema=="csl.obs04-instrumentation-comparison-event/7"||
-        schema=="csl.obs04-instrumentation-comparison-event/8")&&
+        schema=="csl.obs04-instrumentation-comparison-event/8"||
+        schema=="csl.obs04-instrumentation-comparison-event/9")&&
         ((measurement.at("instrumentation")=="disabled"&&
           !measurement.at("family_construction_ns").is_null())||
          (status==AttemptStatus::completed&&measurement.at("instrumentation")=="enabled"&&
           measurement.at("family_construction_ns").is_null())))return false;
     if((schema=="csl.obs04-instrumentation-comparison-event/6"||
         schema=="csl.obs04-instrumentation-comparison-event/7"||
-        schema=="csl.obs04-instrumentation-comparison-event/8") &&
+        schema=="csl.obs04-instrumentation-comparison-event/8"||
+        schema=="csl.obs04-instrumentation-comparison-event/9") &&
         (!measurement.contains("phase_status")||!measurement.at("phase_status").is_string()||
          (measurement.at("phase_status")!="passed"&&measurement.at("phase_status")!="failed")))return false;
     if(schema=="csl.obs04-instrumentation-comparison-event/5"||
         schema=="csl.obs04-instrumentation-comparison-event/6"||
         schema=="csl.obs04-instrumentation-comparison-event/7"||
-        schema=="csl.obs04-instrumentation-comparison-event/8") {
+        schema=="csl.obs04-instrumentation-comparison-event/8"||
+        schema=="csl.obs04-instrumentation-comparison-event/9") {
         for(const auto* field:{"setup_ns","strategy_run_ns"})
             if(!measurement.contains(field)||(!measurement.at(field).is_null()&&
                 !nonnegative_integer(measurement.at(field))))return false;
         if(schema!="csl.obs04-instrumentation-comparison-event/7"&&
             schema!="csl.obs04-instrumentation-comparison-event/8"&&
+            schema!="csl.obs04-instrumentation-comparison-event/9"&&
             !measurement.at("family_construction_ns").is_null())return false;
         if((schema=="csl.obs04-instrumentation-comparison-event/7"||
-            schema=="csl.obs04-instrumentation-comparison-event/8")&&
+            schema=="csl.obs04-instrumentation-comparison-event/8"||
+            schema=="csl.obs04-instrumentation-comparison-event/9")&&
             !measurement.at("family_construction_ns").is_null()&&
             !nonnegative_integer(measurement.at("family_construction_ns")))return false;
         if(status==AttemptStatus::completed &&
@@ -433,12 +440,32 @@ bool measurement_matches_arm(AttemptStatus status,const Json& measurement,const 
             if(measurement.at("end_to_end_ns").get<std::uint64_t>()<phase_total)return false;
         }
     }
-    if(schema=="csl.obs04-instrumentation-comparison-event/8") {
+    if(schema=="csl.obs04-instrumentation-comparison-event/8"||
+        schema=="csl.obs04-instrumentation-comparison-event/9") {
         for(const auto* field:{"strategy_run_cpu_ns","observed_backend_scheduler_width"})
             if(!measurement.contains(field)||(!measurement.at(field).is_null()&&
                 !nonnegative_integer(measurement.at(field))))return false;
         const auto& width=measurement.at("observed_backend_scheduler_width");
         if(!width.is_null()&&width.get<std::uint64_t>()==0)return false;
+    }
+    if(schema=="csl.obs04-instrumentation-comparison-event/9") {
+        if(!measurement.contains("strategy_run_peak_rss")||
+            !measurement.at("strategy_run_peak_rss").is_object())return false;
+        const auto& rss=measurement.at("strategy_run_peak_rss");
+        for(const auto* field:{"status","metric","scope","value_bytes","reason"})
+            if(!rss.contains(field))return false;
+        if(!rss.at("status").is_string()||
+            (rss.at("status")!="available"&&rss.at("status")!="unavailable"&&
+             rss.at("status")!="not_measured")||
+            rss.at("metric")!="process_peak_rss_bytes"||
+            rss.at("scope")!="process_vm_hwm_reset_before_and_read_after_strategy_run")return false;
+        const auto& value=rss.at("value_bytes");
+        const auto& reason=rss.at("reason");
+        if(!value.is_null()&&!nonnegative_integer(value))return false;
+        if(!reason.is_null()&&!reason.is_string())return false;
+        if(rss.at("status")=="available") {
+            if(value.is_null()||!reason.is_null())return false;
+        } else if(!value.is_null()||!reason.is_string()||reason.get_ref<const std::string&>().empty())return false;
     }
     for(const auto* field:{"requested_witness_count","returned_witness_count","distinct_witness_count"})
         if(!measurement.contains(field)||(!measurement.at(field).is_null()&&
@@ -460,7 +487,8 @@ bool measurement_matches_arm(AttemptStatus status,const Json& measurement,const 
         schema=="csl.obs04-instrumentation-comparison-event/5"||
         schema=="csl.obs04-instrumentation-comparison-event/6"||
         schema=="csl.obs04-instrumentation-comparison-event/7"||
-        schema=="csl.obs04-instrumentation-comparison-event/8") &&
+        schema=="csl.obs04-instrumentation-comparison-event/8"||
+        schema=="csl.obs04-instrumentation-comparison-event/9") &&
         (measurement.at("first_witness_query_ns").is_null() ||
          measurement.at("additional_witness_query_ns").is_null()))return false;
     const auto& batch=selection.at("batch");

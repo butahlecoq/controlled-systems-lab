@@ -29,12 +29,17 @@ inclusive and exclusive wall-clock ticks for every span and the
 clock period used to interpret them. Event schema `/7` introduced the
 separately measured `family_construction_ns`; it covers complete-family
 proposal assembly and is null when that phase is not entered or instrumentation
-is disabled. The current driver emits `/8`, which adds process CPU time and
-adapter-reported backend scheduler width per attempt. The width is not active
-or busy-thread utilization. Schemas `/5` and `/6` retain their earlier
-null-field meaning. The driver requests one solver thread and one outer worker.
-Older captures lack CPU and scheduler-width observations; per-attempt memory,
-heap use, and a unique source-mapped limiter remain unavailable. Treat timing
+is disabled. The current driver emits `/9`, which adds process CPU time,
+adapter-reported backend scheduler width, and per-call process peak RSS.
+Linux resets `/proc/self/status` `VmHWM` immediately before the strategy call
+and reads it afterward. This is the whole-process high-water mark for that
+interval, including the driver and all threads; it does not identify
+strategy-only allocations or enforce a memory limit. Other platforms report
+the metric unavailable. Scheduler width is not active or busy-thread
+utilization. Schemas `/5` and `/6` retain their earlier null-field meaning. The
+driver requests one solver thread and one outer worker. Older captures lack
+per-attempt RSS observations. Heap use and a unique source-mapped limiter
+remain unavailable. Treat timing
 differences as descriptive and inconclusive; this tiny analytic case is not
 representative of application workloads.
 
@@ -114,13 +119,14 @@ contain scenario-file timings. Admission combines common request guards,
 strategy capability checks, and registry preparation; the current interface
 does not split these subphases.
 Event `/7` is used in the historical per-attempt artifacts below. The current
-driver emits event `/8`, and the codec accepts event `/2` through `/8`. It records
+driver emits event `/9`, and the codec accepts event `/2` through `/9`. It records
 the `StrategyPort::run` interval, first and additional direction query, their
 combined selection interval, independent verification, and attempt end-to-end
 time. Events `/7` and `/8` also record complete-family proposal construction
 where the strategy exposes that boundary. Event `/8` adds process CPU time for
 the strategy invocation and adapter-reported backend scheduler width. Event
-`/4` was an exploratory increment that
+`/9` adds the per-call process peak RSS observation with explicit scope and
+availability status. Event `/4` was an exploratory increment that
 wrote the full strategy interval into that field; the retained `/4` artifacts
 are historical and must not be interpreted as a separate family-construction
 measurement.
@@ -369,8 +375,9 @@ remains under the repository's release tracker.
 
 The five clean-source captures report fixture-specific instrumentation deltas
 but make no general performance claim. They record process-wide peak RSS and
-CPU/wall time separately, with no memory or wall-time cap; per-attempt memory
-measurement/enforcement remains outstanding. Shared preflight timing separates
+CPU/wall time separately, with no memory or wall-time cap. The current driver
+also records per-attempt process peak RSS on Linux as an observation only;
+memory enforcement remains unavailable. Shared preflight timing separates
 file read, standalone parse, loader validation/resolution, provider registration,
 and comparison admission; parsing inside the public loader and capability work
 inside admission are still combined. Workspace/setup, family construction,

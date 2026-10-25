@@ -26,6 +26,7 @@
 #include <cerrno>
 #include <csignal>
 #include <cstring>
+#include <exception>
 #include <iostream>
 #include <fstream>
 #include <filesystem>
@@ -577,6 +578,83 @@ std::optional<std::uint64_t> elapsed_process_cpu_ns(
     return *end - *begin;
 }
 
+enum class PeakRssStatus { not_measured, unavailable, measuring, available };
+
+struct PeakRssObservation {
+    PeakRssStatus status{PeakRssStatus::not_measured};
+    std::optional<std::uint64_t> value_bytes;
+    std::string reason{"strategy_run_not_started"};
+};
+
+#ifdef __linux__
+std::optional<std::uint64_t> linux_vm_hwm_bytes() {
+    const int fd = ::open("/proc/self/status", O_RDONLY | O_CLOEXEC);
+    if (fd < 0) return std::nullopt;
+    std::array<char, 4096> buffer{};
+    const auto count = ::read(fd, buffer.data(), buffer.size());
+    const int close_result = ::close(fd);
+    if (count <= 0 || close_result != 0) return std::nullopt;
+    const std::string_view contents{buffer.data(), static_cast<std::size_t>(count)};
+    const auto marker = contents.find("VmHWM:");
+    if (marker == std::string_view::npos) return std::nullopt;
+    auto value_begin = marker + sizeof("VmHWM:") - 1;
+    while (value_begin < contents.size() &&
+        (contents[value_begin] == ' ' || contents[value_begin] == '\t')) ++value_begin;
+    std::uint64_t kib{};
+    const auto [value_end, error] = std::from_chars(
+        contents.data() + value_begin, contents.data() + contents.size(), kib);
+    if (error != std::errc{} || value_end == contents.data() + value_begin ||
+        kib > std::numeric_limits<std::uint64_t>::max() / 1024) return std::nullopt;
+    return kib * 1024;
+}
+
+PeakRssObservation begin_peak_rss_observation() {
+    // Touch the status-reader path before resetting VmHWM so its stack use is
+    // already resident at the start of the measured interval.
+    if (!linux_vm_hwm_bytes()) return {PeakRssStatus::unavailable, {}, "vmhwm_read_failed_before_reset"};
+    const int fd = ::open("/proc/self/clear_refs", O_WRONLY | O_CLOEXEC);
+    if (fd < 0) return {PeakRssStatus::unavailable, {}, "vmhwm_reset_open_failed"};
+    constexpr char reset_peak[] = "5\n";
+    const auto written = ::write(fd, reset_peak, sizeof(reset_peak) - 1);
+    const int close_result = ::close(fd);
+    if (written != static_cast<ssize_t>(sizeof(reset_peak) - 1) || close_result != 0)
+        return {PeakRssStatus::unavailable, {}, "vmhwm_reset_failed"};
+    return {PeakRssStatus::measuring, {}, {}};
+}
+#else
+PeakRssObservation begin_peak_rss_observation() {
+    return {PeakRssStatus::unavailable, {}, "per_call_peak_rss_reset_is_linux_only"};
+}
+#endif
+
+void finish_peak_rss_observation(PeakRssObservation& observation) {
+    if (observation.status != PeakRssStatus::measuring) return;
+#ifdef __linux__
+    if (const auto value = linux_vm_hwm_bytes()) {
+        observation.status = PeakRssStatus::available;
+        observation.value_bytes = value;
+        observation.reason.clear();
+        return;
+    }
+    observation.status = PeakRssStatus::unavailable;
+    observation.reason = "vmhwm_read_failed_after_strategy_run";
+#endif
+}
+
+Json peak_rss_json(const PeakRssObservation& observation) {
+    const char* status = "not_measured";
+    switch (observation.status) {
+    case PeakRssStatus::not_measured: status = "not_measured"; break;
+    case PeakRssStatus::unavailable: status = "unavailable"; break;
+    case PeakRssStatus::measuring: status = "unavailable"; break;
+    case PeakRssStatus::available: status = "available"; break;
+    }
+    return {{"status", status}, {"metric", "process_peak_rss_bytes"},
+        {"scope", "process_vm_hwm_reset_before_and_read_after_strategy_run"},
+        {"value_bytes", observation.value_bytes ? Json(*observation.value_bytes) : Json(nullptr)},
+        {"reason", observation.reason.empty() ? Json(nullptr) : Json(observation.reason)}};
+}
+
 std::optional<std::uint64_t> ticks_to_ns(std::uint64_t ticks,const ar::ClockDomain& clock) {
     if(clock.period_denominator==0)return {};
     const long double converted=static_cast<long double>(ticks)*clock.period_numerator*1'000'000'000.0L/
@@ -598,6 +676,7 @@ struct TrialTimings {
     std::optional<std::uint64_t> strategy_run_ns;
     std::optional<std::uint64_t> strategy_run_cpu_ns;
     std::optional<std::size_t> backend_scheduler_width;
+    PeakRssObservation strategy_run_peak_rss;
     std::optional<std::uint64_t> family_construction_ns;
     std::optional<std::uint64_t> selection_setup_ns;
     std::optional<std::uint64_t> selection_run_ns;
@@ -808,24 +887,33 @@ TrialRecord trial_impl(const application::PreparedComparison& prepared, std::siz
     if (collector) context.timing = collector;
     const auto setup_end = Clock::now();
     timings.setup_ns = static_cast<std::uint64_t>(ns(setup_begin, setup_end));
+    timings.strategy_run_peak_rss = begin_peak_rss_observation();
     const auto run_begin = Clock::now();
     const auto cpu_begin = process_cpu_clock_ns();
     timings.strategy_run_begin = run_begin;
     invocation_started=true;
-    const auto outcome = workspaces[strategy_index]->run(context);
+    std::optional<SynthesisOutcome> outcome;
+    std::exception_ptr invocation_error;
+    try {
+        outcome.emplace(workspaces[strategy_index]->run(context));
+    } catch (...) {
+        invocation_error = std::current_exception();
+    }
     const auto cpu_end = process_cpu_clock_ns();
-    returned_outcome=outcome;
     const auto run_end = Clock::now();
+    finish_peak_rss_observation(timings.strategy_run_peak_rss);
     timings.strategy_run_ns = static_cast<std::uint64_t>(ns(run_begin, run_end));
     timings.strategy_run_cpu_ns = elapsed_process_cpu_ns(cpu_begin, cpu_end);
     timings.backend_scheduler_width = backend_thread_observation->maximum();
-    const auto status=attempt_status(outcome);
+    if (invocation_error) std::rethrow_exception(invocation_error);
+    returned_outcome = *outcome;
+    const auto status=attempt_status(*outcome);
     std::optional<Signature> observed;
     bool quality_passed=false;
-    if (std::holds_alternative<SynthesisResult>(outcome)) {
+    if (std::holds_alternative<SynthesisResult>(*outcome)) {
         try {
-            observed=signature(outcome);
-            require_ts01_analytic_result(outcome,*observed);
+            observed=signature(*outcome);
+            require_ts01_analytic_result(*outcome,*observed);
             quality_passed=observed->termination == expected.termination && observed->outcome == expected.outcome &&
                 close(observed->lower, expected.lower) && close(observed->upper, expected.upper) &&
                 observed->profile == expected.profile && observed->complete == expected.complete && observed->complete;
@@ -878,7 +966,7 @@ TrialRecord trial_impl(const application::PreparedComparison& prepared, std::siz
     std::optional<std::uint64_t> first_witness_query_ns;
     std::optional<std::uint64_t> additional_witness_query_ns;
     std::uint64_t verification_ns = 0;
-    const auto* synthesis_result = std::get_if<SynthesisResult>(&outcome);
+    const auto* synthesis_result = std::get_if<SynthesisResult>(&*outcome);
     if (synthesis_result && synthesis_result->family &&
         std::holds_alternative<CompleteOptimalFamily>(synthesis_result->family->outcome())) {
         timings.selection_setup_begin = selection_setup_begin;
@@ -981,7 +1069,7 @@ TrialRecord trial_impl(const application::PreparedComparison& prepared, std::siz
     timings.end_to_end_ns = static_cast<std::uint64_t>(ns(*timings.attempt_begin, attempt_end));
 
     std::ostringstream event;
-    event << "{\"schema\":\"csl.obs04-instrumentation-comparison-event/8\",\"repetition\":" << repetition
+    event << "{\"schema\":\"csl.obs04-instrumentation-comparison-event/9\",\"repetition\":" << repetition
         << ",\"warmup\":" << (warmup ? "true" : "false") << ",\"strategy\":\""
         << (strategy_index == 0 ? "csl.synthesis.reach-back" : "csl.synthesis.strategy-b")
         << "\",\"instrumentation\":\"" << (enabled ? "enabled" : "disabled")
@@ -989,6 +1077,7 @@ TrialRecord trial_impl(const application::PreparedComparison& prepared, std::siz
         << ",\"strategy_run_cpu_ns\":" << optional_ns_json(timings.strategy_run_cpu_ns)
         << ",\"observed_backend_scheduler_width\":"
         << (timings.backend_scheduler_width ? std::to_string(*timings.backend_scheduler_width) : "null")
+        << ",\"strategy_run_peak_rss\":" << peak_rss_json(timings.strategy_run_peak_rss).dump()
         << ",\"family_construction_ns\":" << optional_ns_json(timings.family_construction_ns)
         << ",\"end_to_end_ns\":" << *timings.end_to_end_ns
         << ",\"selection_setup_ns\":" << selection_setup_ns
@@ -1023,9 +1112,9 @@ TrialRecord trial_impl(const application::PreparedComparison& prepared, std::siz
         << ",\"relative_tolerance\":" << relative_tolerance << '}';
 
     auto statistics=timing_report?timing_report->observations:std::move(*setup.empty_statistics);
-    const auto* synthesis=std::get_if<SynthesisResult>(&outcome);
-    application::StrategyExecution recorded_execution{outcome,
-        synthesis?ar::project_final(*synthesis):ar::FinalOutcome{ar::UnsupportedFinal{std::get<Unsupported>(outcome).diagnostics}},
+    const auto* synthesis=std::get_if<SynthesisResult>(&*outcome);
+    application::StrategyExecution recorded_execution{*outcome,
+        synthesis?ar::project_final(*synthesis):ar::FinalOutcome{ar::UnsupportedFinal{std::get<Unsupported>(*outcome).diagnostics}},
         selected_witnesses ? application::SelectionOutcome{*selected_witnesses} : application::SelectionOutcome{std::monostate{}},
         std::move(verification_reports)};
     const ar::Unavailable unavailable{ar::MissingReason::not_requested,{}};
@@ -1072,12 +1161,16 @@ TrialRecord failed_trial(const application::PreparedComparison& prepared, std::s
     for(const auto byte:bytes)wire.push_back(static_cast<char>(std::to_integer<unsigned char>(byte)));
     auto run=take(ar::decode_recorded_run(wire,prepared.problem()));
     std::ostringstream event;
-    event << "{\"schema\":\"csl.obs04-instrumentation-comparison-event/7\",\"repetition\":" << repetition
+    event << "{\"schema\":\"csl.obs04-instrumentation-comparison-event/9\",\"repetition\":" << repetition
         << ",\"warmup\":" << (warmup?"true":"false") << ",\"strategy\":\""
         << (strategy_index==0?"csl.synthesis.reach-back":"csl.synthesis.strategy-b")
         << "\",\"instrumentation\":\"" << (enabled?"enabled":"disabled")
         << "\",\"setup_ns\":" << optional_ns_json(timings.setup_ns)
         << ",\"strategy_run_ns\":" << optional_ns_json(timings.strategy_run_ns)
+        << ",\"strategy_run_cpu_ns\":" << optional_ns_json(timings.strategy_run_cpu_ns)
+        << ",\"observed_backend_scheduler_width\":"
+        << (timings.backend_scheduler_width ? std::to_string(*timings.backend_scheduler_width) : "null")
+        << ",\"strategy_run_peak_rss\":" << peak_rss_json(timings.strategy_run_peak_rss).dump()
         << ",\"family_construction_ns\":" << optional_ns_json(timings.family_construction_ns)
         << ",\"end_to_end_ns\":" << optional_ns_json(timings.end_to_end_ns)
         << ",\"selection_setup_ns\":" << optional_ns_json(timings.selection_setup_ns)
@@ -1133,12 +1226,16 @@ TrialRecord unserializable_outcome_trial(const application::PreparedComparison& 
     for(const auto byte:bytes)wire.push_back(static_cast<char>(std::to_integer<unsigned char>(byte)));
     auto run=take(ar::decode_recorded_run(wire,prepared.problem()));
     std::ostringstream event;
-    event << "{\"schema\":\"csl.obs04-instrumentation-comparison-event/7\",\"repetition\":"
+    event << "{\"schema\":\"csl.obs04-instrumentation-comparison-event/9\",\"repetition\":"
         << repetition << ",\"warmup\":" << (warmup?"true":"false") << ",\"strategy\":\""
         << (strategy_index==0?"csl.synthesis.reach-back":"csl.synthesis.strategy-b")
         << "\",\"instrumentation\":\"" << (enabled?"enabled":"disabled")
         << "\",\"setup_ns\":" << optional_ns_json(timings.setup_ns)
         << ",\"strategy_run_ns\":" << optional_ns_json(timings.strategy_run_ns)
+        << ",\"strategy_run_cpu_ns\":" << optional_ns_json(timings.strategy_run_cpu_ns)
+        << ",\"observed_backend_scheduler_width\":"
+        << (timings.backend_scheduler_width ? std::to_string(*timings.backend_scheduler_width) : "null")
+        << ",\"strategy_run_peak_rss\":" << peak_rss_json(timings.strategy_run_peak_rss).dump()
         << ",\"family_construction_ns\":" << optional_ns_json(timings.family_construction_ns)
         << ",\"end_to_end_ns\":" << optional_ns_json(timings.end_to_end_ns)
         << ",\"selection_setup_ns\":" << optional_ns_json(timings.selection_setup_ns)
@@ -1188,12 +1285,16 @@ TrialRecord recording_failure_trial(const application::PreparedComparison& prepa
             {unavailable,unavailable,unavailable,unavailable,false,ar::MemoryAccounting::unlimited}));
         auto run=take(ar::decode_recorded_run(wire,prepared.problem()));
         std::ostringstream event;
-        event << "{\"schema\":\"csl.obs04-instrumentation-comparison-event/7\",\"repetition\":"
+        event << "{\"schema\":\"csl.obs04-instrumentation-comparison-event/9\",\"repetition\":"
             << repetition << ",\"warmup\":" << (warmup?"true":"false") << ",\"strategy\":\""
             << (strategy_index==0?"csl.synthesis.reach-back":"csl.synthesis.strategy-b")
             << "\",\"instrumentation\":\"" << (enabled?"enabled":"disabled")
             << "\",\"setup_ns\":" << optional_ns_json(timings.setup_ns)
             << ",\"strategy_run_ns\":" << optional_ns_json(timings.strategy_run_ns)
+            << ",\"strategy_run_cpu_ns\":" << optional_ns_json(timings.strategy_run_cpu_ns)
+            << ",\"observed_backend_scheduler_width\":"
+            << (timings.backend_scheduler_width ? std::to_string(*timings.backend_scheduler_width) : "null")
+            << ",\"strategy_run_peak_rss\":" << peak_rss_json(timings.strategy_run_peak_rss).dump()
             << ",\"family_construction_ns\":" << optional_ns_json(timings.family_construction_ns)
             << ",\"end_to_end_ns\":" << optional_ns_json(timings.end_to_end_ns)
             << ",\"selection_setup_ns\":" << optional_ns_json(timings.selection_setup_ns)
