@@ -8,6 +8,9 @@
 #include <string>
 #include <string_view>
 #include <variant>
+#if defined(__linux__)
+#include <sys/resource.h>
+#endif
 
 namespace {
 using namespace csl;
@@ -98,6 +101,24 @@ Vector nonlinear_step(const Vector& state, double accumulated_control) {
     return {fuel * Km, state[1] - 75.0 * state[0], fuel, state[3] - 75.0 * state[2]};
 }
 
+std::vector<Vector> open_loop_replay(const std::vector<std::size_t>& action_indices) {
+    Vector state = initial_state();
+    double accumulated_control = 0.0;
+    std::vector<Vector> states{state};
+    for (const auto action_index : action_indices) {
+        accumulated_control += choices.at(action_index);
+        state = nonlinear_step(state,accumulated_control);
+        states.push_back(state);
+    }
+    return states;
+}
+
+double criterion_squared(const Vector& state, double lambda) {
+    const double sync = state[1] - 2.5 * state[3];
+    return std::pow(state[0]-60.0,2) + std::pow(state[1],2) +
+        std::pow(state[2]-24.0,2) + std::pow(state[3],2) + lambda*sync*sync;
+}
+
 std::pair<std::vector<std::size_t>,std::vector<Vector>> closed_loop_replay(double lambda) {
     Vector state = initial_state();
     double accumulated_control = 0.0;
@@ -162,11 +183,28 @@ json run(std::size_t batch, double lambda, bool geometry) {
         {"winner_action_indices", winner.action_indices}, {"winner_action_sequences", winner_sequences},
         {"objective_squared", optimum.value},
         {"objective_norm", std::sqrt(optimum.value)}, {"winner_maximizer", winner.maximizer}};
+#if defined(__linux__)
+    rusage usage{};
+    if (getrusage(RUSAGE_SELF, &usage) == 0) row["process_peak_rss_kib"] = usage.ru_maxrss;
+    else row["process_peak_rss_kib"] = nullptr;
+#else
+    row["process_peak_rss_kib"] = nullptr;
+#endif
     if (geometry) {
+        const auto open_states = open_loop_replay(winner.action_indices);
         const auto [closed_actions,closed_states] = closed_loop_replay(lambda);
-        row["winner_terminal_vertices_x1_x2_x3_x4"] = vertices(winner.terminal);
+        const auto terminal = vertices(winner.terminal);
+        row["winner_terminal_vertices_x1_x2_x3_x4"] = terminal;
+        row["terminal_vertex_count"] = terminal.size();
+        row["open_loop_replay_states"] = open_states;
+        row["open_loop_replay_terminal_state"] = open_states.back();
+        row["open_loop_replay_objective_squared"] = criterion_squared(open_states.back(),lambda);
+        row["open_loop_replay_objective_norm"] = std::sqrt(row["open_loop_replay_objective_squared"].get<double>());
         row["closed_loop_action_indices"] = closed_actions;
         row["closed_loop_replay_states"] = closed_states;
+        row["closed_loop_replay_terminal_state"] = closed_states.back();
+        row["closed_loop_replay_objective_squared"] = criterion_squared(closed_states.back(),lambda);
+        row["closed_loop_replay_objective_norm"] = std::sqrt(row["closed_loop_replay_objective_squared"].get<double>());
     }
     return row;
 }

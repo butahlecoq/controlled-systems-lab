@@ -332,6 +332,18 @@
       "measured_scope": "One five-stage finite-action minimax case: 3,125 plans x 1,024 disturbance-corner histories; one excluded warmup and seven measured Release calls",
       "evidence_limits": "Owner-confirmed disturbance box is not printed in L09; this is a distinct reference, not a historical reproduction. Exact integer enumeration applies only to this declared rational finite-action case; solver assurance is binary64. Single-adapter timings only, without a limiter profile or speedup claim. The projected vertices are numerical.",
       "zip_sha256": "1fb673b081668644c9754c39d3840cadbf0597ee6e1f1a41e92f677be7936e73"
+    },
+    {
+      "report_id": "issue6-b09-reference-3b48d1362785b85ccaf4dd918a5f26d3dadaae53e0bf0fe28aa3cc6fe3805761",
+      "report_kind": "issue6-b09-reference",
+      "source_report_id": "b09-a08-source-reference-3d043f99",
+      "payload_schema": "csl.issue6-b09-evidence/1",
+      "payload_sha256": "6685eeccad70a3b38ccb36f1096aa3fa8d6a4bdd3df358e8ffe07ea5b85d255f",
+      "native_payload_sha256": "be529cc1b24d8d073148d929eb2dd3d211058dc36126d6dcb6b4ba96609b1dfe",
+      "source_commit": "3d043f99ee226f11aead3c6b82af84e985e838c7",
+      "measured_scope": "Four-stage A08 finite-action minimax case: 6,561 plans per objective; one excluded warmup and seven measured Release calls per objective",
+      "evidence_limits": "Source-revision reference, not a historical reproduction; finite action catalog only; binary64 numerical assurance; replay trajectories are examples, not a global causal optimality claim; single-adapter timings without a source-mapped limiter profile.",
+      "zip_sha256": "1bf3c56c790fd06b428feb289e43491c0581b36f700cdd159011acc184e563db"
     }
   ]
 }

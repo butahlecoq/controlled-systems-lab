@@ -6,33 +6,6 @@ import json
 from pathlib import Path
 
 
-ACTIONS = (1.0, 0.75, 0.5, 0.25, 0.0, -0.25, -0.5, -0.75, -1.0)
-
-
-def nonlinear_replay(action_indices: list[int]) -> list[list[float]]:
-    k, p, inv, c1, c2, c3, c4, c5 = 2.5, 30240.0, 360.0, 0.1, -6700.0, 900.0, -15.0, -12.0
-
-    def flows(total_control: float) -> tuple[float, float]:
-        km = k - 0.03 * k + c1 * total_control
-        delta = km - k
-        pp = p + c2 * delta**2 + c3 * delta
-        iu = inv + c4 * delta**2 + c5 * delta
-        fuel = pp / iu / (1.0 + km)
-        return fuel * km, fuel
-
-    oxidizer, fuel = flows(0.0)
-    state = [oxidizer, 18100.0, fuel, 7150.0]
-    track = [state.copy()]
-    accumulated = 0.0
-    for action_index in action_indices:
-        accumulated += ACTIONS[action_index]
-        next_oxidizer, next_fuel = flows(accumulated)
-        state = [next_oxidizer, state[1] - 75.0 * state[0],
-                 next_fuel, state[3] - 75.0 * state[2]]
-        track.append(state.copy())
-    return track
-
-
 def projected_boundary(points: list[list[float]], columns: tuple[int, int]):
     projected = sorted({(point[columns[0]], point[columns[1]]) for point in points})
     if len(projected) < 3:
@@ -56,14 +29,15 @@ def projected_boundary(points: list[list[float]], columns: tuple[int, int]):
 
 def render(row: dict, output: Path) -> None:
     vertices = row["winner_terminal_vertices_x1_x2_x3_x4"]
-    replay = nonlinear_replay(row["winner_action_indices"])
+    replay = row["open_loop_replay_states"]
     closed_loop = row["closed_loop_replay_states"]
     strategies = ((replay, '#d1495b'), (closed_loop, '#386cb0'))
     width, height = 1240, 760
     parts = [f'<svg xmlns="http://www.w3.org/2000/svg" width="{width}" height="{height}" viewBox="0 0 {width} {height}">',
              '<rect width="100%" height="100%" fill="#fbfcfd"/>',
              '<style>text{font-family:system-ui,sans-serif;fill:#17212b}.grid{stroke:#dce3e8;stroke-width:1}.axis{stroke:#596a76;stroke-width:1.3}.boundary{fill:#4ba3a7;fill-opacity:.23;stroke:#147d83;stroke-width:2}.vertex{fill:#147d83;fill-opacity:.45}.replay{fill:none;stroke:#d1495b;stroke-width:2.5}.tick{font-size:12px}.label{font-size:14px}.title{font-size:18px;font-weight:650}</style>',
-             f'<text x="620" y="28" text-anchor="middle" class="title">A08 source reference, lambda={row["lambda"]}: projections of a 4D model</text>']
+             f'<text x="620" y="26" text-anchor="middle" class="title">A08 source reference, lambda={row["lambda"]}: projections of a 4D model</text>',
+             f'<text x="620" y="48" text-anchor="middle" class="tick">Robust predicted J={row["objective_norm"]:.6f}; open-loop nonlinear J={row["open_loop_replay_objective_norm"]:.6f}; receding-horizon nonlinear J={row["closed_loop_replay_objective_norm"]:.6f}</text>']
     panels = ((0, (0, 2), "Oxidizer flow x1", "Fuel flow x3", "Flow projection"),
               (1, (1, 3), "Oxidizer stock x2", "Fuel stock x4", "Stock projection"))
     for panel_index, columns, xlabel, ylabel, title in panels:

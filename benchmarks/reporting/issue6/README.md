@@ -101,6 +101,15 @@ These are single-adapter observations, not a speed comparison or scalability
 claim. No source-mapped limiter profile was collected. Assurance is numerical;
 no validated-arithmetic or historical row claim is made.
 
+Both nonlinear replay terminal states are evaluated with the same `J_lambda`
+criterion. The saved geometry rows report the open-loop and receding-horizon
+values separately from the robust predicted minimax value. The exhaustive
+corner-history Python checker independently recomputes both replay costs and
+checks every open-loop minimizer. The terminal V representation has 256 vertices
+for each objective. Linux process-lifetime peak RSS is saved per separately
+launched capture call; it includes the receding-horizon planner in geometry
+runs. This is a process high-water mark, not per-stage memory.
+
 Build and reproduce after configuring a Release tree with
 `-DCSL_BUILD_ISSUE6_B09_REPORT=ON`:
 
@@ -109,7 +118,7 @@ build/csl_issue6_b09_report --lambda 0 --geometry > lambda0-geometry.json
 build/csl_issue6_b09_report --lambda 1 --geometry > lambda1-geometry.json
 build/csl_issue6_b09_report --lambda 0 --measure 7 > lambda0-runs.jsonl
 build/csl_issue6_b09_report --lambda 1 --measure 7 > lambda1-runs.jsonl
-python3 benchmarks/reporting/issue6/b09_exact_oracle.py oracle.json
+python3 benchmarks/reporting/issue6/b09_independent_oracle.py oracle.json lambda0-geometry.json lambda1-geometry.json
 python3 benchmarks/reporting/issue6/b09_render_projection.py lambda0-geometry.json --output lambda0-projections
 ```
 

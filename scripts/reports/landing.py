@@ -225,6 +225,10 @@ FAMILIES = {
         "corners per plan, with an independent integer oracle and 2D terminal-set projections. "
         "The disturbance box is owner-confirmed rather than printed in L09, so this is a distinct "
         "reference case, not a historical reproduction."),
+    "issue6-b09-reference": Family(
+        r"issue6-b09-reference-[0-9a-f]{64}", "synthesis", "A08 source-reference fuel minimax",
+        "Exhaustively searches four-stage finite action plans and publishes flow and stock projections "
+        "of the four-state terminal reachable set for two objective variants."),
     "issue3-validated-minimax": Family(
         r"issue3-validated-minimax-[0-9a-f]{64}", "synthesis", "Validated finite-action minimax bounds",
         "Measures three fixed fixtures through the validated API. The B08 row checks 625 plans and "
