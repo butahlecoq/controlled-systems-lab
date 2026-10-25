@@ -147,7 +147,7 @@ target_include_directories(csl_obs04_instrumentation_comparison PRIVATE
 target_include_directories(csl_obs04_instrumentation_comparison SYSTEM PRIVATE
   "${OBS04_JSON_SOURCE_DIR}/single_include")
 target_link_libraries(csl_obs04_instrumentation_comparison PRIVATE
-  CSL::application CSL::strategy_a CSL::strategy_b CSL::polyhedral CSL::affine_sum
+  CSL::input CSL::application CSL::strategy_a CSL::strategy_b CSL::polyhedral CSL::affine_sum
   CSL::qhull_conversion CSL::highs_lp CSL::highs_convex CSL::witness_selector)
 target_compile_features(csl_obs04_instrumentation_comparison PRIVATE cxx_std_20)
 target_compile_definitions(csl_obs04_instrumentation_comparison PRIVATE

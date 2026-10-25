@@ -7,6 +7,7 @@
 #include <csl/geometry/affine_sum.hpp>
 #include <csl/geometry/hull_reducer.hpp>
 #include <csl/geometry/polyhedral_projection.hpp>
+#include <csl/input/scenario_loader.hpp>
 #include <csl/problem/validator.hpp>
 #include <csl/synthesis/strategy_a/strategy.hpp>
 #include <csl/synthesis/strategy_b/direct_joint.hpp>
@@ -215,7 +216,9 @@ HostFacts host_facts() {
 }
 
 struct PreflightTimings {
-    std::uint64_t fixture_construction_and_resolution_ns{};
+    std::uint64_t scenario_file_read_ns{};
+    std::uint64_t scenario_json_parse_ns{};
+    std::uint64_t scenario_load_validation_resolution_ns{};
     std::uint64_t provider_registration_ns{};
     std::uint64_t comparison_admission_ns{};
 };
@@ -252,23 +255,17 @@ template<class Port> registry::PreparedProvider<Port> selected(
     return take(registry::prepare_provider(registry::select_provider(providers, method, requirements)));
 }
 
-SetHandle interval(std::string id) {
-    return take(sets::make_h({{std::move(id)}, 1, {"u"}},
-        {take(numeric::snapshot(Matrix{2, 1, {1, -1}})),
-         take(numeric::snapshot_vector(Vector{1, 0})),
-         take(numeric::snapshot(Matrix{0, 1, {}})),
-         take(numeric::snapshot_vector(Vector{}))})).as_handle();
+std::string read_scenario_file() {
+    std::ifstream input(benchmarks::obs04::build::scenario_file, std::ios::binary);
+    if (!input) throw std::runtime_error("Could not open the pinned OBS-04 scenario file");
+    std::string bytes{std::istreambuf_iterator<char>{input}, std::istreambuf_iterator<char>{}};
+    if (input.bad()) throw std::runtime_error("Could not read the pinned OBS-04 scenario file");
+    return bytes;
 }
 
-problem::ResolvedProblem source() {
-    return take(problem::resolve({{"obs04-ts01-instrumentation"},
-        std::make_shared<const SystemModel>(SystemModel{{
-            {1, 1, 0}, TimeDomain::discrete,
-            LinearStage{{1, 1, {1}}, {1, 1, {1}}, {1, 0, {}}, {0}}}, {}}),
-        {0, 1, 2}, KnownInitial{{0}}, ContinuousDomain{{interval("u0"), interval("u1")}},
-        {UniversalSet{1}, UniversalSet{1}, UniversalSet{1}}, {}, {},
-        InformationPattern::nominal_open_loop, QuadraticTerminal{{1, 1, {2}}, {-2}, 1}},
-        {problem::UncertaintyStructure::stage_product_uncoupled, {}, {}}));
+problem::ResolvedProblem load_scenario(std::string_view bytes) {
+    const auto input_bytes = std::as_bytes(std::span{bytes.data(), bytes.size()});
+    return take(input::load_scenario(input_bytes)).problem();
 }
 
 struct Modules {
@@ -1268,8 +1265,15 @@ int main(int argc, char** argv) {
             throw std::invalid_argument("Profile mode and comparison-record capture are separate modes");
         PreflightTimings preflight;
         auto phase_begin=Clock::now();
-        const auto problem = source();
-        preflight.fixture_construction_and_resolution_ns=static_cast<std::uint64_t>(ns(phase_begin,Clock::now()));
+        const auto scenario_bytes = read_scenario_file();
+        preflight.scenario_file_read_ns=static_cast<std::uint64_t>(ns(phase_begin,Clock::now()));
+        phase_begin=Clock::now();
+        const auto parsed_scenario = Json::parse(scenario_bytes);
+        if (!parsed_scenario.is_object()) throw std::runtime_error("OBS-04 scenario JSON root is not an object");
+        preflight.scenario_json_parse_ns=static_cast<std::uint64_t>(ns(phase_begin,Clock::now()));
+        phase_begin=Clock::now();
+        const auto problem = load_scenario(scenario_bytes);
+        preflight.scenario_load_validation_resolution_ns=static_cast<std::uint64_t>(ns(phase_begin,Clock::now()));
         phase_begin=Clock::now();
         auto modules = make_modules();
         preflight.provider_registration_ns=static_cast<std::uint64_t>(ns(phase_begin,Clock::now()));
@@ -1382,11 +1386,13 @@ int main(int argc, char** argv) {
         if(!output||!(output<<comparison_wire)||!output.flush())
             throw std::runtime_error("Could not write comparison record: "+record_path.string());
         const auto comparison_json=Json::parse(comparison_wire);
-        std::cout << "# shared_preflight=" << Json{{"schema","csl.obs04-shared-preflight/1"},
+        std::cout << "# shared_preflight=" << Json{{"schema","csl.obs04-shared-preflight/2"},
             {"comparison_spec_id",comparison_json.at("comparison_spec_id")},
             {"comparison_run_id",comparison_json.at("comparison_run_id")},
             {"scope","selected_shared_preflight_blocks_before_configuration_workspaces_and_baselines"},
-            {"fixture_construction_and_resolution_ns",preflight.fixture_construction_and_resolution_ns},
+            {"scenario_file_read_ns",preflight.scenario_file_read_ns},
+            {"scenario_json_parse_ns",preflight.scenario_json_parse_ns},
+            {"scenario_load_validation_resolution_ns",preflight.scenario_load_validation_resolution_ns},
             {"provider_registration_ns",preflight.provider_registration_ns},
             {"comparison_admission_ns",preflight.comparison_admission_ns}}.dump() << '\n';
         std::cout << "# comparison_record_digest=" << problem::hex(comparison.content().digest())

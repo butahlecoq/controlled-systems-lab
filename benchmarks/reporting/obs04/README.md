@@ -65,13 +65,15 @@ selects a path, and existing files are never overwritten. Keep the separate
 limiter-profile result with any retained measurement. Do not combine the
 existing synthetic OBS-02 collector loop with these solver timings.
 
-The driver reports three selected shared preflight blocks in a structured
+The driver reports selected shared preflight phases in a structured
 `# shared_preflight=` JSONL comment, keyed by the comparison spec and run IDs.
 The JSONL is retained beside the immutable comparison record; keeping these
 observed durations out of the comparison spec prevents timing noise from
-changing `ComparisonSpecId`. The reported blocks cover fixture construction and
-problem resolution, provider registration, and combined comparison admission.
-The fixture is constructed in code, so there is no input-file parsing phase.
+changing `ComparisonSpecId`. Current schema `/2` times scenario file reading,
+standalone JSON parsing, the complete public scenario load/validation/resolution
+call, provider registration, and combined comparison admission. The standalone
+parse is a diagnostic on the same bytes; the public loader parses those bytes
+again, so its full duration is not reduced by the diagnostic parse time.
 Admission combines common request guards, strategy capability checks, and
 registry preparation; the current interface does not split these subphases.
 These timers stop before configuration-template creation, workspace creation,
@@ -101,10 +103,11 @@ retained rather than discarded. These are process-level samples of the three
 selected blocks, not all pre-attempt setup; the timers stop before
 configuration-template creation, workspace creation, and the two analytic
 baseline strategy runs. They do not establish a performance winner or general
-latency claim. The fixture is constructed in code, so there is no input-file
-parsing phase. Admission combines common request guards, strategy capability
-checks, and registry preparation; the current interface does not split these
-subphases. Family construction inside the strategy remains unavailable.
+latency claim. These `/1` records use the original in-code fixture and do not
+contain scenario-file timings. Admission combines common request guards,
+strategy capability checks, and registry preparation; the current interface
+does not split these subphases. Family construction inside the strategy remains
+unavailable.
 `csl.obs04-instrumentation-comparison-event/6` is the current raw per-attempt
 payload; the codec continues to accept event `/2` through `/5`. It records
 the `StrategyPort::run` interval, first and additional direction query, their
