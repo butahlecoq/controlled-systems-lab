@@ -1,5 +1,7 @@
 #include <csl/experiments/batch_runner.hpp>
 
+#include "process_memory_observer.hpp"
+
 #include <nlohmann/json.hpp>
 #include <algorithm>
 #include <cmath>
@@ -241,14 +243,17 @@ artifacts::ArtifactError artifact_error(artifacts::ArtifactErrorCode code,
 template<class Port>
 std::optional<artifacts::SweepPhaseResources> phase_resources(
     const execution::BatchResult<Port>& batch, const ResourcePolicy& requested,
-    std::optional<std::size_t> retained_result_reservations) {
+    std::optional<std::size_t> retained_result_reservations,
+    std::optional<std::uint64_t> observed_process_memory_bytes) {
     if (!batch.resources) return {};
     const bool reservations_active = batch.enforcement.memory == execution::MemoryEnforcement::active_reservations_only;
-    const auto memory_support = reservations_active
+    const auto reservation_support = reservations_active
         ? retained_result_reservations
             ? artifacts::SweepMemorySupport::active_and_retained_reservations
             : artifacts::SweepMemorySupport::active_workspace_reservations
         : artifacts::SweepMemorySupport::unlimited_accounting;
+    const auto memory_support = observed_process_memory_bytes
+        ? artifacts::SweepMemorySupport::process_observation : reservation_support;
     std::optional<std::uint64_t> workspace;
     if (batch.enforcement.peak_workspace_reservation_bytes)
         workspace = static_cast<std::uint64_t>(*batch.enforcement.peak_workspace_reservation_bytes);
@@ -261,8 +266,10 @@ std::optional<artifacts::SweepPhaseResources> phase_resources(
     return artifacts::SweepPhaseResources{requested,
         static_cast<std::uint64_t>(batch.enforcement.outer_worker_threads_started),
         static_cast<std::uint64_t>(batch.enforcement.peak_active_tasks), {}, workspace, retained,
-        enforced_memory, {}, memory_support,
-        reservations_active ? "executor workspace and declared retained-result reservations" : ""};
+        enforced_memory, observed_process_memory_bytes, memory_support,
+        observed_process_memory_bytes
+            ? "process resident-set snapshot at phase completion; includes unrelated process allocations; not a peak or limit"
+            : reservations_active ? "executor workspace and declared retained-result reservations" : ""};
 }
 
 std::optional<artifacts::SweepNotRunReason> not_run_reason(QueryNotRunReason reason) {
@@ -333,7 +340,8 @@ SweepOutcome run_sweep(std::span<const ScenarioSweepCase> cases, const ResourceP
     if (auto* diagnostics = std::get_if<Diagnostics>(&outcome)) return *diagnostics;
     return SweepResult{std::get<execution::BatchResult<registry::StrategyPort>>(std::move(outcome)),
         std::move(records), resources, retained_result_reservations_known ?
-            std::optional<std::size_t>{retained_result_reservations} : std::nullopt};
+            std::optional<std::size_t>{retained_result_reservations} : std::nullopt,
+        detail::process_resident_bytes()};
 }
 
 FamilyQueryOutcome run_family_queries(SweepResult&& coarse,
@@ -444,7 +452,7 @@ FamilyQueryOutcome run_family_queries(SweepResult&& coarse,
 
     return FamilyQueryResult{std::move(coarse), std::move(records),
         std::get<execution::BatchResult<registry::SelectorPort>>(std::move(query_result)),
-        query_result_reservation_total};
+        query_result_reservation_total, detail::process_resident_bytes()};
 }
 
 artifacts::ArtifactResult<artifacts::RecordedSweepArtifact> record_family_query_sweep(
@@ -461,7 +469,7 @@ artifacts::ArtifactResult<artifacts::RecordedSweepArtifact> record_family_query_
         return artifact_error(artifacts::ArtifactErrorCode::identity, "sweep.run_id",
             "Coarse and query phases must share a run ID");
     const auto coarse_resources = phase_resources(result.sweep.batch, result.sweep.requested_resources,
-        result.sweep.retained_result_reservation_bytes);
+        result.sweep.retained_result_reservation_bytes, result.sweep.observed_process_memory_bytes);
     std::optional<std::size_t> query_retained;
     if (result.sweep.retained_result_reservation_bytes && result.query_result_reservation_bytes) {
         const auto coarse = *result.sweep.retained_result_reservation_bytes;
@@ -471,7 +479,8 @@ artifacts::ArtifactResult<artifacts::RecordedSweepArtifact> record_family_query_
                 "Retained result reservations overflow the addressable size.");
         query_retained = coarse + query;
     }
-    const auto query_resources = phase_resources(result.query_batch, result.sweep.requested_resources, query_retained);
+    const auto query_resources = phase_resources(result.query_batch, result.sweep.requested_resources,
+        query_retained, result.observed_process_memory_bytes);
     if (!coarse_resources || !query_resources)
         return artifact_error(artifacts::ArtifactErrorCode::invalid_input, "sweep.resources",
             "Both execution phases must retain their requested resource policy");

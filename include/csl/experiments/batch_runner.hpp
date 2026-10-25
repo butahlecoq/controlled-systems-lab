@@ -3,6 +3,7 @@
 #include <csl/artifacts/scenario_sweep.hpp>
 #include <csl/execution/executor.hpp>
 #include <csl/registry/provider.hpp>
+#include <cstdint>
 
 namespace csl::experiments {
 
@@ -45,6 +46,8 @@ struct SweepResult {
     // Original request and caller-declared output reservations retained for this sweep.
     ResourcePolicy requested_resources{};
     std::optional<std::size_t> retained_result_reservation_bytes;
+    // Completion-time process resident-set snapshot; not a peak or a memory limit.
+    std::optional<std::uint64_t> observed_process_memory_bytes;
 };
 
 enum class QueryNotRunReason {
@@ -74,6 +77,8 @@ struct FamilyQueryResult {
     execution::BatchResult<registry::SelectorPort> query_batch;
     // Caller-declared reservation for selector outputs retained by this phase.
     std::optional<std::size_t> query_result_reservation_bytes;
+    // Completion-time process resident-set snapshot; includes retained coarse results.
+    std::optional<std::uint64_t> observed_process_memory_bytes;
 };
 
 using SweepOutcome = std::variant<SweepResult, Diagnostics>;
