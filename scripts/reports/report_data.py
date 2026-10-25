@@ -528,9 +528,28 @@ def convex_native_phases(trial, route, solver):
     for key in fields:
         if key.startswith('phase.'):
             is_scheduler_observation=key in {'phase.'+p+'.scheduler_threads' for p in NATIVE_PHASES} | {'phase.qp.retry.scheduler_threads'}
+            is_retry_observation=key in {'phase.qp.retry.'+suffix for suffix in ('time_limit','api_status','model_status')}
             require(key in {'phase.'+p+'.'+suffix for p in NATIVE_PHASES for suffix in ('time_limit','api_status','model_status','iterations','info')} or
+                    is_retry_observation or
                     is_scheduler_observation,'unknown pinned native phase field')
-            if not is_scheduler_observation: phase_evidence.add(key.split('.')[1])
+            if not is_scheduler_observation and not is_retry_observation: phase_evidence.add(key.split('.')[1])
+    for key, value in fields.items():
+        if key.endswith('.scheduler_threads'):
+            require(re.fullmatch(r'[1-9][0-9]*', value) is not None and int(value) <= 4096,
+                    'invalid native scheduler width')
+    retry_keys={key for key in fields if key.startswith('phase.qp.retry.')}
+    if retry_keys:
+        retry_prefix='phase.qp.retry.'
+        require(route=='qp' and fields.get('start.valid')=='true' and
+                {'phase.qp.retry.time_limit','phase.qp.retry.api_status','phase.qp.retry.model_status'} <= retry_keys,
+                'retry diagnostics require an entered QP retry call')
+        require(fields['phase.qp.retry.api_status'] in ('-1','0','1') and
+                re.fullmatch(r'[0-9]+',fields['phase.qp.retry.model_status']) is not None and
+                int(fields['phase.qp.retry.model_status']) <= 18,
+                'invalid pinned retry status')
+        require(positions['phase.qp.retry.time_limit'] < positions.get('phase.qp.retry.scheduler_threads',positions['phase.qp.retry.api_status']) <
+                positions['phase.qp.retry.api_status'] < positions['phase.qp.retry.model_status'],
+                'native retry return statement order differs')
     selected={'qp':{'feasibility','qp'},'linear':{'linear'},'constant':set()}[route]
     require(phase_evidence <= selected, 'native route conflict')
     if trial.get('public_run_entered') is False:
@@ -541,10 +560,6 @@ def convex_native_phases(trial, route, solver):
         prefix = 'phase.' + phase + '.'
         api, model = fields.get(prefix+'api_status'), fields.get(prefix+'model_status')
         count, info = fields.get(prefix+'iterations'), fields.get(prefix+'info')
-        scheduler_threads = fields.get(prefix+'scheduler_threads')
-        if scheduler_threads is not None:
-            require(re.fullmatch(r'[1-9][0-9]*', scheduler_threads) is not None and int(scheduler_threads) <= 4096,
-                    'invalid native scheduler width')
         require((api is None) == (model is None), 'half-paired native status')
         require(not (count is not None and info is not None), 'conflicting native iteration dispositions')
         require(api is not None or (count is None and info is None), 'iteration without returned call')

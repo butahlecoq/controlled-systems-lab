@@ -63,9 +63,13 @@ class NativePhaseTests(unittest.TestCase):
         retry=self.trial('phase.feasibility.time_limit=1\nphase.feasibility.api_status=0\n'
                          'phase.feasibility.model_status=7\nphase.feasibility.iterations=0\n'
                          'start.valid=true\nstart.default_fallback=false\nphase.qp.time_limit=1\n'
-                         'phase.qp.retry.scheduler_threads=2\nphase.qp.api_status=0\n'
-                         'phase.qp.model_status=7\nphase.qp.iterations=0','completed')
+                         'phase.qp.api_status=0\nphase.qp.model_status=7\nphase.qp.iterations=0\n'
+                         'phase.qp.retry.time_limit=1\nphase.qp.retry.scheduler_threads=2\n'
+                         'phase.qp.retry.api_status=0\nphase.qp.retry.model_status=7','completed')
         self.project(retry)
+        retry['result']['raw_diagnostics']=retry['result']['raw_diagnostics'].replace(
+            'phase.qp.retry.scheduler_threads=2','phase.qp.retry.scheduler_threads=999999')
+        with self.assertRaises(ValueError):self.project(retry)
 
     def test_exception_aborted_and_before_entry_are_distinct(self):
         for status,reason in [('exception','exception_boundary_unobserved'),('aborted','aborted_boundary_unobserved')]:
