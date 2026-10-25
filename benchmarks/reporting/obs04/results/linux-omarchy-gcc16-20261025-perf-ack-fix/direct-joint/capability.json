@@ -1,12 +1,12 @@
 {
   "acknowledged_commands": 64,
   "binary_name": "csl_obs04_instrumentation_comparison",
-  "binary_sha256": "8ebf6315802cf15ebdf0a72dcea60070a9dfebef811b7cf0e43341114221043d",
+  "binary_sha256": "1588f202a0709323316b7e918070539642cbe01804362f545d57d76e5a9dac4d",
   "calls_passed": 32,
   "calls_requested": 32,
-  "capture_bytes": 32708,
+  "capture_bytes": 30028,
   "capture_file": "acknowledged.perf.data",
-  "capture_sha256": "44b989678a9bfe8403d9c94475a6473324c5dabe214f3452072b9f3ddc29cc48",
+  "capture_sha256": "dc345550a003ac1dfbe5c7b67a0e398f75649ac4e4584109dd442e5879efd1b4",
   "command": [
     "perf",
     "record",
@@ -38,16 +38,18 @@
   "perf_stdout": "",
   "perf_version": "perf version 7.2.3-1",
   "profile": {
+    "effective_frequency_hz": null,
+    "effective_frequency_status": "not_reported_by_this_probe",
     "event": "cycles:u",
-    "frequency_hz": 4999,
-    "max_bytes": 33554432
+    "max_bytes": 33554432,
+    "requested_frequency_hz": 4999
   },
   "protocol": "linux-perf-record-ack-fifo",
   "reason": "bounded profile contains decoded cycles samples with acknowledged enable/disable commands",
-  "sample_count": 209,
+  "sample_count": 177,
   "sample_scope": "acknowledged_perf_control_transitions",
   "schema": "csl.obs04-perf-probe/1",
-  "source_commit": "da66f849c4b558c12e31a3987c5989722cb2ad72",
+  "source_commit": "2e146c50460ae81cb7c201c1521a186faf513d28",
   "status": "available",
   "strategy": "csl.synthesis.strategy-b",
   "timeout_seconds": 120
