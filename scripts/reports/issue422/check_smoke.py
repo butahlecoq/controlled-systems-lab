@@ -30,8 +30,10 @@ def main() -> int:
     assert archive["schema"] == "csl.comparison-record/1"
     spec = json.loads(archive["spec"])
     assert spec["schema"] == "csl.comparison-spec/3"
+    assert spec["environment"]["build"]["source_dirty"] is False
     assert spec["environment"]["build"]["build_type"] == "Release"
     assert spec["environment"]["runtime"]["binary_sha256"]["status"] == "available"
+    assert spec["environment"]["runtime"]["logical_cpus"]["status"] == "available"
     assert spec["input_manifest_hash"] == digest
     assert spec["problem_id"] == "csl.problem.v1.sha256:" + digest
     assert spec["repetitions"] == 7

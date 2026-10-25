@@ -16,6 +16,9 @@
 #include <stdexcept>
 #include <string_view>
 #include <thread>
+#ifdef __linux__
+#include <sys/utsname.h>
+#endif
 #include <variant>
 
 namespace {
@@ -129,12 +132,46 @@ Json binary_digest(std::string_view path) {
 Json environment_manifest(std::string_view executable) {
     const auto logical=std::thread::hardware_concurrency();
     std::string os_family="unknown";
+    Json os_version=unavailable("not queried by the report harness");
+    Json kernel=unavailable("not queried by the report harness");
+    Json cpu_model=unavailable("not queried by the report harness");
 #ifdef _WIN32
     os_family="Windows";
 #elif defined(__APPLE__)
     os_family="Darwin";
 #elif defined(__linux__)
     os_family="Linux";
+    struct utsname host{};
+    if(uname(&host)==0)kernel=available(host.release);
+    {
+        std::ifstream os_release("/etc/os-release");
+        std::string line;
+        while(std::getline(os_release,line)) {
+            if(line.starts_with("PRETTY_NAME=")) {
+                auto value=line.substr(std::string{"PRETTY_NAME="}.size());
+                if(value.size()>=2&&value.front()=='\"'&&value.back()=='\"')
+                    value=value.substr(1,value.size()-2);
+                os_version=available(std::move(value));
+                break;
+            }
+        }
+    }
+    {
+        std::ifstream cpu_info("/proc/cpuinfo");
+        std::string line;
+        while(std::getline(cpu_info,line)) {
+            if(line.starts_with("model name")) {
+                const auto separator=line.find(':');
+                if(separator!=std::string::npos) {
+                    auto value=line.substr(separator+1);
+                    const auto first=value.find_first_not_of(" \t");
+                    if(first!=std::string::npos)value.erase(0,first);
+                    cpu_model=available(std::move(value));
+                }
+                break;
+            }
+        }
+    }
 #endif
     return {{"schema","csl.obs04-environment/1"},
         {"build",{{"schema","csl.obs04-build/1"},{"source_revision",CSL_ISSUE422_SOURCE_COMMIT},
@@ -150,10 +187,10 @@ Json environment_manifest(std::string_view executable) {
             {"backends",{{"highs",{{"version",CSL_ISSUE422_HIGHS_VERSION},{"archive_sha256",CSL_ISSUE422_HIGHS_SHA256}}},
                 {"qhull",{{"version",CSL_ISSUE422_QHULL_VERSION},{"archive_sha256",CSL_ISSUE422_QHULL_SHA256}}}}}}},
         {"runtime",{{"schema","csl.obs04-runtime/1"},{"binary_sha256",binary_digest(executable)},
-            {"os_family",os_family},{"os_version",unavailable("not queried by the report harness")},
-            {"kernel",unavailable("not queried by the report harness")},
+            {"os_family",os_family},{"os_version",std::move(os_version)},
+            {"kernel",std::move(kernel)},
             {"architecture",CSL_ISSUE422_ARCHITECTURE},
-            {"cpu_model",unavailable("not queried by the report harness")},
+            {"cpu_model",std::move(cpu_model)},
             {"logical_cpus",logical>0?available(logical):unavailable("hardware_concurrency returned zero")}}},
         {"execution",{{"requested_workers",1},{"observed_driver_workers",1},{"requested_backend_threads",1},
             {"observed_backend_threads",unavailable("the finite minimax methods use no external backend")},
