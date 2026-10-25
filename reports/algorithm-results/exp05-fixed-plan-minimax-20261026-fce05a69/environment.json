@@ -1,0 +1,75 @@
+{
+  "build": {
+    "architecture": "x86_64",
+    "backends": {
+      "highs": {
+        "archive_sha256": "2b44b074cf41439325ce4d0bbdac2d51379f56faf17ba15320a410d3c1f07275",
+        "version": "1.11.0"
+      },
+      "qhull": {
+        "archive_sha256": "8774e9a12c70b0180b95d6b0b563c5aa4bea8d5960c15e18ae3b6d2521d64f8b",
+        "version": "8.0.2"
+      }
+    },
+    "build_type": "Release",
+    "c_flags_sha256": "4dd59be449eea44ea9b80469a10392d694a053e017b50b00a65198b9c3010c60",
+    "compiler_id": "GNU",
+    "compiler_version": "16.2.1",
+    "cxx_flags_sha256": "4dd59be449eea44ea9b80469a10392d694a053e017b50b00a65198b9c3010c60",
+    "cxx_standard": "20",
+    "executable_link_flags_sha256": "36a9e7f1c95b82ffb99743e0c5c4ce95d83c9a430aac59f84ef3cbfab6145068",
+    "generator": "Ninja",
+    "schema": "csl.obs04-build/1",
+    "source_dirty": false,
+    "source_revision": "fce05a69fd62a2397934af53eaf269468990176a",
+    "source_snapshot_method": "git-head-tracked-diff-untracked-content-sha256/1",
+    "source_tree_sha256": "2e832abaed70ef085560fccf8983a4b7d60c0e015fa0015f423f99891974562a",
+    "target_flags_sha256": "69c85656de1b7362719e9f3d173994d1424590add2006988b3161803338620be"
+  },
+  "execution": {
+    "cache_policy": "one warm-up repetition per arm; operating-system caches are not flushed",
+    "observed_backend_threads": {
+      "reason": "the finite minimax methods use no external backend",
+      "status": "unavailable"
+    },
+    "observed_driver_workers": 1,
+    "requested_backend_threads": 1,
+    "requested_workers": 1,
+    "seed_policy": {
+      "kind": "not_applicable",
+      "reason": "fixed analytic fixture uses no random generator"
+    },
+    "tolerances": {
+      "absolute": 0.0,
+      "relative": 0.0
+    },
+    "warmup_repetitions": 1,
+    "workspace_policy": "fresh-workspace-per-attempt"
+  },
+  "runtime": {
+    "architecture": "x86_64",
+    "binary_sha256": {
+      "status": "available",
+      "value": "802d1190e77137f179dc977f3436e6e8558580a45a20a9f984d92f033e83874a"
+    },
+    "cpu_model": {
+      "status": "available",
+      "value": "AMD Ryzen 5 3550H with Radeon Vega Mobile Gfx"
+    },
+    "kernel": {
+      "status": "available",
+      "value": "7.2.5-3-omarchy"
+    },
+    "logical_cpus": {
+      "status": "available",
+      "value": 8
+    },
+    "os_family": "Linux",
+    "os_version": {
+      "status": "available",
+      "value": "Omarchy"
+    },
+    "schema": "csl.obs04-runtime/1"
+  },
+  "schema": "csl.obs04-environment/1"
+}

@@ -1,0 +1,15 @@
+-- CSL archive cache hit: eigen 8586084f71f9bde545ee7fa6d00288b264a2b7ac3607b974e54d13e7162c1c72
+-- CSL archive cache hit: json 0d8ef5af7f9794e3263480193c491549b2ba6cc74bb018906202ada498a79406
+-- CSL archive cache hit: doctest 632ed2c05a7f53fa961381497bf8069093f0d6628c5f26286161fbd32a560186
+CMake Deprecation Warning at build/core/_deps/doctest-src/CMakeLists.txt:1 (cmake_minimum_required):
+  Compatibility with CMake < 3.10 will be removed from a future version of
+  CMake.
+
+  Update the VERSION argument <min> value.  Or, use the <min>...<max> syntax
+  to tell CMake that the project requires at least <min> but has been updated
+  to work with policies introduced by <max> or earlier.
+
+
+-- Configuring done (0.6s)
+-- Generating done (0.2s)
+-- Build files have been written to: /home/butahlecoq/.local/share/codex/worktrees/issue422-fixed-plan-minimax-20261026/build/core

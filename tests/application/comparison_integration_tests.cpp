@@ -279,7 +279,7 @@ csl::artifacts::RecordedRunArtifact check_complete_family_encoder_boundary(const
             ar::MemoryAccounting::unlimited});
     REQUIRE(std::holds_alternative<std::string>(encoded));
     const auto& wire=std::get<std::string>(encoded);
-    CHECK(wire.find("csl.run-statistics/6")!=std::string::npos);
+    CHECK(wire.find("csl.run-statistics/7")!=std::string::npos);
     CHECK(wire.find("unverified_recorded_data")!=std::string::npos);
     CHECK(wire.find("csl.h-relation-attachment/1")!=std::string::npos);
     const auto outer = nlohmann::json::parse(wire);
@@ -478,7 +478,7 @@ void compare_profile(const std::string& profile) {
     CHECK(restored_bundle.spec_id().digest==spec.digest());
     CHECK(restored_bundle.identity().digest==bundle.content().digest());
     CHECK(bundle_wire.find("csl.comparison/1")!=std::string::npos);
-    CHECK(bundle_wire.find("csl.run-statistics/6")!=std::string::npos);
+    CHECK(bundle_wire.find("csl.run-statistics/7")!=std::string::npos);
 
     auto run_a_enabled=check_complete_family_encoder_boundary(problem,prepared,execution.strategies[0],
         0,witness_request,true);
@@ -827,7 +827,17 @@ void compare_profile(const std::string& profile) {
         {ar::AttemptStatus::unsupported,
             ar::UnsupportedFinal{{{DiagnosticCode::unsupported,"capability","saved unsupported request"}}},
             "unsupported"},
-        {ar::AttemptStatus::cancelled,ar::SkippedFinal{ar::SkippedReason::cancelled},"cancelled"}};
+        {ar::AttemptStatus::refused,
+            ar::ProgramFinal{ProgramResult{Termination::operation_rejected,
+                {ProgramIdentity{problem.identity(),ProgramId{"saved-provider-refusal"}},MathematicalOutcome::undetermined,Unestablished{},{}},{},{},
+                "saved provider refusal",{}},{}},
+            "refused"},
+        {ar::AttemptStatus::refused,
+            ar::MinimaxFinal{Termination::operation_rejected,MinimaxOutcome::undetermined,
+                Assurance::numerical,ProgramIdentity{problem.identity(),ProgramId{"saved-refusal"}},{},{}},
+            "refused"},
+        {ar::AttemptStatus::cancelled,ar::SkippedFinal{ar::SkippedReason::cancelled},"cancelled"},
+        {ar::AttemptStatus::incomplete,ar::SkippedFinal{ar::SkippedReason::batch_failed},"incomplete"}};
     for(std::size_t index=0;index<non_success_outcomes.size();++index) {
         const auto& [status,final,reported_status]=non_success_outcomes[index];
         const ar::RunId non_success_run{"saved-non-success-"+std::to_string(index)};

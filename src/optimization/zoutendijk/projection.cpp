@@ -33,6 +33,7 @@ bool close_to(double value, double bound, NumericalPolicy policy) {
 ProjectionStopReason stop_reason(Termination termination) {
     switch (termination) {
     case Termination::cancelled: return ProjectionStopReason::cancelled;
+    case Termination::deadline_expired:
     case Termination::resource_limit: return ProjectionStopReason::resource_limit;
     case Termination::operation_rejected: return ProjectionStopReason::operation_rejected;
     case Termination::contract_rejected: return ProjectionStopReason::contract_rejected;

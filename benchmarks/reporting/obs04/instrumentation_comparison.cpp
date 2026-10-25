@@ -498,6 +498,7 @@ ar::AttemptStatus attempt_status(const SynthesisOutcome& outcome) {
     switch (std::get<SynthesisResult>(outcome).termination) {
     case Termination::completed: return ar::AttemptStatus::completed;
     case Termination::cancelled: return ar::AttemptStatus::cancelled;
+    case Termination::deadline_expired: return ar::AttemptStatus::timed_out;
     case Termination::resource_limit: return ar::AttemptStatus::resource_limited;
     case Termination::operation_rejected: return ar::AttemptStatus::unsupported;
     case Termination::numerical_failure:
@@ -510,7 +511,9 @@ const char* attempt_status_name(ar::AttemptStatus status) {
     switch(status) {
     case ar::AttemptStatus::completed: return "passed";
     case ar::AttemptStatus::failed: return "failed";
+    case ar::AttemptStatus::refused: return "refused";
     case ar::AttemptStatus::unsupported: return "unsupported";
+    case ar::AttemptStatus::timed_out: return "timed_out";
     case ar::AttemptStatus::cancelled: return "cancelled";
     case ar::AttemptStatus::resource_limited: return "resource_limited";
     case ar::AttemptStatus::incomplete: return "incomplete";
@@ -522,7 +525,9 @@ const char* terminal_status_name(ar::AttemptStatus status) {
     switch(status) {
     case ar::AttemptStatus::completed: return "completed";
     case ar::AttemptStatus::failed: return "failed";
+    case ar::AttemptStatus::refused: return "refused";
     case ar::AttemptStatus::unsupported: return "unsupported";
+    case ar::AttemptStatus::timed_out: return "timed_out";
     case ar::AttemptStatus::cancelled: return "cancelled";
     case ar::AttemptStatus::resource_limited: return "resource_limited";
     case ar::AttemptStatus::incomplete: return "incomplete";
@@ -534,6 +539,7 @@ const char* termination_name(Termination termination) {
     switch(termination) {
     case Termination::completed: return "completed";
     case Termination::cancelled: return "cancelled";
+    case Termination::deadline_expired: return "deadline_expired";
     case Termination::resource_limit: return "resource_limit";
     case Termination::numerical_failure: return "numerical_failure";
     case Termination::operation_rejected: return "operation_rejected";

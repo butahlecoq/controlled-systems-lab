@@ -7,8 +7,9 @@
 #include <variant>
 
 namespace csl {
-enum class Termination { completed, cancelled, resource_limit, numerical_failure, operation_rejected, contract_rejected };
+enum class Termination { completed, cancelled, deadline_expired, resource_limit, numerical_failure, operation_rejected, contract_rejected };
 enum class MathematicalOutcome { optimal, infeasible, unbounded, infimum_not_attained, undetermined };
+enum class MinimaxOutcome { optimal, infeasible, empty_catalogue, no_scenarios, undetermined };
 template<class Subject> struct OutcomeClaim {
     Subject subject;
     MathematicalOutcome value;

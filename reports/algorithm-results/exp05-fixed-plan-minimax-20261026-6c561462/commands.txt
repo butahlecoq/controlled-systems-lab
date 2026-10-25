@@ -1,0 +1,4 @@
+cmake -S . -B build/core -DCMAKE_BUILD_TYPE=Release -DCSL_BUILD_ISSUE422_REPORT=ON
+cmake --build build/core --target csl_issue422_fixed_plan_comparison --parallel 4
+build/core/csl_issue422_fixed_plan_comparison > benchmarks/reporting/issue422/results/finite-plan-comparison.json
+python scripts/reports/issue422/check_smoke.py build/core/csl_issue422_fixed_plan_comparison

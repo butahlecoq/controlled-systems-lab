@@ -1,0 +1,18 @@
+{
+  "files": {
+    "README.md": "6c4ab98eec64b7ec27f8f9461c648c633260c9ba51137b21ad1d7755574088f5",
+    "build.log": "f71ef195f33e2f866ebe4f76bc7cdd9c067c55ec9e00a337e23f6a7e33e6343d",
+    "commands.txt": "a8bb24f1de912b5c74cf8b752e1076577b4a764806422fb37e50a7f5a337eb09",
+    "comparison-spec-v3.schema.json": "1069873676f67db116227c49a4e81e3bb378e864792f9e3af2dd6bdbcfd7ff6d",
+    "comparison.json": "c2af50e99939113da7369740924798c3609c9b3966cf74a50cb955c7a8240ec1",
+    "configure.log": "1e5d319d6a4b929473eda58a2c3ea0370079d90b10f7c9a6e0a86cd1e93c836d",
+    "environment.json": "68119063b52f97240fd147200959885c3bb3ee77568b438b510095f4389e3941",
+    "fixed_plan_comparison.cpp": "cd29ced4eb525de8c1e58c0c91777c3e699c56e864996ea02d0d2cd29248742b",
+    "index.html": "a0e5b906fe719a5fce19a1aab8c652fd9fa8f7aa9007b9fa3147ac34e2b69f08",
+    "trials.csv": "bcbf72acc71ac4c39018deca52ab9f837cae5b58247b8ac04379757d8545b39e",
+    "visual.svg": "4555af11ed999db069d21ab9e3ffcebc86f54a3a2dce7d69a3ebbbdde8391b0b"
+  },
+  "report_id": "exp05-fixed-plan-minimax-20261026-6c561462",
+  "schema": "csl.exp05-minimax-report-manifest/1",
+  "source_commit": "6c5614620df222a5ca623527e2e26b1afe97757d"
+}

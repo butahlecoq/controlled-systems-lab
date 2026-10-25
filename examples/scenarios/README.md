@@ -52,7 +52,7 @@ solution or a solver trace.
 Issue #421 connects this non-fuel fixture to the existing scenario CLI with a
 `nominal_open_loop` candidate request. The run resolves the authored scenario,
 prepares and executes both registered strategies, then saves one
-`csl.run-statistics/6` artifact per strategy. In the current tested run,
+`csl.run-statistics/7` artifact per strategy. In the current tested run,
 reach-back is rejected by the convex adapter's `1e-12` matrix-removal threshold;
 Strategy B completes with an undetermined candidate and one feasible incumbent
 checked against the original model. The integration check verifies that

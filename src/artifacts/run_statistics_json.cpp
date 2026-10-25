@@ -117,7 +117,8 @@ Json configuration_record(const ConfigurationInput& c,bool semantic) {
     require(std::isfinite(c.numerical.absolute_tolerance)&&c.numerical.absolute_tolerance>=0&&
         std::isfinite(c.numerical.relative_tolerance)&&c.numerical.relative_tolerance>=0,"configuration.numerical","Invalid tolerance");
     require(std::isfinite(c.output.witnesses.distinctness_tolerance)&&c.output.witnesses.distinctness_tolerance>=0,"configuration.output","Invalid distinctness tolerance");
-    require(c.output.kind==OutputKind::synthesis||c.output.kind==OutputKind::program,"configuration.output","Unknown output kind");
+    require(c.output.kind==OutputKind::synthesis||c.output.kind==OutputKind::program||
+        c.output.kind==OutputKind::finite_minimax,"configuration.output","Unknown output kind");
     require(c.output.assurance==Assurance::numerical||c.output.assurance==Assurance::validated,"configuration.output","Unknown assurance");
     const char* family=nullptr;
     switch(c.output.family) {
@@ -160,7 +161,7 @@ Json configuration_record(const ConfigurationInput& c,bool semantic) {
             {"detail_spans",std::to_string(col.detail_spans)},{"detail_bytes",std::to_string(col.detail_bytes)}}},
         {"modules",std::move(modules)},
         {"numerical",{{"absolute_bits",bits(c.numerical.absolute_tolerance)},{"relative_bits",bits(c.numerical.relative_tolerance)}}},
-        {"output",{{"kind",c.output.kind==OutputKind::synthesis?"synthesis":"program"},{"assurance",c.output.assurance==Assurance::numerical?"numerical":"validated"},
+        {"output",{{"kind",c.output.kind==OutputKind::synthesis?"synthesis":c.output.kind==OutputKind::program?"program":"finite_minimax"},{"assurance",c.output.assurance==Assurance::numerical?"numerical":"validated"},
             {"family",family},{"representation",c.output.representation.value},{"witness_count",std::to_string(c.output.witnesses.count)},
             {"distinctness_bits",bits(c.output.witnesses.distinctness_tolerance)},{"directions",std::move(directions)},
             {"seed",c.output.witnesses.seed?Json(std::to_string(*c.output.witnesses.seed)):Json(nullptr)}}},
@@ -238,9 +239,10 @@ EN(CollectionMode,EV(CollectionMode,detail),EV(CollectionMode,summary))
 ST(CollectionSettings,F(enabled),F(mode),F(plan_spans),F(plan_bytes),F(detail_spans),F(detail_bytes))
 EN(Assurance,EV(Assurance,numerical),EV(Assurance,validated))
 EN(SetRelation,EV(SetRelation,equivalent),EV(SetRelation,inner),EV(SetRelation,outer),EV(SetRelation,heuristic))
-EN(Termination,EV(Termination,completed),EV(Termination,cancelled),EV(Termination,resource_limit),EV(Termination,numerical_failure),EV(Termination,operation_rejected),EV(Termination,contract_rejected))
+EN(Termination,EV(Termination,completed),EV(Termination,cancelled),EV(Termination,deadline_expired),EV(Termination,resource_limit),EV(Termination,numerical_failure),EV(Termination,operation_rejected),EV(Termination,contract_rejected))
 EN(StopReason,EV(StopReason,cancelled),EV(StopReason,deadline_expired),EV(StopReason,resource_limit),EV(StopReason,numerical_failure))
 EN(MathematicalOutcome,EV(MathematicalOutcome,optimal),EV(MathematicalOutcome,infeasible),EV(MathematicalOutcome,unbounded),EV(MathematicalOutcome,infimum_not_attained),EV(MathematicalOutcome,undetermined))
+EN(MinimaxOutcome,EV(MinimaxOutcome,optimal),EV(MinimaxOutcome,infeasible),EV(MinimaxOutcome,empty_catalogue),EV(MinimaxOutcome,no_scenarios),EV(MinimaxOutcome,undetermined))
 EN(FamilyTarget,EV(FamilyTarget,exact_optimal_relation),EV(FamilyTarget,candidate_relaxation),EV(FamilyTarget,partial_relation))
 EN(ClockMetric,EV(ClockMetric,steady_wall),EV(ClockMetric,thread_cpu),EV(ClockMetric,process_cpu))
 EN(ParentKind,EV(ParentKind,nested),EV(ParentKind,spawned))
@@ -357,8 +359,8 @@ template<>struct Codec<FamilyRecord>{
     static Json put(const FamilyRecord& v){return object(field("family",v.family),field("payload",v.payload));}
     static FamilyRecord get(const Json& j){closed(j,{"family","payload"});return {artifacts::get<OptimalFamily>(j.at("family")),artifacts::get<FamilyPayload>(j.at("payload"))};}
 };
-ST(SynthesisFinal,F(termination),F(outcome),F(objective),F(family),F(incumbents),F(stop)) ST(ProgramFinal,F(result),F(raw_diagnostics)) ST(UnsupportedFinal,F(diagnostics)) ST(SkippedFinal,F(reason)) ST(FailedFinal,F(phase),F(reason),F(message),F(raw_diagnostics))
-TAG(SynthesisFinal,"synthesis") TAG(ProgramFinal,"program") TAG(UnsupportedFinal,"unsupported") TAG(SkippedFinal,"skipped") TAG(FailedFinal,"failed")
+ST(SynthesisFinal,F(termination),F(outcome),F(objective),F(family),F(incumbents),F(stop)) ST(ProgramFinal,F(result),F(raw_diagnostics)) ST(MinimaxFinal,F(termination),F(outcome),F(assurance),F(subject),F(objective),F(outcome_attachment)) ST(UnsupportedFinal,F(diagnostics)) ST(SkippedFinal,F(reason)) ST(FailedFinal,F(phase),F(reason),F(message),F(raw_diagnostics))
+TAG(SynthesisFinal,"synthesis") TAG(ProgramFinal,"program") TAG(MinimaxFinal,"finite_minimax") TAG(UnsupportedFinal,"unsupported") TAG(SkippedFinal,"skipped") TAG(FailedFinal,"failed")
 ST(AdmissionObservation,F(cause),F(at))
 ST(ExecutionSummary::Task,F(id),F(queued),F(admitted),F(create_started),F(create_finished),F(call_started),F(call_finished),F(released),F(status))
 ST(ExecutionSummary,F(configured_deadline),F(admission_closed),F(external_cancellation),F(workers_joined),F(completed),F(clock),F(started),F(tasks))
@@ -408,7 +410,7 @@ ConfigurationInput parse_configuration(const Json& j) {
     for(const auto& m:modules){closed(m,{"role","id","version","pin","options"});c.modules.push_back({get<std::string>(m.at("role")),{get<ModuleId>(m.at("id")),get<std::string>(m.at("version")),get<PinAvailability>(m.at("pin"))},parse_options(m.at("options"))});}
     const auto& n=j.at("numerical");closed(n,{"absolute_bits","relative_bits"});c.numerical={parse_bits(n.at("absolute_bits")),parse_bits(n.at("relative_bits"))};
     const auto& o=j.at("output");closed(o,{"kind","assurance","family","representation","witness_count","distinctness_bits","directions","seed"});
-    const auto kind=get<std::string>(o.at("kind"));require(kind=="synthesis"||kind=="program","configuration.output.kind","Unknown output kind");c.output.kind=kind=="synthesis"?OutputKind::synthesis:OutputKind::program;
+    const auto kind=get<std::string>(o.at("kind"));require(kind=="synthesis"||kind=="program"||kind=="finite_minimax","configuration.output.kind","Unknown output kind");c.output.kind=kind=="synthesis"?OutputKind::synthesis:kind=="program"?OutputKind::program:OutputKind::finite_minimax;
     c.output.assurance=get<Assurance>(o.at("assurance"));c.output.family=get<FamilyTarget>(o.at("family"));c.output.representation=get<RepresentationId>(o.at("representation"));
     c.output.witnesses.count=get<std::uint64_t>(o.at("witness_count"));c.output.witnesses.distinctness_tolerance=parse_bits(o.at("distinctness_bits"));c.output.witnesses.seed=get<std::optional<std::uint64_t>>(o.at("seed"));
     require(o.at("directions").is_array(),"configuration.output.directions","Expected directions array");for(const auto& row:o.at("directions")){require(row.is_array(),"configuration.output.directions","Expected direction");Vector v;for(const auto& x:row)v.push_back(parse_bits(x));c.output.witnesses.directions.push_back(std::move(v));}
@@ -470,7 +472,9 @@ Json run_json(const RunRecord& r) {
 ArtifactResult<RunStatistics> read_run(const Json& j) {
     closed(j,{"schema","problem","dimensions","horizon","configuration","run","final","statistics","resources","execution","attachments","provenance","selection"});
     const auto version=get<std::string>(j.at("schema"));
-    require(version=="csl.run-statistics/2"||version=="csl.run-statistics/3"||version=="csl.run-statistics/4","schema","Unsupported run statistics version");
+    require(version=="csl.run-statistics/2"||version=="csl.run-statistics/3"||version=="csl.run-statistics/4"||
+        version=="csl.run-statistics/5"||version=="csl.run-statistics/6"||version=="csl.run-statistics/7",
+        "schema","Unsupported run statistics version");
     Json current=j;
     if(version=="csl.run-statistics/2") {
         // V2 did not say whether a feasibility claim covered the relation or a witness.
@@ -506,7 +510,8 @@ ArtifactResult<RunStatistics> read_run(const Json& j) {
     const auto& config=current.at("configuration");closed(config,{"id","value"});auto resolved=resolve_configuration(parse_configuration(config.at("value")));
     if(const auto* error=std::get_if<ArtifactError>(&resolved))return *error;
     const auto configuration=std::get<ResolvedConfiguration>(resolved);
-    if(version!="csl.run-statistics/4"&&!current.at("selection").is_null()) {
+    if(version!="csl.run-statistics/4"&&version!="csl.run-statistics/5"&&version!="csl.run-statistics/6"&&
+        version!="csl.run-statistics/7"&&!current.at("selection").is_null()) {
         auto& batch=current.at("selection").at("batch");
         closed(batch,{"witnesses","requested","selector","seed","source_family"});
         // Older closed formats stored the request facts in configuration only.
@@ -578,7 +583,7 @@ ArtifactResult<RecordedRunArtifact> encode_recorded_run(const RunStatistics& own
         }
         auto wire=Json::parse(recorded_json(owner));
         require(wire.at("schema")=="csl.run-statistics/4","schema","Live run is not in the current v4 wire form");
-        wire["schema"]="csl.run-statistics/6";
+        wire["schema"]="csl.run-statistics/7";
         auto& spans=wire["statistics"]["spans"];
         const auto& source_spans=owner.description().statistics.description().spans;
         require(spans.size()==source_spans.size(),"statistics.spans","Span count changed during serialization");
@@ -602,7 +607,8 @@ static ArtifactResult<problem::ResolvedContent> decode_recorded_run_impl(std::st
     try {
         auto wire=parse_document(text,limits);
         closed(wire,{"schema","problem","dimensions","horizon","configuration","run","final","statistics","resources","execution","attachments","provenance","selection","recorded_state"});
-        require(wire.at("schema")=="csl.run-statistics/5"||wire.at("schema")=="csl.run-statistics/6",
+        require(wire.at("schema")=="csl.run-statistics/5"||wire.at("schema")=="csl.run-statistics/6"||
+            wire.at("schema")=="csl.run-statistics/7",
             "schema","Unsupported recorded run schema");
         require(wire.at("recorded_state")=="unverified_recorded_data","recorded_state","Recorded claims are always untrusted");
         require(wire.dump()==text,"recorded.canonical","Recorded artifact is not in canonical form or contains trailing bytes");

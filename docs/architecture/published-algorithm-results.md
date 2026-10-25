@@ -452,3 +452,18 @@ run a solver, identify a source-mapped limiter, compare methods, or support an
 application-scale or scalability claim. The labelled control-plane figure is
 an analytic illustration, not a solver trace. Publication remains subject to
 main-only Pages deployment and live URL verification; EXT-03 #73 remains open.
+
+## EXP-05 finite fixed-plan minimax comparison
+
+The [versioned report bundle](../../reports/algorithm-results/exp05-fixed-plan-minimax-20261026-6c561462/)
+compares the numerical and interval-validated finite-action solvers on one
+bounded one-stage scalar fixture. The exhaustive independent oracle checks all
+four fixed-plan/disturbance pairs, both stage constraints, and terminal costs.
+Seven measured calls per arm passed, and the `csl.comparison-record/1` archive
+retains all 14 run records, source/configuration identities, and the
+`csl.comparison-spec/3` build/runtime manifest. Timings cover only solver calls;
+one warmup per arm was excluded. They are exploratory, have overlapping ranges,
+and establish no performance winner or scale claim. No separate limiter profile
+was collected. The 2D plot is an explanatory state-stage projection, not a
+solver trace. Review, catalogue registration, main-only Pages deployment and
+live URL verification remain pending.

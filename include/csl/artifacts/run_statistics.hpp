@@ -29,7 +29,7 @@ struct CollectionSettings {
     std::uint64_t plan_spans, plan_bytes, detail_spans, detail_bytes;
     bool operator==(const CollectionSettings&) const = default;
 };
-enum class OutputKind { synthesis, program };
+enum class OutputKind { synthesis, program, finite_minimax };
 struct OutputRequest {
     OutputKind kind; Assurance assurance; FamilyTarget family;
     RepresentationId representation; WitnessRequest witnesses;
@@ -172,13 +172,24 @@ struct SynthesisFinal {
     SynthesisStopEvidence stop{};
 };
 struct ProgramFinal { ProgramResult result; std::optional<AttachmentId> raw_diagnostics; };
+// A finite fixed-plan minimax result. The mathematical claim and run
+// termination are separate; detailed plan evidence remains in a versioned
+// attachment referenced by outcome_attachment.
+struct MinimaxFinal {
+    Termination termination;
+    MinimaxOutcome outcome;
+    Assurance assurance;
+    ProgramIdentity subject;
+    std::optional<ProgramObjectiveEvidence> objective;
+    std::optional<AttachmentId> outcome_attachment;
+};
 struct UnsupportedFinal { Diagnostics diagnostics; };
 enum class SkippedReason { cancelled, deadline, task_limit, reservation_exceeds_budget, batch_failed };
 struct SkippedFinal { SkippedReason reason; };
 enum class FailurePhase { create, invoke, launch, publication };
 enum class FailureReason { allocation, adapter_exception, thread_launch };
 struct FailedFinal { FailurePhase phase; FailureReason reason; std::string message; std::optional<AttachmentId> raw_diagnostics{}; };
-using FinalOutcome=std::variant<SynthesisFinal,ProgramFinal,UnsupportedFinal,SkippedFinal,FailedFinal>;
+using FinalOutcome=std::variant<SynthesisFinal,ProgramFinal,MinimaxFinal,UnsupportedFinal,SkippedFinal,FailedFinal>;
 SynthesisFinal project_final(const SynthesisResult&,std::optional<AttachmentId> family_attachment={});
 ProgramFinal project_final(const ProgramResult&,std::optional<AttachmentId> diagnostics={});
 ArtifactResult<SpanRecord> project_legacy_span(const TimingSpan&,SpanDescriptor);
@@ -244,6 +255,10 @@ private:
     friend ArtifactResult<RecordedRunArtifact> decode_recorded_run(std::string_view,const problem::ResolvedProblem&,DecodeLimits);
 };
 ArtifactResult<RunStatistics> publish_run(RunInput);
+// Publishes a run whose mathematical input has a canonical identity but no
+// `ResolvedProblem` adapter. The caller must bind that identity to owned
+// problem bytes in the run attachments and comparison spec.
+ArtifactResult<RunStatistics> publish_identity_recorded_run(RunRecord);
 ArtifactResult<RunStatistics> decode_run(std::string_view,DecodeLimits={});
 ArtifactResult<RunStatistics> decode_run(std::string_view,const problem::ResolvedProblem&,DecodeLimits={});
 ArtifactResult<std::string> encode_run(const RunStatistics&,EncodeLimits={});
