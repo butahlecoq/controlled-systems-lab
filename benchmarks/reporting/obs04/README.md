@@ -74,6 +74,21 @@ common request guards, strategy capability checks, and registry preparation;
 the current interface does not separate those subphases. Family construction
 inside the strategy remains unavailable, and its field stays null.
 
+## Clean-source preflight capture (2026-10-25)
+
+`results/linux-omarchy-gcc16-20261025-preflight-clean.json` and its adjacent
+JSONL and HTML files retain one Release capture from clean source commit
+`13d51323132766dcc7ba465ee5a849ae49adc24b`. The 32 comparison attempts all
+passed, with seven measured attempts per strategy/instrumentation arm and one
+warmup per arm. The environment manifest records the single shared preflight
+sample: fixture construction and problem resolution 240,046 ns, provider
+registration 220,560 ns, and comparison admission 225,868 ns. These are
+one-time suite setup timings from one process, not per-attempt measurements;
+there is no repeated-run range or limiter attribution. They do not establish a
+performance winner or a general latency claim. The record binds the source
+snapshot and binary digest; the JSONL preserves driver events and the empty
+stderr log is retained.
+
 `csl.obs04-instrumentation-comparison-event/6` is the current raw per-attempt
 payload; the codec continues to accept event `/2` through `/5`. It records
 the `StrategyPort::run` interval, first and additional direction query, their
