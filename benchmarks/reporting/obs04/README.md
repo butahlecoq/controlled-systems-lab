@@ -120,6 +120,11 @@ does not reconstruct new phase values for those records. The OBS-04 smoke run
 produced a `/5` record with 32 attempts, zero failures, one capability call per
 accepted strategy, and nested phase durations below inclusive admission. That
 run checks instrumentation wiring only. It supports no performance claim.
+Five clean-source Release process captures of `/5` are preserved in
+[`results/phase-split-schema5-20261025`](results/phase-split-schema5-20261025/).
+Each has 32/32 completed attempts. Their per-process preflight values and
+hashes are summarized in that bundle; they verify phase capture and provenance
+but make no strategy-performance claim.
 
 If comparison admission is rejected or throws, the driver writes a complete
 `csl.comparison-record/1` to `--record` (or a unique default path) before
