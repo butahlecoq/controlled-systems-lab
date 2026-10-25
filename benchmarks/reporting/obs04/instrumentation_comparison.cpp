@@ -1337,7 +1337,7 @@ int main(int argc, char** argv) {
         std::cout << "# fixture=T-S01; strategies=reach-back,direct-joint; profile=ts01_exact_integrator\n"
             << "# timed_region=exclusive workspace StrategyPort::run; setup and collection snapshot are reported separately\n"
             << "# alternation=strategy execution order and instrumentation mode both alternate by repetition\n"
-            << "# instrumentation=Strategy A phase spans; Strategy B run span; CPU and native backend threads unavailable\n";
+            << "# instrumentation=Strategy A phase spans; Strategy B run and T-S01 family-construction spans; CPU and native backend threads unavailable\n";
         std::size_t failures = 0;
         std::vector<TrialRecord> captured;
         for (std::size_t repetition = 0; repetition <= 7; ++repetition) {
