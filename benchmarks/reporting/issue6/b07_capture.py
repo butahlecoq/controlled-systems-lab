@@ -30,7 +30,15 @@ def main() -> int:
     args = parser.parse_args()
     source = args.source_root.resolve()
     build = args.build_dir.resolve()
-    output = args.output_dir.resolve()
+    raw_output = Path(os.path.abspath(args.output_dir))
+    for parent in (raw_output, *raw_output.parents):
+        if parent.is_symlink():
+            raise SystemExit("capture output path must not contain symlinks")
+    output = raw_output.resolve()
+    if output.is_relative_to(source):
+        raise SystemExit("capture output directory must be outside the source tree")
+    if output.exists() and (not output.is_dir() or any(output.iterdir())):
+        raise SystemExit("capture output directory must be missing or empty")
     executable = build / "csl_issue6_b07_report"
     driver = source / "benchmarks/reporting/issue6/b07_reconstruction.cpp"
     scenario = source / "benchmarks/scenarios/b07-owner-approved-eight-case-v1.json"
@@ -39,7 +47,7 @@ def main() -> int:
         raise SystemExit("source, executable, or CMake cache is missing")
     git = lambda *args: subprocess.run(["git", "-C", str(source), *args], check=True,
         capture_output=True, text=True).stdout.strip()
-    commit = git("rev-parse", "HEAD")
+    capture_commit = git("rev-parse", "HEAD")
     if git("status", "--porcelain"):
         raise SystemExit("capture requires a clean source tree")
     driver_hash, scenario_hash, executable_hash = sha256(driver), sha256(scenario), sha256(executable)
@@ -54,18 +62,27 @@ def main() -> int:
     rows = [json.loads(line) for line in run.stdout.splitlines()]
     if len(rows) != 8 or len({row.get("case_id") for row in rows}) != 8:
         raise SystemExit("B07 executable did not produce eight unique cases")
-    expected = {"source_commit": commit, "driver_sha256": driver_hash,
+    expected = {"driver_sha256": driver_hash,
                 "scenario_sha256": scenario_hash, "executable_sha256": executable_hash,
                 "build_type": "Release"}
+    source_commit = rows[0].get("source_commit", "")
+    ancestor = subprocess.run(["git", "-C", str(source), "merge-base", "--is-ancestor",
+        source_commit, capture_commit], check=False, capture_output=True)
+    if ancestor.returncode != 0:
+        raise SystemExit("executable source commit is not an ancestor of the clean capture checkout")
     for row in rows:
-        if any(row.get(key) != value for key, value in expected.items()):
+        if row.get("source_commit") != source_commit or any(row.get(key) != value for key, value in expected.items()):
             raise SystemExit("run record provenance differs from current source/build")
     output.mkdir(parents=True, exist_ok=True)
+    if output.is_symlink() or any(output.iterdir()):
+        raise SystemExit("capture output directory changed or became nonempty")
     results = output / "results.jsonl"
-    results.write_text(run.stdout, encoding="utf-8")
+    with results.open("x", encoding="utf-8") as stream:
+        stream.write(run.stdout)
     provenance = {
         "schema": "csl.issue6-b07-capture-provenance/1",
-        "source_commit": commit,
+        "source_commit": source_commit,
+        "capture_commit": capture_commit,
         "source_tree_clean": True,
         "driver_sha256": driver_hash,
         "scenario_sha256": scenario_hash,
@@ -83,8 +100,9 @@ def main() -> int:
         "qhull_enabled": configuration.get("CSL_ENABLE_QHULL", ""),
         "capture_command": "b07_capture.py --source-root <repo> --build-dir <release-build> --output-dir <bundle>"
     }
-    (output / "run-provenance.json").write_text(json.dumps(provenance, indent=2) + "\n", encoding="utf-8")
-    print(json.dumps({"cases": len(rows), "source_commit": commit,
+    with (output / "run-provenance.json").open("x", encoding="utf-8") as stream:
+        stream.write(json.dumps(provenance, indent=2) + "\n")
+    print(json.dumps({"cases": len(rows), "source_commit": source_commit,
         "executable_sha256": executable_hash, "results_sha256": provenance["results_sha256"]}, indent=2))
     return 0
 
