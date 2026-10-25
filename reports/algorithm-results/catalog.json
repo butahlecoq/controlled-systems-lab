@@ -334,7 +334,7 @@
       "zip_sha256": "1fb673b081668644c9754c39d3840cadbf0597ee6e1f1a41e92f677be7936e73"
     },
     {
-      "report_id": "issue6-b07-reference-1f990278d6bda53b95e99ba5ea4126f6529db7cf953b581e3b4f60e3a8c5c86c",
+      "report_id": "issue6-b07-reference-a394915af10636430cdcd757d95a9d987eaa6c4c0b742bef7ba1aa04638a2cdd",
       "report_kind": "issue6-b07-reference",
       "source_report_id": "b07-owner-approved-eight-case-v1",
       "payload_schema": "csl.issue6-b07-evidence/1",
@@ -343,7 +343,7 @@
       "source_commit": "18fc55efa5f31e6cb7e348f602f9000896ee7cb9",
       "measured_scope": "Eight five-stage finite-action minimax cases; 3,125 plans x up to 1,024 disturbance histories per case; one excluded warmup and seven measured Release calls per case",
       "evidence_limits": "Eight owner-approved reconstructions, not historical reproductions; the modeled horizon is 10 seconds while the paper states 100 seconds. Single-adapter timings only, without a limiter profile or speedup claim. Plotted points are numerical projections of 4D terminal sets.",
-      "zip_sha256": "ba73b13f2a72fb6bacfa69948b22d80a07163b86a654cb4cd1bf56ff3ae987ae"
+      "zip_sha256": "8763091b0db7a10f568d2e55d49f829c1d31bffe106036a09e90104369d5361a"
     }
   ]
 }

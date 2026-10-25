@@ -2,6 +2,7 @@
 import json
 import csv
 import hashlib
+import io
 import copy
 import importlib.util
 from pathlib import Path
@@ -44,6 +45,40 @@ class RegisteredKindTests(unittest.TestCase):
             'evidence_limits': 'Descriptive only'}]}
         html = site.catalogue_index(catalogue)
         self.assertIn('href="' + catalogue['reports'][0]['report_id'] + '/performance.svg"', html)
+
+    def test_b07_publication_links_real_data_and_checks_oracle_associations(self):
+        root=FIXTURES
+        catalogue=json.loads((root/'catalog.json').read_text(encoding='utf-8'))
+        row=next(report for report in catalogue['reports'] if report.get('report_kind')=='issue6-b07-reference')
+        bundle=root/row['source_report_id']
+        publication=site.issue6_b07.adapt(bundle)
+        html=site.catalogue_index(catalogue)
+        self.assertIn(publication.report_id+'/results.jsonl',html)
+        self.assertIn(publication.report_id+'/projections.svg',html)
+        self.assertNotIn(publication.report_id+'/records.json',html)
+        self.assertNotIn(publication.report_id+'/trials.csv',html)
+        artifacts=site.issue6_b07.publication_artifacts(bundle,publication)
+        self.assertIn('projections.png',artifacts)
+        self.assertIn('projections.svg',artifacts)
+        site.data.validate_svg(artifacts['projections.svg'])
+        with zipfile.ZipFile(io.BytesIO(site.issue6_b07.offline_zip(bundle,publication))) as archive:
+            self.assertIn(publication.report_id+'/projections.png',archive.namelist())
+            self.assertIn(publication.report_id+'/projections.svg',archive.namelist())
+            self.assertIn(publication.report_id+'/results.jsonl',archive.namelist())
+
+        with tempfile.TemporaryDirectory() as directory:
+            copied=Path(directory)/bundle.name
+            shutil.copytree(bundle,copied)
+            oracle_path=copied/'independent-oracle-verification.json'
+            oracle=json.loads(oracle_path.read_text(encoding='utf-8'))
+            oracle[0]['case_id']='misbound-case'
+            oracle_path.write_text(json.dumps(oracle,indent=2)+'\n',encoding='utf-8')
+            checksums=[]
+            for name in sorted(path.name for path in copied.iterdir() if path.is_file() and path.name!='SHA256SUMS'):
+                checksums.append(hashlib.sha256((copied/name).read_bytes()).hexdigest()+'  '+name+'\n')
+            (copied/'SHA256SUMS').write_text(''.join(checksums),encoding='utf-8')
+            with self.assertRaisesRegex(ValueError,'independent oracle evidence differs'):
+                site.issue6_b07.adapt(copied)
 
     def test_committed_opt04_bundle_is_registered_and_stages_typed_publication(self):
         catalog_path = FIXTURES / 'catalog.json'

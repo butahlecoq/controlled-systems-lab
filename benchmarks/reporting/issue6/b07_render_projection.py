@@ -2,6 +2,8 @@ import json
 import argparse
 from html import escape
 from pathlib import Path
+import re
+import xml.etree.ElementTree as ET
 import matplotlib.pyplot as plt
 
 parser=argparse.ArgumentParser()
@@ -24,8 +26,19 @@ for row,(flow,stock) in zip(rows,axes):
     stock.set(xlabel='oxidizer stock x2 (kg)',ylabel='fuel stock x4 (kg)',title='terminal stock projection')
     stock.grid(alpha=.2); stock.legend(loc='best',fontsize=8)
 fig.suptitle('B07 fuel minimax reconstructions: terminal reachable set projections',fontsize=15)
-for ext in ('png','svg'):
-    fig.savefig(out/f'projections.{ext}',dpi=180)
+fig.savefig(out/'projections.png',dpi=180)
+svg_path=out/'projections.svg'
+fig.savefig(svg_path)
+svg=svg_path.read_text(encoding='utf-8')
+svg=re.sub(r'^<\?xml[^>]*\?>\s*','',svg)
+svg=re.sub(r'^<!DOCTYPE svg PUBLIC [\s\S]*?>\s*','',svg)
+ET.register_namespace('', 'http://www.w3.org/2000/svg')
+ET.register_namespace('xlink', 'http://www.w3.org/1999/xlink')
+svg_root=ET.fromstring(svg)
+for element in list(svg_root):
+    if element.tag=='{http://www.w3.org/2000/svg}metadata':
+        svg_root.remove(element)
+svg_path.write_bytes(ET.tostring(svg_root,encoding='utf-8'))
 
 table=''.join(f"<tr><td>{escape(row['case_id'])}</td><td>{row['initial_stock_oxidizer_kg']}, {row['initial_stock_fuel_kg']}</td>"
     f"<td>{row['terminal_lambda']}</td><td>{row['disturbance_coefficients'][0]}, {row['disturbance_coefficients'][1]}</td>"

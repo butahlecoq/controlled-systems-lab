@@ -215,10 +215,10 @@ def catalogue_index(catalogue):
             else:
                 data.require(report["report_kind"] in ("lp","convex"),"unknown catalogue kind")
                 scope='HiGHS reference convex, nine analytic microfixtures' if report["report_kind"]=='convex' else scope
-        csv_name = "stdout.jsonl" if report.get("report_kind") == opt04.KIND else "raw-driver-output.csv" if report.get("report_kind") in ("geo04-intersection", "geo02-affine-sum") else "trials.csv"
-        trial_label = "Trial log" if report.get("report_kind") == opt04.KIND else "Measured tables"
+        csv_name = "stdout.jsonl" if report.get("report_kind") == opt04.KIND else "results.jsonl" if report.get("report_kind") == issue6_b07.KIND else "raw-driver-output.csv" if report.get("report_kind") in ("geo04-intersection", "geo02-affine-sum") else "trials.csv"
+        trial_label = "Run records" if report.get("report_kind") == issue6_b07.KIND else "Trial log" if report.get("report_kind") == opt04.KIND else "Measured tables"
         figure_name = "terminal-projections.svg" if report.get("report_kind")==issue6_b06.KIND else "projections.svg" if report.get("report_kind")==issue6_b07.KIND else "visual.svg" if report.get("report_kind")==ext03_transform.KIND else "performance.svg" if report.get("report_kind") in (opt04.KIND, "syn-ts01-paired-comparison") else "latency.svg" if report.get("report_kind") in ("opt06-basis-reuse", opt07.KIND) else ""
-        links=[("Raw JSON",rid+"/records.json"),(trial_label,rid+"/"+csv_name)]
+        links=[(trial_label,rid+"/"+csv_name)] if report.get("report_kind") == issue6_b07.KIND else [("Raw JSON",rid+"/records.json"),(trial_label,rid+"/"+csv_name)]
         if figure_name: links.append(("Figure",rid+"/"+figure_name))
         links.append(("Offline bundle",rid+".zip"))
         links.append(("Repository copy ("+label+")",tree))
@@ -335,8 +335,10 @@ def stage(catalog_path,out,check=True,allow_test=False):
                 OfflineHTML(page_files).feed((root/source_id/"example-2d.html").read_text(encoding="utf-8"))
             if report["report_kind"] == issue6_b06.KIND:
                 data.validate_svg((root/source_id/"terminal-projections.svg").read_bytes())
-            elif report["report_kind"] not in ("geo05-projection-predecessor", "geo06-quickhull", opt12.KIND, b08_exact.KIND, issue6_b07.KIND, issue3_validated.KIND, "syn07-ts01-analytic", "syn04-strategy-b-ts01", "syn04-strategy-b-ts02", "syn04-strategy-b-ts03", "syn03-strategy-a-ts01", "syn03-strategy-a-ts02", "syn-ts01-paired-comparison"):
-                if report["report_kind"] == ext03_transform.KIND:
+            elif report["report_kind"] not in ("geo05-projection-predecessor", "geo06-quickhull", opt12.KIND, b08_exact.KIND, issue3_validated.KIND, "syn07-ts01-analytic", "syn04-strategy-b-ts01", "syn04-strategy-b-ts02", "syn04-strategy-b-ts03", "syn03-strategy-a-ts01", "syn03-strategy-a-ts02", "syn-ts01-paired-comparison"):
+                if report["report_kind"] == issue6_b07.KIND:
+                    data.validate_svg((root/source_id/"projections.svg").read_bytes())
+                elif report["report_kind"] == ext03_transform.KIND:
                     data.validate_svg((root/source_id/"visual.svg").read_bytes())
                 elif report["report_kind"] == opt04.KIND:
                     data.validate_svg(opt04.public_svg(data.parse_json((root/source_id/"records.json").read_text(encoding="utf-8"))))

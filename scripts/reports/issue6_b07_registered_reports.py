@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import math
 from pathlib import Path
 
 import registered_reports as common
@@ -21,8 +22,18 @@ LIMITS = ("Eight owner-approved reconstructions, not historical reproductions; t
 def _payload(bundle: Path) -> dict:
     rows = [json.loads(line) for line in (bundle / "results.jsonl").read_text(encoding="utf-8").splitlines()]
     provenance = json.loads((bundle / "run-provenance.json").read_text(encoding="utf-8"))
+    results = (bundle / "results.jsonl").read_bytes()
+    if provenance.get("results_sha256") != hashlib.sha256(results).hexdigest():
+        raise ValueError("B07 provenance results digest differs")
     return {"schema": "csl.issue6-b07-evidence/1", "report_id": bundle.name,
             "source_commit": provenance["source_commit"], "cases": rows}
+
+
+def _close(actual, expected, absolute_tolerance: float) -> bool:
+    numeric = (int, float)
+    return (type(actual) in numeric and type(expected) in numeric and
+            math.isfinite(actual) and math.isfinite(expected) and
+            math.isclose(actual, expected, rel_tol=0, abs_tol=absolute_tolerance))
 
 
 def adapt(bundle: Path) -> common.PublicationRecord:
@@ -42,6 +53,8 @@ def adapt(bundle: Path) -> common.PublicationRecord:
     checksums = {}
     for line in (bundle / "SHA256SUMS").read_text(encoding="utf-8").splitlines():
         digest, name = line.split("  ", 1)
+        if name in checksums:
+            raise ValueError("B07 checksum inventory contains duplicate files")
         checksums[name] = digest
     if set(checksums) != set(FILES) - {"SHA256SUMS"}:
         raise ValueError("B07 checksum inventory differs")
@@ -52,14 +65,31 @@ def adapt(bundle: Path) -> common.PublicationRecord:
     if (provenance.get("schema") != "csl.issue6-b07-capture-provenance/1" or
             provenance.get("source_tree_clean") is not True or provenance.get("build_type") != "Release"):
         raise ValueError("B07 capture provenance is incomplete")
-    rows = (bundle / "results.jsonl").read_text(encoding="utf-8").splitlines()
-    if len(rows) != 8 or len({json.loads(row).get("case_id") for row in rows}) != 8:
+    results = (bundle / "results.jsonl").read_bytes()
+    rows = [json.loads(line) for line in results.decode("utf-8").splitlines()]
+    if len(rows) != 8 or len({row.get("case_id") for row in rows}) != 8:
         raise ValueError("B07 eight-case result inventory differs")
     oracle = json.loads((bundle / "independent-oracle-verification.json").read_text(encoding="utf-8"))
-    if len(oracle) != 8 or any(item.get("solver_feasible") != item.get("oracle_feasible") or
-                               item.get("solver_winners") != item.get("oracle_winners") or
-                               item.get("abs_diff", 1) > 1e-7 for item in oracle):
+    rows_by_id = {row["case_id"]: row for row in rows}
+    oracle_by_id = {item.get("case_id"): item for item in oracle}
+    if len(oracle) != 8 or len(oracle_by_id) != 8 or set(oracle_by_id) != set(rows_by_id):
         raise ValueError("B07 independent oracle evidence differs")
+    for case_id, row in rows_by_id.items():
+        item = oracle_by_id[case_id]
+        if any(row.get(field) != provenance.get(source_field) for field, source_field in (
+                ("source_commit", "source_commit"), ("driver_sha256", "driver_sha256"),
+                ("scenario_sha256", "scenario_sha256"), ("executable_sha256", "executable_sha256"),
+                ("build_type", "build_type"))):
+            raise ValueError("B07 row provenance differs from capture provenance: " + case_id)
+        if (item.get("solver_feasible") != row.get("plans_feasible") or
+                item.get("oracle_feasible") != row.get("plans_feasible") or
+                item.get("solver_winners") != row.get("minimizing_plan_indices") or
+                item.get("oracle_winners") != row.get("minimizing_plan_indices") or
+                not _close(item.get("solver_squared"), row.get("value_squared"), 1e-12) or
+                not _close(item.get("oracle_squared"), row.get("value_squared"), 1e-7) or
+                not _close(item.get("abs_diff"), abs(item["solver_squared"]-item["oracle_squared"]), 1e-15) or
+                item["abs_diff"] > 1e-7 or not _close(row.get("value_norm")**2 if type(row.get("value_norm")) in (int,float) else None, row.get("value_squared"), 1e-12)):
+            raise ValueError("B07 row and independent oracle differ: " + case_id)
     payload = _payload(bundle)
     identity = {"schema": "csl.issue6-b07-publication-identity/1", "source_report_id": bundle.name,
                 "source_files": checksums,
@@ -75,7 +105,6 @@ def render_page(bundle: Path, publication: common.PublicationRecord) -> str:
     page = (Path(bundle) / "index.html").read_text(encoding="utf-8")
     if page.count("</html>") != 1:
         raise ValueError("B07 source page insertion point differs")
-    page = page.replace("<img src=\"projections.png\"", "<img src=\"projections.png\"")
     footer = (f'<p>Versioned publication <code>{publication.report_id}</code>; '
               f'native report <code>{publication.source_report_id}</code>. '
               '<a href="report-envelope.json">Report envelope</a> · '
