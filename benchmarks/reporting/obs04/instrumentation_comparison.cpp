@@ -249,6 +249,89 @@ std::string_view common_guard_status_name(application::PreparationObservationSta
     return "unknown";
 }
 
+std::string_view diagnostic_code_name(DiagnosticCode code) {
+    switch (code) {
+    case DiagnosticCode::invalid_input: return "invalid_input";
+    case DiagnosticCode::unsupported: return "unsupported";
+    case DiagnosticCode::evidence_mismatch: return "evidence_mismatch";
+    case DiagnosticCode::invalid_claim: return "invalid_claim";
+    }
+    return "unknown";
+}
+
+Json diagnostics_json(const Diagnostics& diagnostics) {
+    auto result=Json::array();
+    for (const auto& diagnostic : diagnostics)
+        result.push_back({{"code",diagnostic_code_name(diagnostic.code)},
+            {"field",diagnostic.field},{"explanation",diagnostic.explanation}});
+    return result;
+}
+
+void persist_preparation_failure(const problem::ResolvedProblem& problem,
+    const PreflightTimings& preflight,const application::Preparation* preparation,
+    std::string_view thrown,const std::optional<std::string>& requested_path) {
+    const auto& observation=preflight.comparison_observation;
+    Json attempts=Json::array();
+    for (std::size_t index=0; index<observation.registry_attempts.size(); ++index) {
+        const auto& arm=observation.registry_attempts[index];
+        Json detail=Json::array();
+        if (preparation) {
+            if (const auto* rejected=std::get_if<application::RejectedComparison>(preparation)) {
+                for (std::size_t rejection=0; rejection<rejected->strategies.size(); ++rejection) {
+                    if (rejected->strategy_indices[rejection]!=index) continue;
+                    const auto& provenance=rejected->strategies[rejection].provenance;
+                    detail.push_back({{"kind","registry_rejection"},{"port",provenance.port},
+                        {"requested_id",provenance.requested.id.value},
+                        {"requested_version",provenance.requested.version
+                            ? Json{*provenance.requested.version} : Json{}},
+                        {"actual_id",provenance.actual ? Json{provenance.actual->id.value} : Json{}},
+                        {"actual_version",provenance.actual ? Json{provenance.actual->version} : Json{}},
+                        {"diagnostics",diagnostics_json(rejected->strategies[rejection].diagnostics)}});
+                }
+            } else if (const auto* unsupported=std::get_if<application::UnsupportedComparison>(preparation)) {
+                if (arm.status==registry::PreparationObservationStatus::not_entered)
+                    detail.push_back({{"kind","common_guard_rejection"},
+                        {"diagnostics",diagnostics_json(unsupported->diagnostics)}});
+            }
+        }
+        attempts.push_back({{"strategy_index",index},
+            {"status",preparation_status_name(arm.status)},
+            {"callback_external_ns",arm.callback_external_ns},
+            {"capability_callback_ns",arm.capability_callback_ns},
+            {"capability_callback_calls",arm.capability_callback_calls},
+            {"details",std::move(detail)}});
+    }
+    const auto now=std::chrono::duration_cast<std::chrono::nanoseconds>(
+        std::chrono::system_clock::now().time_since_epoch()).count();
+    Json record{{"schema","csl.obs04-preparation-failure/1"},
+        {"problem_id",problem.identity().value},
+        {"failure_phase","comparison_admission"},
+        {"comparison_attempts_started",false},{"registry_attempts",std::move(attempts)},
+        {"common_guard_status",common_guard_status_name(observation.common_guard_status)},
+        {"common_guards_ns",observation.common_guards_ns},
+        {"scenario_file_read_ns",preflight.scenario_file_read_ns},
+        {"scenario_loader_parse_ns",preflight.scenario_load.parse_ns},
+        {"scenario_loader_parse_entered",preflight.scenario_load.parse_entered},
+        {"scenario_semantic_load_ns",preflight.scenario_load.semantic_load_ns},
+        {"scenario_semantic_load_entered",preflight.scenario_load.semantic_load_entered},
+        {"scenario_translation_and_validation_ns",preflight.scenario_load.translation_ns},
+        {"scenario_translation_entered",preflight.scenario_load.translation_entered},
+        {"scenario_resolution_snapshot_ns",preflight.scenario_load.resolution_snapshot_ns},
+        {"scenario_resolution_snapshot_entered",preflight.scenario_load.resolution_snapshot_entered},
+        {"provider_registration_ns",preflight.provider_registration_ns},
+        {"comparison_admission_ns",preflight.comparison_admission_ns},
+        {"thrown",thrown.empty()?Json{}:Json{std::string(thrown)}},
+        {"recorded_at_unix_ns",now}};
+    const auto path=requested_path ? std::filesystem::path{*requested_path} :
+        std::filesystem::path{"obs04-preparation-failure-"+std::to_string(now)+".json"};
+    if (std::filesystem::exists(path))
+        throw std::runtime_error("Refusing to overwrite existing preparation failure record: "+path.string());
+    std::ofstream output(path,std::ios::binary|std::ios::out);
+    if (!output || !(output<<record.dump()<<'\n') || !output.flush())
+        throw std::runtime_error("Could not write preparation failure record: "+path.string());
+    std::cerr << "OBS-04 comparison admission failed; preparation evidence saved to " << path.string() << '\n';
+}
+
 Json environment_manifest(std::string_view argv0, std::optional<std::size_t> backend_threads) {
     const auto host=host_facts();
     const auto backend_thread_fact=backend_threads ? Json{{"status","available"},{"value",*backend_threads}}
@@ -350,7 +433,7 @@ Modules make_modules() {
     return result;
 }
 
-application::PreparedComparison prepare(const problem::ResolvedProblem& problem,
+application::Preparation prepare(const problem::ResolvedProblem& problem,
     registry::StrategyRegistry& strategies,
     application::ComparisonPreparationObservation& observation) {
     FamilyRequest family;
@@ -363,7 +446,7 @@ application::PreparedComparison prepare(const problem::ResolvedProblem& problem,
     a.strategy = {"csl.synthesis.reach-back"}; a.lp = {"csl.lp.highs"};
     a.convex = {"csl.convex.highs"}; a.representation = family.representation;
     StrategyConfiguration b = a; b.strategy = {"csl.synthesis.strategy-b"};
-    return take(application::prepare_comparison_observed({problem, family, {a, b}}, strategies,observation));
+    return application::prepare_comparison_observed({problem, family, {a, b}}, strategies,observation);
 }
 
 struct CollectionSetup {
@@ -1468,8 +1551,24 @@ int main(int argc, char** argv) {
         auto modules = make_modules();
         preflight.provider_registration_ns=static_cast<std::uint64_t>(ns(phase_begin,Clock::now()));
         phase_begin=Clock::now();
-        const auto prepared = prepare(problem, modules.strategies,preflight.comparison_observation);
+        std::optional<application::Preparation> preparation;
+        std::string preparation_error;
+        try {
+            preparation.emplace(prepare(problem,modules.strategies,preflight.comparison_observation));
+        } catch (const std::exception& error) {
+            preparation_error=error.what();
+        } catch (...) {
+            preparation_error="non-standard exception during comparison admission";
+        }
         preflight.comparison_admission_ns=static_cast<std::uint64_t>(ns(phase_begin,Clock::now()));
+        const auto* prepared_result=preparation ?
+            std::get_if<application::PreparedComparison>(&*preparation) : nullptr;
+        if (!prepared_result) {
+            persist_preparation_failure(problem,preflight,
+                preparation ? &*preparation : nullptr,preparation_error,requested_record_path);
+            return 1;
+        }
+        const auto& prepared=*prepared_result;
         const auto& admission_observation=preflight.comparison_observation;
         const auto& reach_back_observation=admission_observation.registry_attempts[0];
         const auto& direct_joint_observation=admission_observation.registry_attempts[1];
