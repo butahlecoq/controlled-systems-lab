@@ -829,8 +829,12 @@ void compare_profile(const std::string& profile) {
             "unsupported"},
         {ar::AttemptStatus::refused,
             ar::ProgramFinal{ProgramResult{Termination::operation_rejected,
-                {expected_identity,MathematicalOutcome::undetermined,Unestablished{},{}},{},{},
+                {ProgramIdentity{problem.identity(),ProgramId{"saved-provider-refusal"}},MathematicalOutcome::undetermined,Unestablished{},{}},{},{},
                 "saved provider refusal",{}},{}},
+            "refused"},
+        {ar::AttemptStatus::refused,
+            ar::MinimaxFinal{Termination::operation_rejected,MinimaxOutcome::undetermined,
+                Assurance::numerical,ProgramIdentity{problem.identity(),ProgramId{"saved-refusal"}},{},{}},
             "refused"},
         {ar::AttemptStatus::cancelled,ar::SkippedFinal{ar::SkippedReason::cancelled},"cancelled"},
         {ar::AttemptStatus::incomplete,ar::SkippedFinal{ar::SkippedReason::batch_failed},"incomplete"}};

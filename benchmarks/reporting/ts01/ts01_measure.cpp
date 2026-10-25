@@ -23,6 +23,7 @@ const char* termination_name(Termination value) {
     switch(value) {
         case Termination::completed: return "completed";
         case Termination::cancelled: return "cancelled";
+        case Termination::deadline_expired: return "deadline_expired";
         case Termination::resource_limit: return "resource_limit";
         case Termination::numerical_failure: return "numerical_failure";
         case Termination::operation_rejected: return "operation_rejected";

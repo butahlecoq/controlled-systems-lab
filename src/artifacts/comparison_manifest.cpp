@@ -110,6 +110,7 @@ std::string bytes_to_string(std::span<const std::byte> bytes) {
 }
 ArtifactResult<problem::ResolvedContent> own(std::string_view text);
 bool input_manifest_attached(const Json& run,const Json& spec) {
+    if(spec.value("schema",std::string{})=="csl.comparison-spec/1")return true;
     if(spec.at("input_manifest_source")=="resolved-problem-canonical-bytes")return true;
     const auto expected=spec.at("input_manifest_hash").get<std::string>();
     const auto& attachments=run.at("attachments");

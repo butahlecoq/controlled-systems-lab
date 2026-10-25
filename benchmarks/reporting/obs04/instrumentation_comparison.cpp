@@ -498,6 +498,7 @@ ar::AttemptStatus attempt_status(const SynthesisOutcome& outcome) {
     switch (std::get<SynthesisResult>(outcome).termination) {
     case Termination::completed: return ar::AttemptStatus::completed;
     case Termination::cancelled: return ar::AttemptStatus::cancelled;
+    case Termination::deadline_expired: return ar::AttemptStatus::resource_limited;
     case Termination::resource_limit: return ar::AttemptStatus::resource_limited;
     case Termination::operation_rejected: return ar::AttemptStatus::unsupported;
     case Termination::numerical_failure:
@@ -534,6 +535,7 @@ const char* termination_name(Termination termination) {
     switch(termination) {
     case Termination::completed: return "completed";
     case Termination::cancelled: return "cancelled";
+    case Termination::deadline_expired: return "deadline_expired";
     case Termination::resource_limit: return "resource_limit";
     case Termination::numerical_failure: return "numerical_failure";
     case Termination::operation_rejected: return "operation_rejected";

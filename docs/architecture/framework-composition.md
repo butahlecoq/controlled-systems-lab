@@ -89,7 +89,7 @@ Strategy A, Strategy B, or a general controller.
 The diagram and table describe current code, not a target microservice layout.
 Solid strategy and verifier paths are exercised by the registered synthesis
 comparison example on the exact T-S01 fixture. The artifact path records each
-strategy attempt separately as `csl.run-statistics/6` data. The current system
+strategy attempt separately as `csl.run-statistics/7` data. The current system
 does not yet publish one paired comparison record. Recorded complete-family
 claims remain unverified data and do not restore proof authority when decoded.
 
@@ -190,7 +190,7 @@ values. The `encode_strategy_run` function routes an individual final
 projection through the existing publisher and encoder. When both strategies
 return complete-family results with completed optimal outcomes and all selected
 witnesses pass numerical checks, the native `scenario_cli --run --output-dir`
-command saves each attempt as a separate `csl.run-statistics/6` recorded
+command saves each attempt as a separate `csl.run-statistics/7` recorded
 artifact. A strategy or witness-check failure returns before artifact
 publication. The artifacts do not serialize one paired comparison or its
 trajectory reports.
@@ -238,7 +238,7 @@ per-strategy outcomes plus independent witness checks. With `--output-dir`, it
 saves one versioned recorded artifact per strategy through the artifact API
 after both strategies return complete-family results with completed optimal
 outcomes and every selected witness passes its numerical checks. A strategy or
-witness-check failure returns before publication. The `csl.run-statistics/6` artifacts retain
+witness-check failure returns before publication. The `csl.run-statistics/7` artifacts retain
 complete-family claims as unverified data. They are not a paired comparison
 record, and decoding them does not mint trusted complete-family authority. See
 the [scenario CLI guide](../how-to/run-scenario.md) for commands and output
