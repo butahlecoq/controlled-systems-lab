@@ -583,7 +583,7 @@
 <text x="935.0" y="457" text-anchor="middle" class="label">Oxidizer stock x2</text>
 <text x="627" y="254.5" transform="rotate(-90 627 254.5)" text-anchor="middle" class="label">Fuel stock x4</text>
 <rect x="105" y="472" width="14" height="14" class="boundary"/>
-<text x="126" y="484" class="label">Projected terminal reachable-set boundary and vertices</text>
+<text x="126" y="484" class="label">Projected terminal-set boundary and stored V rows</text>
 <line x1="685" y1="479" x2="720" y2="479" stroke="#d1495b" stroke-width="3"/>
 <text x="728" y="484" class="label">Open-loop replay</text>
 <line x1="865" y1="479" x2="900" y2="479" stroke="#386cb0" stroke-width="3"/>
@@ -609,4 +609,4 @@
 <line x1="1050" y1="566" x2="1072" y2="566" stroke="#2a9d8f" stroke-width="3"/>
 <text x="1078" y="570" class="tick">x4</text>
 <text x="620" y="725" text-anchor="middle" class="label">Stage (75-second model interval)</text>
-<text x="620" y="746" text-anchor="middle" class="tick">Shaded geometry: uncertain linear model. Lower stock traces: solid = open-loop; dashed = receding horizon. Replanning is not a global feedback optimality claim.</text></svg>
+<text x="620" y="746" text-anchor="middle" class="tick">Shaded geometry: uncertain linear model. Dots: stored V rows; duplicate points can overlap. Solid/dashed stock traces: open-loop/receding horizon.</text></svg>
