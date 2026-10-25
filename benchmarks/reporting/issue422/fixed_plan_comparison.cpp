@@ -209,6 +209,7 @@ artifacts::ResolvedConfiguration configuration(std::string method,std::string so
     ar::NamedOption source_pin{"source_sha256",ar::OptionValue{ar::OptionScalar{std::move(source_sha256)}}};
     input.modules={{"strategy",{{method},"1",missing},{std::move(source_pin)}}};
     input.numerical={0,0};input.resources={1,1,1,{}};
+    // Both arms receive the same minimum assurance request; MinimaxFinal records the assurance actually achieved.
     input.output={ar::OutputKind::finite_minimax,Assurance::numerical,
         FamilyTarget::exact_optimal_relation,{"csl.polyhedron.h"},{0,0,{}, {}}};
     input.selector={{"csl.selector.none"},"1",{}};
@@ -271,10 +272,15 @@ artifacts::RecordedRunArtifact record_non_success_attempt(std::string method,std
     ar::FinalOutcome final;
     if(status=="unsupported") {
         final=ar::UnsupportedFinal{{{DiagnosticCode::unsupported,"solver",std::move(detail)}}};
+    } else if(status=="refused") {
+        final=ar::MinimaxFinal{Termination::operation_rejected,MinimaxOutcome::undetermined,
+            assurance,subject,{}, {}};
     } else if(status=="cancelled"||status=="timed_out"||status=="resource_limited") {
         const auto termination=status=="cancelled"?Termination::cancelled:
             status=="timed_out"?Termination::deadline_expired:Termination::resource_limit;
         final=ar::MinimaxFinal{termination,MinimaxOutcome::undetermined,assurance,subject,{}, {}};
+    } else if(status=="incomplete") {
+        final=ar::SkippedFinal{ar::SkippedReason::batch_failed};
     } else {
         final=ar::FailedFinal{ar::FailurePhase::invoke,ar::FailureReason::adapter_exception,
             std::move(detail),{}};
