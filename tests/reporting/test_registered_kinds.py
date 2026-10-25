@@ -574,7 +574,11 @@ class RegisteredKindTests(unittest.TestCase):
             for report in catalogue['reports']:
                 rid=report['report_id']
                 self.assertIn(rid+'/index.html',index)
-                self.assertIn(rid+'/records.json',index)
+                raw_name='results.jsonl' if report['report_kind']=='issue6-b07-reference' else 'records.json'
+                self.assertIn(rid+'/'+raw_name,index)
+                if report['report_kind']=='issue6-b07-reference':
+                    self.assertNotIn(rid+'/records.json',index)
+                    self.assertNotIn(rid+'/trials.csv',index)
                 self.assertIn(rid+'.zip',index)
                 archive_bytes=(first/(rid+'.zip')).read_bytes()
                 self.assertEqual(archive_bytes,(second/(rid+'.zip')).read_bytes())
