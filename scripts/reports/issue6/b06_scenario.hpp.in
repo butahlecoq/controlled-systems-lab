@@ -1,0 +1,7 @@
+#pragma once
+
+#include <string_view>
+
+namespace csl::issue6 {
+inline constexpr std::string_view configured_b06_scenario = R"CSL_B06_SCENARIO(@ISSUE6_B06_SCENARIO_CONTENT@)CSL_B06_SCENARIO";
+}

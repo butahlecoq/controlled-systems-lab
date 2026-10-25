@@ -1,11 +1,13 @@
 #include <csl/optimization/finite_action_minimax.hpp>
 #include <csl/problem/resolved_problem.hpp>
 #include <nlohmann/json.hpp>
+#include "issue6_b06_scenario.hpp"
 
 #include <chrono>
 #include <cmath>
 #include <fstream>
 #include <iostream>
+#include <iterator>
 #include <stdexcept>
 #include <string>
 #include <string_view>
@@ -130,7 +132,10 @@ FiniteActionMinimaxRequest b06_request(const json& scenario) {
 json load_scenario(const std::string& path="benchmarks/scenarios/b06-owner-confirmed-disturbance-v1.json") {
     std::ifstream stream(path,std::ios::binary);
     if(!stream)throw std::runtime_error("cannot open scenario: "+path);
-    return json::parse(stream);
+    const std::string bytes{std::istreambuf_iterator<char>(stream),std::istreambuf_iterator<char>()};
+    if(bytes!=csl::issue6::configured_b06_scenario)
+        throw std::runtime_error("scenario bytes differ from the configured canonical fixture; reconfigure and rebuild before execution");
+    return json::parse(bytes);
 }
 
 json terminal_vertices(const sets::SetData& set) {
@@ -200,8 +205,8 @@ json run_once(std::size_t batch,const json& scenario,bool include_geometry=false
 int main(int argc,char** argv) {
     try {
         const bool validate_only=argc>=2 && std::string_view(argv[1])=="--validate-only";
-        if(validate_only && argc!=3)throw std::runtime_error("usage: b06_finite_minimax --validate-only SCENARIO.json");
-        const auto scenario=validate_only?load_scenario(argv[2]):load_scenario();
+        if(validate_only && argc>3)throw std::runtime_error("usage: b06_finite_minimax --validate-only [SCENARIO.json]");
+        const auto scenario=validate_only&&argc==3?load_scenario(argv[2]):load_scenario();
         if(validate_only) {
             (void)b06_request(scenario);
             std::cout<<json{{"status","scenario_validated"},{"scenario_id",scenario.at("id")},

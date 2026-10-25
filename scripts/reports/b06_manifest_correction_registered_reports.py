@@ -14,6 +14,16 @@ SOURCE_PATTERN = r"b06-manifest-correction-v1"
 SOURCE_ID = "b06-owner-confirmed-7df01ba3af5e4c46"
 
 
+def validate_canonical_fixture(bundle: Path, canonical_fixture: Path) -> None:
+    corrected_path = Path(bundle) / "corrected-scenario.json"
+    corrected_bytes = corrected_path.read_bytes()
+    canonical_bytes = Path(canonical_fixture).read_bytes()
+    scenario_contract.validate(json.loads(corrected_bytes))
+    scenario_contract.validate(json.loads(canonical_bytes))
+    if corrected_bytes != canonical_bytes:
+        raise ValueError("B06 correction scenario differs from the canonical executable fixture")
+
+
 def adapt(bundle: Path) -> common.PublicationRecord:
     bundle = Path(bundle)
     if bundle.is_symlink() or not bundle.is_dir() or bundle.name != SOURCE_PATTERN:

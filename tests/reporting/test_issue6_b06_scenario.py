@@ -1,12 +1,15 @@
 import json
 import sys
+import tempfile
 import unittest
 from fractions import Fraction
 from pathlib import Path
 
 ROOT=Path(__file__).resolve().parents[2]
 sys.path.insert(0,str(ROOT/"scripts"/"reports"/"issue6"))
+sys.path.insert(0,str(ROOT/"scripts"/"reports"))
 import scenario_contract
+import b06_manifest_correction_registered_reports as correction_publisher
 
 SCENARIO=ROOT/"benchmarks/scenarios/b06-owner-confirmed-disturbance-v1.json"
 
@@ -61,6 +64,18 @@ class B06ScenarioContractTests(unittest.TestCase):
         self.assertEqual(corrected[:13],historical[:13])
         self.assertEqual(corrected[14:],historical[13:])
         self.assertEqual(corrected[13],"0")
+
+    def test_publication_gate_rejects_drift_from_canonical_fixture(self):
+        bundle=ROOT/"reports/algorithm-results/b06-manifest-correction-v1"
+        with tempfile.TemporaryDirectory() as temporary:
+            canonical=Path(temporary)/"canonical.json"
+            canonical.write_bytes(SCENARIO.read_bytes())
+            correction_publisher.validate_canonical_fixture(bundle,canonical)
+            changed=json.loads(canonical.read_text())
+            changed["model"]["A_row_major"][13]="1"
+            canonical.write_text(json.dumps(changed))
+            with self.assertRaisesRegex(ValueError,"differs from the canonical executable fixture"):
+                correction_publisher.validate_canonical_fixture(bundle,canonical)
 
 
 if __name__=="__main__":unittest.main()
