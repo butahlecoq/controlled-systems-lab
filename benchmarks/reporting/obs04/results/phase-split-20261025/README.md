@@ -1,5 +1,11 @@
 # OBS-04 loader and admission phase captures
 
+This initial capture set was superseded by
+[`phase-split-corrected-20261025`](../phase-split-corrected-20261025/README.md)
+after review found the optional timer read the clock even when disabled. The
+corrected source avoids clock reads without an observer; these original records
+remain here with their exact source provenance.
+
 Five clean Release process captures of the fixed analytic T-S01 fixture. Each
 process completed 32 attempts: one warmup and seven measured repetitions for
 each strategy/instrumentation arm. All 160 attempts passed the analytic and

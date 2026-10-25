@@ -92,8 +92,9 @@ residual. Callback timers call the original capability functions exactly once.
 The timers stop before configuration-template creation, workspace creation,
 and the two analytic baseline strategy runs. Complete-family proposal
 construction is measured separately inside each strategy on enabled runs.
-Five clean Release captures of these `/3` loader and capability timings are
-preserved in [`results/phase-split-20261025`](results/phase-split-20261025/).
+Five corrected clean Release captures of these `/3` loader and capability
+timings are preserved in
+[`results/phase-split-corrected-20261025`](results/phase-split-corrected-20261025/).
 
 ## Clean-source preflight capture
 
