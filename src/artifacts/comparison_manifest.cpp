@@ -1,10 +1,12 @@
 #include <csl/artifacts/comparison_manifest.hpp>
 #include <nlohmann/json.hpp>
 #include <algorithm>
+#include <charconv>
 #include <cctype>
 #include <cmath>
 #include <initializer_list>
 #include <limits>
+#include <optional>
 #include <set>
 #include <stdexcept>
 
@@ -305,15 +307,82 @@ bool arm_matches_run(const Json& run,const SpecShape& spec,std::size_t arm) {
     return config.at("strategy").at("strategy")==spec.strategies.at(arm) &&
         config.at("collection").at("enabled").get<bool>()==(spec.instrumentation.at(arm)=="enabled");
 }
-bool measurement_matches_arm(AttemptStatus status,const Json& measurement,const SpecShape& spec,
-    std::size_t arm,std::uint32_t repetition) {
+std::size_t saved_distinct_witness_count(const Json& batch) {
+    const auto& witnesses=batch.at("witnesses");
+    const auto tolerance=batch.at("distinctness_tolerance").get<double>();
+    std::vector<std::size_t> representatives;
+    const auto histories_close=[&](const Json& left,const Json& right) {
+        if(left.size()!=right.size())return false;
+        for(std::size_t time=0;time<left.size();++time) {
+            if(left.at(time).size()!=right.at(time).size())return false;
+            for(std::size_t coordinate=0;coordinate<left.at(time).size();++coordinate)
+                if(!(std::abs(left.at(time).at(coordinate).get<double>()-
+                    right.at(time).at(coordinate).get<double>())<=tolerance))return false;
+        }
+        return true;
+    };
+    for(std::size_t index=0;index<witnesses.size();++index) {
+        bool duplicate=false;
+        for(const auto representative:representatives) {
+            const auto& candidate=witnesses.at(index);
+            const auto& existing=witnesses.at(representative);
+            if(histories_close(candidate.at("states"),existing.at("states"))&&
+                histories_close(candidate.at("controls"),existing.at("controls"))) {
+                duplicate=true;
+                break;
+            }
+        }
+        if(!duplicate)representatives.push_back(index);
+    }
+    return representatives.size();
+}
+bool measurement_matches_arm(AttemptStatus status,const Json& measurement,const Json& run,
+    const SpecShape& spec,std::size_t arm,std::uint32_t repetition) {
     if(!measurement_status_matches(status,measurement))return false;
     if(spec.strategies.empty())return true;
-    return measurement.value("schema",std::string{})=="csl.obs04-instrumentation-comparison-event/2" &&
-        measurement.at("strategy")==spec.strategies.at(arm) &&
-        measurement.at("instrumentation")==spec.instrumentation.at(arm) &&
-        measurement.at("repetition").get<std::uint32_t>()==repetition &&
-        measurement.at("warmup").get<bool>()==(repetition==0);
+    const auto schema=measurement.value("schema",std::string{});
+    if(schema!="csl.obs04-instrumentation-comparison-event/2" &&
+        schema!="csl.obs04-instrumentation-comparison-event/3")return false;
+    if(measurement.at("strategy")!=spec.strategies.at(arm) ||
+        measurement.at("instrumentation")!=spec.instrumentation.at(arm) ||
+        measurement.at("repetition").get<std::uint32_t>()!=repetition ||
+        measurement.at("warmup").get<bool>()!=(repetition==0))return false;
+    if(schema=="csl.obs04-instrumentation-comparison-event/2")return true;
+    const auto nonnegative_integer=[](const Json& value) {
+        if(value.is_number_unsigned())return true;
+        return value.is_number_integer()&&value.get<std::int64_t>()>=0;
+    };
+    const auto canonical_count=[](const Json& value) {
+        if(!value.is_string())return std::optional<std::uint64_t>{};
+        const auto& text=value.get_ref<const std::string&>();
+        std::uint64_t count{};
+        const auto [end,error]=std::from_chars(text.data(),text.data()+text.size(),count);
+        if(error!=std::errc{}||end!=text.data()+text.size())return std::optional<std::uint64_t>{};
+        return std::optional<std::uint64_t>{count};
+    };
+    for(const auto* field:{"selection_setup_ns","selection_run_ns","verification_ns"})
+        if(!measurement.contains(field)||(!measurement.at(field).is_null()&&
+            !nonnegative_integer(measurement.at(field))))return false;
+    for(const auto* field:{"requested_witness_count","returned_witness_count","distinct_witness_count"})
+        if(!measurement.contains(field)||(!measurement.at(field).is_null()&&
+            !nonnegative_integer(measurement.at(field))))return false;
+    const auto& configuration=run.at("configuration").at("value");
+    const auto configured_count=canonical_count(configuration.at("output").at("witness_count"));
+    if(!configured_count||measurement.at("requested_witness_count").get<std::uint64_t>()!=*configured_count)return false;
+    const auto& selection=run.at("selection");
+    if(selection.is_null())
+        return measurement.at("returned_witness_count").is_null()&&
+            measurement.at("distinct_witness_count").is_null();
+    for(const auto* field:{"selection_setup_ns","selection_run_ns","verification_ns"})
+        if(measurement.at(field).is_null())return false;
+    const auto& batch=selection.at("batch");
+    const auto returned=batch.at("witnesses").size();
+    const auto batch_requested=canonical_count(batch.at("requested"));
+    const auto distinct=saved_distinct_witness_count(batch);
+    return batch_requested&&measurement.at("requested_witness_count").get<std::uint64_t>()==
+            *batch_requested &&
+        measurement.at("returned_witness_count").get<std::uint64_t>()==returned &&
+        measurement.at("distinct_witness_count").get<std::uint64_t>()==distinct && distinct<=returned;
 }
 ArtifactResult<problem::ResolvedContent> own(std::string_view text) {
     std::vector<std::byte> bytes; bytes.reserve(text.size());
@@ -378,7 +447,7 @@ ArtifactResult<RecordedComparisonArtifact> encode_recorded_comparison(
                     return error(ArtifactErrorCode::limit,"attempts","Measurement payloads exceed byte budget");
                 payload_bytes+=attempt.measurement_payload.size();
                 const auto measurement=parse_bounded(attempt.measurement_payload,validation_limits);
-                if(!measurement_matches_arm(attempt.reported_status,measurement,spec_shape,
+                if(!measurement_matches_arm(attempt.reported_status,measurement,run_json,spec_shape,
                     attempt.strategy_index,attempt.repetition_index))
                     return error(ArtifactErrorCode::identity,"attempts["+std::to_string(i)+"].measurement_payload.status","Measurement status disagrees with the run record");
                 records.push_back({{"arm_index", attempt.strategy_index}, {"repetition_index", attempt.repetition_index},
@@ -490,7 +559,7 @@ ArtifactResult<RecordedComparisonArtifact> decode_recorded_comparison(std::strin
                 const auto measurement_text=item.at("measurement_payload").get<std::string>();
                 if(measurement_text.size()>limits.bytes||
                     !measurement_matches_arm(parse_status(item.at("reported_status").get<std::string>()),
-                        parse_bounded(measurement_text,limits),spec_shape,key.first,key.second))
+                        parse_bounded(measurement_text,limits),run_json,spec_shape,key.first,key.second))
                     return error(ArtifactErrorCode::identity,"comparison.attempts.measurement_payload","Measurement status disagrees with the run record");
             }
         }

@@ -21,7 +21,9 @@ Strategy execution order also alternates by repetition, so each repetition
 starts with the opposite strategy from the previous one.
 `strategy_run_ns` covers only the exclusive workspace's public `StrategyPort::run`;
 collector/configuration and workspace setup are reported separately, and the
-post-run observation snapshot is outside that interval. Strategy A includes its
+post-run observation snapshot is outside that interval. Witness selection setup,
+selector execution, and independent verification are also reported separately
+after the strategy interval. Strategy A includes its
 five documented phase scopes. Strategy B includes its run scope. Each enabled
 event stores inclusive and exclusive wall-clock ticks for every span and the
 clock period used to interpret them. There is one solver thread and one outer
@@ -63,12 +65,15 @@ selects a path, and existing files are never overwritten. Keep the separate
 limiter-profile result with any retained measurement. Do not combine the
 existing synthetic OBS-02 collector loop with these solver timings.
 
-`csl.obs04-instrumentation-comparison-event/2` remains the raw per-attempt
-measurement payload. The comparison record binds its strategy, instrumentation
+`csl.obs04-instrumentation-comparison-event/3` remains the raw per-attempt
+measurement payload. It records requested, returned, and distinct witness counts,
+with selection setup, selector execution, and independent verification measured
+outside `strategy_run_ns`. The comparison record binds its strategy, instrumentation
 mode, repetition, and status to the arm and attempt indices. The per-run record
 stores the resolved request, outcome/family data and collected spans. This is
-an analytic fixture increment; phase-separated parsing, verification,
-serialization, rendering and end-to-end timings remain outside this driver.
+an analytic fixture increment; phase-separated parsing/validation, capability
+checks, family construction, first/additional witness queries, serialization,
+rendering and end-to-end timings remain outside this driver.
 
 Build a clean Release source checkout and use a separate build directory:
 
@@ -83,7 +88,8 @@ cmake --build build/obs04 --config Release --parallel
 ```
 
 The output does not include process startup, parsing, artifact serialization,
-rendering, or the separate verification/selection path. No correctness or
+rendering, or a complete end-to-end solve duration. The strategy timing excludes
+the separately reported selection and verification phases. No correctness or
 performance conclusion should be based on a timing row whose status is not
 `passed` and whose complete-family oracle is not true.
 
@@ -147,6 +153,7 @@ environment-manifest increment changes the wire schema while retaining legacy
 decoding; it adds no C++ API, installed file, package workflow, or new
 dependency. It does not prepare or publish a release. No capability result is
 claimed until the labelled job has actually run. OBS-04 still needs
-phase-separated timing, requested/returned/distinct witness counts, complete
-resource policy and measurement, instrumentation overhead analysis, report
-rendering, and a usable separate limiter profile before it can close.
+phase-separated parsing/validation, capability, family-construction, and
+first/additional-query timing; complete resource policy and measurement;
+instrumentation overhead analysis; report rendering; and a usable separate
+limiter profile before it can close.

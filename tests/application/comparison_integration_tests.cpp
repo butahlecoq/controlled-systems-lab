@@ -525,6 +525,53 @@ void compare_profile(const std::string& profile) {
     CHECK(version_three_replay.content().digest()==version_three.content().digest());
     CHECK(version_three_replay.spec_id().digest==version_three_spec.digest());
     CHECK(version_three_replay.identity().digest==version_three.identity().digest);
+    const auto& witness_batch=std::get<WitnessSelection>(execution.strategies[0].selection).batch;
+    CHECK(witness_batch.distinct_count()==2);
+    const auto v3_measurement=[&](std::string instrumentation) {
+        return nlohmann::json{{"schema","csl.obs04-instrumentation-comparison-event/3"},
+            {"repetition",0},{"warmup",true},{"status","passed"},
+            {"strategy","csl.synthesis.reach-back"},{"instrumentation",std::move(instrumentation)},
+            {"selection_setup_ns",1},{"selection_run_ns",2},{"verification_ns",3},
+            {"requested_witness_count",witness_batch.requested},
+            {"returned_witness_count",witness_batch.returned_count()},
+            {"distinct_witness_count",witness_batch.distinct_count()}}.dump();
+    };
+    std::vector<ar::ComparisonAttempt> measured_attempts_v3{
+        {0,0,ar::AttemptStatus::completed,
+            {ar::RunId{"application-comparison-encoder-0-uninstrumented"},run_a.content().digest()},
+            run_a,v3_measurement("disabled")},
+        {1,0,ar::AttemptStatus::completed,
+            {ar::RunId{"application-comparison-encoder-0-instrumented"},run_a_enabled.content().digest()},
+            run_a_enabled,v3_measurement("enabled")}};
+    const auto recorded_v3=take_artifact(ar::encode_recorded_comparison(
+        version_three_spec,measured_attempts_v3),"encode_recorded_comparison event/3");
+    const auto recorded_v3_wire=std::string(
+        reinterpret_cast<const char*>(recorded_v3.content().bytes().data()),
+        recorded_v3.content().bytes().size());
+    const auto restored_v3=take_artifact(ar::decode_recorded_comparison(recorded_v3_wire),
+        "decode_recorded_comparison event/3");
+    CHECK(restored_v3.content().digest()==recorded_v3.content().digest());
+    auto bad_witness_counts=measured_attempts_v3;
+    auto bad_measurement=nlohmann::json::parse(bad_witness_counts.front().measurement_payload);
+    bad_measurement["returned_witness_count"]=1;
+    bad_witness_counts.front().measurement_payload=bad_measurement.dump();
+    const auto count_mismatch=ar::encode_recorded_comparison(version_three_spec,bad_witness_counts);
+    REQUIRE(std::holds_alternative<ar::ArtifactError>(count_mismatch));
+    CHECK(std::get<ar::ArtifactError>(count_mismatch).path=="attempts[0].measurement_payload.status");
+    auto bad_distinct_count=measured_attempts_v3;
+    auto bad_distinct_measurement=nlohmann::json::parse(bad_distinct_count.front().measurement_payload);
+    bad_distinct_measurement["distinct_witness_count"]=1;
+    bad_distinct_count.front().measurement_payload=bad_distinct_measurement.dump();
+    const auto distinct_mismatch=ar::encode_recorded_comparison(version_three_spec,bad_distinct_count);
+    REQUIRE(std::holds_alternative<ar::ArtifactError>(distinct_mismatch));
+    CHECK(std::get<ar::ArtifactError>(distinct_mismatch).path=="attempts[0].measurement_payload.status");
+    auto missing_selection_timing=measured_attempts_v3;
+    auto missing_timing_measurement=nlohmann::json::parse(missing_selection_timing.front().measurement_payload);
+    missing_timing_measurement["verification_ns"]=nullptr;
+    missing_selection_timing.front().measurement_payload=missing_timing_measurement.dump();
+    const auto timing_mismatch=ar::encode_recorded_comparison(version_three_spec,missing_selection_timing);
+    REQUIRE(std::holds_alternative<ar::ArtifactError>(timing_mismatch));
+    CHECK(std::get<ar::ArtifactError>(timing_mismatch).path=="attempts[0].measurement_payload.status");
     auto changed_environment_spec_json=version_three_spec_json;
     changed_environment_spec_json["environment"]["build"]["compiler_version"]="13.3.1";
     const auto changed_environment_text=changed_environment_spec_json.dump();
