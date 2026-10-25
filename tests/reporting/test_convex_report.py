@@ -52,6 +52,31 @@ class NativePhaseTests(unittest.TestCase):
         self.expect(zero,'observed_return','returned_status_pair',0)
         self.assertNotEqual(data.digest(unavailable),data.digest(zero))
 
+    def test_scheduler_width_diagnostics_are_accepted_but_validated(self):
+        returned=('phase.linear.time_limit=1\nphase.linear.scheduler_threads=4\n'
+                  'phase.linear.api_status=0\nphase.linear.model_status=7\nphase.linear.iterations=0')
+        p=self.project(self.trial(returned,'completed'),'linear')
+        self.expect(p['linear'],'observed_return','returned_status_pair',0)
+        for invalid in ('0','-1','4097','many'):
+            with self.subTest(width=invalid),self.assertRaises(ValueError):
+                self.project(self.trial(returned.replace('scheduler_threads=4','scheduler_threads='+invalid),'completed'),'linear')
+        with self.assertRaises(ValueError):
+            self.project(self.trial('phase.linear.scheduler_threads=4','completed'),'linear')
+        retry=self.trial('phase.feasibility.time_limit=1\nphase.feasibility.api_status=0\n'
+                         'phase.feasibility.model_status=7\nphase.feasibility.iterations=0\n'
+                         'start.valid=true\nstart.default_fallback=false\nphase.qp.time_limit=1\n'
+                         'phase.qp.api_status=0\nphase.qp.model_status=7\nphase.qp.iterations=0\n'
+                         'phase.qp.retry.time_limit=1\nphase.qp.retry.scheduler_threads=2\n'
+                         'phase.qp.retry.api_status=0\nphase.qp.retry.model_status=7','completed')
+        self.project(retry)
+        retry_without_width=copy.deepcopy(retry)
+        retry_without_width['result']['raw_diagnostics']=retry_without_width['result']['raw_diagnostics'].replace(
+            'phase.qp.retry.scheduler_threads=2\n','')
+        self.project(retry_without_width)
+        retry['result']['raw_diagnostics']=retry['result']['raw_diagnostics'].replace(
+            'phase.qp.retry.scheduler_threads=2','phase.qp.retry.scheduler_threads=999999')
+        with self.assertRaises(ValueError):self.project(retry)
+
     def test_exception_aborted_and_before_entry_are_distinct(self):
         for status,reason in [('exception','exception_boundary_unobserved'),('aborted','aborted_boundary_unobserved')]:
             trial=self.trial(status=status);trial['result']=None;trial['attempt']=None

@@ -32,15 +32,34 @@ function(csl_add_private_highs)
   if(NOT patched_source_sha256 STREQUAL expected_source_sha256)
     message(FATAL_ERROR "Configured HiGHS patch hash is not the verified platform postimage: ${patched_source_sha256}")
   endif()
+  execute_process(
+    COMMAND "${CMAKE_COMMAND}"
+      "-DSOURCE_FILE=${csl_highs_SOURCE_DIR}/highs/Highs.h"
+      -P "${PROJECT_SOURCE_DIR}/cmake/ApplyPinnedHighsThreadObservationPatch.cmake"
+    RESULT_VARIABLE thread_patch_result
+    OUTPUT_VARIABLE thread_patch_output
+    ERROR_VARIABLE thread_patch_error)
+  if(NOT thread_patch_result EQUAL 0)
+    message(FATAL_ERROR "Failed to apply pinned HiGHS scheduler observation patch: ${thread_patch_output}${thread_patch_error}")
+  endif()
+  set(CSL_HIGHS_THREAD_OBSERVATION_PATCH_SHA256
+    "5e81b644fad40522a62037b0dab8ae0f023a8f7db7540297030ac28de58b56cc" PARENT_SCOPE)
   set(CSL_HIGHS_PATCHED_SOURCE_SHA256 "${patched_source_sha256}" PARENT_SCOPE)
   target_compile_definitions(csl_highs_lp PRIVATE
-    "CSL_HIGHS_PATCHED_SOURCE_SHA256=\"${patched_source_sha256}\"")
+    "CSL_HIGHS_PATCHED_SOURCE_SHA256=\"${patched_source_sha256}\""
+    "CSL_HIGHS_THREAD_OBSERVATION_PATCH_SHA256=\"5e81b644fad40522a62037b0dab8ae0f023a8f7db7540297030ac28de58b56cc\"")
   add_test(NAME pinned_highs_patch_contract
     COMMAND "${CMAKE_COMMAND}"
       "-DUPSTREAM_HEADER=${csl_highs_SOURCE_DIR}/highs/util/HVectorBase.h"
       "-DPATCH_SCRIPT=${PROJECT_SOURCE_DIR}/cmake/ApplyPinnedHighsPatch.cmake"
       "-DWORK_DIR=${PROJECT_BINARY_DIR}/pinned-highs-patch-test"
       -P "${PROJECT_SOURCE_DIR}/tests/cmake/pinned_highs_patch_contract.cmake")
+  add_test(NAME pinned_highs_thread_observation_patch_contract
+    COMMAND "${CMAKE_COMMAND}"
+      "-DUPSTREAM_HEADER=${csl_highs_SOURCE_DIR}/highs/Highs.h"
+      "-DPATCH_SCRIPT=${PROJECT_SOURCE_DIR}/cmake/ApplyPinnedHighsThreadObservationPatch.cmake"
+      "-DWORK_DIR=${PROJECT_BINARY_DIR}/pinned-highs-thread-observation-patch-test"
+      -P "${PROJECT_SOURCE_DIR}/tests/cmake/pinned_highs_thread_observation_patch_contract.cmake")
   set(FAST_BUILD ON)
   set(BUILD_SHARED_LIBS OFF)
   set(BUILD_CXX ON)

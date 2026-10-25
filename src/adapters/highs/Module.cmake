@@ -12,7 +12,8 @@ if(CSL_ENABLE_HIGHS)
   target_link_libraries(csl_highs_convex PUBLIC CSL::convex CSL::registry PRIVATE highs)
 
   target_compile_definitions(csl_highs_convex PRIVATE
-    "CSL_HIGHS_PATCHED_SOURCE_SHA256=\"${CSL_HIGHS_PATCHED_SOURCE_SHA256}\"")
+    "CSL_HIGHS_PATCHED_SOURCE_SHA256=\"${CSL_HIGHS_PATCHED_SOURCE_SHA256}\""
+    "CSL_HIGHS_THREAD_OBSERVATION_PATCH_SHA256=\"${CSL_HIGHS_THREAD_OBSERVATION_PATCH_SHA256}\"")
 
 endif()
 

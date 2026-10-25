@@ -110,7 +110,7 @@ Json resource_json(const SweepPhaseResources& resources) {
             {"memory_bytes", optional_json(resources.requested.memory_bytes)}}},
         {"executor_worker_threads_started", optional_json(resources.executor_worker_threads_started)},
         {"peak_active_tasks", optional_json(resources.peak_active_tasks)},
-        {"backend_threads", optional_json(resources.backend_threads)},
+        {"backend_scheduler_width", optional_json(resources.backend_scheduler_width)},
         {"peak_workspace_reservation_bytes", optional_json(resources.peak_workspace_reservation_bytes)},
         {"retained_result_reservation_bytes", optional_json(resources.retained_result_reservation_bytes)},
         {"enforced_memory_reservation_budget_bytes", optional_json(resources.enforced_memory_reservation_budget_bytes)},
@@ -119,10 +119,11 @@ Json resource_json(const SweepPhaseResources& resources) {
         {"memory_observation_scope", resources.memory_observation_scope}};
 }
 
-SweepPhaseResources parse_resources(const Json& value) {
+SweepPhaseResources parse_resources(const Json& value, bool legacy_v1) {
+    const char* backend_field = legacy_v1 ? "backend_threads" : "backend_scheduler_width";
     if (!value.is_object() || value.size() != 10 || !value.contains("requested") ||
         !value.contains("executor_worker_threads_started") || !value.contains("peak_active_tasks") ||
-        !value.contains("backend_threads") || !value.contains("peak_workspace_reservation_bytes") ||
+        !value.contains(backend_field) || !value.contains("peak_workspace_reservation_bytes") ||
         !value.contains("retained_result_reservation_bytes") || !value.contains("enforced_memory_reservation_budget_bytes") ||
         !value.contains("observed_process_memory_bytes") ||
         !value.contains("memory_support") || !value.contains("memory_observation_scope"))
@@ -143,7 +144,7 @@ SweepPhaseResources parse_resources(const Json& value) {
     };
     result.executor_worker_threads_started = optional_count(value.at("executor_worker_threads_started"));
     result.peak_active_tasks = optional_count(value.at("peak_active_tasks"));
-    result.backend_threads = optional_count(value.at("backend_threads"));
+    result.backend_scheduler_width = optional_count(value.at(backend_field));
     result.peak_workspace_reservation_bytes = optional_count(value.at("peak_workspace_reservation_bytes"));
     result.retained_result_reservation_bytes = optional_count(value.at("retained_result_reservation_bytes"));
     result.enforced_memory_reservation_budget_bytes = optional_count(value.at("enforced_memory_reservation_budget_bytes"));
@@ -336,7 +337,7 @@ ArtifactResult<RecordedSweepArtifact> encode_recorded_sweep(const problem::Resol
                 return error(ArtifactErrorCode::identity, "cases[" + std::to_string(i) + "]", "Scenario/configuration identity must be unique");
             records.push_back(case_json(item, validation_limits));
         }
-        Json wire{{"schema", "csl.scenario-sweep/1"}, {"run_id", std::move(run_id)},
+        Json wire{{"schema", "csl.scenario-sweep/2"}, {"run_id", std::move(run_id)},
             {"spec", spec_text}, {"spec_digest", problem::hex(spec.digest())},
             {"cases", std::move(records)}, {"coarse_resources", resource_json(coarse)},
             {"query_resources", resource_json(query)}};
@@ -358,7 +359,10 @@ ArtifactResult<RecordedSweepArtifact> decode_recorded_sweep(std::string_view tex
             !wire.contains("spec") || !wire.contains("spec_digest") || !wire.contains("cases") ||
             !wire.contains("coarse_resources") || !wire.contains("query_resources"))
             return error(ArtifactErrorCode::invalid_input, "sweep.fields", "Sweep fields do not match schema");
-        if (wire.at("schema") != "csl.scenario-sweep/1") return error(ArtifactErrorCode::unsupported, "sweep.schema", "Unknown sweep schema");
+        const auto schema = wire.at("schema").get<std::string>();
+        const bool legacy_v1 = schema == "csl.scenario-sweep/1";
+        if (!legacy_v1 && schema != "csl.scenario-sweep/2")
+            return error(ArtifactErrorCode::unsupported, "sweep.schema", "Unknown sweep schema");
         if (wire.at("run_id").get<std::string>().empty()) return error(ArtifactErrorCode::invalid_input, "sweep.run_id", "Run ID must be nonempty");
         const auto spec_text = wire.at("spec").get<std::string>();
         if (spec_text.size() > limits.string_bytes) return error(ArtifactErrorCode::limit, "sweep.spec", "Spec exceeds string limit");
@@ -378,8 +382,8 @@ ArtifactResult<RecordedSweepArtifact> decode_recorded_sweep(std::string_view tex
             if (identity.first.empty() || identity.second.empty() || !identities.insert(identity).second)
                 return error(ArtifactErrorCode::identity, "sweep.cases[" + std::to_string(i) + "]", "Case identity is empty or duplicated");
         }
-        (void)parse_resources(wire.at("coarse_resources"));
-        (void)parse_resources(wire.at("query_resources"));
+        (void)parse_resources(wire.at("coarse_resources"), legacy_v1);
+        (void)parse_resources(wire.at("query_resources"), legacy_v1);
         auto content = own(text);
         if (auto* owned = std::get_if<problem::ResolvedContent>(&content)) return RecordedSweepArtifact(*owned);
         return std::get<ArtifactError>(std::move(content));

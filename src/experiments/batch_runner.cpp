@@ -265,7 +265,11 @@ std::optional<artifacts::SweepPhaseResources> phase_resources(
         enforced_memory = static_cast<std::uint64_t>(*requested.memory_bytes);
     return artifacts::SweepPhaseResources{requested,
         static_cast<std::uint64_t>(batch.enforcement.outer_worker_threads_started),
-        static_cast<std::uint64_t>(batch.enforcement.peak_active_tasks), {}, workspace, retained,
+        static_cast<std::uint64_t>(batch.enforcement.peak_active_tasks),
+        batch.enforcement.observed_backend_threads
+            ? std::optional<std::uint64_t>{static_cast<std::uint64_t>(*batch.enforcement.observed_backend_threads)}
+            : std::nullopt,
+        workspace, retained,
         enforced_memory, observed_process_memory_bytes, memory_support,
         observed_process_memory_bytes
             ? "process resident-set snapshot at phase completion; includes unrelated process allocations; not a peak or limit"

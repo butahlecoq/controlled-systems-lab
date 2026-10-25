@@ -186,6 +186,7 @@ class HighsLPWorkspace final : public LPWorkspace {
             << "\nnative.version=" << highsVersion() << "\nnative.githash=" << highsGithash()
             << "\nnative.archive_sha256=" << archive_hash
             << "\nnative.downstream.hvectorbase_sha256=" << CSL_HIGHS_PATCHED_SOURCE_SHA256
+            << "\nnative.downstream.scheduler_observation_sha256=" << CSL_HIGHS_THREAD_OBSERVATION_PATCH_SHA256
             << "\nprogram.problem=" << p.identity().problem.value << "\nprogram.id=" << p.identity().program.value
             << "\noptions.solver=simplex\noptions.presolve=off\noptions.parallel=off\noptions.threads=1"
             << "\noptions.random_seed=0\noptions.allow_unbounded_or_infeasible=false\noptions.log_to_console=true\nlogging.destination=callback"
@@ -298,6 +299,7 @@ class HighsLPWorkspace final : public LPWorkspace {
         const auto solve_start=std::chrono::steady_clock::now();
         const auto api = h.run();
         raw << "\nnative.solve_seconds=" << std::chrono::duration<double>(std::chrono::steady_clock::now()-solve_start).count();
+        highs_detail::observe_scheduler_threads(h,c,raw,"native");
         const auto model = h.getModelStatus();
         classify(result,api,model,state);
         raw << "\nnative_run=true\nnative.call_status=" << static_cast<int>(api)
