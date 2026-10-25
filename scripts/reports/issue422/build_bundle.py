@@ -59,6 +59,7 @@ def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--result", type=Path, default=ROOT / "benchmarks/reporting/issue422/results/finite-plan-comparison.json")
     parser.add_argument("--build-log", type=Path, default=ROOT / "build/tmp/issue422-build.log")
+    parser.add_argument("--configure-log", type=Path, default=ROOT / "build/tmp/issue422-configure.log")
     parser.add_argument("--out", type=Path)
     args = parser.parse_args()
     result = json.loads(args.result.read_text(encoding="utf-8"))
@@ -80,6 +81,7 @@ def main() -> int:
     (out / "comparison.json").write_bytes(pretty(result))
     (out / "environment.json").write_bytes(pretty(environment))
     (out / "build.log").write_bytes(args.build_log.read_bytes())
+    (out / "configure.log").write_bytes(args.configure_log.read_bytes())
     (out / "commands.txt").write_text(
         "cmake -S . -B build/core -DCMAKE_BUILD_TYPE=Release -DCSL_BUILD_ISSUE422_REPORT=ON\n"
         "cmake --build build/core --target csl_issue422_fixed_plan_comparison --parallel 4\n"

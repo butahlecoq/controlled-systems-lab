@@ -1,0 +1,18 @@
+{
+  "files": {
+    "README.md": "0f64152ab6840ca83bdafdf605b321c7ab0ec29016915cf99ed0ad6fc80013da",
+    "build.log": "9b2cc3f3709aac84575ad0f866fbe0147e7faee45213b82eeebf93d615d24cd2",
+    "commands.txt": "a8bb24f1de912b5c74cf8b752e1076577b4a764806422fb37e50a7f5a337eb09",
+    "comparison-spec-v3.schema.json": "1069873676f67db116227c49a4e81e3bb378e864792f9e3af2dd6bdbcfd7ff6d",
+    "comparison.json": "b9a2929bacda098e5d61f7da7403a7ac7b46dde0a8549d391be1c4b5420ce104",
+    "configure.log": "1e5d319d6a4b929473eda58a2c3ea0370079d90b10f7c9a6e0a86cd1e93c836d",
+    "environment.json": "c6d797ac530f064446fadc6806658a2aa48b0ef79a731fd95757f0638826b056",
+    "fixed_plan_comparison.cpp": "fa96edf61f0ca1efb5ab853af51e96886019a6546c9df51c09fdc3684183c6b2",
+    "index.html": "c7ce8d2984bd60e3f28909ad2df2846f2e8e34182c9a79e3cfc4409c8432c8ff",
+    "trials.csv": "68d7ca4dd2a15c7a165440d4007844f71d290e6f1f2be58137de6c4540a25957",
+    "visual.svg": "4555af11ed999db069d21ab9e3ffcebc86f54a3a2dce7d69a3ebbbdde8391b0b"
+  },
+  "report_id": "exp05-fixed-plan-minimax-20261026-fce05a69",
+  "schema": "csl.exp05-minimax-report-manifest/1",
+  "source_commit": "fce05a69fd62a2397934af53eaf269468990176a"
+}
