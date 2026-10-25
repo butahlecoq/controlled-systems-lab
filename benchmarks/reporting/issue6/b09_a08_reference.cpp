@@ -1,6 +1,7 @@
 #include <csl/optimization/finite_action_minimax.hpp>
 #include <nlohmann/json.hpp>
 
+#include <array>
 #include <chrono>
 #include <cmath>
 #include <iostream>
@@ -158,9 +159,10 @@ json vertices(const sets::SetData& set) {
 }
 
 std::size_t distinct_point_count(const json& points) {
-    std::set<Vector> unique;
+    std::set<std::array<double, 4>> unique;
     for (const auto& point : points) {
-        Vector value{};
+        if (point.size() != 4) throw std::runtime_error("terminal point dimension mismatch");
+        std::array<double, 4> value{};
         for (std::size_t i = 0; i < value.size(); ++i) value[i] = point.at(i).get<double>();
         unique.insert(value);
     }
