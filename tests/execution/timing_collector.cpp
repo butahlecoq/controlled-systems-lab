@@ -60,7 +60,7 @@ ob::CollectionPlan plan(bool enabled=true,std::size_t count=4,bool escaped_child
             ar::SpanDescriptor d{};d.id={i};if(i)d.parent=ar::SpanParent{{i==3&&count==4?1u:0u},i==3&&count==4&&!escaped_child?ar::ParentKind::nested:ar::ParentKind::spawned};
             d.shard=i%2;d.bucket=0;d.task="task";d.operation="solve";d.module=c.modules[0].implementation;
             d.observation_source="timing-collector-test";
-            d.clock={"wall"};d.requested_assurance=Assurance::numerical;d.applied_assurance=ar::Available<Assurance>{Assurance::numerical};
+            d.clock=wall_metadata.id;d.requested_assurance=Assurance::numerical;d.applied_assurance=ar::Available<Assurance>{Assurance::numerical};
             p.spans.push_back(std::move(d));
         }
     }
@@ -360,4 +360,25 @@ TEST_CASE("matching clock precision and limitations survive portable run publica
         }
         CHECK(persisted.description().statistics.description().buckets[0].observed.value==4);
     }
+}
+
+TEST_CASE("steady clock smoke publishes complete timing without latency thresholds") {
+    auto clock=ob::make_steady_timing_clock();
+    const auto planned=plan(true,4,false,clock->wall_domain());
+    auto timer=accepted(ob::make_timing_collector(planned,clock,{0},{{1},{2}}));
+    auto root=accepted(timer->start({0}));
+    auto first=accepted(timer->start({1}));
+    auto nested=accepted(timer->start({3}));
+    nested.close();
+    first.close();
+    auto second=accepted(timer->start({2}));
+    second.close();
+    root.close();
+
+    const auto report=accepted(timer->snapshot());
+    REQUIRE(report.spans.size()==4);
+    REQUIRE(std::holds_alternative<ar::Available<std::uint64_t>>(report.run_wall_ticks));
+    CHECK(measured(report.run_wall_ticks)==measured(report.spans[0].inclusive_wall_ticks));
+    CHECK(std::holds_alternative<ar::Available<std::uint64_t>>(report.worker_work_ticks));
+    CHECK(report.diagnostics.empty());
 }
