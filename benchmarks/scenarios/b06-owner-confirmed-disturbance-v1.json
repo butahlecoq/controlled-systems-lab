@@ -1,0 +1,38 @@
+{
+  "schema_version": 1,
+  "id": "b06-owner-confirmed-disturbance-v1",
+  "source_scenario_id": "B06/L09",
+  "variant_status": "owner-confirmed reference; not a recovered historical uncertainty catalogue or run",
+  "source": {
+    "artifact_id": "L09",
+    "sha256": "bb32b230e600fd0871322768dbf42d181fa7a0a288b97c717659a6448e3b72aa",
+    "pdf_pages": [10, 11, 12],
+    "owner_disturbance_decision": "2026-10-25; two independent components in [-1,1] at each of five stages"
+  },
+  "model": {
+    "time_domain": "discrete",
+    "horizon": 5,
+    "state_dimension": 4,
+    "control_dimension": 1,
+    "disturbance_dimension": 2,
+    "initial_state": ["29.31", "302", "20.354", "207"],
+    "A_row_major": ["1", "0", "0", "0", "-2", "1", "0", "0", "0", "0", "1", "0", "0", "-2", "1"],
+    "B": ["0.7", "0", "-1/3", "0"],
+    "D_row_major": ["0.05", "0", "0", "0", "0", "-0.04", "0", "0"],
+    "control_catalogue_ordered": ["1", "0.3", "0", "-0.3", "-1"],
+    "disturbance_set_per_stage": "[-1,1]^2 represented by four corners; independent choices across stages",
+    "state_constraints": "none; this is the unconstrained B06/L09 formulation"
+  },
+  "objective": {
+    "reported_value_convention": "square root of the quadratic terminal value",
+    "squared_expression": "(30-x1)^2 + x2^2 + 2.25(20-x3)^2 + 2.25*x4^2 + (x2-1.5*x4)^2",
+    "reported_historical_value": "10.11"
+  },
+  "scope": {
+    "claims_historical_reproduction": false,
+    "claims_nonlinear_replay": false,
+    "claims_validated_arithmetic": false,
+    "disturbance_set_is_owner_confirmed_not_printed": true,
+    "time_coefficient_interpretation": "-10/T with printed T=5, giving -2 in each discrete transition; physical-time mapping is not used in this reference"
+  }
+}
