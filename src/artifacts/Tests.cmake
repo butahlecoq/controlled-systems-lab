@@ -43,3 +43,8 @@ add_executable(plot_request_contract tests/artifacts/plot_request_contract.cpp)
 target_link_libraries(plot_request_contract PRIVATE CSL::artifacts CSL::polyhedral CSL::strategy_ts01 doctest::doctest)
 add_test(NAME plot_request_contract COMMAND plot_request_contract)
 csl_test_target(plot_request_contract artifacts)
+
+add_executable(plot_document_json_contract tests/artifacts/plot_document_json.cpp)
+target_link_libraries(plot_document_json_contract PRIVATE CSL::artifacts doctest::doctest)
+add_test(NAME plot_document_json_contract COMMAND plot_document_json_contract)
+csl_test_target(plot_document_json_contract artifacts)

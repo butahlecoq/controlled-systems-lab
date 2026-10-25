@@ -1,0 +1,31 @@
+{
+  "schema": "csl.figure-export/1",
+  "input_sha256": "a90de31e2c808ff91b0c9dfd27ae69615d2e36223c3b4a9d8784c155a61692e1",
+  "style_id": "csl-control-science-v1",
+  "style_sha256": "b688eff27c1ad95c6977fe17d091633d7f394334b96ced0fe055870b4572fdcf",
+  "matplotlib": "3.11.2",
+  "export_wall_ns": 4396360525,
+  "export_scope": "saved-data validation already complete; matplotlib import through SVG/PNG writes",
+  "solve_query_latency_included": false,
+  "additional_inputs": {},
+  "files": {
+    "fuel-b06-trajectory.svg": "3e7bd4b6371055498de4735f0c2994d36094ebc44205a7d27ea84f90edbf8415",
+    "fuel-b06-trajectory.png": "4b9d87fc469633b372f7e47b3e29cf5d73e113d2a4688b10405687c4086ffbe2",
+    "fuel-b06-flow-projection.svg": "3931baa3cdac98189781cc94d9d300b4bd8a3ed42eecf83f36e6ce16f014cfc4",
+    "fuel-b06-flow-projection.png": "d46325811d348636fcf12c33eabf501ae9e449730a9a2292afa8576560dcc131",
+    "fuel-b06-stock-projection.svg": "e38f97fd7ac56f8ec707589d675ece92593b8810cfcd1ef89219872919b5e0ac",
+    "fuel-b06-stock-projection.png": "1b4fc11e65eb754c0ea3f4dda384f84d546336b5d3709746bb9808468898bbb4",
+    "fuel-b06-timing.svg": "080821b9781c891495ed62ea07d797b4c1e5b7588d2732e6d909d836b21954dc",
+    "fuel-b06-timing.png": "c780f71653aa3400623e7b0f6d37263f8d97ad5f52d96f4175831586a527a41b"
+  },
+  "numpy": "2.5.4",
+  "pillow": "13.0.0",
+  "contourpy": "1.4.0",
+  "cycler": "0.12.1",
+  "fonttools": "4.67.0",
+  "kiwisolver": "1.5.1",
+  "packaging": "26.3",
+  "pyparsing": "3.3.3",
+  "python-dateutil": "3.0.0",
+  "six": "1.17.0"
+}

@@ -1,0 +1,15 @@
+{
+  "schema": "csl.figure-style/1",
+  "style_id": "csl-control-science-v1",
+  "matplotlib_version": "3.11.2",
+  "font_family": "DejaVu Sans",
+  "font_size": 10,
+  "png_dpi": 180,
+  "point_size": 6,
+  "point_alpha": 0.36,
+  "target_size": 90,
+  "trajectory_size": [10, 7],
+  "trajectory_height_per_axis": 2.3,
+  "projection_size": [7, 6],
+  "timing_size": [10, 5]
+}
