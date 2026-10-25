@@ -563,6 +563,11 @@ def convex_native_phases(trial, route, solver):
         prefix = 'phase.' + phase + '.'
         api, model = fields.get(prefix+'api_status'), fields.get(prefix+'model_status')
         count, info = fields.get(prefix+'iterations'), fields.get(prefix+'info')
+        if prefix+'scheduler_threads' in fields:
+            require(prefix+'time_limit' in fields and api is not None and model is not None and
+                    positions[prefix+'time_limit'] < positions[prefix+'scheduler_threads'] <
+                    positions[prefix+'api_status'] < positions[prefix+'model_status'],
+                    'native scheduler width requires an observed phase call')
         require((api is None) == (model is None), 'half-paired native status')
         require(not (count is not None and info is not None), 'conflicting native iteration dispositions')
         require(api is not None or (count is None and info is None), 'iteration without returned call')

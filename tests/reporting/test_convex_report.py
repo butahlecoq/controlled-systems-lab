@@ -60,6 +60,8 @@ class NativePhaseTests(unittest.TestCase):
         for invalid in ('0','-1','4097','many'):
             with self.subTest(width=invalid),self.assertRaises(ValueError):
                 self.project(self.trial(returned.replace('scheduler_threads=4','scheduler_threads='+invalid),'completed'),'linear')
+        with self.assertRaises(ValueError):
+            self.project(self.trial('phase.linear.scheduler_threads=4','completed'),'linear')
         retry=self.trial('phase.feasibility.time_limit=1\nphase.feasibility.api_status=0\n'
                          'phase.feasibility.model_status=7\nphase.feasibility.iterations=0\n'
                          'start.valid=true\nstart.default_fallback=false\nphase.qp.time_limit=1\n'
