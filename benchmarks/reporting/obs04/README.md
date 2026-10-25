@@ -421,3 +421,40 @@ not measure per-attempt memory, enforce a memory limit, establish a general
 resource envelope, compare strategy performance, or identify a unique limiter.
 They add repeatable initial process-resource evidence to #83; full resource
 policy/accounting and the missing timing phases remain open.
+
+## Clean-source scenario-input phase capture (2026-10-25)
+
+`results/linux-omarchy-gcc16-20261025-scenario-input-phases/` retains five
+sequential Release runs of the OBS-04 driver using the public scenario loader
+and `examples/scenarios/two-stage-integrator.json`. Each directory entry has
+the immutable comparison record, JSONL event log, and stderr log; the first run
+also has its saved HTML rendering and renderer log. The records have the same
+`ComparisonSpecId`, five distinct `ComparisonRunId`s, and bind clean source
+commit `a6320a015eb8eea915d241717db9f388830b3008` (tree SHA-256
+`a14e1cb3c78cd9a98f6d9382d038e6d78c97aaa4a9aa3b5de87677a47a87e578`) and
+binary SHA-256
+`e203edd10130bd3f56158c46061281677ea4bc5f075870c6b3e476c7deadf86d`.
+The build is Release with GCC 16.2.1 on x86-64 Omarchy/Linux, using one
+requested driver worker and one requested backend thread. Native backend thread
+count is unavailable from this driver.
+
+All five runs completed 32 attempts with passed event status, zero failed
+attempts, and empty stderr. The structured `/2` preflight comment reports these
+medians and full ranges across the five runs:
+
+| Phase | Median (ns) | Range (ns) |
+| --- | ---: | ---: |
+| Scenario file read | 53,848 | 41,905–93,937 |
+| Standalone JSON parse | 54,267 | 44,908–117,823 |
+| Public scenario load, validation, and resolution | 192,484 | 169,366–359,057 |
+| Provider registration | 134,935 | 85,207–217,138 |
+| Comparison admission | 123,899 | 89,607–213,436 |
+
+The standalone JSON parse is a diagnostic on the file bytes; the public loader
+parses them again, so the loader time includes parsing and is not a
+validation-only measurement. Admission combines request guards, strategy
+capability checks, and registry preparation. These are selected preflight
+durations, not an end-to-end solve benchmark. The run-to-run ranges are wide,
+no source-mapped limiter is established, and this capture supports no speedup,
+winner, or general latency claim. The retained `summary.json` records every
+sample, run/spec ID, attempt count, and source identity.
