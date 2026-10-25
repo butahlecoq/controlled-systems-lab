@@ -334,7 +334,7 @@
       "zip_sha256": "1fb673b081668644c9754c39d3840cadbf0597ee6e1f1a41e92f677be7936e73"
     },
     {
-      "report_id": "issue6-b06-manifest-correction-b480f002a5cee974c180690b6b37c8aaa04848ee2ac824a573cbdb7c1db8a166",
+      "report_id": "issue6-b06-manifest-correction-61d42c498548f6843150d038dc3f005308924d149f53ac066606894fdd5a835f",
       "report_kind": "issue6-b06-manifest-correction",
       "source_report_id": "b06-manifest-correction-v1",
       "payload_schema": "csl.issue6-b06-manifest-correction/1",
@@ -343,7 +343,7 @@
       "source_commit": "7df01ba3af5e4c46e867e2d737aca56a8f2461af",
       "measured_scope": "Versioned manifest correction and source-level audit of the saved B06 five-stage model",
       "evidence_limits": "No solver rerun. Existing results retain binary64 numerical assurance and are not newly recertified; this is not a historical reproduction.",
-      "zip_sha256": "b26c391685d5e53938d0a02e0c5a1cbe2f9416a8bd7b8dbc72c403d893c977a3"
+      "zip_sha256": "d15f1c0d0e56bde772d4c4db45579f73849233a5a88c698ce059c1e06221c9a8"
     },
     {
       "report_id": "issue6-b07-reference-a394915af10636430cdcd757d95a9d987eaa6c4c0b742bef7ba1aa04638a2cdd",
