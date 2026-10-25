@@ -454,10 +454,10 @@ artifacts::ArtifactResult<std::string> encode_strategy_run(
     auto final=execution.final_projection;
     std::vector<artifacts::Attachment> attachments;
     const auto* selected = std::get_if<WitnessSelection>(&execution.selection);
-    if ((selected && selected->batch.witnesses.size() != execution.verification.size()) ||
+    if ((selected && execution.verification.size() > selected->batch.witnesses.size()) ||
         (!selected && !execution.verification.empty()))
         return artifacts::ArtifactError{artifacts::ArtifactErrorCode::identity, "run.verification",
-            "Verifier reports must match the selected witness batch in order and count"};
+            "Verifier reports must bind an ordered prefix of the selected witness batch"};
     for (std::size_t i = 0; selected && i < execution.verification.size(); ++i) {
         const auto& witness = selected->batch.witnesses[i];
         const auto& report = execution.verification[i];

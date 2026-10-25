@@ -344,7 +344,8 @@ bool measurement_matches_arm(AttemptStatus status,const Json& measurement,const 
     if(schema!="csl.obs04-instrumentation-comparison-event/2" &&
         schema!="csl.obs04-instrumentation-comparison-event/3" &&
         schema!="csl.obs04-instrumentation-comparison-event/4" &&
-        schema!="csl.obs04-instrumentation-comparison-event/5")return false;
+        schema!="csl.obs04-instrumentation-comparison-event/5" &&
+        schema!="csl.obs04-instrumentation-comparison-event/6")return false;
     if(measurement.at("strategy")!=spec.strategies.at(arm) ||
         measurement.at("instrumentation")!=spec.instrumentation.at(arm) ||
         measurement.at("repetition").get<std::uint32_t>()!=repetition ||
@@ -375,7 +376,11 @@ bool measurement_matches_arm(AttemptStatus status,const Json& measurement,const 
              !measurement.contains("strategy_run_ns")||measurement.at("strategy_run_ns").is_null()||
              measurement.at("family_construction_ns")!=measurement.at("strategy_run_ns")))return false;
     }
-    if(schema=="csl.obs04-instrumentation-comparison-event/5") {
+    if(schema=="csl.obs04-instrumentation-comparison-event/6" &&
+        (!measurement.contains("phase_status")||!measurement.at("phase_status").is_string()||
+         (measurement.at("phase_status")!="passed"&&measurement.at("phase_status")!="failed")))return false;
+    if(schema=="csl.obs04-instrumentation-comparison-event/5"||
+        schema=="csl.obs04-instrumentation-comparison-event/6") {
         for(const auto* field:{"setup_ns","strategy_run_ns"})
             if(!measurement.contains(field)||(!measurement.at(field).is_null()&&
                 !nonnegative_integer(measurement.at(field))))return false;
@@ -421,7 +426,9 @@ bool measurement_matches_arm(AttemptStatus status,const Json& measurement,const 
     }
     for(const auto* field:{"selection_setup_ns","selection_run_ns","verification_ns"})
         if(measurement.at(field).is_null())return false;
-    if(schema=="csl.obs04-instrumentation-comparison-event/4" &&
+    if((schema=="csl.obs04-instrumentation-comparison-event/4"||
+        schema=="csl.obs04-instrumentation-comparison-event/5"||
+        schema=="csl.obs04-instrumentation-comparison-event/6") &&
         (measurement.at("first_witness_query_ns").is_null() ||
          measurement.at("additional_witness_query_ns").is_null()))return false;
     const auto& batch=selection.at("batch");

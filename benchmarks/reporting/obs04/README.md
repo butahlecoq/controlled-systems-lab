@@ -65,8 +65,8 @@ selects a path, and existing files are never overwritten. Keep the separate
 limiter-profile result with any retained measurement. Do not combine the
 existing synthetic OBS-02 collector loop with these solver timings.
 
-`csl.obs04-instrumentation-comparison-event/5` is the current raw per-attempt
-payload; the codec continues to accept event `/2`, `/3`, and `/4`. It records
+`csl.obs04-instrumentation-comparison-event/6` is the current raw per-attempt
+payload; the codec continues to accept event `/2` through `/5`. It records
 the `StrategyPort::run` interval, first and additional direction query, their
 combined selection interval, independent verification, and attempt end-to-end
 time. Family construction is currently `null`: the driver does not yet isolate
@@ -75,6 +75,8 @@ family-construction time. Event `/4` was an exploratory increment that wrote
 the full strategy interval into that field; the retained `/4` artifacts are
 historical and must not be interpreted as a separate family-construction
 measurement.
+Event `/6` also distinguishes solver `status` from post-run `phase_status` and
+retains partial selections and verifier reports when a later phase fails.
 The selector runs two ordered single-direction requests and composes their
 verified witnesses into the saved batch. The comparison record binds the event
 to its arm and attempt indices; the per-run record stores the resolved request,
@@ -83,6 +85,11 @@ Attempt end-to-end time starts before per-attempt workspace setup and ends after
 witness verification; it excludes process startup, request resolution,
 capability reporting, artifact serialization, report generation, and export.
 This analytic fixture does not separately time those excluded phases.
+The event `status` tracks the strategy terminal outcome and must agree with the
+saved run; `phase_status` reports the subsequent selection, verification, and
+analytic/span checks. A failed post-run phase can therefore retain a completed
+solver outcome while recording `phase_status: failed` and `phase_error`. Any
+available partial selection and verifier reports remain attached to the run.
 
 Build a clean Release source checkout and use a separate build directory:
 
@@ -183,8 +190,8 @@ below is the median of seven measured attempts; query values are in ns.
 
 The event `/4` records above predate the correction that stopped placing the
 whole strategy interval in `family_construction_ns`. They are retained as
-historical records only; the clean-source `/5` capture below is the current
-phase-timing evidence.
+historical records only. The clean-source `/5` capture below predates `/6`,
+which adds distinct post-run phase status and partial evidence retention.
 
 ## Clean-source event `/5` capture (2026-10-25)
 
@@ -241,8 +248,9 @@ environment-manifest increment changes the wire schema while retaining legacy
 decoding; it adds no C++ API, installed file, package workflow, or new
 dependency. It does not prepare or publish a release. No capability result is
 claimed until the labelled job has actually run. The phase timing increment
-records family construction (as the full `StrategyPort::run` interval), first
-and additional direction queries, and attempt end-to-end time. OBS-04 still
-needs phase-separated parsing/validation and capability timing; complete
-resource policy and measurement; instrumentation overhead analysis; report
-rendering; and a usable separate limiter profile before it can close.
+records the full `StrategyPort::run` interval, first and additional direction
+queries, and attempt end-to-end time. Separately timed family construction
+remains unimplemented. OBS-04 still needs phase-separated parsing/validation
+and capability timing; complete resource policy and measurement;
+instrumentation overhead analysis; report rendering; and a usable separate
+limiter profile before it can close.
