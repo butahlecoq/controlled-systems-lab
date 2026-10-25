@@ -122,7 +122,7 @@ template<class Port> std::variant<PreparedProvider<Port>,Rejection> prepare_prov
 }
 
 enum class LPQueryNotRunReason { cancelled, deadline };
-enum class LPQueryStopReason { cancelled, resource_limit, numerical_failure };
+enum class LPQueryStopReason { cancelled, deadline_expired, resource_limit, numerical_failure };
 struct LPQueryNotRun {
     ProgramIdentity request;
     Provenance provider;
@@ -209,7 +209,7 @@ protected:
                 LPQueryStopReason reason=LPQueryStopReason::numerical_failure;
                 switch(result.termination) {
                 case Termination::cancelled: reason=LPQueryStopReason::cancelled; break;
-                case Termination::deadline_expired: reason=LPQueryStopReason::resource_limit; break;
+                case Termination::deadline_expired: reason=LPQueryStopReason::deadline_expired; break;
                 case Termination::resource_limit: reason=LPQueryStopReason::resource_limit; break;
                 case Termination::numerical_failure: reason=LPQueryStopReason::numerical_failure; break;
                 case Termination::operation_rejected: break; // handled before this branch

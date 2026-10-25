@@ -297,6 +297,7 @@ Json report_json(const verification::TrajectoryReport& report, std::size_t witne
                 encoded["kind"] = "stopped";
                 switch (item.reason) {
                 case registry::LPQueryStopReason::cancelled: encoded["reason"] = "cancelled"; break;
+                case registry::LPQueryStopReason::deadline_expired: encoded["reason"] = "deadline_expired"; break;
                 case registry::LPQueryStopReason::resource_limit: encoded["reason"] = "resource_limit"; break;
                 case registry::LPQueryStopReason::numerical_failure: encoded["reason"] = "numerical_failure"; break;
                 }

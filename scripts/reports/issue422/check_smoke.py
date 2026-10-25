@@ -29,7 +29,9 @@ def main() -> int:
     archive = result["comparison_record"]
     assert archive["schema"] == "csl.comparison-record/1"
     spec = json.loads(archive["spec"])
-    assert spec["schema"] == "csl.comparison-spec/2"
+    assert spec["schema"] == "csl.comparison-spec/3"
+    assert spec["environment"]["build"]["build_type"] == "Release"
+    assert spec["environment"]["runtime"]["binary_sha256"]["status"] == "available"
     assert spec["input_manifest_hash"] == digest
     assert spec["problem_id"] == "csl.problem.v1.sha256:" + digest
     assert spec["repetitions"] == 7
@@ -45,7 +47,7 @@ def main() -> int:
             assert run["final"]["kind"] == "finite_minimax"
             expected_assurance = "numerical" if arm == 0 else "validated"
             assert run["final"]["value"]["assurance"] == expected_assurance
-            assert run["configuration"]["value"]["output"]["assurance"] == expected_assurance
+            assert run["configuration"]["value"]["output"]["assurance"] == "numerical"
             assert any(attachment["schema"] == "csl.exp05-minimax-outcome/1" for attachment in run["attachments"])
             event = json.loads(item["measurement_payload"])
             assert event["status"] == "passed"

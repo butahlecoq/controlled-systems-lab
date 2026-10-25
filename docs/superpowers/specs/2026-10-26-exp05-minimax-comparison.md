@@ -55,6 +55,6 @@ Candidate A is the base because it represents pre-result refusal, cancellation, 
 
 The independent candidates converged on a typed minimax run outcome, a dedicated application path, and reuse of the existing content-addressed comparison record. Candidate A's optional-result/lifecycle distinction was kept. Candidate B's explicit oracle mechanics were grafted in. A's proposed use of `ResolvedProblem` was removed after code inspection. The cross-judge agreed with this base and flagged the schema/status mapping as implementation gates.
 
-## Next implementation step
+## Implementation status
 
-Add a single versioned minimax run-final and identity-recorded run input path, with codec tests for completed, unsupported, stopped, and failed outcomes before wiring the paired runner.
+The implementation adds a versioned minimax run-final, identity-recorded run input, codecs, and a paired fixed-plan runner. The runner retains unsupported and stopped outcomes as attempt records and emits a comparison claim only when every measured trial and every per-plan oracle check passes. Remaining delivery gates are independent PR review, Pages publication, and live URL verification.

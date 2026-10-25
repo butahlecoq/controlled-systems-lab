@@ -265,7 +265,8 @@ SpecShape validate_spec(const Json& spec) {
          spec.at("input_manifest_source")=="csl.exp05-finite-minimax-case/1");
     const bool record_with_environment=schema=="csl.comparison-spec/3"&&spec.size()==8&&spec.contains("arms")&&
         spec.contains("input_manifest_hash")&&spec.contains("input_manifest_source")&&
-        spec.at("input_manifest_source")=="resolved-problem-canonical-bytes"&&spec.contains("environment");
+        (spec.at("input_manifest_source")=="resolved-problem-canonical-bytes"||
+         spec.at("input_manifest_source")=="csl.exp05-finite-minimax-case/1")&&spec.contains("environment");
     if(!legacy&&!record&&!record_with_environment)throw std::invalid_argument("Comparison spec fields do not match supported schema");
     if(record_with_environment)validate_environment(spec.at("environment"));
     const auto valid_digest=[](const Json& value){
