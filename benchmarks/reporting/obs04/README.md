@@ -512,3 +512,12 @@ not thread CPU time. Scheduler width is the width configured/reported by a
 backend adapter, not the number of threads observed busy at once. Either field
 may be null when the platform or adapter cannot provide a value. These fields
 supplement wall time and do not establish a unique performance limiter.
+
+## Current clean-source CPU and scheduler capture (2026-10-25)
+
+`results/process-cpu-scheduler-20261025/` records five fresh Release processes
+from one clean source commit, including process CPU time and adapter-reported
+backend scheduler width per strategy invocation. All 160 attempts passed. The
+paired instrumentation differences remain fixture-specific and inconclusive;
+the exact ranges, profile evidence, machine metadata, and retained superseded
+attempts are described in that directory's README and `summary.json`.
