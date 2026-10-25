@@ -319,6 +319,18 @@ csl::artifacts::RecordedRunArtifact check_complete_family_encoder_boundary(const
             ar::MemoryAccounting::unlimited});
     REQUIRE(std::holds_alternative<ar::ArtifactError>(mismatched_artifact));
     CHECK(std::get<ar::ArtifactError>(mismatched_artifact).path == "run.verification[0].context");
+    auto partial_execution=strategy_execution;
+    auto partial_selection=std::get<WitnessSelection>(partial_execution.selection);
+    partial_selection.batch.witnesses.resize(1);
+    partial_selection.termination=Termination::operation_rejected;
+    partial_selection.diagnostics="The second direction query failed; this is a partial batch.";
+    partial_execution.selection=std::move(partial_selection);
+    partial_execution.verification.clear();
+    const auto partial_encoded=application::encode_strategy_run(problem,partial_execution,
+        configuration,run,statistics,
+        {uninstrumented,uninstrumented,uninstrumented,uninstrumented,true,
+            ar::MemoryAccounting::unlimited});
+    REQUIRE(std::holds_alternative<std::string>(partial_encoded));
     CHECK(wire.find("registered_verifier")!=std::string::npos);
     static_assert(!std::is_convertible_v<ar::RecordedRunArtifact,ar::RunStatistics>);
     const auto imported=take_artifact(ar::decode_recorded_run(wire,problem),"decode_recorded_run");
@@ -558,6 +570,100 @@ void compare_profile(const std::string& profile) {
     const auto count_mismatch=ar::encode_recorded_comparison(version_three_spec,bad_witness_counts);
     REQUIRE(std::holds_alternative<ar::ArtifactError>(count_mismatch));
     CHECK(std::get<ar::ArtifactError>(count_mismatch).path=="attempts[0].measurement_payload.status");
+    auto measured_attempts_v4=measured_attempts_v3;
+    for(auto& attempt:measured_attempts_v4) {
+        auto measurement=nlohmann::json::parse(attempt.measurement_payload);
+        measurement["schema"]="csl.obs04-instrumentation-comparison-event/4";
+        measurement["strategy_run_ns"]=2;
+        measurement["family_construction_ns"]=2;
+        measurement["end_to_end_ns"]=30;
+        measurement["selection_run_ns"]=20;
+        measurement["first_witness_query_ns"]=3;
+        measurement["additional_witness_query_ns"]=4;
+        attempt.measurement_payload=measurement.dump();
+    }
+    const auto recorded_v4=take_artifact(ar::encode_recorded_comparison(
+        version_three_spec,measured_attempts_v4),"encode_recorded_comparison event/4");
+    const auto recorded_v4_wire=std::string(
+        reinterpret_cast<const char*>(recorded_v4.content().bytes().data()),
+        recorded_v4.content().bytes().size());
+    const auto restored_v4=take_artifact(ar::decode_recorded_comparison(recorded_v4_wire),
+        "decode_recorded_comparison event/4");
+    CHECK(restored_v4.content().digest()==recorded_v4.content().digest());
+    auto measured_attempts_v5=measured_attempts_v3;
+    for(auto& attempt:measured_attempts_v5) {
+        auto measurement=nlohmann::json::parse(attempt.measurement_payload);
+        measurement["schema"]="csl.obs04-instrumentation-comparison-event/5";
+        measurement["setup_ns"]=1;
+        measurement["strategy_run_ns"]=2;
+        measurement["family_construction_ns"]=nullptr;
+        measurement["end_to_end_ns"]=30;
+        measurement["selection_setup_ns"]=1;
+        measurement["selection_run_ns"]=20;
+        measurement["verification_ns"]=3;
+        measurement["first_witness_query_ns"]=3;
+        measurement["additional_witness_query_ns"]=4;
+        attempt.measurement_payload=measurement.dump();
+    }
+    const auto recorded_v5=take_artifact(ar::encode_recorded_comparison(
+        version_three_spec,measured_attempts_v5),"encode_recorded_comparison event/5");
+    const auto recorded_v5_wire=std::string(
+        reinterpret_cast<const char*>(recorded_v5.content().bytes().data()),
+        recorded_v5.content().bytes().size());
+    const auto restored_v5=take_artifact(ar::decode_recorded_comparison(recorded_v5_wire),
+        "decode_recorded_comparison event/5");
+    CHECK(restored_v5.content().digest()==recorded_v5.content().digest());
+    auto measured_attempts_v6=measured_attempts_v5;
+    for(auto& attempt:measured_attempts_v6) {
+        auto measurement=nlohmann::json::parse(attempt.measurement_payload);
+        measurement["schema"]="csl.obs04-instrumentation-comparison-event/6";
+        measurement["phase_status"]="failed";
+        attempt.measurement_payload=measurement.dump();
+    }
+    const auto recorded_v6=take_artifact(ar::encode_recorded_comparison(
+        version_three_spec,measured_attempts_v6),"encode_recorded_comparison event/6");
+    const auto recorded_v6_wire=std::string(
+        reinterpret_cast<const char*>(recorded_v6.content().bytes().data()),
+        recorded_v6.content().bytes().size());
+    const auto restored_v6=take_artifact(ar::decode_recorded_comparison(recorded_v6_wire),
+        "decode_recorded_comparison event/6");
+    CHECK(restored_v6.content().digest()==recorded_v6.content().digest());
+    auto missing_query_timing=measured_attempts_v4;
+    auto missing_query_measurement=nlohmann::json::parse(missing_query_timing.front().measurement_payload);
+    missing_query_measurement["additional_witness_query_ns"]=nullptr;
+    missing_query_timing.front().measurement_payload=missing_query_measurement.dump();
+    const auto missing_query=ar::encode_recorded_comparison(version_three_spec,missing_query_timing);
+    REQUIRE(std::holds_alternative<ar::ArtifactError>(missing_query));
+    CHECK(std::get<ar::ArtifactError>(missing_query).path=="attempts[0].measurement_payload.status");
+    auto missing_v5_query_timing=measured_attempts_v6;
+    auto missing_v5_query_measurement=nlohmann::json::parse(
+        missing_v5_query_timing.front().measurement_payload);
+    missing_v5_query_measurement["first_witness_query_ns"]=nullptr;
+    missing_v5_query_timing.front().measurement_payload=missing_v5_query_measurement.dump();
+    const auto missing_v5_query=ar::encode_recorded_comparison(
+        version_three_spec,missing_v5_query_timing);
+    REQUIRE(std::holds_alternative<ar::ArtifactError>(missing_v5_query));
+    CHECK(std::get<ar::ArtifactError>(missing_v5_query).path==
+        "attempts[0].measurement_payload.status");
+    auto impossible_query_timing=measured_attempts_v6;
+    auto impossible_query=nlohmann::json::parse(impossible_query_timing.front().measurement_payload);
+    impossible_query["selection_run_ns"]=6;
+    impossible_query_timing.front().measurement_payload=impossible_query.dump();
+    const auto impossible_query_result=ar::encode_recorded_comparison(
+        version_three_spec,impossible_query_timing);
+    REQUIRE(std::holds_alternative<ar::ArtifactError>(impossible_query_result));
+    CHECK(std::get<ar::ArtifactError>(impossible_query_result).path==
+        "attempts[0].measurement_payload.status");
+    auto impossible_end_to_end=measured_attempts_v6;
+    auto impossible_end_to_end_measurement=nlohmann::json::parse(
+        impossible_end_to_end.front().measurement_payload);
+    impossible_end_to_end_measurement["end_to_end_ns"]=26;
+    impossible_end_to_end.front().measurement_payload=impossible_end_to_end_measurement.dump();
+    const auto impossible_end_to_end_result=ar::encode_recorded_comparison(
+        version_three_spec,impossible_end_to_end);
+    REQUIRE(std::holds_alternative<ar::ArtifactError>(impossible_end_to_end_result));
+    CHECK(std::get<ar::ArtifactError>(impossible_end_to_end_result).path==
+        "attempts[0].measurement_payload.status");
     auto bad_distinct_count=measured_attempts_v3;
     auto bad_distinct_measurement=nlohmann::json::parse(bad_distinct_count.front().measurement_payload);
     bad_distinct_measurement["distinct_witness_count"]=1;

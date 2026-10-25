@@ -1,0 +1,22 @@
+{
+  "binary_sha256": "f66c23baf4c8814db75fbc0ad763f58eb7d2a24f56670d526972c1165c83570b",
+  "command": [
+    "build/obs04-phase-timings/csl_obs04_instrumentation_comparison",
+    "--record",
+    "benchmarks/reporting/obs04/results/linux-omarchy-gcc16-20261025-resource-observation-v2-clean/run-02/comparison.json"
+  ],
+  "elapsed_wall_ns": 739960622,
+  "exit_code": 0,
+  "max_rss_kib": 45688,
+  "platform": "linux",
+  "python_version": "3.14.7 (main, Aug 10 2026, 07:46:56) [GCC 16.1.1 20260728]",
+  "record_bytes": 1853088,
+  "record_path": "benchmarks/reporting/obs04/results/linux-omarchy-gcc16-20261025-resource-observation-v2-clean/run-02/comparison.json",
+  "schema": "csl.obs04-process-resource-observation/1",
+  "scope": "one driver process; includes startup, fixture/preparation, all attempts, record encoding and file output",
+  "stderr_bytes": 0,
+  "stdout_bytes": 29920,
+  "system_cpu_seconds": 0.061898999999999996,
+  "user_cpu_seconds": 0.6769,
+  "working_directory": "."
+}

@@ -342,7 +342,10 @@ bool measurement_matches_arm(AttemptStatus status,const Json& measurement,const 
     if(spec.strategies.empty())return true;
     const auto schema=measurement.value("schema",std::string{});
     if(schema!="csl.obs04-instrumentation-comparison-event/2" &&
-        schema!="csl.obs04-instrumentation-comparison-event/3")return false;
+        schema!="csl.obs04-instrumentation-comparison-event/3" &&
+        schema!="csl.obs04-instrumentation-comparison-event/4" &&
+        schema!="csl.obs04-instrumentation-comparison-event/5" &&
+        schema!="csl.obs04-instrumentation-comparison-event/6")return false;
     if(measurement.at("strategy")!=spec.strategies.at(arm) ||
         measurement.at("instrumentation")!=spec.instrumentation.at(arm) ||
         measurement.at("repetition").get<std::uint32_t>()!=repetition ||
@@ -363,6 +366,50 @@ bool measurement_matches_arm(AttemptStatus status,const Json& measurement,const 
     for(const auto* field:{"selection_setup_ns","selection_run_ns","verification_ns"})
         if(!measurement.contains(field)||(!measurement.at(field).is_null()&&
             !nonnegative_integer(measurement.at(field))))return false;
+    if(schema=="csl.obs04-instrumentation-comparison-event/4") {
+        for(const auto* field:{"family_construction_ns","end_to_end_ns",
+                "first_witness_query_ns","additional_witness_query_ns"})
+            if(!measurement.contains(field)||(!measurement.at(field).is_null()&&
+                !nonnegative_integer(measurement.at(field))))return false;
+        if(status==AttemptStatus::completed &&
+            (measurement.at("family_construction_ns").is_null()||measurement.at("end_to_end_ns").is_null()||
+             !measurement.contains("strategy_run_ns")||measurement.at("strategy_run_ns").is_null()||
+             measurement.at("family_construction_ns")!=measurement.at("strategy_run_ns")))return false;
+    }
+    if(schema=="csl.obs04-instrumentation-comparison-event/6" &&
+        (!measurement.contains("phase_status")||!measurement.at("phase_status").is_string()||
+         (measurement.at("phase_status")!="passed"&&measurement.at("phase_status")!="failed")))return false;
+    if(schema=="csl.obs04-instrumentation-comparison-event/5"||
+        schema=="csl.obs04-instrumentation-comparison-event/6") {
+        for(const auto* field:{"setup_ns","strategy_run_ns"})
+            if(!measurement.contains(field)||(!measurement.at(field).is_null()&&
+                !nonnegative_integer(measurement.at(field))))return false;
+        if(!measurement.at("family_construction_ns").is_null())return false;
+        if(status==AttemptStatus::completed &&
+            (measurement.at("setup_ns").is_null()||measurement.at("strategy_run_ns").is_null()||
+             measurement.at("end_to_end_ns").is_null()))return false;
+        const auto add_duration=[](std::uint64_t& total,const Json& value) {
+            if(value.is_null())return true;
+            const auto duration=value.get<std::uint64_t>();
+            if(duration>std::numeric_limits<std::uint64_t>::max()-total)return false;
+            total+=duration;
+            return true;
+        };
+        std::uint64_t query_total=0;
+        if(!add_duration(query_total,measurement.at("first_witness_query_ns"))||
+            !add_duration(query_total,measurement.at("additional_witness_query_ns")))return false;
+        const bool any_query=!measurement.at("first_witness_query_ns").is_null()||
+            !measurement.at("additional_witness_query_ns").is_null();
+        if(any_query && (measurement.at("selection_run_ns").is_null()||
+            measurement.at("selection_run_ns").get<std::uint64_t>()<query_total))return false;
+        if(!measurement.at("end_to_end_ns").is_null()) {
+            std::uint64_t phase_total=0;
+            for(const auto* field:{"setup_ns","strategy_run_ns","selection_setup_ns",
+                    "selection_run_ns","verification_ns"})
+                if(!add_duration(phase_total,measurement.at(field)))return false;
+            if(measurement.at("end_to_end_ns").get<std::uint64_t>()<phase_total)return false;
+        }
+    }
     for(const auto* field:{"requested_witness_count","returned_witness_count","distinct_witness_count"})
         if(!measurement.contains(field)||(!measurement.at(field).is_null()&&
             !nonnegative_integer(measurement.at(field))))return false;
@@ -370,11 +417,20 @@ bool measurement_matches_arm(AttemptStatus status,const Json& measurement,const 
     const auto configured_count=canonical_count(configuration.at("output").at("witness_count"));
     if(!configured_count||measurement.at("requested_witness_count").get<std::uint64_t>()!=*configured_count)return false;
     const auto& selection=run.at("selection");
-    if(selection.is_null())
+    if(selection.is_null()) {
+        if(schema=="csl.obs04-instrumentation-comparison-event/4" &&
+            (!measurement.at("first_witness_query_ns").is_null() ||
+             !measurement.at("additional_witness_query_ns").is_null()))return false;
         return measurement.at("returned_witness_count").is_null()&&
             measurement.at("distinct_witness_count").is_null();
+    }
     for(const auto* field:{"selection_setup_ns","selection_run_ns","verification_ns"})
         if(measurement.at(field).is_null())return false;
+    if((schema=="csl.obs04-instrumentation-comparison-event/4"||
+        schema=="csl.obs04-instrumentation-comparison-event/5"||
+        schema=="csl.obs04-instrumentation-comparison-event/6") &&
+        (measurement.at("first_witness_query_ns").is_null() ||
+         measurement.at("additional_witness_query_ns").is_null()))return false;
     const auto& batch=selection.at("batch");
     const auto returned=batch.at("witnesses").size();
     const auto batch_requested=canonical_count(batch.at("requested"));

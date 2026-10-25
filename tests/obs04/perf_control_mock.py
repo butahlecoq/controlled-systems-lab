@@ -7,9 +7,13 @@ import subprocess
 import sys
 import tempfile
 import threading
+import time
 
 
-def serve(control_path: Path, ack_path: Path, acknowledge: bool, commands: list[str]) -> None:
+def serve(
+    control_path: Path, ack_path: Path, acknowledgement: bytes | None,
+    commands: list[str], fragment_ack: bool = False,
+) -> None:
     control_fd = os.open(control_path, os.O_RDONLY)
     ack_fd = os.open(ack_path, os.O_WRONLY)
     try:
@@ -23,8 +27,13 @@ def serve(control_path: Path, ack_path: Path, acknowledge: bool, commands: list[
                 raw, pending = pending.split(b"\n", 1)
                 command = raw.decode("ascii")
                 commands.append(command)
-                if acknowledge:
-                    os.write(ack_fd, b"ack\n")
+                if acknowledgement is not None:
+                    if fragment_ack:
+                        os.write(ack_fd, acknowledgement[:2])
+                        time.sleep(0.005)
+                        os.write(ack_fd, acknowledgement[2:])
+                    else:
+                        os.write(ack_fd, acknowledgement)
                 else:
                     return
     finally:
@@ -32,7 +41,9 @@ def serve(control_path: Path, ack_path: Path, acknowledge: bool, commands: list[
         os.close(control_fd)
 
 
-def run(binary: Path, acknowledge: bool) -> tuple[subprocess.CompletedProcess[str], list[str]]:
+def run(
+    binary: Path, acknowledgement: bytes | None, fragment_ack: bool = False,
+) -> tuple[subprocess.CompletedProcess[str], list[str]]:
     with tempfile.TemporaryDirectory(prefix="obs04-perf-mock-") as directory:
         root = Path(directory)
         control_path = root / "control"
@@ -41,7 +52,7 @@ def run(binary: Path, acknowledge: bool) -> tuple[subprocess.CompletedProcess[st
         os.mkfifo(ack_path)
         commands: list[str] = []
         server = threading.Thread(
-            target=serve, args=(control_path, ack_path, acknowledge, commands), daemon=True
+            target=serve, args=(control_path, ack_path, acknowledgement, commands, fragment_ack), daemon=True
         )
         server.start()
         environment = os.environ.copy()
@@ -88,18 +99,34 @@ def main() -> int:
         if rejected.returncode == 0 or rejected.stdout or diagnostic not in rejected.stderr:
             raise RuntimeError(f"malformed profile arguments were accepted or started work: {arguments}")
 
-    passed, commands = run(binary, acknowledge=True)
+    passed, commands = run(binary, acknowledgement=b"ack\n")
     if passed.returncode != 0:
         raise RuntimeError(f"acknowledged mock capture failed: {passed.stderr}")
     if commands != ["enable", "disable"]:
         raise RuntimeError(f"unexpected mock command sequence: {commands}")
     events = [json.loads(line) for line in passed.stdout.splitlines() if line.startswith("{")]
-    if not events or events[-1].get("sample_scope") != "acknowledged_perf_control_transitions":
+    if not events or events[-1].get("sample_scope") != "acknowledged_perf_control_window":
         raise RuntimeError("driver did not identify the acknowledged profile scope")
     if events[-1].get("acknowledged_commands") != 2:
         raise RuntimeError("driver did not count both acknowledged transitions")
 
-    missing, missing_commands = run(binary, acknowledge=False)
+    nul_terminated, nul_commands = run(binary, acknowledgement=b"ack\n\0")
+    if nul_terminated.returncode != 0 or nul_commands != ["enable", "disable"]:
+        raise RuntimeError(f"NUL-terminated perf acknowledgements were not accepted: {nul_terminated.stderr}")
+    nul_events = [json.loads(line) for line in nul_terminated.stdout.splitlines() if line.startswith("{")]
+    if not nul_events or nul_events[-1].get("acknowledged_commands") != 2:
+        raise RuntimeError("driver did not count both NUL-terminated acknowledgements")
+
+    fragmented, fragmented_commands = run(
+        binary, acknowledgement=b"ack\n\0", fragment_ack=True,
+    )
+    if fragmented.returncode != 0 or fragmented_commands != ["enable", "disable"]:
+        raise RuntimeError(f"fragmented perf acknowledgements were not accepted: {fragmented.stderr}")
+    fragmented_events = [json.loads(line) for line in fragmented.stdout.splitlines() if line.startswith("{")]
+    if not fragmented_events or fragmented_events[-1].get("acknowledged_commands") != 2:
+        raise RuntimeError("driver did not count both fragmented acknowledgements")
+
+    missing, missing_commands = run(binary, acknowledgement=None)
     if missing.returncode == 0 or missing_commands != ["enable"]:
         raise RuntimeError("driver accepted a control command without an acknowledgement")
     if "perf" not in missing.stderr.lower() and "acknowledgement" not in missing.stderr.lower():

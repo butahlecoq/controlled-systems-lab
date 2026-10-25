@@ -45,11 +45,15 @@ def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--binary", type=Path, required=True)
     parser.add_argument("--output-dir", type=Path, required=True)
+    parser.add_argument("--strategy", choices=("reach-back", "direct-joint"), default="reach-back")
     parser.add_argument("--calls", type=int, default=8)
+    parser.add_argument("--frequency-hz", type=int, default=4999)
     parser.add_argument("--timeout-seconds", type=int, default=120)
     args = parser.parse_args()
     if not 1 <= args.calls <= 32:
         parser.error("--calls must be between 1 and 32")
+    if not 100 <= args.frequency_hz <= 9999:
+        parser.error("--frequency-hz must be between 100 and 9999")
     if not 15 <= args.timeout_seconds <= 300:
         parser.error("--timeout-seconds must be between 15 and 300")
 
@@ -75,6 +79,8 @@ def main() -> int:
         "schema": "csl.obs04-perf-probe/1",
         "status": "unavailable",
         "protocol": "linux-perf-record-ack-fifo",
+        "strategy": ("csl.synthesis.reach-back" if args.strategy == "reach-back"
+            else "csl.synthesis.strategy-b"),
         "calls_requested": args.calls,
         "timeout_seconds": args.timeout_seconds,
         "source_commit": source_commit,
@@ -82,7 +88,13 @@ def main() -> int:
         "binary_sha256": hashlib.sha256(args.binary.read_bytes()).hexdigest(),
         "host": {"platform": platform.platform(), "kernel_release": platform.release(),
             "perf_event_paranoid": perf_event_paranoid},
-        "profile": {"event": "cycles:u", "frequency_hz": 499, "max_bytes": 32 * 1024 * 1024},
+        "profile": {
+            "event": "cycles:u",
+            "requested_frequency_hz": args.frequency_hz,
+            "effective_frequency_hz": None,
+            "effective_frequency_status": "not_reported_by_this_probe",
+            "max_bytes": 32 * 1024 * 1024,
+        },
     }
     if perf is None:
         result["reason"] = "perf executable is not installed"
@@ -113,16 +125,16 @@ def main() -> int:
         environment["CSL_PERF_CONTROL_FIFO"] = str(control)
         environment["CSL_PERF_ACK_FIFO"] = str(ack)
         driver = subprocess.Popen(
-            [str(args.binary), "--profile-strategy", "reach-back", "--profile-calls", str(args.calls)],
+            [str(args.binary), "--profile-strategy", args.strategy, "--profile-calls", str(args.calls)],
             env=environment, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True,
         )
         command = [
-            perf, "record", "--delay=-1", "-F", "499", "-e", "cycles:u", "-g",
+            perf, "record", "--delay=-1", "-F", str(args.frequency_hz), "-e", "cycles:u", "-g", "--sample-cpu",
             "--max-size=32M", "--control=fifo:" + str(control) + "," + str(ack),
             "-o", str(capture_path), "-p", str(driver.pid),
         ]
         result["command"] = [
-            "perf", "record", "--delay=-1", "-F", "499", "-e", "cycles:u", "-g",
+            "perf", "record", "--delay=-1", "-F", str(args.frequency_hz), "-e", "cycles:u", "-g", "--sample-cpu",
             "--max-size=32M", "--control=fifo:<control>,<ack>", "-o", "<capture>", "-p", "<driver pid>",
         ]
         perf_process = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
@@ -168,7 +180,7 @@ def main() -> int:
             result["sample_scope"] = event.get("sample_scope")
             if (event.get("passed") != args.calls or
                     event.get("acknowledged_commands") != 2 * args.calls or
-                    event.get("sample_scope") != "acknowledged_perf_control_transitions"):
+                    event.get("sample_scope") != "acknowledged_perf_control_window"):
                 result["status"] = "failed"
                 result["reason"] = "driver did not report one acknowledged enable/disable pair per call"
             elif not capture_path.is_file() or capture_path.stat().st_size == 0:

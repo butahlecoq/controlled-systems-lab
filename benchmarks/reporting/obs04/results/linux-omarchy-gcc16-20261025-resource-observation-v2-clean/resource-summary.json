@@ -1,0 +1,61 @@
+{
+  "attempts_completed_per_process": 32,
+  "binary_sha256": "f66c23baf4c8814db75fbc0ad763f58eb7d2a24f56670d526972c1165c83570b",
+  "elapsed_wall_ns": {
+    "max": 745210148,
+    "median": 738357090,
+    "min": 736772335
+  },
+  "peak_rss_kib": {
+    "max": 47152,
+    "median": 46628,
+    "min": 45688
+  },
+  "records": [
+    {
+      "attempts": 32,
+      "comparison_run_id": "9bfbd55a7574146c9b4cdb6e78c266d375ac1f66b270afef8348c16dcaffa43d",
+      "record_bytes": 1853090,
+      "run": "01"
+    },
+    {
+      "attempts": 32,
+      "comparison_run_id": "e9daf6c2e916ec6cd9c495241f4fa956bab5b2c6e0c6c0f224c733f6631e0928",
+      "record_bytes": 1853088,
+      "run": "02"
+    },
+    {
+      "attempts": 32,
+      "comparison_run_id": "fcc4a1a96cf404c3f44bfe69ba6f5ed31051c5b31bf4c986df48afd1356ee3ba",
+      "record_bytes": 1853089,
+      "run": "03"
+    },
+    {
+      "attempts": 32,
+      "comparison_run_id": "1e80326df720e2188d8976d885c0e4b0f666851cea9c567325f2833097b59c4a",
+      "record_bytes": 1853078,
+      "run": "04"
+    },
+    {
+      "attempts": 32,
+      "comparison_run_id": "a8fe2f8638b27a27d0d27bcb7740da1a2b2aba854addba17eda2d5a72fcd7348",
+      "record_bytes": 1853078,
+      "run": "05"
+    }
+  ],
+  "run_count": 5,
+  "schema": "csl.obs04-process-resource-summary/1",
+  "source_dirty": false,
+  "source_revision": "9994eef03eeae456a89e041b9cac6b7518ba77b4",
+  "source_tree_sha256": "0cc273de74066a9a24b0aae827501126c691905a8f5ad2c21a895892da472355",
+  "system_cpu_seconds": {
+    "max": 0.061898999999999996,
+    "median": 0.057028999999999996,
+    "min": 0.047998
+  },
+  "user_cpu_seconds": {
+    "max": 0.687975,
+    "median": 0.681549,
+    "min": 0.6769
+  }
+}
