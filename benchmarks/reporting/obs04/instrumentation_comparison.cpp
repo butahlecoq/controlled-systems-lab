@@ -221,20 +221,33 @@ HostFacts host_facts() {
     return host;
 }
 
-struct CapabilityTimings {
-    std::uint64_t reach_back_ns{};
-    std::uint64_t direct_joint_ns{};
-    std::size_t reach_back_calls{};
-    std::size_t direct_joint_calls{};
-};
-
 struct PreflightTimings {
     std::uint64_t scenario_file_read_ns{};
     input::detail::LoadPhaseTimings scenario_load;
     std::uint64_t provider_registration_ns{};
     std::uint64_t comparison_admission_ns{};
-    CapabilityTimings capability;
+    application::ComparisonPreparationObservation comparison_observation;
 };
+
+std::string_view preparation_status_name(registry::PreparationObservationStatus status) {
+    switch (status) {
+    case registry::PreparationObservationStatus::not_entered: return "not_entered";
+    case registry::PreparationObservationStatus::accepted: return "accepted";
+    case registry::PreparationObservationStatus::rejected: return "rejected";
+    case registry::PreparationObservationStatus::threw: return "threw";
+    }
+    return "unknown";
+}
+
+std::string_view common_guard_status_name(application::PreparationObservationStatus status) {
+    switch (status) {
+    case application::PreparationObservationStatus::not_entered: return "not_entered";
+    case application::PreparationObservationStatus::passed: return "passed";
+    case application::PreparationObservationStatus::rejected: return "rejected";
+    case application::PreparationObservationStatus::threw: return "threw";
+    }
+    return "unknown";
+}
 
 Json environment_manifest(std::string_view argv0, std::optional<std::size_t> backend_threads) {
     const auto host=host_facts();
@@ -293,7 +306,7 @@ struct Modules {
     registry::StrategyRegistry strategies;
 };
 
-Modules make_modules(CapabilityTimings& capability_timings) {
+Modules make_modules() {
     auto lp = take(adapters::lp::make_highs_registration());
     auto convex = take(adapters::convex::make_highs_registration());
     auto converter = take(adapters::polyhedral::make_qhull_registration(lp));
@@ -331,32 +344,15 @@ Modules make_modules(CapabilityTimings& capability_timings) {
         throw std::runtime_error("Witness selector registration failed");
     result.membership = std::move(membership);
     auto reach_back = synthesis::strategy_a::make_registration(std::move(providers));
-    auto reach_back_capabilities = std::move(reach_back.capabilities);
-    reach_back.capabilities = [&capability_timings, callback=std::move(reach_back_capabilities)](
-        const registry::StrategyRequest& request, const registry::Requirements& requirements) {
-        const auto start=Clock::now();
-        auto result=callback(request,requirements);
-        capability_timings.reach_back_ns+=static_cast<std::uint64_t>(ns(start,Clock::now()));
-        ++capability_timings.reach_back_calls;
-        return result;
-    };
     auto direct_joint = synthesis::strategy_b::make_registration(*result.lps, *result.convexes);
-    auto direct_joint_capabilities = std::move(direct_joint.capabilities);
-    direct_joint.capabilities = [&capability_timings, callback=std::move(direct_joint_capabilities)](
-        const registry::StrategyRequest& request, const registry::Requirements& requirements) {
-        const auto start=Clock::now();
-        auto result=callback(request,requirements);
-        capability_timings.direct_joint_ns+=static_cast<std::uint64_t>(ns(start,Clock::now()));
-        ++capability_timings.direct_joint_calls;
-        return result;
-    };
     if (result.strategies.add(std::move(reach_back)) || result.strategies.add(std::move(direct_joint)))
         throw std::runtime_error("Strategy registration failed");
     return result;
 }
 
 application::PreparedComparison prepare(const problem::ResolvedProblem& problem,
-    registry::StrategyRegistry& strategies) {
+    registry::StrategyRegistry& strategies,
+    application::ComparisonPreparationObservation& observation) {
     FamilyRequest family;
     family.profile = "ts01_exact_integrator";
     family.objective = problem.identity();
@@ -367,7 +363,7 @@ application::PreparedComparison prepare(const problem::ResolvedProblem& problem,
     a.strategy = {"csl.synthesis.reach-back"}; a.lp = {"csl.lp.highs"};
     a.convex = {"csl.convex.highs"}; a.representation = family.representation;
     StrategyConfiguration b = a; b.strategy = {"csl.synthesis.strategy-b"};
-    return take(application::prepare_comparison({problem, family, {a, b}}, strategies));
+    return take(application::prepare_comparison_observed({problem, family, {a, b}}, strategies,observation));
 }
 
 struct CollectionSetup {
@@ -1469,15 +1465,23 @@ int main(int argc, char** argv) {
         phase_begin=Clock::now();
         const auto problem = load_scenario(scenario_bytes, preflight.scenario_load);
         phase_begin=Clock::now();
-        auto modules = make_modules(preflight.capability);
+        auto modules = make_modules();
         preflight.provider_registration_ns=static_cast<std::uint64_t>(ns(phase_begin,Clock::now()));
         phase_begin=Clock::now();
-        const auto prepared = prepare(problem, modules.strategies);
+        const auto prepared = prepare(problem, modules.strategies,preflight.comparison_observation);
         preflight.comparison_admission_ns=static_cast<std::uint64_t>(ns(phase_begin,Clock::now()));
-        if(preflight.capability.reach_back_calls!=1 || preflight.capability.direct_joint_calls!=1 ||
-           preflight.capability.reach_back_ns>preflight.comparison_admission_ns ||
-           preflight.capability.direct_joint_ns>preflight.comparison_admission_ns)
-            throw std::runtime_error("Capability callback timing did not match the single successful admission path");
+        const auto& admission_observation=preflight.comparison_observation;
+        const auto& reach_back_observation=admission_observation.registry_attempts[0];
+        const auto& direct_joint_observation=admission_observation.registry_attempts[1];
+        const auto observed_admission_ns=admission_observation.common_guards_ns+
+            reach_back_observation.callback_external_ns+reach_back_observation.capability_callback_ns+
+            direct_joint_observation.callback_external_ns+direct_joint_observation.capability_callback_ns;
+        if(admission_observation.common_guard_status!=application::PreparationObservationStatus::passed ||
+           reach_back_observation.status!=registry::PreparationObservationStatus::accepted ||
+           direct_joint_observation.status!=registry::PreparationObservationStatus::accepted ||
+           reach_back_observation.capability_callback_calls!=1 || direct_joint_observation.capability_callback_calls!=1 ||
+           observed_admission_ns>preflight.comparison_admission_ns)
+            throw std::runtime_error("Admission phase timing did not match the successful single-callback path");
         std::array<ar::ResolvedConfiguration,4> configuration_templates{
             configuration_for(prepared,0,false),configuration_for(prepared,0,true),
             configuration_for(prepared,1,false),configuration_for(prepared,1,true)};
@@ -1594,7 +1598,7 @@ int main(int argc, char** argv) {
         if(!output||!(output<<comparison_wire)||!output.flush())
             throw std::runtime_error("Could not write comparison record: "+record_path.string());
         const auto comparison_json=Json::parse(comparison_wire);
-        std::cout << "# shared_preflight=" << Json{{"schema","csl.obs04-shared-preflight/4"},
+        std::cout << "# shared_preflight=" << Json{{"schema","csl.obs04-shared-preflight/5"},
             {"comparison_spec_id",comparison_json.at("comparison_spec_id")},
             {"comparison_run_id",comparison_json.at("comparison_run_id")},
             {"scope","selected_shared_preflight_blocks_before_configuration_workspaces_and_baselines"},
@@ -1609,10 +1613,16 @@ int main(int argc, char** argv) {
             {"scenario_resolution_snapshot_entered",preflight.scenario_load.resolution_snapshot_entered},
             {"provider_registration_ns",preflight.provider_registration_ns},
             {"comparison_admission_ns",preflight.comparison_admission_ns},
-            {"reach_back_capability_callback_ns",preflight.capability.reach_back_ns},
-            {"reach_back_capability_callback_calls",preflight.capability.reach_back_calls},
-            {"direct_joint_capability_callback_ns",preflight.capability.direct_joint_ns},
-            {"direct_joint_capability_callback_calls",preflight.capability.direct_joint_calls}}.dump() << '\n';
+            {"common_guard_status",common_guard_status_name(admission_observation.common_guard_status)},
+            {"common_guards_ns",admission_observation.common_guards_ns},
+            {"reach_back_registry_status",preparation_status_name(reach_back_observation.status)},
+            {"reach_back_registry_callback_external_ns",reach_back_observation.callback_external_ns},
+            {"reach_back_capability_callback_ns",reach_back_observation.capability_callback_ns},
+            {"reach_back_capability_callback_calls",reach_back_observation.capability_callback_calls},
+            {"direct_joint_registry_status",preparation_status_name(direct_joint_observation.status)},
+            {"direct_joint_registry_callback_external_ns",direct_joint_observation.callback_external_ns},
+            {"direct_joint_capability_callback_ns",direct_joint_observation.capability_callback_ns},
+            {"direct_joint_capability_callback_calls",direct_joint_observation.capability_callback_calls}}.dump() << '\n';
         std::cout << "# comparison_record_digest=" << problem::hex(comparison.content().digest())
             << "; attempts=" << attempts.size() << "; failures=" << failures << '\n';
         if (failures != 0) return 1;

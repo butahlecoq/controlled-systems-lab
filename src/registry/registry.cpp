@@ -1,8 +1,77 @@
 #include <csl/registry/registry.hpp>
 #include "compiled_verifiers.hpp"
 #include <algorithm>
+#include <chrono>
 
 namespace csl::registry {
+namespace {
+using PreparationClock = std::chrono::steady_clock;
+
+class PreparationTimer {
+public:
+    explicit PreparationTimer(StrategyPreparationObservation* observation) noexcept
+        : observation_(observation) {
+        if (observation_) {
+            start_ = PreparationClock::now();
+            running_ = true;
+        }
+    }
+
+    template<class Callback>
+    Capability invoke_capability(Callback&& callback) {
+        if (!observation_) return std::forward<Callback>(callback)();
+        const auto callback_start = pause();
+        ++observation_->capability_callback_calls;
+        try {
+            auto result = std::forward<Callback>(callback)();
+            resume(callback_start, PreparationClock::now());
+            return result;
+        } catch (...) {
+            resume(callback_start, PreparationClock::now());
+            throw;
+        }
+    }
+
+    void finish(PreparationObservationStatus status) noexcept {
+        if (!observation_ || finished_) return;
+        if (running_) add_external(PreparationClock::now());
+        observation_->status = status;
+        finished_ = true;
+    }
+
+    ~PreparationTimer() {
+        if (observation_ && !finished_)
+            finish(PreparationObservationStatus::threw);
+    }
+
+private:
+    PreparationClock::time_point pause() noexcept {
+        const auto now = PreparationClock::now();
+        add_external(now);
+        running_ = false;
+        return now;
+    }
+
+    void resume(PreparationClock::time_point callback_start,
+        PreparationClock::time_point callback_end) noexcept {
+        observation_->capability_callback_ns += static_cast<std::uint64_t>(
+            std::chrono::duration_cast<std::chrono::nanoseconds>(callback_end-callback_start).count());
+        start_ = callback_end;
+        running_ = true;
+    }
+
+    void add_external(PreparationClock::time_point end) noexcept {
+        observation_->callback_external_ns += static_cast<std::uint64_t>(
+            std::chrono::duration_cast<std::chrono::nanoseconds>(end-start_).count());
+    }
+
+    StrategyPreparationObservation* observation_{};
+    PreparationClock::time_point start_{};
+    bool running_{};
+    bool finished_{};
+};
+}
+
 SynthesisIdentityExpectation PreparedStrategy::expected_synthesis_identity() const {
     return {request_->problem.identity(), request_->family,
         request_->problem.constraints().coordinates(), request_->configuration.strategy,
@@ -210,58 +279,74 @@ std::optional<Rejection> StrategyRegistry::add(StrategyRegistration entry) {
 }
 std::variant<PreparedStrategy,Rejection> StrategyRegistry::prepare(const StrategyRequest& request,
     const Requirements& requirements, std::optional<std::string> version) const {
-    Provenance provenance{StrategyPort::name,{request.configuration.strategy,std::move(version)},{}};
-    const auto found = entries_.find(request.configuration.strategy.value);
-    if (found == entries_.end()) return detail::reject(provenance,"method","unknown strategy ID");
-    const auto& entry = found->second;
-    provenance.actual = entry.identity;
-    if (provenance.requested.version && *provenance.requested.version != entry.identity.version)
-        return detail::reject(provenance,"method.version","requested strategy version is unavailable");
-    auto request_diagnostics=check_family_request(request.family,request.problem.identity());
-    if (!request_diagnostics.empty()) return Rejection{provenance,std::move(request_diagnostics)};
-    if ((requirements.output.family && *requirements.output.family!=request.family.target) ||
-        requirements.output.assurance!=request.family.assurance)
-        return detail::reject(provenance,"family","Registry requirements differ from the immutable effective family request");
-    if (request.family.assurance==Assurance::validated)
-        return detail::reject(provenance,"family.assurance","Validated family evidence is not implemented");
-    auto verifier_key=entry.complete_family_verifier;
-    if(requirements.output.completeness==Completeness::established&&entry.complete_family_verifier_selector) {
-        const auto selected=entry.complete_family_verifier_selector(request);
-        if(!selected)
-            return detail::reject(provenance,"family.verifier.profile",
-                "No compiled complete-family verifier is registered for this request profile");
-        verifier_key=*selected;
-    }
-    const auto capability = entry.capabilities(request,requirements);
-    if (const auto* diagnostics = std::get_if<Diagnostics>(&capability)) return detail::capability_rejection(provenance,*diagnostics);
-    auto diagnostics = detail::check_offer(std::get<Offer>(capability),requirements,false);
-    if (!diagnostics.empty()) return Rejection{provenance,std::move(diagnostics)};
-    auto verifier=verifier_key.id.value.empty()?nullptr:
-        detail::find_compiled_verifier(verifier_key.id,verifier_key.version);
-    if(requirements.output.completeness==Completeness::established&&!verifier)
-        return detail::reject(provenance,"family.verifier","Complete-family output requires a verifier in the compiled library catalog");
-    auto partial_verifier=entry.partial_family_verifier.id.value.empty()?nullptr:
-        detail::find_compiled_partial_verifier(entry.partial_family_verifier.id,entry.partial_family_verifier.version);
-    auto planned = entry.planner(request,requirements);
-    if (const auto* rejection = std::get_if<Rejection>(&planned)) return *rejection;
-    auto& plan = std::get<StrategyPlan>(planned);
-    auto records = plan.provenance_;
-    records.insert(records.begin(),provenance);
-    // Every pure dependency/transition check has succeeded. Only now copy numerical requests.
-    auto frozen=StrategyPort::snapshot(request);
-    frozen.strategy_version=entry.identity.version;
-    if(entry.expected_lineage) frozen.lineage=entry.expected_lineage(frozen);
-    auto snapshot = std::make_shared<const StrategyRequest>(std::move(frozen));
-    auto factory = plan.snapshot_();
-    std::optional<detail::VerifiedFamilyAuthority> authority;
-    if(verifier||partial_verifier)
-        authority=detail::VerifiedFamilyAuthority(entry.identity.id,entry.identity.version);
-    std::optional<detail::VerifiedPartialFamilyAuthority> partial_authority;
-    if(partial_verifier)
-        partial_authority=detail::VerifiedPartialFamilyAuthority(entry.identity.id,entry.identity.version,
-            partial_verifier->id(),partial_verifier->version());
-    return PreparedStrategy{std::move(snapshot),requirements,std::move(factory),std::move(verifier),
-        std::move(authority),std::move(partial_verifier),std::move(partial_authority),std::move(records)};
+    return prepare_impl(request,requirements,std::move(version),nullptr);
+}
+std::variant<PreparedStrategy,Rejection> StrategyRegistry::prepare_observed(
+    const StrategyRequest& request,const Requirements& requirements,
+    std::optional<std::string> version,StrategyPreparationObservation& observation) const {
+    observation = {};
+    return prepare_impl(request,requirements,std::move(version),&observation);
+}
+std::variant<PreparedStrategy,Rejection> StrategyRegistry::prepare_impl(const StrategyRequest& request,
+    const Requirements& requirements, std::optional<std::string> version,
+    StrategyPreparationObservation* observation) const {
+    PreparationTimer timer{observation};
+    auto result = [&]() -> std::variant<PreparedStrategy,Rejection> {
+        Provenance provenance{StrategyPort::name,{request.configuration.strategy,std::move(version)},{}};
+        const auto found = entries_.find(request.configuration.strategy.value);
+        if (found == entries_.end()) return detail::reject(provenance,"method","unknown strategy ID");
+        const auto& entry = found->second;
+        provenance.actual = entry.identity;
+        if (provenance.requested.version && *provenance.requested.version != entry.identity.version)
+            return detail::reject(provenance,"method.version","requested strategy version is unavailable");
+        auto request_diagnostics=check_family_request(request.family,request.problem.identity());
+        if (!request_diagnostics.empty()) return Rejection{provenance,std::move(request_diagnostics)};
+        if ((requirements.output.family && *requirements.output.family!=request.family.target) ||
+            requirements.output.assurance!=request.family.assurance)
+            return detail::reject(provenance,"family","Registry requirements differ from the immutable effective family request");
+        if (request.family.assurance==Assurance::validated)
+            return detail::reject(provenance,"family.assurance","Validated family evidence is not implemented");
+        auto verifier_key=entry.complete_family_verifier;
+        if(requirements.output.completeness==Completeness::established&&entry.complete_family_verifier_selector) {
+            const auto selected=entry.complete_family_verifier_selector(request);
+            if(!selected)
+                return detail::reject(provenance,"family.verifier.profile",
+                    "No compiled complete-family verifier is registered for this request profile");
+            verifier_key=*selected;
+        }
+        const auto capability = timer.invoke_capability([&] { return entry.capabilities(request,requirements); });
+        if (const auto* diagnostics = std::get_if<Diagnostics>(&capability)) return detail::capability_rejection(provenance,*diagnostics);
+        auto diagnostics = detail::check_offer(std::get<Offer>(capability),requirements,false);
+        if (!diagnostics.empty()) return Rejection{provenance,std::move(diagnostics)};
+        auto verifier=verifier_key.id.value.empty()?nullptr:
+            detail::find_compiled_verifier(verifier_key.id,verifier_key.version);
+        if(requirements.output.completeness==Completeness::established&&!verifier)
+            return detail::reject(provenance,"family.verifier","Complete-family output requires a verifier in the compiled library catalog");
+        auto partial_verifier=entry.partial_family_verifier.id.value.empty()?nullptr:
+            detail::find_compiled_partial_verifier(entry.partial_family_verifier.id,entry.partial_family_verifier.version);
+        auto planned = entry.planner(request,requirements);
+        if (const auto* rejection = std::get_if<Rejection>(&planned)) return *rejection;
+        auto& plan = std::get<StrategyPlan>(planned);
+        auto records = plan.provenance_;
+        records.insert(records.begin(),provenance);
+        auto frozen=StrategyPort::snapshot(request);
+        frozen.strategy_version=entry.identity.version;
+        if(entry.expected_lineage) frozen.lineage=entry.expected_lineage(frozen);
+        auto snapshot = std::make_shared<const StrategyRequest>(std::move(frozen));
+        auto factory = plan.snapshot_();
+        std::optional<detail::VerifiedFamilyAuthority> authority;
+        if(verifier||partial_verifier)
+            authority=detail::VerifiedFamilyAuthority(entry.identity.id,entry.identity.version);
+        std::optional<detail::VerifiedPartialFamilyAuthority> partial_authority;
+        if(partial_verifier)
+            partial_authority=detail::VerifiedPartialFamilyAuthority(entry.identity.id,entry.identity.version,
+                partial_verifier->id(),partial_verifier->version());
+        return PreparedStrategy{std::move(snapshot),requirements,std::move(factory),std::move(verifier),
+            std::move(authority),std::move(partial_verifier),std::move(partial_authority),std::move(records)};
+    }();
+    timer.finish(std::holds_alternative<PreparedStrategy>(result) ?
+        PreparationObservationStatus::accepted : PreparationObservationStatus::rejected);
+    return result;
 }
 namespace detail {
 namespace {

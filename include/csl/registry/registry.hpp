@@ -3,6 +3,7 @@
 #include <csl/synthesis/contracts.hpp>
 #include <csl/problem/resolved_problem.hpp>
 #include <array>
+#include <cstdint>
 #include <functional>
 #include <map>
 #include <stdexcept>
@@ -419,11 +420,24 @@ public:
         return detail::PipelineAccess::bind<StrategyPort>(request_,std::move(workspace));
     }
 };
+enum class PreparationObservationStatus { not_entered, accepted, rejected, threw };
+struct StrategyPreparationObservation {
+    PreparationObservationStatus status{PreparationObservationStatus::not_entered};
+    std::uint64_t callback_external_ns{};
+    std::uint64_t capability_callback_ns{};
+    std::size_t capability_callback_calls{};
+};
+
 class StrategyRegistry {
     std::map<std::string,StrategyRegistration> entries_;
+    std::variant<PreparedStrategy,Rejection> prepare_impl(const StrategyRequest&,
+        const Requirements&,std::optional<std::string>,StrategyPreparationObservation*) const;
 public:
     std::optional<Rejection> add(StrategyRegistration);
     std::variant<PreparedStrategy,Rejection> prepare(const StrategyRequest&, const Requirements& = {},
         std::optional<std::string> version = {}) const;
+    std::variant<PreparedStrategy,Rejection> prepare_observed(const StrategyRequest&,
+        const Requirements&,std::optional<std::string> version,
+        StrategyPreparationObservation&) const;
 };
 } // namespace csl::registry

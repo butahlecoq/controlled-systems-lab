@@ -4,6 +4,7 @@
 #include <csl/registry/provider.hpp>
 #include <csl/verification/trajectory.hpp>
 #include <array>
+#include <cstdint>
 #include <memory>
 #include <optional>
 #include <variant>
@@ -27,6 +28,13 @@ struct RejectedComparison {
     std::vector<std::size_t> strategy_indices;
 };
 
+enum class PreparationObservationStatus { not_entered, passed, rejected, threw };
+struct ComparisonPreparationObservation {
+    PreparationObservationStatus common_guard_status{PreparationObservationStatus::not_entered};
+    std::uint64_t common_guards_ns{};
+    std::array<registry::StrategyPreparationObservation, 2> registry_attempts{};
+};
+
 class PreparedComparison {
 public:
     PreparedComparison(const PreparedComparison&) = default;
@@ -43,6 +51,9 @@ public:
     std::array<std::unique_ptr<registry::BoundWorkspace<registry::StrategyPort>>, 2> create() const;
 
 private:
+    static std::variant<PreparedComparison, UnsupportedComparison, RejectedComparison>
+        prepare_impl(const ComparisonRequest&, const registry::StrategyRegistry&,
+            ComparisonPreparationObservation*);
     PreparedComparison(problem::ResolvedProblem problem, FamilyRequest family,
         std::array<StrategyConfiguration, 2> configurations,
         std::array<registry::PreparedStrategy, 2> prepared)
@@ -55,6 +66,9 @@ private:
     std::array<registry::PreparedStrategy, 2> prepared_;
     friend std::variant<PreparedComparison, UnsupportedComparison, RejectedComparison>
         prepare_comparison(const ComparisonRequest&, const registry::StrategyRegistry&);
+    friend std::variant<PreparedComparison, UnsupportedComparison, RejectedComparison>
+        prepare_comparison_observed(const ComparisonRequest&, const registry::StrategyRegistry&,
+            ComparisonPreparationObservation&);
 };
 
 using SelectionOutcome = std::variant<std::monostate, registry::Rejection, Unsupported,
@@ -76,6 +90,8 @@ using Preparation = std::variant<PreparedComparison, UnsupportedComparison, Reje
 // Admits guarded T-S01/T-S02/T-S03 pairs against one immutable mathematical
 // problem and one effective request. No workspace is created on rejection.
 Preparation prepare_comparison(const ComparisonRequest&, const registry::StrategyRegistry&);
+Preparation prepare_comparison_observed(const ComparisonRequest&,
+    const registry::StrategyRegistry&, ComparisonPreparationObservation&);
 
 // Executes both admitted strategies on the same problem/request. Complete
 // families may be queried through SelectorPort; candidate/partial results are
