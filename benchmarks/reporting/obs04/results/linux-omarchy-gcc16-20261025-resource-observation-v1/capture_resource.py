@@ -4,10 +4,19 @@ import hashlib
 import json
 import os
 from pathlib import Path
-import resource
 import subprocess
 import sys
 import time
+
+try:
+    import resource
+except ImportError:
+    resource = None
+
+if sys.platform != "linux":
+    raise SystemExit("capture_resource.py is Linux-only; ru_maxrss is recorded in KiB")
+if resource is None:
+    raise SystemExit("capture_resource.py requires the Unix resource module")
 
 if len(sys.argv) != 3:
     raise SystemExit("usage: capture_resource.py DRIVER COMPARISON_RECORD")
