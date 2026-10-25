@@ -437,6 +437,8 @@ bool measurement_matches_arm(AttemptStatus status,const Json& measurement,const 
         for(const auto* field:{"strategy_run_cpu_ns","observed_backend_scheduler_width"})
             if(!measurement.contains(field)||(!measurement.at(field).is_null()&&
                 !nonnegative_integer(measurement.at(field))))return false;
+        const auto& width=measurement.at("observed_backend_scheduler_width");
+        if(!width.is_null()&&width.get<std::uint64_t>()==0)return false;
     }
     for(const auto* field:{"requested_witness_count","returned_witness_count","distinct_witness_count"})
         if(!measurement.contains(field)||(!measurement.at(field).is_null()&&

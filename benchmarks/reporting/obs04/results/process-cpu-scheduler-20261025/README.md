@@ -21,6 +21,21 @@ The same executable was profiled in separate runs, 32 strategy calls per arm. Ea
 
 The profile tool was Arch `perf` 7.2.3-1 and was run from a signed package extracted under `/tmp` with its signed shared-library dependencies. No system package was installed. Its exact sample scope and limitations are recorded in each `capability.json`.
 
+## Separate whole-process resource sample
+
+`whole-process-resource/` contains five additional fresh processes of the same
+binary and comparison spec. A parent process used Linux `wait4` to capture each
+child's peak RSS, user/system CPU, and whole-process wall time. All 160 attempts
+passed across these five records. Peak RSS median was 46,660 KiB (range
+46,528–47,000 KiB); full-process wall median was 817,057,979 ns (range
+798,868,687–825,918,341 ns); combined user/system CPU median was 0.814109 s
+(range 0.797719–0.822679 s). These values include startup, preparation,
+baseline runs, all attempts, serialization, and output. They are not
+per-attempt memory measurements. The requested policy was one total thread,
+one outer worker, one thread per worker, no memory cap; no memory or wall-time
+limit was enforced. `whole-process-resource/summary.json` and each
+`run-*.resource.json` preserve the measurement scope and policy.
+
 ## Superseded attempts
 
 `superseded/` preserves five earlier successful but dirty-source captures and the initial failed artifact-serialization attempt. They are not part of the reported five-process sample. The serialization failure showed that the comparison artifact layer needed explicit event `/8` support; the clean-source records above were captured after that support was committed.

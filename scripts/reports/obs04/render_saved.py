@@ -191,6 +191,9 @@ def load_record(path: Path) -> dict[str, Any]:
                 value = measurement.get(field)
                 if value is not None and (not isinstance(value, int) or isinstance(value, bool) or value < 0):
                     raise ValueError(f"attempts[{index}] {field} must be a non-negative integer or null")
+            width = measurement["observed_backend_scheduler_width"]
+            if width == 0:
+                raise ValueError(f"attempts[{index}] observed_backend_scheduler_width must be positive or null")
         parsed_attempts.append({**attempt, "_measurement": measurement, "_run": run})
     identity_material = {
         "attempts": record["attempts"],

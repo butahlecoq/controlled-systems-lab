@@ -1,0 +1,19 @@
+{
+  "enforcement": {
+    "memory_limit": "none",
+    "wall_time_limit": "none"
+  },
+  "measurement": "wait4 child resource usage; not a per-attempt measurement",
+  "peak_rss_kib": 47000,
+  "process_wall_ns": 817057979,
+  "requested_policy": {
+    "memory_cap_bytes": null,
+    "outer_workers": 1,
+    "threads_per_worker": 1,
+    "total_threads": 1
+  },
+  "schema": "csl.obs04-external-process-resource/1",
+  "scope": "whole_driver_process",
+  "system_cpu_seconds": 0.060008,
+  "user_cpu_seconds": 0.754101
+}

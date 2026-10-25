@@ -163,5 +163,48 @@
         }
       }
     }
+  },
+  "whole_process_resource_observations": {
+    "attempts": 160,
+    "enforcement": {
+      "memory_limit": "none",
+      "wall_time_limit": "none"
+    },
+    "observation_method": "Linux wait4 child resource usage",
+    "passed_attempts": 160,
+    "peak_rss_kib": {
+      "max": 47000,
+      "median": 46660,
+      "min": 46528
+    },
+    "process_wall_ns": {
+      "max": 825918341,
+      "median": 817057979,
+      "min": 798868687
+    },
+    "record_directory": "whole-process-resource/",
+    "requested_policy": {
+      "memory_cap_bytes": null,
+      "outer_workers": 1,
+      "threads_per_worker": 1,
+      "total_threads": 1
+    },
+    "samples": 5,
+    "scope": "whole_driver_process",
+    "system_cpu_seconds": {
+      "max": 0.060008,
+      "median": 0.057979,
+      "min": 0.044097
+    },
+    "total_cpu_seconds": {
+      "max": 0.8226789999999999,
+      "median": 0.814109,
+      "min": 0.797719
+    },
+    "user_cpu_seconds": {
+      "max": 0.7755259999999999,
+      "median": 0.754122,
+      "min": 0.73974
+    }
   }
 }

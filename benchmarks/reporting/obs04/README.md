@@ -361,13 +361,18 @@ public `ComparisonAttempt` C++ type, changing its layout and ABI; binary
 consumers must rebuild against the updated headers and library. This
 environment-manifest increment changes the wire schema while retaining legacy
 decoding; it adds no C++ API, installed file, package workflow, or new
-dependency. It does not prepare or publish a release. Current `/7` records add
-family-construction timing where supported, and saved-record rendering is
-available. The five current-mainline captures report fixture-specific
-instrumentation deltas but make no general performance claim. Full resource policy/accounting and directly observed CPU/backend-thread data
-remain outstanding. The current bounded profiles provide candidate hotspots,
-but not one unique limiter. Keep OBS-04 open until remaining acceptance
-criteria have evidence.
+dependency. It does not prepare or publish a release. Current `/8` records add
+process CPU time per strategy call and adapter-reported backend scheduler width;
+the width is not active-thread utilization. Saved-record rendering and legacy
+`/2`–`/7` decoding remain available. Five clean-source captures report
+fixture-specific instrumentation deltas but make no general performance claim.
+Full resource policy/accounting, the remaining requested phase timings, and a
+per-attempt memory measurement/enforcement and a unique source-mapped limiter
+remain outstanding. Five additional whole-process `wait4` observations report
+peak RSS and total CPU/wall time with no memory or wall-time cap; their scope is
+explicitly process-wide. Current bounded profiles provide candidate hotspots
+but do not identify one limiter. Keep OBS-04 open until its remaining
+acceptance criteria have evidence.
 
 ## Acknowledged perf capture after FIFO fix (2026-10-25)
 

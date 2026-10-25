@@ -184,6 +184,21 @@ class SavedRendererTests(unittest.TestCase):
             with self.assertRaisesRegex(ValueError, "strategy_run_cpu_ns must be a non-negative integer or null"):
                 render_saved.load_record(path)
 
+    def test_rejects_zero_event_v8_backend_scheduler_width(self):
+        record = fixture_record()
+        measurement = json.loads(record["attempts"][0]["measurement_payload"])
+        measurement.update({
+            "schema": "csl.obs04-instrumentation-comparison-event/8",
+            "strategy_run_cpu_ns": 1,
+            "observed_backend_scheduler_width": 0,
+        })
+        record["attempts"][0]["measurement_payload"] = json.dumps(measurement)
+        with tempfile.TemporaryDirectory() as temp:
+            path = Path(temp) / "record.json"
+            path.write_text(json.dumps(record), encoding="utf-8")
+            with self.assertRaisesRegex(ValueError, "observed_backend_scheduler_width must be positive or null"):
+                render_saved.load_record(path)
+
     def test_rejects_unknown_record_schema(self):
         with tempfile.TemporaryDirectory() as temp:
             path = Path(temp) / "record.json"
