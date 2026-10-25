@@ -64,4 +64,4 @@ Events disabled
 Events enabled
 Events disabled
 [ perf record: Woken up 65 times to write data ]
-[ perf record: Captured and wrote 0.019 MB /tmp/obs04-profile/final-direct-joint-2e146c50/acknowledged.perf.data (177 samples) ]
+[ perf record: Captured and wrote 0.017 MB /tmp/obs04-profile/final-direct-joint-0657a5e8/acknowledged.perf.data (160 samples) ]

@@ -284,20 +284,20 @@ limiter profile before it can close.
 
 `results/linux-omarchy-gcc16-20261025-perf-ack-fix/` contains separate user-space
 `perf` captures for both strategies from source commit
-`be1c4e92dac0a37ed29434f8516bb303953e27c8`. The fix accepts both the documented
+`0657a5e8c2470a24ce0967d37da76aac1411b935`. The fix accepts both the documented
 `ack\n` frame and Linux perf's observed `ack\n\0` frame; the mock exercises
 both forms and rejects a missing acknowledgement. Each capture ran 32 profiled
 strategy calls with a requested 4,999 Hz sampling frequency and 64 acknowledged
 enable/disable transitions. The effective sample frequency is not reported by
 this probe.
-Reach-back decoded 843 samples (96,084-byte capture); direct-joint decoded 170
-(29,300 bytes). `perf report` found zero lost samples for both. The binary hash
-is `975589fe6d2a8ff2bbdf63d78de579afcceaefd14a9e80289bfd616aaaab4268`.
+Reach-back decoded 921 samples (104,012-byte capture); direct-joint decoded 160
+(27,892 bytes). `perf report` found zero lost samples for both. The binary hash
+is `ee6f65ce671950ffa73e367179bc44d99ff6fc18dbcb53ca1969afae1227b3da`.
 
 These captures establish that bounded acknowledged profiling works on this
 Linux host. The leading self samples are
 allocator/free calls and C++ string operations: `malloc`/`cfree` account for
-14.23% of reach-back samples and 15.92% of direct-joint samples. The reports
+14.99% of reach-back samples and 13.25% of direct-joint samples. The reports
 also attribute samples to HiGHS option registration and native solve methods.
 This makes allocator-heavy backend initialization and solve setup candidate
 hotspots for the T-S01 workload, rather than establishing a unique limiter.
