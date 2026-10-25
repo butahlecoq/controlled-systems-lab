@@ -29,12 +29,17 @@ inclusive and exclusive wall-clock ticks for every span and the
 clock period used to interpret them. Event schema `/7` introduced the
 separately measured `family_construction_ns`; it covers complete-family
 proposal assembly and is null when that phase is not entered or instrumentation
-is disabled. The current driver emits `/8`, which adds process CPU time and
-adapter-reported backend scheduler width per attempt. The width is not active
-or busy-thread utilization. Schemas `/5` and `/6` retain their earlier
-null-field meaning. The driver requests one solver thread and one outer worker.
-Older captures lack CPU and scheduler-width observations; per-attempt memory,
-heap use, and a unique source-mapped limiter remain unavailable. Treat timing
+is disabled. The current driver emits `/9`, which adds process CPU time,
+adapter-reported backend scheduler width, and per-call process peak RSS.
+Linux resets `/proc/self/status` `VmHWM` immediately before the strategy call
+and reads it afterward. This is the whole-process high-water mark for that
+interval, including the driver and all threads; it does not identify
+strategy-only allocations or enforce a memory limit. Other platforms report
+the metric unavailable. Scheduler width is not active or busy-thread
+utilization. Schemas `/5` and `/6` retain their earlier null-field meaning. The
+driver requests one solver thread and one outer worker. Older captures lack
+per-attempt RSS observations. Heap use and a unique source-mapped limiter
+remain unavailable. Treat timing
 differences as descriptive and inconclusive; this tiny analytic case is not
 representative of application workloads.
 
@@ -75,16 +80,23 @@ The driver reports selected shared preflight phases in a structured
 `# shared_preflight=` JSONL comment, keyed by the comparison spec and run IDs.
 The JSONL is retained beside the immutable comparison record; keeping these
 observed durations out of the comparison spec prevents timing noise from
-changing `ComparisonSpecId`. Current schema `/2` times scenario file reading,
-standalone JSON parsing, the complete public scenario load/validation/resolution
-call, provider registration, and combined comparison admission. The standalone
-parse is a diagnostic on the same bytes; the public loader parses those bytes
-again, so its full duration is not reduced by the diagnostic parse time.
-Admission combines common request guards, strategy capability checks, and
-registry preparation; the current interface does not split these subphases.
-These timers stop before configuration-template creation, workspace creation,
+changing `ComparisonSpecId`. Schema `/4` records the actual bounded parser
+inside the scenario loader separately from schema/field translation and input
+validation. Canonical problem resolution and source snapshotting are reported
+as a nested interval within translation; both remain within the inclusive
+semantic-load phase. Phase-entry flags identify which timing hooks were reached
+for each emitted successful preflight. It also retains inclusive
+`comparison_admission_ns` and records each strategy's capability callback
+duration and call count nested inside admission. This callback-only timing
+excludes common request guards and other registry work; the two callback
+durations are not additive with admission and are not subtracted to estimate a
+residual. Callback timers call the original capability functions exactly once.
+The timers stop before configuration-template creation, workspace creation,
 and the two analytic baseline strategy runs. Complete-family proposal
 construction is measured separately inside each strategy on enabled runs.
+Five clean Release captures of these `/4` loader, validation, canonical
+resolution/snapshot, and capability timings are preserved in
+[`results/phase-split-schema4-20261025`](results/phase-split-schema4-20261025/).
 
 ## Clean-source preflight capture
 
@@ -114,13 +126,14 @@ contain scenario-file timings. Admission combines common request guards,
 strategy capability checks, and registry preparation; the current interface
 does not split these subphases.
 Event `/7` is used in the historical per-attempt artifacts below. The current
-driver emits event `/8`, and the codec accepts event `/2` through `/8`. It records
+driver emits event `/9`, and the codec accepts event `/2` through `/9`. It records
 the `StrategyPort::run` interval, first and additional direction query, their
 combined selection interval, independent verification, and attempt end-to-end
 time. Events `/7` and `/8` also record complete-family proposal construction
 where the strategy exposes that boundary. Event `/8` adds process CPU time for
 the strategy invocation and adapter-reported backend scheduler width. Event
-`/4` was an exploratory increment that
+`/9` adds the per-call process peak RSS observation with explicit scope and
+availability status. Event `/4` was an exploratory increment that
 wrote the full strategy interval into that field; the retained `/4` artifacts
 are historical and must not be interpreted as a separate family-construction
 measurement.
@@ -363,14 +376,17 @@ public `ComparisonAttempt` C++ type, changing its layout and ABI; binary
 consumers must rebuild against the updated headers and library. Event `/8`
 adds per-attempt process CPU time and adapter-reported backend scheduler width;
 the width is not active-thread utilization. Saved-record rendering and legacy
-`/2`–`/7` decoding remain available. No new dependency, installed file, or
+`/2`–`/9` decoding remains available. No new dependency, installed file, or
 package workflow is added. This PR does not publish a release; release planning
 remains under the repository's release tracker.
 
 The five clean-source captures report fixture-specific instrumentation deltas
 but make no general performance claim. They record process-wide peak RSS and
-CPU/wall time separately, with no memory or wall-time cap; per-attempt memory
-measurement/enforcement remains outstanding. Shared preflight timing separates
+CPU/wall time separately, with no memory or wall-time cap. The current driver
+also records per-attempt process peak RSS on Linux as an observation only;
+five clean-source event `/9` captures and their saved HTML are retained in
+[`results/attempt-memory-20261025/`](results/attempt-memory-20261025/).
+Memory enforcement remains unavailable. Shared preflight timing separates
 file read, standalone parse, loader validation/resolution, provider registration,
 and comparison admission; parsing inside the public loader and capability work
 inside admission are still combined. Workspace/setup, family construction,

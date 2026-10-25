@@ -18,6 +18,7 @@
 #include <algorithm>
 #include <cmath>
 #include <type_traits>
+#include <tuple>
 #include <utility>
 #include <memory>
 #include <stdexcept>
@@ -359,6 +360,7 @@ csl::artifacts::RecordedRunArtifact check_complete_family_encoder_boundary(const
 
 void compare_profile(const std::string& profile) {
     namespace ar=artifacts;
+    namespace ob=execution::observability;
     const auto problem = source(profile);
     const auto request = request_for(problem, profile);
     auto registered = modules();
@@ -660,6 +662,42 @@ void compare_profile(const std::string& profile) {
     const auto restored_v8=take_artifact(ar::decode_recorded_comparison(recorded_v8_wire),
         "decode_recorded_comparison event/8");
     CHECK(restored_v8.content().digest()==recorded_v8.content().digest());
+    auto measured_attempts_v9=measured_attempts_v8;
+    for(auto& attempt:measured_attempts_v9) {
+        auto measurement=nlohmann::json::parse(attempt.measurement_payload);
+        measurement["schema"]="csl.obs04-instrumentation-comparison-event/9";
+        measurement["strategy_run_peak_rss"]={{"status","available"},
+            {"metric","process_peak_rss_bytes"},
+            {"scope","process_vm_hwm_reset_before_and_read_after_strategy_run"},
+            {"value_bytes",123456}, {"reason",nullptr}};
+        attempt.measurement_payload=measurement.dump();
+    }
+    const auto recorded_v9=take_artifact(ar::encode_recorded_comparison(
+        version_three_spec,measured_attempts_v9),"encode_recorded_comparison event/9");
+    const auto recorded_v9_wire=std::string(
+        reinterpret_cast<const char*>(recorded_v9.content().bytes().data()),
+        recorded_v9.content().bytes().size());
+    const auto restored_v9=take_artifact(ar::decode_recorded_comparison(recorded_v9_wire),
+        "decode_recorded_comparison event/9");
+    CHECK(restored_v9.content().digest()==recorded_v9.content().digest());
+    auto malformed_peak_rss=measured_attempts_v9;
+    auto missing_reason=nlohmann::json::parse(malformed_peak_rss.front().measurement_payload);
+    missing_reason["strategy_run_peak_rss"].erase("reason");
+    malformed_peak_rss.front().measurement_payload=missing_reason.dump();
+    CHECK(std::holds_alternative<ar::ArtifactError>(ar::encode_recorded_comparison(
+        version_three_spec,malformed_peak_rss)));
+    malformed_peak_rss=measured_attempts_v9;
+    auto invalid_value=nlohmann::json::parse(malformed_peak_rss.front().measurement_payload);
+    invalid_value["strategy_run_peak_rss"]["value_bytes"]=true;
+    malformed_peak_rss.front().measurement_payload=invalid_value.dump();
+    CHECK(std::holds_alternative<ar::ArtifactError>(ar::encode_recorded_comparison(
+        version_three_spec,malformed_peak_rss)));
+    malformed_peak_rss=measured_attempts_v9;
+    auto inconsistent_status=nlohmann::json::parse(malformed_peak_rss.front().measurement_payload);
+    inconsistent_status["strategy_run_peak_rss"]["status"]="unavailable";
+    malformed_peak_rss.front().measurement_payload=inconsistent_status.dump();
+    CHECK(std::holds_alternative<ar::ArtifactError>(ar::encode_recorded_comparison(
+        version_three_spec,malformed_peak_rss)));
     auto zero_scheduler_width=measured_attempts_v8;
     auto zero_width_measurement=nlohmann::json::parse(
         zero_scheduler_width.front().measurement_payload);
@@ -765,6 +803,62 @@ void compare_profile(const std::string& profile) {
     const auto wrong_measurement_result=ar::encode_recorded_comparison(record_spec,wrong_measurement);
     REQUIRE(std::holds_alternative<ar::ArtifactError>(wrong_measurement_result));
     CHECK(std::get<ar::ArtifactError>(wrong_measurement_result).code==ar::ArtifactErrorCode::identity);
+    const auto expected_identity=prepared.expected_synthesis_identity(0);
+    const ar::Unavailable uninstrumented{ar::MissingReason::not_instrumented,{}};
+    ar::ConfigurationInput non_success_configuration_input;
+    non_success_configuration_input.collection={false,ar::CollectionMode::detail,5,10000,0,0};
+    non_success_configuration_input.modules={
+        {"strategy",{expected_identity.strategy,expected_identity.strategy_version,uninstrumented},{}},
+        {"lp",{prepared.strategies()[0].lp,"1",uninstrumented},{}},
+        {"convex",{prepared.strategies()[0].convex,"1",uninstrumented},{}}};
+    non_success_configuration_input.numerical=prepared.family().numerical;
+    non_success_configuration_input.resources={1,1,1,{}};
+    non_success_configuration_input.output={ar::OutputKind::synthesis,prepared.family().assurance,
+        prepared.family().target,prepared.family().representation,witness_request};
+    non_success_configuration_input.selector={{synthesis::witness_selector::selector_id},"1",{}};
+    non_success_configuration_input.strategy=prepared.strategies()[0];
+    non_success_configuration_input.strategy.selector=non_success_configuration_input.selector.id;
+    const auto non_success_configuration=take_artifact(ar::resolve_configuration(
+        std::move(non_success_configuration_input)),"resolve non-success run configuration");
+    const std::vector<std::tuple<ar::AttemptStatus,ar::FinalOutcome,std::string>> non_success_outcomes{
+        {ar::AttemptStatus::failed,
+            ar::FailedFinal{ar::FailurePhase::invoke,ar::FailureReason::adapter_exception,"saved adapter failure"},
+            "failed"},
+        {ar::AttemptStatus::unsupported,
+            ar::UnsupportedFinal{{{DiagnosticCode::unsupported,"capability","saved unsupported request"}}},
+            "unsupported"},
+        {ar::AttemptStatus::cancelled,ar::SkippedFinal{ar::SkippedReason::cancelled},"cancelled"}};
+    for(std::size_t index=0;index<non_success_outcomes.size();++index) {
+        const auto& [status,final,reported_status]=non_success_outcomes[index];
+        const ar::RunId non_success_run{"saved-non-success-"+std::to_string(index)};
+        auto statistics=take_artifact(ob::merge_observations(take_artifact(
+            ob::make_collection_plan({problem,non_success_configuration,non_success_run,{},{},0}),
+            "plan non-success run statistics"),{}),"merge non-success run statistics");
+        const auto description=problem.description();
+        ar::RunRecord run_record{problem.identity(),description->model->dynamics.dimensions,
+            static_cast<std::uint64_t>(description->times.size()-1),non_success_configuration,non_success_run,
+            final,std::move(statistics),{uninstrumented,uninstrumented,uninstrumented,uninstrumented,true,
+                ar::MemoryAccounting::unlimited},{},{},ar::ProblemProvenance::problem_revalidated};
+        const auto run_statistics=take_artifact(ar::publish_run({problem,std::move(run_record)}),
+            "publish non-success run");
+        const auto archived_run=take_artifact(ar::encode_recorded_run(run_statistics),
+            "encode non-success run");
+        auto measurement=nlohmann::json::parse(measured_attempts.front().measurement_payload);
+        measurement["status"]=reported_status;
+        std::vector<ar::ComparisonAttempt> attempts_with_non_success{
+            {0,0,status,{ar::RunId{"saved-non-success-"+std::to_string(index)},archived_run.content().digest()},
+                archived_run,measurement.dump()},measured_attempts[1]};
+        const auto archive=take_artifact(ar::encode_recorded_comparison(record_spec,attempts_with_non_success),
+            "encode non-success comparison attempt");
+        const auto archive_wire=std::string(reinterpret_cast<const char*>(archive.content().bytes().data()),
+            archive.content().bytes().size());
+        const auto archive_json=nlohmann::json::parse(archive_wire);
+        CHECK(archive_json["attempts"][0]["reported_status"]==reported_status);
+        CHECK(archive_json["attempts"][0]["measurement_payload"]==measurement.dump());
+        const auto restored=take_artifact(ar::decode_recorded_comparison(archive_wire),
+            "decode non-success comparison attempt");
+        CHECK(restored.content().digest()==archive.content().digest());
+    }
     auto wrong_arm_text=record_spec_text;
     const auto disabled_label=wrong_arm_text.find("disabled");
     REQUIRE(disabled_label!=std::string::npos);

@@ -13,6 +13,16 @@ struct ScenarioStorage {
     SourceProvenance source;
 };
 struct HistoricalStorage { HistoricalRecord record; SourceProvenance source; };
+struct LoadPhaseTimings {
+    std::uint64_t parse_ns{};
+    std::uint64_t semantic_load_ns{};
+    std::uint64_t translation_ns{};
+    std::uint64_t resolution_snapshot_ns{};
+    bool parse_entered{};
+    bool semantic_load_entered{};
+    bool translation_entered{};
+    bool resolution_snapshot_entered{};
+};
 struct Access {
     static LoadedScenario scenario(ScenarioStorage s) {return LoadedScenario(std::make_shared<const ScenarioStorage>(std::move(s)));}
     static HistoricalScenario historical(HistoricalStorage s) {return HistoricalScenario(std::make_shared<const HistoricalStorage>(std::move(s)));}
@@ -27,7 +37,8 @@ void object(const Json&,const std::string& path,std::initializer_list<std::strin
 std::string string(const Json&,const std::string& path);
 std::size_t count(const Json&,const std::string& path);
 double number(const Json&,const std::string& path);
-LoadResult load_bytes(std::span<const std::byte>,const LoadOptions&,const std::filesystem::path&);
+LoadResult load_bytes(std::span<const std::byte>,const LoadOptions&,const std::filesystem::path&,
+                      LoadPhaseTimings* = nullptr);
 template<class T,class... R> T canonical(std::variant<T,R...> value,const std::string& path) {
     if(auto* result=std::get_if<T>(&value)) return std::move(*result);
     if constexpr((std::is_same_v<R,OperationStopped> || ...))

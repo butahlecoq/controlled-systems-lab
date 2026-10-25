@@ -13,6 +13,7 @@ if(NOT EXISTS "${OBS04_JSON_SOURCE_DIR}/single_include/nlohmann/json.hpp")
 endif()
 
 add_executable(csl_obs04_instrumentation_comparison instrumentation_comparison.cpp)
+target_include_directories(csl_obs04_instrumentation_comparison PRIVATE "${CSL_SOURCE_ROOT}/src/input")
 find_package(Git REQUIRED)
 execute_process(COMMAND "${GIT_EXECUTABLE}" rev-parse --git-path HEAD
   WORKING_DIRECTORY "${CSL_SOURCE_ROOT}"

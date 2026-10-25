@@ -138,7 +138,8 @@ def load_record(path: Path) -> dict[str, Any]:
         if event_schema in {
                 "csl.obs04-instrumentation-comparison-event/6",
                 "csl.obs04-instrumentation-comparison-event/7",
-                "csl.obs04-instrumentation-comparison-event/8"}:
+                "csl.obs04-instrumentation-comparison-event/8",
+                "csl.obs04-instrumentation-comparison-event/9"}:
             phase_status = measurement.get("phase_status")
             if phase_status not in {"passed", "failed"}:
                 raise ValueError(f"attempts[{index}] phase status is invalid")
@@ -178,13 +179,14 @@ def load_record(path: Path) -> dict[str, Any]:
                 _run_status(run) != expected_status or
                 attempt.get("reported_status") not in set(measurement_to_reported.values()) or
                 measurement_to_reported.get(measurement.get("status")) != expected_status or
-                event_schema not in {f"csl.obs04-instrumentation-comparison-event/{n}" for n in range(2, 9)} or
+                event_schema not in {f"csl.obs04-instrumentation-comparison-event/{n}" for n in range(2, 10)} or
                 measurement.get("strategy") != expected_strategy or
                 measurement.get("instrumentation") != expected_instrumentation or
                 measurement.get("repetition") != repetition_index or
                 measurement.get("warmup") != (repetition_index == 0)):
             raise ValueError(f"attempts[{index}] identity or status does not match the saved spec and run")
-        if event_schema == "csl.obs04-instrumentation-comparison-event/8":
+        if event_schema in {"csl.obs04-instrumentation-comparison-event/8",
+                            "csl.obs04-instrumentation-comparison-event/9"}:
             for field in ("strategy_run_cpu_ns", "observed_backend_scheduler_width"):
                 if field not in measurement:
                     raise ValueError(f"attempts[{index}] {field} is required by event schema /8")
@@ -194,6 +196,25 @@ def load_record(path: Path) -> dict[str, Any]:
             width = measurement["observed_backend_scheduler_width"]
             if width == 0:
                 raise ValueError(f"attempts[{index}] observed_backend_scheduler_width must be positive or null")
+        if event_schema == "csl.obs04-instrumentation-comparison-event/9":
+            rss = measurement.get("strategy_run_peak_rss")
+            if not isinstance(rss, dict):
+                raise ValueError(f"attempts[{index}] strategy_run_peak_rss must be an object")
+            if not {"status", "metric", "scope", "value_bytes", "reason"} <= rss.keys():
+                raise ValueError(f"attempts[{index}] strategy_run_peak_rss is missing required fields")
+            if (rss.get("metric") != "process_peak_rss_bytes" or
+                    rss.get("scope") != "process_vm_hwm_reset_before_and_read_after_strategy_run"):
+                raise ValueError(f"attempts[{index}] strategy_run_peak_rss metric or scope is invalid")
+            rss_status, value, reason = rss.get("status"), rss.get("value_bytes"), rss.get("reason")
+            if rss_status not in {"available", "unavailable", "not_measured"}:
+                raise ValueError(f"attempts[{index}] strategy_run_peak_rss status is invalid")
+            if value is not None and (not isinstance(value, int) or isinstance(value, bool) or value < 0):
+                raise ValueError(f"attempts[{index}] strategy_run_peak_rss value_bytes must be a non-negative integer or null")
+            if rss_status == "available":
+                if value is None or reason is not None:
+                    raise ValueError(f"attempts[{index}] available strategy_run_peak_rss needs a value and null reason")
+            elif value is not None or not isinstance(reason, str) or not reason:
+                raise ValueError(f"attempts[{index}] unavailable strategy_run_peak_rss needs null value and a reason")
         parsed_attempts.append({**attempt, "_measurement": measurement, "_run": run})
     identity_material = {
         "attempts": record["attempts"],
@@ -265,6 +286,7 @@ def render_html(record: dict[str, Any]) -> str:
             m.get("strategy_run_ns"),
             m.get("strategy_run_cpu_ns"),
             m.get("observed_backend_scheduler_width"),
+            _format_peak_rss(m.get("strategy_run_peak_rss")),
             m.get("end_to_end_ns"),
             attempt.get("run_digest"),
         ])
@@ -304,10 +326,22 @@ td{{overflow-wrap:anywhere}} .note{{border-left:4px solid #5478a4;padding:.5rem 
 {_table(["Strategy", "Instrumentation", "Warmups", "Measured", "Passed", "Passing-attempt phase medians/ranges"], summary_rows)}
 <h2>All retained attempts</h2>
 <p>Warmups, failed phases, and other non-passing outcomes remain listed. Timing summaries use measured attempts whose solver and post-run phase statuses both passed.</p>
-{_table(["Repetition", "Run ID", "Strategy", "Instrumentation", "Status / phase", "Outcome", "Strategy wall (ns)", "Process CPU (ns)", "Backend scheduler width", "End to end (ns)", "Run digest"], attempt_rows)}
+{_table(["Repetition", "Run ID", "Strategy", "Instrumentation", "Status / phase", "Outcome", "Strategy wall (ns)", "Process CPU (ns)", "Backend scheduler width", "Process peak RSS", "End to end (ns)", "Run digest"], attempt_rows)}
 <p class="note">Process CPU covers the whole process during the strategy call. Backend scheduler width is the maximum width reported by adapters; it is not a count of busy threads.</p>
+<p class="note">Process peak RSS is the process VmHWM value after resetting its high-water mark immediately before the strategy call. It includes the driver and all process threads; unsupported platforms report an unavailable status. This is an observation, not a memory limit.</p>
 <p class="note">A timing summary describes only the saved attempts. It is not a method winner claim; consult the saved evidence and limiter profile before making performance claims.</p>
 </body></html>"""
+
+
+def _format_peak_rss(value: Any) -> str:
+    if not isinstance(value, dict):
+        return "—"
+    status = value.get("status", "unknown")
+    amount = value.get("value_bytes")
+    reason = value.get("reason")
+    if amount is not None:
+        return f"{status}: {amount} bytes"
+    return f"{status}: {reason or 'no value'}"
 
 
 def write_report(record_path: Path, output_path: Path) -> None:
