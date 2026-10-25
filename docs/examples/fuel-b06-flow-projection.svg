@@ -1260,10 +1260,11 @@
    </ns0:g>
   </ns0:g>
   <ns0:g id="text_17">
-   <ns0:text style="font-size: 8px; font-family: 'DejaVu Sans'" transform="translate(60.48 389.670781)">B06 finite-action minimax · J=11.060133859949424 (minimum worst-case objective norm;</ns0:text>
-   <ns0:text style="font-size: 8px; font-family: 'DejaVu Sans'" transform="translate(60.48 399.272969)">saved numerical minimax result) terminal projection of 4D numeric V-representation ·</ns0:text>
-   <ns0:text style="font-size: 8px; font-family: 'DejaVu Sans'" transform="translate(60.48 408.875156)">saved numerical solver output; binary64 assurance · not a validated real-arithmetic</ns0:text>
-   <ns0:text style="font-size: 8px; font-family: 'DejaVu Sans'" transform="translate(60.48 418.477344)">enclosure; not a historical reproduction</ns0:text>
+   <ns0:text style="font-size: 8px; font-family: 'DejaVu Sans'" transform="translate(60.48 380.068594)">Source: run b06-owner-confirmed-7df01ba3af5e4c46 · B06 finite-action minimax v saved-</ns0:text>
+   <ns0:text style="font-size: 8px; font-family: 'DejaVu Sans'" transform="translate(60.48 389.670781)">record J=11.060133859949424 (minimum worst-case objective norm; saved numerical minimax</ns0:text>
+   <ns0:text style="font-size: 8px; font-family: 'DejaVu Sans'" transform="translate(60.48 399.272969)">result) terminal projection of 4D numeric V-representation · saved numerical solver</ns0:text>
+   <ns0:text style="font-size: 8px; font-family: 'DejaVu Sans'" transform="translate(60.48 408.875156)">output; binary64 assurance · not a validated real-arithmetic enclosure; not a historical</ns0:text>
+   <ns0:text style="font-size: 8px; font-family: 'DejaVu Sans'" transform="translate(60.48 418.477344)">reproduction</ns0:text>
   </ns0:g>
  </ns0:g>
  <ns0:defs>

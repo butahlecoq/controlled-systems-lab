@@ -85,14 +85,14 @@ def render(document, source_hash, style_path, out, additional_inputs=None):
                 x=document["axes"]["states"]["points"]
                 for path in item["paths"]:
                     ax.plot([point[0] for point in path["points"]],[point[1] for point in path["points"]],
-                            marker="o",label=f"{path['run_id']} · {path['method_id']} v{path['method_version']} · {path['witness_id']} · J={path['objective']} · {path['assurance']}")
+                            marker="o",label=f"{path['run_id']} · {path['method_id']} v {path['method_version']} · {path['witness_id']} · J={path['objective']} · {path['assurance']}")
                 ax.set(xlabel=f"{a['name']} ({a.get('unit') or 'unit unavailable'})",
                        ylabel=f"{b['name']} ({b.get('unit') or 'unit unavailable'})",
                        title=f"{item['title']} · {document['provenance']['scenario_id']}")
                 if style.get("equal_aspect_for_matching_units") and a.get("unit") and a.get("unit")==b.get("unit"):
                     ax.set_aspect("equal",adjustable="box")
                 ax.grid(alpha=.2);ax.legend(fontsize="small")
-                source_ids="; ".join(f"{path['run_id']} / {path['method_id']} v{path['method_version']}" for path in item["paths"])
+                source_ids="; ".join(f"{path['run_id']} / {path['method_id']} v {path['method_version']}" for path in item["paths"])
                 note=f"Source: {source_ids}\n{item['relation']} · {item['evidence']} · {item['limitation']}"
                 fig.text(.12,.025,textwrap.fill(note,width=88),fontsize=8,va="bottom")
                 fig.tight_layout(rect=(0,.12,1,.92))
@@ -132,7 +132,7 @@ def render(document, source_hash, style_path, out, additional_inputs=None):
                 objective=(f"J={item['objective']} ({item['objective_label']}; {item['objective_evidence']})"
                            if "objective" in item else item["objective_context"])
                 source=item["source"]
-                note=(f"Source: {source['kind']} {source['id']} · {source['method_id']} v{source['method_version']}\n"
+                note=(f"Source: {source['kind']} {source['id']} · {source['method_id']} v {source['method_version']}\n"
                       f"{objective}\n{item['relation']} · {item['evidence']} · {item['limitation']}")
                 if item["kind"]=="support_samples":
                     point_count=sum(sample.get("point") is not None for sample in item["samples"])
