@@ -377,7 +377,9 @@ The five clean-source captures report fixture-specific instrumentation deltas
 but make no general performance claim. They record process-wide peak RSS and
 CPU/wall time separately, with no memory or wall-time cap. The current driver
 also records per-attempt process peak RSS on Linux as an observation only;
-memory enforcement remains unavailable. Shared preflight timing separates
+five clean-source event `/9` captures and their saved HTML are retained in
+[`results/attempt-memory-20261025/`](results/attempt-memory-20261025/).
+Memory enforcement remains unavailable. Shared preflight timing separates
 file read, standalone parse, loader validation/resolution, provider registration,
 and comparison admission; parsing inside the public loader and capability work
 inside admission are still combined. Workspace/setup, family construction,
