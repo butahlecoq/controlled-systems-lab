@@ -244,7 +244,8 @@ not a performance comparison and do not establish a unique limiter. Their
 original metadata and raw files remain unchanged and explicitly approximate.
 
 The current profile driver requires both `CSL_PERF_CONTROL_FIFO` and
-`CSL_PERF_ACK_FIFO`. It waits for `ack\n` after each enable/disable command,
+`CSL_PERF_ACK_FIFO`. It waits for either `ack\n` or the observed `ack\n\0`
+frame after each enable/disable command,
 with a five-second bound, and fails a capture if perf exits, rejects the command,
 or does not acknowledge. Profile output marks this scope as
 `acknowledged_perf_control_transitions` and records the number of acknowledgements.
@@ -274,3 +275,23 @@ remains unimplemented. OBS-04 still needs phase-separated parsing/validation
 and capability timing; complete resource policy and measurement;
 instrumentation overhead analysis; report rendering; and a usable separate
 limiter profile before it can close.
+
+## Acknowledged perf capture after FIFO fix (2026-10-25)
+
+`results/linux-omarchy-gcc16-20261025-perf-ack-fix/` contains separate user-space
+`perf` captures for both strategies from source commit
+`da66f849c4b558c12e31a3987c5989722cb2ad72`. The fix accepts both the documented
+`ack\n` frame and Linux perf's observed `ack\n\0` frame; the mock exercises
+both forms and rejects a missing acknowledgement. Each capture ran 32 profiled
+strategy calls at 4,999 Hz with 64 acknowledged enable/disable transitions.
+Reach-back decoded 858 samples (98,332-byte capture); direct-joint decoded 209
+(32,708 bytes). `perf report` found zero lost samples for both. The binary hash
+is `8ebf6315802cf15ebdf0a72dcea60070a9dfebef811b7cf0e43341114221043d`.
+
+These captures establish that bounded acknowledged profiling works on this
+Linux host. They do not isolate a unique limiter: allocator and cleanup symbols
+are prominent, the driver process is profiled across setup and solver calls,
+and the report contains unresolved symbols. Treat the summaries as exploratory
+and do not infer a general performance bottleneck or compare the sample totals
+as strategy speed. Capability metadata, driver/perf logs, text reports, and raw
+`perf.data` are retained separately for each strategy.

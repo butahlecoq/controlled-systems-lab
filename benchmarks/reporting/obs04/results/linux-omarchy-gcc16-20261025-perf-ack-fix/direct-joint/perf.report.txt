@@ -1,0 +1,791 @@
+# To display the perf.data header info, please use --header/--header-only options.
+#
+#
+# Total Lost Samples: 0
+#
+# Samples: 209  of event 'cycles:u'
+# Event count (approx.): 81105826
+#
+# Overhead  Command          Shared Object                         Symbol                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                
+# ........  ...............  ....................................  ......................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................
+#
+     8.58%  csl_obs04_instr  libc.so.6                             [.] malloc
+            |
+            ---malloc
+               |          
+               |--1.12%--OptionRecordInt::OptionRecordInt(std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >, bool, int*, int, int, int) [clone .constprop.0] [clone .isra.0]
+               |          0x6e2078616d207265
+               |          
+               |--0.99%--_M_data (inlined)
+               |          _M_is_local (inlined)
+               |          _M_dispose (inlined)
+               |          _M_assign (inlined)
+               |          |          
+               |           --0.67%--OptionRecordInt::OptionRecordInt(std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >, bool, int*, int, int, int) [clone .constprop.0] [clone .isra.0]
+               |                     0x77ff00646565
+               |          
+               |--0.84%--void std::vector<OptionRecord*, std::allocator<OptionRecord*> >::_M_realloc_append<OptionRecord*>(OptionRecord*&&)
+               |          Highs::Highs()
+               |          
+               |--0.83%--HighsOptions::initRecords()
+               |          Highs::Highs()
+               |          
+               |--0.69%--HighsInfo::initRecords()
+               |          
+               |--0.65%--std::vector<double, std::allocator<double> >::reserve(unsigned long)
+               |          
+               |--0.64%--std::vector<HighsBasisStatus, std::allocator<HighsBasisStatus> >::_M_default_append(unsigned long)
+               |          
+               |--0.64%--OptionRecordBool::OptionRecordBool(std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >, bool, bool*, bool) [clone .constprop.0] [clone .isra.0]
+               |          0x6c706d6920646578
+               |          
+               |--0.64%--Basis::ftran(QpVector const&, QpVector&, bool, int)
+               |          
+                --0.56%--std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >::basic_string(char const*, std::allocator<char> const&) [clone .isra.0]
+                          0x74720073776f
+
+     7.34%  csl_obs04_instr  libc.so.6                             [.] cfree
+            |
+            ---cfree
+               |          
+               |--0.67%--Highs::Highs()
+               |          
+               |--0.64%--0x56
+               |          0x732e31762e6d656c
+               |          
+               |--0.64%--0x65
+               |          0x633a656c62697361
+               |          
+               |--0.64%--0x58dcfa5b2170
+               |          
+               |--0.63%--0x7ffdd4832b10
+               |          
+                --0.50%--0x68736168746967
+
+     3.32%  csl_obs04_instr  libstdc++.so.6.0.36                   [.] operator new(unsigned long)
+            |
+            ---operator new (inlined)
+               |          
+               |--0.85%--std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >::basic_string(char const*, std::allocator<char> const&) [clone .isra.0]
+               |          |          
+               |           --0.53%--0x736500706167
+               |          
+               |--0.64%--_M_replace (inlined)
+               |          csl::synthesis::strategy_b::build_joint_program(csl::problem::ResolvedProblem const&, csl::FamilyRequest const&)
+               |          csl::synthesis::strategy_b::detail::DirectJointExecutionRunner::solve_impl(csl::problem::ResolvedProblem const&, csl::FamilyRequest const&, csl::ExecutionContext const&)
+               |          csl::synthesis::strategy_b::detail::DirectJointExecutionRunner::solve(csl::problem::ResolvedProblem const&, csl::FamilyRequest const&, csl::ExecutionContext const&)
+               |          0x58dcfa5f2800
+               |          0x1
+               |          
+               |--0.60%--HFactor::setupGeneral(int, int, int, int const*, int const*, double const*, int*, double, double, int, HighsLogOptions const*, bool, int)
+               |          
+                --0.60%--_M_data (inlined)
+                          _M_is_local (inlined)
+                          _M_dispose (inlined)
+                          _M_assign (inlined)
+                          OptionRecordInt::OptionRecordInt(std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >, bool, int*, int, int, int) [clone .constprop.0] [clone .isra.0]
+                          operator new (inlined)
+
+     2.86%  csl_obs04_instr  libstdc++.so.6.0.36                   [.] std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >::_M_assign(std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const&)
+            |          
+            |--1.29%--_M_is_local (inlined)
+            |          _M_dispose (inlined)
+            |          _M_assign (inlined)
+            |          InfoRecordDouble::InfoRecordDouble(std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >, bool, double*, double) [clone .constprop.0] [clone .isra.0]
+            |          |          
+            |          |--0.66%--0x7ffdd4833400
+            |          |          
+            |           --0.63%--0x7ffdd4832b10
+            |          
+            |--0.95%--_M_assign (inlined)
+            |          |          
+            |           --0.68%--InfoRecordDouble::InfoRecordDouble(std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >, bool, double*, double) [clone .constprop.0] [clone .isra.0]
+            |                     0x7ffdd4833420
+            |          
+             --0.61%--_M_length (inlined)
+                       _M_set_length (inlined)
+                       _M_assign (inlined)
+                       OptionRecordDouble::OptionRecordDouble(std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >, bool, double*, double, double, double) [clone .constprop.0] [clone .isra.0]
+                       0x7ffdd4007469
+
+     2.02%  csl_obs04_instr  csl_obs04_instrumentation_comparison  [.] Highs::~Highs()
+            |
+            ---Highs::~Highs()
+               |          
+                --0.66%--0x5
+                          0x58dcfa5abd80
+
+     1.97%  csl_obs04_instr  csl_obs04_instrumentation_comparison  [.] std::vector<int, std::allocator<int> >::_M_default_append(unsigned long)
+            |
+            ---std::vector<int, std::allocator<int> >::_M_default_append(unsigned long)
+               |          
+                --1.33%--0
+
+     1.60%  csl_obs04_instr  csl_obs04_instrumentation_comparison  [.] HEkk::HEkk()
+            |
+            ---HEkk::HEkk()
+
+     1.46%  csl_obs04_instr  libc.so.6                             [.] 0x00000000000a4f23
+            |
+            ---0x77ff838a4f23
+               |          
+               |--0.90%--0x77ff838a77c3
+               |          0x77ff838a7a8f
+               |          operator new (inlined)
+               |          |          
+               |           --0.63%--std::vector<int, std::allocator<int> >::reserve(unsigned long)
+               |          
+                --0.56%--0x77ff838a6228
+                          HighsInfo::~HighsInfo()
+                          0x1d482e000
+                          HighsInfo::~HighsInfo()
+                          0x110978b48006dd2
+
+     1.36%  csl_obs04_instr  libstdc++.so.6.0.36                   [.] std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >::_M_replace(unsigned long, unsigned long, char const*, unsigned long)
+            |          
+            |--0.71%--copy (inlined)
+            |          _S_copy (inlined)
+            |          _S_copy (inlined)
+            |          _M_replace (inlined)
+            |          HighsBasis::clear()
+            |          0x6e00726576
+            |          
+             --0.66%--_M_replace (inlined)
+                       auto csl::synthesis::strategy_b::detail::DirectJointExecutionRunner::solve_impl(csl::problem::ResolvedProblem const&, csl::FamilyRequest const&, csl::ExecutionContext const&)::{lambda<typename $T0, typename $T1>($T0 const&, csl::registry::PreparedProvider<$T1> const&)#1}::operator()<csl::ConvexProgram, csl::registry::ConvexPort>(csl::ConvexProgram const&, csl::registry::PreparedProvider<csl::registry::ConvexPort> const&) const
+                       0x56
+                       0x732e31762e6d656c
+
+     1.26%  csl_obs04_instr  libc.so.6                             [.] 0x0000000000176370
+            |
+            ---0x77ff83976370
+               |          
+                --0.63%--0
+
+     1.25%  csl_obs04_instr  csl_obs04_instrumentation_comparison  [.] HFactor::buildSimple()
+            |
+            ---HFactor::buildSimple()
+
+     1.19%  csl_obs04_instr  csl_obs04_instrumentation_comparison  [.] std::vector<int, std::allocator<int> >::_M_fill_assign(unsigned long, int const&)
+            |
+            ---std::vector<int, std::allocator<int> >::_M_fill_assign(unsigned long, int const&)
+
+     1.17%  csl_obs04_instr  csl_obs04_instrumentation_comparison  [.] void std::vector<InfoRecord*, std::allocator<InfoRecord*> >::_M_realloc_append<InfoRecord*>(InfoRecord*&&)
+            |
+            ---void std::vector<InfoRecord*, std::allocator<InfoRecord*> >::_M_realloc_append<InfoRecord*>(InfoRecord*&&)
+               |          
+               |--0.59%--0x68736168746967
+               |          
+                --0.58%--0
+                          0x1
+                          InfoRecordInt::~InfoRecordInt()
+                          0x74c7394840438d48
+
+     1.15%  csl_obs04_instr  csl_obs04_instrumentation_comparison  [.] std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >::_M_create(unsigned long&, unsigned long)@plt
+            |
+            ---std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >::_M_create(unsigned long&, unsigned long)@plt
+               0x7ffdd482be00
+               |          
+                --0.52%--0x7ffdd482be10
+                          0x7ffdd482d9b0
+
+     1.01%  csl_obs04_instr  csl_obs04_instrumentation_comparison  [.] std::_Sp_counted_base<(__gnu_cxx::_Lock_policy)2>::_M_release()
+            |
+            ---std::_Sp_counted_base<(__gnu_cxx::_Lock_policy)2>::_M_release()
+               |          
+                --0.71%--0
+
+     0.95%  csl_obs04_instr  libstdc++.so.6.0.36                   [.] std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >::_M_create(unsigned long&, unsigned long)
+            |
+            ---_M_create (inlined)
+               |          
+                --0.65%--HEkk::getHighsBasis(HighsLp&) const
+                          0
+
+     0.91%  csl_obs04_instr  csl_obs04_instrumentation_comparison  [.] std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >::basic_string(char const*, std::allocator<char> const&) [clone .isra.0]
+            |
+            ---std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >::basic_string(char const*, std::allocator<char> const&) [clone .isra.0]
+               |          
+                --0.61%--0x68736168746967
+
+     0.88%  csl_obs04_instr  csl_obs04_instrumentation_comparison  [.] HighsOptions::initRecords()
+            |
+            ---HighsOptions::initRecords()
+               Highs::Highs()
+
+     0.76%  csl_obs04_instr  csl_obs04_instrumentation_comparison  [.] void std::vector<double, std::allocator<double> >::_M_range_insert<__gnu_cxx::__normal_iterator<double const*, std::vector<double, std::allocator<double> > > >(__gnu_cxx::__normal_iterator<double*, std::vector<double, std::allocator<double> > >, __gnu_cxx::__normal_iterator<double const*, std::vector<double, std::allocator<double> > >, __gnu_cxx::__normal_iterator<double const*, std::vector<double, std::allocator<double> > >, std::forward_iterator_tag) [clone .isra.0]
+            |
+            ---void std::vector<double, std::allocator<double> >::_M_range_insert<__gnu_cxx::__normal_iterator<double const*, std::vector<double, std::allocator<double> > > >(__gnu_cxx::__normal_iterator<double*, std::vector<double, std::allocator<double> > >, __gnu_cxx::__normal_iterator<double const*, std::vector<double, std::allocator<double> > >, __gnu_cxx::__normal_iterator<double const*, std::vector<double, std::allocator<double> > >, std::forward_iterator_tag) [clone .isra.0]
+
+     0.75%  csl_obs04_instr  libc.so.6                             [.] 0x000000000005cc5d
+            |
+            ---0x77ff8385cc5d
+               0x77ff8385eb53
+               0x77ff838667c5
+               vsnprintf
+               highsLogUser(HighsLogOptions const&, HighsLogType, char const*, ...)
+
+     0.73%  csl_obs04_instr  csl_obs04_instrumentation_comparison  [.] void Eigen::internal::tridiagonalization_inplace<Eigen::Matrix<double, -1, -1, 0, -1, -1>, Eigen::Matrix<double, -1, 1, 0, -1, 1> >(Eigen::Matrix<double, -1, -1, 0, -1, -1>&, Eigen::Matrix<double, -1, 1, 0, -1, 1>&)
+            |
+            ---void Eigen::internal::tridiagonalization_inplace<Eigen::Matrix<double, -1, -1, 0, -1, -1>, Eigen::Matrix<double, -1, 1, 0, -1, 1> >(Eigen::Matrix<double, -1, -1, 0, -1, -1>&, Eigen::Matrix<double, -1, 1, 0, -1, 1>&)
+               0
+
+     0.70%  csl_obs04_instr  libc.so.6                             [.] 0x00000000000a4ffe
+            |
+            ---0x77ff838a4ffe
+               0x77ff838a623e
+               HFactor::~HFactor()
+               0x56
+               0x732e31762e6d656c
+
+     0.69%  csl_obs04_instr  libc.so.6                             [.] 0x00000000000a61c1
+            |
+            ---0x77ff838a61c1
+               Basis::ftran(QpVector const&, QpVector&, bool, int)
+
+     0.69%  csl_obs04_instr  csl_obs04_instrumentation_comparison  [.] memcmp@plt
+            |
+            ---memcmp@plt
+               0x58dcfa5e4cf8
+
+     0.69%  csl_obs04_instr  libc.so.6                             [.] 0x00000000000a5063
+            |
+            ---0x77ff838a5063
+               0x77ff838a623e
+               InfoRecordDouble::~InfoRecordDouble()
+               0x1d482e000
+               HighsInfo::~HighsInfo()
+               0x110978b48006dd2
+
+     0.69%  csl_obs04_instr  csl_obs04_instrumentation_comparison  [.] HFactor::ftranU(HVectorBase<double>&, double, HighsTimerClock*) const
+            |
+            ---HFactor::ftranU(HVectorBase<double>&, double, HighsTimerClock*) const
+               0x408f400000000000
+
+     0.68%  csl_obs04_instr  libc.so.6                             [.] 0x000000000006689c
+            |
+            ---0x77ff8386689c
+               vsnprintf
+               highsLogUser(HighsLogOptions const&, HighsLogType, char const*, ...)
+
+     0.68%  csl_obs04_instr  libstdc++.so.6.0.36                   [.] std::basic_ostream<char, std::char_traits<char> >& std::__ostream_insert<char, std::char_traits<char> >(std::basic_ostream<char, std::char_traits<char> >&, char const*, long)
+            |
+            ---__ostream_insert<char, std::char_traits<char> > (inlined)
+               csl::adapters::convex::(anonymous namespace)::Workspace::solve_native(csl::ConvexProgram const&, csl::ExecutionContext const&)
+               csl::adapters::convex::(anonymous namespace)::Workspace::do_solve(csl::ConvexProgram const&, csl::ExecutionContext const&)
+               0x58dcfa5c6080
+               csl::adapters::convex::(anonymous namespace)::Workspace::~Workspace()
+               0x4810ec8348fb8948
+
+     0.68%  csl_obs04_instr  libc.so.6                             [.] 0x00000000001791ad
+            |
+            ---0x77ff839791ad
+               0x656c6163735f74
+
+     0.68%  csl_obs04_instr  csl_obs04_instrumentation_comparison  [.] Highs::setCallback(std::function<void (int, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const&, HighsCallbackOutput const*, HighsCallbackInput*, void*)>, void*)
+            |
+            ---Highs::setCallback(std::function<void (int, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const&, HighsCallbackOutput const*, HighsCallbackInput*, void*)>, void*)
+               0
+
+     0.67%  csl_obs04_instr  libc.so.6                             [.] 0x000000000005c4b7
+            |
+            ---0x77ff8385c4b7
+               0x77ff8385ce87
+               0x77ff8385eb53
+               0x77ff838667c5
+               vsnprintf
+               highsLogUser(HighsLogOptions const&, HighsLogType, char const*, ...)
+
+     0.67%  csl_obs04_instr  libc.so.6                             [.] 0x00000000000a72b4
+            |
+            ---0x77ff838a72b4
+               0x77ff838a7a8f
+               operator new (inlined)
+               std::vector<int, std::allocator<int> >::_M_default_append(unsigned long)
+               0
+
+     0.67%  csl_obs04_instr  csl_obs04_instrumentation_comparison  [.] Highs::returnFromHighs(HighsStatus)
+            |
+            ---Highs::returnFromHighs(HighsStatus)
+
+     0.67%  csl_obs04_instr  csl_obs04_instrumentation_comparison  [.] InfoRecordInt::InfoRecordInt(std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >, bool, int*, int) [clone .constprop.0] [clone .isra.0]
+            |
+            ---InfoRecordInt::InfoRecordInt(std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >, bool, int*, int) [clone .constprop.0] [clone .isra.0]
+               0x7ffdd48333f0
+
+     0.67%  csl_obs04_instr  csl_obs04_instrumentation_comparison  [.] HighsInfo::initRecords()
+            |
+            ---HighsInfo::initRecords()
+               0x68736168746967
+
+     0.67%  csl_obs04_instr  csl_obs04_instrumentation_comparison  [.] csl::adapters::convex::(anonymous namespace)::Workspace::solve_native(csl::ConvexProgram const&, csl::ExecutionContext const&)
+            |
+            ---csl::adapters::convex::(anonymous namespace)::Workspace::solve_native(csl::ConvexProgram const&, csl::ExecutionContext const&)
+               csl::adapters::convex::(anonymous namespace)::Workspace::do_solve(csl::ConvexProgram const&, csl::ExecutionContext const&)
+               0x58dcfa593ee0
+               csl::adapters::convex::(anonymous namespace)::Workspace::~Workspace()
+               0x4810ec8348fb8948
+
+     0.67%  csl_obs04_instr  libc.so.6                             [.] 0x00000000000a505f
+            |
+            ---0x77ff838a505f
+               0x77ff838a623e
+               HEkk::computeDual()
+
+     0.67%  csl_obs04_instr  libc.so.6                             [.] 0x00000000000a75d4
+            |
+            ---0x77ff838a75d4
+               0x77ff838a7a8f
+               operator new (inlined)
+               HighsInfo::initRecords()
+               0x58dcfa5ed420
+
+     0.67%  csl_obs04_instr  csl_obs04_instrumentation_comparison  [.] quass2highs(Instance&, Settings&, Statistics&, QpModelStatus&, QpSolution&, HighsModelStatus&, HighsBasis&, HighsSolution&) [clone .isra.0]
+            |
+            ---quass2highs(Instance&, Settings&, Statistics&, QpModelStatus&, QpSolution&, HighsModelStatus&, HighsBasis&, HighsSolution&) [clone .isra.0]
+               0x31
+
+     0.66%  csl_obs04_instr  libstdc++.so.6.0.36                   [.] operator delete(void*)
+            |
+            ---operator delete (inlined)
+               Highs::Highs()
+
+     0.66%  csl_obs04_instr  libc.so.6                             [.] 0x00000000000a75c4
+            |
+            ---0x77ff838a75c4
+               0x77ff838a7a8f
+               operator new (inlined)
+               Basis::ftran(QpVector const&, QpVector&, bool, int)
+
+     0.66%  csl_obs04_instr  csl_obs04_instrumentation_comparison  [.] getOptionIndex(HighsLogOptions const&, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const&, std::vector<OptionRecord*, std::allocator<OptionRecord*> > const&, int&)
+            |
+            ---getOptionIndex(HighsLogOptions const&, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const&, std::vector<OptionRecord*, std::allocator<OptionRecord*> > const&, int&)
+               0xb
+               0x656c0067616c
+
+     0.66%  csl_obs04_instr  libstdc++.so.6.0.36                   [.] std::ostreambuf_iterator<char, std::char_traits<char> > std::num_put<char, std::ostreambuf_iterator<char, std::char_traits<char> > >::_M_insert_float<double>(std::ostreambuf_iterator<char, std::char_traits<char> >, std::ios_base&, char, char, double) const
+            |
+            ---_M_insert_float<double> (inlined)
+               _M_insert<double> (inlined)
+               csl::adapters::convex::(anonymous namespace)::Workspace::solve_native(csl::ConvexProgram const&, csl::ExecutionContext const&)::{lambda()#1}::operator()() const
+               0x7ffdd4834510
+               0
+               0x58dcfa59eee0
+               0x1
+
+     0.66%  csl_obs04_instr  libc.so.6                             [.] 0x000000000005c4c3
+            |
+            ---0x77ff8385c4c3
+               0x77ff8385d698
+               0x77ff8385eb53
+               0x77ff838667c5
+               vsnprintf
+               0x77ff83d0ef37
+               _M_insert_float<double> (inlined)
+               _M_insert<double> (inlined)
+               csl::adapters::convex::(anonymous namespace)::append_attempt_residuals(std::__cxx11::basic_ostringstream<char, std::char_traits<char>, std::allocator<char> >&, char const*, csl::ProgramResult const&)::{lambda(char const*, csl::ResidualMeasure const&)#1}::operator()(char const*, csl::ResidualMeasure const&) const
+               0x746e656d656c706d
+
+     0.66%  csl_obs04_instr  csl_obs04_instrumentation_comparison  [.] assessExcessiveBoundCost(HighsLogOptions, HighsModel const&)
+            |
+            ---assessExcessiveBoundCost(HighsLogOptions, HighsModel const&)
+
+     0.66%  csl_obs04_instr  libc.so.6                             [.] 0x00000000001764b5
+            |
+            ---0x77ff839764b5
+
+     0.66%  csl_obs04_instr  csl_obs04_instrumentation_comparison  [.] void std::vector<int, std::allocator<int> >::_M_realloc_append<int>(int&&)
+            |
+            ---void std::vector<int, std::allocator<int> >::_M_realloc_append<int>(int&&)
+
+     0.65%  csl_obs04_instr  csl_obs04_instrumentation_comparison  [.] csl::synthesis::strategy_ts01::ExactJointRelation::canonical()
+            |
+            ---csl::synthesis::strategy_ts01::ExactJointRelation::canonical()
+               0x58dcfa59abc0
+               csl::synthesis::strategy_ts01::ExactJointRelation::~ExactJointRelation()
+               0x8548107f8b480789
+
+     0.65%  csl_obs04_instr  libc.so.6                             [.] 0x00000000001764ac
+            |
+            ---0x77ff839764ac
+
+     0.65%  csl_obs04_instr  csl_obs04_instrumentation_comparison  [.] HEkk::moveLp(HighsLpSolverObject&)
+            |
+            ---HEkk::moveLp(HighsLpSolverObject&)
+               0
+
+     0.65%  csl_obs04_instr  csl_obs04_instrumentation_comparison  [.] HighsLp::HighsLp(HighsLp const&)
+            |
+            ---HighsLp::HighsLp(HighsLp const&)
+
+     0.65%  csl_obs04_instr  libc.so.6                             [.] 0x000000000005c2d7
+            |
+            ---0x77ff8385c2d7
+               vsnprintf
+               0x77ff83d0ef37
+               _M_insert_float<double> (inlined)
+               _M_insert<double> (inlined)
+               csl::adapters::convex::(anonymous namespace)::Workspace::solve_native(csl::ConvexProgram const&, csl::ExecutionContext const&)
+               csl::adapters::convex::(anonymous namespace)::Workspace::do_solve(csl::ConvexProgram const&, csl::ExecutionContext const&)
+               0x58dcfa5f5250
+               csl::adapters::convex::(anonymous namespace)::Workspace::~Workspace()
+               0x4810ec8348fb8948
+
+     0.65%  csl_obs04_instr  libc.so.6                             [.] 0x00000000000a63b1
+            |
+            ---0x77ff838a63b1
+
+     0.65%  csl_obs04_instr  libc.so.6                             [.] 0x0000000000175f83
+            |
+            ---0x77ff83975f83
+
+     0.65%  csl_obs04_instr  libc.so.6                             [.] 0x000000000005ce63
+            |
+            ---0x77ff8385ce63
+               0x77ff8385eb53
+               0x77ff838667c5
+               vsnprintf
+               highsLogUser(HighsLogOptions const&, HighsLogType, char const*, ...)
+
+     0.65%  csl_obs04_instr  libc.so.6                             [.] 0x00000000000a7739
+            |
+            ---0x77ff838a7739
+               0x77ff838a7a8f
+               operator new (inlined)
+               HighsInfo::initRecords()
+               getPrimalDualGlpsolErrors(HighsOptions const&, HighsLp const&, std::vector<double, std::allocator<double> > const&, HighsSolution const&, HighsPrimalDualErrors&)
+
+     0.65%  csl_obs04_instr  libc.so.6                             [.] 0x00000000000a506c
+            |
+            ---0x77ff838a506c
+               0x77ff838a623e
+               InfoRecordDouble::~InfoRecordDouble()
+
+     0.64%  csl_obs04_instr  csl_obs04_instrumentation_comparison  [.] Basis::build()
+            |
+            ---Basis::build()
+               0
+
+     0.64%  csl_obs04_instr  libc.so.6                             [.] 0x00000000000a5054
+            |
+            ---0x77ff838a5054
+               0x77ff838a623e
+               debugHighsSolution(std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >, HighsOptions const&, HighsModel const&, HighsSolution const&, HighsBasis const&, HighsModelStatus, HighsInfo const&)
+               Highs::returnFromOptimizeModel(HighsStatus, bool)
+               Highs::optimizeModel()
+               Highs::run()
+
+     0.64%  csl_obs04_instr  libc.so.6                             [.] 0x00000000000a7794
+            |
+            ---0x77ff838a7794
+               0x77ff838a7a8f
+               operator new (inlined)
+               HighsOptions::initRecords()
+               Highs::Highs()
+
+     0.64%  csl_obs04_instr  libc.so.6                             [.] 0x00000000000a5005
+            |
+            ---0x77ff838a5005
+               0x77ff838a623e
+               HEkk::~HEkk()
+
+     0.64%  csl_obs04_instr  csl_obs04_instrumentation_comparison  [.] void std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >::_M_construct<true>(char const*, unsigned long)
+            |
+            ---void std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >::_M_construct<true>(char const*, unsigned long)
+               0x58dcfa5b6880
+
+     0.63%  csl_obs04_instr  libc.so.6                             [.] 0x000000000017646c
+            |
+            ---0x77ff8397646c
+               InfoRecordInt::InfoRecordInt(std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >, bool, int*, int) [clone .constprop.0] [clone .isra.0]
+               0x7ffdd482bc40
+
+     0.63%  csl_obs04_instr  csl_obs04_instrumentation_comparison  [.] std::vector<std::vector<double, std::allocator<double> >, std::allocator<std::vector<double, std::allocator<double> > > >::operator=(std::vector<std::vector<double, std::allocator<double> >, std::allocator<std::vector<double, std::allocator<double> > > > const&) [clone .isra.0]
+            |
+            ---std::vector<std::vector<double, std::allocator<double> >, std::allocator<std::vector<double, std::allocator<double> > > >::operator=(std::vector<std::vector<double, std::allocator<double> >, std::allocator<std::vector<double, std::allocator<double> > > > const&) [clone .isra.0]
+               0x58dcfa5f7070
+
+     0.63%  csl_obs04_instr  csl_obs04_instrumentation_comparison  [.] csl::(anonymous namespace)::valid_lineage(std::vector<csl::TransformStepIdentity, std::allocator<csl::TransformStepIdentity> > const&)
+            |
+            ---csl::(anonymous namespace)::valid_lineage(std::vector<csl::TransformStepIdentity, std::allocator<csl::TransformStepIdentity> > const&)
+               0x58dcfa5f4ae0
+
+     0.63%  csl_obs04_instr  csl_obs04_instrumentation_comparison  [.] decltype(auto) std::__do_visit<void, std::__detail::__variant::_Variant_storage<false, csl::CompleteOptimalFamily, csl::PartialOptimalFamily, csl::CandidateFamily>::_M_reset()::{lambda(auto:1&&)#1}, std::variant<csl::CompleteOptimalFamily, csl::PartialOptimalFamily, csl::CandidateFamily>&>(std::__detail::__variant::_Variant_storage<false, csl::CompleteOptimalFamily, csl::PartialOptimalFamily, csl::CandidateFamily>::_M_reset()::{lambda(auto:1&&)#1}&&, std::variant<csl::CompleteOptimalFamily, csl::PartialOptimalFamily, csl::CandidateFamily>&) [clone .isra.0]
+            |
+            ---decltype(auto) std::__do_visit<void, std::__detail::__variant::_Variant_storage<false, csl::CompleteOptimalFamily, csl::PartialOptimalFamily, csl::CandidateFamily>::_M_reset()::{lambda(auto:1&&)#1}, std::variant<csl::CompleteOptimalFamily, csl::PartialOptimalFamily, csl::CandidateFamily>&>(std::__detail::__variant::_Variant_storage<false, csl::CompleteOptimalFamily, csl::PartialOptimalFamily, csl::CandidateFamily>::_M_reset()::{lambda(auto:1&&)#1}&&, std::variant<csl::CompleteOptimalFamily, csl::PartialOptimalFamily, csl::CandidateFamily>&) [clone .isra.0]
+               0x18
+               0x74732e7369736568
+
+     0.63%  csl_obs04_instr  csl_obs04_instrumentation_comparison  [.] std::vector<double, std::allocator<double> >::_M_default_append(unsigned long)
+            |
+            ---std::vector<double, std::allocator<double> >::_M_default_append(unsigned long)
+               0x58dcfa5cc3c8
+               0
+
+     0.63%  csl_obs04_instr  libc.so.6                             [.] 0x00000000000a4f37
+            |
+            ---0x77ff838a4f37
+               0x77ff838a5068
+               0x77ff838a623e
+               InfoRecordDouble::~InfoRecordDouble()
+
+     0.63%  csl_obs04_instr  [unknown]                             [k] 0xffffffff92001d35
+            |
+            ---0xffffffff92001d35
+               __vdso_clock_gettime
+               Highs::returnFromOptimizeModel(HighsStatus, bool)
+               Highs::optimizeModel()
+               Highs::run()
+
+     0.63%  csl_obs04_instr  csl_obs04_instrumentation_comparison  [.] Highs::passModel(HighsModel)
+            |
+            ---Highs::passModel(HighsModel)
+               0x7ffdd482c0a0
+               0
+
+     0.62%  csl_obs04_instr  libc.so.6                             [.] 0x00000000000a5094
+            |
+            ---0x77ff838a5094
+               0x77ff838a623e
+               InfoRecordInt::~InfoRecordInt()
+               0x1d482e000
+               HighsInfo::~HighsInfo()
+               0x110978b48006dd2
+
+     0.62%  csl_obs04_instr  libc.so.6                             [.] 0x00000000000a4f5b
+            |
+            ---0x77ff838a4f5b
+               0x77ff838a6228
+               csl::registry::detail::VerifiedStrategyWorkspace::solve(csl::problem::ResolvedProblem const&, csl::FamilyRequest const&, csl::ExecutionContext const&)
+               0x1
+
+     0.62%  csl_obs04_instr  libc.so.6                             [.] 0x0000000000175cc2
+            |
+            ---0x77ff83975cc2
+               0x64
+               0x73633a7463617274
+
+     0.62%  csl_obs04_instr  libc.so.6                             [.] 0x0000000000176534
+            |
+            ---0x77ff83976534
+               0xab
+               0x32782820646e6120
+
+     0.62%  csl_obs04_instr  libc.so.6                             [.] 0x00000000000a75cc
+            |
+            ---0x77ff838a75cc
+               0x77ff838a7a8f
+               operator new (inlined)
+               void std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >::_M_construct<true>(char const*, unsigned long)
+               0x3e45798ee2308c3a
+               0
+
+     0.62%  csl_obs04_instr  libc.so.6                             [.] 0x00000000000a6301
+            |
+            ---0x77ff838a6301
+
+     0.62%  csl_obs04_instr  libc.so.6                             [.] 0x00000000001764d4
+            |
+            ---0x77ff839764d4
+               OptionRecordInt::OptionRecordInt(std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >, bool, int*, int, int, int)
+               0x73776f
+
+     0.61%  csl_obs04_instr  libc.so.6                             [.] 0x0000000000178807
+            |
+            ---0x77ff83978807
+               vsnprintf
+               highsLogUser(HighsLogOptions const&, HighsLogType, char const*, ...)
+
+     0.61%  csl_obs04_instr  libc.so.6                             [.] 0x00000000000a6ee8
+            |
+            ---0x77ff838a6ee8
+               0x77ff838a7a8f
+               operator new (inlined)
+               std::vector<int, std::allocator<int> >::_M_default_append(unsigned long)
+               0
+
+     0.61%  csl_obs04_instr  libc.so.6                             [.] 0x00000000000a6ea5
+            |
+            ---0x77ff838a6ea5
+               0x77ff838a7a8f
+               operator new (inlined)
+               OptionRecordInt::OptionRecordInt(std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >, bool, int*, int, int, int) [clone .constprop.0] [clone .isra.0]
+               0x20676e696c616373
+
+     0.61%  csl_obs04_instr  csl_obs04_instrumentation_comparison  [.] csl::registry::detail::(anonymous namespace)::Ts01Verifier::verify(csl::registry::StrategyRequest const&, csl::CompleteFamilyProposal const&) const
+            |
+            ---csl::registry::detail::(anonymous namespace)::Ts01Verifier::verify(csl::registry::StrategyRequest const&, csl::CompleteFamilyProposal const&) const
+               0x56
+               0x732e31762e6d656c
+
+     0.61%  csl_obs04_instr  csl_obs04_instrumentation_comparison  [.] HSimplexNla::debugCheckData(std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >) const
+            |
+            ---HSimplexNla::debugCheckData(std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >) const
+               HEkk::solve(bool)
+               solveLpSimplex(HighsLpSolverObject&)
+               0x7ffdd482d0c0
+               0
+
+     0.61%  csl_obs04_instr  csl_obs04_instrumentation_comparison  [.] refineBasis(HighsLp const&, HighsSolution const&, HighsBasis&)
+            |
+            ---refineBasis(HighsLp const&, HighsSolution const&, HighsBasis&)
+               0x58dcfa5a4f00
+
+     0.61%  csl_obs04_instr  csl_obs04_instrumentation_comparison  [.] HEkk::computeFactor()
+            |
+            ---HEkk::computeFactor()
+
+     0.61%  csl_obs04_instr  csl_obs04_instrumentation_comparison  [.] std::vector<int, std::allocator<int> >::operator=(std::vector<int, std::allocator<int> > const&) [clone .isra.0]
+            |
+            ---std::vector<int, std::allocator<int> >::operator=(std::vector<int, std::allocator<int> > const&) [clone .isra.0]
+
+     0.60%  csl_obs04_instr  csl_obs04_instrumentation_comparison  [.] Quass::solve(QpVector const&, QpVector const&, Basis&, HighsTimer&)
+            |
+            ---Quass::solve(QpVector const&, QpVector const&, Basis&, HighsTimer&)
+               0x7ffdd4830f40
+
+     0.60%  csl_obs04_instr  libc.so.6                             [.] 0x00000000000a4f52
+            |
+            ---0x77ff838a4f52
+               0x77ff838a6228
+               Highs::~Highs()
+
+     0.60%  csl_obs04_instr  libc.so.6                             [.] 0x00000000000a61c5
+            |
+            ---0x77ff838a61c5
+               Highs::~Highs()
+
+     0.60%  csl_obs04_instr  csl_obs04_instrumentation_comparison  [.] presolve::HPresolve::colPresolve(presolve::HighsPostsolveStack&, int)
+            |
+            ---presolve::HPresolve::colPresolve(presolve::HighsPostsolveStack&, int)
+               0x7ffdd482dbb8
+               0x58dcfa5b05a0
+
+     0.60%  csl_obs04_instr  csl_obs04_instrumentation_comparison  [.] checkOptionValue(HighsLogOptions const&, OptionRecordString&, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >)
+            |
+            ---checkOptionValue(HighsLogOptions const&, OptionRecordString&, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >)
+               0x7ffdd48357c8
+
+     0.60%  csl_obs04_instr  libc.so.6                             [.] 0x00000000001765c0
+            |
+            ---0x77ff839765c0
+
+     0.60%  csl_obs04_instr  csl_obs04_instrumentation_comparison  [.] extractTriangularHessian(HighsOptions const&, HighsHessian&)
+            |
+            ---extractTriangularHessian(HighsOptions const&, HighsHessian&)
+               0x31
+
+     0.59%  csl_obs04_instr  libstdc++.so.6.0.36                   [.] std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >::_M_append(char const*, unsigned long)
+            |
+            ---copy (inlined)
+               _S_copy (inlined)
+               _S_copy (inlined)
+               _M_append (inlined)
+               highsLogHeader(HighsLogOptions const&, bool)
+               Highs::logHeader()
+               csl::adapters::convex::(anonymous namespace)::Workspace::do_solve(csl::ConvexProgram const&, csl::ExecutionContext const&)
+               0x58dcfa5f5250
+               csl::adapters::convex::(anonymous namespace)::Workspace::~Workspace()
+               0x4810ec8348fb8948
+
+     0.59%  csl_obs04_instr  libc.so.6                             [.] 0x0000000000064e74
+            |
+            ---0x77ff83864e74
+               highsFormatToString[abi:cxx11](char const*, ...)
+               0x58dcfa5b5ec0
+
+     0.59%  csl_obs04_instr  csl_obs04_instrumentation_comparison  [.] presolve::HPresolve::run(presolve::HighsPostsolveStack&)
+            |
+            ---presolve::HPresolve::run(presolve::HighsPostsolveStack&)
+               PresolveComponent::run()
+               0x58dc00000000
+               PresolveComponent::~PresolveComponent()
+               0x87c748004047c6
+
+     0.58%  csl_obs04_instr  [unknown]                             [k] 0xffffffff93614b19
+            |
+            ---0xffffffff93614b19
+               0xffffffff9200012f
+               __vdso_clock_gettime
+               clock_gettime
+               __cast<long int, std::ratio<1> > (inlined)
+               duration_cast<std::chrono::duration<long int, std::ratio<1, 1000000000> >, long int, std::ratio<1> > (inlined)
+               duration<long int, std::ratio<1> > (inlined)
+               operator+<long int, std::ratio<1>, long int, std::ratio<1, 1000000000> > (inlined)
+               now (inlined)
+               HighsTimer::read(int) const
+               0x3ff0000000000000
+               HighsTimer::~HighsTimer()
+               0x8b485355fc894954
+
+     0.58%  csl_obs04_instr  csl_obs04_instrumentation_comparison  [.] presolve::HPresolve::doubletonEq(presolve::HighsPostsolveStack&, int, presolve::HighsPostsolveStack::RowType)
+            |
+            ---presolve::HPresolve::doubletonEq(presolve::HighsPostsolveStack&, int, presolve::HighsPostsolveStack::RowType)
+               0
+
+     0.58%  csl_obs04_instr  libc.so.6                             [.] 0x00000000000a6eb3
+            |
+            ---0x77ff838a6eb3
+               0x77ff838a7a8f
+               operator new (inlined)
+               OptionRecordString::OptionRecordString(std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >, bool, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >*, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >)
+               operator new (inlined)
+               0x7ffdd482c4b0
+               Highs::Highs()
+
+     0.57%  csl_obs04_instr  csl_obs04_instrumentation_comparison  [.] OptionRecordDouble::OptionRecordDouble(std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >, bool, double*, double, double, double) [clone .constprop.0] [clone .isra.0]
+            |
+            ---OptionRecordDouble::OptionRecordDouble(std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >, bool, double*, double, double, double) [clone .constprop.0] [clone .isra.0]
+               0x7ffdd482c4a0
+
+     0.57%  csl_obs04_instr  libc.so.6                             [.] 0x00000000000a6208
+            |
+            ---0x77ff838a6208
+               HighsOptions::~HighsOptions()
+
+     0.43%  csl_obs04_instr  libstdc++.so.6.0.36                   [.] std::ostream::sentry::sentry(std::ostream&)
+     0.40%  csl_obs04_instr  csl_obs04_instrumentation_comparison  [.] csl::adapters::convex::(anonymous namespace)::require(HighsStatus)
+     0.39%  csl_obs04_instr  csl_obs04_instrumentation_comparison  [.] csl::FamilyIdentity::FamilyIdentity(csl::FamilyIdentity&&)
+     0.32%  csl_obs04_instr  libc.so.6                             [.] 0x00000000001791a7
+     0.32%  csl_obs04_instr  csl_obs04_instrumentation_comparison  [.] std::__cxx11::to_string(unsigned long)
+     0.32%  csl_obs04_instr  libc.so.6                             [.] 0x0000000000176438
+     0.31%  csl_obs04_instr  csl_obs04_instrumentation_comparison  [.] std::optional<csl::registry::detail::StrategyBRuntimeLineageReceipt>& std::optional<csl::registry::detail::StrategyBRuntimeLineageReceipt>::operator=<csl::registry::detail::StrategyBRuntimeLineageReceipt>(csl::registry::detail::StrategyBRuntimeLineageReceipt&&) [clone .isra.0]
+     0.31%  csl_obs04_instr  libc.so.6                             [.] 0x0000000000176ea4
+     0.31%  csl_obs04_instr  libstdc++.so.6.0.36                   [.] std::ios_base::ios_base()
+     0.31%  csl_obs04_instr  csl_obs04_instrumentation_comparison  [.] presolve::HPresolve::aggregator(presolve::HighsPostsolveStack&)
+     0.30%  csl_obs04_instr  csl_obs04_instrumentation_comparison  [.] CholeskyFactor::recompute()
+     0.30%  csl_obs04_instr  libc.so.6                             [.] 0x00000000000a4f31
+     0.30%  csl_obs04_instr  libc.so.6                             [.] 0x00000000000a6294
+     0.30%  csl_obs04_instr  csl_obs04_instrumentation_comparison  [.] operator new(unsigned long)@plt
+     0.30%  csl_obs04_instr  csl_obs04_instrumentation_comparison  [.] Highs::Highs()
+     0.30%  csl_obs04_instr  libc.so.6                             [.] 0x000000000005cd8a
+     0.28%  csl_obs04_instr  libc.so.6                             [.] 0x000000000017643f
+     0.28%  csl_obs04_instr  csl_obs04_instrumentation_comparison  [.] HFactor::~HFactor()
+     0.27%  csl_obs04_instr  libc.so.6                             [.] 0x00000000000a4fe4
+     0.26%  csl_obs04_instr  csl_obs04_instrumentation_comparison  [.] presolve::HPresolve::shrinkProblem(presolve::HighsPostsolveStack&)
+     0.25%  csl_obs04_instr  libc.so.6                             [.] 0x00000000000a7286
+     0.25%  csl_obs04_instr  libc.so.6                             [.] 0x0000000000176e84
+     0.19%  csl_obs04_instr  libstdc++.so.6.0.36                   [.] std::ios_base::_M_init()
+     0.05%  csl_obs04_instr  libc.so.6                             [.] 0x0000000000065190
+     0.05%  csl_obs04_instr  libc.so.6                             [.] 0x00000000001764db
+     0.03%  csl_obs04_instr  csl_obs04_instrumentation_comparison  [.] csl::optimization::snapshot(std::variant<csl::LinearTerminal, csl::QuadraticTerminal, csl::ResidualNormTerminal> const&, csl::optimization::ObjectivePolicy)
+     0.03%  csl_obs04_instr  csl_obs04_instrumentation_comparison  [.] csl::problem::ResolvedProblem::identity() const
+     0.01%  csl_obs04_instr  csl_obs04_instrumentation_comparison  [.] std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >::basic_string<std::allocator<char> >(char const*, std::allocator<char> const&)
+     0.00%  csl_obs04_instr  libc.so.6                             [.] 0x0000000000176466
+     0.00%  csl_obs04_instr  ld-linux-x86-64.so.2                  [.] 0x000000000000b219
+     0.00%  csl_obs04_instr  csl_obs04_instrumentation_comparison  [.] std::variant<csl::registry::PreparedPipeline<csl::registry::ConvexPort>, csl::registry::Rejection> csl::registry::detail::ProviderAccess::prepare<csl::registry::ConvexPort>(csl::registry::PreparedProvider<csl::registry::ConvexPort> const&, csl::registry::ConvexPort::Request const&)
+     0.00%  csl_obs04_instr  ld-linux-x86-64.so.2                  [.] 0x000000000000af84
+     0.00%  csl_obs04_instr  csl_obs04_instrumentation_comparison  [.] csl::check_family_request(csl::FamilyRequest const&, csl::ProblemId const&)
+     0.00%  csl_obs04_instr  ld-linux-x86-64.so.2                  [.] 0x0000000000013475
+     0.00%  csl_obs04_instr  csl_obs04_instrumentation_comparison  [.] csl::synthesis::strategy_b::(anonymous namespace)::scope(csl::ProgramIdentity const&, csl::registry::Provenance const&)
+     0.00%  csl_obs04_instr  ld-linux-x86-64.so.2                  [.] 0x0000000000013418
+     0.00%  csl_obs04_instr  csl_obs04_instrumentation_comparison  [.] (anonymous namespace)::PerfControl::command(std::basic_string_view<char, std::char_traits<char> >)
+     0.00%  csl_obs04_instr  csl_obs04_instrumentation_comparison  [.] main
+     0.00%  csl_obs04_instr  csl_obs04_instrumentation_comparison  [.] read@plt
+     0.00%  csl_obs04_instr  ld-linux-x86-64.so.2                  [.] 0x0000000000015ef3
+     0.00%  csl_obs04_instr  libc.so.6                             [.] read
+     0.00%  csl_obs04_instr  [unknown]                             [k] 0xffffffff92811d54
+
+
+#
+# (Cannot load tips.txt file, please install perf!)
+#
