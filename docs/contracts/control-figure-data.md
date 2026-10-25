@@ -6,9 +6,14 @@ validated by `scripts/reports/control_figure_data.py`. Rendering imports only
 saved values and the pinned Matplotlib adapter; it has no solver, selector, or
 geometry-provider path.
 
-`encode_plot_document_json` converts validated C++ `PlotData` trajectories into
-this document. Its caller supplies the source record schema and SHA-256 so the
-encoded figure input remains bound to the saved run. The document binds each
+`encode_plot_document_json` converts validated C++ `PlotData` trajectories and
+already-computed finite `PlotSetProjection` outcomes into this document. The
+projection overload accepts only bounded finite V-representations and
+singletons, and retains completed directional support-sample values and any
+finite maximizing points; it never invokes a geometry provider. Unsupported
+representations fail explicitly. Its caller supplies the source
+record schema and SHA-256 so the encoded figure input remains bound to the
+saved run. The document binds each
 series to a source ID and method identity; projections also bind to two named
 coordinates, relation/evidence text, objective context, and limitations.
 Selected trajectories carry T+1 states and T controls, with explicit axes and
@@ -40,10 +45,10 @@ reconstruct them. The B06 figures and
 reproduction commands are in
 [`docs/examples/fuel-b06-viz03.html`](../examples/fuel-b06-viz03.html).
 
-The encoder serializes selected witness paths only. It does not serialize
-`PlotSetProjection` because its `SetHandle` may be lazy, unbounded, or lack a
-finite vertex representation; report adapters currently cover the saved B06
-and B07 finite V-representations. Saved OBS-05 tables can be attached with the
+The encoder serializes selected witness paths, finite `PlotSetProjection`
+outcomes, and directional support samples as a separate series kind. It does
+not materialize lazy, unbounded, H-represented, empty, or universal sets.
+Report adapters cover the saved B06 and B07 finite V-representations. Saved OBS-05 tables can be attached with the
 `--obs05-tables` option; they are validated against their raw-record hash, and
 overlapping inclusive module spans are plotted as separate rows rather than
 summed.

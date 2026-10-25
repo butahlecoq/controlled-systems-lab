@@ -40,6 +40,36 @@ Json axis(const PlotAxis& value,bool controls) {
     if(controls)result["interval_ends"]=value.interval_ends;
     return result;
 }
+const char* relation(SetRelation value) {
+    switch(value) {
+    case SetRelation::equivalent:return "equivalent";
+    case SetRelation::inner:return "inner";
+    case SetRelation::outer:return "outer";
+    case SetRelation::heuristic:return "heuristic";
+    }
+    return "unknown";
+}
+std::string support_kind(const EvidenceSupport& support) {
+    return std::visit([](const auto& value)->std::string {
+        using T=std::decay_t<decltype(value)>;
+        if constexpr(std::is_same_v<T,Unestablished>)return "unestablished";
+        else if constexpr(std::is_same_v<T,NumericalCheck>)return "numerical_check";
+        else if constexpr(std::is_same_v<T,SymbolicArgument>)return "symbolic_argument";
+        else if constexpr(std::is_same_v<T,CertificateReference>)return "unchecked_certificate_reference";
+        else return "exact_farkas_evidence";
+    },support);
+}
+std::optional<std::size_t> coordinate_index(const std::vector<CoordinateAnnotation>& values,
+    const CoordinateAnnotation& selected) {
+    std::optional<std::size_t> found;
+    for(std::size_t i=0;i<values.size();++i) {
+        if(values[i].label==selected.label&&values[i].unit==selected.unit) {
+            if(found)return {};
+            found=i;
+        }
+    }
+    return found;
+}
 }
 
 ArtifactResult<std::string> encode_plot_document_json(const PlotData& data,
@@ -95,6 +125,127 @@ ArtifactResult<std::string> encode_plot_document_json(const PlotData& data,
         {"coordinates",{{"states",coordinates(data.states.coordinates,"x")},{"controls",coordinates(data.controls.coordinates,"u")}}},
         {"axes",{{"states",axis(data.state_axis,false)},{"controls",axis(data.control_axis,true)}}},
         {"series",std::move(series)}};
+    return document.dump(2)+"\n";
+}
+
+ArtifactResult<std::string> encode_plot_document_json(const PlotData& data,const PlotOutcome& outcome,
+    std::string_view source_record_schema,std::string_view source_record_sha256) {
+    const auto* projection=std::get_if<PlotSetProjection>(&outcome);
+    const auto* samples=std::get_if<PlotSupportSamples>(&outcome);
+    if(!projection&&!samples)return error(ArtifactErrorCode::unsupported,"plot_outcome",
+        "only completed projection and support-sample outcomes can be persisted by this overload");
+    const auto& problem=projection?projection->problem:samples->problem;
+    const auto& source=projection?projection->source:samples->source;
+    const auto stage=projection?projection->stage:samples->stage;
+    const auto& selected_coordinates=projection?projection->coordinates:samples->coordinates;
+    const auto& provider_provenance=projection?projection->provider:samples->provider;
+    if(problem!=data.problem)return error(ArtifactErrorCode::reference,"plot_outcome.problem",
+        "plot outcome and plot data must refer to the same problem");
+    const auto first=coordinate_index(data.states.coordinates,selected_coordinates[0]);
+    const auto second=coordinate_index(data.states.coordinates,selected_coordinates[1]);
+    if(!first||!second||*first==*second)return error(ArtifactErrorCode::reference,"plot_outcome.coordinates",
+        "projection coordinates must uniquely match two distinct PlotData state coordinates");
+    if(!provider_provenance.actual)return error(ArtifactErrorCode::reference,"plot_outcome.provider",
+        "projection provider identity is required");
+    if(source.problem!=data.problem)return error(ArtifactErrorCode::reference,"plot_outcome.source",
+        "projection source must refer to the PlotData problem");
+    if(stage.value>=data.state_axis.points.size())return error(ArtifactErrorCode::reference,
+        "plot_outcome.stage","projection stage is outside the saved state axis");
+
+    auto encoded=encode_plot_document_json(data,source_record_schema,source_record_sha256);
+    if(const auto* failure=std::get_if<ArtifactError>(&encoded))return *failure;
+    auto document=Json::parse(std::get<std::string>(encoded));
+    const auto owner=std::visit([](const auto& identity)->std::pair<std::string,std::string> {
+        using T=std::decay_t<decltype(identity)>;
+        if constexpr(std::is_same_v<T,SetId>)return {"set",identity.value};
+        else return {"optimal_family",identity.strategy.value+"@"+identity.strategy_version};
+    },source.identity);
+    const auto& provider=*provider_provenance.actual;
+    Json item;
+    if(projection) {
+        if(projection->reference.identity.problem!=data.problem)return error(ArtifactErrorCode::reference,
+            "plot_outcome.geometry_reference","geometry reference must refer to the PlotData problem");
+        if(projection->projected_relation.metadata.dimension!=2)return error(ArtifactErrorCode::reference,
+            "plot_outcome.projected_relation","projection output must be two-dimensional");
+        const auto set=sets::from_handle(projection->projected_relation);
+        if(const auto* failure=std::get_if<Diagnostic>(&set))return error(ArtifactErrorCode::unsupported,
+            "plot_outcome.projected_relation",failure->field+": "+failure->explanation);
+        const auto representation=std::get<sets::SetData>(set).representation();
+        Json points=Json::array();
+        if(const auto* vertices=std::get_if<sets::VRepresentation>(&representation)) {
+            if(vertices->vertices.cols()!=2||vertices->rays.rows()!=0)
+                return error(ArtifactErrorCode::unsupported,"plot_outcome.projected_relation",
+                    "only bounded finite 2D vertex representations are supported");
+            for(std::size_t i=0;i<vertices->vertices.rows();++i) {
+                const double x=vertices->vertices(i,0),y=vertices->vertices(i,1);
+                if(!std::isfinite(x)||!std::isfinite(y))return error(ArtifactErrorCode::invalid_input,
+                    "plot_outcome.projected_relation.vertices","projection contains a nonfinite coordinate");
+                points.push_back({x,y});
+            }
+        } else if(const auto* singleton=std::get_if<sets::SingletonRepresentation>(&representation)) {
+            if(singleton->point.size()!=2)return error(ArtifactErrorCode::unsupported,
+                "plot_outcome.projected_relation","singleton projection must have dimension two");
+            points.push_back({singleton->point[0],singleton->point[1]});
+        } else return error(ArtifactErrorCode::unsupported,"plot_outcome.projected_relation",
+            "projection representation has no finite point list");
+        if(points.empty())return error(ArtifactErrorCode::unsupported,"plot_outcome.projected_relation",
+            "empty projection has no points to draw");
+        item={{"kind","projection"},
+            {"source",{{"kind",owner.first},{"id",owner.second},{"method_id",provider.id.value},{"method_version",provider.version}}},
+            {"title","Saved 2D set projection at stage "+std::to_string(stage.value)},
+            {"scenario_id",problem.value},{"coordinate_ids",{"x"+std::to_string(*first),"x"+std::to_string(*second)}},
+            {"points",std::move(points)},{"relation",relation(projection->relation)},
+            {"evidence","geometry evidence support: "+support_kind(projection->support)},
+            {"limitation","persisted finite projection points; rendering does not compute geometry"},
+            {"objective_context","not applicable to a set projection"},
+            {"geometry_reference",{{"problem",projection->reference.identity.problem.value},
+                {"request",projection->reference.identity.request.value},{"ideal_output",projection->reference.identity.ideal_output.value}}},
+            {"assumptions",projection->assumptions},
+            {"geometry_operation_elapsed_ns",projection->cost.geometry_operation_elapsed.count()}};
+    } else {
+        Json points=Json::array(),records=Json::array();
+        std::size_t without_point=0;
+        for(std::size_t i=0;i<samples->samples.size();++i) {
+            const auto& sample=samples->samples[i];
+            if(sample.reference.identity.problem!=data.problem)return error(ArtifactErrorCode::reference,
+                "plot_outcome.samples["+std::to_string(i)+"].reference","support sample reference problem mismatch");
+            if(!std::isfinite(sample.direction[0])||!std::isfinite(sample.direction[1])||
+                (sample.direction[0]==0.0&&sample.direction[1]==0.0))return error(ArtifactErrorCode::invalid_input,
+                    "plot_outcome.samples["+std::to_string(i)+"].direction","support direction must be finite and nonzero");
+            Json record={{"direction",sample.direction},
+                {"evidence_support",support_kind(sample.support)},
+                {"assumptions",sample.assumptions},
+                {"geometry_reference",{{"request",sample.reference.identity.request.value},
+                    {"ideal_output",sample.reference.identity.ideal_output.value}}}};
+            if(const auto* value=std::get_if<double>(&sample.value)) {
+                if(!std::isfinite(*value))return error(ArtifactErrorCode::invalid_input,
+                    "plot_outcome.samples["+std::to_string(i)+"].value","support value must be finite");
+                record["value"]={{"kind","finite"},{"value",*value}};
+            } else if(std::holds_alternative<EmptySupport>(sample.value))record["value"]={{"kind","empty"}};
+            else record["value"]={{"kind","unbounded"}};
+            if(sample.point) {
+                if(!std::isfinite((*sample.point)[0])||!std::isfinite((*sample.point)[1]))return error(ArtifactErrorCode::invalid_input,
+                    "plot_outcome.samples["+std::to_string(i)+"].point","support point must be finite");
+                record["point"]={(*sample.point)[0],(*sample.point)[1]};
+                points.push_back(record["point"]);
+            } else ++without_point;
+            records.push_back(std::move(record));
+        }
+        if(records.empty())return error(ArtifactErrorCode::invalid_input,"plot_outcome.samples",
+            "at least one support sample is required");
+        item={{"kind","support_samples"},
+            {"source",{{"kind",owner.first},{"id",owner.second},{"method_id",provider.id.value},{"method_version",provider.version}}},
+            {"title","Support samples at stage "+std::to_string(stage.value)},
+            {"scenario_id",problem.value},{"coordinate_ids",{"x"+std::to_string(*first),"x"+std::to_string(*second)}},
+            {"points",std::move(points)},{"samples",std::move(records)},
+            {"relation","directional support samples"},
+            {"evidence","geometry support values returned by the selected provider"},
+            {"limitation","finite directional samples are not a complete boundary; "+std::to_string(without_point)+" samples have no finite maximizing point"},
+            {"objective_context","not applicable to support samples"},
+            {"assumptions",Json::array()},
+            {"geometry_operation_elapsed_ns",samples->cost.geometry_operation_elapsed.count()}};
+    }
+    document["series"].push_back(std::move(item));
     return document.dump(2)+"\n";
 }
 } // namespace csl::artifacts

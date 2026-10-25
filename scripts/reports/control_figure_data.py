@@ -152,8 +152,8 @@ def validate(document):
             if not isinstance(ids, list) or len(ids) != 2 or any(x not in state_ids for x in ids):
                 raise ValueError(f"{path}.coordinate_ids must select two declared state coordinates")
             points = item.get("points")
-            if not isinstance(points, list) or not points:
-                raise ValueError(f"{path}.points must contain persisted points")
+            if not isinstance(points, list) or (kind == "projection" and not points):
+                raise ValueError(f"{path}.points must be a list, and projections need persisted points")
             for n, point in enumerate(points):
                 if not isinstance(point, list) or len(point) != 2:
                     raise ValueError(f"{path}.points[{n}] must be a 2D point")
@@ -162,10 +162,39 @@ def validate(document):
             if not item.get("relation") or not item.get("evidence") or not item.get("limitation"):
                 raise ValueError(f"{path} must label relation, evidence, and limitations")
             if kind == "projection":
-                for field in ("objective_evidence", "objective_label"):
-                    if not isinstance(item.get(field), str) or not item[field]:
-                        raise ValueError(f"{path}.{field} must label objective context")
-                finite(item.get("objective"),f"{path}.objective")
+                if "objective" in item:
+                    for field in ("objective_evidence", "objective_label"):
+                        if not isinstance(item.get(field), str) or not item[field]:
+                            raise ValueError(f"{path}.{field} must label objective context")
+                    finite(item["objective"],f"{path}.objective")
+                elif not isinstance(item.get("objective_context"),str) or not item["objective_context"]:
+                    raise ValueError(f"{path}.objective_context must state why objective data is absent")
+            else:
+                samples = item.get("samples")
+                if not isinstance(samples,list) or not samples:
+                    raise ValueError(f"{path}.samples must retain directional support outcomes")
+                sample_points=[]
+                for n,sample in enumerate(samples):
+                    if not isinstance(sample,dict): raise ValueError(f"{path}.samples[{n}] must be an object")
+                    direction=sample.get("direction")
+                    value=sample.get("value")
+                    if not isinstance(sample.get("evidence_support"),str) or not sample["evidence_support"] or not isinstance(sample.get("assumptions"),list):
+                        raise ValueError(f"{path}.samples[{n}] must preserve evidence support and assumptions")
+                    if not isinstance(direction,list) or len(direction)!=2:
+                        raise ValueError(f"{path}.samples[{n}].direction must be 2D")
+                    if finite(direction[0],f"{path}.samples[{n}].direction[0]")==0 and finite(direction[1],f"{path}.samples[{n}].direction[1]")==0:
+                        raise ValueError(f"{path}.samples[{n}].direction must be nonzero")
+                    if not isinstance(value,dict) or value.get("kind") not in ("finite","empty","unbounded"):
+                        raise ValueError(f"{path}.samples[{n}].value needs a supported outcome kind")
+                    if value["kind"]=="finite": finite(value.get("value"),f"{path}.samples[{n}].value.value")
+                    point=sample.get("point")
+                    if point is not None:
+                        if not isinstance(point,list) or len(point)!=2:
+                            raise ValueError(f"{path}.samples[{n}].point must be 2D")
+                        finite(point[0],f"{path}.samples[{n}].point[0]");finite(point[1],f"{path}.samples[{n}].point[1]")
+                        sample_points.append([float(point[0]),float(point[1])])
+                if sample_points!=[[float(x),float(y)] for x,y in points]:
+                    raise ValueError(f"{path}.points must match the finite maximizing points in samples")
         else:
             if not isinstance(item.get("values"), list):
                 raise ValueError(f"{path}.values array required")
