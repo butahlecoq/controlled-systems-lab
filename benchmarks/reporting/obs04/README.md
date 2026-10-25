@@ -162,25 +162,26 @@ winner.
 
 ## Phase timing capture (2026-10-25)
 
-`results/linux-omarchy-gcc16-20261025-phase-timings.json` and `.jsonl` add
-first/additional query and attempt end-to-end measurements. All 32 attempts
-passed the analytic-family and independent witness checks. This exploratory
-build used the recorded dirty source snapshot at `e48fa6b225ff56e1af244574a045a98d4a35df3f`;
-the immutable record carries its source tree digest and binary hash. Each cell
+`results/linux-omarchy-gcc16-20261025-phase-timings-clean.json` and `.jsonl`
+add first/additional query and attempt end-to-end measurements. All 32 attempts
+passed the analytic-family and independent witness checks. This Release build
+used clean source commit `dcb10390238ce9631a6c8b11d0e7d29a361ebb74`; the
+immutable record carries its source tree digest and binary hash. Each cell
 below is the median of seven measured attempts; query values are in ns.
 
 | Strategy | Collection | Strategy/family | First query | Additional query | Attempt end-to-end |
 | --- | --- | ---: | ---: | ---: | ---: |
-| reach-back | disabled | 4,996,985 | 250,174 | 225,939 | 5,607,684 |
-| reach-back | enabled | 7,822,792 | 443,566 | 438,398 | 9,382,085 |
-| direct-joint | disabled | 816,803 | 237,672 | 223,285 | 1,378,681 |
-| direct-joint | enabled | 975,762 | 322,251 | 317,292 | 1,905,569 |
+| reach-back | disabled | 4,962,456 | 238,021 | 226,147 | 5,570,846 |
+| reach-back | enabled | 7,999,658 | 440,980 | 435,183 | 9,596,307 |
+| direct-joint | disabled | 861,357 | 245,773 | 237,252 | 1,457,804 |
+| direct-joint | enabled | 1,039,383 | 324,414 | 302,764 | 1,988,879 |
 
 The strategy/family column is the complete public `StrategyPort::run` interval.
 This single run shows the added timing boundaries working on T-S01; it does not
 identify a limiter or support a general overhead, end-to-end workload, or
-strategy-winner claim. The source was dirty, so treat this as exploratory
-evidence pending a clean-source rerun.
+strategy-winner claim. The first exploratory capture from the dirty source tree
+is retained as `results/linux-omarchy-gcc16-20261025-phase-timings.json` and
+`.jsonl`; use the clean-source artifact above as the reproducible capture.
 
 `results/strategy-run-perf-20261024/` retains the 2026-10-24 exploratory
 profiles, which were captured before control acknowledgements were added. They
