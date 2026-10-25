@@ -537,6 +537,37 @@ void compare_profile(const std::string& profile) {
     CHECK(version_three_replay.content().digest()==version_three.content().digest());
     CHECK(version_three_replay.spec_id().digest==version_three_spec.digest());
     CHECK(version_three_replay.identity().digest==version_three.identity().digest);
+    auto version_three_with_preflight=nlohmann::json::parse(version_three_spec_text);
+    version_three_with_preflight["environment"]["schema"]="csl.obs04-environment/2";
+    version_three_with_preflight["environment"]["execution"]["preflight"]={
+        {"scope","single_shared_setup_before_attempts"},
+        {"fixture_construction_and_resolution_ns",123},
+        {"provider_registration_ns",456},
+        {"comparison_admission_ns",789}};
+    const auto preflight_spec_text=version_three_with_preflight.dump();
+    const auto preflight_spec_owner=csl::problem::snapshot_content(
+        std::span<const std::byte>{reinterpret_cast<const std::byte*>(preflight_spec_text.data()),
+            preflight_spec_text.size()});
+    REQUIRE(std::holds_alternative<csl::problem::ResolvedContent>(preflight_spec_owner));
+    const auto preflight_spec=std::get<csl::problem::ResolvedContent>(preflight_spec_owner);
+    const auto preflight_record=take_artifact(ar::encode_recorded_comparison(preflight_spec,measured_attempts),
+        "encode_recorded_comparison with preflight timing");
+    const auto preflight_wire=std::string(reinterpret_cast<const char*>(preflight_record.content().bytes().data()),
+        preflight_record.content().bytes().size());
+    const auto preflight_replay=take_artifact(ar::decode_recorded_comparison(preflight_wire),
+        "decode_recorded_comparison with preflight timing");
+    CHECK(preflight_replay.content().digest()==preflight_record.content().digest());
+    auto invalid_preflight=version_three_with_preflight;
+    invalid_preflight["environment"]["execution"]["preflight"]["comparison_admission_ns"]=-1;
+    const auto invalid_preflight_text=invalid_preflight.dump();
+    const auto invalid_preflight_owner=csl::problem::snapshot_content(
+        std::span<const std::byte>{reinterpret_cast<const std::byte*>(invalid_preflight_text.data()),
+            invalid_preflight_text.size()});
+    REQUIRE(std::holds_alternative<csl::problem::ResolvedContent>(invalid_preflight_owner));
+    const auto invalid_preflight_record=ar::encode_recorded_comparison(
+        std::get<csl::problem::ResolvedContent>(invalid_preflight_owner),measured_attempts);
+    REQUIRE(std::holds_alternative<ar::ArtifactError>(invalid_preflight_record));
+    CHECK(std::get<ar::ArtifactError>(invalid_preflight_record).path=="comparison");
     const auto& witness_batch=std::get<WitnessSelection>(execution.strategies[0].selection).batch;
     CHECK(witness_batch.distinct_count()==2);
     const auto v3_measurement=[&](std::string instrumentation) {

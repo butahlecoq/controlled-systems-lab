@@ -214,10 +214,16 @@ HostFacts host_facts() {
     return host;
 }
 
-Json environment_manifest(std::string_view argv0) {
+struct PreflightTimings {
+    std::uint64_t fixture_construction_and_resolution_ns{};
+    std::uint64_t provider_registration_ns{};
+    std::uint64_t comparison_admission_ns{};
+};
+
+Json environment_manifest(std::string_view argv0, const PreflightTimings& preflight) {
     const auto host=host_facts();
     const auto backend_threads=unavailable_fact("native backend thread counts are not observable from the driver");
-    return {{"schema","csl.obs04-environment/1"},
+    return {{"schema","csl.obs04-environment/2"},
         {"build",Json::parse(benchmarks::obs04::build::manifest)},
         {"runtime",{{"schema","csl.obs04-runtime/1"},{"binary_sha256",binary_digest(argv0)},
             {"os_family",host.family},{"os_version",host.version},{"kernel",host.kernel},
@@ -227,6 +233,10 @@ Json environment_manifest(std::string_view argv0) {
             {"requested_backend_threads",1},{"observed_backend_threads",backend_threads},
             {"workspace_policy","fresh-workspace-per-attempt"},
             {"cache_policy","one warm-up repetition per arm; operating-system caches are not flushed"},
+            {"preflight",{{"scope","single_shared_setup_before_attempts"},
+                {"fixture_construction_and_resolution_ns",preflight.fixture_construction_and_resolution_ns},
+                {"provider_registration_ns",preflight.provider_registration_ns},
+                {"comparison_admission_ns",preflight.comparison_admission_ns}}},
             {"warmup_repetitions",1},{"seed_policy",{{"kind","not_applicable"},
                 {"reason","fixed analytic fixture uses no random generator"}}},
             {"tolerances",{{"absolute",absolute_tolerance},{"relative",relative_tolerance}}}}}
@@ -1260,9 +1270,16 @@ int main(int argc, char** argv) {
             throw std::invalid_argument("Profile call count must be positive");
         if(profile_strategy&&requested_record_path)
             throw std::invalid_argument("Profile mode and comparison-record capture are separate modes");
+        PreflightTimings preflight;
+        auto phase_begin=Clock::now();
         const auto problem = source();
+        preflight.fixture_construction_and_resolution_ns=static_cast<std::uint64_t>(ns(phase_begin,Clock::now()));
+        phase_begin=Clock::now();
         auto modules = make_modules();
+        preflight.provider_registration_ns=static_cast<std::uint64_t>(ns(phase_begin,Clock::now()));
+        phase_begin=Clock::now();
         const auto prepared = prepare(problem, modules.strategies);
+        preflight.comparison_admission_ns=static_cast<std::uint64_t>(ns(phase_begin,Clock::now()));
         std::array<ar::ResolvedConfiguration,4> configuration_templates{
             configuration_for(prepared,0,false),configuration_for(prepared,0,true),
             configuration_for(prepared,1,false),configuration_for(prepared,1,true)};
@@ -1339,7 +1356,7 @@ int main(int argc, char** argv) {
                 {"strategy",index/2==0?"csl.synthesis.reach-back":"csl.synthesis.strategy-b"}});
         }
         const Json spec{{"arms",std::move(arms)},
-            {"environment",environment_manifest(argc>0?argv[0]:std::string_view{})},
+            {"environment",environment_manifest(argc>0?argv[0]:std::string_view{},preflight)},
             {"input_manifest_hash",problem::hex(input_manifest_hash)},
             {"input_manifest_source","resolved-problem-canonical-bytes"},
             {"problem_id",problem.identity().value},{"repetitions",8},

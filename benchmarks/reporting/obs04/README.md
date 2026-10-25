@@ -65,6 +65,15 @@ selects a path, and existing files are never overwritten. Keep the separate
 limiter-profile result with any retained measurement. Do not combine the
 existing synthetic OBS-02 collector loop with these solver timings.
 
+Environment schema `/2` additionally records three one-time shared preflight
+durations before the attempt loop: fixture construction/problem resolution,
+provider registration, and comparison admission. These values are bound into
+the comparison spec and are not per-attempt samples. The fixture is constructed
+in code, so there is no input-file parsing phase. Comparison admission combines
+common request guards, strategy capability checks, and registry preparation;
+the current interface does not separate those subphases. Family construction
+inside the strategy remains unavailable, and its field stays null.
+
 `csl.obs04-instrumentation-comparison-event/6` is the current raw per-attempt
 payload; the codec continues to accept event `/2` through `/5`. It records
 the `StrategyPort::run` interval, first and additional direction query, their
