@@ -697,7 +697,8 @@ def algorithm_coverage(catalog, site, gallery_inventory):
             "algorithm coverage refers to an unknown catalog report kind")
     for report in reports:
         route = Path(site) / report["report_id"]
-        require((route / "index.html").is_file() and (route / "records.json").is_file(),
+        raw_name = "results.jsonl" if report["report_kind"] == "issue6-b07-reference" else "records.json"
+        require((route / "index.html").is_file() and (route / raw_name).is_file(),
                 "algorithm coverage catalog report is not staged: " + report["report_id"])
     gallery = {entry["anchor"]: entry for entry in gallery_inventory}
     for family in result["families"]:
@@ -715,7 +716,8 @@ def algorithm_coverage(catalog, site, gallery_inventory):
         family["catalog_reports"] = [
             {"report_kind": entry["report_kind"], "report_id": entry["report_id"],
              "page": "../" + entry["report_id"] + "/index.html",
-             "raw_record": "../" + entry["report_id"] + "/records.json"}
+             "raw_record": "../" + entry["report_id"] + "/" +
+                           ("results.jsonl" if entry["report_kind"] == "issue6-b07-reference" else "records.json")}
             for entry in reports if entry["report_kind"] in family["catalog_kinds"]]
         for route in family["report_routes"]:
             target = Path(site) / route

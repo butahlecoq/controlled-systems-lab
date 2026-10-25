@@ -1,0 +1,21 @@
+{
+  "schema": "csl.issue6-b07-capture-provenance/1",
+  "source_commit": "18fc55efa5f31e6cb7e348f602f9000896ee7cb9",
+  "capture_commit": "857c9667a0a2cf361c5f70f866d4a39152f6ec3c",
+  "source_tree_clean": true,
+  "driver_sha256": "57100f7fb77206d9f67af2858808a6357ada3a38fc29bdb7893b56496f169a05",
+  "scenario_sha256": "d41bac901d8b20e66662df6881d5d553ea197eaa04dee1baae129f2cd3401400",
+  "executable_sha256": "e830042b9de1d387b6d96007e23682349f3c9a569f5d1d5a19ef1e393d1d9bee",
+  "results_sha256": "f2f81f70ab29d0c07624eee01cefb0a8d06f2062487dc5f337141b1d66636881",
+  "compiler_id": "GNU",
+  "compiler_version": "16.2.1",
+  "build_type": "Release",
+  "cmake_generator": "Unix Makefiles",
+  "cmake_cache_sha256": "0a17480c764667bb009ba989ccfe2e0951113bf59de48e99898a5ccb9dfdcce8",
+  "cxx_compiler_path": "/usr/bin/c++",
+  "cxx_flags": "",
+  "release_flags": "-O3 -DNDEBUG",
+  "highs_enabled": "OFF",
+  "qhull_enabled": "OFF",
+  "capture_command": "b07_capture.py --source-root <repo> --build-dir <release-build> --output-dir <bundle>"
+}

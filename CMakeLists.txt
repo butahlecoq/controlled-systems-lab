@@ -25,6 +25,7 @@ option(CSL_BUILD_SYN07_REPORT "Build the T-S01 exact-family measurement driver" 
 option(CSL_BUILD_EXT01_REPORT "Build the EXT-01 fixed-plan numerical report driver" OFF)
 option(CSL_BUILD_ISSUE3_REPORT "Build the finite-action minimax numerical report driver" OFF)
 option(CSL_BUILD_ISSUE6_B06_REPORT "Build the owner-confirmed B06 finite-action reference driver" OFF)
+option(CSL_BUILD_ISSUE6_B07_REPORT "Build the eight-case B07 fuel reference driver" OFF)
 option(CSL_BUILD_ISSUE6_B09_REPORT "Build the A08 fuel source-revision reference driver" OFF)
 option(CSL_BUILD_ISSUE3_VALIDATED_REPORT "Build the validated finite-action minimax report driver" OFF)
 option(CSL_BUILD_EXT04_REPORT "Build the EXT-04 observed replay report driver" OFF)

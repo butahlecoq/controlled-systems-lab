@@ -1,0 +1,130 @@
+[
+  {
+    "case_id": "B07-reconstruction-s0-l0-d0",
+    "solver_feasible": 493,
+    "oracle_feasible": 493,
+    "solver_winners": [
+      188
+    ],
+    "oracle_winners": [
+      188
+    ],
+    "solver_squared": 86.88272499999921,
+    "oracle_squared": 86.8827249999992,
+    "abs_diff": 1.4210854715202004e-14
+  },
+  {
+    "case_id": "B07-reconstruction-s0-l0-d1",
+    "solver_feasible": 365,
+    "oracle_feasible": 365,
+    "solver_winners": [
+      188
+    ],
+    "oracle_winners": [
+      188
+    ],
+    "solver_squared": 93.78435000000007,
+    "oracle_squared": 93.78435000000012,
+    "abs_diff": 4.263256414560601e-14
+  },
+  {
+    "case_id": "B07-reconstruction-s0-l1-d0",
+    "solver_feasible": 493,
+    "oracle_feasible": 493,
+    "solver_winners": [
+      212,
+      292,
+      308
+    ],
+    "oracle_winners": [
+      212,
+      292,
+      308
+    ],
+    "solver_squared": 88.47642499999921,
+    "oracle_squared": 88.47642499999908,
+    "abs_diff": 1.2789769243681803e-13
+  },
+  {
+    "case_id": "B07-reconstruction-s0-l1-d1",
+    "solver_feasible": 365,
+    "oracle_feasible": 365,
+    "solver_winners": [
+      212,
+      292,
+      308
+    ],
+    "oracle_winners": [
+      212,
+      292,
+      308
+    ],
+    "solver_squared": 95.51804999999972,
+    "oracle_squared": 95.51804999999985,
+    "abs_diff": 1.2789769243681803e-13
+  },
+  {
+    "case_id": "B07-reconstruction-s1-l0-d0",
+    "solver_feasible": 442,
+    "oracle_feasible": 442,
+    "solver_winners": [
+      1336
+    ],
+    "oracle_winners": [
+      1336
+    ],
+    "solver_squared": 100.37272499999972,
+    "oracle_squared": 100.3727249999997,
+    "abs_diff": 1.4210854715202004e-14
+  },
+  {
+    "case_id": "B07-reconstruction-s1-l0-d1",
+    "solver_feasible": 328,
+    "oracle_feasible": 328,
+    "solver_winners": [
+      1336
+    ],
+    "oracle_winners": [
+      1336
+    ],
+    "solver_squared": 107.77435,
+    "oracle_squared": 107.77435,
+    "abs_diff": 0.0
+  },
+  {
+    "case_id": "B07-reconstruction-s1-l1-d0",
+    "solver_feasible": 442,
+    "oracle_feasible": 442,
+    "solver_winners": [
+      831,
+      911,
+      1407
+    ],
+    "oracle_winners": [
+      831,
+      911,
+      1407
+    ],
+    "solver_squared": 102.21832500000016,
+    "oracle_squared": 102.21832500000006,
+    "abs_diff": 9.947598300641403e-14
+  },
+  {
+    "case_id": "B07-reconstruction-s1-l1-d1",
+    "solver_feasible": 328,
+    "oracle_feasible": 328,
+    "solver_winners": [
+      831,
+      911,
+      1407
+    ],
+    "oracle_winners": [
+      831,
+      911,
+      1407
+    ],
+    "solver_squared": 109.75944999999994,
+    "oracle_squared": 109.75945000000002,
+    "abs_diff": 7.105427357601002e-14
+  }
+]

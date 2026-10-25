@@ -1,0 +1,49 @@
+{
+  "schema_version": 1,
+  "id": "B07-owner-approved-eight-case-v1",
+  "label": "owner-approved reconstruction cases; not historical reproductions",
+  "sources": {
+    "paper": {
+      "inventory_id": "L10",
+      "sha256": "146ec36e96be4c779158541420eac1e242825262b5981d47b61ba86a9e2126a8"
+    },
+    "planning_script_sha256": "c6af20858e505563c16a9a28a04dbd84dbb70a8d9c25e2e88630bf5493adb644",
+    "paired_nonlinear_replay_sha256": "90a979fea6f492bb9669f1f20d3a6ae2cd420a84b71145d268e1d845426e28e0"
+  },
+  "shared_model": {
+    "horizon_stages": 5,
+    "modeled_horizon_seconds": 10,
+    "step_seconds": 2,
+    "control_alphabet": [1, 0.3, 0, -0.3, -1],
+    "initial_flow_kg_per_second": [29.375, 20.4],
+    "initial_flow_provenance": "owner-approved rounded values consistent with paired nonlinear initialization at u=0",
+    "A": [[1,0,0,0],[-2,1,0,0],[0,0,1,0],[0,0,-2,1]],
+    "B": [0.7,0,-0.3333333333333333,0],
+    "stagewise_flow_constraints": {
+      "oxidizer_flow": [29,31],
+      "fuel_flow": [19.5,20.5]
+    },
+    "stagewise_stock_constraints": {
+      "oxidizer_stock_minimum": 0,
+      "fuel_stock_minimum": 0,
+      "source": "owner-approved B07 reconstruction policy"
+    },
+    "stock_upper_bounds": "omitted as trajectory-redundant under positive flows and zero stock rows in B and W"
+  },
+  "cross_product": {
+    "initial_stock_oxidizer_kg": [305, 302],
+    "initial_stock_fuel_kg": [205, 207],
+    "initial_stock_variant_pairing": [[305,205],[302,207]],
+    "terminal_coupling_lambda": [0,1],
+    "flow_disturbance_coefficients_paper": [0.05,-0.04],
+    "flow_disturbance_coefficients_archive": [0.06,-0.05],
+    "disturbance_set_each_stage": "independent continuous box [-1,1]^2; four vertices supplied to finite-action solver",
+    "terminal_squared_objective": "(30-x1)^2 + x2^2 + 2.25(20-x3)^2 + 2.25x4^2 + lambda*(x2-1.5*x4)^2"
+  },
+  "interpretation": {
+    "historical_status": "not a reproduction",
+    "paper_duration_discrepancy": "paper states 100 seconds; these owner-approved discrete cases use five 2-second depletion steps (10 seconds)",
+    "printed_initial_stock_discrepancy": "preserve and compare (305,205) from initialization table with printed x0 stocks (302,207)",
+    "reported_paper_output": "not used as a tuning target"
+  }
+}
