@@ -65,29 +65,27 @@ selects a path, and existing files are never overwritten. Keep the separate
 limiter-profile result with any retained measurement. Do not combine the
 existing synthetic OBS-02 collector loop with these solver timings.
 
-Environment schema `/2` additionally records three one-time shared preflight
-durations before the attempt loop: fixture construction/problem resolution,
-provider registration, and comparison admission. These values are bound into
-the comparison spec and are not per-attempt samples. The fixture is constructed
-in code, so there is no input-file parsing phase. Comparison admission combines
-common request guards, strategy capability checks, and registry preparation;
-the current interface does not separate those subphases. Family construction
-inside the strategy remains unavailable, and its field stays null.
+The driver reports three selected shared preflight blocks in a structured
+`# shared_preflight=` JSONL comment, keyed by the comparison spec and run IDs.
+The JSONL is retained beside the immutable comparison record; keeping these
+observed durations out of the comparison spec prevents timing noise from
+changing `ComparisonSpecId`. The reported blocks cover fixture construction and
+problem resolution, provider registration, and combined comparison admission.
+The fixture is constructed in code, so there is no input-file parsing phase.
+Admission combines common request guards, strategy capability checks, and
+registry preparation; the current interface does not split these subphases.
+These timers stop before configuration-template creation, workspace creation,
+and the two analytic baseline strategy runs. Family construction inside the
+strategy remains unavailable and its field stays null.
 
-## Clean-source preflight capture (2026-10-25)
+## Clean-source preflight capture
 
-`results/linux-omarchy-gcc16-20261025-preflight-clean.json` and its adjacent
-JSONL and HTML files retain one Release capture from clean source commit
-`13d51323132766dcc7ba465ee5a849ae49adc24b`. The 32 comparison attempts all
-passed, with seven measured attempts per strategy/instrumentation arm and one
-warmup per arm. The environment manifest records the single shared preflight
-sample: fixture construction and problem resolution 240,046 ns, provider
-registration 220,560 ns, and comparison admission 225,868 ns. These are
-one-time suite setup timings from one process, not per-attempt measurements;
-there is no repeated-run range or limiter attribution. They do not establish a
-performance winner or a general latency claim. The record binds the source
-snapshot and binary digest; the JSONL preserves driver events and the empty
-stderr log is retained.
+A clean-source capture will retain the structured `# shared_preflight=` JSONL
+metadata beside the comparison record. It will report one sample for each of
+the three selected preflight blocks and identify the exact comparison spec and
+run; these are not per-attempt timings. The capture will state its source and
+binary identities and disclose that configuration-template creation, workspace
+creation, and analytic baseline runs occur after the measured blocks.
 
 `csl.obs04-instrumentation-comparison-event/6` is the current raw per-attempt
 payload; the codec continues to accept event `/2` through `/5`. It records

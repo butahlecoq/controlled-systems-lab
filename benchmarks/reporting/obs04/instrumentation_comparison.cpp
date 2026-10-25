@@ -220,10 +220,10 @@ struct PreflightTimings {
     std::uint64_t comparison_admission_ns{};
 };
 
-Json environment_manifest(std::string_view argv0, const PreflightTimings& preflight) {
+Json environment_manifest(std::string_view argv0) {
     const auto host=host_facts();
     const auto backend_threads=unavailable_fact("native backend thread counts are not observable from the driver");
-    return {{"schema","csl.obs04-environment/2"},
+    return {{"schema","csl.obs04-environment/1"},
         {"build",Json::parse(benchmarks::obs04::build::manifest)},
         {"runtime",{{"schema","csl.obs04-runtime/1"},{"binary_sha256",binary_digest(argv0)},
             {"os_family",host.family},{"os_version",host.version},{"kernel",host.kernel},
@@ -233,10 +233,6 @@ Json environment_manifest(std::string_view argv0, const PreflightTimings& prefli
             {"requested_backend_threads",1},{"observed_backend_threads",backend_threads},
             {"workspace_policy","fresh-workspace-per-attempt"},
             {"cache_policy","one warm-up repetition per arm; operating-system caches are not flushed"},
-            {"preflight",{{"scope","single_shared_setup_before_attempts"},
-                {"fixture_construction_and_resolution_ns",preflight.fixture_construction_and_resolution_ns},
-                {"provider_registration_ns",preflight.provider_registration_ns},
-                {"comparison_admission_ns",preflight.comparison_admission_ns}}},
             {"warmup_repetitions",1},{"seed_policy",{{"kind","not_applicable"},
                 {"reason","fixed analytic fixture uses no random generator"}}},
             {"tolerances",{{"absolute",absolute_tolerance},{"relative",relative_tolerance}}}}}
@@ -1356,7 +1352,7 @@ int main(int argc, char** argv) {
                 {"strategy",index/2==0?"csl.synthesis.reach-back":"csl.synthesis.strategy-b"}});
         }
         const Json spec{{"arms",std::move(arms)},
-            {"environment",environment_manifest(argc>0?argv[0]:std::string_view{},preflight)},
+            {"environment",environment_manifest(argc>0?argv[0]:std::string_view{})},
             {"input_manifest_hash",problem::hex(input_manifest_hash)},
             {"input_manifest_source","resolved-problem-canonical-bytes"},
             {"problem_id",problem.identity().value},{"repetitions",8},
@@ -1385,6 +1381,14 @@ int main(int argc, char** argv) {
         std::ofstream output(record_path,std::ios::binary|std::ios::out);
         if(!output||!(output<<comparison_wire)||!output.flush())
             throw std::runtime_error("Could not write comparison record: "+record_path.string());
+        const auto comparison_json=Json::parse(comparison_wire);
+        std::cout << "# shared_preflight=" << Json{{"schema","csl.obs04-shared-preflight/1"},
+            {"comparison_spec_id",comparison_json.at("comparison_spec_id")},
+            {"comparison_run_id",comparison_json.at("comparison_run_id")},
+            {"scope","selected_shared_preflight_blocks_before_configuration_workspaces_and_baselines"},
+            {"fixture_construction_and_resolution_ns",preflight.fixture_construction_and_resolution_ns},
+            {"provider_registration_ns",preflight.provider_registration_ns},
+            {"comparison_admission_ns",preflight.comparison_admission_ns}}.dump() << '\n';
         std::cout << "# comparison_record_digest=" << problem::hex(comparison.content().digest())
             << "; attempts=" << attempts.size() << "; failures=" << failures << '\n';
         if (failures != 0) return 1;
