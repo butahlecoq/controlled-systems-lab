@@ -40,6 +40,7 @@
 #include <utility>
 #include <vector>
 #include <iterator>
+#include <limits>
 
 #ifndef _WIN32
 #include <fcntl.h>
@@ -349,7 +350,7 @@ ar::ResolvedConfiguration configuration_for(const application::PreparedCompariso
     const auto expected=prepared.expected_synthesis_identity(strategy_index);
     const ar::Unavailable missing{ar::MissingReason::not_instrumented,{}};
     ar::ConfigurationInput config;
-    config.collection={enabled,ar::CollectionMode::summary,5,10000,0,0};
+    config.collection={enabled,ar::CollectionMode::summary,6,10000,0,0};
     config.modules={{"strategy",{expected.strategy,expected.strategy_version,missing},{}},
         {"lp",{selected_configuration.lp,"1",missing},{}},
         {"convex",{selected_configuration.convex,"1",missing},{}}};
@@ -375,14 +376,14 @@ CollectionSetup collector_for(const application::PreparedComparison& prepared,
     fallback_configuration=resolved_configuration;
 
     ob::PlanInput plan{prepared.problem(), resolved_config, {run_id}, {clock->wall_domain()}, {}, enabled?1u:0u};
-    const std::size_t span_count = enabled ? (strategy_index == 0 ? 5 : 1) : 0;
+    const std::size_t span_count = enabled ? (strategy_index == 0 ? 6 : 2) : 0;
     if(!enabled)plan.clocks.clear();
     if(enabled) {
         plan.tasks = {strategy_index == 0 ? "strategy-a" : "strategy-b"};
         plan.operations = strategy_index == 0
             ? std::vector<std::string>{"strategy-a/run", "strategy-a/forward", "strategy-a/feasible-preimage",
-                "strategy-a/terminal-optimization", "strategy-a/terminal-preimage"}
-            : std::vector<std::string>{"strategy-b/run"};
+                "strategy-a/terminal-optimization", "strategy-a/terminal-preimage", "strategy-a/family-construction"}
+            : std::vector<std::string>{"strategy-b/run", "strategy-b/family-construction"};
     }
     plan.spans.reserve(span_count);
     for (std::size_t index = 0; index < span_count; ++index) {
@@ -540,6 +541,14 @@ std::int64_t ns(Clock::time_point begin, Clock::time_point end) {
     return std::chrono::duration_cast<std::chrono::nanoseconds>(end - begin).count();
 }
 
+std::optional<std::uint64_t> ticks_to_ns(std::uint64_t ticks,const ar::ClockDomain& clock) {
+    if(clock.period_denominator==0)return {};
+    const long double converted=static_cast<long double>(ticks)*clock.period_numerator*1'000'000'000.0L/
+        clock.period_denominator;
+    if(converted<0||converted>std::numeric_limits<std::uint64_t>::max())return {};
+    return static_cast<std::uint64_t>(converted);
+}
+
 struct TrialTimings {
     std::optional<Clock::time_point> attempt_begin;
     std::optional<Clock::time_point> setup_begin;
@@ -551,6 +560,7 @@ struct TrialTimings {
     std::optional<Clock::time_point> verification_begin;
     std::optional<std::uint64_t> setup_ns;
     std::optional<std::uint64_t> strategy_run_ns;
+    std::optional<std::uint64_t> family_construction_ns;
     std::optional<std::uint64_t> selection_setup_ns;
     std::optional<std::uint64_t> selection_run_ns;
     std::optional<std::uint64_t> first_query_ns;
@@ -792,12 +802,13 @@ TrialRecord trial_impl(const application::PreparedComparison& prepared, std::siz
         span_timings = timing_report->spans;
         span_records = timing_report->observations.description().spans;
         if (status==ar::AttemptStatus::completed && (!timing_report->diagnostics.empty() ||
-            observed_spans != (strategy_index == 0 ? 5u : 1u) || completed_spans != observed_spans ||
+            observed_spans != (strategy_index == 0 ? 6u : 2u) || completed_spans != observed_spans ||
             span_timings.size() != observed_spans)) quality_passed=false;
     }
     struct SpanEvent { std::string operation; std::uint64_t inclusive, exclusive; };
     std::vector<SpanEvent> span_events;
     span_events.reserve(span_timings.size());
+    std::size_t family_construction_spans=0;
     for (std::size_t index = 0; index < span_timings.size(); ++index) {
         const auto inclusive = std::get_if<ar::Available<std::uint64_t>>(&span_timings[index].inclusive_wall_ticks);
         const auto exclusive = std::get_if<ar::Available<std::uint64_t>>(&span_timings[index].exclusive_wall_ticks);
@@ -806,7 +817,15 @@ TrialRecord trial_impl(const application::PreparedComparison& prepared, std::siz
             continue;
         }
         span_events.push_back({span_records[index].descriptor.operation, inclusive->value, exclusive->value});
+        if(span_records[index].descriptor.operation=="strategy-a/family-construction"||
+            span_records[index].descriptor.operation=="strategy-b/family-construction") {
+            ++family_construction_spans;
+            const auto& clocks=timing_report->observations.description().clocks;
+            if(clocks.size()==1)timings.family_construction_ns=ticks_to_ns(inclusive->value,clocks.front());
+        }
     }
+    if(enabled&&status==ar::AttemptStatus::completed&&
+        (family_construction_spans!=1||!timings.family_construction_ns))quality_passed=false;
     const auto selection_setup_begin = Clock::now();
     auto& selected_witnesses = timings.selected_witnesses;
     auto& verification_reports = timings.verification_reports;
@@ -918,12 +937,12 @@ TrialRecord trial_impl(const application::PreparedComparison& prepared, std::siz
     timings.end_to_end_ns = static_cast<std::uint64_t>(ns(*timings.attempt_begin, attempt_end));
 
     std::ostringstream event;
-    event << "{\"schema\":\"csl.obs04-instrumentation-comparison-event/6\",\"repetition\":" << repetition
+    event << "{\"schema\":\"csl.obs04-instrumentation-comparison-event/7\",\"repetition\":" << repetition
         << ",\"warmup\":" << (warmup ? "true" : "false") << ",\"strategy\":\""
         << (strategy_index == 0 ? "csl.synthesis.reach-back" : "csl.synthesis.strategy-b")
         << "\",\"instrumentation\":\"" << (enabled ? "enabled" : "disabled")
         << "\",\"setup_ns\":" << *timings.setup_ns << ",\"strategy_run_ns\":" << *timings.strategy_run_ns
-        << ",\"family_construction_ns\":null"
+        << ",\"family_construction_ns\":" << optional_ns_json(timings.family_construction_ns)
         << ",\"end_to_end_ns\":" << *timings.end_to_end_ns
         << ",\"selection_setup_ns\":" << selection_setup_ns
         << ",\"selection_run_ns\":" << selection_run_ns
@@ -937,7 +956,7 @@ TrialRecord trial_impl(const application::PreparedComparison& prepared, std::siz
         << (selected_witnesses ? std::to_string(selected_witnesses->batch.returned_count()) : "null")
         << ",\"distinct_witness_count\":"
         << (selected_witnesses ? std::to_string(selected_witnesses->batch.distinct_count()) : "null")
-        << ",\"spans_planned\":" << (enabled ? (strategy_index == 0 ? 5 : 1) : 0)
+        << ",\"spans_planned\":" << (enabled ? (strategy_index == 0 ? 6 : 2) : 0)
         << ",\"spans_completed\":" << completed_spans << ",\"span_clock_period_num\":"
         << (enabled ? Clock::period::num : 0) << ",\"span_clock_period_den\":" << (enabled ? Clock::period::den : 0)
         << ",\"span_timings\":[";
@@ -1006,13 +1025,14 @@ TrialRecord failed_trial(const application::PreparedComparison& prepared, std::s
     for(const auto byte:bytes)wire.push_back(static_cast<char>(std::to_integer<unsigned char>(byte)));
     auto run=take(ar::decode_recorded_run(wire,prepared.problem()));
     std::ostringstream event;
-    event << "{\"schema\":\"csl.obs04-instrumentation-comparison-event/6\",\"repetition\":" << repetition
+    event << "{\"schema\":\"csl.obs04-instrumentation-comparison-event/7\",\"repetition\":" << repetition
         << ",\"warmup\":" << (warmup?"true":"false") << ",\"strategy\":\""
         << (strategy_index==0?"csl.synthesis.reach-back":"csl.synthesis.strategy-b")
         << "\",\"instrumentation\":\"" << (enabled?"enabled":"disabled")
         << "\",\"setup_ns\":" << optional_ns_json(timings.setup_ns)
         << ",\"strategy_run_ns\":" << optional_ns_json(timings.strategy_run_ns)
-        << ",\"family_construction_ns\":null,\"end_to_end_ns\":" << optional_ns_json(timings.end_to_end_ns)
+        << ",\"family_construction_ns\":" << optional_ns_json(timings.family_construction_ns)
+        << ",\"end_to_end_ns\":" << optional_ns_json(timings.end_to_end_ns)
         << ",\"selection_setup_ns\":" << optional_ns_json(timings.selection_setup_ns)
         << ",\"selection_run_ns\":" << optional_ns_json(timings.selection_run_ns)
         << ",\"first_witness_query_ns\":" << optional_ns_json(timings.first_query_ns)
@@ -1066,13 +1086,14 @@ TrialRecord unserializable_outcome_trial(const application::PreparedComparison& 
     for(const auto byte:bytes)wire.push_back(static_cast<char>(std::to_integer<unsigned char>(byte)));
     auto run=take(ar::decode_recorded_run(wire,prepared.problem()));
     std::ostringstream event;
-    event << "{\"schema\":\"csl.obs04-instrumentation-comparison-event/6\",\"repetition\":"
+    event << "{\"schema\":\"csl.obs04-instrumentation-comparison-event/7\",\"repetition\":"
         << repetition << ",\"warmup\":" << (warmup?"true":"false") << ",\"strategy\":\""
         << (strategy_index==0?"csl.synthesis.reach-back":"csl.synthesis.strategy-b")
         << "\",\"instrumentation\":\"" << (enabled?"enabled":"disabled")
         << "\",\"setup_ns\":" << optional_ns_json(timings.setup_ns)
         << ",\"strategy_run_ns\":" << optional_ns_json(timings.strategy_run_ns)
-        << ",\"family_construction_ns\":null,\"end_to_end_ns\":" << optional_ns_json(timings.end_to_end_ns)
+        << ",\"family_construction_ns\":" << optional_ns_json(timings.family_construction_ns)
+        << ",\"end_to_end_ns\":" << optional_ns_json(timings.end_to_end_ns)
         << ",\"selection_setup_ns\":" << optional_ns_json(timings.selection_setup_ns)
         << ",\"selection_run_ns\":" << optional_ns_json(timings.selection_run_ns)
         << ",\"first_witness_query_ns\":" << optional_ns_json(timings.first_query_ns)
@@ -1120,13 +1141,14 @@ TrialRecord recording_failure_trial(const application::PreparedComparison& prepa
             {unavailable,unavailable,unavailable,unavailable,false,ar::MemoryAccounting::unlimited}));
         auto run=take(ar::decode_recorded_run(wire,prepared.problem()));
         std::ostringstream event;
-        event << "{\"schema\":\"csl.obs04-instrumentation-comparison-event/6\",\"repetition\":"
+        event << "{\"schema\":\"csl.obs04-instrumentation-comparison-event/7\",\"repetition\":"
             << repetition << ",\"warmup\":" << (warmup?"true":"false") << ",\"strategy\":\""
             << (strategy_index==0?"csl.synthesis.reach-back":"csl.synthesis.strategy-b")
             << "\",\"instrumentation\":\"" << (enabled?"enabled":"disabled")
             << "\",\"setup_ns\":" << optional_ns_json(timings.setup_ns)
             << ",\"strategy_run_ns\":" << optional_ns_json(timings.strategy_run_ns)
-            << ",\"family_construction_ns\":null,\"end_to_end_ns\":" << optional_ns_json(timings.end_to_end_ns)
+            << ",\"family_construction_ns\":" << optional_ns_json(timings.family_construction_ns)
+            << ",\"end_to_end_ns\":" << optional_ns_json(timings.end_to_end_ns)
             << ",\"selection_setup_ns\":" << optional_ns_json(timings.selection_setup_ns)
             << ",\"selection_run_ns\":" << optional_ns_json(timings.selection_run_ns)
             << ",\"first_witness_query_ns\":" << optional_ns_json(timings.first_query_ns)

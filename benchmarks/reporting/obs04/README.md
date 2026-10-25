@@ -23,10 +23,14 @@ starts with the opposite strategy from the previous one.
 collector/configuration and workspace setup are reported separately, and the
 post-run observation snapshot is outside that interval. Witness selection setup,
 selector execution, and independent verification are also reported separately
-after the strategy interval. Strategy A includes its
-five documented phase scopes. Strategy B includes its run scope. Each enabled
-event stores inclusive and exclusive wall-clock ticks for every span and the
-clock period used to interpret them. There is one solver thread and one outer
+after the strategy interval. Strategy A includes six planned spans. Strategy B
+includes its run and T-S01 family-construction spans. Each enabled event stores
+inclusive and exclusive wall-clock ticks for every span and the
+clock period used to interpret them. Event schema `/7` records the separately
+measured `family_construction_ns`; it covers complete-family proposal assembly
+and is null when that phase is not entered or instrumentation is disabled.
+Schemas `/5` and `/6` retain their earlier null-field meaning. There is one
+solver thread and one outer
 worker. Native backend thread count, CPU time, heap use, and a source-mapped
 limiter are unavailable. Treat any timing difference as descriptive and
 inconclusive; this tiny analytic case is not representative of application
@@ -77,8 +81,8 @@ again, so its full duration is not reduced by the diagnostic parse time.
 Admission combines common request guards, strategy capability checks, and
 registry preparation; the current interface does not split these subphases.
 These timers stop before configuration-template creation, workspace creation,
-and the two analytic baseline strategy runs. Family construction inside the
-strategy remains unavailable and its field stays null.
+and the two analytic baseline strategy runs. Complete-family proposal
+construction is measured separately inside each strategy on enabled runs.
 
 ## Clean-source preflight capture
 

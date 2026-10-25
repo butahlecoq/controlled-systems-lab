@@ -319,6 +319,10 @@ public:
             }
             publish(result,problem,request,std::move(history),tube,std::move(minimized),std::move(lineage),
                 PreimageTarget::terminal_candidate);
+            std::optional<execution::observability::TimingScope> family_construction_timing;
+            if(result.termination==Termination::completed&&(exact_ts01||exact_ts02||exact_ts03||nominal_exact))
+                family_construction_timing=timing_scope(context,timing::family_construction);
+            ResultTimingScope family_construction_scope(std::move(family_construction_timing),result.termination);
             if(exact_ts01&&result.termination==Termination::completed) {
                 auto canonical=registry::detail::make_ts01_relation();
                 if(const auto* errors=std::get_if<Diagnostics>(&canonical)) {
