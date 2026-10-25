@@ -106,8 +106,10 @@ Both nonlinear replay terminal states are evaluated with the same `J_lambda`
 criterion. The saved geometry rows report the open-loop and receding-horizon
 values separately from the robust predicted minimax value. The exhaustive
 corner-history Python checker independently recomputes both replay costs and
-checks every open-loop minimizer. The terminal V representation has 256 vertices
-for each objective. Linux process-lifetime peak RSS is saved per separately
+checks every open-loop minimizer. Each terminal V representation stores 256
+rows: 256 distinct points for lambda 0 and 240 for lambda 1. These are stored
+representation points, not a count of exposed extreme points. Linux process peak
+RSS is saved per separately
 launched capture call; it includes the receding-horizon planner in geometry
 runs. This is a process high-water mark, not per-stage memory.
 

@@ -215,8 +215,8 @@ def catalogue_index(catalogue):
             else:
                 data.require(report["report_kind"] in ("lp","convex"),"unknown catalogue kind")
                 scope='HiGHS reference convex, nine analytic microfixtures' if report["report_kind"]=='convex' else scope
-        csv_name = "stdout.jsonl" if report.get("report_kind") == opt04.KIND else "raw-driver-output.csv" if report.get("report_kind") in ("geo04-intersection", "geo02-affine-sum") else "trials.csv"
-        trial_label = "Trial log" if report.get("report_kind") == opt04.KIND else "Measured tables"
+        csv_name = "stdout.jsonl" if report.get("report_kind") == opt04.KIND else "raw-runs.jsonl" if report.get("report_kind") == issue6_b09.KIND else "raw-driver-output.csv" if report.get("report_kind") in ("geo04-intersection", "geo02-affine-sum") else "trials.csv"
+        trial_label = "Trial log" if report.get("report_kind") == opt04.KIND else "Raw timing rows" if report.get("report_kind") == issue6_b09.KIND else "Measured tables"
         figure_name = "terminal-projections.svg" if report.get("report_kind")==issue6_b06.KIND else "projections-lambda0.svg" if report.get("report_kind")==issue6_b09.KIND else "visual.svg" if report.get("report_kind")==ext03_transform.KIND else "performance.svg" if report.get("report_kind") in (opt04.KIND, "syn-ts01-paired-comparison") else "latency.svg" if report.get("report_kind") in ("opt06-basis-reuse", opt07.KIND) else ""
         links=[("Raw JSON",rid+"/records.json"),(trial_label,rid+"/"+csv_name)]
         if figure_name: links.append(("Figure",rid+"/"+figure_name))
@@ -352,6 +352,9 @@ def stage(catalog_path,out,check=True,allow_test=False):
             if report["report_kind"] == issue3.KIND:
                 data.require(data.local_file(root, rid + ".zip").read_bytes() == archive_bytes,
                              "committed issue #3 offline ZIP differs from validated source")
+            if report["report_kind"] == issue6_b09.KIND:
+                data.require(data.local_file(root, rid + ".zip").read_bytes() == archive_bytes,
+                             "committed B09 offline ZIP differs from validated source")
             registered_records[rid]=item
             registered_artifacts[rid]=artifacts
             registered_archives[rid]=archive_bytes

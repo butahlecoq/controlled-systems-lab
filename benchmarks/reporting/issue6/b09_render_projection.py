@@ -91,7 +91,7 @@ def render(row: dict, output: Path) -> None:
         parts.append(f'<text x="{px+pw/2}" y="{py+ph+40}" text-anchor="middle" class="label">{xlabel}</text>')
         parts.append(f'<text x="{px-48}" y="{py+ph/2}" transform="rotate(-90 {px-48} {py+ph/2})" text-anchor="middle" class="label">{ylabel}</text>')
     parts.extend(['<rect x="105" y="472" width="14" height="14" class="boundary"/>',
-                  '<text x="126" y="484" class="label">Projected terminal reachable-set boundary and vertices</text>',
+                  '<text x="126" y="484" class="label">Projected terminal-set boundary and stored V rows</text>',
                   '<line x1="685" y1="479" x2="720" y2="479" stroke="#d1495b" stroke-width="3"/>',
                   '<text x="728" y="484" class="label">Open-loop replay</text>',
                   '<line x1="865" y1="479" x2="900" y2="479" stroke="#386cb0" stroke-width="3"/>',
@@ -122,7 +122,7 @@ def render(row: dict, output: Path) -> None:
         parts.append(f'<line x1="{legend_x}" y1="{544 + (stock_index == 3)*22}" x2="{legend_x+22}" y2="{544 + (stock_index == 3)*22}" stroke="{stock_color}" stroke-width="3"/>')
         parts.append(f'<text x="{legend_x+28}" y="{548 + (stock_index == 3)*22}" class="tick">{stock_label}</text>')
     parts.append(f'<text x="620" y="{chart_y+chart_h+40}" text-anchor="middle" class="label">Stage (75-second model interval)</text>')
-    parts.append('<text x="620" y="746" text-anchor="middle" class="tick">Shaded geometry: uncertain linear model. Lower stock traces: solid = open-loop; dashed = receding horizon. Replanning is not a global feedback optimality claim.</text></svg>')
+    parts.append('<text x="620" y="746" text-anchor="middle" class="tick">Shaded geometry: uncertain linear model. Dots: stored V rows; duplicate points can overlap. Solid/dashed stock traces: open-loop/receding horizon.</text></svg>')
     output.with_suffix('.svg').write_text('\n'.join(parts), encoding='utf-8')
 
 

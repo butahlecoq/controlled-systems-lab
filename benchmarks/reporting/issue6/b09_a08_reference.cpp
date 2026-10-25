@@ -4,6 +4,7 @@
 #include <chrono>
 #include <cmath>
 #include <iostream>
+#include <set>
 #include <stdexcept>
 #include <string>
 #include <string_view>
@@ -156,6 +157,16 @@ json vertices(const sets::SetData& set) {
     return result;
 }
 
+std::size_t distinct_point_count(const json& points) {
+    std::set<Vector> unique;
+    for (const auto& point : points) {
+        Vector value{};
+        for (std::size_t i = 0; i < value.size(); ++i) value[i] = point.at(i).get<double>();
+        unique.insert(value);
+    }
+    return unique.size();
+}
+
 json run(std::size_t batch, double lambda, bool geometry) {
     const auto started = std::chrono::steady_clock::now();
     const auto outcome = finite_action_minimax(request(lambda,initial_state(),4), {6561, 4096, 1e-8});
@@ -195,7 +206,8 @@ json run(std::size_t batch, double lambda, bool geometry) {
         const auto [closed_actions,closed_states] = closed_loop_replay(lambda);
         const auto terminal = vertices(winner.terminal);
         row["winner_terminal_vertices_x1_x2_x3_x4"] = terminal;
-        row["terminal_vertex_count"] = terminal.size();
+        row["terminal_v_row_count"] = terminal.size();
+        row["terminal_unique_point_count"] = distinct_point_count(terminal);
         row["open_loop_replay_states"] = open_states;
         row["open_loop_replay_terminal_state"] = open_states.back();
         row["open_loop_replay_objective_squared"] = criterion_squared(open_states.back(),lambda);
