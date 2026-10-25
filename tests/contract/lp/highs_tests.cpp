@@ -1,6 +1,7 @@
 #define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
 #include <doctest/doctest.h>
 #include <csl/adapters/lp/highs.hpp>
+#include "highs_interrupt_test_hook.hpp"
 #include "highs_warm_start_test_hook.hpp"
 #include <csl/optimization/lp_backend.hpp>
 #include <csl/optimization/linear_infeasibility_certificate.hpp>
@@ -405,6 +406,27 @@ TEST_CASE("native limits and pre-stops never claim optimal or reuse a previous c
     cost(again,p,-2);
     cost(history,p,-2);
     CHECK(again.raw_diagnostics.find("model.reused=true") != std::string::npos);
+}
+
+TEST_CASE("cancellation interrupts an active native simplex call without claiming optimality") {
+    const auto program=triangle();
+    auto [worker]=prepare(program).create();
+    std::stop_source cancellation;
+    test_support::cancel_on_next_simplex_interrupt(cancellation);
+    struct ClearInterruptHook {
+        ~ClearInterruptHook() { test_support::clear_pending_simplex_interrupt_for_test(); }
+    } clear_hook;
+    auto stopped_context=context();
+    stopped_context.cancellation=cancellation.get_token();
+    const auto stopped=accepted(worker->run(stopped_context));
+
+    CHECK(cancellation.stop_requested());
+    CHECK(stopped.termination==Termination::cancelled);
+    CHECK(stopped.outcome.value==MathematicalOutcome::undetermined);
+    CHECK(stopped.raw_diagnostics.find("native_run=true")!=std::string::npos);
+    CHECK(stopped.raw_diagnostics.find("native.model_status_name=Interrupt")!=std::string::npos);
+    CHECK_FALSE(stopped.objective.lower);
+    CHECK(check_program_result(stopped,program,Assurance::numerical).empty());
 }
 
 TEST_CASE("selection and execution reject unsupported capabilities and numerical resource policies") {

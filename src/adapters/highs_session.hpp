@@ -4,6 +4,7 @@
 #include <Highs.h>
 #include <algorithm>
 #include <chrono>
+#include <functional>
 #include <optional>
 #include <string>
 
@@ -12,6 +13,9 @@ struct CallbackState {
     const ExecutionContext& context;
     std::optional<Termination> stop;
     std::string log;
+#if defined(CSL_HIGHSLP_TESTING)
+    std::function<void()> before_simplex_interrupt_for_test;
+#endif
     void poll() {
         if (stop) return;
         if (context.cancellation.stop_requested()) stop=Termination::cancelled;
@@ -33,6 +37,9 @@ public:
                 auto& capture=*static_cast<CallbackState*>(user);
                 if (type==kCallbackLogging) capture.log+=message;
                 if (type==kCallbackSimplexInterrupt) {
+#if defined(CSL_HIGHSLP_TESTING)
+                    if (capture.before_simplex_interrupt_for_test) capture.before_simplex_interrupt_for_test();
+#endif
                     capture.poll();
                     if (input && capture.stop) input->user_interrupt=true;
                 }
