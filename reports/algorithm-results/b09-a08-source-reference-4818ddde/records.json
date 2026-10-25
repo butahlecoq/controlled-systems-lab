@@ -235,5 +235,5 @@
     "order": "alternating lambda 0 then lambda 1; each call in a separate process",
     "scope": "request construction plus public finite_action_minimax call; process startup, serialization, oracle and rendering excluded"
   },
-  "peak_rss_scope": "Linux ru_maxrss per separately launched measurement process; geometry rows also include both replay calculations"
+  "peak_rss_scope": "Linux ru_maxrss for separately launched measurement processes, sampled after minimax result assembly and before optional geometry/replay; excludes nonlinear replay and receding-horizon replanning"
 }

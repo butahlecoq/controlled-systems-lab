@@ -38,7 +38,7 @@
   "executable_bytes": 538832,
   "cmake_cache_sha256": "82fb88b8963b571708c3cb9f7db088c713285695ee04eb1ce01ef12ac5d9b223",
   "measurement_order": "alternating lambda 0 and lambda 1; one process per warmup/measurement pair",
-  "memory_observation": "Linux getrusage(RUSAGE_SELF).ru_maxrss per measurement process; not a per-stage or per-call allocation trace",
+  "memory_observation": "Linux getrusage(RUSAGE_SELF).ru_maxrss sampled after minimax result assembly and before optional geometry/replay; excludes nonlinear replay and receding-horizon replanning; not a per-stage or per-call allocation trace",
   "terminal_representation": "Bounded V representation with 256 stored rows each; 256 distinct points for lambda 0 and 240 for lambda 1; not certified to contain only extreme points",
   "renderer_sha256": "1eaaf7749528bc92150cc7bb65792c5c59a754f8479c10442e264a45b7967cf2"
 }

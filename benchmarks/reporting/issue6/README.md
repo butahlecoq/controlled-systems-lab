@@ -81,8 +81,9 @@ a deterministic plant replay of one representative minimizing open-loop plan.
 A second trajectory replans with the finite-horizon minimax solver at each
 observation. This is receding-horizon control, not a global causal-policy
 optimality claim. The lower plot shows both stock trajectories by model stage.
-Neither path is the uncertain reachable-set boundary, and the plotted points
-are numerical vertices.
+Neither path is the uncertain reachable-set boundary. The plotted points are
+stored V-representation rows; duplicate coordinates can overlap, and the rows are
+not asserted to be exposed extreme points.
 
 An independent Python oracle directly enumerates every plan and every disturbance
 corner history, checking all four state constraints and the terminal cost. It
@@ -109,9 +110,10 @@ corner-history Python checker independently recomputes both replay costs and
 checks every open-loop minimizer. Each terminal V representation stores 256
 rows: 256 distinct points for lambda 0 and 240 for lambda 1. These are stored
 representation points, not a count of exposed extreme points. Linux process peak
-RSS is saved per separately
-launched capture call; it includes the receding-horizon planner in geometry
-runs. This is a process high-water mark, not per-stage memory.
+RSS is the Linux process high-water mark sampled for measured calls after
+minimax result assembly and before optional geometry and replay calculations. It
+excludes nonlinear replay and receding-horizon replanning, and is not per-stage
+memory or per-call allocation accounting.
 
 Build and reproduce after configuring a Release tree with
 `-DCSL_BUILD_ISSUE6_B09_REPORT=ON`:
