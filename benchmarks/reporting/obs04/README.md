@@ -247,8 +247,10 @@ The current profile driver requires both `CSL_PERF_CONTROL_FIFO` and
 `CSL_PERF_ACK_FIFO`. It waits for either `ack\n` or the observed `ack\n\0`
 frame after each enable/disable command,
 with a five-second bound, and fails a capture if perf exits, rejects the command,
-or does not acknowledge. Profile output marks this scope as
-`acknowledged_perf_control_transitions` and records the number of acknowledgements.
+or does not acknowledge. Profile output marks the sample scope as
+`exclusive_strategy_port_run` and records the number of acknowledgements.
+Workspace creation occurs before the enable command; outcome checking occurs
+after disable, so both are outside the sampled interval.
 Invoke it separately with `--profile-strategy reach-back|direct-joint` and
 `--profile-calls N`; it performs a warmup and the requested number of profiled
 calls, then exits without comparison-record capture. The normal comparison run
@@ -291,9 +293,11 @@ Reach-back decoded 894 samples (100,220-byte capture); direct-joint decoded 177
 is `1588f202a0709323316b7e918070539642cbe01804362f545d57d76e5a9dac4d`.
 
 These captures establish that bounded acknowledged profiling works on this
-Linux host. They do not isolate a unique limiter: allocator and cleanup symbols
-are prominent, the driver process is profiled across setup and solver calls,
-and the report contains unresolved symbols. Treat the summaries as exploratory
-and do not infer a general performance bottleneck or compare the sample totals
-as strategy speed. Capability metadata, driver/perf logs, text reports, and raw
-`perf.data` are retained separately for each strategy.
+Linux host and isolate the strategy invocation. The leading self samples are
+allocator/free and C++ string operations; call stacks include HiGHS option and
+solver initialization. This points to backend setup/teardown and allocation as
+the local T-S01 limiter, rather than one dominant optimization kernel. Direct-
+joint has only 177 samples and both reports contain unresolved symbols, so this
+is an exploratory microprofile, not a general performance claim. Do not compare
+sample totals as strategy speed. Capability metadata, driver/perf logs, text
+reports, and raw `perf.data` are retained separately for each strategy.

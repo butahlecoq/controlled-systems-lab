@@ -105,7 +105,7 @@ def main() -> int:
     if commands != ["enable", "disable"]:
         raise RuntimeError(f"unexpected mock command sequence: {commands}")
     events = [json.loads(line) for line in passed.stdout.splitlines() if line.startswith("{")]
-    if not events or events[-1].get("sample_scope") != "acknowledged_perf_control_transitions":
+    if not events or events[-1].get("sample_scope") != "exclusive_strategy_port_run":
         raise RuntimeError("driver did not identify the acknowledged profile scope")
     if events[-1].get("acknowledged_commands") != 2:
         raise RuntimeError("driver did not count both acknowledged transitions")

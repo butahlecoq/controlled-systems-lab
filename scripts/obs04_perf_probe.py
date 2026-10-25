@@ -180,7 +180,7 @@ def main() -> int:
             result["sample_scope"] = event.get("sample_scope")
             if (event.get("passed") != args.calls or
                     event.get("acknowledged_commands") != 2 * args.calls or
-                    event.get("sample_scope") != "acknowledged_perf_control_transitions"):
+                    event.get("sample_scope") != "exclusive_strategy_port_run"):
                 result["status"] = "failed"
                 result["reason"] = "driver did not report one acknowledged enable/disable pair per call"
             elif not capture_path.is_file() or capture_path.stat().st_size == 0:
