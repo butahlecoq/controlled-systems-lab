@@ -547,9 +547,12 @@ def convex_native_phases(trial, route, solver):
                 re.fullmatch(r'[0-9]+',fields['phase.qp.retry.model_status']) is not None and
                 int(fields['phase.qp.retry.model_status']) <= 18,
                 'invalid pinned retry status')
-        require(positions['phase.qp.retry.time_limit'] < positions.get('phase.qp.retry.scheduler_threads',positions['phase.qp.retry.api_status']) <
-                positions['phase.qp.retry.api_status'] < positions['phase.qp.retry.model_status'],
+        require(positions['phase.qp.retry.time_limit'] < positions['phase.qp.retry.api_status'] <
+                positions['phase.qp.retry.model_status'],
                 'native retry return statement order differs')
+        if 'phase.qp.retry.scheduler_threads' in positions:
+            require(positions['phase.qp.retry.time_limit'] < positions['phase.qp.retry.scheduler_threads'] <
+                    positions['phase.qp.retry.api_status'], 'native retry scheduler observation order differs')
     selected={'qp':{'feasibility','qp'},'linear':{'linear'},'constant':set()}[route]
     require(phase_evidence <= selected, 'native route conflict')
     if trial.get('public_run_entered') is False:

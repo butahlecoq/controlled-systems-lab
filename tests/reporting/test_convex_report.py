@@ -67,6 +67,10 @@ class NativePhaseTests(unittest.TestCase):
                          'phase.qp.retry.time_limit=1\nphase.qp.retry.scheduler_threads=2\n'
                          'phase.qp.retry.api_status=0\nphase.qp.retry.model_status=7','completed')
         self.project(retry)
+        retry_without_width=copy.deepcopy(retry)
+        retry_without_width['result']['raw_diagnostics']=retry_without_width['result']['raw_diagnostics'].replace(
+            'phase.qp.retry.scheduler_threads=2\n','')
+        self.project(retry_without_width)
         retry['result']['raw_diagnostics']=retry['result']['raw_diagnostics'].replace(
             'phase.qp.retry.scheduler_threads=2','phase.qp.retry.scheduler_threads=999999')
         with self.assertRaises(ValueError):self.project(retry)
