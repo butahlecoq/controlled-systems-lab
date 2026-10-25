@@ -527,8 +527,10 @@ def convex_native_phases(trial, route, solver):
     phase_evidence=set()
     for key in fields:
         if key.startswith('phase.'):
-            require(key in {'phase.'+p+'.'+suffix for p in NATIVE_PHASES for suffix in ('time_limit','api_status','model_status','iterations','info')},'unknown pinned native phase field')
-            phase_evidence.add(key.split('.')[1])
+            is_scheduler_observation=key in {'phase.'+p+'.scheduler_threads' for p in NATIVE_PHASES} | {'phase.qp.retry.scheduler_threads'}
+            require(key in {'phase.'+p+'.'+suffix for p in NATIVE_PHASES for suffix in ('time_limit','api_status','model_status','iterations','info')} or
+                    is_scheduler_observation,'unknown pinned native phase field')
+            if not is_scheduler_observation: phase_evidence.add(key.split('.')[1])
     selected={'qp':{'feasibility','qp'},'linear':{'linear'},'constant':set()}[route]
     require(phase_evidence <= selected, 'native route conflict')
     if trial.get('public_run_entered') is False:
@@ -539,6 +541,10 @@ def convex_native_phases(trial, route, solver):
         prefix = 'phase.' + phase + '.'
         api, model = fields.get(prefix+'api_status'), fields.get(prefix+'model_status')
         count, info = fields.get(prefix+'iterations'), fields.get(prefix+'info')
+        scheduler_threads = fields.get(prefix+'scheduler_threads')
+        if scheduler_threads is not None:
+            require(re.fullmatch(r'[1-9][0-9]*', scheduler_threads) is not None and int(scheduler_threads) <= 4096,
+                    'invalid native scheduler width')
         require((api is None) == (model is None), 'half-paired native status')
         require(not (count is not None and info is not None), 'conflicting native iteration dispositions')
         require(api is not None or (count is None and info is None), 'iteration without returned call')
