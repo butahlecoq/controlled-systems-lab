@@ -183,8 +183,29 @@ below is the median of seven measured attempts; query values are in ns.
 
 The event `/4` records above predate the correction that stopped placing the
 whole strategy interval in `family_construction_ns`. They are retained as
-historical records only. A clean-source `/5` capture with that field explicitly
-unavailable will replace these figures as the current phase-timing evidence.
+historical records only; the clean-source `/5` capture below is the current
+phase-timing evidence.
+
+## Clean-source event `/5` capture (2026-10-25)
+
+`results/linux-omarchy-gcc16-20261025-phase-timings-v5.json` and `.jsonl`
+record the corrected event contract from clean commit
+`c5090ce6834abef61ec6eb285ca676676970fb05`. All 32 attempts passed the
+analytic-family and independent witness checks, and every attempt returned two
+distinct witnesses. The immutable record binds the source tree and binary
+hashes. The table reports medians of seven measured attempts per arm (ns).
+
+| Strategy | Collection | Strategy run | Family construction | First query | Additional query | Attempt end-to-end |
+| --- | --- | ---: | ---: | ---: | ---: | ---: |
+| reach-back | disabled | 4,976,786 | unavailable | 262,046 | 240,954 | 5,606,829 |
+| reach-back | enabled | 8,144,181 | unavailable | 460,677 | 438,606 | 9,792,726 |
+| direct-joint | disabled | 827,416 | unavailable | 240,395 | 222,935 | 1,400,328 |
+| direct-joint | enabled | 984,211 | unavailable | 327,139 | 306,326 | 1,927,633 |
+
+Family construction is explicitly unavailable because the driver still does
+not isolate that interval inside the strategies. This one T-S01 capture only
+demonstrates the timing fields and checks; it establishes no limiter, general
+instrumentation overhead, workload latency, scalability, or strategy winner.
 
 `results/strategy-run-perf-20261024/` retains the 2026-10-24 exploratory
 profiles, which were captured before control acknowledgements were added. They
