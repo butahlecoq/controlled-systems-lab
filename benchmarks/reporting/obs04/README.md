@@ -111,12 +111,14 @@ latency claim. These `/1` records use the original in-code fixture and do not
 contain scenario-file timings. Admission combines common request guards,
 strategy capability checks, and registry preparation; the current interface
 does not split these subphases.
-`csl.obs04-instrumentation-comparison-event/7` is the current raw per-attempt
-payload; the codec accepts event `/2` through `/7`. It records
+Event `/7` is used in the historical per-attempt artifacts below. The current
+driver emits event `/8`, and the codec accepts event `/2` through `/8`. It records
 the `StrategyPort::run` interval, first and additional direction query, their
 combined selection interval, independent verification, and attempt end-to-end
-time. Event `/7` also records complete-family proposal construction where the
-strategy exposes that boundary. Event `/4` was an exploratory increment that
+time. Events `/7` and `/8` also record complete-family proposal construction
+where the strategy exposes that boundary. Event `/8` adds process CPU time for
+the strategy invocation and adapter-reported backend scheduler width. Event
+`/4` was an exploratory increment that
 wrote the full strategy interval into that field; the retained `/4` artifacts
 are historical and must not be interpreted as a separate family-construction
 measurement.
