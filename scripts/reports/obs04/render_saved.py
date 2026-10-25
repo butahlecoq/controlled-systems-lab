@@ -8,6 +8,7 @@ import hashlib
 import html
 import json
 from pathlib import Path
+import re
 import statistics
 from typing import Any
 
@@ -71,8 +72,20 @@ def load_record(path: Path) -> dict[str, Any]:
     spec = _json_value(spec_text, "record spec")
     if not isinstance(spec, dict) or spec.get("schema") != "csl.comparison-spec/3":
         raise ValueError("record spec must use csl.comparison-spec/3")
+    if set(spec) != {"arms", "environment", "input_manifest_hash", "input_manifest_source",
+                     "problem_id", "repetitions", "request_digest", "schema"}:
+        raise ValueError("comparison spec fields are invalid")
     if _canonical_json(spec) != spec_text:
         raise ValueError("record spec is not canonical JSON")
+    input_hash = spec.get("input_manifest_hash")
+    problem_id = spec.get("problem_id")
+    digest_pattern = re.compile(r"[0-9a-f]{64}")
+    if (not isinstance(input_hash, str) or not digest_pattern.fullmatch(input_hash) or
+            spec.get("input_manifest_source") != "resolved-problem-canonical-bytes" or
+            not isinstance(problem_id, str) or problem_id != "csl.problem.v1.sha256:" + input_hash):
+        raise ValueError("comparison spec problem identity and input manifest hash disagree")
+    if not isinstance(spec.get("request_digest"), str) or not digest_pattern.fullmatch(spec["request_digest"]):
+        raise ValueError("comparison spec request digest is invalid")
     spec_id = hashlib.sha256(spec_text.encode("utf-8")).hexdigest()
     if record.get("comparison_spec_id") != spec_id:
         raise ValueError("comparison spec identity does not match its saved spec")
@@ -84,6 +97,10 @@ def load_record(path: Path) -> dict[str, Any]:
     if any(not isinstance(arm, dict) or set(arm) != {"configuration_id", "strategy", "instrumentation"}
            for arm in arms):
         raise ValueError("comparison spec arm fields are invalid")
+    if any(not isinstance(arm["strategy"], str) or not arm["strategy"] or
+           not isinstance(arm["instrumentation"], str) or arm["instrumentation"] not in {"enabled", "disabled"} or
+           not isinstance(arm["configuration_id"], str) for arm in arms):
+        raise ValueError("comparison spec arm values are invalid")
     if len(record["attempts"]) != len(arms) * repetitions:
         raise ValueError("comparison record does not contain every ordered attempt")
     record["_parsed_spec"] = spec
@@ -124,6 +141,8 @@ def load_record(path: Path) -> dict[str, Any]:
                 raise ValueError(f"attempts[{index}] phase status is invalid")
             if measurement.get("analytic_family_checked") is not (phase_status == "passed"):
                 raise ValueError(f"attempts[{index}] analytic-check flag disagrees with phase status")
+            if measurement.get("complete_family_verified") is not (phase_status == "passed"):
+                raise ValueError(f"attempts[{index}] complete-family flag disagrees with phase status")
         expected_strategy = arm.get("strategy") if isinstance(arm, dict) else None
         expected_instrumentation = arm.get("instrumentation") if isinstance(arm, dict) else None
         if not isinstance(config_value, dict):

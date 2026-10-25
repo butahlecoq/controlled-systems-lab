@@ -37,9 +37,10 @@ def fixture_record():
         "arms": [{"configuration_id": config_id, "strategy": strategy_id,
                   "instrumentation": "disabled"}],
         "repetitions": 4,
-        "problem_id": "problem-1",
+        "problem_id": "csl.problem.v1.sha256:" + "a" * 64,
         "request_digest": hashlib.sha256(canonical(common_request).encode()).hexdigest(),
-        "input_manifest_hash": "input-hash",
+        "input_manifest_hash": "a" * 64,
+        "input_manifest_source": "resolved-problem-canonical-bytes",
         "environment": {
             "build": {"source_revision": "commit-1", "source_tree_sha256": "tree-hash",
                       "compiler_id": "GNU", "compiler_version": "16", "build_type": "Release"},
@@ -72,7 +73,7 @@ def fixture_record():
         run_id = f"run-{index}"
         run = {
             "schema": "csl.run-statistics/6", "recorded_state": "unverified_recorded_data",
-            "run": run_id, "problem": "problem-1",
+            "run": run_id, "problem": spec["problem_id"],
             "configuration": {"id": config_id, "value": config_value},
             "final": {"kind": "synthesis", "value": {"termination": "completed"}}
             if status == "passed" else {"kind": "failed", "value": {}},
@@ -96,6 +97,17 @@ def fixture_record():
         canonical(identity_material).encode()
     ).hexdigest()
     return record
+
+
+def reseal_spec(record, spec):
+    canonical = lambda value: json.dumps(value, sort_keys=True, separators=(",", ":"), ensure_ascii=False)
+    spec_text = canonical(spec)
+    record["spec"] = spec_text
+    spec_id = hashlib.sha256(spec_text.encode()).hexdigest()
+    record["comparison_spec_id"] = spec_id
+    identity_material = {"attempts": record["attempts"], "comparison_spec_id": spec_id,
+                         "schema": "csl.comparison-record/1"}
+    record["comparison_run_id"] = hashlib.sha256(canonical(identity_material).encode()).hexdigest()
 
 
 class SavedRendererTests(unittest.TestCase):
@@ -165,6 +177,39 @@ class SavedRendererTests(unittest.TestCase):
             path = Path(temp) / "record.json"
             path.write_text(json.dumps(record), encoding="utf-8")
             with self.assertRaisesRegex(ValueError, "analytic-check flag"):
+                render_saved.load_record(path)
+
+    def test_rejects_passed_phase_without_complete_family(self):
+        record = fixture_record()
+        measurement = json.loads(record["attempts"][1]["measurement_payload"])
+        measurement["complete_family_verified"] = False
+        record["attempts"][1]["measurement_payload"] = json.dumps(measurement)
+        with tempfile.TemporaryDirectory() as temp:
+            path = Path(temp) / "record.json"
+            path.write_text(json.dumps(record), encoding="utf-8")
+            with self.assertRaisesRegex(ValueError, "complete-family flag"):
+                render_saved.load_record(path)
+
+    def test_rejects_spec_hash_not_bound_to_problem_id(self):
+        record = fixture_record()
+        spec = json.loads(record["spec"])
+        spec["input_manifest_hash"] = "b" * 64
+        reseal_spec(record, spec)
+        with tempfile.TemporaryDirectory() as temp:
+            path = Path(temp) / "record.json"
+            path.write_text(json.dumps(record), encoding="utf-8")
+            with self.assertRaisesRegex(ValueError, "problem identity"):
+                render_saved.load_record(path)
+
+    def test_rejects_unknown_instrumentation_mode(self):
+        record = fixture_record()
+        spec = json.loads(record["spec"])
+        spec["arms"][0]["instrumentation"] = "maybe"
+        reseal_spec(record, spec)
+        with tempfile.TemporaryDirectory() as temp:
+            path = Path(temp) / "record.json"
+            path.write_text(json.dumps(record), encoding="utf-8")
+            with self.assertRaisesRegex(ValueError, "arm values"):
                 render_saved.load_record(path)
 
     def test_output_cannot_replace_record(self):
