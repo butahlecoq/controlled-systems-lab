@@ -1058,9 +1058,9 @@ TrialRecord unserializable_outcome_trial(const application::PreparedComparison& 
         << ",\"additional_witness_query_ns\":" << optional_ns_json(timings.additional_query_ns)
         << ",\"verification_ns\":" << optional_ns_json(timings.verification_ns)
         << ",\"requested_witness_count\":2,\"returned_witness_count\":"
-        << (timings.selected_witnesses?std::to_string(timings.selected_witnesses->batch.returned_count()):"null")
+        << "null"
         << ",\"distinct_witness_count\":"
-        << (timings.selected_witnesses?std::to_string(timings.selected_witnesses->batch.distinct_count()):"null")
+        << "null"
         << ",\"status\":\"failed\",\"phase_status\":\"failed\",\"solver_returned\":true,"
         << "\"solver_outcome_in_run_artifact\":false,\"solver_status\":\""
         << terminal_status_name(attempt_status(outcome)) << "\",\"solver_termination\":\""
