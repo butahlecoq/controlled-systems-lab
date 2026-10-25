@@ -1,6 +1,6 @@
 {
   "schema": "csl.issue6-b09-capture-provenance/1",
-  "source_commit": "75d8e5a5eaa9a5807a449086f8d206c254a2f315",
+  "source_commit": "3d043f99ee226f11aead3c6b82af84e985e838c7",
   "source_tree_clean_at_build": true,
   "build_type": "Release",
   "compiler": "GCC 16.2.1",
@@ -17,18 +17,18 @@
     "cpu": "AMD Ryzen 5 3550H with Radeon Vega Mobile Gfx",
     "logical_processors": 8,
     "load_average_before_run": [
-      0.18,
-      0.28,
-      0.33
+      0.25,
+      0.23,
+      0.29
     ],
-    "uptime_before_run": "2 days, 16:49"
+    "uptime_before_run": "2 days, 16:54"
   },
-  "scenario_sha256": "2b17fd772cd6871523dd4f5fd6c9a06a13dc4daad36b9fbac60b9c035bbfb85c",
-  "driver_sha256": "48a9f021663a13ea73d7d93789b54fbc2e7b70cd3790c31d13ca106c31b67b29",
-  "executable_sha256": "64aa7f42db723a3c86d9c1dea1bab63a9677f3548f9fc20c3384ab23bd2ad9e2",
+  "scenario_sha256": "21bbad25657ad07267b4da9c2d77ef36f961dac7c9986f2d895d61a78a74db33",
+  "driver_sha256": "5340ebfda53c425080fad33ec9b03deeeb4508efdf251c611b4f928f90a9f893",
+  "executable_sha256": "9bc3c8b72e305374dbdf932996c915acca5a2675838056d9371f546b647e5aae",
   "geometry_record_sha256": {
-    "0.0": "98ba6a9763865e474917e5b118b3ae8e5cb8117eae84e935c06d150d21414b25",
-    "1.0": "6613374965b337cf63a56328b09d7c9d6b7a19abf708c5290212c019bcd2ab02"
+    "0.0": "b10d2302b9ca3e65ac46163a653a1f3fed68bb1ea61b59e4f80e791b208691e2",
+    "1.0": "9b5c12545e5012061c50de37207fa87f238be787f7e6b7e57618c037c707c091"
   },
   "measurements_per_objective": 7,
   "excluded_warmups_per_objective": 1,

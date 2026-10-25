@@ -1,0 +1,198 @@
+{
+  "schema": "csl.issue6-b09-evidence/1",
+  "report_id": "b09-a08-source-reference-3d043f99",
+  "source_commit": "3d043f99ee226f11aead3c6b82af84e985e838c7",
+  "claim": "A08 source-revision finite-action reference; not historical reproduction",
+  "cases": [
+    {
+      "lambda": 0.0,
+      "objective_squared": 2518.0254696696175,
+      "objective_norm": 50.1799309452456,
+      "feasible_plan_count": 76,
+      "winner_count": 4,
+      "winner_action_sequences": [
+        [
+          0,
+          0,
+          6,
+          6
+        ],
+        [
+          0,
+          1,
+          4,
+          7
+        ],
+        [
+          0,
+          2,
+          2,
+          8
+        ],
+        [
+          1,
+          0,
+          3,
+          8
+        ]
+      ],
+      "closed_loop_action_indices": [
+        0,
+        0,
+        6,
+        7
+      ],
+      "median_elapsed_ns": 243294905,
+      "minimum_elapsed_ns": 238114601,
+      "maximum_elapsed_ns": 261631377,
+      "oracle_agrees": true
+    },
+    {
+      "lambda": 1.0,
+      "objective_squared": 13408.277178974853,
+      "objective_norm": 115.79411547645611,
+      "feasible_plan_count": 76,
+      "winner_count": 6,
+      "winner_action_sequences": [
+        [
+          0,
+          0,
+          7,
+          5
+        ],
+        [
+          0,
+          1,
+          5,
+          6
+        ],
+        [
+          0,
+          2,
+          3,
+          7
+        ],
+        [
+          0,
+          3,
+          1,
+          8
+        ],
+        [
+          1,
+          0,
+          4,
+          7
+        ],
+        [
+          1,
+          1,
+          2,
+          8
+        ]
+      ],
+      "closed_loop_action_indices": [
+        0,
+        0,
+        7,
+        6
+      ],
+      "median_elapsed_ns": 246247677,
+      "minimum_elapsed_ns": 239973090,
+      "maximum_elapsed_ns": 253728361,
+      "oracle_agrees": true
+    }
+  ],
+  "objective_definition": "sqrt((x1-60)^2+x2^2+(x3-24)^2+x4^2+lambda*(x2-2.5*x4)^2), lambda in {0,1}",
+  "complete_open_loop_winner_sequences": {
+    "0.0": [
+      [
+        0,
+        0,
+        6,
+        6
+      ],
+      [
+        0,
+        1,
+        4,
+        7
+      ],
+      [
+        0,
+        2,
+        2,
+        8
+      ],
+      [
+        1,
+        0,
+        3,
+        8
+      ]
+    ],
+    "1.0": [
+      [
+        0,
+        0,
+        7,
+        5
+      ],
+      [
+        0,
+        1,
+        5,
+        6
+      ],
+      [
+        0,
+        2,
+        3,
+        7
+      ],
+      [
+        0,
+        3,
+        1,
+        8
+      ],
+      [
+        1,
+        0,
+        4,
+        7
+      ],
+      [
+        1,
+        1,
+        2,
+        8
+      ]
+    ]
+  },
+  "receding_horizon_action_sequences": {
+    "0.0": [
+      0,
+      0,
+      6,
+      7
+    ],
+    "1.0": [
+      0,
+      0,
+      7,
+      6
+    ]
+  },
+  "geometry_records": [
+    "lambda0-result.json",
+    "lambda1-result.json"
+  ],
+  "visuals": [
+    "projections-lambda0.svg",
+    "projections-lambda1.svg"
+  ],
+  "independent_oracle": "independent-oracle-verification.json",
+  "raw_measurements": "raw-runs.jsonl",
+  "assurance": "numerical; independent exhaustive corner-history oracle agrees with the complete fixed-plan minimizer family"
+}

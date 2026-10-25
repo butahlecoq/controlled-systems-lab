@@ -94,8 +94,8 @@ tolerance in squared objective when retaining near-optimal plans.
 Seven measured Release calls per objective follow one excluded warmup. The public
 call includes request construction and minimax solution, but not process startup,
 serialization, independent enumeration or figure rendering. On the recorded
-8-thread Ryzen 5 3550H host, medians were 242.215 ms (lambda 0; range
-237.100–254.395 ms) and 242.795 ms (lambda 1; range 235.211–247.650 ms);
+8-thread Ryzen 5 3550H host, medians were 243.295 ms (lambda 0; range
+238.115–261.631 ms) and 246.248 ms (lambda 1; range 239.973–253.728 ms);
 complete raw records are in the B09 result bundle.
 These are single-adapter observations, not a speed comparison or scalability
 claim. No source-mapped limiter profile was collected. Assurance is numerical;
