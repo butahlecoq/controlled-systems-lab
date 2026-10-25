@@ -311,7 +311,8 @@ def export_tables(record_path: Path, output_dir: Path) -> None:
     _write_csv(target / "module-spans.csv", span_fields, span_rows)
 
     summary_fields = ["arm_index", "strategy", "instrumentation", "task", "operation", "module", "backend", "stage", "query",
-                      "clock", "planned_spans", "observed_calls", "available_durations", "median_ns", "p95_ns",
+                      "clock", "planned_spans", "returned_calls", "known_not_called_spans", "unknown_execution_spans",
+                      "available_durations", "total_inclusive_ns", "median_ns", "p95_ns",
                       "minimum_ns", "maximum_ns", "available_exclusive_durations", "median_exclusive_wall_ns", "p95_exclusive_wall_ns",
                       "tail_statistic"]
     summary_rows = []
@@ -322,8 +323,11 @@ def export_tables(record_path: Path, output_dir: Path) -> None:
         exclusive_durations = sorted(Fraction(row["exclusive_wall_ns"]) for row in measured_rows
                                      if row["exclusive_wall_availability"] == "available")
         p95 = durations[max(0, (95 * len(durations) + 99) // 100 - 1)] if durations else ""
-        observed_calls = sum(row["execution_kind"] == "observed_return" for row in measured_rows)
-        summary_rows.append(dict(zip(summary_fields, [*key, len(measured_rows), observed_calls, len(durations),
+        returned_calls = sum(row["execution_kind"] == "observed_return" for row in measured_rows)
+        known_not_called = sum(row["execution_kind"] == "known_not_called" for row in measured_rows)
+        unknown_execution = sum(row["execution_kind"] == "unknown" for row in measured_rows)
+        summary_rows.append(dict(zip(summary_fields, [*key, len(measured_rows), returned_calls,
+            known_not_called, unknown_execution, len(durations), str(sum(durations)) if durations else "",
             str(statistics.median(durations)) if durations else "", str(p95) if durations else "",
             min(durations) if durations else "", max(durations) if durations else "",
             len(exclusive_durations),
@@ -341,7 +345,7 @@ def export_tables(record_path: Path, output_dir: Path) -> None:
         "source": "saved comparison record only; no solver, selector, or provider calls",
         "duration": "Recorded clock ticks converted with the persisted clock period to exact rational nanoseconds.",
         "cpu_and_memory": "Run-level process CPU and peak RSS observations remain in attempts.csv with scope and availability; per-span values are explicitly unavailable when the run schema does not expose them.",
-        "aggregation": "Phase and module summaries use measured attempts only and report median plus nearest-rank p95. Unavailable phases remain explicit. Span durations retain exact rational nanoseconds; every attempt remains in the raw record and CSV exports.",
+        "aggregation": "Phase and module summaries use measured attempts only and report totals, median and nearest-rank p95. Module totals sum spans within one operation row and are not end-to-end latency; do not sum across nested rows. Unavailable phases remain explicit. Span durations retain exact rational nanoseconds; every attempt remains in the raw record and CSV exports.",
     }
     (target / "manifest.json").write_text(json.dumps(manifest, indent=2, sort_keys=True) + "\n", encoding="utf-8")
 

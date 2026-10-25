@@ -19,7 +19,7 @@ The output contains:
 | `attempts.csv` | Every warm-up and measured attempt, status, run identity and recorded run-level measurements. Structured final result, selection evidence, resource observation and the complete event payload remain as JSON columns so objective conventions, residuals, evidence and failure detail accompany timing without being recomputed. |
 | `phase-summary.csv` | Per-arm phase summaries over measured attempts only. |
 | `module-spans.csv` | Every persisted module span, parentage, status, termination, clock, iteration and representation-size availability. |
-| `module-summary.csv` | Per-arm, per-operation planned span count, observed return count, inclusive and exclusive duration counts, medians, p95 values, minimum and maximum. |
+| `module-summary.csv` | Per-arm, per-operation planned span count, returned/known-not-called/unknown execution counts, total and distribution of inclusive duration, plus exclusive duration counts, medians and p95 values. |
 | `manifest.json` | Export schema, input identities, byte-preservation hash and metric semantics. |
 
 The record track is carried into the manifest and attempt rows. Historical
@@ -34,11 +34,13 @@ integer. Exclusive wall duration subtracts the union of recorded descendant
 intervals clipped to the span; it is unavailable when the span or a descendant
 interval is incomplete or uses a different clock. Span rows are observations,
 not additive phases: nested and overlapping worker durations are never summed
-into run latency. Aggregate worker-work and per-span CPU/work are unavailable
-because the current saved schema does not record their selection or scope.
-Summary values include measured attempts only; `attempts.csv` and
-`module-spans.csv` retain warm-ups, failed or stopped attempts, and unavailable
-values.
+into run latency. `total_inclusive_ns` sums available per-attempt spans within
+one operation row; it is operation work across those observations, not
+end-to-end latency, and callers must not sum it across nested operation rows.
+Aggregate worker-work and per-span CPU/work are unavailable because the current
+saved schema does not record their selection or scope. Summary values include
+measured attempts only; `attempts.csv` and `module-spans.csv` retain warm-ups,
+failed or stopped attempts, and unavailable values.
 
 Run-level process CPU and peak RSS preserve the metric scope/status and missing
 reason in `attempts.csv`. The current run-statistics schema does not expose

@@ -76,21 +76,31 @@ class Obs05ExportTests(unittest.TestCase):
                 span["completion_observed"] = True
             attempt["run"] = _canonical(run)
             attempt["run_digest"] = hashlib.sha256(attempt["run"].encode()).hexdigest()
+        failed_run = json.loads(record["attempts"][3]["run"])
+        failed_run["statistics"]["spans"][1]["execution"] = {"kind": "unknown", "value": {}}
+        record["attempts"][3]["run"] = _canonical(failed_run)
+        record["attempts"][3]["run_digest"] = hashlib.sha256(record["attempts"][3]["run"].encode()).hexdigest()
         spec = json.loads(record["spec"])
         spec["repetitions"] = 5
         record["spec"] = _canonical(spec)
         record["comparison_spec_id"] = hashlib.sha256(record["spec"].encode()).hexdigest()
-        unsupported = json.loads(json.dumps(record["attempts"][-1]))
+        unsupported = json.loads(json.dumps(record["attempts"][2]))
         unsupported["repetition_index"] = 4
         unsupported["run_id"] = "run-4"
         unsupported["reported_status"] = "unsupported"
         unsupported_measurement = json.loads(unsupported["measurement_payload"])
         unsupported_measurement.update(repetition=4, status="unsupported", phase_status="failed",
-                                       analytic_family_checked=False, complete_family_verified=False)
+                                       analytic_family_checked=False, complete_family_verified=False,
+                                       strategy_run_ns=None)
         unsupported["measurement_payload"] = _canonical(unsupported_measurement)
         unsupported_run = json.loads(unsupported["run"])
         unsupported_run["run"] = "run-4"
         unsupported_run["final"] = {"kind": "unsupported", "value": {}}
+        unsupported_run["statistics"]["spans"][3]["execution"] = {"kind": "known_not_called", "value": {
+            "reason": "capability_rejected", "source_location": "fixture", "source_version": "1"}}
+        for endpoint in ("start", "end"):
+            unsupported_run["statistics"]["spans"][3]["interval"]["value"][endpoint] = {
+                "state": "unavailable", "value": None, "reason": "not_applicable", "detail": ""}
         unsupported["run"] = _canonical(unsupported_run)
         unsupported["run_digest"] = hashlib.sha256(unsupported["run"].encode()).hexdigest()
         record["attempts"].append(unsupported)
@@ -119,20 +129,28 @@ class Obs05ExportTests(unittest.TestCase):
                 summaries = list(csv.DictReader(stream))
             root_summary = next(row for row in summaries if row["operation"] == "strategy/run")
             self.assertEqual(root_summary["planned_spans"], "4")
-            self.assertEqual(root_summary["observed_calls"], "4")
+            self.assertEqual(root_summary["returned_calls"], "4")
+            self.assertEqual(root_summary["known_not_called_spans"], "0")
+            self.assertEqual(root_summary["unknown_execution_spans"], "0")
             self.assertEqual(root_summary["available_durations"], "4")
+            self.assertEqual(root_summary["total_inclusive_ns"], "80")
             self.assertEqual(root_summary["median_ns"], "20")
             self.assertEqual(root_summary["p95_ns"], "20")
             self.assertEqual(root_summary["available_exclusive_durations"], "4")
             self.assertEqual(root_summary["median_exclusive_wall_ns"], "5")
-            self.assertEqual(root_summary["p95_exclusive_wall_ns"], "5")
+            self.assertEqual(root_summary["p95_exclusive_wall_ns"], "10")
             self.assertEqual(root_summary["tail_statistic"], "nearest-rank p95; spans are per attempt and are not summed")
             worker_summary = next(row for row in summaries if row["operation"] == "worker/a")
             self.assertEqual(worker_summary["planned_spans"], "8")
-            self.assertEqual(worker_summary["available_durations"], "8")
-            self.assertEqual(worker_summary["median_ns"], "11")
+            self.assertEqual(worker_summary["returned_calls"], "7")
+            self.assertEqual(worker_summary["known_not_called_spans"], "1")
+            self.assertEqual(worker_summary["available_durations"], "7")
+            self.assertEqual(worker_summary["total_inclusive_ns"], "76")
+            self.assertEqual(worker_summary["median_ns"], "10")
             self.assertEqual(worker_summary["p95_ns"], "12")
-            self.assertEqual(worker_summary["median_exclusive_wall_ns"], "11")
+            family_summary = next(row for row in summaries if row["operation"] == "strategy/family")
+            self.assertEqual(family_summary["unknown_execution_spans"], "1")
+            self.assertEqual(worker_summary["median_exclusive_wall_ns"], "10")
             with (destination / "phase-summary.csv").open(newline="", encoding="utf-8") as stream:
                 phases = list(csv.DictReader(stream))
             strategy_summary = next(row for row in phases if row["metric"] == "strategy_run_ns")
