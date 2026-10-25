@@ -353,3 +353,28 @@ renderer’s identity checks and produced the retained HTML report. The capture
 script, raw stdout/stderr, measurement JSON, record, and report are kept beside
 one another. This one observation does not establish a stable resource
 envelope or general scalability.
+
+## Five clean-source process observations (2026-10-25)
+
+`results/linux-omarchy-gcc16-20261025-resource-observation-v2-clean/` adds
+repeatability evidence from five fresh sequential processes using the same
+Release binary (SHA-256
+`f66c23baf4c8814db75fbc0ad763f58eb7d2a24f56670d526972c1165c83570b`). Its
+embedded build manifest records clean source commit
+`9994eef03eeae456a89e041b9cac6b7518ba77b4` and snapshot SHA-256
+`0cc273de74066a9a24b0aae827501126c691905a8f5ad2c21a895892da472355`.
+
+Each process completed all 32 attempts, returned status 0, and wrote no stderr.
+Peak RSS had a median of 46,628 KiB and a range of 45,688–47,152 KiB. The
+external whole-process wall-time observation had a median of 738,357,090 ns
+and a range of 736,772,335–745,210,148 ns; it includes startup, fixture and
+preparation, all attempts, encoding, and file output. Run-specific resource
+measurements, comparison records, and stdout/stderr are retained separately;
+the first saved record also has a rendered HTML report. The summarizer validates
+all five records with the saved-record renderer before reporting the summary.
+
+These measurements describe one small T-S01 process on this Linux host. They do
+not measure per-attempt memory, enforce a memory limit, establish a general
+resource envelope, compare strategy performance, or identify a unique limiter.
+They add repeatable initial process-resource evidence to #83; full resource
+policy/accounting and the missing timing phases remain open.
