@@ -194,6 +194,7 @@ TEST_CASE("ordinary selected-witness pair plots never call the geometry provider
     REQUIRE(std::holds_alternative<ar::PlotTrajectoryPair>(outcome));
     const auto& plotted = std::get<ar::PlotTrajectoryPair>(outcome);
     CHECK(plotted.kind == ar::PlotSampleKind::selected_witnesses);
+    CHECK(plotted.kind != ar::PlotSampleKind::support_samples);
     REQUIRE(plotted.paths.size() == 1);
     CHECK(plotted.paths[0].points == std::vector<std::array<double,2>>{{2.0,-0.5},{1.0,-1.5}});
     REQUIRE(plotted.terminal_samples.size() == 1);

@@ -80,7 +80,7 @@ struct PlotRequest {
         CoordinatePair, SetRelation, Assurance, RequestId, ReferenceId);
 };
 
-enum class PlotSampleKind { selected_witnesses };
+enum class PlotSampleKind { selected_witnesses, support_samples };
 
 struct PlotTrajectoryPath {
     RunId run;
