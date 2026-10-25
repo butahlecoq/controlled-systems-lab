@@ -72,12 +72,28 @@ struct SetProjectionRequest {
     ReferenceId ideal_output;
 };
 
+struct SupportSampleDirection {
+    std::array<double, 2> direction;
+    RequestId request;
+    ReferenceId ideal_output;
+};
+
+struct SupportSamplesRequest {
+    std::shared_ptr<const PlotProjectionSource> source;
+    StageIndex stage;
+    CoordinatePair coordinates;
+    std::vector<SupportSampleDirection> directions;
+    Assurance assurance;
+};
+
 struct PlotRequest {
-    std::variant<TrajectoryPairRequest, SetProjectionRequest> source;
+    std::variant<TrajectoryPairRequest, SetProjectionRequest, SupportSamplesRequest> source;
 
     static PlotRequest trajectory_pair(CoordinatePair);
     static PlotRequest set_projection(std::shared_ptr<const PlotProjectionSource>, StageIndex,
         CoordinatePair, SetRelation, Assurance, RequestId, ReferenceId);
+    static PlotRequest support_samples(std::shared_ptr<const PlotProjectionSource>, StageIndex,
+        CoordinatePair, std::vector<SupportSampleDirection>, Assurance);
 };
 
 enum class PlotSampleKind { selected_witnesses, support_samples };
@@ -126,6 +142,27 @@ struct PlotSetProjection {
     PlotQueryCost cost;
 };
 
+struct PlotSupportSample {
+    std::array<double, 2> direction;
+    std::variant<double, EmptySupport, UnboundedSupport> value;
+    std::optional<std::array<double, 2>> point;
+    GeometryReference reference;
+    EvidenceSupport support;
+    std::vector<std::string> assumptions;
+};
+
+struct PlotSupportSamples {
+    ProblemId problem;
+    PlotSourceOwner source;
+    StageIndex stage;
+    std::array<CoordinateAnnotation, 2> coordinates;
+    PlotSampleKind kind{PlotSampleKind::support_samples};
+    std::vector<PlotSupportSample> samples;
+    registry::Provenance provider;
+    std::optional<FamilySourceEvidence> family_evidence;
+    PlotQueryCost cost;
+};
+
 struct PlotRequestFailure {
     std::optional<GeometryRequestIdentity> identity;
     std::optional<registry::Provenance> selected_provider;
@@ -133,7 +170,8 @@ struct PlotRequestFailure {
     std::variant<registry::Rejection, Unsupported, OperationStopped, ArtifactError> cause;
 };
 
-using PlotOutcome = std::variant<PlotTrajectoryPair, PlotSetProjection, PlotRequestFailure>;
+using PlotOutcome = std::variant<PlotTrajectoryPair, PlotSetProjection, PlotSupportSamples,
+    PlotRequestFailure>;
 
 PlotOutcome make_plot(const PlotData&, const PlotRequest&);
 PlotOutcome make_plot(const PlotData&, const PlotRequest&,

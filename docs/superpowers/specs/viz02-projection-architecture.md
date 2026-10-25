@@ -24,11 +24,13 @@ auto projection = make_plot(plot_data, request, geometry_provider, context);
 
 If the caller asks for validated arithmetic that no selected provider supports, preparation returns a typed rejection before workspace creation. If a geometry operation runs but stops or returns unsupported, the failure retains the source/request identity, selected provider context, and elapsed operation duration when available.
 
+Finite support samples are a third explicit request path. The caller supplies one or more nonzero 2D directions, each with its own request and reference identity. The adapter embeds each direction into the chosen two coordinates of the source relation and invokes the selected `SupportQuery` provider. Each returned support value, optional maximizing point, support-value evidence, reference and assumptions stay tagged as `support_samples`; they are not returned as a complete set projection. A V-only support provider rejects an H source during admission.
+
 ## Shape
 
-Use one tagged `PlotRequest` and a `PlotOutcome` variant while keeping the two execution paths separate inside the adapter. The trajectory alternative contains only an ordered pair of state-coordinate indices; it extracts the pair at every state point and marks each path's terminal point. The set-projection alternative contains a projectable source, stage, coordinate pair, required `SetRelation`, `Assurance`, `RequestId`, and `ReferenceId`. A projection source owns a live `SetHandle`, the problem and source owner identity, and a complete stage-to-relation coordinate map. The map has one row per state stage and one relation index per state coordinate, so a joint family can select a state marginal without guessing how its stored state and control coordinates are ordered.
+Use one tagged `PlotRequest` and a `PlotOutcome` variant while keeping the trajectory, projection, and support-sample paths separate inside the adapter. The trajectory alternative contains only an ordered pair of state-coordinate indices; it extracts the pair at every state point and marks each path's terminal point. The set-projection alternative contains a projectable source, stage, coordinate pair, required `SetRelation`, `Assurance`, `RequestId`, and `ReferenceId`. The support-sample alternative contains a projectable source, stage, coordinate pair, explicit 2D directions and a unique request/reference identity per direction. A projection source owns a live `SetHandle`, the problem and source owner identity, and a complete stage-to-relation coordinate map. The map has one row per state stage and one relation index per state coordinate, so a joint family can select a state marginal without guessing how its stored state and control coordinates are ordered.
 
-`make_plot(plot_data, trajectory_request)` is pure selection of state-coordinate values and terminal samples. It has no provider parameter. `make_plot(plot_data, set_request, prepared_geometry_provider, context)` validates the source map and pair, constructs the existing `OperationRequest{Projection{...}}`, prepares the selected provider, creates a workspace only after admission, and runs it. The result copies the returned `GeometryReference`, relation, support, assumptions and selected actual provider provenance. It also records `std::chrono::nanoseconds` for the geometry operation run, separate from synthesis and strategy timings. This is descriptive wall time, not CPU work or a complexity count.
+`make_plot(plot_data, trajectory_request)` is pure selection of state-coordinate values and terminal samples. It has no provider parameter. `make_plot(plot_data, set_request, prepared_geometry_provider, context)` validates the source map and pair, constructs the existing `OperationRequest{Projection{...}}`, prepares the selected provider, creates a workspace only after admission, and runs it. The result copies the returned `GeometryReference`, relation, support, assumptions and selected actual provider provenance. The support-sample path embeds each 2D direction in the full source dimension, prepares and runs one existing `SupportQuery` per direction, and retains optional projected maximizers and support values separately from set geometry. Both geometry-backed paths record only wall time around operation runs, separate from synthesis and strategy timings. These durations are descriptive, not CPU work or complexity counts.
 
 The source factory for an `OptimalFamily` accepts only a live complete family with registry verification and an available concrete relation representation. It obtains ordinary set data from the family payload, then retains the family identity and completeness support alongside (not inside) the projection evidence. If the payload has no projectable relation view, or the family is partial, candidate-only, or merely decoded, construction returns unsupported. A direct reachable-set source must provide its own live `SetHandle`, source identity and state-coordinate map. The adapter never infers a family handle from a witness, run identity, or coordinate dimension.
 
@@ -83,13 +85,28 @@ struct SetProjectionRequest {
     RequestId request;
     ReferenceId ideal_output;
 };
-struct PlotRequest {
-    std::variant<TrajectoryPairRequest, SetProjectionRequest> source;
-    static PlotRequest trajectory_pair(CoordinatePair);
-    static PlotRequest set_projection(PlotProjectionSource, StageIndex,
-        CoordinatePair, SetRelation, Assurance, RequestId, ReferenceId);
+struct SupportSampleDirection {
+    std::array<double, 2> direction;
+    RequestId request;
+    ReferenceId ideal_output;
 };
-struct PlotQueryCost { std::chrono::nanoseconds geometry_operation_elapsed; };
+struct SupportSamplesRequest {
+    std::shared_ptr<const PlotProjectionSource> source;
+    StageIndex stage;
+    CoordinatePair coordinates;
+    std::vector<SupportSampleDirection> directions;
+    Assurance assurance;
+};
+struct PlotRequest {
+    std::variant<TrajectoryPairRequest, SetProjectionRequest, SupportSamplesRequest> source;
+    static PlotRequest trajectory_pair(CoordinatePair);
+    static PlotRequest set_projection(std::shared_ptr<const PlotProjectionSource>, StageIndex,
+        CoordinatePair, SetRelation, Assurance, RequestId, ReferenceId);
+    static PlotRequest support_samples(std::shared_ptr<const PlotProjectionSource>, StageIndex,
+        CoordinatePair, std::vector<SupportSampleDirection>, Assurance);
+};
+enum class PlotSampleKind { selected_witnesses, support_samples };
+struct PlotQueryCost { std::chrono::nanoseconds geometry_operation_elapsed{}; };
 struct PlotTrajectoryPath {
     RunId run;
     std::size_t source_ordinal;
@@ -98,6 +115,11 @@ struct PlotTrajectoryPath {
     double objective;
     PlotEvidence evidence;
     std::vector<std::array<double, 2>> points;
+};
+struct PlotTerminalSample {
+    RunId run;
+    std::size_t source_ordinal;
+    std::array<double, 2> point;
 };
 struct PlotTrajectoryPair {
     ProblemId problem;
@@ -111,23 +133,43 @@ struct PlotRequestFailure {
     std::optional<GeometryRequestIdentity> identity;
     std::optional<registry::Provenance> selected_provider;
     std::optional<PlotQueryCost> cost;
-    std::variant<Rejection, Unsupported, OperationStopped, ArtifactError> cause;
+    std::variant<registry::Rejection, Unsupported, OperationStopped, ArtifactError> cause;
 };
 struct PlotSetProjection {
-    StageIndex stage;
+    ProblemId problem;
     PlotSourceOwner source;
+    StageIndex stage;
     GeometryReference reference;
     SetHandle projected_relation;
-    CoordinatePair coordinates;
-    std::array<CoordinateAnnotation, 2> coordinate_metadata;
+    std::array<CoordinateAnnotation, 2> coordinates;
     SetRelation relation;
     EvidenceSupport support;
     std::vector<std::string> assumptions;
     registry::Provenance provider;
     std::optional<FamilySourceEvidence> family_evidence;
-    std::optional<PlotQueryCost> cost;
+    PlotQueryCost cost;
 };
-using PlotOutcome = std::variant<PlotTrajectoryPair, PlotSetProjection, PlotRequestFailure>;
+struct PlotSupportSample {
+    std::array<double, 2> direction;
+    std::variant<double, EmptySupport, UnboundedSupport> value;
+    std::optional<std::array<double, 2>> point;
+    GeometryReference reference;
+    EvidenceSupport support;
+    std::vector<std::string> assumptions;
+};
+struct PlotSupportSamples {
+    ProblemId problem;
+    PlotSourceOwner source;
+    StageIndex stage;
+    std::array<CoordinateAnnotation, 2> coordinates;
+    PlotSampleKind kind{PlotSampleKind::support_samples};
+    std::vector<PlotSupportSample> samples;
+    registry::Provenance provider;
+    std::optional<FamilySourceEvidence> family_evidence;
+    PlotQueryCost cost;
+};
+using PlotOutcome = std::variant<PlotTrajectoryPair, PlotSetProjection,
+    PlotSupportSamples, PlotRequestFailure>;
 
 PlotOutcome make_plot(const PlotData&, const PlotRequest&);
 PlotOutcome make_plot(const PlotData&, const PlotRequest&,
@@ -139,7 +181,7 @@ The implementation should use concrete success/failure variants rather than defa
 
 ## Synthesis decision
 
-Use Candidate B's tagged `PlotRequest`/`PlotResult` and source-supplied live `SetHandle`. This most directly matches the issue's request object, expresses stage-to-joint-coordinate selection, and refuses to invent an `OptimalFamily` conversion that existing payloads do not promise. Graft Candidate A's separate source-family claim and failure provenance/cost fields so callers can distinguish family completeness from geometry evidence and retain context across rejection or stop. The cross-judge also required a bound family-source factory and an unambiguous stage mapping; those are included here. Reject Candidate A's loose `PlotSetSource` construction as too easy to misbind, and reject renderer-managed raw `GeometryOperation` construction because it would duplicate provider policy and evidence labeling.
+Use Candidate B's tagged `PlotRequest`/`PlotOutcome` and source-supplied live `SetHandle`. This most directly matches the issue's request object, expresses stage-to-joint-coordinate selection, and refuses to invent an `OptimalFamily` conversion that existing payloads do not promise. Graft Candidate A's separate source-family claim and failure provenance/cost fields so callers can distinguish family completeness from projection evidence and retain context across rejection or stop. The cross-judge also required a bound family-source factory and an unambiguous stage mapping; those are included here. Reject Candidate A's loose `PlotSetSource` construction as too easy to misbind, and reject renderer-managed raw `GeometryOperation` construction because it would duplicate provider policy and evidence labeling.
 
 ## Tradeoffs accepted
 

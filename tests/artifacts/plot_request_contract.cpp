@@ -3,6 +3,7 @@
 
 #include <csl/artifacts/plot_request.hpp>
 #include <csl/geometry/polyhedral_projection.hpp>
+#include <csl/geometry/polyhedral_support.hpp>
 #include <csl/numeric/data.hpp>
 #include <csl/problem/validator.hpp>
 #include <csl/sets/data.hpp>
@@ -44,6 +45,19 @@ sets::SetData line4() {
         {2, 4, {1,0,0,0, -1,0,0,0}}, {1,1},
         {3, 4, {-2,1,0,0, -3,0,1,0, -4,0,0,1}}, {0,0,0},
         {"oxidizer flow", "oxidizer stock", "fuel flow", "fuel stock"});
+}
+
+sets::SetData box4_v() {
+    Matrix vertices{16, 4, Vector(64)};
+    for (std::size_t mask = 0; mask < 16; ++mask) {
+        vertices.values[mask * 4] = (mask & 1) ? 2.0 : 0.0;
+        vertices.values[mask * 4 + 1] = (mask & 2) ? 1.0 : -1.0;
+        vertices.values[mask * 4 + 2] = (mask & 4) ? 2.0 : 0.0;
+        vertices.values[mask * 4 + 3] = (mask & 8) ? 1.0 : -1.0;
+    }
+    return take(sets::make_v({{"fuel-like-box-v"}, 4,
+        {"oxidizer flow", "oxidizer stock", "fuel flow", "fuel stock"}},
+        {take(numeric::snapshot(vertices)), take(numeric::snapshot(Matrix{0,4,{}}))}));
 }
 
 ar::PlotData plot_data() {
@@ -133,6 +147,14 @@ reg::PreparedProvider<reg::GeometryPort> h_projection_provider() {
     requirements.output.representation = {"csl.polyhedron.h"};
     requirements.output.relation = SetRelation::equivalent;
     return take(reg::prepare_provider(reg::select_provider(registry, method, requirements)));
+}
+
+reg::PreparedProvider<reg::GeometryPort> support_provider() {
+    reg::Registry<reg::GeometryPort> registry;
+    auto entry = geo::make_support_registration();
+    const auto method = reg::Method{entry.identity.id, entry.identity.version};
+    REQUIRE_FALSE(registry.add(std::move(entry)).has_value());
+    return take(reg::prepare_provider(reg::select_provider(registry, method)));
 }
 
 bool contains_h2(const SetHandle& handle, const std::array<double, 2>& point) {
@@ -257,13 +279,71 @@ TEST_CASE("a lower-dimensional 4D relation projects to the hand-derived line") {
     CHECK_FALSE(contains_h2(projection.projected_relation, {3.0,6.0}));
 }
 
+TEST_CASE("support queries return explicitly tagged finite 2D support samples") {
+    auto data = plot_data();
+    const auto relation = box4_v();
+    auto map = ar::StateRelationCoordinates{{{0,1,2,3},{0,1,2,3}}};
+    auto source_result = ar::make_reachable_set_source(relation.as_handle(), data.problem, std::move(map));
+    REQUIRE(std::holds_alternative<std::shared_ptr<const ar::PlotProjectionSource>>(source_result));
+    auto source = std::get<std::shared_ptr<const ar::PlotProjectionSource>>(std::move(source_result));
+    auto provider = support_provider();
+    std::vector<ar::SupportSampleDirection> directions{
+        {{{1.0,0.0}}, {"support-east"}, {"support-east-value"}},
+        {{{-1.0,0.0}}, {"support-west"}, {"support-west-value"}},
+        {{{0.0,1.0}}, {"support-north"}, {"support-north-value"}},
+        {{{0.0,-1.0}}, {"support-south"}, {"support-south-value"}}};
+    const auto request = ar::PlotRequest::support_samples(source, StageIndex{1}, {2,3},
+        std::move(directions), Assurance::numerical);
+    const auto outcome = ar::make_plot(data, request, provider);
+    REQUIRE(std::holds_alternative<ar::PlotSupportSamples>(outcome));
+    const auto& samples = std::get<ar::PlotSupportSamples>(outcome);
+    CHECK(samples.kind == ar::PlotSampleKind::support_samples);
+    REQUIRE(samples.samples.size() == 4);
+    CHECK(std::get<double>(samples.samples[0].value) == 2.0);
+    REQUIRE(samples.samples[0].point.has_value());
+    CHECK((*samples.samples[0].point)[0] == 2.0);
+    CHECK(std::get<double>(samples.samples[1].value) == 0.0);
+    REQUIRE(samples.samples[1].point.has_value());
+    CHECK((*samples.samples[1].point)[0] == 0.0);
+    CHECK(std::get<double>(samples.samples[2].value) == 1.0);
+    REQUIRE(samples.samples[2].point.has_value());
+    CHECK((*samples.samples[2].point)[1] == 1.0);
+    CHECK(std::get<double>(samples.samples[3].value) == 1.0);
+    REQUIRE(samples.samples[3].point.has_value());
+    CHECK((*samples.samples[3].point)[1] == -1.0);
+    CHECK(std::holds_alternative<SymbolicArgument>(samples.samples[0].support));
+    CHECK(samples.samples[0].reference.identity.request == RequestId{"support-east"});
+    CHECK(samples.cost.geometry_operation_elapsed.count() >= 0);
+
+    auto h_source = set_source(box4());
+    const auto unsupported = ar::PlotRequest::support_samples(h_source, StageIndex{1}, {2,3},
+        {{{{1.0,0.0}}, {"unsupported-h-support"}, {"unsupported-h-support-value"}}},
+        Assurance::numerical);
+    const auto unsupported_outcome = ar::make_plot(data, unsupported, provider);
+    REQUIRE(std::holds_alternative<ar::PlotRequestFailure>(unsupported_outcome));
+    CHECK(std::holds_alternative<reg::Rejection>(
+        std::get<ar::PlotRequestFailure>(unsupported_outcome).cause));
+    CHECK_FALSE(std::get<ar::PlotRequestFailure>(unsupported_outcome).cost.has_value());
+
+    const auto duplicate_ids = ar::PlotRequest::support_samples(source, StageIndex{1}, {2,3},
+        {{{{1.0,0.0}}, {"duplicate-sample"}, {"first-output"}},
+         {{{0.0,1.0}}, {"duplicate-sample"}, {"second-output"}}}, Assurance::numerical);
+    const auto duplicate_outcome = ar::make_plot(data, duplicate_ids, provider);
+    REQUIRE(std::holds_alternative<ar::PlotRequestFailure>(duplicate_outcome));
+    CHECK(std::holds_alternative<ar::ArtifactError>(
+        std::get<ar::PlotRequestFailure>(duplicate_outcome).cause));
+    CHECK_FALSE(std::get<ar::PlotRequestFailure>(duplicate_outcome).cost.has_value());
+}
+
 TEST_CASE("a registry-verified complete optimal family binds its native relation") {
     const auto family = verified_one_state_family();
     REQUIRE(family->registry_verified());
-    ar::StateRelationCoordinates map{{{0}, {1}, {2}}};
+    ar::StateRelationCoordinates map{{{0}, {2}, {4}}};
     auto source = ar::make_optimal_family_source(*family, std::move(map));
     REQUIRE(std::holds_alternative<std::shared_ptr<const ar::PlotProjectionSource>>(source));
     const auto& projected_source = *std::get<std::shared_ptr<const ar::PlotProjectionSource>>(source);
+    CHECK(projected_source.coordinates().by_stage ==
+        std::vector<std::vector<std::size_t>>{{0}, {2}, {4}});
     CHECK(std::get<FamilyIdentity>(projected_source.owner().identity) == family->identity());
     REQUIRE(projected_source.family_evidence().has_value());
     CHECK(projected_source.family_evidence()->family == family->identity());

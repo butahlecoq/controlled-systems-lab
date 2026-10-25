@@ -2,6 +2,7 @@
 
 #include <algorithm>
 #include <chrono>
+#include <cmath>
 #include <set>
 
 namespace csl::artifacts {
@@ -154,6 +155,132 @@ PlotOutcome project_plot(const PlotData& data, const SetProjectionRequest& reque
         result.relation, result.evidence.support, result.evidence.assumptions, operation_provider,
         source.family_evidence(), cost};
 }
+
+PlotOutcome sample_plot(const PlotData& data, const SupportSamplesRequest& request,
+    const registry::PreparedProvider<registry::GeometryPort>& provider,
+    const ExecutionContext& context) {
+    if (!request.source)
+        return failure({}, provider.provenance(), artifact_error(ArtifactErrorCode::invalid_input,
+            "request.source", "support samples require a live projection source"));
+    const auto& source = *request.source;
+    if (request.directions.empty())
+        return failure({}, provider.provenance(), artifact_error(ArtifactErrorCode::invalid_input,
+            "request.directions", "at least one support direction is required"));
+
+    const auto& first_identity = request.directions.front();
+    const auto failure_identity = [&](const SupportSampleDirection& direction) {
+        return std::optional<GeometryRequestIdentity>{GeometryRequestIdentity{
+            data.problem, direction.request, direction.ideal_output}};
+    };
+    const auto placeholder_identity = failure_identity(first_identity);
+    if (source.owner().problem != data.problem)
+        return failure(placeholder_identity, provider.provenance(), artifact_error(ArtifactErrorCode::identity,
+            "request.source.problem", "projection source belongs to a different problem"));
+    if (const auto problem = validate_pair(request.coordinates, data.states.coordinates.size(), "request.coordinates"))
+        return failure(placeholder_identity, provider.provenance(), *problem);
+    if (request.stage.value >= data.state_axis.points.size())
+        return failure(placeholder_identity, provider.provenance(), artifact_error(ArtifactErrorCode::invalid_input,
+            "request.stage", "state stage is outside the plot horizon"));
+
+    const auto relation_dimension = source.relation().metadata.dimension;
+    if (const auto problem = validate_coordinate_map(source.coordinates(), data.state_axis.points.size(),
+            data.states.coordinates.size(), relation_dimension, "request.source.coordinates"))
+        return failure(placeholder_identity, provider.provenance(), *problem);
+
+    std::set<std::string> request_ids;
+    std::set<std::string> ideal_output_ids;
+    for (std::size_t i = 0; i < request.directions.size(); ++i) {
+        const auto& direction = request.directions[i];
+        if (direction.request.value.empty() || direction.ideal_output.value.empty())
+            return failure(failure_identity(direction), provider.provenance(),
+                artifact_error(ArtifactErrorCode::invalid_input,
+                    "request.directions[" + std::to_string(i) + "]",
+                    "each support sample requires request and ideal-output identities"));
+        if (!request_ids.insert(direction.request.value).second ||
+            !ideal_output_ids.insert(direction.ideal_output.value).second)
+            return failure(failure_identity(direction), provider.provenance(),
+                artifact_error(ArtifactErrorCode::identity,
+                    "request.directions[" + std::to_string(i) + "]",
+                    "support sample request and ideal-output identities must be unique"));
+    }
+
+    const auto actual = provider.provenance().actual;
+    if (!actual)
+        return failure(placeholder_identity, provider.provenance(), unsupported("request.provider",
+            "selected geometry provider has no resolved implementation identity"));
+
+    PlotSupportSamples result{data.problem, source.owner(), request.stage,
+        {data.states.coordinates[request.coordinates.first], data.states.coordinates[request.coordinates.second]},
+        PlotSampleKind::support_samples, {}, provider.provenance(), source.family_evidence(), {}};
+    result.samples.reserve(request.directions.size());
+    bool operation_ran = false;
+    const auto elapsed_cost = [&]() -> std::optional<PlotQueryCost> {
+        return operation_ran ? std::optional<PlotQueryCost>{result.cost} : std::nullopt;
+    };
+    const auto& mapped = source.coordinates().by_stage[request.stage.value];
+    for (const auto& direction : request.directions) {
+        const auto identity = failure_identity(direction);
+        if (!std::isfinite(direction.direction[0]) || !std::isfinite(direction.direction[1]) ||
+            (direction.direction[0] == 0.0 && direction.direction[1] == 0.0))
+            return failure(identity, result.provider, artifact_error(ArtifactErrorCode::invalid_input,
+                "request.directions", "support directions must be finite and nonzero"), elapsed_cost());
+
+        Vector full_direction(relation_dimension, 0.0);
+        full_direction[mapped[request.coordinates.first]] = direction.direction[0];
+        full_direction[mapped[request.coordinates.second]] = direction.direction[1];
+        OperationRequest operation{*identity, actual->id,
+            SupportQuery{source.relation(), std::move(full_direction)}, SetRelation::equivalent,
+            request.assurance};
+        auto admission = provider.prepare(operation);
+        if (const auto* rejected = std::get_if<registry::Rejection>(&admission))
+            return failure(identity, rejected->provenance, *rejected, elapsed_cost());
+        auto prepared = std::get<registry::PreparedPipeline<registry::GeometryPort>>(std::move(admission));
+        const auto operation_provider = prepared.provenance().front();
+        auto [workspace] = prepared.create();
+        const auto started = std::chrono::steady_clock::now();
+        auto outcome = workspace->run(context);
+        const auto elapsed = std::chrono::duration_cast<std::chrono::nanoseconds>(
+            std::chrono::steady_clock::now() - started);
+        operation_ran = true;
+        result.cost.geometry_operation_elapsed += elapsed;
+        if (const auto* stopped = std::get_if<OperationStopped>(&outcome))
+            return failure(identity, operation_provider, *stopped, result.cost);
+        if (const auto* rejected = std::get_if<Unsupported>(&outcome))
+            return failure(identity, operation_provider, *rejected, result.cost);
+        const auto* support = std::get_if<SupportResult>(&outcome);
+        if (!support)
+            return failure(identity, operation_provider, unsupported("support.outcome",
+                "geometry provider returned a non-support result"), result.cost);
+        if (support->evidence.scope != GeometryClaimScope::support_value)
+            return failure(identity, operation_provider, unsupported("support.evidence.scope",
+                "geometry provider returned evidence for a different claim scope"), result.cost);
+        if (const auto errors = check_geometry_evidence(support->evidence, operation); !errors.empty())
+            return failure(identity, operation_provider, Unsupported{errors}, result.cost);
+        if (const auto* value = std::get_if<double>(&support->value); value && !std::isfinite(*value))
+            return failure(identity, operation_provider, unsupported("support.value",
+                "support provider returned a non-finite value"), result.cost);
+        if (!std::holds_alternative<double>(support->value) && support->maximizer)
+            return failure(identity, operation_provider, unsupported("support.maximizer",
+                "empty or unbounded support cannot include a finite maximizer"), result.cost);
+
+        std::optional<std::array<double, 2>> point;
+        if (support->maximizer) {
+            if (support->maximizer->size() != relation_dimension)
+                return failure(identity, operation_provider, unsupported("support.maximizer.dimension",
+                    "support maximizer does not match the source relation dimension"), result.cost);
+            if (std::any_of(support->maximizer->begin(), support->maximizer->end(),
+                    [](double value) { return !std::isfinite(value); }))
+                return failure(identity, operation_provider, unsupported("support.maximizer.value",
+                    "support maximizer contains a non-finite value"), result.cost);
+            point = std::array<double, 2>{
+                (*support->maximizer)[mapped[request.coordinates.first]],
+                (*support->maximizer)[mapped[request.coordinates.second]]};
+        }
+        result.samples.push_back({direction.direction, support->value, point,
+            support->evidence.reference, support->evidence.support, support->evidence.assumptions});
+    }
+    return result;
+}
 }
 
 PlotProjectionSource::PlotProjectionSource(SetHandle relation, PlotSourceOwner owner,
@@ -211,9 +338,24 @@ PlotRequest PlotRequest::set_projection(std::shared_ptr<const PlotProjectionSour
         std::move(request), std::move(ideal_output)}};
 }
 
+PlotRequest PlotRequest::support_samples(std::shared_ptr<const PlotProjectionSource> source,
+    StageIndex stage, CoordinatePair coordinates, std::vector<SupportSampleDirection> directions,
+    Assurance assurance) {
+    return {SupportSamplesRequest{std::move(source), stage, coordinates,
+        std::move(directions), assurance}};
+}
+
 PlotOutcome make_plot(const PlotData& data, const PlotRequest& request) {
     if (const auto* trajectory = std::get_if<TrajectoryPairRequest>(&request.source))
         return trajectory_plot(data, trajectory->coordinates);
+    if (const auto* support = std::get_if<SupportSamplesRequest>(&request.source)) {
+        const std::optional<GeometryRequestIdentity> support_identity = support->directions.empty()
+            ? std::optional<GeometryRequestIdentity>{}
+            : GeometryRequestIdentity{data.problem, support->directions.front().request,
+                support->directions.front().ideal_output};
+        return failure(support_identity, {}, unsupported("plot.provider",
+            "support samples require a prepared GeometryPort provider"));
+    }
     const auto& projection = std::get<SetProjectionRequest>(request.source);
     const std::optional<GeometryRequestIdentity> identity =
         GeometryRequestIdentity{data.problem, projection.request, projection.ideal_output};
@@ -226,7 +368,9 @@ PlotOutcome make_plot(const PlotData& data, const PlotRequest& request,
     const ExecutionContext& context) {
     if (const auto* trajectory = std::get_if<TrajectoryPairRequest>(&request.source))
         return trajectory_plot(data, trajectory->coordinates);
-    return project_plot(data, std::get<SetProjectionRequest>(request.source), provider, context);
+    if (const auto* projection = std::get_if<SetProjectionRequest>(&request.source))
+        return project_plot(data, *projection, provider, context);
+    return sample_plot(data, std::get<SupportSamplesRequest>(request.source), provider, context);
 }
 
 }
