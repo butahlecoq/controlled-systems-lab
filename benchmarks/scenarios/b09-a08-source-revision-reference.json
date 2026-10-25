@@ -35,7 +35,8 @@
   "information_patterns": {
     "open_loop": "enumerate one four-action sequence before disturbance history",
     "replay_timing": "four 75-second model stages; stock update at each boundary uses the preceding flow, so the final control increment changes terminal flows but not terminal stocks",
-    "captured_control_problem": "open-loop finite-action minimax; the source's adaptive/replanning loop is not included in this report"
+    "captured_control_problems": ["open-loop finite-action minimax", "deterministic nonlinear replay with finite-horizon minimax replanning at each observation"],
+    "feedback_scope": "receding-horizon replay is included as a trajectory example; it is not a globally optimal causal policy guarantee"
   },
   "scope": {
     "claims_historical_reproduction": false,

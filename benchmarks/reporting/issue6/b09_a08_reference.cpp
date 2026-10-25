@@ -31,6 +31,7 @@ constexpr double c5 = -12.0;
 constexpr double t1 = 300.0;
 constexpr double horizon = 4.0;
 constexpr double dK = -0.03 * K;
+const Vector choices{1,0.75,0.5,0.25,0,-0.25,-0.5,-0.75,-1};
 
 Vector initial_state() {
     const double Km = K + dK;
@@ -51,17 +52,19 @@ Vector input_column() {
     return {b1, 0.0, b3, 0.0};
 }
 
-FiniteActionMinimaxRequest request(double lambda) {
+FiniteActionMinimaxRequest request(double lambda, const Vector& start, std::size_t stages) {
+    Vector times;
+    for (std::size_t stage=0; stage<=stages; ++stage) times.push_back(75.0*static_cast<double>(stage));
     const SystemModel authored{{{4, 1, 2}, TimeDomain::discrete,
         LinearStage{
             {4, 4, {1,0,0,0,-75,1,0,0,0,0,1,0,0,0,-75,1}},
             {4, 1, input_column()},
             {4, 2, {0.06,0,0,0,0,-0.06,0,0}},
             {0, 0, 0, 0}}}, {}};
-    const auto system = take(model::snapshot(authored, Vector{0,75,150,225,300}));
+    const auto system = take(model::snapshot(authored, times));
     const auto initial = take(sets::make_singleton({{"b09-a08-x0"}, 4,
         {"oxidizer_flow", "oxidizer_stock", "fuel_flow", "fuel_stock"}},
-        take(numeric::snapshot_vector(initial_state()))));
+        take(numeric::snapshot_vector(start))));
     const auto disturbance = take(sets::make_v({{"b09-a08-disturbance"}, 2, {"w1", "w2"}},
         {take(numeric::snapshot(Matrix{4,2,{-1,-1,-1,1,1,-1,1,1}})),
          take(numeric::snapshot(Matrix{0,2,{}}))}));
@@ -73,18 +76,49 @@ FiniteActionMinimaxRequest request(double lambda) {
          take(numeric::snapshot_vector(Vector{62.5,-57.5,20000,30,25,-23,8000,30})),
          take(numeric::snapshot(Matrix{0,4,{}})),
          take(numeric::snapshot_vector(Vector{}))}));
-    std::vector<sets::SetData> disturbances(4, disturbance);
-    std::vector<sets::SetData> safe_sets(5, safe);
+    std::vector<sets::SetData> disturbances(stages, disturbance);
+    std::vector<sets::SetData> safe_sets(stages+1, safe);
     const Matrix Q{4,4,{2,0,0,0,0,2*(1+lambda),0,-5*lambda,
                         0,0,2,0,0,-5*lambda,0,2*(1+6.25*lambda)}};
     const auto objective = std::get<Objective>(snapshot(
         QuadraticTerminal{Q, {-120,0,-48,0}, 4176.0}));
-    const Vector choices{1,0.75,0.5,0.25,0,-0.25,-0.5,-0.75,-1};
     std::vector<Vector> catalogue;
     for (double value : choices) catalogue.push_back({value});
     return {{"b09-a08-source-revision-reference-v1"}, {"b09-a08-lambda-" + std::to_string(static_cast<int>(lambda))},
         system, initial, {1, std::move(catalogue)}, std::move(disturbances),
         std::move(safe_sets), objective};
+}
+
+Vector nonlinear_step(const Vector& state, double accumulated_control) {
+    const double Km = K + dK + c1 * accumulated_control;
+    const double delta = Km - K;
+    const double Pp = P + c2 * delta * delta + c3 * delta;
+    const double Iu = I + c4 * delta * delta + c5 * delta;
+    const double fuel = Pp / Iu / (1.0 + Km);
+    return {fuel * Km, state[1] - 75.0 * state[0], fuel, state[3] - 75.0 * state[2]};
+}
+
+std::pair<std::vector<std::size_t>,std::vector<Vector>> closed_loop_replay(double lambda) {
+    Vector state = initial_state();
+    double accumulated_control = 0.0;
+    std::vector<std::size_t> actions;
+    std::vector<Vector> states{state};
+    for (std::size_t stage=0; stage<4; ++stage) {
+        const auto outcome = finite_action_minimax(request(lambda,state,4-stage),
+                                                   {static_cast<std::size_t>(std::pow(9.0,4-stage)),4096,1e-8});
+        if (!std::holds_alternative<FiniteMinimaxOptimal>(outcome))
+            throw std::runtime_error("A08 receding-horizon planner did not return an optimum");
+        const auto& optimum = std::get<FiniteMinimaxOptimal>(outcome);
+        if (optimum.minimizing_plan_indices.empty())
+            throw std::runtime_error("A08 receding-horizon planner has no minimizing plan");
+        const auto& plan = std::get<FinitePlanFeasible>(optimum.plans.at(optimum.minimizing_plan_indices.front()));
+        const auto action_index = plan.action_indices.front();
+        actions.push_back(action_index);
+        accumulated_control += choices.at(action_index);
+        state = nonlinear_step(state,accumulated_control);
+        states.push_back(state);
+    }
+    return {actions,states};
 }
 
 json vertices(const sets::SetData& set) {
@@ -103,7 +137,7 @@ json vertices(const sets::SetData& set) {
 
 json run(std::size_t batch, double lambda, bool geometry) {
     const auto started = std::chrono::steady_clock::now();
-    const auto outcome = finite_action_minimax(request(lambda), {6561, 4096, 1e-8});
+    const auto outcome = finite_action_minimax(request(lambda,initial_state(),4), {6561, 4096, 1e-8});
     const auto stopped = std::chrono::steady_clock::now();
     if (!std::holds_alternative<FiniteMinimaxOptimal>(outcome))
         throw std::runtime_error("A08 source-reference planner did not return an optimum");
@@ -128,7 +162,12 @@ json run(std::size_t batch, double lambda, bool geometry) {
         {"winner_action_indices", winner.action_indices}, {"winner_action_sequences", winner_sequences},
         {"objective_squared", optimum.value},
         {"objective_norm", std::sqrt(optimum.value)}, {"winner_maximizer", winner.maximizer}};
-    if (geometry) row["winner_terminal_vertices_x1_x2_x3_x4"] = vertices(winner.terminal);
+    if (geometry) {
+        const auto [closed_actions,closed_states] = closed_loop_replay(lambda);
+        row["winner_terminal_vertices_x1_x2_x3_x4"] = vertices(winner.terminal);
+        row["closed_loop_action_indices"] = closed_actions;
+        row["closed_loop_replay_states"] = closed_states;
+    }
     return row;
 }
 }

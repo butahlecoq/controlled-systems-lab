@@ -78,8 +78,11 @@ on the four-state terminal reachable set for all `9^4 = 6,561` fixed action
 plans. Each stage uses four corners of `[-1,1]^2`; the 4D set is projected to
 flows `(x1,x3)` and stocks `(x2,x4)` for the figures. The nonlinear red path is
 a deterministic plant replay of one representative minimizing open-loop plan.
-The lower plot shows its stock trajectory by model stage. It is not the uncertain
-reachable-set boundary, and the plotted points are numerical vertices.
+A second trajectory replans with the finite-horizon minimax solver at each
+observation. This is receding-horizon control, not a global causal-policy
+optimality claim. The lower plot shows both stock trajectories by model stage.
+Neither path is the uncertain reachable-set boundary, and the plotted points
+are numerical vertices.
 
 An independent Python oracle directly enumerates every plan and every disturbance
 corner history, checking all four state constraints and the terminal cost. It

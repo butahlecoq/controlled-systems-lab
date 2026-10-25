@@ -57,6 +57,8 @@ def projected_boundary(points: list[list[float]], columns: tuple[int, int]):
 def render(row: dict, output: Path) -> None:
     vertices = row["winner_terminal_vertices_x1_x2_x3_x4"]
     replay = nonlinear_replay(row["winner_action_indices"])
+    closed_loop = row["closed_loop_replay_states"]
+    strategies = ((replay, '#d1495b'), (closed_loop, '#386cb0'))
     width, height = 1240, 760
     parts = [f'<svg xmlns="http://www.w3.org/2000/svg" width="{width}" height="{height}" viewBox="0 0 {width} {height}">',
              '<rect width="100%" height="100%" fill="#fbfcfd"/>',
@@ -68,11 +70,12 @@ def render(row: dict, output: Path) -> None:
         px = 65 + panel_index * 610
         py, pw, ph = 92, 520, 325
         projected = [(point[columns[0]], point[columns[1]]) for point in vertices]
-        path = [(point[columns[0]], point[columns[1]]) for point in replay]
+        paths = [[(point[columns[0]], point[columns[1]]) for point in states] for states, _ in strategies]
         boundary = projected_boundary(vertices, columns)
-        display_path = path if panel_index == 0 else [path[-1]]
-        all_x = [p[0] for p in projected + display_path]
-        all_y = [p[1] for p in projected + display_path]
+        display_paths = paths if panel_index == 0 else [[path[-1]] for path in paths]
+        plotted = [point for path in display_paths for point in path]
+        all_x = [p[0] for p in projected + plotted]
+        all_y = [p[1] for p in projected + plotted]
         xmin, xmax = min(all_x), max(all_x)
         ymin, ymax = min(all_y), max(all_y)
         xpad = max((xmax-xmin)*0.08, 1e-6)
@@ -101,18 +104,24 @@ def render(row: dict, output: Path) -> None:
         for point in projected:
             x, y = point_xy(point)
             parts.append(f'<circle cx="{x:.2f}" cy="{y:.2f}" r="2.2" class="vertex"/>')
-        replay_xy = [point_xy(point) for point in display_path]
-        if panel_index == 0:
-            parts.append('<polyline class="replay" points="' + ' '.join(f'{x:.2f},{y:.2f}' for x,y in replay_xy) + '"/>')
-        for point, color in ((path[0], '#1d3557'), (path[-1], '#d1495b')) if panel_index == 0 else ((path[-1], '#d1495b'),):
-            x, y = point_xy(point)
+        for path_index, (display_path, (_, color)) in enumerate(zip(display_paths, strategies)):
+            replay_xy = [point_xy(point) for point in display_path]
+            if panel_index == 0:
+                parts.append(f'<polyline fill="none" stroke="{color}" stroke-width="2.5" points="' +
+                             ' '.join(f'{x:.2f},{y:.2f}' for x,y in replay_xy) + '"/>')
+            x, y = point_xy(display_path[-1])
             parts.append(f'<circle cx="{x:.2f}" cy="{y:.2f}" r="5" fill="{color}"/>')
+            if panel_index == 0 and path_index == 0:
+                x, y = point_xy(display_path[0])
+                parts.append(f'<circle cx="{x:.2f}" cy="{y:.2f}" r="5" fill="#1d3557"/>')
         parts.append(f'<text x="{px+pw/2}" y="{py+ph+40}" text-anchor="middle" class="label">{xlabel}</text>')
         parts.append(f'<text x="{px-48}" y="{py+ph/2}" transform="rotate(-90 {px-48} {py+ph/2})" text-anchor="middle" class="label">{ylabel}</text>')
     parts.extend(['<rect x="105" y="472" width="14" height="14" class="boundary"/>',
                   '<text x="126" y="484" class="label">Projected terminal reachable-set boundary and vertices</text>',
-                  '<line x1="685" y1="479" x2="720" y2="479" class="replay"/>',
-                  '<text x="728" y="484" class="label">Nonlinear open-loop replay in the flow projection; terminal point in the stock projection</text>',
+                  '<line x1="685" y1="479" x2="720" y2="479" stroke="#d1495b" stroke-width="3"/>',
+                  '<text x="728" y="484" class="label">Open-loop replay</text>',
+                  '<line x1="865" y1="479" x2="900" y2="479" stroke="#386cb0" stroke-width="3"/>',
+                  '<text x="908" y="484" class="label">Receding-horizon replay</text>',
                   '<text x="620" y="520" text-anchor="middle" class="title">Nonlinear plant stock trajectory over the four 75-second stages</text>'])
     chart_x, chart_y, chart_w, chart_h = 105, 540, 1030, 145
     for tick in range(5):
@@ -120,22 +129,26 @@ def render(row: dict, output: Path) -> None:
         parts.append(f'<line x1="{x:.2f}" y1="{chart_y}" x2="{x:.2f}" y2="{chart_y+chart_h}" class="grid"/>')
         parts.append(f'<text x="{x:.2f}" y="{chart_y+chart_h+18}" text-anchor="middle" class="tick">{tick}</text>')
     parts.append(f'<line x1="{chart_x}" y1="{chart_y+chart_h}" x2="{chart_x+chart_w}" y2="{chart_y+chart_h}" class="axis"/>')
-    max_stock = max(point[1] for point in replay)
-    min_stock = min(point[1] for point in replay)
-    max_stock = max(max_stock, max(point[3] for point in replay))
-    min_stock = min(min_stock, min(point[3] for point in replay))
+    all_states=[point for states,_ in strategies for point in states]
+    max_stock = max(point[1] for point in all_states)
+    min_stock = min(point[1] for point in all_states)
+    max_stock = max(max_stock, max(point[3] for point in all_states))
+    min_stock = min(min_stock, min(point[3] for point in all_states))
     padding = (max_stock-min_stock)*0.06
     min_stock, max_stock = min_stock-padding, max_stock+padding
-    for index, color, label in ((1, '#6a4c93', 'Oxidizer stock x2'), (3, '#2a9d8f', 'Fuel stock x4')):
-        coords = [(chart_x + (i/(len(replay)-1))*chart_w,
-                   chart_y + chart_h - (point[index]-min_stock)/(max_stock-min_stock)*chart_h)
-                  for i, point in enumerate(replay)]
-        parts.append(f'<polyline fill="none" stroke="{color}" stroke-width="2.2" points="' +
-                     ' '.join(f'{x:.2f},{y:.2f}' for x,y in coords) + '"/>')
-        parts.append(f'<line x1="1000" y1="{544 + (index == 3)*22}" x2="1022" y2="{544 + (index == 3)*22}" stroke="{color}" stroke-width="3"/>')
-        parts.append(f'<text x="1028" y="{548 + (index == 3)*22}" class="tick">{label}</text>')
+    for stock_index, stock_color, stock_label in ((1, '#6a4c93', 'x2'), (3, '#2a9d8f', 'x4')):
+        for strategy_index, (states, strategy_color) in enumerate(strategies):
+            coords = [(chart_x + (i/(len(states)-1))*chart_w,
+                       chart_y + chart_h - (point[stock_index]-min_stock)/(max_stock-min_stock)*chart_h)
+                      for i, point in enumerate(states)]
+            dash = ' stroke-dasharray="6 4"' if strategy_index else ''
+            parts.append(f'<polyline fill="none" stroke="{stock_color}" stroke-width="2.2"{dash} points="' +
+                         ' '.join(f'{x:.2f},{y:.2f}' for x,y in coords) + '"/>')
+        legend_x=900 + (stock_index==3)*150
+        parts.append(f'<line x1="{legend_x}" y1="{544 + (stock_index == 3)*22}" x2="{legend_x+22}" y2="{544 + (stock_index == 3)*22}" stroke="{stock_color}" stroke-width="3"/>')
+        parts.append(f'<text x="{legend_x+28}" y="{548 + (stock_index == 3)*22}" class="tick">{stock_label}</text>')
     parts.append(f'<text x="620" y="{chart_y+chart_h+40}" text-anchor="middle" class="label">Stage (75-second model interval)</text>')
-    parts.append('<text x="620" y="746" text-anchor="middle" class="tick">Shaded geometry: uncertain linear model. Curves: deterministic nonlinear replay. One representative plan is shown from the tied optimum family.</text></svg>')
+    parts.append('<text x="620" y="746" text-anchor="middle" class="tick">Shaded geometry: uncertain linear model. Curves: nonlinear replays. The receding-horizon trace is not a global feedback optimality claim.</text></svg>')
     output.with_suffix('.svg').write_text('\n'.join(parts), encoding='utf-8')
 
 
