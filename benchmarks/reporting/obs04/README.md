@@ -306,3 +306,26 @@ the sample window includes small control-protocol work; this is exploratory
 evidence, not a general performance claim. Do not compare sample totals as
 strategy speed. Capability metadata, driver/perf logs, text reports, and raw
 `perf.data` are retained separately for each strategy.
+
+## Render a saved comparison record
+
+Run the renderer against a saved `csl.comparison-record/1` file:
+
+```sh
+python3 scripts/reports/obs04/render_saved.py \
+  --record benchmarks/reporting/obs04/results/linux-omarchy-gcc16-20261025-phase-timings-v6-clean.json \
+  --out benchmarks/reporting/obs04/results/linux-omarchy-gcc16-20261025-phase-timings-v6-clean.report.html
+```
+
+The renderer reads the saved JSON record. It does not run a solver or alter the
+record. The HTML lists every attempt, including warmups and failed phases. Its
+median and range summaries include only measured attempts whose solver and
+post-run phase both passed. It reports statuses and timings from the record, not
+from the adjacent JSONL event log. The saved HTML report is committed beside
+the source record.
+
+Run the renderer contract tests with:
+
+```sh
+python3 -m unittest tests/reporting/test_obs04_saved_renderer.py
+```
