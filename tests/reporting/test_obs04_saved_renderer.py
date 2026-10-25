@@ -169,6 +169,64 @@ class SavedRendererTests(unittest.TestCase):
         self.assertIn("Backend scheduler width", page)
         self.assertIn("not a count of busy threads", page)
 
+    def test_renders_event_v9_peak_rss_observation(self):
+        record = fixture_record()
+        for attempt in record["attempts"]:
+            measurement = json.loads(attempt["measurement_payload"])
+            measurement.update({
+                "schema": "csl.obs04-instrumentation-comparison-event/9",
+                "strategy_run_cpu_ns": 87 if measurement["status"] == "passed" else None,
+                "observed_backend_scheduler_width": 1 if measurement["status"] == "passed" else None,
+                "strategy_run_peak_rss": {
+                    "status": "available",
+                    "metric": "process_peak_rss_bytes",
+                    "scope": "process_vm_hwm_reset_before_and_read_after_strategy_run",
+                    "value_bytes": 123456,
+                    "reason": None,
+                },
+            })
+            attempt["measurement_payload"] = json.dumps(measurement)
+        reseal_record_identity(record)
+        with tempfile.TemporaryDirectory() as temp:
+            path = Path(temp) / "record.json"
+            path.write_text(json.dumps(record), encoding="utf-8")
+            loaded = render_saved.load_record(path)
+        page = render_saved.render_html(loaded)
+        self.assertIn("Process peak RSS", page)
+        self.assertIn("available: 123456 bytes", page)
+        self.assertIn("includes the driver and all process threads", page)
+
+    def test_rejects_malformed_event_v9_peak_rss(self):
+        invalid_mutations = [
+            (lambda rss: rss.pop("reason"), "missing required fields"),
+            (lambda rss: rss.update(value_bytes=True), "value_bytes must be a non-negative integer or null"),
+            (lambda rss: rss.update(status="unavailable"), "unavailable strategy_run_peak_rss needs null value and a reason"),
+        ]
+        for mutate, error in invalid_mutations:
+            with self.subTest(error=error):
+                record = fixture_record()
+                measurement = json.loads(record["attempts"][0]["measurement_payload"])
+                measurement.update({
+                    "schema": "csl.obs04-instrumentation-comparison-event/9",
+                    "strategy_run_cpu_ns": 87,
+                    "observed_backend_scheduler_width": 1,
+                    "strategy_run_peak_rss": {
+                        "status": "available",
+                        "metric": "process_peak_rss_bytes",
+                        "scope": "process_vm_hwm_reset_before_and_read_after_strategy_run",
+                        "value_bytes": 123456,
+                        "reason": None,
+                    },
+                })
+                mutate(measurement["strategy_run_peak_rss"])
+                record["attempts"][0]["measurement_payload"] = json.dumps(measurement)
+                reseal_record_identity(record)
+                with tempfile.TemporaryDirectory() as temp:
+                    path = Path(temp) / "record.json"
+                    path.write_text(json.dumps(record), encoding="utf-8")
+                    with self.assertRaisesRegex(ValueError, error):
+                        render_saved.load_record(path)
+
     def test_rejects_invalid_event_v8_resource_observation(self):
         record = fixture_record()
         measurement = json.loads(record["attempts"][0]["measurement_payload"])

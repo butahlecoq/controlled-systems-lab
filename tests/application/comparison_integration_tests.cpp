@@ -660,6 +660,42 @@ void compare_profile(const std::string& profile) {
     const auto restored_v8=take_artifact(ar::decode_recorded_comparison(recorded_v8_wire),
         "decode_recorded_comparison event/8");
     CHECK(restored_v8.content().digest()==recorded_v8.content().digest());
+    auto measured_attempts_v9=measured_attempts_v8;
+    for(auto& attempt:measured_attempts_v9) {
+        auto measurement=nlohmann::json::parse(attempt.measurement_payload);
+        measurement["schema"]="csl.obs04-instrumentation-comparison-event/9";
+        measurement["strategy_run_peak_rss"]={{"status","available"},
+            {"metric","process_peak_rss_bytes"},
+            {"scope","process_vm_hwm_reset_before_and_read_after_strategy_run"},
+            {"value_bytes",123456}, {"reason",nullptr}};
+        attempt.measurement_payload=measurement.dump();
+    }
+    const auto recorded_v9=take_artifact(ar::encode_recorded_comparison(
+        version_three_spec,measured_attempts_v9),"encode_recorded_comparison event/9");
+    const auto recorded_v9_wire=std::string(
+        reinterpret_cast<const char*>(recorded_v9.content().bytes().data()),
+        recorded_v9.content().bytes().size());
+    const auto restored_v9=take_artifact(ar::decode_recorded_comparison(recorded_v9_wire),
+        "decode_recorded_comparison event/9");
+    CHECK(restored_v9.content().digest()==recorded_v9.content().digest());
+    auto malformed_peak_rss=measured_attempts_v9;
+    auto missing_reason=nlohmann::json::parse(malformed_peak_rss.front().measurement_payload);
+    missing_reason["strategy_run_peak_rss"].erase("reason");
+    malformed_peak_rss.front().measurement_payload=missing_reason.dump();
+    CHECK(std::holds_alternative<ar::ArtifactError>(ar::encode_recorded_comparison(
+        version_three_spec,malformed_peak_rss)));
+    malformed_peak_rss=measured_attempts_v9;
+    auto invalid_value=nlohmann::json::parse(malformed_peak_rss.front().measurement_payload);
+    invalid_value["strategy_run_peak_rss"]["value_bytes"]=true;
+    malformed_peak_rss.front().measurement_payload=invalid_value.dump();
+    CHECK(std::holds_alternative<ar::ArtifactError>(ar::encode_recorded_comparison(
+        version_three_spec,malformed_peak_rss)));
+    malformed_peak_rss=measured_attempts_v9;
+    auto inconsistent_status=nlohmann::json::parse(malformed_peak_rss.front().measurement_payload);
+    inconsistent_status["strategy_run_peak_rss"]["status"]="unavailable";
+    malformed_peak_rss.front().measurement_payload=inconsistent_status.dump();
+    CHECK(std::holds_alternative<ar::ArtifactError>(ar::encode_recorded_comparison(
+        version_three_spec,malformed_peak_rss)));
     auto zero_scheduler_width=measured_attempts_v8;
     auto zero_width_measurement=nlohmann::json::parse(
         zero_scheduler_width.front().measurement_payload);
