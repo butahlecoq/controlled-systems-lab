@@ -1,5 +1,10 @@
 # OBS-04 loader and admission phase captures
 
+This capture set was superseded by
+[`phase-split-final-20261025`](../phase-split-final-20261025/README.md), which
+adds a nested canonical resolution/source snapshot timer. These records retain
+their exact source provenance and remain valid for the earlier phase schema.
+
 Five clean Release process captures of the fixed analytic T-S01 fixture. Each
 completed 32 attempts: one warmup and seven measured repetitions for each
 strategy/instrumentation arm. All 160 attempts passed the analytic and witness
