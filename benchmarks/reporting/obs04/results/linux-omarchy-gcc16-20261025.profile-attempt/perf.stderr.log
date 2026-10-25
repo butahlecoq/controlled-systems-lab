@@ -1,0 +1,6 @@
+Events disabled
+Events enabled
+Events disabled
+Events disabled
+[ perf record: Woken up 4 times to write data ]
+[ perf record: Captured and wrote 0.003 MB /tmp/obs04-perf-overhead-20261025/acknowledged.perf.data (6 samples) ]

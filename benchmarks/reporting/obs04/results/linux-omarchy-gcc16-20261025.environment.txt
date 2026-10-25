@@ -1,0 +1,30 @@
+Capture date: 2026-10-25 (Europe/Moscow; time not recorded by the driver)
+Source commit: 2d78543799c7ad267f22ccf613b89e5ac236259f
+Tracked source tree clean: yes (the comparison spec records source_dirty=false)
+Build: clean CMake Release, C++20, GNU 16.2.1, Unix Makefiles
+Build command:
+  cmake -S benchmarks/reporting/obs04 -B build/obs04-overhead-20261025 \
+    -DCSL_SOURCE_ROOT=<absolute checkout path> -DCMAKE_BUILD_TYPE=Release
+  cmake --build build/obs04-overhead-20261025 --config Release --parallel 4
+Run command:
+  build/obs04-overhead-20261025/csl_obs04_instrumentation_comparison \
+    --record <output path>
+Binary SHA-256: 9bc9f360e9d44ba37c90c35645d75c956a8956dd8cde6172c7a9f0eaa4951e13
+Comparison-record SHA-256: 47b748d38474287d0dc8db05a0274025fcf5caa48f0f88202f70eeae558b7500
+JSONL SHA-256: 9324d387ff356bded6ce70e73e49a5180cf117f871bf546929a80a71c15581e8
+
+Host: Omarchy Linux, kernel 7.2.5-3-omarchy, x86_64
+CPU: AMD Ryzen 5 3550H with Radeon Vega Mobile Gfx; 8 logical CPUs
+Backends: HiGHS 1.11.0, Qhull 8.0.2 (archive hashes are in the comparison record)
+Requested workers/backend threads: 1/1; observed backend thread count unavailable
+Workspace policy: fresh workspace per attempt; one warmup per arm; OS caches not flushed
+Fixture: T-S01 exact integrator profile; absolute/relative tolerance 1e-8; fixed seed 31
+Host load before build: 0.08, 0.13, 0.33 on 8 logical CPUs. Load was not sampled during the capture.
+
+The driver completed 32/32 attempts; all strategy results, complete-family checks, witness counts, and independent witness checks passed. This is one analytic fixture, not an end-to-end workload. `strategy_run_ns` measures only the exclusive public StrategyPort::run interval. Setup, witness selection, and witness verification are recorded separately.
+
+Paired per-repetition strategy-run deltas (collection enabled minus disabled):
+- reach-back: median +2,925,131 ns; range +2,696,957 to +3,943,779 ns; median paired relative change +59.08% (range +51.88% to +75.23%).
+- direct-joint: median +146,320 ns; range +97,988 to +205,127 ns; median paired relative change +17.74% (range +10.38% to +23.76%).
+
+These observations are descriptive and inconclusive. The local acknowledged perf attempt captured six samples but exited after an unexpected control-FIFO acknowledgement; that profile was rejected and is not evidence for a limiter. GitHub Actions run 40149000169 also could not profile: the Ubuntu 24.04 runner had perf_event_paranoid=4, perf exited 255, and the driver timed out waiting for acknowledgement. Its capability record and logs are retained alongside this report. No general instrumentation-overhead, end-to-end, scalability, or strategy-winner claim follows.

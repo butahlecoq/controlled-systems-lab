@@ -119,6 +119,43 @@ summary and raw file are in `results/`. This tiny analytic fixture does not
 represent application workloads and supports no general instrumentation
 overhead or strategy winner claim.
 
+## Fresh paired instrumentation capture (2026-10-25)
+
+`results/linux-omarchy-gcc16-20261025.json` and `.jsonl` preserve a fresh
+32-attempt Release capture from source commit
+`2d78543799c7ad267f22ccf613b89e5ac236259f`. Four arms use the same resolved
+T-S01 request: both strategies with collection disabled and enabled. The driver
+alternates strategy order and the first instrumentation mode by repetition,
+with one warmup and seven measured repetitions per arm. All 32 attempts passed
+the analytic-family and independent witness checks; each returned two distinct
+witnesses. The record also binds build/runtime metadata and the executable hash.
+
+Measured `strategy_run_ns` medians and ranges were:
+
+| Strategy | Collection | Median (ns) | Range (ns) |
+| --- | --- | ---: | ---: |
+| reach-back | disabled | 4,951,254 | 4,873,729–5,242,147 |
+| reach-back | enabled | 7,895,243 | 7,823,515–9,185,926 |
+| direct-joint | disabled | 863,389 | 786,842–943,568 |
+| direct-joint | enabled | 1,003,703 | 953,555–1,068,516 |
+
+The median paired enabled-minus-disabled differences were +2,925,131 ns for
+reach-back (range +2,696,957 to +3,943,779 ns) and +146,320 ns for direct-joint
+(range +97,988 to +205,127 ns). Every measured pair was slower with collection
+enabled. Both bounded profiler attempts were rejected: the local attempt failed
+its acknowledgement protocol after six samples, and the GitHub Actions Ubuntu
+24.04 runner reported `perf_event_paranoid=4` and timed out waiting for the
+perf acknowledgement. The limiter is not established and the result remains
+inconclusive. See
+[`linux-omarchy-gcc16-20261025.environment.txt`](results/linux-omarchy-gcc16-20261025.environment.txt)
+and
+[`linux-omarchy-gcc16-20261025.profile-summary.md`](results/linux-omarchy-gcc16-20261025.profile-summary.md)
+and the retained hosted attempt in
+[`linux-github-actions-ubuntu24-20261025.profile-attempt/`](results/linux-github-actions-ubuntu24-20261025.profile-attempt/)
+for the run limits and profile status. These fixture timings do not establish a
+general instrumentation overhead, end-to-end latency, scalability, or method
+winner.
+
 `results/strategy-run-perf-20261024/` retains the 2026-10-24 exploratory
 profiles, which were captured before control acknowledgements were added. They
 send enable/disable around `StrategyPort::run` but do not wait for perf's

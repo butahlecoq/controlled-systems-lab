@@ -1,0 +1,43 @@
+{
+  "binary_name": "csl_obs04_instrumentation_comparison",
+  "binary_sha256": "edf9cc9510aef7f739dd17fced440e6b6193b0806ae30b4595c20c3501e91c73",
+  "calls_requested": 8,
+  "command": [
+    "perf",
+    "record",
+    "--delay=-1",
+    "-F",
+    "499",
+    "-e",
+    "cycles:u",
+    "-g",
+    "--max-size=32M",
+    "--control=fifo:<control>,<ack>",
+    "-o",
+    "<capture>",
+    "-p",
+    "<driver pid>"
+  ],
+  "driver_exit_code": 1,
+  "driver_stderr": "OBS-04 measurement failed: Timed out waiting for perf control acknowledgement",
+  "host": {
+    "kernel_release": "6.17.0-1022-azure",
+    "perf_event_paranoid": "4",
+    "platform": "Linux-6.17.0-1022-azure-x86_64-with-glibc2.39"
+  },
+  "perf_executable": "perf",
+  "perf_exit_code": 255,
+  "perf_stdout": "",
+  "perf_version": "perf version 6.17.13",
+  "profile": {
+    "event": "cycles:u",
+    "frequency_hz": 499,
+    "max_bytes": 33554432
+  },
+  "protocol": "linux-perf-record-ack-fifo",
+  "reason": "OBS-04 measurement failed: Timed out waiting for perf control acknowledgement\n\nMissing support for build id in kernel mmap events.\nDisable this warning with --no-buildid-mmap\nError:\nAccess to performance monitoring and observability operations is limited.\nConsider adjusting /proc/sys/kernel/perf_event_paranoid setting to open\naccess to performance monitoring and observability operations for processes\nwithout CAP_PERFMON, CAP_SYS_PTRACE or CAP_SYS_ADMIN Linux capability.\nMore information can be found at 'Perf events and tool security' document:\nhttps://www.kernel.org/doc/html/latest/admin-guide/perf-security.html\nperf_event_paranoid setting is 4:\n  -1: Allow use of (almost) all events by all users\n      Ignore mlock limit after perf_event_mlock_kb without CAP_IPC_LOCK\n>= 0: Disallow raw and ftrace function tracepoint access\n>= 1: Disallow CPU event access\n>= 2: Disallow kernel profiling\nTo make the adjusted perf_event_paranoid setting permanent preserve it\nin /etc/sysctl.conf (e.g. kernel.perf_event_paranoid = <setting>)",
+  "schema": "csl.obs04-perf-probe/1",
+  "source_commit": "212cb97f0c031b6125f2ad52d1ad27ded9ffbda8",
+  "status": "unavailable",
+  "timeout_seconds": 120
+}
