@@ -1256,7 +1256,8 @@ TrialRecord unserializable_outcome_trial(const application::PreparedComparison& 
         << "\",\"complete_family_verified\":"
         << (synthesis&&synthesis->family&&
             std::holds_alternative<CompleteOptimalFamily>(synthesis->family->outcome())?"true":"false")
-        << ",\"recording_error\":\"" << escaped(message) << "\"}";
+        << ",\"analytic_family_checked\":false,\"recording_error\":\""
+        << escaped(message) << "\"}";
     const auto measurement=event.str();
     std::cout << measurement << '\n';
     return {static_cast<std::uint32_t>(strategy_index*2+(enabled?1:0)),

@@ -200,6 +200,8 @@ def load_record(path: Path) -> dict[str, Any]:
             rss = measurement.get("strategy_run_peak_rss")
             if not isinstance(rss, dict):
                 raise ValueError(f"attempts[{index}] strategy_run_peak_rss must be an object")
+            if not {"status", "metric", "scope", "value_bytes", "reason"} <= rss.keys():
+                raise ValueError(f"attempts[{index}] strategy_run_peak_rss is missing required fields")
             if (rss.get("metric") != "process_peak_rss_bytes" or
                     rss.get("scope") != "process_vm_hwm_reset_before_and_read_after_strategy_run"):
                 raise ValueError(f"attempts[{index}] strategy_run_peak_rss metric or scope is invalid")

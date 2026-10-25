@@ -369,7 +369,7 @@ public `ComparisonAttempt` C++ type, changing its layout and ABI; binary
 consumers must rebuild against the updated headers and library. Event `/8`
 adds per-attempt process CPU time and adapter-reported backend scheduler width;
 the width is not active-thread utilization. Saved-record rendering and legacy
-`/2`–`/7` decoding remain available. No new dependency, installed file, or
+`/2`–`/9` decoding remains available. No new dependency, installed file, or
 package workflow is added. This PR does not publish a release; release planning
 remains under the repository's release tracker.
 
