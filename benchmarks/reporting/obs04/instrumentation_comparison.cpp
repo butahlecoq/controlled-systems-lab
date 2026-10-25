@@ -676,9 +676,9 @@ private:
             written += static_cast<std::size_t>(count);
         }
 
-        std::string response;
-        response.reserve(4);
-        while (response.size() < 4) {
+        std::array<char, 5> response{};
+        ssize_t received = 0;
+        while (received == 0) {
             const auto remaining = std::chrono::duration_cast<std::chrono::milliseconds>(deadline - Clock::now()).count();
             if (remaining <= 0) throw std::runtime_error("Timed out waiting for perf control acknowledgement");
             pollfd descriptor{ack_fd_, POLLIN, 0};
@@ -693,16 +693,18 @@ private:
                     std::this_thread::sleep_for(std::chrono::milliseconds(1));
                 continue;
             }
-            char byte{};
-            const auto count = ::read(ack_fd_, &byte, 1);
-            if (count < 0 && (errno == EINTR || errno == EAGAIN)) continue;
-            if (count <= 0) throw std::runtime_error("perf closed the acknowledgement FIFO");
-            response.push_back(byte);
-            if (response.size() > 4) throw std::runtime_error("Malformed perf control acknowledgement");
-            if (response.size() <= 3 && response.back() != std::string_view("ack\n")[response.size() - 1])
-                throw std::runtime_error("Unexpected perf control acknowledgement");
+            received = ::read(ack_fd_, response.data(), response.size());
+            if (received < 0 && (errno == EINTR || errno == EAGAIN)) {
+                received = 0;
+                continue;
+            }
+            if (received <= 0) throw std::runtime_error("perf closed the acknowledgement FIFO");
         }
-        if (response != "ack\n") throw std::runtime_error("Unexpected perf control acknowledgement");
+        const std::string_view acknowledgement{response.data(), static_cast<std::size_t>(received)};
+        constexpr std::string_view newline_ack{"ack\n", 4};
+        constexpr std::string_view nul_terminated_ack{"ack\n\0", 5};
+        if (acknowledgement != newline_ack && acknowledgement != nul_terminated_ack)
+            throw std::runtime_error("Unexpected perf control acknowledgement frame");
         ++acknowledged_commands_;
     }
 
