@@ -827,7 +827,13 @@ void compare_profile(const std::string& profile) {
         {ar::AttemptStatus::unsupported,
             ar::UnsupportedFinal{{{DiagnosticCode::unsupported,"capability","saved unsupported request"}}},
             "unsupported"},
-        {ar::AttemptStatus::cancelled,ar::SkippedFinal{ar::SkippedReason::cancelled},"cancelled"}};
+        {ar::AttemptStatus::refused,
+            ar::ProgramFinal{ProgramResult{Termination::operation_rejected,
+                {expected_identity,MathematicalOutcome::undetermined,Unestablished{},{}},{},{},
+                "saved provider refusal",{}},{}},
+            "refused"},
+        {ar::AttemptStatus::cancelled,ar::SkippedFinal{ar::SkippedReason::cancelled},"cancelled"},
+        {ar::AttemptStatus::incomplete,ar::SkippedFinal{ar::SkippedReason::batch_failed},"incomplete"}};
     for(std::size_t index=0;index<non_success_outcomes.size();++index) {
         const auto& [status,final,reported_status]=non_success_outcomes[index];
         const ar::RunId non_success_run{"saved-non-success-"+std::to_string(index)};
