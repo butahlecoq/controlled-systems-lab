@@ -9,6 +9,7 @@
 #include <csl/synthesis/strategy_b/direct_joint.hpp>
 #include <csl/synthesis/witness_selector.hpp>
 
+#include <algorithm>
 #include <array>
 #include <charconv>
 #include <stdexcept>
@@ -468,8 +469,10 @@ int run(const input::LoadedScenario& scenario, const Options& options) {
     }
     if (has_unsupported_backend(*requested)) return 2;
     const std::string profile = options.profile.value_or("ts01_exact_integrator");
-    if (profile != "ts01_exact_integrator" && profile != "ts02_constant_integrator") {
-        std::cerr << "Unsupported profile: " << profile << "; expected ts01_exact_integrator or ts02_constant_integrator\n";
+    const bool generality_candidate = profile == "nominal_open_loop";
+    if (profile != "ts01_exact_integrator" && profile != "ts02_constant_integrator" && !generality_candidate) {
+        std::cerr << "Unsupported profile: " << profile
+                  << "; expected ts01_exact_integrator, ts02_constant_integrator, or nominal_open_loop\n";
         return 2;
     }
     if (requested->representation && requested->representation->value != "csl.polyhedron.h") {
@@ -482,7 +485,8 @@ int run(const input::LoadedScenario& scenario, const Options& options) {
     FamilyRequest family;
     family.profile = profile;
     family.objective = problem.identity();
-    family.target = FamilyTarget::exact_optimal_relation;
+    family.target = generality_candidate ? FamilyTarget::candidate_relaxation :
+        FamilyTarget::exact_optimal_relation;
     family.assurance = Assurance::numerical;
     family.representation = {"csl.polyhedron.h"};
     if (requested->numerical) family.numerical = *requested->numerical;
@@ -548,6 +552,7 @@ int run(const input::LoadedScenario& scenario, const Options& options) {
               << " seed=" << witnesses.seed.value_or(31)
               << " threads=" << resources.total_threads << '\n';
     bool all_passed = true;
+    bool candidate_observed = false;
     for (std::size_t index = 0; index < execution.strategies.size(); ++index) {
         const auto& strategy = execution.strategies[index];
         const auto* result = std::get_if<SynthesisResult>(&strategy.outcome);
@@ -559,6 +564,9 @@ int run(const input::LoadedScenario& scenario, const Options& options) {
         }
         const bool complete = result->family &&
             std::holds_alternative<CompleteOptimalFamily>(result->family->outcome());
+        const bool candidate_family = result->family &&
+            result->family->target() == FamilyTarget::candidate_relaxation;
+        candidate_observed = candidate_observed || candidate_family;
         const auto* selected_witnesses = std::get_if<WitnessSelection>(&strategy.selection);
         std::cout << "mode=run profile=" << profile << " strategy=" << (index == 0 ? "csl.synthesis.reach-back" : "csl.synthesis.strategy-b");
         if (result->family)
@@ -566,19 +574,42 @@ int run(const input::LoadedScenario& scenario, const Options& options) {
         std::cout << " seed=" << witnesses.seed.value_or(31) << " threads=" << resources.total_threads
                   << " termination=" << termination_name(result->termination)
                   << " outcome=" << outcome_name(result->outcome.value)
-                  << " family=" << (complete ? "complete" : (result->family ? "partial" : "none"))
-                  << " selected=" << (selected_witnesses ? selected_witnesses->batch.returned_count() : 0);
+                  << " family=" << (complete ? "complete_optimal" :
+                      (candidate_family ? "candidate" : (result->family ? "partial" : "none")))
+                  << " selected=" << (selected_witnesses ? selected_witnesses->batch.returned_count() : 0)
+                  << " incumbents=" << result->incumbents.size();
         bool verification_passed = selected_witnesses != nullptr &&
             strategy.verification.size() == selected_witnesses->batch.witnesses.size();
         for (const auto& report : strategy.verification) {
             verification_passed = verification_passed &&
                 report.termination == Termination::completed && passed(report.bindings) && passed(report.feasibility) && passed(report.objective) && report.recomputed_objective.has_value();
         }
+        const bool incumbent_evidence = !result->incumbents.empty() &&
+            std::all_of(result->incumbents.begin(), result->incumbents.end(), [](const auto& incumbent) {
+                return std::holds_alternative<NumericalCheck>(incumbent.feasibility.support);
+            });
         std::cout << " verification="
-                  << (verification_passed ? "numerical_pass" : "not_passed") << '\n';
+                  << (verification_passed ? "numerical_pass" : "not_passed")
+                  << " incumbent_evidence=" << (incumbent_evidence ? "numerical" : "none") << '\n';
+        if (const auto* stopped = std::get_if<ScopedOperationStopped>(&result->stop))
+            std::cout << "  stop=" << stopped->stop.diagnostics << '\n';
+        if (const auto* rejected = std::get_if<ScopedRequestRejection>(&result->stop))
+            for (const auto& diagnostic : rejected->diagnostics)
+                std::cout << "  rejection=" << diagnostic.field << ':' << diagnostic.explanation << '\n';
+        if (const auto* invalid = std::get_if<ContractValidationFailure>(&result->stop))
+            for (const auto& diagnostic : invalid->diagnostics)
+                std::cout << "  validation=" << diagnostic.field << ':' << diagnostic.explanation << '\n';
         if (!verification_passed || result->termination != Termination::completed ||
-            result->outcome.value != MathematicalOutcome::optimal || !complete)
+            (generality_candidate ? !candidate_family :
+                result->outcome.value != MathematicalOutcome::optimal || !complete))
             all_passed = false;
+    }
+    if (generality_candidate) {
+        if (!candidate_observed) return 1;
+        if (options.output_directory)
+            return persist(problem, prepared, execution, modules, resources, witnesses, *options.output_directory);
+        std::cout << "artifact_export=not_requested evidence=attempts_preserved\n";
+        return 0;
     }
     if (!all_passed) return 1;
     if (options.output_directory) return persist(problem, prepared, execution, modules, resources, witnesses, *options.output_directory);
@@ -592,7 +623,7 @@ int main(int argc, char** argv) try {
     Options options;
     if (!parse_options(argc, argv, options)) {
         std::cerr << "Usage: scenario_cli --validate-only <scenario.json>\n"
-                  << "   or: scenario_cli --run <scenario.json> [--profile ts01_exact_integrator|ts02_constant_integrator]"
+                  << "   or: scenario_cli --run <scenario.json> [--profile ts01_exact_integrator|ts02_constant_integrator|nominal_open_loop]"
                      " [--lp id] [--convex id] [--seed n] [--threads n] [--output-dir directory]\n";
         return 2;
     }

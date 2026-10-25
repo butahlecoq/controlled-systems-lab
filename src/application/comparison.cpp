@@ -376,13 +376,18 @@ Preparation PreparedComparison::prepare_impl(const ComparisonRequest& request,
         guard_timer.finish(PreparationObservationStatus::rejected);
         return unsupported(std::move(field),std::move(explanation));
     };
-    if (std::find(profiles.begin(), profiles.end(), request.family.profile) == profiles.end())
+    const bool candidate_generality =
+        request.family.profile == "nominal_open_loop" &&
+        request.family.target == FamilyTarget::candidate_relaxation;
+    if (!candidate_generality &&
+        std::find(profiles.begin(), profiles.end(), request.family.profile) == profiles.end())
         return reject("comparison.family.profile",
-            "Only the guarded T-S01, T-S02 and T-S03 complete-family profiles are admitted.");
+            "Only guarded T-S01/T-S02/T-S03 complete-family profiles and nominal-open-loop candidate generality are admitted.");
     if (request.family.objective != request.problem.identity())
         return reject("comparison.family.objective",
             "The common family request must name the supplied resolved problem.");
-    if (request.family.target != FamilyTarget::exact_optimal_relation ||
+    if ((!candidate_generality && request.family.target != FamilyTarget::exact_optimal_relation) ||
+        (candidate_generality && request.family.target != FamilyTarget::candidate_relaxation) ||
         request.family.assurance != Assurance::numerical ||
         !admitted_representation(request.family.representation))
         return reject("comparison.family",
@@ -407,7 +412,8 @@ Preparation PreparedComparison::prepare_impl(const ComparisonRequest& request,
         registry::Requirements requirements;
         requirements.output.representation = request.family.representation;
         requirements.output.family = request.family.target;
-        requirements.output.completeness = registry::Completeness::established;
+        requirements.output.completeness = candidate_generality ?
+            registry::Completeness::unestablished : registry::Completeness::established;
         auto result = observation ? registry.prepare_observed(strategy_request,requirements,{},
             observation->registry_attempts[index]) : registry.prepare(strategy_request, requirements);
         if (auto* rejection = std::get_if<registry::Rejection>(&result)) {
