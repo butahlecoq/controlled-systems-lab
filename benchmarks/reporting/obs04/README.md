@@ -121,13 +121,13 @@ produced a `/5` record with 32 attempts, zero failures, one capability call per
 accepted strategy, and nested phase durations below inclusive admission. That
 run checks instrumentation wiring only. It supports no performance claim.
 
-If comparison admission is rejected or throws, the driver writes a
-`csl.obs04-preparation-failure/1` record to `--record` (or a unique default
-path) before exiting unsuccessfully. It preserves the common-guard and per-arm
-registry observations, available diagnostics, and earlier preflight timings.
-`comparison_attempts_started: false` makes clear that no workspace run exists
-to add to a `csl.comparison-record/1`; the saved failure record must not be
-reported as a completed comparison or as a solver execution attempt.
+If comparison admission is rejected or throws, the driver writes a complete
+`csl.comparison-record/1` to `--record` (or a unique default path) before
+exiting unsuccessfully. It contains all 32 ordered unsupported/failed arm
+attempts, with valid run references, the admission diagnostics and timing, and
+`strategy_run_ns: null`. Each event marks `admission_failure` and says that no
+workspace ran. This preserves the refusal in the paired comparison record
+without presenting it as a solver execution or completed comparison.
 
 ## Clean-source preflight capture
 
