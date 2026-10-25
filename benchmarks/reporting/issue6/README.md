@@ -13,6 +13,16 @@ scaled by 1500 and an objective-squared denominator of 9,000,000. Together,
 these give an exact reference for the explicitly stated rational case. The
 solver measurement itself uses the project's binary64 numerical assurance.
 
+The saved run found one minimizing plan, the printed L09 sequence
+`(-0.3, 1, 0, 0, 0.3)`, with exact squared objective
+`1100939049/9000000` and norm `11.060133859949435`. Seven Release calls had
+median `1,196,536,901 ns`, range `1,188,696,999–1,253,915,262 ns`, and no
+failures. The cumulative process peak RSS was `107,936 KiB`. The report and
+flow/stock projections are in
+[`reports/algorithm-results/b06-owner-confirmed-7df01ba3af5e4c46`](../../../reports/algorithm-results/b06-owner-confirmed-7df01ba3af5e4c46/index.html).
+No limiter profile was collected; this single-adapter result makes no speedup
+claim.
+
 ## Reproduce
 
 Configure and build a clean Release driver:

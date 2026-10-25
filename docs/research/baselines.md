@@ -99,7 +99,9 @@ $$
 2.25x_4^2+(x_2-1.5x_4)^2}.
 $$
 
-Reported: 3125 plans; worst-case 10.11; nonlinear state (30,6.0345,20,4.4731) and cost 9.049; runtime 300 s. L09 p. 11 visually prints the unique linear minimax sequence `(-0.3, 1, 0, 0, 0.3)` for control indices 0–4; p. 12 states that this found minimax control is applied to the original nonlinear system for the reported terminal result. The disturbance bounds and independent reproduction remain unresolved; see the [B06 source audit](b06-source-audit.md).
+Reported: 3125 plans; worst-case 10.11; nonlinear state (30,6.0345,20,4.4731) and cost 9.049; runtime 300 s. L09 p. 11 visually prints the unique linear minimax sequence `(-0.3, 1, 0, 0, 0.3)` for control indices 0–4; p. 12 states that this found minimax control is applied to the original nonlinear system for the reported terminal result. The PDF does not print numeric disturbance bounds; the historical uncertainty catalogue and run remain unrecovered. See the [B06 source audit](b06-source-audit.md).
+
+The separate [owner-confirmed disturbance reference](../../benchmarks/scenarios/b06-owner-confirmed-disturbance-v1.json) combines the displayed discrete model with the owner's later `[-1,1]^2` disturbance-set decision. The current finite-action minimax adapter exhaustively evaluates all 3,125 plans and 1,024 disturbance-corner histories per plan. Its independent integer-scaled exact oracle finds the unique minimizer `(-0.3,1,0,0,0.3)` and squared value `1100939049/9000000` (norm `11.060133859949435`). This is a result for the named reference case; the paper does not print the numerical uncertainty set, so it does not reproduce or explain the reported `10.11`. The [saved numerical report and 2D terminal projections](../../reports/algorithm-results/b06-owner-confirmed-7df01ba3af5e4c46/index.html) include seven Release timings and raw inputs/results.
 
 B07/L10 uses
 

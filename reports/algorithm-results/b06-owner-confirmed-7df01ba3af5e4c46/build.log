@@ -1,0 +1,47 @@
+[  4%] Building CXX object CMakeFiles/csl_contracts.dir/src/contracts/model.cpp.o
+[  4%] Building CXX object CMakeFiles/csl_contracts.dir/src/contracts/outcomes.cpp.o
+[  9%] Building CXX object CMakeFiles/csl_contracts.dir/src/contracts/geometry.cpp.o
+[  9%] Building CXX object CMakeFiles/csl_contracts.dir/src/contracts/problem.cpp.o
+[ 13%] Building CXX object CMakeFiles/csl_contracts.dir/src/contracts/execution.cpp.o
+[ 18%] Building CXX object CMakeFiles/csl_contracts.dir/src/contracts/synthesis.cpp.o
+[ 18%] Linking CXX static library libcsl_contracts.a
+[ 18%] Built target csl_contracts
+[ 22%] Building CXX object CMakeFiles/csl_numeric.dir/src/numeric/data.cpp.o
+[ 22%] Linking CXX static library libcsl_numeric.a
+[ 22%] Built target csl_numeric
+[ 27%] Building CXX object CMakeFiles/csl_sets.dir/src/sets/data.cpp.o
+[ 31%] Building CXX object CMakeFiles/csl_objectives.dir/src/optimization/objective_reformulation.cpp.o
+[ 31%] Linking CXX static library libcsl_sets.a
+[ 31%] Built target csl_sets
+[ 36%] Linking CXX static library libcsl_objectives.a
+[ 36%] Built target csl_objectives
+[ 45%] Building CXX object CMakeFiles/csl_model.dir/src/model/discretization/adapter.cpp.o
+[ 45%] Building CXX object CMakeFiles/csl_worst_case_vertex.dir/src/optimization/worst_case_vertex.cpp.o
+[ 40%] Building CXX object CMakeFiles/csl_model.dir/src/model/linear_system.cpp.o
+[ 45%] Building CXX object CMakeFiles/csl_model.dir/src/model/discretization/rk4.cpp.o
+[ 50%] Building CXX object CMakeFiles/csl_model.dir/src/model/hybrid_system.cpp.o
+[ 50%] Linking CXX static library libcsl_worst_case_vertex.a
+[ 50%] Built target csl_worst_case_vertex
+[ 54%] Linking CXX static library libcsl_model.a
+[ 54%] Built target csl_model
+[ 59%] Building CXX object CMakeFiles/csl_fixed_plan_disturbance.dir/src/reachability/fixed_plan_disturbance.cpp.o
+[ 63%] Building CXX object CMakeFiles/csl_problem.dir/src/problem/initial_information.cpp.o
+[ 68%] Building CXX object CMakeFiles/csl_problem.dir/src/problem/constraints.cpp.o
+[ 68%] Building CXX object CMakeFiles/csl_problem.dir/src/problem/domains.cpp.o
+[ 72%] Linking CXX static library libcsl_problem.a
+[ 72%] Built target csl_problem
+[ 77%] Building CXX object CMakeFiles/csl_resolved_core.dir/src/problem/identity.cpp.o
+[ 77%] Building CXX object CMakeFiles/csl_resolved_core.dir/src/problem/resolved.cpp.o
+[ 81%] Linking CXX static library libcsl_fixed_plan_disturbance.a
+[ 81%] Built target csl_fixed_plan_disturbance
+[ 86%] Building CXX object CMakeFiles/csl_finite_action_minimax.dir/src/optimization/finite_action_minimax.cpp.o
+[ 90%] Linking CXX static library libcsl_finite_action_minimax.a
+[ 90%] Built target csl_finite_action_minimax
+[ 95%] Linking CXX static library libcsl_resolved_core.a
+[ 95%] Built target csl_resolved_core
+[ 95%] Building CXX object CMakeFiles/csl_issue6_b06_report.dir/benchmarks/reporting/issue6/b06_finite_minimax.cpp.o
+[100%] Linking CXX executable csl_issue6_b06_report
+[100%] Built target csl_issue6_b06_report
+[ 50%] Building CXX object CMakeFiles/csl_issue6_b06_exact_oracle.dir/benchmarks/reporting/issue6/b06_exact_oracle.cpp.o
+[100%] Linking CXX executable csl_issue6_b06_exact_oracle
+[100%] Built target csl_issue6_b06_exact_oracle

@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1120" height="500" viewBox="0 0 1120 500">
+<rect width="100%" height="100%" fill="white"/>
+<style>text{font:15px sans-serif;fill:#17212b}.title{font-size:20px;font-weight:600}.poly{fill:#64a8d6;fill-opacity:.34;stroke:#155d89;stroke-width:2}.target{fill:#d23b32;stroke:white;stroke-width:1.5}</style>
+<text x="560" y="30" text-anchor="middle" class="title">B06 reference: numerical 2D projections of the computed terminal reachable set</text>
+<text x="300.0" y="58" text-anchor="middle" class="title">Terminal flows</text>
+<line x1="65" y1="425" x2="535" y2="425" stroke="#334"/>
+<line x1="65" y1="75" x2="65" y2="425" stroke="#334"/>
+<polygon class="poly" points="110.48,391.13 489.52,391.13 489.52,108.87 110.48,108.87"/>
+<circle class="target" cx="292.42" cy="264.58" r="6"/>
+<text x="301.42" y="257.58">target</text>
+<text x="300.0" y="470" text-anchor="middle">Oxidizer flow x₁ (kg/s)</text>
+<text transform="translate(17,250.0) rotate(-90)" text-anchor="middle">Fuel flow x₃ (kg/s)</text>
+<text x="300.0" y="445" text-anchor="middle" font-size="12">x: 29.7 … 30.32</text>
+<text transform="translate(77,250.0) rotate(-90)" text-anchor="middle" font-size="12">y: 19.773 … 20.269</text>
+<text x="850.0" y="58" text-anchor="middle" class="title">Terminal stock balances</text>
+<line x1="615" y1="425" x2="1085" y2="425" stroke="#334"/>
+<line x1="615" y1="75" x2="615" y2="425" stroke="#334"/>
+<polygon class="poly" points="936.80,191.58 1039.52,191.58 1039.52,108.87 936.80,108.87"/>
+<circle class="target" cx="660.48" cy="391.13" r="6"/>
+<text x="669.48" y="384.13">target</text>
+<text x="850.0" y="470" text-anchor="middle">Oxidizer balance x₂ (kg)</text>
+<text transform="translate(567,250.0) rotate(-90)" text-anchor="middle">Fuel balance x₄ (kg)</text>
+<text x="850.0" y="445" text-anchor="middle" font-size="12">x: -0.8856 … 8.2656</text>
+<text transform="translate(627,250.0) rotate(-90)" text-anchor="middle" font-size="12">y: -0.6552 … 6.1152</text>
+<text x="560" y="490" text-anchor="middle" font-size="13">Winning fixed plan (-0.3, 1, 0, 0, 0.3); all 1,024 corner histories, numeric V-representation</text>
+</svg>
