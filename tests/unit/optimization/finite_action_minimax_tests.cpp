@@ -1,6 +1,9 @@
 #define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
 #include <doctest/doctest.h>
 #include <csl/optimization/finite_action_minimax.hpp>
+#include <algorithm>
+#include <cmath>
+#include <limits>
 
 using namespace csl;
 using namespace csl::optimization;
@@ -66,6 +69,58 @@ TEST_CASE("duplicate catalogue rows remain separate tied plans") {
     CHECK(result.minimizing_plan_indices==std::vector<std::size_t>{0,1});
     CHECK(std::get<FinitePlanFeasible>(result.plans[0]).terminal.metadata()->id !=
           std::get<FinitePlanFeasible>(result.plans[1]).terminal.metadata()->id);
+}
+
+TEST_CASE("independent exhaustive oracle checks every tied robust finite plan") {
+    const Vector catalogue{0,0,1};
+    auto input=request(catalogue,10);
+    const SystemModel authored{{{1,1,1},TimeDomain::discrete,
+        LinearStage{{1,1,{1}},{1,1,{1}},{1,1,{1}},{0}}}, {}};
+    input.system=take(model::snapshot(authored,Vector{0,1,2}));
+    input.disturbances.push_back(input.disturbances.front());
+    input.admissible_states.push_back(input.admissible_states.back());
+
+    struct ReferencePlan {
+        std::vector<std::size_t> action_indices;
+        double worst_value;
+    };
+    std::vector<ReferencePlan> reference;
+    double reference_minimum=std::numeric_limits<double>::infinity();
+    for(std::size_t first=0;first<catalogue.size();++first) {
+        for(std::size_t second=0;second<catalogue.size();++second) {
+            double worst_value=-std::numeric_limits<double>::infinity();
+            for(const double first_disturbance:Vector{0,2}) {
+                for(const double second_disturbance:Vector{0,2}) {
+                    const double x1=catalogue[first]+first_disturbance;
+                    const double x2=x1+catalogue[second]+second_disturbance;
+                    REQUIRE(std::abs(x1)<=10);
+                    REQUIRE(std::abs(x2)<=10);
+                    const double terminal_residual=x2-1;
+                    worst_value=std::max(worst_value,terminal_residual*terminal_residual);
+                }
+            }
+            reference.push_back({{first,second},worst_value});
+            reference_minimum=std::min(reference_minimum,worst_value);
+        }
+    }
+    std::vector<std::size_t> reference_ties;
+    for(std::size_t index=0;index<reference.size();++index)
+        if(reference[index].worst_value==reference_minimum) reference_ties.push_back(index);
+
+    const auto outcome=finite_action_minimax(input,{9,4,0});
+    REQUIRE(std::holds_alternative<FiniteMinimaxOptimal>(outcome));
+    const auto& result=std::get<FiniteMinimaxOptimal>(outcome);
+    REQUIRE(result.plans.size()==reference.size());
+    CHECK(result.value==reference_minimum);
+    CHECK(result.minimizing_plan_indices==reference_ties);
+    CHECK(reference_ties==std::vector<std::size_t>{0,1,3,4});
+    for(std::size_t index=0;index<reference.size();++index) {
+        const auto* plan=std::get_if<FinitePlanFeasible>(&result.plans[index]);
+        REQUIRE(plan!=nullptr);
+        CHECK(plan->action_indices==reference[index].action_indices);
+        CHECK(plan->worst_value==reference[index].worst_value);
+        CHECK(plan->evaluated_vertices==4);
+    }
 }
 
 TEST_CASE("all robust violations yield whole catalogue infeasible evidence") {
