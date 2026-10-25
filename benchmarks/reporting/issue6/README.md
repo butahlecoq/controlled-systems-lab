@@ -91,8 +91,9 @@ six for lambda 1. The squared minima are 2,518.0254696696175 and
 13,408.277178974853, respectively. The numerical solver uses a `1e-8` absolute
 tolerance in squared objective when retaining near-optimal plans.
 
-Seven measured Release calls per objective follow one excluded warmup. The public
-call includes request construction and minimax solution, but not process startup,
+Seven alternating Release measurement rounds per objective use one excluded
+warmup in each separately launched process. The public call includes request
+construction and minimax solution, but not process startup,
 serialization, independent enumeration or figure rendering. On the recorded
 8-thread Ryzen 5 3550H host, medians were 243.295 ms (lambda 0; range
 238.115–261.631 ms) and 246.248 ms (lambda 1; range 239.973–253.728 ms);
@@ -116,8 +117,7 @@ Build and reproduce after configuring a Release tree with
 ```sh
 build/csl_issue6_b09_report --lambda 0 --geometry > lambda0-geometry.json
 build/csl_issue6_b09_report --lambda 1 --geometry > lambda1-geometry.json
-build/csl_issue6_b09_report --lambda 0 --measure 7 > lambda0-runs.jsonl
-build/csl_issue6_b09_report --lambda 1 --measure 7 > lambda1-runs.jsonl
+python3 benchmarks/reporting/issue6/b09_measure_alternating.py build/csl_issue6_b09_report --rounds 7 --output raw-runs.jsonl
 python3 benchmarks/reporting/issue6/b09_independent_oracle.py oracle.json lambda0-geometry.json lambda1-geometry.json
 python3 benchmarks/reporting/issue6/b09_render_projection.py lambda0-geometry.json --output lambda0-projections
 ```
