@@ -455,7 +455,7 @@ main-only Pages deployment and live URL verification; EXT-03 #73 remains open.
 
 ## EXP-05 finite fixed-plan minimax comparison
 
-The [versioned report bundle](../../reports/algorithm-results/exp05-fixed-plan-minimax-20261026-fce05a69/)
+The [versioned report bundle](../../reports/algorithm-results/exp05-fixed-plan-minimax-20261026-6c561462/)
 compares the numerical and interval-validated finite-action solvers on one
 bounded one-stage scalar fixture. The exhaustive independent oracle checks all
 four fixed-plan/disturbance pairs, both stage constraints, and terminal costs.

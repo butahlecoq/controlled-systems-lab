@@ -1,0 +1,19 @@
+<!doctype html>
+<html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width">
+<title>EXP-05 finite fixed-plan minimax</title>
+<style>
+body{font:16px system-ui;max-width:960px;margin:2rem auto;padding:0 1rem;background:#172019;color:#dce5d5;line-height:1.55}
+main{background:#202a22;border:1px solid #405045;border-radius:12px;padding:1.5rem}a{color:#b4cda3}
+svg{display:block;width:100%;height:auto;margin:1rem 0}table{border-collapse:collapse;width:100%;margin:1rem 0}
+th,td{border:1px solid #53634f;padding:.45rem;text-align:left}code{color:#b4cda3}
+</style><main>
+<h1>Finite fixed-plan minimax</h1>
+<p>This report compares two solvers on one bounded, one-stage scalar case. The action is fixed before the disturbance is revealed. The case is <code>x₁=x₀+u+w</code>, <code>x₀=0</code>, <code>u∈{0,1}</code>, <code>w∈{0,2}</code>, safe set <code>−10≤x≤10</code>, and terminal cost <code>|x₁−1|</code>.</p>
+<img src="visual.svg" alt="State trajectories for both fixed actions and disturbance vertices">
+<p>The independent oracle enumerates every action and disturbance pair, checks both stage constraints, and evaluates the terminal cost. Its global minimax value is <strong>1.0</strong>. All seven measured outcomes from each method passed the oracle checks.</p>
+<h2>Exploratory timings</h2>
+<p>Each duration covers the solver call only. One warmup per arm was excluded. Median and min–max range: numerical 7054 ns (5797–7543 ns); validated 7124 ns (6705–7543 ns). Ranges overlap. This tiny fixture supports no performance winner, scalability, or application-scale claim. No separate limiter profile was collected.</p>
+<table><thead><tr><th>Method</th><th>Measured repetition</th><th>Status</th><th>Solver time (ns)</th></tr></thead><tbody><tr><td>Numerical</td><td>1</td><td>completed</td><td>7264</td></tr><tr><td>Numerical</td><td>2</td><td>completed</td><td>7543</td></tr><tr><td>Numerical</td><td>3</td><td>completed</td><td>6146</td></tr><tr><td>Numerical</td><td>4</td><td>completed</td><td>7124</td></tr><tr><td>Numerical</td><td>5</td><td>completed</td><td>5797</td></tr><tr><td>Numerical</td><td>6</td><td>completed</td><td>7054</td></tr><tr><td>Numerical</td><td>7</td><td>completed</td><td>5797</td></tr><tr><td>Validated</td><td>1</td><td>completed</td><td>7543</td></tr><tr><td>Validated</td><td>2</td><td>completed</td><td>7124</td></tr><tr><td>Validated</td><td>3</td><td>completed</td><td>7543</td></tr><tr><td>Validated</td><td>4</td><td>completed</td><td>6705</td></tr><tr><td>Validated</td><td>5</td><td>completed</td><td>7124</td></tr><tr><td>Validated</td><td>6</td><td>completed</td><td>6775</td></tr><tr><td>Validated</td><td>7</td><td>completed</td><td>7473</td></tr></tbody></table>
+<h2>Reproduce and inspect</h2><p>Source revision: <code>6c5614620df222a5ca623527e2e26b1afe97757d</code>. Input manifest SHA-256: <code>f023a2968a067892faa2bbba2c8f264e8e98192c416e3eb52f9ada1d37eb34a5</code>. Build: GNU 16.2.1, Release.</p>
+<ul><li><a href="comparison.json">Raw comparison record and all 14 run records</a></li><li><a href="environment.json">Build and runtime environment</a></li><li><a href="trials.csv">Per-attempt timing table</a></li><li><a href="fixed_plan_comparison.cpp">Comparison driver and independent oracle</a></li><li><a href="build.log">Release build log</a></li><li><a href="commands.txt">Reproduction command</a></li></ul>
+</main></html>
