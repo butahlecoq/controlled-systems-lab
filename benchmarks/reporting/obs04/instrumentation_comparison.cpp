@@ -3,6 +3,7 @@
 #include <csl/adapters/polyhedral/qhull.hpp>
 #include <csl/application/comparison.hpp>
 #include <csl/artifacts/comparison_manifest.hpp>
+#include <csl/execution/contracts.hpp>
 #include <csl/execution/timing_collector.hpp>
 #include <csl/geometry/affine_sum.hpp>
 #include <csl/geometry/hull_reducer.hpp>
@@ -46,6 +47,7 @@
 #include <fcntl.h>
 #include <poll.h>
 #include <sys/utsname.h>
+#include <time.h>
 #include <unistd.h>
 #else
 #define NOMINMAX
@@ -541,6 +543,39 @@ std::int64_t ns(Clock::time_point begin, Clock::time_point end) {
     return std::chrono::duration_cast<std::chrono::nanoseconds>(end - begin).count();
 }
 
+std::optional<std::uint64_t> process_cpu_clock_ns() {
+#ifdef _WIN32
+    FILETIME created{}, exited{}, kernel{}, user{};
+    if (!GetProcessTimes(GetCurrentProcess(), &created, &exited, &kernel, &user)) return std::nullopt;
+    ULARGE_INTEGER kernel_ticks{}, user_ticks{};
+    kernel_ticks.LowPart = kernel.dwLowDateTime;
+    kernel_ticks.HighPart = kernel.dwHighDateTime;
+    user_ticks.LowPart = user.dwLowDateTime;
+    user_ticks.HighPart = user.dwHighDateTime;
+    constexpr std::uint64_t hundred_ns = 100;
+    const auto maximum = std::numeric_limits<std::uint64_t>::max();
+    if (user_ticks.QuadPart > maximum - kernel_ticks.QuadPart) return std::nullopt;
+    const auto total_ticks = static_cast<std::uint64_t>(kernel_ticks.QuadPart + user_ticks.QuadPart);
+    if (total_ticks > maximum / hundred_ns) return std::nullopt;
+    return total_ticks * hundred_ns;
+#else
+    timespec value{};
+    if (clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &value) != 0 || value.tv_sec < 0 || value.tv_nsec < 0)
+        return std::nullopt;
+    const auto seconds = static_cast<std::uint64_t>(value.tv_sec);
+    const auto nanoseconds = static_cast<std::uint64_t>(value.tv_nsec);
+    const auto maximum = std::numeric_limits<std::uint64_t>::max();
+    if (seconds > (maximum - nanoseconds) / 1'000'000'000ULL) return std::nullopt;
+    return seconds * 1'000'000'000ULL + nanoseconds;
+#endif
+}
+
+std::optional<std::uint64_t> elapsed_process_cpu_ns(
+    const std::optional<std::uint64_t>& begin, const std::optional<std::uint64_t>& end) {
+    if (!begin || !end || *end < *begin) return std::nullopt;
+    return *end - *begin;
+}
+
 std::optional<std::uint64_t> ticks_to_ns(std::uint64_t ticks,const ar::ClockDomain& clock) {
     if(clock.period_denominator==0)return {};
     const long double converted=static_cast<long double>(ticks)*clock.period_numerator*1'000'000'000.0L/
@@ -560,6 +595,8 @@ struct TrialTimings {
     std::optional<Clock::time_point> verification_begin;
     std::optional<std::uint64_t> setup_ns;
     std::optional<std::uint64_t> strategy_run_ns;
+    std::optional<std::uint64_t> strategy_run_cpu_ns;
+    std::optional<std::size_t> backend_scheduler_width;
     std::optional<std::uint64_t> family_construction_ns;
     std::optional<std::uint64_t> selection_setup_ns;
     std::optional<std::uint64_t> selection_run_ns;
@@ -764,17 +801,23 @@ TrialRecord trial_impl(const application::PreparedComparison& prepared, std::siz
     auto workspaces = prepared.create();
     ExecutionContext context;
     context.resources = std::make_shared<const ResourcePolicy>(ResourcePolicy{1, 1, 1, {}});
+    auto backend_thread_observation = std::make_shared<execution::BackendThreadObservation>();
+    context.backend_thread_observation = backend_thread_observation;
     context.numerical = prepared.family().numerical;
     if (collector) context.timing = collector;
     const auto setup_end = Clock::now();
     timings.setup_ns = static_cast<std::uint64_t>(ns(setup_begin, setup_end));
     const auto run_begin = Clock::now();
+    const auto cpu_begin = process_cpu_clock_ns();
     timings.strategy_run_begin = run_begin;
     invocation_started=true;
     const auto outcome = workspaces[strategy_index]->run(context);
+    const auto cpu_end = process_cpu_clock_ns();
     returned_outcome=outcome;
     const auto run_end = Clock::now();
     timings.strategy_run_ns = static_cast<std::uint64_t>(ns(run_begin, run_end));
+    timings.strategy_run_cpu_ns = elapsed_process_cpu_ns(cpu_begin, cpu_end);
+    timings.backend_scheduler_width = backend_thread_observation->maximum();
     const auto status=attempt_status(outcome);
     std::optional<Signature> observed;
     bool quality_passed=false;
@@ -937,11 +980,14 @@ TrialRecord trial_impl(const application::PreparedComparison& prepared, std::siz
     timings.end_to_end_ns = static_cast<std::uint64_t>(ns(*timings.attempt_begin, attempt_end));
 
     std::ostringstream event;
-    event << "{\"schema\":\"csl.obs04-instrumentation-comparison-event/7\",\"repetition\":" << repetition
+    event << "{\"schema\":\"csl.obs04-instrumentation-comparison-event/8\",\"repetition\":" << repetition
         << ",\"warmup\":" << (warmup ? "true" : "false") << ",\"strategy\":\""
         << (strategy_index == 0 ? "csl.synthesis.reach-back" : "csl.synthesis.strategy-b")
         << "\",\"instrumentation\":\"" << (enabled ? "enabled" : "disabled")
         << "\",\"setup_ns\":" << *timings.setup_ns << ",\"strategy_run_ns\":" << *timings.strategy_run_ns
+        << ",\"strategy_run_cpu_ns\":" << optional_ns_json(timings.strategy_run_cpu_ns)
+        << ",\"observed_backend_scheduler_width\":"
+        << (timings.backend_scheduler_width ? std::to_string(*timings.backend_scheduler_width) : "null")
         << ",\"family_construction_ns\":" << optional_ns_json(timings.family_construction_ns)
         << ",\"end_to_end_ns\":" << *timings.end_to_end_ns
         << ",\"selection_setup_ns\":" << selection_setup_ns

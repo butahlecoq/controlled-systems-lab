@@ -502,3 +502,13 @@ durations, not an end-to-end solve benchmark. The run-to-run ranges are wide,
 no source-mapped limiter is established, and this capture supports no speedup,
 winner, or general latency claim. The retained `summary.json` records every
 sample, run/spec ID, attempt count, and source identity.
+
+## Per-attempt resource observations (event /8)
+
+The driver now records process CPU nanoseconds across each strategy invocation
+and the maximum backend scheduler width reported through the execution context.
+The CPU value covers all threads in the driver process during that call; it is
+not thread CPU time. Scheduler width is the width configured/reported by a
+backend adapter, not the number of threads observed busy at once. Either field
+may be null when the platform or adapter cannot provide a value. These fields
+supplement wall time and do not establish a unique performance limiter.

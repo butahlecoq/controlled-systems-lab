@@ -134,7 +134,7 @@ class SavedRendererTests(unittest.TestCase):
         self.assertIn("&lt;script&gt;reach-back&lt;/script&gt;", page)
         self.assertNotIn("<script>reach-back</script>", page)
 
-    def test_renders_event_v7_family_construction_duration(self):
+    def test_renders_event_v8_resource_observations_and_family_duration(self):
         record = fixture_record()
         spec = json.loads(record["spec"])
         spec["arms"][0]["instrumentation"] = "enabled"
@@ -142,9 +142,11 @@ class SavedRendererTests(unittest.TestCase):
         configuration_id = None
         for attempt in record["attempts"]:
             measurement = json.loads(attempt["measurement_payload"])
-            measurement["schema"] = "csl.obs04-instrumentation-comparison-event/7"
+            measurement["schema"] = "csl.obs04-instrumentation-comparison-event/8"
             measurement["instrumentation"] = "enabled"
             measurement["family_construction_ns"] = 123 if measurement["status"] == "passed" else None
+            measurement["strategy_run_cpu_ns"] = 87 if measurement["status"] == "passed" else None
+            measurement["observed_backend_scheduler_width"] = 1 if measurement["status"] == "passed" else None
             attempt["measurement_payload"] = json.dumps(measurement)
             run = json.loads(attempt["run"])
             run["configuration"]["value"]["collection"]["enabled"] = True
@@ -163,6 +165,24 @@ class SavedRendererTests(unittest.TestCase):
             loaded = render_saved.load_record(path)
         page = render_saved.render_html(loaded)
         self.assertIn("family_construction: 123 ns (123–123)", page)
+        self.assertIn("strategy_run_cpu: 87 ns (87–87)", page)
+        self.assertIn("Backend scheduler width", page)
+        self.assertIn("not a count of busy threads", page)
+
+    def test_rejects_invalid_event_v8_resource_observation(self):
+        record = fixture_record()
+        measurement = json.loads(record["attempts"][0]["measurement_payload"])
+        measurement.update({
+            "schema": "csl.obs04-instrumentation-comparison-event/8",
+            "strategy_run_cpu_ns": True,
+            "observed_backend_scheduler_width": 1,
+        })
+        record["attempts"][0]["measurement_payload"] = json.dumps(measurement)
+        with tempfile.TemporaryDirectory() as temp:
+            path = Path(temp) / "record.json"
+            path.write_text(json.dumps(record), encoding="utf-8")
+            with self.assertRaisesRegex(ValueError, "strategy_run_cpu_ns must be a non-negative integer or null"):
+                render_saved.load_record(path)
 
     def test_rejects_unknown_record_schema(self):
         with tempfile.TemporaryDirectory() as temp:
