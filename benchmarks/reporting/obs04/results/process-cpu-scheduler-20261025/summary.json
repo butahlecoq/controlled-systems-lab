@@ -41,8 +41,67 @@
     1
   ],
   "passed_attempts": 160,
+  "postrun_phases": {
+    "nonlinear_replay": {
+      "reason": "The T-S01 fixture is an exact linear integrator; this capture does not invoke a nonlinear replay adapter.",
+      "status": "not_run"
+    },
+    "plot_export": {
+      "reason": "This OBS-04 capture renders comparison records as HTML and does not create a set-geometry plot.",
+      "status": "not_applicable"
+    },
+    "report_export_completed": 10,
+    "report_export_invocations": 10,
+    "report_export_saved_html_matches": 10,
+    "report_export_timeout_seconds_per_invocation": 30,
+    "report_export_wall_ns": {
+      "max": 153331922,
+      "median": 133306645,
+      "min": 129455521
+    }
+  },
   "processes": 5,
   "schema": "csl.obs04-process-resource-summary/1",
+  "shared_preflight": {
+    "comparison_spec_id": "1142a4075227c4673de0f9bbed7f896aff6176184867d07c61de38d315904df8",
+    "paired_run_ids": [
+      "842fb6fe298128aa91e57310b9f912ab6fd7fd4537ae9342eb09aad3ab5bf990",
+      "634950967f1633206534a1c3d585df79240d81ac834851e530767459d2c21d68",
+      "7c12b7ca4f039c6cb3aed9dbfed85ec45455bb7b6dbfae7ca985f2b7ca2c1c79",
+      "6e799d8a3ecb1f87d1e622b400ae815787a5f5b5b6eb1903fccc484ea7ec1347",
+      "965de6fc456d83821eabe13646299b35dce12f668704f035185c3342acacbe33"
+    ],
+    "phases": {
+      "comparison_admission_ns": {
+        "max": 196885,
+        "median": 88210,
+        "min": 80178
+      },
+      "provider_registration_ns": {
+        "max": 193183,
+        "median": 100991,
+        "min": 97150
+      },
+      "scenario_file_read_ns": {
+        "max": 70191,
+        "median": 44350,
+        "min": 38134
+      },
+      "scenario_json_parse_ns": {
+        "max": 87721,
+        "median": 57899,
+        "min": 46375
+      },
+      "scenario_load_validation_resolution_ns": {
+        "max": 301508,
+        "median": 184732,
+        "min": 152046
+      }
+    },
+    "samples": 5,
+    "schema": "csl.obs04-shared-preflight/2",
+    "scope": "selected_shared_preflight_blocks_before_configuration_workspaces_and_baselines"
+  },
   "source_dirty": false,
   "source_revision": "f8c62cb86ccaaf9644a9a973a5f79f41dc6058d1",
   "source_tree_sha256": "80706b5b6ba4ecb1c464d8bf02abc3e9e1557fc14d578dc2892aef25004c71e2",

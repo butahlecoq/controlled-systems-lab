@@ -26,15 +26,17 @@ selector execution, and independent verification are also reported separately
 after the strategy interval. Strategy A includes six planned spans. Strategy B
 includes its run and T-S01 family-construction spans. Each enabled event stores
 inclusive and exclusive wall-clock ticks for every span and the
-clock period used to interpret them. Event schema `/7` records the separately
-measured `family_construction_ns`; it covers complete-family proposal assembly
-and is null when that phase is not entered or instrumentation is disabled.
-Schemas `/5` and `/6` retain their earlier null-field meaning. There is one
-solver thread and one outer
-worker. Native backend thread count, CPU time, heap use, and a source-mapped
-limiter are unavailable. Treat any timing difference as descriptive and
-inconclusive; this tiny analytic case is not representative of application
-workloads.
+clock period used to interpret them. Event schema `/7` introduced the
+separately measured `family_construction_ns`; it covers complete-family
+proposal assembly and is null when that phase is not entered or instrumentation
+is disabled. The current driver emits `/8`, which adds process CPU time and
+adapter-reported backend scheduler width per attempt. The width is not active
+or busy-thread utilization. Schemas `/5` and `/6` retain their earlier
+null-field meaning. The driver requests one solver thread and one outer worker.
+Older captures lack CPU and scheduler-width observations; per-attempt memory,
+heap use, and a unique source-mapped limiter remain unavailable. Treat timing
+differences as descriptive and inconclusive; this tiny analytic case is not
+representative of application workloads.
 
 The driver emits a commented header and one JSON event per attempt. It also
 writes a digest-named `csl.comparison-record/1` artifact containing all 32
@@ -322,7 +324,7 @@ are medians of seven measured attempts per arm (ns).
 This single tiny-fixture capture verifies event and artifact behavior only. It
 does not locate a limiter or establish general overhead, application latency,
 scalability, or a strategy winner. Family construction is unavailable in these
-historical `/6` records; current `/7` captures report it where measured.
+historical `/6` records; newer `/7` and `/8` captures report it where measured.
 
 `results/strategy-run-perf-20261024/` retains the 2026-10-24 exploratory
 profiles, which were captured before control acknowledgements were added. They
@@ -358,21 +360,26 @@ and logs; permission or PMU denial is reported as `unavailable`, while protocol
 or capture errors are retained as `failed`. The workflow artifact is temporary
 (14-day retention). The comparison record adds `measurement_payload` to the
 public `ComparisonAttempt` C++ type, changing its layout and ABI; binary
-consumers must rebuild against the updated headers and library. This
-environment-manifest increment changes the wire schema while retaining legacy
-decoding; it adds no C++ API, installed file, package workflow, or new
-dependency. It does not prepare or publish a release. Current `/8` records add
-process CPU time per strategy call and adapter-reported backend scheduler width;
+consumers must rebuild against the updated headers and library. Event `/8`
+adds per-attempt process CPU time and adapter-reported backend scheduler width;
 the width is not active-thread utilization. Saved-record rendering and legacy
-`/2`–`/7` decoding remain available. Five clean-source captures report
-fixture-specific instrumentation deltas but make no general performance claim.
-Full resource policy/accounting, the remaining requested phase timings, and a
-per-attempt memory measurement/enforcement and a unique source-mapped limiter
-remain outstanding. Five additional whole-process `wait4` observations report
-peak RSS and total CPU/wall time with no memory or wall-time cap; their scope is
-explicitly process-wide. Current bounded profiles provide candidate hotspots
-but do not identify one limiter. Keep OBS-04 open until its remaining
-acceptance criteria have evidence.
+`/2`–`/7` decoding remain available. No new dependency, installed file, or
+package workflow is added. This PR does not publish a release; release planning
+remains under the repository's release tracker.
+
+The five clean-source captures report fixture-specific instrumentation deltas
+but make no general performance claim. They record process-wide peak RSS and
+CPU/wall time separately, with no memory or wall-time cap; per-attempt memory
+measurement/enforcement remains outstanding. Shared preflight timing separates
+file read, standalone parse, loader validation/resolution, provider registration,
+and comparison admission; parsing inside the public loader and capability work
+inside admission are still combined. Workspace/setup, family construction,
+queries, verification, and end-to-end timing are retained per attempt. Ten
+record-to-HTML exports completed under individual 30-second bounds with saved
+HTML hashes matching; no geometry plot or nonlinear replay applies to this
+linear fixture. The bounded profiles show candidate hotspots but no unique
+source-mapped limiter. Keep OBS-04 open until those remaining gaps have
+evidence.
 
 ## Acknowledged perf capture after FIFO fix (2026-10-25)
 

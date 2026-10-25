@@ -1,0 +1,127 @@
+{
+  "nonlinear_replay": {
+    "reason": "The T-S01 fixture is an exact linear integrator; this capture does not invoke a nonlinear replay adapter.",
+    "status": "not_run"
+  },
+  "plot_export": {
+    "reason": "This OBS-04 capture renders comparison records as HTML and does not create a set-geometry plot.",
+    "status": "not_applicable"
+  },
+  "report_export": {
+    "invocations": [
+      {
+        "html_sha256": "c621c0c47f524940b0fcf506753786fea29f451b38ecc23a93763f3fa73c2657",
+        "record": "benchmarks/reporting/obs04/results/process-cpu-scheduler-20261025/run-01.json",
+        "return_code": 0,
+        "saved_html_matches": true,
+        "status": "completed",
+        "stderr": "",
+        "stdout": "Rendered saved comparison record to /tmp/obs04-render-timing-20261025/render-01.html",
+        "timeout_seconds": 30,
+        "wall_ns": 137890761
+      },
+      {
+        "html_sha256": "0284cec8b0c291f08e80eec866146945afe08077236d5b1b30b7e79144d96894",
+        "record": "benchmarks/reporting/obs04/results/process-cpu-scheduler-20261025/run-02.json",
+        "return_code": 0,
+        "saved_html_matches": true,
+        "status": "completed",
+        "stderr": "",
+        "stdout": "Rendered saved comparison record to /tmp/obs04-render-timing-20261025/render-02.html",
+        "timeout_seconds": 30,
+        "wall_ns": 133609795
+      },
+      {
+        "html_sha256": "f35252eef675196b15e719324759053a03c6bfa104cc5d9dcf8972831eb62d51",
+        "record": "benchmarks/reporting/obs04/results/process-cpu-scheduler-20261025/run-03.json",
+        "return_code": 0,
+        "saved_html_matches": true,
+        "status": "completed",
+        "stderr": "",
+        "stdout": "Rendered saved comparison record to /tmp/obs04-render-timing-20261025/render-03.html",
+        "timeout_seconds": 30,
+        "wall_ns": 132336923
+      },
+      {
+        "html_sha256": "1d9a272209ba96ab99bfd723bc054cd5c85baff957329bf3d846349947169b52",
+        "record": "benchmarks/reporting/obs04/results/process-cpu-scheduler-20261025/run-04.json",
+        "return_code": 0,
+        "saved_html_matches": true,
+        "status": "completed",
+        "stderr": "",
+        "stdout": "Rendered saved comparison record to /tmp/obs04-render-timing-20261025/render-04.html",
+        "timeout_seconds": 30,
+        "wall_ns": 153331922
+      },
+      {
+        "html_sha256": "14853c515b7dd8241cf4009e6cccb590f2ab251d780ec6ddd4b26e9c4c05c3ef",
+        "record": "benchmarks/reporting/obs04/results/process-cpu-scheduler-20261025/run-05.json",
+        "return_code": 0,
+        "saved_html_matches": true,
+        "status": "completed",
+        "stderr": "",
+        "stdout": "Rendered saved comparison record to /tmp/obs04-render-timing-20261025/render-05.html",
+        "timeout_seconds": 30,
+        "wall_ns": 136349348
+      },
+      {
+        "html_sha256": "4d423ffa6ccf298a4bd5572a543b7496f3b2889e39214bebd267347928f0dc47",
+        "record": "benchmarks/reporting/obs04/results/process-cpu-scheduler-20261025/whole-process-resource/run-01.json",
+        "return_code": 0,
+        "saved_html_matches": true,
+        "status": "completed",
+        "stderr": "",
+        "stdout": "Rendered saved comparison record to /tmp/obs04-render-timing-20261025/render-06.html",
+        "timeout_seconds": 30,
+        "wall_ns": 129845100
+      },
+      {
+        "html_sha256": "074b76d0f76012f3d941ec054c4e25c202796a52adc7e64d796ec8c6e60289ed",
+        "record": "benchmarks/reporting/obs04/results/process-cpu-scheduler-20261025/whole-process-resource/run-02.json",
+        "return_code": 0,
+        "saved_html_matches": true,
+        "status": "completed",
+        "stderr": "",
+        "stdout": "Rendered saved comparison record to /tmp/obs04-render-timing-20261025/render-07.html",
+        "timeout_seconds": 30,
+        "wall_ns": 130403976
+      },
+      {
+        "html_sha256": "32907cabf3c11ab21ca3cf82380e2e737bdbe7642fd002001763545baaa13ef5",
+        "record": "benchmarks/reporting/obs04/results/process-cpu-scheduler-20261025/whole-process-resource/run-03.json",
+        "return_code": 0,
+        "saved_html_matches": true,
+        "status": "completed",
+        "stderr": "",
+        "stdout": "Rendered saved comparison record to /tmp/obs04-render-timing-20261025/render-08.html",
+        "timeout_seconds": 30,
+        "wall_ns": 129455521
+      },
+      {
+        "html_sha256": "4ec3db3addf00306c1c01195e59e8919619507399fb966b21ec7c04b51fbd8e4",
+        "record": "benchmarks/reporting/obs04/results/process-cpu-scheduler-20261025/whole-process-resource/run-04.json",
+        "return_code": 0,
+        "saved_html_matches": true,
+        "status": "completed",
+        "stderr": "",
+        "stdout": "Rendered saved comparison record to /tmp/obs04-render-timing-20261025/render-09.html",
+        "timeout_seconds": 30,
+        "wall_ns": 141798491
+      },
+      {
+        "html_sha256": "090c34cf017074fd50624b8116ad31ab5c271b055bbd527f8d0e730b07ba47e4",
+        "record": "benchmarks/reporting/obs04/results/process-cpu-scheduler-20261025/whole-process-resource/run-05.json",
+        "return_code": 0,
+        "saved_html_matches": true,
+        "status": "completed",
+        "stderr": "",
+        "stdout": "Rendered saved comparison record to /tmp/obs04-render-timing-20261025/render-10.html",
+        "timeout_seconds": 30,
+        "wall_ns": 133003496
+      }
+    ],
+    "scope": "saved comparison record to standalone HTML",
+    "timeout_seconds_per_invocation": 30
+  },
+  "schema": "csl.obs04-postrun-phase-observations/1"
+}

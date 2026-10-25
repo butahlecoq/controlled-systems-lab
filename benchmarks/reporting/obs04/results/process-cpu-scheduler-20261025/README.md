@@ -15,6 +15,21 @@ The values below are enabled-minus-disabled differences within the same process 
 
 Absolute per-arm medians and ranges, process IDs, run/spec IDs, binary identity, and attempt records are in `summary.json` and `run-01.json` through `run-05.json`. Each saved record has an HTML rendering. The ranges overlap for direct-joint, so its paired difference is not consistent. The result is fixture-specific and inconclusive; it does not support a general instrumentation-overhead claim, end-to-end performance claim, or strategy winner.
 
+The five shared preflight samples report these medians and full ranges:
+
+| Preflight phase | Median (ns) | Range (ns) |
+| --- | ---: | ---: |
+| Scenario file read | 44,350 | 38,134–70,191 |
+| Standalone JSON parse | 57,899 | 46,375–87,721 |
+| Public loader, validation, and resolution | 184,732 | 152,046–301,508 |
+| Provider registration | 100,991 | 97,150–193,183 |
+| Comparison admission, including capability checks | 88,210 | 80,178–196,885 |
+
+The public loader parses the file again, so its combined load/validation/
+resolution time is not a validation-only duration. These shared blocks occur
+before configuration workspaces and analytic baselines; they are not added to
+per-attempt solver durations.
+
 ## Separate limiter profiles
 
 The same executable was profiled in separate runs, 32 strategy calls per arm. Each profile acknowledged 64 enable/disable transitions. `perf report` decoded 889 reach-back samples and 253 direct-joint samples; both reports show zero lost samples. Requested frequency was 4,999 Hz, but effective frequency is not reported. The sampling window includes FIFO command/acknowledgement overhead. Allocation/free, C++ string operations, and HiGHS setup are visible candidates, but this small profile does not isolate a unique limiter. Raw profiles, capability metadata, reports, and logs are retained in `limiter-profile-userspace-perf-32-*`.
@@ -35,6 +50,15 @@ per-attempt memory measurements. The requested policy was one total thread,
 one outer worker, one thread per worker, no memory cap; no memory or wall-time
 limit was enforced. `whole-process-resource/summary.json` and each
 `run-*.resource.json` preserve the measurement scope and policy.
+
+## Separate report export phase
+
+`postrun-phases.json` retains ten saved-record-to-HTML render invocations, each
+bounded by a 30-second timeout. All ten completed and each regenerated HTML
+hash matched its saved report. Wall time median was 133,306,645 ns (range
+129,455,521–153,331,922 ns). No set-geometry plot or nonlinear replay was
+performed for this linear T-S01 fixture; both are explicitly marked
+not-applicable/not-run in the phase record.
 
 ## Superseded attempts
 
