@@ -147,11 +147,6 @@ bool positive_small_integer(const Json& value) {
     const auto integer=value.get<std::int64_t>();
     return integer>0&&integer<=std::numeric_limits<std::uint32_t>::max();
 }
-bool nonnegative_integer(const Json& value) {
-    if(!value.is_number_integer())return false;
-    if(value.is_number_unsigned())return true;
-    return value.get<std::int64_t>()>=0;
-}
 void validate_fact(const Json& fact, bool numeric, std::string_view path) {
     if(!fact.is_object()||!fact.contains("status")||!fact.at("status").is_string())
         throw std::invalid_argument(std::string(path)+" has no valid status");
@@ -172,13 +167,8 @@ void validate_fact(const Json& fact, bool numeric, std::string_view path) {
     } else throw std::invalid_argument(std::string(path)+" has an unknown status");
 }
 void validate_environment(const Json& environment) {
-    if(!environment.is_object()||!environment.contains("schema")||
-        (environment.at("schema")=="csl.obs04-environment/1"&&
-            !exact_fields(environment,{"schema","build","runtime","execution"}))||
-        (environment.at("schema")=="csl.obs04-environment/2"&&
-            !exact_fields(environment,{"schema","build","runtime","execution"}))||
-        (environment.at("schema")!="csl.obs04-environment/1"&&
-            environment.at("schema")!="csl.obs04-environment/2"))
+    if(!exact_fields(environment,{"schema","build","runtime","execution"})||
+        environment.at("schema")!="csl.obs04-environment/1")
         throw std::invalid_argument("Environment manifest schema or fields are invalid");
     const auto& build=environment.at("build");
     if(!exact_fields(build,{"schema","source_revision","source_tree_sha256","source_snapshot_method","source_dirty",
@@ -222,12 +212,8 @@ void validate_environment(const Json& environment) {
     validate_fact(runtime.at("cpu_model"),false,"runtime.cpu_model");
     validate_fact(runtime.at("logical_cpus"),true,"runtime.logical_cpus");
     const auto& execution=environment.at("execution");
-    const bool environment_v2=environment.at("schema")=="csl.obs04-environment/2";
-    const bool base_execution_fields=exact_fields(execution,{"requested_workers","observed_driver_workers","requested_backend_threads",
-        "observed_backend_threads","workspace_policy","cache_policy","warmup_repetitions","seed_policy","tolerances"});
-    const bool v2_execution_fields=exact_fields(execution,{"requested_workers","observed_driver_workers","requested_backend_threads",
-        "observed_backend_threads","workspace_policy","cache_policy","warmup_repetitions","seed_policy","tolerances","preflight"});
-    if((environment_v2?!v2_execution_fields:!base_execution_fields)||
+    if(!exact_fields(execution,{"requested_workers","observed_driver_workers","requested_backend_threads",
+        "observed_backend_threads","workspace_policy","cache_policy","warmup_repetitions","seed_policy","tolerances"})||
         !positive_small_integer(execution.at("requested_workers"))||
         execution.at("observed_driver_workers")!=1||execution.at("requested_backend_threads")!=1||
         !execution.at("workspace_policy").is_string()||execution.at("workspace_policy")!="fresh-workspace-per-attempt"||
@@ -247,17 +233,6 @@ void validate_environment(const Json& environment) {
         !std::isfinite(tolerances.at("relative").get<double>())||tolerances.at("absolute").get<double>()<0||
         tolerances.at("relative").get<double>()<0)
         throw std::invalid_argument("Environment numerical tolerances are invalid");
-    if(environment_v2) {
-        const auto& preflight=execution.at("preflight");
-        if(!exact_fields(preflight,{"scope","fixture_construction_and_resolution_ns",
-                "provider_registration_ns","comparison_admission_ns"})||
-            preflight.at("scope")!="single_shared_setup_before_attempts")
-            throw std::invalid_argument("Environment preflight timing fields are invalid");
-        for(const auto* field:{"fixture_construction_and_resolution_ns","provider_registration_ns",
-                "comparison_admission_ns"})
-            if(!nonnegative_integer(preflight.at(field)))
-                throw std::invalid_argument(std::string("Environment preflight timing is invalid: ")+field);
-    }
 }
 SpecShape validate_spec(const Json& spec) {
     if (!spec.is_object() || !spec.contains("problem_id") || !spec.contains("request_digest") ||
