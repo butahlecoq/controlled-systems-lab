@@ -1,0 +1,113 @@
+{
+  "environment": {
+    "capture_date_local": "2026-10-25 11:22:44 MSK",
+    "source_revision": "76d8ae64b8ec7d36c975eae64f7581bf345cf387",
+    "source_clean": true,
+    "binary": "/home/butahlecoq/.local/share/codex/worktrees/obs04-environment-records-20261025/build/obs04-driver-environment/csl_obs04_instrumentation_comparison",
+    "binary_sha256": "9c8fdf63b91ab0c48c6e9650051f9b56753e231dd33ba03e906d444ee8af15f2",
+    "build_type": "Release",
+    "host": "Linux-7.2.5-3-omarchy-x86_64-with-glibc2.44",
+    "cpu": "AMD Ryzen 5 3550H with Radeon Vega Mobile Gfx",
+    "logical_cpus": 8,
+    "load_before_capture": "11:22:44 up 2 days, 11:57,  1 user,  load average: 2.62, 2.91, 2.23",
+    "measurement": "five fresh driver processes; each process warms all four strategy/instrumentation arms and captures seven measured repetitions per arm; strategy order and instrumentation mode alternate by repetition",
+    "command_template": "/home/butahlecoq/.local/share/codex/worktrees/obs04-environment-records-20261025/build/obs04-driver-environment/csl_obs04_instrumentation_comparison --record <run-NN.json>"
+  },
+  "runs": [
+    {
+      "run": 1,
+      "exit_code": 0,
+      "wall_ns": 853373895,
+      "record_sha256": "c360dc91126f3bb7379ef477031a1dc506e359977eb805b8c163382c5281d46c",
+      "spec_id": "ea9550a6bffd3bdf8a1d6c50ca40d84d0a3c255ebd48ef659f1822c2c4b1a11f",
+      "run_id": "88d8f862e879069afa9d6ef5efb6bf49ba6fc745e1574a9f5e95058566c4562b",
+      "source_revision": "76d8ae64b8ec7d36c975eae64f7581bf345cf387",
+      "source_dirty": false,
+      "attempts": 32,
+      "solver_status_counts": {
+        "passed": 32
+      },
+      "phase_status_counts": {
+        "passed": 32
+      },
+      "stderr_bytes": 0,
+      "stdout_lines": 38
+    },
+    {
+      "run": 2,
+      "exit_code": 0,
+      "wall_ns": 849555844,
+      "record_sha256": "83dcd495e34a7feac11bdf2043cb8a919219acfae19a14f684845ffdbc89188b",
+      "spec_id": "ea9550a6bffd3bdf8a1d6c50ca40d84d0a3c255ebd48ef659f1822c2c4b1a11f",
+      "run_id": "1f8490ec63933338dc5675c848273783ad2bf01228f0f525fede754dfe5c933d",
+      "source_revision": "76d8ae64b8ec7d36c975eae64f7581bf345cf387",
+      "source_dirty": false,
+      "attempts": 32,
+      "solver_status_counts": {
+        "passed": 32
+      },
+      "phase_status_counts": {
+        "passed": 32
+      },
+      "stderr_bytes": 0,
+      "stdout_lines": 38
+    },
+    {
+      "run": 3,
+      "exit_code": 0,
+      "wall_ns": 853769480,
+      "record_sha256": "0c678035360c535a921ed840b3d381a90a53abd67fe93998e6a2ba3ad2eaa2cd",
+      "spec_id": "ea9550a6bffd3bdf8a1d6c50ca40d84d0a3c255ebd48ef659f1822c2c4b1a11f",
+      "run_id": "32f73cb77fe360ce049ad30b7dac3444955a4236c789e1f5efe82b9ae000c232",
+      "source_revision": "76d8ae64b8ec7d36c975eae64f7581bf345cf387",
+      "source_dirty": false,
+      "attempts": 32,
+      "solver_status_counts": {
+        "passed": 32
+      },
+      "phase_status_counts": {
+        "passed": 32
+      },
+      "stderr_bytes": 0,
+      "stdout_lines": 38
+    },
+    {
+      "run": 4,
+      "exit_code": 0,
+      "wall_ns": 820935028,
+      "record_sha256": "40bbf101bb8ecec3c9950b3e1cf1bae9a45f56fa5b4a83dcc955fee60699d7ef",
+      "spec_id": "ea9550a6bffd3bdf8a1d6c50ca40d84d0a3c255ebd48ef659f1822c2c4b1a11f",
+      "run_id": "42de4001599638b9daea25ed607ece52920da5771187c7ade58a5be94de99749",
+      "source_revision": "76d8ae64b8ec7d36c975eae64f7581bf345cf387",
+      "source_dirty": false,
+      "attempts": 32,
+      "solver_status_counts": {
+        "passed": 32
+      },
+      "phase_status_counts": {
+        "passed": 32
+      },
+      "stderr_bytes": 0,
+      "stdout_lines": 38
+    },
+    {
+      "run": 5,
+      "exit_code": 0,
+      "wall_ns": 826205792,
+      "record_sha256": "77142e5f0317da575748bb6d7a1f47196428470cd0fdad6407289d71599f745e",
+      "spec_id": "ea9550a6bffd3bdf8a1d6c50ca40d84d0a3c255ebd48ef659f1822c2c4b1a11f",
+      "run_id": "20564f19b3958787ded742f240dc8f7e493c109e1c891080938b06c4131876c0",
+      "source_revision": "76d8ae64b8ec7d36c975eae64f7581bf345cf387",
+      "source_dirty": false,
+      "attempts": 32,
+      "solver_status_counts": {
+        "passed": 32
+      },
+      "phase_status_counts": {
+        "passed": 32
+      },
+      "stderr_bytes": 0,
+      "stdout_lines": 38
+    }
+  ]
+}

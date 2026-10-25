@@ -644,6 +644,29 @@ void compare_profile(const std::string& profile) {
     const auto restored_v7=take_artifact(ar::decode_recorded_comparison(recorded_v7_wire),
         "decode_recorded_comparison event/7");
     CHECK(restored_v7.content().digest()==recorded_v7.content().digest());
+    auto measured_attempts_v8=measured_attempts_v7;
+    for(auto& attempt:measured_attempts_v8) {
+        auto measurement=nlohmann::json::parse(attempt.measurement_payload);
+        measurement["schema"]="csl.obs04-instrumentation-comparison-event/8";
+        measurement["strategy_run_cpu_ns"]=1;
+        measurement["observed_backend_scheduler_width"]=1;
+        attempt.measurement_payload=measurement.dump();
+    }
+    const auto recorded_v8=take_artifact(ar::encode_recorded_comparison(
+        version_three_spec,measured_attempts_v8),"encode_recorded_comparison event/8");
+    const auto recorded_v8_wire=std::string(
+        reinterpret_cast<const char*>(recorded_v8.content().bytes().data()),
+        recorded_v8.content().bytes().size());
+    const auto restored_v8=take_artifact(ar::decode_recorded_comparison(recorded_v8_wire),
+        "decode_recorded_comparison event/8");
+    CHECK(restored_v8.content().digest()==recorded_v8.content().digest());
+    auto zero_scheduler_width=measured_attempts_v8;
+    auto zero_width_measurement=nlohmann::json::parse(
+        zero_scheduler_width.front().measurement_payload);
+    zero_width_measurement["observed_backend_scheduler_width"]=0;
+    zero_scheduler_width.front().measurement_payload=zero_width_measurement.dump();
+    const auto zero_width=ar::encode_recorded_comparison(version_three_spec,zero_scheduler_width);
+    REQUIRE(std::holds_alternative<ar::ArtifactError>(zero_width));
     auto negative_family_timing=measured_attempts_v7;
     auto negative_family_measurement=nlohmann::json::parse(
         negative_family_timing.front().measurement_payload);

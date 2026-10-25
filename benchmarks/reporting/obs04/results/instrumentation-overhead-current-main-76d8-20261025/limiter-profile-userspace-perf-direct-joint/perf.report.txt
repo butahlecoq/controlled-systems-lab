@@ -1,0 +1,310 @@
+# To display the perf.data header info, please use --header/--header-only options.
+#
+#
+# Total Lost Samples: 0
+#
+# Samples: 73  of event 'cycles:u'
+# Event count (approx.): 22876506
+#
+# Overhead  Symbol                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  Shared Object                         IPC   [IPC Coverage]
+# ........  ......................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................  ....................................  ....................
+#
+     7.26%  [.] cfree                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               libc.so.6                             -      -
+            |
+            |--1.56%--Highs::Highs()
+            |
+            |--1.50%--0x7ffeefdaaa40
+            |
+            |--1.05%--Highs::optimizeModel()
+            |          Highs::run()
+            |
+             --1.04%--0
+
+     7.18%  [.] malloc                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              libc.so.6                             -      -
+            |
+            |--2.81%--std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >::basic_string(char const*, std::allocator<char> const&) [clone .isra.0]
+            |          |
+            |          |--1.59%--getPrimalDualGlpsolErrors(HighsOptions const&, HighsLp const&, std::vector<double, std::allocator<double> > const&, HighsSolution const&, HighsPrimalDualErrors&)
+            |          |
+            |           --1.23%--0x7400676e6972
+            |
+            |--2.20%--void std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >::_M_construct<true>(char const*, unsigned long)
+            |          0
+            |          csl::verification::verify_trajectory(csl::problem::ResolvedProblem const&, csl::verification::TrajectoryRequest const&, csl::ExecutionContext const&, std::optional<csl::registry::PreparedProvider<csl::registry::LPPort> >)
+            |
+             --2.16%--_M_data (inlined)
+                       _M_is_local (inlined)
+                       _M_dispose (inlined)
+                       _M_assign (inlined)
+                       OptionRecordInt::OptionRecordInt(std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >, bool, int*, int, int, int) [clone .constprop.1] [clone .isra.0]
+                       operator new (inlined)
+
+     5.66%  [.] 0x0000000000176e8e                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  libc.so.6                             -      -
+            |
+             --3.56%--0
+
+     5.42%  [.] operator new(unsigned long)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         libstdc++.so.6.0.36                   -      -
+            |
+            |--2.31%--void std::vector<InfoRecord*, std::allocator<InfoRecord*> >::_M_realloc_append<InfoRecord*>(InfoRecord*&&)
+            |          0x68736168746967
+            |
+            |--2.10%--_M_data (inlined)
+            |          _M_is_local (inlined)
+            |          _M_dispose (inlined)
+            |          _M_assign (inlined)
+            |          OptionRecordInt::OptionRecordInt(std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >, bool, int*, int, int, int)
+            |          0x18
+            |
+             --1.01%--0x7ffeefdaaa50
+
+     4.15%  [.] resetLocalOptions(std::vector<OptionRecord*, std::allocator<OptionRecord*> >&)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      csl_obs04_instrumentation_comparison  -      -
+            |
+            |--2.31%--0x63e1f4bf5050
+            |          0x63e1f4bc88d0
+            |          0x3
+            |          OptionRecordString::~OptionRecordString()
+            |          0x74c7394870438d48
+            |
+             --1.84%--0x63e1f4bc7de0
+                       0x63e1f4c0ab40
+                       0x3
+                       OptionRecordString::~OptionRecordString()
+                       0x74c7394870438d48
+
+     3.02%  [.] std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >::_M_create(unsigned long&, unsigned long)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           libstdc++.so.6.0.36                   -      -
+            |
+             --2.07%--0x3
+
+     2.55%  [.] 0x000000000010eef4                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  libstdc++.so.6.0.36                   -      -
+            |
+            ---_M_insert_float<double> (inlined)
+               _M_insert<double> (inlined)
+               csl::adapters::convex::(anonymous namespace)::Workspace::solve_native(csl::ConvexProgram const&, csl::ExecutionContext const&)
+               csl::adapters::convex::(anonymous namespace)::Workspace::do_solve(csl::ConvexProgram const&, csl::ExecutionContext const&)
+               0x63e1f4be1d10
+               csl::adapters::convex::(anonymous namespace)::Workspace::~Workspace()
+               0x4810ec8348fb8948
+
+     2.55%  [.] std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >::basic_string(char const*, std::allocator<char> const&) [clone .isra.0]                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             csl_obs04_instrumentation_comparison  -      -
+            |
+            ---0
+
+     2.52%  [.] HEkk::~HEkk()                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       csl_obs04_instrumentation_comparison  -      -
+            |
+            ---0
+
+     2.40%  [.] decltype(auto) std::__do_visit<void, std::__detail::__variant::_Variant_storage<false, csl::Unestablished, csl::NumericalCheck, csl::SymbolicArgument, csl::CertificateReference, csl::ExactFarkasEvidence>::_M_reset()::{lambda(auto:1&&)#1}, std::variant<csl::Unestablished, csl::NumericalCheck, csl::SymbolicArgument, csl::CertificateReference, csl::ExactFarkasEvidence>&>(std::__detail::__variant::_Variant_storage<false, csl::Unestablished, csl::NumericalCheck, csl::SymbolicArgument, csl::CertificateReference, csl::ExactFarkasEvidence>::_M_reset()::{lambda(auto:1&&)#1}&&, std::variant<csl::Unestablished, csl::NumericalCheck, csl::SymbolicArgument, csl::CertificateReference, csl::ExactFarkasEvidence>&) [clone .isra.0]  csl_obs04_instrumentation_comparison  -      -
+            |
+            ---0x63e1f4ba61d0
+
+     2.35%  [.] HEkk::initialiseSimplexLpRandomVectors()                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            csl_obs04_instrumentation_comparison  -      -
+     2.29%  [.] 0x00000000000a6ecb                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  libc.so.6                             -      -
+            |
+            ---0x71b1872a7a8f
+               operator new (inlined)
+               HFactor::build(HighsTimerClock*)
+               Basis::build()
+               0
+
+     2.27%  [.] std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >::_M_assign(std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const&)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  libstdc++.so.6.0.36                   -      -
+            |
+            ---_M_assign (inlined)
+               OptionRecordInt::OptionRecordInt(std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >, bool, int*, int, int, int) [clone .constprop.0] [clone .isra.0]
+               operator new (inlined)
+
+     2.23%  [.] HighsSolution::invalidate()                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         csl_obs04_instrumentation_comparison  -      -
+     2.16%  [.] 0x0000000000175f83                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  libc.so.6                             -      -
+            |
+            ---0x63e1f4bd9c18
+
+     1.98%  [k] 0xffffffff9234536b                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  [unknown]                             -      -
+            |
+            ---0xffffffff924add48
+               0xffffffff924b7c31
+               0xffffffff924b92f1
+               0xffffffff93614b9a
+               0xffffffff9200012f
+               __vdso_clock_gettime
+               clock_gettime
+               __cast<long int, std::ratio<1> > (inlined)
+               duration_cast<std::chrono::duration<long int, std::ratio<1, 1000000000> >, long int, std::ratio<1> > (inlined)
+               duration<long int, std::ratio<1> > (inlined)
+               operator+<long int, std::ratio<1>, long int, std::ratio<1, 1000000000> > (inlined)
+               now (inlined)
+               HighsTimer::stop(int)
+               0x3ff0000000000000
+               HighsTimer::~HighsTimer()
+               0x8b485355fc894954
+
+     1.98%  [.] 0x00000000000a75c0                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  libc.so.6                             -      -
+            |
+            ---0x71b1872a7a8f
+               operator new (inlined)
+               HighsInfo::initRecords()
+               Highs::returnFromOptimizeModel(HighsStatus, bool)
+               Highs::optimizeModel()
+               Highs::run()
+
+     1.85%  [.] OptionRecordDouble::OptionRecordDouble(std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >, bool, double*, double, double, double) [clone .constprop.0] [clone .isra.0]                                                                                                                                                                                                                                                                                                                                                                                                                                                                csl_obs04_instrumentation_comparison  -      -
+            |
+            ---0x6f63657328207469
+
+     1.77%  [.] HFactor::buildKernel()                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              csl_obs04_instrumentation_comparison  -      -
+            |
+            ---Basis::build()
+               0x4082c00000000000
+
+     1.73%  [.] 0x00000000001792d9                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  libc.so.6                             -      -
+            |
+            ---0
+               0
+
+     1.66%  [.] bool std::operator==<char, std::char_traits<char>, std::allocator<char> >(std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const&, char const*)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      csl_obs04_instrumentation_comparison  -      -
+            |
+            ---csl::synthesis::strategy_b::detail::DirectJointExecutionRunner::solve(csl::problem::ResolvedProblem const&, csl::FamilyRequest const&, csl::ExecutionContext const&)
+               0x63e1f4b932b0
+               0x1
+
+     1.62%  [.] std::basic_ostream<char, std::char_traits<char> >& std::__ostream_insert<char, std::char_traits<char> >(std::basic_ostream<char, std::char_traits<char> >&, char const*, long)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      libstdc++.so.6.0.36                   -      -
+            |
+            ---0x6e6f6e2064252064
+
+     1.61%  [.] Highs::setOptionValue(std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const&, bool)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 csl_obs04_instrumentation_comparison  -      -
+            |
+            ---0x4489480000002825
+
+     1.61%  [.] getOptionIndex(HighsLogOptions const&, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const&, std::vector<OptionRecord*, std::allocator<OptionRecord*> > const&, int&)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             csl_obs04_instrumentation_comparison  -      -
+            |
+            ---0xe
+               0x74726174735f
+
+     1.56%  [.] HighsLinearSumBounds::getResidualSumLowerOrig(int, int, double) const                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               csl_obs04_instrumentation_comparison  -      -
+     1.50%  [.] 0x00000000001764d4                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  libc.so.6                             -      -
+            |
+            ---OptionRecordString::OptionRecordString(std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >, bool, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >*, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >)
+               0x7ffeefda3ab0
+
+     1.47%  [.] auto csl::synthesis::strategy_b::detail::DirectJointExecutionRunner::solve_impl(csl::problem::ResolvedProblem const&, csl::FamilyRequest const&, csl::ExecutionContext const&)::{lambda<typename $T0, typename $T1>($T0 const&, csl::registry::PreparedProvider<$T1> const&)#1}::operator()<csl::ConvexProgram, csl::registry::ConvexPort>(csl::ConvexProgram const&, csl::registry::PreparedProvider<csl::registry::ConvexPort> const&) const                                                                                                                                                                                                                                                                                                      csl_obs04_instrumentation_comparison  -      -
+            |
+            ---0x1
+               csl::synthesis::strategy_b::DirectJointPayload::~DirectJointPayload()
+               0x708c78148fb8948
+
+     1.44%  [.] OptionRecordInt::OptionRecordInt(std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >, bool, int*, int, int, int) [clone .constprop.0] [clone .isra.0]                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  csl_obs04_instrumentation_comparison  -      -
+            |
+            ---operator new (inlined)
+
+     1.41%  [.] 0x00000000000a619d                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  libc.so.6                             -      -
+            |
+            ---OptionRecordInt::~OptionRecordInt()
+
+     1.38%  [.] 0x00000000000a4f23                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  libc.so.6                             -      -
+            |
+            ---0x71b1872a77c3
+               0x71b1872a7a8f
+               operator new (inlined)
+               HighsInfo::initRecords()
+               getPrimalDualGlpsolErrors(HighsOptions const&, HighsLp const&, std::vector<double, std::allocator<double> > const&, HighsSolution const&, HighsPrimalDualErrors&)
+
+     1.37%  [.] Highs::~Highs()                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     csl_obs04_instrumentation_comparison  -      -
+     1.30%  [.] std::_Sp_counted_base<(__gnu_cxx::_Lock_policy)2>::_M_release()                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     csl_obs04_instrumentation_comparison  -      -
+            |
+            ---0x56
+               0x732e31762e6d656c
+
+     1.25%  [.] std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >::_M_dispose()                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       libstdc++.so.6.0.36                   -      -
+            |
+            ---deallocate (inlined)
+               _M_destroy (inlined)
+               _M_dispose (inlined)
+               0x10
+               0x73686769682e7865
+
+     1.24%  [.] setLocalOptionValue(OptionRecordBool&, bool)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        csl_obs04_instrumentation_comparison  -      -
+            |
+            ---0x63e1f4baba38
+
+     1.21%  [.] memset@plt                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          csl_obs04_instrumentation_comparison  -      -
+            |
+            ---0x63e1f4bc8440
+               0
+
+     1.07%  [.] std::_Sp_counted_base<(__gnu_cxx::_Lock_policy)2>::_M_add_ref_copy()                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                csl_obs04_instrumentation_comparison  -      -
+            |
+            ---0xb1
+
+     1.07%  [.] 0x0000000000176e84                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  libc.so.6                             -      -
+            |
+            ---0
+
+     1.05%  [.] HighsOptions::initRecords()                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         csl_obs04_instrumentation_comparison  -      -
+            |
+            ---Highs::Highs()
+
+     1.04%  [.] 0x00000000000a727c                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  libc.so.6                             -      -
+            |
+            ---0x71b1872a7a8f
+               operator new (inlined)
+               _M_data (inlined)
+               _M_is_local (inlined)
+               _M_dispose (inlined)
+               _M_assign (inlined)
+               OptionRecordInt::OptionRecordInt(std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >, bool, int*, int, int, int)
+               0xe0
+
+     1.04%  [.] 0x000000000017658a                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  libc.so.6                             -      -
+            |
+            ---0x63e100000001
+
+     1.03%  [.] 0x00000000000a61f0                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  libc.so.6                             -      -
+            |
+            ---InfoRecordDouble::~InfoRecordDouble()
+               0
+               HighsInfo::~HighsInfo()
+               0x110978b48006e29
+
+     1.03%  [.] 0x00000000001791a1                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  libc.so.6                             -      -
+            |
+            ---0xff007469
+
+     1.03%  [.] bool okResize<std::set<int, std::less<int>, std::allocator<int> > >(std::vector<std::set<int, std::less<int>, std::allocator<int> >, std::allocator<std::set<int, std::less<int>, std::allocator<int> > > >&, int, std::set<int, std::less<int>, std::allocator<int> >)                                                                                                                                                                                                                                                                                                                                                                                                                                                                             csl_obs04_instrumentation_comparison  -      -
+            |
+            ---0x63e1f4bf2ec0
+
+     1.02%  [.] 0x00000000000a7739                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  libc.so.6                             -      -
+            |
+            ---0x71b1872a7a8f
+               operator new (inlined)
+               _M_data (inlined)
+               _M_is_local (inlined)
+               _M_dispose (inlined)
+               _M_assign (inlined)
+               InfoRecordDouble::InfoRecordDouble(std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >, bool, double*, double) [clone .constprop.0] [clone .isra.0]
+               0x7ffeefdaa140
+
+     1.02%  [.] std::_Function_handler<void (int, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const&, HighsCallbackOutput const*, HighsCallbackInput*, void*), csl::adapters::highs_detail::CallbackGuard<void (*)(HighsStatus)>::CallbackGuard(Highs&, csl::adapters::highs_detail::CallbackState&, void (*)(HighsStatus))::{lambda(int, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const&, HighsCallbackOutput const*, HighsCallbackInput*, void*)#1}>::_M_manager(std::_Any_data&, std::_Any_data const&, std::_Manager_operation)                                                                                                                                                      csl_obs04_instrumentation_comparison  -      -
+            |
+            ---Highs::passModel(HighsModel)
+               Highs::setCallback(std::function<void (int, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const&, HighsCallbackOutput const*, HighsCallbackInput*, void*)>, void*)
+
+     1.01%  [.] 0x000000000005c7a3                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  libc.so.6                             -      -
+            |
+            ---0x71b18725eb53
+               0x71b1872667c5
+               vsnprintf
+               0x71b18770ef37
+               _M_insert_float<double> (inlined)
+               _M_insert<double> (inlined)
+               csl::adapters::convex::(anonymous namespace)::append_attempt_residuals(std::__cxx11::basic_ostringstream<char, std::char_traits<char>, std::allocator<char> >&, char const*, csl::ProgramResult const&)::{lambda(char const*, csl::ResidualMeasure const&)#1}::operator()(char const*, csl::ResidualMeasure const&) const
+               0x6e6f6e2064252064
+
+     1.01%  [.] 0x0000000000176485                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  libc.so.6                             -      -
+            |
+            ---0x18
+               0x79746964696c
+
+
+
+#
+# (Cannot load tips.txt file, please install perf!)
+#

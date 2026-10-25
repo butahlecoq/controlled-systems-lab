@@ -1,0 +1,19 @@
+Events disabled
+Events enabled
+Events disabled
+Events enabled
+Events disabled
+Events enabled
+Events disabled
+Events enabled
+Events disabled
+Events enabled
+Events disabled
+Events enabled
+Events disabled
+Events enabled
+Events disabled
+Events enabled
+Events disabled
+[ perf record: Woken up 17 times to write data ]
+[ perf record: Captured and wrote 0.031 MB /home/butahlecoq/.local/share/codex/worktrees/obs04-environment-records-20261025/benchmarks/reporting/obs04/results/instrumentation-overhead-current-main-76d8-20261025/limiter-profile-userspace-perf/acknowledged.perf.data (298 samples) ]

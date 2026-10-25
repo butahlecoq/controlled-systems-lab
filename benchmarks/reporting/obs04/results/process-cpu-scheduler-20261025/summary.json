@@ -1,0 +1,269 @@
+{
+  "attempts": 160,
+  "binary_sha256": "121deb424eef3bf5f616119a7ad5bacdf310a0f2512726ffe17bc9b94464c361",
+  "comparison_run_ids": [
+    "842fb6fe298128aa91e57310b9f912ab6fd7fd4537ae9342eb09aad3ab5bf990",
+    "634950967f1633206534a1c3d585df79240d81ac834851e530767459d2c21d68",
+    "7c12b7ca4f039c6cb3aed9dbfed85ec45455bb7b6dbfae7ca985f2b7ca2c1c79",
+    "6e799d8a3ecb1f87d1e622b400ae815787a5f5b5b6eb1903fccc484ea7ec1347",
+    "965de6fc456d83821eabe13646299b35dce12f668704f035185c3342acacbe33"
+  ],
+  "comparison_spec_id": "1142a4075227c4673de0f9bbed7f896aff6176184867d07c61de38d315904df8",
+  "failed_attempts": 0,
+  "interpretation": "Fixture-specific evidence. Process CPU covers all driver threads during the strategy call. Backend scheduler width is adapter-reported configured width, not busy-thread count. Profiles are separate acknowledged runs; their sampling window includes FIFO coordination, effective frequency is unreported, and samples do not identify a unique limiter. No general overhead or strategy-winner claim is supported.",
+  "limiter_profiles": {
+    "direct-joint": {
+      "acknowledged_commands": 64,
+      "binary_sha256": "121deb424eef3bf5f616119a7ad5bacdf310a0f2512726ffe17bc9b94464c361",
+      "calls_passed": 32,
+      "calls_requested": 32,
+      "effective_frequency_status": "not_reported_by_this_probe",
+      "requested_frequency_hz": 4999,
+      "sample_scope": "acknowledged_perf_control_window",
+      "samples": 253,
+      "status": "available",
+      "total_lost_samples": 0
+    },
+    "reach-back": {
+      "acknowledged_commands": 64,
+      "binary_sha256": "121deb424eef3bf5f616119a7ad5bacdf310a0f2512726ffe17bc9b94464c361",
+      "calls_passed": 32,
+      "calls_requested": 32,
+      "effective_frequency_status": "not_reported_by_this_probe",
+      "requested_frequency_hz": 4999,
+      "sample_scope": "acknowledged_perf_control_window",
+      "samples": 889,
+      "status": "available",
+      "total_lost_samples": 0
+    }
+  },
+  "observed_backend_scheduler_widths": [
+    1
+  ],
+  "passed_attempts": 160,
+  "postrun_phases": {
+    "nonlinear_replay": {
+      "reason": "The T-S01 fixture is an exact linear integrator; this capture does not invoke a nonlinear replay adapter.",
+      "status": "not_run"
+    },
+    "plot_export": {
+      "reason": "This OBS-04 capture renders comparison records as HTML and does not create a set-geometry plot.",
+      "status": "not_applicable"
+    },
+    "report_export_completed": 10,
+    "report_export_invocations": 10,
+    "report_export_saved_html_matches": 10,
+    "report_export_timeout_seconds_per_invocation": 30,
+    "report_export_wall_ns": {
+      "max": 153331922,
+      "median": 133306645,
+      "min": 129455521
+    }
+  },
+  "processes": 5,
+  "schema": "csl.obs04-process-resource-summary/1",
+  "shared_preflight": {
+    "comparison_spec_id": "1142a4075227c4673de0f9bbed7f896aff6176184867d07c61de38d315904df8",
+    "paired_run_ids": [
+      "842fb6fe298128aa91e57310b9f912ab6fd7fd4537ae9342eb09aad3ab5bf990",
+      "634950967f1633206534a1c3d585df79240d81ac834851e530767459d2c21d68",
+      "7c12b7ca4f039c6cb3aed9dbfed85ec45455bb7b6dbfae7ca985f2b7ca2c1c79",
+      "6e799d8a3ecb1f87d1e622b400ae815787a5f5b5b6eb1903fccc484ea7ec1347",
+      "965de6fc456d83821eabe13646299b35dce12f668704f035185c3342acacbe33"
+    ],
+    "phases": {
+      "comparison_admission_ns": {
+        "max": 196885,
+        "median": 88210,
+        "min": 80178
+      },
+      "provider_registration_ns": {
+        "max": 193183,
+        "median": 100991,
+        "min": 97150
+      },
+      "scenario_file_read_ns": {
+        "max": 70191,
+        "median": 44350,
+        "min": 38134
+      },
+      "scenario_json_parse_ns": {
+        "max": 87721,
+        "median": 57899,
+        "min": 46375
+      },
+      "scenario_load_validation_resolution_ns": {
+        "max": 301508,
+        "median": 184732,
+        "min": 152046
+      }
+    },
+    "samples": 5,
+    "schema": "csl.obs04-shared-preflight/2",
+    "scope": "selected_shared_preflight_blocks_before_configuration_workspaces_and_baselines"
+  },
+  "source_dirty": false,
+  "source_revision": "f8c62cb86ccaaf9644a9a973a5f79f41dc6058d1",
+  "source_tree_sha256": "80706b5b6ba4ecb1c464d8bf02abc3e9e1557fc14d578dc2892aef25004c71e2",
+  "strategy_metrics": {
+    "csl.synthesis.reach-back": {
+      "disabled": {
+        "end_to_end_ns": {
+          "count": 35,
+          "max": 6526872,
+          "median": 5651053,
+          "min": 5477566
+        },
+        "strategy_run_cpu_ns": {
+          "count": 35,
+          "max": 5890288,
+          "median": 5003642,
+          "min": 4857780
+        },
+        "strategy_run_ns": {
+          "count": 35,
+          "max": 5896757,
+          "median": 5010881,
+          "min": 4863166
+        }
+      },
+      "enabled": {
+        "end_to_end_ns": {
+          "count": 35,
+          "max": 12257335,
+          "median": 10166615,
+          "min": 9804067
+        },
+        "strategy_run_cpu_ns": {
+          "count": 35,
+          "max": 9889694,
+          "median": 8360562,
+          "min": 8119596
+        },
+        "strategy_run_ns": {
+          "count": 35,
+          "max": 9901076,
+          "median": 8389906,
+          "min": 8129396
+        }
+      },
+      "paired_enabled_minus_disabled": {
+        "strategy_run_cpu_ns": {
+          "count": 35,
+          "enabled_slower": 35,
+          "max": 4916179,
+          "median": 3402930,
+          "min": 2933502
+        },
+        "strategy_run_ns": {
+          "count": 35,
+          "enabled_slower": 35,
+          "max": 4922671,
+          "median": 3395927,
+          "min": 2962278
+        }
+      }
+    },
+    "csl.synthesis.strategy-b": {
+      "disabled": {
+        "end_to_end_ns": {
+          "count": 35,
+          "max": 2030655,
+          "median": 1445659,
+          "min": 1359055
+        },
+        "strategy_run_cpu_ns": {
+          "count": 35,
+          "max": 1225126,
+          "median": 849148,
+          "min": 775454
+        },
+        "strategy_run_ns": {
+          "count": 35,
+          "max": 1235365,
+          "median": 855075,
+          "min": 785024
+        }
+      },
+      "enabled": {
+        "end_to_end_ns": {
+          "count": 35,
+          "max": 2954664,
+          "median": 2245000,
+          "min": 2069208
+        },
+        "strategy_run_cpu_ns": {
+          "count": 35,
+          "max": 1477238,
+          "median": 1117048,
+          "min": 992317
+        },
+        "strategy_run_ns": {
+          "count": 35,
+          "max": 1485679,
+          "median": 1122850,
+          "min": 997343
+        }
+      },
+      "paired_enabled_minus_disabled": {
+        "strategy_run_cpu_ns": {
+          "count": 35,
+          "enabled_slower": 34,
+          "max": 607101,
+          "median": 258738,
+          "min": -181711
+        },
+        "strategy_run_ns": {
+          "count": 35,
+          "enabled_slower": 34,
+          "max": 605880,
+          "median": 263513,
+          "min": -180333
+        }
+      }
+    }
+  },
+  "whole_process_resource_observations": {
+    "attempts": 160,
+    "enforcement": {
+      "memory_limit": "none",
+      "wall_time_limit": "none"
+    },
+    "observation_method": "Linux wait4 child resource usage",
+    "passed_attempts": 160,
+    "peak_rss_kib": {
+      "max": 47000,
+      "median": 46660,
+      "min": 46528
+    },
+    "process_wall_ns": {
+      "max": 825918341,
+      "median": 817057979,
+      "min": 798868687
+    },
+    "record_directory": "whole-process-resource/",
+    "requested_policy": {
+      "memory_cap_bytes": null,
+      "outer_workers": 1,
+      "threads_per_worker": 1,
+      "total_threads": 1
+    },
+    "samples": 5,
+    "scope": "whole_driver_process",
+    "system_cpu_seconds": {
+      "max": 0.060008,
+      "median": 0.057979,
+      "min": 0.044097
+    },
+    "total_cpu_seconds": {
+      "max": 0.8226789999999999,
+      "median": 0.814109,
+      "min": 0.797719
+    },
+    "user_cpu_seconds": {
+      "max": 0.7755259999999999,
+      "median": 0.754122,
+      "min": 0.73974
+    }
+  }
+}

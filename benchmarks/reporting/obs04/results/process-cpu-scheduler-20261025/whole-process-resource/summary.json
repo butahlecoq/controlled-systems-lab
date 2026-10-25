@@ -1,0 +1,54 @@
+{
+  "attempts": 160,
+  "comparison_run_ids": [
+    "5c3843178431ecf7e6a0df9db10d2f44c1085738d553d57573465e26369ffcb8",
+    "596770ff5961745889ee69d123d12c2a7b78c24c86e7528b10347120696c3ac8",
+    "1c072eff01dd6849b63570d52ce2be6ec8d981c35ff0577abeb295994913a056",
+    "4f18cccfdd305d32422a677e675351d75ad50ad6293f0e8602fb7559eba99ea8",
+    "52802c281385f0b67d216fced154d2025db096b65dbaa74fba3895ef32e1fa98"
+  ],
+  "comparison_spec_ids": [
+    "1142a4075227c4673de0f9bbed7f896aff6176184867d07c61de38d315904df8"
+  ],
+  "enforcement": {
+    "memory_limit": "none",
+    "wall_time_limit": "none"
+  },
+  "interpretation": "Peak RSS and CPU apply to each whole driver process, including startup, preparation, baseline runs, all attempts, serialization and output. They are not per-attempt resource measurements. No memory or wall-time limit was requested or enforced.",
+  "observation_method": "Linux wait4 child resource usage",
+  "passing_attempts": 160,
+  "peak_rss_kib": {
+    "max": 47000,
+    "median": 46660,
+    "min": 46528
+  },
+  "process_wall_ns": {
+    "max": 825918341,
+    "median": 817057979,
+    "min": 798868687
+  },
+  "requested_policy": {
+    "memory_cap_bytes": null,
+    "outer_workers": 1,
+    "threads_per_worker": 1,
+    "total_threads": 1
+  },
+  "samples": 5,
+  "schema": "csl.obs04-external-process-resource-summary/1",
+  "scope": "whole_driver_process",
+  "system_cpu_seconds": {
+    "max": 0.060008,
+    "median": 0.057979,
+    "min": 0.044097
+  },
+  "total_cpu_seconds": {
+    "max": 0.8226789999999999,
+    "median": 0.814109,
+    "min": 0.797719
+  },
+  "user_cpu_seconds": {
+    "max": 0.7755259999999999,
+    "median": 0.754122,
+    "min": 0.73974
+  }
+}

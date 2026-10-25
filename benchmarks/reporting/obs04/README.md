@@ -26,15 +26,17 @@ selector execution, and independent verification are also reported separately
 after the strategy interval. Strategy A includes six planned spans. Strategy B
 includes its run and T-S01 family-construction spans. Each enabled event stores
 inclusive and exclusive wall-clock ticks for every span and the
-clock period used to interpret them. Event schema `/7` records the separately
-measured `family_construction_ns`; it covers complete-family proposal assembly
-and is null when that phase is not entered or instrumentation is disabled.
-Schemas `/5` and `/6` retain their earlier null-field meaning. There is one
-solver thread and one outer
-worker. Native backend thread count, CPU time, heap use, and a source-mapped
-limiter are unavailable. Treat any timing difference as descriptive and
-inconclusive; this tiny analytic case is not representative of application
-workloads.
+clock period used to interpret them. Event schema `/7` introduced the
+separately measured `family_construction_ns`; it covers complete-family
+proposal assembly and is null when that phase is not entered or instrumentation
+is disabled. The current driver emits `/8`, which adds process CPU time and
+adapter-reported backend scheduler width per attempt. The width is not active
+or busy-thread utilization. Schemas `/5` and `/6` retain their earlier
+null-field meaning. The driver requests one solver thread and one outer worker.
+Older captures lack CPU and scheduler-width observations; per-attempt memory,
+heap use, and a unique source-mapped limiter remain unavailable. Treat timing
+differences as descriptive and inconclusive; this tiny analytic case is not
+representative of application workloads.
 
 The driver emits a commented header and one JSON event per attempt. It also
 writes a digest-named `csl.comparison-record/1` artifact containing all 32
@@ -110,19 +112,19 @@ baseline strategy runs. They do not establish a performance winner or general
 latency claim. These `/1` records use the original in-code fixture and do not
 contain scenario-file timings. Admission combines common request guards,
 strategy capability checks, and registry preparation; the current interface
-does not split these subphases. Family construction inside the strategy remains
-unavailable.
-`csl.obs04-instrumentation-comparison-event/6` is the current raw per-attempt
-payload; the codec continues to accept event `/2` through `/5`. It records
+does not split these subphases.
+Event `/7` is used in the historical per-attempt artifacts below. The current
+driver emits event `/8`, and the codec accepts event `/2` through `/8`. It records
 the `StrategyPort::run` interval, first and additional direction query, their
 combined selection interval, independent verification, and attempt end-to-end
-time. Family construction is currently `null`: the driver does not yet isolate
-that phase inside either strategy, so the strategy interval is not relabeled as
-family-construction time. Event `/4` was an exploratory increment that wrote
-the full strategy interval into that field; the retained `/4` artifacts are
-historical and must not be interpreted as a separate family-construction
+time. Events `/7` and `/8` also record complete-family proposal construction
+where the strategy exposes that boundary. Event `/8` adds process CPU time for
+the strategy invocation and adapter-reported backend scheduler width. Event
+`/4` was an exploratory increment that
+wrote the full strategy interval into that field; the retained `/4` artifacts
+are historical and must not be interpreted as a separate family-construction
 measurement.
-Event `/6` also distinguishes solver `status` from post-run `phase_status` and
+Events `/6` and `/7` distinguish solver `status` from post-run `phase_status` and
 retains partial selections and verifier reports when a later phase fails.
 The selector runs two ordered single-direction requests and composes their
 verified witnesses into the saved batch. The comparison record binds the event
@@ -219,6 +221,48 @@ for the run limits and profile status. These fixture timings do not establish a
 general instrumentation overhead, end-to-end latency, scalability, or method
 winner.
 
+## Five current-mainline instrumentation captures (2026-10-25)
+
+`results/instrumentation-overhead-current-main-76d8-20261025/` retains five
+fresh Release processes built from clean source commit
+`76d8ae64b8ec7d36c975eae64f7581bf345cf387`. Every process used the same binary
+(SHA-256
+`9c8fdf63b91ab0c48c6e9650051f9b56753e231dd33ba03e906d444ee8af15f2`) and
+produced the same `ComparisonSpecId` with a distinct `ComparisonRunId`. Each
+contains one warmup and seven measured repetitions per strategy/instrumentation
+arm. The driver alternates both strategy order and instrumentation mode within
+each process. All 160 attempts passed the analytic-family and witness checks;
+each requested, returned, and distinct witness count was two. The five complete
+records, JSONL/stdout logs, stderr logs, saved HTML reports, environment
+manifest, and computed summary are retained in that directory.
+
+Across 35 matched measured pairs per strategy, the enabled-minus-disabled
+`strategy_run_ns` deltas were:
+
+| Strategy | Disabled median (range), ns | Enabled median (range), ns | Paired delta median (range), ns | Enabled slower pairs |
+| --- | ---: | ---: | ---: | ---: |
+| reach-back | 5,087,777 (4,893,617–6,584,141) | 8,581,691 (8,222,354–10,871,460) | +3,468,770 (+2,186,822–+5,913,938) | 35/35 |
+| direct-joint | 867,856 (795,989–1,403,474) | 1,139,541 (1,034,219–2,229,774) | +263,862 (-226,846–+1,391,252) | 34/35 |
+
+The median paired relative changes were +68.7% for reach-back (range
++33.2%–+119.3%) and +32.4% for direct-joint (range -16.2%–+165.9%). The
+second strategy's single faster pair and wide range show meaningful run-to-run
+variation. These five same-host processes measure this T-S01 analytic fixture;
+they do not establish general instrumentation overhead, end-to-end latency,
+scalability, or a strategy winner. Whole-process time had a median of
+849,555,844 ns (range 820,935,028–853,769,480 ns), including startup,
+preparation, baselines, attempts, encoding, and file output.
+
+The embedded environment reports CPU time and native backend thread count as
+unavailable. The first bounded profile attempt is retained in `limiter-profile/`
+and records `unavailable` because `perf` was not installed. Signed Arch
+packages were then extracted into a user-space directory and used to profile
+this exact binary for 32 acknowledged calls per strategy. The profiles and
+source summary are retained in `limiter-profile-userspace-perf-32-*` and
+`limiter-profile-summary.md`. Allocation/free, C++ strings, and HiGHS setup
+appear as candidate hotspots; the small sample and fixture do not establish
+one unique limiter, so the comparison remains inconclusive.
+
 ## Exploratory event `/4` phase timing capture (2026-10-25)
 
 `results/linux-omarchy-gcc16-20261025-phase-timings-clean.json` and `.jsonl`
@@ -279,7 +323,8 @@ are medians of seven measured attempts per arm (ns).
 
 This single tiny-fixture capture verifies event and artifact behavior only. It
 does not locate a limiter or establish general overhead, application latency,
-scalability, or a strategy winner. Family construction remains unmeasured.
+scalability, or a strategy winner. Family construction is unavailable in these
+historical `/6` records; newer `/7` and `/8` captures report it where measured.
 
 `results/strategy-run-perf-20261024/` retains the 2026-10-24 exploratory
 profiles, which were captured before control acknowledgements were added. They
@@ -315,17 +360,26 @@ and logs; permission or PMU denial is reported as `unavailable`, while protocol
 or capture errors are retained as `failed`. The workflow artifact is temporary
 (14-day retention). The comparison record adds `measurement_payload` to the
 public `ComparisonAttempt` C++ type, changing its layout and ABI; binary
-consumers must rebuild against the updated headers and library. This
-environment-manifest increment changes the wire schema while retaining legacy
-decoding; it adds no C++ API, installed file, package workflow, or new
-dependency. It does not prepare or publish a release. No capability result is
-claimed until the labelled job has actually run. The phase timing increment
-records the full `StrategyPort::run` interval, first and additional direction
-queries, and attempt end-to-end time. Separately timed family construction
-remains unimplemented. OBS-04 still needs phase-separated parsing/validation
-and capability timing; complete resource policy and measurement;
-instrumentation overhead analysis; report rendering; and a usable separate
-limiter profile before it can close.
+consumers must rebuild against the updated headers and library. Event `/8`
+adds per-attempt process CPU time and adapter-reported backend scheduler width;
+the width is not active-thread utilization. Saved-record rendering and legacy
+`/2`–`/7` decoding remain available. No new dependency, installed file, or
+package workflow is added. This PR does not publish a release; release planning
+remains under the repository's release tracker.
+
+The five clean-source captures report fixture-specific instrumentation deltas
+but make no general performance claim. They record process-wide peak RSS and
+CPU/wall time separately, with no memory or wall-time cap; per-attempt memory
+measurement/enforcement remains outstanding. Shared preflight timing separates
+file read, standalone parse, loader validation/resolution, provider registration,
+and comparison admission; parsing inside the public loader and capability work
+inside admission are still combined. Workspace/setup, family construction,
+queries, verification, and end-to-end timing are retained per attempt. Ten
+record-to-HTML exports completed under individual 30-second bounds with saved
+HTML hashes matching; no geometry plot or nonlinear replay applies to this
+linear fixture. The bounded profiles show candidate hotspots but no unique
+source-mapped limiter. Keep OBS-04 open until those remaining gaps have
+evidence.
 
 ## Acknowledged perf capture after FIFO fix (2026-10-25)
 
@@ -462,3 +516,22 @@ durations, not an end-to-end solve benchmark. The run-to-run ranges are wide,
 no source-mapped limiter is established, and this capture supports no speedup,
 winner, or general latency claim. The retained `summary.json` records every
 sample, run/spec ID, attempt count, and source identity.
+
+## Per-attempt resource observations (event /8)
+
+The driver now records process CPU nanoseconds across each strategy invocation
+and the maximum backend scheduler width reported through the execution context.
+The CPU value covers all threads in the driver process during that call; it is
+not thread CPU time. Scheduler width is the width configured/reported by a
+backend adapter, not the number of threads observed busy at once. Either field
+may be null when the platform or adapter cannot provide a value. These fields
+supplement wall time and do not establish a unique performance limiter.
+
+## Current clean-source CPU and scheduler capture (2026-10-25)
+
+`results/process-cpu-scheduler-20261025/` records five fresh Release processes
+from one clean source commit, including process CPU time and adapter-reported
+backend scheduler width per strategy invocation. All 160 attempts passed. The
+paired instrumentation differences remain fixture-specific and inconclusive;
+the exact ranges, profile evidence, machine metadata, and retained superseded
+attempts are described in that directory's README and `summary.json`.

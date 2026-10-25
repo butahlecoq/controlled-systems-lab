@@ -1,0 +1,148 @@
+{
+  "schema": "csl.obs04-overhead-summary/1",
+  "source_revision": "76d8ae64b8ec7d36c975eae64f7581bf345cf387",
+  "binary_sha256": "9c8fdf63b91ab0c48c6e9650051f9b56753e231dd33ba03e906d444ee8af15f2",
+  "capture_count": 5,
+  "attempts_per_capture": 32,
+  "total_attempts": 160,
+  "all_attempts_passed": true,
+  "same_spec_id": true,
+  "unique_run_ids": true,
+  "wall_time_ns": {
+    "n": 5,
+    "median": 849555844,
+    "range": [
+      820935028,
+      853769480
+    ]
+  },
+  "strategies": {
+    "csl.synthesis.reach-back": {
+      "disabled": {
+        "measured_attempts": 35,
+        "median_strategy_run_ns": 5087777,
+        "range_strategy_run_ns": [
+          4893617,
+          6584141
+        ],
+        "per_process_medians_ns": [
+          4942227,
+          5217125,
+          5041472,
+          5087777,
+          5130242
+        ]
+      },
+      "enabled": {
+        "measured_attempts": 35,
+        "median_strategy_run_ns": 8581691,
+        "range_strategy_run_ns": [
+          8222354,
+          10871460
+        ],
+        "per_process_medians_ns": [
+          8580364,
+          8682682,
+          8731991,
+          8529170,
+          8535944
+        ]
+      },
+      "paired_enabled_minus_disabled": {
+        "pairs": 35,
+        "median_delta_ns": 3468770,
+        "range_delta_ns": [
+          2186822,
+          5913938
+        ],
+        "median_relative_change_percent": 68.66843973629791,
+        "range_relative_change_percent": [
+          33.21347462030354,
+          119.2922189755285
+        ],
+        "enabled_slower": 35,
+        "equal": 0,
+        "enabled_faster": 0
+      }
+    },
+    "csl.synthesis.strategy-b": {
+      "disabled": {
+        "measured_attempts": 35,
+        "median_strategy_run_ns": 867856,
+        "range_strategy_run_ns": [
+          795989,
+          1403474
+        ],
+        "per_process_medians_ns": [
+          827906,
+          916257,
+          846345,
+          866180,
+          851374
+        ]
+      },
+      "enabled": {
+        "measured_attempts": 35,
+        "median_strategy_run_ns": 1139541,
+        "range_strategy_run_ns": [
+          1034219,
+          2229774
+        ],
+        "per_process_medians_ns": [
+          1138145,
+          1118938,
+          1126062,
+          1155186,
+          1139541
+        ]
+      },
+      "paired_enabled_minus_disabled": {
+        "pairs": 35,
+        "median_delta_ns": 263862,
+        "range_delta_ns": [
+          -226846,
+          1391252
+        ],
+        "median_relative_change_percent": 32.435380299405026,
+        "range_relative_change_percent": [
+          -16.16317794273353,
+          165.9171733120896
+        ],
+        "enabled_slower": 34,
+        "equal": 0,
+        "enabled_faster": 1
+      }
+    }
+  },
+  "record_sha256": {
+    "run-01.json": "c360dc91126f3bb7379ef477031a1dc506e359977eb805b8c163382c5281d46c",
+    "run-02.json": "83dcd495e34a7feac11bdf2043cb8a919219acfae19a14f684845ffdbc89188b",
+    "run-03.json": "0c678035360c535a921ed840b3d381a90a53abd67fe93998e6a2ba3ad2eaa2cd",
+    "run-04.json": "40bbf101bb8ecec3c9950b3e1cf1bae9a45f56fa5b4a83dcc955fee60699d7ef",
+    "run-05.json": "77142e5f0317da575748bb6d7a1f47196428470cd0fdad6407289d71599f745e"
+  },
+  "interpretation": "Five-process paired instrumentation deltas are fixture-specific. The separate profile reports candidate hotspots but does not establish a unique limiter. No general overhead, end-to-end latency, scalability, or strategy-winner claim is made.",
+  "limiter_profile": {
+    "status": "available",
+    "strategies": {
+      "reach-back": {
+        "calls_passed": 32,
+        "acknowledged_commands": 64,
+        "samples": 933,
+        "lost_samples": 0,
+        "capture_bytes": 106076
+      },
+      "direct-joint": {
+        "calls_passed": 32,
+        "acknowledged_commands": 64,
+        "samples": 180,
+        "lost_samples": 0,
+        "capture_bytes": 30220
+      }
+    },
+    "requested_frequency_hz": 4999,
+    "effective_frequency_status": "not_reported_by_this_probe",
+    "profile_summary": "limiter-profile-summary.md",
+    "interpretation": "Allocation, C++ string handling, and HiGHS setup are candidate hotspots; the small fixture and sample counts do not identify one unique limiter."
+  }
+}
