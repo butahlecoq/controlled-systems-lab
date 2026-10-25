@@ -42,6 +42,7 @@ class GalleryTests(unittest.TestCase):
             shutil.copyfile(example["records_path"], target / "records.json")
             (target / "index.html").write_text("<html><body>Reviewed report</body></html>")
         catalog = json.loads(self.catalog.read_text())
+        self.catalog_reports = catalog["reports"]
         by_source = {entry["source_report_id"]: entry["report_id"]
                      for entry in catalog["reports"] if "source_report_id" in entry}
         by_kind = {}
@@ -71,8 +72,9 @@ class GalleryTests(unittest.TestCase):
         for report in catalog["reports"]:
             target = self.site / report["report_id"]
             target.mkdir(exist_ok=True)
-            if not (target / "records.json").exists():
-                (target / "records.json").write_text("{}", encoding="utf-8")
+            raw_name = "results.jsonl" if report["report_kind"] == "issue6-b07-reference" else "records.json"
+            if not (target / raw_name).exists():
+                (target / raw_name).write_text("{}", encoding="utf-8")
             if not (target / "index.html").exists():
                 (target / "index.html").write_text("<html>report fixture</html>", encoding="utf-8")
         coverage_source = json.loads((ROOT / "scripts/reports/algorithm_visual_coverage.json").read_text())
@@ -346,6 +348,12 @@ class GalleryTests(unittest.TestCase):
         self.assertEqual(result["examples"][2]["vertices"][0], [-1.0000000000000002, -.5000000000000001])
         self.assertEqual(result["examples"][3]["kind"], "hybrid")
         self.assertEqual(result["examples"][4]["kind"], "two_parameter")
+        coverage=json.loads((self.site/"examples/algorithm-coverage.json").read_text())
+        b07=next(report for report in self.catalog_reports if report["report_kind"]=="issue6-b07-reference")
+        family=next(entry for entry in coverage["families"] if "issue6-b07-reference" in entry["catalog_kinds"])
+        linked=next(report for report in family["catalog_reports"] if report["report_kind"]=="issue6-b07-reference")
+        self.assertEqual(linked["report_id"],b07["report_id"])
+        self.assertTrue(linked["raw_record"].endswith(b07["report_id"]+"/results.jsonl"))
 
 
 if __name__ == "__main__":
