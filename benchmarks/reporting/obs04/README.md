@@ -301,7 +301,7 @@ allocator/free calls and C++ string operations: `malloc`/`cfree` account for
 also attribute samples to HiGHS option registration and native solve methods.
 This makes allocator-heavy backend initialization and solve setup candidate
 hotspots for the T-S01 workload, rather than establishing a unique limiter.
-Direct-joint has only 170 samples, both reports contain unresolved symbols, and
+Direct-joint has only 160 samples, both reports contain unresolved symbols, and
 the sample window includes small control-protocol work; this is exploratory
 evidence, not a general performance claim. Do not compare sample totals as
 strategy speed. Capability metadata, driver/perf logs, text reports, and raw
