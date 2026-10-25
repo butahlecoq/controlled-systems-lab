@@ -65,11 +65,16 @@ selects a path, and existing files are never overwritten. Keep the separate
 limiter-profile result with any retained measurement. Do not combine the
 existing synthetic OBS-02 collector loop with these solver timings.
 
-`csl.obs04-instrumentation-comparison-event/4` is the current raw per-attempt
-payload; the codec continues to accept event `/2` and `/3`. It records the
-complete `StrategyPort::run` interval as family-construction time, separately
-times the first and additional direction query, and records their combined
-selection interval, independent verification, and attempt end-to-end time.
+`csl.obs04-instrumentation-comparison-event/5` is the current raw per-attempt
+payload; the codec continues to accept event `/2`, `/3`, and `/4`. It records
+the `StrategyPort::run` interval, first and additional direction query, their
+combined selection interval, independent verification, and attempt end-to-end
+time. Family construction is currently `null`: the driver does not yet isolate
+that phase inside either strategy, so the strategy interval is not relabeled as
+family-construction time. Event `/4` was an exploratory increment that wrote
+the full strategy interval into that field; the retained `/4` artifacts are
+historical and must not be interpreted as a separate family-construction
+measurement.
 The selector runs two ordered single-direction requests and composes their
 verified witnesses into the saved batch. The comparison record binds the event
 to its arm and attempt indices; the per-run record stores the resolved request,
@@ -160,7 +165,7 @@ for the run limits and profile status. These fixture timings do not establish a
 general instrumentation overhead, end-to-end latency, scalability, or method
 winner.
 
-## Phase timing capture (2026-10-25)
+## Exploratory event `/4` phase timing capture (2026-10-25)
 
 `results/linux-omarchy-gcc16-20261025-phase-timings-clean.json` and `.jsonl`
 add first/additional query and attempt end-to-end measurements. All 32 attempts
@@ -169,19 +174,17 @@ used clean source commit `dcb10390238ce9631a6c8b11d0e7d29a361ebb74`; the
 immutable record carries its source tree digest and binary hash. Each cell
 below is the median of seven measured attempts; query values are in ns.
 
-| Strategy | Collection | Strategy/family | First query | Additional query | Attempt end-to-end |
-| --- | --- | ---: | ---: | ---: | ---: |
-| reach-back | disabled | 4,962,456 | 238,021 | 226,147 | 5,570,846 |
-| reach-back | enabled | 7,999,658 | 440,980 | 435,183 | 9,596,307 |
-| direct-joint | disabled | 861,357 | 245,773 | 237,252 | 1,457,804 |
-| direct-joint | enabled | 1,039,383 | 324,414 | 302,764 | 1,988,879 |
+| Strategy | Collection | Strategy run | Family construction | First query | Additional query | Attempt end-to-end |
+| --- | --- | ---: | ---: | ---: | ---: | ---: |
+| reach-back | disabled | 4,962,456 | unavailable | 238,021 | 226,147 | 5,570,846 |
+| reach-back | enabled | 7,999,658 | unavailable | 440,980 | 435,183 | 9,596,307 |
+| direct-joint | disabled | 861,357 | unavailable | 245,773 | 237,252 | 1,457,804 |
+| direct-joint | enabled | 1,039,383 | unavailable | 324,414 | 302,764 | 1,988,879 |
 
-The strategy/family column is the complete public `StrategyPort::run` interval.
-This single run shows the added timing boundaries working on T-S01; it does not
-identify a limiter or support a general overhead, end-to-end workload, or
-strategy-winner claim. The first exploratory capture from the dirty source tree
-is retained as `results/linux-omarchy-gcc16-20261025-phase-timings.json` and
-`.jsonl`; use the clean-source artifact above as the reproducible capture.
+The event `/4` records above predate the correction that stopped placing the
+whole strategy interval in `family_construction_ns`. They are retained as
+historical records only. A clean-source `/5` capture with that field explicitly
+unavailable will replace these figures as the current phase-timing evidence.
 
 `results/strategy-run-perf-20261024/` retains the 2026-10-24 exploratory
 profiles, which were captured before control acknowledgements were added. They

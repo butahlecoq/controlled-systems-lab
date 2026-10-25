@@ -537,6 +537,43 @@ std::int64_t ns(Clock::time_point begin, Clock::time_point end) {
     return std::chrono::duration_cast<std::chrono::nanoseconds>(end - begin).count();
 }
 
+struct TrialTimings {
+    std::optional<Clock::time_point> attempt_begin;
+    std::optional<Clock::time_point> setup_begin;
+    std::optional<Clock::time_point> selection_setup_begin;
+    std::optional<Clock::time_point> selection_run_begin;
+    std::optional<Clock::time_point> first_query_begin;
+    std::optional<Clock::time_point> additional_query_begin;
+    std::optional<Clock::time_point> verification_begin;
+    std::optional<std::uint64_t> setup_ns;
+    std::optional<std::uint64_t> strategy_run_ns;
+    std::optional<std::uint64_t> selection_setup_ns;
+    std::optional<std::uint64_t> selection_run_ns;
+    std::optional<std::uint64_t> first_query_ns;
+    std::optional<std::uint64_t> additional_query_ns;
+    std::optional<std::uint64_t> verification_ns;
+    std::optional<std::uint64_t> end_to_end_ns;
+
+    void capture_partial() {
+        const auto now = Clock::now();
+        const auto elapsed = [now](std::optional<Clock::time_point> begin) -> std::optional<std::uint64_t> {
+            if (!begin) return std::nullopt;
+            return static_cast<std::uint64_t>(ns(*begin, now));
+        };
+        if (!setup_ns) setup_ns = elapsed(setup_begin);
+        if (!selection_setup_ns) selection_setup_ns = elapsed(selection_setup_begin);
+        if (!selection_run_ns) selection_run_ns = elapsed(selection_run_begin);
+        if (!first_query_ns) first_query_ns = elapsed(first_query_begin);
+        if (!additional_query_ns) additional_query_ns = elapsed(additional_query_begin);
+        if (!verification_ns) verification_ns = elapsed(verification_begin);
+        if (!end_to_end_ns) end_to_end_ns = elapsed(attempt_begin);
+    }
+};
+
+std::string optional_ns_json(const std::optional<std::uint64_t>& value) {
+    return value ? std::to_string(*value) : "null";
+}
+
 class PerfControl {
 public:
     PerfControl() {
@@ -678,9 +715,11 @@ TrialRecord trial_impl(const application::PreparedComparison& prepared, std::siz
     const ar::ResolvedConfiguration& resolved_configuration,
     std::optional<ar::ResolvedConfiguration>& fallback_configuration,
     std::optional<ar::CollectedStatistics>& fallback_statistics,
-    std::optional<SynthesisOutcome>& returned_outcome, bool& invocation_started) {
-    const auto attempt_begin = Clock::now();
+    std::optional<SynthesisOutcome>& returned_outcome, bool& invocation_started,
+    TrialTimings& timings) {
+    timings.attempt_begin = Clock::now();
     const auto setup_begin = Clock::now();
+    timings.setup_begin = setup_begin;
     const ar::RunId run_id{"obs04-" + std::to_string(strategy_index) + "-" +
         (enabled ? "enabled-" : "disabled-") + std::to_string(repetition) + (warmup ? "-warmup" : "")};
     auto setup = collector_for(prepared, strategy_index, enabled, run_id.value,
@@ -693,11 +732,13 @@ TrialRecord trial_impl(const application::PreparedComparison& prepared, std::siz
     context.numerical = prepared.family().numerical;
     if (collector) context.timing = collector;
     const auto setup_end = Clock::now();
+    timings.setup_ns = static_cast<std::uint64_t>(ns(setup_begin, setup_end));
     const auto run_begin = Clock::now();
     invocation_started=true;
     const auto outcome = workspaces[strategy_index]->run(context);
     returned_outcome=outcome;
     const auto run_end = Clock::now();
+    timings.strategy_run_ns = static_cast<std::uint64_t>(ns(run_begin, run_end));
     const auto status=attempt_status(outcome);
     std::optional<Signature> observed;
     bool quality_passed=false;
@@ -741,6 +782,7 @@ TrialRecord trial_impl(const application::PreparedComparison& prepared, std::siz
         span_events.push_back({span_records[index].descriptor.operation, inclusive->value, exclusive->value});
     }
     const auto selection_setup_begin = Clock::now();
+    timings.selection_setup_begin = selection_setup_begin;
     std::optional<WitnessSelection> selected_witnesses;
     std::vector<verification::TrajectoryReport> verification_reports;
     std::uint64_t selection_setup_ns = 0;
@@ -770,17 +812,24 @@ TrialRecord trial_impl(const application::PreparedComparison& prepared, std::siz
         auto additional_workspaces = additional_selector.create();
         const auto selection_setup_end = Clock::now();
         selection_setup_ns = ns(selection_setup_begin, selection_setup_end);
+        timings.selection_setup_ns = static_cast<std::uint64_t>(selection_setup_ns);
         const auto selection_run_begin = Clock::now();
+        timings.selection_run_begin = selection_run_begin;
         const auto first_query_begin = Clock::now();
+        timings.first_query_begin = first_query_begin;
         const auto first_outcome = std::get<0>(first_workspaces)->run(context);
         const auto first_query_end = Clock::now();
         first_witness_query_ns = ns(first_query_begin, first_query_end);
+        timings.first_query_ns = static_cast<std::uint64_t>(*first_witness_query_ns);
         const auto additional_query_begin = Clock::now();
+        timings.additional_query_begin = additional_query_begin;
         const auto additional_outcome = std::get<0>(additional_workspaces)->run(context);
         const auto additional_query_end = Clock::now();
         additional_witness_query_ns = ns(additional_query_begin, additional_query_end);
+        timings.additional_query_ns = static_cast<std::uint64_t>(*additional_witness_query_ns);
         const auto selection_run_end = Clock::now();
         selection_run_ns = ns(selection_run_begin, selection_run_end);
+        timings.selection_run_ns = static_cast<std::uint64_t>(selection_run_ns);
         if (!std::holds_alternative<WitnessSelection>(first_outcome) ||
             !std::holds_alternative<WitnessSelection>(additional_outcome))
             throw std::runtime_error("Witness selector rejected an analytic direction query");
@@ -808,6 +857,7 @@ TrialRecord trial_impl(const application::PreparedComparison& prepared, std::siz
         if (!expected_synthesis.lineage)
             throw std::runtime_error("Prepared strategy has no lineage for independent witness verification");
         const auto verification_begin = Clock::now();
+        timings.verification_begin = verification_begin;
         for (const auto& witness : selected_witnesses->batch.witnesses) {
             verification::TrajectoryRequest verification_request;
             verification_request.witness = witness;
@@ -823,6 +873,7 @@ TrialRecord trial_impl(const application::PreparedComparison& prepared, std::siz
         }
         const auto verification_end = Clock::now();
         verification_ns = ns(verification_begin, verification_end);
+        timings.verification_ns = static_cast<std::uint64_t>(verification_ns);
         for (const auto& report : verification_reports) {
             if (report.bindings != verification::CheckStatus::numerical_pass ||
                 report.feasibility != verification::CheckStatus::numerical_pass ||
@@ -831,16 +882,16 @@ TrialRecord trial_impl(const application::PreparedComparison& prepared, std::siz
         }
     }
     const auto attempt_end = Clock::now();
-    const auto end_to_end_ns = ns(attempt_begin, attempt_end);
+    timings.end_to_end_ns = static_cast<std::uint64_t>(ns(*timings.attempt_begin, attempt_end));
 
     std::ostringstream event;
-    event << "{\"schema\":\"csl.obs04-instrumentation-comparison-event/4\",\"repetition\":" << repetition
+    event << "{\"schema\":\"csl.obs04-instrumentation-comparison-event/5\",\"repetition\":" << repetition
         << ",\"warmup\":" << (warmup ? "true" : "false") << ",\"strategy\":\""
         << (strategy_index == 0 ? "csl.synthesis.reach-back" : "csl.synthesis.strategy-b")
         << "\",\"instrumentation\":\"" << (enabled ? "enabled" : "disabled")
-        << "\",\"setup_ns\":" << ns(setup_begin, setup_end) << ",\"strategy_run_ns\":" << ns(run_begin, run_end)
-        << ",\"family_construction_ns\":" << ns(run_begin, run_end)
-        << ",\"end_to_end_ns\":" << end_to_end_ns
+        << "\",\"setup_ns\":" << *timings.setup_ns << ",\"strategy_run_ns\":" << *timings.strategy_run_ns
+        << ",\"family_construction_ns\":null"
+        << ",\"end_to_end_ns\":" << *timings.end_to_end_ns
         << ",\"selection_setup_ns\":" << selection_setup_ns
         << ",\"selection_run_ns\":" << selection_run_ns
         << ",\"first_witness_query_ns\":"
@@ -902,7 +953,7 @@ std::string escaped(std::string_view value) {
 TrialRecord failed_trial(const application::PreparedComparison& prepared, std::size_t strategy_index,
     bool enabled, std::size_t repetition, bool warmup, std::string_view message,
     ar::ResolvedConfiguration configuration, ar::CollectedStatistics statistics,
-    bool invocation_started) {
+    bool invocation_started, const TrialTimings& timings) {
     const ar::RunId run_id{"obs04-" + std::to_string(strategy_index) + "-"+
         (enabled ? "enabled-" : "disabled-") + std::to_string(repetition) + (warmup ? "-warmup" : "")};
     const auto description=prepared.problem().description();
@@ -920,13 +971,18 @@ TrialRecord failed_trial(const application::PreparedComparison& prepared, std::s
     for(const auto byte:bytes)wire.push_back(static_cast<char>(std::to_integer<unsigned char>(byte)));
     auto run=take(ar::decode_recorded_run(wire,prepared.problem()));
     std::ostringstream event;
-    event << "{\"schema\":\"csl.obs04-instrumentation-comparison-event/4\",\"repetition\":" << repetition
+    event << "{\"schema\":\"csl.obs04-instrumentation-comparison-event/5\",\"repetition\":" << repetition
         << ",\"warmup\":" << (warmup?"true":"false") << ",\"strategy\":\""
         << (strategy_index==0?"csl.synthesis.reach-back":"csl.synthesis.strategy-b")
         << "\",\"instrumentation\":\"" << (enabled?"enabled":"disabled")
-        << "\",\"family_construction_ns\":null,\"end_to_end_ns\":null"
-        << ",\"selection_setup_ns\":null,\"selection_run_ns\":null"
-        << ",\"first_witness_query_ns\":null,\"additional_witness_query_ns\":null,\"verification_ns\":null"
+        << "\",\"setup_ns\":" << optional_ns_json(timings.setup_ns)
+        << ",\"strategy_run_ns\":" << optional_ns_json(timings.strategy_run_ns)
+        << ",\"family_construction_ns\":null,\"end_to_end_ns\":" << optional_ns_json(timings.end_to_end_ns)
+        << ",\"selection_setup_ns\":" << optional_ns_json(timings.selection_setup_ns)
+        << ",\"selection_run_ns\":" << optional_ns_json(timings.selection_run_ns)
+        << ",\"first_witness_query_ns\":" << optional_ns_json(timings.first_query_ns)
+        << ",\"additional_witness_query_ns\":" << optional_ns_json(timings.additional_query_ns)
+        << ",\"verification_ns\":" << optional_ns_json(timings.verification_ns)
         << ",\"requested_witness_count\":2,\"returned_witness_count\":null,\"distinct_witness_count\":null"
         << ",\"status\":\"failed\",\"analytic_family_checked\":false,\"complete_family_verified\":false,\"error\":\""
         << escaped(message) << "\"}";
@@ -940,7 +996,7 @@ TrialRecord failed_trial(const application::PreparedComparison& prepared, std::s
 TrialRecord unserializable_outcome_trial(const application::PreparedComparison& prepared,
     std::size_t strategy_index, bool enabled, std::size_t repetition, bool warmup,
     const SynthesisOutcome& outcome, ar::ResolvedConfiguration configuration,
-    ar::CollectedStatistics statistics, std::string_view message) {
+    ar::CollectedStatistics statistics, std::string_view message, const TrialTimings& timings) {
     const ar::RunId run_id{"obs04-"+std::to_string(strategy_index)+"-"+
         (enabled?"enabled-":"disabled-")+std::to_string(repetition)+(warmup?"-warmup":"")};
     const auto* synthesis=std::get_if<SynthesisResult>(&outcome);
@@ -972,13 +1028,18 @@ TrialRecord unserializable_outcome_trial(const application::PreparedComparison& 
     for(const auto byte:bytes)wire.push_back(static_cast<char>(std::to_integer<unsigned char>(byte)));
     auto run=take(ar::decode_recorded_run(wire,prepared.problem()));
     std::ostringstream event;
-    event << "{\"schema\":\"csl.obs04-instrumentation-comparison-event/4\",\"repetition\":"
+    event << "{\"schema\":\"csl.obs04-instrumentation-comparison-event/5\",\"repetition\":"
         << repetition << ",\"warmup\":" << (warmup?"true":"false") << ",\"strategy\":\""
         << (strategy_index==0?"csl.synthesis.reach-back":"csl.synthesis.strategy-b")
         << "\",\"instrumentation\":\"" << (enabled?"enabled":"disabled")
-        << "\",\"family_construction_ns\":null,\"end_to_end_ns\":null"
-        << ",\"selection_setup_ns\":null,\"selection_run_ns\":null"
-        << ",\"first_witness_query_ns\":null,\"additional_witness_query_ns\":null,\"verification_ns\":null"
+        << "\",\"setup_ns\":" << optional_ns_json(timings.setup_ns)
+        << ",\"strategy_run_ns\":" << optional_ns_json(timings.strategy_run_ns)
+        << ",\"family_construction_ns\":null,\"end_to_end_ns\":" << optional_ns_json(timings.end_to_end_ns)
+        << ",\"selection_setup_ns\":" << optional_ns_json(timings.selection_setup_ns)
+        << ",\"selection_run_ns\":" << optional_ns_json(timings.selection_run_ns)
+        << ",\"first_witness_query_ns\":" << optional_ns_json(timings.first_query_ns)
+        << ",\"additional_witness_query_ns\":" << optional_ns_json(timings.additional_query_ns)
+        << ",\"verification_ns\":" << optional_ns_json(timings.verification_ns)
         << ",\"requested_witness_count\":2,\"returned_witness_count\":null,\"distinct_witness_count\":null"
         << ",\"status\":\"failed\",\"solver_returned\":true,"
         << "\"solver_outcome_in_run_artifact\":false,\"solver_status\":\""
@@ -1000,7 +1061,7 @@ TrialRecord unserializable_outcome_trial(const application::PreparedComparison& 
 TrialRecord recording_failure_trial(const application::PreparedComparison& prepared,
     std::size_t strategy_index, bool enabled, std::size_t repetition, bool warmup,
     const SynthesisOutcome& outcome, ar::ResolvedConfiguration configuration,
-    ar::CollectedStatistics statistics, std::string_view message) {
+    ar::CollectedStatistics statistics, std::string_view message, const TrialTimings& timings) {
     const ar::RunId run_id{"obs04-"+std::to_string(strategy_index)+"-"+
         (enabled?"enabled-":"disabled-")+std::to_string(repetition)+(warmup?"-warmup":"")};
     const auto status=attempt_status(outcome);
@@ -1016,13 +1077,18 @@ TrialRecord recording_failure_trial(const application::PreparedComparison& prepa
             {unavailable,unavailable,unavailable,unavailable,false,ar::MemoryAccounting::unlimited}));
         auto run=take(ar::decode_recorded_run(wire,prepared.problem()));
         std::ostringstream event;
-        event << "{\"schema\":\"csl.obs04-instrumentation-comparison-event/4\",\"repetition\":"
+        event << "{\"schema\":\"csl.obs04-instrumentation-comparison-event/5\",\"repetition\":"
             << repetition << ",\"warmup\":" << (warmup?"true":"false") << ",\"strategy\":\""
             << (strategy_index==0?"csl.synthesis.reach-back":"csl.synthesis.strategy-b")
             << "\",\"instrumentation\":\"" << (enabled?"enabled":"disabled")
-            << "\",\"family_construction_ns\":null,\"end_to_end_ns\":null"
-            << ",\"selection_setup_ns\":null,\"selection_run_ns\":null"
-            << ",\"first_witness_query_ns\":null,\"additional_witness_query_ns\":null,\"verification_ns\":null"
+            << "\",\"setup_ns\":" << optional_ns_json(timings.setup_ns)
+            << ",\"strategy_run_ns\":" << optional_ns_json(timings.strategy_run_ns)
+            << ",\"family_construction_ns\":null,\"end_to_end_ns\":" << optional_ns_json(timings.end_to_end_ns)
+            << ",\"selection_setup_ns\":" << optional_ns_json(timings.selection_setup_ns)
+            << ",\"selection_run_ns\":" << optional_ns_json(timings.selection_run_ns)
+            << ",\"first_witness_query_ns\":" << optional_ns_json(timings.first_query_ns)
+            << ",\"additional_witness_query_ns\":" << optional_ns_json(timings.additional_query_ns)
+            << ",\"verification_ns\":" << optional_ns_json(timings.verification_ns)
             << ",\"requested_witness_count\":2,\"returned_witness_count\":null,\"distinct_witness_count\":null"
             << ",\"status\":\"" << attempt_status_name(status)
             << "\",\"analytic_family_checked\":false,\"complete_family_verified\":false,\"recording_error\":\""
@@ -1033,7 +1099,7 @@ TrialRecord recording_failure_trial(const application::PreparedComparison& prepa
             static_cast<std::uint32_t>(repetition),status,run_id,std::move(run),measurement,false};
     } catch(const std::exception& serialization_error) {
         return unserializable_outcome_trial(prepared,strategy_index,enabled,repetition,warmup,outcome,
-            std::move(configuration),std::move(statistics),serialization_error.what());
+            std::move(configuration),std::move(statistics),serialization_error.what(),timings);
     }
 }
 
@@ -1057,17 +1123,19 @@ std::optional<TrialRecord> trial(const application::PreparedComparison& prepared
     fallback_statistics=empty_fallback_statistics(prepared.problem(),resolved_configuration,run_id);
     std::optional<SynthesisOutcome> returned_outcome;
     bool invocation_started=false;
+    TrialTimings timings;
     try {
         return trial_impl(prepared, strategy_index, modules, enabled, repetition, warmup, expected,
             resolved_configuration,
-            fallback_configuration,fallback_statistics,returned_outcome,invocation_started);
+            fallback_configuration,fallback_statistics,returned_outcome,invocation_started,timings);
     } catch (const std::exception& error) {
         if(!fallback_configuration||!fallback_statistics)throw;
+        timings.capture_partial();
         if(returned_outcome)
             return recording_failure_trial(prepared,strategy_index,enabled,repetition,warmup,
-                *returned_outcome,std::move(*fallback_configuration),std::move(*fallback_statistics),error.what());
+                *returned_outcome,std::move(*fallback_configuration),std::move(*fallback_statistics),error.what(),timings);
         return failed_trial(prepared,strategy_index,enabled,repetition,warmup,error.what(),
-            std::move(*fallback_configuration),std::move(*fallback_statistics),invocation_started);
+            std::move(*fallback_configuration),std::move(*fallback_statistics),invocation_started,timings);
     }
 }
 

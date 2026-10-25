@@ -564,7 +564,8 @@ void compare_profile(const std::string& profile) {
         measurement["schema"]="csl.obs04-instrumentation-comparison-event/4";
         measurement["strategy_run_ns"]=2;
         measurement["family_construction_ns"]=2;
-        measurement["end_to_end_ns"]=12;
+        measurement["end_to_end_ns"]=30;
+        measurement["selection_run_ns"]=20;
         measurement["first_witness_query_ns"]=3;
         measurement["additional_witness_query_ns"]=4;
         attempt.measurement_payload=measurement.dump();
@@ -577,6 +578,29 @@ void compare_profile(const std::string& profile) {
     const auto restored_v4=take_artifact(ar::decode_recorded_comparison(recorded_v4_wire),
         "decode_recorded_comparison event/4");
     CHECK(restored_v4.content().digest()==recorded_v4.content().digest());
+    auto measured_attempts_v5=measured_attempts_v3;
+    for(auto& attempt:measured_attempts_v5) {
+        auto measurement=nlohmann::json::parse(attempt.measurement_payload);
+        measurement["schema"]="csl.obs04-instrumentation-comparison-event/5";
+        measurement["setup_ns"]=1;
+        measurement["strategy_run_ns"]=2;
+        measurement["family_construction_ns"]=nullptr;
+        measurement["end_to_end_ns"]=30;
+        measurement["selection_setup_ns"]=1;
+        measurement["selection_run_ns"]=20;
+        measurement["verification_ns"]=3;
+        measurement["first_witness_query_ns"]=3;
+        measurement["additional_witness_query_ns"]=4;
+        attempt.measurement_payload=measurement.dump();
+    }
+    const auto recorded_v5=take_artifact(ar::encode_recorded_comparison(
+        version_three_spec,measured_attempts_v5),"encode_recorded_comparison event/5");
+    const auto recorded_v5_wire=std::string(
+        reinterpret_cast<const char*>(recorded_v5.content().bytes().data()),
+        recorded_v5.content().bytes().size());
+    const auto restored_v5=take_artifact(ar::decode_recorded_comparison(recorded_v5_wire),
+        "decode_recorded_comparison event/5");
+    CHECK(restored_v5.content().digest()==recorded_v5.content().digest());
     auto missing_query_timing=measured_attempts_v4;
     auto missing_query_measurement=nlohmann::json::parse(missing_query_timing.front().measurement_payload);
     missing_query_measurement["additional_witness_query_ns"]=nullptr;
@@ -584,6 +608,25 @@ void compare_profile(const std::string& profile) {
     const auto missing_query=ar::encode_recorded_comparison(version_three_spec,missing_query_timing);
     REQUIRE(std::holds_alternative<ar::ArtifactError>(missing_query));
     CHECK(std::get<ar::ArtifactError>(missing_query).path=="attempts[0].measurement_payload.status");
+    auto impossible_query_timing=measured_attempts_v5;
+    auto impossible_query=nlohmann::json::parse(impossible_query_timing.front().measurement_payload);
+    impossible_query["selection_run_ns"]=6;
+    impossible_query_timing.front().measurement_payload=impossible_query.dump();
+    const auto impossible_query_result=ar::encode_recorded_comparison(
+        version_three_spec,impossible_query_timing);
+    REQUIRE(std::holds_alternative<ar::ArtifactError>(impossible_query_result));
+    CHECK(std::get<ar::ArtifactError>(impossible_query_result).path==
+        "attempts[0].measurement_payload.status");
+    auto impossible_end_to_end=measured_attempts_v5;
+    auto impossible_end_to_end_measurement=nlohmann::json::parse(
+        impossible_end_to_end.front().measurement_payload);
+    impossible_end_to_end_measurement["end_to_end_ns"]=26;
+    impossible_end_to_end.front().measurement_payload=impossible_end_to_end_measurement.dump();
+    const auto impossible_end_to_end_result=ar::encode_recorded_comparison(
+        version_three_spec,impossible_end_to_end);
+    REQUIRE(std::holds_alternative<ar::ArtifactError>(impossible_end_to_end_result));
+    CHECK(std::get<ar::ArtifactError>(impossible_end_to_end_result).path==
+        "attempts[0].measurement_payload.status");
     auto bad_distinct_count=measured_attempts_v3;
     auto bad_distinct_measurement=nlohmann::json::parse(bad_distinct_count.front().measurement_payload);
     bad_distinct_measurement["distinct_witness_count"]=1;
