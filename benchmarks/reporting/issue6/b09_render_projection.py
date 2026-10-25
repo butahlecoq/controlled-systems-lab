@@ -122,7 +122,7 @@ def render(row: dict, output: Path) -> None:
         parts.append(f'<line x1="{legend_x}" y1="{544 + (stock_index == 3)*22}" x2="{legend_x+22}" y2="{544 + (stock_index == 3)*22}" stroke="{stock_color}" stroke-width="3"/>')
         parts.append(f'<text x="{legend_x+28}" y="{548 + (stock_index == 3)*22}" class="tick">{stock_label}</text>')
     parts.append(f'<text x="620" y="{chart_y+chart_h+40}" text-anchor="middle" class="label">Stage (75-second model interval)</text>')
-    parts.append('<text x="620" y="746" text-anchor="middle" class="tick">Shaded geometry: uncertain linear model. Curves: nonlinear replays. The receding-horizon trace is not a global feedback optimality claim.</text></svg>')
+    parts.append('<text x="620" y="746" text-anchor="middle" class="tick">Shaded geometry: uncertain linear model. Lower stock traces: solid = open-loop; dashed = receding horizon. Replanning is not a global feedback optimality claim.</text></svg>')
     output.with_suffix('.svg').write_text('\n'.join(parts), encoding='utf-8')
 
 

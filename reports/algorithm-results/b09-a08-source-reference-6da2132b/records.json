@@ -1,7 +1,7 @@
 {
   "schema": "csl.issue6-b09-evidence/1",
-  "report_id": "b09-a08-source-reference-3d043f99",
-  "source_commit": "3d043f99ee226f11aead3c6b82af84e985e838c7",
+  "report_id": "b09-a08-source-reference-6da2132b",
+  "source_commit": "6da2132b6ad6ed6900229e8dc71ac237cbeea3df",
   "claim": "A08 source-revision finite-action reference; not historical reproduction",
   "cases": [
     {
@@ -42,10 +42,26 @@
         6,
         7
       ],
-      "median_elapsed_ns": 243294905,
-      "minimum_elapsed_ns": 238114601,
-      "maximum_elapsed_ns": 261631377,
-      "oracle_agrees": true
+      "median_elapsed_ns": 240167811,
+      "minimum_elapsed_ns": 235491272,
+      "maximum_elapsed_ns": 244367678,
+      "oracle_agrees": true,
+      "open_loop_replay_terminal_state": [
+        60.258434759826415,
+        5.56886057048996,
+        23.864726637555016,
+        15.663991217474631
+      ],
+      "open_loop_replay_objective_norm": 16.627023676002686,
+      "closed_loop_replay_terminal_state": [
+        60.0,
+        5.56886057048996,
+        24.0,
+        15.663991217474631
+      ],
+      "closed_loop_replay_objective_norm": 16.624464770773226,
+      "terminal_vertex_count": 256,
+      "process_peak_rss_kib_max": 16428
     },
     {
       "lambda": 1.0,
@@ -97,10 +113,26 @@
         7,
         6
       ],
-      "median_elapsed_ns": 246247677,
-      "minimum_elapsed_ns": 239973090,
-      "maximum_elapsed_ns": 253728361,
-      "oracle_agrees": true
+      "median_elapsed_ns": 239681921,
+      "minimum_elapsed_ns": 237592812,
+      "maximum_elapsed_ns": 245080624,
+      "oracle_agrees": true,
+      "open_loop_replay_terminal_state": [
+        60.258434759826415,
+        22.64391591369713,
+        23.864726637555016,
+        5.018800353485631
+      ],
+      "open_loop_replay_objective_norm": 25.297590111018575,
+      "closed_loop_replay_terminal_state": [
+        60.0,
+        22.64391591369713,
+        24.0,
+        5.018800353485631
+      ],
+      "closed_loop_replay_objective_norm": 25.29590832560537,
+      "terminal_vertex_count": 256,
+      "process_peak_rss_kib_max": 16428
     }
   ],
   "objective_definition": "sqrt((x1-60)^2+x2^2+(x3-24)^2+x4^2+lambda*(x2-2.5*x4)^2), lambda in {0,1}",
@@ -194,5 +226,12 @@
   ],
   "independent_oracle": "independent-oracle-verification.json",
   "raw_measurements": "raw-runs.jsonl",
-  "assurance": "numerical; independent exhaustive corner-history oracle agrees with the complete fixed-plan minimizer family"
+  "assurance": "numerical; independent exhaustive corner-history oracle agrees with the complete fixed-plan minimizer family",
+  "measurement_design": {
+    "measured_rounds_per_objective": 7,
+    "excluded_warmups_per_objective": 7,
+    "order": "alternating lambda 0 then lambda 1; each call in a separate process",
+    "scope": "request construction plus public finite_action_minimax call; process startup, serialization, oracle and rendering excluded"
+  },
+  "peak_rss_scope": "Linux ru_maxrss per separately launched measurement process; geometry rows also include both replay calculations"
 }

@@ -95,9 +95,9 @@ Seven alternating Release measurement rounds per objective use one excluded
 warmup in each separately launched process. The public call includes request
 construction and minimax solution, but not process startup,
 serialization, independent enumeration or figure rendering. On the recorded
-8-thread Ryzen 5 3550H host, medians were 243.295 ms (lambda 0; range
-238.115–261.631 ms) and 246.248 ms (lambda 1; range 239.973–253.728 ms);
-complete raw records are in the B09 result bundle.
+8-thread Ryzen 5 3550H host, medians were 240.168 ms (lambda 0; range
+235.491–244.368 ms) and 239.682 ms (lambda 1; range 237.593–245.081 ms);
+complete raw records are in the [B09 result bundle](../../../reports/algorithm-results/b09-a08-source-reference-6da2132b/index.html).
 These are single-adapter observations, not a speed comparison or scalability
 claim. No source-mapped limiter profile was collected. Assurance is numerical;
 no validated-arithmetic or historical row claim is made.

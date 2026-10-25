@@ -283,14 +283,17 @@
         "FiniteActionMinimaxPort"
       ],
       "support": "supported-2d",
-      "limit": "B06 shows numerical projections of one computed 4D terminal set. Its disturbance box is owner-confirmed rather than printed in L09; exact integer enumeration and binary64 solver assurance apply only to this named reference case.",
+      "limit": "B06 and B09 show numerical 2D projections of computed 4D terminal sets. B06 uses an owner-confirmed disturbance box not printed in L09; B09 is a source-revision reference, not a historical reproduction. Both use binary64 numerical solver assurance.",
       "catalog_kinds": [
         "issue3-finite-catalogue",
-        "issue6-b06-reference"
+        "issue6-b06-reference",
+        "issue6-b09-reference"
       ],
       "report_routes": [],
       "examples": [
-        "saved-figure-13"
+        "saved-figure-13",
+        "saved-figure-14",
+        "saved-figure-15"
       ],
       "implementation_issues": [
         3,

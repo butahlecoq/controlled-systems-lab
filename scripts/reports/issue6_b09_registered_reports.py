@@ -68,7 +68,7 @@ def adapt(bundle: Path) -> common.PublicationRecord:
                 "publisher_sha256": hashlib.sha256(publisher).hexdigest()}
     report_id = KIND + "-" + common._digest(identity)
     scope = ("Four-stage A08 finite-action minimax case: 6,561 plans per objective; "
-             "one excluded warmup and seven measured Release calls per objective")
+             "seven alternating measured Release calls per objective, each after one process warmup")
     record_bytes = (bundle / "records.json").read_bytes()
     return common.PublicationRecord(KIND, report_id, common._digest(record), record["source_commit"],
                                     scope, LIMITS, tuple(sorted(expected)),

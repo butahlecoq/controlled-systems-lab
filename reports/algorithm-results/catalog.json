@@ -334,16 +334,16 @@
       "zip_sha256": "1fb673b081668644c9754c39d3840cadbf0597ee6e1f1a41e92f677be7936e73"
     },
     {
-      "report_id": "issue6-b09-reference-3b48d1362785b85ccaf4dd918a5f26d3dadaae53e0bf0fe28aa3cc6fe3805761",
+      "report_id": "issue6-b09-reference-14322a8818539f90d59338ce3b920e70df8a7eefa103d510e89970d99881ecc6",
       "report_kind": "issue6-b09-reference",
-      "source_report_id": "b09-a08-source-reference-3d043f99",
+      "source_report_id": "b09-a08-source-reference-6da2132b",
       "payload_schema": "csl.issue6-b09-evidence/1",
-      "payload_sha256": "6685eeccad70a3b38ccb36f1096aa3fa8d6a4bdd3df358e8ffe07ea5b85d255f",
-      "native_payload_sha256": "be529cc1b24d8d073148d929eb2dd3d211058dc36126d6dcb6b4ba96609b1dfe",
-      "source_commit": "3d043f99ee226f11aead3c6b82af84e985e838c7",
-      "measured_scope": "Four-stage A08 finite-action minimax case: 6,561 plans per objective; one excluded warmup and seven measured Release calls per objective",
+      "payload_sha256": "a9cdd5b45fe78f7eae5231b2dd5380d66ac95fead02679850c87351ec23c0eb1",
+      "native_payload_sha256": "cd30e0ed2e29db4942742bc1d349f6ec2be9e782c2e33d7566ed782379985f1b",
+      "source_commit": "6da2132b6ad6ed6900229e8dc71ac237cbeea3df",
+      "measured_scope": "Four-stage A08 finite-action minimax case: 6,561 plans per objective; seven alternating measured Release calls per objective, each after one process warmup",
       "evidence_limits": "Source-revision reference, not a historical reproduction; finite action catalog only; binary64 numerical assurance; replay trajectories are examples, not a global causal optimality claim; single-adapter timings without a source-mapped limiter profile.",
-      "zip_sha256": "1bf3c56c790fd06b428feb289e43491c0581b36f700cdd159011acc184e563db"
+      "zip_sha256": "f9ade914dea58ae82ce8fec99f8073cd1b91ea7051fd82b6b750b468ec4ce27c"
     }
   ]
 }
