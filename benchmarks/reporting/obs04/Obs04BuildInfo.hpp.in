@@ -2,4 +2,5 @@
 
 namespace csl::benchmarks::obs04::build {
 inline constexpr char manifest[] = R"CSLENV(@OBS04_BUILD_INFO_JSON@)CSLENV";
+inline constexpr char scenario_file[] = R"CSLSCENARIO(@CSL_SOURCE_ROOT@/examples/scenarios/two-stage-integrator.json)CSLSCENARIO";
 }

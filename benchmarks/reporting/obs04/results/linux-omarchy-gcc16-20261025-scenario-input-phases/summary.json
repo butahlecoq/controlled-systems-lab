@@ -1,0 +1,181 @@
+{
+  "schema": "csl.obs04-shared-preflight-summary/2",
+  "run_count": 5,
+  "attempts_per_run": [
+    32,
+    32,
+    32,
+    32,
+    32
+  ],
+  "source_revision": "a6320a015eb8eea915d241717db9f388830b3008",
+  "source_dirty": false,
+  "spec_ids": [
+    "777a8278575eea7323d8bc15839c878512dc2f8b851c21b08cfeb0f86c956fd3",
+    "777a8278575eea7323d8bc15839c878512dc2f8b851c21b08cfeb0f86c956fd3",
+    "777a8278575eea7323d8bc15839c878512dc2f8b851c21b08cfeb0f86c956fd3",
+    "777a8278575eea7323d8bc15839c878512dc2f8b851c21b08cfeb0f86c956fd3",
+    "777a8278575eea7323d8bc15839c878512dc2f8b851c21b08cfeb0f86c956fd3"
+  ],
+  "run_ids": [
+    "2b167621e440b3cefb67aabdbe2f80f5440313f24d23d9c1d71046c8521f2042",
+    "18af133bd855ac6b217cd42f5f9a591cadbf21a09ac059f327400b04f746628a",
+    "a042facdecd1dbcc0577c4798c8e789e050a84f143f1eb3c3caa09ca8a34d3e5",
+    "70823e9c67292013fe69661c69065c81892c039fe85f0785c46e206aa4791a6c",
+    "0931b0d6b5d6f9248749c7885cc96523c079d520202a57db80d9e64906f38a59"
+  ],
+  "phase_ns": {
+    "scenario_file_read_ns": {
+      "median": 53848,
+      "min": 41905,
+      "max": 93937,
+      "samples": [
+        93937,
+        53848,
+        65302,
+        46585,
+        41905
+      ]
+    },
+    "scenario_json_parse_ns": {
+      "median": 54267,
+      "min": 44908,
+      "max": 117823,
+      "samples": [
+        117823,
+        44908,
+        82902,
+        54267,
+        49727
+      ]
+    },
+    "scenario_load_validation_resolution_ns": {
+      "median": 192484,
+      "min": 169366,
+      "max": 359057,
+      "samples": [
+        359057,
+        170554,
+        282929,
+        192484,
+        169366
+      ]
+    },
+    "provider_registration_ns": {
+      "median": 134935,
+      "min": 85207,
+      "max": 217138,
+      "samples": [
+        217138,
+        85207,
+        174255,
+        120896,
+        134935
+      ]
+    },
+    "comparison_admission_ns": {
+      "median": 123899,
+      "min": 89607,
+      "max": 213436,
+      "samples": [
+        213436,
+        89607,
+        176001,
+        123899,
+        117404
+      ]
+    }
+  },
+  "records": [
+    {
+      "stem": "run-01",
+      "phase": {
+        "comparison_admission_ns": 213436,
+        "comparison_run_id": "2b167621e440b3cefb67aabdbe2f80f5440313f24d23d9c1d71046c8521f2042",
+        "comparison_spec_id": "777a8278575eea7323d8bc15839c878512dc2f8b851c21b08cfeb0f86c956fd3",
+        "provider_registration_ns": 217138,
+        "scenario_file_read_ns": 93937,
+        "scenario_json_parse_ns": 117823,
+        "scenario_load_validation_resolution_ns": 359057,
+        "schema": "csl.obs04-shared-preflight/2",
+        "scope": "selected_shared_preflight_blocks_before_configuration_workspaces_and_baselines"
+      },
+      "spec_id": "777a8278575eea7323d8bc15839c878512dc2f8b851c21b08cfeb0f86c956fd3",
+      "run_id": "2b167621e440b3cefb67aabdbe2f80f5440313f24d23d9c1d71046c8521f2042",
+      "attempts": 32,
+      "record_bytes": 1853091
+    },
+    {
+      "stem": "run-02",
+      "phase": {
+        "comparison_admission_ns": 89607,
+        "comparison_run_id": "18af133bd855ac6b217cd42f5f9a591cadbf21a09ac059f327400b04f746628a",
+        "comparison_spec_id": "777a8278575eea7323d8bc15839c878512dc2f8b851c21b08cfeb0f86c956fd3",
+        "provider_registration_ns": 85207,
+        "scenario_file_read_ns": 53848,
+        "scenario_json_parse_ns": 44908,
+        "scenario_load_validation_resolution_ns": 170554,
+        "schema": "csl.obs04-shared-preflight/2",
+        "scope": "selected_shared_preflight_blocks_before_configuration_workspaces_and_baselines"
+      },
+      "spec_id": "777a8278575eea7323d8bc15839c878512dc2f8b851c21b08cfeb0f86c956fd3",
+      "run_id": "18af133bd855ac6b217cd42f5f9a591cadbf21a09ac059f327400b04f746628a",
+      "attempts": 32,
+      "record_bytes": 1853079
+    },
+    {
+      "stem": "run-03",
+      "phase": {
+        "comparison_admission_ns": 176001,
+        "comparison_run_id": "a042facdecd1dbcc0577c4798c8e789e050a84f143f1eb3c3caa09ca8a34d3e5",
+        "comparison_spec_id": "777a8278575eea7323d8bc15839c878512dc2f8b851c21b08cfeb0f86c956fd3",
+        "provider_registration_ns": 174255,
+        "scenario_file_read_ns": 65302,
+        "scenario_json_parse_ns": 82902,
+        "scenario_load_validation_resolution_ns": 282929,
+        "schema": "csl.obs04-shared-preflight/2",
+        "scope": "selected_shared_preflight_blocks_before_configuration_workspaces_and_baselines"
+      },
+      "spec_id": "777a8278575eea7323d8bc15839c878512dc2f8b851c21b08cfeb0f86c956fd3",
+      "run_id": "a042facdecd1dbcc0577c4798c8e789e050a84f143f1eb3c3caa09ca8a34d3e5",
+      "attempts": 32,
+      "record_bytes": 1853077
+    },
+    {
+      "stem": "run-04",
+      "phase": {
+        "comparison_admission_ns": 123899,
+        "comparison_run_id": "70823e9c67292013fe69661c69065c81892c039fe85f0785c46e206aa4791a6c",
+        "comparison_spec_id": "777a8278575eea7323d8bc15839c878512dc2f8b851c21b08cfeb0f86c956fd3",
+        "provider_registration_ns": 120896,
+        "scenario_file_read_ns": 46585,
+        "scenario_json_parse_ns": 54267,
+        "scenario_load_validation_resolution_ns": 192484,
+        "schema": "csl.obs04-shared-preflight/2",
+        "scope": "selected_shared_preflight_blocks_before_configuration_workspaces_and_baselines"
+      },
+      "spec_id": "777a8278575eea7323d8bc15839c878512dc2f8b851c21b08cfeb0f86c956fd3",
+      "run_id": "70823e9c67292013fe69661c69065c81892c039fe85f0785c46e206aa4791a6c",
+      "attempts": 32,
+      "record_bytes": 1853085
+    },
+    {
+      "stem": "run-05",
+      "phase": {
+        "comparison_admission_ns": 117404,
+        "comparison_run_id": "0931b0d6b5d6f9248749c7885cc96523c079d520202a57db80d9e64906f38a59",
+        "comparison_spec_id": "777a8278575eea7323d8bc15839c878512dc2f8b851c21b08cfeb0f86c956fd3",
+        "provider_registration_ns": 134935,
+        "scenario_file_read_ns": 41905,
+        "scenario_json_parse_ns": 49727,
+        "scenario_load_validation_resolution_ns": 169366,
+        "schema": "csl.obs04-shared-preflight/2",
+        "scope": "selected_shared_preflight_blocks_before_configuration_workspaces_and_baselines"
+      },
+      "spec_id": "777a8278575eea7323d8bc15839c878512dc2f8b851c21b08cfeb0f86c956fd3",
+      "run_id": "0931b0d6b5d6f9248749c7885cc96523c079d520202a57db80d9e64906f38a59",
+      "attempts": 32,
+      "record_bytes": 1853088
+    }
+  ]
+}
