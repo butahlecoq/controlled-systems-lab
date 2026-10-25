@@ -16,6 +16,7 @@ inline constexpr artifacts::SpanId forward{1};
 inline constexpr artifacts::SpanId feasible_preimage{2};
 inline constexpr artifacts::SpanId terminal_optimization{3};
 inline constexpr artifacts::SpanId terminal_preimage{4};
+inline constexpr artifacts::SpanId family_construction{5};
 }
 enum class PreimageTarget { forward_terminal_slice, terminal_candidate };
 // Scoped derivation evidence: terminal-program bounds concern the supplied

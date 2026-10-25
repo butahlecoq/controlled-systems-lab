@@ -1,11 +1,16 @@
 #pragma once
 
 #include <csl/synthesis/contracts.hpp>
+#include <csl/artifacts/run_statistics.hpp>
 
 #include <csl/registry/provider.hpp>
 #include <csl/sets/data.hpp>
 
 namespace csl::synthesis::strategy_b {
+namespace timing {
+inline constexpr artifacts::SpanId run{0};
+inline constexpr artifacts::SpanId family_construction{1};
+}
 enum class RowSource { initial, state, control, transition, temporal };
 struct RowLineage {
     RowSource source;

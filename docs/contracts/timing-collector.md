@@ -9,16 +9,25 @@ OBS-03 owns automatic instrumentation of mathematical ports.
 ## Strategy A phase slots
 
 The public `csl/synthesis/strategy_a/strategy.hpp` header reserves these planned
-IDs for the first Strategy A timing slice. The caller must put all five IDs in
-the resolved `CollectionPlan`; ID 0 is the run root and IDs 1–4 are nested below
-it. The operation labels are `strategy-a/run`, `strategy-a/forward`,
-`strategy-a/feasible-preimage`, `strategy-a/terminal-optimization`, and
-`strategy-a/terminal-preimage`. The `SpanDescriptor` remains authoritative for
+IDs for Strategy A. The caller must put all six IDs in the resolved
+`CollectionPlan`; ID 0 is the run root and IDs 1–5 are nested below it. The
+operation labels are `strategy-a/run`, `strategy-a/forward`,
+`strategy-a/feasible-preimage`, `strategy-a/terminal-optimization`,
+`strategy-a/terminal-preimage`, and `strategy-a/family-construction`. The last
+span covers an attempt to construct a supported complete-family proposal,
+including its canonical relation and attached optimality/completeness evidence.
+It is unentered when that path does not apply; a failed construction retains
+its measured duration. The `SpanDescriptor` remains authoritative for
 module/backend provenance and all other observations. Phase spans measure the
 named Strategy A logical phase; backend-specific LP, convex, geometry,
 conversion, and provider identities still require instrumentation at those
 ports. Strategy A does not translate collector ticks into the legacy
 `SynthesisResult::spans` seconds field.
+
+Strategy B reserves run span 0 and family-construction span 1 in
+`csl/synthesis/strategy_b/direct_joint.hpp`. The latter is entered only when
+the supported T-S01 complete-family proposal is built. It covers canonical
+relation and claim assembly, not the optimization call.
 
 An enabled plan that omits a reserved ID causes that span start to be rejected
 by the collector; the mathematical result is not changed by timing failures.

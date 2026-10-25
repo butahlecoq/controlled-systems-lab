@@ -628,6 +628,36 @@ void compare_profile(const std::string& profile) {
     const auto restored_v6=take_artifact(ar::decode_recorded_comparison(recorded_v6_wire),
         "decode_recorded_comparison event/6");
     CHECK(restored_v6.content().digest()==recorded_v6.content().digest());
+    auto measured_attempts_v7=measured_attempts_v6;
+    for(auto& attempt:measured_attempts_v7) {
+        auto measurement=nlohmann::json::parse(attempt.measurement_payload);
+        measurement["schema"]="csl.obs04-instrumentation-comparison-event/7";
+        if(measurement["instrumentation"]=="enabled")measurement["family_construction_ns"]=5;
+        else measurement["family_construction_ns"]=nullptr;
+        attempt.measurement_payload=measurement.dump();
+    }
+    const auto recorded_v7=take_artifact(ar::encode_recorded_comparison(
+        version_three_spec,measured_attempts_v7),"encode_recorded_comparison event/7");
+    const auto recorded_v7_wire=std::string(
+        reinterpret_cast<const char*>(recorded_v7.content().bytes().data()),
+        recorded_v7.content().bytes().size());
+    const auto restored_v7=take_artifact(ar::decode_recorded_comparison(recorded_v7_wire),
+        "decode_recorded_comparison event/7");
+    CHECK(restored_v7.content().digest()==recorded_v7.content().digest());
+    auto negative_family_timing=measured_attempts_v7;
+    auto negative_family_measurement=nlohmann::json::parse(
+        negative_family_timing.front().measurement_payload);
+    negative_family_measurement["family_construction_ns"]=-1;
+    negative_family_timing.front().measurement_payload=negative_family_measurement.dump();
+    const auto negative_family=ar::encode_recorded_comparison(version_three_spec,negative_family_timing);
+    REQUIRE(std::holds_alternative<ar::ArtifactError>(negative_family));
+    auto missing_family_timing=measured_attempts_v7;
+    auto missing_family_measurement=nlohmann::json::parse(
+        missing_family_timing.at(1).measurement_payload);
+    missing_family_measurement["family_construction_ns"]=nullptr;
+    missing_family_timing.at(1).measurement_payload=missing_family_measurement.dump();
+    const auto missing_family=ar::encode_recorded_comparison(version_three_spec,missing_family_timing);
+    REQUIRE(std::holds_alternative<ar::ArtifactError>(missing_family));
     auto missing_query_timing=measured_attempts_v4;
     auto missing_query_measurement=nlohmann::json::parse(missing_query_timing.front().measurement_payload);
     missing_query_measurement["additional_witness_query_ns"]=nullptr;

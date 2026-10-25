@@ -39,6 +39,15 @@ std::optional<ob::TimingScope> start_planned_run_scope(const ExecutionContext& c
     }
     return {};
 }
+std::optional<ob::TimingScope> start_planned_family_scope(const ExecutionContext& context) noexcept {
+    try {
+        auto started=ob::start_timing(context,timing::family_construction);
+        if(auto* scope=std::get_if<ob::TimingScope>(&started))return std::move(*scope);
+    } catch(...) {
+        // Instrumentation failure cannot change the mathematical result.
+    }
+    return {};
+}
 bool same_module(const ar::ModuleIdentity& planned,const registry::Identity& actual) noexcept {
     return planned.id==actual.id&&planned.version==actual.version;
 }
@@ -574,10 +583,12 @@ SynthesisResult detail::DirectJointExecutionRunner::solve_impl(const problem::Re
             data->optimization->outcome.value==MathematicalOutcome::optimal&&result.incumbents.size()==1&&
             result.incumbents.front().witness.original_objective==0&&result.objective.upper&&result.objective.upper->value==0;
         if(completed_extraction&&supported_optimum&&result.termination==Termination::completed) {
+            auto family_construction_timing=start_planned_family_scope(context);
             auto relation=synthesis::strategy_ts01::ExactJointRelation::canonical();
             if(const auto* errors=std::get_if<Diagnostics>(&relation)) {
                 result.termination=Termination::contract_rejected;
                 result.stop=ContractValidationFailure{*errors,retained(result),std::monostate{}};
+                if(family_construction_timing)family_construction_timing->close(result.termination);
                 return result;
             }
             auto payload=std::get<std::shared_ptr<const synthesis::strategy_ts01::ExactJointRelation>>(std::move(relation));
@@ -599,6 +610,7 @@ SynthesisResult detail::DirectJointExecutionRunner::solve_impl(const problem::Re
             result.outcome={p.identity(),MathematicalOutcome::optimal,derivation,{}};
             result.objective=optimum_evidence.bounds;
             result.complete_proposal=CompleteFamilyProposal{identity,std::move(complete)};
+            if(family_construction_timing)family_construction_timing->close(result.termination);
         } else if(result.termination==Termination::completed) {
             result.termination=Termination::operation_rejected;
             result.stop=ScopedRequestRejection{{{"syn04-ts01-coverage:"+p.identity().value},"strategy",{strategy_id},
