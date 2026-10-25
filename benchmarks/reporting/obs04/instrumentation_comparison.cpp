@@ -226,9 +226,10 @@ struct PreflightTimings {
     std::uint64_t comparison_admission_ns{};
 };
 
-Json environment_manifest(std::string_view argv0) {
+Json environment_manifest(std::string_view argv0, std::optional<std::size_t> backend_threads) {
     const auto host=host_facts();
-    const auto backend_threads=unavailable_fact("native backend thread counts are not observable from the driver");
+    const auto backend_thread_fact=backend_threads ? Json{{"status","available"},{"value",*backend_threads}}
+        : unavailable_fact("no adapter reported a backend scheduler width");
     return {{"schema","csl.obs04-environment/1"},
         {"build",Json::parse(benchmarks::obs04::build::manifest)},
         {"runtime",{{"schema","csl.obs04-runtime/1"},{"binary_sha256",binary_digest(argv0)},
@@ -236,7 +237,7 @@ Json environment_manifest(std::string_view argv0) {
             {"architecture",host.architecture},{"cpu_model",host.cpu_model},
             {"logical_cpus",available_count(std::thread::hardware_concurrency())}}},
         {"execution",{{"requested_workers",1},{"observed_driver_workers",1},
-            {"requested_backend_threads",1},{"observed_backend_threads",backend_threads},
+            {"requested_backend_threads",1},{"observed_backend_threads",backend_thread_fact},
             {"workspace_policy","fresh-workspace-per-attempt"},
             {"cache_policy","one warm-up repetition per arm; operating-system caches are not flushed"},
             {"warmup_repetitions",1},{"seed_policy",{{"kind","not_applicable"},
@@ -1383,7 +1384,7 @@ int main(int argc, char** argv) {
         std::cout << "# fixture=T-S01; strategies=reach-back,direct-joint; profile=ts01_exact_integrator\n"
             << "# timed_region=exclusive workspace StrategyPort::run; setup and collection snapshot are reported separately\n"
             << "# alternation=strategy execution order and instrumentation mode both alternate by repetition\n"
-            << "# instrumentation=Strategy A phase spans; Strategy B run and T-S01 family-construction spans; CPU and native backend threads unavailable\n";
+            << "# instrumentation=Strategy A phase spans; Strategy B run and T-S01 family-construction spans; process CPU and backend scheduler width are recorded per attempt\n";
         std::size_t failures = 0;
         std::vector<TrialRecord> captured;
         for (std::size_t repetition = 0; repetition <= 7; ++repetition) {
@@ -1404,6 +1405,16 @@ int main(int argc, char** argv) {
             return std::pair{left.arm_index,left.repetition_index}<std::pair{right.arm_index,right.repetition_index};
         });
         if(captured.size()!=32)throw std::runtime_error("The comparison record does not contain all 32 warmup and measured attempts");
+        std::optional<std::size_t> observed_backend_threads;
+        for(const auto& attempt:captured) {
+            const auto event=Json::parse(attempt.measurement_payload);
+            const auto& width=event.at("observed_backend_scheduler_width");
+            if(width.is_number_unsigned()||width.is_number_integer()) {
+                const auto observed=width.get<std::size_t>();
+                observed_backend_threads=observed_backend_threads?
+                    std::max(*observed_backend_threads,observed):observed;
+            }
+        }
         std::array<std::string,4> config_ids{};
         for(const auto& attempt:captured) {
             if(attempt.repetition_index!=0)continue;
@@ -1424,7 +1435,7 @@ int main(int argc, char** argv) {
                 {"strategy",index/2==0?"csl.synthesis.reach-back":"csl.synthesis.strategy-b"}});
         }
         const Json spec{{"arms",std::move(arms)},
-            {"environment",environment_manifest(argc>0?argv[0]:std::string_view{})},
+            {"environment",environment_manifest(argc>0?argv[0]:std::string_view{},observed_backend_threads)},
             {"input_manifest_hash",problem::hex(input_manifest_hash)},
             {"input_manifest_source","resolved-problem-canonical-bytes"},
             {"problem_id",problem.identity().value},{"repetitions",8},
