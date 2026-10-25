@@ -118,6 +118,15 @@ class SavedRendererTests(unittest.TestCase):
             with self.assertRaisesRegex(ValueError, "comparison run identity"):
                 render_saved.load_record(path)
 
+    def test_rejects_tampered_run_digest(self):
+        record = fixture_record()
+        record["attempts"][1]["run_digest"] = "0" * 64
+        with tempfile.TemporaryDirectory() as temp:
+            path = Path(temp) / "record.json"
+            path.write_text(json.dumps(record), encoding="utf-8")
+            with self.assertRaisesRegex(ValueError, "run digest"):
+                render_saved.load_record(path)
+
     def test_rejects_reported_status_that_disagrees_with_measurement_and_run(self):
         record = fixture_record()
         record["attempts"][1]["reported_status"] = "failed"

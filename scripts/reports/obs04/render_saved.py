@@ -77,8 +77,12 @@ def load_record(path: Path) -> dict[str, Any]:
         raise ValueError("comparison spec identity does not match its saved spec")
     arms = spec.get("arms")
     repetitions = spec.get("repetitions")
-    if not isinstance(arms, list) or not arms or not isinstance(repetitions, int) or repetitions < 1:
+    if (not isinstance(arms, list) or not arms or
+            not isinstance(repetitions, int) or isinstance(repetitions, bool) or repetitions < 1):
         raise ValueError("comparison spec arms or repetition count are invalid")
+    if any(not isinstance(arm, dict) or set(arm) != {"configuration_id", "strategy", "instrumentation"}
+           for arm in arms):
+        raise ValueError("comparison spec arm fields are invalid")
     if len(record["attempts"]) != len(arms) * repetitions:
         raise ValueError("comparison record does not contain every ordered attempt")
     record["_parsed_spec"] = spec
@@ -113,6 +117,8 @@ def load_record(path: Path) -> dict[str, Any]:
             "cancelled": "cancelled", "resource_limited": "resource_limited", "incomplete": "incomplete",
         }
         event_schema = measurement.get("schema")
+        if event_schema == "csl.obs04-instrumentation-comparison-event/6" and measurement.get("phase_status") not in {"passed", "failed"}:
+            raise ValueError(f"attempts[{index}] phase status is invalid")
         expected_strategy = arm.get("strategy") if isinstance(arm, dict) else None
         expected_instrumentation = arm.get("instrumentation") if isinstance(arm, dict) else None
         if (run.get("schema") not in {"csl.run-statistics/5", "csl.run-statistics/6"} or
