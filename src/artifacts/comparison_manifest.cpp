@@ -46,7 +46,9 @@ std::string status_name(AttemptStatus status) {
     switch (status) {
     case AttemptStatus::completed: return "completed";
     case AttemptStatus::failed: return "failed";
+    case AttemptStatus::refused: return "refused";
     case AttemptStatus::unsupported: return "unsupported";
+    case AttemptStatus::timed_out: return "timed_out";
     case AttemptStatus::cancelled: return "cancelled";
     case AttemptStatus::resource_limited: return "resource_limited";
     case AttemptStatus::incomplete: return "incomplete";
@@ -56,7 +58,9 @@ std::string status_name(AttemptStatus status) {
 AttemptStatus parse_status(const std::string& value) {
     if (value == "completed") return AttemptStatus::completed;
     if (value == "failed") return AttemptStatus::failed;
+    if (value == "refused") return AttemptStatus::refused;
     if (value == "unsupported") return AttemptStatus::unsupported;
+    if (value == "timed_out") return AttemptStatus::timed_out;
     if (value == "cancelled") return AttemptStatus::cancelled;
     if (value == "resource_limited") return AttemptStatus::resource_limited;
     if (value == "incomplete") return AttemptStatus::incomplete;
@@ -68,7 +72,9 @@ bool measurement_status_matches(AttemptStatus status, const Json& measurement) {
     const auto value=measurement.at("status").get<std::string>();
     if(value=="passed")return status==AttemptStatus::completed;
     if(value=="failed")return status==AttemptStatus::failed;
+    if(value=="refused")return status==AttemptStatus::refused;
     if(value=="unsupported")return status==AttemptStatus::unsupported;
+    if(value=="timed_out")return status==AttemptStatus::timed_out;
     if(value=="cancelled")return status==AttemptStatus::cancelled;
     if(value=="resource_limited")return status==AttemptStatus::resource_limited;
     return value=="incomplete"&&status==AttemptStatus::incomplete;
@@ -76,13 +82,15 @@ bool measurement_status_matches(AttemptStatus status, const Json& measurement) {
 bool status_matches(AttemptStatus status, const Json& run) {
     const auto& final=run.at("final");
     const auto kind=final.at("kind").get<std::string>();
-    if(kind=="synthesis"||kind=="program") {
-        const auto& result=kind=="synthesis"?final.at("value"):final.at("value").at("result");
+    if(kind=="synthesis"||kind=="program"||kind=="finite_minimax") {
+        const auto& result=kind=="synthesis"||kind=="finite_minimax"?final.at("value"):final.at("value").at("result");
         const auto termination=result.at("termination").get<std::string>();
         if(termination=="completed")return status==AttemptStatus::completed;
         if(termination=="cancelled")return status==AttemptStatus::cancelled;
+        if(termination=="deadline_expired")return status==AttemptStatus::timed_out;
         if(termination=="resource_limit")return status==AttemptStatus::resource_limited;
-        if(termination=="operation_rejected")return status==AttemptStatus::unsupported;
+        if(termination=="operation_rejected")return status==
+            (kind=="synthesis"?AttemptStatus::unsupported:AttemptStatus::refused);
         if(termination=="contract_rejected")return status==AttemptStatus::failed;
         return termination=="numerical_failure"&&status==AttemptStatus::failed;
     }
@@ -101,6 +109,17 @@ std::string bytes_to_string(std::span<const std::byte> bytes) {
     return out;
 }
 ArtifactResult<problem::ResolvedContent> own(std::string_view text);
+bool input_manifest_attached(const Json& run,const Json& spec) {
+    if(spec.at("input_manifest_source")=="resolved-problem-canonical-bytes")return true;
+    const auto expected=spec.at("input_manifest_hash").get<std::string>();
+    const auto& attachments=run.at("attachments");
+    std::size_t matches=0;
+    for(const auto& attachment:attachments)
+        if(attachment.at("role")=="certificate"&&
+           attachment.at("schema")=="csl.exp05-finite-minimax-case/1"&&
+           attachment.at("digest")==expected&&!attachment.at("content").is_null())++matches;
+    return matches==1;
+}
 Json common_request(const Json& run) {
     auto request=run.at("configuration").at("value");
     request.erase("modules");
@@ -242,7 +261,8 @@ SpecShape validate_spec(const Json& spec) {
     const bool legacy=schema=="csl.comparison-spec/1"&&spec.size()==5&&spec.contains("strategies");
     const bool record=schema=="csl.comparison-spec/2"&&spec.size()==7&&spec.contains("arms")&&
         spec.contains("input_manifest_hash")&&spec.contains("input_manifest_source")&&
-        spec.at("input_manifest_source")=="resolved-problem-canonical-bytes";
+        (spec.at("input_manifest_source")=="resolved-problem-canonical-bytes"||
+         spec.at("input_manifest_source")=="csl.exp05-finite-minimax-case/1");
     const bool record_with_environment=schema=="csl.comparison-spec/3"&&spec.size()==8&&spec.contains("arms")&&
         spec.contains("input_manifest_hash")&&spec.contains("input_manifest_source")&&
         spec.at("input_manifest_source")=="resolved-problem-canonical-bytes"&&spec.contains("environment");
@@ -266,7 +286,8 @@ SpecShape validate_spec(const Json& spec) {
         ((record||record_with_environment)&&!valid_digest(spec.at("input_manifest_hash"))))
         throw std::invalid_argument("Comparison spec digest is malformed");
     if(record||record_with_environment) {
-        if(spec.at("input_manifest_source")!="resolved-problem-canonical-bytes")
+        if(spec.at("input_manifest_source")!="resolved-problem-canonical-bytes"&&
+           spec.at("input_manifest_source")!="csl.exp05-finite-minimax-case/1")
             throw std::invalid_argument("Comparison input manifest source is unsupported");
         constexpr std::string_view prefix="csl.problem.v1.sha256:";
         const auto& problem_id=spec.at("problem_id").get_ref<const std::string&>();
@@ -341,6 +362,10 @@ bool measurement_matches_arm(AttemptStatus status,const Json& measurement,const 
     if(!measurement_status_matches(status,measurement))return false;
     if(spec.strategies.empty())return true;
     const auto schema=measurement.value("schema",std::string{});
+    if(schema=="csl.exp05-fixed-plan-event/1")
+        return measurement.contains("strategy")&&measurement.at("strategy")==spec.strategies.at(arm)&&
+            measurement.contains("instrumentation")&&measurement.at("instrumentation")==spec.instrumentation.at(arm)&&
+            measurement.contains("repetition")&&measurement.at("repetition").get<std::uint32_t>()==repetition;
     if(schema!="csl.obs04-instrumentation-comparison-event/2" &&
         schema!="csl.obs04-instrumentation-comparison-event/3" &&
         schema!="csl.obs04-instrumentation-comparison-event/4" &&
@@ -553,6 +578,7 @@ ArtifactResult<RecordedComparisonArtifact> encode_recorded_comparison(
                 run_json.at("configuration").at("id").get<std::string>()!=
                     spec_shape.configurations.at(attempt.strategy_index) ||
                 problem::hex(request_digest(run_json))!=spec_json.at("request_digest").get<std::string>() ||
+                !input_manifest_attached(run_json,spec_json) ||
                 !arm_matches_run(run_json,spec_shape,attempt.strategy_index) ||
                 !status_matches(attempt.reported_status,run_json))
                 return error(ArtifactErrorCode::identity, "attempts[" + std::to_string(i) + "].reference", "Run reference identity or content digest mismatch");
@@ -668,6 +694,7 @@ ArtifactResult<RecordedComparisonArtifact> decode_recorded_comparison(std::strin
                 run_json.at("configuration").at("id").get<std::string>()!=
                     spec_shape.configurations.at(key.first) ||
                 problem::hex(request_digest(run_json))!=spec.at("request_digest").get<std::string>() ||
+                !input_manifest_attached(run_json,spec) ||
                 !arm_matches_run(run_json,spec_shape,key.first) ||
                 !status_matches(parse_status(item.at("reported_status").get<std::string>()),run_json))
                 return error(ArtifactErrorCode::identity,"comparison.attempts.reference","Run reference identity or digest mismatch");

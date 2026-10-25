@@ -273,19 +273,24 @@ to a diagnostics-role attachment. A missing attachment remains explicit null.
 
 ## Wire format and compatibility
 
-The [v4 schema](../artifacts/schemas/run-statistics-v4.schema.json) describes closed
-objects and variants. The checked codec additionally enforces integer width,
+The live `encode_run` form is described by the [v4 schema](../artifacts/schemas/run-statistics-v4.schema.json).
+`encode_recorded_run` emits the inert archival [v7 schema](../artifacts/schemas/run-statistics-v7.schema.json),
+which adds a finite fixed-plan minimax outcome, its outcome attachment reference,
+the `finite_minimax` configuration output kind and explicit deadline termination.
+The checked codec additionally enforces integer width,
 UTF-8 byte limits, finite values, content digests, recomputed configuration ID,
 problem/config/run bindings, parent DAGs, capacities and reference semantics.
 Input byte, string, node and depth limits are checked before unrestricted DOM
 growth; duplicate keys are rejected before overwrite. Unknown fields/tags/versions,
 noncanonical integers, invalid UTF-8, trailing input and contradictory metric
 variants are errors. New fields or variants require a new wire version and
-explicit reader policy. This reader accepts v4, v3 and historical v2. A v2 candidate
+explicit reader policy. The live reader accepts v7, v6, v5, v4, v3 and historical
+v2; the recorded-run reader accepts v7, v6 and v5. A v2 candidate
 with unestablished feasibility maps to v3 `Unestablished`; supported v2
 candidate feasibility is rejected because its unscoped claim cannot be assigned
-relation or witness scope without inventing evidence. Decoding a v2 record and
-encoding it again emits v4; the historical fixture and schema remain unchanged.
+relation or witness scope without inventing evidence. Decoding a v2 live record and
+encoding it again emits v4; recording a validated live run emits v7. Historical
+fixtures and schemas remain unchanged.
 The [v1 schema](../artifacts/schemas/run-statistics-v1.schema.json)
 and the [v1 fixture](../../tests/artifacts/fixtures/run-statistics-v1.json) remain
 historical evidence. V1 synthesis records are explicitly rejected with a schema

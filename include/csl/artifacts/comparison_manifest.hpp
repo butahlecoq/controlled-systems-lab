@@ -8,7 +8,7 @@
 
 namespace csl::artifacts {
 
-enum class AttemptStatus { completed, failed, unsupported, cancelled, resource_limited, incomplete };
+enum class AttemptStatus { completed, failed, refused, unsupported, timed_out, cancelled, resource_limited, incomplete };
 struct ComparisonSpecId { problem::ContentDigest digest; };
 struct ComparisonRunId { problem::ContentDigest digest; };
 struct RunRecordRef { RunId run; problem::ContentDigest content_digest; };

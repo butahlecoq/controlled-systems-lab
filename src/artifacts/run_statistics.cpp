@@ -342,6 +342,28 @@ ArtifactResult<RunStatistics> publish_record(RunRecord input) {
             if(r.residuals.primal&&(!context(r.residuals.primal->context)||!measure(r.residuals.primal->rows)||!measure(r.residuals.primal->variables)))return reject("run.final.program.residuals","Invalid primal residuals");
             if(r.residuals.dual){const auto& d=*r.residuals.dual;if(!context(d.context))return reject("run.final.program.residuals","Foreign dual residuals");for(const auto* m:{&d.stationarity,&d.signs,&d.complementarity})if(*m&&!measure(**m))return reject("run.final.program.residuals","Invalid dual residuals");}
             if(p->raw_diagnostics&&!attachment_role(*p->raw_diagnostics,AttachmentRole::diagnostics))return reject("run.final.program.diagnostics","Missing diagnostics-role attachment");
+        } else if(const auto* minimax=std::get_if<MinimaxFinal>(&input.final)){
+            if(minimax->subject.problem!=input.problem||minimax->subject.program.value.empty()||
+                (minimax->assurance!=Assurance::numerical&&minimax->assurance!=Assurance::validated))
+                return reject("run.final.minimax.identity","Foreign minimax program identity or unknown assurance");
+            const bool completed=minimax->termination==Termination::completed;
+            if((completed&&minimax->outcome==MinimaxOutcome::undetermined)||
+                (!completed&&minimax->outcome!=MinimaxOutcome::undetermined))
+                return reject("run.final.minimax.outcome","Mathematical outcome disagrees with termination");
+            if(minimax->objective){
+                for(const auto* bound:{&minimax->objective->lower,&minimax->objective->upper})if(*bound&&
+                    (!std::isfinite((*bound)->value)||(*bound)->evidence.subject!=minimax->subject||
+                     !support_valid((*bound)->evidence.support)))
+                    return reject("run.final.minimax.objective","Foreign or invalid minimax objective evidence");
+            }
+            if(minimax->outcome==MinimaxOutcome::optimal&&
+                (!minimax->objective||!minimax->objective->lower||!minimax->objective->upper))
+                return reject("run.final.minimax.objective","An optimal minimax result requires lower and upper objective evidence");
+            if(minimax->outcome_attachment&&
+                !attachment_role(*minimax->outcome_attachment,AttachmentRole::certificate))
+                return reject("run.final.minimax.attachment","Missing certificate-role minimax outcome attachment");
+            if(completed&&!minimax->outcome_attachment)
+                return reject("run.final.minimax.attachment","Completed minimax result requires its lossless outcome attachment");
         }
         auto portable=check_record_portability(input);
         if(const auto* e=std::get_if<ArtifactError>(&portable))return *e;
@@ -355,6 +377,14 @@ ArtifactResult<RunStatistics> publish_run(RunInput input) {
         return ArtifactError{ArtifactErrorCode::identity,"run.problem","Record does not match actual immutable problem"};
     input.record.provenance=ProblemProvenance::problem_revalidated;return publish_record(std::move(input.record));
     }catch(const std::bad_alloc&){return ArtifactError{ArtifactErrorCode::allocation,{},{}};}
+}
+ArtifactResult<RunStatistics> publish_identity_recorded_run(RunRecord record) {
+    try {
+        record.provenance=ProblemProvenance::identity_recorded;
+        return publish_record(std::move(record));
+    } catch(const std::bad_alloc&) {
+        return ArtifactError{ArtifactErrorCode::allocation,{},{}};
+    }
 }
 } // namespace csl::artifacts
 namespace csl::artifacts {

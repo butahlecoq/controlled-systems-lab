@@ -93,7 +93,7 @@ Diagnostics check_program_result(const ProgramResult& r,const LinearProgram& p,A
     auto diagnostics=check_outcome_evidence(r.outcome,p.identity(),assurance);
     if(!diagnostics.empty()) return diagnostics;
     switch(r.termination) {
-        case Termination::completed: case Termination::cancelled: case Termination::resource_limit: case Termination::numerical_failure: break;
+        case Termination::completed: case Termination::cancelled: case Termination::deadline_expired: case Termination::resource_limit: case Termination::numerical_failure: break;
         default: return invalid("lp.termination","unknown termination");
     }
     switch(r.outcome.value) {

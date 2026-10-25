@@ -200,7 +200,40 @@ target_compile_options(csl_issue3_validated_report PRIVATE /W4 /WX /permissive-)
 else()
 target_compile_options(csl_issue3_validated_report PRIVATE -Wall -Wextra -Wpedantic -Werror)
 endif()
+endif()
 
+if(CSL_BUILD_ISSUE422_REPORT)
+include(cmake/JsonDependencies.cmake)
+file(SHA256 ${CMAKE_CURRENT_SOURCE_DIR}/benchmarks/reporting/issue422/fixed_plan_comparison.cpp
+    ISSUE422_HARNESS_SHA256)
+file(SHA256 ${CMAKE_CURRENT_SOURCE_DIR}/src/optimization/finite_action_minimax.cpp
+    ISSUE422_NUMERICAL_SOURCE_SHA256)
+file(SHA256 ${CMAKE_CURRENT_SOURCE_DIR}/src/optimization/validated_finite_action_minimax.cpp
+    ISSUE422_VALIDATED_SOURCE_SHA256)
+execute_process(COMMAND git rev-parse HEAD WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+    OUTPUT_VARIABLE ISSUE422_SOURCE_COMMIT OUTPUT_STRIP_TRAILING_WHITESPACE COMMAND_ERROR_IS_FATAL ANY)
+add_executable(csl_issue422_fixed_plan_comparison benchmarks/reporting/issue422/fixed_plan_comparison.cpp)
+target_link_libraries(csl_issue422_fixed_plan_comparison PRIVATE
+    CSL::finite_action_minimax CSL::validated_finite_action_minimax CSL::artifacts CSL::resolved_core)
+target_include_directories(csl_issue422_fixed_plan_comparison SYSTEM PRIVATE ${csl_json_SOURCE_DIR}/include)
+target_compile_features(csl_issue422_fixed_plan_comparison PRIVATE cxx_std_20)
+target_compile_definitions(csl_issue422_fixed_plan_comparison PRIVATE
+    $<$<CONFIG:Release>:NDEBUG> CSL_ISSUE422_HARNESS_SHA256="${ISSUE422_HARNESS_SHA256}"
+    CSL_ISSUE422_SOURCE_COMMIT="${ISSUE422_SOURCE_COMMIT}"
+    CSL_ISSUE422_NUMERICAL_SOURCE_SHA256="${ISSUE422_NUMERICAL_SOURCE_SHA256}"
+    CSL_ISSUE422_VALIDATED_SOURCE_SHA256="${ISSUE422_VALIDATED_SOURCE_SHA256}")
+if(MSVC)
+target_compile_options(csl_issue422_fixed_plan_comparison PRIVATE /W4 /WX /permissive-)
+else()
+target_compile_options(csl_issue422_fixed_plan_comparison PRIVATE -Wall -Wextra -Wpedantic -Werror)
+endif()
+if(BUILD_TESTING)
+find_package(Python3 3.11 REQUIRED COMPONENTS Interpreter)
+add_test(NAME issue422_fixed_plan_report_smoke COMMAND Python3::Interpreter
+  ${CMAKE_CURRENT_SOURCE_DIR}/scripts/reports/issue422/check_smoke.py
+  $<TARGET_FILE:csl_issue422_fixed_plan_comparison>)
+set_tests_properties(issue422_fixed_plan_report_smoke PROPERTIES LABELS reporting)
+endif()
 endif()
 
 if(CSL_BUILD_ISSUE6_B06_REPORT)

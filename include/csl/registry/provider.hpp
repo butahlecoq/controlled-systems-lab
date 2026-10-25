@@ -209,6 +209,7 @@ protected:
                 LPQueryStopReason reason=LPQueryStopReason::numerical_failure;
                 switch(result.termination) {
                 case Termination::cancelled: reason=LPQueryStopReason::cancelled; break;
+                case Termination::deadline_expired: reason=LPQueryStopReason::resource_limit; break;
                 case Termination::resource_limit: reason=LPQueryStopReason::resource_limit; break;
                 case Termination::numerical_failure: reason=LPQueryStopReason::numerical_failure; break;
                 case Termination::operation_rejected: break; // handled before this branch

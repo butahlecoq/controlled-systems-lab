@@ -32,6 +32,7 @@ bool valid_termination(Termination value) noexcept {
     switch(value){
     case Termination::completed:
     case Termination::cancelled:
+    case Termination::deadline_expired:
     case Termination::resource_limit:
     case Termination::numerical_failure:
     case Termination::operation_rejected:
