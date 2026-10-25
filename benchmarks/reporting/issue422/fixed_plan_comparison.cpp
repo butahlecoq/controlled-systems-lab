@@ -106,7 +106,7 @@ problem::ResolvedContent owned(std::string_view text) {
     return take(problem::snapshot_content(std::as_bytes(std::span<const char>{text.data(),text.size()})));
 }
 
-artifacts::ResolvedConfiguration configuration(std::string method,std::string source_sha256) {
+artifacts::ResolvedConfiguration configuration(std::string method,std::string source_sha256,Assurance assurance) {
     namespace ar=artifacts;
     const ar::Unavailable missing{ar::MissingReason::not_instrumented,{}};
     ar::ConfigurationInput input;
@@ -114,7 +114,7 @@ artifacts::ResolvedConfiguration configuration(std::string method,std::string so
     ar::NamedOption source_pin{"source_sha256",ar::OptionValue{ar::OptionScalar{std::move(source_sha256)}}};
     input.modules={{"strategy",{{method},"1",missing},{std::move(source_pin)}}};
     input.numerical={0,0};input.resources={1,1,1,{}};
-    input.output={ar::OutputKind::finite_minimax,Assurance::numerical,
+    input.output={ar::OutputKind::finite_minimax,assurance,
         FamilyTarget::exact_optimal_relation,{"csl.polyhedron.h"},{0,0,{}, {}}};
     input.selector={{"csl.selector.none"},"1",{}};
     input.strategy={{method},{},{},{},{},{},{},input.selector.id,input.output.representation};
@@ -127,7 +127,7 @@ artifacts::RecordedRunArtifact record_attempt(std::string method,std::string run
         const Json& detailed_outcome,const Json& independent_oracle,
         const ProblemId& problem_id,const Dimensions dimensions,std::string source_sha256) {
     namespace ar=artifacts;
-    auto config=configuration(method,std::move(source_sha256));
+    auto config=configuration(method,std::move(source_sha256),assurance);
     const ar::RunId run{run_id};
     const ar::CollectionSettings settings{false,ar::CollectionMode::summary,0,0,0,0};
     const ar::CollectionRecord collection{problem_id,config.identity(),run,settings,{}, {}, {},
@@ -300,7 +300,7 @@ Json main_run() {
             problem_id,request.system.dimensions(),CSL_ISSUE422_NUMERICAL_SOURCE_SHA256));
         const auto& vtrial=validated_trials[repetition];
         validated_runs.push_back(record_attempt(validated_method,"issue422-validated-r"+std::to_string(repetition),
-            Assurance::numerical,vtrial.at("lower"),vtrial.at("upper"),canonical,vtrial.at("plans"),truth,
+            Assurance::validated,vtrial.at("lower"),vtrial.at("upper"),canonical,vtrial.at("plans"),truth,
             problem_id,request.system.dimensions(),CSL_ISSUE422_VALIDATED_SOURCE_SHA256));
     }
     const auto config_n=take_artifact(ar::comparison_configuration_id(numerical_runs.front()));

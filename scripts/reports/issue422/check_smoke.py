@@ -43,6 +43,9 @@ def main() -> int:
             run = json.loads(item["run"])
             assert run["schema"] == "csl.run-statistics/7"
             assert run["final"]["kind"] == "finite_minimax"
+            expected_assurance = "numerical" if arm == 0 else "validated"
+            assert run["final"]["value"]["assurance"] == expected_assurance
+            assert run["configuration"]["value"]["output"]["assurance"] == expected_assurance
             assert any(attachment["schema"] == "csl.exp05-minimax-outcome/1" for attachment in run["attachments"])
             event = json.loads(item["measurement_payload"])
             assert event["status"] == "passed"
