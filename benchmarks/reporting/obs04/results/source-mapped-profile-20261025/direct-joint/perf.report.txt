@@ -1,0 +1,1255 @@
+# To display the perf.data header info, please use --header/--header-only options.
+#
+#
+# Total Lost Samples: 0
+#
+# Samples: 175  of event 'cycles:u'
+# Event count (approx.): 86468690
+#
+# Overhead  Shared Object                         Symbol                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  Source:Line                         IPC   [IPC Coverage]
+# ........  ....................................  ......................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................  ..................................  ....................
+#
+     1.46%  csl_obs04_instrumentation_comparison  [.] Basis::Basis(Runtime&, std::vector<int, std::allocator<int> >, std::vector<BasisStatus, std::allocator<BasisStatus> >, std::vector<int, std::allocator<int> >)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      stl_vector.h:1136                   -      -
+            |
+            |--0.87%--resize (inlined)
+            |          QpVector (inlined)
+            |          Basis (inlined)
+            |          0
+            |
+             --0.59%--0x5bb1b0b34a9d
+                       0x5bb1b0b34a9d
+                       0x5bb1b0b34a9d
+                       0
+
+     0.61%  csl_obs04_instrumentation_comparison  [.] HEkk::initialiseSimplexLpRandomVectors()                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            HEkk.cpp:1657                       -      -
+            |
+            ---initialiseSimplexLpRandomVectors (inlined)
+
+     0.54%  csl_obs04_instrumentation_comparison  [.] HEkk::setBasis(HighsBasis const&)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   HEkk.cpp:1226                       -      -
+            |
+            ---setBasis (inlined)
+               0xffffffff
+
+     1.16%  csl_obs04_instrumentation_comparison  [.] HEkk::~HEkk()                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       stl_vector.h:375                    -      -
+            |
+            |--0.61%--0x5bb1b08ebe77
+            |          0x5bb1b08ebe77
+            |          0x5bb1b08ebe77
+            |          0x5bb1b08ebe77
+            |          0x56
+            |          0x732e31762e6d656c
+            |
+             --0.55%--~_Vector_base (inlined)
+                       ~vector (inlined)
+                       ~HighsSimplexInfo (inlined)
+                       ~HEkk (inlined)
+                       0x56
+                       0x732e31762e6d656c
+
+     0.60%  csl_obs04_instrumentation_comparison  [.] HFactor::buildSimple()                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              stl_vector.h:1254                   -      -
+            |
+            ---operator[] (inlined)
+               buildSimple (inlined)
+
+     0.59%  csl_obs04_instrumentation_comparison  [.] HFactor::~HFactor()                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 stl_vector.h:397                    -      -
+            |
+            ---_M_deallocate (inlined)
+               ~_Vector_base (inlined)
+               ~vector (inlined)
+               ~HFactor (inlined)
+               0
+
+     0.59%  csl_obs04_instrumentation_comparison  [.] HSimplexNla::setup(HighsLp const*, int*, HighsOptions const*, HighsTimer*, HighsSimplexAnalysis*, HighsSparseMatrix const*, double)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 HSimplexNla.cpp:34                  -      -
+            |
+            ---setup (inlined)
+               0x7fffbae75750
+               ~HighsOptions (inlined)
+               0x468978b48006e2b
+
+     0.62%  csl_obs04_instrumentation_comparison  [.] Highs::callSolveQp()                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                stl_uninitialized.h:164             -      -
+            |
+            ---__do_uninit_copy<std::move_iterator<double*>, std::move_iterator<double*>, double*> (inlined)
+               uninitialized_copy<std::move_iterator<double*>, double*> (inlined)
+               __uninitialized_copy_a<std::move_iterator<double*>, std::move_iterator<double*>, double*, double> (inlined)
+               __uninitialized_move_if_noexcept_a<double*, double*, std::allocator<double> > (inlined)
+               _M_fill_append (inlined)
+               resize (inlined)
+               QpVector (inlined)
+               Instance (inlined)
+               callSolveQp (inlined)
+               optimizeModel (inlined)
+               run (inlined)
+
+     0.58%  csl_obs04_instrumentation_comparison  [.] Highs::passModel(HighsLp)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           char_traits.h:432                   -      -
+            |
+            ---copy (inlined)
+               basic_string (inlined)
+               HighsLp (inlined)
+               HighsModel (inlined)
+               passModel (inlined)
+               0x7fffbae73c20
+               0
+
+     0.53%  csl_obs04_instrumentation_comparison  [.] Highs::resetOptions()                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               Highs.cpp:135                       -      -
+            |
+            ---resetOptions (inlined)
+
+     0.54%  csl_obs04_instrumentation_comparison  [.] Highs::run()                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        Highs.cpp:936                       -      -
+            |
+            ---run (inlined)
+
+     0.59%  csl_obs04_instrumentation_comparison  [.] HighsIis::invalidate()                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              stl_vector.h:2231                   -      -
+            |
+            ---_M_erase_at_end (inlined)
+               clear (inlined)
+               invalidate (inlined)
+
+     0.58%  csl_obs04_instrumentation_comparison  [.] HighsInfo::initRecords()                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            HighsInfo.h:341                     -      -
+            |
+            ---initRecords (inlined)
+               0x7fffbae73980
+
+     0.62%  csl_obs04_instrumentation_comparison  [.] HighsValueDistribution::~HighsValueDistribution()                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   basic_string.h:256                  -      -
+            |
+            ---_M_local_data (inlined)
+               _M_is_local (inlined)
+               _M_dispose (inlined)
+               ~basic_string (inlined)
+               ~HighsValueDistribution (inlined)
+
+     0.61%  csl_obs04_instrumentation_comparison  [.] HighsValueDistribution::~HighsValueDistribution()                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   stl_vector.h:397                    -      -
+            |
+            ---_M_deallocate (inlined)
+               ~_Vector_base (inlined)
+               ~vector (inlined)
+               ~HighsValueDistribution (inlined)
+
+     0.73%  csl_obs04_instrumentation_comparison  [.] InfoRecordDouble::InfoRecordDouble(std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >, bool, double*, double) [clone .constprop.0] [clone .isra.0]                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    HighsInfo.h:78                      -      -
+            |
+            ---InfoRecordDouble (inlined)
+               0x7fffbae7af80
+
+     0.62%  csl_obs04_instrumentation_comparison  [.] Matrix::transpose()                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 stl_iterator.h:1059                 -      -
+            |
+            ---__normal_iterator (inlined)
+               end (inlined)
+               transpose (inlined)
+
+     0.61%  csl_obs04_instrumentation_comparison  [.] Matrix::transpose()                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 matrix.hpp:161                      -      -
+            |
+            ---transpose (inlined)
+
+     0.56%  csl_obs04_instrumentation_comparison  [.] OptionRecordBool::OptionRecordBool(std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >, bool, bool*, bool) [clone .constprop.0] [clone .isra.0]                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        basic_string.h:1795                 -      -
+            |
+            ---assign (inlined)
+               operator= (inlined)
+               OptionRecord (inlined)
+               OptionRecordBool (inlined)
+               0x7fffbae73930
+
+     0.63%  csl_obs04_instrumentation_comparison  [.] OptionRecordBool::OptionRecordBool(std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >, bool, bool*, bool) [clone .constprop.1] [clone .isra.0]                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        HighsOptions.h:37                   -      -
+            |
+            ---OptionRecord (inlined)
+               OptionRecordBool (inlined)
+               0x7fffbae7af70
+
+     0.52%  csl_obs04_instrumentation_comparison  [.] OptionRecordBool::OptionRecordBool(std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >, bool, bool*, bool) [clone .constprop.1] [clone .isra.0]                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        HighsOptions.h:53                   -      -
+            |
+            ---OptionRecordBool (inlined)
+               0x7fffbae74020
+
+     0.62%  csl_obs04_instrumentation_comparison  [.] OptionRecordInt::OptionRecordInt(std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >, bool, int*, int, int, int) [clone .constprop.1] [clone .isra.0]                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  HighsOptions.h:70                   -      -
+            |
+            ---OptionRecordInt (inlined)
+               HighsOptions (inlined)
+               Highs (inlined)
+
+     0.52%  csl_obs04_instrumentation_comparison  [.] assessExcessiveBoundCost(HighsLogOptions, HighsModel const&)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        HighsSolve.cpp:349                  -      -
+            |
+            ---operator() (inlined)
+               assessExcessiveBoundCost (inlined)
+
+     0.94%  csl_obs04_instrumentation_comparison  [.] assessQpPrimalFeasibility(Instance const&, double, std::vector<double, std::allocator<double> > const&, std::vector<double, std::allocator<double> > const&, int&, double&, double&, int&, double&, double&, double&, double&)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      stl_vector.h:2205                   -      -
+            |
+            ---_S_check_init_len (inlined)
+               vector (inlined)
+               _M_fill_assign (inlined)
+               assign (inlined)
+               assessQpPrimalFeasibility (inlined)
+               0
+
+     0.54%  csl_obs04_instrumentation_comparison  [.] computeDualObjectiveValue(double const*, HighsLp const&, HighsSolution const&, double&)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             HighsSolution.cpp:1040              -      -
+            |
+            ---computeDualObjectiveValue (inlined)
+               computeDualObjectiveValue (inlined)
+               0xfff0000000000000
+
+     0.57%  csl_obs04_instrumentation_comparison  [.] computeStartingPointHighs(Instance&, Settings&, Statistics&, QpModelStatus&, QpHotstartInformation&, HighsModelStatus&, HighsBasis&, HighsSolution&, HighsTimer&) [clone .isra.0]                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   new_allocator.h:162                 -      -
+            |
+            ---allocate (inlined)
+               allocate (inlined)
+               _M_allocate (inlined)
+               _M_realloc_append<BasisStatus> (inlined)
+               emplace_back<BasisStatus> (inlined)
+               push_back (inlined)
+               computeStartingPointHighs (inlined)
+               0x4
+
+     0.63%  csl_obs04_instrumentation_comparison  [.] csl::adapters::convex::(anonymous namespace)::require(HighsStatus)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  highs.cpp:96                        -      -
+            |
+            ---require (inlined)
+               0x7fffbae8af50
+
+     0.59%  csl_obs04_instrumentation_comparison  [.] csl::execution::observability::TimingScope::close(csl::Termination)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 shared_ptr_base.h:1622              -      -
+            |
+            ---__shared_ptr (inlined)
+               shared_ptr (inlined)
+               __exchange<std::shared_ptr<csl::execution::observability::TimingScope::Owner>, std::shared_ptr<csl::execution::observability::TimingScope::Owner> > (inlined)
+               exchange<std::shared_ptr<csl::execution::observability::TimingScope::Owner> > (inlined)
+               close (inlined)
+               solve (inlined)
+               0x5bb1eb284960
+               0x1
+
+     0.85%  csl_obs04_instrumentation_comparison  [.] csl::optimization::evaluate_primal(csl::ConvexProgram const&, std::span<double const, 18446744073709551615ul>, csl::NumericalPolicy, csl::Verifier const&)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          convex_backend.cpp:94               -      -
+            |
+            ---evaluate_primal (inlined)
+               0x5bb1eb268dd0
+               0x56
+               0x732e31762e6d656c
+
+     0.79%  csl_obs04_instrumentation_comparison  [.] csl::registry::StrategyRequest::StrategyRequest(csl::registry::StrategyRequest const&)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              basic_string.h:621                  -      -
+            |
+            ---basic_string (inlined)
+               ModuleId (inlined)
+               StrategyConfiguration (inlined)
+               StrategyRequest (inlined)
+               0x1a
+               0x3073742e72656966
+
+     0.56%  csl_obs04_instrumentation_comparison  [.] csl::registry::detail::strategy_b_ts01_profile_valid(csl::problem::ResolvedProblem const&, csl::registry::StrategyRequest const&)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   compiled_verifiers.cpp:259          -      -
+            |
+            ---strategy_b_ts01_profile_valid (inlined)
+               solve (inlined)
+               0x5bb1eb28bad0
+               0x1
+
+     0.67%  csl_obs04_instrumentation_comparison  [.] csl::sets::(anonymous namespace)::check_description(csl::sets::Description const&)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  data.cpp:20                         -      -
+            |
+            ---check_description (inlined)
+               0x6a
+               0x656c2d6c616d6974
+
+     0.59%  csl_obs04_instrumentation_comparison  [.] csl::synthesis::strategy_b::JointProgram::~JointProgram()                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           variant:524                         -      -
+            |
+            ---_M_valid (inlined)
+               _M_reset (inlined)
+               ~_Variant_storage (inlined)
+               ~_Copy_ctor_base (inlined)
+               ~_Move_ctor_base (inlined)
+               ~_Copy_assign_base (inlined)
+               ~_Move_assign_base (inlined)
+               ~_Variant_base (inlined)
+               ~variant (inlined)
+               ~JointProgram (inlined)
+               solve (inlined)
+               0x5bb1eb224a00
+               0x1
+
+     0.59%  csl_obs04_instrumentation_comparison  [.] csl::synthesis::strategy_b::build_joint_program(csl::problem::ResolvedProblem const&, csl::FamilyRequest const&)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    direct_joint.cpp:187                -      -
+            |
+            ---build_joint_program (inlined)
+               solve (inlined)
+               0x5bb1eb267310
+               0x1
+
+     0.55%  csl_obs04_instrumentation_comparison  [.] csl::verification::(anonymous namespace)::Check::run()                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              basic_string.h:920                  -      -
+            |
+            ---~basic_string (inlined)
+               bindings (inlined)
+               run (inlined)
+               0x56
+               0x732e31762e6d656c
+
+     0.60%  csl_obs04_instrumentation_comparison  [.] csl::verification::(anonymous namespace)::indexed(std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const&, unsigned long)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            basic_string.tcc:483                -      -
+            |
+            ---_M_append (inlined)
+               append (inlined)
+               __str_concat<std::__cxx11::basic_string<char> > (inlined)
+               operator+<char, std::char_traits<char>, std::allocator<char> > (inlined)
+               indexed (inlined)
+               0x5bb1eb21cb30
+               0x1
+
+     0.57%  csl_obs04_instrumentation_comparison  [.] decltype(auto) std::__do_visit<void, std::__detail::__variant::_Variant_storage<false, csl::Unestablished, csl::NumericalCheck, csl::SymbolicArgument, csl::CertificateReference, csl::ExactFarkasEvidence>::_M_reset()::{lambda(auto:1&&)#1}, std::variant<csl::Unestablished, csl::NumericalCheck, csl::SymbolicArgument, csl::CertificateReference, csl::ExactFarkasEvidence>&>(std::__detail::__variant::_Variant_storage<false, csl::Unestablished, csl::NumericalCheck, csl::SymbolicArgument, csl::CertificateReference, csl::ExactFarkasEvidence>::_M_reset()::{lambda(auto:1&&)#1}&&, std::variant<csl::Unestablished, csl::NumericalCheck, csl::SymbolicArgument, csl::CertificateReference, csl::ExactFarkasEvidence>&) [clone .isra.0]  variant:1917                        -      -
+            |
+            ---__do_visit<void, std::__detail::__variant::_Variant_storage<false, csl::Unestablished, csl::NumericalCheck, csl::SymbolicArgument, csl::CertificateReference, csl::ExactFarkasEvidence>::_M_reset()::<lambda(auto:6&&)>, std::variant<csl::Unestablished, csl::NumericalCheck, csl::SymbolicArgument, csl::CertificateReference, csl::ExactFarkasEvidence>&> (inlined)
+               0x7fffbae82248
+
+     0.61%  csl_obs04_instrumentation_comparison  [.] getKktFailures(HighsOptions const&, bool, HighsLp const&, std::vector<double, std::allocator<double> > const&, HighsSolution const&, HighsInfo&, bool)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              HighsSolution.cpp:243               -      -
+            |
+            ---getKktFailures (inlined)
+
+     0.63%  csl_obs04_instrumentation_comparison  [.] getOptionIndex(HighsLogOptions const&, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const&, std::vector<OptionRecord*, std::allocator<OptionRecord*> > const&, int&)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             HighsOptions.cpp:114                -      -
+            |
+            ---getOptionIndex (inlined)
+               0x1d
+               0x5f6465646e756f62
+
+     0.66%  csl_obs04_instrumentation_comparison  [.] getPrimalDualBasisErrors(HighsOptions const&, HighsLp const&, HighsSolution const&, HighsBasis const&, HighsPrimalDualErrors&)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      HighsSolution.cpp:907               -      -
+            |
+            ---getPrimalDualBasisErrors (inlined)
+               0
+
+     0.63%  csl_obs04_instrumentation_comparison  [.] highsLogUser(HighsLogOptions const&, HighsLogType, char const*, ...)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                HighsIO.cpp:97                      -      -
+            |
+            ---highsLogUser (inlined)
+               0x41
+
+     0.57%  csl_obs04_instrumentation_comparison  [.] presolve::HPresolve::detectParallelRowsAndCols(presolve::HighsPostsolveStack&)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      stl_vector.h:389                    -      -
+            |
+            ---_M_allocate (inlined)
+               _M_create_storage (inlined)
+               _Vector_base (inlined)
+               vector (inlined)
+               detectParallelRowsAndCols (inlined)
+
+     0.83%  csl_obs04_instrumentation_comparison  [.] presolve::HPresolve::shrinkProblem(presolve::HighsPostsolveStack&)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  stl_construct.h:225                 -      -
+            |
+            ---_Destroy<std::set<int>*> (inlined)
+               _Destroy<std::set<int>*, std::set<int> > (inlined)
+               _M_erase_at_end (inlined)
+               resize (inlined)
+               shrinkProblem (inlined)
+               0x622d646500000000
+
+     0.68%  csl_obs04_instrumentation_comparison  [.] ratiotest_relax_instance(Runtime&)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  stl_uninitialized.h:291             -      -
+            |
+            ---uninitialized_copy<__gnu_cxx::__normal_iterator<int const*, std::vector<int> >, int*> (inlined)
+               __uninitialized_copy_a<__gnu_cxx::__normal_iterator<int const*, std::vector<int> >, __gnu_cxx::__normal_iterator<int const*, std::vector<int> >, int*, int> (inlined)
+               vector (inlined)
+               MatrixBase (inlined)
+               Matrix (inlined)
+               Instance (inlined)
+               ratiotest_relax_instance (inlined)
+
+     0.57%  csl_obs04_instrumentation_comparison  [.] resetLocalOptions(std::vector<OptionRecord*, std::allocator<OptionRecord*> >&)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      stl_vector.h:1254                   -      -
+            |
+            ---operator[] (inlined)
+               resetLocalOptions (inlined)
+               0x5bb1eb26a2f0
+               0x5bb1eb263dc0
+               0x3
+               ~OptionRecordString (inlined)
+               0x74c7394870438d48
+
+     0.63%  csl_obs04_instrumentation_comparison  [.] solveqp_actual(Instance&, Settings&, QpHotstartInformation&, Statistics&, QpModelStatus&, QpSolution&, HighsTimer&)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 stl_vector.h:1136                   -      -
+            |
+            ---resize (inlined)
+               QpVector (inlined)
+               Runtime (inlined)
+               solveqp_actual (inlined)
+               0
+
+     0.53%  csl_obs04_instrumentation_comparison  [.] solveqp_actual(Instance&, Settings&, QpHotstartInformation&, Statistics&, QpModelStatus&, QpSolution&, HighsTimer&)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 stl_vector.h:409                    -      -
+            |
+            ---_M_create_storage (inlined)
+               _Vector_base (inlined)
+               vector (inlined)
+               MatrixBase (inlined)
+               Matrix (inlined)
+               Instance (inlined)
+               Runtime (inlined)
+               solveqp_actual (inlined)
+               0x5bb450384a0f
+
+     0.59%  csl_obs04_instrumentation_comparison  [.] std::_Function_handler<std::unique_ptr<csl::ConvexWorkspace, std::default_delete<csl::ConvexWorkspace> > (csl::ConvexProgram const&), csl::adapters::convex::make_highs_registration(csl::adapters::convex::HighsConvexOptions)::{lambda(csl::ConvexProgram const&)#1}>::_M_manager(std::_Any_data&, std::_Any_data const&, std::_Manager_operation)                                                                                                                                                                                                                                                                                                                                                                                                std_function.h:146                  -      -
+            |
+            ---_M_get_pointer (inlined)
+               _M_manager (inlined)
+               _M_manager (inlined)
+               0x10
+               0x73686769682e7865
+
+     0.56%  csl_obs04_instrumentation_comparison  [.] std::_Function_handler<void (QpModelStatus&), Highs::callSolveQp()::{lambda(QpModelStatus&)#1}>::_M_manager(std::_Any_data&, std::_Any_data const&, std::_Manager_operation)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        std_function.h:275                  -      -
+            |
+            ---_M_manager (inlined)
+               0
+
+     1.06%  csl_obs04_instrumentation_comparison  [.] std::_Sp_counted_ptr_inplace<csl::sets::detail::Storage, std::allocator<void>, (__gnu_cxx::_Lock_policy)2>::_M_dispose()                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            shared_ptr_base.h:680               -      -
+            |
+            ---_M_dispose (inlined)
+               0x5bb1eb21d4e0
+               0x56
+               0x732e31762e6d656c
+
+     0.61%  csl_obs04_instrumentation_comparison  [.] std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >::basic_string(char const*, std::allocator<char> const&) [clone .isra.0]                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             basic_string.tcc:235                -      -
+            |
+            ---_M_construct<char const*> (inlined)
+               basic_string (inlined)
+               0x65636e6172
+
+     0.66%  csl_obs04_instrumentation_comparison  [.] std::vector<csl::Diagnostic, std::allocator<csl::Diagnostic> > csl::(anonymous namespace)::check_outcome<csl::ProgramIdentity>(csl::OutcomeClaim<csl::ProgramIdentity> const&, csl::ProgramIdentity const&, csl::Assurance)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         outcomes.cpp:16                     -      -
+            |
+            ---check_outcome<csl::ProgramIdentity> (inlined)
+               0x5bb1eb2869a0
+               0x56
+               0x732e31762e6d656c
+
+     0.63%  csl_obs04_instrumentation_comparison  [.] std::vector<double, std::allocator<double> >::_M_default_append(unsigned long)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      stl_vector.h:1109                   -      -
+            |
+            ---size (inlined)
+               _M_default_append (inlined)
+               0
+
+     0.52%  csl_obs04_instrumentation_comparison  [.] std::vector<double, std::allocator<double> >::_M_default_append(unsigned long)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      vector.tcc:825                      -      -
+            |
+            ---_M_default_append (inlined)
+               0x7fffbae75738
+               0
+
+     0.61%  csl_obs04_instrumentation_comparison  [.] std::vector<std::vector<double, std::allocator<double> >, std::allocator<std::vector<double, std::allocator<double> > > >::operator=(std::vector<std::vector<double, std::allocator<double> >, std::allocator<std::vector<double, std::allocator<double> > > > const&) [clone .isra.0]                                                                                                                                                                                                                                                                                                                                                                                                                                                              stl_uninitialized.h:294             -      -
+            |
+            ---uninitialized_copy<__gnu_cxx::__normal_iterator<double const*, std::vector<double> >, double*> (inlined)
+               __uninitialized_copy_a<__gnu_cxx::__normal_iterator<double const*, std::vector<double> >, __gnu_cxx::__normal_iterator<double const*, std::vector<double> >, double*, double> (inlined)
+               vector (inlined)
+               _Construct<std::vector<double>, const std::vector<double, std::allocator<double> >&> (inlined)
+               __do_uninit_copy<__gnu_cxx::__normal_iterator<const std::vector<double>*, std::vector<std::vector<double> > >, __gnu_cxx::__normal_iterator<const std::vector<double>*, std::vector<std::vector<double> > >, std::vector<double>*> (inlined)
+               uninitialized_copy<__gnu_cxx::__normal_iterator<const std::vector<double>*, std::vector<std::vector<double> > >, std::vector<double>*> (inlined)
+               __uninitialized_copy_a<__gnu_cxx::__normal_iterator<const std::vector<double>*, std::vector<std::vector<double> > >, __gnu_cxx::__normal_iterator<const std::vector<double>*, std::vector<std::vector<double> > >, std::vector<double>*, std::vector<double> > (inlined)
+               _M_allocate_and_copy<__gnu_cxx::__normal_iterator<const std::vector<double>*, std::vector<std::vector<double> > > > (inlined)
+               operator= (inlined)
+               0x5bb1eb265370
+
+     0.39%  csl_obs04_instrumentation_comparison  [.] void std::_Construct<csl::synthesis::strategy_b::DirectJointPayload, csl::synthesis::strategy_b::JointProgram const&, csl::sets::SetData const&>(csl::synthesis::strategy_b::DirectJointPayload*, csl::synthesis::strategy_b::JointProgram const&, csl::sets::SetData const&)                                                                                                                                                                                                                                                                                                                                                                                                                                                                       shared_ptr_base.h:1609              -      -
+            |
+            ---__shared_ptr (inlined)
+               shared_ptr (inlined)
+               ConvexProgram (inlined)
+               _Uninitialized<const csl::ConvexProgram&> (inlined)
+               _Variadic_union<const csl::ConvexProgram&> (inlined)
+               _Variadic_union<1, const csl::ConvexProgram&> (inlined)
+               _Construct<std::__detail::__variant::_Variadic_union<false, csl::LinearProgram, csl::ConvexProgram>, const std::in_place_index_t<1>&, const csl::ConvexProgram&> (inlined)
+               operator()<const csl::ConvexProgram&, std::integral_constant<long unsigned int, 1> > (inlined)
+               __invoke_impl<void, std::__detail::__variant::_Copy_ctor_base<false, csl::LinearProgram, csl::ConvexProgram>::_Copy_ctor_base(const std::__detail::__variant::_Copy_ctor_base<false, csl::LinearProgram, csl::ConvexProgram>&)::<lambda(auto:7&&, auto:8)>, const csl::ConvexProgram&, std::integral_constant<long unsigned int, 1> > (inlined)
+               __invoke<std::__detail::__variant::_Copy_ctor_base<false, csl::LinearProgram, csl::ConvexProgram>::_Copy_ctor_base(const std::__detail::__variant::_Copy_ctor_base<false, csl::LinearProgram, csl::ConvexProgram>&)::<lambda(auto:7&&, auto:8)>, const csl::ConvexProgram&, std::integral_constant<long unsigned int, 1> > (inlined)
+               __visit_invoke (inlined)
+               __do_visit<std::__detail::__variant::__variant_idx_cookie, std::__detail::__variant::_Copy_ctor_base<false, csl::LinearProgram, csl::ConvexProgram>::_Copy_ctor_base(const std::__detail::__variant::_Copy_ctor_base<false, csl::LinearProgram, csl::ConvexProgram>&)::<lambda(auto:7&&, auto:8)>, const std::variant<csl::LinearProgram, csl::ConvexProgram>&> (inlined)
+               __raw_idx_visit<std::__detail::__variant::_Copy_ctor_base<false, csl::LinearProgram, csl::ConvexProgram>::_Copy_ctor_base(const std::__detail::__variant::_Copy_ctor_base<false, csl::LinearProgram, csl::ConvexProgram>&)::<lambda(auto:7&&, auto:8)>, const std::variant<csl::LinearProgram, csl::ConvexProgram>&> (inlined)
+               _Copy_ctor_base (inlined)
+               _Move_ctor_base (inlined)
+               _Copy_assign_base (inlined)
+               _Move_assign_base (inlined)
+               _Variant_base (inlined)
+               variant (inlined)
+               JointProgram (inlined)
+               _Construct<csl::synthesis::strategy_b::DirectJointPayload, const csl::synthesis::strategy_b::JointProgram&, const csl::sets::SetData&> (inlined)
+               0
+
+     0.94%  csl_obs04_instrumentation_comparison  [.] void std::vector<InfoRecord*, std::allocator<InfoRecord*> >::_M_realloc_append<InfoRecord*>(InfoRecord*&&)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          stl_vector.h:1109                   -      -
+            |
+            ---size (inlined)
+               _M_check_len (inlined)
+               _M_realloc_append<InfoRecord*> (inlined)
+               _M_deallocate (inlined)
+               ~_Vector_base (inlined)
+               ~vector (inlined)
+               getPrimalDualGlpsolErrors (inlined)
+
+     0.89%  libc.so.6                             [.] __libc_alloca_cutoff                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                __libc_alloca_cutoff+13             -      -
+            |
+            ---__libc_alloca_cutoff
+               0x7deacfe5eb53
+               0x7deacfe667c5
+               vsnprintf
+               0x7dead030ef37
+               _M_insert_float<double> (inlined)
+               _M_insert<double> (inlined)
+               operator<< (inlined)
+               solve_native (inlined)
+               do_solve (inlined)
+               0x5bb1eb25ae70
+               ~Workspace (inlined)
+               0x4810ec8348fb8948
+
+     1.75%  libc.so.6                             [.] cfree                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               cfree+100                           -      -
+            |
+            ---cfree
+               |
+               |--0.60%--0x7dead0019b38
+               |
+                --0.54%--operator new (inlined)
+
+     0.90%  libc.so.6                             [.] cfree                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               cfree+127                           -      -
+            |
+            ---cfree
+               operator new (inlined)
+
+     0.56%  libc.so.6                             [.] cfree                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               cfree+130                           -      -
+            |
+            ---cfree
+               operator new (inlined)
+
+     0.56%  libc.so.6                             [.] cfree                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               cfree+58                            -      -
+            |
+            ---cfree
+               0x7fffbae7af90
+
+     0.56%  libc.so.6                             [.] cfree                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               cfree+71                            -      -
+            |
+            ---cfree
+               0x5bb1eb23dd40
+               0x3
+               ~OptionRecordString (inlined)
+               0x74c7394870438d48
+
+     0.54%  libc.so.6                             [.] cfree                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               cfree+7                             -      -
+            |
+            ---cfree
+               0x7fffbae7afa0
+
+     0.54%  libc.so.6                             [.] cfree                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               cfree+0                             -      -
+            |
+            ---cfree
+               0x7fffbae74020
+
+     2.94%  libc.so.6                             [.] malloc                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              malloc+72                           -      -
+            |
+            ---malloc
+               |
+               |--1.08%--initRecords (inlined)
+               |          operator= (inlined)
+               |          HighsOptions (inlined)
+               |          0x7fffbae75750
+               |          ~HighsOptions (inlined)
+               |          0x468978b48006e2b
+               |
+               |--0.66%--_M_fill_append (inlined)
+               |          resize (inlined)
+               |          QpVector (inlined)
+               |          QpSolution (inlined)
+               |          solveqp (inlined)
+               |          callSolveQp (inlined)
+               |          optimizeModel (inlined)
+               |          run (inlined)
+               |
+               |--0.61%--_M_construct<true> (inlined)
+               |          basic_string (inlined)
+               |          InfoRecordDouble (inlined)
+               |          0x7fffbae7af80
+               |
+                --0.58%--_M_construct<char const*> (inlined)
+                          basic_string (inlined)
+                          0x74720073776f
+
+     2.32%  libc.so.6                             [.] malloc                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              malloc+67                           -      -
+            |
+            ---malloc
+               |
+               |--0.97%--_M_default_append (inlined)
+               |          0
+               |
+               |--0.72%--_M_construct<char const*> (inlined)
+               |          basic_string (inlined)
+               |          _M_deallocate (inlined)
+               |          ~_Vector_base (inlined)
+               |          ~vector (inlined)
+               |          getPrimalDualGlpsolErrors (inlined)
+               |
+                --0.63%--_M_data (inlined)
+                          _M_is_local (inlined)
+                          _M_dispose (inlined)
+                          _M_assign (inlined)
+                          _M_data (inlined)
+                          _M_is_local (inlined)
+                          _M_dispose (inlined)
+                          ~basic_string (inlined)
+                          OptionRecordBool (inlined)
+                          0x74726174735f
+
+     1.81%  libc.so.6                             [.] malloc                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              malloc+95                           -      -
+            |
+            ---malloc
+               |
+               |--0.64%--construct<double, double const&> (inlined)
+               |          construct<double, double const&> (inlined)
+               |          _M_realloc_append<double const&> (inlined)
+               |          push_back (inlined)
+               |          clock_def (inlined)
+               |          HighsTimer (inlined)
+               |          build (inlined)
+               |          size (inlined)
+               |          build (inlined)
+               |          0
+               |
+               |--0.61%--_M_construct<true> (inlined)
+               |          basic_string (inlined)
+               |          InfoRecordDouble (inlined)
+               |          0x7fffbae74030
+               |
+                --0.56%--_M_copy_data (inlined)
+                          _M_swap_data (inlined)
+                          _M_fill_assign (inlined)
+                          assign (inlined)
+                          clear (inlined)
+
+     1.72%  libc.so.6                             [.] malloc                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              malloc+0                            -      -
+            |
+            ---malloc
+               |
+               |--0.60%--_M_construct<true> (inlined)
+               |          basic_string (inlined)
+               |          OptionRecordBool (inlined)
+               |          0x7fffbae7af70
+               |          0x7fffbae7af80
+               |          HighsOptions (inlined)
+               |          Highs (inlined)
+               |
+               |--0.56%--_M_data (inlined)
+               |          _M_is_local (inlined)
+               |          _M_dispose (inlined)
+               |          _M_assign (inlined)
+               |          assign (inlined)
+               |          operator= (inlined)
+               |          InfoRecord (inlined)
+               |          InfoRecordInt (inlined)
+               |          0x7fffbae74020
+               |
+                --0.55%--_M_construct<char const*> (inlined)
+                          basic_string (inlined)
+                          0x74720073776f
+
+     1.35%  libc.so.6                             [.] malloc                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              malloc+20                           -      -
+            |
+            ---malloc
+               |
+               |--0.78%--uninitialized_copy<__gnu_cxx::__normal_iterator<signed char const*, std::vector<signed char> >, signed char*> (inlined)
+               |          __uninitialized_copy_a<__gnu_cxx::__normal_iterator<signed char const*, std::vector<signed char> >, __gnu_cxx::__normal_iterator<signed char const*, std::vector<signed char> >, signed char*, signed char> (inlined)
+               |          _M_allocate_and_copy<__gnu_cxx::__normal_iterator<signed char const*, std::vector<signed char> > > (inlined)
+               |          operator= (inlined)
+               |
+                --0.57%--uninitialized_copy<__gnu_cxx::__normal_iterator<int const*, std::vector<int> >, int*> (inlined)
+                          __uninitialized_copy_a<__gnu_cxx::__normal_iterator<int const*, std::vector<int> >, __gnu_cxx::__normal_iterator<int const*, std::vector<int> >, int*, int> (inlined)
+                          vector (inlined)
+                          HVectorBase (inlined)
+                          btran (inlined)
+
+     0.57%  libc.so.6                             [.] 0x000000000005c3c0                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  libc.so.6[5c3c0]                    -      -
+            |
+            ---0x7deacfe5c3c0
+               0x7deacfe5eb53
+               0x7deacfe667c5
+               vsnprintf
+               _Alloc_hider (inlined)
+               basic_string (inlined)
+               highsFormatToString (inlined)
+               0x5bb1eb22ce70
+
+     1.27%  libc.so.6                             [.] 0x000000000005d490                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  libc.so.6[5d490]                    -      -
+            |
+            ---0x7deacfe5d490
+               0x7deacfe5eb53
+               0x7deacfe667c5
+               vsnprintf
+               |
+               |--0.72%--highsLogUser (inlined)
+               |
+                --0.56%--0x7dead030ef37
+                          _M_insert_float<double> (inlined)
+                          _M_insert<double> (inlined)
+                          operator() (inlined)
+                          0x7fffbae7c090
+                          0
+                          0x5bb1eb285610
+                          0x1
+
+     0.67%  libc.so.6                             [.] 0x000000000005ead0                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  libc.so.6[5ead0]                    -      -
+            |
+            ---0x7deacfe5ead0
+               0x7deacfe667c5
+               vsnprintf
+               0x7dead030ef37
+               _M_insert_float<double> (inlined)
+               _M_insert<double> (inlined)
+               operator<< (inlined)
+               solve_native (inlined)
+               do_solve (inlined)
+               0x5bb1eb21b170
+               ~Workspace (inlined)
+               0x4810ec8348fb8948
+
+     0.59%  libc.so.6                             [.] 0x0000000000066647                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  libc.so.6[66647]                    -      -
+            |
+            ---0x7deacfe66647
+               vsnprintf
+               highsLogUser (inlined)
+
+     1.34%  libc.so.6                             [.] 0x00000000000a4f23                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  libc.so.6[a4f23]                    -      -
+            |
+            ---0x7deacfea4f23
+               0x7deacfea77c3
+               0x7deacfea7a8f
+               operator new (inlined)
+               |
+               |--0.97%--_M_data (inlined)
+               |          _M_is_local (inlined)
+               |          _M_dispose (inlined)
+               |          _M_assign (inlined)
+               |          _M_data (inlined)
+               |          _M_is_local (inlined)
+               |          _M_dispose (inlined)
+               |          ~basic_string (inlined)
+               |          OptionRecordInt (inlined)
+               |          0x73657661656c
+               |
+                --0.37%--_M_construct<true> (inlined)
+                          basic_string (inlined)
+                          OptionRecordDouble (inlined)
+                          0x7fffbae7af70
+
+     1.59%  libc.so.6                             [.] 0x00000000000a4f3b                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  libc.so.6[a4f3b]                    -      -
+            |
+            ---0x7deacfea4f3b
+               0x7deacfea77c3
+               0x7deacfea7a8f
+               operator new (inlined)
+               |
+               |--0.96%--_M_data (inlined)
+               |          reserve (inlined)
+               |          _M_check_length (inlined)
+               |          append (inlined)
+               |          __str_concat<std::__cxx11::basic_string<char> > (inlined)
+               |          operator+<char, std::char_traits<char>, std::allocator<char> > (inlined)
+               |          solveLp (inlined)
+               |          _M_data (inlined)
+               |          _M_is_local (inlined)
+               |          _M_dispose (inlined)
+               |          ~basic_string (inlined)
+               |          callSolveLp (inlined)
+               |          __cast<long int, std::ratio<1> > (inlined)
+               |          duration_cast<std::chrono::duration<long int, std::ratio<1, 1000000000> >, long int, std::ratio<1> > (inlined)
+               |          duration<long int, std::ratio<1> > (inlined)
+               |          operator+<long int, std::ratio<1>, long int, std::ratio<1, 1000000000> > (inlined)
+               |          now (inlined)
+               |
+                --0.63%--initRecords (inlined)
+                          HighsOptions (inlined)
+                          Highs (inlined)
+
+     0.57%  libc.so.6                             [.] 0x00000000000a4f52                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  libc.so.6[a4f52]                    -      -
+            |
+            ---0x7deacfea4f52
+               0x7deacfea6228
+               _M_data (inlined)
+               _M_is_local (inlined)
+               _M_dispose (inlined)
+               ~basic_string (inlined)
+               ~OptionRecord (inlined)
+               ~OptionRecordInt (inlined)
+               ~OptionRecordInt (inlined)
+
+     1.31%  libc.so.6                             [.] 0x00000000000a4ffe                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  libc.so.6[a4ffe]                    -      -
+            |
+            ---0x7deacfea4ffe
+               0x7deacfea623e
+               |
+               |--0.72%--~_Vector_base (inlined)
+               |          ~vector (inlined)
+               |          ~HighsBasis (inlined)
+               |          ~Highs (inlined)
+               |
+                --0.59%--~OptionRecordBool (inlined)
+
+     1.35%  libc.so.6                             [.] 0x00000000000a5047                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  libc.so.6[a5047]                    -      -
+            |
+            ---0x7deacfea5047
+               |
+               |--0.75%--_M_data (inlined)
+               |          _M_is_local (inlined)
+               |          _M_dispose (inlined)
+               |          ~basic_string (inlined)
+               |          ~OptionRecord (inlined)
+               |          ~OptionRecordDouble (inlined)
+               |          ~OptionRecordDouble (inlined)
+               |
+                --0.60%--size (inlined)
+                          deleteRecords (inlined)
+                          ~HighsOptions (inlined)
+                          ~Highs (inlined)
+
+     0.60%  libc.so.6                             [.] 0x00000000000a506c                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  libc.so.6[a506c]                    -      -
+            |
+            ---0x7deacfea506c
+               0x7deacfea623e
+               ~InfoRecordDouble (inlined)
+
+     0.59%  libc.so.6                             [.] 0x00000000000a5094                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  libc.so.6[a5094]                    -      -
+            |
+            ---0x7deacfea5094
+               0x7deacfea623e
+               size (inlined)
+               deleteRecords (inlined)
+               ~HighsOptions (inlined)
+               ~Highs (inlined)
+
+     0.54%  libc.so.6                             [.] 0x00000000000a61d3                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  libc.so.6[a61d3]                    -      -
+            |
+            ---0x7deacfea61d3
+               _M_data (inlined)
+               _M_is_local (inlined)
+               _M_dispose (inlined)
+               ~basic_string (inlined)
+               ~OptionRecord (inlined)
+               ~OptionRecordBool (inlined)
+               ~OptionRecordBool (inlined)
+
+     0.55%  libc.so.6                             [.] 0x00000000000a6208                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  libc.so.6[a6208]                    -      -
+            |
+            ---0x7deacfea6208
+               size (inlined)
+               deleteRecords (inlined)
+               ~HighsOptions (inlined)
+
+     0.63%  libc.so.6                             [.] 0x00000000000a6264                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  libc.so.6[a6264]                    -      -
+            |
+            ---0x7deacfea6264
+               size (inlined)
+               deleteRecords (inlined)
+               ~HighsInfo (inlined)
+               debugHighsSolution (inlined)
+               _M_data (inlined)
+               _M_is_local (inlined)
+               _M_dispose (inlined)
+               ~basic_string (inlined)
+               returnFromOptimizeModel (inlined)
+               optimizeModel (inlined)
+               run (inlined)
+
+     0.62%  libc.so.6                             [.] 0x00000000000a6ed5                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  libc.so.6[a6ed5]                    -      -
+            |
+            ---0x7deacfea6ed5
+               0x7deacfea7a8f
+               operator new (inlined)
+               _M_construct<true> (inlined)
+               basic_string (inlined)
+               OptionRecordBool (inlined)
+               0x626173696420726f
+
+     0.57%  libc.so.6                             [.] 0x00000000000a6ee8                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  libc.so.6[a6ee8]                    -      -
+            |
+            ---0x7deacfea6ee8
+               0x7deacfea7a8f
+               operator new (inlined)
+               initRecords (inlined)
+               HighsOptions (inlined)
+               Highs (inlined)
+
+     0.57%  libc.so.6                             [.] 0x00000000000a6f7b                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  libc.so.6[a6f7b]                    -      -
+            |
+            ---0x7deacfea6f7b
+               0x7deacfea7a8f
+               operator new (inlined)
+               _M_construct<true> (inlined)
+               basic_string (inlined)
+               InfoRecordDouble (inlined)
+               0x7fffbae73690
+
+     0.60%  libc.so.6                             [.] 0x00000000000a7162                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  libc.so.6[a7162]                    -      -
+            |
+            ---0x7deacfea7162
+               0x7deacfea7a8f
+               operator new (inlined)
+               _M_data (inlined)
+               _M_is_local (inlined)
+               _M_dispose (inlined)
+               _M_assign (inlined)
+               assign (inlined)
+               operator= (inlined)
+               OptionRecord (inlined)
+               OptionRecordInt (inlined)
+               0x1710
+
+     1.17%  libc.so.6                             [.] 0x00000000000a728d                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  libc.so.6[a728d]                    -      -
+            |
+            ---0x7deacfea728d
+               0x7deacfea7a8f
+               operator new (inlined)
+               _M_construct<char const*> (inlined)
+               basic_string (inlined)
+               |
+               |--0.61%--0x65007365646f6e
+               |
+                --0.56%--0x6500676f6c00
+
+     0.62%  libc.so.6                             [.] 0x00000000000a72cb                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  libc.so.6[a72cb]                    -      -
+            |
+            ---0x7deacfea72cb
+               0x7deacfea7a8f
+               operator new (inlined)
+               _M_data (inlined)
+               _M_is_local (inlined)
+               _M_dispose (inlined)
+               _M_assign (inlined)
+               _M_data (inlined)
+               _M_is_local (inlined)
+               _M_dispose (inlined)
+               ~basic_string (inlined)
+               OptionRecordBool (inlined)
+               0x7fffbae7af70
+
+     0.62%  libc.so.6                             [.] 0x00000000000a75a1                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  libc.so.6[a75a1]                    -      -
+            |
+            ---0x7deacfea75a1
+               0x7deacfea7a8f
+               operator new (inlined)
+               _M_data (inlined)
+               _M_is_local (inlined)
+               _M_dispose (inlined)
+               _M_assign (inlined)
+               _M_data (inlined)
+               _M_is_local (inlined)
+               _M_dispose (inlined)
+               ~basic_string (inlined)
+               OptionRecordInt (inlined)
+               operator new (inlined)
+
+     1.24%  libc.so.6                             [.] 0x00000000000a75c0                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  libc.so.6[a75c0]                    -      -
+            |
+            ---0x7deacfea75c0
+               0x7deacfea7a8f
+               operator new (inlined)
+               |
+               |--0.62%--_M_construct<true> (inlined)
+               |          basic_string (inlined)
+               |          OptionRecordInt (inlined)
+               |          0x207265626d756e20
+               |
+                --0.61%--initRecords (inlined)
+                          HighsOptions (inlined)
+                          Highs (inlined)
+
+     1.34%  libc.so.6                             [.] 0x00000000000a75c4                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  libc.so.6[a75c4]                    -      -
+            |
+            ---0x7deacfea75c4
+               0x7deacfea7a8f
+               operator new (inlined)
+               |
+               |--0.68%--_M_data (inlined)
+               |          _M_is_local (inlined)
+               |          _M_dispose (inlined)
+               |          _M_assign (inlined)
+               |          _M_data (inlined)
+               |          _M_is_local (inlined)
+               |          _M_dispose (inlined)
+               |          ~basic_string (inlined)
+               |          OptionRecordInt (inlined)
+               |          operator new (inlined)
+               |
+                --0.66%--initRecords (inlined)
+                          0x68736168746967
+
+     0.60%  libc.so.6                             [.] 0x00000000000a75f8                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  libc.so.6[a75f8]                    -      -
+            |
+            ---0x7deacfea75f8
+               0x7deacfea7a8f
+               operator new (inlined)
+               initRecords (inlined)
+               0x68736168746967
+
+     0.58%  libc.so.6                             [.] 0x00000000000a7a98                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  libc.so.6[a7a98]                    -      -
+            |
+            ---0x7deacfea7a98
+               operator new (inlined)
+               _M_construct<true> (inlined)
+               basic_string (inlined)
+               OptionRecordString (inlined)
+               operator new (inlined)
+
+     0.53%  libc.so.6                             [.] 0x0000000000175fa8                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  libc.so.6[175fa8]                   -      -
+            |
+            ---0x7deacff75fa8
+               0x17
+               0x6f6974617a697261
+
+     1.98%  libc.so.6                             [.] 0x0000000000176370                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  libc.so.6[176370]                   -      -
+            |
+            ---0x7deacff76370
+               |
+               |--0.81%--0x7fffbae78640
+               |          0x5bb1eb2a32d0
+               |
+               |--0.65%--0x7fffbae73930
+               |
+                --0.52%--OptionRecord (inlined)
+                          OptionRecordDouble (inlined)
+                          0x646e756f625f65
+
+     1.52%  libc.so.6                             [.] 0x0000000000176385                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  libc.so.6[176385]                   -      -
+            |
+            ---0x7deacff76385
+               |
+               |--0.85%--0x5bb1eb23e960
+               |          0
+               |
+                --0.67%--0
+
+     1.15%  libc.so.6                             [.] 0x0000000000176433                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  libc.so.6[176433]                   -      -
+            |
+            ---0x7deacff76433
+               |
+               |--0.58%--0x656c610067616c
+               |
+                --0.57%--0x5bb1eb24ef70
+
+     0.54%  libc.so.6                             [.] 0x0000000000176466                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  libc.so.6[176466]                   -      -
+            |
+            ---0x7deacff76466
+               0
+
+     0.74%  libc.so.6                             [.] 0x000000000017646c                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  libc.so.6[17646c]                   -      -
+            |
+            ---0x7deacff7646c
+               0xf
+               0
+
+     0.58%  libc.so.6                             [.] 0x0000000000176497                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  libc.so.6[176497]                   -      -
+            |
+            ---0x7deacff76497
+               0x6c6f73206e6f2065
+
+     0.66%  libc.so.6                             [.] 0x00000000001764b5                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  libc.so.6[1764b5]                   -      -
+            |
+            ---0x7deacff764b5
+
+     0.63%  libc.so.6                             [.] 0x00000000001765c5                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  libc.so.6[1765c5]                   -      -
+            |
+            ---0x7deacff765c5
+
+     0.63%  libc.so.6                             [.] 0x0000000000176e84                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  libc.so.6[176e84]                   -      -
+            |
+            ---0x7deacff76e84
+               0
+
+     0.54%  libc.so.6                             [.] 0x0000000000176e8e                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  libc.so.6[176e8e]                   -      -
+            |
+            ---0x7deacff76e8e
+               0
+
+     0.58%  libc.so.6                             [.] 0x0000000000176ea0                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  libc.so.6[176ea0]                   -      -
+            |
+            ---0x7deacff76ea0
+
+     1.27%  libc.so.6                             [.] 0x00000000001791a1                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  libc.so.6[1791a1]                   -      -
+            |
+            ---0x7deacff791a1
+               |
+               |--0.64%--0x65636e6172
+               |
+                --0.63%--0x5bb1eb235d80
+                          0x7dea00000002
+                          ~InfoRecordDouble (inlined)
+                          0x74c7394840438d48
+
+     1.24%  libc.so.6                             [.] 0x00000000001791a7                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  libc.so.6[1791a7]                   -      -
+            |
+            ---0x7deacff791a7
+               |
+               |--0.64%--0x12
+               |          0x7fffbae8af50
+               |
+                --0.60%--0x7deacfe667c5
+                          vsnprintf
+                          highsLogUser (inlined)
+
+     0.62%  libc.so.6                             [.] 0x00000000001792d4                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  libc.so.6[1792d4]                   -      -
+            |
+            ---0x7deacff792d4
+               0x650074636178
+
+     0.58%  libstdc++.so.6.0.36                   [.] operator delete(void*)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              del_op.cc:48                        -      -
+            |
+            ---operator delete (inlined)
+
+     1.40%  libstdc++.so.6.0.36                   [.] operator new(unsigned long)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         new_op.cc:43                        -      -
+            |
+            ---operator new (inlined)
+               |
+               |--0.83%--0x6c616d6972702066
+               |
+                --0.57%--0x68736168746967
+
+     0.75%  libstdc++.so.6.0.36                   [.] std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >::_M_assign(std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const&)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  basic_string.tcc:351                -      -
+            |
+            ---_M_assign (inlined)
+               assign (inlined)
+               operator= (inlined)
+               OptionRecord (inlined)
+               OptionRecordInt (inlined)
+               operator new (inlined)
+
+     0.66%  libstdc++.so.6.0.36                   [.] std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >::_M_assign(std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const&)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  basic_string.h:238                  -      -
+            |
+            ---_M_data (inlined)
+               _M_set_length (inlined)
+               _M_assign (inlined)
+               assign (inlined)
+               operator= (inlined)
+               OptionRecord (inlined)
+               OptionRecordDouble (inlined)
+               0x74736f635f
+
+     0.61%  libstdc++.so.6.0.36                   [.] std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >::_M_assign(std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const&)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  basic_string.tcc:340                -      -
+            |
+            ---_M_assign (inlined)
+               operator new (inlined)
+
+     0.56%  libstdc++.so.6.0.36                   [.] std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >::_M_assign(std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const&)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  char_traits.h:432                   -      -
+            |
+            ---copy (inlined)
+               _S_copy (inlined)
+               _S_copy (inlined)
+               _M_assign (inlined)
+               assign (inlined)
+               operator= (inlined)
+               OptionRecord (inlined)
+               OptionRecordDouble (inlined)
+               0x7fffbae7af90
+
+     0.68%  libstdc++.so.6.0.36                   [.] std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >::_M_create(unsigned long&, unsigned long)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           basic_string.tcc:148                -      -
+            |
+            ---_M_create (inlined)
+               0x74720073776f
+
+     0.66%  libstdc++.so.6.0.36                   [.] std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >::_M_create(unsigned long&, unsigned long)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           basic_string.tcc:143                -      -
+            |
+            ---_M_create (inlined)
+               assign (inlined)
+               operator= (inlined)
+               OptionRecord (inlined)
+               OptionRecordBool (inlined)
+               0x7fffbae7af70
+
+     0.65%  libstdc++.so.6.0.36                   [.] std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >::_M_dispose()                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       basic_string.h:299                  -      -
+            |
+            ---_M_dispose (inlined)
+               0x18
+               0x74732e7369736568
+
+     0.62%  libstdc++.so.6.0.36                   [.] std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >::_M_dispose()                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       basic_string.h:295                  -      -
+            |
+            ---_M_dispose (inlined)
+               solve (inlined)
+               0x5bb1eb267310
+               0x1
+
+     0.57%  libstdc++.so.6.0.36                   [.] std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >::_M_dispose()                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       new_allocator.h:183                 -      -
+            |
+            ---deallocate (inlined)
+               deallocate (inlined)
+               _M_destroy (inlined)
+               _M_dispose (inlined)
+               run (inlined)
+
+     0.63%  libstdc++.so.6.0.36                   [.] std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >::_M_replace(unsigned long, unsigned long, char const*, unsigned long)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               basic_string.h:426                  -      -
+            |
+            ---_M_check_length (inlined)
+               _M_replace (inlined)
+               0x7dea00000000
+
+     0.61%  libstdc++.so.6.0.36                   [.] std::__cxx11::basic_stringbuf<char, std::char_traits<char>, std::allocator<char> >::_M_sync(char*, unsigned long, unsigned long)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    basic_string.h:238                  -      -
+            |
+            ---_M_data (inlined)
+               _M_is_local (inlined)
+               capacity (inlined)
+               _M_sync (inlined)
+               xsputn (inlined)
+               __ostream_write<char, std::char_traits<char> > (inlined)
+               __ostream_write<char, std::char_traits<char> > (inlined)
+               __ostream_insert<char, std::char_traits<char> > (inlined)
+               operator<< (inlined)
+               observe_scheduler_threads<std::__cxx11::basic_ostringstream<char> > (inlined)
+               0x7dead04c8e78
+               ~basic_ostringstream (inlined)
+               0x8ec8348fb894853
+
+     0.62%  libstdc++.so.6.0.36                   [.] std::basic_streambuf<char, std::char_traits<char> >::xsputn(char const*, long)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      streambuf:546                       -      -
+            |
+            ---pptr (inlined)
+               xsputn (inlined)
+               __ostream_write<char, std::char_traits<char> > (inlined)
+               __ostream_write<char, std::char_traits<char> > (inlined)
+               __ostream_insert<char, std::char_traits<char> > (inlined)
+               reportModelStats (inlined)
+
+     0.62%  libstdc++.so.6.0.36                   [.] std::ostream& std::ostream::_M_insert<unsigned long>(unsigned long)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 ostream.tcc:67                      -      -
+            |
+            ---_M_insert<long unsigned int> (inlined)
+               do_solve (inlined)
+               0x5bb1eb224990
+               ~Workspace (inlined)
+               0x4810ec8348fb8948
+
+     0.61%  libstdc++.so.6.0.36                   [.] std::ostream::sentry::sentry(std::ostream&)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         ostream.tcc:55                      -      -
+            |
+            ---sentry (inlined)
+               operator<< (inlined)
+               solve_native (inlined)
+               do_solve (inlined)
+               0x5bb1eb229b40
+               ~Workspace (inlined)
+               0x4810ec8348fb8948
+
+     0.53%  [unknown]                             [k] 0xffffffff920000ab                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  ??:0                                -      -
+            |
+            ---0xffffffff920000ab
+               __vdso_clock_gettime
+               0x7dea00000000
+
+     0.60%  [unknown]                             [k] 0xffffffff9234536b                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  ??:0                                -      -
+            |
+            ---0xffffffff9234536b
+               0xffffffff924add48
+               0xffffffff924b7c31
+               0xffffffff924b92f1
+               0xffffffff93614b9a
+               0xffffffff9200012f
+               __vdso_clock_gettime
+               clock_gettime
+               __cast<long int, std::ratio<1> > (inlined)
+               duration_cast<std::chrono::duration<long int, std::ratio<1, 1000000000> >, long int, std::ratio<1> > (inlined)
+               duration<long int, std::ratio<1> > (inlined)
+               operator+<long int, std::ratio<1>, long int, std::ratio<1, 1000000000> > (inlined)
+               now (inlined)
+               operator[] (inlined)
+               stop (inlined)
+               operator() (inlined)
+               0x7dead0010101
+               ~Highs (inlined)
+               0x485310c083485554
+
+     0.57%  [unknown]                             [k] 0xffffffff924adc24                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  ??:0                                -      -
+            |
+            ---0xffffffff924adc24
+               0xffffffff924b7c31
+               0xffffffff924b92f1
+               0xffffffff93614b9a
+               0xffffffff9200012f
+               __vdso_clock_gettime
+               clock_gettime
+               __cast<long int, std::ratio<1> > (inlined)
+               duration_cast<std::chrono::duration<long int, std::ratio<1, 1000000000> >, long int, std::ratio<1> > (inlined)
+               duration<long int, std::ratio<1> > (inlined)
+               operator+<long int, std::ratio<1>, long int, std::ratio<1, 1000000000> > (inlined)
+               now (inlined)
+               __cast<long int, std::ratio<1, 1000000000> > (inlined)
+               duration_cast<std::chrono::duration<double>, long int, std::ratio<1, 1000000000> > (inlined)
+               getWallTime (inlined)
+               read (inlined)
+               reportSolvedLpQpStats (inlined)
+               0x7fffbae7d348
+
+
+
+#
+# (Cannot load tips.txt file, please install perf!)
+#
