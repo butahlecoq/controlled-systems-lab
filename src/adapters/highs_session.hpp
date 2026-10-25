@@ -6,6 +6,7 @@
 #include <chrono>
 #include <functional>
 #include <optional>
+#include <sstream>
 #include <string>
 
 namespace csl::adapters::highs_detail {
@@ -77,6 +78,15 @@ template<class Check> void configure_common(Highs& h,Check check) {
     check(h.setOptionValue("large_matrix_value",kHighsInf));
     check(h.setOptionValue("infinite_bound",kHighsInf));
     check(h.setOptionValue("infinite_cost",kHighsInf));
+}
+template<class Stream> void observe_scheduler_threads(
+    Highs& h,const ExecutionContext& context,Stream& diagnostics,const char* phase) {
+    const auto threads=h.getNumSchedulerThreads();
+    if(threads<=0)return;
+    const auto observed=static_cast<std::size_t>(threads);
+    diagnostics<<'\n'<<phase<<".scheduler_threads="<<observed;
+    if(context.backend_thread_observation)
+        context.backend_thread_observation->record(observed);
 }
 template<class Check> double deadline(Highs& h,const ExecutionContext& c,Check check) {
     const double remaining=c.deadline?

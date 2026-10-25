@@ -457,7 +457,9 @@ TEST_CASE("a completed family query sweep records aligned runs and measured phas
         execution::CallStopSupport::cooperative_boundaries,5};
     auto coarse = experiments::run_sweep(cases, resources, context, execution::Mode::bounded_parallel);
     REQUIRE(std::holds_alternative<experiments::SweepResult>(coarse));
-    auto queried = experiments::run_family_queries(std::get<experiments::SweepResult>(std::move(coarse)),
+    auto coarse_result=std::get<experiments::SweepResult>(std::move(coarse));
+    coarse_result.batch.enforcement.observed_backend_threads=3;
+    auto queried = experiments::run_family_queries(std::move(coarse_result),
         selector, resources, context, execution::Mode::bounded_parallel, query_resources);
     REQUIRE(std::holds_alternative<experiments::FamilyQueryResult>(queried));
     const auto& query_result = std::get<experiments::FamilyQueryResult>(queried);
@@ -486,6 +488,7 @@ TEST_CASE("a completed family query sweep records aligned runs and measured phas
     CHECK(wire.find("\"executor_worker_threads_started\":2") != std::string::npos);
     CHECK(wire.find("\"executor_worker_threads_started\":1") != std::string::npos);
     CHECK(wire.find("\"backend_threads\":null") != std::string::npos);
+    CHECK(wire.find("\"backend_threads\":3") != std::string::npos);
     CHECK(wire.find("\"memory_support\":\"process_observation\"") != std::string::npos);
     CHECK(wire.find("\"observed_process_memory_bytes\":null") == std::string::npos);
     CHECK(wire.find("process resident-set snapshot at phase completion") != std::string::npos);

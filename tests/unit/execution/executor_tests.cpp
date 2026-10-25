@@ -184,6 +184,17 @@ TEST_CASE("pre-cancel expired deadline zero creation limit and empty batches") {
     CHECK(empty.tasks.empty());
     CHECK(empty.enforcement.outer_worker_threads_started==0);
 }
+TEST_CASE("backend scheduler observations aggregate to the maximum within one batch") {
+    auto e=executor();
+    auto observations=std::make_shared<ex::BackendThreadObservation>();
+    auto ctx=context(*e);ctx.backend_thread_observation=observations;
+    std::vector<LPTask> tasks{
+        task("narrow",3,std::make_shared<Counts>(),[](const ExecutionContext& c){c.backend_thread_observation->record(2);}),
+        task("wide",-2,std::make_shared<Counts>(),[](const ExecutionContext& c){c.backend_thread_observation->record(5);})};
+    const auto result=run(*e,tasks,ctx,ex::Mode::bounded_parallel);
+    CHECK(result.enforcement.observed_backend_threads==5);
+    CHECK(observations->maximum()==5);
+}
 TEST_CASE("reservation credits serialize six plus six under ten and skip eleven") {
     auto e=executor({2,2,1,10});auto counts=std::make_shared<Counts>();
     std::vector<LPTask> tasks{task("a",3,counts),task("b",-2,counts),task("oversize",0,counts,{},{},use(11))};

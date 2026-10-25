@@ -293,6 +293,7 @@ class Workspace final : public ConvexWorkspace {
         raw<<std::setprecision(17)<<"adapter.version="<<version<<"\nnative.version="<<highsVersion()
             <<"\nnative.archive_sha256=2b44b074cf41439325ce4d0bbdac2d51379f56faf17ba15320a410d3c1f07275"
             <<"\nnative.downstream.hvectorbase_sha256="<<CSL_HIGHS_PATCHED_SOURCE_SHA256
+            <<"\nnative.downstream.scheduler_observation_sha256="<<CSL_HIGHS_THREAD_OBSERVATION_PATCH_SHA256
             <<"\nprogram.original="<<p.identity().program.value<<"\nprogram.solver="<<p.quadratic_program().identity().program.value
             <<"\nprofile.maximum_variables=4096\nprofile.highs_int_bits=32\noptions.qp_nullspace_limit=4096"
             <<"\noptions.qp_regularization_value=0\noptions.use_warm_start=true\noptions.presolve=off\noptions.threads=1\noptions.parallel=off"
@@ -339,6 +340,7 @@ class Workspace final : public ConvexWorkspace {
                 auto lp=model.lp_; lp.col_cost_.assign(q.variables().size(),0); lp.offset_=0;
                 require(phase.passModel(lp)); raw<<"\nphase.feasibility.time_limit="<<highs_detail::deadline(phase,c,require); capture.poll(); if(capture.stop) return finish();
                 auto api=phase.run(); const auto status=phase.getModelStatus();
+                highs_detail::observe_scheduler_threads(phase,c,raw,"phase.feasibility");
                 raw<<"\nphase.feasibility.api_status="<<static_cast<int>(api)<<"\nphase.feasibility.model_status="<<static_cast<int>(status);
                 if(api!=HighsStatus::kError && phase.getInfo().valid) raw<<"\nphase.feasibility.iterations="<<phase.getInfo().simplex_iteration_count;
                 else raw<<"\nphase.feasibility.info=unavailable";
@@ -359,6 +361,7 @@ class Workspace final : public ConvexWorkspace {
                 raw<<"\nstart.valid=true\nstart.default_fallback=false";
                 raw<<"\nphase.qp.time_limit="<<highs_detail::deadline(h,c,require); capture.poll(); if(capture.stop) return finish();
                 api=h.run(); const auto qp_status=h.getModelStatus();
+                highs_detail::observe_scheduler_threads(h,c,raw,"phase.qp");
                 raw<<"\nphase.qp.api_status="<<static_cast<int>(api)<<"\nphase.qp.model_status="<<static_cast<int>(qp_status);
                 if(api!=HighsStatus::kError && h.getInfo().valid) raw<<"\nphase.qp.iterations="<<h.getInfo().qp_iteration_count;
                 else raw<<"\nphase.qp.info=unavailable";
@@ -376,6 +379,7 @@ class Workspace final : public ConvexWorkspace {
                     raw<<"\nphase.qp.retry=cold_fresh_model\nphase.qp.retry.time_limit="<<highs_detail::deadline(retry,c,require);
                     capture.poll(); if(capture.stop) return finish();
                     const auto retry_api=retry.run(); const auto retry_status=retry.getModelStatus();
+                    highs_detail::observe_scheduler_threads(retry,c,raw,"phase.qp.retry");
                     raw<<"\nphase.qp.retry.api_status="<<static_cast<int>(retry_api)<<"\nphase.qp.retry.model_status="<<static_cast<int>(retry_status);
                     classify(result,retry_api,retry_status);
                     if(retry_api!=HighsStatus::kError) candidate(result,p,c,retry.getSolution(),raw,true,private_free_row);
@@ -385,6 +389,7 @@ class Workspace final : public ConvexWorkspace {
                 auto& h=*solver_; configure(h,c,options_,false); highs_detail::CallbackGuard callbacks(h,capture,require);
                 require(h.passModel(model.lp_)); raw<<"\nphase.linear.time_limit="<<highs_detail::deadline(h,c,require); capture.poll(); if(capture.stop) return finish();
                 const auto api=h.run(); const auto status=h.getModelStatus();
+                highs_detail::observe_scheduler_threads(h,c,raw,"phase.linear");
                 raw<<"\nphase.linear.api_status="<<static_cast<int>(api)<<"\nphase.linear.model_status="<<static_cast<int>(status);
                 if(api!=HighsStatus::kError && h.getInfo().valid) raw<<"\nphase.linear.iterations="<<h.getInfo().simplex_iteration_count;
                 else raw<<"\nphase.linear.info=unavailable";

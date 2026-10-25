@@ -60,6 +60,9 @@ struct EnforcementReport {
     std::size_t outer_worker_threads_started{};
     std::size_t peak_active_tasks{}, peak_reserved_threads{};
     std::optional<std::size_t> peak_workspace_reservation_bytes;
+    // Maximum native scheduler width observed during this run; null when no
+    // adapter reports a runtime value. This is not instantaneous busy-thread count.
+    std::optional<std::size_t> observed_backend_threads;
 };
 template<class Port> struct BatchResult {
     std::string run_id;
@@ -148,7 +151,11 @@ public:
                 diagnostics.push_back({DiagnosticCode::invalid_input,field+".id","task IDs must be unique within a batch"});
         }
         if (!diagnostics.empty()) return diagnostics;
-        const ExecutionContext frozen=context;
+        auto backend_thread_observation=context.backend_thread_observation;
+        if(!backend_thread_observation)
+            backend_thread_observation=std::make_shared<BackendThreadObservation>();
+        ExecutionContext frozen=context;
+        frozen.backend_thread_observation=backend_thread_observation;
         BatchResult<Port> result{frozen.run_id,resources_,frozen.numerical,mode,{},{},{},{}};
         result.tasks.reserve(tasks.size());
         for (const auto& task:tasks)
@@ -174,6 +181,7 @@ public:
         auto summary=detail::dispatch(jobs,frozen,mode,limit);
         result.timing=summary.timing;
         result.enforcement=summary.enforcement;
+        result.enforcement.observed_backend_threads=backend_thread_observation->maximum();
         result.launch_failure=summary.launch_failure;
         return result;
     }

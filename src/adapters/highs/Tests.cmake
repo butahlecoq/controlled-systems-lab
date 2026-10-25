@@ -2,7 +2,8 @@ if(TARGET CSL::highs_convex)
   add_executable(highs_convex_tests tests/contract/convex/highs_tests.cpp)
   target_link_libraries(highs_convex_tests PRIVATE CSL::highs_convex doctest::doctest Threads::Threads)
   target_compile_definitions(highs_convex_tests PRIVATE
-      "CSL_HIGHS_PATCHED_SOURCE_SHA256=\"${CSL_HIGHS_PATCHED_SOURCE_SHA256}\"")
+      "CSL_HIGHS_PATCHED_SOURCE_SHA256=\"${CSL_HIGHS_PATCHED_SOURCE_SHA256}\""
+      "CSL_HIGHS_THREAD_OBSERVATION_PATCH_SHA256=\"${CSL_HIGHS_THREAD_OBSERVATION_PATCH_SHA256}\"")
   add_test(NAME highs_convex_tests COMMAND highs_convex_tests)
   csl_test_target(highs_convex_tests adapters)
 endif()
@@ -35,13 +36,15 @@ if(TARGET CSL::highs_lp)
   target_include_directories(csl_highs_lp_test PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/tests/support
     ${csl_highs_SOURCE_DIR} ${csl_highs_SOURCE_DIR}/highs ${csl_highs_BINARY_DIR})
   target_compile_definitions(csl_highs_lp_test PRIVATE CSL_HIGHSLP_TESTING
-    "CSL_HIGHS_PATCHED_SOURCE_SHA256=\"${CSL_HIGHS_PATCHED_SOURCE_SHA256}\"")
+    "CSL_HIGHS_PATCHED_SOURCE_SHA256=\"${CSL_HIGHS_PATCHED_SOURCE_SHA256}\""
+    "CSL_HIGHS_THREAD_OBSERVATION_PATCH_SHA256=\"${CSL_HIGHS_THREAD_OBSERVATION_PATCH_SHA256}\"")
   target_link_libraries(csl_highs_lp_test PUBLIC CSL::optimization CSL::registry PRIVATE highs)
   add_executable(highs_lp_tests tests/contract/lp/highs_tests.cpp)
   target_link_libraries(highs_lp_tests PRIVATE csl_highs_lp_test doctest::doctest Threads::Threads)
   target_include_directories(highs_lp_tests PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/tests/support)
   target_compile_definitions(highs_lp_tests PRIVATE
-      "CSL_HIGHS_PATCHED_SOURCE_SHA256=\"${CSL_HIGHS_PATCHED_SOURCE_SHA256}\"")
+      "CSL_HIGHS_PATCHED_SOURCE_SHA256=\"${CSL_HIGHS_PATCHED_SOURCE_SHA256}\""
+      "CSL_HIGHS_THREAD_OBSERVATION_PATCH_SHA256=\"${CSL_HIGHS_THREAD_OBSERVATION_PATCH_SHA256}\"")
   add_test(NAME highs_lp_tests COMMAND highs_lp_tests)
   csl_test_target(highs_lp_tests adapters)
 endif()
