@@ -214,6 +214,12 @@ HostFacts host_facts() {
     return host;
 }
 
+struct PreflightTimings {
+    std::uint64_t fixture_construction_and_resolution_ns{};
+    std::uint64_t provider_registration_ns{};
+    std::uint64_t comparison_admission_ns{};
+};
+
 Json environment_manifest(std::string_view argv0) {
     const auto host=host_facts();
     const auto backend_threads=unavailable_fact("native backend thread counts are not observable from the driver");
@@ -1260,9 +1266,16 @@ int main(int argc, char** argv) {
             throw std::invalid_argument("Profile call count must be positive");
         if(profile_strategy&&requested_record_path)
             throw std::invalid_argument("Profile mode and comparison-record capture are separate modes");
+        PreflightTimings preflight;
+        auto phase_begin=Clock::now();
         const auto problem = source();
+        preflight.fixture_construction_and_resolution_ns=static_cast<std::uint64_t>(ns(phase_begin,Clock::now()));
+        phase_begin=Clock::now();
         auto modules = make_modules();
+        preflight.provider_registration_ns=static_cast<std::uint64_t>(ns(phase_begin,Clock::now()));
+        phase_begin=Clock::now();
         const auto prepared = prepare(problem, modules.strategies);
+        preflight.comparison_admission_ns=static_cast<std::uint64_t>(ns(phase_begin,Clock::now()));
         std::array<ar::ResolvedConfiguration,4> configuration_templates{
             configuration_for(prepared,0,false),configuration_for(prepared,0,true),
             configuration_for(prepared,1,false),configuration_for(prepared,1,true)};
@@ -1368,6 +1381,14 @@ int main(int argc, char** argv) {
         std::ofstream output(record_path,std::ios::binary|std::ios::out);
         if(!output||!(output<<comparison_wire)||!output.flush())
             throw std::runtime_error("Could not write comparison record: "+record_path.string());
+        const auto comparison_json=Json::parse(comparison_wire);
+        std::cout << "# shared_preflight=" << Json{{"schema","csl.obs04-shared-preflight/1"},
+            {"comparison_spec_id",comparison_json.at("comparison_spec_id")},
+            {"comparison_run_id",comparison_json.at("comparison_run_id")},
+            {"scope","selected_shared_preflight_blocks_before_configuration_workspaces_and_baselines"},
+            {"fixture_construction_and_resolution_ns",preflight.fixture_construction_and_resolution_ns},
+            {"provider_registration_ns",preflight.provider_registration_ns},
+            {"comparison_admission_ns",preflight.comparison_admission_ns}}.dump() << '\n';
         std::cout << "# comparison_record_digest=" << problem::hex(comparison.content().digest())
             << "; attempts=" << attempts.size() << "; failures=" << failures << '\n';
         if (failures != 0) return 1;
