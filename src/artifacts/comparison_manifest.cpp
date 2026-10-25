@@ -307,6 +307,35 @@ bool arm_matches_run(const Json& run,const SpecShape& spec,std::size_t arm) {
     return config.at("strategy").at("strategy")==spec.strategies.at(arm) &&
         config.at("collection").at("enabled").get<bool>()==(spec.instrumentation.at(arm)=="enabled");
 }
+std::size_t saved_distinct_witness_count(const Json& batch) {
+    const auto& witnesses=batch.at("witnesses");
+    const auto tolerance=batch.at("distinctness_tolerance").get<double>();
+    std::vector<std::size_t> representatives;
+    const auto histories_close=[&](const Json& left,const Json& right) {
+        if(left.size()!=right.size())return false;
+        for(std::size_t time=0;time<left.size();++time) {
+            if(left.at(time).size()!=right.at(time).size())return false;
+            for(std::size_t coordinate=0;coordinate<left.at(time).size();++coordinate)
+                if(!(std::abs(left.at(time).at(coordinate).get<double>()-
+                    right.at(time).at(coordinate).get<double>())<=tolerance))return false;
+        }
+        return true;
+    };
+    for(std::size_t index=0;index<witnesses.size();++index) {
+        bool duplicate=false;
+        for(const auto representative:representatives) {
+            const auto& candidate=witnesses.at(index);
+            const auto& existing=witnesses.at(representative);
+            if(histories_close(candidate.at("states"),existing.at("states"))&&
+                histories_close(candidate.at("controls"),existing.at("controls"))) {
+                duplicate=true;
+                break;
+            }
+        }
+        if(!duplicate)representatives.push_back(index);
+    }
+    return representatives.size();
+}
 bool measurement_matches_arm(AttemptStatus status,const Json& measurement,const Json& run,
     const SpecShape& spec,std::size_t arm,std::uint32_t repetition) {
     if(!measurement_status_matches(status,measurement))return false;
@@ -344,13 +373,16 @@ bool measurement_matches_arm(AttemptStatus status,const Json& measurement,const 
     if(selection.is_null())
         return measurement.at("returned_witness_count").is_null()&&
             measurement.at("distinct_witness_count").is_null();
+    for(const auto* field:{"selection_setup_ns","selection_run_ns","verification_ns"})
+        if(measurement.at(field).is_null())return false;
     const auto& batch=selection.at("batch");
     const auto returned=batch.at("witnesses").size();
     const auto batch_requested=canonical_count(batch.at("requested"));
-    const auto distinct=measurement.at("distinct_witness_count").get<std::uint64_t>();
+    const auto distinct=saved_distinct_witness_count(batch);
     return batch_requested&&measurement.at("requested_witness_count").get<std::uint64_t>()==
             *batch_requested &&
-        measurement.at("returned_witness_count").get<std::uint64_t>()==returned && distinct<=returned;
+        measurement.at("returned_witness_count").get<std::uint64_t>()==returned &&
+        measurement.at("distinct_witness_count").get<std::uint64_t>()==distinct && distinct<=returned;
 }
 ArtifactResult<problem::ResolvedContent> own(std::string_view text) {
     std::vector<std::byte> bytes; bytes.reserve(text.size());

@@ -526,6 +526,7 @@ void compare_profile(const std::string& profile) {
     CHECK(version_three_replay.spec_id().digest==version_three_spec.digest());
     CHECK(version_three_replay.identity().digest==version_three.identity().digest);
     const auto& witness_batch=std::get<WitnessSelection>(execution.strategies[0].selection).batch;
+    CHECK(witness_batch.distinct_count()==2);
     const auto v3_measurement=[&](std::string instrumentation) {
         return nlohmann::json{{"schema","csl.obs04-instrumentation-comparison-event/3"},
             {"repetition",0},{"warmup",true},{"status","passed"},
@@ -557,6 +558,20 @@ void compare_profile(const std::string& profile) {
     const auto count_mismatch=ar::encode_recorded_comparison(version_three_spec,bad_witness_counts);
     REQUIRE(std::holds_alternative<ar::ArtifactError>(count_mismatch));
     CHECK(std::get<ar::ArtifactError>(count_mismatch).path=="attempts[0].measurement_payload.status");
+    auto bad_distinct_count=measured_attempts_v3;
+    auto bad_distinct_measurement=nlohmann::json::parse(bad_distinct_count.front().measurement_payload);
+    bad_distinct_measurement["distinct_witness_count"]=1;
+    bad_distinct_count.front().measurement_payload=bad_distinct_measurement.dump();
+    const auto distinct_mismatch=ar::encode_recorded_comparison(version_three_spec,bad_distinct_count);
+    REQUIRE(std::holds_alternative<ar::ArtifactError>(distinct_mismatch));
+    CHECK(std::get<ar::ArtifactError>(distinct_mismatch).path=="attempts[0].measurement_payload.status");
+    auto missing_selection_timing=measured_attempts_v3;
+    auto missing_timing_measurement=nlohmann::json::parse(missing_selection_timing.front().measurement_payload);
+    missing_timing_measurement["verification_ns"]=nullptr;
+    missing_selection_timing.front().measurement_payload=missing_timing_measurement.dump();
+    const auto timing_mismatch=ar::encode_recorded_comparison(version_three_spec,missing_selection_timing);
+    REQUIRE(std::holds_alternative<ar::ArtifactError>(timing_mismatch));
+    CHECK(std::get<ar::ArtifactError>(timing_mismatch).path=="attempts[0].measurement_payload.status");
     auto changed_environment_spec_json=version_three_spec_json;
     changed_environment_spec_json["environment"]["build"]["compiler_version"]="13.3.1";
     const auto changed_environment_text=changed_environment_spec_json.dump();
