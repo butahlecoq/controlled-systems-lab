@@ -4,6 +4,7 @@
 #include <algorithm>
 #include <chrono>
 #include <cmath>
+#include <cstdlib>
 #include <cstdint>
 #include <iostream>
 #include <stdexcept>
@@ -89,7 +90,16 @@ json run_once(Case c) {
     std::size_t feasible=0;
     for(const auto& p:result.plans) if(std::holds_alternative<FinitePlanFeasible>(p)) ++feasible;
     return {{"case_id","B07-reconstruction-s"+std::to_string(c.stocks)+"-l"+std::to_string(c.lambda)+"-d"+std::to_string(c.archive_disturbance)},
+        {"source_commit",CSL_ISSUE6_B07_SOURCE_COMMIT},
+        {"driver_sha256",CSL_ISSUE6_B07_DRIVER_SHA256},
+        {"scenario_sha256",CSL_ISSUE6_B07_SCENARIO_SHA256},
+        {"compiler_id",CSL_ISSUE6_B07_COMPILER_ID},
+        {"compiler_version",CSL_ISSUE6_B07_COMPILER_VERSION},
+        {"build_type",CSL_ISSUE6_B07_BUILD_TYPE},
+        {"executable_sha256",std::getenv("CSL_ISSUE6_B07_EXECUTABLE_SHA256")?
+            std::getenv("CSL_ISSUE6_B07_EXECUTABLE_SHA256"):"not-supplied"},
         {"initial_stock_oxidizer_kg",c.stocks?302:305},{"initial_stock_fuel_kg",c.stocks?207:205},
+        {"initial_flow_oxidizer_kg_per_second",29.375},{"initial_flow_fuel_kg_per_second",20.4},
         {"terminal_lambda",c.lambda},{"disturbance_coefficients",{c.archive_disturbance?0.06:0.05,c.archive_disturbance?-0.05:-0.04}},
         {"modeled_horizon_seconds",10},{"step_seconds",2},{"status","numerical_optimal"},
         {"plans_total",result.plans.size()},{"plans_feasible",feasible},

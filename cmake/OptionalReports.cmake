@@ -237,11 +237,22 @@ endif()
 
 if(CSL_BUILD_ISSUE6_B07_REPORT)
 include(cmake/JsonDependencies.cmake)
+file(SHA256 ${CMAKE_CURRENT_SOURCE_DIR}/benchmarks/reporting/issue6/b07_reconstruction.cpp ISSUE6_B07_DRIVER_SHA256)
+file(SHA256 ${CMAKE_CURRENT_SOURCE_DIR}/benchmarks/scenarios/b07-owner-approved-eight-case-v1.json ISSUE6_B07_SCENARIO_SHA256)
+execute_process(COMMAND git rev-parse HEAD WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+    OUTPUT_VARIABLE ISSUE6_B07_SOURCE_COMMIT OUTPUT_STRIP_TRAILING_WHITESPACE COMMAND_ERROR_IS_FATAL ANY)
 add_executable(csl_issue6_b07_report benchmarks/reporting/issue6/b07_reconstruction.cpp)
 target_link_libraries(csl_issue6_b07_report PRIVATE CSL::finite_action_minimax CSL::resolved_core)
 target_include_directories(csl_issue6_b07_report SYSTEM PRIVATE ${csl_json_SOURCE_DIR}/include)
 target_compile_features(csl_issue6_b07_report PRIVATE cxx_std_20)
-target_compile_definitions(csl_issue6_b07_report PRIVATE $<$<CONFIG:Release>:NDEBUG>)
+target_compile_definitions(csl_issue6_b07_report PRIVATE
+    $<$<CONFIG:Release>:NDEBUG>
+    CSL_ISSUE6_B07_SOURCE_COMMIT="${ISSUE6_B07_SOURCE_COMMIT}"
+    CSL_ISSUE6_B07_DRIVER_SHA256="${ISSUE6_B07_DRIVER_SHA256}"
+    CSL_ISSUE6_B07_SCENARIO_SHA256="${ISSUE6_B07_SCENARIO_SHA256}"
+    CSL_ISSUE6_B07_COMPILER_ID="${CMAKE_CXX_COMPILER_ID}"
+    CSL_ISSUE6_B07_COMPILER_VERSION="${CMAKE_CXX_COMPILER_VERSION}"
+    CSL_ISSUE6_B07_BUILD_TYPE="${CMAKE_BUILD_TYPE}")
 if(MSVC)
 target_compile_options(csl_issue6_b07_report PRIVATE /W4 /WX /permissive-)
 else()

@@ -9,12 +9,32 @@ args=parser.parse_args()
 root=args.results.parent
 output=root/'independent-oracle-verification.json'
 rows=[json.loads(line) for line in (root/'results.jsonl').read_text().splitlines()]
+expected={}
+for stocks in range(2):
+    for lam in range(2):
+        for disturbance in range(2):
+            case_id=f'B07-reconstruction-s{stocks}-l{lam}-d{disturbance}'
+            expected[case_id]=((305,205) if stocks==0 else (302,207),lam,
+                (0.05,-0.04) if disturbance==0 else (0.06,-0.05))
+assert len(rows)==8 and len({row['case_id'] for row in rows})==8
+assert {row['case_id'] for row in rows}==set(expected)
 actions=np.array([1.,.3,0.,-.3,-1.])
 corners=np.array([[-1.,-1.],[-1.,1.],[1.,-1.],[1.,1.]])
 hist=np.array(list(itertools.product(range(4),repeat=5)),dtype=int)
 w=corners[hist]
 checks=[]
 for row in rows:
+    stocks,lam,coefficients=expected[row['case_id']]
+    assert (row['initial_stock_oxidizer_kg'],row['initial_stock_fuel_kg'])==stocks
+    assert row['terminal_lambda']==lam and tuple(row['disturbance_coefficients'])==coefficients
+    assert row['initial_flow_oxidizer_kg_per_second']==29.375
+    assert row['initial_flow_fuel_kg_per_second']==20.4
+    assert row['modeled_horizon_seconds']==10 and row['step_seconds']==2
+    assert row['plans_total']==3125 and row['status']=='numerical_optimal'
+    assert len(row['source_commit'])==40 and len(row['driver_sha256'])==64 and len(row['scenario_sha256'])==64
+    assert row['build_type']=='Release' and row['compiler_id']=='GNU'
+    exe=row['executable_sha256']
+    assert exe=='not-supplied' or (len(exe)==64 and all(ch in '0123456789abcdef' for ch in exe))
     samples=row['measured_elapsed_ns']
     assert len(samples)==7 and row['warmup_calls']==1 and row['measured_calls']==7
     assert row['median_elapsed_ns']==sorted(samples)[3]
