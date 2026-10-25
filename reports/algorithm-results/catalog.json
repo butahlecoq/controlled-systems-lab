@@ -332,6 +332,18 @@
       "measured_scope": "One five-stage finite-action minimax case: 3,125 plans x 1,024 disturbance-corner histories; one excluded warmup and seven measured Release calls",
       "evidence_limits": "Owner-confirmed disturbance box is not printed in L09; this is a distinct reference, not a historical reproduction. Exact integer enumeration applies only to this declared rational finite-action case; solver assurance is binary64. Single-adapter timings only, without a limiter profile or speedup claim. The projected vertices are numerical.",
       "zip_sha256": "1fb673b081668644c9754c39d3840cadbf0597ee6e1f1a41e92f677be7936e73"
+    },
+    {
+      "report_id": "issue6-b07-reference-1f990278d6bda53b95e99ba5ea4126f6529db7cf953b581e3b4f60e3a8c5c86c",
+      "report_kind": "issue6-b07-reference",
+      "source_report_id": "b07-owner-approved-eight-case-v1",
+      "payload_schema": "csl.issue6-b07-evidence/1",
+      "payload_sha256": "71b3ec4fb0df867ea7c4ab9503b86f98fa767481dd0b12d074fe9b78b186f353",
+      "native_payload_sha256": "f2f81f70ab29d0c07624eee01cefb0a8d06f2062487dc5f337141b1d66636881",
+      "source_commit": "18fc55efa5f31e6cb7e348f602f9000896ee7cb9",
+      "measured_scope": "Eight five-stage finite-action minimax cases; 3,125 plans x up to 1,024 disturbance histories per case; one excluded warmup and seven measured Release calls per case",
+      "evidence_limits": "Eight owner-approved reconstructions, not historical reproductions; the modeled horizon is 10 seconds while the paper states 100 seconds. Single-adapter timings only, without a limiter profile or speedup claim. Plotted points are numerical projections of 4D terminal sets.",
+      "zip_sha256": "ba73b13f2a72fb6bacfa69948b22d80a07163b86a654cb4cd1bf56ff3ae987ae"
     }
   ]
 }

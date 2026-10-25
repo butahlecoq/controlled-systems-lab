@@ -283,10 +283,11 @@
         "FiniteActionMinimaxPort"
       ],
       "support": "supported-2d",
-      "limit": "B06 shows numerical projections of one computed 4D terminal set. Its disturbance box is owner-confirmed rather than printed in L09; exact integer enumeration and binary64 solver assurance apply only to this named reference case.",
+      "limit": "B06 shows numerical projections of one computed 4D terminal set. Its disturbance box is owner-confirmed rather than printed in L09; exact integer enumeration and binary64 solver assurance apply only to this named reference case. B07 adds 2D flow and stock projections across eight owner-approved 4D reconstruction cases.",
       "catalog_kinds": [
         "issue3-finite-catalogue",
-        "issue6-b06-reference"
+        "issue6-b06-reference",
+        "issue6-b07-reference"
       ],
       "report_routes": [],
       "examples": [
