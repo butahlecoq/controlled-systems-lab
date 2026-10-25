@@ -2,6 +2,7 @@
 import json
 import csv
 import hashlib
+import io
 import copy
 import importlib.util
 from pathlib import Path
@@ -44,6 +45,40 @@ class RegisteredKindTests(unittest.TestCase):
             'evidence_limits': 'Descriptive only'}]}
         html = site.catalogue_index(catalogue)
         self.assertIn('href="' + catalogue['reports'][0]['report_id'] + '/performance.svg"', html)
+
+    def test_b07_publication_links_real_data_and_checks_oracle_associations(self):
+        root=FIXTURES
+        catalogue=json.loads((root/'catalog.json').read_text(encoding='utf-8'))
+        row=next(report for report in catalogue['reports'] if report.get('report_kind')=='issue6-b07-reference')
+        bundle=root/row['source_report_id']
+        publication=site.issue6_b07.adapt(bundle)
+        html=site.catalogue_index(catalogue)
+        self.assertIn(publication.report_id+'/results.jsonl',html)
+        self.assertIn(publication.report_id+'/projections.svg',html)
+        self.assertNotIn(publication.report_id+'/records.json',html)
+        self.assertNotIn(publication.report_id+'/trials.csv',html)
+        artifacts=site.issue6_b07.publication_artifacts(bundle,publication)
+        self.assertIn('projections.png',artifacts)
+        self.assertIn('projections.svg',artifacts)
+        site.data.validate_svg(artifacts['projections.svg'])
+        with zipfile.ZipFile(io.BytesIO(site.issue6_b07.offline_zip(bundle,publication))) as archive:
+            self.assertIn(publication.report_id+'/projections.png',archive.namelist())
+            self.assertIn(publication.report_id+'/projections.svg',archive.namelist())
+            self.assertIn(publication.report_id+'/results.jsonl',archive.namelist())
+
+        with tempfile.TemporaryDirectory() as directory:
+            copied=Path(directory)/bundle.name
+            shutil.copytree(bundle,copied)
+            oracle_path=copied/'independent-oracle-verification.json'
+            oracle=json.loads(oracle_path.read_text(encoding='utf-8'))
+            oracle[0]['case_id']='misbound-case'
+            oracle_path.write_text(json.dumps(oracle,indent=2)+'\n',encoding='utf-8')
+            checksums=[]
+            for name in sorted(path.name for path in copied.iterdir() if path.is_file() and path.name!='SHA256SUMS'):
+                checksums.append(hashlib.sha256((copied/name).read_bytes()).hexdigest()+'  '+name+'\n')
+            (copied/'SHA256SUMS').write_text(''.join(checksums),encoding='utf-8')
+            with self.assertRaisesRegex(ValueError,'independent oracle evidence differs'):
+                site.issue6_b07.adapt(copied)
 
     def test_committed_opt04_bundle_is_registered_and_stages_typed_publication(self):
         catalog_path = FIXTURES / 'catalog.json'
@@ -472,7 +507,7 @@ class RegisteredKindTests(unittest.TestCase):
         root=repo/'reports'/'algorithm-results'
         catalogue=json.loads((root/'catalog.json').read_text(encoding='utf-8'))
         self.assertEqual(catalogue['schema'],'csl.algorithm-report-catalog/3')
-        self.assertEqual({item['report_kind'] for item in catalogue['reports']},{'lp','convex','opt04-phase-one','opt05-hull','opt06-basis-reuse','opt07-ordered-hull','opt11-recursive-hull','geo03-hv','geo04-intersection','geo02-affine-sum','geo05-projection-predecessor','geo06-quickhull','b08-displayed-exact','issue3-finite-catalogue','issue3-validated-minimax','issue6-b06-reference','syn01-nominal-forward','syn02-terminal-minimizers','syn07-ts01-analytic','syn04-strategy-b-ts01','syn04-strategy-b-ts02','syn04-strategy-b-ts03','syn03-strategy-a-ts01','syn03-strategy-a-ts02','syn-ts01-paired-comparison','opt12-warm-start','ext03-temporal-transform'})
+        self.assertEqual({item['report_kind'] for item in catalogue['reports']},{'lp','convex','opt04-phase-one','opt05-hull','opt06-basis-reuse','opt07-ordered-hull','opt11-recursive-hull','geo03-hv','geo04-intersection','geo02-affine-sum','geo05-projection-predecessor','geo06-quickhull','b08-displayed-exact','issue3-finite-catalogue','issue3-validated-minimax','issue6-b06-reference','issue6-b07-reference','syn01-nominal-forward','syn02-terminal-minimizers','syn07-ts01-analytic','syn04-strategy-b-ts01','syn04-strategy-b-ts02','syn04-strategy-b-ts03','syn03-strategy-a-ts01','syn03-strategy-a-ts02','syn-ts01-paired-comparison','opt12-warm-start','ext03-temporal-transform'})
         shared={'report_id','report_kind','payload_sha256','source_commit','zip_sha256'}
         for report in catalogue['reports']:
             self.assertTrue(shared <= set(report))
@@ -539,7 +574,11 @@ class RegisteredKindTests(unittest.TestCase):
             for report in catalogue['reports']:
                 rid=report['report_id']
                 self.assertIn(rid+'/index.html',index)
-                self.assertIn(rid+'/records.json',index)
+                raw_name='results.jsonl' if report['report_kind']=='issue6-b07-reference' else 'records.json'
+                self.assertIn(rid+'/'+raw_name,index)
+                if report['report_kind']=='issue6-b07-reference':
+                    self.assertNotIn(rid+'/records.json',index)
+                    self.assertNotIn(rid+'/trials.csv',index)
                 self.assertIn(rid+'.zip',index)
                 archive_bytes=(first/(rid+'.zip')).read_bytes()
                 self.assertEqual(archive_bytes,(second/(rid+'.zip')).read_bytes())
