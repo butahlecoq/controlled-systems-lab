@@ -5,8 +5,12 @@
 #include <csl/synthesis/strategy_ts01/analytic_profile.hpp>
 #include <nlohmann/json.hpp>
 
+#include <atomic>
+#include <barrier>
+#include <condition_variable>
 #include <fstream>
 #include <iterator>
+#include <mutex>
 
 using namespace csl;
 namespace {
@@ -154,8 +158,74 @@ public:
     }
 };
 
+struct BarrierSelectorState {
+    std::barrier<> rendezvous{2};
+    std::mutex mutex;
+    std::condition_variable changed;
+    bool second_finished{};
+    std::vector<std::size_t> completion_order;
+    std::stop_source cancellation;
+    bool fail_second{};
+    bool cancel_after_second{};
+    std::atomic<std::size_t> created{};
+    std::atomic<std::size_t> active{};
+    std::atomic<std::size_t> peak_active{};
+    std::atomic<bool> shared_workspace{};
+};
+
+class BarrierSelector final : public WitnessSelectorWorkspace {
+    std::shared_ptr<BarrierSelectorState> state_;
+    std::atomic<bool> active_{};
+public:
+    explicit BarrierSelector(std::shared_ptr<BarrierSelectorState> state)
+        : state_(std::move(state)) { ++state_->created; }
+
+    std::variant<WitnessSelection, Unsupported> select(const OptimalFamily& family,
+        const WitnessRequest& request, const ExecutionContext& context) override {
+        if(active_.exchange(true))state_->shared_workspace=true;
+        const auto active=++state_->active;
+        auto peak=state_->peak_active.load();
+        while(peak<active&&!state_->peak_active.compare_exchange_weak(peak,active)){}
+        state_->rendezvous.arrive_and_wait();
+        if(request.seed==20) {
+            {
+                std::scoped_lock lock(state_->mutex);
+                state_->completion_order.push_back(20);
+                state_->second_finished=true;
+            }
+            if(state_->cancel_after_second)state_->cancellation.request_stop();
+            state_->changed.notify_all();
+            if(state_->fail_second) {
+                --state_->active;
+                active_=false;
+                throw std::runtime_error("controlled selector failure after both workspaces entered");
+            }
+        } else {
+            std::unique_lock lock(state_->mutex);
+            state_->changed.wait(lock,[&]{return state_->second_finished;});
+            state_->completion_order.push_back(19);
+        }
+        WitnessBatch batch;
+        batch.requested=request.count;
+        batch.selector={"test.barrier-selector"};
+        batch.source_family=family.identity();
+        batch.seed=request.seed;
+        batch.directions=request.directions;
+        batch.distinctness_tolerance=request.distinctness_tolerance;
+        if(state_->cancel_after_second&&context.cancellation.stop_requested()) {
+            if(request.seed==20)
+                batch.witnesses.push_back({family.identity().problem,{{0},{0},{1}},{{0},{1}},0.0});
+            --state_->active;
+            active_=false;
+            return WitnessSelection{std::move(batch),Termination::cancelled,
+                request.seed==20?"cancelled after retaining one feasible witness":"cancelled before producing a witness"};
+        }
+        return WitnessSelection{std::move(batch),Termination::completed,{}};
+    }
+};
+
 registry::PreparedProvider<registry::SelectorPort> prepare_selector_provider(bool reject_seed_twenty=false,
-    bool recorded_fixture=false) {
+    bool recorded_fixture=false,std::shared_ptr<BarrierSelectorState> barrier_state={}) {
     registry::Registry<registry::SelectorPort> selectors;
     registry::Registration<registry::SelectorPort> registration{
         {{recorded_fixture ? "first" : "test.selector"},"1"},
@@ -165,7 +235,10 @@ registry::PreparedProvider<registry::SelectorPort> prepare_selector_provider(boo
                 return Diagnostics{{DiagnosticCode::unsupported,"test.selector.seed","seed 20 rejected by fixture"}};
             return registry::Offer{requirements.output};
         },
-        [recorded_fixture](const registry::SelectorRequest&) { return std::make_unique<EchoSelector>(recorded_fixture); }};
+        [recorded_fixture,barrier_state](const registry::SelectorRequest&) -> std::unique_ptr<WitnessSelectorWorkspace> {
+            if(barrier_state)return std::make_unique<BarrierSelector>(barrier_state);
+            return std::make_unique<EchoSelector>(recorded_fixture);
+        }};
     REQUIRE_FALSE(selectors.add(std::move(registration)));
     registry::Requirements requirements;
     requirements.output.representation={"csl.witness-batch.v1"};
@@ -193,6 +266,7 @@ TEST_CASE("a bounded sweep keeps whole scenario identities and deterministic sel
     context.resources=std::make_shared<const ResourcePolicy>(resources);
     context.run_id="sweep-run";
 
+    const auto expected_strategy=prepared.expected_synthesis_identity();
     std::optional<double> reference_optimum;
     for(const auto mode:{execution::Mode::sequential,execution::Mode::bounded_parallel}) {
         auto outcome=experiments::run_sweep(cases,resources,context,mode);
@@ -207,9 +281,13 @@ TEST_CASE("a bounded sweep keeps whole scenario identities and deterministic sel
         CHECK(result.cases[0].identity==experiments::ScenarioConfigurationId{{"scenario-a"},{"config-a"}});
         CHECK(result.cases[1].identity==experiments::ScenarioConfigurationId{{"scenario-b"},{"config-b"}});
         REQUIRE(result.cases[0].selection);
+        REQUIRE(result.cases[1].selection);
         CHECK(result.cases[0].selection->count==2);
         CHECK(result.cases[0].selection->seed==19);
         CHECK(result.cases[0].selection->directions==std::vector<Vector>{{1,-1},{-1,1}});
+        CHECK(result.cases[1].selection->count==2);
+        CHECK(result.cases[1].selection->seed==19);
+        CHECK(result.cases[1].selection->directions==std::vector<Vector>{{1,-1},{-1,1}});
         CHECK(result.batch.enforcement.outer_admission==execution::OuterAdmissionEnforcement::enforced);
         CHECK(result.batch.enforcement.native_threads==execution::NativeThreadEnforcement::declared_only);
         CHECK(result.batch.enforcement.memory==execution::MemoryEnforcement::unlimited_accounting);
@@ -222,6 +300,10 @@ TEST_CASE("a bounded sweep keeps whole scenario identities and deterministic sel
             const auto& value=std::get<SynthesisResult>(std::get<execution::Returned<registry::StrategyPort>>(task.outcome).value);
             CHECK(value.termination==Termination::completed);
             CHECK(value.family.has_value());
+            if(value.family) {
+                CHECK(value.family->identity().strategy==expected_strategy.strategy);
+                CHECK(value.family->identity().strategy_version==expected_strategy.strategy_version);
+            }
             REQUIRE(value.objective.lower);
             REQUIRE(value.objective.upper);
             CHECK(value.objective.lower->value==doctest::Approx(0.0).epsilon(1e-12));
@@ -324,6 +406,159 @@ TEST_CASE("family queries preserve coarse results and map deterministic requests
         CHECK(result.query_batch.run_id==result.sweep.batch.run_id);
         CHECK(result.query_batch.timing.started_at>=result.sweep.batch.timing.completed_at);
     }
+}
+
+TEST_CASE("bounded family queries isolate mutable workspaces and retain input order after reverse completion") {
+    const auto prepared=prepare_strategy();
+    constexpr std::string_view configuration_a{"csl.config.v1.sha256:e27f771c2d04bb72827ad27eeaa4123a4df58eaea22aaac4b789ee36033e5abf"};
+    constexpr std::string_view configuration_b{"csl.config.v1.sha256:be6229a59f2b2f14b2660dd3437bbbd225f73c808c51c2a93eef795fe62ab49a"};
+    std::vector<experiments::ScenarioSweepCase> cases{
+        sweep_case("scenario-a",std::string(configuration_a),prepared),
+        sweep_case("scenario-b",std::string(configuration_b),prepared)};
+    cases[1].selection.seed=20;
+    const ResourcePolicy resources{2,2,1,std::nullopt};
+    ExecutionContext context;
+    context.resources=std::make_shared<const ResourcePolicy>(resources);
+    context.run_id="barrier-query-isolation";
+
+    auto coarse=experiments::run_sweep(cases,resources,context,execution::Mode::bounded_parallel);
+    REQUIRE(std::holds_alternative<experiments::SweepResult>(coarse));
+    auto state=std::make_shared<BarrierSelectorState>();
+    const auto selector=prepare_selector_provider(false,false,state);
+    const execution::ResourceUse query_resources{1,"one selector workspace per case",std::nullopt,
+        execution::CallStopSupport::cooperative_boundaries};
+    auto queried=experiments::run_family_queries(std::get<experiments::SweepResult>(std::move(coarse)),
+        selector,resources,context,execution::Mode::bounded_parallel,query_resources);
+    REQUIRE(std::holds_alternative<experiments::FamilyQueryResult>(queried));
+    const auto& result=std::get<experiments::FamilyQueryResult>(queried);
+    REQUIRE(result.query_batch.tasks.size()==2);
+    REQUIRE(result.queries.size()==2);
+    CHECK(state->created==2);
+    CHECK_FALSE(state->shared_workspace.load());
+    CHECK(state->peak_active==2);
+    CHECK(state->completion_order==std::vector<std::size_t>{20,19});
+    CHECK(result.query_batch.enforcement.outer_admission==execution::OuterAdmissionEnforcement::enforced);
+    CHECK(result.query_batch.enforcement.native_threads==execution::NativeThreadEnforcement::declared_only);
+    CHECK(result.query_batch.enforcement.peak_active_tasks==2);
+    CHECK(result.query_batch.enforcement.outer_worker_threads_started==2);
+    REQUIRE(result.sweep.cases.size()==2);
+    CHECK(result.sweep.cases[0].identity==experiments::ScenarioConfigurationId{{"scenario-a"},{std::string(configuration_a)}});
+    CHECK(result.sweep.cases[1].identity==experiments::ScenarioConfigurationId{{"scenario-b"},{std::string(configuration_b)}});
+    REQUIRE(result.sweep.cases[0].selection);
+    REQUIRE(result.sweep.cases[1].selection);
+    CHECK(result.sweep.cases[0].selection->count==2);
+    CHECK(result.sweep.cases[0].selection->distinctness_tolerance==0.0);
+    CHECK(result.sweep.cases[0].selection->directions==std::vector<Vector>{{1,-1},{-1,1}});
+    CHECK(result.sweep.cases[0].selection->seed==19);
+    CHECK(result.sweep.cases[1].selection->count==2);
+    CHECK(result.sweep.cases[1].selection->distinctness_tolerance==0.0);
+    CHECK(result.sweep.cases[1].selection->directions==std::vector<Vector>{{1,-1},{-1,1}});
+    CHECK(result.sweep.cases[1].selection->seed==20);
+    CHECK(result.queries[0].identity==experiments::ScenarioConfigurationId{{"scenario-a"},{std::string(configuration_a)}});
+    CHECK(result.queries[1].identity==experiments::ScenarioConfigurationId{{"scenario-b"},{std::string(configuration_b)}});
+    for(std::size_t index=0;index<result.queries.size();++index) {
+        const auto* scheduled=std::get_if<experiments::FamilyQueryScheduled>(&result.queries[index].status);
+        REQUIRE(scheduled);
+        REQUIRE(scheduled->task_index<result.query_batch.tasks.size());
+        const auto& task=result.query_batch.tasks[scheduled->task_index];
+        CHECK(task.id.value=="family-query-"+std::to_string(index));
+        REQUIRE(std::holds_alternative<execution::Returned<registry::SelectorPort>>(task.outcome));
+        const auto& returned=std::get<execution::Returned<registry::SelectorPort>>(task.outcome).value;
+        REQUIRE(std::holds_alternative<WitnessSelection>(returned));
+        CHECK(std::get<WitnessSelection>(returned).batch.seed==cases[index].selection.seed);
+    }
+}
+
+TEST_CASE("a failed selector task retains the completed sibling outcome in input order") {
+    const auto prepared=prepare_strategy();
+    std::vector<experiments::ScenarioSweepCase> cases{
+        sweep_case("scenario-a","config-a",prepared),
+        sweep_case("scenario-b","config-b",prepared)};
+    cases[1].selection.seed=20;
+    const ResourcePolicy resources{2,2,1,std::nullopt};
+    ExecutionContext context;
+    context.resources=std::make_shared<const ResourcePolicy>(resources);
+    context.run_id="barrier-query-failure";
+    auto coarse=experiments::run_sweep(cases,resources,context,execution::Mode::bounded_parallel);
+    REQUIRE(std::holds_alternative<experiments::SweepResult>(coarse));
+    auto state=std::make_shared<BarrierSelectorState>();
+    state->fail_second=true;
+    const auto selector=prepare_selector_provider(false,false,state);
+    auto queried=experiments::run_family_queries(std::get<experiments::SweepResult>(std::move(coarse)),
+        selector,resources,context,execution::Mode::bounded_parallel,
+        {1,"one selector workspace per case",std::nullopt,execution::CallStopSupport::cooperative_boundaries});
+    REQUIRE(std::holds_alternative<experiments::FamilyQueryResult>(queried));
+    const auto& result=std::get<experiments::FamilyQueryResult>(queried);
+    REQUIRE(result.query_batch.tasks.size()==2);
+    CHECK_FALSE(state->shared_workspace.load());
+    CHECK(state->peak_active==2);
+    REQUIRE(std::holds_alternative<execution::Returned<registry::SelectorPort>>(
+        result.query_batch.tasks[0].outcome));
+    const auto& sibling=std::get<execution::Returned<registry::SelectorPort>>(
+        result.query_batch.tasks[0].outcome).value;
+    REQUIRE(std::holds_alternative<WitnessSelection>(sibling));
+    const auto& selected=std::get<WitnessSelection>(sibling);
+    CHECK(selected.termination==Termination::completed);
+    CHECK(selected.batch.seed==19);
+    CHECK(selected.batch.requested==cases[0].selection.count);
+    CHECK(selected.batch.directions==cases[0].selection.directions);
+    CHECK(selected.batch.distinctness_tolerance==cases[0].selection.distinctness_tolerance);
+    const auto& sibling_run=std::get<SynthesisResult>(std::get<execution::Returned<registry::StrategyPort>>(
+        result.sweep.batch.tasks[0].outcome).value);
+    REQUIRE(sibling_run.family);
+    CHECK(selected.batch.source_family==sibling_run.family->identity());
+    const auto* failed=std::get_if<execution::TaskFailure>(&result.query_batch.tasks[1].outcome);
+    REQUIRE(failed);
+    CHECK(failed->kind==execution::FailureKind::adapter_exception);
+}
+
+TEST_CASE("whole-batch cancellation retains each selector outcome and a genuine partial witness") {
+    const auto prepared=prepare_strategy();
+    std::vector<experiments::ScenarioSweepCase> cases{
+        sweep_case("scenario-a","config-a",prepared),
+        sweep_case("scenario-b","config-b",prepared)};
+    cases[1].selection.seed=20;
+    const ResourcePolicy resources{2,2,1,std::nullopt};
+    auto state=std::make_shared<BarrierSelectorState>();
+    state->cancel_after_second=true;
+    ExecutionContext context;
+    context.resources=std::make_shared<const ResourcePolicy>(resources);
+    context.cancellation=state->cancellation.get_token();
+    context.run_id="barrier-query-cancellation";
+    auto coarse=experiments::run_sweep(cases,resources,context,execution::Mode::bounded_parallel);
+    REQUIRE(std::holds_alternative<experiments::SweepResult>(coarse));
+    const auto selector=prepare_selector_provider(false,false,state);
+    auto queried=experiments::run_family_queries(std::get<experiments::SweepResult>(std::move(coarse)),
+        selector,resources,context,execution::Mode::bounded_parallel,
+        {1,"one selector workspace per case",std::nullopt,execution::CallStopSupport::cooperative_boundaries});
+    REQUIRE(std::holds_alternative<experiments::FamilyQueryResult>(queried));
+    const auto& result=std::get<experiments::FamilyQueryResult>(queried);
+    REQUIRE(result.query_batch.tasks.size()==2);
+    CHECK(context.cancellation.stop_requested());
+    CHECK_FALSE(state->shared_workspace.load());
+    for(const auto& task:result.query_batch.tasks) {
+        REQUIRE(std::holds_alternative<execution::Returned<registry::SelectorPort>>(task.outcome));
+        const auto& returned=std::get<execution::Returned<registry::SelectorPort>>(task.outcome).value;
+        REQUIRE(std::holds_alternative<WitnessSelection>(returned));
+        CHECK(std::get<WitnessSelection>(returned).termination==Termination::cancelled);
+    }
+    const auto& first=std::get<WitnessSelection>(
+        std::get<execution::Returned<registry::SelectorPort>>(result.query_batch.tasks[0].outcome).value);
+    CHECK(first.batch.seed==19);
+    CHECK(first.batch.witnesses.empty());
+    CHECK(first.diagnostics=="cancelled before producing a witness");
+    const auto& second=std::get<WitnessSelection>(
+        std::get<execution::Returned<registry::SelectorPort>>(result.query_batch.tasks[1].outcome).value);
+    REQUIRE(second.batch.witnesses.size()==1);
+    CHECK(second.batch.seed==20);
+    const auto& sibling_run=std::get<SynthesisResult>(std::get<execution::Returned<registry::StrategyPort>>(
+        result.sweep.batch.tasks[1].outcome).value);
+    REQUIRE(sibling_run.family);
+    CHECK(second.batch.witnesses[0].problem==sibling_run.family->identity().problem);
+    CHECK(second.batch.witnesses[0].states==std::vector<Vector>{{0},{0},{1}});
+    CHECK(second.batch.witnesses[0].controls==std::vector<Vector>{{0},{1}});
+    CHECK(second.batch.witnesses[0].original_objective==doctest::Approx(0.0));
+    CHECK(second.diagnostics=="cancelled after retaining one feasible witness");
 }
 
 TEST_CASE("family query dispositions retain cases whose coarse strategy was skipped") {
