@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import argparse
+import copy
 import hashlib
 import html
 import json
@@ -117,14 +118,38 @@ def load_record(path: Path) -> dict[str, Any]:
             "cancelled": "cancelled", "resource_limited": "resource_limited", "incomplete": "incomplete",
         }
         event_schema = measurement.get("schema")
-        if event_schema == "csl.obs04-instrumentation-comparison-event/6" and measurement.get("phase_status") not in {"passed", "failed"}:
-            raise ValueError(f"attempts[{index}] phase status is invalid")
+        if event_schema == "csl.obs04-instrumentation-comparison-event/6":
+            phase_status = measurement.get("phase_status")
+            if phase_status not in {"passed", "failed"}:
+                raise ValueError(f"attempts[{index}] phase status is invalid")
+            if measurement.get("analytic_family_checked") is not (phase_status == "passed"):
+                raise ValueError(f"attempts[{index}] analytic-check flag disagrees with phase status")
         expected_strategy = arm.get("strategy") if isinstance(arm, dict) else None
         expected_instrumentation = arm.get("instrumentation") if isinstance(arm, dict) else None
+        if not isinstance(config_value, dict):
+            raise ValueError(f"attempts[{index}] configuration value is invalid")
+        semantic_config = copy.deepcopy(config_value)
+        for module in semantic_config.get("modules", []):
+            pin = module.get("pin", {})
+            if pin.get("state") == "unavailable":
+                pin["detail"] = ""
+        config_material = b"CSL.RESOLVED.CONFIG\0v1\0" + _canonical_json(semantic_config).encode("utf-8")
+        expected_config_id = "csl.config.v1.sha256:" + hashlib.sha256(config_material).hexdigest()
+        common_request = copy.deepcopy(config_value)
+        common_request.pop("modules", None)
+        common_request.get("collection", {}).pop("enabled", None)
+        if isinstance(common_request.get("strategy"), dict):
+            strategy = common_request["strategy"]
+            common_request["strategy"] = {
+                "selector": strategy.get("selector"),
+                "representation": strategy.get("representation"),
+            }
+        request_digest = hashlib.sha256(_canonical_json(common_request).encode("utf-8")).hexdigest()
         if (run.get("schema") not in {"csl.run-statistics/5", "csl.run-statistics/6"} or
                 run.get("recorded_state") != "unverified_recorded_data" or
                 run.get("run") != attempt.get("run_id") or run.get("problem") != spec.get("problem_id") or
                 not isinstance(config, dict) or config.get("id") != arm.get("configuration_id") or
+                config.get("id") != expected_config_id or request_digest != spec.get("request_digest") or
                 not isinstance(strategy_config, dict) or strategy_config.get("strategy") != expected_strategy or
                 not isinstance(collection_config, dict) or collection_config.get("enabled") != (expected_instrumentation == "enabled") or
                 _run_status(run) != expected_status or
@@ -249,19 +274,26 @@ td{{overflow-wrap:anywhere}} .note{{border-left:4px solid #5478a4;padding:.5rem 
 </body></html>"""
 
 
+def write_report(record_path: Path, output_path: Path) -> None:
+    source = record_path.resolve(strict=True)
+    target = output_path.resolve()
+    if source == target or (target.exists() and source.samefile(target)):
+        raise ValueError("HTML output must not replace the saved comparison record")
+    record = load_record(source)
+    target.parent.mkdir(parents=True, exist_ok=True)
+    target.write_text(render_html(record), encoding="utf-8")
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--record", type=Path, required=True, help="saved csl.comparison-record/1 JSON file")
     parser.add_argument("--out", type=Path, required=True, help="HTML output path")
     args = parser.parse_args()
     try:
-        record = load_record(args.record)
-        document = render_html(record)
+        write_report(args.record, args.out)
     except (OSError, json.JSONDecodeError, ValueError) as error:
         parser.error(str(error))
-    args.out.parent.mkdir(parents=True, exist_ok=True)
-    args.out.write_text(document, encoding="utf-8")
-    print(f"Rendered {len(record['_parsed_attempts'])} saved attempts to {args.out}")
+    print(f"Rendered saved comparison record to {args.out}")
     return 0
 
 

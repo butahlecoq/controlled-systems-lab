@@ -12,12 +12,33 @@ import render_saved
 
 
 def fixture_record():
+    strategy_id = "<script>reach-back</script>"
+    config_value = {
+        "collection": {"enabled": False, "mode": "summary"},
+        "modules": [],
+        "numerical": {"absolute_bits": "0", "relative_bits": "0"},
+        "output": {"kind": "synthesis", "witness_count": "2"},
+        "resources": {"total_threads": "1"},
+        "selector": {"id": "selector", "version": "1", "options": []},
+        "stop": {"deadline_budget_ticks": None},
+        "strategy": {"strategy": strategy_id, "selector": "selector", "representation": "representation"},
+        "workspace_policy": "fresh",
+    }
+    canonical = lambda value: json.dumps(value, sort_keys=True, separators=(",", ":"), ensure_ascii=False)
+    config_id = "csl.config.v1.sha256:" + hashlib.sha256(
+        b"CSL.RESOLVED.CONFIG\0v1\0" + canonical(config_value).encode()
+    ).hexdigest()
+    common_request = json.loads(json.dumps(config_value))
+    common_request.pop("modules")
+    common_request["collection"].pop("enabled")
+    common_request["strategy"] = {"selector": "selector", "representation": "representation"}
     spec = {
         "schema": "csl.comparison-spec/3",
-        "arms": [{"configuration_id": "config-1", "strategy": "<script>reach-back</script>",
+        "arms": [{"configuration_id": config_id, "strategy": strategy_id,
                   "instrumentation": "disabled"}],
         "repetitions": 4,
         "problem_id": "problem-1",
+        "request_digest": hashlib.sha256(canonical(common_request).encode()).hexdigest(),
         "input_manifest_hash": "input-hash",
         "environment": {
             "build": {"source_revision": "commit-1", "source_tree_sha256": "tree-hash",
@@ -36,12 +57,14 @@ def fixture_record():
     ]):
         measurement = {
             "schema": "csl.obs04-instrumentation-comparison-event/6",
-            "strategy": "<script>reach-back</script>",
+            "strategy": strategy_id,
             "instrumentation": "disabled",
             "repetition": index,
             "warmup": warmup,
             "status": "passed" if status == "passed" else "failed",
             "phase_status": phase,
+            "analytic_family_checked": status == "passed",
+            "complete_family_verified": status == "passed",
             "outcome": "optimal" if status == "passed" else "unknown",
             "strategy_run_ns": duration,
             "end_to_end_ns": duration,
@@ -50,14 +73,11 @@ def fixture_record():
         run = {
             "schema": "csl.run-statistics/6", "recorded_state": "unverified_recorded_data",
             "run": run_id, "problem": "problem-1",
-            "configuration": {"id": "config-1", "value": {
-                "strategy": {"strategy": "<script>reach-back</script>"},
-                "collection": {"enabled": False},
-            }},
+            "configuration": {"id": config_id, "value": config_value},
             "final": {"kind": "synthesis", "value": {"termination": "completed"}}
             if status == "passed" else {"kind": "failed", "value": {}},
         }
-        run_text = json.dumps(run, sort_keys=True, separators=(",", ":"), ensure_ascii=False)
+        run_text = canonical(run)
         attempts.append({
             "arm_index": 0, "run_id": run_id,
             "run_digest": hashlib.sha256(run_text.encode()).hexdigest(),
@@ -65,7 +85,7 @@ def fixture_record():
             "reported_status": "completed" if status == "passed" else "failed",
             "measurement_payload": json.dumps(measurement), "run": run_text,
         })
-    spec_text = json.dumps(spec, sort_keys=True, separators=(",", ":"), ensure_ascii=False)
+    spec_text = canonical(spec)
     spec_id = hashlib.sha256(spec_text.encode()).hexdigest()
     record = {"schema": "csl.comparison-record/1", "comparison_run_id": "",
               "comparison_spec_id": spec_id, "track": "new-comparison",
@@ -73,7 +93,7 @@ def fixture_record():
     identity_material = {"attempts": attempts, "comparison_spec_id": spec_id,
                          "schema": "csl.comparison-record/1"}
     record["comparison_run_id"] = hashlib.sha256(
-        json.dumps(identity_material, sort_keys=True, separators=(",", ":"), ensure_ascii=False).encode()
+        canonical(identity_material).encode()
     ).hexdigest()
     return record
 
@@ -135,6 +155,26 @@ class SavedRendererTests(unittest.TestCase):
             path.write_text(json.dumps(record), encoding="utf-8")
             with self.assertRaisesRegex(ValueError, "identity or status"):
                 render_saved.load_record(path)
+
+    def test_rejects_passed_phase_without_analytic_check(self):
+        record = fixture_record()
+        measurement = json.loads(record["attempts"][1]["measurement_payload"])
+        measurement["analytic_family_checked"] = False
+        record["attempts"][1]["measurement_payload"] = json.dumps(measurement)
+        with tempfile.TemporaryDirectory() as temp:
+            path = Path(temp) / "record.json"
+            path.write_text(json.dumps(record), encoding="utf-8")
+            with self.assertRaisesRegex(ValueError, "analytic-check flag"):
+                render_saved.load_record(path)
+
+    def test_output_cannot_replace_record(self):
+        with tempfile.TemporaryDirectory() as temp:
+            path = Path(temp) / "record.json"
+            original = json.dumps(fixture_record()).encode()
+            path.write_bytes(original)
+            with self.assertRaisesRegex(ValueError, "must not replace"):
+                render_saved.write_report(path, path)
+            self.assertEqual(path.read_bytes(), original)
 
 
 if __name__ == "__main__":
