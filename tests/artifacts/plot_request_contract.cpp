@@ -4,7 +4,9 @@
 #include <csl/artifacts/plot_request.hpp>
 #include <csl/geometry/polyhedral_projection.hpp>
 #include <csl/numeric/data.hpp>
+#include <csl/problem/validator.hpp>
 #include <csl/sets/data.hpp>
+#include <csl/synthesis/strategy_ts01/analytic_profile.hpp>
 
 #include <memory>
 #include <stop_token>
@@ -72,6 +74,43 @@ ar::PlotData plot_data() {
         {{1.0, 2.0, 3.0, -0.5}, {1.5, 1.0, 2.5, -1.5}},
         {{0.0}}, 5.0, std::move(evidence)});
     return data;
+}
+
+std::shared_ptr<const OptimalFamily> verified_one_state_family() {
+    auto control_set = h_set("fuel-family-control", 1,
+        {2, 1, {1, -1}}, {1, 0}, {0, 1, {}}, {}, {"u"}).as_handle();
+    Dynamics dynamics{{1,1,0}, TimeDomain::discrete,
+        LinearStage{{1,1,{1}}, {1,1,{1}}, {1,0,{}}, {0}}};
+    Problem input{{"fuel-family-fixture"},
+        std::make_shared<const SystemModel>(SystemModel{std::move(dynamics), {}}),
+        {0,1,2}, KnownInitial{{0}}, ContinuousDomain{{control_set, control_set}},
+        {UniversalSet{1}, UniversalSet{1}, UniversalSet{1}}, {}, {},
+        InformationPattern::nominal_open_loop, QuadraticTerminal{{1,1,{2}}, {-2}, 1}};
+    auto problem = take(problem::resolve(input,
+        {problem::UncertaintyStructure::stage_product_uncoupled, {}, {}}));
+
+    FamilyRequest family;
+    family.profile = synthesis::strategy_ts01::profile_id;
+    family.objective = problem.identity();
+    family.target = FamilyTarget::exact_optimal_relation;
+    family.representation = {"csl.polyhedron.h"};
+    StrategyConfiguration configuration;
+    configuration.strategy = {synthesis::strategy_ts01::strategy_id};
+    configuration.representation = family.representation;
+    registry::StrategyRequest request{std::move(problem), std::move(configuration), std::move(family), {}, {}};
+    registry::StrategyRegistry strategies;
+    REQUIRE_FALSE(strategies.add(synthesis::strategy_ts01::make_registration()).has_value());
+    registry::Requirements requirements;
+    requirements.output.representation = request.family.representation;
+    requirements.output.family = request.family.target;
+    requirements.output.completeness = registry::Completeness::established;
+    auto prepared = take(strategies.prepare(request, requirements));
+    auto workspace = prepared.create();
+    ExecutionContext context;
+    context.resources = std::make_shared<const ResourcePolicy>(ResourcePolicy{1, 1, 1, {}});
+    auto result = take(workspace->run(context));
+    REQUIRE(result.family.has_value());
+    return std::make_shared<const OptimalFamily>(std::move(*result.family));
 }
 
 ar::PlotProjectionSource const* source_ptr(const std::shared_ptr<const ar::PlotProjectionSource>& source) {
@@ -184,6 +223,8 @@ TEST_CASE("every ordered pair of distinct 4D fuel coordinates projects to its an
             CHECK(std::holds_alternative<Unestablished>(projection.support));
             CHECK(projection.coordinates[0].label == data.states.coordinates[first].label);
             CHECK(projection.coordinates[1].label == data.states.coordinates[second].label);
+            CHECK(projection.coordinates[0].unit == data.states.coordinates[first].unit);
+            CHECK(projection.coordinates[1].unit == data.states.coordinates[second].unit);
             CHECK(projection.cost.geometry_operation_elapsed.count() >= 0);
             const auto lower = [](std::size_t coordinate) { return coordinate % 2 == 0 ? 0.0 : -1.0; };
             const auto upper = [](std::size_t coordinate) { return coordinate % 2 == 0 ? 2.0 : 1.0; };
@@ -213,6 +254,38 @@ TEST_CASE("a lower-dimensional 4D relation projects to the hand-derived line") {
     CHECK(contains_h2(projection.projected_relation, {2.0,4.0}));
     CHECK_FALSE(contains_h2(projection.projected_relation, {0.0,1.0}));
     CHECK_FALSE(contains_h2(projection.projected_relation, {3.0,6.0}));
+}
+
+TEST_CASE("a registry-verified complete optimal family binds its native relation") {
+    const auto family = verified_one_state_family();
+    REQUIRE(family->registry_verified());
+    ar::StateRelationCoordinates map{{{0}, {1}, {2}}};
+    auto source = ar::make_optimal_family_source(*family, std::move(map));
+    REQUIRE(std::holds_alternative<std::shared_ptr<const ar::PlotProjectionSource>>(source));
+    const auto& projected_source = *std::get<std::shared_ptr<const ar::PlotProjectionSource>>(source);
+    CHECK(std::get<FamilyIdentity>(projected_source.owner().identity) == family->identity());
+    REQUIRE(projected_source.family_evidence().has_value());
+    CHECK(projected_source.family_evidence()->family == family->identity());
+    CHECK(projected_source.family_evidence()->registry_verified);
+    CHECK(projected_source.relation().id == std::get<CompleteOptimalFamily>(family->outcome()).relation.payload
+        ->h_relation_for_recording()->metadata()->id);
+}
+
+TEST_CASE("an unverified family is rejected as a projection source") {
+    const auto id = ProblemId{"unverified-projection-family"};
+    FamilyRequest request;
+    request.profile = "unsupported-fixture";
+    request.objective = id;
+    request.target = FamilyTarget::candidate_relaxation;
+    request.representation = {"csl.polyhedron.h"};
+    FamilyIdentity identity{id, request, {{1,0,0}, 1}, {"fixture.strategy"}, "1", {}};
+    CandidateFamily candidate{{identity.coordinates, request.representation,
+        std::make_shared<const JointRelationPayload>()}, HeuristicRelationEvidence{"fixture"}, Unestablished{}};
+    auto published = FamilyPublisher::publish(identity, OptimalFamilyOutcome{std::move(candidate)});
+    REQUIRE(std::holds_alternative<OptimalFamily>(published));
+    auto source = ar::make_optimal_family_source(std::get<OptimalFamily>(published), {{{0},{0}}});
+    REQUIRE(std::holds_alternative<Diagnostics>(source));
+    CHECK(std::get<Diagnostics>(source).front().code == DiagnosticCode::unsupported);
 }
 
 TEST_CASE("empty and unbounded 4D sets retain their projected set semantics") {
