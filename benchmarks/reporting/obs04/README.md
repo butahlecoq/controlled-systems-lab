@@ -331,3 +331,25 @@ Run the renderer contract tests with:
 ```sh
 python3 -m unittest tests/reporting/test_obs04_saved_renderer.py
 ```
+
+## One-process resource observation (2026-10-25)
+
+`results/linux-omarchy-gcc16-20261025-resource-observation-v1/` retains one
+fresh Release driver invocation wrapped by the standard-library
+`resource.getrusage(RUSAGE_CHILDREN)` observer. The observed child-process peak
+RSS was 46,344 KiB; wrapper-to-child wall time was 743,850,874 ns, with
+0.692361 s user CPU and 0.065067 s system CPU. This is a single whole-process
+observation on the recorded Linux host, not a per-attempt memory value or a
+limit-enforcement claim. The binary SHA-256 is
+`ee6f65ce671950ffa73e367179bc44d99ff6fc18dbcb53ca1969afae1227b3da`; its
+embedded build manifest identifies source revision `be1c4e92` with
+`source_dirty: true` and snapshot SHA-256
+`abb455cd8e2e24cad66fc0f8f57bf2a29aa34fd5cc2870af18c62eafc17fa948`. This
+resource measurement therefore does not claim a clean-source rebuild.
+
+The driver exited successfully, wrote a 1,853,117-byte comparison record with
+32/32 completed attempts, and emitted no stderr. The record passed the saved
+renderer’s identity checks and produced the retained HTML report. The capture
+script, raw stdout/stderr, measurement JSON, record, and report are kept beside
+one another. This one observation does not establish a stable resource
+envelope or general scalability.
