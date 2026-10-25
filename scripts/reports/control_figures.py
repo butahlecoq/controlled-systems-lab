@@ -70,8 +70,9 @@ def render(document, source_hash, style_path, out, additional_inputs=None):
                     ax.set(xlabel=document["axes"]["controls"].get("label", "stage"), ylabel=f"{coord['name']} ({coord.get('unit') or 'unit unavailable'})",
                            title=f"Stage-aligned control coordinate {coord['id']} (left-held)")
                     ax.grid(alpha=.2);ax.legend(fontsize="small")
-                fig.text(.02,.005," · ".join(f"{t['witness_id']}: J={t['objective']} ({t['objective_evidence']}); {t['evidence']} ({t['assurance']}; {t['approximation']})" for t in trajectories),fontsize=8)
-                fig.tight_layout(rect=(0,.04,1,1))
+                note=" · ".join(f"{t['witness_id']}: J={t['objective']} ({t['objective_evidence']}); {t['evidence']} ({t['assurance']}; {t['approximation']})" for t in trajectories)
+                fig.text(.02,.012,textwrap.fill(note,width=145),fontsize=8,va="bottom")
+                fig.tight_layout(rect=(0,.075,1,.96))
                 path = out / "trajectories"
                 _save(fig, path, style)
                 files.extend((path.with_suffix(".svg"), path.with_suffix(".png")))

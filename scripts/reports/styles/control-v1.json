@@ -9,7 +9,7 @@
   "point_alpha": 0.36,
   "target_size": 90,
   "trajectory_size": [10, 7],
-  "trajectory_height_per_axis": 2.3,
+  "trajectory_height_per_axis": 3.0,
   "projection_size": [7, 6],
   "timing_size": [10, 5]
 }
