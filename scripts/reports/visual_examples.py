@@ -57,6 +57,10 @@ SAVED_FIGURES = (
          family="Strategy A · nominal linear exact profile", title="A complete 2D optimal face",
          alt="The feasible upper triangle in the unit square and its full optimal diagonal segment from (0,1) to (1,0).",
          summary="The installed Strategy A example returned objective 1 and a registry-verified complete face x+y=1, 0<=x,y<=1. The page retains inputs, raw result and the numerical assurance limits."),
+    dict(source_report_id="b06-owner-confirmed-7df01ba3af5e4c46", image="terminal-projections.svg",
+         page="index.html", family="Fuel minimax reference", title="B06 fuel terminal set: two projections",
+         alt="Numerical projections of the four-state terminal reachable set onto flow and stock-balance coordinates; the stock target is outside the projected set.",
+         summary="The figure uses all 1,024 disturbance-corner histories for the unique winning fixed plan. The owner-confirmed disturbance box is not printed in L09, so this is a distinct reference case rather than a historical reproduction."),
 )
 
 
