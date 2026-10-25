@@ -1,0 +1,108 @@
+{
+  "schema": "csl.issue6-b09-evidence/1",
+  "report_id": "b09-a08-source-reference-75d8e5a5",
+  "source_commit": "75d8e5a5eaa9a5807a449086f8d206c254a2f315",
+  "claim": "A08 source-revision finite-action minimax reference; not a historical reproduction",
+  "cases": [
+    {
+      "lambda": 0.0,
+      "objective_squared": 2518.0254696696175,
+      "objective_norm": 50.1799309452456,
+      "feasible_plan_count": 76,
+      "winner_count": 4,
+      "median_elapsed_ns": 242215031,
+      "minimum_elapsed_ns": 237100379,
+      "maximum_elapsed_ns": 254394664,
+      "oracle_agrees": true
+    },
+    {
+      "lambda": 1.0,
+      "objective_squared": 13408.277178974853,
+      "objective_norm": 115.79411547645611,
+      "feasible_plan_count": 76,
+      "winner_count": 6,
+      "median_elapsed_ns": 242794858,
+      "minimum_elapsed_ns": 235211161,
+      "maximum_elapsed_ns": 247649766,
+      "oracle_agrees": true
+    }
+  ],
+  "objective_definition": "sqrt((x1-60)^2+x2^2+(x3-24)^2+x4^2+lambda*(x2-2.5*x4)^2), lambda in {0,1}",
+  "complete_winner_sequences": {
+    "0.0": [
+      [
+        0,
+        0,
+        6,
+        6
+      ],
+      [
+        0,
+        1,
+        4,
+        7
+      ],
+      [
+        0,
+        2,
+        2,
+        8
+      ],
+      [
+        1,
+        0,
+        3,
+        8
+      ]
+    ],
+    "1.0": [
+      [
+        0,
+        0,
+        7,
+        5
+      ],
+      [
+        0,
+        1,
+        5,
+        6
+      ],
+      [
+        0,
+        2,
+        3,
+        7
+      ],
+      [
+        0,
+        3,
+        1,
+        8
+      ],
+      [
+        1,
+        0,
+        4,
+        7
+      ],
+      [
+        1,
+        1,
+        2,
+        8
+      ]
+    ]
+  },
+  "geometry_records": [
+    "lambda0-result.json",
+    "lambda1-result.json"
+  ],
+  "visuals": [
+    "projections-lambda0.svg",
+    "projections-lambda1.svg"
+  ],
+  "independent_oracle": "independent-oracle-verification.json",
+  "raw_measurements": "raw-runs.jsonl",
+  "assurance": "numerical; independent exhaustive corner-history oracle agrees"
+}

@@ -1,0 +1,604 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1240" height="760" viewBox="0 0 1240 760">
+<rect width="100%" height="100%" fill="#fbfcfd"/>
+<style>text{font-family:system-ui,sans-serif;fill:#17212b}.grid{stroke:#dce3e8;stroke-width:1}.axis{stroke:#596a76;stroke-width:1.3}.boundary{fill:#4ba3a7;fill-opacity:.23;stroke:#147d83;stroke-width:2}.vertex{fill:#147d83;fill-opacity:.45}.replay{fill:none;stroke:#d1495b;stroke-width:2.5}.tick{font-size:12px}.label{font-size:14px}.title{font-size:18px;font-weight:650}</style>
+<text x="620" y="28" text-anchor="middle" class="title">A08 source reference, lambda=1.0: projections of a 4D model</text>
+<text x="325.0" y="66" text-anchor="middle" class="title">Flow projection</text>
+<line x1="65.00" y1="92" x2="65.00" y2="417" class="grid"/>
+<line x1="65" y1="417.00" x2="585" y2="417.00" class="grid"/>
+<text x="65.00" y="437" text-anchor="middle" class="tick">59</text>
+<text x="57" y="421.00" text-anchor="end" class="tick">23.2</text>
+<line x1="169.00" y1="92" x2="169.00" y2="417" class="grid"/>
+<line x1="65" y1="352.00" x2="585" y2="352.00" class="grid"/>
+<text x="169.00" y="437" text-anchor="middle" class="tick">59.4</text>
+<text x="57" y="356.00" text-anchor="end" class="tick">23.5</text>
+<line x1="273.00" y1="92" x2="273.00" y2="417" class="grid"/>
+<line x1="65" y1="287.00" x2="585" y2="287.00" class="grid"/>
+<text x="273.00" y="437" text-anchor="middle" class="tick">59.9</text>
+<text x="57" y="291.00" text-anchor="end" class="tick">23.7</text>
+<line x1="377.00" y1="92" x2="377.00" y2="417" class="grid"/>
+<line x1="65" y1="222.00" x2="585" y2="222.00" class="grid"/>
+<text x="377.00" y="437" text-anchor="middle" class="tick">60.4</text>
+<text x="57" y="226.00" text-anchor="end" class="tick">24</text>
+<line x1="481.00" y1="92" x2="481.00" y2="417" class="grid"/>
+<line x1="65" y1="157.00" x2="585" y2="157.00" class="grid"/>
+<text x="481.00" y="437" text-anchor="middle" class="tick">60.8</text>
+<text x="57" y="161.00" text-anchor="end" class="tick">24.2</text>
+<line x1="585.00" y1="92" x2="585.00" y2="417" class="grid"/>
+<line x1="65" y1="92.00" x2="585" y2="92.00" class="grid"/>
+<text x="585.00" y="437" text-anchor="middle" class="tick">61.3</text>
+<text x="57" y="96.00" text-anchor="end" class="tick">24.5</text>
+<line x1="65" y1="417" x2="585" y2="417" class="axis"/>
+<line x1="65" y1="92" x2="65" y2="417" class="axis"/>
+<polygon class="boundary" points="285.22,312.64 392.58,312.64 392.58,189.75 285.22,189.75"/>
+<circle cx="285.22" cy="189.75" r="2.2" class="vertex"/>
+<circle cx="285.22" cy="220.47" r="2.2" class="vertex"/>
+<circle cx="312.06" cy="189.75" r="2.2" class="vertex"/>
+<circle cx="312.06" cy="220.47" r="2.2" class="vertex"/>
+<circle cx="285.22" cy="220.47" r="2.2" class="vertex"/>
+<circle cx="285.22" cy="251.20" r="2.2" class="vertex"/>
+<circle cx="312.06" cy="220.47" r="2.2" class="vertex"/>
+<circle cx="312.06" cy="251.20" r="2.2" class="vertex"/>
+<circle cx="312.06" cy="189.75" r="2.2" class="vertex"/>
+<circle cx="312.06" cy="220.47" r="2.2" class="vertex"/>
+<circle cx="338.90" cy="189.75" r="2.2" class="vertex"/>
+<circle cx="338.90" cy="220.47" r="2.2" class="vertex"/>
+<circle cx="312.06" cy="220.47" r="2.2" class="vertex"/>
+<circle cx="312.06" cy="251.20" r="2.2" class="vertex"/>
+<circle cx="338.90" cy="220.47" r="2.2" class="vertex"/>
+<circle cx="338.90" cy="251.20" r="2.2" class="vertex"/>
+<circle cx="285.22" cy="220.47" r="2.2" class="vertex"/>
+<circle cx="285.22" cy="251.20" r="2.2" class="vertex"/>
+<circle cx="312.06" cy="220.47" r="2.2" class="vertex"/>
+<circle cx="312.06" cy="251.20" r="2.2" class="vertex"/>
+<circle cx="285.22" cy="251.20" r="2.2" class="vertex"/>
+<circle cx="285.22" cy="281.92" r="2.2" class="vertex"/>
+<circle cx="312.06" cy="251.20" r="2.2" class="vertex"/>
+<circle cx="312.06" cy="281.92" r="2.2" class="vertex"/>
+<circle cx="312.06" cy="220.47" r="2.2" class="vertex"/>
+<circle cx="312.06" cy="251.20" r="2.2" class="vertex"/>
+<circle cx="338.90" cy="220.47" r="2.2" class="vertex"/>
+<circle cx="338.90" cy="251.20" r="2.2" class="vertex"/>
+<circle cx="312.06" cy="251.20" r="2.2" class="vertex"/>
+<circle cx="312.06" cy="281.92" r="2.2" class="vertex"/>
+<circle cx="338.90" cy="251.20" r="2.2" class="vertex"/>
+<circle cx="338.90" cy="281.92" r="2.2" class="vertex"/>
+<circle cx="312.06" cy="189.75" r="2.2" class="vertex"/>
+<circle cx="312.06" cy="220.47" r="2.2" class="vertex"/>
+<circle cx="338.90" cy="189.75" r="2.2" class="vertex"/>
+<circle cx="338.90" cy="220.47" r="2.2" class="vertex"/>
+<circle cx="312.06" cy="220.47" r="2.2" class="vertex"/>
+<circle cx="312.06" cy="251.20" r="2.2" class="vertex"/>
+<circle cx="338.90" cy="220.47" r="2.2" class="vertex"/>
+<circle cx="338.90" cy="251.20" r="2.2" class="vertex"/>
+<circle cx="338.90" cy="189.75" r="2.2" class="vertex"/>
+<circle cx="338.90" cy="220.47" r="2.2" class="vertex"/>
+<circle cx="365.74" cy="189.75" r="2.2" class="vertex"/>
+<circle cx="365.74" cy="220.47" r="2.2" class="vertex"/>
+<circle cx="338.90" cy="220.47" r="2.2" class="vertex"/>
+<circle cx="338.90" cy="251.20" r="2.2" class="vertex"/>
+<circle cx="365.74" cy="220.47" r="2.2" class="vertex"/>
+<circle cx="365.74" cy="251.20" r="2.2" class="vertex"/>
+<circle cx="312.06" cy="220.47" r="2.2" class="vertex"/>
+<circle cx="312.06" cy="251.20" r="2.2" class="vertex"/>
+<circle cx="338.90" cy="220.47" r="2.2" class="vertex"/>
+<circle cx="338.90" cy="251.20" r="2.2" class="vertex"/>
+<circle cx="312.06" cy="251.20" r="2.2" class="vertex"/>
+<circle cx="312.06" cy="281.92" r="2.2" class="vertex"/>
+<circle cx="338.90" cy="251.20" r="2.2" class="vertex"/>
+<circle cx="338.90" cy="281.92" r="2.2" class="vertex"/>
+<circle cx="338.90" cy="220.47" r="2.2" class="vertex"/>
+<circle cx="338.90" cy="251.20" r="2.2" class="vertex"/>
+<circle cx="365.74" cy="220.47" r="2.2" class="vertex"/>
+<circle cx="365.74" cy="251.20" r="2.2" class="vertex"/>
+<circle cx="338.90" cy="251.20" r="2.2" class="vertex"/>
+<circle cx="338.90" cy="281.92" r="2.2" class="vertex"/>
+<circle cx="365.74" cy="251.20" r="2.2" class="vertex"/>
+<circle cx="365.74" cy="281.92" r="2.2" class="vertex"/>
+<circle cx="285.22" cy="220.47" r="2.2" class="vertex"/>
+<circle cx="285.22" cy="251.20" r="2.2" class="vertex"/>
+<circle cx="312.06" cy="220.47" r="2.2" class="vertex"/>
+<circle cx="312.06" cy="251.20" r="2.2" class="vertex"/>
+<circle cx="285.22" cy="251.20" r="2.2" class="vertex"/>
+<circle cx="285.22" cy="281.92" r="2.2" class="vertex"/>
+<circle cx="312.06" cy="251.20" r="2.2" class="vertex"/>
+<circle cx="312.06" cy="281.92" r="2.2" class="vertex"/>
+<circle cx="312.06" cy="220.47" r="2.2" class="vertex"/>
+<circle cx="312.06" cy="251.20" r="2.2" class="vertex"/>
+<circle cx="338.90" cy="220.47" r="2.2" class="vertex"/>
+<circle cx="338.90" cy="251.20" r="2.2" class="vertex"/>
+<circle cx="312.06" cy="251.20" r="2.2" class="vertex"/>
+<circle cx="312.06" cy="281.92" r="2.2" class="vertex"/>
+<circle cx="338.90" cy="251.20" r="2.2" class="vertex"/>
+<circle cx="338.90" cy="281.92" r="2.2" class="vertex"/>
+<circle cx="285.22" cy="251.20" r="2.2" class="vertex"/>
+<circle cx="285.22" cy="281.92" r="2.2" class="vertex"/>
+<circle cx="312.06" cy="251.20" r="2.2" class="vertex"/>
+<circle cx="312.06" cy="281.92" r="2.2" class="vertex"/>
+<circle cx="285.22" cy="281.92" r="2.2" class="vertex"/>
+<circle cx="285.22" cy="312.64" r="2.2" class="vertex"/>
+<circle cx="312.06" cy="281.92" r="2.2" class="vertex"/>
+<circle cx="312.06" cy="312.64" r="2.2" class="vertex"/>
+<circle cx="312.06" cy="251.20" r="2.2" class="vertex"/>
+<circle cx="312.06" cy="281.92" r="2.2" class="vertex"/>
+<circle cx="338.90" cy="251.20" r="2.2" class="vertex"/>
+<circle cx="338.90" cy="281.92" r="2.2" class="vertex"/>
+<circle cx="312.06" cy="281.92" r="2.2" class="vertex"/>
+<circle cx="312.06" cy="312.64" r="2.2" class="vertex"/>
+<circle cx="338.90" cy="281.92" r="2.2" class="vertex"/>
+<circle cx="338.90" cy="312.64" r="2.2" class="vertex"/>
+<circle cx="312.06" cy="220.47" r="2.2" class="vertex"/>
+<circle cx="312.06" cy="251.20" r="2.2" class="vertex"/>
+<circle cx="338.90" cy="220.47" r="2.2" class="vertex"/>
+<circle cx="338.90" cy="251.20" r="2.2" class="vertex"/>
+<circle cx="312.06" cy="251.20" r="2.2" class="vertex"/>
+<circle cx="312.06" cy="281.92" r="2.2" class="vertex"/>
+<circle cx="338.90" cy="251.20" r="2.2" class="vertex"/>
+<circle cx="338.90" cy="281.92" r="2.2" class="vertex"/>
+<circle cx="338.90" cy="220.47" r="2.2" class="vertex"/>
+<circle cx="338.90" cy="251.20" r="2.2" class="vertex"/>
+<circle cx="365.74" cy="220.47" r="2.2" class="vertex"/>
+<circle cx="365.74" cy="251.20" r="2.2" class="vertex"/>
+<circle cx="338.90" cy="251.20" r="2.2" class="vertex"/>
+<circle cx="338.90" cy="281.92" r="2.2" class="vertex"/>
+<circle cx="365.74" cy="251.20" r="2.2" class="vertex"/>
+<circle cx="365.74" cy="281.92" r="2.2" class="vertex"/>
+<circle cx="312.06" cy="251.20" r="2.2" class="vertex"/>
+<circle cx="312.06" cy="281.92" r="2.2" class="vertex"/>
+<circle cx="338.90" cy="251.20" r="2.2" class="vertex"/>
+<circle cx="338.90" cy="281.92" r="2.2" class="vertex"/>
+<circle cx="312.06" cy="281.92" r="2.2" class="vertex"/>
+<circle cx="312.06" cy="312.64" r="2.2" class="vertex"/>
+<circle cx="338.90" cy="281.92" r="2.2" class="vertex"/>
+<circle cx="338.90" cy="312.64" r="2.2" class="vertex"/>
+<circle cx="338.90" cy="251.20" r="2.2" class="vertex"/>
+<circle cx="338.90" cy="281.92" r="2.2" class="vertex"/>
+<circle cx="365.74" cy="251.20" r="2.2" class="vertex"/>
+<circle cx="365.74" cy="281.92" r="2.2" class="vertex"/>
+<circle cx="338.90" cy="281.92" r="2.2" class="vertex"/>
+<circle cx="338.90" cy="312.64" r="2.2" class="vertex"/>
+<circle cx="365.74" cy="281.92" r="2.2" class="vertex"/>
+<circle cx="365.74" cy="312.64" r="2.2" class="vertex"/>
+<circle cx="312.06" cy="189.75" r="2.2" class="vertex"/>
+<circle cx="312.06" cy="220.47" r="2.2" class="vertex"/>
+<circle cx="338.90" cy="189.75" r="2.2" class="vertex"/>
+<circle cx="338.90" cy="220.47" r="2.2" class="vertex"/>
+<circle cx="312.06" cy="220.47" r="2.2" class="vertex"/>
+<circle cx="312.06" cy="251.20" r="2.2" class="vertex"/>
+<circle cx="338.90" cy="220.47" r="2.2" class="vertex"/>
+<circle cx="338.90" cy="251.20" r="2.2" class="vertex"/>
+<circle cx="338.90" cy="189.75" r="2.2" class="vertex"/>
+<circle cx="338.90" cy="220.47" r="2.2" class="vertex"/>
+<circle cx="365.74" cy="189.75" r="2.2" class="vertex"/>
+<circle cx="365.74" cy="220.47" r="2.2" class="vertex"/>
+<circle cx="338.90" cy="220.47" r="2.2" class="vertex"/>
+<circle cx="338.90" cy="251.20" r="2.2" class="vertex"/>
+<circle cx="365.74" cy="220.47" r="2.2" class="vertex"/>
+<circle cx="365.74" cy="251.20" r="2.2" class="vertex"/>
+<circle cx="312.06" cy="220.47" r="2.2" class="vertex"/>
+<circle cx="312.06" cy="251.20" r="2.2" class="vertex"/>
+<circle cx="338.90" cy="220.47" r="2.2" class="vertex"/>
+<circle cx="338.90" cy="251.20" r="2.2" class="vertex"/>
+<circle cx="312.06" cy="251.20" r="2.2" class="vertex"/>
+<circle cx="312.06" cy="281.92" r="2.2" class="vertex"/>
+<circle cx="338.90" cy="251.20" r="2.2" class="vertex"/>
+<circle cx="338.90" cy="281.92" r="2.2" class="vertex"/>
+<circle cx="338.90" cy="220.47" r="2.2" class="vertex"/>
+<circle cx="338.90" cy="251.20" r="2.2" class="vertex"/>
+<circle cx="365.74" cy="220.47" r="2.2" class="vertex"/>
+<circle cx="365.74" cy="251.20" r="2.2" class="vertex"/>
+<circle cx="338.90" cy="251.20" r="2.2" class="vertex"/>
+<circle cx="338.90" cy="281.92" r="2.2" class="vertex"/>
+<circle cx="365.74" cy="251.20" r="2.2" class="vertex"/>
+<circle cx="365.74" cy="281.92" r="2.2" class="vertex"/>
+<circle cx="338.90" cy="189.75" r="2.2" class="vertex"/>
+<circle cx="338.90" cy="220.47" r="2.2" class="vertex"/>
+<circle cx="365.74" cy="189.75" r="2.2" class="vertex"/>
+<circle cx="365.74" cy="220.47" r="2.2" class="vertex"/>
+<circle cx="338.90" cy="220.47" r="2.2" class="vertex"/>
+<circle cx="338.90" cy="251.20" r="2.2" class="vertex"/>
+<circle cx="365.74" cy="220.47" r="2.2" class="vertex"/>
+<circle cx="365.74" cy="251.20" r="2.2" class="vertex"/>
+<circle cx="365.74" cy="189.75" r="2.2" class="vertex"/>
+<circle cx="365.74" cy="220.47" r="2.2" class="vertex"/>
+<circle cx="392.58" cy="189.75" r="2.2" class="vertex"/>
+<circle cx="392.58" cy="220.47" r="2.2" class="vertex"/>
+<circle cx="365.74" cy="220.47" r="2.2" class="vertex"/>
+<circle cx="365.74" cy="251.20" r="2.2" class="vertex"/>
+<circle cx="392.58" cy="220.47" r="2.2" class="vertex"/>
+<circle cx="392.58" cy="251.20" r="2.2" class="vertex"/>
+<circle cx="338.90" cy="220.47" r="2.2" class="vertex"/>
+<circle cx="338.90" cy="251.20" r="2.2" class="vertex"/>
+<circle cx="365.74" cy="220.47" r="2.2" class="vertex"/>
+<circle cx="365.74" cy="251.20" r="2.2" class="vertex"/>
+<circle cx="338.90" cy="251.20" r="2.2" class="vertex"/>
+<circle cx="338.90" cy="281.92" r="2.2" class="vertex"/>
+<circle cx="365.74" cy="251.20" r="2.2" class="vertex"/>
+<circle cx="365.74" cy="281.92" r="2.2" class="vertex"/>
+<circle cx="365.74" cy="220.47" r="2.2" class="vertex"/>
+<circle cx="365.74" cy="251.20" r="2.2" class="vertex"/>
+<circle cx="392.58" cy="220.47" r="2.2" class="vertex"/>
+<circle cx="392.58" cy="251.20" r="2.2" class="vertex"/>
+<circle cx="365.74" cy="251.20" r="2.2" class="vertex"/>
+<circle cx="365.74" cy="281.92" r="2.2" class="vertex"/>
+<circle cx="392.58" cy="251.20" r="2.2" class="vertex"/>
+<circle cx="392.58" cy="281.92" r="2.2" class="vertex"/>
+<circle cx="312.06" cy="220.47" r="2.2" class="vertex"/>
+<circle cx="312.06" cy="251.20" r="2.2" class="vertex"/>
+<circle cx="338.90" cy="220.47" r="2.2" class="vertex"/>
+<circle cx="338.90" cy="251.20" r="2.2" class="vertex"/>
+<circle cx="312.06" cy="251.20" r="2.2" class="vertex"/>
+<circle cx="312.06" cy="281.92" r="2.2" class="vertex"/>
+<circle cx="338.90" cy="251.20" r="2.2" class="vertex"/>
+<circle cx="338.90" cy="281.92" r="2.2" class="vertex"/>
+<circle cx="338.90" cy="220.47" r="2.2" class="vertex"/>
+<circle cx="338.90" cy="251.20" r="2.2" class="vertex"/>
+<circle cx="365.74" cy="220.47" r="2.2" class="vertex"/>
+<circle cx="365.74" cy="251.20" r="2.2" class="vertex"/>
+<circle cx="338.90" cy="251.20" r="2.2" class="vertex"/>
+<circle cx="338.90" cy="281.92" r="2.2" class="vertex"/>
+<circle cx="365.74" cy="251.20" r="2.2" class="vertex"/>
+<circle cx="365.74" cy="281.92" r="2.2" class="vertex"/>
+<circle cx="312.06" cy="251.20" r="2.2" class="vertex"/>
+<circle cx="312.06" cy="281.92" r="2.2" class="vertex"/>
+<circle cx="338.90" cy="251.20" r="2.2" class="vertex"/>
+<circle cx="338.90" cy="281.92" r="2.2" class="vertex"/>
+<circle cx="312.06" cy="281.92" r="2.2" class="vertex"/>
+<circle cx="312.06" cy="312.64" r="2.2" class="vertex"/>
+<circle cx="338.90" cy="281.92" r="2.2" class="vertex"/>
+<circle cx="338.90" cy="312.64" r="2.2" class="vertex"/>
+<circle cx="338.90" cy="251.20" r="2.2" class="vertex"/>
+<circle cx="338.90" cy="281.92" r="2.2" class="vertex"/>
+<circle cx="365.74" cy="251.20" r="2.2" class="vertex"/>
+<circle cx="365.74" cy="281.92" r="2.2" class="vertex"/>
+<circle cx="338.90" cy="281.92" r="2.2" class="vertex"/>
+<circle cx="338.90" cy="312.64" r="2.2" class="vertex"/>
+<circle cx="365.74" cy="281.92" r="2.2" class="vertex"/>
+<circle cx="365.74" cy="312.64" r="2.2" class="vertex"/>
+<circle cx="338.90" cy="220.47" r="2.2" class="vertex"/>
+<circle cx="338.90" cy="251.20" r="2.2" class="vertex"/>
+<circle cx="365.74" cy="220.47" r="2.2" class="vertex"/>
+<circle cx="365.74" cy="251.20" r="2.2" class="vertex"/>
+<circle cx="338.90" cy="251.20" r="2.2" class="vertex"/>
+<circle cx="338.90" cy="281.92" r="2.2" class="vertex"/>
+<circle cx="365.74" cy="251.20" r="2.2" class="vertex"/>
+<circle cx="365.74" cy="281.92" r="2.2" class="vertex"/>
+<circle cx="365.74" cy="220.47" r="2.2" class="vertex"/>
+<circle cx="365.74" cy="251.20" r="2.2" class="vertex"/>
+<circle cx="392.58" cy="220.47" r="2.2" class="vertex"/>
+<circle cx="392.58" cy="251.20" r="2.2" class="vertex"/>
+<circle cx="365.74" cy="251.20" r="2.2" class="vertex"/>
+<circle cx="365.74" cy="281.92" r="2.2" class="vertex"/>
+<circle cx="392.58" cy="251.20" r="2.2" class="vertex"/>
+<circle cx="392.58" cy="281.92" r="2.2" class="vertex"/>
+<circle cx="338.90" cy="251.20" r="2.2" class="vertex"/>
+<circle cx="338.90" cy="281.92" r="2.2" class="vertex"/>
+<circle cx="365.74" cy="251.20" r="2.2" class="vertex"/>
+<circle cx="365.74" cy="281.92" r="2.2" class="vertex"/>
+<circle cx="338.90" cy="281.92" r="2.2" class="vertex"/>
+<circle cx="338.90" cy="312.64" r="2.2" class="vertex"/>
+<circle cx="365.74" cy="281.92" r="2.2" class="vertex"/>
+<circle cx="365.74" cy="312.64" r="2.2" class="vertex"/>
+<circle cx="365.74" cy="251.20" r="2.2" class="vertex"/>
+<circle cx="365.74" cy="281.92" r="2.2" class="vertex"/>
+<circle cx="392.58" cy="251.20" r="2.2" class="vertex"/>
+<circle cx="392.58" cy="281.92" r="2.2" class="vertex"/>
+<circle cx="365.74" cy="281.92" r="2.2" class="vertex"/>
+<circle cx="365.74" cy="312.64" r="2.2" class="vertex"/>
+<circle cx="392.58" cy="281.92" r="2.2" class="vertex"/>
+<circle cx="392.58" cy="312.64" r="2.2" class="vertex"/>
+<polyline class="replay" points="100.86,114.41 352.45,247.61 549.14,394.59 406.82,283.10 352.45,247.61"/>
+<circle cx="100.86" cy="114.41" r="5" fill="#1d3557"/>
+<circle cx="352.45" cy="247.61" r="5" fill="#d1495b"/>
+<text x="325.0" y="457" text-anchor="middle" class="label">Oxidizer flow x1</text>
+<text x="17" y="254.5" transform="rotate(-90 17 254.5)" text-anchor="middle" class="label">Fuel flow x3</text>
+<text x="935.0" y="66" text-anchor="middle" class="title">Stock projection</text>
+<line x1="675.00" y1="92" x2="675.00" y2="417" class="grid"/>
+<line x1="675" y1="417.00" x2="1195" y2="417.00" class="grid"/>
+<text x="675.00" y="437" text-anchor="middle" class="tick">-10.6</text>
+<text x="667" y="421.00" text-anchor="end" class="tick">-26.5</text>
+<line x1="779.00" y1="92" x2="779.00" y2="417" class="grid"/>
+<line x1="675" y1="352.00" x2="1195" y2="352.00" class="grid"/>
+<text x="779.00" y="437" text-anchor="middle" class="tick">1.89</text>
+<text x="667" y="356.00" text-anchor="end" class="tick">-14</text>
+<line x1="883.00" y1="92" x2="883.00" y2="417" class="grid"/>
+<line x1="675" y1="287.00" x2="1195" y2="287.00" class="grid"/>
+<text x="883.00" y="437" text-anchor="middle" class="tick">14.4</text>
+<text x="667" y="291.00" text-anchor="end" class="tick">-1.46</text>
+<line x1="987.00" y1="92" x2="987.00" y2="417" class="grid"/>
+<line x1="675" y1="222.00" x2="1195" y2="222.00" class="grid"/>
+<text x="987.00" y="437" text-anchor="middle" class="tick">26.9</text>
+<text x="667" y="226.00" text-anchor="end" class="tick">11.1</text>
+<line x1="1091.00" y1="92" x2="1091.00" y2="417" class="grid"/>
+<line x1="675" y1="157.00" x2="1195" y2="157.00" class="grid"/>
+<text x="1091.00" y="437" text-anchor="middle" class="tick">39.5</text>
+<text x="667" y="161.00" text-anchor="end" class="tick">23.6</text>
+<line x1="1195.00" y1="92" x2="1195.00" y2="417" class="grid"/>
+<line x1="675" y1="92.00" x2="1195" y2="92.00" class="grid"/>
+<text x="1195.00" y="437" text-anchor="middle" class="tick">52</text>
+<text x="667" y="96.00" text-anchor="end" class="tick">36.1</text>
+<line x1="675" y1="417" x2="1195" y2="417" class="axis"/>
+<line x1="675" y1="92" x2="675" y2="417" class="axis"/>
+<polygon class="boundary" points="710.86,394.59 1159.14,394.59 1159.14,114.41 710.86,114.41"/>
+<circle cx="1159.14" cy="394.59" r="2.2" class="vertex"/>
+<circle cx="1159.14" cy="394.59" r="2.2" class="vertex"/>
+<circle cx="1159.14" cy="394.59" r="2.2" class="vertex"/>
+<circle cx="1159.14" cy="394.59" r="2.2" class="vertex"/>
+<circle cx="1159.14" cy="347.89" r="2.2" class="vertex"/>
+<circle cx="1159.14" cy="347.89" r="2.2" class="vertex"/>
+<circle cx="1159.14" cy="347.89" r="2.2" class="vertex"/>
+<circle cx="1159.14" cy="347.89" r="2.2" class="vertex"/>
+<circle cx="1084.43" cy="394.59" r="2.2" class="vertex"/>
+<circle cx="1084.43" cy="394.59" r="2.2" class="vertex"/>
+<circle cx="1084.43" cy="394.59" r="2.2" class="vertex"/>
+<circle cx="1084.43" cy="394.59" r="2.2" class="vertex"/>
+<circle cx="1084.43" cy="347.89" r="2.2" class="vertex"/>
+<circle cx="1084.43" cy="347.89" r="2.2" class="vertex"/>
+<circle cx="1084.43" cy="347.89" r="2.2" class="vertex"/>
+<circle cx="1084.43" cy="347.89" r="2.2" class="vertex"/>
+<circle cx="1159.14" cy="301.20" r="2.2" class="vertex"/>
+<circle cx="1159.14" cy="301.20" r="2.2" class="vertex"/>
+<circle cx="1159.14" cy="301.20" r="2.2" class="vertex"/>
+<circle cx="1159.14" cy="301.20" r="2.2" class="vertex"/>
+<circle cx="1159.14" cy="254.50" r="2.2" class="vertex"/>
+<circle cx="1159.14" cy="254.50" r="2.2" class="vertex"/>
+<circle cx="1159.14" cy="254.50" r="2.2" class="vertex"/>
+<circle cx="1159.14" cy="254.50" r="2.2" class="vertex"/>
+<circle cx="1084.43" cy="301.20" r="2.2" class="vertex"/>
+<circle cx="1084.43" cy="301.20" r="2.2" class="vertex"/>
+<circle cx="1084.43" cy="301.20" r="2.2" class="vertex"/>
+<circle cx="1084.43" cy="301.20" r="2.2" class="vertex"/>
+<circle cx="1084.43" cy="254.50" r="2.2" class="vertex"/>
+<circle cx="1084.43" cy="254.50" r="2.2" class="vertex"/>
+<circle cx="1084.43" cy="254.50" r="2.2" class="vertex"/>
+<circle cx="1084.43" cy="254.50" r="2.2" class="vertex"/>
+<circle cx="1009.71" cy="394.59" r="2.2" class="vertex"/>
+<circle cx="1009.71" cy="394.59" r="2.2" class="vertex"/>
+<circle cx="1009.71" cy="394.59" r="2.2" class="vertex"/>
+<circle cx="1009.71" cy="394.59" r="2.2" class="vertex"/>
+<circle cx="1009.71" cy="347.89" r="2.2" class="vertex"/>
+<circle cx="1009.71" cy="347.89" r="2.2" class="vertex"/>
+<circle cx="1009.71" cy="347.89" r="2.2" class="vertex"/>
+<circle cx="1009.71" cy="347.89" r="2.2" class="vertex"/>
+<circle cx="935.00" cy="394.59" r="2.2" class="vertex"/>
+<circle cx="935.00" cy="394.59" r="2.2" class="vertex"/>
+<circle cx="935.00" cy="394.59" r="2.2" class="vertex"/>
+<circle cx="935.00" cy="394.59" r="2.2" class="vertex"/>
+<circle cx="935.00" cy="347.89" r="2.2" class="vertex"/>
+<circle cx="935.00" cy="347.89" r="2.2" class="vertex"/>
+<circle cx="935.00" cy="347.89" r="2.2" class="vertex"/>
+<circle cx="935.00" cy="347.89" r="2.2" class="vertex"/>
+<circle cx="1009.71" cy="301.20" r="2.2" class="vertex"/>
+<circle cx="1009.71" cy="301.20" r="2.2" class="vertex"/>
+<circle cx="1009.71" cy="301.20" r="2.2" class="vertex"/>
+<circle cx="1009.71" cy="301.20" r="2.2" class="vertex"/>
+<circle cx="1009.71" cy="254.50" r="2.2" class="vertex"/>
+<circle cx="1009.71" cy="254.50" r="2.2" class="vertex"/>
+<circle cx="1009.71" cy="254.50" r="2.2" class="vertex"/>
+<circle cx="1009.71" cy="254.50" r="2.2" class="vertex"/>
+<circle cx="935.00" cy="301.20" r="2.2" class="vertex"/>
+<circle cx="935.00" cy="301.20" r="2.2" class="vertex"/>
+<circle cx="935.00" cy="301.20" r="2.2" class="vertex"/>
+<circle cx="935.00" cy="301.20" r="2.2" class="vertex"/>
+<circle cx="935.00" cy="254.50" r="2.2" class="vertex"/>
+<circle cx="935.00" cy="254.50" r="2.2" class="vertex"/>
+<circle cx="935.00" cy="254.50" r="2.2" class="vertex"/>
+<circle cx="935.00" cy="254.50" r="2.2" class="vertex"/>
+<circle cx="1159.14" cy="254.50" r="2.2" class="vertex"/>
+<circle cx="1159.14" cy="254.50" r="2.2" class="vertex"/>
+<circle cx="1159.14" cy="254.50" r="2.2" class="vertex"/>
+<circle cx="1159.14" cy="254.50" r="2.2" class="vertex"/>
+<circle cx="1159.14" cy="207.80" r="2.2" class="vertex"/>
+<circle cx="1159.14" cy="207.80" r="2.2" class="vertex"/>
+<circle cx="1159.14" cy="207.80" r="2.2" class="vertex"/>
+<circle cx="1159.14" cy="207.80" r="2.2" class="vertex"/>
+<circle cx="1084.43" cy="254.50" r="2.2" class="vertex"/>
+<circle cx="1084.43" cy="254.50" r="2.2" class="vertex"/>
+<circle cx="1084.43" cy="254.50" r="2.2" class="vertex"/>
+<circle cx="1084.43" cy="254.50" r="2.2" class="vertex"/>
+<circle cx="1084.43" cy="207.80" r="2.2" class="vertex"/>
+<circle cx="1084.43" cy="207.80" r="2.2" class="vertex"/>
+<circle cx="1084.43" cy="207.80" r="2.2" class="vertex"/>
+<circle cx="1084.43" cy="207.80" r="2.2" class="vertex"/>
+<circle cx="1159.14" cy="161.11" r="2.2" class="vertex"/>
+<circle cx="1159.14" cy="161.11" r="2.2" class="vertex"/>
+<circle cx="1159.14" cy="161.11" r="2.2" class="vertex"/>
+<circle cx="1159.14" cy="161.11" r="2.2" class="vertex"/>
+<circle cx="1159.14" cy="114.41" r="2.2" class="vertex"/>
+<circle cx="1159.14" cy="114.41" r="2.2" class="vertex"/>
+<circle cx="1159.14" cy="114.41" r="2.2" class="vertex"/>
+<circle cx="1159.14" cy="114.41" r="2.2" class="vertex"/>
+<circle cx="1084.43" cy="161.11" r="2.2" class="vertex"/>
+<circle cx="1084.43" cy="161.11" r="2.2" class="vertex"/>
+<circle cx="1084.43" cy="161.11" r="2.2" class="vertex"/>
+<circle cx="1084.43" cy="161.11" r="2.2" class="vertex"/>
+<circle cx="1084.43" cy="114.41" r="2.2" class="vertex"/>
+<circle cx="1084.43" cy="114.41" r="2.2" class="vertex"/>
+<circle cx="1084.43" cy="114.41" r="2.2" class="vertex"/>
+<circle cx="1084.43" cy="114.41" r="2.2" class="vertex"/>
+<circle cx="1009.71" cy="254.50" r="2.2" class="vertex"/>
+<circle cx="1009.71" cy="254.50" r="2.2" class="vertex"/>
+<circle cx="1009.71" cy="254.50" r="2.2" class="vertex"/>
+<circle cx="1009.71" cy="254.50" r="2.2" class="vertex"/>
+<circle cx="1009.71" cy="207.80" r="2.2" class="vertex"/>
+<circle cx="1009.71" cy="207.80" r="2.2" class="vertex"/>
+<circle cx="1009.71" cy="207.80" r="2.2" class="vertex"/>
+<circle cx="1009.71" cy="207.80" r="2.2" class="vertex"/>
+<circle cx="935.00" cy="254.50" r="2.2" class="vertex"/>
+<circle cx="935.00" cy="254.50" r="2.2" class="vertex"/>
+<circle cx="935.00" cy="254.50" r="2.2" class="vertex"/>
+<circle cx="935.00" cy="254.50" r="2.2" class="vertex"/>
+<circle cx="935.00" cy="207.80" r="2.2" class="vertex"/>
+<circle cx="935.00" cy="207.80" r="2.2" class="vertex"/>
+<circle cx="935.00" cy="207.80" r="2.2" class="vertex"/>
+<circle cx="935.00" cy="207.80" r="2.2" class="vertex"/>
+<circle cx="1009.71" cy="161.11" r="2.2" class="vertex"/>
+<circle cx="1009.71" cy="161.11" r="2.2" class="vertex"/>
+<circle cx="1009.71" cy="161.11" r="2.2" class="vertex"/>
+<circle cx="1009.71" cy="161.11" r="2.2" class="vertex"/>
+<circle cx="1009.71" cy="114.41" r="2.2" class="vertex"/>
+<circle cx="1009.71" cy="114.41" r="2.2" class="vertex"/>
+<circle cx="1009.71" cy="114.41" r="2.2" class="vertex"/>
+<circle cx="1009.71" cy="114.41" r="2.2" class="vertex"/>
+<circle cx="935.00" cy="161.11" r="2.2" class="vertex"/>
+<circle cx="935.00" cy="161.11" r="2.2" class="vertex"/>
+<circle cx="935.00" cy="161.11" r="2.2" class="vertex"/>
+<circle cx="935.00" cy="161.11" r="2.2" class="vertex"/>
+<circle cx="935.00" cy="114.41" r="2.2" class="vertex"/>
+<circle cx="935.00" cy="114.41" r="2.2" class="vertex"/>
+<circle cx="935.00" cy="114.41" r="2.2" class="vertex"/>
+<circle cx="935.00" cy="114.41" r="2.2" class="vertex"/>
+<circle cx="935.00" cy="394.59" r="2.2" class="vertex"/>
+<circle cx="935.00" cy="394.59" r="2.2" class="vertex"/>
+<circle cx="935.00" cy="394.59" r="2.2" class="vertex"/>
+<circle cx="935.00" cy="394.59" r="2.2" class="vertex"/>
+<circle cx="935.00" cy="347.89" r="2.2" class="vertex"/>
+<circle cx="935.00" cy="347.89" r="2.2" class="vertex"/>
+<circle cx="935.00" cy="347.89" r="2.2" class="vertex"/>
+<circle cx="935.00" cy="347.89" r="2.2" class="vertex"/>
+<circle cx="860.29" cy="394.59" r="2.2" class="vertex"/>
+<circle cx="860.29" cy="394.59" r="2.2" class="vertex"/>
+<circle cx="860.29" cy="394.59" r="2.2" class="vertex"/>
+<circle cx="860.29" cy="394.59" r="2.2" class="vertex"/>
+<circle cx="860.29" cy="347.89" r="2.2" class="vertex"/>
+<circle cx="860.29" cy="347.89" r="2.2" class="vertex"/>
+<circle cx="860.29" cy="347.89" r="2.2" class="vertex"/>
+<circle cx="860.29" cy="347.89" r="2.2" class="vertex"/>
+<circle cx="935.00" cy="301.20" r="2.2" class="vertex"/>
+<circle cx="935.00" cy="301.20" r="2.2" class="vertex"/>
+<circle cx="935.00" cy="301.20" r="2.2" class="vertex"/>
+<circle cx="935.00" cy="301.20" r="2.2" class="vertex"/>
+<circle cx="935.00" cy="254.50" r="2.2" class="vertex"/>
+<circle cx="935.00" cy="254.50" r="2.2" class="vertex"/>
+<circle cx="935.00" cy="254.50" r="2.2" class="vertex"/>
+<circle cx="935.00" cy="254.50" r="2.2" class="vertex"/>
+<circle cx="860.29" cy="301.20" r="2.2" class="vertex"/>
+<circle cx="860.29" cy="301.20" r="2.2" class="vertex"/>
+<circle cx="860.29" cy="301.20" r="2.2" class="vertex"/>
+<circle cx="860.29" cy="301.20" r="2.2" class="vertex"/>
+<circle cx="860.29" cy="254.50" r="2.2" class="vertex"/>
+<circle cx="860.29" cy="254.50" r="2.2" class="vertex"/>
+<circle cx="860.29" cy="254.50" r="2.2" class="vertex"/>
+<circle cx="860.29" cy="254.50" r="2.2" class="vertex"/>
+<circle cx="785.57" cy="394.59" r="2.2" class="vertex"/>
+<circle cx="785.57" cy="394.59" r="2.2" class="vertex"/>
+<circle cx="785.57" cy="394.59" r="2.2" class="vertex"/>
+<circle cx="785.57" cy="394.59" r="2.2" class="vertex"/>
+<circle cx="785.57" cy="347.89" r="2.2" class="vertex"/>
+<circle cx="785.57" cy="347.89" r="2.2" class="vertex"/>
+<circle cx="785.57" cy="347.89" r="2.2" class="vertex"/>
+<circle cx="785.57" cy="347.89" r="2.2" class="vertex"/>
+<circle cx="710.86" cy="394.59" r="2.2" class="vertex"/>
+<circle cx="710.86" cy="394.59" r="2.2" class="vertex"/>
+<circle cx="710.86" cy="394.59" r="2.2" class="vertex"/>
+<circle cx="710.86" cy="394.59" r="2.2" class="vertex"/>
+<circle cx="710.86" cy="347.89" r="2.2" class="vertex"/>
+<circle cx="710.86" cy="347.89" r="2.2" class="vertex"/>
+<circle cx="710.86" cy="347.89" r="2.2" class="vertex"/>
+<circle cx="710.86" cy="347.89" r="2.2" class="vertex"/>
+<circle cx="785.57" cy="301.20" r="2.2" class="vertex"/>
+<circle cx="785.57" cy="301.20" r="2.2" class="vertex"/>
+<circle cx="785.57" cy="301.20" r="2.2" class="vertex"/>
+<circle cx="785.57" cy="301.20" r="2.2" class="vertex"/>
+<circle cx="785.57" cy="254.50" r="2.2" class="vertex"/>
+<circle cx="785.57" cy="254.50" r="2.2" class="vertex"/>
+<circle cx="785.57" cy="254.50" r="2.2" class="vertex"/>
+<circle cx="785.57" cy="254.50" r="2.2" class="vertex"/>
+<circle cx="710.86" cy="301.20" r="2.2" class="vertex"/>
+<circle cx="710.86" cy="301.20" r="2.2" class="vertex"/>
+<circle cx="710.86" cy="301.20" r="2.2" class="vertex"/>
+<circle cx="710.86" cy="301.20" r="2.2" class="vertex"/>
+<circle cx="710.86" cy="254.50" r="2.2" class="vertex"/>
+<circle cx="710.86" cy="254.50" r="2.2" class="vertex"/>
+<circle cx="710.86" cy="254.50" r="2.2" class="vertex"/>
+<circle cx="710.86" cy="254.50" r="2.2" class="vertex"/>
+<circle cx="935.00" cy="254.50" r="2.2" class="vertex"/>
+<circle cx="935.00" cy="254.50" r="2.2" class="vertex"/>
+<circle cx="935.00" cy="254.50" r="2.2" class="vertex"/>
+<circle cx="935.00" cy="254.50" r="2.2" class="vertex"/>
+<circle cx="935.00" cy="207.80" r="2.2" class="vertex"/>
+<circle cx="935.00" cy="207.80" r="2.2" class="vertex"/>
+<circle cx="935.00" cy="207.80" r="2.2" class="vertex"/>
+<circle cx="935.00" cy="207.80" r="2.2" class="vertex"/>
+<circle cx="860.29" cy="254.50" r="2.2" class="vertex"/>
+<circle cx="860.29" cy="254.50" r="2.2" class="vertex"/>
+<circle cx="860.29" cy="254.50" r="2.2" class="vertex"/>
+<circle cx="860.29" cy="254.50" r="2.2" class="vertex"/>
+<circle cx="860.29" cy="207.80" r="2.2" class="vertex"/>
+<circle cx="860.29" cy="207.80" r="2.2" class="vertex"/>
+<circle cx="860.29" cy="207.80" r="2.2" class="vertex"/>
+<circle cx="860.29" cy="207.80" r="2.2" class="vertex"/>
+<circle cx="935.00" cy="161.11" r="2.2" class="vertex"/>
+<circle cx="935.00" cy="161.11" r="2.2" class="vertex"/>
+<circle cx="935.00" cy="161.11" r="2.2" class="vertex"/>
+<circle cx="935.00" cy="161.11" r="2.2" class="vertex"/>
+<circle cx="935.00" cy="114.41" r="2.2" class="vertex"/>
+<circle cx="935.00" cy="114.41" r="2.2" class="vertex"/>
+<circle cx="935.00" cy="114.41" r="2.2" class="vertex"/>
+<circle cx="935.00" cy="114.41" r="2.2" class="vertex"/>
+<circle cx="860.29" cy="161.11" r="2.2" class="vertex"/>
+<circle cx="860.29" cy="161.11" r="2.2" class="vertex"/>
+<circle cx="860.29" cy="161.11" r="2.2" class="vertex"/>
+<circle cx="860.29" cy="161.11" r="2.2" class="vertex"/>
+<circle cx="860.29" cy="114.41" r="2.2" class="vertex"/>
+<circle cx="860.29" cy="114.41" r="2.2" class="vertex"/>
+<circle cx="860.29" cy="114.41" r="2.2" class="vertex"/>
+<circle cx="860.29" cy="114.41" r="2.2" class="vertex"/>
+<circle cx="785.57" cy="254.50" r="2.2" class="vertex"/>
+<circle cx="785.57" cy="254.50" r="2.2" class="vertex"/>
+<circle cx="785.57" cy="254.50" r="2.2" class="vertex"/>
+<circle cx="785.57" cy="254.50" r="2.2" class="vertex"/>
+<circle cx="785.57" cy="207.80" r="2.2" class="vertex"/>
+<circle cx="785.57" cy="207.80" r="2.2" class="vertex"/>
+<circle cx="785.57" cy="207.80" r="2.2" class="vertex"/>
+<circle cx="785.57" cy="207.80" r="2.2" class="vertex"/>
+<circle cx="710.86" cy="254.50" r="2.2" class="vertex"/>
+<circle cx="710.86" cy="254.50" r="2.2" class="vertex"/>
+<circle cx="710.86" cy="254.50" r="2.2" class="vertex"/>
+<circle cx="710.86" cy="254.50" r="2.2" class="vertex"/>
+<circle cx="710.86" cy="207.80" r="2.2" class="vertex"/>
+<circle cx="710.86" cy="207.80" r="2.2" class="vertex"/>
+<circle cx="710.86" cy="207.80" r="2.2" class="vertex"/>
+<circle cx="710.86" cy="207.80" r="2.2" class="vertex"/>
+<circle cx="785.57" cy="161.11" r="2.2" class="vertex"/>
+<circle cx="785.57" cy="161.11" r="2.2" class="vertex"/>
+<circle cx="785.57" cy="161.11" r="2.2" class="vertex"/>
+<circle cx="785.57" cy="161.11" r="2.2" class="vertex"/>
+<circle cx="785.57" cy="114.41" r="2.2" class="vertex"/>
+<circle cx="785.57" cy="114.41" r="2.2" class="vertex"/>
+<circle cx="785.57" cy="114.41" r="2.2" class="vertex"/>
+<circle cx="785.57" cy="114.41" r="2.2" class="vertex"/>
+<circle cx="710.86" cy="161.11" r="2.2" class="vertex"/>
+<circle cx="710.86" cy="161.11" r="2.2" class="vertex"/>
+<circle cx="710.86" cy="161.11" r="2.2" class="vertex"/>
+<circle cx="710.86" cy="161.11" r="2.2" class="vertex"/>
+<circle cx="710.86" cy="114.41" r="2.2" class="vertex"/>
+<circle cx="710.86" cy="114.41" r="2.2" class="vertex"/>
+<circle cx="710.86" cy="114.41" r="2.2" class="vertex"/>
+<circle cx="710.86" cy="114.41" r="2.2" class="vertex"/>
+<circle cx="951.31" cy="253.40" r="5" fill="#d1495b"/>
+<text x="935.0" y="457" text-anchor="middle" class="label">Oxidizer stock x2</text>
+<text x="627" y="254.5" transform="rotate(-90 627 254.5)" text-anchor="middle" class="label">Fuel stock x4</text>
+<rect x="105" y="472" width="14" height="14" class="boundary"/>
+<text x="126" y="484" class="label">Projected terminal reachable-set boundary and vertices</text>
+<line x1="685" y1="479" x2="720" y2="479" class="replay"/>
+<text x="728" y="484" class="label">Nonlinear open-loop replay in the flow projection; terminal point in the stock projection</text>
+<text x="620" y="520" text-anchor="middle" class="title">Nonlinear plant stock trajectory over the four 75-second stages</text>
+<line x1="105.00" y1="540" x2="105.00" y2="685" class="grid"/>
+<text x="105.00" y="703" text-anchor="middle" class="tick">0</text>
+<line x1="362.50" y1="540" x2="362.50" y2="685" class="grid"/>
+<text x="362.50" y="703" text-anchor="middle" class="tick">1</text>
+<line x1="620.00" y1="540" x2="620.00" y2="685" class="grid"/>
+<text x="620.00" y="703" text-anchor="middle" class="tick">2</text>
+<line x1="877.50" y1="540" x2="877.50" y2="685" class="grid"/>
+<text x="877.50" y="703" text-anchor="middle" class="tick">3</text>
+<line x1="1135.00" y1="540" x2="1135.00" y2="685" class="grid"/>
+<text x="1135.00" y="703" text-anchor="middle" class="tick">4</text>
+<line x1="105" y1="685" x2="1135" y2="685" class="axis"/>
+<polyline fill="none" stroke="#6a4c93" stroke-width="2.2" points="105.00,547.77 362.50,579.50 620.00,611.83 877.50,644.64 1135.00,677.11"/>
+<line x1="1000" y1="544" x2="1022" y2="544" stroke="#6a4c93" stroke-width="3"/>
+<text x="1028" y="548" class="tick">Oxidizer stock x2</text>
+<polyline fill="none" stroke="#2a9d8f" stroke-width="2.2" points="105.00,626.11 362.50,639.20 620.00,652.00 877.50,664.50 1135.00,677.23"/>
+<line x1="1000" y1="566" x2="1022" y2="566" stroke="#2a9d8f" stroke-width="3"/>
+<text x="1028" y="570" class="tick">Fuel stock x4</text>
+<text x="620" y="725" text-anchor="middle" class="label">Stage (75-second model interval)</text>
+<text x="620" y="746" text-anchor="middle" class="tick">Shaded geometry: uncertain linear model. Curves: deterministic nonlinear replay. One representative plan is shown from the tied optimum family.</text></svg>

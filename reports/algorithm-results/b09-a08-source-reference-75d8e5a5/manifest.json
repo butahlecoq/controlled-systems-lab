@@ -1,0 +1,17 @@
+{
+  "schema": "csl.issue6-b09-files/1",
+  "files": [
+    "README.md",
+    "independent-oracle-verification.json",
+    "index.html",
+    "lambda0-result.json",
+    "lambda1-result.json",
+    "projections-lambda0.svg",
+    "projections-lambda1.svg",
+    "raw-runs.jsonl",
+    "records.json",
+    "results.jsonl",
+    "run-provenance.json",
+    "scenario.json"
+  ]
+}
