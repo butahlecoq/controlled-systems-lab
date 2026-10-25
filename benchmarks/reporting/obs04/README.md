@@ -214,6 +214,26 @@ not isolate that interval inside the strategies. This one T-S01 capture only
 demonstrates the timing fields and checks; it establishes no limiter, general
 instrumentation overhead, workload latency, scalability, or strategy winner.
 
+## Clean-source event `/6` capture (2026-10-25)
+
+`results/linux-omarchy-gcc16-20261025-phase-timings-v6-clean.json` and `.jsonl`
+record the current event schema from clean commit
+`e9dc98f491d5bc465812d200755299737e7013ef`. All 32 attempts passed the
+analytic-family, witness, and phase checks, and each returned two distinct
+witnesses. The immutable record binds source and binary hashes. Values below
+are medians of seven measured attempts per arm (ns).
+
+| Strategy | Collection | Strategy run | Family construction | First query | Additional query | Attempt end-to-end |
+| --- | --- | ---: | ---: | ---: | ---: | ---: |
+| reach-back | disabled | 5,021,007 | unavailable | 242,212 | 226,637 | 5,644,696 |
+| reach-back | enabled | 8,192,810 | unavailable | 466,545 | 441,750 | 9,780,946 |
+| direct-joint | disabled | 818,547 | unavailable | 237,044 | 224,891 | 1,393,347 |
+| direct-joint | enabled | 1,039,527 | unavailable | 331,469 | 305,000 | 1,982,743 |
+
+This single tiny-fixture capture verifies event and artifact behavior only. It
+does not locate a limiter or establish general overhead, application latency,
+scalability, or a strategy winner. Family construction remains unmeasured.
+
 `results/strategy-run-perf-20261024/` retains the 2026-10-24 exploratory
 profiles, which were captured before control acknowledgements were added. They
 send enable/disable around `StrategyPort::run` but do not wait for perf's
