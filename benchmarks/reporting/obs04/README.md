@@ -80,14 +80,16 @@ The driver reports selected shared preflight phases in a structured
 `# shared_preflight=` JSONL comment, keyed by the comparison spec and run IDs.
 The JSONL is retained beside the immutable comparison record; keeping these
 observed durations out of the comparison spec prevents timing noise from
-changing `ComparisonSpecId`. Current schema `/2` times scenario file reading,
-standalone JSON parsing, the complete public scenario load/validation/resolution
-call, provider registration, and combined comparison admission. The standalone
-parse is a diagnostic on the same bytes; the public loader parses those bytes
-again, so its full duration is not reduced by the diagnostic parse time.
-Admission combines common request guards, strategy capability checks, and
-registry preparation; the current interface does not split these subphases.
-These timers stop before configuration-template creation, workspace creation,
+changing `ComparisonSpecId`. Schema `/3` records the actual bounded parser
+inside the scenario loader separately from semantic loading and resolution.
+Parser and semantic-load entry flags identify which timing hooks were reached
+for each emitted successful preflight. It also retains inclusive
+`comparison_admission_ns` and records each strategy's capability callback
+duration and call count nested inside admission. This callback-only timing
+excludes common request guards and other registry work; the two callback
+durations are not additive with admission and are not subtracted to estimate a
+residual. Callback timers call the original capability functions exactly once.
+The timers stop before configuration-template creation, workspace creation,
 and the two analytic baseline strategy runs. Complete-family proposal
 construction is measured separately inside each strategy on enabled runs.
 

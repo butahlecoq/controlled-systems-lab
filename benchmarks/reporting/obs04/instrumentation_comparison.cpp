@@ -9,6 +9,7 @@
 #include <csl/geometry/hull_reducer.hpp>
 #include <csl/geometry/polyhedral_projection.hpp>
 #include <csl/input/scenario_loader.hpp>
+#include "scenario_json.hpp"
 #include <csl/problem/validator.hpp>
 #include <csl/synthesis/strategy_a/strategy.hpp>
 #include <csl/synthesis/strategy_b/direct_joint.hpp>
@@ -66,6 +67,7 @@ namespace ar = artifacts;
 namespace ob = execution::observability;
 using Json = nlohmann::json;
 using Clock = std::chrono::steady_clock;
+std::int64_t ns(Clock::time_point begin, Clock::time_point end);
 constexpr double absolute_tolerance = 1e-8;
 constexpr double relative_tolerance = 1e-8;
 
@@ -219,12 +221,19 @@ HostFacts host_facts() {
     return host;
 }
 
+struct CapabilityTimings {
+    std::uint64_t reach_back_ns{};
+    std::uint64_t direct_joint_ns{};
+    std::size_t reach_back_calls{};
+    std::size_t direct_joint_calls{};
+};
+
 struct PreflightTimings {
     std::uint64_t scenario_file_read_ns{};
-    std::uint64_t scenario_json_parse_ns{};
-    std::uint64_t scenario_load_validation_resolution_ns{};
+    input::detail::LoadPhaseTimings scenario_load;
     std::uint64_t provider_registration_ns{};
     std::uint64_t comparison_admission_ns{};
+    CapabilityTimings capability;
 };
 
 Json environment_manifest(std::string_view argv0, std::optional<std::size_t> backend_threads) {
@@ -268,9 +277,9 @@ std::string read_scenario_file() {
     return bytes;
 }
 
-problem::ResolvedProblem load_scenario(std::string_view bytes) {
+problem::ResolvedProblem load_scenario(std::string_view bytes, input::detail::LoadPhaseTimings& timings) {
     const auto input_bytes = std::as_bytes(std::span{bytes.data(), bytes.size()});
-    return take(input::load_scenario(input_bytes)).problem();
+    return take(input::detail::load_bytes(input_bytes, input::LoadOptions{}, {}, &timings)).problem();
 }
 
 struct Modules {
@@ -284,7 +293,7 @@ struct Modules {
     registry::StrategyRegistry strategies;
 };
 
-Modules make_modules() {
+Modules make_modules(CapabilityTimings& capability_timings) {
     auto lp = take(adapters::lp::make_highs_registration());
     auto convex = take(adapters::convex::make_highs_registration());
     auto converter = take(adapters::polyhedral::make_qhull_registration(lp));
@@ -321,8 +330,27 @@ Modules make_modules() {
     if (result.selectors.add(synthesis::witness_selector::make_registration(membership)))
         throw std::runtime_error("Witness selector registration failed");
     result.membership = std::move(membership);
-    if (result.strategies.add(synthesis::strategy_a::make_registration(std::move(providers))) ||
-        result.strategies.add(synthesis::strategy_b::make_registration(*result.lps, *result.convexes)))
+    auto reach_back = synthesis::strategy_a::make_registration(std::move(providers));
+    auto reach_back_capabilities = std::move(reach_back.capabilities);
+    reach_back.capabilities = [&capability_timings, callback=std::move(reach_back_capabilities)](
+        const registry::StrategyRequest& request, const registry::Requirements& requirements) {
+        const auto start=Clock::now();
+        auto result=callback(request,requirements);
+        capability_timings.reach_back_ns+=static_cast<std::uint64_t>(ns(start,Clock::now()));
+        ++capability_timings.reach_back_calls;
+        return result;
+    };
+    auto direct_joint = synthesis::strategy_b::make_registration(*result.lps, *result.convexes);
+    auto direct_joint_capabilities = std::move(direct_joint.capabilities);
+    direct_joint.capabilities = [&capability_timings, callback=std::move(direct_joint_capabilities)](
+        const registry::StrategyRequest& request, const registry::Requirements& requirements) {
+        const auto start=Clock::now();
+        auto result=callback(request,requirements);
+        capability_timings.direct_joint_ns+=static_cast<std::uint64_t>(ns(start,Clock::now()));
+        ++capability_timings.direct_joint_calls;
+        return result;
+    };
+    if (result.strategies.add(std::move(reach_back)) || result.strategies.add(std::move(direct_joint)))
         throw std::runtime_error("Strategy registration failed");
     return result;
 }
@@ -1439,18 +1467,17 @@ int main(int argc, char** argv) {
         const auto scenario_bytes = read_scenario_file();
         preflight.scenario_file_read_ns=static_cast<std::uint64_t>(ns(phase_begin,Clock::now()));
         phase_begin=Clock::now();
-        const auto parsed_scenario = Json::parse(scenario_bytes);
-        if (!parsed_scenario.is_object()) throw std::runtime_error("OBS-04 scenario JSON root is not an object");
-        preflight.scenario_json_parse_ns=static_cast<std::uint64_t>(ns(phase_begin,Clock::now()));
+        const auto problem = load_scenario(scenario_bytes, preflight.scenario_load);
         phase_begin=Clock::now();
-        const auto problem = load_scenario(scenario_bytes);
-        preflight.scenario_load_validation_resolution_ns=static_cast<std::uint64_t>(ns(phase_begin,Clock::now()));
-        phase_begin=Clock::now();
-        auto modules = make_modules();
+        auto modules = make_modules(preflight.capability);
         preflight.provider_registration_ns=static_cast<std::uint64_t>(ns(phase_begin,Clock::now()));
         phase_begin=Clock::now();
         const auto prepared = prepare(problem, modules.strategies);
         preflight.comparison_admission_ns=static_cast<std::uint64_t>(ns(phase_begin,Clock::now()));
+        if(preflight.capability.reach_back_calls!=1 || preflight.capability.direct_joint_calls!=1 ||
+           preflight.capability.reach_back_ns>preflight.comparison_admission_ns ||
+           preflight.capability.direct_joint_ns>preflight.comparison_admission_ns)
+            throw std::runtime_error("Capability callback timing did not match the single successful admission path");
         std::array<ar::ResolvedConfiguration,4> configuration_templates{
             configuration_for(prepared,0,false),configuration_for(prepared,0,true),
             configuration_for(prepared,1,false),configuration_for(prepared,1,true)};
@@ -1567,15 +1594,21 @@ int main(int argc, char** argv) {
         if(!output||!(output<<comparison_wire)||!output.flush())
             throw std::runtime_error("Could not write comparison record: "+record_path.string());
         const auto comparison_json=Json::parse(comparison_wire);
-        std::cout << "# shared_preflight=" << Json{{"schema","csl.obs04-shared-preflight/2"},
+        std::cout << "# shared_preflight=" << Json{{"schema","csl.obs04-shared-preflight/3"},
             {"comparison_spec_id",comparison_json.at("comparison_spec_id")},
             {"comparison_run_id",comparison_json.at("comparison_run_id")},
             {"scope","selected_shared_preflight_blocks_before_configuration_workspaces_and_baselines"},
             {"scenario_file_read_ns",preflight.scenario_file_read_ns},
-            {"scenario_json_parse_ns",preflight.scenario_json_parse_ns},
-            {"scenario_load_validation_resolution_ns",preflight.scenario_load_validation_resolution_ns},
+            {"scenario_loader_parse_ns",preflight.scenario_load.parse_ns},
+            {"scenario_loader_parse_entered",preflight.scenario_load.parse_entered},
+            {"scenario_semantic_load_ns",preflight.scenario_load.semantic_load_ns},
+            {"scenario_semantic_load_entered",preflight.scenario_load.semantic_load_entered},
             {"provider_registration_ns",preflight.provider_registration_ns},
-            {"comparison_admission_ns",preflight.comparison_admission_ns}}.dump() << '\n';
+            {"comparison_admission_ns",preflight.comparison_admission_ns},
+            {"reach_back_capability_callback_ns",preflight.capability.reach_back_ns},
+            {"reach_back_capability_callback_calls",preflight.capability.reach_back_calls},
+            {"direct_joint_capability_callback_ns",preflight.capability.direct_joint_ns},
+            {"direct_joint_capability_callback_calls",preflight.capability.direct_joint_calls}}.dump() << '\n';
         std::cout << "# comparison_record_digest=" << problem::hex(comparison.content().digest())
             << "; attempts=" << attempts.size() << "; failures=" << failures << '\n';
         if (failures != 0) return 1;

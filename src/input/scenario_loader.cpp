@@ -1,6 +1,7 @@
 #include "scenario_json.hpp"
 #include <csl/sets/data.hpp>
 #include <algorithm>
+#include <chrono>
 #include <limits>
 
 namespace csl::input {
@@ -15,6 +16,16 @@ std::shared_ptr<const HistoricalRecord> HistoricalScenario::record() const noexc
 std::shared_ptr<const SourceProvenance> HistoricalScenario::source() const noexcept {return {storage_,&storage_->source};}
 namespace detail {
 namespace {
+class PhaseTimer {
+    std::uint64_t* elapsed_;
+    std::chrono::steady_clock::time_point start_{std::chrono::steady_clock::now()};
+public:
+    explicit PhaseTimer(std::uint64_t* elapsed):elapsed_(elapsed) {}
+    ~PhaseTimer() {
+        if(elapsed_) *elapsed_=static_cast<std::uint64_t>(std::chrono::duration_cast<std::chrono::nanoseconds>(
+            std::chrono::steady_clock::now()-start_).count());
+    }
+};
 std::string kind(const Json& value,const std::string& path,const char* category,
                  std::initializer_list<std::string_view> supported,
                  std::initializer_list<std::string_view> reserved,const char* expected) {
@@ -392,9 +403,17 @@ LoadedScenario translate(const Json& root,std::span<const std::byte> bytes,const
         {std::move(source),location,schema,version_one?"csl.scenario-defaults/1":"csl.scenario-defaults/2",options.objective_policy}});
 }
 }
-LoadResult load_bytes(std::span<const std::byte> bytes,const LoadOptions& options,const std::filesystem::path& location) {
+LoadResult load_bytes(std::span<const std::byte> bytes,const LoadOptions& options,const std::filesystem::path& location,
+                      LoadPhaseTimings* timings) {
     try {
-        auto root=parse(bytes,options);
+        if(timings) timings->parse_entered=true;
+        Json root;
+        {
+            PhaseTimer timer{timings?&timings->parse_ns:nullptr};
+            root=parse(bytes,options);
+        }
+        if(timings) timings->semantic_load_entered=true;
+        PhaseTimer semantic_timer{timings?&timings->semantic_load_ns:nullptr};
         if(root.is_object() && root.contains("schema_version")) {
             if(root.contains("schema")) fail("/schema","conflicting formats","one scenario format",InputCategory::schema);
             if(!root["schema_version"].is_number_unsigned() || root["schema_version"]!=1 || !root.contains("id") || root["id"]!="B04-historical")
