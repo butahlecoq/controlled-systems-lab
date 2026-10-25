@@ -98,6 +98,42 @@ Five clean Release captures of these `/4` loader, validation, canonical
 resolution/snapshot, and capability timings are preserved in
 [`results/phase-split-schema4-20261025`](results/phase-split-schema4-20261025/).
 
+The current driver emits shared-preflight schema `/5`. It times the common
+application guards and each registry preparation directly. A registry interval
+pauses around the capability callback; the callback's own duration and call
+count are recorded at that same boundary. Each registry arm reports its
+accepted, rejected, or thrown status. The common guard reports passed, rejected,
+or thrown status. A common-guard rejection leaves both registry arms
+`not_entered`.
+
+`common_guards_ns`, the registry callback-external duration, and the capability
+callback duration are nested within `comparison_admission_ns`. The application
+timer stops after the shared profile, objective, family, strategy, and
+representation checks. Request construction and result assembly remain inside
+inclusive admission only. Do not add nested values to admission or subtract a
+callback interval to infer other registry work. The observed API resets its
+caller-owned fixed-size record on each call. The existing unobserved APIs keep
+their signatures and take no clock reads.
+
+Schema `/4` captures retain their original fields and meaning. The `/5` driver
+does not reconstruct new phase values for those records. The OBS-04 smoke run
+produced a `/5` record with 32 attempts, zero failures, one capability call per
+accepted strategy, and nested phase durations below inclusive admission. That
+run checks instrumentation wiring only. It supports no performance claim.
+Five clean-source Release process captures of `/5` are preserved in
+[`results/phase-split-schema5-20261025`](results/phase-split-schema5-20261025/).
+Each has 32/32 completed attempts. Their per-process preflight values and
+hashes are summarized in that bundle; they verify phase capture and provenance
+but make no strategy-performance claim.
+
+If comparison admission is rejected or throws, the driver writes a complete
+`csl.comparison-record/1` to `--record` (or a unique default path) before
+exiting unsuccessfully. It contains all 32 ordered unsupported/failed arm
+attempts, with valid run references, the admission diagnostics and timing, and
+`strategy_run_ns: null`. Each event marks `admission_failure` and says that no
+workspace ran. This preserves the refusal in the paired comparison record
+without presenting it as a solver execution or completed comparison.
+
 ## Clean-source preflight capture
 
 `results/linux-omarchy-gcc16-20261025-preflight-{a,b,c,d,e}.json`, their
@@ -388,14 +424,24 @@ five clean-source event `/9` captures and their saved HTML are retained in
 [`results/attempt-memory-20261025/`](results/attempt-memory-20261025/).
 Memory enforcement remains unavailable. Shared preflight timing separates
 file read, standalone parse, loader validation/resolution, provider registration,
-and comparison admission; parsing inside the public loader and capability work
-inside admission are still combined. Workspace/setup, family construction,
+and inclusive comparison admission. The retained records use schema `/4`,
+which combines common guards and callback-external registry preparation. The
+current source emits schema `/5` with those phases measured directly.
+Workspace/setup, family construction,
 queries, verification, and end-to-end timing are retained per attempt. Ten
 record-to-HTML exports completed under individual 30-second bounds with saved
 HTML hashes matching; no geometry plot or nonlinear replay applies to this
 linear fixture. The bounded profiles show candidate hotspots but no unique
-source-mapped limiter. Keep OBS-04 open until those remaining gaps have
-evidence.
+source-mapped limiter. Per-attempt RSS is observation-only, and the correctness
+pilot does not use the enforced 300-second/8-GiB profile. The limiter-profile
+conclusion remains inconclusive.
+
+The OBS-04 report driver adds two functions in public headers. Existing
+`prepare_comparison` and `StrategyRegistry::prepare` signatures and object
+layouts remain unchanged. The observed functions add no dependency and do not
+change installation or package workflows. No release is needed for this
+additive API. Any later release still follows the repository's normal release
+gates.
 
 ## Acknowledged perf capture after FIFO fix (2026-10-25)
 

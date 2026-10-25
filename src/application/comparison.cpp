@@ -5,6 +5,7 @@
 #include <algorithm>
 #include <bit>
 #include <charconv>
+#include <chrono>
 #include <cstdint>
 #include <string_view>
 #include <type_traits>
@@ -15,8 +16,37 @@ namespace {
 using Json = nlohmann::ordered_json;
 constexpr std::array<std::string_view, 3> profiles{
     "ts01_exact_integrator", "ts02_constant_integrator", "ts03_singular_integrator"};
-constexpr std::array<std::string_view, 2> strategies{
+constexpr std::array<std::string_view, 2> strategy_order{
     "csl.synthesis.reach-back", "csl.synthesis.strategy-b"};
+
+class CommonGuardTimer {
+public:
+    explicit CommonGuardTimer(ComparisonPreparationObservation* observation) noexcept
+        : observation_(observation) {
+        if (observation_) {
+            start_ = std::chrono::steady_clock::now();
+            active_ = true;
+        }
+    }
+
+    void finish(PreparationObservationStatus status) noexcept {
+        if (!observation_ || !active_) return;
+        observation_->common_guards_ns = static_cast<std::uint64_t>(
+            std::chrono::duration_cast<std::chrono::nanoseconds>(
+                std::chrono::steady_clock::now()-start_).count());
+        observation_->common_guard_status = status;
+        active_ = false;
+    }
+
+    ~CommonGuardTimer() {
+        if (active_) finish(PreparationObservationStatus::threw);
+    }
+
+private:
+    ComparisonPreparationObservation* observation_{};
+    std::chrono::steady_clock::time_point start_{};
+    bool active_{};
+};
 
 std::string bits(double value) {
     char buffer[16];
@@ -330,26 +360,43 @@ artifacts::FinalOutcome project(const SynthesisOutcome& outcome) {
 
 Preparation prepare_comparison(const ComparisonRequest& request,
     const registry::StrategyRegistry& registry) {
+    return PreparedComparison::prepare_impl(request,registry,nullptr);
+}
+
+Preparation prepare_comparison_observed(const ComparisonRequest& request,
+    const registry::StrategyRegistry& registry,ComparisonPreparationObservation& observation) {
+    observation = {};
+    return PreparedComparison::prepare_impl(request,registry,&observation);
+}
+
+Preparation PreparedComparison::prepare_impl(const ComparisonRequest& request,
+    const registry::StrategyRegistry& registry,ComparisonPreparationObservation* observation) {
+    CommonGuardTimer guard_timer{observation};
+    auto reject = [&](std::string field,std::string explanation) {
+        guard_timer.finish(PreparationObservationStatus::rejected);
+        return unsupported(std::move(field),std::move(explanation));
+    };
     if (std::find(profiles.begin(), profiles.end(), request.family.profile) == profiles.end())
-        return unsupported("comparison.family.profile",
+        return reject("comparison.family.profile",
             "Only the guarded T-S01, T-S02 and T-S03 complete-family profiles are admitted.");
     if (request.family.objective != request.problem.identity())
-        return unsupported("comparison.family.objective",
+        return reject("comparison.family.objective",
             "The common family request must name the supplied resolved problem.");
     if (request.family.target != FamilyTarget::exact_optimal_relation ||
         request.family.assurance != Assurance::numerical ||
         !admitted_representation(request.family.representation))
-        return unsupported("comparison.family",
+        return reject("comparison.family",
             "The initial paired workflow requires a numerical exact relation in csl.polyhedron.h.");
 
-    for (std::size_t index = 0; index < strategies.size(); ++index) {
-        if (request.strategies[index].strategy.value != strategies[index])
-            return unsupported("comparison.strategies[" + std::to_string(index) + "]",
+    for (std::size_t index = 0; index < request.strategies.size(); ++index) {
+        if (request.strategies[index].strategy.value != strategy_order[index])
+            return reject("comparison.strategies[" + std::to_string(index) + "]",
                 "The first paired workflow requires reach-back followed by direct joint synthesis.");
         if (request.strategies[index].representation != request.family.representation)
-            return unsupported("comparison.strategies[" + std::to_string(index) + "].representation",
+            return reject("comparison.strategies[" + std::to_string(index) + "].representation",
                 "Both strategies must use the common family representation.");
     }
+    guard_timer.finish(PreparationObservationStatus::passed);
 
     std::array<std::optional<registry::PreparedStrategy>, 2> prepared;
     std::vector<registry::Rejection> rejections;
@@ -361,7 +408,8 @@ Preparation prepare_comparison(const ComparisonRequest& request,
         requirements.output.representation = request.family.representation;
         requirements.output.family = request.family.target;
         requirements.output.completeness = registry::Completeness::established;
-        auto result = registry.prepare(strategy_request, requirements);
+        auto result = observation ? registry.prepare_observed(strategy_request,requirements,{},
+            observation->registry_attempts[index]) : registry.prepare(strategy_request, requirements);
         if (auto* rejection = std::get_if<registry::Rejection>(&result)) {
             rejections.push_back(std::move(*rejection));
             rejected_indices.push_back(index);

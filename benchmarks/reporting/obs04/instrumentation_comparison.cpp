@@ -221,20 +221,51 @@ HostFacts host_facts() {
     return host;
 }
 
-struct CapabilityTimings {
-    std::uint64_t reach_back_ns{};
-    std::uint64_t direct_joint_ns{};
-    std::size_t reach_back_calls{};
-    std::size_t direct_joint_calls{};
-};
-
 struct PreflightTimings {
     std::uint64_t scenario_file_read_ns{};
     input::detail::LoadPhaseTimings scenario_load;
     std::uint64_t provider_registration_ns{};
     std::uint64_t comparison_admission_ns{};
-    CapabilityTimings capability;
+    application::ComparisonPreparationObservation comparison_observation;
 };
+
+std::string_view preparation_status_name(registry::PreparationObservationStatus status) {
+    switch (status) {
+    case registry::PreparationObservationStatus::not_entered: return "not_entered";
+    case registry::PreparationObservationStatus::accepted: return "accepted";
+    case registry::PreparationObservationStatus::rejected: return "rejected";
+    case registry::PreparationObservationStatus::threw: return "threw";
+    }
+    return "unknown";
+}
+
+std::string_view common_guard_status_name(application::PreparationObservationStatus status) {
+    switch (status) {
+    case application::PreparationObservationStatus::not_entered: return "not_entered";
+    case application::PreparationObservationStatus::passed: return "passed";
+    case application::PreparationObservationStatus::rejected: return "rejected";
+    case application::PreparationObservationStatus::threw: return "threw";
+    }
+    return "unknown";
+}
+
+std::string_view diagnostic_code_name(DiagnosticCode code) {
+    switch (code) {
+    case DiagnosticCode::invalid_input: return "invalid_input";
+    case DiagnosticCode::unsupported: return "unsupported";
+    case DiagnosticCode::evidence_mismatch: return "evidence_mismatch";
+    case DiagnosticCode::invalid_claim: return "invalid_claim";
+    }
+    return "unknown";
+}
+
+Json diagnostics_json(const Diagnostics& diagnostics) {
+    auto result=Json::array();
+    for (const auto& diagnostic : diagnostics)
+        result.push_back({{"code",diagnostic_code_name(diagnostic.code)},
+            {"field",diagnostic.field},{"explanation",diagnostic.explanation}});
+    return result;
+}
 
 Json environment_manifest(std::string_view argv0, std::optional<std::size_t> backend_threads) {
     const auto host=host_facts();
@@ -291,9 +322,10 @@ struct Modules {
     registry::Registry<registry::SelectorPort> selectors;
     std::optional<registry::PreparedProvider<registry::LPPort>> membership;
     registry::StrategyRegistry strategies;
+    std::array<registry::Identity,2> strategy_identities;
 };
 
-Modules make_modules(CapabilityTimings& capability_timings) {
+Modules make_modules() {
     auto lp = take(adapters::lp::make_highs_registration());
     auto convex = take(adapters::convex::make_highs_registration());
     auto converter = take(adapters::polyhedral::make_qhull_registration(lp));
@@ -322,7 +354,7 @@ Modules make_modules(CapabilityTimings& capability_timings) {
         registry::select_provider(*conversions, cm, h), registry::select_provider(*lps, lm, program),
         registry::select_provider(*convexes, qm, program)));
     Modules result{std::move(projections), std::move(affines), std::move(conversions),
-        std::move(lps), std::move(convexes), {}, {}, {}};
+        std::move(lps), std::move(convexes), {}, {}, {}, {}};
     registry::Requirements membership_requirements;
     membership_requirements.output.representation = {"csl.program-result.v1"};
     auto membership = take(registry::prepare_provider(
@@ -331,32 +363,14 @@ Modules make_modules(CapabilityTimings& capability_timings) {
         throw std::runtime_error("Witness selector registration failed");
     result.membership = std::move(membership);
     auto reach_back = synthesis::strategy_a::make_registration(std::move(providers));
-    auto reach_back_capabilities = std::move(reach_back.capabilities);
-    reach_back.capabilities = [&capability_timings, callback=std::move(reach_back_capabilities)](
-        const registry::StrategyRequest& request, const registry::Requirements& requirements) {
-        const auto start=Clock::now();
-        auto result=callback(request,requirements);
-        capability_timings.reach_back_ns+=static_cast<std::uint64_t>(ns(start,Clock::now()));
-        ++capability_timings.reach_back_calls;
-        return result;
-    };
     auto direct_joint = synthesis::strategy_b::make_registration(*result.lps, *result.convexes);
-    auto direct_joint_capabilities = std::move(direct_joint.capabilities);
-    direct_joint.capabilities = [&capability_timings, callback=std::move(direct_joint_capabilities)](
-        const registry::StrategyRequest& request, const registry::Requirements& requirements) {
-        const auto start=Clock::now();
-        auto result=callback(request,requirements);
-        capability_timings.direct_joint_ns+=static_cast<std::uint64_t>(ns(start,Clock::now()));
-        ++capability_timings.direct_joint_calls;
-        return result;
-    };
+    result.strategy_identities={reach_back.identity,direct_joint.identity};
     if (result.strategies.add(std::move(reach_back)) || result.strategies.add(std::move(direct_joint)))
         throw std::runtime_error("Strategy registration failed");
     return result;
 }
 
-application::PreparedComparison prepare(const problem::ResolvedProblem& problem,
-    registry::StrategyRegistry& strategies) {
+application::ComparisonRequest comparison_request(const problem::ResolvedProblem& problem) {
     FamilyRequest family;
     family.profile = "ts01_exact_integrator";
     family.objective = problem.identity();
@@ -367,7 +381,13 @@ application::PreparedComparison prepare(const problem::ResolvedProblem& problem,
     a.strategy = {"csl.synthesis.reach-back"}; a.lp = {"csl.lp.highs"};
     a.convex = {"csl.convex.highs"}; a.representation = family.representation;
     StrategyConfiguration b = a; b.strategy = {"csl.synthesis.strategy-b"};
-    return take(application::prepare_comparison({problem, family, {a, b}}, strategies));
+    return {problem,family,{a,b}};
+}
+
+application::Preparation prepare(const problem::ResolvedProblem& problem,
+    registry::StrategyRegistry& strategies,
+    application::ComparisonPreparationObservation& observation) {
+    return application::prepare_comparison_observed(comparison_request(problem),strategies,observation);
 }
 
 struct CollectionSetup {
@@ -376,24 +396,29 @@ struct CollectionSetup {
     std::optional<ar::CollectedStatistics> empty_statistics;
 };
 
-ar::ResolvedConfiguration configuration_for(const application::PreparedComparison& prepared,
-    std::size_t strategy_index, bool enabled) {
-    const auto& selected_configuration=prepared.strategies()[strategy_index];
-    const auto expected=prepared.expected_synthesis_identity(strategy_index);
+ar::ResolvedConfiguration configuration_for(const StrategyConfiguration& selected_configuration,
+    const FamilyRequest& family,const registry::Identity& strategy_identity,bool enabled) {
     const ar::Unavailable missing{ar::MissingReason::not_instrumented,{}};
     ar::ConfigurationInput config;
     config.collection={enabled,ar::CollectionMode::summary,6,10000,0,0};
-    config.modules={{"strategy",{expected.strategy,expected.strategy_version,missing},{}},
+    config.modules={{"strategy",{strategy_identity.id,strategy_identity.version,missing},{}},
         {"lp",{selected_configuration.lp,"1",missing},{}},
         {"convex",{selected_configuration.convex,"1",missing},{}}};
-    config.numerical=prepared.family().numerical;
+    config.numerical=family.numerical;
     config.resources={1,1,1,{}};
-    config.output={ar::OutputKind::synthesis,prepared.family().assurance,
-        prepared.family().target,prepared.family().representation,{2,0,{{1,-1},{-1,1}},31}};
+    config.output={ar::OutputKind::synthesis,family.assurance,
+        family.target,family.representation,{2,0,{{1,-1},{-1,1}},31}};
     config.selector={{synthesis::witness_selector::selector_id},"1",{}};
     config.strategy=selected_configuration;
     config.strategy.selector=config.selector.id;
     return take(ar::resolve_configuration(std::move(config)));
+}
+
+ar::ResolvedConfiguration configuration_for(const application::PreparedComparison& prepared,
+    std::size_t strategy_index,bool enabled) {
+    const auto expected=prepared.expected_synthesis_identity(strategy_index);
+    return configuration_for(prepared.strategies()[strategy_index],prepared.family(),
+        {expected.strategy,expected.strategy_version},enabled);
 }
 
 CollectionSetup collector_for(const application::PreparedComparison& prepared,
@@ -1359,6 +1384,167 @@ ar::CollectedStatistics empty_fallback_statistics(const problem::ResolvedProblem
     return take(ar::publish_collection(std::move(record)));
 }
 
+void persist_preparation_failure(const problem::ResolvedProblem& problem,const Modules& modules,
+    const PreflightTimings& preflight,const application::Preparation* preparation,
+    std::string_view thrown,const std::optional<std::string>& requested_path,std::string_view argv0) {
+    const auto request=comparison_request(problem);
+    const auto& observation=preflight.comparison_observation;
+    const auto recorded_at=std::chrono::duration_cast<std::chrono::nanoseconds>(
+        std::chrono::system_clock::now().time_since_epoch()).count();
+    const auto timestamp=std::to_string(recorded_at);
+    const auto diagnostic_for=[&](std::size_t strategy_index) {
+        if (!thrown.empty())
+            return Diagnostics{{DiagnosticCode::unsupported,"comparison.admission.exception",
+                "Comparison admission threw before any strategy workspace ran: "+std::string(thrown)}};
+        if (preparation) {
+            if (const auto* unsupported=std::get_if<application::UnsupportedComparison>(preparation))
+                return unsupported->diagnostics;
+            if (const auto* rejected=std::get_if<application::RejectedComparison>(preparation)) {
+                for (std::size_t index=0; index<rejected->strategies.size(); ++index)
+                    if (rejected->strategy_indices[index]==strategy_index)
+                        return rejected->strategies[index].diagnostics;
+            }
+        }
+        return Diagnostics{{DiagnosticCode::unsupported,"comparison.admission.pair",
+            "The paired comparison was not admitted, so this strategy arm did not run"}};
+    };
+    Json shared_registry=Json::array();
+    for (std::size_t index=0; index<observation.registry_attempts.size(); ++index) {
+        const auto& arm=observation.registry_attempts[index];
+        shared_registry.push_back({{"strategy_index",index},
+            {"status",preparation_status_name(arm.status)},
+            {"callback_external_ns",arm.callback_external_ns},
+            {"capability_callback_ns",arm.capability_callback_ns},
+            {"capability_callback_calls",arm.capability_callback_calls}});
+    }
+    const Json shared_preflight{{"schema","csl.obs04-shared-preflight/5"},
+        {"scope","comparison_admission_failed_before_workspace_creation"},
+        {"common_guard_status",common_guard_status_name(observation.common_guard_status)},
+        {"common_guards_ns",observation.common_guards_ns},
+        {"registry_attempts",shared_registry},
+        {"scenario_file_read_ns",preflight.scenario_file_read_ns},
+        {"scenario_loader_parse_ns",preflight.scenario_load.parse_ns},
+        {"scenario_loader_parse_entered",preflight.scenario_load.parse_entered},
+        {"scenario_semantic_load_ns",preflight.scenario_load.semantic_load_ns},
+        {"scenario_semantic_load_entered",preflight.scenario_load.semantic_load_entered},
+        {"scenario_translation_and_validation_ns",preflight.scenario_load.translation_ns},
+        {"scenario_translation_entered",preflight.scenario_load.translation_entered},
+        {"scenario_resolution_snapshot_ns",preflight.scenario_load.resolution_snapshot_ns},
+        {"scenario_resolution_snapshot_entered",preflight.scenario_load.resolution_snapshot_entered},
+        {"provider_registration_ns",preflight.provider_registration_ns},
+        {"comparison_admission_ns",preflight.comparison_admission_ns},
+        {"thrown",thrown.empty()?Json{}:Json{std::string(thrown)}}};
+
+    std::array<ar::ResolvedConfiguration,4> configurations{
+        configuration_for(request.strategies[0],request.family,modules.strategy_identities[0],false),
+        configuration_for(request.strategies[0],request.family,modules.strategy_identities[0],true),
+        configuration_for(request.strategies[1],request.family,modules.strategy_identities[1],false),
+        configuration_for(request.strategies[1],request.family,modules.strategy_identities[1],true)};
+    std::array<std::string,4> configuration_ids{};
+    Json arms=Json::array();
+    for (std::size_t index=0; index<configurations.size(); ++index) {
+        configuration_ids[index]=configurations[index].identity().value;
+        arms.push_back({{"configuration_id",configuration_ids[index]},
+            {"instrumentation",index%2==0?"disabled":"enabled"},
+            {"strategy",request.strategies[index/2].strategy.value}});
+    }
+    std::vector<ar::ComparisonAttempt> attempts;
+    attempts.reserve(32);
+    std::optional<problem::ContentDigest> request_digest;
+    for (std::uint32_t arm_index=0; arm_index<4; ++arm_index) {
+        const auto strategy_index=static_cast<std::size_t>(arm_index/2);
+        const bool enabled=arm_index%2!=0;
+        for (std::uint32_t repetition=0; repetition<8; ++repetition) {
+            const auto run_id=ar::RunId{"obs04-admission-"+timestamp+"-"+
+                std::to_string(arm_index)+"-"+std::to_string(repetition)};
+            auto statistics=empty_fallback_statistics(problem,configurations[arm_index],run_id);
+            const auto diagnostics=diagnostic_for(strategy_index);
+            ar::AttemptStatus status=thrown.empty()?ar::AttemptStatus::unsupported:ar::AttemptStatus::failed;
+            ar::RecordedRunArtifact run=[&] {
+                if (thrown.empty()) {
+                    application::StrategyExecution execution{Unsupported{diagnostics},
+                        ar::UnsupportedFinal{diagnostics},std::monostate{}, {}};
+                    const auto wire=take(application::encode_strategy_run(problem,execution,
+                        configurations[arm_index],run_id,statistics,
+                        {ar::Unavailable{ar::MissingReason::not_requested,{}},
+                         ar::Unavailable{ar::MissingReason::not_requested,{}},
+                         ar::Unavailable{ar::MissingReason::not_requested,{}},
+                         ar::Unavailable{ar::MissingReason::not_requested,{}},false,
+                         ar::MemoryAccounting::unlimited}));
+                    return take(ar::decode_recorded_run(wire,problem));
+                }
+                const auto description=problem.description();
+                const ar::Unavailable unavailable{ar::MissingReason::not_requested,{}};
+                ar::RunRecord record{problem.identity(),description->model->dynamics.dimensions,
+                    static_cast<std::uint64_t>(description->times.size()-1),configurations[arm_index],run_id,
+                    ar::FailedFinal{ar::FailurePhase::create,ar::FailureReason::adapter_exception,
+                        "Comparison admission threw before workspace creation: "+std::string(thrown),{}},
+                    statistics,{unavailable,unavailable,unavailable,unavailable,false,ar::MemoryAccounting::unlimited},
+                    {},{},ar::ProblemProvenance::problem_revalidated,{}};
+                auto published=take(ar::publish_run({problem,std::move(record)}));
+                const auto encoded=take(ar::encode_recorded_run(published));
+                const auto bytes=encoded.content().bytes();
+                std::string wire;wire.reserve(bytes.size());
+                for (const auto byte:bytes)wire.push_back(static_cast<char>(std::to_integer<unsigned char>(byte)));
+                return take(ar::decode_recorded_run(wire,problem));
+            }();
+            if (!request_digest) request_digest=take(ar::comparison_request_digest(run));
+            Json measurement{{"schema","csl.obs04-instrumentation-comparison-event/9"},
+                {"repetition",repetition},{"warmup",repetition==0},
+                {"strategy",request.strategies[strategy_index].strategy.value},
+                {"instrumentation",enabled?"enabled":"disabled"},
+                {"setup_ns",nullptr},{"strategy_run_ns",nullptr},{"strategy_run_cpu_ns",nullptr},
+                {"observed_backend_scheduler_width",nullptr},
+                {"strategy_run_peak_rss",{{"status","not_measured"},
+                    {"metric","process_peak_rss_bytes"},
+                    {"scope","process_vm_hwm_reset_before_and_read_after_strategy_run"},
+                    {"value_bytes",nullptr},{"reason","no strategy workspace ran"}}},
+                {"family_construction_ns",nullptr},{"end_to_end_ns",nullptr},
+                {"selection_setup_ns",nullptr},{"selection_run_ns",nullptr},
+                {"first_witness_query_ns",nullptr},{"additional_witness_query_ns",nullptr},
+                {"verification_ns",nullptr},{"requested_witness_count",2},
+                {"returned_witness_count",nullptr},{"distinct_witness_count",nullptr},
+                {"status",status==ar::AttemptStatus::unsupported?"unsupported":"failed"},
+                {"phase_status","failed"},{"phase_error",thrown.empty()?"comparison admission rejected":thrown},
+                {"complete_family_verified",false},{"analytic_family_checked",false},
+                {"admission_failure",{{"failure_phase","comparison_admission"},
+                    {"diagnostics",diagnostics_json(diagnostics)},{"shared_preflight",shared_preflight}}}};
+            const auto measurement_text=measurement.dump();
+            const auto digest=run.content().digest();
+            attempts.push_back({arm_index,repetition,status,
+                {run_id,digest},std::move(run),measurement_text});
+        }
+    }
+    const auto request_hash=*request_digest;
+    const auto canonical_problem=problem.canonical_bytes();
+    const auto input_manifest_hash=take(problem::snapshot_content(std::span<const std::byte>{canonical_problem})).digest();
+    const Json spec{{"arms",std::move(arms)},
+        {"environment",environment_manifest(argv0,std::nullopt)},
+        {"input_manifest_hash",problem::hex(input_manifest_hash)},
+        {"input_manifest_source","resolved-problem-canonical-bytes"},
+        {"problem_id",problem.identity().value},{"repetitions",8},
+        {"request_digest",problem::hex(request_hash)},{"schema","csl.comparison-spec/3"}};
+    const auto spec_text=spec.dump();
+    auto spec_content=take(problem::snapshot_content(std::span<const std::byte>{
+        reinterpret_cast<const std::byte*>(spec_text.data()),spec_text.size()}));
+    auto comparison=take(ar::encode_recorded_comparison(spec_content,attempts));
+    std::string comparison_wire;
+    for (const auto byte:comparison.content().bytes())
+        comparison_wire.push_back(static_cast<char>(std::to_integer<unsigned char>(byte)));
+    auto replay=take(ar::decode_recorded_comparison(comparison_wire));
+    if (replay.content().digest()!=comparison.content().digest())
+        throw std::runtime_error("Admission failure comparison record failed exact round-trip identity");
+    const auto path=requested_path ? std::filesystem::path{*requested_path} :
+        std::filesystem::path{"obs04-comparison-record-"+problem::hex(comparison.content().digest())+".json"};
+    if (std::filesystem::exists(path))
+        throw std::runtime_error("Refusing to overwrite existing comparison record: "+path.string());
+    std::ofstream output(path,std::ios::binary|std::ios::out);
+    if (!output || !(output<<comparison_wire) || !output.flush())
+        throw std::runtime_error("Could not write comparison record: "+path.string());
+    std::cerr << "OBS-04 comparison admission failed; 32 unsupported/failed attempts saved to "
+        << path.string() << '\n';
+}
+
 std::optional<TrialRecord> trial(const application::PreparedComparison& prepared, std::size_t strategy_index,
     Modules& modules, bool enabled, std::size_t repetition, bool warmup, const Signature& expected,
     const ar::ResolvedConfiguration& resolved_configuration) {
@@ -1469,15 +1655,40 @@ int main(int argc, char** argv) {
         phase_begin=Clock::now();
         const auto problem = load_scenario(scenario_bytes, preflight.scenario_load);
         phase_begin=Clock::now();
-        auto modules = make_modules(preflight.capability);
+        auto modules = make_modules();
         preflight.provider_registration_ns=static_cast<std::uint64_t>(ns(phase_begin,Clock::now()));
         phase_begin=Clock::now();
-        const auto prepared = prepare(problem, modules.strategies);
+        std::optional<application::Preparation> preparation;
+        std::string preparation_error;
+        try {
+            preparation.emplace(prepare(problem,modules.strategies,preflight.comparison_observation));
+        } catch (const std::exception& error) {
+            preparation_error=error.what();
+        } catch (...) {
+            preparation_error="non-standard exception during comparison admission";
+        }
         preflight.comparison_admission_ns=static_cast<std::uint64_t>(ns(phase_begin,Clock::now()));
-        if(preflight.capability.reach_back_calls!=1 || preflight.capability.direct_joint_calls!=1 ||
-           preflight.capability.reach_back_ns>preflight.comparison_admission_ns ||
-           preflight.capability.direct_joint_ns>preflight.comparison_admission_ns)
-            throw std::runtime_error("Capability callback timing did not match the single successful admission path");
+        const auto* prepared_result=preparation ?
+            std::get_if<application::PreparedComparison>(&*preparation) : nullptr;
+        if (!prepared_result) {
+            persist_preparation_failure(problem,modules,preflight,
+                preparation ? &*preparation : nullptr,preparation_error,requested_record_path,
+                argc>0?std::string_view{argv[0]}:std::string_view{});
+            return 1;
+        }
+        const auto& prepared=*prepared_result;
+        const auto& admission_observation=preflight.comparison_observation;
+        const auto& reach_back_observation=admission_observation.registry_attempts[0];
+        const auto& direct_joint_observation=admission_observation.registry_attempts[1];
+        const auto observed_admission_ns=admission_observation.common_guards_ns+
+            reach_back_observation.callback_external_ns+reach_back_observation.capability_callback_ns+
+            direct_joint_observation.callback_external_ns+direct_joint_observation.capability_callback_ns;
+        if(admission_observation.common_guard_status!=application::PreparationObservationStatus::passed ||
+           reach_back_observation.status!=registry::PreparationObservationStatus::accepted ||
+           direct_joint_observation.status!=registry::PreparationObservationStatus::accepted ||
+           reach_back_observation.capability_callback_calls!=1 || direct_joint_observation.capability_callback_calls!=1 ||
+           observed_admission_ns>preflight.comparison_admission_ns)
+            throw std::runtime_error("Admission phase timing did not match the successful single-callback path");
         std::array<ar::ResolvedConfiguration,4> configuration_templates{
             configuration_for(prepared,0,false),configuration_for(prepared,0,true),
             configuration_for(prepared,1,false),configuration_for(prepared,1,true)};
@@ -1594,7 +1805,7 @@ int main(int argc, char** argv) {
         if(!output||!(output<<comparison_wire)||!output.flush())
             throw std::runtime_error("Could not write comparison record: "+record_path.string());
         const auto comparison_json=Json::parse(comparison_wire);
-        std::cout << "# shared_preflight=" << Json{{"schema","csl.obs04-shared-preflight/4"},
+        std::cout << "# shared_preflight=" << Json{{"schema","csl.obs04-shared-preflight/5"},
             {"comparison_spec_id",comparison_json.at("comparison_spec_id")},
             {"comparison_run_id",comparison_json.at("comparison_run_id")},
             {"scope","selected_shared_preflight_blocks_before_configuration_workspaces_and_baselines"},
@@ -1609,10 +1820,16 @@ int main(int argc, char** argv) {
             {"scenario_resolution_snapshot_entered",preflight.scenario_load.resolution_snapshot_entered},
             {"provider_registration_ns",preflight.provider_registration_ns},
             {"comparison_admission_ns",preflight.comparison_admission_ns},
-            {"reach_back_capability_callback_ns",preflight.capability.reach_back_ns},
-            {"reach_back_capability_callback_calls",preflight.capability.reach_back_calls},
-            {"direct_joint_capability_callback_ns",preflight.capability.direct_joint_ns},
-            {"direct_joint_capability_callback_calls",preflight.capability.direct_joint_calls}}.dump() << '\n';
+            {"common_guard_status",common_guard_status_name(admission_observation.common_guard_status)},
+            {"common_guards_ns",admission_observation.common_guards_ns},
+            {"reach_back_registry_status",preparation_status_name(reach_back_observation.status)},
+            {"reach_back_registry_callback_external_ns",reach_back_observation.callback_external_ns},
+            {"reach_back_capability_callback_ns",reach_back_observation.capability_callback_ns},
+            {"reach_back_capability_callback_calls",reach_back_observation.capability_callback_calls},
+            {"direct_joint_registry_status",preparation_status_name(direct_joint_observation.status)},
+            {"direct_joint_registry_callback_external_ns",direct_joint_observation.callback_external_ns},
+            {"direct_joint_capability_callback_ns",direct_joint_observation.capability_callback_ns},
+            {"direct_joint_capability_callback_calls",direct_joint_observation.capability_callback_calls}}.dump() << '\n';
         std::cout << "# comparison_record_digest=" << problem::hex(comparison.content().digest())
             << "; attempts=" << attempts.size() << "; failures=" << failures << '\n';
         if (failures != 0) return 1;
