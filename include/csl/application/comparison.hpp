@@ -87,8 +87,9 @@ struct ComparisonExecution {
 
 using Preparation = std::variant<PreparedComparison, UnsupportedComparison, RejectedComparison>;
 
-// Admits guarded T-S01/T-S02/T-S03 pairs against one immutable mathematical
-// problem and one effective request. No workspace is created on rejection.
+// Admits guarded T-S01/T-S02/T-S03 complete-family pairs and nominal-open-loop
+// candidate generality runs against one immutable problem/request. No workspace
+// is created on rejection.
 Preparation prepare_comparison(const ComparisonRequest&, const registry::StrategyRegistry&);
 Preparation prepare_comparison_observed(const ComparisonRequest&,
     const registry::StrategyRegistry&, ComparisonPreparationObservation&);

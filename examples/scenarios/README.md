@@ -49,6 +49,33 @@ encode `(p-1)²+(v-0.5)²` in the documented `0.5 xᵀQx + qᵀx + c` convention
 The listed control sequence is a hand-derived feasible example, not an optimal
 solution or a solver trace.
 
+Issue #421 connects this non-fuel fixture to the existing scenario CLI with a
+`nominal_open_loop` candidate request. The run resolves the authored scenario,
+prepares and executes both registered strategies, then saves one
+`csl.run-statistics/6` artifact per strategy. In the current tested run,
+reach-back is rejected by the convex adapter's `1e-12` matrix-removal threshold;
+Strategy B completes with an undetermined candidate and one feasible incumbent
+checked against the original model. The integration check verifies that
+incumbent's trajectory, residual bound, and zero terminal tracking cost, and
+preserves both attempt records. These are observed outcomes for this
+configuration; changing the solver or model may change them.
+The run makes no optimality, family-completeness, or paired-performance claim.
+Exercise it without performance measurement through the installed-package
+consumer suite, from the repository root:
+
+```sh
+ctest --preset highs -R '^installed_public_client$' --output-on-failure
+```
+
+The run request is `nominal_open_loop` with `candidate_relaxation`, numerical
+assurance, `csl.polyhedron.h`, `csl.lp.highs`, and `csl.convex.highs`; the
+scenario's default numerical tolerances are `1e-8` absolute and relative. This
+fixture follows the non-fuel task selected in [decision #401](https://github.com/butahlecoq/controlled-systems-lab/issues/401), as implemented under #421; it does not reproduce a paper or historical run.
+
+The CTest `scenario_cli_run_double_integrator_generality` checks this
+resolve/prepare/execute/report path and confirms the candidate result is
+reported without upgrading it to a verified complete family.
+
 `temporal-slew-integrator.json` uses `csl.scenario/2` because scenario v1
 reserves and rejects temporal data. Its one row is authored in canonical
 `[x0,x1,x2,u0,u1]` order and imposes `u1-u0 in [-1/4,1/4]`. The exact feasible

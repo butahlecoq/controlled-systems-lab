@@ -142,6 +142,9 @@ example_check(scenario_cli_missing scenario_cli "--validate-only;${CMAKE_CURRENT
   "Input rejected: category=io.*expected")
 example_check(scenario_cli_run_ts01 scenario_cli "--run;${CMAKE_CURRENT_SOURCE_DIR}/scenarios/two-stage-integrator.json;--seed;42;--threads;2" 0
   "mode=run profile=ts01_exact_integrator strategy=csl.synthesis.reach-back.*seed=42 threads=2.*verification=numerical_pass")
+example_check(scenario_cli_run_double_integrator_generality scenario_cli
+  "--run;${CMAKE_CURRENT_SOURCE_DIR}/scenarios/double-integrator-generality.json;--profile;nominal_open_loop"
+  0 "mode=run profile=nominal_open_loop strategy=csl.synthesis.strategy-b.*outcome=undetermined family=candidate selected=0 incumbents=1 verification=not_passed incumbent_evidence=numerical")
 example_check(scenario_cli_run_missing scenario_cli "--run;${CMAKE_CURRENT_BINARY_DIR}/no-such-scenario.json" 2
   "Input rejected: category=io.*expected")
 example_check(scenario_cli_run_unknown_backend scenario_cli
@@ -158,6 +161,15 @@ if(TARGET scenario_cli)
       "-DOUTPUT_DIRECTORY=${CMAKE_CURRENT_BINARY_DIR}/scenario-cli-export-roundtrip"
       -P "${CMAKE_CURRENT_SOURCE_DIR}/scenario_cli_export_check.cmake")
   set_tests_properties(scenario_cli_run_export_roundtrip PROPERTIES TIMEOUT 30)
+  add_test(NAME scenario_cli_double_integrator_generality_export
+    COMMAND ${CMAKE_COMMAND}
+      "-DSCENARIO_CLI=$<TARGET_FILE:scenario_cli>"
+      "-DSCENARIO_INPUT=${CMAKE_CURRENT_SOURCE_DIR}/scenarios/double-integrator-generality.json"
+      "-DSCENARIO_PROFILE=nominal_open_loop"
+      "-DEXPECTED_FAMILY_KIND=candidate"
+      "-DOUTPUT_DIRECTORY=${CMAKE_CURRENT_BINARY_DIR}/scenario-cli-double-integrator-generality"
+      -P "${CMAKE_CURRENT_SOURCE_DIR}/scenario_cli_export_check.cmake")
+  set_tests_properties(scenario_cli_double_integrator_generality_export PROPERTIES TIMEOUT 30)
 endif()
 example_check(scenario_cli_malformed scenario_cli "--validate-only;${CMAKE_CURRENT_BINARY_DIR}/malformed.json" 2
   "Input rejected: category=syntax.*expected")

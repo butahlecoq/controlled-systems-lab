@@ -113,6 +113,20 @@ TEST_CASE("comparison admission rejects unguarded profiles before registry acces
     CHECK(observation.registry_attempts[1].status==csl::registry::PreparationObservationStatus::not_entered);
 }
 
+TEST_CASE("comparison admission allows nominal-open-loop candidate generality requests") {
+    const auto problem=zero_problem();
+    auto request=request_for(problem);
+    request.family.profile="nominal_open_loop";
+    request.family.target=csl::FamilyTarget::candidate_relaxation;
+    const csl::registry::StrategyRegistry empty;
+    csl::application::ComparisonPreparationObservation observation;
+    const auto result=csl::application::prepare_comparison_observed(request,empty,observation);
+    REQUIRE(std::holds_alternative<csl::application::RejectedComparison>(result));
+    CHECK(observation.common_guard_status==csl::application::PreparationObservationStatus::passed);
+    CHECK(observation.registry_attempts[0].status==csl::registry::PreparationObservationStatus::rejected);
+    CHECK(observation.registry_attempts[1].status==csl::registry::PreparationObservationStatus::rejected);
+}
+
 TEST_CASE("both capability rejections are reported without planner or workspace creation") {
     const auto problem=zero_problem();
     const auto request=request_for(problem);

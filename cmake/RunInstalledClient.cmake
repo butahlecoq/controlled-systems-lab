@@ -161,6 +161,8 @@ file(COPY "${CSL_SOURCE_DIR}/examples/scenario_cli_export_check.cmake"
   DESTINATION "${example_source}")
 file(COPY "${CSL_SOURCE_DIR}/examples/scenarios/two-stage-integrator.json"
   DESTINATION "${example_source}/scenarios")
+file(COPY "${CSL_SOURCE_DIR}/examples/scenarios/double-integrator-generality.json"
+  DESTINATION "${example_source}/scenarios")
 execute_process(COMMAND "${CMAKE_COMMAND}" -S "${example_source}" -B "${work}/examples-build"
   ${generator_args} "-DCMAKE_PREFIX_PATH=${prefix}" "-DCMAKE_BUILD_TYPE=${CSL_CONFIG}"
   "-DCMAKE_CXX_COMPILER=${CSL_CXX_COMPILER}" "-DCMAKE_CXX_FLAGS=${CSL_CXX_FLAGS}"
