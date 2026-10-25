@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 980 500" role="img" aria-labelledby="title desc">
+  <title id="title">Two coordinate projections of an illustrative four-state fuel-like set</title>
+  <desc id="desc">An illustrative four-dimensional box with oxidizer flow, oxidizer working-stock balance, fuel flow and fuel working-stock balance projects to two rectangles. The right plot shows fuel flow versus fuel stock, including negative stock values. These are analytic projections of a fixture, not historical B04 results. The relation is equivalent for the represented sets; arithmetic support is unestablished.</desc>
+  <rect width="980" height="500" fill="#172019"/>
+  <g font-family="system-ui, sans-serif" fill="#dce5d5">
+    <text x="490" y="34" text-anchor="middle" font-size="22">Fuel-like state relation: selected 2D projections</text>
+    <text x="490" y="61" text-anchor="middle" font-size="14">Illustrative analytic fixture · four independent bounded coordinates · not historical B04 data</text>
+    <g stroke="#405045" stroke-width="1">
+      <path d="M100 390H435 M100 310H435 M100 230H435 M100 150H435 M100 70V390 M183.75 70V390 M267.5 70V390 M351.25 70V390 M435 70V390"/>
+      <path d="M545 390H880 M545 310H880 M545 230H880 M545 150H880 M545 70V390 M628.75 70V390 M712.5 70V390 M796.25 70V390 M880 70V390"/>
+    </g>
+    <path d="M100 390H435 M100 390V70 M545 390H880 M545 390V70" stroke="#a9b7a0" stroke-width="2"/>
+    <polygon points="100,390 435,390 435,70 100,70" fill="#76966d" fill-opacity=".30" stroke="#b4cda3" stroke-width="3"/>
+    <polygon points="545,390 880,390 880,70 545,70" fill="#e09a73" fill-opacity=".30" stroke="#e9ad8d" stroke-width="3"/>
+    <g fill="#f2f7ed" stroke="#b4cda3" stroke-width="2"><circle cx="100" cy="390" r="5"/><circle cx="435" cy="390" r="5"/><circle cx="435" cy="70" r="5"/><circle cx="100" cy="70" r="5"/></g>
+    <g fill="#f2f7ed" stroke="#e9ad8d" stroke-width="2"><circle cx="545" cy="390" r="5"/><circle cx="880" cy="390" r="5"/><circle cx="880" cy="70" r="5"/><circle cx="545" cy="70" r="5"/></g>
+    <g font-size="13" fill="#dce5d5">
+      <text x="100" y="412" text-anchor="middle">0</text><text x="183.75" y="412" text-anchor="middle">0.5</text><text x="267.5" y="412" text-anchor="middle">1</text><text x="351.25" y="412" text-anchor="middle">1.5</text><text x="435" y="412" text-anchor="middle">2</text>
+      <text x="545" y="412" text-anchor="middle">0</text><text x="628.75" y="412" text-anchor="middle">0.5</text><text x="712.5" y="412" text-anchor="middle">1</text><text x="796.25" y="412" text-anchor="middle">1.5</text><text x="880" y="412" text-anchor="middle">2</text>
+      <text x="90" y="394" text-anchor="end">−1</text><text x="90" y="314" text-anchor="end">−0.5</text><text x="90" y="234" text-anchor="end">0</text><text x="90" y="154" text-anchor="end">0.5</text><text x="90" y="74" text-anchor="end">1</text>
+      <text x="535" y="394" text-anchor="end">−1</text><text x="535" y="314" text-anchor="end">−0.5</text><text x="535" y="234" text-anchor="end">0</text><text x="535" y="154" text-anchor="end">0.5</text><text x="535" y="74" text-anchor="end">1</text>
+    </g>
+    <text x="267" y="444" text-anchor="middle" font-size="15">Oxidizer flow [kg/s]</text>
+    <text x="712" y="444" text-anchor="middle" font-size="15">Fuel flow [kg/s]</text>
+    <text x="40" y="230" text-anchor="middle" font-size="14" transform="rotate(-90 40 230)">Fuel working-stock balance [kg]</text>
+    <text x="485" y="230" text-anchor="middle" font-size="14" transform="rotate(-90 485 230)">Fuel working-stock balance [kg]</text>
+    <text x="267" y="95" text-anchor="middle" font-size="14">axes: state coordinates 0 and 3</text>
+    <text x="712" y="95" text-anchor="middle" font-size="14">axes: state coordinates 2 and 3</text>
+    <text x="490" y="477" text-anchor="middle" font-size="13">Projection relation: equivalent for the represented sets · arithmetic support: unestablished · negative stock values shown</text>
+  </g>
+</svg>
