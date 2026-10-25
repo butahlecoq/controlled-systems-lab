@@ -320,6 +320,18 @@
       "native_payload_sha256": "5c0ae99d9f86e4b7af3911e32592291cd54e0b98774e7a9653cf81447216c4aa",
       "measured_scope": "One fixed two-step scalar temporal lift and history recovery; seven measured batches",
       "evidence_limits": "Transform-only microbenchmark; no solver timing, comparator, speedup, source-mapped limiter, application-scale or scalability claim"
+    },
+    {
+      "report_id": "issue6-b06-reference-761bdc6e40b93814f873f105313d1eed4f63711653aa583a16a2ddfbc67c2a82",
+      "report_kind": "issue6-b06-reference",
+      "source_report_id": "b06-owner-confirmed-7df01ba3af5e4c46",
+      "payload_schema": "csl.issue6-b06-evidence/1",
+      "payload_sha256": "90a0c3f139815c1f7095bf0806567c95db197a21cd8d1ce86bd3bef6e19a465b",
+      "native_payload_sha256": "6946372c2df9ba131b2316a51d5d42b331b7a64ace73f7f68b55403e4444ed2e",
+      "source_commit": "7df01ba3af5e4c46e867e2d737aca56a8f2461af",
+      "measured_scope": "One five-stage finite-action minimax case: 3,125 plans x 1,024 disturbance-corner histories; one excluded warmup and seven measured Release calls",
+      "evidence_limits": "Owner-confirmed disturbance box is not printed in L09; this is a distinct reference, not a historical reproduction. Exact integer enumeration applies only to this declared rational finite-action case; solver assurance is binary64. Single-adapter timings only, without a limiter profile or speedup claim. The projected vertices are numerical.",
+      "zip_sha256": "1fb673b081668644c9754c39d3840cadbf0597ee6e1f1a41e92f677be7936e73"
     }
   ]
 }

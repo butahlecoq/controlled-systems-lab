@@ -292,6 +292,29 @@ records are registered in the schema-3 catalogue and the site generator
 validates the saved bundle. Main-only Pages publication and live URL/download
 verification remain pending.
 
+## Issue #6 owner-confirmed B06 reference
+
+The native bundle
+[`b06-owner-confirmed-7df01ba3af5e4c46`](../../reports/algorithm-results/b06-owner-confirmed-7df01ba3af5e4c46/)
+records a five-stage, four-state finite-action minimax reference based on the
+displayed L09 model and the owner's later `[-1,1]^2` disturbance decision. The
+paper does not print that numerical disturbance set, so this is a distinct
+reference rather than a reproduction of its reported `10.11`. An independent
+integer-scaled oracle exhausts 3,125 plans and 1,024 corner histories per plan;
+it finds the unique printed plan `(-0.3, 1, 0, 0, 0.3)` with exact squared
+objective `1100939049/9000000` (norm `11.060133859949435`). The solver path
+reports binary64 numerical assurance. Seven measured Release calls follow one
+excluded warmup; median is 1,196,536,901 ns (range 1,188,696,999–1,253,915,262)
+with no comparator, speedup claim or limiter profile. The saved report includes
+raw runs, exact oracle, build provenance and terminal vertices. Its
+[standalone 2D example](../../reports/algorithm-results/b06-owner-confirmed-7df01ba3af5e4c46/example-2d.html)
+and saved-figure gallery card show the flow projection and the zero
+stock-balance target outside the computed projection. The schema-3 route is
+`issue6-b06-reference-761bdc6e40b93814f873f105313d1eed4f63711653aa583a16a2ddfbc67c2a82`;
+main-only deployment and live URL/download verification remain pending. This
+partial result does not resolve canonical B04 inputs or the remaining B07/B08/B09
+historical questions in issue #6.
+
 ## Reference-LP pipeline
 
 The [report-record contract](../contracts/algorithm-report-records.md) specifies the executable, saved schemas, exact timing scopes, independent literals, build/environment provenance, commands and OBS migration. `csl_lp_report --smoke` is a bounded functional test. Accepted seven-trial measurements and the separate counter profile follow review of a fixed clean Release code commit; their source identity is distinct from the later artifact commit.

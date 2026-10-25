@@ -1,0 +1,63 @@
+{
+  "schema": "csl.issue6-b06-evidence/1",
+  "report_id": "b06-owner-confirmed-7df01ba3af5e4c46",
+  "scenario_id": "b06-owner-confirmed-disturbance-v1",
+  "source_commit": "7df01ba3af5e4c46e867e2d737aca56a8f2461af",
+  "source_worktree_clean": true,
+  "driver_sha256": "b157f7259a0b0033c289ab327d57d613d43907166f58024114c2271f0652e88f",
+  "fixture_sha256": "27cb9d50cf8241914695f4e0706e3852de190fdec0c53e5f689e9624aa404f71",
+  "exact_oracle_sha256": "99b82b0065e7b1fc34cd963e218a0221170fcd3b3b09ab219d64e5c6bde1feaf",
+  "code_build": {
+    "configuration": "Release",
+    "compiler": "GCC 16.2.1",
+    "language": "C++20",
+    "cmake": "3.31.6",
+    "build_type": "CMAKE_BUILD_TYPE=Release",
+    "solver_dependencies": "none; finite-action minimax and fixed-plan geometry only",
+    "build_log": "build.log",
+    "configure_log": "configure.log",
+    "flags": "C++ target: -O3 -DNDEBUG -std=c++20 -Wall -Wextra -Wpedantic -Werror; no project solver or geometry dependencies outside finite-action minimax modules",
+    "flags_file": "compile-flags.txt",
+    "exact_oracle_flags_file": "exact-oracle-flags.txt"
+  },
+  "protocol": {
+    "warmup_count": 1,
+    "measured_repetitions": 7,
+    "order": "one excluded warmup, then seven sequential calls",
+    "seed": "none; deterministic exhaustive enumeration",
+    "workers_requested": 1,
+    "workers_observed": 1,
+    "native_solver_threads": "not applicable",
+    "workspace_policy": "fresh request constructed per call; no explicit retained workspace",
+    "near_optimal_tolerance": 0.0,
+    "plan_limit": 3125,
+    "points_per_stage_limit": 1024
+  },
+  "timing": {
+    "unit": "ns",
+    "scope": "request construction and finite_action_minimax public call; excludes result-summary checks, JSON serialization, process startup, exact oracle, figure and HTML rendering",
+    "median_ns": 1196536901,
+    "min_ns": 1188696999,
+    "max_ns": 1253915262,
+    "timed_work_confirmed": true,
+    "failures": 0,
+    "limiter_profile": "not collected; descriptive single-adapter evidence, no speedup claim"
+  },
+  "resources": {
+    "process_peak_rss_kib": 107936,
+    "scope": "cumulative process maximum across warmup and seven measured calls; not an individual-call peak"
+  },
+  "result": {
+    "plan_count": 3125,
+    "disturbance_histories_per_plan": 1024,
+    "evaluated_plan_history_pairs": 3200000,
+    "minimizing_plan_indices": [
+      1936
+    ],
+    "exact_squared_numerator": 1100939049,
+    "exact_squared_denominator": 9000000,
+    "exact_norm_approximation": 11.060133859949435,
+    "historical_reported_norm": "10.11",
+    "historical_reproduction_claim": false
+  }
+}

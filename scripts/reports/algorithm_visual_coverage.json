@@ -275,6 +275,29 @@
       ]
     },
     {
+      "id": "finite-action-minimax",
+      "name": "Finite-action robust minimax",
+      "composition": "outside-main-strategy-composition",
+      "modules": [
+        "CSL::finite_action_minimax",
+        "FiniteActionMinimaxPort"
+      ],
+      "support": "supported-2d",
+      "limit": "B06 shows numerical projections of one computed 4D terminal set. Its disturbance box is owner-confirmed rather than printed in L09; exact integer enumeration and binary64 solver assurance apply only to this named reference case.",
+      "catalog_kinds": [
+        "issue3-finite-catalogue",
+        "issue6-b06-reference"
+      ],
+      "report_routes": [],
+      "examples": [
+        "saved-figure-13"
+      ],
+      "implementation_issues": [
+        3,
+        6
+      ]
+    },
+    {
       "id": "forward-reachability",
       "name": "Nominal forward reachability",
       "composition": "main-synthesis-path",
