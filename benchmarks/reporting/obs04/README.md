@@ -80,7 +80,7 @@ The driver reports selected shared preflight phases in a structured
 `# shared_preflight=` JSONL comment, keyed by the comparison spec and run IDs.
 The JSONL is retained beside the immutable comparison record; keeping these
 observed durations out of the comparison spec prevents timing noise from
-changing `ComparisonSpecId`. Schema `/3` records the actual bounded parser
+changing `ComparisonSpecId`. Schema `/4` records the actual bounded parser
 inside the scenario loader separately from schema/field translation and input
 validation. Canonical problem resolution and source snapshotting are reported
 as a nested interval within translation; both remain within the inclusive

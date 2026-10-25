@@ -1594,7 +1594,7 @@ int main(int argc, char** argv) {
         if(!output||!(output<<comparison_wire)||!output.flush())
             throw std::runtime_error("Could not write comparison record: "+record_path.string());
         const auto comparison_json=Json::parse(comparison_wire);
-        std::cout << "# shared_preflight=" << Json{{"schema","csl.obs04-shared-preflight/3"},
+        std::cout << "# shared_preflight=" << Json{{"schema","csl.obs04-shared-preflight/4"},
             {"comparison_spec_id",comparison_json.at("comparison_spec_id")},
             {"comparison_run_id",comparison_json.at("comparison_run_id")},
             {"scope","selected_shared_preflight_blocks_before_configuration_workspaces_and_baselines"},
