@@ -1,14 +1,17 @@
 """Verify OBS-04 HTML is derived from and preserves saved attempts."""
 import json
 import hashlib
+import importlib.util
 from pathlib import Path
-import sys
 import tempfile
 import unittest
 
 ROOT = Path(__file__).resolve().parents[2]
-sys.path.insert(0, str(ROOT / "scripts/reports/obs04"))
-import render_saved
+RENDERER_SPEC = importlib.util.spec_from_file_location(
+    "obs04_saved_renderer_module", ROOT / "scripts/reports/obs04/render_saved.py"
+)
+render_saved = importlib.util.module_from_spec(RENDERER_SPEC)
+RENDERER_SPEC.loader.exec_module(render_saved)
 
 
 def fixture_record():
