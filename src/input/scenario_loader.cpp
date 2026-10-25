@@ -18,12 +18,15 @@ namespace detail {
 namespace {
 class PhaseTimer {
     std::uint64_t* elapsed_;
-    std::chrono::steady_clock::time_point start_{std::chrono::steady_clock::now()};
+    std::chrono::steady_clock::time_point start_{};
 public:
-    explicit PhaseTimer(std::uint64_t* elapsed):elapsed_(elapsed) {}
+    explicit PhaseTimer(std::uint64_t* elapsed):elapsed_(elapsed) {
+        if(elapsed_) start_=std::chrono::steady_clock::now();
+    }
     ~PhaseTimer() {
-        if(elapsed_) *elapsed_=static_cast<std::uint64_t>(std::chrono::duration_cast<std::chrono::nanoseconds>(
-            std::chrono::steady_clock::now()-start_).count());
+        if(elapsed_)
+            *elapsed_=static_cast<std::uint64_t>(std::chrono::duration_cast<std::chrono::nanoseconds>(
+                std::chrono::steady_clock::now()-start_).count());
     }
 };
 std::string kind(const Json& value,const std::string& path,const char* category,
