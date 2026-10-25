@@ -250,10 +250,14 @@ scalability, or a strategy winner. Whole-process time had a median of
 preparation, baselines, attempts, encoding, and file output.
 
 The embedded environment reports CPU time and native backend thread count as
-unavailable. A current-source bounded profile attempt is retained in
-`limiter-profile/`; it records `unavailable` because `perf` is not installed on
-this host. Earlier valid-capability profiles are not available for this exact
-binary, so the limiter remains unidentified and the comparison is inconclusive.
+unavailable. The first bounded profile attempt is retained in `limiter-profile/`
+and records `unavailable` because `perf` was not installed. Signed Arch
+packages were then extracted into a user-space directory and used to profile
+this exact binary for 32 acknowledged calls per strategy. The profiles and
+source summary are retained in `limiter-profile-userspace-perf-32-*` and
+`limiter-profile-summary.md`. Allocation/free, C++ strings, and HiGHS setup
+appear as candidate hotspots; the small sample and fixture do not establish
+one unique limiter, so the comparison remains inconclusive.
 
 ## Exploratory event `/4` phase timing capture (2026-10-25)
 
