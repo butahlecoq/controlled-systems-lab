@@ -134,20 +134,35 @@ class SavedRendererTests(unittest.TestCase):
         self.assertIn("&lt;script&gt;reach-back&lt;/script&gt;", page)
         self.assertNotIn("<script>reach-back</script>", page)
 
-    def test_renders_event_v7_family_construction_phase(self):
+    def test_renders_event_v7_family_construction_duration(self):
         record = fixture_record()
+        spec = json.loads(record["spec"])
+        spec["arms"][0]["instrumentation"] = "enabled"
+        canonical = lambda value: json.dumps(value, sort_keys=True, separators=(",", ":"), ensure_ascii=False)
+        configuration_id = None
         for attempt in record["attempts"]:
             measurement = json.loads(attempt["measurement_payload"])
             measurement["schema"] = "csl.obs04-instrumentation-comparison-event/7"
-            measurement["family_construction_ns"] = None
+            measurement["instrumentation"] = "enabled"
+            measurement["family_construction_ns"] = 123 if measurement["status"] == "passed" else None
             attempt["measurement_payload"] = json.dumps(measurement)
-        reseal_record_identity(record)
+            run = json.loads(attempt["run"])
+            run["configuration"]["value"]["collection"]["enabled"] = True
+            config_value = run["configuration"]["value"]
+            configuration_id = "csl.config.v1.sha256:" + hashlib.sha256(
+                b"CSL.RESOLVED.CONFIG\0v1\0" + canonical(config_value).encode()
+            ).hexdigest()
+            run["configuration"]["id"] = configuration_id
+            attempt["run"] = canonical(run)
+            attempt["run_digest"] = hashlib.sha256(attempt["run"].encode()).hexdigest()
+        spec["arms"][0]["configuration_id"] = configuration_id
+        reseal_spec(record, spec)
         with tempfile.TemporaryDirectory() as temp:
             path = Path(temp) / "record.json"
             path.write_text(json.dumps(record), encoding="utf-8")
             loaded = render_saved.load_record(path)
         page = render_saved.render_html(loaded)
-        self.assertIn("family_construction: unavailable", page)
+        self.assertIn("family_construction: 123 ns (123–123)", page)
 
     def test_rejects_unknown_record_schema(self):
         with tempfile.TemporaryDirectory() as temp:
