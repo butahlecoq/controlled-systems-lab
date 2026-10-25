@@ -53,3 +53,61 @@ Seven observations describe this one case; they do not support a comparison,
 speedup, or general scalability claim. The `[-1,1]^2` disturbance set and the
 interpretation of `-10/T` with discrete `T=5` are explicit reference-case
 inputs, not recovered historical run details.
+
+## B09 A08 source-revision fuel reference
+
+`b09-a08-source-revision-reference-v1` is an independent C++ implementation of
+the four-stage affine model transcribed from the local `Minmaxclosedloop.m`
+revision (SHA-256 `06c2f750a2c7deb01dbc457185378b440f8ba134216d7ab0762b8b28229ba2d9`)
+and its `Minmaxopenloop.m` planner (SHA-256
+`59daeacc7727cb7ff5e0090368d76e401fa4d0c874ef359a97d6acb722467aa6`). The
+source paper is L13 (`Электронная версия_статьи.pdf`, SHA-256
+`4556046bb893a9a7a8c7b8489673dc95315d8ea49bf37e787a59d897c8a7a70e`). These
+identities do not establish which source revision generated a printed paper
+row, and this is not a historical reproduction.
+
+Both owner-selected objective variants are run:
+
+```text
+J_lambda(x) = sqrt((x1-60)^2 + x2^2 + (x3-24)^2 + x4^2
+                   + lambda*(x2-2.5*x4)^2), lambda in {0,1}.
+```
+
+The solver minimizes the equivalent squared objective. The objective is evaluated
+on the four-state terminal reachable set for all `9^4 = 6,561` fixed action
+plans. Each stage uses four corners of `[-1,1]^2`; the 4D set is projected to
+flows `(x1,x3)` and stocks `(x2,x4)` for the figures. The nonlinear red path is
+a deterministic plant replay of one representative minimizing open-loop plan.
+The lower plot shows its stock trajectory by model stage. It is not the uncertain
+reachable-set boundary, and the plotted points are numerical vertices.
+
+An independent Python oracle directly enumerates every plan and every disturbance
+corner history, checking all four state constraints and the terminal cost. It
+agrees on the complete minimizing sequence family: four plans for lambda 0 and
+six for lambda 1. The squared minima are 2,518.0254696696175 and
+13,408.277178974853, respectively. The numerical solver uses a `1e-8` absolute
+tolerance in squared objective when retaining near-optimal plans.
+
+Seven measured Release calls per objective follow one excluded warmup. The public
+call includes request construction and minimax solution, but not process startup,
+serialization, independent enumeration or figure rendering. On the recorded
+8-thread Ryzen 5 3550H host, medians were approximately 238 ms (lambda 0) and
+241 ms (lambda 1); ranges and complete raw records are in the B09 result bundle.
+These are single-adapter observations, not a speed comparison or scalability
+claim. No source-mapped limiter profile was collected. Assurance is numerical;
+no validated-arithmetic or historical row claim is made.
+
+Build and reproduce after configuring a Release tree with
+`-DCSL_BUILD_ISSUE6_B09_REPORT=ON`:
+
+```sh
+build/csl_issue6_b09_report --lambda 0 --geometry > lambda0-geometry.json
+build/csl_issue6_b09_report --lambda 1 --geometry > lambda1-geometry.json
+build/csl_issue6_b09_report --lambda 0 --measure 7 > lambda0-runs.jsonl
+build/csl_issue6_b09_report --lambda 1 --measure 7 > lambda1-runs.jsonl
+python3 benchmarks/reporting/issue6/b09_exact_oracle.py oracle.json
+python3 benchmarks/reporting/issue6/b09_render_projection.py lambda0-geometry.json --output lambda0-projections
+```
+
+The saved projections are included with raw solver rows, independent oracle
+output, provenance and checksums in the B09 result bundle.
