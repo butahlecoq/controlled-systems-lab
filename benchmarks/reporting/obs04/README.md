@@ -142,12 +142,16 @@ Measured `strategy_run_ns` medians and ranges were:
 The median paired enabled-minus-disabled differences were +2,925,131 ns for
 reach-back (range +2,696,957 to +3,943,779 ns) and +146,320 ns for direct-joint
 (range +97,988 to +205,127 ns). Every measured pair was slower with collection
-enabled, but the separate local profiler attempt failed its acknowledgement
-protocol after six samples, so the limiter is not established and the result
-remains inconclusive. See
+enabled. Both bounded profiler attempts were rejected: the local attempt failed
+its acknowledgement protocol after six samples, and the GitHub Actions Ubuntu
+24.04 runner reported `perf_event_paranoid=4` and timed out waiting for the
+perf acknowledgement. The limiter is not established and the result remains
+inconclusive. See
 [`linux-omarchy-gcc16-20261025.environment.txt`](results/linux-omarchy-gcc16-20261025.environment.txt)
 and
 [`linux-omarchy-gcc16-20261025.profile-summary.md`](results/linux-omarchy-gcc16-20261025.profile-summary.md)
+and the retained hosted attempt in
+[`linux-github-actions-ubuntu24-20261025.profile-attempt/`](results/linux-github-actions-ubuntu24-20261025.profile-attempt/)
 for the run limits and profile status. These fixture timings do not establish a
 general instrumentation overhead, end-to-end latency, scalability, or method
 winner.
