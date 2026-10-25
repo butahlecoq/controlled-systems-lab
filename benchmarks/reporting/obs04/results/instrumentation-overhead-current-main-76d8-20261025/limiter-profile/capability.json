@@ -1,0 +1,24 @@
+{
+  "binary_name": "csl_obs04_instrumentation_comparison",
+  "binary_sha256": "9c8fdf63b91ab0c48c6e9650051f9b56753e231dd33ba03e906d444ee8af15f2",
+  "calls_requested": 8,
+  "host": {
+    "kernel_release": "7.2.5-3-omarchy",
+    "perf_event_paranoid": "2",
+    "platform": "Linux-7.2.5-3-omarchy-x86_64-with-glibc2.44"
+  },
+  "profile": {
+    "effective_frequency_hz": null,
+    "effective_frequency_status": "not_reported_by_this_probe",
+    "event": "cycles:u",
+    "max_bytes": 33554432,
+    "requested_frequency_hz": 4999
+  },
+  "protocol": "linux-perf-record-ack-fifo",
+  "reason": "perf executable is not installed",
+  "schema": "csl.obs04-perf-probe/1",
+  "source_commit": "76d8ae64b8ec7d36c975eae64f7581bf345cf387",
+  "status": "unavailable",
+  "strategy": "csl.synthesis.reach-back",
+  "timeout_seconds": 120
+}

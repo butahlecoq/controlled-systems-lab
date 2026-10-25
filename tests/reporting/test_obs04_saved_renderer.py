@@ -134,6 +134,21 @@ class SavedRendererTests(unittest.TestCase):
         self.assertIn("&lt;script&gt;reach-back&lt;/script&gt;", page)
         self.assertNotIn("<script>reach-back</script>", page)
 
+    def test_renders_event_v7_family_construction_phase(self):
+        record = fixture_record()
+        for attempt in record["attempts"]:
+            measurement = json.loads(attempt["measurement_payload"])
+            measurement["schema"] = "csl.obs04-instrumentation-comparison-event/7"
+            measurement["family_construction_ns"] = None
+            attempt["measurement_payload"] = json.dumps(measurement)
+        reseal_record_identity(record)
+        with tempfile.TemporaryDirectory() as temp:
+            path = Path(temp) / "record.json"
+            path.write_text(json.dumps(record), encoding="utf-8")
+            loaded = render_saved.load_record(path)
+        page = render_saved.render_html(loaded)
+        self.assertIn("family_construction: unavailable", page)
+
     def test_rejects_unknown_record_schema(self):
         with tempfile.TemporaryDirectory() as temp:
             path = Path(temp) / "record.json"

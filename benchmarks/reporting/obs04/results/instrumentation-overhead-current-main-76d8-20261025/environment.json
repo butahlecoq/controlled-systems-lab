@@ -1,0 +1,14 @@
+{
+  "capture_date_local": "2026-10-25 11:22:44 MSK",
+  "source_revision": "76d8ae64b8ec7d36c975eae64f7581bf345cf387",
+  "source_clean": true,
+  "binary": "/home/butahlecoq/.local/share/codex/worktrees/obs04-environment-records-20261025/build/obs04-driver-environment/csl_obs04_instrumentation_comparison",
+  "binary_sha256": "9c8fdf63b91ab0c48c6e9650051f9b56753e231dd33ba03e906d444ee8af15f2",
+  "build_type": "Release",
+  "host": "Linux-7.2.5-3-omarchy-x86_64-with-glibc2.44",
+  "cpu": "AMD Ryzen 5 3550H with Radeon Vega Mobile Gfx",
+  "logical_cpus": 8,
+  "load_before_capture": "11:22:44 up 2 days, 11:57,  1 user,  load average: 2.62, 2.91, 2.23",
+  "measurement": "five fresh driver processes; each process warms all four strategy/instrumentation arms and captures seven measured repetitions per arm; strategy order and instrumentation mode alternate by repetition",
+  "command_template": "/home/butahlecoq/.local/share/codex/worktrees/obs04-environment-records-20261025/build/obs04-driver-environment/csl_obs04_instrumentation_comparison --record <run-NN.json>"
+}

@@ -135,7 +135,9 @@ def load_record(path: Path) -> dict[str, Any]:
             "cancelled": "cancelled", "resource_limited": "resource_limited", "incomplete": "incomplete",
         }
         event_schema = measurement.get("schema")
-        if event_schema == "csl.obs04-instrumentation-comparison-event/6":
+        if event_schema in {
+                "csl.obs04-instrumentation-comparison-event/6",
+                "csl.obs04-instrumentation-comparison-event/7"}:
             phase_status = measurement.get("phase_status")
             if phase_status not in {"passed", "failed"}:
                 raise ValueError(f"attempts[{index}] phase status is invalid")
@@ -175,7 +177,7 @@ def load_record(path: Path) -> dict[str, Any]:
                 _run_status(run) != expected_status or
                 attempt.get("reported_status") not in set(measurement_to_reported.values()) or
                 measurement_to_reported.get(measurement.get("status")) != expected_status or
-                event_schema not in {f"csl.obs04-instrumentation-comparison-event/{n}" for n in range(2, 7)} or
+                event_schema not in {f"csl.obs04-instrumentation-comparison-event/{n}" for n in range(2, 8)} or
                 measurement.get("strategy") != expected_strategy or
                 measurement.get("instrumentation") != expected_instrumentation or
                 measurement.get("repetition") != repetition_index or
