@@ -1,0 +1,43 @@
+{
+  "binary_name": "csl_obs04_instrumentation_comparison",
+  "binary_sha256": "9bc9f360e9d44ba37c90c35645d75c956a8956dd8cde6172c7a9f0eaa4951e13",
+  "calls_requested": 8,
+  "command": [
+    "perf",
+    "record",
+    "--delay=-1",
+    "-F",
+    "499",
+    "-e",
+    "cycles:u",
+    "-g",
+    "--max-size=32M",
+    "--control=fifo:<control>,<ack>",
+    "-o",
+    "<capture>",
+    "-p",
+    "<driver pid>"
+  ],
+  "driver_exit_code": 1,
+  "driver_stderr": "OBS-04 measurement failed: Unexpected perf control acknowledgement",
+  "host": {
+    "kernel_release": "7.2.5-3-omarchy",
+    "perf_event_paranoid": "2",
+    "platform": "Linux-7.2.5-3-omarchy-x86_64-with-glibc2.44"
+  },
+  "perf_executable": "perf",
+  "perf_exit_code": 0,
+  "perf_stdout": "",
+  "perf_version": "perf version 7.2.3-1",
+  "profile": {
+    "event": "cycles:u",
+    "frequency_hz": 499,
+    "max_bytes": 33554432
+  },
+  "protocol": "linux-perf-record-ack-fifo",
+  "reason": "OBS-04 measurement failed: Unexpected perf control acknowledgement\n\nEvents disabled\nEvents enabled\nEvents disabled\nEvents disabled\n[ perf record: Woken up 4 times to write data ]\n[ perf record: Captured and wrote 0.003 MB /tmp/obs04-perf-overhead-20261025/acknowledged.perf.data (6 samples) ]",
+  "schema": "csl.obs04-perf-probe/1",
+  "source_commit": "2d78543799c7ad267f22ccf613b89e5ac236259f",
+  "status": "failed",
+  "timeout_seconds": 120
+}
