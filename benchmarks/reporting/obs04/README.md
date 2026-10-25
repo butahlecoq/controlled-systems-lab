@@ -81,8 +81,10 @@ The driver reports selected shared preflight phases in a structured
 The JSONL is retained beside the immutable comparison record; keeping these
 observed durations out of the comparison spec prevents timing noise from
 changing `ComparisonSpecId`. Schema `/3` records the actual bounded parser
-inside the scenario loader separately from semantic loading and resolution.
-Parser and semantic-load entry flags identify which timing hooks were reached
+inside the scenario loader separately from schema/field translation and input
+validation. Canonical problem resolution and source snapshotting are reported
+as a nested interval within translation; both remain within the inclusive
+semantic-load phase. Phase-entry flags identify which timing hooks were reached
 for each emitted successful preflight. It also retains inclusive
 `comparison_admission_ns` and records each strategy's capability callback
 duration and call count nested inside admission. This callback-only timing

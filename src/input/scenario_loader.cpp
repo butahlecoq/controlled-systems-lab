@@ -358,7 +358,10 @@ public:
         return out;
     }
 };
-LoadedScenario translate(const Json& root,std::span<const std::byte> bytes,const LoadOptions& options,const std::filesystem::path& location) {
+LoadedScenario translate(const Json& root,std::span<const std::byte> bytes,const LoadOptions& options,
+                         const std::filesystem::path& location,LoadPhaseTimings* timings) {
+    if(timings) timings->translation_entered=true;
+    PhaseTimer translation_timer{timings?&timings->translation_ns:nullptr};
     Reader r(options);
     const auto schema=string(member(root,"schema",""),"/schema");
     const bool version_one=schema=="csl.scenario/1",version_two=schema=="csl.scenario/2";
@@ -390,17 +393,22 @@ LoadedScenario translate(const Json& root,std::span<const std::byte> bytes,const
         r.defaults.push_back({child("",path),meaning,root.contains(path)});
     Problem p{{metadata.id},std::make_shared<const SystemModel>(std::move(model)),std::move(times),KnownInitial{initial},ContinuousDomain{std::move(controls)},
         std::move(states),std::move(temporal),{},InformationPattern::nominal_open_loop,std::move(objective)};
-    auto resolution=problem::resolve(p,{problem::UncertaintyStructure::stage_product_uncoupled,options.objective_policy,{}});
-    if(const auto* d=std::get_if<Diagnostic>(&resolution)) {
-        // Shape/finite checks above retain their exact authored pointers. These
-        // remaining canonical checks concern Q or caller-supplied load policy.
-        const auto path=d->field=="objective.psd" || d->field=="objective.symmetry"?"/objective/Q":"";
-        if(d->code==DiagnosticCode::unsupported)
-            throw UnsupportedInput{d->field,path,d->explanation,"supported canonical data and publication policy",*d};
-        throw InputFailure{InputCategory::field,path,d->explanation,"valid canonical data",{},*d};
-    }
-    auto resolved=canonical<problem::ResolvedProblem>(std::move(resolution),"");
-    auto source=canonical<problem::ResolvedContent>(problem::snapshot_content(bytes),"");
+    if(timings) timings->resolution_snapshot_entered=true;
+    auto [resolved,source]=[&] {
+        PhaseTimer timer{timings?&timings->resolution_snapshot_ns:nullptr};
+        auto resolution=problem::resolve(p,{problem::UncertaintyStructure::stage_product_uncoupled,options.objective_policy,{}});
+        if(const auto* d=std::get_if<Diagnostic>(&resolution)) {
+            // Shape/finite checks above retain their exact authored pointers. These
+            // remaining canonical checks concern Q or caller-supplied load policy.
+            const auto path=d->field=="objective.psd" || d->field=="objective.symmetry"?"/objective/Q":"";
+            if(d->code==DiagnosticCode::unsupported)
+                throw UnsupportedInput{d->field,path,d->explanation,"supported canonical data and publication policy",*d};
+            throw InputFailure{InputCategory::field,path,d->explanation,"valid canonical data",{},*d};
+        }
+        auto resolved=canonical<problem::ResolvedProblem>(std::move(resolution),"");
+        auto source=canonical<problem::ResolvedContent>(problem::snapshot_content(bytes),"");
+        return std::pair{std::move(resolved),std::move(source)};
+    }();
     poll(options);
     return Access::scenario({std::move(resolved),std::move(run),std::move(r.defaults),std::move(metadata),
         {std::move(source),location,schema,version_one?"csl.scenario-defaults/1":"csl.scenario-defaults/2",options.objective_policy}});
@@ -433,7 +441,7 @@ LoadResult load_bytes(std::span<const std::byte> bytes,const LoadOptions& option
             auto source=canonical<problem::ResolvedContent>(problem::snapshot_content(bytes),"");poll(options);
             return Access::historical({std::move(record),{std::move(source),location,"B04-historical/1","none",options.objective_policy}});
         }
-        return translate(root,bytes,options,location);
+        return translate(root,bytes,options,location,timings);
     }
     catch(const InputFailure& f) {return f;}
     catch(const UnsupportedInput& f) {return f;}

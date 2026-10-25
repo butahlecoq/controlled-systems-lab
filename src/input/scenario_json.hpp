@@ -16,8 +16,12 @@ struct HistoricalStorage { HistoricalRecord record; SourceProvenance source; };
 struct LoadPhaseTimings {
     std::uint64_t parse_ns{};
     std::uint64_t semantic_load_ns{};
+    std::uint64_t translation_ns{};
+    std::uint64_t resolution_snapshot_ns{};
     bool parse_entered{};
     bool semantic_load_entered{};
+    bool translation_entered{};
+    bool resolution_snapshot_entered{};
 };
 struct Access {
     static LoadedScenario scenario(ScenarioStorage s) {return LoadedScenario(std::make_shared<const ScenarioStorage>(std::move(s)));}
