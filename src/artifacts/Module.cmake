@@ -1,8 +1,8 @@
 # Target and installation ownership for artifacts. Included from the project root.
 
-csl_add_library(csl_artifacts STATIC src/artifacts/run_statistics.cpp src/artifacts/run_statistics_json.cpp src/artifacts/comparison_manifest.cpp src/artifacts/scenario_sweep.cpp src/artifacts/h_relation_attachment.cpp src/artifacts/bounded_hull_check.cpp src/execution/observability.cpp src/execution/timing_collector.cpp src/execution/operation_observability.cpp)
+csl_add_library(csl_artifacts STATIC src/artifacts/run_statistics.cpp src/artifacts/run_statistics_json.cpp src/artifacts/comparison_manifest.cpp src/artifacts/scenario_sweep.cpp src/artifacts/h_relation_attachment.cpp src/artifacts/bounded_hull_check.cpp src/artifacts/final_plot_data.cpp src/execution/observability.cpp src/execution/timing_collector.cpp src/execution/operation_observability.cpp)
 
-target_link_libraries(csl_artifacts PUBLIC CSL::resolved_problem CSL::execution CSL::bounded_hull_checker)
+target_link_libraries(csl_artifacts PUBLIC CSL::resolved_problem CSL::execution CSL::bounded_hull_checker CSL::verification)
 
 target_include_directories(csl_artifacts SYSTEM PRIVATE ${csl_json_SOURCE_DIR}/single_include)
 
