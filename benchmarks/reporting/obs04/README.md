@@ -248,15 +248,17 @@ The current profile driver requires both `CSL_PERF_CONTROL_FIFO` and
 frame after each enable/disable command,
 with a five-second bound, and fails a capture if perf exits, rejects the command,
 or does not acknowledge. Profile output marks the sample scope as
-`exclusive_strategy_port_run` and records the number of acknowledgements.
-Workspace creation occurs before the enable command; outcome checking occurs
-after disable, so both are outside the sampled interval.
+`acknowledged_perf_control_window` and records the number of acknowledgements.
+Workspace creation occurs before the enable command and outcome checking after
+the disable acknowledgement, so those phases are outside the window. The window
+includes the small FIFO command/acknowledgement work around each `StrategyPort::run`;
+it is not an exact instruction-only measurement of the call.
 Invoke it separately with `--profile-strategy reach-back|direct-joint` and
 `--profile-calls N`; it performs a warmup and the requested number of profiled
 calls, then exits without comparison-record capture. The normal comparison run
 (optionally `--record <path>`) does not control `perf`. Acknowledgements improve
 control-boundary synchronization but do not make the small T-S01 workload
-representative or support a unique limiter claim.
+representative of larger problems.
 
 To exercise host capability, add the `run-obs04-perf-probe` label to a PR. The
 Linux job builds the Release driver, tests the FIFO protocol with a mock perf
@@ -282,22 +284,25 @@ limiter profile before it can close.
 
 `results/linux-omarchy-gcc16-20261025-perf-ack-fix/` contains separate user-space
 `perf` captures for both strategies from source commit
-`2e146c50460ae81cb7c201c1521a186faf513d28`. The fix accepts both the documented
+`be1c4e92dac0a37ed29434f8516bb303953e27c8`. The fix accepts both the documented
 `ack\n` frame and Linux perf's observed `ack\n\0` frame; the mock exercises
 both forms and rejects a missing acknowledgement. Each capture ran 32 profiled
 strategy calls with a requested 4,999 Hz sampling frequency and 64 acknowledged
 enable/disable transitions. The effective sample frequency is not reported by
 this probe.
-Reach-back decoded 894 samples (100,220-byte capture); direct-joint decoded 177
-(30,028 bytes). `perf report` found zero lost samples for both. The binary hash
-is `1588f202a0709323316b7e918070539642cbe01804362f545d57d76e5a9dac4d`.
+Reach-back decoded 843 samples (96,084-byte capture); direct-joint decoded 170
+(29,300 bytes). `perf report` found zero lost samples for both. The binary hash
+is `975589fe6d2a8ff2bbdf63d78de579afcceaefd14a9e80289bfd616aaaab4268`.
 
 These captures establish that bounded acknowledged profiling works on this
-Linux host and isolate the strategy invocation. The leading self samples are
-allocator/free and C++ string operations; call stacks include HiGHS option and
-solver initialization. This points to backend setup/teardown and allocation as
-the local T-S01 limiter, rather than one dominant optimization kernel. Direct-
-joint has only 177 samples and both reports contain unresolved symbols, so this
-is an exploratory microprofile, not a general performance claim. Do not compare
-sample totals as strategy speed. Capability metadata, driver/perf logs, text
-reports, and raw `perf.data` are retained separately for each strategy.
+Linux host. The leading self samples are
+allocator/free calls and C++ string operations: `malloc`/`cfree` account for
+14.23% of reach-back samples and 15.92% of direct-joint samples. The reports
+also attribute samples to HiGHS option registration and native solve methods.
+This makes allocator-heavy backend initialization and solve setup candidate
+hotspots for the T-S01 workload, rather than establishing a unique limiter.
+Direct-joint has only 170 samples, both reports contain unresolved symbols, and
+the sample window includes small control-protocol work; this is exploratory
+evidence, not a general performance claim. Do not compare sample totals as
+strategy speed. Capability metadata, driver/perf logs, text reports, and raw
+`perf.data` are retained separately for each strategy.
