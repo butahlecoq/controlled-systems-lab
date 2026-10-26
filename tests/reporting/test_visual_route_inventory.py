@@ -12,6 +12,8 @@ import audit_visual_routes
 class VisualRouteInventoryTests(unittest.TestCase):
     def test_known_producers_historical_routes_and_fuel_companion_are_in_inventory(self):
         inventory=audit_visual_routes.build(ROOT)
+        committed=json.loads((ROOT/"scripts/reports/visual-route-inventory.json").read_text())
+        self.assertEqual(committed,inventory)
         self.assertEqual(inventory["schema"],"csl.visual-route-inventory/1")
         producers={entry["source"]:entry for entry in inventory["producers_and_routes"]}
         for source in ("scripts/reports/control_figures.py","scripts/reports/plot.py",

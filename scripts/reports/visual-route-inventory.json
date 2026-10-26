@@ -758,7 +758,8 @@
         "latency.svg"
       ],
       "index_sha256": "54947c78cf175f3b6647234ef5dc33117d7ee01375a251520fc270f0a6411211",
-      "disposition": "justified-exception: immutable historical evidence; publish an additive companion for presentation changes"
+      "disposition": "deferred: route-level readability and additive-companion review pending",
+      "follow_up_issue": 669
     },
     {
       "route": "app02-box-8ff979de60ea9d22",
@@ -767,7 +768,8 @@
         "polygons.svg"
       ],
       "index_sha256": "bf8bfd6d96c99670cad420a66a4c4b9d77a840f04aeab5c057a15459a45b3307",
-      "disposition": "justified-exception: immutable historical evidence; publish an additive companion for presentation changes"
+      "disposition": "deferred: route-level readability and additive-companion review pending",
+      "follow_up_issue": 669
     },
     {
       "route": "app03-zonotope-4522855018fa9b0b",
@@ -776,7 +778,8 @@
         "zonotope-2d.svg"
       ],
       "index_sha256": "b3d4b04afd09d1b70f3936da477a144d76010aa29ff326a055706d01927da9ef",
-      "disposition": "justified-exception: immutable historical evidence; publish an additive companion for presentation changes"
+      "disposition": "deferred: route-level readability and additive-companion review pending",
+      "follow_up_issue": 669
     },
     {
       "route": "app04-ellipsoid-fd302c34092f8b19",
@@ -785,7 +788,8 @@
         "ellipsoid-2d.svg"
       ],
       "index_sha256": "356ca56e0cd84e0f498fde14b0e70c25665e3c83ee8531977bdf4ebc468dbc8f",
-      "disposition": "justified-exception: immutable historical evidence; publish an additive companion for presentation changes"
+      "disposition": "deferred: route-level readability and additive-companion review pending",
+      "follow_up_issue": 669
     },
     {
       "route": "approximation-matched-pilot-20261023-r1",
@@ -794,7 +798,8 @@
         "comparison.svg"
       ],
       "index_sha256": "d59d854fcf1d0d385e12f4f94c48d13ee97b0015838ba3c1270435348b39546d",
-      "disposition": "justified-exception: immutable historical evidence; publish an additive companion for presentation changes"
+      "disposition": "deferred: route-level readability and additive-companion review pending",
+      "follow_up_issue": 669
     },
     {
       "route": "b06-owner-confirmed-7df01ba3af5e4c46",
@@ -803,7 +808,8 @@
         "terminal-projections.svg"
       ],
       "index_sha256": "54958057c49eda62d81d627583e69707cb1f5f7b0635d24da33659db686d095c",
-      "disposition": "justified-exception: immutable historical evidence; publish an additive companion for presentation changes"
+      "disposition": "deferred: route-level readability and additive-companion review pending",
+      "follow_up_issue": 669
     },
     {
       "route": "b07-owner-approved-eight-case-v1",
@@ -813,7 +819,8 @@
         "projections.svg"
       ],
       "index_sha256": "88e510e20a6ea9c93613d11c9d8da3079ad1bc69cfc06242e028faa06bf85c30",
-      "disposition": "justified-exception: immutable historical evidence; publish an additive companion for presentation changes"
+      "disposition": "deferred: route-level readability and additive-companion review pending",
+      "follow_up_issue": 669
     },
     {
       "route": "b09-a08-source-reference-4818ddde",
@@ -823,7 +830,8 @@
         "projections-lambda1.svg"
       ],
       "index_sha256": "39895f60c78d3ac110f8d6f9b3bbc81274c4825db6e7d303d4dbe860fed5c906",
-      "disposition": "justified-exception: immutable historical evidence; publish an additive companion for presentation changes"
+      "disposition": "deferred: route-level readability and additive-companion review pending",
+      "follow_up_issue": 669
     },
     {
       "route": "convex-20261012T041854Z-4d54a407c9b2",
@@ -833,7 +841,8 @@
         "latency.svg"
       ],
       "index_sha256": "14882d50e392e3abfd57504c6f9fb175aa73f6ace856a8f20322ffdc9f1220fc",
-      "disposition": "justified-exception: immutable historical evidence; publish an additive companion for presentation changes"
+      "disposition": "deferred: route-level readability and additive-companion review pending",
+      "follow_up_issue": 669
     },
     {
       "route": "exp04-replay-93fe3b87795e1d3a",
@@ -842,7 +851,8 @@
         "trajectory.svg"
       ],
       "index_sha256": "ffbd787b7a01ecafae6c8e9b37e4abc98a1db1a134e94214388aa37b4ee9d76f",
-      "disposition": "justified-exception: immutable historical evidence; publish an additive companion for presentation changes"
+      "disposition": "deferred: route-level readability and additive-companion review pending",
+      "follow_up_issue": 669
     },
     {
       "route": "exp05-fixed-plan-minimax-20261026-6c561462",
@@ -851,7 +861,8 @@
         "visual.svg"
       ],
       "index_sha256": "a0e5b906fe719a5fce19a1aab8c652fd9fa8f7aa9007b9fa3147ac34e2b69f08",
-      "disposition": "justified-exception: immutable historical evidence; publish an additive companion for presentation changes"
+      "disposition": "deferred: route-level readability and additive-companion review pending",
+      "follow_up_issue": 669
     },
     {
       "route": "exp05-fixed-plan-minimax-20261026-fce05a69",
@@ -860,7 +871,8 @@
         "visual.svg"
       ],
       "index_sha256": "c7ce8d2984bd60e3f28909ad2df2846f2e8e34182c9a79e3cfc4409c8432c8ff",
-      "disposition": "justified-exception: immutable historical evidence; publish an additive companion for presentation changes"
+      "disposition": "deferred: route-level readability and additive-companion review pending",
+      "follow_up_issue": 669
     },
     {
       "route": "ext01-fixed-plan-20261016-11b7bc74",
@@ -869,7 +881,8 @@
         "b08-trials.svg"
       ],
       "index_sha256": "d2970b9a585d1c06d3867a226531e4464599f2e6204187ea8db92fc9ba209e64",
-      "disposition": "justified-exception: immutable historical evidence; publish an additive companion for presentation changes"
+      "disposition": "deferred: route-level readability and additive-companion review pending",
+      "follow_up_issue": 669
     },
     {
       "route": "ext03-transform-20261024-a3a3af9",
@@ -878,7 +891,8 @@
         "visual.svg"
       ],
       "index_sha256": "f5d9b20d0f449a88431cb881718e44cdd576a4ed69c137f1f0db394d0fc9af77",
-      "disposition": "justified-exception: immutable historical evidence; publish an additive companion for presentation changes"
+      "disposition": "deferred: route-level readability and additive-companion review pending",
+      "follow_up_issue": 669
     },
     {
       "route": "ext04-continuous-27d4ad2e12958609",
@@ -887,7 +901,8 @@
         "example-2d.svg"
       ],
       "index_sha256": "0c0f0dce3e03705a2065e6eaf5114e5d5a6ba76d97cc1086a3ff19e268272099",
-      "disposition": "justified-exception: immutable historical evidence; publish an additive companion for presentation changes"
+      "disposition": "deferred: route-level readability and additive-companion review pending",
+      "follow_up_issue": 669
     },
     {
       "route": "ext04-continuous-ebcf879d07ee9157",
@@ -896,7 +911,8 @@
         "example-2d.svg"
       ],
       "index_sha256": "1e56a8447428fa560d4508ca41b805378d7272bb52615fb54188c2fc5075384c",
-      "disposition": "justified-exception: immutable historical evidence; publish an additive companion for presentation changes"
+      "disposition": "deferred: route-level readability and additive-companion review pending",
+      "follow_up_issue": 669
     },
     {
       "route": "ext04-df62c7c6d295e135",
@@ -905,7 +921,8 @@
         "performance.svg"
       ],
       "index_sha256": "0a33bf830a2e4abe77a4b6f2fede1d29bb25836778e30222cb297afeff621ae3",
-      "disposition": "justified-exception: immutable historical evidence; publish an additive companion for presentation changes"
+      "disposition": "deferred: route-level readability and additive-companion review pending",
+      "follow_up_issue": 669
     },
     {
       "route": "ext05-discretization-a40ba9647cc023dc",
@@ -914,7 +931,8 @@
         "trajectory-2d.svg"
       ],
       "index_sha256": "291c9e51e95d68bf83a91af850399825d66f7b888c05bfd351ac723a136c52ee",
-      "disposition": "justified-exception: immutable historical evidence; publish an additive companion for presentation changes"
+      "disposition": "deferred: route-level readability and additive-companion review pending",
+      "follow_up_issue": 669
     },
     {
       "route": "ext07-hybrid-51d9ee2e89d240eb",
@@ -923,7 +941,8 @@
         "joint-relation-2d.svg"
       ],
       "index_sha256": "9b914e6355ab9b0ca480b3b50712d2d9182f0c81985cc411bf140f8015359496",
-      "disposition": "justified-exception: immutable historical evidence; publish an additive companion for presentation changes"
+      "disposition": "deferred: route-level readability and additive-companion review pending",
+      "follow_up_issue": 669
     },
     {
       "route": "ext07-hybrid-two-parameter-26f402289a309403",
@@ -932,7 +951,8 @@
         "feasible-polygons.svg"
       ],
       "index_sha256": "d32671ca88301a07fbdc55709deb94c6685545ca4d0e838dd7a85eb08609235a",
-      "disposition": "justified-exception: immutable historical evidence; publish an additive companion for presentation changes"
+      "disposition": "deferred: route-level readability and additive-companion review pending",
+      "follow_up_issue": 669
     },
     {
       "route": "ext07-hybrid-two-parameter-8ad871b5ea29fc7b",
@@ -941,7 +961,8 @@
         "feasible-polygons.svg"
       ],
       "index_sha256": "8a68ed07ff8b49750fc3d56cb21e20a3c3dbd01bd869251af7768b47a9dfae10",
-      "disposition": "justified-exception: immutable historical evidence; publish an additive companion for presentation changes"
+      "disposition": "deferred: route-level readability and additive-companion review pending",
+      "follow_up_issue": 669
     },
     {
       "route": "ext07-hybrid-two-parameter-df7acc27de65930b",
@@ -950,7 +971,8 @@
         "feasible-polygons.svg"
       ],
       "index_sha256": "a13f19bf9ec23d74decdad43ca1d97344de64ef58db649dbb6ada5acb7744ac4",
-      "disposition": "justified-exception: immutable historical evidence; publish an additive companion for presentation changes"
+      "disposition": "deferred: route-level readability and additive-companion review pending",
+      "follow_up_issue": 669
     },
     {
       "route": "finite-feedback-a6e96fd96c7ac7cc",
@@ -959,7 +981,8 @@
         "performance.svg"
       ],
       "index_sha256": "32b0713ab87d982138f743ddee399e8c62256ee0ef4fcfc956643ecf9b986baf",
-      "disposition": "justified-exception: immutable historical evidence; publish an additive companion for presentation changes"
+      "disposition": "deferred: route-level readability and additive-companion review pending",
+      "follow_up_issue": 669
     },
     {
       "route": "geo02-20261012T235755Z-6b1f504ad3db",
@@ -968,7 +991,8 @@
         "timings.svg"
       ],
       "index_sha256": "0b396d7f6f36958014aa05399decb6e63213190a7863edfbcac655282ee9de96",
-      "disposition": "justified-exception: immutable historical evidence; publish an additive companion for presentation changes"
+      "disposition": "deferred: route-level readability and additive-companion review pending",
+      "follow_up_issue": 669
     },
     {
       "route": "geo02-20261013T061151Z-338ff7d1d63c",
@@ -977,7 +1001,8 @@
         "timings.svg"
       ],
       "index_sha256": "69cb89158dc1a47fc2a6e758b9ea39c57247654fd8d7eba08da19dff5e52c3a2",
-      "disposition": "justified-exception: immutable historical evidence; publish an additive companion for presentation changes"
+      "disposition": "deferred: route-level readability and additive-companion review pending",
+      "follow_up_issue": 669
     },
     {
       "route": "geo03-20261012-3c12ca125831",
@@ -986,7 +1011,8 @@
         "latency.svg"
       ],
       "index_sha256": "50765dc949fe50477c4fdd8bf6eedec3ca0ab8cd5e1fa40e22eb5fb4624d8fe7",
-      "disposition": "justified-exception: immutable historical evidence; publish an additive companion for presentation changes"
+      "disposition": "deferred: route-level readability and additive-companion review pending",
+      "follow_up_issue": 669
     },
     {
       "route": "geo04-20261012T224946Z-c37852bcc80d",
@@ -995,7 +1021,8 @@
         "latency.svg"
       ],
       "index_sha256": "9aa60da764e8812499135ccb7862079e7ca5a1da81efff86b4ed83fbd0473e50",
-      "disposition": "justified-exception: immutable historical evidence; publish an additive companion for presentation changes"
+      "disposition": "deferred: route-level readability and additive-companion review pending",
+      "follow_up_issue": 669
     },
     {
       "route": "geo07-9ef0d347291774da",
@@ -1004,7 +1031,8 @@
         "performance.svg"
       ],
       "index_sha256": "63c4e4ce1d0c60d08b9b7b5fb5889caf12bd401ec81f5cc50452e31bdad1333a",
-      "disposition": "justified-exception: immutable historical evidence; publish an additive companion for presentation changes"
+      "disposition": "deferred: route-level readability and additive-companion review pending",
+      "follow_up_issue": 669
     },
     {
       "route": "geo07-dependent-4dcc5a8fe36f17ed",
@@ -1013,7 +1041,8 @@
         "performance.svg"
       ],
       "index_sha256": "fd864c550abc19d1865bafeced0efd2a036ba589477f95dc2e179981c850a01f",
-      "disposition": "justified-exception: immutable historical evidence; publish an additive companion for presentation changes"
+      "disposition": "deferred: route-level readability and additive-companion review pending",
+      "follow_up_issue": 669
     },
     {
       "route": "geo07-port-4dee19cde3d50259",
@@ -1022,7 +1051,8 @@
         "performance.svg"
       ],
       "index_sha256": "fecd6c41eeed1b4fbe209157c9ad8cd4e6b6ac10fc06e5b9ac02d30ecc5a398c",
-      "disposition": "justified-exception: immutable historical evidence; publish an additive companion for presentation changes"
+      "disposition": "deferred: route-level readability and additive-companion review pending",
+      "follow_up_issue": 669
     },
     {
       "route": "geo08-lazy-6dbdd6b2f9235837",
@@ -1031,7 +1061,8 @@
         "lazy-2d.svg"
       ],
       "index_sha256": "0d66d413d542281e6060962ec6ec9b515784119104c87bceb1ed4a9b2fd25867",
-      "disposition": "justified-exception: immutable historical evidence; publish an additive companion for presentation changes"
+      "disposition": "deferred: route-level readability and additive-companion review pending",
+      "follow_up_issue": 669
     },
     {
       "route": "issue3-finite-catalogue-b4632ce76510aa4f",
@@ -1040,7 +1071,8 @@
         "latency.svg"
       ],
       "index_sha256": "3d363a58d18695507688616577beb52078bbbc20514bb9c091981582d3962adb",
-      "disposition": "justified-exception: immutable historical evidence; publish an additive companion for presentation changes"
+      "disposition": "deferred: route-level readability and additive-companion review pending",
+      "follow_up_issue": 669
     },
     {
       "route": "issue3-validated-minimax-20261023-r1",
@@ -1049,7 +1081,8 @@
         "analytic-2d.svg"
       ],
       "index_sha256": "fc9f9920e20072dd6d4cfa04094a7235f01fb0da87e5d95ebe4cdb643ba95564",
-      "disposition": "justified-exception: immutable historical evidence; publish an additive companion for presentation changes"
+      "disposition": "deferred: route-level readability and additive-companion review pending",
+      "follow_up_issue": 669
     },
     {
       "route": "issue4-volterra-7dce05b47c50c27a",
@@ -1058,7 +1091,8 @@
         "error-box.svg"
       ],
       "index_sha256": "9ae62adb575c44a4da216c5fbf2d396375f6965c742c5ca2dddb06d644b4a3d1",
-      "disposition": "justified-exception: immutable historical evidence; publish an additive companion for presentation changes"
+      "disposition": "deferred: route-level readability and additive-companion review pending",
+      "follow_up_issue": 669
     },
     {
       "route": "lotka-volterra-sampled-20261023",
@@ -1067,7 +1101,8 @@
         "geometry.svg"
       ],
       "index_sha256": "63858310c070de048bfa01cb796174ba2a4fd73a3135dcf4fa80c3d57ea9c675",
-      "disposition": "justified-exception: immutable historical evidence; publish an additive companion for presentation changes"
+      "disposition": "deferred: route-level readability and additive-companion review pending",
+      "follow_up_issue": 669
     },
     {
       "route": "lp-20261012T000346Z-ee5e9193b7a5",
@@ -1077,7 +1112,8 @@
         "latency.svg"
       ],
       "index_sha256": "2b7d31cb884861fdab7abe2d1fad8dadb4be1489f5e1edda4afdc8b05b3c22c2",
-      "disposition": "justified-exception: immutable historical evidence; publish an additive companion for presentation changes"
+      "disposition": "deferred: route-level readability and additive-companion review pending",
+      "follow_up_issue": 669
     },
     {
       "route": "opt04-20261013T172839Z-6451c4b89d3b",
@@ -1086,7 +1122,8 @@
         "performance.svg"
       ],
       "index_sha256": "315886d8b30c2e00147c6a52e94c14694c558c44f4520edd734d3098ba3e47fd",
-      "disposition": "justified-exception: immutable historical evidence; publish an additive companion for presentation changes"
+      "disposition": "deferred: route-level readability and additive-companion review pending",
+      "follow_up_issue": 669
     },
     {
       "route": "opt05-hull-20261012-d1c211c2",
@@ -1095,7 +1132,8 @@
         "latency.svg"
       ],
       "index_sha256": "836ceac4fa757dfef471686bb4d04bd47e7da39fd849c22095a30d57f04b6c00",
-      "disposition": "justified-exception: immutable historical evidence; publish an additive companion for presentation changes"
+      "disposition": "deferred: route-level readability and additive-companion review pending",
+      "follow_up_issue": 669
     },
     {
       "route": "opt06-basis-reuse-20261014-ef70e8c5-r2/evidence/accepted-002",
@@ -1104,7 +1142,8 @@
         "latency.svg"
       ],
       "index_sha256": "6df67c44cdcd92535e878297b77a7e09252935bd2d26dad5d17174be68d447cd",
-      "disposition": "justified-exception: immutable historical evidence; publish an additive companion for presentation changes"
+      "disposition": "deferred: route-level readability and additive-companion review pending",
+      "follow_up_issue": 669
     },
     {
       "route": "opt06-basis-reuse-20261014-ef70e8c5-r2",
@@ -1113,7 +1152,8 @@
         "latency.svg"
       ],
       "index_sha256": "6df67c44cdcd92535e878297b77a7e09252935bd2d26dad5d17174be68d447cd",
-      "disposition": "justified-exception: immutable historical evidence; publish an additive companion for presentation changes"
+      "disposition": "deferred: route-level readability and additive-companion review pending",
+      "follow_up_issue": 669
     },
     {
       "route": "opt07-bbb4aee749d643ff",
@@ -1122,7 +1162,8 @@
         "latency.svg"
       ],
       "index_sha256": "f72c860d3cbabbe6cc867c4434eb7920a6e2746f12a8b81ec43cb494d320d91e",
-      "disposition": "justified-exception: immutable historical evidence; publish an additive companion for presentation changes"
+      "disposition": "deferred: route-level readability and additive-companion review pending",
+      "follow_up_issue": 669
     },
     {
       "route": "opt10-smooth-188130d94d7bf2de",
@@ -1131,7 +1172,8 @@
         "feasible-box-2d.svg"
       ],
       "index_sha256": "089785059008e29003e134f6863776d5cbf57f71526811124bb2a9d12415c8c5",
-      "disposition": "justified-exception: immutable historical evidence; publish an additive companion for presentation changes"
+      "disposition": "deferred: route-level readability and additive-companion review pending",
+      "follow_up_issue": 669
     },
     {
       "route": "opt11-8cfbc0c65f420dfd",
@@ -1140,7 +1182,8 @@
         "latency.svg"
       ],
       "index_sha256": "9561239ae2d3bfb7563fbe5605825ddb5f5704e956a9bc158f3baa42d81c24a6",
-      "disposition": "justified-exception: immutable historical evidence; publish an additive companion for presentation changes"
+      "disposition": "deferred: route-level readability and additive-companion review pending",
+      "follow_up_issue": 669
     },
     {
       "route": "opt12-7b732a53716c",
@@ -1149,7 +1192,8 @@
         "comparison.svg"
       ],
       "index_sha256": "0705b99923579a3d7a61a1a6a40039cbfce3e7f76ecf1b9b6552d8590ae9561f",
-      "disposition": "justified-exception: immutable historical evidence; publish an additive companion for presentation changes"
+      "disposition": "deferred: route-level readability and additive-companion review pending",
+      "follow_up_issue": 669
     },
     {
       "route": "quickhull-it17-paper-adaptations-20261024-r1",
@@ -1158,7 +1202,8 @@
         "fixture-geometry.svg"
       ],
       "index_sha256": "9bb9a9c7f8c9d317d457e7449c9271f1317a8843c5640f921bc051789581f058",
-      "disposition": "justified-exception: immutable historical evidence; publish an additive companion for presentation changes"
+      "disposition": "deferred: route-level readability and additive-companion review pending",
+      "follow_up_issue": 669
     },
     {
       "route": "quickhull-it17-preliminary-20261023-r1",
@@ -1167,7 +1212,8 @@
         "fixture-geometry.svg"
       ],
       "index_sha256": "ae29269a1860101623835da276fceca7587e2619f910a2c64a62626dcee94004",
-      "disposition": "justified-exception: immutable historical evidence; publish an additive companion for presentation changes"
+      "disposition": "deferred: route-level readability and additive-companion review pending",
+      "follow_up_issue": 669
     },
     {
       "route": "rejected/finite-feedback-bee7e6d32c88451d",
@@ -1176,7 +1222,8 @@
         "performance.svg"
       ],
       "index_sha256": "e3d54618560811b3d66f837d6a63645695bbfbaaa76275fd7442f3a65da21f83",
-      "disposition": "justified-exception: immutable historical evidence; publish an additive companion for presentation changes"
+      "disposition": "deferred: route-level readability and additive-companion review pending",
+      "follow_up_issue": 669
     },
     {
       "route": "syn-ts01-paired-20261014-b7f1ac0",
@@ -1185,7 +1232,8 @@
         "performance.svg"
       ],
       "index_sha256": "d7996d79d6e8634e6b27cf0c26acc7095c40d1528885e7a9d49792db6e9cbf4d",
-      "disposition": "justified-exception: immutable historical evidence; publish an additive companion for presentation changes"
+      "disposition": "deferred: route-level readability and additive-companion review pending",
+      "follow_up_issue": 669
     },
     {
       "route": "syn01-nominal-20261013-f7ba310d-48a679cfc0d4",
@@ -1194,7 +1242,8 @@
         "latency.svg"
       ],
       "index_sha256": "2a0b1246172312edbe71aca26e70f7d418700e1b0511a9b614fd489aaffbc0c0",
-      "disposition": "justified-exception: immutable historical evidence; publish an additive companion for presentation changes"
+      "disposition": "deferred: route-level readability and additive-companion review pending",
+      "follow_up_issue": 669
     },
     {
       "route": "syn02-terminal-20261013-c234a1a0-35de886a7fb4",
@@ -1203,7 +1252,8 @@
         "latency.svg"
       ],
       "index_sha256": "cdaaf456b55361f516273637eb3f52488ba9870432dfce4b4eb2e7c59cb2ff2e",
-      "disposition": "justified-exception: immutable historical evidence; publish an additive companion for presentation changes"
+      "disposition": "deferred: route-level readability and additive-companion review pending",
+      "follow_up_issue": 669
     },
     {
       "route": "syn03-nominal-exact-2d-8b94095",
@@ -1212,7 +1262,8 @@
         "optimal-face.svg"
       ],
       "index_sha256": "65fd3369fb5ce4e1a708ced00c707bba6c1fd38f115e26aa82c0dc3420eaa05b",
-      "disposition": "justified-exception: immutable historical evidence; publish an additive companion for presentation changes"
+      "disposition": "deferred: route-level readability and additive-companion review pending",
+      "follow_up_issue": 669
     },
     {
       "route": "syn04-strategy-b-ts03-20261022-2c0c9210",
@@ -1221,7 +1272,8 @@
         "control-projection.svg"
       ],
       "index_sha256": "26ee1788329d707d2d11763fe9ac9852d541c2a971cef1493ff8fdd60b7d3338",
-      "disposition": "justified-exception: immutable historical evidence; publish an additive companion for presentation changes"
+      "disposition": "deferred: route-level readability and additive-companion review pending",
+      "follow_up_issue": 669
     },
     {
       "route": "syn06-verifier-20261012-f0e32e2b",
@@ -1230,7 +1282,8 @@
         "latency.svg"
       ],
       "index_sha256": "6a8224b6b50cc551615ea2a0e151960f34e79a1eb66eb895cdff59837fd11b1f",
-      "disposition": "justified-exception: immutable historical evidence; publish an additive companion for presentation changes"
+      "disposition": "deferred: route-level readability and additive-companion review pending",
+      "follow_up_issue": 669
     }
   ],
   "gallery_routes": [
