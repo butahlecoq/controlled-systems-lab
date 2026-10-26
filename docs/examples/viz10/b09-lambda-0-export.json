@@ -1,0 +1,16 @@
+{
+  "schema": "csl.viz10-figure-export/1",
+  "title": "B09 four-state fuel projections at lambda 0.0",
+  "description": "Coordinate projections of the saved four-state terminal V rows, with open-loop and receding-horizon nonlinear replay endpoints marked separately. The V rows are plotted as points; no projected hull is recomputed. Equal data scaling is used within each same-unit coordinate pair.",
+  "quantitative_axis_policy": "csl-report-quantitative-v1",
+  "style_sha256": "3d0c2b8360fb03a45fd41841775ac94bc6c57b67de4a4d9b3ba4ac9e8947df1a",
+  "matplotlib": "3.11.2",
+  "sources": {
+    "reports/algorithm-results/b09-a08-source-reference-4818ddde/results.jsonl": "9d2cfe56dc7ea94dcb26241bc423b3ce294d4220e98964fb8195f6afe62956e6",
+    "reports/algorithm-results/b09-a08-source-reference-4818ddde/scenario.json": "21bbad25657ad07267b4da9c2d77ef36f961dac7c9986f2d895d61a78a74db33"
+  },
+  "files": {
+    "b09-lambda-0.svg": "12bf8b74787760b70e546eb19e72d76cc9ae23a8ef91f0e105f7a8afa0bbd1cf",
+    "b09-lambda-0.png": "5ade7f069041292210bb0d042fefaa0713b87a9f78e85944a9c63fdd246e70a8"
+  }
+}

@@ -22,7 +22,30 @@ class VisualRouteInventoryTests(unittest.TestCase):
         for source in ("benchmarks/reporting/issue6/b07_render_projection.py",
                        "benchmarks/reporting/issue6/b09_render_projection.py"):
             self.assertIn(source,producers)
-            self.assertEqual(producers[source]["disposition"],"deferred-family-specific-migration")
+            self.assertEqual(producers[source]["disposition"],"frozen-renderer-preserved-with-shared-policy-companion")
+        for source in ("scripts/reports/b08_exact_report.py", "scripts/reports/exp04/render_saved.py",
+                       "scripts/reports/issue3/render_saved.py", "scripts/reports/issue3/validated_saved.py",
+                       "scripts/reports/issue4_volterra/render.py", "scripts/reports/issue6/render.py"):
+            self.assertEqual(producers[source]["disposition"],
+                             "frozen-renderer-preserved-with-shared-policy-companion")
+        self.assertEqual(producers["benchmarks/reporting/approximation_pilot/summarize.py"]["disposition"],
+                         "reviewed-static-diagram-exception")
+        self.assertEqual(producers["scripts/reports/issue422/build_bundle.py"]["disposition"],
+                         "composes-or-copies-existing-saved-figure")
+        self.assertEqual(producers["scripts/reports/render.py"]["disposition"],
+                         "publication-validation-or-frozen-route")
+        self.assertEqual(producers["scripts/reports/viz10_plot_companions.py"]["disposition"],
+                         "shared-quantitative-policy-companion-renderer")
+        viz10_sources = (
+            "benchmarks/reporting/approximation_pilot/summarize.py",
+            "benchmarks/reporting/issue6/b07_render_projection.py",
+            "benchmarks/reporting/issue6/b09_render_projection.py",
+            "scripts/reports/b08_exact_report.py", "scripts/reports/exp04/render_saved.py",
+            "scripts/reports/issue3/render_saved.py", "scripts/reports/issue3/validated_saved.py",
+            "scripts/reports/issue422/build_bundle.py", "scripts/reports/issue4_volterra/render.py",
+            "scripts/reports/issue6/render.py", "scripts/reports/render.py")
+        for source in viz10_sources:
+            self.assertTrue(producers[source]["role_and_disposition_reason"], source)
         self.assertEqual(producers["scripts/reports/control_figures.py"]["disposition"],
                          "adopted-shared-quantitative-policy")
         self.assertEqual(producers["scripts/reports/visual_illustrations.py"]["disposition"],
@@ -62,7 +85,7 @@ class VisualRouteInventoryTests(unittest.TestCase):
         self.assertTrue(deferred)
         follow_up_counts={number:sum(entry["follow_up_issue"]==number for entry in deferred)
                           for number in (684,685,686,687)}
-        self.assertEqual(follow_up_counts,{684:5,685:0,686:17,687:11})
+        self.assertEqual(follow_up_counts,{684:5,685:0,686:17,687:0})
         self.assertTrue(all(entry["follow_up_issue"] in follow_up_counts for entry in deferred))
         routes={entry["route"]:entry for entry in inventory["frozen_published_routes"]}
         self.assertGreater(len(routes),40)
@@ -92,7 +115,8 @@ class VisualRouteInventoryTests(unittest.TestCase):
             "ext01-b08-timing-v1.html", "ext01-b08-timing-v1.svg",
             "ext01-b08-timing-v1.png", "ext01-b08-timing-v1-export.json",
             "ext05-states-v1.html", "ext05-states-v1.svg", "ext05-states-v1.png",
-            "ext05-states-v1-export.json", *audit_visual_routes.geometry_companion_assets()})
+            "ext05-states-v1-export.json", *audit_visual_routes.geometry_companion_assets(),
+            *audit_visual_routes.viz10_companion_assets()})
         self.assertEqual((ROOT/"docs/examples/examples.css").read_bytes(),
                          (ROOT/"scripts/reports/visual_examples.css").read_bytes())
         before=ROOT/"docs/examples/fuel-b06-viz06-before.svg"

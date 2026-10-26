@@ -1,0 +1,15 @@
+{
+  "schema": "csl.viz10-figure-export/1",
+  "title": "Issue #4 saved Volterra error boxes",
+  "description": "Axis-aligned boxes use the saved interval endpoints at stages 1, 20, 40 and 60. The plotted rectangles are illustrative binary64 coordinates; decimal endpoints remain in the immutable record and CSV.",
+  "quantitative_axis_policy": "csl-report-quantitative-v1",
+  "style_sha256": "3d0c2b8360fb03a45fd41841775ac94bc6c57b67de4a4d9b3ba4ac9e8947df1a",
+  "matplotlib": "3.11.2",
+  "sources": {
+    "reports/algorithm-results/issue4-volterra-7dce05b47c50c27a/records.json": "8adb1f411b31da8d84e4a0ca4f8ea2b4c4b260e3a245d64c1d06ca5fc05edd8d"
+  },
+  "files": {
+    "issue4-volterra-error-boxes.svg": "151f1e98eb34218ae01e80111a14fb2db6168fc9859f40d54a34e7308b45d968",
+    "issue4-volterra-error-boxes.png": "af121fd67fe44632652e2a92e55d9ba586bf3d3a639730e0cc0c635d9ffc54ae"
+  }
+}

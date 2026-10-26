@@ -884,6 +884,12 @@ def build(catalog, site):
         path = fuel_assets / name
         require(path.is_file(), "missing VIZ-03 fuel figure asset: " + str(path))
         outputs[name] = path.read_text(encoding="utf-8") if path.suffix == ".html" else path.read_bytes()
+    viz10_assets = Path(__file__).parents[2] / "docs/examples/viz10"
+    require((viz10_assets / "index.html").is_file(), "missing VIZ-10 saved-data plot gallery")
+    for path in sorted(viz10_assets.rglob("*")):
+        if path.is_file() and "mpl-config" not in path.parts:
+            name = "viz10/" + path.relative_to(viz10_assets).as_posix()
+            outputs[name] = path.read_text(encoding="utf-8") if path.suffix == ".html" else path.read_bytes()
     gallery_inventory = []
     for example in examples:
         source_page = f"../{example['report_id']}/index.html"
@@ -925,6 +931,14 @@ def build(catalog, site):
                   "figure":"fuel-b06-viz06-flow.svg", "source_page":"https://github.com/butahlecoq/controlled-systems-lab/blob/main/reports/algorithm-results/b06-owner-confirmed-7df01ba3af5e4c46/index.html",
                   "raw_record":"fuel-b06-viz06-source.json"}
     gallery_inventory.append(fuel_entry)
+    viz10_entry = {"family": "Historical and benchmark reports",
+                   "title": "VIZ-10 saved-data plots, including B07 and B09 fuel projections",
+                   "status": "saved-data-companion", "anchor": "saved-figure-viz10-plots",
+                   "page": "viz10/index.html",
+                   "figure": "viz10/b07-b07-reconstruction-s0-l0-d0.png",
+                   "source_page": "../issue6-b07-reference-a394915af10636430cdcd757d95a9d987eaa6c4c0b742bef7ba1aa04638a2cdd/index.html",
+                   "raw_record": "viz10/manifest.json"}
+    gallery_inventory.append(viz10_entry)
     lotka_route = "lotka-volterra-sampled-20261023"
     lotka_anchor = "saved-figure-lotka-quantitative"
     gallery_inventory.append({"family": "Lotka–Volterra reachability samples",
@@ -1049,8 +1063,14 @@ def build(catalog, site):
             f'<h3>{escape(fuel_entry["title"])}</h3>'
             f'<p>{escape("Readable, versioned SVG and PNG projections of the saved 4D B06 terminal set, with exact values, units, target, evidence limits and reproduction commands.")}</p>'
             f'<a href="{fuel_entry["page"]}"><img src="{fuel_entry["figure"]}" alt="{escape("B06 four-state terminal set projected onto flow coordinates")}"></a>'
-            f'<p><a href="{fuel_entry["page"]}">Open the fuel projections and timing figures →</a></p></article>' + '</div></section>' +
-            '<footer>Controlled Systems Lab · Saved evidence, visible geometry.</footer></main></div>'
+            f'<p><a href="{fuel_entry["page"]}">Open the fuel projections and timing figures →</a></p></article>' +
+            f'<article class="saved-figure" id="{viz10_entry["anchor"]}"><p class="eyebrow">Historical and benchmark reports · Saved-data companion</p>'
+            f'<h3>{escape(viz10_entry["title"])}</h3>'
+            '<a href="viz10/index.html"><img src="viz10/b07-b07-reconstruction-s0-l0-d0.png" '
+            'alt="B07 terminal points projected from four state coordinates onto oxidizer/fuel flow and stock axes"></a>'
+            '<p>Plots saved B07 and B09 four-state terminal rows in labeled flow and stock coordinate pairs. The figures show points and do not reconstruct a filled enclosure.</p>'
+            '<p><a href="viz10/index.html">Open the historical and benchmark saved-data plots →</a></p></article>' +
+            '</div></section><footer>Controlled Systems Lab · Saved evidence, visible geometry.</footer></main></div>'
             '<script>document.querySelector(".nav-shortcut").addEventListener("click",event=>{'
             'const target=document.querySelector(event.currentTarget.hash);if(!target)return;'
             'event.preventDefault();history.pushState(null,"",event.currentTarget.hash);'
@@ -1099,11 +1119,13 @@ def build(catalog, site):
         "analytic": projected["analytic"],
     }, indent=2) + "\n"
     for name, content in outputs.items():
-        require(not (out / name).is_symlink(), "gallery file must not be a symlink")
+        destination = out / name
+        require(not destination.is_symlink(), "gallery file must not be a symlink")
+        destination.parent.mkdir(parents=True, exist_ok=True)
         if isinstance(content, bytes):
-            (out / name).write_bytes(content)
+            destination.write_bytes(content)
         else:
-            (out / name).write_text(content, encoding="utf-8")
+            destination.write_text(content, encoding="utf-8")
     validate_gallery_inventory(out, gallery_inventory)
     require(not (out / "examples.css").is_symlink(), "gallery stylesheet must not be a symlink")
     shutil.copyfile(Path(__file__).with_name("visual_examples.css"), out / "examples.css")

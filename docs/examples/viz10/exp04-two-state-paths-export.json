@@ -1,0 +1,15 @@
+{
+  "schema": "csl.viz10-figure-export/1",
+  "title": "EXP-04 two-state replay paths",
+  "description": "The paths are the two literal saved replay fixtures in physical state coordinates; x and y have different units, so axis scaling is independent.",
+  "quantitative_axis_policy": "csl-report-quantitative-v1",
+  "style_sha256": "3d0c2b8360fb03a45fd41841775ac94bc6c57b67de4a4d9b3ba4ac9e8947df1a",
+  "matplotlib": "3.11.2",
+  "sources": {
+    "reports/algorithm-results/exp04-replay-93fe3b87795e1d3a/records.json": "bef01d73818e5413d6ff29cd4e0e8f036b6e2e6b8c44ebae9064a916d5304255"
+  },
+  "files": {
+    "exp04-two-state-paths.svg": "ac4ecc7990f59128aab9f9cc48f5882ee84d269e43910069923c7a731b453c0c",
+    "exp04-two-state-paths.png": "1f01a7dd9264f33564a65fcc519485df17872493fe834b5de3fc52315ae3138d"
+  }
+}
