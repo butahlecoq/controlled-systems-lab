@@ -45,7 +45,8 @@ def reseal(document):
 
 class StageProjectionBatchTests(unittest.TestCase):
     def read(self, document, expected_request_id="request-1"):
-        return data.loads_stage_projection_batch(json.dumps(document), expected_run_id="run-1",
+        raw = document if isinstance(document, str) else json.dumps(document)
+        return data.loads_stage_projection_batch(raw, expected_run_id="run-1",
             expected_problem_id="problem-1", expected_request_id=expected_request_id,
             expected_route_id="route-1", expected_record_schema="csl.run/1",
             expected_source_sha256="a" * 64)
