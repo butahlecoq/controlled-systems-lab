@@ -1,6 +1,7 @@
 #pragma once
 
 #include <cstddef>
+#include <cstdint>
 #include <optional>
 #include <string>
 #include <variant>
@@ -108,6 +109,26 @@ struct IndependentEvidence {
 struct Trajectory {
     std::vector<Vector> states;
     std::vector<Vector> controls;
+};
+
+struct NativeAttempt {
+    std::string method;
+    Termination termination{Termination::incomplete};
+    MathematicalOutcome outcome{MathematicalOutcome::undetermined};
+    std::string native_status;
+    std::optional<Trajectory> witness;
+    Vector solver_primal;
+    Vector solver_dual;
+    std::optional<double> solver_objective;
+    std::optional<double> original_objective;
+    std::uint64_t formulation_ns{};
+    std::uint64_t setup_ns{};
+    std::uint64_t warm_start_ns{};
+    std::uint64_t solve_ns{};
+    std::uint64_t extraction_ns{};
+    bool factorization_in_setup{};
+    bool factorization_in_solve{};
+    std::string diagnostics;
 };
 
 } // namespace csl::mpc01

@@ -54,6 +54,7 @@ endif()
 
 if(CSL_BUILD_MPC01_REPORT)
 include(cmake/JsonDependencies.cmake)
+include(cmake/Mpc01Dependencies.cmake)
 add_library(csl_mpc01_model STATIC
   benchmarks/reporting/mpc01/model.cpp
   benchmarks/reporting/mpc01/fixtures.cpp
@@ -69,7 +70,22 @@ else()
 target_compile_options(csl_mpc01_model PRIVATE -Wall -Wextra -Wpedantic -Werror)
 endif()
 set_target_properties(csl_mpc01_model PROPERTIES POSITION_INDEPENDENT_CODE ON)
+add_executable(csl_mpc01_report
+  benchmarks/reporting/mpc01/main.cpp
+  benchmarks/reporting/mpc01/osqp_adapter.cpp
+  benchmarks/reporting/mpc01/hpipm_adapter.cpp)
+target_link_libraries(csl_mpc01_report PRIVATE csl_mpc01_model
+  csl_mpc01_osqp csl_mpc01_hpipm csl_mpc01_blasfeo)
+target_compile_features(csl_mpc01_report PRIVATE cxx_std_20)
+target_include_directories(csl_mpc01_report SYSTEM PRIVATE ${csl_json_SOURCE_DIR}/single_include)
+add_dependencies(csl_mpc01_report csl_mpc01_native_dependencies)
+if(MSVC)
+target_compile_options(csl_mpc01_report PRIVATE /W4 /WX /permissive-)
+else()
+target_compile_options(csl_mpc01_report PRIVATE -Wall -Wextra -Wpedantic -Werror)
+endif()
 if(BUILD_TESTING)
+find_package(Python3 3.11 REQUIRED COMPONENTS Interpreter)
 add_executable(mpc01_model_tests tests/benchmarks/mpc01_model_tests.cpp)
 target_link_libraries(mpc01_model_tests PRIVATE csl_mpc01_model)
 target_compile_features(mpc01_model_tests PRIVATE cxx_std_20)
@@ -77,6 +93,10 @@ add_test(NAME mpc01_model_contract COMMAND mpc01_model_tests
   ${PROJECT_SOURCE_DIR}/examples/scenarios/double-integrator-generality.json
   ${PROJECT_SOURCE_DIR}/docs/research/evidence/b04-reference-v1/canonical-case.json)
 set_tests_properties(mpc01_model_contract PROPERTIES LABELS reporting)
+add_test(NAME mpc01_native_smoke COMMAND Python3::Interpreter
+  ${PROJECT_SOURCE_DIR}/scripts/reports/mpc01/check_native_smoke.py
+  $<TARGET_FILE:csl_mpc01_report> ${PROJECT_SOURCE_DIR})
+set_tests_properties(mpc01_native_smoke PROPERTIES LABELS reporting)
 endif()
 endif()
 
