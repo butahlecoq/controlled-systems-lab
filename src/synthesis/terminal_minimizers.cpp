@@ -92,7 +92,7 @@ TerminalMinimizers TerminalOptimizer::solve(const problem::ResolvedProblem& prob
     auto execution=context;execution.numerical=request.numerical;
     TerminalMinimizers result;result.construction.feasible_slice=slice.feasible.metadata()->id;
     if(context.cancellation.stop_requested()||(context.deadline&&std::chrono::steady_clock::now()>=*context.deadline)) {
-        result.termination=context.cancellation.stop_requested()?Termination::cancelled:Termination::resource_limit;return result;
+        result.termination=context.cancellation.stop_requested()?Termination::cancelled:Termination::deadline_expired;return result;
     }
     const ProgramIdentity identity{problem.identity(),{"syn02-terminal:"+slice.feasible.metadata()->id.value}};
     const auto description=objective_description(objective);
