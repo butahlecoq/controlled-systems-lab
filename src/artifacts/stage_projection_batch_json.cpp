@@ -24,6 +24,15 @@ const char* relation(SetRelation value) {
     return "unknown";
 }
 const char* assurance(Assurance value) { return value == Assurance::validated ? "validated" : "numerical"; }
+const char* stop_reason(StopReason value) {
+    switch (value) {
+    case StopReason::cancelled: return "cancelled";
+    case StopReason::deadline_expired: return "deadline_expired";
+    case StopReason::resource_limit: return "resource_limit";
+    case StopReason::numerical_failure: return "numerical_failure";
+    }
+    return "unknown";
+}
 bool valid_digest(std::string_view value) {
     return value.size() == 64 && std::all_of(value.begin(), value.end(), [](char c) {
         return (c >= '0' && c <= '9') || (c >= 'a' && c <= 'f');
@@ -85,7 +94,8 @@ Json failure_cause(const StageProjectionFailure& failure) {
                 {"diagnostics", std::move(detail)}};
         }
         else if constexpr (std::is_same_v<T, OperationStopped>)
-            return {{"kind", "stopped"}, {"explanation", cause.diagnostics}};
+            return {{"kind", "stopped"}, {"explanation", cause.diagnostics.empty() ? "Geometry operation stopped." : cause.diagnostics},
+                {"stop_reason", stop_reason(cause.reason)}, {"stop_diagnostics", cause.diagnostics}};
         else return {{"kind", "artifact_error"}, {"explanation", cause.message}};
     }, failure.cause);
 }
@@ -266,9 +276,15 @@ ArtifactResult<std::string> encode_stage_projection_batch_json(
             } else if (const auto* unavailable = std::get_if<StageProjectionUnavailable>(&row.outcome)) {
                 if (unavailable->explanation.empty())
                     return error(ArtifactErrorCode::invalid_input, "records.outcome.explanation", "Unavailable outcomes require an explanation");
+                if ((unavailable->kind == StageProjectionGap::Kind::stopped) != unavailable->stop.has_value())
+                    return error(ArtifactErrorCode::reference, "records.outcome.stop", "Only stopped outcomes must carry a stop reason");
                 const char* kind = unavailable->kind == StageProjectionGap::Kind::missing ? "missing" :
                     unavailable->kind == StageProjectionGap::Kind::unsupported ? "unsupported" : "stopped";
                 outcome = {{"status", "unavailable"}, {"kind", kind}, {"explanation", unavailable->explanation}};
+                if (unavailable->stop) {
+                    outcome["stop_reason"] = stop_reason(unavailable->stop->reason);
+                    outcome["stop_diagnostics"] = unavailable->stop->diagnostics;
+                }
             } else {
                 const auto& failed = std::get<StageProjectionFailure>(row.outcome);
                 const auto cause = failure_cause(failed);
@@ -276,6 +292,10 @@ ArtifactResult<std::string> encode_stage_projection_batch_json(
                     return error(ArtifactErrorCode::invalid_input, "records.outcome.explanation", "Failure outcomes require an explanation");
                 outcome = {{"status", "failure"}, {"kind", cause["kind"]}, {"explanation", cause["explanation"]}};
                 if (cause.contains("diagnostics")) outcome["diagnostics"] = cause["diagnostics"];
+                if (cause.contains("stop_reason")) {
+                    outcome["stop_reason"] = cause["stop_reason"];
+                    outcome["stop_diagnostics"] = cause["stop_diagnostics"];
+                }
                 if (failed.identity.problem != batch.problem || failed.identity.request.value.empty())
                     return error(ArtifactErrorCode::identity, "records.outcome", "Failure identity does not match batch problem/request");
             }

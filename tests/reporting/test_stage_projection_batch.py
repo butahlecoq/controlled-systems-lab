@@ -24,7 +24,8 @@ def fixture():
                              "support": {"kind": "numerical_check"}, "assumptions": []}],
                          "components": [{"component_id": f"component-{stage}", "kind": kind, "vertices": vertices}]}}
             for stage, kind, vertices in (
-                (0, "point", [[0, 0]]), (1, "segment", [[0, 0], [1, 1]]),
+                (0, "point", [[0, 0], [0, 0], [0, 0]]),
+                (1, "segment", [[0, 0], [1, 1], [2, 2]]),
                 (2, "polygon", [[0, 0], [1, 0], [0, 1]]))
         ],
         "trajectory_series": [],
@@ -60,6 +61,10 @@ class StageProjectionBatchTests(unittest.TestCase):
         self.assertEqual(loaded["route_id"], "fuel-route")
         self.assertEqual(loaded["requested_pairs"], [[0, 2]])
         self.assertEqual(loaded["records"][0]["outcome"]["components"][0]["kind"], "polygon")
+        self.assertEqual(len(loaded["records"][1]["outcome"]["components"][0]["vertices"]), 3)
+        self.assertEqual(loaded["records"][1]["outcome"]["components"][0]["kind"], "segment")
+        self.assertEqual(len(loaded["records"][2]["outcome"]["components"][0]["vertices"]), 3)
+        self.assertEqual(loaded["records"][2]["outcome"]["components"][0]["kind"], "point")
         self.assertEqual(loaded["trajectory_series"][0]["kind"], "trajectory")
         self.assertEqual(loaded["trajectory_series"][0]["coordinate_ids"], ["x0", "x2"])
 
@@ -88,6 +93,34 @@ class StageProjectionBatchTests(unittest.TestCase):
         document["records"][0]["outcome"]["components"][0]["vertices"] = [[0, 0, 0]]
         reseal(document)
         with self.assertRaises(data.ProjectionBatchError):
+            self.read(document)
+
+    def test_rejects_degenerate_geometry_and_invalid_axes(self):
+        for kind, vertices in (("segment", [[0, 0], [0, 0]]),
+                               ("polygon", [[0, 0], [1, 1], [2, 2]])):
+            document = fixture()
+            component = document["records"][0]["outcome"]["components"][0]
+            component.update(kind=kind, vertices=vertices)
+            reseal(document)
+            with self.assertRaises(data.ProjectionBatchError):
+                self.read(document)
+        document = fixture()
+        document["records"][0]["outcome"]["components"] = [
+            {"component_id": "unbounded", "kind": "unbounded", "vertices": [[0, 0]], "rays": [[0, 0]]}]
+        reseal(document)
+        with self.assertRaisesRegex(data.ProjectionBatchError, "nonzero ray"):
+            self.read(document)
+        document = fixture()
+        document["stage_axis"]["points"] = []
+        reseal(document)
+        with self.assertRaises(data.ProjectionBatchError):
+            self.read(document)
+        document = fixture()
+        document["stage_axis"] = {"kind": "physical_time", "points": [0, 2, 1], "unit": "s"}
+        for row, time in zip(document["records"], document["stage_axis"]["points"]):
+            row["physical_time"] = time
+        reseal(document)
+        with self.assertRaisesRegex(data.ProjectionBatchError, "strictly increasing"):
             self.read(document)
 
     def test_rejects_geometry_tampering_and_writer_reseals(self):
@@ -129,8 +162,10 @@ class StageProjectionBatchTests(unittest.TestCase):
     def test_preserves_each_unavailable_and_failure_outcome(self):
         for kind in ("missing", "unsupported", "stopped"):
             document = fixture()
-            document["records"][0]["outcome"] = {
-                "status": "unavailable", "kind": kind, "explanation": f"{kind} by fixture"}
+            outcome = {"status": "unavailable", "kind": kind, "explanation": f"{kind} by fixture"}
+            if kind == "stopped":
+                outcome.update(stop_reason="deadline_expired", stop_diagnostics="fixture deadline")
+            document["records"][0]["outcome"] = outcome
             reseal(document)
             self.assertEqual(self.read(document)["records"][0]["outcome"]["kind"], kind)
         document = fixture()

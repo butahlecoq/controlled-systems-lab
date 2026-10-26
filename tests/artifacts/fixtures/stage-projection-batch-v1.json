@@ -1,6 +1,6 @@
 {
   "assurance": "numerical",
-  "content_sha256": "e7f1ab00867eac25c3bf11eb9d38376fe7ed0f5eacbfd4bf8f74be212c235cc2",
+  "content_sha256": "1d868602a359c6786ac94535070339b8cf23459682fbdff9b7dc951e68069602",
   "coordinates": [
     {
       "id": "x0",
@@ -112,40 +112,20 @@
           {
             "component_id": "stage-projection/pair/0/stage/1",
             "interpretation": "conv_vertices_plus_cone_rays",
-            "kind": "polygon",
+            "kind": "segment",
             "rays": [],
             "vertices": [
               [
-                -1.0,
-                -1.0
-              ],
-              [
-                -1.0,
-                1.0
-              ],
-              [
-                -1.0,
-                -1.0
-              ],
-              [
-                -1.0,
-                1.0
-              ],
-              [
-                1.0,
-                -1.0
+                0.0,
+                0.0
               ],
               [
                 1.0,
                 1.0
               ],
               [
-                1.0,
-                -1.0
-              ],
-              [
-                1.0,
-                1.0
+                2.0,
+                2.0
               ]
             ]
           }
@@ -159,7 +139,7 @@
             ],
             "ideal_output_id": "stage-projection/pair/0/stage/1",
             "input_set_ids": [
-              "cube"
+              "line"
             ],
             "request_id": "stage-batch/pair/0/stage/1",
             "scope": "set_relation",
@@ -181,9 +161,69 @@
       "physical_time": 1.0,
       "source_assurance": "numerical",
       "source_set_ids": [
-        "cube"
+        "line"
       ],
       "stage": 1
+    },
+    {
+      "outcome": {
+        "assurance": "numerical",
+        "components": [
+          {
+            "component_id": "stage-projection/pair/0/stage/2",
+            "interpretation": "conv_vertices_plus_cone_rays",
+            "kind": "point",
+            "rays": [],
+            "vertices": [
+              [
+                5.0,
+                7.0
+              ],
+              [
+                5.0,
+                7.0
+              ],
+              [
+                5.0,
+                7.0
+              ]
+            ]
+          }
+        ],
+        "evidence": [
+          {
+            "assumptions": [
+              "ordered selected coordinates retained; affine dimension is not inferred",
+              "generator copying or lazy retention introduces no arithmetic conversion",
+              "H materialization preserves equalities; V materialization preserves every ray including zero images"
+            ],
+            "ideal_output_id": "stage-projection/pair/0/stage/2",
+            "input_set_ids": [
+              "point"
+            ],
+            "request_id": "stage-batch/pair/0/stage/2",
+            "scope": "set_relation",
+            "support": {
+              "assumptions": "Coordinate selection copies generators; lazy projection retains its immutable source without elimination.",
+              "kind": "symbolic_argument",
+              "reference": "Coordinate projection of conv(V)+cone(R), or retained existential projection"
+            }
+          }
+        ],
+        "provider": {
+          "id": "csl.geometry.polyhedral-projection",
+          "version": "1.0.0"
+        },
+        "relation": "equivalent",
+        "status": "success"
+      },
+      "pair_index": 0,
+      "physical_time": 2.0,
+      "source_assurance": "numerical",
+      "source_set_ids": [
+        "point"
+      ],
+      "stage": 2
     }
   ],
   "relation": "equivalent",
@@ -200,7 +240,8 @@
     "kind": "stage",
     "points": [
       0.0,
-      1.0
+      1.0,
+      2.0
     ],
     "unit": null
   },
@@ -220,6 +261,10 @@
         [
           1.0,
           1.0
+        ],
+        [
+          5.0,
+          7.0
         ]
       ],
       "source_run_id": "run-1"

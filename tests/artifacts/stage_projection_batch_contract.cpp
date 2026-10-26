@@ -37,10 +37,34 @@ sets::SetData cube() {
     return take(sets::make_v({{"cube"}, 3, {"x", "y", "z"}},
         {take(numeric::snapshot(vertices)), take(numeric::snapshot(rays))}));
 }
+
+sets::SetData line_with_interior_vertex() {
+    Matrix vertices{3, 3, {0,0,0, 1,0,1, 2,0,2}};
+    Matrix rays{0, 3, {}};
+    return take(sets::make_v({{"line"}, 3, {"x", "y", "z"}},
+        {take(numeric::snapshot(vertices)), take(numeric::snapshot(rays))}));
+}
+
+sets::SetData point_with_duplicate_vertices() {
+    Matrix vertices{3, 3, {5,0,7, 5,0,7, 5,0,7}};
+    Matrix rays{0, 3, {}};
+    return take(sets::make_v({{"point"}, 3, {"x", "y", "z"}},
+        {take(numeric::snapshot(vertices)), take(numeric::snapshot(rays))}));
+}
+
+ar::StageProjectionSet projection_source(const sets::SetData& set) {
+    ar::StageProjectionSet source;
+    source.relation = set.as_handle();
+    source.owner = {{"fuel"}, set.metadata()->id};
+    source.relation_coordinates = {0, 1, 2};
+    return source;
+}
 }
 
 TEST_CASE("stage projection batch JSON binds source identity and retains 2D geometry") {
     const auto source_set = cube();
+    const auto line_set = line_with_interior_vertex();
+    const auto point_set = point_with_duplicate_vertices();
     ar::StageProjectionSet source;
     source.relation = source_set.as_handle();
     source.owner = {{"fuel"}, source_set.metadata()->id};
@@ -48,13 +72,15 @@ TEST_CASE("stage projection batch JSON binds source identity and retains 2D geom
     ar::StageProjectionCaptureRequest request{{"fuel"}, {"stage-batch"},
         {{"oxidizer flow", "kg/s", {}, {}}, {"oxidizer stock", "kg", {}, {}}, {"fuel flow", "kg/s", {}, {}}},
         {{{ar::CoordinateOrdinal{0}, ar::CoordinateOrdinal{2}}}},
-        {{{0}, 0.0, source}, {{1}, 1.0, source}}, SetRelation::equivalent, Assurance::numerical};
+        {{{0}, 0.0, source}, {{1}, 1.0, projection_source(line_set)},
+            {{2}, 2.0, projection_source(point_set)}},
+        SetRelation::equivalent, Assurance::numerical};
     const auto capture = ar::capture_stage_projections(request, provider());
     REQUIRE(std::holds_alternative<ar::StageProjectionBatchCapture>(capture));
 
     ar::StageProjectionBatchIdentity identity{{"run-1"}, "fuel-route", "csl.run-statistics/7", std::string(64, 'a'),
-        request.state_coordinates, {{0, 2}}, {ar::PlotAxis::Kind::stage, {0.0, 1.0}, {}, {}}, {}};
-    identity.trajectory_series.push_back({{"run-1"}, {0, 2}, {{-1.0, -1.0}, {1.0, 1.0}}, "selected witness only"});
+        request.state_coordinates, {{0, 2}}, {ar::PlotAxis::Kind::stage, {0.0, 1.0, 2.0}, {}, {}}, {}};
+    identity.trajectory_series.push_back({{"run-1"}, {0, 2}, {{-1.0, -1.0}, {1.0, 1.0}, {5.0, 7.0}}, "selected witness only"});
     const auto encoded = ar::encode_stage_projection_batch_json(identity,
         std::get<ar::StageProjectionBatchCapture>(capture));
     REQUIRE(std::holds_alternative<std::string>(encoded));
@@ -67,6 +93,8 @@ TEST_CASE("stage projection batch JSON binds source identity and retains 2D geom
     CHECK(json.find("fuel-route") != std::string::npos);
     CHECK(json.find("conv_vertices_plus_cone_rays") != std::string::npos);
     CHECK(json.find("\"kind\": \"polygon\"") != std::string::npos);
+    CHECK(json.find("\"kind\": \"segment\"") != std::string::npos);
+    CHECK(json.find("\"kind\": \"point\"") != std::string::npos);
 }
 
 TEST_CASE("stage projection batch JSON rejects reordered pairs and bad source hashes") {

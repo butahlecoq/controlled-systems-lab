@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import json
 import hashlib
+from fractions import Fraction
 from pathlib import Path
 from typing import Any
 
@@ -76,6 +77,10 @@ def loads_stage_projection_batch(
 
     pair_count = len(document["requested_pairs"])
     stage_points = document["stage_axis"]["points"]
+    if not stage_points:
+        raise ProjectionBatchError("stage_axis.points must not be empty")
+    if any(right <= left for left, right in zip(stage_points, stage_points[1:])):
+        raise ProjectionBatchError("stage_axis.points must be strictly increasing")
     seen_pairs: set[tuple[int, int]] = set()
     for i, pair in enumerate(document["requested_pairs"]):
         normalized = tuple(pair)
@@ -118,14 +123,29 @@ def loads_stage_projection_batch(
                     raise ProjectionBatchError(f"records[{i}] bounded geometry cannot include recession rays")
                 if kind == "empty" and (vertices or rays):
                     raise ProjectionBatchError(f"records[{i}] empty geometry cannot include vertices or rays")
-                if kind == "point" and len(vertices) != 1:
-                    raise ProjectionBatchError(f"records[{i}] point geometry must have one vertex")
-                if kind == "segment" and len(vertices) != 2:
-                    raise ProjectionBatchError(f"records[{i}] segment geometry must have two vertices")
-                if kind == "polygon" and len(vertices) < 3:
-                    raise ProjectionBatchError(f"records[{i}] polygon geometry must have at least three vertices")
+                if kind in {"point", "segment", "polygon"}:
+                    unique = list(dict.fromkeys(tuple(point) for point in vertices))
+                    if kind == "point" and len(unique) != 1:
+                        raise ProjectionBatchError(f"records[{i}] point vertices must all represent one point")
+                    if kind == "segment" and len(unique) < 2:
+                        raise ProjectionBatchError(f"records[{i}] segment vertices must include two distinct points")
+                    if kind == "polygon" and len(unique) < 3:
+                        raise ProjectionBatchError(f"records[{i}] polygon vertices must include three distinct points")
+                    if kind != "point" and len(unique) >= 2:
+                        x0, y0 = (Fraction.from_float(float(value)) for value in unique[0])
+                        x1, y1 = (Fraction.from_float(float(value)) for value in unique[1])
+                        area = any((x1 - x0) * (Fraction.from_float(float(y)) - y0) !=
+                                   (y1 - y0) * (Fraction.from_float(float(x)) - x0)
+                                   for x, y in unique[2:])
+                        if (kind == "segment") == area:
+                            raise ProjectionBatchError(f"records[{i}] geometry kind does not match its exact vertex affine dimension")
                 if kind == "unbounded" and not rays:
                     raise ProjectionBatchError(f"records[{i}] unbounded geometry must include a ray")
+                if kind == "unbounded" and not any(any(value != 0 for value in ray) for ray in rays):
+                    raise ProjectionBatchError(f"records[{i}] unbounded geometry must include a nonzero ray")
+        if outcome.get("kind") == "stopped" and outcome.get("status") in {"unavailable", "failure"}:
+            if not outcome.get("stop_reason") or "stop_diagnostics" not in outcome:
+                raise ProjectionBatchError(f"records[{i}] stopped outcome must retain its stop reason and diagnostics")
     coordinate_ids = [coordinate["id"] for coordinate in document["coordinates"]]
     for i, trajectory in enumerate(document["trajectory_series"]):
         if trajectory["source_run_id"] != expected_run_id:

@@ -15,10 +15,16 @@ ordered. Empty geometry has no vertices or rays. Unbounded geometry has a
 finite base vertex and at least one nonzero recession ray. Point, segment and
 polygon distinguish affine dimensions zero, one and two. Multiple components
 remain separate so renderers do not fill the gaps by convexifying them.
+Redundant V vertices are preserved, including duplicate point vertices and
+interior collinear segment vertices; readers validate affine dimension rather
+than requiring a minimal vertex list. Stage and physical-time axes are
+nonempty and strictly increasing.
 
 Unavailable outcomes identify missing, unsupported, or stopped stages.
-Failures retain the failure class and diagnostics. Optional trajectory series
-are stored in their own top-level field and never imply reachable-set geometry.
+Stopped outcomes preserve their stop reason and diagnostics. Failures retain
+the failure class and diagnostics, including stop details when applicable.
+Optional trajectory series are stored in their own top-level field and never
+imply reachable-set geometry.
 
 The document binds to a source run, problem, request, route and source-record
 SHA-256. `content_sha256` is SHA-256 over the UTF-8 canonical JSON document
