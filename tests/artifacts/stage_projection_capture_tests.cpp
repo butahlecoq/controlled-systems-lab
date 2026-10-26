@@ -1,7 +1,7 @@
 #define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
 #include <doctest/doctest.h>
 
-#include <csl/artifacts/stage_projection_request.hpp>
+#include <csl/artifacts/stage_projection_capture.hpp>
 #include <csl/geometry/polyhedral_projection.hpp>
 #include <csl/numeric/data.hpp>
 #include <csl/sets/data.hpp>
@@ -41,14 +41,14 @@ ar::StageProjectionInput available_stage(std::size_t stage, const sets::SetData&
     ar::StageProjectionSet source;
     source.relation = set.as_handle();
     source.owner = {{"fuel-analytic-fixture"}, set.metadata()->id};
-    source.state_coordinates = {{"oxidizer flow", "kg/s", {}, {}},
-        {"oxidizer stock", "kg", {}, {}}, {"fuel flow", "kg/s", {}, {}}};
     source.relation_coordinates = {0, 1, 2};
     return {{stage}, static_cast<double>(stage), std::move(source)};
 }
 
 ar::StageProjectionCaptureRequest request(std::vector<ar::StageProjectionInput> stages) {
     return {{"fuel-analytic-fixture"}, {"capture"},
+        {{"oxidizer flow", "kg/s", {}, {}}, {"oxidizer stock", "kg", {}, {}},
+            {"fuel flow", "kg/s", {}, {}}},
         {{{ar::CoordinateName{"oxidizer flow"}, ar::CoordinateOrdinal{2}}}},
         std::move(stages), SetRelation::equivalent, Assurance::numerical};
 }
@@ -82,6 +82,11 @@ TEST_CASE("stage projection capture returns one projection or explicit gap per p
     REQUIRE(std::holds_alternative<ar::StageProjectionUnavailable>(batch.records[2].outcome));
     CHECK(std::get<ar::StageProjectionUnavailable>(batch.records[2].outcome).kind ==
         ar::StageProjectionGap::Kind::missing);
+
+    auto inconsistent = input;
+    inconsistent.state_coordinates[0].label = "changed route label";
+    const auto routed_name = ar::capture_stage_projections(inconsistent, projection_provider());
+    CHECK(std::holds_alternative<ar::ArtifactError>(routed_name));
 }
 
 TEST_CASE("stage projection capture preserves ordered pairs and rejects invalid references") {

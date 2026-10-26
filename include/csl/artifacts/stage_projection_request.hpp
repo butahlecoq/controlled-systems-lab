@@ -18,11 +18,11 @@ struct StageCoordinatePair {
 struct StageProjectionSet {
     SetHandle relation;
     PlotSourceOwner owner;
-    std::vector<CoordinateAnnotation> state_coordinates;
     // Maps each state coordinate to its coordinate in `relation`.
     std::vector<std::size_t> relation_coordinates;
     SetRelation relation_claim{SetRelation::equivalent};
     Assurance assurance{Assurance::numerical};
+    std::vector<GeometryEvidence> source_evidence;
 };
 
 struct StageProjectionGap {
@@ -40,6 +40,8 @@ struct StageProjectionInput {
 struct StageProjectionCaptureRequest {
     ProblemId problem;
     RequestId request;
+    // The route-wide state schema used to resolve every requested pair once.
+    std::vector<CoordinateAnnotation> state_coordinates;
     std::vector<StageCoordinatePair> coordinate_pairs;
     std::vector<StageProjectionInput> stages;
     SetRelation required_relation{SetRelation::equivalent};
@@ -52,44 +54,14 @@ struct ResolvedStageProjectionPair {
     std::array<CoordinateAnnotation, 2> coordinates;
 };
 
-struct StageProjectionUnavailable {
-    StageProjectionGap::Kind kind;
-    std::string explanation;
-    std::optional<OperationStopped> stop;
+struct ValidatedStageProjectionRequest {
+    std::vector<ResolvedStageProjectionPair> coordinate_pairs;
 };
 
-struct StageProjectionFailure {
-    GeometryRequestIdentity identity;
-    std::optional<registry::Provenance> selected_provider;
-    std::optional<PlotQueryCost> cost;
-    std::variant<registry::Rejection, Unsupported, OperationStopped, ArtifactError> cause;
-};
+using StageProjectionRequestValidation = std::variant<ValidatedStageProjectionRequest,
+    ArtifactError>;
 
-using StageProjectionOutcome = std::variant<PlotSetProjection, StageProjectionUnavailable,
-    StageProjectionFailure>;
-
-struct StageProjectionRecord {
-    StageIndex stage;
-    std::optional<double> physical_time;
-    ResolvedStageProjectionPair pair;
-    std::optional<Assurance> source_assurance;
-    StageProjectionOutcome outcome;
-};
-
-struct StageProjectionBatchCapture {
-    ProblemId problem;
-    RequestId request;
-    SetRelation required_relation;
-    Assurance requested_assurance;
-    std::vector<StageProjectionRecord> records;
-};
-
-using StageProjectionCaptureOutcome = std::variant<StageProjectionBatchCapture,
-    Unsupported, ArtifactError>;
-
-StageProjectionCaptureOutcome capture_stage_projections(
-    const StageProjectionCaptureRequest&,
-    const registry::PreparedProvider<registry::GeometryPort>&,
-    const ExecutionContext& = {});
+StageProjectionRequestValidation validate_stage_projection_request(
+    const StageProjectionCaptureRequest&);
 
 } // namespace csl::artifacts
