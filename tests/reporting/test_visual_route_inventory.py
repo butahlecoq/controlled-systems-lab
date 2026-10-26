@@ -78,6 +78,7 @@ class VisualRouteInventoryTests(unittest.TestCase):
                  "gallery-composition-and-route","publication-validation-or-frozen-route",
                  "deferred-family-specific-migration", "composes-or-copies-existing-saved-figure",
                  "frozen-renderer-preserved-with-shared-policy-companion",
+                 "measurement-collector-preserved-with-saved-data-companion",
                  "shared-quantitative-policy-companion-renderer"}
         self.assertTrue(all(entry["disposition"] in allowed for entry in producers.values()))
         deferred=[entry for entry in producers.values()
@@ -85,7 +86,7 @@ class VisualRouteInventoryTests(unittest.TestCase):
         self.assertTrue(deferred)
         follow_up_counts={number:sum(entry["follow_up_issue"]==number for entry in deferred)
                           for number in (684,685,686,687)}
-        self.assertEqual(follow_up_counts,{684:5,685:0,686:18,687:0})
+        self.assertEqual(follow_up_counts,{684:4,685:0,686:18,687:0})
         self.assertTrue(all(entry["follow_up_issue"] in follow_up_counts for entry in deferred))
         routes={entry["route"]:entry for entry in inventory["frozen_published_routes"]}
         self.assertGreater(len(routes),40)
@@ -93,6 +94,8 @@ class VisualRouteInventoryTests(unittest.TestCase):
                             and entry["follow_up_issue"] == 669 for entry in routes.values()))
         self.assertEqual(routes["app03-zonotope-4522855018fa9b0b"]["companion_route"],
                          "examples/app03-zonotope-v1.html")
+        self.assertEqual(routes["app01-plan-20261016-22d406fd"]["companion_route"],
+                         "examples/app01-plan-timing-v1.html")
         self.assertEqual(routes["app03-zonotope-4522855018fa9b0b"]["follow_up_issue"], 669)
         self.assertTrue(any(name.endswith("terminal-projections.svg")
                             for entry in routes.values() for name in entry["assets"]))
@@ -116,6 +119,8 @@ class VisualRouteInventoryTests(unittest.TestCase):
             "ext01-b08-timing-v1.png", "ext01-b08-timing-v1-export.json",
             "ext05-states-v1.html", "ext05-states-v1.svg", "ext05-states-v1.png",
             "ext05-states-v1-export.json",
+            "app01-plan-timing-v1.html", "app01-plan-timing-v1.svg",
+            "app01-plan-timing-v1.png", "app01-plan-timing-v1-export.json",
             "mpc03-open-loop-pilot-v1/index.html",
             "mpc03-open-loop-pilot-v1/record.json",
             "mpc03-open-loop-pilot-v1/pilot-output.json",

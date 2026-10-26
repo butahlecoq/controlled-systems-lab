@@ -47,6 +47,11 @@ class GalleryTests(unittest.TestCase):
         shutil.copyfile(ROOT / "reports/algorithm-results/ext01-fixed-plan-20261016-11b7bc74/records.json",
                         ext01 / "records.json")
         (ext01 / "index.html").write_text("<html><body>Reviewed EXT-01 report</body></html>")
+        app01 = self.site / "app01-plan-20261016-22d406fd"
+        app01.mkdir()
+        shutil.copyfile(ROOT / "reports/algorithm-results/app01-plan-20261016-22d406fd/records.json",
+                        app01 / "records.json")
+        (app01 / "index.html").write_text("<html><body>Reviewed APP-01 report</body></html>")
         catalog = json.loads(self.catalog.read_text())
         self.catalog_reports = catalog["reports"]
         by_source = {entry["source_report_id"]: entry["report_id"]
@@ -211,7 +216,7 @@ class GalleryTests(unittest.TestCase):
             if not urlsplit(link).scheme and not link.startswith("#"):
                 self.assertTrue((self.site / "examples" / link.split("#")[0]).is_file(), link)
         figures = list((self.site / "examples").glob("*.svg"))
-        self.assertEqual(len(figures), len(self.examples) + len(gallery.visual_illustrations.CASES) + 16)
+        self.assertEqual(len(figures), len(self.examples) + len(gallery.visual_illustrations.CASES) + 17)
         for figure in figures:
             if figure.name == "fuel-b06-viz06-before.svg":
                 self.assertEqual(hashlib.sha256(figure.read_bytes()).hexdigest(),
@@ -253,7 +258,8 @@ class GalleryTests(unittest.TestCase):
                                    ("app04-square-v1", "diagonal orientation"),
                                    ("app03-zonotope-v1", "input zonotope · saved generators"),
                                    ("ext05-states-v1", "saved states at t = 0, 1, 3"),
-                                   ("ext01-b08-timing-v1", "saved B08 calls")):
+                                   ("ext01-b08-timing-v1", "saved B08 calls"),
+                                   ("app01-plan-timing-v1", "Three markers show archived fixture medians")):
             companion_page = (self.site / "examples" / (stem + ".html")).read_text()
             self.assertIn("csl-report-quantitative-v1", companion_page)
             self.assertIn("Frozen values", companion_page)
@@ -277,6 +283,18 @@ class GalleryTests(unittest.TestCase):
         self.assertIn("elapsed time (ms per call)", ext01_description.text)
         self.assertIn("ext01-fixed-plan-303ad863ca3af58dc6a515844c474fe0e1af9349e55cb8acd1ff1a3f220f1b54/records.json",
                       ext01_page)
+        app01_page = (self.site / "examples/app01-plan-timing-v1.html").read_text()
+        self.assertIn("seven measured batches of 40,000 checked calls", app01_page)
+        self.assertIn("not a speed comparison or a performance-winner claim", app01_page)
+        self.assertIn("valid_plan 189.261 ms", app01_page)
+        self.assertIn("invalid_plan 190.659 ms", app01_page)
+        self.assertIn("empty_inner 127.619 ms", app01_page)
+        self.assertIn("Fixture ordinal and median elapsed time use separate numeric axes", app01_page)
+        self.assertIn("Source commit 22d406fd9ea92315ef2a4f6b5703eec74e710d47", app01_page)
+        app01_svg = ET.parse(self.site / "examples/app01-plan-timing-v1.svg").getroot()
+        app01_description = app01_svg.find("{http://www.w3.org/2000/svg}desc")
+        self.assertIn("median elapsed time per 40,000-call batch (ms)", app01_description.text)
+        self.assertIn("not a speed comparison", app01_description.text)
         app03_page = (self.site / "examples/app03-zonotope-v1.html").read_text()
         self.assertIn("method tag generator-axis-cover", app03_page)
         self.assertIn("Input generators are (1,0), (0,1), (0.5,0.5)", app03_page)

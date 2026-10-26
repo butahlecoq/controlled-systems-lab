@@ -964,6 +964,9 @@ def build(catalog, site):
     ext01_companion = approx_extension_companions.ext01_companion(
         site / "ext01-fixed-plan-303ad863ca3af58dc6a515844c474fe0e1af9349e55cb8acd1ff1a3f220f1b54" / "records.json",
         Path(__file__).parent / "styles/control-v1.json")
+    app01_companion = approx_extension_companions.app01_companion(
+        site / "app01-plan-20261016-22d406fd" / "records.json",
+        Path(__file__).parent / "styles/control-v1.json")
     for family, title, stem, report_id in (
             ("Box approximation", "APP-02 diamond approximations", "app02-diamond-v1", "app02-box-8ff979de60ea9d22"),
             ("Ellipsoidal approximation", "APP-04 square and ellipses", "app04-square-v1", "app04-ellipsoid-fd302c34092f8b19"),
@@ -984,6 +987,11 @@ def build(catalog, site):
                               "page": "app03-zonotope-v1.html", "figure": "app03-zonotope-v1.svg",
                               "source_page": "../app03-zonotope-4522855018fa9b0b/index.html",
                               "raw_record": "../app03-zonotope-4522855018fa9b0b/records.json"})
+    gallery_inventory.append({"family": "Inner state-plan checks", "title": "APP-01 saved plan-check timings",
+                              "status": "saved-data-companion", "anchor": "app01-plan-timing-v1",
+                              "page": "app01-plan-timing-v1.html", "figure": "app01-plan-timing-v1.svg",
+                              "source_page": "../app01-plan-20261016-22d406fd/index.html",
+                              "raw_record": "../app01-plan-20261016-22d406fd/records.json"})
     coverage_data = algorithm_coverage(catalog, site, gallery_inventory)
     issue3_report = next(entry for entry in json.loads(Path(catalog).read_text(encoding="utf-8"))["reports"]
                          if entry["report_kind"] == "issue3-validated-minimax")
@@ -1062,6 +1070,12 @@ def build(catalog, site):
             'alt="Saved APP-03 planar zonotope and outer axis cover with numeric x-y axes"></a>'
             '<p>Replots the archived generator sums and outer-cover generators with numeric ticks, major grids, and equal x-y scales.</p>'
             '<p><a href="app03-zonotope-v1.html">Open the saved-data companion →</a></p></article>' +
+            '<article class="saved-figure" id="app01-plan-timing-v1"><p class="eyebrow">Inner state-plan checks · Saved-data companion</p>'
+            '<h3>APP-01 saved plan-check timings</h3>'
+            '<a href="app01-plan-timing-v1.html"><img src="app01-plan-timing-v1.svg" '
+            'alt="Three archived APP-01 median timings on numeric axes, one for each saved fixture"></a>'
+            '<p>Plots archived medians for valid, invalid, and empty-inner fixtures. Each point summarizes seven batches of 40,000 checks; it does not claim a performance winner.</p>'
+            '<p><a href="app01-plan-timing-v1.html">Open the saved-data companion →</a></p></article>' +
             f'<article class="saved-figure" id="{fuel_anchor}"><p class="eyebrow">Fuel minimax reference · Saved-data companion</p>'
             f'<h3>{escape(fuel_entry["title"])}</h3>'
             f'<p>{escape("Readable, versioned SVG and PNG projections of the saved 4D B06 terminal set, with exact values, units, target, evidence limits and reproduction commands.")}</p>'
@@ -1094,6 +1108,7 @@ def build(catalog, site):
     outputs.update(app04_companion)
     outputs.update(ext05_companion)
     outputs.update(ext01_companion)
+    outputs.update(app01_companion)
     hybrid = next(example for example in examples if example["kind"] == "hybrid")
     outputs["two_stage_scalar_family.json"] = json.dumps({
         "schema": "csl.visual-example/ext07-two-stage-scalar/1",

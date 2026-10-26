@@ -82,7 +82,9 @@ SAVED_COMPANION_ROUTES = {
     "benchmarks/reporting/issue6/b07_render_projection.py",
     "benchmarks/reporting/issue6/b09_render_projection.py",
 }
+SAVED_DATA_COMPANION_COLLECTORS = {"scripts/reports/app01/collect.py"}
 FROZEN_COMPANIONS = {
+    "app01-plan-20261016-22d406fd": "examples/app01-plan-timing-v1.html",
     "mpc03-open-loop-pilot-v1": "examples/index.html",
     "mpc03-b08-l04-miQCP-v1": "examples/index.html",
     "app02-box-8ff979de60ea9d22": "examples/app02-diamond-v1.html",
@@ -121,6 +123,8 @@ def source_inventory(root: Path) -> list[dict]:
             assets = sorted(set(ASSET_NAME.findall(source)))
             if relative in COMPOSED_SAVED_ROUTES:
                 disposition = "composes-or-copies-existing-saved-figure"
+            elif relative in SAVED_DATA_COMPANION_COLLECTORS:
+                disposition = "measurement-collector-preserved-with-saved-data-companion"
             elif relative in FROZEN_DIAGRAM_EXCEPTIONS:
                 disposition = "reviewed-static-diagram-exception"
             elif relative in PUBLICATION_EXPORT_ROUTES:
@@ -208,6 +212,8 @@ def build(root: Path = ROOT) -> dict:
                     "ext01-b08-timing-v1.png", "ext01-b08-timing-v1-export.json",
                     "ext05-states-v1.html", "ext05-states-v1.svg",
                     "ext05-states-v1.png", "ext05-states-v1-export.json",
+                    "app01-plan-timing-v1.html", "app01-plan-timing-v1.svg",
+                    "app01-plan-timing-v1.png", "app01-plan-timing-v1-export.json",
                     "mpc03-open-loop-pilot-v1/index.html",
                     "mpc03-open-loop-pilot-v1/record.json",
                     "mpc03-open-loop-pilot-v1/pilot-output.json",
