@@ -84,8 +84,7 @@
       "asset_name_literals": [
         "b08-trials.svg"
       ],
-      "disposition": "deferred-family-specific-migration",
-      "follow_up_issue": 684
+      "disposition": "frozen-renderer-preserved-with-shared-policy-companion"
     },
     {
       "source": "scripts/reports/ext03_transform/registered_reports.py",
@@ -677,13 +676,14 @@
     },
     {
       "source": "scripts/reports/visual_examples.py",
-      "signal_count": 47,
+      "signal_count": 49,
       "asset_name_literals": [
         "app02-diamond-v1.svg",
         "app04-square-v1.svg",
         "control-projection.svg",
         "ellipsoid-2d.svg",
         "example-2d.svg",
+        "ext01-b08-timing-v1.svg",
         "ext05-states-v1.svg",
         "feasible-box-2d.svg",
         "fuel-b06-flow-projection.png",
@@ -1335,6 +1335,10 @@
         "app04-square-v1.svg",
         "app04-square-v1.png",
         "app04-square-v1-export.json",
+        "ext01-b08-timing-v1.html",
+        "ext01-b08-timing-v1.svg",
+        "ext01-b08-timing-v1.png",
+        "ext01-b08-timing-v1-export.json",
         "ext05-states-v1.html",
         "ext05-states-v1.svg",
         "ext05-states-v1.png",

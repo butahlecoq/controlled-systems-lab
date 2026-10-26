@@ -116,6 +116,43 @@ def ext05_companion(record_path: Path, style_path: Path) -> dict[str, bytes]:
         aspect="independent")}
 
 
+def ext01_companion(record_path: Path, style_path: Path) -> dict[str, bytes]:
+    """Plot the seven archived EXT-01 B08 timing observations."""
+    record = json.loads(Path(record_path).read_text(encoding="utf-8"))
+    trials = [row for row in record.get("trials", [])
+              if row.get("fixture") == "b08_rounded" and not row.get("warmup")]
+    _require(record.get("schema") == "csl.ext01-fixed-plan-records/1" and
+             record.get("report_id") == "ext01-fixed-plan-20261016-11b7bc74" and
+             len(trials) == 7 and
+             [row.get("round") for row in trials] == list(range(1, 8)) and
+             all(row.get("batch") == row.get("checked_calls") == 1 and
+                 row.get("result", {}).get("disturbance_histories") == 160000 and
+                 row.get("result", {}).get("plan_count") == 625
+                 for row in trials),
+             "EXT-01 saved B08 trial identities changed")
+    points = [[row["round"], row["elapsed_ns"] / 1_000_000] for row in trials]
+    median_ms = next(row["median_elapsed_ns"] for row in record["summary"]
+                     if row["fixture"] == "b08_rounded") / 1_000_000
+    document = {"schema": "csl.saved-geometric-plot/1",
+                "title": "EXT-01 saved B08 timing observations",
+                "description": ("Seven markers show saved full-catalogue timing observations for the rounded B08 reference. "
+                                "Each marker is one checked public call over 625 plans and 160,000 disturbance histories. "
+                                "No line is drawn between rounds; this is descriptive timing evidence, not a comparison or speedup claim."),
+                "aspect": "independent",
+                "axes": {"x": {"label": "measured round"},
+                         "y": {"label": "elapsed time (ms per call)"}},
+                "series": [{"kind": "points", "label": "saved B08 calls",
+                            "color": "#0072B2", "points": points, "size": 42, "alpha": 1}]}
+    outputs = _render_companion(document, style_path, "ext01-b08-timing-v1")
+    return outputs | {"ext01-b08-timing-v1.html": _companion_page(
+        "EXT-01 B08 full-catalogue timing", "ext01-b08-timing-v1",
+        "ext01-fixed-plan-303ad863ca3af58dc6a515844c474fe0e1af9349e55cb8acd1ff1a3f220f1b54",
+        f"This companion plots the seven saved measured B08 observations from the frozen EXT-01 record. "
+        f"Each point is one checked call over 625 plans and 160,000 disturbance histories; the archived median is {median_ms:.3f} ms. "
+        "The points are not connected, and the observation does not establish a speedup or performance winner.",
+        aspect="numeric")}
+
+
 def _require(condition: bool, message: str) -> None:
     if not condition:
         raise ValueError(message)
@@ -126,16 +163,19 @@ def _companion_page(title: str, stem: str, report_id: str, summary: str,
     title = escape(title)
     summary = escape(summary)
     report_id = escape(report_id, quote=True)
-    scaling = ("The plot uses equal x-y scales and preserves the archived fixture values."
-               if aspect == "equal" else
-               "Independent coordinate scales are disclosed; the saved state coordinates use different physical meanings.")
+    if aspect == "equal":
+        scaling = "The plot uses equal x-y scales and preserves the archived fixture values."
+    elif aspect == "numeric":
+        scaling = "Round and elapsed time use separate numeric axes; elapsed time is shown in milliseconds per call."
+    else:
+        scaling = "Independent coordinate scales are disclosed; the saved state coordinates use different physical meanings."
     return ('<!doctype html><html lang="en"><head><meta charset="utf-8">'
             '<meta name="viewport" content="width=device-width,initial-scale=1">'
             f'<title>{title} · shared axis policy</title><link rel="stylesheet" href="examples.css"></head><body>'
             '<main><p><a href="index.html#saved-report-figures">← Reviewed report figures</a></p>'
             '<p class="eyebrow">Saved-data companion · shared quantitative axes</p>'
             f'<h1>{title}</h1><p>{summary}</p>'
-            f'<figure><img src="{stem}.svg" alt="{title}; saved geometric values on labelled x-y axes">'
+            f'<figure><img src="{stem}.svg" alt="{title}; saved values on labelled numeric axes">'
             '<figcaption>Numeric ticks and major grids follow the shared csl-report-quantitative-v1 policy. '
             + escape(scaling) + '</figcaption></figure>'
             f'<p><a href="{stem}.png">Standalone PNG</a> · <a href="../{report_id}/records.json">Frozen values ↗</a> · '
