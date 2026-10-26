@@ -3,6 +3,7 @@
 #include <csl/input/scenario_loader.hpp>
 #include <fstream>
 #include <iterator>
+#include <vector>
 using namespace csl;
 using namespace csl::input;
 namespace {
@@ -11,19 +12,32 @@ template<class T> T accepted(LoadResult value) {REQUIRE(std::holds_alternative<T
 std::string read(const std::filesystem::path& path) {std::ifstream stream(path,std::ios::binary);REQUIRE(stream.good());return {std::istreambuf_iterator<char>(stream),{}};}
 std::filesystem::path write(const char* name,std::string_view data) {const auto path=output/name;std::ofstream stream(path,std::ios::binary);stream.write(data.data(),static_cast<std::streamsize>(data.size()));REQUIRE(stream.good());return path;}
 LoadResult bytes(std::string_view text) {return load_scenario(std::as_bytes(std::span(text.data(),text.size())));}
+void check_same_defaults(const std::vector<DefaultRecord>& expected,const std::vector<DefaultRecord>& actual) {
+    REQUIRE(expected.size()==actual.size());
+    for(std::size_t i=0;i<expected.size();++i) {
+        CHECK(expected[i].path==actual[i].path);
+        CHECK(expected[i].meaning==actual[i].meaning);
+        CHECK(expected[i].authored==actual[i].authored);
+    }
+}
 }
 TEST_CASE("actual fixture files translate to the same owned mathematics as their bytes") {
     auto path=source/"tests/fixtures/input/minimal-integrator.json";auto text=read(path);
     auto file=accepted<LoadedScenario>(load_scenario_file(path));auto memory=accepted<LoadedScenario>(bytes(text));
     CHECK(file.problem().identity()==memory.problem().identity());CHECK(file.source()->location==path);CHECK(memory.source()->location.empty());
     CHECK(file.source()->content.digest()==memory.source()->content.digest());
+    const auto file_defaults=file.defaults(),memory_defaults=memory.defaults();
+    check_same_defaults(*file_defaults,*memory_defaults);
     CHECK(file.problem().model().horizon()==2);
     auto affine=accepted<LoadedScenario>(load_scenario_file(source/"tests/fixtures/input/affine-ltv.json"));
     CHECK(std::get<Vector>(affine.problem().model().step({0},Vector{2},Vector{1},{}))==Vector{7});
     CHECK(std::get<Vector>(affine.problem().model().step({1},Vector{7},Vector{-2},{}))==Vector{16});
     const auto ownedpath=write("owned.json",text);auto retained=accepted<LoadedScenario>(load_scenario_file(ownedpath)).source();
     write("owned.json","{}");CHECK(retained->content.digest()==memory.source()->content.digest());
-    CHECK(accepted<LoadedScenario>(load_scenario(retained->content.bytes())).problem().identity()==memory.problem().identity());
+    const auto restored=accepted<LoadedScenario>(load_scenario(retained->content.bytes()));
+    CHECK(restored.problem().identity()==memory.problem().identity());
+    CHECK(restored.source()->content.digest()==memory.source()->content.digest());
+    check_same_defaults(*memory_defaults,*restored.defaults());
 }
 TEST_CASE("all four continuous forms reject at both actual byte and file loader boundaries") {
     for(const auto kind:{"linear_continuous","linear_continuous_ltv","affine_continuous","affine_continuous_ltv"}) {
