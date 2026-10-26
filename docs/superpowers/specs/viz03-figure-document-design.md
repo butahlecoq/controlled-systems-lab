@@ -24,6 +24,12 @@ projection points into a `csl.plot-document/1`. Offline adapters convert saved
 B06/B07 records into the same document. Rendering loads, validates, and formats
 that document only.
 
+The current document does not represent a sequence of reachable-set marginals.
+Witness traces may have one state point per stage, but that does not supply set
+geometry for those stages. Issue #708 defines an additive, versioned batch for
+R0 through RT and leaves the trajectory semantics and reader contract here
+unchanged.
+
 ## Shape
 
 The JSON document is a closed, versioned report boundary with source-record
