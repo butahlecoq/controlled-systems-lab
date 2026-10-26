@@ -1,12 +1,13 @@
 # MPC-01 five-repetition native solver comparison
 
-This is a new comparison on the frozen `b04-reference-v1` article-derived input and six analytic/general-purpose cases. It is not a historical B04 reconstruction. The native solver status is recorded separately from mathematical evidence. Binary64 trajectory diagnostics are inconclusive and do not establish optimality.
+This is a new comparison on the frozen `b04-reference-v1` article-derived input and six analytic/general-purpose cases. It is not a historical B04 reconstruction. The native solver status is recorded separately from mathematical evidence. Binary64 residual diagnostics alone are inconclusive; a separate exact-rational checker re-derives feasible trajectories and objective bounds from the saved controls.
 
 ## Run identity
 
 - Records SHA-256: `b617f7f24794e898bae5e2c64663b9474fe1b5c642db3aee4b76fffe16ac645a`
 - Runner stdout SHA-256: `c37f59b1d5db218685f317b90442ac121dbcaa5c557e10959c2c1142578cde4b`
 - Canonical records: 7; attempts: 140; repetitions per arm: 5.
+- Exact independent candidate checks: 90; see `exact-check-manifest.json` and `exact-candidate-checks.jsonl`.
 - Execution alternated which backend ran first on each repetition. Each backend used a fresh workspace for the cold attempt, then a separate fresh workspace seeded from that repetition's cold result when available. Warm fallback remains explicit.
 - Reported phases are formulation, setup, warm-start, solve and extraction. This excludes post-run independent proof work; the available binary64 residual diagnostics remain inconclusive.
 - No acados or Strategy A/B paired comparison is included. These records do not support a control-strategy or overall solver winner claim.
@@ -41,12 +42,20 @@ These are solver-status classifications; they are not independent mathematical o
 
 - Exact reference norm: 160.880653945527.
 - Native original-norm range: 160.880653945490–160.882458930638; max absolute difference from exact reference: 0.00180499.
-- Largest binary64 dynamics/bound residual across native attempts: 1.91348e-06; diagnostics remain inconclusive.
+- Largest binary64 dynamics/bound residual across native attempts: 1.91348e-06; those diagnostics alone remain inconclusive.
 - The five cold paths per backend are not averaged. The figure selects the cold repetition whose solve duration is closest to that backend's median cold solve duration. It is a representative trajectory, not a median trajectory.
 
 ## Singular T-S03 analytic reference
 
 For this fixture, the state recurrence is `x[t+1]=u[t]`, with both controls in `[0,1]`, and the terminal objective is `(x2-1)^2`. Therefore the objective reduces to `(u1-1)^2`: its exact minimum is zero and its complete optimal control face is `{(u0,u1): 0<=u0<=1, u1=1}`. The first control is a singular zero-curvature direction. This exact derivation checks solver objective values without requiring identical witnesses; it does not certify general family completeness for either native QP backend.
+
+## Infeasible and unbounded analytic references
+
+The infeasible fixture fixes `x0=0`, `u0=0`, and requires `x1=1`, while its dynamics require `x1=x0+u0=0`; infeasibility follows from the exact contradiction. In the unbounded fixture, `x1=u0` has no finite control bound and the objective is `-x1`; the feasible ray `u0=s` drives the objective to `-infinity`. OSQP's precise native classifications agree with these references. HPIPM returns undetermined on both and remains so in the saved records.
+
+## Independent exact feasibility and objective bounds
+
+The standalone Fraction checker exactly re-derived states from each saved binary64 control sequence and the exact fixture recurrence, verified all relevant control/state bounds, and compared exact candidate objective upper bounds with analytic lower bounds for 90 optimal attempts. It checks squared norm for B04. Maximum exact objective gaps by case: b04-reference-v1: max exact gap 1.99716e-06; double-integrator-421-v1: max exact gap 4.87484e-20; ts01-exact-v1: max exact gap 7.15511e-25; ts02-constant-v1: max exact gap 0; ts03-singular-v1: max exact gap 2.22706e-14.
 
 ## Limiter and interpretation
 

@@ -2,6 +2,7 @@
 """Summarize canonical MPC comparison records and render representative B04 projections."""
 
 import argparse
+from fractions import Fraction
 import hashlib
 import json
 import math
@@ -136,16 +137,63 @@ def main() -> None:
             profile_summary = "A separate process profile is present but lacks complete real/user/system timing fields."
     else:
         profile_summary = "A separate process profile is not included in this evidence bundle."
+    exact_checks_path = output / "exact-candidate-checks.jsonl"
+    exact_check_summary = "Exact rational candidate checks are not included in this evidence bundle."
+    if exact_checks_path.exists():
+        exact_manifest_path = output / "exact-check-manifest.json"
+        exact_manifest = json.loads(exact_manifest_path.read_text(encoding="utf-8"))
+        exact_checks = read_jsonl(exact_checks_path)
+        if (exact_manifest.get("schema") != "csl.mpc01-exact-check-manifest/1" or
+                exact_manifest.get("checks_sha256") != digest(exact_checks_path) or
+                exact_manifest.get("checker_source_sha256") != digest(Path(__file__).with_name("verify_saved_exact_optimality.py")) or
+                exact_manifest.get("attempts_sha256") != digest(args.attempts) or
+                exact_manifest.get("comparison_records_sha256") != digest(args.records) or
+                exact_manifest.get("checked_optimal_candidates") != len(exact_checks) or
+                len(exact_checks) != 90):
+            raise ValueError("exact candidate-check manifest does not bind the saved 90-result audit")
+        exact_by_case: dict[str, list[Fraction]] = defaultdict(list)
+        exact_keys: set[tuple[str, str, str, int]] = set()
+        for check in exact_checks:
+            if check.get("schema") != "csl.mpc01-exact-candidate-check/1" or check.get("feasibility") != "verified_exact_rational":
+                raise ValueError("exact candidate-check row does not establish exact feasibility")
+            gap = Fraction(int(check["exact_gap"]["numerator"]), int(check["exact_gap"]["denominator"]))
+            if gap < 0:
+                raise ValueError("exact candidate objective fell below its analytic lower bound")
+            key = (check["case_id"], check["method"], check["start_mode"], check["repetition"])
+            if key in exact_keys:
+                raise ValueError("duplicate exact candidate-check row")
+            exact_keys.add(key)
+            exact_by_case[check["case_id"]].append(gap)
+        expected_exact_keys = {
+            (case, method, mode, repetition)
+            for case, methods in expected_outcomes.items()
+            for method, outcome in methods.items()
+            if outcome == "optimal"
+            for mode in ("cold", "warm_if_available")
+            for repetition in range(5)
+        }
+        if exact_keys != expected_exact_keys:
+            raise ValueError("exact candidate checks do not cover every saved optimal attempt exactly once")
+        if set(exact_by_case) != set(expected_outcomes) - {"infeasible-integrator-v1", "unbounded-integrator-v1"}:
+            raise ValueError("exact candidate-check cases differ from the optimal fixture set")
+        gap_summary = "; ".join(
+            f"{case}: max exact gap {float(max(gaps)):.6g}"
+            for case, gaps in sorted(exact_by_case.items()))
+        exact_check_summary = (
+            f"The standalone Fraction checker exactly re-derived states from each saved binary64 control sequence and the exact fixture recurrence, verified all relevant control/state bounds, and compared exact candidate objective upper bounds with analytic lower bounds for {len(exact_checks)} optimal attempts. "
+            f"It checks squared norm for B04. Maximum exact objective gaps by case: {gap_summary}."
+        )
     markdown = [
         "# MPC-01 five-repetition native solver comparison",
         "",
-        "This is a new comparison on the frozen `b04-reference-v1` article-derived input and six analytic/general-purpose cases. It is not a historical B04 reconstruction. The native solver status is recorded separately from mathematical evidence. Binary64 trajectory diagnostics are inconclusive and do not establish optimality.",
+        "This is a new comparison on the frozen `b04-reference-v1` article-derived input and six analytic/general-purpose cases. It is not a historical B04 reconstruction. The native solver status is recorded separately from mathematical evidence. Binary64 residual diagnostics alone are inconclusive; a separate exact-rational checker re-derives feasible trajectories and objective bounds from the saved controls.",
         "",
         "## Run identity",
         "",
         f"- Records SHA-256: `{digest(args.records)}`",
         f"- Runner stdout SHA-256: `{digest(args.attempts)}`",
         f"- Canonical records: {len(records)}; attempts: {len(stdout_rows)}; repetitions per arm: 5.",
+        f"- Exact independent candidate checks: {len(read_jsonl(exact_checks_path)) if exact_checks_path.exists() else 0}; see `exact-check-manifest.json` and `exact-candidate-checks.jsonl`.",
         "- Execution alternated which backend ran first on each repetition. Each backend used a fresh workspace for the cold attempt, then a separate fresh workspace seeded from that repetition's cold result when available. Warm fallback remains explicit.",
         "- Reported phases are formulation, setup, warm-start, solve and extraction. This excludes post-run independent proof work; the available binary64 residual diagnostics remain inconclusive.",
         "- No acados or Strategy A/B paired comparison is included. These records do not support a control-strategy or overall solver winner claim.",
@@ -205,12 +253,20 @@ def main() -> None:
         "", "## B04 diagnostics", "",
         f"- Exact reference norm: {exact_norm:.12f}.",
         f"- Native original-norm range: {min(objective_values):.12f}–{max(objective_values):.12f}; max absolute difference from exact reference: {max(abs(v-exact_norm) for v in objective_values):.6g}.",
-        f"- Largest binary64 dynamics/bound residual across native attempts: {max(residual_values):.6g}; diagnostics remain inconclusive.",
+        f"- Largest binary64 dynamics/bound residual across native attempts: {max(residual_values):.6g}; those diagnostics alone remain inconclusive.",
         "- The five cold paths per backend are not averaged. The figure selects the cold repetition whose solve duration is closest to that backend's median cold solve duration. It is a representative trajectory, not a median trajectory.",
         "",
         "## Singular T-S03 analytic reference",
         "",
         "For this fixture, the state recurrence is `x[t+1]=u[t]`, with both controls in `[0,1]`, and the terminal objective is `(x2-1)^2`. Therefore the objective reduces to `(u1-1)^2`: its exact minimum is zero and its complete optimal control face is `{(u0,u1): 0<=u0<=1, u1=1}`. The first control is a singular zero-curvature direction. This exact derivation checks solver objective values without requiring identical witnesses; it does not certify general family completeness for either native QP backend.",
+        "",
+        "## Infeasible and unbounded analytic references",
+        "",
+        "The infeasible fixture fixes `x0=0`, `u0=0`, and requires `x1=1`, while its dynamics require `x1=x0+u0=0`; infeasibility follows from the exact contradiction. In the unbounded fixture, `x1=u0` has no finite control bound and the objective is `-x1`; the feasible ray `u0=s` drives the objective to `-infinity`. OSQP's precise native classifications agree with these references. HPIPM returns undetermined on both and remains so in the saved records.",
+        "",
+        "## Independent exact feasibility and objective bounds",
+        "",
+        exact_check_summary,
         "",
         "## Limiter and interpretation",
         "",

@@ -72,6 +72,12 @@ The analytic singular T-S03 case has dynamics `x[t+1] = u[t]`, box controls,
 and terminal objective `(x2-1)^2`. Its joint-control Hessian is singular and
 its exact minimizing face is `{(u0,u1): 0<=u0<=1, u1=1}`; the runner checks
 objective values along that face while retaining native solver witnesses.
+The seven-case r3 capture also includes a separate exact-rational checker for
+all 90 native attempts classified optimal. It reconstructs states from the
+saved binary64 controls as exact dyadic rationals, checks original bounds and
+dynamics, and stores exact feasible objective upper bounds beside analytic
+lower bounds. This replaces residual-only feasibility evidence for these
+saved controls; the solver status itself remains a native classification.
 The analytic infeasible and unbounded rows exercise outcome handling. OSQP's
 precise primal/dual infeasibility statuses map to `infeasible`/`unbounded`;
 inaccurate certificates remain `undetermined`. HPIPM returns status 2 on the
@@ -81,8 +87,9 @@ sentinel values and non-optimal iterates are not presented as solution
 objectives. Non-optimal primal vectors are labelled candidate iterates, not
 feasible trajectories.
 
-Strategy A/B paired outcomes and independently justified optimality evidence
-for the remaining cases remain outstanding. The separate
+Strategy A/B paired outcomes remain outstanding from this external-solver
+comparison; exact feasibility and candidate objective bounds for its optimal
+native attempts are in the r3 bundle. The separate
 `b04-reference-v1/native-smoke-20261026` projection overlays one cold smoke
 trajectory per solver with the exact witness; it is illustrative, not a
 repeated benchmark, and its residual checks are inconclusive. The B04 Pages
