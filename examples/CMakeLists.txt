@@ -141,10 +141,10 @@ example_check(scenario_cli_valid scenario_cli "--validate-only;${CMAKE_CURRENT_S
 example_check(scenario_cli_missing scenario_cli "--validate-only;${CMAKE_CURRENT_BINARY_DIR}/no-such-scenario.json" 2
   "Input rejected: category=io.*expected")
 example_check(scenario_cli_run_ts01 scenario_cli "--run;${CMAKE_CURRENT_SOURCE_DIR}/scenarios/two-stage-integrator.json;--seed;42;--threads;2" 0
-  "mode=run profile=ts01_exact_integrator strategy=csl.synthesis.reach-back.*seed=42 threads=2.*verification=numerical_pass")
+  "mode=run profile=ts01_exact_integrator strategy=csl.synthesis.reach-back.*seed=42 threads=2.*trajectory_verification=numerical_pass")
 example_check(scenario_cli_run_double_integrator_generality scenario_cli
   "--run;${CMAKE_CURRENT_SOURCE_DIR}/scenarios/double-integrator-generality.json;--profile;nominal_open_loop"
-  0 "mode=run profile=nominal_open_loop strategy=csl.synthesis.strategy-b.*outcome=undetermined family=candidate selected=0 candidate_witnesses=1 verification=not_passed candidate_feasibility_claim=numerical")
+  0 "mode=run profile=nominal_open_loop strategy=csl.synthesis.strategy-b.*outcome_claim=undetermined outcome_claim_support=[a-z_]+ outcome_claim_assumptions=\\[\\] family=candidate selected=0 candidate_witnesses=1 trajectory_verification=not_passed candidate_feasibility_claim=numerical")
 example_check(scenario_cli_run_missing scenario_cli "--run;${CMAKE_CURRENT_BINARY_DIR}/no-such-scenario.json" 2
   "Input rejected: category=io.*expected")
 example_check(scenario_cli_run_unknown_backend scenario_cli
@@ -187,7 +187,7 @@ string(JSON explicit_h_representation_scenario SET "${validation_scenario}" run 
 file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/explicit-h-representation.json" "${explicit_h_representation_scenario}")
 example_check(scenario_cli_run_explicit_h_representation scenario_cli
   "--run;${CMAKE_CURRENT_BINARY_DIR}/explicit-h-representation.json" 0
-  "mode=run profile=ts01_exact_integrator strategy=csl.synthesis.reach-back.*seed=31 threads=1.*verification=numerical_pass")
+  "mode=run profile=ts01_exact_integrator strategy=csl.synthesis.reach-back.*seed=31 threads=1.*trajectory_verification=numerical_pass")
 example_check(file_history scenario_file "${CMAKE_CURRENT_SOURCE_DIR}/scenarios/two-stage-integrator.json" 0
   "states=0,0.25,1 controls=0.25,0.75 original_cost=0")
 example_check(substitution_highs backend_substitution csl.lp.highs 0 "backend=csl.lp.highs version=1.1.0.highs.1.11.0")
