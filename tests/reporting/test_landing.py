@@ -126,6 +126,25 @@ class AssembledIndexTests(unittest.TestCase):
         landing.build(self.site)
         self.assertEqual(first, (self.site / "index.html").read_bytes())
 
+    def test_saved_mpc03_pilot_is_added_to_the_archive_from_its_record(self):
+        report_id = "mpc03-open-loop-pilot-v1"
+        report = self.site / report_id
+        report.mkdir()
+        (report / "index.html").write_text("<html><body>MPC-03</body></html>", encoding="utf-8")
+        (report / "record.json").write_text(json.dumps({
+            "source_commit": "1b5ec86a7b5d1cc91b707a0588a43cd6517b23b2",
+            "measured_scope": "One synthetic two-stage scalar formulation cross-check; no timing measured",
+            "evidence_limits": ["No performance timing or comparative winner"],
+        }), encoding="utf-8")
+        for filename in ("pilot-output.json", "build-provenance.json"):
+            (report / filename).write_text("{}", encoding="utf-8")
+        landing.build(self.site)
+        page = (self.site / "index.html").read_text(encoding="utf-8")
+        self.assertIn('href="' + report_id + '/index.html"', page)
+        self.assertIn('href="' + report_id + '/record.json"', page)
+        self.assertIn("no timing measured", page)
+        self.assertIn("1b5ec86a7b5d1cc91b707a0588a43cd6517b23b2", page)
+
     def test_links_to_missing_staged_files_are_rejected(self):
         (self.site / self.report_id / "records.json").unlink()
         with self.assertRaisesRegex(ValueError, "missing staged file"):

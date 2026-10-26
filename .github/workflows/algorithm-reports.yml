@@ -133,6 +133,9 @@ jobs:
       - name: Stage minimal 2D visual examples from reviewed saved results
         if: steps.catalog.outputs.has_reports == 'true'
         run: python scripts/reports/visual_examples.py --catalog reports/algorithm-results/catalog.json --site build/report-site
+      - name: Stage the saved MPC-03 pilot report and gallery link
+        if: steps.catalog.outputs.has_reports == 'true' && hashFiles('reports/algorithm-results/mpc03-open-loop-pilot-v1/record.json') != ''
+        run: python scripts/reports/stage_mpc03.py --source reports/algorithm-results/mpc03-open-loop-pilot-v1 --site build/report-site
       - name: Render the readable archive landing page
         if: steps.catalog.outputs.has_reports == 'true'
         run: python scripts/reports/landing.py --site build/report-site

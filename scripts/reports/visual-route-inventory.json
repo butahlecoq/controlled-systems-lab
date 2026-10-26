@@ -485,6 +485,14 @@
       "disposition": "publication-validation-or-frozen-route"
     },
     {
+      "source": "scripts/reports/stage_mpc03.py",
+      "signal_count": 2,
+      "asset_name_literals": [
+        "disturbance-tube.svg"
+      ],
+      "disposition": "composes-or-copies-existing-saved-figure"
+    },
+    {
       "source": "scripts/reports/stage_syn03_nominal_exact_example.py",
       "signal_count": 1,
       "asset_name_literals": [
@@ -1154,6 +1162,17 @@
       "follow_up_issue": 669
     },
     {
+      "route": "mpc03-open-loop-pilot-v1",
+      "source_bundle": "mpc03-open-loop-pilot-v1",
+      "assets": [
+        "disturbance-tube.svg"
+      ],
+      "index_sha256": "662c496834c435c40cf9428bb536e117ef792485b77fb4e73e819bd343fb1529",
+      "disposition": "deferred: original frozen route-level readability review remains; companion availability is listed separately",
+      "follow_up_issue": 669,
+      "companion_route": "examples/index.html"
+    },
+    {
       "route": "opt04-20261013T172839Z-6451c4b89d3b",
       "source_bundle": "opt04-20261013T172839Z-6451c4b89d3b",
       "assets": [
@@ -1366,6 +1385,11 @@
         "ext05-states-v1.svg",
         "ext05-states-v1.png",
         "ext05-states-v1-export.json",
+        "mpc03-open-loop-pilot-v1/index.html",
+        "mpc03-open-loop-pilot-v1/record.json",
+        "mpc03-open-loop-pilot-v1/pilot-output.json",
+        "mpc03-open-loop-pilot-v1/build-provenance.json",
+        "mpc03-open-loop-pilot-v1/disturbance-tube.svg",
         "geometry-optimization-v1.html",
         "geometry-opt/geo02/figure.svg",
         "geometry-opt/geo02/figure.png",

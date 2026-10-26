@@ -1,0 +1,134 @@
+{
+  "schema": "csl.mpc03-open-loop-pilot-record/1",
+  "report_id": "mpc03-open-loop-pilot-v1",
+  "source_commit": "1b5ec86a7b5d1cc91b707a0588a43cd6517b23b2",
+  "measured_scope": "One synthetic two-stage scalar formulation cross-check; no timing measured",
+  "evidence_limits": [
+    "binary64 numerical exhaustive finite-action evidence; not validated arithmetic",
+    "one synthetic two-stage scalar case; not a B08 reproduction",
+    "no performance timing or comparative winner",
+    "linear objective only; no MIQCP or general continuous-action result",
+    "full issue 599 comparison-record and publication workflow remains incomplete"
+  ],
+  "provenance": {
+    "schema": "csl.mpc03-pilot-provenance/1",
+    "source_commit": "1b5ec86a7b5d1cc91b707a0588a43cd6517b23b2",
+    "driver_path": "benchmarks/reporting/mpc03/robust_minimax_driver.cpp",
+    "driver_sha256": "3ebb0ed02b34db9a3213dc9964fb28b553e2cb39b4cfe9c5a58bb74def4944a6",
+    "host": {
+      "system": "Linux",
+      "release": "7.2.5-3-omarchy",
+      "machine": "x86_64"
+    },
+    "compiler": "g++ (GCC) 16.2.1 20260810",
+    "build_type": "Release",
+    "generator": "Unix Makefiles",
+    "highs": "source-pinned HiGHS 1.11.0",
+    "highs_threads": 1,
+    "timings": "not measured; this is a deterministic formulation and oracle cross-check",
+    "reproduction": "cmake -S . -B build/mpc03 -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTING=ON -DCSL_ENABLE_HIGHS=ON -DCSL_ENABLE_QHULL=OFF -DCSL_BUILD_MPC03_REPORT=ON && cmake --build build/mpc03 --target csl_mpc03_robust_minimax_report && build/mpc03/csl_mpc03_robust_minimax_report --smoke",
+    "output_sha256": "3e50d4247205f35f6710b9a54521a410f0a9b89853b059daf1212d21a3a729a4",
+    "release_flags": "-O3 -DNDEBUG"
+  },
+  "scenario": {
+    "id": "scalar-slew-free-two-stage",
+    "equations": "x[t+1] = x[t] + u[t] + w[t]",
+    "initial_state": 0,
+    "ordered_control_catalogue": [
+      0,
+      1,
+      1
+    ],
+    "disturbance_intervals": [
+      [
+        -0.125,
+        0.125
+      ],
+      [
+        -0.125,
+        0.125
+      ]
+    ],
+    "safe_state_intervals": [
+      [
+        -10,
+        10
+      ],
+      [
+        -10,
+        10
+      ],
+      [
+        1.5,
+        10
+      ]
+    ],
+    "vertex_sufficiency": "states and safety rows are affine in disturbance coordinates; terminal objective is linear, so extrema over each interval product occur at its endpoint products",
+    "finite_histories": "four endpoint products independently enumerated"
+  },
+  "result": {
+    "case_id": "scalar-slew-free-two-stage",
+    "controls": [
+      0.0,
+      1.0,
+      1.0
+    ],
+    "convex_action_relaxation": {
+      "controls": [
+        0.75,
+        1.0
+      ],
+      "lower_bound": 2.0,
+      "objective": 2.0,
+      "status": "optimal"
+    },
+    "disturbances_each_stage": [
+      -0.125,
+      0.125
+    ],
+    "extensive_form_milp": {
+      "best_bound": 2.25,
+      "gap": 0.0,
+      "objective": 2.25,
+      "shared_action_indices": [
+        0.0,
+        1.0,
+        0.0,
+        0.0,
+        1.0,
+        0.0
+      ],
+      "status": "optimal"
+    },
+    "finite_reference": {
+      "assurance": "numerical_exhaustive",
+      "minimizing_plan_indices": [
+        4,
+        5,
+        7,
+        8
+      ],
+      "plan_count": 9,
+      "value": 2.25
+    },
+    "finite_upper_bound": 2.25,
+    "history_count": 4,
+    "relaxation_lower_bound": 2.0,
+    "safe_stages": [
+      "-10 <= x0 <= 10",
+      "-10 <= x1 <= 10",
+      "1.5 <= x2 <= 10"
+    ],
+    "schema": "csl.mpc03-open-loop-pilot/1",
+    "solver": "HiGHS 1.11.0, one thread",
+    "terminal_cost": "minimize worst-case x2"
+  },
+  "evidence_limits": [
+    "binary64 numerical exhaustive finite-action evidence; not validated arithmetic",
+    "one synthetic two-stage scalar case; not a B08 reproduction",
+    "no performance timing or comparative winner",
+    "linear objective only; no MIQCP or general continuous-action result",
+    "full issue 599 comparison-record and publication workflow remains incomplete"
+  ],
+  "scenario_sha256": "61c03940021f189cd1b62d59c20b6461227d63d086ef6ee890d3c104c0a3a050"
+}
