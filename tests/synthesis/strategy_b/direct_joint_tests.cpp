@@ -2,6 +2,7 @@
 #include <doctest/doctest.h>
 #include <csl/synthesis/strategy_b/direct_joint.hpp>
 #include <csl/input/scenario_loader.hpp>
+#include <csl/problem/temporal_lifts.hpp>
 #include <csl/synthesis/strategy_a/strategy.hpp>
 #include <csl/synthesis/strategy_ts01/analytic_profile.hpp>
 #include <csl/synthesis/ts02_constant_integrator.hpp>
@@ -17,6 +18,7 @@
 #include "compiled_verifiers.hpp"
 #include "strategy_b_lineage.hpp"
 #include <algorithm>
+#include <array>
 #include <cmath>
 #include <functional>
 #include <limits>
@@ -131,6 +133,18 @@ Problem integrator(TerminalObjective objective = QuadraticTerminal{{1,1,{2}},{-2
         {0,1,2},KnownInitial{{0}},ContinuousDomain{{unit,unit}},
         {UniversalSet{1},UniversalSet{1},UniversalSet{1}},{},{},
         InformationPattern::nominal_open_loop,std::move(objective)};
+}
+Problem mpc02_two_state_integrator() {
+    const auto control=bounded_interval(-1,1).as_handle();
+    const auto model=std::make_shared<const SystemModel>(SystemModel{
+        Dynamics{{2,1,0},TimeDomain::discrete,std::vector<LinearStage>{
+            LinearStage{{2,2,{1,0,0,1}},{2,1,{1,0}},{2,0,{}},{0,0}},
+            LinearStage{{2,2,{1,0,0,1}},{2,1,{0,1}},{2,0,{}},{0,0}}}},
+        {}});
+    return {{"mpc02-slew-2d-v1"},model,
+        {0,1,2},KnownInitial{{0,0}},ContinuousDomain{{control,control}},
+        {UniversalSet{2},UniversalSet{2},UniversalSet{2}},{},{},InformationPattern::nominal_open_loop,
+        QuadraticTerminal{{2,2,{2,0,0,2}},{-1,0},0.25}};
 }
 problem::ResolvedProblem resolve(const Problem& p) {
     return accepted(problem::resolve(p,{problem::UncertaintyStructure::stage_product_uncoupled,{},{}}));
@@ -313,6 +327,84 @@ TEST_CASE("temporal coupling prevents the physical-state-only false terminal opt
     CHECK_FALSE(feasible(q,{0,1,0,1,-1}));
     CHECK(1.75*1.75==49.0/16.0);
     CHECK(0.0*0.0==0.0);
+}
+TEST_CASE("MPC-02 registers distinct constraint tracks and direct and memory-lift relations agree") {
+    const std::array<std::pair<const char*, const char*>,4> scenarios{{
+        {"mpc02-unconstrained-2d.json","mpc02-unconstrained-2d-v1"},
+        {"mpc02-stage-box-2d.json","mpc02-stage-box-2d-v1"},
+        {"mpc02-slew-2d.json","mpc02-slew-2d-v1"},
+        {"mpc02-l1-budget-2d.json","mpc02-l1-budget-2d-v1"}}};
+    for(const auto& [file,id]:scenarios) {
+        const auto loaded=input::load_scenario_file(std::string(CSL_MPC02_SCENARIO_DIR)+"/"+file);
+        REQUIRE(std::holds_alternative<input::LoadedScenario>(loaded));
+        const auto& scenario=std::get<input::LoadedScenario>(loaded);
+        CHECK(scenario.metadata()->id==id);
+        CHECK(scenario.problem().model().horizon()==2);
+        CHECK(scenario.problem().model().dimensions()==Dimensions{2,1,0});
+    }
+
+    auto authored=mpc02_two_state_integrator();
+    authored.temporal=TemporalConstraints{{1,8,{0,2},{6,7},{-1,1}},{{-.25,.25}}};
+    const auto direct_problem=resolve(authored);
+    const auto direct_joint=accepted(build_joint_program(direct_problem,request(direct_problem)));
+    CHECK(direct_joint.coordinates==JointCoordinates{{2,1,0},2});
+
+    const auto stagewise=mpc02_two_state_integrator();
+    const auto slew=problem::lift_one_step_slew(stagewise,
+        {problem::UnconstrainedFirstAction{}, {bounded_interval(-.25,.25).as_handle()}});
+    REQUIRE(std::holds_alternative<problem::SlewMemoryLift>(slew));
+    const auto& lift=std::get<problem::SlewMemoryLift>(slew);
+    const auto lifted_problem=resolve(lift.problem);
+    const auto lifted_joint=accepted(build_joint_program(lifted_problem,request(lifted_problem)));
+    CHECK(lifted_joint.coordinates==JointCoordinates{{3,1,0},2});
+    CHECK(direct_joint.rows.size()==11);
+    CHECK(lifted_joint.rows.size()==18);
+
+    const auto flatten=[](const std::vector<Vector>& states,const std::vector<Vector>& controls) {
+        Vector result;
+        for(const auto& state:states) result.insert(result.end(),state.begin(),state.end());
+        for(const auto& control:controls) result.insert(result.end(),control.begin(),control.end());
+        return result;
+    };
+    // The box intersected with |u1-u0|<=1/4 has these six exact vertices.
+    // M maps each control vertex to the original terminal state, with
+    // x2=(u0,u1). The lift stores p1=u0 and p2=u1 separately.
+    const std::vector<Vector> vertices{{-1,-1},{-.75,-1},{1,.75},{1,1},{.75,1},{-1,-.75}};
+    for(const auto& u:vertices) {
+        const problem::ControlHistory history{{{0,0},{u[0],0},{u[0],u[1]}},{{u[0]},{u[1]}}};
+        const auto direct_coordinates=flatten(history.states,history.controls);
+        REQUIRE(feasible(direct_joint,direct_coordinates));
+        const auto lifted_history=problem::lift_history(lift.coordinates,history);
+        REQUIRE(std::holds_alternative<problem::LiftedControlHistory>(lifted_history));
+        const auto& mapped=std::get<problem::LiftedControlHistory>(lifted_history);
+        const auto lifted_coordinates=flatten(mapped.augmented_states,mapped.increments);
+        CHECK(feasible(lifted_joint,lifted_coordinates));
+        const auto recovered=problem::recover_history(lift.coordinates,mapped,0,0);
+        REQUIRE(std::holds_alternative<problem::ControlHistory>(recovered));
+        CHECK(std::get<problem::ControlHistory>(recovered).states==history.states);
+        CHECK(std::get<problem::ControlHistory>(recovered).controls==history.controls);
+    }
+    const problem::ControlHistory slew_violating{{{0,0},{-1,0},{-1,1}},{{-1},{1}}};
+    const auto rejected_direct=flatten(slew_violating.states,slew_violating.controls);
+    CHECK_FALSE(feasible(direct_joint,rejected_direct));
+    const auto rejected_lift=problem::lift_history(lift.coordinates,slew_violating);
+    REQUIRE(std::holds_alternative<problem::LiftedControlHistory>(rejected_lift));
+    CHECK_FALSE(feasible(lifted_joint,flatten(std::get<problem::LiftedControlHistory>(rejected_lift).augmented_states,
+        std::get<problem::LiftedControlHistory>(rejected_lift).increments)));
+
+    // Strict convexity gives one optimum. The rate bound is active at
+    // (u0,u1)=(3/8,1/8), xT=(3/8,1/8), with cost 1/32.
+    const double u0=3.0/8.0,u1=1.0/8.0;
+    const Vector direct_optimum{0,0,u0,0,u0,u1,u0,u1};
+    const Vector lifted_optimum{0,0,0,u0,0,u0,u0,u1,u1,u0,-.25};
+    REQUIRE(feasible(direct_joint,direct_optimum));
+    REQUIRE(feasible(lifted_joint,lifted_optimum));
+    const auto direct_cost=accepted(optimization::evaluate_primal(std::get<ConvexProgram>(direct_joint.program),
+        direct_optimum,{1e-12,1e-12},{{"mpc02-analytic-oracle"},"1"}));
+    const auto lifted_cost=accepted(optimization::evaluate_primal(std::get<ConvexProgram>(lifted_joint.program),
+        lifted_optimum,{1e-12,1e-12},{{"mpc02-analytic-oracle"},"1"}));
+    CHECK(direct_cost.original_objective==doctest::Approx(1.0/32.0).epsilon(1e-12));
+    CHECK(lifted_cost.original_objective==doctest::Approx(direct_cost.original_objective).epsilon(1e-12));
 }
 bool feasible(const JointProgram& p,const Vector& x) {
     for(std::size_t i=0;i<p.constraints.rows;++i) {
