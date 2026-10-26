@@ -1,0 +1,21 @@
+{
+  "schema": "csl.fuel-projection-analytic-oracles/1",
+  "coordinate_convention": "ordered zero-based state coordinates; projected coordinates retain request order",
+  "cases": [
+    {
+      "id": "unit-box-3d-to-x2-x0",
+      "source": "0 <= x0,x1,x2 <= 1",
+      "projection_coordinates": [2, 0],
+      "projected_vertices": [[0, 0], [0, 1], [1, 0], [1, 1]],
+      "support_extrema": {"coordinate_0": [0, 1], "coordinate_1": [0, 1]}
+    },
+    {
+      "id": "affine-segment-3d-to-x0-x2",
+      "source": "(x0,x1,x2) = (s,1-s,2s), 0 <= s <= 1",
+      "projection_coordinates": [0, 2],
+      "projected_endpoints": [[0, 0], [1, 2]],
+      "interior_witness": [0.5, 1],
+      "support_extrema": {"coordinate_0": [0, 1], "coordinate_1": [0, 2]}
+    }
+  ]
+}

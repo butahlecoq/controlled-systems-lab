@@ -41,6 +41,8 @@ csl_test_target(final_plot_data_contract artifacts)
 
 add_executable(plot_request_contract tests/artifacts/plot_request_contract.cpp)
 target_link_libraries(plot_request_contract PRIVATE CSL::artifacts CSL::polyhedral CSL::strategy_ts01 doctest::doctest)
+target_compile_definitions(plot_request_contract PRIVATE CSL_FUEL_PROJECTION_ORACLES="${CMAKE_CURRENT_SOURCE_DIR}/tests/artifacts/fixtures/fuel-projection-analytic-oracles.json")
+target_include_directories(plot_request_contract SYSTEM PRIVATE ${csl_json_SOURCE_DIR}/single_include)
 add_test(NAME plot_request_contract COMMAND plot_request_contract)
 csl_test_target(plot_request_contract artifacts)
 
