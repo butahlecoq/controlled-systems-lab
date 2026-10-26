@@ -191,6 +191,25 @@ class GalleryTests(unittest.TestCase):
         page = result.files["control-witness-v1.html"].decode()
         self.assertIn("Projection of the saved five-coordinate joint relation", page)
         self.assertIn("(0,s,1,s,1), 0&lt;=s&lt;=1", page)
+        examples_dir = self.site / "examples"
+        examples_dir.mkdir(exist_ok=True)
+        (examples_dir / "index.html").write_text("<html>gallery fixture</html>", encoding="utf-8")
+        shutil.copyfile(Path(gallery.__file__).with_name("visual_examples.css"),
+                        examples_dir / "examples.css")
+        for name, contents in result.files.items():
+            target = examples_dir / name
+            target.parent.mkdir(parents=True, exist_ok=True)
+            target.write_bytes(contents)
+        for page_name in ("control-witness-v1.html", "control-witness-timing-v1.html"):
+            companion_page = result.files[page_name].decode()
+            links = Links()
+            links.feed(companion_page)
+            for link in links.links:
+                parts = urlsplit(link)
+                if parts.scheme or parts.netloc or not parts.path:
+                    continue
+                target = (examples_dir / parts.path).resolve()
+                self.assertTrue(target.is_file(), link)
         for report_id, digest in originals.items():
             self.assertEqual(hashlib.sha256((self.site / report_id / "records.json").read_bytes()).hexdigest(), digest)
         evidence = json.loads(result.files["control-witness/strategy-b-ts03-evidence.json"])
