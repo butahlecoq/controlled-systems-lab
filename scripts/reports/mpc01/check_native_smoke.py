@@ -29,6 +29,16 @@ def main() -> None:
         "b04-reference-v1",
     }
     methods = {"osqp-sparse-qp": "solved", "hpipm-structured-ocp-qp": "hpipm-status-0"}
+    reference = json.loads(
+        (source_root / "docs/research/evidence/b04-reference-v1/exact-optimal-reference.json")
+        .read_text(encoding="utf-8")
+    )
+    expected_objective = {
+        "ts01-exact-v1": (0.0, 1e-7),
+        "ts02-constant-v1": (3.0, 1e-7),
+        "double-integrator-421-v1": (0.0, 1e-6),
+        "b04-reference-v1": (float(reference["exact_norm_optimum_decimal"]), 0.003),
+    }
     expected_keys = {
         (case, method, mode)
         for case in expected_cases
@@ -45,6 +55,10 @@ def main() -> None:
             raise AssertionError(f"unexpected solver status for {key}: {row['native_status']}")
         if row["mathematical_outcome"] != "optimal" or row["termination"] != "completed":
             raise AssertionError(f"unexpected outcome for {key}")
+        objective = row["original_objective"]
+        target, tolerance = expected_objective[row["case_id"]]
+        if objective is None or not math.isfinite(objective) or abs(objective - target) > tolerance:
+            raise AssertionError(f"objective {objective} differs from reference {target} by more than {tolerance} for {key}")
         diagnostics = row["original_data_diagnostics"]
         if diagnostics["evidence_status"] != "inconclusive":
             raise AssertionError(f"residual diagnostics were overstated for {key}")

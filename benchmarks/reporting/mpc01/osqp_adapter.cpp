@@ -146,6 +146,7 @@ NativeAttempt solve_osqp(const MpcCase& problem, const SparseQp& qp,
         return result;
     }
 
+    const auto setup_start = Clock::now();
     auto p_data = copy_csc(qp.hessian);
     Vector row_lower;
     Vector row_upper;
@@ -175,7 +176,6 @@ NativeAttempt solve_osqp(const MpcCase& problem, const SparseQp& qp,
     settings.eps_rel = 1e-7;
 
     OSQPSolver* raw_solver = nullptr;
-    const auto setup_start = Clock::now();
     const auto setup_error = osqp_setup(
         &raw_solver, p.get(), const_cast<OSQPFloat*>(qp.linear.data()), a.get(),
         row_lower.data(), row_upper.data(), static_cast<OSQPInt>(row_lower.size()),

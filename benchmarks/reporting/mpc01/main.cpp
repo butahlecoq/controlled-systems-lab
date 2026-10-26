@@ -42,6 +42,26 @@ double box_violation(std::span<const double> value, const std::optional<Box>& bo
 
 NumericCheck check_trajectory(const MpcCase& problem, const Trajectory& trajectory) {
     NumericCheck check;
+    if (trajectory.states.size() != problem.horizon() + 1 ||
+        trajectory.controls.size() != problem.horizon()) {
+        return {std::numeric_limits<double>::infinity(),
+                std::numeric_limits<double>::infinity(),
+                std::numeric_limits<double>::infinity()};
+    }
+    for (const auto& state : trajectory.states) {
+        if (!std::all_of(state.begin(), state.end(), [](double value) { return std::isfinite(value); })) {
+            return {std::numeric_limits<double>::infinity(),
+                    std::numeric_limits<double>::infinity(),
+                    std::numeric_limits<double>::infinity()};
+        }
+    }
+    for (const auto& control : trajectory.controls) {
+        if (!std::all_of(control.begin(), control.end(), [](double value) { return std::isfinite(value); })) {
+            return {std::numeric_limits<double>::infinity(),
+                    std::numeric_limits<double>::infinity(),
+                    std::numeric_limits<double>::infinity()};
+        }
+    }
     check.state_bounds = box_violation(trajectory.states.front(),
         Box{problem.initial_state, problem.initial_state});
     for (std::size_t t = 0; t <= problem.horizon(); ++t) {
@@ -62,8 +82,10 @@ NumericCheck check_trajectory(const MpcCase& problem, const Trajectory& trajecto
             for (std::size_t j = 0; j < problem.control_dimension(); ++j) {
                 predicted += dynamics.b[i][j] * trajectory.controls[t][j];
             }
-            check.dynamics = std::max(check.dynamics,
-                std::abs(trajectory.states[t + 1][i] - predicted));
+            const double residual = std::abs(trajectory.states[t + 1][i] - predicted);
+            check.dynamics = std::isfinite(residual)
+                ? std::max(check.dynamics, residual)
+                : std::numeric_limits<double>::infinity();
         }
     }
     return check;
@@ -156,7 +178,8 @@ void run_case(const MpcCase& problem, bool hpipm_first) {
         auto warm = solve_osqp(problem, std::get<SparseQp>(warm_mapped),
                                cold.witness ? &cold : nullptr);
         warm.formulation_ns = elapsed_ns(warm_map_start, warm_map_end);
-        std::cout << serialize_attempt(problem, warm, "warm_previous_witness").dump() << '\n';
+        std::cout << serialize_attempt(problem, warm,
+            cold.witness ? "warm_previous_witness" : "cold_fallback_no_witness").dump() << '\n';
     };
     const auto run_hpipm = [&] {
         const auto map_start = Clock::now();
@@ -177,7 +200,8 @@ void run_case(const MpcCase& problem, bool hpipm_first) {
         auto warm = solve_hpipm(problem, std::get<OcpQp>(warm_mapped),
                                 cold.witness ? &cold : nullptr);
         warm.formulation_ns = elapsed_ns(warm_map_start, warm_map_end);
-        std::cout << serialize_attempt(problem, warm, "warm_previous_witness").dump() << '\n';
+        std::cout << serialize_attempt(problem, warm,
+            cold.witness ? "warm_previous_witness" : "cold_fallback_no_witness").dump() << '\n';
     };
     if (hpipm_first) {
         run_hpipm();
