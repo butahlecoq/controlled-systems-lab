@@ -655,6 +655,10 @@ def validate_gallery_inventory(out, entries):
         require(page_target.is_relative_to(site_root) and page_target.is_file() and
                 (not page_anchor or page_anchor in anchors),
                 "visual inventory page or anchor is missing or escaping")
+        if "walkthrough_page" in entry:
+            walkthrough = (out / entry["walkthrough_page"]).resolve()
+            require(walkthrough.is_relative_to(site_root) and walkthrough.is_file(),
+                    "visual inventory walkthrough page is missing or escaping")
         raw_path = (out / entry["raw_record"]).resolve()
         require(raw_path.is_relative_to(site_root) and raw_path.is_file(),
                 "visual inventory raw record is missing or escaping")
@@ -739,7 +743,9 @@ def coverage_html(coverage):
     rows = []
     for family in coverage["families"]:
         examples = " · ".join(
-            f'<a href="#{escape(entry["anchor"], quote=True)}">{escape(entry["title"])}</a>'
+            f'<a href="#{escape(entry["anchor"], quote=True)}">{escape(entry["title"])}</a>' +
+            (f' · <a href="{escape(entry["walkthrough_page"], quote=True)}">End-to-end walkthrough</a>'
+             if entry.get("walkthrough_page") else "")
             for entry in family["gallery_examples"]) or "No 2D example currently published"
         issues = " · ".join(
             f'<a href="{escape(issue["url"], quote=True)}">Issue #{issue["number"]}</a>'
@@ -754,6 +760,84 @@ def coverage_html(coverage):
                     '</p><p>Examples: ' + examples + '</p><p>Saved reports: ' +
                     (report_links or "No saved report") + '</p><p>Related work: ' + issues + '</p></article>')
     return ''.join(rows)
+
+
+def issue3_control_walkthrough(record_path, report_id):
+    """Create a saved-data-only end-to-end view of the two-plan analytic run."""
+    document = json.loads(Path(record_path).read_text(encoding="utf-8"))
+    rows = document["rows"]
+    saved = next((row for row in rows if row.get("fixture") == "analytic_2d"
+                  and not row.get("warmup")), None)
+    require(saved is not None, "issue3 walkthrough needs a measured saved analytic_2d record")
+    request = json.loads(saved["input_canonical"])
+    identity = [["0x1p+0", "0x0p+0"], ["0x0p+0", "0x1p+0"]]
+    require(request["system"]["horizon"] == 1 and request["initial"] == ["0x0p+0", "0x0p+0"]
+            and request["system"]["A"] == identity and request["system"]["B"] == identity
+            and request["system"]["E"] == identity and request["system"]["c"] == ["0x0p+0", "0x0p+0"]
+            and request["actions"] == [["0x0p+0", "0x0p+0"], ["0x1p+0", "0x0p+0"]]
+            and request["disturbance_vertices"] == [["0x0p+0", "0x0p+0"]]
+            and request["safe_sets"] == "universal"
+            and request["objective"] == {"type": "residual_norm_terminal", "C": identity,
+                                          "target": ["0x1p+0", "0x0p+0"]},
+            "issue3 walkthrough saved fixture changed; review the geometry before publishing")
+    result = saved["result"]
+    require(result["status"] == "validated_bounds" and result["lower"] == 0
+            and result["upper"] == 0 and result["plans"] == 2
+            and result["histories_examined"] == 2,
+            "issue3 walkthrough saved result changed; review the explanation before publishing")
+    source_commit = saved["source_commit"]
+    harness_commit = saved["harness_commit"]
+    figure = ('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 420" role="img" aria-labelledby="title desc">'
+              '<title id="title">Issue 3 one-step terminal states and target</title>'
+              '<desc id="desc">The two finite actions end at (0,0) and (1,0). The target is (1,0), so the second action attains zero residual.</desc>'
+              '<rect width="640" height="420" fill="#172019"/>')
+    for x, label in ((120, "0"), (240, "0.5"), (360, "1"), (480, "1.5")):
+        figure += f'<line x1="{x}" y1="60" x2="{x}" y2="310" stroke="#354337"/><text x="{x}" y="338" text-anchor="middle" fill="#dce5d5">{label}</text>'
+    for y, label in ((310, "−0.5"), (230, "0"), (150, "0.5")):
+        figure += f'<line x1="80" y1="{y}" x2="530" y2="{y}" stroke="#354337"/><text x="65" y="{y+5}" text-anchor="end" fill="#dce5d5">{label}</text>'
+    figure += ('<line x1="80" y1="230" x2="530" y2="230" stroke="#b4cda3" stroke-width="2"/>'
+               '<circle cx="360" cy="230" r="12" fill="#f0c674"/><text x="377" y="210" fill="#f0c674">target (1,0)</text>'
+               '<circle cx="120" cy="230" r="10" fill="#72b7b2"/><text x="95" y="198" fill="#72b7b2">action 0: (0,0), cost 1</text>'
+               '<circle cx="360" cy="230" r="7" fill="#b4cda3" stroke="#fff" stroke-width="2"/><text x="370" y="262" fill="#b4cda3">action 1: (1,0), cost 0</text>'
+               '<text x="300" y="385" text-anchor="middle" fill="#dce5d5">terminal state x₁ coordinate (dimensionless)</text>'
+               '<text transform="translate(20 210) rotate(-90)" text-anchor="middle" fill="#dce5d5">terminal state y₁ coordinate (dimensionless)</text></svg>')
+    page = ('<!doctype html><html lang="en"><head><meta charset="utf-8">'
+            '<meta name="viewport" content="width=device-width,initial-scale=1">'
+            '<title>One saved control task from input to verified result</title>'
+            '<link rel="stylesheet" href="examples.css"></head><body><main class="walkthrough">'
+            '<p><a href="index.html#algorithm-coverage">← Algorithm family coverage</a></p>'
+            '<p class="eyebrow">Saved validated API run · Issue #3</p>'
+            '<h1>One finite-action control task, end to end</h1>'
+            '<p>This walkthrough reads the saved <code>analytic_2d</code> input and result. It does not rerun the solver. '
+            'The plotted terminal points are independently calculated from the saved matrices and actions.</p>'
+            '<h2>1. Define the problem</h2><p>One transition: <code>x₁ = x₀ + u₀ + w₀</code>, '
+            '<code>x₀=(0,0)</code>, zero disturbance, universal safety sets, and terminal objective '
+            '<code>||x₁−(1,0)||₂</code>. The ordered finite action catalogue is <code>[(0,0),(1,0)]</code>.</p>'
+            '<h2>2. Run the supported profile</h2><p>The recorded profile is the validated finite-action minimax API, with horizon 1, '
+            '2 plans, 2 histories total, and a 100,000 interval-operation limit. The raw record reports '
+            '<code>validated_bounds [0,0]</code>. This is a small analytic fixture of the implemented validated profile.</p>'
+            '<h2>3. Select from the complete finite family</h2><p>Both catalogue plans were examined. Direct substitution gives terminal states '
+            '<code>(0,0)</code> and <code>(1,0)</code>; their terminal residual norms are 1 and 0. The selected witness is action index 1, '
+            '<code>u₀=(1,0)</code>. The API driver checks that plan index 1 is feasible and has exact bounds [0,0].</p>'
+            '<figure><img src="issue3-control-walkthrough.svg" alt="The two terminal states and target in 2D state coordinates">'
+            '<figcaption>Independent arithmetic from the saved system, initial state, action catalogue, disturbance and target. '
+            'This figure is not an emitted solver trace.</figcaption></figure>'
+            '<h2>4. Independently verify the answer</h2><p>Using the saved identity matrices and zero disturbance, '
+            '<code>x₁=x₀+u₀</code>. Evaluating the objective at both possible states gives a minimum of exactly zero. '
+            'That agrees with the saved validated interval [0,0] and the driver’s assertions that both plans were returned '
+            'and action index 1 was feasible. Safety is universal in this fixture, so there are no state inequalities to test.</p>'
+            '<h2>5. Inspect the saved export and provenance</h2><ul><li><a href="../' + escape(report_id, quote=True) +
+            '/records.json">Raw records and exact hexadecimal input ↗</a></li><li><a href="../' + escape(report_id, quote=True) +
+            '/index.html">Saved run report ↗</a></li><li><a href="https://github.com/butahlecoq/controlled-systems-lab/blob/' +
+            escape(harness_commit, quote=True) + '/benchmarks/reporting/issue3/validated_driver.cpp">Validated-run harness at its recorded commit ↗</a></li>'
+            '<li><a href="https://github.com/butahlecoq/controlled-systems-lab/blob/' +
+            escape(source_commit, quote=True) + '/include/csl/optimization/validated_finite_action_minimax.hpp">Validated API header at its recorded source commit ↗</a></li></ul>'
+            '<p>Evidence boundary: this explains the saved analytic fixture only. It does not generalize to continuous action sets '
+            'or claim correctness beyond the recorded API result and the direct finite calculation above.</p>'
+            '<p>Rebuild the gallery from the repository root with '
+            '<code>python scripts/reports/visual_examples.py --catalog reports/algorithm-results/catalog.json --site build/report-site</code>.</p>'
+            '</main></body></html>')
+    return figure, page
 
 
 def build(catalog, site):
@@ -805,6 +889,9 @@ def build(catalog, site):
                                   "figure": example["slug"] + ".svg", "source_page": source_page,
                                   "raw_record": raw_record})
     gallery_inventory.extend(analytic_inventory)
+    for entry in gallery_inventory:
+        if entry["anchor"] == "visual-issue3-validated-minimax-2d":
+            entry["walkthrough_page"] = "issue3-control-walkthrough.html"
     for figure_index, entry in enumerate(saved_inventory):
         report_page = entry["page"]
         report_figure = entry["figure"]
@@ -823,6 +910,11 @@ def build(catalog, site):
                   "raw_record":"fuel-b06-viz06-source.json"}
     gallery_inventory.append(fuel_entry)
     coverage_data = algorithm_coverage(catalog, site, gallery_inventory)
+    issue3_report = next(entry for entry in json.loads(Path(catalog).read_text(encoding="utf-8"))["reports"]
+                         if entry["report_kind"] == "issue3-validated-minimax")
+    workflow_figure, workflow_page = issue3_control_walkthrough(
+        Path(catalog).resolve().parent / issue3_report["source_report_id"] / "records.json",
+        issue3_report["report_id"])
     navigation = "".join(f'<a href="#{e["slug"]}">{e["title"]}</a>' for e in examples)
     navigation += '<a href="#analytic-illustrations">Analytic geometry and optimization</a>'
     navigation += '<a href="#algorithm-coverage">Algorithm coverage map</a>'
@@ -875,6 +967,8 @@ def build(catalog, site):
     outputs["visual-route-inventory.json"] = json.dumps(
         audit_visual_routes.build(Path(__file__).resolve().parents[2]), indent=2, ensure_ascii=False) + "\n"
     outputs["algorithm-coverage.json"] = json.dumps(coverage_data, indent=2, ensure_ascii=False) + "\n"
+    outputs["issue3-control-walkthrough.svg"] = workflow_figure
+    outputs["issue3-control-walkthrough.html"] = workflow_page
     hybrid = next(example for example in examples if example["kind"] == "hybrid")
     outputs["two_stage_scalar_family.json"] = json.dumps({
         "schema": "csl.visual-example/ext07-two-stage-scalar/1",
