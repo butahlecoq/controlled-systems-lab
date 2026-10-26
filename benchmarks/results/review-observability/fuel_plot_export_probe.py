@@ -65,6 +65,7 @@ def render_one(kind: str, style: dict, temporary_root: Path) -> dict:
         return {"elapsed_ns": elapsed, "figure_count": expected_count,
                 "svg_png_receipt_count": len(generated),
                 "output_bytes": sum(path.stat().st_size for path in generated),
+                "output_sha256": {path.name: digest(path) for path in sorted(generated)},
                 "validation": "passed"}
 
 
@@ -126,6 +127,12 @@ def main() -> int:
     probe_source = Path(__file__).resolve()
     commit = subprocess.run(["git", "rev-parse", "HEAD"], cwd=ROOT, check=True,
                             capture_output=True, text=True).stdout.strip()
+    input_paths = {
+        "b07_results": ROOT / "reports/algorithm-results/b07-owner-approved-eight-case-v1/results.jsonl",
+        "b07_readme": ROOT / "reports/algorithm-results/b07-owner-approved-eight-case-v1/README.md",
+        "b09_results": ROOT / "reports/algorithm-results/b09-a08-source-reference-4818ddde/results.jsonl",
+        "b09_scenario": ROOT / "reports/algorithm-results/b09-a08-source-reference-4818ddde/scenario.json",
+    }
     result = {
         "schema": "csl.review07-fuel-plot-export-probe/1",
         "claim": "wall time for saved-data B07/B09 figure generation and SVG/PNG/export-receipt writes; no solver or geometry query",
@@ -133,6 +140,7 @@ def main() -> int:
         "probe_source_sha256": digest(probe_source),
         "renderer_source_sha256": digest(source),
         "style_sha256": digest(STYLE_PATH),
+        "input_sha256": {name: digest(path) for name, path in input_paths.items()},
         "environment": {"python": sys.version, "matplotlib": matplotlib.__version__,
                         "platform": platform.platform(), "cpu_model": cpu_model(),
                         "logical_cpus": os.cpu_count(),
