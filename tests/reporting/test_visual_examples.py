@@ -392,7 +392,10 @@ class GalleryTests(unittest.TestCase):
         self.assertEqual((self.site / "index.html").read_text().count('id="visual-examples-link"'), 1)
         companion = self.site / "examples/geometry-optimization-v1.html"
         self.assertTrue(companion.is_file())
-        self.assertEqual(companion.read_text().count('<section id='), 11)
+        companion_html = companion.read_text()
+        self.assertEqual(companion_html.count('<section id='), 11)
+        self.assertIn('role="region" tabindex="0" aria-label="Timing values for GEO-04 intersection and reduction"',
+                      companion_html)
         for name in ("geo08/geometry.svg", "opt10/geometry.svg", "geo04/figure.svg"):
             svg = ET.parse(self.site / "examples/geometry-opt" / name).getroot()
             self.assertEqual(svg.get("role"), "img")

@@ -296,7 +296,8 @@ def _timing_page_section(slug: str, title: str, description: str, report_id: str
                f'<a href="{html.escape(svg_name, quote=True)}">SVG</a> · '
                f'<a href="{html.escape(export_name, quote=True)}">export metadata</a> · '
                f'<a href="{html.escape(raw_name, quote=True)}">raw saved record</a></p>'
-               '<div class="scroll"><table><thead><tr><th>Fixture / phase</th><th>Series</th><th>Median (ns)</th>'
+               f'<div class="scroll" role="region" tabindex="0" aria-label="Timing values for {html.escape(title, quote=True)}">'
+               '<table><thead><tr><th>Fixture / phase</th><th>Series</th><th>Median (ns)</th>'
                f'<th>Min–max (ns)</th></tr></thead><tbody>{timing_rows_html}</tbody></table></div></section>')
     (output / export_name).write_text(json.dumps({**metadata, "report_id": report_id,
         "raw_record_sha256": sha((RESULTS / report_id / "records.json").read_bytes())}, indent=2, allow_nan=False) + "\n",
