@@ -928,15 +928,26 @@ def build(catalog, site):
         site / "app02-box-8ff979de60ea9d22" / "records.json", Path(__file__).parent / "styles/control-v1.json")
     app04_companion = approx_extension_companions.app04_companion(
         site / "app04-ellipsoid-fd302c34092f8b19" / "records.json", Path(__file__).parent / "styles/control-v1.json")
+    ext05_companion = approx_extension_companions.ext05_companion(
+        site / "ext05-discretization-a40ba9647cc023dc" / "records.json", Path(__file__).parent / "styles/control-v1.json")
+    ext01_companion = approx_extension_companions.ext01_companion(
+        site / "ext01-fixed-plan-303ad863ca3af58dc6a515844c474fe0e1af9349e55cb8acd1ff1a3f220f1b54" / "records.json",
+        Path(__file__).parent / "styles/control-v1.json")
     for family, title, stem, report_id in (
             ("Box approximation", "APP-02 diamond approximations", "app02-diamond-v1", "app02-box-8ff979de60ea9d22"),
-            ("Ellipsoidal approximation", "APP-04 square and ellipses", "app04-square-v1", "app04-ellipsoid-fd302c34092f8b19")):
+            ("Ellipsoidal approximation", "APP-04 square and ellipses", "app04-square-v1", "app04-ellipsoid-fd302c34092f8b19"),
+            ("Discretization", "EXT-05 saved state samples", "ext05-states-v1", "ext05-discretization-a40ba9647cc023dc")):
         gallery_inventory.append({"family": family, "title": title,
                                   "status": "saved-data-companion",
                                   "anchor": stem, "page": stem + ".html",
                                   "figure": stem + ".svg",
                                   "source_page": "../" + report_id + "/index.html",
                                   "raw_record": "../" + report_id + "/records.json"})
+    gallery_inventory.append({"family": "Fixed-plan minimax", "title": "EXT-01 B08 full-catalogue timing",
+                              "status": "saved-data-companion", "anchor": "ext01-b08-timing-v1",
+                              "page": "ext01-b08-timing-v1.html", "figure": "ext01-b08-timing-v1.svg",
+                              "source_page": "../ext01-fixed-plan-303ad863ca3af58dc6a515844c474fe0e1af9349e55cb8acd1ff1a3f220f1b54/index.html",
+                              "raw_record": "../ext01-fixed-plan-303ad863ca3af58dc6a515844c474fe0e1af9349e55cb8acd1ff1a3f220f1b54/records.json"})
     coverage_data = algorithm_coverage(catalog, site, gallery_inventory)
     issue3_report = next(entry for entry in json.loads(Path(catalog).read_text(encoding="utf-8"))["reports"]
                          if entry["report_kind"] == "issue3-validated-minimax")
@@ -995,6 +1006,16 @@ def build(catalog, site):
             'alt="Saved APP-04 square and two enclosing ellipses on labelled x-y axes"></a>'
             '<p>Replots the frozen vertices and radii with numeric ticks, major grids, and equal x-y scales.</p>'
             '<p><a href="app04-square-v1.html">Open the saved-data companion →</a></p></article>' +
+            '<article class="saved-figure" id="ext05-states-v1"><p class="eyebrow">Discretization · Saved-data companion</p>'
+            '<h3>EXT-05 saved state samples</h3><a href="ext05-states-v1.html"><img src="ext05-states-v1.svg" '
+            'alt="Three archived EXT-05 position-velocity states at times zero, one, and three"></a>'
+            '<p>Plots only the archived state samples; it does not interpolate the continuous trajectory.</p>'
+            '<p><a href="ext05-states-v1.html">Open the saved-data companion →</a></p></article>' +
+            '<article class="saved-figure" id="ext01-b08-timing-v1"><p class="eyebrow">Fixed-plan minimax · Saved-data companion</p>'
+            '<h3>EXT-01 B08 full-catalogue timing</h3><a href="ext01-b08-timing-v1.html"><img src="ext01-b08-timing-v1.svg" '
+            'alt="Seven saved EXT-01 B08 timing observations in milliseconds on labelled numeric axes"></a>'
+            '<p>Plots the seven frozen observations as separate points with numeric ticks and major grids; no speedup or winner is claimed.</p>'
+            '<p><a href="ext01-b08-timing-v1.html">Open the saved-data companion →</a></p></article>' +
             f'<article class="saved-figure" id="{fuel_anchor}"><p class="eyebrow">Fuel minimax reference · Saved-data companion</p>'
             f'<h3>{escape(fuel_entry["title"])}</h3>'
             f'<p>{escape("Readable, versioned SVG and PNG projections of the saved 4D B06 terminal set, with exact values, units, target, evidence limits and reproduction commands.")}</p>'
@@ -1018,6 +1039,8 @@ def build(catalog, site):
     outputs.update(lotka_companion)
     outputs.update(app02_companion)
     outputs.update(app04_companion)
+    outputs.update(ext05_companion)
+    outputs.update(ext01_companion)
     hybrid = next(example for example in examples if example["kind"] == "hybrid")
     outputs["two_stage_scalar_family.json"] = json.dumps({
         "schema": "csl.visual-example/ext07-two-stage-scalar/1",
