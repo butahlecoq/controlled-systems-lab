@@ -237,6 +237,8 @@ def cards(cases):
             + (f'<p>API source at <a href="https://github.com/butahlecoq/controlled-systems-lab/blob/{escape(case["source_commit"], quote=True)}/{escape(case["source_files"][0], quote=True)}">public header</a> · '
                f'<a href="https://github.com/butahlecoq/controlled-systems-lab/blob/{escape(case["source_commit"], quote=True)}/{escape(case["source_files"][1], quote=True)}">implementation</a></p>'
                if "source_commit" in case else "")
+            + ('<p><a href="issue3-control-walkthrough.html">Open the saved-data end-to-end control walkthrough ↗</a></p>'
+               if case["id"] == "issue3-validated-minimax-2d" else "")
             + '<p class="provenance">Reproduce gallery from the repository root after staging the reports:<br>'
             '<code>python scripts/reports/visual_examples.py --catalog reports/algorithm-results/catalog.json --site build/report-site</code></p></article>')
     return "".join(rendered)

@@ -186,6 +186,8 @@ class GalleryTests(unittest.TestCase):
         self.assertIn("Projected terminal set: x₁∈[0,0.5]", page)
         self.assertIn('href="projected_hybrid_reachability.json"', page)
         self.assertIn('href="algorithm-coverage.json"', page)
+        self.assertIn('href="issue3-control-walkthrough.html"', page)
+        self.assertIn("End-to-end walkthrough", page)
         self.assertIn("065de5e45d295dfa099e25265c4014c0c46673f8", page)
         self.assertIn("blob/b83b8dc415dbe5811371b8446931ae4c6f3d2e28/reports/algorithm-results/tooling/geo04/polyhedral_intersection_driver.cpp", page)
         parser = Links()
@@ -194,7 +196,7 @@ class GalleryTests(unittest.TestCase):
             if not urlsplit(link).scheme and not link.startswith("#"):
                 self.assertTrue((self.site / "examples" / link.split("#")[0]).is_file(), link)
         figures = list((self.site / "examples").glob("*.svg"))
-        self.assertEqual(len(figures), len(self.examples) + len(gallery.visual_illustrations.CASES) + 9)
+        self.assertEqual(len(figures), len(self.examples) + len(gallery.visual_illustrations.CASES) + 10)
         for figure in figures:
             if figure.name == "fuel-b06-viz06-before.svg":
                 self.assertEqual(hashlib.sha256(figure.read_bytes()).hexdigest(),
@@ -203,6 +205,21 @@ class GalleryTests(unittest.TestCase):
             tree = ET.fromstring(figure.read_text())
             self.assertEqual(tree.attrib["role"], "img")
             self.assertIsNotNone(tree.find("{http://www.w3.org/2000/svg}desc"))
+        workflow = (self.site / "examples/issue3-control-walkthrough.html").read_text()
+        for step in ("1. Define the problem", "2. Run the supported profile",
+                     "3. Select from the complete finite family", "4. Independently verify the answer",
+                     "5. Inspect the saved export and provenance", "validated_bounds [0,0]"):
+            self.assertIn(step, workflow)
+        self.assertIn("blob/1c606969b0d15700b61e43effdbbd545e9d0ed73/benchmarks/reporting/issue3/validated_driver.cpp", workflow)
+        self.assertIn("blob/c72f3480c8fea2575ba860890502857006e9b9f4/include/csl/optimization/validated_finite_action_minimax.hpp", workflow)
+        workflow_links = Links()
+        workflow_links.feed(workflow)
+        for link in workflow_links.links:
+            if not urlsplit(link).scheme and not link.startswith("#"):
+                self.assertTrue((self.site / "examples" / link.split("#")[0]).is_file(), link)
+        workflow_svg = ET.parse(self.site / "examples/issue3-control-walkthrough.svg")
+        self.assertIn("action 0: (0,0), cost 1", "".join(workflow_svg.getroot().itertext()))
+        self.assertIn("action 1: (1,0), cost 0", "".join(workflow_svg.getroot().itertext()))
         square = ET.parse(self.site / "examples/square_duplicates.svg")
         boundary = square.find(".//{http://www.w3.org/2000/svg}polygon")
         self.assertEqual(boundary.attrib["points"],
@@ -250,6 +267,9 @@ class GalleryTests(unittest.TestCase):
         self.assertEqual(mapped_kinds, catalog_kinds)
         visual_coverage = json.loads((self.site / "examples/visual-coverage.json").read_text())
         visual_anchors = {entry["anchor"] for entry in visual_coverage["entries"]}
+        issue3_entry = next(entry for entry in visual_coverage["entries"]
+                            if entry["anchor"] == "visual-issue3-validated-minimax-2d")
+        self.assertEqual(issue3_entry["walkthrough_page"], "issue3-control-walkthrough.html")
         for family in coverage["families"]:
             if family["support"].startswith("supported-"):
                 self.assertTrue(family["examples"], family["id"])
