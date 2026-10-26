@@ -6,15 +6,22 @@ import importlib.metadata
 import json
 import os
 from pathlib import Path
-import textwrap
 import time
 import xml.etree.ElementTree as ET
 
 import control_figure_data as data
+import figure_style
 
 
 def _hash(path):
     return hashlib.sha256(Path(path).read_bytes()).hexdigest()
+
+
+def set_coordinate_aspect(axis, first, second, style):
+    if style.get("equal_aspect_for_matching_units") and first.get("unit") and first.get("unit")==second.get("unit"):
+        axis.set_aspect("equal",adjustable="box")
+        return "Equal x/y data scaling; both coordinates use " + first["unit"] + "."
+    return "Independent x/y scales; do not infer geometric distances or angles."
 
 
 def render(document, source_hash, style_path, out, additional_inputs=None):
@@ -22,6 +29,8 @@ def render(document, source_hash, style_path, out, additional_inputs=None):
     style = json.loads(style_bytes)
     if style.get("schema") != "csl.figure-style/1":
         raise ValueError("expected csl.figure-style/1")
+    if style.get("quantitative_axis_policy") != figure_style.STYLE_ID:
+        raise ValueError("expected the versioned quantitative axis policy")
     out = Path(out)
     out.mkdir(parents=True, exist_ok=False)
     os.environ.setdefault("MPLCONFIGDIR", str(out.parent / "mpl-config"))
@@ -60,7 +69,9 @@ def render(document, source_hash, style_path, out, additional_inputs=None):
                     ax.axhline(0, color="#777", linewidth=.8)
                     ax.set(xlabel=document["axes"]["states"].get("label", "stage"), ylabel=f"{coord['name']} ({coord.get('unit') or 'unit unavailable'})",
                            title=f"State coordinate {coord['id']}")
-                    ax.grid(alpha=.2);ax.legend(fontsize="small")
+                    figure_style.configure_numeric_axis(ax)
+                    ax.set_xticks(x_state)
+                    ax.legend(fontsize="small")
                 for coord_index, coord_id in enumerate(control_ids):
                     coord=control_defs[coord_id];ax=axes[len(state_ids)+coord_index]
                     for trace in trajectories:
@@ -70,12 +81,14 @@ def render(document, source_hash, style_path, out, additional_inputs=None):
                     ax.axhline(0, color="#777", linewidth=.8)
                     ax.set(xlabel=document["axes"]["controls"].get("label", "stage"), ylabel=f"{coord['name']} ({coord.get('unit') or 'unit unavailable'})",
                            title=f"Stage-aligned control coordinate {coord['id']} (left-held)")
-                    ax.grid(alpha=.2);ax.legend(fontsize="small")
-                note=" · ".join(f"{t['witness_id']}: J={t['objective']} ({t['objective_evidence']}); {t['evidence']} ({t['assurance']}; {t['approximation']})" for t in trajectories)
-                fig.text(.02,.012,textwrap.fill(note,width=145),fontsize=8,va="bottom")
-                fig.tight_layout(rect=(0,.075,1,.96))
+                    figure_style.configure_numeric_axis(ax)
+                    ax.set_xticks(x_control + ends[-1:])
+                    ax.legend(fontsize="small")
+                note=("Stage and physical-coordinate axes use independent scales. " +
+                      " · ".join(f"{t['witness_id']}: J={t['objective']} ({t['objective_evidence']}); {t['evidence']} ({t['assurance']}; {t['approximation']})" for t in trajectories))
+                fig.tight_layout(rect=(0,0,1,.96))
                 path = out / "trajectories"
-                _save(fig, path, style)
+                _save(fig, path, style, note)
                 files.extend((path.with_suffix(".svg"), path.with_suffix(".png")))
             finally: plt.close(fig)
         for index,item in enumerate(trajectory_pairs):
@@ -89,14 +102,13 @@ def render(document, source_hash, style_path, out, additional_inputs=None):
                 ax.set(xlabel=f"{a['name']} ({a.get('unit') or 'unit unavailable'})",
                        ylabel=f"{b['name']} ({b.get('unit') or 'unit unavailable'})",
                        title=f"{item['title']} · {document['provenance']['scenario_id']}")
-                if style.get("equal_aspect_for_matching_units") and a.get("unit") and a.get("unit")==b.get("unit"):
-                    ax.set_aspect("equal",adjustable="box")
-                ax.grid(alpha=.2);ax.legend(fontsize="small")
+                aspect_note=set_coordinate_aspect(ax,a,b,style)
+                figure_style.configure_numeric_axis(ax)
+                ax.legend(fontsize="small")
                 source_ids="; ".join(f"{path['run_id']} / {path['method_id']} v {path['method_version']}" for path in item["paths"])
-                note=f"Source: {source_ids}\n{item['relation']} · {item['evidence']} · {item['limitation']}"
-                fig.text(.12,.025,textwrap.fill(note,width=88),fontsize=8,va="bottom")
-                fig.tight_layout(rect=(0,.12,1,.92))
-                path=out/f"trajectory-pair-{index+1:02d}";_save(fig,path,style)
+                note=f"{aspect_note} Source: {source_ids}\n{item['relation']} · {item['evidence']} · {item['limitation']}"
+                fig.tight_layout(rect=(0,0,1,.92))
+                path=out/f"trajectory-pair-{index+1:02d}";_save(fig,path,style,note)
                 files.extend((path.with_suffix(".svg"),path.with_suffix(".png")))
             finally: plt.close(fig)
         for index, item in enumerate(projections + samples):
@@ -108,7 +120,9 @@ def render(document, source_hash, style_path, out, additional_inputs=None):
                            label=f"{item['kind'].replace('_', ' ')} ({len(pts)})")
                 target = item.get("target")
                 if target is not None:
-                    ax.scatter([target[0]], [target[1]], marker="*", s=style["target_size"], color="#d1495b", label="target")
+                    ax.scatter([target[0]], [target[1]], marker="*", s=style["target_size"], color="#d1495b")
+                    ax.annotate("target",(target[0],target[1]),xytext=(9,9),textcoords="offset points",
+                                color="#a92f43",fontsize=style["font_size"])
                 xr=[p[0] for p in pts]+([target[0]] if target is not None else [])
                 yr=[p[1] for p in pts]+([target[1]] if target is not None else [])
                 def limits(values):
@@ -126,13 +140,12 @@ def render(document, source_hash, style_path, out, additional_inputs=None):
                 ax.set(xlabel=f"{a['name']} ({a.get('unit') or 'unit unavailable'})",
                        ylabel=f"{b['name']} ({b.get('unit') or 'unit unavailable'})",
                        title=f"{item.get('title', item['kind'])} · {item.get('scenario_id', document['provenance']['scenario_id'])}")
-                if style.get("equal_aspect_for_matching_units") and a.get("unit") and a.get("unit")==b.get("unit"):
-                    ax.set_aspect("equal",adjustable="box")
+                aspect_note=set_coordinate_aspect(ax,a,b,style)
                 ax.set_title(ax.get_title(),fontsize=10,wrap=True)
                 objective=(f"J={item['objective']} ({item['objective_label']}; {item['objective_evidence']})"
                            if "objective" in item else item["objective_context"])
                 source=item["source"]
-                note=(f"Source: {source['kind']} {source['id']} · {source['method_id']} v {source['method_version']}\n"
+                note=(f"{aspect_note} Source: {source['kind']} {source['id']} · {source['method_id']} v {source['method_version']}\n"
                       f"{objective}\n{item['relation']} · {item['evidence']} · {item['limitation']}")
                 if item["kind"]=="support_samples":
                     point_count=sum(sample.get("point") is not None for sample in item["samples"])
@@ -140,12 +153,13 @@ def render(document, source_hash, style_path, out, additional_inputs=None):
                               for kind in ("finite","empty","unbounded")}
                     note+=(f"\n{len(item['samples'])} directions; {point_count} finite maximizing points plotted; "
                            f"{outcomes['empty']} empty and {outcomes['unbounded']} unbounded outcomes")
-                fig.text(.12,.025,textwrap.fill(note,width=88),fontsize=8,va="bottom")
-                ax.grid(alpha=.2); ax.legend(fontsize="small")
-                fig.tight_layout(rect=(0,.15,1,.92))
+                figure_style.configure_numeric_axis(ax)
+                if target is None:
+                    ax.legend(fontsize="small")
+                fig.tight_layout(rect=(0,0,1,.92))
                 prefix="support" if item["kind"]=="support_samples" else "projection"
                 path = out / f"{prefix}-{index + 1:02d}"
-                _save(fig, path, style)
+                _save(fig, path, style, note)
                 files.extend((path.with_suffix(".svg"), path.with_suffix(".png")))
             finally: plt.close(fig)
         if timings:
@@ -157,11 +171,13 @@ def render(document, source_hash, style_path, out, additional_inputs=None):
                                   (" — unavailable" if item["availability"] == "unavailable" else ""))
                     if item["availability"] == "available":
                         ax.scatter(item["values"], [len(labels)-1]*len(item["values"]), label=labels[-1])
-                ax.set_yticks(range(len(labels)), labels); ax.set_ylim(-.5, len(labels)-.5); ax.set_xlabel("Duration (ns); operation rows are not additive"); ax.set_title("Saved performance observations"); ax.grid(axis="x", alpha=.2)
-                path=out/"timing";_save(fig,path,style);files.extend((path.with_suffix(".svg"),path.with_suffix(".png")))
+                ax.set_yticks(range(len(labels)), labels); ax.set_ylim(-.5, len(labels)-.5); ax.set_xlabel("Duration (ns); operation rows are not additive"); ax.set_title("Saved performance observations")
+                figure_style.configure_numeric_axis(ax, "x")
+                path=out/"timing";_save(fig,path,style,"Saved performance observations. Operation rows are not additive.");files.extend((path.with_suffix(".svg"),path.with_suffix(".png")))
             finally:plt.close(fig)
     ended=time.monotonic_ns()
     receipt={"schema":"csl.figure-export/1","input_sha256":source_hash,"style_id":style["style_id"],
+             "quantitative_axis_policy":figure_style.STYLE_ID,
              "style_sha256":hashlib.sha256(style_bytes).hexdigest(),"matplotlib":matplotlib.__version__,
              "export_wall_ns":ended-started,"export_scope":"saved-data validation already complete; matplotlib import through SVG/PNG writes",
              "solve_query_latency_included":False,"additional_inputs":additional_inputs or {},"files":{p.name:_hash(p) for p in files}}
@@ -171,14 +187,23 @@ def render(document, source_hash, style_path, out, additional_inputs=None):
     return receipt
 
 
-def _save(fig, path, style):
+def _save(fig, path, style, description_text=""):
     fig.savefig(path.with_suffix(".svg"), metadata={"Date":None,"Creator":"CSL saved figure exporter"})
     fig.savefig(path.with_suffix(".png"), dpi=style["png_dpi"], metadata={"Software":style["style_id"]})
     svg=path.with_suffix(".svg")
     tree=ET.parse(svg);root=tree.getroot();root.set("role","img")
-    description=ET.Element("{http://www.w3.org/2000/svg}desc")
-    description.text="Scientific figure generated from a validated saved control-system plot document. See labels for evidence and limitations."
-    root.insert(0,description);tree.write(svg,encoding="utf-8",xml_declaration=True)
+    root.set("aria-labelledby","figure-title figure-description")
+    title=ET.Element("{http://www.w3.org/2000/svg}title",{"id":"figure-title"})
+    title.text=fig._suptitle.get_text() if fig._suptitle else "; ".join(
+        axis.get_title() for axis in fig.axes if axis.get_title()) or path.stem
+    axes_summary="; ".join(
+        ", ".join(part for part in (axis.get_xlabel(),axis.get_ylabel()) if part)
+        for axis in fig.axes)
+    description=ET.Element("{http://www.w3.org/2000/svg}desc",{"id":"figure-description"})
+    description.text=(f"{axes_summary}. Numeric ticks and major gridlines are shown. {description_text} "
+                      "Read the adjacent HTML description and saved-value record for exact values, evidence and limitations.")
+    root.insert(0,description);root.insert(0,title)
+    tree.write(svg,encoding="utf-8",xml_declaration=True)
 
 
 def main():
