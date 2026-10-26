@@ -97,6 +97,7 @@ NativeAttempt solve_hpipm(const MpcCase& problem, const OcpQp& qp,
                           const NativeAttempt* warm_start) {
     NativeAttempt result;
     result.method = "hpipm-structured-ocp-qp";
+    result.warm_start_requested = warm_start != nullptr;
     if (const auto error = validate(problem)) {
         result.termination = Termination::refused;
         result.native_status = "invalid-case";
@@ -245,6 +246,7 @@ NativeAttempt solve_hpipm(const MpcCase& problem, const OcpQp& qp,
         }
         const auto end = Clock::now();
         result.warm_start_ns = elapsed_ns(start, end);
+        result.warm_start_seed_applied = true;
     } else {
         d_ocp_qp_sol_set_zero(&solution);
     }
@@ -253,6 +255,9 @@ NativeAttempt solve_hpipm(const MpcCase& problem, const OcpQp& qp,
     d_ocp_qp_ipm_solve(&native_qp, &solution, &arg, &workspace);
     const auto solve_end = Clock::now();
     result.solve_ns = elapsed_ns(solve_start, solve_end);
+    int iterations = -1;
+    d_ocp_qp_ipm_get_iter(&workspace, &iterations);
+    if (iterations >= 0) result.solver_iterations = static_cast<std::uint64_t>(iterations);
     int status = -1;
     d_ocp_qp_ipm_get_status(&workspace, &status);
     result.native_status = "hpipm-status-" + std::to_string(status);

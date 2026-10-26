@@ -55,6 +55,7 @@ endif()
 if(CSL_BUILD_MPC01_REPORT)
 include(cmake/JsonDependencies.cmake)
 include(cmake/Mpc01Dependencies.cmake)
+include(cmake/Mpc01Provenance.cmake)
 add_library(csl_mpc01_model STATIC
   benchmarks/reporting/mpc01/model.cpp
   benchmarks/reporting/mpc01/fixtures.cpp
@@ -72,10 +73,11 @@ endif()
 set_target_properties(csl_mpc01_model PROPERTIES POSITION_INDEPENDENT_CODE ON)
 add_executable(csl_mpc01_report
   benchmarks/reporting/mpc01/main.cpp
+  benchmarks/reporting/mpc01/environment.cpp
   benchmarks/reporting/mpc01/osqp_adapter.cpp
   benchmarks/reporting/mpc01/hpipm_adapter.cpp)
 target_link_libraries(csl_mpc01_report PRIVATE csl_mpc01_model
-  csl_mpc01_osqp csl_mpc01_hpipm csl_mpc01_blasfeo)
+  csl_mpc01_osqp csl_mpc01_hpipm csl_mpc01_blasfeo CSL::artifacts)
 target_compile_features(csl_mpc01_report PRIVATE cxx_std_20)
 target_include_directories(csl_mpc01_report SYSTEM PRIVATE ${csl_json_SOURCE_DIR}/single_include)
 add_dependencies(csl_mpc01_report csl_mpc01_native_dependencies)
@@ -84,6 +86,7 @@ target_compile_options(csl_mpc01_report PRIVATE /W4 /WX /permissive-)
 else()
 target_compile_options(csl_mpc01_report PRIVATE -Wall -Wextra -Wpedantic -Werror)
 endif()
+csl_mpc01_attach_provenance(csl_mpc01_report)
 if(BUILD_TESTING)
 find_package(Python3 3.11 REQUIRED COMPONENTS Interpreter)
 add_executable(mpc01_model_tests tests/benchmarks/mpc01_model_tests.cpp)

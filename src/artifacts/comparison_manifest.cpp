@@ -1,6 +1,7 @@
 #include <csl/artifacts/comparison_manifest.hpp>
 #include <nlohmann/json.hpp>
 #include <algorithm>
+#include <bit>
 #include <charconv>
 #include <cctype>
 #include <cmath>
@@ -113,11 +114,13 @@ bool input_manifest_attached(const Json& run,const Json& spec) {
     if(spec.value("schema",std::string{})=="csl.comparison-spec/1")return true;
     if(spec.at("input_manifest_source")=="resolved-problem-canonical-bytes")return true;
     const auto expected=spec.at("input_manifest_hash").get<std::string>();
+    const auto source=spec.at("input_manifest_source").get<std::string>();
+    const auto expected_role=source=="csl.mpc01-canonical-input/1"?"diagnostics":"certificate";
     const auto& attachments=run.at("attachments");
     std::size_t matches=0;
     for(const auto& attachment:attachments)
-        if(attachment.at("role")=="certificate"&&
-           attachment.at("schema")==spec.at("input_manifest_source")&&
+        if(attachment.at("role")==expected_role&&
+           attachment.at("schema")==source&&
            attachment.at("digest")==expected&&!attachment.at("content").is_null())++matches;
     return matches==1;
 }
@@ -141,6 +144,7 @@ struct SpecShape {
     std::vector<std::string> strategies;
     std::vector<std::string> instrumentation;
     std::uint32_t repetitions{};
+    Json environment{nullptr};
 };
 bool exact_fields(const Json& value, std::initializer_list<std::string_view> fields) {
     if(!value.is_object()||value.size()!=fields.size())return false;
@@ -187,16 +191,18 @@ void validate_fact(const Json& fact, bool numeric, std::string_view path) {
     } else throw std::invalid_argument(std::string(path)+" has an unknown status");
 }
 void validate_environment(const Json& environment) {
+    const bool mpc=environment.value("schema",std::string{})=="csl.mpc01-environment/1";
     if(!exact_fields(environment,{"schema","build","runtime","execution"})||
-        environment.at("schema")!="csl.obs04-environment/1")
+        (environment.at("schema")!="csl.obs04-environment/1"&&!mpc))
         throw std::invalid_argument("Environment manifest schema or fields are invalid");
     const auto& build=environment.at("build");
     if(!exact_fields(build,{"schema","source_revision","source_tree_sha256","source_snapshot_method","source_dirty",
         "compiler_id","compiler_version","generator","architecture","build_type","cxx_standard",
         "c_flags_sha256","cxx_flags_sha256","executable_link_flags_sha256","target_flags_sha256","backends"})||
-        build.at("schema")!="csl.obs04-build/1"||!valid_git_revision(build.at("source_revision"))||
+        build.at("schema")!=(mpc?"csl.mpc01-build/1":"csl.obs04-build/1")||!valid_git_revision(build.at("source_revision"))||
         !valid_sha256(build.at("source_tree_sha256"))||
-        build.at("source_snapshot_method")!="git-head-tracked-diff-untracked-content-sha256/1"||
+        (build.at("source_snapshot_method")!="git-head-tracked-diff-untracked-content-sha256/1"&&
+         build.at("source_snapshot_method")!="git-head-tracked-diff-untracked-content-excluding-run-output-sha256/2")||
         !build.at("source_dirty").is_boolean()||
         !build.at("compiler_id").is_string()||build.at("compiler_id").get_ref<const std::string&>().empty()||
         !build.at("compiler_version").is_string()||build.at("compiler_version").get_ref<const std::string&>().empty()||
@@ -208,10 +214,9 @@ void validate_environment(const Json& environment) {
         !valid_sha256(build.at("target_flags_sha256")))
         throw std::invalid_argument("Environment build facts are invalid");
     const auto& backends=build.at("backends");
-    if(!exact_fields(backends,{"highs","qhull"}))
+    if(mpc?!exact_fields(backends,{"osqp","hpipm","blasfeo"}):!exact_fields(backends,{"highs","qhull"}))
         throw std::invalid_argument("Environment backend facts are invalid");
-    for(const auto name:{"highs","qhull"}) {
-        const auto& backend=backends.at(name);
+    for(const auto& [name,backend]:backends.items()) {
         if(!exact_fields(backend,{"version","archive_sha256"})||
             !backend.at("version").is_string()||backend.at("version").get_ref<const std::string&>().empty()||
             !valid_sha256(backend.at("archive_sha256")))
@@ -238,7 +243,7 @@ void validate_environment(const Json& environment) {
         execution.at("observed_driver_workers")!=1||execution.at("requested_backend_threads")!=1||
         !execution.at("workspace_policy").is_string()||execution.at("workspace_policy")!="fresh-workspace-per-attempt"||
         !execution.at("cache_policy").is_string()||execution.at("cache_policy").get_ref<const std::string&>().empty()||
-        !positive_small_integer(execution.at("warmup_repetitions"))||execution.at("warmup_repetitions")!=1||
+        execution.at("warmup_repetitions")!=(mpc?0:1)||
         !positive_small_integer(execution.at("requested_backend_threads"))||
         !positive_small_integer(execution.at("observed_driver_workers")))
         throw std::invalid_argument("Environment execution facts are invalid");
@@ -264,11 +269,13 @@ SpecShape validate_spec(const Json& spec) {
         spec.contains("input_manifest_hash")&&spec.contains("input_manifest_source")&&
         (spec.at("input_manifest_source")=="resolved-problem-canonical-bytes"||
          spec.at("input_manifest_source")=="csl.exp05-finite-minimax-case/1"||
-         spec.at("input_manifest_source")=="csl.mpc03-b08-case/1");
+         spec.at("input_manifest_source")=="csl.mpc03-b08-case/1"||
+         spec.at("input_manifest_source")=="csl.mpc01-canonical-input/1");
     const bool record_with_environment=schema=="csl.comparison-spec/3"&&spec.size()==8&&spec.contains("arms")&&
         spec.contains("input_manifest_hash")&&spec.contains("input_manifest_source")&&
         (spec.at("input_manifest_source")=="resolved-problem-canonical-bytes"||
          spec.at("input_manifest_source")=="csl.exp05-finite-minimax-case/1"||
+         spec.at("input_manifest_source")=="csl.mpc01-canonical-input/1"||
          spec.at("input_manifest_source")=="csl.mpc03-b08-case/1")&&spec.contains("environment");
     if(!legacy&&!record&&!record_with_environment)throw std::invalid_argument("Comparison spec fields do not match supported schema");
     if(record_with_environment)validate_environment(spec.at("environment"));
@@ -292,6 +299,7 @@ SpecShape validate_spec(const Json& spec) {
     if(record||record_with_environment) {
         if(spec.at("input_manifest_source")!="resolved-problem-canonical-bytes"&&
            spec.at("input_manifest_source")!="csl.exp05-finite-minimax-case/1"&&
+           spec.at("input_manifest_source")!="csl.mpc01-canonical-input/1"&&
            spec.at("input_manifest_source")!="csl.mpc03-b08-case/1")
             throw std::invalid_argument("Comparison input manifest source is unsupported");
         constexpr std::string_view prefix="csl.problem.v1.sha256:";
@@ -325,7 +333,9 @@ SpecShape validate_spec(const Json& spec) {
     }
     const auto repetitions=spec.at("repetitions").get<std::uint32_t>();
     if(repetitions==0)throw std::invalid_argument("Repetition count must be positive");
-    return {record||record_with_environment,std::move(configurations),std::move(strategies),std::move(instrumentation),repetitions};
+    return {record||record_with_environment,std::move(configurations),std::move(strategies),
+        std::move(instrumentation),repetitions,
+        record_with_environment?spec.at("environment"):Json{nullptr}};
 }
 bool arm_matches_run(const Json& run,const SpecShape& spec,std::size_t arm) {
     if(spec.strategies.empty())return true;
@@ -362,11 +372,106 @@ std::size_t saved_distinct_witness_count(const Json& batch) {
     }
     return representatives.size();
 }
+std::string binary64_hex(double value) {
+    constexpr char digits[]="0123456789abcdef";
+    const auto bits=std::bit_cast<std::uint64_t>(value);
+    std::string encoded(16,'0');
+    for(std::size_t index=0;index<16;++index)
+        encoded[15-index]=digits[(bits>>(index*4))&15];
+    return encoded;
+}
 bool measurement_matches_arm(AttemptStatus status,const Json& measurement,const Json& run,
     const SpecShape& spec,std::size_t arm,std::uint32_t repetition) {
     if(!measurement_status_matches(status,measurement))return false;
     if(spec.strategies.empty())return true;
     const auto schema=measurement.value("schema",std::string{});
+    if(schema=="csl.mpc01-comparison-event/1") {
+        if(!exact_fields(measurement,{"schema","strategy","instrumentation","repetition","status","attempt"})||
+            measurement.at("strategy")!=spec.strategies.at(arm)||
+            measurement.at("instrumentation")!=spec.instrumentation.at(arm)||
+            measurement.at("repetition")!=repetition)return false;
+        const auto& native=measurement.at("attempt");
+        if(!native.is_object()||native.value("schema",std::string{})!="csl.mpc01-native-attempt/1")return false;
+        const auto termination=native.value("termination",std::string{});
+        const auto iterations=native.find("solver_iterations");
+        if(termination=="completed"&&(iterations==native.end()||!iterations->is_number_unsigned()))return false;
+        if(measurement.at("status")!=(termination=="completed"?"passed":termination))return false;
+        const auto method=native.value("method",std::string{});
+        const auto backend=method=="osqp-sparse-qp"?"csl.external.osqp.sparse-qp":
+            method=="hpipm-structured-ocp-qp"?"csl.external.hpipm.structured-ocp-qp":"";
+        if(std::string(backend).empty()||spec.environment.is_null()||
+            spec.strategies.at(arm)!=backend||
+            run.at("problem")!="csl.problem.v1.sha256:"+native.value("input_sha256",std::string{}))return false;
+        const auto& backends=spec.environment.at("build").at("backends");
+        const auto backend_key=method=="osqp-sparse-qp"?"osqp":"hpipm";
+        const auto& pinned=backends.at(backend_key);
+        bool matched_start_mode=false;
+        for(const auto& module:run.at("configuration").at("value").at("modules")) {
+            if(module.at("role")!="strategy"||module.at("id")!=backend)continue;
+            if(module.at("version")!=pinned.at("version")||
+                module.at("pin").at("state")!="available"||
+                module.at("pin").at("value").at("scope")!="source_archive"||
+                module.at("pin").at("value").at("sha256")!=pinned.at("archive_sha256"))return false;
+            const auto option_matches=[&](std::string_view name,const Json& expected) {
+                for(const auto& option:module.at("options"))
+                    if(option.at("name")==name&&option.at("value")==expected)return true;
+                return false;
+            };
+            const auto string_option=[](std::string value) {
+                return Json{{"type","string"},{"value",std::move(value)}};
+            };
+            const auto bool_option=[](bool value) {return Json{{"type","boolean"},{"value",value}};};
+            const auto integer_option=[](std::int64_t value) {
+                return Json{{"type","signed64"},{"value",std::to_string(value)}};
+            };
+            const auto number_option=[](double value) {
+                return Json{{"type","binary64_bits"},{"value",binary64_hex(value)}};
+            };
+            for(const auto& option:module.at("options"))
+                if(option.at("name")=="start_mode"&&option.at("value").at("type")=="string"&&
+                    option.at("value").at("value")==native.value("start_mode",std::string{}))
+                    matched_start_mode=true;
+            const bool osqp=method=="osqp-sparse-qp";
+            if(!option_matches("native_defaults",string_option(osqp?"osqp_set_default_settings":"d_ocp_qp_ipm_arg_set_default_BALANCE"))||
+                !option_matches("iteration_limit",integer_option(osqp?200000:1000))||
+                !option_matches("warm_start_enabled",bool_option(osqp||native.value("start_mode",std::string{})=="warm_if_available")))return false;
+            if(osqp) {
+                if(!option_matches("eps_abs",number_option(1e-7))||
+                    !option_matches("eps_rel",number_option(1e-7)))return false;
+            } else if(!option_matches("mode",string_option("BALANCE"))||
+                !option_matches("tol_stat",number_option(1e-8))||
+                !option_matches("tol_eq",number_option(1e-8))||
+                !option_matches("tol_ineq",number_option(1e-8))||
+                !option_matches("tol_comp",number_option(1e-8)))return false;
+        }
+        if(!matched_start_mode)return false;
+        const auto settings=native.find("solver_settings");
+        if(settings==native.end()||!settings->is_object())return false;
+        if(method=="osqp-sparse-qp") {
+            if(settings->value("max_iter",std::int64_t{})!=200000||
+                settings->value("eps_abs",-1.0)!=1e-7||settings->value("eps_rel",-1.0)!=1e-7||
+                settings->value("warm_starting",false)!=true||
+                native.value("warm_start_requested",false)!=(native.value("start_mode",std::string{})=="warm_if_available")||
+                (native.value("warm_start_seed_applied",false)&&!native.value("warm_start_requested",false)))return false;
+        } else if(settings->value("max_iter",std::int64_t{})!=1000||
+            settings->value("mode",std::string{})!="BALANCE"||
+            settings->value("tol_stat",-1.0)!=1e-8||settings->value("tol_eq",-1.0)!=1e-8||
+            settings->value("tol_ineq",-1.0)!=1e-8||settings->value("tol_comp",-1.0)!=1e-8||
+            settings->value("warm_start",false)!=(native.value("start_mode",std::string{})=="warm_if_available")||
+            native.value("warm_start_requested",false)!=(native.value("start_mode",std::string{})=="warm_if_available")||
+            (native.value("warm_start_seed_applied",false)&&!native.value("warm_start_requested",false)))return false;
+        const auto payload=native.dump();
+        constexpr char digits[]="0123456789abcdef";
+        std::string encoded;encoded.reserve(payload.size()*2);
+        for(const unsigned char byte:payload) {
+            encoded.push_back(digits[byte>>4]);encoded.push_back(digits[byte&15]);
+        }
+        std::size_t matches=0;
+        for(const auto& attachment:run.at("attachments"))
+            if(attachment.at("id")=="native-attempt"&&attachment.at("role")=="diagnostics"&&
+                attachment.at("schema")=="csl.mpc01-native-attempt/1"&&attachment.at("content")==encoded)++matches;
+        return matches==1;
+    }
     if(schema=="csl.exp05-fixed-plan-event/1")
         return measurement.contains("strategy")&&measurement.at("strategy")==spec.strategies.at(arm)&&
             measurement.contains("instrumentation")&&measurement.at("instrumentation")==spec.instrumentation.at(arm)&&

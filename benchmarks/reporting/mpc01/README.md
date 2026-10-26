@@ -25,15 +25,35 @@ cmake --build build/mpc01 --target csl_mpc01_report mpc01_model_tests --parallel
 ctest --test-dir build/mpc01 -R '^mpc01_(model_contract|native_smoke)$' --output-on-failure
 build/mpc01/csl_mpc01_report \
   examples/scenarios/double-integrator-generality.json \
-  docs/research/evidence/b04-reference-v1/canonical-case.json
+  docs/research/evidence/b04-reference-v1/canonical-case.json \
+  --records build/mpc01/comparison-records.jsonl
+build/mpc01/csl_mpc01_report --verify-records build/mpc01/comparison-records.jsonl
 ```
 
 Pass `--reverse` to run HPIPM before OSQP; alternating this flag across
-repetitions reduces fixed-order bias. The current executable emits provisional
-JSONL attempt rows to stdout. They are functional and diagnostic output, not
-yet the immutable `csl.comparison-record/1` artifact required for published
-comparisons. The model currently uses binary64 residual checks, labelled
-inconclusive; solver optimal status is not itself an independent proof.
+repetitions reduces fixed-order bias. The runner writes native attempt rows to
+stdout and, when `--records` names a new file, one self-contained
+`csl.comparison-record/1` archive per fixture. Each archive binds the exact
+input bytes, all four solver/start-mode arms, run records, measurements,
+dependency hashes, source/build/runtime facts, and per-attempt native settings.
+`--verify-records` checks saved archives without invoking a solver. Repetition
+and cold/warm identity are recorded separately: this functional smoke has one
+attempt for each of cold and warm/fallback per solver, not a repeated timing
+comparison. The model's binary64 feasibility checks remain inconclusive, and
+solver optimal status is not an independent optimality proof.
+
+The five-repetition B04 native comparison, its six canonical comparison
+records, timing summary, and representative cold trajectory projections are
+preserved under
+`docs/research/evidence/mpc01-external-qps-20261026/`. Run
+`scripts/reports/mpc01/summarize_repeated_comparison.py` with the saved records
+and runner stdout to reproduce the summary and the flow/working-stock figure.
+The figure selects one actual cold path per solver, choosing the repetition
+whose solve time is closest to that solver's five-run median. Paths are not
+averaged. The run records OSQP and HPIPM iteration counts. In this B04 case,
+the cold solve medians are 162.5 ms at 33,125 OSQP iterations and 0.994 ms at
+30 HPIPM iterations; those microbenchmarks do not establish an overall solver
+or control-strategy winner.
 
 The analytic infeasible and unbounded rows exercise outcome handling. OSQP's
 precise primal/dual infeasibility statuses map to `infeasible`/`unbounded`;
@@ -44,9 +64,8 @@ sentinel values and non-optimal iterates are not presented as solution
 objectives. Non-optimal primal vectors are labelled candidate iterates, not
 feasible trajectories.
 
-This slice does not implement Strategy A/B outcomes, the shared
-comparison-record codec, independent report review, or a solver-trajectory
-plot backed by a canonical comparison record. The separate
+Strategy A/B outcomes and independently justified optimality evidence remain
+outstanding. The separate
 `b04-reference-v1/native-smoke-20261026` projection overlays one cold smoke
 trajectory per solver with the exact witness; it is illustrative, not a
 repeated benchmark, and its residual checks are inconclusive. The B04 Pages

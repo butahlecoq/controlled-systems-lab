@@ -127,8 +127,11 @@ struct NativeAttempt {
     std::uint64_t warm_start_ns{};
     std::uint64_t solve_ns{};
     std::uint64_t extraction_ns{};
+    std::optional<std::uint64_t> solver_iterations;
     bool factorization_in_setup{};
     bool factorization_in_solve{};
+    bool warm_start_requested{};
+    bool warm_start_seed_applied{};
     std::string diagnostics;
 };
 

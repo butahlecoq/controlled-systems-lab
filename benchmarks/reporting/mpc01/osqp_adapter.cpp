@@ -136,6 +136,7 @@ NativeAttempt solve_osqp(const MpcCase& problem, const SparseQp& qp,
                          const NativeAttempt* warm_start) {
     NativeAttempt result;
     result.method = "osqp-sparse-qp";
+    result.warm_start_requested = warm_start != nullptr;
     if (const auto error = validate(problem)) {
         result.termination = Termination::refused;
         result.native_status = "invalid-case";
@@ -201,6 +202,7 @@ NativeAttempt solve_osqp(const MpcCase& problem, const SparseQp& qp,
                                                 warm_start->solver_dual.data());
         const auto end = Clock::now();
         result.warm_start_ns = elapsed_ns(start, end);
+        result.warm_start_seed_applied = warm_error == 0;
         if (warm_error != 0) {
             result.diagnostics = "warm-start-error-" + std::to_string(warm_error);
         }
@@ -225,6 +227,8 @@ NativeAttempt solve_osqp(const MpcCase& problem, const SparseQp& qp,
         return result;
     }
     result.native_status = solver->info->status;
+    if (solver->info->iter >= 0)
+        result.solver_iterations = static_cast<std::uint64_t>(solver->info->iter);
     classify_status(solver->info->status_val, result);
     result.solver_objective = solver->info->obj_val + qp.objective_offset;
 

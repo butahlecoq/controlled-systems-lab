@@ -1,0 +1,6 @@
+Separate diagnostic run, excluded from the five-repetition timing sample.
+Command: Bash built-in time around csl_mpc01_report with --repetitions 1 over all six cases.
+real 0.550 s
+user 0.417 s
+sys  0.132 s
+The user+system CPU time nearly equals elapsed time, so the suite process was CPU-bound on this host during this capture. This is a whole-process profile, not a per-function profile. Per-solver iteration counts in the canonical records identify the cold B04 solve effort: OSQP 33,125 iterations and HPIPM 30.
