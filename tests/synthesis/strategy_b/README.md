@@ -111,8 +111,8 @@ targeted build; the subsequent single broad build succeeded.
 ### Production integration and stop-contract review follow-up
 
 Production library/test registration was added in commit `002c75a`. Review fixes
-keep pre-expired deadlines as `Termination::cancelled` with the distinct typed
-`StopReason::deadline_expired`, represent early materialization exhaustion as
+keep pre-expired deadlines as `Termination::deadline_expired` with the matching
+typed `StopReason::deadline_expired`, represent early materialization exhaustion as
 `Termination::resource_limit` with `ScopedOperationStopped(resource_limit)`, and
 use `ContractValidationFailure` for validation failures. Registered execution
 tests exercise the shared result validation/sanitization boundary for all three.

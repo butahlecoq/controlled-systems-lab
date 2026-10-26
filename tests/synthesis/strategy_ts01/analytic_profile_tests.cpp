@@ -8,6 +8,7 @@
 #include <cmath>
 #include <iostream>
 #include <limits>
+#include <chrono>
 
 using namespace csl;
 using namespace csl::registry;
@@ -63,7 +64,7 @@ ExecutionContext make_execution_context() {
     ExecutionContext result;result.resources=std::make_shared<const ResourcePolicy>(ResourcePolicy{1,1,1,{}});
     return result;
 }
-SynthesisResult run(StrategyRequest request_) {
+SynthesisResult run(StrategyRequest request_,ExecutionContext context=make_execution_context()) {
     StrategyRegistry strategies;
     REQUIRE_FALSE(strategies.add(synthesis::strategy_ts01::make_registration()).has_value());
     Requirements requirements;requirements.output.representation=request_.family.representation;
@@ -72,7 +73,7 @@ SynthesisResult run(StrategyRequest request_) {
         Completeness::established:Completeness::unestablished;
     auto prepared=take(strategies.prepare(request_,requirements));
     auto workspace=prepared.create();
-    return take(workspace->run(make_execution_context()));
+    return take(workspace->run(context));
 }
 bool rejected(Problem p) {
     auto request_=request(resolve(std::move(p)));
@@ -444,4 +445,17 @@ TEST_CASE("result boundary keeps its outcome and bounds aligned with sealed fami
     REQUIRE(changed_upper.objective.upper);
     changed_upper.objective.upper->value=1;
     CHECK_FALSE(check_synthesis_result(changed_upper,identity).empty());
+}
+
+TEST_CASE("analytic T-S01 preserves deadline termination and scoped evidence") {
+    auto p=resolve(source());
+    ExecutionContext context=make_execution_context();
+    context.deadline=std::chrono::steady_clock::now()-std::chrono::seconds(1);
+    const auto result=run(request(p),context);
+    CHECK(result.termination==Termination::deadline_expired);
+    REQUIRE(std::holds_alternative<ScopedOperationStopped>(result.stop));
+    CHECK(std::get<ScopedOperationStopped>(result.stop).stop.reason==StopReason::deadline_expired);
+    const auto expected=FamilyIdentity{p.identity(),request(p).family,p.constraints().coordinates(),
+        {"csl.synthesis.ts01-analytic"},"1",{}};
+    CHECK(check_synthesis_result(result,expected).empty());
 }

@@ -110,8 +110,8 @@ new shared contract. No shared interface is changed by this module.
   unchanged and a mismatching execution context rejects at `StrategyPort`.
 - Cancellation/deadline checks occur between phases and inside selected providers;
   this module adds no scheduler, backend, or OS resource-enforcement claim.
-  A direct deadline stop preserves `deadline_expired` and uses `cancelled`
-  termination, as required by the current shared synthesis result guard.
+  A deadline stop preserves `deadline_expired` in both the termination and
+  scoped stop reason.
 - Witness selection, independent history verification, reviewed coverage,
   cross-strategy T-X01 comparison, and T-L02 barycentric diagnostics are not
   delivered here. Run export remains limited to the existing H attachment

@@ -74,9 +74,11 @@ public:
             if(const auto* n=std::get_if<NumericalCheck>(&evidence))
                 if(!finite_nonnegative(n->absolute_tolerance)||!finite_nonnegative(n->relative_tolerance)||
                     !finite_nonnegative(n->max_residual)||n->verifier.value.empty())mismatch(field,"malformed numerical evidence");
-            if(const auto* proof=std::get_if<ExactFarkasEvidence>(&evidence))
+            if(const auto* proof=std::get_if<ExactFarkasEvidence>(&evidence)) {
                 if(!expected_program||proof->subject()!=*expected_program)
                     mismatch(field,"exact Farkas evidence is not bound to the exact expected program");
+                else mismatch(field,"exact Farkas evidence proves infeasibility, not an objective bound");
+            }
         };
         const auto claim=[&](const ClaimEvidence& evidence,const std::string& field) {
             id(evidence.problem,field);support(evidence.support,field,std::nullopt);

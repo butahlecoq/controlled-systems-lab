@@ -1334,7 +1334,7 @@ TEST_CASE("post-terminal deadline expiry retains the completed slice and unestab
     ExecutionContext context;context.resources=std::make_shared<const ResourcePolicy>(ResourcePolicy{1,1,1,{}});
     auto prepared=take(admit(query,false,{},false,false,false,&context));auto workspace=prepared.create();
     auto result=take(workspace->run(context));
-    CHECK(result.termination==Termination::cancelled);
+    CHECK(result.termination==Termination::deadline_expired);
     CHECK(result.outcome.value==MathematicalOutcome::undetermined);
     CHECK_FALSE(result.objective.lower);CHECK_FALSE(result.objective.upper);
     CHECK(result.incumbents.empty());CHECK_FALSE(result.complete_proposal);CHECK_FALSE(result.partial_proposal);
@@ -1573,7 +1573,7 @@ TEST_CASE("cancellation and deadline retain distinct scoped stops and no mathema
     REQUIRE(std::holds_alternative<ScopedOperationStopped>(cancelled.stop));
     CHECK(std::get<ScopedOperationStopped>(cancelled.stop).stop.reason==StopReason::cancelled);
     context={};context.deadline=std::chrono::steady_clock::now();auto expired=run(query,false,context);
-    CHECK(expired.termination==Termination::cancelled);
+    CHECK(expired.termination==Termination::deadline_expired);
     REQUIRE(std::holds_alternative<ScopedOperationStopped>(expired.stop));
     CHECK(std::get<ScopedOperationStopped>(expired.stop).stop.reason==StopReason::deadline_expired);
     CHECK(std::get<ScopedOperationStopped>(expired.stop).stop.diagnostics.find("deadline")!=std::string::npos);

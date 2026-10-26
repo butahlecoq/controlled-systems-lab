@@ -957,7 +957,7 @@ TEST_CASE("registered deadline expiring as solver returns resource limit keeps d
     auto workspace=prepared.create();
     const auto result=accepted(workspace->run(context));
 
-    CHECK(result.termination==Termination::cancelled);
+    CHECK(result.termination==Termination::deadline_expired);
     CHECK(result.outcome.value==MathematicalOutcome::undetermined);
     REQUIRE(std::holds_alternative<ScopedOperationStopped>(result.stop));
     CHECK(std::get<ScopedOperationStopped>(result.stop).stop.reason==StopReason::deadline_expired);
@@ -1024,7 +1024,7 @@ TEST_CASE("registered deadline expiry after optimization retains candidate and s
     });
     auto workspace=prepared.create();
     const auto result=accepted(workspace->run(context));
-    CHECK(result.termination==Termination::cancelled);
+    CHECK(result.termination==Termination::deadline_expired);
     CHECK(result.outcome.subject==p.identity());
     CHECK(result.outcome.value==MathematicalOutcome::undetermined);
     CHECK(std::holds_alternative<Unestablished>(result.outcome.support));
@@ -1879,7 +1879,7 @@ TEST_CASE("early cancellation and deadline retain their distinct source stop rea
     REQUIRE(std::holds_alternative<ScopedOperationStopped>(cancelled.stop));CHECK(std::get<ScopedOperationStopped>(cancelled.stop).stop.reason==StopReason::cancelled);
     CHECK_FALSE(cancelled.family);
     ExecutionContext deadline;deadline.deadline=std::chrono::steady_clock::now();
-    const auto expired=workspace.solve(p,request(p),deadline);CHECK(expired.termination==Termination::cancelled);
+    const auto expired=workspace.solve(p,request(p),deadline);CHECK(expired.termination==Termination::deadline_expired);
     REQUIRE(std::holds_alternative<ScopedOperationStopped>(expired.stop));CHECK(std::get<ScopedOperationStopped>(expired.stop).stop.reason==StopReason::deadline_expired);
     CHECK_FALSE(expired.family);
     const FamilyIdentity expected{p.identity(),request(p),p.constraints().coordinates(),{"csl.synthesis.strategy-b"},"1",{}};
@@ -1940,7 +1940,7 @@ TEST_CASE("registered deadline stop survives public result sanitization") {
     const auto p=resolve(integrator());const auto prepared=registered_prepared(p,request(p));
     ExecutionContext context;context.deadline=std::chrono::steady_clock::now()-std::chrono::seconds(1);
     auto workspace=prepared.create();const auto r=accepted(workspace->run(context));
-    CHECK(r.termination==Termination::cancelled);REQUIRE(std::holds_alternative<ScopedOperationStopped>(r.stop));
+    CHECK(r.termination==Termination::deadline_expired);REQUIRE(std::holds_alternative<ScopedOperationStopped>(r.stop));
     CHECK(std::get<ScopedOperationStopped>(r.stop).stop.reason==StopReason::deadline_expired);
     CHECK_FALSE(r.family);CHECK(r.incumbents.empty());CHECK(r.outcome.value==MathematicalOutcome::undetermined);
 }

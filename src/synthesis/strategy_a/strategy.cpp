@@ -122,10 +122,7 @@ void contract_failure(SynthesisResult& result,Diagnostics diagnostics) {
 void stop(SynthesisResult& result,RequestProvenance request,OperationStopped cause) {
     switch(cause.reason) {
     case StopReason::cancelled:result.termination=Termination::cancelled;break;
-    case StopReason::deadline_expired:
-        // Existing shared guard accepts deadline_expired with cancelled. Keep
-        // the distinct source reason rather than rewriting a deadline as a cap.
-        result.termination=Termination::cancelled;break;
+    case StopReason::deadline_expired:result.termination=Termination::deadline_expired;break;
     case StopReason::resource_limit:result.termination=Termination::resource_limit;break;
     case StopReason::numerical_failure:result.termination=Termination::numerical_failure;break;
     }
@@ -159,7 +156,8 @@ public:
 Termination forward_termination(const reachability::ForwardFailure& failure) {
     if(std::holds_alternative<Unsupported>(failure.cause))return Termination::operation_rejected;
     switch(std::get<OperationStopped>(failure.cause).reason) {
-    case StopReason::cancelled:case StopReason::deadline_expired:return Termination::cancelled;
+    case StopReason::cancelled:return Termination::cancelled;
+    case StopReason::deadline_expired:return Termination::deadline_expired;
     case StopReason::resource_limit:return Termination::resource_limit;
     case StopReason::numerical_failure:return Termination::numerical_failure;
     }

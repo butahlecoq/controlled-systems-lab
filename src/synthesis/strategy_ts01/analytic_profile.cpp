@@ -33,7 +33,7 @@ public:
         }
         if(context.cancellation.stop_requested()||(context.deadline&&std::chrono::steady_clock::now()>=*context.deadline)) {
             const auto reason=context.cancellation.stop_requested()?StopReason::cancelled:StopReason::deadline_expired;
-            result.termination=Termination::cancelled;
+            result.termination=reason==StopReason::deadline_expired?Termination::deadline_expired:Termination::cancelled;
             result.stop=ScopedOperationStopped{{reason,"Stopped before analytic T-S01 publication."},
                 {{"ts01/analytic"},"strategy",ModuleId{strategy_id},std::string(strategy_version),
                     ModuleId{strategy_id},std::string(strategy_version)},{false,false,0,false}};

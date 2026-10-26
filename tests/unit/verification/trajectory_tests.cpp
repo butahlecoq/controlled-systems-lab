@@ -376,7 +376,7 @@ TEST_CASE("Farkas evidence must bind the exact generated program or remain unpro
 
     auto q=request(p);
     q.backend_bounds.push_back({ProgramObjectiveBound{0,{first.identity(),proof,{}}},std::nullopt});
-    CHECK(verify_trajectory(p,q).bindings==CheckStatus::numerical_pass);
+    CHECK(verify_trajectory(p,q).bindings==CheckStatus::invalid_input);
 
     auto foreign=first.identity();foreign.program={"farkas/foreign"};
     q.backend_bounds[0].lower->evidence.subject=foreign;
