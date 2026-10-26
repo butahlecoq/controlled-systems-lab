@@ -75,7 +75,7 @@ CASES = (
         "family": "Nominal open-loop optimization · MPC-01",
         "title": "Project a four-state fuel trajectory into two planes",
         "summary": "One exact optimal witness from the separate b04-reference-v1 case is projected onto oxidizer/fuel flow and working-stock planes. It is not a historical B04 reconstruction or an external-solver comparison.",
-        "figure": "mpc01-b04-reference-projection.svg",
+        "figure": "b04-reference-trajectory-projections.svg",
         "record": "mpc01-b04-reference-projection.json",
         "kind": "analytic-illustration",
         "source_path": "docs/research/evidence/b04-reference-v1/canonical-case.json",
