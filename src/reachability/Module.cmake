@@ -7,7 +7,7 @@ target_link_libraries(csl_nominal_forward PUBLIC CSL::polyhedral CSL::resolved_p
 
 csl_add_library(csl_fixed_plan_disturbance STATIC src/reachability/fixed_plan_disturbance.cpp)
 
-target_link_libraries(csl_fixed_plan_disturbance PUBLIC CSL::model CSL::sets)
+target_link_libraries(csl_fixed_plan_disturbance PUBLIC CSL::model CSL::sets CSL::artifacts)
 
 csl_add_library(csl_finite_feedback STATIC src/reachability/finite_feedback.cpp)
 

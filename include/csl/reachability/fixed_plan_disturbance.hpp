@@ -3,6 +3,7 @@
 #include <csl/model/linear_system.hpp>
 #include <csl/sets/data.hpp>
 #include <csl/execution/contracts.hpp>
+#include <csl/artifacts/run_statistics.hpp>
 
 namespace csl::reachability {
 
@@ -27,6 +28,10 @@ struct FixedPlanViolation {
     Vector violating_successor;
 };
 struct FixedPlanEmpty { std::size_t stage; };
+struct FixedPlanTimingSpans {
+    // One unique, caller-planned ID for each generated stage V representation.
+    std::vector<artifacts::SpanId> stage_materialization;
+};
 using FixedPlanOutcome = std::variant<FixedPlanReachable, FixedPlanViolation,
     FixedPlanEmpty, Unsupported, OperationStopped>;
 
@@ -34,6 +39,7 @@ using FixedPlanOutcome = std::variant<FixedPlanReachable, FixedPlanViolation,
 // Every x/w pair is propagated. An unsafe successor rejects the whole plan;
 // no state-set clipping is performed. max_points bounds each generated stage.
 FixedPlanOutcome fixed_plan_disturbance(const FixedPlanRequest& request,
-    std::size_t max_points, const ExecutionContext& context = {});
+    std::size_t max_points, const ExecutionContext& context = {},
+    const FixedPlanTimingSpans* timing_spans = nullptr);
 
 } // namespace csl::reachability

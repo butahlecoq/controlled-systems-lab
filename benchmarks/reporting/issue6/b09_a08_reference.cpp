@@ -1,4 +1,5 @@
 #include <csl/optimization/finite_action_minimax.hpp>
+#include "fuel_timing.hpp"
 #include <nlohmann/json.hpp>
 
 #include <array>
@@ -171,7 +172,9 @@ std::size_t distinct_point_count(const json& points) {
 
 json run(std::size_t batch, double lambda, bool geometry) {
     const auto started = std::chrono::steady_clock::now();
-    const auto outcome = finite_action_minimax(request(lambda,initial_state(),4), {6561, 4096, 1e-8});
+    const auto input=request(lambda,initial_state(),4);
+    const auto solver_started=std::chrono::steady_clock::now();
+    const auto outcome = finite_action_minimax(input, {6561, 4096, 1e-8});
     const auto stopped = std::chrono::steady_clock::now();
     if (!std::holds_alternative<FiniteMinimaxOptimal>(outcome))
         throw std::runtime_error("A08 source-reference planner did not return an optimum");
@@ -192,6 +195,7 @@ json run(std::size_t batch, double lambda, bool geometry) {
         {"driver_sha256", CSL_ISSUE6_DRIVER_SHA256},
         {"lambda", lambda}, {"status", "numerical_optimal"}, {"assurance", "numerical"},
         {"elapsed_ns", std::chrono::duration_cast<std::chrono::nanoseconds>(stopped-started).count()},
+        {"solver_call_wall_ns",std::chrono::duration_cast<std::chrono::nanoseconds>(stopped-solver_started).count()},
         {"plan_count", optimum.plans.size()}, {"minimizing_plan_indices", optimum.minimizing_plan_indices},
         {"winner_action_indices", winner.action_indices}, {"winner_action_sequences", winner_sequences},
         {"objective_squared", optimum.value},
@@ -204,12 +208,19 @@ json run(std::size_t batch, double lambda, bool geometry) {
     row["process_peak_rss_kib"] = nullptr;
 #endif
     if (geometry) {
+        const auto open_started=std::chrono::steady_clock::now();
         const auto open_states = open_loop_replay(winner.action_indices);
+        const auto open_stopped=std::chrono::steady_clock::now();
+        const auto closed_started=std::chrono::steady_clock::now();
         const auto [closed_actions,closed_states] = closed_loop_replay(lambda);
+        const auto closed_stopped=std::chrono::steady_clock::now();
+        const auto projection_started=std::chrono::steady_clock::now();
         const auto terminal = vertices(winner.terminal);
+        const auto distinct=distinct_point_count(terminal);
+        const auto projection_stopped=std::chrono::steady_clock::now();
         row["winner_terminal_vertices_x1_x2_x3_x4"] = terminal;
         row["terminal_v_row_count"] = terminal.size();
-        row["terminal_unique_point_count"] = distinct_point_count(terminal);
+        row["terminal_unique_point_count"] = distinct;
         row["open_loop_replay_states"] = open_states;
         row["open_loop_replay_terminal_state"] = open_states.back();
         row["open_loop_replay_objective_squared"] = criterion_squared(open_states.back(),lambda);
@@ -219,8 +230,38 @@ json run(std::size_t batch, double lambda, bool geometry) {
         row["closed_loop_replay_terminal_state"] = closed_states.back();
         row["closed_loop_replay_objective_squared"] = criterion_squared(closed_states.back(),lambda);
         row["closed_loop_replay_objective_norm"] = std::sqrt(row["closed_loop_replay_objective_squared"].get<double>());
+        row["post_solver_phase_ns"]={{"open_loop_replay_and_cost",
+                std::chrono::duration_cast<std::chrono::nanoseconds>(open_stopped-open_started).count()},
+            {"receding_horizon_replay_and_replanning",
+                std::chrono::duration_cast<std::chrono::nanoseconds>(closed_stopped-closed_started).count()},
+            {"terminal_vrow_projection_and_distinct_count",
+                std::chrono::duration_cast<std::chrono::nanoseconds>(projection_stopped-projection_started).count()}};
     }
     return row;
+}
+
+json phase_run(double lambda) {
+    const auto request_started=std::chrono::steady_clock::now();
+    const auto input=request(lambda,initial_state(),4);
+    const auto request_ready=std::chrono::steady_clock::now();
+    auto timed=csl::issue6::timing::run_enabled(input,{6561,4096,1e-8},
+        "b09-phase-lambda-"+std::to_string(static_cast<int>(lambda)),CSL_ISSUE6_FIXTURE_SHA256);
+    if(!std::holds_alternative<FiniteMinimaxOptimal>(timed.outcome))
+        throw std::runtime_error("B09 instrumented call did not return an optimum");
+    const auto& optimum=std::get<FiniteMinimaxOptimal>(timed.outcome);
+    if(optimum.plans.size()!=6561 || optimum.minimizing_plan_indices.empty())
+        throw std::runtime_error("B09 instrumented plan catalogue mismatch");
+    const auto& winner=std::get<FinitePlanFeasible>(optimum.plans.at(optimum.minimizing_plan_indices.front()));
+    const auto request_ns=std::chrono::duration_cast<std::chrono::nanoseconds>(request_ready-request_started).count();
+    auto phase=csl::issue6::timing::phase_json(timed.report,timed.collector_setup_ns,timed.solver_call_ns);
+    phase["request_construction_ns"]=request_ns;
+    phase["public_call_wall_ns"]=request_ns+timed.collector_setup_ns+timed.solver_call_ns;
+    return {{"schema","csl.obs06-b09-case/1"},{"lambda",lambda},{"status","numerical_optimal"},
+        {"source_commit",CSL_ISSUE6_SOURCE_COMMIT},{"driver_sha256",CSL_ISSUE6_DRIVER_SHA256},
+        {"scenario_sha256",CSL_ISSUE6_FIXTURE_SHA256},
+        {"plan_count",optimum.plans.size()},{"minimizing_plan_indices",optimum.minimizing_plan_indices},
+        {"winner_action_indices",winner.action_indices},{"objective_squared",optimum.value},
+        {"phase_timing",std::move(phase)}};
 }
 }
 
@@ -229,16 +270,41 @@ int main(int argc, char** argv) {
         double lambda = 1.0;
         std::size_t measured = 0;
         bool geometry = false;
+        bool phase_timing = false;
         for (int i=1; i<argc; ++i) {
             const std::string_view arg{argv[i]};
             if (arg == "--lambda" && i+1 < argc) lambda = std::stod(argv[++i]);
             else if (arg == "--measure" && i+1 < argc) measured = std::stoul(argv[++i]);
             else if (arg == "--geometry") geometry = true;
-            else throw std::runtime_error("usage: csl_issue6_b09_report [--lambda 0|1] [--measure N] [--geometry]");
+            else if (arg == "--phase-timing") phase_timing = true;
+            else throw std::runtime_error("usage: csl_issue6_b09_report [--lambda 0|1] [--measure N] [--geometry|--phase-timing]");
         }
-        if ((lambda != 0.0 && lambda != 1.0) || measured > 25 || (geometry && measured != 0))
+        if ((lambda != 0.0 && lambda != 1.0) || measured > 25 || ((geometry||phase_timing) && measured != 0) || (geometry&&phase_timing))
             throw std::runtime_error("lambda must be 0 or 1; measurements 0..25; geometry cannot be measured");
         if (geometry) std::cout << run(0, lambda, true).dump() << '\n';
+        else if(phase_timing) {
+            const auto baseline=run(0,lambda,false);
+            auto measured_result=phase_run(lambda);
+            if(baseline.at("plan_count")!=measured_result.at("plan_count") ||
+               baseline.at("minimizing_plan_indices")!=measured_result.at("minimizing_plan_indices") ||
+               baseline.at("winner_action_indices")!=measured_result.at("winner_action_indices") ||
+               baseline.at("objective_squared")!=measured_result.at("objective_squared"))
+                throw std::runtime_error("B09 instrumentation changed the numerical result");
+            measured_result["phase_timing"]["outcome_fields_match_exactly"]=true;
+            measured_result["phase_timing"]["uninstrumented_solver_call_wall_ns"]=
+                baseline.at("solver_call_wall_ns");
+            measured_result["phase_timing"]["instrumented_solver_call_wall_ns"]=
+                measured_result["phase_timing"]["solver_call_wall_ns"];
+            measured_result["phase_timing"]["warmup_repetitions"]=0;
+            measured_result["phase_timing"]["pair_order"]={"uninstrumented","instrumented"};
+            const auto serialization_started=std::chrono::steady_clock::now();
+            const auto serialized=measured_result.dump();
+            measured_result["phase_timing"]["serialization_ns"]=
+                std::chrono::duration_cast<std::chrono::nanoseconds>(
+                    std::chrono::steady_clock::now()-serialization_started).count();
+            measured_result["phase_timing"]["pre_record_serialized_bytes"]=serialized.size();
+            std::cout<<measured_result.dump()<<'\n';
+        }
         else for (std::size_t batch=0; batch<=measured; ++batch)
             std::cout << run(batch, lambda, false).dump() << '\n';
         return 0;

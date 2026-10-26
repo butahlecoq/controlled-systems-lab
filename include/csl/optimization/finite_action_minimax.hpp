@@ -3,6 +3,9 @@
 #include <csl/problem/contracts.hpp>
 #include <csl/reachability/fixed_plan_disturbance.hpp>
 #include <csl/optimization/worst_case_vertex.hpp>
+#include <csl/artifacts/run_statistics.hpp>
+
+#include <vector>
 
 namespace csl::optimization {
 
@@ -22,6 +25,21 @@ struct FiniteActionMinimaxLimits {
     std::size_t max_points_per_stage;
     // Computed values within this absolute distance of the minimum are retained.
     double near_optimal_tolerance;
+};
+// Optional caller-planned timing IDs for one execution. The caller must add
+// every ID to the collector plan as a nested descendant of its run span.
+// Plan phase vectors follow the finite catalogue enumeration order.
+struct FiniteMinimaxPlanTimingSpans {
+    artifacts::SpanId plan_setup;
+    artifacts::SpanId propagation;
+    std::vector<artifacts::SpanId> stage_materialization;
+    artifacts::SpanId objective;
+    artifacts::SpanId record_assembly;
+};
+struct FiniteMinimaxTimingSpans {
+    artifacts::SpanId validation;
+    std::vector<FiniteMinimaxPlanTimingSpans> plans;
+    artifacts::SpanId result_selection;
 };
 struct FinitePlanFeasible {
     std::vector<std::size_t> action_indices;
@@ -65,6 +83,7 @@ using FiniteActionMinimaxOutcome = std::variant<FiniteMinimaxOptimal,
 FiniteActionMinimaxOutcome finite_action_minimax(
     const FiniteActionMinimaxRequest& request,
     FiniteActionMinimaxLimits limits,
-    const ExecutionContext& context = {});
+    const ExecutionContext& context = {},
+    const FiniteMinimaxTimingSpans* timing_spans = nullptr);
 
 } // namespace csl::optimization

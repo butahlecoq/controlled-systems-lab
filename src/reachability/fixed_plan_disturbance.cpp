@@ -1,14 +1,38 @@
 #include <csl/reachability/fixed_plan_disturbance.hpp>
+#include <csl/execution/timing_collector.hpp>
 #include <algorithm>
 #include <cmath>
 #include <limits>
+#include <stdexcept>
 
 namespace csl::reachability {
 namespace {
+namespace ob = execution::observability;
 Unsupported unsupported(std::string field, std::string explanation,
                         DiagnosticCode code=DiagnosticCode::unsupported) {
     return {{{code,std::move(field),std::move(explanation)}}};
 }
+class FinalizeUnstartedStages {
+    const ExecutionContext& context_;
+    const FixedPlanTimingSpans* spans_;
+    std::vector<unsigned char> started_;
+public:
+    FinalizeUnstartedStages(const ExecutionContext& context,const FixedPlanTimingSpans* spans)
+        :context_(context),spans_(spans),started_(spans?spans->stage_materialization.size():0,0){}
+    void mark_started(std::size_t stage) {if(stage<started_.size())started_[stage]=1;}
+    ~FinalizeUnstartedStages() {
+        if(!spans_)return;
+        for(std::size_t stage=0;stage<spans_->stage_materialization.size();++stage) {
+            if(started_[stage])continue;
+            const auto id=spans_->stage_materialization[stage];
+            auto started=ob::start_timing(context_,id);
+            if(auto* scope=std::get_if<ob::TimingScope>(&started))
+                scope->close_not_called(artifacts::NotCalledReason::earlier_phase_exit,Termination::completed);
+        }
+    }
+    FinalizeUnstartedStages(const FinalizeUnstartedStages&)=delete;
+    FinalizeUnstartedStages& operator=(const FinalizeUnstartedStages&)=delete;
+};
 std::optional<OperationStopped> stopped(const ExecutionContext& context) {
     if(context.cancellation.stop_requested())
         return OperationStopped{StopReason::cancelled,"Fixed-plan propagation cancelled."};
@@ -94,9 +118,14 @@ std::variant<sets::SetData,Unsupported> stage_set(const FixedPlanRequest& reques
 }
 
 FixedPlanOutcome fixed_plan_disturbance(const FixedPlanRequest& request,
-    std::size_t max_points,const ExecutionContext& context) {
+    std::size_t max_points,const ExecutionContext& context,
+    const FixedPlanTimingSpans* timing_spans) {
+    FinalizeUnstartedStages finalize_stages{context,timing_spans};
     const auto dims=request.system.dimensions();
     const auto horizon=request.system.horizon();
+    if(timing_spans && timing_spans->stage_materialization.size()!=horizon)
+        return unsupported("fixed_plan.timing_spans",
+            "Timing span layout must contain one stage materialization span per horizon stage.");
     if(request.request.value.empty())
         return unsupported("fixed_plan.request","A nonempty caller-unique request ID is required.",DiagnosticCode::invalid_input);
     if(request.controls.size()!=horizon||request.disturbances.size()!=horizon||
@@ -171,7 +200,21 @@ FixedPlanOutcome fixed_plan_disturbance(const FixedPlanRequest& request,
             if(membership==Membership::numerical_failure)return OperationStopped{StopReason::numerical_failure,"Nonfinite safe-set arithmetic."};
             next.push_back(std::move(successor));
         }
+        std::optional<execution::observability::TimingScope> materialization_scope;
+        if(timing_spans && stage<timing_spans->stage_materialization.size()) {
+            auto started=execution::observability::start_timing(context,
+                timing_spans->stage_materialization[stage]);
+            if(auto* scope=std::get_if<execution::observability::TimingScope>(&started)) {
+                materialization_scope.emplace(std::move(*scope));
+                finalize_stages.mark_started(stage);
+            } else if(const auto* error=std::get_if<artifacts::ArtifactError>(&started)) {
+                throw std::runtime_error(error->path+": "+error->message);
+            }
+        }
         auto materialized=stage_set(request,stage+1,next);
+        if(materialization_scope)
+            materialization_scope->close(std::holds_alternative<Unsupported>(materialized)?
+                Termination::operation_rejected:Termination::completed);
         if(const auto* error=std::get_if<Unsupported>(&materialized))return *error;
         tube.stages.push_back(std::get<sets::SetData>(std::move(materialized)));
         current=std::move(next);
