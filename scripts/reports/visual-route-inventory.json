@@ -735,6 +735,13 @@
       "disposition": "reviewed-static-diagram-exception"
     },
     {
+      "source": "scripts/reports/viz04/render_saved.py",
+      "signal_count": 1,
+      "asset_name_literals": [],
+      "disposition": "deferred-family-specific-migration",
+      "follow_up_issue": 687
+    },
+    {
       "source": "scripts/reports/viz10_plot_companions.py",
       "signal_count": 10,
       "asset_name_literals": [],
