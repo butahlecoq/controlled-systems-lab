@@ -12,6 +12,8 @@ import audit_visual_routes
 class VisualRouteInventoryTests(unittest.TestCase):
     def test_known_producers_historical_routes_and_fuel_companion_are_in_inventory(self):
         inventory=audit_visual_routes.build(ROOT)
+        committed=json.loads((ROOT/"scripts/reports/visual-route-inventory.json").read_text())
+        self.assertEqual(committed,inventory)
         self.assertEqual(inventory["schema"],"csl.visual-route-inventory/1")
         producers={entry["source"]:entry for entry in inventory["producers_and_routes"]}
         for source in ("scripts/reports/control_figures.py","scripts/reports/plot.py",
@@ -32,9 +34,14 @@ class VisualRouteInventoryTests(unittest.TestCase):
         deferred=[entry for entry in producers.values()
                   if entry["disposition"]=="deferred-family-specific-migration"]
         self.assertTrue(deferred)
-        self.assertTrue(all(entry["follow_up_issue"]==669 for entry in deferred))
+        follow_up_counts={number:sum(entry["follow_up_issue"]==number for entry in deferred)
+                          for number in (684,685,686,687)}
+        self.assertEqual(follow_up_counts,{684:13,685:12,686:17,687:11})
+        self.assertTrue(all(entry["follow_up_issue"] in follow_up_counts for entry in deferred))
         routes={entry["route"]:entry for entry in inventory["frozen_published_routes"]}
         self.assertGreater(len(routes),40)
+        self.assertTrue(all(entry["disposition"].startswith("deferred: route-level readability")
+                            and entry["follow_up_issue"] == 669 for entry in routes.values()))
         self.assertTrue(any(name.endswith("terminal-projections.svg")
                             for entry in routes.values() for name in entry["assets"]))
         self.assertEqual(inventory["gallery_routes"][0]["route"],"examples/index.html")
