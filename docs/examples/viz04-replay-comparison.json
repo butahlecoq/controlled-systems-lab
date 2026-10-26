@@ -1,0 +1,120 @@
+{
+  "schema": "csl.viz04-replay-comparison/1",
+  "source_run": {
+    "run": "fuel-toy-run",
+    "content_sha256": "0000000000000000000000000000000000000000000000000000000000000000"
+  },
+  "problem": "four-state-fuel-toy",
+  "strategy": "linear-toy-strategy",
+  "strategy_version": "1",
+  "state_axis": {
+    "kind": "physical_time",
+    "points": [0.0, 1.0, 2.0],
+    "interval_ends": [],
+    "unit": "s"
+  },
+  "state_coordinates": [
+    {"label": "flow A", "unit": "kg/s", "target": null, "bounds": null},
+    {"label": "stock A", "unit": "kg", "target": null, "bounds": null},
+    {"label": "flow B", "unit": "kg/s", "target": null, "bounds": null},
+    {"label": "stock B", "unit": "kg", "target": null, "bounds": null}
+  ],
+  "control_coordinates": [
+    {"label": "control A", "unit": "kg/s", "target": null, "bounds": null},
+    {"label": "control B", "unit": "kg/s", "target": null, "bounds": null}
+  ],
+  "linear_objective_convention": {
+    "kind": "residual_norm",
+    "map": {"rows": 2, "cols": 4, "values": [1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0]},
+    "target": [1.0, 1.0]
+  },
+  "linear_objective_unit": "kg/s",
+  "witnesses": [
+    {
+      "source_ordinal": 0,
+      "strategy": "linear-toy-strategy",
+      "strategy_version": "1",
+      "policy_class": "selected_linear_witness",
+      "claims": {
+        "nonlinear_feasibility": "not_checked",
+        "nonlinear_objective_quality": "not_checked",
+        "nonlinear_global_optimality": "not_checked"
+      },
+      "linear_states": [[0.0, 0.0, 0.0, 0.0], [0.0, 0.0, 0.0, 0.0], [1.0, 0.0, 1.0, 0.0]],
+      "linear_controls": [[0.0, 0.0], [1.0, 1.0]],
+      "linear_objective": 0.0,
+      "linear_evidence": {
+        "bindings": "numerical_pass",
+        "feasibility": "numerical_pass",
+        "objective": "numerical_pass",
+        "optimality": "numerical_pass",
+        "completeness": "unsupported",
+        "validated": "unsupported",
+        "residuals": []
+      },
+      "replay": {
+        "status": "complete",
+        "plant": {"name": "toy.four-state-fuel", "version": "1", "source": "VIZ-04 analytic fixture; not B04 data"},
+        "parameters": [{"name": "quadratic_gain", "value": 1.0, "unit": "1"}],
+        "initial_state": [0.0, 0.0, 0.0, 0.0],
+        "time_unit": "s",
+        "times": [0.0, 1.0, 2.0],
+        "state_units": ["kg/s", "kg", "kg/s", "kg"],
+        "control_units": ["kg/s", "kg/s"],
+        "objective_name": "terminal stock sum",
+        "objective_unit": "kg",
+        "integration": "exact_discrete_map",
+        "control_hold": "constant_on_interval",
+        "controls": [[0.0, 0.0], [1.0, 1.0]],
+        "states": [[0.0, 0.0, 0.0, 0.0], [0.0, 0.0, 0.0, 0.0], [2.0, 0.0, 3.0, 0.0]],
+        "original_objective": 0.0,
+        "replay_time_ns": 0,
+        "missing_prerequisites": [],
+        "diagnostics": []
+      }
+    },
+    {
+      "source_ordinal": 1,
+      "strategy": "linear-toy-strategy",
+      "strategy_version": "1",
+      "policy_class": "selected_linear_witness",
+      "claims": {
+        "nonlinear_feasibility": "not_checked",
+        "nonlinear_objective_quality": "not_checked",
+        "nonlinear_global_optimality": "not_checked"
+      },
+      "linear_states": [[0.0, 0.0, 0.0, 0.0], [0.5, 0.0, 0.5, 0.0], [1.0, 0.0, 1.0, 0.0]],
+      "linear_controls": [[0.5, 0.5], [0.5, 0.5]],
+      "linear_objective": 0.0,
+      "linear_evidence": {
+        "bindings": "numerical_pass",
+        "feasibility": "numerical_pass",
+        "objective": "numerical_pass",
+        "optimality": "numerical_pass",
+        "completeness": "unsupported",
+        "validated": "unsupported",
+        "residuals": []
+      },
+      "replay": {
+        "status": "complete",
+        "plant": {"name": "toy.four-state-fuel", "version": "1", "source": "VIZ-04 analytic fixture; not B04 data"},
+        "parameters": [{"name": "quadratic_gain", "value": 1.0, "unit": "1"}],
+        "initial_state": [0.0, 0.0, 0.0, 0.0],
+        "time_unit": "s",
+        "times": [0.0, 1.0, 2.0],
+        "state_units": ["kg/s", "kg", "kg/s", "kg"],
+        "control_units": ["kg/s", "kg/s"],
+        "objective_name": "terminal stock sum",
+        "objective_unit": "kg",
+        "integration": "exact_discrete_map",
+        "control_hold": "constant_on_interval",
+        "controls": [[0.5, 0.5], [0.5, 0.5]],
+        "states": [[0.0, 0.0, 0.0, 0.0], [0.75, 0.0, 1.0, 0.0], [1.5, 0.75, 2.0, 1.0]],
+        "original_objective": 1.75,
+        "replay_time_ns": 0,
+        "missing_prerequisites": [],
+        "diagnostics": []
+      }
+    }
+  ]
+}

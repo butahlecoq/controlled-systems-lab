@@ -12,8 +12,8 @@
 
 namespace csl::simulation {
 
-struct PlantParameter { std::string name; double value; std::string unit; };
-struct PlantIdentity { std::string name, version, source; };
+struct PlantParameter { std::string name; double value; std::string unit; bool operator==(const PlantParameter&) const = default; };
+struct PlantIdentity { std::string name, version, source; bool operator==(const PlantIdentity&) const = default; };
 enum class IntegrationMethod { exact_discrete_map };
 enum class ControlHold { constant_on_interval };
 
@@ -30,6 +30,7 @@ struct Plant {
     std::optional<std::vector<PlantParameter>> parameters;
     std::optional<Vector> initial_state;
     std::optional<std::vector<double>> times;
+    std::string time_unit;
     std::vector<std::string> state_units, control_units;
     std::string objective_name, objective_unit;
     std::optional<IntegrationMethod> integration;
@@ -46,6 +47,7 @@ struct ReplayRecord {
     PlantIdentity plant;
     std::vector<PlantParameter> parameters;
     std::optional<Vector> declared_initial_state;
+    std::string time_unit;
     std::vector<std::string> state_units, control_units;
     std::string objective_name, objective_unit;
     std::optional<IntegrationMethod> integration;

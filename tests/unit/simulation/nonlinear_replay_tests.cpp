@@ -16,6 +16,7 @@ Plant analytic_toy() {
     plant.parameters = std::vector<PlantParameter>{{"quadratic_gain", 1.0, "dimensionless"}};
     plant.initial_state = Vector{0.0};
     plant.times = std::vector<double>{0.0, 1.0, 2.0};
+    plant.time_unit = "s";
     plant.state_units = {"dimensionless"};
     plant.control_units = {"dimensionless"};
     plant.objective_name = "terminal state";
@@ -59,6 +60,7 @@ TEST_CASE("two tied linear control sums have different independent nonlinear rep
     CHECK(a.parameters[0].value == 1.0);
     CHECK(a.declared_initial_state == Vector{0.0});
     CHECK(a.times == std::vector<double>{0.0, 1.0, 2.0});
+    CHECK(a.time_unit == "s");
     CHECK(a.controls == first);
     CHECK(a.state_units == std::vector<std::string>{"dimensionless"});
     CHECK(a.objective_name == "terminal state");
@@ -94,12 +96,14 @@ TEST_CASE("missing independent plant data and incomplete controls name prerequis
     auto plant = analytic_toy();
     plant.parameters.reset();
     plant.times.reset();
+    plant.time_unit.clear();
     plant.objective = {};
     const std::vector<Vector> one{{0.0}};
     const auto absent = replay(plant, one);
     CHECK(absent.status == ReplayStatus::unavailable);
     CHECK(missing(absent, "plant.parameters"));
     CHECK(missing(absent, "plant.times"));
+    CHECK(missing(absent, "plant.time_unit"));
     CHECK(missing(absent, "plant.objective"));
     CHECK(absent.declared_initial_state == Vector{0.0});
     CHECK(absent.states.empty());

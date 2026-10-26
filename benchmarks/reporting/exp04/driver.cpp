@@ -17,6 +17,7 @@ Plant scalar() {
     plant.parameters = std::vector<PlantParameter>{{"quadratic_gain", 1.0, "dimensionless"}};
     plant.initial_state = Vector{0.0};
     plant.times = std::vector<double>{0.0, 1.0, 2.0};
+    plant.time_unit = "s";
     plant.state_units = {"dimensionless"};
     plant.control_units = {"dimensionless"};
     plant.objective_name = "terminal state";
@@ -40,6 +41,7 @@ Plant plane() {
     plant.identity = {"analytic.interval-plane", "1", "EXP-04 declared two-state toy"};
     plant.initial_state = Vector{0.0, 0.0};
     plant.times = std::vector<double>{0.0, 1.0, 3.0};
+    plant.time_unit = "s";
     plant.state_units = {"length", "action"};
     plant.objective_name = "terminal length";
     plant.objective_unit = "length";

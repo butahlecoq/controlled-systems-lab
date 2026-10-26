@@ -1,0 +1,387 @@
+{
+  "schema": "csl.b04-historical-report/1",
+  "track": "historical-only",
+  "scenario_id": "B04-historical",
+  "manifest_sha256": "92900c07ac4b1ce2f889a99023809e789110e77d7416cd192facc3ffc89d072d",
+  "consistency_audit_sha256": "8e3e53324ec0b4b9fb35a66030b308138b1b71e12308683f5dc89dbff4b8b9dc",
+  "archive_register_sha256": "89ab1a8c64f8f4074d5ce729e770f82d3621f588aeeda0949794aa1cb1399e99",
+  "source_citations": [
+    {
+      "id": "A11",
+      "path": "Публикации/Известия РАН. Теория и системы управления/Статья/ШориковАФ, КалевВИ, таблицы и рисунки.doc",
+      "sha256": "45d6d82e0447a3a1b988753b618097c20f9be56c30d2c2022789b8893a4f9de1",
+      "role": "B04 tables and figure captions recovered locally",
+      "table": "Table 2"
+    },
+    {
+      "id": "A12",
+      "path": "Публикации/Известия РАН. Теория и системы управления/Статья/ШориковАФ_КалевВИ_статья в Известия РАН.pdf",
+      "sha256": "8ade2a23baf0a99dd53022abb436f6d1975db3616487d8e7c97b3c2d4d7531af",
+      "role": "23-page B04 draft containing tables",
+      "page": 20
+    },
+    {
+      "id": "A14",
+      "path": "Публикации/Известия РАН. Теория и системы управления/Статья/ШориковАФ, КалевВИ, последняя версия.pdf",
+      "sha256": "e04c2f1609e2580c8878ab7fb91bc41151ccc8e0cf1f5deac4cef9fd860ce147",
+      "role": "Byte-identical copy of supplied L11"
+    },
+    {
+      "id": "R40",
+      "url": "https://sciencejournals.ru/view-article/?a=TeorSist1902009Kalev&j=teorsist&n=1&v=0&y=2019",
+      "doi": "10.1134/S0002338819020094",
+      "role": "published_counterpart_with_tables"
+    }
+  ],
+  "reported_table": {
+    "source_label": "A11 Table 2; policy labels cross-checked A12 PDF p. 20 and R40 Table 2",
+    "rows": [
+      {
+        "policy_id": "u(t)=0",
+        "policy_label": "Nominal reference, u(t)=0",
+        "source_ids": [
+          "A11",
+          "A12",
+          "R40"
+        ],
+        "terminal_state": [
+          {
+            "value": "1200",
+            "fractional_digits": 0,
+            "radius_exact": "1/2"
+          },
+          {
+            "value": "0",
+            "fractional_digits": 0,
+            "radius_exact": "1/2"
+          },
+          {
+            "value": "450",
+            "fractional_digits": 0,
+            "radius_exact": "1/2"
+          },
+          {
+            "value": "0",
+            "fractional_digits": 0,
+            "radius_exact": "1/2"
+          }
+        ],
+        "reported_objective": {
+          "value": "0",
+          "fractional_digits": 0,
+          "radius_exact": "1/2"
+        },
+        "printed_coordinate_evaluation": {
+          "objective_norm": "0",
+          "objective_squared_exact": "0",
+          "coordinate_rounding_effect_bound": "2.7233557730613653091117634459550806",
+          "coordinate_rounding_effect_bound_squared_exact": "89/12",
+          "interpretation": "display-coordinate evaluation and rounding bound; not a reproduced run result"
+        },
+        "row_note": "Separate nominal reference, not a zero-control solution from perturbed B04 initial state"
+      },
+      {
+        "policy_id": "frozen_coefficient_regulator",
+        "policy_label": "Nonlinear, frozen-coefficient regulator u*",
+        "source_ids": [
+          "A11",
+          "A12",
+          "R40"
+        ],
+        "terminal_state": [
+          {
+            "value": "1190.4",
+            "fractional_digits": 1,
+            "radius_exact": "1/20"
+          },
+          {
+            "value": "101.7",
+            "fractional_digits": 1,
+            "radius_exact": "1/20"
+          },
+          {
+            "value": "455.12",
+            "fractional_digits": 2,
+            "radius_exact": "1/200"
+          },
+          {
+            "value": "-72.817",
+            "fractional_digits": 3,
+            "radius_exact": "1/2000"
+          }
+        ],
+        "reported_objective": {
+          "value": "368.45",
+          "fractional_digits": 2,
+          "radius_exact": "1/200"
+        },
+        "printed_coordinate_evaluation": {
+          "objective_norm": "368.60684134725443264279291958383919",
+          "objective_squared_exact": "4245968859/31250",
+          "coordinate_rounding_effect_bound": "0.088400603316191607690105540869517922",
+          "coordinate_rounding_effect_bound_squared_exact": "5861/750000",
+          "interpretation": "display-coordinate evaluation and rounding bound; not a reproduced run result"
+        },
+        "row_note": null
+      },
+      {
+        "policy_id": "optimal_linear_witness_1",
+        "policy_label": "Nonlinear, optimal linear witness 1",
+        "source_ids": [
+          "A11",
+          "A12",
+          "R40"
+        ],
+        "terminal_state": [
+          {
+            "value": "1200.5",
+            "fractional_digits": 1,
+            "radius_exact": "1/20"
+          },
+          {
+            "value": "-2.695",
+            "fractional_digits": 3,
+            "radius_exact": "1/2000"
+          },
+          {
+            "value": "449.72",
+            "fractional_digits": 2,
+            "radius_exact": "1/200"
+          },
+          {
+            "value": "10.556",
+            "fractional_digits": 3,
+            "radius_exact": "1/2000"
+          }
+        ],
+        "reported_objective": {
+          "value": "41.855",
+          "fractional_digits": 3,
+          "radius_exact": "1/2000"
+        },
+        "printed_coordinate_evaluation": {
+          "objective_norm": "41.854849205319089286931504332807995",
+          "objective_squared_exact": "875914201/500000",
+          "coordinate_rounding_effect_bound": "0.051799292144455667905646535444926816",
+          "coordinate_rounding_effect_bound_squared_exact": "16099/6000000",
+          "interpretation": "display-coordinate evaluation and rounding bound; not a reproduced run result"
+        },
+        "row_note": "optimal for the linear model; this row does not claim nonlinear global optimality"
+      },
+      {
+        "policy_id": "optimal_linear_witness_2",
+        "policy_label": "Nonlinear, optimal linear witness 2",
+        "source_ids": [
+          "A11",
+          "A12",
+          "R40"
+        ],
+        "terminal_state": [
+          {
+            "value": "1200.5",
+            "fractional_digits": 1,
+            "radius_exact": "1/20"
+          },
+          {
+            "value": "0.50887",
+            "fractional_digits": 5,
+            "radius_exact": "1/200000"
+          },
+          {
+            "value": "449.72",
+            "fractional_digits": 2,
+            "radius_exact": "1/200"
+          },
+          {
+            "value": "17.561",
+            "fractional_digits": 3,
+            "radius_exact": "1/2000"
+          }
+        ],
+        "reported_objective": {
+          "value": "65.874",
+          "fractional_digits": 3,
+          "radius_exact": "1/2000"
+        },
+        "printed_coordinate_evaluation": {
+          "objective_norm": "65.875930685244465343968244917319849",
+          "objective_squared_exact": "65094573654707/15000000000",
+          "coordinate_rounding_effect_bound": "0.051781721839532013254760935688817443",
+          "coordinate_rounding_effect_bound_squared_exact": "160880803/60000000000",
+          "interpretation": "display-coordinate evaluation and rounding bound; not a reproduced run result"
+        },
+        "row_note": "optimal for the linear model; this row does not claim nonlinear global optimality"
+      },
+      {
+        "policy_id": "optimal_linear_witness_3",
+        "policy_label": "Nonlinear, optimal linear witness 3",
+        "source_ids": [
+          "A11",
+          "A12",
+          "R40"
+        ],
+        "terminal_state": [
+          {
+            "value": "1200.5",
+            "fractional_digits": 1,
+            "radius_exact": "1/20"
+          },
+          {
+            "value": "-6.366",
+            "fractional_digits": 3,
+            "radius_exact": "1/2000"
+          },
+          {
+            "value": "449.72",
+            "fractional_digits": 2,
+            "radius_exact": "1/200"
+          },
+          {
+            "value": "-1.475",
+            "fractional_digits": 3,
+            "radius_exact": "1/2000"
+          }
+        ],
+        "reported_objective": {
+          "value": "7.922",
+          "fractional_digits": 3,
+          "radius_exact": "1/2000"
+        },
+        "printed_coordinate_evaluation": {
+          "objective_norm": "7.9197503327651265886362486052101466",
+          "objective_squared_exact": "23520917/375000",
+          "coordinate_rounding_effect_bound": "0.051799292144455667905646535444926816",
+          "coordinate_rounding_effect_bound_squared_exact": "16099/6000000",
+          "interpretation": "display-coordinate evaluation and rounding bound; not a reproduced run result"
+        },
+        "row_note": "optimal for the linear model; this row does not claim nonlinear global optimality"
+      },
+      {
+        "policy_id": "linear_any_of_witnesses_1_to_3",
+        "policy_label": "Linear, any of witnesses 1–3",
+        "source_ids": [
+          "A11",
+          "A12",
+          "R40"
+        ],
+        "terminal_state": [
+          {
+            "value": "1200.7",
+            "fractional_digits": 1,
+            "radius_exact": "1/20"
+          },
+          {
+            "value": "-22.929",
+            "fractional_digits": 3,
+            "radius_exact": "1/2000"
+          },
+          {
+            "value": "450.2",
+            "fractional_digits": 1,
+            "radius_exact": "1/20"
+          },
+          {
+            "value": "-7.709",
+            "fractional_digits": 3,
+            "radius_exact": "1/2000"
+          }
+        ],
+        "reported_objective": {
+          "value": "30.899",
+          "fractional_digits": 3,
+          "radius_exact": "1/2000"
+        },
+        "printed_coordinate_evaluation": {
+          "objective_norm": "30.898903572780701501316535212588709",
+          "objective_squared_exact": "477371121/500000",
+          "coordinate_rounding_effect_bound": "0.14241898281713244516437153625477400",
+          "coordinate_rounding_effect_bound_squared_exact": "121699/6000000",
+          "interpretation": "display-coordinate evaluation and rounding bound; not a reproduced run result"
+        },
+        "row_note": null
+      }
+    ]
+  },
+  "restoration": {
+    "status": "displayed_data_inconsistent_with_reported_optimizer",
+    "execution_gate": "Do not solve this manifest or compare against 30.899 until missing inputs and inconsistent model are resolved. A fully specified reference variant must use a distinct scenario ID.",
+    "unresolved_inputs": [
+      "Canonical numerical U_t (owner provisionally recalls [-1,1]) and whether u_0 is fixed",
+      "Matrix/data inconsistency proved by terminal invariant; recover actual numerical model",
+      "Any additional state constraints not displayed in numerical example",
+      "Complete witness histories and nonlinear replay/time convention"
+    ],
+    "stock_invariant": {
+      "left_vector": [
+        0,
+        12,
+        0,
+        17
+      ],
+      "required_exact": "-21227/10",
+      "reported_point_exact": "-406201/1000",
+      "gap_exact": "1716499/1000",
+      "reported_point_rounding_radius_exact": "29/2000"
+    },
+    "unrestricted_terminal_plane_minimum": {
+      "terminal_state_exact": [
+        "591241264/492375",
+        "-382086/3095",
+        "591057859/1313000",
+        "-233497/6190"
+      ],
+      "terminal_state_float": [
+        "1200.7946463569433",
+        "-123.45266558966074",
+        "450.1583084539223",
+        "-37.721647819063"
+      ],
+      "sum_controls_exact": "-466579/492375",
+      "weighted_sum_controls_exact": "-1505224/77375",
+      "objective_squared_exact": "2958186538093451/114292546875",
+      "objective_float": "160.8806539455271",
+      "scope": "Global lower bound for any constraints on the displayed linear model; not the historical constrained optimum"
+    },
+    "limits": [
+      "No numerical U_t recovered and no constrained optimal family or historical witness computed.",
+      "The displayed coefficients are treated as exact rational data; original unrounded coefficients are unknown.",
+      "Terminal-point rounding alone cannot repair the stock invariant; possible model/coefficient/transcription changes remain unresolved.",
+      "No nonlinear simulation, runtime reproduction or full validated floating-point solver certificate."
+    ],
+    "excluded_control_interval_hypothesis": {
+      "source": "L16",
+      "control_interval": [
+        -1,
+        1
+      ],
+      "status": "adaptive_demonstration_only_not_confirmed_B04_data",
+      "source_model_differences": "Different fitted B and documented L28 uniform-grid recurrence defect",
+      "owner_control_interval_recollection": {
+        "date": "2026-10-11",
+        "interval": [
+          -1,
+          1
+        ],
+        "status": "provisional_owner_recollection",
+        "source_statement": "Most likely u is in [-1,1]; not an exact quotation from the numerical tables"
+      }
+    }
+  },
+  "runtime": {
+    "historical_reported_seconds": "0.4",
+    "historical_context": {
+      "software": "MATLAB R2014a",
+      "cpu": "Intel Core i7-3770 3.4 GHz",
+      "ram_gb": 8,
+      "timing_scope": "not_precisely_specified"
+    },
+    "current_measurement": {
+      "status": "unavailable",
+      "reason": "No executable B04 historical run exists in the archived manifest."
+    }
+  },
+  "reproduction": {
+    "status": "unavailable",
+    "reason": "The manifest is non-executable, has unresolved controls and first-action semantics, and contains a proved displayed-model/terminal-result inconsistency."
+  }
+}

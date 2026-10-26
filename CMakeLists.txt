@@ -52,6 +52,7 @@ if(CSL_DEPENDENCY_PROBES AND (NOT BUILD_TESTING OR NOT CSL_ENABLE_HIGHS OR NOT C
 endif()
 find_package(Threads REQUIRED)
 include(cmake/ModulePolicy.cmake)
+include(cmake/JsonDependencies.cmake)
 
 # Include module-owned declarations in the project scope so dependency pins and
 # package state remain shared. The same order is used for focused test ownership.

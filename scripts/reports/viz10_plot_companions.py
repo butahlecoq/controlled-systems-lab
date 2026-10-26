@@ -21,6 +21,8 @@ STYLE = ROOT / "scripts/reports/styles/control-v1.json"
 REPORTS = ROOT / "reports/algorithm-results"
 FUEL_PAIRS = ((0, 2, "Oxidizer flow x₁ (kg/s)", "Fuel flow x₃ (kg/s)"),
               (1, 3, "Oxidizer stock balance x₂ (kg)", "Fuel stock balance x₄ (kg)"))
+B07_PAIRS = ((0, 1, FUEL_PAIRS[0][2], FUEL_PAIRS[0][3]),
+             (2, 3, FUEL_PAIRS[1][2], FUEL_PAIRS[1][3]))
 COLORS = {"stored": "#2367a8", "target": "#b23b33", "open": "#d97706", "closed": "#257a5a"}
 
 
@@ -34,6 +36,10 @@ def load_json(path: Path):
 
 def load_jsonl(path: Path):
     return [json.loads(line) for line in path.read_text(encoding="utf-8").splitlines() if line]
+
+
+def project_coordinates(vertices: list[list[float]], first: int, second: int) -> list[tuple[float, float]]:
+    return [(vertex[first], vertex[second]) for vertex in vertices]
 
 
 def add_svg_description(path: Path, title: str, description: str) -> None:
@@ -79,16 +85,15 @@ def render_b07(out: Path, style: dict, receipts: list[dict]) -> list[tuple[str, 
     source_hashes = {str(path.relative_to(ROOT)): sha(path.read_bytes()),
                      str(readme.relative_to(ROOT)): sha(readme.read_bytes())}
     figures = []
-    b07_pairs = ((0, 1, FUEL_PAIRS[0][2], FUEL_PAIRS[0][3]),
-                 (2, 3, FUEL_PAIRS[1][2], FUEL_PAIRS[1][3]))
     for row in load_jsonl(path):
         vertices = row["winner_terminal_vertices_x1_x3_x2_x4"]
         case = row["case_id"]
         slug = "b07-" + case.lower().replace("_", "-")
         fig, axes = __import__("matplotlib.pyplot", fromlist=["subplots"]).subplots(1, 2, figsize=(11, 5.4))
         try:
-            for axis, (first, second, xlabel, ylabel), title in zip(axes, b07_pairs, ("Flow projection", "Stock projection")):
-                axis.scatter([v[first] for v in vertices], [v[second] for v in vertices],
+            for axis, (first, second, xlabel, ylabel), title in zip(axes, B07_PAIRS, ("Flow projection", "Stock projection")):
+                projected = project_coordinates(vertices, first, second)
+                axis.scatter([point[0] for point in projected], [point[1] for point in projected],
                              s=style["point_size"], alpha=style["point_alpha"], color=COLORS["stored"],
                              label=f"Stored terminal V rows ({len(vertices)})")
                 target = (30.0, 20.0) if first == 0 else (0.0, 0.0)
@@ -121,7 +126,8 @@ def render_b09(out: Path, style: dict, receipts: list[dict]) -> list[tuple[str, 
         slug = f"b09-lambda-{int(row['lambda'])}"
         fig, axes = __import__("matplotlib.pyplot", fromlist=["subplots"]).subplots(1, 2, figsize=(11, 5.4))
         for axis, (first, second, xlabel, ylabel), title in zip(axes, FUEL_PAIRS, ("Flow projection", "Stock projection")):
-            axis.scatter([v[first] for v in vertices], [v[second] for v in vertices],
+            projected = project_coordinates(vertices, first, second)
+            axis.scatter([point[0] for point in projected], [point[1] for point in projected],
                          s=style["point_size"], alpha=style["point_alpha"], color=COLORS["stored"],
                          label=f"Stored terminal V rows ({len(vertices)})")
             for state, label, key in ((row["open_loop_replay_terminal_state"], "Open-loop replay terminal state", "open"),
