@@ -19,6 +19,12 @@ def load(path: Path) -> dict:
     if len(coordinates) != 4 or len(witnesses) != 2:
         raise ValueError("the visual example requires four state coordinates and two witnesses")
     for witness in witnesses:
+        if witness.get("policy_class") != "selected_linear_witness":
+            raise ValueError("the visual example must preserve the selected-witness policy class")
+        claims = witness.get("claims", {})
+        if any(claims.get(name) != "not_checked" for name in (
+                "nonlinear_feasibility", "nonlinear_objective_quality", "nonlinear_global_optimality")):
+            raise ValueError("this renderer cannot present unchecked replay claims as verified")
         replay = witness["replay"]
         if replay["status"] != "complete" or len(replay["states"]) != len(replay["times"]):
             raise ValueError("the visual example requires complete replay states on every time point")

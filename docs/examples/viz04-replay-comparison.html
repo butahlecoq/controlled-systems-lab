@@ -29,7 +29,9 @@ code{overflow-wrap:anywhere}
 <tr><th scope="row">2 · controls (0.5,0.5), (0.5,0.5)</th><td>0 kg</td><td>(1.5 kg/s, 0.75 kg, 2 kg/s, 1 kg)</td><td>1.75 kg</td></tr>
 </tbody>
 </table>
-<p>The objective names and units belong to their own models. “Replay complete” means the declared discrete map ran to completion; it does not establish nonlinear global optimality. The checked-in source data retain the plant identity, parameters, physical times, controls, states, linear evidence, and separate objectives.</p>
+<p>The objective names and units belong to their own models. “Replay complete” means the declared discrete map ran to completion; it does not establish nonlinear feasibility, objective quality, or global optimality. The artifact marks all three as not checked and records replay objective values as observations.</p>
+<p>Policy classes stay separate: this example contains selected linear witnesses only. It does not merge them with a nominal reference or frozen-coefficient regulator. For B04, the nominal <code>u=0</code> row is not evidence of a zero-control solution from the perturbed initial state.</p>
+<p>The checked-in source data retain the plant identity, parameters, physical times, controls, states, policy class, linear evidence, and separate objectives.</p>
 <h2>Reproduce the figure</h2>
 <p>Install the pinned reporting dependencies from <code>scripts/reports/requirements.txt</code>, then run:</p>
 <pre><code>python scripts/reports/viz04/render_saved.py \

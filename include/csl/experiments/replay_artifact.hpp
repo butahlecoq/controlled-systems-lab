@@ -11,9 +11,19 @@
 
 namespace csl::experiments {
 
+enum class ReplayPolicyClass { nominal_reference, frozen_coefficient_regulator, selected_linear_witness };
+
+struct ReplayClaimScope {
+    verification::CheckStatus nonlinear_feasibility{verification::CheckStatus::not_checked};
+    verification::CheckStatus nonlinear_objective_quality{verification::CheckStatus::not_checked};
+    verification::CheckStatus nonlinear_global_optimality{verification::CheckStatus::not_checked};
+};
+
 struct WitnessReplay {
     artifacts::PlotPath linear;
     simulation::ReplayRecord nonlinear;
+    ReplayPolicyClass policy_class{ReplayPolicyClass::selected_linear_witness};
+    ReplayClaimScope claims;
 };
 
 struct ReplayComparison {
@@ -42,6 +52,8 @@ struct ReplayTrajectoryPath {
     std::string plant_objective_unit;
     std::vector<std::string> missing_prerequisites;
     std::vector<std::array<double, 2>> points;
+    ReplayPolicyClass policy_class{ReplayPolicyClass::selected_linear_witness};
+    ReplayClaimScope claims;
 };
 
 struct ReplayTrajectoryPair {

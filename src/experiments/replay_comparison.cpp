@@ -2,7 +2,9 @@
 #include <nlohmann/json.hpp>
 
 #include <algorithm>
+#include <cctype>
 #include <cmath>
+#include <limits>
 #include <set>
 #include <stdexcept>
 
@@ -35,6 +37,15 @@ const char* replay_status(simulation::ReplayStatus value) {
     case simulation::ReplayStatus::callback_failure: return "callback_failure";
     case simulation::ReplayStatus::cancelled: return "cancelled";
     case simulation::ReplayStatus::resource_limit: return "resource_limit";
+    }
+    return "unknown";
+}
+
+const char* policy_class(ReplayPolicyClass value) {
+    switch (value) {
+    case ReplayPolicyClass::nominal_reference: return "nominal_reference";
+    case ReplayPolicyClass::frozen_coefficient_regulator: return "frozen_coefficient_regulator";
+    case ReplayPolicyClass::selected_linear_witness: return "selected_linear_witness";
     }
     return "unknown";
 }
@@ -127,6 +138,10 @@ Json comparison_json(const ReplayComparison& comparison) {
     for (const auto& item : comparison.witnesses) {
         witnesses.push_back({{"source_ordinal", item.linear.source_ordinal},
             {"strategy", item.linear.strategy.value}, {"strategy_version", item.linear.strategy_version},
+            {"policy_class", policy_class(item.policy_class)},
+            {"claims", {{"nonlinear_feasibility", check_status(item.claims.nonlinear_feasibility)},
+                {"nonlinear_objective_quality", check_status(item.claims.nonlinear_objective_quality)},
+                {"nonlinear_global_optimality", check_status(item.claims.nonlinear_global_optimality)}}},
             {"linear_states", history_json(item.linear.states)},
             {"linear_controls", history_json(item.linear.controls)},
             {"linear_objective", item.linear.objective}, {"linear_evidence", evidence_json(item.linear.evidence)},
@@ -169,6 +184,225 @@ bool valid_history(const std::vector<Vector>& history, std::size_t dimension) {
             [](double value) { return std::isfinite(value); });
     });
 }
+
+bool finite_number(const Json& value) {
+    return value.is_number() && std::isfinite(value.get<double>());
+}
+
+bool finite_vector(const Json& value) {
+    return value.is_array() && std::all_of(value.begin(), value.end(), finite_number);
+}
+
+bool finite_history(const Json& value) {
+    return value.is_array() && std::all_of(value.begin(), value.end(), finite_vector);
+}
+
+bool string_array(const Json& value) {
+    return value.is_array() && std::all_of(value.begin(), value.end(),
+        [](const auto& item) { return item.is_string(); });
+}
+
+bool optional_string(const Json& value) {
+    return value.is_null() || value.is_string();
+}
+
+bool annotation_array(const Json& value) {
+    if (!value.is_array()) return false;
+    for (const auto& item : value) {
+        if (!item.is_object() || !item.contains("label") || !optional_string(item["label"]) ||
+            !item.contains("unit") || !optional_string(item["unit"]) || !item.contains("target") ||
+            !item.contains("bounds")) return false;
+        const auto valid_point = [](const Json& point) {
+            return point.is_object() && point.contains("value") && finite_number(point["value"]) &&
+                point.contains("source") && point["source"].is_string();
+        };
+        if (!item["target"].is_null() && !valid_point(item["target"])) return false;
+        const auto& bounds = item["bounds"];
+        if (!bounds.is_null() && (!bounds.is_array() || bounds.size() != 2 ||
+            !valid_point(bounds[0]) || !valid_point(bounds[1]))) return false;
+    }
+    return true;
+}
+
+bool objective_document(const Json& objective) {
+    if (!objective.is_object() || !objective.contains("kind") || !objective["kind"].is_string()) return false;
+    const auto kind = objective["kind"].get<std::string>();
+    if (kind == "linear")
+        return objective.contains("coefficients") && finite_vector(objective["coefficients"]) &&
+            objective.contains("offset") && finite_number(objective["offset"]);
+    if (kind == "quadratic" || kind == "residual_norm") {
+        const char* matrix_name = kind == "quadratic" ? "Q" : "map";
+        if (!objective.contains(matrix_name) || !objective[matrix_name].is_object()) return false;
+        const auto& matrix = objective[matrix_name];
+        if (!matrix.contains("rows") || !matrix["rows"].is_number_unsigned() ||
+            !matrix.contains("cols") || !matrix["cols"].is_number_unsigned() ||
+            !matrix.contains("values") || !finite_vector(matrix["values"])) return false;
+        const auto rows = matrix["rows"].get<std::uint64_t>();
+        const auto cols = matrix["cols"].get<std::uint64_t>();
+        if (cols != 0 && rows > std::numeric_limits<std::uint64_t>::max() / cols) return false;
+        if (matrix["values"].size() != rows * cols) return false;
+        if (kind == "quadratic")
+            return objective.contains("linear") && finite_vector(objective["linear"]) &&
+                objective.contains("offset") && finite_number(objective["offset"]);
+        return objective.contains("target") && finite_vector(objective["target"]);
+    }
+    return false;
+}
+
+bool evidence_document(const Json& evidence) {
+    if (!evidence.is_object() || !evidence.contains("residuals") || !evidence["residuals"].is_array()) return false;
+    const auto status = [](const Json& value) {
+        return value.is_string() && (value == "not_checked" || value == "numerical_pass" ||
+            value == "violation" || value == "invalid_input" || value == "unsupported");
+    };
+    for (const char* field : {"bindings", "feasibility", "objective", "optimality", "completeness", "validated"})
+        if (!evidence.contains(field) || !status(evidence[field])) return false;
+    for (const auto& residual : evidence["residuals"])
+        if (!residual.is_object() || !residual.contains("field") || !residual["field"].is_string() ||
+            !residual.contains("violation") || !finite_number(residual["violation"]) ||
+            !residual.contains("scale") || !finite_number(residual["scale"]) ||
+            !residual.contains("tolerance") || !finite_number(residual["tolerance"]) ||
+            !residual.contains("satisfied") || !residual["satisfied"].is_boolean()) return false;
+    return true;
+}
+
+bool replay_document(const Json& replay, std::size_t state_dimensions,
+    std::size_t control_dimensions, std::size_t linear_intervals) {
+    if (!replay.is_object() || !replay.contains("status") || !replay["status"].is_string() ||
+        !replay.contains("plant") || !replay["plant"].is_object() ||
+        !replay.contains("parameters") || !replay["parameters"].is_array() ||
+        !replay.contains("initial_state") || !replay.contains("time_unit") || !replay["time_unit"].is_string() ||
+        !replay.contains("times") || !finite_vector(replay["times"]) ||
+        !replay.contains("state_units") || !string_array(replay["state_units"]) ||
+        !replay.contains("control_units") || !string_array(replay["control_units"]) ||
+        !replay.contains("objective_name") || !replay["objective_name"].is_string() ||
+        !replay.contains("objective_unit") || !replay["objective_unit"].is_string() ||
+        !replay.contains("integration") || !optional_string(replay["integration"]) ||
+        !replay.contains("control_hold") || !optional_string(replay["control_hold"]) ||
+        !replay.contains("controls") || !finite_history(replay["controls"]) ||
+        !replay.contains("states") || !finite_history(replay["states"]) ||
+        !replay.contains("original_objective") || !replay.contains("replay_time_ns") ||
+        !replay["replay_time_ns"].is_number_integer() || !replay.contains("missing_prerequisites") ||
+        !string_array(replay["missing_prerequisites"]) || !replay.contains("diagnostics") ||
+        !replay["diagnostics"].is_array()) return false;
+    if (!replay["replay_time_ns"].is_number_unsigned() &&
+        replay["replay_time_ns"].get<std::int64_t>() < 0) return false;
+    const auto& plant = replay["plant"];
+    for (const char* field : {"name", "version", "source"})
+        if (!plant.contains(field) || !plant[field].is_string()) return false;
+    for (const auto& parameter : replay["parameters"])
+        if (!parameter.is_object() || !parameter.contains("name") || !parameter["name"].is_string() ||
+            !parameter.contains("value") || !finite_number(parameter["value"]) ||
+            !parameter.contains("unit") || !parameter["unit"].is_string()) return false;
+    if (!replay["initial_state"].is_null() && !finite_vector(replay["initial_state"])) return false;
+    for (const auto& diagnostic : replay["diagnostics"])
+        if (!diagnostic.is_object() || !diagnostic.contains("code") || !diagnostic["code"].is_string() ||
+            !diagnostic.contains("field") || !diagnostic["field"].is_string() ||
+            !diagnostic.contains("explanation") || !diagnostic["explanation"].is_string()) return false;
+    const auto status = replay["status"].get<std::string>();
+    if (status != "complete" && status != "unavailable" && status != "invalid_input" &&
+        status != "numerical_failure" && status != "callback_failure" && status != "cancelled" &&
+        status != "resource_limit") return false;
+    const auto& controls = replay["controls"];
+    const auto& states = replay["states"];
+    if (std::any_of(controls.begin(), controls.end(), [control_dimensions](const auto& row) {
+            return row.size() != control_dimensions;
+        }) || std::any_of(states.begin(), states.end(), [state_dimensions](const auto& row) {
+            return row.size() != state_dimensions;
+        }) || controls.size() > linear_intervals || states.size() > replay["times"].size()) return false;
+    if (status == "complete")
+        return replay["state_units"].size() == state_dimensions &&
+            replay["control_units"].size() == control_dimensions &&
+            controls.size() == linear_intervals && states.size() == controls.size() + 1 &&
+            states.size() == replay["times"].size() && !replay["time_unit"].get<std::string>().empty() &&
+            !replay["original_objective"].is_null() && finite_number(replay["original_objective"]) &&
+            replay["missing_prerequisites"].empty() && replay["integration"] == "exact_discrete_map" &&
+            replay["control_hold"] == "constant_on_interval";
+    return replay["original_objective"].is_null();
+}
+
+bool comparison_document(const Json& document) {
+    if (!document.is_object() || document.value("schema", std::string{}) != "csl.viz04-replay-comparison/1" ||
+        !document.contains("source_run") || !document["source_run"].is_object() ||
+        !document.contains("problem") || !document["problem"].is_string() || document["problem"].get<std::string>().empty() ||
+        !document.contains("strategy") || !document["strategy"].is_string() || document["strategy"].get<std::string>().empty() ||
+        !document.contains("strategy_version") || !document["strategy_version"].is_string() ||
+        document["strategy_version"].get<std::string>().empty() ||
+        !document.contains("state_axis") || !document["state_axis"].is_object() ||
+        !document.contains("state_coordinates") || !annotation_array(document["state_coordinates"]) ||
+        !document.contains("control_coordinates") || !annotation_array(document["control_coordinates"]) ||
+        !document.contains("linear_objective_convention") || !objective_document(document["linear_objective_convention"]) ||
+        !document.contains("linear_objective_unit") || !optional_string(document["linear_objective_unit"]) ||
+        !document.contains("witnesses") || !document["witnesses"].is_array() || document["witnesses"].empty()) return false;
+    const auto& source = document["source_run"];
+    if (!source.contains("run") || !source["run"].is_string() || source["run"].get<std::string>().empty() ||
+        !source.contains("content_sha256") || !source["content_sha256"].is_string()) return false;
+    const auto digest = source["content_sha256"].get<std::string>();
+    if (digest.size() != 64 || !std::all_of(digest.begin(), digest.end(), [](unsigned char c) {
+            return std::isxdigit(c) != 0;
+        })) return false;
+    const auto& axis = document["state_axis"];
+    if (!axis.contains("kind") || !axis["kind"].is_string() ||
+        (axis["kind"] != "stage" && axis["kind"] != "physical_time") ||
+        !axis.contains("points") || !finite_vector(axis["points"]) ||
+        !axis.contains("interval_ends") || !finite_vector(axis["interval_ends"]) ||
+        !axis.contains("unit") || !optional_string(axis["unit"]) ||
+        document["state_coordinates"].empty()) return false;
+    std::set<std::uint64_t> source_ordinals;
+    for (const auto& witness : document["witnesses"]) {
+        if (!witness.is_object() || !witness.contains("source_ordinal") ||
+            !witness["source_ordinal"].is_number_unsigned() || !witness.contains("strategy") ||
+            !witness["strategy"].is_string() || !witness.contains("strategy_version") ||
+            !witness["strategy_version"].is_string() || !witness.contains("policy_class") ||
+            !witness["policy_class"].is_string() ||
+            (witness["policy_class"] != "nominal_reference" &&
+                witness["policy_class"] != "frozen_coefficient_regulator" &&
+                witness["policy_class"] != "selected_linear_witness") ||
+            !witness.contains("claims") || !witness["claims"].is_object() ||
+            !witness.contains("linear_states") ||
+            !finite_history(witness["linear_states"]) || !witness.contains("linear_controls") ||
+            !finite_history(witness["linear_controls"]) || !witness.contains("linear_objective") ||
+            !finite_number(witness["linear_objective"]) || !witness.contains("linear_evidence") ||
+            !evidence_document(witness["linear_evidence"]) || !witness.contains("replay") ||
+            !replay_document(witness["replay"], document["state_coordinates"].size(),
+                document["control_coordinates"].size(), witness["linear_controls"].size()) ||
+            witness["linear_states"].size() != witness["linear_controls"].size() + 1 ||
+            witness["linear_states"].size() < 2 ||
+            witness["linear_states"].size() != axis["points"].size() ||
+            witness["strategy"] != document["strategy"] ||
+            witness["strategy_version"] != document["strategy_version"]) return false;
+        if (!source_ordinals.insert(witness["source_ordinal"].get<std::uint64_t>()).second) return false;
+        const auto& claims = witness["claims"];
+        const auto check_status_valid = [](const Json& value) {
+            return value.is_string() && (value == "not_checked" || value == "numerical_pass" ||
+                value == "violation" || value == "invalid_input" || value == "unsupported");
+        };
+        for (const char* field : {"nonlinear_feasibility", "nonlinear_objective_quality",
+                "nonlinear_global_optimality"})
+            if (!claims.contains(field) || !check_status_valid(claims[field]) ||
+                claims[field] != "not_checked") return false;
+        const auto& replay = witness["replay"];
+        const auto& linear_states = witness["linear_states"];
+        const auto& linear_controls = witness["linear_controls"];
+        if (std::any_of(linear_states.begin(), linear_states.end(), [&](const auto& row) {
+                return row.size() != document["state_coordinates"].size();
+            }) || std::any_of(linear_controls.begin(), linear_controls.end(), [&](const auto& row) {
+                return row.size() != document["control_coordinates"].size();
+            })) return false;
+        const auto& replay_controls = replay["controls"];
+        if (replay_controls.size() > linear_controls.size()) return false;
+        for (std::size_t i = 0; i < replay_controls.size(); ++i)
+            if (replay_controls[i] != linear_controls[i]) return false;
+        if (replay["status"] == "complete" && replay_controls != linear_controls) return false;
+        if (replay_controls.size() != linear_controls.size() &&
+            std::find(replay["missing_prerequisites"].begin(), replay["missing_prerequisites"].end(),
+                "controls.complete_history") == replay["missing_prerequisites"].end()) return false;
+        if (replay["status"] == "complete" && axis["kind"] == "physical_time" &&
+            (replay["times"] != axis["points"] ||
+                (axis["unit"].is_string() && replay["time_unit"] != axis["unit"]))) return false;
+    }
+    return true;
+}
 }
 
 artifacts::ArtifactResult<ReplayComparison> associate_replays(const Problem& source,
@@ -179,6 +413,8 @@ artifacts::ArtifactResult<ReplayComparison> associate_replays(const Problem& sou
         return error(artifacts::ArtifactErrorCode::identity, "problem", "Plot data belongs to another linear problem");
     if (source_run.run != plot.run)
         return error(artifacts::ArtifactErrorCode::identity, "source_run.run", "Run reference does not match plot data");
+    if (plot.paths.empty())
+        return error(artifacts::ArtifactErrorCode::reference, "witnesses", "Replay association requires at least one selected linear path");
     if (plot.paths.size() != replays.size())
         return error(artifacts::ArtifactErrorCode::reference, "witnesses", "There must be one replay record per selected linear path");
     if (linear_objective_unit && linear_objective_unit->empty())
@@ -254,7 +490,8 @@ artifacts::ArtifactResult<ReplayComparison> associate_replays(const Problem& sou
                 return error(artifacts::ArtifactErrorCode::invalid_input, "witnesses[" + std::to_string(index) + "].replay.states",
                     "An incomplete replay may retain only a finite state prefix");
         }
-        result.witnesses.push_back({linear, nonlinear});
+        result.witnesses.push_back({linear, nonlinear,
+            ReplayPolicyClass::selected_linear_witness, {}});
     }
     return result;
 }
@@ -272,7 +509,8 @@ artifacts::ArtifactResult<ReplayTrajectoryPair> project_replay_trajectories(
         const auto& replay = association.nonlinear;
         ReplayTrajectoryPath path{association.linear.source_ordinal, association.linear.objective,
             association.linear.evidence.optimality, replay.status, replay.original_objective,
-            replay.objective_unit, replay.missing_prerequisites, {}};
+            replay.objective_unit, replay.missing_prerequisites, {},
+            association.policy_class, association.claims};
         for (const auto& state : replay.states) {
             if (pair.first >= state.size() || pair.second >= state.size())
                 return error(artifacts::ArtifactErrorCode::invalid_input, "coordinates",
@@ -343,14 +581,7 @@ artifacts::ArtifactResult<problem::ResolvedContent> decode_replay_comparison(
             if (ends_container && depth > 0) --depth;
             return true;
         });
-        if (!document.is_object() || document.value("schema", std::string{}) != "csl.viz04-replay-comparison/1" ||
-            !document.contains("source_run") || !document.at("source_run").is_object() ||
-            !document.at("source_run").contains("run") || !document.at("source_run").at("run").is_string() ||
-            document.at("source_run").at("run").get<std::string>().empty() ||
-            !document.at("source_run").contains("content_sha256") ||
-            !document.at("source_run").at("content_sha256").is_string() ||
-            document.at("source_run").at("content_sha256").get<std::string>().size() != 64 ||
-            !document.contains("witnesses") || !document.at("witnesses").is_array())
+        if (!comparison_document(document))
             return error(artifacts::ArtifactErrorCode::invalid_input, "replay_comparison.schema",
                 "Document does not match csl.viz04-replay-comparison/1");
         auto content = problem::snapshot_content({reinterpret_cast<const std::byte*>(text.data()), text.size()});

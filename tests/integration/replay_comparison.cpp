@@ -134,12 +134,22 @@ TEST_CASE("4D selected linear witnesses retain separate nonlinear replay and 2D 
     CHECK(wire.find("csl.viz04-replay-comparison/1") != std::string::npos);
     CHECK(wire.find("linear_objective_convention") != std::string::npos);
     CHECK(wire.find("replay_time_ns") != std::string::npos);
+    const auto encoded_json = nlohmann::json::parse(wire);
+    CHECK(encoded_json["witnesses"][0]["policy_class"] == "selected_linear_witness");
+    CHECK(encoded_json["witnesses"][0]["claims"]["nonlinear_feasibility"] == "not_checked");
+    CHECK(encoded_json["witnesses"][0]["claims"]["nonlinear_objective_quality"] == "not_checked");
+    CHECK(encoded_json["witnesses"][0]["claims"]["nonlinear_global_optimality"] == "not_checked");
     const auto decoded = ex::decode_replay_comparison(wire);
     REQUIRE(std::holds_alternative<problem::ResolvedContent>(decoded));
     CHECK(std::get<problem::ResolvedContent>(decoded).digest() == content.digest());
     const auto limited = ex::decode_replay_comparison(wire, {wire.size(), 1, 64, 1024});
     REQUIRE(std::holds_alternative<ar::ArtifactError>(limited));
     CHECK(std::get<ar::ArtifactError>(limited).code == ar::ArtifactErrorCode::limit);
+    auto malformed_json = encoded_json;
+    malformed_json["witnesses"][0] = nullptr;
+    const auto malformed = ex::decode_replay_comparison(malformed_json.dump());
+    REQUIRE(std::holds_alternative<ar::ArtifactError>(malformed));
+    CHECK(std::get<ar::ArtifactError>(malformed).code == ar::ArtifactErrorCode::invalid_input);
 }
 
 TEST_CASE("replay association refuses swapped control order, mismatched axes and bad projections") {

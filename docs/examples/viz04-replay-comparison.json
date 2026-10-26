@@ -34,6 +34,12 @@
       "source_ordinal": 0,
       "strategy": "linear-toy-strategy",
       "strategy_version": "1",
+      "policy_class": "selected_linear_witness",
+      "claims": {
+        "nonlinear_feasibility": "not_checked",
+        "nonlinear_objective_quality": "not_checked",
+        "nonlinear_global_optimality": "not_checked"
+      },
       "linear_states": [[0.0, 0.0, 0.0, 0.0], [0.0, 0.0, 0.0, 0.0], [1.0, 0.0, 1.0, 0.0]],
       "linear_controls": [[0.0, 0.0], [1.0, 1.0]],
       "linear_objective": 0.0,
@@ -71,6 +77,12 @@
       "source_ordinal": 1,
       "strategy": "linear-toy-strategy",
       "strategy_version": "1",
+      "policy_class": "selected_linear_witness",
+      "claims": {
+        "nonlinear_feasibility": "not_checked",
+        "nonlinear_objective_quality": "not_checked",
+        "nonlinear_global_optimality": "not_checked"
+      },
       "linear_states": [[0.0, 0.0, 0.0, 0.0], [0.5, 0.0, 0.5, 0.0], [1.0, 0.0, 1.0, 0.0]],
       "linear_controls": [[0.5, 0.5], [0.5, 0.5]],
       "linear_objective": 0.0,
