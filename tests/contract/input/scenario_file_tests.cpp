@@ -17,13 +17,28 @@ TEST_CASE("actual fixture files translate to the same owned mathematics as their
     auto file=accepted<LoadedScenario>(load_scenario_file(path));auto memory=accepted<LoadedScenario>(bytes(text));
     CHECK(file.problem().identity()==memory.problem().identity());CHECK(file.source()->location==path);CHECK(memory.source()->location.empty());
     CHECK(file.source()->content.digest()==memory.source()->content.digest());
+    const auto file_defaults=file.defaults(),memory_defaults=memory.defaults();
+    REQUIRE(file_defaults->size()==memory_defaults->size());
+    for(std::size_t i=0;i<file_defaults->size();++i) {
+        CHECK(file_defaults->at(i).path==memory_defaults->at(i).path);
+        CHECK(file_defaults->at(i).meaning==memory_defaults->at(i).meaning);
+        CHECK(file_defaults->at(i).authored==memory_defaults->at(i).authored);
+    }
     CHECK(file.problem().model().horizon()==2);
     auto affine=accepted<LoadedScenario>(load_scenario_file(source/"tests/fixtures/input/affine-ltv.json"));
     CHECK(std::get<Vector>(affine.problem().model().step({0},Vector{2},Vector{1},{}))==Vector{7});
     CHECK(std::get<Vector>(affine.problem().model().step({1},Vector{7},Vector{-2},{}))==Vector{16});
     const auto ownedpath=write("owned.json",text);auto retained=accepted<LoadedScenario>(load_scenario_file(ownedpath)).source();
     write("owned.json","{}");CHECK(retained->content.digest()==memory.source()->content.digest());
-    CHECK(accepted<LoadedScenario>(load_scenario(retained->content.bytes())).problem().identity()==memory.problem().identity());
+    const auto restored=accepted<LoadedScenario>(load_scenario(retained->content.bytes()));
+    CHECK(restored.problem().identity()==memory.problem().identity());
+    CHECK(restored.source()->content.digest()==memory.source()->content.digest());
+    const auto restored_defaults=restored.defaults();REQUIRE(restored_defaults->size()==memory_defaults->size());
+    for(std::size_t i=0;i<memory_defaults->size();++i) {
+        CHECK(restored_defaults->at(i).path==memory_defaults->at(i).path);
+        CHECK(restored_defaults->at(i).meaning==memory_defaults->at(i).meaning);
+        CHECK(restored_defaults->at(i).authored==memory_defaults->at(i).authored);
+    }
 }
 TEST_CASE("all four continuous forms reject at both actual byte and file loader boundaries") {
     for(const auto kind:{"linear_continuous","linear_continuous_ltv","affine_continuous","affine_continuous_ltv"}) {
