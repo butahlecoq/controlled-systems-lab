@@ -46,6 +46,11 @@ target_include_directories(plot_request_contract SYSTEM PRIVATE ${csl_json_SOURC
 add_test(NAME plot_request_contract COMMAND plot_request_contract)
 csl_test_target(plot_request_contract artifacts)
 
+add_executable(stage_projection_capture_tests tests/artifacts/stage_projection_capture_tests.cpp)
+target_link_libraries(stage_projection_capture_tests PRIVATE CSL::artifacts CSL::polyhedral doctest::doctest)
+add_test(NAME stage_projection_capture_tests COMMAND stage_projection_capture_tests)
+csl_test_target(stage_projection_capture_tests artifacts)
+
 add_executable(plot_document_json_contract tests/artifacts/plot_document_json.cpp)
 target_link_libraries(plot_document_json_contract PRIVATE CSL::artifacts doctest::doctest)
 add_test(NAME plot_document_json_contract COMMAND plot_document_json_contract)
