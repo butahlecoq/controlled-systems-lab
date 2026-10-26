@@ -27,16 +27,24 @@ class VisualRouteInventoryTests(unittest.TestCase):
                          "adopted-shared-quantitative-policy")
         self.assertEqual(producers["scripts/reports/visual_illustrations.py"]["disposition"],
                          "reviewed-static-diagram-exception")
+        self.assertEqual(producers["scripts/reports/ext03_transform/report.py"]["disposition"],
+                         "composes-or-copies-existing-saved-figure")
+        self.assertEqual(producers["scripts/reports/app02/render_saved.py"]["disposition"],
+                         "frozen-renderer-preserved-with-shared-policy-companion")
+        self.assertEqual(producers["scripts/reports/geometry_figures.py"]["disposition"],
+                         "shared-quantitative-policy-companion-renderer")
         allowed={"adopted-shared-quantitative-policy","reviewed-static-diagram-exception",
                  "gallery-composition-and-route","publication-validation-or-frozen-route",
-                 "deferred-family-specific-migration"}
+                 "deferred-family-specific-migration", "composes-or-copies-existing-saved-figure",
+                 "frozen-renderer-preserved-with-shared-policy-companion",
+                 "shared-quantitative-policy-companion-renderer"}
         self.assertTrue(all(entry["disposition"] in allowed for entry in producers.values()))
         deferred=[entry for entry in producers.values()
                   if entry["disposition"]=="deferred-family-specific-migration"]
         self.assertTrue(deferred)
         follow_up_counts={number:sum(entry["follow_up_issue"]==number for entry in deferred)
                           for number in (684,685,686,687)}
-        self.assertEqual(follow_up_counts,{684:13,685:12,686:17,687:11})
+        self.assertEqual(follow_up_counts,{684:8,685:12,686:17,687:11})
         self.assertTrue(all(entry["follow_up_issue"] in follow_up_counts for entry in deferred))
         routes={entry["route"]:entry for entry in inventory["frozen_published_routes"]}
         self.assertGreater(len(routes),40)
@@ -52,7 +60,12 @@ class VisualRouteInventoryTests(unittest.TestCase):
             "fuel-b06-viz06-flow.svg", "fuel-b06-viz06-flow.png",
             "fuel-b06-viz06-stock.svg", "fuel-b06-viz06-stock.png",
             "fuel-b06-viz06-trajectory.svg", "fuel-b06-viz06-trajectory.png",
-            "fuel-b06-viz06-timing.svg", "fuel-b06-viz06-timing.png"})
+            "fuel-b06-viz06-timing.svg", "fuel-b06-viz06-timing.png",
+            "lotka-volterra-sampled-v1.html", "lotka-volterra-sampled-v1.svg",
+            "lotka-volterra-sampled-v1.png", "lotka-volterra-sampled-v1-export.json",
+            "app02-diamond-v1.html", "app02-diamond-v1.svg", "app02-diamond-v1.png",
+            "app02-diamond-v1-export.json", "app04-square-v1.html", "app04-square-v1.svg",
+            "app04-square-v1.png", "app04-square-v1-export.json"})
         self.assertEqual((ROOT/"docs/examples/examples.css").read_bytes(),
                          (ROOT/"scripts/reports/visual_examples.css").read_bytes())
         before=ROOT/"docs/examples/fuel-b06-viz06-before.svg"
