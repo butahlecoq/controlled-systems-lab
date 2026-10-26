@@ -12,6 +12,10 @@ namespace {
 struct Stopped {};
 std::string indexed(const std::string& name,std::size_t index) {return name+"["+std::to_string(index)+"]";}
 bool finite_nonnegative(double x) {return std::isfinite(x)&&x>=0;}
+bool same_witness_values(const Witness& left,const Witness& right) {
+    return left.problem==right.problem&&left.states==right.states&&left.controls==right.controls&&
+        left.original_objective==right.original_objective;
+}
 class Check {
     const problem::ResolvedProblem& original_;
     const ExecutionContext& context_;
@@ -133,6 +137,9 @@ public:
                         else if constexpr(std::is_same_v<F,WitnessFeasibilityEvidence>) {
                             id(feasibility.witness.problem,"family.candidate.feasibility.witness");
                             claim(feasibility.support,"family.candidate.feasibility.witness");
+                            if(!same_witness_values(feasibility.witness,report_.input.witness))
+                                mismatch("family.candidate.feasibility.witness",
+                                    "candidate witness differs from the trajectory independently checked by this report");
                         }
                     },product.feasibility);
                 }

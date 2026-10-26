@@ -28,6 +28,8 @@ struct TrajectoryRequest {
     Witness witness;
     Assurance assurance{Assurance::numerical};
     std::optional<SynthesisOutcomeClaim> outcome;
+    // A candidate family's WitnessFeasibilityEvidence must contain this same
+    // witness because the verifier independently recalculates only this field.
     std::optional<OptimalFamily> family;
     ObjectiveEvidence bounds;
     // Retained program provenance only; no unprovided program-to-problem proof is inferred.
