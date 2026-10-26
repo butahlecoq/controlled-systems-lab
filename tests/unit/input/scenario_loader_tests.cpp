@@ -177,6 +177,19 @@ TEST_CASE("literal structural identity composes canonical singleton and linear o
     CHECK(changed.identity().value=="csl.problem.v1.sha256:695f976378c20b642302b5d1af88e656bdd50c1828824a92c0088ecc6364f1dc");
     CHECK(accepted<Vector>(changed.model().step({0},Vector{2},Vector{3},{}))==Vector{5});
 }
+TEST_CASE("mathematical identity changes with dynamics initial data objective and constraints") {
+    const auto baseline=accepted<LoadedScenario>(load(minimal)).problem().identity();
+    const std::vector<std::pair<std::string,std::string>> variants{
+        {R"("A":[[1]])",R"("A":[[2]])"},
+        {R"("initial_state":[0])",R"("initial_state":[1])"},
+        {R"("target":[1])",R"("target":[2])"},
+        {R"("upper":[1])",R"("upper":[2])"}
+    };
+    for(const auto& [from,to]:variants) {
+        const auto changed=accepted<LoadedScenario>(load(replace(std::string(minimal),from,to)));
+        CHECK_FALSE(changed.problem().identity()==baseline);
+    }
+}
 TEST_CASE("quadratic and rectangular residual objectives retain original costs") {
     constexpr auto old=R"({"kind":"terminal_distance","target":[1]})";
     auto q=accepted<LoadedScenario>(load(replace(std::string(minimal),old,R"({"kind":"quadratic","Q":[[2]],"linear":[-6],"offset":9})")));
