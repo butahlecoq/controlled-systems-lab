@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 from html import escape
+from itertools import product
 import json
 from pathlib import Path
 import tempfile
@@ -92,6 +93,68 @@ def app04_companion(record_path: Path, style_path: Path) -> dict[str, bytes]:
         "This companion plots the saved square vertices and two outer ellipse results. The diagonal-orientation radius is converted to physical x-y coordinates using the declared orientation; the circles show the resulting ellipses in this special two-dimensional fixture.")}
 
 
+def app03_companion(record_path: Path, style_path: Path) -> dict[str, bytes]:
+    """Plot APP-03's saved planar zonotope and saved axis-cover generators."""
+    record = json.loads(Path(record_path).read_text(encoding="utf-8"))
+    fixture = record["fixtures"]["diamond-axis-cover"]
+    generators = fixture["input_generators"]
+    output = fixture["expected_generators"]
+    _require(record.get("schema") == "csl.app03-zonotope-reduction/1" and
+             record.get("report_id") == "app03-zonotope-4522855018fa9b0b" and
+             fixture["center"] == [0, 0] and
+             generators == [[1, 0, .5], [0, 1, .5]] and
+             output == [[1.5, 0], [0, 1.5]] and
+             fixture["relation"] == "outer" and
+             fixture["analytic_support_1_minus_1"] == {"input": 2, "output": 3},
+             "APP-03 saved zonotope or outer-cover fixture changed")
+    signed_points = sorted({
+        (sum(generators[0][index] * signs[index] for index in range(len(signs))),
+         sum(generators[1][index] * signs[index] for index in range(len(signs))))
+        for signs in product((-1, 1), repeat=len(generators[0]))
+    })
+
+    def cross(origin: tuple[float, float], first: tuple[float, float],
+              second: tuple[float, float]) -> float:
+        return ((first[0] - origin[0]) * (second[1] - origin[1]) -
+                (first[1] - origin[1]) * (second[0] - origin[0]))
+
+    lower: list[tuple[float, float]] = []
+    upper: list[tuple[float, float]] = []
+    for point in signed_points:
+        while len(lower) >= 2 and cross(lower[-2], lower[-1], point) <= 0:
+            lower.pop()
+        lower.append(point)
+    for point in reversed(signed_points):
+        while len(upper) >= 2 and cross(upper[-2], upper[-1], point) <= 0:
+            upper.pop()
+        upper.append(point)
+    hull = lower[:-1] + upper[:-1]
+    cover = [(-output[0][0], -output[1][1]), (output[0][0], -output[1][1]),
+             (output[0][0], output[1][1]), (-output[0][0], output[1][1])]
+    document = {"schema": "csl.saved-geometric-plot/1",
+                "title": "APP-03 saved planar zonotope and axis cover",
+                "description": ("The input boundary is the convex hull of the eight signed sums formed directly from the three archived generator columns. "
+                                "White points show those saved-coefficient sums; the orange square uses the recorded outer-cover generators. "
+                                "This is a 2D display of one saved fixture, not a new geometry query or a finite error certificate."),
+                "aspect": "equal",
+                "axes": {"x": {"label": "x coordinate (source units unspecified)"},
+                         "y": {"label": "y coordinate (source units unspecified)"}},
+                "series": [
+                    {"kind": "polygon", "label": "saved outer axis cover", "color": "#D55E00",
+                     "fill": True, "alpha": .08, "points": [list(point) for point in cover]},
+                    {"kind": "polygon", "label": "input zonotope · saved generators", "color": "#0072B2",
+                     "fill": True, "alpha": .18, "points": [list(point) for point in hull]},
+                    {"kind": "points", "label": "eight saved-generator sign sums", "color": "#222222",
+                     "points": [list(point) for point in signed_points], "size": 26, "alpha": .65},
+                ]}
+    outputs = _render_companion(document, style_path, "app03-zonotope-v1")
+    return outputs | {"app03-zonotope-v1.html": _companion_page(
+        "APP-03 saved planar zonotope", "app03-zonotope-v1",
+        "app03-zonotope-4522855018fa9b0b",
+        "The saved CSL::approximation zonotope-reduction adapter reports method tag generator-axis-cover. Input generators are (1,0), (0,1), (0.5,0.5); the recorded outer-cover generators are (1.5,0), (0,1.5). The signed points are direct sums of archived binary64 coefficients; the blue outline joins their planar convex hull. The fixture reports support 2 for the input and 3 for its axis cover in direction (1, −1). This display does not add a finite approximation-error bound or validated real-arithmetic claim.",
+        source_commit=record["source_commit"])}
+
+
 def ext05_companion(record_path: Path, style_path: Path) -> dict[str, bytes]:
     """Plot only the archived EXT-05 state samples, without interpolating a path."""
     record = json.loads(Path(record_path).read_text(encoding="utf-8"))
@@ -159,10 +222,13 @@ def _require(condition: bool, message: str) -> None:
 
 
 def _companion_page(title: str, stem: str, report_id: str, summary: str,
-                    aspect: str = "equal") -> bytes:
+                    aspect: str = "equal", source_commit: str | None = None) -> bytes:
     title = escape(title)
     summary = escape(summary)
     report_id = escape(report_id, quote=True)
+    source_link = (f' · <a href="https://github.com/butahlecoq/controlled-systems-lab/commit/'
+                   f'{escape(source_commit, quote=True)}">Source commit {escape(source_commit)} ↗</a>'
+                   if source_commit else "")
     if aspect == "equal":
         scaling = "The plot uses equal x-y scales and preserves the archived fixture values."
     elif aspect == "numeric":
@@ -179,7 +245,7 @@ def _companion_page(title: str, stem: str, report_id: str, summary: str,
             '<figcaption>Numeric ticks and major grids follow the shared csl-report-quantitative-v1 policy. '
             + escape(scaling) + '</figcaption></figure>'
             f'<p><a href="{stem}.png">Standalone PNG</a> · <a href="../{report_id}/records.json">Frozen values ↗</a> · '
-            f'<a href="../{report_id}/index.html">Original report ↗</a></p></main></body></html>').encode()
+            f'<a href="../{report_id}/index.html">Original report ↗</a>{source_link}</p></main></body></html>').encode()
 
 
 def lotka_volterra_companion(record_path: Path, style_path: Path) -> dict[str, bytes]:
