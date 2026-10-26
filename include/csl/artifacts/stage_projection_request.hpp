@@ -15,6 +15,12 @@ struct StageCoordinatePair {
     StateCoordinate second;
 };
 
+struct StageProjectionSourceEvidence {
+    StageIndex stage;
+    SetId source_set;
+    GeometryEvidence evidence;
+};
+
 struct StageProjectionSet {
     SetHandle relation;
     PlotSourceOwner owner;
@@ -22,6 +28,7 @@ struct StageProjectionSet {
     std::vector<std::size_t> relation_coordinates;
     SetRelation relation_claim{SetRelation::equivalent};
     Assurance assurance{Assurance::numerical};
+    std::vector<StageProjectionSourceEvidence> evidence;
 };
 
 struct StageProjectionGap {

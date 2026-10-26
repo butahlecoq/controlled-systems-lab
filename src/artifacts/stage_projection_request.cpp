@@ -74,6 +74,15 @@ StageProjectionRequestValidation validate_stage_projection_request(
             if (source->relation.metadata.dimension == 0)
                 return invalid("request.stages[" + std::to_string(s) + "].source.relation",
                     "stage source relation must have a positive dimension");
+            for (const auto& item : source->evidence) {
+                if (item.stage.value != stage.stage.value || item.source_set != source->relation.id ||
+                    item.evidence.reference.identity.problem != source->owner.problem ||
+                    item.evidence.reference.identity.ideal_output.value != source->relation.id.value ||
+                    item.evidence.scope != GeometryClaimScope::set_relation)
+                    return ArtifactError{ArtifactErrorCode::identity,
+                        "request.stages[" + std::to_string(s) + "].source.evidence",
+                        "source evidence must identify this stage, relation set, problem, and set-relation claim"};
+            }
             if (source->relation_coordinates.size() != request.state_coordinates.size())
                 return invalid("request.stages[" + std::to_string(s) + "].source.relation_coordinates",
                     "coordinate map must contain one relation coordinate per route state coordinate");

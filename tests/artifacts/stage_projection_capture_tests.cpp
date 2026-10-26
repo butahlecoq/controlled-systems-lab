@@ -42,6 +42,13 @@ ar::StageProjectionInput available_stage(std::size_t stage, const sets::SetData&
     source.relation = set.as_handle();
     source.owner = {{"fuel-analytic-fixture"}, set.metadata()->id};
     source.relation_coordinates = {0, 1, 2};
+    if (stage == 0) {
+        const GeometryRequestIdentity evidence_identity{{"fuel-analytic-fixture"},
+            {"source-stage-0"}, {"fuel-initial"}};
+        source.evidence.push_back({{stage}, set.metadata()->id,
+            {{evidence_identity, {set.metadata()->id}}, GeometryClaimScope::set_relation,
+                NumericalCheck{0.0, 0.0, 0.0, {"fixture-check"}}, {}, {}}});
+    }
     return {{stage}, static_cast<double>(stage), std::move(source)};
 }
 
@@ -80,6 +87,8 @@ TEST_CASE("stage projection capture returns one projection or explicit gap per p
     CHECK(projection.reference.inputs.front() == initial.metadata()->id);
     REQUIRE(batch.records[0].source_assurance.has_value());
     CHECK(*batch.records[0].source_assurance == Assurance::numerical);
+    REQUIRE(batch.records[0].source_evidence.size() == 1);
+    CHECK(batch.records[0].source_evidence.front().source_set == initial.metadata()->id);
     CHECK(projection.cost.geometry_operation_elapsed.count() >= 0);
     REQUIRE(std::holds_alternative<ar::StageProjectionUnavailable>(batch.records[2].outcome));
     CHECK(std::get<ar::StageProjectionUnavailable>(batch.records[2].outcome).kind ==
