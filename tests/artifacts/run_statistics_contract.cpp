@@ -234,6 +234,12 @@ namespace {
 std::string fixture_text(){std::ifstream source(CSL_STATISTICS_FIXTURE);return {std::istreambuf_iterator<char>{source},std::istreambuf_iterator<char>{}};}
 std::string fixture_v2_text(){std::ifstream source(CSL_STATISTICS_V2_FIXTURE);return {std::istreambuf_iterator<char>{source},std::istreambuf_iterator<char>{}};}
 problem::ResolvedProblem integrator_problem();
+std::vector<IncumbentCandidate> candidate_values(const std::vector<FeasibleIncumbent>& values) {
+    std::vector<IncumbentCandidate> result;
+    result.reserve(values.size());
+    for(const auto& value:values)result.push_back({value.witness,value.feasibility});
+    return result;
+}
 std::string changed(std::string source,std::string_view from,std::string_view to){const auto position=source.find(from);REQUIRE(position!=std::string::npos);source.replace(position,from.size(),to);return source;}
 }
 TEST_CASE("serialized registered verifier evidence decodes as untrusted and cannot publish complete family") {
@@ -513,6 +519,68 @@ TEST_CASE("scenario publication rejects foreign module stage geometry and invali
     collected=owner.description().statistics.description();collected.spans[0].descriptor.relation_evidence=std::make_shared<const GeometryEvidence>(GeometryEvidence{{{zero_problem().identity(),{"request"},{"reference"}},{{"input"}}},GeometryClaimScope::set_relation,Unestablished{},{},{}});
     CHECK(std::holds_alternative<ar::ArtifactError>(ar::publish_collection(collected)));
 }
+TEST_CASE("problem-aware run publication independently verifies synthesis incumbents") {
+    const auto problem=integrator_problem();
+    auto record=accepted(ar::decode_run(fixture_text())).description();
+    REQUIRE(std::holds_alternative<ar::SynthesisFinal>(record.final));
+    auto& incumbents=std::get<ar::SynthesisFinal>(record.final).incumbents;
+    REQUIRE(!incumbents.empty());
+    incumbents.front().witness.states.back().front()=99.0;
+    const auto rejected=ar::publish_run({problem,record});
+    REQUIRE(std::holds_alternative<ar::ArtifactError>(rejected));
+    CHECK(std::get<ar::ArtifactError>(rejected).path=="run.final.incumbents[0].feasibility");
+
+    auto wrong_upper=accepted(ar::decode_run(fixture_text())).description();
+    auto& upper=std::get<ar::SynthesisFinal>(wrong_upper.final).objective.upper;
+    REQUIRE(upper.has_value());
+    upper->value=-1;
+    const auto rejected_bound=ar::publish_run({problem,wrong_upper});
+    REQUIRE(std::holds_alternative<ar::ArtifactError>(rejected_bound));
+    CHECK(std::get<ar::ArtifactError>(rejected_bound).path=="run.final.objective.upper");
+
+    auto wrong_objective=accepted(ar::decode_run(fixture_text())).description();
+    auto& wrong_incumbent=std::get<ar::SynthesisFinal>(wrong_objective.final).incumbents.front().witness;
+    wrong_incumbent.original_objective+=10.0;
+    auto& objective_bounds=std::get<ar::SynthesisFinal>(wrong_objective.final).objective;
+    objective_bounds.lower.reset();objective_bounds.upper.reset();
+    const auto rejected_objective=ar::publish_run({problem,wrong_objective});
+    REQUIRE(std::holds_alternative<ar::ArtifactError>(rejected_objective));
+    CHECK(std::get<ar::ArtifactError>(rejected_objective).path=="run.final.incumbents[0].objective");
+
+    record.provenance=ar::ProblemProvenance::problem_revalidated;
+    const auto identity_only=ar::publish_identity_recorded_run(std::move(record));
+    REQUIRE(std::holds_alternative<ar::RunStatistics>(identity_only));
+    CHECK(std::get<ar::RunStatistics>(identity_only).description().provenance==ar::ProblemProvenance::identity_recorded);
+    const auto wire=accepted(ar::encode_run(std::get<ar::RunStatistics>(identity_only)));
+    const auto restored=accepted(ar::decode_run(wire));
+    CHECK(restored.description().provenance==ar::ProblemProvenance::identity_recorded);
+    CHECK(std::get<ar::SynthesisFinal>(restored.description().final).incumbents.front().witness.states.back()==Vector{99});
+}
+TEST_CASE("problem-aware publication does not promote unsupported V-set membership") {
+    const auto vertices=std::get<numeric::MatrixView>(numeric::snapshot(Matrix{2,1,{0,4}}));
+    const auto rays=std::get<numeric::MatrixView>(numeric::snapshot(Matrix{0,1,{}}));
+    const auto initial_domain=std::get<sets::SetData>(sets::make_v({{"initial-v-set"},1,{"x"}},
+        {vertices,rays})).as_handle();
+    Problem source{{"v-set-trajectory"},std::make_shared<const SystemModel>(SystemModel{{{1,1,0},
+        TimeDomain::discrete,LinearStage{{1,1,{1}},{1,1,{1}},{1,0,{}},{0}}},{}}),{0,1},
+        KnownInitial{{0}},ContinuousDomain{{Singleton{{0}}}},
+        {initial_domain,UniversalSet{1}},{},{},InformationPattern::nominal_open_loop,LinearTerminal{{1},0}};
+    const auto resolved=std::get<problem::ResolvedProblem>(problem::resolve(source,
+        {problem::UncertaintyStructure::stage_product_uncoupled}));
+    auto record=accepted(ar::decode_run(fixture_text())).description();
+    record.problem=resolved.identity();
+    record.dimensions={1,1,0};
+    record.horizon=1;
+    auto& final=std::get<ar::SynthesisFinal>(record.final);
+    final.outcome={resolved.identity(),MathematicalOutcome::undetermined,Unestablished{}, {}};
+    final.objective={};
+    final.family.reset();
+    final.incumbents={{Witness{resolved.identity(),{{0},{0}},{{0}},0},
+        ClaimEvidence{resolved.identity(),NumericalCheck{0,0,0,{"backend"}}}}};
+    const auto rejected=ar::publish_run({resolved,record});
+    REQUIRE(std::holds_alternative<ar::ArtifactError>(rejected));
+    CHECK(std::get<ar::ArtifactError>(rejected).path=="run.final.incumbents[0].feasibility");
+}
 TEST_CASE("canonical family projection without exporter preserves metadata and evidence") {
     const auto id=zero_problem().identity();
     FamilyIdentity identity{id,{"nominal",id,FamilyTarget::candidate_relaxation,{0,0},Assurance::numerical,{"joint"},{}},{{0,0,0},0},{"joint"},"1",{}};
@@ -601,7 +669,7 @@ TEST_CASE("strategy boundary preserves a candidate through contradictory-status 
         SynthesisResult solve(const problem::ResolvedProblem&,const FamilyRequest&,const ExecutionContext&) override{return result;}
     } workspace{SynthesisResult{Termination::completed,
         {record.problem,MathematicalOutcome::infeasible,SymbolicArgument{"synthetic contradiction","fixture"},{}},
-        source.objective,source.family->family,source.incumbents,{}}};
+        source.objective,source.family->family,candidate_values(source.incumbents),{}}};
     const auto problem=integrator_problem();
     registry::StrategyRequest request{problem,configuration().strategy,identity.request,identity.strategy_version,{}};
     const ExecutionContext context{std::make_shared<const ResourcePolicy>(ResourcePolicy{1,1,1,{}}),{}, {},
@@ -626,7 +694,7 @@ TEST_CASE("strategy boundary preserves a candidate through contradictory-status 
     std::get<ar::SynthesisFinal>(illegal.final).outcome.value=MathematicalOutcome::infeasible;
     CHECK(std::holds_alternative<ar::ArtifactError>(ar::publish_run({problem,illegal})));
 }
-TEST_CASE("strategy boundary retains a feasible incumbent against a no-family infeasibility claim") {
+TEST_CASE("strategy boundary keeps an unchecked candidate distinct from an infeasibility claim") {
     auto record=accepted(ar::decode_run(fixture_text())).description();
     const auto& source=std::get<ar::SynthesisFinal>(record.final);
     REQUIRE(source.family.has_value());
@@ -638,7 +706,7 @@ TEST_CASE("strategy boundary retains a feasible incumbent against a no-family in
         SynthesisResult solve(const problem::ResolvedProblem&,const FamilyRequest&,const ExecutionContext&) override{return result;}
     } workspace{SynthesisResult{Termination::completed,
         {record.problem,MathematicalOutcome::infeasible,SymbolicArgument{"synthetic contradiction","fixture"},{}},
-        source.objective,{},source.incumbents,{}}};
+        source.objective,{},candidate_values(source.incumbents),{}}};
     const auto problem=integrator_problem();
     registry::StrategyRequest request{problem,configuration().strategy,identity.request,identity.strategy_version,{}};
     const ExecutionContext context{std::make_shared<const ResourcePolicy>(ResourcePolicy{1,1,1,{}}),{}, {},
@@ -646,28 +714,15 @@ TEST_CASE("strategy boundary retains a feasible incumbent against a no-family in
     auto observed=registry::StrategyPort::run(workspace,request,context);
     REQUIRE(std::holds_alternative<SynthesisResult>(observed));
     const auto& result=std::get<SynthesisResult>(observed);
-    CHECK(result.termination==Termination::contract_rejected);
-    CHECK(result.outcome.value==MathematicalOutcome::undetermined);
+    CHECK(result.termination==Termination::completed);
+    CHECK(result.outcome.value==MathematicalOutcome::infeasible);
     CHECK_FALSE(result.family.has_value());
     CHECK(result.incumbents.size()==incumbents_count);
-    REQUIRE(std::holds_alternative<ContractValidationFailure>(result.stop));
-    const auto& failure=std::get<ContractValidationFailure>(result.stop);
-    CHECK(failure.retained.incumbents==incumbents_count);
-    CHECK(std::any_of(failure.diagnostics.begin(),failure.diagnostics.end(),[](const Diagnostic& diagnostic){
-        return diagnostic.field=="result.outcome.infeasible";
-    }));
     record.selection.reset();
     record.final=ar::project_final(result);
-    const auto owner=accepted(ar::publish_run({problem,record}));
-    const auto restored=accepted(ar::decode_run(accepted(ar::encode_run(owner)),problem));
-    const auto& final=std::get<ar::SynthesisFinal>(restored.description().final);
-    CHECK(final.termination==Termination::contract_rejected);
-    CHECK(final.outcome.value==MathematicalOutcome::undetermined);
-    CHECK_FALSE(final.family.has_value());
-    CHECK(final.incumbents.size()==incumbents_count);
-    auto illegal=record;
-    std::get<ar::SynthesisFinal>(illegal.final).outcome.value=MathematicalOutcome::infeasible;
-    CHECK(std::holds_alternative<ar::ArtifactError>(ar::publish_run({problem,illegal})));
+    const auto rejected=ar::publish_run({problem,record});
+    REQUIRE(std::holds_alternative<ar::ArtifactError>(rejected));
+    CHECK(std::get<ar::ArtifactError>(rejected).path=="run.final.outcome");
 }
 TEST_CASE("strategy boundary sanitizes contradictory bounds and malformed incumbent histories before v3 publication") {
     const auto problem=integrator_problem();
@@ -678,7 +733,7 @@ TEST_CASE("strategy boundary sanitizes contradictory bounds and malformed incumb
         const auto identity=source.family->family.identity();
         SynthesisResult raw{Termination::completed,
             {record.problem,MathematicalOutcome::undetermined,Unestablished{},{}},
-            source.objective,{},source.incumbents,{}};
+            source.objective,{},candidate_values(source.incumbents),{}};
         if (case_id==0) {
             REQUIRE(raw.objective.lower.has_value());
             raw.objective.lower->value=10;
@@ -704,17 +759,31 @@ TEST_CASE("strategy boundary sanitizes contradictory bounds and malformed incumb
         auto observed=registry::StrategyPort::run(workspace,request,context);
         REQUIRE(std::holds_alternative<SynthesisResult>(observed));
         const auto& result=std::get<SynthesisResult>(observed);
-        CHECK(result.termination==Termination::contract_rejected);
+        if (case_id==0) {
+            CHECK(result.termination==Termination::completed);
+            REQUIRE(result.objective.lower.has_value());
+            CHECK(result.objective.lower->value==10);
+        } else CHECK(result.termination==Termination::contract_rejected);
         if (case_id==1) {
             CHECK(result.incumbents.size()==1);
             REQUIRE(result.objective.lower.has_value());
             CHECK(result.objective.lower->value==0);
-        } else {
+        } else if (case_id==2) {
             CHECK(result.incumbents.size()==2);
             CHECK_FALSE(result.objective.lower.has_value());
+        } else {
+            CHECK(result.incumbents.size()==2);
+            REQUIRE(result.objective.lower.has_value());
+            CHECK(result.objective.lower->value==10);
         }
         record.selection.reset();
         record.final=ar::project_final(result);
+        if (case_id==0) {
+            const auto rejected=ar::publish_run({problem,record});
+            REQUIRE(std::holds_alternative<ar::ArtifactError>(rejected));
+            CHECK(std::get<ar::ArtifactError>(rejected).path=="run.final.objective.lower");
+            continue;
+        }
         const auto owner=accepted(ar::publish_run({problem,record}));
         const auto restored=accepted(ar::decode_run(accepted(ar::encode_run(owner)),problem));
         const auto& final=std::get<ar::SynthesisFinal>(restored.description().final);

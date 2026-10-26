@@ -211,6 +211,13 @@ struct FeasibleIncumbent {
     Witness witness;
     ClaimEvidence feasibility;
 };
+// Strategy results carry candidate histories and backend feasibility claims.
+// They do not become FeasibleIncumbent values until a consumer checks them
+// against the authoritative ResolvedProblem.
+struct IncumbentCandidate {
+    Witness witness;
+    ClaimEvidence feasibility_claim;
+};
 struct WitnessBatch { std::vector<Witness> witnesses; std::size_t requested; ModuleId selector; std::optional<std::size_t> seed; std::optional<FamilyIdentity> source_family{};
     std::vector<Vector> directions{};
     double distinctness_tolerance{};
@@ -284,7 +291,9 @@ struct SynthesisResult {
     SynthesisOutcomeClaim outcome;
     ObjectiveEvidence objective;
     std::optional<OptimalFamily> family;
-    std::vector<FeasibleIncumbent> incumbents;
+    // These are proposed witnesses only. A trajectory check against the
+    // ResolvedProblem is required before exposing them as feasible incumbents.
+    std::vector<IncumbentCandidate> incumbents;
     std::vector<TimingSpan> spans;
     SynthesisStopEvidence stop{};
     std::optional<CompleteFamilyProposal> complete_proposal{};
@@ -308,7 +317,7 @@ public:
 Diagnostics check_family_request(const FamilyRequest&, const ProblemId&);
 Diagnostics check_family_evidence(const OptimalFamily&, const ProblemId&, Assurance);
 bool supported_synthesis_bound(const ObjectiveBound&, const ProblemId&);
-bool supported_feasible_incumbent(const FeasibleIncumbent&, const FamilyIdentity&);
+bool valid_incumbent_candidate(const IncumbentCandidate&, const FamilyIdentity&);
 Diagnostics check_synthesis_result(const SynthesisResult&, const FamilyIdentity&);
 Diagnostics check_synthesis_result(const SynthesisResult&, const SynthesisIdentityExpectation&);
 } // namespace csl

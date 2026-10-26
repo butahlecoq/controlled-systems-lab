@@ -882,8 +882,8 @@ TEST_CASE("numerical failure preserves the caller-visible incumbent bound and ca
     CHECK(data.optimization->objective.upper->evidence.subject==data.optimization->outcome.subject);
     CHECK(std::holds_alternative<SymbolicArgument>(data.optimization->objective.upper->evidence.support));
     REQUIRE(result.incumbents.size()==1);
-    CHECK(result.incumbents.front().feasibility.problem==p.identity());
-    CHECK(std::holds_alternative<NumericalCheck>(result.incumbents.front().feasibility.support));
+    CHECK(result.incumbents.front().feasibility_claim.problem==p.identity());
+    CHECK(std::holds_alternative<NumericalCheck>(result.incumbents.front().feasibility_claim.support));
     REQUIRE(result.objective.upper);
     CHECK(result.objective.upper->value==0);
     CHECK(result.objective.upper->evidence.problem==p.identity());
@@ -934,8 +934,8 @@ TEST_CASE("registered resource limit preserves scoped solver evidence and feasib
     CHECK(data.optimization->objective.upper->evidence.subject==data.optimization->outcome.subject);
     CHECK(std::holds_alternative<SymbolicArgument>(data.optimization->objective.upper->evidence.support));
     REQUIRE(result.incumbents.size()==1);
-    CHECK(result.incumbents.front().feasibility.problem==p.identity());
-    CHECK(std::holds_alternative<NumericalCheck>(result.incumbents.front().feasibility.support));
+    CHECK(result.incumbents.front().feasibility_claim.problem==p.identity());
+    CHECK(std::holds_alternative<NumericalCheck>(result.incumbents.front().feasibility_claim.support));
     REQUIRE(result.objective.upper);
     CHECK(result.objective.upper->value==0);
     CHECK(result.objective.upper->evidence.problem==p.identity());

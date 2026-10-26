@@ -12,6 +12,7 @@ using namespace registry_fixtures;
 static_assert(!std::is_default_constructible_v<PreparedPipeline<LPPort>>);
 static_assert(!std::is_default_constructible_v<PreparedStrategy>);
 static_assert(!std::is_copy_constructible_v<BoundWorkspace<LPPort>>);
+static_assert(!std::is_convertible_v<IncumbentCandidate,FeasibleIncumbent>);
 
 namespace {
 // A plugin may omit provenance, misreport it, or return a foreign witness.
@@ -643,7 +644,7 @@ TEST_CASE("public prepared strategy retains bound and incumbent when a later gen
     CHECK(result.incumbents[0].witness.states==std::vector<Vector>{{0},{0}});
     CHECK(result.incumbents[0].witness.controls==std::vector<Vector>{{0}});
     CHECK(result.incumbents[0].witness.original_objective==2);
-    CHECK(std::get<SymbolicArgument>(result.incumbents[0].feasibility.support).reference==
+    CHECK(std::get<SymbolicArgument>(result.incumbents[0].feasibility_claim.support).reference==
         "generated/accepted/lp/1 endpoint enumeration");
     REQUIRE(result.spans.size()==1);
     CHECK(result.spans[0].module==ModuleId{"accepted-lp"});
@@ -1712,6 +1713,11 @@ TEST_CASE("public strategy outcome keeps candidate, partial, rejection and retai
             SynthesisResult result{Termination::completed,
                 {id,MathematicalOutcome::undetermined,Unestablished{},{}},{},{},
                 {{{id,{{0},{1}},{{1}},5},support}}, {}};
+            if (request.profile=="forged-incumbent") {
+                result.incumbents.front().witness.states={{9},{9}};
+                result.incumbents.front().witness.controls={{0}};
+                result.incumbents.front().feasibility_claim={id,NumericalCheck{0,0,0,{"synthetic-backend"}}};
+            }
             if (request.profile=="late-provider-rejection" || request.profile=="malformed-provider-rejection" ||
                 request.profile=="malformed-lineage-rejection") {
                 result.termination=Termination::operation_rejected;
@@ -1803,7 +1809,7 @@ TEST_CASE("public strategy outcome keeps candidate, partial, rejection and retai
         const auto& result=std::get<SynthesisResult>(answer);
         REQUIRE(result.incumbents.size()==1);
         CHECK(result.incumbents[0].witness.original_objective==5);
-        CHECK(result.incumbents[0].feasibility.problem==request.problem.identity());
+        CHECK(result.incumbents[0].feasibility_claim.problem==request.problem.identity());
         if (target!=FamilyTarget::candidate_relaxation) {
             CHECK(result.termination==Termination::contract_rejected);
             CHECK_FALSE(result.family.has_value());
@@ -1824,6 +1830,18 @@ TEST_CASE("public strategy outcome keeps candidate, partial, rejection and retai
             CHECK(std::holds_alternative<WitnessFeasibilityEvidence>(candidate.feasibility));
         }
     }
+    auto forged_request=strategy_request();
+    forged_request.configuration.strategy={"synthetic"};
+    forged_request.family.profile="forged-incumbent";
+    const auto forged_preparation=registry.prepare(forged_request);
+    REQUIRE(std::holds_alternative<PreparedStrategy>(forged_preparation));
+    const auto forged_answer=std::get<SynthesisResult>(
+        std::get<PreparedStrategy>(forged_preparation).create()->run(context()));
+    REQUIRE(forged_answer.incumbents.size()==1);
+    CHECK(forged_answer.incumbents.front().witness.states.front()==Vector{9});
+    CHECK(forged_answer.incumbents.front().feasibility_claim.problem==forged_request.problem.identity());
+    static_assert(!std::is_convertible_v<IncumbentCandidate,FeasibleIncumbent>);
+
     auto request=strategy_request();request.configuration.strategy={"synthetic"};
     request.family.profile="late-provider-rejection";
     auto preparation=registry.prepare(request);
@@ -1968,10 +1986,10 @@ TEST_CASE("public strategy outcome keeps candidate, partial, rejection and retai
     CHECK(std::get<SymbolicArgument>(limited.objective.upper->evidence.support).assumptions=="literal fixture only");
     REQUIRE(limited.incumbents.size()==1);
     CHECK(limited.incumbents[0].witness.original_objective==5);
-    CHECK(limited.incumbents[0].feasibility.problem==request.problem.identity());
-    REQUIRE(std::holds_alternative<SymbolicArgument>(limited.incumbents[0].feasibility.support));
-    CHECK(std::get<SymbolicArgument>(limited.incumbents[0].feasibility.support).reference=="synthetic fixture assertion");
-    CHECK(std::get<SymbolicArgument>(limited.incumbents[0].feasibility.support).assumptions=="literal fixture only");
+    CHECK(limited.incumbents[0].feasibility_claim.problem==request.problem.identity());
+    REQUIRE(std::holds_alternative<SymbolicArgument>(limited.incumbents[0].feasibility_claim.support));
+    CHECK(std::get<SymbolicArgument>(limited.incumbents[0].feasibility_claim.support).reference=="synthetic fixture assertion");
+    CHECK(std::get<SymbolicArgument>(limited.incumbents[0].feasibility_claim.support).assumptions=="literal fixture only");
     REQUIRE(limited.family.has_value());
     CHECK(limited.family->target()==FamilyTarget::candidate_relaxation);
     CHECK(limited.family->identity().request==request.family);

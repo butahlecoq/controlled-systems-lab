@@ -144,7 +144,7 @@ example_check(scenario_cli_run_ts01 scenario_cli "--run;${CMAKE_CURRENT_SOURCE_D
   "mode=run profile=ts01_exact_integrator strategy=csl.synthesis.reach-back.*seed=42 threads=2.*verification=numerical_pass")
 example_check(scenario_cli_run_double_integrator_generality scenario_cli
   "--run;${CMAKE_CURRENT_SOURCE_DIR}/scenarios/double-integrator-generality.json;--profile;nominal_open_loop"
-  0 "mode=run profile=nominal_open_loop strategy=csl.synthesis.strategy-b.*outcome=undetermined family=candidate selected=0 incumbents=1 verification=not_passed incumbent_evidence=numerical")
+  0 "mode=run profile=nominal_open_loop strategy=csl.synthesis.strategy-b.*outcome=undetermined family=candidate selected=0 candidate_witnesses=1 verification=not_passed candidate_feasibility_claim=numerical")
 example_check(scenario_cli_run_missing scenario_cli "--run;${CMAKE_CURRENT_BINARY_DIR}/no-such-scenario.json" 2
   "Input rejected: category=io.*expected")
 example_check(scenario_cli_run_unknown_backend scenario_cli

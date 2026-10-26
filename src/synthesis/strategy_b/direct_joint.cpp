@@ -435,7 +435,7 @@ SynthesisResult detail::DirectJointExecutionRunner::solve_impl(const problem::Re
         }
         FamilyIdentity identity{p.identity(),request,build_artifact->coordinates,{strategy_id},strategy_version,lineage};
         CandidateFeasibility feasibility=Unestablished{};
-        if(!result.incumbents.empty()) feasibility=WitnessFeasibilityEvidence{result.incumbents.front().witness,result.incumbents.front().feasibility};
+        if(!result.incumbents.empty()) feasibility=WitnessFeasibilityEvidence{result.incumbents.front().witness,result.incumbents.front().feasibility_claim};
         CandidateFamily candidate{{build_artifact->coordinates,request.representation,data},
             HeuristicRelationEvidence{"binary64 full joint feasible/optimal-level relation; program/problem equivalence and optimal coverage unestablished"},std::move(feasibility)};
         auto family=FamilyPublisher::publish(std::move(identity),std::move(candidate));

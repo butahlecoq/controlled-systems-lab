@@ -59,6 +59,15 @@ evidence. `bindings == numerical_pass` means all supplied identity expectations
 and available original-problem, witness, coordinate and evidence bindings
 passed; it does not establish optimality, family completeness or validated
 evidence.
+
+`SynthesisResult::incumbents` are `IncumbentCandidate` values: strategy output
+and its feasibility support claim, not independently verified feasible
+incumbents. The registry may retain a well-shaped candidate while preserving
+the strategy's termination and outcome; the candidate alone does not contradict
+infeasibility or establish an objective upper bound. Consumers that publish a
+problem-aware run must verify each candidate's exact witness against the
+resolved problem before recording a feasible incumbent. Problem-free archive
+admission keeps the record at `identity_recorded` provenance.
 Optimality, complete-family coverage and validated certification remain distinct
 unsupported report fields even for a feasible witness and a claimed optimal
 backend result. The original mathematical outcome is retained independently of

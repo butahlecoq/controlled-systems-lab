@@ -5,9 +5,10 @@
 Version 6 retains the applied relation in each span descriptor; v5 remains
 readable for existing records. Include `csl/artifacts/run_statistics.hpp` for
 records and `csl/execution/observability.hpp` for bounded collection and RUN01
-projection. These additions preserve source contract 1.5 and mathematical identity
-version 1. No solver, estimator, mathematical verifier, timer instrumentation, or
-scenario planner is introduced.
+projection. These additions preserve mathematical identity version 1. The
+problem-aware publication boundary uses the existing trajectory verifier; it
+does not introduce a solver, estimator, timer instrumentation, or scenario
+planner.
 
 ## Publication and identity
 
@@ -17,16 +18,23 @@ checks complete selected module IDs/versions, options, selector, numerical and
 resource requests, output, stop budget, workspace policy and all six collection
 settings. It resolves no registry defaults. `publish_run(RunInput)` checks the
 actual problem identity and full-history dimensions before publishing a deep
-immutable owner. `RunStatistics::description()` borrows while that owner survives.
+immutable owner. For synthesis results it also independently verifies each
+claimed incumbent against the resolved problem, including the original objective,
+before setting `problem_revalidated` provenance. An infeasible outcome that
+conflicts with a verified feasible incumbent, or a bound that conflicts with its
+verified objective, is rejected. `RunStatistics::description()` borrows while
+that owner survives.
 All producer strings, vectors, JSON and optional metadata may be destroyed or
 changed after successful publication.
 
 `decode_run(text, limits)` records a syntactically checked mathematical identity;
-it sets provenance to `identity_recorded`. It cannot establish what absent
-external problem bytes mean. The overload taking an actual `ResolvedProblem`
-checks identity and shapes and returns `problem_revalidated`. Neither reader
-creates a callable workspace, valid NVI stamp, executable family, exception
-pointer, solver registration or a mathematical certificate.
+it sets provenance to `identity_recorded` and does not promote incumbent support
+claims to verified feasibility. It cannot establish what absent external problem
+bytes mean. The overload taking an actual `ResolvedProblem` routes synthesis
+incumbents through the independent trajectory check before returning
+`problem_revalidated`. Neither reader creates a callable workspace, valid NVI
+stamp, executable family, exception pointer, solver registration or a
+mathematical certificate.
 
 Configuration identity is `csl.config.v1.sha256:` plus 64 lowercase hexadecimal
 digits. The canonical byte prefix is `CSL.RESOLVED.CONFIG`, NUL, `v1`, NUL, followed
@@ -104,8 +112,11 @@ authority is implemented, so decoded claims remain archival data even when all
 digests match.
 Candidate feasibility is scoped to the whole relation, a named full-history
 witness, or unknown; an outer enclosure with one feasible witness does not
-claim whole-relation feasibility. Feasible incumbents retain their own
-feasibility support. A late generated-request rejection retains request/provider
+claim whole-relation feasibility. Strategy results expose `IncumbentCandidate`
+values, whose backend feasibility support is a claim. The portable
+`SynthesisFinal::incumbents` values preserve that claim, but only a successful
+problem-aware publication gives the enclosing record `problem_revalidated`
+provenance. A late generated-request rejection retains request/provider
 provenance, completed lineage and the scope of bounds, incumbents and candidate
 or partial family that survived the stop. A separate contract-validation failure
 retains the original stop record without inventing provider provenance. An external attachment is a digest/size/schema/media claim,
