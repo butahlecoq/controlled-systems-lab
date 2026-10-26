@@ -39,6 +39,8 @@ class Mpc02AnalyticProjectionSourceTests(unittest.TestCase):
                          (Fraction(1, 2), Fraction(0)))
 
         projection = source["projection"]
+        self.assertEqual(rational_vector(projection["stage_box_optimum_control_rational"]),
+                         (Fraction(1, 2), Fraction(0)))
         controls = [rational_vector(vertex)
                     for vertex in projection["control_vertices_rational"]]
         expected = ((-1, -1), (Fraction(-3, 4), -1), (1, Fraction(3, 4)),
