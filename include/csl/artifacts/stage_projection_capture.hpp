@@ -20,6 +20,7 @@ struct StageProjectionFailure {
 struct StageProjectionSuccess {
     PlotSetProjection projection;
     std::optional<GeometryErrorBound> error_bound;
+    std::vector<SetHandle> additional_components;
 };
 
 using StageProjectionOutcome = std::variant<StageProjectionSuccess, StageProjectionUnavailable,
