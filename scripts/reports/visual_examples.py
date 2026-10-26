@@ -926,6 +926,8 @@ def build(catalog, site):
         site / lotka_route / "records.json", Path(__file__).parent / "styles/control-v1.json")
     app02_companion = approx_extension_companions.app02_companion(
         site / "app02-box-8ff979de60ea9d22" / "records.json", Path(__file__).parent / "styles/control-v1.json")
+    app03_companion = approx_extension_companions.app03_companion(
+        site / "app03-zonotope-4522855018fa9b0b" / "records.json", Path(__file__).parent / "styles/control-v1.json")
     app04_companion = approx_extension_companions.app04_companion(
         site / "app04-ellipsoid-fd302c34092f8b19" / "records.json", Path(__file__).parent / "styles/control-v1.json")
     ext05_companion = approx_extension_companions.ext05_companion(
@@ -948,6 +950,11 @@ def build(catalog, site):
                               "page": "ext01-b08-timing-v1.html", "figure": "ext01-b08-timing-v1.svg",
                               "source_page": "../ext01-fixed-plan-303ad863ca3af58dc6a515844c474fe0e1af9349e55cb8acd1ff1a3f220f1b54/index.html",
                               "raw_record": "../ext01-fixed-plan-303ad863ca3af58dc6a515844c474fe0e1af9349e55cb8acd1ff1a3f220f1b54/records.json"})
+    gallery_inventory.append({"family": "Zonotopes", "title": "APP-03 saved planar zonotope and outer cover",
+                              "status": "saved-data-companion", "anchor": "app03-zonotope-v1",
+                              "page": "app03-zonotope-v1.html", "figure": "app03-zonotope-v1.svg",
+                              "source_page": "../app03-zonotope-4522855018fa9b0b/index.html",
+                              "raw_record": "../app03-zonotope-4522855018fa9b0b/records.json"})
     coverage_data = algorithm_coverage(catalog, site, gallery_inventory)
     issue3_report = next(entry for entry in json.loads(Path(catalog).read_text(encoding="utf-8"))["reports"]
                          if entry["report_kind"] == "issue3-validated-minimax")
@@ -1016,6 +1023,12 @@ def build(catalog, site):
             'alt="Seven saved EXT-01 B08 timing observations in milliseconds on labelled numeric axes"></a>'
             '<p>Plots the seven frozen observations as separate points with numeric ticks and major grids; no speedup or winner is claimed.</p>'
             '<p><a href="ext01-b08-timing-v1.html">Open the saved-data companion →</a></p></article>' +
+            '<article class="saved-figure" id="app03-zonotope-v1"><p class="eyebrow">Zonotopes · Saved-data companion</p>'
+            '<h3>APP-03 saved planar zonotope and outer cover</h3>'
+            '<a href="app03-zonotope-v1.html"><img src="app03-zonotope-v1.svg" '
+            'alt="Saved APP-03 planar zonotope and outer axis cover with numeric x-y axes"></a>'
+            '<p>Replots the archived generator sums and outer-cover generators with numeric ticks, major grids, and equal x-y scales.</p>'
+            '<p><a href="app03-zonotope-v1.html">Open the saved-data companion →</a></p></article>' +
             f'<article class="saved-figure" id="{fuel_anchor}"><p class="eyebrow">Fuel minimax reference · Saved-data companion</p>'
             f'<h3>{escape(fuel_entry["title"])}</h3>'
             f'<p>{escape("Readable, versioned SVG and PNG projections of the saved 4D B06 terminal set, with exact values, units, target, evidence limits and reproduction commands.")}</p>'
@@ -1038,6 +1051,7 @@ def build(catalog, site):
     outputs["issue3-control-walkthrough.html"] = workflow_page
     outputs.update(lotka_companion)
     outputs.update(app02_companion)
+    outputs.update(app03_companion)
     outputs.update(app04_companion)
     outputs.update(ext05_companion)
     outputs.update(ext01_companion)

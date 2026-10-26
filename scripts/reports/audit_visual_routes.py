@@ -23,10 +23,19 @@ COMPOSED_SAVED_ROUTES = {
 }
 SAVED_COMPANION_ROUTES = {
     "scripts/reports/app02/render_saved.py",
+    "scripts/reports/app03/render_saved.py",
     "scripts/reports/app04/render_saved.py",
     "scripts/reports/ext01/render_saved.py",
     "scripts/reports/ext05/render_saved.py",
     "scripts/reports/lotka_volterra_sampled.py",
+}
+FROZEN_COMPANIONS = {
+    "app02-box-8ff979de60ea9d22": "examples/app02-diamond-v1.html",
+    "app03-zonotope-4522855018fa9b0b": "examples/app03-zonotope-v1.html",
+    "app04-ellipsoid-fd302c34092f8b19": "examples/app04-square-v1.html",
+    "ext01-fixed-plan-20261016-11b7bc74": "examples/ext01-b08-timing-v1.html",
+    "ext05-discretization-a40ba9647cc023dc": "examples/ext05-states-v1.html",
+    "lotka-volterra-sampled-20261023": "examples/lotka-volterra-sampled-v1.html",
 }
 
 
@@ -87,11 +96,14 @@ def frozen_routes(root: Path) -> list[dict]:
         if not figures:
             continue
         route = bundle.relative_to(base).as_posix()
-        routes.append({"route": route, "source_bundle": route,
-                       "assets": [path.name for path in figures],
-                       "index_sha256": hashlib.sha256(page.read_bytes()).hexdigest(),
-                       "disposition": "deferred: route-level readability and additive-companion review pending",
-                       "follow_up_issue": 669})
+        entry = {"route": route, "source_bundle": route,
+                 "assets": [path.name for path in figures],
+                 "index_sha256": hashlib.sha256(page.read_bytes()).hexdigest(),
+                 "disposition": "deferred: original frozen route-level readability review remains; companion availability is listed separately",
+                 "follow_up_issue": 669}
+        if route in FROZEN_COMPANIONS:
+            entry["companion_route"] = FROZEN_COMPANIONS[route]
+        routes.append(entry)
     return routes
 
 
@@ -119,6 +131,8 @@ def build(root: Path = ROOT) -> dict:
                     "app02-diamond-v1.png", "app02-diamond-v1-export.json",
                     "app04-square-v1.html", "app04-square-v1.svg",
                     "app04-square-v1.png", "app04-square-v1-export.json",
+                    "app03-zonotope-v1.html", "app03-zonotope-v1.svg",
+                    "app03-zonotope-v1.png", "app03-zonotope-v1-export.json",
                     "ext01-b08-timing-v1.html", "ext01-b08-timing-v1.svg",
                     "ext01-b08-timing-v1.png", "ext01-b08-timing-v1-export.json",
                     "ext05-states-v1.html", "ext05-states-v1.svg",

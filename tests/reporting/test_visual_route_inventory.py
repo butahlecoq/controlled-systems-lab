@@ -31,6 +31,8 @@ class VisualRouteInventoryTests(unittest.TestCase):
                          "composes-or-copies-existing-saved-figure")
         self.assertEqual(producers["scripts/reports/app02/render_saved.py"]["disposition"],
                          "frozen-renderer-preserved-with-shared-policy-companion")
+        self.assertEqual(producers["scripts/reports/app03/render_saved.py"]["disposition"],
+                         "frozen-renderer-preserved-with-shared-policy-companion")
         self.assertEqual(producers["scripts/reports/ext01/render_saved.py"]["disposition"],
                          "frozen-renderer-preserved-with-shared-policy-companion")
         self.assertEqual(producers["scripts/reports/ext05/render_saved.py"]["disposition"],
@@ -48,12 +50,15 @@ class VisualRouteInventoryTests(unittest.TestCase):
         self.assertTrue(deferred)
         follow_up_counts={number:sum(entry["follow_up_issue"]==number for entry in deferred)
                           for number in (684,685,686,687)}
-        self.assertEqual(follow_up_counts,{684:6,685:12,686:17,687:11})
+        self.assertEqual(follow_up_counts,{684:5,685:12,686:17,687:11})
         self.assertTrue(all(entry["follow_up_issue"] in follow_up_counts for entry in deferred))
         routes={entry["route"]:entry for entry in inventory["frozen_published_routes"]}
         self.assertGreater(len(routes),40)
-        self.assertTrue(all(entry["disposition"].startswith("deferred: route-level readability")
+        self.assertTrue(all(entry["disposition"].startswith("deferred: original frozen route-level readability")
                             and entry["follow_up_issue"] == 669 for entry in routes.values()))
+        self.assertEqual(routes["app03-zonotope-4522855018fa9b0b"]["companion_route"],
+                         "examples/app03-zonotope-v1.html")
+        self.assertEqual(routes["app03-zonotope-4522855018fa9b0b"]["follow_up_issue"], 669)
         self.assertTrue(any(name.endswith("terminal-projections.svg")
                             for entry in routes.values() for name in entry["assets"]))
         self.assertEqual(inventory["gallery_routes"][0]["route"],"examples/index.html")
@@ -70,6 +75,8 @@ class VisualRouteInventoryTests(unittest.TestCase):
             "app02-diamond-v1.html", "app02-diamond-v1.svg", "app02-diamond-v1.png",
             "app02-diamond-v1-export.json", "app04-square-v1.html", "app04-square-v1.svg",
             "app04-square-v1.png", "app04-square-v1-export.json",
+            "app03-zonotope-v1.html", "app03-zonotope-v1.svg",
+            "app03-zonotope-v1.png", "app03-zonotope-v1-export.json",
             "ext01-b08-timing-v1.html", "ext01-b08-timing-v1.svg",
             "ext01-b08-timing-v1.png", "ext01-b08-timing-v1-export.json",
             "ext05-states-v1.html", "ext05-states-v1.svg", "ext05-states-v1.png",
