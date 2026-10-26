@@ -55,7 +55,10 @@ class GalleryTests(unittest.TestCase):
             source_id = saved.get("source_report_id", report_id)
             source = ROOT / "reports/algorithm-results" / source_id
             if not (target / "records.json").exists():
-                (target / "records.json").write_text("{}", encoding="utf-8")
+                if (source / "records.json").is_file():
+                    shutil.copyfile(source / "records.json", target / "records.json")
+                else:
+                    (target / "records.json").write_text("{}", encoding="utf-8")
             if not (target / saved["page"]).exists():
                 (target / saved["page"]).write_text("<html>report fixture</html>", encoding="utf-8")
             if not (target / saved["image"]).exists():
@@ -188,6 +191,7 @@ class GalleryTests(unittest.TestCase):
         self.assertIn('href="algorithm-coverage.json"', page)
         self.assertIn('href="issue3-control-walkthrough.html"', page)
         self.assertIn("End-to-end walkthrough", page)
+        self.assertIn('href="lotka-volterra-sampled-v1.html"', page)
         self.assertIn("065de5e45d295dfa099e25265c4014c0c46673f8", page)
         self.assertIn("blob/b83b8dc415dbe5811371b8446931ae4c6f3d2e28/reports/algorithm-results/tooling/geo04/polyhedral_intersection_driver.cpp", page)
         parser = Links()
@@ -196,7 +200,7 @@ class GalleryTests(unittest.TestCase):
             if not urlsplit(link).scheme and not link.startswith("#"):
                 self.assertTrue((self.site / "examples" / link.split("#")[0]).is_file(), link)
         figures = list((self.site / "examples").glob("*.svg"))
-        self.assertEqual(len(figures), len(self.examples) + len(gallery.visual_illustrations.CASES) + 10)
+        self.assertEqual(len(figures), len(self.examples) + len(gallery.visual_illustrations.CASES) + 13)
         for figure in figures:
             if figure.name == "fuel-b06-viz06-before.svg":
                 self.assertEqual(hashlib.sha256(figure.read_bytes()).hexdigest(),
@@ -220,6 +224,27 @@ class GalleryTests(unittest.TestCase):
         workflow_svg = ET.parse(self.site / "examples/issue3-control-walkthrough.svg")
         self.assertIn("action 0: (0,0), cost 1", "".join(workflow_svg.getroot().itertext()))
         self.assertIn("action 1: (1,0), cost 0", "".join(workflow_svg.getroot().itertext()))
+        lotka_page = (self.site / "examples/lotka-volterra-sampled-v1.html").read_text()
+        self.assertIn("frozen record directly; it does not re-run the recurrence", lotka_page)
+        self.assertIn("not an exact reachability set", lotka_page)
+        lotka_svg = ET.parse(self.site / "examples/lotka-volterra-sampled-v1.svg").getroot()
+        lotka_description = lotka_svg.find("{http://www.w3.org/2000/svg}desc")
+        self.assertIn("csl-report-quantitative-v1", lotka_description.text)
+        visual_inventory = json.loads((self.site / "examples/visual-coverage.json").read_text())
+        lotka_entry = next(entry for entry in visual_inventory["entries"]
+                           if entry["anchor"] == "saved-figure-lotka-quantitative")
+        self.assertEqual(lotka_entry["figure"], "lotka-volterra-sampled-v1.svg")
+        for stem, expected_text in (("app02-diamond-v1", "saved input and rotated outer bound"),
+                                   ("app04-square-v1", "diagonal orientation")):
+            companion_page = (self.site / "examples" / (stem + ".html")).read_text()
+            self.assertIn("csl-report-quantitative-v1", companion_page)
+            self.assertIn("Frozen values", companion_page)
+            companion_svg = ET.parse(self.site / "examples" / (stem + ".svg")).getroot()
+            description = companion_svg.find("{http://www.w3.org/2000/svg}desc")
+            self.assertIn("csl-report-quantitative-v1", description.text)
+            self.assertIn(expected_text, " ".join(companion_svg.itertext()))
+            entry = next(entry for entry in visual_inventory["entries"] if entry["anchor"] == stem)
+            self.assertEqual(entry["figure"], stem + ".svg")
         square = ET.parse(self.site / "examples/square_duplicates.svg")
         boundary = square.find(".//{http://www.w3.org/2000/svg}polygon")
         self.assertEqual(boundary.attrib["points"],
