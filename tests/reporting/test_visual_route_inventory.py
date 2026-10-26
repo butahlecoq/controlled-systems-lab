@@ -32,9 +32,14 @@ class VisualRouteInventoryTests(unittest.TestCase):
         deferred=[entry for entry in producers.values()
                   if entry["disposition"]=="deferred-family-specific-migration"]
         self.assertTrue(deferred)
-        self.assertTrue(all(entry["follow_up_issue"]==669 for entry in deferred))
+        follow_up_counts={number:sum(entry["follow_up_issue"]==number for entry in deferred)
+                          for number in (684,685,686,687)}
+        self.assertEqual(follow_up_counts,{684:13,685:12,686:17,687:11})
+        self.assertTrue(all(entry["follow_up_issue"] in follow_up_counts for entry in deferred))
         routes={entry["route"]:entry for entry in inventory["frozen_published_routes"]}
         self.assertGreater(len(routes),40)
+        self.assertTrue(all(entry["disposition"].startswith("justified-exception: immutable")
+                            and "follow_up_issue" not in entry for entry in routes.values()))
         self.assertTrue(any(name.endswith("terminal-projections.svg")
                             for entry in routes.values() for name in entry["assets"]))
         self.assertEqual(inventory["gallery_routes"][0]["route"],"examples/index.html")

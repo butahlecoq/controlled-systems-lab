@@ -11,6 +11,22 @@ import re
 ROOT = Path(__file__).resolve().parents[2]
 VISUAL_SIGNAL = re.compile(r"<svg|savefig\s*\(|write_image\s*\(|\.svg\b|\.png\b|render_svg", re.I)
 ASSET_NAME = re.compile(r"[A-Za-z0-9_.-]+\.(?:svg|png)")
+MIGRATION_ISSUES = {
+    "approximation-and-extensions": 684,
+    "geometry-and-optimization": 685,
+    "control-strategy-and-witness": 686,
+    "historical-and-benchmarks": 687,
+}
+
+
+def migration_issue(source: str) -> int:
+    if any(token in source for token in ("/app0", "/ext", "/finite_feedback", "/lotka_volterra")):
+        return MIGRATION_ISSUES["approximation-and-extensions"]
+    if any(token in source for token in ("/geo", "/opt", "/it17_hull")):
+        return MIGRATION_ISSUES["geometry-and-optimization"]
+    if "/syn" in source or "/ts01" in source:
+        return MIGRATION_ISSUES["control-strategy-and-witness"]
+    return MIGRATION_ISSUES["historical-and-benchmarks"]
 
 
 def source_inventory(root: Path) -> list[dict]:
@@ -39,7 +55,8 @@ def source_inventory(root: Path) -> list[dict]:
                 disposition = "deferred-family-specific-migration"
             entries.append({"source": relative, "signal_count": len(matches),
                             "asset_name_literals": assets, "disposition": disposition,
-                            **({"follow_up_issue": 669} if disposition == "deferred-family-specific-migration" else {})})
+                            **({"follow_up_issue": migration_issue(relative)}
+                               if disposition == "deferred-family-specific-migration" else {})})
     return entries
 
 
@@ -56,8 +73,7 @@ def frozen_routes(root: Path) -> list[dict]:
         routes.append({"route": route, "source_bundle": route,
                        "assets": [path.name for path in figures],
                        "index_sha256": hashlib.sha256(page.read_bytes()).hexdigest(),
-                       "disposition": "immutable-preserved; publish a companion for presentation changes",
-                       "follow_up_issue": 669})
+                       "disposition": "justified-exception: immutable historical evidence; publish an additive companion for presentation changes"})
     return routes
 
 
@@ -80,7 +96,7 @@ def build(root: Path = ROOT) -> dict:
                     "fuel-b06-viz06-trajectory.svg", "fuel-b06-viz06-trajectory.png",
                     "fuel-b06-viz06-timing.svg", "fuel-b06-viz06-timing.png"],
                  "disposition": "adopted-shared-quantitative-policy"}],
-            "migration_owner": "#669; deferred family-specific renderers and frozen routes remain inventoried until migrated or split into scoped follow-up work"}
+            "migration_owner": "#669 owns the shared policy; deferred family renderers link to scoped follow-up issues #684–#687, while frozen report bundles remain immutable evidence"}
 
 
 def main() -> None:

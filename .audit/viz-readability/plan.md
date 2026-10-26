@@ -13,7 +13,7 @@
 
 ## Scope estimate and constraints
 
-The initial source scan found 192 Python files under `scripts/reports`, 62 files containing an SVG or savefig signal, and 44 with SVG literals. The deterministic inventory scans both `scripts/reports/**/*.py` and `benchmarks/reporting/**/*.py`; it records 82 source candidates, 53 frozen report routes with figures, and the gallery route. Of the source candidates, 53 family-specific renderers remain deferred under #669; route-level adoption/follow-up decisions need final review before this issue closes. The first wave has a new B06 flow/stock projection companion, one trajectory/stage chart, one timing chart, accessible exact-value data, and a byte-identical old figure for comparison.
+The initial source scan found 192 Python files under `scripts/reports`, 62 files containing an SVG or savefig signal, and 44 with SVG literals. The deterministic inventory scans both `scripts/reports/**/*.py` and `benchmarks/reporting/**/*.py`; it records 82 source candidates, 53 frozen report routes with figures, and the gallery route. Of the source candidates, 53 family-specific renderers remain deferred and now link to scoped follow-ups #684–#687 (13 approximation/extension, 12 geometry/optimization, 17 control/witness, and 11 historical/benchmark candidates). Frozen report routes are explicit immutable-evidence exceptions with additive-companion treatment. Row-by-row role and disposition review remains open under #669. The first wave has a new B06 flow/stock projection companion, one trajectory/stage chart, one timing chart, accessible exact-value data, and a byte-identical old figure for comparison.
 
 The task has high rigor because it changes publication presentation, can mislead readers about scientific data, and spans many producers. Saved records and manifests are immutable evidence. B06 remains affected by issue #668 and must link its correction/erratum. B04 is not canonical and must remain restoration-labelled.
 
@@ -23,7 +23,7 @@ The task has high rigor because it changes publication presentation, can mislead
 2. **Inventory lever.** Build a deterministic audit tool that enumerates report/gallery producers, generated assets, publication registrations, and mutable versus frozen destinations. Store a route manifest; this slice verifies known B06 producers, the mutable gallery route, and frozen-route discovery. Full row-by-row role/disposition review remains open.
 3. **Shared static plot policy.** Prototype the saved-data shape and tick/aspect formatting contract. Extend the existing pinned Matplotlib path only where appropriate. Preserve hand-authored SVG for simple diagrams under the same output checks. Add fixture-driven behavior tests before migrating callers.
 4. **Representative migration.** Render new, versioned B06 flow/stock companions from saved geometry and source values. Migrate one trajectory/stage and one timing plot. Add raw-value tables, text descriptions, source/evidence notes, and responsive/offline HTML. Do not replace existing report bytes or routes.
-5. **Remaining coverage and follow-ups.** Classify every inventoried route. Migrate safe current generators that share the selected adapter. Create scoped issues for larger family migrations or producers without a verified saved-data adapter. Link all companions from the mutable gallery/index.
+5. **Remaining coverage and follow-ups.** Scoped issues #684–#687 now own the deferred family migration candidates. Classify every inventoried route, migrate safe current generators that share the selected adapter, and link companions from the mutable gallery/index.
 6. **End-to-end verification.** Run focused and full reporting checks. Compare source hashes and original publication IDs before and after. Inspect screenshots at desktop, 320/375 px, browser zoom, print, SVG/PNG, and offline HTML. Deploy only through the existing main-only workflow; verify the new live routes and unchanged old URLs.
 7. **Review and delivery.** Review the exact base/head against standards and #669 criteria. Record release/package impact, each inventory disposition, visual evidence, and follow-ups. Close #669 only when its stated done conditions are satisfied.
 
@@ -41,6 +41,7 @@ The task has high rigor because it changes publication presentation, can mislead
 - [x] Build the route inventory tool and validate known B06 producers, gallery route, and frozen-route discovery; full row-by-row disposition review remains open.
 - [x] Define and test the shared saved-data plotting contract for Matplotlib control and timing plots.
 - [x] Generate B06 flow/stock, trajectory and timing figures from saved records; inspect desktop, mobile, standalone SVG/PNG, offline HTML and print. Browser zoom remains to verify.
-- [ ] Classify the full route inventory and open scoped migration follow-ups.
+- [x] Open four scoped follow-up issues covering all 53 deferred source candidates; the route-by-route role/disposition audit remains open.
+- [ ] Classify the full route inventory.
 - [ ] Run reporting tests, visual QA, and unchanged-artifact checks.
 - [ ] Merge, deploy, verify live routes, and update #669.
