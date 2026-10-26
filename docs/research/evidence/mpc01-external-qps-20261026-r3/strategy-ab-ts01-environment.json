@@ -1,0 +1,34 @@
+{
+  "source_commit": "ce7cc08f585fd80f5e63d30becf5ef4054fd879e",
+  "source_dirty_before_run": false,
+  "source_file": "examples/registered_synthesis_comparison.cpp",
+  "source_file_sha256": "ecde95451db3809d4054c3a7c02801fb5eb46cd6b26af976110824a6730c7513",
+  "scenario": "examples/scenarios/two-stage-integrator.json",
+  "scenario_sha256": "bbeb83947627a197d71dd380dbaa5cfae12e22cd6d79b12e66ef08275b2c390a",
+  "executable": "/var/tmp/csl-mpc01-strategy-ab/examples/registered_synthesis_comparison",
+  "executable_sha256": "02cd6bfb4e51e565cbf58cd2322adca4765f9c9dc6144f8429eda57575a9046b",
+  "build": {
+    "type": "Release",
+    "cmake_generator": "Unix Makefiles",
+    "compiler": "GNU 16.2.1",
+    "flags": "-O3 -DNDEBUG",
+    "highs": "1.11.0",
+    "qhull": "8.0.2"
+  },
+  "host": {
+    "os": "Linux Omarchy",
+    "kernel": "7.2.5-3-omarchy",
+    "cpu": "AMD Ryzen 5 3550H",
+    "logical_cpus": 8,
+    "load_average_immediately_before_run": [1.06, 1.73, 1.33]
+  },
+  "measurement": {
+    "command": "registered_synthesis_comparison --measure examples/scenarios/two-stage-integrator.json strategy-ab-ts01-events.jsonl",
+    "event_count_including_header": 17,
+    "warmup_pairs_excluded": 1,
+    "measured_alternating_pairs": 7,
+    "per_attempt_wall_time_cap": null,
+    "memory_cap_bytes": null,
+    "cpu_time_or_peak_memory_profiled": false
+  }
+}

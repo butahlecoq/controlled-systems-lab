@@ -10,8 +10,9 @@ This is a new comparison on the frozen `b04-reference-v1` article-derived input 
 - Exact independent candidate checks: 90; see `exact-check-manifest.json` and `exact-candidate-checks.jsonl`.
 - Execution alternated which backend ran first on each repetition. Each backend used a fresh workspace for the cold attempt, then a separate fresh workspace seeded from that repetition's cold result when available. Warm fallback remains explicit.
 - Reported phases are formulation, setup, warm-start, solve and extraction. This excludes post-run independent proof work; the available binary64 residual diagnostics remain inconclusive.
-- No acados or Strategy A/B paired comparison is included. These records do not support a control-strategy or overall solver winner claim.
+- The separate current-branch Strategy A/B T-S01 paired run is recorded in `strategy-ab-ts01-summary.md`; it is a tiny functional/end-to-end case and supports no general strategy performance winner claim. No acados result is included.
 - See `comparison-records.jsonl` for the canonical, self-contained archives; `runner-attempts.jsonl` preserves the runner's stdout rows.
+- The B04 fuel case includes [4D-to-2D flow and working-stock projections](b04-repeated-benchmark-projections.html) with the exact witness and representative solver trajectories. Figure inputs and scope are recorded in `figure-manifest.json`.
 
 ## B04 reference case: phase timing, microseconds
 
