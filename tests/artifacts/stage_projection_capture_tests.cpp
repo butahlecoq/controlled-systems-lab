@@ -76,6 +76,8 @@ TEST_CASE("stage projection capture returns one projection or explicit gap per p
     CHECK(projection.projected_relation.metadata.dimension == 2);
     CHECK(projection.reference.identity.problem.value == "fuel-analytic-fixture");
     CHECK(projection.reference.identity.request.value == "capture/pair/0/stage/0");
+    REQUIRE(projection.reference.inputs.size() == 1);
+    CHECK(projection.reference.inputs.front() == initial.metadata()->id);
     REQUIRE(batch.records[0].source_assurance.has_value());
     CHECK(*batch.records[0].source_assurance == Assurance::numerical);
     CHECK(projection.cost.geometry_operation_elapsed.count() >= 0);

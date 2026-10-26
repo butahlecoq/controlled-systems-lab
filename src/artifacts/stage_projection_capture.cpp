@@ -22,12 +22,11 @@ StageProjectionFailure failed(const GeometryRequestIdentity& identity,
 
 void append_failure(StageProjectionBatchCapture& batch, const StageProjectionInput& input,
     const ResolvedStageProjectionPair& pair, Assurance source_assurance,
-    const std::vector<GeometryEvidence>& source_evidence,
     const GeometryRequestIdentity& identity,
     std::optional<registry::Provenance> selected_provider,
     std::variant<registry::Rejection, Unsupported, OperationStopped, ArtifactError> cause,
     std::optional<PlotQueryCost> cost = {}) {
-    batch.records.push_back({input.stage, input.physical_time, pair, source_assurance, source_evidence,
+    batch.records.push_back({input.stage, input.physical_time, pair, source_assurance,
         failed(identity, std::move(selected_provider), std::move(cause), std::move(cost))});
 }
 
@@ -57,7 +56,7 @@ StageProjectionCaptureOutcome capture_stage_projections(
             const auto& pair = pairs[p];
             if (!source) {
                 const auto& gap = std::get<StageProjectionGap>(input.source);
-                batch.records.push_back({input.stage, input.physical_time, pair, {}, {},
+                batch.records.push_back({input.stage, input.physical_time, pair, {},
                     StageProjectionUnavailable{gap.kind, gap.explanation, gap.stop}});
                 continue;
             }
@@ -67,14 +66,14 @@ StageProjectionCaptureOutcome capture_stage_projections(
                 {request.request.value + suffix}, {"stage-projection" + suffix}};
             const auto selected_provider = provider.provenance();
             if (source->owner.problem != request.problem) {
-                append_failure(batch, input, pair, source->assurance, source->source_evidence,
+                append_failure(batch, input, pair, source->assurance,
                     identity, selected_provider,
                     ArtifactError{ArtifactErrorCode::identity, "request.stages.source.owner",
                         "stage source belongs to a different problem"});
                 continue;
             }
             if (source->relation_claim != request.required_relation) {
-                append_failure(batch, input, pair, source->assurance, source->source_evidence,
+                append_failure(batch, input, pair, source->assurance,
                     identity, selected_provider,
                     unsupported("request.required_relation",
                         "source stage does not satisfy the requested relation claim"));
@@ -87,7 +86,7 @@ StageProjectionCaptureOutcome capture_stage_projections(
                 Projection{source->relation, std::move(selected)}, request.required_relation,
                 request.assurance};
             if (const auto errors = check_operation_shape(operation); !errors.empty()) {
-                append_failure(batch, input, pair, source->assurance, source->source_evidence,
+                append_failure(batch, input, pair, source->assurance,
                     identity, selected_provider,
                     Unsupported{errors});
                 continue;
@@ -95,7 +94,7 @@ StageProjectionCaptureOutcome capture_stage_projections(
 
             auto admission = provider.prepare(operation);
             if (const auto* rejected = std::get_if<registry::Rejection>(&admission)) {
-                append_failure(batch, input, pair, source->assurance, source->source_evidence, identity,
+                append_failure(batch, input, pair, source->assurance, identity,
                     rejected->provenance, *rejected);
                 continue;
             }
@@ -107,41 +106,40 @@ StageProjectionCaptureOutcome capture_stage_projections(
                 std::chrono::steady_clock::now() - started)};
             const auto operation_provider = prepared.provenance().front();
             if (const auto* stopped = std::get_if<OperationStopped>(&outcome)) {
-                append_failure(batch, input, pair, source->assurance, source->source_evidence, identity,
+                append_failure(batch, input, pair, source->assurance, identity,
                     operation_provider, *stopped, cost);
                 continue;
             }
             if (const auto* rejected = std::get_if<Unsupported>(&outcome)) {
-                append_failure(batch, input, pair, source->assurance, source->source_evidence, identity,
+                append_failure(batch, input, pair, source->assurance, identity,
                     operation_provider, *rejected, cost);
                 continue;
             }
             const auto* projection = std::get_if<OperationResult>(&outcome);
             if (!projection) {
-                append_failure(batch, input, pair, source->assurance, source->source_evidence, identity,
+                append_failure(batch, input, pair, source->assurance, identity,
                     operation_provider, unsupported("projection.outcome",
                         "geometry provider returned a non-projection result"), cost);
                 continue;
             }
             if (projection->relation != request.required_relation) {
-                append_failure(batch, input, pair, source->assurance, source->source_evidence, identity,
+                append_failure(batch, input, pair, source->assurance, identity,
                     operation_provider, unsupported("projection.relation",
                         "geometry provider returned a different relation guarantee"), cost);
                 continue;
             }
             if (const auto errors = check_geometry_evidence(projection->evidence, operation); !errors.empty()) {
-                append_failure(batch, input, pair, source->assurance, source->source_evidence, identity,
+                append_failure(batch, input, pair, source->assurance, identity,
                     operation_provider, Unsupported{errors}, cost);
                 continue;
             }
             if (projection->output.metadata.dimension != 2) {
-                append_failure(batch, input, pair, source->assurance, source->source_evidence, identity,
+                append_failure(batch, input, pair, source->assurance, identity,
                     operation_provider, unsupported("projection.dimension",
                         "geometry provider did not return two coordinates"), cost);
                 continue;
             }
             batch.records.push_back({input.stage, input.physical_time, pair, source->assurance,
-                source->source_evidence,
                 PlotSetProjection{request.problem, source->owner, input.stage,
                     projection->evidence.reference, projection->output, pair.coordinates,
                     projection->relation, projection->evidence.support,

@@ -25,7 +25,6 @@ struct StageProjectionRecord {
     std::optional<double> physical_time;
     ResolvedStageProjectionPair pair;
     std::optional<Assurance> source_assurance;
-    std::vector<GeometryEvidence> source_evidence;
     StageProjectionOutcome outcome;
 };
 

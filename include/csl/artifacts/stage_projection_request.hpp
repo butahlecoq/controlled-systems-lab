@@ -22,7 +22,6 @@ struct StageProjectionSet {
     std::vector<std::size_t> relation_coordinates;
     SetRelation relation_claim{SetRelation::equivalent};
     Assurance assurance{Assurance::numerical};
-    std::vector<GeometryEvidence> source_evidence;
 };
 
 struct StageProjectionGap {
