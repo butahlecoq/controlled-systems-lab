@@ -1,5 +1,6 @@
 #include <csl/optimization/finite_action_minimax.hpp>
 #include <csl/execution/timing_collector.hpp>
+#include <algorithm>
 
 #include <cmath>
 #include <limits>
