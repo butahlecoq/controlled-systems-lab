@@ -739,7 +739,7 @@
       "signal_count": 1,
       "asset_name_literals": [],
       "disposition": "deferred-family-specific-migration",
-      "follow_up_issue": 687
+      "follow_up_issue": 686
     },
     {
       "source": "scripts/reports/viz10_plot_companions.py",
