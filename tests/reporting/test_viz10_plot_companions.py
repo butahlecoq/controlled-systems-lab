@@ -11,6 +11,21 @@ import viz10_plot_companions as renderer
 
 
 class Viz10SavedPlotCompanionTests(unittest.TestCase):
+    def test_fuel_figure_coordinates_match_saved_four_state_rows(self):
+        b07_path = ROOT / "reports/algorithm-results/b07-owner-approved-eight-case-v1/results.jsonl"
+        b09_path = ROOT / "reports/algorithm-results/b09-a08-source-reference-4818ddde/results.jsonl"
+
+        self.assertEqual([(pair[0], pair[1]) for pair in renderer.B07_PAIRS], [(0, 1), (2, 3)])
+        self.assertEqual([(pair[0], pair[1]) for pair in renderer.FUEL_PAIRS], [(0, 2), (1, 3)])
+
+        b07 = renderer.load_jsonl(b07_path)[0]["winner_terminal_vertices_x1_x3_x2_x4"]
+        self.assertEqual(renderer.project_coordinates(b07, 0, 1), [(row[0], row[1]) for row in b07])
+        self.assertEqual(renderer.project_coordinates(b07, 2, 3), [(row[2], row[3]) for row in b07])
+
+        b09 = renderer.load_jsonl(b09_path)[0]["winner_terminal_vertices_x1_x2_x3_x4"]
+        self.assertEqual(renderer.project_coordinates(b09, 0, 2), [(row[0], row[2]) for row in b09])
+        self.assertEqual(renderer.project_coordinates(b09, 1, 3), [(row[1], row[3]) for row in b09])
+
     def test_companions_replay_saved_records_with_quantitative_axes_and_provenance(self):
         with tempfile.TemporaryDirectory(prefix="viz10-render-", dir=ROOT) as temporary:
             out = Path(temporary) / "gallery"
