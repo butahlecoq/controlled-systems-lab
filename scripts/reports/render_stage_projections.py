@@ -9,7 +9,6 @@ ROOT = Path(__file__).resolve().parents[2]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-from scripts.reports.stage_projection_data import read_stage_projection_batch
 from scripts.reports.stage_projection_figures import render_batch
 
 
@@ -34,8 +33,8 @@ def main() -> None:
         "expected_record_schema": args.expected_record_schema,
         "expected_source_sha256": args.expected_source_sha256,
     }
-    batch = read_stage_projection_batch(args.input, **expected)
-    paths = render_batch(batch, args.out.resolve(), style_path=args.style.resolve(strict=True))
+    paths = render_batch(args.input, args.out.resolve(), expected_identity=expected,
+                         style_path=args.style.resolve(strict=True))
     output = args.out.resolve(strict=True)
     print(f"index: {output / 'index.html'}")
     print(f"manifest: {output / 'render-manifest.json'}")

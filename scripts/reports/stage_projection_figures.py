@@ -10,6 +10,7 @@ from pathlib import Path
 import xml.etree.ElementTree as ET
 
 from scripts.reports import figure_style
+from scripts.reports.stage_projection_data import read_stage_projection_batch
 
 
 PALETTE = ("#9ccfd8", "#c4a7e7", "#f6c177", "#eb6f92", "#a6da95", "#e0def4")
@@ -228,8 +229,9 @@ def _render_pair(batch: dict, pair_index: int, stage_rows: list[dict], trajector
     return svg, png, title, description.text
 
 
-def render_batch(batch: dict, output_directory: Path, *, style_path: Path) -> list[dict]:
-    """Write one SVG/PNG per coordinate pair and an offline, responsive index."""
+def render_batch(input_path: Path, output_directory: Path, *, expected_identity: dict[str, str],
+                 style_path: Path) -> list[dict]:
+    """Validate a saved batch, then write figures and an offline responsive index."""
     import os
 
     os.environ.setdefault("MPLCONFIGDIR", str(output_directory.parent / "mpl-config"))
@@ -239,6 +241,7 @@ def render_batch(batch: dict, output_directory: Path, *, style_path: Path) -> li
 
     if output_directory.exists():
         raise FileExistsError(f"output directory already exists: {output_directory}")
+    batch = read_stage_projection_batch(input_path, **expected_identity)
     style = json.loads(style_path.read_text(encoding="utf-8"))
     if style.get("schema") != "csl.figure-style/1" or \
             style.get("quantitative_axis_policy") != figure_style.STYLE_ID:

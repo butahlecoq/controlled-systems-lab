@@ -35,11 +35,16 @@ class StageProjectionFiguresTests(unittest.TestCase):
     def load_fixture(self) -> dict:
         return data.read_stage_projection_batch(FIXTURE, **IDENTITY)
 
+    def render(self, batch: dict, output: Path) -> list[dict]:
+        input_path = output.parent / "validated-input.json"
+        input_path.write_bytes(data.dumps_stage_projection_batch(batch, **IDENTITY))
+        return render_batch(input_path, output, expected_identity=IDENTITY, style_path=STYLE)
+
     def test_saved_batch_renders_accessible_svg_png_and_offline_html(self):
         batch = self.load_fixture()
         with tempfile.TemporaryDirectory() as temporary:
             output = Path(temporary) / "rendered"
-            outputs = render_batch(batch, output, style_path=STYLE)
+            outputs = self.render(batch, output)
 
             self.assertEqual(len(outputs), len(batch["requested_pairs"]))
             self.assertTrue((output / "index.html").is_file())
@@ -76,7 +81,7 @@ class StageProjectionFiguresTests(unittest.TestCase):
             data.dumps_stage_projection_batch(batch, **IDENTITY), **IDENTITY)
         with tempfile.TemporaryDirectory() as temporary:
             output = Path(temporary) / "rendered"
-            render_batch(batch, output, style_path=STYLE)
+            self.render(batch, output)
             html = (output / "index.html").read_text(encoding="utf-8")
             self.assertIn("unbounded", html)
             self.assertIn("missing", html)
@@ -100,7 +105,7 @@ class StageProjectionFiguresTests(unittest.TestCase):
             data.dumps_stage_projection_batch(batch, **IDENTITY), **IDENTITY)
         with tempfile.TemporaryDirectory() as temporary:
             output = Path(temporary) / "rendered"
-            rendered = render_batch(batch, output, style_path=STYLE)
+            rendered = self.render(batch, output)
             svg_root = ET.parse(output / rendered[0]["svg"]).getroot()
             text = " ".join(node.text or "" for node in svg_root.iter()
                              if node.tag.endswith("}text"))
@@ -130,7 +135,7 @@ class StageProjectionFiguresTests(unittest.TestCase):
             data.dumps_stage_projection_batch(batch, **IDENTITY), **IDENTITY)
         with tempfile.TemporaryDirectory() as temporary:
             output = Path(temporary) / "rendered"
-            rendered = render_batch(batch, output, style_path=STYLE)
+            rendered = self.render(batch, output)
             self.assertEqual([item["svg"] for item in rendered], [
                 "projection-01-x0-x2.svg", "projection-02-x2-x0.svg"])
             html = (output / "index.html").read_text(encoding="utf-8")
@@ -142,7 +147,7 @@ class StageProjectionFiguresTests(unittest.TestCase):
             output = Path(temporary) / "existing"
             output.mkdir()
             with self.assertRaises(FileExistsError):
-                render_batch(self.load_fixture(), output, style_path=STYLE)
+                self.render(self.load_fixture(), output)
 
     def test_offline_command_prints_absolute_artifact_paths(self):
         with tempfile.TemporaryDirectory() as temporary:
