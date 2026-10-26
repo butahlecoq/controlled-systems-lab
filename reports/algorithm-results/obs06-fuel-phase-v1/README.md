@@ -66,8 +66,8 @@ build/csl_issue6_b07_report --phase-timing > raw/b07-phase.jsonl
 build/csl_issue6_b09_report --lambda 0 --phase-timing > raw/b09-lambda0-phase.json
 build/csl_issue6_b09_report --lambda 1 --phase-timing > raw/b09-lambda1-phase.json
 python3 benchmarks/reporting/issue6/fuel_phase_summary.py \
-  raw/b06-phase.json.gz raw/b07-phase.jsonl.gz \
-  raw/b09-lambda0-phase.json.gz raw/b09-lambda1-phase.json.gz \
+  raw/b06-phase.json raw/b07-phase.jsonl \
+  raw/b09-lambda0-phase.json raw/b09-lambda1-phase.json \
   --output phase-summary.csv --provenance capture-provenance.json
 ```
 

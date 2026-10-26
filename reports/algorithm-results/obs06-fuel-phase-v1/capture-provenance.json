@@ -1,8 +1,8 @@
 {
   "schema": "csl.obs06-capture-provenance/1",
-  "source_commit": "dc06f0a8fcb9301b0397b7c184c5b17d50a70474",
+  "source_commit": "953c74fbf71549501b1bb0fb7b6f9aec18326f55",
   "source_tree_clean_at_capture": true,
-  "capture_started_utc": "2026-10-26T19:16:22.157436+00:00",
+  "capture_started_utc": "2026-10-26T19:33:06.463623+00:00",
   "build_type": "Release",
   "compiler": "c++ (GCC) 16.2.1 20260810",
   "cmake": "cmake version 3.31.6",
@@ -12,9 +12,9 @@
     "kernel": "7.2.5-3-omarchy",
     "cpu_model": "AMD Ryzen 5 3550H with Radeon Vega Mobile Gfx",
     "load_average_at_manifest_write": [
-      0.69970703125,
-      0.82177734375,
-      0.767578125
+      1.46,
+      1.62,
+      1.12
     ],
     "configuration": "Release, BUILD_TESTING=ON, HiGHS=OFF, Qhull=OFF",
     "resources": {
@@ -36,20 +36,20 @@
     "process_state": "new process per executable invocation; B07 cases share one process"
   },
   "binary_sha256": {
-    "csl_issue6_b06_report": "b32b32190e0291c51072b509dc25e486c1967791e9b42dfe2d7ccdc7117b304b",
-    "csl_issue6_b07_report": "f7d71b89e7c5c68c382bedb4e67b4705c065d515a23a871678882824c79f8b44",
-    "csl_issue6_b09_report": "c2be797363092f0b065eea5333bfa013c39ebc238efdc61850ec81c6443bae16"
+    "csl_issue6_b06_phase_report": "30d1da84e551563d1533fcb1975e5219a93eb43cc14ae32a46cb93a38c903f25",
+    "csl_issue6_b07_report": "6b6bc852d505b0790dea2e221bc7c6e0942f5c65788ceed236f9c127b309706f",
+    "csl_issue6_b09_report": "d094e3deb226ca6480c57f13dbf1729c2adc74dfbe7323e75320ded5c9dd694d"
   },
   "raw_binary_sha256": {
-    "b06-phase.json.gz": "b32b32190e0291c51072b509dc25e486c1967791e9b42dfe2d7ccdc7117b304b",
-    "b07-phase.jsonl.gz": "f7d71b89e7c5c68c382bedb4e67b4705c065d515a23a871678882824c79f8b44",
-    "b09-lambda0-phase.json.gz": "c2be797363092f0b065eea5333bfa013c39ebc238efdc61850ec81c6443bae16",
-    "b09-lambda1-phase.json.gz": "c2be797363092f0b065eea5333bfa013c39ebc238efdc61850ec81c6443bae16"
+    "b06-phase.json.gz": "30d1da84e551563d1533fcb1975e5219a93eb43cc14ae32a46cb93a38c903f25",
+    "b07-phase.jsonl.gz": "6b6bc852d505b0790dea2e221bc7c6e0942f5c65788ceed236f9c127b309706f",
+    "b09-lambda0-phase.json.gz": "d094e3deb226ca6480c57f13dbf1729c2adc74dfbe7323e75320ded5c9dd694d",
+    "b09-lambda1-phase.json.gz": "d094e3deb226ca6480c57f13dbf1729c2adc74dfbe7323e75320ded5c9dd694d"
   },
   "raw_files": {
-    "b06-phase.json.gz": "00fd91d8b863c8484f550fcbfbadc57640500b46495667b9c50be786f3651a8a",
-    "b07-phase.jsonl.gz": "0879084911a64865ff18562b99e99a44a59a4bc54e32dd99637b965e614da558",
-    "b09-lambda0-phase.json.gz": "5162bbb466696fb018c14a6a51fceb72c1399f924246926461619c870f21e3ce",
-    "b09-lambda1-phase.json.gz": "fe473daba008408c0d3f919ecbd92aaec9e057094fc555dd86a2e8366e43124e"
+    "b06-phase.json.gz": "74bff0300418380b92ef312b5991a1c4dcdf8b7bc7a9c7a59b10cf02159ad763",
+    "b07-phase.jsonl.gz": "b4a5ddec9ace0ce194dcd3c1905addbc4254279d1062953b3f97280c9f702903",
+    "b09-lambda0-phase.json.gz": "91ecdfeb9e4796c21b6e695b84a2cc763d534e376733eed3cdca413c0853d1a2",
+    "b09-lambda1-phase.json.gz": "d86c4d11ddf34074e5a8a7a9fac06181ceb5cc1d59dad0c0c81517f910885fe6"
   }
 }
