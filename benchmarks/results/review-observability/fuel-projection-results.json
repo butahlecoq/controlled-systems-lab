@@ -1,0 +1,193 @@
+{
+  "schema": "csl.review07-fuel-projection-probe/1",
+  "claim": "coordinate-selection wall time only; excludes solving, input loading, plotting, and rendering",
+  "source_commit": "d656c41d238b2f6d48b24c291b12ad8a0cdb4c0a",
+  "probe_source_sha256": "a15a6a36ae85295582abeac6cd504626790f3cde181d9af552dacd50a1995dee",
+  "renderer_source_sha256": "7d91916425af0f87021bf462a6a155be6af892e31fd90edc946be4e42c9ea141",
+  "input_sha256": {
+    "b07_results": "f2f81f70ab29d0c07624eee01cefb0a8d06f2062487dc5f337141b1d66636881",
+    "b09_results": "9d2cfe56dc7ea94dcb26241bc423b3ce294d4220e98964fb8195f6afe62956e6"
+  },
+  "environment": {
+    "python": "3.14.7 (main, Aug 10 2026, 07:46:56) [GCC 16.1.1 20260728]",
+    "platform": "Linux-7.2.5-3-omarchy-x86_64-with-glibc2.44",
+    "processor": "",
+    "logical_cpus": 8,
+    "cpu_model": "AMD Ryzen 5 3550H with Radeon Vega Mobile Gfx",
+    "load_average_before": [
+      0.59912109375,
+      0.3427734375,
+      0.3515625
+    ]
+  },
+  "iterations_per_sample": 100,
+  "warmups_per_dataset": 1,
+  "alternating_pairs": 7,
+  "dataset_shape": {
+    "b07": {
+      "cases": 8,
+      "vertices_per_case": [
+        1024,
+        1024,
+        1024,
+        1024,
+        1024,
+        1024,
+        1024,
+        1024
+      ],
+      "projected_pairs_per_case": [
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
+    },
+    "b09": {
+      "cases": 2,
+      "vertices_per_case": [
+        256,
+        256
+      ],
+      "projected_pairs_per_case": [
+        2,
+        2
+      ]
+    }
+  },
+  "raw_order": [
+    {
+      "pair": 1,
+      "dataset": "b07",
+      "elapsed_ns": 121035768,
+      "validation": "passed"
+    },
+    {
+      "pair": 1,
+      "dataset": "b09",
+      "elapsed_ns": 5728434,
+      "validation": "passed"
+    },
+    {
+      "pair": 2,
+      "dataset": "b09",
+      "elapsed_ns": 5204619,
+      "validation": "passed"
+    },
+    {
+      "pair": 2,
+      "dataset": "b07",
+      "elapsed_ns": 126029884,
+      "validation": "passed"
+    },
+    {
+      "pair": 3,
+      "dataset": "b07",
+      "elapsed_ns": 131240440,
+      "validation": "passed"
+    },
+    {
+      "pair": 3,
+      "dataset": "b09",
+      "elapsed_ns": 5100416,
+      "validation": "passed"
+    },
+    {
+      "pair": 4,
+      "dataset": "b09",
+      "elapsed_ns": 4840045,
+      "validation": "passed"
+    },
+    {
+      "pair": 4,
+      "dataset": "b07",
+      "elapsed_ns": 121309897,
+      "validation": "passed"
+    },
+    {
+      "pair": 5,
+      "dataset": "b07",
+      "elapsed_ns": 130711317,
+      "validation": "passed"
+    },
+    {
+      "pair": 5,
+      "dataset": "b09",
+      "elapsed_ns": 5116410,
+      "validation": "passed"
+    },
+    {
+      "pair": 6,
+      "dataset": "b09",
+      "elapsed_ns": 4822305,
+      "validation": "passed"
+    },
+    {
+      "pair": 6,
+      "dataset": "b07",
+      "elapsed_ns": 124322738,
+      "validation": "passed"
+    },
+    {
+      "pair": 7,
+      "dataset": "b07",
+      "elapsed_ns": 146070463,
+      "validation": "passed"
+    },
+    {
+      "pair": 7,
+      "dataset": "b09",
+      "elapsed_ns": 6882781,
+      "validation": "passed"
+    }
+  ],
+  "summary": {
+    "b07": {
+      "count": 7,
+      "median_ns": 126029884,
+      "range_ns": [
+        121035768,
+        146070463
+      ],
+      "samples_ns": [
+        121035768,
+        126029884,
+        131240440,
+        121309897,
+        130711317,
+        124322738,
+        146070463
+      ]
+    },
+    "b09": {
+      "count": 7,
+      "median_ns": 5116410,
+      "range_ns": [
+        4822305,
+        6882781
+      ],
+      "samples_ns": [
+        5728434,
+        5204619,
+        5100416,
+        4840045,
+        5116410,
+        4822305,
+        6882781
+      ]
+    }
+  },
+  "all_projection_checks_passed": true,
+  "profile_file": "fuel-projection-profile.txt",
+  "profile_sha256": "db6cc56847b36dc762c8b05044174a398730df01d0349471abb0af2f419de796",
+  "limitations": [
+    "microbenchmark only",
+    "no solver or geometry-query timing",
+    "no figure/image export timing",
+    "no speedup or scalability claim"
+  ]
+}

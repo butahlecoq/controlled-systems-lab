@@ -1,0 +1,10 @@
+         2004 function calls in 0.147 seconds
+
+   Ordered by: internal time
+
+   ncalls  tottime  percall  cumtime  percall filename:lineno(function)
+     2000    0.111    0.000    0.111    0.000 viz10_plot_companions.py:41(project_coordinates)
+        2    0.035    0.018    0.147    0.073 fuel_projection_probe.py:46(project_batch)
+        2    0.000    0.000    0.000    0.000 {method 'disable' of '_lsprof.Profiler' objects}
+
+
