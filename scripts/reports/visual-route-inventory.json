@@ -1167,7 +1167,7 @@
       "assets": [
         "disturbance-tube.svg"
       ],
-      "index_sha256": "662c496834c435c40cf9428bb536e117ef792485b77fb4e73e819bd343fb1529",
+      "index_sha256": "805acd1977b50f2f7dc18bd206fd729a0c3ef73491717786e78ca9c3c01d07bd",
       "disposition": "deferred: original frozen route-level readability review remains; companion availability is listed separately",
       "follow_up_issue": 669,
       "companion_route": "examples/index.html"
