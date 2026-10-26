@@ -11,9 +11,11 @@ requested order, including reversed pairs. A successful record contains the
 relation and assurance claim, provider identity, evidence, and one or more
 geometry components. A component using a V representation means
 `conv(vertices) + cone(rays)`; the vertices are not assumed to be cyclically
-ordered. Empty geometry has no vertices or rays. Unbounded geometry has a
-finite base vertex and at least one nonzero recession ray. Point, segment and
-polygon distinguish affine dimensions zero, one and two. Multiple components
+ordered. Empty geometry has no vertices; its rays are retained when supplied
+by the source representation. Unbounded geometry has a finite base vertex and
+at least one nonzero recession ray. Zero-image rays are retained for bounded
+geometry. Point, segment and polygon distinguish numerical affine dimensions
+zero, one and two using the shared binary64 determinant predicate. Multiple components
 remain separate so renderers do not fill the gaps by convexifying them.
 Redundant V vertices are preserved, including duplicate point vertices and
 interior collinear segment vertices; readers validate affine dimension rather

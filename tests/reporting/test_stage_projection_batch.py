@@ -64,8 +64,12 @@ class StageProjectionBatchTests(unittest.TestCase):
         self.assertEqual(loaded["records"][0]["outcome"]["components"][0]["kind"], "polygon")
         self.assertEqual(len(loaded["records"][1]["outcome"]["components"][0]["vertices"]), 3)
         self.assertEqual(loaded["records"][1]["outcome"]["components"][0]["kind"], "segment")
+        self.assertEqual(loaded["records"][1]["outcome"]["components"][0]["vertices"][1], [1e16, 1e16 + 2])
         self.assertEqual(len(loaded["records"][2]["outcome"]["components"][0]["vertices"]), 3)
         self.assertEqual(loaded["records"][2]["outcome"]["components"][0]["kind"], "point")
+        self.assertEqual(loaded["records"][2]["outcome"]["components"][0]["rays"], [[0.0, 0.0]])
+        self.assertEqual(loaded["records"][3]["outcome"]["components"][0]["kind"], "empty")
+        self.assertEqual(loaded["records"][3]["outcome"]["components"][0]["rays"], [[1.0, 0.0]])
         self.assertEqual(loaded["trajectory_series"][0]["kind"], "trajectory")
         self.assertEqual(loaded["trajectory_series"][0]["coordinate_ids"], ["x0", "x2"])
 
@@ -117,6 +121,16 @@ class StageProjectionBatchTests(unittest.TestCase):
         with self.assertRaisesRegex(data.ProjectionBatchError, "nonzero ray"):
             self.read(document)
         document = fixture()
+        component = document["records"][0]["outcome"]["components"][0]
+        component["rays"] = [[0, 0]]
+        reseal(document)
+        self.assertEqual(self.read(document)["records"][0]["outcome"]["components"][0]["rays"], [[0, 0]])
+        document = fixture()
+        component = document["records"][0]["outcome"]["components"][0]
+        component.update(kind="empty", vertices=[], rays=[[1, 0]])
+        reseal(document)
+        self.assertEqual(self.read(document)["records"][0]["outcome"]["components"][0]["kind"], "empty")
+        document = fixture()
         document["stage_axis"]["points"] = []
         reseal(document)
         with self.assertRaises(data.ProjectionBatchError):
@@ -150,7 +164,8 @@ class StageProjectionBatchTests(unittest.TestCase):
         document["records"][1]["outcome"]["components"] = [
             {"component_id": "unbounded", "kind": "unbounded", "vertices": [[0, 0]], "rays": [[1, 0]]}]
         document["records"][2]["outcome"] = {
-            "status": "unavailable", "kind": "stopped", "explanation": "route stopped before R2"}
+            "status": "unavailable", "kind": "stopped", "explanation": "route stopped before R2",
+            "stop_reason": "deadline_expired", "stop_diagnostics": "fixture deadline"}
         reseal(document)
         loaded = self.read(document)
         self.assertEqual(len(loaded["records"][0]["outcome"]["components"]), 2)

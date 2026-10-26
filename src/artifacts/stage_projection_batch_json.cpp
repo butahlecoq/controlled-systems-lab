@@ -155,12 +155,12 @@ ArtifactResult<Json> geometry(const SetHandle& handle, std::string component_id)
         while (second < v->vertices.rows() && v->vertices(second, 0) == x0 && v->vertices(second, 1) == y0) ++second;
         bool area = false;
         if (second < v->vertices.rows()) {
-            const long double dx = static_cast<long double>(v->vertices(second, 0)) - x0;
-            const long double dy = static_cast<long double>(v->vertices(second, 1)) - y0;
+            const double dx = v->vertices(second, 0) - x0;
+            const double dy = v->vertices(second, 1) - y0;
             for (std::size_t i = second + 1; i < v->vertices.rows(); ++i) {
-                const long double ex = static_cast<long double>(v->vertices(i, 0)) - x0;
-                const long double ey = static_cast<long double>(v->vertices(i, 1)) - y0;
-                if (dx * ey - dy * ex != 0) { area = true; break; }
+                const double ex = v->vertices(i, 0) - x0;
+                const double ey = v->vertices(i, 1) - y0;
+                if (dx * ey - dy * ex != 0.0) { area = true; break; }
             }
         }
         output["kind"] = area ? "polygon" : second == v->vertices.rows() ? "point" : "segment";

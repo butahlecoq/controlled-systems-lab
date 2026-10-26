@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import json
 import hashlib
-from fractions import Fraction
 from pathlib import Path
 from typing import Any
 
@@ -122,10 +121,10 @@ def loads_stage_projection_batch(
                 kind, vertices, rays = component["kind"], component.get("vertices", []), component.get("rays", [])
                 if kind != "empty" and not vertices:
                     raise ProjectionBatchError(f"records[{i}] nonempty geometry must include vertices")
-                if kind in {"point", "segment", "polygon"} and rays:
-                    raise ProjectionBatchError(f"records[{i}] bounded geometry cannot include recession rays")
-                if kind == "empty" and (vertices or rays):
-                    raise ProjectionBatchError(f"records[{i}] empty geometry cannot include vertices or rays")
+                if kind in {"point", "segment", "polygon"} and any(any(value != 0 for value in ray) for ray in rays):
+                    raise ProjectionBatchError(f"records[{i}] bounded geometry cannot include nonzero recession rays")
+                if kind == "empty" and vertices:
+                    raise ProjectionBatchError(f"records[{i}] empty geometry cannot include vertices")
                 if kind in {"point", "segment", "polygon"}:
                     unique = list(dict.fromkeys(tuple(point) for point in vertices))
                     if kind == "point" and len(unique) != 1:
@@ -135,13 +134,13 @@ def loads_stage_projection_batch(
                     if kind == "polygon" and len(unique) < 3:
                         raise ProjectionBatchError(f"records[{i}] polygon vertices must include three distinct points")
                     if kind != "point" and len(unique) >= 2:
-                        x0, y0 = (Fraction.from_float(float(value)) for value in unique[0])
-                        x1, y1 = (Fraction.from_float(float(value)) for value in unique[1])
-                        area = any((x1 - x0) * (Fraction.from_float(float(y)) - y0) !=
-                                   (y1 - y0) * (Fraction.from_float(float(x)) - x0)
+                        x0, y0 = (float(value) for value in unique[0])
+                        x1, y1 = (float(value) for value in unique[1])
+                        dx, dy = x1 - x0, y1 - y0
+                        area = any(dx * (float(y) - y0) - dy * (float(x) - x0) != 0.0
                                    for x, y in unique[2:])
                         if (kind == "segment") == area:
-                            raise ProjectionBatchError(f"records[{i}] geometry kind does not match its exact vertex affine dimension")
+                            raise ProjectionBatchError(f"records[{i}] geometry kind does not match its binary64 affine-dimension classification")
                 if kind == "unbounded" and not rays:
                     raise ProjectionBatchError(f"records[{i}] unbounded geometry must include a ray")
                 if kind == "unbounded" and not any(any(value != 0 for value in ray) for ray in rays):
