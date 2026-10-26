@@ -1,0 +1,44 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:csl:stage-projection-batch:1",
+  "title": "Saved stage projection batch",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema", "provenance", "problem_id", "request_id", "route_id", "coordinates", "requested_pairs", "stage_axis", "relation", "assurance", "records", "trajectory_series", "content_sha256"],
+  "properties": {
+    "schema": {"const": "csl.stage-projection-batch/1"},
+    "provenance": {
+      "type": "object", "additionalProperties": false,
+      "required": ["run_id", "record_schema", "source_sha256"],
+      "properties": {
+        "run_id": {"$ref": "#/$defs/id"},
+        "record_schema": {"type": "string", "minLength": 1},
+        "source_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"}
+      }
+    },
+    "problem_id": {"$ref": "#/$defs/id"},
+    "request_id": {"$ref":"#/$defs/id"},
+    "route_id": {"$ref": "#/$defs/id"},
+    "coordinates": {"type": "array", "minItems": 2, "items": {"$ref": "#/$defs/coordinate"}},
+    "requested_pairs": {"type": "array", "minItems": 1, "items": {"type": "array", "prefixItems": [{"type":"integer","minimum":0},{"type":"integer","minimum":0}], "minItems":2,"maxItems":2}},
+    "stage_axis": {"$ref": "#/$defs/axis"},
+    "relation": {"enum": ["equivalent", "inner", "outer", "heuristic"]},
+    "assurance": {"enum": ["numerical", "validated"]},
+    "records": {"type": "array", "items": {"$ref": "#/$defs/record"}},
+    "trajectory_series": {"type": "array", "items": {"$ref":"#/$defs/trajectory"}},
+    "content_sha256": {"type":"string","pattern":"^[0-9a-f]{64}$"}
+  },
+  "$defs": {
+    "id": {"type":"string","minLength":1},
+    "coordinate": {"type":"object","additionalProperties":false,"required":["id","name","unit"],"properties":{"id":{"type":"string","pattern":"^x[0-9]+$"},"name":{"type":"string","minLength":1},"unit":{"type":["string","null"]},"target":{"$ref":"#/$defs/referenced_value"},"bounds":{"type":"object","additionalProperties":false,"required":["lower","upper"],"properties":{"lower":{"$ref":"#/$defs/referenced_value"},"upper":{"$ref":"#/$defs/referenced_value"}}}}},
+    "referenced_value": {"type":"object","additionalProperties":false,"required":["value","source"],"properties":{"value":{"type":"number"},"source":{"type":"string","minLength":1}}},
+    "axis": {"type":"object","additionalProperties":false,"required":["kind","points","unit"],"properties":{"kind":{"enum":["stage","physical_time"]},"points":{"type":"array","minItems":1,"items":{"type":"number"}},"unit":{"type":["string","null"]}}},
+    "trajectory": {"type":"object","additionalProperties":false,"required":["kind","source_run_id","coordinate_ids","points","evidence"],"properties":{"kind":{"const":"trajectory"},"source_run_id":{"$ref":"#/$defs/id"},"coordinate_ids":{"type":"array","minItems":2,"maxItems":2,"items":{"type":"string","pattern":"^x[0-9]+$"}},"points":{"type":"array","minItems":1,"items":{"type":"array","prefixItems":[{"type":"number"},{"type":"number"}],"minItems":2,"maxItems":2}},"evidence":{"type":"string","minLength":1}}},
+    "record": {"type":"object","additionalProperties":false,"required":["stage","physical_time","pair_index","source_assurance","source_set_ids","outcome"],"properties":{"stage":{"type":"integer","minimum":0},"physical_time":{"type":["number","null"]},"pair_index":{"type":"integer","minimum":0},"source_assurance":{"enum":["numerical","validated",null]},"source_set_ids":{"type":"array","items":{"$ref":"#/$defs/id"}},"outcome":{"oneOf":[{"$ref":"#/$defs/success"},{"$ref":"#/$defs/unavailable"},{"$ref":"#/$defs/failure"}]}}},
+    "success": {"type":"object","additionalProperties":false,"required":["status","relation","assurance","provider","evidence","components"],"properties":{"status":{"const":"success"},"relation":{"enum":["equivalent","inner","outer","heuristic"]},"assurance":{"enum":["numerical","validated"]},"provider":{"type":"object","additionalProperties":false,"required":["id","version"],"properties":{"id":{"$ref":"#/$defs/id"},"version":{"type":"string","minLength":1}}},"evidence":{"type":"array","minItems":1,"items":{"$ref":"#/$defs/evidence"}},"components":{"type":"array","minItems":1,"items":{"$ref":"#/$defs/geometry"}},"error_bound":{"type":"object","additionalProperties":false,"required":["metric","bound","units"],"properties":{"metric":{"$ref":"#/$defs/id"},"bound":{"type":"number","minimum":0},"units":{"type":"string"}}}}},
+    "evidence": {"type":"object","additionalProperties":false,"required":["request_id","ideal_output_id","scope","input_set_ids","support","assumptions"],"properties":{"request_id":{"$ref":"#/$defs/id"},"ideal_output_id":{"$ref":"#/$defs/id"},"scope":{"const":"set_relation"},"input_set_ids":{"type":"array","items":{"$ref":"#/$defs/id"}},"support":{"type":"object"},"assumptions":{"type":"array","items":{"type":"string"}}}},
+    "geometry": {"type":"object","additionalProperties":false,"required":["component_id","kind"],"properties":{"component_id":{"$ref":"#/$defs/id"},"kind":{"enum":["point","segment","polygon","empty","unbounded"]},"interpretation":{"const":"conv_vertices_plus_cone_rays"},"vertices":{"type":"array","items":{"type":"array","prefixItems":[{"type":"number"},{"type":"number"}],"minItems":2,"maxItems":2}},"rays":{"type":"array","items":{"type":"array","prefixItems":[{"type":"number"},{"type":"number"}],"minItems":2,"maxItems":2}}}},
+    "unavailable": {"type":"object","additionalProperties":false,"required":["status","kind","explanation"],"properties":{"status":{"const":"unavailable"},"kind":{"enum":["empty","unbounded","missing","unsupported","stopped"]},"explanation":{"type":"string","minLength":1},"stop_reason":{"enum":["cancelled","deadline_expired","resource_limit","numerical_failure"]},"stop_diagnostics":{"type":"string"}},"allOf":[{"if":{"properties":{"kind":{"const":"stopped"}}},"then":{"required":["stop_reason","stop_diagnostics"]}},{"if":{"properties":{"kind":{"enum":["missing","unsupported"]}}},"then":{"not":{"anyOf":[{"required":["stop_reason"]},{"required":["stop_diagnostics"]}]}}}]},
+    "failure": {"type":"object","additionalProperties":false,"required":["status","kind","explanation"],"properties":{"status":{"const":"failure"},"kind":{"enum":["rejected","unsupported","stopped","artifact_error"]},"explanation":{"type":"string","minLength":1},"stop_reason":{"enum":["cancelled","deadline_expired","resource_limit","numerical_failure"]},"stop_diagnostics":{"type":"string"},"diagnostics":{"type":"array","items":{"type":"object","additionalProperties":false,"required":["field","explanation"],"properties":{"field":{"type":"string","minLength":1},"explanation":{"type":"string","minLength":1}}}}},"allOf":[{"if":{"properties":{"kind":{"const":"stopped"}}},"then":{"required":["stop_reason","stop_diagnostics"]}}]}
+  }
+}
