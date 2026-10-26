@@ -375,10 +375,35 @@ TEST_CASE("MPC-02 registers distinct constraint tracks and direct and memory-lif
         }
     }
 
+    const auto loaded_slew=input::load_scenario_file(
+        std::string(CSL_MPC02_SCENARIO_DIR)+"/mpc02-slew-2d.json");
+    REQUIRE(std::holds_alternative<input::LoadedScenario>(loaded_slew));
+    const auto loaded_slew_problem=std::get<input::LoadedScenario>(loaded_slew).problem();
     auto authored=mpc02_two_state_integrator();
     authored.temporal=TemporalConstraints{{1,8,{0,2},{6,7},{-1,1}},{{-.25,.25}}};
     const auto direct_problem=resolve(authored);
     const auto direct_joint=accepted(build_joint_program(direct_problem,request(direct_problem)));
+    const auto loaded_slew_joint=accepted(build_joint_program(
+        loaded_slew_problem,request(loaded_slew_problem)));
+    CHECK(loaded_slew_joint.coordinates==direct_joint.coordinates);
+    CHECK(loaded_slew_joint.source_to_program==direct_joint.source_to_program);
+    REQUIRE(loaded_slew_joint.rows.size()==direct_joint.rows.size());
+    for(std::size_t i=0;i<direct_joint.rows.size();++i) {
+        CHECK(loaded_slew_joint.rows[i].source==direct_joint.rows[i].source);
+        CHECK(loaded_slew_joint.rows[i].stage==direct_joint.rows[i].stage);
+        CHECK(loaded_slew_joint.rows[i].source_row==direct_joint.rows[i].source_row);
+        CHECK(loaded_slew_joint.rows[i].program_row==direct_joint.rows[i].program_row);
+    }
+    CHECK(loaded_slew_joint.constraints.rows==direct_joint.constraints.rows);
+    CHECK(loaded_slew_joint.constraints.cols==direct_joint.constraints.cols);
+    CHECK(loaded_slew_joint.constraints.row_offsets==direct_joint.constraints.row_offsets);
+    CHECK(loaded_slew_joint.constraints.column_indices==direct_joint.constraints.column_indices);
+    CHECK(loaded_slew_joint.constraints.values==direct_joint.constraints.values);
+    REQUIRE(loaded_slew_joint.bounds.size()==direct_joint.bounds.size());
+    for(std::size_t i=0;i<direct_joint.bounds.size();++i) {
+        CHECK(loaded_slew_joint.bounds[i].lower==direct_joint.bounds[i].lower);
+        CHECK(loaded_slew_joint.bounds[i].upper==direct_joint.bounds[i].upper);
+    }
     CHECK(direct_joint.coordinates==JointCoordinates{{2,1,0},2});
 
     const auto stagewise=mpc02_two_state_integrator();
