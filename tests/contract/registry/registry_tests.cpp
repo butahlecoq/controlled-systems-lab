@@ -314,6 +314,27 @@ TEST_CASE("direct strategy admission rejects malformed effective requests before
     CHECK(workspace.attempts==1);
 }
 
+TEST_CASE("deadline termination requires matching scoped stop evidence") {
+    auto request=strategy_request();
+    const auto id=request.problem.identity();
+    const SynthesisIdentityExpectation expected{id,request.family,request.problem.constraints().coordinates(),
+        request.configuration.strategy,request.strategy_version,std::nullopt};
+    SynthesisResult result{Termination::deadline_expired,
+        {id,MathematicalOutcome::undetermined,Unestablished{},{}},{},{},{},{}};
+    CHECK_FALSE(check_synthesis_result(result,expected).empty());
+
+    const RequestProvenance provenance{{"generated/deadline"},"strategy",{"fixture"},std::string{"1"},
+        ModuleId{"fixture"},std::string{"1"}};
+    result.stop=ScopedOperationStopped{{StopReason::deadline_expired,"deadline reached"},provenance,{}};
+    CHECK(check_synthesis_result(result,expected).empty());
+    result.stop=ScopedOperationStopped{{StopReason::cancelled,"wrong stop reason"},provenance,{}};
+    CHECK_FALSE(check_synthesis_result(result,expected).empty());
+
+    result.termination=Termination::cancelled;
+    result.stop=ScopedOperationStopped{{StopReason::deadline_expired,"deadline reached"},provenance,{}};
+    CHECK_FALSE(check_synthesis_result(result,expected).empty());
+}
+
 TEST_CASE("prepared strategy reports a mismatched execution policy as pre-execution contract rejection") {
     auto solve_count=std::make_shared<std::size_t>();
     class PolicyObservingWorkspace final : public SynthesisWorkspace {
@@ -415,7 +436,8 @@ TEST_CASE("scoped provider provenance is checked without erasing retained eviden
                     {{DiagnosticCode::unsupported,"geometry.generated","literal provider rejection"}},lineage,
                     {true,true,1,true}};
             else {
-                result.termination=reason==StopReason::resource_limit?Termination::resource_limit:
+                result.termination=reason==StopReason::deadline_expired?Termination::deadline_expired:
+                    reason==StopReason::resource_limit?Termination::resource_limit:
                     reason==StopReason::numerical_failure?Termination::numerical_failure:Termination::cancelled;
                 result.stop=ScopedOperationStopped{{reason,"literal provider stop"},provenance,{true,true,1,true}};
             }
@@ -1713,7 +1735,7 @@ TEST_CASE("public strategy outcome keeps candidate, partial, rejection and retai
             }
             if (request.profile=="user-cancel" || request.profile=="deadline") {
                 const auto reason=request.profile=="deadline"?StopReason::deadline_expired:StopReason::cancelled;
-                result.termination=Termination::cancelled;
+                result.termination=reason==StopReason::deadline_expired?Termination::deadline_expired:Termination::cancelled;
                 result.spans.push_back({0,{},ModuleId{"synthetic"},0,1});
                 result.stop=ScopedOperationStopped{{reason,"synthetic stop"},
                     RequestProvenance{{"generated/step/3"},"strategy",{"synthetic"},std::string{"1"},
@@ -1916,7 +1938,7 @@ TEST_CASE("public strategy outcome keeps candidate, partial, rejection and retai
         auto stopped=std::get<PreparedStrategy>(std::move(prepared)).create()->run(context());
         REQUIRE(std::holds_alternative<SynthesisResult>(stopped));
         const auto& value=std::get<SynthesisResult>(stopped);
-        CHECK(value.termination==Termination::cancelled);
+        CHECK(value.termination==(reason==StopReason::deadline_expired?Termination::deadline_expired:Termination::cancelled));
         REQUIRE(std::holds_alternative<ScopedOperationStopped>(value.stop));
         CHECK(std::get<ScopedOperationStopped>(value.stop).stop.reason==reason);
         CHECK(value.incumbents[0].witness.original_objective==5);

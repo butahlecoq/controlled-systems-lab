@@ -255,7 +255,7 @@ TEST_CASE("reject malformed direction before provider creation and honor cancell
     CHECK(cancelled.termination==Termination::cancelled); CHECK(cancelled.batch.witnesses.empty()); CHECK(*creations==0);
     context=make_execution_context(); context.deadline=std::chrono::steady_clock::now();
     auto expired=take(workspace->select(query.family,query.selection,context));
-    CHECK(expired.termination==Termination::cancelled);
+    CHECK(expired.termination==Termination::deadline_expired);
     CHECK(expired.diagnostics.find("deadline")!=std::string::npos);
     CHECK(*creations==0);
     auto valid=take(workspace->select(query.family,query.selection,make_execution_context()));
@@ -762,7 +762,7 @@ TEST_CASE("deadline and provider capacity remain distinct and retain earlier obs
         auto workspace=registration.factory(query);auto context=make_execution_context();
         context.deadline=std::chrono::steady_clock::now()+std::chrono::seconds(1);
         auto selected=take(workspace->select(query.family,query.selection,context));
-        CHECK(selected.termination==(deadline?Termination::cancelled:Termination::resource_limit));
+        CHECK(selected.termination==(deadline?Termination::deadline_expired:Termination::resource_limit));
         CHECK(selected.diagnostics.find(deadline?"deadline":"capacity")!=std::string::npos);
         REQUIRE(selected.batch.returned_count()==1);CHECK(selected.batch.witnesses[0].controls==std::vector<Vector>{{0},{1}});
         CHECK(selected.batch.source_family==query.family.identity());

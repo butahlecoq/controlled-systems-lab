@@ -238,7 +238,8 @@ constexpr const char* complete_verifier_id="csl.verifier.ts01-analytic";
 constexpr const char* complete_verifier_version="1";
 Termination stopped_termination(StopReason reason) {
     switch(reason) {
-    case StopReason::cancelled:case StopReason::deadline_expired:return Termination::cancelled;
+    case StopReason::cancelled:return Termination::cancelled;
+    case StopReason::deadline_expired:return Termination::deadline_expired;
     case StopReason::resource_limit:return Termination::resource_limit;
     case StopReason::numerical_failure:return Termination::numerical_failure;
     }
@@ -530,6 +531,7 @@ SynthesisResult detail::DirectJointExecutionRunner::solve_impl(const problem::Re
                     StopReason reason=StopReason::numerical_failure;
                     if(context.cancellation.stop_requested())reason=StopReason::cancelled;
                     else if(context.deadline && std::chrono::steady_clock::now()>=*context.deadline)reason=StopReason::deadline_expired;
+                    else if(checked.termination==Termination::deadline_expired)reason=StopReason::deadline_expired;
                     else if(checked.termination==Termination::resource_limit)reason=StopReason::resource_limit;
                     result.termination=stopped_termination(reason);
                     result.stop=ScopedOperationStopped{{reason,"Original-problem anchor verification stopped; program evidence and feasible candidate retained."},provenance,retained(result)};
@@ -568,6 +570,7 @@ SynthesisResult detail::DirectJointExecutionRunner::solve_impl(const problem::Re
             if(context.cancellation.stop_requested())reason=StopReason::cancelled;
             else if(context.deadline && std::chrono::steady_clock::now()>=*context.deadline)reason=StopReason::deadline_expired;
             else if(evidence.termination==Termination::cancelled)reason=StopReason::cancelled;
+            else if(evidence.termination==Termination::deadline_expired)reason=StopReason::deadline_expired;
             else if(evidence.termination==Termination::resource_limit)reason=StopReason::resource_limit;
             result.termination=stopped_termination(reason);
             result.stop=ScopedOperationStopped{{reason,evidence.raw_diagnostics},provenance,retained(result)};

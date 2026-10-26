@@ -105,6 +105,14 @@ TEST_CASE("execution stop remains distinct from supported optimizer evidence") {
     auto r=analytic_optimizer({0,0},0,false,MathematicalOutcome::optimal,Termination::resource_limit).solve(p,q,{p.identity(),box()},{});
     CHECK(r.termination==Termination::resource_limit);CHECK(r.outcome==MathematicalOutcome::optimal);REQUIRE(r.relation);REQUIRE(r.optimization);REQUIRE(r.optimum);CHECK(r.optimum->bounds.upper->value==0);
 }
+TEST_CASE("expired terminal optimizer deadline remains distinct from resource limits") {
+    auto p=resolved(LinearTerminal{{1,0},0});FamilyRequest q;q.objective=p.identity();
+    ExecutionContext context;context.deadline=std::chrono::steady_clock::now();
+    auto result=analytic_optimizer({0,0},0).solve(p,q,{p.identity(),box()},context);
+    CHECK(result.termination==Termination::deadline_expired);
+    CHECK_FALSE(result.relation);
+    CHECK_FALSE(result.optimization);
+}
 TEST_CASE("wrong slice identity and unsupported representation are explicit") {
     auto p=resolved(LinearTerminal{{1,0},0});FamilyRequest q;q.objective=p.identity();auto o=analytic_optimizer({0,0},0);
     auto r=o.solve(p,q,{{"foreign"},box()},{});CHECK(r.termination==Termination::contract_rejected);CHECK_FALSE(r.relation);

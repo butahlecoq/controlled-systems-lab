@@ -163,6 +163,9 @@ std::optional<OperationStopped> stopped(const ExecutionContext& context) {
     if(context.deadline&&std::chrono::steady_clock::now()>=*context.deadline)return OperationStopped{StopReason::deadline_expired,"Query deadline expired; earlier observations retained."};
     return {};
 }
+Termination stopped_termination(StopReason reason) {
+    return reason==StopReason::deadline_expired?Termination::deadline_expired:Termination::cancelled;
+}
 class Workspace final : public WitnessSelectorWorkspace {
     registry::PreparedProvider<registry::LPPort> provider_;
 public:
@@ -177,12 +180,12 @@ public:
             return Unsupported{reject("selector.numerical","Finite nonnegative numerical tolerances are required.")};
         WitnessSelection selected{{{},request.count,{selector_id},request.seed,family.identity(),request.directions,
             request.distinctness_tolerance},Termination::completed,{}};
-        if(const auto stop=stopped(context)) {selected.termination=Termination::cancelled;selected.diagnostics=stop->diagnostics;return selected;}
+        if(const auto stop=stopped(context)) {selected.termination=stopped_termination(stop->reason);selected.diagnostics=stop->diagnostics;return selected;}
         try {
             // Admit every generated direction before the first native solve.
             std::vector<LinearProgram> programs;
             for(std::size_t i=0;i<request.directions.size()&&request.count!=0;++i) {
-                if(const auto stop=stopped(context)) {selected.termination=Termination::cancelled;selected.diagnostics=stop->diagnostics;return selected;}
+                if(const auto stop=stopped(context)) {selected.termination=stopped_termination(stop->reason);selected.diagnostics=stop->diagnostics;return selected;}
                 auto generated=program(family,request.directions[i],i);
                 if(auto* errors=std::get_if<Diagnostics>(&generated))return Unsupported{std::move(*errors)};
                 auto lp=std::get<LinearProgram>(std::move(generated));
@@ -197,7 +200,7 @@ public:
             for(std::size_t index=0;index<programs.size();++index) {
                 const auto& lp=programs[index];
                 if(selected.batch.distinct_count()>=request.count)break;
-                if(const auto stop=stopped(context)) {selected.termination=Termination::cancelled;selected.diagnostics=stop->diagnostics;return selected;}
+                if(const auto stop=stopped(context)) {selected.termination=stopped_termination(stop->reason);selected.diagnostics=stop->diagnostics;return selected;}
                 std::optional<ar::ModuleIdentity> backend;
                 if(const auto& actual=provider_.provenance().actual;actual)
                     backend=backend_module_identity(*actual);
@@ -227,7 +230,7 @@ public:
                     if(!runner.records().empty())
                         if(const auto* not_run=std::get_if<registry::LPQueryNotRun>(&runner.records().back());
                            not_run&&not_run->request==lp.identity()&&not_run->reason==registry::LPQueryNotRunReason::deadline) {
-                            selected.termination=Termination::cancelled;
+                            selected.termination=Termination::deadline_expired;
                             selected.diagnostics="Query deadline expired before provider execution; earlier observations retained.";
                         }
                     return selected;
