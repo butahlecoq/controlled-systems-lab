@@ -282,6 +282,41 @@ std::string_view outcome_name(MathematicalOutcome value) {
     }
     return "unknown";
 }
+std::string_view outcome_support_name(const EvidenceSupport& support) {
+    return std::visit([](const auto& value) -> std::string_view {
+        using T = std::decay_t<decltype(value)>;
+        if constexpr (std::is_same_v<T, Unestablished>) return "unestablished";
+        if constexpr (std::is_same_v<T, NumericalCheck>) return "numerical_check";
+        if constexpr (std::is_same_v<T, SymbolicArgument>) return "symbolic_argument";
+        if constexpr (std::is_same_v<T, CertificateReference>) return "unchecked_certificate_reference";
+        if constexpr (std::is_same_v<T, ExactFarkasEvidence>) return "exact_farkas_claim";
+        return "unknown";
+    }, support);
+}
+[[maybe_unused]] std::string quoted(std::string_view value) {
+    constexpr char hex[] = "0123456789abcdef";
+    std::string result{"\""};
+    for (const unsigned char c : value) {
+        if (c == '"' || c == '\\') {
+            result.push_back('\\'); result.push_back(static_cast<char>(c));
+        } else if (c == '\n') result += "\\n";
+        else if (c == '\r') result += "\\r";
+        else if (c == '\t') result += "\\t";
+        else if (c < 0x20) {
+            result += "\\u00"; result.push_back(hex[c >> 4]); result.push_back(hex[c & 0xf]);
+        } else result.push_back(static_cast<char>(c));
+    }
+    result.push_back('"');
+    return result;
+}
+void print_assumptions(std::ostream& output, const std::vector<std::string>& assumptions) {
+    output << '[';
+    for (std::size_t i = 0; i < assumptions.size(); ++i) {
+        if (i) output << ',';
+        output << quoted(assumptions[i]);
+    }
+    output << ']';
+}
 template<class T>
 bool passed(const T& value) {
     return value == verification::CheckStatus::numerical_pass;
@@ -559,7 +594,7 @@ int run(const input::LoadedScenario& scenario, const Options& options) {
         const auto* result = std::get_if<SynthesisResult>(&strategy.outcome);
         if (!result) {
             std::cout << "mode=run profile=" << profile << " strategy=" << (index == 0 ? "csl.synthesis.reach-back" : "csl.synthesis.strategy-b")
-                      << " outcome=unsupported\n";
+                      << " outcome_claim=unsupported\n";
             all_passed = false;
             continue;
         }
@@ -574,7 +609,13 @@ int run(const input::LoadedScenario& scenario, const Options& options) {
             std::cout << " version=" << result->family->identity().strategy_version;
         std::cout << " seed=" << witnesses.seed.value_or(31) << " threads=" << resources.total_threads
                   << " termination=" << termination_name(result->termination)
-                  << " outcome=" << outcome_name(result->outcome.value)
+                  << " outcome_claim=" << outcome_name(result->outcome.value)
+                  << " outcome_claim_support=" << outcome_support_name(result->outcome.support)
+                  << " outcome_claim_assumptions=";
+        print_assumptions(std::cout, result->outcome.assumptions);
+        if (const auto* symbolic = std::get_if<SymbolicArgument>(&result->outcome.support))
+            std::cout << " outcome_claim_support_assumptions=" << quoted(symbolic->assumptions);
+        std::cout
                   << " family=" << (complete ? "complete_optimal" :
                       (candidate_family ? "candidate" : (result->family ? "partial" : "none")))
                   << " selected=" << (selected_witnesses ? selected_witnesses->batch.returned_count() : 0)
@@ -589,7 +630,7 @@ int run(const input::LoadedScenario& scenario, const Options& options) {
             std::all_of(result->incumbents.begin(), result->incumbents.end(), [](const auto& incumbent) {
                 return std::holds_alternative<NumericalCheck>(incumbent.feasibility_claim.support);
             });
-        std::cout << " verification="
+        std::cout << " trajectory_verification="
                   << (verification_passed ? "numerical_pass" : "not_passed")
                   << " candidate_feasibility_claim=" << (candidate_feasibility_claim ? "numerical" : "none") << '\n';
         if (const auto* stopped = std::get_if<ScopedOperationStopped>(&result->stop))
