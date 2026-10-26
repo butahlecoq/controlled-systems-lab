@@ -53,10 +53,16 @@ endif()
 endif()
 
 if(CSL_BUILD_MPC01_REPORT)
-add_library(csl_mpc01_model STATIC benchmarks/reporting/mpc01/model.cpp)
+include(cmake/JsonDependencies.cmake)
+add_library(csl_mpc01_model STATIC
+  benchmarks/reporting/mpc01/model.cpp
+  benchmarks/reporting/mpc01/fixtures.cpp
+  benchmarks/reporting/mpc01/problem_mapping.cpp)
 target_include_directories(csl_mpc01_model PUBLIC
   $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/benchmarks/reporting/mpc01>)
 target_compile_features(csl_mpc01_model PUBLIC cxx_std_20)
+target_link_libraries(csl_mpc01_model PUBLIC CSL::input)
+target_include_directories(csl_mpc01_model SYSTEM PRIVATE ${csl_json_SOURCE_DIR}/single_include)
 if(MSVC)
 target_compile_options(csl_mpc01_model PRIVATE /W4 /WX /permissive-)
 else()
@@ -67,7 +73,9 @@ if(BUILD_TESTING)
 add_executable(mpc01_model_tests tests/benchmarks/mpc01_model_tests.cpp)
 target_link_libraries(mpc01_model_tests PRIVATE csl_mpc01_model)
 target_compile_features(mpc01_model_tests PRIVATE cxx_std_20)
-add_test(NAME mpc01_model_contract COMMAND mpc01_model_tests)
+add_test(NAME mpc01_model_contract COMMAND mpc01_model_tests
+  ${PROJECT_SOURCE_DIR}/examples/scenarios/double-integrator-generality.json
+  ${PROJECT_SOURCE_DIR}/docs/research/evidence/b04-reference-v1/canonical-case.json)
 set_tests_properties(mpc01_model_contract PROPERTIES LABELS reporting)
 endif()
 endif()
