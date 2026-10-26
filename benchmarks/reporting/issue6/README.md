@@ -138,7 +138,9 @@ selection. Not-called phases remain explicit; `span_count` is planned records,
 while `call_count` excludes not-called records. Raw wall ticks retain their
 clock period, and CPU/worker metrics stay explicitly unavailable where no CPU
 clock or worker span was supplied. Inclusive and exclusive sums are grouped by
-operation; totals across different operations are not elapsed wall time.
+operation; totals across different operations are not elapsed wall time. Raw
+span rows retain each planned parent ID and `nested`/`spawned` kind so the
+topology behind inclusive and exclusive intervals can be audited.
 
 B06 phase timing uses a separate report executable so the original
 `b06_finite_minimax.cpp` source hash remains fixed for historical B06 captures.

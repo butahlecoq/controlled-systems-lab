@@ -8,8 +8,8 @@ speedup or strategy-winner claim.
 
 The raw records contain 28,128 spans for B06, 28,128 spans for each of the
 eight B07 cases, and 52,491 spans for each B09 lambda case. Each record retains
-its raw wall endpoints, wall-clock ticks and period, execution status, phase
-status, and inclusive/exclusive wall metrics. The phase table reports planned
+its raw wall endpoints, wall-clock ticks and period, parent ID/kind, execution
+status, phase status, and inclusive/exclusive wall metrics. The phase table reports planned
 `span_count` separately from actual `call_count`; not-called phases are not
 zero-duration calls. Summed per-operation values are work totals across spans,
 not elapsed time across operations. Nested inclusive values overlap and must

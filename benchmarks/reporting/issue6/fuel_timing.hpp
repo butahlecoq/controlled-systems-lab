@@ -199,14 +199,17 @@ inline Json phase_json(const ob::TimingReport& report,std::int64_t collector_set
             group["wall_exclusive_ticks_sum"]=group["wall_exclusive_ticks_sum"].get<std::uint64_t>()+value->value;
         const auto* interval=std::get_if<ar::TickInterval>(&record.interval);
         observations.push_back({{"id",span.id.value},{"operation",operation},
-            {"plan_index",record.descriptor.query?Json{*record.descriptor.query}:Json(nullptr)},
-            {"stage",record.descriptor.stage?Json{*record.descriptor.stage}:Json(nullptr)},
+            {"parent_id",record.descriptor.parent?Json(record.descriptor.parent->id.value):Json(nullptr)},
+            {"parent_kind",record.descriptor.parent?
+                Json(record.descriptor.parent->kind==ar::ParentKind::nested?"nested":"spawned"):Json(nullptr)},
+            {"plan_index",record.descriptor.query?Json(*record.descriptor.query):Json(nullptr)},
+            {"stage",record.descriptor.stage?Json(*record.descriptor.stage):Json(nullptr)},
             {"start_tick",interval?raw_ticks(interval->start):Json(nullptr)},
             {"end_tick",interval?raw_ticks(interval->end):Json(nullptr)},
             {"execution",std::holds_alternative<ar::NotCalledObservation>(record.execution)?"not_called":
                 std::holds_alternative<ar::ReturnedObservation>(record.execution)?"returned":"unknown"},
             {"not_called_reason",std::holds_alternative<ar::NotCalledObservation>(record.execution)?
-                Json{static_cast<int>(std::get<ar::NotCalledObservation>(record.execution).reason)}:Json(nullptr)},
+                Json(static_cast<int>(std::get<ar::NotCalledObservation>(record.execution).reason)):Json(nullptr)},
             {"status",std::holds_alternative<ar::ReturnedSpan>(record.status)?"returned":
                 std::holds_alternative<ar::RejectedSpan>(record.status)?"rejected":
                 std::holds_alternative<ar::FailedSpan>(record.status)?"failed":"other"},
@@ -221,7 +224,7 @@ inline Json phase_json(const ob::TimingReport& report,std::int64_t collector_set
     if(const auto* value=std::get_if<ar::Available<std::uint64_t>>(&report.worker_work_ticks))worker_work=value->value;
     else worker_work={{"unavailable",static_cast<int>(
         std::get<ar::Unavailable>(report.worker_work_ticks).reason)}};
-    return {{"schema","csl.obs06-fuel-phase/1"},{"span_count",observations.size()},
+    return {{"schema","csl.obs06-fuel-phase/2"},{"span_count",observations.size()},
         {"span_count_is_planned_count",true},{"call_count_excludes_not_called_spans",true},
         {"counts_by_operation",std::move(counts)},
         {"wall_clock",{{"id",clock.id.value},{"period_numerator",clock.period_numerator},

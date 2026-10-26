@@ -23,6 +23,41 @@ def tick_value(metric):
     return metric if isinstance(metric, int) else None
 
 
+def validate_topology(timing, source):
+    spans = timing["spans"]
+    by_id = {span["id"]: span for span in spans}
+    if len(by_id) != len(spans):
+        raise ValueError(f"duplicate span ID in {source}")
+    roots = [span for span in spans if span.get("parent_id") is None]
+    if len(roots) != 1 or roots[0]["id"] != 0 or roots[0].get("parent_kind") is not None:
+        raise ValueError(f"invalid root span topology in {source}")
+    for span in spans:
+        parent_id = span.get("parent_id")
+        parent_kind = span.get("parent_kind")
+        if parent_id is None:
+            continue
+        if not isinstance(parent_id, int) or parent_id not in by_id or parent_kind not in {"nested", "spawned"}:
+            raise ValueError(f"invalid parent link for span {span['id']} in {source}")
+        seen = {span["id"]}
+        ancestor = parent_id
+        while ancestor != roots[0]["id"]:
+            if ancestor in seen:
+                raise ValueError(f"cycle in span topology in {source}")
+            seen.add(ancestor)
+            ancestor_span = by_id.get(ancestor)
+            if ancestor_span is None or ancestor_span.get("parent_id") is None:
+                raise ValueError(f"span {span['id']} does not descend from the run root in {source}")
+            ancestor = ancestor_span["parent_id"]
+        if parent_kind == "nested":
+            parent = by_id[parent_id]
+            child_start, child_end = span.get("start_tick"), span.get("end_tick")
+            parent_start, parent_end = parent.get("start_tick"), parent.get("end_tick")
+            if all(isinstance(value, int) for value in
+                   (child_start, child_end, parent_start, parent_end)) and not (
+                    parent_start <= child_start <= child_end <= parent_end):
+                raise ValueError(f"nested span {span['id']} lies outside its parent in {source}")
+
+
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("raw", nargs="+", type=Path, help="B06/B07/B09 phase JSON or JSONL files")
@@ -41,8 +76,9 @@ def main() -> None:
             if not case_id and "batch" in row:
                 case_id = "B06-paired-run"
             timing = row["phase_timing"]
-            if timing["schema"] != "csl.obs06-fuel-phase/1":
+            if timing["schema"] != "csl.obs06-fuel-phase/2":
                 raise ValueError(f"unsupported phase schema in {source}")
+            validate_topology(timing, source)
             clock = timing["wall_clock"]
             numerator = int(clock["period_numerator"])
             denominator = int(clock["period_denominator"])
@@ -103,6 +139,7 @@ def main() -> None:
                 })
             failure = timing.get("failure_pair", {}).get("phase_timing")
             if failure:
+                validate_topology(failure, source)
                 for operation, group in sorted(failure["counts_by_operation"].items()):
                     inclusive = group["wall_inclusive_ticks_sum"] * numerator / denominator * 1e3
                     exclusive = group["wall_exclusive_ticks_sum"] * numerator / denominator * 1e3
