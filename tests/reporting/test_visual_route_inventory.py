@@ -17,6 +17,10 @@ class VisualRouteInventoryTests(unittest.TestCase):
         for source in ("scripts/reports/control_figures.py","scripts/reports/plot.py",
                        "scripts/reports/visual_examples.py","scripts/reports/visual_illustrations.py"):
             self.assertIn(source,producers)
+        for source in ("benchmarks/reporting/issue6/b07_render_projection.py",
+                       "benchmarks/reporting/issue6/b09_render_projection.py"):
+            self.assertIn(source,producers)
+            self.assertEqual(producers[source]["disposition"],"deferred-family-specific-migration")
         self.assertEqual(producers["scripts/reports/control_figures.py"]["disposition"],
                          "adopted-shared-quantitative-policy")
         self.assertEqual(producers["scripts/reports/visual_illustrations.py"]["disposition"],
@@ -34,6 +38,16 @@ class VisualRouteInventoryTests(unittest.TestCase):
         self.assertTrue(any(name.endswith("terminal-projections.svg")
                             for entry in routes.values() for name in entry["assets"]))
         self.assertEqual(inventory["gallery_routes"][0]["route"],"examples/index.html")
+        gallery_assets=set(inventory["gallery_routes"][0]["assets"])
+        self.assertEqual(gallery_assets,{
+            "examples.css", "fuel-b06-viz06.html", "fuel-b06-viz06-source.json",
+            "fuel-b06-viz06-export.json", "fuel-b06-viz06-before.svg",
+            "fuel-b06-viz06-flow.svg", "fuel-b06-viz06-flow.png",
+            "fuel-b06-viz06-stock.svg", "fuel-b06-viz06-stock.png",
+            "fuel-b06-viz06-trajectory.svg", "fuel-b06-viz06-trajectory.png",
+            "fuel-b06-viz06-timing.svg", "fuel-b06-viz06-timing.png"})
+        self.assertEqual((ROOT/"docs/examples/examples.css").read_bytes(),
+                         (ROOT/"scripts/reports/visual_examples.css").read_bytes())
         before=ROOT/"docs/examples/fuel-b06-viz06-before.svg"
         self.assertEqual(hashlib.sha256(before.read_bytes()).hexdigest(),
                          "ac5997b750ef20fb80c90b46549a1110cf10f7ff37bbb5f9d72ab1cc44461f20")

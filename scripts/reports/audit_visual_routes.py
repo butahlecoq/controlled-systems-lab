@@ -14,31 +14,32 @@ ASSET_NAME = re.compile(r"[A-Za-z0-9_.-]+\.(?:svg|png)")
 
 
 def source_inventory(root: Path) -> list[dict]:
-    base = root / "scripts/reports"
     entries = []
-    for path in sorted(base.rglob("*.py")):
-        if path.name == "audit_visual_routes.py" or any(part.startswith("test") for part in path.parts):
-            continue
-        source = path.read_text(encoding="utf-8")
-        matches = VISUAL_SIGNAL.findall(source)
-        if not matches:
-            continue
-        relative = path.relative_to(root).as_posix()
-        assets = sorted(set(ASSET_NAME.findall(source)))
-        if relative.endswith("/control_figures.py") or relative.endswith("/plot.py"):
-            disposition = "adopted-shared-quantitative-policy"
-        elif relative.endswith("/visual_illustrations.py"):
-            disposition = "reviewed-static-diagram-exception"
-        elif relative.endswith("/visual_examples.py"):
-            disposition = "gallery-composition-and-route"
-        elif ("registered_reports.py" in path.name or path.name.startswith(("stage_", "validate_"))
-              or path.name in {"site.py", "report_data.py"}):
-            disposition = "publication-validation-or-frozen-route"
-        else:
-            disposition = "deferred-family-specific-migration"
-        entries.append({"source": relative, "signal_count": len(matches),
-                        "asset_name_literals": assets, "disposition": disposition,
-                        **({"follow_up_issue": 669} if disposition == "deferred-family-specific-migration" else {})})
+    bases = (root / "scripts/reports", root / "benchmarks/reporting")
+    for base in bases:
+        for path in sorted(base.rglob("*.py")):
+            if path.name == "audit_visual_routes.py" or any(part.startswith("test") for part in path.parts):
+                continue
+            source = path.read_text(encoding="utf-8")
+            matches = VISUAL_SIGNAL.findall(source)
+            if not matches:
+                continue
+            relative = path.relative_to(root).as_posix()
+            assets = sorted(set(ASSET_NAME.findall(source)))
+            if relative.endswith("/control_figures.py") or relative.endswith("/plot.py"):
+                disposition = "adopted-shared-quantitative-policy"
+            elif relative.endswith("/visual_illustrations.py"):
+                disposition = "reviewed-static-diagram-exception"
+            elif relative.endswith("/visual_examples.py"):
+                disposition = "gallery-composition-and-route"
+            elif ("registered_reports.py" in path.name or path.name.startswith(("stage_", "validate_"))
+                  or path.name in {"site.py", "report_data.py"}):
+                disposition = "publication-validation-or-frozen-route"
+            else:
+                disposition = "deferred-family-specific-migration"
+            entries.append({"source": relative, "signal_count": len(matches),
+                            "asset_name_literals": assets, "disposition": disposition,
+                            **({"follow_up_issue": 669} if disposition == "deferred-family-specific-migration" else {})})
     return entries
 
 
@@ -66,13 +67,18 @@ def build(root: Path = ROOT) -> dict:
             "policy": {"id": "csl-report-quantitative-v1",
                        "solution": "Matplotlib 3.11.2 static SVG/PNG plus passive hand-authored SVG for reviewed diagrams",
                        "no_solver_or_geometry_runs": True},
-            "source_discovery": {"method": "deterministic text scan of scripts/reports/**/*.py for SVG/PNG/savefig/write_image/render_svg signals",
+            "source_discovery": {"method": "deterministic text scan of scripts/reports/**/*.py and benchmarks/reporting/**/*.py for SVG/PNG/savefig/write_image/render_svg signals",
                                  "review_required": "signal hits are candidate producers or route validators; inspect the role before migration"},
             "producers_and_routes": source_inventory(root),
             "frozen_published_routes": frozen_routes(root),
             "gallery_routes": [
-                {"route": "examples/index.html", "assets": ["fuel-b06-viz06.html", "fuel-b06-viz06-flow.svg",
-                 "fuel-b06-viz06-stock.svg", "fuel-b06-viz06-trajectory.svg", "fuel-b06-viz06-timing.svg"],
+                {"route": "examples/index.html", "assets": [
+                    "examples.css", "fuel-b06-viz06.html", "fuel-b06-viz06-source.json",
+                    "fuel-b06-viz06-export.json", "fuel-b06-viz06-before.svg",
+                    "fuel-b06-viz06-flow.svg", "fuel-b06-viz06-flow.png",
+                    "fuel-b06-viz06-stock.svg", "fuel-b06-viz06-stock.png",
+                    "fuel-b06-viz06-trajectory.svg", "fuel-b06-viz06-trajectory.png",
+                    "fuel-b06-viz06-timing.svg", "fuel-b06-viz06-timing.png"],
                  "disposition": "adopted-shared-quantitative-policy"}],
             "migration_owner": "#669; deferred family-specific renderers and frozen routes remain inventoried until migrated or split into scoped follow-up work"}
 

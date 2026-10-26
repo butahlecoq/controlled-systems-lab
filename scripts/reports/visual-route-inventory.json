@@ -6,7 +6,7 @@
     "no_solver_or_geometry_runs": true
   },
   "source_discovery": {
-    "method": "deterministic text scan of scripts/reports/**/*.py for SVG/PNG/savefig/write_image/render_svg signals",
+    "method": "deterministic text scan of scripts/reports/**/*.py and benchmarks/reporting/**/*.py for SVG/PNG/savefig/write_image/render_svg signals",
     "review_required": "signal hits are candidate producers or route validators; inspect the role before migration"
   },
   "producers_and_routes": [
@@ -713,6 +713,41 @@
         "opt04-phase-one.svg"
       ],
       "disposition": "reviewed-static-diagram-exception"
+    },
+    {
+      "source": "benchmarks/reporting/approximation_pilot/summarize.py",
+      "signal_count": 3,
+      "asset_name_literals": [
+        "comparison.svg"
+      ],
+      "disposition": "deferred-family-specific-migration",
+      "follow_up_issue": 669
+    },
+    {
+      "source": "benchmarks/reporting/issue6/b07_render_projection.py",
+      "signal_count": 6,
+      "asset_name_literals": [
+        "projections.png",
+        "projections.svg"
+      ],
+      "disposition": "deferred-family-specific-migration",
+      "follow_up_issue": 669
+    },
+    {
+      "source": "benchmarks/reporting/issue6/b09_render_projection.py",
+      "signal_count": 2,
+      "asset_name_literals": [],
+      "disposition": "deferred-family-specific-migration",
+      "follow_up_issue": 669
+    },
+    {
+      "source": "benchmarks/reporting/it17_hull/summarize.py",
+      "signal_count": 4,
+      "asset_name_literals": [
+        "fixture-geometry.svg"
+      ],
+      "disposition": "deferred-family-specific-migration",
+      "follow_up_issue": 669
     }
   ],
   "frozen_published_routes": [
@@ -1255,11 +1290,19 @@
     {
       "route": "examples/index.html",
       "assets": [
+        "examples.css",
         "fuel-b06-viz06.html",
+        "fuel-b06-viz06-source.json",
+        "fuel-b06-viz06-export.json",
+        "fuel-b06-viz06-before.svg",
         "fuel-b06-viz06-flow.svg",
+        "fuel-b06-viz06-flow.png",
         "fuel-b06-viz06-stock.svg",
+        "fuel-b06-viz06-stock.png",
         "fuel-b06-viz06-trajectory.svg",
-        "fuel-b06-viz06-timing.svg"
+        "fuel-b06-viz06-trajectory.png",
+        "fuel-b06-viz06-timing.svg",
+        "fuel-b06-viz06-timing.png"
       ],
       "disposition": "adopted-shared-quantitative-policy"
     }
