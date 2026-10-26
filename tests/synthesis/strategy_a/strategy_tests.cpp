@@ -254,6 +254,19 @@ class ResourceLimitAfterTerminal final : public ConvexWorkspace {
 public:
     explicit ResourceLimitAfterTerminal(std::unique_ptr<ConvexWorkspace> inner):inner_(std::move(inner)){}
 };
+class DeadlineResultAfterTerminal final : public ConvexWorkspace {
+    std::unique_ptr<ConvexWorkspace> inner_;
+    ProgramOutcome do_solve(const ConvexProgram& program,const ExecutionContext& context) override {
+        auto outcome=inner_->solve(program,context);
+        if(auto* solved=std::get_if<ProgramResult>(&outcome)) {
+            solved->termination=Termination::deadline_expired;
+            solved->raw_diagnostics+="\ninjected terminal deadline result";
+        }
+        return outcome;
+    }
+public:
+    explicit DeadlineResultAfterTerminal(std::unique_ptr<ConvexWorkspace> inner):inner_(std::move(inner)){}
+};
 class DeadlineAfterTerminal final : public ConvexWorkspace {
     std::unique_ptr<ConvexWorkspace> inner_;
     ExecutionContext* caller_context_;
@@ -270,7 +283,8 @@ public:
 std::variant<PreparedStrategy,Rejection> admit(const StrategyRequest& request_,bool reject_terminal=false,
     std::optional<std::stop_source> stop_after_terminal={},bool omit_test_verifier=false,
     bool fail_terminal_numerically=false,bool limit_terminal_resources=false,
-    ExecutionContext* expire_deadline_after_terminal=nullptr,int* lp_workspace_factories=nullptr) {
+    ExecutionContext* expire_deadline_after_terminal=nullptr,int* lp_workspace_factories=nullptr,
+    bool deadline_terminal_result=false) {
     auto lp=take(adapters::lp::make_highs_registration());
     if(lp_workspace_factories) {
         const auto factory=lp.factory;
@@ -304,6 +318,12 @@ std::variant<PreparedStrategy,Rejection> admit(const StrategyRequest& request_,b
         const auto factory=convex.factory;
         convex.factory=[factory](const ConvexProgram& program) {
             return std::make_unique<ResourceLimitAfterTerminal>(factory(program));
+        };
+    }
+    if(deadline_terminal_result) {
+        const auto factory=convex.factory;
+        convex.factory=[factory](const ConvexProgram& program) {
+            return std::make_unique<DeadlineResultAfterTerminal>(factory(program));
         };
     }
     if(expire_deadline_after_terminal) {
@@ -1433,6 +1453,17 @@ TEST_CASE("registered terminal resource limit retains only the unestablished fea
     CHECK(stop.retained.incumbents==0);CHECK(stop.retained.partial_or_candidate_family);
     // Strategy A emits no caller-visible timing spans on this stop; timing coverage remains a #89 dependency.
     CHECK(result.spans.empty());
+}
+TEST_CASE("registered terminal provider deadline preserves its termination without caller deadline") {
+    const auto query=request(integrator());
+    auto prepared=take(admit(query,false,{},false,false,false,nullptr,nullptr,true));
+    auto workspace=prepared.create();
+    ExecutionContext context;context.resources=std::make_shared<const ResourcePolicy>(ResourcePolicy{1,1,1,{}});
+    const auto result=take(workspace->run(context));
+    CHECK(result.termination==Termination::deadline_expired);
+    REQUIRE(std::holds_alternative<ScopedOperationStopped>(result.stop));
+    CHECK(std::get<ScopedOperationStopped>(result.stop).stop.reason==StopReason::deadline_expired);
+    CHECK(result.outcome.value==MathematicalOutcome::undetermined);
 }
 TEST_CASE("registered terminal numerical failure retains the feasible candidate and scoped optimizer evidence") {
     const auto query=request(integrator());

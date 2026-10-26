@@ -962,6 +962,16 @@ TEST_CASE("registered deadline expiring as solver returns resource limit keeps d
     REQUIRE(std::holds_alternative<ScopedOperationStopped>(result.stop));
     CHECK(std::get<ScopedOperationStopped>(result.stop).stop.reason==StopReason::deadline_expired);
 }
+TEST_CASE("registered provider deadline preserves termination without caller deadline") {
+    const auto p=resolve(integrator());const auto q=request(p);
+    const auto prepared=registered_prepared(p,q,false,Termination::deadline_expired);
+    auto workspace=prepared.create();
+    const auto result=accepted(workspace->run({}));
+    CHECK(result.termination==Termination::deadline_expired);
+    REQUIRE(std::holds_alternative<ScopedOperationStopped>(result.stop));
+    CHECK(std::get<ScopedOperationStopped>(result.stop).stop.reason==StopReason::deadline_expired);
+    CHECK(result.outcome.value==MathematicalOutcome::undetermined);
+}
 TEST_CASE("registered cancellation takes priority when deadline and resource limit coincide") {
     const auto p=resolve(integrator());
     const auto q=request(p);

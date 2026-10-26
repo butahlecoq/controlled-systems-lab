@@ -270,6 +270,7 @@ public:
             }
             if(minimized.termination!=Termination::completed) {
                 const auto reason=minimized.termination==Termination::cancelled?StopReason::cancelled:
+                    minimized.termination==Termination::deadline_expired?StopReason::deadline_expired:
                     minimized.termination==Termination::resource_limit?StopReason::resource_limit:StopReason::numerical_failure;
                 stop(result,selected,{reason,"Terminal optimization stopped; slice-scoped evidence retained."});return result;
             }

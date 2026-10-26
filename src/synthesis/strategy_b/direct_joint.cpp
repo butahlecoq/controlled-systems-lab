@@ -531,6 +531,7 @@ SynthesisResult detail::DirectJointExecutionRunner::solve_impl(const problem::Re
                     StopReason reason=StopReason::numerical_failure;
                     if(context.cancellation.stop_requested())reason=StopReason::cancelled;
                     else if(context.deadline && std::chrono::steady_clock::now()>=*context.deadline)reason=StopReason::deadline_expired;
+                    else if(checked.termination==Termination::deadline_expired)reason=StopReason::deadline_expired;
                     else if(checked.termination==Termination::resource_limit)reason=StopReason::resource_limit;
                     result.termination=stopped_termination(reason);
                     result.stop=ScopedOperationStopped{{reason,"Original-problem anchor verification stopped; program evidence and feasible candidate retained."},provenance,retained(result)};
@@ -569,6 +570,7 @@ SynthesisResult detail::DirectJointExecutionRunner::solve_impl(const problem::Re
             if(context.cancellation.stop_requested())reason=StopReason::cancelled;
             else if(context.deadline && std::chrono::steady_clock::now()>=*context.deadline)reason=StopReason::deadline_expired;
             else if(evidence.termination==Termination::cancelled)reason=StopReason::cancelled;
+            else if(evidence.termination==Termination::deadline_expired)reason=StopReason::deadline_expired;
             else if(evidence.termination==Termination::resource_limit)reason=StopReason::resource_limit;
             result.termination=stopped_termination(reason);
             result.stop=ScopedOperationStopped{{reason,evidence.raw_diagnostics},provenance,retained(result)};
