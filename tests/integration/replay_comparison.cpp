@@ -150,6 +150,13 @@ TEST_CASE("4D selected linear witnesses retain separate nonlinear replay and 2D 
     const auto malformed = ex::decode_replay_comparison(malformed_json.dump());
     REQUIRE(std::holds_alternative<ar::ArtifactError>(malformed));
     CHECK(std::get<ar::ArtifactError>(malformed).code == ar::ArtifactErrorCode::invalid_input);
+    auto unnamed_unavailable = encoded_json;
+    unnamed_unavailable["witnesses"][0]["replay"]["status"] = "unavailable";
+    unnamed_unavailable["witnesses"][0]["replay"]["original_objective"] = nullptr;
+    unnamed_unavailable["witnesses"][0]["replay"]["missing_prerequisites"] = nlohmann::json::array();
+    const auto missing_reason = ex::decode_replay_comparison(unnamed_unavailable.dump());
+    REQUIRE(std::holds_alternative<ar::ArtifactError>(missing_reason));
+    CHECK(std::get<ar::ArtifactError>(missing_reason).code == ar::ArtifactErrorCode::invalid_input);
 }
 
 TEST_CASE("replay association refuses swapped control order, mismatched axes and bad projections") {

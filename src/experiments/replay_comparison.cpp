@@ -318,6 +318,7 @@ bool replay_document(const Json& replay, std::size_t state_dimensions,
             !replay["original_objective"].is_null() && finite_number(replay["original_objective"]) &&
             replay["missing_prerequisites"].empty() && replay["integration"] == "exact_discrete_map" &&
             replay["control_hold"] == "constant_on_interval";
+    if (status == "unavailable" && replay["missing_prerequisites"].empty()) return false;
     return replay["original_objective"].is_null();
 }
 
