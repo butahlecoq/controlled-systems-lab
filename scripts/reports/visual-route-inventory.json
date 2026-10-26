@@ -1,0 +1,1312 @@
+{
+  "schema": "csl.visual-route-inventory/1",
+  "policy": {
+    "id": "csl-report-quantitative-v1",
+    "solution": "Matplotlib 3.11.2 static SVG/PNG plus passive hand-authored SVG for reviewed diagrams",
+    "no_solver_or_geometry_runs": true
+  },
+  "source_discovery": {
+    "method": "deterministic text scan of scripts/reports/**/*.py and benchmarks/reporting/**/*.py for SVG/PNG/savefig/write_image/render_svg signals",
+    "review_required": "signal hits are candidate producers or route validators; inspect the role before migration"
+  },
+  "producers_and_routes": [
+    {
+      "source": "scripts/reports/app01/collect.py",
+      "signal_count": 3,
+      "asset_name_literals": [
+        "latency.svg",
+        "report.svg"
+      ],
+      "disposition": "deferred-family-specific-migration",
+      "follow_up_issue": 669
+    },
+    {
+      "source": "scripts/reports/app02/render_saved.py",
+      "signal_count": 4,
+      "asset_name_literals": [
+        "polygons.svg"
+      ],
+      "disposition": "deferred-family-specific-migration",
+      "follow_up_issue": 669
+    },
+    {
+      "source": "scripts/reports/app03/render_saved.py",
+      "signal_count": 5,
+      "asset_name_literals": [
+        "zonotope-2d.svg"
+      ],
+      "disposition": "deferred-family-specific-migration",
+      "follow_up_issue": 669
+    },
+    {
+      "source": "scripts/reports/app04/render_saved.py",
+      "signal_count": 5,
+      "asset_name_literals": [
+        "ellipsoid-2d.svg"
+      ],
+      "disposition": "deferred-family-specific-migration",
+      "follow_up_issue": 669
+    },
+    {
+      "source": "scripts/reports/b08_exact_report.py",
+      "signal_count": 1,
+      "asset_name_literals": [],
+      "disposition": "deferred-family-specific-migration",
+      "follow_up_issue": 669
+    },
+    {
+      "source": "scripts/reports/control_figures.py",
+      "signal_count": 13,
+      "asset_name_literals": [],
+      "disposition": "adopted-shared-quantitative-policy"
+    },
+    {
+      "source": "scripts/reports/exp04/render_saved.py",
+      "signal_count": 4,
+      "asset_name_literals": [
+        "trajectory.svg"
+      ],
+      "disposition": "deferred-family-specific-migration",
+      "follow_up_issue": 669
+    },
+    {
+      "source": "scripts/reports/ext01/render_saved.py",
+      "signal_count": 3,
+      "asset_name_literals": [
+        "b08-trials.svg"
+      ],
+      "disposition": "deferred-family-specific-migration",
+      "follow_up_issue": 669
+    },
+    {
+      "source": "scripts/reports/ext03_transform/registered_reports.py",
+      "signal_count": 2,
+      "asset_name_literals": [
+        "visual.svg"
+      ],
+      "disposition": "publication-validation-or-frozen-route"
+    },
+    {
+      "source": "scripts/reports/ext03_transform/report.py",
+      "signal_count": 1,
+      "asset_name_literals": [
+        "visual.svg"
+      ],
+      "disposition": "deferred-family-specific-migration",
+      "follow_up_issue": 669
+    },
+    {
+      "source": "scripts/reports/ext04/continuous_report.py",
+      "signal_count": 2,
+      "asset_name_literals": [
+        "example-2d.svg"
+      ],
+      "disposition": "deferred-family-specific-migration",
+      "follow_up_issue": 669
+    },
+    {
+      "source": "scripts/reports/ext04/render_saved.py",
+      "signal_count": 3,
+      "asset_name_literals": [
+        "performance.svg"
+      ],
+      "disposition": "deferred-family-specific-migration",
+      "follow_up_issue": 669
+    },
+    {
+      "source": "scripts/reports/ext05/render_saved.py",
+      "signal_count": 4,
+      "asset_name_literals": [
+        "trajectory-2d.svg"
+      ],
+      "disposition": "deferred-family-specific-migration",
+      "follow_up_issue": 669
+    },
+    {
+      "source": "scripts/reports/ext07/render_saved.py",
+      "signal_count": 4,
+      "asset_name_literals": [
+        "joint-relation-2d.svg"
+      ],
+      "disposition": "deferred-family-specific-migration",
+      "follow_up_issue": 669
+    },
+    {
+      "source": "scripts/reports/ext07/two_parameter_render_saved.py",
+      "signal_count": 5,
+      "asset_name_literals": [
+        "feasible-polygons.svg"
+      ],
+      "disposition": "deferred-family-specific-migration",
+      "follow_up_issue": 669
+    },
+    {
+      "source": "scripts/reports/finite_feedback/render_saved.py",
+      "signal_count": 4,
+      "asset_name_literals": [
+        "performance.svg"
+      ],
+      "disposition": "deferred-family-specific-migration",
+      "follow_up_issue": 669
+    },
+    {
+      "source": "scripts/reports/geo02/render.py",
+      "signal_count": 6,
+      "asset_name_literals": [
+        "timings.svg"
+      ],
+      "disposition": "deferred-family-specific-migration",
+      "follow_up_issue": 669
+    },
+    {
+      "source": "scripts/reports/geo02_registered_reports.py",
+      "signal_count": 4,
+      "asset_name_literals": [
+        "timings.svg"
+      ],
+      "disposition": "publication-validation-or-frozen-route"
+    },
+    {
+      "source": "scripts/reports/geo03/build_report.py",
+      "signal_count": 2,
+      "asset_name_literals": [
+        "latency.svg"
+      ],
+      "disposition": "deferred-family-specific-migration",
+      "follow_up_issue": 669
+    },
+    {
+      "source": "scripts/reports/geo03/validate_report.py",
+      "signal_count": 1,
+      "asset_name_literals": [],
+      "disposition": "publication-validation-or-frozen-route"
+    },
+    {
+      "source": "scripts/reports/geo04/render.py",
+      "signal_count": 5,
+      "asset_name_literals": [
+        "latency.svg"
+      ],
+      "disposition": "deferred-family-specific-migration",
+      "follow_up_issue": 669
+    },
+    {
+      "source": "scripts/reports/geo04_registered_reports.py",
+      "signal_count": 3,
+      "asset_name_literals": [
+        "latency.svg"
+      ],
+      "disposition": "publication-validation-or-frozen-route"
+    },
+    {
+      "source": "scripts/reports/geo05/render.py",
+      "signal_count": 3,
+      "asset_name_literals": [],
+      "disposition": "deferred-family-specific-migration",
+      "follow_up_issue": 669
+    },
+    {
+      "source": "scripts/reports/geo06_registered_reports.py",
+      "signal_count": 1,
+      "asset_name_literals": [],
+      "disposition": "publication-validation-or-frozen-route"
+    },
+    {
+      "source": "scripts/reports/geo07/render_saved.py",
+      "signal_count": 4,
+      "asset_name_literals": [
+        "performance.svg"
+      ],
+      "disposition": "deferred-family-specific-migration",
+      "follow_up_issue": 669
+    },
+    {
+      "source": "scripts/reports/geo07_dependent/render_saved.py",
+      "signal_count": 4,
+      "asset_name_literals": [
+        "performance.svg"
+      ],
+      "disposition": "deferred-family-specific-migration",
+      "follow_up_issue": 669
+    },
+    {
+      "source": "scripts/reports/geo07_port/render_saved.py",
+      "signal_count": 6,
+      "asset_name_literals": [
+        "performance.svg"
+      ],
+      "disposition": "deferred-family-specific-migration",
+      "follow_up_issue": 669
+    },
+    {
+      "source": "scripts/reports/geo08/render_saved.py",
+      "signal_count": 4,
+      "asset_name_literals": [
+        "lazy-2d.svg"
+      ],
+      "disposition": "deferred-family-specific-migration",
+      "follow_up_issue": 669
+    },
+    {
+      "source": "scripts/reports/issue3/render_saved.py",
+      "signal_count": 4,
+      "asset_name_literals": [
+        "latency.svg"
+      ],
+      "disposition": "deferred-family-specific-migration",
+      "follow_up_issue": 669
+    },
+    {
+      "source": "scripts/reports/issue3/validated_saved.py",
+      "signal_count": 3,
+      "asset_name_literals": [
+        "analytic-2d.svg"
+      ],
+      "disposition": "deferred-family-specific-migration",
+      "follow_up_issue": 669
+    },
+    {
+      "source": "scripts/reports/issue422/build_bundle.py",
+      "signal_count": 3,
+      "asset_name_literals": [
+        "fixed-plan-minimax-2d.svg",
+        "visual.svg"
+      ],
+      "disposition": "deferred-family-specific-migration",
+      "follow_up_issue": 669
+    },
+    {
+      "source": "scripts/reports/issue4_volterra/render.py",
+      "signal_count": 5,
+      "asset_name_literals": [
+        "error-box.svg"
+      ],
+      "disposition": "deferred-family-specific-migration",
+      "follow_up_issue": 669
+    },
+    {
+      "source": "scripts/reports/issue6/render.py",
+      "signal_count": 5,
+      "asset_name_literals": [
+        "terminal-projections.svg"
+      ],
+      "disposition": "deferred-family-specific-migration",
+      "follow_up_issue": 669
+    },
+    {
+      "source": "scripts/reports/issue6_b07_registered_reports.py",
+      "signal_count": 2,
+      "asset_name_literals": [
+        "projections.png",
+        "projections.svg"
+      ],
+      "disposition": "publication-validation-or-frozen-route"
+    },
+    {
+      "source": "scripts/reports/issue6_b09_registered_reports.py",
+      "signal_count": 3,
+      "asset_name_literals": [
+        "projections-lambda0.svg",
+        "projections-lambda1.svg"
+      ],
+      "disposition": "publication-validation-or-frozen-route"
+    },
+    {
+      "source": "scripts/reports/lotka_volterra_sampled.py",
+      "signal_count": 5,
+      "asset_name_literals": [
+        "geometry.svg"
+      ],
+      "disposition": "deferred-family-specific-migration",
+      "follow_up_issue": 669
+    },
+    {
+      "source": "scripts/reports/opt04/render.py",
+      "signal_count": 5,
+      "asset_name_literals": [
+        "performance.svg"
+      ],
+      "disposition": "deferred-family-specific-migration",
+      "follow_up_issue": 669
+    },
+    {
+      "source": "scripts/reports/opt04/validate_report.py",
+      "signal_count": 1,
+      "asset_name_literals": [
+        "performance.svg"
+      ],
+      "disposition": "publication-validation-or-frozen-route"
+    },
+    {
+      "source": "scripts/reports/opt04_registered_reports.py",
+      "signal_count": 4,
+      "asset_name_literals": [
+        "performance.svg"
+      ],
+      "disposition": "publication-validation-or-frozen-route"
+    },
+    {
+      "source": "scripts/reports/opt10/render_saved.py",
+      "signal_count": 4,
+      "asset_name_literals": [
+        "feasible-box-2d.svg"
+      ],
+      "disposition": "deferred-family-specific-migration",
+      "follow_up_issue": 669
+    },
+    {
+      "source": "scripts/reports/opt12_registered_reports.py",
+      "signal_count": 1,
+      "asset_name_literals": [
+        "comparison.svg"
+      ],
+      "disposition": "publication-validation-or-frozen-route"
+    },
+    {
+      "source": "scripts/reports/opt12_render.py",
+      "signal_count": 3,
+      "asset_name_literals": [
+        "comparison.svg"
+      ],
+      "disposition": "deferred-family-specific-migration",
+      "follow_up_issue": 669
+    },
+    {
+      "source": "scripts/reports/plot.py",
+      "signal_count": 7,
+      "asset_name_literals": [
+        "csl.report.svg",
+        "latency.png",
+        "latency.svg"
+      ],
+      "disposition": "adopted-shared-quantitative-policy"
+    },
+    {
+      "source": "scripts/reports/registered_reports.py",
+      "signal_count": 7,
+      "asset_name_literals": [
+        "latency.svg"
+      ],
+      "disposition": "publication-validation-or-frozen-route"
+    },
+    {
+      "source": "scripts/reports/render.py",
+      "signal_count": 6,
+      "asset_name_literals": [
+        "csl.report.svg",
+        "latency.png",
+        "latency.svg"
+      ],
+      "disposition": "deferred-family-specific-migration",
+      "follow_up_issue": 669
+    },
+    {
+      "source": "scripts/reports/report_data.py",
+      "signal_count": 1,
+      "asset_name_literals": [
+        "csl.report.svg"
+      ],
+      "disposition": "publication-validation-or-frozen-route"
+    },
+    {
+      "source": "scripts/reports/site.py",
+      "signal_count": 20,
+      "asset_name_literals": [
+        "csl.report.svg",
+        "latency.png",
+        "latency.svg",
+        "performance.svg",
+        "projections-lambda0.svg",
+        "projections.svg",
+        "terminal-projections.svg",
+        "timings.svg",
+        "visual.svg"
+      ],
+      "disposition": "publication-validation-or-frozen-route"
+    },
+    {
+      "source": "scripts/reports/stage_app01.py",
+      "signal_count": 3,
+      "asset_name_literals": [
+        "latency.svg"
+      ],
+      "disposition": "publication-validation-or-frozen-route"
+    },
+    {
+      "source": "scripts/reports/stage_app02.py",
+      "signal_count": 4,
+      "asset_name_literals": [
+        "polygons.svg"
+      ],
+      "disposition": "publication-validation-or-frozen-route"
+    },
+    {
+      "source": "scripts/reports/stage_app03.py",
+      "signal_count": 4,
+      "asset_name_literals": [
+        "zonotope-2d.svg"
+      ],
+      "disposition": "publication-validation-or-frozen-route"
+    },
+    {
+      "source": "scripts/reports/stage_ext01.py",
+      "signal_count": 1,
+      "asset_name_literals": [
+        "b08-trials.svg"
+      ],
+      "disposition": "publication-validation-or-frozen-route"
+    },
+    {
+      "source": "scripts/reports/stage_ext04_continuous.py",
+      "signal_count": 2,
+      "asset_name_literals": [
+        "example-2d.svg"
+      ],
+      "disposition": "publication-validation-or-frozen-route"
+    },
+    {
+      "source": "scripts/reports/stage_it17_hull_adaptations.py",
+      "signal_count": 1,
+      "asset_name_literals": [
+        "fixture-geometry.svg"
+      ],
+      "disposition": "publication-validation-or-frozen-route"
+    },
+    {
+      "source": "scripts/reports/stage_syn03_nominal_exact_example.py",
+      "signal_count": 1,
+      "asset_name_literals": [
+        "optimal-face.svg"
+      ],
+      "disposition": "publication-validation-or-frozen-route"
+    },
+    {
+      "source": "scripts/reports/stage_syn06.py",
+      "signal_count": 3,
+      "asset_name_literals": [
+        "latency.svg"
+      ],
+      "disposition": "publication-validation-or-frozen-route"
+    },
+    {
+      "source": "scripts/reports/syn01/collect.py",
+      "signal_count": 2,
+      "asset_name_literals": [
+        "latency.svg"
+      ],
+      "disposition": "deferred-family-specific-migration",
+      "follow_up_issue": 669
+    },
+    {
+      "source": "scripts/reports/syn01/render_saved.py",
+      "signal_count": 2,
+      "asset_name_literals": [
+        "latency.svg"
+      ],
+      "disposition": "deferred-family-specific-migration",
+      "follow_up_issue": 669
+    },
+    {
+      "source": "scripts/reports/syn01/report.py",
+      "signal_count": 3,
+      "asset_name_literals": [],
+      "disposition": "deferred-family-specific-migration",
+      "follow_up_issue": 669
+    },
+    {
+      "source": "scripts/reports/syn01_registered_reports.py",
+      "signal_count": 4,
+      "asset_name_literals": [
+        "latency.svg"
+      ],
+      "disposition": "publication-validation-or-frozen-route"
+    },
+    {
+      "source": "scripts/reports/syn02/collect.py",
+      "signal_count": 1,
+      "asset_name_literals": [],
+      "disposition": "deferred-family-specific-migration",
+      "follow_up_issue": 669
+    },
+    {
+      "source": "scripts/reports/syn02/publication_map.py",
+      "signal_count": 2,
+      "asset_name_literals": [
+        "latency.svg"
+      ],
+      "disposition": "deferred-family-specific-migration",
+      "follow_up_issue": 669
+    },
+    {
+      "source": "scripts/reports/syn02/render_saved.py",
+      "signal_count": 1,
+      "asset_name_literals": [
+        "latency.svg"
+      ],
+      "disposition": "deferred-family-specific-migration",
+      "follow_up_issue": 669
+    },
+    {
+      "source": "scripts/reports/syn02_registered_reports.py",
+      "signal_count": 3,
+      "asset_name_literals": [
+        "latency.svg"
+      ],
+      "disposition": "publication-validation-or-frozen-route"
+    },
+    {
+      "source": "scripts/reports/syn03/strategy_a_report.py",
+      "signal_count": 1,
+      "asset_name_literals": [],
+      "disposition": "deferred-family-specific-migration",
+      "follow_up_issue": 669
+    },
+    {
+      "source": "scripts/reports/syn03_ts02/report.py",
+      "signal_count": 1,
+      "asset_name_literals": [],
+      "disposition": "deferred-family-specific-migration",
+      "follow_up_issue": 669
+    },
+    {
+      "source": "scripts/reports/syn04/report.py",
+      "signal_count": 1,
+      "asset_name_literals": [],
+      "disposition": "deferred-family-specific-migration",
+      "follow_up_issue": 669
+    },
+    {
+      "source": "scripts/reports/syn04_ts02/report.py",
+      "signal_count": 1,
+      "asset_name_literals": [],
+      "disposition": "deferred-family-specific-migration",
+      "follow_up_issue": 669
+    },
+    {
+      "source": "scripts/reports/syn04_ts03/build_bundle.py",
+      "signal_count": 2,
+      "asset_name_literals": [
+        "control-projection.svg",
+        "syn04-strategy-b-ts03-control-projection.svg"
+      ],
+      "disposition": "deferred-family-specific-migration",
+      "follow_up_issue": 669
+    },
+    {
+      "source": "scripts/reports/syn04_ts03/report.py",
+      "signal_count": 2,
+      "asset_name_literals": [
+        "control-projection.svg"
+      ],
+      "disposition": "deferred-family-specific-migration",
+      "follow_up_issue": 669
+    },
+    {
+      "source": "scripts/reports/syn04_ts03_registered_reports.py",
+      "signal_count": 1,
+      "asset_name_literals": [
+        "control-projection.svg"
+      ],
+      "disposition": "publication-validation-or-frozen-route"
+    },
+    {
+      "source": "scripts/reports/syn06/collect.py",
+      "signal_count": 3,
+      "asset_name_literals": [
+        "latency.svg",
+        "report.svg"
+      ],
+      "disposition": "deferred-family-specific-migration",
+      "follow_up_issue": 669
+    },
+    {
+      "source": "scripts/reports/syn_ts01_paired/build_bundle.py",
+      "signal_count": 2,
+      "asset_name_literals": [
+        "performance.svg"
+      ],
+      "disposition": "deferred-family-specific-migration",
+      "follow_up_issue": 669
+    },
+    {
+      "source": "scripts/reports/syn_ts01_paired/regenerate_bundle.py",
+      "signal_count": 3,
+      "asset_name_literals": [
+        "performance.svg"
+      ],
+      "disposition": "deferred-family-specific-migration",
+      "follow_up_issue": 669
+    },
+    {
+      "source": "scripts/reports/syn_ts01_paired/report.py",
+      "signal_count": 6,
+      "asset_name_literals": [
+        "performance.svg"
+      ],
+      "disposition": "deferred-family-specific-migration",
+      "follow_up_issue": 669
+    },
+    {
+      "source": "scripts/reports/syn_ts01_paired_registered_reports.py",
+      "signal_count": 1,
+      "asset_name_literals": [
+        "performance.svg"
+      ],
+      "disposition": "publication-validation-or-frozen-route"
+    },
+    {
+      "source": "scripts/reports/ts01/report.py",
+      "signal_count": 1,
+      "asset_name_literals": [],
+      "disposition": "deferred-family-specific-migration",
+      "follow_up_issue": 669
+    },
+    {
+      "source": "scripts/reports/visual_examples.py",
+      "signal_count": 38,
+      "asset_name_literals": [
+        "control-projection.svg",
+        "ellipsoid-2d.svg",
+        "example-2d.svg",
+        "feasible-box-2d.svg",
+        "fuel-b06-flow-projection.png",
+        "fuel-b06-flow-projection.svg",
+        "fuel-b06-stock-projection.png",
+        "fuel-b06-stock-projection.svg",
+        "fuel-b06-timing.png",
+        "fuel-b06-timing.svg",
+        "fuel-b06-trajectory.png",
+        "fuel-b06-trajectory.svg",
+        "fuel-b06-viz06-before.svg",
+        "fuel-b06-viz06-flow.png",
+        "fuel-b06-viz06-flow.svg",
+        "fuel-b06-viz06-stock.png",
+        "fuel-b06-viz06-stock.svg",
+        "fuel-b06-viz06-timing.png",
+        "fuel-b06-viz06-timing.svg",
+        "fuel-b06-viz06-trajectory.png",
+        "fuel-b06-viz06-trajectory.svg",
+        "geometry.svg",
+        "joint-relation-2d.svg",
+        "lazy-2d.svg",
+        "optimal-face.svg",
+        "polygons.svg",
+        "projections-lambda0.svg",
+        "projections-lambda1.svg",
+        "terminal-projections.svg",
+        "trajectory-2d.svg",
+        "trajectory.svg",
+        "zonotope-2d.svg"
+      ],
+      "disposition": "gallery-composition-and-route"
+    },
+    {
+      "source": "scripts/reports/visual_illustrations.py",
+      "signal_count": 8,
+      "asset_name_literals": [
+        "ext03-slew-memory.svg",
+        "geo02-minkowski.svg",
+        "geo03-hv-square.svg",
+        "geo05-predecessor.svg",
+        "issue3-validated-minimax.svg",
+        "lp-triangle.svg",
+        "opt04-phase-one.svg"
+      ],
+      "disposition": "reviewed-static-diagram-exception"
+    },
+    {
+      "source": "benchmarks/reporting/approximation_pilot/summarize.py",
+      "signal_count": 3,
+      "asset_name_literals": [
+        "comparison.svg"
+      ],
+      "disposition": "deferred-family-specific-migration",
+      "follow_up_issue": 669
+    },
+    {
+      "source": "benchmarks/reporting/issue6/b07_render_projection.py",
+      "signal_count": 6,
+      "asset_name_literals": [
+        "projections.png",
+        "projections.svg"
+      ],
+      "disposition": "deferred-family-specific-migration",
+      "follow_up_issue": 669
+    },
+    {
+      "source": "benchmarks/reporting/issue6/b09_render_projection.py",
+      "signal_count": 2,
+      "asset_name_literals": [],
+      "disposition": "deferred-family-specific-migration",
+      "follow_up_issue": 669
+    },
+    {
+      "source": "benchmarks/reporting/it17_hull/summarize.py",
+      "signal_count": 4,
+      "asset_name_literals": [
+        "fixture-geometry.svg"
+      ],
+      "disposition": "deferred-family-specific-migration",
+      "follow_up_issue": 669
+    }
+  ],
+  "frozen_published_routes": [
+    {
+      "route": "app01-plan-20261016-22d406fd",
+      "source_bundle": "app01-plan-20261016-22d406fd",
+      "assets": [
+        "latency.svg"
+      ],
+      "index_sha256": "54947c78cf175f3b6647234ef5dc33117d7ee01375a251520fc270f0a6411211",
+      "disposition": "immutable-preserved; publish a companion for presentation changes",
+      "follow_up_issue": 669
+    },
+    {
+      "route": "app02-box-8ff979de60ea9d22",
+      "source_bundle": "app02-box-8ff979de60ea9d22",
+      "assets": [
+        "polygons.svg"
+      ],
+      "index_sha256": "bf8bfd6d96c99670cad420a66a4c4b9d77a840f04aeab5c057a15459a45b3307",
+      "disposition": "immutable-preserved; publish a companion for presentation changes",
+      "follow_up_issue": 669
+    },
+    {
+      "route": "app03-zonotope-4522855018fa9b0b",
+      "source_bundle": "app03-zonotope-4522855018fa9b0b",
+      "assets": [
+        "zonotope-2d.svg"
+      ],
+      "index_sha256": "b3d4b04afd09d1b70f3936da477a144d76010aa29ff326a055706d01927da9ef",
+      "disposition": "immutable-preserved; publish a companion for presentation changes",
+      "follow_up_issue": 669
+    },
+    {
+      "route": "app04-ellipsoid-fd302c34092f8b19",
+      "source_bundle": "app04-ellipsoid-fd302c34092f8b19",
+      "assets": [
+        "ellipsoid-2d.svg"
+      ],
+      "index_sha256": "356ca56e0cd84e0f498fde14b0e70c25665e3c83ee8531977bdf4ebc468dbc8f",
+      "disposition": "immutable-preserved; publish a companion for presentation changes",
+      "follow_up_issue": 669
+    },
+    {
+      "route": "approximation-matched-pilot-20261023-r1",
+      "source_bundle": "approximation-matched-pilot-20261023-r1",
+      "assets": [
+        "comparison.svg"
+      ],
+      "index_sha256": "d59d854fcf1d0d385e12f4f94c48d13ee97b0015838ba3c1270435348b39546d",
+      "disposition": "immutable-preserved; publish a companion for presentation changes",
+      "follow_up_issue": 669
+    },
+    {
+      "route": "b06-owner-confirmed-7df01ba3af5e4c46",
+      "source_bundle": "b06-owner-confirmed-7df01ba3af5e4c46",
+      "assets": [
+        "terminal-projections.svg"
+      ],
+      "index_sha256": "54958057c49eda62d81d627583e69707cb1f5f7b0635d24da33659db686d095c",
+      "disposition": "immutable-preserved; publish a companion for presentation changes",
+      "follow_up_issue": 669
+    },
+    {
+      "route": "b07-owner-approved-eight-case-v1",
+      "source_bundle": "b07-owner-approved-eight-case-v1",
+      "assets": [
+        "projections.png",
+        "projections.svg"
+      ],
+      "index_sha256": "88e510e20a6ea9c93613d11c9d8da3079ad1bc69cfc06242e028faa06bf85c30",
+      "disposition": "immutable-preserved; publish a companion for presentation changes",
+      "follow_up_issue": 669
+    },
+    {
+      "route": "b09-a08-source-reference-4818ddde",
+      "source_bundle": "b09-a08-source-reference-4818ddde",
+      "assets": [
+        "projections-lambda0.svg",
+        "projections-lambda1.svg"
+      ],
+      "index_sha256": "39895f60c78d3ac110f8d6f9b3bbc81274c4825db6e7d303d4dbe860fed5c906",
+      "disposition": "immutable-preserved; publish a companion for presentation changes",
+      "follow_up_issue": 669
+    },
+    {
+      "route": "convex-20261012T041854Z-4d54a407c9b2",
+      "source_bundle": "convex-20261012T041854Z-4d54a407c9b2",
+      "assets": [
+        "latency.png",
+        "latency.svg"
+      ],
+      "index_sha256": "14882d50e392e3abfd57504c6f9fb175aa73f6ace856a8f20322ffdc9f1220fc",
+      "disposition": "immutable-preserved; publish a companion for presentation changes",
+      "follow_up_issue": 669
+    },
+    {
+      "route": "exp04-replay-93fe3b87795e1d3a",
+      "source_bundle": "exp04-replay-93fe3b87795e1d3a",
+      "assets": [
+        "trajectory.svg"
+      ],
+      "index_sha256": "ffbd787b7a01ecafae6c8e9b37e4abc98a1db1a134e94214388aa37b4ee9d76f",
+      "disposition": "immutable-preserved; publish a companion for presentation changes",
+      "follow_up_issue": 669
+    },
+    {
+      "route": "exp05-fixed-plan-minimax-20261026-6c561462",
+      "source_bundle": "exp05-fixed-plan-minimax-20261026-6c561462",
+      "assets": [
+        "visual.svg"
+      ],
+      "index_sha256": "a0e5b906fe719a5fce19a1aab8c652fd9fa8f7aa9007b9fa3147ac34e2b69f08",
+      "disposition": "immutable-preserved; publish a companion for presentation changes",
+      "follow_up_issue": 669
+    },
+    {
+      "route": "exp05-fixed-plan-minimax-20261026-fce05a69",
+      "source_bundle": "exp05-fixed-plan-minimax-20261026-fce05a69",
+      "assets": [
+        "visual.svg"
+      ],
+      "index_sha256": "c7ce8d2984bd60e3f28909ad2df2846f2e8e34182c9a79e3cfc4409c8432c8ff",
+      "disposition": "immutable-preserved; publish a companion for presentation changes",
+      "follow_up_issue": 669
+    },
+    {
+      "route": "ext01-fixed-plan-20261016-11b7bc74",
+      "source_bundle": "ext01-fixed-plan-20261016-11b7bc74",
+      "assets": [
+        "b08-trials.svg"
+      ],
+      "index_sha256": "d2970b9a585d1c06d3867a226531e4464599f2e6204187ea8db92fc9ba209e64",
+      "disposition": "immutable-preserved; publish a companion for presentation changes",
+      "follow_up_issue": 669
+    },
+    {
+      "route": "ext03-transform-20261024-a3a3af9",
+      "source_bundle": "ext03-transform-20261024-a3a3af9",
+      "assets": [
+        "visual.svg"
+      ],
+      "index_sha256": "f5d9b20d0f449a88431cb881718e44cdd576a4ed69c137f1f0db394d0fc9af77",
+      "disposition": "immutable-preserved; publish a companion for presentation changes",
+      "follow_up_issue": 669
+    },
+    {
+      "route": "ext04-continuous-27d4ad2e12958609",
+      "source_bundle": "ext04-continuous-27d4ad2e12958609",
+      "assets": [
+        "example-2d.svg"
+      ],
+      "index_sha256": "0c0f0dce3e03705a2065e6eaf5114e5d5a6ba76d97cc1086a3ff19e268272099",
+      "disposition": "immutable-preserved; publish a companion for presentation changes",
+      "follow_up_issue": 669
+    },
+    {
+      "route": "ext04-continuous-ebcf879d07ee9157",
+      "source_bundle": "ext04-continuous-ebcf879d07ee9157",
+      "assets": [
+        "example-2d.svg"
+      ],
+      "index_sha256": "1e56a8447428fa560d4508ca41b805378d7272bb52615fb54188c2fc5075384c",
+      "disposition": "immutable-preserved; publish a companion for presentation changes",
+      "follow_up_issue": 669
+    },
+    {
+      "route": "ext04-df62c7c6d295e135",
+      "source_bundle": "ext04-df62c7c6d295e135",
+      "assets": [
+        "performance.svg"
+      ],
+      "index_sha256": "0a33bf830a2e4abe77a4b6f2fede1d29bb25836778e30222cb297afeff621ae3",
+      "disposition": "immutable-preserved; publish a companion for presentation changes",
+      "follow_up_issue": 669
+    },
+    {
+      "route": "ext05-discretization-a40ba9647cc023dc",
+      "source_bundle": "ext05-discretization-a40ba9647cc023dc",
+      "assets": [
+        "trajectory-2d.svg"
+      ],
+      "index_sha256": "291c9e51e95d68bf83a91af850399825d66f7b888c05bfd351ac723a136c52ee",
+      "disposition": "immutable-preserved; publish a companion for presentation changes",
+      "follow_up_issue": 669
+    },
+    {
+      "route": "ext07-hybrid-51d9ee2e89d240eb",
+      "source_bundle": "ext07-hybrid-51d9ee2e89d240eb",
+      "assets": [
+        "joint-relation-2d.svg"
+      ],
+      "index_sha256": "9b914e6355ab9b0ca480b3b50712d2d9182f0c81985cc411bf140f8015359496",
+      "disposition": "immutable-preserved; publish a companion for presentation changes",
+      "follow_up_issue": 669
+    },
+    {
+      "route": "ext07-hybrid-two-parameter-26f402289a309403",
+      "source_bundle": "ext07-hybrid-two-parameter-26f402289a309403",
+      "assets": [
+        "feasible-polygons.svg"
+      ],
+      "index_sha256": "d32671ca88301a07fbdc55709deb94c6685545ca4d0e838dd7a85eb08609235a",
+      "disposition": "immutable-preserved; publish a companion for presentation changes",
+      "follow_up_issue": 669
+    },
+    {
+      "route": "ext07-hybrid-two-parameter-8ad871b5ea29fc7b",
+      "source_bundle": "ext07-hybrid-two-parameter-8ad871b5ea29fc7b",
+      "assets": [
+        "feasible-polygons.svg"
+      ],
+      "index_sha256": "8a68ed07ff8b49750fc3d56cb21e20a3c3dbd01bd869251af7768b47a9dfae10",
+      "disposition": "immutable-preserved; publish a companion for presentation changes",
+      "follow_up_issue": 669
+    },
+    {
+      "route": "ext07-hybrid-two-parameter-df7acc27de65930b",
+      "source_bundle": "ext07-hybrid-two-parameter-df7acc27de65930b",
+      "assets": [
+        "feasible-polygons.svg"
+      ],
+      "index_sha256": "a13f19bf9ec23d74decdad43ca1d97344de64ef58db649dbb6ada5acb7744ac4",
+      "disposition": "immutable-preserved; publish a companion for presentation changes",
+      "follow_up_issue": 669
+    },
+    {
+      "route": "finite-feedback-a6e96fd96c7ac7cc",
+      "source_bundle": "finite-feedback-a6e96fd96c7ac7cc",
+      "assets": [
+        "performance.svg"
+      ],
+      "index_sha256": "32b0713ab87d982138f743ddee399e8c62256ee0ef4fcfc956643ecf9b986baf",
+      "disposition": "immutable-preserved; publish a companion for presentation changes",
+      "follow_up_issue": 669
+    },
+    {
+      "route": "geo02-20261012T235755Z-6b1f504ad3db",
+      "source_bundle": "geo02-20261012T235755Z-6b1f504ad3db",
+      "assets": [
+        "timings.svg"
+      ],
+      "index_sha256": "0b396d7f6f36958014aa05399decb6e63213190a7863edfbcac655282ee9de96",
+      "disposition": "immutable-preserved; publish a companion for presentation changes",
+      "follow_up_issue": 669
+    },
+    {
+      "route": "geo02-20261013T061151Z-338ff7d1d63c",
+      "source_bundle": "geo02-20261013T061151Z-338ff7d1d63c",
+      "assets": [
+        "timings.svg"
+      ],
+      "index_sha256": "69cb89158dc1a47fc2a6e758b9ea39c57247654fd8d7eba08da19dff5e52c3a2",
+      "disposition": "immutable-preserved; publish a companion for presentation changes",
+      "follow_up_issue": 669
+    },
+    {
+      "route": "geo03-20261012-3c12ca125831",
+      "source_bundle": "geo03-20261012-3c12ca125831",
+      "assets": [
+        "latency.svg"
+      ],
+      "index_sha256": "50765dc949fe50477c4fdd8bf6eedec3ca0ab8cd5e1fa40e22eb5fb4624d8fe7",
+      "disposition": "immutable-preserved; publish a companion for presentation changes",
+      "follow_up_issue": 669
+    },
+    {
+      "route": "geo04-20261012T224946Z-c37852bcc80d",
+      "source_bundle": "geo04-20261012T224946Z-c37852bcc80d",
+      "assets": [
+        "latency.svg"
+      ],
+      "index_sha256": "9aa60da764e8812499135ccb7862079e7ca5a1da81efff86b4ed83fbd0473e50",
+      "disposition": "immutable-preserved; publish a companion for presentation changes",
+      "follow_up_issue": 669
+    },
+    {
+      "route": "geo07-9ef0d347291774da",
+      "source_bundle": "geo07-9ef0d347291774da",
+      "assets": [
+        "performance.svg"
+      ],
+      "index_sha256": "63c4e4ce1d0c60d08b9b7b5fb5889caf12bd401ec81f5cc50452e31bdad1333a",
+      "disposition": "immutable-preserved; publish a companion for presentation changes",
+      "follow_up_issue": 669
+    },
+    {
+      "route": "geo07-dependent-4dcc5a8fe36f17ed",
+      "source_bundle": "geo07-dependent-4dcc5a8fe36f17ed",
+      "assets": [
+        "performance.svg"
+      ],
+      "index_sha256": "fd864c550abc19d1865bafeced0efd2a036ba589477f95dc2e179981c850a01f",
+      "disposition": "immutable-preserved; publish a companion for presentation changes",
+      "follow_up_issue": 669
+    },
+    {
+      "route": "geo07-port-4dee19cde3d50259",
+      "source_bundle": "geo07-port-4dee19cde3d50259",
+      "assets": [
+        "performance.svg"
+      ],
+      "index_sha256": "fecd6c41eeed1b4fbe209157c9ad8cd4e6b6ac10fc06e5b9ac02d30ecc5a398c",
+      "disposition": "immutable-preserved; publish a companion for presentation changes",
+      "follow_up_issue": 669
+    },
+    {
+      "route": "geo08-lazy-6dbdd6b2f9235837",
+      "source_bundle": "geo08-lazy-6dbdd6b2f9235837",
+      "assets": [
+        "lazy-2d.svg"
+      ],
+      "index_sha256": "0d66d413d542281e6060962ec6ec9b515784119104c87bceb1ed4a9b2fd25867",
+      "disposition": "immutable-preserved; publish a companion for presentation changes",
+      "follow_up_issue": 669
+    },
+    {
+      "route": "issue3-finite-catalogue-b4632ce76510aa4f",
+      "source_bundle": "issue3-finite-catalogue-b4632ce76510aa4f",
+      "assets": [
+        "latency.svg"
+      ],
+      "index_sha256": "3d363a58d18695507688616577beb52078bbbc20514bb9c091981582d3962adb",
+      "disposition": "immutable-preserved; publish a companion for presentation changes",
+      "follow_up_issue": 669
+    },
+    {
+      "route": "issue3-validated-minimax-20261023-r1",
+      "source_bundle": "issue3-validated-minimax-20261023-r1",
+      "assets": [
+        "analytic-2d.svg"
+      ],
+      "index_sha256": "fc9f9920e20072dd6d4cfa04094a7235f01fb0da87e5d95ebe4cdb643ba95564",
+      "disposition": "immutable-preserved; publish a companion for presentation changes",
+      "follow_up_issue": 669
+    },
+    {
+      "route": "issue4-volterra-7dce05b47c50c27a",
+      "source_bundle": "issue4-volterra-7dce05b47c50c27a",
+      "assets": [
+        "error-box.svg"
+      ],
+      "index_sha256": "9ae62adb575c44a4da216c5fbf2d396375f6965c742c5ca2dddb06d644b4a3d1",
+      "disposition": "immutable-preserved; publish a companion for presentation changes",
+      "follow_up_issue": 669
+    },
+    {
+      "route": "lotka-volterra-sampled-20261023",
+      "source_bundle": "lotka-volterra-sampled-20261023",
+      "assets": [
+        "geometry.svg"
+      ],
+      "index_sha256": "63858310c070de048bfa01cb796174ba2a4fd73a3135dcf4fa80c3d57ea9c675",
+      "disposition": "immutable-preserved; publish a companion for presentation changes",
+      "follow_up_issue": 669
+    },
+    {
+      "route": "lp-20261012T000346Z-ee5e9193b7a5",
+      "source_bundle": "lp-20261012T000346Z-ee5e9193b7a5",
+      "assets": [
+        "latency.png",
+        "latency.svg"
+      ],
+      "index_sha256": "2b7d31cb884861fdab7abe2d1fad8dadb4be1489f5e1edda4afdc8b05b3c22c2",
+      "disposition": "immutable-preserved; publish a companion for presentation changes",
+      "follow_up_issue": 669
+    },
+    {
+      "route": "opt04-20261013T172839Z-6451c4b89d3b",
+      "source_bundle": "opt04-20261013T172839Z-6451c4b89d3b",
+      "assets": [
+        "performance.svg"
+      ],
+      "index_sha256": "315886d8b30c2e00147c6a52e94c14694c558c44f4520edd734d3098ba3e47fd",
+      "disposition": "immutable-preserved; publish a companion for presentation changes",
+      "follow_up_issue": 669
+    },
+    {
+      "route": "opt05-hull-20261012-d1c211c2",
+      "source_bundle": "opt05-hull-20261012-d1c211c2",
+      "assets": [
+        "latency.svg"
+      ],
+      "index_sha256": "836ceac4fa757dfef471686bb4d04bd47e7da39fd849c22095a30d57f04b6c00",
+      "disposition": "immutable-preserved; publish a companion for presentation changes",
+      "follow_up_issue": 669
+    },
+    {
+      "route": "opt06-basis-reuse-20261014-ef70e8c5-r2/evidence/accepted-002",
+      "source_bundle": "opt06-basis-reuse-20261014-ef70e8c5-r2/evidence/accepted-002",
+      "assets": [
+        "latency.svg"
+      ],
+      "index_sha256": "6df67c44cdcd92535e878297b77a7e09252935bd2d26dad5d17174be68d447cd",
+      "disposition": "immutable-preserved; publish a companion for presentation changes",
+      "follow_up_issue": 669
+    },
+    {
+      "route": "opt06-basis-reuse-20261014-ef70e8c5-r2",
+      "source_bundle": "opt06-basis-reuse-20261014-ef70e8c5-r2",
+      "assets": [
+        "latency.svg"
+      ],
+      "index_sha256": "6df67c44cdcd92535e878297b77a7e09252935bd2d26dad5d17174be68d447cd",
+      "disposition": "immutable-preserved; publish a companion for presentation changes",
+      "follow_up_issue": 669
+    },
+    {
+      "route": "opt07-bbb4aee749d643ff",
+      "source_bundle": "opt07-bbb4aee749d643ff",
+      "assets": [
+        "latency.svg"
+      ],
+      "index_sha256": "f72c860d3cbabbe6cc867c4434eb7920a6e2746f12a8b81ec43cb494d320d91e",
+      "disposition": "immutable-preserved; publish a companion for presentation changes",
+      "follow_up_issue": 669
+    },
+    {
+      "route": "opt10-smooth-188130d94d7bf2de",
+      "source_bundle": "opt10-smooth-188130d94d7bf2de",
+      "assets": [
+        "feasible-box-2d.svg"
+      ],
+      "index_sha256": "089785059008e29003e134f6863776d5cbf57f71526811124bb2a9d12415c8c5",
+      "disposition": "immutable-preserved; publish a companion for presentation changes",
+      "follow_up_issue": 669
+    },
+    {
+      "route": "opt11-8cfbc0c65f420dfd",
+      "source_bundle": "opt11-8cfbc0c65f420dfd",
+      "assets": [
+        "latency.svg"
+      ],
+      "index_sha256": "9561239ae2d3bfb7563fbe5605825ddb5f5704e956a9bc158f3baa42d81c24a6",
+      "disposition": "immutable-preserved; publish a companion for presentation changes",
+      "follow_up_issue": 669
+    },
+    {
+      "route": "opt12-7b732a53716c",
+      "source_bundle": "opt12-7b732a53716c",
+      "assets": [
+        "comparison.svg"
+      ],
+      "index_sha256": "0705b99923579a3d7a61a1a6a40039cbfce3e7f76ecf1b9b6552d8590ae9561f",
+      "disposition": "immutable-preserved; publish a companion for presentation changes",
+      "follow_up_issue": 669
+    },
+    {
+      "route": "quickhull-it17-paper-adaptations-20261024-r1",
+      "source_bundle": "quickhull-it17-paper-adaptations-20261024-r1",
+      "assets": [
+        "fixture-geometry.svg"
+      ],
+      "index_sha256": "9bb9a9c7f8c9d317d457e7449c9271f1317a8843c5640f921bc051789581f058",
+      "disposition": "immutable-preserved; publish a companion for presentation changes",
+      "follow_up_issue": 669
+    },
+    {
+      "route": "quickhull-it17-preliminary-20261023-r1",
+      "source_bundle": "quickhull-it17-preliminary-20261023-r1",
+      "assets": [
+        "fixture-geometry.svg"
+      ],
+      "index_sha256": "ae29269a1860101623835da276fceca7587e2619f910a2c64a62626dcee94004",
+      "disposition": "immutable-preserved; publish a companion for presentation changes",
+      "follow_up_issue": 669
+    },
+    {
+      "route": "rejected/finite-feedback-bee7e6d32c88451d",
+      "source_bundle": "rejected/finite-feedback-bee7e6d32c88451d",
+      "assets": [
+        "performance.svg"
+      ],
+      "index_sha256": "e3d54618560811b3d66f837d6a63645695bbfbaaa76275fd7442f3a65da21f83",
+      "disposition": "immutable-preserved; publish a companion for presentation changes",
+      "follow_up_issue": 669
+    },
+    {
+      "route": "syn-ts01-paired-20261014-b7f1ac0",
+      "source_bundle": "syn-ts01-paired-20261014-b7f1ac0",
+      "assets": [
+        "performance.svg"
+      ],
+      "index_sha256": "d7996d79d6e8634e6b27cf0c26acc7095c40d1528885e7a9d49792db6e9cbf4d",
+      "disposition": "immutable-preserved; publish a companion for presentation changes",
+      "follow_up_issue": 669
+    },
+    {
+      "route": "syn01-nominal-20261013-f7ba310d-48a679cfc0d4",
+      "source_bundle": "syn01-nominal-20261013-f7ba310d-48a679cfc0d4",
+      "assets": [
+        "latency.svg"
+      ],
+      "index_sha256": "2a0b1246172312edbe71aca26e70f7d418700e1b0511a9b614fd489aaffbc0c0",
+      "disposition": "immutable-preserved; publish a companion for presentation changes",
+      "follow_up_issue": 669
+    },
+    {
+      "route": "syn02-terminal-20261013-c234a1a0-35de886a7fb4",
+      "source_bundle": "syn02-terminal-20261013-c234a1a0-35de886a7fb4",
+      "assets": [
+        "latency.svg"
+      ],
+      "index_sha256": "cdaaf456b55361f516273637eb3f52488ba9870432dfce4b4eb2e7c59cb2ff2e",
+      "disposition": "immutable-preserved; publish a companion for presentation changes",
+      "follow_up_issue": 669
+    },
+    {
+      "route": "syn03-nominal-exact-2d-8b94095",
+      "source_bundle": "syn03-nominal-exact-2d-8b94095",
+      "assets": [
+        "optimal-face.svg"
+      ],
+      "index_sha256": "65fd3369fb5ce4e1a708ced00c707bba6c1fd38f115e26aa82c0dc3420eaa05b",
+      "disposition": "immutable-preserved; publish a companion for presentation changes",
+      "follow_up_issue": 669
+    },
+    {
+      "route": "syn04-strategy-b-ts03-20261022-2c0c9210",
+      "source_bundle": "syn04-strategy-b-ts03-20261022-2c0c9210",
+      "assets": [
+        "control-projection.svg"
+      ],
+      "index_sha256": "26ee1788329d707d2d11763fe9ac9852d541c2a971cef1493ff8fdd60b7d3338",
+      "disposition": "immutable-preserved; publish a companion for presentation changes",
+      "follow_up_issue": 669
+    },
+    {
+      "route": "syn06-verifier-20261012-f0e32e2b",
+      "source_bundle": "syn06-verifier-20261012-f0e32e2b",
+      "assets": [
+        "latency.svg"
+      ],
+      "index_sha256": "6a8224b6b50cc551615ea2a0e151960f34e79a1eb66eb895cdff59837fd11b1f",
+      "disposition": "immutable-preserved; publish a companion for presentation changes",
+      "follow_up_issue": 669
+    }
+  ],
+  "gallery_routes": [
+    {
+      "route": "examples/index.html",
+      "assets": [
+        "examples.css",
+        "fuel-b06-viz06.html",
+        "fuel-b06-viz06-source.json",
+        "fuel-b06-viz06-export.json",
+        "fuel-b06-viz03.html",
+        "fuel-b06-viz06-before.svg",
+        "fuel-b06-viz06-flow.svg",
+        "fuel-b06-viz06-flow.png",
+        "fuel-b06-viz06-stock.svg",
+        "fuel-b06-viz06-stock.png",
+        "fuel-b06-viz06-trajectory.svg",
+        "fuel-b06-viz06-trajectory.png",
+        "fuel-b06-viz06-timing.svg",
+        "fuel-b06-viz06-timing.png"
+      ],
+      "disposition": "adopted-shared-quantitative-policy"
+    }
+  ],
+  "migration_owner": "#669; deferred family-specific renderers and frozen routes remain inventoried until migrated or split into scoped follow-up work"
+}

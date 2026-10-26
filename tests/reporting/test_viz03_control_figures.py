@@ -4,6 +4,8 @@ import csv
 import sys
 import tempfile
 import unittest
+import warnings
+import xml.etree.ElementTree as ET
 from pathlib import Path
 
 ROOT=Path(__file__).resolve().parents[2]
@@ -11,9 +13,55 @@ sys.path.insert(0,str(ROOT/"scripts"/"reports"))
 import control_figure_data as data
 import adapt_fuel_record as fuel
 import control_figures
+import figure_style
 
 
 class ControlFiguresTests(unittest.TestCase):
+    def test_tick_policy_keeps_narrow_offset_and_small_values_distinct(self):
+        for ticks in ([1e12, 1e12 + .025, 1e12 + .05, 1e12 + .075, 1e12 + .1],
+                      [-1e-12, -.5e-12, 0, .5e-12, 1e-12],
+                      [-3.5, -1.75, 0, 1.75, 3.5]):
+            labels=[figure_style.format_tick(value,ticks) for value in ticks]
+            self.assertEqual(len(labels),len(set(labels)),(ticks,labels))
+            self.assertNotIn("-0",labels)
+
+        import matplotlib
+        matplotlib.use("Agg")
+        import matplotlib.pyplot as plt
+        fig,axis=plt.subplots()
+        try:
+            axis.plot([-3.5,3.5],[-1e-12,1e-12])
+            axis.set_xlim(-3.5,3.5);axis.set_ylim(-1e-12,1e-12)
+            figure_style.configure_numeric_axis(axis)
+            fig.canvas.draw()
+            for dimension in (axis.xaxis,axis.yaxis):
+                labels=[tick.get_text() for tick in dimension.get_ticklabels() if tick.get_visible()]
+                self.assertGreaterEqual(len(labels),3)
+                self.assertEqual(len(labels),len(set(labels)),labels)
+            self.assertTrue(any(line.get_visible() for line in axis.get_xgridlines()))
+            self.assertTrue(any(line.get_visible() for line in axis.get_ygridlines()))
+        finally:
+            plt.close(fig)
+        fig,axis=plt.subplots()
+        try:
+            axis.plot([2,2],[4,4])
+            with warnings.catch_warnings():
+                warnings.simplefilter("ignore",UserWarning)
+                axis.set_xlim(2,2);axis.set_ylim(4,4)
+            axis.set_xlabel("Long physical state coordinate x₁ (kg/s)")
+            axis.set_ylabel("Long physical stock balance coordinate x₂ (kg)")
+            axis.set_title("Long report-family title with scenario, method and evidence labels",wrap=True)
+            figure_style.configure_numeric_axis(axis)
+            fig.canvas.draw()
+            for dimension in (axis.xaxis,axis.yaxis):
+                labels=[tick.get_text() for tick in dimension.get_ticklabels() if tick.get_visible()]
+                self.assertGreaterEqual(len(labels),3)
+                self.assertEqual(len(labels),len(set(labels)),labels)
+            self.assertEqual(axis.get_xlabel(),"Long physical state coordinate x₁ (kg/s)")
+            self.assertEqual(axis.get_ylabel(),"Long physical stock balance coordinate x₂ (kg)")
+        finally:
+            plt.close(fig)
+
     def test_b06_saved_projection_keeps_four_dimensional_coordinate_mapping(self):
         root=ROOT/"reports/algorithm-results/b06-owner-confirmed-7df01ba3af5e4c46"
         doc=fuel.convert_b06(root);data.validate(doc)
@@ -60,6 +108,7 @@ class ControlFiguresTests(unittest.TestCase):
             root=Path(temp);input_path=root/"input.json";input_path.write_text(json.dumps(doc))
             output=root/"out";style=ROOT/"scripts/reports/styles/control-v1.json"
             self.assertTrue(json.loads(style.read_text())["equal_aspect_for_matching_units"])
+            self.assertEqual(json.loads(style.read_text())["quantitative_axis_policy"],figure_style.STYLE_ID)
             receipt=control_figures.render(doc,hashlib.sha256(input_path.read_bytes()).hexdigest(),style,output)
             for name in ("trajectories.svg","trajectories.png","trajectory-pair-01.svg","trajectory-pair-01.png","projection-01.svg","projection-01.png","support-02.svg","support-02.png","support-03.svg","support-03.png","timing.svg","timing.png"):
                 self.assertTrue((output/name).is_file(),name)
@@ -72,6 +121,19 @@ class ControlFiguresTests(unittest.TestCase):
             projection_svg=(output/"projection-01.svg").read_text()
             self.assertIn("Source: run fixture-run · analytic fixture v 1",projection_svg)
             self.assertIn("not applicable to a set projection",projection_svg)
+            projection_tree=ET.fromstring(projection_svg)
+            self.assertEqual(projection_tree.attrib["aria-labelledby"],"figure-title figure-description")
+            self.assertIn("projected terminal relation",projection_tree.find("{http://www.w3.org/2000/svg}title").text)
+            description=projection_tree.find("{http://www.w3.org/2000/svg}desc").text
+            self.assertIn("major gridlines",description)
+            self.assertIn("Independent x/y scales",description)
+            self.assertIn("independent scales",ET.parse(output/"trajectories.svg").getroot().find("{http://www.w3.org/2000/svg}desc").text)
+            import matplotlib.pyplot as plt
+            equal_axis=plt.subplots()[1]
+            self.assertIn("Equal x/y data scaling",control_figures.set_coordinate_aspect(
+                equal_axis,{"unit":"kg/s"},{"unit":"kg/s"},json.loads(style.read_text())))
+            self.assertEqual(equal_axis.get_aspect(),1.0)
+            plt.close(equal_axis.figure)
             pair_svg=(output/"trajectory-pair-01.svg").read_text()
             self.assertIn("fixture-run · analytic fixture v 1 · witness-0",pair_svg)
             self.assertIn("selected witness trajectories",pair_svg)
@@ -82,6 +144,8 @@ class ControlFiguresTests(unittest.TestCase):
             self.assertIn("1 empty and 1 unbounded outcomes",no_point_svg)
             saved_receipt=json.loads((output/"export.json").read_text())
             self.assertFalse(saved_receipt["solve_query_latency_included"])
+            self.assertEqual(saved_receipt["quantitative_axis_policy"],"csl-report-quantitative-v1")
+            self.assertIn("csl-report-quantitative-v1",json.dumps(saved_receipt))
 
     def test_rejects_unbound_projection_and_wrong_control_interval_count(self):
         doc={"schema":data.SCHEMA,"provenance":{"record_schema":"x","record_id":"x","source_sha256":"b"*64,"scenario_id":"x","method_id":"x"},

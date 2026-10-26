@@ -12,6 +12,7 @@ from urllib.parse import urlsplit
 
 import geo04_registered_reports as intersection_reports
 import geo06_registered_reports as hull_reports
+import audit_visual_routes
 import report_data
 import stage_ext07 as ext07_reports
 import visual_illustrations
@@ -760,7 +761,7 @@ def build(catalog, site):
     site = Path(site).resolve(strict=True)
     saved_figures, saved_inventory = saved_figure_sections(catalog, site)
     last_topic_anchor = "visual-fuel-b06-viz03"
-    last_topic_title = "B06 fuel terminal set: versioned scientific projections"
+    last_topic_title = "B06 fuel terminal set: readable 4D-to-2D projections"
     analytic_files, analytic_inventory = visual_illustrations.build(Path(catalog))
     index = report_data.local_file(site, "index.html")
     original = index.read_text(encoding="utf-8")
@@ -779,13 +780,16 @@ def build(catalog, site):
     out.mkdir(exist_ok=True)
     outputs = {e["slug"] + ".svg": plot(e) for e in examples}
     outputs.update(analytic_files)
-    fuel_page = Path(__file__).parents[2] / "docs/examples/fuel-b06-viz03.html"
     fuel_assets = Path(__file__).parents[2] / "docs/examples"
     fuel_files = ("fuel-b06-viz03.html", "fuel-b06-viz03-source.json", "fuel-b06-viz03-export.json",
                   "fuel-b06-flow-projection.svg", "fuel-b06-flow-projection.png", "fuel-b06-stock-projection.svg",
-                  "fuel-b06-stock-projection.png", "fuel-b06-trajectory.svg", "fuel-b06-trajectory.png", "fuel-b06-timing.svg", "fuel-b06-timing.png")
+                  "fuel-b06-stock-projection.png", "fuel-b06-trajectory.svg", "fuel-b06-trajectory.png", "fuel-b06-timing.svg", "fuel-b06-timing.png",
+                  "fuel-b06-viz06.html", "fuel-b06-viz06-source.json", "fuel-b06-viz06-export.json",
+                  "fuel-b06-viz06-before.svg",
+                  "fuel-b06-viz06-flow.svg", "fuel-b06-viz06-flow.png", "fuel-b06-viz06-stock.svg", "fuel-b06-viz06-stock.png",
+                  "fuel-b06-viz06-trajectory.svg", "fuel-b06-viz06-trajectory.png", "fuel-b06-viz06-timing.svg", "fuel-b06-viz06-timing.png")
     for name in fuel_files:
-        path = fuel_page if name.endswith(".html") else fuel_assets / name
+        path = fuel_assets / name
         require(path.is_file(), "missing VIZ-03 fuel figure asset: " + str(path))
         outputs[name] = path.read_text(encoding="utf-8") if path.suffix == ".html" else path.read_bytes()
     gallery_inventory = []
@@ -813,10 +817,10 @@ def build(catalog, site):
         entry["status"] = "saved-report-figure"
         gallery_inventory.append(entry)
     fuel_anchor = "visual-fuel-b06-viz03"
-    fuel_entry = {"family":"Fuel minimax reference", "title":"B06 fuel terminal set: versioned scientific projections",
-                  "status":"saved-report-figure", "anchor":fuel_anchor, "page":"fuel-b06-viz03.html",
-                  "figure":"fuel-b06-flow-projection.svg", "source_page":"https://github.com/butahlecoq/controlled-systems-lab/blob/main/reports/algorithm-results/b06-owner-confirmed-7df01ba3af5e4c46/index.html",
-                  "raw_record":"fuel-b06-viz03-source.json"}
+    fuel_entry = {"family":"Fuel minimax reference", "title":"B06 fuel terminal set: readable 4D-to-2D projections",
+                  "status":"saved-report-figure", "anchor":fuel_anchor, "page":"fuel-b06-viz06.html",
+                  "figure":"fuel-b06-viz06-flow.svg", "source_page":"https://github.com/butahlecoq/controlled-systems-lab/blob/main/reports/algorithm-results/b06-owner-confirmed-7df01ba3af5e4c46/index.html",
+                  "raw_record":"fuel-b06-viz06-source.json"}
     gallery_inventory.append(fuel_entry)
     coverage_data = algorithm_coverage(catalog, site, gallery_inventory)
     navigation = "".join(f'<a href="#{e["slug"]}">{e["title"]}</a>' for e in examples)
@@ -838,6 +842,7 @@ def build(catalog, site):
             'they are not new performance measurements. Each page states whether it replays saved output or illustrates a literal fixture.</p>'
             '<p><a href="minimal-inputs.json" download>Download inputs and displayed outputs (JSON)</a> · '
             '<a href="visual-coverage.json" download>Download current gallery inventory (JSON)</a> · '
+            '<a href="visual-route-inventory.json" download>Download report figure routes and migration status (JSON)</a> · '
             '<a href="algorithm-coverage.json" download>Download algorithm-family coverage (JSON)</a></p>'
             '<p class="limits">This inventory describes figures currently linked here; it does not imply that every implemented algorithm already has a 2D example. '
             'The full algorithm-coverage gap is tracked in <a href="https://github.com/butahlecoq/controlled-systems-lab/issues/563">issue #563</a>.</p></header>'
@@ -854,7 +859,7 @@ def build(catalog, site):
             'Open a report for its exact inputs, answers, reproduction commands, provenance and evidence limits.</p>'
             '<div class="saved-grid">' + saved_figures +
             f'<article class="saved-figure" id="{fuel_anchor}"><h3>{escape(fuel_entry["title"])}</h3>'
-            f'<p>{escape("Versioned SVG and PNG projections of saved B06 terminal vertices, with units, target, numerical evidence and reproduction commands.")}</p>'
+            f'<p>{escape("Readable, versioned SVG and PNG projections of the saved 4D B06 terminal set, with exact values, units, target, evidence limits and reproduction commands.")}</p>'
             f'<a href="{fuel_entry["page"]}"><img src="{fuel_entry["figure"]}" alt="{escape("B06 four-state terminal set projected onto flow coordinates")}"></a>'
             f'<p><a href="{fuel_entry["page"]}">Open the fuel projections and timing figures →</a></p></article>' + '</div></section>' +
             '<footer>Controlled Systems Lab · Saved evidence, visible geometry.</footer></main></div>'
@@ -867,6 +872,8 @@ def build(catalog, site):
     outputs["minimal-inputs.json"] = json.dumps({"schema": "csl.visual-examples/1", "examples": export}, indent=2) + "\n"
     outputs["visual-coverage.json"] = json.dumps(
         {"schema": "csl.visual-gallery-inventory/1", "entries": gallery_inventory}, indent=2) + "\n"
+    outputs["visual-route-inventory.json"] = json.dumps(
+        audit_visual_routes.build(Path(__file__).resolve().parents[2]), indent=2, ensure_ascii=False) + "\n"
     outputs["algorithm-coverage.json"] = json.dumps(coverage_data, indent=2, ensure_ascii=False) + "\n"
     hybrid = next(example for example in examples if example["kind"] == "hybrid")
     outputs["two_stage_scalar_family.json"] = json.dumps({

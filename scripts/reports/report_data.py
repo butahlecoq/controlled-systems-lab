@@ -375,6 +375,8 @@ def validate_figure_metadata(view,metadata):
     require(metadata["schema"]=="csl.report-figure/1" and metadata["payload_sha256"]==view["payload_sha256"],"figure metadata subject/version differs")
     require(metadata["unit"]=="ns" and metadata["series"]==figure_series(view),"figure series or units differ from saved records")
     require(metadata["matplotlib"]=="3.11.2" and metadata["svg_policy"]=="csl.report.svg.mpl-3.11.2/1","figure producer/policy differs")
+    if "quantitative_axis_policy" in metadata:
+        require(metadata["quantitative_axis_policy"]=="csl-report-quantitative-v1","quantitative figure style policy differs")
 
 
 def artifact_reference(ref):

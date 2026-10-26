@@ -38,6 +38,7 @@ class PlotTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as temp:
             root=Path(temp)
             metadata=self.plot.plot(view,root/"figures")
+            self.assertEqual(metadata["quantitative_axis_policy"],"csl-report-quantitative-v1")
             final=(root/"figures/latency.svg").read_bytes()
             self.assertFalse(final.startswith(b'<?xml'))
             self.assertNotIn(b'<!DOCTYPE',final)

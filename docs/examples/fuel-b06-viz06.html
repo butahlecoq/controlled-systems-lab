@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>B06 fuel projections · readable saved-data companion</title><link rel="stylesheet" href="examples.css">
+</head>
+<body><a class="skip" href="#main">Skip to figures</a><div class="shell"><aside>
+<a class="brand" href="index.html">[ csl ]<br>Visual examples</a><p class="eyebrow">Fuel reachability</p>
+<a class="nav-shortcut" href="#flow">Jump to 4D projection figures ↓</a>
+<nav aria-label="Fuel example"><a href="#flow">Flow projection</a><a href="#stock">Stock projection</a><a href="#trajectory">State and controls</a><a href="#timing">Timing</a><a href="#values">Exact values</a></nav>
+</aside><main id="main">
+<header><p class="eyebrow">B06 saved numerical record · VIZ-06 readability companion · plot policy csl-report-quantitative-v1</p>
+<h1>One 4D fuel set,<br><em>readable in 2D.</em></h1>
+<p>The saved terminal vertices use <code>(x₁,x₂,x₃,x₄)</code> = oxidizer flow, oxidizer stock balance, fuel flow, and fuel stock balance. The figures project those same 1,024 saved vertices onto flow coordinates <code>(x₁,x₃)</code> and stock coordinates <code>(x₂,x₄)</code>. Each panel has numeric ticks and major grids; the two axes in each projection use equal data scaling because their units match.</p>
+<p class="limits">These are saved numerical V-representation points with binary64 solver assurance. They are not validated real-arithmetic enclosures or a reproduction of the historical paper. B06's malformed 15-entry matrix remains recorded and is tracked by <a href="https://github.com/butahlecoq/controlled-systems-lab/issues/668">issue #668</a>; this visualization does not fix or certify that input.</p>
+<p class="provenance">Method: B06 finite-action minimax, implementation source commit <a href="https://github.com/butahlecoq/controlled-systems-lab/commit/7df01ba3af5e4c46e867e2d737aca56a8f2461af"><code>7df01ba3af5e4c46e867e2d737aca56a8f2461af</code></a>. The source JSON binds the saved geometry, scenario, and B06 driver by SHA-256.</p>
+<p><a href="fuel-b06-viz06-source.json" download>Download exact plotted values and trajectory (JSON)</a> · <a href="fuel-b06-viz06-export.json" download>Download plot/export receipt</a> · <a href="fuel-b06-viz03.html">Earlier VIZ-03 companion</a></p></header>
+<section id="flow"><h2>Flow projection <code>(x₁,x₃)</code></h2>
+<figure><a href="fuel-b06-viz06-flow.svg"><img src="fuel-b06-viz06-flow.png" alt="Equal-scale projection of all 1,024 saved B06 terminal vertices onto oxidizer and fuel flow, with the target marked by a red star"></a><figcaption>Saved terminal flow values and target. Open the SVG for a full-size zoomable view; <a href="fuel-b06-viz06-flow.svg">SVG</a> · <a href="fuel-b06-viz06-flow.png" download>PNG</a>.</figcaption></figure></section>
+<section id="stock"><h2>Stock projection <code>(x₂,x₄)</code></h2>
+<figure><a href="fuel-b06-viz06-stock.svg"><img src="fuel-b06-viz06-stock.png" alt="Equal-scale projection of all 1,024 saved B06 terminal vertices onto oxidizer and fuel stock balances, with the target marked by a red star"></a><figcaption>The model has no nonnegativity constraint, so the projection is not clipped to positive balances. Open the SVG for a full-size zoomable view; <a href="fuel-b06-viz06-stock.svg">SVG</a> · <a href="fuel-b06-viz06-stock.png" download>PNG</a>.</figcaption></figure></section>
+<section id="trajectory"><h2>One stage-aligned history</h2><p>This is one zero-disturbance history derived from the saved initial state, control catalogue, and hashed B06 source-driver transition. It is not a captured solver stage trace or the full reachable family. The displayed minimax objective belongs to the saved plan's worst case, not this particular history.</p>
+<figure><a href="fuel-b06-viz06-trajectory.svg"><img src="fuel-b06-viz06-trajectory.png" alt="Four state coordinates over six stages and the left-held control over five intervals"></a><figcaption>State stage and control interval labels follow the saved scenario. Coordinate values are in the downloadable JSON. Open the SVG for a full-size zoomable view; <a href="fuel-b06-viz06-trajectory.svg">SVG</a> · <a href="fuel-b06-viz06-trajectory.png" download>PNG</a>.</figcaption></figure></section>
+<section id="timing"><h2>Saved timing observations</h2><figure><a href="fuel-b06-viz06-timing.svg"><img src="fuel-b06-viz06-timing.png" alt="Saved B06 minimax timing observations with unavailable metrics shown separately"></a><figcaption>These are recorded observations. Rendering time is recorded separately in the export receipt and is not solver timing. Open the SVG for a full-size zoomable view; <a href="fuel-b06-viz06-timing.svg">SVG</a> · <a href="fuel-b06-viz06-timing.png" download>PNG</a>.</figcaption></figure></section>
+<section id="values"><h2>Exact-value access</h2><p>The table summarizes the plotted coordinate ranges and exact saved targets. The downloadable source contains every plotted point, the state-stage rows, and the control intervals.</p>
+<div class="scroll"><table><caption>Saved projection bounds and target coordinates, in model units</caption><thead><tr><th scope="col">Projection</th><th scope="col">Coordinate</th><th scope="col">Minimum</th><th scope="col">Maximum</th><th scope="col">Target</th></tr></thead><tbody>
+<tr><th scope="row" rowspan="2">Flow</th><td>x₁ oxidizer flow (kg/s)</td><td>29.759999999999994</td><td>30.26</td><td>30</td></tr>
+<tr><td>x₃ fuel flow (kg/s)</td><td>19.82066666666667</td><td>20.220666666666663</td><td>20</td></tr>
+<tr><th scope="row" rowspan="2">Stock balance</th><td>x₂ oxidizer (kg)</td><td>5.3799999999999955</td><td>7.380000000000024</td><td>0</td></tr>
+<tr><td>x₄ fuel (kg)</td><td>3.8600000000000136</td><td>5.4599999999999795</td><td>0</td></tr>
+</tbody></table></div>
+<p class="provenance">The ranges and target are copied from the source JSON generated from <a href="https://github.com/butahlecoq/controlled-systems-lab/blob/main/reports/algorithm-results/b06-owner-confirmed-7df01ba3af5e4c46/geometry.json">saved B06 geometry</a>. The source record contains the complete point list; no geometry was recomputed for this page.</p>
+<details><summary>Before: original reference projection</summary><p class="limits">This byte-identical copy of the original figure is provided for an offline visual comparison. The versioned report remains unchanged. Its single SVG has range annotations but no graduated ticks/grid, and holds both panels in one wide image.</p><figure><a href="fuel-b06-viz06-before.svg"><img src="fuel-b06-viz06-before.svg" alt="Original B06 two-panel flow and stock projection figure, retained as historical report evidence"></a><figcaption>Original asset SHA-256: <code>ac5997b750ef20fb80c90b46549a1110cf10f7ff37bbb5f9d72ab1cc44461f20</code>. <a href="https://butahlecoq.github.io/controlled-systems-lab/issue6-b06-reference-761bdc6e40b93814f873f105313d1eed4f63711653aa583a16a2ddfbc67c2a82/index.html">Open immutable original B06 report</a>.</figcaption></figure></details></section>
+<section><h2>Reproduce from saved records</h2><p>This builds a plot document and renders figures. It does not run a solver, geometry operation, experiment, or benchmark.</p><pre><code>python -m venv build/report-env
+build/report-env/bin/pip install -r scripts/reports/requirements.txt
+build/report-env/bin/python scripts/reports/adapt_fuel_record.py b06 \
+  reports/algorithm-results/b06-owner-confirmed-7df01ba3af5e4c46 build/fuel-b06.plot.json
+build/report-env/bin/python scripts/reports/control_figures.py \
+  --input build/fuel-b06.plot.json --style scripts/reports/styles/control-v1.json \
+  --out build/fuel-b06-viz06</code></pre></section>
+<footer>Controlled Systems Lab · B06 saved evidence with explicit 4D-to-2D projections.</footer>
+</main></div></body></html>

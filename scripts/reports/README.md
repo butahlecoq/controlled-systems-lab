@@ -51,6 +51,31 @@ with the pattern that matches its published routes. A route that matches no
 registered family is an error, so a newly published report cannot reach the
 archive unexplained, and a new route shape has to be registered on purpose.
 
+## Figure readability policy
+
+New quantitative SVG/PNG report figures use the pinned Matplotlib 3.11.2
+renderer and the versioned `csl-report-quantitative-v1` axis policy in
+`figure_style.py`. It positions major ticks, formats neighboring values
+distinctly (including narrow ranges and small magnitudes), and draws a quiet
+major grid. Use equal data scaling when both axes describe commensurate
+geometric coordinates; label stages, units and independent scales explicitly.
+Figures published as external images also need useful HTML alternatives and
+reader-facing exact values or a linked saved-value table/record. A raw download
+does not replace a concise description of what the figure shows.
+
+Hand-authored SVG remains appropriate for small explanatory diagrams with
+literal geometry. Keep those routes in the reviewed inventory and provide
+labelled scales, accessible `<title>`/`<desc>`, and text values when the diagram
+is quantitative. Do not rewrite a published evidence bundle to update its
+presentation: add a separately versioned companion and link it from the mutable
+gallery.
+
+Regenerate the producer/route inventory with
+`python scripts/reports/audit_visual_routes.py`. Its source scan deliberately
+includes candidate producers and validators so contributors can review the
+role instead of silently omitting a route; each frozen report route records its
+existing image assets and page digest.
+
 The scope and the limits on a card are read from the report's own staged
 bundle - its publication envelope or its saved record - and not from the
 wording of the script that staged it. The renderer only reads the assembled

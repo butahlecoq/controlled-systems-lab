@@ -31,6 +31,21 @@ class RecordTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             self.data.statistics([])
 
+    def test_legacy_figure_metadata_without_axis_policy_remains_readable(self):
+        view = self.fixture()
+        metadata = {
+            "schema": "csl.report-figure/1",
+            "payload_sha256": view["payload_sha256"],
+            "unit": "ns",
+            "series": self.data.figure_series(view),
+            "matplotlib": "3.11.2",
+            "svg_policy": "csl.report.svg.mpl-3.11.2/1",
+        }
+        self.data.validate_figure_metadata(view, metadata)
+        metadata["quantitative_axis_policy"] = "unexpected-policy"
+        with self.assertRaises(ValueError):
+            self.data.validate_figure_metadata(view, metadata)
+
     def test_duplicate_keys_nonfinite_and_unknown_schema_rejected(self):
         for text in ['{"a":1,"a":2}', '{"a":NaN}', '{"a":Infinity}']:
             with self.subTest(text=text), self.assertRaises(ValueError):

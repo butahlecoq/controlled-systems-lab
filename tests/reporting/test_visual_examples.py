@@ -134,7 +134,7 @@ class GalleryTests(unittest.TestCase):
             self.assertEqual((self.site / rid / "index.html").read_bytes(), content)
         self.assertIn('href="examples/index.html"', (self.site / "index.html").read_text())
         page = (self.site / "examples/index.html").read_text(encoding="utf-8")
-        last_topic_title = "B06 fuel terminal set: versioned scientific projections"
+        last_topic_title = "B06 fuel terminal set: readable 4D-to-2D projections"
         last_anchor = "visual-fuel-b06-viz03"
         self.assertIn(
             f'<a class="nav-shortcut" href="#{last_anchor}">Jump to final example: '
@@ -148,6 +148,17 @@ class GalleryTests(unittest.TestCase):
         for link in fuel_links.links:
             if not urlsplit(link).scheme:
                 self.assertTrue((fuel_page.parent / link.split("#")[0]).is_file(), link)
+        readable_fuel_page = self.site / "examples/fuel-b06-viz06.html"
+        self.assertTrue(readable_fuel_page.is_file())
+        readable_html=readable_fuel_page.read_text(encoding="utf-8")
+        self.assertIn("One 4D fuel set",readable_html)
+        self.assertIn("issue #668",readable_html)
+        self.assertIn("30.26",readable_html)
+        self.assertIn("fuel-b06-viz06-source.json",readable_html)
+        readable_links=Links();readable_links.feed(readable_html)
+        for link in readable_links.links:
+            if not urlsplit(link).scheme and not link.startswith("#"):
+                self.assertTrue((readable_fuel_page.parent/link.split("#")[0]).is_file(),link)
         stylesheet = (Path(gallery.__file__).with_name("visual_examples.css")).read_text(encoding="utf-8")
         self.assertIn("height:calc(100vh - 6rem);display:flex;flex-direction:column", stylesheet)
         self.assertIn("min-height:0;max-height:min(42vh,24rem);overflow-y:auto", stylesheet)
@@ -183,8 +194,12 @@ class GalleryTests(unittest.TestCase):
             if not urlsplit(link).scheme and not link.startswith("#"):
                 self.assertTrue((self.site / "examples" / link.split("#")[0]).is_file(), link)
         figures = list((self.site / "examples").glob("*.svg"))
-        self.assertEqual(len(figures), len(self.examples) + len(gallery.visual_illustrations.CASES) + 4)
+        self.assertEqual(len(figures), len(self.examples) + len(gallery.visual_illustrations.CASES) + 9)
         for figure in figures:
+            if figure.name == "fuel-b06-viz06-before.svg":
+                self.assertEqual(hashlib.sha256(figure.read_bytes()).hexdigest(),
+                                 "ac5997b750ef20fb80c90b46549a1110cf10f7ff37bbb5f9d72ab1cc44461f20")
+                continue
             tree = ET.fromstring(figure.read_text())
             self.assertEqual(tree.attrib["role"], "img")
             self.assertIsNotNone(tree.find("{http://www.w3.org/2000/svg}desc"))
