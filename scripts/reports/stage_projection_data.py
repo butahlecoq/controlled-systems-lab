@@ -38,6 +38,7 @@ def loads_stage_projection_batch(
     expected_problem_id: str,
     expected_request_id: str,
     expected_route_id: str,
+    expected_record_schema: str,
     expected_source_sha256: str,
 ) -> dict[str, Any]:
     """Parse and validate one batch, including exact source-record binding."""
@@ -58,6 +59,7 @@ def loads_stage_projection_batch(
         "problem_id": expected_problem_id,
         "request_id": expected_request_id,
         "route_id": expected_route_id,
+        "record_schema": expected_record_schema,
         "source_sha256": expected_source_sha256,
     }
     actual = {
@@ -65,6 +67,7 @@ def loads_stage_projection_batch(
         "problem_id": document["problem_id"],
         "request_id": document["request_id"],
         "route_id": document["route_id"],
+        "record_schema": provenance["record_schema"],
         "source_sha256": provenance["source_sha256"],
     }
     if actual != expected:

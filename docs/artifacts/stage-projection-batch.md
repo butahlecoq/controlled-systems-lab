@@ -42,6 +42,7 @@ batch = read_stage_projection_batch(
     expected_problem_id="fuel-v1",
     expected_request_id="projection-request-2",
     expected_route_id="direct-minimax",
+expected_record_schema="csl.run-statistics/7",
     expected_source_sha256="a" * 64,
 )
 ```
