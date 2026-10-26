@@ -72,20 +72,24 @@ STRATEGY_TIMINGS = (
 )
 
 
+def strategy_slug(report_id: str) -> str:
+    family = "strategy-a" if "syn03-strategy-a-" in report_id else "strategy-b"
+    task = next((f"ts0{n}" for n in range(1, 4) if f"-ts0{n}-" in report_id), None)
+    if task is None or not report_id.startswith(("syn03-strategy-a-", "syn04-strategy-b-")):
+        raise ValueError("unrecognized strategy report identity: " + report_id)
+    return family + "-" + task
+
+
 def asset_paths() -> list[str]:
     paths = ["control-witness-v1.html", "control-witness-timing-v1.html"]
     for report_id, *_ in PROJECTIONS:
-        family = "strategy-a" if "syn03" in report_id else "strategy-b"
-        task = next(f"ts0{n}" for n in range(1, 4) if f"-ts0{n}-" in report_id)
-        stem = "control-witness/" + family + "-" + task
+        stem = "control-witness/" + strategy_slug(report_id)
         paths.extend(stem + suffix for suffix in (".svg", ".png", "-evidence.json"))
     for name in ("syn01", "syn02", "syn06", "syn-ts01-paired"):
         stem = "control-witness/" + name + "-timing"
         paths.extend((stem + ".svg", stem + ".png", stem + "-evidence.json"))
     for report_id, _ in STRATEGY_TIMINGS:
-        family = "strategy-a" if "syn03" in report_id else "strategy-b"
-        task = next(f"ts0{n}" for n in range(1, 4) if f"-ts0{n}-" in report_id)
-        stem = f"control-witness/{family}-{task}-timing"
+        stem = f"control-witness/{strategy_slug(report_id)}-timing"
         paths.extend((stem + ".svg", stem + ".png", stem + "-evidence.json"))
     return paths
 
@@ -102,6 +106,17 @@ def source_inventory() -> dict[str, SourceDisposition]:
 class BuildResult:
     files: dict[str, bytes]
     gallery_entries: tuple[dict, ...]
+
+
+@dataclass(frozen=True)
+class TimingSet:
+    key: str
+    title: str
+    report_id: str
+    record_bytes: bytes
+    rows: list[dict]
+    description: str
+    samples: list[dict] | None = None
 
 
 def _load_record(site: Path, report_id: str) -> tuple[dict, bytes]:
@@ -130,9 +145,7 @@ def build(site: Path) -> BuildResult:
         relation = record.get("canonical_relation", {}).get("parametric_form")
         if relation != expected_relation:
             raise ValueError("saved relation differs for " + report_id)
-        family = "strategy-a" if "syn03" in report_id else "strategy-b"
-        task = next(f"ts0{n}" for n in range(1, 4) if f"-ts0{n}-" in report_id)
-        slug = family + "-" + task
+        slug = strategy_slug(report_id)
         if "ts03" in report_id:
             description = ("Projection of the saved five-coordinate joint relation onto (u₀,u₁). "
                            "The line does not display the complete joint relation.")
@@ -180,7 +193,7 @@ def build(site: Path) -> BuildResult:
             rows.append({"label": f"{scenario['scenario']} · {phase.removesuffix('_ns')}",
                          "median": stats["median_ns"], "minimum": stats["min_ns"],
                          "maximum": stats["max_ns"], "status": f"{stats['available_trials']} of {scenario['attempts']} trials"})
-    timing_sets.append(("syn01", "SYN01 saved phase timings", syn01_id, syn01_bytes, rows,
+    timing_sets.append(TimingSet("syn01", "SYN01 saved phase timings", syn01_id, syn01_bytes, rows,
                         "The figure plots per-phase medians. The table gives the observed minimum and maximum; phases are separate measurements."))
 
     syn02_id = "syn02-terminal-20261013-c234a1a0-35de886a7fb4"
@@ -200,7 +213,7 @@ def build(site: Path) -> BuildResult:
                          "minimum": stats.get("min_ns") if stats else None,
                          "maximum": stats.get("max_ns") if stats else None,
                          "status": status})
-    timing_sets.append(("syn02", "SYN02 saved terminal timing observations", syn02_id, syn02_bytes, rows,
+    timing_sets.append(TimingSet("syn02", "SYN02 saved terminal timing observations", syn02_id, syn02_bytes, rows,
                         "The figure plots saved medians; the table gives ranges for completed fixtures. The failed shifted-residual fixture remains listed with no timing."))
 
     syn06_id = "syn06-verifier-20261012-f0e32e2b"
@@ -214,7 +227,7 @@ def build(site: Path) -> BuildResult:
                      "maximum": item["max_elapsed_ns"] / batch,
                      "status": f"{item['trials']} trials · {item['checked_calls']} checked calls · batch {batch}",
                      "saved_median_elapsed_ns": item["median_elapsed_ns"], "batch": batch})
-    timing_sets.append(("syn06", "SYN06 saved verifier timings", syn06_id, syn06_bytes, rows,
+    timing_sets.append(TimingSet("syn06", "SYN06 saved verifier timings", syn06_id, syn06_bytes, rows,
                         "Points show the archived median elapsed nanoseconds divided by the archived batch size; the exact source median and batch are in the evidence table."))
 
     paired_id = "syn-ts01-paired-20261014-b7f1ac0"
@@ -233,7 +246,7 @@ def build(site: Path) -> BuildResult:
         if available:
             samples.append({"label": event["strategy"], "value": timing["value"],
                             "y": event["repetition"] + strategies[event["strategy"]] * .12})
-    timing_sets.append(("syn-ts01-paired", "Paired SYN-TS01 end-to-end timings", paired_id, paired_bytes, rows,
+    timing_sets.append(TimingSet("syn-ts01-paired", "Paired SYN-TS01 end-to-end timings", paired_id, paired_bytes, rows,
                         "Each point is one saved end-to-end strategy observation; the inclusive total is not a sum of other phase durations.", samples))
 
     for report_id, title in STRATEGY_TIMINGS:
@@ -245,30 +258,29 @@ def build(site: Path) -> BuildResult:
         rows = [{"label": f"measured repetition {index + 1}", "median": value,
                  "minimum": value, "maximum": value, "status": "saved observation"}
                 for index, value in enumerate(observations)]
-        family = "strategy-a" if "syn03" in report_id else "strategy-b"
-        task = next(f"ts0{n}" for n in range(1, 4) if f"-ts0{n}-" in report_id)
-        timing_sets.append((family + "-" + task + "-timing", title, report_id, record_bytes, rows,
+        timing_sets.append(TimingSet(strategy_slug(report_id) + "-timing", title, report_id, record_bytes, rows,
                             "Each point is one of the seven saved non-warmup elapsed-time observations, in nanoseconds."))
 
     timing_cards = []
-    for values in timing_sets:
-        key, title, report_id, record_bytes, rows, description, *sample_data = values
+    for item in timing_sets:
+        key, title, report_id, record_bytes, rows, description = (
+            item.key, item.title, item.report_id, item.record_bytes, item.rows, item.description)
         record_hash = hashlib.sha256(record_bytes).hexdigest()
         points = ([[row["median"], index] for index, row in enumerate(rows) if row["median"] is not None]
-                  if not sample_data else [[item["value"], item["y"]] for item in sample_data[0]])
+                  if item.samples is None else [[sample["value"], sample["y"]] for sample in item.samples])
         if not points:
             raise ValueError("saved timing companion has no available observations: " + key)
         stem = "control-witness/" + (key if key.startswith("strategy-") else key + "-timing")
         series = [{"kind": "points", "label": "Saved timing observations", "color": "#b23b33", "points": points}]
-        if sample_data:
+        if item.samples is not None:
             series = [{"kind": "points", "label": strategy, "color": color,
-                       "points": [[item["value"], item["y"]] for item in sample_data[0]
-                                  if item["label"] == strategy]}
+                       "points": [[sample["value"], sample["y"]] for sample in item.samples
+                                  if sample["label"] == strategy]}
                       for strategy, color in zip(paired["strategies"], ("#b23b33", "#2367a8"))]
         document = {"schema": "csl.saved-geometric-plot/1", "title": title,
                     "description": description,
                     "axes": {"x": {"label": "Duration (ns/call)" if key == "syn06" else "Duration (ns)"},
-                             "y": {"label": "Saved observation row" if not sample_data else "Paired repetition"}},
+                             "y": {"label": "Saved observation row" if item.samples is None else "Paired repetition"}},
                     "aspect": "independent", "series": series}
         with tempfile.TemporaryDirectory(prefix="csl-viz09-time-") as temporary:
             generated = Path(temporary)
