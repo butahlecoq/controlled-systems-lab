@@ -650,7 +650,8 @@ def validate_gallery_inventory(out, entries):
         required = ("family", "title", "status", "anchor", "page", "figure", "source_page", "raw_record")
         require(all(isinstance(entry.get(field), str) and entry[field] for field in required),
                 "visual inventory entry is missing required metadata or provenance")
-        require(entry["status"] in {"educational-example", "saved-report-figure", "analytic-illustration"},
+        require(entry["status"] in {"educational-example", "saved-report-figure",
+                                    "saved-data-companion", "analytic-illustration"},
                 "unknown visual inventory status")
         require(entry["anchor"] in anchors, "visual inventory target is missing from gallery")
         page_ref, _, page_anchor = entry["page"].partition("#")
@@ -916,7 +917,7 @@ def build(catalog, site):
     lotka_anchor = "saved-figure-lotka-quantitative"
     gallery_inventory.append({"family": "Lotka–Volterra reachability samples",
                               "title": "Stage-banded Lotka–Volterra samples · shared quantitative axes",
-                              "status": "saved-report-figure", "anchor": lotka_anchor,
+                              "status": "saved-data-companion", "anchor": lotka_anchor,
                               "page": "index.html#" + lotka_anchor,
                               "figure": "lotka-volterra-sampled-v1.svg",
                               "source_page": "../" + lotka_route + "/index.html",
@@ -931,7 +932,7 @@ def build(catalog, site):
             ("Box approximation", "APP-02 diamond approximations", "app02-diamond-v1", "app02-box-8ff979de60ea9d22"),
             ("Ellipsoidal approximation", "APP-04 square and ellipses", "app04-square-v1", "app04-ellipsoid-fd302c34092f8b19")):
         gallery_inventory.append({"family": family, "title": title,
-                                  "status": "saved-report-figure",
+                                  "status": "saved-data-companion",
                                   "anchor": stem, "page": stem + ".html",
                                   "figure": stem + ".svg",
                                   "source_page": "../" + report_id + "/index.html",
@@ -974,8 +975,9 @@ def build(catalog, site):
             'It separates the nominal synthesis path from installed modules outside that path and records where this gallery has no supported 2D case.</p>'
             '<div class="coverage-grid">' + coverage_html(coverage_data) + '</div></section>' +
             '<section id="saved-report-figures"><p class="eyebrow">Reviewed report figures</p>'
-            '<h2>More algorithms, from saved evidence</h2><p>These figures are published with their original reports. '
-            'Open a report for its exact inputs, answers, reproduction commands, provenance and evidence limits.</p>'
+            '<h2>More algorithms, from saved evidence</h2><p>Most displayed figures are published inside their original reports. '
+            'Cards marked “Saved-data companion” are generated into this gallery from frozen records; they do not change those reports. '
+            'Open a report for exact inputs, answers, reproduction commands, provenance and evidence limits.</p>'
             '<div class="saved-grid">' + saved_figures +
             f'<article class="saved-figure" id="{lotka_anchor}"><p class="eyebrow">Saved sample geometry</p>'
             '<h3>Lotka–Volterra samples with shared quantitative axes</h3>'

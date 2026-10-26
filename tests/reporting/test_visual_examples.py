@@ -192,6 +192,7 @@ class GalleryTests(unittest.TestCase):
         self.assertIn('href="issue3-control-walkthrough.html"', page)
         self.assertIn("End-to-end walkthrough", page)
         self.assertIn('href="lotka-volterra-sampled-v1.html"', page)
+        self.assertIn("Cards marked “Saved-data companion” are generated into this gallery from frozen records", page)
         self.assertIn("065de5e45d295dfa099e25265c4014c0c46673f8", page)
         self.assertIn("blob/b83b8dc415dbe5811371b8446931ae4c6f3d2e28/reports/algorithm-results/tooling/geo04/polyhedral_intersection_driver.cpp", page)
         parser = Links()
@@ -234,6 +235,7 @@ class GalleryTests(unittest.TestCase):
         lotka_entry = next(entry for entry in visual_inventory["entries"]
                            if entry["anchor"] == "saved-figure-lotka-quantitative")
         self.assertEqual(lotka_entry["figure"], "lotka-volterra-sampled-v1.svg")
+        self.assertEqual(lotka_entry["status"], "saved-data-companion")
         for stem, expected_text in (("app02-diamond-v1", "saved input and rotated outer bound"),
                                    ("app04-square-v1", "diagonal orientation")):
             companion_page = (self.site / "examples" / (stem + ".html")).read_text()
@@ -245,6 +247,7 @@ class GalleryTests(unittest.TestCase):
             self.assertIn(expected_text, " ".join(companion_svg.itertext()))
             entry = next(entry for entry in visual_inventory["entries"] if entry["anchor"] == stem)
             self.assertEqual(entry["figure"], stem + ".svg")
+            self.assertEqual(entry["status"], "saved-data-companion")
         square = ET.parse(self.site / "examples/square_duplicates.svg")
         boundary = square.find(".//{http://www.w3.org/2000/svg}polygon")
         self.assertEqual(boundary.attrib["points"],
