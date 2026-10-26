@@ -181,6 +181,10 @@ ArtifactResult<std::string> encode_stage_projection_batch_json(
     for (std::size_t i = 0; i < identity.stage_axis.points.size(); ++i)
         if (!std::isfinite(identity.stage_axis.points[i]) || (i && identity.stage_axis.points[i] <= identity.stage_axis.points[i - 1]))
             return error(ArtifactErrorCode::invalid_input, "stage_axis.points", "Stage axis must be finite and strictly increasing");
+    if (identity.stage_axis.kind == PlotAxis::Kind::stage)
+        for (std::size_t i = 0; i < identity.stage_axis.points.size(); ++i)
+            if (identity.stage_axis.points[i] != static_cast<double>(i))
+                return error(ArtifactErrorCode::invalid_input, "stage_axis.points", "Stage axis must be the contiguous R0-based sequence");
     for (std::size_t i = 0; i < identity.state_coordinates.size(); ++i) {
         const auto& coordinate = identity.state_coordinates[i];
         if (coordinate.target && (!std::isfinite(coordinate.target->value) || coordinate.target->source.empty()))

@@ -113,6 +113,11 @@ TEST_CASE("stage projection batch JSON rejects reordered pairs and bad source ha
     auto encoded = ar::encode_stage_projection_batch_json(identity, empty);
     REQUIRE(std::holds_alternative<ar::ArtifactError>(encoded));
     CHECK(std::get<ar::ArtifactError>(encoded).path == "records");
+    identity.stage_axis.points = {0.0, 2.0, 4.0};
+    encoded = ar::encode_stage_projection_batch_json(identity, empty);
+    REQUIRE(std::holds_alternative<ar::ArtifactError>(encoded));
+    CHECK(std::get<ar::ArtifactError>(encoded).path == "stage_axis.points");
+    identity.stage_axis.points = {0.0};
     identity.source_record_sha256 = "not-a-digest";
     encoded = ar::encode_stage_projection_batch_json(identity, empty);
     REQUIRE(std::holds_alternative<ar::ArtifactError>(encoded));
