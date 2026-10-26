@@ -17,6 +17,15 @@ MIGRATION_ISSUES = {
     "control-strategy-and-witness": 686,
     "historical-and-benchmarks": 687,
 }
+COMPOSED_SAVED_ROUTES = {
+    "scripts/reports/ext03_transform/report.py",
+    "scripts/reports/ext04/continuous_report.py",
+}
+SAVED_COMPANION_ROUTES = {
+    "scripts/reports/app02/render_saved.py",
+    "scripts/reports/app04/render_saved.py",
+    "scripts/reports/lotka_volterra_sampled.py",
+}
 
 
 def migration_issue(source: str) -> int:
@@ -42,7 +51,13 @@ def source_inventory(root: Path) -> list[dict]:
                 continue
             relative = path.relative_to(root).as_posix()
             assets = sorted(set(ASSET_NAME.findall(source)))
-            if relative.endswith("/control_figures.py") or relative.endswith("/plot.py"):
+            if relative in COMPOSED_SAVED_ROUTES:
+                disposition = "composes-or-copies-existing-saved-figure"
+            elif relative in SAVED_COMPANION_ROUTES:
+                disposition = "frozen-renderer-preserved-with-shared-policy-companion"
+            elif relative.endswith(("/geometry_figures.py", "/approx_extension_companions.py")):
+                disposition = "shared-quantitative-policy-companion-renderer"
+            elif relative.endswith("/control_figures.py") or relative.endswith("/plot.py"):
                 disposition = "adopted-shared-quantitative-policy"
             elif relative.endswith("/visual_illustrations.py"):
                 disposition = "reviewed-static-diagram-exception"
@@ -95,7 +110,13 @@ def build(root: Path = ROOT) -> dict:
                     "fuel-b06-viz06-flow.svg", "fuel-b06-viz06-flow.png",
                     "fuel-b06-viz06-stock.svg", "fuel-b06-viz06-stock.png",
                     "fuel-b06-viz06-trajectory.svg", "fuel-b06-viz06-trajectory.png",
-                    "fuel-b06-viz06-timing.svg", "fuel-b06-viz06-timing.png"],
+                    "fuel-b06-viz06-timing.svg", "fuel-b06-viz06-timing.png",
+                    "lotka-volterra-sampled-v1.html", "lotka-volterra-sampled-v1.svg",
+                    "lotka-volterra-sampled-v1.png", "lotka-volterra-sampled-v1-export.json",
+                    "app02-diamond-v1.html", "app02-diamond-v1.svg",
+                    "app02-diamond-v1.png", "app02-diamond-v1-export.json",
+                    "app04-square-v1.html", "app04-square-v1.svg",
+                    "app04-square-v1.png", "app04-square-v1-export.json"],
                  "disposition": "adopted-shared-quantitative-policy"}],
             "migration_owner": "#669 owns the shared policy; deferred family renderers link to scoped follow-up issues #684–#687, while frozen report bundles remain immutable evidence"}
 

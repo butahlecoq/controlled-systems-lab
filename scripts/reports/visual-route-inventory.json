@@ -26,8 +26,7 @@
       "asset_name_literals": [
         "polygons.svg"
       ],
-      "disposition": "deferred-family-specific-migration",
-      "follow_up_issue": 684
+      "disposition": "frozen-renderer-preserved-with-shared-policy-companion"
     },
     {
       "source": "scripts/reports/app03/render_saved.py",
@@ -44,8 +43,18 @@
       "asset_name_literals": [
         "ellipsoid-2d.svg"
       ],
-      "disposition": "deferred-family-specific-migration",
-      "follow_up_issue": 684
+      "disposition": "frozen-renderer-preserved-with-shared-policy-companion"
+    },
+    {
+      "source": "scripts/reports/approx_extension_companions.py",
+      "signal_count": 13,
+      "asset_name_literals": [
+        "geometry.png",
+        "geometry.svg",
+        "lotka-volterra-sampled-v1.png",
+        "lotka-volterra-sampled-v1.svg"
+      ],
+      "disposition": "shared-quantitative-policy-companion-renderer"
     },
     {
       "source": "scripts/reports/b08_exact_report.py",
@@ -92,8 +101,7 @@
       "asset_name_literals": [
         "visual.svg"
       ],
-      "disposition": "deferred-family-specific-migration",
-      "follow_up_issue": 684
+      "disposition": "composes-or-copies-existing-saved-figure"
     },
     {
       "source": "scripts/reports/ext04/continuous_report.py",
@@ -101,8 +109,7 @@
       "asset_name_literals": [
         "example-2d.svg"
       ],
-      "disposition": "deferred-family-specific-migration",
-      "follow_up_issue": 684
+      "disposition": "composes-or-copies-existing-saved-figure"
     },
     {
       "source": "scripts/reports/ext04/render_saved.py",
@@ -248,6 +255,15 @@
       "follow_up_issue": 685
     },
     {
+      "source": "scripts/reports/geometry_figures.py",
+      "signal_count": 4,
+      "asset_name_literals": [
+        "geometry.png",
+        "geometry.svg"
+      ],
+      "disposition": "shared-quantitative-policy-companion-renderer"
+    },
+    {
       "source": "scripts/reports/issue3/render_saved.py",
       "signal_count": 4,
       "asset_name_literals": [
@@ -317,8 +333,7 @@
       "asset_name_literals": [
         "geometry.svg"
       ],
-      "disposition": "deferred-family-specific-migration",
-      "follow_up_issue": 684
+      "disposition": "frozen-renderer-preserved-with-shared-policy-companion"
     },
     {
       "source": "scripts/reports/opt04/render.py",
@@ -663,8 +678,10 @@
     },
     {
       "source": "scripts/reports/visual_examples.py",
-      "signal_count": 38,
+      "signal_count": 46,
       "asset_name_literals": [
+        "app02-diamond-v1.svg",
+        "app04-square-v1.svg",
         "control-projection.svg",
         "ellipsoid-2d.svg",
         "example-2d.svg",
@@ -687,8 +704,10 @@
         "fuel-b06-viz06-trajectory.png",
         "fuel-b06-viz06-trajectory.svg",
         "geometry.svg",
+        "issue3-control-walkthrough.svg",
         "joint-relation-2d.svg",
         "lazy-2d.svg",
+        "lotka-volterra-sampled-v1.svg",
         "optimal-face.svg",
         "polygons.svg",
         "projections-lambda0.svg",
@@ -1303,7 +1322,19 @@
         "fuel-b06-viz06-trajectory.svg",
         "fuel-b06-viz06-trajectory.png",
         "fuel-b06-viz06-timing.svg",
-        "fuel-b06-viz06-timing.png"
+        "fuel-b06-viz06-timing.png",
+        "lotka-volterra-sampled-v1.html",
+        "lotka-volterra-sampled-v1.svg",
+        "lotka-volterra-sampled-v1.png",
+        "lotka-volterra-sampled-v1-export.json",
+        "app02-diamond-v1.html",
+        "app02-diamond-v1.svg",
+        "app02-diamond-v1.png",
+        "app02-diamond-v1-export.json",
+        "app04-square-v1.html",
+        "app04-square-v1.svg",
+        "app04-square-v1.png",
+        "app04-square-v1-export.json"
       ],
       "disposition": "adopted-shared-quantitative-policy"
     }

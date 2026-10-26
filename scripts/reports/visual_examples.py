@@ -13,6 +13,7 @@ from urllib.parse import urlsplit
 import geo04_registered_reports as intersection_reports
 import geo06_registered_reports as hull_reports
 import audit_visual_routes
+import approx_extension_companions
 import report_data
 import stage_ext07 as ext07_reports
 import visual_illustrations
@@ -639,15 +640,18 @@ def validate_gallery_inventory(out, entries):
             "visual inventory anchors must be unique")
     rendered = set(re.findall(r'<section id="([A-Za-z0-9_-]+)"', page)) - {
         "saved-report-figures", "analytic-illustrations", "algorithm-coverage"}
-    rendered.update(re.findall(r'<article id="(saved-figure-[0-9]+)"', page))
-    rendered.update(re.findall(r'<article class="saved-figure" id="(visual-[A-Za-z0-9_-]+)"', page))
+    rendered.update(re.findall(r'<article\b[^>]*\bid="(saved-figure-[A-Za-z0-9_-]+)"', page))
+    rendered.update(re.findall(r'<article class="saved-figure" id="([A-Za-z0-9_-]+)"', page))
     listed = {entry["anchor"] for entry in entries}
-    require(rendered == listed, "every rendered gallery example must appear in the visual inventory")
+    require(rendered == listed,
+            "every rendered gallery example must appear in the visual inventory; missing=" +
+            repr(sorted(rendered - listed)) + ", stale=" + repr(sorted(listed - rendered)))
     for entry in entries:
         required = ("family", "title", "status", "anchor", "page", "figure", "source_page", "raw_record")
         require(all(isinstance(entry.get(field), str) and entry[field] for field in required),
                 "visual inventory entry is missing required metadata or provenance")
-        require(entry["status"] in {"educational-example", "saved-report-figure", "analytic-illustration"},
+        require(entry["status"] in {"educational-example", "saved-report-figure",
+                                    "saved-data-companion", "analytic-illustration"},
                 "unknown visual inventory status")
         require(entry["anchor"] in anchors, "visual inventory target is missing from gallery")
         page_ref, _, page_anchor = entry["page"].partition("#")
@@ -905,10 +909,34 @@ def build(catalog, site):
         gallery_inventory.append(entry)
     fuel_anchor = "visual-fuel-b06-viz03"
     fuel_entry = {"family":"Fuel minimax reference", "title":"B06 fuel terminal set: readable 4D-to-2D projections",
-                  "status":"saved-report-figure", "anchor":fuel_anchor, "page":"fuel-b06-viz06.html",
+                  "status":"saved-data-companion", "anchor":fuel_anchor, "page":"fuel-b06-viz06.html",
                   "figure":"fuel-b06-viz06-flow.svg", "source_page":"https://github.com/butahlecoq/controlled-systems-lab/blob/main/reports/algorithm-results/b06-owner-confirmed-7df01ba3af5e4c46/index.html",
                   "raw_record":"fuel-b06-viz06-source.json"}
     gallery_inventory.append(fuel_entry)
+    lotka_route = "lotka-volterra-sampled-20261023"
+    lotka_anchor = "saved-figure-lotka-quantitative"
+    gallery_inventory.append({"family": "Lotka–Volterra reachability samples",
+                              "title": "Stage-banded Lotka–Volterra samples · shared quantitative axes",
+                              "status": "saved-data-companion", "anchor": lotka_anchor,
+                              "page": "index.html#" + lotka_anchor,
+                              "figure": "lotka-volterra-sampled-v1.svg",
+                              "source_page": "../" + lotka_route + "/index.html",
+                              "raw_record": "../" + lotka_route + "/records.json"})
+    lotka_companion = approx_extension_companions.lotka_volterra_companion(
+        site / lotka_route / "records.json", Path(__file__).parent / "styles/control-v1.json")
+    app02_companion = approx_extension_companions.app02_companion(
+        site / "app02-box-8ff979de60ea9d22" / "records.json", Path(__file__).parent / "styles/control-v1.json")
+    app04_companion = approx_extension_companions.app04_companion(
+        site / "app04-ellipsoid-fd302c34092f8b19" / "records.json", Path(__file__).parent / "styles/control-v1.json")
+    for family, title, stem, report_id in (
+            ("Box approximation", "APP-02 diamond approximations", "app02-diamond-v1", "app02-box-8ff979de60ea9d22"),
+            ("Ellipsoidal approximation", "APP-04 square and ellipses", "app04-square-v1", "app04-ellipsoid-fd302c34092f8b19")):
+        gallery_inventory.append({"family": family, "title": title,
+                                  "status": "saved-data-companion",
+                                  "anchor": stem, "page": stem + ".html",
+                                  "figure": stem + ".svg",
+                                  "source_page": "../" + report_id + "/index.html",
+                                  "raw_record": "../" + report_id + "/records.json"})
     coverage_data = algorithm_coverage(catalog, site, gallery_inventory)
     issue3_report = next(entry for entry in json.loads(Path(catalog).read_text(encoding="utf-8"))["reports"]
                          if entry["report_kind"] == "issue3-validated-minimax")
@@ -947,10 +975,28 @@ def build(catalog, site):
             'It separates the nominal synthesis path from installed modules outside that path and records where this gallery has no supported 2D case.</p>'
             '<div class="coverage-grid">' + coverage_html(coverage_data) + '</div></section>' +
             '<section id="saved-report-figures"><p class="eyebrow">Reviewed report figures</p>'
-            '<h2>More algorithms, from saved evidence</h2><p>These figures are published with their original reports. '
-            'Open a report for its exact inputs, answers, reproduction commands, provenance and evidence limits.</p>'
+            '<h2>More algorithms, from saved evidence</h2><p>Most displayed figures are published inside their original reports. '
+            'Cards marked “Saved-data companion” are generated into this gallery from frozen records; they do not change those reports. '
+            'Open a report for exact inputs, answers, reproduction commands, provenance and evidence limits.</p>'
             '<div class="saved-grid">' + saved_figures +
-            f'<article class="saved-figure" id="{fuel_anchor}"><h3>{escape(fuel_entry["title"])}</h3>'
+            f'<article class="saved-figure" id="{lotka_anchor}"><p class="eyebrow">Saved sample geometry · Saved-data companion</p>'
+            '<h3>Lotka–Volterra samples with shared quantitative axes</h3>'
+            '<a href="lotka-volterra-sampled-v1.html"><img src="lotka-volterra-sampled-v1.svg" '
+            'alt="Saved Lotka–Volterra state samples across four stage bands"></a>'
+            '<p>Replots the frozen sample record with numeric ticks, major grids, and disclosed independent scales; samples are not reachability bounds.</p>'
+            '<p><a href="lotka-volterra-sampled-v1.html">Open the saved-data companion →</a></p></article>' +
+            '<article class="saved-figure" id="app02-diamond-v1"><p class="eyebrow">Box approximation · Saved-data companion</p>'
+            '<h3>APP-02 diamond approximations</h3><a href="app02-diamond-v1.html"><img src="app02-diamond-v1.svg" '
+            'alt="Saved APP-02 diamond input, outer bounds, and inner box on labelled x-y axes"></a>'
+            '<p>Replots the frozen vertices with numeric ticks, major grids, and equal x-y scales.</p>'
+            '<p><a href="app02-diamond-v1.html">Open the saved-data companion →</a></p></article>' +
+            '<article class="saved-figure" id="app04-square-v1"><p class="eyebrow">Ellipsoidal approximation · Saved-data companion</p>'
+            '<h3>APP-04 square and ellipses</h3><a href="app04-square-v1.html"><img src="app04-square-v1.svg" '
+            'alt="Saved APP-04 square and two enclosing ellipses on labelled x-y axes"></a>'
+            '<p>Replots the frozen vertices and radii with numeric ticks, major grids, and equal x-y scales.</p>'
+            '<p><a href="app04-square-v1.html">Open the saved-data companion →</a></p></article>' +
+            f'<article class="saved-figure" id="{fuel_anchor}"><p class="eyebrow">Fuel minimax reference · Saved-data companion</p>'
+            f'<h3>{escape(fuel_entry["title"])}</h3>'
             f'<p>{escape("Readable, versioned SVG and PNG projections of the saved 4D B06 terminal set, with exact values, units, target, evidence limits and reproduction commands.")}</p>'
             f'<a href="{fuel_entry["page"]}"><img src="{fuel_entry["figure"]}" alt="{escape("B06 four-state terminal set projected onto flow coordinates")}"></a>'
             f'<p><a href="{fuel_entry["page"]}">Open the fuel projections and timing figures →</a></p></article>' + '</div></section>' +
@@ -969,6 +1015,9 @@ def build(catalog, site):
     outputs["algorithm-coverage.json"] = json.dumps(coverage_data, indent=2, ensure_ascii=False) + "\n"
     outputs["issue3-control-walkthrough.svg"] = workflow_figure
     outputs["issue3-control-walkthrough.html"] = workflow_page
+    outputs.update(lotka_companion)
+    outputs.update(app02_companion)
+    outputs.update(app04_companion)
     hybrid = next(example for example in examples if example["kind"] == "hybrid")
     outputs["two_stage_scalar_family.json"] = json.dumps({
         "schema": "csl.visual-example/ext07-two-stage-scalar/1",
