@@ -1,0 +1,55 @@
+{
+  "schema": "csl.obs06-capture-provenance/1",
+  "source_commit": "c84ccc75cbb9abe01072bf244a32077de65454b2",
+  "source_tree_clean_at_capture": true,
+  "capture_started_utc": "2026-10-26T19:55:56.966093870+00:00",
+  "build_type": "Release",
+  "compiler": "c++ (GCC) 16.2.1 20260810",
+  "cmake": "cmake version 3.31.6",
+  "environment": {
+    "platform": "Linux-7.2.5-3-omarchy-x86_64-with-glibc2.44",
+    "machine": "x86_64",
+    "kernel": "7.2.5-3-omarchy",
+    "cpu_model": "AMD Ryzen 5 3550H with Radeon Vega Mobile Gfx",
+    "load_average_at_manifest_write": [
+      1.46,
+      1.62,
+      1.12
+    ],
+    "configuration": "Release, BUILD_TESTING=ON, HiGHS=OFF, Qhull=OFF",
+    "resources": {
+      "requested_outer_workers": 1,
+      "selected_worker_spans": 0,
+      "native_backend_threads": "not_applicable: no external numerical backend",
+      "process_memory_per_phase": "unavailable for B07/B09 phase rows; B06 reports process peak RSS"
+    },
+    "clock": {
+      "metric": "steady wall",
+      "period": "1/1000000000 seconds per tick"
+    },
+    "cpu_timing": "unavailable: no CPU clock supplied"
+  },
+  "warmup_and_order": {
+    "B06": "one uninstrumented call then one instrumented call; zero warmups",
+    "B07": "one uninstrumented batch per case (one excluded warmup plus seven measured calls), followed by one instrumented call; all eight baseline attempt rows and outcomes are retained",
+    "B09": "one uninstrumented call then one instrumented call per lambda; zero warmups",
+    "process_state": "new process per executable invocation; B07 cases share one process"
+  },
+  "binary_sha256": {
+    "csl_issue6_b06_phase_report": "0d6077e22f42243dc281bc847aa4383716774e4dc0a2c5cf838aefe991939336",
+    "csl_issue6_b07_report": "57eb63712d3b861ff2667b21259598d0836e3a37c41d64e40c093fadfcb79209",
+    "csl_issue6_b09_report": "91e3d2137c0b5ba3b301c2e4c87206a9ffbdd16bfb09f0c55b7da219b152c260"
+  },
+  "raw_binary_sha256": {
+    "b06-phase.json.gz": "0d6077e22f42243dc281bc847aa4383716774e4dc0a2c5cf838aefe991939336",
+    "b07-phase.jsonl.gz": "57eb63712d3b861ff2667b21259598d0836e3a37c41d64e40c093fadfcb79209",
+    "b09-lambda0-phase.json.gz": "91e3d2137c0b5ba3b301c2e4c87206a9ffbdd16bfb09f0c55b7da219b152c260",
+    "b09-lambda1-phase.json.gz": "91e3d2137c0b5ba3b301c2e4c87206a9ffbdd16bfb09f0c55b7da219b152c260"
+  },
+  "raw_files": {
+    "b06-phase.json.gz": "009caf7e552a6a34ca44e52960fb6074525daa174076744bcb231a5ee44c42a8",
+    "b07-phase.jsonl.gz": "5a22b3a7b302549ed88ab03daf75d80fc4f4983fe25ec6c4d38e3d55ad9b72e0",
+    "b09-lambda0-phase.json.gz": "9bb8b3a501f4632c49b8003d64aea4b1d3f1fd33007e1ccb3bdd785b7235c04e",
+    "b09-lambda1-phase.json.gz": "2019ab7df07076417c578982381d12c25c732d5bbfeff76a75e2070c270c43b2"
+  }
+}

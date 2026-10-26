@@ -1,0 +1,153 @@
+{
+  "schema": "csl.obs06-postprocess-timings/1",
+  "source_commit": "3fa4e1d1b05b968f3690b966c87f3e1e7e1f7a8d",
+  "timing_clock": "python time.perf_counter_ns; process-level wall time",
+  "limitations": "single attempt per operation; includes process startup and file writes; not a strategy or performance comparison",
+  "records": [
+    {
+      "operation": "B06 exact oracle",
+      "scope": "one subprocess wall interval including process startup and output writes",
+      "attempts": 1,
+      "warmups": 0,
+      "wall_ns": 31765003,
+      "exit_code": 0,
+      "outputs": [
+        {
+          "path": "b06-oracle.json",
+          "bytes": 35126,
+          "sha256": "d2499f12257c636d2aa4a7c732711f9704a721e8f9a52137e77797c3aac634ce"
+        }
+      ]
+    },
+    {
+      "operation": "B07 independent verification",
+      "scope": "one subprocess wall interval including process startup and output writes",
+      "attempts": 1,
+      "warmups": 0,
+      "wall_ns": 4058024303,
+      "exit_code": 0,
+      "outputs": [
+        {
+          "path": "independent-oracle-verification.json",
+          "bytes": 2665,
+          "sha256": "d02a98407cf92ed96658a766ee87800546f133183f0b6c0844070d6902f9bd57"
+        }
+      ]
+    },
+    {
+      "operation": "B09 independent verification",
+      "scope": "one subprocess wall interval including process startup and output writes",
+      "attempts": 1,
+      "warmups": 0,
+      "wall_ns": 6095951978,
+      "exit_code": 0,
+      "outputs": [
+        {
+          "path": "b09-oracle.json",
+          "bytes": 2607,
+          "sha256": "243ecc62766463f6c30d17563996176a85563033a1865805be3da4af18c5db15"
+        }
+      ]
+    },
+    {
+      "operation": "B06 saved-data figure and HTML export",
+      "scope": "one subprocess wall interval including process startup and output writes",
+      "attempts": 1,
+      "warmups": 0,
+      "wall_ns": 52255104,
+      "exit_code": 0,
+      "outputs": [
+        {
+          "path": "terminal-projections.svg",
+          "bytes": 2344,
+          "sha256": "ac5997b750ef20fb80c90b46549a1110cf10f7ff37bbb5f9d72ab1cc44461f20"
+        },
+        {
+          "path": "index.html",
+          "bytes": 2620,
+          "sha256": "54958057c49eda62d81d627583e69707cb1f5f7b0635d24da33659db686d095c"
+        },
+        {
+          "path": "example-2d.html",
+          "bytes": 2886,
+          "sha256": "773ab6ef2b69b2893fb3d3d82112c224f1d29a6038e0975a82ddd91925d1f6ff"
+        }
+      ]
+    },
+    {
+      "operation": "B07 saved-data projection export",
+      "scope": "one subprocess wall interval including process startup and output writes",
+      "attempts": 1,
+      "warmups": 0,
+      "wall_ns": 6250836680,
+      "exit_code": 0,
+      "outputs": [
+        {
+          "path": "index.html",
+          "bytes": 3545,
+          "sha256": "88e510e20a6ea9c93613d11c9d8da3079ad1bc69cfc06242e028faa06bf85c30"
+        },
+        {
+          "path": "projections.svg",
+          "bytes": 2745673,
+          "sha256": "436815068dcdf9b8e86344b3bc38c6fb3668e225f2381a2b016e3f9f2c09d3b9"
+        },
+        {
+          "path": "projections.png",
+          "bytes": 740402,
+          "sha256": "b0d9e54b19afae6d6e5f37866eb871a09f1ed24f75012786f372001c68685e71"
+        }
+      ]
+    },
+    {
+      "operation": "B09 lambda 0 projection export",
+      "scope": "one subprocess wall interval including process startup and output writes",
+      "attempts": 1,
+      "warmups": 0,
+      "wall_ns": 65872148,
+      "exit_code": 0,
+      "outputs": [
+        {
+          "path": "b09-l0.svg",
+          "bytes": 37216,
+          "sha256": "724416c0cff5f1b46d1da8c8dd25ed89dbfead4796bcccecd26f5ca1a99082f9"
+        }
+      ]
+    },
+    {
+      "operation": "B09 lambda 1 projection export",
+      "scope": "one subprocess wall interval including process startup and output writes",
+      "attempts": 1,
+      "warmups": 0,
+      "wall_ns": 64252937,
+      "exit_code": 0,
+      "outputs": [
+        {
+          "path": "b09-l1.svg",
+          "bytes": 37214,
+          "sha256": "0d9d9d30647e8e0e295ce25e6cbb42583667b99b20a634a63edcb857ff4697f7"
+        }
+      ]
+    },
+    {
+      "operation": "phase table regeneration",
+      "scope": "one subprocess wall interval including process startup and output writes",
+      "attempts": 1,
+      "warmups": 0,
+      "wall_ns": 5334455750,
+      "exit_code": 0,
+      "outputs": [
+        {
+          "path": "phase-summary.csv",
+          "bytes": 55598,
+          "sha256": "984e38bc44fad8b41c77c532bdaeeb84d8fae6a4b26770bcb45e4f8bf9d313fb"
+        },
+        {
+          "path": "phase-summary.md",
+          "bytes": 13151,
+          "sha256": "bc1528c4562eced5d6bab818f88450649bd56006aeef7b7e6ad9dd621995f818"
+        }
+      ]
+    }
+  ]
+}

@@ -294,31 +294,43 @@ endif()
 if(CSL_BUILD_ISSUE6_B06_REPORT)
 include(cmake/JsonDependencies.cmake)
 file(SHA256 ${CMAKE_CURRENT_SOURCE_DIR}/benchmarks/reporting/issue6/b06_finite_minimax.cpp ISSUE6_B06_DRIVER_SHA256)
+file(SHA256 ${CMAKE_CURRENT_SOURCE_DIR}/benchmarks/reporting/issue6/b06_phase_timing.cpp ISSUE6_B06_PHASE_DRIVER_SHA256)
 file(SHA256 ${CMAKE_CURRENT_SOURCE_DIR}/benchmarks/reporting/issue6/b06_exact_oracle.cpp ISSUE6_B06_ORACLE_SHA256)
 file(SHA256 ${CMAKE_CURRENT_SOURCE_DIR}/benchmarks/scenarios/b06-owner-confirmed-disturbance-v1.json ISSUE6_B06_FIXTURE_SHA256)
 execute_process(COMMAND git rev-parse HEAD WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
     OUTPUT_VARIABLE ISSUE6_B06_SOURCE_COMMIT OUTPUT_STRIP_TRAILING_WHITESPACE COMMAND_ERROR_IS_FATAL ANY)
 add_executable(csl_issue6_b06_report benchmarks/reporting/issue6/b06_finite_minimax.cpp)
+add_executable(csl_issue6_b06_phase_report benchmarks/reporting/issue6/b06_phase_timing.cpp)
 add_executable(csl_issue6_b06_exact_oracle benchmarks/reporting/issue6/b06_exact_oracle.cpp)
 target_link_libraries(csl_issue6_b06_report PRIVATE CSL::finite_action_minimax CSL::resolved_core)
+target_link_libraries(csl_issue6_b06_phase_report PRIVATE CSL::finite_action_minimax CSL::resolved_core)
 target_include_directories(csl_issue6_b06_report SYSTEM PRIVATE ${csl_json_SOURCE_DIR}/include)
+target_include_directories(csl_issue6_b06_phase_report SYSTEM PRIVATE ${csl_json_SOURCE_DIR}/include)
 target_include_directories(csl_issue6_b06_exact_oracle SYSTEM PRIVATE ${csl_json_SOURCE_DIR}/include)
 target_compile_features(csl_issue6_b06_report PRIVATE cxx_std_20)
+target_compile_features(csl_issue6_b06_phase_report PRIVATE cxx_std_20)
 target_compile_features(csl_issue6_b06_exact_oracle PRIVATE cxx_std_20)
 target_compile_definitions(csl_issue6_b06_report PRIVATE
     $<$<CONFIG:Release>:NDEBUG>
     CSL_ISSUE6_SOURCE_COMMIT="${ISSUE6_B06_SOURCE_COMMIT}"
     CSL_ISSUE6_FIXTURE_SHA256="${ISSUE6_B06_FIXTURE_SHA256}"
     CSL_ISSUE6_DRIVER_SHA256="${ISSUE6_B06_DRIVER_SHA256}")
+target_compile_definitions(csl_issue6_b06_phase_report PRIVATE
+    $<$<CONFIG:Release>:NDEBUG>
+    CSL_ISSUE6_SOURCE_COMMIT="${ISSUE6_B06_SOURCE_COMMIT}"
+    CSL_ISSUE6_FIXTURE_SHA256="${ISSUE6_B06_FIXTURE_SHA256}"
+    CSL_ISSUE6_DRIVER_SHA256="${ISSUE6_B06_PHASE_DRIVER_SHA256}")
 target_compile_definitions(csl_issue6_b06_exact_oracle PRIVATE
     CSL_ISSUE6_SOURCE_COMMIT="${ISSUE6_B06_SOURCE_COMMIT}"
     CSL_ISSUE6_FIXTURE_SHA256="${ISSUE6_B06_FIXTURE_SHA256}"
     CSL_ISSUE6_ORACLE_SHA256="${ISSUE6_B06_ORACLE_SHA256}")
 if(MSVC)
 target_compile_options(csl_issue6_b06_report PRIVATE /W4 /WX /permissive-)
+target_compile_options(csl_issue6_b06_phase_report PRIVATE /W4 /WX /permissive-)
 target_compile_options(csl_issue6_b06_exact_oracle PRIVATE /W4 /WX /permissive-)
 else()
 target_compile_options(csl_issue6_b06_report PRIVATE -Wall -Wextra -Wpedantic -Werror)
+target_compile_options(csl_issue6_b06_phase_report PRIVATE -Wall -Wextra -Wpedantic -Werror)
 target_compile_options(csl_issue6_b06_exact_oracle PRIVATE -Wall -Wextra -Wpedantic -Werror)
 endif()
 endif()

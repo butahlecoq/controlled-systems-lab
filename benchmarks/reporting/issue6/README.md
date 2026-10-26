@@ -31,7 +31,7 @@ Configure and build a clean Release driver:
 cmake -S . -B build/issue6-b06 -DBUILD_TESTING=OFF \
   -DCSL_ENABLE_HIGHS=OFF -DCSL_ENABLE_QHULL=OFF \
   -DCSL_BUILD_ISSUE6_B06_REPORT=ON -DCMAKE_BUILD_TYPE=Release
-cmake --build build/issue6-b06 --target csl_issue6_b06_report csl_issue6_b06_exact_oracle --parallel 4
+cmake --build build/issue6-b06 --target csl_issue6_b06_report csl_issue6_b06_phase_report csl_issue6_b06_exact_oracle --parallel 4
 ```
 
 Capture the oracle, one geometry record, and one excluded warmup plus seven
@@ -128,3 +128,47 @@ python3 benchmarks/reporting/issue6/b09_render_projection.py lambda0-geometry.js
 
 The saved projections are included with raw solver rows, independent oracle
 output, provenance and checksums in the B09 result bundle.
+
+## OBS-06 phase timing captures
+
+The phase captures measure the same B06/B07/B09 model cases. They expose the
+actual minimax call tree: validation, per-plan setup and propagation, each
+stage V materialization, objective evaluation, record assembly and result
+selection. Not-called phases remain explicit; `span_count` is planned records,
+while `call_count` excludes not-called records. Raw wall ticks retain their
+clock period, and CPU/worker metrics stay explicitly unavailable where no CPU
+clock or worker span was supplied. Inclusive and exclusive sums are grouped by
+operation; totals across different operations are not elapsed wall time. Raw
+span rows retain each planned parent ID and `nested`/`spawned` kind so the
+topology behind inclusive and exclusive intervals can be audited.
+
+B06 phase timing uses a separate report executable so the original
+`b06_finite_minimax.cpp` source hash remains fixed for historical B06 captures.
+
+Run after building the three Release report targets:
+
+```sh
+build/csl_issue6_b06_phase_report --phase-timing > b06-phase.json
+build/csl_issue6_b07_report --phase-timing > b07-phase.jsonl
+build/csl_issue6_b09_report --lambda 0 --phase-timing > b09-lambda0-phase.json
+build/csl_issue6_b09_report --lambda 1 --phase-timing > b09-lambda1-phase.json
+python3 benchmarks/reporting/issue6/fuel_phase_summary.py \
+  b06-phase.json b07-phase.jsonl b09-lambda0-phase.json b09-lambda1-phase.json \
+  --output fuel-phase-summary.csv --provenance capture-provenance.json
+```
+
+The summary script regenerates CSV and Markdown tables from the raw spans. The
+capture manifest records executable hashes and environment facts; each raw row
+records its source commit, driver hash and scenario/fixture hash. The paired
+instrumentation checks report baseline and instrumented call intervals and
+verify identical successful outputs. B06 also checks an unsupported capacity
+failure pair and retains its failure-path spans.
+
+The figures for these fuel models are available in the existing result
+bundles: [B06 4D terminal projection](../../../reports/algorithm-results/b06-owner-confirmed-7df01ba3af5e4c46/terminal-projections.svg),
+[B07 flow and stock projections](../../../reports/algorithm-results/b07-owner-approved-eight-case-v1/projections.svg),
+and [B09 lambda 0](../../../reports/algorithm-results/b09-a08-source-reference-4818ddde/projections-lambda0.svg)
+and [lambda 1](../../../reports/algorithm-results/b09-a08-source-reference-4818ddde/projections-lambda1.svg).
+Each plots a 2D projection of saved terminal rows from the 4D model; B09 also
+shows the nonlinear replay traces. These are explanatory geometry figures, not
+timing plots or strategy winner claims.

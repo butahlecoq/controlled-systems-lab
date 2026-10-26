@@ -3,6 +3,7 @@
 #include <cstring>
 #include <limits>
 #include <mutex>
+#include <unordered_set>
 #include <utility>
 
 namespace csl::execution::observability {
@@ -229,6 +230,25 @@ CollectionResult<TimingScope> TimingCollector::start(ar::SpanId id,const Executi
     if(owner_->cpu_applies(index))slot.cpu_start=owner_->clock->cpu_now();
     else if(owner_->cpu)slot.cpu_start=slot.cpu_end=missing(ar::MissingReason::not_applicable);
     return TimingScope{owner_,index,context};
+}
+CollectionResult<bool> TimingCollector::validate_unstarted(std::span<const ar::SpanId> ids) const {
+    const auto& descriptions=owner_->plan.description().spans;
+    if(owner_->slots.empty())return true;
+    std::unordered_set<std::uint64_t> unique;
+    unique.reserve(ids.size());
+    std::lock_guard lock{owner_->mutex};
+    for(const auto id:ids){
+        if(!unique.insert(id.value).second)
+            return error("timing.layout","Timing span layout contains a duplicate ID");
+        const auto found=std::lower_bound(descriptions.begin(),descriptions.end(),id.value,
+            [](const auto& descriptor,auto value){return descriptor.id.value<value;});
+        if(found==descriptions.end()||found->id!=id)
+            return error("timing.layout","Timing span layout contains an ID absent from the collection plan");
+        const auto index=static_cast<std::size_t>(found-descriptions.begin());
+        if(owner_->slots[index].state!=Slot::State::unstarted)
+            return error("timing.layout","Timing span layout contains an ID that has already been started");
+    }
+    return true;
 }
 CollectionResult<TimingReport> TimingCollector::snapshot() const {
     try {

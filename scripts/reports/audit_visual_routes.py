@@ -86,6 +86,8 @@ FROZEN_COMPANIONS = {
 
 
 def migration_issue(source: str) -> int:
+    if "/viz04/" in source:
+        return MIGRATION_ISSUES["control-strategy-and-witness"]
     if any(token in source for token in ("/app0", "/ext", "/finite_feedback", "/lotka_volterra")):
         return MIGRATION_ISSUES["approximation-and-extensions"]
     if any(token in source for token in ("/geo", "/opt", "/it17_hull")):

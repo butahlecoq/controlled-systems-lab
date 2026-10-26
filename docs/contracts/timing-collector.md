@@ -83,6 +83,39 @@ in-memory metrics in the wall clock's tick unit:
   Nested spans are not selected again. It measures occupied worker wall time,
   including waits, rather than CPU use; it may exceed run latency.
 
+## Finite-action fuel minimax spans
+
+`optimization::FiniteMinimaxTimingSpans` is an optional, caller-owned layout for
+one `finite_action_minimax` call. When supplied, every ID must be present in the
+resolved `CollectionPlan` and be a descendant of the caller's run span. Plan
+entries follow the same catalogue enumeration order as the solver. Each entry
+owns a unique ID for plan request setup, fixed-plan propagation, terminal
+objective evaluation, and result-record assembly; it also owns one unique
+stage-materialization ID per model transition. Stage-materialization spans are
+nested under that plan's propagation span. The layout is ignored when omitted.
+A supplied layout must include exactly one plan entry per enumerated plan and
+one materialization ID per model transition; malformed layouts are rejected
+before solver work begins.
+
+Validation covers finite-minimax request and capacity admission. Plan setup
+covers construction of a `FixedPlanRequest`. Propagation includes disturbance
+point extraction, successor generation, state-membership checks, and early
+safe-set rejection. Stage materialization covers the numeric snapshots and
+bounded V set built after a stage. Objective evaluation runs only for plans
+that pass propagation; rejected plans record a typed not-called observation.
+Record assembly stores each feasible or rejected plan record. Result selection
+collects the complete near-optimal plan family or the infeasibility result.
+Unentered plan stages and phases are retained as not-called observations with
+the earlier-exit reason; they are not reported as zero-duration calls. Summary
+`span_count` counts planned records. `call_count` excludes not-called records;
+returned, rejected, failed and incomplete counters describe calls only.
+
+Request construction, collector-plan construction, replay, independent oracle
+work, projection, JSON serialization, and figure export happen in reporting
+drivers outside the minimax call. Report those intervals separately when they
+run. `TimingReport` wall and CPU derivatives are not persisted by OBS-01; retain
+them alongside the raw endpoint/status records when producing a timing table.
+
 ## Provider operation spans
 
 `execution/instrumented_operation.hpp` supplies a reusable wrapper for provider
