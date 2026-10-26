@@ -81,7 +81,9 @@ CASES = (
         "source_path": "docs/research/evidence/b04-reference-v1/canonical-case.json",
         "source_commit": "23b0d912236386860ad036894af138bf9f78a9db",
         "source_files": ["docs/research/evidence/b04-reference-v1/canonical-case.json",
-                         "docs/research/evidence/b04-reference-v1/exact-optimal-reference.json"],
+                         "docs/research/evidence/b04-reference-v1/exact-optimal-reference.json",
+                         "docs/research/evidence/b04-reference-v1/exact_check.py",
+                         "docs/research/evidence/b04-reference-v1/exact-check-report.json"],
         "source_file_labels": ["canonical case JSON", "exact witness JSON"],
         "source_label": "Pinned input and exact witness",
         "example_page": "b04-reference-trajectory-projections.html",
@@ -91,6 +93,7 @@ CASES = (
                    "source_case": "docs/research/evidence/b04-reference-v1/canonical-case.json",
                    "source_witness": "docs/research/evidence/b04-reference-v1/exact-optimal-reference.json"},
         "answer": {"one_exact_optimal_witness": True, "checked_states": 17,
+                   "method": "exact rational terminal-plane minimization with exact feasibility checks",
                    "checked_dynamics": "exact rational recurrence", "flow_constraints": "satisfied at stages 0 through 16",
                    "historical_reproduction": False, "external_solver_comparison": False},
         "reproduction_command": "python3 scripts/reports/mpc01/b04_projection_example.py",
@@ -163,7 +166,7 @@ def svg(case):
     kind = case["svg"]
     if kind == "mpc01-b04-reference-projection":
         source = Path(__file__).parents[2] / "docs/examples/b04-reference-trajectory-projections.svg"
-        return source.read_text(encoding="utf-8")
+        return source.read_bytes().decode("utf-8")
     if kind == "minkowski":
         shape = [_polygon([[0, 0], [3, 0], [2, 1], [0, 2]], -1, 4, "#b4cda3", "#7b9b70")]
         return _base("Minkowski sum A+B", -1, 4, shape, ("A+B", "vertices: (0,0)", "(3,0), (2,1)", "(0,2)"))

@@ -805,6 +805,39 @@ def build(catalog, site):
     outputs.update(ext01_companion)
     outputs.update(app01_companion)
     outputs.update(hybrid_examples.download_records(examples))
+    hybrid = next(example for example in examples if example["kind"] == "hybrid")
+    outputs["two_stage_scalar_family.json"] = json.dumps({
+        "schema": "csl.visual-example/ext07-two-stage-scalar/1",
+        "illustration_only": True,
+        "algorithm_source_commit": hybrid["source"],
+        "oracle_harness_commit": hybrid["harness"],
+        "inputs": hybrid["inputs"],
+        "analytic": hybrid["analytic"],
+    }, indent=2) + "\n"
+    two_parameter = next(example for example in examples if example["kind"] == "two_parameter")
+    outputs["two_parameter_scalar_polytopes.json"] = json.dumps({
+        "schema": "csl.visual-example/ext07-two-parameter-scalar/1",
+        "illustration_only": True,
+        "algorithm_source_commit": two_parameter["source"],
+        "oracle_harness_commit": two_parameter["harness"],
+        "inputs": two_parameter["inputs"],
+        "analytic": {"paths": two_parameter["polygons"], **two_parameter["analytic"]},
+    }, indent=2) + "\n"
+    projected = next(example for example in examples if example["kind"] == "projected_reachability")
+    outputs["projected_hybrid_reachability.json"] = json.dumps({
+        "schema": "csl.visual-example/ext07-projected-hybrid-reachability/1",
+        "illustration_only": True,
+        "algorithm_source_commit": projected["source"],
+        "oracle_harness_commit": projected["harness"],
+        "inputs": projected["inputs"],
+        "analytic": projected["analytic"],
+    }, indent=2) + "\n"
+    for name, content in outputs.items():
+        require(not (out / name).is_symlink(), "gallery file must not be a symlink")
+        (out / name).write_bytes(content.encode("utf-8"))
+    validate_gallery_inventory(out, gallery_inventory)
+    require(not (out / "examples.css").is_symlink(), "gallery stylesheet must not be a symlink")
+    shutil.copyfile(Path(__file__).with_name("visual_examples.css"), out / "examples.css")
     link = '<p id="visual-examples-link"><a href="examples/index.html">Visual examples: minimal 2D inputs, hull vertices and plots →</a></p>'
     output_files = {name: (content if isinstance(content, bytes) else content.encode("utf-8"))
                     for name, content in outputs.items()}
