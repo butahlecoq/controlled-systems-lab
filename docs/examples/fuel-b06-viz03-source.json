@@ -1,0 +1,31 @@
+{
+  "schema": "csl.saved-figure-reference/1",
+  "scenario_id": "b06-owner-confirmed-disturbance-v1",
+  "source_record": "reports/algorithm-results/b06-owner-confirmed-7df01ba3af5e4c46/geometry.json",
+  "source_record_schema": "csl.issue6-b06-run/1",
+  "coordinate_order": [
+    "x1 oxidizer flow (kg/s)",
+    "x2 oxidizer stock balance (kg)",
+    "x3 fuel flow (kg/s)",
+    "x4 fuel stock balance (kg)"
+  ],
+  "projection_pairs": [
+    [
+      "x1",
+      "x3"
+    ],
+    [
+      "x2",
+      "x4"
+    ]
+  ],
+  "displayed_vertices": 1024,
+  "evidence": "Saved numerical V-representation; binary64 solver assurance. Not a validated real-arithmetic enclosure or historical reproduction.",
+  "trajectory": "One zero-disturbance history of unique minimizing plan 1936; derived in binary64 from saved scenario initial state and control catalogue plus the matching hashed B06 C++ source-driver transition. The saved scenario A matrix is malformed with 15 entries for 4x4 and is not rewritten. Not a captured stage history or complete reachable family.",
+  "reproduction_command": "python scripts/reports/adapt_fuel_record.py b06 reports/algorithm-results/b06-owner-confirmed-7df01ba3af5e4c46 build/fuel-b06.plot.json",
+  "trajectory_source_files_sha256": {
+    "geometry.json": "0d1d47f7686638c73e0a938f2f2e07989179cc70edc49ae9118feabeb58af9fb",
+    "scenario.json": "27cb9d50cf8241914695f4e0706e3852de190fdec0c53e5f689e9624aa404f71",
+    "b06_finite_minimax.cpp": "b157f7259a0b0033c289ab327d57d613d43907166f58024114c2271f0652e88f"
+  }
+}

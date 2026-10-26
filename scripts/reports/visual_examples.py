@@ -759,8 +759,8 @@ def build(catalog, site):
     examples = load_examples(catalog)
     site = Path(site).resolve(strict=True)
     saved_figures, saved_inventory = saved_figure_sections(catalog, site)
-    last_topic_anchor = f"saved-figure-{len(SAVED_FIGURES)}"
-    last_topic_title = SAVED_FIGURES[-1]["title"]
+    last_topic_anchor = "visual-fuel-b06-viz03"
+    last_topic_title = "B06 fuel terminal set: versioned scientific projections"
     analytic_files, analytic_inventory = visual_illustrations.build(Path(catalog))
     index = report_data.local_file(site, "index.html")
     original = index.read_text(encoding="utf-8")
@@ -779,6 +779,15 @@ def build(catalog, site):
     out.mkdir(exist_ok=True)
     outputs = {e["slug"] + ".svg": plot(e) for e in examples}
     outputs.update(analytic_files)
+    fuel_page = Path(__file__).parents[2] / "docs/examples/fuel-b06-viz03.html"
+    fuel_assets = Path(__file__).parents[2] / "docs/examples"
+    fuel_files = ("fuel-b06-viz03.html", "fuel-b06-viz03-source.json", "fuel-b06-viz03-export.json",
+                  "fuel-b06-flow-projection.svg", "fuel-b06-flow-projection.png", "fuel-b06-stock-projection.svg",
+                  "fuel-b06-stock-projection.png", "fuel-b06-trajectory.svg", "fuel-b06-trajectory.png", "fuel-b06-timing.svg", "fuel-b06-timing.png")
+    for name in fuel_files:
+        path = fuel_page if name.endswith(".html") else fuel_assets / name
+        require(path.is_file(), "missing VIZ-03 fuel figure asset: " + str(path))
+        outputs[name] = path.read_text(encoding="utf-8") if path.suffix == ".html" else path.read_bytes()
     gallery_inventory = []
     for example in examples:
         source_page = f"../{example['report_id']}/index.html"
@@ -803,6 +812,12 @@ def build(catalog, site):
         entry["raw_record"] = f"../{entry['report_id']}/{report_record}"
         entry["status"] = "saved-report-figure"
         gallery_inventory.append(entry)
+    fuel_anchor = "visual-fuel-b06-viz03"
+    fuel_entry = {"family":"Fuel minimax reference", "title":"B06 fuel terminal set: versioned scientific projections",
+                  "status":"saved-report-figure", "anchor":fuel_anchor, "page":"fuel-b06-viz03.html",
+                  "figure":"fuel-b06-flow-projection.svg", "source_page":"https://github.com/butahlecoq/controlled-systems-lab/blob/main/reports/algorithm-results/b06-owner-confirmed-7df01ba3af5e4c46/index.html",
+                  "raw_record":"fuel-b06-viz03-source.json"}
+    gallery_inventory.append(fuel_entry)
     coverage_data = algorithm_coverage(catalog, site, gallery_inventory)
     navigation = "".join(f'<a href="#{e["slug"]}">{e["title"]}</a>' for e in examples)
     navigation += '<a href="#analytic-illustrations">Analytic geometry and optimization</a>'
@@ -837,7 +852,11 @@ def build(catalog, site):
             '<section id="saved-report-figures"><p class="eyebrow">Reviewed report figures</p>'
             '<h2>More algorithms, from saved evidence</h2><p>These figures are published with their original reports. '
             'Open a report for its exact inputs, answers, reproduction commands, provenance and evidence limits.</p>'
-            '<div class="saved-grid">' + saved_figures + '</div></section>' +
+            '<div class="saved-grid">' + saved_figures +
+            f'<article class="saved-figure" id="{fuel_anchor}"><h3>{escape(fuel_entry["title"])}</h3>'
+            f'<p>{escape("Versioned SVG and PNG projections of saved B06 terminal vertices, with units, target, numerical evidence and reproduction commands.")}</p>'
+            f'<a href="{fuel_entry["page"]}"><img src="{fuel_entry["figure"]}" alt="{escape("B06 four-state terminal set projected onto flow coordinates")}"></a>'
+            f'<p><a href="{fuel_entry["page"]}">Open the fuel projections and timing figures →</a></p></article>' + '</div></section>' +
             '<footer>Controlled Systems Lab · Saved evidence, visible geometry.</footer></main></div>'
             '<script>document.querySelector(".nav-shortcut").addEventListener("click",event=>{'
             'const target=document.querySelector(event.currentTarget.hash);if(!target)return;'
@@ -878,7 +897,10 @@ def build(catalog, site):
     }, indent=2) + "\n"
     for name, content in outputs.items():
         require(not (out / name).is_symlink(), "gallery file must not be a symlink")
-        (out / name).write_text(content, encoding="utf-8")
+        if isinstance(content, bytes):
+            (out / name).write_bytes(content)
+        else:
+            (out / name).write_text(content, encoding="utf-8")
     validate_gallery_inventory(out, gallery_inventory)
     require(not (out / "examples.css").is_symlink(), "gallery stylesheet must not be a symlink")
     shutil.copyfile(Path(__file__).with_name("visual_examples.css"), out / "examples.css")
