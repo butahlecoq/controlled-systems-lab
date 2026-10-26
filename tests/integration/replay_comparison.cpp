@@ -121,8 +121,8 @@ TEST_CASE("4D selected linear witnesses retain separate nonlinear replay and 2D 
             verification::CheckStatus::numerical_pass, verified.completeness,
             verified.validated, verified.residuals};
     }
-    source.plot.paths[0].evidence.residuals.push_back(
-        {"state[1]", {0.0, 1.0}, 1e-12, true});
+    REQUIRE_FALSE(source.plot.paths[0].evidence.residuals.empty());
+    const auto expected_linear_residual = source.plot.paths[0].evidence.residuals.front();
     const ar::RunRecordRef run_ref{source.plot.run, problem::ContentDigest{}};
     const auto associated = ex::associate_replays(source.problem, source.plot, run_ref, source.replays, "kg/s");
     REQUIRE(std::holds_alternative<ex::ReplayComparison>(associated));
@@ -193,10 +193,12 @@ TEST_CASE("4D selected linear witnesses retain separate nonlinear replay and 2D 
     CHECK(encoded_json["witnesses"][0]["claims"]["nonlinear_feasibility"] == "not_checked");
     CHECK(encoded_json["witnesses"][0]["claims"]["nonlinear_objective_quality"] == "not_checked");
     CHECK(encoded_json["witnesses"][0]["claims"]["nonlinear_global_optimality"] == "not_checked");
-    const auto& saved_residual = encoded_json["witnesses"][0]["linear_evidence"]["residuals"].back();
-    CHECK(saved_residual["field"] == "state[1]");
-    CHECK(saved_residual["violation"] == 0.0);
-    CHECK(saved_residual["tolerance"] == 1e-12);
+    const auto& saved_residual = encoded_json["witnesses"][0]["linear_evidence"]["residuals"][0];
+    CHECK(saved_residual["field"] == expected_linear_residual.field);
+    CHECK(saved_residual["violation"] == expected_linear_residual.measure.violation);
+    CHECK(saved_residual["scale"] == expected_linear_residual.measure.scale);
+    CHECK(saved_residual["tolerance"] == expected_linear_residual.tolerance);
+    CHECK(saved_residual["satisfied"] == expected_linear_residual.satisfied);
     const auto decoded = ex::decode_replay_comparison(wire);
     REQUIRE(std::holds_alternative<problem::ResolvedContent>(decoded));
     CHECK(std::get<problem::ResolvedContent>(decoded).digest() == content.digest());
@@ -225,6 +227,7 @@ TEST_CASE("replay association refuses swapped control order, mismatched axes and
     const auto wrong_controls = ex::associate_replays(source.problem, source.plot, run_ref, source.replays);
     REQUIRE(std::holds_alternative<ar::ArtifactError>(wrong_controls));
     CHECK(std::get<ar::ArtifactError>(wrong_controls).code == ar::ArtifactErrorCode::reference);
+    CHECK(std::get<ar::ArtifactError>(wrong_controls).path == "witnesses[1].replay.controls");
 
     source = fixture();
     source.plot.state_axis.points = {0.0, 1.0, 3.0};
