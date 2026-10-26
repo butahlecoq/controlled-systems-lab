@@ -240,6 +240,36 @@ MpcCase make_ts02() {
     return result;
 }
 
+MpcCase make_infeasible() {
+    MpcCase result;
+    result.id = "infeasible-integrator-v1";
+    result.version = "1";
+    result.source_kind = "analytic-contract";
+    result.source_ref = "benchmarks/reporting/mpc01/fixtures.cpp#make_infeasible";
+    result.canonical_input_sha256 = digest_text(
+        R"({"schema":"csl.mpc01-fixture/1","id":"infeasible-integrator-v1","x0":[0],"A":[[1]],"B":[[1]],"u":[[0,0]],"x1":[1,1],"cost":{"kind":"quadratic","Q":[[2]],"linear":[0],"offset":0}})");
+    result.initial_state = {0.0};
+    result.dynamics = {{{{1.0}}, {{1.0}}, {0.0}}};
+    result.stages = {{{}, Box{{0.0}, {0.0}}}, {Box{{1.0}, {1.0}}, {}}};
+    result.terminal_cost = QuadraticTerminalCost{{{2.0}}, {0.0}, 0.0};
+    return result;
+}
+
+MpcCase make_unbounded() {
+    MpcCase result;
+    result.id = "unbounded-integrator-v1";
+    result.version = "1";
+    result.source_kind = "analytic-contract";
+    result.source_ref = "benchmarks/reporting/mpc01/fixtures.cpp#make_unbounded";
+    result.canonical_input_sha256 = digest_text(
+        R"({"schema":"csl.mpc01-fixture/1","id":"unbounded-integrator-v1","x0":[0],"A":[[1]],"B":[[1]],"u":[null],"cost":{"kind":"quadratic","Q":[[0]],"linear":[-1],"offset":0}})");
+    result.initial_state = {0.0};
+    result.dynamics = {{{{1.0}}, {{1.0}}, {0.0}}};
+    result.stages = {{{}, std::nullopt}, {{}, {}}};
+    result.terminal_cost = QuadraticTerminalCost{{{0.0}}, {-1.0}, 0.0};
+    return result;
+}
+
 FixtureLoad load_double_integrator_421(const std::filesystem::path& path) {
     auto loaded = input::load_scenario_file(path);
     if (const auto* error = std::get_if<input::InputFailure>(&loaded)) {

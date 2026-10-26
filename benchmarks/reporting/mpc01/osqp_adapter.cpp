@@ -106,14 +106,17 @@ void classify_status(OSQPInt status, NativeAttempt& attempt) {
             attempt.outcome = MathematicalOutcome::optimal;
             break;
         case OSQP_PRIMAL_INFEASIBLE:
-        case OSQP_PRIMAL_INFEASIBLE_INACCURATE:
             attempt.outcome = MathematicalOutcome::infeasible;
             break;
         case OSQP_DUAL_INFEASIBLE:
-        case OSQP_DUAL_INFEASIBLE_INACCURATE:
             attempt.outcome = MathematicalOutcome::unbounded;
             break;
+        case OSQP_PRIMAL_INFEASIBLE_INACCURATE:
+        case OSQP_DUAL_INFEASIBLE_INACCURATE:
+            attempt.outcome = MathematicalOutcome::undetermined;
+            break;
         case OSQP_TIME_LIMIT_REACHED:
+            attempt.outcome = MathematicalOutcome::undetermined;
             attempt.termination = Termination::timed_out;
             break;
         case OSQP_SOLVED_INACCURATE:

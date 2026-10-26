@@ -44,6 +44,34 @@ int main(int argc, char** argv) {
     using namespace csl::mpc01;
     if (validate(make_ts01())) return fail("T-S01 fixture is invalid");
     if (validate(make_ts02())) return fail("T-S02 fixture is invalid");
+    if (validate(make_infeasible())) return fail("infeasible analytic fixture is invalid");
+    if (validate(make_unbounded())) return fail("unbounded analytic fixture is invalid");
+    const auto infeasible = make_infeasible();
+    const auto& infeasible_dynamics = infeasible.dynamics.front();
+    const auto forced_next = infeasible_dynamics.a[0][0] * infeasible.initial_state[0] +
+                             infeasible_dynamics.b[0][0] * 0.0 +
+                             infeasible_dynamics.affine[0];
+    if (!infeasible.stages.front().control ||
+        infeasible.stages.front().control->lower != Vector{0.0} ||
+        infeasible.stages.front().control->upper != Vector{0.0} ||
+        !infeasible.stages.back().state || forced_next != 0.0 ||
+        infeasible.stages.back().state->lower != Vector{1.0} ||
+        infeasible.stages.back().state->upper != Vector{1.0}) {
+        return fail("exact infeasibility oracle no longer encodes 0=1");
+    }
+    const auto unbounded = make_unbounded();
+    if (unbounded.stages.front().control || unbounded.stages.back().state ||
+        unbounded.dynamics.front().b[0][0] != 1.0) {
+        return fail("exact unboundedness oracle lost its free control direction");
+    }
+    for (const double control : Vector{0.0, 1.0, 2.0, 4.0}) {
+        const auto terminal = unbounded.dynamics.front().a[0][0] * unbounded.initial_state[0] +
+                             unbounded.dynamics.front().b[0][0] * control +
+                             unbounded.dynamics.front().affine[0];
+        if (original_terminal_objective(unbounded, Vector{terminal}) != -control) {
+            return fail("exact unboundedness oracle does not decrease along its feasible recession direction");
+        }
+    }
     const auto ts01 = make_ts01();
     const auto sparse = make_osqp_problem(ts01);
     if (!std::holds_alternative<SparseQp>(sparse)) return fail("T-S01 sparse mapping failed");

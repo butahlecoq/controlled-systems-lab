@@ -2,7 +2,8 @@
 
 `CSL_BUILD_MPC01_REPORT=ON` enables a private runner for the four current
 comparison fixtures: T-S01, T-S02, #421, and the distinct
-`b04-reference-v1` case. It builds static OSQP 1.0.0, HPIPM
+`b04-reference-v1` case. Two additional analytic diagnostic cases exercise
+infeasible and unbounded outcomes. It builds static OSQP 1.0.0, HPIPM
 `e3a56c1caddd7f12d125d84f337b9a9e5c186271`, and BLASFEO
 `d6251233923c9b475fe894fb729fb63ab693e301` in a nested build. Archive SHA-256
 values and build options are pinned in `native/CMakeLists.txt`.
@@ -34,7 +35,16 @@ yet the immutable `csl.comparison-record/1` artifact required for published
 comparisons. The model currently uses binary64 residual checks, labelled
 inconclusive; solver optimal status is not itself an independent proof.
 
-This slice does not implement Strategy A/B outcomes, infeasible/unbounded
-fixtures, the shared comparison-record codec, independent report review, or a
-published solver-trajectory plot. The existing B04 Pages example remains the
-separate exact-witness illustration, not solver output.
+The analytic infeasible and unbounded rows exercise outcome handling. OSQP's
+precise primal/dual infeasibility statuses map to `infeasible`/`unbounded`;
+inaccurate certificates remain `undetermined`. HPIPM returns status 2 on the
+current fixtures, which this runner also retains as `undetermined`. Objective
+fields are null unless the outcome is `optimal` or `feasible`, so solver
+sentinel values and non-optimal iterates are not presented as solution
+objectives. Non-optimal primal vectors are labelled candidate iterates, not
+feasible trajectories.
+
+This slice does not implement Strategy A/B outcomes, the shared
+comparison-record codec, independent report review, or a published
+solver-trajectory plot. The existing B04 Pages example remains the separate
+exact-witness illustration, not solver output.

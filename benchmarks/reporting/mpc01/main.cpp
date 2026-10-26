@@ -116,6 +116,10 @@ std::string outcome_name(MathematicalOutcome value) {
     return "undetermined";
 }
 
+json optional_finite(double value) {
+    return std::isfinite(value) ? json(value) : json(nullptr);
+}
+
 json serialize_attempt(const MpcCase& problem, const NativeAttempt& attempt,
                        const std::string& start_mode) {
     json row = {{"schema", "csl.mpc01-native-attempt/1"},
@@ -136,14 +140,20 @@ json serialize_attempt(const MpcCase& problem, const NativeAttempt& attempt,
                 {"factorization_in_solve", attempt.factorization_in_solve},
                 {"diagnostics", attempt.diagnostics}};
     row["solver_objective"] = attempt.solver_objective
-        ? json(*attempt.solver_objective) : json(nullptr);
+        && (attempt.outcome == MathematicalOutcome::optimal ||
+            attempt.outcome == MathematicalOutcome::feasible)
+        ? optional_finite(*attempt.solver_objective) : json(nullptr);
     row["original_objective"] = attempt.original_objective
-        ? json(*attempt.original_objective) : json(nullptr);
+        && (attempt.outcome == MathematicalOutcome::optimal ||
+            attempt.outcome == MathematicalOutcome::feasible)
+        ? optional_finite(*attempt.original_objective) : json(nullptr);
     if (attempt.witness) {
         const auto check = check_trajectory(problem, *attempt.witness);
-        row["trajectory"] = {{"states", attempt.witness->states},
-                             {"controls", attempt.witness->controls}};
-        row["original_data_diagnostics"] = {
+        const bool has_usable_witness = attempt.outcome == MathematicalOutcome::optimal ||
+                                        attempt.outcome == MathematicalOutcome::feasible;
+        row[has_usable_witness ? "trajectory" : "candidate_iterate"] = {
+            {"states", attempt.witness->states}, {"controls", attempt.witness->controls}};
+        row[has_usable_witness ? "original_data_diagnostics" : "candidate_iterate_diagnostics"] = {
             {"checker", "binary64-residual-diagnostic/1"},
             {"evidence_status", "inconclusive"},
             {"max_dynamics_residual", check.dynamics},
@@ -223,6 +233,8 @@ int main(int argc, char** argv) {
         }
         run_case(make_ts01(), hpipm_first);
         run_case(make_ts02(), hpipm_first);
+        run_case(make_infeasible(), hpipm_first);
+        run_case(make_unbounded(), hpipm_first);
         run_case(take_fixture(load_double_integrator_421(argv[1])), hpipm_first);
         run_case(take_fixture(load_b04_reference_v1(argv[2])), hpipm_first);
         return 0;
