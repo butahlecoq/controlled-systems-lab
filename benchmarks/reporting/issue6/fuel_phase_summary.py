@@ -35,6 +35,11 @@ def main() -> None:
     result = []
     for source in args.raw:
         for row in rows_from(source):
+            case_id = row.get("case_id") or row.get("scenario")
+            if not case_id and "lambda" in row:
+                case_id = f"B09-lambda-{row['lambda']:g}"
+            if not case_id and "batch" in row:
+                case_id = "B06-paired-run"
             timing = row["phase_timing"]
             if timing["schema"] != "csl.obs06-fuel-phase/1":
                 raise ValueError(f"unsupported phase schema in {source}")
@@ -77,7 +82,7 @@ def main() -> None:
                 result.append({
                     "source_file": source.name,
                     "binary_sha256": binary_hashes.get(source.name, "unavailable"),
-                    "case_id": row.get("case_id", row.get("scenario", row.get("batch", ""))),
+                    "case_id": case_id or "unknown-case",
                     "operation": operation,
                     "span_count": group["span_count"],
                     "call_count": group["call_count"],
@@ -96,6 +101,33 @@ def main() -> None:
                     "driver_sha256": row.get("driver_sha256", "unavailable"),
                     "scenario_sha256": row.get("scenario_sha256", row.get("fixture_sha256", "unavailable")),
                 })
+            failure = timing.get("failure_pair", {}).get("phase_timing")
+            if failure:
+                for operation, group in sorted(failure["counts_by_operation"].items()):
+                    inclusive = group["wall_inclusive_ticks_sum"] * numerator / denominator * 1e3
+                    exclusive = group["wall_exclusive_ticks_sum"] * numerator / denominator * 1e3
+                    result.append({
+                        "source_file": source.name,
+                        "binary_sha256": binary_hashes.get(source.name, "unavailable"),
+                        "case_id": "B06-unsupported-capacity-failure",
+                        "operation": operation,
+                        "span_count": group["span_count"],
+                        "call_count": group["call_count"],
+                        "returned": group["returned"],
+                        "rejected": group["rejected"],
+                        "failed": group["failed"],
+                        "not_called": group["not_called"],
+                        "incomplete": group["incomplete"],
+                        "inclusive_wall_ms_sum": inclusive,
+                        "exclusive_wall_ms_sum": exclusive,
+                        "solver_call_wall_ns": failure.get("solver_call_wall_ns"),
+                        "clock_period_seconds": f"{numerator}/{denominator}",
+                        "cpu_time": failure.get("cpu_time", "unavailable"),
+                        "worker_accounting": json.dumps(failure.get("worker_accounting", "unavailable"), sort_keys=True),
+                        "source_commit": row.get("source_commit", "unavailable"),
+                        "driver_sha256": row.get("driver_sha256", "unavailable"),
+                        "scenario_sha256": row.get("scenario_sha256", row.get("fixture_sha256", "unavailable")),
+                    })
     args.output.parent.mkdir(parents=True, exist_ok=True)
     with args.output.open("w", newline="", encoding="utf-8") as stream:
         writer = csv.DictWriter(stream, fieldnames=list(result[0]))

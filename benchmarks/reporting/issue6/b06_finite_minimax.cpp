@@ -117,6 +117,9 @@ json run_once(std::size_t batch,bool include_geometry=false,bool phase_timing=fa
         {"driver_sha256",CSL_ISSUE6_DRIVER_SHA256},
         {"status","numerical_optimal"},{"assurance","numerical"},
         {"elapsed_ns",elapsed},{"plan_count",optimum.plans.size()},
+        {"request_construction_ns",std::chrono::duration_cast<std::chrono::nanoseconds>(request_ready-setup_started).count()},
+        {"collector_setup_ns",std::chrono::duration_cast<std::chrono::nanoseconds>(solver_started-request_ready).count()},
+        {"public_call_wall_ns",std::chrono::duration_cast<std::chrono::nanoseconds>(stopped-setup_started).count()},
         {"solver_call_wall_ns",std::chrono::duration_cast<std::chrono::nanoseconds>(stopped-solver_started).count()},
         {"evaluated_terminal_vertices",checked_vertices},
         {"minimizing_plan_indices",optimum.minimizing_plan_indices},
@@ -192,6 +195,10 @@ int main(int argc,char** argv) {
                 instrumented.at("solver_call_wall_ns");
             instrumented["phase_timing"]["uninstrumented_call_wall_ns"]=
                 uninstrumented.at("solver_call_wall_ns");
+            instrumented["phase_timing"]["uninstrumented_public_call_wall_ns"]=
+                uninstrumented.at("public_call_wall_ns");
+            instrumented["phase_timing"]["uninstrumented_request_construction_ns"]=
+                uninstrumented.at("request_construction_ns");
             instrumented["phase_timing"]["outcome_fields_match_exactly"]=true;
             instrumented["phase_timing"]["failure_outcome_fields_match_exactly"]=true;
             instrumented["phase_timing"]["failure_status"]="unsupported_capacity";

@@ -195,6 +195,8 @@ json run(std::size_t batch, double lambda, bool geometry) {
         {"driver_sha256", CSL_ISSUE6_DRIVER_SHA256},
         {"lambda", lambda}, {"status", "numerical_optimal"}, {"assurance", "numerical"},
         {"elapsed_ns", std::chrono::duration_cast<std::chrono::nanoseconds>(stopped-started).count()},
+        {"request_construction_ns",std::chrono::duration_cast<std::chrono::nanoseconds>(solver_started-started).count()},
+        {"public_call_wall_ns",std::chrono::duration_cast<std::chrono::nanoseconds>(stopped-started).count()},
         {"solver_call_wall_ns",std::chrono::duration_cast<std::chrono::nanoseconds>(stopped-solver_started).count()},
         {"plan_count", optimum.plans.size()}, {"minimizing_plan_indices", optimum.minimizing_plan_indices},
         {"winner_action_indices", winner.action_indices}, {"winner_action_sequences", winner_sequences},
@@ -293,6 +295,10 @@ int main(int argc, char** argv) {
             measured_result["phase_timing"]["outcome_fields_match_exactly"]=true;
             measured_result["phase_timing"]["uninstrumented_solver_call_wall_ns"]=
                 baseline.at("solver_call_wall_ns");
+            measured_result["phase_timing"]["uninstrumented_public_call_wall_ns"]=
+                baseline.at("public_call_wall_ns");
+            measured_result["phase_timing"]["uninstrumented_request_construction_ns"]=
+                baseline.at("request_construction_ns");
             measured_result["phase_timing"]["instrumented_solver_call_wall_ns"]=
                 measured_result["phase_timing"]["solver_call_wall_ns"];
             measured_result["phase_timing"]["warmup_repetitions"]=0;

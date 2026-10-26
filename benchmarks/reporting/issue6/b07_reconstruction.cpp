@@ -129,6 +129,8 @@ json run(Case c) {
     std::sort(sorted.begin(),sorted.end());
     json result=runs.back();
     result["warmup_calls"]=1;
+    result["warmup_elapsed_ns"]=runs.front()["elapsed_ns"];
+    result["warmup_solver_call_wall_ns"]=runs.front()["solver_call_wall_ns"];
     result["measured_calls"]=measured.size();
     result["measured_elapsed_ns"]=measured;
     result["median_elapsed_ns"]=sorted[3];
@@ -192,6 +194,14 @@ int main(int argc,char** argv) {
                             baseline.at("median_solver_call_wall_ns");
                         measured["phase_timing"]["uninstrumented_median_public_call_wall_ns"]=
                             baseline.at("median_elapsed_ns");
+                        measured["phase_timing"]["uninstrumented_warmup_elapsed_ns"]=
+                            baseline.at("warmup_elapsed_ns");
+                        measured["phase_timing"]["uninstrumented_warmup_solver_call_wall_ns"]=
+                            baseline.at("warmup_solver_call_wall_ns");
+                        measured["phase_timing"]["uninstrumented_measured_elapsed_ns"]=
+                            baseline.at("measured_elapsed_ns");
+                        measured["phase_timing"]["uninstrumented_measured_solver_call_wall_ns"]=
+                            baseline.at("measured_solver_call_wall_ns");
                         measured["phase_timing"]["baseline_warmup_repetitions"]=1;
                         measured["phase_timing"]["baseline_measured_repetitions"]=7;
                         measured["phase_timing"]["pair_order"]={"uninstrumented-seven-sample-batch","instrumented-single-call"};
