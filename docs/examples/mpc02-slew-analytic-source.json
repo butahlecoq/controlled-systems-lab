@@ -20,6 +20,10 @@
       ["-1", "-1"], ["-3/4", "-1"], ["1", "3/4"],
       ["1", "1"], ["3/4", "1"], ["-1", "-3/4"]
     ],
+    "lifted_memory_projection_vertices_rational": [
+      ["-1", "-1"], ["-3/4", "-1"], ["1", "3/4"],
+      ["1", "1"], ["3/4", "1"], ["-1", "-3/4"]
+    ],
     "stage_box_optimum_control_rational": ["1/2", "0"],
     "slew_optimum_control_rational": ["3/8", "1/8"],
     "slew_optimum_terminal_state_rational": ["3/8", "1/8"],

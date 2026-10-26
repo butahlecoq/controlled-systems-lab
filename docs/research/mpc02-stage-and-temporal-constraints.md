@@ -56,9 +56,12 @@ counts describe the current generated programs, not runtime cost.
 
 The affine memory equations give inverse maps between each original feasible
 history and its lifted history. The regression fixture checks all six exact
-vertices of the bounded slew polygon in both programs, a stagewise-feasible
-history rejected by the slew row in both, exact reconstruction, the
-boundary-active optimizer, and equal evaluated original objective values.
+vertices of the bounded slew polygon in both directions: direct vertices are
+lifted and checked against the augmented rows, and lifted-projection vertices
+are constructed in augmented coordinates, recovered, and checked against the
+direct rows. It also checks a stagewise-feasible history rejected by the slew
+row in both, exact reconstruction, the boundary-active optimizer, and equal
+evaluated original objective values.
 It makes no complete-family solver claim. The separate historical
 [`temporal-coupling.md`](temporal-coupling.md) note proves why dropping memory
 can admit invalid future controls and records the general lift equations.

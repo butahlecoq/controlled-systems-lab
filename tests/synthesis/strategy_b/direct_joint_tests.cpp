@@ -441,6 +441,25 @@ TEST_CASE("MPC-02 registers distinct constraint tracks and direct and memory-lif
         CHECK(std::get<problem::ControlHistory>(recovered).states==history.states);
         CHECK(std::get<problem::ControlHistory>(recovered).controls==history.controls);
     }
+    // Enumerate the same exact polygon as the lifted program's projection
+    // onto (p1,p2)=(u0,u1), construct each augmented history directly, and
+    // recover it back to the original state/control coordinates. This checks
+    // the reverse inclusion independently of lift_history above.
+    const std::vector<Vector> lifted_projection_vertices{
+        {-1,-1},{-.75,-1},{1,.75},{1,1},{.75,1},{-1,-.75}};
+    for(const auto& u:lifted_projection_vertices) {
+        const problem::LiftedControlHistory lifted{
+            {{0,0,0},{u[0],0,u[0]},{u[0],u[1],u[1]}},
+            {{u[0]},{u[1]-u[0]}}};
+        const auto lifted_coordinates=flatten(lifted.augmented_states,lifted.increments);
+        REQUIRE(feasible(lifted_joint,lifted_coordinates));
+        const auto recovered=problem::recover_history(lift.coordinates,lifted,1e-12,1e-12);
+        REQUIRE(std::holds_alternative<problem::ControlHistory>(recovered));
+        const auto& history=std::get<problem::ControlHistory>(recovered);
+        CHECK(feasible(direct_joint,flatten(history.states,history.controls)));
+        CHECK((history.controls==std::vector<Vector>{{u[0]},{u[1]}}));
+        CHECK((history.states==std::vector<Vector>{{0,0},{u[0],0},{u[0],u[1]}}));
+    }
     const problem::ControlHistory slew_violating{{{0,0},{-1,0},{-1,1}},{{-1},{1}}};
     const auto rejected_direct=flatten(slew_violating.states,slew_violating.controls);
     CHECK_FALSE(feasible(direct_joint,rejected_direct));

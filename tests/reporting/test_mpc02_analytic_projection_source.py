@@ -52,6 +52,13 @@ class Mpc02AnalyticProjectionSourceTests(unittest.TestCase):
             self.assertLessEqual(abs(second - first), Fraction(1, 4))
         self.assertEqual([rational_vector(vertex)
                           for vertex in projection["terminal_state_vertices_rational"]], controls)
+        lifted_vertices = [rational_vector(vertex)
+                           for vertex in projection["lifted_memory_projection_vertices_rational"]]
+        self.assertEqual(lifted_vertices, list(expected))
+        for first, second in lifted_vertices:
+            self.assertLessEqual(abs(first), 1)
+            self.assertLessEqual(abs(second), 1)
+            self.assertLessEqual(abs(second - first), Fraction(1, 4))
 
         optimum = rational_vector(projection["slew_optimum_control_rational"])
         target = rational_vector(source["model"]["terminal_target"])
