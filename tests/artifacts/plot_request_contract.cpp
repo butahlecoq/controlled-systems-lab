@@ -64,6 +64,23 @@ sets::SetData affine_segment3() {
         {2, 3, {1,1,0, -2,0,1}}, {1,0}, {"x0", "x1", "x2"});
 }
 
+sets::SetData unit_box3_v() {
+    Matrix vertices{8, 3, Vector(24)};
+    for (std::size_t mask = 0; mask < 8; ++mask) {
+        for (std::size_t coordinate = 0; coordinate < 3; ++coordinate) {
+            vertices.values[mask * 3 + coordinate] = (mask & (1U << coordinate)) ? 1.0 : 0.0;
+        }
+    }
+    return take(sets::make_v({{"unit-box-three-state-v"}, 3, {"x0", "x1", "x2"}},
+        {take(numeric::snapshot(vertices)), take(numeric::snapshot(Matrix{0,3,{}}))}));
+}
+
+sets::SetData affine_segment3_v() {
+    Matrix vertices{2, 3, {0,1,0, 1,0,2}};
+    return take(sets::make_v({{"affine-segment-three-state-v"}, 3, {"x0", "x1", "x2"}},
+        {take(numeric::snapshot(vertices)), take(numeric::snapshot(Matrix{0,3,{}}))}));
+}
+
 sets::SetData box4_v() {
     Matrix vertices{16, 4, Vector(64)};
     for (std::size_t mask = 0; mask < 16; ++mask) {
@@ -388,6 +405,43 @@ TEST_CASE("a 3D affine segment projects to the analytic (s, 2s) segment") {
     CHECK_FALSE(contains_h2_near(projection.projected_relation, {0.5,1.001}));
     CHECK_FALSE(contains_h2_near(projection.projected_relation, {-1e-4,-2e-4}));
     CHECK_FALSE(contains_h2_near(projection.projected_relation, {1.0001,2.0002}));
+}
+
+TEST_CASE("analytic 3D projections match fixture support extrema on both ordered axes") {
+    const auto oracles = projection_oracles()["cases"];
+    auto data = three_coordinate_plot_data();
+    auto provider = support_provider();
+    const std::vector<ar::SupportSampleDirection> directions{
+        {{{1,0}}, {"axis-0-positive"}, {"axis-0-positive-support"}},
+        {{{-1,0}}, {"axis-0-negative"}, {"axis-0-negative-support"}},
+        {{{0,1}}, {"axis-1-positive"}, {"axis-1-positive-support"}},
+        {{{0,-1}}, {"axis-1-negative"}, {"axis-1-negative-support"}}};
+
+    const auto check_extrema = [&](const sets::SetData& relation, const json& oracle,
+                                   ar::CoordinatePair coordinates) {
+        auto source_result = ar::make_reachable_set_source(relation.as_handle(), data.problem,
+            {{{0,1,2}, {0,1,2}}});
+        REQUIRE(std::holds_alternative<std::shared_ptr<const ar::PlotProjectionSource>>(source_result));
+        const auto request = ar::PlotRequest::support_samples(
+            std::get<std::shared_ptr<const ar::PlotProjectionSource>>(std::move(source_result)),
+            StageIndex{1}, coordinates, directions, Assurance::numerical);
+        const auto outcome = ar::make_plot(data, request, provider);
+        REQUIRE(std::holds_alternative<ar::PlotSupportSamples>(outcome));
+        const auto& samples = std::get<ar::PlotSupportSamples>(outcome).samples;
+        REQUIRE(samples.size() == 4);
+        for (std::size_t axis = 0; axis < 2; ++axis) {
+            const auto key = "coordinate_" + std::to_string(axis);
+            const auto lower = oracle["support_extrema"][key][0].get<double>();
+            const auto upper = oracle["support_extrema"][key][1].get<double>();
+            REQUIRE(std::holds_alternative<double>(samples[axis * 2].value));
+            REQUIRE(std::holds_alternative<double>(samples[axis * 2 + 1].value));
+            CHECK(std::get<double>(samples[axis * 2].value) == doctest::Approx(upper));
+            CHECK(-std::get<double>(samples[axis * 2 + 1].value) == doctest::Approx(lower));
+        }
+    };
+
+    check_extrema(unit_box3_v(), oracles[0], {2,0});
+    check_extrema(affine_segment3_v(), oracles[1], {0,2});
 }
 
 TEST_CASE("support queries return explicitly tagged finite 2D support samples") {
