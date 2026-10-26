@@ -45,6 +45,9 @@ objectives. Non-optimal primal vectors are labelled candidate iterates, not
 feasible trajectories.
 
 This slice does not implement Strategy A/B outcomes, the shared
-comparison-record codec, independent report review, or a published
-solver-trajectory plot. The existing B04 Pages example remains the separate
-exact-witness illustration, not solver output.
+comparison-record codec, independent report review, or a solver-trajectory
+plot backed by a canonical comparison record. The separate
+`b04-reference-v1/native-smoke-20261026` projection overlays one cold smoke
+trajectory per solver with the exact witness; it is illustrative, not a
+repeated benchmark, and its residual checks are inconclusive. The B04 Pages
+example remains the exact-witness illustration.
