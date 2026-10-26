@@ -443,6 +443,27 @@ TEST_CASE("published candidate and claimed optimum never establish family covera
     CHECK(verify_trajectory(p,q).bindings==CheckStatus::invalid_input);
     q.family.reset();q.outcome->subject={"wrong"};CHECK(verify_trajectory(p,q).bindings==CheckStatus::invalid_input);
 }
+TEST_CASE("candidate-family witness cannot borrow feasibility from a different checked trajectory") {
+    auto p=resolve(scalar());
+    auto q=request(p);
+    const ClaimEvidence claim{p.identity(),NumericalCheck{0,0,0,{"backend"}}};
+    const auto coordinates=p.constraints().coordinates();
+    const FamilyRequest effective{"nominal",p.identity(),FamilyTarget::candidate_relaxation,
+        {1e-8,1e-8},Assurance::numerical,{"candidate-family"},{}};
+    const ModuleId strategy{"candidate-strategy"};
+    q.expected_synthesis=ExpectedSynthesisBinding{effective,strategy,"1",{}};
+    const FamilyIdentity identity{p.identity(),effective,coordinates,strategy,"1",{}};
+    const auto relation=JointRelation{coordinates,effective.representation,{}};
+
+    auto forged=q.witness;
+    forged.states[1][0]=99;
+    q.family=accepted(FamilyPublisher::publish(identity,CandidateFamily{relation,
+        HeuristicRelationEvidence{"literal candidate"},WitnessFeasibilityEvidence{forged,claim}}));
+
+    const auto report=verify_trajectory(p,q);
+    CHECK(report.bindings==CheckStatus::invalid_input);
+    CHECK(report.feasibility==CheckStatus::not_checked);
+}
 TEST_CASE("sampled relaxed and symbolic candidate metadata never establish family coverage") {
     const auto p=resolve(scalar());auto q=request(p);
     const ClaimEvidence numerical{p.identity(),NumericalCheck{0,0,0,{"candidate backend"}}};
