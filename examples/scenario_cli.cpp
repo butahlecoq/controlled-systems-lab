@@ -293,7 +293,7 @@ std::string_view outcome_support_name(const EvidenceSupport& support) {
         return "unknown";
     }, support);
 }
-std::string quoted(std::string_view value) {
+[[maybe_unused]] std::string quoted(std::string_view value) {
     constexpr char hex[] = "0123456789abcdef";
     std::string result{"\""};
     for (const unsigned char c : value) {
