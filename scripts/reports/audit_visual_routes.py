@@ -73,7 +73,8 @@ def frozen_routes(root: Path) -> list[dict]:
         routes.append({"route": route, "source_bundle": route,
                        "assets": [path.name for path in figures],
                        "index_sha256": hashlib.sha256(page.read_bytes()).hexdigest(),
-                       "disposition": "justified-exception: immutable historical evidence; publish an additive companion for presentation changes"})
+                       "disposition": "deferred: route-level readability and additive-companion review pending",
+                       "follow_up_issue": 669})
     return routes
 
 

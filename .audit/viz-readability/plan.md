@@ -15,7 +15,7 @@
 
 The initial source scan found 192 Python files under `scripts/reports`, 62 files containing an SVG or savefig signal, and 44 with SVG literals. The deterministic inventory scans both `scripts/reports/**/*.py` and `benchmarks/reporting/**/*.py`; it records 82 source candidates, 53 frozen report routes with figures, and the gallery route. Of the source candidates, 53 family-specific renderers remain deferred and now link to scoped follow-ups #684–#687 (13 approximation/extension, 12 geometry/optimization, 17 control/witness, and 11 historical/benchmark candidates). Frozen report routes are explicit immutable-evidence exceptions with additive-companion treatment. Row-by-row role and disposition review remains open under #669. The first wave has a new B06 flow/stock projection companion, one trajectory/stage chart, one timing chart, accessible exact-value data, and a byte-identical old figure for comparison.
 
-The task has high rigor because it changes publication presentation, can mislead readers about scientific data, and spans many producers. Saved records and manifests are immutable evidence. B06 remains affected by issue #668 and must link its correction/erratum. B04 is not canonical and must remain restoration-labelled.
+The task has high rigor because it changes publication presentation, can mislead readers about scientific data, and spans many producers. Saved records and manifests are immutable evidence. B06 remains affected by issue #668 and must link its correction/erratum. B04 is not canonical and must remain restoration-labelled. Frozen report bundles cannot be rewritten, but each route remains pending a readability review and a decision about an additive companion under #669.
 
 ## Phases
 
