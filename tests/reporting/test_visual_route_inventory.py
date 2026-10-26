@@ -39,6 +39,18 @@ class VisualRouteInventoryTests(unittest.TestCase):
                          "frozen-renderer-preserved-with-shared-policy-companion")
         self.assertEqual(producers["scripts/reports/geometry_figures.py"]["disposition"],
                          "shared-quantitative-policy-companion-renderer")
+        self.assertEqual(producers["benchmarks/reporting/it17_hull/summarize.py"]["disposition"],
+                         "reviewed-static-diagram-exception")
+        for source in ("scripts/reports/geo02/render.py", "scripts/reports/geo03/build_report.py",
+                       "scripts/reports/geo04/render.py", "scripts/reports/geo05/render.py",
+                       "scripts/reports/geo07/render_saved.py", "scripts/reports/geo07_dependent/render_saved.py",
+                       "scripts/reports/geo07_port/render_saved.py", "scripts/reports/geo08/render_saved.py",
+                       "scripts/reports/opt04/render.py", "scripts/reports/opt10/render_saved.py",
+                       "scripts/reports/opt12_render.py"):
+            self.assertEqual(producers[source]["disposition"],
+                             "frozen-renderer-preserved-with-shared-policy-companion")
+        self.assertEqual(producers["scripts/reports/geometry_opt_companions.py"]["disposition"],
+                         "shared-quantitative-policy-companion-renderer")
         allowed={"adopted-shared-quantitative-policy","reviewed-static-diagram-exception",
                  "gallery-composition-and-route","publication-validation-or-frozen-route",
                  "deferred-family-specific-migration", "composes-or-copies-existing-saved-figure",
@@ -50,7 +62,7 @@ class VisualRouteInventoryTests(unittest.TestCase):
         self.assertTrue(deferred)
         follow_up_counts={number:sum(entry["follow_up_issue"]==number for entry in deferred)
                           for number in (684,685,686,687)}
-        self.assertEqual(follow_up_counts,{684:5,685:12,686:17,687:11})
+        self.assertEqual(follow_up_counts,{684:5,685:0,686:17,687:11})
         self.assertTrue(all(entry["follow_up_issue"] in follow_up_counts for entry in deferred))
         routes={entry["route"]:entry for entry in inventory["frozen_published_routes"]}
         self.assertGreater(len(routes),40)
@@ -80,7 +92,7 @@ class VisualRouteInventoryTests(unittest.TestCase):
             "ext01-b08-timing-v1.html", "ext01-b08-timing-v1.svg",
             "ext01-b08-timing-v1.png", "ext01-b08-timing-v1-export.json",
             "ext05-states-v1.html", "ext05-states-v1.svg", "ext05-states-v1.png",
-            "ext05-states-v1-export.json"})
+            "ext05-states-v1-export.json", *audit_visual_routes.geometry_companion_assets()})
         self.assertEqual((ROOT/"docs/examples/examples.css").read_bytes(),
                          (ROOT/"scripts/reports/visual_examples.css").read_bytes())
         before=ROOT/"docs/examples/fuel-b06-viz06-before.svg"

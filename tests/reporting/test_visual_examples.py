@@ -384,10 +384,24 @@ class GalleryTests(unittest.TestCase):
         self.assertIn("temporal-slew-integrator.json", slew["source_path"])
         slew_svg = ET.parse(self.site / "examples/ext03-slew-memory.svg")
         self.assertEqual(len(slew_svg.findall(f".//{ns}polygon")), 1)
-        first = {p.name: p.read_bytes() for p in (self.site / "examples").iterdir()}
+        first = {p.relative_to(self.site / "examples").as_posix(): p.read_bytes()
+                 for p in (self.site / "examples").rglob("*") if p.is_file()}
         gallery.build(self.catalog, self.site)
-        self.assertEqual({p.name: p.read_bytes() for p in (self.site / "examples").iterdir()}, first)
+        self.assertEqual({p.relative_to(self.site / "examples").as_posix(): p.read_bytes()
+                          for p in (self.site / "examples").rglob("*") if p.is_file()}, first)
         self.assertEqual((self.site / "index.html").read_text().count('id="visual-examples-link"'), 1)
+        companion = self.site / "examples/geometry-optimization-v1.html"
+        self.assertTrue(companion.is_file())
+        companion_html = companion.read_text()
+        self.assertEqual(companion_html.count('<section id='), 11)
+        self.assertIn('role="region" tabindex="0" aria-label="Timing values for GEO-04 intersection and reduction"',
+                      companion_html)
+        for name in ("geo08/geometry.svg", "opt10/geometry.svg", "geo04/figure.svg"):
+            svg = ET.parse(self.site / "examples/geometry-opt" / name).getroot()
+            self.assertEqual(svg.get("role"), "img")
+            self.assertTrue(svg.find("{http://www.w3.org/2000/svg}desc").text)
+        raw = json.loads((self.site / "examples/geometry-opt/data/geo08-lazy-6dbdd6b2f9235837.json").read_text())
+        self.assertIn("fixture", raw)
 
     def test_every_rendered_example_is_listed_in_inventory(self):
         gallery.build(self.catalog, self.site)
