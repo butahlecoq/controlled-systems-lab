@@ -862,6 +862,12 @@ void compare_profile(const std::string& profile) {
             {problem.identity(),MathematicalOutcome::undetermined,Unestablished{},{}},
             {},std::nullopt,{},std::move(stop)};
     };
+    const auto stopped_program=[&](Termination termination,std::string id) -> ar::FinalOutcome {
+        const ProgramIdentity subject{problem.identity(),ProgramId{std::move(id)}};
+        return ar::ProgramFinal{ProgramResult{termination,
+            {subject,MathematicalOutcome::undetermined,Unestablished{},{}},
+            {},{},"saved stopped program attempt",{}},{}};
+    };
     const std::vector<std::tuple<ar::AttemptStatus,ar::FinalOutcome,std::string>> non_success_outcomes{
         {ar::AttemptStatus::failed,
             ar::FailedFinal{ar::FailurePhase::invoke,ar::FailureReason::adapter_exception,"saved adapter failure"},
@@ -879,7 +885,11 @@ void compare_profile(const std::string& profile) {
                 Assurance::numerical,ProgramIdentity{problem.identity(),ProgramId{"saved-refusal"}},{},{}},
             "refused"},
         {ar::AttemptStatus::cancelled,ar::SkippedFinal{ar::SkippedReason::cancelled},"cancelled"},
-        {ar::AttemptStatus::resource_limited,ar::SkippedFinal{ar::SkippedReason::deadline},"resource_limited"},
+        {ar::AttemptStatus::timed_out,
+            stopped_program(Termination::deadline_expired,"saved-deadline-expired"),"timed_out"},
+        {ar::AttemptStatus::resource_limited,
+            stopped_program(Termination::resource_limit,"saved-resource-limited"),"resource_limited"},
+        {ar::AttemptStatus::resource_limited,ar::SkippedFinal{ar::SkippedReason::task_limit},"resource_limited"},
         {ar::AttemptStatus::incomplete,ar::SkippedFinal{ar::SkippedReason::batch_failed},"incomplete"},
         {ar::AttemptStatus::unsupported,rejected_synthesis(Termination::operation_rejected),"unsupported"},
         {ar::AttemptStatus::failed,rejected_synthesis(Termination::contract_rejected),"failed"}};
