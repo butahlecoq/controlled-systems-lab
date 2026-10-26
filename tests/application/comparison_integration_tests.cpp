@@ -242,9 +242,15 @@ application::ComparisonRequest request_for(const problem::ResolvedProblem& probl
     return {problem, family, {reach_back, direct_joint}};
 }
 
-csl::artifacts::RecordedRunArtifact check_complete_family_encoder_boundary(const problem::ResolvedProblem& problem,
+struct EncoderBoundaryRuns {
+    csl::artifacts::RecordedRunArtifact complete;
+    csl::artifacts::RecordedRunArtifact partial_selection;
+};
+
+EncoderBoundaryRuns check_complete_family_encoder_boundary(const problem::ResolvedProblem& problem,
     const application::PreparedComparison& prepared, const application::StrategyExecution& strategy_execution,
-    std::size_t strategy_index, const WitnessRequest& witnesses, bool instrumentation_enabled=false) {
+    std::size_t strategy_index, const WitnessRequest& witnesses, bool instrumentation_enabled=false,
+    std::size_t repetition=0) {
     namespace ar = artifacts;
     namespace ob = csl::execution::observability;
     const auto& synthesis_result = std::get<SynthesisResult>(strategy_execution.outcome);
@@ -268,8 +274,9 @@ csl::artifacts::RecordedRunArtifact check_complete_family_encoder_boundary(const
     const auto configuration = take_artifact(ar::resolve_configuration(std::move(input)),
         "resolve_configuration");
     CHECK(configuration.description().strategy.selector == configuration.description().selector.id);
+    const auto run_suffix=repetition==0?std::string{}:"-rep"+std::to_string(repetition);
     const ar::RunId run{"application-comparison-encoder-"+std::to_string(strategy_index)+
-        (instrumentation_enabled?"-instrumented":"-uninstrumented")};
+        (instrumentation_enabled?"-instrumented":"-uninstrumented")+run_suffix};
     const auto plan = take_artifact(ob::make_collection_plan({problem, configuration, run, {}, {}, 0}),
         "make_collection_plan");
     const auto statistics = take_artifact(ob::merge_observations(plan, {}), "merge_observations");
@@ -327,11 +334,24 @@ csl::artifacts::RecordedRunArtifact check_complete_family_encoder_boundary(const
     partial_selection.diagnostics="The second direction query failed; this is a partial batch.";
     partial_execution.selection=std::move(partial_selection);
     partial_execution.verification.clear();
+    const ar::RunId partial_run{"application-comparison-encoder-"+std::to_string(strategy_index)+
+        (instrumentation_enabled?"-instrumented":"-uninstrumented")+run_suffix+"-partial"};
+    const auto partial_plan=take_artifact(ob::make_collection_plan(
+        {problem,configuration,partial_run,{},{},0}),"make partial selection statistics plan");
+    const auto partial_statistics=take_artifact(ob::merge_observations(partial_plan,{}),
+        "merge partial selection statistics");
     const auto partial_encoded=application::encode_strategy_run(problem,partial_execution,
-        configuration,run,statistics,
+        configuration,partial_run,partial_statistics,
         {uninstrumented,uninstrumented,uninstrumented,uninstrumented,true,
             ar::MemoryAccounting::unlimited});
     REQUIRE(std::holds_alternative<std::string>(partial_encoded));
+    const auto partial_document=nlohmann::json::parse(std::get<std::string>(partial_encoded));
+    REQUIRE(partial_document.at("selection").at("batch").at("witnesses").size()==1);
+    CHECK(partial_document.at("selection").at("termination")=="operation_rejected");
+    CHECK(partial_document.at("selection").at("diagnostics")==
+        "The second direction query failed; this is a partial batch.");
+    const auto partial_archived=take_artifact(ar::decode_recorded_run(
+        std::get<std::string>(partial_encoded),problem),"decode partial selection run");
     CHECK(wire.find("registered_verifier")!=std::string::npos);
     static_assert(!std::is_convertible_v<ar::RecordedRunArtifact,ar::RunStatistics>);
     const auto imported=take_artifact(ar::decode_recorded_run(wire,problem),"decode_recorded_run");
@@ -355,7 +375,7 @@ csl::artifacts::RecordedRunArtifact check_complete_family_encoder_boundary(const
     const auto state_result=ar::decode_recorded_run(self_asserted);
     REQUIRE(std::holds_alternative<ar::ArtifactError>(state_result));
     CHECK(std::get<ar::ArtifactError>(state_result).path=="recorded_state");
-    return imported;
+    return {imported,partial_archived};
 }
 
 void compare_profile(const std::string& profile) {
@@ -435,10 +455,12 @@ void compare_profile(const std::string& profile) {
             CHECK_FALSE(family_contains_history(*synthesis.family, cross_stage_cartesian_history));
         }
     }
-    auto run_a=check_complete_family_encoder_boundary(problem, prepared, execution.strategies[0],
+    auto run_a_boundary=check_complete_family_encoder_boundary(problem, prepared, execution.strategies[0],
         0, witness_request);
-    auto run_b=check_complete_family_encoder_boundary(problem, prepared, execution.strategies[1],
+    auto run_b_boundary=check_complete_family_encoder_boundary(problem, prepared, execution.strategies[1],
         1, witness_request);
+    auto run_a=run_a_boundary.complete;
+    auto run_b=run_b_boundary.complete;
     const auto request_a=take_artifact(ar::comparison_request_digest(run_a),"comparison_request_digest A");
     const auto request_b=take_artifact(ar::comparison_request_digest(run_b),"comparison_request_digest B");
     REQUIRE(request_a==request_b);
@@ -480,8 +502,9 @@ void compare_profile(const std::string& profile) {
     CHECK(bundle_wire.find("csl.comparison/1")!=std::string::npos);
     CHECK(bundle_wire.find("csl.run-statistics/7")!=std::string::npos);
 
-    auto run_a_enabled=check_complete_family_encoder_boundary(problem,prepared,execution.strategies[0],
+    auto run_a_enabled_boundary=check_complete_family_encoder_boundary(problem,prepared,execution.strategies[0],
         0,witness_request,true);
+    auto run_a_enabled=run_a_enabled_boundary.complete;
     const auto config_a_enabled=take_artifact(ar::comparison_configuration_id(run_a_enabled),
         "comparison_configuration_id enabled A");
     const auto request_a_enabled=take_artifact(ar::comparison_request_digest(run_a_enabled),
@@ -820,6 +843,31 @@ void compare_profile(const std::string& profile) {
     non_success_configuration_input.strategy.selector=non_success_configuration_input.selector.id;
     const auto non_success_configuration=take_artifact(ar::resolve_configuration(
         std::move(non_success_configuration_input)),"resolve non-success run configuration");
+    const auto rejected_synthesis=[&](Termination termination) -> ar::FinalOutcome {
+        const RetainedEvidenceScope retained{};
+        const RequestProvenance provenance{{"generated-query"},"strategy",
+            prepared.strategies()[0].strategy,std::optional<std::string>{"1"},
+            prepared.strategies()[0].strategy,std::optional<std::string>{"1"}};
+        SynthesisStopEvidence stop;
+        if(termination==Termination::operation_rejected) {
+            stop=ScopedRequestRejection{provenance,
+                {{DiagnosticCode::unsupported,"strategy","provider rejected the generated request"}},
+                {},retained};
+        } else {
+            stop=ContractValidationFailure{
+                {{DiagnosticCode::invalid_claim,"result.family","publisher rejected the result"}},
+                retained,std::monostate{}};
+        }
+        return ar::SynthesisFinal{termination,
+            {problem.identity(),MathematicalOutcome::undetermined,Unestablished{},{}},
+            {},std::nullopt,{},std::move(stop)};
+    };
+    const auto stopped_program=[&](Termination termination,std::string id) -> ar::FinalOutcome {
+        const ProgramIdentity subject{problem.identity(),ProgramId{std::move(id)}};
+        return ar::ProgramFinal{ProgramResult{termination,
+            {subject,MathematicalOutcome::undetermined,Unestablished{},{}},
+            {},{},"saved stopped program attempt",{}},{}};
+    };
     const std::vector<std::tuple<ar::AttemptStatus,ar::FinalOutcome,std::string>> non_success_outcomes{
         {ar::AttemptStatus::failed,
             ar::FailedFinal{ar::FailurePhase::invoke,ar::FailureReason::adapter_exception,"saved adapter failure"},
@@ -837,7 +885,26 @@ void compare_profile(const std::string& profile) {
                 Assurance::numerical,ProgramIdentity{problem.identity(),ProgramId{"saved-refusal"}},{},{}},
             "refused"},
         {ar::AttemptStatus::cancelled,ar::SkippedFinal{ar::SkippedReason::cancelled},"cancelled"},
-        {ar::AttemptStatus::incomplete,ar::SkippedFinal{ar::SkippedReason::batch_failed},"incomplete"}};
+        {ar::AttemptStatus::timed_out,
+            stopped_program(Termination::deadline_expired,"saved-deadline-expired"),"timed_out"},
+        {ar::AttemptStatus::resource_limited,
+            stopped_program(Termination::resource_limit,"saved-resource-limited"),"resource_limited"},
+        {ar::AttemptStatus::resource_limited,ar::SkippedFinal{ar::SkippedReason::task_limit},"resource_limited"},
+        {ar::AttemptStatus::incomplete,ar::SkippedFinal{ar::SkippedReason::batch_failed},"incomplete"},
+        {ar::AttemptStatus::unsupported,rejected_synthesis(Termination::operation_rejected),"unsupported"},
+        {ar::AttemptStatus::failed,rejected_synthesis(Termination::contract_rejected),"failed"}};
+    std::vector<ar::ComparisonAttempt> first_arm_status_attempts;
+    std::vector<ar::ComparisonAttempt> second_arm_successful_attempts;
+    first_arm_status_attempts.reserve(non_success_outcomes.size()+1);
+    second_arm_successful_attempts.reserve(non_success_outcomes.size()+1);
+    first_arm_status_attempts.push_back({0,0,ar::AttemptStatus::completed,
+        {ar::RunId{"application-comparison-encoder-0-uninstrumented-partial"},
+            run_a_boundary.partial_selection.content().digest()},run_a_boundary.partial_selection,
+        "{\"schema\":\"csl.obs04-instrumentation-comparison-event/2\",\"repetition\":0,\"warmup\":true,\"status\":\"passed\",\"strategy\":\"csl.synthesis.reach-back\",\"instrumentation\":\"disabled\"}"});
+    second_arm_successful_attempts.push_back({1,0,ar::AttemptStatus::completed,
+        {ar::RunId{"application-comparison-encoder-0-instrumented-partial"},
+            run_a_enabled_boundary.partial_selection.content().digest()},run_a_enabled_boundary.partial_selection,
+        "{\"schema\":\"csl.obs04-instrumentation-comparison-event/2\",\"repetition\":0,\"warmup\":true,\"status\":\"passed\",\"strategy\":\"csl.synthesis.reach-back\",\"instrumentation\":\"enabled\"}"});
     for(std::size_t index=0;index<non_success_outcomes.size();++index) {
         const auto& [status,final,reported_status]=non_success_outcomes[index];
         const ar::RunId non_success_run{"saved-non-success-"+std::to_string(index)};
@@ -855,9 +922,19 @@ void compare_profile(const std::string& profile) {
             "encode non-success run");
         auto measurement=nlohmann::json::parse(measured_attempts.front().measurement_payload);
         measurement["status"]=reported_status;
+        const auto repeated_success=check_complete_family_encoder_boundary(problem,prepared,
+            execution.strategies[0],0,witness_request,true,index+1).complete;
+        const auto repeated_success_wire=std::string(
+            reinterpret_cast<const char*>(repeated_success.content().bytes().data()),
+            repeated_success.content().bytes().size());
+        const auto repeated_success_json=nlohmann::json::parse(repeated_success_wire);
         std::vector<ar::ComparisonAttempt> attempts_with_non_success{
             {0,0,status,{ar::RunId{"saved-non-success-"+std::to_string(index)},archived_run.content().digest()},
-                archived_run,measurement.dump()},measured_attempts[1]};
+                archived_run,measurement.dump()},
+            {1,0,ar::AttemptStatus::completed,
+                {ar::RunId{repeated_success_json.at("run").get<std::string>()},
+                    repeated_success.content().digest()},repeated_success,
+                measured_attempts[1].measurement_payload}};
         const auto archive=take_artifact(ar::encode_recorded_comparison(record_spec,attempts_with_non_success),
             "encode non-success comparison attempt");
         const auto archive_wire=std::string(reinterpret_cast<const char*>(archive.content().bytes().data()),
@@ -868,6 +945,82 @@ void compare_profile(const std::string& profile) {
         const auto restored=take_artifact(ar::decode_recorded_comparison(archive_wire),
             "decode non-success comparison attempt");
         CHECK(restored.content().digest()==archive.content().digest());
+        attempts_with_non_success[0].repetition_index=static_cast<std::uint32_t>(index+1);
+        measurement["repetition"]=index+1;
+        measurement["warmup"]=false;
+        attempts_with_non_success[0].measurement_payload=measurement.dump();
+        auto successful_measurement=nlohmann::json::parse(
+            attempts_with_non_success[1].measurement_payload);
+        successful_measurement["repetition"]=index+1;
+        successful_measurement["warmup"]=false;
+        attempts_with_non_success[1].repetition_index=static_cast<std::uint32_t>(index+1);
+        attempts_with_non_success[1].measurement_payload=successful_measurement.dump();
+        first_arm_status_attempts.push_back(std::move(attempts_with_non_success[0]));
+        second_arm_successful_attempts.push_back(std::move(attempts_with_non_success[1]));
+    }
+    auto all_status_attempts=std::move(first_arm_status_attempts);
+    all_status_attempts.insert(all_status_attempts.end(),
+        std::make_move_iterator(second_arm_successful_attempts.begin()),
+        std::make_move_iterator(second_arm_successful_attempts.end()));
+    auto all_status_spec_json=nlohmann::json::parse(record_spec_text);
+    const auto total_repetitions=non_success_outcomes.size()+1;
+    all_status_spec_json["repetitions"]=total_repetitions;
+    const auto all_status_spec_text=all_status_spec_json.dump();
+    const auto all_status_spec_owner=csl::problem::snapshot_content(
+        std::span<const std::byte>{reinterpret_cast<const std::byte*>(all_status_spec_text.data()),
+            all_status_spec_text.size()});
+    REQUIRE(std::holds_alternative<csl::problem::ResolvedContent>(all_status_spec_owner));
+    const auto all_status_archive=take_artifact(ar::encode_recorded_comparison(
+        std::get<csl::problem::ResolvedContent>(all_status_spec_owner),all_status_attempts),
+        "encode comparison with every saved attempt status");
+    const auto all_status_wire=std::string(
+        reinterpret_cast<const char*>(all_status_archive.content().bytes().data()),
+        all_status_archive.content().bytes().size());
+    const auto all_status_restored=take_artifact(ar::decode_recorded_comparison(all_status_wire),
+        "decode comparison with every saved attempt status");
+    CHECK(all_status_restored.content().digest()==all_status_archive.content().digest());
+    const auto all_status_json=nlohmann::json::parse(all_status_wire);
+    REQUIRE(all_status_json.at("attempts").size()==all_status_attempts.size());
+    CHECK(all_status_json.at("attempts").at(0).at("reported_status")=="completed");
+    for(std::size_t index=0;index<non_success_outcomes.size();++index) {
+        const auto& status=std::get<2>(non_success_outcomes[index]);
+        CHECK(all_status_json.at("attempts").at(index+1).at("reported_status")==status);
+        CHECK(all_status_json.at("attempts").at(total_repetitions+index)
+            .at("reported_status")=="completed");
+    }
+    CHECK(all_status_json.at("attempts").at(total_repetitions).at("reported_status")=="completed");
+    for(std::size_t index=0;index<all_status_attempts.size();++index) {
+        const auto& saved=all_status_json.at("attempts").at(index);
+        const auto& literal=all_status_attempts[index];
+        const auto run_json=nlohmann::json::parse(saved.at("run").get<std::string>());
+        CHECK(saved.at("arm_index")==literal.strategy_index);
+        CHECK(saved.at("repetition_index")==literal.repetition_index);
+        CHECK(saved.at("run_id")==literal.reference.run.value);
+        CHECK(saved.at("run_digest")==csl::problem::hex(literal.reference.content_digest));
+        CHECK(saved.at("run_id")==run_json.at("run"));
+        CHECK(saved.at("run_digest")==csl::problem::hex(literal.run.content().digest()));
+        CHECK(run_json.at("problem")==problem.identity().value);
+        CHECK(run_json.at("configuration").at("id")==
+            all_status_spec_json.at("arms").at(saved.at("arm_index").get<std::size_t>()).at("configuration_id"));
+        CHECK(run_json.at("configuration").at("value").at("strategy").at("strategy")==
+            all_status_spec_json.at("arms").at(saved.at("arm_index").get<std::size_t>()).at("strategy"));
+        const auto strategy_module=std::find_if(run_json.at("configuration").at("value").at("modules").begin(),
+            run_json.at("configuration").at("value").at("modules").end(),
+            [](const auto& module){return module.at("role")=="strategy";});
+        REQUIRE(strategy_module!=run_json.at("configuration").at("value").at("modules").end());
+        CHECK(strategy_module->at("id")==expected_identity.strategy.value);
+        CHECK(strategy_module->at("version")==expected_identity.strategy_version);
+        CHECK(csl::problem::hex(take_artifact(ar::comparison_request_digest(
+            literal.run),"saved comparison request digest"))==request_digest);
+        const auto& saved_final=run_json.at("final");
+        if(saved_final.at("kind")=="synthesis"&&
+            !saved_final.at("value").at("family").is_null()) {
+            const auto& source_family=saved_final.at("value").at("family").at("family").at("identity");
+            CHECK(source_family.at("problem")==problem.identity().value);
+            CHECK(source_family.at("request").at("profile")==profile);
+            CHECK(source_family.at("strategy")==expected_identity.strategy.value);
+            CHECK(source_family.at("strategy_version")==expected_identity.strategy_version);
+        }
     }
     auto wrong_arm_text=record_spec_text;
     const auto disabled_label=wrong_arm_text.find("disabled");
