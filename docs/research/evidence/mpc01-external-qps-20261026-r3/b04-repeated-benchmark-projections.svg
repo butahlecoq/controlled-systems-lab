@@ -1,0 +1,184 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1100 670" role="img" aria-labelledby="title desc">
+<title id="title">B04 repeated benchmark trajectories projected from four states into two planes</title>
+<desc id="desc">Representative cold OSQP and HPIPM trajectories, selected from five repetitions by proximity to each backend median solve time, are overlaid with the exact saved reference witness. The left panel projects four-dimensional states onto oxidizer and fuel flows; the right projects them onto working stocks. The paths are representative individual attempts, not averaged trajectories or a historical B04 reconstruction. Binary64 solver residual checks are inconclusive.</desc>
+<rect width="1100" height="670" fill="#172019"/><style>svg{font-family:system-ui,sans-serif;color:#dce5d5}text{fill:#dce5d5}.axis{stroke:#a9b7a0;stroke-width:2}.grid{stroke:#71806e;stroke-opacity:.25;stroke-width:1}.leader{stroke:#dce5d5;stroke-width:1}.feasible{fill:#76966d;fill-opacity:.10;stroke:#b4cda3;stroke-dasharray:6 4;stroke-width:2}</style>
+<text x="550" y="32" text-anchor="middle" font-size="22">B04 fuel case: representative native trajectories in two 2D projections</text>
+<text x="550" y="54" text-anchor="middle" font-size="12">b04-reference-v1 · five repetitions per solver · median-time representative cold paths · not historical B04</text>
+<path d="M155 75h36" stroke="#f2b880" stroke-width="4"/><text x="199.0" y="80.0" text-anchor="start" font-size="12">Exact witness</text> <path d="M475 75h36" stroke="#75c6e8" stroke-width="4" stroke-dasharray="8 5"/><text x="519.0" y="80.0" text-anchor="start" font-size="12">OSQP cold</text> <path d="M795 75h36" stroke="#a8d18d" stroke-width="4" stroke-dasharray="3 4"/><text x="839.0" y="80.0" text-anchor="start" font-size="12">HPIPM cold</text>
+<text x="322.0" y="112.0" text-anchor="middle" font-size="18">Flow plane</text>
+<path d="M112.0 148V508 M112 508.0H532" class="grid"/>
+<text x="112.0" y="530.0" text-anchor="middle" font-size="11">1156.0</text>
+<text x="102.0" y="512.0" text-anchor="end" font-size="11">419.1</text>
+<path d="M196.0 148V508 M112 436.0H532" class="grid"/>
+<text x="196.0" y="530.0" text-anchor="middle" font-size="11">1173.8</text>
+<text x="102.0" y="440.0" text-anchor="end" font-size="11">431.6</text>
+<path d="M280.0 148V508 M112 364.0H532" class="grid"/>
+<text x="280.0" y="530.0" text-anchor="middle" font-size="11">1191.5</text>
+<text x="102.0" y="368.0" text-anchor="end" font-size="11">444.2</text>
+<path d="M364.0 148V508 M112 292.0H532" class="grid"/>
+<text x="364.0" y="530.0" text-anchor="middle" font-size="11">1209.3</text>
+<text x="102.0" y="296.0" text-anchor="end" font-size="11">456.7</text>
+<path d="M448.0 148V508 M112 220.0H532" class="grid"/>
+<text x="448.0" y="530.0" text-anchor="middle" font-size="11">1227.0</text>
+<text x="102.0" y="224.0" text-anchor="end" font-size="11">469.2</text>
+<path d="M532.0 148V508 M112 148.0H532" class="grid"/>
+<text x="532.0" y="530.0" text-anchor="middle" font-size="11">1244.8</text>
+<text x="102.0" y="152.0" text-anchor="end" font-size="11">481.8</text>
+<path d="M112 508H532 M112 148V508" class="axis"/>
+<rect x="206.6" y="227.1" width="227.1" height="206.8" class="feasible"/>
+<text x="322.0" y="168.0" text-anchor="middle" font-size="11">flow bounds apply at stages 0 and 16</text>
+<polyline points="400.1,395.0 319.7,326.0 294.1,304.1 294.1,304.1 294.1,304.1 294.1,304.1 294.1,304.1 294.1,304.1 294.1,304.1 294.1,304.1 294.1,304.1 294.1,304.1 294.1,304.1 294.1,304.1 294.1,304.1 294.1,304.1 323.9,329.6" fill="none" stroke="#f2b880" stroke-width="3"/>
+<circle cx="400.1" cy="395.0" r="4" fill="#f2b880"/>
+<path d="M400.1 395.0L410.9 384.9" class="leader"/>
+<text x="415.1" y="381.0" text-anchor="start" font-size="10">0</text>
+<circle cx="319.7" cy="326.0" r="4" fill="#f2b880"/>
+<circle cx="294.1" cy="304.1" r="4" fill="#f2b880"/>
+<circle cx="294.1" cy="304.1" r="4" fill="#f2b880"/>
+<circle cx="294.1" cy="304.1" r="4" fill="#f2b880"/>
+<path d="M294.1 304.1L273.9 288.2" class="leader"/>
+<text x="266.1" y="282.1" text-anchor="end" font-size="10">4</text>
+<circle cx="294.1" cy="304.1" r="4" fill="#f2b880"/>
+<circle cx="294.1" cy="304.1" r="4" fill="#f2b880"/>
+<circle cx="294.1" cy="304.1" r="4" fill="#f2b880"/>
+<circle cx="294.1" cy="304.1" r="4" fill="#f2b880"/>
+<path d="M294.1 304.1L299.9 285.4" class="leader"/>
+<text x="302.1" y="278.1" text-anchor="start" font-size="10">8</text>
+<circle cx="294.1" cy="304.1" r="4" fill="#f2b880"/>
+<circle cx="294.1" cy="304.1" r="4" fill="#f2b880"/>
+<circle cx="294.1" cy="304.1" r="4" fill="#f2b880"/>
+<circle cx="294.1" cy="304.1" r="4" fill="#f2b880"/>
+<path d="M294.1 304.1L279.7 321.4" class="leader"/>
+<text x="274.1" y="328.1" text-anchor="end" font-size="10">12</text>
+<circle cx="294.1" cy="304.1" r="4" fill="#f2b880"/>
+<circle cx="294.1" cy="304.1" r="4" fill="#f2b880"/>
+<circle cx="294.1" cy="304.1" r="4" fill="#f2b880"/>
+<circle cx="323.9" cy="329.6" r="4" fill="#f2b880"/>
+<path d="M323.9 329.6L335.4 339.0" class="leader"/>
+<text x="339.9" y="342.6" text-anchor="start" font-size="10">16</text>
+<polyline points="400.1,395.0 449.0,436.8 503.0,483.2 447.9,435.9 385.7,382.6 334.7,338.9 299.8,309.0 270.9,284.2 254.2,269.9 241.0,258.6 221.3,241.7 193.5,217.8 141.0,172.8 182.9,208.8 234.9,253.4 277.2,289.6 323.9,329.6" fill="none" stroke="#75c6e8" stroke-width="3" stroke-dasharray="8 5"/>
+<circle cx="400.1" cy="395.0" r="2.5" fill="#75c6e8"/>
+<circle cx="449.0" cy="436.8" r="2.5" fill="#75c6e8"/>
+<circle cx="503.0" cy="483.2" r="2.5" fill="#75c6e8"/>
+<circle cx="447.9" cy="435.9" r="2.5" fill="#75c6e8"/>
+<circle cx="385.7" cy="382.6" r="2.5" fill="#75c6e8"/>
+<circle cx="334.7" cy="338.9" r="2.5" fill="#75c6e8"/>
+<circle cx="299.8" cy="309.0" r="2.5" fill="#75c6e8"/>
+<circle cx="270.9" cy="284.2" r="2.5" fill="#75c6e8"/>
+<circle cx="254.2" cy="269.9" r="2.5" fill="#75c6e8"/>
+<circle cx="241.0" cy="258.6" r="2.5" fill="#75c6e8"/>
+<circle cx="221.3" cy="241.7" r="2.5" fill="#75c6e8"/>
+<circle cx="193.5" cy="217.8" r="2.5" fill="#75c6e8"/>
+<circle cx="141.0" cy="172.8" r="2.5" fill="#75c6e8"/>
+<circle cx="182.9" cy="208.8" r="2.5" fill="#75c6e8"/>
+<circle cx="234.9" cy="253.4" r="2.5" fill="#75c6e8"/>
+<circle cx="277.2" cy="289.6" r="2.5" fill="#75c6e8"/>
+<circle cx="323.9" cy="329.6" r="2.5" fill="#75c6e8"/>
+<polyline points="400.1,395.0 374.1,372.7 350.4,352.4 331.0,335.7 312.9,320.2 297.3,306.8 284.5,295.8 274.4,287.2 267.6,281.3 264.1,278.4 263.5,277.8 266.3,280.3 271.8,285.0 280.4,292.4 292.1,302.3 306.6,314.8 323.9,329.6" fill="none" stroke="#a8d18d" stroke-width="3" stroke-dasharray="3 4"/>
+<circle cx="400.1" cy="395.0" r="2.5" fill="#a8d18d"/>
+<circle cx="374.1" cy="372.7" r="2.5" fill="#a8d18d"/>
+<circle cx="350.4" cy="352.4" r="2.5" fill="#a8d18d"/>
+<circle cx="331.0" cy="335.7" r="2.5" fill="#a8d18d"/>
+<circle cx="312.9" cy="320.2" r="2.5" fill="#a8d18d"/>
+<circle cx="297.3" cy="306.8" r="2.5" fill="#a8d18d"/>
+<circle cx="284.5" cy="295.8" r="2.5" fill="#a8d18d"/>
+<circle cx="274.4" cy="287.2" r="2.5" fill="#a8d18d"/>
+<circle cx="267.6" cy="281.3" r="2.5" fill="#a8d18d"/>
+<circle cx="264.1" cy="278.4" r="2.5" fill="#a8d18d"/>
+<circle cx="263.5" cy="277.8" r="2.5" fill="#a8d18d"/>
+<circle cx="266.3" cy="280.3" r="2.5" fill="#a8d18d"/>
+<circle cx="271.8" cy="285.0" r="2.5" fill="#a8d18d"/>
+<circle cx="280.4" cy="292.4" r="2.5" fill="#a8d18d"/>
+<circle cx="292.1" cy="302.3" r="2.5" fill="#a8d18d"/>
+<circle cx="306.6" cy="314.8" r="2.5" fill="#a8d18d"/>
+<circle cx="323.9" cy="329.6" r="2.5" fill="#a8d18d"/>
+<text x="322.0" y="556.0" text-anchor="middle" font-size="13">Oxidizer flow (kg/s)</text>
+<text transform="translate(54 328.0) rotate(-90)" text-anchor="middle">Fuel flow (kg/s)</text>
+<text x="815.0" y="112.0" text-anchor="middle" font-size="18">Working-stock plane</text>
+<path d="M605.0 148V508 M605 508.0H1025" class="grid"/>
+<text x="605.0" y="530.0" text-anchor="middle" font-size="11">-9693.3</text>
+<text x="595.0" y="512.0" text-anchor="end" font-size="11">-3664.7</text>
+<path d="M689.0 148V508 M605 436.0H1025" class="grid"/>
+<text x="689.0" y="530.0" text-anchor="middle" font-size="11">18059.3</text>
+<text x="595.0" y="440.0" text-anchor="end" font-size="11">6853.6</text>
+<path d="M773.0 148V508 M605 364.0H1025" class="grid"/>
+<text x="773.0" y="530.0" text-anchor="middle" font-size="11">45812.0</text>
+<text x="595.0" y="368.0" text-anchor="end" font-size="11">17372.0</text>
+<path d="M857.0 148V508 M605 292.0H1025" class="grid"/>
+<text x="857.0" y="530.0" text-anchor="middle" font-size="11">73564.6</text>
+<text x="595.0" y="296.0" text-anchor="end" font-size="11">27890.3</text>
+<path d="M941.0 148V508 M605 220.0H1025" class="grid"/>
+<text x="941.0" y="530.0" text-anchor="middle" font-size="11">101317.2</text>
+<text x="595.0" y="224.0" text-anchor="end" font-size="11">38408.7</text>
+<path d="M1025.0 148V508 M605 148.0H1025" class="grid"/>
+<text x="1025.0" y="530.0" text-anchor="middle" font-size="11">129069.9</text>
+<text x="595.0" y="152.0" text-anchor="end" font-size="11">48927.0</text>
+<path d="M605 508H1025 M605 148V508" class="axis"/>
+<polyline points="996.0,172.8 973.0,191.6 950.3,210.9 927.7,230.3 905.1,249.8 882.5,269.2 859.9,288.7 837.3,308.1 814.7,327.6 792.1,347.0 769.5,366.5 746.9,385.9 724.4,405.4 701.8,424.8 679.2,444.3 656.6,463.7 634.0,483.2" fill="none" stroke="#f2b880" stroke-width="3"/>
+<circle cx="996.0" cy="172.8" r="4" fill="#f2b880"/>
+<path d="M996.0 172.8L1006.8 163.5" class="leader"/>
+<text x="1011.0" y="159.8" text-anchor="start" font-size="10">0</text>
+<circle cx="973.0" cy="191.6" r="4" fill="#f2b880"/>
+<circle cx="950.3" cy="210.9" r="4" fill="#f2b880"/>
+<circle cx="927.7" cy="230.3" r="4" fill="#f2b880"/>
+<circle cx="905.1" cy="249.8" r="4" fill="#f2b880"/>
+<path d="M905.1 249.8L923.1 238.3" class="leader"/>
+<text x="930.1" y="233.8" text-anchor="start" font-size="10">4</text>
+<circle cx="882.5" cy="269.2" r="4" fill="#f2b880"/>
+<circle cx="859.9" cy="288.7" r="4" fill="#f2b880"/>
+<circle cx="837.3" cy="308.1" r="4" fill="#f2b880"/>
+<circle cx="814.7" cy="327.6" r="4" fill="#f2b880"/>
+<path d="M814.7 327.6L833.5 330.5" class="leader"/>
+<text x="840.7" y="331.6" text-anchor="start" font-size="10">8</text>
+<circle cx="792.1" cy="347.0" r="4" fill="#f2b880"/>
+<circle cx="769.5" cy="366.5" r="4" fill="#f2b880"/>
+<circle cx="746.9" cy="385.9" r="4" fill="#f2b880"/>
+<circle cx="724.4" cy="405.4" r="4" fill="#f2b880"/>
+<path d="M724.4 405.4L704.2 419.8" class="leader"/>
+<text x="696.4" y="425.4" text-anchor="end" font-size="10">12</text>
+<circle cx="701.8" cy="424.8" r="4" fill="#f2b880"/>
+<circle cx="679.2" cy="444.3" r="4" fill="#f2b880"/>
+<circle cx="656.6" cy="463.7" r="4" fill="#f2b880"/>
+<circle cx="634.0" cy="483.2" r="4" fill="#f2b880"/>
+<path d="M634.0 483.2L621.0 472.4" class="leader"/>
+<text x="616.0" y="468.2" text-anchor="end" font-size="10">16</text>
+<polyline points="996.0,172.8 973.0,191.6 949.8,210.1 926.4,228.2 903.2,246.6 880.2,265.5 857.4,284.7 834.8,304.1 812.3,323.7 789.9,343.4 767.5,363.2 745.2,383.1 723.0,403.2 701.0,423.6 678.9,443.8 656.5,463.6 634.0,483.2" fill="none" stroke="#75c6e8" stroke-width="3" stroke-dasharray="8 5"/>
+<circle cx="996.0" cy="172.8" r="2.5" fill="#75c6e8"/>
+<circle cx="973.0" cy="191.6" r="2.5" fill="#75c6e8"/>
+<circle cx="949.8" cy="210.1" r="2.5" fill="#75c6e8"/>
+<circle cx="926.4" cy="228.2" r="2.5" fill="#75c6e8"/>
+<circle cx="903.2" cy="246.6" r="2.5" fill="#75c6e8"/>
+<circle cx="880.2" cy="265.5" r="2.5" fill="#75c6e8"/>
+<circle cx="857.4" cy="284.7" r="2.5" fill="#75c6e8"/>
+<circle cx="834.8" cy="304.1" r="2.5" fill="#75c6e8"/>
+<circle cx="812.3" cy="323.7" r="2.5" fill="#75c6e8"/>
+<circle cx="789.9" cy="343.4" r="2.5" fill="#75c6e8"/>
+<circle cx="767.5" cy="363.2" r="2.5" fill="#75c6e8"/>
+<circle cx="745.2" cy="383.1" r="2.5" fill="#75c6e8"/>
+<circle cx="723.0" cy="403.2" r="2.5" fill="#75c6e8"/>
+<circle cx="701.0" cy="423.6" r="2.5" fill="#75c6e8"/>
+<circle cx="678.9" cy="443.8" r="2.5" fill="#75c6e8"/>
+<circle cx="656.5" cy="463.6" r="2.5" fill="#75c6e8"/>
+<circle cx="634.0" cy="483.2" r="2.5" fill="#75c6e8"/>
+<polyline points="996.0,172.8 973.0,191.6 950.1,210.5 927.3,229.6 904.5,248.8 881.9,268.2 859.3,287.6 836.7,307.1 814.2,326.7 791.7,346.3 769.2,365.9 746.7,385.6 724.2,405.2 701.7,424.8 679.2,444.3 656.6,463.8 634.0,483.2" fill="none" stroke="#a8d18d" stroke-width="3" stroke-dasharray="3 4"/>
+<circle cx="996.0" cy="172.8" r="2.5" fill="#a8d18d"/>
+<circle cx="973.0" cy="191.6" r="2.5" fill="#a8d18d"/>
+<circle cx="950.1" cy="210.5" r="2.5" fill="#a8d18d"/>
+<circle cx="927.3" cy="229.6" r="2.5" fill="#a8d18d"/>
+<circle cx="904.5" cy="248.8" r="2.5" fill="#a8d18d"/>
+<circle cx="881.9" cy="268.2" r="2.5" fill="#a8d18d"/>
+<circle cx="859.3" cy="287.6" r="2.5" fill="#a8d18d"/>
+<circle cx="836.7" cy="307.1" r="2.5" fill="#a8d18d"/>
+<circle cx="814.2" cy="326.7" r="2.5" fill="#a8d18d"/>
+<circle cx="791.7" cy="346.3" r="2.5" fill="#a8d18d"/>
+<circle cx="769.2" cy="365.9" r="2.5" fill="#a8d18d"/>
+<circle cx="746.7" cy="385.6" r="2.5" fill="#a8d18d"/>
+<circle cx="724.2" cy="405.2" r="2.5" fill="#a8d18d"/>
+<circle cx="701.7" cy="424.8" r="2.5" fill="#a8d18d"/>
+<circle cx="679.2" cy="444.3" r="2.5" fill="#a8d18d"/>
+<circle cx="656.6" cy="463.8" r="2.5" fill="#a8d18d"/>
+<circle cx="634.0" cy="483.2" r="2.5" fill="#a8d18d"/>
+<text x="815.0" y="556.0" text-anchor="middle" font-size="13">Oxidizer working stock (kg)</text>
+<text transform="translate(547 328.0) rotate(-90)" text-anchor="middle">Fuel working stock (kg)</text>
+<text x="550" y="628" text-anchor="middle" font-size="12">State order: oxidizer flow, oxidizer stock, fuel flow, fuel stock. Stage numbers label the exact saved witness.</text>
+<text x="550" y="649" text-anchor="middle" font-size="12">Stocks are unconstrained in the source; solver optimal status and binary64 residuals do not independently prove optimality.</text>
+</svg>

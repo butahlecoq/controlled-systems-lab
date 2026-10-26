@@ -55,6 +55,19 @@ the cold solve medians are 162.5 ms at 33,125 OSQP iterations and 0.994 ms at
 30 HPIPM iterations; those microbenchmarks do not establish an overall solver
 or control-strategy winner.
 
+The expanded seven-case capture is saved under
+[`mpc01-external-qps-20261026-r3`](../../../docs/research/evidence/mpc01-external-qps-20261026-r3/).
+It was built from clean Release source commit `943c63a637a260cb7ddcf8a20822e05a32aa228d`
+and retains seven canonical records / 140 attempts, a separate one-repetition
+process profile, and a regenerated B04 projection figure. The B04 cold solve
+medians in this capture are 163.642 ms for OSQP and 1.011 ms for HPIPM; these
+are native QP solve-phase measurements, not an end-to-end or strategy winner.
+On the new singular T-S03 case, all OSQP cold/warm attempts returned native
+`solved` with original objective 0–2.24e-14; HPIPM hit its 1,000-iteration
+limit (status 1), retained as `undetermined` with its candidate iterate. The
+fixture's exact objective reduction and full optimal face are stated in the
+saved summary.
+
 The analytic singular T-S03 case has dynamics `x[t+1] = u[t]`, box controls,
 and terminal objective `(x2-1)^2`. Its joint-control Hessian is singular and
 its exact minimizing face is `{(u0,u1): 0<=u0<=1, u1=1}`; the runner checks
@@ -68,8 +81,8 @@ sentinel values and non-optimal iterates are not presented as solution
 objectives. Non-optimal primal vectors are labelled candidate iterates, not
 feasible trajectories.
 
-Strategy A/B outcomes and independently justified optimality evidence remain
-outstanding. The separate
+Strategy A/B paired outcomes and independently justified optimality evidence
+for the remaining cases remain outstanding. The separate
 `b04-reference-v1/native-smoke-20261026` projection overlays one cold smoke
 trajectory per solver with the exact witness; it is illustrative, not a
 repeated benchmark, and its residual checks are inconclusive. The B04 Pages

@@ -1,0 +1,6 @@
+Purpose: separate one-repetition seven-case process profile; excluded from the five-repetition timing sample.
+Command: csl_mpc01_report examples/scenarios/double-integrator-generality.json docs/research/evidence/b04-reference-v1/canonical-case.json --repetitions 1
+Mechanism: Bash built-in time -p around the entire runner process; no per-child or per-solver CPU attribution.
+real 0.62
+user 0.50
+sys 0.12

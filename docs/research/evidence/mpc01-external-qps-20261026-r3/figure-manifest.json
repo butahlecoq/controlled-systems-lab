@@ -1,0 +1,24 @@
+{
+  "case_id": "b04-reference-v1",
+  "case_sha256": "bc9e1b804b7878cb0da5c28c030893e1b41e7a2a34cb86b1c0fb8380ec780f6d",
+  "comparison_spec_id": "a32760e2fcd01756582be168daa7385d343488c4be3bb06f2547bfa6a18b9b95",
+  "figure_sha256": "a3240a6c185a6671b9c128b5643b4114045f2a49a249035a9c8ca21e2fc2e31b",
+  "records_sha256": "b617f7f24794e898bae5e2c64663b9474fe1b5c642db3aee4b76fffe16ac645a",
+  "schema": "csl.mpc01-repeated-benchmark-figure/1",
+  "selected_attempts_sha256": "6f54a0426aca59d699c42de8ccb822bb7a82674851e3c74b1fd55f92e1b00462",
+  "selection": [
+    {
+      "median_cold_solve_ns": 163642194,
+      "method": "osqp-sparse-qp",
+      "repetition": 4,
+      "solve_ns": 163642194
+    },
+    {
+      "median_cold_solve_ns": 1010757,
+      "method": "hpipm-structured-ocp-qp",
+      "repetition": 4,
+      "solve_ns": 1010757
+    }
+  ],
+  "stdout_attempts_sha256": "c37f59b1d5db218685f317b90442ac121dbcaa5c557e10959c2c1142578cde4b"
+}

@@ -4,6 +4,7 @@
 import argparse
 import hashlib
 import json
+import math
 import statistics
 from collections import Counter, defaultdict
 from pathlib import Path
@@ -71,9 +72,70 @@ def main() -> None:
         raise ValueError("canonical measurement events do not match runner stdout attempts")
     if len(stdout_rows) != len(records) * 20:
         raise ValueError("expected twenty native attempts per canonical case")
+    reference = json.loads(projection.REFERENCE.read_text(encoding="utf-8"))
+    exact_norm = float(reference["exact_norm_optimum_decimal"])
+    expected_outcomes = {
+        "ts01-exact-v1": {"osqp-sparse-qp": "optimal", "hpipm-structured-ocp-qp": "optimal"},
+        "ts02-constant-v1": {"osqp-sparse-qp": "optimal", "hpipm-structured-ocp-qp": "optimal"},
+        "ts03-singular-v1": {"osqp-sparse-qp": "optimal", "hpipm-structured-ocp-qp": "undetermined"},
+        "infeasible-integrator-v1": {"osqp-sparse-qp": "infeasible", "hpipm-structured-ocp-qp": "undetermined"},
+        "unbounded-integrator-v1": {"osqp-sparse-qp": "unbounded", "hpipm-structured-ocp-qp": "undetermined"},
+        "double-integrator-421-v1": {"osqp-sparse-qp": "optimal", "hpipm-structured-ocp-qp": "optimal"},
+        "b04-reference-v1": {"osqp-sparse-qp": "optimal", "hpipm-structured-ocp-qp": "optimal"},
+    }
+    expected_objectives = {
+        "ts01-exact-v1": (0.0, 1e-7),
+        "ts02-constant-v1": (3.0, 1e-7),
+        "ts03-singular-v1": (0.0, 1e-7),
+        "double-integrator-421-v1": (0.0, 1e-6),
+        "b04-reference-v1": (exact_norm, 0.003),
+    }
+    for case, attempts in rows_by_case.items():
+        for _, row in attempts:
+            method = row["method"]
+            expected = expected_outcomes[case][method]
+            if row["mathematical_outcome"] != expected or row["termination"] != "completed":
+                raise ValueError(f"unexpected outcome/termination in {case} for {method}: {row['mathematical_outcome']}/{row['termination']}")
+            if expected != "optimal":
+                if row["solver_objective"] is not None or row["original_objective"] is not None or "trajectory" in row:
+                    raise ValueError(f"non-optimal outcome published solution data in {case} for {method}")
+                continue
+            target, tolerance = expected_objectives[case]
+            objective = row["original_objective"]
+            if objective is None or not math.isfinite(objective) or abs(objective - target) > tolerance:
+                raise ValueError(f"original objective {objective} differs from exact reference {target} in {case} for {method}")
+            diagnostics = row["original_data_diagnostics"]
+            if diagnostics["evidence_status"] != "inconclusive":
+                raise ValueError(f"binary64 residuals were overstated in {case} for {method}")
+            residual = max(diagnostics[key] for key in (
+                "max_dynamics_residual", "max_state_bound_violation", "max_control_bound_violation"))
+            limit = 1e-5 if case == "b04-reference-v1" else 1e-8
+            if not math.isfinite(residual) or residual > limit:
+                raise ValueError(f"original-data residual {residual} exceeds {limit} in {case} for {method}")
+            if case == "ts03-singular-v1":
+                controls = row["trajectory"]["controls"]
+                if not (0.0 <= controls[0][0] <= 1.0 and (controls[1][0] - 1.0) ** 2 <= tolerance):
+                    raise ValueError("T-S03 witness exceeds the analytic optimal-face objective tolerance")
 
     output = args.output_dir
     output.mkdir(parents=True, exist_ok=True)
+    profile_path = output / "process-profile.txt"
+    if profile_path.exists():
+        profile = {}
+        for line in profile_path.read_text(encoding="utf-8").splitlines():
+            parts = line.split()
+            if len(parts) == 2 and parts[0] in {"real", "user", "sys"}:
+                profile[parts[0]] = parts[1]
+        if {"real", "user", "sys"} <= profile.keys():
+            profile_summary = (
+                f"A separate one-repetition seven-case process profile recorded {profile['user']} s user CPU, "
+                f"{profile['sys']} s system CPU, and {profile['real']} s elapsed; it is excluded from the timing sample. "
+                "Bash built-in time measures the runner process in aggregate and does not isolate per-solver CPU."
+            )
+        else:
+            profile_summary = "A separate process profile is present but lacks complete real/user/system timing fields."
+    else:
+        profile_summary = "A separate process profile is not included in this evidence bundle."
     markdown = [
         "# MPC-01 five-repetition native solver comparison",
         "",
@@ -134,8 +196,6 @@ def main() -> None:
             method_outcomes[method] = f"{', '.join(values)} ({', '.join(terms)})"
         markdown.append(f"| `{case}` | {method_outcomes['osqp-sparse-qp']} | {method_outcomes['hpipm-structured-ocp-qp']} |")
 
-    reference = json.loads(projection.REFERENCE.read_text(encoding="utf-8"))
-    exact_norm = float(reference["exact_norm_optimum_decimal"])
     b04_all = [row for _, row in rows_by_case["b04-reference-v1"]]
     objective_values = [row["original_objective"] for row in b04_all]
     residual_values = [max(row["original_data_diagnostics"][key] for key in (
@@ -154,7 +214,7 @@ def main() -> None:
         "",
         "## Limiter and interpretation",
         "",
-        f"Solver iteration counts explain work per solve: cold B04 OSQP used 33,125 iterations, while HPIPM used 30. In a separate one-repetition diagnostic process run, the prior six-case runner consumed 0.417 s user CPU and 0.132 s system CPU over 0.550 s elapsed; that profile is not part of this timing sample. `process-profile.txt` in the earlier evidence bundle records those aggregate times. The repeated run did not enforce per-attempt wall or memory caps; its records mark memory as unlimited. It is a local exploratory measurement rather than the enforced-comparison resource profile. These tiny QP cases are microbenchmarks. They do not establish end-to-end planning latency or a control-strategy winner. Host load sampled just after this run was {args.host_load} with 8 logical CPUs.",
+        f"Solver iteration counts explain work per solve: cold B04 OSQP used 33,125 iterations, while HPIPM used 30. {profile_summary} The timed run did not enforce per-attempt wall or memory caps; its records mark memory as unlimited. It is a local exploratory measurement rather than the enforced-comparison resource profile. These tiny QP cases are microbenchmarks. They do not establish end-to-end planning latency or a control-strategy winner. Host load sampled just after this run was {args.host_load} with 8 logical CPUs.",
         "",
     ])
     (output / "benchmark-summary.md").write_text("\n".join(markdown), encoding="utf-8")
