@@ -41,7 +41,7 @@ class VisualRouteInventoryTests(unittest.TestCase):
         gallery_assets=set(inventory["gallery_routes"][0]["assets"])
         self.assertEqual(gallery_assets,{
             "examples.css", "fuel-b06-viz06.html", "fuel-b06-viz06-source.json",
-            "fuel-b06-viz06-export.json", "fuel-b06-viz06-before.svg",
+            "fuel-b06-viz06-export.json", "fuel-b06-viz03.html", "fuel-b06-viz06-before.svg",
             "fuel-b06-viz06-flow.svg", "fuel-b06-viz06-flow.png",
             "fuel-b06-viz06-stock.svg", "fuel-b06-viz06-stock.png",
             "fuel-b06-viz06-trajectory.svg", "fuel-b06-viz06-trajectory.png",
