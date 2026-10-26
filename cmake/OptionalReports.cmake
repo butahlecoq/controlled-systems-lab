@@ -341,6 +341,8 @@ endif()
 
 if(CSL_BUILD_ENV717_REPORT)
 include(cmake/JsonDependencies.cmake)
+set_property(DIRECTORY APPEND PROPERTY CMAKE_CONFIGURE_DEPENDS
+    ${CMAKE_CURRENT_SOURCE_DIR}/benchmarks/reporting/env717/simple_control.cpp)
 file(SHA256 ${CMAKE_CURRENT_SOURCE_DIR}/benchmarks/reporting/env717/simple_control.cpp
     ENV717_DRIVER_SHA256)
 execute_process(COMMAND git rev-parse HEAD WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}

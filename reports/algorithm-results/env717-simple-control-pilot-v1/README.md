@@ -37,7 +37,8 @@ two different running-reward coefficients.
 To keep exhaustive fixed-plan enumeration small, this pilot changes the
 initial scalar state to `x0 = 0.1` and uses four steps (`T = 0.2 s`). Its
 objective is terminal `x^2` only; it omits the running reward and fixes the
-disturbance at zero. The result is a numerical finite-catalogue solution for
+disturbance at zero. The model time grid is physical time
+`[0, 0.05, 0.10, 0.15, 0.20] s`. The result is a numerical finite-catalogue solution for
 this adapted problem, not a reproduction of the original environment reward or
 its default episode.
 

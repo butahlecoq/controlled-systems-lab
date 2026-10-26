@@ -38,7 +38,8 @@ FiniteActionMinimaxRequest request() {
     constexpr double step = 0.05;
     const SystemModel authored{{{1, 1, 1}, TimeDomain::discrete,
         LinearStage{{1, 1, {1.0}}, {1, 1, {step}}, {1, 1, {0.0}}, {0.0}}}, {}};
-    const auto system = take(model::snapshot(authored, Vector{0, 1, 2, 3, 4}));
+    const auto system = take(model::snapshot(authored,
+        Vector{0.0, step, 2.0 * step, 3.0 * step, 4.0 * step}));
     const auto disturbance = no_disturbance();
     std::vector<sets::SetData> disturbances(horizon, disturbance);
     std::vector<sets::SetData> safe;
@@ -114,6 +115,7 @@ Json main_record() {
             {"cost_method_running_reward", "-dt * u^2 (differs from step())"}}},
         {"adaptation", {{"initial_x", initial}, {"horizon_steps", horizon},
             {"terminal_time_seconds", step * horizon}, {"action_catalogue", actions},
+            {"model_time_grid_seconds", Json::array({0.0, step, 2.0 * step, 3.0 * step, 4.0 * step})},
             {"objective", "minimize terminal x^2; source running reward omitted"},
             {"disturbance", "fixed at zero"}, {"safe_state", "unbounded scalar state"}}},
         {"algorithm", "csl.finite-action-minimax.numerical"},

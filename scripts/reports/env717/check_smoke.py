@@ -20,6 +20,10 @@ from pathlib import Path
 def verify(record: dict) -> None:
     adaptation = record["adaptation"]
     step = adaptation["terminal_time_seconds"] / adaptation["horizon_steps"]
+    grid = adaptation["model_time_grid_seconds"]
+    assert len(grid) == adaptation["horizon_steps"] + 1
+    assert all(math.isclose(t, i * step, abs_tol=1e-15, rel_tol=0.0)
+               for i, t in enumerate(grid))
     initial = adaptation["initial_x"]
     actions = adaptation["action_catalogue"]
     expected: dict[tuple[float, ...], list[float]] = {}
