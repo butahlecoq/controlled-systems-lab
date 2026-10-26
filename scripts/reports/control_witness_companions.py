@@ -119,10 +119,39 @@ class TimingSet:
     samples: list[dict] | None = None
 
 
-def _load_record(site: Path, report_id: str) -> tuple[dict, bytes]:
+def published_routes(catalog_path: Path) -> dict[str, str]:
+    """Map immutable source report IDs to their current published route IDs."""
+    catalog_path = Path(catalog_path)
+    candidates = (catalog_path, catalog_path.with_name("syn06-publications.json"))
+    routes: dict[str, str] = {}
+    for candidate in candidates:
+        if not candidate.is_file():
+            continue
+        if candidate.is_symlink():
+            raise ValueError("report catalogue must not be a symlink: " + str(candidate))
+        catalogue = json.loads(candidate.read_text(encoding="utf-8"))
+        for entry in catalogue.get("reports", ()):
+            source_id = entry.get("source_report_id", entry.get("report_id"))
+            route_id = entry.get("report_id")
+            for identity in (source_id, route_id):
+                if not isinstance(identity, str) or any(
+                    char not in "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-"
+                    for char in identity
+                ):
+                    raise ValueError("unsafe report identity in catalogue")
+            previous = routes.get(source_id)
+            if previous is not None and previous != route_id:
+                raise ValueError("ambiguous published route for source report: " + source_id)
+            routes[source_id] = route_id
+    return routes
+
+
+def _load_record(site: Path, report_id: str, route_id: str) -> tuple[dict, bytes]:
     if not report_id or any(char not in "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-" for char in report_id):
         raise ValueError("unsafe saved report identity")
-    route = site / report_id
+    if not route_id or any(char not in "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-" for char in route_id):
+        raise ValueError("unsafe published report route")
+    route = site / route_id
     path = route / "records.json"
     if route.is_symlink() or path.is_symlink() or not path.is_file():
         raise ValueError("missing or unsafe staged record: " + report_id)
@@ -133,15 +162,25 @@ def _load_record(site: Path, report_id: str) -> tuple[dict, bytes]:
     return record, raw
 
 
-def build(site: Path) -> BuildResult:
+def build(site: Path, catalog_path: Path) -> BuildResult:
     """Build companions from staged published records only."""
     site = Path(site).resolve(strict=True)
+    routes = published_routes(catalog_path)
+
+    def load_record(report_id: str) -> tuple[dict, bytes]:
+        try:
+            route_id = routes[report_id]
+        except KeyError as error:
+            raise ValueError("saved report is absent from publication catalogues: " + report_id) from error
+        return _load_record(site, report_id, route_id)
+
     style = Path(__file__).with_name("styles") / "control-v1.json"
     outputs: dict[str, bytes] = {}
     cards: list[dict] = []
 
     for report_id, title, expected_relation, points in PROJECTIONS:
-        record, record_bytes = _load_record(site, report_id)
+        record, record_bytes = load_record(report_id)
+        route_id = routes[report_id]
         relation = record.get("canonical_relation", {}).get("parametric_form")
         if relation != expected_relation:
             raise ValueError("saved relation differs for " + report_id)
@@ -174,18 +213,19 @@ def build(site: Path) -> BuildResult:
         raw_hash = hashlib.sha256(record_bytes).hexdigest()
         outputs[stem + "-evidence.json"] = (json.dumps({
             "schema": "csl.control-witness-evidence/1", "report_id": report_id,
+            "published_report_id": route_id,
             "record_sha256": raw_hash, "parametric_form": relation,
             "coordinates": record["canonical_relation"]["coordinates"],
             "projection": {"axes": ["u0", "u1"], "vertices": points,
                            "meaning": description}, "figure_export": export,
         }, indent=2, ensure_ascii=False) + "\n").encode()
-        cards.append({"title": title, "report_id": report_id, "stem": stem,
+        cards.append({"title": title, "report_id": report_id, "route_id": route_id, "stem": stem,
                       "description": description, "relation": relation,
                       "vertices": points})
 
     timing_sets = []
     syn01_id = "syn01-nominal-20261013-f7ba310d-48a679cfc0d4"
-    syn01, syn01_bytes = _load_record(site, syn01_id)
+    syn01, syn01_bytes = load_record(syn01_id)
     rows = []
     for scenario in syn01["summary"]:
         for phase in ("setup_ns", "solve_ns", "execute_ns"):
@@ -197,7 +237,7 @@ def build(site: Path) -> BuildResult:
                         "The figure plots per-phase medians. The table gives the observed minimum and maximum; phases are separate measurements."))
 
     syn02_id = "syn02-terminal-20261013-c234a1a0-35de886a7fb4"
-    syn02, syn02_bytes = _load_record(site, syn02_id)
+    syn02, syn02_bytes = load_record(syn02_id)
     rows = []
     for scenario in syn02["summary"]:
         if not scenario["completed"]:
@@ -217,7 +257,7 @@ def build(site: Path) -> BuildResult:
                         "The figure plots saved medians; the table gives ranges for completed fixtures. The failed shifted-residual fixture remains listed with no timing."))
 
     syn06_id = "syn06-verifier-20261012-f0e32e2b"
-    syn06, syn06_bytes = _load_record(site, syn06_id)
+    syn06, syn06_bytes = load_record(syn06_id)
     rows = []
     for item in syn06["payload"]["summary"]:
         batch = item["batch"]
@@ -231,7 +271,7 @@ def build(site: Path) -> BuildResult:
                         "Points show the archived median elapsed nanoseconds divided by the archived batch size; the exact source median and batch are in the evidence table."))
 
     paired_id = "syn-ts01-paired-20261014-b7f1ac0"
-    paired, paired_bytes = _load_record(site, paired_id)
+    paired, paired_bytes = load_record(paired_id)
     samples = []
     rows = []
     strategies = {name: index for index, name in enumerate(paired["strategies"])}
@@ -250,7 +290,7 @@ def build(site: Path) -> BuildResult:
                         "Each point is one saved end-to-end strategy observation; the inclusive total is not a sum of other phase durations.", samples))
 
     for report_id, title in STRATEGY_TIMINGS:
-        record, record_bytes = _load_record(site, report_id)
+        record, record_bytes = load_record(report_id)
         timing = record.get("measurement", {}).get("timing_ns", {})
         observations = timing.get("observations")
         if not isinstance(observations, list) or len(observations) != 7:
@@ -289,7 +329,8 @@ def build(site: Path) -> BuildResult:
                 outputs[stem + "." + suffix] = (generated / ("geometry." + suffix)).read_bytes()
             export = json.loads((generated / "export.json").read_text())
         outputs[stem + "-evidence.json"] = (json.dumps({"schema": "csl.control-witness-timing/1",
-            "report_id": report_id, "record_sha256": record_hash, "description": description,
+            "report_id": report_id, "published_report_id": routes[report_id],
+            "record_sha256": record_hash, "description": description,
             "rows": rows, "figure_export": export}, indent=2, ensure_ascii=False) + "\n").encode()
         table = "".join("<tr><th>" + html.escape(row["label"]) + "</th><td>" +
             (html.escape(str(row["median"])) if row["median"] is not None else "Unavailable") +
@@ -300,7 +341,7 @@ def build(site: Path) -> BuildResult:
             "</p><figure><img src=\"" + stem + ".svg\" alt=\"" + html.escape(description, quote=True) +
             "\"><figcaption><a href=\"" + stem + ".png\">Open PNG figure ↗</a></figcaption></figure><table><caption>Exact displayed timing values; units are stated on the figure</caption><thead><tr><th>Observation</th>"
             "<th>Median or sample</th><th>Minimum</th><th>Maximum</th><th>Status</th></tr></thead><tbody>" + table +
-            "</tbody></table><p><a href=\"../" + report_id + "/records.json\">Raw saved record ↗</a> · "
+            "</tbody></table><p><a href=\"../" + routes[report_id] + "/records.json\">Raw saved record ↗</a> · "
             "<a href=\"" + stem + "-evidence.json\">Evidence data ↗</a></p></article>")
 
     outputs["control-witness-timing-v1.html"] = (
@@ -311,12 +352,13 @@ def build(site: Path) -> BuildResult:
     timing_entry = {"family": "Control strategy and witness reports", "title": "Saved SYN report timings",
                     "status": "saved-data-companion", "anchor": "control-witness-timings",
                     "page": "control-witness-timing-v1.html", "figure": "control-witness/syn01-timing.svg",
-                    "source_page": "../" + syn01_id + "/index.html", "raw_record": "../" + syn01_id + "/records.json"}
+                    "source_page": "../" + routes[syn01_id] + "/index.html",
+                    "raw_record": "../" + routes[syn01_id] + "/records.json"}
 
     body = []
     for card in cards:
-        record_link = "../" + card["report_id"] + "/records.json"
-        page_link = "../" + card["report_id"] + "/index.html"
+        record_link = "../" + card["route_id"] + "/records.json"
+        page_link = "../" + card["route_id"] + "/index.html"
         stem = card["stem"]
         table_rows = "".join(f"<tr><th>({p[0]}, {p[1]})</th><td>saved projection vertex</td></tr>" for p in card["vertices"])
         body.append(
@@ -339,8 +381,8 @@ def build(site: Path) -> BuildResult:
                 "title": "Strategy A and B control-relation projections",
                 "status": "saved-data-companion", "anchor": "control-witness-companions",
                 "page": "control-witness-v1.html", "figure": cards[0]["stem"] + ".svg",
-                "source_page": "../" + cards[0]["report_id"] + "/index.html",
-                "raw_record": "../" + cards[0]["report_id"] + "/records.json"}, timing_entry)
+                "source_page": "../" + cards[0]["route_id"] + "/index.html",
+                "raw_record": "../" + cards[0]["route_id"] + "/records.json"}, timing_entry)
     if set(outputs) != set(asset_paths()):
         missing = sorted(set(asset_paths()) - set(outputs))
         extra = sorted(set(outputs) - set(asset_paths()))

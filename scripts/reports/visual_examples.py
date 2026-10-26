@@ -535,7 +535,7 @@ def build(catalog, site):
         for asset in geometry_assets:
             outputs[asset] = (geometry_root / asset).read_bytes()
     gallery_inventory = []
-    control_witness = control_witness_companions.build(site)
+    control_witness = control_witness_companions.build(site, catalog)
     outputs.update(control_witness.files)
     gallery_inventory.extend(control_witness.gallery_entries)
     fuel_assets = Path(__file__).parents[2] / "docs/examples"

@@ -39,18 +39,22 @@ class GalleryTests(unittest.TestCase):
         self.addCleanup(self.temp.cleanup)
         self.site = Path(self.temp.name)
         (self.site / "index.html").write_text("<html><body><h1>Reports</h1><ul></ul></body></html>")
+        catalog = json.loads(self.catalog.read_text())
+        self.catalog_reports = catalog["reports"]
+        route_by_source = control_witness_companions.published_routes(self.catalog)
         for example in self.examples:
             target = self.site / example["report_id"]
             target.mkdir(exist_ok=True)
             shutil.copyfile(example["records_path"], target / "records.json")
             (target / "index.html").write_text("<html><body>Reviewed report</body></html>")
         report_ids = [report_id for report_id, *_ in control_witness_companions.PROJECTIONS]
+        report_ids.extend(report_id for report_id, _ in control_witness_companions.STRATEGY_TIMINGS)
         report_ids.extend(("syn01-nominal-20261013-f7ba310d-48a679cfc0d4",
                            "syn02-terminal-20261013-c234a1a0-35de886a7fb4",
                            "syn06-verifier-20261012-f0e32e2b",
                            "syn-ts01-paired-20261014-b7f1ac0"))
-        for report_id in report_ids:
-            target = self.site / report_id
+        for report_id in set(report_ids):
+            target = self.site / route_by_source[report_id]
             target.mkdir(exist_ok=True)
             source = ROOT / "reports/algorithm-results" / report_id
             shutil.copyfile(source / "records.json", target / "records.json")
@@ -66,8 +70,6 @@ class GalleryTests(unittest.TestCase):
         self.assertNotEqual(self.app01_report_id, self.app01_source_id)
         self.assertTrue((self.site / self.app01_report_id / "records.json").is_file())
         self.assertFalse((self.site / self.app01_source_id).exists())
-        catalog = json.loads(self.catalog.read_text())
-        self.catalog_reports = catalog["reports"]
         by_source = {entry["source_report_id"]: entry["report_id"]
                      for entry in catalog["reports"] if "source_report_id" in entry}
         by_kind = {}
@@ -169,9 +171,10 @@ class GalleryTests(unittest.TestCase):
         self.assertIn("constant-zero objective", hybrid_html)
         self.assertIn("two_parameter_scalar_polytopes.json", hybrid_html)
     def test_control_witness_companions_project_frozen_relations(self):
-        originals = {report_id: hashlib.sha256((self.site / report_id / "records.json").read_bytes()).hexdigest()
+        routes = control_witness_companions.published_routes(self.catalog)
+        originals = {report_id: hashlib.sha256((self.site / routes[report_id] / "records.json").read_bytes()).hexdigest()
                      for report_id, *_ in control_witness_companions.PROJECTIONS}
-        result = control_witness_companions.build(self.site)
+        result = control_witness_companions.build(self.site, self.catalog)
         self.assertEqual(len(result.gallery_entries), 2)
         gallery_anchors = {entry["anchor"] for entry in result.gallery_entries}
         self.assertEqual(gallery_anchors, {"control-witness-companions", "control-witness-timings"})
@@ -211,9 +214,10 @@ class GalleryTests(unittest.TestCase):
                 target = (examples_dir / parts.path).resolve()
                 self.assertTrue(target.is_file(), link)
         for report_id, digest in originals.items():
-            self.assertEqual(hashlib.sha256((self.site / report_id / "records.json").read_bytes()).hexdigest(), digest)
+            self.assertEqual(hashlib.sha256((self.site / routes[report_id] / "records.json").read_bytes()).hexdigest(), digest)
         evidence = json.loads(result.files["control-witness/strategy-b-ts03-evidence.json"])
         self.assertEqual(evidence["record_sha256"], originals["syn04-strategy-b-ts03-20261022-2c0c9210"])
+        self.assertEqual(evidence["published_report_id"], routes["syn04-strategy-b-ts03-20261022-2c0c9210"])
         self.assertEqual(evidence["projection"]["axes"], ["u0", "u1"])
         self.assertEqual(evidence["projection"]["vertices"], [[0, 1], [1, 1]])
         svg = ET.fromstring(result.files["control-witness/strategy-b-ts03.svg"])
@@ -230,7 +234,7 @@ class GalleryTests(unittest.TestCase):
         self.assertEqual(syn06_evidence["rows"][0]["batch"], 28000)
         self.assertEqual(syn06_evidence["rows"][0]["median"],
                          syn06_evidence["rows"][0]["saved_median_elapsed_ns"] / 28000)
-        repeated = control_witness_companions.build(self.site)
+        repeated = control_witness_companions.build(self.site, self.catalog)
         self.assertEqual(result.files, repeated.files)
 
     def test_build_preserves_reports_and_has_resolvable_links(self):
