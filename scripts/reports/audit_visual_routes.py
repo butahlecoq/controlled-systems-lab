@@ -24,6 +24,7 @@ COMPOSED_SAVED_ROUTES = {
 SAVED_COMPANION_ROUTES = {
     "scripts/reports/app02/render_saved.py",
     "scripts/reports/app04/render_saved.py",
+    "scripts/reports/ext05/render_saved.py",
     "scripts/reports/lotka_volterra_sampled.py",
 }
 
@@ -116,7 +117,9 @@ def build(root: Path = ROOT) -> dict:
                     "app02-diamond-v1.html", "app02-diamond-v1.svg",
                     "app02-diamond-v1.png", "app02-diamond-v1-export.json",
                     "app04-square-v1.html", "app04-square-v1.svg",
-                    "app04-square-v1.png", "app04-square-v1-export.json"],
+                    "app04-square-v1.png", "app04-square-v1-export.json",
+                    "ext05-states-v1.html", "ext05-states-v1.svg",
+                    "ext05-states-v1.png", "ext05-states-v1-export.json"],
                  "disposition": "adopted-shared-quantitative-policy"}],
             "migration_owner": "#669 owns the shared policy; deferred family renderers link to scoped follow-up issues #684–#687, while frozen report bundles remain immutable evidence"}
 

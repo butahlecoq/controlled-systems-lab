@@ -194,7 +194,7 @@ class GalleryTests(unittest.TestCase):
         self.assertIn('href="lotka-volterra-sampled-v1.html"', page)
         self.assertIn("Cards marked “Saved-data companion” are generated into this gallery from frozen records", page)
         for stem in ("saved-figure-lotka-quantitative", "app02-diamond-v1", "app04-square-v1",
-                     "visual-fuel-b06-viz03"):
+                     "ext05-states-v1", "visual-fuel-b06-viz03"):
             card = page.split(f'id="{stem}"', 1)[1].split("</article>", 1)[0]
             self.assertIn("Saved-data companion", card)
         self.assertIn("065de5e45d295dfa099e25265c4014c0c46673f8", page)
@@ -205,7 +205,7 @@ class GalleryTests(unittest.TestCase):
             if not urlsplit(link).scheme and not link.startswith("#"):
                 self.assertTrue((self.site / "examples" / link.split("#")[0]).is_file(), link)
         figures = list((self.site / "examples").glob("*.svg"))
-        self.assertEqual(len(figures), len(self.examples) + len(gallery.visual_illustrations.CASES) + 13)
+        self.assertEqual(len(figures), len(self.examples) + len(gallery.visual_illustrations.CASES) + 14)
         for figure in figures:
             if figure.name == "fuel-b06-viz06-before.svg":
                 self.assertEqual(hashlib.sha256(figure.read_bytes()).hexdigest(),
@@ -244,7 +244,8 @@ class GalleryTests(unittest.TestCase):
                           if entry["anchor"] == "visual-fuel-b06-viz03")
         self.assertEqual(fuel_entry["status"], "saved-data-companion")
         for stem, expected_text in (("app02-diamond-v1", "saved input and rotated outer bound"),
-                                   ("app04-square-v1", "diagonal orientation")):
+                                   ("app04-square-v1", "diagonal orientation"),
+                                   ("ext05-states-v1", "saved states at t = 0, 1, 3")):
             companion_page = (self.site / "examples" / (stem + ".html")).read_text()
             self.assertIn("csl-report-quantitative-v1", companion_page)
             self.assertIn("Frozen values", companion_page)
@@ -255,6 +256,9 @@ class GalleryTests(unittest.TestCase):
             entry = next(entry for entry in visual_inventory["entries"] if entry["anchor"] == stem)
             self.assertEqual(entry["figure"], stem + ".svg")
             self.assertEqual(entry["status"], "saved-data-companion")
+        ext05_page = (self.site / "examples/ext05-states-v1.html").read_text()
+        self.assertIn("no line between markers", ext05_page)
+        self.assertIn("Independent coordinate scales are disclosed", ext05_page)
         square = ET.parse(self.site / "examples/square_duplicates.svg")
         boundary = square.find(".//{http://www.w3.org/2000/svg}polygon")
         self.assertEqual(boundary.attrib["points"],

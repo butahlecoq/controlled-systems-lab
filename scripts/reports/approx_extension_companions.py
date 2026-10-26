@@ -92,15 +92,43 @@ def app04_companion(record_path: Path, style_path: Path) -> dict[str, bytes]:
         "This companion plots the saved square vertices and two outer ellipse results. The diagonal-orientation radius is converted to physical x-y coordinates using the declared orientation; the circles show the resulting ellipses in this special two-dimensional fixture.")}
 
 
+def ext05_companion(record_path: Path, style_path: Path) -> dict[str, bytes]:
+    """Plot only the archived EXT-05 state samples, without interpolating a path."""
+    record = json.loads(Path(record_path).read_text(encoding="utf-8"))
+    times = record["model"]["times"]
+    states = record["analytic"]["trajectory"]
+    _require(record.get("schema") == "csl.ext05-discretization-report/1" and
+             times == [0, 1, 3] and states == [[0, 0], [1, 2], [3, 0]],
+             "EXT-05 saved sample times or states changed")
+    document = {"schema": "csl.saved-geometric-plot/1",
+                "title": "EXT-05 saved position–velocity states",
+                "description": ("Markers show the three states recorded at physical times 0, 1, and 3. "
+                                "The figure does not interpolate between samples or claim to show the continuous trajectory."),
+                "aspect": "independent",
+                "axes": {"x": {"label": "position state (source units unspecified)"},
+                         "y": {"label": "velocity state (source units unspecified)"}},
+                "series": [{"kind": "points", "label": "saved states at t = 0, 1, 3",
+                            "color": "#D55E00", "points": states, "size": 52, "alpha": 1}]}
+    outputs = _render_companion(document, style_path, "ext05-states-v1")
+    return outputs | {"ext05-states-v1.html": _companion_page(
+        "EXT-05 saved state samples", "ext05-states-v1", "ext05-discretization-a40ba9647cc023dc",
+        "This companion plots exactly the archived position–velocity states at physical times 0, 1, and 3. It shows only the saved samples: no line between markers or continuous-time trajectory is inferred.",
+        aspect="independent")}
+
+
 def _require(condition: bool, message: str) -> None:
     if not condition:
         raise ValueError(message)
 
 
-def _companion_page(title: str, stem: str, report_id: str, summary: str) -> bytes:
+def _companion_page(title: str, stem: str, report_id: str, summary: str,
+                    aspect: str = "equal") -> bytes:
     title = escape(title)
     summary = escape(summary)
     report_id = escape(report_id, quote=True)
+    scaling = ("The plot uses equal x-y scales and preserves the archived fixture values."
+               if aspect == "equal" else
+               "Independent coordinate scales are disclosed; the saved state coordinates use different physical meanings.")
     return ('<!doctype html><html lang="en"><head><meta charset="utf-8">'
             '<meta name="viewport" content="width=device-width,initial-scale=1">'
             f'<title>{title} · shared axis policy</title><link rel="stylesheet" href="examples.css"></head><body>'
@@ -109,7 +137,7 @@ def _companion_page(title: str, stem: str, report_id: str, summary: str) -> byte
             f'<h1>{title}</h1><p>{summary}</p>'
             f'<figure><img src="{stem}.svg" alt="{title}; saved geometric values on labelled x-y axes">'
             '<figcaption>Numeric ticks and major grids follow the shared csl-report-quantitative-v1 policy. '
-            'The plot uses equal x-y scales and preserves the archived fixture values.</figcaption></figure>'
+            + escape(scaling) + '</figcaption></figure>'
             f'<p><a href="{stem}.png">Standalone PNG</a> · <a href="../{report_id}/records.json">Frozen values ↗</a> · '
             f'<a href="../{report_id}/index.html">Original report ↗</a></p></main></body></html>').encode()
 
