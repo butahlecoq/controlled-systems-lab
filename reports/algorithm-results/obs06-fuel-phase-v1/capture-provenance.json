@@ -1,8 +1,8 @@
 {
   "schema": "csl.obs06-capture-provenance/1",
-  "source_commit": "953c74fbf71549501b1bb0fb7b6f9aec18326f55",
+  "source_commit": "c84ccc75cbb9abe01072bf244a32077de65454b2",
   "source_tree_clean_at_capture": true,
-  "capture_started_utc": "2026-10-26T19:33:06.463623+00:00",
+  "capture_started_utc": "2026-10-26T19:55:56.966093870+00:00",
   "build_type": "Release",
   "compiler": "c++ (GCC) 16.2.1 20260810",
   "cmake": "cmake version 3.31.6",
@@ -36,20 +36,20 @@
     "process_state": "new process per executable invocation; B07 cases share one process"
   },
   "binary_sha256": {
-    "csl_issue6_b06_phase_report": "30d1da84e551563d1533fcb1975e5219a93eb43cc14ae32a46cb93a38c903f25",
-    "csl_issue6_b07_report": "6b6bc852d505b0790dea2e221bc7c6e0942f5c65788ceed236f9c127b309706f",
-    "csl_issue6_b09_report": "d094e3deb226ca6480c57f13dbf1729c2adc74dfbe7323e75320ded5c9dd694d"
+    "csl_issue6_b06_phase_report": "0d6077e22f42243dc281bc847aa4383716774e4dc0a2c5cf838aefe991939336",
+    "csl_issue6_b07_report": "57eb63712d3b861ff2667b21259598d0836e3a37c41d64e40c093fadfcb79209",
+    "csl_issue6_b09_report": "91e3d2137c0b5ba3b301c2e4c87206a9ffbdd16bfb09f0c55b7da219b152c260"
   },
   "raw_binary_sha256": {
-    "b06-phase.json.gz": "30d1da84e551563d1533fcb1975e5219a93eb43cc14ae32a46cb93a38c903f25",
-    "b07-phase.jsonl.gz": "6b6bc852d505b0790dea2e221bc7c6e0942f5c65788ceed236f9c127b309706f",
-    "b09-lambda0-phase.json.gz": "d094e3deb226ca6480c57f13dbf1729c2adc74dfbe7323e75320ded5c9dd694d",
-    "b09-lambda1-phase.json.gz": "d094e3deb226ca6480c57f13dbf1729c2adc74dfbe7323e75320ded5c9dd694d"
+    "b06-phase.json.gz": "0d6077e22f42243dc281bc847aa4383716774e4dc0a2c5cf838aefe991939336",
+    "b07-phase.jsonl.gz": "57eb63712d3b861ff2667b21259598d0836e3a37c41d64e40c093fadfcb79209",
+    "b09-lambda0-phase.json.gz": "91e3d2137c0b5ba3b301c2e4c87206a9ffbdd16bfb09f0c55b7da219b152c260",
+    "b09-lambda1-phase.json.gz": "91e3d2137c0b5ba3b301c2e4c87206a9ffbdd16bfb09f0c55b7da219b152c260"
   },
   "raw_files": {
-    "b06-phase.json.gz": "74bff0300418380b92ef312b5991a1c4dcdf8b7bc7a9c7a59b10cf02159ad763",
-    "b07-phase.jsonl.gz": "b4a5ddec9ace0ce194dcd3c1905addbc4254279d1062953b3f97280c9f702903",
-    "b09-lambda0-phase.json.gz": "91ecdfeb9e4796c21b6e695b84a2cc763d534e376733eed3cdca413c0853d1a2",
-    "b09-lambda1-phase.json.gz": "d86c4d11ddf34074e5a8a7a9fac06181ceb5cc1d59dad0c0c81517f910885fe6"
+    "b06-phase.json.gz": "009caf7e552a6a34ca44e52960fb6074525daa174076744bcb231a5ee44c42a8",
+    "b07-phase.jsonl.gz": "5a22b3a7b302549ed88ab03daf75d80fc4f4983fe25ec6c4d38e3d55ad9b72e0",
+    "b09-lambda0-phase.json.gz": "9bb8b3a501f4632c49b8003d64aea4b1d3f1fd33007e1ccb3bdd785b7235c04e",
+    "b09-lambda1-phase.json.gz": "2019ab7df07076417c578982381d12c25c732d5bbfeff76a75e2070c270c43b2"
   }
 }
