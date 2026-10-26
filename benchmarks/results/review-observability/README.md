@@ -33,6 +33,28 @@ is not used as the reported wall-time measurement. It identifies Python
 coordinate selection and tuple creation as the measured operation; no
 comparison winner or speedup is claimed.
 
+## Figure export cost
+
+A second probe times the actual B07 and B09 saved-data renderer functions. It
+includes loading and hashing their saved rows, generating the figures, writing
+SVG and PNG outputs, and writing per-figure export receipts. Each measured call
+uses a fresh output directory; one warmup per renderer is excluded, followed by
+seven alternating B07/B09 pairs in one warm Python process.
+
+| Renderer | Figures | SVG/PNG/receipt files | Median | Range | Output bytes |
+|---|---:|---:|---:|---:|---:|
+| B07 (8 saved cases) | 8 | 24 | 5.166 s | 5.126–5.323 s | 3,618,304 |
+| B09 (2 objective variants) | 2 | 6 | 1.238 s | 1.228–1.334 s | 461,304 |
+
+The separate profile run shows work distributed across Matplotlib text layout,
+SVG serialization and PNG encoding; it does not identify one unique limiter.
+The 24 B07 and 6 B09 output hashes are retained for every measured sample. They
+match the corresponding files in `docs/examples/viz10/` byte-for-byte. The
+figure export time is separate from the coordinate-selection microbenchmark
+above. Both are static report-generation measurements from saved data. Neither
+includes solving or a geometry query, and the renderer probe excludes the
+gallery index and manifest.
+
 ## Provenance and reproduction
 
 - Measurement source commit: `d656c41d238b2f6d48b24c291b12ad8a0cdb4c0a` (contains the probe script).
@@ -43,6 +65,10 @@ comparison winner or speedup is claimed.
 - Host: Linux Omarchy, kernel `7.2.5-3-omarchy`, AMD Ryzen 5 3550H, 8 logical CPUs.
 - Python: 3.14.7; initial 1/5/15-minute load averages were 0.60/0.34/0.35.
 - All 14 timed samples passed their raw-row projection checks.
+- Figure export probe source commit with output hashes: `69adbff15a93c7cac762a5025b672fb2b5cf99e4`.
+- Figure export probe source and result hashes are in `fuel-plot-export-results.json`.
+- Figure export profile output is `fuel-plot-export-profile.txt`; the profile run is separate from reported times.
+- Figure export run load averages before measurement: 0.66/0.53/0.43.
 
 Reproduce with the repository's pinned reporting dependencies:
 
@@ -58,3 +84,16 @@ python3 -m venv <temporary-venv>
 The raw sample order, environment, input hashes, source hashes and scope limits
 are in `fuel-projection-results.json`; the separate profiler output is in
 `fuel-projection-profile.txt`.
+
+Reproduce the figure-export measurements with the same pinned environment:
+
+```sh
+<temporary-venv>/bin/python benchmarks/results/review-observability/fuel_plot_export_probe.py \
+  --output benchmarks/results/review-observability/fuel-plot-export-results.json \
+  --profile-output benchmarks/results/review-observability/fuel-plot-export-profile.txt \
+  --temporary-root /dev/shm
+```
+
+The probe uses temporary per-run figure directories and removes them when each
+sample completes. Its retained records contain the exact raw timing samples,
+output sizes, source hashes, environment and profiler hash.
