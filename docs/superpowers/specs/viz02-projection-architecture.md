@@ -206,3 +206,19 @@ Use Candidate B's tagged `PlotRequest`/`PlotOutcome` and source-supplied live `S
 ## Implementation and follow-up
 
 The bound projection-source factories and tagged plot request are implemented in `plot_request.hpp` and `plot_request.cpp`. Contract tests prove the no-query witness path and analytic rectangle/line projections. #96 remains responsible for regenerating standalone figures from saved result data, with visual QA and raster previews.
+
+## Stage-resolved extension in #708
+
+This VIZ-02 contract remains a single-pair, single-stage projection API. The
+closed #91 scope excluded intermediate all-stage viewers. Issue #708 adds a
+separate requirement for ordered coordinate-pair lists and stage-labelled set
+marginals R0 through RT, with trajectories stored as distinct series. It does
+not change the meaning of `PlotData`, `PlotRequest`, or the `csl.plot-document/1`
+format. The [stage-projection architecture note](../../architecture/stage-projection-visualization.md)
+records the route capability audit and the additive batch design.
+
+Projection remains an explicit geometry operation through the existing
+`GeometryPort`. Capture uses only stage relations exposed by the task run and
+records missing or unsupported stages. It does not infer set geometry from a
+trajectory or rerun a task to fill missing records. An offline renderer reads
+the saved stage batch and performs no geometry or solver operation.
