@@ -11,6 +11,7 @@ using FixtureLoad = std::variant<MpcCase, std::string>;
 
 MpcCase make_ts01();
 MpcCase make_ts02();
+MpcCase make_ts03_singular();
 MpcCase make_infeasible();
 MpcCase make_unbounded();
 FixtureLoad load_double_integrator_421(const std::filesystem::path&);

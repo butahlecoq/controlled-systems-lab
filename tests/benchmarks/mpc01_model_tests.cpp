@@ -49,6 +49,7 @@ int main(int argc, char** argv) {
     if (validate(scalar_case())) return fail("valid scalar fixture rejected");
     if (validate(make_ts01())) return fail("T-S01 fixture is invalid");
     if (validate(make_ts02())) return fail("T-S02 fixture is invalid");
+    if (validate(make_ts03_singular())) return fail("T-S03 singular fixture is invalid");
     if (validate(make_infeasible())) return fail("infeasible analytic fixture is invalid");
     if (validate(make_unbounded())) return fail("unbounded analytic fixture is invalid");
     const auto infeasible = make_infeasible();
@@ -97,6 +98,26 @@ int main(int argc, char** argv) {
     }
     if (original_terminal_objective(ts01, Vector{1.0}) != 0.0) {
         return fail("original T-S01 objective evaluator disagrees with the analytic optimum");
+    }
+    const auto ts03 = make_ts03_singular();
+    for (const double free_control : Vector{0.0, 0.25, 0.5, 1.0}) {
+        const Vector history{0.0, free_control, 1.0, free_control, 1.0};
+        if (original_terminal_objective(ts03, Vector{history[2]}) != 0.0 ||
+            history[1] != free_control || history[3] != free_control || history[4] != 1.0) {
+            return fail("T-S03 analytic optimal face is not independent of the first control");
+        }
+    }
+    const auto singular_sparse = make_osqp_problem(ts03);
+    if (!std::holds_alternative<SparseQp>(singular_sparse) ||
+        std::get<SparseQp>(singular_sparse).hessian.values != Vector{2.0}) {
+        return fail("T-S03 sparse Hessian must retain its singular free-control direction");
+    }
+    const auto singular_ocp = make_hpipm_problem(ts03);
+    if (!std::holds_alternative<OcpQp>(singular_ocp) ||
+        std::get<OcpQp>(singular_ocp).stages[0].r[0][0] != 0.0 ||
+        std::get<OcpQp>(singular_ocp).stages[1].r[0][0] != 0.0 ||
+        std::get<OcpQp>(singular_ocp).stages[2].q[0][0] != 2.0) {
+        return fail("T-S03 OCP-QP must preserve the singular first-stage cost and terminal curvature");
     }
     auto problem = scalar_case();
     if (validate(problem)) return fail("valid scalar fixture rejected");

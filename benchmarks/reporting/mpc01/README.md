@@ -1,7 +1,7 @@
 # MPC-01 native solver runner
 
-`CSL_BUILD_MPC01_REPORT=ON` enables a private runner for the four current
-comparison fixtures: T-S01, T-S02, #421, and the distinct
+`CSL_BUILD_MPC01_REPORT=ON` enables a private runner for the five current
+comparison fixtures: T-S01, T-S02, the singular T-S03 profile, #421, and the distinct
 `b04-reference-v1` case. Two additional analytic diagnostic cases exercise
 infeasible and unbounded outcomes. It builds static OSQP 1.0.0, HPIPM
 `e3a56c1caddd7f12d125d84f337b9a9e5c186271`, and BLASFEO
@@ -55,6 +55,10 @@ the cold solve medians are 162.5 ms at 33,125 OSQP iterations and 0.994 ms at
 30 HPIPM iterations; those microbenchmarks do not establish an overall solver
 or control-strategy winner.
 
+The analytic singular T-S03 case has dynamics `x[t+1] = u[t]`, box controls,
+and terminal objective `(x2-1)^2`. Its joint-control Hessian is singular and
+its exact minimizing face is `{(u0,u1): 0<=u0<=1, u1=1}`; the runner checks
+objective values along that face while retaining native solver witnesses.
 The analytic infeasible and unbounded rows exercise outcome handling. OSQP's
 precise primal/dual infeasibility statuses map to `infeasible`/`unbounded`;
 inaccurate certificates remain `undetermined`. HPIPM returns status 2 on the

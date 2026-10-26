@@ -38,7 +38,7 @@ def main() -> None:
                                  capture_output=True, text=True)
         if refused.returncode == 0:
             raise AssertionError("tampered comparison input binding was accepted")
-    if len(records) != 6:
+    if len(records) != 7:
         raise AssertionError("expected one comparison record per smoke case")
     recorded_rows = []
     for record in records:
@@ -67,6 +67,7 @@ def main() -> None:
     expected_cases = {
         "ts01-exact-v1",
         "ts02-constant-v1",
+        "ts03-singular-v1",
         "infeasible-integrator-v1",
         "unbounded-integrator-v1",
         "double-integrator-421-v1",
@@ -80,10 +81,13 @@ def main() -> None:
     expected_objective = {
         "ts01-exact-v1": (0.0, 1e-7),
         "ts02-constant-v1": (3.0, 1e-7),
+        "ts03-singular-v1": (0.0, 1e-7),
         "double-integrator-421-v1": (0.0, 1e-6),
         "b04-reference-v1": (float(reference["exact_norm_optimum_decimal"]), 0.003),
     }
     expected_outcome = {
+        "ts03-singular-v1": {"osqp-sparse-qp": "optimal",
+                              "hpipm-structured-ocp-qp": "undetermined"},
         "infeasible-integrator-v1": {"osqp-sparse-qp": "infeasible",
                                       "hpipm-structured-ocp-qp": "undetermined"},
         "unbounded-integrator-v1": {"osqp-sparse-qp": "unbounded",
@@ -107,15 +111,16 @@ def main() -> None:
                 outcome = "undetermined"
             if row["mathematical_outcome"] != outcome or row["termination"] != "completed":
                 raise AssertionError(f"unexpected classification for {key}: {row['mathematical_outcome']}/{row['termination']}")
-            if row["solver_objective"] is not None or row["original_objective"] is not None:
-                raise AssertionError(f"non-optimal {key} row must not present a solver objective")
-            if "trajectory" in row:
-                raise AssertionError(f"non-optimal {key} row must label solver output as a candidate iterate")
-            if "candidate_iterate" in row and row["candidate_iterate_diagnostics"]["evidence_status"] != "inconclusive":
-                raise AssertionError(f"candidate iterate diagnostics were overstated for {key}")
-            if key[1] == "hpipm-structured-ocp-qp" and row["native_status"] == "hpipm-status-0":
-                raise AssertionError(f"HPIPM reported optimality for the {key[0]} fixture")
-            continue
+            if outcome != "optimal":
+                if row["solver_objective"] is not None or row["original_objective"] is not None:
+                    raise AssertionError(f"non-optimal {key} row must not present a solver objective")
+                if "trajectory" in row:
+                    raise AssertionError(f"non-optimal {key} row must label solver output as a candidate iterate")
+                if "candidate_iterate" in row and row["candidate_iterate_diagnostics"]["evidence_status"] != "inconclusive":
+                    raise AssertionError(f"candidate iterate diagnostics were overstated for {key}")
+                if key[1] == "hpipm-structured-ocp-qp" and row["native_status"] == "hpipm-status-0":
+                    raise AssertionError(f"HPIPM reported optimality for the {key[0]} fixture")
+                continue
         if row["native_status"] != methods[row["method"]]:
             raise AssertionError(f"unexpected solver status for {key}: {row['native_status']}")
         if row["mathematical_outcome"] != "optimal" or row["termination"] != "completed":
@@ -154,7 +159,7 @@ def main() -> None:
         if reverse_rows[0]["method"] != "hpipm-structured-ocp-qp":
             raise AssertionError("--reverse did not run HPIPM before OSQP")
         reverse_records = [json.loads(line) for line in reverse_path.read_text().splitlines()]
-        if len(reverse_records) != 6:
+        if len(reverse_records) != 7:
             raise AssertionError("reverse-order run omitted comparison records")
     print(f"checked {len(rows)} native attempts across {len(expected_cases)} cases, including infeasible and unbounded cases")
 

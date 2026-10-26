@@ -424,6 +424,7 @@ int main(int argc, char** argv) {
         auto* records = record_path ? &record_file : nullptr;
         run_case(make_ts01(), hpipm_first, repetitions, records, argv[0]);
         run_case(make_ts02(), hpipm_first, repetitions, records, argv[0]);
+        run_case(make_ts03_singular(), hpipm_first, repetitions, records, argv[0]);
         run_case(make_infeasible(), hpipm_first, repetitions, records, argv[0]);
         run_case(make_unbounded(), hpipm_first, repetitions, records, argv[0]);
         run_case(take_fixture(load_double_integrator_421(argv[1])), hpipm_first, repetitions, records, argv[0]);
