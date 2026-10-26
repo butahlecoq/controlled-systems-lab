@@ -1,6 +1,7 @@
 #pragma once
 #include <csl/execution/observability.hpp>
 #include <cstdint>
+#include <span>
 #include <thread>
 
 namespace csl::execution::observability {
@@ -67,6 +68,8 @@ private:
 class TimingCollector {
 public:
     CollectionResult<TimingScope> start(artifacts::SpanId,const ExecutionContext& = {});
+    // Check a caller-owned layout before execution without sampling clocks or claiming spans.
+    CollectionResult<bool> validate_unstarted(std::span<const artifacts::SpanId>) const;
     // Consistent snapshot; open/unstarted spans remain incomplete. Snapshots do not consume scopes.
     CollectionResult<TimingReport> snapshot() const;
     bool enabled() const noexcept;

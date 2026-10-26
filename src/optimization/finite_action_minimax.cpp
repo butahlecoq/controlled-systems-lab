@@ -112,6 +112,17 @@ FiniteActionMinimaxOutcome finite_action_minimax(
     FiniteActionMinimaxLimits limits,
     const ExecutionContext& context,
     const FiniteMinimaxTimingSpans* timing_spans) {
+    if(timing_spans&&context.timing) {
+        std::vector<artifacts::SpanId> ids{timing_spans->validation,timing_spans->result_selection};
+        for(const auto& plan:timing_spans->plans) {
+            ids.push_back(plan.plan_setup);ids.push_back(plan.propagation);
+            ids.insert(ids.end(),plan.stage_materialization.begin(),plan.stage_materialization.end());
+            ids.push_back(plan.objective);ids.push_back(plan.record_assembly);
+        }
+        const auto valid=context.timing->validate_unstarted(ids);
+        if(const auto* failure=std::get_if<artifacts::ArtifactError>(&valid))
+            return unsupported("finite_minimax.timing_spans",failure->message,DiagnosticCode::invalid_input);
+    }
     FinalizeUnstartedPhases finalize{context,timing_spans};
     PlannedPhase validation{context,timing_spans?std::optional{timing_spans->validation}:std::nullopt,&finalize};
     auto reject_validation=[&validation](Unsupported result) {

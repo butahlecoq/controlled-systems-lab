@@ -120,6 +120,11 @@ std::variant<sets::SetData,Unsupported> stage_set(const FixedPlanRequest& reques
 FixedPlanOutcome fixed_plan_disturbance(const FixedPlanRequest& request,
     std::size_t max_points,const ExecutionContext& context,
     const FixedPlanTimingSpans* timing_spans) {
+    if(timing_spans&&context.timing) {
+        const auto valid=context.timing->validate_unstarted(timing_spans->stage_materialization);
+        if(const auto* failure=std::get_if<artifacts::ArtifactError>(&valid))
+            return unsupported("fixed_plan.timing_spans",failure->message,DiagnosticCode::invalid_input);
+    }
     FinalizeUnstartedStages finalize_stages{context,timing_spans};
     const auto dims=request.system.dimensions();
     const auto horizon=request.system.horizon();
