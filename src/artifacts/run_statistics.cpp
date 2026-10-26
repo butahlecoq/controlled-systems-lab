@@ -398,6 +398,10 @@ ArtifactResult<RunStatistics> publish_run(RunInput input) {
                 return ArtifactError{ArtifactErrorCode::invalid_input,
                     "run.final.incumbents["+std::to_string(index)+"].feasibility",
                     "Incumbent did not pass independent verification against the resolved problem"};
+            if(report.objective!=verification::CheckStatus::numerical_pass || !report.recomputed_objective)
+                return ArtifactError{ArtifactErrorCode::invalid_input,
+                    "run.final.incumbents["+std::to_string(index)+"].objective",
+                    "Incumbent objective did not pass independent verification against the resolved problem"};
             if(final->outcome.value==MathematicalOutcome::infeasible)
                 return ArtifactError{ArtifactErrorCode::invalid_input,"run.final.outcome",
                     "An independently verified feasible incumbent contradicts infeasibility"};

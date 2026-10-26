@@ -538,6 +538,15 @@ TEST_CASE("problem-aware run publication independently verifies synthesis incumb
     REQUIRE(std::holds_alternative<ar::ArtifactError>(rejected_bound));
     CHECK(std::get<ar::ArtifactError>(rejected_bound).path=="run.final.objective.upper");
 
+    auto wrong_objective=accepted(ar::decode_run(fixture_text())).description();
+    auto& wrong_incumbent=std::get<ar::SynthesisFinal>(wrong_objective.final).incumbents.front().witness;
+    wrong_incumbent.original_objective+=10.0;
+    auto& objective_bounds=std::get<ar::SynthesisFinal>(wrong_objective.final).objective;
+    objective_bounds.lower.reset();objective_bounds.upper.reset();
+    const auto rejected_objective=ar::publish_run({problem,wrong_objective});
+    REQUIRE(std::holds_alternative<ar::ArtifactError>(rejected_objective));
+    CHECK(std::get<ar::ArtifactError>(rejected_objective).path=="run.final.incumbents[0].objective");
+
     record.provenance=ar::ProblemProvenance::problem_revalidated;
     const auto identity_only=ar::publish_identity_recorded_run(std::move(record));
     REQUIRE(std::holds_alternative<ar::RunStatistics>(identity_only));
