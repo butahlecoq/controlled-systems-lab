@@ -1,0 +1,16 @@
+2121a07e35bc87482623562e5ad0c45476b21a42f4a8efe5a309a26596cb5902  ./README.md
+d2499f12257c636d2aa4a7c732711f9704a721e8f9a52137e77797c3aac634ce  ./b06-exact-oracle.json
+d02a98407cf92ed96658a766ee87800546f133183f0b6c0844070d6902f9bd57  ./b07-independent-oracle.json
+243ecc62766463f6c30d17563996176a85563033a1865805be3da4af18c5db15  ./b09-independent-oracle.json
+d3dad0582d58cd4056a6dec6d4338d6ca5a63863fda049b9c11816325434cc03  ./b09-lambda0-geometry.json
+523084ae997b91222837e5f42bb1eec232c892c7ad6514b38fafbd825865aa4e  ./b09-lambda1-geometry.json
+99a04e66b6811ddefd35759853c2b3e744bad6623f9819a403e357ca2c66145b  ./capture-provenance.json
+984e38bc44fad8b41c77c532bdaeeb84d8fae6a4b26770bcb45e4f8bf9d313fb  ./phase-summary.csv
+bc1528c4562eced5d6bab818f88450649bd56006aeef7b7e6ad9dd621995f818  ./phase-summary.md
+912768e6b687d0f3e9a65f80144a1fe04adb6fb588f2e851deb41c953a2a7c24  ./postprocess-timings.json
+724416c0cff5f1b46d1da8c8dd25ed89dbfead4796bcccecd26f5ca1a99082f9  ./projections-lambda0.svg
+0d9d9d30647e8e0e295ce25e6cbb42583667b99b20a634a63edcb857ff4697f7  ./projections-lambda1.svg
+3731ff96db1578c2c85e3d67bd1e380cf9800167323e68f3547da50d02aecc0c  ./raw/b06-phase.json.gz
+37392660b414388cbd1e982cc3e2a038d64edf964845da2db2bfe91a64050b15  ./raw/b07-phase.jsonl.gz
+2d9a5f739bacafcaa2145c2a87baafbec784c422fce00ce25c92a79f99e90120  ./raw/b09-lambda0-phase.json.gz
+a6497fbda20c1f51a637a37a2718c500c0bf2cfe6e383a8911b9ddadfd8cf38b  ./raw/b09-lambda1-phase.json.gz
