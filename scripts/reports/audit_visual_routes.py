@@ -8,6 +8,10 @@ import json
 from pathlib import Path
 import re
 
+import control_witness_companions
+
+import control_witness_companions
+
 
 ROOT = Path(__file__).resolve().parents[2]
 VISUAL_SIGNAL = re.compile(r"<svg|savefig\s*\(|write_image\s*\(|\.svg\b|\.png\b|render_svg", re.I)
@@ -123,6 +127,8 @@ def migration_issue(source: str) -> int:
 
 def source_inventory(root: Path) -> list[dict]:
     entries = []
+    reviewed = control_witness_companions.source_inventory()
+    found = set()
     bases = (root / "scripts/reports", root / "benchmarks/reporting")
     for base in bases:
         for path in sorted(base.rglob("*.py")):
@@ -137,6 +143,15 @@ def source_inventory(root: Path) -> list[dict]:
             assets = sorted({asset for node in ast.walk(tree)
                              if isinstance(node, ast.Constant) and isinstance(node.value, str)
                              for asset in ASSET_NAME.findall(node.value)})
+            if relative in reviewed:
+                spec = reviewed[relative]
+                found.add(relative)
+                entries.append({"source": relative, "signal_count": len(matches),
+                                "asset_name_literals": assets,
+                                "role": spec.role,
+                                "disposition": spec.disposition,
+                                "companion_ids": list(spec.companion_ids)})
+                continue
             if relative in COMPOSED_SAVED_ROUTES:
                 disposition = "composes-or-copies-existing-saved-figure"
             elif relative in SAVED_DATA_COMPANION_COLLECTORS:
@@ -152,6 +167,8 @@ def source_inventory(root: Path) -> list[dict]:
                 disposition = "shared-quantitative-policy-companion-renderer"
             elif relative == "scripts/reports/stage_projection_figures.py":
                 disposition = "adopted-shared-quantitative-policy"
+            elif relative.endswith("/control_witness_companions.py"):
+                disposition = "saved-control-witness-gallery-companion-builder"
             elif relative == "benchmarks/reporting/it17_hull/summarize.py":
                 disposition = "reviewed-static-diagram-exception"
             elif relative in {"scripts/reports/mpc03/b08_miqcp.py",
@@ -179,6 +196,9 @@ def source_inventory(root: Path) -> list[dict]:
                                if relative in VIZ10_ROLE_REASONS else {}),
                             **({"follow_up_issue": migration_issue(relative)}
                                if disposition == "deferred-family-specific-migration" else {})})
+    missing = set(reviewed) - found
+    if missing:
+        raise ValueError("reviewed VIZ-09 sources missing from visual scan: " + ", ".join(sorted(missing)))
     return entries
 
 
@@ -246,7 +266,7 @@ def build(root: Path = ROOT) -> dict:
                     "mpc03-b08-l04-miQCP-v1/solver-output.json",
                     "mpc03-b08-l04-miQCP-v1/independent-oracle.json",
                     "mpc03-b08-l04-miQCP-v1/disturbance-tube.svg"] + geometry_companion_assets() +
-                    viz10_companion_assets(),
+                    viz10_companion_assets() + control_witness_companions.asset_paths(),
                  "disposition": "adopted-shared-quantitative-policy"}],
             "migration_owner": "#669 owns the shared policy; deferred family renderers link to scoped follow-up issues #684–#687, while frozen report bundles remain immutable evidence"}
 

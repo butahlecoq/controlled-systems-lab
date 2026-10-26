@@ -15,6 +15,7 @@ ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / "scripts/reports"))
 import visual_examples as gallery
 import stage_app01 as app01_reports
+import control_witness_companions
 import stage_syn03_nominal_exact_example as nominal_exact_example
 
 
@@ -43,6 +44,17 @@ class GalleryTests(unittest.TestCase):
             target.mkdir(exist_ok=True)
             shutil.copyfile(example["records_path"], target / "records.json")
             (target / "index.html").write_text("<html><body>Reviewed report</body></html>")
+        report_ids = [report_id for report_id, *_ in control_witness_companions.PROJECTIONS]
+        report_ids.extend(("syn01-nominal-20261013-f7ba310d-48a679cfc0d4",
+                           "syn02-terminal-20261013-c234a1a0-35de886a7fb4",
+                           "syn06-verifier-20261012-f0e32e2b",
+                           "syn-ts01-paired-20261014-b7f1ac0"))
+        for report_id in report_ids:
+            target = self.site / report_id
+            target.mkdir(exist_ok=True)
+            source = ROOT / "reports/algorithm-results" / report_id
+            shutil.copyfile(source / "records.json", target / "records.json")
+            (target / "index.html").write_text("<html><body>Reviewed control report</body></html>")
         ext01 = self.site / "ext01-fixed-plan-303ad863ca3af58dc6a515844c474fe0e1af9349e55cb8acd1ff1a3f220f1b54"
         ext01.mkdir()
         shutil.copyfile(ROOT / "reports/algorithm-results/ext01-fixed-plan-20261016-11b7bc74/records.json",
@@ -156,6 +168,51 @@ class GalleryTests(unittest.TestCase):
         self.assertIn("not a validated exact enclosure", geometry_html)
         self.assertIn("constant-zero objective", hybrid_html)
         self.assertIn("two_parameter_scalar_polytopes.json", hybrid_html)
+    def test_control_witness_companions_project_frozen_relations(self):
+        originals = {report_id: hashlib.sha256((self.site / report_id / "records.json").read_bytes()).hexdigest()
+                     for report_id, *_ in control_witness_companions.PROJECTIONS}
+        result = control_witness_companions.build(self.site)
+        self.assertEqual(len(result.gallery_entries), 2)
+        gallery_anchors = {entry["anchor"] for entry in result.gallery_entries}
+        self.assertEqual(gallery_anchors, {"control-witness-companions", "control-witness-timings"})
+        self.assertTrue(all(set(disposition.companion_ids) <= gallery_anchors
+                            for disposition in control_witness_companions.SOURCE_DISPOSITIONS))
+        self.assertEqual(len([name for name in result.files if name.startswith("control-witness/strategy-") and name.endswith(".svg")]), 10)
+        strategy_timing = [name for name in result.files
+                            if name.startswith("control-witness/strategy-") and "-timing.svg" in name]
+        self.assertEqual(len(strategy_timing), 5)
+        for report_id, *_ in control_witness_companions.STRATEGY_TIMINGS:
+            task = next(f"ts0{n}" for n in range(1, 4) if f"-ts0{n}-" in report_id)
+            stem = "control-witness/" + ("strategy-a" if "syn03" in report_id else "strategy-b") + "-" + task + "-timing"
+            timing_record = json.loads(result.files[stem + "-evidence.json"])
+            self.assertEqual(timing_record["report_id"], report_id)
+            self.assertEqual(len(timing_record["rows"]), 7)
+        self.assertIn("control-witness/strategy-b-ts03-evidence.json", result.files)
+        page = result.files["control-witness-v1.html"].decode()
+        self.assertIn("Projection of the saved five-coordinate joint relation", page)
+        self.assertIn("(0,s,1,s,1), 0&lt;=s&lt;=1", page)
+        for report_id, digest in originals.items():
+            self.assertEqual(hashlib.sha256((self.site / report_id / "records.json").read_bytes()).hexdigest(), digest)
+        evidence = json.loads(result.files["control-witness/strategy-b-ts03-evidence.json"])
+        self.assertEqual(evidence["record_sha256"], originals["syn04-strategy-b-ts03-20261022-2c0c9210"])
+        self.assertEqual(evidence["projection"]["axes"], ["u0", "u1"])
+        self.assertEqual(evidence["projection"]["vertices"], [[0, 1], [1, 1]])
+        svg = ET.fromstring(result.files["control-witness/strategy-b-ts03.svg"])
+        self.assertEqual(svg.attrib["role"], "img")
+        self.assertTrue(any(node.tag.endswith("title") for node in svg))
+        self.assertTrue(any(node.tag.endswith("desc") for node in svg))
+        self.assertTrue(result.files["control-witness/strategy-b-ts03.png"].startswith(b"\x89PNG\r\n\x1a\n"))
+        syn02_evidence = json.loads(result.files["control-witness/syn02-timing-evidence.json"])
+        failed = [row for row in syn02_evidence["rows"] if row["label"].startswith("shifted-residual-degenerate")]
+        self.assertEqual(len(failed), 3)
+        self.assertTrue(all(row["median"] is None and "failed" in row["status"] for row in failed))
+        self.assertEqual(len([name for name in result.files if name.endswith(".svg")]), 14)
+        syn06_evidence = json.loads(result.files["control-witness/syn06-timing-evidence.json"])
+        self.assertEqual(syn06_evidence["rows"][0]["batch"], 28000)
+        self.assertEqual(syn06_evidence["rows"][0]["median"],
+                         syn06_evidence["rows"][0]["saved_median_elapsed_ns"] / 28000)
+        repeated = control_witness_companions.build(self.site)
+        self.assertEqual(result.files, repeated.files)
 
     def test_build_preserves_reports_and_has_resolvable_links(self):
         before = {p.relative_to(self.site): hashlib.sha256(p.read_bytes()).hexdigest()

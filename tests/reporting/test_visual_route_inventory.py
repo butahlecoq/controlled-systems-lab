@@ -91,7 +91,23 @@ class VisualRouteInventoryTests(unittest.TestCase):
                  "deferred-family-specific-migration", "composes-or-copies-existing-saved-figure",
                  "frozen-renderer-preserved-with-shared-policy-companion",
                  "measurement-collector-preserved-with-saved-data-companion",
-                 "shared-quantitative-policy-companion-renderer", "gallery-case-content-owner"}
+                 "shared-quantitative-policy-companion-renderer", "gallery-case-content-owner",
+                 "frozen-evidence-collector-preserved",
+                 "frozen-evidence-collector-preserved-with-gallery-timing-companion",
+                 "frozen-evidence-collector-preserved-with-failure-aware-gallery-companion",
+                 "frozen-renderer-preserved-with-gallery-companion",
+                 "frozen-report-composer-preserved", "publication-identity-map-preserved",
+                 "frozen-renderer-preserved-with-failure-aware-gallery-companion",
+                 "frozen-envelope-collector-preserved-with-gallery-timing-companion",
+                 "frozen-report-plot-preserved-with-saved-relation-companion",
+                 "frozen-report-plot-preserved-with-relation-and-timing-companions",
+                 "frozen-bundle-composer-preserved", "frozen-report-plot-preserved-with-labeled-projection",
+                 "frozen-bundle-composer-preserved-with-saved-timing-companion",
+                 "frozen-report-plot-preserved-with-projection-and-timing-companions",
+                 "frozen-report-plot-preserved-with-saved-timing-companion",
+                 "regeneration-entrypoint-preserved-gallery-never-invokes-it",
+                 "saved-control-witness-gallery-companion-builder",
+                 "reviewed-analytic-diagram-preserved"}
         self.assertTrue(all(entry["disposition"] in allowed for entry in producers.values()))
         deferred=[entry for entry in producers.values()
                   if entry["disposition"]=="deferred-family-specific-migration"]
@@ -99,7 +115,11 @@ class VisualRouteInventoryTests(unittest.TestCase):
         follow_up_counts={number:sum(entry["follow_up_issue"]==number for entry in deferred)
                           for number in (684,685,686,687,708,717)}
         self.assertEqual(follow_up_counts,
-                         {684:4,685:0,686:20,687:1,708:1,717:7})
+                         {684:4,685:0,686:0,687:1,708:1,717:7})
+        reviewed=[entry for entry in producers.values() if entry.get("role")]
+        self.assertEqual(len(reviewed),18)
+        self.assertEqual(set(entry["source"] for entry in reviewed),
+                         set(audit_visual_routes.control_witness_companions.source_inventory()))
         self.assertTrue(all(entry["follow_up_issue"] in follow_up_counts for entry in deferred))
         routes={entry["route"]:entry for entry in inventory["frozen_published_routes"]}
         self.assertGreater(len(routes),40)
@@ -155,7 +175,9 @@ class VisualRouteInventoryTests(unittest.TestCase):
             "mpc03-b08-l04-miQCP-v1/independent-oracle.json",
             "mpc03-b08-l04-miQCP-v1/disturbance-tube.svg",
             *audit_visual_routes.geometry_companion_assets(),
-            *audit_visual_routes.viz10_companion_assets()})
+            *audit_visual_routes.viz10_companion_assets(),
+            *audit_visual_routes.control_witness_companions.asset_paths()})
+
         self.assertEqual((ROOT/"docs/examples/examples.css").read_bytes(),
                          (ROOT/"scripts/reports/visual_examples.css").read_bytes())
         before=ROOT/"docs/examples/fuel-b06-viz06-before.svg"
