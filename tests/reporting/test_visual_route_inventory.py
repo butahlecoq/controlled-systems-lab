@@ -54,8 +54,11 @@ class VisualRouteInventoryTests(unittest.TestCase):
         self.assertTrue(all(entry["follow_up_issue"] in follow_up_counts for entry in deferred))
         routes={entry["route"]:entry for entry in inventory["frozen_published_routes"]}
         self.assertGreater(len(routes),40)
-        self.assertTrue(all(entry["disposition"].startswith("deferred: route-level readability")
+        self.assertTrue(all(entry["disposition"].startswith("deferred: original frozen route-level readability")
                             and entry["follow_up_issue"] == 669 for entry in routes.values()))
+        self.assertEqual(routes["app03-zonotope-4522855018fa9b0b"]["companion_route"],
+                         "examples/app03-zonotope-v1.html")
+        self.assertEqual(routes["app03-zonotope-4522855018fa9b0b"]["follow_up_issue"], 669)
         self.assertTrue(any(name.endswith("terminal-projections.svg")
                             for entry in routes.values() for name in entry["assets"]))
         self.assertEqual(inventory["gallery_routes"][0]["route"],"examples/index.html")

@@ -134,7 +134,7 @@ def app03_companion(record_path: Path, style_path: Path) -> dict[str, bytes]:
     document = {"schema": "csl.saved-geometric-plot/1",
                 "title": "APP-03 saved planar zonotope and axis cover",
                 "description": ("The input boundary is the convex hull of the eight signed sums formed directly from the three archived generator columns. "
-                                "White points show those saved-coefficient sums; the orange square uses the recorded outer-cover generators. "
+                                "Dark points show those saved-coefficient sums; the orange square uses the recorded outer-cover generators. "
                                 "This is a 2D display of one saved fixture, not a new geometry query or a finite error certificate."),
                 "aspect": "equal",
                 "axes": {"x": {"label": "x coordinate (source units unspecified)"},

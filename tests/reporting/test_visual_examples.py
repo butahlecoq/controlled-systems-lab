@@ -285,6 +285,7 @@ class GalleryTests(unittest.TestCase):
         app03_svg = ET.parse(self.site / "examples/app03-zonotope-v1.svg").getroot()
         app03_description = app03_svg.find("{http://www.w3.org/2000/svg}desc")
         self.assertIn("convex hull of the eight signed sums", app03_description.text)
+        self.assertIn("Dark points show those saved-coefficient sums", app03_description.text)
         self.assertIn("outer-cover generators", app03_description.text)
         square = ET.parse(self.site / "examples/square_duplicates.svg")
         boundary = square.find(".//{http://www.w3.org/2000/svg}polygon")
