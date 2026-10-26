@@ -33,7 +33,7 @@ public:
     void boundary() {
         if(context_.cancellation.stop_requested())stop(Termination::cancelled,"cancellation observed");
         if(context_.deadline&&std::chrono::steady_clock::now()>=*context_.deadline)
-            stop(Termination::resource_limit,"deadline observed");
+            stop(Termination::deadline_expired,"deadline observed");
     }
     double number(double value) {
         if(!std::isfinite(value))stop(Termination::numerical_failure,"nonfinite verification arithmetic");
@@ -69,16 +69,20 @@ public:
         const auto id=[&](const ProblemId& subject,const std::string& field) {
             if(subject!=report_.problem)mismatch(field,"problem identity differs from original resolved data");
         };
-        const auto support=[&](const EvidenceSupport& evidence,const std::string& field) {
+        const auto support=[&](const EvidenceSupport& evidence,const std::string& field,
+            const std::optional<ProgramIdentity>& expected_program) {
             if(const auto* n=std::get_if<NumericalCheck>(&evidence))
                 if(!finite_nonnegative(n->absolute_tolerance)||!finite_nonnegative(n->relative_tolerance)||
                     !finite_nonnegative(n->max_residual)||n->verifier.value.empty())mismatch(field,"malformed numerical evidence");
+            if(const auto* proof=std::get_if<ExactFarkasEvidence>(&evidence))
+                if(!expected_program||proof->subject()!=*expected_program)
+                    mismatch(field,"exact Farkas evidence is not bound to the exact expected program");
         };
         const auto claim=[&](const ClaimEvidence& evidence,const std::string& field) {
-            id(evidence.problem,field);support(evidence.support,field);
+            id(evidence.problem,field);support(evidence.support,field,std::nullopt);
         };
         id(report_.input.witness.problem,"witness.problem");
-        if(const auto& outcome=report_.input.outcome) {id(outcome->subject,"outcome.subject");support(outcome->support,"outcome.support");}
+        if(const auto& outcome=report_.input.outcome) {id(outcome->subject,"outcome.subject");support(outcome->support,"outcome.support",std::nullopt);}
         if(const auto& family=report_.input.family) {
             const auto& identity=family->identity();
             id(identity.problem,"family.problem");id(identity.request.objective,"family.request.objective");
@@ -140,7 +144,7 @@ public:
             const auto program_bound=[&](const std::optional<ProgramObjectiveBound>& b,const std::string& suffix) {
                 if(!b)return;
                 const auto field=indexed("backend_bounds",i)+suffix;
-                id(b->evidence.subject.problem,field);support(b->evidence.support,field);
+                id(b->evidence.subject.problem,field);support(b->evidence.support,field,b->evidence.subject);
                 if(b->evidence.subject.program.value.empty()||!std::isfinite(b->value))mismatch(field,"missing program identity or nonfinite bound");
             };
             program_bound(report_.input.backend_bounds[i].lower,".lower");program_bound(report_.input.backend_bounds[i].upper,".upper");

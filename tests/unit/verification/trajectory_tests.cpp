@@ -4,6 +4,7 @@
 #include <algorithm>
 #include <limits>
 #include <csl/optimization/phase_one.hpp>
+#include <csl/optimization/linear_infeasibility_certificate.hpp>
 using namespace csl;
 using namespace csl::verification;
 namespace {
@@ -358,9 +359,32 @@ TEST_CASE("stops and count limits retain supplied evidence and checked prefixes"
     std::stop_source stop;stop.request_stop();ExecutionContext c;c.cancellation=stop.get_token();
     auto r=verify_trajectory(p,q,c);CHECK(r.termination==Termination::cancelled);CHECK(r.feasibility==CheckStatus::not_checked);REQUIRE(r.input.bounds.lower);
     CHECK(std::get<CertificateReference>(r.input.bounds.lower->evidence.support).artifact=="retained");
-    c={};c.deadline=std::chrono::steady_clock::time_point::min();CHECK(verify_trajectory(p,q,c).termination==Termination::resource_limit);
+    c={};c.deadline=std::chrono::steady_clock::time_point::min();CHECK(verify_trajectory(p,q,c).termination==Termination::deadline_expired);
     q.limits.residuals=1;r=verify_trajectory(p,q);CHECK(r.termination==Termination::resource_limit);CHECK(r.residuals.size()==1);
     CHECK(r.feasibility!=CheckStatus::numerical_pass);
+}
+TEST_CASE("Farkas evidence must bind the exact generated program or remain unpromoted") {
+    const auto p=resolve(scalar());
+    auto published=optimization::make_linear_program({{p.identity(),{"farkas/first"}},{0},0,
+        {2,1,{0,1,2},{0,0},{1,1}},{{{},{}}},{{1,{}},{{},0}}});
+    REQUIRE(std::holds_alternative<LinearProgram>(published));
+    const auto first=std::get<LinearProgram>(std::move(published));
+    const LinearInfeasibilityCertificate certificate{first.identity(),{1,0},{0,1},{0},{0}};
+    auto checked=optimization::verify_linear_infeasibility_certificate(first,certificate);
+    REQUIRE(std::holds_alternative<ExactFarkasEvidence>(checked));
+    const auto proof=std::get<ExactFarkasEvidence>(std::move(checked));
+
+    auto q=request(p);
+    q.backend_bounds.push_back({ProgramObjectiveBound{0,{first.identity(),proof,{}}},std::nullopt});
+    CHECK(verify_trajectory(p,q).bindings==CheckStatus::numerical_pass);
+
+    auto foreign=first.identity();foreign.program={"farkas/foreign"};
+    q.backend_bounds[0].lower->evidence.subject=foreign;
+    CHECK(verify_trajectory(p,q).bindings==CheckStatus::invalid_input);
+
+    q=request(p);
+    q.bounds.lower=ObjectiveBound{0,{p.identity(),proof}};
+    CHECK(verify_trajectory(p,q).bindings==CheckStatus::invalid_input);
 }
 TEST_CASE("late cancellation after registered membership retains evidence without completing claims") {
     auto input=scalar();input.states[1]=segment_v();auto p=resolve(input);auto q=request(p);

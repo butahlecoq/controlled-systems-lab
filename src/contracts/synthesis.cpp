@@ -318,14 +318,14 @@ Diagnostics check_synthesis_result(const SynthesisResult& result,const Synthesis
         }
     } else if (std::holds_alternative<ContractValidationFailure>(result.stop))
         add(DiagnosticCode::invalid_claim,"result.stop","ContractValidationFailure requires contract_rejected termination");
-    if (result.termination==Termination::cancelled || result.termination==Termination::resource_limit ||
-        result.termination==Termination::numerical_failure) {
+    if (result.termination==Termination::cancelled || result.termination==Termination::deadline_expired ||
+        result.termination==Termination::resource_limit || result.termination==Termination::numerical_failure) {
         if (!std::holds_alternative<ScopedOperationStopped>(result.stop))
             add(DiagnosticCode::invalid_claim,"result.stop","Cancelled, deadline and resource stops require scoped stop evidence");
         else {
         const auto reason=std::get<ScopedOperationStopped>(result.stop).stop.reason;
-        if ((result.termination==Termination::cancelled && reason!=StopReason::cancelled &&
-                reason!=StopReason::deadline_expired) ||
+        if ((result.termination==Termination::cancelled && reason!=StopReason::cancelled) ||
+            (result.termination==Termination::deadline_expired && reason!=StopReason::deadline_expired) ||
             (result.termination==Termination::resource_limit && reason!=StopReason::resource_limit) ||
             (result.termination==Termination::numerical_failure && reason!=StopReason::numerical_failure))
             add(DiagnosticCode::invalid_claim,"result.stop.reason","Execution termination and scoped stop reason differ");
