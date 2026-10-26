@@ -159,8 +159,7 @@
       "asset_name_literals": [
         "timings.svg"
       ],
-      "disposition": "deferred-family-specific-migration",
-      "follow_up_issue": 685
+      "disposition": "frozen-renderer-preserved-with-shared-policy-companion"
     },
     {
       "source": "scripts/reports/geo02_registered_reports.py",
@@ -176,8 +175,7 @@
       "asset_name_literals": [
         "latency.svg"
       ],
-      "disposition": "deferred-family-specific-migration",
-      "follow_up_issue": 685
+      "disposition": "frozen-renderer-preserved-with-shared-policy-companion"
     },
     {
       "source": "scripts/reports/geo03/validate_report.py",
@@ -191,8 +189,7 @@
       "asset_name_literals": [
         "latency.svg"
       ],
-      "disposition": "deferred-family-specific-migration",
-      "follow_up_issue": 685
+      "disposition": "frozen-renderer-preserved-with-shared-policy-companion"
     },
     {
       "source": "scripts/reports/geo04_registered_reports.py",
@@ -206,8 +203,7 @@
       "source": "scripts/reports/geo05/render.py",
       "signal_count": 3,
       "asset_name_literals": [],
-      "disposition": "deferred-family-specific-migration",
-      "follow_up_issue": 685
+      "disposition": "frozen-renderer-preserved-with-shared-policy-companion"
     },
     {
       "source": "scripts/reports/geo06_registered_reports.py",
@@ -221,8 +217,7 @@
       "asset_name_literals": [
         "performance.svg"
       ],
-      "disposition": "deferred-family-specific-migration",
-      "follow_up_issue": 685
+      "disposition": "frozen-renderer-preserved-with-shared-policy-companion"
     },
     {
       "source": "scripts/reports/geo07_dependent/render_saved.py",
@@ -230,8 +225,7 @@
       "asset_name_literals": [
         "performance.svg"
       ],
-      "disposition": "deferred-family-specific-migration",
-      "follow_up_issue": 685
+      "disposition": "frozen-renderer-preserved-with-shared-policy-companion"
     },
     {
       "source": "scripts/reports/geo07_port/render_saved.py",
@@ -239,8 +233,7 @@
       "asset_name_literals": [
         "performance.svg"
       ],
-      "disposition": "deferred-family-specific-migration",
-      "follow_up_issue": 685
+      "disposition": "frozen-renderer-preserved-with-shared-policy-companion"
     },
     {
       "source": "scripts/reports/geo08/render_saved.py",
@@ -248,13 +241,23 @@
       "asset_name_literals": [
         "lazy-2d.svg"
       ],
-      "disposition": "deferred-family-specific-migration",
-      "follow_up_issue": 685
+      "disposition": "frozen-renderer-preserved-with-shared-policy-companion"
     },
     {
       "source": "scripts/reports/geometry_figures.py",
       "signal_count": 4,
       "asset_name_literals": [
+        "geometry.png",
+        "geometry.svg"
+      ],
+      "disposition": "shared-quantitative-policy-companion-renderer"
+    },
+    {
+      "source": "scripts/reports/geometry_opt_companions.py",
+      "signal_count": 12,
+      "asset_name_literals": [
+        "figure.png",
+        "figure.svg",
         "geometry.png",
         "geometry.svg"
       ],
@@ -338,8 +341,7 @@
       "asset_name_literals": [
         "performance.svg"
       ],
-      "disposition": "deferred-family-specific-migration",
-      "follow_up_issue": 685
+      "disposition": "frozen-renderer-preserved-with-shared-policy-companion"
     },
     {
       "source": "scripts/reports/opt04/validate_report.py",
@@ -363,8 +365,7 @@
       "asset_name_literals": [
         "feasible-box-2d.svg"
       ],
-      "disposition": "deferred-family-specific-migration",
-      "follow_up_issue": 685
+      "disposition": "frozen-renderer-preserved-with-shared-policy-companion"
     },
     {
       "source": "scripts/reports/opt12_registered_reports.py",
@@ -380,8 +381,7 @@
       "asset_name_literals": [
         "comparison.svg"
       ],
-      "disposition": "deferred-family-specific-migration",
-      "follow_up_issue": 685
+      "disposition": "frozen-renderer-preserved-with-shared-policy-companion"
     },
     {
       "source": "scripts/reports/plot.py",
@@ -765,8 +765,7 @@
       "asset_name_literals": [
         "fixture-geometry.svg"
       ],
-      "disposition": "deferred-family-specific-migration",
-      "follow_up_issue": 685
+      "disposition": "reviewed-static-diagram-exception"
     }
   ],
   "frozen_published_routes": [
@@ -1352,7 +1351,52 @@
         "ext05-states-v1.html",
         "ext05-states-v1.svg",
         "ext05-states-v1.png",
-        "ext05-states-v1-export.json"
+        "ext05-states-v1-export.json",
+        "geometry-optimization-v1.html",
+        "geometry-opt/geo02/figure.svg",
+        "geometry-opt/geo02/figure.png",
+        "geometry-opt/geo02/export.json",
+        "geometry-opt/data/geo02-20261013T061151Z-338ff7d1d63c.json",
+        "geometry-opt/geo03/figure.svg",
+        "geometry-opt/geo03/figure.png",
+        "geometry-opt/geo03/export.json",
+        "geometry-opt/data/geo03-20261012-3c12ca125831.json",
+        "geometry-opt/geo04/figure.svg",
+        "geometry-opt/geo04/figure.png",
+        "geometry-opt/geo04/export.json",
+        "geometry-opt/data/geo04-20261012T224946Z-c37852bcc80d.json",
+        "geometry-opt/geo05/figure.svg",
+        "geometry-opt/geo05/figure.png",
+        "geometry-opt/geo05/export.json",
+        "geometry-opt/data/geo05-7fddaba0c7698f72.json",
+        "geometry-opt/geo07/figure.svg",
+        "geometry-opt/geo07/figure.png",
+        "geometry-opt/geo07/export.json",
+        "geometry-opt/data/geo07-9ef0d347291774da.json",
+        "geometry-opt/geo07-dependent/figure.svg",
+        "geometry-opt/geo07-dependent/figure.png",
+        "geometry-opt/geo07-dependent/export.json",
+        "geometry-opt/data/geo07-dependent-4dcc5a8fe36f17ed.json",
+        "geometry-opt/geo07-port/figure.svg",
+        "geometry-opt/geo07-port/figure.png",
+        "geometry-opt/geo07-port/export.json",
+        "geometry-opt/data/geo07-port-4dee19cde3d50259.json",
+        "geometry-opt/opt04/figure.svg",
+        "geometry-opt/opt04/figure.png",
+        "geometry-opt/opt04/export.json",
+        "geometry-opt/data/opt04-20261013T172839Z-6451c4b89d3b.json",
+        "geometry-opt/opt12/figure.svg",
+        "geometry-opt/opt12/figure.png",
+        "geometry-opt/opt12/export.json",
+        "geometry-opt/data/opt12-7b732a53716c.json",
+        "geometry-opt/geo08/geometry.svg",
+        "geometry-opt/geo08/geometry.png",
+        "geometry-opt/geo08/export.json",
+        "geometry-opt/data/geo08-lazy-6dbdd6b2f9235837.json",
+        "geometry-opt/opt10/geometry.svg",
+        "geometry-opt/opt10/geometry.png",
+        "geometry-opt/opt10/export.json",
+        "geometry-opt/data/opt10-smooth-188130d94d7bf2de.json"
       ],
       "disposition": "adopted-shared-quantitative-policy"
     }

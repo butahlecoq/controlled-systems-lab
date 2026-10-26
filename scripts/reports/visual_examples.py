@@ -14,6 +14,7 @@ import geo04_registered_reports as intersection_reports
 import geo06_registered_reports as hull_reports
 import audit_visual_routes
 import approx_extension_companions
+import geometry_opt_companions
 import report_data
 import stage_ext07 as ext07_reports
 import visual_illustrations
@@ -868,6 +869,9 @@ def build(catalog, site):
     out.mkdir(exist_ok=True)
     outputs = {e["slug"] + ".svg": plot(e) for e in examples}
     outputs.update(analytic_files)
+    _, geometry_inventory, geometry_assets = geometry_opt_companions.build(out)
+    for asset in geometry_assets:
+        outputs[asset] = (out / asset).read_bytes()
     fuel_assets = Path(__file__).parents[2] / "docs/examples"
     fuel_files = ("fuel-b06-viz03.html", "fuel-b06-viz03-source.json", "fuel-b06-viz03-export.json",
                   "fuel-b06-flow-projection.svg", "fuel-b06-flow-projection.png", "fuel-b06-stock-projection.svg",
@@ -893,6 +897,14 @@ def build(catalog, site):
                                   "figure": example["slug"] + ".svg", "source_page": source_page,
                                   "raw_record": raw_record})
     gallery_inventory.extend(analytic_inventory)
+    geometry_first = geometry_inventory[0]
+    gallery_inventory.append({"family": "Geometry and optimization",
+                              "title": "Readable geometry and timing figures",
+                              "status": "saved-data-companion", "anchor": "geometry-optimization-companions",
+                              "page": "index.html#geometry-optimization-companions",
+                              "figure": geometry_first["figure"],
+                              "source_page": "geometry-optimization-v1.html",
+                              "raw_record": geometry_first["records"]})
     for entry in gallery_inventory:
         if entry["anchor"] == "visual-issue3-validated-minimax-2d":
             entry["walkthrough_page"] = "issue3-control-walkthrough.html"
@@ -997,6 +1009,10 @@ def build(catalog, site):
             'Cards marked “Saved-data companion” are generated into this gallery from frozen records; they do not change those reports. '
             'Open a report for exact inputs, answers, reproduction commands, provenance and evidence limits.</p>'
             '<div class="saved-grid">' + saved_figures +
+            '<article class="saved-figure" id="geometry-optimization-companions"><p class="eyebrow">Geometry and optimization · Saved-data companion</p>'
+            '<h3>Readable geometry and timing figures</h3><p>Eleven companions replot frozen report records with the shared quantitative axis policy. '
+            'The geometry examples use saved 2D coordinates; timing charts show saved medians and observed ranges.</p>'
+            '<p><a href="geometry-optimization-v1.html">Open geometry and optimization figures →</a></p></article>' +
             f'<article class="saved-figure" id="{lotka_anchor}"><p class="eyebrow">Saved sample geometry · Saved-data companion</p>'
             '<h3>Lotka–Volterra samples with shared quantitative axes</h3>'
             '<a href="lotka-volterra-sampled-v1.html"><img src="lotka-volterra-sampled-v1.svg" '

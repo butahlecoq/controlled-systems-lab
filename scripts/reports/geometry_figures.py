@@ -23,6 +23,9 @@ def render(document: dict, style_path: Path, out: Path) -> dict:
         raise ValueError("both coordinate axes need visible labels")
     if document.get("aspect") not in {"equal", "independent"}:
         raise ValueError("aspect must be explicit")
+    tick_bins = document.get("tick_bins", 5)
+    if not isinstance(tick_bins, int) or not 2 <= tick_bins <= 10:
+        raise ValueError("tick_bins must be an integer from 2 through 10")
     series = document.get("series")
     if not isinstance(series, list) or not series:
         raise ValueError("at least one saved geometry series is required")
@@ -53,7 +56,7 @@ def render(document: dict, style_path: Path, out: Path) -> dict:
     if style.get("schema") != "csl.figure-style/1" or style.get("quantitative_axis_policy") != figure_style.STYLE_ID:
         raise ValueError("expected the versioned csl-report-quantitative-v1 style")
     out = Path(out)
-    out.mkdir(parents=True, exist_ok=False)
+    out.mkdir(parents=True, exist_ok=True)
     os.environ.setdefault("MPLCONFIGDIR", str(out.parent / "mpl-config"))
     import matplotlib
     if matplotlib.__version__ != style.get("matplotlib_version"):
@@ -100,7 +103,7 @@ def render(document: dict, style_path: Path, out: Path) -> dict:
                 scale_note = "Equal data scaling on both axes."
             else:
                 scale_note = "Independent data scaling on the two axes."
-            figure_style.configure_numeric_axis(axis)
+            figure_style.configure_numeric_axis(axis, bins=tick_bins)
             handles, labels = axis.get_legend_handles_labels()
             fig.suptitle(document["title"], fontsize=10, y=.98, wrap=True)
             fig.legend(handles, labels, fontsize="small", loc="upper center",

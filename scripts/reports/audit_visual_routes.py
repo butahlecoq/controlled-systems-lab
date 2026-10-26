@@ -28,6 +28,17 @@ SAVED_COMPANION_ROUTES = {
     "scripts/reports/ext01/render_saved.py",
     "scripts/reports/ext05/render_saved.py",
     "scripts/reports/lotka_volterra_sampled.py",
+    "scripts/reports/geo02/render.py",
+    "scripts/reports/geo03/build_report.py",
+    "scripts/reports/geo04/render.py",
+    "scripts/reports/geo05/render.py",
+    "scripts/reports/geo07/render_saved.py",
+    "scripts/reports/geo07_dependent/render_saved.py",
+    "scripts/reports/geo07_port/render_saved.py",
+    "scripts/reports/geo08/render_saved.py",
+    "scripts/reports/opt04/render.py",
+    "scripts/reports/opt10/render_saved.py",
+    "scripts/reports/opt12_render.py",
 }
 FROZEN_COMPANIONS = {
     "app02-box-8ff979de60ea9d22": "examples/app02-diamond-v1.html",
@@ -66,8 +77,11 @@ def source_inventory(root: Path) -> list[dict]:
                 disposition = "composes-or-copies-existing-saved-figure"
             elif relative in SAVED_COMPANION_ROUTES:
                 disposition = "frozen-renderer-preserved-with-shared-policy-companion"
-            elif relative.endswith(("/geometry_figures.py", "/approx_extension_companions.py")):
+            elif relative.endswith(("/geometry_figures.py", "/approx_extension_companions.py",
+                                    "/geometry_opt_companions.py")):
                 disposition = "shared-quantitative-policy-companion-renderer"
+            elif relative == "benchmarks/reporting/it17_hull/summarize.py":
+                disposition = "reviewed-static-diagram-exception"
             elif relative.endswith("/control_figures.py") or relative.endswith("/plot.py"):
                 disposition = "adopted-shared-quantitative-policy"
             elif relative.endswith("/visual_illustrations.py"):
@@ -136,9 +150,21 @@ def build(root: Path = ROOT) -> dict:
                     "ext01-b08-timing-v1.html", "ext01-b08-timing-v1.svg",
                     "ext01-b08-timing-v1.png", "ext01-b08-timing-v1-export.json",
                     "ext05-states-v1.html", "ext05-states-v1.svg",
-                    "ext05-states-v1.png", "ext05-states-v1-export.json"],
+                    "ext05-states-v1.png", "ext05-states-v1-export.json"] + geometry_companion_assets(),
                  "disposition": "adopted-shared-quantitative-policy"}],
             "migration_owner": "#669 owns the shared policy; deferred family renderers link to scoped follow-up issues #684–#687, while frozen report bundles remain immutable evidence"}
+
+
+def geometry_companion_assets() -> list[str]:
+    from geometry_opt_companions import GEOMETRY_REPORTS, TIMING_REPORTS
+    assets = ["geometry-optimization-v1.html"]
+    for slug, report_id, *_ in TIMING_REPORTS:
+        assets.extend((f"geometry-opt/{slug}/figure.svg", f"geometry-opt/{slug}/figure.png",
+                       f"geometry-opt/{slug}/export.json", f"geometry-opt/data/{report_id}.json"))
+    for slug, report_id, *_ in GEOMETRY_REPORTS:
+        assets.extend((f"geometry-opt/{slug}/geometry.svg", f"geometry-opt/{slug}/geometry.png",
+                       f"geometry-opt/{slug}/export.json", f"geometry-opt/data/{report_id}.json"))
+    return assets
 
 
 def main() -> None:
