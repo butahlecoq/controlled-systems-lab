@@ -909,7 +909,7 @@ def build(catalog, site):
         gallery_inventory.append(entry)
     fuel_anchor = "visual-fuel-b06-viz03"
     fuel_entry = {"family":"Fuel minimax reference", "title":"B06 fuel terminal set: readable 4D-to-2D projections",
-                  "status":"saved-report-figure", "anchor":fuel_anchor, "page":"fuel-b06-viz06.html",
+                  "status":"saved-data-companion", "anchor":fuel_anchor, "page":"fuel-b06-viz06.html",
                   "figure":"fuel-b06-viz06-flow.svg", "source_page":"https://github.com/butahlecoq/controlled-systems-lab/blob/main/reports/algorithm-results/b06-owner-confirmed-7df01ba3af5e4c46/index.html",
                   "raw_record":"fuel-b06-viz06-source.json"}
     gallery_inventory.append(fuel_entry)
@@ -979,23 +979,24 @@ def build(catalog, site):
             'Cards marked “Saved-data companion” are generated into this gallery from frozen records; they do not change those reports. '
             'Open a report for exact inputs, answers, reproduction commands, provenance and evidence limits.</p>'
             '<div class="saved-grid">' + saved_figures +
-            f'<article class="saved-figure" id="{lotka_anchor}"><p class="eyebrow">Saved sample geometry</p>'
+            f'<article class="saved-figure" id="{lotka_anchor}"><p class="eyebrow">Saved sample geometry · Saved-data companion</p>'
             '<h3>Lotka–Volterra samples with shared quantitative axes</h3>'
             '<a href="lotka-volterra-sampled-v1.html"><img src="lotka-volterra-sampled-v1.svg" '
             'alt="Saved Lotka–Volterra state samples across four stage bands"></a>'
             '<p>Replots the frozen sample record with numeric ticks, major grids, and disclosed independent scales; samples are not reachability bounds.</p>'
             '<p><a href="lotka-volterra-sampled-v1.html">Open the saved-data companion →</a></p></article>' +
-            '<article class="saved-figure" id="app02-diamond-v1"><p class="eyebrow">Box approximation</p>'
+            '<article class="saved-figure" id="app02-diamond-v1"><p class="eyebrow">Box approximation · Saved-data companion</p>'
             '<h3>APP-02 diamond approximations</h3><a href="app02-diamond-v1.html"><img src="app02-diamond-v1.svg" '
             'alt="Saved APP-02 diamond input, outer bounds, and inner box on labelled x-y axes"></a>'
             '<p>Replots the frozen vertices with numeric ticks, major grids, and equal x-y scales.</p>'
             '<p><a href="app02-diamond-v1.html">Open the saved-data companion →</a></p></article>' +
-            '<article class="saved-figure" id="app04-square-v1"><p class="eyebrow">Ellipsoidal approximation</p>'
+            '<article class="saved-figure" id="app04-square-v1"><p class="eyebrow">Ellipsoidal approximation · Saved-data companion</p>'
             '<h3>APP-04 square and ellipses</h3><a href="app04-square-v1.html"><img src="app04-square-v1.svg" '
             'alt="Saved APP-04 square and two enclosing ellipses on labelled x-y axes"></a>'
             '<p>Replots the frozen vertices and radii with numeric ticks, major grids, and equal x-y scales.</p>'
             '<p><a href="app04-square-v1.html">Open the saved-data companion →</a></p></article>' +
-            f'<article class="saved-figure" id="{fuel_anchor}"><h3>{escape(fuel_entry["title"])}</h3>'
+            f'<article class="saved-figure" id="{fuel_anchor}"><p class="eyebrow">Fuel minimax reference · Saved-data companion</p>'
+            f'<h3>{escape(fuel_entry["title"])}</h3>'
             f'<p>{escape("Readable, versioned SVG and PNG projections of the saved 4D B06 terminal set, with exact values, units, target, evidence limits and reproduction commands.")}</p>'
             f'<a href="{fuel_entry["page"]}"><img src="{fuel_entry["figure"]}" alt="{escape("B06 four-state terminal set projected onto flow coordinates")}"></a>'
             f'<p><a href="{fuel_entry["page"]}">Open the fuel projections and timing figures →</a></p></article>' + '</div></section>' +

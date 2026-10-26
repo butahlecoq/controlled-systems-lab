@@ -193,6 +193,10 @@ class GalleryTests(unittest.TestCase):
         self.assertIn("End-to-end walkthrough", page)
         self.assertIn('href="lotka-volterra-sampled-v1.html"', page)
         self.assertIn("Cards marked “Saved-data companion” are generated into this gallery from frozen records", page)
+        for stem in ("saved-figure-lotka-quantitative", "app02-diamond-v1", "app04-square-v1",
+                     "visual-fuel-b06-viz03"):
+            card = page.split(f'id="{stem}"', 1)[1].split("</article>", 1)[0]
+            self.assertIn("Saved-data companion", card)
         self.assertIn("065de5e45d295dfa099e25265c4014c0c46673f8", page)
         self.assertIn("blob/b83b8dc415dbe5811371b8446931ae4c6f3d2e28/reports/algorithm-results/tooling/geo04/polyhedral_intersection_driver.cpp", page)
         parser = Links()
@@ -236,6 +240,9 @@ class GalleryTests(unittest.TestCase):
                            if entry["anchor"] == "saved-figure-lotka-quantitative")
         self.assertEqual(lotka_entry["figure"], "lotka-volterra-sampled-v1.svg")
         self.assertEqual(lotka_entry["status"], "saved-data-companion")
+        fuel_entry = next(entry for entry in visual_inventory["entries"]
+                          if entry["anchor"] == "visual-fuel-b06-viz03")
+        self.assertEqual(fuel_entry["status"], "saved-data-companion")
         for stem, expected_text in (("app02-diamond-v1", "saved input and rotated outer bound"),
                                    ("app04-square-v1", "diagonal orientation")):
             companion_page = (self.site / "examples" / (stem + ".html")).read_text()
