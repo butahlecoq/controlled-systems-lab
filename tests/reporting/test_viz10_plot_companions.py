@@ -4,6 +4,9 @@ from pathlib import Path
 import sys
 import tempfile
 import unittest
+from unittest.mock import patch
+
+import matplotlib.axes
 
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / "scripts/reports"))
@@ -50,7 +53,34 @@ class Viz10SavedPlotCompanionTests(unittest.TestCase):
     def test_companions_replay_saved_records_with_quantitative_axes_and_provenance(self):
         with tempfile.TemporaryDirectory(prefix="viz10-render-", dir=ROOT) as temporary:
             out = Path(temporary) / "gallery"
-            renderer.build(out)
+            plotted_fuel_rows = []
+            original_scatter = matplotlib.axes.Axes.scatter
+
+            def capture_scatter(axis, x, y, *args, **kwargs):
+                label = kwargs.get("label") or ""
+                if label.startswith("Stored terminal V rows"):
+                    plotted_fuel_rows.append((list(x), list(y)))
+                return original_scatter(axis, x, y, *args, **kwargs)
+
+            with patch.object(matplotlib.axes.Axes, "scatter", new=capture_scatter):
+                renderer.build(out)
+
+            expected_fuel_rows = []
+            for case in renderer.load_jsonl(ROOT / "reports/algorithm-results/b07-owner-approved-eight-case-v1/results.jsonl"):
+                vertices = case["winner_terminal_vertices_x1_x3_x2_x4"]
+                expected_fuel_rows.extend(
+                    ([vertex[first] for vertex in vertices], [vertex[second] for vertex in vertices])
+                    for first, second, _, _ in renderer.B07_PAIRS
+                )
+            for objective in renderer.load_jsonl(ROOT / "reports/algorithm-results/b09-a08-source-reference-4818ddde/results.jsonl"):
+                vertices = objective["winner_terminal_vertices_x1_x2_x3_x4"]
+                expected_fuel_rows.extend(
+                    ([vertex[first] for vertex in vertices], [vertex[second] for vertex in vertices])
+                    for first, second, _, _ in renderer.FUEL_PAIRS
+                )
+            self.assertEqual(plotted_fuel_rows, expected_fuel_rows)
+            self.assertEqual(len(plotted_fuel_rows), 20)
+
             manifest = json.loads((out / "manifest.json").read_text(encoding="utf-8"))
             self.assertEqual(manifest["schema"], "csl.viz10-gallery/1")
             self.assertEqual(manifest["quantitative_axis_policy"], "csl-report-quantitative-v1")
