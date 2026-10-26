@@ -9,6 +9,7 @@ int main() {
     plant.parameters = std::vector<PlantParameter>{{"gain", 1.0, "dimensionless"}};
     plant.initial_state = Vector{0.0};
     plant.times = std::vector<double>{0.0, 1.0, 2.0};
+    plant.time_unit = "s";
     plant.state_units = {"dimensionless"};
     plant.control_units = {"dimensionless"};
     plant.objective_name = "terminal state";

@@ -3,7 +3,8 @@
 `CSL::simulation` consumes one complete, ordered control vector per physical
 interval. The caller supplies a separate plant transition and terminal
 objective, explicit plant identity and source, named parameters and units,
-initial state, strictly increasing physical times, state/control units,
+initial state, strictly increasing physical times with a declared time unit,
+state/control units,
 integration method, control-hold convention and finite nonnegative numerical
 tolerances. The tolerances are retained metadata for this exact-map path; they
 do not certify callback error or alter its returned state. The current method
@@ -40,3 +41,16 @@ outcomes, but not a canonical complete control history and matching timing and
 integration convention. No B04 plant adapter is provided until those inputs
 are sourced. Association with linear witnesses belongs to VIZ-04, not this
 plant stepper.
+
+VIZ-04 records policy class separately from replay status and objective. The
+nominal reference, frozen-coefficient regulator and selected linear witnesses
+must not be collapsed into one policy or one objective record. The replay
+artifact reports nonlinear feasibility, objective quality and global optimality
+as `not_checked` unless separate evidence is added; a completed transition-map
+replay alone establishes none of those claims. In particular, B04's nominal
+`u=0` row is not a demonstrated zero-control solution from the perturbed B04
+initial state.
+
+The [VIZ-04 analytic replay example](../examples/viz04-replay-comparison.html)
+shows two labelled 2D projections of selected paths from a four-state toy plant.
+It is not a B04 replay or a reachable-set boundary.

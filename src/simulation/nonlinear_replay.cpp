@@ -19,6 +19,7 @@ ReplayRecord replay(const Plant& plant, std::span<const Vector> controls,
     if (plant.parameters) result.parameters = *plant.parameters;
     result.declared_initial_state = plant.initial_state;
     if (plant.times) result.times = *plant.times;
+    result.time_unit = plant.time_unit;
     result.state_units = plant.state_units;
     result.control_units = plant.control_units;
     result.objective_name = plant.objective_name;
@@ -40,6 +41,7 @@ ReplayRecord replay(const Plant& plant, std::span<const Vector> controls,
     prerequisite(plant.parameters.has_value(), "plant.parameters");
     prerequisite(plant.initial_state.has_value(), "plant.initial_state");
     prerequisite(plant.times.has_value(), "plant.times");
+    prerequisite(!plant.time_unit.empty(), "plant.time_unit");
     prerequisite(!plant.state_units.empty(), "plant.state_units");
     prerequisite(!plant.control_units.empty(), "plant.control_units");
     prerequisite(!plant.objective_name.empty(), "plant.objective_name");
