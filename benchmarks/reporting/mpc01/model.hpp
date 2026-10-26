@@ -48,6 +48,7 @@ struct MpcCase {
     std::string source_kind;
     std::string source_ref;
     std::string canonical_input_sha256;
+    std::string canonical_input_bytes;
     Vector initial_state;
     std::vector<StageDynamics> dynamics;
     std::vector<StageBounds> stages;

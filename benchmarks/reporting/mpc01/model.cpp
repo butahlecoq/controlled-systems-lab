@@ -1,6 +1,9 @@
 #include "model.hpp"
 
+#include <csl/problem/resolved_problem.hpp>
+
 #include <algorithm>
+#include <span>
 #include <type_traits>
 
 namespace csl::mpc01 {
@@ -40,8 +43,19 @@ std::optional<ValidationError> box_shape(const std::optional<Box>& box,
 std::optional<ValidationError> validate(const MpcCase& problem) {
     const auto nx = problem.state_dimension();
     if (problem.id.empty() || problem.version.empty() || problem.source_kind.empty() ||
-        problem.source_ref.empty() || problem.canonical_input_sha256.size() != 64) {
+        problem.source_ref.empty() || problem.canonical_input_sha256.size() != 64 ||
+        problem.canonical_input_bytes.empty()) {
         return ValidationError{"identity", "case identity and a SHA-256 input digest are required"};
+    }
+    const auto input_span = std::as_bytes(std::span{problem.canonical_input_bytes.data(),
+                                                    problem.canonical_input_bytes.size()});
+    const auto content = csl::problem::snapshot_content(input_span);
+    if (const auto* diagnostic = std::get_if<csl::Diagnostic>(&content)) {
+        return ValidationError{"canonical_input_bytes", diagnostic->explanation};
+    }
+    const auto& resolved_content = std::get<csl::problem::ResolvedContent>(content);
+    if (csl::problem::hex(resolved_content.digest()) != problem.canonical_input_sha256) {
+        return ValidationError{"canonical_input_sha256", "digest does not match the retained canonical input bytes"};
     }
     if (nx == 0 || problem.horizon() == 0 || problem.stages.size() != problem.horizon() + 1) {
         return ValidationError{"dimensions", "nonempty states and horizon+1 stage records are required"};

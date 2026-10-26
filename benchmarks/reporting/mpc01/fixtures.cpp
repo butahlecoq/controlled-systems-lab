@@ -74,18 +74,6 @@ Matrix rational_matrix(const json& values, std::size_t rows, std::size_t columns
     return result;
 }
 
-std::string digest_file(const std::filesystem::path& path) {
-    std::ifstream input_file(path, std::ios::binary);
-    if (!input_file) throw std::runtime_error("cannot open canonical fixture: " + path.string());
-    const std::string bytes((std::istreambuf_iterator<char>(input_file)), {});
-    const auto data = std::as_bytes(std::span{bytes.data(), bytes.size()});
-    auto snapshot = problem::snapshot_content(data);
-    if (const auto* error = std::get_if<Diagnostic>(&snapshot)) {
-        throw std::runtime_error("cannot hash canonical fixture: " + error->explanation);
-    }
-    return problem::hex(std::get<problem::ResolvedContent>(snapshot).digest());
-}
-
 BoxResult as_axis_aligned_box(const AdmissibleSet& set, std::size_t dimension,
                               const std::string& path) {
     if (std::holds_alternative<UniversalSet>(set)) return std::optional<Box>{};
@@ -156,6 +144,8 @@ FixtureLoad from_loaded_scenario(const input::LoadedScenario& loaded,
     result.source_ref = path.generic_string();
     const auto provenance = loaded.source();
     result.canonical_input_sha256 = problem::hex(provenance->content.digest());
+    const auto source_bytes = provenance->content.bytes();
+    result.canonical_input_bytes.assign(reinterpret_cast<const char*>(source_bytes.data()), source_bytes.size());
     result.initial_state = known->point;
     result.dynamics.reserve(horizon);
     for (std::size_t t = 0; t < horizon; ++t) {
@@ -221,8 +211,8 @@ MpcCase make_ts01() {
     result.version = "1";
     result.source_kind = "analytic-contract";
     result.source_ref = "docs/superpowers/specs/2026-10-12-class-level-system-architecture.md#ts01";
-    result.canonical_input_sha256 = digest_text(
-        R"({"schema":"csl.mpc01-fixture/1","id":"ts01-exact-v1","x0":[0],"A":[[1],[1]],"B":[[1],[1]],"u":[[0,1],[0,1]],"cost":{"kind":"quadratic","Q":[[2]],"linear":[-2],"offset":1}})");
+    result.canonical_input_bytes = R"({"schema":"csl.mpc01-fixture/1","id":"ts01-exact-v1","x0":[0],"A":[[1],[1]],"B":[[1],[1]],"u":[[0,1],[0,1]],"cost":{"kind":"quadratic","Q":[[2]],"linear":[-2],"offset":1}})";
+    result.canonical_input_sha256 = digest_text(result.canonical_input_bytes);
     result.initial_state = {0.0};
     result.dynamics = {{{{1.0}}, {{1.0}}, {0.0}}, {{{1.0}}, {{1.0}}, {0.0}}};
     result.stages = {{{}, Box{{0.0}, {1.0}}}, {{}, Box{{0.0}, {1.0}}}, {{}, {}}};
@@ -235,8 +225,8 @@ MpcCase make_ts02() {
     result.id = "ts02-constant-v1";
     result.source_ref = "docs/contracts/complete-family-verifier-seam-blocker.md#ts02";
     result.terminal_cost = QuadraticTerminalCost{{{0.0}}, {0.0}, 3.0};
-    result.canonical_input_sha256 = digest_text(
-        R"({"schema":"csl.mpc01-fixture/1","id":"ts02-constant-v1","x0":[0],"A":[[1],[1]],"B":[[1],[1]],"u":[[0,1],[0,1]],"cost":{"kind":"quadratic","Q":[[0]],"linear":[0],"offset":3}})");
+    result.canonical_input_bytes = R"({"schema":"csl.mpc01-fixture/1","id":"ts02-constant-v1","x0":[0],"A":[[1],[1]],"B":[[1],[1]],"u":[[0,1],[0,1]],"cost":{"kind":"quadratic","Q":[[0]],"linear":[0],"offset":3}})";
+    result.canonical_input_sha256 = digest_text(result.canonical_input_bytes);
     return result;
 }
 
@@ -246,8 +236,8 @@ MpcCase make_infeasible() {
     result.version = "1";
     result.source_kind = "analytic-contract";
     result.source_ref = "benchmarks/reporting/mpc01/fixtures.cpp#make_infeasible";
-    result.canonical_input_sha256 = digest_text(
-        R"({"schema":"csl.mpc01-fixture/1","id":"infeasible-integrator-v1","x0":[0],"A":[[1]],"B":[[1]],"u":[[0,0]],"x1":[1,1],"cost":{"kind":"quadratic","Q":[[2]],"linear":[0],"offset":0}})");
+    result.canonical_input_bytes = R"({"schema":"csl.mpc01-fixture/1","id":"infeasible-integrator-v1","x0":[0],"A":[[1]],"B":[[1]],"u":[[0,0]],"x1":[1,1],"cost":{"kind":"quadratic","Q":[[2]],"linear":[0],"offset":0}})";
+    result.canonical_input_sha256 = digest_text(result.canonical_input_bytes);
     result.initial_state = {0.0};
     result.dynamics = {{{{1.0}}, {{1.0}}, {0.0}}};
     result.stages = {{{}, Box{{0.0}, {0.0}}}, {Box{{1.0}, {1.0}}, {}}};
@@ -261,8 +251,8 @@ MpcCase make_unbounded() {
     result.version = "1";
     result.source_kind = "analytic-contract";
     result.source_ref = "benchmarks/reporting/mpc01/fixtures.cpp#make_unbounded";
-    result.canonical_input_sha256 = digest_text(
-        R"({"schema":"csl.mpc01-fixture/1","id":"unbounded-integrator-v1","x0":[0],"A":[[1]],"B":[[1]],"u":[null],"cost":{"kind":"quadratic","Q":[[0]],"linear":[-1],"offset":0}})");
+    result.canonical_input_bytes = R"({"schema":"csl.mpc01-fixture/1","id":"unbounded-integrator-v1","x0":[0],"A":[[1]],"B":[[1]],"u":[null],"cost":{"kind":"quadratic","Q":[[0]],"linear":[-1],"offset":0}})";
+    result.canonical_input_sha256 = digest_text(result.canonical_input_bytes);
     result.initial_state = {0.0};
     result.dynamics = {{{{1.0}}, {{1.0}}, {0.0}}};
     result.stages = {{{}, std::nullopt}, {{}, {}}};
@@ -290,7 +280,8 @@ FixtureLoad load_b04_reference_v1(const std::filesystem::path& path) {
     try {
         std::ifstream input_file(path, std::ios::binary);
         if (!input_file) return "cannot open b04-reference-v1 canonical case: " + path.string();
-        const json document = json::parse(input_file);
+        const std::string canonical_bytes((std::istreambuf_iterator<char>(input_file)), {});
+        const json document = json::parse(canonical_bytes);
         if (document.at("case_id") != "b04-reference-v1") {
             return "case identity does not match b04-reference-v1";
         }
@@ -310,7 +301,8 @@ FixtureLoad load_b04_reference_v1(const std::filesystem::path& path) {
         result.version = "1";
         result.source_kind = "article-derived-owner-authorized-reference";
         result.source_ref = path.generic_string();
-        result.canonical_input_sha256 = digest_file(path);
+        result.canonical_input_bytes = canonical_bytes;
+        result.canonical_input_sha256 = digest_text(result.canonical_input_bytes);
         result.initial_state = rational_vector(document.at("initial_state"));
         const auto a = rational_matrix(dynamics.at("A_row_major"), nx, nx);
         const auto b = rational_vector(dynamics.at("B"));

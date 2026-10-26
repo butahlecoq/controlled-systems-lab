@@ -15,7 +15,8 @@ csl::mpc01::MpcCase scalar_case() {
     result.version = "1";
     result.source_kind = "analytic-contract";
     result.source_ref = "T-S01";
-    result.canonical_input_sha256 = std::string(64, 'a');
+    result.canonical_input_bytes = "{}";
+    result.canonical_input_sha256 = "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a";
     result.initial_state = {0.0};
     result.dynamics = {{{{1.0}}, {{1.0}}, {0.0}},
                        {{{1.0}}, {{1.0}}, {0.0}}};
@@ -42,6 +43,10 @@ double at(const csl::mpc01::CscMatrix& matrix, std::size_t row, std::size_t colu
 
 int main(int argc, char** argv) {
     using namespace csl::mpc01;
+    auto mismatched_input = scalar_case();
+    mismatched_input.canonical_input_sha256 = std::string(64, 'a');
+    if (!validate(mismatched_input)) return fail("case input digest mismatch was accepted");
+    if (validate(scalar_case())) return fail("valid scalar fixture rejected");
     if (validate(make_ts01())) return fail("T-S01 fixture is invalid");
     if (validate(make_ts02())) return fail("T-S02 fixture is invalid");
     if (validate(make_infeasible())) return fail("infeasible analytic fixture is invalid");
