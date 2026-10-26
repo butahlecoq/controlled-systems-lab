@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Nonlinear replay: two projections of a four-state example</title>
+<style>
+body{margin:2rem auto;padding:0 1rem;max-width:1100px;font:16px/1.55 system-ui,sans-serif;color:#18212a}
+h1,h2{line-height:1.2}.notice{padding:1rem;border-left:5px solid #c55;background:#fff4ee}
+img{display:block;width:100%;height:auto}table{border-collapse:collapse;width:100%;margin:1rem 0}
+th,td{border:1px solid #bbc4cc;padding:.5rem;text-align:left}thead{background:#edf2f5}
+code{overflow-wrap:anywhere}
+</style>
+</head>
+<body>
+<main>
+<h1>Nonlinear replay projected from four state coordinates</h1>
+<p class="notice"><strong>Analytic toy fixture only.</strong> The plant is a small, discrete four-state example used to test witness-to-replay association. It is not the historical B04 fuel model, a B04 replay, or a reachability set.</p>
+<p>Both selected linear witnesses have the same terminal linear objective (0 kg) and use the same two control intervals. The independent nonlinear toy plant produces different trajectories and terminal stock objectives. The side-by-side panels project the full four-dimensional replay state onto the flow coordinates <code>(x₁,x₃)</code> and stock coordinates <code>(x₂,x₄)</code>.</p>
+<figure>
+  <img src="viz04-replay-comparison.svg" alt="Two panels show the projected paths of two selected witness replays from a four-state toy plant. The flow-coordinate paths differ, and the stock-coordinate projection shows witness 1 staying at zero while witness 2 reaches (0.75 kg, 1 kg).">
+  <figcaption>Connected lines show three saved replay states at t = 0, 1, and 2 seconds. They are trajectories, not boundaries of reachable sets.</figcaption>
+</figure>
+<h2>Recorded comparison values</h2>
+<table>
+<thead><tr><th>Selected witness</th><th>Linear objective</th><th>Replay terminal state (x₁, x₂, x₃, x₄)</th><th>Replay objective</th></tr></thead>
+<tbody>
+<tr><th scope="row">1 · controls (0,0), (1,1)</th><td>0 kg</td><td>(2 kg/s, 0 kg, 3 kg/s, 0 kg)</td><td>0 kg</td></tr>
+<tr><th scope="row">2 · controls (0.5,0.5), (0.5,0.5)</th><td>0 kg</td><td>(1.5 kg/s, 0.75 kg, 2 kg/s, 1 kg)</td><td>1.75 kg</td></tr>
+</tbody>
+</table>
+<p>The objective names and units belong to their own models. “Replay complete” means the declared discrete map ran to completion; it does not establish nonlinear global optimality. The checked-in source data retain the plant identity, parameters, physical times, controls, states, linear evidence, and separate objectives.</p>
+<h2>Reproduce the figure</h2>
+<p>Install the pinned reporting dependencies from <code>scripts/reports/requirements.txt</code>, then run:</p>
+<pre><code>python scripts/reports/viz04/render_saved.py \
+  --artifact docs/examples/viz04-replay-comparison.json \
+  --output docs/examples/viz04-replay-comparison.svg
+ctest --test-dir build/core --output-on-failure -R '^(replay_comparison_tests|nonlinear_replay_tests)$'</code></pre>
+<p>The independent integration test checks the saved projections against the replay stepper. The B04 historical report remains non-executable because its canonical controls and integration conventions are unavailable.</p>
+<p><a href="viz04-replay-comparison.json">Saved versioned replay data</a></p>
+</main>
+</body>
+</html>
