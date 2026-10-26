@@ -65,6 +65,7 @@ class EnvironmentPublicationTests(unittest.TestCase):
             rendered = (site / "index.html").read_text(encoding="utf-8")
             self.assertIn("SimpleControlProblem finite-action pilot", rendered)
             self.assertIn(f'href="{report_id}/projection.svg"', rendered)
+            self.assertIn(manifest["source_commit"], rendered)
 
     def test_rejects_tampered_source_artifact(self) -> None:
         with tempfile.TemporaryDirectory() as temporary:

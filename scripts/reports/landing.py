@@ -578,7 +578,7 @@ def parse_index(html: str):
 
 def recorded(site: Path, report_id: str) -> dict:
     """Read the scope, the limits and the source commit recorded with a report."""
-    for name in ("report-envelope.json", "records.json", "record.json"):
+    for name in ("report-envelope.json", "records.json", "record.json", "publication-manifest.json"):
         path = site / report_id / name
         if not path.is_file():
             continue

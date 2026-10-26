@@ -105,7 +105,7 @@ def svg_plot(record: dict) -> str:
         f'<text x="{left + plot_width / 2}" y="{top + plot_height + 57}" text-anchor="middle" fill="#f4f1e8" font-size="16" font-family="sans-serif">time (s)</text>',
         f'<text x="27" y="{top + plot_height / 2}" transform="rotate(-90 27 {top + plot_height / 2})" text-anchor="middle" fill="#f4f1e8" font-size="16" font-family="sans-serif">state x</text>',
         f'<line x1="695" y1="{top + plot_height + 52}" x2="725" y2="{top + plot_height + 52}" stroke="#56b4e9" stroke-width="2" stroke-opacity="0.6"/>',
-        f'<text x="733" y="{top + plot_height + 57}" fill="#d2dce1" font-size="13" font-family="sans-serif">other 72 plans</text>',
+        f'<text x="733" y="{top + plot_height + 57}" fill="#d2dce1" font-size="13" font-family="sans-serif">other 71 plans</text>',
         f'<line x1="825" y1="{top + plot_height + 52}" x2="855" y2="{top + plot_height + 52}" stroke="#f4a261" stroke-width="3"/>',
         f'<text x="863" y="{top + plot_height + 57}" fill="#d2dce1" font-size="13" font-family="sans-serif">10 minimizers</text>',
         '<text x="100" y="590" fill="#93a4ae" font-size="12" font-family="sans-serif">Illustrative finite-action adaptation; running reward omitted. The projection shows time and scalar state.</text>',

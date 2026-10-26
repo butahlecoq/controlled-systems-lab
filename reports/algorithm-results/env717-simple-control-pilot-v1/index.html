@@ -115,12 +115,12 @@
 <text x="510.0" y="559" text-anchor="middle" fill="#f4f1e8" font-size="16" font-family="sans-serif">time (s)</text>
 <text x="27" y="297.0" transform="rotate(-90 27 297.0)" text-anchor="middle" fill="#f4f1e8" font-size="16" font-family="sans-serif">state x</text>
 <line x1="695" y1="554" x2="725" y2="554" stroke="#56b4e9" stroke-width="2" stroke-opacity="0.6"/>
-<text x="733" y="559" fill="#d2dce1" font-size="13" font-family="sans-serif">other 72 plans</text>
+<text x="733" y="559" fill="#d2dce1" font-size="13" font-family="sans-serif">other 71 plans</text>
 <line x1="825" y1="554" x2="855" y2="554" stroke="#f4a261" stroke-width="3"/>
 <text x="863" y="559" fill="#d2dce1" font-size="13" font-family="sans-serif">10 minimizers</text>
 <text x="100" y="590" fill="#93a4ae" font-size="12" font-family="sans-serif">Illustrative finite-action adaptation; running reward omitted. The projection shows time and scalar state.</text>
 </svg></div>
 <p class="note"><strong>Scope:</strong> the source defaults to initial state [0, 1] and terminal time 2 s. This pilot uses x₀ = 0.1 and 0.2 s to keep exhaustive enumeration small. It minimizes terminal x² and omits the source running reward. The source also has different running-reward coefficients in cost() and step(); the source step() execution rule is the reference for the environment. This is not a reproduction of the original reward objective.</p>
 <p>Source repository commit: <code>f4d76c60f4003f50954174e96eafd8e514bd5441</code>. CSL source commit: <code>61a07f2c4379748594a8fcde853d8886dd0b46d4</code>. Assurance: numerical, exhaustive over the declared finite action catalogue.</p>
-<p>Timing: median 509706 ns (range 445382–945100 ns; seven calls after one warmup). Compiler: GNU 16.2.1; build: Release; host: Linux-7.2.5-3-omarchy-x86_64-with-glibc2.44; CPU: AMD Ryzen 5 3550H with Radeon Vega Mobile Gfx; logical CPUs: 8; load average before capture: [0.4638671875, 0.39208984375, 0.4560546875].</p>
+<p>Timing: median 1000484 ns (range 884826–1077870 ns; seven calls after one warmup). Compiler: GNU 16.2.1; build: Release; host: Linux-7.2.5-3-omarchy-x86_64-with-glibc2.44; CPU: AMD Ryzen 5 3550H with Radeon Vega Mobile Gfx; logical CPUs: 8; load average before capture: [0.30810546875, 0.3935546875, 0.44482421875].</p>
 <p><a href="result.json">Saved result JSON</a> · <a href="projection.svg">Standalone SVG</a> · <a href="projection.png">PNG</a></p></main></html>

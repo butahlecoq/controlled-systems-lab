@@ -1446,19 +1446,19 @@
   "source_repository_commit": "f4d76c60f4003f50954174e96eafd8e514bd5441",
   "timing": {
     "limiter_profile": "not collected; no comparative performance claim",
-    "max_wall_ns": 945100,
+    "max_wall_ns": 1077870,
     "measured_calls": 7,
     "measured_wall_ns": [
-      945100,
-      531496,
-      509706,
-      538550,
-      445382,
-      470035,
-      445941
+      1001114,
+      884826,
+      911018,
+      975971,
+      1000484,
+      1077870,
+      1046651
     ],
-    "median_wall_ns": 509706,
-    "min_wall_ns": 445382,
+    "median_wall_ns": 1000484,
+    "min_wall_ns": 884826,
     "scope": "finite_action_minimax call; request setup and JSON output excluded",
     "warmup_calls": 1
   },
@@ -1467,11 +1467,11 @@
     "processor": "AMD Ryzen 5 3550H with Radeon Vega Mobile Gfx",
     "logical_cpus": 8,
     "load_average_before_run": [
-      0.4638671875,
-      0.39208984375,
-      0.4560546875
+      0.30810546875,
+      0.3935546875,
+      0.44482421875
     ],
-    "capture_started_unix_ns": 1793049400727339744
+    "capture_started_unix_ns": 1793049548631035299
   },
-  "renderer_sha256": "38c2f598ef48182fd69f2ec5e504cc0d25d5418540a12cc350a66d20e3c72cb3"
+  "renderer_sha256": "8416657ad6423f5653855197ef76f79ee1d3e16ac409f9ab2826cc3b827c1534"
 }
