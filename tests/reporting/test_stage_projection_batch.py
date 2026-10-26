@@ -44,11 +44,12 @@ def reseal(document):
 
 
 class StageProjectionBatchTests(unittest.TestCase):
-    def read(self, document, expected_request_id="request-1"):
+    def read(self, document, expected_request_id="request-1", *, expected_problem_id="problem-1",
+             expected_route_id="route-1", expected_record_schema="csl.run/1"):
         raw = document if isinstance(document, str) else json.dumps(document)
         return data.loads_stage_projection_batch(raw, expected_run_id="run-1",
-            expected_problem_id="problem-1", expected_request_id=expected_request_id,
-            expected_route_id="route-1", expected_record_schema="csl.run/1",
+            expected_problem_id=expected_problem_id, expected_request_id=expected_request_id,
+            expected_route_id=expected_route_id, expected_record_schema=expected_record_schema,
             expected_source_sha256="a" * 64)
 
     def test_accepts_point_segment_polygon_and_keeps_trajectory_separate(self):
@@ -59,7 +60,9 @@ class StageProjectionBatchTests(unittest.TestCase):
 
     def test_cpp_writer_fixture_is_python_reader_compatible(self):
         fixture_path = Path(__file__).parents[1] / "artifacts/fixtures/stage-projection-batch-v1.json"
-        loaded = self.read(json.loads(fixture_path.read_text(encoding="utf-8")), expected_request_id="stage-batch")
+        loaded = self.read(json.loads(fixture_path.read_text(encoding="utf-8")), expected_request_id="stage-batch",
+                           expected_problem_id="fuel", expected_route_id="fuel-route",
+                           expected_record_schema="csl.run-statistics/7")
         self.assertEqual(loaded["route_id"], "fuel-route")
         self.assertEqual(loaded["requested_pairs"], [[0, 2]])
         self.assertEqual(loaded["records"][0]["outcome"]["components"][0]["kind"], "polygon")
