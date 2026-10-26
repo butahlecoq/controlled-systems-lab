@@ -1,0 +1,16 @@
+{
+  "schema": "csl.viz10-figure-export/1",
+  "title": "B07 four-state fuel projections: B07-reconstruction-s1-l0-d0",
+  "description": "Two coordinate projections from the recorded four-state terminal rows: x1/x3 flow and x2/x4 stock. Markers are the saved terminal V rows, not a filled enclosure or nonlinear replay. Equal data scaling is used within each same-unit pair.",
+  "quantitative_axis_policy": "csl-report-quantitative-v1",
+  "style_sha256": "3d0c2b8360fb03a45fd41841775ac94bc6c57b67de4a4d9b3ba4ac9e8947df1a",
+  "matplotlib": "3.11.2",
+  "sources": {
+    "reports/algorithm-results/b07-owner-approved-eight-case-v1/results.jsonl": "f2f81f70ab29d0c07624eee01cefb0a8d06f2062487dc5f337141b1d66636881",
+    "reports/algorithm-results/b07-owner-approved-eight-case-v1/README.md": "7aa0daee5f1008c0eb505ca78d37fd7b93159f484728ec8fe0a110d993106e05"
+  },
+  "files": {
+    "b07-b07-reconstruction-s1-l0-d0.svg": "20ad861bd8090259e61542769f63126d4c02eb263691f1351ab73fdf7fc2a720",
+    "b07-b07-reconstruction-s1-l0-d0.png": "dfe8c27543bf1719d24fd44724e840b904747e5bfe2f8ed912ef4b56e9c53ffc"
+  }
+}

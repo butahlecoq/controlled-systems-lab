@@ -1,0 +1,15 @@
+{
+  "schema": "csl.viz10-figure-export/1",
+  "title": "Issue #3 analytic two-dimensional fixture",
+  "description": "Two authored plans reach the displayed terminal states; the target and exact zero residual are recorded in the validated report. This is a fixture diagram, not a solver trace.",
+  "quantitative_axis_policy": "csl-report-quantitative-v1",
+  "style_sha256": "3d0c2b8360fb03a45fd41841775ac94bc6c57b67de4a4d9b3ba4ac9e8947df1a",
+  "matplotlib": "3.11.2",
+  "sources": {
+    "reports/algorithm-results/issue3-validated-minimax-20261023-r1/records.json": "4e61982a233ff7ecd1b9ee6afc7142ea5168c1ddd86153fb8657b86837b91fa1"
+  },
+  "files": {
+    "issue3-analytic-fixture.svg": "4713e2e67006a37f013e27061d474b0c83cf8923b679615183e7df29de477315",
+    "issue3-analytic-fixture.png": "135cea789b8240d4a15106cc67b32f94792c3c7a74ed463fc4370755a2d89c59"
+  }
+}

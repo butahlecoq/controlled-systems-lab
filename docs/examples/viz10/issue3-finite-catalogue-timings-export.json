@@ -1,0 +1,15 @@
+{
+  "schema": "csl.viz10-figure-export/1",
+  "title": "Issue #3 saved finite-catalogue batch timings",
+  "description": "Every plotted point and median is read from the immutable saved report record; no timing run is performed.",
+  "quantitative_axis_policy": "csl-report-quantitative-v1",
+  "style_sha256": "3d0c2b8360fb03a45fd41841775ac94bc6c57b67de4a4d9b3ba4ac9e8947df1a",
+  "matplotlib": "3.11.2",
+  "sources": {
+    "reports/algorithm-results/issue3-finite-catalogue-b4632ce76510aa4f/records.json": "00bd9580b17a466f6dd322ed3d2010f8bfb5da3c3b7c56b05d30e91a88824b5f"
+  },
+  "files": {
+    "issue3-finite-catalogue-timings.svg": "331531a25b23e78af65a3739d9df6de6e1310c7f7d889d1b41c48eaf9ab83f47",
+    "issue3-finite-catalogue-timings.png": "f4c4ca3299ef454bd3b0fa0a2b1fce0311bf7986459d78de2a57962178292905"
+  }
+}

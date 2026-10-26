@@ -1,0 +1,15 @@
+{
+  "schema": "csl.viz10-figure-export/1",
+  "title": "B08 saved fresh-process timings",
+  "description": "Every plotted point and median is read from the immutable saved report record; no timing run is performed.",
+  "quantitative_axis_policy": "csl-report-quantitative-v1",
+  "style_sha256": "3d0c2b8360fb03a45fd41841775ac94bc6c57b67de4a4d9b3ba4ac9e8947df1a",
+  "matplotlib": "3.11.2",
+  "sources": {
+    "reports/algorithm-results/b08-exact-b0d0e85d4d338f56/records.json": "d584d26eb9f90e850dd309d82d396790db52846d58bc221bbd0d6019840158c8"
+  },
+  "files": {
+    "b08-exact-timings.svg": "8faab0a303ee0b7009b4c6407d634931468a79e1af40ac8fd42df5486907e99f",
+    "b08-exact-timings.png": "4e88d3edae4bbf9df6498409cbb486c9ae2c45545ca67efddcf5a52e83ff786b"
+  }
+}

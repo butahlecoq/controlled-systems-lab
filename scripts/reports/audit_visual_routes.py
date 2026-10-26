@@ -20,6 +20,33 @@ MIGRATION_ISSUES = {
 COMPOSED_SAVED_ROUTES = {
     "scripts/reports/ext03_transform/report.py",
     "scripts/reports/ext04/continuous_report.py",
+    "scripts/reports/issue422/build_bundle.py",
+}
+FROZEN_DIAGRAM_EXCEPTIONS = {"benchmarks/reporting/approximation_pilot/summarize.py"}
+PUBLICATION_EXPORT_ROUTES = {"scripts/reports/render.py"}
+VIZ10_ROLE_REASONS = {
+    "benchmarks/reporting/approximation_pilot/summarize.py":
+        "Draws a reviewed static fixture diagram from authored input shapes and area formulas; it does not plot a saved run record.",
+    "benchmarks/reporting/issue6/b07_render_projection.py":
+        "Frozen B07 report producer for saved four-state terminal rows; the shared-policy companion plots x1/x3 and x2/x4 rows directly without constructing a hull.",
+    "benchmarks/reporting/issue6/b09_render_projection.py":
+        "Frozen B09 report producer and nonlinear replay display; the shared-policy companion plots stored terminal rows and replay endpoints separately without recomputing the projected hull.",
+    "scripts/reports/b08_exact_report.py":
+        "Produces a quantitative plot from saved fresh-process durations; the companion reads the immutable records and separates the excluded warmup.",
+    "scripts/reports/exp04/render_saved.py":
+        "Validates saved EXP-04 records and plots two-state replay paths; the companion retains the physical coordinates and discloses independent unit scales.",
+    "scripts/reports/issue3/render_saved.py":
+        "Validates and plots saved finite-catalogue timing summaries; the companion shows saved median and min/max values without recollection.",
+    "scripts/reports/issue3/validated_saved.py":
+        "Validates a frozen capture and draws its authored analytic 2D fixture; the companion preserves the two plan points and target as an illustration.",
+    "scripts/reports/issue422/build_bundle.py":
+        "Assembles a report bundle by copying the pre-existing fixed-plan SVG; it does not create or transform plot data.",
+    "scripts/reports/issue4_volterra/render.py":
+        "Validates and publishes a saved interval certificate with error-box artwork; the companion reads endpoint strings from the frozen record and does not rerun the checker.",
+    "scripts/reports/issue6/render.py":
+        "Publishes the saved B06 four-state projection; a VIZ-03 shared-policy companion already provides labeled x1/x3 flow and x2/x4 stock projections.",
+    "scripts/reports/render.py":
+        "Generic report exporter validates and copies a supplied saved figure; it does not produce quantitative plot data.",
 }
 SAVED_COMPANION_ROUTES = {
     "scripts/reports/app02/render_saved.py",
@@ -39,6 +66,14 @@ SAVED_COMPANION_ROUTES = {
     "scripts/reports/opt04/render.py",
     "scripts/reports/opt10/render_saved.py",
     "scripts/reports/opt12_render.py",
+    "scripts/reports/b08_exact_report.py",
+    "scripts/reports/exp04/render_saved.py",
+    "scripts/reports/issue3/render_saved.py",
+    "scripts/reports/issue3/validated_saved.py",
+    "scripts/reports/issue4_volterra/render.py",
+    "scripts/reports/issue6/render.py",
+    "benchmarks/reporting/issue6/b07_render_projection.py",
+    "benchmarks/reporting/issue6/b09_render_projection.py",
 }
 FROZEN_COMPANIONS = {
     "app02-box-8ff979de60ea9d22": "examples/app02-diamond-v1.html",
@@ -75,10 +110,14 @@ def source_inventory(root: Path) -> list[dict]:
             assets = sorted(set(ASSET_NAME.findall(source)))
             if relative in COMPOSED_SAVED_ROUTES:
                 disposition = "composes-or-copies-existing-saved-figure"
+            elif relative in FROZEN_DIAGRAM_EXCEPTIONS:
+                disposition = "reviewed-static-diagram-exception"
+            elif relative in PUBLICATION_EXPORT_ROUTES:
+                disposition = "publication-validation-or-frozen-route"
             elif relative in SAVED_COMPANION_ROUTES:
                 disposition = "frozen-renderer-preserved-with-shared-policy-companion"
             elif relative.endswith(("/geometry_figures.py", "/approx_extension_companions.py",
-                                    "/geometry_opt_companions.py")):
+                                    "/geometry_opt_companions.py", "/viz10_plot_companions.py")):
                 disposition = "shared-quantitative-policy-companion-renderer"
             elif relative == "benchmarks/reporting/it17_hull/summarize.py":
                 disposition = "reviewed-static-diagram-exception"
@@ -95,6 +134,8 @@ def source_inventory(root: Path) -> list[dict]:
                 disposition = "deferred-family-specific-migration"
             entries.append({"source": relative, "signal_count": len(matches),
                             "asset_name_literals": assets, "disposition": disposition,
+                            **({"role_and_disposition_reason": VIZ10_ROLE_REASONS[relative]}
+                               if relative in VIZ10_ROLE_REASONS else {}),
                             **({"follow_up_issue": migration_issue(relative)}
                                if disposition == "deferred-family-specific-migration" else {})})
     return entries
@@ -150,7 +191,8 @@ def build(root: Path = ROOT) -> dict:
                     "ext01-b08-timing-v1.html", "ext01-b08-timing-v1.svg",
                     "ext01-b08-timing-v1.png", "ext01-b08-timing-v1-export.json",
                     "ext05-states-v1.html", "ext05-states-v1.svg",
-                    "ext05-states-v1.png", "ext05-states-v1-export.json"] + geometry_companion_assets(),
+                    "ext05-states-v1.png", "ext05-states-v1-export.json"] + geometry_companion_assets() +
+                    viz10_companion_assets(),
                  "disposition": "adopted-shared-quantitative-policy"}],
             "migration_owner": "#669 owns the shared policy; deferred family renderers link to scoped follow-up issues #684–#687, while frozen report bundles remain immutable evidence"}
 
@@ -165,6 +207,12 @@ def geometry_companion_assets() -> list[str]:
         assets.extend((f"geometry-opt/{slug}/geometry.svg", f"geometry-opt/{slug}/geometry.png",
                        f"geometry-opt/{slug}/export.json", f"geometry-opt/data/{report_id}.json"))
     return assets
+
+
+def viz10_companion_assets() -> list[str]:
+    base = ROOT / "docs/examples/viz10"
+    return ["viz10/" + path.relative_to(base).as_posix()
+            for path in sorted(base.rglob("*")) if path.is_file()]
 
 
 def main() -> None:
