@@ -1,4 +1,5 @@
 #include "hpipm_adapter.hpp"
+#include "timing.hpp"
 
 #include <hpipm_common.h>
 #include <hpipm_d_ocp_qp.h>
@@ -7,7 +8,6 @@
 #include <hpipm_d_ocp_qp_sol.h>
 
 #include <algorithm>
-#include <chrono>
 #include <cmath>
 #include <cstdlib>
 #include <limits>
@@ -17,13 +17,9 @@
 namespace csl::mpc01 {
 namespace {
 
-using Clock = std::chrono::steady_clock;
+using timing::Clock;
+using timing::elapsed_ns;
 using Memory = std::unique_ptr<void, decltype(&std::free)>;
-
-std::uint64_t elapsed_ns(Clock::time_point start, Clock::time_point end) {
-    return static_cast<std::uint64_t>(
-        std::chrono::duration_cast<std::chrono::nanoseconds>(end - start).count());
-}
 
 Matrix transpose_storage(const Matrix& matrix) {
     if (matrix.empty()) return {};

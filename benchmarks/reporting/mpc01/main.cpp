@@ -2,6 +2,8 @@
 #include "hpipm_adapter.hpp"
 #include "environment.hpp"
 #include "osqp_adapter.hpp"
+#include "timing.hpp"
+#include "trajectory_evidence.hpp"
 
 #include <csl/artifacts/comparison_manifest.hpp>
 #include <csl/problem/resolved_problem.hpp>
@@ -9,7 +11,6 @@
 
 #include <algorithm>
 #include <charconv>
-#include <chrono>
 #include <cmath>
 #include <iostream>
 #include <fstream>
@@ -23,8 +24,9 @@ namespace {
 
 using namespace csl::mpc01;
 using json = nlohmann::json;
-using Clock = std::chrono::steady_clock;
 namespace ar = csl::artifacts;
+using timing::Clock;
+using timing::elapsed_ns;
 
 template<class T> T take_artifact(ar::ArtifactResult<T> result) {
     if (const auto* error = std::get_if<ar::ArtifactError>(&result)) {
@@ -46,78 +48,6 @@ struct CapturedAttempt {
     std::uint32_t repetition{};
     json event;
 };
-
-std::uint64_t elapsed_ns(Clock::time_point start, Clock::time_point end) {
-    return static_cast<std::uint64_t>(
-        std::chrono::duration_cast<std::chrono::nanoseconds>(end - start).count());
-}
-
-struct NumericCheck {
-    double dynamics{};
-    double state_bounds{};
-    double control_bounds{};
-};
-
-double box_violation(std::span<const double> value, const std::optional<Box>& box) {
-    if (!box) return 0.0;
-    double violation = 0.0;
-    for (std::size_t i = 0; i < value.size(); ++i) {
-        if (std::isfinite(box->lower[i])) violation = std::max(violation, box->lower[i] - value[i]);
-        if (std::isfinite(box->upper[i])) violation = std::max(violation, value[i] - box->upper[i]);
-    }
-    return std::max(0.0, violation);
-}
-
-NumericCheck check_trajectory(const MpcCase& problem, const Trajectory& trajectory) {
-    NumericCheck check;
-    if (trajectory.states.size() != problem.horizon() + 1 ||
-        trajectory.controls.size() != problem.horizon()) {
-        return {std::numeric_limits<double>::infinity(),
-                std::numeric_limits<double>::infinity(),
-                std::numeric_limits<double>::infinity()};
-    }
-    for (const auto& state : trajectory.states) {
-        if (!std::all_of(state.begin(), state.end(), [](double value) { return std::isfinite(value); })) {
-            return {std::numeric_limits<double>::infinity(),
-                    std::numeric_limits<double>::infinity(),
-                    std::numeric_limits<double>::infinity()};
-        }
-    }
-    for (const auto& control : trajectory.controls) {
-        if (!std::all_of(control.begin(), control.end(), [](double value) { return std::isfinite(value); })) {
-            return {std::numeric_limits<double>::infinity(),
-                    std::numeric_limits<double>::infinity(),
-                    std::numeric_limits<double>::infinity()};
-        }
-    }
-    check.state_bounds = box_violation(trajectory.states.front(),
-        Box{problem.initial_state, problem.initial_state});
-    for (std::size_t t = 0; t <= problem.horizon(); ++t) {
-        check.state_bounds = std::max(check.state_bounds,
-            box_violation(trajectory.states[t], problem.stages[t].state));
-        if (t < problem.horizon()) {
-            check.control_bounds = std::max(check.control_bounds,
-                box_violation(trajectory.controls[t], problem.stages[t].control));
-        }
-    }
-    for (std::size_t t = 0; t < problem.horizon(); ++t) {
-        const auto& dynamics = problem.dynamics[t];
-        for (std::size_t i = 0; i < problem.state_dimension(); ++i) {
-            double predicted = dynamics.affine[i];
-            for (std::size_t j = 0; j < problem.state_dimension(); ++j) {
-                predicted += dynamics.a[i][j] * trajectory.states[t][j];
-            }
-            for (std::size_t j = 0; j < problem.control_dimension(); ++j) {
-                predicted += dynamics.b[i][j] * trajectory.controls[t][j];
-            }
-            const double residual = std::abs(trajectory.states[t + 1][i] - predicted);
-            check.dynamics = std::isfinite(residual)
-                ? std::max(check.dynamics, residual)
-                : std::numeric_limits<double>::infinity();
-        }
-    }
-    return check;
-}
 
 std::string termination_name(Termination value) {
     switch (value) {
@@ -185,7 +115,7 @@ json serialize_attempt(const MpcCase& problem, const NativeAttempt& attempt,
             attempt.outcome == MathematicalOutcome::feasible)
         ? optional_finite(*attempt.original_objective) : json(nullptr);
     if (attempt.witness) {
-        const auto check = check_trajectory(problem, *attempt.witness);
+        const auto check = evidence::check_trajectory(problem, *attempt.witness);
         const bool has_usable_witness = attempt.outcome == MathematicalOutcome::optimal ||
                                         attempt.outcome == MathematicalOutcome::feasible;
         row[has_usable_witness ? "trajectory" : "candidate_iterate"] = {
@@ -193,9 +123,9 @@ json serialize_attempt(const MpcCase& problem, const NativeAttempt& attempt,
         row[has_usable_witness ? "original_data_diagnostics" : "candidate_iterate_diagnostics"] = {
             {"checker", "binary64-residual-diagnostic/1"},
             {"evidence_status", "inconclusive"},
-            {"max_dynamics_residual", check.dynamics},
-            {"max_state_bound_violation", check.state_bounds},
-            {"max_control_bound_violation", check.control_bounds}};
+            {"max_dynamics_residual", check.dynamics_residual},
+            {"max_state_bound_violation", check.state_bound_violation},
+            {"max_control_bound_violation", check.control_bound_violation}};
     }
     return row;
 }

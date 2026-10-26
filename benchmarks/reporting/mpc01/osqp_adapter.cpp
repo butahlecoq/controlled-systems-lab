@@ -1,9 +1,9 @@
 #include "osqp_adapter.hpp"
+#include "timing.hpp"
 
 #include <osqp.h>
 
 #include <algorithm>
-#include <chrono>
 #include <cmath>
 #include <limits>
 #include <memory>
@@ -12,14 +12,10 @@
 namespace csl::mpc01 {
 namespace {
 
-using Clock = std::chrono::steady_clock;
+using timing::Clock;
+using timing::elapsed_ns;
 using CscHandle = std::unique_ptr<OSQPCscMatrix, decltype(&OSQPCscMatrix_free)>;
 using SolverHandle = std::unique_ptr<OSQPSolver, decltype(&osqp_cleanup)>;
-
-std::uint64_t elapsed_ns(Clock::time_point start, Clock::time_point end) {
-    return static_cast<std::uint64_t>(
-        std::chrono::duration_cast<std::chrono::nanoseconds>(end - start).count());
-}
 
 bool dimensions_fit(const SparseQp& qp) {
     const auto maximum = static_cast<std::size_t>(std::numeric_limits<OSQPInt>::max());

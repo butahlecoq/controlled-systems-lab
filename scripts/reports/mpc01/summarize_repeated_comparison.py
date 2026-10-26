@@ -121,7 +121,9 @@ def main() -> None:
             markdown.append("| " + " | ".join([f"{label} / {mode}", iteration_label, *phases,
                 f"{outcomes}; seed applied {applied}/5"]) + " |")
 
-    markdown.extend(["", "## Outcome coverage", "", "| Case | OSQP | HPIPM |", "|---|---|---|"])
+    markdown.extend(["", "## Native solver classification and termination", "",
+                     "These are solver-status classifications; they are not independent mathematical outcome claims.",
+                     "", "| Case | OSQP classification / termination | HPIPM classification / termination |", "|---|---|---|"])
     for case in sorted(rows_by_case):
         method_outcomes = {}
         for method in ("osqp-sparse-qp", "hpipm-structured-ocp-qp"):
@@ -148,7 +150,7 @@ def main() -> None:
         "",
         "## Limiter and interpretation",
         "",
-        f"Solver iteration counts explain work per solve: cold B04 OSQP used 33,125 iterations, while HPIPM used 30. In a separate one-repetition diagnostic process run, the full six-case runner consumed 0.417 s user CPU and 0.132 s system CPU over 0.550 s elapsed, indicating the suite was CPU-bound on this host; that run is not part of the timing sample. `process-profile.txt` records those aggregate times. These tiny QP cases are microbenchmarks. They do not establish end-to-end planning latency or a control-strategy winner. Machine load immediately before the reported run was {args.host_load} with 8 logical CPUs.",
+        f"Solver iteration counts explain work per solve: cold B04 OSQP used 33,125 iterations, while HPIPM used 30. In a separate one-repetition diagnostic process run, the full six-case runner consumed 0.417 s user CPU and 0.132 s system CPU over 0.550 s elapsed, indicating the suite was CPU-bound on this host; that run is not part of the timing sample. `process-profile.txt` records those aggregate times. The repeated run did not enforce per-attempt wall or memory caps; its records mark memory as unlimited. It is a local exploratory measurement rather than the enforced-comparison resource profile. These tiny QP cases are microbenchmarks. They do not establish end-to-end planning latency or a control-strategy winner. Machine load immediately before the reported run was {args.host_load} with 8 logical CPUs.",
         "",
     ])
     (output / "benchmark-summary.md").write_text("\n".join(markdown), encoding="utf-8")

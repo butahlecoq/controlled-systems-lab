@@ -71,12 +71,23 @@ else()
 target_compile_options(csl_mpc01_model PRIVATE -Wall -Wextra -Wpedantic -Werror)
 endif()
 set_target_properties(csl_mpc01_model PROPERTIES POSITION_INDEPENDENT_CODE ON)
+add_library(csl_mpc01_evidence STATIC
+  benchmarks/reporting/mpc01/trajectory_evidence.cpp)
+target_include_directories(csl_mpc01_evidence PUBLIC
+  $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/benchmarks/reporting/mpc01>)
+target_compile_features(csl_mpc01_evidence PUBLIC cxx_std_20)
+target_link_libraries(csl_mpc01_evidence PUBLIC csl_mpc01_model)
+if(MSVC)
+target_compile_options(csl_mpc01_evidence PRIVATE /W4 /WX /permissive-)
+else()
+target_compile_options(csl_mpc01_evidence PRIVATE -Wall -Wextra -Wpedantic -Werror)
+endif()
 add_executable(csl_mpc01_report
   benchmarks/reporting/mpc01/main.cpp
   benchmarks/reporting/mpc01/environment.cpp
   benchmarks/reporting/mpc01/osqp_adapter.cpp
   benchmarks/reporting/mpc01/hpipm_adapter.cpp)
-target_link_libraries(csl_mpc01_report PRIVATE csl_mpc01_model
+target_link_libraries(csl_mpc01_report PRIVATE csl_mpc01_model csl_mpc01_evidence
   csl_mpc01_osqp csl_mpc01_hpipm csl_mpc01_blasfeo CSL::artifacts)
 target_compile_features(csl_mpc01_report PRIVATE cxx_std_20)
 target_include_directories(csl_mpc01_report SYSTEM PRIVATE ${csl_json_SOURCE_DIR}/single_include)

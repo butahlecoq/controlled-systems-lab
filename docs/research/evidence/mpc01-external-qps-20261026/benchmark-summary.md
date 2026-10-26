@@ -23,9 +23,11 @@ Times are median (minimum–maximum) over five attempts. A performance differenc
 | OSQP / warm_if_available | 25 (25–25) | 56.3 (55.0–60.1) | 106.2 (102.9–117.2) | 2.0 (1.9–2.4) | 135.2 (134.9–135.5) | 4.7 (4.4–4.8) | optimal; seed applied 5/5 |
 | HPIPM / warm_if_available | 8 (8–8) | 38.5 (37.7–39.5) | 36.7 (26.3–42.0) | 2.3 (1.4–2.4) | 256.9 (255.8–274.0) | 4.7 (4.7–4.8) | optimal; seed applied 5/5 |
 
-## Outcome coverage
+## Native solver classification and termination
 
-| Case | OSQP | HPIPM |
+These are solver-status classifications; they are not independent mathematical outcome claims.
+
+| Case | OSQP classification / termination | HPIPM classification / termination |
 |---|---|---|
 | `b04-reference-v1` | optimal (completed) | optimal (completed) |
 | `double-integrator-421-v1` | optimal (completed) | optimal (completed) |
@@ -43,4 +45,4 @@ Times are median (minimum–maximum) over five attempts. A performance differenc
 
 ## Limiter and interpretation
 
-Solver iteration counts explain work per solve: cold B04 OSQP used 33,125 iterations, while HPIPM used 30. In a separate one-repetition diagnostic process run, the full six-case runner consumed 0.417 s user CPU and 0.132 s system CPU over 0.550 s elapsed, indicating the suite was CPU-bound on this host; that run is not part of the timing sample. `process-profile.txt` records those aggregate times. These tiny QP cases are microbenchmarks. They do not establish end-to-end planning latency or a control-strategy winner. Machine load immediately before the reported run was 0.91, 0.88, 1.25 with 8 logical CPUs.
+Solver iteration counts explain work per solve: cold B04 OSQP used 33,125 iterations, while HPIPM used 30. In a separate one-repetition diagnostic process run, the full six-case runner consumed 0.417 s user CPU and 0.132 s system CPU over 0.550 s elapsed, indicating the suite was CPU-bound on this host; that run is not part of the timing sample. `process-profile.txt` records those aggregate times. The repeated run did not enforce per-attempt wall or memory caps; its records mark memory as unlimited. It is a local exploratory measurement rather than the enforced-comparison resource profile. These tiny QP cases are microbenchmarks. They do not establish end-to-end planning latency or a control-strategy winner. Machine load immediately before the reported run was captured in run metadata with 8 logical CPUs.
