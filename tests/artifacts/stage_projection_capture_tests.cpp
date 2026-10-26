@@ -76,8 +76,8 @@ TEST_CASE("stage projection capture returns one projection or explicit gap per p
     CHECK(batch.records[0].stage.value == 0);
     CHECK(batch.records[0].pair.first == 0);
     CHECK(batch.records[0].pair.second == 2);
-    REQUIRE(std::holds_alternative<ar::PlotSetProjection>(batch.records[0].outcome));
-    const auto& projection = std::get<ar::PlotSetProjection>(batch.records[0].outcome);
+    REQUIRE(std::holds_alternative<ar::StageProjectionSuccess>(batch.records[0].outcome));
+    const auto& projection = std::get<ar::StageProjectionSuccess>(batch.records[0].outcome).projection;
     CHECK(projection.coordinates[0].label == "oxidizer flow");
     CHECK(projection.coordinates[1].label == "fuel flow");
     CHECK(projection.projected_relation.metadata.dimension == 2);

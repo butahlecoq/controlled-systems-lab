@@ -17,7 +17,12 @@ struct StageProjectionFailure {
     std::variant<registry::Rejection, Unsupported, OperationStopped, ArtifactError> cause;
 };
 
-using StageProjectionOutcome = std::variant<PlotSetProjection, StageProjectionUnavailable,
+struct StageProjectionSuccess {
+    PlotSetProjection projection;
+    std::optional<GeometryErrorBound> error_bound;
+};
+
+using StageProjectionOutcome = std::variant<StageProjectionSuccess, StageProjectionUnavailable,
     StageProjectionFailure>;
 
 struct StageProjectionRecord {
