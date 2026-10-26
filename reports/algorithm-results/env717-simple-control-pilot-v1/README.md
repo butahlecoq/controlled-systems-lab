@@ -59,9 +59,10 @@ python3 scripts/reports/env717/check_smoke.py \
 The final command independently checks the saved plan family and regenerates
 the standalone HTML and SVG. It also writes PNG when `rsvg-convert` is
 available. The result embeds the upstream repository commit and source-file
-blob identities, along with the CSL source commit, driver hash, and renderer
-hash. `SHA256SUMS` binds the report, raw result, renderer output and figure
-files.
+blob identities, along with the CSL source commit, driver hash, renderer
+hash, and hashes for the solver sources used by the measurement. CMake
+reconfigures when a measured source changes and rejects dirty solver sources.
+`SHA256SUMS` binds the report, raw result, renderer output and figure files.
 
 ## Remaining source candidates
 

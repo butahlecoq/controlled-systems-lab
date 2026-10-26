@@ -20,8 +20,9 @@
     "terminal_time_seconds": 0.2
   },
   "algorithm": "csl.finite-action-minimax.numerical",
+  "algorithm_source_sha256": "31b61c8e4a6d4f3cc769fb6c63694ee45228c90e942929836de818911084c5a8",
   "assurance": "numerical; exhaustive over all 3^4 fixed action sequences",
-  "driver_sha256": "8379bcf96d131a4a46a1dbc938a46a2f1d01431e4f8c1c5380386c4f65827678",
+  "driver_sha256": "6cb30cf7af87798f6103c78aace1a27de8c2459ce603868022c28f0f0ef00a04",
   "environment": {
     "architecture": "x86_64",
     "build_type": "Release",
@@ -1436,7 +1437,7 @@
     "state": "[time, x]",
     "step_reward": "-0.5 * dt * u^2; terminal reward additionally subtracts x^2"
   },
-  "source_commit": "bdbc0cc0a38df83ab7a38cff6bf91154a80d19c4",
+  "source_commit": "ebc42092f3567e94c6a74c99109186ec1218b62c",
   "source_file_blobs": {
     "SimpleControlProblem.py": "4eb0bb6fc04aa8e56891e1772287d013d2b32b3d",
     "SimpleControlProblem_Discrete.py": "40b9c13cf0d123ae3823a91b36a1b54162e04dad"
@@ -1445,19 +1446,19 @@
   "source_repository_commit": "f4d76c60f4003f50954174e96eafd8e514bd5441",
   "timing": {
     "limiter_profile": "not collected; no comparative performance claim",
-    "max_wall_ns": 885595,
+    "max_wall_ns": 1206658,
     "measured_calls": 7,
     "measured_wall_ns": [
-      685637,
-      561668,
-      728101,
-      740603,
-      885595,
-      853118,
-      857867
+      1206658,
+      873303,
+      887551,
+      938675,
+      958509,
+      1121590,
+      1055031
     ],
-    "median_wall_ns": 740603,
-    "min_wall_ns": 561668,
+    "median_wall_ns": 958509,
+    "min_wall_ns": 873303,
     "scope": "finite_action_minimax call; request setup and JSON output excluded",
     "warmup_calls": 1
   },
@@ -1466,11 +1467,11 @@
     "processor": "AMD Ryzen 5 3550H with Radeon Vega Mobile Gfx",
     "logical_cpus": 8,
     "load_average_before_run": [
-      0.7744140625,
-      0.48291015625,
-      0.53173828125
+      0.42724609375,
+      0.47900390625,
+      0.5263671875
     ],
-    "capture_started_unix_ns": 1793048916890476608
+    "capture_started_unix_ns": 1793049066780200913
   },
   "renderer_sha256": "38c2f598ef48182fd69f2ec5e504cc0d25d5418540a12cc350a66d20e3c72cb3"
 }
