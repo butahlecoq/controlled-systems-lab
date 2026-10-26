@@ -55,12 +55,16 @@ fuel model. They are explanatory geometry, not timing plots.
 
 ## Reproduction
 
-Build the three Release report executables with the options in
+Build the three Release report executables plus the dedicated B06 phase driver with the options in
 [`benchmarks/reporting/issue6/README.md`](../../../benchmarks/reporting/issue6/README.md).
 Run each executable with `--phase-timing`, retaining stdout as the matching
 raw JSON/JSONL file. Regenerate the table with:
 
 ```sh
+build/csl_issue6_b06_phase_report --phase-timing > raw/b06-phase.json
+build/csl_issue6_b07_report --phase-timing > raw/b07-phase.jsonl
+build/csl_issue6_b09_report --lambda 0 --phase-timing > raw/b09-lambda0-phase.json
+build/csl_issue6_b09_report --lambda 1 --phase-timing > raw/b09-lambda1-phase.json
 python3 benchmarks/reporting/issue6/fuel_phase_summary.py \
   raw/b06-phase.json.gz raw/b07-phase.jsonl.gz \
   raw/b09-lambda0-phase.json.gz raw/b09-lambda1-phase.json.gz \

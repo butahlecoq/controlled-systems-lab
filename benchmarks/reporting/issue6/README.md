@@ -31,7 +31,7 @@ Configure and build a clean Release driver:
 cmake -S . -B build/issue6-b06 -DBUILD_TESTING=OFF \
   -DCSL_ENABLE_HIGHS=OFF -DCSL_ENABLE_QHULL=OFF \
   -DCSL_BUILD_ISSUE6_B06_REPORT=ON -DCMAKE_BUILD_TYPE=Release
-cmake --build build/issue6-b06 --target csl_issue6_b06_report csl_issue6_b06_exact_oracle --parallel 4
+cmake --build build/issue6-b06 --target csl_issue6_b06_report csl_issue6_b06_phase_report csl_issue6_b06_exact_oracle --parallel 4
 ```
 
 Capture the oracle, one geometry record, and one excluded warmup plus seven
@@ -140,10 +140,13 @@ clock period, and CPU/worker metrics stay explicitly unavailable where no CPU
 clock or worker span was supplied. Inclusive and exclusive sums are grouped by
 operation; totals across different operations are not elapsed wall time.
 
+B06 phase timing uses a separate report executable so the original
+`b06_finite_minimax.cpp` source hash remains fixed for historical B06 captures.
+
 Run after building the three Release report targets:
 
 ```sh
-build/csl_issue6_b06_report --phase-timing > b06-phase.json
+build/csl_issue6_b06_phase_report --phase-timing > b06-phase.json
 build/csl_issue6_b07_report --phase-timing > b07-phase.jsonl
 build/csl_issue6_b09_report --lambda 0 --phase-timing > b09-lambda0-phase.json
 build/csl_issue6_b09_report --lambda 1 --phase-timing > b09-lambda1-phase.json
