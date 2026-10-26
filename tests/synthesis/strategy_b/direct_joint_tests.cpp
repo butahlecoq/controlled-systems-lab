@@ -24,6 +24,7 @@
 #include <limits>
 #include <string>
 #include <type_traits>
+#include <tuple>
 #include <vector>
 #include <atomic>
 using namespace csl;
@@ -329,18 +330,49 @@ TEST_CASE("temporal coupling prevents the physical-state-only false terminal opt
     CHECK(0.0*0.0==0.0);
 }
 TEST_CASE("MPC-02 registers distinct constraint tracks and direct and memory-lift relations agree") {
-    const std::array<std::pair<const char*, const char*>,4> scenarios{{
-        {"mpc02-unconstrained-2d.json","mpc02-unconstrained-2d-v1"},
-        {"mpc02-stage-box-2d.json","mpc02-stage-box-2d-v1"},
-        {"mpc02-slew-2d.json","mpc02-slew-2d-v1"},
-        {"mpc02-l1-budget-2d.json","mpc02-l1-budget-2d-v1"}}};
-    for(const auto& [file,id]:scenarios) {
+    const std::array<std::tuple<const char*, const char*, Vector, double>,4> scenarios{{
+        {"mpc02-unconstrained-2d.json","mpc02-unconstrained-2d-v1",{.5,0},0},
+        {"mpc02-stage-box-2d.json","mpc02-stage-box-2d-v1",{.5,0},0},
+        {"mpc02-slew-2d.json","mpc02-slew-2d-v1",{.375,.125},1.0/32.0},
+        {"mpc02-l1-budget-2d.json","mpc02-l1-budget-2d-v1",{.25,0},1.0/16.0}}};
+    for(const auto& [file,id,controls,cost]:scenarios) {
         const auto loaded=input::load_scenario_file(std::string(CSL_MPC02_SCENARIO_DIR)+"/"+file);
         REQUIRE(std::holds_alternative<input::LoadedScenario>(loaded));
         const auto& scenario=std::get<input::LoadedScenario>(loaded);
         CHECK(scenario.metadata()->id==id);
         CHECK(scenario.problem().model().horizon()==2);
         CHECK(scenario.problem().model().dimensions()==Dimensions{2,1,0});
+        const auto loaded_problem=scenario.problem();
+        const auto loaded_joint=accepted(build_joint_program(loaded_problem,request(loaded_problem)));
+        const problem::ControlHistory analytic_history{
+            {{0,0},{controls[0],0},{controls[0],controls[1]}},
+            {{controls[0]},{controls[1]}}};
+        const auto flatten_history=[](const problem::ControlHistory& history) {
+            Vector result;
+            for(const auto& state:history.states) result.insert(result.end(),state.begin(),state.end());
+            for(const auto& control:history.controls) result.insert(result.end(),control.begin(),control.end());
+            return result;
+        };
+        const auto analytic_coordinates=flatten_history(analytic_history);
+        CHECK(feasible(loaded_joint,analytic_coordinates));
+        const auto analytic_cost=accepted(optimization::evaluate_primal(
+            std::get<ConvexProgram>(loaded_joint.program),analytic_coordinates,
+            {1e-12,1e-12},{{"mpc02-authored-scenario-oracle"},"1"}));
+        CHECK(analytic_cost.original_objective==doctest::Approx(cost).epsilon(1e-12));
+
+        if(id=="mpc02-slew-2d-v1") {
+            CHECK_FALSE(feasible(loaded_joint,
+                flatten_history({{{0,0},{1,0},{1,-1}},{{1},{-1}}})));
+        } else if(id=="mpc02-l1-budget-2d-v1") {
+            CHECK_FALSE(feasible(loaded_joint,
+                flatten_history({{{0,0},{.25,0},{.25,.25}},{{.25},{.25}}})));
+        } else if(id=="mpc02-stage-box-2d-v1") {
+            CHECK_FALSE(feasible(loaded_joint,
+                flatten_history({{{0,0},{2,0},{2,0}},{{2},{0}}})));
+        } else {
+            CHECK(feasible(loaded_joint,
+                flatten_history({{{0,0},{2,0},{2,0}},{{2},{0}}})));
+        }
     }
 
     auto authored=mpc02_two_state_integrator();
