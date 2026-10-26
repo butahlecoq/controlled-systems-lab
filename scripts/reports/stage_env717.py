@@ -71,10 +71,12 @@ def _inputs(source: Path) -> tuple[dict[str, bytes], dict]:
 
 def stage(source: Path, site_root: Path) -> str:
     files, result = _inputs(source)
+    stager_sha256 = _digest(Path(__file__).read_bytes())
     identity = {"schema": "csl.env717-publication-identity/1",
                 "source_report_id": source.name,
                 "result_sha256": _digest(files["result.json"]),
                 "renderer_sha256": result["renderer_sha256"],
+                "stager_sha256": stager_sha256,
                 "source_file_hashes": {name: _digest(content) for name, content in sorted(files.items())}}
     report_id = "env717-simple-control-" + _digest(
         json.dumps(identity, sort_keys=True, separators=(",", ":")).encode())[:20]
@@ -89,11 +91,6 @@ def stage(source: Path, site_root: Path) -> str:
     if destination.exists() or archive_path.exists():
         raise ValueError("versioned environment report route already exists")
 
-    manifest = {"schema": "csl.env717-publication/1", "report_id": report_id,
-                "source_report_id": source.name, "source_repository_commit": SOURCE_COMMIT,
-                "source_commit": result["source_commit"],
-                "result_sha256": _digest(files["result.json"]),
-                "files": {name: _digest(content) for name, content in sorted(files.items())}}
     page = files["index.html"].decode("utf-8")
     footer = (f'<p>Immutable Pages report <code>{escape(report_id)}</code>. '
               f'<a href="publication-manifest.json">Publication manifest</a> · '
@@ -102,11 +99,19 @@ def stage(source: Path, site_root: Path) -> str:
         raise ValueError("source report page insertion point differs")
     generated = dict(files)
     generated["index.html"] = page.replace("</main>", footer + "</main>").encode("utf-8")
-    generated["publication-manifest.json"] = (json.dumps(manifest, indent=2) + "\n").encode()
     generated["SHA256SUMS"] = "".join(
         f"{_digest(generated[name])}  {name}\n"
         for name in sorted(generated) if name not in ("SHA256SUMS", "publication-manifest.json")
     ).encode("ascii")
+    manifest = {"schema": "csl.env717-publication/1", "report_id": report_id,
+                "source_report_id": source.name, "source_repository_commit": SOURCE_COMMIT,
+                "source_commit": result["source_commit"],
+                "result_sha256": _digest(files["result.json"]),
+                "stager_sha256": stager_sha256,
+                "source_files": {name: _digest(content) for name, content in sorted(files.items())},
+                "published_files": {name: _digest(content)
+                                    for name, content in sorted(generated.items())}}
+    generated["publication-manifest.json"] = (json.dumps(manifest, indent=2) + "\n").encode()
     route_link = (f'<li><a href="{report_id}/index.html">SimpleControlProblem finite-action pilot</a>'
                   f' — 81 four-step plans; 2D time/state figure'
                   f' · <a href="{report_id}/result.json">result JSON</a>'

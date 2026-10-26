@@ -341,28 +341,34 @@ endif()
 
 if(CSL_BUILD_ENV717_REPORT)
 include(cmake/JsonDependencies.cmake)
+file(GLOB_RECURSE ENV717_LIBRARY_INPUTS CONFIGURE_DEPENDS
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/*.cc
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/*.cxx
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/*.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/*.hpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/*.hxx
+    ${CMAKE_CURRENT_SOURCE_DIR}/include/*.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/include/*.hpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/include/*.hxx)
 set_property(DIRECTORY APPEND PROPERTY CMAKE_CONFIGURE_DEPENDS
     ${CMAKE_CURRENT_SOURCE_DIR}/benchmarks/reporting/env717/simple_control.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/optimization/finite_action_minimax.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/reachability/fixed_plan_disturbance.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/optimization/worst_case_vertex.cpp)
+    ${ENV717_LIBRARY_INPUTS})
 file(SHA256 ${CMAKE_CURRENT_SOURCE_DIR}/benchmarks/reporting/env717/simple_control.cpp
     ENV717_DRIVER_SHA256)
-set(ENV717_ALGORITHM_SOURCES
-    src/optimization/finite_action_minimax.cpp
-    src/reachability/fixed_plan_disturbance.cpp
-    src/optimization/worst_case_vertex.cpp)
+execute_process(COMMAND git status --porcelain -- src include
+    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+    OUTPUT_VARIABLE ENV717_LIBRARY_DIRTY OUTPUT_STRIP_TRAILING_WHITESPACE
+    COMMAND_ERROR_IS_FATAL ANY)
+if(NOT ENV717_LIBRARY_DIRTY STREQUAL "")
+    message(FATAL_ERROR "ENV717 measured library source tree is dirty: ${ENV717_LIBRARY_DIRTY}")
+endif()
 set(ENV717_ALGORITHM_HASHES "")
-foreach(ENV717_SOURCE IN LISTS ENV717_ALGORITHM_SOURCES)
-    file(SHA256 ${CMAKE_CURRENT_SOURCE_DIR}/${ENV717_SOURCE} ENV717_ALGORITHM_SHA256)
-    execute_process(COMMAND git status --porcelain -- ${ENV717_SOURCE}
-        WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-        OUTPUT_VARIABLE ENV717_ALGORITHM_DIRTY OUTPUT_STRIP_TRAILING_WHITESPACE
-        COMMAND_ERROR_IS_FATAL ANY)
-    if(NOT ENV717_ALGORITHM_DIRTY STREQUAL "")
-        message(FATAL_ERROR "ENV717 measured algorithm source is dirty: ${ENV717_SOURCE}")
-    endif()
-    string(APPEND ENV717_ALGORITHM_HASHES "${ENV717_SOURCE}:${ENV717_ALGORITHM_SHA256}\n")
+foreach(ENV717_SOURCE IN LISTS ENV717_LIBRARY_INPUTS)
+    file(RELATIVE_PATH ENV717_SOURCE_RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} ${ENV717_SOURCE})
+    file(SHA256 ${ENV717_SOURCE} ENV717_ALGORITHM_SHA256)
+    string(APPEND ENV717_ALGORITHM_HASHES
+        "${ENV717_SOURCE_RELATIVE}:${ENV717_ALGORITHM_SHA256}\n")
 endforeach()
 string(SHA256 ENV717_ALGORITHM_SOURCE_SHA256 "${ENV717_ALGORITHM_HASHES}")
 execute_process(COMMAND git rev-parse HEAD WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
