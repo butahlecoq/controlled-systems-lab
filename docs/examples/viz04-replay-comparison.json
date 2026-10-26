@@ -24,11 +24,11 @@
     {"label": "control B", "unit": "kg/s", "target": null, "bounds": null}
   ],
   "linear_objective_convention": {
-    "kind": "linear",
-    "coefficients": [0.0, 1.0, 0.0, 1.0],
-    "offset": 0.0
+    "kind": "residual_norm",
+    "map": {"rows": 2, "cols": 4, "values": [1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0]},
+    "target": [1.0, 1.0]
   },
-  "linear_objective_unit": "kg",
+  "linear_objective_unit": "kg/s",
   "witnesses": [
     {
       "source_ordinal": 0,
@@ -48,8 +48,8 @@
         "feasibility": "numerical_pass",
         "objective": "numerical_pass",
         "optimality": "numerical_pass",
-        "completeness": "numerical_pass",
-        "validated": "numerical_pass",
+        "completeness": "unsupported",
+        "validated": "unsupported",
         "residuals": []
       },
       "replay": {
@@ -91,8 +91,8 @@
         "feasibility": "numerical_pass",
         "objective": "numerical_pass",
         "optimality": "numerical_pass",
-        "completeness": "numerical_pass",
-        "validated": "numerical_pass",
+        "completeness": "unsupported",
+        "validated": "unsupported",
         "residuals": []
       },
       "replay": {

@@ -6,7 +6,7 @@ add_test(NAME batch_runner_tests COMMAND batch_runner_tests)
 csl_test_target(batch_runner_tests experiments)
 
 add_executable(replay_comparison_tests tests/integration/replay_comparison.cpp)
-target_link_libraries(replay_comparison_tests PRIVATE CSL::experiments doctest::doctest)
+target_link_libraries(replay_comparison_tests PRIVATE CSL::experiments CSL::verification doctest::doctest)
 target_include_directories(replay_comparison_tests SYSTEM PRIVATE ${csl_json_SOURCE_DIR}/single_include)
 target_compile_definitions(replay_comparison_tests PRIVATE
   CSL_VIZ04_REPLAY_FIXTURE="${CMAKE_CURRENT_SOURCE_DIR}/docs/examples/viz04-replay-comparison.json")

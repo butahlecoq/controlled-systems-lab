@@ -2,6 +2,7 @@
 #include <doctest/doctest.h>
 
 #include <csl/experiments/replay_artifact.hpp>
+#include <csl/verification/trajectory.hpp>
 #include <nlohmann/json.hpp>
 
 #include <fstream>
@@ -48,14 +49,34 @@ ar::PlotEvidence numerical_witness_evidence() {
 
 struct Fixture {
     Problem problem;
+    problem::ResolvedProblem resolved;
     ar::PlotData plot;
     std::vector<sim::ReplayRecord> replays;
 };
 
+problem::ResolvedProblem resolve(const Problem& source) {
+    auto result = problem::resolve(source,
+        {problem::UncertaintyStructure::stage_product_uncoupled, {}, {}});
+    REQUIRE(std::holds_alternative<problem::ResolvedProblem>(result));
+    return std::get<problem::ResolvedProblem>(std::move(result));
+}
+
 Fixture fixture() {
     Problem source;
     source.id = {"four-state-fuel-toy"};
-    source.objective = LinearTerminal{{0.0, 1.0, 0.0, 1.0}, 0.0};
+    source.model = std::make_shared<const SystemModel>(SystemModel{{{4, 2, 0}, TimeDomain::discrete,
+        std::vector<LinearStage>{
+            {{4, 4, {1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1}},
+                {4, 2, {1, 0, 0, 0, 0, 1, 0, 0}}, {4, 0, {}}, {0, 0, 0, 0}},
+            {{4, 4, {1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1}},
+                {4, 2, {1, 0, 0, 0, 0, 1, 0, 0}}, {4, 0, {}}, {0, 0, 0, 0}}}}, {}});
+    source.times = {0.0, 1.0, 2.0};
+    source.initial = KnownInitial{{0.0, 0.0, 0.0, 0.0}};
+    source.controls = ContinuousDomain{{UniversalSet{2}, UniversalSet{2}}};
+    source.states = {UniversalSet{4}, UniversalSet{4}, UniversalSet{4}};
+    source.information = InformationPattern::nominal_open_loop;
+    source.objective = ResidualNormTerminal{{2, 4, {1, 0, 0, 0, 0, 0, 1, 0}}, {1, 1}};
+    const auto resolved = resolve(source);
     const auto plant = fuel_toy();
     const std::vector<Vector> first_controls{{0.0, 0.0}, {1.0, 1.0}};
     const std::vector<Vector> second_controls{{0.5, 0.5}, {0.5, 0.5}};
@@ -80,14 +101,28 @@ Fixture fixture() {
             {{0.0, 0.0, 0.0, 0.0}, {0.5, 0.0, 0.5, 0.0}, {1.0, 0.0, 1.0, 0.0}},
             second_controls, 0.0, numerical_witness_evidence()},
     };
-    return {source, std::move(plot), {first, second}};
+    return {source, resolved, std::move(plot), {first, second}};
 }
 }
 
 TEST_CASE("4D selected linear witnesses retain separate nonlinear replay and 2D projections") {
     auto source = fixture();
+    for (auto& path : source.plot.paths) {
+        verification::TrajectoryRequest request;
+        request.witness = {source.resolved.identity(), path.states, path.controls, path.objective};
+        const auto verified = verification::verify_trajectory(source.resolved, request);
+        REQUIRE(verified.bindings == verification::CheckStatus::numerical_pass);
+        REQUIRE(verified.feasibility == verification::CheckStatus::numerical_pass);
+        REQUIRE(verified.objective == verification::CheckStatus::numerical_pass);
+        REQUIRE(verified.recomputed_objective == doctest::Approx(0.0));
+        // This objective is a norm, so zero is an exact global lower bound
+        // and both independently verified histories attain it.
+        path.evidence = {verified.bindings, verified.feasibility, verified.objective,
+            verification::CheckStatus::numerical_pass, verified.completeness,
+            verified.validated, verified.residuals};
+    }
     const ar::RunRecordRef run_ref{source.plot.run, problem::ContentDigest{}};
-    const auto associated = ex::associate_replays(source.problem, source.plot, run_ref, source.replays, "kg");
+    const auto associated = ex::associate_replays(source.problem, source.plot, run_ref, source.replays, "kg/s");
     REQUIRE(std::holds_alternative<ex::ReplayComparison>(associated));
     const auto& comparison = std::get<ex::ReplayComparison>(associated);
     REQUIRE(comparison.witnesses.size() == 2);
@@ -96,16 +131,25 @@ TEST_CASE("4D selected linear witnesses retain separate nonlinear replay and 2D 
     CHECK(comparison.witnesses[1].nonlinear.original_objective == doctest::Approx(1.75));
     CHECK(comparison.witnesses[0].nonlinear.objective_unit == "kg");
     CHECK(comparison.witnesses[0].linear.evidence.optimality == verification::CheckStatus::numerical_pass);
-    CHECK(comparison.linear_objective_unit == std::optional<std::string>{"kg"});
+    CHECK(comparison.linear_objective_unit == std::optional<std::string>{"kg/s"});
 
     std::ifstream fixture_file(CSL_VIZ04_REPLAY_FIXTURE);
     REQUIRE(fixture_file.good());
     const auto saved_example = nlohmann::json::parse(fixture_file);
+    CHECK(saved_example["linear_objective_unit"] == "kg/s");
+    CHECK(saved_example["linear_objective_convention"]["kind"] == "residual_norm");
+    CHECK(saved_example["linear_objective_convention"]["target"] == std::vector<double>{1.0, 1.0});
     REQUIRE(saved_example["witnesses"].size() == comparison.witnesses.size());
     for (std::size_t i = 0; i < comparison.witnesses.size(); ++i) {
         CHECK(saved_example["witnesses"][i]["replay"]["states"] == comparison.witnesses[i].nonlinear.states);
         CHECK(saved_example["witnesses"][i]["replay"]["controls"] == comparison.witnesses[i].nonlinear.controls);
         CHECK(saved_example["witnesses"][i]["linear_objective"] == comparison.witnesses[i].linear.objective);
+        CHECK(saved_example["witnesses"][i]["linear_evidence"]["bindings"] == "numerical_pass");
+        CHECK(saved_example["witnesses"][i]["linear_evidence"]["feasibility"] == "numerical_pass");
+        CHECK(saved_example["witnesses"][i]["linear_evidence"]["objective"] == "numerical_pass");
+        CHECK(saved_example["witnesses"][i]["linear_evidence"]["optimality"] == "numerical_pass");
+        CHECK(saved_example["witnesses"][i]["linear_evidence"]["completeness"] == "unsupported");
+        CHECK(saved_example["witnesses"][i]["linear_evidence"]["validated"] == "unsupported");
     }
 
     const auto flow = ex::project_replay_trajectories(comparison, {0, 2},
