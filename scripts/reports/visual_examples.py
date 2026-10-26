@@ -780,6 +780,13 @@ def build(catalog, site):
             'event.preventDefault();history.pushState(null,"",event.currentTarget.hash);'
             'target.scrollIntoView({behavior:"instant",block:"start"});});</script></body></html>')
     outputs["index.html"] = body
+    fuel_example_dir = Path(__file__).parents[2] / "docs/examples"
+    for filename in ("b04-reference-trajectory-projections.html",
+                     "b04-reference-trajectory-projections.svg"):
+        source = fuel_example_dir / filename
+        require(source.is_file() and not source.is_symlink(),
+                "missing fuel projection example asset: " + filename)
+        outputs[filename] = source.read_text(encoding="utf-8")
     export = [{key: value for key, value in e.items() if key not in {"records_path", "domain"}} for e in examples]
     outputs["minimal-inputs.json"] = json.dumps({"schema": "csl.visual-examples/1", "examples": export}, indent=2) + "\n"
     outputs["visual-coverage.json"] = json.dumps(
