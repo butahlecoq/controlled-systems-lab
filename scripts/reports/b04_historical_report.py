@@ -74,18 +74,30 @@ def _plain_json(value: Any) -> Any:
     return value
 
 
+def _index_sources(entries: list[Any], name: str) -> dict[str, dict[str, Any]]:
+    by_id: dict[str, dict[str, Any]] = {}
+    for item in entries:
+        if not isinstance(item, dict) or not isinstance(item.get("id"), str):
+            raise ValueError(f"{name} entries must be objects with string IDs")
+        source_id = item["id"]
+        if source_id in by_id:
+            raise ValueError(f"{name} contains duplicate source ID {source_id}")
+        by_id[source_id] = item
+    return by_id
+
+
 def _source_map(register: dict[str, Any], manifest: dict[str, Any]) -> dict[str, dict[str, Any]]:
     entries = register.get("selected_sources")
     if not isinstance(entries, list):
         raise ValueError("archive register selected_sources must be an array")
-    by_id = {item.get("id"): item for item in entries if isinstance(item, dict)}
+    by_id = _index_sources(entries, "archive register")
     required = {"A11", "A12", "A14"}
     if not required <= by_id.keys():
         raise ValueError("archive register must contain the B04 A11, A12, and A14 sources")
     sources = manifest.get("sources")
     if not isinstance(sources, list):
         raise ValueError("historical manifest sources must be an array")
-    by_manifest_id = {item.get("id"): item for item in sources if isinstance(item, dict)}
+    by_manifest_id = _index_sources(sources, "historical manifest")
     l11 = by_manifest_id.get("L11")
     if not isinstance(l11, dict) or l11.get("sha256") != by_id["A14"].get("sha256"):
         raise ValueError("historical L11 and byte-identical A14 source identities disagree")

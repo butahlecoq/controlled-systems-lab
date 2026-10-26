@@ -87,6 +87,19 @@ class B04HistoricalReportTests(unittest.TestCase):
             with self.assertRaisesRegex(ValueError, "invalid SHA-256"):
                 report.build(self.manifest, self.consistency, register_path)
 
+            register = json.loads(self.register.read_text())
+            register["selected_sources"].append(
+                dict(next(item for item in register["selected_sources"] if item["id"] == "A11")))
+            register_path.write_text(json.dumps(register))
+            with self.assertRaisesRegex(ValueError, "archive register contains duplicate source ID A11"):
+                report.build(self.manifest, self.consistency, register_path)
+
+            manifest = json.loads(self.manifest.read_text())
+            manifest["sources"].append(dict(manifest["sources"][0]))
+            register = json.loads(self.register.read_text())
+            with self.assertRaisesRegex(ValueError, "historical manifest contains duplicate source ID"):
+                report._source_map(register, manifest)
+
             duplicate_path = tmp / "duplicate.json"
             duplicate_path.write_text('{"schema_version":1,"schema_version":1}')
             with self.assertRaisesRegex(ValueError, "duplicate JSON key"):
