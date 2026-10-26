@@ -678,7 +678,7 @@
     },
     {
       "source": "scripts/reports/visual_examples.py",
-      "signal_count": 43,
+      "signal_count": 46,
       "asset_name_literals": [
         "app02-diamond-v1.svg",
         "app04-square-v1.svg",
@@ -704,6 +704,7 @@
         "fuel-b06-viz06-trajectory.png",
         "fuel-b06-viz06-trajectory.svg",
         "geometry.svg",
+        "issue3-control-walkthrough.svg",
         "joint-relation-2d.svg",
         "lazy-2d.svg",
         "lotka-volterra-sampled-v1.svg",
