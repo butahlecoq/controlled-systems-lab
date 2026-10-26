@@ -171,12 +171,12 @@ bool supported_synthesis_bound(const ObjectiveBound& bound,const ProblemId& prob
         !std::holds_alternative<Unestablished>(bound.evidence.support) &&
         !std::holds_alternative<ExactFarkasEvidence>(bound.evidence.support);
 }
-bool supported_feasible_incumbent(const FeasibleIncumbent& incumbent,const FamilyIdentity& expected) {
+bool valid_incumbent_candidate(const IncumbentCandidate& incumbent,const FamilyIdentity& expected) {
     const auto& witness=incumbent.witness;
     const auto& coordinates=expected.coordinates;
-    if (witness.problem!=expected.problem || incumbent.feasibility.problem!=expected.problem ||
-        std::holds_alternative<Unestablished>(incumbent.feasibility.support) ||
-        std::holds_alternative<ExactFarkasEvidence>(incumbent.feasibility.support) ||
+    if (witness.problem!=expected.problem || incumbent.feasibility_claim.problem!=expected.problem ||
+        std::holds_alternative<Unestablished>(incumbent.feasibility_claim.support) ||
+        std::holds_alternative<ExactFarkasEvidence>(incumbent.feasibility_claim.support) ||
         !std::isfinite(witness.original_objective) ||
         coordinates.horizon==std::numeric_limits<std::size_t>::max() ||
         witness.states.size()!=coordinates.horizon+1 || witness.controls.size()!=coordinates.horizon)
@@ -213,27 +213,14 @@ Diagnostics check_synthesis_result(const SynthesisResult& result,const Synthesis
     if (result.objective.lower && result.objective.upper && result.objective.lower->value>result.objective.upper->value)
         add(DiagnosticCode::invalid_claim,"result.objective","Lower bound exceeds upper bound");
     for (const auto& incumbent:result.incumbents)
-        if (!supported_feasible_incumbent(incumbent,expected_identity))
+        if (!valid_incumbent_candidate(incumbent,expected_identity))
             add(DiagnosticCode::evidence_mismatch,"result.incumbents",
-                "An incumbent needs matching problem, supported feasibility and a finite full history in canonical dimensions");
-    if (result.outcome.value==MathematicalOutcome::infeasible &&
-        std::any_of(result.incumbents.begin(),result.incumbents.end(),[&](const FeasibleIncumbent& incumbent){
-            return supported_feasible_incumbent(incumbent,expected_identity);
-        }))
-        add(DiagnosticCode::invalid_claim,"result.outcome.infeasible",
-            "A supported feasible incumbent contradicts an infeasibility claim");
+                "A candidate needs matching problem and claim identities and a finite full history in canonical dimensions");
     if (result.outcome.value==MathematicalOutcome::unbounded &&
         !std::holds_alternative<Unestablished>(result.outcome.support) &&
         result.objective.lower && supported_synthesis_bound(*result.objective.lower,expected.problem))
         add(DiagnosticCode::invalid_claim,"result.outcome.unbounded",
             "Supported unboundedness conflicts with a supported finite lower bound");
-    if (result.objective.lower && supported_synthesis_bound(*result.objective.lower,expected.problem) &&
-        std::any_of(result.incumbents.begin(),result.incumbents.end(),[&](const FeasibleIncumbent& incumbent){
-            return supported_feasible_incumbent(incumbent,expected_identity) &&
-                incumbent.witness.original_objective<result.objective.lower->value;
-        }))
-        add(DiagnosticCode::invalid_claim,"result.objective.lower",
-            "A supported feasible incumbent has objective below the claimed lower bound");
     if (result.family) {
         const auto& identity=result.family->identity();
         if (identity.problem!=expected.problem || identity.request!=expected.request ||

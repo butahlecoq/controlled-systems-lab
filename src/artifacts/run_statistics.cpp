@@ -1,4 +1,5 @@
 #include <csl/artifacts/run_statistics.hpp>
+#include <csl/verification/trajectory.hpp>
 #include "collection_budget.hpp"
 #include <limits>
 #include <algorithm>
@@ -229,8 +230,9 @@ bool support_valid(const EvidenceSupport& support){
     return true;
 }
 }
-ArtifactResult<RunStatistics> publish_record(RunRecord input) {
+static ArtifactResult<RunStatistics> publish_record_impl(RunRecord input, bool problem_revalidated) {
     try {
+        input.provenance=problem_revalidated ? ProblemProvenance::problem_revalidated : ProblemProvenance::identity_recorded;
         const auto reject=[](std::string path,std::string message)->ArtifactResult<RunStatistics>{return ArtifactError{ArtifactErrorCode::invalid_input,std::move(path),std::move(message)};};
         if(!identity(input.problem.value,"csl.problem.v1.sha256:")||input.run.value.empty())return reject("run.problem","Invalid run or mathematical identity");
         const auto& statistics=input.statistics.description();
@@ -318,7 +320,13 @@ ArtifactResult<RunStatistics> publish_record(RunRecord input) {
                 return reject("run.horizon","Horizon exceeds this platform's coordinate size");
             expected.coordinates={input.dimensions,static_cast<std::size_t>(input.horizon)};
             if(s->family)expected=s->family->family.identity();
-            const SynthesisResult checked{s->termination,s->outcome,s->objective,s->family?std::optional<OptimalFamily>{s->family->family}:std::nullopt,s->incumbents,{},s->stop};
+            std::vector<IncumbentCandidate> candidates;
+            candidates.reserve(s->incumbents.size());
+            for(const auto& incumbent:s->incumbents)
+                candidates.push_back({incumbent.witness,incumbent.feasibility});
+            const SynthesisResult checked{s->termination,s->outcome,s->objective,
+                s->family?std::optional<OptimalFamily>{s->family->family}:std::nullopt,
+                std::move(candidates),{},s->stop};
             if(!check_synthesis_result(checked,expected).empty())return reject("run.final.synthesis.evidence","Unsupported or contradictory synthesis evidence");
             const auto retained_scope=[&](const RetainedEvidenceScope& scope){
                 return scope.lower_bound==s->objective.lower.has_value()&&scope.upper_bound==s->objective.upper.has_value()&&
@@ -370,18 +378,55 @@ ArtifactResult<RunStatistics> publish_record(RunRecord input) {
         return ArtifactAccess::run(std::move(input),std::get<std::string>(std::move(portable)));
     }catch(const std::bad_alloc&){return ArtifactError{ArtifactErrorCode::allocation,{},{}};}
 }
+ArtifactResult<RunStatistics> publish_record(RunRecord input) {
+    return publish_record_impl(std::move(input),false);
+}
 ArtifactResult<RunStatistics> publish_run(RunInput input) {
     try {
     const auto description=input.problem.description();
     if(input.record.problem!=input.problem.identity()||input.record.dimensions.state!=description->model->dynamics.dimensions.state||input.record.dimensions.control!=description->model->dynamics.dimensions.control||input.record.dimensions.external!=description->model->dynamics.dimensions.external||input.record.horizon!=description->times.size()-1)
         return ArtifactError{ArtifactErrorCode::identity,"run.problem","Record does not match actual immutable problem"};
-    input.record.provenance=ProblemProvenance::problem_revalidated;return publish_record(std::move(input.record));
+    if(const auto* final=std::get_if<SynthesisFinal>(&input.record.final)) {
+        std::optional<double> best_incumbent_objective;
+        for(std::size_t index=0;index<final->incumbents.size();++index) {
+            verification::TrajectoryRequest request;
+            request.witness=final->incumbents[index].witness;
+            request.verification=verification::VerificationRequest{
+                input.record.configuration.description().numerical,Assurance::numerical};
+            const auto report=verification::verify_trajectory(input.problem,request);
+            if(report.termination!=Termination::completed || report.feasibility!=verification::CheckStatus::numerical_pass)
+                return ArtifactError{ArtifactErrorCode::invalid_input,
+                    "run.final.incumbents["+std::to_string(index)+"].feasibility",
+                    "Incumbent did not pass independent verification against the resolved problem"};
+            if(final->outcome.value==MathematicalOutcome::infeasible)
+                return ArtifactError{ArtifactErrorCode::invalid_input,"run.final.outcome",
+                    "An independently verified feasible incumbent contradicts infeasibility"};
+            if(report.recomputed_objective) {
+                if(!best_incumbent_objective || *report.recomputed_objective<*best_incumbent_objective)
+                    best_incumbent_objective=*report.recomputed_objective;
+            }
+        }
+        if(best_incumbent_objective) {
+            const auto& numerical=input.record.configuration.description().numerical;
+            const auto within_tolerance=[&](double value) {
+                return numerical.absolute_tolerance + numerical.relative_tolerance *
+                    std::max(std::abs(value),std::abs(*best_incumbent_objective));
+            };
+            if(final->objective.lower && *best_incumbent_objective+within_tolerance(final->objective.lower->value)<final->objective.lower->value)
+                return ArtifactError{ArtifactErrorCode::invalid_input,"run.final.objective.lower",
+                    "A verified feasible incumbent lies below the claimed objective lower bound"};
+            if(final->objective.upper && *best_incumbent_objective-within_tolerance(final->objective.upper->value)>final->objective.upper->value)
+                return ArtifactError{ArtifactErrorCode::invalid_input,"run.final.objective.upper",
+                    "The claimed objective upper bound lies below every verified feasible incumbent"};
+        }
+    }
+    return publish_record_impl(std::move(input.record),true);
     }catch(const std::bad_alloc&){return ArtifactError{ArtifactErrorCode::allocation,{},{}};}
 }
 ArtifactResult<RunStatistics> publish_identity_recorded_run(RunRecord record) {
     try {
         record.provenance=ProblemProvenance::identity_recorded;
-        return publish_record(std::move(record));
+        return publish_record_impl(std::move(record),false);
     } catch(const std::bad_alloc&) {
         return ArtifactError{ArtifactErrorCode::allocation,{},{}};
     }
@@ -405,7 +450,12 @@ SynthesisFinal project_final(const SynthesisResult& result,std::optional<Attachm
             family=FamilyRecord{std::get<OptimalFamily>(std::move(metadata)),std::move(payload)};
         }
     }
-    return {result.termination,result.outcome,result.objective,std::move(family),result.incumbents,result.stop};
+    std::vector<FeasibleIncumbent> recorded_candidates;
+    recorded_candidates.reserve(result.incumbents.size());
+    for(const auto& candidate:result.incumbents)
+        recorded_candidates.push_back({candidate.witness,candidate.feasibility_claim});
+    return {result.termination,result.outcome,result.objective,std::move(family),
+        std::move(recorded_candidates),result.stop};
 }
 ArtifactResult<SpanRecord> project_legacy_span(const TimingSpan& value,SpanDescriptor descriptor){
     try {

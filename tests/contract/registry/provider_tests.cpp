@@ -159,7 +159,7 @@ TEST_CASE("mixed fixed and generated strategy owns both after enclosing preparat
     const auto result=std::get<SynthesisResult>(prepared.create()->run(context()));
     REQUIRE(result.incumbents.size()==1);CHECK(result.incumbents[0].witness.states==std::vector<Vector>{{0},{4}});
     CHECK(result.incumbents[0].witness.controls==std::vector<Vector>{{4}});CHECK(result.incumbents[0].witness.original_objective==14);
-    CHECK(std::get<SymbolicArgument>(result.incumbents[0].feasibility.support).assumptions=="x0=0, u0=4, x1=x0+u0=4; control is unconstrained; counter=31");
+    CHECK(std::get<SymbolicArgument>(result.incumbents[0].feasibility_claim.support).assumptions=="x0=0, u0=4, x1=x0+u0=4; control is unconstrained; counter=31");
 }
 TEST_CASE("later outer dependency rejection snapshots neither fixed data nor generated callbacks") {
     struct CopyProbe {

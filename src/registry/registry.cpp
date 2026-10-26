@@ -221,12 +221,6 @@ SynthesisOutcome StrategyPort::run(Workspace& workspace,const Request& request,c
         supported_synthesis_bound(*answer.objective.lower,id) &&
         supported_synthesis_bound(*answer.objective.upper,id) &&
         answer.objective.lower->value>answer.objective.upper->value;
-    const bool lower_exceeds_incumbent=answer.objective.lower.has_value() &&
-        supported_synthesis_bound(*answer.objective.lower,id) &&
-        std::any_of(answer.incumbents.begin(),answer.incumbents.end(),[&](const FeasibleIncumbent& incumbent){
-            return supported_feasible_incumbent(incumbent,validation_identity) &&
-                incumbent.witness.original_objective<answer.objective.lower->value;
-        });
     auto retained=std::move(answer);
     if (!check_outcome_evidence(retained.outcome,id,request.family.assurance).empty())
         retained.outcome={id,MathematicalOutcome::undetermined,Unestablished{}, {}};
@@ -236,9 +230,9 @@ SynthesisOutcome StrategyPort::run(Workspace& workspace,const Request& request,c
         retained.objective.upper.reset();
     if (inverted_bounds) {
         retained.objective.lower.reset(); retained.objective.upper.reset();
-    } else if (lower_exceeds_incumbent) retained.objective.lower.reset();
-    std::erase_if(retained.incumbents,[&](const FeasibleIncumbent& incumbent) {
-        return !supported_feasible_incumbent(incumbent,validation_identity);
+    }
+    std::erase_if(retained.incumbents,[&](const IncumbentCandidate& incumbent) {
+        return !valid_incumbent_candidate(incumbent,validation_identity);
     });
     if (retained.family && !check_family_evidence(*retained.family,id,request.family.assurance).empty())
         retained.family.reset();
@@ -249,10 +243,9 @@ SynthesisOutcome StrategyPort::run(Workspace& workspace,const Request& request,c
             identity.strategy_version!=expected.strategy_version) retained.family.reset();
     }
     if (retained.family && retained.family->target()==FamilyTarget::exact_optimal_relation) retained.family.reset();
-    // A supported candidate or incumbent survives a contradictory solver status;
-    // the rejected mathematical claim remains in the diagnostics, not the result.
-    if ((retained.family || (!retained.incumbents.empty() &&
-            retained.outcome.value==MathematicalOutcome::infeasible)) &&
+    // A verified family survives a contradictory solver status; unverified
+    // incumbent candidates do not establish feasibility or alter the outcome.
+    if (retained.family &&
         (retained.outcome.value==MathematicalOutcome::infeasible ||
             retained.outcome.value==MathematicalOutcome::unbounded ||
             retained.outcome.value==MathematicalOutcome::infimum_not_attained))

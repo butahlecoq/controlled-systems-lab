@@ -578,20 +578,20 @@ int run(const input::LoadedScenario& scenario, const Options& options) {
                   << " family=" << (complete ? "complete_optimal" :
                       (candidate_family ? "candidate" : (result->family ? "partial" : "none")))
                   << " selected=" << (selected_witnesses ? selected_witnesses->batch.returned_count() : 0)
-                  << " incumbents=" << result->incumbents.size();
+                  << " candidate_witnesses=" << result->incumbents.size();
         bool verification_passed = selected_witnesses != nullptr &&
             strategy.verification.size() == selected_witnesses->batch.witnesses.size();
         for (const auto& report : strategy.verification) {
             verification_passed = verification_passed &&
                 report.termination == Termination::completed && passed(report.bindings) && passed(report.feasibility) && passed(report.objective) && report.recomputed_objective.has_value();
         }
-        const bool incumbent_evidence = !result->incumbents.empty() &&
+        const bool candidate_feasibility_claim = !result->incumbents.empty() &&
             std::all_of(result->incumbents.begin(), result->incumbents.end(), [](const auto& incumbent) {
-                return std::holds_alternative<NumericalCheck>(incumbent.feasibility.support);
+                return std::holds_alternative<NumericalCheck>(incumbent.feasibility_claim.support);
             });
         std::cout << " verification="
                   << (verification_passed ? "numerical_pass" : "not_passed")
-                  << " incumbent_evidence=" << (incumbent_evidence ? "numerical" : "none") << '\n';
+                  << " candidate_feasibility_claim=" << (candidate_feasibility_claim ? "numerical" : "none") << '\n';
         if (const auto* stopped = std::get_if<ScopedOperationStopped>(&result->stop))
             std::cout << "  stop=" << stopped->stop.diagnostics << '\n';
         if (const auto* rejected = std::get_if<ScopedRequestRejection>(&result->stop))
