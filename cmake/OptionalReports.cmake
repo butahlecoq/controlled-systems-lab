@@ -342,9 +342,29 @@ endif()
 if(CSL_BUILD_ENV717_REPORT)
 include(cmake/JsonDependencies.cmake)
 set_property(DIRECTORY APPEND PROPERTY CMAKE_CONFIGURE_DEPENDS
-    ${CMAKE_CURRENT_SOURCE_DIR}/benchmarks/reporting/env717/simple_control.cpp)
+    ${CMAKE_CURRENT_SOURCE_DIR}/benchmarks/reporting/env717/simple_control.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/optimization/finite_action_minimax.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/reachability/fixed_plan_disturbance.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/optimization/worst_case_vertex.cpp)
 file(SHA256 ${CMAKE_CURRENT_SOURCE_DIR}/benchmarks/reporting/env717/simple_control.cpp
     ENV717_DRIVER_SHA256)
+set(ENV717_ALGORITHM_SOURCES
+    src/optimization/finite_action_minimax.cpp
+    src/reachability/fixed_plan_disturbance.cpp
+    src/optimization/worst_case_vertex.cpp)
+set(ENV717_ALGORITHM_HASHES "")
+foreach(ENV717_SOURCE IN LISTS ENV717_ALGORITHM_SOURCES)
+    file(SHA256 ${CMAKE_CURRENT_SOURCE_DIR}/${ENV717_SOURCE} ENV717_ALGORITHM_SHA256)
+    execute_process(COMMAND git status --porcelain -- ${ENV717_SOURCE}
+        WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+        OUTPUT_VARIABLE ENV717_ALGORITHM_DIRTY OUTPUT_STRIP_TRAILING_WHITESPACE
+        COMMAND_ERROR_IS_FATAL ANY)
+    if(NOT ENV717_ALGORITHM_DIRTY STREQUAL "")
+        message(FATAL_ERROR "ENV717 measured algorithm source is dirty: ${ENV717_SOURCE}")
+    endif()
+    string(APPEND ENV717_ALGORITHM_HASHES "${ENV717_SOURCE}:${ENV717_ALGORITHM_SHA256}\n")
+endforeach()
+string(SHA256 ENV717_ALGORITHM_SOURCE_SHA256 "${ENV717_ALGORITHM_HASHES}")
 execute_process(COMMAND git rev-parse HEAD WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
     OUTPUT_VARIABLE ENV717_SOURCE_COMMIT OUTPUT_STRIP_TRAILING_WHITESPACE COMMAND_ERROR_IS_FATAL ANY)
 add_executable(csl_env717_simple_control benchmarks/reporting/env717/simple_control.cpp)
@@ -358,7 +378,8 @@ target_compile_definitions(csl_env717_simple_control PRIVATE
     CSL_ENV717_COMPILER_ID="${CMAKE_CXX_COMPILER_ID}"
     CSL_ENV717_COMPILER_VERSION="${CMAKE_CXX_COMPILER_VERSION}"
     CSL_ENV717_BUILD_TYPE="${CMAKE_BUILD_TYPE}"
-    CSL_ENV717_ARCHITECTURE="${CMAKE_SYSTEM_PROCESSOR}")
+    CSL_ENV717_ARCHITECTURE="${CMAKE_SYSTEM_PROCESSOR}"
+    CSL_ENV717_ALGORITHM_SOURCE_SHA256="${ENV717_ALGORITHM_SOURCE_SHA256}")
 if(MSVC)
     target_compile_options(csl_env717_simple_control PRIVATE /W4 /WX /permissive-)
 else()

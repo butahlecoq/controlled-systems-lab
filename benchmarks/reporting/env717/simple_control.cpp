@@ -133,6 +133,7 @@ Json main_record() {
         {"plan_count", optimal->plans.size()}, {"objective_value", optimal->value},
         {"minimizing_plan_indices", std::move(winners)}, {"plans", std::move(plans)},
         {"driver_sha256", CSL_ENV717_DRIVER_SHA256},
+        {"algorithm_source_sha256", CSL_ENV717_ALGORITHM_SOURCE_SHA256},
         {"source_commit", CSL_ENV717_SOURCE_COMMIT}};
 }
 }
