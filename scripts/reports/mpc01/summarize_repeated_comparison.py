@@ -26,13 +26,13 @@ def main() -> None:
                         help="runner stdout JSONL, retained as a cross-check against record events")
     parser.add_argument("--output-dir", required=True, type=Path)
     parser.add_argument("--host-load", default="unavailable",
-                        help="load averages captured immediately before the repeated run")
+                        help="load averages and sampling point for the run")
     args = parser.parse_args()
 
     records = read_jsonl(args.records)
     stdout_rows = read_jsonl(args.attempts)
     required_cases = {
-        "ts01-exact-v1", "ts02-constant-v1", "infeasible-integrator-v1",
+        "ts01-exact-v1", "ts02-constant-v1", "ts03-singular-v1", "infeasible-integrator-v1",
         "unbounded-integrator-v1", "double-integrator-421-v1", "b04-reference-v1",
     }
     rows_by_case: dict[str, list[tuple[int, dict]]] = defaultdict(list)
@@ -69,15 +69,15 @@ def main() -> None:
     stdout_counter = Counter(json.dumps(row, sort_keys=True, separators=(",", ":")) for row in stdout_rows)
     if row_counter != stdout_counter:
         raise ValueError("canonical measurement events do not match runner stdout attempts")
-    if len(stdout_rows) != 120:
-        raise ValueError("expected 120 native attempts")
+    if len(stdout_rows) != len(records) * 20:
+        raise ValueError("expected twenty native attempts per canonical case")
 
     output = args.output_dir
     output.mkdir(parents=True, exist_ok=True)
     markdown = [
         "# MPC-01 five-repetition native solver comparison",
         "",
-        "This is a new comparison on the frozen `b04-reference-v1` article-derived input and five analytic/general-purpose cases. It is not a historical B04 reconstruction. The native solver status is recorded separately from mathematical evidence. Binary64 trajectory diagnostics are inconclusive and do not establish optimality.",
+        "This is a new comparison on the frozen `b04-reference-v1` article-derived input and six analytic/general-purpose cases. It is not a historical B04 reconstruction. The native solver status is recorded separately from mathematical evidence. Binary64 trajectory diagnostics are inconclusive and do not establish optimality.",
         "",
         "## Run identity",
         "",
@@ -148,9 +148,13 @@ def main() -> None:
         f"- Largest binary64 dynamics/bound residual across native attempts: {max(residual_values):.6g}; diagnostics remain inconclusive.",
         "- The five cold paths per backend are not averaged. The figure selects the cold repetition whose solve duration is closest to that backend's median cold solve duration. It is a representative trajectory, not a median trajectory.",
         "",
+        "## Singular T-S03 analytic reference",
+        "",
+        "For this fixture, the state recurrence is `x[t+1]=u[t]`, with both controls in `[0,1]`, and the terminal objective is `(x2-1)^2`. Therefore the objective reduces to `(u1-1)^2`: its exact minimum is zero and its complete optimal control face is `{(u0,u1): 0<=u0<=1, u1=1}`. The first control is a singular zero-curvature direction. This exact derivation checks solver objective values without requiring identical witnesses; it does not certify general family completeness for either native QP backend.",
+        "",
         "## Limiter and interpretation",
         "",
-        f"Solver iteration counts explain work per solve: cold B04 OSQP used 33,125 iterations, while HPIPM used 30. In a separate one-repetition diagnostic process run, the full six-case runner consumed 0.417 s user CPU and 0.132 s system CPU over 0.550 s elapsed, indicating the suite was CPU-bound on this host; that run is not part of the timing sample. `process-profile.txt` records those aggregate times. The repeated run did not enforce per-attempt wall or memory caps; its records mark memory as unlimited. It is a local exploratory measurement rather than the enforced-comparison resource profile. These tiny QP cases are microbenchmarks. They do not establish end-to-end planning latency or a control-strategy winner. Machine load immediately before the reported run was {args.host_load} with 8 logical CPUs.",
+        f"Solver iteration counts explain work per solve: cold B04 OSQP used 33,125 iterations, while HPIPM used 30. In a separate one-repetition diagnostic process run, the prior six-case runner consumed 0.417 s user CPU and 0.132 s system CPU over 0.550 s elapsed; that profile is not part of this timing sample. `process-profile.txt` in the earlier evidence bundle records those aggregate times. The repeated run did not enforce per-attempt wall or memory caps; its records mark memory as unlimited. It is a local exploratory measurement rather than the enforced-comparison resource profile. These tiny QP cases are microbenchmarks. They do not establish end-to-end planning latency or a control-strategy winner. Host load sampled just after this run was {args.host_load} with 8 logical CPUs.",
         "",
     ])
     (output / "benchmark-summary.md").write_text("\n".join(markdown), encoding="utf-8")
