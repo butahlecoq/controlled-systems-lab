@@ -1049,6 +1049,60 @@ TEST_CASE("application preparation retains provider registries after module asse
     CHECK(workspaces[0] != nullptr);
     CHECK(workspaces[1] != nullptr);
 }
+TEST_CASE("application selected methods preserve versions and share verification") {
+    const auto problem = source("ts01_exact_integrator");
+    auto paired_request = request_for(problem, "ts01_exact_integrator");
+    auto registered = modules();
+    std::vector<application::SelectedMethod> methods{
+        {paired_request.strategies[0], std::string{"1"}},
+        {paired_request.strategies[1], std::string{"1"}}};
+    auto selection = application::SelectedMethods::make(std::move(methods));
+    REQUIRE(std::holds_alternative<application::SelectedMethods>(selection));
+    auto admission = application::prepare_selected_run({problem, paired_request.family,
+        std::get<application::SelectedMethods>(std::move(selection))}, registered.strategies);
+    REQUIRE(std::holds_alternative<application::PreparedSelection>(admission));
+    const auto& prepared = std::get<application::PreparedSelection>(admission);
+    REQUIRE(prepared.methods().size() == 2);
+    CHECK(prepared.expected_synthesis_identity(0).strategy_version == "1");
+    CHECK(prepared.expected_synthesis_identity(1).strategy_version == "1");
+
+    registry::Requirements selection_requirements;
+    selection_requirements.output.representation = {"csl.witness-batch.v1"};
+    ExecutionContext context;
+    context.numerical = paired_request.family.numerical;
+    context.resources = std::make_shared<const ResourcePolicy>(ResourcePolicy{1, 1, 1, {}});
+    const auto execution = application::run_selected(prepared, registered.selectors,
+        {synthesis::witness_selector::selector_id, {}}, {2, 0, {{1, -1}, {-1, 1}}, 31},
+        selection_requirements, context, registered.membership);
+    REQUIRE(execution.methods.size() == 2);
+    for (const auto& method : execution.methods) {
+        REQUIRE(std::holds_alternative<SynthesisResult>(method.execution.outcome));
+        REQUIRE(std::holds_alternative<WitnessSelection>(method.execution.selection));
+        const auto& selected = std::get<WitnessSelection>(method.execution.selection);
+        REQUIRE(method.execution.verification.size() == selected.batch.witnesses.size());
+        for (const auto& report : method.execution.verification)
+            CHECK(report.bindings == verification::CheckStatus::numerical_pass);
+    }
+}
+
+TEST_CASE("selected method admission retains the rejected input index") {
+    const auto problem = source("ts01_exact_integrator");
+    auto request = request_for(problem, "ts01_exact_integrator");
+    auto registered = modules();
+    auto methods = application::SelectedMethods::make({
+        {request.strategies[0], std::string{"1"}},
+        {request.strategies[1], std::string{"not-registered"}}});
+    REQUIRE(std::holds_alternative<application::SelectedMethods>(methods));
+    auto admission = application::prepare_selected_run({problem, request.family,
+        std::get<application::SelectedMethods>(std::move(methods))}, registered.strategies);
+    REQUIRE(std::holds_alternative<application::RejectedSelection>(admission));
+    const auto& rejected = std::get<application::RejectedSelection>(admission);
+    REQUIRE(rejected.methods.size() == 1);
+    CHECK(rejected.methods[0].index == 1);
+
+    CHECK(std::holds_alternative<Diagnostics>(application::SelectedMethods::make({})));
+}
+
 TEST_CASE("application composes and verifies paired T-S01 complete families") {
     compare_profile("ts01_exact_integrator");
 }

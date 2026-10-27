@@ -259,6 +259,23 @@ std::string backend_id(const input::RequestedRun& requested, input::BackendRole 
     return std::string(fallback);
 }
 
+std::string method_file_stem(std::size_t index, std::string_view id) {
+    std::string stem = "method-" + std::to_string(index) + "-";
+    bool separator = false;
+    for (const unsigned char value : id) {
+        if ((value >= 'a' && value <= 'z') || (value >= 'A' && value <= 'Z') ||
+            (value >= '0' && value <= '9')) {
+            stem.push_back(static_cast<char>(value));
+            separator = false;
+        } else if (!separator) {
+            stem.push_back('-');
+            separator = true;
+        }
+    }
+    while (!stem.empty() && stem.back() == '-') stem.pop_back();
+    return stem;
+}
+
 std::string_view termination_name(Termination value) {
     switch (value) {
     case Termination::completed: return "completed";
@@ -322,9 +339,10 @@ bool passed(const T& value) {
     return value == verification::CheckStatus::numerical_pass;
 }
 
-int persist(const problem::ResolvedProblem& problem, const application::PreparedComparison& prepared,
-    const application::ComparisonExecution& execution, const Modules& modules, const ResourcePolicy& resources, const WitnessRequest& witnesses,
-    const std::filesystem::path& directory) {
+int persist(const problem::ResolvedProblem& problem, const application::PreparedSelection& prepared,
+    const application::SelectedRunExecution& execution, const Modules& modules,
+    const ResourcePolicy& resources, const WitnessRequest& witnesses,
+    const std::filesystem::path& directory, const std::vector<std::string>& file_stems) {
     namespace ar = artifacts;
     namespace ob = csl::execution::observability;
     std::error_code ec;
@@ -388,14 +406,18 @@ int persist(const problem::ResolvedProblem& problem, const application::Prepared
         }
     } publication_lock;
     if (!publication_lock.acquire(directory)) {
-        std::cerr << "Output rejected: cannot acquire paired publication lock in "
+        std::cerr << "Output rejected: cannot acquire scenario publication lock in "
                   << directory.string() << ": another publication may be in progress\n";
         return 2;
     }
 
-    constexpr std::array<std::string_view, 2> names{"reach-back", "strategy-b"};
-    std::array<std::filesystem::path, 2> targets{
-        directory / "reach-back.run.json", directory / "strategy-b.run.json"};
+    if (file_stems.size() != execution.methods.size()) {
+        std::cerr << "Artifact export rejected: method names do not match the prepared execution count\n";
+        return 3;
+    }
+    std::vector<std::filesystem::path> targets;
+    targets.reserve(file_stems.size());
+    for (const auto& stem : file_stems) targets.push_back(directory / (stem + ".run.json"));
     for (const auto& target : targets) {
         if (std::filesystem::exists(target, ec) || ec) {
             std::cerr << "Output rejected: refusing to replace existing file "
@@ -404,24 +426,25 @@ int persist(const problem::ResolvedProblem& problem, const application::Prepared
         }
     }
 
-    std::array<std::string, 2> encoded;
-    for (std::size_t index = 0; index < execution.strategies.size(); ++index) {
+    std::vector<std::string> encoded(execution.methods.size());
+    for (std::size_t index = 0; index < execution.methods.size(); ++index) {
         const auto& expected = prepared.expected_synthesis_identity(index);
+        const auto& strategy = prepared.methods()[index].configuration;
         const auto unavailable = ar::Unavailable{ar::MissingReason::not_instrumented, {}};
         ar::ConfigurationInput input;
         input.collection = {false, ar::CollectionMode::detail, 0, 0, 0, 0};
         input.modules = {
             {"strategy", {expected.strategy, expected.strategy_version, unavailable}, {}},
-            {"lp", {prepared.strategies()[index].lp, modules.lp_identity.version, unavailable}, {}},
-            {"convex", {prepared.strategies()[index].convex, modules.convex_identity.version, unavailable}, {}}};
+            {"lp", {strategy.lp, modules.lp_identity.version, unavailable}, {}},
+            {"convex", {strategy.convex, modules.convex_identity.version, unavailable}, {}}};
         input.numerical = prepared.family().numerical;
         input.resources = resources;
         input.output = {ar::OutputKind::synthesis, prepared.family().assurance,
             prepared.family().target, prepared.family().representation, witnesses};
         input.selector = {modules.selector_identity.id, modules.selector_identity.version, {}};
-        input.strategy = prepared.strategies()[index];
+        input.strategy = strategy;
         input.strategy.selector = modules.selector_identity.id;
-        const ar::RunId run{"scenario-cli-" + std::string(names[index])};
+        const ar::RunId run{"scenario-cli-" + file_stems[index]};
         const auto configuration = ar::resolve_configuration(std::move(input));
         const auto* configuration_error = std::get_if<ar::ArtifactError>(&configuration);
         if (configuration_error) {
@@ -447,7 +470,7 @@ int persist(const problem::ResolvedProblem& problem, const application::Prepared
             return 3;
         }
         const auto resource_unavailable = ar::Unavailable{ar::MissingReason::not_instrumented, {}};
-        const auto artifact = application::encode_strategy_run(problem, execution.strategies[index],
+        const auto artifact = application::encode_strategy_run(problem, execution.methods[index].execution,
             resolved_configuration, run, std::get<ar::CollectedStatistics>(statistics),
             {resource_unavailable, resource_unavailable, resource_unavailable, resource_unavailable,
                 true, ar::MemoryAccounting::unlimited});
@@ -459,7 +482,9 @@ int persist(const problem::ResolvedProblem& problem, const application::Prepared
         encoded[index] = std::get<std::string>(artifact);
     }
 
-    std::array<std::filesystem::path, 2> temporary{targets[0].string() + ".tmp", targets[1].string() + ".tmp"};
+    std::vector<std::filesystem::path> temporary;
+    temporary.reserve(targets.size());
+    for (const auto& target : targets) temporary.emplace_back(target.string() + ".tmp");
     for (const auto& path : temporary) {
         if (std::filesystem::exists(path, ec) || ec) {
             std::cerr << "Output rejected: refusing to replace existing temporary file "
@@ -475,6 +500,7 @@ int persist(const problem::ResolvedProblem& problem, const application::Prepared
             return 2;
         }
     }
+    std::size_t published_count = 0;
     for (std::size_t index = 0; index < encoded.size(); ++index) {
         std::filesystem::rename(temporary[index], targets[index], ec);
         if (ec) {
@@ -482,27 +508,27 @@ int persist(const problem::ResolvedProblem& problem, const application::Prepared
                       << ": " << ec.message() << '\n';
             for (std::size_t remaining = index; remaining < temporary.size(); ++remaining)
                 std::filesystem::remove(temporary[remaining], ec);
-            if (index > 0) {
+            for (std::size_t published = 0; published < published_count; ++published) {
                 std::error_code rollback_error;
-                std::filesystem::remove(targets[index - 1], rollback_error);
+                std::filesystem::remove(targets[published], rollback_error);
                 if (rollback_error)
                     std::cerr << "Output rollback failed: cannot remove "
-                              << targets[index - 1].string() << ": "
+                              << targets[published].string() << ": "
                               << rollback_error.message() << '\n';
             }
             return 2;
         }
+        ++published_count;
     }
-    std::cout << "artifacts_saved=" << targets[0].string() << ',' << targets[1].string() << '\n';
+    std::cout << "artifacts_saved=";
+    for (std::size_t index = 0; index < targets.size(); ++index)
+        std::cout << (index ? "," : "") << targets[index].string();
+    std::cout << '\n';
     return 0;
 }
 
 int run(const input::LoadedScenario& scenario, const Options& options) {
     const auto requested = scenario.requested_run();
-    if (!std::holds_alternative<input::ComparisonRequest>(requested->selection)) {
-        std::cerr << "Input unsupported: path=/run/methods; expected the default paired comparison request\n";
-        return 2;
-    }
     if (has_unsupported_backend(*requested)) return 2;
     const std::string profile = options.profile.value_or("ts01_exact_integrator");
     const bool generality_candidate = profile == "nominal_open_loop";
@@ -529,35 +555,64 @@ int run(const input::LoadedScenario& scenario, const Options& options) {
 
     const auto lp_id = backend_id(*requested, input::BackendRole::lp, options.lp, "csl.lp.highs");
     const auto convex_id = backend_id(*requested, input::BackendRole::convex, options.convex, "csl.convex.highs");
-    StrategyConfiguration reach_back;
-    reach_back.strategy = {"csl.synthesis.reach-back"};
-    reach_back.lp = {lp_id};
-    reach_back.convex = {convex_id};
-    reach_back.representation = family.representation;
-    StrategyConfiguration direct = reach_back;
-    direct.strategy = {"csl.synthesis.strategy-b"};
-    application::ComparisonRequest comparison{problem, family, {reach_back, direct}};
+    std::vector<application::SelectedMethod> methods;
+    const bool paired_comparison = std::holds_alternative<input::ComparisonRequest>(requested->selection);
+    if (paired_comparison) {
+        StrategyConfiguration reach_back;
+        reach_back.strategy = {"csl.synthesis.reach-back"};
+        reach_back.lp = {lp_id};
+        reach_back.convex = {convex_id};
+        reach_back.representation = family.representation;
+        StrategyConfiguration direct = reach_back;
+        direct.strategy = {"csl.synthesis.strategy-b"};
+        methods.push_back({std::move(reach_back), std::nullopt});
+        methods.push_back({std::move(direct), std::nullopt});
+    } else {
+        const auto& authored = std::get<std::vector<input::ModuleRequest>>(requested->selection);
+        methods.reserve(authored.size());
+        for (const auto& method : authored) {
+            StrategyConfiguration configuration;
+            configuration.strategy = method.id;
+            configuration.lp = {lp_id};
+            configuration.convex = {convex_id};
+            configuration.representation = family.representation;
+            methods.push_back({std::move(configuration), method.version});
+        }
+    }
 
     auto modules = make_modules();
-    auto preparation = application::prepare_comparison(comparison, modules.strategies);
-    if (const auto* unsupported = std::get_if<application::UnsupportedComparison>(&preparation)) {
-        std::cerr << "Comparison unsupported:";
+    auto method_values = application::SelectedMethods::make(std::move(methods));
+    if (const auto* invalid = std::get_if<Diagnostics>(&method_values)) {
+        std::cerr << "Input unsupported:";
+        for (const auto& diagnostic : *invalid)
+            std::cerr << " " << diagnostic.field << " " << diagnostic.explanation;
+        std::cerr << '\n';
+        return 2;
+    }
+    auto preparation = application::prepare_selected_run(
+        {problem, family, std::get<application::SelectedMethods>(std::move(method_values))}, modules.strategies);
+    if (const auto* unsupported = std::get_if<application::UnsupportedSelection>(&preparation)) {
+        std::cerr << "Selected run unsupported:";
         for (const auto& diagnostic : unsupported->diagnostics)
             std::cerr << " " << diagnostic.field << " " << diagnostic.explanation;
         std::cerr << '\n';
         return 2;
     }
-    if (const auto* rejected = std::get_if<application::RejectedComparison>(&preparation)) {
-        std::cerr << "Strategy preparation rejected:";
-        for (const auto& rejection : rejected->strategies) {
-            std::cerr << " " << rejection.provenance.requested.id.value;
-            for (const auto& diagnostic : rejection.diagnostics)
-                std::cerr << " " << diagnostic.field << " " << diagnostic.explanation;
+    if (const auto* rejected = std::get_if<application::RejectedSelection>(&preparation)) {
+        std::cerr << "Input unsupported:";
+        for (const auto& method : rejected->methods) {
+            const auto& provenance = method.rejection.provenance.requested;
+            const auto field = provenance.version ? "version" : "id";
+            const auto observed = provenance.version ? *provenance.version : provenance.id.value;
+            std::cerr << " path=/run/methods/" << method.index << '/' << field
+                      << " observed=" << observed;
+            for (const auto& diagnostic : method.rejection.diagnostics)
+                std::cerr << " reason=" << diagnostic.field << ':' << diagnostic.explanation;
         }
         std::cerr << '\n';
-        return 1;
+        return 2;
     }
-    const auto& prepared = std::get<application::PreparedComparison>(preparation);
+    const auto& prepared = std::get<application::PreparedSelection>(preparation);
 
     WitnessRequest witnesses{2, 0, {{1,-1}, {-1,1}}, requested->seed.value_or(31)};
     if (requested->witnesses) {
@@ -578,7 +633,7 @@ int run(const input::LoadedScenario& scenario, const Options& options) {
     context.resources = std::make_shared<const ResourcePolicy>(resources);
     Requirements selector_requirements;
     selector_requirements.output.representation = {"csl.witness-batch.v1"};
-    const auto execution = application::run_comparison(prepared, modules.selectors,
+    const auto execution = application::run_selected(prepared, modules.selectors,
         {modules.selector_identity.id, modules.selector_identity.version}, witnesses,
         selector_requirements, context, modules.membership);
 
@@ -589,11 +644,13 @@ int run(const input::LoadedScenario& scenario, const Options& options) {
               << " threads=" << resources.total_threads << '\n';
     bool all_passed = true;
     bool candidate_observed = false;
-    for (std::size_t index = 0; index < execution.strategies.size(); ++index) {
-        const auto& strategy = execution.strategies[index];
+    for (std::size_t index = 0; index < execution.methods.size(); ++index) {
+        const auto& method = execution.methods[index];
+        const auto& strategy = method.execution;
+        const auto& strategy_id = prepared.methods()[index].configuration.strategy.value;
         const auto* result = std::get_if<SynthesisResult>(&strategy.outcome);
         if (!result) {
-            std::cout << "mode=run profile=" << profile << " strategy=" << (index == 0 ? "csl.synthesis.reach-back" : "csl.synthesis.strategy-b")
+            std::cout << "mode=run profile=" << profile << " strategy=" << strategy_id
                       << " outcome_claim=unsupported\n";
             all_passed = false;
             continue;
@@ -604,7 +661,7 @@ int run(const input::LoadedScenario& scenario, const Options& options) {
             result->family->target() == FamilyTarget::candidate_relaxation;
         candidate_observed = candidate_observed || candidate_family;
         const auto* selected_witnesses = std::get_if<WitnessSelection>(&strategy.selection);
-        std::cout << "mode=run profile=" << profile << " strategy=" << (index == 0 ? "csl.synthesis.reach-back" : "csl.synthesis.strategy-b");
+        std::cout << "mode=run profile=" << profile << " strategy=" << strategy_id;
         if (result->family)
             std::cout << " version=" << result->family->identity().strategy_version;
         std::cout << " seed=" << witnesses.seed.value_or(31) << " threads=" << resources.total_threads
@@ -648,13 +705,26 @@ int run(const input::LoadedScenario& scenario, const Options& options) {
     }
     if (generality_candidate) {
         if (!candidate_observed) return 1;
-        if (options.output_directory)
-            return persist(problem, prepared, execution, modules, resources, witnesses, *options.output_directory);
+        if (options.output_directory) {
+            std::vector<std::string> stems;
+            for (std::size_t index = 0; index < prepared.methods().size(); ++index)
+                stems.push_back(paired_comparison ? (index == 0 ? "reach-back" : "strategy-b") :
+                    method_file_stem(index, prepared.methods()[index].configuration.strategy.value));
+            return persist(problem, prepared, execution, modules, resources, witnesses,
+                *options.output_directory, stems);
+        }
         std::cout << "artifact_export=not_requested evidence=attempts_preserved\n";
         return 0;
     }
     if (!all_passed) return 1;
-    if (options.output_directory) return persist(problem, prepared, execution, modules, resources, witnesses, *options.output_directory);
+    if (options.output_directory) {
+        std::vector<std::string> stems;
+        for (std::size_t index = 0; index < prepared.methods().size(); ++index)
+            stems.push_back(paired_comparison ? (index == 0 ? "reach-back" : "strategy-b") :
+                method_file_stem(index, prepared.methods()[index].configuration.strategy.value));
+        return persist(problem, prepared, execution, modules, resources, witnesses,
+            *options.output_directory, stems);
+    }
     std::cout << "artifact_export=not_requested\n";
     return 0;
 }

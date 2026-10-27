@@ -7,6 +7,7 @@
 #include <charconv>
 #include <chrono>
 #include <cstdint>
+#include <functional>
 #include <string_view>
 #include <type_traits>
 #include <utility>
@@ -358,6 +359,145 @@ artifacts::FinalOutcome project(const SynthesisOutcome& outcome) {
         else return artifacts::UnsupportedFinal{value.diagnostics};
     }, outcome);
 }
+
+Diagnostics unsupported_diagnostics(std::string field, std::string explanation) {
+    return {{DiagnosticCode::unsupported, std::move(field), std::move(explanation)}};
+}
+
+SelectedRunExecution execute_prepared_methods(const problem::ResolvedProblem& problem,
+    const FamilyRequest& family,
+    std::vector<std::unique_ptr<registry::BoundWorkspace<registry::StrategyPort>>> workspaces,
+    const std::vector<StrategyConfiguration>& configurations,
+    const std::function<SynthesisIdentityExpectation(std::size_t)>& expected_identity,
+    const registry::Registry<registry::SelectorPort>& selectors, registry::Method selector,
+    const WitnessRequest& witness_request, const registry::Requirements& selector_requirements,
+    const ExecutionContext& context,
+    std::optional<registry::PreparedProvider<registry::LPPort>> membership_provider) {
+    auto effective_context = context;
+    effective_context.numerical = family.numerical;
+    SelectedRunExecution execution;
+    execution.methods.reserve(workspaces.size());
+    for (std::size_t index = 0; index < workspaces.size(); ++index) {
+        auto outcome = workspaces[index]->run(effective_context);
+        auto projection = project(outcome);
+        SelectionOutcome selection;
+        std::vector<verification::TrajectoryReport> reports;
+
+        const auto* result = std::get_if<SynthesisResult>(&outcome);
+        if (result && result->family &&
+            std::holds_alternative<CompleteOptimalFamily>(result->family->outcome())) {
+            const registry::SelectorRequest query{*result->family, witness_request};
+            auto prepared_selector = registry::prepare_pipeline(registry::select(
+                selectors, selector, query, selector_requirements));
+            if (auto* rejection = std::get_if<registry::Rejection>(&prepared_selector)) {
+                selection = std::move(*rejection);
+            } else {
+                auto selector_workspaces = std::get<registry::PreparedPipeline<registry::SelectorPort>>(
+                    std::move(prepared_selector)).create();
+                auto selected = std::get<0>(selector_workspaces)->run(effective_context);
+                if (auto* unsupported_selection = std::get_if<Unsupported>(&selected)) {
+                    selection = std::move(*unsupported_selection);
+                } else {
+                    auto selected_result = std::get<WitnessSelection>(std::move(selected));
+                    const auto expected = expected_identity(index);
+                    if (!expected.lineage) {
+                        selection = Unsupported{{Diagnostic{DiagnosticCode::unsupported,
+                            "selected_run.verification.lineage",
+                            "The prepared strategy did not provide an expected transformation lineage; "
+                            "the selected witnesses were not independently verified."}}};
+                    } else {
+                        for (const auto& witness : selected_result.batch.witnesses) {
+                            verification::TrajectoryRequest request;
+                            request.witness = witness;
+                            request.assurance = expected.request.assurance;
+                            request.outcome = result->outcome;
+                            request.family = result->family;
+                            request.bounds = result->objective;
+                            request.expected_synthesis = verification::ExpectedSynthesisBinding{
+                                expected.request, expected.strategy, expected.strategy_version,
+                                *expected.lineage};
+                            reports.push_back(verification::verify_trajectory(problem, request,
+                                effective_context, membership_provider));
+                        }
+                        selection = std::move(selected_result);
+                    }
+                }
+            }
+        }
+        execution.methods.push_back({configurations[index],
+            {std::move(outcome), std::move(projection), std::move(selection), std::move(reports)}});
+    }
+    return execution;
+}
+}
+
+std::variant<SelectedMethods, Diagnostics> SelectedMethods::make(std::vector<SelectedMethod> methods) {
+    if (methods.empty())
+        return unsupported_diagnostics("selected_run.methods", "At least one method must be selected.");
+    return SelectedMethods{std::move(methods)};
+}
+
+std::variant<PreparedSelection, UnsupportedSelection, RejectedSelection>
+PreparedSelection::prepare_impl(const SelectedRunRequest& request,
+    const registry::StrategyRegistry& strategy_registry,
+    ComparisonPreparationObservation* observation) {
+    const bool candidate_generality = request.family.profile == "nominal_open_loop" &&
+        request.family.target == FamilyTarget::candidate_relaxation;
+    if ((!candidate_generality &&
+            std::find(profiles.begin(), profiles.end(), request.family.profile) == profiles.end()) ||
+        (candidate_generality && request.family.profile != "nominal_open_loop"))
+        return UnsupportedSelection{unsupported_diagnostics("selected_run.family.profile",
+            "Only guarded T-S01/T-S02/T-S03 complete-family profiles and nominal-open-loop candidate generality are admitted.")};
+    if (request.family.objective != request.problem.identity())
+        return UnsupportedSelection{unsupported_diagnostics("selected_run.family.objective",
+            "The common family request must name the supplied resolved problem.")};
+    if ((!candidate_generality && request.family.target != FamilyTarget::exact_optimal_relation) ||
+        (candidate_generality && request.family.target != FamilyTarget::candidate_relaxation) ||
+        request.family.assurance != Assurance::numerical ||
+        !admitted_representation(request.family.representation))
+        return UnsupportedSelection{unsupported_diagnostics("selected_run.family",
+            "The selected-method workflow requires a supported numerical relation in csl.polyhedron.h.")};
+
+    std::vector<SelectedMethod> methods(request.methods.values().begin(), request.methods.values().end());
+    std::vector<registry::PreparedStrategy> prepared;
+    prepared.reserve(methods.size());
+    std::vector<RejectedSelection::Entry> rejections;
+    for (std::size_t index = 0; index < methods.size(); ++index) {
+        const auto& method = methods[index];
+        if (method.configuration.representation != request.family.representation)
+            return UnsupportedSelection{unsupported_diagnostics(
+                "selected_run.methods[" + std::to_string(index) + "].representation",
+                "The strategy must use the common family representation.")};
+        const registry::StrategyRequest strategy_request{
+            request.problem, method.configuration, request.family, {}, {}};
+        registry::Requirements requirements;
+        requirements.output.representation = request.family.representation;
+        requirements.output.family = request.family.target;
+        requirements.output.completeness = candidate_generality ?
+            registry::Completeness::unestablished : registry::Completeness::established;
+        auto result = observation ? strategy_registry.prepare_observed(strategy_request, requirements,
+            method.requested_version, observation->registry_attempts[index]) :
+            strategy_registry.prepare(strategy_request, requirements, method.requested_version);
+        if (auto* rejection = std::get_if<registry::Rejection>(&result))
+            rejections.push_back({index, std::move(*rejection)});
+        else
+            prepared.push_back(std::get<registry::PreparedStrategy>(std::move(result)));
+    }
+    if (!rejections.empty()) return RejectedSelection{std::move(rejections)};
+    return PreparedSelection{request.problem, request.family, std::move(methods), std::move(prepared)};
+}
+
+SelectionPreparation prepare_selected_run(const SelectedRunRequest& request,
+    const registry::StrategyRegistry& registry) {
+    return PreparedSelection::prepare_impl(request, registry, nullptr);
+}
+
+std::vector<std::unique_ptr<registry::BoundWorkspace<registry::StrategyPort>>>
+PreparedSelection::create() const {
+    std::vector<std::unique_ptr<registry::BoundWorkspace<registry::StrategyPort>>> workspaces;
+    workspaces.reserve(prepared_.size());
+    for (const auto& method : prepared_) workspaces.push_back(method.create());
+    return workspaces;
 }
 
 Preparation prepare_comparison(const ComparisonRequest& request,
@@ -404,37 +544,31 @@ Preparation PreparedComparison::prepare_impl(const ComparisonRequest& request,
                 "Both strategies must use the common family representation.");
     }
     guard_timer.finish(PreparationObservationStatus::passed);
-
-    std::array<std::optional<registry::PreparedStrategy>, 2> prepared;
-    std::vector<registry::Rejection> rejections;
-    std::vector<std::size_t> rejected_indices;
-    for (std::size_t index = 0; index < request.strategies.size(); ++index) {
-        const registry::StrategyRequest strategy_request{
-            request.problem, request.strategies[index], request.family, {}, {}};
-        registry::Requirements requirements;
-        requirements.output.representation = request.family.representation;
-        requirements.output.family = request.family.target;
-        requirements.output.completeness = candidate_generality ?
-            registry::Completeness::unestablished : registry::Completeness::established;
-        auto result = observation ? registry.prepare_observed(strategy_request,requirements,{},
-            observation->registry_attempts[index]) : registry.prepare(strategy_request, requirements);
-        if (auto* rejection = std::get_if<registry::Rejection>(&result)) {
-            rejections.push_back(std::move(*rejection));
-            rejected_indices.push_back(index);
+    std::vector<SelectedMethod> methods;
+    methods.reserve(request.strategies.size());
+    for (const auto& configuration : request.strategies)
+        methods.push_back({configuration, std::nullopt});
+    auto selected_methods = SelectedMethods::make(std::move(methods));
+    auto selected = PreparedSelection::prepare_impl({request.problem, request.family,
+        std::get<SelectedMethods>(std::move(selected_methods))}, registry, observation);
+    if (auto* unsupported_selection = std::get_if<UnsupportedSelection>(&selected))
+        return UnsupportedComparison{std::move(unsupported_selection->diagnostics)};
+    if (auto* rejected = std::get_if<RejectedSelection>(&selected)) {
+        std::vector<registry::Rejection> rejections;
+        std::vector<std::size_t> indices;
+        for (auto& entry : rejected->methods) {
+            indices.push_back(entry.index);
+            rejections.push_back(std::move(entry.rejection));
         }
-        else
-            prepared[index].emplace(std::get<registry::PreparedStrategy>(std::move(result)));
+        return RejectedComparison{std::move(rejections), std::move(indices)};
     }
-    if (!rejections.empty())
-        return RejectedComparison{std::move(rejections), std::move(rejected_indices)};
-
-    return PreparedComparison{request.problem, request.family, request.strategies,
-        {std::move(*prepared[0]), std::move(*prepared[1])}};
+    return PreparedComparison{std::get<PreparedSelection>(std::move(selected)), request.strategies};
 }
 
 std::array<std::unique_ptr<registry::BoundWorkspace<registry::StrategyPort>>, 2>
 PreparedComparison::create() const {
-    return {prepared_[0].create(), prepared_[1].create()};
+    auto workspaces = selection_.create();
+    return {std::move(workspaces[0]), std::move(workspaces[1])};
 }
 
 ComparisonExecution run_comparison(const PreparedComparison& prepared,
@@ -443,60 +577,34 @@ ComparisonExecution run_comparison(const PreparedComparison& prepared,
     const ExecutionContext& context,
     std::optional<registry::PreparedProvider<registry::LPPort>> membership_provider) {
     auto workspaces = prepared.create();
-    auto effective_context = context;
-    effective_context.numerical = prepared.family().numerical;
+    std::vector<std::unique_ptr<registry::BoundWorkspace<registry::StrategyPort>>> selected_workspaces;
+    selected_workspaces.reserve(workspaces.size());
+    for (auto& workspace : workspaces) selected_workspaces.push_back(std::move(workspace));
+    const std::vector<StrategyConfiguration> configurations(
+        prepared.strategies().begin(), prepared.strategies().end());
+    auto selected = execute_prepared_methods(prepared.problem(), prepared.family(),
+        std::move(selected_workspaces), configurations,
+        [&](std::size_t index) { return prepared.expected_synthesis_identity(index); },
+        selectors, std::move(selector), witness_request, selector_requirements, context,
+        std::move(membership_provider));
     ComparisonExecution execution{};
-    for (std::size_t index = 0; index < workspaces.size(); ++index) {
-        auto outcome = workspaces[index]->run(effective_context);
-        auto projection = project(outcome);
-        SelectionOutcome selection;
-        std::vector<verification::TrajectoryReport> reports;
-
-        const auto* result = std::get_if<SynthesisResult>(&outcome);
-        if (result && result->family &&
-            std::holds_alternative<CompleteOptimalFamily>(result->family->outcome())) {
-            const registry::SelectorRequest query{*result->family, witness_request};
-            auto prepared_selector = registry::prepare_pipeline(registry::select(
-                selectors, selector, query, selector_requirements));
-            if (auto* rejection = std::get_if<registry::Rejection>(&prepared_selector)) {
-                selection = std::move(*rejection);
-            } else {
-                auto selector_workspaces = std::get<registry::PreparedPipeline<registry::SelectorPort>>(
-                    std::move(prepared_selector)).create();
-                auto selected = std::get<0>(selector_workspaces)->run(effective_context);
-                if (auto* unsupported_selection = std::get_if<Unsupported>(&selected)) {
-                    selection = std::move(*unsupported_selection);
-                } else {
-                    auto selected_result = std::get<WitnessSelection>(std::move(selected));
-                    const auto expected = prepared.expected_synthesis_identity(index);
-                    if (!expected.lineage) {
-                        selection = Unsupported{{Diagnostic{DiagnosticCode::unsupported,
-                            "comparison.verification.lineage",
-                            "The prepared strategy did not provide an expected transformation lineage; "
-                            "the selected witnesses were not independently verified."}}};
-                    } else {
-                        for (const auto& witness : selected_result.batch.witnesses) {
-                            verification::TrajectoryRequest request;
-                            request.witness = witness;
-                            request.assurance = expected.request.assurance;
-                            request.outcome = result->outcome;
-                            request.family = result->family;
-                            request.bounds = result->objective;
-                            request.expected_synthesis = verification::ExpectedSynthesisBinding{
-                                expected.request, expected.strategy, expected.strategy_version,
-                                *expected.lineage};
-                            reports.push_back(verification::verify_trajectory(prepared.problem(), request,
-                                effective_context, membership_provider));
-                        }
-                        selection = std::move(selected_result);
-                    }
-                }
-            }
-        }
-        execution.strategies[index] = {std::move(outcome), std::move(projection),
-            std::move(selection), std::move(reports)};
-    }
+    for (std::size_t index = 0; index < execution.strategies.size(); ++index)
+        execution.strategies[index] = std::move(selected.methods[index].execution);
     return execution;
+}
+
+SelectedRunExecution run_selected(const PreparedSelection& prepared,
+    const registry::Registry<registry::SelectorPort>& selectors, registry::Method selector,
+    const WitnessRequest& witness_request, const registry::Requirements& selector_requirements,
+    const ExecutionContext& context,
+    std::optional<registry::PreparedProvider<registry::LPPort>> membership_provider) {
+    std::vector<StrategyConfiguration> configurations;
+    configurations.reserve(prepared.methods().size());
+    for (const auto& method : prepared.methods()) configurations.push_back(method.configuration);
+    return execute_prepared_methods(prepared.problem(), prepared.family(), prepared.create(),
+        configurations, [&](std::size_t index) { return prepared.expected_synthesis_identity(index); },
+        selectors, std::move(selector), witness_request, selector_requirements, context,
+        std::move(membership_provider));
 }
 
 artifacts::ArtifactResult<std::string> encode_strategy_run(
