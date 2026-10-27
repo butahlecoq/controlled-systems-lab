@@ -1,0 +1,5 @@
+profile,case,strategy,n,median_ns,min_ns,max_ns,all_passed
+ts02_constant_integrator,T-S02 constant integrator,csl.synthesis.reach-back,5,5345407,5246581,9692986,True
+ts02_constant_integrator,T-S02 constant integrator,csl.synthesis.strategy-b,5,567883,529680,706589,True
+ts03_singular_integrator,T-S03 singular integrator,csl.synthesis.reach-back,5,4741277,4687079,10245155,True
+ts03_singular_integrator,T-S03 singular integrator,csl.synthesis.strategy-b,5,1249958,1234313,1297869,True

@@ -1,0 +1,51 @@
+{
+  "schema": "csl.exp02-paired-profile-summary/1",
+  "result_classification": "descriptive; performance-inconclusive",
+  "profiles": [
+    {
+      "profile": "ts02_constant_integrator",
+      "case": "T-S02 constant integrator",
+      "strategy": "csl.synthesis.reach-back",
+      "n": 5,
+      "median_ns": 5345407,
+      "min_ns": 5246581,
+      "max_ns": 9692986,
+      "all_passed": true
+    },
+    {
+      "profile": "ts02_constant_integrator",
+      "case": "T-S02 constant integrator",
+      "strategy": "csl.synthesis.strategy-b",
+      "n": 5,
+      "median_ns": 567883,
+      "min_ns": 529680,
+      "max_ns": 706589,
+      "all_passed": true
+    },
+    {
+      "profile": "ts03_singular_integrator",
+      "case": "T-S03 singular integrator",
+      "strategy": "csl.synthesis.reach-back",
+      "n": 5,
+      "median_ns": 4741277,
+      "min_ns": 4687079,
+      "max_ns": 10245155,
+      "all_passed": true
+    },
+    {
+      "profile": "ts03_singular_integrator",
+      "case": "T-S03 singular integrator",
+      "strategy": "csl.synthesis.strategy-b",
+      "n": 5,
+      "median_ns": 1249958,
+      "min_ns": 1234313,
+      "max_ns": 1297869,
+      "all_passed": true
+    }
+  ],
+  "limitations": [
+    "load average was collected after rather than before the timed runs",
+    "perf and a profiler-instrumented build were unavailable; source-mapped limiter is unknown",
+    "only T-S02 and T-S03 exact profiles are covered; no scalability or general winner claim"
+  ]
+}

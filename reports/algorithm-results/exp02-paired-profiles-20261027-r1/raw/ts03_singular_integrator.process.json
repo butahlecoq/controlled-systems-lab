@@ -1,0 +1,28 @@
+{
+  "command": [
+    "/home/butahlecoq/.cache/csl-exp02-paired-20261028/examples-build/registered_synthesis_comparison",
+    "--measure-profile",
+    "ts03_singular_integrator",
+    "/home/butahlecoq/.local/share/codex/worktrees/exp02-itis17-fidelity-94-20261027/reports/algorithm-results/exp02-paired-profiles-20261027-r1/ts03-singular-integrator.json",
+    "/home/butahlecoq/.local/share/codex/worktrees/exp02-itis17-fidelity-94-20261027/reports/algorithm-results/exp02-paired-profiles-20261027-r1/raw/ts03_singular_integrator.jsonl"
+  ],
+  "elapsed_wall_seconds": 0.06343822804046795,
+  "executable_sha256": "300863246730c863d12ddd95090a5d0e0350a3389fb39019dc4e29e6e9274384",
+  "exit_code": 0,
+  "host": {
+    "logical_cpus": 8,
+    "machine": "x86_64",
+    "platform": "Linux-7.2.5-3-omarchy-x86_64-with-glibc2.44",
+    "processor": ""
+  },
+  "resource_limits": {
+    "address_space_bytes": 8589934592,
+    "cpu_seconds_hard": 305,
+    "cpu_seconds_soft": 300,
+    "scope": "whole per-profile process: one warmup pair plus five measured pairs",
+    "wall_timeout_seconds": 300
+  },
+  "scenario_sha256": "c63dd94a45b22a557879fbda83dd49938cde9aa4fa24b5f5fc4e2cf0204397d2",
+  "timed_out": false,
+  "working_directory": "/home/butahlecoq/.local/share/codex/worktrees/exp02-itis17-fidelity-94-20261027"
+}

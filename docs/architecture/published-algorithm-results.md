@@ -221,6 +221,20 @@ ZIP entry matches, and the live landing page links to the report. This remains
 partial EXP-02 evidence; issue #94 remains open for its paired strategy, full
 workload/resource matrix and comparison-record requirements.
 
+## EXP-02 paired synthesis profile slice
+
+The [paired T-S02/T-S03 report](../../reports/algorithm-results/exp02-paired-profiles-20261027-r1/)
+adds five alternating Release repetitions for reach-back and Strategy B on two
+exact profiles, retaining one excluded warmup pair, all JSONL events, process
+output, scenario/executable identities and checksums. Every measured attempt
+completed its family checks and independently verified two distinct witnesses.
+The medians were 5,345,407 ns vs 567,883 ns for T-S02 and 4,741,277 ns vs
+1,249,958 ns for T-S03. These are descriptive observations only: pre-run load
+was not recorded and no source profiler was available, so the limiter and
+performance conclusion remain unknown. The report includes analytical 2D
+control-family projections. This does not complete EXP-02 #94, which remains
+open for the broader substitution and workload matrix.
+
 ## APP-02 box and parallelotope approximations
 
 Issue [APP-02 #33](https://github.com/butahlecoq/controlled-systems-lab/issues/33)

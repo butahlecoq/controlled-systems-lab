@@ -1,0 +1,17 @@
+<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>EXP-02 paired synthesis profiles</title></head>
+<body>
+<main>
+<h1>EXP-02 paired synthesis profiles</h1>
+<p>Partial, descriptive Strategy A/B measurements on T-S02 and T-S03. No performance winner or limiter is claimed. See the <a href="README.md">full report and limitations</a>.</p>
+<table><thead><tr><th>Profile</th><th>Method</th><th>Measured median</th><th>Range</th></tr></thead><tbody>
+<tr><td>T-S02</td><td>Reach-back</td><td>5,345,407 ns</td><td>5,246,581–9,692,986 ns</td></tr>
+<tr><td>T-S02</td><td>Strategy B</td><td>567,883 ns</td><td>529,680–706,589 ns</td></tr>
+<tr><td>T-S03</td><td>Reach-back</td><td>4,741,277 ns</td><td>4,687,079–10,245,155 ns</td></tr>
+<tr><td>T-S03</td><td>Strategy B</td><td>1,249,958 ns</td><td>1,234,313–1,297,869 ns</td></tr>
+</tbody></table>
+<section><h2>T-S02 complete optimal control set</h2><p>Constant objective: every point of the control square is optimal.</p><a href="ts02_constant_integrator-control-projection.svg"><img src="ts02_constant_integrator-control-projection.svg" width="720" height="500" alt="T-S02 control square, all feasible control pairs are optimal"></a></section>
+<section><h2>T-S03 complete optimal control set</h2><p>The objective is minimized on the upper edge of the feasible control square.</p><a href="ts03_singular_integrator-control-projection.svg"><img src="ts03_singular_integrator-control-projection.svg" width="720" height="500" alt="T-S03 control square, with the upper edge marked as optimal"></a></section>
+<p>Raw JSONL, process metadata, summaries, scenarios and all file hashes are included in this directory. These are numerical-assurance measurements, not formal optimality proofs.</p>
+</main></body></html>
