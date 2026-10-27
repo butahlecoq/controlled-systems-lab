@@ -53,6 +53,11 @@ def stage(source: Path, site: Path) -> None:
     require(solver.get("schema") == "csl.mpc03-b08-solver-output/1", "unexpected B08 solver schema")
     require(record.get("source_commit") == solver.get("source_commit"), "B08 source commit differs")
     require(record.get("scenario_sha256") == solver.get("scenario_sha256"), "B08 scenario hash differs")
+    result = record.get("result", {})
+    require(result.get("finite") == solver.get("finite_miqcp"),
+            "B08 finite-action solver result differs from saved record")
+    require(result.get("relaxation") == solver.get("convex_control_qcp"),
+            "B08 relaxation solver result differs from saved record")
     require(record.get("result", {}).get("exact_reference") == oracle,
             "B08 record and independent oracle differ")
     require(solver.get("disturbance_history_count") == 256, "B08 does not retain all disturbance histories")
