@@ -10,6 +10,7 @@ import hashlib
 import html
 import json
 from pathlib import Path
+import subprocess
 import sys
 
 import numpy as np
@@ -25,6 +26,12 @@ TOL = 1e-8
 
 def _sha256(path: Path) -> str:
     return hashlib.sha256(path.read_bytes()).hexdigest()
+
+
+def _code_commit() -> str:
+    result = subprocess.run(["git", "rev-parse", "HEAD"], cwd=ROOT,
+                            capture_output=True, check=True, text=True)
+    return result.stdout.strip()
 
 
 def _unique(rows: list[np.ndarray]) -> list[np.ndarray]:
@@ -292,7 +299,8 @@ def capture(model_path: Path, output_path: Path) -> dict:
         "assurance": "numerical",
         "source": {"path": model["source"], "sha256": source_hash,
                    "source_file_available_in_checkout": source_available,
-                   "model_sha256": _sha256(model_path), "script_sha256": _sha256(Path(__file__))},
+                   "model_sha256": _sha256(model_path), "script_sha256": _sha256(Path(__file__)),
+                   "code_commit": _code_commit()},
         "semantics": {
             "forward": "Rk: all states reachable from the singleton initial state in k steps under the continuous control interval and state constraints",
             "backward": "Gk: all states from which some admissible control sequence reaches the selected optimal terminal state, with state constraints enforced at each stage",
@@ -455,7 +463,7 @@ def render(record_path: Path, output_dir: Path) -> list[Path]:
         card = f'''<section><h2>{html.escape(pair_titles[key])}</h2><figure><a href="{svg.name}"><img src="{png.name}" alt="Forward and backward fuel reachable sets at every stage, full-state intersections, and one selected minimizing trajectory projected onto {pair[0]} and {pair[1]}"></a><figcaption><a href="{svg.name}">SVG</a> · <a href="{png.name}" download>PNG</a></figcaption></figure></section>'''
         (primary_cards if key in {"x1-x2", "x3-x4"} else supplementary_cards).append(card)
     html_path = output_dir / "index.html"
-    html_path.write_text(f'''<!doctype html><html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Fuel reachability layers</title><style>body{{max-width:1100px;margin:2rem auto;padding:0 1rem;font:16px/1.55 system-ui;color:#18212b}}img{{width:100%;height:auto}}section{{border-top:1px solid #ccd3db;padding:1rem 0;break-inside:avoid}}.note{{padding:1rem;background:#f2f5f8;border-left:4px solid #2f6bff}}a{{color:#174ea6}}@media print{{img{{max-height:8.5in;object-fit:contain}}}}</style><main><h1>Forward and backward fuel reachable sets</h1><p class="note">The main plots are the oxidizer flow/stock projection (x₁,x₂) and fuel flow/stock projection (x₃,x₄). Two cross-coordinate projections follow as supplementary views. The figures use deterministic linear model parameters transcribed from local source <code>papers/Minimax/Constrained/ReachableSets.m</code> (SHA-256 recorded in the model and geometry records); the source file is not redistributed. Each 2D plot shows stage-labelled forward sets R0…RT, backward sets G0…GT leading to the selected minimizing terminal point, their full-state intersections, and one selected minimizing open-loop trajectory. Intersections are computed in full 4D before projection. Degenerate projections remain points or line segments; no artificial area is added. This is not the B06/L09 minimax run, a historical figure reproduction, or a claim about disturbance-robust or complete optimal families.</p><p>Selected controls: {html.escape(', '.join(f'{value:.6g}' for value in record['optimal']['controls']))}. Terminal objective: {record['optimal']['objective']:.9g}. <a href="plot-data.json" download>Saved geometry and provenance</a> · <a href="fuel-reachability-layers-model.json" download>Model input</a>.</p><h2>Oxidizer and fuel state projections</h2>{''.join(primary_cards)}<h2>Supplementary cross-coordinate projections</h2>{''.join(supplementary_cards)}</main></html>''', encoding="utf-8")
+    html_path.write_text(f'''<!doctype html><html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Fuel reachability layers</title><style>body{{max-width:1100px;margin:2rem auto;padding:0 1rem;font:16px/1.55 system-ui;color:#18212b}}img{{width:100%;height:auto}}section{{border-top:1px solid #ccd3db;padding:1rem 0;break-inside:avoid}}.note{{padding:1rem;background:#f2f5f8;border-left:4px solid #2f6bff}}a{{color:#174ea6}}@media print{{img{{max-height:8.5in;object-fit:contain}}}}</style><main><h1>Forward and backward fuel reachable sets</h1><p class="note">The main plots are the oxidizer flow/stock projection (x₁,x₂) and fuel flow/stock projection (x₃,x₄). Two cross-coordinate projections follow as supplementary views. The figures use deterministic linear model parameters transcribed from local source <code>papers/Minimax/Constrained/ReachableSets.m</code> (SHA-256 recorded in the model and geometry records); the source file is not redistributed. Each 2D plot shows stage-labelled forward sets R0…RT, backward sets G0…GT leading to the selected minimizing terminal point, their full-state intersections, and one selected minimizing open-loop trajectory. Intersections are computed in full 4D before projection. Degenerate projections remain points or line segments; no artificial area is added. This is not the B06/L09 minimax run, a historical figure reproduction, or a claim about disturbance-robust or complete optimal families.</p><p>Selected controls: {html.escape(', '.join(f'{value:.6g}' for value in record['optimal']['controls']))}. Terminal objective: {record['optimal']['objective']:.9g}. Capture code commit: <code>{html.escape(record['source']['code_commit'])}</code>. <a href="plot-data.json" download>Saved geometry and provenance</a> · <a href="fuel-reachability-layers-model.json" download>Model input</a>.</p><h2>Oxidizer and fuel state projections</h2>{''.join(primary_cards)}<h2>Supplementary cross-coordinate projections</h2>{''.join(supplementary_cards)}</main></html>''', encoding="utf-8")
     saved_data = output_dir / "plot-data.json"
     saved_data.write_text(record_path.read_text(encoding="utf-8"), encoding="utf-8")
     model_copy = output_dir / "fuel-reachability-layers-model.json"

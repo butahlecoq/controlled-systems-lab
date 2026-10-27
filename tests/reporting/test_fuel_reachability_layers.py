@@ -31,9 +31,33 @@ class FuelReachabilityLayersTests(unittest.TestCase):
 
         terminal = np.asarray(record["optimal"]["terminal_state"], dtype=float)
         target = np.asarray(model["target"], dtype=float)
-        objective = float((terminal - target) @ (terminal - target))
+        objective_matrix = np.asarray(model["terminal_objective_matrix"], dtype=float)
+        objective = float((terminal - target) @ objective_matrix @ (terminal - target))
         self.assertAlmostEqual(record["optimal"]["objective"], objective, places=10)
         self.assertEqual(record["model"]["target"], model["target"])
+        controls = np.asarray(record["optimal"]["controls"], dtype=float)
+        A = np.asarray(model["A"], dtype=float)
+        B = np.asarray(model["B"], dtype=float)
+        initial = np.asarray(model["initial_state"], dtype=float)
+        control_map = np.column_stack([
+            np.linalg.matrix_power(A, 2) @ B,
+            A @ B,
+            B,
+        ])
+        gradient = 2 * control_map.T @ objective_matrix @ (terminal - target)
+        lower, upper = model["control_bounds"]
+        for control, derivative in zip(controls, gradient, strict=True):
+            if np.isclose(control, lower, atol=1e-8):
+                self.assertGreaterEqual(derivative, -1e-8)
+            elif np.isclose(control, upper, atol=1e-8):
+                self.assertLessEqual(derivative, 1e-8)
+            else:
+                self.assertAlmostEqual(derivative, 0.0, places=8)
+        state = initial
+        for control in controls:
+            state = A @ state + B * control
+            self.assertTrue(28.0 < state[0] < 32.0)
+            self.assertTrue(18.0 < state[2] < 21.0)
 
 
 if __name__ == "__main__":
