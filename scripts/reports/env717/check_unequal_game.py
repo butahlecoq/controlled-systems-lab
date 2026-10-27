@@ -125,7 +125,10 @@ def plot_svg(data: dict, value: float) -> str:
         out.append(f'<line x1="{px(t):.2f}" y1="{y0}" x2="{px(t):.2f}" y2="{y0+ph}" stroke="#293640"/>')
         out.append(f'<text x="{px(t):.2f}" y="{y0+ph+24}" fill="#bac6ce" font-family="sans-serif" font-size="12" text-anchor="middle">{t:.2f}</text>')
     target = math.sqrt(value)
-    out.append(f'<rect x="{px(tmax)-18:.2f}" y="{py(target):.2f}" width="36" height="{py(-target)-py(target):.2f}" fill="#d9a441" fill-opacity="0.25"/>')
+    visible_target_low = max(ymin, -target)
+    visible_target_high = min(ymax, target)
+    if visible_target_low <= visible_target_high:
+        out.append(f'<rect x="{px(tmax)-18:.2f}" y="{py(visible_target_high):.2f}" width="36" height="{py(visible_target_low)-py(visible_target_high):.2f}" fill="#d9a441" fill-opacity="0.25"><title>Visible part of terminal target x² ≤ {value:.6g}</title></rect>')
     for stage, groups in enumerate(data["forward_groups"]):
         t = stage * DT
         for group in groups:
@@ -147,7 +150,7 @@ def plot_svg(data: dict, value: float) -> str:
     out.extend([f'<rect x="{x0}" y="{y0}" width="{pw}" height="{ph}" fill="none" stroke="#81909a"/>',
         f'<text x="{x0+pw/2}" y="{y0+ph+52}" fill="#f4f1e8" font-family="sans-serif" font-size="15" text-anchor="middle">Time (s)</text>',
         f'<text x="32" y="{y0+ph/2}" fill="#f4f1e8" font-family="sans-serif" font-size="15" text-anchor="middle" transform="rotate(-90 32 {y0+ph/2})">Position x</text>',
-        '<text x="100" y="585" fill="#bac6ce" font-family="sans-serif" font-size="12">Blue: forward reachable intervals by control prefix · gold: forward/backward intersection · orange: one worst-case minimax trajectory · gold band: terminal target</text>',
+        '<text x="100" y="585" fill="#bac6ce" font-family="sans-serif" font-size="12">Blue: forward intervals by control prefix · gold: forward/backward intersection · orange: worst-case minimax trajectory · gold band: visible terminal target portion</text>',
         '</svg>'])
     return "\n".join(out)
 
