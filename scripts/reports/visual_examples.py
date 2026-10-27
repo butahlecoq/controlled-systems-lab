@@ -977,7 +977,7 @@ def build(catalog, site):
             "staged APP-01 records differ from reviewed source")
     app01_companion = approx_extension_companions.app01_companion(
         app01_record_path,
-        Path(__file__).parent / "styles/control-v1.json")
+        Path(__file__).parent / "styles/control-v1.json", app01_report_id)
     for family, title, stem, report_id in (
             ("Box approximation", "APP-02 diamond approximations", "app02-diamond-v1", "app02-box-8ff979de60ea9d22"),
             ("Ellipsoidal approximation", "APP-04 square and ellipses", "app04-square-v1", "app04-ellipsoid-fd302c34092f8b19"),
