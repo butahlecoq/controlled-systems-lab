@@ -63,6 +63,9 @@ class PublicationPolicyTests(unittest.TestCase):
         self.assertEqual(publication_policy.for_kind("geo04-intersection").svg_files,
                          ("latency.svg",))
 
+    def test_issue3_policy_keeps_native_payload_digest_admission(self):
+        self.assertTrue(publication_policy.for_kind("issue3-finite-catalogue").native_digest)
+
     def test_staging_rejects_wrong_source_identity_before_opening_bundle(self):
         catalogue = json.loads((FIXTURES / "catalog.json").read_text(encoding="utf-8"))
         row = next(row for row in catalogue["reports"] if row.get("report_kind") == "geo04-intersection")
@@ -104,6 +107,23 @@ class PublicationPolicyTests(unittest.TestCase):
                 catalog_path.write_text(json.dumps({**catalogue, "reports": [row]}), encoding="utf-8")
                 with self.subTest(field=field), self.assertRaisesRegex(ValueError, message):
                     report_site.stage(catalog_path, root / ("site-" + field), check=False)
+
+    def test_staging_rejects_issue3_native_digest_mismatch(self):
+        catalogue = json.loads((FIXTURES / "catalog.json").read_text(encoding="utf-8"))
+        original = next(row for row in catalogue["reports"]
+                        if row.get("report_kind") == "issue3-finite-catalogue")
+        source_id = original["source_report_id"]
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            shutil.copyfile(FIXTURES / "legacy-publications.json", root / "legacy-publications.json")
+            shutil.copytree(FIXTURES / source_id, root / source_id)
+            shutil.copyfile(FIXTURES / (original["report_id"] + ".zip"),
+                            root / (original["report_id"] + ".zip"))
+            row = {**original, "native_payload_sha256": "0" * 64}
+            catalog_path = root / "catalog.json"
+            catalog_path.write_text(json.dumps({**catalogue, "reports": [row]}), encoding="utf-8")
+            with self.assertRaisesRegex(ValueError, "catalogue native digest differs"):
+                report_site.stage(catalog_path, root / "site", check=False)
 
 
 if __name__ == "__main__":

@@ -3,4 +3,4 @@ import issue3_registered_reports as publisher
 from publication_policy import PublicationPolicy, register
 
 POLICY = register(PublicationPolicy(publisher.KIND, r"issue3-finite-catalogue-[0-9a-f]{16}", publisher,
-    svg_files=("latency.svg",), committed_archive=True))
+    native_digest=True, svg_files=("latency.svg",), committed_archive=True))
