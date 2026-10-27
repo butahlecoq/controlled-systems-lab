@@ -7,7 +7,7 @@
     "The rational oracle treats printed decimals as exact; SCIP receives binary64 coefficients.",
     "No nonlinear trajectory, historical reproduction, or solver-speed comparison is claimed."
   ],
-  "source_commit": "5393384d58159af72d5b52a532cd669b11c2cc1c",
+  "source_commit": "4d812d3e3f0e9b84a7508ddcb83e32b1d32a43fe",
   "scenario": {
     "source_id": "L04",
     "source_sha256": "6e07c9a2fac2d112885a495c9fe7f13acec9d990d947017b1701a4b95538cd5f",
@@ -65,13 +65,13 @@
     ]
   },
   "scenario_sha256": "f895bf7169e522b75b0e70c6cfa1506b62caeb362737a015f8ed236570647c15",
-  "solver_output_sha256": "701567474790194ec220d34d8c9906acb7d93e4c6d9f37c4a29bd6446bbafd75",
+  "solver_output_sha256": "4405fbda120496872b9ea6713186fc455b96cc811210177671173edb5fc0cdcd",
   "oracle_sha256": "dc8fbb816f359d132284fa92c8289b87a4cd7804270aa35fab926cdeb90e3e0a",
   "result": {
     "finite": {
       "formulation": "finite-miQCP",
       "status": "optimal",
-      "elapsed_ns_single_capture": 2266830273,
+      "elapsed_ns_single_capture": 2277863832,
       "objective_squared": 4509.203228280342,
       "global_dual_bound_squared": 4509.203228280342,
       "relative_gap": 0.0,
@@ -127,7 +127,7 @@
     "relaxation": {
       "formulation": "convex-control-QCP",
       "status": "optimal",
-      "elapsed_ns_single_capture": 764621562,
+      "elapsed_ns_single_capture": 758814395,
       "objective_squared": 4492.233805598401,
       "global_dual_bound_squared": 4492.233805598401,
       "relative_gap": 0.0,
