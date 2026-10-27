@@ -6,10 +6,31 @@ raw=report/'raw'
 summary=[]
 for profile,label in [('ts02_constant_integrator','T-S02 constant integrator'),('ts03_singular_integrator','T-S03 singular integrator')]:
  rows=[json.loads(x) for x in (raw/f'{profile}.jsonl').read_text().splitlines()]
- measured=[r for r in rows if r['event']=='trial' and not r.get('warmup') and r.get('strategy')]
+ if len(rows) != 13 or rows[0].get('event') != 'header' or rows[0].get('schema') != 'csl.synthesis.paired-family-event/1' or rows[0].get('profile') != profile:
+  raise SystemExit(f'{profile}: expected one matching header and exactly 12 trial rows')
+ trials=rows[1:]
+ expected_strategies={'csl.synthesis.reach-back','csl.synthesis.strategy-b'}
+ if any(r.get('event') != 'trial' or r.get('schema') != 'csl.synthesis.paired-family-event/1' for r in trials):
+  raise SystemExit(f'{profile}: malformed or missing trial event')
+ for repetition in range(6):
+  pair=[r for r in trials if r.get('repetition') == repetition]
+  expected_warmup=(repetition == 0)
+  expected_order=(['csl.synthesis.reach-back','csl.synthesis.strategy-b']
+                  if repetition == 0 or repetition % 2 == 1 else ['csl.synthesis.strategy-b','csl.synthesis.reach-back'])
+  if len(pair) != 2 or [r.get('order_position') for r in pair] != [0,1] or [r.get('strategy') for r in pair] != expected_order or any(r.get('warmup') is not expected_warmup for r in pair):
+   raise SystemExit(f'{profile}: repetition {repetition} is missing, duplicated, or not alternating')
+  if any(r.get('family_identity',{}).get('request',{}).get('profile') != profile for r in pair):
+   raise SystemExit(f'{profile}: trial request profile does not match header')
+ measured=[r for r in trials if r.get('repetition') in range(1,6)]
+ for strategy in expected_strategies:
+  group=[r for r in measured if r.get('strategy') == strategy]
+  if len(group) != 5:
+   raise SystemExit(f'{profile}: expected exactly five measured attempts for {strategy}')
+  if any(r.get('status') != 'passed' or r.get('termination') != 'completed' or r.get('outcome') != 'optimal' or r.get('complete_family_verified') is not True or r.get('distinct_witnesses') != 2 for r in group):
+   raise SystemExit(f'{profile}: failed or incomplete measured attempt for {strategy}')
  for strategy in ['csl.synthesis.reach-back','csl.synthesis.strategy-b']:
   vals=[r['timings_ns']['end_to_end_strategy']['value'] for r in measured if r['strategy']==strategy]
-  summary.append({'profile':profile,'case':label,'strategy':strategy,'n':len(vals),'median_ns':int(statistics.median(vals)),'min_ns':min(vals),'max_ns':max(vals),'all_passed':all(r['status']=='passed' and r['termination']=='completed' and r['outcome']=='optimal' and r['complete_family_verified'] and r['distinct_witnesses']==2 for r in measured if r['strategy']==strategy)})
+  summary.append({'profile':profile,'case':label,'strategy':strategy,'n':len(vals),'median_ns':int(statistics.median(vals)),'min_ns':min(vals),'max_ns':max(vals),'all_passed':True})
 # Summary files
 with (report/'summary.csv').open('w',newline='') as f:
  w=csv.DictWriter(f,fieldnames=summary[0].keys()); w.writeheader(); w.writerows(summary)
