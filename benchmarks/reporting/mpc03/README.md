@@ -30,7 +30,9 @@ The verified output is saved in
 build provenance, and a standalone English HTML report. The existing report
 workflow stages a versioned route, adds it to the archive index and links it
 from the examples gallery; the live Pages URL is pending merge and deployment.
-The report records numerical outcomes only; it makes no performance claim.
+The report records numerical outcomes only; it makes no performance claim. Its
+HTML and SVG are deterministic renderings of `record.json`; publication checks
+both renderings against the saved record before writing the staged route.
 
 Run the non-timed smoke check with an optional Release build configured using
 `-DCSL_ENABLE_HIGHS=ON -DCSL_BUILD_MPC03_REPORT=ON`; the target is
@@ -42,9 +44,9 @@ The labelled 2D state projection at
 `docs/examples/mpc03-open-loop-disturbance-tube.svg` shows all four terminal
 history points for the finite upper-bound plan, the convex hull of their
 endpoints, the robust terminal safety threshold, and the worst-cost history.
-It preserves endpoint-history identities while representing the full
-continuous disturbance box through vertex sufficiency; the hull is a
-visual projection, not the disturbance set itself.
+The polygon visits the endpoints in perimeter order, preserves each history's
+identity, and represents the full continuous disturbance box through vertex
+sufficiency; the hull is a visual projection, not the disturbance set itself.
 
 This pilot does not yet implement convex quadratic/norm MIQCPs or the full
 comparison-record publication/capture workflow. It establishes the first
