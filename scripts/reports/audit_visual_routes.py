@@ -24,9 +24,14 @@ COMPOSED_SAVED_ROUTES = {
     "scripts/reports/stage_mpc03.py",
     "scripts/reports/stage_mpc03_b08.py",
 }
-FROZEN_DIAGRAM_EXCEPTIONS = {"benchmarks/reporting/approximation_pilot/summarize.py"}
+FROZEN_DIAGRAM_EXCEPTIONS = {
+    "benchmarks/reporting/approximation_pilot/summarize.py",
+    "benchmarks/reporting/mpc08_explicit/explicit_double_integrator.py",
+}
 PUBLICATION_EXPORT_ROUTES = {"scripts/reports/render.py"}
 VIZ10_ROLE_REASONS = {
+    "benchmarks/reporting/mpc08_explicit/explicit_double_integrator.py":
+        "Generates one exact 2D critical-region diagram from the rational fixture, with labelled initial and terminal coordinates; it is not a general plotting path.",
     "benchmarks/reporting/approximation_pilot/summarize.py":
         "Draws a reviewed static fixture diagram from authored input shapes and area formulas; it does not plot a saved run record.",
     "benchmarks/reporting/issue6/b07_render_projection.py":

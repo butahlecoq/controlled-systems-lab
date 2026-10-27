@@ -840,8 +840,8 @@
       "asset_name_literals": [
         "explicit-double-integrator.svg"
       ],
-      "disposition": "deferred-family-specific-migration",
-      "follow_up_issue": 687
+      "disposition": "reviewed-static-diagram-exception",
+      "role_and_disposition_reason": "Generates one exact 2D critical-region diagram from the rational fixture, with labelled initial and terminal coordinates; it is not a general plotting path."
     }
   ],
   "frozen_published_routes": [
