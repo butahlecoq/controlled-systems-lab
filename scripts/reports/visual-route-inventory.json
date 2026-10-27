@@ -477,6 +477,14 @@
       "disposition": "publication-validation-or-frozen-route"
     },
     {
+      "source": "scripts/reports/stage_exp02_it17_dyadic.py",
+      "signal_count": 1,
+      "asset_name_literals": [
+        "fixture-geometry.svg"
+      ],
+      "disposition": "publication-validation-or-frozen-route"
+    },
+    {
       "source": "scripts/reports/stage_ext01.py",
       "signal_count": 1,
       "asset_name_literals": [
@@ -914,6 +922,16 @@
         "latency.svg"
       ],
       "index_sha256": "14882d50e392e3abfd57504c6f9fb175aa73f6ace856a8f20322ffdc9f1220fc",
+      "disposition": "deferred: original frozen route-level readability review remains; companion availability is listed separately",
+      "follow_up_issue": 669
+    },
+    {
+      "route": "exp02-it17-dyadic-interior-20261027-r1",
+      "source_bundle": "exp02-it17-dyadic-interior-20261027-r1",
+      "assets": [
+        "fixture-geometry.svg"
+      ],
+      "index_sha256": "aa0ffa810d33b7ab9842724395a58b0f418fa1460ba15daef99d18780bc168e1",
       "disposition": "deferred: original frozen route-level readability review remains; companion availability is listed separately",
       "follow_up_issue": 669
     },
