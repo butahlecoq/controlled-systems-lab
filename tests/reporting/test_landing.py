@@ -75,6 +75,13 @@ class LandingTests(unittest.TestCase):
             self.assertTrue(description.title, family)
             self.assertTrue(description.summary.endswith("."), family)
 
+    def test_repeated_it17_dyadic_pilot_has_a_geometry_family_description(self):
+        family = landing.FAMILIES[landing.family_for(
+            "exp02-it17-dyadic-interior-20261027-r1")]
+        self.assertEqual(family.group, "geometry")
+        self.assertIn("six", family.summary)
+        self.assertIn("inconclusive", family.summary)
+
 
 class AssembledIndexTests(unittest.TestCase):
     """The published landing page is built from the assembled staged index."""

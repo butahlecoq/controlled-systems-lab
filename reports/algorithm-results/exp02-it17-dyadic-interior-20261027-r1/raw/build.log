@@ -1,0 +1,263 @@
+[  0%] Building CXX object csl/CMakeFiles/csl_quickhull_2d.dir/src/geometry/hull/quickhull_2d.cpp.o
+[  0%] Building CXX object csl/CMakeFiles/csl_contracts.dir/src/contracts/model.cpp.o
+[  0%] Building CXX object csl/CMakeFiles/csl_contracts.dir/src/contracts/problem.cpp.o
+[  1%] Linking CXX static library libcsl_quickhull_2d.a
+[  1%] Built target csl_quickhull_2d
+[  1%] Building CXX object _deps/csl_highs-build/highs/CMakeFiles/highs.dir/__/__/csl_highs-src/extern/filereaderlp/reader.cpp.o
+[  3%] Building CXX object csl/CMakeFiles/csl_contracts.dir/src/contracts/geometry.cpp.o
+[  3%] Building CXX object _deps/csl_highs-build/highs/CMakeFiles/highs.dir/interfaces/highs_c_api.cpp.o
+[  3%] Building CXX object csl/CMakeFiles/csl_contracts.dir/src/contracts/outcomes.cpp.o
+[  3%] Building CXX object csl/CMakeFiles/csl_contracts.dir/src/contracts/execution.cpp.o
+[  3%] Building CXX object csl/CMakeFiles/csl_contracts.dir/src/contracts/synthesis.cpp.o
+[  4%] Building CXX object _deps/csl_highs-build/highs/CMakeFiles/highs.dir/io/Filereader.cpp.o
+[  4%] Building CXX object _deps/csl_highs-build/highs/CMakeFiles/highs.dir/io/FilereaderEms.cpp.o
+[  4%] Building CXX object _deps/csl_highs-build/highs/CMakeFiles/highs.dir/io/FilereaderLp.cpp.o
+[  6%] Linking CXX static library libcsl_contracts.a
+[  6%] Built target csl_contracts
+[  6%] Building CXX object _deps/csl_highs-build/highs/CMakeFiles/highs.dir/io/FilereaderMps.cpp.o
+[  7%] Building CXX object _deps/csl_highs-build/highs/CMakeFiles/highs.dir/io/HighsIO.cpp.o
+[  9%] Building CXX object csl/CMakeFiles/csl_numeric.dir/src/numeric/data.cpp.o
+[  9%] Building CXX object _deps/csl_highs-build/highs/CMakeFiles/highs.dir/io/HMpsFF.cpp.o
+[  9%] Linking CXX static library libcsl_numeric.a
+[  9%] Built target csl_numeric
+[  9%] Building CXX object _deps/csl_highs-build/highs/CMakeFiles/highs.dir/io/HMPSIO.cpp.o
+[  9%] Building CXX object _deps/csl_highs-build/highs/CMakeFiles/highs.dir/io/LoadOptions.cpp.o
+[ 10%] Building CXX object _deps/csl_highs-build/highs/CMakeFiles/highs.dir/ipm/IpxWrapper.cpp.o
+[ 10%] Building CXX object _deps/csl_highs-build/highs/CMakeFiles/highs.dir/lp_data/Highs.cpp.o
+[ 10%] Building CXX object _deps/csl_highs-build/highs/CMakeFiles/highs.dir/lp_data/HighsCallback.cpp.o
+[ 12%] Building CXX object _deps/csl_highs-build/highs/CMakeFiles/highs.dir/lp_data/HighsDebug.cpp.o
+[ 12%] Building CXX object _deps/csl_highs-build/highs/CMakeFiles/highs.dir/lp_data/HighsIis.cpp.o
+[ 12%] Building CXX object _deps/csl_highs-build/highs/CMakeFiles/highs.dir/lp_data/HighsInfo.cpp.o
+[ 12%] Building CXX object _deps/csl_highs-build/highs/CMakeFiles/highs.dir/lp_data/HighsInfoDebug.cpp.o
+[ 13%] Building CXX object _deps/csl_highs-build/highs/CMakeFiles/highs.dir/lp_data/HighsDeprecated.cpp.o
+[ 13%] Building CXX object _deps/csl_highs-build/highs/CMakeFiles/highs.dir/lp_data/HighsInterface.cpp.o
+[ 13%] Building CXX object _deps/csl_highs-build/highs/CMakeFiles/highs.dir/lp_data/HighsLp.cpp.o
+[ 15%] Building CXX object _deps/csl_highs-build/highs/CMakeFiles/highs.dir/lp_data/HighsLpUtils.cpp.o
+[ 15%] Building CXX object _deps/csl_highs-build/highs/CMakeFiles/highs.dir/lp_data/HighsModelUtils.cpp.o
+[ 15%] Building CXX object _deps/csl_highs-build/highs/CMakeFiles/highs.dir/lp_data/HighsOptions.cpp.o
+[ 15%] Building CXX object _deps/csl_highs-build/highs/CMakeFiles/highs.dir/lp_data/HighsRanging.cpp.o
+[ 16%] Building CXX object _deps/csl_highs-build/highs/CMakeFiles/highs.dir/lp_data/HighsSolution.cpp.o
+[ 16%] Building CXX object _deps/csl_highs-build/highs/CMakeFiles/highs.dir/lp_data/HighsSolutionDebug.cpp.o
+[ 16%] Building CXX object _deps/csl_highs-build/highs/CMakeFiles/highs.dir/lp_data/HighsSolve.cpp.o
+[ 16%] Building CXX object _deps/csl_highs-build/highs/CMakeFiles/highs.dir/lp_data/HighsStatus.cpp.o
+[ 18%] Building CXX object _deps/csl_highs-build/highs/CMakeFiles/highs.dir/mip/HighsCliqueTable.cpp.o
+[ 18%] Building CXX object _deps/csl_highs-build/highs/CMakeFiles/highs.dir/mip/HighsConflictPool.cpp.o
+[ 18%] Building CXX object _deps/csl_highs-build/highs/CMakeFiles/highs.dir/mip/HighsCutGeneration.cpp.o
+[ 20%] Building CXX object _deps/csl_highs-build/highs/CMakeFiles/highs.dir/mip/HighsCutPool.cpp.o
+[ 20%] Building CXX object csl/CMakeFiles/csl_objectives.dir/src/optimization/objective_reformulation.cpp.o
+[ 20%] Building CXX object _deps/csl_highs-build/highs/CMakeFiles/highs.dir/mip/HighsDebugSol.cpp.o
+[ 20%] Building CXX object _deps/csl_highs-build/highs/CMakeFiles/highs.dir/mip/HighsDomain.cpp.o
+[ 20%] Building CXX object _deps/csl_highs-build/highs/CMakeFiles/highs.dir/mip/HighsDynamicRowMatrix.cpp.o
+[ 21%] Linking CXX static library libcsl_objectives.a
+[ 21%] Built target csl_objectives
+[ 21%] Building CXX object csl/CMakeFiles/csl_sets.dir/src/sets/data.cpp.o
+[ 23%] Building CXX object _deps/csl_highs-build/highs/CMakeFiles/highs.dir/mip/HighsFeasibilityJump.cpp.o
+[ 23%] Linking CXX static library libcsl_sets.a
+[ 23%] Built target csl_sets
+[ 23%] Building CXX object _deps/csl_highs-build/highs/CMakeFiles/highs.dir/mip/HighsGFkSolve.cpp.o
+[ 23%] Building CXX object _deps/csl_highs-build/highs/CMakeFiles/highs.dir/mip/HighsImplications.cpp.o
+[ 23%] Building CXX object _deps/csl_highs-build/highs/CMakeFiles/highs.dir/mip/HighsLpAggregator.cpp.o
+[ 24%] Building CXX object _deps/csl_highs-build/highs/CMakeFiles/highs.dir/mip/HighsLpRelaxation.cpp.o
+[ 24%] Building CXX object _deps/csl_highs-build/highs/CMakeFiles/highs.dir/mip/HighsMipAnalysis.cpp.o
+[ 24%] Building CXX object _deps/csl_highs-build/highs/CMakeFiles/highs.dir/mip/HighsMipSolver.cpp.o
+[ 26%] Building CXX object _deps/csl_highs-build/highs/CMakeFiles/highs.dir/mip/HighsMipSolverData.cpp.o
+[ 26%] Building CXX object _deps/csl_highs-build/highs/CMakeFiles/highs.dir/mip/HighsModkSeparator.cpp.o
+[ 26%] Building CXX object _deps/csl_highs-build/highs/CMakeFiles/highs.dir/mip/HighsNodeQueue.cpp.o
+[ 26%] Building CXX object _deps/csl_highs-build/highs/CMakeFiles/highs.dir/mip/HighsObjectiveFunction.cpp.o
+[ 27%] Building CXX object _deps/csl_highs-build/highs/CMakeFiles/highs.dir/mip/HighsPathSeparator.cpp.o
+[ 27%] Building CXX object _deps/csl_highs-build/highs/CMakeFiles/highs.dir/mip/HighsPrimalHeuristics.cpp.o
+[ 27%] Building CXX object _deps/csl_highs-build/highs/CMakeFiles/highs.dir/mip/HighsPseudocost.cpp.o
+[ 29%] Building CXX object _deps/csl_highs-build/highs/CMakeFiles/highs.dir/mip/HighsRedcostFixing.cpp.o
+[ 29%] Building CXX object _deps/csl_highs-build/highs/CMakeFiles/highs.dir/mip/HighsSearch.cpp.o
+[ 29%] Building CXX object _deps/csl_highs-build/highs/CMakeFiles/highs.dir/mip/HighsSeparation.cpp.o
+[ 29%] Building CXX object _deps/csl_highs-build/highs/CMakeFiles/highs.dir/mip/HighsSeparator.cpp.o
+[ 30%] Building CXX object _deps/csl_highs-build/highs/CMakeFiles/highs.dir/mip/HighsTableauSeparator.cpp.o
+[ 30%] Building CXX object _deps/csl_highs-build/highs/CMakeFiles/highs.dir/mip/HighsTransformedLp.cpp.o
+[ 30%] Building CXX object _deps/csl_highs-build/highs/CMakeFiles/highs.dir/model/HighsHessian.cpp.o
+[ 30%] Building CXX object _deps/csl_highs-build/highs/CMakeFiles/highs.dir/model/HighsHessianUtils.cpp.o
+[ 32%] Building CXX object _deps/csl_highs-build/highs/CMakeFiles/highs.dir/model/HighsModel.cpp.o
+[ 32%] Building CXX object _deps/csl_highs-build/highs/CMakeFiles/highs.dir/parallel/HighsTaskExecutor.cpp.o
+[ 32%] Building CXX object csl/CMakeFiles/csl_optimization.dir/src/optimization/linear_program.cpp.o
+[ 32%] Building CXX object _deps/csl_highs-build/highs/CMakeFiles/highs.dir/pdlp/CupdlpWrapper.cpp.o
+[ 32%] Building CXX object csl/CMakeFiles/csl_optimization.dir/src/optimization/lp_backend.cpp.o
+[ 33%] Building CXX object _deps/csl_highs-build/highs/CMakeFiles/highs.dir/presolve/HighsPostsolveStack.cpp.o
+[ 33%] Building CXX object _deps/csl_highs-build/highs/CMakeFiles/highs.dir/presolve/HighsSymmetry.cpp.o
+[ 33%] Building CXX object csl/CMakeFiles/csl_optimization.dir/src/optimization/linear_infeasibility_certificate.cpp.o
+[ 35%] Linking CXX static library libcsl_optimization.a
+[ 35%] Built target csl_optimization
+[ 36%] Building CXX object csl/CMakeFiles/csl_model.dir/src/model/linear_system.cpp.o
+[ 36%] Building CXX object csl/CMakeFiles/csl_model.dir/src/model/discretization/adapter.cpp.o
+In file included from /home/butahlecoq/.local/share/codex/worktrees/exp02-comparison-94-20261027/build/exp02-it17-dyadic-interior-20261027-r1/_deps/csl_highs-src/highs/presolve/HighsSymmetry.cpp:13:
+In constructor ‘HighsOrbitopeMatrix::HighsOrbitopeMatrix(HighsOrbitopeMatrix&&)’,
+    inlined from ‘void std::__new_allocator<_Tp>::construct(_Up*, _Args&& ...) [with _Up = HighsOrbitopeMatrix; _Args = {HighsOrbitopeMatrix}; _Tp = HighsOrbitopeMatrix]’ at /usr/include/c++/16/bits/new_allocator.h:203:4,
+    inlined from ‘static void std::allocator_traits<std::allocator<_Tp1> >::construct(allocator_type&, _Up*, _Args&& ...) [with _Up = HighsOrbitopeMatrix; _Args = {HighsOrbitopeMatrix}; _Tp = HighsOrbitopeMatrix]’ at /usr/include/c++/16/bits/alloc_traits.h:714:17,
+    inlined from ‘void std::vector<_Tp, _Alloc>::emplace_back(_Args&& ...) [with _Args = {HighsOrbitopeMatrix}; _Tp = HighsOrbitopeMatrix; _Alloc = std::allocator<HighsOrbitopeMatrix>]’ at /usr/include/c++/16/bits/vector.tcc:121:30,
+    inlined from ‘bool HighsSymmetryDetection::isFullOrbitope(const ComponentData&, HighsInt, HighsSymmetries&)’ at /home/butahlecoq/.local/share/codex/worktrees/exp02-comparison-94-20261027/build/exp02-it17-dyadic-interior-20261027-r1/_deps/csl_highs-src/highs/presolve/HighsSymmetry.cpp:1670:36:
+/home/butahlecoq/.local/share/codex/worktrees/exp02-comparison-94-20261027/build/exp02-it17-dyadic-interior-20261027-r1/_deps/csl_highs-src/highs/presolve/HighsSymmetry.h:67:8: warning: ‘orbitopeMatrix.HighsOrbitopeMatrix::numSetPackingRows’ may be used uninitialized [-Wmaybe-uninitialized]
+   67 | struct HighsOrbitopeMatrix {
+      |        ^~~~~~~~~~~~~~~~~~~
+/home/butahlecoq/.local/share/codex/worktrees/exp02-comparison-94-20261027/build/exp02-it17-dyadic-interior-20261027-r1/_deps/csl_highs-src/highs/presolve/HighsSymmetry.cpp: In member function ‘bool HighsSymmetryDetection::isFullOrbitope(const ComponentData&, HighsInt, HighsSymmetries&)’:
+/home/butahlecoq/.local/share/codex/worktrees/exp02-comparison-94-20261027/build/exp02-it17-dyadic-interior-20261027-r1/_deps/csl_highs-src/highs/presolve/HighsSymmetry.cpp:1569:23: note: ‘orbitopeMatrix’ declared here
+ 1569 |   HighsOrbitopeMatrix orbitopeMatrix;
+      |                       ^~~~~~~~~~~~~~
+[ 36%] Building CXX object _deps/csl_highs-build/highs/CMakeFiles/highs.dir/presolve/HPresolve.cpp.o
+[ 36%] Building CXX object csl/CMakeFiles/csl_model.dir/src/model/discretization/rk4.cpp.o
+[ 38%] Building CXX object csl/CMakeFiles/csl_model.dir/src/model/hybrid_system.cpp.o
+[ 38%] Linking CXX static library libcsl_model.a
+[ 38%] Built target csl_model
+[ 38%] Building CXX object _deps/csl_highs-build/highs/CMakeFiles/highs.dir/presolve/HPresolveAnalysis.cpp.o
+[ 40%] Building CXX object _deps/csl_highs-build/highs/CMakeFiles/highs.dir/presolve/ICrash.cpp.o
+[ 40%] Building CXX object _deps/csl_highs-build/highs/CMakeFiles/highs.dir/presolve/ICrashUtil.cpp.o
+[ 40%] Building CXX object _deps/csl_highs-build/highs/CMakeFiles/highs.dir/presolve/ICrashX.cpp.o
+[ 40%] Building CXX object _deps/csl_highs-build/highs/CMakeFiles/highs.dir/presolve/PresolveComponent.cpp.o
+[ 41%] Building CXX object _deps/csl_highs-build/highs/CMakeFiles/highs.dir/qpsolver/a_asm.cpp.o
+[ 41%] Building CXX object _deps/csl_highs-build/highs/CMakeFiles/highs.dir/qpsolver/a_quass.cpp.o
+[ 41%] Building CXX object _deps/csl_highs-build/highs/CMakeFiles/highs.dir/qpsolver/basis.cpp.o
+[ 43%] Building CXX object _deps/csl_highs-build/highs/CMakeFiles/highs.dir/qpsolver/perturbation.cpp.o
+[ 43%] Building CXX object _deps/csl_highs-build/highs/CMakeFiles/highs.dir/qpsolver/quass.cpp.o
+[ 43%] Building CXX object _deps/csl_highs-build/highs/CMakeFiles/highs.dir/qpsolver/ratiotest.cpp.o
+[ 43%] Building CXX object _deps/csl_highs-build/highs/CMakeFiles/highs.dir/qpsolver/scaling.cpp.o
+[ 43%] Building CXX object csl/CMakeFiles/csl_problem.dir/src/problem/domains.cpp.o
+[ 44%] Building CXX object _deps/csl_highs-build/highs/CMakeFiles/highs.dir/simplex/HEkk.cpp.o
+[ 46%] Building CXX object csl/CMakeFiles/csl_problem.dir/src/problem/constraints.cpp.o
+[ 46%] Building CXX object csl/CMakeFiles/csl_problem.dir/src/problem/initial_information.cpp.o
+[ 46%] Linking CXX static library libcsl_problem.a
+[ 46%] Built target csl_problem
+[ 46%] Building CXX object _deps/csl_highs-build/highs/CMakeFiles/highs.dir/simplex/HEkkControl.cpp.o
+[ 46%] Building CXX object csl/CMakeFiles/csl_resolved_core.dir/src/problem/identity.cpp.o
+[ 46%] Building CXX object _deps/csl_highs-build/highs/CMakeFiles/highs.dir/simplex/HEkkDebug.cpp.o
+[ 47%] Building CXX object _deps/csl_highs-build/highs/CMakeFiles/highs.dir/simplex/HEkkDual.cpp.o
+[ 49%] Building CXX object csl/CMakeFiles/csl_resolved_core.dir/src/problem/resolved.cpp.o
+[ 49%] Building CXX object _deps/csl_highs-build/highs/CMakeFiles/highs.dir/simplex/HEkkDualMulti.cpp.o
+[ 49%] Linking CXX static library libcsl_resolved_core.a
+[ 49%] Built target csl_resolved_core
+[ 49%] Building CXX object _deps/csl_highs-build/highs/CMakeFiles/highs.dir/simplex/HEkkDualRHS.cpp.o
+[ 49%] Building CXX object csl/CMakeFiles/csl_verifiers.dir/src/registry/compiled_verifiers.cpp.o
+[ 49%] Building CXX object _deps/csl_highs-build/highs/CMakeFiles/highs.dir/simplex/HEkkDualRow.cpp.o
+[ 50%] Building CXX object _deps/csl_highs-build/highs/CMakeFiles/highs.dir/simplex/HEkkInterface.cpp.o
+[ 50%] Building CXX object _deps/csl_highs-build/highs/CMakeFiles/highs.dir/simplex/HEkkPrimal.cpp.o
+[ 50%] Building CXX object csl/CMakeFiles/csl_verifiers.dir/src/registry/nominal_linear_exact_verifier.cpp.o
+[ 50%] Building CXX object _deps/csl_highs-build/highs/CMakeFiles/highs.dir/simplex/HighsSimplexAnalysis.cpp.o
+[ 50%] Building CXX object _deps/csl_highs-build/highs/CMakeFiles/highs.dir/simplex/HSimplex.cpp.o
+[ 52%] Building CXX object _deps/csl_highs-build/highs/CMakeFiles/highs.dir/simplex/HSimplexDebug.cpp.o
+[ 53%] Linking CXX static library libcsl_verifiers.a
+[ 53%] Built target csl_verifiers
+[ 53%] Building CXX object _deps/csl_highs-build/highs/CMakeFiles/highs.dir/simplex/HSimplexNla.cpp.o
+[ 53%] Building CXX object csl/CMakeFiles/csl_registry.dir/src/registry/registry.cpp.o
+[ 53%] Building CXX object _deps/csl_highs-build/highs/CMakeFiles/highs.dir/simplex/HSimplexNlaDebug.cpp.o
+[ 55%] Building CXX object _deps/csl_highs-build/highs/CMakeFiles/highs.dir/simplex/HSimplexNlaFreeze.cpp.o
+[ 55%] Building CXX object _deps/csl_highs-build/highs/CMakeFiles/highs.dir/simplex/HSimplexNlaProductForm.cpp.o
+[ 55%] Building CXX object _deps/csl_highs-build/highs/CMakeFiles/highs.dir/simplex/HSimplexReport.cpp.o
+[ 55%] Building CXX object _deps/csl_highs-build/highs/CMakeFiles/highs.dir/test_kkt/KktCh2.cpp.o
+[ 55%] Linking CXX static library libcsl_registry.a
+[ 55%] Built target csl_registry
+[ 56%] Building CXX object _deps/csl_highs-build/highs/CMakeFiles/highs.dir/test_kkt/DevKkt.cpp.o
+[ 56%] Building CXX object csl/CMakeFiles/csl_resolved_problem.dir/src/problem/validator.cpp.o
+[ 56%] Building CXX object _deps/csl_highs-build/highs/CMakeFiles/highs.dir/util/HFactor.cpp.o
+[ 56%] Building CXX object csl/CMakeFiles/csl_resolved_problem.dir/src/problem/temporal_lifts.cpp.o
+[ 56%] Building CXX object _deps/csl_highs-build/highs/CMakeFiles/highs.dir/util/HFactorDebug.cpp.o
+[ 56%] Building CXX object _deps/csl_highs-build/highs/CMakeFiles/highs.dir/util/HFactorExtend.cpp.o
+[ 58%] Building CXX object _deps/csl_highs-build/highs/CMakeFiles/highs.dir/util/HFactorRefactor.cpp.o
+[ 58%] Building CXX object _deps/csl_highs-build/highs/CMakeFiles/highs.dir/util/HFactorUtils.cpp.o
+[ 58%] Building CXX object _deps/csl_highs-build/highs/CMakeFiles/highs.dir/util/HighsHash.cpp.o
+[ 60%] Linking CXX static library libcsl_resolved_problem.a
+[ 61%] Building CXX object _deps/csl_highs-build/highs/CMakeFiles/highs.dir/util/HighsLinearSumBounds.cpp.o
+[ 61%] Built target csl_resolved_problem
+[ 61%] Building CXX object csl/CMakeFiles/csl_phase_one.dir/src/optimization/phase_one/program.cpp.o
+[ 61%] Building CXX object _deps/csl_highs-build/highs/CMakeFiles/highs.dir/util/HighsMatrixPic.cpp.o
+[ 61%] Building CXX object _deps/csl_highs-build/highs/CMakeFiles/highs.dir/util/HighsMatrixUtils.cpp.o
+[ 61%] Building CXX object csl/CMakeFiles/csl_phase_one.dir/src/optimization/phase_one/simplex.cpp.o
+[ 61%] Building CXX object _deps/csl_highs-build/highs/CMakeFiles/highs.dir/util/HighsSort.cpp.o
+[ 63%] Building CXX object _deps/csl_highs-build/highs/CMakeFiles/highs.dir/util/HighsSparseMatrix.cpp.o
+[ 63%] Building CXX object _deps/csl_highs-build/highs/CMakeFiles/highs.dir/util/HighsUtils.cpp.o
+[ 63%] Building CXX object _deps/csl_highs-build/highs/CMakeFiles/highs.dir/util/HSet.cpp.o
+[ 63%] Building CXX object _deps/csl_highs-build/highs/CMakeFiles/highs.dir/util/HVectorBase.cpp.o
+[ 64%] Building CXX object _deps/csl_highs-build/highs/CMakeFiles/highs.dir/util/stringutil.cpp.o
+[ 64%] Building C object _deps/csl_highs-build/highs/CMakeFiles/highs.dir/pdlp/cupdlp/cupdlp_cs.c.o
+[ 64%] Building C object _deps/csl_highs-build/highs/CMakeFiles/highs.dir/pdlp/cupdlp/cupdlp_linalg.c.o
+[ 66%] Building C object _deps/csl_highs-build/highs/CMakeFiles/highs.dir/pdlp/cupdlp/cupdlp_proj.c.o
+[ 66%] Building C object _deps/csl_highs-build/highs/CMakeFiles/highs.dir/pdlp/cupdlp/cupdlp_restart.c.o
+[ 66%] Building C object _deps/csl_highs-build/highs/CMakeFiles/highs.dir/pdlp/cupdlp/cupdlp_scaling.c.o
+[ 66%] Building C object _deps/csl_highs-build/highs/CMakeFiles/highs.dir/pdlp/cupdlp/cupdlp_solver.c.o
+[ 67%] Building C object _deps/csl_highs-build/highs/CMakeFiles/highs.dir/pdlp/cupdlp/cupdlp_step.c.o
+[ 67%] Building C object _deps/csl_highs-build/highs/CMakeFiles/highs.dir/pdlp/cupdlp/cupdlp_utils.c.o
+[ 67%] Building CXX object _deps/csl_highs-build/highs/CMakeFiles/highs.dir/ipm/ipx/basiclu_kernel.cc.o
+[ 69%] Building CXX object _deps/csl_highs-build/highs/CMakeFiles/highs.dir/ipm/ipx/basiclu_wrapper.cc.o
+[ 69%] Linking CXX static library libcsl_phase_one.a
+[ 69%] Built target csl_phase_one
+[ 69%] Building CXX object csl/CMakeFiles/csl_bounded_hull_checker.dir/src/geometry/bounded_hull_checker.cpp.o
+[ 69%] Building CXX object _deps/csl_highs-build/highs/CMakeFiles/highs.dir/ipm/ipx/basis.cc.o
+[ 69%] Building CXX object _deps/csl_highs-build/highs/CMakeFiles/highs.dir/ipm/ipx/conjugate_residuals.cc.o
+[ 70%] Linking CXX static library libcsl_bounded_hull_checker.a
+[ 70%] Built target csl_bounded_hull_checker
+[ 70%] Building CXX object csl/CMakeFiles/csl_hull.dir/src/geometry/hull_reducer.cpp.o
+[ 70%] Building CXX object _deps/csl_highs-build/highs/CMakeFiles/highs.dir/ipm/ipx/control.cc.o
+[ 72%] Building CXX object _deps/csl_highs-build/highs/CMakeFiles/highs.dir/ipm/ipx/crossover.cc.o
+[ 72%] Building CXX object _deps/csl_highs-build/highs/CMakeFiles/highs.dir/ipm/ipx/diagonal_precond.cc.o
+[ 72%] Building CXX object _deps/csl_highs-build/highs/CMakeFiles/highs.dir/ipm/ipx/forrest_tomlin.cc.o
+[ 72%] Building CXX object csl/CMakeFiles/csl_hull.dir/src/geometry/basis_reuse_reducer.cpp.o
+[ 72%] Building CXX object _deps/csl_highs-build/highs/CMakeFiles/highs.dir/ipm/ipx/guess_basis.cc.o
+[ 73%] Building CXX object _deps/csl_highs-build/highs/CMakeFiles/highs.dir/ipm/ipx/indexed_vector.cc.o
+[ 73%] Building CXX object _deps/csl_highs-build/highs/CMakeFiles/highs.dir/ipm/ipx/info.cc.o
+[ 73%] Building CXX object _deps/csl_highs-build/highs/CMakeFiles/highs.dir/ipm/ipx/ipm.cc.o
+[ 75%] Building CXX object _deps/csl_highs-build/highs/CMakeFiles/highs.dir/ipm/ipx/ipx_c.cc.o
+[ 75%] Building CXX object _deps/csl_highs-build/highs/CMakeFiles/highs.dir/ipm/ipx/iterate.cc.o
+[ 75%] Building CXX object _deps/csl_highs-build/highs/CMakeFiles/highs.dir/ipm/ipx/kkt_solver_basis.cc.o
+[ 75%] Building CXX object csl/CMakeFiles/csl_hull.dir/src/geometry/hull/ordered_reducer.cpp.o
+[ 75%] Building CXX object _deps/csl_highs-build/highs/CMakeFiles/highs.dir/ipm/ipx/kkt_solver_diag.cc.o
+[ 76%] Building CXX object _deps/csl_highs-build/highs/CMakeFiles/highs.dir/ipm/ipx/kkt_solver.cc.o
+[ 76%] Building CXX object _deps/csl_highs-build/highs/CMakeFiles/highs.dir/ipm/ipx/linear_operator.cc.o
+[ 76%] Building CXX object _deps/csl_highs-build/highs/CMakeFiles/highs.dir/ipm/ipx/lp_solver.cc.o
+[ 78%] Building CXX object csl/CMakeFiles/csl_hull.dir/src/geometry/hull/itis17_reducers.cpp.o
+[ 78%] Building CXX object _deps/csl_highs-build/highs/CMakeFiles/highs.dir/ipm/ipx/lu_factorization.cc.o
+[ 80%] Building CXX object _deps/csl_highs-build/highs/CMakeFiles/highs.dir/ipm/ipx/lu_update.cc.o
+[ 80%] Building CXX object _deps/csl_highs-build/highs/CMakeFiles/highs.dir/ipm/ipx/maxvolume.cc.o
+[ 80%] Building CXX object _deps/csl_highs-build/highs/CMakeFiles/highs.dir/ipm/ipx/model.cc.o
+[ 80%] Building CXX object csl/CMakeFiles/csl_hull.dir/src/geometry/hull/grouped_reducer.cpp.o
+[ 81%] Building CXX object _deps/csl_highs-build/highs/CMakeFiles/highs.dir/ipm/ipx/normal_matrix.cc.o
+[ 81%] Building CXX object _deps/csl_highs-build/highs/CMakeFiles/highs.dir/ipm/ipx/sparse_matrix.cc.o
+[ 81%] Building CXX object csl/CMakeFiles/csl_hull.dir/src/geometry/hull/recursive_reducer.cpp.o
+[ 81%] Building CXX object _deps/csl_highs-build/highs/CMakeFiles/highs.dir/ipm/ipx/sparse_utils.cc.o
+[ 81%] Building CXX object _deps/csl_highs-build/highs/CMakeFiles/highs.dir/ipm/ipx/splitted_normal_matrix.cc.o
+[ 83%] Building CXX object _deps/csl_highs-build/highs/CMakeFiles/highs.dir/ipm/ipx/starting_basis.cc.o
+[ 83%] Building CXX object _deps/csl_highs-build/highs/CMakeFiles/highs.dir/ipm/ipx/symbolic_invert.cc.o
+[ 83%] Building CXX object _deps/csl_highs-build/highs/CMakeFiles/highs.dir/ipm/ipx/timer.cc.o
+[ 84%] Building CXX object _deps/csl_highs-build/highs/CMakeFiles/highs.dir/ipm/ipx/utils.cc.o
+[ 84%] Building C object _deps/csl_highs-build/highs/CMakeFiles/highs.dir/ipm/basiclu/basiclu_factorize.c.o
+[ 84%] Building C object _deps/csl_highs-build/highs/CMakeFiles/highs.dir/ipm/basiclu/basiclu_get_factors.c.o
+[ 84%] Building C object _deps/csl_highs-build/highs/CMakeFiles/highs.dir/ipm/basiclu/basiclu_initialize.c.o
+[ 86%] Building C object _deps/csl_highs-build/highs/CMakeFiles/highs.dir/ipm/basiclu/basiclu_object.c.o
+[ 86%] Building C object _deps/csl_highs-build/highs/CMakeFiles/highs.dir/ipm/basiclu/basiclu_solve_dense.c.o
+[ 86%] Building C object _deps/csl_highs-build/highs/CMakeFiles/highs.dir/ipm/basiclu/basiclu_solve_for_update.c.o
+[ 86%] Building C object _deps/csl_highs-build/highs/CMakeFiles/highs.dir/ipm/basiclu/basiclu_solve_sparse.c.o
+[ 87%] Building C object _deps/csl_highs-build/highs/CMakeFiles/highs.dir/ipm/basiclu/basiclu_update.c.o
+[ 87%] Building C object _deps/csl_highs-build/highs/CMakeFiles/highs.dir/ipm/basiclu/lu_build_factors.c.o
+[ 87%] Building C object _deps/csl_highs-build/highs/CMakeFiles/highs.dir/ipm/basiclu/lu_condest.c.o
+[ 89%] Building C object _deps/csl_highs-build/highs/CMakeFiles/highs.dir/ipm/basiclu/lu_dfs.c.o
+[ 89%] Building C object _deps/csl_highs-build/highs/CMakeFiles/highs.dir/ipm/basiclu/lu_factorize_bump.c.o
+[ 89%] Building C object _deps/csl_highs-build/highs/CMakeFiles/highs.dir/ipm/basiclu/lu_file.c.o
+[ 89%] Building C object _deps/csl_highs-build/highs/CMakeFiles/highs.dir/ipm/basiclu/lu_garbage_perm.c.o
+[ 90%] Building C object _deps/csl_highs-build/highs/CMakeFiles/highs.dir/ipm/basiclu/lu_initialize.c.o
+[ 90%] Building C object _deps/csl_highs-build/highs/CMakeFiles/highs.dir/ipm/basiclu/lu_internal.c.o
+[ 92%] Linking CXX static library libcsl_hull.a
+[ 92%] Built target csl_hull
+[ 92%] Building C object _deps/csl_highs-build/highs/CMakeFiles/highs.dir/ipm/basiclu/lu_markowitz.c.o
+[ 92%] Building C object _deps/csl_highs-build/highs/CMakeFiles/highs.dir/ipm/basiclu/lu_matrix_norm.c.o
+[ 93%] Building C object _deps/csl_highs-build/highs/CMakeFiles/highs.dir/ipm/basiclu/lu_pivot.c.o
+[ 93%] Building C object _deps/csl_highs-build/highs/CMakeFiles/highs.dir/ipm/basiclu/lu_residual_test.c.o
+[ 93%] Building C object _deps/csl_highs-build/highs/CMakeFiles/highs.dir/ipm/basiclu/lu_setup_bump.c.o
+[ 95%] Building C object _deps/csl_highs-build/highs/CMakeFiles/highs.dir/ipm/basiclu/lu_singletons.c.o
+[ 95%] Building C object _deps/csl_highs-build/highs/CMakeFiles/highs.dir/ipm/basiclu/lu_solve_for_update.c.o
+[ 95%] Building C object _deps/csl_highs-build/highs/CMakeFiles/highs.dir/ipm/basiclu/lu_solve_dense.c.o
+[ 95%] Building C object _deps/csl_highs-build/highs/CMakeFiles/highs.dir/ipm/basiclu/lu_solve_sparse.c.o
+[ 96%] Building C object _deps/csl_highs-build/highs/CMakeFiles/highs.dir/ipm/basiclu/lu_solve_symbolic.c.o
+[ 96%] Building C object _deps/csl_highs-build/highs/CMakeFiles/highs.dir/ipm/basiclu/lu_update.c.o
+[ 96%] Building C object _deps/csl_highs-build/highs/CMakeFiles/highs.dir/ipm/basiclu/lu_solve_triangular.c.o
+[ 98%] Linking CXX static library ../../../lib/libhighs.a
+[ 98%] Built target highs
+[ 98%] Building CXX object csl/CMakeFiles/csl_highs_lp.dir/src/adapters/lp/highs.cpp.o
+[100%] Linking CXX static library libcsl_highs_lp.a
+[100%] Built target csl_highs_lp
+[100%] Building CXX object csl/CMakeFiles/csl_it17_hull_comparison_report.dir/benchmarks/reporting/it17_hull/preliminary_driver.cpp.o
+[100%] Linking CXX executable csl_it17_hull_comparison_report
+[100%] Built target csl_it17_hull_comparison_report
