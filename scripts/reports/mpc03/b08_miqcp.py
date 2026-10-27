@@ -295,8 +295,8 @@ def run(args):
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--output-dir", type=Path,
-                        default=ROOT / "reports/algorithm-results" / REPORT_ID)
+    parser.add_argument("--output-dir", type=Path, required=True,
+                        help="explicit output directory; use a scratch path to preserve frozen reports")
     args = parser.parse_args()
     run(args)
 

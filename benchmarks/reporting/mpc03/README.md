@@ -69,6 +69,15 @@ gives norm `67.150601101404892...`. Original unrounded arrays, the nonlinear
 plant and the historical generator are unavailable, so this is not a
 reproduction claim.
 
+Run the optional solver into a scratch directory so the frozen report is not
+overwritten:
+
+```sh
+python3 -m venv .venv
+.venv/bin/python -m pip install pyscipopt==6.3.0
+.venv/bin/python scripts/reports/mpc03/b08_miqcp.py --output-dir /tmp/mpc03-b08-l04-miQCP-v1
+```
+
 The B08 report adds a stage-by-stage 2D `(x1,x3)` projection of the four-state
 disturbance tube, with the exact displayed-data worst terminal corner and
 projected target marked. It shows every corner history for the returned fixed
