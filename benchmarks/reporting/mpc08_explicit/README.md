@@ -2,6 +2,8 @@
 
 This is a bounded pilot for [issue #604](https://github.com/butahlecoq/controlled-systems-lab/issues/604), not a complete comparison-program result. It gives an exact parametric reference for one double-integrator step, separately identifies the invariant terminal set, and records fixed-initial CSL candidate checks and a condensed online-QP baseline.
 
+Saved HTML report and offline bundle: [MPC-08 explicit pilot](../../../reports/algorithm-results/mpc08-explicit-pilot-v1/index.html). Its public Pages route is pending merge and deployment.
+
 The products stay separate: `F` ranges over initial states; `T` is invariant under its named terminal feedback; `u*` and `V1` are explicit functions of one initial state; each CSL run returns a candidate relation for one fixed initial state. A reachable terminal set and a complete joint optimal relation are not inferred from these outputs.
 
 ![Exact feasible domain, nine critical regions, and the separate terminal invariant set](generated/explicit-double-integrator.svg)
