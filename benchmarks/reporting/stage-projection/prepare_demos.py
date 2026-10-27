@@ -11,6 +11,7 @@ import os
 from pathlib import Path
 import platform
 import shutil
+import subprocess
 import sys
 
 ROOT = Path(__file__).resolve().parents[3]
@@ -186,7 +187,11 @@ def _batch(source: dict, source_bytes: bytes) -> dict:
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--out", type=Path, required=True, help="new output directory")
+    parser.add_argument("--route-executable", type=Path,
+                        default=ROOT / "build/stage-projection-route-build/csl_stage_projection_route",
+                        help="built native nominal_forward route adapter")
     args = parser.parse_args()
+    route_executable = args.route_executable.expanduser().resolve(strict=True)
     output = args.out.expanduser().resolve()
     if output.exists():
         raise FileExistsError(f"refusing to overwrite existing output: {output}")
@@ -199,7 +204,6 @@ def main() -> None:
         source, raw = _parse(source_path)
         inputs.append({"path": str(source_path.relative_to(ROOT)),
                        "sha256": hashlib.sha256(raw).hexdigest()})
-        batch = _batch(source, raw)
         expected = {
             "expected_run_id": source["run_id"],
             "expected_problem_id": source["problem_id"],
@@ -208,6 +212,20 @@ def main() -> None:
             "expected_record_schema": source["record_schema"],
             "expected_source_sha256": hashlib.sha256(raw).hexdigest(),
         }
+        if stem == "fuel-four-state":
+            native_path = output / f"{stem}.nominal-forward.stage-projection-batch.json"
+            subprocess.run([str(route_executable), str(source_path.resolve()), expected["expected_source_sha256"],
+                            str(native_path)], check=True)
+            native_batch = json.loads(native_path.read_text(encoding="utf-8"))
+            native_expected = dict(expected, expected_problem_id=native_batch["problem_id"])
+            native_path.write_bytes(dumps_stage_projection_batch(native_batch, **native_expected))
+            gaps = [record for record in native_batch["records"] if record["outcome"]["status"] != "success"]
+            print(f"native route batch: {native_path.resolve()} ({len(gaps)} explicit unavailable stage/pair records)")
+            demo_source = dict(source, route_id="demo.affine-box-reachability")
+            expected["expected_route_id"] = demo_source["route_id"]
+            batch = _batch(demo_source, raw)
+        else:
+            batch = _batch(source, raw)
         batch_bytes = dumps_stage_projection_batch(batch, **expected)
         batch_path = output / f"{stem}.stage-projection-batch.json"
         batch_path.write_bytes(batch_bytes)
@@ -225,7 +243,13 @@ def main() -> None:
     if cache.exists():
         shutil.rmtree(cache)
     source_files = ["benchmarks/reporting/stage-projection/prepare_demos.py",
+                    "benchmarks/reporting/stage-projection/nominal_forward_route.cpp",
+                    "benchmarks/reporting/stage-projection/check_nominal_forward_route.py",
                     "benchmarks/reporting/stage-projection/BUNDLE-README.md",
+                    "CMakeLists.txt", "cmake/OptionalReports.cmake",
+                    "scripts/reports/stage_projection_route_capabilities.json",
+                    "benchmarks/reporting/stage-projection/README.md",
+                    "tests/reporting/test_stage_projection_demos.py",
                     "scripts/reports/stage_projection_data.py",
                     "scripts/reports/stage_projection_figures.py",
                     "scripts/reports/figure_style.py",

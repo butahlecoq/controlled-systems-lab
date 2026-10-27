@@ -2,9 +2,12 @@
 
 These files are illustrative model demonstrations, not benchmark results or
 claims about optimal control. The fuel example is a 4D affine open-loop system
-with independent controls in `[-1,1]` at five stages and zero disturbance.
+with an independent scalar control in `[-1,1]` at five stages and zero
+disturbance.
 Its four paired projections are stored in source-bound stage batches and
-rendered offline from those batches.
+rendered offline. A separate native `reachability.nominal_forward` batch records
+the available prefix and explicit unavailable stages. The nonfuel example uses
+the analytic demonstration adapter.
 
 ## Fuel figures
 
@@ -13,8 +16,12 @@ rendered offline from those batches.
 - [Oxidizer flow x1 vs fuel stock x4 (PNG)](fuel-four-state-figures/projection-03-x0-x3.png) · [SVG](fuel-four-state-figures/projection-03-x0-x3.svg)
 - [Oxidizer stock x2 vs fuel flow x3 (PNG)](fuel-four-state-figures/projection-04-x1-x2.png) · [SVG](fuel-four-state-figures/projection-04-x1-x2.svg)
 - [Fuel offline HTML index](fuel-four-state-figures/index.html)
+- [Native nominal-forward capture (two available stages; explicit later gaps)](fuel-four-state.nominal-forward.stage-projection-batch.json)
 
-Each panel shows stored projected V generators for R0 through R5. The dashed
+The offline figure panels show the full analytic demo's projected vertices for
+R0 through R5. The separate native route batch keeps only route-produced stages
+and marks unavailable stages with the provider's affine-rank diagnostic. It is
+not used to fill the figure. The dashed
 green path is the fixed `u=1` illustrative control history. Negative fuel
 stock values are retained. No hull boundary is reconstructed from the stored
 points.

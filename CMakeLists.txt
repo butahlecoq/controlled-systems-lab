@@ -20,6 +20,7 @@ option(CSL_BUILD_OBSERVABILITY_BENCHMARK "Build the OBS-02 collection overhead m
 option(CSL_BUILD_SYN06_REPORT "Build the SYN-06 verifier measurement driver" OFF)
 option(CSL_BUILD_APP01_REPORT "Build the APP-01 reachable-plan measurement driver" OFF)
 option(CSL_BUILD_SYN01_REPORT "Build the private SYN-01 nominal-forward numerical report driver" OFF)
+option(CSL_BUILD_STAGE_PROJECTION_ROUTE "Build the private stage-projection nominal-forward route adapter" OFF)
 option(CSL_BUILD_SYN02_REPORT "Build the SYN-02 terminal minimizer measurement driver" OFF)
 option(CSL_BUILD_SYN07_REPORT "Build the T-S01 exact-family measurement driver" OFF)
 option(CSL_BUILD_EXT01_REPORT "Build the EXT-01 fixed-plan numerical report driver" OFF)

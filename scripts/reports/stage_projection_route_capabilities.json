@@ -4,7 +4,7 @@
     {
       "route_id": "demo.affine-box-reachability",
       "source": "benchmarks/reporting/stage-projection/prepare_demos.py",
-      "adapter_status": "connected demonstration adapter",
+      "adapter_status": "connected analytic demonstration adapter",
       "capability": "stage_sets",
       "stages": "R0 through RT",
       "state_geometry": "convex hull of every endpoint of the declared independent box controls under the supplied affine model",
@@ -32,11 +32,11 @@
     {
       "route_id": "reachability.nominal_forward",
       "source": "src/reachability/nominal_forward.cpp",
-      "adapter_status": "not yet connected to the demonstration command",
+      "adapter_status": "connected through native stage-projection capture; unsupported suffixes are explicit gaps",
       "capability": "stage_sets_available",
-      "stages": "initial and completed forward marginals",
-      "evidence": "per-stage OperationResult geometry evidence and provider lineage",
-      "limitations": ["discrete nominal open-loop profile only", "does not represent uncertain or feedback reachability"]
+      "stages": "initial and completed forward marginals, followed by explicit gaps if a later provider operation stops",
+      "evidence": "per-stage OperationResult geometry evidence and selected projection provider lineage serialized in csl.stage-projection-batch/1",
+      "limitations": ["discrete nominal open-loop profile only", "the current scalar fuel fixture stops at R2 when the selected H/V conversion cannot resolve affine rank", "does not represent uncertain or feedback reachability", "fuel example is illustrative, not a benchmark"]
     },
     {
       "route_id": "reachability.fixed_plan_disturbance",

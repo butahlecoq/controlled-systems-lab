@@ -17,6 +17,8 @@ class StageProjectionDemoTests(unittest.TestCase):
     def make_batch(self, stem):
         path = DEMOS.EXAMPLES / f"{stem}.json"
         source, raw = DEMOS._parse(path)
+        if stem == "fuel-four-state":
+            source = dict(source, route_id="demo.affine-box-reachability")
         batch = DEMOS._batch(source, raw)
         expected = {
             "expected_run_id": source["run_id"],
@@ -86,6 +88,7 @@ class StageProjectionDemoTests(unittest.TestCase):
         routes = {route["route_id"]: route for route in value["routes"]}
         self.assertEqual(routes["issue6.b06-finite-action-minimax"]["capability"], "terminal_set_only")
         self.assertEqual(routes["simulation.replay"]["capability"], "trajectory_only")
+        self.assertIn("explicit gaps", routes["reachability.nominal_forward"]["adapter_status"])
         self.assertEqual(set(routes), {
             "demo.affine-box-reachability",
             "issue6.b06-finite-action-minimax",

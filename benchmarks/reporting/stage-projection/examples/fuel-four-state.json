@@ -2,7 +2,7 @@
   "schema": "csl.stage-projection-demo-source/1",
   "problem_id": "fuel-four-state-box-control-demo",
   "request_id": "fuel-four-state-stage-projections-v1",
-  "route_id": "demo.affine-box-reachability",
+  "route_id": "reachability.nominal_forward",
   "run_id": "fuel-four-state-box-control-demo-v1",
   "record_schema": "csl.stage-projection-demo-source/1",
   "description": "Illustrative four-state open-loop model based on the owner-confirmed B06/L09 fuel dynamics. This is a separate demonstration, not a benchmark or a reproduction of the minimax result.",

@@ -2,7 +2,7 @@
   "artifacts": [
     {
       "path": "README.md",
-      "sha256": "8ba6b198e5ad6f9036190252cc4eda6c57e28cd53710f71126beca91aa3c9dbc"
+      "sha256": "c67d1ddbcaa114dc0d52413a7c63b7c19a27fdbd91036ee86078bf8887935d06"
     },
     {
       "path": "fuel-four-state-figures/index.html",
@@ -42,11 +42,15 @@
     },
     {
       "path": "fuel-four-state-figures/render-manifest.json",
-      "sha256": "5dd75ba7821ab67721e31ae07766aec2fff90e3cd3c2d1456b5cdd0d14d21eb7"
+      "sha256": "54995d69cd18d0ec5a6948673f20e5c0e1d3a6af8ef8023565c3ef388a876be0"
+    },
+    {
+      "path": "fuel-four-state.nominal-forward.stage-projection-batch.json",
+      "sha256": "71cc7f5df0d9d034cbcdeb07500a79c2dc3ad3a9d6dc17713c1af121b896385c"
     },
     {
       "path": "fuel-four-state.stage-projection-batch.json",
-      "sha256": "38ede9dc6b50c9bcf3ece51650fe181f6b773f7f3c11e8d844beb6c85b2bfbe1"
+      "sha256": "3b2e082a9ede9609b4771f14abd6174677453f50cfff93ce302ed54b928f805d"
     },
     {
       "path": "nonfuel-integrator-figures/index.html",
@@ -78,7 +82,7 @@
   "inputs": [
     {
       "path": "benchmarks/reporting/stage-projection/examples/fuel-four-state.json",
-      "sha256": "0cfeded56300e197172d95c82a1eb267afec5a1c39b028f8f1e2415e9300e4dd"
+      "sha256": "a2e9f6d7af643d4d06048c256e34efd0e3a2e2fe5267ee0602fa82801712e077"
     },
     {
       "path": "benchmarks/reporting/stage-projection/examples/nonfuel-integrator.json",
@@ -89,11 +93,39 @@
   "source_files": [
     {
       "path": "benchmarks/reporting/stage-projection/prepare_demos.py",
-      "sha256": "44501829c697a922ac15fe9abcd18f17bb8e69ccbbae7263b5469659f0ba6da1"
+      "sha256": "5f207cfce857bf6d5c0e5445706f493547fa24ef5ac5b12fabca21cb831927ec"
+    },
+    {
+      "path": "benchmarks/reporting/stage-projection/nominal_forward_route.cpp",
+      "sha256": "d22c13e09f17f7fbf82d0343ce4acf07fb793fa8ceeb73da00399ceb60d004e7"
+    },
+    {
+      "path": "benchmarks/reporting/stage-projection/check_nominal_forward_route.py",
+      "sha256": "b4df3f1e682478d8cfaf4db20accd9facb0f524041e491eea577e9c0030cfbc9"
     },
     {
       "path": "benchmarks/reporting/stage-projection/BUNDLE-README.md",
-      "sha256": "8ba6b198e5ad6f9036190252cc4eda6c57e28cd53710f71126beca91aa3c9dbc"
+      "sha256": "c67d1ddbcaa114dc0d52413a7c63b7c19a27fdbd91036ee86078bf8887935d06"
+    },
+    {
+      "path": "CMakeLists.txt",
+      "sha256": "56900844f02d9b029b2490d2663383054679ba1b37a24f7724a86482fb88a843"
+    },
+    {
+      "path": "cmake/OptionalReports.cmake",
+      "sha256": "eed7fef69a6bc93f4f950cba9b71a5f7133734caa75c41c92b4a3d84a5b113aa"
+    },
+    {
+      "path": "scripts/reports/stage_projection_route_capabilities.json",
+      "sha256": "e48781a1d1b49dd870f1f33dae833e885b85e0dff4cbc8bfbabc3891c2734729"
+    },
+    {
+      "path": "benchmarks/reporting/stage-projection/README.md",
+      "sha256": "369826fb02fec0f4503327d19cb296f619676fbc6b29360d61748d73a0ab5d64"
+    },
+    {
+      "path": "tests/reporting/test_stage_projection_demos.py",
+      "sha256": "530e16b79b291c4e00b6aabd0efd7a2fe84cb2556978cce9b4d8ab2823038354"
     },
     {
       "path": "scripts/reports/stage_projection_data.py",

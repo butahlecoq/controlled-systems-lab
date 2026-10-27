@@ -1,6 +1,6 @@
 {
   "schema": "csl.stage-projection-figure-export/1",
-  "input_content_sha256": "4a48ecdb9bf981803bfc889caad53641cc1da2c6f49cd9cc0e274ecb8446aa2a",
+  "input_content_sha256": "43d46c7d73f2be779fe2eaa6dd59840488e1cff130ce8d05510ca62881df802d",
   "style_id": "csl-control-science-v1",
   "quantitative_axis_policy": "csl-report-quantitative-v1",
   "output_directory": ".",
