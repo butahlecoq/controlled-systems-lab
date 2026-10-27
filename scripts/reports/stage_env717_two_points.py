@@ -30,6 +30,7 @@ legacy_checker = _load_checker(LEGACY_CHECKER, "env717_two_points_legacy_checker
 FILES = ("README.md", "capture.json", "figure-data.json", "index.html",
          "projections.svg", "result.json", "SHA256SUMS")
 SOURCE_COMMIT = "f4d76c60f4003f50954174e96eafd8e514bd5441"
+PUBLISHED_LEGACY_ROUTE = "env717-two-points-33ebdad360671940fb54"
 
 
 class LocalLinks(HTMLParser):
@@ -179,6 +180,19 @@ def stage(source: Path, site_root: Path) -> str:
             info.external_attr = 0o100644 << 16
             archive.writestr(info, content)
     index.write_text(index_text.replace("</ul>", route_link + "</ul>"), encoding="utf-8")
+    if result.get("schema") == "csl.env717-two-points-pilot/1":
+        redirect = site_root / PUBLISHED_LEGACY_ROUTE
+        if redirect.exists():
+            raise ValueError("historical TwoPoints route already exists")
+        redirect.mkdir()
+        (redirect / "index.html").write_text(
+            "<!doctype html><html lang=\"en\"><meta charset=\"utf-8\">"
+            "<meta http-equiv=\"refresh\" content=\"0; url=../" +
+            escape(report_id) + "/index.html\"><title>TwoPoints report moved</title>"
+            "<p>The immutable report is available at "
+            "<a href=\"../" + escape(report_id) +
+            "/index.html\">the preserved fixed-plan report route</a>.</p></html>",
+            encoding="utf-8")
     return report_id
 
 

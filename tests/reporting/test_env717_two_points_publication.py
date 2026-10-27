@@ -58,6 +58,8 @@ class TwoPointsPublicationTests(unittest.TestCase):
         site_index = (self.site / "index.html").read_text()
         self.assertIn(f"{legacy_id}/index.html", site_index)
         self.assertIn(f"{report_id}/index.html", site_index)
+        legacy_redirect = (self.site / stage_module.PUBLISHED_LEGACY_ROUTE / "index.html").read_text()
+        self.assertIn(f"../{legacy_id}/index.html", legacy_redirect)
         self.assertIn("TwoPointsOnParallelLines differential-game pilot", site_index)
         self.assertIn("TwoPoints finite-feedback differential-game report", site_index)
         published_svg = (destination / "projections.svg").read_text()
