@@ -3,7 +3,9 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 import hashlib
+import os
 from pathlib import Path, PurePosixPath
+import tempfile
 from typing import Callable, Mapping
 
 
@@ -98,7 +100,20 @@ def prepare(
 
 def _write(path: Path, content: bytes) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_bytes(content)
+    staged: Path | None = None
+    try:
+        with tempfile.NamedTemporaryFile(prefix="." + path.name + ".", suffix=".tmp",
+                                         dir=path.parent, delete=False) as stream:
+            staged = Path(stream.name)
+            stream.write(content)
+            stream.flush()
+        os.replace(staged, path)
+    finally:
+        if staged is not None:
+            try:
+                staged.unlink()
+            except FileNotFoundError:
+                pass
 
 
 def commit(plan: Plan, *, writer: Callable[[Path, bytes], None] | None = None) -> None:
