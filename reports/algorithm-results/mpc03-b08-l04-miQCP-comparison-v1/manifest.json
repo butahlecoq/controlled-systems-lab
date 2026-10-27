@@ -1,0 +1,29 @@
+{
+  "schema": "csl.mpc03-b08-comparison-bundle/1",
+  "comparison_spec_id": "40886ab17e030b4c05b078a8982d3e6b5bf60252388b8724d1c73399715e294a",
+  "comparison_run_id": "afa3190fb287ab396af1655ac7bd7d73f0c93b41375ca11da297b5ea36c5d43d",
+  "comparison_record_sha256": "b37510d6acf9e831d1f045e66e51962a24ddd4ac9d5ef4390e2dae20acdd38d8",
+  "source_bundle": "mpc03-b08-l04-miQCP-v1",
+  "source_files": {
+    "record.json": "39a271205826863a55b8a89140e62c8a123688c4a7b33ad06aaf813a11597b7a",
+    "solver-output.json": "4405fbda120496872b9ea6713186fc455b96cc811210177671173edb5fc0cdcd",
+    "independent-oracle.json": "dc8fbb816f359d132284fa92c8289b87a4cd7804270aa35fab926cdeb90e3e0a",
+    "disturbance-tube.svg": "9d9b0150ccda4a538d5960640b0d0d6d970ccd72a4f93cd1c60dc63746c61b1e"
+  },
+  "capture_scope": "one exploratory solve per formulation; no speed comparison",
+  "projection": {
+    "file": "mpc03-b08-l04-miQCP-v1/disturbance-tube.svg",
+    "coordinates": [
+      "x1",
+      "x3"
+    ],
+    "source_state_dimension": 4,
+    "axis_labels": [
+      "oxidizer flow x1 (kg/s)",
+      "fuel flow x3 (kg/s)"
+    ],
+    "stages": [0, 1, 2, 3, 4],
+    "meaning": "all disturbance-corner histories for the selected finite action plan, projected from the four-state model",
+    "markers": ["projected target", "worst-cost terminal point"]
+  }
+}

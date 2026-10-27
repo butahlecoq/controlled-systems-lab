@@ -1,0 +1,22 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:csl:mpc03-b08-case:1",
+  "title": "B08 L04 displayed-data input manifest",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["source_id", "source_sha256", "state_dimension", "horizon", "initial_state", "target", "input_vector", "actions_in_source_order", "disturbance_bounds_by_stage", "model", "cost", "assumptions"],
+  "properties": {
+    "source_id": {"const": "L04"},
+    "source_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "state_dimension": {"const": 4},
+    "horizon": {"const": 4},
+    "initial_state": {"type": "array", "items": {"type": "number"}, "minItems": 4, "maxItems": 4},
+    "target": {"type": "array", "items": {"type": "number"}, "minItems": 4, "maxItems": 4},
+    "input_vector": {"type": "array", "items": {"type": "number"}, "minItems": 4, "maxItems": 4},
+    "actions_in_source_order": {"type": "array", "items": {"type": "number"}, "minItems": 1},
+    "disturbance_bounds_by_stage": {"type": "array", "items": {"type": "array", "items": {"type": "number"}, "minItems": 2, "maxItems": 2}, "minItems": 4, "maxItems": 4},
+    "model": {"type": "string", "minLength": 1},
+    "cost": {"type": "string", "minLength": 1},
+    "assumptions": {"type": "array", "items": {"type": "string", "minLength": 1}, "minItems": 1}
+  }
+}
