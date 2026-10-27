@@ -158,6 +158,8 @@ foreach(example_file CMakeLists.txt registered_lp.cpp registered_convex.cpp
   file(COPY "${CSL_SOURCE_DIR}/examples/${example_file}" DESTINATION "${example_source}")
 endforeach()
 file(COPY "${CSL_SOURCE_DIR}/examples/scenario_cli_export_check.cmake"
+  "${CSL_SOURCE_DIR}/examples/scenario_cli_methods_export_check.cmake"
+  "${CSL_SOURCE_DIR}/examples/scenario_cli_identity_check.cmake"
   DESTINATION "${example_source}")
 file(COPY "${CSL_SOURCE_DIR}/examples/scenarios/two-stage-integrator.json"
   DESTINATION "${example_source}/scenarios")
