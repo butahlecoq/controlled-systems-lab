@@ -102,6 +102,11 @@ jobs:
                 --source reports/algorithm-results/exp02-it17-dyadic-interior-20261027-r1 \
                 --site build/report-site
             fi
+            if test -d reports/algorithm-results/exp02-it17-a44-paper-order-20261027-r2; then
+              python scripts/reports/stage_exp02_it17_dyadic.py \
+                --source reports/algorithm-results/exp02-it17-a44-paper-order-20261027-r2 \
+                --site build/report-site
+            fi
             if test -d reports/algorithm-results/syn03-nominal-exact-2d-8b94095; then
               python scripts/reports/stage_syn03_nominal_exact_example.py \
                 --source reports/algorithm-results/syn03-nominal-exact-2d-8b94095 \

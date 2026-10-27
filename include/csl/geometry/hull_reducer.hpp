@@ -61,9 +61,10 @@ struct A43ReductionMetrics {
 };
 
 struct A44ReductionMetrics {
-    // Deterministic farthest-first order under normalized Chebyshev distance
+    // Deterministic farthest-first order under normalized Euclidean distance
     // from the cloud's bounding-box center. IDs refer to the original cloud.
     std::vector<std::size_t> processing_order;
+    std::size_t seeded_candidates{};
     std::size_t incremental_membership_calls{};
     std::size_t final_recheck_calls{};
     std::size_t zero_width_coordinates{};
@@ -161,9 +162,9 @@ HullReductionResult reduce_ordered_hull(const PointCloud&, LPWorkspace&,
 HullReductionResult reduce_itis17_a43_hull(const PointCloud&, LPWorkspace&,
                                            const ExecutionContext&);
 
-// Paper-informed A44 incremental LP membership with the ambiguous ordering
-// interpreted as farthest-first normalized Chebyshev distance. A complete LP
-// recheck follows the incremental pass.
+// A44 incremental LP membership using the paper's farthest-first reading of
+// its conflicting ordering statements and its k+1 initial candidate set. A
+// complete LP recheck follows the incremental pass.
 HullReductionResult reduce_itis17_a44_hull(const PointCloud&, LPWorkspace&,
                                            const ExecutionContext&);
 

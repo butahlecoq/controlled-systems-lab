@@ -942,6 +942,26 @@
       "follow_up_issue": 669
     },
     {
+      "route": "exp02-it17-a44-paper-order-20261027-r1",
+      "source_bundle": "exp02-it17-a44-paper-order-20261027-r1",
+      "assets": [
+        "fixture-geometry.svg"
+      ],
+      "index_sha256": "23f7d994897a48bb7be4d8529bf9733bfb5d5acacd47d6fc7e10de3c305ecea4",
+      "disposition": "deferred: original frozen route-level readability review remains; companion availability is listed separately",
+      "follow_up_issue": 669
+    },
+    {
+      "route": "exp02-it17-a44-paper-order-20261027-r2",
+      "source_bundle": "exp02-it17-a44-paper-order-20261027-r2",
+      "assets": [
+        "fixture-geometry.svg"
+      ],
+      "index_sha256": "1da8dc942527df3f275e294b7df38e802cbd04745be8cf936dd8614c056d200b",
+      "disposition": "deferred: original frozen route-level readability review remains; companion availability is listed separately",
+      "follow_up_issue": 669
+    },
+    {
       "route": "exp02-it17-dyadic-interior-20261027-r1",
       "source_bundle": "exp02-it17-dyadic-interior-20261027-r1",
       "assets": [

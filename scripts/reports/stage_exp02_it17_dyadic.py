@@ -17,6 +17,10 @@ assert site_spec.loader is not None
 site_spec.loader.exec_module(site_module)
 
 REPORT_ID = "exp02-it17-dyadic-interior-20261027-r1"
+REPORT_IDS = {
+    REPORT_ID,
+    "exp02-it17-a44-paper-order-20261027-r2",
+}
 
 
 def bundle_files(source: Path) -> set[str]:
@@ -30,7 +34,8 @@ def bundle_files(source: Path) -> set[str]:
 
 
 def validate_bundle(source: Path) -> None:
-    if source.is_symlink() or not source.is_dir() or source.name != REPORT_ID:
+    report_id = source.name
+    if source.is_symlink() or not source.is_dir() or report_id not in REPORT_IDS:
         raise ValueError("expected the versioned EXP-02 dyadic report directory")
     entries = {}
     for line in (source / "SHA256SUMS").read_text(encoding="utf-8").splitlines():
@@ -49,7 +54,7 @@ def validate_bundle(source: Path) -> None:
         if actual != expected:
             raise ValueError("report bundle file hash mismatch: " + name)
     record = json.loads((source / "record.json").read_text(encoding="utf-8"))
-    if record.get("report_id") != REPORT_ID or record.get("attempts") != 72:
+    if record.get("report_id") != report_id or record.get("attempts") != 72:
         raise ValueError("report identity or attempt count differs")
     for page in sorted(path for path in source.rglob("*.html") if path.is_file()):
         page_assets = set()
@@ -66,10 +71,11 @@ def validate_bundle(source: Path) -> None:
 
 def stage(source: Path, site_root: Path) -> str:
     validate_bundle(source)
+    report_id = source.name
     if not site_root.is_dir():
         raise ValueError("site root must already exist")
-    destination = site_root / REPORT_ID
-    archive_path = site_root / (REPORT_ID + ".zip")
+    destination = site_root / report_id
+    archive_path = site_root / (report_id + ".zip")
     if destination.exists() or archive_path.exists():
         raise ValueError("versioned report route already exists")
     shutil.copytree(source, destination, symlinks=False)
@@ -77,7 +83,7 @@ def stage(source: Path, site_root: Path) -> str:
     offline_index = (
         '<!doctype html><html lang="en"><meta charset="utf-8">'
         '<title>Offline EXP-02 pilot</title><h1>Offline report</h1>'
-        f'<a href="{REPORT_ID}/index.html">{REPORT_ID}</a></html>'
+        f'<a href="{report_id}/index.html">{report_id}</a></html>'
     ).encode("utf-8")
     with zipfile.ZipFile(archive_path, "x", compression=zipfile.ZIP_DEFLATED) as archive:
         for name, content in [("index.html", offline_index)]:
@@ -86,26 +92,28 @@ def stage(source: Path, site_root: Path) -> str:
             info.external_attr = 0o100644 << 16
             archive.writestr(info, content)
         for name in sorted(bundle_files(source) | {"SHA256SUMS"}):
-            info = zipfile.ZipInfo(f"{REPORT_ID}/{name}", date_time=(2026, 1, 1, 0, 0, 0))
+            info = zipfile.ZipInfo(f"{report_id}/{name}", date_time=(2026, 1, 1, 0, 0, 0))
             info.compress_type = zipfile.ZIP_DEFLATED
             info.external_attr = 0o100644 << 16
             archive.writestr(info, (source / name).read_bytes())
 
     index = site_root / "index.html"
     text = index.read_text(encoding="utf-8")
-    if text.count("</ul>") != 1 or REPORT_ID in text:
+    if text.count("</ul>") != 1 or report_id in text:
         raise ValueError("site index insertion point differs")
+    title = ("QuickHull and ITIS17 A44 source-aligned rerun" if report_id.endswith("-r2")
+             else "QuickHull and ITIS17 dyadic hull pilot")
     link = (
-        f'<li><a href="{REPORT_ID}/index.html">QuickHull and ITIS17 dyadic hull pilot</a>'
+        f'<li><a href="{report_id}/index.html">{title}</a>'
         ' — repeated exploratory 2D comparison on two interior-heavy square clouds'
-        f' · <a href="{REPORT_ID}/summary.csv">measured table</a>'
-        f' · <a href="{REPORT_ID}.zip">offline bundle</a></li>'
+        f' · <a href="{report_id}/summary.csv">measured table</a>'
+        f' · <a href="{report_id}.zip">offline bundle</a></li>'
     )
     site_module.OfflineHTML({
-        f"{REPORT_ID}/index.html", f"{REPORT_ID}/summary.csv", REPORT_ID + ".zip"
+        f"{report_id}/index.html", f"{report_id}/summary.csv", report_id + ".zip"
     }).feed(link)
     index.write_text(text.replace("</ul>", link + "</ul>"), encoding="utf-8")
-    return REPORT_ID
+    return report_id
 
 
 if __name__ == "__main__":

@@ -16,6 +16,34 @@ spec.loader.exec_module(stage_report)
 
 
 class Exp02IT17DyadicStageTests(unittest.TestCase):
+    def test_clean_a44_v2_bundle_stages_with_source_identity_and_figure(self):
+        report_id = "exp02-it17-a44-paper-order-20261027-r2"
+        source = ROOT / "reports/algorithm-results" / report_id
+        with tempfile.TemporaryDirectory() as temp:
+            site = Path(temp) / "site"
+            site.mkdir()
+            (site / "index.html").write_text(
+                '<!doctype html><html lang="en"><body><ul></ul></body></html>',
+                encoding="utf-8")
+
+            self.assertEqual(stage_report.stage(source, site), report_id)
+            import landing
+            landing.build(site)
+
+            report_page = site / report_id / "index.html"
+            page = report_page.read_text(encoding="utf-8")
+            self.assertIn("A44 v2", page)
+            self.assertIn("ec7d183842d8725d10276dee8b8689ee5313448e", page)
+            self.assertTrue((site / report_id / "fixture-geometry.svg").is_file())
+            self.assertTrue((site / report_id / "raw/n256.jsonl").is_file())
+            self.assertIn(report_id + ".zip", (site / "index.html").read_text(encoding="utf-8"))
+
+            with ZipFile(site / (report_id + ".zip")) as archive:
+                names = set(archive.namelist())
+                self.assertIn(report_id + "/raw/n64.jsonl", names)
+                self.assertIn(report_id + "/fixture-geometry.svg", names)
+                self.assertIn(report_id + "/SHA256SUMS", names)
+
     def test_versioned_report_and_raw_rows_stage_into_site_and_offline_zip(self):
         source = ROOT / "reports/algorithm-results" / stage_report.REPORT_ID
         with tempfile.TemporaryDirectory() as temp:

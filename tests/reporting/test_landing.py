@@ -82,6 +82,15 @@ class LandingTests(unittest.TestCase):
         self.assertIn("six", family.summary)
         self.assertIn("inconclusive", family.summary)
 
+    def test_a44_v2_description_does_not_relabel_the_historical_adaptation_route(self):
+        historical = landing.FAMILIES[landing.family_for(
+            "quickhull-it17-paper-adaptations-20261024-r1")]
+        current = landing.FAMILIES[landing.family_for(
+            "exp02-it17-a44-paper-order-20261027-r2")]
+        self.assertIn("A43 and A44 are paper-informed adaptations", historical.summary)
+        self.assertNotIn("A44 v2", historical.summary)
+        self.assertIn("A44 interpretation", current.summary)
+
 
 class AssembledIndexTests(unittest.TestCase):
     """The published landing page is built from the assembled staged index."""

@@ -70,14 +70,14 @@ public:
                 for (std::size_t coordinate = 0; coordinate < dimension; ++coordinate) {
                     const auto width = high[coordinate] - low[coordinate];
                     if (width == 0.0L) continue;
-                    const auto normalized = std::abs(
+                    const auto normalized =
                         (static_cast<long double>(cloud.points[point][coordinate]) - center[coordinate]) /
-                        width);
+                        width;
                     if (!std::isfinite(normalized)) {
                         metrics.used_identity_fallback = true;
                         break;
                     }
-                    score[point] = std::max(score[point], normalized);
+                    score[point] += normalized * normalized;
                 }
                 if (metrics.used_identity_fallback) break;
             }
@@ -90,17 +90,19 @@ public:
             }
         }
 
-        std::vector<std::size_t> retained;
+        // The paper seeds X_pr with the first k+1 points, described as the
+        // points farthest from the box center, then classifies the remainder.
+        // Its earlier "increasing distance" sentence conflicts with that
+        // description; this implementation records the farthest-first reading.
+        const auto seed_count = std::min(order.size(), dimension + 1);
+        std::vector<std::size_t> retained(order.begin(),
+            order.begin() + static_cast<std::ptrdiff_t>(seed_count));
         std::vector<RemovalCertificate> removed;
         std::vector<MembershipAttempt> attempts;
         ReductionStatus stage_status = ReductionStatus::complete;
         std::size_t incremental_calls = 0;
-        for (std::size_t position = 0; position < order.size(); ++position) {
+        for (std::size_t position = seed_count; position < order.size(); ++position) {
             const auto candidate = order[position];
-            if (retained.empty()) {
-                retained.push_back(candidate);
-                continue;
-            }
             auto classified = detail::classify_candidate(cloud, retained, candidate,
                 lp, context, "itis17-a44-incremental");
             incremental_calls += classified.lp_calls;
@@ -126,6 +128,7 @@ public:
         if (!std::holds_alternative<HullReduction>(final_result)) return final_result;
         auto reduction = std::get<HullReduction>(std::move(final_result));
         metrics.incremental_membership_calls = incremental_calls;
+        metrics.seeded_candidates = seed_count;
         metrics.final_recheck_calls = reduction.lp_calls;
         reduction.lp_calls += incremental_calls;
         reduction.attempts.insert(reduction.attempts.begin(), attempts.begin(), attempts.end());
@@ -159,7 +162,7 @@ registry::Registration<registry::HullReducerPort> make_itis17_a43_hull_reducer_r
 }
 
 registry::Registration<registry::HullReducerPort> make_itis17_a44_hull_reducer_registration() {
-    return {{{"csl.hull.itis17.a44-incremental-lp"}, "1.0.0"},
+    return {{{"csl.hull.itis17.a44-incremental-lp"}, "2.0.0"},
         [](const PointCloud&, const registry::Requirements&) -> registry::Capability {
             return registry::Offer{};
         },
