@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import argparse
+import ast
 import hashlib
 import json
 from pathlib import Path
@@ -10,7 +11,7 @@ import re
 
 ROOT = Path(__file__).resolve().parents[2]
 VISUAL_SIGNAL = re.compile(r"<svg|savefig\s*\(|write_image\s*\(|\.svg\b|\.png\b|render_svg", re.I)
-ASSET_NAME = re.compile(r"[A-Za-z0-9_.-]+\.(?:svg|png)")
+ASSET_NAME = re.compile(r"(?<![A-Za-z0-9_.-])[A-Za-z0-9_.-]+\.(?:svg|png)(?![A-Za-z0-9_.-])")
 MIGRATION_ISSUES = {
     "approximation-and-extensions": 684,
     "geometry-and-optimization": 685,
@@ -120,7 +121,10 @@ def source_inventory(root: Path) -> list[dict]:
             if not matches:
                 continue
             relative = path.relative_to(root).as_posix()
-            assets = sorted(set(ASSET_NAME.findall(source)))
+            tree = ast.parse(source, filename=relative)
+            assets = sorted({asset for node in ast.walk(tree)
+                             if isinstance(node, ast.Constant) and isinstance(node.value, str)
+                             for asset in ASSET_NAME.findall(node.value)})
             if relative in COMPOSED_SAVED_ROUTES:
                 disposition = "composes-or-copies-existing-saved-figure"
             elif relative in SAVED_DATA_COMPANION_COLLECTORS:
@@ -148,7 +152,9 @@ def source_inventory(root: Path) -> list[dict]:
             elif relative.endswith("/visual_examples.py"):
                 disposition = "gallery-composition-and-route"
             elif ("registered_reports.py" in path.name or path.name.startswith(("stage_", "validate_"))
-                  or path.name in {"site.py", "report_data.py"}):
+                  or "publication_policy" in path.name
+                  or path.name in {"site.py", "report_data.py", "registered_report_policies.py",
+                                   "schema3_publication_policies.py"}):
                 disposition = "publication-validation-or-frozen-route"
             else:
                 disposition = "deferred-family-specific-migration"

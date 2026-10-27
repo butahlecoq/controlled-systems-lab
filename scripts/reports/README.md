@@ -28,6 +28,31 @@ and publication manifest validation used by the other adapters. Each kind's
 adapter retains its scientific validation and typed page rendering. Rendering
 and staging read saved data and never execute numerical collectors.
 
+## Schema-v3 publication adapters
+
+`publication_policy.py` is the staging seam for the 27 schema-v3 non-LP/convex
+report kinds loaded by `schema3_publication_policies.py`. Each adapter's policy
+binds its report kind to the publisher, source-directory identity rule,
+catalogue links, and staging checks such as SVG validation or a committed
+archive comparison. The publisher continues to own scientific validation,
+report identity, rendering, and archive construction. Registration rejects
+duplicate kinds; catalogue staging rejects unsupported kinds. The shared
+`registered_reports.py` adapter owns its three policies together. Add or change
+an adapter by updating its policy module and the import list in
+`schema3_publication_policies.py`, the adapter's scientific checks as needed,
+and `tests/reporting/test_publication_policy.py` plus the relevant adapter
+test. Full-catalog staging is checked by `tests/reporting/test_registered_kinds.py`.
+
+GEO-04, GEO-05 and B09 keep their policy declarations next to, but outside,
+their publisher source files. Those publishers bind their own source bytes into
+public report IDs. Moving policy declarations into those files would change
+historical IDs even when rendered report bytes stayed the same. Policy wiring
+therefore lives in separate files and the full-catalog tests compare report
+IDs, page bytes, archive bytes, hashes and URLs against the saved catalogue.
+This staging refactor has no C++ API, dependency, install-tree or package
+release impact; publication behavior remains gated on exact saved-output
+checks and independent review.
+
 `site_additions.py` owns the common file-staging lifecycle for the educational
 gallery and versioned report additions such as APP-02. Callers render all
 intended bytes, validate their scientific and link inventories, then prepare a

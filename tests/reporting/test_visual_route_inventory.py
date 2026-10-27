@@ -16,6 +16,10 @@ class VisualRouteInventoryTests(unittest.TestCase):
         self.assertEqual(committed,inventory)
         self.assertEqual(inventory["schema"],"csl.visual-route-inventory/1")
         producers={entry["source"]:entry for entry in inventory["producers_and_routes"]}
+        self.assertNotIn("policy.svg", producers["scripts/reports/site.py"]["asset_name_literals"])
+        self.assertIn("visual.svg", producers["scripts/reports/ext03_transform/report.py"]["asset_name_literals"])
+        self.assertNotIn("csl.report.svg", {
+            asset for entry in producers.values() for asset in entry["asset_name_literals"]})
         for source in ("scripts/reports/control_figures.py","scripts/reports/plot.py",
                        "scripts/reports/visual_examples.py","scripts/reports/visual_illustrations.py"):
             self.assertIn(source,producers)

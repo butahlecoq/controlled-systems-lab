@@ -14,8 +14,7 @@
       "source": "scripts/reports/app01/collect.py",
       "signal_count": 3,
       "asset_name_literals": [
-        "latency.svg",
-        "report.svg"
+        "latency.svg"
       ],
       "disposition": "measurement-collector-preserved-with-saved-data-companion"
     },
@@ -101,6 +100,14 @@
       "disposition": "composes-or-copies-existing-saved-figure"
     },
     {
+      "source": "scripts/reports/ext03_transform_publication_policy.py",
+      "signal_count": 2,
+      "asset_name_literals": [
+        "visual.svg"
+      ],
+      "disposition": "publication-validation-or-frozen-route"
+    },
+    {
       "source": "scripts/reports/ext04/continuous_report.py",
       "signal_count": 2,
       "asset_name_literals": [
@@ -161,6 +168,14 @@
       "disposition": "frozen-renderer-preserved-with-shared-policy-companion"
     },
     {
+      "source": "scripts/reports/geo02_publication_policy.py",
+      "signal_count": 1,
+      "asset_name_literals": [
+        "timings.svg"
+      ],
+      "disposition": "publication-validation-or-frozen-route"
+    },
+    {
       "source": "scripts/reports/geo02_registered_reports.py",
       "signal_count": 4,
       "asset_name_literals": [
@@ -189,6 +204,14 @@
         "latency.svg"
       ],
       "disposition": "frozen-renderer-preserved-with-shared-policy-companion"
+    },
+    {
+      "source": "scripts/reports/geo04_publication_policy.py",
+      "signal_count": 1,
+      "asset_name_literals": [
+        "latency.svg"
+      ],
+      "disposition": "publication-validation-or-frozen-route"
     },
     {
       "source": "scripts/reports/geo04_registered_reports.py",
@@ -281,6 +304,14 @@
       "role_and_disposition_reason": "Validates a frozen capture and draws its authored analytic 2D fixture; the companion preserves the two plan points and target as an illustration."
     },
     {
+      "source": "scripts/reports/issue3_publication_policy.py",
+      "signal_count": 1,
+      "asset_name_literals": [
+        "latency.svg"
+      ],
+      "disposition": "publication-validation-or-frozen-route"
+    },
+    {
       "source": "scripts/reports/issue422/build_bundle.py",
       "signal_count": 3,
       "asset_name_literals": [
@@ -309,11 +340,36 @@
       "role_and_disposition_reason": "Publishes the saved B06 four-state projection; a VIZ-03 shared-policy companion already provides labeled x1/x3 flow and x2/x4 stock projections."
     },
     {
+      "source": "scripts/reports/issue6_b06_publication_policy.py",
+      "signal_count": 2,
+      "asset_name_literals": [
+        "terminal-projections.svg"
+      ],
+      "disposition": "publication-validation-or-frozen-route"
+    },
+    {
+      "source": "scripts/reports/issue6_b07_publication_policy.py",
+      "signal_count": 2,
+      "asset_name_literals": [
+        "projections.svg"
+      ],
+      "disposition": "publication-validation-or-frozen-route"
+    },
+    {
       "source": "scripts/reports/issue6_b07_registered_reports.py",
       "signal_count": 2,
       "asset_name_literals": [
         "projections.png",
         "projections.svg"
+      ],
+      "disposition": "publication-validation-or-frozen-route"
+    },
+    {
+      "source": "scripts/reports/issue6_b09_publication_policy.py",
+      "signal_count": 3,
+      "asset_name_literals": [
+        "projections-lambda0.svg",
+        "projections-lambda1.svg"
       ],
       "disposition": "publication-validation-or-frozen-route"
     },
@@ -367,10 +423,26 @@
       "disposition": "publication-validation-or-frozen-route"
     },
     {
+      "source": "scripts/reports/opt04_publication_policy.py",
+      "signal_count": 1,
+      "asset_name_literals": [
+        "performance.svg"
+      ],
+      "disposition": "publication-validation-or-frozen-route"
+    },
+    {
       "source": "scripts/reports/opt04_registered_reports.py",
       "signal_count": 4,
       "asset_name_literals": [
         "performance.svg"
+      ],
+      "disposition": "publication-validation-or-frozen-route"
+    },
+    {
+      "source": "scripts/reports/opt07_publication_policy.py",
+      "signal_count": 2,
+      "asset_name_literals": [
+        "latency.svg"
       ],
       "disposition": "publication-validation-or-frozen-route"
     },
@@ -381,6 +453,14 @@
         "feasible-box-2d.svg"
       ],
       "disposition": "frozen-renderer-preserved-with-shared-policy-companion"
+    },
+    {
+      "source": "scripts/reports/opt11_publication_policy.py",
+      "signal_count": 1,
+      "asset_name_literals": [
+        "latency.svg"
+      ],
+      "disposition": "publication-validation-or-frozen-route"
     },
     {
       "source": "scripts/reports/opt12_registered_reports.py",
@@ -402,11 +482,18 @@
       "source": "scripts/reports/plot.py",
       "signal_count": 7,
       "asset_name_literals": [
-        "csl.report.svg",
         "latency.png",
         "latency.svg"
       ],
       "disposition": "adopted-shared-quantitative-policy"
+    },
+    {
+      "source": "scripts/reports/registered_report_policies.py",
+      "signal_count": 4,
+      "asset_name_literals": [
+        "latency.svg"
+      ],
+      "disposition": "publication-validation-or-frozen-route"
     },
     {
       "source": "scripts/reports/registered_reports.py",
@@ -420,7 +507,6 @@
       "source": "scripts/reports/render.py",
       "signal_count": 6,
       "asset_name_literals": [
-        "csl.report.svg",
         "latency.png",
         "latency.svg"
       ],
@@ -430,24 +516,15 @@
     {
       "source": "scripts/reports/report_data.py",
       "signal_count": 1,
-      "asset_name_literals": [
-        "csl.report.svg"
-      ],
+      "asset_name_literals": [],
       "disposition": "publication-validation-or-frozen-route"
     },
     {
       "source": "scripts/reports/site.py",
-      "signal_count": 20,
+      "signal_count": 7,
       "asset_name_literals": [
-        "csl.report.svg",
         "latency.png",
-        "latency.svg",
-        "performance.svg",
-        "projections-lambda0.svg",
-        "projections.svg",
-        "terminal-projections.svg",
-        "timings.svg",
-        "visual.svg"
+        "latency.svg"
       ],
       "disposition": "publication-validation-or-frozen-route"
     },
@@ -578,6 +655,14 @@
       "follow_up_issue": 686
     },
     {
+      "source": "scripts/reports/syn01_publication_policy.py",
+      "signal_count": 1,
+      "asset_name_literals": [
+        "latency.svg"
+      ],
+      "disposition": "publication-validation-or-frozen-route"
+    },
+    {
       "source": "scripts/reports/syn01_registered_reports.py",
       "signal_count": 4,
       "asset_name_literals": [
@@ -609,6 +694,14 @@
       ],
       "disposition": "deferred-family-specific-migration",
       "follow_up_issue": 686
+    },
+    {
+      "source": "scripts/reports/syn02_publication_policy.py",
+      "signal_count": 1,
+      "asset_name_literals": [
+        "latency.svg"
+      ],
+      "disposition": "publication-validation-or-frozen-route"
     },
     {
       "source": "scripts/reports/syn02_registered_reports.py",
@@ -677,8 +770,7 @@
       "source": "scripts/reports/syn06/collect.py",
       "signal_count": 3,
       "asset_name_literals": [
-        "latency.svg",
-        "report.svg"
+        "latency.svg"
       ],
       "disposition": "deferred-family-specific-migration",
       "follow_up_issue": 686
@@ -709,6 +801,14 @@
       ],
       "disposition": "deferred-family-specific-migration",
       "follow_up_issue": 686
+    },
+    {
+      "source": "scripts/reports/syn_ts01_paired_publication_policy.py",
+      "signal_count": 1,
+      "asset_name_literals": [
+        "performance.svg"
+      ],
+      "disposition": "publication-validation-or-frozen-route"
     },
     {
       "source": "scripts/reports/syn_ts01_paired_registered_reports.py",
