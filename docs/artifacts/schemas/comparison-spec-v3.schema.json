@@ -15,7 +15,7 @@
         "strategy": {"type": "string", "minLength": 1}, "instrumentation": {"enum": ["enabled", "disabled"]}}}},
     "repetitions": {"type": "integer", "minimum": 1, "maximum": 4294967295},
     "input_manifest_hash": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
-    "input_manifest_source": {"enum": ["resolved-problem-canonical-bytes", "csl.exp05-finite-minimax-case/1"]},
+    "input_manifest_source": {"enum": ["resolved-problem-canonical-bytes", "csl.exp05-finite-minimax-case/1", "csl.mpc03-b08-case/1"]},
     "environment": {"$ref": "#/$defs/environment"}
   },
   "$defs": {

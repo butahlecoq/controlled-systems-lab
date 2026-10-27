@@ -117,7 +117,7 @@ bool input_manifest_attached(const Json& run,const Json& spec) {
     std::size_t matches=0;
     for(const auto& attachment:attachments)
         if(attachment.at("role")=="certificate"&&
-           attachment.at("schema")=="csl.exp05-finite-minimax-case/1"&&
+           attachment.at("schema")==spec.at("input_manifest_source")&&
            attachment.at("digest")==expected&&!attachment.at("content").is_null())++matches;
     return matches==1;
 }
@@ -263,11 +263,13 @@ SpecShape validate_spec(const Json& spec) {
     const bool record=schema=="csl.comparison-spec/2"&&spec.size()==7&&spec.contains("arms")&&
         spec.contains("input_manifest_hash")&&spec.contains("input_manifest_source")&&
         (spec.at("input_manifest_source")=="resolved-problem-canonical-bytes"||
-         spec.at("input_manifest_source")=="csl.exp05-finite-minimax-case/1");
+         spec.at("input_manifest_source")=="csl.exp05-finite-minimax-case/1"||
+         spec.at("input_manifest_source")=="csl.mpc03-b08-case/1");
     const bool record_with_environment=schema=="csl.comparison-spec/3"&&spec.size()==8&&spec.contains("arms")&&
         spec.contains("input_manifest_hash")&&spec.contains("input_manifest_source")&&
         (spec.at("input_manifest_source")=="resolved-problem-canonical-bytes"||
-         spec.at("input_manifest_source")=="csl.exp05-finite-minimax-case/1")&&spec.contains("environment");
+         spec.at("input_manifest_source")=="csl.exp05-finite-minimax-case/1"||
+         spec.at("input_manifest_source")=="csl.mpc03-b08-case/1")&&spec.contains("environment");
     if(!legacy&&!record&&!record_with_environment)throw std::invalid_argument("Comparison spec fields do not match supported schema");
     if(record_with_environment)validate_environment(spec.at("environment"));
     const auto valid_digest=[](const Json& value){
@@ -289,7 +291,8 @@ SpecShape validate_spec(const Json& spec) {
         throw std::invalid_argument("Comparison spec digest is malformed");
     if(record||record_with_environment) {
         if(spec.at("input_manifest_source")!="resolved-problem-canonical-bytes"&&
-           spec.at("input_manifest_source")!="csl.exp05-finite-minimax-case/1")
+           spec.at("input_manifest_source")!="csl.exp05-finite-minimax-case/1"&&
+           spec.at("input_manifest_source")!="csl.mpc03-b08-case/1")
             throw std::invalid_argument("Comparison input manifest source is unsupported");
         constexpr std::string_view prefix="csl.problem.v1.sha256:";
         const auto& problem_id=spec.at("problem_id").get_ref<const std::string&>();
@@ -365,6 +368,10 @@ bool measurement_matches_arm(AttemptStatus status,const Json& measurement,const 
     if(spec.strategies.empty())return true;
     const auto schema=measurement.value("schema",std::string{});
     if(schema=="csl.exp05-fixed-plan-event/1")
+        return measurement.contains("strategy")&&measurement.at("strategy")==spec.strategies.at(arm)&&
+            measurement.contains("instrumentation")&&measurement.at("instrumentation")==spec.instrumentation.at(arm)&&
+            measurement.contains("repetition")&&measurement.at("repetition").get<std::uint32_t>()==repetition;
+    if(schema=="csl.mpc03-b08-comparison-event/1")
         return measurement.contains("strategy")&&measurement.at("strategy")==spec.strategies.at(arm)&&
             measurement.contains("instrumentation")&&measurement.at("instrumentation")==spec.instrumentation.at(arm)&&
             measurement.contains("repetition")&&measurement.at("repetition").get<std::uint32_t>()==repetition;
