@@ -85,7 +85,7 @@ def _inputs(source: Path) -> tuple[dict[str, bytes], dict]:
     if files["projections.svg"].decode("utf-8") != expected_svg:
         raise ValueError("saved SVG differs from independent figure data")
     expected_page = checker.report_page(
-        verified_result, expected_svg[:-1]).encode("utf-8")
+        verified_result, expected_svg[:-1], capture["capture_environment"]).encode("utf-8")
     if files["index.html"] != expected_page:
         raise ValueError("saved report page differs from verified result and SVG")
     parser = LocalLinks()
