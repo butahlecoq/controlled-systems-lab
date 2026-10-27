@@ -42,7 +42,6 @@ SOURCE_FILES = (
     "benchmarks/reporting/mpc08_explicit/explicit_double_integrator.py",
     "benchmarks/reporting/mpc08_explicit/mpc08_strategy_comparison.cpp",
     "scripts/reports/stage_mpc08.py", "scripts/reports/landing.py",
-    "scripts/reports/visual-route-inventory.json",
     ".github/workflows/algorithm-reports.yml",
 )
 CARD = (
