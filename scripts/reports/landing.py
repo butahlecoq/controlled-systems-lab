@@ -346,6 +346,13 @@ FAMILIES = {
         "and includes a labelled time/state trajectory plot. The pilot changes the upstream "
         "initial state and horizon, omits running reward, and makes no general environment or "
         "performance claim."),
+    "env717-two-points": Family(
+        r"env717-two-points-[0-9a-f]{20}", "synthesis",
+        "TwoPointsOnParallelLines finite-action differential-game pilot",
+        "Exhaustively evaluates 27 open-loop control sequences against every disturbance-vertex "
+        "history, with independently replayed forward reachable phase-plane polytopes and a "
+        "finite-vertex backward feedback graph. The source continuous-action 10-second task is "
+        "adapted to three stages; this makes no claim about continuous or full-horizon control."),
     "syn06-verifier": Family(
         r"syn06-verifier-\d{8}-[0-9a-f]{64}", "verification", "Trajectory verification",
         "Re-checks two literal two-stage integrator witnesses against the original saved input "

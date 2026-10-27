@@ -189,7 +189,7 @@ def frozen_routes(root: Path) -> list[dict]:
                  "assets": [path.name for path in figures],
                  "index_sha256": hashlib.sha256(page.read_bytes()).hexdigest(),
                  "disposition": "deferred: original frozen route-level readability review remains; companion availability is listed separately",
-                 "follow_up_issue": 669}
+                 "follow_up_issue": 717 if route.startswith("env717-") else 669}
         if route in FROZEN_COMPANIONS:
             entry["companion_route"] = FROZEN_COMPANIONS[route]
         routes.append(entry)

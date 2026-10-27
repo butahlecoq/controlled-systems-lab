@@ -353,9 +353,12 @@ file(GLOB_RECURSE ENV717_LIBRARY_INPUTS CONFIGURE_DEPENDS
     ${CMAKE_CURRENT_SOURCE_DIR}/include/*.hxx)
 set_property(DIRECTORY APPEND PROPERTY CMAKE_CONFIGURE_DEPENDS
     ${CMAKE_CURRENT_SOURCE_DIR}/benchmarks/reporting/env717/simple_control.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/benchmarks/reporting/env717/two_points.cpp
     ${ENV717_LIBRARY_INPUTS})
 file(SHA256 ${CMAKE_CURRENT_SOURCE_DIR}/benchmarks/reporting/env717/simple_control.cpp
     ENV717_DRIVER_SHA256)
+file(SHA256 ${CMAKE_CURRENT_SOURCE_DIR}/benchmarks/reporting/env717/two_points.cpp
+    ENV717_TWO_POINTS_DRIVER_SHA256)
 execute_process(COMMAND git status --porcelain -- src include
     WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
     OUTPUT_VARIABLE ENV717_LIBRARY_DIRTY OUTPUT_STRIP_TRAILING_WHITESPACE
@@ -374,9 +377,13 @@ string(SHA256 ENV717_ALGORITHM_SOURCE_SHA256 "${ENV717_ALGORITHM_HASHES}")
 execute_process(COMMAND git rev-parse HEAD WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
     OUTPUT_VARIABLE ENV717_SOURCE_COMMIT OUTPUT_STRIP_TRAILING_WHITESPACE COMMAND_ERROR_IS_FATAL ANY)
 add_executable(csl_env717_simple_control benchmarks/reporting/env717/simple_control.cpp)
+add_executable(csl_env717_two_points benchmarks/reporting/env717/two_points.cpp)
 target_link_libraries(csl_env717_simple_control PRIVATE CSL::finite_action_minimax)
+target_link_libraries(csl_env717_two_points PRIVATE CSL::finite_action_minimax)
 target_include_directories(csl_env717_simple_control SYSTEM PRIVATE ${csl_json_SOURCE_DIR}/include)
+target_include_directories(csl_env717_two_points SYSTEM PRIVATE ${csl_json_SOURCE_DIR}/include)
 target_compile_features(csl_env717_simple_control PRIVATE cxx_std_20)
+target_compile_features(csl_env717_two_points PRIVATE cxx_std_20)
 target_compile_definitions(csl_env717_simple_control PRIVATE
     $<$<CONFIG:Release>:NDEBUG>
     CSL_ENV717_DRIVER_SHA256="${ENV717_DRIVER_SHA256}"
@@ -386,10 +393,21 @@ target_compile_definitions(csl_env717_simple_control PRIVATE
     CSL_ENV717_BUILD_TYPE="${CMAKE_BUILD_TYPE}"
     CSL_ENV717_ARCHITECTURE="${CMAKE_SYSTEM_PROCESSOR}"
     CSL_ENV717_ALGORITHM_SOURCE_SHA256="${ENV717_ALGORITHM_SOURCE_SHA256}")
+target_compile_definitions(csl_env717_two_points PRIVATE
+    $<$<CONFIG:Release>:NDEBUG>
+    CSL_ENV717_DRIVER_SHA256="${ENV717_TWO_POINTS_DRIVER_SHA256}"
+    CSL_ENV717_COMPILER_ID="${CMAKE_CXX_COMPILER_ID}"
+    CSL_ENV717_COMPILER_VERSION="${CMAKE_CXX_COMPILER_VERSION}"
+    CSL_ENV717_BUILD_TYPE="${CMAKE_BUILD_TYPE}"
+    CSL_ENV717_ARCHITECTURE="${CMAKE_SYSTEM_PROCESSOR}"
+    CSL_ENV717_ALGORITHM_SOURCE_SHA256="${ENV717_ALGORITHM_SOURCE_SHA256}"
+    CSL_ENV717_SOURCE_COMMIT="${ENV717_SOURCE_COMMIT}")
 if(MSVC)
     target_compile_options(csl_env717_simple_control PRIVATE /W4 /WX /permissive-)
+    target_compile_options(csl_env717_two_points PRIVATE /W4 /WX /permissive-)
 else()
     target_compile_options(csl_env717_simple_control PRIVATE -Wall -Wextra -Wpedantic -Werror)
+    target_compile_options(csl_env717_two_points PRIVATE -Wall -Wextra -Wpedantic -Werror)
 endif()
 if(BUILD_TESTING)
     find_package(Python3 3.11 REQUIRED COMPONENTS Interpreter)
@@ -397,6 +415,10 @@ if(BUILD_TESTING)
         ${CMAKE_CURRENT_SOURCE_DIR}/scripts/reports/env717/check_smoke.py
         $<TARGET_FILE:csl_env717_simple_control>)
     set_tests_properties(env717_simple_control_smoke PROPERTIES LABELS reporting)
+    add_test(NAME env717_two_points_smoke COMMAND Python3::Interpreter
+        ${CMAKE_CURRENT_SOURCE_DIR}/scripts/reports/env717/check_two_points.py
+        $<TARGET_FILE:csl_env717_two_points>)
+    set_tests_properties(env717_two_points_smoke PROPERTIES LABELS reporting)
 endif()
 endif()
 

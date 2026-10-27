@@ -16,6 +16,10 @@ class VisualRouteInventoryTests(unittest.TestCase):
         self.assertEqual(committed,inventory)
         self.assertEqual(inventory["schema"],"csl.visual-route-inventory/1")
         producers={entry["source"]:entry for entry in inventory["producers_and_routes"]}
+        self.assertIn("scripts/reports/env717/check_two_points.py", producers)
+        self.assertEqual(producers["scripts/reports/env717/check_two_points.py"]["follow_up_issue"],717)
+        self.assertEqual(producers["scripts/reports/env717/check_two_points.py"]["asset_name_literals"],
+                         ["projections.svg"])
         self.assertNotIn("policy.svg", producers["scripts/reports/site.py"]["asset_name_literals"])
         self.assertIn("visual.svg", producers["scripts/reports/ext03_transform/report.py"]["asset_name_literals"])
         self.assertNotIn("csl.report.svg", {
@@ -95,17 +99,22 @@ class VisualRouteInventoryTests(unittest.TestCase):
         follow_up_counts={number:sum(entry["follow_up_issue"]==number for entry in deferred)
                           for number in (684,685,686,687,708,717)}
         self.assertEqual(follow_up_counts,
-                         {684:4,685:0,686:18,687:0,708:1,717:1})
+                         {684:4,685:0,686:18,687:0,708:1,717:2})
         self.assertTrue(all(entry["follow_up_issue"] in follow_up_counts for entry in deferred))
         routes={entry["route"]:entry for entry in inventory["frozen_published_routes"]}
         self.assertGreater(len(routes),40)
         self.assertTrue(all(entry["disposition"].startswith("deferred: original frozen route-level readability")
-                            and entry["follow_up_issue"] == 669 for entry in routes.values()))
+                            for entry in routes.values()))
+        self.assertTrue(all(entry["follow_up_issue"] ==
+                            (717 if entry["route"].startswith("env717-") else 669)
+                            for entry in routes.values()))
         self.assertEqual(routes["app03-zonotope-4522855018fa9b0b"]["companion_route"],
                          "examples/app03-zonotope-v1.html")
         self.assertEqual(routes["app01-plan-20261016-22d406fd"]["companion_route"],
                          "examples/app01-plan-timing-v1.html")
         self.assertEqual(routes["app03-zonotope-4522855018fa9b0b"]["follow_up_issue"], 669)
+        self.assertEqual(routes["env717-simple-control-pilot-v1"]["follow_up_issue"], 717)
+        self.assertEqual(routes["env717-two-points-pilot-v1"]["follow_up_issue"], 717)
         self.assertTrue(any(name.endswith("terminal-projections.svg")
                             for entry in routes.values() for name in entry["assets"]))
         self.assertEqual(inventory["gallery_routes"][0]["route"],"examples/index.html")
