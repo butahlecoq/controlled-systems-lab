@@ -86,6 +86,17 @@ class StageProjectionDemoTests(unittest.TestCase):
         routes = {route["route_id"]: route for route in value["routes"]}
         self.assertEqual(routes["issue6.b06-finite-action-minimax"]["capability"], "terminal_set_only")
         self.assertEqual(routes["simulation.replay"]["capability"], "trajectory_only")
+        self.assertTrue({
+            "reachability.nominal_forward",
+            "reachability.fixed_plan_disturbance",
+            "reachability.nominal_predecessor",
+            "reachability.finite_feedback",
+            "synthesis.strategy_a",
+            "synthesis.strategy_b.direct_joint",
+            "synthesis.terminal_minimizers",
+            "synthesis.hybrid_projected_reachability",
+            "simulation.replay",
+        }.issubset(routes))
 
     def test_checked_in_bundle_uses_portable_paths_and_current_file_hashes(self):
         bundle = ROOT / "benchmarks/reporting/stage-projection/bundle-v1"
