@@ -47,6 +47,15 @@ class StageMpc03Tests(unittest.TestCase):
             stage_mpc03.stage(self.source, self.site)
         self.assertFalse((self.site / stage_mpc03.REPORT_ID).exists())
 
+    def test_stage_rejects_a_source_link_commit_that_disagrees_with_provenance(self):
+        record_path = self.source / "record.json"
+        record = json.loads(record_path.read_text(encoding="utf-8"))
+        record["source_commit"] = "f" * 40
+        record_path.write_text(json.dumps(record), encoding="utf-8")
+        with self.assertRaisesRegex(ValueError, "source commit differs from build provenance"):
+            stage_mpc03.stage(self.source, self.site)
+        self.assertFalse((self.site / stage_mpc03.REPORT_ID).exists())
+
     def test_saved_projection_matches_literal_endpoints_and_simple_hull(self):
         record = json.loads((self.source / "record.json").read_text(encoding="utf-8"))
         points = stage_mpc03.result_points(record)

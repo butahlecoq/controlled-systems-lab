@@ -157,6 +157,8 @@ def stage(source: Path, site: Path) -> None:
             provenance.get("output_sha256") == hashlib.sha256(raw).hexdigest(),
             "MPC-03 output provenance hash differs")
     require(record.get("provenance") == provenance, "record and provenance metadata differ")
+    require(record.get("source_commit") == provenance.get("source_commit"),
+            "MPC-03 report source commit differs from build provenance")
     scenario_hash = hashlib.sha256(json.dumps(record.get("scenario"), sort_keys=True,
                                               separators=(",", ":")).encode()).hexdigest()
     require(record.get("scenario_sha256") == scenario_hash, "MPC-03 scenario hash differs")
