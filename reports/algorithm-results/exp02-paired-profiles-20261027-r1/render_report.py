@@ -1,8 +1,10 @@
 from pathlib import Path
-import json, csv, statistics, hashlib, subprocess
+import argparse, json, csv, statistics, hashlib, subprocess
 root=Path(__file__).resolve().parents[3]
 report=root/'reports/algorithm-results/exp02-paired-profiles-20261027-r1'
-raw=report/'raw'
+parser=argparse.ArgumentParser(description='Regenerate summaries and figures from saved paired-profile events.')
+parser.add_argument('--raw', type=Path, default=report/'raw', help='directory containing the retained JSONL profile events')
+raw=parser.parse_args().raw.resolve()
 summary=[]
 for profile,label in [('ts02_constant_integrator','T-S02 constant integrator'),('ts03_singular_integrator','T-S03 singular integrator')]:
  rows=[json.loads(x) for x in (raw/f'{profile}.jsonl').read_text().splitlines()]

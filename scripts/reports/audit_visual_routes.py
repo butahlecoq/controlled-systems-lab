@@ -96,6 +96,11 @@ FROZEN_COMPANIONS = {
     "ext05-discretization-a40ba9647cc023dc": "examples/ext05-states-v1.html",
     "lotka-volterra-sampled-20261023": "examples/lotka-volterra-sampled-v1.html",
 }
+FROZEN_ROUTE_FOLLOW_UP_ISSUES = {
+    # The paired synthesis profile is a control-family report and its current
+    # readability follow-up belongs to the active control/witness migration.
+    "exp02-paired-profiles-20261027-r1": 686,
+}
 
 
 def migration_issue(source: str) -> int:
@@ -189,7 +194,8 @@ def frozen_routes(root: Path) -> list[dict]:
                  "assets": [path.name for path in figures],
                  "index_sha256": hashlib.sha256(page.read_bytes()).hexdigest(),
                  "disposition": "deferred: original frozen route-level readability review remains; companion availability is listed separately",
-                 "follow_up_issue": 717 if route.startswith("env717-") else 669}
+                 "follow_up_issue": FROZEN_ROUTE_FOLLOW_UP_ISSUES.get(
+                     route, 717 if route.startswith("env717-") else 669)}
         if route in FROZEN_COMPANIONS:
             entry["companion_route"] = FROZEN_COMPANIONS[route]
         routes.append(entry)

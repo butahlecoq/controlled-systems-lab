@@ -1180,7 +1180,7 @@
       ],
       "index_sha256": "78309c404a04d45934e4466fc6233251db6dd4e72c40e4daf2bc9a3470be251e",
       "disposition": "deferred: original frozen route-level readability review remains; companion availability is listed separately",
-      "follow_up_issue": 669
+      "follow_up_issue": 686
     },
     {
       "route": "exp04-replay-93fe3b87795e1d3a",
