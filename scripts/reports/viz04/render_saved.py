@@ -79,12 +79,14 @@ def render(value: dict, output: Path) -> None:
             axis.set_axisbelow(True)
             axis.legend(frameon=False, loc="best")
         fig.suptitle("Selected witness replays projected from four state coordinates", fontsize=13)
-        fig.tight_layout(rect=(0, 0.1, 1, 0.94))
-        fig.text(0.5, 0.025,
-                 " ".join(aspect_notes) + " "
-                 "Analytic VIZ-04 toy fixture. Paths are selected trajectories, not reachable-set boundaries. "
-                 "This is not a B04 replay or a historical fuel result.",
-                 ha="center", va="bottom", fontsize=9, color="#35414c")
+        fig.tight_layout(rect=(0, 0.13, 1, 0.94))
+        notes = (
+            " ".join(dict.fromkeys(aspect_notes)),
+            "Analytic VIZ-04 toy fixture. Paths are selected trajectories, not reachable-set boundaries.",
+            "Not a B04 replay or a historical fuel result.",
+        )
+        for y, note in zip((0.075, 0.045, 0.015), notes):
+            fig.text(0.5, y, note, ha="center", va="bottom", fontsize=8.5, color="#35414c")
         output.parent.mkdir(parents=True, exist_ok=True)
         fig.savefig(output, format="svg", metadata={"Date": None, "Creator": None})
         plt.close(fig)
