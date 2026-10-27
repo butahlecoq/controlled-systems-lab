@@ -1,0 +1,18 @@
+{
+  "schema": "csl.fuel-reachability-model/1",
+  "source": "papers/Minimax/Constrained/ReachableSets.m",
+  "source_sha256": "97906077cc799564c5e38053830bbedeba85f4fd962ed6abec46600ccdefc218",
+  "state_order": ["x1", "x2", "x3", "x4"],
+  "state_names": ["oxidizer flow", "oxidizer stock balance", "fuel flow", "fuel stock balance"],
+  "state_units": ["kg/s", "kg", "kg/s", "kg"],
+  "initial_state": [30.5, 302.0, 19.66, 198.0],
+  "horizon": 3,
+  "A": [[1.0, 0.0, 0.0, 0.0], [-3.3333333333333335, 1.0, 0.0, 0.0], [0.0, 0.0, 1.0, 0.0], [0.0, 0.0, -3.3333333333333335, 1.0]],
+  "B": [0.5, 0.0, -0.3333333333333333, 0.0],
+  "control_bounds": [-1.0, 1.0],
+  "state_bounds": {"x1": [28.0, 32.0], "x3": [18.0, 21.0]},
+  "terminal_objective": "(30-x1)^2 + x2^2 + (20-x3)^2 + x4^2 + (x2-x4)^2",
+  "target": [30.0, 0.0, 20.0, 0.0],
+  "coordinate_pairs": [["x1", "x2"], ["x3", "x4"], ["x1", "x3"], ["x2", "x4"]],
+  "interpretation": "Deterministic discrete linear model and continuous scalar control interval as written in ReachableSets.m; no disturbance is modeled. The original MATLAB script's plotted forward/backward/intersection sets are reproduced numerically from these stated parameters. This is not the separate B06/L09 minimax run or a historical figure reproduction."
+}
