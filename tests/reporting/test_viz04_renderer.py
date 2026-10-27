@@ -1,11 +1,13 @@
 from pathlib import Path
-import sys
+import importlib.util
 import tempfile
 import unittest
 
 ROOT = Path(__file__).resolve().parents[2]
-sys.path.insert(0, str(ROOT / "scripts/reports/viz04"))
-import render_saved
+RENDERER_PATH = ROOT / "scripts/reports/viz04/render_saved.py"
+SPEC = importlib.util.spec_from_file_location("viz04_render_saved", RENDERER_PATH)
+render_saved = importlib.util.module_from_spec(SPEC)
+SPEC.loader.exec_module(render_saved)
 
 
 class Viz04RendererTests(unittest.TestCase):
