@@ -150,10 +150,22 @@ int main(int argc, char** argv) try {
     using namespace csl;
     using namespace csl::registry;
     const bool measure = argc >= 2 && std::string_view(argv[1]) == "--measure";
-    const int scenario_index = measure ? 2 : 1;
-    if ((measure && (argc < 3 || argc > 4)) || (!measure && (argc < 2 || argc > 3))) {
+    const bool measure_profile = argc >= 2 && std::string_view(argv[1]) == "--measure-profile";
+    const int scenario_index = measure_profile ? 3 : measure ? 2 : 1;
+    if ((measure && (argc < 3 || argc > 4)) || (measure_profile && (argc < 4 || argc > 5)) ||
+        (!measure && !measure_profile && (argc < 2 || argc > 3))) {
         std::cerr << "Usage: registered_synthesis_comparison <two-stage-integrator.json> [results.json]\n"
-                  << "   or: registered_synthesis_comparison --measure <two-stage-integrator.json> [events.jsonl]\n";
+                  << "   or: registered_synthesis_comparison --measure <two-stage-integrator.json> [events.jsonl]\n"
+                  << "   or: registered_synthesis_comparison --measure-profile <exact-profile> <scenario.json> [events.jsonl]\n";
+        return 2;
+    }
+    const std::string_view family_profile = measure_profile ? std::string_view(argv[2]) : "ts01_exact_integrator";
+    const std::size_t measured_pairs = measure_profile ? 5 : 7;
+    const std::string_view event_schema = measure_profile ? "csl.synthesis.paired-family-event/1" : "csl.synthesis.paired-ts01-event/1";
+    const bool has_event_path = measure_profile ? argc == 5 : measure && argc == 4;
+    const int event_path_index = measure_profile ? 4 : 3;
+    if (measure_profile && family_profile != "ts02_constant_integrator" && family_profile != "ts03_singular_integrator") {
+        std::cerr << "Profile rejected: expected ts02_constant_integrator or ts03_singular_integrator\n";
         return 2;
     }
     const auto scenario_load_started = Clock::now();
@@ -177,7 +189,7 @@ int main(int argc, char** argv) try {
     const auto resolved = scenario.problem();
     const auto scenario_load_ns = elapsed_ns(scenario_load_started, Clock::now());
     FamilyRequest family;
-    family.profile = "ts01_exact_integrator";
+    family.profile = family_profile;
     family.objective = resolved.identity();
     family.target = FamilyTarget::exact_optimal_relation;
     family.assurance = Assurance::numerical;
@@ -220,12 +232,12 @@ int main(int argc, char** argv) try {
     Requirements witness_output; witness_output.output.representation = {"csl.witness-batch.v1"};
     const auto shared_provider_setup_ns = elapsed_ns(provider_setup_started, Clock::now());
 
-    if (measure) {
+    if (measure || measure_profile) {
         std::ofstream event_file;
-        if (argc == 4) {
-            std::ifstream existing(argv[3], std::ios::binary);
+        if (has_event_path) {
+            std::ifstream existing(argv[event_path_index], std::ios::binary);
             if (existing.good()) { std::cerr << "Output rejected: events file already exists\n"; return 2; }
-            event_file.open(argv[3], std::ios::binary | std::ios::out);
+            event_file.open(argv[event_path_index], std::ios::binary | std::ios::out);
             if (!event_file) { std::cerr << "Output rejected: cannot create events file\n"; return 2; }
         }
         const auto emit = [&](const std::string& line) {
@@ -236,9 +248,9 @@ int main(int argc, char** argv) try {
         std::ostringstream header;
         header.imbue(std::locale::classic());
         header << std::setprecision(17)
-            << "{\"schema\":\"csl.synthesis.paired-ts01-event/1\",\"event\":\"header\",\"problem\":"
+            << "{\"schema\":" << quoted(event_schema) << ",\"event\":\"header\",\"problem\":"
             << quoted(resolved.identity().value) << ",\"scenario_sha256\":" << quoted(problem::hex(scenario.source()->content.digest()))
-            << ",\"profile\":\"ts01_exact_integrator\",\"target\":\"exact_optimal_relation\",\"representation\":\"csl.polyhedron.h\",\"assurance\":\"numerical\","
+            << ",\"profile\":" << quoted(family_profile) << ",\"target\":\"exact_optimal_relation\",\"representation\":\"csl.polyhedron.h\",\"assurance\":\"numerical\","
             << "\"resource_policy\":";
         resource_policy_json(header, *context.resources);
         header
@@ -246,7 +258,7 @@ int main(int argc, char** argv) try {
             << ",\"shared_setup_ns\":{\"scenario_load_and_resolution\":" << scenario_load_ns
             << ",\"provider_and_registry_setup\":" << shared_provider_setup_ns << "},"
             << "\"shared_setup_scope\":\"Scenario JSON parse and immutable resolution are timed once; provider registration/selection, strategy and selector registries, and prepared membership provider are timed once. These shared setup values are excluded from per-strategy totals.\","
-            << "\"order_policy\":\"One excluded A-then-B warmup pair; seven measured pairs alternate A/B then B/A. Both members of every pair share this immutable resolved problem and provider registries.\","
+            << "\"order_policy\":" << quoted("One excluded A-then-B warmup pair; " + std::to_string(measured_pairs) + " measured pairs alternate A/B then B/A. Both members of every pair share this immutable resolved problem and provider registries.") << ","
             << "\"per_strategy_scope\":\"Fresh StrategyRegistry::prepare through exclusive workspace creation, public StrategyPort run and complete-family acceptance, selector preparation/query returning two distinct histories, and witness-only verification of both histories against the original resolved problem. Excludes process startup, shared scenario/provider setup, JSON serialization/file I/O, build, plots and report rendering.\","
             << "\"phase_scope\":{\"preparation_ns\":\"StrategyRegistry::prepare including capability admission and immutable plan creation\",\"workspace_creation_ns\":\"Prepared strategy create through exclusive workspace return\",\"family_construction_ns\":\"Public workspace run through result return, including the registered exact-profile verifier\",\"selector_preparation_ns\":\"Selector selection/preparation for this strategy result\",\"selector_workspace_creation_ns\":\"Prepared selector create through exclusive query workspace return\",\"witness_query_ns\":\"Selector workspace run and checked batch binding/count\",\"original_verification_ns\":\"verification::verify_trajectory for both selected witnesses\",\"end_to_end_strategy_ns\":\"Preparation start through completion of both original-data witness checks; inclusive total, not a sum of other measured phases\"},"
             << "\"phase_counters_unavailable\":[\"Internal LP/convex, projection, affine-sum, conversion, hull-membership and verifier subphase durations/call counts are not exposed by these public APIs.\",\"CPU time and per-call peak memory are not measured by this timing driver.\"]}\n";
@@ -375,7 +387,7 @@ int main(int argc, char** argv) try {
             }
             std::ostringstream event;
             event.imbue(std::locale::classic()); event << std::setprecision(17);
-            event << "{\"schema\":\"csl.synthesis.paired-ts01-event/1\",\"event\":\"trial\",\"repetition\":" << repetition
+            event << "{\"schema\":" << quoted(event_schema) << ",\"event\":\"trial\",\"repetition\":" << repetition
                 << ",\"warmup\":" << (warmup ? "true" : "false") << ",\"order_position\":" << order_position
                 << ",\"strategy\":" << quoted(id) << ",\"strategy_version\":" << quoted(strategy_version)
                 << ",\"strategy_provenance\":" << strategy_provenance << ",\"selector_provenance\":" << selector_provenance
@@ -403,7 +415,7 @@ int main(int argc, char** argv) try {
         };
 
         bool all_passed = true;
-        for (std::size_t repetition = 0; repetition <= 7; ++repetition) {
+        for (std::size_t repetition = 0; repetition <= measured_pairs; ++repetition) {
             const bool warmup = repetition == 0;
             const std::size_t order_position = repetition == 0 ? 0 : (repetition - 1) % 2;
             const char* first = order_position == 0 ? "csl.synthesis.reach-back" : "csl.synthesis.strategy-b";

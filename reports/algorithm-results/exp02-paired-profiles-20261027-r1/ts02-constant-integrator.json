@@ -1,0 +1,9 @@
+{
+  "schema": "csl.scenario/1",
+  "id": "ts02-constant-integrator",
+  "horizon": 2,
+  "model": {"kind": "linear_discrete", "A": [[1]], "B": [[1]]},
+  "initial_state": [0],
+  "controls": {"kind": "box", "lower": [0], "upper": [1]},
+  "objective": {"kind": "linear", "coefficients": [0], "offset": 3}
+}

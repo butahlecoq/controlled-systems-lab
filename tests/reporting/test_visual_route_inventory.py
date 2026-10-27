@@ -106,8 +106,11 @@ class VisualRouteInventoryTests(unittest.TestCase):
         self.assertTrue(all(entry["disposition"].startswith("deferred: original frozen route-level readability")
                             for entry in routes.values()))
         self.assertTrue(all(entry["follow_up_issue"] ==
-                            (717 if entry["route"].startswith("env717-") else 669)
+                            audit_visual_routes.FROZEN_ROUTE_FOLLOW_UP_ISSUES.get(
+                                entry["route"],
+                                717 if entry["route"].startswith("env717-") else 669)
                             for entry in routes.values()))
+        self.assertEqual(routes["exp02-paired-profiles-20261027-r1"]["follow_up_issue"], 686)
         self.assertEqual(routes["app03-zonotope-4522855018fa9b0b"]["companion_route"],
                          "examples/app03-zonotope-v1.html")
         self.assertEqual(routes["app01-plan-20261016-22d406fd"]["companion_route"],

@@ -272,6 +272,8 @@ example_check(file_no_argument scenario_file "" 2 "Usage: scenario_file")
 if(TARGET registered_synthesis_comparison)
 example_check(synthesis_comparison registered_synthesis_comparison "${CMAKE_CURRENT_SOURCE_DIR}/scenarios/two-stage-integrator.json" 0
   "schema.*csl.example.synthesis-comparison/1.*csl.synthesis.reach-back.*csl.synthesis.strategy-b")
+example_check(synthesis_comparison_unknown_measurement_profile registered_synthesis_comparison
+  "--measure-profile;unknown;${CMAKE_CURRENT_SOURCE_DIR}/scenarios/two-stage-integrator.json" 2 "Profile rejected.*expected")
 add_test(NAME synthesis_comparison_export COMMAND "${CMAKE_COMMAND}"
   "-DEXAMPLE_EXE=$<TARGET_FILE:registered_synthesis_comparison>"
   "-DEXAMPLE_ARGUMENT=${CMAKE_CURRENT_SOURCE_DIR}/scenarios/two-stage-integrator.json"
