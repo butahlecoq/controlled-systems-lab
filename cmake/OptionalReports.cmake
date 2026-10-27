@@ -383,7 +383,7 @@ add_executable(csl_env717_simple_control benchmarks/reporting/env717/simple_cont
 add_executable(csl_env717_two_points benchmarks/reporting/env717/two_points.cpp)
 add_executable(csl_env717_unequal_game benchmarks/reporting/env717/unequal_game.cpp)
 target_link_libraries(csl_env717_simple_control PRIVATE CSL::finite_action_minimax)
-target_link_libraries(csl_env717_two_points PRIVATE CSL::finite_action_minimax)
+target_link_libraries(csl_env717_two_points PRIVATE CSL::finite_action_minimax CSL::finite_feedback)
 target_link_libraries(csl_env717_unequal_game PRIVATE CSL::finite_action_minimax)
 target_include_directories(csl_env717_simple_control SYSTEM PRIVATE ${csl_json_SOURCE_DIR}/include)
 target_include_directories(csl_env717_two_points SYSTEM PRIVATE ${csl_json_SOURCE_DIR}/include)

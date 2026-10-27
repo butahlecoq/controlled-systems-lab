@@ -21,6 +21,10 @@ INITIAL = (4.5, 0.0, 0.0, 0.0)
 HORIZON = 3
 SOURCE_COMMIT = "f4d76c60f4003f50954174e96eafd8e514bd5441"
 SOURCE_BLOB = "4e71bed8ceffa1990645fb85e54d6b5b1eeb688d"
+LATTICE_SCALE = 2000
+EULER_CROSSCHECK_TOLERANCE = 1e-10
+ACTION_CODES = (-1, 0, 1)
+DISTURBANCE_CODES = (-1, 0, 1)
 
 
 def advance(state: tuple[float, ...], u: float, v: float) -> tuple[float, ...]:
@@ -35,6 +39,142 @@ def advance(state: tuple[float, ...], u: float, v: float) -> tuple[float, ...]:
 
 def key(state: tuple[float, ...]) -> tuple[float, ...]:
     return tuple(round(x, 12) for x in state)
+
+
+def lattice_step(state: tuple[int, ...], action: int, disturbance: int) -> tuple[int, ...]:
+    p1, v1, p2, v2 = state
+    if v1 % 100 or v2 % 10:
+        raise AssertionError("nonintegral fixed-scale transition division")
+    result = (p1 + v1 // 100 + 450 * action, 5000 * action,
+              p2 + v2 // 10 + 9 * disturbance, v2 + 200 * disturbance)
+    if any(value < -(1 << 63) or value > (1 << 63) - 1 for value in result):
+        raise AssertionError("feedback lattice coordinate exceeds int64")
+    return result
+
+
+def gap_numerator(state: tuple[int, ...]) -> int:
+    gap = state[0] - state[2]
+    if gap < -(1 << 63) or gap > (1 << 63) - 1:
+        raise AssertionError("terminal gap subtraction exceeds int64")
+    value = gap * gap
+    if value > (1 << 63) - 1:
+        raise AssertionError("terminal gap square exceeds int64")
+    return value
+
+
+def feedback_oracle(saved: dict) -> dict:
+    feedback = saved["feedback"]
+    layers: list[list[tuple[int, ...]]] = [[(9000, 0, 0, 0)]]
+    for _ in range(HORIZON):
+        next_layer = {lattice_step(state, a, d) for state in layers[-1]
+                      for a in ACTION_CODES for d in DISTURBANCE_CODES}
+        layers.append(sorted(next_layer))
+    n = max(map(len, layers))
+    assert feedback["scale"] == LATTICE_SCALE
+    assert feedback["layer_states"] == [[list(state) for state in layer] for layer in layers]
+    assert feedback["padded_state_count"] == n
+    expected_stage_safe = [[i < len(layer) for i in range(n)] for layer in layers[:-1]]
+    expected_terminal_safe = [i < len(layers[-1]) for i in range(n)]
+    assert feedback["stage_safe_masks"] == expected_stage_safe
+    assert feedback["terminal_safe_mask"] == expected_terminal_safe
+    transitions: list[list[list[list[int]]]] = []
+    max_discrepancy = 0.0
+    for t in range(HORIZON):
+        next_ids = {state: i for i, state in enumerate(layers[t + 1])}
+        table = []
+        for i in range(n):
+            row = []
+            for a in ACTION_CODES:
+                successors = []
+                for d in DISTURBANCE_CODES:
+                    if i < len(layers[t]):
+                        source = layers[t][i]
+                        target = lattice_step(source, a, d)
+                        assert target in next_ids, "real transition targets padding"
+                        successors.append(next_ids[target])
+                        physical_source = tuple(value / LATTICE_SCALE for value in source)
+                        physical_target = tuple(value / LATTICE_SCALE for value in target)
+                        euler_target = advance(physical_source, 2.5 * a, float(d))
+                        discrepancy = max(abs(x-y) for x, y in zip(physical_target, euler_target))
+                        max_discrepancy = max(max_discrepancy, discrepancy)
+                    else:
+                        # Padding cannot win; keep a complete in-range successor row.
+                        successors.append(len(layers[t + 1]) if len(layers[t + 1]) < n else 0)
+                row.append(successors)
+            table.append(row)
+        transitions.append(table)
+
+    candidates = sorted({gap_numerator(state) for state in layers[-1]})
+    assert feedback["candidate_count"] == len(candidates)
+    assert max_discrepancy <= EULER_CROSSCHECK_TOLERANCE
+    assert feedback["euler_crosscheck_tolerance"] == EULER_CROSSCHECK_TOLERANCE
+    assert math.isclose(feedback["euler_max_abs_discrepancy"], max_discrepancy,
+                        rel_tol=0.0, abs_tol=1e-18)
+
+    def solve(candidate: int) -> tuple[list[list[bool]], list[list[list[int]]]]:
+        wins = [[False] * n for _ in range(HORIZON + 1)]
+        actions = [[[] for _ in range(n)] for _ in range(HORIZON)]
+        for i, state in enumerate(layers[-1]):
+            wins[-1][i] = gap_numerator(state) <= candidate
+        for t in range(HORIZON - 1, -1, -1):
+            for i in range(len(layers[t])):
+                for ai, a in enumerate(ACTION_CODES):
+                    if all(wins[t+1][j] for j in transitions[t][i][ai]):
+                        actions[t][i].append(a)
+                wins[t][i] = bool(actions[t][i])
+        return wins, actions
+
+    chosen = None
+    expected = None
+    solves = 0
+    for candidate in candidates:
+        solves += 1
+        candidate_policy = solve(candidate)
+        if candidate_policy[0][0][0]:
+            chosen, expected = candidate, candidate_policy
+            break
+    assert chosen is not None and expected is not None
+    assert feedback["threshold_numerator"] == chosen
+    assert feedback["threshold_denominator"] == 4_000_000
+    assert feedback["solve_count"] == solves
+    assert feedback["winning"] == expected[0]
+    assert feedback["admissible_action_codes"] == expected[1]
+    assert feedback["action_codes"] == list(ACTION_CODES)
+    assert feedback["disturbance_codes"] == list(DISTURBANCE_CODES)
+    assert feedback["solver"] == "csl.reachability.finite_feedback.solve"
+    assert feedback["information_pattern"] == "action selected from current exact state before disturbance vertex"
+    assert "not cost-optimal" in feedback["selector"]
+
+    # Replay every rectangular table cell, including unsafe padding.
+    assert feedback["transition_table"] == transitions
+    for t in range(HORIZON):
+        for i in range(n):
+            assert len(transitions[t][i]) == len(ACTION_CODES)
+            assert all(len(row) == len(DISTURBANCE_CODES) for row in transitions[t][i])
+            if i >= len(layers[t]):
+                assert expected[1][t][i] == [] and not expected[0][t][i]
+
+    # Recompute the first-admissible selector and its maximum-terminal-gap path.
+    def worst(t: int, state: tuple[int, ...], disturbances: tuple[int, ...]):
+        if t == HORIZON:
+            return gap_numerator(state), [state], [], list(disturbances)
+        i = {value: j for j, value in enumerate(layers[t])}[state]
+        action = expected[1][t][i][0]
+        options = []
+        for d in DISTURBANCE_CODES:
+            nxt = lattice_step(state, action, d)
+            value, path, acts, ds = worst(t + 1, nxt, disturbances + (d,))
+            options.append((value, [state] + path, [action] + acts, ds))
+        return max(options, key=lambda item: (item[0], tuple(-d for d in item[3])))
+
+    witness = worst(0, layers[0][0], ())
+    assert feedback["worst_case_states"] == [list(state) for state in witness[1]]
+    assert feedback["selected_actions"] == witness[2]
+    assert feedback["worst_case_disturbances"] == witness[3]
+    assert feedback["worst_terminal_gap_numerator"] == witness[0]
+    return {"layers": layers, "transitions": transitions, "winning": expected[0],
+            "actions": expected[1], "threshold": chosen, "witness": witness,
+            "euler_max_abs_discrepancy": max_discrepancy, "padded_count": n}
 
 
 def convex_hull(points: list[tuple[float, float]]) -> list[tuple[float, float]]:
@@ -121,10 +261,11 @@ def enumerate_game() -> tuple[dict, list[list[tuple[float, ...]]], list[set[tupl
 
 
 def verify_record(source: dict) -> tuple[dict, dict]:
-    assert source["schema"] == "csl.env717-two-points-pilot/1"
+    assert source["schema"] == "csl.env717-two-points-feedback/1"
     assert source["source_repository_commit"] == SOURCE_COMMIT
     assert source["source_file_blob"] == SOURCE_BLOB
     oracle, layers, backward = enumerate_game()
+    feedback = feedback_oracle(source)
     assert source["plan_count"] == 27 and len(source["plans"]) == 27
     assert source["minimizing_plan_indices"] == oracle["minimizing_indices"]
     assert math.isclose(source["objective_value"], oracle["optimum"], abs_tol=1e-11)
@@ -153,6 +294,18 @@ def verify_record(source: dict) -> tuple[dict, dict]:
                "selected_plan": oracle["selected_plan"],
                "selected_worst_disturbance": oracle["selected_disturbance"],
                "trajectory": oracle["trajectory"],
+               "feedback_forward_layers": [[tuple(x / LATTICE_SCALE for x in state)
+                                              for state in layer]
+                                             for layer in feedback["layers"]],
+               "feedback_backward_layers": [
+                   [tuple(x / LATTICE_SCALE for x in state)
+                    for i, state in enumerate(layer) if feedback["winning"][t][i]]
+                   for t, layer in enumerate(feedback["layers"])],
+               "feedback_trajectory": [tuple(x / LATTICE_SCALE for x in state)
+                                       for state in feedback["witness"][1]],
+               "feedback_threshold_numerator": feedback["threshold"],
+               "feedback_threshold_denominator": 4_000_000,
+               "feedback_max_abs_euler_discrepancy": feedback["euler_max_abs_discrepancy"],
                "terminal_target": "squared position gap <= minimax value",
                "intersection_semantics": "finite-catalogue state nodes in both forward layer and robust backward winning set"}
     return source, derived
@@ -164,7 +317,7 @@ def verify(executable: Path) -> tuple[dict, dict]:
 
 
 def plot_svg(derived: dict) -> str:
-    width, height = 1260, 650
+    width, height = 1260, 700
     panels = [(75, 135, 520, 390, 0, 1, "Point 1 phase plane", "x1 position", "x2 velocity"),
               (665, 135, 520, 390, 2, 3, "Point 2 phase plane", "x3 position", "x4 velocity")]
     colors = ["#d6e7f0", "#56b4e9", "#00c49a", "#d9a441"]
@@ -172,12 +325,13 @@ def plot_svg(derived: dict) -> str:
     groups_by_stage = derived["forward_groups"]
     back_by_stage = derived["robust_backward_layers"]
     trajectory = derived["trajectory"]
+    feedback_trajectory = derived["feedback_trajectory"]
     out = [f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {width} {height}" role="img" aria-labelledby="title desc">',
            '<title id="title">Two points on parallel lines: forward reachability and robust backward sets</title>',
            '<desc id="desc">Forward reachable polytopes for each finite control prefix, robust backward winning nodes, their intersections, and one minimax trajectory, shown in both point phase planes.</desc>',
            '<rect width="100%" height="100%" fill="#111820"/>',
            '<text x="75" y="45" fill="#f4f1e8" font-family="sans-serif" font-size="27" font-weight="700">Two points on parallel lines · finite-action differential-game pilot</text>',
-           '<text x="75" y="77" fill="#bac6ce" font-family="sans-serif" font-size="15">3 stages · dt = 0.1 s · 27 control plans × 27 disturbance sequences · robust target set is defined by the minimax value</text>']
+           '<text x="75" y="77" fill="#bac6ce" font-family="sans-serif" font-size="15">3 stages · fixed-plan minimax and CSL finite vertex feedback · exact scale-2000 state graph</text>']
     for x0, y0, pw, ph, xi, yi, title, xlabel, ylabel in panels:
         all_x = [state[xi] for layer in states_by_stage for state in layer]
         all_y = [state[yi] for layer in states_by_stage for state in layer]
@@ -216,24 +370,35 @@ def plot_svg(derived: dict) -> str:
                 radius = 4.4 if inside else 2.3
                 opacity = 0.92 if inside else 0.22
                 out.append(f'<circle cx="{px(state[xi]):.2f}" cy="{py(state[yi]):.2f}" r="{radius}" fill="{color}" fill-opacity="{opacity}"/>')
+        for states in derived["feedback_backward_layers"]:
+            for state in states:
+                out.append(f'<circle cx="{px(state[xi]):.2f}" cy="{py(state[yi]):.2f}" r="6.3" fill="none" stroke="#c77dff" stroke-width="1.5"/>')
         coords = " ".join(f'{px(state[xi]):.2f},{py(state[yi]):.2f}' for state in trajectory)
         out.append(f'<polyline points="{coords}" fill="none" stroke="#ff6b35" stroke-width="4" stroke-linejoin="round"/>')
         for state in trajectory:
             out.append(f'<circle cx="{px(state[xi]):.2f}" cy="{py(state[yi]):.2f}" r="5.5" fill="#ff6b35" stroke="#fff4e6" stroke-width="1.5"/>')
+        feedback_coords = " ".join(f'{px(state[xi]):.2f},{py(state[yi]):.2f}' for state in feedback_trajectory)
+        out.append(f'<polyline points="{feedback_coords}" fill="none" stroke="#57d9a3" stroke-width="3.5" stroke-dasharray="9 5" stroke-linejoin="round"/>')
+        for state in feedback_trajectory:
+            out.append(f'<circle cx="{px(state[xi]):.2f}" cy="{py(state[yi]):.2f}" r="4.8" fill="#57d9a3" stroke="#111820" stroke-width="1.4"/>')
         out.append(f'<text x="{x0+pw/2}" y="{y0+ph+48}" fill="#f4f1e8" font-family="sans-serif" font-size="14" text-anchor="middle">{xlabel}</text>')
         out.append(f'<text x="{x0-48}" y="{y0+ph/2}" fill="#f4f1e8" font-family="sans-serif" font-size="14" text-anchor="middle" transform="rotate(-90 {x0-48} {y0+ph/2})">{ylabel}</text>')
     out.extend(['<rect x="79" y="583" width="9" height="9" fill="#56b4e9" fill-opacity="0.4" stroke="#56b4e9"/><text x="95" y="592" fill="#d2dce1" font-family="sans-serif" font-size="13">Forward reachable polytopes by stage/control prefix</text>',
                 '<rect x="79" y="607" width="12" height="10" fill="#d9a441" fill-opacity="0.3" stroke="#d9a441" stroke-width="1.5"/><text x="99" y="617" fill="#d2dce1" font-family="sans-serif" font-size="13">Stage 3 terminal reachable set (one projected set per control prefix)</text>',
-                '<circle cx="470" cy="587" r="4" fill="#f4a261"/><text x="482" y="592" fill="#d2dce1" font-family="sans-serif" font-size="13">Forward ∩ robust backward vertices</text>',
-                '<line x1="690" y1="587" x2="720" y2="587" stroke="#ff6b35" stroke-width="4"/><text x="730" y="592" fill="#d2dce1" font-family="sans-serif" font-size="13">Verified minimax trajectory (one worst-case disturbance)</text>',
-                '<text x="75" y="642" fill="#93a4ae" font-family="sans-serif" font-size="12">Forward polygons exactly project convex disturbance-reachable polytopes per control prefix; backward nodes are finite-vertex feedback-game nodes, not continuous predecessor sets. Horizon: 0.3 s.</text>',
+                '<circle cx="470" cy="587" r="4" fill="#f4a261"/><text x="482" y="592" fill="#d2dce1" font-family="sans-serif" font-size="13">Fixed-plan forward ∩ backward vertices</text>',
+                '<circle cx="470" cy="611" r="5" fill="none" stroke="#c77dff"/><text x="482" y="616" fill="#d2dce1" font-family="sans-serif" font-size="13">CSL feedback graph forward ∩ winning states</text>',
+                '<line x1="79" y1="638" x2="105" y2="638" stroke="#ff6b35" stroke-width="4"/><text x="115" y="643" fill="#d2dce1" font-family="sans-serif" font-size="13">Open-loop worst-case trajectory</text>',
+                '<line x1="470" y1="638" x2="496" y2="638" stroke="#57d9a3" stroke-width="3" stroke-dasharray="6 3"/><text x="506" y="643" fill="#d2dce1" font-family="sans-serif" font-size="13">First-admissible feedback selector worst case</text>',
+                '<text x="75" y="674" fill="#93a4ae" font-family="sans-serif" font-size="12">Finite vertex graph only; neither trajectory nor winning nodes imply continuous-state feedback or an RL reproduction. Horizon: 0.3 s.</text>',
                 '</svg>'])
     return "\n".join(out)
 
 
 def report_page(source: dict, svg: str, host: dict) -> str:
     timing = source["timing"]
-    return f'''<!doctype html><html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Two-point minimax pilot</title><style>body{{margin:0;background:#111820;color:#f4f1e8;font:16px/1.55 system-ui,sans-serif}}main{{max-width:1320px;margin:auto;padding:2rem}}a{{color:#8bd3f7}}svg{{width:100%;height:auto}}.note{{border-left:4px solid #f4a261;padding:.7rem 1rem;background:#1a252e}}</style><main><h1>Two points on parallel lines: reachability and minimax</h1><p>The finite-action minimax method exhausts 27 fixed control plans and all 27 adversarial disturbance vertex sequences per plan. An independent Python replay checks every plan score, minimizing plan, source-integrator trajectory, forward reachable polytopes, and backward vertex-game nodes. The two panels are the physical phase planes `(x1,x2)=(position₁, velocity₁)` and `(x3,x4)=(position₂, velocity₂)`.</p><div>{svg}</div><p class="note"><strong>Adaptation:</strong> the source uses continuous actions over 10 seconds. This pilot uses a 3-stage control catalogue and disturbance sets equal to the convex hull of the listed vertices. The discrete linear stage map is derived from the source’s ten explicit-Euler substeps. The minimax solver selects an open-loop control sequence against the full convex disturbance sets. Forward polygons exactly project each convex disturbance-reachable polytope for one fixed control prefix. The separately computed backwards nodes permit state-dependent controls in a finite vertex game; they are not complete continuous-state predecessor sets or the fixed-plan solver’s output. This is not a reproduction of the original continuous-control RL experiment.</p><p>Minimax squared gap: {source['objective_value']:.8g}; worst absolute gap: {source['worst_terminal_gap']:.8g}. Seven single-threaded solver-call observations after one warmup have median {timing['median_wall_ns']} ns and range {timing['min_wall_ns']}–{timing['max_wall_ns']} ns. No comparative speed claim is supported. <a href="result.json">Result JSON</a> · <a href="figure-data.json">Figure data</a> · <a href="projections.svg">Standalone SVG</a></p><p>Upstream commit <code>{SOURCE_COMMIT}</code>; source blob <code>{SOURCE_BLOB}</code>. Runtime environment: {html.escape(host['os'])}, {html.escape(host['processor'])}, {host['logical_cpus']} logical CPUs.</p></main></html>'''
+    feedback = source["feedback"]
+    threshold = feedback["threshold_numerator"] / feedback["threshold_denominator"]
+    return f'''<!doctype html><html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Two-point minimax and finite feedback</title><style>body{{margin:0;background:#111820;color:#f4f1e8;font:16px/1.55 system-ui,sans-serif}}main{{max-width:1320px;margin:auto;padding:2rem}}a{{color:#8bd3f7}}svg{{width:100%;height:auto}}.note{{border-left:4px solid #f4a261;padding:.7rem 1rem;background:#1a252e}}</style><main><h1>Two points on parallel lines: reachability and minimax</h1><p>The report compares CSL finite-action minimax with CSL finite feedback on the same three-stage TwoPoints adaptation. The panels show `(x1,x2)=(position₁, velocity₁)` and `(x3,x4)=(position₂, velocity₂)`, including both open-loop and causal-feedback worst-case trajectories.</p><div>{svg}</div><p class="note"><strong>Scope:</strong> the source uses continuous actions over 10 seconds. This report uses three stages, actions `2.5a` for `a ∈ {{-1,0,1}}`, and disturbance vertices `d ∈ {{-1,0,1}}`. Its scale-2000 integer graph has exact transitions and a terminal squared-gap threshold of <code>{feedback['threshold_numerator']}/{feedback['threshold_denominator']} = {threshold:.8g}</code>. The Python checker independently rebuilds the graph, checks every transition and policy cell, verifies the threshold is minimal on the finite candidate set, and cross-checks the integer transitions against the source's ten binary64 Euler substeps (maximum absolute discrepancy {feedback['euler_max_abs_discrepancy']:.3g}, tolerance {feedback['euler_crosscheck_tolerance']:.1g}). Action is selected from the current state before the disturbance vertex is revealed. The solver returns feasible actions, not cost-optimal actions; the plotted selector chooses the first admissible action. The guarantee applies only to this exact finite vertex game, not continuous-state feedback or the original RL experiment.</p><p>Open-loop minimax squared gap: {source['objective_value']:.8g}; feedback threshold numerator/denominator: {feedback['threshold_numerator']}/{feedback['threshold_denominator']}. The finite-feedback solver considered {feedback['solve_count']} of {feedback['candidate_count']} distinct terminal gap candidates. Seven minimax solver-call observations after one warmup have median {timing['median_wall_ns']} ns; no comparative speed claim is supported. <a href="result.json">Result JSON</a> · <a href="figure-data.json">Figure data</a> · <a href="projections.svg">Standalone SVG</a></p><p>Upstream commit <code>{SOURCE_COMMIT}</code>; source blob <code>{SOURCE_BLOB}</code>. Runtime environment: {html.escape(host['os'])}, {html.escape(host['processor'])}, {host['logical_cpus']} logical CPUs.</p></main></html>'''
 
 
 def processor_identity() -> tuple[str, str]:

@@ -132,6 +132,11 @@ jobs:
                 --source reports/algorithm-results/env717-two-points-pilot-v1 \
                 --site build/report-site
             fi
+            if test -d reports/algorithm-results/env717-two-points-feedback-v1; then
+              python scripts/reports/stage_env717_two_points.py \
+                --source reports/algorithm-results/env717-two-points-feedback-v1 \
+                --site build/report-site
+            fi
             if test -d reports/algorithm-results/env717-unequal-game-pilot-v1; then
               python scripts/reports/stage_env717_unequal_game.py \
                 --source reports/algorithm-results/env717-unequal-game-pilot-v1 \

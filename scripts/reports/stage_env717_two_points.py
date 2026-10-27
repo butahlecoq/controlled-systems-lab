@@ -11,12 +11,21 @@ from pathlib import Path
 import zipfile
 
 ROOT = Path(__file__).resolve().parents[2]
-SOURCE = ROOT / "reports/algorithm-results/env717-two-points-pilot-v1"
+SOURCE = ROOT / "reports/algorithm-results/env717-two-points-feedback-v1"
 CHECKER = ROOT / "scripts/reports/env717/check_two_points.py"
-spec = importlib.util.spec_from_file_location("env717_two_points_checker", CHECKER)
-checker = importlib.util.module_from_spec(spec)
-assert spec.loader is not None
-spec.loader.exec_module(checker)
+LEGACY_CHECKER = ROOT / "scripts/reports/env717/check_two_points_legacy.py"
+
+
+def _load_checker(path: Path, name: str):
+    spec = importlib.util.spec_from_file_location(name, path)
+    module = importlib.util.module_from_spec(spec)
+    assert spec is not None and spec.loader is not None
+    spec.loader.exec_module(module)
+    return module
+
+
+checker = _load_checker(CHECKER, "env717_two_points_feedback_checker")
+legacy_checker = _load_checker(LEGACY_CHECKER, "env717_two_points_legacy_checker")
 
 FILES = ("README.md", "capture.json", "figure-data.json", "index.html",
          "projections.svg", "result.json", "SHA256SUMS")
@@ -37,7 +46,7 @@ def _digest(data: bytes) -> str:
     return hashlib.sha256(data).hexdigest()
 
 
-def _inputs(source: Path) -> tuple[dict[str, bytes], dict]:
+def _inputs(source: Path) -> tuple[dict[str, bytes], dict, Path, object]:
     if source.is_symlink() or not source.is_dir():
         raise ValueError("environment report source must be a directory")
     if {path.name for path in source.iterdir()} != set(FILES):
@@ -53,7 +62,11 @@ def _inputs(source: Path) -> tuple[dict[str, bytes], dict]:
                 if name != "SHA256SUMS"}:
         raise ValueError("environment report checksum mismatch")
     result = json.loads(files["result.json"])
-    if result.get("schema") != "csl.env717-two-points-pilot/1":
+    if result.get("schema") == "csl.env717-two-points-feedback/1":
+        selected_checker, checker_path = checker, CHECKER
+    elif result.get("schema") == "csl.env717-two-points-pilot/1":
+        selected_checker, checker_path = legacy_checker, LEGACY_CHECKER
+    else:
         raise ValueError("environment report schema differs")
     if result.get("source_repository_commit") != SOURCE_COMMIT:
         raise ValueError("upstream environment source commit differs")
@@ -64,7 +77,7 @@ def _inputs(source: Path) -> tuple[dict[str, bytes], dict]:
                 any(char not in "0123456789abcdef" for char in value)):
             raise ValueError(f"environment report provenance field is invalid: {field}")
     try:
-        verified_result, derived = checker.verify_record(result)
+        verified_result, derived = selected_checker.verify_record(result)
     except (AssertionError, KeyError, TypeError) as error:
         raise ValueError("independent environment replay failed") from error
     try:
@@ -74,17 +87,17 @@ def _inputs(source: Path) -> tuple[dict[str, bytes], dict]:
         raise ValueError("environment report JSON is invalid") from error
     if figure_data != json.loads(json.dumps(derived)):
         raise ValueError("saved figure data differs from independent replay")
-    if capture.get("renderer_sha256") != _digest(CHECKER.read_bytes()):
+    if capture.get("renderer_sha256") != _digest(checker_path.read_bytes()):
         raise ValueError("environment report renderer identity differs")
     host = capture.get("capture_environment")
     if (not isinstance(host, dict) or not host.get("processor") or
             not host.get("processor_identity_source") or not host.get("os") or
             not isinstance(host.get("logical_cpus"), int)):
         raise ValueError("environment report capture metadata is incomplete")
-    expected_svg = checker.plot_svg(derived) + "\n"
+    expected_svg = selected_checker.plot_svg(derived) + "\n"
     if files["projections.svg"].decode("utf-8") != expected_svg:
         raise ValueError("saved SVG differs from independent figure data")
-    expected_page = checker.report_page(
+    expected_page = selected_checker.report_page(
         verified_result, expected_svg[:-1], host).encode("utf-8")
     if files["index.html"] != expected_page:
         raise ValueError("saved report page differs from verified result and SVG")
@@ -92,16 +105,16 @@ def _inputs(source: Path) -> tuple[dict[str, bytes], dict]:
     parser.feed(files["index.html"].decode("utf-8"))
     if not parser.hrefs or any(href not in files for href in parser.hrefs):
         raise ValueError("report page has a missing or nonlocal asset link")
-    return files, result
+    return files, result, checker_path, selected_checker
 
 
 def stage(source: Path, site_root: Path) -> str:
-    files, result = _inputs(source)
+    files, result, checker_path, selected_checker = _inputs(source)
     stager_sha256 = _digest(Path(__file__).read_bytes())
     identity = {"schema": "csl.env717-publication-identity/1",
                 "source_report_id": source.name,
                 "result_sha256": _digest(files["result.json"]),
-                "renderer_sha256": _digest(CHECKER.read_bytes()),
+                "renderer_sha256": _digest(checker_path.read_bytes()),
                 "stager_sha256": stager_sha256,
                 "source_file_hashes": {name: _digest(content)
                                        for name, content in sorted(files.items())}}
@@ -142,8 +155,12 @@ def stage(source: Path, site_root: Path) -> str:
                 "published_files": {name: _digest(content)
                                     for name, content in sorted(generated.items())}}
     generated["publication-manifest.json"] = (json.dumps(manifest, indent=2) + "\n").encode()
-    route_link = (f'<li><a href="{report_id}/index.html">TwoPointsOnParallelLines differential-game pilot</a>'
-                  f' — 27 fixed plans; two phase-plane projections'
+    route_title = ("TwoPoints finite-feedback differential-game report"
+                   if "feedback" in result else "TwoPointsOnParallelLines differential-game pilot")
+    route_description = ("fixed-plan minimax plus finite vertex feedback; two phase-plane projections"
+                         if "feedback" in result else "27 fixed plans; two phase-plane projections")
+    route_link = (f'<li><a href="{report_id}/index.html">{escape(route_title)}</a>'
+                  f' — {route_description}'
                   f' · <a href="{report_id}/result.json">result JSON</a>'
                   f' · <a href="{report_id}/projections.svg">projection figure</a>'
                   f' · <a href="{report_id}.zip">offline ZIP</a></li>')
