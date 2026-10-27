@@ -211,9 +211,15 @@ profile was available; LP workspace construction is excluded. The result is
 therefore exploratory and performance-inconclusive. The saved report includes
 the 2D input geometry, all 72 warmup/measured rows, failed-attempt diagnostics,
 source/build identities and checksums. Pages publication and live URL/hash
-verification remain pending. This is partial EXP-02 evidence; issue #94 remains
-open for its paired strategy, full workload/resource matrix and comparison
-record requirements.
+verification completed after PR #747 merged as `444c0ee08497e79e740c06f6cdcb1a6c4a144396`.
+The [deployed report](https://butahlecoq.github.io/controlled-systems-lab/exp02-it17-a44-paper-order-20261027-r2/index.html)
+has SHA-256 `1da8dc942527df3f275e294b7df38e802cbd04745be8cf936dd8614c056d200b`;
+the [offline bundle](https://butahlecoq.github.io/controlled-systems-lab/exp02-it17-a44-paper-order-20261027-r2.zip)
+has SHA-256 `69a37d193fa3723059aaa0cdb684434d349b5b6f3e1b5eecaa92419302391ca0`.
+All 17 deployed report files match the saved `SHA256SUMS`, every corresponding
+ZIP entry matches, and the live landing page links to the report. This remains
+partial EXP-02 evidence; issue #94 remains open for its paired strategy, full
+workload/resource matrix and comparison-record requirements.
 
 ## APP-02 box and parallelotope approximations
 

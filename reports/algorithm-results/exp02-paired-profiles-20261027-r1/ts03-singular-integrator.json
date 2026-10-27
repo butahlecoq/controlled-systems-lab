@@ -1,0 +1,9 @@
+{
+  "schema": "csl.scenario/1",
+  "id": "ts03-singular-integrator",
+  "horizon": 2,
+  "model": {"kind": "linear_discrete", "A": [[0]], "B": [[1]]},
+  "initial_state": [0],
+  "controls": {"kind": "box", "lower": [0], "upper": [1]},
+  "objective": {"kind": "quadratic", "Q": [[2]], "linear": [-2], "offset": 1}
+}
