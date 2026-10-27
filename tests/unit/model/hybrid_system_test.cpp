@@ -3,9 +3,11 @@
 
 #include <csl/model/hybrid_system.hpp>
 #include <csl/sets/data.hpp>
+#include "../../../src/model/hybrid_path_layout_arithmetic.hpp"
 
 #include <algorithm>
 #include <array>
+#include <limits>
 #include <optional>
 #include <span>
 #include <type_traits>
@@ -571,6 +573,72 @@ TEST_CASE("hybrid joint relation retains flow, controls, resets, and mode-local 
         if(value!=expected_rhs[i]) altered_satisfies=false;
     }
     CHECK_FALSE(altered_satisfies);
+}
+
+TEST_CASE("hybrid preflight composition and objective use the same literal path coordinates") {
+    auto [system,request]=dimension_changing_example();
+    system.modes[0].flow=std::vector<LinearStage>{
+        {Matrix{1,1,{1}},Matrix{1,1,{0}},Matrix{1,0,{}},Vector{0}}};
+    const HybridPath path{{{"source"},{"target"}},{{"switch"}}};
+    const std::array<HybridPath,1> paths{path};
+
+    const auto preflight=preflight_hybrid_path_relations(system,request,paths,{16,64,1024});
+    REQUIRE(std::holds_alternative<std::monostate>(preflight));
+
+    const auto composed=compose_hybrid_path_relation(system,request,path,{16,64,1024});
+    REQUIRE(std::holds_alternative<sets::SetData>(composed));
+    const auto& relation=std::get<sets::SetData>(composed);
+    CHECK(relation.metadata()->set.dimension==5);
+    CHECK(relation.metadata()->coordinate_labels==std::vector<std::string>{
+        "post:0:6:source:2:x0","control:0:6:source:2:u0","pre:1:6:source:2:x0",
+        "post:1:6:target:1:p","post:1:6:target:1:v"});
+    const auto representation=relation.representation();
+    REQUIRE(std::holds_alternative<sets::HRepresentation>(representation));
+    const auto& h=std::get<sets::HRepresentation>(representation);
+    REQUIRE(h.equalities.rows()==2);
+    const Matrix expected_equalities{2,5,{1,0,0,0,0, -1,0,1,0,0}};
+    const Vector expected_rhs{3,0};
+    for(std::size_t i=0;i<expected_equalities.rows;++i) {
+        CHECK(h.equality_values[i]==expected_rhs[i]);
+        for(std::size_t j=0;j<expected_equalities.cols;++j)
+            CHECK(h.equalities(i,j)==expected_equalities.values[i*expected_equalities.cols+j]);
+    }
+
+    const auto lifted=lift_hybrid_terminal_objective(system,request,path,{16,64,1024});
+    REQUIRE(std::holds_alternative<TerminalObjective>(lifted));
+    const auto* linear=std::get_if<LinearTerminal>(&std::get<TerminalObjective>(lifted));
+    REQUIRE(linear);
+    CHECK(linear->coefficients==Vector{0,0,0,1,0});
+}
+
+TEST_CASE("hybrid path-layout preflight preserves connectivity and variable-limit diagnostics") {
+    auto [system,request]=dimension_changing_example();
+    const HybridPath disconnected{{{"source"},{"target"}},{{"missing"}}};
+    const std::array<HybridPath,1> disconnected_paths{disconnected};
+    const auto bad_path=preflight_hybrid_path_relations(
+        system,request,disconnected_paths,{16,64,1024});
+    REQUIRE(std::holds_alternative<HybridPathCompositionFailureReport>(bad_path));
+    const auto& bad_report=std::get<HybridPathCompositionFailureReport>(bad_path);
+    const auto* bad_diagnostic=std::get_if<Diagnostic>(&bad_report.failure);
+    REQUIRE(bad_diagnostic);
+    CHECK(bad_diagnostic->field=="hybrid.path.edges");
+
+    const HybridPath path{{{"source"},{"target"}},{{"switch"}}};
+    const std::array<HybridPath,1> paths{path};
+    const auto limited=preflight_hybrid_path_relations(system,request,paths,{4,64,1024});
+    REQUIRE(std::holds_alternative<HybridPathCompositionFailureReport>(limited));
+    const auto& limit_report=std::get<HybridPathCompositionFailureReport>(limited);
+    const auto* limit_diagnostic=std::get_if<Diagnostic>(&limit_report.failure);
+    REQUIRE(limit_diagnostic);
+    CHECK(limit_diagnostic->field=="hybrid.relation.variables");
+    CHECK(limit_diagnostic->explanation.find("stage 0 edge switch")!=std::string::npos);
+}
+
+TEST_CASE("hybrid path coordinate width rejects size_t overflow") {
+    const auto max=std::numeric_limits<std::size_t>::max();
+    CHECK(csl::model::detail::checked_coordinate_width(max,0)==max);
+    CHECK(csl::model::detail::checked_coordinate_width(max-2,2)==max);
+    CHECK_FALSE(csl::model::detail::checked_coordinate_width(max-1,2));
 }
 
 TEST_CASE("hybrid composition report records mode and transition operations with resource use") {
