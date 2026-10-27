@@ -17,6 +17,7 @@ site_spec = importlib.util.spec_from_file_location("app02_site_validator", Path(
 site = importlib.util.module_from_spec(site_spec)
 assert site_spec.loader is not None
 site_spec.loader.exec_module(site)
+import site_additions
 
 
 def sha(value: bytes) -> str:
@@ -65,23 +66,16 @@ def stage(catalog: Path, site_dir: Path) -> str:
     bundle = catalog.parent / report_id
     report.collect.require(data["reports"][0] == catalog_entry(bundle),
                            "APP-02 catalog differs from saved source")
-    destination = site_dir / report_id
-    example_dir = site_dir / "app02-example"
-    report.collect.require(site_dir.is_dir() and not site_dir.is_symlink() and
-                           not destination.exists() and not example_dir.exists(),
-                           "APP-02 public route must be fresh")
-    destination.mkdir()
-    for path in bundle.iterdir():
-        (destination / path.name).write_bytes(path.read_bytes())
-    example_dir.mkdir()
+    report.collect.require(site_dir.is_dir() and not site_dir.is_symlink(),
+                           "APP-02 site root must be an existing directory")
     record = report.validate(bundle)
     example_html = example(record).encode()
-    (example_dir / "index.html").write_bytes(example_html)
-    (example_dir / "polygons.svg").write_bytes((bundle / "polygons.svg").read_bytes())
     site.OfflineHTML({"polygons.svg", "../" + report_id + "/index.html",
         "../" + report_id + "/records.json", "../" + report_id + "/smoke.csv",
         "../" + report_id + "/bundle.zip"}).feed(example_html.decode())
     index_path = site_dir / "index.html"
+    report.collect.require(not index_path.is_symlink() and index_path.is_file(),
+                           "APP-02 site catalogue must be a regular file")
     index = index_path.read_text(encoding="utf-8")
     report.collect.require(index.count("</ul>") == 1 and report_id not in index,
                            "APP-02 site catalogue insertion point differs")
@@ -92,7 +86,14 @@ def stage(catalog: Path, site_dir: Path) -> str:
             ' · <a href="' + escape(report_id) + '/bundle.zip">offline ZIP</a></li>')
     site.OfflineHTML({report_id + "/index.html", report_id + "/records.json",
                       report_id + "/bundle.zip", "app02-example/index.html"}).feed(link)
-    index_path.write_text(index.replace("</ul>", link + "</ul>"), encoding="utf-8")
+    files = {f"{report_id}/{path.name}": path.read_bytes() for path in bundle.iterdir()}
+    files.update({"app02-example/index.html": example_html,
+                  "app02-example/polygons.svg": (bundle / "polygons.svg").read_bytes(),
+                  "index.html": index.replace("</ul>", link + "</ul>").encode("utf-8")})
+    plan = site_additions.prepare(site_dir, files,
+        replace_existing=("index.html",),
+        require_absent=(report_id, "app02-example"))
+    site_additions.commit(plan)
     return report_id
 
 
