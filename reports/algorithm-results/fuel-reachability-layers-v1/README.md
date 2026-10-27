@@ -13,6 +13,10 @@ flow and working-stock balance. The model uses `x[k+1] = A x[k] + B u[k]`,
 and state bounds `28 ≤ x1 ≤ 32`, `18 ≤ x3 ≤ 21` at each stage. There is no
 disturbance. The terminal objective is
 `(30-x1)^2 + x2^2 + (20-x3)^2 + x4^2 + (x2-x4)^2`.
+Capture evaluates the quadratic form and target from the model JSON and searches
+the active control and state-bound constraints for a feasible minimizer. The
+model accepts a positive-semidefinite 4×4 objective matrix and a four-state
+target; the displayed formula describes the checked-in source-bound instance.
 
 For each stage `k`, `Rk` is the forward reachable set from the initial point;
 `Gk` is the set of states from which an admissible future control sequence can

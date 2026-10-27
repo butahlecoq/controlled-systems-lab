@@ -5,7 +5,7 @@ Capture computes set geometry. Render reads the saved geometry only.
 from __future__ import annotations
 
 import argparse
-from itertools import combinations, product
+from itertools import combinations
 import hashlib
 import html
 import json
@@ -100,42 +100,53 @@ def _state_bound_inequalities(model: dict, affine: tuple[np.ndarray, np.ndarray]
     return result
 
 
-def _objective(state: np.ndarray) -> float:
-    x1, x2, x3, x4 = map(float, state)
-    return (30.0 - x1) ** 2 + x2**2 + (20.0 - x3) ** 2 + x4**2 + (x2 - x4) ** 2
+def _objective(state: np.ndarray, model: dict) -> float:
+    difference = np.asarray(state, dtype=float) - np.asarray(model["target"], dtype=float)
+    matrix = np.asarray(model["terminal_objective_matrix"], dtype=float)
+    return float(difference @ matrix @ difference)
 
 
 def _optimal_controls(model: dict) -> tuple[np.ndarray, np.ndarray, float]:
     center, coefficients = _state_affine_forward(model, model["horizon"])
-    q = np.array([[1, 0, 0, 0], [0, 2, 0, -1], [0, 0, 1, 0], [0, -1, 0, 2]], dtype=float)
-    linear = np.array([-30.0, 0.0, -20.0, 0.0])
+    q = np.asarray(model["terminal_objective_matrix"], dtype=float)
+    target = np.asarray(model["target"], dtype=float)
     hessian = coefficients.T @ q @ coefficients
-    gradient_center = coefficients.T @ (q @ center + linear)
-    lo, hi = map(float, model["control_bounds"])
+    gradient_center = coefficients.T @ q @ (center - target)
+    inequalities = _control_box(coefficients.shape[1], model["control_bounds"])
+    for stage in range(1, model["horizon"] + 1):
+        inequalities.extend(_state_bound_inequalities(
+            model, _state_affine_forward(model, stage), coefficients.shape[1]))
     best: tuple[float, np.ndarray, np.ndarray] | None = None
-    for statuses in product((-1, 0, 1), repeat=coefficients.shape[1]):
-        fixed = np.asarray([index for index, value in enumerate(statuses) if value != 0], dtype=int)
-        free = np.asarray([index for index, value in enumerate(statuses) if value == 0], dtype=int)
-        controls = np.zeros(coefficients.shape[1])
-        for index in fixed:
-            controls[index] = lo if statuses[index] == -1 else hi
-        if len(free):
-            rhs = -gradient_center[free]
-            if len(fixed):
-                rhs -= hessian[np.ix_(free, fixed)] @ controls[fixed]
-            controls[free] = np.linalg.solve(hessian[np.ix_(free, free)], rhs)
-        if np.any(controls < lo - TOL) or np.any(controls > hi + TOL):
-            continue
-        states = [np.asarray(model["initial_state"], dtype=float)]
-        for value in controls:
-            states.append(np.asarray(model["A"], dtype=float) @ states[-1] +
-                          np.asarray(model["B"], dtype=float) * value)
-        if any(not _in_state_bounds(model, state) for state in states):
-            continue
-        terminal = states[-1]
-        score = _objective(terminal)
-        if best is None or score < best[0] - TOL:
-            best = score, controls, terminal
+    dimension = coefficients.shape[1]
+    for active_count in range(min(dimension, len(inequalities)) + 1):
+        for active in combinations(range(len(inequalities)), active_count):
+            active_rows = (np.vstack([inequalities[index][0] for index in active])
+                           if active else np.empty((0, dimension)))
+            active_bounds = np.asarray([inequalities[index][1] for index in active], dtype=float)
+            if active and np.linalg.matrix_rank(active_rows, tol=TOL) != active_count:
+                continue
+            kkt = np.block([[hessian, active_rows.T],
+                            [active_rows, np.zeros((active_count, active_count))]])
+            rhs = np.concatenate((-gradient_center, active_bounds))
+            solution, *_ = np.linalg.lstsq(kkt, rhs, rcond=None)
+            if not np.allclose(kkt @ solution, rhs, rtol=0, atol=TOL):
+                continue
+            controls = solution[:dimension]
+            multipliers = solution[dimension:]
+            if active and np.any(multipliers < -TOL):
+                continue
+            if any(float(np.dot(row, controls)) > bound + TOL for row, bound in inequalities):
+                continue
+            states = [np.asarray(model["initial_state"], dtype=float)]
+            for value in controls:
+                states.append(np.asarray(model["A"], dtype=float) @ states[-1] +
+                              np.asarray(model["B"], dtype=float) * value)
+            if any(not _in_state_bounds(model, state) for state in states):
+                continue
+            terminal = states[-1]
+            score = _objective(terminal, model)
+            if best is None or score < best[0] - TOL:
+                best = score, controls, terminal
     if best is None:
         raise ValueError("no feasible terminal-objective minimizer found")
     return best[1], best[2], best[0]
@@ -233,6 +244,14 @@ def _intersection_vertices(model: dict, stage: int, terminal: np.ndarray) -> lis
 
 def capture(model_path: Path, output_path: Path) -> dict:
     model = json.loads(model_path.read_text(encoding="utf-8"))
+    objective_matrix = np.asarray(model["terminal_objective_matrix"], dtype=float)
+    target = np.asarray(model["target"], dtype=float)
+    if objective_matrix.shape != (4, 4) or target.shape != (4,):
+        raise ValueError("terminal objective matrix and target must match the four-state model")
+    if not np.allclose(objective_matrix, objective_matrix.T, rtol=0, atol=TOL):
+        raise ValueError("terminal objective matrix must be symmetric")
+    if np.linalg.eigvalsh(objective_matrix).min() < -TOL:
+        raise ValueError("terminal objective matrix must be positive semidefinite")
     source_path = ROOT / model["source"]
     source_available = source_path.is_file()
     source_hash = _sha256(source_path) if source_available else model["source_sha256"]

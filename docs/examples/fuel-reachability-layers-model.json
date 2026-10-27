@@ -11,7 +11,8 @@
   "B": [0.5, 0.0, -0.3333333333333333, 0.0],
   "control_bounds": [-1.0, 1.0],
   "state_bounds": {"x1": [28.0, 32.0], "x3": [18.0, 21.0]},
-  "terminal_objective": "(30-x1)^2 + x2^2 + (20-x3)^2 + x4^2 + (x2-x4)^2",
+  "terminal_objective": "(x-target)^T Q (x-target)",
+  "terminal_objective_matrix": [[1.0, 0.0, 0.0, 0.0], [0.0, 2.0, 0.0, -1.0], [0.0, 0.0, 1.0, 0.0], [0.0, -1.0, 0.0, 2.0]],
   "target": [30.0, 0.0, 20.0, 0.0],
   "coordinate_pairs": [["x1", "x2"], ["x3", "x4"], ["x1", "x3"], ["x2", "x4"]],
   "interpretation": "Deterministic discrete linear model and continuous scalar control interval as written in ReachableSets.m; no disturbance is modeled. The original MATLAB script's plotted forward/backward/intersection sets are reproduced numerically from these stated parameters. This is not the separate B06/L09 minimax run or a historical figure reproduction."
