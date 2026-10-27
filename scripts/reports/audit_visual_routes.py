@@ -24,6 +24,7 @@ COMPOSED_SAVED_ROUTES = {
     "scripts/reports/issue422/build_bundle.py",
     "scripts/reports/stage_mpc03.py",
     "scripts/reports/stage_mpc03_b08.py",
+    "scripts/reports/visual_example_fuel_layers.py",
 }
 FROZEN_DIAGRAM_EXCEPTIONS = {
     "benchmarks/reporting/approximation_pilot/summarize.py",
@@ -98,6 +99,8 @@ FROZEN_COMPANIONS = {
 
 
 def migration_issue(source: str) -> int:
+    if source == "scripts/reports/fuel_reachability_layers.py":
+        return 708
     if "/viz04/" in source:
         return MIGRATION_ISSUES["control-strategy-and-witness"]
     if any(token in source for token in ("/app0", "/ext", "/finite_feedback", "/lotka_volterra")):
