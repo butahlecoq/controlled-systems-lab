@@ -64,9 +64,30 @@ def _inputs(source: Path) -> tuple[dict[str, bytes], dict]:
                 any(char not in "0123456789abcdef" for char in value)):
             raise ValueError(f"environment report provenance field is invalid: {field}")
     try:
-        checker.verify_record(result)
+        verified_result, derived = checker.verify_record(result)
     except (AssertionError, KeyError, TypeError) as error:
         raise ValueError("independent environment replay failed") from error
+    try:
+        figure_data = json.loads(files["figure-data.json"])
+        capture = json.loads(files["capture.json"])
+    except (UnicodeDecodeError, ValueError) as error:
+        raise ValueError("environment report JSON is invalid") from error
+    if figure_data != json.loads(json.dumps(derived)):
+        raise ValueError("saved figure data differs from independent replay")
+    if capture.get("renderer_sha256") != _digest(CHECKER.read_bytes()):
+        raise ValueError("environment report renderer identity differs")
+    host = capture.get("capture_environment")
+    if (not isinstance(host, dict) or not host.get("processor") or
+            not host.get("processor_identity_source") or not host.get("os") or
+            not isinstance(host.get("logical_cpus"), int)):
+        raise ValueError("environment report capture metadata is incomplete")
+    expected_svg = checker.plot_svg(derived) + "\n"
+    if files["projections.svg"].decode("utf-8") != expected_svg:
+        raise ValueError("saved SVG differs from independent figure data")
+    expected_page = checker.report_page(
+        verified_result, expected_svg[:-1], host).encode("utf-8")
+    if files["index.html"] != expected_page:
+        raise ValueError("saved report page differs from verified result and SVG")
     parser = LocalLinks()
     parser.feed(files["index.html"].decode("utf-8"))
     if not parser.hrefs or any(href not in files for href in parser.hrefs):

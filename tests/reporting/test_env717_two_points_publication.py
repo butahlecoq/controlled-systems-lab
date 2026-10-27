@@ -67,6 +67,29 @@ class TwoPointsPublicationTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "independent environment replay failed"):
             stage_module.stage(self.source, self.site)
 
+    def test_rejects_rehashed_figure_and_page_that_disagree_with_verified_result(self):
+        for name, expected_error in (("figure-data.json", "saved figure data differs"),
+                                     ("projections.svg", "saved SVG differs"),
+                                     ("index.html", "saved report page differs")):
+            with self.subTest(name=name):
+                source = self.root / ("mutated-" + name)
+                shutil.copytree(self.source, source)
+                target = source / name
+                original = target.read_bytes()
+                if name == "figure-data.json":
+                    data = json.loads(original)
+                    data["trajectory"][0][0] += 1
+                    target.write_text(json.dumps(data, indent=2) + "\n")
+                else:
+                    target.write_bytes(original.replace(b"Two points", b"Fake points", 1))
+                checksum_names = [item for item in stage_module.FILES
+                                  if item != "SHA256SUMS"]
+                (source / "SHA256SUMS").write_text("".join(
+                    f"{hashlib.sha256((source / item).read_bytes()).hexdigest()}  {item}\n"
+                    for item in checksum_names), encoding="ascii")
+                with self.assertRaisesRegex(ValueError, expected_error):
+                    stage_module.stage(source, self.site)
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -104,12 +104,17 @@ class VisualRouteInventoryTests(unittest.TestCase):
         routes={entry["route"]:entry for entry in inventory["frozen_published_routes"]}
         self.assertGreater(len(routes),40)
         self.assertTrue(all(entry["disposition"].startswith("deferred: original frozen route-level readability")
-                            and entry["follow_up_issue"] == 669 for entry in routes.values()))
+                            for entry in routes.values()))
+        self.assertTrue(all(entry["follow_up_issue"] ==
+                            (717 if entry["route"].startswith("env717-") else 669)
+                            for entry in routes.values()))
         self.assertEqual(routes["app03-zonotope-4522855018fa9b0b"]["companion_route"],
                          "examples/app03-zonotope-v1.html")
         self.assertEqual(routes["app01-plan-20261016-22d406fd"]["companion_route"],
                          "examples/app01-plan-timing-v1.html")
         self.assertEqual(routes["app03-zonotope-4522855018fa9b0b"]["follow_up_issue"], 669)
+        self.assertEqual(routes["env717-simple-control-pilot-v1"]["follow_up_issue"], 717)
+        self.assertEqual(routes["env717-two-points-pilot-v1"]["follow_up_issue"], 717)
         self.assertTrue(any(name.endswith("terminal-projections.svg")
                             for entry in routes.values() for name in entry["assets"]))
         self.assertEqual(inventory["gallery_routes"][0]["route"],"examples/index.html")

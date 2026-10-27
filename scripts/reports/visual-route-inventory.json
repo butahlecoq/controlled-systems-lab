@@ -593,7 +593,7 @@
     },
     {
       "source": "scripts/reports/stage_env717_two_points.py",
-      "signal_count": 3,
+      "signal_count": 4,
       "asset_name_literals": [
         "projections.png",
         "projections.svg"
@@ -1119,7 +1119,7 @@
       ],
       "index_sha256": "af744b7305ee07f20efef36cad47fec600f7ea65da38305250f6e527b8456160",
       "disposition": "deferred: original frozen route-level readability review remains; companion availability is listed separately",
-      "follow_up_issue": 669
+      "follow_up_issue": 717
     },
     {
       "route": "env717-two-points-pilot-v1",
@@ -1128,9 +1128,9 @@
         "projections.png",
         "projections.svg"
       ],
-      "index_sha256": "27465570f73142105034207ed14c04ac443fadbcd0adc8ed8e2821339655a3b9",
+      "index_sha256": "556145644b3d12cddabef770e382e85c18b8348e1d69ebb0819d9c22f963c8e1",
       "disposition": "deferred: original frozen route-level readability review remains; companion availability is listed separately",
-      "follow_up_issue": 669
+      "follow_up_issue": 717
     },
     {
       "route": "exp02-it17-a44-paper-order-20261027-r1",
