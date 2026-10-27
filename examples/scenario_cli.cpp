@@ -340,7 +340,8 @@ bool passed(const T& value) {
     return value == verification::CheckStatus::numerical_pass;
 }
 
-int persist(const problem::ResolvedProblem& problem, const application::PreparedSelection& prepared,
+int persist(const input::LoadedScenario& scenario, const problem::ResolvedProblem& problem,
+    const application::PreparedSelection& prepared,
     const application::SelectedRunExecution& execution, const Modules& modules,
     const ResourcePolicy& resources, const WitnessRequest& witnesses,
     const std::filesystem::path& directory, const std::vector<std::string>& file_stems) {
@@ -731,7 +732,7 @@ int run(const input::LoadedScenario& scenario, const Options& options) {
             for (std::size_t index = 0; index < prepared.methods().size(); ++index)
                 stems.push_back(paired_comparison ? (index == 0 ? "reach-back" : "strategy-b") :
                     method_file_stem(index, prepared.methods()[index].configuration.strategy.value));
-            return persist(problem, prepared, execution, modules, resources, witnesses,
+            return persist(scenario, problem, prepared, execution, modules, resources, witnesses,
                 *options.output_directory, stems);
         }
         std::cout << "artifact_export=not_requested evidence=attempts_preserved\n";
@@ -743,7 +744,7 @@ int run(const input::LoadedScenario& scenario, const Options& options) {
         for (std::size_t index = 0; index < prepared.methods().size(); ++index)
             stems.push_back(paired_comparison ? (index == 0 ? "reach-back" : "strategy-b") :
                 method_file_stem(index, prepared.methods()[index].configuration.strategy.value));
-        return persist(problem, prepared, execution, modules, resources, witnesses,
+        return persist(scenario, problem, prepared, execution, modules, resources, witnesses,
             *options.output_directory, stems);
     }
     std::cout << "artifact_export=not_requested\n";
