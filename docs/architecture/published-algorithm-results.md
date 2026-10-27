@@ -353,7 +353,7 @@ report ID, and records why the existing measurements may be associated with
 the hardcoded model while preserving their binary64 numerical-assurance limit.
 It also carries the saved 4D terminal geometry projections into flow and stock
 views for visual context. See the [versioned manifest correction and corrected
-scenario](https://butahlecoq.github.io/controlled-systems-lab/issue6-b06-manifest-correction-61d42c498548f6843150d038dc3f005308924d149f53ac066606894fdd5a835f/index.html).
+scenario](https://butahlecoq.github.io/controlled-systems-lab/issue6-b06-manifest-correction-39775c544395bd7282351218d301d1f3039e5510d8326399b011de4dc31f3020/index.html).
 
 The native bundle
 [`b06-owner-confirmed-7df01ba3af5e4c46`](../../reports/algorithm-results/b06-owner-confirmed-7df01ba3af5e4c46/)
