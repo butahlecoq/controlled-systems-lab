@@ -1,0 +1,262 @@
+{
+  "schema": "csl.review05-paired-summary/1",
+  "comparison_spec_id": "affec760aa87f4c380c80e15692ee103a23c81da7a43dd070f47da4b3e3c03ab",
+  "comparison_run_id": "edb7dc755fcdcf100a125d22862184f4809a9f3929191c07eb02b84c4c897c1e",
+  "source_revision": "2f05203b69e69f1eccbf6d33a175229775c06271",
+  "source_tree_sha256": "b202f9b655e6231ec8621d408d7ea8ccfbebf407a306b9b17d2c0e3625721d7d",
+  "source_dirty": true,
+  "binary_sha256": "3bd2a1d78fe020940c132cf3aff2515f9b6b0dee736792a1b418b2f5fc2bafaa",
+  "input_manifest_hash": "56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d30",
+  "problem_id": "csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d30",
+  "tolerances": {
+    "absolute": 1e-08,
+    "relative": 1e-08
+  },
+  "requested_threads": 1,
+  "observed_backend_threads": {
+    "status": "available",
+    "value": 1
+  },
+  "attempts": {
+    "total": 32,
+    "passed": 32,
+    "warmups": 4,
+    "measured": 28
+  },
+  "arms": [
+    {
+      "strategy": "csl.synthesis.reach-back",
+      "instrumentation": "disabled",
+      "repetitions": 7,
+      "strategy_run_ns": {
+        "median": 4946683,
+        "min": 4867482,
+        "max": 5711730
+      },
+      "strategy_run_cpu_ns": {
+        "median": 4938271,
+        "min": 4860226,
+        "max": 5686869
+      },
+      "whole_process_peak_rss_bytes": {
+        "median": 13672448,
+        "min": 12992512,
+        "max": 14516224
+      },
+      "all_passed": true
+    },
+    {
+      "strategy": "csl.synthesis.reach-back",
+      "instrumentation": "enabled",
+      "repetitions": 7,
+      "strategy_run_ns": {
+        "median": 8383666,
+        "min": 8253901,
+        "max": 10844192
+      },
+      "strategy_run_cpu_ns": {
+        "median": 8372732,
+        "min": 8245503,
+        "max": 10784620
+      },
+      "whole_process_peak_rss_bytes": {
+        "median": 13733888,
+        "min": 12898304,
+        "max": 14430208
+      },
+      "all_passed": true
+    },
+    {
+      "strategy": "csl.synthesis.strategy-b",
+      "instrumentation": "disabled",
+      "repetitions": 7,
+      "strategy_run_ns": {
+        "median": 849975,
+        "min": 830838,
+        "max": 1236409
+      },
+      "strategy_run_cpu_ns": {
+        "median": 841790,
+        "min": 822938,
+        "max": 1212572
+      },
+      "whole_process_peak_rss_bytes": {
+        "median": 13770752,
+        "min": 12845056,
+        "max": 14430208
+      },
+      "all_passed": true
+    },
+    {
+      "strategy": "csl.synthesis.strategy-b",
+      "instrumentation": "enabled",
+      "repetitions": 7,
+      "strategy_run_ns": {
+        "median": 1125221,
+        "min": 1036452,
+        "max": 1304295
+      },
+      "strategy_run_cpu_ns": {
+        "median": 1106180,
+        "min": 1033526,
+        "max": 1300216
+      },
+      "whole_process_peak_rss_bytes": {
+        "median": 13770752,
+        "min": 12877824,
+        "max": 14430208
+      },
+      "all_passed": true
+    }
+  ],
+  "instrumentation_deltas": [
+    {
+      "strategy": "csl.synthesis.reach-back",
+      "paired_enabled_minus_disabled_ns": {
+        "median": 3400177,
+        "min": 2542171,
+        "max": 5894994
+      },
+      "values": [
+        2935519,
+        2542171,
+        3400177,
+        3617735,
+        3348774,
+        3492297,
+        5894994
+      ]
+    },
+    {
+      "strategy": "csl.synthesis.strategy-b",
+      "paired_enabled_minus_disabled_ns": {
+        "median": 244306,
+        "min": -108184,
+        "max": 285165
+      },
+      "values": [
+        67886,
+        271475,
+        -108184,
+        285165,
+        244306,
+        275246,
+        226428
+      ]
+    }
+  ],
+  "enabled_phase_spans": [
+    {
+      "operation": "strategy-a/family-construction",
+      "samples": 7,
+      "inclusive_wall_ns": {
+        "median": 10895,
+        "min": 10476,
+        "max": 27588
+      },
+      "exclusive_wall_ns": {
+        "median": 10895,
+        "min": 10476,
+        "max": 27588
+      }
+    },
+    {
+      "operation": "strategy-a/feasible-preimage",
+      "samples": 7,
+      "inclusive_wall_ns": {
+        "median": 15016,
+        "min": 14457,
+        "max": 17460
+      },
+      "exclusive_wall_ns": {
+        "median": 15016,
+        "min": 14457,
+        "max": 17460
+      }
+    },
+    {
+      "operation": "strategy-a/forward",
+      "samples": 7,
+      "inclusive_wall_ns": {
+        "median": 7518397,
+        "min": 7444434,
+        "max": 9803480
+      },
+      "exclusive_wall_ns": {
+        "median": 7518397,
+        "min": 7444434,
+        "max": 9803480
+      }
+    },
+    {
+      "operation": "strategy-a/run",
+      "samples": 7,
+      "inclusive_wall_ns": {
+        "median": 8275621,
+        "min": 8165202,
+        "max": 10747950
+      },
+      "exclusive_wall_ns": {
+        "median": 137169,
+        "min": 133888,
+        "max": 178585
+      }
+    },
+    {
+      "operation": "strategy-a/terminal-optimization",
+      "samples": 7,
+      "inclusive_wall_ns": {
+        "median": 582830,
+        "min": 550702,
+        "max": 733269
+      },
+      "exclusive_wall_ns": {
+        "median": 582830,
+        "min": 550702,
+        "max": 733269
+      }
+    },
+    {
+      "operation": "strategy-a/terminal-preimage",
+      "samples": 7,
+      "inclusive_wall_ns": {
+        "median": 10476,
+        "min": 9638,
+        "max": 13828
+      },
+      "exclusive_wall_ns": {
+        "median": 10476,
+        "min": 9638,
+        "max": 13828
+      }
+    },
+    {
+      "operation": "strategy-b/family-construction",
+      "samples": 7,
+      "inclusive_wall_ns": {
+        "median": 13969,
+        "min": 12781,
+        "max": 29613
+      },
+      "exclusive_wall_ns": {
+        "median": 13969,
+        "min": 12781,
+        "max": 29613
+      }
+    },
+    {
+      "operation": "strategy-b/run",
+      "samples": 7,
+      "inclusive_wall_ns": {
+        "median": 981765,
+        "min": 898235,
+        "max": 1117468
+      },
+      "exclusive_wall_ns": {
+        "median": 967308,
+        "min": 885454,
+        "max": 1087855
+      }
+    }
+  ]
+}

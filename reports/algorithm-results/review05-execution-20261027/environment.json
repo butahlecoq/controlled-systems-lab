@@ -1,0 +1,54 @@
+{
+  "schema": "csl.review05-execution-environment/1",
+  "review_source_commit": "2c7107a868a9fb25a0bca1da4fd8d640babe2cff",
+  "benchmark_source_revision": "2f05203b69e69f1eccbf6d33a175229775c06271",
+  "benchmark_source_tree_sha256": "b202f9b655e6231ec8621d408d7ea8ccfbebf407a306b9b17d2c0e3625721d7d",
+  "benchmark_source_dirty": true,
+  "benchmark_binary_sha256": "3bd2a1d78fe020940c132cf3aff2515f9b6b0dee736792a1b418b2f5fc2bafaa",
+  "runtime": {
+    "os": "Linux 7.2.5-3-omarchy x86_64",
+    "cpu_model": "AMD Ryzen 5 3550H with Radeon Vega Mobile Gfx",
+    "logical_cpus": 8
+  },
+  "release_build": {
+    "cmake": "3.31.6",
+    "compiler": "GCC 16.2.1 20260810",
+    "generator": "Unix Makefiles",
+    "configuration": "Release",
+    "cxx_standard": 20,
+    "highs": "1.11.0",
+    "qhull": "8.0.2",
+    "resource_policy": {
+      "total_threads": 1,
+      "outer_workers": 1,
+      "threads_per_worker": 1,
+      "memory_bytes": null
+    }
+  },
+  "thread_sanitizer_build": {
+    "compiler": "GCC 16.2.1 20260810",
+    "configuration": "RelWithDebInfo",
+    "flags": "-fsanitize=thread -fno-omit-frame-pointer",
+    "highs": false,
+    "qhull": false,
+    "tsan_options": "halt_on_error=1"
+  },
+  "paired_capture": {
+    "comparison_spec_id": "affec760aa87f4c380c80e15692ee103a23c81da7a43dd070f47da4b3e3c03ab",
+    "comparison_run_id": "edb7dc755fcdcf100a125d22862184f4809a9f3929191c07eb02b84c4c897c1e",
+    "input_manifest_hash": "56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d30",
+    "total_attempts": 32,
+    "passed_attempts": 32,
+    "warmups": 4,
+    "measured_attempts": 28,
+    "measured_repetitions_per_arm": 7,
+    "requested_backend_threads": 1,
+    "observed_backend_threads": 1,
+    "absolute_tolerance": 1e-8,
+    "relative_tolerance": 1e-8
+  },
+  "performance_profiler": {
+    "perf_available": false,
+    "current_build_limiter_profile": "not_collected"
+  }
+}
