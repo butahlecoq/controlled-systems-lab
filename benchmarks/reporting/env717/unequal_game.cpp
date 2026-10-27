@@ -34,7 +34,7 @@ FiniteActionMinimaxRequest request() {
     constexpr double dt = 0.05;
     const SystemModel authored{{{1, 1, 1}, TimeDomain::discrete,
         LinearStage{{1, 1, {1.0}}, {1, 1, {dt}}, {1, 1, {dt}}, {0.0}}}, {}};
-    const auto system = take(model::snapshot(authored, Vector{1.0}));
+    const auto system = take(model::snapshot(authored, Vector{0.0, dt, 2.0 * dt, 3.0 * dt}));
     std::vector<sets::SetData> disturbances;
     disturbances.reserve(horizon);
     for(std::size_t stage = 0; stage < horizon; ++stage)
