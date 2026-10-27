@@ -19,7 +19,7 @@ code{overflow-wrap:anywhere}
 <p>Both selected linear witnesses have the same terminal objective (0 kg/s) and use the same two control intervals. The explicit linear toy model integrates each control into its flow coordinate, and minimizes the terminal residual norm <code>||(x₁,x₃) − (1,1)||₂</code>. This objective is nonnegative, both verified histories attain zero, and therefore both are global minimizers. The fixture checks each full history against the declared linear dynamics and original objective; it does not claim that these two witnesses form a complete optimal family. The independent nonlinear toy plant produces different trajectories and terminal stock objectives. The side-by-side panels project the full four-dimensional replay state onto the flow coordinates <code>(x₁,x₃)</code> and stock coordinates <code>(x₂,x₄)</code>.</p>
 <figure>
   <img src="viz04-replay-comparison.svg" alt="Two panels show the projected paths of two selected witness replays from a four-state toy plant. The flow-coordinate paths differ, and the stock-coordinate projection shows witness 1 staying at zero while witness 2 reaches (0.75 kg, 1 kg).">
-  <figcaption>Connected lines show three saved replay states at t = 0, 1, and 2 seconds. They are trajectories, not boundaries of reachable sets.</figcaption>
+  <figcaption>Connected lines show three saved replay states at t = 0, 1, and 2 seconds. Each panel uses equal x/y scaling because its paired coordinates share units. These are trajectories, not boundaries of reachable sets.</figcaption>
 </figure>
 <h2>Recorded comparison values</h2>
 <table>

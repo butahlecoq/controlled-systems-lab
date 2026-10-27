@@ -10,6 +10,13 @@ SCHEMA = "csl.viz04-replay-comparison/1"
 PAIRS = ((0, 2), (1, 3))
 
 
+def set_coordinate_aspect(axis, x_coord: dict, y_coord: dict) -> str:
+    if x_coord["unit"] == y_coord["unit"]:
+        axis.set_aspect("equal", adjustable="box")
+        return "Equal x/y scale because paired coordinates share units."
+    return "Independent x/y scales because paired coordinates use different units."
+
+
 def load(path: Path) -> dict:
     value = json.loads(path.read_text(encoding="utf-8"))
     if value.get("schema") != SCHEMA:
@@ -49,6 +56,7 @@ def render(value: dict, output: Path) -> None:
     colors = ("#225b92", "#b14d28")
     markers = ("o", "s")
     labels = ("Linear witness 1", "Linear witness 2")
+    aspect_notes = []
     with matplotlib.rc_context({"font.family": "DejaVu Sans", "font.size": 10,
                                 "svg.hashsalt": "csl-viz04-replay-v1", "svg.fonttype": "path"}):
         fig, axes = plt.subplots(1, 2, figsize=(12.2, 5.7))
@@ -64,6 +72,7 @@ def render(value: dict, output: Path) -> None:
             axis.set_title(title)
             axis.set_xlabel(f"{x_coord['label']} ({x_coord['unit']})")
             axis.set_ylabel(f"{y_coord['label']} ({y_coord['unit']})")
+            aspect_notes.append(set_coordinate_aspect(axis, x_coord, y_coord))
             axis.xaxis.set_major_locator(MaxNLocator(nbins=6))
             axis.yaxis.set_major_locator(MaxNLocator(nbins=6))
             axis.grid(True, which="major", color="#aeb8c2", linewidth=0.7, alpha=0.45)
@@ -72,6 +81,7 @@ def render(value: dict, output: Path) -> None:
         fig.suptitle("Selected witness replays projected from four state coordinates", fontsize=13)
         fig.tight_layout(rect=(0, 0.1, 1, 0.94))
         fig.text(0.5, 0.025,
+                 " ".join(aspect_notes) + " "
                  "Analytic VIZ-04 toy fixture. Paths are selected trajectories, not reachable-set boundaries. "
                  "This is not a B04 replay or a historical fuel result.",
                  ha="center", va="bottom", fontsize=9, color="#35414c")

@@ -47,7 +47,7 @@ SOURCE_DISPOSITIONS = (
     SourceDisposition("scripts/reports/syn_ts01_paired/regenerate_bundle.py", "bundle-regenerator", "regeneration-entrypoint-preserved-gallery-never-invokes-it"),
     SourceDisposition("scripts/reports/syn_ts01_paired/report.py", "report-plot-renderer", "frozen-report-plot-preserved-with-saved-timing-companion", ("control-witness-timings",)),
     SourceDisposition("scripts/reports/ts01/report.py", "analytic-diagram-renderer", "reviewed-analytic-diagram-preserved"),
-    SourceDisposition("scripts/reports/viz04/render_saved.py", "analytic-diagram-renderer", "reviewed-analytic-diagram-preserved"),
+    SourceDisposition("scripts/reports/viz04/render_saved.py", "saved-plot-renderer", "adopted-shared-quantitative-policy"),
 )
 
 PROJECTIONS = (
