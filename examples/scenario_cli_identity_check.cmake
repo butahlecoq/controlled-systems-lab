@@ -1,0 +1,27 @@
+if(NOT DEFINED SCENARIO_CLI OR NOT DEFINED COMPARISON_INPUT OR
+   NOT DEFINED METHODS_INPUT OR NOT DEFINED CHANGED_INPUT)
+  message(FATAL_ERROR "Scenario identity check requires executable and three inputs")
+endif()
+
+function(read_problem_identity input output_variable)
+  execute_process(COMMAND "${SCENARIO_CLI}" --validate-only "${input}"
+    RESULT_VARIABLE status OUTPUT_VARIABLE output ERROR_VARIABLE error)
+  if(NOT "${status}" STREQUAL "0")
+    message(FATAL_ERROR "Scenario validation failed for ${input}: ${output}${error}")
+  endif()
+  string(REGEX MATCH "problem=([^ ]+)" match "${output}")
+  if(NOT match)
+    message(FATAL_ERROR "Validation omitted the problem identity for ${input}: ${output}")
+  endif()
+  set(${output_variable} "${CMAKE_MATCH_1}" PARENT_SCOPE)
+endfunction()
+
+read_problem_identity("${COMPARISON_INPUT}" comparison_identity)
+read_problem_identity("${METHODS_INPUT}" methods_identity)
+read_problem_identity("${CHANGED_INPUT}" changed_identity)
+if(NOT "${comparison_identity}" STREQUAL "${methods_identity}")
+  message(FATAL_ERROR "Changing the run selection changed ProblemId: ${comparison_identity} != ${methods_identity}")
+endif()
+if("${comparison_identity}" STREQUAL "${changed_identity}")
+  message(FATAL_ERROR "Changing mathematical data did not change ProblemId: ${changed_identity}")
+endif()
