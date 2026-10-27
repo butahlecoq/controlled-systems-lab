@@ -338,6 +338,14 @@ FAMILIES = {
         "Replays chosen controls on the public exact-discrete plant map over four analytic "
         "histories and checks every trajectory and terminal objective. The timings are "
         "exploratory single-adapter observations."),
+    "env717-simple-control": Family(
+        r"env717-simple-control-[0-9a-f]{20}", "synthesis",
+        "SimpleControlProblem finite-action pilot",
+        "Exhaustively evaluates 81 four-step control sequences for one source-attributed "
+        "discrete environment adaptation, checks the ten near-minimizing plans independently, "
+        "and includes a labelled time/state trajectory plot. The pilot changes the upstream "
+        "initial state and horizon, omits running reward, and makes no general environment or "
+        "performance claim."),
     "syn06-verifier": Family(
         r"syn06-verifier-\d{8}-[0-9a-f]{64}", "verification", "Trajectory verification",
         "Re-checks two literal two-stage integrator witnesses against the original saved input "
@@ -570,7 +578,7 @@ def parse_index(html: str):
 
 def recorded(site: Path, report_id: str) -> dict:
     """Read the scope, the limits and the source commit recorded with a report."""
-    for name in ("report-envelope.json", "records.json", "record.json"):
+    for name in ("report-envelope.json", "records.json", "record.json", "publication-manifest.json"):
         path = site / report_id / name
         if not path.is_file():
             continue

@@ -339,6 +339,67 @@ set_tests_properties(mpc03_b08_comparison_record PROPERTIES LABELS reporting)
 endif()
 endif()
 
+if(CSL_BUILD_ENV717_REPORT)
+include(cmake/JsonDependencies.cmake)
+file(GLOB_RECURSE ENV717_LIBRARY_INPUTS CONFIGURE_DEPENDS
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/*.cc
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/*.cxx
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/*.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/*.hpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/*.hxx
+    ${CMAKE_CURRENT_SOURCE_DIR}/include/*.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/include/*.hpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/include/*.hxx)
+set_property(DIRECTORY APPEND PROPERTY CMAKE_CONFIGURE_DEPENDS
+    ${CMAKE_CURRENT_SOURCE_DIR}/benchmarks/reporting/env717/simple_control.cpp
+    ${ENV717_LIBRARY_INPUTS})
+file(SHA256 ${CMAKE_CURRENT_SOURCE_DIR}/benchmarks/reporting/env717/simple_control.cpp
+    ENV717_DRIVER_SHA256)
+execute_process(COMMAND git status --porcelain -- src include
+    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+    OUTPUT_VARIABLE ENV717_LIBRARY_DIRTY OUTPUT_STRIP_TRAILING_WHITESPACE
+    COMMAND_ERROR_IS_FATAL ANY)
+if(NOT ENV717_LIBRARY_DIRTY STREQUAL "")
+    message(FATAL_ERROR "ENV717 measured library source tree is dirty: ${ENV717_LIBRARY_DIRTY}")
+endif()
+set(ENV717_ALGORITHM_HASHES "")
+foreach(ENV717_SOURCE IN LISTS ENV717_LIBRARY_INPUTS)
+    file(RELATIVE_PATH ENV717_SOURCE_RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} ${ENV717_SOURCE})
+    file(SHA256 ${ENV717_SOURCE} ENV717_ALGORITHM_SHA256)
+    string(APPEND ENV717_ALGORITHM_HASHES
+        "${ENV717_SOURCE_RELATIVE}:${ENV717_ALGORITHM_SHA256}\n")
+endforeach()
+string(SHA256 ENV717_ALGORITHM_SOURCE_SHA256 "${ENV717_ALGORITHM_HASHES}")
+execute_process(COMMAND git rev-parse HEAD WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+    OUTPUT_VARIABLE ENV717_SOURCE_COMMIT OUTPUT_STRIP_TRAILING_WHITESPACE COMMAND_ERROR_IS_FATAL ANY)
+add_executable(csl_env717_simple_control benchmarks/reporting/env717/simple_control.cpp)
+target_link_libraries(csl_env717_simple_control PRIVATE CSL::finite_action_minimax)
+target_include_directories(csl_env717_simple_control SYSTEM PRIVATE ${csl_json_SOURCE_DIR}/include)
+target_compile_features(csl_env717_simple_control PRIVATE cxx_std_20)
+target_compile_definitions(csl_env717_simple_control PRIVATE
+    $<$<CONFIG:Release>:NDEBUG>
+    CSL_ENV717_DRIVER_SHA256="${ENV717_DRIVER_SHA256}"
+    CSL_ENV717_SOURCE_COMMIT="${ENV717_SOURCE_COMMIT}"
+    CSL_ENV717_COMPILER_ID="${CMAKE_CXX_COMPILER_ID}"
+    CSL_ENV717_COMPILER_VERSION="${CMAKE_CXX_COMPILER_VERSION}"
+    CSL_ENV717_BUILD_TYPE="${CMAKE_BUILD_TYPE}"
+    CSL_ENV717_ARCHITECTURE="${CMAKE_SYSTEM_PROCESSOR}"
+    CSL_ENV717_ALGORITHM_SOURCE_SHA256="${ENV717_ALGORITHM_SOURCE_SHA256}")
+if(MSVC)
+    target_compile_options(csl_env717_simple_control PRIVATE /W4 /WX /permissive-)
+else()
+    target_compile_options(csl_env717_simple_control PRIVATE -Wall -Wextra -Wpedantic -Werror)
+endif()
+if(BUILD_TESTING)
+    find_package(Python3 3.11 REQUIRED COMPONENTS Interpreter)
+    add_test(NAME env717_simple_control_smoke COMMAND Python3::Interpreter
+        ${CMAKE_CURRENT_SOURCE_DIR}/scripts/reports/env717/check_smoke.py
+        $<TARGET_FILE:csl_env717_simple_control>)
+    set_tests_properties(env717_simple_control_smoke PROPERTIES LABELS reporting)
+endif()
+endif()
+
 if(CSL_BUILD_ISSUE6_B06_REPORT)
 include(cmake/JsonDependencies.cmake)
 file(SHA256 ${CMAKE_CURRENT_SOURCE_DIR}/benchmarks/reporting/issue6/b06_finite_minimax.cpp ISSUE6_B06_DRIVER_SHA256)

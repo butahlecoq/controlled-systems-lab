@@ -1,0 +1,126 @@
+<!doctype html>
+<html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Simple control pilot</title>
+<style>body{margin:0;background:#111820;color:#f4f1e8;font:16px/1.55 system-ui,sans-serif}main{max-width:1100px;margin:auto;padding:2rem}a{color:#8bd3f7}.plot{width:100%;height:auto}.note{border-left:4px solid #f4a261;padding:.7rem 1rem;background:#1a252e}</style>
+<main><h1>Simple control: finite-action pilot</h1>
+<p>This first source-attributed slice adapts the discrete SimpleControlProblem to a four-step terminal minimax problem. The solver exhausts all 81 action sequences; an independent Python enumeration checks every saved trajectory and the ten near-optimal plans under absolute tolerance 1e-14. One warmup and seven measured solver calls are recorded; setup and JSON output are excluded.</p>
+<div class="plot"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 620" role="img" aria-labelledby="title desc">
+<title id="title">Simple control pilot: time-state trajectories</title>
+<desc id="desc">All 81 four-step trajectories are shown. Ten near-optimal terminal-only plans finish at zero within the declared tolerance.</desc>
+<rect width="100%" height="100%" fill="#111820"/>
+<text x="100" y="38" fill="#f4f1e8" font-size="25" font-family="sans-serif" font-weight="700">Simple control · finite-action pilot</text>
+<text x="100" y="66" fill="#bac6ce" font-size="14" font-family="sans-serif">4 steps · dt = 0.05 s · x₀ = 0.1 · actions {−1, 0, 1} · minimize terminal x²</text>
+<line x1="100" y1="483.36" x2="920" y2="483.36" stroke="#293640"/>
+<text x="85" y="488.36" text-anchor="end" fill="#d2dce1" font-size="13" font-family="sans-serif">-0.1</text>
+<line x1="100" y1="390.18" x2="920" y2="390.18" stroke="#60717d" stroke-dasharray="7 6"/>
+<text x="85" y="395.18" text-anchor="end" fill="#d2dce1" font-size="13" font-family="sans-serif">0.0</text>
+<line x1="100" y1="297.00" x2="920" y2="297.00" stroke="#293640"/>
+<text x="85" y="302.00" text-anchor="end" fill="#d2dce1" font-size="13" font-family="sans-serif">0.1</text>
+<line x1="100" y1="203.82" x2="920" y2="203.82" stroke="#293640"/>
+<text x="85" y="208.82" text-anchor="end" fill="#d2dce1" font-size="13" font-family="sans-serif">0.2</text>
+<line x1="100" y1="110.64" x2="920" y2="110.64" stroke="#293640"/>
+<text x="85" y="115.64" text-anchor="end" fill="#d2dce1" font-size="13" font-family="sans-serif">0.3</text>
+<line x1="100.00" y1="92" x2="100.00" y2="502" stroke="#293640"/>
+<text x="100.00" y="526" text-anchor="middle" fill="#d2dce1" font-size="13" font-family="sans-serif">0.00</text>
+<line x1="305.00" y1="92" x2="305.00" y2="502" stroke="#293640"/>
+<text x="305.00" y="526" text-anchor="middle" fill="#d2dce1" font-size="13" font-family="sans-serif">0.05</text>
+<line x1="510.00" y1="92" x2="510.00" y2="502" stroke="#293640"/>
+<text x="510.00" y="526" text-anchor="middle" fill="#d2dce1" font-size="13" font-family="sans-serif">0.10</text>
+<line x1="715.00" y1="92" x2="715.00" y2="502" stroke="#293640"/>
+<text x="715.00" y="526" text-anchor="middle" fill="#d2dce1" font-size="13" font-family="sans-serif">0.15</text>
+<line x1="920.00" y1="92" x2="920.00" y2="502" stroke="#293640"/>
+<text x="920.00" y="526" text-anchor="middle" fill="#d2dce1" font-size="13" font-family="sans-serif">0.20</text>
+<rect x="100" y="92" width="820" height="410" fill="none" stroke="#81909a"/>
+<polyline points="100.00,297.00 305.00,343.59 510.00,390.18 715.00,436.77 920.00,483.36" fill="none" stroke="#56b4e9" stroke-width="1.2" stroke-opacity="0.14"/>
+<polyline points="100.00,297.00 305.00,343.59 510.00,390.18 715.00,436.77 920.00,436.77" fill="none" stroke="#56b4e9" stroke-width="1.2" stroke-opacity="0.14"/>
+<polyline points="100.00,297.00 305.00,343.59 510.00,390.18 715.00,436.77 920.00,390.18" fill="none" stroke="#f4a261" stroke-width="2.6" stroke-opacity="0.88"/>
+<polyline points="100.00,297.00 305.00,343.59 510.00,390.18 715.00,390.18 920.00,436.77" fill="none" stroke="#56b4e9" stroke-width="1.2" stroke-opacity="0.14"/>
+<polyline points="100.00,297.00 305.00,343.59 510.00,390.18 715.00,390.18 920.00,390.18" fill="none" stroke="#f4a261" stroke-width="2.6" stroke-opacity="0.88"/>
+<polyline points="100.00,297.00 305.00,343.59 510.00,390.18 715.00,390.18 920.00,343.59" fill="none" stroke="#56b4e9" stroke-width="1.2" stroke-opacity="0.14"/>
+<polyline points="100.00,297.00 305.00,343.59 510.00,390.18 715.00,343.59 920.00,390.18" fill="none" stroke="#f4a261" stroke-width="2.6" stroke-opacity="0.88"/>
+<polyline points="100.00,297.00 305.00,343.59 510.00,390.18 715.00,343.59 920.00,343.59" fill="none" stroke="#56b4e9" stroke-width="1.2" stroke-opacity="0.14"/>
+<polyline points="100.00,297.00 305.00,343.59 510.00,390.18 715.00,343.59 920.00,297.00" fill="none" stroke="#56b4e9" stroke-width="1.2" stroke-opacity="0.14"/>
+<polyline points="100.00,297.00 305.00,343.59 510.00,343.59 715.00,390.18 920.00,436.77" fill="none" stroke="#56b4e9" stroke-width="1.2" stroke-opacity="0.14"/>
+<polyline points="100.00,297.00 305.00,343.59 510.00,343.59 715.00,390.18 920.00,390.18" fill="none" stroke="#f4a261" stroke-width="2.6" stroke-opacity="0.88"/>
+<polyline points="100.00,297.00 305.00,343.59 510.00,343.59 715.00,390.18 920.00,343.59" fill="none" stroke="#56b4e9" stroke-width="1.2" stroke-opacity="0.14"/>
+<polyline points="100.00,297.00 305.00,343.59 510.00,343.59 715.00,343.59 920.00,390.18" fill="none" stroke="#f4a261" stroke-width="2.6" stroke-opacity="0.88"/>
+<polyline points="100.00,297.00 305.00,343.59 510.00,343.59 715.00,343.59 920.00,343.59" fill="none" stroke="#56b4e9" stroke-width="1.2" stroke-opacity="0.14"/>
+<polyline points="100.00,297.00 305.00,343.59 510.00,343.59 715.00,343.59 920.00,297.00" fill="none" stroke="#56b4e9" stroke-width="1.2" stroke-opacity="0.14"/>
+<polyline points="100.00,297.00 305.00,343.59 510.00,343.59 715.00,297.00 920.00,343.59" fill="none" stroke="#56b4e9" stroke-width="1.2" stroke-opacity="0.14"/>
+<polyline points="100.00,297.00 305.00,343.59 510.00,343.59 715.00,297.00 920.00,297.00" fill="none" stroke="#56b4e9" stroke-width="1.2" stroke-opacity="0.14"/>
+<polyline points="100.00,297.00 305.00,343.59 510.00,343.59 715.00,297.00 920.00,250.41" fill="none" stroke="#56b4e9" stroke-width="1.2" stroke-opacity="0.14"/>
+<polyline points="100.00,297.00 305.00,343.59 510.00,297.00 715.00,343.59 920.00,390.18" fill="none" stroke="#f4a261" stroke-width="2.6" stroke-opacity="0.88"/>
+<polyline points="100.00,297.00 305.00,343.59 510.00,297.00 715.00,343.59 920.00,343.59" fill="none" stroke="#56b4e9" stroke-width="1.2" stroke-opacity="0.14"/>
+<polyline points="100.00,297.00 305.00,343.59 510.00,297.00 715.00,343.59 920.00,297.00" fill="none" stroke="#56b4e9" stroke-width="1.2" stroke-opacity="0.14"/>
+<polyline points="100.00,297.00 305.00,343.59 510.00,297.00 715.00,297.00 920.00,343.59" fill="none" stroke="#56b4e9" stroke-width="1.2" stroke-opacity="0.14"/>
+<polyline points="100.00,297.00 305.00,343.59 510.00,297.00 715.00,297.00 920.00,297.00" fill="none" stroke="#56b4e9" stroke-width="1.2" stroke-opacity="0.14"/>
+<polyline points="100.00,297.00 305.00,343.59 510.00,297.00 715.00,297.00 920.00,250.41" fill="none" stroke="#56b4e9" stroke-width="1.2" stroke-opacity="0.14"/>
+<polyline points="100.00,297.00 305.00,343.59 510.00,297.00 715.00,250.41 920.00,297.00" fill="none" stroke="#56b4e9" stroke-width="1.2" stroke-opacity="0.14"/>
+<polyline points="100.00,297.00 305.00,343.59 510.00,297.00 715.00,250.41 920.00,250.41" fill="none" stroke="#56b4e9" stroke-width="1.2" stroke-opacity="0.14"/>
+<polyline points="100.00,297.00 305.00,343.59 510.00,297.00 715.00,250.41 920.00,203.82" fill="none" stroke="#56b4e9" stroke-width="1.2" stroke-opacity="0.14"/>
+<polyline points="100.00,297.00 305.00,297.00 510.00,343.59 715.00,390.18 920.00,436.77" fill="none" stroke="#56b4e9" stroke-width="1.2" stroke-opacity="0.14"/>
+<polyline points="100.00,297.00 305.00,297.00 510.00,343.59 715.00,390.18 920.00,390.18" fill="none" stroke="#f4a261" stroke-width="2.6" stroke-opacity="0.88"/>
+<polyline points="100.00,297.00 305.00,297.00 510.00,343.59 715.00,390.18 920.00,343.59" fill="none" stroke="#56b4e9" stroke-width="1.2" stroke-opacity="0.14"/>
+<polyline points="100.00,297.00 305.00,297.00 510.00,343.59 715.00,343.59 920.00,390.18" fill="none" stroke="#f4a261" stroke-width="2.6" stroke-opacity="0.88"/>
+<polyline points="100.00,297.00 305.00,297.00 510.00,343.59 715.00,343.59 920.00,343.59" fill="none" stroke="#56b4e9" stroke-width="1.2" stroke-opacity="0.14"/>
+<polyline points="100.00,297.00 305.00,297.00 510.00,343.59 715.00,343.59 920.00,297.00" fill="none" stroke="#56b4e9" stroke-width="1.2" stroke-opacity="0.14"/>
+<polyline points="100.00,297.00 305.00,297.00 510.00,343.59 715.00,297.00 920.00,343.59" fill="none" stroke="#56b4e9" stroke-width="1.2" stroke-opacity="0.14"/>
+<polyline points="100.00,297.00 305.00,297.00 510.00,343.59 715.00,297.00 920.00,297.00" fill="none" stroke="#56b4e9" stroke-width="1.2" stroke-opacity="0.14"/>
+<polyline points="100.00,297.00 305.00,297.00 510.00,343.59 715.00,297.00 920.00,250.41" fill="none" stroke="#56b4e9" stroke-width="1.2" stroke-opacity="0.14"/>
+<polyline points="100.00,297.00 305.00,297.00 510.00,297.00 715.00,343.59 920.00,390.18" fill="none" stroke="#f4a261" stroke-width="2.6" stroke-opacity="0.88"/>
+<polyline points="100.00,297.00 305.00,297.00 510.00,297.00 715.00,343.59 920.00,343.59" fill="none" stroke="#56b4e9" stroke-width="1.2" stroke-opacity="0.14"/>
+<polyline points="100.00,297.00 305.00,297.00 510.00,297.00 715.00,343.59 920.00,297.00" fill="none" stroke="#56b4e9" stroke-width="1.2" stroke-opacity="0.14"/>
+<polyline points="100.00,297.00 305.00,297.00 510.00,297.00 715.00,297.00 920.00,343.59" fill="none" stroke="#56b4e9" stroke-width="1.2" stroke-opacity="0.14"/>
+<polyline points="100.00,297.00 305.00,297.00 510.00,297.00 715.00,297.00 920.00,297.00" fill="none" stroke="#56b4e9" stroke-width="1.2" stroke-opacity="0.14"/>
+<polyline points="100.00,297.00 305.00,297.00 510.00,297.00 715.00,297.00 920.00,250.41" fill="none" stroke="#56b4e9" stroke-width="1.2" stroke-opacity="0.14"/>
+<polyline points="100.00,297.00 305.00,297.00 510.00,297.00 715.00,250.41 920.00,297.00" fill="none" stroke="#56b4e9" stroke-width="1.2" stroke-opacity="0.14"/>
+<polyline points="100.00,297.00 305.00,297.00 510.00,297.00 715.00,250.41 920.00,250.41" fill="none" stroke="#56b4e9" stroke-width="1.2" stroke-opacity="0.14"/>
+<polyline points="100.00,297.00 305.00,297.00 510.00,297.00 715.00,250.41 920.00,203.82" fill="none" stroke="#56b4e9" stroke-width="1.2" stroke-opacity="0.14"/>
+<polyline points="100.00,297.00 305.00,297.00 510.00,250.41 715.00,297.00 920.00,343.59" fill="none" stroke="#56b4e9" stroke-width="1.2" stroke-opacity="0.14"/>
+<polyline points="100.00,297.00 305.00,297.00 510.00,250.41 715.00,297.00 920.00,297.00" fill="none" stroke="#56b4e9" stroke-width="1.2" stroke-opacity="0.14"/>
+<polyline points="100.00,297.00 305.00,297.00 510.00,250.41 715.00,297.00 920.00,250.41" fill="none" stroke="#56b4e9" stroke-width="1.2" stroke-opacity="0.14"/>
+<polyline points="100.00,297.00 305.00,297.00 510.00,250.41 715.00,250.41 920.00,297.00" fill="none" stroke="#56b4e9" stroke-width="1.2" stroke-opacity="0.14"/>
+<polyline points="100.00,297.00 305.00,297.00 510.00,250.41 715.00,250.41 920.00,250.41" fill="none" stroke="#56b4e9" stroke-width="1.2" stroke-opacity="0.14"/>
+<polyline points="100.00,297.00 305.00,297.00 510.00,250.41 715.00,250.41 920.00,203.82" fill="none" stroke="#56b4e9" stroke-width="1.2" stroke-opacity="0.14"/>
+<polyline points="100.00,297.00 305.00,297.00 510.00,250.41 715.00,203.82 920.00,250.41" fill="none" stroke="#56b4e9" stroke-width="1.2" stroke-opacity="0.14"/>
+<polyline points="100.00,297.00 305.00,297.00 510.00,250.41 715.00,203.82 920.00,203.82" fill="none" stroke="#56b4e9" stroke-width="1.2" stroke-opacity="0.14"/>
+<polyline points="100.00,297.00 305.00,297.00 510.00,250.41 715.00,203.82 920.00,157.23" fill="none" stroke="#56b4e9" stroke-width="1.2" stroke-opacity="0.14"/>
+<polyline points="100.00,297.00 305.00,250.41 510.00,297.00 715.00,343.59 920.00,390.18" fill="none" stroke="#f4a261" stroke-width="2.6" stroke-opacity="0.88"/>
+<polyline points="100.00,297.00 305.00,250.41 510.00,297.00 715.00,343.59 920.00,343.59" fill="none" stroke="#56b4e9" stroke-width="1.2" stroke-opacity="0.14"/>
+<polyline points="100.00,297.00 305.00,250.41 510.00,297.00 715.00,343.59 920.00,297.00" fill="none" stroke="#56b4e9" stroke-width="1.2" stroke-opacity="0.14"/>
+<polyline points="100.00,297.00 305.00,250.41 510.00,297.00 715.00,297.00 920.00,343.59" fill="none" stroke="#56b4e9" stroke-width="1.2" stroke-opacity="0.14"/>
+<polyline points="100.00,297.00 305.00,250.41 510.00,297.00 715.00,297.00 920.00,297.00" fill="none" stroke="#56b4e9" stroke-width="1.2" stroke-opacity="0.14"/>
+<polyline points="100.00,297.00 305.00,250.41 510.00,297.00 715.00,297.00 920.00,250.41" fill="none" stroke="#56b4e9" stroke-width="1.2" stroke-opacity="0.14"/>
+<polyline points="100.00,297.00 305.00,250.41 510.00,297.00 715.00,250.41 920.00,297.00" fill="none" stroke="#56b4e9" stroke-width="1.2" stroke-opacity="0.14"/>
+<polyline points="100.00,297.00 305.00,250.41 510.00,297.00 715.00,250.41 920.00,250.41" fill="none" stroke="#56b4e9" stroke-width="1.2" stroke-opacity="0.14"/>
+<polyline points="100.00,297.00 305.00,250.41 510.00,297.00 715.00,250.41 920.00,203.82" fill="none" stroke="#56b4e9" stroke-width="1.2" stroke-opacity="0.14"/>
+<polyline points="100.00,297.00 305.00,250.41 510.00,250.41 715.00,297.00 920.00,343.59" fill="none" stroke="#56b4e9" stroke-width="1.2" stroke-opacity="0.14"/>
+<polyline points="100.00,297.00 305.00,250.41 510.00,250.41 715.00,297.00 920.00,297.00" fill="none" stroke="#56b4e9" stroke-width="1.2" stroke-opacity="0.14"/>
+<polyline points="100.00,297.00 305.00,250.41 510.00,250.41 715.00,297.00 920.00,250.41" fill="none" stroke="#56b4e9" stroke-width="1.2" stroke-opacity="0.14"/>
+<polyline points="100.00,297.00 305.00,250.41 510.00,250.41 715.00,250.41 920.00,297.00" fill="none" stroke="#56b4e9" stroke-width="1.2" stroke-opacity="0.14"/>
+<polyline points="100.00,297.00 305.00,250.41 510.00,250.41 715.00,250.41 920.00,250.41" fill="none" stroke="#56b4e9" stroke-width="1.2" stroke-opacity="0.14"/>
+<polyline points="100.00,297.00 305.00,250.41 510.00,250.41 715.00,250.41 920.00,203.82" fill="none" stroke="#56b4e9" stroke-width="1.2" stroke-opacity="0.14"/>
+<polyline points="100.00,297.00 305.00,250.41 510.00,250.41 715.00,203.82 920.00,250.41" fill="none" stroke="#56b4e9" stroke-width="1.2" stroke-opacity="0.14"/>
+<polyline points="100.00,297.00 305.00,250.41 510.00,250.41 715.00,203.82 920.00,203.82" fill="none" stroke="#56b4e9" stroke-width="1.2" stroke-opacity="0.14"/>
+<polyline points="100.00,297.00 305.00,250.41 510.00,250.41 715.00,203.82 920.00,157.23" fill="none" stroke="#56b4e9" stroke-width="1.2" stroke-opacity="0.14"/>
+<polyline points="100.00,297.00 305.00,250.41 510.00,203.82 715.00,250.41 920.00,297.00" fill="none" stroke="#56b4e9" stroke-width="1.2" stroke-opacity="0.14"/>
+<polyline points="100.00,297.00 305.00,250.41 510.00,203.82 715.00,250.41 920.00,250.41" fill="none" stroke="#56b4e9" stroke-width="1.2" stroke-opacity="0.14"/>
+<polyline points="100.00,297.00 305.00,250.41 510.00,203.82 715.00,250.41 920.00,203.82" fill="none" stroke="#56b4e9" stroke-width="1.2" stroke-opacity="0.14"/>
+<polyline points="100.00,297.00 305.00,250.41 510.00,203.82 715.00,203.82 920.00,250.41" fill="none" stroke="#56b4e9" stroke-width="1.2" stroke-opacity="0.14"/>
+<polyline points="100.00,297.00 305.00,250.41 510.00,203.82 715.00,203.82 920.00,203.82" fill="none" stroke="#56b4e9" stroke-width="1.2" stroke-opacity="0.14"/>
+<polyline points="100.00,297.00 305.00,250.41 510.00,203.82 715.00,203.82 920.00,157.23" fill="none" stroke="#56b4e9" stroke-width="1.2" stroke-opacity="0.14"/>
+<polyline points="100.00,297.00 305.00,250.41 510.00,203.82 715.00,157.23 920.00,203.82" fill="none" stroke="#56b4e9" stroke-width="1.2" stroke-opacity="0.14"/>
+<polyline points="100.00,297.00 305.00,250.41 510.00,203.82 715.00,157.23 920.00,157.23" fill="none" stroke="#56b4e9" stroke-width="1.2" stroke-opacity="0.14"/>
+<polyline points="100.00,297.00 305.00,250.41 510.00,203.82 715.00,157.23 920.00,110.64" fill="none" stroke="#56b4e9" stroke-width="1.2" stroke-opacity="0.14"/>
+<text x="510.0" y="559" text-anchor="middle" fill="#f4f1e8" font-size="16" font-family="sans-serif">time (s)</text>
+<text x="27" y="297.0" transform="rotate(-90 27 297.0)" text-anchor="middle" fill="#f4f1e8" font-size="16" font-family="sans-serif">state x</text>
+<line x1="695" y1="554" x2="725" y2="554" stroke="#56b4e9" stroke-width="2" stroke-opacity="0.6"/>
+<text x="733" y="559" fill="#d2dce1" font-size="13" font-family="sans-serif">other 71 plans</text>
+<line x1="825" y1="554" x2="855" y2="554" stroke="#f4a261" stroke-width="3"/>
+<text x="863" y="559" fill="#d2dce1" font-size="13" font-family="sans-serif">10 minimizers</text>
+<text x="100" y="590" fill="#93a4ae" font-size="12" font-family="sans-serif">Illustrative finite-action adaptation; running reward omitted. The projection shows time and scalar state.</text>
+</svg></div>
+<p class="note"><strong>Scope:</strong> the source defaults to initial state [0, 1] and terminal time 2 s. This pilot uses x₀ = 0.1 and 0.2 s to keep exhaustive enumeration small. It minimizes terminal x² and omits the source running reward. The source also has different running-reward coefficients in cost() and step(); the source step() execution rule is the reference for the environment. This is not a reproduction of the original reward objective.</p>
+<p>Source repository commit: <code>f4d76c60f4003f50954174e96eafd8e514bd5441</code>. CSL source commit: <code>969af71400894e8cd225cd8740b58777228a136b</code>. Assurance: numerical, exhaustive over the declared finite action catalogue.</p>
+<p>Timing: median 364085 ns (range 348930–605179 ns; seven calls after one warmup). Compiler: GNU 16.2.1; build: Release; host: Linux-7.2.5-3-omarchy-x86_64-with-glibc2.44; CPU: AMD Ryzen 5 3550H with Radeon Vega Mobile Gfx; logical CPUs: 8; load average before capture: [1.61376953125, 1.73681640625, 1.62646484375].</p>
+<p><a href="result.json">Saved result JSON</a> · <a href="projection.svg">Standalone SVG</a> · <a href="projection.png">PNG</a></p></main></html>
