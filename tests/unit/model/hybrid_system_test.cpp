@@ -3,9 +3,11 @@
 
 #include <csl/model/hybrid_system.hpp>
 #include <csl/sets/data.hpp>
+#include "../../../src/model/hybrid_path_layout_arithmetic.hpp"
 
 #include <algorithm>
 #include <array>
+#include <limits>
 #include <optional>
 #include <span>
 #include <type_traits>
@@ -630,6 +632,13 @@ TEST_CASE("hybrid path-layout preflight preserves connectivity and variable-limi
     REQUIRE(limit_diagnostic);
     CHECK(limit_diagnostic->field=="hybrid.relation.variables");
     CHECK(limit_diagnostic->explanation.find("stage 0 edge switch")!=std::string::npos);
+}
+
+TEST_CASE("hybrid path coordinate width rejects size_t overflow") {
+    const auto max=std::numeric_limits<std::size_t>::max();
+    CHECK(csl::model::detail::checked_coordinate_width(max,0)==max);
+    CHECK(csl::model::detail::checked_coordinate_width(max-2,2)==max);
+    CHECK_FALSE(csl::model::detail::checked_coordinate_width(max-1,2));
 }
 
 TEST_CASE("hybrid composition report records mode and transition operations with resource use") {

@@ -18,7 +18,7 @@ The synthesis path admits its full inventory first, then invokes the existing re
 
 ## Shape
 
-One private resolver creates an immutable `HybridPathLayout`. It stores resolved mode and edge identities, ordered post-state ranges, per-transition control and pre-reset ranges, and checked total width. The coordinate order is the initial post-state followed by each transition's control, pre-reset state, and next post-state. Separate mode and transition sequences represent a zero-horizon path as one post-state and no transitions.
+One private resolver creates a `HybridPathLayout` that consumers treat as immutable after resolution. It stores resolved mode and edge identities, ordered post-state ranges, per-transition control and pre-reset ranges, and checked total width. The coordinate order is the initial post-state followed by each transition's control, pre-reset state, and next post-state. Separate mode and transition sequences represent a zero-horizon path as one post-state and no transitions.
 
 The resolver owns path-shape, endpoint, connectivity, dimension, and offset validation. Preflight uses this layout to count supported H rows and enforce variable, row, and matrix-element limits. Admission remains distinct from relation construction, and objective lifting uses the layout without inheriting H-representation admission. Each consumer resolves one ephemeral layout for its call; preflight does not return layouts to synthesis. Composition and objective-lift consumers use named coordinate ranges and do not independently resolve path identities or recalculate offsets.
 
@@ -46,4 +46,4 @@ Neither candidate supplied the required behavior-test matrix, so implementation 
 
 ## Verification and remaining risks
 
-The focused `hybrid_model_tests` and `hybrid_path_program_tests` pass. New coverage checks a literal dimension-changing relation and lifted objective, malformed connectivity, and stage-context variable-limit diagnostics. Existing tests cover zero horizon, resets, cancellation, and row/storage limits. The main remaining risk is preserving diagnostic precedence across less common malformed-profile combinations; the layout stays private so it can be adjusted without changing caller APIs.
+The focused `hybrid_model_tests` and `hybrid_path_program_tests` pass. New coverage checks a literal dimension-changing relation and lifted objective, malformed connectivity, stage-context variable-limit diagnostics, and the checked coordinate-width arithmetic at the `size_t` boundary. Existing tests cover zero horizon, resets, cancellation, and row/storage limits. The main remaining risk is preserving diagnostic precedence across less common malformed-profile combinations; the layout stays private so it can be adjusted without changing caller APIs.

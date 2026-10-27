@@ -2,6 +2,7 @@
 #include <csl/optimization/objectives.hpp>
 #include <csl/sets/data.hpp>
 #include <csl/numeric/data.hpp>
+#include "hybrid_path_layout_arithmetic.hpp"
 
 #include <algorithm>
 #include <cmath>
@@ -439,7 +440,6 @@ HybridPathLayoutResult resolve_hybrid_path_layout(const HybridSystem& system,
         layout.modes.push_back(mode);
     }
 
-    const auto max=std::numeric_limits<std::size_t>::max();
     if(check_variable_limit && layout.modes.front()->state_dimension>limits.max_variables)
         return HybridPathLayoutFailure{{DiagnosticCode::unsupported,
             "hybrid.relation.variables","Joint relation exceeds its variable limit"},0,{}};
@@ -458,11 +458,12 @@ HybridPathLayoutResult resolve_hybrid_path_layout(const HybridSystem& system,
 
         enum class ReserveFailure { none, variable_limit, width_overflow };
         auto reserve=[&](std::size_t amount,std::size_t& offset)->ReserveFailure {
-            if(layout.width>max-amount) return ReserveFailure::width_overflow;
-            if(check_variable_limit && layout.width+amount>limits.max_variables)
+            const auto next_width=detail::checked_coordinate_width(layout.width,amount);
+            if(!next_width) return ReserveFailure::width_overflow;
+            if(check_variable_limit && *next_width>limits.max_variables)
                 return ReserveFailure::variable_limit;
             offset=layout.width;
-            layout.width+=amount;
+            layout.width=*next_width;
             return ReserveFailure::none;
         };
         HybridTransitionLayout transition;
