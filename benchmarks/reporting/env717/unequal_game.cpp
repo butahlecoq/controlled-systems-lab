@@ -68,7 +68,23 @@ Json result_record() {
                 stopped - started).count());
     }
     const auto* result = std::get_if<FiniteMinimaxOptimal>(&outcome);
-    if(!result) throw std::runtime_error("finite-action minimax did not return an optimum");
+    if(!result) {
+        if(const auto* unsupported = std::get_if<Unsupported>(&outcome)) {
+            std::string detail;
+            for(const auto& diagnostic : unsupported->diagnostics)
+                detail += diagnostic.field + ": " + diagnostic.explanation + "; ";
+            throw std::runtime_error("finite-action minimax unsupported: " + detail);
+        }
+        if(const auto* stopped = std::get_if<OperationStopped>(&outcome))
+            throw std::runtime_error("finite-action minimax stopped: " + stopped->diagnostics);
+        if(std::holds_alternative<FiniteMinimaxInfeasible>(outcome))
+            throw std::runtime_error("finite-action minimax rejected every control plan");
+        if(std::holds_alternative<FiniteMinimaxNoScenarios>(outcome))
+            throw std::runtime_error("finite-action minimax had no scenarios");
+        if(std::holds_alternative<FiniteMinimaxEmptyCatalogue>(outcome))
+            throw std::runtime_error("finite-action minimax received an empty catalogue");
+        throw std::runtime_error("finite-action minimax returned an unexpected outcome");
+    }
     if(result->plans.size() != 27 || result->minimizing_plan_indices.empty())
         throw std::runtime_error("unexpected exhaustive action catalogue");
 
