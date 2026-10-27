@@ -1,5 +1,6 @@
 from pathlib import Path
 import sys
+import tempfile
 import unittest
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -32,6 +33,14 @@ class Viz04RendererTests(unittest.TestCase):
         page = (ROOT / "docs/examples/viz04-replay-comparison.html").read_text(encoding="utf-8")
         self.assertIn("equal x/y scaling because its paired coordinates share units", page)
         self.assertIn("not boundaries of reachable sets", page)
+
+    def test_checked_in_svg_matches_saved_artifact_renderer(self):
+        artifact = ROOT / "docs/examples/viz04-replay-comparison.json"
+        checked_in = ROOT / "docs/examples/viz04-replay-comparison.svg"
+        with tempfile.TemporaryDirectory() as temporary:
+            rendered = Path(temporary) / "replay.svg"
+            render_saved.render(render_saved.load(artifact), rendered)
+            self.assertEqual(rendered.read_bytes(), checked_in.read_bytes())
 
 
 if __name__ == "__main__":
