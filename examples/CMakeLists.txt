@@ -189,7 +189,7 @@ example_check(scenario_cli_run_explicit_h_representation scenario_cli
   "--run;${CMAKE_CURRENT_BINARY_DIR}/explicit-h-representation.json" 0
   "mode=run profile=ts01_exact_integrator strategy=csl.synthesis.reach-back.*seed=31 threads=1.*trajectory_verification=numerical_pass")
 string(JSON explicit_methods_scenario SET "${validation_scenario}" run
-  "{\"methods\":[{\"id\":\"csl.synthesis.reach-back\",\"version\":\"1\"}],\"seed\":42}")
+  "{\"methods\":[{\"id\":\"csl.synthesis.reach-back\",\"version\":\"1\"}],\"backends\":{\"lp\":{\"id\":\"csl.lp.highs\"}},\"seed\":42}")
 file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/explicit-methods.json" "${explicit_methods_scenario}")
 string(JSON changed_method_problem_scenario SET "${explicit_methods_scenario}" model A "[[2]]")
 file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/explicit-methods-changed-data.json" "${changed_method_problem_scenario}")
