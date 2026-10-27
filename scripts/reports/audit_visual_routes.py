@@ -10,7 +10,7 @@ import re
 
 ROOT = Path(__file__).resolve().parents[2]
 VISUAL_SIGNAL = re.compile(r"<svg|savefig\s*\(|write_image\s*\(|\.svg\b|\.png\b|render_svg", re.I)
-ASSET_NAME = re.compile(r"[A-Za-z0-9_.-]+\.(?:svg|png)")
+ASSET_NAME = re.compile(r"(?P<quote>['\"])[^'\"\n]*?(?P<asset>[A-Za-z0-9_.-]+\.(?:svg|png))(?P=quote)")
 MIGRATION_ISSUES = {
     "approximation-and-extensions": 684,
     "geometry-and-optimization": 685,
@@ -120,7 +120,7 @@ def source_inventory(root: Path) -> list[dict]:
             if not matches:
                 continue
             relative = path.relative_to(root).as_posix()
-            assets = sorted(set(ASSET_NAME.findall(source)))
+            assets = sorted({match.group("asset") for match in ASSET_NAME.finditer(source)})
             if relative in COMPOSED_SAVED_ROUTES:
                 disposition = "composes-or-copies-existing-saved-figure"
             elif relative in SAVED_DATA_COMPANION_COLLECTORS:

@@ -14,8 +14,7 @@
       "source": "scripts/reports/app01/collect.py",
       "signal_count": 3,
       "asset_name_literals": [
-        "latency.svg",
-        "report.svg"
+        "latency.svg"
       ],
       "disposition": "measurement-collector-preserved-with-saved-data-companion"
     },
@@ -95,9 +94,7 @@
     {
       "source": "scripts/reports/ext03_transform/report.py",
       "signal_count": 1,
-      "asset_name_literals": [
-        "visual.svg"
-      ],
+      "asset_name_literals": [],
       "disposition": "composes-or-copies-existing-saved-figure"
     },
     {
@@ -483,7 +480,6 @@
       "source": "scripts/reports/plot.py",
       "signal_count": 7,
       "asset_name_literals": [
-        "csl.report.svg",
         "latency.png",
         "latency.svg"
       ],
@@ -509,7 +505,6 @@
       "source": "scripts/reports/render.py",
       "signal_count": 6,
       "asset_name_literals": [
-        "csl.report.svg",
         "latency.png",
         "latency.svg"
       ],
@@ -519,19 +514,15 @@
     {
       "source": "scripts/reports/report_data.py",
       "signal_count": 1,
-      "asset_name_literals": [
-        "csl.report.svg"
-      ],
+      "asset_name_literals": [],
       "disposition": "publication-validation-or-frozen-route"
     },
     {
       "source": "scripts/reports/site.py",
       "signal_count": 7,
       "asset_name_literals": [
-        "csl.report.svg",
         "latency.png",
-        "latency.svg",
-        "policy.svg"
+        "latency.svg"
       ],
       "disposition": "publication-validation-or-frozen-route"
     },
@@ -777,8 +768,7 @@
       "source": "scripts/reports/syn06/collect.py",
       "signal_count": 3,
       "asset_name_literals": [
-        "latency.svg",
-        "report.svg"
+        "latency.svg"
       ],
       "disposition": "deferred-family-specific-migration",
       "follow_up_issue": 686
