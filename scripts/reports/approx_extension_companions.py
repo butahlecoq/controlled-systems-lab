@@ -179,6 +179,50 @@ def ext05_companion(record_path: Path, style_path: Path) -> dict[str, bytes]:
         aspect="independent")}
 
 
+def app01_companion(record_path: Path, style_path: Path, publication_report_id: str) -> dict[str, bytes]:
+    """Plot APP-01's archived plan-check medians without collecting new timings."""
+    record = json.loads(Path(record_path).read_text(encoding="utf-8"))
+    payload = record.get("payload", {})
+    summary = payload.get("summary", [])
+    expected = {"valid_plan": 189260900, "invalid_plan": 190658800,
+                "empty_inner": 127618800}
+    _require(record.get("schema") == "csl.app01-plan-report/1" and
+             record.get("report_id") == "app01-plan-20261016-22d406fd" and
+             isinstance(publication_report_id, str) and publication_report_id.startswith("app01-plan-") and
+             payload.get("schema") == "csl.app01-plan-report/1" and
+             payload.get("source_commit") == "22d406fd9ea92315ef2a4f6b5703eec74e710d47" and
+             [row.get("fixture") for row in summary] == list(expected) and
+             all(row.get("median_elapsed_ns") == expected[row["fixture"]] and
+                 row.get("trials") == 7 and row.get("batch") == 40000 and
+                 row.get("checked_calls") == 280000 and row.get("failures") == 0
+                 for row in summary),
+             "APP-01 saved fixture timing identities changed")
+    colors = {"valid_plan": "#0072B2", "invalid_plan": "#D55E00", "empty_inner": "#009E73"}
+    points = {row["fixture"]: [index, row["median_elapsed_ns"] / 1_000_000]
+              for index, row in enumerate(summary, start=1)}
+    document = {"schema": "csl.saved-geometric-plot/1",
+                "title": "APP-01 saved plan-check median times",
+                "description": ("Three markers show archived fixture medians: valid plan, invalid plan, and empty inner set. "
+                                "Each median summarizes seven measured batches of 40,000 checked calls. "
+                                "This descriptive report is not a speed comparison or performance-winner claim."),
+                "aspect": "independent",
+                "axes": {"x": {"label": "fixture ordinal (1 valid, 2 invalid, 3 empty inner)"},
+                         "y": {"label": "median elapsed time per 40,000-call batch (ms)"}},
+                "series": [{"kind": "points", "label": f"{name} · {expected[name] / 1_000_000:.3f} ms median",
+                            "color": colors[name], "points": [points[name]], "size": 52, "alpha": 1}
+                           for name in expected]}
+    outputs = _render_companion(document, style_path, "app01-plan-timing-v1")
+    return outputs | {"app01-plan-timing-v1.html": _companion_page(
+        "APP-01 saved plan-check timings", "app01-plan-timing-v1", publication_report_id,
+        f"This companion plots archived medians: valid_plan {expected['valid_plan'] / 1_000_000:.3f} ms, "
+        f"invalid_plan {expected['invalid_plan'] / 1_000_000:.3f} ms, and "
+        f"empty_inner {expected['empty_inner'] / 1_000_000:.3f} ms. Each median summarizes seven measured "
+        "batches of 40,000 checked calls (280,000 calls per fixture). "
+        "Exact nanosecond values, trials, configuration, and evidence limits remain in the frozen record. "
+        "This is descriptive evidence, not a speed comparison or a performance-winner claim.",
+        aspect="fixture-timing", source_commit=payload["source_commit"])}
+
+
 def ext01_companion(record_path: Path, style_path: Path) -> dict[str, bytes]:
     """Plot the seven archived EXT-01 B08 timing observations."""
     record = json.loads(Path(record_path).read_text(encoding="utf-8"))
@@ -233,6 +277,8 @@ def _companion_page(title: str, stem: str, report_id: str, summary: str,
         scaling = "The plot uses equal x-y scales and preserves the archived fixture values."
     elif aspect == "numeric":
         scaling = "Round and elapsed time use separate numeric axes; elapsed time is shown in milliseconds per call."
+    elif aspect == "fixture-timing":
+        scaling = "Fixture ordinal and median elapsed time use separate numeric axes; elapsed time is per 40,000-call batch in milliseconds."
     else:
         scaling = "Independent coordinate scales are disclosed; the saved state coordinates use different physical meanings."
     return ('<!doctype html><html lang="en"><head><meta charset="utf-8">'

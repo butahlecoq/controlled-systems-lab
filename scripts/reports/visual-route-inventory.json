@@ -17,8 +17,7 @@
         "latency.svg",
         "report.svg"
       ],
-      "disposition": "deferred-family-specific-migration",
-      "follow_up_issue": 684
+      "disposition": "measurement-collector-preserved-with-saved-data-companion"
     },
     {
       "source": "scripts/reports/app02/render_saved.py",
@@ -728,8 +727,9 @@
     },
     {
       "source": "scripts/reports/visual_examples.py",
-      "signal_count": 53,
+      "signal_count": 55,
       "asset_name_literals": [
+        "app01-plan-timing-v1.svg",
         "app02-diamond-v1.svg",
         "app03-zonotope-v1.svg",
         "app04-square-v1.svg",
@@ -853,7 +853,8 @@
       ],
       "index_sha256": "54947c78cf175f3b6647234ef5dc33117d7ee01375a251520fc270f0a6411211",
       "disposition": "deferred: original frozen route-level readability review remains; companion availability is listed separately",
-      "follow_up_issue": 669
+      "follow_up_issue": 669,
+      "companion_route": "examples/app01-plan-timing-v1.html"
     },
     {
       "route": "app02-box-8ff979de60ea9d22",
@@ -1500,6 +1501,10 @@
         "ext05-states-v1.svg",
         "ext05-states-v1.png",
         "ext05-states-v1-export.json",
+        "app01-plan-timing-v1.html",
+        "app01-plan-timing-v1.svg",
+        "app01-plan-timing-v1.png",
+        "app01-plan-timing-v1-export.json",
         "mpc03-open-loop-pilot-v1/index.html",
         "mpc03-open-loop-pilot-v1/record.json",
         "mpc03-open-loop-pilot-v1/pilot-output.json",
