@@ -1,5 +1,6 @@
 import hashlib
 import importlib.util
+import itertools
 import json
 from pathlib import Path
 import unittest
@@ -44,6 +45,33 @@ class StageProjectionDemoTests(unittest.TestCase):
         first_flow_points = batch["records"][4]["outcome"]["components"][0]["vertices"]
         rounded = {(round(point[0], 6), round(point[1], 6)) for point in first_flow_points}
         self.assertEqual(rounded, {(28.61, 20.687333), (30.01, 20.020667)})
+
+    def test_every_fuel_projection_matches_independent_closed_form_oracle(self):
+        batch = self.make_batch("fuel-four-state")
+        initial = (29.31, 302.0, 20.354, 207.0)
+        controls = (-1.0, 1.0)
+        for stage in range(6):
+            projected_control_count = 1 if stage == 0 else 2 ** stage
+            histories = itertools.product(controls, repeat=stage)
+            oracle_states = []
+            for history in histories:
+                control_sum = sum(history)
+                weighted_sum = sum((stage - 1 - index) * value
+                                   for index, value in enumerate(history[:-1]))
+                oracle_states.append((
+                    initial[0] + 0.7 * control_sum,
+                    initial[1] - 2.0 * stage * initial[0] - 1.4 * weighted_sum,
+                    initial[2] - (1.0 / 3.0) * control_sum,
+                    initial[3] - 2.0 * stage * initial[2] + (2.0 / 3.0) * weighted_sum,
+                ))
+            self.assertEqual(len(oracle_states), projected_control_count)
+            for pair_index, (first, second) in enumerate(batch["requested_pairs"]):
+                record = batch["records"][stage * len(batch["requested_pairs"]) + pair_index]
+                observed = record["outcome"]["components"][0]["vertices"]
+                observed_points = {(round(point[0], 9), round(point[1], 9)) for point in observed}
+                expected_points = {(round(state[first], 9), round(state[second], 9))
+                                   for state in oracle_states}
+                self.assertEqual(observed_points, expected_points, (stage, pair_index))
 
     def test_nonfuel_demo_uses_the_same_batch_contract(self):
         batch = self.make_batch("nonfuel-integrator")

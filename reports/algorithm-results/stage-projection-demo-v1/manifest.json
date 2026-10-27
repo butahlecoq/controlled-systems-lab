@@ -6,23 +6,23 @@
     },
     {
       "path": "fuel-four-state-figures/index.html",
-      "sha256": "9fe20d4fabaee159d32b7271ee11572ece856cf50819dc8a4b324a91d756cdd7"
+      "sha256": "0216067d16b56468f1379e41d8391f42f94e3d06e6c0a901373f91c928229745"
     },
     {
       "path": "fuel-four-state-figures/projection-01-x0-x2.png",
-      "sha256": "1301279f135cc5f587cd0cd5cfd7d8b9e1746844bd6fe1c09db9c3f9a6d38575"
+      "sha256": "2c4ed8143bb4c90afb083fdee3493409ed6a76278fcca7d9390ec78b0f35cafe"
     },
     {
       "path": "fuel-four-state-figures/projection-01-x0-x2.svg",
-      "sha256": "208d61c36b90ead60159fa525b7d4d373f913b7686e2debb0f72e3f8047b8d89"
+      "sha256": "3bccb480e391fb867f38f8ed2013f09663dff9b700ba3ac6473a12ad9a39c505"
     },
     {
       "path": "fuel-four-state-figures/projection-02-x1-x3.png",
-      "sha256": "bc4ef5a57b577b86e9ada7e96f60e6121f92e74454dd3273ca3cf2070bb943fd"
+      "sha256": "c45a72d84e6bf4106eb1bb18d6c7f7143cc283d8fc39c95d0eadc677d319f996"
     },
     {
       "path": "fuel-four-state-figures/projection-02-x1-x3.svg",
-      "sha256": "35abf182e041e2611da0eb4dcda67f446201db16c6009143ee103341ae3315c4"
+      "sha256": "1b3e10dd01465654cf20558ace015fa2b3708a3a122bb93c4a1170c54d9ab1da"
     },
     {
       "path": "fuel-four-state-figures/projection-03-x0-x3.png",
@@ -42,31 +42,31 @@
     },
     {
       "path": "fuel-four-state-figures/render-manifest.json",
-      "sha256": "1cabbf72e796ad87c836a85b2731b3ea85faa0b912cdc09b9366ed4686ca8573"
+      "sha256": "ead20a9774f63d15001cc9574a57a12131a6e128fad228bb95c1dc328da1a15c"
     },
     {
       "path": "fuel-four-state.stage-projection-batch.json",
-      "sha256": "cafe36caee069b13a56ca4d155c0c0116b9a6eae4001b99da54851a5b7d65fe4"
+      "sha256": "38ede9dc6b50c9bcf3ece51650fe181f6b773f7f3c11e8d844beb6c85b2bfbe1"
     },
     {
       "path": "nonfuel-integrator-figures/index.html",
-      "sha256": "e3a94c77fcdafff10aa8dac6269386eb12b838f1e82003cd6d1dfa70816e8706"
+      "sha256": "f68f0b24c80ed89831b0885bbfd92e0f8904c62c505a84209450d1c81a2a6c86"
     },
     {
       "path": "nonfuel-integrator-figures/projection-01-x0-x1.png",
-      "sha256": "a52e55d98d04ae25306699233636dfddded5fd28ffd74ae6a37fc8bcbf1eb4db"
+      "sha256": "3b2c4999904c409e8ccc8a229974973663764c37ee346da204252c36617a07ac"
     },
     {
       "path": "nonfuel-integrator-figures/projection-01-x0-x1.svg",
-      "sha256": "09743de80ec9a90679f483b9b3bb0ffa7ce59fa2864abca225f090e80b751363"
+      "sha256": "95d2b61dac7748ee2211ab6825a08f74797f4c8d56a65acd61d9ee1045fd0be8"
     },
     {
       "path": "nonfuel-integrator-figures/render-manifest.json",
-      "sha256": "dfaf8e428e62071d4c4a2c542429862c5c78c77dfa3a0ffccdd0ff5995fb7e84"
+      "sha256": "c23d27707e5f5ab20b846055dab21d6e35ee1d42396c9c067127c96a22c1d4f8"
     },
     {
       "path": "nonfuel-integrator.stage-projection-batch.json",
-      "sha256": "49a6f11c80d60c5a7d1773ed4645c0e82573d00301356567e7f68a099791cc76"
+      "sha256": "6abfec7d1679088bbcb70e9d56ba97f5b20722d8f0fa0f3ad5e55c4319c67eef"
     }
   ],
   "classification": "illustrative demonstration; not benchmark results",
@@ -89,7 +89,7 @@
   "source_files": [
     {
       "path": "benchmarks/reporting/stage-projection/prepare_demos.py",
-      "sha256": "d2904d05912301913c4c86916385f9af10179f45de76c743170ee9720819f119"
+      "sha256": "538cc6a93a60d4ed24762c3266a87bb88c72d4ad7f5f30096320fa9d94d616b8"
     },
     {
       "path": "benchmarks/reporting/stage-projection/BUNDLE-README.md",

@@ -75,7 +75,7 @@ def _geometry_kind(points: list[list[float]]) -> tuple[str, list[list[float]]]:
     has_area = any(dx * (y - y0) - dy * (x - x0) != 0.0 for x, y in unique[2:])
     if has_area:
         return "polygon", [list(point) for point in points]
-    return "segment", [list(unique[0]), list(unique[1])]
+    return "segment", [list(point) for point in points]
 
 
 def _batch(source: dict, source_bytes: bytes) -> dict:

@@ -1,12 +1,12 @@
 {
   "schema": "csl.stage-projection-figure-export/1",
-  "input_content_sha256": "9442fc117c8659b3f271ec6693d877e23545f88c40263e99619475b192c4061d",
+  "input_content_sha256": "85c29db34670e88e08df8c3fba91729657a262bb69c8cb185fbe681e848f1136",
   "style_id": "csl-control-science-v1",
   "quantitative_axis_policy": "csl-report-quantitative-v1",
-  "output_directory": "/home/butahlecoq/.local/share/codex/worktrees/viz15-fuel-route-demonstrations-713-20261027/reports/algorithm-results/stage-projection-demo-v1-check2/nonfuel-integrator-figures",
+  "output_directory": "/home/butahlecoq/.local/share/codex/worktrees/viz15-fuel-route-demonstrations-713-20261027/reports/algorithm-results/stage-projection-demo-v1-check3/nonfuel-integrator-figures",
   "files": {
-    "index.html": "e3a94c77fcdafff10aa8dac6269386eb12b838f1e82003cd6d1dfa70816e8706",
-    "projection-01-x0-x1.png": "a52e55d98d04ae25306699233636dfddded5fd28ffd74ae6a37fc8bcbf1eb4db",
-    "projection-01-x0-x1.svg": "09743de80ec9a90679f483b9b3bb0ffa7ce59fa2864abca225f090e80b751363"
+    "index.html": "f68f0b24c80ed89831b0885bbfd92e0f8904c62c505a84209450d1c81a2a6c86",
+    "projection-01-x0-x1.png": "3b2c4999904c409e8ccc8a229974973663764c37ee346da204252c36617a07ac",
+    "projection-01-x0-x1.svg": "95d2b61dac7748ee2211ab6825a08f74797f4c8d56a65acd61d9ee1045fd0be8"
   }
 }
