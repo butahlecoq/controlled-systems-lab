@@ -94,7 +94,9 @@
     {
       "source": "scripts/reports/ext03_transform/report.py",
       "signal_count": 1,
-      "asset_name_literals": [],
+      "asset_name_literals": [
+        "visual.svg"
+      ],
       "disposition": "composes-or-copies-existing-saved-figure"
     },
     {
@@ -480,6 +482,7 @@
       "source": "scripts/reports/plot.py",
       "signal_count": 7,
       "asset_name_literals": [
+        "csl.report.svg",
         "latency.png",
         "latency.svg"
       ],
@@ -505,6 +508,7 @@
       "source": "scripts/reports/render.py",
       "signal_count": 6,
       "asset_name_literals": [
+        "csl.report.svg",
         "latency.png",
         "latency.svg"
       ],
@@ -514,13 +518,16 @@
     {
       "source": "scripts/reports/report_data.py",
       "signal_count": 1,
-      "asset_name_literals": [],
+      "asset_name_literals": [
+        "csl.report.svg"
+      ],
       "disposition": "publication-validation-or-frozen-route"
     },
     {
       "source": "scripts/reports/site.py",
       "signal_count": 7,
       "asset_name_literals": [
+        "csl.report.svg",
         "latency.png",
         "latency.svg"
       ],
