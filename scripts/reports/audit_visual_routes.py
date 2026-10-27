@@ -129,7 +129,8 @@ def source_inventory(root: Path) -> list[dict]:
                 disposition = "adopted-shared-quantitative-policy"
             elif relative == "benchmarks/reporting/it17_hull/summarize.py":
                 disposition = "reviewed-static-diagram-exception"
-            elif relative == "scripts/reports/mpc03/b08_report.py":
+            elif relative in {"scripts/reports/mpc03/b08_miqcp.py",
+                              "scripts/reports/mpc03/b08_report.py"}:
                 disposition = "adopted-shared-quantitative-policy"
             elif relative.endswith("/control_figures.py") or relative.endswith("/plot.py"):
                 disposition = "adopted-shared-quantitative-policy"
