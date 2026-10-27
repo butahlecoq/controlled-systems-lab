@@ -12,12 +12,13 @@
 #include <algorithm>
 #include <array>
 #include <charconv>
-#include <stdexcept>
+#include <cstddef>
 #include <filesystem>
 #include <fstream>
 #include <iostream>
 #include <memory>
 #include <optional>
+#include <stdexcept>
 #include <string>
 #include <string_view>
 #include <type_traits>
@@ -602,10 +603,22 @@ int run(const input::LoadedScenario& scenario, const Options& options) {
         std::cerr << "Input unsupported:";
         for (const auto& method : rejected->methods) {
             const auto& provenance = method.rejection.provenance.requested;
-            const auto field = provenance.version ? "version" : "id";
-            const auto observed = provenance.version ? *provenance.version : provenance.id.value;
-            std::cerr << " path=/run/methods/" << method.index << '/' << field
-                      << " observed=" << observed;
+            const auto port = method.rejection.provenance.port;
+            if (port == LPPort::name || port == ConvexPort::name) {
+                const auto role = port == LPPort::name ? "lp" : "convex";
+                std::cerr << " path=/run/backends/" << role
+                          << " observed=" << provenance.id.value;
+            } else {
+                const bool version_error = std::any_of(method.rejection.diagnostics.begin(),
+                    method.rejection.diagnostics.end(), [](const auto& diagnostic) {
+                        return diagnostic.field == "method.version";
+                    });
+                const auto field = version_error ? "version" : "id";
+                const auto observed = version_error && provenance.version ?
+                    *provenance.version : provenance.id.value;
+                std::cerr << " path=/run/methods/" << method.index << '/' << field
+                          << " observed=" << observed;
+            }
             for (const auto& diagnostic : method.rejection.diagnostics)
                 std::cerr << " reason=" << diagnostic.field << ':' << diagnostic.explanation;
         }
