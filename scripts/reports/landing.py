@@ -155,6 +155,12 @@ FAMILIES = {
         "Compares geometric QuickHull with five separately identified LP reducers on three "
         "small exact 2D clouds. A43 and A44 are paper-informed adaptations, not faithful paper "
         "or Pascal ports; the performance conclusion is inconclusive."),
+    "exp02-it17-dyadic": Family(
+        r"exp02-it17-dyadic-interior-\d{8}-r\d+", "geometry",
+        "Repeated ITIS17 dyadic hull pilot",
+        "Compares six separately identified hull reducers on two deterministic interior-heavy "
+        "2D square clouds. Failed attempts remain visible; three methods pass on both fixtures, "
+        "and the performance conclusion is inconclusive."),
     "geo07-generator-sets": Family(
         r"geo07-generator-sets-[0-9a-f]{16,64}", "geometry", "Generator-set evaluation",
         "Evaluates generator-set requests over three bounded public generator-set fixtures, "

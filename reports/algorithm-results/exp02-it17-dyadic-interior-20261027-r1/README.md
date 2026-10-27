@@ -37,12 +37,21 @@ The LP baseline and ordered method passed 0/5 at each size. A43 passed 0/5 at ei
 
 ## Evidence files
 
+- [`index.html`](index.html): versioned, standalone report with the input-geometry figure, passing timing summary and explicit failures/limitations.
+- [`fixture-geometry.svg`](fixture-geometry.svg): the shared 64- and 256-point inputs with their exact square hull.
+- [`record.json`](record.json): source identity, input hashes, scope and evidence limits for the Pages landing card.
+- [`SHA256SUMS`](SHA256SUMS): hashes for every file in this immutable report bundle.
 - `raw/n64.jsonl`, `raw/n256.jsonl`: all 72 raw warmup and measured rows.
 - `raw/n64.stderr`, `raw/n256.stderr`: validation diagnostics, including every failed method attempt.
 - `validated-rows.jsonl`, `summary.csv`: validated matrix and per-method summaries.
 - `raw/top-profile.txt`: separate, non-reported CPU/RSS sampling run.
 - `raw/environment-before.txt`, `raw/environment-after.txt`, `raw/configure.log`, `raw/build.log`: host and build records.
 - `raw/source.sha256`, `raw/executable.sha256`: source and executable digests.
+
+The report staging script publishes this bundle under the versioned route
+`exp02-it17-dyadic-interior-20261027-r1/`, adds raw/summary links to the
+Pages archive, and creates an offline ZIP. The public URL remains pending until
+the reviewed PR is merged and the main-only Pages workflow is verified.
 
 ## Reproduction
 
@@ -61,3 +70,15 @@ python3 reports/algorithm-results/exp02-it17-dyadic-interior-20261027-r1/summari
 ```
 
 The 5 measured rounds are interleaved within each fixture. Re-run the two commands separately to preserve the recorded fixture-specific input hashes and attempt order.
+
+After the source rows are present, regenerate the saved HTML, figure, metadata
+and bundle hashes without rerunning the solver:
+
+```sh
+python3 reports/algorithm-results/exp02-it17-dyadic-interior-20261027-r1/render_report.py
+```
+
+This PR adds a report-only Pages staging route; it changes no public C++ API,
+dependency, installation, release, or package workflow. Release/package impact:
+**no release needed**. Pages deployment remains gated on review, merge and live
+URL verification.
