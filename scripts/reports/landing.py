@@ -71,6 +71,11 @@ GROUPS = (
 # Report family -> description. The pattern matches the whole published route,
 # so a new route shape has to be registered here on purpose.
 FAMILIES = {
+    "mpc08-explicit-pilot": Family(
+        r"mpc08-explicit-pilot-v1", "synthesis", "Explicit MPC feasible domain and critical regions",
+        "Presents an exact rational one-step double-integrator fixture with its feasible initial-state "
+        "domain, nine control critical regions, separate terminal invariant set, and fixed-initial "
+        "candidate and online-QP observations. It is a bounded pilot and does not complete issue #604."),
     "mpc03-open-loop-pilot": Family(
         r"mpc03-open-loop-pilot-v1", "synthesis", "Open-loop robust minimax formulation pilot",
         "Cross-checks one synthetic two-stage scalar fixed-plan minimax case with an exhaustive "

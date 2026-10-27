@@ -41,7 +41,8 @@ SOURCE_FILES = (
     "benchmarks/reporting/mpc08_explicit/README.md",
     "benchmarks/reporting/mpc08_explicit/explicit_double_integrator.py",
     "benchmarks/reporting/mpc08_explicit/mpc08_strategy_comparison.cpp",
-    "scripts/reports/stage_mpc08.py", ".github/workflows/algorithm-reports.yml",
+    "scripts/reports/stage_mpc08.py", "scripts/reports/landing.py",
+    ".github/workflows/algorithm-reports.yml",
 )
 CARD = (
     '<article class="saved-figure" id="mpc08-explicit-pilot-v1">'
@@ -52,6 +53,23 @@ CARD = (
     'alt="Nine critical regions cover the feasible initial-state polygon; a separate terminal invariant set is shown beside it."></a>'
     '<p>Exact rational one-step terminal-only fixture. The report preserves candidate failures and makes no performance-winner claim.</p>'
     '<p><a href="../mpc08-explicit-pilot-v1/index.html">Open the report, raw observations, and offline bundle →</a></p></article>'
+)
+INDEX_CARD = (
+    '<li><p class="eyebrow">Control synthesis · pilot</p>'
+    '<h3><a href="mpc08-explicit-pilot-v1/index.html">Explicit MPC feasible domain and critical regions</a></h3>'
+    '<p class="summary">Exact rational one-step double-integrator fixture with its feasible initial-state '
+    'domain, nine control regions, separate terminal invariant set, and fixed-initial candidate and online-QP observations.</p>'
+    '<p class="card-scope"><strong>What was measured.</strong> One fixture; 45 rational solver-validation '
+    'points and 810 method observations, including six retained noncompleted Strategy B attempts.</p>'
+    '<details><summary>Evidence limits</summary><p>Candidate containment is not completeness. No robust or predecessor '
+    'quantifier, minimax, new nonunique fixture, region-growth, or approximation comparison is made. Timings '
+    'are inconclusive and no winner is claimed.</p></details>'
+    '<p class="card-links"><a href="mpc08-explicit-pilot-v1/README.md">Methodology</a> · '
+    '<a href="mpc08-explicit-pilot-v1/record.json">Summary</a> · '
+    '<a href="mpc08-explicit-pilot-v1/csl-candidate-observations.jsonl">Raw observations</a> · '
+    '<a href="mpc08-explicit-pilot-v1/critical-regions.svg">Figure</a> · '
+    '<a href="mpc08-explicit-pilot-v1.zip">Offline ZIP</a></p>'
+    '<p>Source commit <code>{source_commit}</code></p></li>'
 )
 
 
@@ -136,6 +154,7 @@ def package(source_commit: str) -> None:
                   f"{source_commit}/benchmarks/reporting/mpc08_explicit/README.md")
     record = {
         "schema": "csl.mpc08-explicit-pilot-record/1", "report_id": REPORT_ID,
+        "scope": "One exact rational one-step double-integrator fixture; 45 solver-validation points and 810 fixed-initial method observations.",
         "issue": "https://github.com/butahlecoq/controlled-systems-lab/issues/604",
         "source_commit": source_commit, "base_commit": "0994a51478b4fa3aa448308bddc2e6308c37111d",
         "source_url": source_url, "scenario_sha256": raw_hashes["explicit-double-integrator.json"],
@@ -294,6 +313,15 @@ def validate_bundle(source: Path) -> dict:
 def stage(source: Path, site: Path) -> None:
     source, site = source.resolve(), site.resolve()
     validate_bundle(source)
+    archive_index = site / "index.html"
+    require(archive_index.is_file() and not archive_index.is_symlink(), "report archive index is missing")
+    index_html = archive_index.read_text(encoding="utf-8")
+    report_link = f'{REPORT_ID}/index.html'
+    require("</ul>" in index_html, "report archive insertion point is missing")
+    if report_link not in index_html:
+        index_html = index_html.replace("</ul>", INDEX_CARD.format(
+            source_commit=read_json(source / "record.json")["source_commit"]) + "</ul>", 1)
+        archive_index.write_text(index_html, encoding="utf-8")
     gallery = site / "examples/index.html"
     require(gallery.is_file() and not gallery.is_symlink(), "examples gallery is missing")
     html = gallery.read_text(encoding="utf-8")
