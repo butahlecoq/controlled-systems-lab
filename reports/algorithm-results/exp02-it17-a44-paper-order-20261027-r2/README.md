@@ -50,7 +50,7 @@ cmake --build build/exp02-a44-v2 --target csl_geometry_checks csl_it17_hull_comp
 ctest --test-dir build/exp02-a44-v2 -R '^itis17_hull_reducers_test$' --output-on-failure
 build/exp02-a44-v2/csl_it17_hull_comparison_report --dyadic-size 64 --measure 5
 build/exp02-a44-v2/csl_it17_hull_comparison_report --dyadic-size 256 --measure 5
-python3 reports/algorithm-results/exp02-it17-a44-paper-order-20261027-r1/summarize.py
+python3 reports/algorithm-results/exp02-it17-a44-paper-order-20261027-r2/summarize.py
 ```
 
 This pilot advances only the hull comparison slice. It does not satisfy EXP-02's paired control strategies, full dimension/distribution/representation matrix, comparison-record requirements, resource enforcement, or end-to-end measurements. Issue #94 remains open.

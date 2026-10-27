@@ -158,15 +158,15 @@ FAMILIES = {
         r"quickhull-it17-paper-adaptations-\d{8}-r\d+", "geometry",
         "QuickHull and ITIS17 paper-informed LP reducers",
         "Compares geometric QuickHull with five separately identified LP reducers on three "
-        "small exact 2D clouds. A43 remains a paper-informed adaptation; A44 v2 follows the "
-        "paper's farthest-seeded Euclidean ordering under a stated interpretation. No matching "
-        "Pascal source was found; the performance conclusion is inconclusive."),
+        "small exact 2D clouds. A43 and A44 are paper-informed adaptations, not faithful paper "
+        "or Pascal ports; the performance conclusion is inconclusive."),
     "exp02-it17-dyadic": Family(
         r"exp02-it17-(?:dyadic-interior|a44-paper-order)-\d{8}-r\d+", "geometry",
         "Repeated ITIS17 dyadic hull pilot",
         "Compares six separately identified hull reducers on two deterministic interior-heavy "
-        "2D square clouds. Failed attempts remain visible; three methods pass on both fixtures, "
-        "and the performance conclusion is inconclusive."),
+        "2D square clouds. r1 labels A43/A44 as adaptations; r2 adds the k+1 farthest-seeded "
+        "Euclidean A44 interpretation. Failed attempts remain visible and the performance "
+        "conclusion is inconclusive."),
     "geo07-generator-sets": Family(
         r"geo07-generator-sets-[0-9a-f]{16,64}", "geometry", "Generator-set evaluation",
         "Evaluates generator-set requests over three bounded public generator-set fixtures, "
