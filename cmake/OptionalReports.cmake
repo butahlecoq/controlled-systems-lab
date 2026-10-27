@@ -1,10 +1,11 @@
 if((CSL_BUILD_GEO02_REPORT OR CSL_BUILD_GEO03_REPORT OR CSL_BUILD_GEO04_REPORT OR
-    CSL_BUILD_OPT04_REPORT OR CSL_BUILD_SYN01_REPORT OR CSL_BUILD_SYN02_REPORT OR CSL_BUILD_MPC03_REPORT OR
+    CSL_BUILD_OPT04_REPORT OR CSL_BUILD_SYN01_REPORT OR CSL_BUILD_MPC03_REPORT OR
+    CSL_BUILD_STAGE_PROJECTION_ROUTE OR CSL_BUILD_SYN02_REPORT OR
     CSL_BUILD_REPORTS) AND NOT CSL_ENABLE_HIGHS)
   message(FATAL_ERROR "The selected report requires CSL_ENABLE_HIGHS")
 endif()
 if((CSL_BUILD_GEO02_REPORT OR CSL_BUILD_GEO03_REPORT OR CSL_BUILD_GEO04_REPORT OR
-    CSL_BUILD_SYN01_REPORT) AND NOT CSL_ENABLE_QHULL)
+    CSL_BUILD_SYN01_REPORT OR CSL_BUILD_STAGE_PROJECTION_ROUTE) AND NOT CSL_ENABLE_QHULL)
   message(FATAL_ERROR "The selected report requires CSL_ENABLE_QHULL")
 endif()
 
@@ -620,6 +621,28 @@ if(MSVC)
 target_compile_options(csl_syn01_nominal_forward_report PRIVATE /W4 /WX /permissive-)
 else()
 target_compile_options(csl_syn01_nominal_forward_report PRIVATE -Wall -Wextra -Wpedantic -Werror)
+endif()
+
+endif()
+
+if(CSL_BUILD_STAGE_PROJECTION_ROUTE)
+include(cmake/JsonDependencies.cmake)
+add_executable(csl_stage_projection_route benchmarks/reporting/stage-projection/nominal_forward_route.cpp)
+target_compile_features(csl_stage_projection_route PRIVATE cxx_std_20)
+target_include_directories(csl_stage_projection_route SYSTEM PRIVATE ${csl_json_SOURCE_DIR}/single_include)
+target_link_libraries(csl_stage_projection_route PRIVATE CSL::nominal_forward CSL::affine_sum CSL::hull CSL::highs_lp CSL::qhull_conversion CSL::phase_one CSL::artifacts)
+if(MSVC)
+target_compile_options(csl_stage_projection_route PRIVATE /W4 /WX /permissive-)
+else()
+target_compile_options(csl_stage_projection_route PRIVATE -Wall -Wextra -Wpedantic -Werror)
+endif()
+if(BUILD_TESTING)
+find_package(Python3 3.11 REQUIRED COMPONENTS Interpreter)
+add_test(NAME stage_projection_nominal_forward_route
+  COMMAND Python3::Interpreter
+    ${CMAKE_CURRENT_SOURCE_DIR}/benchmarks/reporting/stage-projection/check_nominal_forward_route.py
+    --route-executable $<TARGET_FILE:csl_stage_projection_route>)
+set_tests_properties(stage_projection_nominal_forward_route PROPERTIES LABELS reporting)
 endif()
 endif()
 

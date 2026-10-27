@@ -1,0 +1,20 @@
+{
+  "schema": "csl.stage-projection-demo-source/1",
+  "problem_id": "fuel-four-state-box-control-demo",
+  "request_id": "fuel-four-state-stage-projections-v1",
+  "route_id": "reachability.nominal_forward",
+  "run_id": "fuel-four-state-box-control-demo-v1",
+  "record_schema": "csl.stage-projection-demo-source/1",
+  "description": "Illustrative four-state open-loop model based on the owner-confirmed B06/L09 fuel dynamics. This is a separate demonstration, not a benchmark or a reproduction of the minimax result.",
+  "state_names": ["oxidizer flow x1", "oxidizer stock x2", "fuel flow x3", "fuel stock x4"],
+  "state_units": ["kg/s", "kg", "kg/s", "kg"],
+  "initial_state": [29.31, 302.0, 20.354, 207.0],
+  "dynamics": {
+    "A": [[1.0, 0.0, 0.0, 0.0], [-2.0, 1.0, 0.0, 0.0], [0.0, 0.0, 1.0, 0.0], [0.0, 0.0, -2.0, 1.0]],
+    "B": [0.7, 0.0, -0.3333333333333333, 0.0],
+    "control_bounds": [-1.0, 1.0],
+    "horizon": 5,
+    "disturbance": "zero"
+  },
+  "coordinate_pairs": [[0, 2], [1, 3], [0, 3], [1, 2]]
+}

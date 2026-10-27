@@ -493,6 +493,12 @@
       "disposition": "composes-or-copies-existing-saved-figure"
     },
     {
+      "source": "scripts/reports/stage_projection_figures.py",
+      "signal_count": 4,
+      "asset_name_literals": [],
+      "disposition": "adopted-shared-quantitative-policy"
+    },
+    {
       "source": "scripts/reports/stage_syn03_nominal_exact_example.py",
       "signal_count": 1,
       "asset_name_literals": [

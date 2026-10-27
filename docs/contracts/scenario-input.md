@@ -96,10 +96,13 @@ recognized unsupported; nested entries of a stages provider use ordinary set
 kinds only. No future grammar or capability is fabricated.
 
 An external matrix descriptor has exactly kind=external, string uri, 64 lowercase
-hexadecimal sha256, unsigned rows/cols and layout=row_major. The descriptor is
-validated and then rejected as unsupported without opening the locator or
-claiming digest verification. Future support must decode actual bounded owned
-bytes and pass their canonical content bindings into resolve.
+hexadecimal sha256, unsigned rows/cols and layout=row_major. Both executable
+schemas validate the descriptor and then reject it as unsupported. They do not
+resolve the URI, read its bytes, or verify the digest, even when the URI names a
+local file. Keep current schemas fail-closed. A future schema can support local
+files only after it defines path resolution, byte and scalar limits, digest
+mismatch handling, cancellation, and canonical content bindings for the bytes
+passed to resolve. Network references need a separate contract.
 
 Admission order is bytes/encoding/syntax/duplicate/quota checks; root schema,
 unknown/required fields; exclusions; profile; reserved root keys in the order

@@ -1,0 +1,4964 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:csl:run-statistics:8",
+  "title": "CSL scenario sourced run statistics v8",
+  "description": "Closed structural schema. The checked codec additionally enforces uint64/int64 range, finite values, UTF-8 byte limits, recomputed identities, content digests, subjects, clocks, DAGs, capacities and aggregate consistency.",
+  "type": "object",
+  "properties": {
+    "schema": {
+      "const": "csl.run-statistics/8"
+    },
+    "problem": {
+      "$ref": "#/$defs/problemId"
+    },
+    "dimensions": {
+      "$ref": "#/$defs/dimensions"
+    },
+    "horizon": {
+      "$ref": "#/$defs/uint64"
+    },
+    "configuration": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/configId"
+        },
+        "value": {
+          "$ref": "#/$defs/configuration"
+        }
+      },
+      "required": [
+        "id",
+        "value"
+      ],
+      "additionalProperties": false
+    },
+    "run": {
+      "type": "string"
+    },
+    "final": {
+      "$ref": "#/$defs/final"
+    },
+    "statistics": {
+      "$ref": "#/$defs/statistics"
+    },
+    "resources": {
+      "$ref": "#/$defs/resources"
+    },
+    "execution": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/execution"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "attachments": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/attachment"
+      }
+    },
+    "provenance": {
+      "enum": [
+        "problem_revalidated",
+        "identity_recorded"
+      ]
+    },
+    "selection": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/selection"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "scenario_source": {
+      "type": "object",
+      "properties": {
+        "record_schema": {
+          "const": "csl.scenario-source-record/1"
+        },
+        "source_sha256": {
+          "$ref": "#/$defs/sha256"
+        },
+        "schema": {
+          "type": "string",
+          "minLength": 1
+        },
+        "defaults_revision": {
+          "type": "string",
+          "minLength": 1
+        },
+        "defaults": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "path": {
+                "type": "string",
+                "minLength": 1
+              },
+              "meaning": {
+                "type": "string",
+                "minLength": 1
+              },
+              "authored": {
+                "type": "boolean"
+              }
+            },
+            "required": [
+              "path",
+              "meaning",
+              "authored"
+            ],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": [
+        "record_schema",
+        "source_sha256",
+        "schema",
+        "defaults_revision",
+        "defaults"
+      ],
+      "additionalProperties": false
+    }
+  },
+  "required": [
+    "schema",
+    "problem",
+    "dimensions",
+    "horizon",
+    "configuration",
+    "run",
+    "final",
+    "statistics",
+    "resources",
+    "execution",
+    "attachments",
+    "provenance",
+    "selection",
+    "scenario_source"
+  ],
+  "additionalProperties": false,
+  "$defs": {
+    "uint64": {
+      "type": "string",
+      "pattern": "^(0|[1-9][0-9]*)$",
+      "maxLength": 20
+    },
+    "int64": {
+      "type": "string",
+      "pattern": "^(0|-?[1-9][0-9]*)$",
+      "maxLength": 20
+    },
+    "sha256": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "problemId": {
+      "type": "string",
+      "pattern": "^csl\\.problem\\.v1\\.sha256:[0-9a-f]{64}$"
+    },
+    "configId": {
+      "type": "string",
+      "pattern": "^csl\\.config\\.v1\\.sha256:[0-9a-f]{64}$"
+    },
+    "missingReason": {
+      "enum": [
+        "not_requested",
+        "not_instrumented",
+        "not_supported",
+        "not_exposed_by_adapter",
+        "execution_unknown",
+        "incomplete_span",
+        "clock_unavailable",
+        "clock_mismatch",
+        "overflow",
+        "detail_limit",
+        "collection_disabled",
+        "not_applicable"
+      ]
+    },
+    "pin": {
+      "oneOf": [
+        {
+          "type": "object",
+          "properties": {
+            "state": {
+              "const": "available"
+            },
+            "value": {
+              "type": "object",
+              "properties": {
+                "scope": {
+                  "enum": [
+                    "source_archive",
+                    "build_manifest"
+                  ]
+                },
+                "sha256": {
+                  "$ref": "#/$defs/sha256"
+                }
+              },
+              "required": [
+                "scope",
+                "sha256"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "required": [
+            "state",
+            "value"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "state": {
+              "const": "unavailable"
+            },
+            "value": {
+              "type": "null"
+            },
+            "reason": {
+              "enum": [
+                "not_instrumented",
+                "not_exposed_by_adapter",
+                "not_applicable"
+              ]
+            },
+            "detail": {
+              "type": "string",
+              "maxLength": 256
+            }
+          },
+          "required": [
+            "state",
+            "value",
+            "reason",
+            "detail"
+          ],
+          "additionalProperties": false
+        }
+      ]
+    },
+    "module": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "version": {
+          "type": "string"
+        },
+        "pin": {
+          "$ref": "#/$defs/pin"
+        }
+      },
+      "required": [
+        "id",
+        "version",
+        "pin"
+      ],
+      "additionalProperties": false
+    },
+    "collection": {
+      "type": "object",
+      "properties": {
+        "enabled": {
+          "type": "boolean"
+        },
+        "mode": {
+          "enum": [
+            "detail",
+            "summary"
+          ]
+        },
+        "plan_spans": {
+          "$ref": "#/$defs/uint64"
+        },
+        "plan_bytes": {
+          "$ref": "#/$defs/uint64"
+        },
+        "detail_spans": {
+          "$ref": "#/$defs/uint64"
+        },
+        "detail_bytes": {
+          "$ref": "#/$defs/uint64"
+        }
+      },
+      "required": [
+        "enabled",
+        "mode",
+        "plan_spans",
+        "plan_bytes",
+        "detail_spans",
+        "detail_bytes"
+      ],
+      "additionalProperties": false
+    },
+    "bits": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{16}$"
+    },
+    "bytes": {
+      "type": "string",
+      "pattern": "^([0-9a-f]{2})*$"
+    },
+    "scalarOption": {
+      "oneOf": [
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "const": "boolean"
+            },
+            "value": {
+              "type": "boolean"
+            }
+          },
+          "required": [
+            "type",
+            "value"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "const": "signed64"
+            },
+            "value": {
+              "$ref": "#/$defs/int64"
+            }
+          },
+          "required": [
+            "type",
+            "value"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "const": "unsigned64"
+            },
+            "value": {
+              "$ref": "#/$defs/uint64"
+            }
+          },
+          "required": [
+            "type",
+            "value"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "const": "binary64_bits"
+            },
+            "value": {
+              "$ref": "#/$defs/bits"
+            }
+          },
+          "required": [
+            "type",
+            "value"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "const": "string"
+            },
+            "value": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "type",
+            "value"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "const": "bytes"
+            },
+            "value": {
+              "$ref": "#/$defs/bytes"
+            }
+          },
+          "required": [
+            "type",
+            "value"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "const": "content"
+            },
+            "value": {
+              "type": "object",
+              "properties": {
+                "schema": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "sha256": {
+                  "$ref": "#/$defs/sha256"
+                },
+                "byte_count": {
+                  "$ref": "#/$defs/uint64"
+                },
+                "bytes": {
+                  "$ref": "#/$defs/bytes"
+                }
+              },
+              "required": [
+                "schema",
+                "sha256",
+                "byte_count",
+                "bytes"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "required": [
+            "type",
+            "value"
+          ],
+          "additionalProperties": false
+        }
+      ]
+    },
+    "optionValue": {
+      "oneOf": [
+        {
+          "$ref": "#/$defs/scalarOption"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "const": "list"
+            },
+            "value": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/scalarOption"
+              }
+            }
+          },
+          "required": [
+            "type",
+            "value"
+          ],
+          "additionalProperties": false
+        }
+      ]
+    },
+    "option": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "pattern": "^[a-z0-9_.-]+$"
+        },
+        "value": {
+          "$ref": "#/$defs/optionValue"
+        }
+      },
+      "required": [
+        "name",
+        "value"
+      ],
+      "additionalProperties": false
+    },
+    "selectedModule": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "version": {
+          "type": "string"
+        },
+        "pin": {
+          "$ref": "#/$defs/pin"
+        },
+        "role": {
+          "type": "string",
+          "pattern": "^[a-z0-9_.-]+$"
+        },
+        "options": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/option"
+          }
+        }
+      },
+      "required": [
+        "id",
+        "version",
+        "pin",
+        "role",
+        "options"
+      ],
+      "additionalProperties": false
+    },
+    "familyTarget": {
+      "enum": [
+        "exact_optimal_relation",
+        "candidate_relaxation",
+        "partial_relation"
+      ]
+    },
+    "assurance": {
+      "enum": [
+        "numerical",
+        "validated"
+      ]
+    },
+    "configuration": {
+      "type": "object",
+      "properties": {
+        "collection": {
+          "$ref": "#/$defs/collection"
+        },
+        "modules": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/selectedModule"
+          }
+        },
+        "numerical": {
+          "type": "object",
+          "properties": {
+            "absolute_bits": {
+              "$ref": "#/$defs/bits"
+            },
+            "relative_bits": {
+              "$ref": "#/$defs/bits"
+            }
+          },
+          "required": [
+            "absolute_bits",
+            "relative_bits"
+          ],
+          "additionalProperties": false
+        },
+        "output": {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "enum": [
+                "synthesis",
+                "program"
+              ]
+            },
+            "assurance": {
+              "$ref": "#/$defs/assurance"
+            },
+            "family": {
+              "$ref": "#/$defs/familyTarget"
+            },
+            "representation": {
+              "type": "string"
+            },
+            "witness_count": {
+              "$ref": "#/$defs/uint64"
+            },
+            "distinctness_bits": {
+              "$ref": "#/$defs/bits"
+            },
+            "directions": {
+              "type": "array",
+              "items": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/$defs/bits"
+                }
+              }
+            },
+            "seed": {
+              "anyOf": [
+                {
+                  "$ref": "#/$defs/uint64"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            }
+          },
+          "required": [
+            "kind",
+            "assurance",
+            "family",
+            "representation",
+            "witness_count",
+            "distinctness_bits",
+            "directions",
+            "seed"
+          ],
+          "additionalProperties": false
+        },
+        "resources": {
+          "type": "object",
+          "properties": {
+            "total_threads": {
+              "$ref": "#/$defs/uint64"
+            },
+            "outer_workers": {
+              "$ref": "#/$defs/uint64"
+            },
+            "threads_per_worker": {
+              "$ref": "#/$defs/uint64"
+            },
+            "memory_bytes": {
+              "anyOf": [
+                {
+                  "$ref": "#/$defs/uint64"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            }
+          },
+          "required": [
+            "total_threads",
+            "outer_workers",
+            "threads_per_worker",
+            "memory_bytes"
+          ],
+          "additionalProperties": false
+        },
+        "selector": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string"
+            },
+            "version": {
+              "type": "string"
+            },
+            "options": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/option"
+              }
+            }
+          },
+          "required": [
+            "id",
+            "version",
+            "options"
+          ],
+          "additionalProperties": false
+        },
+        "stop": {
+          "oneOf": [
+            {
+              "type": "object",
+              "properties": {
+                "deadline_budget_ticks": {
+                  "type": "null"
+                }
+              },
+              "required": [
+                "deadline_budget_ticks"
+              ],
+              "additionalProperties": false
+            },
+            {
+              "type": "object",
+              "properties": {
+                "deadline_budget_ticks": {
+                  "$ref": "#/$defs/int64"
+                },
+                "period_numerator": {
+                  "$ref": "#/$defs/uint64"
+                },
+                "period_denominator": {
+                  "$ref": "#/$defs/uint64"
+                }
+              },
+              "required": [
+                "deadline_budget_ticks",
+                "period_numerator",
+                "period_denominator"
+              ],
+              "additionalProperties": false
+            }
+          ]
+        },
+        "strategy": {
+          "type": "object",
+          "properties": {
+            "strategy": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "lp": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "convex": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "hull": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "geometry": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "converter": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "approximation": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "selector": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "representation": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "strategy",
+            "lp",
+            "convex",
+            "hull",
+            "geometry",
+            "converter",
+            "approximation",
+            "selector",
+            "representation"
+          ],
+          "additionalProperties": false
+        },
+        "workspace_policy": {
+          "enum": [
+            "fresh",
+            "reused"
+          ]
+        }
+      },
+      "required": [
+        "collection",
+        "modules",
+        "numerical",
+        "output",
+        "resources",
+        "selector",
+        "stop",
+        "strategy",
+        "workspace_policy"
+      ],
+      "additionalProperties": false
+    },
+    "dimensions": {
+      "type": "object",
+      "properties": {
+        "state": {
+          "$ref": "#/$defs/uint64"
+        },
+        "control": {
+          "$ref": "#/$defs/uint64"
+        },
+        "external": {
+          "$ref": "#/$defs/uint64"
+        }
+      },
+      "required": [
+        "state",
+        "control",
+        "external"
+      ],
+      "additionalProperties": false
+    },
+    "coordinates": {
+      "type": "object",
+      "properties": {
+        "dimensions": {
+          "$ref": "#/$defs/dimensions"
+        },
+        "horizon": {
+          "$ref": "#/$defs/uint64"
+        }
+      },
+      "required": [
+        "dimensions",
+        "horizon"
+      ],
+      "additionalProperties": false
+    },
+    "programIdentity": {
+      "type": "object",
+      "properties": {
+        "problem": {
+          "$ref": "#/$defs/problemId"
+        },
+        "program": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "problem",
+        "program"
+      ],
+      "additionalProperties": false
+    },
+    "termination": {
+      "enum": [
+        "completed",
+        "cancelled",
+        "resource_limit",
+        "numerical_failure",
+        "operation_rejected",
+        "contract_rejected"
+      ]
+    },
+    "mathematicalOutcome": {
+      "enum": [
+        "optimal",
+        "infeasible",
+        "unbounded",
+        "infimum_not_attained",
+        "undetermined"
+      ]
+    },
+    "evidence": {
+      "oneOf": [
+        {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "unestablished"
+            },
+            "value": {
+              "type": "object",
+              "properties": {},
+              "required": [],
+              "additionalProperties": false
+            }
+          },
+          "required": [
+            "kind",
+            "value"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "numerical_check"
+            },
+            "value": {
+              "type": "object",
+              "properties": {
+                "absolute_tolerance": {
+                  "type": "number"
+                },
+                "relative_tolerance": {
+                  "type": "number"
+                },
+                "max_residual": {
+                  "type": "number"
+                },
+                "verifier": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "absolute_tolerance",
+                "relative_tolerance",
+                "max_residual",
+                "verifier"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "required": [
+            "kind",
+            "value"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "symbolic_argument"
+            },
+            "value": {
+              "type": "object",
+              "properties": {
+                "reference": {
+                  "type": "string"
+                },
+                "assumptions": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "reference",
+                "assumptions"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "required": [
+            "kind",
+            "value"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "certificate_reference"
+            },
+            "value": {
+              "type": "object",
+              "properties": {
+                "artifact": {
+                  "type": "string"
+                },
+                "verifier": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "artifact",
+                "verifier"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "required": [
+            "kind",
+            "value"
+          ],
+          "additionalProperties": false
+        }
+      ]
+    },
+    "claimEvidence": {
+      "type": "object",
+      "properties": {
+        "problem": {
+          "$ref": "#/$defs/problemId"
+        },
+        "support": {
+          "$ref": "#/$defs/evidence"
+        }
+      },
+      "required": [
+        "problem",
+        "support"
+      ],
+      "additionalProperties": false
+    },
+    "familyEvidence": {
+      "type": "object",
+      "properties": {
+        "feasibility": {
+          "$ref": "#/$defs/claimEvidence"
+        },
+        "optimality": {
+          "$ref": "#/$defs/claimEvidence"
+        },
+        "completeness": {
+          "$ref": "#/$defs/claimEvidence"
+        }
+      },
+      "required": [
+        "feasibility",
+        "optimality",
+        "completeness"
+      ],
+      "additionalProperties": false
+    },
+    "outcome": {
+      "type": "object",
+      "properties": {
+        "subject": {
+          "$ref": "#/$defs/problemId"
+        },
+        "value": {
+          "$ref": "#/$defs/mathematicalOutcome"
+        },
+        "support": {
+          "$ref": "#/$defs/evidence"
+        },
+        "assumptions": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "required": [
+        "subject",
+        "value",
+        "support",
+        "assumptions"
+      ],
+      "additionalProperties": false
+    },
+    "programOutcome": {
+      "type": "object",
+      "properties": {
+        "subject": {
+          "$ref": "#/$defs/programIdentity"
+        },
+        "value": {
+          "$ref": "#/$defs/mathematicalOutcome"
+        },
+        "support": {
+          "$ref": "#/$defs/evidence"
+        },
+        "assumptions": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "required": [
+        "subject",
+        "value",
+        "support",
+        "assumptions"
+      ],
+      "additionalProperties": false
+    },
+    "bound": {
+      "type": "object",
+      "properties": {
+        "value": {
+          "type": "number"
+        },
+        "evidence": {
+          "$ref": "#/$defs/claimEvidence"
+        }
+      },
+      "required": [
+        "value",
+        "evidence"
+      ],
+      "additionalProperties": false
+    },
+    "objective": {
+      "type": "object",
+      "properties": {
+        "lower": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/bound"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "upper": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/bound"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "lower",
+        "upper"
+      ],
+      "additionalProperties": false
+    },
+    "programBound": {
+      "type": "object",
+      "properties": {
+        "value": {
+          "type": "number"
+        },
+        "evidence": {
+          "type": "object",
+          "properties": {
+            "subject": {
+              "$ref": "#/$defs/programIdentity"
+            },
+            "support": {
+              "$ref": "#/$defs/evidence"
+            },
+            "assumptions": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          },
+          "required": [
+            "subject",
+            "support",
+            "assumptions"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "value",
+        "evidence"
+      ],
+      "additionalProperties": false
+    },
+    "programObjective": {
+      "type": "object",
+      "properties": {
+        "lower": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/programBound"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "upper": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/programBound"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "lower",
+        "upper"
+      ],
+      "additionalProperties": false
+    },
+    "residualMeasure": {
+      "type": "object",
+      "properties": {
+        "violation": {
+          "type": "number"
+        },
+        "scale": {
+          "type": "number"
+        }
+      },
+      "required": [
+        "violation",
+        "scale"
+      ],
+      "additionalProperties": false
+    },
+    "residualContext": {
+      "type": "object",
+      "properties": {
+        "subject": {
+          "$ref": "#/$defs/programIdentity"
+        },
+        "verifier": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string"
+            },
+            "version": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "id",
+            "version"
+          ],
+          "additionalProperties": false
+        },
+        "absolute_tolerance": {
+          "type": "number"
+        },
+        "relative_tolerance": {
+          "type": "number"
+        }
+      },
+      "required": [
+        "subject",
+        "verifier",
+        "absolute_tolerance",
+        "relative_tolerance"
+      ],
+      "additionalProperties": false
+    },
+    "residuals": {
+      "type": "object",
+      "properties": {
+        "primal": {
+          "anyOf": [
+            {
+              "type": "object",
+              "properties": {
+                "context": {
+                  "$ref": "#/$defs/residualContext"
+                },
+                "rows": {
+                  "$ref": "#/$defs/residualMeasure"
+                },
+                "variables": {
+                  "$ref": "#/$defs/residualMeasure"
+                }
+              },
+              "required": [
+                "context",
+                "rows",
+                "variables"
+              ],
+              "additionalProperties": false
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "dual": {
+          "anyOf": [
+            {
+              "type": "object",
+              "properties": {
+                "context": {
+                  "$ref": "#/$defs/residualContext"
+                },
+                "stationarity": {
+                  "anyOf": [
+                    {
+                      "$ref": "#/$defs/residualMeasure"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "signs": {
+                  "anyOf": [
+                    {
+                      "$ref": "#/$defs/residualMeasure"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "complementarity": {
+                  "anyOf": [
+                    {
+                      "$ref": "#/$defs/residualMeasure"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                }
+              },
+              "required": [
+                "context",
+                "stationarity",
+                "signs",
+                "complementarity"
+              ],
+              "additionalProperties": false
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "primal",
+        "dual"
+      ],
+      "additionalProperties": false
+    },
+    "programResult": {
+      "type": "object",
+      "properties": {
+        "termination": {
+          "$ref": "#/$defs/termination"
+        },
+        "outcome": {
+          "$ref": "#/$defs/programOutcome"
+        },
+        "primal": {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "type": "number"
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "objective": {
+          "$ref": "#/$defs/programObjective"
+        },
+        "raw_diagnostics": {
+          "type": "string"
+        },
+        "residuals": {
+          "$ref": "#/$defs/residuals"
+        }
+      },
+      "required": [
+        "termination",
+        "outcome",
+        "primal",
+        "objective",
+        "raw_diagnostics",
+        "residuals"
+      ],
+      "additionalProperties": false
+    },
+    "family": {
+      "type": "object",
+      "properties": {
+        "family": {
+          "$ref": "#/$defs/optimalFamily"
+        },
+        "payload": {
+          "oneOf": [
+            {
+              "type": "object",
+              "properties": {
+                "kind": {
+                  "const": "external_reference"
+                },
+                "value": {
+                  "type": "object",
+                  "properties": {
+                    "attachment": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "attachment"
+                  ],
+                  "additionalProperties": false
+                }
+              },
+              "required": [
+                "kind",
+                "value"
+              ],
+              "additionalProperties": false
+            },
+            {
+              "type": "object",
+              "properties": {
+                "kind": {
+                  "const": "unavailable_no_exporter"
+                },
+                "value": {
+                  "type": "object",
+                  "properties": {},
+                  "required": [],
+                  "additionalProperties": false
+                }
+              },
+              "required": [
+                "kind",
+                "value"
+              ],
+              "additionalProperties": false
+            }
+          ]
+        }
+      },
+      "required": [
+        "family",
+        "payload"
+      ],
+      "additionalProperties": false
+    },
+    "witness": {
+      "type": "object",
+      "properties": {
+        "problem": {
+          "$ref": "#/$defs/problemId"
+        },
+        "states": {
+          "type": "array",
+          "items": {
+            "type": "array",
+            "items": {
+              "type": "number"
+            }
+          }
+        },
+        "controls": {
+          "type": "array",
+          "items": {
+            "type": "array",
+            "items": {
+              "type": "number"
+            }
+          }
+        },
+        "original_objective": {
+          "type": "number"
+        }
+      },
+      "required": [
+        "problem",
+        "states",
+        "controls",
+        "original_objective"
+      ],
+      "additionalProperties": false
+    },
+    "diagnostic": {
+      "type": "object",
+      "properties": {
+        "code": {
+          "enum": [
+            "invalid_input",
+            "unsupported",
+            "evidence_mismatch",
+            "invalid_claim"
+          ]
+        },
+        "field": {
+          "type": "string"
+        },
+        "explanation": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "code",
+        "field",
+        "explanation"
+      ],
+      "additionalProperties": false
+    },
+    "final": {
+      "oneOf": [
+        {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "synthesis"
+            },
+            "value": {
+              "type": "object",
+              "properties": {
+                "termination": {
+                  "$ref": "#/$defs/termination"
+                },
+                "outcome": {
+                  "$ref": "#/$defs/outcome"
+                },
+                "objective": {
+                  "$ref": "#/$defs/objective"
+                },
+                "family": {
+                  "anyOf": [
+                    {
+                      "$ref": "#/$defs/family"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "incumbents": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/$defs/feasibleIncumbent"
+                  }
+                },
+                "stop": {
+                  "$ref": "#/$defs/synthesisStop"
+                }
+              },
+              "required": [
+                "termination",
+                "outcome",
+                "objective",
+                "family",
+                "incumbents",
+                "stop"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "required": [
+            "kind",
+            "value"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "program"
+            },
+            "value": {
+              "type": "object",
+              "properties": {
+                "result": {
+                  "$ref": "#/$defs/programResult"
+                },
+                "raw_diagnostics": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                }
+              },
+              "required": [
+                "result",
+                "raw_diagnostics"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "required": [
+            "kind",
+            "value"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "unsupported"
+            },
+            "value": {
+              "type": "object",
+              "properties": {
+                "diagnostics": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/$defs/diagnostic"
+                  }
+                }
+              },
+              "required": [
+                "diagnostics"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "required": [
+            "kind",
+            "value"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "skipped"
+            },
+            "value": {
+              "type": "object",
+              "properties": {
+                "reason": {
+                  "enum": [
+                    "cancelled",
+                    "deadline",
+                    "task_limit",
+                    "reservation_exceeds_budget",
+                    "batch_failed"
+                  ]
+                }
+              },
+              "required": [
+                "reason"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "required": [
+            "kind",
+            "value"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "failed"
+            },
+            "value": {
+              "type": "object",
+              "properties": {
+                "phase": {
+                  "enum": [
+                    "create",
+                    "invoke",
+                    "launch",
+                    "publication"
+                  ]
+                },
+                "reason": {
+                  "enum": [
+                    "allocation",
+                    "adapter_exception",
+                    "thread_launch"
+                  ]
+                },
+                "message": {
+                  "type": "string"
+                },
+                "raw_diagnostics": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                }
+              },
+              "required": [
+                "phase",
+                "reason",
+                "message",
+                "raw_diagnostics"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "required": [
+            "kind",
+            "value"
+          ],
+          "additionalProperties": false
+        }
+      ]
+    },
+    "clock": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "metric": {
+          "enum": [
+            "steady_wall",
+            "thread_cpu",
+            "process_cpu"
+          ]
+        },
+        "scope": {
+          "type": "string"
+        },
+        "period_numerator": {
+          "$ref": "#/$defs/uint64"
+        },
+        "period_denominator": {
+          "$ref": "#/$defs/uint64"
+        },
+        "resolution_ticks": {
+          "oneOf": [
+            {
+              "type": "object",
+              "properties": {
+                "state": {
+                  "const": "available"
+                },
+                "value": {
+                  "$ref": "#/$defs/uint64"
+                }
+              },
+              "required": [
+                "state",
+                "value"
+              ],
+              "additionalProperties": false
+            },
+            {
+              "type": "object",
+              "properties": {
+                "state": {
+                  "const": "unavailable"
+                },
+                "value": {
+                  "type": "null"
+                },
+                "reason": {
+                  "$ref": "#/$defs/missingReason"
+                },
+                "detail": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "state",
+                "value",
+                "reason",
+                "detail"
+              ],
+              "additionalProperties": false
+            }
+          ]
+        },
+        "origin_label": {
+          "type": "string"
+        },
+        "calibration": {
+          "oneOf": [
+            {
+              "type": "object",
+              "properties": {
+                "state": {
+                  "const": "available"
+                },
+                "value": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "state",
+                "value"
+              ],
+              "additionalProperties": false
+            },
+            {
+              "type": "object",
+              "properties": {
+                "state": {
+                  "const": "unavailable"
+                },
+                "value": {
+                  "type": "null"
+                },
+                "reason": {
+                  "$ref": "#/$defs/missingReason"
+                },
+                "detail": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "state",
+                "value",
+                "reason",
+                "detail"
+              ],
+              "additionalProperties": false
+            }
+          ]
+        }
+      },
+      "required": [
+        "id",
+        "metric",
+        "scope",
+        "period_numerator",
+        "period_denominator",
+        "resolution_ticks",
+        "origin_label",
+        "calibration"
+      ],
+      "additionalProperties": false
+    },
+    "interval": {
+      "oneOf": [
+        {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "ticks"
+            },
+            "value": {
+              "type": "object",
+              "properties": {
+                "start": {
+                  "oneOf": [
+                    {
+                      "type": "object",
+                      "properties": {
+                        "state": {
+                          "const": "available"
+                        },
+                        "value": {
+                          "$ref": "#/$defs/int64"
+                        }
+                      },
+                      "required": [
+                        "state",
+                        "value"
+                      ],
+                      "additionalProperties": false
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "state": {
+                          "const": "unavailable"
+                        },
+                        "value": {
+                          "type": "null"
+                        },
+                        "reason": {
+                          "$ref": "#/$defs/missingReason"
+                        },
+                        "detail": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "state",
+                        "value",
+                        "reason",
+                        "detail"
+                      ],
+                      "additionalProperties": false
+                    }
+                  ]
+                },
+                "end": {
+                  "oneOf": [
+                    {
+                      "type": "object",
+                      "properties": {
+                        "state": {
+                          "const": "available"
+                        },
+                        "value": {
+                          "$ref": "#/$defs/int64"
+                        }
+                      },
+                      "required": [
+                        "state",
+                        "value"
+                      ],
+                      "additionalProperties": false
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "state": {
+                          "const": "unavailable"
+                        },
+                        "value": {
+                          "type": "null"
+                        },
+                        "reason": {
+                          "$ref": "#/$defs/missingReason"
+                        },
+                        "detail": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "state",
+                        "value",
+                        "reason",
+                        "detail"
+                      ],
+                      "additionalProperties": false
+                    }
+                  ]
+                }
+              },
+              "required": [
+                "start",
+                "end"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "required": [
+            "kind",
+            "value"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "legacy_seconds"
+            },
+            "value": {
+              "type": "object",
+              "properties": {
+                "start": {
+                  "type": "number"
+                },
+                "end": {
+                  "type": "number"
+                }
+              },
+              "required": [
+                "start",
+                "end"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "required": [
+            "kind",
+            "value"
+          ],
+          "additionalProperties": false
+        }
+      ]
+    },
+    "notCalledReason": {
+      "enum": [
+        "capability_rejected",
+        "task_not_admitted",
+        "before_public_entry",
+        "explicit_pre_entry_stop",
+        "constant_rows_wrapper",
+        "stopped_before_phase_call",
+        "earlier_phase_exit",
+        "invalid_qp_start",
+        "route_not_selected"
+      ]
+    },
+    "callObservation": {
+      "oneOf": [
+        {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "observed_return"
+            },
+            "value": {
+              "type": "object",
+              "properties": {},
+              "required": [],
+              "additionalProperties": false
+            }
+          },
+          "required": [
+            "kind",
+            "value"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "known_not_called"
+            },
+            "value": {
+              "type": "object",
+              "properties": {
+                "reason": {
+                  "$ref": "#/$defs/notCalledReason"
+                },
+                "source_location": {
+                  "type": "string"
+                },
+                "source_version": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "reason",
+                "source_location",
+                "source_version"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "required": [
+            "kind",
+            "value"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "unknown"
+            },
+            "value": {
+              "type": "object",
+              "properties": {},
+              "required": [],
+              "additionalProperties": false
+            }
+          },
+          "required": [
+            "kind",
+            "value"
+          ],
+          "additionalProperties": false
+        }
+      ]
+    },
+    "spanStatus": {
+      "oneOf": [
+        {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "incomplete"
+            },
+            "value": {
+              "type": "object",
+              "properties": {},
+              "required": [],
+              "additionalProperties": false
+            }
+          },
+          "required": [
+            "kind",
+            "value"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "returned"
+            },
+            "value": {
+              "type": "object",
+              "properties": {
+                "termination": {
+                  "$ref": "#/$defs/termination"
+                },
+                "outcome": {
+                  "oneOf": [
+                    {
+                      "type": "object",
+                      "properties": {
+                        "state": {
+                          "const": "available"
+                        },
+                        "value": {
+                          "$ref": "#/$defs/mathematicalOutcome"
+                        }
+                      },
+                      "required": [
+                        "state",
+                        "value"
+                      ],
+                      "additionalProperties": false
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "state": {
+                          "const": "unavailable"
+                        },
+                        "value": {
+                          "type": "null"
+                        },
+                        "reason": {
+                          "$ref": "#/$defs/missingReason"
+                        },
+                        "detail": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "state",
+                        "value",
+                        "reason",
+                        "detail"
+                      ],
+                      "additionalProperties": false
+                    }
+                  ]
+                }
+              },
+              "required": [
+                "termination",
+                "outcome"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "required": [
+            "kind",
+            "value"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "capability_rejected"
+            },
+            "value": {
+              "type": "object",
+              "properties": {
+                "reason": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "reason"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "required": [
+            "kind",
+            "value"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "skipped"
+            },
+            "value": {
+              "type": "object",
+              "properties": {
+                "reason": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "reason"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "required": [
+            "kind",
+            "value"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "failed"
+            },
+            "value": {
+              "type": "object",
+              "properties": {
+                "phase": {
+                  "type": "string"
+                },
+                "reason": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "phase",
+                "reason"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "required": [
+            "kind",
+            "value"
+          ],
+          "additionalProperties": false
+        }
+      ]
+    },
+    "spanId": {
+      "type": "object",
+      "properties": {
+        "value": {
+          "$ref": "#/$defs/uint64"
+        }
+      },
+      "required": [
+        "value"
+      ],
+      "additionalProperties": false
+    },
+    "geometryEvidence": {
+      "type": "object",
+      "properties": {
+        "reference": {
+          "type": "object",
+          "properties": {
+            "identity": {
+              "type": "object",
+              "properties": {
+                "problem": {
+                  "$ref": "#/$defs/problemId"
+                },
+                "request": {
+                  "type": "string"
+                },
+                "ideal_output": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "problem",
+                "request",
+                "ideal_output"
+              ],
+              "additionalProperties": false
+            },
+            "inputs": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          },
+          "required": [
+            "identity",
+            "inputs"
+          ],
+          "additionalProperties": false
+        },
+        "scope": {
+          "enum": [
+            "set_relation",
+            "support_value",
+            "containment"
+          ]
+        },
+        "support": {
+          "$ref": "#/$defs/evidence"
+        },
+        "assumptions": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "error_bound": {
+          "anyOf": [
+            {
+              "type": "object",
+              "properties": {
+                "metric": {
+                  "type": "string"
+                },
+                "bound": {
+                  "type": "number"
+                },
+                "units": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "metric",
+                "bound",
+                "units"
+              ],
+              "additionalProperties": false
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "reference",
+        "scope",
+        "support",
+        "assumptions",
+        "error_bound"
+      ],
+      "additionalProperties": false
+    },
+    "representationSummary": {
+      "type": "object",
+      "properties": {
+        "representation": {
+          "type": "string"
+        },
+        "dimension": {
+          "$ref": "#/$defs/uint64"
+        },
+        "sizes": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "quantity": {
+                "type": "string"
+              },
+              "unit": {
+                "type": "string"
+              },
+              "value": {
+                "oneOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "state": {
+                        "const": "available"
+                      },
+                      "value": {
+                        "$ref": "#/$defs/uint64"
+                      }
+                    },
+                    "required": [
+                      "state",
+                      "value"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "object",
+                    "properties": {
+                      "state": {
+                        "const": "unavailable"
+                      },
+                      "value": {
+                        "type": "null"
+                      },
+                      "reason": {
+                        "$ref": "#/$defs/missingReason"
+                      },
+                      "detail": {
+                        "type": "string"
+                      }
+                    },
+                    "required": [
+                      "state",
+                      "value",
+                      "reason",
+                      "detail"
+                    ],
+                    "additionalProperties": false
+                  }
+                ]
+              }
+            },
+            "required": [
+              "quantity",
+              "unit",
+              "value"
+            ],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": [
+        "representation",
+        "dimension",
+        "sizes"
+      ],
+      "additionalProperties": false
+    },
+    "spanDescriptor": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/spanId"
+        },
+        "parent": {
+          "anyOf": [
+            {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "$ref": "#/$defs/spanId"
+                },
+                "kind": {
+                  "enum": [
+                    "nested",
+                    "spawned"
+                  ]
+                }
+              },
+              "required": [
+                "id",
+                "kind"
+              ],
+              "additionalProperties": false
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "shard": {
+          "$ref": "#/$defs/uint64"
+        },
+        "bucket": {
+          "$ref": "#/$defs/uint64"
+        },
+        "task": {
+          "type": "string"
+        },
+        "operation": {
+          "type": "string"
+        },
+        "module": {
+          "$ref": "#/$defs/module"
+        },
+        "backend": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/module"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "clock": {
+          "type": "string"
+        },
+        "program": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/programIdentity"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "stage": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/uint64"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "query": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/uint64"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "input_representation": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "output_representation": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "input_size": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/uint64"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "output_size": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/uint64"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "requested_assurance": {
+          "$ref": "#/$defs/assurance"
+        },
+        "applied_assurance": {
+          "oneOf": [
+            {
+              "type": "object",
+              "properties": {
+                "state": {
+                  "const": "available"
+                },
+                "value": {
+                  "enum": [
+                    "numerical"
+                  ]
+                }
+              },
+              "required": [
+                "state",
+                "value"
+              ],
+              "additionalProperties": false
+            },
+            {
+              "type": "object",
+              "properties": {
+                "state": {
+                  "const": "unavailable"
+                },
+                "value": {
+                  "type": "null"
+                },
+                "reason": {
+                  "$ref": "#/$defs/missingReason"
+                },
+                "detail": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "state",
+                "value",
+                "reason",
+                "detail"
+              ],
+              "additionalProperties": false
+            }
+          ]
+        },
+        "relation": {
+          "anyOf": [
+            {
+              "enum": [
+                "equivalent",
+                "inner",
+                "outer",
+                "heuristic"
+              ]
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "relation_evidence": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/geometryEvidence"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "input_summary": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/representationSummary"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "output_summary": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/representationSummary"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "observation_source": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "parent",
+        "shard",
+        "bucket",
+        "task",
+        "operation",
+        "module",
+        "backend",
+        "clock",
+        "program",
+        "stage",
+        "query",
+        "input_representation",
+        "output_representation",
+        "input_size",
+        "output_size",
+        "requested_assurance",
+        "applied_assurance",
+        "relation",
+        "relation_evidence",
+        "input_summary",
+        "output_summary",
+        "observation_source"
+      ],
+      "additionalProperties": false
+    },
+    "span": {
+      "type": "object",
+      "properties": {
+        "descriptor": {
+          "$ref": "#/$defs/spanDescriptor"
+        },
+        "interval": {
+          "$ref": "#/$defs/interval"
+        },
+        "execution": {
+          "$ref": "#/$defs/callObservation"
+        },
+        "termination": {
+          "oneOf": [
+            {
+              "type": "object",
+              "properties": {
+                "state": {
+                  "const": "available"
+                },
+                "value": {
+                  "$ref": "#/$defs/termination"
+                }
+              },
+              "required": [
+                "state",
+                "value"
+              ],
+              "additionalProperties": false
+            },
+            {
+              "type": "object",
+              "properties": {
+                "state": {
+                  "const": "unavailable"
+                },
+                "value": {
+                  "type": "null"
+                },
+                "reason": {
+                  "$ref": "#/$defs/missingReason"
+                },
+                "detail": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "state",
+                "value",
+                "reason",
+                "detail"
+              ],
+              "additionalProperties": false
+            }
+          ]
+        },
+        "iterations": {
+          "oneOf": [
+            {
+              "type": "object",
+              "properties": {
+                "state": {
+                  "const": "available"
+                },
+                "value": {
+                  "$ref": "#/$defs/uint64"
+                }
+              },
+              "required": [
+                "state",
+                "value"
+              ],
+              "additionalProperties": false
+            },
+            {
+              "type": "object",
+              "properties": {
+                "state": {
+                  "const": "unavailable"
+                },
+                "value": {
+                  "type": "null"
+                },
+                "reason": {
+                  "$ref": "#/$defs/missingReason"
+                },
+                "detail": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "state",
+                "value",
+                "reason",
+                "detail"
+              ],
+              "additionalProperties": false
+            }
+          ]
+        },
+        "detail": {
+          "oneOf": [
+            {
+              "type": "object",
+              "properties": {
+                "state": {
+                  "const": "available"
+                },
+                "value": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "state",
+                "value"
+              ],
+              "additionalProperties": false
+            },
+            {
+              "type": "object",
+              "properties": {
+                "state": {
+                  "const": "unavailable"
+                },
+                "value": {
+                  "type": "null"
+                },
+                "reason": {
+                  "$ref": "#/$defs/missingReason"
+                },
+                "detail": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "state",
+                "value",
+                "reason",
+                "detail"
+              ],
+              "additionalProperties": false
+            }
+          ]
+        },
+        "status": {
+          "$ref": "#/$defs/spanStatus"
+        },
+        "completion_observed": {
+          "type": "boolean"
+        },
+        "detail_state": {
+          "enum": [
+            "not_observed",
+            "retained",
+            "capacity_dropped",
+            "rejected",
+            "not_requested"
+          ]
+        }
+      },
+      "required": [
+        "descriptor",
+        "interval",
+        "execution",
+        "termination",
+        "iterations",
+        "detail",
+        "status",
+        "completion_observed",
+        "detail_state"
+      ],
+      "additionalProperties": false
+    },
+    "count": {
+      "type": "object",
+      "properties": {
+        "value": {
+          "$ref": "#/$defs/uint64"
+        },
+        "exact": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "value",
+        "exact"
+      ],
+      "additionalProperties": false
+    },
+    "bucket": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/uint64"
+        },
+        "clock": {
+          "type": "string"
+        },
+        "observed": {
+          "$ref": "#/$defs/count"
+        },
+        "detail_dropped": {
+          "$ref": "#/$defs/count"
+        },
+        "duplicate": {
+          "$ref": "#/$defs/count"
+        },
+        "wrong_shard": {
+          "$ref": "#/$defs/count"
+        },
+        "declared_overflow": {
+          "$ref": "#/$defs/count"
+        },
+        "duration_contributors": {
+          "$ref": "#/$defs/count"
+        },
+        "failed": {
+          "$ref": "#/$defs/count"
+        },
+        "not_called": {
+          "$ref": "#/$defs/count"
+        },
+        "unknown": {
+          "$ref": "#/$defs/count"
+        },
+        "incomplete": {
+          "$ref": "#/$defs/count"
+        },
+        "inclusive_ticks": {
+          "oneOf": [
+            {
+              "type": "object",
+              "properties": {
+                "state": {
+                  "const": "available"
+                },
+                "value": {
+                  "$ref": "#/$defs/uint64"
+                }
+              },
+              "required": [
+                "state",
+                "value"
+              ],
+              "additionalProperties": false
+            },
+            {
+              "type": "object",
+              "properties": {
+                "state": {
+                  "const": "unavailable"
+                },
+                "value": {
+                  "type": "null"
+                },
+                "reason": {
+                  "$ref": "#/$defs/missingReason"
+                },
+                "detail": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "state",
+                "value",
+                "reason",
+                "detail"
+              ],
+              "additionalProperties": false
+            }
+          ]
+        }
+      },
+      "required": [
+        "id",
+        "clock",
+        "observed",
+        "detail_dropped",
+        "duplicate",
+        "wrong_shard",
+        "declared_overflow",
+        "duration_contributors",
+        "failed",
+        "not_called",
+        "unknown",
+        "incomplete",
+        "inclusive_ticks"
+      ],
+      "additionalProperties": false
+    },
+    "statistics": {
+      "type": "object",
+      "properties": {
+        "problem": {
+          "$ref": "#/$defs/problemId"
+        },
+        "configuration": {
+          "$ref": "#/$defs/configId"
+        },
+        "run": {
+          "type": "string"
+        },
+        "settings": {
+          "$ref": "#/$defs/collection"
+        },
+        "clocks": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/clock"
+          }
+        },
+        "spans": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/span"
+          }
+        },
+        "buckets": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/bucket"
+          }
+        },
+        "complete": {
+          "oneOf": [
+            {
+              "type": "object",
+              "properties": {
+                "state": {
+                  "const": "available"
+                },
+                "value": {
+                  "type": "boolean"
+                }
+              },
+              "required": [
+                "state",
+                "value"
+              ],
+              "additionalProperties": false
+            },
+            {
+              "type": "object",
+              "properties": {
+                "state": {
+                  "const": "unavailable"
+                },
+                "value": {
+                  "type": "null"
+                },
+                "reason": {
+                  "$ref": "#/$defs/missingReason"
+                },
+                "detail": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "state",
+                "value",
+                "reason",
+                "detail"
+              ],
+              "additionalProperties": false
+            }
+          ]
+        },
+        "tasks": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "operations": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "required": [
+        "problem",
+        "configuration",
+        "run",
+        "settings",
+        "clocks",
+        "spans",
+        "buckets",
+        "complete",
+        "tasks",
+        "operations"
+      ],
+      "additionalProperties": false
+    },
+    "task": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "queued": {
+          "oneOf": [
+            {
+              "type": "object",
+              "properties": {
+                "state": {
+                  "const": "available"
+                },
+                "value": {
+                  "$ref": "#/$defs/int64"
+                }
+              },
+              "required": [
+                "state",
+                "value"
+              ],
+              "additionalProperties": false
+            },
+            {
+              "type": "object",
+              "properties": {
+                "state": {
+                  "const": "unavailable"
+                },
+                "value": {
+                  "type": "null"
+                },
+                "reason": {
+                  "$ref": "#/$defs/missingReason"
+                },
+                "detail": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "state",
+                "value",
+                "reason",
+                "detail"
+              ],
+              "additionalProperties": false
+            }
+          ]
+        },
+        "admitted": {
+          "oneOf": [
+            {
+              "type": "object",
+              "properties": {
+                "state": {
+                  "const": "available"
+                },
+                "value": {
+                  "$ref": "#/$defs/int64"
+                }
+              },
+              "required": [
+                "state",
+                "value"
+              ],
+              "additionalProperties": false
+            },
+            {
+              "type": "object",
+              "properties": {
+                "state": {
+                  "const": "unavailable"
+                },
+                "value": {
+                  "type": "null"
+                },
+                "reason": {
+                  "$ref": "#/$defs/missingReason"
+                },
+                "detail": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "state",
+                "value",
+                "reason",
+                "detail"
+              ],
+              "additionalProperties": false
+            }
+          ]
+        },
+        "create_started": {
+          "oneOf": [
+            {
+              "type": "object",
+              "properties": {
+                "state": {
+                  "const": "available"
+                },
+                "value": {
+                  "$ref": "#/$defs/int64"
+                }
+              },
+              "required": [
+                "state",
+                "value"
+              ],
+              "additionalProperties": false
+            },
+            {
+              "type": "object",
+              "properties": {
+                "state": {
+                  "const": "unavailable"
+                },
+                "value": {
+                  "type": "null"
+                },
+                "reason": {
+                  "$ref": "#/$defs/missingReason"
+                },
+                "detail": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "state",
+                "value",
+                "reason",
+                "detail"
+              ],
+              "additionalProperties": false
+            }
+          ]
+        },
+        "create_finished": {
+          "oneOf": [
+            {
+              "type": "object",
+              "properties": {
+                "state": {
+                  "const": "available"
+                },
+                "value": {
+                  "$ref": "#/$defs/int64"
+                }
+              },
+              "required": [
+                "state",
+                "value"
+              ],
+              "additionalProperties": false
+            },
+            {
+              "type": "object",
+              "properties": {
+                "state": {
+                  "const": "unavailable"
+                },
+                "value": {
+                  "type": "null"
+                },
+                "reason": {
+                  "$ref": "#/$defs/missingReason"
+                },
+                "detail": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "state",
+                "value",
+                "reason",
+                "detail"
+              ],
+              "additionalProperties": false
+            }
+          ]
+        },
+        "call_started": {
+          "oneOf": [
+            {
+              "type": "object",
+              "properties": {
+                "state": {
+                  "const": "available"
+                },
+                "value": {
+                  "$ref": "#/$defs/int64"
+                }
+              },
+              "required": [
+                "state",
+                "value"
+              ],
+              "additionalProperties": false
+            },
+            {
+              "type": "object",
+              "properties": {
+                "state": {
+                  "const": "unavailable"
+                },
+                "value": {
+                  "type": "null"
+                },
+                "reason": {
+                  "$ref": "#/$defs/missingReason"
+                },
+                "detail": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "state",
+                "value",
+                "reason",
+                "detail"
+              ],
+              "additionalProperties": false
+            }
+          ]
+        },
+        "call_finished": {
+          "oneOf": [
+            {
+              "type": "object",
+              "properties": {
+                "state": {
+                  "const": "available"
+                },
+                "value": {
+                  "$ref": "#/$defs/int64"
+                }
+              },
+              "required": [
+                "state",
+                "value"
+              ],
+              "additionalProperties": false
+            },
+            {
+              "type": "object",
+              "properties": {
+                "state": {
+                  "const": "unavailable"
+                },
+                "value": {
+                  "type": "null"
+                },
+                "reason": {
+                  "$ref": "#/$defs/missingReason"
+                },
+                "detail": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "state",
+                "value",
+                "reason",
+                "detail"
+              ],
+              "additionalProperties": false
+            }
+          ]
+        },
+        "released": {
+          "oneOf": [
+            {
+              "type": "object",
+              "properties": {
+                "state": {
+                  "const": "available"
+                },
+                "value": {
+                  "$ref": "#/$defs/int64"
+                }
+              },
+              "required": [
+                "state",
+                "value"
+              ],
+              "additionalProperties": false
+            },
+            {
+              "type": "object",
+              "properties": {
+                "state": {
+                  "const": "unavailable"
+                },
+                "value": {
+                  "type": "null"
+                },
+                "reason": {
+                  "$ref": "#/$defs/missingReason"
+                },
+                "detail": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "state",
+                "value",
+                "reason",
+                "detail"
+              ],
+              "additionalProperties": false
+            }
+          ]
+        },
+        "status": {
+          "$ref": "#/$defs/spanStatus"
+        }
+      },
+      "required": [
+        "id",
+        "queued",
+        "admitted",
+        "create_started",
+        "create_finished",
+        "call_started",
+        "call_finished",
+        "released",
+        "status"
+      ],
+      "additionalProperties": false
+    },
+    "execution": {
+      "type": "object",
+      "properties": {
+        "configured_deadline": {
+          "oneOf": [
+            {
+              "type": "object",
+              "properties": {
+                "state": {
+                  "const": "available"
+                },
+                "value": {
+                  "$ref": "#/$defs/int64"
+                }
+              },
+              "required": [
+                "state",
+                "value"
+              ],
+              "additionalProperties": false
+            },
+            {
+              "type": "object",
+              "properties": {
+                "state": {
+                  "const": "unavailable"
+                },
+                "value": {
+                  "type": "null"
+                },
+                "reason": {
+                  "$ref": "#/$defs/missingReason"
+                },
+                "detail": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "state",
+                "value",
+                "reason",
+                "detail"
+              ],
+              "additionalProperties": false
+            }
+          ]
+        },
+        "admission_closed": {
+          "anyOf": [
+            {
+              "type": "object",
+              "properties": {
+                "cause": {
+                  "enum": [
+                    "cancelled",
+                    "deadline",
+                    "task_limit",
+                    "allocation",
+                    "adapter_exception",
+                    "thread_launch"
+                  ]
+                },
+                "at": {
+                  "oneOf": [
+                    {
+                      "type": "object",
+                      "properties": {
+                        "state": {
+                          "const": "available"
+                        },
+                        "value": {
+                          "$ref": "#/$defs/int64"
+                        }
+                      },
+                      "required": [
+                        "state",
+                        "value"
+                      ],
+                      "additionalProperties": false
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "state": {
+                          "const": "unavailable"
+                        },
+                        "value": {
+                          "type": "null"
+                        },
+                        "reason": {
+                          "$ref": "#/$defs/missingReason"
+                        },
+                        "detail": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "state",
+                        "value",
+                        "reason",
+                        "detail"
+                      ],
+                      "additionalProperties": false
+                    }
+                  ]
+                }
+              },
+              "required": [
+                "cause",
+                "at"
+              ],
+              "additionalProperties": false
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "external_cancellation": {
+          "oneOf": [
+            {
+              "type": "object",
+              "properties": {
+                "state": {
+                  "const": "available"
+                },
+                "value": {
+                  "$ref": "#/$defs/int64"
+                }
+              },
+              "required": [
+                "state",
+                "value"
+              ],
+              "additionalProperties": false
+            },
+            {
+              "type": "object",
+              "properties": {
+                "state": {
+                  "const": "unavailable"
+                },
+                "value": {
+                  "type": "null"
+                },
+                "reason": {
+                  "$ref": "#/$defs/missingReason"
+                },
+                "detail": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "state",
+                "value",
+                "reason",
+                "detail"
+              ],
+              "additionalProperties": false
+            }
+          ]
+        },
+        "workers_joined": {
+          "oneOf": [
+            {
+              "type": "object",
+              "properties": {
+                "state": {
+                  "const": "available"
+                },
+                "value": {
+                  "$ref": "#/$defs/int64"
+                }
+              },
+              "required": [
+                "state",
+                "value"
+              ],
+              "additionalProperties": false
+            },
+            {
+              "type": "object",
+              "properties": {
+                "state": {
+                  "const": "unavailable"
+                },
+                "value": {
+                  "type": "null"
+                },
+                "reason": {
+                  "$ref": "#/$defs/missingReason"
+                },
+                "detail": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "state",
+                "value",
+                "reason",
+                "detail"
+              ],
+              "additionalProperties": false
+            }
+          ]
+        },
+        "completed": {
+          "oneOf": [
+            {
+              "type": "object",
+              "properties": {
+                "state": {
+                  "const": "available"
+                },
+                "value": {
+                  "$ref": "#/$defs/int64"
+                }
+              },
+              "required": [
+                "state",
+                "value"
+              ],
+              "additionalProperties": false
+            },
+            {
+              "type": "object",
+              "properties": {
+                "state": {
+                  "const": "unavailable"
+                },
+                "value": {
+                  "type": "null"
+                },
+                "reason": {
+                  "$ref": "#/$defs/missingReason"
+                },
+                "detail": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "state",
+                "value",
+                "reason",
+                "detail"
+              ],
+              "additionalProperties": false
+            }
+          ]
+        },
+        "clock": {
+          "$ref": "#/$defs/clock"
+        },
+        "started": {
+          "oneOf": [
+            {
+              "type": "object",
+              "properties": {
+                "state": {
+                  "const": "available"
+                },
+                "value": {
+                  "$ref": "#/$defs/int64"
+                }
+              },
+              "required": [
+                "state",
+                "value"
+              ],
+              "additionalProperties": false
+            },
+            {
+              "type": "object",
+              "properties": {
+                "state": {
+                  "const": "unavailable"
+                },
+                "value": {
+                  "type": "null"
+                },
+                "reason": {
+                  "$ref": "#/$defs/missingReason"
+                },
+                "detail": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "state",
+                "value",
+                "reason",
+                "detail"
+              ],
+              "additionalProperties": false
+            }
+          ]
+        },
+        "tasks": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/task"
+          }
+        }
+      },
+      "required": [
+        "configured_deadline",
+        "admission_closed",
+        "external_cancellation",
+        "workers_joined",
+        "completed",
+        "clock",
+        "started",
+        "tasks"
+      ],
+      "additionalProperties": false
+    },
+    "resources": {
+      "type": "object",
+      "properties": {
+        "peak_active_tasks": {
+          "oneOf": [
+            {
+              "type": "object",
+              "properties": {
+                "state": {
+                  "const": "available"
+                },
+                "value": {
+                  "$ref": "#/$defs/uint64"
+                }
+              },
+              "required": [
+                "state",
+                "value"
+              ],
+              "additionalProperties": false
+            },
+            {
+              "type": "object",
+              "properties": {
+                "state": {
+                  "const": "unavailable"
+                },
+                "value": {
+                  "type": "null"
+                },
+                "reason": {
+                  "$ref": "#/$defs/missingReason"
+                },
+                "detail": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "state",
+                "value",
+                "reason",
+                "detail"
+              ],
+              "additionalProperties": false
+            }
+          ]
+        },
+        "peak_reserved_threads": {
+          "oneOf": [
+            {
+              "type": "object",
+              "properties": {
+                "state": {
+                  "const": "available"
+                },
+                "value": {
+                  "$ref": "#/$defs/uint64"
+                }
+              },
+              "required": [
+                "state",
+                "value"
+              ],
+              "additionalProperties": false
+            },
+            {
+              "type": "object",
+              "properties": {
+                "state": {
+                  "const": "unavailable"
+                },
+                "value": {
+                  "type": "null"
+                },
+                "reason": {
+                  "$ref": "#/$defs/missingReason"
+                },
+                "detail": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "state",
+                "value",
+                "reason",
+                "detail"
+              ],
+              "additionalProperties": false
+            }
+          ]
+        },
+        "peak_reserved_bytes": {
+          "oneOf": [
+            {
+              "type": "object",
+              "properties": {
+                "state": {
+                  "const": "available"
+                },
+                "value": {
+                  "$ref": "#/$defs/uint64"
+                }
+              },
+              "required": [
+                "state",
+                "value"
+              ],
+              "additionalProperties": false
+            },
+            {
+              "type": "object",
+              "properties": {
+                "state": {
+                  "const": "unavailable"
+                },
+                "value": {
+                  "type": "null"
+                },
+                "reason": {
+                  "$ref": "#/$defs/missingReason"
+                },
+                "detail": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "state",
+                "value",
+                "reason",
+                "detail"
+              ],
+              "additionalProperties": false
+            }
+          ]
+        },
+        "actual_threads": {
+          "oneOf": [
+            {
+              "type": "object",
+              "properties": {
+                "state": {
+                  "const": "available"
+                },
+                "value": {
+                  "$ref": "#/$defs/uint64"
+                }
+              },
+              "required": [
+                "state",
+                "value"
+              ],
+              "additionalProperties": false
+            },
+            {
+              "type": "object",
+              "properties": {
+                "state": {
+                  "const": "unavailable"
+                },
+                "value": {
+                  "type": "null"
+                },
+                "reason": {
+                  "$ref": "#/$defs/missingReason"
+                },
+                "detail": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "state",
+                "value",
+                "reason",
+                "detail"
+              ],
+              "additionalProperties": false
+            }
+          ]
+        },
+        "outer_admission_enforced": {
+          "type": "boolean"
+        },
+        "memory": {
+          "enum": [
+            "unlimited",
+            "active_reservations"
+          ]
+        }
+      },
+      "required": [
+        "peak_active_tasks",
+        "peak_reserved_threads",
+        "peak_reserved_bytes",
+        "actual_threads",
+        "outer_admission_enforced",
+        "memory"
+      ],
+      "additionalProperties": false
+    },
+    "attachment": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "role": {
+          "enum": [
+            "diagnostics",
+            "family",
+            "certificate",
+            "profiler"
+          ]
+        },
+        "digest": {
+          "$ref": "#/$defs/sha256"
+        },
+        "byte_count": {
+          "$ref": "#/$defs/uint64"
+        },
+        "media_type": {
+          "type": "string"
+        },
+        "schema": {
+          "type": "string"
+        },
+        "relative_path": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "content": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/bytes"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "id",
+        "role",
+        "digest",
+        "byte_count",
+        "media_type",
+        "schema",
+        "relative_path",
+        "content"
+      ],
+      "additionalProperties": false
+    },
+    "selection": {
+      "type": "object",
+      "properties": {
+        "batch": {
+          "type": "object",
+          "properties": {
+            "witnesses": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/witness"
+              }
+            },
+            "requested": {
+              "$ref": "#/$defs/uint64"
+            },
+            "selector": {
+              "type": "string"
+            },
+            "seed": {
+              "anyOf": [
+                {
+                  "$ref": "#/$defs/uint64"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "source_family": {
+              "anyOf": [
+                {
+                  "$ref": "#/$defs/familyIdentity"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "directions": {
+              "type": "array",
+              "items": {
+                "type": "array",
+                "items": {
+                  "type": "number"
+                }
+              },
+              "description": "Oriented control-space directions requested for minimization."
+            },
+            "distinctness_tolerance": {
+              "type": "number",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "witnesses",
+            "requested",
+            "selector",
+            "seed",
+            "source_family",
+            "directions",
+            "distinctness_tolerance"
+          ],
+          "additionalProperties": false,
+          "description": "Raw observations are retained. returned_count is witnesses length; distinct_count uses ordered greedy representatives, matching states/control shapes, and maximum absolute difference over full joint histories <= distinctness_tolerance. This relation is nontransitive and its representative count is order dependent."
+        },
+        "termination": {
+          "$ref": "#/$defs/termination"
+        },
+        "diagnostics": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "batch",
+        "termination",
+        "diagnostics"
+      ],
+      "additionalProperties": false
+    },
+    "numericalPolicy": {
+      "type": "object",
+      "properties": {
+        "absolute_tolerance": {
+          "type": "number"
+        },
+        "relative_tolerance": {
+          "type": "number"
+        }
+      },
+      "required": [
+        "absolute_tolerance",
+        "relative_tolerance"
+      ],
+      "additionalProperties": false
+    },
+    "familyRequest": {
+      "type": "object",
+      "properties": {
+        "profile": {
+          "type": "string"
+        },
+        "objective": {
+          "$ref": "#/$defs/problemId"
+        },
+        "target": {
+          "$ref": "#/$defs/familyTarget"
+        },
+        "numerical": {
+          "$ref": "#/$defs/numericalPolicy"
+        },
+        "assurance": {
+          "$ref": "#/$defs/assurance"
+        },
+        "representation": {
+          "type": "string"
+        },
+        "materialization_limit": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/uint64"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "profile",
+        "objective",
+        "target",
+        "numerical",
+        "assurance",
+        "representation",
+        "materialization_limit"
+      ],
+      "additionalProperties": false
+    },
+    "transformStepIdentity": {
+      "type": "object",
+      "properties": {
+        "request": {
+          "type": "string"
+        },
+        "input": {
+          "type": "string"
+        },
+        "output": {
+          "type": "string"
+        },
+        "module": {
+          "type": "string"
+        },
+        "version": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "request",
+        "input",
+        "output",
+        "module",
+        "version"
+      ],
+      "additionalProperties": false
+    },
+    "familyIdentity": {
+      "type": "object",
+      "properties": {
+        "problem": {
+          "$ref": "#/$defs/problemId"
+        },
+        "request": {
+          "$ref": "#/$defs/familyRequest"
+        },
+        "coordinates": {
+          "$ref": "#/$defs/coordinates"
+        },
+        "strategy": {
+          "type": "string"
+        },
+        "strategy_version": {
+          "type": "string"
+        },
+        "lineage": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/transformStepIdentity"
+          }
+        }
+      },
+      "required": [
+        "problem",
+        "request",
+        "coordinates",
+        "strategy",
+        "strategy_version",
+        "lineage"
+      ],
+      "additionalProperties": false
+    },
+    "jointRelation": {
+      "type": "object",
+      "properties": {
+        "coordinates": {
+          "$ref": "#/$defs/coordinates"
+        },
+        "representation": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "coordinates",
+        "representation"
+      ],
+      "additionalProperties": false
+    },
+    "optimumEvidence": {
+      "type": "object",
+      "properties": {
+        "optimum": {
+          "$ref": "#/$defs/claimEvidence"
+        },
+        "bounds": {
+          "$ref": "#/$defs/objective"
+        }
+      },
+      "required": [
+        "optimum",
+        "bounds"
+      ],
+      "additionalProperties": false
+    },
+    "numericalCoverageEvidence": {
+      "type": "object",
+      "properties": {
+        "procedure": {
+          "type": "string"
+        },
+        "policy": {
+          "$ref": "#/$defs/numericalPolicy"
+        },
+        "verifier": {
+          "type": "string"
+        },
+        "diagnostics": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "procedure",
+        "policy",
+        "verifier",
+        "diagnostics"
+      ],
+      "additionalProperties": false
+    },
+    "validatedCoverageEvidence": {
+      "type": "object",
+      "properties": {
+        "certificate": {
+          "type": "string"
+        },
+        "verifier": {
+          "type": "string"
+        },
+        "arithmetic_profile": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "certificate",
+        "verifier",
+        "arithmetic_profile"
+      ],
+      "additionalProperties": false
+    },
+    "completenessEvidence": {
+      "type": "object",
+      "properties": {
+        "binding": {
+          "$ref": "#/$defs/familyIdentity"
+        },
+        "support": {
+          "oneOf": [
+            {
+              "type": "object",
+              "properties": {
+                "kind": {
+                  "const": "numerical"
+                },
+                "value": {
+                  "$ref": "#/$defs/numericalCoverageEvidence"
+                }
+              },
+              "required": [
+                "kind",
+                "value"
+              ],
+              "additionalProperties": false
+            },
+            {
+              "type": "object",
+              "properties": {
+                "kind": {
+                  "const": "validated"
+                },
+                "value": {
+                  "$ref": "#/$defs/validatedCoverageEvidence"
+                }
+              },
+              "required": [
+                "kind",
+                "value"
+              ],
+              "additionalProperties": false
+            }
+          ]
+        }
+      },
+      "required": [
+        "binding",
+        "support"
+      ],
+      "additionalProperties": false
+    },
+    "completeFamily": {
+      "type": "object",
+      "properties": {
+        "relation": {
+          "$ref": "#/$defs/jointRelation"
+        },
+        "optimum": {
+          "$ref": "#/$defs/optimumEvidence"
+        },
+        "completeness": {
+          "$ref": "#/$defs/completenessEvidence"
+        },
+        "assurance": {
+          "$ref": "#/$defs/assurance"
+        }
+      },
+      "required": [
+        "relation",
+        "optimum",
+        "completeness",
+        "assurance"
+      ],
+      "additionalProperties": false
+    },
+    "partialFamily": {
+      "type": "object",
+      "properties": {
+        "relation": {
+          "$ref": "#/$defs/jointRelation"
+        },
+        "optimum": {
+          "$ref": "#/$defs/optimumEvidence"
+        },
+        "optimal_subset": {
+          "type": "object",
+          "properties": {
+            "every_history_optimal": {
+              "$ref": "#/$defs/claimEvidence"
+            },
+            "procedure": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "every_history_optimal",
+            "procedure"
+          ],
+          "additionalProperties": false
+        },
+        "known_scope": {
+          "type": "object",
+          "properties": {
+            "description": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "description"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "relation",
+        "optimum",
+        "optimal_subset",
+        "known_scope"
+      ],
+      "additionalProperties": false
+    },
+    "candidateFamily": {
+      "type": "object",
+      "properties": {
+        "relation": {
+          "$ref": "#/$defs/jointRelation"
+        },
+        "relation_to_target": {
+          "oneOf": [
+            {
+              "type": "object",
+              "properties": {
+                "kind": {
+                  "const": "outer"
+                },
+                "value": {
+                  "type": "object",
+                  "properties": {
+                    "enclosure": {
+                      "$ref": "#/$defs/claimEvidence"
+                    }
+                  },
+                  "required": [
+                    "enclosure"
+                  ],
+                  "additionalProperties": false
+                }
+              },
+              "required": [
+                "kind",
+                "value"
+              ],
+              "additionalProperties": false
+            },
+            {
+              "type": "object",
+              "properties": {
+                "kind": {
+                  "const": "feasible"
+                },
+                "value": {
+                  "type": "object",
+                  "properties": {
+                    "feasibility": {
+                      "$ref": "#/$defs/claimEvidence"
+                    }
+                  },
+                  "required": [
+                    "feasibility"
+                  ],
+                  "additionalProperties": false
+                }
+              },
+              "required": [
+                "kind",
+                "value"
+              ],
+              "additionalProperties": false
+            },
+            {
+              "type": "object",
+              "properties": {
+                "kind": {
+                  "const": "heuristic"
+                },
+                "value": {
+                  "type": "object",
+                  "properties": {
+                    "method": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "method"
+                  ],
+                  "additionalProperties": false
+                }
+              },
+              "required": [
+                "kind",
+                "value"
+              ],
+              "additionalProperties": false
+            }
+          ]
+        },
+        "feasibility": {
+          "oneOf": [
+            {
+              "type": "object",
+              "properties": {
+                "kind": {
+                  "const": "unestablished"
+                },
+                "value": {
+                  "type": "object",
+                  "properties": {},
+                  "required": [],
+                  "additionalProperties": false
+                }
+              },
+              "required": [
+                "kind",
+                "value"
+              ],
+              "additionalProperties": false
+            },
+            {
+              "type": "object",
+              "properties": {
+                "kind": {
+                  "const": "relation"
+                },
+                "value": {
+                  "$ref": "#/$defs/relationFeasibilityEvidence"
+                }
+              },
+              "required": [
+                "kind",
+                "value"
+              ],
+              "additionalProperties": false
+            },
+            {
+              "type": "object",
+              "properties": {
+                "kind": {
+                  "const": "witness"
+                },
+                "value": {
+                  "$ref": "#/$defs/witnessFeasibilityEvidence"
+                }
+              },
+              "required": [
+                "kind",
+                "value"
+              ],
+              "additionalProperties": false
+            }
+          ]
+        }
+      },
+      "required": [
+        "relation",
+        "relation_to_target",
+        "feasibility"
+      ],
+      "additionalProperties": false
+    },
+    "familyOutcome": {
+      "oneOf": [
+        {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "complete"
+            },
+            "value": {
+              "$ref": "#/$defs/completeFamily"
+            }
+          },
+          "required": [
+            "kind",
+            "value"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "partial"
+            },
+            "value": {
+              "$ref": "#/$defs/partialFamily"
+            }
+          },
+          "required": [
+            "kind",
+            "value"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "candidate"
+            },
+            "value": {
+              "$ref": "#/$defs/candidateFamily"
+            }
+          },
+          "required": [
+            "kind",
+            "value"
+          ],
+          "additionalProperties": false
+        }
+      ]
+    },
+    "optimalFamily": {
+      "type": "object",
+      "properties": {
+        "identity": {
+          "$ref": "#/$defs/familyIdentity"
+        },
+        "outcome": {
+          "$ref": "#/$defs/familyOutcome"
+        }
+      },
+      "required": [
+        "identity",
+        "outcome"
+      ],
+      "additionalProperties": false
+    },
+    "feasibleIncumbent": {
+      "type": "object",
+      "properties": {
+        "witness": {
+          "$ref": "#/$defs/witness"
+        },
+        "feasibility": {
+          "$ref": "#/$defs/claimEvidence"
+        }
+      },
+      "required": [
+        "witness",
+        "feasibility"
+      ],
+      "additionalProperties": false
+    },
+    "requestProvenance": {
+      "type": "object",
+      "properties": {
+        "request": {
+          "type": "string"
+        },
+        "port": {
+          "type": "string"
+        },
+        "requested_module": {
+          "type": "string"
+        },
+        "requested_version": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "actual_module": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "actual_version": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "request",
+        "port",
+        "requested_module",
+        "requested_version",
+        "actual_module",
+        "actual_version"
+      ],
+      "additionalProperties": false
+    },
+    "retainedEvidenceScope": {
+      "type": "object",
+      "properties": {
+        "lower_bound": {
+          "type": "boolean"
+        },
+        "upper_bound": {
+          "type": "boolean"
+        },
+        "incumbents": {
+          "$ref": "#/$defs/uint64"
+        },
+        "partial_or_candidate_family": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "lower_bound",
+        "upper_bound",
+        "incumbents",
+        "partial_or_candidate_family"
+      ],
+      "additionalProperties": false
+    },
+    "operationStopped": {
+      "type": "object",
+      "properties": {
+        "reason": {
+          "enum": [
+            "cancelled",
+            "deadline_expired",
+            "resource_limit",
+            "numerical_failure"
+          ]
+        },
+        "diagnostics": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "reason",
+        "diagnostics"
+      ],
+      "additionalProperties": false
+    },
+    "scopedOperationStopped": {
+      "type": "object",
+      "properties": {
+        "stop": {
+          "$ref": "#/$defs/operationStopped"
+        },
+        "request": {
+          "$ref": "#/$defs/requestProvenance"
+        },
+        "retained": {
+          "$ref": "#/$defs/retainedEvidenceScope"
+        }
+      },
+      "required": [
+        "stop",
+        "request",
+        "retained"
+      ],
+      "additionalProperties": false
+    },
+    "scopedRequestRejection": {
+      "type": "object",
+      "properties": {
+        "request": {
+          "$ref": "#/$defs/requestProvenance"
+        },
+        "diagnostics": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/diagnostic"
+          }
+        },
+        "completed_lineage": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/transformStepIdentity"
+          }
+        },
+        "retained": {
+          "$ref": "#/$defs/retainedEvidenceScope"
+        }
+      },
+      "required": [
+        "request",
+        "diagnostics",
+        "completed_lineage",
+        "retained"
+      ],
+      "additionalProperties": false
+    },
+    "synthesisStop": {
+      "oneOf": [
+        {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "none"
+            },
+            "value": {
+              "type": "object",
+              "properties": {},
+              "required": [],
+              "additionalProperties": false
+            }
+          },
+          "required": [
+            "kind",
+            "value"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "operation_stopped"
+            },
+            "value": {
+              "$ref": "#/$defs/scopedOperationStopped"
+            }
+          },
+          "required": [
+            "kind",
+            "value"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "request_rejected"
+            },
+            "value": {
+              "$ref": "#/$defs/scopedRequestRejection"
+            }
+          },
+          "required": [
+            "kind",
+            "value"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "contract_validation_failure"
+            },
+            "value": {
+              "$ref": "#/$defs/contractValidationFailure"
+            }
+          },
+          "required": [
+            "kind",
+            "value"
+          ],
+          "additionalProperties": false
+        }
+      ]
+    },
+    "relationFeasibilityEvidence": {
+      "type": "object",
+      "properties": {
+        "support": {
+          "$ref": "#/$defs/claimEvidence"
+        }
+      },
+      "required": [
+        "support"
+      ],
+      "additionalProperties": false
+    },
+    "witnessFeasibilityEvidence": {
+      "type": "object",
+      "properties": {
+        "witness": {
+          "$ref": "#/$defs/witness"
+        },
+        "support": {
+          "$ref": "#/$defs/claimEvidence"
+        }
+      },
+      "required": [
+        "witness",
+        "support"
+      ],
+      "additionalProperties": false
+    },
+    "sourceStop": {
+      "oneOf": [
+        {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "none"
+            },
+            "value": {
+              "type": "object",
+              "properties": {},
+              "required": [],
+              "additionalProperties": false
+            }
+          },
+          "required": [
+            "kind",
+            "value"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "operation_stopped"
+            },
+            "value": {
+              "$ref": "#/$defs/scopedOperationStopped"
+            }
+          },
+          "required": [
+            "kind",
+            "value"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "request_rejected"
+            },
+            "value": {
+              "$ref": "#/$defs/scopedRequestRejection"
+            }
+          },
+          "required": [
+            "kind",
+            "value"
+          ],
+          "additionalProperties": false
+        }
+      ]
+    },
+    "contractValidationFailure": {
+      "type": "object",
+      "properties": {
+        "diagnostics": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/diagnostic"
+          }
+        },
+        "retained": {
+          "$ref": "#/$defs/retainedEvidenceScope"
+        },
+        "source_stop": {
+          "$ref": "#/$defs/sourceStop"
+        }
+      },
+      "required": [
+        "diagnostics",
+        "retained",
+        "source_stop"
+      ],
+      "additionalProperties": false
+    }
+  }
+}

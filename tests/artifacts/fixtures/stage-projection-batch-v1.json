@@ -1,0 +1,335 @@
+{
+  "assurance": "numerical",
+  "content_sha256": "d9ca413b41dd2fd4a904bd2005150219702907c101d1f3836c8dd5e474b12a06",
+  "coordinates": [
+    {
+      "id": "x0",
+      "name": "oxidizer flow",
+      "unit": "kg/s"
+    },
+    {
+      "id": "x1",
+      "name": "oxidizer stock",
+      "unit": "kg"
+    },
+    {
+      "id": "x2",
+      "name": "fuel flow",
+      "unit": "kg/s"
+    }
+  ],
+  "problem_id": "fuel",
+  "provenance": {
+    "record_schema": "csl.run-statistics/7",
+    "run_id": "run-1",
+    "source_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+  },
+  "records": [
+    {
+      "outcome": {
+        "assurance": "numerical",
+        "components": [
+          {
+            "component_id": "stage-projection/pair/0/stage/0",
+            "interpretation": "conv_vertices_plus_cone_rays",
+            "kind": "polygon",
+            "rays": [],
+            "vertices": [
+              [
+                -1.0,
+                -1.0
+              ],
+              [
+                -1.0,
+                1.0
+              ],
+              [
+                -1.0,
+                -1.0
+              ],
+              [
+                -1.0,
+                1.0
+              ],
+              [
+                1.0,
+                -1.0
+              ],
+              [
+                1.0,
+                1.0
+              ],
+              [
+                1.0,
+                -1.0
+              ],
+              [
+                1.0,
+                1.0
+              ]
+            ]
+          }
+        ],
+        "evidence": [
+          {
+            "assumptions": [
+              "ordered selected coordinates retained; affine dimension is not inferred",
+              "generator copying or lazy retention introduces no arithmetic conversion",
+              "H materialization preserves equalities; V materialization preserves every ray including zero images"
+            ],
+            "ideal_output_id": "stage-projection/pair/0/stage/0",
+            "input_set_ids": [
+              "cube"
+            ],
+            "request_id": "stage-batch/pair/0/stage/0",
+            "scope": "set_relation",
+            "support": {
+              "assumptions": "Coordinate selection copies generators; lazy projection retains its immutable source without elimination.",
+              "kind": "symbolic_argument",
+              "reference": "Coordinate projection of conv(V)+cone(R), or retained existential projection"
+            }
+          }
+        ],
+        "provider": {
+          "id": "csl.geometry.polyhedral-projection",
+          "version": "1.0.0"
+        },
+        "relation": "equivalent",
+        "status": "success"
+      },
+      "pair_index": 0,
+      "physical_time": 0.0,
+      "source_assurance": "numerical",
+      "source_set_ids": [
+        "cube"
+      ],
+      "stage": 0
+    },
+    {
+      "outcome": {
+        "assurance": "numerical",
+        "components": [
+          {
+            "component_id": "stage-projection/pair/0/stage/1",
+            "interpretation": "conv_vertices_plus_cone_rays",
+            "kind": "segment",
+            "rays": [],
+            "vertices": [
+              [
+                0.0,
+                0.0
+              ],
+              [
+                1e+16,
+                1.0000000000000002e+16
+              ],
+              [
+                1.0000000000000002e+16,
+                1.0000000000000004e+16
+              ]
+            ]
+          }
+        ],
+        "evidence": [
+          {
+            "assumptions": [
+              "ordered selected coordinates retained; affine dimension is not inferred",
+              "generator copying or lazy retention introduces no arithmetic conversion",
+              "H materialization preserves equalities; V materialization preserves every ray including zero images"
+            ],
+            "ideal_output_id": "stage-projection/pair/0/stage/1",
+            "input_set_ids": [
+              "line"
+            ],
+            "request_id": "stage-batch/pair/0/stage/1",
+            "scope": "set_relation",
+            "support": {
+              "assumptions": "Coordinate selection copies generators; lazy projection retains its immutable source without elimination.",
+              "kind": "symbolic_argument",
+              "reference": "Coordinate projection of conv(V)+cone(R), or retained existential projection"
+            }
+          }
+        ],
+        "provider": {
+          "id": "csl.geometry.polyhedral-projection",
+          "version": "1.0.0"
+        },
+        "relation": "equivalent",
+        "status": "success"
+      },
+      "pair_index": 0,
+      "physical_time": 1.0,
+      "source_assurance": "numerical",
+      "source_set_ids": [
+        "line"
+      ],
+      "stage": 1
+    },
+    {
+      "outcome": {
+        "assurance": "numerical",
+        "components": [
+          {
+            "component_id": "stage-projection/pair/0/stage/2",
+            "interpretation": "conv_vertices_plus_cone_rays",
+            "kind": "point",
+            "rays": [
+              [
+                0.0,
+                0.0
+              ]
+            ],
+            "vertices": [
+              [
+                5.0,
+                7.0
+              ],
+              [
+                5.0,
+                7.0
+              ],
+              [
+                5.0,
+                7.0
+              ]
+            ]
+          }
+        ],
+        "evidence": [
+          {
+            "assumptions": [
+              "ordered selected coordinates retained; affine dimension is not inferred",
+              "generator copying or lazy retention introduces no arithmetic conversion",
+              "H materialization preserves equalities; V materialization preserves every ray including zero images"
+            ],
+            "ideal_output_id": "stage-projection/pair/0/stage/2",
+            "input_set_ids": [
+              "point"
+            ],
+            "request_id": "stage-batch/pair/0/stage/2",
+            "scope": "set_relation",
+            "support": {
+              "assumptions": "Coordinate selection copies generators; lazy projection retains its immutable source without elimination.",
+              "kind": "symbolic_argument",
+              "reference": "Coordinate projection of conv(V)+cone(R), or retained existential projection"
+            }
+          }
+        ],
+        "provider": {
+          "id": "csl.geometry.polyhedral-projection",
+          "version": "1.0.0"
+        },
+        "relation": "equivalent",
+        "status": "success"
+      },
+      "pair_index": 0,
+      "physical_time": 2.0,
+      "source_assurance": "numerical",
+      "source_set_ids": [
+        "point"
+      ],
+      "stage": 2
+    },
+    {
+      "outcome": {
+        "assurance": "numerical",
+        "components": [
+          {
+            "component_id": "stage-projection/pair/0/stage/3",
+            "interpretation": "conv_vertices_plus_cone_rays",
+            "kind": "empty",
+            "rays": [
+              [
+                1.0,
+                0.0
+              ]
+            ],
+            "vertices": []
+          }
+        ],
+        "evidence": [
+          {
+            "assumptions": [
+              "ordered selected coordinates retained; affine dimension is not inferred",
+              "generator copying or lazy retention introduces no arithmetic conversion",
+              "H materialization preserves equalities; V materialization preserves every ray including zero images"
+            ],
+            "ideal_output_id": "stage-projection/pair/0/stage/3",
+            "input_set_ids": [
+              "empty"
+            ],
+            "request_id": "stage-batch/pair/0/stage/3",
+            "scope": "set_relation",
+            "support": {
+              "assumptions": "Coordinate selection copies generators; lazy projection retains its immutable source without elimination.",
+              "kind": "symbolic_argument",
+              "reference": "Coordinate projection of conv(V)+cone(R), or retained existential projection"
+            }
+          }
+        ],
+        "provider": {
+          "id": "csl.geometry.polyhedral-projection",
+          "version": "1.0.0"
+        },
+        "relation": "equivalent",
+        "status": "success"
+      },
+      "pair_index": 0,
+      "physical_time": 3.0,
+      "source_assurance": "numerical",
+      "source_set_ids": [
+        "empty"
+      ],
+      "stage": 3
+    }
+  ],
+  "relation": "equivalent",
+  "request_id": "stage-batch",
+  "requested_pairs": [
+    [
+      0,
+      2
+    ]
+  ],
+  "route_id": "fuel-route",
+  "schema": "csl.stage-projection-batch/1",
+  "stage_axis": {
+    "kind": "stage",
+    "points": [
+      0.0,
+      1.0,
+      2.0,
+      3.0
+    ],
+    "unit": null
+  },
+  "trajectory_series": [
+    {
+      "coordinate_ids": [
+        "x0",
+        "x2"
+      ],
+      "evidence": "selected witness only",
+      "kind": "trajectory",
+      "points": [
+        [
+          -1.0,
+          -1.0
+        ],
+        [
+          1.0,
+          1.0
+        ],
+        [
+          5.0,
+          7.0
+        ],
+        [
+          0.0,
+          0.0
+        ]
+      ],
+      "source_run_id": "run-1"
+    }
+  ]
+}

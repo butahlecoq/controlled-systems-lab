@@ -1,7 +1,8 @@
 # Run a scenario
 
 Use `scenario_cli` to validate a scenario or run the guarded reach-back and
-direct-joint comparison on a supported T-S01 or T-S02 profile.
+direct-joint comparison, or the strategy methods selected in its `run.methods`
+list, on a supported profile.
 
 ## Build the installed CLI
 
@@ -69,20 +70,43 @@ do not prove a complete optimal family or establish which strategy is faster.
 The CLI supports only the two named profiles and registered providers available
 to this executable. Unsupported combinations remain explicit outcomes.
 
+## Select explicit methods
+
+Instead of the named comparison, a scenario may request one or more registered
+strategy IDs in order, with an optional exact strategy version:
+
+```json
+"run": {
+  "methods": [
+    {"id": "csl.synthesis.reach-back", "version": "1"}
+  ],
+  "seed": 42
+}
+```
+
+The CLI executes every requested method through the same admission, witness
+selection, and verification workflow as the paired comparison. An unavailable
+method or version reports its `/run/methods/<index>` field. Each result line
+names the requested strategy. Method selection and run settings do not change
+the mathematical problem identity. The current CLI only registers the two
+strategies and HiGHS LP/convex providers; requesting another module produces a
+diagnostic instead of silently substituting one.
+
 ## Save the strategy records
 
-Pass a new output directory to save both attempts through the artifact API:
+Pass a new output directory to save attempts through the artifact API:
 
 ```sh
 build/examples/scenario_cli --run examples/scenarios/two-stage-integrator.json \
   --output-dir build/results/two-stage-integrator-01
 ```
 
-The CLI writes `reach-back.run.json` and `strategy-b.run.json` as
-`csl.run-statistics/7` recorded artifacts only after both strategies return
-complete-family results with completed optimal outcomes, and every selected
-witness passes numerical checks. If a strategy or witness check fails, the
-command returns before publication.
+For the named comparison the CLI writes `reach-back.run.json` and
+`strategy-b.run.json`. Explicit method selections write one
+`method-<index>-<strategy-id>.run.json` record per requested method; the index
+keeps duplicate IDs distinct. Records use the `csl.run-statistics/9` schema and include the source SHA-256, scenario schema, defaults revision and resolved defaults. They omit machine-local paths; the content digest is the portable source binding.
+The CLI does not publish when its selected profile's result requirements or
+witness checks fail.
 Use a fresh directory because the CLI refuses to replace existing result
 files. The records preserve family claims as `unverified_recorded_data`;
 decoding does not make those claims trusted evidence. The two records are not a

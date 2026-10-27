@@ -146,7 +146,7 @@ StageProjectionCaptureOutcome capture_stage_projections(
                     projection->evidence.reference, projection->output, pair.coordinates,
                     projection->relation, projection->evidence.support,
                     projection->evidence.assumptions, operation_provider, {}, cost},
-                    projection->evidence.error_bound}});
+                    projection->evidence.error_bound, {}}});
         }
     }
     return batch;

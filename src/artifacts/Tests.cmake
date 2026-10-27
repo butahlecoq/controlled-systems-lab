@@ -51,6 +51,18 @@ target_link_libraries(stage_projection_capture_tests PRIVATE CSL::artifacts CSL:
 add_test(NAME stage_projection_capture_tests COMMAND stage_projection_capture_tests)
 csl_test_target(stage_projection_capture_tests artifacts)
 
+add_executable(stage_projection_capture_integration_tests tests/artifacts/stage_projection_capture_integration_tests.cpp)
+target_link_libraries(stage_projection_capture_integration_tests PRIVATE CSL::artifacts CSL::polyhedral doctest::doctest)
+add_test(NAME stage_projection_capture_integration_tests COMMAND stage_projection_capture_integration_tests)
+csl_test_target(stage_projection_capture_integration_tests artifacts)
+
+add_executable(stage_projection_batch_contract tests/artifacts/stage_projection_batch_contract.cpp)
+target_link_libraries(stage_projection_batch_contract PRIVATE CSL::artifacts CSL::polyhedral doctest::doctest)
+target_compile_definitions(stage_projection_batch_contract PRIVATE CSL_STAGE_PROJECTION_BATCH_FIXTURE="${CMAKE_CURRENT_SOURCE_DIR}/tests/artifacts/fixtures/stage-projection-batch-v1.json")
+target_include_directories(stage_projection_batch_contract SYSTEM PRIVATE ${csl_json_SOURCE_DIR}/single_include)
+add_test(NAME stage_projection_batch_contract COMMAND stage_projection_batch_contract)
+csl_test_target(stage_projection_batch_contract artifacts)
+
 add_executable(plot_document_json_contract tests/artifacts/plot_document_json.cpp)
 target_link_libraries(plot_document_json_contract PRIVATE CSL::artifacts doctest::doctest)
 add_test(NAME plot_document_json_contract COMMAND plot_document_json_contract)

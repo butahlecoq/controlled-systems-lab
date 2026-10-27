@@ -10,6 +10,7 @@ if(DEFINED SCENARIO_PROFILE)
 endif()
 
 file(REMOVE_RECURSE "${OUTPUT_DIRECTORY}")
+file(SHA256 "${SCENARIO_INPUT}" expected_source_hash)
 execute_process(
   COMMAND "${SCENARIO_CLI}" --run "${SCENARIO_INPUT}" ${profile_arguments} --output-dir "${OUTPUT_DIRECTORY}"
   RESULT_VARIABLE status OUTPUT_VARIABLE output ERROR_VARIABLE error)
@@ -25,9 +26,17 @@ foreach(name IN ITEMS reach-back strategy-b)
   file(READ "${path}" artifact)
   string(JSON schema GET "${artifact}" schema)
   string(JSON state GET "${artifact}" recorded_state)
+  string(JSON source_hash GET "${artifact}" scenario_source source_sha256)
+  string(JSON input_schema GET "${artifact}" scenario_source schema)
+  string(JSON defaults_revision GET "${artifact}" scenario_source defaults_revision)
   string(JSON final_kind GET "${artifact}" final kind)
-  if(NOT "${schema}" STREQUAL "csl.run-statistics/7")
+  if(NOT "${schema}" STREQUAL "csl.run-statistics/9")
     message(FATAL_ERROR "${path} uses unexpected schema ${schema}")
+  endif()
+  if(NOT "${source_hash}" STREQUAL "${expected_source_hash}" OR
+     NOT "${input_schema}" STREQUAL "csl.scenario/1" OR
+     NOT "${defaults_revision}" STREQUAL "csl.scenario-defaults/1")
+    message(FATAL_ERROR "${path} does not retain matching scenario source provenance")
   endif()
   if(NOT "${state}" STREQUAL "unverified_recorded_data")
     message(FATAL_ERROR "${path} does not declare its untrusted recorded state")

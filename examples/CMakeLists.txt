@@ -114,6 +114,7 @@ csl_example(scenario_cli CSL::input CSL::application CSL::strategy_a CSL::strate
   CSL::witness_selector CSL::verification CSL::highs_lp CSL::highs_convex
   CSL::qhull_conversion CSL::affine_sum)
 csl_example(backend_substitution CSL::highs_lp CSL::phase_one)
+csl_example(scenario_backend_substitution CSL::input CSL::highs_lp CSL::phase_one)
 csl_example(registered_synthesis_comparison CSL::input CSL::strategy_a CSL::strategy_b
   CSL::witness_selector CSL::verification CSL::highs_lp CSL::highs_convex CSL::qhull_conversion CSL::affine_sum)
 csl_example(nominal_linear_exact_2d CSL::strategy_a CSL::highs_lp CSL::highs_convex
@@ -148,8 +149,8 @@ example_check(scenario_cli_run_double_integrator_generality scenario_cli
 example_check(scenario_cli_run_missing scenario_cli "--run;${CMAKE_CURRENT_BINARY_DIR}/no-such-scenario.json" 2
   "Input rejected: category=io.*expected")
 example_check(scenario_cli_run_unknown_backend scenario_cli
-  "--run;${CMAKE_CURRENT_SOURCE_DIR}/scenarios/two-stage-integrator.json;--lp;missing-backend" 1
-  "Strategy preparation rejected.*missing-backend")
+  "--run;${CMAKE_CURRENT_SOURCE_DIR}/scenarios/two-stage-integrator.json;--lp;missing-backend" 2
+  "Input unsupported: path=/run/backends/lp observed=missing-backend")
 example_check(scenario_cli_run_unsupported_profile scenario_cli
   "--run;${CMAKE_CURRENT_SOURCE_DIR}/scenarios/two-stage-integrator.json;--profile;unsupported-profile" 2
   "Unsupported profile.*unsupported-profile")
@@ -188,6 +189,54 @@ file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/explicit-h-representation.json" "${expli
 example_check(scenario_cli_run_explicit_h_representation scenario_cli
   "--run;${CMAKE_CURRENT_BINARY_DIR}/explicit-h-representation.json" 0
   "mode=run profile=ts01_exact_integrator strategy=csl.synthesis.reach-back.*seed=31 threads=1.*trajectory_verification=numerical_pass")
+string(JSON explicit_methods_scenario SET "${validation_scenario}" run
+  "{\"methods\":[{\"id\":\"csl.synthesis.reach-back\",\"version\":\"1\"}],\"backends\":{\"lp\":{\"id\":\"csl.lp.highs\"}},\"seed\":42}")
+file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/explicit-methods.json" "${explicit_methods_scenario}")
+string(JSON changed_method_problem_scenario SET "${explicit_methods_scenario}" model A "[[2]]")
+file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/explicit-methods-changed-data.json" "${changed_method_problem_scenario}")
+string(JSON changed_backend_scenario SET "${explicit_methods_scenario}" run backends lp id "\"phase-one-bland\"")
+file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/explicit-methods-changed-backend.json" "${changed_backend_scenario}")
+if(TARGET scenario_cli)
+  add_test(NAME scenario_cli_problem_identity_boundary
+    COMMAND ${CMAKE_COMMAND}
+      "-DSCENARIO_CLI=$<TARGET_FILE:scenario_cli>"
+      "-DCOMPARISON_INPUT=${CMAKE_CURRENT_SOURCE_DIR}/scenarios/two-stage-integrator.json"
+      "-DMETHODS_INPUT=${CMAKE_CURRENT_BINARY_DIR}/explicit-methods.json"
+      "-DCHANGED_INPUT=${CMAKE_CURRENT_BINARY_DIR}/explicit-methods-changed-data.json"
+      "-DBACKEND_CHANGED_INPUT=${CMAKE_CURRENT_BINARY_DIR}/explicit-methods-changed-backend.json"
+      -P "${CMAKE_CURRENT_SOURCE_DIR}/scenario_cli_identity_check.cmake")
+  set_tests_properties(scenario_cli_problem_identity_boundary PROPERTIES TIMEOUT 30)
+endif()
+if(TARGET scenario_cli)
+  add_test(NAME scenario_cli_explicit_method_export
+    COMMAND ${CMAKE_COMMAND}
+      "-DSCENARIO_CLI=$<TARGET_FILE:scenario_cli>"
+      "-DSCENARIO_INPUT=${CMAKE_CURRENT_BINARY_DIR}/explicit-methods.json"
+      "-DOUTPUT_DIRECTORY=${CMAKE_CURRENT_BINARY_DIR}/scenario-cli-explicit-method"
+      -P "${CMAKE_CURRENT_SOURCE_DIR}/scenario_cli_methods_export_check.cmake")
+  set_tests_properties(scenario_cli_explicit_method_export PROPERTIES TIMEOUT 30)
+endif()
+example_check(scenario_cli_run_explicit_method scenario_cli
+  "--run;${CMAKE_CURRENT_BINARY_DIR}/explicit-methods.json" 0
+  "mode=run profile=ts01_exact_integrator.*strategy=csl.synthesis.reach-back version=1.*seed=42.*trajectory_verification=numerical_pass")
+string(JSON unknown_method_scenario SET "${validation_scenario}" run
+  "{\"methods\":[{\"id\":\"csl.synthesis.missing\"}]}")
+file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/unknown-method.json" "${unknown_method_scenario}")
+example_check(scenario_cli_run_unknown_method scenario_cli
+  "--run;${CMAKE_CURRENT_BINARY_DIR}/unknown-method.json" 2
+  "Input unsupported: path=/run/methods/0/id observed=csl.synthesis.missing")
+string(JSON unknown_method_version_scenario SET "${validation_scenario}" run
+  "{\"methods\":[{\"id\":\"csl.synthesis.missing\",\"version\":\"1\"}]}")
+file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/unknown-method-with-version.json" "${unknown_method_version_scenario}")
+example_check(scenario_cli_run_unknown_method_with_version scenario_cli
+  "--run;${CMAKE_CURRENT_BINARY_DIR}/unknown-method-with-version.json" 2
+  "Input unsupported: path=/run/methods/0/id observed=csl.synthesis.missing")
+string(JSON unknown_version_scenario SET "${validation_scenario}" run
+  "{\"methods\":[{\"id\":\"csl.synthesis.reach-back\",\"version\":\"unsupported\"}]}")
+file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/unknown-method-version.json" "${unknown_version_scenario}")
+example_check(scenario_cli_run_unknown_method_version scenario_cli
+  "--run;${CMAKE_CURRENT_BINARY_DIR}/unknown-method-version.json" 2
+  "Input unsupported: path=/run/methods/0/version observed=unsupported")
 example_check(file_history scenario_file "${CMAKE_CURRENT_SOURCE_DIR}/scenarios/two-stage-integrator.json" 0
   "states=0,0.25,1 controls=0.25,0.75 original_cost=0")
 example_check(substitution_highs backend_substitution csl.lp.highs 0 "backend=csl.lp.highs version=1.1.0.highs.1.11.0")
@@ -197,6 +246,25 @@ example_check(nominal_linear_exact_2d_complete_face nominal_linear_exact_2d "" 0
 example_check(lp_unknown_backend registered_lp missing-backend 2 "Selection rejected.*missing-backend")
 example_check(convex_unknown_backend registered_convex missing-backend 2 "Selection rejected.*missing-backend")
 example_check(substitution_unknown_backend backend_substitution missing-backend 2 "Selection rejected.*missing-backend")
+if(TARGET scenario_backend_substitution)
+  add_executable(scenario_backend_artifact_check scenario_backend_artifact_check.cpp)
+  target_compile_features(scenario_backend_artifact_check PRIVATE cxx_std_20)
+  set_target_properties(scenario_backend_artifact_check PROPERTIES CXX_EXTENSIONS OFF)
+  if(MSVC)
+    target_compile_options(scenario_backend_artifact_check PRIVATE /W4 /WX /permissive-)
+  else()
+    target_compile_options(scenario_backend_artifact_check PRIVATE -Wall -Wextra -Wpedantic -Werror)
+  endif()
+  add_test(NAME scenario_backend_substitution_saved_outputs
+    COMMAND ${CMAKE_COMMAND}
+      "-DSCENARIO_BACKEND_SUBSTITUTION=$<TARGET_FILE:scenario_backend_substitution>"
+      "-DSCENARIO_BACKEND_ARTIFACT_CHECK=$<TARGET_FILE:scenario_backend_artifact_check>"
+      "-DHIGHS_SCENARIO=${CMAKE_CURRENT_SOURCE_DIR}/scenarios/two-stage-integrator-highs.json"
+      "-DPHASE_ONE_SCENARIO=${CMAKE_CURRENT_SOURCE_DIR}/scenarios/two-stage-integrator-phase-one.json"
+      "-DOUTPUT_DIRECTORY=${CMAKE_CURRENT_BINARY_DIR}/scenario-backend-substitution"
+      -P "${CMAKE_CURRENT_SOURCE_DIR}/scenario_backend_substitution_check.cmake")
+  set_tests_properties(scenario_backend_substitution_saved_outputs PROPERTIES TIMEOUT 30)
+endif()
 example_check(file_missing scenario_file "${CMAKE_CURRENT_BINARY_DIR}/no-such-scenario.json" 2 "Input rejected.*expected")
 file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/malformed.json" "{ invalid JSON")
 example_check(file_malformed scenario_file "${CMAKE_CURRENT_BINARY_DIR}/malformed.json" 2 "Input rejected.*expected")

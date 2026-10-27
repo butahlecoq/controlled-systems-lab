@@ -1,0 +1,20 @@
+{
+  "schema": "csl.stage-projection-demo-source/1",
+  "problem_id": "planar-integrator-box-control-demo",
+  "request_id": "planar-integrator-stage-projections-v1",
+  "route_id": "demo.affine-box-reachability",
+  "run_id": "planar-integrator-box-control-demo-v1",
+  "record_schema": "csl.stage-projection-demo-source/1",
+  "description": "Small nonfuel discrete-time integrator with a bounded scalar control. This is a demonstration, not a benchmark.",
+  "state_names": ["horizontal position x1", "vertical position x2"],
+  "state_units": ["m", "m"],
+  "initial_state": [0.0, 0.0],
+  "dynamics": {
+    "A": [[1.0, 0.0], [0.0, 1.0]],
+    "B": [1.0, 0.5],
+    "control_bounds": [-0.5, 0.5],
+    "horizon": 3,
+    "disturbance": "zero"
+  },
+  "coordinate_pairs": [[0, 1]]
+}
