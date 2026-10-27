@@ -71,6 +71,21 @@ TEST_CASE("duplicate catalogue rows remain separate tied plans") {
           std::get<FinitePlanFeasible>(result.plans[1]).terminal.metadata()->id);
 }
 
+TEST_CASE("near-optimal tolerance does not turn numerical near-ties into exact ties") {
+    const auto exact=finite_action_minimax(request({0,1e-8}),{2,2,0});
+    REQUIRE(std::holds_alternative<FiniteMinimaxOptimal>(exact));
+    const auto& exact_result=std::get<FiniteMinimaxOptimal>(exact);
+    CHECK(exact_result.minimizing_plan_indices==std::vector<std::size_t>{0});
+    CHECK(std::get<FinitePlanFeasible>(exact_result.plans[1]).worst_value>exact_result.value);
+
+    const auto tolerant=finite_action_minimax(request({0,1e-8}),{2,2,1e-7});
+    REQUIRE(std::holds_alternative<FiniteMinimaxOptimal>(tolerant));
+    const auto& tolerant_result=std::get<FiniteMinimaxOptimal>(tolerant);
+    CHECK(tolerant_result.value==exact_result.value);
+    CHECK(tolerant_result.minimizing_plan_indices==std::vector<std::size_t>{0,1});
+    CHECK(std::get<FinitePlanFeasible>(tolerant_result.plans[1]).worst_value>tolerant_result.value);
+}
+
 TEST_CASE("independent exhaustive oracle checks every tied robust finite plan") {
     const Vector catalogue{0,0,1};
     auto input=request(catalogue,10);
