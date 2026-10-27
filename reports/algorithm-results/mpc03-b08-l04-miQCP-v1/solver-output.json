@@ -1,0 +1,100 @@
+{
+  "schema": "csl.mpc03-b08-solver-output/1",
+  "scenario_sha256": "f895bf7169e522b75b0e70c6cfa1506b62caeb362737a015f8ed236570647c15",
+  "disturbance_history_count": 256,
+  "finite_miqcp": {
+    "formulation": "finite-miQCP",
+    "status": "optimal",
+    "elapsed_ns_single_capture": 2277863832,
+    "objective_squared": 4509.203228280342,
+    "global_dual_bound_squared": 4509.203228280342,
+    "relative_gap": 0.0,
+    "node_count": 9,
+    "solution_count": 6,
+    "limit_seconds": 300.0,
+    "requested_threads": 1,
+    "pyscipopt_version": "6.3.0",
+    "scip_version": "10.0",
+    "selector_values": [
+      [
+        0.0,
+        1.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      [
+        1.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      [
+        1.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "action_indices": [
+      1,
+      0,
+      0,
+      4
+    ],
+    "actions": [
+      0.3,
+      0.6,
+      0.6,
+      -0.6
+    ]
+  },
+  "convex_control_qcp": {
+    "formulation": "convex-control-QCP",
+    "status": "optimal",
+    "elapsed_ns_single_capture": 758814395,
+    "objective_squared": 4492.233805598401,
+    "global_dual_bound_squared": 4492.233805598401,
+    "relative_gap": 0.0,
+    "node_count": 1,
+    "solution_count": 4,
+    "limit_seconds": 300.0,
+    "requested_threads": 1,
+    "pyscipopt_version": "6.3.0",
+    "scip_version": "10.0",
+    "relaxed_controls": [
+      0.5014621249885906,
+      0.4691514439009892,
+      0.26458036960003345,
+      -0.32657414972127696
+    ],
+    "controls_are_catalogue_feasible": false,
+    "direct_corner_cost_squared": 4492.23380649924,
+    "direct_cost_matches_solver_within_1e-6": true
+  },
+  "timing_scope": "one exploratory solve per formulation; no performance comparison",
+  "warmups": 0,
+  "attempt_count_per_formulation": 1,
+  "thread_limit": 1,
+  "source_commit": "4d812d3e3f0e9b84a7508ddcb83e32b1d32a43fe",
+  "driver_path": "scripts/reports/mpc03/b08_miqcp.py",
+  "driver_sha256": "6f3cda02a4864b430f95f0a6825c5ed389d3b86cdeeaba67f806ddf5b80db530",
+  "environment": {
+    "python": "3.14.7",
+    "platform": "Linux-7.2.5-3-omarchy-x86_64-with-glibc2.44",
+    "machine": "x86_64",
+    "logical_cpus": 8,
+    "cpu_model": "AMD Ryzen 5 3550H with Radeon Vega Mobile Gfx",
+    "memory_limit": "not enforced for this local exploratory capture",
+    "solver_threads": 1
+  }
+}

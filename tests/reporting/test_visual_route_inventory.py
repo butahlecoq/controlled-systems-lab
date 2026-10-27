@@ -121,6 +121,11 @@ class VisualRouteInventoryTests(unittest.TestCase):
             "mpc03-open-loop-pilot-v1/pilot-output.json",
             "mpc03-open-loop-pilot-v1/build-provenance.json",
             "mpc03-open-loop-pilot-v1/disturbance-tube.svg",
+            "mpc03-b08-l04-miQCP-v1/index.html",
+            "mpc03-b08-l04-miQCP-v1/record.json",
+            "mpc03-b08-l04-miQCP-v1/solver-output.json",
+            "mpc03-b08-l04-miQCP-v1/independent-oracle.json",
+            "mpc03-b08-l04-miQCP-v1/disturbance-tube.svg",
             *audit_visual_routes.geometry_companion_assets(),
             *audit_visual_routes.viz10_companion_assets()})
         self.assertEqual((ROOT/"docs/examples/examples.css").read_bytes(),

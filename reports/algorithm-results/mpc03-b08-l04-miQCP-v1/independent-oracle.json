@@ -1,0 +1,63 @@
+{
+  "scope": "exact rational enumeration of L04 displayed rounded linear data",
+  "source_id": "L04",
+  "source_sha256": "6e07c9a2fac2d112885a495c9fe7f13acec9d990d947017b1701a4b95538cd5f",
+  "plan_count": 625,
+  "disturbance_corner_count_per_plan": 256,
+  "objective": "Euclidean terminal norm; exact values below are squared norms",
+  "minimum_squared_exact": "112730080707/25000000",
+  "minimum_norm_decimal": "67.150601101404892785077587907567047",
+  "exact_minimizers": [
+    [
+      "3/5",
+      "3/5",
+      "-3/10",
+      "0"
+    ],
+    [
+      "3/5",
+      "3/10",
+      "3/10",
+      "-3/10"
+    ],
+    [
+      "3/10",
+      "3/5",
+      "3/5",
+      "-3/5"
+    ]
+  ],
+  "reported_plan": [
+    "3/5",
+    "3/5",
+    "-3/10",
+    "0"
+  ],
+  "reported_plan_squared_exact": "112730080707/25000000",
+  "reported_plan_norm_decimal": "67.150601101404892785077587907567047",
+  "reported_plan_worst_corner_signs": [
+    1,
+    -1,
+    1,
+    -1,
+    1,
+    -1,
+    1,
+    -1
+  ],
+  "reported_plan_worst_terminal_exact": [
+    "12011397/10000",
+    "-10931/400",
+    "4526063/10000",
+    "-24509/400"
+  ],
+  "reported_norm": "67.12",
+  "reported_plan_is_exact_minimizer": true,
+  "reported_norm_squared_exact": "2815684/625",
+  "displayed_model_matches_reported_norm": false,
+  "limitations": [
+    "Printed decimals are treated as exact rationals; original unrounded arrays are unavailable.",
+    "Only the displayed four-step unconstrained linear minimax model is checked.",
+    "No nonlinear trajectory, historical timing, or complete publication generator is reproduced."
+  ]
+}

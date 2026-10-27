@@ -22,6 +22,7 @@ COMPOSED_SAVED_ROUTES = {
     "scripts/reports/ext04/continuous_report.py",
     "scripts/reports/issue422/build_bundle.py",
     "scripts/reports/stage_mpc03.py",
+    "scripts/reports/stage_mpc03_b08.py",
 }
 FROZEN_DIAGRAM_EXCEPTIONS = {"benchmarks/reporting/approximation_pilot/summarize.py"}
 PUBLICATION_EXPORT_ROUTES = {"scripts/reports/render.py"}
@@ -78,6 +79,7 @@ SAVED_COMPANION_ROUTES = {
 }
 FROZEN_COMPANIONS = {
     "mpc03-open-loop-pilot-v1": "examples/index.html",
+    "mpc03-b08-l04-miQCP-v1": "examples/index.html",
     "app02-box-8ff979de60ea9d22": "examples/app02-diamond-v1.html",
     "app03-zonotope-4522855018fa9b0b": "examples/app03-zonotope-v1.html",
     "app04-ellipsoid-fd302c34092f8b19": "examples/app04-square-v1.html",
@@ -127,6 +129,9 @@ def source_inventory(root: Path) -> list[dict]:
                 disposition = "adopted-shared-quantitative-policy"
             elif relative == "benchmarks/reporting/it17_hull/summarize.py":
                 disposition = "reviewed-static-diagram-exception"
+            elif relative in {"scripts/reports/mpc03/b08_miqcp.py",
+                              "scripts/reports/mpc03/b08_report.py"}:
+                disposition = "adopted-shared-quantitative-policy"
             elif relative.endswith("/control_figures.py") or relative.endswith("/plot.py"):
                 disposition = "adopted-shared-quantitative-policy"
             elif relative.endswith("/visual_illustrations.py"):
@@ -202,7 +207,12 @@ def build(root: Path = ROOT) -> dict:
                     "mpc03-open-loop-pilot-v1/record.json",
                     "mpc03-open-loop-pilot-v1/pilot-output.json",
                     "mpc03-open-loop-pilot-v1/build-provenance.json",
-                    "mpc03-open-loop-pilot-v1/disturbance-tube.svg"] + geometry_companion_assets() +
+                    "mpc03-open-loop-pilot-v1/disturbance-tube.svg",
+                    "mpc03-b08-l04-miQCP-v1/index.html",
+                    "mpc03-b08-l04-miQCP-v1/record.json",
+                    "mpc03-b08-l04-miQCP-v1/solver-output.json",
+                    "mpc03-b08-l04-miQCP-v1/independent-oracle.json",
+                    "mpc03-b08-l04-miQCP-v1/disturbance-tube.svg"] + geometry_companion_assets() +
                     viz10_companion_assets(),
                  "disposition": "adopted-shared-quantitative-policy"}],
             "migration_owner": "#669 owns the shared policy; deferred family renderers link to scoped follow-up issues #684–#687, while frozen report bundles remain immutable evidence"}

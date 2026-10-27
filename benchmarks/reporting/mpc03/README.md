@@ -48,7 +48,48 @@ The polygon visits the endpoints in perimeter order, preserves each history's
 identity, and represents the full continuous disturbance box through vertex
 sufficiency; the hull is a visual projection, not the disturbance set itself.
 
-This pilot does not yet implement convex quadratic/norm MIQCPs or the full
-comparison-record publication/capture workflow. It establishes the first
-linear-cost MILP case and its relaxation direction before adding those
-remaining acceptance items.
+## B08 displayed-data MIQCP
+
+`scripts/reports/mpc03/b08_miqcp.py` adds an optional PySCIPOpt 6.3.0 / SCIP
+10.0 report-only run for the L04 displayed rounded linear B08 fixture. It
+builds one shared binary selector per stage/action and one quadratic epigraph
+constraint for each of the 256 disturbance histories. The companion
+continuous-control model uses `conv(U)=[-0.6,0.6]`; it supplies a numerical
+lower bound, not a catalogue-feasible plan. Both formulations use one solver
+thread and a 300 s limit. Each is captured once; those elapsed values are not a
+performance comparison.
+
+The saved bundle is independently checked by
+`docs/research/tools/check_b08_displayed_exact.py`, which enumerates all 625
+finite plans and 256 disturbance corners per plan using rational arithmetic.
+The solver's returned plan must be among the three exact minimizers, and its
+objective must match the exact displayed-data result. The report retains the
+historical `67.12` as a separate value: treating the printed decimals as exact
+gives norm `67.150601101404892...`. Original unrounded arrays, the nonlinear
+plant and the historical generator are unavailable, so this is not a
+reproduction claim.
+
+Run the optional solver into a scratch directory so the frozen report is not
+overwritten:
+
+```sh
+python3 -m venv .venv
+.venv/bin/python -m pip install pyscipopt==6.3.0
+.venv/bin/python scripts/reports/mpc03/b08_miqcp.py --output-dir /tmp/mpc03-b08-l04-miQCP-v1
+```
+
+The B08 report adds a stage-by-stage 2D `(x1,x3)` projection of the four-state
+disturbance tube, with the exact displayed-data worst terminal corner and
+projected target marked. It shows every corner history for the returned fixed
+plan and does not claim a nonlinear or historical trajectory.
+
+PySCIPOpt is optional and isolated to this report driver; no library dependency,
+public API, CMake install target or package surface is added. PySCIPOpt is MIT
+licensed, while the bundled SCIP version is Apache-2.0 (SCIP >= 8.0.3). The
+official PyPI wheels support Linux x86-64, Windows x86-64 and macOS x86-64 /
+ARM64. See the [installation guide](https://pyscipopt.readthedocs.io/en/stable/install.html)
+and [license details](https://github.com/scipopt/PySCIPOpt).
+
+The initial scalar MILP pilot remains a separate synthetic case. Issue #599
+remains open for the remaining comparison-record integration and acceptance
+work; neither the pilot nor B08 report alone completes that issue.

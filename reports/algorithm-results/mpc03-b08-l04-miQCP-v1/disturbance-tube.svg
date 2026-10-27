@@ -1,0 +1,473 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1040" height="810" viewBox="0 0 1040 810" role="img" aria-labelledby="title desc">
+<title id="title">B08 displayed-data fixed-plan disturbance tube</title>
+<desc id="desc">For fixed plan (0.3, 0.6, 0.6, -0.6), each stage shows every disturbance-corner history projected from the four-state model onto oxidizer flow x1 and fuel flow x3. The stage-four panel marks worst disturbance signs +−+−+−+− and the projected target.</desc>
+<rect width="100%" height="100%" fill="white"/>
+<style>text{font-family:Arial,sans-serif;fill:#20242b}.title{font-size:19px;font-weight:bold}.label{font-size:13px}.small{font-size:11px}.grid{stroke:#d8dde4;stroke-width:1}.hull{fill:#4c9fbb;fill-opacity:.18;stroke:#176b87;stroke-width:2}.point{fill:#176b87;fill-opacity:.36}.worst{stroke:#bd263b;stroke-width:3}.target{fill:#f2b544;stroke:#714f00;stroke-width:1.4}</style>
+<text x="520" y="27" text-anchor="middle" class="title">B08 L04 disturbance tube — fixed plan (0.3, 0.6, 0.6, -0.6)</text>
+<text x="520" y="46" text-anchor="middle" class="small">All corner histories at each stage, projected from the four-state model; panels use shared bounds.</text>
+<text x="21" y="73" class="label">Stage 0: 1 disturbance histories</text>
+<line x1="70" y1="83" x2="70" y2="262" class="grid"/>
+<text x="70" y="277" text-anchor="middle" class="small">1181.9</text>
+<line x1="70" y1="262" x2="450" y2="262" class="grid"/>
+<text x="63" y="266" text-anchor="end" class="small">442.8</text>
+<line x1="165" y1="83" x2="165" y2="262" class="grid"/>
+<text x="165" y="277" text-anchor="middle" class="small">1189.7</text>
+<line x1="70" y1="217.25" x2="450" y2="217.25" class="grid"/>
+<text x="63" y="221.25" text-anchor="end" class="small">447.1</text>
+<line x1="260" y1="83" x2="260" y2="262" class="grid"/>
+<text x="260" y="277" text-anchor="middle" class="small">1197.4</text>
+<line x1="70" y1="172.5" x2="450" y2="172.5" class="grid"/>
+<text x="63" y="176.5" text-anchor="end" class="small">451.4</text>
+<line x1="355" y1="83" x2="355" y2="262" class="grid"/>
+<text x="355" y="277" text-anchor="middle" class="small">1205.2</text>
+<line x1="70" y1="127.75" x2="450" y2="127.75" class="grid"/>
+<text x="63" y="131.75" text-anchor="end" class="small">455.7</text>
+<line x1="450" y1="83" x2="450" y2="262" class="grid"/>
+<text x="450" y="277" text-anchor="middle" class="small">1212.9</text>
+<line x1="70" y1="83" x2="450" y2="83" class="grid"/>
+<text x="63" y="87" text-anchor="end" class="small">460.0</text>
+<circle cx="71.84" cy="84.56" r="2.2" class="point"/>
+<text x="260" y="289" text-anchor="middle" class="small">oxidizer flow x1 (kg/s)</text>
+<text x="30" y="177" text-anchor="middle" transform="rotate(-90 30 177)" class="small">fuel flow x3 (kg/s)</text>
+<text x="531" y="73" class="label">Stage 1: 4 disturbance histories</text>
+<line x1="580" y1="83" x2="580" y2="262" class="grid"/>
+<text x="580" y="277" text-anchor="middle" class="small">1181.9</text>
+<line x1="580" y1="262" x2="960" y2="262" class="grid"/>
+<text x="573" y="266" text-anchor="end" class="small">442.8</text>
+<line x1="675" y1="83" x2="675" y2="262" class="grid"/>
+<text x="675" y="277" text-anchor="middle" class="small">1189.7</text>
+<line x1="580" y1="217.25" x2="960" y2="217.25" class="grid"/>
+<text x="573" y="221.25" text-anchor="end" class="small">447.1</text>
+<line x1="770" y1="83" x2="770" y2="262" class="grid"/>
+<text x="770" y="277" text-anchor="middle" class="small">1197.4</text>
+<line x1="580" y1="172.5" x2="960" y2="172.5" class="grid"/>
+<text x="573" y="176.5" text-anchor="end" class="small">451.4</text>
+<line x1="865" y1="83" x2="865" y2="262" class="grid"/>
+<text x="865" y="277" text-anchor="middle" class="small">1205.2</text>
+<line x1="580" y1="127.75" x2="960" y2="127.75" class="grid"/>
+<text x="573" y="131.75" text-anchor="end" class="small">455.7</text>
+<line x1="960" y1="83" x2="960" y2="262" class="grid"/>
+<text x="960" y="277" text-anchor="middle" class="small">1212.9</text>
+<line x1="580" y1="83" x2="960" y2="83" class="grid"/>
+<text x="573" y="87" text-anchor="end" class="small">460.0</text>
+<polygon points="654.41,118.28 656.86,118.28 656.86,116.20 654.41,116.20" class="hull"/>
+<circle cx="654.41" cy="116.20" r="2.2" class="point"/>
+<circle cx="654.41" cy="118.28" r="2.2" class="point"/>
+<circle cx="656.86" cy="116.20" r="2.2" class="point"/>
+<circle cx="656.86" cy="118.28" r="2.2" class="point"/>
+<text x="770" y="289" text-anchor="middle" class="small">oxidizer flow x1 (kg/s)</text>
+<text x="540" y="177" text-anchor="middle" transform="rotate(-90 540 177)" class="small">fuel flow x3 (kg/s)</text>
+<text x="21" y="318" class="label">Stage 2: 16 disturbance histories</text>
+<line x1="70" y1="328" x2="70" y2="507" class="grid"/>
+<text x="70" y="522" text-anchor="middle" class="small">1181.9</text>
+<line x1="70" y1="507" x2="450" y2="507" class="grid"/>
+<text x="63" y="511" text-anchor="end" class="small">442.8</text>
+<line x1="165" y1="328" x2="165" y2="507" class="grid"/>
+<text x="165" y="522" text-anchor="middle" class="small">1189.7</text>
+<line x1="70" y1="462.25" x2="450" y2="462.25" class="grid"/>
+<text x="63" y="466.25" text-anchor="end" class="small">447.1</text>
+<line x1="260" y1="328" x2="260" y2="507" class="grid"/>
+<text x="260" y="522" text-anchor="middle" class="small">1197.4</text>
+<line x1="70" y1="417.5" x2="450" y2="417.5" class="grid"/>
+<text x="63" y="421.5" text-anchor="end" class="small">451.4</text>
+<line x1="355" y1="328" x2="355" y2="507" class="grid"/>
+<text x="355" y="522" text-anchor="middle" class="small">1205.2</text>
+<line x1="70" y1="372.75" x2="450" y2="372.75" class="grid"/>
+<text x="63" y="376.75" text-anchor="end" class="small">455.7</text>
+<line x1="450" y1="328" x2="450" y2="507" class="grid"/>
+<text x="450" y="522" text-anchor="middle" class="small">1212.9</text>
+<line x1="70" y1="328" x2="450" y2="328" class="grid"/>
+<text x="63" y="332" text-anchor="end" class="small">460.0</text>
+<polygon points="289.54,432.80 296.90,432.80 296.90,422.40 289.54,422.40" class="hull"/>
+<circle cx="289.54" cy="422.40" r="2.2" class="point"/>
+<circle cx="289.54" cy="430.72" r="2.2" class="point"/>
+<circle cx="294.45" cy="422.40" r="2.2" class="point"/>
+<circle cx="294.45" cy="430.72" r="2.2" class="point"/>
+<circle cx="289.54" cy="424.48" r="2.2" class="point"/>
+<circle cx="289.54" cy="432.80" r="2.2" class="point"/>
+<circle cx="294.45" cy="424.48" r="2.2" class="point"/>
+<circle cx="294.45" cy="432.80" r="2.2" class="point"/>
+<circle cx="292.00" cy="422.40" r="2.2" class="point"/>
+<circle cx="292.00" cy="430.72" r="2.2" class="point"/>
+<circle cx="296.90" cy="422.40" r="2.2" class="point"/>
+<circle cx="296.90" cy="430.72" r="2.2" class="point"/>
+<circle cx="292.00" cy="424.48" r="2.2" class="point"/>
+<circle cx="292.00" cy="432.80" r="2.2" class="point"/>
+<circle cx="296.90" cy="424.48" r="2.2" class="point"/>
+<circle cx="296.90" cy="432.80" r="2.2" class="point"/>
+<text x="260" y="534" text-anchor="middle" class="small">oxidizer flow x1 (kg/s)</text>
+<text x="30" y="422" text-anchor="middle" transform="rotate(-90 30 422)" class="small">fuel flow x3 (kg/s)</text>
+<text x="531" y="318" class="label">Stage 3: 64 disturbance histories</text>
+<line x1="580" y1="328" x2="580" y2="507" class="grid"/>
+<text x="580" y="522" text-anchor="middle" class="small">1181.9</text>
+<line x1="580" y1="507" x2="960" y2="507" class="grid"/>
+<text x="573" y="511" text-anchor="end" class="small">442.8</text>
+<line x1="675" y1="328" x2="675" y2="507" class="grid"/>
+<text x="675" y="522" text-anchor="middle" class="small">1189.7</text>
+<line x1="580" y1="462.25" x2="960" y2="462.25" class="grid"/>
+<text x="573" y="466.25" text-anchor="end" class="small">447.1</text>
+<line x1="770" y1="328" x2="770" y2="507" class="grid"/>
+<text x="770" y="522" text-anchor="middle" class="small">1197.4</text>
+<line x1="580" y1="417.5" x2="960" y2="417.5" class="grid"/>
+<text x="573" y="421.5" text-anchor="end" class="small">451.4</text>
+<line x1="865" y1="328" x2="865" y2="507" class="grid"/>
+<text x="865" y="522" text-anchor="middle" class="small">1205.2</text>
+<line x1="580" y1="372.75" x2="960" y2="372.75" class="grid"/>
+<text x="573" y="376.75" text-anchor="end" class="small">455.7</text>
+<line x1="960" y1="328" x2="960" y2="507" class="grid"/>
+<text x="960" y="522" text-anchor="middle" class="small">1212.9</text>
+<line x1="580" y1="328" x2="960" y2="328" class="grid"/>
+<text x="573" y="332" text-anchor="end" class="small">460.0</text>
+<polygon points="943.46,505.44 958.16,505.44 958.16,480.48 943.46,480.48" class="hull"/>
+<circle cx="943.46" cy="480.48" r="2.2" class="point"/>
+<circle cx="943.46" cy="495.04" r="2.2" class="point"/>
+<circle cx="950.81" cy="480.48" r="2.2" class="point"/>
+<circle cx="950.81" cy="495.04" r="2.2" class="point"/>
+<circle cx="943.46" cy="488.80" r="2.2" class="point"/>
+<circle cx="943.46" cy="503.36" r="2.2" class="point"/>
+<circle cx="950.81" cy="488.80" r="2.2" class="point"/>
+<circle cx="950.81" cy="503.36" r="2.2" class="point"/>
+<circle cx="948.36" cy="480.48" r="2.2" class="point"/>
+<circle cx="948.36" cy="495.04" r="2.2" class="point"/>
+<circle cx="955.71" cy="480.48" r="2.2" class="point"/>
+<circle cx="955.71" cy="495.04" r="2.2" class="point"/>
+<circle cx="948.36" cy="488.80" r="2.2" class="point"/>
+<circle cx="948.36" cy="503.36" r="2.2" class="point"/>
+<circle cx="955.71" cy="488.80" r="2.2" class="point"/>
+<circle cx="955.71" cy="503.36" r="2.2" class="point"/>
+<circle cx="943.46" cy="482.56" r="2.2" class="point"/>
+<circle cx="943.46" cy="497.12" r="2.2" class="point"/>
+<circle cx="950.81" cy="482.56" r="2.2" class="point"/>
+<circle cx="950.81" cy="497.12" r="2.2" class="point"/>
+<circle cx="943.46" cy="490.88" r="2.2" class="point"/>
+<circle cx="943.46" cy="505.44" r="2.2" class="point"/>
+<circle cx="950.81" cy="490.88" r="2.2" class="point"/>
+<circle cx="950.81" cy="505.44" r="2.2" class="point"/>
+<circle cx="948.36" cy="482.56" r="2.2" class="point"/>
+<circle cx="948.36" cy="497.12" r="2.2" class="point"/>
+<circle cx="955.71" cy="482.56" r="2.2" class="point"/>
+<circle cx="955.71" cy="497.12" r="2.2" class="point"/>
+<circle cx="948.36" cy="490.88" r="2.2" class="point"/>
+<circle cx="948.36" cy="505.44" r="2.2" class="point"/>
+<circle cx="955.71" cy="490.88" r="2.2" class="point"/>
+<circle cx="955.71" cy="505.44" r="2.2" class="point"/>
+<circle cx="945.91" cy="480.48" r="2.2" class="point"/>
+<circle cx="945.91" cy="495.04" r="2.2" class="point"/>
+<circle cx="953.26" cy="480.48" r="2.2" class="point"/>
+<circle cx="953.26" cy="495.04" r="2.2" class="point"/>
+<circle cx="945.91" cy="488.80" r="2.2" class="point"/>
+<circle cx="945.91" cy="503.36" r="2.2" class="point"/>
+<circle cx="953.26" cy="488.80" r="2.2" class="point"/>
+<circle cx="953.26" cy="503.36" r="2.2" class="point"/>
+<circle cx="950.81" cy="480.48" r="2.2" class="point"/>
+<circle cx="950.81" cy="495.04" r="2.2" class="point"/>
+<circle cx="958.16" cy="480.48" r="2.2" class="point"/>
+<circle cx="958.16" cy="495.04" r="2.2" class="point"/>
+<circle cx="950.81" cy="488.80" r="2.2" class="point"/>
+<circle cx="950.81" cy="503.36" r="2.2" class="point"/>
+<circle cx="958.16" cy="488.80" r="2.2" class="point"/>
+<circle cx="958.16" cy="503.36" r="2.2" class="point"/>
+<circle cx="945.91" cy="482.56" r="2.2" class="point"/>
+<circle cx="945.91" cy="497.12" r="2.2" class="point"/>
+<circle cx="953.26" cy="482.56" r="2.2" class="point"/>
+<circle cx="953.26" cy="497.12" r="2.2" class="point"/>
+<circle cx="945.91" cy="490.88" r="2.2" class="point"/>
+<circle cx="945.91" cy="505.44" r="2.2" class="point"/>
+<circle cx="953.26" cy="490.88" r="2.2" class="point"/>
+<circle cx="953.26" cy="505.44" r="2.2" class="point"/>
+<circle cx="950.81" cy="482.56" r="2.2" class="point"/>
+<circle cx="950.81" cy="497.12" r="2.2" class="point"/>
+<circle cx="958.16" cy="482.56" r="2.2" class="point"/>
+<circle cx="958.16" cy="497.12" r="2.2" class="point"/>
+<circle cx="950.81" cy="490.88" r="2.2" class="point"/>
+<circle cx="950.81" cy="505.44" r="2.2" class="point"/>
+<circle cx="958.16" cy="490.88" r="2.2" class="point"/>
+<circle cx="958.16" cy="505.44" r="2.2" class="point"/>
+<text x="770" y="534" text-anchor="middle" class="small">oxidizer flow x1 (kg/s)</text>
+<text x="540" y="422" text-anchor="middle" transform="rotate(-90 540 422)" class="small">fuel flow x3 (kg/s)</text>
+<text x="21" y="563" class="label">Stage 4: 256 disturbance histories</text>
+<line x1="70" y1="573" x2="70" y2="752" class="grid"/>
+<text x="70" y="767" text-anchor="middle" class="small">1181.9</text>
+<line x1="70" y1="752" x2="450" y2="752" class="grid"/>
+<text x="63" y="756" text-anchor="end" class="small">442.8</text>
+<line x1="165" y1="573" x2="165" y2="752" class="grid"/>
+<text x="165" y="767" text-anchor="middle" class="small">1189.7</text>
+<line x1="70" y1="707.25" x2="450" y2="707.25" class="grid"/>
+<text x="63" y="711.25" text-anchor="end" class="small">447.1</text>
+<line x1="260" y1="573" x2="260" y2="752" class="grid"/>
+<text x="260" y="767" text-anchor="middle" class="small">1197.4</text>
+<line x1="70" y1="662.5" x2="450" y2="662.5" class="grid"/>
+<text x="63" y="666.5" text-anchor="end" class="small">451.4</text>
+<line x1="355" y1="573" x2="355" y2="752" class="grid"/>
+<text x="355" y="767" text-anchor="middle" class="small">1205.2</text>
+<line x1="70" y1="617.75" x2="450" y2="617.75" class="grid"/>
+<text x="63" y="621.75" text-anchor="end" class="small">455.7</text>
+<line x1="450" y1="573" x2="450" y2="752" class="grid"/>
+<text x="450" y="767" text-anchor="middle" class="small">1212.9</text>
+<line x1="70" y1="573" x2="450" y2="573" class="grid"/>
+<text x="63" y="577" text-anchor="end" class="small">460.0</text>
+<polygon points="280.97,695.48 305.48,695.48 305.48,649.72 280.97,649.72" class="hull"/>
+<circle cx="280.97" cy="649.72" r="2.2" class="point"/>
+<circle cx="280.97" cy="670.52" r="2.2" class="point"/>
+<circle cx="290.77" cy="649.72" r="2.2" class="point"/>
+<circle cx="290.77" cy="670.52" r="2.2" class="point"/>
+<circle cx="280.97" cy="664.28" r="2.2" class="point"/>
+<circle cx="280.97" cy="685.08" r="2.2" class="point"/>
+<circle cx="290.77" cy="664.28" r="2.2" class="point"/>
+<circle cx="290.77" cy="685.08" r="2.2" class="point"/>
+<circle cx="288.32" cy="649.72" r="2.2" class="point"/>
+<circle cx="288.32" cy="670.52" r="2.2" class="point"/>
+<circle cx="298.12" cy="649.72" r="2.2" class="point"/>
+<circle cx="298.12" cy="670.52" r="2.2" class="point"/>
+<circle cx="288.32" cy="664.28" r="2.2" class="point"/>
+<circle cx="288.32" cy="685.08" r="2.2" class="point"/>
+<circle cx="298.12" cy="664.28" r="2.2" class="point"/>
+<circle cx="298.12" cy="685.08" r="2.2" class="point"/>
+<circle cx="280.97" cy="658.04" r="2.2" class="point"/>
+<circle cx="280.97" cy="678.84" r="2.2" class="point"/>
+<circle cx="290.77" cy="658.04" r="2.2" class="point"/>
+<circle cx="290.77" cy="678.84" r="2.2" class="point"/>
+<circle cx="280.97" cy="672.60" r="2.2" class="point"/>
+<circle cx="280.97" cy="693.40" r="2.2" class="point"/>
+<circle cx="290.77" cy="672.60" r="2.2" class="point"/>
+<circle cx="290.77" cy="693.40" r="2.2" class="point"/>
+<circle cx="288.32" cy="658.04" r="2.2" class="point"/>
+<circle cx="288.32" cy="678.84" r="2.2" class="point"/>
+<circle cx="298.12" cy="658.04" r="2.2" class="point"/>
+<circle cx="298.12" cy="678.84" r="2.2" class="point"/>
+<circle cx="288.32" cy="672.60" r="2.2" class="point"/>
+<circle cx="288.32" cy="693.40" r="2.2" class="point"/>
+<circle cx="298.12" cy="672.60" r="2.2" class="point"/>
+<circle cx="298.12" cy="693.40" r="2.2" class="point"/>
+<circle cx="285.87" cy="649.72" r="2.2" class="point"/>
+<circle cx="285.87" cy="670.52" r="2.2" class="point"/>
+<circle cx="295.67" cy="649.72" r="2.2" class="point"/>
+<circle cx="295.67" cy="670.52" r="2.2" class="point"/>
+<circle cx="285.87" cy="664.28" r="2.2" class="point"/>
+<circle cx="285.87" cy="685.08" r="2.2" class="point"/>
+<circle cx="295.67" cy="664.28" r="2.2" class="point"/>
+<circle cx="295.67" cy="685.08" r="2.2" class="point"/>
+<circle cx="293.22" cy="649.72" r="2.2" class="point"/>
+<circle cx="293.22" cy="670.52" r="2.2" class="point"/>
+<circle cx="303.02" cy="649.72" r="2.2" class="point"/>
+<circle cx="303.02" cy="670.52" r="2.2" class="point"/>
+<circle cx="293.22" cy="664.28" r="2.2" class="point"/>
+<circle cx="293.22" cy="685.08" r="2.2" class="point"/>
+<circle cx="303.02" cy="664.28" r="2.2" class="point"/>
+<circle cx="303.02" cy="685.08" r="2.2" class="point"/>
+<circle cx="285.87" cy="658.04" r="2.2" class="point"/>
+<circle cx="285.87" cy="678.84" r="2.2" class="point"/>
+<circle cx="295.67" cy="658.04" r="2.2" class="point"/>
+<circle cx="295.67" cy="678.84" r="2.2" class="point"/>
+<circle cx="285.87" cy="672.60" r="2.2" class="point"/>
+<circle cx="285.87" cy="693.40" r="2.2" class="point"/>
+<circle cx="295.67" cy="672.60" r="2.2" class="point"/>
+<circle cx="295.67" cy="693.40" r="2.2" class="point"/>
+<circle cx="293.22" cy="658.04" r="2.2" class="point"/>
+<circle cx="293.22" cy="678.84" r="2.2" class="point"/>
+<circle cx="303.02" cy="658.04" r="2.2" class="point"/>
+<circle cx="303.02" cy="678.84" r="2.2" class="point"/>
+<circle cx="293.22" cy="672.60" r="2.2" class="point"/>
+<circle cx="293.22" cy="693.40" r="2.2" class="point"/>
+<circle cx="303.02" cy="672.60" r="2.2" class="point"/>
+<circle cx="303.02" cy="693.40" r="2.2" class="point"/>
+<circle cx="280.97" cy="651.80" r="2.2" class="point"/>
+<circle cx="280.97" cy="672.60" r="2.2" class="point"/>
+<circle cx="290.77" cy="651.80" r="2.2" class="point"/>
+<circle cx="290.77" cy="672.60" r="2.2" class="point"/>
+<circle cx="280.97" cy="666.36" r="2.2" class="point"/>
+<circle cx="280.97" cy="687.16" r="2.2" class="point"/>
+<circle cx="290.77" cy="666.36" r="2.2" class="point"/>
+<circle cx="290.77" cy="687.16" r="2.2" class="point"/>
+<circle cx="288.32" cy="651.80" r="2.2" class="point"/>
+<circle cx="288.32" cy="672.60" r="2.2" class="point"/>
+<circle cx="298.12" cy="651.80" r="2.2" class="point"/>
+<circle cx="298.12" cy="672.60" r="2.2" class="point"/>
+<circle cx="288.32" cy="666.36" r="2.2" class="point"/>
+<circle cx="288.32" cy="687.16" r="2.2" class="point"/>
+<circle cx="298.12" cy="666.36" r="2.2" class="point"/>
+<circle cx="298.12" cy="687.16" r="2.2" class="point"/>
+<circle cx="280.97" cy="660.12" r="2.2" class="point"/>
+<circle cx="280.97" cy="680.92" r="2.2" class="point"/>
+<circle cx="290.77" cy="660.12" r="2.2" class="point"/>
+<circle cx="290.77" cy="680.92" r="2.2" class="point"/>
+<circle cx="280.97" cy="674.68" r="2.2" class="point"/>
+<circle cx="280.97" cy="695.48" r="2.2" class="point"/>
+<circle cx="290.77" cy="674.68" r="2.2" class="point"/>
+<circle cx="290.77" cy="695.48" r="2.2" class="point"/>
+<circle cx="288.32" cy="660.12" r="2.2" class="point"/>
+<circle cx="288.32" cy="680.92" r="2.2" class="point"/>
+<circle cx="298.12" cy="660.12" r="2.2" class="point"/>
+<circle cx="298.12" cy="680.92" r="2.2" class="point"/>
+<circle cx="288.32" cy="674.68" r="2.2" class="point"/>
+<circle cx="288.32" cy="695.48" r="2.2" class="point"/>
+<circle cx="298.12" cy="674.68" r="2.2" class="point"/>
+<circle cx="298.12" cy="695.48" r="2.2" class="point"/>
+<circle cx="285.87" cy="651.80" r="2.2" class="point"/>
+<circle cx="285.87" cy="672.60" r="2.2" class="point"/>
+<circle cx="295.67" cy="651.80" r="2.2" class="point"/>
+<circle cx="295.67" cy="672.60" r="2.2" class="point"/>
+<circle cx="285.87" cy="666.36" r="2.2" class="point"/>
+<circle cx="285.87" cy="687.16" r="2.2" class="point"/>
+<circle cx="295.67" cy="666.36" r="2.2" class="point"/>
+<circle cx="295.67" cy="687.16" r="2.2" class="point"/>
+<circle cx="293.22" cy="651.80" r="2.2" class="point"/>
+<circle cx="293.22" cy="672.60" r="2.2" class="point"/>
+<circle cx="303.02" cy="651.80" r="2.2" class="point"/>
+<circle cx="303.02" cy="672.60" r="2.2" class="point"/>
+<circle cx="293.22" cy="666.36" r="2.2" class="point"/>
+<circle cx="293.22" cy="687.16" r="2.2" class="point"/>
+<circle cx="303.02" cy="666.36" r="2.2" class="point"/>
+<circle cx="303.02" cy="687.16" r="2.2" class="point"/>
+<circle cx="285.87" cy="660.12" r="2.2" class="point"/>
+<circle cx="285.87" cy="680.92" r="2.2" class="point"/>
+<circle cx="295.67" cy="660.12" r="2.2" class="point"/>
+<circle cx="295.67" cy="680.92" r="2.2" class="point"/>
+<circle cx="285.87" cy="674.68" r="2.2" class="point"/>
+<circle cx="285.87" cy="695.48" r="2.2" class="point"/>
+<circle cx="295.67" cy="674.68" r="2.2" class="point"/>
+<circle cx="295.67" cy="695.48" r="2.2" class="point"/>
+<circle cx="293.22" cy="660.12" r="2.2" class="point"/>
+<circle cx="293.22" cy="680.92" r="2.2" class="point"/>
+<circle cx="303.02" cy="660.12" r="2.2" class="point"/>
+<circle cx="303.02" cy="680.92" r="2.2" class="point"/>
+<circle cx="293.22" cy="674.68" r="2.2" class="point"/>
+<circle cx="293.22" cy="695.48" r="2.2" class="point"/>
+<circle cx="303.02" cy="674.68" r="2.2" class="point"/>
+<circle cx="303.02" cy="695.48" r="2.2" class="point"/>
+<circle cx="283.42" cy="649.72" r="2.2" class="point"/>
+<circle cx="283.42" cy="670.52" r="2.2" class="point"/>
+<circle cx="293.22" cy="649.72" r="2.2" class="point"/>
+<circle cx="293.22" cy="670.52" r="2.2" class="point"/>
+<circle cx="283.42" cy="664.28" r="2.2" class="point"/>
+<circle cx="283.42" cy="685.08" r="2.2" class="point"/>
+<circle cx="293.22" cy="664.28" r="2.2" class="point"/>
+<circle cx="293.22" cy="685.08" r="2.2" class="point"/>
+<circle cx="290.77" cy="649.72" r="2.2" class="point"/>
+<circle cx="290.77" cy="670.52" r="2.2" class="point"/>
+<circle cx="300.57" cy="649.72" r="2.2" class="point"/>
+<circle cx="300.57" cy="670.52" r="2.2" class="point"/>
+<circle cx="290.77" cy="664.28" r="2.2" class="point"/>
+<circle cx="290.77" cy="685.08" r="2.2" class="point"/>
+<circle cx="300.57" cy="664.28" r="2.2" class="point"/>
+<circle cx="300.57" cy="685.08" r="2.2" class="point"/>
+<circle cx="283.42" cy="658.04" r="2.2" class="point"/>
+<circle cx="283.42" cy="678.84" r="2.2" class="point"/>
+<circle cx="293.22" cy="658.04" r="2.2" class="point"/>
+<circle cx="293.22" cy="678.84" r="2.2" class="point"/>
+<circle cx="283.42" cy="672.60" r="2.2" class="point"/>
+<circle cx="283.42" cy="693.40" r="2.2" class="point"/>
+<circle cx="293.22" cy="672.60" r="2.2" class="point"/>
+<circle cx="293.22" cy="693.40" r="2.2" class="point"/>
+<circle cx="290.77" cy="658.04" r="2.2" class="point"/>
+<circle cx="290.77" cy="678.84" r="2.2" class="point"/>
+<circle cx="300.57" cy="658.04" r="2.2" class="point"/>
+<circle cx="300.57" cy="678.84" r="2.2" class="point"/>
+<circle cx="290.77" cy="672.60" r="2.2" class="point"/>
+<circle cx="290.77" cy="693.40" r="2.2" class="point"/>
+<circle cx="300.57" cy="672.60" r="2.2" class="point"/>
+<circle cx="300.57" cy="693.40" r="2.2" class="point"/>
+<circle cx="288.32" cy="649.72" r="2.2" class="point"/>
+<circle cx="288.32" cy="670.52" r="2.2" class="point"/>
+<circle cx="298.12" cy="649.72" r="2.2" class="point"/>
+<circle cx="298.12" cy="670.52" r="2.2" class="point"/>
+<circle cx="288.32" cy="664.28" r="2.2" class="point"/>
+<circle cx="288.32" cy="685.08" r="2.2" class="point"/>
+<circle cx="298.12" cy="664.28" r="2.2" class="point"/>
+<circle cx="298.12" cy="685.08" r="2.2" class="point"/>
+<circle cx="295.67" cy="649.72" r="2.2" class="point"/>
+<circle cx="295.67" cy="670.52" r="2.2" class="point"/>
+<circle cx="305.48" cy="649.72" r="2.2" class="point"/>
+<circle cx="305.48" cy="670.52" r="2.2" class="point"/>
+<circle cx="295.67" cy="664.28" r="2.2" class="point"/>
+<circle cx="295.67" cy="685.08" r="2.2" class="point"/>
+<circle cx="305.48" cy="664.28" r="2.2" class="point"/>
+<circle cx="305.48" cy="685.08" r="2.2" class="point"/>
+<circle cx="288.32" cy="658.04" r="2.2" class="point"/>
+<circle cx="288.32" cy="678.84" r="2.2" class="point"/>
+<circle cx="298.12" cy="658.04" r="2.2" class="point"/>
+<circle cx="298.12" cy="678.84" r="2.2" class="point"/>
+<circle cx="288.32" cy="672.60" r="2.2" class="point"/>
+<circle cx="288.32" cy="693.40" r="2.2" class="point"/>
+<circle cx="298.12" cy="672.60" r="2.2" class="point"/>
+<circle cx="298.12" cy="693.40" r="2.2" class="point"/>
+<circle cx="295.67" cy="658.04" r="2.2" class="point"/>
+<circle cx="295.67" cy="678.84" r="2.2" class="point"/>
+<circle cx="305.48" cy="658.04" r="2.2" class="point"/>
+<circle cx="305.48" cy="678.84" r="2.2" class="point"/>
+<circle cx="295.67" cy="672.60" r="2.2" class="point"/>
+<circle cx="295.67" cy="693.40" r="2.2" class="point"/>
+<circle cx="305.48" cy="672.60" r="2.2" class="point"/>
+<circle cx="305.48" cy="693.40" r="2.2" class="point"/>
+<circle cx="283.42" cy="651.80" r="2.2" class="point"/>
+<circle cx="283.42" cy="672.60" r="2.2" class="point"/>
+<circle cx="293.22" cy="651.80" r="2.2" class="point"/>
+<circle cx="293.22" cy="672.60" r="2.2" class="point"/>
+<circle cx="283.42" cy="666.36" r="2.2" class="point"/>
+<circle cx="283.42" cy="687.16" r="2.2" class="point"/>
+<circle cx="293.22" cy="666.36" r="2.2" class="point"/>
+<circle cx="293.22" cy="687.16" r="2.2" class="point"/>
+<circle cx="290.77" cy="651.80" r="2.2" class="point"/>
+<circle cx="290.77" cy="672.60" r="2.2" class="point"/>
+<circle cx="300.57" cy="651.80" r="2.2" class="point"/>
+<circle cx="300.57" cy="672.60" r="2.2" class="point"/>
+<circle cx="290.77" cy="666.36" r="2.2" class="point"/>
+<circle cx="290.77" cy="687.16" r="2.2" class="point"/>
+<circle cx="300.57" cy="666.36" r="2.2" class="point"/>
+<circle cx="300.57" cy="687.16" r="2.2" class="point"/>
+<circle cx="283.42" cy="660.12" r="2.2" class="point"/>
+<circle cx="283.42" cy="680.92" r="2.2" class="point"/>
+<circle cx="293.22" cy="660.12" r="2.2" class="point"/>
+<circle cx="293.22" cy="680.92" r="2.2" class="point"/>
+<circle cx="283.42" cy="674.68" r="2.2" class="point"/>
+<circle cx="283.42" cy="695.48" r="2.2" class="point"/>
+<circle cx="293.22" cy="674.68" r="2.2" class="point"/>
+<circle cx="293.22" cy="695.48" r="2.2" class="point"/>
+<circle cx="290.77" cy="660.12" r="2.2" class="point"/>
+<circle cx="290.77" cy="680.92" r="2.2" class="point"/>
+<circle cx="300.57" cy="660.12" r="2.2" class="point"/>
+<circle cx="300.57" cy="680.92" r="2.2" class="point"/>
+<circle cx="290.77" cy="674.68" r="2.2" class="point"/>
+<circle cx="290.77" cy="695.48" r="2.2" class="point"/>
+<circle cx="300.57" cy="674.68" r="2.2" class="point"/>
+<circle cx="300.57" cy="695.48" r="2.2" class="point"/>
+<circle cx="288.32" cy="651.80" r="2.2" class="point"/>
+<circle cx="288.32" cy="672.60" r="2.2" class="point"/>
+<circle cx="298.12" cy="651.80" r="2.2" class="point"/>
+<circle cx="298.12" cy="672.60" r="2.2" class="point"/>
+<circle cx="288.32" cy="666.36" r="2.2" class="point"/>
+<circle cx="288.32" cy="687.16" r="2.2" class="point"/>
+<circle cx="298.12" cy="666.36" r="2.2" class="point"/>
+<circle cx="298.12" cy="687.16" r="2.2" class="point"/>
+<circle cx="295.67" cy="651.80" r="2.2" class="point"/>
+<circle cx="295.67" cy="672.60" r="2.2" class="point"/>
+<circle cx="305.48" cy="651.80" r="2.2" class="point"/>
+<circle cx="305.48" cy="672.60" r="2.2" class="point"/>
+<circle cx="295.67" cy="666.36" r="2.2" class="point"/>
+<circle cx="295.67" cy="687.16" r="2.2" class="point"/>
+<circle cx="305.48" cy="666.36" r="2.2" class="point"/>
+<circle cx="305.48" cy="687.16" r="2.2" class="point"/>
+<circle cx="288.32" cy="660.12" r="2.2" class="point"/>
+<circle cx="288.32" cy="680.92" r="2.2" class="point"/>
+<circle cx="298.12" cy="660.12" r="2.2" class="point"/>
+<circle cx="298.12" cy="680.92" r="2.2" class="point"/>
+<circle cx="288.32" cy="674.68" r="2.2" class="point"/>
+<circle cx="288.32" cy="695.48" r="2.2" class="point"/>
+<circle cx="298.12" cy="674.68" r="2.2" class="point"/>
+<circle cx="298.12" cy="695.48" r="2.2" class="point"/>
+<circle cx="295.67" cy="660.12" r="2.2" class="point"/>
+<circle cx="295.67" cy="680.92" r="2.2" class="point"/>
+<circle cx="305.48" cy="660.12" r="2.2" class="point"/>
+<circle cx="305.48" cy="680.92" r="2.2" class="point"/>
+<circle cx="295.67" cy="674.68" r="2.2" class="point"/>
+<circle cx="295.67" cy="695.48" r="2.2" class="point"/>
+<circle cx="305.48" cy="674.68" r="2.2" class="point"/>
+<circle cx="305.48" cy="695.48" r="2.2" class="point"/>
+<path d="M 299.48 649.72 L 311.48 649.72 M 305.48 643.72 L 305.48 655.72" class="worst"/>
+<circle cx="291.51" cy="676.83" r="5" class="target"/>
+<text x="260" y="779" text-anchor="middle" class="small">oxidizer flow x1 (kg/s)</text>
+<text x="30" y="667" text-anchor="middle" transform="rotate(-90 30 667)" class="small">fuel flow x3 (kg/s)</text>
+<circle cx="60" cy="792" r="4" class="point"/><text x="70" y="796" class="small">disturbance-corner point / projected hull</text>
+<path d="M 345 792 L 357 792 M 351 786 L 351 798" class="worst"/><text x="363" y="796" class="small">worst-cost terminal</text>
+<circle cx="520" cy="792" r="5" class="target"/><text x="531" y="796" class="small">projected target at stage 4</text>
+</svg>
