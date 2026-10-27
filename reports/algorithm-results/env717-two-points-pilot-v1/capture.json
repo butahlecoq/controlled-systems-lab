@@ -6,10 +6,10 @@
     "processor_identity_source": "/proc/cpuinfo",
     "logical_cpus": 8,
     "load_average_before_run": [
-      0.2412109375,
-      0.37158203125,
-      0.83984375
+      0.6181640625,
+      0.37890625,
+      0.509765625
     ],
-    "capture_started_unix_ns": 1793135280031469628
+    "capture_started_unix_ns": 1793136175261453464
   }
 }

@@ -443,7 +443,7 @@
     }
   ],
   "schema": "csl.env717-two-points-pilot/1",
-  "source_commit": "d80d21b382c4db54c8e7c52494de686bc37e271f",
+  "source_commit": "11f3ff0afea7d15b5aad2fb82999183c8ef74a0a",
   "source_file_blob": "4e71bed8ceffa1990645fb85e54d6b5b1eeb688d",
   "source_license": "no license declared in repository metadata",
   "source_model": {
@@ -478,19 +478,19 @@
   ],
   "timing": {
     "limiter_profile": "not collected; no comparative speed claim",
-    "max_wall_ns": 1199534,
+    "max_wall_ns": 627180,
     "measured_calls": 7,
     "measured_wall_ns": [
-      985119,
-      943982,
-      970103,
-      1089811,
-      1177114,
-      1199534,
-      1099799
+      579129,
+      559783,
+      534290,
+      627180,
+      510056,
+      503141,
+      448944
     ],
-    "median_wall_ns": 1089811,
-    "min_wall_ns": 943982,
+    "median_wall_ns": 534290,
+    "min_wall_ns": 448944,
     "scope": "finite_action_minimax call; request setup and JSON output excluded",
     "warmup_calls": 1
   },
