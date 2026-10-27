@@ -139,7 +139,11 @@ class AssembledIndexTests(unittest.TestCase):
         for filename in ("pilot-output.json", "build-provenance.json"):
             (report / filename).write_text("{}", encoding="utf-8")
         landing.build(self.site)
+        first = (self.site / "index.html").read_bytes()
+        landing.build(self.site)
         page = (self.site / "index.html").read_text(encoding="utf-8")
+        self.assertEqual(first, (self.site / "index.html").read_bytes())
+        self.assertEqual(page.count('href="' + report_id + '/index.html"'), 1)
         self.assertIn('href="' + report_id + '/index.html"', page)
         self.assertIn('href="' + report_id + '/record.json"', page)
         self.assertIn("no timing measured", page)

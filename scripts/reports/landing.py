@@ -617,6 +617,7 @@ def build(site: Path) -> None:
                               links=entry.links))
     pilot = "mpc03-open-loop-pilot-v1"
     if (site / pilot / "index.html").is_file():
+        detailed = [entry for entry in detailed if entry.report_id != pilot]
         details = recorded(site, pilot)
         detailed.append(Entry(
             report_id=pilot,
