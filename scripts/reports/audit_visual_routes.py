@@ -21,6 +21,7 @@ COMPOSED_SAVED_ROUTES = {
     "scripts/reports/ext03_transform/report.py",
     "scripts/reports/ext04/continuous_report.py",
     "scripts/reports/issue422/build_bundle.py",
+    "scripts/reports/stage_mpc03.py",
 }
 FROZEN_DIAGRAM_EXCEPTIONS = {"benchmarks/reporting/approximation_pilot/summarize.py"}
 PUBLICATION_EXPORT_ROUTES = {"scripts/reports/render.py"}
@@ -76,6 +77,7 @@ SAVED_COMPANION_ROUTES = {
     "benchmarks/reporting/issue6/b09_render_projection.py",
 }
 FROZEN_COMPANIONS = {
+    "mpc03-open-loop-pilot-v1": "examples/index.html",
     "app02-box-8ff979de60ea9d22": "examples/app02-diamond-v1.html",
     "app03-zonotope-4522855018fa9b0b": "examples/app03-zonotope-v1.html",
     "app04-ellipsoid-fd302c34092f8b19": "examples/app04-square-v1.html",
@@ -195,7 +197,12 @@ def build(root: Path = ROOT) -> dict:
                     "ext01-b08-timing-v1.html", "ext01-b08-timing-v1.svg",
                     "ext01-b08-timing-v1.png", "ext01-b08-timing-v1-export.json",
                     "ext05-states-v1.html", "ext05-states-v1.svg",
-                    "ext05-states-v1.png", "ext05-states-v1-export.json"] + geometry_companion_assets() +
+                    "ext05-states-v1.png", "ext05-states-v1-export.json",
+                    "mpc03-open-loop-pilot-v1/index.html",
+                    "mpc03-open-loop-pilot-v1/record.json",
+                    "mpc03-open-loop-pilot-v1/pilot-output.json",
+                    "mpc03-open-loop-pilot-v1/build-provenance.json",
+                    "mpc03-open-loop-pilot-v1/disturbance-tube.svg"] + geometry_companion_assets() +
                     viz10_companion_assets(),
                  "disposition": "adopted-shared-quantitative-policy"}],
             "migration_owner": "#669 owns the shared policy; deferred family renderers link to scoped follow-up issues #684–#687, while frozen report bundles remain immutable evidence"}

@@ -1,5 +1,6 @@
 if((CSL_BUILD_GEO02_REPORT OR CSL_BUILD_GEO03_REPORT OR CSL_BUILD_GEO04_REPORT OR
-    CSL_BUILD_OPT04_REPORT OR CSL_BUILD_SYN01_REPORT OR CSL_BUILD_STAGE_PROJECTION_ROUTE OR CSL_BUILD_SYN02_REPORT OR
+    CSL_BUILD_OPT04_REPORT OR CSL_BUILD_SYN01_REPORT OR CSL_BUILD_MPC03_REPORT OR
+    CSL_BUILD_STAGE_PROJECTION_ROUTE OR CSL_BUILD_SYN02_REPORT OR
     CSL_BUILD_REPORTS) AND NOT CSL_ENABLE_HIGHS)
   message(FATAL_ERROR "The selected report requires CSL_ENABLE_HIGHS")
 endif()
@@ -288,6 +289,26 @@ add_test(NAME issue422_fixed_plan_report_smoke COMMAND Python3::Interpreter
   ${CMAKE_CURRENT_SOURCE_DIR}/scripts/reports/issue422/check_smoke.py
   $<TARGET_FILE:csl_issue422_fixed_plan_comparison>)
 set_tests_properties(issue422_fixed_plan_report_smoke PROPERTIES LABELS reporting)
+endif()
+endif()
+
+if(CSL_BUILD_MPC03_REPORT)
+include(cmake/JsonDependencies.cmake)
+add_executable(csl_mpc03_robust_minimax_report benchmarks/reporting/mpc03/robust_minimax_driver.cpp)
+target_link_libraries(csl_mpc03_robust_minimax_report PRIVATE highs CSL::finite_action_minimax CSL::resolved_core)
+target_include_directories(csl_mpc03_robust_minimax_report SYSTEM PRIVATE ${csl_json_SOURCE_DIR}/include)
+target_compile_features(csl_mpc03_robust_minimax_report PRIVATE cxx_std_20)
+if(MSVC)
+target_compile_options(csl_mpc03_robust_minimax_report PRIVATE /W4 /WX /permissive-)
+else()
+target_compile_options(csl_mpc03_robust_minimax_report PRIVATE -Wall -Wextra -Wpedantic -Werror)
+endif()
+if(BUILD_TESTING)
+find_package(Python3 3.11 REQUIRED COMPONENTS Interpreter)
+add_test(NAME mpc03_report_smoke COMMAND Python3::Interpreter
+  ${CMAKE_CURRENT_SOURCE_DIR}/scripts/reports/mpc03/check_smoke.py
+  $<TARGET_FILE:csl_mpc03_robust_minimax_report>)
+set_tests_properties(mpc03_report_smoke PROPERTIES LABELS reporting)
 endif()
 endif()
 

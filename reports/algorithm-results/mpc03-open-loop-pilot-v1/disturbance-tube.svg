@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 460" role="img" aria-labelledby="title desc">
+  <title id="title">Two-stage open-loop minimax disturbance histories</title>
+  <desc id="desc">Saved-record projection of endpoint histories: --: (0.875, 1.75) -+: (0.875, 2) +-: (1.125, 2) ++: (1.125, 2.25). The dashed polygon is their convex hull in intermediate state x1 and terminal state x2.</desc>
+  <rect width="760" height="460" fill="#fff"/>
+  <text x="380" y="30" text-anchor="middle" font-family="sans-serif" font-size="20" font-weight="700">Fixed plan (u0,u1) = (1,1): four disturbance histories</text>
+  <text x="380" y="55" text-anchor="middle" font-family="sans-serif" font-size="13" fill="#444">2D state projection; terminal cost max x2 = 2.25</text>
+  <g stroke="#d8dee8" stroke-width="1"><path d="M100 100V360"/><path d="M210 100V360"/><path d="M320 100V360"/><path d="M430 100V360"/><path d="M540 100V360"/><path d="M650 100V360"/><path d="M100 360H650"/><path d="M100 295H650"/><path d="M100 230H650"/><path d="M100 165H650"/><path d="M100 100H650"/></g>
+  <path d="M100 360H650M100 360V100" fill="none" stroke="#222" stroke-width="2"/>
+  <path d="M237.5 295 L237.5 230 L512.5 165 L512.5 230Z" fill="#dce9f7" fill-opacity=".7" stroke="#50769e" stroke-width="2" stroke-dasharray="6 4"/>
+  <path d="M100 360H650" stroke="#c23b32" stroke-width="2" stroke-dasharray="8 5"/>
+  <text x="645" y="352" text-anchor="end" font-family="sans-serif" font-size="12" fill="#a52c25">terminal safety x2 &gt;= 1.5</text>
+  <g font-family="sans-serif" font-size="12" font-weight="700" text-anchor="middle">
+    <circle cx="237.5" cy="295" r="7" fill="#235789"/><text x="237.5" y="283">(--)</text><circle cx="237.5" cy="230" r="7" fill="#235789"/><text x="237.5" y="218">(-+)</text><circle cx="512.5" cy="230" r="7" fill="#235789"/><text x="512.5" y="218">(+-)</text><circle cx="512.5" cy="165" r="8" fill="#d97706"/><text x="512.5" y="153">(++) worst</text>
+  </g>
+  <g font-family="sans-serif" font-size="12" fill="#333" text-anchor="middle"><text x="100" y="380">0.75</text><text x="210" y="380">0.85</text><text x="320" y="380">0.95</text><text x="430" y="380">1.05</text><text x="540" y="380">1.15</text><text x="650" y="380">1.25</text></g>
+  <g font-family="sans-serif" font-size="12" fill="#333" text-anchor="end"><text x="90" y="104">2.5</text><text x="90" y="169">2.25</text><text x="90" y="234">2</text><text x="90" y="299">1.75</text><text x="90" y="364">1.5</text></g>
+  <text x="380" y="410" text-anchor="middle" font-family="sans-serif" font-size="14">Intermediate state x1</text>
+  <text x="28" y="230" transform="rotate(-90 28 230)" text-anchor="middle" font-family="sans-serif" font-size="14">Terminal state and cost x2</text>
+  <text x="380" y="450" text-anchor="middle" font-family="sans-serif" font-size="11" fill="#555">Coordinates and hull are rendered from record.json; discrete endpoint histories remain labelled.</text>
+</svg>

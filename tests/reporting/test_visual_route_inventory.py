@@ -115,7 +115,13 @@ class VisualRouteInventoryTests(unittest.TestCase):
             "ext01-b08-timing-v1.html", "ext01-b08-timing-v1.svg",
             "ext01-b08-timing-v1.png", "ext01-b08-timing-v1-export.json",
             "ext05-states-v1.html", "ext05-states-v1.svg", "ext05-states-v1.png",
-            "ext05-states-v1-export.json", *audit_visual_routes.geometry_companion_assets(),
+            "ext05-states-v1-export.json",
+            "mpc03-open-loop-pilot-v1/index.html",
+            "mpc03-open-loop-pilot-v1/record.json",
+            "mpc03-open-loop-pilot-v1/pilot-output.json",
+            "mpc03-open-loop-pilot-v1/build-provenance.json",
+            "mpc03-open-loop-pilot-v1/disturbance-tube.svg",
+            *audit_visual_routes.geometry_companion_assets(),
             *audit_visual_routes.viz10_companion_assets()})
         self.assertEqual((ROOT/"docs/examples/examples.css").read_bytes(),
                          (ROOT/"scripts/reports/visual_examples.css").read_bytes())

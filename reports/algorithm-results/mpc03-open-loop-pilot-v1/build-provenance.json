@@ -1,0 +1,20 @@
+{
+  "schema": "csl.mpc03-pilot-provenance/1",
+  "source_commit": "1b5ec86a7b5d1cc91b707a0588a43cd6517b23b2",
+  "driver_path": "benchmarks/reporting/mpc03/robust_minimax_driver.cpp",
+  "driver_sha256": "3ebb0ed02b34db9a3213dc9964fb28b553e2cb39b4cfe9c5a58bb74def4944a6",
+  "host": {
+    "system": "Linux",
+    "release": "7.2.5-3-omarchy",
+    "machine": "x86_64"
+  },
+  "compiler": "g++ (GCC) 16.2.1 20260810",
+  "build_type": "Release",
+  "generator": "Unix Makefiles",
+  "highs": "source-pinned HiGHS 1.11.0",
+  "highs_threads": 1,
+  "timings": "not measured; this is a deterministic formulation and oracle cross-check",
+  "reproduction": "cmake -S . -B build/mpc03 -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTING=ON -DCSL_ENABLE_HIGHS=ON -DCSL_ENABLE_QHULL=OFF -DCSL_BUILD_MPC03_REPORT=ON && cmake --build build/mpc03 --target csl_mpc03_robust_minimax_report && build/mpc03/csl_mpc03_robust_minimax_report --smoke",
+  "output_sha256": "3e50d4247205f35f6710b9a54521a410f0a9b89853b059daf1212d21a3a729a4",
+  "release_flags": "-O3 -DNDEBUG"
+}

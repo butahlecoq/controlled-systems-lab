@@ -71,6 +71,11 @@ GROUPS = (
 # Report family -> description. The pattern matches the whole published route,
 # so a new route shape has to be registered here on purpose.
 FAMILIES = {
+    "mpc03-open-loop-pilot": Family(
+        r"mpc03-open-loop-pilot-v1", "synthesis", "Open-loop robust minimax formulation pilot",
+        "Cross-checks one synthetic two-stage scalar fixed-plan minimax case with an exhaustive "
+        "finite-action oracle, a shared-selector MILP and its continuous selector relaxation. "
+        "The report measures no performance and does not complete issue #599."),
     "lp": Family(
         r"lp-\d{8}T\d{6}Z-[0-9a-f]{12,64}", "optimization", "Linear programming reference run",
         "Runs the registered HiGHS linear-programming adapter on five small analytic "
@@ -548,7 +553,7 @@ def parse_index(html: str):
 
 def recorded(site: Path, report_id: str) -> dict:
     """Read the scope, the limits and the source commit recorded with a report."""
-    for name in ("report-envelope.json", "records.json"):
+    for name in ("report-envelope.json", "records.json", "record.json"):
         path = site / report_id / name
         if not path.is_file():
             continue
@@ -610,6 +615,18 @@ def build(site: Path) -> None:
                               limits=details.get("limits", entry.limits),
                               commit=details.get("commit", entry.commit),
                               links=entry.links))
+    pilot = "mpc03-open-loop-pilot-v1"
+    if (site / pilot / "index.html").is_file():
+        detailed = [entry for entry in detailed if entry.report_id != pilot]
+        details = recorded(site, pilot)
+        detailed.append(Entry(
+            report_id=pilot,
+            scope=details.get("scope", "One synthetic two-stage scalar formulation cross-check"),
+            limits=details.get("limits", "Numerical outcomes only; no timing or comparison claim"),
+            commit=details.get("commit", ""),
+            links=(("Full result record", pilot + "/record.json"),
+                   ("Raw executable output", pilot + "/pilot-output.json"),
+                   ("Build provenance", pilot + "/build-provenance.json"))))
     rendered = page(detailed, extras)
     validate(rendered, site)
     index.write_text(rendered, encoding="utf-8")
