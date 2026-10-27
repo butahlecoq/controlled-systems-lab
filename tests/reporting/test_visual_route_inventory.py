@@ -16,6 +16,10 @@ class VisualRouteInventoryTests(unittest.TestCase):
         self.assertEqual(committed,inventory)
         self.assertEqual(inventory["schema"],"csl.visual-route-inventory/1")
         producers={entry["source"]:entry for entry in inventory["producers_and_routes"]}
+        self.assertIn("scripts/reports/env717/check_two_points.py", producers)
+        self.assertEqual(producers["scripts/reports/env717/check_two_points.py"]["follow_up_issue"],717)
+        self.assertEqual(producers["scripts/reports/env717/check_two_points.py"]["asset_name_literals"],
+                         ["projections.png", "projections.svg"])
         self.assertNotIn("policy.svg", producers["scripts/reports/site.py"]["asset_name_literals"])
         self.assertIn("visual.svg", producers["scripts/reports/ext03_transform/report.py"]["asset_name_literals"])
         self.assertNotIn("csl.report.svg", {
@@ -95,7 +99,7 @@ class VisualRouteInventoryTests(unittest.TestCase):
         follow_up_counts={number:sum(entry["follow_up_issue"]==number for entry in deferred)
                           for number in (684,685,686,687,708,717)}
         self.assertEqual(follow_up_counts,
-                         {684:4,685:0,686:18,687:0,708:1,717:1})
+                         {684:4,685:0,686:18,687:0,708:1,717:2})
         self.assertTrue(all(entry["follow_up_issue"] in follow_up_counts for entry in deferred))
         routes={entry["route"]:entry for entry in inventory["frozen_published_routes"]}
         self.assertGreater(len(routes),40)

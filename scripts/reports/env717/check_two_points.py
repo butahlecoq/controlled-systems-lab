@@ -121,8 +121,7 @@ def enumerate_game() -> tuple[dict, list[list[tuple[float, ...]]], list[set[tupl
     return record, record["layers"], record["backward"]
 
 
-def verify(executable: Path) -> tuple[dict, dict]:
-    source = json.loads(subprocess.check_output([str(executable)], text=True))
+def verify_record(source: dict) -> tuple[dict, dict]:
     assert source["schema"] == "csl.env717-two-points-pilot/1"
     assert source["source_repository_commit"] == SOURCE_COMMIT
     assert source["source_file_blob"] == SOURCE_BLOB
@@ -158,6 +157,11 @@ def verify(executable: Path) -> tuple[dict, dict]:
                "terminal_target": "squared position gap <= minimax value",
                "intersection_semantics": "finite-catalogue state nodes in both forward layer and robust backward winning set"}
     return source, derived
+
+
+def verify(executable: Path) -> tuple[dict, dict]:
+    source = json.loads(subprocess.check_output([str(executable)], text=True))
+    return verify_record(source)
 
 
 def plot_svg(derived: dict) -> str:
@@ -218,7 +222,7 @@ def plot_svg(derived: dict) -> str:
     out.extend(['<rect x="79" y="583" width="9" height="9" fill="#56b4e9" fill-opacity="0.4" stroke="#56b4e9"/><text x="95" y="592" fill="#d2dce1" font-family="sans-serif" font-size="13">Forward reachable polytopes by stage/control prefix</text>',
                 '<circle cx="470" cy="587" r="4" fill="#f4a261"/><text x="482" y="592" fill="#d2dce1" font-family="sans-serif" font-size="13">Forward ∩ robust backward vertices</text>',
                 '<line x1="690" y1="587" x2="720" y2="587" stroke="#ff6b35" stroke-width="4"/><text x="730" y="592" fill="#d2dce1" font-family="sans-serif" font-size="13">Verified minimax trajectory (one worst-case disturbance)</text>',
-                '<text x="75" y="626" fill="#93a4ae" font-family="sans-serif" font-size="12">Forward polygons are exact projections of convex disturbance-reachable polytopes for one finite control prefix; backward winning nodes use the enumerated vertex graph. Adapted to 0.3 s.</text>',
+                '<text x="75" y="626" fill="#93a4ae" font-family="sans-serif" font-size="12">Forward polygons exactly project convex disturbance-reachable polytopes per control prefix; backward nodes are finite-vertex feedback-game nodes, not continuous predecessor sets. Horizon: 0.3 s.</text>',
                 '</svg>'])
     return "\n".join(out)
 
@@ -241,7 +245,7 @@ def render(executable: Path, output: Path | None) -> None:
         subprocess.run([converter, "--output", str(output / "projections.png"),
                         str(output / "projections.svg")], check=True)
     timing = source["timing"]
-    page = f'''<!doctype html><html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Two-point minimax pilot</title><style>body{{margin:0;background:#111820;color:#f4f1e8;font:16px/1.55 system-ui,sans-serif}}main{{max-width:1320px;margin:auto;padding:2rem}}a{{color:#8bd3f7}}svg{{width:100%;height:auto}}.note{{border-left:4px solid #f4a261;padding:.7rem 1rem;background:#1a252e}}</style><main><h1>Two points on parallel lines: reachability and minimax</h1><p>The finite-action minimax method exhausts 27 fixed control plans and all 27 adversarial disturbance vertex sequences per plan. An independent Python replay checks every plan score, minimizing plan, source-integrator trajectory, forward reachable polytopes, and robust backward winning nodes. The two panels are the physical phase planes `(x1,x2)=(position₁, velocity₁)` and `(x3,x4)=(position₂, velocity₂)`.</p><div>{svg}</div><p class="note"><strong>Adaptation:</strong> the source uses continuous actions over 10 seconds. This pilot uses a 3-stage control catalogue and disturbance sets equal to the convex hull of the listed vertices. The discrete linear stage map is derived from the source’s ten explicit-Euler substeps. The solver is open-loop in the minimizing control sequence; the disturbance is chosen over its full sequence. Forward polygons are exact projections of each convex disturbance-reachable polytope for one fixed control prefix. Backward winning nodes are computed over the enumerated vertex graph. This is not a reproduction of the original continuous-control RL experiment.</p><p>Minimax squared gap: {source['objective_value']:.8g}; worst absolute gap: {source['worst_terminal_gap']:.8g}. Seven single-threaded solver-call observations after one warmup have median {timing['median_wall_ns']} ns and range {timing['min_wall_ns']}–{timing['max_wall_ns']} ns. No comparative speed claim is supported. <a href="result.json">Result JSON</a> · <a href="figure-data.json">Figure data</a> · <a href="projections.svg">Standalone SVG</a></p><p>Upstream commit <code>{SOURCE_COMMIT}</code>; source blob <code>{SOURCE_BLOB}</code>. Runtime environment: {html.escape(host['os'])}, {html.escape(host['processor'])}, {host['logical_cpus']} logical CPUs.</p></main></html>'''
+    page = f'''<!doctype html><html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Two-point minimax pilot</title><style>body{{margin:0;background:#111820;color:#f4f1e8;font:16px/1.55 system-ui,sans-serif}}main{{max-width:1320px;margin:auto;padding:2rem}}a{{color:#8bd3f7}}svg{{width:100%;height:auto}}.note{{border-left:4px solid #f4a261;padding:.7rem 1rem;background:#1a252e}}</style><main><h1>Two points on parallel lines: reachability and minimax</h1><p>The finite-action minimax method exhausts 27 fixed control plans and all 27 adversarial disturbance vertex sequences per plan. An independent Python replay checks every plan score, minimizing plan, source-integrator trajectory, forward reachable polytopes, and backward vertex-game nodes. The two panels are the physical phase planes `(x1,x2)=(position₁, velocity₁)` and `(x3,x4)=(position₂, velocity₂)`.</p><div>{svg}</div><p class="note"><strong>Adaptation:</strong> the source uses continuous actions over 10 seconds. This pilot uses a 3-stage control catalogue and disturbance sets equal to the convex hull of the listed vertices. The discrete linear stage map is derived from the source’s ten explicit-Euler substeps. The minimax solver selects an open-loop control sequence against the full convex disturbance sets. Forward polygons exactly project each convex disturbance-reachable polytope for one fixed control prefix. The separately computed backwards nodes permit state-dependent controls in a finite vertex game; they are not complete continuous-state predecessor sets or the fixed-plan solver’s output. This is not a reproduction of the original continuous-control RL experiment.</p><p>Minimax squared gap: {source['objective_value']:.8g}; worst absolute gap: {source['worst_terminal_gap']:.8g}. Seven single-threaded solver-call observations after one warmup have median {timing['median_wall_ns']} ns and range {timing['min_wall_ns']}–{timing['max_wall_ns']} ns. No comparative speed claim is supported. <a href="result.json">Result JSON</a> · <a href="figure-data.json">Figure data</a> · <a href="projections.svg">Standalone SVG</a></p><p>Upstream commit <code>{SOURCE_COMMIT}</code>; source blob <code>{SOURCE_BLOB}</code>. Runtime environment: {html.escape(host['os'])}, {html.escape(host['processor'])}, {host['logical_cpus']} logical CPUs.</p></main></html>'''
     (output / "index.html").write_text(page, encoding="utf-8")
     identity = {"renderer_sha256": hashlib.sha256(Path(__file__).read_bytes()).hexdigest(),
                 "capture_environment": host}
