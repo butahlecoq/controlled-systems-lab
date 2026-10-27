@@ -7,4 +7,5 @@ POLICY = register(PublicationPolicy(
     kind="geo04-intersection",
     source_pattern=r"geo04-\d{8}T\d{6}Z-[0-9a-f]{12}",
     publisher=publisher,
+    svg_files=("latency.svg",),
     csv_name="raw-driver-output.csv"))

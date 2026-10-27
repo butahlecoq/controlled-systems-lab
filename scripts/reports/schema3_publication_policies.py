@@ -1,0 +1,26 @@
+"""Load the adapter-owned registrations used by schema-v3 site staging."""
+import registered_report_policies
+import opt04_publication_policy
+import opt07_publication_policy
+import opt11_publication_policy
+import opt12_publication_policy
+import geo02_publication_policy
+import geo04_publication_policy
+import geo05_publication_policy
+import geo06_publication_policy
+import b08_exact_publication_policy
+import issue6_b06_publication_policy
+import issue6_b07_publication_policy
+import issue6_b09_publication_policy
+import issue3_publication_policy
+import issue3_validated_publication_policy
+import syn02_publication_policy
+import syn01_publication_policy
+import ts01_publication_policy
+import syn04_strategy_b_publication_policy
+import syn04_ts02_publication_policy
+import syn04_ts03_publication_policy
+import syn03_strategy_a_publication_policy
+import syn03_strategy_a_ts02_publication_policy
+import syn_ts01_paired_publication_policy
+import ext03_transform_publication_policy

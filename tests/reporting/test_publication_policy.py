@@ -21,7 +21,16 @@ class PublicationPolicyTests(unittest.TestCase):
     def test_only_supported_registered_kinds_resolve(self):
         self.assertEqual(
             publication_policy.registered_kinds(),
-            {"geo04-intersection", "geo05-projection-predecessor", "issue6-b09-reference"},
+            {
+                "b08-displayed-exact", "ext03-temporal-transform", "geo02-affine-sum", "geo03-hv",
+                "geo04-intersection", "geo05-projection-predecessor", "geo06-quickhull",
+                "issue3-finite-catalogue", "issue3-validated-minimax", "issue6-b06-reference",
+                "issue6-b07-reference", "issue6-b09-reference", "opt04-phase-one", "opt05-hull",
+                "opt06-basis-reuse", "opt07-ordered-hull", "opt11-recursive-hull", "opt12-warm-start",
+                "syn-ts01-paired-comparison", "syn01-nominal-forward", "syn02-terminal-minimizers",
+                "syn03-strategy-a-ts01", "syn03-strategy-a-ts02", "syn04-strategy-b-ts01",
+                "syn04-strategy-b-ts02", "syn04-strategy-b-ts03", "syn07-ts01-analytic",
+            },
         )
         with self.assertRaisesRegex(ValueError, "unsupported registered publication kind"):
             publication_policy.for_kind("unknown-kind")
@@ -42,6 +51,17 @@ class PublicationPolicyTests(unittest.TestCase):
         policy = publication_policy.for_kind("geo04-intersection")
         with self.assertRaisesRegex(ValueError, "duplicate publication kind registration"):
             publication_policy.register(policy)
+
+    def test_policy_retains_b09_archive_and_figure_admission_checks(self):
+        policy = publication_policy.for_kind("issue6-b09-reference")
+        self.assertTrue(policy.native_digest)
+        self.assertEqual(policy.svg_files, ("projections-lambda0.svg", "projections-lambda1.svg"))
+        self.assertTrue(policy.include_parent_archive)
+        self.assertTrue(policy.committed_archive)
+
+    def test_geo04_keeps_the_staging_svg_check(self):
+        self.assertEqual(publication_policy.for_kind("geo04-intersection").svg_files,
+                         ("latency.svg",))
 
     def test_staging_rejects_wrong_source_identity_before_opening_bundle(self):
         catalogue = json.loads((FIXTURES / "catalog.json").read_text(encoding="utf-8"))

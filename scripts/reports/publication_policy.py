@@ -13,7 +13,15 @@ class PublicationPolicy:
     publisher: ModuleType
     native_digest: bool = False
     svg_files: tuple[str, ...] = ()
+    generated_svg: bool = False
+    extra_html_files: tuple[str, ...] = ()
+    include_source_evidence: bool = False
+    include_parent_archive: bool = False
     committed_archive: bool = False
+    adapt_allow_test: bool = False
+    render_allow_test: bool = False
+    archive_allow_test: bool = False
+    raw_json_link: bool = True
     csv_name: str = "trials.csv"
     trial_label: str = "Measured tables"
     figure_name: str = ""

@@ -30,17 +30,18 @@ and staging read saved data and never execute numerical collectors.
 
 ## Schema-v3 publication adapters
 
-`publication_policy.py` is the staging seam for policies registered by
-`*_publication_policy.py` modules. A policy binds one report kind to its
-source-directory identity pattern, publisher module, catalogue links, and
-staging-only checks such as SVG validation or a committed archive comparison.
-The publisher continues to own scientific validation, report identity,
-rendering, and archive construction. Registration rejects duplicate kinds;
-catalogue staging rejects kinds without an adapter. Add or change an adapter by
-updating its policy module, the adapter's scientific checks as needed, and
-`tests/reporting/test_publication_policy.py` plus the relevant adapter test.
-The production catalog staging contract is checked by
-`tests/reporting/test_registered_kinds.py`.
+`publication_policy.py` is the staging seam for the 27 schema-v3 non-LP/convex
+report kinds loaded by `schema3_publication_policies.py`. Each adapter's policy
+binds its report kind to the publisher, source-directory identity rule,
+catalogue links, and staging checks such as SVG validation or a committed
+archive comparison. The publisher continues to own scientific validation,
+report identity, rendering, and archive construction. Registration rejects
+duplicate kinds; catalogue staging rejects unsupported kinds. The shared
+`registered_reports.py` adapter owns its three policies together. Add or change
+an adapter by updating its policy module and the import list in
+`schema3_publication_policies.py`, the adapter's scientific checks as needed,
+and `tests/reporting/test_publication_policy.py` plus the relevant adapter
+test. Full-catalog staging is checked by `tests/reporting/test_registered_kinds.py`.
 
 GEO-04, GEO-05 and B09 keep their policy declarations next to, but outside,
 their publisher source files. Those publishers bind their own source bytes into
