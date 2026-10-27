@@ -1,3 +1,5 @@
+> Superseded pre-commit capture. Retained for audit only; do not use these rows as current evidence. The clean-source rerun is in [r2](../exp02-it17-a44-paper-order-20261027-r2/README.md).
+
 # EXP-02: A44 farthest-seeded hull pilot
 
 ## Verdict

@@ -1,0 +1,41 @@
+-- HIGHS version: 1.11.0
+-- Git hash: n/a
+-- Build C++ library: ON
+-- Build C++ library: OFF
+-- Build Fortran: OFF
+-- Build CSharp: OFF
+-- Build Python: OFF
+-- Build all tests: OFF
+-- ZLIB: OFF
+-- Build pdlp with GPU: OFF
+-- Use FindCUDAConf: OFF
+-- Build type: Release
+-- Found long size: 8
+-- Found long long size: 8
+-- Found int64_t size: 8
+-- Found unsigned long size: 8
+-- Found unsigned long long size: 8
+-- Found uint64_t size: 8
+-- Found int * size: 8
+-- IPO / LTO supported by compiler: YES
+-- IPO / LTO: disabled by default when building a static library; set CMAKE_INTERPROCEDURAL_OPTIMIZATION=ON to enable
+-- Default multithreading: disabled
+-- FAST_BUILD set to on.
+-- Build examples: OFF
+-- Build C++ example: OFF
+-- Build CSharp example: OFF
+-- Build dotnet package: OFF
+-- No CSharp support
+-- .Net: Use .Net Framework 2.1 support: ON
+CMake Deprecation Warning at /home/butahlecoq/.cache/csl-exp02-a44-build-20261027/_deps/doctest-src/CMakeLists.txt:1 (cmake_minimum_required):
+  Compatibility with CMake < 3.10 will be removed from a future version of
+  CMake.
+
+  Update the VERSION argument <min> value.  Or, use the <min>...<max> syntax
+  to tell CMake that the project requires at least <min> but has been updated
+  to work with policies introduced by <max> or earlier.
+
+
+-- Configuring done (1.2s)
+-- Generating done (0.6s)
+-- Build files have been written to: /home/butahlecoq/.cache/csl-exp02-a44-build-20261027

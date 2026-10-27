@@ -158,10 +158,11 @@ FAMILIES = {
         r"quickhull-it17-paper-adaptations-\d{8}-r\d+", "geometry",
         "QuickHull and ITIS17 paper-informed LP reducers",
         "Compares geometric QuickHull with five separately identified LP reducers on three "
-        "small exact 2D clouds. A43 and A44 are paper-informed adaptations, not faithful paper "
-        "or Pascal ports; the performance conclusion is inconclusive."),
+        "small exact 2D clouds. A43 remains a paper-informed adaptation; A44 v2 follows the "
+        "paper's farthest-seeded Euclidean ordering under a stated interpretation. No matching "
+        "Pascal source was found; the performance conclusion is inconclusive."),
     "exp02-it17-dyadic": Family(
-        r"exp02-it17-dyadic-interior-\d{8}-r\d+", "geometry",
+        r"exp02-it17-(?:dyadic-interior|a44-paper-order)-\d{8}-r\d+", "geometry",
         "Repeated ITIS17 dyadic hull pilot",
         "Compares six separately identified hull reducers on two deterministic interior-heavy "
         "2D square clouds. Failed attempts remain visible; three methods pass on both fixtures, "
