@@ -1,0 +1,408 @@
+{
+  "adaptation": {
+    "horizon_steps": 3,
+    "information_pattern": "open-loop control sequence; adversary chooses a full disturbance sequence",
+    "objective": "minimize maximum squared terminal position over all disturbance vertices",
+    "safe_state": "unbounded one-dimensional state",
+    "stage_map": "x_next=x+0.05*u+0.05*v",
+    "terminal_time_seconds": 0.15,
+    "u_catalogue": [
+      -2.0,
+      0.0,
+      2.0
+    ],
+    "v_catalogue": [
+      -1.0,
+      0.0,
+      1.0
+    ]
+  },
+  "algorithm": "csl.finite-action-minimax.numerical",
+  "algorithm_source_sha256": "a222ed777cba81bce2170d96f22b4e5fd9d55aa92ae66413246e97f3c11f03f1",
+  "assurance": "numerical; exhaustive over all 27 fixed control plans and 27 disturbance sequences per plan",
+  "driver_sha256": "59ad072a31ae5064b291f538720ec6ed8cb1e472f0d14445ff93ca4c4d43a87d",
+  "environment": {
+    "architecture": "x86_64",
+    "build_type": "Release",
+    "compiler_id": "GNU",
+    "compiler_version": "16.2.1",
+    "requested_workers": 1,
+    "solver_parallelism": "single-threaded"
+  },
+  "minimizing_plan_indices": [
+    0
+  ],
+  "near_optimal_tolerance": 1e-12,
+  "objective_value": 0.7225000000000004,
+  "plan_count": 27,
+  "plans": [
+    {
+      "controls": [
+        -2.0,
+        -2.0,
+        -2.0
+      ],
+      "maximizing_terminal_state": [
+        0.8500000000000002
+      ],
+      "plan_index": 0,
+      "worst_terminal_squared_state": 0.7225000000000004
+    },
+    {
+      "controls": [
+        -2.0,
+        -2.0,
+        0.0
+      ],
+      "maximizing_terminal_state": [
+        0.9500000000000002
+      ],
+      "plan_index": 1,
+      "worst_terminal_squared_state": 0.9025000000000003
+    },
+    {
+      "controls": [
+        -2.0,
+        -2.0,
+        2.0
+      ],
+      "maximizing_terminal_state": [
+        1.0500000000000003
+      ],
+      "plan_index": 2,
+      "worst_terminal_squared_state": 1.1025000000000005
+    },
+    {
+      "controls": [
+        -2.0,
+        0.0,
+        -2.0
+      ],
+      "maximizing_terminal_state": [
+        0.9500000000000001
+      ],
+      "plan_index": 3,
+      "worst_terminal_squared_state": 0.9025000000000001
+    },
+    {
+      "controls": [
+        -2.0,
+        0.0,
+        0.0
+      ],
+      "maximizing_terminal_state": [
+        1.05
+      ],
+      "plan_index": 4,
+      "worst_terminal_squared_state": 1.1025
+    },
+    {
+      "controls": [
+        -2.0,
+        0.0,
+        2.0
+      ],
+      "maximizing_terminal_state": [
+        1.1500000000000001
+      ],
+      "plan_index": 5,
+      "worst_terminal_squared_state": 1.3225000000000002
+    },
+    {
+      "controls": [
+        -2.0,
+        2.0,
+        -2.0
+      ],
+      "maximizing_terminal_state": [
+        1.05
+      ],
+      "plan_index": 6,
+      "worst_terminal_squared_state": 1.1025
+    },
+    {
+      "controls": [
+        -2.0,
+        2.0,
+        0.0
+      ],
+      "maximizing_terminal_state": [
+        1.1500000000000001
+      ],
+      "plan_index": 7,
+      "worst_terminal_squared_state": 1.3225000000000002
+    },
+    {
+      "controls": [
+        -2.0,
+        2.0,
+        2.0
+      ],
+      "maximizing_terminal_state": [
+        1.2500000000000002
+      ],
+      "plan_index": 8,
+      "worst_terminal_squared_state": 1.5625000000000007
+    },
+    {
+      "controls": [
+        0.0,
+        -2.0,
+        -2.0
+      ],
+      "maximizing_terminal_state": [
+        0.9500000000000001
+      ],
+      "plan_index": 9,
+      "worst_terminal_squared_state": 0.9025000000000001
+    },
+    {
+      "controls": [
+        0.0,
+        -2.0,
+        0.0
+      ],
+      "maximizing_terminal_state": [
+        1.05
+      ],
+      "plan_index": 10,
+      "worst_terminal_squared_state": 1.1025
+    },
+    {
+      "controls": [
+        0.0,
+        -2.0,
+        2.0
+      ],
+      "maximizing_terminal_state": [
+        1.1500000000000001
+      ],
+      "plan_index": 11,
+      "worst_terminal_squared_state": 1.3225000000000002
+    },
+    {
+      "controls": [
+        0.0,
+        0.0,
+        -2.0
+      ],
+      "maximizing_terminal_state": [
+        1.05
+      ],
+      "plan_index": 12,
+      "worst_terminal_squared_state": 1.1025
+    },
+    {
+      "controls": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "maximizing_terminal_state": [
+        1.1500000000000001
+      ],
+      "plan_index": 13,
+      "worst_terminal_squared_state": 1.3225000000000002
+    },
+    {
+      "controls": [
+        0.0,
+        0.0,
+        2.0
+      ],
+      "maximizing_terminal_state": [
+        1.2500000000000002
+      ],
+      "plan_index": 14,
+      "worst_terminal_squared_state": 1.5625000000000007
+    },
+    {
+      "controls": [
+        0.0,
+        2.0,
+        -2.0
+      ],
+      "maximizing_terminal_state": [
+        1.1500000000000001
+      ],
+      "plan_index": 15,
+      "worst_terminal_squared_state": 1.3225000000000002
+    },
+    {
+      "controls": [
+        0.0,
+        2.0,
+        0.0
+      ],
+      "maximizing_terminal_state": [
+        1.2500000000000002
+      ],
+      "plan_index": 16,
+      "worst_terminal_squared_state": 1.5625000000000007
+    },
+    {
+      "controls": [
+        0.0,
+        2.0,
+        2.0
+      ],
+      "maximizing_terminal_state": [
+        1.3500000000000003
+      ],
+      "plan_index": 17,
+      "worst_terminal_squared_state": 1.822500000000001
+    },
+    {
+      "controls": [
+        2.0,
+        -2.0,
+        -2.0
+      ],
+      "maximizing_terminal_state": [
+        1.05
+      ],
+      "plan_index": 18,
+      "worst_terminal_squared_state": 1.1025
+    },
+    {
+      "controls": [
+        2.0,
+        -2.0,
+        0.0
+      ],
+      "maximizing_terminal_state": [
+        1.1500000000000001
+      ],
+      "plan_index": 19,
+      "worst_terminal_squared_state": 1.3225000000000002
+    },
+    {
+      "controls": [
+        2.0,
+        -2.0,
+        2.0
+      ],
+      "maximizing_terminal_state": [
+        1.2500000000000002
+      ],
+      "plan_index": 20,
+      "worst_terminal_squared_state": 1.5625000000000007
+    },
+    {
+      "controls": [
+        2.0,
+        0.0,
+        -2.0
+      ],
+      "maximizing_terminal_state": [
+        1.1500000000000001
+      ],
+      "plan_index": 21,
+      "worst_terminal_squared_state": 1.3225000000000002
+    },
+    {
+      "controls": [
+        2.0,
+        0.0,
+        0.0
+      ],
+      "maximizing_terminal_state": [
+        1.2500000000000002
+      ],
+      "plan_index": 22,
+      "worst_terminal_squared_state": 1.5625000000000007
+    },
+    {
+      "controls": [
+        2.0,
+        0.0,
+        2.0
+      ],
+      "maximizing_terminal_state": [
+        1.3500000000000003
+      ],
+      "plan_index": 23,
+      "worst_terminal_squared_state": 1.822500000000001
+    },
+    {
+      "controls": [
+        2.0,
+        2.0,
+        -2.0
+      ],
+      "maximizing_terminal_state": [
+        1.2500000000000002
+      ],
+      "plan_index": 24,
+      "worst_terminal_squared_state": 1.5625000000000007
+    },
+    {
+      "controls": [
+        2.0,
+        2.0,
+        0.0
+      ],
+      "maximizing_terminal_state": [
+        1.3500000000000003
+      ],
+      "plan_index": 25,
+      "worst_terminal_squared_state": 1.822500000000001
+    },
+    {
+      "controls": [
+        2.0,
+        2.0,
+        2.0
+      ],
+      "maximizing_terminal_state": [
+        1.4500000000000004
+      ],
+      "plan_index": 26,
+      "worst_terminal_squared_state": 2.1025000000000014
+    }
+  ],
+  "schema": "csl.env717-unequal-game-pilot/1",
+  "source_commit": "9a6a2ed10fe8d82f8d0d31124cf85f3354572789",
+  "source_file_blob": "a05c7caafa8c36b44f75a8c3e3355677419af6c4",
+  "source_license": "no license declared in repository metadata",
+  "source_model": {
+    "dt_seconds": 0.05,
+    "initial_state": [
+      0.0,
+      1.0
+    ],
+    "reward": "squared terminal position",
+    "source_horizon_seconds": 2.0,
+    "transition": "t_next=t+dt; x_next=x+dt*(u+v)",
+    "u_bounds": [
+      -2.0,
+      2.0
+    ],
+    "v_bounds": [
+      -1.0,
+      1.0
+    ]
+  },
+  "source_repository_commit": "f4d76c60f4003f50954174e96eafd8e514bd5441",
+  "state_order": [
+    "position"
+  ],
+  "timing": {
+    "limiter_profile": "not collected; no comparative speed claim",
+    "max_wall_ns": 654487,
+    "measured_calls": 7,
+    "measured_wall_ns": [
+      654487,
+      588556,
+      607903,
+      614329,
+      601548,
+      629763,
+      629484
+    ],
+    "median_wall_ns": 614329,
+    "min_wall_ns": 588556,
+    "scope": "finite_action_minimax call; request setup and JSON output excluded",
+    "warmup_calls": 1
+  }
+}

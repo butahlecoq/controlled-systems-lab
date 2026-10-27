@@ -1,0 +1,99 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>UnequalGame minimax pilot</title><style>body{margin:0;background:#111820;color:#f4f1e8;font:16px/1.55 system-ui,sans-serif}main{max-width:1100px;margin:auto;padding:2rem}svg{width:100%;height:auto}.note{border-left:4px solid #f4a261;padding:.7rem 1rem;background:#1a252e}a{color:#8bd3f7}</style><main><h1>UnequalGame: reachability and minimax</h1><p>CSL's finite-action minimax method exhausts 27 fixed control plans and all 27 adversarial disturbance sequences per plan. An independent enumeration replays every plan, its worst terminal state, the finite forward reachable sets, backward robust nodes, and a selected worst-case trajectory.</p><div><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 620" role="img" aria-labelledby="title desc">
+<title id="title">UnequalGame: finite-action reachability and minimax</title>
+<desc id="desc">Time-position plot with forward reachable intervals, robust backward winning nodes and intersections, terminal target, and one worst-case minimax trajectory.</desc>
+<rect width="100%" height="100%" fill="#111820"/>
+<text x="60" y="42" fill="#f4f1e8" font-family="sans-serif" font-size="25" font-weight="700">UnequalGame · finite-action differential-game pilot</text>
+<text x="60" y="72" fill="#bac6ce" font-family="sans-serif" font-size="14">3 stages · dt = 0.05 s · 27 fixed control plans × 27 disturbance sequences · minimax terminal x² = 0.7225</text>
+<line x1="100" y1="520.00" x2="920" y2="520.00" stroke="#293640"/>
+<text x="90" y="524.00" fill="#bac6ce" font-family="sans-serif" font-size="12" text-anchor="end">0.47</text>
+<line x1="100" y1="415.00" x2="920" y2="415.00" stroke="#293640"/>
+<text x="90" y="419.00" fill="#bac6ce" font-family="sans-serif" font-size="12" text-anchor="end">0.735</text>
+<line x1="100" y1="310.00" x2="920" y2="310.00" stroke="#293640"/>
+<text x="90" y="314.00" fill="#bac6ce" font-family="sans-serif" font-size="12" text-anchor="end">1</text>
+<line x1="100" y1="205.00" x2="920" y2="205.00" stroke="#293640"/>
+<text x="90" y="209.00" fill="#bac6ce" font-family="sans-serif" font-size="12" text-anchor="end">1.26</text>
+<line x1="100" y1="100.00" x2="920" y2="100.00" stroke="#293640"/>
+<text x="90" y="104.00" fill="#bac6ce" font-family="sans-serif" font-size="12" text-anchor="end">1.53</text>
+<line x1="100.00" y1="100" x2="100.00" y2="520" stroke="#293640"/>
+<text x="100.00" y="544" fill="#bac6ce" font-family="sans-serif" font-size="12" text-anchor="middle">0.00</text>
+<line x1="373.33" y1="100" x2="373.33" y2="520" stroke="#293640"/>
+<text x="373.33" y="544" fill="#bac6ce" font-family="sans-serif" font-size="12" text-anchor="middle">0.05</text>
+<line x1="646.67" y1="100" x2="646.67" y2="520" stroke="#293640"/>
+<text x="646.67" y="544" fill="#bac6ce" font-family="sans-serif" font-size="12" text-anchor="middle">0.10</text>
+<line x1="920.00" y1="100" x2="920.00" y2="520" stroke="#293640"/>
+<text x="920.00" y="544" fill="#bac6ce" font-family="sans-serif" font-size="12" text-anchor="middle">0.15</text>
+<rect x="902.00" y="369.43" width="36" height="150.57" fill="#d9a441" fill-opacity="0.25"><title>Visible part of terminal target x² ≤ 0.7225</title></rect>
+<line x1="100.00" y1="310.00" x2="100.00" y2="310.00" stroke="#56b4e9" stroke-opacity="0.2" stroke-width="3"/>
+<line x1="373.33" y1="369.43" x2="373.33" y2="329.81" stroke="#56b4e9" stroke-opacity="0.2" stroke-width="3"/>
+<line x1="373.33" y1="329.81" x2="373.33" y2="290.19" stroke="#56b4e9" stroke-opacity="0.2" stroke-width="3"/>
+<line x1="373.33" y1="290.19" x2="373.33" y2="250.57" stroke="#56b4e9" stroke-opacity="0.2" stroke-width="3"/>
+<line x1="646.67" y1="428.87" x2="646.67" y2="349.62" stroke="#56b4e9" stroke-opacity="0.2" stroke-width="3"/>
+<line x1="646.67" y1="389.25" x2="646.67" y2="310.00" stroke="#56b4e9" stroke-opacity="0.2" stroke-width="3"/>
+<line x1="646.67" y1="349.62" x2="646.67" y2="270.38" stroke="#56b4e9" stroke-opacity="0.2" stroke-width="3"/>
+<line x1="646.67" y1="389.25" x2="646.67" y2="310.00" stroke="#56b4e9" stroke-opacity="0.2" stroke-width="3"/>
+<line x1="646.67" y1="349.62" x2="646.67" y2="270.38" stroke="#56b4e9" stroke-opacity="0.2" stroke-width="3"/>
+<line x1="646.67" y1="310.00" x2="646.67" y2="230.75" stroke="#56b4e9" stroke-opacity="0.2" stroke-width="3"/>
+<line x1="646.67" y1="349.62" x2="646.67" y2="270.38" stroke="#56b4e9" stroke-opacity="0.2" stroke-width="3"/>
+<line x1="646.67" y1="310.00" x2="646.67" y2="230.75" stroke="#56b4e9" stroke-opacity="0.2" stroke-width="3"/>
+<line x1="646.67" y1="270.38" x2="646.67" y2="191.13" stroke="#56b4e9" stroke-opacity="0.2" stroke-width="3"/>
+<line x1="920.00" y1="488.30" x2="920.00" y2="369.43" stroke="#56b4e9" stroke-opacity="0.55" stroke-width="3"/>
+<line x1="920.00" y1="448.68" x2="920.00" y2="329.81" stroke="#56b4e9" stroke-opacity="0.55" stroke-width="3"/>
+<line x1="920.00" y1="409.06" x2="920.00" y2="290.19" stroke="#56b4e9" stroke-opacity="0.55" stroke-width="3"/>
+<line x1="920.00" y1="448.68" x2="920.00" y2="329.81" stroke="#56b4e9" stroke-opacity="0.55" stroke-width="3"/>
+<line x1="920.00" y1="409.06" x2="920.00" y2="290.19" stroke="#56b4e9" stroke-opacity="0.55" stroke-width="3"/>
+<line x1="920.00" y1="369.43" x2="920.00" y2="250.57" stroke="#56b4e9" stroke-opacity="0.55" stroke-width="3"/>
+<line x1="920.00" y1="409.06" x2="920.00" y2="290.19" stroke="#56b4e9" stroke-opacity="0.55" stroke-width="3"/>
+<line x1="920.00" y1="369.43" x2="920.00" y2="250.57" stroke="#56b4e9" stroke-opacity="0.55" stroke-width="3"/>
+<line x1="920.00" y1="329.81" x2="920.00" y2="210.94" stroke="#56b4e9" stroke-opacity="0.55" stroke-width="3"/>
+<line x1="920.00" y1="448.68" x2="920.00" y2="329.81" stroke="#56b4e9" stroke-opacity="0.55" stroke-width="3"/>
+<line x1="920.00" y1="409.06" x2="920.00" y2="290.19" stroke="#56b4e9" stroke-opacity="0.55" stroke-width="3"/>
+<line x1="920.00" y1="369.43" x2="920.00" y2="250.57" stroke="#56b4e9" stroke-opacity="0.55" stroke-width="3"/>
+<line x1="920.00" y1="409.06" x2="920.00" y2="290.19" stroke="#56b4e9" stroke-opacity="0.55" stroke-width="3"/>
+<line x1="920.00" y1="369.43" x2="920.00" y2="250.57" stroke="#56b4e9" stroke-opacity="0.55" stroke-width="3"/>
+<line x1="920.00" y1="329.81" x2="920.00" y2="210.94" stroke="#56b4e9" stroke-opacity="0.55" stroke-width="3"/>
+<line x1="920.00" y1="369.43" x2="920.00" y2="250.57" stroke="#56b4e9" stroke-opacity="0.55" stroke-width="3"/>
+<line x1="920.00" y1="329.81" x2="920.00" y2="210.94" stroke="#56b4e9" stroke-opacity="0.55" stroke-width="3"/>
+<line x1="920.00" y1="290.19" x2="920.00" y2="171.32" stroke="#56b4e9" stroke-opacity="0.55" stroke-width="3"/>
+<line x1="920.00" y1="409.06" x2="920.00" y2="290.19" stroke="#56b4e9" stroke-opacity="0.55" stroke-width="3"/>
+<line x1="920.00" y1="369.43" x2="920.00" y2="250.57" stroke="#56b4e9" stroke-opacity="0.55" stroke-width="3"/>
+<line x1="920.00" y1="329.81" x2="920.00" y2="210.94" stroke="#56b4e9" stroke-opacity="0.55" stroke-width="3"/>
+<line x1="920.00" y1="369.43" x2="920.00" y2="250.57" stroke="#56b4e9" stroke-opacity="0.55" stroke-width="3"/>
+<line x1="920.00" y1="329.81" x2="920.00" y2="210.94" stroke="#56b4e9" stroke-opacity="0.55" stroke-width="3"/>
+<line x1="920.00" y1="290.19" x2="920.00" y2="171.32" stroke="#56b4e9" stroke-opacity="0.55" stroke-width="3"/>
+<line x1="920.00" y1="329.81" x2="920.00" y2="210.94" stroke="#56b4e9" stroke-opacity="0.55" stroke-width="3"/>
+<line x1="920.00" y1="290.19" x2="920.00" y2="171.32" stroke="#56b4e9" stroke-opacity="0.55" stroke-width="3"/>
+<line x1="920.00" y1="250.57" x2="920.00" y2="131.70" stroke="#56b4e9" stroke-opacity="0.55" stroke-width="3"/>
+<circle cx="100.00" cy="310.00" r="5" fill="#f4a261" stroke="#fff" stroke-width="1"/>
+<circle cx="373.33" cy="369.43" r="5" fill="#f4a261" stroke="#fff" stroke-width="1"/>
+<circle cx="373.33" cy="349.62" r="5" fill="#f4a261" stroke="#fff" stroke-width="1"/>
+<circle cx="373.33" cy="329.81" r="5" fill="#f4a261" stroke="#fff" stroke-width="1"/>
+<circle cx="646.67" cy="428.87" r="5" fill="#f4a261" stroke="#fff" stroke-width="1"/>
+<circle cx="646.67" cy="409.06" r="5" fill="#f4a261" stroke="#fff" stroke-width="1"/>
+<circle cx="646.67" cy="389.25" r="5" fill="#f4a261" stroke="#fff" stroke-width="1"/>
+<circle cx="646.67" cy="389.25" r="5" fill="#f4a261" stroke="#fff" stroke-width="1"/>
+<circle cx="646.67" cy="369.43" r="5" fill="#f4a261" stroke="#fff" stroke-width="1"/>
+<circle cx="646.67" cy="349.62" r="5" fill="#f4a261" stroke="#fff" stroke-width="1"/>
+<circle cx="646.67" cy="349.62" r="5" fill="#f4a261" stroke="#fff" stroke-width="1"/>
+<circle cx="920.00" cy="488.30" r="5" fill="#f4a261" stroke="#fff" stroke-width="1"/>
+<circle cx="920.00" cy="468.49" r="5" fill="#f4a261" stroke="#fff" stroke-width="1"/>
+<circle cx="920.00" cy="448.68" r="5" fill="#f4a261" stroke="#fff" stroke-width="1"/>
+<circle cx="920.00" cy="448.68" r="5" fill="#f4a261" stroke="#fff" stroke-width="1"/>
+<circle cx="920.00" cy="428.87" r="5" fill="#f4a261" stroke="#fff" stroke-width="1"/>
+<circle cx="920.00" cy="428.87" r="5" fill="#f4a261" stroke="#fff" stroke-width="1"/>
+<circle cx="920.00" cy="409.06" r="5" fill="#f4a261" stroke="#fff" stroke-width="1"/>
+<circle cx="920.00" cy="409.06" r="5" fill="#f4a261" stroke="#fff" stroke-width="1"/>
+<circle cx="920.00" cy="389.25" r="5" fill="#f4a261" stroke="#fff" stroke-width="1"/>
+<circle cx="920.00" cy="389.25" r="5" fill="#f4a261" stroke="#fff" stroke-width="1"/>
+<circle cx="920.00" cy="369.43" r="5" fill="#f4a261" stroke="#fff" stroke-width="1"/>
+<circle cx="920.00" cy="369.43" r="5" fill="#f4a261" stroke="#fff" stroke-width="1"/>
+<circle cx="920.00" cy="369.43" r="5" fill="#f4a261" stroke="#fff" stroke-width="1"/>
+<polyline points="100.00,310.00 373.33,329.81 646.67,349.62 920.00,369.43" fill="none" stroke="#ff6b35" stroke-width="4" stroke-linejoin="round"/>
+<circle cx="100.00" cy="310.00" r="5" fill="#ff6b35"/>
+<circle cx="373.33" cy="329.81" r="5" fill="#ff6b35"/>
+<circle cx="646.67" cy="349.62" r="5" fill="#ff6b35"/>
+<circle cx="920.00" cy="369.43" r="5" fill="#ff6b35"/>
+<rect x="100" y="100" width="820" height="420" fill="none" stroke="#81909a"/>
+<text x="510.0" y="572" fill="#f4f1e8" font-family="sans-serif" font-size="15" text-anchor="middle">Time (s)</text>
+<text x="32" y="310.0" fill="#f4f1e8" font-family="sans-serif" font-size="15" text-anchor="middle" transform="rotate(-90 32 310.0)">Position x</text>
+<text x="100" y="585" fill="#bac6ce" font-family="sans-serif" font-size="12">Blue: forward intervals by control prefix · gold: forward/backward intersection · orange: worst-case minimax trajectory · gold band: visible terminal target portion</text>
+</svg></div><p class="note"><strong>Adaptation:</strong> the upstream environment uses continuous controls and a 2-second horizon. This pilot uses three stages over 0.15 seconds and finite control/disturbance catalogues. The minimizer commits to an open-loop control sequence; the adversary chooses a full disturbance sequence. This is not a reproduction of the source RL training run.</p><p>Minimax squared terminal position: 0.7225. Seven single-threaded solver-call observations after one warmup have median 614329 ns and range 588556–654487 ns. No comparative speed claim is made. <a href="result.json">Result JSON</a> · <a href="figure-data.json">Figure data</a> · <a href="projections.svg">Standalone SVG</a></p><p>Source commit <code>f4d76c60f4003f50954174e96eafd8e514bd5441</code>; source blob <code>a05c7caafa8c36b44f75a8c3e3355677419af6c4</code>. Runtime: GNU 16.2.1, Linux-7.2.5-3-omarchy-x86_64-with-glibc2.44.</p></main></html>
