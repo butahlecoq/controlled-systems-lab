@@ -11,7 +11,7 @@ import re
 
 ROOT = Path(__file__).resolve().parents[2]
 VISUAL_SIGNAL = re.compile(r"<svg|savefig\s*\(|write_image\s*\(|\.svg\b|\.png\b|render_svg", re.I)
-ASSET_NAME = re.compile(r"[A-Za-z0-9_.-]+\.(?:svg|png)")
+ASSET_NAME = re.compile(r"(?<![A-Za-z0-9_.-])[A-Za-z0-9_.-]+\.(?:svg|png)(?![A-Za-z0-9_.-])")
 MIGRATION_ISSUES = {
     "approximation-and-extensions": 684,
     "geometry-and-optimization": 685,
