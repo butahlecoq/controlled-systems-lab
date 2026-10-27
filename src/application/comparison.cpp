@@ -610,7 +610,8 @@ SelectedRunExecution run_selected(const PreparedSelection& prepared,
 artifacts::ArtifactResult<std::string> encode_strategy_run(
     const problem::ResolvedProblem& problem, const StrategyExecution& execution,
     artifacts::ResolvedConfiguration configuration, artifacts::RunId run,
-    artifacts::CollectedStatistics statistics, artifacts::ResourceObservation resources) {
+    artifacts::CollectedStatistics statistics, artifacts::ResourceObservation resources,
+    std::optional<artifacts::ScenarioSourceRecord> scenario_source) {
     const auto description = problem.description();
     std::optional<WitnessSelection> selection;
     if (const auto* selected = std::get_if<WitnessSelection>(&execution.selection))
@@ -696,7 +697,8 @@ artifacts::ArtifactResult<std::string> encode_strategy_run(
     artifacts::RunRecord record{problem.identity(), description->model->dynamics.dimensions,
         static_cast<std::uint64_t>(description->times.size() - 1), std::move(configuration),
         std::move(run), std::move(final), std::move(statistics), std::move(resources),
-        {}, std::move(attachments), artifacts::ProblemProvenance::problem_revalidated, std::move(selection)};
+        {}, std::move(attachments), artifacts::ProblemProvenance::problem_revalidated,
+        std::move(selection), std::move(scenario_source)};
     auto published = artifacts::publish_run({problem, std::move(record)});
     if (auto* error = std::get_if<artifacts::ArtifactError>(&published)) return *error;
     auto encoded=artifacts::encode_recorded_run(std::get<artifacts::RunStatistics>(published));

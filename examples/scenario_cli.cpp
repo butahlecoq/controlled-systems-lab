@@ -340,7 +340,8 @@ bool passed(const T& value) {
     return value == verification::CheckStatus::numerical_pass;
 }
 
-int persist(const problem::ResolvedProblem& problem, const application::PreparedSelection& prepared,
+int persist(const input::LoadedScenario& scenario, const problem::ResolvedProblem& problem,
+    const application::PreparedSelection& prepared,
     const application::SelectedRunExecution& execution, const Modules& modules,
     const ResourcePolicy& resources, const WitnessRequest& witnesses,
     const std::filesystem::path& directory, const std::vector<std::string>& file_stems) {
@@ -427,6 +428,14 @@ int persist(const problem::ResolvedProblem& problem, const application::Prepared
         }
     }
 
+    const auto source = scenario.source();
+    const auto defaults = scenario.defaults();
+    ar::ScenarioSourceRecord scenario_source{source->content.digest(), source->schema,
+        source->defaults_revision, {}};
+    scenario_source.defaults.reserve(defaults->size());
+    for (const auto& value : *defaults)
+        scenario_source.defaults.push_back({value.path, value.meaning, value.authored});
+
     std::vector<std::string> encoded(execution.methods.size());
     for (std::size_t index = 0; index < execution.methods.size(); ++index) {
         const auto& expected = prepared.expected_synthesis_identity(index);
@@ -474,7 +483,7 @@ int persist(const problem::ResolvedProblem& problem, const application::Prepared
         const auto artifact = application::encode_strategy_run(problem, execution.methods[index].execution,
             resolved_configuration, run, std::get<ar::CollectedStatistics>(statistics),
             {resource_unavailable, resource_unavailable, resource_unavailable, resource_unavailable,
-                true, ar::MemoryAccounting::unlimited});
+                true, ar::MemoryAccounting::unlimited}, scenario_source);
         if (const auto* error = std::get_if<ar::ArtifactError>(&artifact)) {
             std::cerr << "Artifact export rejected: code=" << static_cast<int>(error->code)
                       << " path=" << error->path << " message=" << error->message << '\n';
@@ -723,7 +732,7 @@ int run(const input::LoadedScenario& scenario, const Options& options) {
             for (std::size_t index = 0; index < prepared.methods().size(); ++index)
                 stems.push_back(paired_comparison ? (index == 0 ? "reach-back" : "strategy-b") :
                     method_file_stem(index, prepared.methods()[index].configuration.strategy.value));
-            return persist(problem, prepared, execution, modules, resources, witnesses,
+            return persist(scenario, problem, prepared, execution, modules, resources, witnesses,
                 *options.output_directory, stems);
         }
         std::cout << "artifact_export=not_requested evidence=attempts_preserved\n";
@@ -735,7 +744,7 @@ int run(const input::LoadedScenario& scenario, const Options& options) {
         for (std::size_t index = 0; index < prepared.methods().size(); ++index)
             stems.push_back(paired_comparison ? (index == 0 ? "reach-back" : "strategy-b") :
                 method_file_stem(index, prepared.methods()[index].configuration.strategy.value));
-        return persist(problem, prepared, execution, modules, resources, witnesses,
+        return persist(scenario, problem, prepared, execution, modules, resources, witnesses,
             *options.output_directory, stems);
     }
     std::cout << "artifact_export=not_requested\n";

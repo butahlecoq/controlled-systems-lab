@@ -178,6 +178,7 @@ ComparisonExecution run_comparison(const PreparedComparison&,
 artifacts::ArtifactResult<std::string> encode_strategy_run(
     const problem::ResolvedProblem&, const StrategyExecution&,
     artifacts::ResolvedConfiguration, artifacts::RunId,
-    artifacts::CollectedStatistics, artifacts::ResourceObservation);
+    artifacts::CollectedStatistics, artifacts::ResourceObservation,
+    std::optional<artifacts::ScenarioSourceRecord> scenario_source = std::nullopt);
 
 } // namespace csl::application
