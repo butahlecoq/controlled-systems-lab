@@ -19,8 +19,10 @@ SPEC.loader.exec_module(stage_module)
 
 class TwoPointsPublicationTests(unittest.TestCase):
     def setUp(self):
+        temp_root = ROOT / "build/env717-two-points-make/tmp"
+        temp_root.mkdir(parents=True, exist_ok=True)
         self.temp = tempfile.TemporaryDirectory(
-            dir=ROOT / "build/env717-two-points-make/tmp")
+            dir=temp_root)
         self.root = Path(self.temp.name)
         self.source = self.root / stage_module.SOURCE.name
         shutil.copytree(stage_module.SOURCE, self.source)
