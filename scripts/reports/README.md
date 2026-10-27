@@ -28,6 +28,30 @@ and publication manifest validation used by the other adapters. Each kind's
 adapter retains its scientific validation and typed page rendering. Rendering
 and staging read saved data and never execute numerical collectors.
 
+## Schema-v3 publication adapters
+
+`publication_policy.py` is the staging seam for policies registered by
+`*_publication_policy.py` modules. A policy binds one report kind to its
+source-directory identity pattern, publisher module, catalogue links, and
+staging-only checks such as SVG validation or a committed archive comparison.
+The publisher continues to own scientific validation, report identity,
+rendering, and archive construction. Registration rejects duplicate kinds;
+catalogue staging rejects kinds without an adapter. Add or change an adapter by
+updating its policy module, the adapter's scientific checks as needed, and
+`tests/reporting/test_publication_policy.py` plus the relevant adapter test.
+The production catalog staging contract is checked by
+`tests/reporting/test_registered_kinds.py`.
+
+GEO-04, GEO-05 and B09 keep their policy declarations next to, but outside,
+their publisher source files. Those publishers bind their own source bytes into
+public report IDs. Moving policy declarations into those files would change
+historical IDs even when rendered report bytes stayed the same. Policy wiring
+therefore lives in separate files and the full-catalog tests compare report
+IDs, page bytes, archive bytes, hashes and URLs against the saved catalogue.
+This staging refactor has no C++ API, dependency, install-tree or package
+release impact; publication behavior remains gated on exact saved-output
+checks and independent review.
+
 `site_additions.py` owns the common file-staging lifecycle for the educational
 gallery and versioned report additions such as APP-02. Callers render all
 intended bytes, validate their scientific and link inventories, then prepare a
