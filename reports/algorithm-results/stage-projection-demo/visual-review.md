@@ -17,18 +17,18 @@ Inspected asset: `projection-01-x0-x2.png` (3960 × 1980), opened directly
 from the bundle. Its six stage panels and physical coordinate labels/units
 are legible at native image size. I also rasterized the actual SVG
 `projection-01-x0-x2.svg` with `rsvg-convert`; the inspected preview is
-`/tmp/714-fuel-svg-render.png` (1440 × 720). The rendered desktop page capture is
-`/tmp/714-fuel-desktop.png` (1440 × 1600). The narrow viewport capture is
-`/tmp/714-fuel-narrow-retry.png` (390 × 900); at that viewport, the document
+`visuals/fuel-svg-preview-1440x720.png` (1440 × 720). The rendered desktop page
+capture is `visuals/fuel-desktop.png` (1440 × 1600). The narrow viewport capture
+is `visuals/fuel-narrow-390x900.png` (390 × 900); at that viewport, the document
 reflows to a single column and the page scrolls vertically. The long evidence
 description precedes the plot, so the plot is below the initial mobile
 viewport and requires scrolling.
 
 Print review used WeasyPrint 70 against the offline page, with its print media
-rules active. The PDF is `/tmp/714-fuel-print-weasy.pdf`: nine A4 pages
+rules active. The PDF is `visuals/fuel-print-weasyprint-70.pdf`: nine A4 pages
 (595.276 × 841.89 pt). The first page is the introduction; the first six-stage
 fuel-flow figure appears on page 3 at
-`/tmp/714-fuel-print-weasy-page3.png` (827 × 1170). All four saved figures
+`visuals/fuel-print-page3-827x1170.png` (827 × 1170). All four saved figures
 appear, but each is split across separate pages: the verbose stage evidence
 description occupies one page and the plot with its SVG/PNG links the next.
 The plots are small with substantial unused page area. This print layout is
@@ -43,13 +43,13 @@ Inspected the nonfuel planar integrator PNG
 (3960 × 990) directly. The four panels show R0–R3 with trajectory overlay. I
 also rasterized and inspected the actual SVG
 `benchmarks/reporting/stage-projection/bundle-v1/nonfuel-integrator-figures/projection-01-x0-x1.svg`
-at `/tmp/714-nonfuel-svg-render.png` (1440 × 360). The offline desktop page
-capture is `/tmp/714-nonfuel-desktop.png` (1440 × 1100). At a 390 × 900 mobile
-viewport, `/tmp/714-nonfuel-narrow-top.png` shows single-column reflow; the
+at `visuals/nonfuel-svg-preview-1440x360.png` (1440 × 360). The offline desktop
+page capture is `visuals/nonfuel-desktop.png` (1440 × 1100). At a 390 × 900
+mobile viewport, `visuals/nonfuel-narrow-390x900.png` shows single-column reflow; the
 graph is below the long evidence text and outside that initial viewport.
 
-The nonfuel print PDF is `/tmp/714-nonfuel-print-weasy.pdf`: two A4 pages.
-The graph appears on page 2 at `/tmp/714-nonfuel-print-weasy-page2.png`
+The nonfuel print PDF is `visuals/nonfuel-print-weasyprint-70.pdf`: two A4 pages.
+The graph appears on page 2 at `visuals/nonfuel-print-page2-827x1170.png`
 (827 × 1170), below its long evidence description. It is visible but small
 within the printable page area.
 
