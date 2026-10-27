@@ -5,7 +5,8 @@ This bundle reconstructs the deterministic four-state linear model stated in
 `97906077cc799564c5e38053830bbedeba85f4fd962ed6abec46600ccdefc218`). The
 local MATLAB source is not redistributed. The checked-in model input contains
 the transcribed matrices, bounds, horizon, target, objective and coordinate
-metadata; `plot-data.json` binds that input and the capture script by SHA-256.
+metadata; `plot-data.json` binds that input and the capture script by SHA-256
+and records the exact capture code commit.
 
 The state is `(x1,x2,x3,x4)`: oxidizer flow and working-stock balance, then fuel
 flow and working-stock balance. The model uses `x[k+1] = A x[k] + B u[k]`,
@@ -48,6 +49,9 @@ build/report-env/bin/python scripts/reports/fuel_reachability_layers.py render
 `render` consumes that saved record only and writes standalone SVG/PNG figures
 and an offline page to `docs/examples/fuel-reachability-layers/`. It does not
 run a native solver, geometry provider, benchmark or numerical experiment.
+The checked-in gallery stages the offline page and its assets under
+`examples/fuel-reachability-layers/` and links the oxidizer view from the visual
+examples index.
 
 The standalone page and eight figure files are checked against the SHA-256
 manifest in this directory.
