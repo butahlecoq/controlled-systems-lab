@@ -36,6 +36,8 @@ def adapt(bundle: Path) -> common.PublicationRecord:
     correction = json.loads((bundle / "manifest-correction.json").read_text(encoding="utf-8"))
     scenario = json.loads((bundle / "corrected-scenario.json").read_text(encoding="utf-8"))
     scenario_contract.validate(scenario)
+    canonical = Path(__file__).resolve().parents[2] / "benchmarks/scenarios/b06-owner-confirmed-disturbance-v1.json"
+    validate_canonical_fixture(bundle, canonical)
     if correction.get("schema") != "csl.issue6-b06-manifest-correction/1" or correction.get("correction_id") != SOURCE_PATTERN:
         raise ValueError("B06 correction record identity/schema differs")
     if correction.get("original_source_report_id") != SOURCE_ID or correction.get("corrected_fixture_sha256") != hashlib.sha256((bundle / "corrected-scenario.json").read_bytes()).hexdigest():

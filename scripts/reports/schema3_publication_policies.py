@@ -10,6 +10,7 @@ import geo05_publication_policy
 import geo06_publication_policy
 import b08_exact_publication_policy
 import issue6_b06_publication_policy
+import b06_manifest_correction_publication_policy
 import issue6_b07_publication_policy
 import issue6_b09_publication_policy
 import issue3_publication_policy

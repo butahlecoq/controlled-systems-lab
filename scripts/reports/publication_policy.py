@@ -17,6 +17,7 @@ class PublicationPolicy:
     extra_html_files: tuple[str, ...] = ()
     include_source_evidence: bool = False
     include_parent_archive: bool = False
+    extra_page_files: tuple[str, ...] = ()
     committed_archive: bool = False
     adapt_allow_test: bool = False
     render_allow_test: bool = False
@@ -25,6 +26,7 @@ class PublicationPolicy:
     csv_name: str = "trials.csv"
     trial_label: str = "Measured tables"
     figure_name: str = ""
+    extra_links: tuple[tuple[str, str], ...] = ()
 
     def accepts_source_id(self, source_id: object) -> bool:
         return isinstance(source_id, str) and re.fullmatch(self.source_pattern, source_id) is not None
