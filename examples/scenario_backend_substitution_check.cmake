@@ -1,4 +1,5 @@
-if(NOT DEFINED SCENARIO_BACKEND_SUBSTITUTION OR NOT DEFINED HIGHS_SCENARIO OR
+if(NOT DEFINED SCENARIO_BACKEND_SUBSTITUTION OR NOT DEFINED SCENARIO_BACKEND_ARTIFACT_CHECK OR
+   NOT DEFINED HIGHS_SCENARIO OR
    NOT DEFINED PHASE_ONE_SCENARIO OR NOT DEFINED OUTPUT_DIRECTORY)
   message(FATAL_ERROR "Scenario backend substitution check requires executable, scenarios, and output directory")
 endif()
@@ -21,6 +22,16 @@ endif()
 file(READ "${highs_output}" highs)
 file(READ "${phase_one_output}" phase_one)
 foreach(artifact IN ITEMS highs phase_one)
+  if(artifact STREQUAL "highs")
+    set(artifact_path "${highs_output}")
+  else()
+    set(artifact_path "${phase_one_output}")
+  endif()
+  execute_process(COMMAND "${SCENARIO_BACKEND_ARTIFACT_CHECK}" "${artifact_path}"
+    RESULT_VARIABLE artifact_check_status OUTPUT_VARIABLE artifact_check_stdout ERROR_VARIABLE artifact_check_stderr)
+  if(NOT "${artifact_check_status}" STREQUAL "0")
+    message(FATAL_ERROR "Saved ${artifact} witness failed independent checks: ${artifact_check_stdout}${artifact_check_stderr}")
+  endif()
   string(JSON schema GET "${${artifact}}" schema)
   string(JSON problem GET "${${artifact}}" problem)
   string(JSON requested GET "${${artifact}}" requested_backend)

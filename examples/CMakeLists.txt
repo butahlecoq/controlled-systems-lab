@@ -247,9 +247,18 @@ example_check(lp_unknown_backend registered_lp missing-backend 2 "Selection reje
 example_check(convex_unknown_backend registered_convex missing-backend 2 "Selection rejected.*missing-backend")
 example_check(substitution_unknown_backend backend_substitution missing-backend 2 "Selection rejected.*missing-backend")
 if(TARGET scenario_backend_substitution)
+  add_executable(scenario_backend_artifact_check scenario_backend_artifact_check.cpp)
+  target_compile_features(scenario_backend_artifact_check PRIVATE cxx_std_20)
+  set_target_properties(scenario_backend_artifact_check PROPERTIES CXX_EXTENSIONS OFF)
+  if(MSVC)
+    target_compile_options(scenario_backend_artifact_check PRIVATE /W4 /WX /permissive-)
+  else()
+    target_compile_options(scenario_backend_artifact_check PRIVATE -Wall -Wextra -Wpedantic -Werror)
+  endif()
   add_test(NAME scenario_backend_substitution_saved_outputs
     COMMAND ${CMAKE_COMMAND}
       "-DSCENARIO_BACKEND_SUBSTITUTION=$<TARGET_FILE:scenario_backend_substitution>"
+      "-DSCENARIO_BACKEND_ARTIFACT_CHECK=$<TARGET_FILE:scenario_backend_artifact_check>"
       "-DHIGHS_SCENARIO=${CMAKE_CURRENT_SOURCE_DIR}/scenarios/two-stage-integrator-highs.json"
       "-DPHASE_ONE_SCENARIO=${CMAKE_CURRENT_SOURCE_DIR}/scenarios/two-stage-integrator-phase-one.json"
       "-DOUTPUT_DIRECTORY=${CMAKE_CURRENT_BINARY_DIR}/scenario-backend-substitution"

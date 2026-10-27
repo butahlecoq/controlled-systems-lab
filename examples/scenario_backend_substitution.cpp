@@ -128,7 +128,12 @@ int main(int argc, char** argv) try {
     }
     const auto& prepared = std::get<PreparedPipeline<LPPort>>(preparation);
     auto [workspace] = prepared.create();
-    const auto outcome = workspace->run({{}, {}, {}, {1e-8, 1e-8}, "scenario-backend-fixture"});
+    ResourcePolicy resources{1, 1, 1, {}};
+    ExecutionContext context;
+    context.resources = std::make_shared<const ResourcePolicy>(resources);
+    context.numerical = {1e-8, 1e-8};
+    context.run_id = "scenario-backend-fixture";
+    const auto outcome = workspace->run(context);
     const auto* result = std::get_if<ProgramResult>(&outcome);
     if (!result || result->termination != Termination::completed ||
         result->outcome.value != MathematicalOutcome::optimal || !result->primal ||
