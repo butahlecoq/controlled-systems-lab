@@ -18,6 +18,7 @@ import approx_extension_companions
 import geometry_opt_companions
 import report_data
 import site_additions
+import stage_app01 as app01_reports
 import stage_ext07 as ext07_reports
 import visual_illustrations
 
@@ -964,8 +965,18 @@ def build(catalog, site):
     ext01_companion = approx_extension_companions.ext01_companion(
         site / "ext01-fixed-plan-303ad863ca3af58dc6a515844c474fe0e1af9349e55cb8acd1ff1a3f220f1b54" / "records.json",
         Path(__file__).parent / "styles/control-v1.json")
+    app01_source_id = "app01-plan-20261016-22d406fd"
+    app01_publication_catalog = Path(catalog).resolve().with_name("app01-publications.json")
+    app01_report_id = app01_reports.publication_route(app01_publication_catalog, app01_source_id)
+    app01_route = site / app01_report_id
+    require(not app01_route.is_symlink() and (app01_route / "index.html").is_file(),
+            "missing staged APP-01 publication route")
+    app01_record_path = report_data.local_file(app01_route, "records.json")
+    app01_source_record = app01_publication_catalog.parent / app01_source_id / "records.json"
+    require(app01_record_path.read_bytes() == app01_source_record.read_bytes(),
+            "staged APP-01 records differ from reviewed source")
     app01_companion = approx_extension_companions.app01_companion(
-        site / "app01-plan-20261016-22d406fd" / "records.json",
+        app01_record_path,
         Path(__file__).parent / "styles/control-v1.json")
     for family, title, stem, report_id in (
             ("Box approximation", "APP-02 diamond approximations", "app02-diamond-v1", "app02-box-8ff979de60ea9d22"),
@@ -990,8 +1001,8 @@ def build(catalog, site):
     gallery_inventory.append({"family": "Inner state-plan checks", "title": "APP-01 saved plan-check timings",
                               "status": "saved-data-companion", "anchor": "app01-plan-timing-v1",
                               "page": "app01-plan-timing-v1.html", "figure": "app01-plan-timing-v1.svg",
-                              "source_page": "../app01-plan-20261016-22d406fd/index.html",
-                              "raw_record": "../app01-plan-20261016-22d406fd/records.json"})
+                              "source_page": "../" + app01_report_id + "/index.html",
+                              "raw_record": "../" + app01_report_id + "/records.json"})
     coverage_data = algorithm_coverage(catalog, site, gallery_inventory)
     issue3_report = next(entry for entry in json.loads(Path(catalog).read_text(encoding="utf-8"))["reports"]
                          if entry["report_kind"] == "issue3-validated-minimax")

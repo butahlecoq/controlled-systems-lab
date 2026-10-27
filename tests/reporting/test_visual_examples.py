@@ -14,6 +14,7 @@ import xml.etree.ElementTree as ET
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / "scripts/reports"))
 import visual_examples as gallery
+import stage_app01 as app01_reports
 import stage_syn03_nominal_exact_example as nominal_exact_example
 
 
@@ -36,7 +37,7 @@ class GalleryTests(unittest.TestCase):
         self.temp = tempfile.TemporaryDirectory()
         self.addCleanup(self.temp.cleanup)
         self.site = Path(self.temp.name)
-        (self.site / "index.html").write_text("<html><body><h1>Reports</h1></body></html>")
+        (self.site / "index.html").write_text("<html><body><h1>Reports</h1><ul></ul></body></html>")
         for example in self.examples:
             target = self.site / example["report_id"]
             target.mkdir(exist_ok=True)
@@ -47,11 +48,12 @@ class GalleryTests(unittest.TestCase):
         shutil.copyfile(ROOT / "reports/algorithm-results/ext01-fixed-plan-20261016-11b7bc74/records.json",
                         ext01 / "records.json")
         (ext01 / "index.html").write_text("<html><body>Reviewed EXT-01 report</body></html>")
-        app01 = self.site / "app01-plan-20261016-22d406fd"
-        app01.mkdir()
-        shutil.copyfile(ROOT / "reports/algorithm-results/app01-plan-20261016-22d406fd/records.json",
-                        app01 / "records.json")
-        (app01 / "index.html").write_text("<html><body>Reviewed APP-01 report</body></html>")
+        app01_catalogue = ROOT / "reports/algorithm-results/app01-publications.json"
+        self.app01_report_id = app01_reports.stage(app01_catalogue, self.site)
+        self.app01_source_id = "app01-plan-20261016-22d406fd"
+        self.assertNotEqual(self.app01_report_id, self.app01_source_id)
+        self.assertTrue((self.site / self.app01_report_id / "records.json").is_file())
+        self.assertFalse((self.site / self.app01_source_id).exists())
         catalog = json.loads(self.catalog.read_text())
         self.catalog_reports = catalog["reports"]
         by_source = {entry["source_report_id"]: entry["report_id"]
@@ -142,6 +144,11 @@ class GalleryTests(unittest.TestCase):
         original_reports = {e["report_id"]: (self.site / e["report_id"] / "index.html").read_bytes()
                             for e in self.examples}
         gallery.build(self.catalog, self.site)
+        app01_page = self.site / "examples/app01-plan-timing-v1.html"
+        app01_html = app01_page.read_text(encoding="utf-8")
+        self.assertIn(f"../{self.app01_report_id}/index.html", app01_html)
+        self.assertIn(f"../{self.app01_report_id}/records.json", app01_html)
+        self.assertNotIn(self.app01_source_id, app01_html)
         for path, digest in before.items():
             self.assertEqual(hashlib.sha256((self.site / path).read_bytes()).hexdigest(), digest)
         for rid, content in original_reports.items():

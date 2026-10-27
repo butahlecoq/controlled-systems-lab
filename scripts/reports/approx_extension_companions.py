@@ -179,7 +179,7 @@ def ext05_companion(record_path: Path, style_path: Path) -> dict[str, bytes]:
         aspect="independent")}
 
 
-def app01_companion(record_path: Path, style_path: Path) -> dict[str, bytes]:
+def app01_companion(record_path: Path, style_path: Path, publication_report_id: str) -> dict[str, bytes]:
     """Plot APP-01's archived plan-check medians without collecting new timings."""
     record = json.loads(Path(record_path).read_text(encoding="utf-8"))
     payload = record.get("payload", {})
@@ -188,6 +188,7 @@ def app01_companion(record_path: Path, style_path: Path) -> dict[str, bytes]:
                 "empty_inner": 127618800}
     _require(record.get("schema") == "csl.app01-plan-report/1" and
              record.get("report_id") == "app01-plan-20261016-22d406fd" and
+             isinstance(publication_report_id, str) and publication_report_id.startswith("app01-plan-") and
              payload.get("schema") == "csl.app01-plan-report/1" and
              payload.get("source_commit") == "22d406fd9ea92315ef2a4f6b5703eec74e710d47" and
              [row.get("fixture") for row in summary] == list(expected) and
@@ -212,7 +213,7 @@ def app01_companion(record_path: Path, style_path: Path) -> dict[str, bytes]:
                            for name in expected]}
     outputs = _render_companion(document, style_path, "app01-plan-timing-v1")
     return outputs | {"app01-plan-timing-v1.html": _companion_page(
-        "APP-01 saved plan-check timings", "app01-plan-timing-v1", "app01-plan-20261016-22d406fd",
+        "APP-01 saved plan-check timings", "app01-plan-timing-v1", publication_report_id,
         f"This companion plots archived medians: valid_plan {expected['valid_plan'] / 1_000_000:.3f} ms, "
         f"invalid_plan {expected['invalid_plan'] / 1_000_000:.3f} ms, and "
         f"empty_inner {expected['empty_inner'] / 1_000_000:.3f} ms. Each median summarizes seven measured "
