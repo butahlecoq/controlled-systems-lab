@@ -114,6 +114,7 @@ csl_example(scenario_cli CSL::input CSL::application CSL::strategy_a CSL::strate
   CSL::witness_selector CSL::verification CSL::highs_lp CSL::highs_convex
   CSL::qhull_conversion CSL::affine_sum)
 csl_example(backend_substitution CSL::highs_lp CSL::phase_one)
+csl_example(scenario_backend_substitution CSL::input CSL::highs_lp CSL::phase_one)
 csl_example(registered_synthesis_comparison CSL::input CSL::strategy_a CSL::strategy_b
   CSL::witness_selector CSL::verification CSL::highs_lp CSL::highs_convex CSL::qhull_conversion CSL::affine_sum)
 csl_example(nominal_linear_exact_2d CSL::strategy_a CSL::highs_lp CSL::highs_convex
@@ -245,6 +246,25 @@ example_check(nominal_linear_exact_2d_complete_face nominal_linear_exact_2d "" 0
 example_check(lp_unknown_backend registered_lp missing-backend 2 "Selection rejected.*missing-backend")
 example_check(convex_unknown_backend registered_convex missing-backend 2 "Selection rejected.*missing-backend")
 example_check(substitution_unknown_backend backend_substitution missing-backend 2 "Selection rejected.*missing-backend")
+if(TARGET scenario_backend_substitution)
+  add_executable(scenario_backend_artifact_check scenario_backend_artifact_check.cpp)
+  target_compile_features(scenario_backend_artifact_check PRIVATE cxx_std_20)
+  set_target_properties(scenario_backend_artifact_check PROPERTIES CXX_EXTENSIONS OFF)
+  if(MSVC)
+    target_compile_options(scenario_backend_artifact_check PRIVATE /W4 /WX /permissive-)
+  else()
+    target_compile_options(scenario_backend_artifact_check PRIVATE -Wall -Wextra -Wpedantic -Werror)
+  endif()
+  add_test(NAME scenario_backend_substitution_saved_outputs
+    COMMAND ${CMAKE_COMMAND}
+      "-DSCENARIO_BACKEND_SUBSTITUTION=$<TARGET_FILE:scenario_backend_substitution>"
+      "-DSCENARIO_BACKEND_ARTIFACT_CHECK=$<TARGET_FILE:scenario_backend_artifact_check>"
+      "-DHIGHS_SCENARIO=${CMAKE_CURRENT_SOURCE_DIR}/scenarios/two-stage-integrator-highs.json"
+      "-DPHASE_ONE_SCENARIO=${CMAKE_CURRENT_SOURCE_DIR}/scenarios/two-stage-integrator-phase-one.json"
+      "-DOUTPUT_DIRECTORY=${CMAKE_CURRENT_BINARY_DIR}/scenario-backend-substitution"
+      -P "${CMAKE_CURRENT_SOURCE_DIR}/scenario_backend_substitution_check.cmake")
+  set_tests_properties(scenario_backend_substitution_saved_outputs PROPERTIES TIMEOUT 30)
+endif()
 example_check(file_missing scenario_file "${CMAKE_CURRENT_BINARY_DIR}/no-such-scenario.json" 2 "Input rejected.*expected")
 file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/malformed.json" "{ invalid JSON")
 example_check(file_malformed scenario_file "${CMAKE_CURRENT_BINARY_DIR}/malformed.json" 2 "Input rejected.*expected")
