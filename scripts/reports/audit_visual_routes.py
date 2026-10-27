@@ -90,8 +90,6 @@ FROZEN_COMPANIONS = {
 
 
 def migration_issue(source: str) -> int:
-    if "/mpc03/" in source or "mpc03-b08" in source:
-        return 599
     if "/viz04/" in source:
         return MIGRATION_ISSUES["control-strategy-and-witness"]
     if any(token in source for token in ("/app0", "/ext", "/finite_feedback", "/lotka_volterra")):
@@ -131,6 +129,8 @@ def source_inventory(root: Path) -> list[dict]:
                 disposition = "adopted-shared-quantitative-policy"
             elif relative == "benchmarks/reporting/it17_hull/summarize.py":
                 disposition = "reviewed-static-diagram-exception"
+            elif relative == "scripts/reports/mpc03/b08_report.py":
+                disposition = "adopted-shared-quantitative-policy"
             elif relative.endswith("/control_figures.py") or relative.endswith("/plot.py"):
                 disposition = "adopted-shared-quantitative-policy"
             elif relative.endswith("/visual_illustrations.py"):
