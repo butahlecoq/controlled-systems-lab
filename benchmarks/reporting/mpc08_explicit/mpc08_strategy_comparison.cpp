@@ -282,7 +282,8 @@ void run_one(Providers& providers, const Query& query, bool use_a,
         << (result_optimal?"true":"false") << ",\"family_present\":" << (family_present?"true":"false")
         << ",\"termination_code\":" << termination_code << ",\"outcome_code\":" << outcome_code
         << ",\"candidate_contains_exact_reference_history\":"
-        << (candidate_member?"true":"false") << ",\"expected_value_exact\":\"" << query.value_exact
+        << (candidate_member?"true":"false") << ",\"action_and_value_match_exact_reference\":null"
+        << ",\"expected_value_exact\":\"" << query.value_exact
         << "\",\"candidate_inequality_rows\":" << rows << ",\"candidate_equality_rows\":" << equalities
         << ",\"coordinate_labels\":\"" << json_escape(labels) << "\",\"elapsed_ns\":" << elapsed
         << ",\"stop_details\":\"" << json_escape(stop_details)
@@ -349,7 +350,8 @@ void run_online_qp(Providers& providers, const Query& query, std::size_t repetit
         <<",\"repetition\":"<<repetition<<",\"status\":\""<<status<<"\",\"termination_optimal\":"
         <<(optimal?"true":"false")<<",\"family_present\":false,\"termination_code\":"<<termination_code
         <<",\"outcome_code\":"<<outcome_code<<",\"candidate_contains_exact_reference_history\":"
-        <<(matches_reference?"true":"false")<<",\"input_value\":"<<std::setprecision(17)<<input_value
+        <<"false,\"action_and_value_match_exact_reference\":"<<(matches_reference?"true":"false")
+        <<",\"input_value\":"<<std::setprecision(17)<<input_value
         <<",\"objective_at_primal\":"<<std::setprecision(17)<<objective_at_primal
         <<",\"objective_lower\":";
     if (objective_lower) std::cout<<std::setprecision(17)<<*objective_lower; else std::cout<<"null";

@@ -217,8 +217,7 @@ def svg(feasible: list[Point], regions: list[Region], invariant: list[Point]) ->
         return " ".join(f"{px:.2f},{py:.2f}" for px, py in (xy(x, origin, scale) for x in poly))
     left_origin, left_scale = (340, 400), 85
     x_box = [(F(-3), F(-2)), (F(3), F(-2)), (F(3), F(2)), (F(-3), F(2))]
-    shapes = [f'<polygon points="{points(x_box,left_origin,left_scale)}" fill="#f3f4f6" stroke="#6b7280" stroke-width="2"/>',
-              '<text x="100" y="245" font-size="13" font-weight="bold">X</text>']
+    shapes = [f'<polygon points="{points(x_box,left_origin,left_scale)}" fill="#f3f4f6" stroke="#6b7280" stroke-width="2"/>']
     for index, region in enumerate(regions):
         shapes.append(f'<polygon points="{points(region.polygon,left_origin,left_scale)}" fill="{colors[index%len(colors)]}" stroke="#263544" stroke-width="1"/>')
         cx = sum((p[0] for p in region.polygon), F(0)) / len(region.polygon)

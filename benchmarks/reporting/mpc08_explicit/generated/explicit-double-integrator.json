@@ -49,16 +49,16 @@
     "performance timings are descriptive Python point-location/region-generation timings, not compared to C++ solver timings"
   ],
   "measurement": {
-    "offline_region_construction_ns": 84269112,
+    "offline_region_construction_ns": 79333412,
     "point_location_queries": 191,
     "point_location_rounds_ns": [
-      111482512,
-      106850820,
-      106692908,
-      107956554,
-      108050421,
-      109080446,
-      106058257
+      108783427,
+      108881346,
+      106710525,
+      112173265,
+      106081321,
+      111013194,
+      107966000
     ],
     "scope": "Python exact-rational region construction; point-location only, excludes optimizer and CSL workspaces"
   },
