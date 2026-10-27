@@ -67,6 +67,16 @@
       "disposition": "adopted-shared-quantitative-policy"
     },
     {
+      "source": "scripts/reports/env717/check_smoke.py",
+      "signal_count": 6,
+      "asset_name_literals": [
+        "projection.png",
+        "projection.svg"
+      ],
+      "disposition": "deferred-family-specific-migration",
+      "follow_up_issue": 717
+    },
+    {
       "source": "scripts/reports/exp04/render_saved.py",
       "signal_count": 4,
       "asset_name_literals": [
@@ -559,6 +569,15 @@
       "signal_count": 4,
       "asset_name_literals": [
         "zonotope-2d.svg"
+      ],
+      "disposition": "publication-validation-or-frozen-route"
+    },
+    {
+      "source": "scripts/reports/stage_env717.py",
+      "signal_count": 3,
+      "asset_name_literals": [
+        "projection.png",
+        "projection.svg"
       ],
       "disposition": "publication-validation-or-frozen-route"
     },
@@ -1069,6 +1088,17 @@
         "latency.svg"
       ],
       "index_sha256": "14882d50e392e3abfd57504c6f9fb175aa73f6ace856a8f20322ffdc9f1220fc",
+      "disposition": "deferred: original frozen route-level readability review remains; companion availability is listed separately",
+      "follow_up_issue": 669
+    },
+    {
+      "route": "env717-simple-control-pilot-v1",
+      "source_bundle": "env717-simple-control-pilot-v1",
+      "assets": [
+        "projection.png",
+        "projection.svg"
+      ],
+      "index_sha256": "af744b7305ee07f20efef36cad47fec600f7ea65da38305250f6e527b8456160",
       "disposition": "deferred: original frozen route-level readability review remains; companion availability is listed separately",
       "follow_up_issue": 669
     },

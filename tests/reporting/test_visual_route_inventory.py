@@ -93,8 +93,9 @@ class VisualRouteInventoryTests(unittest.TestCase):
                   if entry["disposition"]=="deferred-family-specific-migration"]
         self.assertTrue(deferred)
         follow_up_counts={number:sum(entry["follow_up_issue"]==number for entry in deferred)
-                          for number in (684,685,686,687,708)}
-        self.assertEqual(follow_up_counts,{684:4,685:0,686:18,687:0,708:1})
+                          for number in (684,685,686,687,708,717)}
+        self.assertEqual(follow_up_counts,
+                         {684:4,685:0,686:18,687:0,708:1,717:1})
         self.assertTrue(all(entry["follow_up_issue"] in follow_up_counts for entry in deferred))
         routes={entry["route"]:entry for entry in inventory["frozen_published_routes"]}
         self.assertGreater(len(routes),40)
