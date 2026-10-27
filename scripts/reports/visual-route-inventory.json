@@ -523,6 +523,15 @@
       "disposition": "composes-or-copies-existing-saved-figure"
     },
     {
+      "source": "scripts/reports/stage_mpc08.py",
+      "signal_count": 12,
+      "asset_name_literals": [
+        "critical-regions.svg",
+        "explicit-double-integrator.svg"
+      ],
+      "disposition": "publication-validation-or-frozen-route"
+    },
+    {
       "source": "scripts/reports/stage_projection_figures.py",
       "signal_count": 4,
       "asset_name_literals": [],
@@ -824,6 +833,15 @@
         "fixture-geometry.svg"
       ],
       "disposition": "reviewed-static-diagram-exception"
+    },
+    {
+      "source": "benchmarks/reporting/mpc08_explicit/explicit_double_integrator.py",
+      "signal_count": 2,
+      "asset_name_literals": [
+        "explicit-double-integrator.svg"
+      ],
+      "disposition": "deferred-family-specific-migration",
+      "follow_up_issue": 687
     }
   ],
   "frozen_published_routes": [
@@ -1238,6 +1256,16 @@
       "disposition": "deferred: original frozen route-level readability review remains; companion availability is listed separately",
       "follow_up_issue": 669,
       "companion_route": "examples/index.html"
+    },
+    {
+      "route": "mpc08-explicit-pilot-v1",
+      "source_bundle": "mpc08-explicit-pilot-v1",
+      "assets": [
+        "critical-regions.svg"
+      ],
+      "index_sha256": "e2ddcf39a875becd6a85c0287520be964fc3bf9c4775f425033ce157249cd2da",
+      "disposition": "deferred: original frozen route-level readability review remains; companion availability is listed separately",
+      "follow_up_issue": 669
     },
     {
       "route": "opt04-20261013T172839Z-6451c4b89d3b",
