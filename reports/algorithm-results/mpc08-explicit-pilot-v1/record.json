@@ -1,0 +1,121 @@
+{
+  "base_commit": "0994a51478b4fa3aa448308bddc2e6308c37111d",
+  "critical_regions": 9,
+  "evidence_limits": [
+    "A and B return candidate relations for one fixed initial state; containment is not a completeness proof.",
+    "The online QP returns one first action and an independently recomputed value; it does not return a joint family.",
+    "Strategy B has five measured numerical failures at Q017 plus its warmup failure; those outcomes remain in raw observations.",
+    "Timings do different work and no fastest-method verdict is supported; no source profiler was available.",
+    "No uncertainty, predecessor quantifier, minimax, nonunique new-fixture, region-growth, or approximation comparison is made."
+  ],
+  "feasible_initial_area": "21/2",
+  "figure_sha256": "5451c26560586996ae14fb7723728e22955a247740c910bdaa7d467be78ed456",
+  "issue": "https://github.com/butahlecoq/controlled-systems-lab/issues/604",
+  "methods": {
+    "csl.synthesis.reach-back": {
+      "attempts_including_warmup": 270,
+      "max_elapsed_ns": 2415965,
+      "measured_attempts": 225,
+      "median_elapsed_ns": 2042940,
+      "min_elapsed_ns": 1922044,
+      "statuses": {
+        "candidate_contains_analytic_unique_history": 270
+      },
+      "warmups": 45
+    },
+    "csl.synthesis.strategy-b": {
+      "attempts_including_warmup": 270,
+      "max_elapsed_ns": 549515,
+      "measured_attempts": 225,
+      "median_elapsed_ns": 472060,
+      "min_elapsed_ns": 380917,
+      "statuses": {
+        "candidate_contains_analytic_unique_history": 264,
+        "noncompleted_candidate_contains_analytic_unique_history": 6
+      },
+      "warmups": 45
+    },
+    "online-condensed-qp": {
+      "attempts_including_warmup": 270,
+      "max_elapsed_ns": 358567,
+      "measured_attempts": 225,
+      "median_elapsed_ns": 320573,
+      "min_elapsed_ns": 302275,
+      "statuses": {
+        "online_qp_matches_exact_reference": 270
+      },
+      "warmups": 45
+    }
+  },
+  "noncompleted_attempts": [
+    {
+      "query_id": "Q017",
+      "repetition": 0,
+      "stop_details": "adapter.version=1.0.0+highs.1.11.0\nnative.version=1.11.0\nnative.archive_sha256=2b44b074cf41439325ce4d0bbdac2d51379f56faf17ba15320a410d3c1f07275\nnative.downstream.hvectorbase_sha256=8ee92e023806826fded545e38d0598adacc7b08f07c395c557a1dbaa1733b00b\nnative.downstream.scheduler_observation_sha256=5e81b644fad40522a62037b0dab8ae0f023a8f7db7540297030ac28de58b56cc\nprogram.original=syn04-joint:csl.problem.v1.sha256:6687633c3b093969d931fe1783224fae72d307d6a785908b4da4eb5fda2fcff6\nprogram.solver=syn04-joint:csl.problem.v1.sha256:6687633c3b093969d931fe1783224fae72d307d6a785908b4da4eb5fda2fcff6\nprofile.maximum_variables=4096\nprofile.highs_int_bits=32\noptions.qp_nullspace_limit=4096\noptions.qp_regularization_value=0\noptions.use_warm_start=true\noptions.presolve=off\noptions.threads=1\noptions.parallel=off\noptions.small_matrix_value=1e-12\noptions.infinite_bound=inf\noptions.infinite_cost=inf\noptions.large_matrix_value=inf\noptions.native_tolerance=1e-08\noptions.feasibility_iteration_limit=2147483647\noptions.qp_iteration_limit=2147483647\nmodel.private_free_row=false\nmodel.original_rows=10\nmodel.native_rows=10\nphase.feasibility.time_limit=inf\nphase.feasibility.scheduler_threads=1\nphase.feasibility.api_status=0\nphase.feasibility.model_status=7\nphase.feasibility.iterations=3\nstart.valid=true\nstart.default_fallback=false\nphase.qp.time_limit=inf\nphase.qp.scheduler_threads=1\nphase.qp.api_status=-1\nphase.qp.model_status=4\nphase.qp.info=unavailable\ncertificates=unavailable\nbounds=unavailable\nbasis=unavailable\nfamilies=unavailable\nnative.log:\nRunning HiGHS 1.11.0 (git hash: n/a): Copyright (c) 2025 HiGHS under MIT licence terms\nLP   has 10 rows; 5 cols; 18 nonzeros\nCoefficient ranges:\n  Matrix [1e+00, 2e+00]\n  Cost   [0e+00, 0e+00]\n  Bound  [0e+00, 0e+00]\n  RHS    [1e+00, 1e+00]\nSolving LP without presolve, or with basis, or unconstrained\nUsing EKK dual simplex solver - serial\n  Iteration        Objective     Infeasibilities num(sum)\n          0     0.0000000000e+00 Pr: 1(1); Du: 0(1.61792e-12) 0s\n          3     0.0000000000e+00 Pr: 0(0) 0s\nModel status        : Optimal\nSimplex   iterations: 3\nObjective value     :  0.0000000000e+00\nP-D objective error :  0.0000000000e+00\nHiGHS run time      :          0.00\nRunning HiGHS 1.11.0 (git hash: n/a): Copyright (c) 2025 HiGHS under MIT licence terms\nQP   has 10 rows; 5 cols; 18 matrix nonzeros; 5 Hessian nonzeros\nCoefficient ranges:\n  Matrix [1e+00, 2e+00]\n  Cost   [0e+00, 0e+00]\n  Bound  [0e+00, 0e+00]\n  RHS    [1e+00, 1e+00]\n  Iteration        Objective     NullspaceDim\n          0                1                2      0.00s\nQP solver model status: Undetermined\nModel status        : Solve error\nHiGHS run time      :          0.00\n",
+      "strategy": "csl.synthesis.strategy-b",
+      "termination_code": 4,
+      "warmup": true
+    },
+    {
+      "query_id": "Q017",
+      "repetition": 1,
+      "stop_details": "adapter.version=1.0.0+highs.1.11.0\nnative.version=1.11.0\nnative.archive_sha256=2b44b074cf41439325ce4d0bbdac2d51379f56faf17ba15320a410d3c1f07275\nnative.downstream.hvectorbase_sha256=8ee92e023806826fded545e38d0598adacc7b08f07c395c557a1dbaa1733b00b\nnative.downstream.scheduler_observation_sha256=5e81b644fad40522a62037b0dab8ae0f023a8f7db7540297030ac28de58b56cc\nprogram.original=syn04-joint:csl.problem.v1.sha256:6687633c3b093969d931fe1783224fae72d307d6a785908b4da4eb5fda2fcff6\nprogram.solver=syn04-joint:csl.problem.v1.sha256:6687633c3b093969d931fe1783224fae72d307d6a785908b4da4eb5fda2fcff6\nprofile.maximum_variables=4096\nprofile.highs_int_bits=32\noptions.qp_nullspace_limit=4096\noptions.qp_regularization_value=0\noptions.use_warm_start=true\noptions.presolve=off\noptions.threads=1\noptions.parallel=off\noptions.small_matrix_value=1e-12\noptions.infinite_bound=inf\noptions.infinite_cost=inf\noptions.large_matrix_value=inf\noptions.native_tolerance=1e-08\noptions.feasibility_iteration_limit=2147483647\noptions.qp_iteration_limit=2147483647\nmodel.private_free_row=false\nmodel.original_rows=10\nmodel.native_rows=10\nphase.feasibility.time_limit=inf\nphase.feasibility.scheduler_threads=1\nphase.feasibility.api_status=0\nphase.feasibility.model_status=7\nphase.feasibility.iterations=3\nstart.valid=true\nstart.default_fallback=false\nphase.qp.time_limit=inf\nphase.qp.scheduler_threads=1\nphase.qp.api_status=-1\nphase.qp.model_status=4\nphase.qp.info=unavailable\ncertificates=unavailable\nbounds=unavailable\nbasis=unavailable\nfamilies=unavailable\nnative.log:\nRunning HiGHS 1.11.0 (git hash: n/a): Copyright (c) 2025 HiGHS under MIT licence terms\nLP   has 10 rows; 5 cols; 18 nonzeros\nCoefficient ranges:\n  Matrix [1e+00, 2e+00]\n  Cost   [0e+00, 0e+00]\n  Bound  [0e+00, 0e+00]\n  RHS    [1e+00, 1e+00]\nSolving LP without presolve, or with basis, or unconstrained\nUsing EKK dual simplex solver - serial\n  Iteration        Objective     Infeasibilities num(sum)\n          0     0.0000000000e+00 Pr: 1(1); Du: 0(1.61792e-12) 0s\n          3     0.0000000000e+00 Pr: 0(0) 0s\nModel status        : Optimal\nSimplex   iterations: 3\nObjective value     :  0.0000000000e+00\nP-D objective error :  0.0000000000e+00\nHiGHS run time      :          0.00\nRunning HiGHS 1.11.0 (git hash: n/a): Copyright (c) 2025 HiGHS under MIT licence terms\nQP   has 10 rows; 5 cols; 18 matrix nonzeros; 5 Hessian nonzeros\nCoefficient ranges:\n  Matrix [1e+00, 2e+00]\n  Cost   [0e+00, 0e+00]\n  Bound  [0e+00, 0e+00]\n  RHS    [1e+00, 1e+00]\n  Iteration        Objective     NullspaceDim\n          0                1                2      0.00s\nQP solver model status: Undetermined\nModel status        : Solve error\nHiGHS run time      :          0.00\n",
+      "strategy": "csl.synthesis.strategy-b",
+      "termination_code": 4,
+      "warmup": false
+    },
+    {
+      "query_id": "Q017",
+      "repetition": 2,
+      "stop_details": "adapter.version=1.0.0+highs.1.11.0\nnative.version=1.11.0\nnative.archive_sha256=2b44b074cf41439325ce4d0bbdac2d51379f56faf17ba15320a410d3c1f07275\nnative.downstream.hvectorbase_sha256=8ee92e023806826fded545e38d0598adacc7b08f07c395c557a1dbaa1733b00b\nnative.downstream.scheduler_observation_sha256=5e81b644fad40522a62037b0dab8ae0f023a8f7db7540297030ac28de58b56cc\nprogram.original=syn04-joint:csl.problem.v1.sha256:6687633c3b093969d931fe1783224fae72d307d6a785908b4da4eb5fda2fcff6\nprogram.solver=syn04-joint:csl.problem.v1.sha256:6687633c3b093969d931fe1783224fae72d307d6a785908b4da4eb5fda2fcff6\nprofile.maximum_variables=4096\nprofile.highs_int_bits=32\noptions.qp_nullspace_limit=4096\noptions.qp_regularization_value=0\noptions.use_warm_start=true\noptions.presolve=off\noptions.threads=1\noptions.parallel=off\noptions.small_matrix_value=1e-12\noptions.infinite_bound=inf\noptions.infinite_cost=inf\noptions.large_matrix_value=inf\noptions.native_tolerance=1e-08\noptions.feasibility_iteration_limit=2147483647\noptions.qp_iteration_limit=2147483647\nmodel.private_free_row=false\nmodel.original_rows=10\nmodel.native_rows=10\nphase.feasibility.time_limit=inf\nphase.feasibility.scheduler_threads=1\nphase.feasibility.api_status=0\nphase.feasibility.model_status=7\nphase.feasibility.iterations=3\nstart.valid=true\nstart.default_fallback=false\nphase.qp.time_limit=inf\nphase.qp.scheduler_threads=1\nphase.qp.api_status=-1\nphase.qp.model_status=4\nphase.qp.info=unavailable\ncertificates=unavailable\nbounds=unavailable\nbasis=unavailable\nfamilies=unavailable\nnative.log:\nRunning HiGHS 1.11.0 (git hash: n/a): Copyright (c) 2025 HiGHS under MIT licence terms\nLP   has 10 rows; 5 cols; 18 nonzeros\nCoefficient ranges:\n  Matrix [1e+00, 2e+00]\n  Cost   [0e+00, 0e+00]\n  Bound  [0e+00, 0e+00]\n  RHS    [1e+00, 1e+00]\nSolving LP without presolve, or with basis, or unconstrained\nUsing EKK dual simplex solver - serial\n  Iteration        Objective     Infeasibilities num(sum)\n          0     0.0000000000e+00 Pr: 1(1); Du: 0(1.61792e-12) 0s\n          3     0.0000000000e+00 Pr: 0(0) 0s\nModel status        : Optimal\nSimplex   iterations: 3\nObjective value     :  0.0000000000e+00\nP-D objective error :  0.0000000000e+00\nHiGHS run time      :          0.00\nRunning HiGHS 1.11.0 (git hash: n/a): Copyright (c) 2025 HiGHS under MIT licence terms\nQP   has 10 rows; 5 cols; 18 matrix nonzeros; 5 Hessian nonzeros\nCoefficient ranges:\n  Matrix [1e+00, 2e+00]\n  Cost   [0e+00, 0e+00]\n  Bound  [0e+00, 0e+00]\n  RHS    [1e+00, 1e+00]\n  Iteration        Objective     NullspaceDim\n          0                1                2      0.00s\nQP solver model status: Undetermined\nModel status        : Solve error\nHiGHS run time      :          0.00\n",
+      "strategy": "csl.synthesis.strategy-b",
+      "termination_code": 4,
+      "warmup": false
+    },
+    {
+      "query_id": "Q017",
+      "repetition": 3,
+      "stop_details": "adapter.version=1.0.0+highs.1.11.0\nnative.version=1.11.0\nnative.archive_sha256=2b44b074cf41439325ce4d0bbdac2d51379f56faf17ba15320a410d3c1f07275\nnative.downstream.hvectorbase_sha256=8ee92e023806826fded545e38d0598adacc7b08f07c395c557a1dbaa1733b00b\nnative.downstream.scheduler_observation_sha256=5e81b644fad40522a62037b0dab8ae0f023a8f7db7540297030ac28de58b56cc\nprogram.original=syn04-joint:csl.problem.v1.sha256:6687633c3b093969d931fe1783224fae72d307d6a785908b4da4eb5fda2fcff6\nprogram.solver=syn04-joint:csl.problem.v1.sha256:6687633c3b093969d931fe1783224fae72d307d6a785908b4da4eb5fda2fcff6\nprofile.maximum_variables=4096\nprofile.highs_int_bits=32\noptions.qp_nullspace_limit=4096\noptions.qp_regularization_value=0\noptions.use_warm_start=true\noptions.presolve=off\noptions.threads=1\noptions.parallel=off\noptions.small_matrix_value=1e-12\noptions.infinite_bound=inf\noptions.infinite_cost=inf\noptions.large_matrix_value=inf\noptions.native_tolerance=1e-08\noptions.feasibility_iteration_limit=2147483647\noptions.qp_iteration_limit=2147483647\nmodel.private_free_row=false\nmodel.original_rows=10\nmodel.native_rows=10\nphase.feasibility.time_limit=inf\nphase.feasibility.scheduler_threads=1\nphase.feasibility.api_status=0\nphase.feasibility.model_status=7\nphase.feasibility.iterations=3\nstart.valid=true\nstart.default_fallback=false\nphase.qp.time_limit=inf\nphase.qp.scheduler_threads=1\nphase.qp.api_status=-1\nphase.qp.model_status=4\nphase.qp.info=unavailable\ncertificates=unavailable\nbounds=unavailable\nbasis=unavailable\nfamilies=unavailable\nnative.log:\nRunning HiGHS 1.11.0 (git hash: n/a): Copyright (c) 2025 HiGHS under MIT licence terms\nLP   has 10 rows; 5 cols; 18 nonzeros\nCoefficient ranges:\n  Matrix [1e+00, 2e+00]\n  Cost   [0e+00, 0e+00]\n  Bound  [0e+00, 0e+00]\n  RHS    [1e+00, 1e+00]\nSolving LP without presolve, or with basis, or unconstrained\nUsing EKK dual simplex solver - serial\n  Iteration        Objective     Infeasibilities num(sum)\n          0     0.0000000000e+00 Pr: 1(1); Du: 0(1.61792e-12) 0s\n          3     0.0000000000e+00 Pr: 0(0) 0s\nModel status        : Optimal\nSimplex   iterations: 3\nObjective value     :  0.0000000000e+00\nP-D objective error :  0.0000000000e+00\nHiGHS run time      :          0.00\nRunning HiGHS 1.11.0 (git hash: n/a): Copyright (c) 2025 HiGHS under MIT licence terms\nQP   has 10 rows; 5 cols; 18 matrix nonzeros; 5 Hessian nonzeros\nCoefficient ranges:\n  Matrix [1e+00, 2e+00]\n  Cost   [0e+00, 0e+00]\n  Bound  [0e+00, 0e+00]\n  RHS    [1e+00, 1e+00]\n  Iteration        Objective     NullspaceDim\n          0                1                2      0.00s\nQP solver model status: Undetermined\nModel status        : Solve error\nHiGHS run time      :          0.00\n",
+      "strategy": "csl.synthesis.strategy-b",
+      "termination_code": 4,
+      "warmup": false
+    },
+    {
+      "query_id": "Q017",
+      "repetition": 4,
+      "stop_details": "adapter.version=1.0.0+highs.1.11.0\nnative.version=1.11.0\nnative.archive_sha256=2b44b074cf41439325ce4d0bbdac2d51379f56faf17ba15320a410d3c1f07275\nnative.downstream.hvectorbase_sha256=8ee92e023806826fded545e38d0598adacc7b08f07c395c557a1dbaa1733b00b\nnative.downstream.scheduler_observation_sha256=5e81b644fad40522a62037b0dab8ae0f023a8f7db7540297030ac28de58b56cc\nprogram.original=syn04-joint:csl.problem.v1.sha256:6687633c3b093969d931fe1783224fae72d307d6a785908b4da4eb5fda2fcff6\nprogram.solver=syn04-joint:csl.problem.v1.sha256:6687633c3b093969d931fe1783224fae72d307d6a785908b4da4eb5fda2fcff6\nprofile.maximum_variables=4096\nprofile.highs_int_bits=32\noptions.qp_nullspace_limit=4096\noptions.qp_regularization_value=0\noptions.use_warm_start=true\noptions.presolve=off\noptions.threads=1\noptions.parallel=off\noptions.small_matrix_value=1e-12\noptions.infinite_bound=inf\noptions.infinite_cost=inf\noptions.large_matrix_value=inf\noptions.native_tolerance=1e-08\noptions.feasibility_iteration_limit=2147483647\noptions.qp_iteration_limit=2147483647\nmodel.private_free_row=false\nmodel.original_rows=10\nmodel.native_rows=10\nphase.feasibility.time_limit=inf\nphase.feasibility.scheduler_threads=1\nphase.feasibility.api_status=0\nphase.feasibility.model_status=7\nphase.feasibility.iterations=3\nstart.valid=true\nstart.default_fallback=false\nphase.qp.time_limit=inf\nphase.qp.scheduler_threads=1\nphase.qp.api_status=-1\nphase.qp.model_status=4\nphase.qp.info=unavailable\ncertificates=unavailable\nbounds=unavailable\nbasis=unavailable\nfamilies=unavailable\nnative.log:\nRunning HiGHS 1.11.0 (git hash: n/a): Copyright (c) 2025 HiGHS under MIT licence terms\nLP   has 10 rows; 5 cols; 18 nonzeros\nCoefficient ranges:\n  Matrix [1e+00, 2e+00]\n  Cost   [0e+00, 0e+00]\n  Bound  [0e+00, 0e+00]\n  RHS    [1e+00, 1e+00]\nSolving LP without presolve, or with basis, or unconstrained\nUsing EKK dual simplex solver - serial\n  Iteration        Objective     Infeasibilities num(sum)\n          0     0.0000000000e+00 Pr: 1(1); Du: 0(1.61792e-12) 0s\n          3     0.0000000000e+00 Pr: 0(0) 0s\nModel status        : Optimal\nSimplex   iterations: 3\nObjective value     :  0.0000000000e+00\nP-D objective error :  0.0000000000e+00\nHiGHS run time      :          0.00\nRunning HiGHS 1.11.0 (git hash: n/a): Copyright (c) 2025 HiGHS under MIT licence terms\nQP   has 10 rows; 5 cols; 18 matrix nonzeros; 5 Hessian nonzeros\nCoefficient ranges:\n  Matrix [1e+00, 2e+00]\n  Cost   [0e+00, 0e+00]\n  Bound  [0e+00, 0e+00]\n  RHS    [1e+00, 1e+00]\n  Iteration        Objective     NullspaceDim\n          0                1                2      0.00s\nQP solver model status: Undetermined\nModel status        : Solve error\nHiGHS run time      :          0.00\n",
+      "strategy": "csl.synthesis.strategy-b",
+      "termination_code": 4,
+      "warmup": false
+    },
+    {
+      "query_id": "Q017",
+      "repetition": 5,
+      "stop_details": "adapter.version=1.0.0+highs.1.11.0\nnative.version=1.11.0\nnative.archive_sha256=2b44b074cf41439325ce4d0bbdac2d51379f56faf17ba15320a410d3c1f07275\nnative.downstream.hvectorbase_sha256=8ee92e023806826fded545e38d0598adacc7b08f07c395c557a1dbaa1733b00b\nnative.downstream.scheduler_observation_sha256=5e81b644fad40522a62037b0dab8ae0f023a8f7db7540297030ac28de58b56cc\nprogram.original=syn04-joint:csl.problem.v1.sha256:6687633c3b093969d931fe1783224fae72d307d6a785908b4da4eb5fda2fcff6\nprogram.solver=syn04-joint:csl.problem.v1.sha256:6687633c3b093969d931fe1783224fae72d307d6a785908b4da4eb5fda2fcff6\nprofile.maximum_variables=4096\nprofile.highs_int_bits=32\noptions.qp_nullspace_limit=4096\noptions.qp_regularization_value=0\noptions.use_warm_start=true\noptions.presolve=off\noptions.threads=1\noptions.parallel=off\noptions.small_matrix_value=1e-12\noptions.infinite_bound=inf\noptions.infinite_cost=inf\noptions.large_matrix_value=inf\noptions.native_tolerance=1e-08\noptions.feasibility_iteration_limit=2147483647\noptions.qp_iteration_limit=2147483647\nmodel.private_free_row=false\nmodel.original_rows=10\nmodel.native_rows=10\nphase.feasibility.time_limit=inf\nphase.feasibility.scheduler_threads=1\nphase.feasibility.api_status=0\nphase.feasibility.model_status=7\nphase.feasibility.iterations=3\nstart.valid=true\nstart.default_fallback=false\nphase.qp.time_limit=inf\nphase.qp.scheduler_threads=1\nphase.qp.api_status=-1\nphase.qp.model_status=4\nphase.qp.info=unavailable\ncertificates=unavailable\nbounds=unavailable\nbasis=unavailable\nfamilies=unavailable\nnative.log:\nRunning HiGHS 1.11.0 (git hash: n/a): Copyright (c) 2025 HiGHS under MIT licence terms\nLP   has 10 rows; 5 cols; 18 nonzeros\nCoefficient ranges:\n  Matrix [1e+00, 2e+00]\n  Cost   [0e+00, 0e+00]\n  Bound  [0e+00, 0e+00]\n  RHS    [1e+00, 1e+00]\nSolving LP without presolve, or with basis, or unconstrained\nUsing EKK dual simplex solver - serial\n  Iteration        Objective     Infeasibilities num(sum)\n          0     0.0000000000e+00 Pr: 1(1); Du: 0(1.61792e-12) 0s\n          3     0.0000000000e+00 Pr: 0(0) 0s\nModel status        : Optimal\nSimplex   iterations: 3\nObjective value     :  0.0000000000e+00\nP-D objective error :  0.0000000000e+00\nHiGHS run time      :          0.00\nRunning HiGHS 1.11.0 (git hash: n/a): Copyright (c) 2025 HiGHS under MIT licence terms\nQP   has 10 rows; 5 cols; 18 matrix nonzeros; 5 Hessian nonzeros\nCoefficient ranges:\n  Matrix [1e+00, 2e+00]\n  Cost   [0e+00, 0e+00]\n  Bound  [0e+00, 0e+00]\n  RHS    [1e+00, 1e+00]\n  Iteration        Objective     NullspaceDim\n          0                1                2      0.00s\nQP solver model status: Undetermined\nModel status        : Solve error\nHiGHS run time      :          0.00\n",
+      "strategy": "csl.synthesis.strategy-b",
+      "termination_code": 4,
+      "warmup": false
+    }
+  ],
+  "observations_sha256": "0e8717ddfda8941b5b117c94ac28fa13c42a5135496f78968f19bba735efaaba",
+  "offline_region_construction_ns_single_run": 79333412,
+  "point_location_queries": 191,
+  "point_location_rounds_ns": [
+    108783427,
+    108881346,
+    106710525,
+    112173265,
+    106081321,
+    111013194,
+    107966000
+  ],
+  "query_sha256": "b105730bbd963bb04dfdeb03dd8c9b4ee9f6d95e55689562d50127823892249e",
+  "report_id": "mpc08-explicit-pilot-v1",
+  "scenario_sha256": "36f40844e6ef7082324b7fefbf6a1b6a143141a20e88192347b0aea1ae9b8048",
+  "schema": "csl.mpc08-explicit-pilot-record/1",
+  "scope": "One exact rational one-step double-integrator fixture; 45 solver-validation points and 810 fixed-initial method observations.",
+  "solver_validation_queries": 45,
+  "source_commit": "ea756e66ccef9aef633798016b7acd87d01fccc7",
+  "source_url": "https://github.com/butahlecoq/controlled-systems-lab/blob/ea756e66ccef9aef633798016b7acd87d01fccc7/benchmarks/reporting/mpc08_explicit/README.md",
+  "total_region_facets": 34
+}

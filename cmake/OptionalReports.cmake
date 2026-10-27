@@ -1,15 +1,30 @@
 if((CSL_BUILD_GEO02_REPORT OR CSL_BUILD_GEO03_REPORT OR CSL_BUILD_GEO04_REPORT OR
     CSL_BUILD_OPT04_REPORT OR CSL_BUILD_SYN01_REPORT OR CSL_BUILD_MPC03_REPORT OR
     CSL_BUILD_STAGE_PROJECTION_ROUTE OR CSL_BUILD_SYN02_REPORT OR
+    CSL_BUILD_MPC08_REPORT OR
     CSL_BUILD_REPORTS) AND NOT CSL_ENABLE_HIGHS)
   message(FATAL_ERROR "The selected report requires CSL_ENABLE_HIGHS")
 endif()
 if((CSL_BUILD_GEO02_REPORT OR CSL_BUILD_GEO03_REPORT OR CSL_BUILD_GEO04_REPORT OR
-    CSL_BUILD_SYN01_REPORT OR CSL_BUILD_STAGE_PROJECTION_ROUTE) AND NOT CSL_ENABLE_QHULL)
+    CSL_BUILD_SYN01_REPORT OR CSL_BUILD_STAGE_PROJECTION_ROUTE OR
+    CSL_BUILD_MPC08_REPORT) AND NOT CSL_ENABLE_QHULL)
   message(FATAL_ERROR "The selected report requires CSL_ENABLE_QHULL")
 endif()
 
 # Non-installed measurement targets; each option requires the declared adapters.
+
+if(CSL_BUILD_MPC08_REPORT)
+add_executable(csl_mpc08_explicit_compare benchmarks/reporting/mpc08_explicit/mpc08_strategy_comparison.cpp)
+target_compile_features(csl_mpc08_explicit_compare PRIVATE cxx_std_20)
+target_compile_definitions(csl_mpc08_explicit_compare PRIVATE $<$<CONFIG:Release>:NDEBUG>)
+target_link_libraries(csl_mpc08_explicit_compare PRIVATE CSL::strategy_a CSL::strategy_b
+    CSL::highs_lp CSL::highs_convex CSL::qhull_conversion CSL::affine_sum CSL::polyhedral)
+if(MSVC)
+target_compile_options(csl_mpc08_explicit_compare PRIVATE /W4 /WX /permissive-)
+else()
+target_compile_options(csl_mpc08_explicit_compare PRIVATE -Wall -Wextra -Wpedantic -Werror)
+endif()
+endif()
 
 if(CSL_BUILD_GEO08_REPORT)
 add_executable(csl_geo08_lazy_report benchmarks/reporting/geo08/driver.cpp)
