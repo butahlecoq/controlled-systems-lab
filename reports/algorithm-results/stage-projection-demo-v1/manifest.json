@@ -1,0 +1,115 @@
+{
+  "artifacts": [
+    {
+      "path": "README.md",
+      "sha256": "8bda5d6d78031d76664eaf521e9e7c0c2b437fb2da50f034b3da99a154c8d720"
+    },
+    {
+      "path": "fuel-four-state-figures/index.html",
+      "sha256": "9fe20d4fabaee159d32b7271ee11572ece856cf50819dc8a4b324a91d756cdd7"
+    },
+    {
+      "path": "fuel-four-state-figures/projection-01-x0-x2.png",
+      "sha256": "1301279f135cc5f587cd0cd5cfd7d8b9e1746844bd6fe1c09db9c3f9a6d38575"
+    },
+    {
+      "path": "fuel-four-state-figures/projection-01-x0-x2.svg",
+      "sha256": "208d61c36b90ead60159fa525b7d4d373f913b7686e2debb0f72e3f8047b8d89"
+    },
+    {
+      "path": "fuel-four-state-figures/projection-02-x1-x3.png",
+      "sha256": "bc4ef5a57b577b86e9ada7e96f60e6121f92e74454dd3273ca3cf2070bb943fd"
+    },
+    {
+      "path": "fuel-four-state-figures/projection-02-x1-x3.svg",
+      "sha256": "35abf182e041e2611da0eb4dcda67f446201db16c6009143ee103341ae3315c4"
+    },
+    {
+      "path": "fuel-four-state-figures/projection-03-x0-x3.png",
+      "sha256": "67c0d5d9af2332d38ac58a2de9a26bbe02cbcf7abded42ad6abf6f26db946bdc"
+    },
+    {
+      "path": "fuel-four-state-figures/projection-03-x0-x3.svg",
+      "sha256": "789474015fc4d8338f85c14f4a16a374ac87e9e66a8b4f7f414af44c37e3abff"
+    },
+    {
+      "path": "fuel-four-state-figures/projection-04-x1-x2.png",
+      "sha256": "84577d24ff5c40c7ea294a75feef41e47e17ab2263cbdc1518dd14c3531ea9b6"
+    },
+    {
+      "path": "fuel-four-state-figures/projection-04-x1-x2.svg",
+      "sha256": "e9400b3168738494e49623f81da8d571999696a0c92dbbb33c3f25847da0a78f"
+    },
+    {
+      "path": "fuel-four-state-figures/render-manifest.json",
+      "sha256": "1cabbf72e796ad87c836a85b2731b3ea85faa0b912cdc09b9366ed4686ca8573"
+    },
+    {
+      "path": "fuel-four-state.stage-projection-batch.json",
+      "sha256": "cafe36caee069b13a56ca4d155c0c0116b9a6eae4001b99da54851a5b7d65fe4"
+    },
+    {
+      "path": "nonfuel-integrator-figures/index.html",
+      "sha256": "e3a94c77fcdafff10aa8dac6269386eb12b838f1e82003cd6d1dfa70816e8706"
+    },
+    {
+      "path": "nonfuel-integrator-figures/projection-01-x0-x1.png",
+      "sha256": "a52e55d98d04ae25306699233636dfddded5fd28ffd74ae6a37fc8bcbf1eb4db"
+    },
+    {
+      "path": "nonfuel-integrator-figures/projection-01-x0-x1.svg",
+      "sha256": "09743de80ec9a90679f483b9b3bb0ffa7ce59fa2864abca225f090e80b751363"
+    },
+    {
+      "path": "nonfuel-integrator-figures/render-manifest.json",
+      "sha256": "dfaf8e428e62071d4c4a2c542429862c5c78c77dfa3a0ffccdd0ff5995fb7e84"
+    },
+    {
+      "path": "nonfuel-integrator.stage-projection-batch.json",
+      "sha256": "49a6f11c80d60c5a7d1773ed4645c0e82573d00301356567e7f68a099791cc76"
+    }
+  ],
+  "classification": "illustrative demonstration; not benchmark results",
+  "environment": {
+    "matplotlib": "3.11.2",
+    "python": "3.14.7"
+  },
+  "generator": "benchmarks/reporting/stage-projection/prepare_demos.py",
+  "inputs": [
+    {
+      "path": "benchmarks/reporting/stage-projection/examples/fuel-four-state.json",
+      "sha256": "0cfeded56300e197172d95c82a1eb267afec5a1c39b028f8f1e2415e9300e4dd"
+    },
+    {
+      "path": "benchmarks/reporting/stage-projection/examples/nonfuel-integrator.json",
+      "sha256": "bb064b6353ab14b8b5ea02673175bc454b27f3604fc6e0848bae54764eb5d012"
+    }
+  ],
+  "schema": "csl.stage-projection-demo-bundle/1",
+  "source_files": [
+    {
+      "path": "benchmarks/reporting/stage-projection/prepare_demos.py",
+      "sha256": "d2904d05912301913c4c86916385f9af10179f45de76c743170ee9720819f119"
+    },
+    {
+      "path": "benchmarks/reporting/stage-projection/BUNDLE-README.md",
+      "sha256": "8bda5d6d78031d76664eaf521e9e7c0c2b437fb2da50f034b3da99a154c8d720"
+    },
+    {
+      "path": "scripts/reports/stage_projection_data.py",
+      "sha256": "0e2a315acb1919ecc02ac4de747eac08e51798eac1016b45981e6bba31b3a08b"
+    },
+    {
+      "path": "scripts/reports/stage_projection_figures.py",
+      "sha256": "02ee11fdffa174d7e576431fefb0299beede9ad7c6301aa4a4f8a1fda6e355be"
+    },
+    {
+      "path": "scripts/reports/figure_style.py",
+      "sha256": "c2f7078df95b9d75fe90f0f407023383cae4b58dd688dfa5fa5ac5b9d18664c6"
+    },
+    {
+      "path": "scripts/reports/styles/control-v1.json",
+      "sha256": "3d0c2b8360fb03a45fd41841775ac94bc6c57b67de4a4d9b3ba4ac9e8947df1a"
+    }
+  ]
+}

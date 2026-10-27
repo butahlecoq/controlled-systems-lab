@@ -1,0 +1,18 @@
+{
+  "schema": "csl.stage-projection-figure-export/1",
+  "input_content_sha256": "b0ad96507c9c6e4c9ab64cbfa4e31cc0b6c7482a9552a9320b0b0b6339a0b3a6",
+  "style_id": "csl-control-science-v1",
+  "quantitative_axis_policy": "csl-report-quantitative-v1",
+  "output_directory": "/home/butahlecoq/.local/share/codex/worktrees/viz15-fuel-route-demonstrations-713-20261027/reports/algorithm-results/stage-projection-demo-v1-check2/fuel-four-state-figures",
+  "files": {
+    "index.html": "9fe20d4fabaee159d32b7271ee11572ece856cf50819dc8a4b324a91d756cdd7",
+    "projection-01-x0-x2.png": "1301279f135cc5f587cd0cd5cfd7d8b9e1746844bd6fe1c09db9c3f9a6d38575",
+    "projection-01-x0-x2.svg": "208d61c36b90ead60159fa525b7d4d373f913b7686e2debb0f72e3f8047b8d89",
+    "projection-02-x1-x3.png": "bc4ef5a57b577b86e9ada7e96f60e6121f92e74454dd3273ca3cf2070bb943fd",
+    "projection-02-x1-x3.svg": "35abf182e041e2611da0eb4dcda67f446201db16c6009143ee103341ae3315c4",
+    "projection-03-x0-x3.png": "67c0d5d9af2332d38ac58a2de9a26bbe02cbcf7abded42ad6abf6f26db946bdc",
+    "projection-03-x0-x3.svg": "789474015fc4d8338f85c14f4a16a374ac87e9e66a8b4f7f414af44c37e3abff",
+    "projection-04-x1-x2.png": "84577d24ff5c40c7ea294a75feef41e47e17ab2263cbdc1518dd14c3531ea9b6",
+    "projection-04-x1-x2.svg": "e9400b3168738494e49623f81da8d571999696a0c92dbbb33c3f25847da0a78f"
+  }
+}

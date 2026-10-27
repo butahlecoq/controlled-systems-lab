@@ -1,0 +1,66 @@
+{
+  "schema": "csl.stage-projection-route-capabilities/1",
+  "routes": [
+    {
+      "route_id": "demo.affine-box-reachability",
+      "source": "benchmarks/reporting/stage-projection/prepare_demos.py",
+      "adapter_status": "connected demonstration adapter",
+      "capability": "stage_sets",
+      "stages": "R0 through RT",
+      "state_geometry": "convex hull of every endpoint of the declared independent box controls under the supplied affine model",
+      "evidence": "source-bound csl.stage-projection-batch/1 with numerical binary64 assurance",
+      "limitations": ["illustrative demonstration data, not a benchmark", "no disturbances", "no optimality claim"]
+    },
+    {
+      "route_id": "issue6.b06-finite-action-minimax",
+      "source": "benchmarks/reporting/issue6/b06_finite_minimax.cpp",
+      "adapter_status": "not connected; source stores terminal geometry only",
+      "capability": "terminal_set_only",
+      "stages": "terminal geometry only",
+      "evidence": "saved B06 report bundle; no all-stage set sequence is stored",
+      "limitations": ["not adapted to the all-stage batch route", "do not infer missing intermediate sets"]
+    },
+    {
+      "route_id": "issue6.b09-nonlinear-replay",
+      "source": "benchmarks/reporting/issue6/b09_a08_reference.cpp",
+      "adapter_status": "not connected; source stores terminal geometry and replay states",
+      "capability": "terminal_set_and_replay_trajectories",
+      "stages": "terminal geometry plus sampled replay states",
+      "evidence": "saved B09 report bundle",
+      "limitations": ["replay paths are trajectories, not reachable-set marginals", "no all-stage set sequence is stored"]
+    },
+    {
+      "route_id": "reachability.nominal_forward",
+      "source": "src/reachability/nominal_forward.cpp",
+      "adapter_status": "not yet connected to the demonstration command",
+      "capability": "stage_sets_available",
+      "stages": "initial and completed forward marginals",
+      "evidence": "per-stage OperationResult geometry evidence and provider lineage",
+      "limitations": ["discrete nominal open-loop profile only", "does not represent uncertain or feedback reachability"]
+    },
+    {
+      "route_id": "reachability.finite_feedback",
+      "source": "src/reachability/finite_feedback.cpp",
+      "capability": "finite_policy_only",
+      "stages": "discrete state ordinals and successor relation",
+      "evidence": "finite-state policy result",
+      "limitations": ["no geometric embedding or physical units are declared"]
+    },
+    {
+      "route_id": "synthesis.strategy_b.direct_joint",
+      "source": "src/synthesis/strategy_b/direct_joint.cpp",
+      "capability": "coupled_state_control_relation",
+      "stages": "joint relation, not a canonical R0 through RT sequence",
+      "evidence": "saved payload and operation diagnostics",
+      "limitations": ["do not project transition columns as stage marginals"]
+    },
+    {
+      "route_id": "simulation.replay",
+      "source": "src/simulation/nonlinear_replay.cpp",
+      "capability": "trajectory_only",
+      "stages": "sampled states for one supplied control history",
+      "evidence": "replay status and diagnostics",
+      "limitations": ["not a reachable set", "does not establish reachability or optimality"]
+    }
+  ]
+}
