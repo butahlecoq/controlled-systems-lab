@@ -90,7 +90,10 @@ def _inputs(source: Path) -> tuple[dict[str, bytes], dict]:
         raise ValueError("saved report page differs from verified result and SVG")
     parser = LocalLinks()
     parser.feed(files["index.html"].decode("utf-8"))
-    if not parser.hrefs or any(href not in files for href in parser.hrefs):
+    local_hrefs = [href for href in parser.hrefs if not href.startswith("https://")]
+    if (not parser.hrefs or any(href not in files for href in local_hrefs) or
+            any(not href.startswith("https://github.com/") for href in parser.hrefs
+                if href not in local_hrefs)):
         raise ValueError("report page has a missing or nonlocal asset link")
     return files, result
 

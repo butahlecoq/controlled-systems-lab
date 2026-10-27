@@ -156,7 +156,10 @@ def plot_svg(data: dict, value: float) -> str:
 
 
 def report_page(source: dict, svg: str) -> str:
-    return f'''<!doctype html><html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>UnequalGame minimax pilot</title><style>body{{margin:0;background:#111820;color:#f4f1e8;font:16px/1.55 system-ui,sans-serif}}main{{max-width:1100px;margin:auto;padding:2rem}}svg{{width:100%;height:auto}}.note{{border-left:4px solid #f4a261;padding:.7rem 1rem;background:#1a252e}}a{{color:#8bd3f7}}</style><main><h1>UnequalGame: reachability and minimax</h1><p>CSL's finite-action minimax method exhausts 27 fixed control plans and all 27 adversarial disturbance sequences per plan. An independent enumeration replays every plan, its worst terminal state, the finite forward reachable sets, backward robust nodes, and a selected worst-case trajectory.</p><div>{svg}</div><p class="note"><strong>Adaptation:</strong> the upstream environment uses continuous controls and a 2-second horizon. This pilot uses three stages over 0.15 seconds and finite control/disturbance catalogues. The minimizer commits to an open-loop control sequence; the adversary chooses a full disturbance sequence. This is not a reproduction of the source RL training run.</p><p>Minimax squared terminal position: {source['objective_value']:.8g}. Seven single-threaded solver-call observations after one warmup have median {source['timing']['median_wall_ns']} ns and range {source['timing']['min_wall_ns']}–{source['timing']['max_wall_ns']} ns. No comparative speed claim is made. <a href="result.json">Result JSON</a> · <a href="figure-data.json">Figure data</a> · <a href="projections.svg">Standalone SVG</a></p><p>Source commit <code>{SOURCE_COMMIT}</code>; source blob <code>{SOURCE_BLOB}</code>. Runtime: {html.escape(source['environment']['compiler_id'])} {html.escape(source['environment']['compiler_version'])}, {html.escape(platform.platform())}.</p></main></html>'''
+    upstream = ("https://github.com/imm-rl-lab/optimal_control/blob/"
+        f"{SOURCE_COMMIT}/Environments/UnequalGame/UnequalGame.py")
+    csl_source = f"https://github.com/butahlecoq/controlled-systems-lab/tree/{source['source_commit']}"
+    return f'''<!doctype html><html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>UnequalGame minimax pilot</title><style>body{{margin:0;background:#111820;color:#f4f1e8;font:16px/1.55 system-ui,sans-serif}}main{{max-width:1100px;margin:auto;padding:2rem}}svg{{width:100%;height:auto}}.note{{border-left:4px solid #f4a261;padding:.7rem 1rem;background:#1a252e}}a{{color:#8bd3f7}}</style><main><h1>UnequalGame: reachability and minimax</h1><p>CSL's finite-action minimax method exhausts 27 fixed control plans and all 27 adversarial disturbance sequences per plan. An independent enumeration replays every plan, its worst terminal state, the finite forward reachable sets, backward robust nodes, and a selected worst-case trajectory.</p><div>{svg}</div><p class="note"><strong>Adaptation:</strong> the upstream environment uses continuous controls and a 2-second horizon. This pilot uses three stages over 0.15 seconds and finite control/disturbance catalogues. The minimizer commits to an open-loop control sequence; the adversary chooses a full disturbance sequence. This is not a reproduction of the source RL training run.</p><p>Minimax squared terminal position: {source['objective_value']:.8g}. Seven single-threaded solver-call observations after one warmup have median {source['timing']['median_wall_ns']} ns and range {source['timing']['min_wall_ns']}–{source['timing']['max_wall_ns']} ns. No comparative speed claim is made. <a href="result.json">Result JSON</a> · <a href="figure-data.json">Figure data</a> · <a href="capture.json">Capture environment</a> · <a href="projections.svg">Standalone SVG</a></p><p>Upstream source: <a href="{upstream}">UnequalGame.py</a> at commit <code>{SOURCE_COMMIT}</code>. CSL measured source: <a href="{csl_source}"><code>{source['source_commit']}</code></a>. Runtime: {html.escape(source['environment']['compiler_id'])} {html.escape(source['environment']['compiler_version'])}, {html.escape(platform.platform())}.</p></main></html>'''
 
 
 def main() -> int:
@@ -181,14 +184,41 @@ def main() -> int:
             "capture.json": json.dumps(capture, indent=2) + "\n",
             "projections.svg": svg,
             "index.html": report_page(actual, svg[:-1])}
+        source_file = ("https://github.com/imm-rl-lab/optimal_control/blob/"
+            f"{SOURCE_COMMIT}/Environments/UnequalGame/UnequalGame.py")
         files["README.md"] = ("# UnequalGame finite-action minimax pilot\n\n"
-            "Source-attributed adaptation of the upstream UnequalGame differential game. "
-            "This report uses a three-stage finite action catalogue over 0.15 seconds; "
-            "the source uses continuous controls over two seconds. The captured result "
-            "is an open-loop fixed-plan minimax value, not the continuous-action RL result.\n\n"
-            f"Upstream commit: `{SOURCE_COMMIT}`. Source blob: `{SOURCE_BLOB}`. "
-            "No license is declared by the upstream repository; this report re-expresses "
-            "the equations and does not copy its implementation.\n")
+            "This is a source-attributed adaptation of the upstream two-player differential game. "
+            "The source model is `ẋ = u + v`, initial `(t,x)=(0,1)`, terminal time 2 s, "
+            "`u ∈ [-2,2]`, `v ∈ [-1,1]`, and terminal reward `x²`. The source uses "
+            "continuous controls. This pilot uses the exact discrete step `x[k+1] = "
+            "x[k] + 0.05(u[k]+v[k])`, three stages (0.15 s), control catalogue "
+            "`{-2,0,2}`, and disturbance vertices `{-1,0,1}`. The controller selects "
+            "one open-loop plan before the adversary selects its full disturbance sequence.\n\n"
+            f"The minimax solver exhausts 27 plans and 27 disturbance sequences per plan. "
+            f"The saved minimax value is `{actual['objective_value']:.8g}`; the selected "
+            f"controls are `{actual['plans'][actual['minimizing_plan_indices'][0]]['controls']}`. "
+            "This is not a reproduction of the original continuous-action RL run.\n\n"
+            f"Upstream source: [{SOURCE_COMMIT}]({source_file}) (blob `{SOURCE_BLOB}`). "
+            f"Measured CSL source commit: `{actual['source_commit']}`. No upstream license "
+            "is declared; this report re-expresses the equations and does not copy the code.\n\n"
+            "## Reproduce\n\n"
+            "Use the recorded CSL source commit in a separate worktree and choose a fresh output directory:\n\n"
+            "```sh\n"
+            f"git worktree add --detach ../csl-env717-unequal-game {actual['source_commit']}\n"
+            "cd ../csl-env717-unequal-game\n"
+            "cmake -S . -B build/env717-unequal-game -G 'Unix Makefiles' \\\n"
+            "  -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTING=ON \\\n"
+            "  -DCSL_ENABLE_HIGHS=OFF -DCSL_ENABLE_QHULL=OFF \\\n"
+            "  -DCSL_BUILD_ENV717_REPORT=ON\n"
+            "cmake --build build/env717-unequal-game --target csl_env717_unequal_game --parallel 4\n"
+            "python3 scripts/reports/env717/check_unequal_game.py \\\n"
+            "  build/env717-unequal-game/csl_env717_unequal_game \\\n"
+            "  --output /tmp/env717-unequal-game-rerun\n"
+            "```\n\n"
+            "The output contains the complete result JSON, figure data, SVG, HTML, capture "
+            "environment, and checksums. See `result.json` for raw plan records and timing "
+            "observations. Timings are single-host descriptive values with no comparator or "
+            "performance winner claim.\n")
         for name, content in files.items():
             (output / name).write_text(content, encoding="utf-8")
         sums = "".join(f"{hashlib.sha256((output / name).read_bytes()).hexdigest()}  {name}\n"
