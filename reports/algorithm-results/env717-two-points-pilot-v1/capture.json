@@ -1,15 +1,15 @@
 {
-  "renderer_sha256": "faa63b8ab0d5869229e82ddb9e0b5c889c02d20d5b883c9bf25f58b7de11b74a",
+  "renderer_sha256": "896673fa64c3b9401025a20c4e3c20efe109e0a73df3ff313785cfe5a26cdbf0",
   "capture_environment": {
     "os": "Linux-7.2.5-3-omarchy-x86_64-with-glibc2.44",
     "processor": "AMD Ryzen 5 3550H with Radeon Vega Mobile Gfx",
     "processor_identity_source": "/proc/cpuinfo",
     "logical_cpus": 8,
     "load_average_before_run": [
-      0.35546875,
-      0.45166015625,
-      0.91650390625
+      0.2412109375,
+      0.37158203125,
+      0.83984375
     ],
-    "capture_started_unix_ns": 1793135186707723007
+    "capture_started_unix_ns": 1793135280031469628
   }
 }

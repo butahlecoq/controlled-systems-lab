@@ -32,6 +32,7 @@ Seven single-threaded solver-call timings after one warmup are retained in `resu
 - Upstream repository commit: [`f4d76c60f4003f50954174e96eafd8e514bd5441`](https://github.com/imm-rl-lab/optimal_control/tree/f4d76c60f4003f50954174e96eafd8e514bd5441)
 - Source file blob: [`4e71bed8ceffa1990645fb85e54d6b5b1eeb688d`](https://github.com/imm-rl-lab/optimal_control/blob/f4d76c60f4003f50954174e96eafd8e514bd5441/Environments/TwoPointsOnParallelLines/TwoPointsOnParallelLines.py)
 - CSL code commit, compiler and source fingerprints: `result.json`
+- Standalone two-panel figure: [`projections.svg`](projections.svg)
 - Rendered figure data and capture environment: `figure-data.json`, `capture.json`
 
 Configure and run the smoke/renderer locally:

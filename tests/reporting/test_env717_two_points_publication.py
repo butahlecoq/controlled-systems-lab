@@ -45,7 +45,8 @@ class TwoPointsPublicationTests(unittest.TestCase):
             self.assertEqual(hashlib.sha256((destination / name).read_bytes()).hexdigest(), digest)
         with zipfile.ZipFile(self.site / f"{report_id}.zip") as archive:
             self.assertEqual(archive.testzip(), None)
-            self.assertIn(f"{report_id}/projections.png", archive.namelist())
+            self.assertIn(f"{report_id}/projections.svg", archive.namelist())
+            self.assertNotIn(f"{report_id}/projections.png", archive.namelist())
             self.assertIn(f"{report_id}/publication-manifest.json", archive.namelist())
         self.assertIn(f"{report_id}/index.html", (self.site / "index.html").read_text())
         published_svg = (destination / "projections.svg").read_text()

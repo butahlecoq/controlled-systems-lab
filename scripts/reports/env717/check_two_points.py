@@ -10,7 +10,6 @@ import json
 import math
 import os
 import platform
-import shutil
 import subprocess
 import sys
 import time
@@ -267,10 +266,6 @@ def render(executable: Path, output: Path | None) -> None:
     (output / "figure-data.json").write_text(json.dumps(derived, indent=2) + "\n", encoding="utf-8")
     svg = plot_svg(derived)
     (output / "projections.svg").write_text(svg + "\n", encoding="utf-8")
-    converter = shutil.which("rsvg-convert")
-    if converter:
-        subprocess.run([converter, "--output", str(output / "projections.png"),
-                        str(output / "projections.svg")], check=True)
     page = report_page(source, svg, host)
     (output / "index.html").write_text(page, encoding="utf-8")
     identity = {"renderer_sha256": hashlib.sha256(Path(__file__).read_bytes()).hexdigest(),

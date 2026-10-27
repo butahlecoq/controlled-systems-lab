@@ -78,9 +78,8 @@
     },
     {
       "source": "scripts/reports/env717/check_two_points.py",
-      "signal_count": 5,
+      "signal_count": 3,
       "asset_name_literals": [
-        "projections.png",
         "projections.svg"
       ],
       "disposition": "deferred-family-specific-migration",
@@ -593,9 +592,8 @@
     },
     {
       "source": "scripts/reports/stage_env717_two_points.py",
-      "signal_count": 4,
+      "signal_count": 3,
       "asset_name_literals": [
-        "projections.png",
         "projections.svg"
       ],
       "disposition": "publication-validation-or-frozen-route"
@@ -1125,10 +1123,9 @@
       "route": "env717-two-points-pilot-v1",
       "source_bundle": "env717-two-points-pilot-v1",
       "assets": [
-        "projections.png",
         "projections.svg"
       ],
-      "index_sha256": "556145644b3d12cddabef770e382e85c18b8348e1d69ebb0819d9c22f963c8e1",
+      "index_sha256": "f4f068ad858f7eb6f197b66051dcd750bdcbafdea7445280fef0d84e81d47167",
       "disposition": "deferred: original frozen route-level readability review remains; companion availability is listed separately",
       "follow_up_issue": 717
     },

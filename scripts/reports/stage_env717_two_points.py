@@ -19,7 +19,7 @@ assert spec.loader is not None
 spec.loader.exec_module(checker)
 
 FILES = ("README.md", "capture.json", "figure-data.json", "index.html",
-         "projections.png", "projections.svg", "result.json", "SHA256SUMS")
+         "projections.svg", "result.json", "SHA256SUMS")
 SOURCE_COMMIT = "f4d76c60f4003f50954174e96eafd8e514bd5441"
 
 

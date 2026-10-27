@@ -19,7 +19,7 @@ class VisualRouteInventoryTests(unittest.TestCase):
         self.assertIn("scripts/reports/env717/check_two_points.py", producers)
         self.assertEqual(producers["scripts/reports/env717/check_two_points.py"]["follow_up_issue"],717)
         self.assertEqual(producers["scripts/reports/env717/check_two_points.py"]["asset_name_literals"],
-                         ["projections.png", "projections.svg"])
+                         ["projections.svg"])
         self.assertNotIn("policy.svg", producers["scripts/reports/site.py"]["asset_name_literals"])
         self.assertIn("visual.svg", producers["scripts/reports/ext03_transform/report.py"]["asset_name_literals"])
         self.assertNotIn("csl.report.svg", {
