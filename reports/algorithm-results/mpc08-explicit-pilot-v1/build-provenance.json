@@ -45,7 +45,7 @@
     "build/mpc08/csl_mpc08_explicit_compare benchmarks/reporting/mpc08_explicit/generated/explicit-double-integrator-queries.csv > benchmarks/reporting/mpc08_explicit/generated/csl-candidate-observations.jsonl"
   ],
   "schema": "csl.mpc08-explicit-pilot-provenance/1",
-  "source_commit": "a3a6f090c2e5be0cb32cb0c1daa72521dcdf5513",
+  "source_commit": "ea756e66ccef9aef633798016b7acd87d01fccc7",
   "source_files_sha256": {
     ".github/workflows/algorithm-reports.yml": "0e6651698f0758ba232c2773edf8dad23d3f55d20020c07e422d3abbf1952ae2",
     "CMakeLists.txt": "4c8e203e180697ee6d13bed4572766f7a1159da24a1df635481ea5109c51eb98",
@@ -54,7 +54,6 @@
     "benchmarks/reporting/mpc08_explicit/mpc08_strategy_comparison.cpp": "56a01612d0aa69c15e28658403346fe629bf2f611de889d2816cbbbe9d4d9be6",
     "cmake/OptionalReports.cmake": "77a663dd23f65011a0371f4b04f5a24cba69eec78e0dc0a786aadd1bd15a3d46",
     "scripts/reports/landing.py": "a6233b92ee09e04c672a9f7ef5ed8d754de092726a8912b592df199dde30b369",
-    "scripts/reports/stage_mpc08.py": "0738ca872dfce5ace1020b19d8f03ee746ac2776964bc1434a3dffdaad66b60b",
-    "scripts/reports/visual-route-inventory.json": "9a95355804d68a504c9c95fb70338d31b784b618293c096f0867d82259928418"
+    "scripts/reports/stage_mpc08.py": "871ca4e77a0826c407a94fbdebe69c2cf3530b842c5fc005db729de5a4bffffb"
   }
 }
