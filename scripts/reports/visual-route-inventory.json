@@ -931,7 +931,17 @@
       "assets": [
         "fixture-geometry.svg"
       ],
-      "index_sha256": "aa0ffa810d33b7ab9842724395a58b0f418fa1460ba15daef99d18780bc168e1",
+      "index_sha256": "855ea9b5c2394ddfa36f81665c42a4b67d69a07e8efa5f165bed85591da54579",
+      "disposition": "deferred: original frozen route-level readability review remains; companion availability is listed separately",
+      "follow_up_issue": 669
+    },
+    {
+      "route": "exp02-it17-dyadic-interior-20261027-r1/prior-halton-ladder",
+      "source_bundle": "exp02-it17-dyadic-interior-20261027-r1/prior-halton-ladder",
+      "assets": [
+        "halton-square-n1000.svg"
+      ],
+      "index_sha256": "306c1dadd31c2b4dcfa92cf1914062c14d812a141de5502f50983af5fbd441ec",
       "disposition": "deferred: original frozen route-level readability review remains; companion availability is listed separately",
       "follow_up_issue": 669
     },

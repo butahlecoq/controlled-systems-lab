@@ -34,6 +34,10 @@ class Exp02IT17DyadicStageTests(unittest.TestCase):
             self.assertIn("performance verdict inconclusive", page)
             self.assertIn("60 interior points", page)
             self.assertTrue((site / stage_report.REPORT_ID / "raw/n64.jsonl").is_file())
+            prior_page = site / stage_report.REPORT_ID / "prior-halton-ladder/index.html"
+            self.assertTrue(prior_page.is_file())
+            self.assertTrue((prior_page.parent / "halton-square-n1000.svg").is_file())
+            self.assertIn("Earlier size ladder", page)
             landing_page = (site / "index.html").read_text(encoding="utf-8")
             self.assertIn(stage_report.REPORT_ID + "/index.html", landing_page)
             self.assertIn(stage_report.REPORT_ID + ".zip", landing_page)
@@ -41,6 +45,8 @@ class Exp02IT17DyadicStageTests(unittest.TestCase):
             with ZipFile(site / (stage_report.REPORT_ID + ".zip")) as archive:
                 names = set(archive.namelist())
                 self.assertIn(stage_report.REPORT_ID + "/raw/n256.jsonl", names)
+                self.assertIn(stage_report.REPORT_ID + "/prior-halton-ladder/index.html", names)
+                self.assertIn(stage_report.REPORT_ID + "/prior-halton-ladder/halton-square-n1000.svg", names)
                 self.assertIn(stage_report.REPORT_ID + "/SHA256SUMS", names)
 
     def test_bundle_hash_mismatch_is_rejected(self):

@@ -78,6 +78,19 @@ and bundle hashes without rerunning the solver:
 python3 reports/algorithm-results/exp02-it17-dyadic-interior-20261027-r1/render_report.py
 ```
 
+The bundle also carries the separately captured 250/1,000/5,000-point Halton
+size ladder at [`prior-halton-ladder/index.html`](prior-halton-ladder/index.html).
+That earlier run uses source commit `5ee632d105f134fbcba3a4f50334eef8e97476ab`
+and a different fixture generator. Its rows are not pooled with this pilot:
+QuickHull and basis reuse passed its measured attempts, while the other four
+reducers failed completion checks. It is evidence for workload scaling and
+failure behavior only; its 5,000-point run resumed after the original 300-second
+suite cap, and it had no per-attempt limiter.
+
+The dependency list recorded by that earlier README is stale. The live issue
+tracker currently reports all native #94 blockers closed. This benchmark bundle
+still does not satisfy the full EXP-02 acceptance criteria.
+
 This PR adds a report-only Pages staging route; it changes no public C++ API,
 dependency, installation, release, or package workflow. Release/package impact:
 **no release needed**. Pages deployment remains gated on review, merge and live
