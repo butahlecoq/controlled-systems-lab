@@ -486,7 +486,7 @@
     },
     {
       "source": "scripts/reports/stage_mpc03.py",
-      "signal_count": 2,
+      "signal_count": 9,
       "asset_name_literals": [
         "disturbance-tube.svg"
       ],
@@ -1173,7 +1173,7 @@
       "assets": [
         "disturbance-tube.svg"
       ],
-      "index_sha256": "805acd1977b50f2f7dc18bd206fd729a0c3ef73491717786e78ca9c3c01d07bd",
+      "index_sha256": "89635ada87c2ce2f9665ec7f285c052e3f281abfb91f4f3e03cadbd4d83681ca",
       "disposition": "deferred: original frozen route-level readability review remains; companion availability is listed separately",
       "follow_up_issue": 669,
       "companion_route": "examples/index.html"
