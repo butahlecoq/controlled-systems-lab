@@ -17,7 +17,6 @@ class PublicationPolicy:
     extra_html_files: tuple[str, ...] = ()
     include_source_evidence: bool = False
     include_parent_archive: bool = False
-    extra_page_files: tuple[str, ...] = ()
     committed_archive: bool = False
     adapt_allow_test: bool = False
     render_allow_test: bool = False

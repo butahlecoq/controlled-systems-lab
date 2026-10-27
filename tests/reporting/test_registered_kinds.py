@@ -572,11 +572,15 @@ class RegisteredKindTests(unittest.TestCase):
                             if item['report_kind']=='issue6-b06-manifest-correction')
             correction_page=(first/correction['report_id']/'index.html').read_text(encoding='utf-8')
             self.assertIn(correction['report_id']+'/manifest-correction.json',correction_page)
-            original_route='issue6-b06-reference-761bdc6e40b93814f873f105313d1eed4f63711653aa583a16a2ddfbc67c2a82'
-            for relative in (f'../{original_route}/index.html',f'../{original_route}.zip',
-                             f'../{original_route}/raw-runs.jsonl',f'../{original_route}/exact-oracle.json'):
+            for relative in ('source-report/index.html','source-report/original-source.zip',
+                             'source-report/raw-runs.jsonl','source-report/exact-oracle.json'):
                 self.assertIn(f'href="{relative}"',correction_page)
             self.assertTrue((first/correction['report_id']/'terminal-projections.svg').is_file())
+            with zipfile.ZipFile(first/(correction['report_id']+'.zip')) as correction_zip:
+                for relative in ('source-report/index.html','source-report/original-source.zip',
+                                 'source-report/raw-runs.jsonl','source-report/exact-oracle.json',
+                                 'report-envelope.json','publication-manifest.json'):
+                    self.assertIn(correction['report_id']+'/'+relative,correction_zip.namelist())
             pins=json.loads((root/'legacy-publications.json').read_text(encoding='utf-8'))
             self.assertEqual(registered._digest(pins),site.LEGACY_PINS_SHA256)
             live_anchors={

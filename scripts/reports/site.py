@@ -301,7 +301,6 @@ def stage(catalog_path,out,check=True,allow_test=False):
                 page_files |= {"source-evidence/" + name for name in item.files}
             if policy.include_parent_archive:
                 page_files.add("../" + rid + ".zip")
-            page_files.update(policy.extra_page_files)
             OfflineHTML(page_files).feed(generated_page)
             for name in policy.extra_html_files:
                 OfflineHTML(page_files).feed((root/source_id/name).read_text(encoding="utf-8"))
