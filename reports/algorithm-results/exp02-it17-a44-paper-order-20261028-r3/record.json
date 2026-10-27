@@ -1,0 +1,16 @@
+{
+  "attempts": 72,
+  "evidence_limits": "Exploratory two-fixture pilot; clean measured source commit; LP workspace setup excluded; no resource limiter; no source-function profile; three methods return hull-valid but classification-incomplete outputs; no general winner or scalability claim",
+  "input_sha256": {
+    "dyadic-square-n256": "15a4d6095985530bd4aa16a7169db002c642147061f221456a204e2d72bd2240",
+    "dyadic-square-n64": "e668ac1f3760efe95ffedd3daee6f98ee9635597983046ee7fca6dc24a67462a"
+  },
+  "measured_scope": "Six hull methods on deterministic 64- and 256-point 2D exact-dyadic square clouds; five measured attempts and one warmup per method and size",
+  "measurement_rows": 60,
+  "method_count": 6,
+  "method_identity": "csl.hull.itis17.a44-incremental-lp@2.0.0",
+  "report_id": "exp02-it17-a44-paper-order-20261028-r3",
+  "schema": "csl.exploratory-comparison-report/1",
+  "source_commit": "34e101b0319479779dee89c8d0c1658f14ef1247",
+  "visual_example": "fixture-geometry.svg"
+}

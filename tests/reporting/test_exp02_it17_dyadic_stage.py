@@ -16,6 +16,36 @@ spec.loader.exec_module(stage_report)
 
 
 class Exp02IT17DyadicStageTests(unittest.TestCase):
+    def test_output_status_bundle_stages_verified_hulls_and_incomplete_classification(self):
+        report_id = "exp02-it17-a44-paper-order-20261028-r3"
+        source = ROOT / "reports/algorithm-results" / report_id
+        with tempfile.TemporaryDirectory() as temp:
+            site = Path(temp) / "site"
+            site.mkdir()
+            (site / "index.html").write_text(
+                '<!doctype html><html lang="en"><body><ul></ul></body></html>',
+                encoding="utf-8")
+
+            self.assertEqual(stage_report.stage(source, site), report_id)
+            import landing
+            landing.build(site)
+
+            page = (site / report_id / "index.html").read_text(encoding="utf-8")
+            self.assertIn("output-status pilot", page)
+            self.assertIn("incomplete point classification", page)
+            self.assertIn("34e101b0319479779dee89c8d0c1658f14ef1247", page)
+            self.assertTrue((site / report_id / "fixture-geometry.svg").is_file())
+            raw = (site / report_id / "raw/n64.jsonl").read_text(encoding="utf-8")
+            self.assertIn('"reduction_complete":false', raw)
+            self.assertIn('"passed":true', raw)
+            self.assertIn(report_id + ".zip", (site / "index.html").read_text(encoding="utf-8"))
+
+            with ZipFile(site / (report_id + ".zip")) as archive:
+                names = set(archive.namelist())
+                self.assertIn(report_id + "/raw/n256.jsonl", names)
+                self.assertIn(report_id + "/fixture-geometry.svg", names)
+                self.assertIn(report_id + "/SHA256SUMS", names)
+
     def test_clean_a44_v2_bundle_stages_with_source_identity_and_figure(self):
         report_id = "exp02-it17-a44-paper-order-20261027-r2"
         source = ROOT / "reports/algorithm-results" / report_id

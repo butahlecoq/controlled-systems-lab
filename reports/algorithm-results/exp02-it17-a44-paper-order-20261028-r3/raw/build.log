@@ -1,0 +1,18 @@
+[  2%] Built target csl_contracts
+[  4%] Built target csl_quickhull_2d
+[  5%] Built target csl_numeric
+[  7%] Built target csl_sets
+[ 83%] Built target highs
+[ 83%] Built target csl_objectives
+[ 86%] Built target csl_optimization
+[ 89%] Built target csl_model
+[ 91%] Built target csl_problem
+[ 91%] Built target csl_resolved_core
+[ 91%] Built target csl_verifiers
+[ 92%] Built target csl_registry
+[ 94%] Built target csl_resolved_problem
+[ 94%] Built target csl_phase_one
+[ 94%] Built target csl_bounded_hull_checker
+[ 95%] Built target csl_highs_lp
+[ 98%] Built target csl_hull
+[100%] Built target csl_it17_hull_comparison_report

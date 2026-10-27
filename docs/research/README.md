@@ -20,6 +20,9 @@ closed-loop experiments. It authorizes no numerical runs.
 The [ITIS'17 hull-method source audit](exp02-itis17-source-audit-20261027.md)
 records the primary-paper algorithms, the A43/A44 implementation boundaries,
 paper hashes, and the completed search for matching Pascal sources.
+The [EXP-02 output-status pilot](exp02-it17-output-status-pilot-20261028.md)
+separates exact hull validity from complete redundant-point classification and
+links its repeated Release measurements and raw rows.
 
 ## Evidence conventions
 

@@ -221,6 +221,33 @@ ZIP entry matches, and the live landing page links to the report. This remains
 partial EXP-02 evidence; issue #94 remains open for its paired strategy, full
 workload/resource matrix and comparison-record requirements.
 
+### ITIS17 hull output-status update
+
+The [r3 output-status report](../../reports/algorithm-results/exp02-it17-a44-paper-order-20261028-r3/)
+uses source commit `34e101b0319479779dee89c8d0c1658f14ef1247` and adds the
+`reduction_complete` field to the exploratory hull rows. The `passed` field now
+means complete source-index accounting plus independent exact hull verification;
+it no longer fails solely because the reducer retained unresolved redundant
+points. This preserves incomplete classification as a separate outcome and
+allows the report to show both geometry validity and output size.
+
+All 60 measured attempts passed the exact 2D hull checker over 64- and
+256-point exact-dyadic square clouds. The LP baseline, ordered reducer and A43
+adaptation remained incomplete in all 10 attempts each, while basis reuse,
+QuickHull and A44 v2 completed. Median reducer-call times at 64/256 points were
+0.144/0.587 ms for QuickHull, 0.226/0.769 ms for basis reuse,
+5.273/25.267 ms for A43, 7.191/27.939 ms for A44 v2,
+10.424/70.204 ms for the baseline, and 10.568/69.816 ms for ordered LP.
+Timing excludes workspace creation and verification. No source-function
+profile or resource limiter was available, so these are fixture-specific
+descriptive values and the performance conclusion remains inconclusive.
+
+The versioned HTML page, raw attempts, summary table, fixture figure, executable
+identity and offline ZIP are staged in the bundle. The deployed URL and live
+hash verification remain pending the main-only Pages deployment for this PR.
+This is still a partial hull-method slice; #94 remains open for its broader
+strategy, workload and representation matrix.
+
 ## EXP-02 paired synthesis profile slice
 
 The [paired T-S02/T-S03 report](../../reports/algorithm-results/exp02-paired-profiles-20261027-r1/)

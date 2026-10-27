@@ -1431,6 +1431,16 @@
       "follow_up_issue": 669
     },
     {
+      "route": "exp02-it17-a44-paper-order-20261028-r3",
+      "source_bundle": "exp02-it17-a44-paper-order-20261028-r3",
+      "assets": [
+        "fixture-geometry.svg"
+      ],
+      "index_sha256": "19db1aa0b845774676f41a4cd78375fbb565d427838bd7679e3068c8dcdd791c",
+      "disposition": "deferred: original frozen route-level readability review remains; companion availability is listed separately",
+      "follow_up_issue": 94
+    },
+    {
       "route": "exp02-it17-dyadic-interior-20261027-r1",
       "source_bundle": "exp02-it17-dyadic-interior-20261027-r1",
       "assets": [
