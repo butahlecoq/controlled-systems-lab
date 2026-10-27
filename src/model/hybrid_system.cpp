@@ -388,6 +388,132 @@ HybridCapabilityReportResult report_hybrid_capability(const HybridSystem& system
     return report;
 }
 
+namespace {
+struct CoordinateRange {
+    std::size_t offset{};
+    std::size_t size{};
+};
+
+struct HybridTransitionLayout {
+    const HybridTransitionEdge* edge{};
+    CoordinateRange control;
+    CoordinateRange pre_state;
+};
+
+struct HybridPathLayout {
+    std::vector<const HybridMode*> modes;
+    std::vector<HybridTransitionLayout> transitions;
+    std::vector<CoordinateRange> post_states;
+    std::size_t width{};
+};
+
+struct HybridPathLayoutFailure {
+    Diagnostic diagnostic;
+    std::optional<std::size_t> stage;
+    std::optional<HybridEdgeId> edge;
+    bool width_overflow{};
+};
+
+using HybridPathLayoutResult = std::variant<HybridPathLayout,
+    HybridPathLayoutFailure,OperationStopped>;
+
+HybridPathLayoutResult resolve_hybrid_path_layout(const HybridSystem& system,
+    const HybridRequest& request,const HybridPath& path,HybridRelationLimits limits,
+    bool check_variable_limit,bool check_stage_cancellation,std::stop_token cancellation) {
+    if(path.modes.size()!=system.horizon+1 || path.edges.size()!=system.horizon ||
+       path.modes.empty() || path.modes.front()!=request.initial.mode ||
+       std::find(request.allowed_terminal_modes.begin(),request.allowed_terminal_modes.end(),path.modes.back())==
+           request.allowed_terminal_modes.end())
+        return HybridPathLayoutFailure{invalid("hybrid.path",
+            "Path must match the horizon and request endpoints"),{}, {}};
+
+    HybridPathLayout layout;
+    layout.modes.reserve(path.modes.size());
+    layout.transitions.reserve(path.edges.size());
+    layout.post_states.reserve(path.modes.size());
+    for(const auto& id:path.modes) {
+        const auto* mode=find_mode(system,id);
+        if(!mode)
+            return HybridPathLayoutFailure{invalid("hybrid.path.modes",
+                "Path references an unknown mode"),{}, {}};
+        layout.modes.push_back(mode);
+    }
+
+    const auto max=std::numeric_limits<std::size_t>::max();
+    if(check_variable_limit && layout.modes.front()->state_dimension>limits.max_variables)
+        return HybridPathLayoutFailure{{DiagnosticCode::unsupported,
+            "hybrid.relation.variables","Joint relation exceeds its variable limit"},0,{}};
+    layout.width=layout.modes.front()->state_dimension;
+    layout.post_states.push_back({0,layout.width});
+    for(std::size_t stage=0;stage<system.horizon;++stage) {
+        if(check_stage_cancellation && cancellation.stop_requested())
+            return OperationStopped{StopReason::cancelled,
+                "Hybrid relation preflight was cancelled; no path relations were constructed"};
+        const auto found=std::find_if(system.edges.begin(),system.edges.end(),
+            [&](const auto& edge){return edge.id==path.edges[stage];});
+        if(found==system.edges.end() || found->source!=path.modes[stage] ||
+           found->target!=path.modes[stage+1])
+            return HybridPathLayoutFailure{invalid("hybrid.path.edges",
+                "Each path edge must connect its adjacent modes"),{}, {}};
+
+        enum class ReserveFailure { none, variable_limit, width_overflow };
+        auto reserve=[&](std::size_t amount,std::size_t& offset)->ReserveFailure {
+            if(layout.width>max-amount) return ReserveFailure::width_overflow;
+            if(check_variable_limit && layout.width+amount>limits.max_variables)
+                return ReserveFailure::variable_limit;
+            offset=layout.width;
+            layout.width+=amount;
+            return ReserveFailure::none;
+        };
+        HybridTransitionLayout transition;
+        transition.edge=&*found;
+        auto reserve_failure=[&] {
+            return HybridPathLayoutFailure{{DiagnosticCode::unsupported,
+                "hybrid.relation.variables","Joint relation exceeds its variable limit"},
+                stage,found->id,false};
+        };
+        const auto control_result=reserve(layout.modes[stage]->control_dimension,
+            transition.control.offset);
+        if(control_result!=ReserveFailure::none) {
+            auto failure=reserve_failure();
+            failure.width_overflow=control_result==ReserveFailure::width_overflow;
+            return failure;
+        }
+        const auto pre_result=reserve(layout.modes[stage]->state_dimension,
+            transition.pre_state.offset);
+        if(pre_result!=ReserveFailure::none) {
+            auto failure=reserve_failure();
+            failure.width_overflow=pre_result==ReserveFailure::width_overflow;
+            return failure;
+        }
+        transition.control.size=layout.modes[stage]->control_dimension;
+        transition.pre_state.size=layout.modes[stage]->state_dimension;
+        CoordinateRange post_state;
+        const auto post_result=reserve(layout.modes[stage+1]->state_dimension,
+            post_state.offset);
+        if(post_result!=ReserveFailure::none) {
+            auto failure=reserve_failure();
+            failure.width_overflow=post_result==ReserveFailure::width_overflow;
+            return failure;
+        }
+        post_state.size=layout.modes[stage+1]->state_dimension;
+        layout.transitions.push_back(transition);
+        layout.post_states.push_back(post_state);
+    }
+    return layout;
+}
+
+Diagnostic objective_layout_failure(const HybridPathLayoutFailure& failure) {
+    if(failure.width_overflow)
+        return invalid("hybrid.objective.width","Joint coordinate count overflows size_t");
+    if(failure.diagnostic.field=="hybrid.relation.variables")
+        return {DiagnosticCode::unsupported,"hybrid.objective.variables",
+            "Lifted objective exceeds its variable limit"};
+    return failure.diagnostic;
+}
+
+}
+
 HybridRelationPreflightResult preflight_hybrid_path_relations(
     const HybridSystem& system,const HybridRequest& request,
     std::span<const HybridPath> paths,HybridRelationLimits limits,
@@ -414,39 +540,17 @@ HybridRelationPreflightResult preflight_hybrid_path_relations(
                 (edge?" edge "+edge->value:std::string{})+": "+diagnostic.explanation;
             return fail(std::move(diagnostic));
         };
-        if(path.modes.size()!=system.horizon+1 || path.edges.size()!=system.horizon ||
-           path.modes.empty() || path.modes.front()!=request.initial.mode ||
-           std::find(request.allowed_terminal_modes.begin(),request.allowed_terminal_modes.end(),path.modes.back())==
-               request.allowed_terminal_modes.end())
-            return fail(invalid("hybrid.path","Path must match the horizon and request endpoints"));
-        std::vector<const HybridMode*> modes;
-        std::vector<const HybridTransitionEdge*> edges;
-        modes.reserve(path.modes.size());
-        edges.reserve(path.edges.size());
-        for(const auto& id:path.modes) {
-            const auto* mode=find_mode(system,id);
-            if(!mode) return fail(invalid("hybrid.path.modes","Path references an unknown mode"));
-            modes.push_back(mode);
+        const auto resolved=resolve_hybrid_path_layout(system,request,path,limits,true,true,cancellation);
+        if(const auto* stopped_result=std::get_if<OperationStopped>(&resolved)) return *stopped_result;
+        if(const auto* failure=std::get_if<HybridPathLayoutFailure>(&resolved)) {
+            if(failure->stage)
+                return fail_stage(failure->diagnostic,*failure->stage,failure->edge);
+            return fail(failure->diagnostic);
         }
-        std::size_t width=modes.front()->state_dimension;
-        if(width>limits.max_variables)
-            return fail_stage({DiagnosticCode::unsupported,"hybrid.relation.variables","Joint relation exceeds its variable limit"},0);
-        for(std::size_t stage=0;stage<system.horizon;++stage) {
-            if(cancellation.stop_requested()) return stopped();
-            const auto found=std::find_if(system.edges.begin(),system.edges.end(),[&](const auto& edge) {
-                return edge.id==path.edges[stage];
-            });
-            if(found==system.edges.end() || found->source!=path.modes[stage] ||
-               found->target!=path.modes[stage+1])
-                return fail(invalid("hybrid.path.edges","Each path edge must connect adjacent modes"));
-            edges.push_back(&*found);
-            for(const auto amount:{modes[stage]->control_dimension,modes[stage]->state_dimension,
-                                   modes[stage+1]->state_dimension}) {
-                if(width>max-amount || width+amount>limits.max_variables)
-                    return fail_stage({DiagnosticCode::unsupported,"hybrid.relation.variables","Joint relation exceeds its variable limit"},stage,path.edges[stage]);
-                width+=amount;
-            }
-        }
+        const auto& layout=std::get<HybridPathLayout>(resolved);
+        const auto& modes=layout.modes;
+        const auto& transitions=layout.transitions;
+        const auto width=layout.width;
         std::size_t rows=0;
         auto add_rows=[&](std::size_t amount)->bool {
             if(rows>max-amount || rows+amount>limits.max_rows) return false;
@@ -503,7 +607,7 @@ HybridRelationPreflightResult preflight_hybrid_path_relations(
         for(std::size_t stage=0;stage<system.horizon;++stage) {
             if(cancellation.stop_requested()) return stopped();
             const auto& mode=*modes[stage];
-            const auto& edge=*edges[stage];
+            const auto& edge=*transitions[stage].edge;
             if(auto d=admit_set(mode.invariants[stage],"hybrid.invariant.representation"))
                 return fail_stage(*d,stage,edge.id);
             const auto& flow=std::holds_alternative<LinearStage>(mode.flow)?
@@ -538,36 +642,14 @@ HybridRelationResult compose_hybrid_path_relation_impl(const HybridSystem& syste
     const auto stopped = [] { return OperationStopped{StopReason::cancelled,
         "Hybrid joint-relation construction was cancelled; no relation was returned"}; };
     if (cancellation.stop_requested()) return stopped();
-    if (path.modes.size() != system.horizon + 1 || path.edges.size() != system.horizon ||
-        path.modes.front() != request.initial.mode ||
-        std::find(request.allowed_terminal_modes.begin(), request.allowed_terminal_modes.end(), path.modes.back()) == request.allowed_terminal_modes.end())
-        return invalid("hybrid.path", "Path must match the horizon and request endpoints");
-    const auto max = std::numeric_limits<std::size_t>::max();
-    std::vector<const HybridMode*> modes;
-    std::vector<const HybridTransitionEdge*> edges;
-    for (const auto& id : path.modes) {
-        const auto* mode = find_mode(system, id);
-        if (!mode) return invalid("hybrid.path.modes", "Path references an unknown mode");
-        modes.push_back(mode);
-    }
-    std::vector<std::size_t> state_offsets(system.horizon + 1), control_offsets(system.horizon), pre_offsets(system.horizon);
-    std::size_t width = 0;
-    auto reserve = [&](std::size_t amount, std::size_t& offset) {
-        if (width > max - amount) return false;
-        offset = width; width += amount; return width <= limits.max_variables;
-    };
-    if (!reserve(modes[0]->state_dimension, state_offsets[0]))
-        return Diagnostic{DiagnosticCode::unsupported,"hybrid.relation.variables","Joint relation exceeds its variable limit"};
-    for (std::size_t t=0; t<system.horizon; ++t) {
-        const auto found = std::find_if(system.edges.begin(),system.edges.end(),[&](const auto& e){return e.id==path.edges[t];});
-        if (found==system.edges.end() || found->source!=path.modes[t] || found->target!=path.modes[t+1])
-            return invalid("hybrid.path.edges", "Each path edge must connect its adjacent modes");
-        edges.push_back(&*found);
-        if (!reserve(modes[t]->control_dimension,control_offsets[t]) ||
-            !reserve(modes[t]->state_dimension,pre_offsets[t]) ||
-            !reserve(modes[t+1]->state_dimension,state_offsets[t+1]))
-            return Diagnostic{DiagnosticCode::unsupported,"hybrid.relation.variables","Joint relation exceeds its variable limit"};
-    }
+    const auto resolved=resolve_hybrid_path_layout(system,request,path,limits,true,false,cancellation);
+    if(const auto* stopped_result=std::get_if<OperationStopped>(&resolved)) return *stopped_result;
+    if(const auto* failure=std::get_if<HybridPathLayoutFailure>(&resolved))
+        return failure->diagnostic;
+    const auto& layout=std::get<HybridPathLayout>(resolved);
+    const auto& modes=layout.modes;
+    const auto& transitions=layout.transitions;
+    const auto width=layout.width;
     auto preflight = [](const SetHandle& handle, const char* field) -> std::optional<Diagnostic> {
         const auto frozen=sets::from_handle(handle);
         if(const auto* d=std::get_if<Diagnostic>(&frozen)) return *d;
@@ -587,8 +669,8 @@ HybridRelationResult compose_hybrid_path_relation_impl(const HybridSystem& syste
         if(auto d=preflight_set(modes[t]->control_sets[t],"hybrid.control.representation")) return *d;
         if(auto d=preflight_set(modes[t]->invariants[t],"hybrid.invariant.representation")) return *d;
         if(auto d=preflight_set(modes[t]->invariants[t+1],"hybrid.invariant.representation")) return *d;
-        if(auto d=preflight_set(edges[t]->guards[t],"hybrid.guard.representation")) return *d;
-        if(auto d=preflight(edges[t]->reset_relations[t],"hybrid.reset.representation")) return *d;
+        if(auto d=preflight_set(transitions[t].edge->guards[t],"hybrid.guard.representation")) return *d;
+        if(auto d=preflight(transitions[t].edge->reset_relations[t],"hybrid.reset.representation")) return *d;
     }
     if(auto d=preflight_set(modes.back()->invariants[system.horizon],"hybrid.invariant.representation")) return *d;
     std::vector<Vector> inequalities, equalities;
@@ -678,40 +760,42 @@ HybridRelationResult compose_hybrid_path_relation_impl(const HybridSystem& syste
             total_rows,total_rows*width});
     };
     auto rows_before=row_count();
-    auto initial_error=add_set(Singleton{request.initial.state},state_offsets[0],modes[0]->state_dimension);
+    auto initial_error=add_set(Singleton{request.initial.state},layout.post_states[0].offset,modes[0]->state_dimension);
     if(initial_error) return cancellation.stop_requested()?HybridRelationResult{stopped()}:HybridRelationResult{*initial_error};
     record_operation(HybridRelationOperationKind::initial_state,0,modes[0]->id,{},rows_before);
     for(std::size_t t=0;t<=system.horizon;++t) {
         if(cancellation.stop_requested()) return stopped();
         rows_before=row_count();
-        if(auto e=add_set(modes[t]->invariants[t],state_offsets[t],modes[t]->state_dimension))
+        if(auto e=add_set(modes[t]->invariants[t],layout.post_states[t].offset,modes[t]->state_dimension))
             return cancellation.stop_requested()?HybridRelationResult{stopped()}:HybridRelationResult{*e};
         record_operation(HybridRelationOperationKind::post_state_invariant,t,modes[t]->id,{},rows_before);
         if(t==system.horizon) continue;
         const auto& mode=*modes[t];
         const auto& flow=std::holds_alternative<LinearStage>(mode.flow)?std::get<LinearStage>(mode.flow):std::get<std::vector<LinearStage>>(mode.flow)[t];
         rows_before=row_count();
-        if(!add_linear(flow,state_offsets[t],control_offsets[t],pre_offsets[t])) {
+        if(!add_linear(flow,layout.post_states[t].offset,transitions[t].control.offset,
+            transitions[t].pre_state.offset)) {
             if(cancellation.stop_requested()) return stopped();
             return Diagnostic{DiagnosticCode::unsupported,"hybrid.relation.rows","Joint relation exceeds its row limit"};
         }
         record_operation(HybridRelationOperationKind::mode_flow,t,mode.id,{},rows_before);
         rows_before=row_count();
-        if(auto e=add_set(mode.control_sets[t],control_offsets[t],mode.control_dimension))
+        if(auto e=add_set(mode.control_sets[t],transitions[t].control.offset,mode.control_dimension))
             return cancellation.stop_requested()?HybridRelationResult{stopped()}:HybridRelationResult{*e};
         record_operation(HybridRelationOperationKind::continuous_control,t,mode.id,{},rows_before);
         rows_before=row_count();
-        if(auto e=add_set(mode.invariants[t+1],pre_offsets[t],mode.state_dimension))
+        if(auto e=add_set(mode.invariants[t+1],transitions[t].pre_state.offset,mode.state_dimension))
             return cancellation.stop_requested()?HybridRelationResult{stopped()}:HybridRelationResult{*e};
         record_operation(HybridRelationOperationKind::pre_reset_invariant,t+1,mode.id,{},rows_before);
         rows_before=row_count();
-        if(auto e=add_set(edges[t]->guards[t],pre_offsets[t],mode.state_dimension))
+        if(auto e=add_set(transitions[t].edge->guards[t],transitions[t].pre_state.offset,mode.state_dimension))
             return cancellation.stop_requested()?HybridRelationResult{stopped()}:HybridRelationResult{*e};
-        record_operation(HybridRelationOperationKind::transition_guard,t,{},edges[t]->id,rows_before);
+        record_operation(HybridRelationOperationKind::transition_guard,t,{},transitions[t].edge->id,rows_before);
         rows_before=row_count();
-        if(auto e=add_reset(edges[t]->reset_relations[t],pre_offsets[t],state_offsets[t+1],mode.state_dimension,modes[t+1]->state_dimension))
+        if(auto e=add_reset(transitions[t].edge->reset_relations[t],transitions[t].pre_state.offset,
+            layout.post_states[t+1].offset,mode.state_dimension,modes[t+1]->state_dimension))
             return cancellation.stop_requested()?HybridRelationResult{stopped()}:HybridRelationResult{*e};
-        record_operation(HybridRelationOperationKind::reset_relation,t,{},edges[t]->id,rows_before);
+        record_operation(HybridRelationOperationKind::reset_relation,t,{},transitions[t].edge->id,rows_before);
     }
     if(cancellation.stop_requested()) return stopped();
     std::vector<std::string> coordinate_labels(width);
@@ -724,11 +808,11 @@ HybridRelationResult compose_hybrid_path_relation_impl(const HybridSystem& syste
                 std::to_string(coordinate.size())+":"+coordinate;
         }
     };
-    label_block(state_offsets[0],*modes[0],modes[0]->state_coordinate_labels,0,"post");
+    label_block(layout.post_states[0].offset,*modes[0],modes[0]->state_coordinate_labels,0,"post");
     for(std::size_t t=0;t<system.horizon;++t) {
-        label_block(control_offsets[t],*modes[t],modes[t]->control_coordinate_labels,t,"control");
-        label_block(pre_offsets[t],*modes[t],modes[t]->state_coordinate_labels,t+1,"pre");
-        label_block(state_offsets[t+1],*modes[t+1],modes[t+1]->state_coordinate_labels,t+1,"post");
+        label_block(transitions[t].control.offset,*modes[t],modes[t]->control_coordinate_labels,t,"control");
+        label_block(transitions[t].pre_state.offset,*modes[t],modes[t]->state_coordinate_labels,t+1,"pre");
+        label_block(layout.post_states[t+1].offset,*modes[t+1],modes[t+1]->state_coordinate_labels,t+1,"post");
     }
     Matrix A{inequalities.size(),width,{}}; A.values.reserve(inequalities.size()*width);
     for(const auto& row:inequalities) A.values.insert(A.values.end(),row.begin(),row.end());
@@ -772,32 +856,16 @@ HybridObjectiveLiftResult lift_hybrid_terminal_objective(const HybridSystem& sys
     const HybridRequest& request, const HybridPath& path, HybridRelationLimits limits) {
     const auto errors=check_hybrid_profile(system,request);
     if(!errors.empty()) return errors.front();
-    if(path.modes.size()!=system.horizon+1 || path.edges.size()!=system.horizon ||
-       path.modes.front()!=request.initial.mode ||
-       std::find(request.allowed_terminal_modes.begin(),request.allowed_terminal_modes.end(),path.modes.back())==request.allowed_terminal_modes.end())
-        return invalid("hybrid.path","Path must match the horizon and request endpoints");
-    std::vector<const HybridMode*> modes;
-    modes.reserve(path.modes.size());
-    for(const auto& id:path.modes) {
-        const auto* mode=find_mode(system,id);
-        if(!mode) return invalid("hybrid.path.modes","Path references an unknown mode");
-        modes.push_back(mode);
-    }
-    std::size_t width=modes.front()->state_dimension;
-    for(std::size_t t=0;t<system.horizon;++t) {
-        const auto edge=std::find_if(system.edges.begin(),system.edges.end(),[&](const auto& candidate){return candidate.id==path.edges[t];});
-        if(edge==system.edges.end() || edge->source!=path.modes[t] || edge->target!=path.modes[t+1])
-            return invalid("hybrid.path.edges","Each path edge must connect its adjacent modes");
-        for(const auto amount:{modes[t]->control_dimension,modes[t]->state_dimension,modes[t+1]->state_dimension}) {
-            if(width>std::numeric_limits<std::size_t>::max()-amount)
-                return invalid("hybrid.objective.width","Joint coordinate count overflows size_t");
-            width+=amount;
-        }
-    }
+    const auto resolved=resolve_hybrid_path_layout(system,request,path,limits,false,false,{});
+    if(const auto* failure=std::get_if<HybridPathLayoutFailure>(&resolved))
+        return objective_layout_failure(*failure);
+    const auto& layout=std::get<HybridPathLayout>(resolved);
+    const auto& modes=layout.modes;
+    const auto width=layout.width;
     if(width>limits.max_variables)
         return Diagnostic{DiagnosticCode::unsupported,"hybrid.objective.variables","Lifted objective exceeds its variable limit"};
     const auto terminal_dimension=modes.back()->state_dimension;
-    const auto terminal_offset=width-terminal_dimension;
+    const auto terminal_offset=layout.post_states.back().offset;
     const auto objective=std::find_if(request.terminal_objectives.begin(),request.terminal_objectives.end(),
         [&](const HybridModeObjective& entry){return entry.mode==path.modes.back();});
     if(objective==request.terminal_objectives.end())
