@@ -115,7 +115,7 @@
   "schema": "csl.mpc08-explicit-pilot-record/1",
   "scope": "One exact rational one-step double-integrator fixture; 45 solver-validation points and 810 fixed-initial method observations.",
   "solver_validation_queries": 45,
-  "source_commit": "741a6de89e41400e38d1efb136b946e1df5f9ac9",
-  "source_url": "https://github.com/butahlecoq/controlled-systems-lab/blob/741a6de89e41400e38d1efb136b946e1df5f9ac9/benchmarks/reporting/mpc08_explicit/README.md",
+  "source_commit": "f18b3e6ffb01e92e2ba71025f8ac25e4908b576a",
+  "source_url": "https://github.com/butahlecoq/controlled-systems-lab/blob/f18b3e6ffb01e92e2ba71025f8ac25e4908b576a/benchmarks/reporting/mpc08_explicit/README.md",
   "total_region_facets": 34
 }
