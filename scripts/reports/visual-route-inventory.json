@@ -479,9 +479,7 @@
     {
       "source": "scripts/reports/stage_exp02_it17_dyadic.py",
       "signal_count": 1,
-      "asset_name_literals": [
-        "fixture-geometry.svg"
-      ],
+      "asset_name_literals": [],
       "disposition": "publication-validation-or-frozen-route"
     },
     {
@@ -941,7 +939,7 @@
       "assets": [
         "halton-square-n1000.svg"
       ],
-      "index_sha256": "306c1dadd31c2b4dcfa92cf1914062c14d812a141de5502f50983af5fbd441ec",
+      "index_sha256": "884e59c57a2a4a18cce40630a37b6c495abbddb3ea8eda4be128262a9ee2ea79",
       "disposition": "deferred: original frozen route-level readability review remains; companion availability is listed separately",
       "follow_up_issue": 669
     },

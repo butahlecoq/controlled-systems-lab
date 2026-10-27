@@ -51,9 +51,17 @@ def validate_bundle(source: Path) -> None:
     record = json.loads((source / "record.json").read_text(encoding="utf-8"))
     if record.get("report_id") != REPORT_ID or record.get("attempts") != 72:
         raise ValueError("report identity or attempt count differs")
-    site_module.OfflineHTML(bundle_files(source)).feed(
-        (source / "index.html").read_text(encoding="utf-8"))
-    site_module.data.validate_svg((source / "fixture-geometry.svg").read_bytes())
+    for page in sorted(path for path in source.rglob("*.html") if path.is_file()):
+        page_assets = set()
+        for candidate in source.rglob("*"):
+            if candidate.is_file():
+                try:
+                    page_assets.add(candidate.relative_to(page.parent).as_posix())
+                except ValueError:
+                    continue
+        site_module.OfflineHTML(page_assets).feed(page.read_text(encoding="utf-8"))
+    for figure in sorted(path for path in source.rglob("*.svg") if path.is_file()):
+        site_module.data.validate_svg(figure.read_bytes())
 
 
 def stage(source: Path, site_root: Path) -> str:

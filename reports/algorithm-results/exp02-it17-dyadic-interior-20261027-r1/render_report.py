@@ -161,6 +161,12 @@ def render_prior_ladder() -> None:
         "This artifact records an exploratory 2D benchmark for issue #94. The native dependency #86 is still open, so these measurements do not satisfy the full EXP-02 acceptance criteria and do not resolve that dependency.",
         "This artifact records an exploratory 2D benchmark for issue #94. At the time of this run, native dependency #86 was open. The live issue tracker now reports the native blockers closed; these measurements still do not satisfy the full EXP-02 acceptance criteria.")
     prior_readme.write_text(prior_text, encoding="utf-8")
+    prior_svg = destination / "halton-square-n1000.svg"
+    svg_text = prior_svg.read_text(encoding="utf-8")
+    svg_text = svg_text.replace(
+        ".points circle{fill:#306da8;opacity:.53}",
+        ".points{fill:#306da8;opacity:.53}")
+    prior_svg.write_text(svg_text, encoding="utf-8")
 
     rows = list(csv.DictReader((destination / "summary.csv").open(
         encoding="utf-8", newline="")))
@@ -175,14 +181,14 @@ def render_prior_ladder() -> None:
 body{{font:16px/1.55 system-ui,sans-serif;max-width:1100px;margin:2rem auto;padding:0 1rem;color:#eee;background:#17191d}}
 p{{max-width:85ch;color:#ccc}}table{{border-collapse:collapse;width:100%;font-size:.9rem}}th,td{{border:1px solid #555;padding:.4rem;text-align:left}}th{{background:#292c32}}
 img{{max-width:100%;height:auto;background:#222;border-radius:.5rem}}.warning{{border-left:4px solid #e0a75e;padding:.6rem 1rem;background:#29251e}}
-</style></head><body><main><p><a href="../index.html">Return to the combined EXP-02 report</a></p>
+</style></head><body><main><p><a href="README.md">Read the methodology and reproduction details</a></p>
 <h1>Earlier Halton square size ladder</h1>
 <p>This is a separate exploratory run from source commit 5ee632d105f134fbcba3a4f50334eef8e97476ab. It uses 250, 1,000, and 5,000-point unscrambled Halton square inputs, one warmup and seven interleaved measured attempts per method and size. It is not pooled with the newer dyadic fixtures in the parent report.</p>
 <p class="warning">QuickHull and basis reuse passed all 21 measured attempts. The other four reducers failed completion checks across this ladder; their elapsed times are diagnostic only. The original 5,000-point run exceeded its first 300-second cap and continued from round 4. This run had no per-attempt resource limiter, and no overall winner or scalability claim is made.</p>
 <figure><img src="halton-square-n1000.svg" alt="Four square corners and 996 unscrambled Halton points inside the unit square"><figcaption>Example input: four square corners and 996 interior points.</figcaption></figure>
 <h2>Per-method results</h2><p>Times are milliseconds. Blank medians indicate that no attempt passed validation.</p>
 <table><thead><tr><th>Points</th><th>Method</th><th>Valid</th><th>Trials</th><th>Median valid ms</th><th>Min</th><th>Max</th><th>Failed</th></tr></thead><tbody>{table}</tbody></table>
-<h2>Saved evidence</h2><ul><li><a href="summary.csv">Summary CSV</a></li><li><a href="validated-rows.jsonl">Validated rows</a></li><li><a href="coverage.json">Coverage and input hashes</a></li><li><a href="README.md">Methodology, limitations, and reproduction</a></li><li><a href="raw/raw-250.jsonl">250-point raw attempts</a></li><li><a href="raw/raw-1000.jsonl">1,000-point raw attempts</a></li><li><a href="raw/raw-5000.jsonl">5,000-point raw attempts</a></li></ul>
+<h2>Saved evidence</h2><ul><li><a href="summary.csv">Summary CSV</a></li><li><a href="validated-rows.jsonl">Validated rows</a></li><li><a href="coverage.json">Coverage and input hashes</a></li><li><a href="README.md">Methodology, limitations, and reproduction</a></li><li><a href="raw/raw-250.jsonl">250-point raw attempts</a></li><li><a href="raw/raw-1000.jsonl">1,000-point raw attempts</a></li><li><a href="raw/raw-5000.jsonl">5,000-point initial run (26 rows; exit 124)</a></li><li><a href="raw/raw-5000-resume.jsonl">5,000-point continuation (24 rows; includes 2 repeated keys)</a></li></ul>
 <p>Source and timing scope differ from the 2026-10-27 dyadic pilot. See each report's own environment, raw records, and checksums.</p></main></body></html>''', encoding="utf-8")
 
 

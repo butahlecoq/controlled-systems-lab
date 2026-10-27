@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="900" height="960" viewBox="0 0 900 960" role="img" aria-labelledby="title desc">
 <title id="title">1,000-point Halton square workload</title><desc id="desc">Four square corners and 996 deterministic Halton points in the unit square.</desc>
-<style>text{font-family:system-ui,sans-serif;fill:#202938} .points circle{fill:#306da8;opacity:.53} .corner{fill:#d44832;stroke:white;stroke-width:1.5} .box{fill:none;stroke:#222d3d;stroke-width:2}</style>
+<style>text{font-family:system-ui,sans-serif;fill:#202938} .points{fill:#306da8;opacity:.53} .corner{fill:#d44832;stroke:white;stroke-width:1.5} .box{fill:none;stroke:#222d3d;stroke-width:2}</style>
 <rect width="900" height="960" fill="#fff"/><text x="50" y="32" font-size="22" font-weight="700">Deterministic 2D hull fixture · n = 1,000</text>
 <text x="50" y="54" font-size="14">Four square corners plus 996 unscrambled Halton points (bases 2 and 3; index starts at 1)</text>
 <rect class="box" x="50" y="50" width="800" height="800"/><g class="points"><circle cx="450.000" cy="583.333" r="1.65" />
