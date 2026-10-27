@@ -2,7 +2,6 @@
 from __future__ import annotations
 
 import importlib.util
-import hashlib
 import json
 from pathlib import Path
 import shutil
@@ -28,11 +27,9 @@ def snapshot(root: Path):
             for path in root.rglob("*")}
 
 
-def catalog_for_current_stager(path: Path) -> Path:
+def catalog_with_saved_bundle(path: Path) -> Path:
     data = json.loads(CATALOG.read_text(encoding="utf-8"))
     shutil.copytree(BUNDLE, path.parent / data["reports"][0]["report_id"])
-    stager = ROOT / "scripts/reports/stage_app02.py"
-    data["reports"][0]["stager_sha256"] = hashlib.sha256(stager.read_bytes()).hexdigest()
     path.write_text(json.dumps(data), encoding="utf-8")
     return path
 
@@ -67,7 +64,7 @@ class SavedApp02Test(unittest.TestCase):
             site_dir.mkdir()
             (site_dir / "index.html").write_text(
                 "<html><body><h1>Reports</h1><ul><li>Existing</li></ul></body></html>", encoding="utf-8")
-            catalog = catalog_for_current_stager(root / "catalog.json")
+            catalog = catalog_with_saved_bundle(root / "catalog.json")
             report_id = stage_app02.stage(catalog, site_dir)
             self.assertEqual((site_dir / report_id / "records.json").read_bytes(),
                              (BUNDLE / "records.json").read_bytes())
@@ -99,7 +96,7 @@ class SavedApp02Test(unittest.TestCase):
                 site_dir = Path(temporary) / "site"
                 site_dir.mkdir()
                 (site_dir / "index.html").write_text(index_text, encoding="utf-8")
-                catalog = catalog_for_current_stager(Path(temporary) / "catalog.json")
+                catalog = catalog_with_saved_bundle(Path(temporary) / "catalog.json")
                 before = snapshot(site_dir)
                 with self.assertRaisesRegex(ValueError, "insertion point"):
                     stage_app02.stage(catalog, site_dir)
@@ -114,7 +111,7 @@ class SavedApp02Test(unittest.TestCase):
             index = site_dir / "index.html"
             index.write_text("<html><body><ul></ul></body></html>", encoding="utf-8")
             original_index = index.read_bytes()
-            catalog = catalog_for_current_stager(root / "catalog.json")
+            catalog = catalog_with_saved_bundle(root / "catalog.json")
             real_commit = stage_app02.site_additions.commit
 
             def fail_after_one(plan):

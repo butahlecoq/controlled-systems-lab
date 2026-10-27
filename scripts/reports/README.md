@@ -35,7 +35,9 @@ plan that checks normalized paths, symlinks, destination types, freshness
 requirements and existing-file fingerprints. No site path is created or written
 until preparation succeeds. Gallery rebuilds may replace only files named in
 their plan; APP-02 requires its report and example routes to be fresh. Existing
-report bundles are read-only inputs.
+report bundles are read-only inputs. APP-02's published catalog retains its
+historical stager fingerprint; newly generated catalog entries use the current
+stager fingerprint.
 
 Validation or preparation failures leave all pre-existing site bytes and paths
 unchanged. During commit, route data and nested index pages are written before

@@ -9,6 +9,9 @@ import json
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
+HISTORICAL_STAGER_HASHES = {
+    "app02-box-8ff979de60ea9d22": "d63f67e8496b8cd225f3a4ca78ca274b80ea8553e619fda6473412184a3dd0be",
+}
 spec = importlib.util.spec_from_file_location("app02_saved_renderer", ROOT / "scripts/reports/app02/render_saved.py")
 report = importlib.util.module_from_spec(spec)
 assert spec.loader is not None
@@ -64,7 +67,10 @@ def stage(catalog: Path, site_dir: Path) -> str:
                            len(report_id) == len("app02-box-") + 16,
                            "Unsafe APP-02 report ID")
     bundle = catalog.parent / report_id
-    report.collect.require(data["reports"][0] == catalog_entry(bundle),
+    expected_entry = catalog_entry(bundle)
+    if report_id in HISTORICAL_STAGER_HASHES:
+        expected_entry["stager_sha256"] = HISTORICAL_STAGER_HASHES[report_id]
+    report.collect.require(data["reports"][0] == expected_entry,
                            "APP-02 catalog differs from saved source")
     report.collect.require(site_dir.is_dir() and not site_dir.is_symlink(),
                            "APP-02 site root must be an existing directory")
