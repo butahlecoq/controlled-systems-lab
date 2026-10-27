@@ -1263,7 +1263,7 @@
       "assets": [
         "critical-regions.svg"
       ],
-      "index_sha256": "e2ddcf39a875becd6a85c0287520be964fc3bf9c4775f425033ce157249cd2da",
+      "index_sha256": "79899001122229a18ab337373d5081de2b3ce09775486f75ab21ce920c59244d",
       "disposition": "deferred: original frozen route-level readability review remains; companion availability is listed separately",
       "follow_up_issue": 669
     },
