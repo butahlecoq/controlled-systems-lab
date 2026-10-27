@@ -1,0 +1,18 @@
+{
+  "schema": "csl.stage-projection-figure-export/1",
+  "input_content_sha256": "43d46c7d73f2be779fe2eaa6dd59840488e1cff130ce8d05510ca62881df802d",
+  "style_id": "csl-control-science-v1",
+  "quantitative_axis_policy": "csl-report-quantitative-v1",
+  "output_directory": ".",
+  "files": {
+    "index.html": "e5ed08ed53abd529d9c0b4f636e4d1643cb33e6bffe240a5a63d9c2e57925f58",
+    "projection-01-x0-x2.png": "2c4ed8143bb4c90afb083fdee3493409ed6a76278fcca7d9390ec78b0f35cafe",
+    "projection-01-x0-x2.svg": "3bccb480e391fb867f38f8ed2013f09663dff9b700ba3ac6473a12ad9a39c505",
+    "projection-02-x1-x3.png": "c45a72d84e6bf4106eb1bb18d6c7f7143cc283d8fc39c95d0eadc677d319f996",
+    "projection-02-x1-x3.svg": "1b3e10dd01465654cf20558ace015fa2b3708a3a122bb93c4a1170c54d9ab1da",
+    "projection-03-x0-x3.png": "67c0d5d9af2332d38ac58a2de9a26bbe02cbcf7abded42ad6abf6f26db946bdc",
+    "projection-03-x0-x3.svg": "789474015fc4d8338f85c14f4a16a374ac87e9e66a8b4f7f414af44c37e3abff",
+    "projection-04-x1-x2.png": "84577d24ff5c40c7ea294a75feef41e47e17ab2263cbdc1518dd14c3531ea9b6",
+    "projection-04-x1-x2.svg": "e9400b3168738494e49623f81da8d571999696a0c92dbbb33c3f25847da0a78f"
+  }
+}
