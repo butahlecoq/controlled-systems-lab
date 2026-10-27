@@ -3,9 +3,9 @@
   "input_content_sha256": "85c29db34670e88e08df8c3fba91729657a262bb69c8cb185fbe681e848f1136",
   "style_id": "csl-control-science-v1",
   "quantitative_axis_policy": "csl-report-quantitative-v1",
-  "output_directory": "/home/butahlecoq/.local/share/codex/worktrees/viz15-fuel-route-demonstrations-713-20261027/benchmarks/reporting/stage-projection/bundle-v1-check/nonfuel-integrator-figures",
+  "output_directory": ".",
   "files": {
-    "index.html": "148fab8fb8adbc7bc2cd8c7b7d3c247465f461c6ddb7daf789a17d50e71e182b",
+    "index.html": "ed5a6e443f6982ddd1c35c7b20122a7dbbd2364d7a0999f64795eb967f930c50",
     "projection-01-x0-x1.png": "3b2c4999904c409e8ccc8a229974973663764c37ee346da204252c36617a07ac",
     "projection-01-x0-x1.svg": "95d2b61dac7748ee2211ab6825a08f74797f4c8d56a65acd61d9ee1045fd0be8"
   }

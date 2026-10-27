@@ -6,7 +6,7 @@
     },
     {
       "path": "fuel-four-state-figures/index.html",
-      "sha256": "41e092985a6d9b62c120aa6f128101e326f7fdfb6fa76f00bf7f3c94d531db1e"
+      "sha256": "e5ed08ed53abd529d9c0b4f636e4d1643cb33e6bffe240a5a63d9c2e57925f58"
     },
     {
       "path": "fuel-four-state-figures/projection-01-x0-x2.png",
@@ -42,7 +42,7 @@
     },
     {
       "path": "fuel-four-state-figures/render-manifest.json",
-      "sha256": "68c961ff3dfc9e042ff34df5d2590873f08c945f343642dece1f54f995b8becf"
+      "sha256": "5dd75ba7821ab67721e31ae07766aec2fff90e3cd3c2d1456b5cdd0d14d21eb7"
     },
     {
       "path": "fuel-four-state.stage-projection-batch.json",
@@ -50,7 +50,7 @@
     },
     {
       "path": "nonfuel-integrator-figures/index.html",
-      "sha256": "148fab8fb8adbc7bc2cd8c7b7d3c247465f461c6ddb7daf789a17d50e71e182b"
+      "sha256": "ed5a6e443f6982ddd1c35c7b20122a7dbbd2364d7a0999f64795eb967f930c50"
     },
     {
       "path": "nonfuel-integrator-figures/projection-01-x0-x1.png",
@@ -62,7 +62,7 @@
     },
     {
       "path": "nonfuel-integrator-figures/render-manifest.json",
-      "sha256": "34789d90452b16c314d1b06fe6ba46d5a1335771ec022589b8d2254bac1d5c39"
+      "sha256": "07a40432bebe612c5599a472cc36704d8a7ad8f1963e14ad3a1fe387e406272b"
     },
     {
       "path": "nonfuel-integrator.stage-projection-batch.json",
@@ -89,7 +89,7 @@
   "source_files": [
     {
       "path": "benchmarks/reporting/stage-projection/prepare_demos.py",
-      "sha256": "538cc6a93a60d4ed24762c3266a87bb88c72d4ad7f5f30096320fa9d94d616b8"
+      "sha256": "44501829c697a922ac15fe9abcd18f17bb8e69ccbbae7263b5469659f0ba6da1"
     },
     {
       "path": "benchmarks/reporting/stage-projection/BUNDLE-README.md",

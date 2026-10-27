@@ -78,6 +78,23 @@ def _geometry_kind(points: list[list[float]]) -> tuple[str, list[list[float]]]:
     return "segment", [list(point) for point in points]
 
 
+def _normalize_render_paths(directory: Path) -> None:
+    """Make checked-in render outputs portable after absolute CLI paths print."""
+    index = directory / "index.html"
+    html = index.read_text(encoding="utf-8")
+    html = html.replace(
+        f'Output directory: <code class="path">{directory.resolve(strict=True)}</code>',
+        'Output directory: <code class="path">this bundle directory</code>',
+    )
+    index.write_text(html, encoding="utf-8")
+
+    receipt_path = directory / "render-manifest.json"
+    receipt = json.loads(receipt_path.read_text(encoding="utf-8"))
+    receipt["output_directory"] = "."
+    receipt["files"]["index.html"] = hashlib.sha256(index.read_bytes()).hexdigest()
+    receipt_path.write_text(json.dumps(receipt, indent=2, allow_nan=False) + "\n", encoding="utf-8")
+
+
 def _batch(source: dict, source_bytes: bytes) -> dict:
     source_hash = hashlib.sha256(source_bytes).hexdigest()
     coordinates = [
@@ -196,6 +213,7 @@ def main() -> None:
         batch_path.write_bytes(batch_bytes)
         figures = render_batch(batch_path, output / f"{stem}-figures", expected_identity=expected,
                                style_path=STYLE.resolve(strict=True))
+        _normalize_render_paths(output / f"{stem}-figures")
         print(f"{source['description']}")
         print(f"batch: {batch_path}")
         print(f"index: {(output / f'{stem}-figures/index.html').resolve()}")

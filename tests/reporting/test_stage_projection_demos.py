@@ -87,6 +87,16 @@ class StageProjectionDemoTests(unittest.TestCase):
         self.assertEqual(routes["issue6.b06-finite-action-minimax"]["capability"], "terminal_set_only")
         self.assertEqual(routes["simulation.replay"]["capability"], "trajectory_only")
 
+    def test_checked_in_bundle_uses_portable_paths_and_current_file_hashes(self):
+        bundle = ROOT / "benchmarks/reporting/stage-projection/bundle-v1"
+        for index in bundle.glob("*-figures/index.html"):
+            html = index.read_text()
+            self.assertIn("Output directory: <code class=\"path\">this bundle directory</code>", html)
+            self.assertNotIn("bundle-v1-check", html)
+            receipt = json.loads((index.parent / "render-manifest.json").read_text())
+            self.assertEqual(receipt["output_directory"], ".")
+            self.assertEqual(receipt["files"]["index.html"], hashlib.sha256(index.read_bytes()).hexdigest())
+
 
 if __name__ == "__main__":
     unittest.main()
