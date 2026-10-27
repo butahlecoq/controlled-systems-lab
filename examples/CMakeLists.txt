@@ -193,7 +193,7 @@ string(JSON explicit_methods_scenario SET "${validation_scenario}" run
 file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/explicit-methods.json" "${explicit_methods_scenario}")
 string(JSON changed_method_problem_scenario SET "${explicit_methods_scenario}" model A "[[2]]")
 file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/explicit-methods-changed-data.json" "${changed_method_problem_scenario}")
-string(JSON changed_backend_scenario SET "${explicit_methods_scenario}" run.backends.lp.id "phase-one-bland")
+string(JSON changed_backend_scenario SET "${explicit_methods_scenario}" run backends lp id "\"phase-one-bland\"")
 file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/explicit-methods-changed-backend.json" "${changed_backend_scenario}")
 if(TARGET scenario_cli)
   add_test(NAME scenario_cli_problem_identity_boundary
