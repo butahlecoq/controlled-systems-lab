@@ -11,8 +11,6 @@ import shutil
 import tempfile
 from urllib.parse import urlsplit
 
-import geo04_registered_reports as intersection_reports
-import geo06_registered_reports as hull_reports
 import audit_visual_routes
 import approx_extension_companions
 import geometry_opt_companions
@@ -20,8 +18,17 @@ import report_data
 import site_additions
 import stage_ext07 as ext07_reports
 import visual_illustrations
+import visual_example_geometry as geometry_examples
+import visual_example_hybrid as hybrid_examples
 
-CURRENT_EXT07_TWO_PARAMETER_REPORT = "ext07-hybrid-two-parameter-8ad871b5ea29fc7b"
+CASE_OWNERS = {
+    "hull": geometry_examples,
+    "intersection": geometry_examples,
+    "hybrid": hybrid_examples,
+    "two_parameter": hybrid_examples,
+    "projected_reachability": hybrid_examples,
+}
+
 SAVED_FIGURES = (
     dict(route="ext04-continuous-ebcf879d07ee9157", image="example-2d.svg", page="index.html",
          family="Continuous feedback · EXT-04", title="A partial observation policy over an initial set",
@@ -77,236 +84,12 @@ SAVED_FIGURES = (
 )
 
 
-def require(condition, message):
-    if not condition:
-        raise ValueError(message)
+require = report_data.require
 
 
 def load_examples(catalog):
-    """Validate source bundles using their existing publishers before reading data."""
-    catalog = Path(catalog)
-    entries = json.loads(catalog.read_text(encoding="utf-8"))["reports"]
-    selected = {}
-    # Pin the educational snapshots, so a later report of the same kind does
-    # not silently change an example or make catalogue selection ambiguous.
-    for kind, source_id, adapter in (("geo06-quickhull", "geo06-b010fb3df212604b", hull_reports),
-                                     ("geo04-intersection", "geo04-20261012T224946Z-c37852bcc80d", intersection_reports)):
-        matches = [entry for entry in entries
-                   if entry["report_kind"] == kind and entry["source_report_id"] == source_id]
-        require(len(matches) == 1, "gallery needs one reviewed " + kind + " report")
-        entry = matches[0]
-        for key in ("source_report_id", "report_id"):
-            require(re.fullmatch(r"[A-Za-z0-9-]+", entry[key]) is not None, "unsafe report route")
-        bundle = catalog.parent / entry["source_report_id"]
-        publication = adapter.adapt(bundle)
-        require(publication.report_id == entry["report_id"], "catalogue publication identity differs")
-        records_path = report_data.local_file(bundle, "records.json")
-        selected[kind] = (entry, json.loads(records_path.read_text(encoding="utf-8")), records_path)
-
-    entry, record, records_path = selected["geo06-quickhull"]
-    examples = []
-    for name, title, domain in (("square_duplicates", "Find the convex hull", (-.25, 1.25)),
-                                 ("collinear_endpoints", "When the hull is a line", (-.5, 3.5))):
-        fixture = record["catalog"][name]
-        rows = [row for row in record["rows"] if row["scenario"] == name]
-        indices = [int(value) for value in rows[0]["indices"].split(":")]
-        examples.append(dict(slug=name, title=title, points=fixture["points"], indices=indices,
-                             vertices=[fixture["points"][i] for i in indices], domain=domain,
-                             inputs={"points": fixture["points"]}, report_id=entry["report_id"],
-                             records_path=records_path, source=record["source_commit"],
-                             harness=record["harness_commit"], kind="hull"))
-
-    entry, record, records_path = selected["geo04-intersection"]
-    trial = next(row for row in record["trials"] if row["scenario"] == "crossing_octagon")
-    vertices = trial["vertices_json"]
-    # Separate literal geometric oracle; do not replace native floating outputs
-    # by these ideal vertices in the plot, table or downloadable example record.
-    expected = {(1,.5),(1,-.5),(-1,.5),(-1,-.5),(.5,1),(-.5,1),(.5,-1),(-.5,-1)}
-    require(len(vertices) == 8 and {tuple(round(v, 7) for v in p) for p in vertices} == expected,
-            "intersection differs from the eight literal vertices")
-    examples.append(dict(slug="crossing_octagon", title="Intersect two sets", vertices=vertices,
-                         points=vertices, indices=list(range(8)), domain=(-1.8, 1.8),
-                         inputs=record["expected"]["crossing_octagon"]["inputs"],
-                         report_id=entry["report_id"], records_path=records_path,
-                         source=record["algorithm"]["source_commit"],
-                         harness=record["algorithm"]["harness_commit"], kind="intersection"))
-
-    ext07_catalog = json.loads((catalog.parent / "ext07-publications.json").read_text(encoding="utf-8"))
-    require(ext07_catalog.get("schema") == "csl.ext07-publications/1" and
-            isinstance(ext07_catalog.get("reports"), list),
-            "gallery needs reviewed EXT-07 reports")
-    reports_by_schema = {}
-    for entry in ext07_catalog["reports"]:
-        bundle = catalog.parent / entry["report_id"]
-        require(ext07_reports.catalog_entry(bundle) == entry,
-                "EXT-07 publication identity differs")
-        reports_by_schema.setdefault(entry["schema"], []).append((entry, bundle))
-    one_step = reports_by_schema.get("csl.ext07-hybrid-profile-report/1", [])
-    two_parameter = [item for item in reports_by_schema.get(
-        "csl.ext07-hybrid-two-parameter-report/1", [])
-        if item[0].get("verifier_id") == "csl.hybrid.exact-linear-h" and
-        item[0].get("report_id") == CURRENT_EXT07_TWO_PARAMETER_REPORT]
-    require(len(one_step) == 1 and len(two_parameter) == 1,
-            "gallery needs one one-step report and one exact-H two-control report")
-    one_step_entry, one_step_bundle = one_step[0]
-    two_parameter_entry, two_parameter_bundle = two_parameter[0]
-    inputs = {
-        "initial": {"mode": "start", "state": [0]},
-        "horizon": 2,
-        "state_dimension": 1,
-        "control_dimension": 1,
-        "allowed_terminal_modes": ["terminal"],
-        "modes": [
-            {"id": "start", "active_stages_on_path": [0],
-             "flow_by_stage": [{"A": 1, "B": 1, "offset": 0}, {"A": 1, "B": 1, "offset": 0}],
-             "controls_by_stage": [{"interval": [0, 1]}, {"singleton": 0}],
-             "invariants_by_boundary": ["universal"] * 3},
-            {"id": "middle", "active_stages_on_path": [1],
-             "flow_by_stage": [{"A": 1, "B": 1, "offset": 0}, {"A": 1, "B": 1, "offset": 0}],
-             "controls_by_stage": [{"singleton": 0}, {"singleton": 0}],
-             "invariants_by_boundary": ["universal"] * 3},
-            {"id": "terminal", "active_stages_on_path": [2],
-             "flow_by_stage": [{"A": 1, "B": 1, "offset": 0}, {"A": 1, "B": 1, "offset": 0}],
-             "controls_by_stage": [{"singleton": 0}, {"singleton": 0}],
-             "invariants_by_boundary": ["universal"] * 3},
-        ],
-        "edges": [
-            {"id": "enter", "source": "start", "target": "middle",
-             "guards_by_stage": [{"interval": [0, 1]}, {"type": "universal", "dimension": 1}],
-             "reset_by_stage": [{"type": "identity", "dimension": 1},
-                                {"type": "universal", "dimension": 2}]},
-            {"id": "to-terminal", "source": "middle", "target": "terminal",
-             "guards_by_stage": [{"type": "universal", "dimension": 1}, {"interval": [0, 0.5]}],
-             "reset_by_stage": [{"type": "universal", "dimension": 2},
-                                {"type": "identity", "dimension": 1}]},
-        ],
-        "edge_timing": "guards constrain the stage pre-reset state; reset relations map pre-reset to the next state",
-        "terminal_objective": "minimize x[2]",
-    }
-    analytic = {
-        "fixed_path": ["enter", "to-terminal"],
-        "joint_relation": "x[0]=0; u[0]=x_pre[0]=x[1]=x_pre[1]=x[2]; u[1]=0; 0<=u[0]<=0.5",
-        "feasible_projection": "(u[0], x[2]) = (s, s), 0<=s<=0.5",
-        "complete_minimizer": "all joint coordinates are zero",
-        "minimum_objective": 0,
-    }
-    examples.append(dict(
-        slug="two_stage_scalar_family", title="A two-stage scalar family",
-        vertices=[[0, 0], [0.5, 0.5]], points=[[0, 0], [0.5, 0.5]], indices=[0, 1],
-        domain=(0, 0.5), inputs=inputs, analytic=analytic,
-        report_id=one_step_entry["report_id"], records_path=one_step_bundle / "records.json",
-        source="c6d135c94ee0fe4fece074b455dae18bee0d22b2",
-        harness="451d0157109b03ef8fab5a656b487c248b7f29a4", kind="hybrid"))
-    two_parameter_inputs = {
-        "initial": {"mode": "two-parameter-start", "state": [0]},
-        "horizon": 2,
-        "state_dimension": 1,
-        "control_dimension": 1,
-        "allowed_terminal_modes": ["two-parameter-terminal"],
-        "modes": [
-            {"id": "two-parameter-start", "active_stages_on_path": [0],
-             "flow_by_stage": [{"A": 0, "B": 1, "offset": 0},
-                               {"A": 1, "B": 1, "offset": 0}],
-             "controls_by_stage": [{"interval": [0, 1]}, {"singleton": 0}],
-             "invariants_by_boundary": ["universal", "universal", "universal"]},
-            {"id": "two-parameter-middle", "active_stages_on_path": [1],
-             "flow_by_stage": [{"A": 0, "B": 1, "offset": 0},
-                               {"A": 1, "B": 1, "offset": 0}],
-             "controls_by_stage": [{"singleton": 0}, {"interval": [0, 1]}],
-             "invariants_by_boundary": ["universal", "universal", "universal"]},
-            {"id": "two-parameter-terminal", "active_stages_on_path": [2],
-             "flow_by_stage": [{"A": 0, "B": 1, "offset": 0},
-                               {"A": 1, "B": 1, "offset": 0}],
-             "controls_by_stage": [{"singleton": 0}, {"singleton": 0}],
-             "invariants_by_boundary": ["universal", "universal", {"interval": [0, 1]}]},
-        ],
-        "edges": [
-            {"id": "two-parameter-enter-half", "source": "two-parameter-start",
-             "target": "two-parameter-middle",
-             "guards_by_stage": [{"interval": [0, 0.5]}, {"type": "universal", "dimension": 1}],
-             "reset_by_stage": [{"type": "identity", "dimension": 1},
-                                {"type": "universal", "dimension": 2}]},
-            {"id": "two-parameter-enter-full", "source": "two-parameter-start",
-             "target": "two-parameter-middle",
-             "guards_by_stage": [{"type": "universal", "dimension": 1},
-                                 {"type": "universal", "dimension": 1}],
-             "reset_by_stage": [{"type": "identity", "dimension": 1},
-                                {"type": "universal", "dimension": 2}]},
-            {"id": "two-parameter-finish", "source": "two-parameter-middle",
-             "target": "two-parameter-terminal",
-             "guards_by_stage": [{"type": "universal", "dimension": 1},
-                                 {"type": "universal", "dimension": 1}],
-             "reset_by_stage": [{"type": "universal", "dimension": 2},
-                                {"type": "identity", "dimension": 1}]},
-        ],
-        "edge_timing": "guards constrain the stage pre-reset state; reset relations map pre-reset to the next state",
-        "terminal_objective": {"type": "linear", "coefficients": [0], "constant": 0},
-    }
-    two_parameter_paths = [
-        {"path": ["two-parameter-enter-half", "two-parameter-finish"],
-         "feasible_polygon_in_control_coordinates": [[0, 0], [0.5, 0], [0.5, 0.5], [0, 1]]},
-        {"path": ["two-parameter-enter-full", "two-parameter-finish"],
-         "feasible_polygon_in_control_coordinates": [[0, 0], [1, 0], [0, 1]]},
-    ]
-    examples.append(dict(
-        slug="two_parameter_scalar_polytopes", title="Two labelled optimal polygons",
-        polygons=two_parameter_paths, points=[[0, 0], [0.5, 0], [0.5, 0.5], [0, 1],
-                                               [1, 0], [0, 1]],
-        indices=[], domain=(0, 1), inputs=two_parameter_inputs,
-        analytic={
-            "joint_relation": "[x0,u0,x_pre0,x1,u1,x_pre1,x2]=[0,u0,u0,u0,u1,u0+u1,u0+u1]",
-            "feasibility": "u0>=0; u1>=0; u0+u1<=1",
-            "enter_half_guard": "u0<=0.5",
-            "enter_full_guard": "universal",
-            "complete_optimal_family": "every point in each labelled feasible polygon; both paths are retained",
-            "minimum_objective": 0,
-        },
-        report_id=two_parameter_entry["report_id"],
-        records_path=two_parameter_bundle / "records.json",
-        source="eb0645f522c78007e8ffc8a1dab6bff16840e64a",
-        harness="eb0645f522c78007e8ffc8a1dab6bff16840e64a", kind="two_parameter"))
-    projected_inputs = {
-        "initial": {"mode": "projected-source", "state": [0]},
-        "horizon": 1,
-        "state_dimension": 1,
-        "control_dimension": 1,
-        "allowed_terminal_modes": ["projected-target"],
-        "modes": [
-            {"id": "projected-source", "active_stages_on_path": [0],
-             "flow_by_stage": [{"A": 1, "B": 1, "offset": 0}],
-             "controls_by_stage": [{"interval": [0, 1]}],
-             "invariants_by_boundary": ["universal", "universal"]},
-            {"id": "projected-target", "active_stages_on_path": [1],
-             "flow_by_stage": [{"A": 1, "B": 0, "offset": 0}],
-             "controls_by_stage": [{"universal": 0}],
-             "invariants_by_boundary": ["universal", "universal"]},
-        ],
-        "edges": [{"id": "cap-at-half", "source": "projected-source",
-                   "target": "projected-target",
-                   "guards_by_stage": [{"interval": [0, 0.5]}],
-                   "reset_by_stage": [{"type": "identity", "dimension": 1}]}],
-        "edge_timing": "the guard constrains the post-flow, pre-reset state; the reset maps it to the next state",
-        "terminal_objectives": [{"mode": "projected-target",
-                                 "linear": {"coefficients": [1], "constant": 0},
-                                 "id": "terminal-cost", "unit": "state"}],
-    }
-    projected_analytic = {
-        "fixed_path": ["cap-at-half"],
-        "joint_relation": "x[0]=0; x_pre[0]=x[0]+u[0]; x[1]=x_pre[0]; 0<=u[0]<=1; 0<=x_pre[0]<=0.5",
-        "projected_terminal_set": "0<=x[1]<=0.5",
-        "feasible_projection": "(u[0], x[1]) = (s, s), 0<=s<=0.5",
-    }
-    examples.append(dict(
-        slug="one_step_projected_hybrid_reachability",
-        title="Project a one-step hybrid state set",
-        vertices=[[0, 0], [0.5, 0.5]], points=[[0, 0], [0.5, 0.5]],
-        indices=[0, 1], domain=(0, 0.5), inputs=projected_inputs,
-        analytic=projected_analytic, report_id=one_step_entry["report_id"],
-        records_path=one_step_bundle / "records.json",
-        source="065de5e45d295dfa099e25265c4014c0c46673f8",
-        harness="065de5e45d295dfa099e25265c4014c0c46673f8",
-        kind="projected_reachability"))
-    return examples
+    """Combine case-owned data prepared by the geometry and hybrid modules."""
+    return geometry_examples.load_examples(catalog) + hybrid_examples.load_examples(catalog)
 
 
 def plot(example):
@@ -449,153 +232,20 @@ def point_table(example):
 
 
 def section(example, number):
-    if example["kind"] == "hull":
-        explanation = ("Stretch a rubber band around these points. The band touches only the extreme vertices; "
-                       "the center point does not change the hull. Coincident input rows share one location.")
-        if example["slug"] == "collinear_endpoints":
-            explanation = ("All points lie on y = x. The convex hull is the segment from (0, 0) to (3, 3), "
-                           "so only its two endpoints are retained. Intermediate collinear points are omitted.")
-        result = "Returned original vertex IDs: " + json.dumps(example["indices"]) + "."
-        notes = ("The first input ID wins for coincident points. Polygon vertices start at the lexicographically "
-                 "smallest point and continue counterclockwise, without repeating the closing vertex. "
-                 "QuickHull uses exact orientation for the supplied binary64 coordinates; these small cases do not establish general performance.")
-        option, target = "GEO06", "csl_geo06_quickhull_report"
-        flags = " -DCSL_ENABLE_HIGHS=OFF -DCSL_ENABLE_QHULL=OFF"
-        driver = "benchmarks/reporting/geo06/quickhull_driver.cpp"
-        extra = ('<details><summary>Minimal public C++ call</summary><pre><code>' + escape(
-            '#include <csl/geometry/quickhull_2d.hpp>\n#include <iostream>\n#include <vector>\n\n'
-            'int main() {\n    const std::vector<csl::Vector> points = ' +
-            json.dumps(example["points"]).replace("[", "{").replace("]", "}") + ';\n'
-            '    auto result = csl::geometry::quickhull_2d(points);\n'
-            '    const auto* hull = std::get_if<csl::geometry::QuickHull2D>(&result);\n'
-            '    if (!hull) return 1;\n'
-            '    for (auto id : hull->vertex_indices) std::cout << id << " ";\n}\n'
-            '// Link the installed target CSL::quickhull_2d (C++20).\n') + '</code></pre></details>')
-    elif example["kind"] == "intersection":
-        explanation = ("Keep points that satisfy both shapes: the square −1 ≤ x,y ≤ 1 and the diamond "
-                       "|x| + |y| ≤ 1.5. Each shape cuts off four corners of the other. The shared region is an octagon.")
-        result = "Expected vertices: (±1, ±0.5) and (±0.5, ±1), all sign combinations."
-        notes = ("The plot uses the saved native vertex coordinates, not idealized oracle replacements. "
-                 "Qhull/HiGHS outputs match this fixture within absolute tolerance 1e−7; they are numerical geometry, "
-                 "not a validated exact enclosure. Vertex row order is not a promised cyclic boundary order.")
-        option, target = "GEO04", "csl_geo04_intersection_report"
-        # This frozen harness predates optional-adapter flags and the later
-        # move to benchmarks/reporting. Reproduce its actual historical tree.
-        flags = ""
-        driver = "reports/algorithm-results/tooling/geo04/polyhedral_intersection_driver.cpp"
-        extra = "<p>The complete inputs below use A·[x,y] ≤ b for each shape. The driver links CSL::polyhedral, CSL::qhull_conversion and CSL::highs_lp.</p>"
-    elif example["kind"] == "two_parameter":
-        explanation = ("The enter-half transition constrains the first pre-reset state to [0,0.5], while "
-                       "enter-full has a universal guard. Both labelled paths then share the terminal bound "
-                       "u₀+u₁≤1. The green quadrilateral lies inside the amber dashed triangle; their overlap "
-                       "belongs to both mode paths.")
-        result = ("Enter-half path: (0,0), (0.5,0), (0.5,0.5), (0,1). Enter-full path: "
-                  "(0,0), (1,0), (0,1). The objective is identically zero, so every point in each complete "
-                  "polygon is optimal and both labelled paths are retained.")
-        notes = ("This exact rational construction illustrates the bounded two-free-control verifier profile. "
-                 "It is an analytic illustration, not a saved solver run, timing result or measured fixture.")
-        option, target = "", "hybrid_path_program_tests"
-        flags = ""
-        driver = "tests/unit/synthesis/hybrid_path_program_tests.cpp"
-        extra = ("<p>The downloadable input record includes both free controls, all mode flows, invariants, "
-                 "transition guards and resets, terminal policy and both path polygons.</p>")
-    elif example["kind"] == "projected_reachability":
-        explanation = ("Start at x₀=0, flow with x_pre₁=x₀+u₀ for u₀∈[0,1], and take the fixed "
-                       "transition only when its post-flow guard admits x_pre₁∈[0,0.5]. The identity "
-                       "reset carries that state to x₁. Projecting the full labelled relation onto x₁ "
-                       "gives the terminal interval shown.")
-        result = ("Projected terminal set: x₁∈[0,0.5]. The plotted full relation is "
-                  "(u₀,x₁)=(s,s), 0≤s≤0.5.")
-        notes = ("This exact rational construction illustrates the bounded one-transition scalar "
-                 "projected-state adapter profile. It is an analytic illustration, not a saved solver "
-                 "run or a timing result; the independent contract test checks the joint relation and "
-                 "terminal-set bounds.")
-        option, target = "", "hybrid_path_program_tests"
-        flags = ""
-        driver = "tests/unit/synthesis/hybrid_path_program_tests.cpp"
-        extra = ("<p>The adapter retains the path-labelled joint H relation and returns its terminal H "
-                 "projection. The request objective is present for contract completeness but does not "
-                 "affect reachability.</p>")
-    else:
-        explanation = ("Two scalar stages follow the fixed path start → middle → terminal. The first control is "
-                       "free in [0,1] and the second is fixed at zero. The second transition requires its "
-                       "pre-reset state x_pre[1] in [0,0.5], then its identity reset sets x[2]=x_pre[1].")
-        result = ("Complete feasible family: (u₀, x₂) = (s, s), 0 ≤ s ≤ 0.5. "
-                  "The unique minimum of x₂ is (u₀, x₂) = (0, 0).")
-        notes = ("This is an exact rational illustration of a supported input, not a saved solver run or a timing "
-                 "result. The independent test oracle derives the interval and checks both endpoints and an outside point.")
-        option, target = "", "hybrid_path_program_tests"
-        flags = ""
-        driver = "tests/unit/synthesis/hybrid_path_program_tests.cpp"
-        extra = ('<p>The fixture record contains all mode, flow, control, invariant, transition, guard, reset and objective inputs.</p>')
-    command = ("cmake --preset dev\n"
-               f"cmake --build --preset dev --target {target}\n"
-               f"ctest --preset dev -R '^{target}$'") if example["kind"] in {"hybrid", "two_parameter", "projected_reachability"} else (
-        f'cmake -S . -B build/visual-{option.lower()} -DCMAKE_BUILD_TYPE=Release '
-        f'-DBUILD_TESTING=OFF -DCSL_BUILD_{option}_REPORT=ON{flags}\n'
-        f'cmake --build build/visual-{option.lower()} --config Release --target {target} --parallel 2\n'
-        f'./build/visual-{option.lower()}/{target} --smoke')
-    source_url = "https://github.com/butahlecoq/controlled-systems-lab/blob/" + example["harness"] + "/" + driver
-    caption = ("Green: hull boundary; amber: omitted points. Slash-separated original IDs coincide. Equal x/y scale."
-               if example["kind"] == "hull" else
-               "Green: returned intersection. Blue: input square; amber: input diamond. Labels are saved output row IDs. Equal x/y scale."
-               if example["kind"] == "intersection" else
-               "Amber dashed: enter-full path. Green: enter-half path. The green polygon is contained in the triangle; both retain all optimal points."
-               if example["kind"] == "two_parameter" else
-                "Green: full feasible control/terminal-state relation. Its terminal-state projection is the interval [0,0.5]."
-                if example["kind"] == "projected_reachability" else
-               "Green: complete feasible relation. Gold: unique minimizer. Both axes show the same scalar system in control and terminal-state coordinates.")
-    example_type = ("2D two-control family" if example["kind"] == "two_parameter" else
-                    "2D projected reachability" if example["kind"] == "projected_reachability" else
-                    "2D control family" if example["kind"] == "hybrid" else "2D geometry")
-    reproduction = ('<p>From the repository checkout at the linked fixture commit, configure the development preset and run:</p>'
-                    if example["kind"] in {"hybrid", "two_parameter", "projected_reachability"} else
-                    f'<p>From a checkout of harness commit <code>{example["harness"]}</code>, using CMake 3.31+ and a C++20 compiler:</p>')
-    platform_note = ("This runs the functional two-stage oracle test; it creates no timing evidence."
-                     if example["kind"] == "hybrid" else
-                     "This runs the functional two-parameter polygon oracle test; it creates no timing evidence."
-                     if example["kind"] == "two_parameter" else
-                      "This runs the functional projected-state reachability test; it creates no timing evidence."
-                      if example["kind"] == "projected_reachability" else
-                     'For Visual Studio, use its developer shell, configure with its generator, and run '
-                     '<code>Release/' + target + '.exe --smoke</code> in the build directory. '
-                     'This is a functional smoke, not a new benchmark; discard smoke timing values.')
-    report_links = (f'<p>Related one-step report: <a href="../{example["report_id"]}/index.html">saved numerical evidence ↗</a> · '
-                    f'<a href="../{example["report_id"]}/records.json">one-step raw record ↗</a>. '
-                    'This two-stage illustration is not part of that measured fixture.</p>'
-                    if example["kind"] == "hybrid" else
-                    f'<p>Related two-control report: <a href="../{example["report_id"]}/index.html">saved numerical evidence ↗</a> · '
-                    f'<a href="../{example["report_id"]}/records.json">two-control raw record ↗</a>. '
-                    'The measured report uses rectangular parameter sets and minimizes x_terminal=u0; '
-                    'this illustration has a coupled triangular/quadrilateral feasible set and a '
-                    'constant-zero objective.</p>'
-                    if example["kind"] == "two_parameter" else
-                     f'<p>Related one-step verification report (a separate algorithm): <a href="../{example["report_id"]}/index.html">saved numerical evidence ↗</a> · '
-                     f'<a href="../{example["report_id"]}/records.json">one-step raw record ↗</a>.</p>'
-                     if example["kind"] == "projected_reachability" else
-                    f'<p><a href="../{example["report_id"]}/index.html">Reviewed numerical report ↗</a> · '
-                    f'<a href="../{example["report_id"]}/records.json">Full saved native records ↗</a></p>')
-    raw_record_link = ('<p><a href="two_stage_scalar_family.json">Two-stage fixture and analytic raw record ↗</a></p>'
-                       if example["kind"] == "hybrid" else "")
-    if example["kind"] == "two_parameter":
-        raw_record_link = '<p><a href="two_parameter_scalar_polytopes.json">Two-control fixture and analytic raw record ↗</a></p>'
-    if example["kind"] == "projected_reachability":
-        raw_record_link = '<p><a href="projected_hybrid_reachability.json">Projected reachability fixture and analytic raw record ↗</a></p>'
-    source_provenance = (f'<p class="provenance">Algorithm source <a href="https://github.com/butahlecoq/controlled-systems-lab/commit/{example["source"]}"><code>{example["source"]}</code></a></p>'
-                         if example["kind"] in {"hybrid", "two_parameter", "projected_reachability"} else
-                         f'<p class="provenance">Algorithm source <code>{example["source"]}</code></p>')
-    return (f'<section id="{example["slug"]}"><p class="eyebrow">Example {number:02d} / {example_type}</p>'
-            f'<h2>{example["title"]}</h2><p>{explanation}</p>'
-            f'<figure><img src="{example["slug"]}.svg" alt="{escape(explanation, quote=True)}">'
-            f'<figcaption>{caption}</figcaption></figure>'
-            f'<p class="answer">{result}</p>{point_table(example)}'
+    owner = CASE_OWNERS[example["kind"]]
+    content = owner.presentation(example)
+    return (f'<section id="{example["slug"]}"><p class="eyebrow">Example {number:02d} / {content["example_type"]}</p>'
+            f'<h2>{example["title"]}</h2><p>{content["explanation"]}</p>'
+            f'<figure><img src="{example["slug"]}.svg" alt="{escape(content["explanation"], quote=True)}">'
+            f'<figcaption>{content["caption"]}</figcaption></figure>'
+            f'<p class="answer">{content["result"]}</p>{point_table(example)}'
             '<details><summary>Complete minimal input</summary><pre><code>' + escape(json.dumps(example["inputs"], indent=2)) + '</code></pre></details>'
-            + extra + '<details><summary>Reproduce the functional example</summary>' + reproduction +
-            '<pre><code>' + escape(command) + '</code></pre>'
-            '<p>' + platform_note + '</p>'
-            f'<p><a href="{source_url}">Complete native fixture/driver ↗</a></p></details>'
-            f'<p class="limits">{notes}</p>' + source_provenance +
-            raw_record_link + report_links + '</section>')
+            + content["extra"] + '<details><summary>Reproduce the functional example</summary>' + content["reproduction"] +
+            '<pre><code>' + escape(content["command"]) + '</code></pre>'
+            '<p>' + content["platform_note"] + '</p>'
+            f'<p><a href="{content["source_url"]}">Complete native fixture/driver ↗</a></p></details>'
+            f'<p class="limits">{content["notes"]}</p>' + content["source_provenance"] +
+            content["raw_record_link"] + content["report_links"] + '</section>')
 
 
 def saved_figure_sections(catalog, site):
@@ -895,16 +545,8 @@ def build(catalog, site):
             outputs[name] = path.read_text(encoding="utf-8") if path.suffix == ".html" else path.read_bytes()
     gallery_inventory = []
     for example in examples:
-        source_page = f"../{example['report_id']}/index.html"
-        raw_record = f"../{example['report_id']}/records.json"
-        family = {"hull": "Polytope hull construction", "intersection": "Polytope intersection",
-                  "hybrid": "Hybrid control family", "two_parameter": "Hybrid control polytopes",
-                  "projected_reachability": "Projected hybrid reachability"}[example["kind"]]
-        gallery_inventory.append({"family": family, "title": example["title"],
-                                  "status": "educational-example",
-                                  "anchor": example["slug"], "page": "index.html#" + example["slug"],
-                                  "figure": example["slug"] + ".svg", "source_page": source_page,
-                                  "raw_record": raw_record})
+        owner = CASE_OWNERS[example["kind"]]
+        gallery_inventory.append(owner.inventory_entry(example))
     gallery_inventory.extend(analytic_inventory)
     geometry_first = geometry_inventory[0]
     gallery_inventory.append({"family": "Geometry and optimization",
@@ -1129,33 +771,7 @@ def build(catalog, site):
     outputs.update(ext05_companion)
     outputs.update(ext01_companion)
     outputs.update(app01_companion)
-    hybrid = next(example for example in examples if example["kind"] == "hybrid")
-    outputs["two_stage_scalar_family.json"] = json.dumps({
-        "schema": "csl.visual-example/ext07-two-stage-scalar/1",
-        "illustration_only": True,
-        "algorithm_source_commit": hybrid["source"],
-        "oracle_harness_commit": hybrid["harness"],
-        "inputs": hybrid["inputs"],
-        "analytic": hybrid["analytic"],
-    }, indent=2) + "\n"
-    two_parameter = next(example for example in examples if example["kind"] == "two_parameter")
-    outputs["two_parameter_scalar_polytopes.json"] = json.dumps({
-        "schema": "csl.visual-example/ext07-two-parameter-scalar/1",
-        "illustration_only": True,
-        "algorithm_source_commit": two_parameter["source"],
-        "oracle_harness_commit": two_parameter["harness"],
-        "inputs": two_parameter["inputs"],
-        "analytic": {"paths": two_parameter["polygons"], **two_parameter["analytic"]},
-    }, indent=2) + "\n"
-    projected = next(example for example in examples if example["kind"] == "projected_reachability")
-    outputs["projected_hybrid_reachability.json"] = json.dumps({
-        "schema": "csl.visual-example/ext07-projected-hybrid-reachability/1",
-        "illustration_only": True,
-        "algorithm_source_commit": projected["source"],
-        "oracle_harness_commit": projected["harness"],
-        "inputs": projected["inputs"],
-        "analytic": projected["analytic"],
-    }, indent=2) + "\n"
+    outputs.update(hybrid_examples.download_records(examples))
     link = '<p id="visual-examples-link"><a href="examples/index.html">Visual examples: minimal 2D inputs, hull vertices and plots →</a></p>'
     output_files = {name: (content if isinstance(content, bytes) else content.encode("utf-8"))
                     for name, content in outputs.items()}

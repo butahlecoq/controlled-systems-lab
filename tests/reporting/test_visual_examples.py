@@ -104,7 +104,11 @@ class GalleryTests(unittest.TestCase):
                     (target / "index.html").write_text("<html>report fixture</html>", encoding="utf-8")
 
     def test_saved_outputs_match_literal_geometry(self):
-        square, line, intersection, hybrid = self.examples[:4]
+        cases = {example["slug"]: example for example in self.examples}
+        square = cases["square_duplicates"]
+        line = cases["collinear_endpoints"]
+        intersection = cases["crossing_octagon"]
+        hybrid = cases["two_stage_scalar_family"]
         self.assertEqual(square["points"], [[0,0],[1,0],[1,1],[0,1],[.5,.5],[0,0],[1,0]])
         self.assertEqual(square["indices"], [0,1,2,3])
         self.assertEqual(line["indices"], [1,3])
@@ -116,8 +120,9 @@ class GalleryTests(unittest.TestCase):
         self.assertEqual(hybrid["analytic"]["complete_minimizer"], "all joint coordinates are zero")
         self.assertEqual(hybrid["inputs"]["horizon"], 2)
         loaded = gallery.load_examples(self.catalog)
-        two_parameter = next(example for example in loaded if example["kind"] == "two_parameter")
-        projected = next(example for example in loaded if example["kind"] == "projected_reachability")
+        loaded_by_id = {example["slug"]: example for example in loaded}
+        two_parameter = loaded_by_id["two_parameter_scalar_polytopes"]
+        projected = loaded_by_id["one_step_projected_hybrid_reachability"]
         self.assertEqual(two_parameter["kind"], "two_parameter")
         self.assertEqual(two_parameter["report_id"],
                          "ext07-hybrid-two-parameter-8ad871b5ea29fc7b")
@@ -137,6 +142,18 @@ class GalleryTests(unittest.TestCase):
                          [{"interval": [0, 0.5]}])
         self.assertEqual(projected["inputs"]["terminal_objectives"][0]["linear"],
                          {"coefficients": [1], "constant": 0})
+
+    def test_case_owners_keep_case_evidence_and_narrative_together(self):
+        geometry = {case["slug"]: case for case in gallery.geometry_examples.load_examples(self.catalog)}
+        hybrid = {case["slug"]: case for case in gallery.hybrid_examples.load_examples(self.catalog)}
+        self.assertEqual(set(geometry), {"square_duplicates", "collinear_endpoints", "crossing_octagon"})
+        self.assertEqual(set(hybrid), {"two_stage_scalar_family", "two_parameter_scalar_polytopes",
+                                       "one_step_projected_hybrid_reachability"})
+        geometry_html = gallery.section(geometry["crossing_octagon"], 1)
+        hybrid_html = gallery.section(hybrid["two_parameter_scalar_polytopes"], 2)
+        self.assertIn("not a validated exact enclosure", geometry_html)
+        self.assertIn("constant-zero objective", hybrid_html)
+        self.assertIn("two_parameter_scalar_polytopes.json", hybrid_html)
 
     def test_build_preserves_reports_and_has_resolvable_links(self):
         before = {p.relative_to(self.site): hashlib.sha256(p.read_bytes()).hexdigest()
@@ -491,11 +508,12 @@ class GalleryTests(unittest.TestCase):
         subprocess.run([sys.executable, str(ROOT / "scripts/reports/visual_examples.py"),
                         "--catalog", str(self.catalog), "--site", str(self.site)], check=True)
         result = json.loads((self.site / "examples/minimal-inputs.json").read_text())
-        self.assertEqual(result["examples"][0]["indices"], [0,1,2,3])
-        self.assertEqual(result["examples"][1]["vertices"], [[0,0],[3,3]])
-        self.assertEqual(result["examples"][2]["vertices"][0], [-1.0000000000000002, -.5000000000000001])
-        self.assertEqual(result["examples"][3]["kind"], "hybrid")
-        self.assertEqual(result["examples"][4]["kind"], "two_parameter")
+        examples = {example["slug"]: example for example in result["examples"]}
+        self.assertEqual(examples["square_duplicates"]["indices"], [0,1,2,3])
+        self.assertEqual(examples["collinear_endpoints"]["vertices"], [[0,0],[3,3]])
+        self.assertEqual(examples["crossing_octagon"]["vertices"][0], [-1.0000000000000002, -.5000000000000001])
+        self.assertEqual(examples["two_stage_scalar_family"]["kind"], "hybrid")
+        self.assertEqual(examples["two_parameter_scalar_polytopes"]["kind"], "two_parameter")
         coverage=json.loads((self.site/"examples/algorithm-coverage.json").read_text())
         b07=next(report for report in self.catalog_reports if report["report_kind"]=="issue6-b07-reference")
         family=next(entry for entry in coverage["families"] if "issue6-b07-reference" in entry["catalog_kinds"])
