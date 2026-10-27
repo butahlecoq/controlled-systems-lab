@@ -19,6 +19,7 @@ import site_additions
 import stage_ext07 as ext07_reports
 import visual_illustrations
 import visual_example_geometry as geometry_examples
+import visual_example_fuel_layers
 import visual_example_hybrid as hybrid_examples
 
 CASE_OWNERS = {
@@ -501,6 +502,9 @@ def build(catalog, site):
     examples = load_examples(catalog)
     site = Path(site).resolve(strict=True)
     saved_figures, saved_inventory = saved_figure_sections(catalog, site)
+    fuel_layer_files, fuel_layer_inventory, fuel_layer_card = visual_example_fuel_layers.build(
+        Path(__file__).resolve().parents[2])
+    saved_figures += fuel_layer_card
     last_topic_anchor = "visual-fuel-b06-viz03"
     last_topic_title = "B06 fuel terminal set: readable 4D-to-2D projections"
     analytic_files, analytic_inventory = visual_illustrations.build(Path(catalog))
@@ -548,6 +552,7 @@ def build(catalog, site):
         owner = CASE_OWNERS[example["kind"]]
         gallery_inventory.append(owner.inventory_entry(example))
     gallery_inventory.extend(analytic_inventory)
+    gallery_inventory.extend(fuel_layer_inventory)
     geometry_first = geometry_inventory[0]
     gallery_inventory.append({"family": "Geometry and optimization",
                               "title": "Readable geometry and timing figures",
@@ -762,6 +767,7 @@ def build(catalog, site):
     outputs["visual-route-inventory.json"] = json.dumps(
         audit_visual_routes.build(Path(__file__).resolve().parents[2]), indent=2, ensure_ascii=False) + "\n"
     outputs["algorithm-coverage.json"] = json.dumps(coverage_data, indent=2, ensure_ascii=False) + "\n"
+    outputs.update(fuel_layer_files)
     outputs["issue3-control-walkthrough.svg"] = workflow_figure
     outputs["issue3-control-walkthrough.html"] = workflow_page
     outputs.update(lotka_companion)

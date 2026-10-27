@@ -160,6 +160,16 @@
       "follow_up_issue": 684
     },
     {
+      "source": "scripts/reports/fuel_reachability_layers.py",
+      "signal_count": 8,
+      "asset_name_literals": [
+        "fuel-reachability-layers.png",
+        "fuel-reachability-layers.svg"
+      ],
+      "disposition": "deferred-family-specific-migration",
+      "follow_up_issue": 708
+    },
+    {
       "source": "scripts/reports/geo02/render.py",
       "signal_count": 6,
       "asset_name_literals": [
@@ -824,6 +834,14 @@
       "asset_name_literals": [],
       "disposition": "deferred-family-specific-migration",
       "follow_up_issue": 686
+    },
+    {
+      "source": "scripts/reports/visual_example_fuel_layers.py",
+      "signal_count": 1,
+      "asset_name_literals": [
+        "fuel-reachability-x1-x2.png"
+      ],
+      "disposition": "composes-or-copies-existing-saved-figure"
     },
     {
       "source": "scripts/reports/visual_example_geometry.py",

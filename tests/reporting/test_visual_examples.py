@@ -278,6 +278,11 @@ class GalleryTests(unittest.TestCase):
         fuel_entry = next(entry for entry in visual_inventory["entries"]
                           if entry["anchor"] == "visual-fuel-b06-viz03")
         self.assertEqual(fuel_entry["status"], "saved-data-companion")
+        layered_fuel = next(entry for entry in visual_inventory["entries"]
+                            if entry["anchor"] == "fuel-reachability-layers")
+        self.assertEqual(layered_fuel["page"], "fuel-reachability-layers/index.html")
+        self.assertTrue((self.site / "examples" / layered_fuel["page"]).is_file())
+        self.assertTrue((self.site / "examples" / layered_fuel["figure"]).is_file())
         for stem, expected_text in (("app02-diamond-v1", "saved input and rotated outer bound"),
                                    ("app04-square-v1", "diagonal orientation"),
                                    ("app03-zonotope-v1", "input zonotope · saved generators"),
