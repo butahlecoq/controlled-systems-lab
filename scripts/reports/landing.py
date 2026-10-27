@@ -76,6 +76,11 @@ FAMILIES = {
         "Cross-checks one synthetic two-stage scalar fixed-plan minimax case with an exhaustive "
         "finite-action oracle, a shared-selector MILP and its continuous selector relaxation. "
         "The report measures no performance and does not complete issue #599."),
+    "mpc03-b08-miQCP": Family(
+        r"mpc03-b08-l04-miQCP-v1", "synthesis", "B08 robust minimax MIQCP",
+        "Solves the four-step L04 displayed-data finite-action minimax model with a shared-selector "
+        "MIQCP, checks it against exact rational enumeration, and records a numerical convex-hull "
+        "relaxation bound. This is not a historical reproduction or solver-speed comparison."),
     "lp": Family(
         r"lp-\d{8}T\d{6}Z-[0-9a-f]{12,64}", "optimization", "Linear programming reference run",
         "Runs the registered HiGHS linear-programming adapter on five small analytic "
@@ -627,6 +632,18 @@ def build(site: Path) -> None:
             links=(("Full result record", pilot + "/record.json"),
                    ("Raw executable output", pilot + "/pilot-output.json"),
                    ("Build provenance", pilot + "/build-provenance.json"))))
+    b08 = "mpc03-b08-l04-miQCP-v1"
+    if (site / b08 / "index.html").is_file():
+        detailed = [entry for entry in detailed if entry.report_id != b08]
+        details = recorded(site, b08)
+        detailed.append(Entry(
+            report_id=b08,
+            scope=details.get("scope", "Four-step B08 displayed-data MIQCP and convex-control bound"),
+            limits=details.get("limits", "No historical reproduction or solver-speed claim"),
+            commit=details.get("commit", ""),
+            links=(("Full result record", b08 + "/record.json"),
+                   ("Raw solver output", b08 + "/solver-output.json"),
+                   ("Independent exact oracle", b08 + "/independent-oracle.json"))))
     rendered = page(detailed, extras)
     validate(rendered, site)
     index.write_text(rendered, encoding="utf-8")
