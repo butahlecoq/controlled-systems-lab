@@ -122,9 +122,10 @@ std::unique_ptr<LPWorkspace> workspace(const geometry::PointCloud& cloud) {
     return adapter.factory(std::get<LinearProgram>(seed));
 }
 
+// A geometrically valid hull may retain unresolved redundant inputs. Keep that
+// independent hull result separate from ReductionStatus::complete in each row.
 bool valid_reduction(const Fixture& fixture, const geometry::HullReduction& result) {
-    if (result.status != geometry::ReductionStatus::complete ||
-        result.retained.empty() || result.retained.size() + result.removed.size() !=
+    if (result.retained.empty() || result.retained.size() + result.removed.size() !=
                                    fixture.cloud.points.size()) return false;
     std::set<std::size_t> accounted;
     for (const auto id : result.retained) {
@@ -168,7 +169,8 @@ bool valid_reduction(const Fixture& fixture, const geometry::HullReduction& resu
 }
 
 struct Outcome {
-    bool passed{};
+    bool passed{}; // complete accounting and independent exact hull check passed
+    bool reduction_complete{};
     long long elapsed_ns{};
     std::size_t retained{}, removed{}, lp_calls{}, basis_solves{}, bulk_removals{},
                 ordered_candidates{};
@@ -202,7 +204,7 @@ Outcome run(const Fixture& fixture, Method method) {
             for (const auto& point : coordinates)
                 std::cerr << " quickhull-point=" << point[0] << ',' << point[1] << '\n';
         }
-        return {coordinates == expected && checked,
+        return {coordinates == expected && checked, true,
             std::chrono::duration_cast<std::chrono::nanoseconds>(end-begin).count(),
             hull.vertex_indices.size(), fixture.cloud.points.size()-hull.vertex_indices.size(),
             0, 0, 0, 0};
@@ -228,6 +230,7 @@ Outcome run(const Fixture& fixture, Method method) {
     if (!std::holds_alternative<geometry::HullReduction>(result)) return outcome;
     const auto& reduction = std::get<geometry::HullReduction>(result);
     outcome.passed = valid_reduction(fixture, reduction);
+    outcome.reduction_complete = reduction.status == geometry::ReductionStatus::complete;
     if (!outcome.passed) {
         std::cerr << "validation failure method=" << info(method).name
                   << " status=" << static_cast<int>(reduction.status)
@@ -267,13 +270,14 @@ void print(const Fixture& fixture, Method method, bool warmup, int round,
     const auto digest = geometry::digest_hull_input(fixture.cloud.points);
     if (!std::holds_alternative<geometry::HullInputDigest>(digest))
         throw std::runtime_error("input digest could not be computed");
-    std::cout << "{\"schema\":\"csl.it17-hull-paper-adaptation-row/1\",\"source_commit\":\""
+    std::cout << "{\"schema\":\"csl.it17-hull-paper-adaptation-row/2\",\"source_commit\":\""
               << CSL_SOURCE_COMMIT << "\",\"fixture\":\"" << fixture.id
               << "\",\"input_sha256\":\"" << problem::hex(std::get<geometry::HullInputDigest>(digest))
               << "\",\"method\":\"" << info(method).name << "\",\"method_identity\":\""
               << info(method).identity << "\",\"method_version\":\"" << info(method).version
               << "\",\"lp_provider\":\"HiGHS/1.11.0\",\"warmup\":"
               << (warmup ? "true" : "false") << ",\"round\":" << round
+              << ",\"reduction_complete\":" << (outcome.reduction_complete ? "true" : "false")
               << ",\"elapsed_ns\":" << outcome.elapsed_ns << ",\"passed\":"
               << (outcome.passed ? "true" : "false") << ",\"input_points\":"
               << fixture.cloud.points.size() << ",\"retained\":" << outcome.retained
