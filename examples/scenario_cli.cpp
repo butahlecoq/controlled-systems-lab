@@ -427,6 +427,14 @@ int persist(const problem::ResolvedProblem& problem, const application::Prepared
         }
     }
 
+    const auto source = scenario.source();
+    const auto defaults = scenario.defaults();
+    ar::ScenarioSourceRecord scenario_source{source->content.digest(), source->schema,
+        source->defaults_revision, {}};
+    scenario_source.defaults.reserve(defaults->size());
+    for (const auto& value : *defaults)
+        scenario_source.defaults.push_back({value.path, value.meaning, value.authored});
+
     std::vector<std::string> encoded(execution.methods.size());
     for (std::size_t index = 0; index < execution.methods.size(); ++index) {
         const auto& expected = prepared.expected_synthesis_identity(index);
@@ -474,7 +482,7 @@ int persist(const problem::ResolvedProblem& problem, const application::Prepared
         const auto artifact = application::encode_strategy_run(problem, execution.methods[index].execution,
             resolved_configuration, run, std::get<ar::CollectedStatistics>(statistics),
             {resource_unavailable, resource_unavailable, resource_unavailable, resource_unavailable,
-                true, ar::MemoryAccounting::unlimited});
+                true, ar::MemoryAccounting::unlimited}, scenario_source);
         if (const auto* error = std::get_if<ar::ArtifactError>(&artifact)) {
             std::cerr << "Artifact export rejected: code=" << static_cast<int>(error->code)
                       << " path=" << error->path << " message=" << error->message << '\n';

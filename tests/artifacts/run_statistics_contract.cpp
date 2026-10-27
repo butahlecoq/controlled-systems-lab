@@ -206,6 +206,42 @@ TEST_CASE("independent full history fixture retains witnesses family evidence ne
     CHECK(std::get<ar::SynthesisFinal>(restored.description().final).incumbents[1].witness.controls==std::vector<Vector>{{1},{0}});
     CHECK(std::get<ar::Available<std::uint64_t>>(restored.description().statistics.description().buckets[0].inclusive_ticks).value==47);
 }
+namespace { std::string fixture_text(); }
+TEST_CASE("scenario source provenance round trips without changing mathematical or configuration identity") {
+    const auto original=accepted(ar::decode_run(fixture_text()));
+    auto record=original.description();
+    const auto problem_id=record.problem;
+    const auto config_id=record.configuration.identity();
+    ar::ScenarioSourceRecord source{};
+    source.source_digest.bytes[0]=std::byte{0xab};
+    source.input_schema="csl.scenario/1";
+    source.defaults_revision="csl.scenario-defaults/1";
+    source.defaults={{"objective.offset","zero default",false}};
+    record.scenario_source=source;
+    const auto owner=accepted(ar::publish_identity_recorded_run(std::move(record)));
+
+    const auto live=accepted(ar::encode_run(owner));
+    CHECK(live.find("csl.run-statistics/8")!=std::string::npos);
+    const auto restored=accepted(ar::decode_run(live));
+    REQUIRE(restored.description().scenario_source.has_value());
+    CHECK(restored.description().problem==problem_id);
+    CHECK(restored.description().configuration.identity()==config_id);
+    CHECK(problem::hex(restored.description().scenario_source->source_digest)==problem::hex(source.source_digest));
+    CHECK(restored.description().scenario_source->input_schema==source.input_schema);
+    CHECK(restored.description().scenario_source->defaults_revision==source.defaults_revision);
+    REQUIRE(restored.description().scenario_source->defaults.size()==1);
+    CHECK(restored.description().scenario_source->defaults[0].path=="objective.offset");
+    CHECK_FALSE(restored.description().scenario_source->defaults[0].authored);
+    auto invalid=original.description();
+    invalid.scenario_source=source;
+    invalid.scenario_source->input_schema.clear();
+    CHECK(std::holds_alternative<ar::ArtifactError>(ar::publish_identity_recorded_run(std::move(invalid))));
+
+    const auto archived=accepted(ar::encode_recorded_run(owner));
+    const std::string archive_wire{reinterpret_cast<const char*>(archived.content().bytes().data()),archived.content().bytes().size()};
+    CHECK(archive_wire.find("csl.run-statistics/9")!=std::string::npos);
+    CHECK(std::holds_alternative<ar::RecordedRunArtifact>(ar::decode_recorded_run(archive_wire)));
+}
 TEST_CASE("post-join projection preserves earlier failure later cancellation and original deadline") {
     using namespace execution;using Duration=TimePoint::duration;
     const TimePoint origin{};

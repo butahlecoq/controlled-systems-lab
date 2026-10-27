@@ -193,6 +193,8 @@ string(JSON explicit_methods_scenario SET "${validation_scenario}" run
 file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/explicit-methods.json" "${explicit_methods_scenario}")
 string(JSON changed_method_problem_scenario SET "${explicit_methods_scenario}" model A "[[2]]")
 file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/explicit-methods-changed-data.json" "${changed_method_problem_scenario}")
+string(JSON changed_backend_scenario SET "${explicit_methods_scenario}" run.backends.lp.id "phase-one-bland")
+file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/explicit-methods-changed-backend.json" "${changed_backend_scenario}")
 if(TARGET scenario_cli)
   add_test(NAME scenario_cli_problem_identity_boundary
     COMMAND ${CMAKE_COMMAND}
@@ -200,6 +202,7 @@ if(TARGET scenario_cli)
       "-DCOMPARISON_INPUT=${CMAKE_CURRENT_SOURCE_DIR}/scenarios/two-stage-integrator.json"
       "-DMETHODS_INPUT=${CMAKE_CURRENT_BINARY_DIR}/explicit-methods.json"
       "-DCHANGED_INPUT=${CMAKE_CURRENT_BINARY_DIR}/explicit-methods-changed-data.json"
+      "-DBACKEND_CHANGED_INPUT=${CMAKE_CURRENT_BINARY_DIR}/explicit-methods-changed-backend.json"
       -P "${CMAKE_CURRENT_SOURCE_DIR}/scenario_cli_identity_check.cmake")
   set_tests_properties(scenario_cli_problem_identity_boundary PROPERTIES TIMEOUT 30)
 endif()

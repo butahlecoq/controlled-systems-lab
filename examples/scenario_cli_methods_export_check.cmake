@@ -17,9 +17,18 @@ endif()
 file(READ "${path}" artifact)
 string(JSON schema GET "${artifact}" schema)
 string(JSON state GET "${artifact}" recorded_state)
+string(JSON source_hash GET "${artifact}" scenario_source source_sha256)
+string(JSON source_schema GET "${artifact}" scenario_source schema)
+string(JSON defaults_revision GET "${artifact}" scenario_source defaults_revision)
+string(JSON defaults_length LENGTH "${artifact}" scenario_source defaults)
+file(SHA256 "${SCENARIO_INPUT}" expected_source_hash)
 string(JSON module_count LENGTH "${artifact}" configuration value modules)
-if(NOT "${schema}" STREQUAL "csl.run-statistics/7" OR
-   NOT "${state}" STREQUAL "unverified_recorded_data")
+if(NOT "${schema}" STREQUAL "csl.run-statistics/9" OR
+   NOT "${state}" STREQUAL "unverified_recorded_data" OR
+   NOT "${source_hash}" STREQUAL "${expected_source_hash}" OR
+   NOT "${source_schema}" STREQUAL "csl.scenario/1" OR
+   NOT "${defaults_revision}" STREQUAL "csl.scenario-defaults/1" OR
+   defaults_length LESS 1)
   message(FATAL_ERROR "Explicit method record has unexpected schema/state: ${schema}/${state}")
 endif()
 set(strategy_found FALSE)

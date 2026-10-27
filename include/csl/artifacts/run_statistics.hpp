@@ -194,6 +194,16 @@ SynthesisFinal project_final(const SynthesisResult&,std::optional<AttachmentId> 
 ProgramFinal project_final(const ProgramResult&,std::optional<AttachmentId> diagnostics={});
 ArtifactResult<SpanRecord> project_legacy_span(const TimingSpan&,SpanDescriptor);
 
+struct ScenarioDefaultRecord {
+    std::string path, meaning;
+    bool authored;
+};
+struct ScenarioSourceRecord {
+    problem::ContentDigest source_digest;
+    std::string input_schema, defaults_revision;
+    std::vector<ScenarioDefaultRecord> defaults;
+};
+
 enum class AdmissionCause { cancelled, deadline, task_limit, allocation, adapter_exception, thread_launch };
 struct AdmissionObservation { AdmissionCause cause; Metric<std::int64_t> at; };
 struct ExecutionSummary {
@@ -223,6 +233,7 @@ struct RunRecord {
     std::optional<ExecutionSummary> execution; std::vector<Attachment> attachments;
     ProblemProvenance provenance;
     std::optional<WitnessSelection> selection{};
+    std::optional<ScenarioSourceRecord> scenario_source{};
 };
 struct RunInput { problem::ResolvedProblem problem; RunRecord record; };
 class RunStatistics {
