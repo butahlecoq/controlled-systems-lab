@@ -1,0 +1,899 @@
+{
+  "explicit_solution": {
+    "coverage_check": "exact rational half-space partition",
+    "critical_region_count": 9,
+    "feasible_area": "21/2",
+    "feasible_initial_polygon": [
+      [
+        "-3",
+        "1/2"
+      ],
+      [
+        "0",
+        "-1"
+      ],
+      [
+        "3",
+        "-2"
+      ],
+      [
+        "3",
+        "-1/2"
+      ],
+      [
+        "0",
+        "1"
+      ],
+      [
+        "-3",
+        "2"
+      ]
+    ],
+    "interior_overlaps": 0,
+    "lower_u": [
+      "-1",
+      "-1-p-2v",
+      "(-1-p-3v)/2"
+    ],
+    "region_area_sum": "21/2",
+    "u_star": "clamp(-v, max(lower_u), min(upper_u))",
+    "upper_u": [
+      "1",
+      "1-p-2v",
+      "(1-p-3v)/2"
+    ]
+  },
+  "limitations": [
+    "fixture-specific one-step reference, not a general mpQP implementation",
+    "online values/first action are explicit maps; CSL returns a fixed-initial joint relation",
+    "performance timings are descriptive Python point-location/region-generation timings, not compared to C++ solver timings"
+  ],
+  "measurement": {
+    "offline_region_construction_ns": 79333412,
+    "point_location_queries": 191,
+    "point_location_rounds_ns": [
+      108783427,
+      108881346,
+      106710525,
+      112173265,
+      106081321,
+      111013194,
+      107966000
+    ],
+    "scope": "Python exact-rational region construction; point-location only, excludes optimizer and CSL workspaces"
+  },
+  "model": {
+    "A": [
+      [
+        1,
+        1
+      ],
+      [
+        0,
+        1
+      ]
+    ],
+    "B": [
+      [
+        0
+      ],
+      [
+        1
+      ]
+    ],
+    "control_box": [
+      -1,
+      1
+    ],
+    "horizon": 1,
+    "state_parameter_box": [
+      [
+        -3,
+        3
+      ],
+      [
+        -2,
+        2
+      ]
+    ]
+  },
+  "objective": "minimize p1^2 + v1^2 (terminal-only; no control regularizer)",
+  "regions": [
+    {
+      "active_lower": 0,
+      "active_upper": 1,
+      "area": "11/12",
+      "clamp_case": "upper",
+      "control_affine_p_v_constant": [
+        "-1",
+        "-2",
+        "1"
+      ],
+      "id": "R1",
+      "terminal_position_affine_p_v_constant": [
+        "1",
+        "1",
+        "0"
+      ],
+      "terminal_velocity_affine_p_v_constant": [
+        "-1",
+        "-1",
+        "1"
+      ],
+      "value_polynomial_coefficients_p2_pv_v2_p_v_constant": [
+        "2",
+        "4",
+        "2",
+        "-2",
+        "-2",
+        "1"
+      ],
+      "vertices": [
+        [
+          "1",
+          "0"
+        ],
+        [
+          "3",
+          "-2/3"
+        ],
+        [
+          "3",
+          "-1/2"
+        ],
+        [
+          "0",
+          "1"
+        ]
+      ]
+    },
+    {
+      "active_lower": 0,
+      "active_upper": 2,
+      "area": "5/4",
+      "clamp_case": "lower",
+      "control_affine_p_v_constant": [
+        "0",
+        "0",
+        "-1"
+      ],
+      "id": "R2",
+      "terminal_position_affine_p_v_constant": [
+        "1",
+        "1",
+        "0"
+      ],
+      "terminal_velocity_affine_p_v_constant": [
+        "0",
+        "1",
+        "-1"
+      ],
+      "value_polynomial_coefficients_p2_pv_v2_p_v_constant": [
+        "1",
+        "2",
+        "2",
+        "0",
+        "-2",
+        "1"
+      ],
+      "vertices": [
+        [
+          "-3",
+          "3/2"
+        ],
+        [
+          "-2",
+          "1"
+        ],
+        [
+          "0",
+          "1"
+        ],
+        [
+          "-3",
+          "2"
+        ]
+      ]
+    },
+    {
+      "active_lower": 0,
+      "active_upper": 2,
+      "area": "1",
+      "clamp_case": "free",
+      "control_affine_p_v_constant": [
+        "0",
+        "-1",
+        "0"
+      ],
+      "id": "R3",
+      "terminal_position_affine_p_v_constant": [
+        "1",
+        "1",
+        "0"
+      ],
+      "terminal_velocity_affine_p_v_constant": [
+        "0",
+        "0",
+        "0"
+      ],
+      "value_polynomial_coefficients_p2_pv_v2_p_v_constant": [
+        "1",
+        "2",
+        "1",
+        "0",
+        "0",
+        "0"
+      ],
+      "vertices": [
+        [
+          "-2",
+          "1"
+        ],
+        [
+          "1",
+          "0"
+        ],
+        [
+          "0",
+          "1"
+        ]
+      ]
+    },
+    {
+      "active_lower": 1,
+      "active_upper": 0,
+      "area": "11/12",
+      "clamp_case": "lower",
+      "control_affine_p_v_constant": [
+        "-1",
+        "-2",
+        "-1"
+      ],
+      "id": "R4",
+      "terminal_position_affine_p_v_constant": [
+        "1",
+        "1",
+        "0"
+      ],
+      "terminal_velocity_affine_p_v_constant": [
+        "-1",
+        "-1",
+        "-1"
+      ],
+      "value_polynomial_coefficients_p2_pv_v2_p_v_constant": [
+        "2",
+        "4",
+        "2",
+        "2",
+        "2",
+        "1"
+      ],
+      "vertices": [
+        [
+          "-1",
+          "0"
+        ],
+        [
+          "-3",
+          "2/3"
+        ],
+        [
+          "-3",
+          "1/2"
+        ],
+        [
+          "0",
+          "-1"
+        ]
+      ]
+    },
+    {
+      "active_lower": 1,
+      "active_upper": 2,
+      "area": "13/12",
+      "clamp_case": "lower",
+      "control_affine_p_v_constant": [
+        "-1",
+        "-2",
+        "-1"
+      ],
+      "id": "R5",
+      "terminal_position_affine_p_v_constant": [
+        "1",
+        "1",
+        "0"
+      ],
+      "terminal_velocity_affine_p_v_constant": [
+        "-1",
+        "-1",
+        "-1"
+      ],
+      "value_polynomial_coefficients_p2_pv_v2_p_v_constant": [
+        "2",
+        "4",
+        "2",
+        "2",
+        "2",
+        "1"
+      ],
+      "vertices": [
+        [
+          "-1",
+          "0"
+        ],
+        [
+          "-2",
+          "1"
+        ],
+        [
+          "-3",
+          "3/2"
+        ],
+        [
+          "-3",
+          "2/3"
+        ]
+      ]
+    },
+    {
+      "active_lower": 2,
+      "active_upper": 0,
+      "area": "1",
+      "clamp_case": "free",
+      "control_affine_p_v_constant": [
+        "0",
+        "-1",
+        "0"
+      ],
+      "id": "R6",
+      "terminal_position_affine_p_v_constant": [
+        "1",
+        "1",
+        "0"
+      ],
+      "terminal_velocity_affine_p_v_constant": [
+        "0",
+        "0",
+        "0"
+      ],
+      "value_polynomial_coefficients_p2_pv_v2_p_v_constant": [
+        "1",
+        "2",
+        "1",
+        "0",
+        "0",
+        "0"
+      ],
+      "vertices": [
+        [
+          "2",
+          "-1"
+        ],
+        [
+          "-1",
+          "0"
+        ],
+        [
+          "0",
+          "-1"
+        ]
+      ]
+    },
+    {
+      "active_lower": 2,
+      "active_upper": 0,
+      "area": "5/4",
+      "clamp_case": "upper",
+      "control_affine_p_v_constant": [
+        "0",
+        "0",
+        "1"
+      ],
+      "id": "R7",
+      "terminal_position_affine_p_v_constant": [
+        "1",
+        "1",
+        "0"
+      ],
+      "terminal_velocity_affine_p_v_constant": [
+        "0",
+        "1",
+        "1"
+      ],
+      "value_polynomial_coefficients_p2_pv_v2_p_v_constant": [
+        "1",
+        "2",
+        "2",
+        "0",
+        "2",
+        "1"
+      ],
+      "vertices": [
+        [
+          "2",
+          "-1"
+        ],
+        [
+          "0",
+          "-1"
+        ],
+        [
+          "3",
+          "-2"
+        ],
+        [
+          "3",
+          "-3/2"
+        ]
+      ]
+    },
+    {
+      "active_lower": 2,
+      "active_upper": 1,
+      "area": "13/12",
+      "clamp_case": "upper",
+      "control_affine_p_v_constant": [
+        "-1",
+        "-2",
+        "1"
+      ],
+      "id": "R8",
+      "terminal_position_affine_p_v_constant": [
+        "1",
+        "1",
+        "0"
+      ],
+      "terminal_velocity_affine_p_v_constant": [
+        "-1",
+        "-1",
+        "1"
+      ],
+      "value_polynomial_coefficients_p2_pv_v2_p_v_constant": [
+        "2",
+        "4",
+        "2",
+        "-2",
+        "-2",
+        "1"
+      ],
+      "vertices": [
+        [
+          "1",
+          "0"
+        ],
+        [
+          "2",
+          "-1"
+        ],
+        [
+          "3",
+          "-3/2"
+        ],
+        [
+          "3",
+          "-2/3"
+        ]
+      ]
+    },
+    {
+      "active_lower": 2,
+      "active_upper": 2,
+      "area": "2",
+      "clamp_case": "free",
+      "control_affine_p_v_constant": [
+        "0",
+        "-1",
+        "0"
+      ],
+      "id": "R9",
+      "terminal_position_affine_p_v_constant": [
+        "1",
+        "1",
+        "0"
+      ],
+      "terminal_velocity_affine_p_v_constant": [
+        "0",
+        "0",
+        "0"
+      ],
+      "value_polynomial_coefficients_p2_pv_v2_p_v_constant": [
+        "1",
+        "2",
+        "1",
+        "0",
+        "0",
+        "0"
+      ],
+      "vertices": [
+        [
+          "1",
+          "0"
+        ],
+        [
+          "-2",
+          "1"
+        ],
+        [
+          "-1",
+          "0"
+        ],
+        [
+          "2",
+          "-1"
+        ]
+      ]
+    }
+  ],
+  "schema": "csl.mpc08-explicit-double-integrator/1",
+  "solver_validation_queries": [
+    {
+      "id": "Q001",
+      "p": "-3",
+      "u_star": "1",
+      "v": "1/2",
+      "value": "17/2"
+    },
+    {
+      "id": "Q002",
+      "p": "-3",
+      "u_star": "5/6",
+      "v": "7/12",
+      "value": "565/72"
+    },
+    {
+      "id": "Q003",
+      "p": "-3",
+      "u_star": "2/3",
+      "v": "2/3",
+      "value": "65/9"
+    },
+    {
+      "id": "Q004",
+      "p": "-3",
+      "u_star": "-1/6",
+      "v": "13/12",
+      "value": "325/72"
+    },
+    {
+      "id": "Q005",
+      "p": "-3",
+      "u_star": "-1",
+      "v": "3/2",
+      "value": "5/2"
+    },
+    {
+      "id": "Q006",
+      "p": "-3",
+      "u_star": "-1",
+      "v": "7/4",
+      "value": "17/8"
+    },
+    {
+      "id": "Q007",
+      "p": "-3",
+      "u_star": "-1",
+      "v": "2",
+      "value": "2"
+    },
+    {
+      "id": "Q008",
+      "p": "-5/2",
+      "u_star": "-1",
+      "v": "5/4",
+      "value": "13/8"
+    },
+    {
+      "id": "Q009",
+      "p": "-9/4",
+      "u_star": "-1/3",
+      "v": "19/24",
+      "value": "673/288"
+    },
+    {
+      "id": "Q010",
+      "p": "-2",
+      "u_star": "1/3",
+      "v": "1/3",
+      "value": "29/9"
+    },
+    {
+      "id": "Q011",
+      "p": "-2",
+      "u_star": "-1",
+      "v": "1",
+      "value": "1"
+    },
+    {
+      "id": "Q012",
+      "p": "-2",
+      "u_star": "-1",
+      "v": "11/8",
+      "value": "17/32"
+    },
+    {
+      "id": "Q013",
+      "p": "-7/4",
+      "u_star": "2/3",
+      "v": "1/24",
+      "value": "985/288"
+    },
+    {
+      "id": "Q014",
+      "p": "-3/2",
+      "u_star": "1",
+      "v": "-1/4",
+      "value": "29/8"
+    },
+    {
+      "id": "Q015",
+      "p": "-3/2",
+      "u_star": "-1/2",
+      "v": "1/2",
+      "value": "1"
+    },
+    {
+      "id": "Q016",
+      "p": "-3/2",
+      "u_star": "-1",
+      "v": "3/2",
+      "value": "1/4"
+    },
+    {
+      "id": "Q017",
+      "p": "-1",
+      "u_star": "0",
+      "v": "0",
+      "value": "1"
+    },
+    {
+      "id": "Q018",
+      "p": "-1",
+      "u_star": "-1",
+      "v": "1",
+      "value": "0"
+    },
+    {
+      "id": "Q019",
+      "p": "-1/2",
+      "u_star": "1/2",
+      "v": "-1/2",
+      "value": "1"
+    },
+    {
+      "id": "Q020",
+      "p": "-1/2",
+      "u_star": "-1/2",
+      "v": "1/2",
+      "value": "0"
+    },
+    {
+      "id": "Q021",
+      "p": "-1/3",
+      "u_star": "-2/3",
+      "v": "2/3",
+      "value": "1/9"
+    },
+    {
+      "id": "Q022",
+      "p": "0",
+      "u_star": "1",
+      "v": "-1",
+      "value": "1"
+    },
+    {
+      "id": "Q023",
+      "p": "0",
+      "u_star": "0",
+      "v": "0",
+      "value": "0"
+    },
+    {
+      "id": "Q024",
+      "p": "0",
+      "u_star": "-1",
+      "v": "1",
+      "value": "1"
+    },
+    {
+      "id": "Q025",
+      "p": "1/3",
+      "u_star": "2/3",
+      "v": "-2/3",
+      "value": "1/9"
+    },
+    {
+      "id": "Q026",
+      "p": "1/2",
+      "u_star": "1/2",
+      "v": "-1/2",
+      "value": "0"
+    },
+    {
+      "id": "Q027",
+      "p": "1/2",
+      "u_star": "-1/2",
+      "v": "1/2",
+      "value": "1"
+    },
+    {
+      "id": "Q028",
+      "p": "1",
+      "u_star": "1",
+      "v": "-1",
+      "value": "0"
+    },
+    {
+      "id": "Q029",
+      "p": "1",
+      "u_star": "0",
+      "v": "0",
+      "value": "1"
+    },
+    {
+      "id": "Q030",
+      "p": "3/2",
+      "u_star": "1",
+      "v": "-3/2",
+      "value": "1/4"
+    },
+    {
+      "id": "Q031",
+      "p": "3/2",
+      "u_star": "1/2",
+      "v": "-1/2",
+      "value": "1"
+    },
+    {
+      "id": "Q032",
+      "p": "3/2",
+      "u_star": "-1",
+      "v": "1/4",
+      "value": "29/8"
+    },
+    {
+      "id": "Q033",
+      "p": "7/4",
+      "u_star": "-2/3",
+      "v": "-1/24",
+      "value": "985/288"
+    },
+    {
+      "id": "Q034",
+      "p": "2",
+      "u_star": "1",
+      "v": "-11/8",
+      "value": "17/32"
+    },
+    {
+      "id": "Q035",
+      "p": "2",
+      "u_star": "1",
+      "v": "-1",
+      "value": "1"
+    },
+    {
+      "id": "Q036",
+      "p": "2",
+      "u_star": "-1/3",
+      "v": "-1/3",
+      "value": "29/9"
+    },
+    {
+      "id": "Q037",
+      "p": "9/4",
+      "u_star": "1/3",
+      "v": "-19/24",
+      "value": "673/288"
+    },
+    {
+      "id": "Q038",
+      "p": "5/2",
+      "u_star": "1",
+      "v": "-5/4",
+      "value": "13/8"
+    },
+    {
+      "id": "Q039",
+      "p": "3",
+      "u_star": "1",
+      "v": "-2",
+      "value": "2"
+    },
+    {
+      "id": "Q040",
+      "p": "3",
+      "u_star": "1",
+      "v": "-7/4",
+      "value": "17/8"
+    },
+    {
+      "id": "Q041",
+      "p": "3",
+      "u_star": "1",
+      "v": "-3/2",
+      "value": "5/2"
+    },
+    {
+      "id": "Q042",
+      "p": "3",
+      "u_star": "1/6",
+      "v": "-13/12",
+      "value": "325/72"
+    },
+    {
+      "id": "Q043",
+      "p": "3",
+      "u_star": "-2/3",
+      "v": "-2/3",
+      "value": "65/9"
+    },
+    {
+      "id": "Q044",
+      "p": "3",
+      "u_star": "-5/6",
+      "v": "-7/12",
+      "value": "565/72"
+    },
+    {
+      "id": "Q045",
+      "p": "3",
+      "u_star": "-1",
+      "v": "-1/2",
+      "value": "17/2"
+    }
+  ],
+  "solver_validation_query_count": 45,
+  "terminal_set": {
+    "closed_loop_matrix": [
+      [
+        "1",
+        "1"
+      ],
+      [
+        "-1",
+        "-1"
+      ]
+    ],
+    "closed_loop_matrix_square": [
+      [
+        "0",
+        "0"
+      ],
+      [
+        "0",
+        "0"
+      ]
+    ],
+    "coordinates": [
+      "p1",
+      "v1"
+    ],
+    "inequalities": [
+      "|p1+2v1|<=1",
+      "|p1+v1|<=1"
+    ],
+    "invariant_feedback": [
+      "-1",
+      "-2"
+    ],
+    "invariant_verified_at_all_vertices": true,
+    "vertices": [
+      [
+        "1",
+        "0"
+      ],
+      [
+        "-3",
+        "2"
+      ],
+      [
+        "-1",
+        "0"
+      ],
+      [
+        "3",
+        "-2"
+      ]
+    ]
+  }
+}
