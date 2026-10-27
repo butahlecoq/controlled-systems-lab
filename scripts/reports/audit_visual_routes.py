@@ -148,7 +148,9 @@ def source_inventory(root: Path) -> list[dict]:
             elif relative.endswith("/visual_examples.py"):
                 disposition = "gallery-composition-and-route"
             elif ("registered_reports.py" in path.name or path.name.startswith(("stage_", "validate_"))
-                  or path.name in {"site.py", "report_data.py"}):
+                  or "publication_policy" in path.name
+                  or path.name in {"site.py", "report_data.py", "registered_report_policies.py",
+                                   "schema3_publication_policies.py"}):
                 disposition = "publication-validation-or-frozen-route"
             else:
                 disposition = "deferred-family-specific-migration"
