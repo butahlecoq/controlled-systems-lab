@@ -3,9 +3,9 @@
   "input_content_sha256": "4a48ecdb9bf981803bfc889caad53641cc1da2c6f49cd9cc0e274ecb8446aa2a",
   "style_id": "csl-control-science-v1",
   "quantitative_axis_policy": "csl-report-quantitative-v1",
-  "output_directory": "/home/butahlecoq/.local/share/codex/worktrees/viz15-fuel-route-demonstrations-713-20261027/reports/algorithm-results/stage-projection-demo-v1-check3/fuel-four-state-figures",
+  "output_directory": "/home/butahlecoq/.local/share/codex/worktrees/viz15-fuel-route-demonstrations-713-20261027/benchmarks/reporting/stage-projection/bundle-v1-check/fuel-four-state-figures",
   "files": {
-    "index.html": "0216067d16b56468f1379e41d8391f42f94e3d06e6c0a901373f91c928229745",
+    "index.html": "41e092985a6d9b62c120aa6f128101e326f7fdfb6fa76f00bf7f3c94d531db1e",
     "projection-01-x0-x2.png": "2c4ed8143bb4c90afb083fdee3493409ed6a76278fcca7d9390ec78b0f35cafe",
     "projection-01-x0-x2.svg": "3bccb480e391fb867f38f8ed2013f09663dff9b700ba3ac6473a12ad9a39c505",
     "projection-02-x1-x3.png": "c45a72d84e6bf4106eb1bb18d6c7f7143cc283d8fc39c95d0eadc677d319f996",

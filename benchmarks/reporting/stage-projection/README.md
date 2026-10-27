@@ -18,7 +18,7 @@ renderer reads only those saved batches; it does not call a solver, route, or
 geometry provider. Use a new `--out` directory for each run; existing output is
 never overwritten.
 
-The checked-in [v1 demonstration bundle](../../../reports/algorithm-results/stage-projection-demo-v1/README.md)
+The checked-in [v1 demonstration bundle](bundle-v1/README.md)
 contains the generated figures, offline indexes, saved batches, manifest, and
 checksums.
 

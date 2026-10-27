@@ -26,4 +26,4 @@ points.
 
 The source-bound batches, rendering manifests, bundle manifest, and
 `SHA256SUMS` are included beside these figures. Regenerate with the command in
-[`benchmarks/reporting/stage-projection/README.md`](../../../benchmarks/reporting/stage-projection/README.md).
+[`README.md`](../README.md).

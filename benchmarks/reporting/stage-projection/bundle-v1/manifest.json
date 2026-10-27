@@ -2,11 +2,11 @@
   "artifacts": [
     {
       "path": "README.md",
-      "sha256": "8bda5d6d78031d76664eaf521e9e7c0c2b437fb2da50f034b3da99a154c8d720"
+      "sha256": "8ba6b198e5ad6f9036190252cc4eda6c57e28cd53710f71126beca91aa3c9dbc"
     },
     {
       "path": "fuel-four-state-figures/index.html",
-      "sha256": "0216067d16b56468f1379e41d8391f42f94e3d06e6c0a901373f91c928229745"
+      "sha256": "41e092985a6d9b62c120aa6f128101e326f7fdfb6fa76f00bf7f3c94d531db1e"
     },
     {
       "path": "fuel-four-state-figures/projection-01-x0-x2.png",
@@ -42,7 +42,7 @@
     },
     {
       "path": "fuel-four-state-figures/render-manifest.json",
-      "sha256": "ead20a9774f63d15001cc9574a57a12131a6e128fad228bb95c1dc328da1a15c"
+      "sha256": "68c961ff3dfc9e042ff34df5d2590873f08c945f343642dece1f54f995b8becf"
     },
     {
       "path": "fuel-four-state.stage-projection-batch.json",
@@ -50,7 +50,7 @@
     },
     {
       "path": "nonfuel-integrator-figures/index.html",
-      "sha256": "f68f0b24c80ed89831b0885bbfd92e0f8904c62c505a84209450d1c81a2a6c86"
+      "sha256": "148fab8fb8adbc7bc2cd8c7b7d3c247465f461c6ddb7daf789a17d50e71e182b"
     },
     {
       "path": "nonfuel-integrator-figures/projection-01-x0-x1.png",
@@ -62,7 +62,7 @@
     },
     {
       "path": "nonfuel-integrator-figures/render-manifest.json",
-      "sha256": "c23d27707e5f5ab20b846055dab21d6e35ee1d42396c9c067127c96a22c1d4f8"
+      "sha256": "34789d90452b16c314d1b06fe6ba46d5a1335771ec022589b8d2254bac1d5c39"
     },
     {
       "path": "nonfuel-integrator.stage-projection-batch.json",
@@ -93,7 +93,7 @@
     },
     {
       "path": "benchmarks/reporting/stage-projection/BUNDLE-README.md",
-      "sha256": "8bda5d6d78031d76664eaf521e9e7c0c2b437fb2da50f034b3da99a154c8d720"
+      "sha256": "8ba6b198e5ad6f9036190252cc4eda6c57e28cd53710f71126beca91aa3c9dbc"
     },
     {
       "path": "scripts/reports/stage_projection_data.py",
