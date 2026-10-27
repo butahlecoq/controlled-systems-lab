@@ -36,7 +36,9 @@ standalone illustrative open-loop reachability case. It is not the B06 minimax
 result, a historical reproduction, or benchmark data. The native
 `nominal_forward` route batch is saved separately with per-stage evidence and
 explicit provider gaps; H/V conversion stops at R2 on affine-rank ambiguity for
-this scalar-control case. The full figure is the separate analytic
+this scalar-control case. A source-bound evidence sidecar retains each available
+marginal's OperationResult evidence, H-to-V conversion evidence, and provider
+lineage. The full figure is the separate analytic
 demonstration. It does not draw a filled boundary or claim its plotted points
 are all exposed extreme points. Negative fuel stock values are preserved.
 

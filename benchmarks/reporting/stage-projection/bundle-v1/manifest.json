@@ -2,7 +2,7 @@
   "artifacts": [
     {
       "path": "README.md",
-      "sha256": "c67d1ddbcaa114dc0d52413a7c63b7c19a27fdbd91036ee86078bf8887935d06"
+      "sha256": "b123c631149fa5dbe8849f9348d06bb996bb57048820275ec7f72fa04f064ca9"
     },
     {
       "path": "fuel-four-state-figures/index.html",
@@ -49,6 +49,10 @@
       "sha256": "71cc7f5df0d9d034cbcdeb07500a79c2dc3ad3a9d6dc17713c1af121b896385c"
     },
     {
+      "path": "fuel-four-state.nominal-forward.stage-projection-batch.json.evidence.json",
+      "sha256": "86ae4678c9828d69d49bdb6944fa58816f79f61fabf126cf10670b49f36e1fdc"
+    },
+    {
       "path": "fuel-four-state.stage-projection-batch.json",
       "sha256": "3b2e082a9ede9609b4771f14abd6174677453f50cfff93ce302ed54b928f805d"
     },
@@ -93,19 +97,19 @@
   "source_files": [
     {
       "path": "benchmarks/reporting/stage-projection/prepare_demos.py",
-      "sha256": "5f207cfce857bf6d5c0e5445706f493547fa24ef5ac5b12fabca21cb831927ec"
+      "sha256": "2b95525ae6a0e7331489e7dee8681f4454a0349069f4c7b4bf30bf2d3c0fb305"
     },
     {
       "path": "benchmarks/reporting/stage-projection/nominal_forward_route.cpp",
-      "sha256": "d22c13e09f17f7fbf82d0343ce4acf07fb793fa8ceeb73da00399ceb60d004e7"
+      "sha256": "d45d387c06e6d45b7265d343bca0b1883a9f91b2a9cb825a7d9e0c873831cb16"
     },
     {
       "path": "benchmarks/reporting/stage-projection/check_nominal_forward_route.py",
-      "sha256": "b4df3f1e682478d8cfaf4db20accd9facb0f524041e491eea577e9c0030cfbc9"
+      "sha256": "192e5599445a2e3db7c888c4a872ad12378e50b2c278451218351d222945abd8"
     },
     {
       "path": "benchmarks/reporting/stage-projection/BUNDLE-README.md",
-      "sha256": "c67d1ddbcaa114dc0d52413a7c63b7c19a27fdbd91036ee86078bf8887935d06"
+      "sha256": "b123c631149fa5dbe8849f9348d06bb996bb57048820275ec7f72fa04f064ca9"
     },
     {
       "path": "CMakeLists.txt",
@@ -117,15 +121,15 @@
     },
     {
       "path": "scripts/reports/stage_projection_route_capabilities.json",
-      "sha256": "e48781a1d1b49dd870f1f33dae833e885b85e0dff4cbc8bfbabc3891c2734729"
+      "sha256": "b1089de0d4a8053bd18a6c6b15b8a5e45f398d0ae1e62179f81070af1e38c394"
     },
     {
       "path": "benchmarks/reporting/stage-projection/README.md",
-      "sha256": "369826fb02fec0f4503327d19cb296f619676fbc6b29360d61748d73a0ab5d64"
+      "sha256": "f9fdccde894fee349414b3b2bc72936df0120e850a5dd233dd719ede1d3b9dff"
     },
     {
       "path": "tests/reporting/test_stage_projection_demos.py",
-      "sha256": "530e16b79b291c4e00b6aabd0efd7a2fe84cb2556978cce9b4d8ab2823038354"
+      "sha256": "20f158d6757cd291aeef7ee85ee7be677a7a9039f3ee8615287329e30a76605b"
     },
     {
       "path": "scripts/reports/stage_projection_data.py",

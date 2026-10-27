@@ -25,12 +25,18 @@ def main() -> None:
         output = Path(directory) / "native-batch.json"
         subprocess.run([str(executable), str(source_path), source_hash, str(output)], check=True)
         raw = output.read_bytes()
+        evidence = json.loads(Path(f"{output}.evidence.json").read_text(encoding="utf-8"))
     batch = json.loads(raw)
     digest = batch.pop("content_sha256")
     canonical = json.dumps(batch, ensure_ascii=False, allow_nan=False, sort_keys=True,
                            separators=(",", ":")).encode("utf-8")
     if hashlib.sha256(canonical).hexdigest() != digest:
         raise SystemExit("native route batch content hash mismatch")
+    evidence_digest = evidence.pop("content_sha256", None)
+    evidence_canonical = json.dumps(evidence, ensure_ascii=False, allow_nan=False,
+                                    sort_keys=True, separators=(",", ":")).encode("utf-8")
+    if evidence_digest is not None and hashlib.sha256(evidence_canonical).hexdigest() != evidence_digest:
+        raise SystemExit("native route evidence content hash mismatch")
     provenance = batch["provenance"]
     if (batch["schema"] != "csl.stage-projection-batch/1"
             or provenance["run_id"] != source["run_id"]
@@ -39,6 +45,16 @@ def main() -> None:
             or provenance["record_schema"] != source["record_schema"]
             or provenance["source_sha256"] != source_hash):
         raise SystemExit("native route batch source identity mismatch")
+    if (evidence["schema"] != "csl.nominal-forward-stage-evidence/1"
+            or evidence["run_id"] != source["run_id"]
+            or evidence["problem_id"] != batch["problem_id"]
+            or evidence["request_id"] != source["request_id"]
+            or evidence["route_id"] != "reachability.nominal_forward"
+            or evidence["source_sha256"] != source_hash
+            or len(evidence["stage_sources"]) != 2
+            or not all("marginal_evidence" in stage and "h_to_v_evidence" in stage
+                       and stage["providers"] for stage in evidence["stage_sources"])):
+        raise SystemExit("native route evidence sidecar is incomplete or source-mismatched")
     statuses = {(record["pair_index"], record["stage"]): record["outcome"]["status"]
                 for record in batch["records"]}
     pairs = len(source["coordinate_pairs"])

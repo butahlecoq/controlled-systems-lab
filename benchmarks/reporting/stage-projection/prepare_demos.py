@@ -15,6 +15,7 @@ import subprocess
 import sys
 
 ROOT = Path(__file__).resolve().parents[3]
+EXECUTABLE_SUFFIX = ".exe" if os.name == "nt" else ""
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
@@ -188,7 +189,7 @@ def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--out", type=Path, required=True, help="new output directory")
     parser.add_argument("--route-executable", type=Path,
-                        default=ROOT / "build/stage-projection-route-build/csl_stage_projection_route",
+                        default=ROOT / f"build/stage-projection-route-build/csl_stage_projection_route{EXECUTABLE_SUFFIX}",
                         help="built native nominal_forward route adapter")
     args = parser.parse_args()
     route_executable = args.route_executable.expanduser().resolve(strict=True)
@@ -219,8 +220,20 @@ def main() -> None:
             native_batch = json.loads(native_path.read_text(encoding="utf-8"))
             native_expected = dict(expected, expected_problem_id=native_batch["problem_id"])
             native_path.write_bytes(dumps_stage_projection_batch(native_batch, **native_expected))
+            evidence_path = Path(f"{native_path}.evidence.json")
+            native_evidence = json.loads(evidence_path.read_text(encoding="utf-8"))
+            if (native_evidence.get("source_sha256") != expected["expected_source_sha256"]
+                    or native_evidence.get("problem_id") != native_batch["problem_id"]
+                    or native_evidence.get("route_id") != source["route_id"]):
+                raise ValueError("native route evidence sidecar does not match its source and batch")
+            evidence_canonical = json.dumps(native_evidence, ensure_ascii=False, allow_nan=False,
+                                            sort_keys=True, separators=(",", ":")).encode("utf-8")
+            native_evidence["content_sha256"] = hashlib.sha256(evidence_canonical).hexdigest()
+            evidence_path.write_text(json.dumps(native_evidence, ensure_ascii=False, allow_nan=False,
+                                                indent=2, sort_keys=True) + "\n", encoding="utf-8")
             gaps = [record for record in native_batch["records"] if record["outcome"]["status"] != "success"]
             print(f"native route batch: {native_path.resolve()} ({len(gaps)} explicit unavailable stage/pair records)")
+            print(f"native route evidence: {evidence_path.resolve()}")
             demo_source = dict(source, route_id="demo.affine-box-reachability")
             expected["expected_route_id"] = demo_source["route_id"]
             batch = _batch(demo_source, raw)

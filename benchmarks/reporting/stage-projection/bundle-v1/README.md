@@ -17,8 +17,12 @@ the analytic demonstration adapter.
 - [Oxidizer stock x2 vs fuel flow x3 (PNG)](fuel-four-state-figures/projection-04-x1-x2.png) · [SVG](fuel-four-state-figures/projection-04-x1-x2.svg)
 - [Fuel offline HTML index](fuel-four-state-figures/index.html)
 - [Native nominal-forward capture (two available stages; explicit later gaps)](fuel-four-state.nominal-forward.stage-projection-batch.json)
+- [Native route evidence sidecar](fuel-four-state.nominal-forward.stage-projection-batch.json.evidence.json)
 
-The offline figure panels show the full analytic demo's projected vertices for
+The native route evidence sidecar retains each available marginal's geometry
+evidence, H-to-V conversion evidence, and provider identities under the same
+source hash as its batch, with its own content hash. The offline figure panels
+show the full analytic demo's projected vertices for
 R0 through R5. The separate native route batch keeps only route-produced stages
 and marks unavailable stages with the provider's affine-rank diagnostic. It is
 not used to fill the figure. The dashed

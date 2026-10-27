@@ -9,6 +9,7 @@
 #include <fstream>
 #include <iostream>
 #include <stdexcept>
+#include <type_traits>
 
 namespace {
 using namespace csl;
@@ -52,6 +53,36 @@ struct RouteDependencies {
     registry::PreparedProvider<registry::GeometryPort> capture_projection;
     registry::PreparedProvider<registry::ConversionPort> to_v;
 };
+
+Json evidence_json(const GeometryEvidence& evidence) {
+    const auto support = std::visit([](const auto& value) -> Json {
+        using T = std::decay_t<decltype(value)>;
+        if constexpr (std::is_same_v<T, Unestablished>) return {{"kind", "unestablished"}};
+        else if constexpr (std::is_same_v<T, NumericalCheck>)
+            return {{"kind", "numerical_check"}, {"absolute_tolerance", value.absolute_tolerance},
+                {"relative_tolerance", value.relative_tolerance}, {"max_residual", value.max_residual},
+                {"verifier", value.verifier.value}};
+        else if constexpr (std::is_same_v<T, SymbolicArgument>)
+            return {{"kind", "symbolic_argument"}, {"reference", value.reference}, {"assumptions", value.assumptions}};
+        else if constexpr (std::is_same_v<T, CertificateReference>)
+            return {{"kind", "certificate_reference"}, {"artifact", value.artifact}, {"verifier", value.verifier}};
+        else return {{"kind", "exact_farkas"}, {"subject_problem", value.subject().problem.value},
+            {"subject_program", value.subject().program.value}};
+    }, evidence.support);
+    Json inputs = Json::array();
+    for (const auto& input : evidence.reference.inputs) inputs.push_back(input.value);
+    Json document{{"reference", {{"problem", evidence.reference.identity.problem.value},
+        {"request", evidence.reference.identity.request.value},
+        {"ideal_output", evidence.reference.identity.ideal_output.value}, {"inputs", std::move(inputs)}}},
+        {"scope", evidence.scope == GeometryClaimScope::set_relation ? "set_relation" :
+            evidence.scope == GeometryClaimScope::support_value ? "support_value" : "containment"},
+        {"support", support}, {"assumptions", evidence.assumptions}};
+    if (evidence.error_bound)
+        document["error_bound"] = {{"metric", evidence.error_bound->metric.value},
+            {"bound", evidence.error_bound->bound}, {"units", evidence.error_bound->units}};
+    else document["error_bound"] = nullptr;
+    return document;
+}
 
 RouteDependencies dependencies() {
     const adapters::lp::HighsLPOptions lp_options{std::nullopt};
@@ -115,7 +146,12 @@ Problem make_problem(const Json& source) {
         LinearTerminal{Vector(dimension, 0.0), 0.0}};
 }
 
-artifacts::StageProjectionCaptureRequest capture_request(
+struct CapturedRequest {
+    artifacts::StageProjectionCaptureRequest request;
+    Json source_evidence;
+};
+
+CapturedRequest capture_request(
         const Json& source, const reachability::ForwardTube& tube,
         const reachability::ForwardFailure* failure, const RouteDependencies& dependencies,
         const ExecutionContext& context) {
@@ -133,6 +169,7 @@ artifacts::StageProjectionCaptureRequest capture_request(
         ordinals.push_back({first, second});
     }
     std::vector<ar::StageProjectionInput> stages;
+    Json stage_sources = Json::array();
     for (const auto& stage : tube.stages) {
         ConversionRequest conversion{{tube.problem,
             {source.at("request_id").get<std::string>() + "/capture/stage/" + std::to_string(stage.stage.value) + "/to-v"},
@@ -149,6 +186,19 @@ artifacts::StageProjectionCaptureRequest capture_request(
         const auto* converted_result = std::get_if<OperationResult>(&converted);
         if (!converted_result) throw std::runtime_error("route marginal H-to-V conversion failed");
         auto data = take(sets::from_handle(converted_result->output));
+        Json providers = Json::array();
+        for (const auto& provider : stage.providers)
+            providers.push_back({{"request", provider.request.value}, {"port", provider.port},
+                {"requested_module", provider.requested_module.value},
+                {"requested_version", provider.requested_version ? Json(*provider.requested_version) : Json(nullptr)},
+                {"actual_module", provider.actual_module ? Json(provider.actual_module->value) : Json(nullptr)},
+                {"actual_version", provider.actual_version ? Json(*provider.actual_version) : Json(nullptr)}});
+        stage_sources.push_back({{"stage", stage.stage.value}, {"marginal_set_id", stage.marginal.output.id.value},
+            {"marginal_evidence", evidence_json(stage.marginal.evidence)},
+            {"h_to_v_set_id", data.metadata()->id.value},
+            {"h_to_v_evidence", evidence_json(converted_result->evidence)},
+            {"operation_lineage", [&] { Json values = Json::array(); for (const auto& item : stage.operation_lineage) values.push_back(evidence_json(item)); return values; }()},
+            {"providers", std::move(providers)}});
         ar::StageProjectionSet relation;
         relation.relation = converted_result->output;
         relation.owner = ar::PlotSourceOwner{tube.problem,
@@ -190,9 +240,21 @@ artifacts::StageProjectionCaptureRequest capture_request(
             : ar::StageProjectionGap::Kind::missing;
         stages.push_back({{stage}, static_cast<double>(stage), ar::StageProjectionGap{kind, explanation, {}}});
     }
-    return {{tube.problem.value}, {source.at("request_id").get<std::string>()},
+    Json unavailable = Json::array();
+    for (const auto& input : stages) {
+        if (const auto* gap = std::get_if<ar::StageProjectionGap>(&input.source))
+            unavailable.push_back({{"stage", input.stage.value}, {"kind", gap->kind == ar::StageProjectionGap::Kind::missing ? "missing" :
+                gap->kind == ar::StageProjectionGap::Kind::unsupported ? "unsupported" : "stopped"},
+                {"explanation", gap->explanation}});
+    }
+    Json source_evidence{{"schema", "csl.nominal-forward-stage-evidence/1"},
+        {"run_id", source.at("run_id")}, {"problem_id", tube.problem.value},
+        {"request_id", source.at("request_id")}, {"route_id", source.at("route_id")},
+        {"source_sha256", ""}, {"stage_sources", std::move(stage_sources)},
+        {"unavailable_stages", std::move(unavailable)}};
+    return {{csl::ProblemId{tube.problem.value}, {source.at("request_id").get<std::string>()},
         std::move(coordinates), std::move(pairs), std::move(stages),
-        SetRelation::equivalent, Assurance::numerical};
+        SetRelation::equivalent, Assurance::numerical}, std::move(source_evidence)};
 }
 }
 
@@ -216,7 +278,8 @@ int main(int argc, char** argv) {
         const auto* failure = std::get_if<csl::reachability::ForwardFailure>(&outcome);
         if (failure) tube = &failure->prefix;
         if (!tube) throw std::runtime_error("nominal_forward returned an empty initial or later stage");
-        auto request = capture_request(source, *tube, failure, route_dependencies, context);
+        auto captured_request = capture_request(source, *tube, failure, route_dependencies, context);
+        auto& request = captured_request.request;
         const auto projection = csl::artifacts::capture_stage_projections(request,
             route_dependencies.capture_projection, context);
         const auto* captured = std::get_if<csl::artifacts::StageProjectionBatchCapture>(&projection);
@@ -270,6 +333,12 @@ int main(int argc, char** argv) {
         if (!output) throw std::runtime_error("cannot create output batch");
         output << *json << '\n';
         if (!output) throw std::runtime_error("failed writing output batch");
+        captured_request.source_evidence["source_sha256"] = argv[2];
+        const auto evidence_path = std::string(argv[3]) + ".evidence.json";
+        std::ofstream evidence_output(evidence_path);
+        if (!evidence_output) throw std::runtime_error("cannot create route evidence sidecar");
+        evidence_output << captured_request.source_evidence.dump(2) << '\n';
+        if (!evidence_output) throw std::runtime_error("failed writing route evidence sidecar");
         std::cout << "captured " << tube->stages.size() << " available stages from reachability.nominal_forward";
         if (failure) std::cout << "; explicit gaps begin at R" << failure->stage.value;
         std::cout << '\n';

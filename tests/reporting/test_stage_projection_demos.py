@@ -2,6 +2,7 @@ import hashlib
 import importlib.util
 import itertools
 import json
+import os
 from pathlib import Path
 import unittest
 
@@ -104,6 +105,9 @@ class StageProjectionDemoTests(unittest.TestCase):
             "simulation.replay",
         })
 
+    def test_native_route_default_executable_uses_platform_suffix(self):
+        self.assertEqual(DEMOS.EXECUTABLE_SUFFIX, ".exe" if os.name == "nt" else "")
+
     def test_checked_in_bundle_uses_portable_paths_and_current_file_hashes(self):
         bundle = ROOT / "benchmarks/reporting/stage-projection/bundle-v1"
         for index in bundle.glob("*-figures/index.html"):
@@ -113,6 +117,33 @@ class StageProjectionDemoTests(unittest.TestCase):
             receipt = json.loads((index.parent / "render-manifest.json").read_text())
             self.assertEqual(receipt["output_directory"], ".")
             self.assertEqual(receipt["files"]["index.html"], hashlib.sha256(index.read_bytes()).hexdigest())
+
+    def test_native_route_bundle_preserves_source_and_conversion_evidence(self):
+        source = DEMOS.EXAMPLES / "fuel-four-state.json"
+        source_data = json.loads(source.read_text())
+        expected_source = hashlib.sha256(source.read_bytes()).hexdigest()
+        bundle = ROOT / "benchmarks/reporting/stage-projection/bundle-v1"
+        path = bundle / "fuel-four-state.nominal-forward.stage-projection-batch.json.evidence.json"
+        evidence = json.loads(path.read_text())
+        digest = evidence.pop("content_sha256")
+        canonical = json.dumps(evidence, ensure_ascii=False, allow_nan=False,
+                               sort_keys=True, separators=(",", ":")).encode()
+        self.assertEqual(hashlib.sha256(canonical).hexdigest(), digest)
+        self.assertEqual(evidence["schema"], "csl.nominal-forward-stage-evidence/1")
+        self.assertEqual(evidence["source_sha256"], expected_source)
+        self.assertEqual(evidence["route_id"], "reachability.nominal_forward")
+        self.assertEqual(len(evidence["stage_sources"]), 2)
+        for stage in evidence["stage_sources"]:
+            self.assertEqual(stage["marginal_evidence"]["scope"], "set_relation")
+            self.assertIn("support", stage["marginal_evidence"])
+            self.assertIn("h_to_v_evidence", stage)
+            self.assertTrue(stage["providers"])
+        unavailable = evidence["unavailable_stages"]
+        self.assertEqual([row["stage"] for row in unavailable], [2, 3, 4, 5])
+        self.assertIn("affine_rank", unavailable[0]["explanation"])
+        batch = json.loads((bundle / "fuel-four-state.nominal-forward.stage-projection-batch.json").read_text())
+        self.assertEqual(batch["provenance"]["source_sha256"], expected_source)
+        self.assertEqual(batch["route_id"], source_data["route_id"])
 
 
 if __name__ == "__main__":
