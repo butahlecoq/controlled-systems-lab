@@ -21,7 +21,12 @@ nanosecond values, median and range in `result.json`. The interval covers the
 `finite_action_minimax` call; request construction, numerical replay checks and
 JSON/figure export are outside it. No limiter profile was collected, so these
 are descriptive timing observations for one tiny fixture, not a performance
-claim or comparison.
+claim or comparison. The current capture was rebuilt from Release commit
+`969af71400894e8cd225cd8740b58777228a136b` with GNU C++ 16.2.1. It hashes all
+240 C++ source and public-header inputs under `src/` and `include/`. Seven
+single-threaded calls measured a median of 364,085 ns (range 348,930–605,179
+ns). The spread is retained as observed; no stable performance conclusion is
+drawn from this one small fixture.
 
 ## Source behavior and pilot changes
 

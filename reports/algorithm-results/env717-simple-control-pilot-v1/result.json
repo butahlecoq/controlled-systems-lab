@@ -20,7 +20,7 @@
     "terminal_time_seconds": 0.2
   },
   "algorithm": "csl.finite-action-minimax.numerical",
-  "algorithm_source_sha256": "7c7dff1b04b12106737a697515a4ef73d33c8e4404f2471f124c85e9552b5ca2",
+  "algorithm_source_sha256": "a222ed777cba81bce2170d96f22b4e5fd9d55aa92ae66413246e97f3c11f03f1",
   "assurance": "numerical; exhaustive over all 3^4 fixed action sequences",
   "driver_sha256": "6cb30cf7af87798f6103c78aace1a27de8c2459ce603868022c28f0f0ef00a04",
   "environment": {
@@ -1437,7 +1437,7 @@
     "state": "[time, x]",
     "step_reward": "-0.5 * dt * u^2; terminal reward additionally subtracts x^2"
   },
-  "source_commit": "61a07f2c4379748594a8fcde853d8886dd0b46d4",
+  "source_commit": "969af71400894e8cd225cd8740b58777228a136b",
   "source_file_blobs": {
     "SimpleControlProblem.py": "4eb0bb6fc04aa8e56891e1772287d013d2b32b3d",
     "SimpleControlProblem_Discrete.py": "40b9c13cf0d123ae3823a91b36a1b54162e04dad"
@@ -1446,19 +1446,19 @@
   "source_repository_commit": "f4d76c60f4003f50954174e96eafd8e514bd5441",
   "timing": {
     "limiter_profile": "not collected; no comparative performance claim",
-    "max_wall_ns": 1077870,
+    "max_wall_ns": 605179,
     "measured_calls": 7,
     "measured_wall_ns": [
-      1001114,
-      884826,
-      911018,
-      975971,
-      1000484,
-      1077870,
-      1046651
+      561947,
+      348930,
+      605179,
+      364085,
+      366041,
+      353540,
+      353190
     ],
-    "median_wall_ns": 1000484,
-    "min_wall_ns": 884826,
+    "median_wall_ns": 364085,
+    "min_wall_ns": 348930,
     "scope": "finite_action_minimax call; request setup and JSON output excluded",
     "warmup_calls": 1
   },
@@ -1467,11 +1467,11 @@
     "processor": "AMD Ryzen 5 3550H with Radeon Vega Mobile Gfx",
     "logical_cpus": 8,
     "load_average_before_run": [
-      0.30810546875,
-      0.3935546875,
-      0.44482421875
+      1.61376953125,
+      1.73681640625,
+      1.62646484375
     ],
-    "capture_started_unix_ns": 1793049548631035299
+    "capture_started_unix_ns": 1793132960068394412
   },
   "renderer_sha256": "8416657ad6423f5653855197ef76f79ee1d3e16ac409f9ab2826cc3b827c1534"
 }

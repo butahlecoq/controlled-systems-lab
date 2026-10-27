@@ -3,9 +3,9 @@
   "processor": "AMD Ryzen 5 3550H with Radeon Vega Mobile Gfx",
   "logical_cpus": 8,
   "load_average_before_run": [
-    0.30810546875,
-    0.3935546875,
-    0.44482421875
+    1.61376953125,
+    1.73681640625,
+    1.62646484375
   ],
-  "capture_started_unix_ns": 1793049548631035299
+  "capture_started_unix_ns": 1793132960068394412
 }
