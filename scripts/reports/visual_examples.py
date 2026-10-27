@@ -8,6 +8,7 @@ import math
 from pathlib import Path
 import re
 import shutil
+import tempfile
 from urllib.parse import urlsplit
 
 import geo04_registered_reports as intersection_reports
@@ -16,6 +17,7 @@ import audit_visual_routes
 import approx_extension_companions
 import geometry_opt_companions
 import report_data
+import site_additions
 import stage_ext07 as ext07_reports
 import visual_illustrations
 
@@ -866,12 +868,13 @@ def build(catalog, site):
                 "staged records differ from reviewed source")
     out = site / "examples"
     require(not out.is_symlink(), "gallery output must not be a symlink")
-    out.mkdir(exist_ok=True)
     outputs = {e["slug"] + ".svg": plot(e) for e in examples}
     outputs.update(analytic_files)
-    _, geometry_inventory, geometry_assets = geometry_opt_companions.build(out)
-    for asset in geometry_assets:
-        outputs[asset] = (out / asset).read_bytes()
+    with tempfile.TemporaryDirectory(prefix="csl-gallery-geometry-") as temporary:
+        geometry_root = Path(temporary) / "examples"
+        _, geometry_inventory, geometry_assets = geometry_opt_companions.build(geometry_root)
+        for asset in geometry_assets:
+            outputs[asset] = (geometry_root / asset).read_bytes()
     fuel_assets = Path(__file__).parents[2] / "docs/examples"
     fuel_files = ("fuel-b06-viz03.html", "fuel-b06-viz03-source.json", "fuel-b06-viz03-export.json",
                   "fuel-b06-flow-projection.svg", "fuel-b06-flow-projection.png", "fuel-b06-stock-projection.svg",
@@ -1118,20 +1121,52 @@ def build(catalog, site):
         "inputs": projected["inputs"],
         "analytic": projected["analytic"],
     }, indent=2) + "\n"
-    for name, content in outputs.items():
-        destination = out / name
-        require(not destination.is_symlink(), "gallery file must not be a symlink")
-        destination.parent.mkdir(parents=True, exist_ok=True)
-        if isinstance(content, bytes):
-            destination.write_bytes(content)
-        else:
-            destination.write_text(content, encoding="utf-8")
-    validate_gallery_inventory(out, gallery_inventory)
-    require(not (out / "examples.css").is_symlink(), "gallery stylesheet must not be a symlink")
-    shutil.copyfile(Path(__file__).with_name("visual_examples.css"), out / "examples.css")
     link = '<p id="visual-examples-link"><a href="examples/index.html">Visual examples: minimal 2D inputs, hull vertices and plots →</a></p>'
+    output_files = {name: (content if isinstance(content, bytes) else content.encode("utf-8"))
+                    for name, content in outputs.items()}
+    output_files["examples.css"] = Path(__file__).with_name("visual_examples.css").read_bytes()
+
+    with tempfile.TemporaryDirectory(prefix="csl-gallery-validation-") as temporary:
+        validation_site = Path(temporary)
+        validation_out = validation_site / "examples"
+        validation_out.mkdir()
+        for name, content in output_files.items():
+            target = validation_out / name
+            target.parent.mkdir(parents=True, exist_ok=True)
+            target.write_bytes(content)
+        references = []
+        for entry in gallery_inventory:
+            for field in ("page", "walkthrough_page", "figure", "source_page", "raw_record", "report_records"):
+                value = entry.get(field)
+                references.extend(value if isinstance(value, list) else [value])
+        for value in references:
+            if not isinstance(value, str) or urlsplit(value).scheme:
+                continue
+            ref = value.split("#", 1)[0]
+            staged = (validation_out / ref).resolve()
+            if staged.is_relative_to(validation_site) and staged.is_file():
+                continue
+            source = (out / ref).resolve()
+            if not source.is_relative_to(site):
+                raise ValueError("visual inventory reference escapes the site")
+            relative = source.relative_to(site)
+            staged = validation_site / relative
+            current = site
+            for part in relative.parts:
+                current = current / part
+                require(not current.is_symlink(), "visual inventory source must not be a symlink")
+            require(source.is_file(), "visual inventory source is missing")
+            source_file = source
+            staged.parent.mkdir(parents=True, exist_ok=True)
+            shutil.copyfile(source_file, staged)
+        validate_gallery_inventory(validation_out, gallery_inventory)
+
+    site_files = {"examples/" + name: content for name, content in output_files.items()}
     if 'id="visual-examples-link"' not in original:
-        index.write_text(re.sub(r"(<body\b[^>]*>)", lambda match: match[1] + link, original, count=1), encoding="utf-8")
+        site_files["index.html"] = re.sub(
+            r"(<body\b[^>]*>)", lambda match: match[1] + link, original, count=1).encode("utf-8")
+    plan = site_additions.prepare(site, site_files, replace_existing=frozenset(site_files))
+    site_additions.commit(plan)
 
 
 def main():

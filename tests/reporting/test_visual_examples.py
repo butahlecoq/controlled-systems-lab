@@ -7,6 +7,7 @@ import shutil
 import sys
 import tempfile
 import unittest
+from unittest.mock import patch
 from urllib.parse import urlsplit
 import xml.etree.ElementTree as ET
 
@@ -476,6 +477,68 @@ class GalleryTests(unittest.TestCase):
         linked=next(report for report in family["catalog_reports"] if report["report_kind"]=="issue6-b07-reference")
         self.assertEqual(linked["report_id"],b07["report_id"])
         self.assertTrue(linked["raw_record"].endswith(b07["report_id"]+"/results.jsonl"))
+
+
+    def test_output_symlinks_are_rejected_before_any_gallery_write(self):
+        for relative in ("examples/examples.css", "examples/viz10"):
+            with self.subTest(path=relative):
+                target = self.site / "symlink-target"
+                target.mkdir(exist_ok=True)
+                output = self.site / relative
+                output.parent.mkdir(parents=True, exist_ok=True)
+                output.symlink_to(target, target_is_directory=relative.endswith("viz10"))
+                before = {path.relative_to(self.site).as_posix():
+                          ("symlink", str(path.readlink())) if path.is_symlink() else
+                          ("file", path.read_bytes()) if path.is_file() else ("directory", None)
+                          for path in self.site.rglob("*")}
+                with self.assertRaisesRegex(ValueError, "symlink"):
+                    gallery.build(self.catalog, self.site)
+                after = {path.relative_to(self.site).as_posix():
+                         ("symlink", str(path.readlink())) if path.is_symlink() else
+                         ("file", path.read_bytes()) if path.is_file() else ("directory", None)
+                         for path in self.site.rglob("*")}
+                self.assertEqual(after, before)
+                output.unlink()
+
+    def test_generated_inventory_failure_leaves_gallery_and_site_index_unchanged(self):
+        before = {path.relative_to(self.site).as_posix():
+                  ("file", path.read_bytes()) if path.is_file() else ("directory", None)
+                  for path in self.site.rglob("*")}
+        with patch.object(gallery, "validate_gallery_inventory",
+                          side_effect=ValueError("invalid generated inventory")):
+            with self.assertRaisesRegex(ValueError, "invalid generated inventory"):
+                gallery.build(self.catalog, self.site)
+        after = {path.relative_to(self.site).as_posix():
+                 ("file", path.read_bytes()) if path.is_file() else ("directory", None)
+                 for path in self.site.rglob("*")}
+        self.assertEqual(after, before)
+
+    def test_commit_io_failure_leaves_root_index_unchanged_and_may_leave_partial_gallery(self):
+        root_index = (self.site / "index.html").read_bytes()
+        report_bytes = {entry["report_id"]: (self.site / entry["report_id"] / "index.html").read_bytes()
+                        for entry in self.examples}
+        real_commit = gallery.site_additions.commit
+
+        def fail_after_one(plan):
+            writes = 0
+
+            def writer(path, content):
+                nonlocal writes
+                writes += 1
+                if writes == 2:
+                    raise OSError("injected gallery commit failure")
+                path.parent.mkdir(parents=True, exist_ok=True)
+                path.write_bytes(content)
+
+            real_commit(plan, writer=writer)
+
+        with patch.object(gallery.site_additions, "commit", side_effect=fail_after_one):
+            with self.assertRaisesRegex(OSError, "injected gallery commit failure"):
+                gallery.build(self.catalog, self.site)
+        self.assertEqual((self.site / "index.html").read_bytes(), root_index)
+        for report_id, content in report_bytes.items():
+            self.assertEqual((self.site / report_id / "index.html").read_bytes(), content)
+        self.assertTrue(any(path.is_file() for path in (self.site / "examples").rglob("*")))
 
 
 if __name__ == "__main__":

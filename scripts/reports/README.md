@@ -28,6 +28,26 @@ and publication manifest validation used by the other adapters. Each kind's
 adapter retains its scientific validation and typed page rendering. Rendering
 and staging read saved data and never execute numerical collectors.
 
+`site_additions.py` owns the common file-staging lifecycle for the educational
+gallery and versioned report additions such as APP-02. Callers render all
+intended bytes, validate their scientific and link inventories, then prepare a
+plan that checks normalized paths, symlinks, destination types, freshness
+requirements and existing-file fingerprints. No site path is created or written
+until preparation succeeds. Gallery rebuilds may replace only files named in
+their plan; APP-02 requires its report and example routes to be fresh. Existing
+report bundles are read-only inputs. APP-02's published catalog retains its
+historical stager fingerprint; newly generated catalog entries use the current
+stager fingerprint.
+
+Validation or preparation failures leave all pre-existing site bytes and paths
+unchanged. During commit, route data and nested index pages are written before
+the site-root `index.html`. A commit-time I/O error may leave some new or
+replaced route files behind; the stager does not promise rollback. The root
+index remains unchanged unless its final write succeeds. This guarantee does
+not cover process crashes or concurrent writers. Gallery rebuilds intentionally
+keep their existing route and can therefore be partially visible after a
+commit-time failure. Re-run the gallery build to converge its generated files.
+
 The explicit historical publication pins bind **both** the complete native
 source inventory, any sibling archive used by the adapter identity, and the exact offline ZIP output. Current validation always
 runs first. A changed source file or changed generated output cannot reuse a
