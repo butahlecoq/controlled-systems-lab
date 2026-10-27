@@ -154,14 +154,18 @@ set(example_source "${work}/examples-source")
 file(MAKE_DIRECTORY "${example_source}/scenarios")
 foreach(example_file CMakeLists.txt registered_lp.cpp registered_convex.cpp
     resolved_scenario.cpp scenario_file.cpp backend_substitution.cpp registered_synthesis_comparison.cpp
-    nominal_linear_exact_2d.cpp scenario_cli.cpp continuous_policy.cpp)
+    nominal_linear_exact_2d.cpp scenario_cli.cpp continuous_policy.cpp
+    scenario_backend_substitution.cpp scenario_backend_artifact_check.cpp)
   file(COPY "${CSL_SOURCE_DIR}/examples/${example_file}" DESTINATION "${example_source}")
 endforeach()
 file(COPY "${CSL_SOURCE_DIR}/examples/scenario_cli_export_check.cmake"
   "${CSL_SOURCE_DIR}/examples/scenario_cli_methods_export_check.cmake"
   "${CSL_SOURCE_DIR}/examples/scenario_cli_identity_check.cmake"
+  "${CSL_SOURCE_DIR}/examples/scenario_backend_substitution_check.cmake"
   DESTINATION "${example_source}")
 file(COPY "${CSL_SOURCE_DIR}/examples/scenarios/two-stage-integrator.json"
+  "${CSL_SOURCE_DIR}/examples/scenarios/two-stage-integrator-highs.json"
+  "${CSL_SOURCE_DIR}/examples/scenarios/two-stage-integrator-phase-one.json"
   DESTINATION "${example_source}/scenarios")
 file(COPY "${CSL_SOURCE_DIR}/examples/scenarios/double-integrator-generality.json"
   DESTINATION "${example_source}/scenarios")
