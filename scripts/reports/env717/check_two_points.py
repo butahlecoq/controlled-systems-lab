@@ -204,7 +204,11 @@ def plot_svg(derived: dict) -> str:
                 hull = convex_hull(projected)
                 if len(hull) >= 3:
                     coords = " ".join(f'{px(x):.2f},{py(y):.2f}' for x, y in hull)
-                    out.append(f'<polygon points="{coords}" fill="{colors[stage]}" fill-opacity="0.055" stroke="{colors[stage]}" stroke-opacity="0.28" stroke-width="0.8"/>')
+                    terminal = stage == HORIZON
+                    fill_opacity = "0.13" if terminal else "0.035"
+                    stroke_opacity = "0.85" if terminal else "0.2"
+                    stroke_width = "1.6" if terminal else "0.8"
+                    out.append(f'<polygon points="{coords}" fill="{colors[stage]}" fill-opacity="{fill_opacity}" stroke="{colors[stage]}" stroke-opacity="{stroke_opacity}" stroke-width="{stroke_width}"/>')
         for stage, states in enumerate(states_by_stage):
             backward = {tuple(state) for state in back_by_stage[stage]}
             for state in states:
@@ -220,9 +224,10 @@ def plot_svg(derived: dict) -> str:
         out.append(f'<text x="{x0+pw/2}" y="{y0+ph+48}" fill="#f4f1e8" font-family="sans-serif" font-size="14" text-anchor="middle">{xlabel}</text>')
         out.append(f'<text x="{x0-48}" y="{y0+ph/2}" fill="#f4f1e8" font-family="sans-serif" font-size="14" text-anchor="middle" transform="rotate(-90 {x0-48} {y0+ph/2})">{ylabel}</text>')
     out.extend(['<rect x="79" y="583" width="9" height="9" fill="#56b4e9" fill-opacity="0.4" stroke="#56b4e9"/><text x="95" y="592" fill="#d2dce1" font-family="sans-serif" font-size="13">Forward reachable polytopes by stage/control prefix</text>',
+                '<rect x="79" y="607" width="12" height="10" fill="#d9a441" fill-opacity="0.3" stroke="#d9a441" stroke-width="1.5"/><text x="99" y="617" fill="#d2dce1" font-family="sans-serif" font-size="13">Stage 3 terminal reachable set (one projected set per control prefix)</text>',
                 '<circle cx="470" cy="587" r="4" fill="#f4a261"/><text x="482" y="592" fill="#d2dce1" font-family="sans-serif" font-size="13">Forward ∩ robust backward vertices</text>',
                 '<line x1="690" y1="587" x2="720" y2="587" stroke="#ff6b35" stroke-width="4"/><text x="730" y="592" fill="#d2dce1" font-family="sans-serif" font-size="13">Verified minimax trajectory (one worst-case disturbance)</text>',
-                '<text x="75" y="626" fill="#93a4ae" font-family="sans-serif" font-size="12">Forward polygons exactly project convex disturbance-reachable polytopes per control prefix; backward nodes are finite-vertex feedback-game nodes, not continuous predecessor sets. Horizon: 0.3 s.</text>',
+                '<text x="75" y="642" fill="#93a4ae" font-family="sans-serif" font-size="12">Forward polygons exactly project convex disturbance-reachable polytopes per control prefix; backward nodes are finite-vertex feedback-game nodes, not continuous predecessor sets. Horizon: 0.3 s.</text>',
                 '</svg>'])
     return "\n".join(out)
 

@@ -48,6 +48,10 @@ class TwoPointsPublicationTests(unittest.TestCase):
             self.assertIn(f"{report_id}/projections.png", archive.namelist())
             self.assertIn(f"{report_id}/publication-manifest.json", archive.namelist())
         self.assertIn(f"{report_id}/index.html", (self.site / "index.html").read_text())
+        published_svg = (destination / "projections.svg").read_text()
+        self.assertIn("Stage 3 terminal reachable set", published_svg)
+        self.assertIn("x1 position", published_svg)
+        self.assertIn("x3 position", published_svg)
         with self.assertRaisesRegex(ValueError, "already exists"):
             stage_module.stage(self.source, self.site)
 

@@ -478,19 +478,19 @@
   ],
   "timing": {
     "limiter_profile": "not collected; no comparative speed claim",
-    "max_wall_ns": 1213924,
+    "max_wall_ns": 582761,
     "measured_calls": 7,
     "measured_wall_ns": [
-      1213924,
-      1017249,
-      996436,
-      1036944,
-      1082272,
-      1150438,
-      1139193
+      582761,
+      566698,
+      554476,
+      536177,
+      577733,
+      555523,
+      520882
     ],
-    "median_wall_ns": 1082272,
-    "min_wall_ns": 996436,
+    "median_wall_ns": 555523,
+    "min_wall_ns": 520882,
     "scope": "finite_action_minimax call; request setup and JSON output excluded",
     "warmup_calls": 1
   },

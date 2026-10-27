@@ -1,14 +1,14 @@
 {
-  "renderer_sha256": "a9ff2826db38b484eb91092a56030132b7a799e55dc92ea8d8a05b353e3371d9",
+  "renderer_sha256": "98ce5ca951ab87be5d0ae0c0f7cd2b9c9d2e95d95ba8aab0cebc9759e13c99ee",
   "capture_environment": {
     "os": "Linux-7.2.5-3-omarchy-x86_64-with-glibc2.44",
     "processor": "",
     "logical_cpus": 8,
     "load_average_before_run": [
-      0.3154296875,
-      0.7822265625,
-      1.21484375
+      0.2744140625,
+      0.6103515625,
+      1.06884765625
     ],
-    "capture_started_unix_ns": 1793134819784812136
+    "capture_started_unix_ns": 1793135001254675130
   }
 }
