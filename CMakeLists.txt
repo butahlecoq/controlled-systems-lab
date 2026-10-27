@@ -25,7 +25,7 @@ option(CSL_BUILD_SYN02_REPORT "Build the SYN-02 terminal minimizer measurement d
 option(CSL_BUILD_SYN07_REPORT "Build the T-S01 exact-family measurement driver" OFF)
 option(CSL_BUILD_EXT01_REPORT "Build the EXT-01 fixed-plan numerical report driver" OFF)
 option(CSL_BUILD_ISSUE3_REPORT "Build the finite-action minimax numerical report driver" OFF)
-option(CSL_BUILD_ENV717_REPORT "Build the source-attributed SimpleControlProblem pilot" OFF)
+option(CSL_BUILD_ENV717_REPORT "Build source-attributed ENV-717 environment report drivers" OFF)
 option(CSL_BUILD_ISSUE6_B06_REPORT "Build the owner-confirmed B06 finite-action reference driver" OFF)
 option(CSL_BUILD_ISSUE6_B07_REPORT "Build the eight-case B07 fuel reference driver" OFF)
 option(CSL_BUILD_ISSUE6_B09_REPORT "Build the A08 fuel source-revision reference driver" OFF)
