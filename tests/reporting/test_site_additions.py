@@ -1,6 +1,8 @@
 from __future__ import annotations
 
+import os
 from pathlib import Path
+import stat
 import sys
 import tempfile
 import unittest
@@ -71,6 +73,19 @@ class SiteAdditionsTests(unittest.TestCase):
             self.assertEqual(index.read_bytes(), b"original")
             self.assertEqual((site / "route.html").read_bytes(), b"route")
             self.assertEqual({path.name for path in site.iterdir()}, {"index.html", "route.html"})
+
+    @unittest.skipUnless(os.name == "posix", "POSIX file mode semantics")
+    def test_replacement_preserves_existing_mode_and_new_routes_are_public_readable(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary:
+            site = Path(temporary)
+            index = site / "index.html"
+            index.write_bytes(b"original")
+            index.chmod(0o640)
+            plan = site_additions.prepare(site, {"route.html": b"route", "index.html": b"updated"},
+                                          replace_existing={"index.html"})
+            site_additions.commit(plan)
+            self.assertEqual(stat.S_IMODE(index.stat().st_mode), 0o640)
+            self.assertEqual(stat.S_IMODE((site / "route.html").stat().st_mode), 0o644)
 
 
 if __name__ == "__main__":

@@ -5,6 +5,7 @@ from dataclasses import dataclass
 import hashlib
 import os
 from pathlib import Path, PurePosixPath
+import stat
 import tempfile
 from typing import Callable, Mapping
 
@@ -100,6 +101,7 @@ def prepare(
 
 def _write(path: Path, content: bytes) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
+    mode = stat.S_IMODE(path.stat().st_mode) if path.exists() else 0o644
     staged: Path | None = None
     try:
         with tempfile.NamedTemporaryFile(prefix="." + path.name + ".", suffix=".tmp",
@@ -107,6 +109,7 @@ def _write(path: Path, content: bytes) -> None:
             staged = Path(stream.name)
             stream.write(content)
             stream.flush()
+        os.chmod(staged, mode)
         os.replace(staged, path)
     finally:
         if staged is not None:
