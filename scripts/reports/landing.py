@@ -353,6 +353,13 @@ FAMILIES = {
         "history, with independently replayed forward reachable phase-plane polytopes and a "
         "finite-vertex backward feedback graph. The source continuous-action 10-second task is "
         "adapted to three stages; this makes no claim about continuous or full-horizon control."),
+    "env717-unequal-game": Family(
+        r"env717-unequal-game-[0-9a-f]{20}", "synthesis",
+        "UnequalGame finite-action minimax pilot",
+        "Exhaustively evaluates 27 fixed control sequences against 27 disturbance-vertex histories "
+        "per sequence, with independent replay of the scalar forward reachable intervals, robust "
+        "backward nodes and a worst-case trajectory. The source continuous-action 2-second task is "
+        "adapted to three stages; this is not a reproduction of the RL run."),
     "syn06-verifier": Family(
         r"syn06-verifier-\d{8}-[0-9a-f]{64}", "verification", "Trajectory verification",
         "Re-checks two literal two-stage integrator witnesses against the original saved input "

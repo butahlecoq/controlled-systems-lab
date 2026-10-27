@@ -50,9 +50,9 @@ jobs:
           cmake -S . -B build/env717-report-ci -DBUILD_TESTING=ON -DCMAKE_BUILD_TYPE=Release \
             -DCSL_ENABLE_HIGHS=OFF -DCSL_ENABLE_QHULL=OFF -DCSL_BUILD_ENV717_REPORT=ON
           cmake --build build/env717-report-ci --config Release \
-            --target csl_env717_simple_control csl_env717_two_points --parallel 2
+            --target csl_env717_simple_control csl_env717_two_points csl_env717_unequal_game --parallel 2
           ctest --test-dir build/env717-report-ci -C Release --output-on-failure \
-            -R '^env717_(simple_control|two_points)_smoke$'
+            -R '^env717_(simple_control|two_points|unequal_game)_smoke$'
       - name: Check reviewed catalogue and stage only allowlisted files
         id: catalog
         shell: bash
@@ -130,6 +130,11 @@ jobs:
             if test -d reports/algorithm-results/env717-two-points-pilot-v1; then
               python scripts/reports/stage_env717_two_points.py \
                 --source reports/algorithm-results/env717-two-points-pilot-v1 \
+                --site build/report-site
+            fi
+            if test -d reports/algorithm-results/env717-unequal-game-pilot-v1; then
+              python scripts/reports/stage_env717_unequal_game.py \
+                --source reports/algorithm-results/env717-unequal-game-pilot-v1 \
                 --site build/report-site
             fi
             if test -f reports/algorithm-results/exp04-publications.json; then
