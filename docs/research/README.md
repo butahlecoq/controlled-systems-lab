@@ -17,6 +17,10 @@ qualifies solver and controller candidates, and links the task-specific issues.
 It distinguishes fixed-plan minimax, causal policies, relaxation bounds, and
 closed-loop experiments. It authorizes no numerical runs.
 
+The [ITIS'17 hull-method source audit](exp02-itis17-source-audit-20261027.md)
+records the primary-paper algorithms, the A43/A44 implementation boundaries,
+paper hashes, and the completed search for matching Pascal sources.
+
 ## Evidence conventions
 
 For competing source interpretations, use the [source-variant evidence

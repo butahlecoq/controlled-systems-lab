@@ -25,17 +25,18 @@ struct MethodInfo {
     Method method;
     const char* name;
     const char* identity;
+    const char* version;
 };
 
 constexpr std::array<MethodInfo, 6> method_info{{
-    {Method::quickhull, "geometric-quickhull", "csl.geometry.quickhull-2d"},
-    {Method::lp_baseline, "lp-membership-baseline", "csl.hull.lp-membership"},
-    {Method::basis_reuse, "basis-reuse-related-to-A43", "csl.hull.phase-one-basis-bulk"},
-    {Method::ordered_lp, "ordered-membership-related-to-A44", "csl.hull.ordered-membership"},
+    {Method::quickhull, "geometric-quickhull", "csl.geometry.quickhull-2d", "1.0.0"},
+    {Method::lp_baseline, "lp-membership-baseline", "csl.hull.lp-membership", "1.0.0"},
+    {Method::basis_reuse, "basis-reuse-related-to-A43", "csl.hull.phase-one-basis-bulk", "1.0.0"},
+    {Method::ordered_lp, "ordered-membership-related-to-A44", "csl.hull.ordered-membership", "1.0.0"},
     {Method::a43_safe, "A43-certificate-safe-basis-adaptation",
-        "csl.hull.itis17.a43-certified-basis-reuse"},
-    {Method::a44_incremental, "A44-incremental-LP-paper-adaptation",
-        "csl.hull.itis17.a44-incremental-lp"},
+        "csl.hull.itis17.a43-certified-basis-reuse", "1.0.0"},
+    {Method::a44_incremental, "A44-incremental-LP-farthest-seed",
+        "csl.hull.itis17.a44-incremental-lp", "2.0.0"},
 }};
 constexpr std::array<Method, method_info.size()> methods{
     Method::quickhull, Method::lp_baseline, Method::basis_reuse,
@@ -270,7 +271,8 @@ void print(const Fixture& fixture, Method method, bool warmup, int round,
               << CSL_SOURCE_COMMIT << "\",\"fixture\":\"" << fixture.id
               << "\",\"input_sha256\":\"" << problem::hex(std::get<geometry::HullInputDigest>(digest))
               << "\",\"method\":\"" << info(method).name << "\",\"method_identity\":\""
-              << info(method).identity << "\",\"method_version\":\"1.0.0\",\"lp_provider\":\"HiGHS/1.11.0\",\"warmup\":"
+              << info(method).identity << "\",\"method_version\":\"" << info(method).version
+              << "\",\"lp_provider\":\"HiGHS/1.11.0\",\"warmup\":"
               << (warmup ? "true" : "false") << ",\"round\":" << round
               << ",\"elapsed_ns\":" << outcome.elapsed_ns << ",\"passed\":"
               << (outcome.passed ? "true" : "false") << ",\"input_points\":"

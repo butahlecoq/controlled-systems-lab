@@ -190,6 +190,30 @@ the ZIP SHA-256 is `4690be18b48dd2e6ae33c75d46b2768163f9b5c54ff8cedd4875385077a0
 The fetched page matched the reviewed HTML bytes, and its archive entries matched
 the saved report bundle.
 
+### ITIS17 A44 source-aligned follow-up
+
+The next [EXP-02 pilot](../../reports/algorithm-results/exp02-it17-a44-paper-order-20261027-r1/)
+implements the paper's k+1 farthest-point seed and normalized Euclidean
+ordering as csl.hull.itis17.a44-incremental-lp@2.0.0. It records the paper's
+conflicting ordering sentences and uses the interpretation that the seed points
+are farthest from the box center. The v1 adaptation and its historical rows
+remain unchanged. Five interleaved measurements on each of deterministic
+64-point and 256-point exact-dyadic 2D square clouds yielded 10/10 passing A44
+attempts; QuickHull and OPT-06 basis reuse also passed 10/10. The baseline,
+OPT-07 ordered method and A43 adaptation failed their completion checks in all
+30 measured attempts; their diagnostic elapsed times are excluded from timing summaries.
+A44 medians were 7,128,751 ns (range 7,083,354–7,189,653) and 27,898,232 ns
+(range 27,641,005–30,981,467); QuickHull medians were 140,382 ns and 562,645 ns,
+and basis-reuse medians were 228,592 ns and 755,199 ns at the corresponding
+sizes. A separate profile observed one-core saturation, but no source-function
+profile was available; LP workspace construction is excluded. The result is
+therefore exploratory and performance-inconclusive. The saved report includes
+the 2D input geometry, all 72 warmup/measured rows, failed-attempt diagnostics,
+source/build identities and checksums. Pages publication and live URL/hash
+verification remain pending. This is partial EXP-02 evidence; issue #94 remains
+open for its paired strategy, full workload/resource matrix and comparison
+record requirements.
+
 ## APP-02 box and parallelotope approximations
 
 Issue [APP-02 #33](https://github.com/butahlecoq/controlled-systems-lab/issues/33)

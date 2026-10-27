@@ -60,7 +60,8 @@ TEST_CASE("A44 incremental LP adaptation preserves the exact hull and records bo
     REQUIRE(reduction.itis17_a44.has_value());
     CHECK(reduction.itis17_a44->processing_order.size() == cloud.points.size());
     CHECK(reduction.itis17_a44->processing_order ==
-          std::vector<std::size_t>{0, 1, 2, 3, 5, 6, 4});
+          std::vector<std::size_t>{0, 1, 2, 3, 6, 5, 4});
+    CHECK(reduction.itis17_a44->seeded_candidates == 3);
     CHECK(reduction.itis17_a44->incremental_membership_calls > 0);
     CHECK(reduction.itis17_a44->final_recheck_calls > 0);
     CHECK(reduction.lp_calls == reduction.itis17_a44->incremental_membership_calls +
@@ -77,6 +78,7 @@ TEST_CASE("A44 incremental LP adaptation preserves the exact hull and records bo
 
     const auto registration = geometry::make_itis17_a44_hull_reducer_registration();
     CHECK(registration.identity.id.value == "csl.hull.itis17.a44-incremental-lp");
+    CHECK(registration.identity.version == "2.0.0");
 }
 
 TEST_CASE("A44 zero-width axes keep deterministic order and verify a collinear hull") {
@@ -108,7 +110,8 @@ TEST_CASE("A44 keeps uncertain candidates and reports an incomplete two-pass res
     CHECK(reduction.status == geometry::ReductionStatus::incomplete);
     CHECK(reduction.retained.size() == cloud.points.size());
     REQUIRE(reduction.itis17_a44.has_value());
-    CHECK(reduction.itis17_a44->incremental_membership_calls == 1);
+    CHECK(reduction.itis17_a44->seeded_candidates == cloud.points.size());
+    CHECK(reduction.itis17_a44->incremental_membership_calls == 0);
 }
 
 TEST_CASE("A43 certificate-safe basis adaptation rechecks and preserves hull equality") {
