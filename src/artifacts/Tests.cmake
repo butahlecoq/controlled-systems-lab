@@ -51,6 +51,11 @@ target_link_libraries(stage_projection_capture_tests PRIVATE CSL::artifacts CSL:
 add_test(NAME stage_projection_capture_tests COMMAND stage_projection_capture_tests)
 csl_test_target(stage_projection_capture_tests artifacts)
 
+add_executable(stage_projection_capture_integration_tests tests/artifacts/stage_projection_capture_integration_tests.cpp)
+target_link_libraries(stage_projection_capture_integration_tests PRIVATE CSL::artifacts CSL::polyhedral doctest::doctest)
+add_test(NAME stage_projection_capture_integration_tests COMMAND stage_projection_capture_integration_tests)
+csl_test_target(stage_projection_capture_integration_tests artifacts)
+
 add_executable(stage_projection_batch_contract tests/artifacts/stage_projection_batch_contract.cpp)
 target_link_libraries(stage_projection_batch_contract PRIVATE CSL::artifacts CSL::polyhedral doctest::doctest)
 target_compile_definitions(stage_projection_batch_contract PRIVATE CSL_STAGE_PROJECTION_BATCH_FIXTURE="${CMAKE_CURRENT_SOURCE_DIR}/tests/artifacts/fixtures/stage-projection-batch-v1.json")
