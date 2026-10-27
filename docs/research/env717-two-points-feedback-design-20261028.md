@@ -2,7 +2,7 @@
 
 ## Problem
 
-The TwoPoints report runs CSL's fixed-plan minimax solver, then builds a separate finite vertex-game backward graph in Python. The report does not call CSL's `reachability::finite_feedback` solver. The follow-up will run that solver on a graph derived from the same three-stage source adaptation and show its causal result beside the fixed-plan result. The graph will model the exact finite action and disturbance catalogues in the report. It will not claim a guarantee for the continuous disturbance hull or the original 10-second RL task.
+The TwoPoints report runs CSL's fixed-plan minimax solver and CSL's `reachability::finite_feedback` solver on a separate finite vertex-game graph derived from the same three-stage source adaptation. The graph models the exact finite action and disturbance catalogues in the report. It does not claim a guarantee for the continuous disturbance hull or the original 10-second RL task.
 
 ## Usage
 
@@ -28,7 +28,7 @@ Store coordinates as integer multiples of `1/2000`. For the source-derived map a
 P1' = P1 + V1 / 100 + 450a
 V1' = 5000a
 P2' = P2 + V2 / 10 + 9d
-V2' = 200d
+V2' = V2 + 200d
 ```
 
 The initial state is `(9000,0,0,0)`. The physical terminal squared gap is `(P1-P2)^2 / 4,000,000`. Keep the numerator and denominator in the saved result. Also compare this integer map with the pinned implementation's ten binary64 Euler substeps and record the declared tolerance and observed maximum discrepancy.
@@ -43,7 +43,7 @@ Extend the existing two-panel figure. Retain stage-wise forward sets and backwar
 
 The design arena selected Candidate B's fixed scale and stage-local state catalogues. The cross-judge scored Candidate B 10/10 and Candidate A 9/10. Candidate B makes the solver's rectangular-state requirement explicit and hides state IDs and padding behind one report-local graph builder. This document corrects Candidate B's verifier boundary to place verification in the existing Python checker.
 
-The implementation will graft four details from Candidate A: retain exact threshold fractions, check integer bounds and fail on overflow, preserve the existing singleton initial state, and record the Euler-map comparison. It will also reject any transition to a padded slot and verify every padded row independently.
+The implementation grafts four details from Candidate A: exact threshold fractions, integer-bound checks and overflow failure, the existing singleton initial state, and the Euler-map comparison. It rejects transitions to padded slots and verifies every padded row independently. The source's second-point velocity accumulates disturbance across stages, so the integer map retains `V2` in the update.
 
 ## Tradeoffs accepted
 
@@ -65,6 +65,6 @@ The fixed scale works only while all selected model coefficients and catalogues 
 
 The finite feedback result applies to listed disturbance vertices. It does not certify the convex hull between vertices because intermediate states can affect later feedback decisions. Keep that limitation visible in the report.
 
-## Next implementation step
+## Implementation status
 
-Add the private fixed-scale state graph and threshold search to the TwoPoints report driver, then verify the graph and policy independently in the existing Python checker.
+Implemented in `benchmarks/reporting/env717/two_points.cpp` and `scripts/reports/env717/check_two_points.py`. The checker reconstructs all 345 terminal candidates, verifies the graph and complete policy, checks the threshold `58323769/4000000`, and compares each transition against the source's ten binary64 Euler substeps. The observed maximum absolute discrepancy is `3.552713678800501e-15` with tolerance `1e-10`. The saved report bundle is `reports/algorithm-results/env717-two-points-feedback-v1/`; the publication workflow retains both the original fixed-plan report route and this feedback route.
