@@ -18,7 +18,6 @@ import approx_extension_companions
 import geometry_opt_companions
 import report_data
 import site_additions
-import stage_app01 as app01_reports
 import stage_ext07 as ext07_reports
 import visual_illustrations
 
@@ -967,7 +966,17 @@ def build(catalog, site):
         Path(__file__).parent / "styles/control-v1.json")
     app01_source_id = "app01-plan-20261016-22d406fd"
     app01_publication_catalog = Path(catalog).resolve().with_name("app01-publications.json")
-    app01_report_id = app01_reports.publication_route(app01_publication_catalog, app01_source_id)
+    app01_publications = json.loads(app01_publication_catalog.read_text(encoding="utf-8"))
+    require(app01_publications.get("schema") == "csl.app01-report-extension/1" and
+            isinstance(app01_publications.get("reports"), list),
+            "APP-01 publication catalogue differs")
+    app01_matches = [entry for entry in app01_publications["reports"]
+                     if entry.get("source_report_id") == app01_source_id]
+    require(len(app01_matches) == 1, "APP-01 source identity is missing or duplicated in publication catalogue")
+    app01_report_id = app01_matches[0].get("report_id")
+    require(isinstance(app01_report_id, str) and
+            re.fullmatch(r"app01-plan-\d{8}-[0-9a-f]{64}", app01_report_id),
+            "APP-01 publication route is invalid")
     app01_route = site / app01_report_id
     require(not app01_route.is_symlink() and (app01_route / "index.html").is_file(),
             "missing staged APP-01 publication route")

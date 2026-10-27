@@ -349,21 +349,6 @@ def catalogue_entry(bundle: Path) -> dict:
                 evidence_limits=item.evidence_limits, zip_sha256=sha(archive))
 
 
-def publication_route(catalogue: Path, source_report_id: str) -> str:
-    """Resolve one source identity to its validated published route."""
-    catalog = read_json(catalogue)
-    require(catalog.get("schema") == "csl.app01-report-extension/1" and
-            isinstance(catalog.get("reports"), list),
-            "APP-01 extension catalogue differs")
-    matches = [entry for entry in catalog["reports"]
-               if entry.get("source_report_id") == source_report_id]
-    require(len(matches) == 1, "APP-01 source identity is missing or duplicated in catalogue")
-    report_id = matches[0].get("report_id")
-    require(isinstance(report_id, str) and re.fullmatch(r"app01-plan-\d{8}-[0-9a-f]{64}", report_id),
-            "APP-01 published route is invalid")
-    return report_id
-
-
 def stage(catalogue: Path, site_dir: Path) -> str:
     catalog = read_json(catalogue)
     require(catalog.get("schema") == "csl.app01-report-extension/1" and
