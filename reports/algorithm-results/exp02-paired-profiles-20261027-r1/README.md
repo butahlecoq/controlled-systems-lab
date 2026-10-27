@@ -19,14 +19,14 @@ The SVG/PNG panels show analytical projections of each complete optimal control 
 
 ## Reproduction and evidence
 
-To collect a fresh run without overwriting this frozen evidence, use an empty output directory, then render from that same directory:
+To collect and render a fresh run without modifying this frozen evidence, use fresh raw and render directories:
 
 ```sh
-python3 run.py --executable /absolute/path/to/registered_synthesis_comparison --raw /tmp/exp02-paired-profiles-rerun
-python3 render_report.py --raw /tmp/exp02-paired-profiles-rerun
+python3 run.py --executable /absolute/path/to/registered_synthesis_comparison --raw /tmp/exp02-paired-profiles-rerun/raw
+python3 render_report.py --raw /tmp/exp02-paired-profiles-rerun/raw --out /tmp/exp02-paired-profiles-rerun/rendered
 ```
 
-The runner refuses to overwrite raw evidence and enforces 300 seconds CPU, 300 seconds wall, and 8 GiB address-space limits over each entire profile process. The outer limits are stricter than the per-attempt contract in scope and should not be read as an observed memory measurement. The committed `raw/` retains JSONL, stdout, stderr, process metadata, scenario hashes, and executable hashes. Process wall times were 0.052113 s (T-S02) and 0.063438 s (T-S03).
+The runner refuses to overwrite raw evidence and enforces 300 seconds CPU, 300 seconds wall, and 8 GiB address-space limits over each entire profile process. The outer limits are stricter than the per-attempt contract in scope and should not be read as an observed memory measurement. The renderer requires an empty output directory outside this frozen report bundle and writes regenerated summary and projection files there. It does not modify this README, `index.html`, `SHA256SUMS`, or any committed bundle file. Recheck generated files against the new capture before treating them as a new report. The committed `raw/` retains JSONL, stdout, stderr, process metadata, scenario hashes, and executable hashes. Process wall times were 0.052113 s (T-S02) and 0.063438 s (T-S03).
 
 The source revision is `2977b95bab581a343c2daba02459f96014e893b0`. The executable was built in Release mode with GCC 16.2.1 (`-O3 -DNDEBUG`), CMake 3.31.6, HiGHS 1.11.0 and Qhull 8.0.2. Its SHA-256 is `300863246730c863d12ddd95090a5d0e0350a3389fb39019dc4e29e6e9274384`. The host was Linux x86_64 with 8 logical CPUs. Load average was checked after the runs (0.18, 1.37, 1.27), not before or during them.
 
