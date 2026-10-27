@@ -21,8 +21,12 @@ class VisualRouteInventoryTests(unittest.TestCase):
         self.assertNotIn("csl.report.svg", {
             asset for entry in producers.values() for asset in entry["asset_name_literals"]})
         for source in ("scripts/reports/control_figures.py","scripts/reports/plot.py",
-                       "scripts/reports/visual_examples.py","scripts/reports/visual_illustrations.py"):
+                       "scripts/reports/visual_examples.py","scripts/reports/visual_illustrations.py",
+                       "scripts/reports/visual_example_geometry.py","scripts/reports/visual_example_hybrid.py"):
             self.assertIn(source,producers)
+        for source in ("scripts/reports/visual_example_geometry.py",
+                       "scripts/reports/visual_example_hybrid.py"):
+            self.assertEqual(producers[source]["disposition"],"gallery-case-content-owner")
         for source in ("benchmarks/reporting/issue6/b07_render_projection.py",
                        "benchmarks/reporting/issue6/b09_render_projection.py"):
             self.assertIn(source,producers)
@@ -83,7 +87,7 @@ class VisualRouteInventoryTests(unittest.TestCase):
                  "deferred-family-specific-migration", "composes-or-copies-existing-saved-figure",
                  "frozen-renderer-preserved-with-shared-policy-companion",
                  "measurement-collector-preserved-with-saved-data-companion",
-                 "shared-quantitative-policy-companion-renderer"}
+                 "shared-quantitative-policy-companion-renderer", "gallery-case-content-owner"}
         self.assertTrue(all(entry["disposition"] in allowed for entry in producers.values()))
         deferred=[entry for entry in producers.values()
                   if entry["disposition"]=="deferred-family-specific-migration"]

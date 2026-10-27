@@ -149,6 +149,9 @@ def source_inventory(root: Path) -> list[dict]:
                 disposition = "adopted-shared-quantitative-policy"
             elif relative.endswith("/visual_illustrations.py"):
                 disposition = "reviewed-static-diagram-exception"
+            elif relative in {"scripts/reports/visual_example_geometry.py",
+                              "scripts/reports/visual_example_hybrid.py"}:
+                disposition = "gallery-case-content-owner"
             elif relative.endswith("/visual_examples.py"):
                 disposition = "gallery-composition-and-route"
             elif ("registered_reports.py" in path.name or path.name.startswith(("stage_", "validate_"))

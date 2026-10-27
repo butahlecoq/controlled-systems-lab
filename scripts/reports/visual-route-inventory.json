@@ -826,8 +826,20 @@
       "follow_up_issue": 686
     },
     {
+      "source": "scripts/reports/visual_example_geometry.py",
+      "signal_count": 1,
+      "asset_name_literals": [],
+      "disposition": "gallery-case-content-owner"
+    },
+    {
+      "source": "scripts/reports/visual_example_hybrid.py",
+      "signal_count": 1,
+      "asset_name_literals": [],
+      "disposition": "gallery-case-content-owner"
+    },
+    {
       "source": "scripts/reports/visual_examples.py",
-      "signal_count": 55,
+      "signal_count": 54,
       "asset_name_literals": [
         "app01-plan-timing-v1.svg",
         "app02-diamond-v1.svg",
