@@ -10,8 +10,6 @@ import re
 
 import control_witness_companions
 
-import control_witness_companions
-
 
 ROOT = Path(__file__).resolve().parents[2]
 VISUAL_SIGNAL = re.compile(r"<svg|savefig\s*\(|write_image\s*\(|\.svg\b|\.png\b|render_svg", re.I)
