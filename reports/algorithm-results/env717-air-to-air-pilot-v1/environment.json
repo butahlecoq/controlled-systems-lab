@@ -1,0 +1,11 @@
+{
+  "schema": "csl.env717-air-to-air-environment/1",
+  "source_repository": "https://github.com/imm-rl-lab/optimal_control",
+  "source_repository_commit": "f4d76c60f4003f50954174e96eafd8e514bd5441",
+  "source_file_blob": "9054c9fcd01e49f3dbfd8b8ee8d12e7365e1d9b5",
+  "adapter": "finite 3-stage open-loop minimax with 5-point action catalogues per player",
+  "release": "pilot; no performance claim",
+  "algorithm_source_sha256": "a222ed777cba81bce2170d96f22b4e5fd9d55aa92ae66413246e97f3c11f03f1",
+  "platform": "Linux-7.2.5-3-omarchy-x86_64-with-glibc2.44",
+  "python": "3.14.7"
+}
