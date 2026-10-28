@@ -16,6 +16,7 @@ from pathlib import Path
 SOURCE_COMMIT = "f4d76c60f4003f50954174e96eafd8e514bd5441"
 SOURCE_BLOB = "9054c9fcd01e49f3dbfd8b8ee8d12e7365e1d9b5"
 DT, INNER_N, HORIZON = 0.05, 10, 3
+WINNING_SET_TOLERANCE = 1e-8
 INITIAL = (0., 0., 30., 0., 0., 80., 0., 200., -70., 0., 80.)
 U = ((0., 0.), (4.35, 0.), (-4.35, 0.), (0., 5.), (0., -5.))
 V = ((0., 0.), (0.66, 0.), (-0.66, 0.), (0., 1.), (0., -1.))
@@ -85,6 +86,10 @@ def verify(actual: dict) -> dict:
     assert len(timing["measured_wall_ns"]) == 1
     assert type(timing["measured_wall_ns"][0]) is int and timing["measured_wall_ns"][0] > 0
     assert timing["comparison_claim"] is False
+    assert timing["worker_threads_requested"] == timing["worker_threads_actual"] == 1
+    assert timing["native_threads_requested"] == timing["native_threads_actual"] == 1
+    assert timing["workspace_reuse"] == "none"
+    assert timing["cache_state"] == "cold process; no prior solver call"
     return expected
 
 
@@ -115,9 +120,9 @@ def feedback_sets(open_loop_value: float) -> dict:
                                 for outcomes in edges[t][state].values())
                      for state in layers[t]}
     feedback_value = values[0][INITIAL]
-    winning = [{state for state in layer if values[t][state] <= feedback_value + 1e-8}
+    winning = [{state for state in layer if values[t][state] <= feedback_value + WINNING_SET_TOLERANCE}
                for t, layer in enumerate(layers)]
-    open_loop_winning = [{state for state in layer if values[t][state] <= open_loop_value + 1e-8}
+    open_loop_winning = [{state for state in layer if values[t][state] <= open_loop_value + WINNING_SET_TOLERANCE}
                          for t, layer in enumerate(layers)]
     return {"forward": layers, "winning": winning, "open_loop_winning": open_loop_winning,
             "values": values, "feedback_value": feedback_value}
@@ -189,11 +194,14 @@ def svg_figure(expected: dict, sets: dict) -> str:
 
 
 def build_report(executable: Path, output: Path) -> None:
+    if output.exists():
+        raise FileExistsError(f"report output already exists: {output}")
     run = subprocess.run([str(executable)], check=True, capture_output=True, text=True)
     actual = json.loads(run.stdout)
     expected = verify(actual)
     sets = feedback_sets(expected["value"])
-    output.mkdir(parents=True, exist_ok=True)
+    output.parent.mkdir(parents=True, exist_ok=True)
+    output.mkdir()
     (output / "result.json").write_text(json.dumps(actual, indent=2) + "\n", encoding="utf-8")
     def projected(layers, i):
         return [[list(point) for point in sorted({tuple(relative(s)[i:i+2]) for s in layer})]
@@ -209,15 +217,17 @@ def build_report(executable: Path, output: Path) -> None:
                        "open_loop_threshold_winning_layers": projected(sets["open_loop_winning"], 2)},
                    "selected_worst_case": [list(relative(s)) for s in expected["trajectory"]],
                    "open_loop_value": expected["value"],
+                   "winning_set_threshold_tolerance": WINNING_SET_TOLERANCE,
                    "feedback_value": sets["feedback_value"]}
     (output / "figure-data.json").write_text(json.dumps(figure_data, indent=2) + "\n", encoding="utf-8")
     figure = svg_figure(expected, sets)
     (output / "projections.svg").write_text(figure, encoding="utf-8")
     feedback_gap = abs(expected["value"] - sets["feedback_value"])
     source_url = f"https://github.com/imm-rl-lab/optimal_control/blob/{SOURCE_COMMIT}/Environments/AirToAirInterception/AirToAirInterception.py"
-    page = f'''<!doctype html><html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width"><title>AirToAirInterception finite minimax pilot</title><main><h1>AirToAirInterception</h1><p>Three stages at 0.05 seconds each adapt the source 2-second continuous-action RL task to finite action catalogues. Source explicit-Euler dynamics use 10 inner steps per stage. This is not an RL reproduction or a continuous-action solution.</p><p>Fixed open-loop minimax terminal range: {expected['value']:.9g} m (125 plans × 125 disturbance sequences). Causal finite-state feedback minimax terminal range: {sets['feedback_value']:.9g} m (dynamic programming over the exact reachable transition graph). The values coincide within {feedback_gap:.3g} m for this finite adaptation.</p><p>The purple nodes show causal backward-winning states at the feedback minimax value; light purple shows the winning set at the open-loop minimax threshold. Both intersect the forward reachable layers. The orange path is the selected minimizing fixed open-loop plan under a maximizing disturbance sequence. Solver near-optimal tolerance: {actual['near_optimal_tolerance']:.1e}. One timing observation, zero warmups; no performance comparison is claimed.</p><figure><img src="projections.svg" alt="Relative position and velocity projections with forward reachable stages, feedback-winning intersections, and a selected open-loop worst-case path"><figcaption>Horizontal and vertical relative-motion phase planes; forward reachable nodes are colored R0–R3.</figcaption></figure><ul><li><a href="result.json">Complete enumerated result</a></li><li><a href="figure-data.json">Projection data</a></li><li><a href="{source_url}">Pinned upstream environment source</a></li><li>Algorithm source commit: <code>{actual['source_commit']}</code>.</li></ul></main></html>'''
+    timing = actual["timing"]
+    page = f'''<!doctype html><html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width"><title>AirToAirInterception finite minimax pilot</title><main><h1>AirToAirInterception</h1><p>Three stages at 0.05 seconds each adapt the source 2-second continuous-action RL task to finite action catalogues. Source explicit-Euler dynamics use 10 inner steps per stage. This is not an RL reproduction or a continuous-action solution.</p><p>Fixed open-loop minimax terminal range: {expected['value']:.9g} m (125 plans × 125 disturbance sequences). Causal finite-state feedback minimax terminal range: {sets['feedback_value']:.9g} m (dynamic programming over the exact reachable transition graph). The values coincide within {feedback_gap:.3g} m for this finite adaptation.</p><p>The single purple layer shows causal backward-winning states at the feedback minimax value; those states coincide with the winning set at the open-loop minimax threshold. Feedback membership tolerance: {WINNING_SET_TOLERANCE:.1e} m. These sets intersect the forward reachable layers. The orange path is the selected minimizing fixed open-loop plan under a maximizing disturbance sequence. Solver near-optimal tolerance: {actual['near_optimal_tolerance']:.1e}. Timing: one observation, zero warmups, one worker/native thread, no workspace reuse, cold process; no performance comparison is claimed.</p><figure><img src="projections.svg" alt="Relative position and velocity projections with forward reachable stages, feedback-winning intersections, and a selected open-loop worst-case path"><figcaption>Horizontal and vertical relative-motion phase planes; forward reachable nodes are colored R0–R3.</figcaption></figure><ul><li><a href="result.json">Complete enumerated result</a></li><li><a href="figure-data.json">Projection data</a></li><li><a href="{source_url}">Pinned upstream environment source</a></li><li>Algorithm source commit: <code>{actual['source_commit']}</code>.</li></ul></main></html>'''
     (output / "index.html").write_text(page, encoding="utf-8")
-    (output / "environment.json").write_text(json.dumps({"schema":"csl.env717-air-to-air-environment/1", "source_repository":"https://github.com/imm-rl-lab/optimal_control", "source_repository_commit":SOURCE_COMMIT, "source_file_blob":SOURCE_BLOB, "source_horizon_seconds":2.0, "adapted_horizon_seconds":HORIZON*DT, "adapter":"finite 3-stage minimax with 5-point action catalogues per player; upstream continuous-action task is adapted, not reproduced", "near_optimal_tolerance":actual["near_optimal_tolerance"], "release":"pilot; no performance claim", "algorithm_source_sha256":actual["algorithm_source_sha256"], "platform":platform.platform(), "python":platform.python_version()}, indent=2)+"\n", encoding="utf-8")
+    (output / "environment.json").write_text(json.dumps({"schema":"csl.env717-air-to-air-environment/1", "source_repository":"https://github.com/imm-rl-lab/optimal_control", "source_repository_commit":SOURCE_COMMIT, "source_file_blob":SOURCE_BLOB, "source_horizon_seconds":2.0, "adapted_horizon_seconds":HORIZON*DT, "adapter":"finite 3-stage minimax with 5-point action catalogues per player; upstream continuous-action task is adapted, not reproduced", "near_optimal_tolerance":actual["near_optimal_tolerance"], "winning_set_threshold_tolerance":WINNING_SET_TOLERANCE, "release":"pilot; no performance claim", "algorithm_source_sha256":actual["algorithm_source_sha256"], "platform":platform.platform(), "python":platform.python_version()}, indent=2)+"\n", encoding="utf-8")
     readme = f'''# AirToAirInterception finite minimax pilot
 
 The upstream environment source is pinned to [{SOURCE_COMMIT}]({source_url}) (blob `{SOURCE_BLOB}`). The measured algorithm source commit is `{actual['source_commit']}`. The report independently replays 125 fixed plans against 125 disturbance sequences, and computes a separate causal finite-state feedback value on the exact reachable graph. Both objective values are in `index.html`; full raw outcomes are in `result.json`.
@@ -230,7 +240,7 @@ Reproduce from the repository checkout:
 cmake -S . -B build/env717 -DCMAKE_BUILD_TYPE=Release -DCSL_BUILD_ENV717_REPORT=ON
 cmake --build build/env717 --config Release --target csl_env717_air_to_air
 python3 scripts/reports/env717/check_air_to_air.py build/env717/csl_env717_air_to_air \\
-  --build-report reports/algorithm-results/env717-air-to-air-pilot-v1
+  --build-report build/env717/air-to-air-reproduction
 ```
 '''
     (output / "README.md").write_text(readme, encoding="utf-8")
@@ -244,7 +254,15 @@ python3 scripts/reports/env717/check_air_to_air.py build/env717/csl_env717_air_t
                 break
     except OSError:
         pass
-    (output / "capture.json").write_text(json.dumps({"schema":"csl.env717-capture/1", "source_commit":actual["source_commit"], "driver_sha256":actual["driver_sha256"], "renderer_sha256":hashlib.sha256(Path(__file__).read_bytes()).hexdigest(), "capture_environment":{"os":platform.platform(), "processor":cpu_model, "processor_identity_source":cpu_source, "architecture":platform.machine(), "logical_cpus":os.cpu_count()}, "measurement":{"warmup_calls":0, "measured_calls":1, "measured_wall_ns":actual["timing"]["measured_wall_ns"], "limiter":"not profiled; single descriptive observation only", "comparison_claim":False}}, indent=2)+"\n", encoding="utf-8")
+    measurement = dict(actual["timing"])
+    measurement["limiter"] = "not profiled; single descriptive observation only"
+    capture = {"schema":"csl.env717-capture/1", "source_commit":actual["source_commit"],
+        "driver_sha256":actual["driver_sha256"],
+        "renderer_sha256":hashlib.sha256(Path(__file__).read_bytes()).hexdigest(),
+        "capture_environment":{"os":platform.platform(), "processor":cpu_model,
+            "processor_identity_source":cpu_source, "architecture":platform.machine(),
+            "logical_cpus":os.cpu_count()}, "measurement":measurement}
+    (output / "capture.json").write_text(json.dumps(capture, indent=2)+"\n", encoding="utf-8")
     sums = []
     for path in sorted(output.iterdir()):
         if path.name != "SHA256SUMS":

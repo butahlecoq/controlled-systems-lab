@@ -64,6 +64,7 @@ def inputs(source: Path) -> dict[str, bytes]:
                          "open_loop_threshold_winning_layers":projected(derived["open_loop_winning"],2)},
                      "selected_worst_case": [list(checker.relative(s)) for s in expected["trajectory"]],
                      "open_loop_value": expected["value"],
+                     "winning_set_threshold_tolerance": checker.WINNING_SET_TOLERANCE,
                      "feedback_value": derived["feedback_value"]}
     if json.loads(files["figure-data.json"]) != expected_data:
         raise ValueError("saved geometry does not match independent replay")
@@ -82,9 +83,16 @@ def inputs(source: Path) -> dict[str, bytes]:
             not isinstance(host.get("logical_cpus"), int)):
         raise ValueError("capture host metadata is incomplete")
     if (not isinstance(measurement, dict) or measurement.get("warmup_calls") != 0 or
-            measurement.get("measured_calls") != 1 or measurement.get("comparison_claim") is not False):
+            measurement.get("measured_calls") != 1 or measurement.get("comparison_claim") is not False or
+            measurement.get("worker_threads_requested") != 1 or
+            measurement.get("worker_threads_actual") != 1 or
+            measurement.get("native_threads_requested") != 1 or
+            measurement.get("native_threads_actual") != 1 or
+            measurement.get("workspace_reuse") != "none" or
+            measurement.get("cache_state") != "cold process; no prior solver call"):
         raise ValueError("timing evidence scope differs")
     if (environment.get("near_optimal_tolerance") != result.get("near_optimal_tolerance") or
+            environment.get("winning_set_threshold_tolerance") != checker.WINNING_SET_TOLERANCE or
             environment.get("source_horizon_seconds") != 2.0 or
             environment.get("adapted_horizon_seconds") != checker.HORIZON * checker.DT):
         raise ValueError("solver tolerance or adaptation metadata differs")
