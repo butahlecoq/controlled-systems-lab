@@ -66,9 +66,9 @@ jobs:
           cmake -S . -B build/env717-report-ci -DBUILD_TESTING=ON -DCMAKE_BUILD_TYPE=Release \
             -DCSL_ENABLE_HIGHS=OFF -DCSL_ENABLE_QHULL=OFF -DCSL_BUILD_ENV717_REPORT=ON
           cmake --build build/env717-report-ci --config Release \
-            --target csl_env717_simple_control csl_env717_two_points csl_env717_unequal_game csl_env717_max_coordinate csl_env717_air_to_air csl_env717_sphere_game csl_env717_point_on_plane csl_env717_time_sphere --parallel 2
+            --target csl_env717_simple_control csl_env717_two_points csl_env717_unequal_game csl_env717_max_coordinate csl_env717_air_to_air csl_env717_sphere_game csl_env717_point_on_plane csl_env717_time_sphere csl_env717_multipoint_cost_game --parallel 2
           ctest --test-dir build/env717-report-ci -C Release --output-on-failure \
-            -R '^env717_(simple_control|two_points|unequal_game|max_coordinate|air_to_air|sphere_game|point_on_plane|time_sphere)_smoke$'
+            -R '^env717_(simple_control|two_points|unequal_game|max_coordinate|air_to_air|sphere_game|point_on_plane|time_sphere|multipoint_cost_game)_smoke$'
       - name: Build and check MPC-05 causal minimax report driver
         if: needs.route.outputs.native == 'true' && hashFiles('reports/algorithm-results/mpc05-causal-tree-pilot-v2/result.json') != ''
         shell: bash
@@ -208,6 +208,11 @@ jobs:
             if test -d reports/algorithm-results/env717-time-sphere-pilot-v1; then
               python scripts/reports/stage_env717_time_sphere.py \
                 --source reports/algorithm-results/env717-time-sphere-pilot-v1 \
+                --site build/report-site
+            fi
+            if test -d reports/algorithm-results/env717-multipoint-cost-game-pilot-v1; then
+              python scripts/reports/stage_env717_multipoint_cost_game.py \
+                --source reports/algorithm-results/env717-multipoint-cost-game-pilot-v1 \
                 --site build/report-site
             fi
             if test -f reports/algorithm-results/exp04-publications.json; then

@@ -601,3 +601,21 @@ do-mpc multi-stage objective is a weighted scenario sum and its robust horizon
 can truncate branching; the saved report records the required full-horizon
 worst-leaf epigraph change and uses an explicit HiGHS extensive form. PR review,
 main-only Pages publication and live URL/hash verification remain pending.
+
+## ENV-717 MultiPointCostGame finite minimax pilot
+
+The [MultiPointCostGame report](../../reports/algorithm-results/env717-multipoint-cost-game-pilot-v1/)
+plots the complete four-stage forward reachable state catalogues in the
+position–velocity plane, with one worst-case trajectory for the best fixed
+open-loop plan and one for exact-state causal feedback. An independent Python
+replay reconstructs all transitions, 81 fixed plans against 81 disturbance
+sequences, and the full Bellman value/action table. The recorded values are
+177.4852655588 (open-loop) and 21.5124275626 (feedback) for the finite terminal
+cost game. The upstream RL environment also charges checkpoint costs at t=1 and
+t=3; this pilot intentionally omits them and is explicitly terminal-only. It
+therefore demonstrates the information-pattern effect on reachable states and
+terminal minimax cost, not the upstream RL result, continuous feedback, or a
+backward winning set. Timings use seven alternating solver-only calls after one
+warmup per method; no speed claim is made. The report route and source hashes
+are staged reproducibly; Pages publication and live URL verification remain
+pending.
