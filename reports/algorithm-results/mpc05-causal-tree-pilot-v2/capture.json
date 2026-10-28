@@ -6,15 +6,15 @@
   "machine": "x86_64",
   "measurement": "No performance timings collected; this run compares numerical values and policy witnesses.",
   "platform": "Linux-7.2.8-9-omarchy-x86_64-with-glibc2.44",
-  "report_executable_sha256": "12b63ceaa58f8c22a60a79d512f26bd10be2cf7d9df4a897ff85017924a1bfab",
+  "report_executable_sha256": "7a67af1a1d5d15dbb4a96b993b0cc9a08cc22f7013f8158344d31bf1ee0718a4",
   "run": [
     "/home/butahlecoq/.local/share/codex/worktrees/mpc06-tube-mpc-602-20261028/build/dev/csl_mpc05_causal_tree_report",
     "--smoke"
   ],
   "schema": "csl.mpc05-causal-tree-capture/1",
-  "source_commit": "353518447a5fb6b27bf3cac276485501ca1c8928",
+  "source_commit": "2940efbe8381d961757b4cfe2c387e0ae2f23ec0",
   "source_sha256": {
-    "benchmarks/reporting/mpc05/causal_tree_driver.cpp": "449d8299e95ed3d079fbb076c41b1316104e7a0561645f33e121f80c57c0e885",
+    "benchmarks/reporting/mpc05/causal_tree_driver.cpp": "1d1ecff81983f8415b90b9434f02b129850792de99638faae84a11e4642bb99d",
     "include/csl/optimization/finite_causal_minimax.hpp": "2b71f6a5029b016444ec72b0cf528043eea83ce202cba4817d76f8d1805b0c18",
     "reports/algorithm-results/env717-two-points-pilot-v1/figure-data.json": "4d90e86ec9231773551094083c347b00b87e70b0ce3a636a1d61c49028533cbc",
     "reports/algorithm-results/env717-two-points-pilot-v1/projections.svg": "08ada6ec4a41428b92772dd29b65ddaa8f27358f14305b92302e353d35afd643",
