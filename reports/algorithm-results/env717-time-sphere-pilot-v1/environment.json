@@ -1,0 +1,12 @@
+{
+  "schema": "csl.env717-time-sphere-environment/1",
+  "source_repository": "https://github.com/imm-rl-lab/optimal_control",
+  "source_repository_commit": "f4d76c60f4003f50954174e96eafd8e514bd5441",
+  "source_file_blob": "fd7709a6f8e4196665d36b4ac5d348173599c250",
+  "adaptation": "finite-state nominal reachability with source opponent action fixed to zero",
+  "maximum_horizon_seconds": 1.2000000000000002,
+  "performance_comparison": false,
+  "algorithm_source_sha256": "75d9bd0c5f41461b19fa7c8ade2bf3971179ce2461d146f666920539c9560127",
+  "platform": "Linux-7.2.8-9-omarchy-x86_64-with-glibc2.44",
+  "python": "3.14.8"
+}
