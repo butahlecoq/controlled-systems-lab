@@ -75,6 +75,14 @@
       "disposition": "adopted-shared-quantitative-policy"
     },
     {
+      "source": "scripts/reports/control_witness_companions.py",
+      "signal_count": 13,
+      "asset_name_literals": [
+        "syn01-timing.svg"
+      ],
+      "disposition": "saved-control-witness-gallery-companion-builder"
+    },
+    {
       "source": "scripts/reports/env717/check_air_to_air.py",
       "signal_count": 3,
       "asset_name_literals": [
@@ -801,8 +809,11 @@
       "asset_name_literals": [
         "latency.svg"
       ],
-      "disposition": "deferred-family-specific-migration",
-      "follow_up_issue": 686
+      "role": "collector-and-plot-renderer",
+      "disposition": "frozen-evidence-collector-preserved-with-gallery-timing-companion",
+      "companion_ids": [
+        "control-witness-timings"
+      ]
     },
     {
       "source": "scripts/reports/syn01/render_saved.py",
@@ -810,15 +821,21 @@
       "asset_name_literals": [
         "latency.svg"
       ],
-      "disposition": "deferred-family-specific-migration",
-      "follow_up_issue": 686
+      "role": "saved-plot-renderer",
+      "disposition": "frozen-renderer-preserved-with-gallery-companion",
+      "companion_ids": [
+        "control-witness-timings"
+      ]
     },
     {
       "source": "scripts/reports/syn01/report.py",
       "signal_count": 3,
       "asset_name_literals": [],
-      "disposition": "deferred-family-specific-migration",
-      "follow_up_issue": 686
+      "role": "report-plot-renderer",
+      "disposition": "frozen-report-plot-preserved-with-saved-timing-companion",
+      "companion_ids": [
+        "control-witness-timings"
+      ]
     },
     {
       "source": "scripts/reports/syn01_publication_policy.py",
@@ -840,8 +857,11 @@
       "source": "scripts/reports/syn02/collect.py",
       "signal_count": 1,
       "asset_name_literals": [],
-      "disposition": "deferred-family-specific-migration",
-      "follow_up_issue": 686
+      "role": "collector-and-plot-renderer",
+      "disposition": "frozen-evidence-collector-preserved-with-failure-aware-gallery-companion",
+      "companion_ids": [
+        "control-witness-timings"
+      ]
     },
     {
       "source": "scripts/reports/syn02/publication_map.py",
@@ -849,8 +869,9 @@
       "asset_name_literals": [
         "latency.svg"
       ],
-      "disposition": "deferred-family-specific-migration",
-      "follow_up_issue": 686
+      "role": "publication-mapper",
+      "disposition": "publication-identity-map-preserved",
+      "companion_ids": []
     },
     {
       "source": "scripts/reports/syn02/render_saved.py",
@@ -858,8 +879,11 @@
       "asset_name_literals": [
         "latency.svg"
       ],
-      "disposition": "deferred-family-specific-migration",
-      "follow_up_issue": 686
+      "role": "saved-plot-renderer",
+      "disposition": "frozen-renderer-preserved-with-failure-aware-gallery-companion",
+      "companion_ids": [
+        "control-witness-timings"
+      ]
     },
     {
       "source": "scripts/reports/syn02_publication_policy.py",
@@ -881,29 +905,45 @@
       "source": "scripts/reports/syn03/strategy_a_report.py",
       "signal_count": 1,
       "asset_name_literals": [],
-      "disposition": "deferred-family-specific-migration",
-      "follow_up_issue": 686
+      "role": "report-plot-renderer",
+      "disposition": "frozen-report-plot-preserved-with-relation-and-timing-companions",
+      "companion_ids": [
+        "control-witness-companions",
+        "control-witness-timings"
+      ]
     },
     {
       "source": "scripts/reports/syn03_ts02/report.py",
       "signal_count": 1,
       "asset_name_literals": [],
-      "disposition": "deferred-family-specific-migration",
-      "follow_up_issue": 686
+      "role": "report-plot-renderer",
+      "disposition": "frozen-report-plot-preserved-with-relation-and-timing-companions",
+      "companion_ids": [
+        "control-witness-companions",
+        "control-witness-timings"
+      ]
     },
     {
       "source": "scripts/reports/syn04/report.py",
       "signal_count": 1,
       "asset_name_literals": [],
-      "disposition": "deferred-family-specific-migration",
-      "follow_up_issue": 686
+      "role": "report-plot-renderer",
+      "disposition": "frozen-report-plot-preserved-with-relation-and-timing-companions",
+      "companion_ids": [
+        "control-witness-companions",
+        "control-witness-timings"
+      ]
     },
     {
       "source": "scripts/reports/syn04_ts02/report.py",
       "signal_count": 1,
       "asset_name_literals": [],
-      "disposition": "deferred-family-specific-migration",
-      "follow_up_issue": 686
+      "role": "report-plot-renderer",
+      "disposition": "frozen-report-plot-preserved-with-relation-and-timing-companions",
+      "companion_ids": [
+        "control-witness-companions",
+        "control-witness-timings"
+      ]
     },
     {
       "source": "scripts/reports/syn04_ts03/build_bundle.py",
@@ -912,8 +952,9 @@
         "control-projection.svg",
         "syn04-strategy-b-ts03-control-projection.svg"
       ],
-      "disposition": "deferred-family-specific-migration",
-      "follow_up_issue": 686
+      "role": "bundle-composer",
+      "disposition": "frozen-bundle-composer-preserved",
+      "companion_ids": []
     },
     {
       "source": "scripts/reports/syn04_ts03/report.py",
@@ -921,8 +962,12 @@
       "asset_name_literals": [
         "control-projection.svg"
       ],
-      "disposition": "deferred-family-specific-migration",
-      "follow_up_issue": 686
+      "role": "report-plot-renderer",
+      "disposition": "frozen-report-plot-preserved-with-projection-and-timing-companions",
+      "companion_ids": [
+        "control-witness-companions",
+        "control-witness-timings"
+      ]
     },
     {
       "source": "scripts/reports/syn04_ts03_registered_reports.py",
@@ -938,8 +983,11 @@
       "asset_name_literals": [
         "latency.svg"
       ],
-      "disposition": "deferred-family-specific-migration",
-      "follow_up_issue": 686
+      "role": "collector-and-plot-renderer",
+      "disposition": "frozen-envelope-collector-preserved-with-gallery-timing-companion",
+      "companion_ids": [
+        "control-witness-timings"
+      ]
     },
     {
       "source": "scripts/reports/syn_ts01_paired/build_bundle.py",
@@ -947,8 +995,11 @@
       "asset_name_literals": [
         "performance.svg"
       ],
-      "disposition": "deferred-family-specific-migration",
-      "follow_up_issue": 686
+      "role": "bundle-composer-and-plot-renderer",
+      "disposition": "frozen-bundle-composer-preserved-with-saved-timing-companion",
+      "companion_ids": [
+        "control-witness-timings"
+      ]
     },
     {
       "source": "scripts/reports/syn_ts01_paired/regenerate_bundle.py",
@@ -956,8 +1007,9 @@
       "asset_name_literals": [
         "performance.svg"
       ],
-      "disposition": "deferred-family-specific-migration",
-      "follow_up_issue": 686
+      "role": "bundle-regenerator",
+      "disposition": "regeneration-entrypoint-preserved-gallery-never-invokes-it",
+      "companion_ids": []
     },
     {
       "source": "scripts/reports/syn_ts01_paired/report.py",
@@ -965,8 +1017,11 @@
       "asset_name_literals": [
         "performance.svg"
       ],
-      "disposition": "deferred-family-specific-migration",
-      "follow_up_issue": 686
+      "role": "report-plot-renderer",
+      "disposition": "frozen-report-plot-preserved-with-saved-timing-companion",
+      "companion_ids": [
+        "control-witness-timings"
+      ]
     },
     {
       "source": "scripts/reports/syn_ts01_paired_publication_policy.py",
@@ -988,8 +1043,9 @@
       "source": "scripts/reports/ts01/report.py",
       "signal_count": 1,
       "asset_name_literals": [],
-      "disposition": "deferred-family-specific-migration",
-      "follow_up_issue": 686
+      "role": "analytic-diagram-renderer",
+      "disposition": "reviewed-analytic-diagram-preserved",
+      "companion_ids": []
     },
     {
       "source": "scripts/reports/visual_example_fuel_layers.py",
@@ -1013,7 +1069,7 @@
     },
     {
       "source": "scripts/reports/visual_examples.py",
-      "signal_count": 54,
+      "signal_count": 56,
       "asset_name_literals": [
         "app01-plan-timing-v1.svg",
         "app02-diamond-v1.svg",
@@ -1052,6 +1108,8 @@
         "polygons.svg",
         "projections-lambda0.svg",
         "projections-lambda1.svg",
+        "strategy-a-ts01.svg",
+        "syn01-timing.svg",
         "terminal-projections.svg",
         "trajectory-2d.svg",
         "trajectory.svg",
@@ -1077,8 +1135,9 @@
       "source": "scripts/reports/viz04/render_saved.py",
       "signal_count": 1,
       "asset_name_literals": [],
-      "disposition": "deferred-family-specific-migration",
-      "follow_up_issue": 686
+      "role": "saved-plot-renderer",
+      "disposition": "adopted-shared-quantitative-policy",
+      "companion_ids": []
     },
     {
       "source": "scripts/reports/viz10_plot_companions.py",
@@ -2006,7 +2065,51 @@
         "viz10/issue4-volterra-error-boxes-export.json",
         "viz10/issue4-volterra-error-boxes.png",
         "viz10/issue4-volterra-error-boxes.svg",
-        "viz10/manifest.json"
+        "viz10/manifest.json",
+        "control-witness-v1.html",
+        "control-witness-timing-v1.html",
+        "control-witness/strategy-a-ts01.svg",
+        "control-witness/strategy-a-ts01.png",
+        "control-witness/strategy-a-ts01-evidence.json",
+        "control-witness/strategy-a-ts02.svg",
+        "control-witness/strategy-a-ts02.png",
+        "control-witness/strategy-a-ts02-evidence.json",
+        "control-witness/strategy-b-ts01.svg",
+        "control-witness/strategy-b-ts01.png",
+        "control-witness/strategy-b-ts01-evidence.json",
+        "control-witness/strategy-b-ts02.svg",
+        "control-witness/strategy-b-ts02.png",
+        "control-witness/strategy-b-ts02-evidence.json",
+        "control-witness/strategy-b-ts03.svg",
+        "control-witness/strategy-b-ts03.png",
+        "control-witness/strategy-b-ts03-evidence.json",
+        "control-witness/syn01-timing.svg",
+        "control-witness/syn01-timing.png",
+        "control-witness/syn01-timing-evidence.json",
+        "control-witness/syn02-timing.svg",
+        "control-witness/syn02-timing.png",
+        "control-witness/syn02-timing-evidence.json",
+        "control-witness/syn06-timing.svg",
+        "control-witness/syn06-timing.png",
+        "control-witness/syn06-timing-evidence.json",
+        "control-witness/syn-ts01-paired-timing.svg",
+        "control-witness/syn-ts01-paired-timing.png",
+        "control-witness/syn-ts01-paired-timing-evidence.json",
+        "control-witness/strategy-a-ts01-timing.svg",
+        "control-witness/strategy-a-ts01-timing.png",
+        "control-witness/strategy-a-ts01-timing-evidence.json",
+        "control-witness/strategy-a-ts02-timing.svg",
+        "control-witness/strategy-a-ts02-timing.png",
+        "control-witness/strategy-a-ts02-timing-evidence.json",
+        "control-witness/strategy-b-ts01-timing.svg",
+        "control-witness/strategy-b-ts01-timing.png",
+        "control-witness/strategy-b-ts01-timing-evidence.json",
+        "control-witness/strategy-b-ts02-timing.svg",
+        "control-witness/strategy-b-ts02-timing.png",
+        "control-witness/strategy-b-ts02-timing-evidence.json",
+        "control-witness/strategy-b-ts03-timing.svg",
+        "control-witness/strategy-b-ts03-timing.png",
+        "control-witness/strategy-b-ts03-timing-evidence.json"
       ],
       "disposition": "adopted-shared-quantitative-policy"
     }
