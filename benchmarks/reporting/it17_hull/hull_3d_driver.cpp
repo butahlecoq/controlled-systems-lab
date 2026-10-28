@@ -6,6 +6,7 @@
 #include <algorithm>
 #include <array>
 #include <chrono>
+#include <cmath>
 #include <cstdint>
 #include <iostream>
 #include <memory>
@@ -50,10 +51,18 @@ double halton(std::uint64_t index, std::uint32_t base) {
 }
 
 geometry::PointCloud fixture() {
-    geometry::PointCloud cloud{{"exp02-halton-3d-n250"}, {}};
+    geometry::PointCloud cloud{{"exp02-simplex-halton-interior-3d-n250"},
+        {{0, 0, 0}, {1, 0, 0}, {0, 1, 0}, {0, 0, 1}}};
     cloud.points.reserve(250);
-    for (std::uint64_t index = 1; cloud.points.size() < 250; ++index)
-        cloud.points.push_back({halton(index, 2), halton(index, 3), halton(index, 5)});
+    for (std::uint64_t index = 1; cloud.points.size() < 250; ++index) {
+        const auto w1 = 1U + static_cast<std::uint32_t>(std::floor(5.0 * halton(index, 2)));
+        const auto w2 = 1U + static_cast<std::uint32_t>(std::floor(5.0 * halton(index, 3)));
+        const auto w3 = 1U + static_cast<std::uint32_t>(std::floor(5.0 * halton(index, 5)));
+        if (w1 + w2 + w3 > 7U) continue;
+        cloud.points.push_back({static_cast<double>(w1) / 8.0,
+                                static_cast<double>(w2) / 8.0,
+                                static_cast<double>(w3) / 8.0});
+    }
     return cloud;
 }
 
@@ -115,7 +124,7 @@ void print(const geometry::PointCloud& cloud, Method method, bool warmup, int ro
     if (!std::holds_alternative<geometry::HullInputDigest>(digest))
         throw std::runtime_error("input digest could not be computed");
     std::cout << "{\"schema\":\"csl.exp02-hull-3d-row/1\",\"source_commit\":\""
-              << CSL_SOURCE_COMMIT << "\",\"fixture\":\"exp02-halton-3d-n250\",\"dimension\":3"
+              << CSL_SOURCE_COMMIT << "\",\"fixture\":\"exp02-simplex-halton-interior-3d-n250\",\"dimension\":3"
               << ",\"input_points\":" << cloud.points.size() << ",\"input_sha256\":\""
               << problem::hex(std::get<geometry::HullInputDigest>(digest))
               << "\",\"method\":\"" << info(method).name << "\",\"method_identity\":\""

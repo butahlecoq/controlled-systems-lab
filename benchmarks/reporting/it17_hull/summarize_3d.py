@@ -32,11 +32,24 @@ def halton(index: int, base: int) -> float:
     return value
 
 
+def fixture_points() -> list[tuple[float, float, float]]:
+    points = [(0.0, 0.0, 0.0), (1.0, 0.0, 0.0),
+              (0.0, 1.0, 0.0), (0.0, 0.0, 1.0)]
+    index = 1
+    while len(points) < 250:
+        weights = [1 + math.floor(5 * halton(index, base)) for base in (2, 3, 5)]
+        index += 1
+        if sum(weights) <= 7:
+            points.append(tuple(weight / 8.0 for weight in weights))
+    return points
+
+
 def read_rows(path: Path) -> list[dict]:
     rows = [json.loads(line) for line in path.read_text().splitlines() if line.strip()]
     if not rows:
         raise ValueError("raw input has no observations")
     if any(row.get("schema") != SCHEMA or row.get("dimension") != 3 or
+           row.get("fixture") != "exp02-simplex-halton-interior-3d-n250" or
            row.get("input_points") != 250 for row in rows):
         raise ValueError("schema, dimension, or fixture size mismatch")
     commits = {row["source_commit"] for row in rows}
@@ -50,7 +63,7 @@ def read_rows(path: Path) -> list[dict]:
            (row["outcome"] != "unsupported_dimension" or row["elapsed_ns"] != 0)
            for row in rows):
         raise ValueError("3D QuickHull rows must remain unsupported and untimed")
-    points = [(halton(i, 2), halton(i, 3), halton(i, 5)) for i in range(1, 251)]
+    points = fixture_points()
     for row in rows:
         if row["method"] == "geometric-quickhull":
             row["independent_hull_check"] = None
@@ -115,24 +128,25 @@ def exact_hull_certificate(row: dict, points: list[tuple[float, float, float]]) 
 
 
 def plot_svg() -> str:
-    pts = [(halton(i, 2), halton(i, 3), halton(i, 5)) for i in range(1, 251)]
+    pts = fixture_points()
     planes = [(0, 1, "x₁", "x₂"), (0, 2, "x₁", "x₃"), (1, 2, "x₂", "x₃")]
     width, height, panel_w, panel_h = 960, 350, 290, 270
     parts = [f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {width} {height}" role="img">',
-             '<title>250-point three-dimensional Halton input in three coordinate projections</title>',
+             '<title>250-point tetrahedron with Halton-generated dyadic interior points in three projections</title>',
              '<desc>Scatter plots show input points only; no projected hull boundary is implied.</desc>',
-             '<style>text{font:13px system-ui,sans-serif;fill:#172438}.axis{stroke:#56657a;stroke-width:1}.pt{fill:#4f65b5;fill-opacity:.52}</style>']
+             '<style>text{font:13px system-ui,sans-serif;fill:#172438}.axis{stroke:#56657a;stroke-width:1}.pt{fill:#4f65b5;fill-opacity:.52}.corner{fill:#c74b42;stroke:white;stroke-width:1}</style>']
     for p, (a, b, xlabel, ylabel) in enumerate(planes):
         ox, oy, plot_w, plot_h = 30 + p * 315, 36, panel_w - 45, panel_h - 48
         parts.append(f'<text x="{ox}" y="20">Projection {xlabel}–{ylabel}</text>')
         parts.append(f'<path class="axis" d="M{ox},{oy + plot_h}H{ox + plot_w} M{ox},{oy}V{oy + plot_h}"/>')
         parts.append(f'<text x="{ox + plot_w / 2}" y="{oy + plot_h + 30}" text-anchor="middle">{xlabel}</text>')
         parts.append(f'<text x="{ox}" y="{oy + plot_h + 44}">0</text><text x="{ox + plot_w}" y="{oy + plot_h + 44}" text-anchor="end">1</text>')
-        for point in pts:
+        for point_id, point in enumerate(pts):
             xx = ox + point[a] * plot_w
             yy = oy + (1 - point[b]) * plot_h
-            parts.append(f'<circle class="pt" cx="{xx:.2f}" cy="{yy:.2f}" r="2"/>')
-    parts.append('<text x="480" y="340" text-anchor="middle">Unscrambled Halton bases 2, 3, 5; indices 1–250. Input-point projections only.</text>')
+            marker = "corner" if point_id < 4 else "pt"
+            parts.append(f'<circle class="{marker}" cx="{xx:.2f}" cy="{yy:.2f}" r="{4 if point_id < 4 else 2}"/>')
+    parts.append('<text x="480" y="340" text-anchor="middle">Tetrahedron corners plus dyadic interior points from Halton bases 2, 3, 5; input projections only.</text>')
     parts.append('</svg>')
     return "".join(parts)
 
@@ -164,7 +178,33 @@ def main() -> None:
     for row in csv.DictReader((args.output_dir / "summary.csv").open()):
         tables.append("<tr>" + "".join(f"<td>{html.escape(value)}</td>" for value in row.values()) + "</tr>")
     headers = "".join(f"<th>{html.escape(value)}</th>" for value in next(csv.reader((args.output_dir / "summary.csv").open())))
-    page = f'''<!doctype html><html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width"><title>EXP-02 3D hull pilot</title><style>body{{font:16px/1.5 system-ui,sans-serif;max-width:1100px;margin:2rem auto;padding:0 1rem;color:#172438}}table{{border-collapse:collapse;width:100%;font-size:.9rem}}th,td{{border:1px solid #ccd3df;padding:.45rem;text-align:left}}th{{background:#eef1f7}}img{{max-width:100%}}code{{overflow-wrap:anywhere}}</style><h1>EXP-02: first 3D hull-ladder cell</h1><p>One 250-point, three-dimensional unscrambled Halton input (bases 2, 3, 5; index starts at 1). Five LP reducers ran with one warmup and five measured calls each. Every reducer result is checked by an independent exact-rational validator that verifies each removal certificate and its acyclic expansion to the retained source points. The check proves equality of the finite input hull and returned hull, including when the reducer conservatively retains redundant points.</p><p>QuickHull is recorded as unsupported because the registered geometric implementation is 2D-only. The plotted projections show input points only, not hull outlines.</p><figure><img src="input-projections.svg" alt="Input points projected into coordinate planes x1-x2, x1-x3, and x2-x3"><figcaption>Three coordinate projections of the shared input; no hull boundary is drawn.</figcaption></figure><table><thead><tr>{headers}</tr></thead><tbody>{''.join(tables)}</tbody></table><h2>Scope limits</h2><ul><li>Single workload size and one deterministic point cloud; this is the first ladder cell, not the EXP-02 matrix.</li><li>These reducers are implementation variants; A43/A44 are paper-informed adaptations, not faithful ports.</li><li>Workspace creation and independent checking are outside the reducer timing. HiGHS is pinned and single-threaded.</li><li>Timing is descriptive. No comparative speedup is claimed without a separate source-mapped limiter profile.</li><li>Raw JSONL preserves every attempt and unsupported outcome. See <a href="validated-rows.jsonl">validated rows</a> and <a href="summary.csv">CSV</a>.</li></ul></html>'''
+    page = f'''<!doctype html>
+<html lang="en">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width">
+<title>EXP-02 3D hull pilot</title>
+<style>
+body {{ font:16px/1.5 system-ui,sans-serif; max-width:1100px; margin:2rem auto; padding:0 1rem; color:#172438 }}
+table {{ border-collapse:collapse; width:100%; font-size:.9rem }}
+th,td {{ border:1px solid #ccd3df; padding:.45rem; text-align:left }}
+th {{ background:#eef1f7 }}
+img {{ max-width:100% }}
+</style>
+<h1>EXP-02: first 3D hull-ladder cell</h1>
+<p>The workload has four tetrahedron corners and 246 dyadic interior points. Halton bases 2, 3, and 5 deterministically select strictly positive barycentric weights in multiples of 1/8, making interior-point removal certificates exactly representable. Five LP reducers ran with one warmup and five measured calls each. An independent exact-rational validator verifies each removal certificate and its acyclic expansion to the retained source points. This proves equality of the finite input hull and returned hull even when a reducer conservatively retains some redundant points.</p>
+<p>QuickHull is recorded as unsupported because the registered geometric implementation is 2D-only. The plotted projections show input points only; red markers identify the tetrahedron corners. The earlier pure Halton cloud retained every point and is preserved in the <a href="../exp02-it17-hull-3d-halton-cloud-20261028-r1/index.html">initial exploratory attempt</a>.</p>
+<figure><img src="input-projections.svg" alt="Input points projected into coordinate planes x1-x2, x1-x3, and x2-x3"><figcaption>Three coordinate projections of the same 3D input; no projected hull boundary is implied.</figcaption></figure>
+<table><thead><tr>{headers}</tr></thead><tbody>{''.join(tables)}</tbody></table>
+<h2>Scope limits</h2>
+<ul>
+<li>One deterministic 250-point fixture; this is the first ladder cell, not the EXP-02 matrix.</li>
+<li>These reducers are implementation variants; A43/A44 are paper-informed adaptations, not faithful ports.</li>
+<li>Workspace creation and independent checking are outside reducer timing. HiGHS is pinned; native solver threading is disabled.</li>
+<li>Timing is descriptive. No comparative speedup is claimed because no source-mapped limiter profile is available.</li>
+<li>Raw JSONL preserves every attempt and unsupported outcome. See <a href="validated-rows.jsonl">validated rows</a> and <a href="summary.csv">CSV</a>.</li>
+</ul>
+</html>'''
+
     (args.output_dir / "index.html").write_text(page)
 
 
