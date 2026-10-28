@@ -1,5 +1,6 @@
 """The repeated ITIS17 dyadic bundle stages as a safe, navigable Pages report."""
 import importlib.util
+import json
 from pathlib import Path
 import sys
 import tempfile
@@ -16,7 +17,7 @@ spec.loader.exec_module(stage_report)
 
 
 class Exp02IT17DyadicStageTests(unittest.TestCase):
-    def test_output_status_bundle_stages_verified_hulls_and_incomplete_classification(self):
+    def test_output_status_bundle_stages_verified_hulls_and_reducer_status(self):
         report_id = "exp02-it17-a44-paper-order-20261028-r3"
         source = ROOT / "reports/algorithm-results" / report_id
         with tempfile.TemporaryDirectory() as temp:
@@ -32,11 +33,13 @@ class Exp02IT17DyadicStageTests(unittest.TestCase):
 
             page = (site / report_id / "index.html").read_text(encoding="utf-8")
             self.assertIn("output-status pilot", page)
-            self.assertIn("incomplete point classification", page)
-            self.assertIn("34e101b0319479779dee89c8d0c1658f14ef1247", page)
+            self.assertIn("incomplete reducer status", page)
+            record = json.loads((source / "record.json").read_text(encoding="utf-8"))
+            self.assertIn(record["source_commit"], page)
             self.assertTrue((site / report_id / "fixture-geometry.svg").is_file())
             raw = (site / report_id / "raw/n64.jsonl").read_text(encoding="utf-8")
-            self.assertIn('"reduction_complete":false', raw)
+            self.assertIn('"reducer_status_complete":false', raw)
+            self.assertIn('"reducer_status_complete":null', raw)
             self.assertIn('"passed":true', raw)
             self.assertIn(report_id + ".zip", (site / "index.html").read_text(encoding="utf-8"))
 

@@ -170,7 +170,7 @@ bool valid_reduction(const Fixture& fixture, const geometry::HullReduction& resu
 
 struct Outcome {
     bool passed{}; // complete accounting and independent exact hull check passed
-    bool reduction_complete{};
+    std::optional<bool> reducer_status_complete;
     long long elapsed_ns{};
     std::size_t retained{}, removed{}, lp_calls{}, basis_solves{}, bulk_removals{},
                 ordered_candidates{};
@@ -204,7 +204,7 @@ Outcome run(const Fixture& fixture, Method method) {
             for (const auto& point : coordinates)
                 std::cerr << " quickhull-point=" << point[0] << ',' << point[1] << '\n';
         }
-        return {coordinates == expected && checked, true,
+        return {coordinates == expected && checked, std::nullopt,
             std::chrono::duration_cast<std::chrono::nanoseconds>(end-begin).count(),
             hull.vertex_indices.size(), fixture.cloud.points.size()-hull.vertex_indices.size(),
             0, 0, 0, 0};
@@ -230,7 +230,7 @@ Outcome run(const Fixture& fixture, Method method) {
     if (!std::holds_alternative<geometry::HullReduction>(result)) return outcome;
     const auto& reduction = std::get<geometry::HullReduction>(result);
     outcome.passed = valid_reduction(fixture, reduction);
-    outcome.reduction_complete = reduction.status == geometry::ReductionStatus::complete;
+    outcome.reducer_status_complete = reduction.status == geometry::ReductionStatus::complete;
     if (!outcome.passed) {
         std::cerr << "validation failure method=" << info(method).name
                   << " status=" << static_cast<int>(reduction.status)
@@ -270,14 +270,19 @@ void print(const Fixture& fixture, Method method, bool warmup, int round,
     const auto digest = geometry::digest_hull_input(fixture.cloud.points);
     if (!std::holds_alternative<geometry::HullInputDigest>(digest))
         throw std::runtime_error("input digest could not be computed");
-    std::cout << "{\"schema\":\"csl.it17-hull-paper-adaptation-row/2\",\"source_commit\":\""
+    std::cout << "{\"schema\":\"csl.it17-hull-paper-adaptation-row/3\",\"source_commit\":\""
               << CSL_SOURCE_COMMIT << "\",\"fixture\":\"" << fixture.id
               << "\",\"input_sha256\":\"" << problem::hex(std::get<geometry::HullInputDigest>(digest))
               << "\",\"method\":\"" << info(method).name << "\",\"method_identity\":\""
               << info(method).identity << "\",\"method_version\":\"" << info(method).version
               << "\",\"lp_provider\":\"HiGHS/1.11.0\",\"warmup\":"
               << (warmup ? "true" : "false") << ",\"round\":" << round
-              << ",\"reduction_complete\":" << (outcome.reduction_complete ? "true" : "false")
+              << ",\"reducer_status_complete\":";
+    if (outcome.reducer_status_complete)
+        std::cout << (*outcome.reducer_status_complete ? "true" : "false");
+    else
+        std::cout << "null";
+    std::cout
               << ",\"elapsed_ns\":" << outcome.elapsed_ns << ",\"passed\":"
               << (outcome.passed ? "true" : "false") << ",\"input_points\":"
               << fixture.cloud.points.size() << ",\"retained\":" << outcome.retained
