@@ -89,6 +89,8 @@ def exact_hull_certificate(row: dict, points: list[tuple[float, float, float]]) 
     if not retained or len(set(retained)) != len(retained) or any(not isinstance(i, int) or not 0 <= i < len(points) for i in retained):
         return False
     retained_set = set(retained)
+    if not set(range(4)).issubset(retained_set):
+        return False
     positions: dict[int, int] = {}
     for index, certificate in enumerate(certificates):
         point = certificate.get("removed")
@@ -168,11 +170,15 @@ def main() -> None:
             if method == "geometric-quickhull":
                 writer.writerow([method, len(group), 0, 0, "n/a", "n/a", "", "", "", "unsupported in 3D"])
                 continue
-            valid = len(measured) >= 5 and all(r["outcome"] == "verified" for r in measured)
+            valid = (len(measured) >= 5 and
+                     all(r["outcome"] == "verified" and r["reducer_status_complete"] is True
+                         for r in measured))
             values = [r["elapsed_ns"] / 1e6 for r in measured] if valid else []
             complete = sum(r["reducer_status_complete"] is True for r in measured)
             verified = sum(r["outcome"] == "verified" for r in measured)
-            writer.writerow([method, sum(r["warmup"] for r in group), len(measured), f"{verified}/{len(measured)}", f"{complete}/{len(measured)}", f"{statistics.median(r['retained'] for r in measured):g}" if valid else "", f"{statistics.median(values):.6f}" if valid else "", f"{min(values):.6f}" if valid else "", f"{max(values):.6f}" if valid else "", "descriptive only; no speedup claim; limiter not source-profiled"])
+            verdict = ("descriptive only; no speedup claim; source limiter not profiled" if valid
+                       else "timing withheld: incomplete or failed reducer; no performance comparison")
+            writer.writerow([method, sum(r["warmup"] for r in group), len(measured), f"{verified}/{len(measured)}", f"{complete}/{len(measured)}", f"{statistics.median(r['retained'] for r in measured):g}" if valid else "", f"{statistics.median(values):.6f}" if valid else "", f"{min(values):.6f}" if valid else "", f"{max(values):.6f}" if valid else "", verdict])
     (args.output_dir / "input-projections.svg").write_text(plot_svg())
     tables = []
     for row in csv.DictReader((args.output_dir / "summary.csv").open()):
