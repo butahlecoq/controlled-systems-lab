@@ -13,6 +13,7 @@ from urllib.parse import urlsplit
 
 import audit_visual_routes
 import approx_extension_companions
+import control_witness_companions
 import geometry_opt_companions
 import report_data
 import site_additions
@@ -533,6 +534,10 @@ def build(catalog, site):
         _, geometry_inventory, geometry_assets = geometry_opt_companions.build(geometry_root)
         for asset in geometry_assets:
             outputs[asset] = (geometry_root / asset).read_bytes()
+    gallery_inventory = []
+    control_witness = control_witness_companions.build(site, catalog)
+    outputs.update(control_witness.files)
+    gallery_inventory.extend(control_witness.gallery_entries)
     fuel_assets = Path(__file__).parents[2] / "docs/examples"
     fuel_files = ("fuel-b06-viz03.html", "fuel-b06-viz03-source.json", "fuel-b06-viz03-export.json",
                   "fuel-b06-flow-projection.svg", "fuel-b06-flow-projection.png", "fuel-b06-stock-projection.svg",
@@ -551,7 +556,6 @@ def build(catalog, site):
         if path.is_file() and "mpl-config" not in path.parts:
             name = "viz10/" + path.relative_to(viz10_assets).as_posix()
             outputs[name] = path.read_text(encoding="utf-8") if path.suffix == ".html" else path.read_bytes()
-    gallery_inventory = []
     for example in examples:
         owner = CASE_OWNERS[example["kind"]]
         gallery_inventory.append(owner.inventory_entry(example))
@@ -709,6 +713,18 @@ def build(catalog, site):
             '<h3>Readable geometry and timing figures</h3><p>Eleven companions replot frozen report records with the shared quantitative axis policy. '
             'The geometry examples use saved 2D coordinates; timing charts show saved medians and observed ranges.</p>'
             '<p><a href="geometry-optimization-v1.html">Open geometry and optimization figures →</a></p></article>' +
+            '<article class="saved-figure" id="control-witness-companions"><p class="eyebrow">Control strategy · Saved-data companion</p>'
+            '<h3>Strategy A and B control-relation projections</h3>'
+            '<a href="control-witness-v1.html"><img src="control-witness/strategy-a-ts01.svg" '
+            'alt="Projection of a saved five-coordinate control relation into the u0 and u1 control plane"></a>'
+            '<p>Five figures plot the exact saved control projections from Strategy A and B. A companion page also shows their saved timing observations.</p>'
+            '<p><a href="control-witness-v1.html">Open the control-relation figures →</a></p></article>' +
+            '<article class="saved-figure" id="control-witness-timings"><p class="eyebrow">Control reports · Saved-data companion</p>'
+            '<h3>Saved synthesis and verifier timings</h3>'
+            '<a href="control-witness-timing-v1.html"><img src="control-witness/syn01-timing.svg" '
+            'alt="Saved SYN01 phase timing observations with exact values and ranges in an adjacent table"></a>'
+            '<p>The figures replot saved observations from SYN01, SYN02, SYN06, the Strategy A/B reports and paired SYN-TS01. The failed SYN02 shifted-residual fixture remains listed as unavailable with its saved failure status.</p>'
+            '<p><a href="control-witness-timing-v1.html">Open the saved timing figures →</a></p></article>' +
             f'<article class="saved-figure" id="{lotka_anchor}"><p class="eyebrow">Saved sample geometry · Saved-data companion</p>'
             '<h3>Lotka–Volterra samples with shared quantitative axes</h3>'
             '<a href="lotka-volterra-sampled-v1.html"><img src="lotka-volterra-sampled-v1.svg" '
