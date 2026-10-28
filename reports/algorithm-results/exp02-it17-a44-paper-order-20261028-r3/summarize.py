@@ -8,6 +8,11 @@ root = Path(__file__).parent
 raw = root / "raw"
 rows = [json.loads(line) for path in (raw / "n64.jsonl", raw / "n256.jsonl")
         for line in path.read_text().splitlines() if line.strip()]
+if any(row["schema"] != "csl.it17-hull-paper-adaptation-row/3" for row in rows):
+    raise ValueError("raw rows must use schema version 3")
+if any((row["reducer_status_complete"] is not None) !=
+       (row["method"] != "geometric-quickhull") for row in rows):
+    raise ValueError("only LP reducers expose ReductionStatus completion")
 source_commits = {row["source_commit"] for row in rows}
 if len(source_commits) != 1:
     raise ValueError("raw rows must identify one measured source commit")
@@ -40,7 +45,7 @@ with (root / "summary.csv").open("w", newline="") as stream:
     writer.writerows(summary)
 
 header = """<!doctype html><html lang=\"en\"><meta charset=\"utf-8\"><meta name=\"viewport\" content=\"width=device-width,initial-scale=1\"><title>ITIS'17 hull output-status pilot</title><style>body{font:16px/1.5 system-ui,sans-serif;max-width:1100px;margin:2rem auto;padding:0 1rem;color:#18212b}table{border-collapse:collapse;width:100%;margin:1rem 0}th,td{border:1px solid #ccd4dd;padding:.45rem;text-align:left}th{background:#eef3f7}img{max-width:100%;height:auto}code{overflow-wrap:anywhere}.verdict{border-left:4px solid #b7791f;padding:.6rem 1rem;background:#fff8e8}</style><h1>ITIS'17 hull methods: output-status pilot</h1>"""
-body = """<p class=\"verdict\"><strong>Verdict: exact hulls verified; performance comparison inconclusive.</strong> All six methods returned a retained source-index set whose exact hull matched the input. The baseline, ordered LP reducer, and A43 adaptation still report incomplete point classification, with redundant inputs retained. This report separates hull validity from reduction completeness.</p>
+body = """<p class=\"verdict\"><strong>Verdict: exact hulls verified; performance comparison inconclusive.</strong> All six methods returned a retained source-index set whose exact hull matched the input. The baseline, ordered LP reducer, and A43 adaptation report incomplete reducer status, with redundant inputs retained. This report separates hull validity from ReductionStatus completion.</p>
 <h2>Geometry</h2><figure><img src=\"fixture-geometry.svg\" alt=\"The identical 64-point and 256-point square clouds used by all methods; each contains the four unit-square corners and generated interior points.\"><figcaption>Shared exact-dyadic inputs and expected square hull. The same fixtures were used for all six methods.</figcaption></figure>
 <h2>Measured outcomes</h2><p>Five interleaved measured attempts per method and fixture, plus one warmup. All 60 measured attempts passed complete point accounting and the independent exact 2D hull check. The table reports ReductionStatus completion for LP reducers; QuickHull has no such status and is marked n/a. Status completion means candidate calls completed and were correctly bound, not that retained points are exactly the extreme vertices. Medians and ranges include all hull-verified calls; the measured interval excludes workspace creation and output validation.</p><table><thead><tr><th>Fixture</th><th>Method</th><th>Hull valid</th><th>Reducer status complete</th><th>Retained points</th><th>Median (ms)</th><th>Range (ms)</th><th>LP calls, median</th></tr></thead><tbody>"""
 for row in summary:

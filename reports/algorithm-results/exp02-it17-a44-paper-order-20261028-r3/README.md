@@ -4,9 +4,9 @@
 
 All six methods returned retained source-index sets whose exact hulls match
 the complete input on both measured fixtures. The LP membership baseline,
-ordered LP reducer, and A43 certificate-safe adaptation still report incomplete
-point classification; their unresolved redundant points remain in the output.
-This report separates geometric validity from reduction completeness.
+ordered LP reducer, and A43 certificate-safe adaptation report incomplete
+reducer status; their unresolved redundant points remain in the output. This
+report separates geometric validity from `ReductionStatus` completion.
 
 Performance interpretation remains **inconclusive**. The run excludes LP
 workspace creation and output validation, has no source-function profile or
@@ -22,18 +22,18 @@ hashes, outcomes, call counts and individual timings.
 
 | Points | Method | Hull verified | Reducer status complete | Retained | Median reducer call |
 |---:|---|---:|---:|---:|---:|
-| 64 | QuickHull | 5/5 | n/a | 4 | 0.144 ms |
-| 64 | LP membership baseline | 5/5 | 0/5 | 64 | 10.424 ms |
-| 64 | Phase-I basis reuse (related to A43) | 5/5 | 5/5 | 34 | 0.226 ms |
-| 64 | Ordered LP membership (related to A44) | 5/5 | 0/5 | 64 | 10.568 ms |
-| 64 | A43 certificate-safe adaptation | 5/5 | 0/5 | 34 | 5.273 ms |
-| 64 | A44 incremental LP adaptation v2 | 5/5 | 5/5 | 4 | 7.191 ms |
-| 256 | QuickHull | 5/5 | n/a | 4 | 0.587 ms |
-| 256 | LP membership baseline | 5/5 | 0/5 | 255 | 70.204 ms |
-| 256 | Phase-I basis reuse (related to A43) | 5/5 | 5/5 | 125 | 0.769 ms |
-| 256 | Ordered LP membership (related to A44) | 5/5 | 0/5 | 255 | 69.816 ms |
-| 256 | A43 certificate-safe adaptation | 5/5 | 0/5 | 123 | 25.267 ms |
-| 256 | A44 incremental LP adaptation v2 | 5/5 | 5/5 | 4 | 27.939 ms |
+| 64 | QuickHull | 5/5 | n/a | 4 | 0.142 ms |
+| 64 | LP membership baseline | 5/5 | 0/5 | 64 | 10.252 ms |
+| 64 | Phase-I basis reuse (related to A43) | 5/5 | 5/5 | 34 | 0.225 ms |
+| 64 | Ordered LP membership (related to A44) | 5/5 | 0/5 | 64 | 10.302 ms |
+| 64 | A43 certificate-safe adaptation | 5/5 | 0/5 | 34 | 5.337 ms |
+| 64 | A44 incremental LP adaptation v2 | 5/5 | 5/5 | 4 | 7.112 ms |
+| 256 | QuickHull | 5/5 | n/a | 4 | 0.572 ms |
+| 256 | LP membership baseline | 5/5 | 0/5 | 255 | 69.935 ms |
+| 256 | Phase-I basis reuse (related to A43) | 5/5 | 5/5 | 125 | 0.756 ms |
+| 256 | Ordered LP membership (related to A44) | 5/5 | 0/5 | 255 | 69.555 ms |
+| 256 | A43 certificate-safe adaptation | 5/5 | 0/5 | 123 | 25.306 ms |
+| 256 | A44 incremental LP adaptation v2 | 5/5 | 5/5 | 4 | 28.176 ms |
 
 The [fixture geometry](fixture-geometry.svg) shows both square point clouds.
 The [summary CSV](summary.csv), [64-point rows](raw/n64.jsonl),
@@ -62,7 +62,7 @@ are retained for LP removals.
 
 ## Environment and timing scope
 
-- Source commit: `34e101b0319479779dee89c8d0c1658f14ef1247`.
+- Source commit: `7c839f41246823300a939562ce239b0bf80282b8`.
 - Release build, GCC 16.2.1, CMake 3.31.6, C++20, HiGHS 1.11.0, one LP thread.
 - AMD Ryzen 5 3550H, Linux x86_64, 8 logical CPUs; pre-run load average `0.76, 1.25, 0.77`; 2.5 GiB available memory.
 - Timing covers the public reducer call. LP workspace creation and output validation are outside the interval.

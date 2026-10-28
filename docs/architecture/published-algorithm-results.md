@@ -235,13 +235,14 @@ size.
 
 All 60 measured attempts passed the exact 2D hull checker over 64- and
 256-point exact-dyadic square clouds. The LP baseline, ordered reducer and A43
-adaptation remained incomplete in all 10 attempts each, while basis reuse,
-QuickHull and A44 v2 completed. Median reducer-call times at 64/256 points were
-0.144/0.587 ms for QuickHull, 0.226/0.769 ms for basis reuse,
-5.273/25.267 ms for A43, 7.191/27.939 ms for A44 v2,
-10.424/70.204 ms for the baseline, and 10.568/69.816 ms for ordered LP.
-Timing excludes workspace creation and verification. No source-function
-profile or resource limiter was available, so these are fixture-specific
+adaptation reported incomplete `ReductionStatus` in all 10 attempts each;
+basis reuse and A44 v2 reported complete status. QuickHull has no
+`ReductionStatus`. Median reducer-call times at 64/256 points were 0.142/0.572
+ms for QuickHull, 0.225/0.756 ms for basis reuse, 5.337/25.306 ms for A43,
+7.112/28.176 ms for A44 v2, 10.252/69.935 ms for the baseline, and
+10.302/69.555 ms for ordered LP. Timing excludes workspace creation and
+verification. `perf` was unavailable, and no resource limiter or
+source-function profile was available, so these are fixture-specific
 descriptive values and the performance conclusion remains inconclusive.
 
 The versioned HTML page, raw attempts, summary table, fixture figure, executable

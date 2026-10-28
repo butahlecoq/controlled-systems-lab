@@ -1,18 +1,5 @@
-[  2%] Built target csl_contracts
-[  4%] Built target csl_quickhull_2d
-[  5%] Built target csl_numeric
-[  7%] Built target csl_sets
-[ 83%] Built target highs
-[ 83%] Built target csl_objectives
-[ 86%] Built target csl_optimization
-[ 89%] Built target csl_model
-[ 91%] Built target csl_problem
-[ 91%] Built target csl_resolved_core
-[ 91%] Built target csl_verifiers
-[ 92%] Built target csl_registry
-[ 94%] Built target csl_resolved_problem
-[ 94%] Built target csl_phase_one
-[ 94%] Built target csl_bounded_hull_checker
-[ 95%] Built target csl_highs_lp
-[ 98%] Built target csl_hull
-[100%] Built target csl_it17_hull_comparison_report
+Configure command:
+cmake -S . -B build/it17-status-review -G Ninja -DCMAKE_BUILD_TYPE=Release -DCSL_BUILD_IT17_HULL_REPORT=ON -DCSL_ENABLE_HIGHS=ON -DCSL_ENABLE_QHULL=OFF
+Build command:
+cmake --build build/it17-status-review --target csl_it17_hull_comparison_report --parallel 4
+Pinned HiGHS 1.11.0 configured successfully. The initial clean build completed 287/287 Ninja actions. After the source-identity commit 7c839f41246823300a939562ce239b0bf80282b8, CMake reconfiguration and the 20-action incremental target rebuild completed successfully.
