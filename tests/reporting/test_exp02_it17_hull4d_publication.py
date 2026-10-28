@@ -27,7 +27,12 @@ class Exp02Hull4DPublicationTests(unittest.TestCase):
         self.assertEqual(len(measured), 30)
         lp_measured = [row for row in measured if row["method"] != "geometric-quickhull"]
         self.assertEqual(len(lp_measured), 25)
-        self.assertTrue(all(row["outcome"] == "verified" for row in lp_measured))
+        self.assertTrue(all(row["outcome"] == "reducer_returned" for row in lp_measured))
+        self.assertTrue(all(row["independent_hull_check"] for row in lp_measured))
+        self.assertEqual(sum(row["evidence_status"] == "verified" for row in lp_measured), 15)
+        self.assertEqual(sum(row["evidence_status"] == "inconclusive" for row in lp_measured), 10)
+        self.assertTrue(all(row["evidence_status"] == "inconclusive"
+                            for row in lp_measured if row["reducer_status_complete"] is False))
         self.assertEqual(sum(row["reducer_status_complete"] is True for row in lp_measured), 15)
         self.assertTrue(all(row["outcome"] == "unsupported_dimension" and row["elapsed_ns"] == 0
                             for row in rows if row["method"] == "geometric-quickhull"))
@@ -48,6 +53,25 @@ class Exp02Hull4DPublicationTests(unittest.TestCase):
             with self.assertRaisesRegex(ValueError, "independently hashed source and fixture"):
                 summarize_4d.read_rows(raw)
 
+    def test_failed_attempt_is_retained_as_inconclusive_with_a_stable_code(self) -> None:
+        rows = [json.loads(line) for line in
+                (BUNDLE / "raw/raw-rows.jsonl").read_text(encoding="utf-8").splitlines()]
+        failed = next(row for row in rows
+                      if row["method"] == summarize_4d.METHODS[0] and not row["warmup"])
+        failed.update({"outcome": "failed", "diagnostic_code": "workspace_creation_failed",
+                       "reducer_status_complete": None, "elapsed_ns": 0, "retained": 0,
+                       "removed": 0, "lp_calls": 0, "retained_ids": [],
+                       "removal_certificates": []})
+        with tempfile.TemporaryDirectory() as temporary:
+            raw = Path(temporary) / "failure.jsonl"
+            raw.write_text("".join(json.dumps(row) + "\n" for row in rows), encoding="utf-8")
+            validated = summarize_4d.read_rows(raw)
+        preserved = next(row for row in validated
+                         if row.get("diagnostic_code") == "workspace_creation_failed")
+        self.assertEqual(preserved["outcome"], "failed")
+        self.assertIsNone(preserved["independent_hull_check"])
+        self.assertEqual(preserved["evidence_status"], "inconclusive")
+
     def test_report_preserves_withheld_timings_and_six_input_projections(self) -> None:
         with (BUNDLE / "summary.csv").open(encoding="utf-8") as stream:
             summary = {row["method"]: row for row in csv.DictReader(stream)}
@@ -57,12 +81,22 @@ class Exp02Hull4DPublicationTests(unittest.TestCase):
         for method in (summarize_4d.METHODS[1], summarize_4d.METHODS[3],
                        summarize_4d.METHODS[4]):
             self.assertEqual(summary[method]["reducer_complete"], "5/5")
+            self.assertIn("verified 5/5", summary[method]["evidence_status"])
             self.assertNotEqual(summary[method]["elapsed_median_ms"], "")
+        for method in (summarize_4d.METHODS[0], summarize_4d.METHODS[2]):
+            self.assertIn("inconclusive 5/5", summary[method]["evidence_status"])
+            self.assertEqual(summary[method]["independent_hull_checks"], "5/5")
+            self.assertEqual(summary[method]["elapsed_median_ms"], "")
         page = (BUNDLE / "index.html").read_text(encoding="utf-8")
         figure = (BUNDLE / "input-projections.svg").read_text(encoding="utf-8")
         self.assertIn("no speedup claim", page)
         self.assertIn("input points only", figure)
         self.assertIn('transform="rotate(-90', figure)
+        self.assertIn("2D visual companion", page)
+        self.assertIn("quickhull-it17-paper-adaptations-20261024-r1", page)
+        self.assertIn('src="2d-visual-companion.svg"', page)
+        self.assertTrue((BUNDLE / "2d-visual-companion.svg").is_file())
+        self.assertIn("only a complete reducer with a valid chain is labelled verified", page)
         for pair in ("x1–x2", "x1–x3", "x1–x4", "x2–x3", "x2–x4", "x3–x4"):
             self.assertIn(f"Projection {pair}", figure)
 

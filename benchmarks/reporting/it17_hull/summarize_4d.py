@@ -89,9 +89,18 @@ def read_rows(path: Path) -> list[dict]:
     for row in rows:
         if row["method"] == "geometric-quickhull":
             row["independent_hull_check"] = None
+            row["evidence_status"] = "inconclusive"
+            continue
+        if row["outcome"] != "reducer_returned":
+            if row["outcome"] in {"failed", "diagnostics"} and not row.get("diagnostic_code"):
+                raise ValueError("failed attempt is missing its stable diagnostic code")
+            row["independent_hull_check"] = None
+            row["evidence_status"] = "inconclusive"
             continue
         row["independent_hull_check"] = exact_hull_certificate(row, points)
-        row["outcome"] = "verified" if row["independent_hull_check"] else "invalid_certificate_chain"
+        row["evidence_status"] = (
+            "verified" if row["reducer_status_complete"] is True and row["independent_hull_check"]
+            else "inconclusive")
     for method in METHODS[:-1]:
         attempts = [row for row in rows if row["method"] == method]
         warmups = [row for row in attempts if row["warmup"]]
@@ -193,36 +202,47 @@ def main() -> None:
     (args.output_dir / "validated-rows.jsonl").write_text("".join(json.dumps(row, sort_keys=True) + "\n" for row in rows))
     with (args.output_dir / "summary.csv").open("w", newline="") as stream:
         writer = csv.writer(stream)
-        writer.writerow(["method", "warmups", "measured", "independently_verified", "reducer_complete", "retained_median", "elapsed_median_ms", "elapsed_min_ms", "elapsed_max_ms", "performance_verdict"])
+        writer.writerow(["method", "warmups", "measured", "independent_hull_checks", "evidence_status", "reducer_complete", "retained_median", "elapsed_median_ms", "elapsed_min_ms", "elapsed_max_ms", "performance_verdict"])
         for method in METHODS:
             group = [r for r in rows if r["method"] == method]
             measured = [r for r in group if not r["warmup"]]
             if method == "geometric-quickhull":
-                writer.writerow([method, len(group), 0, 0, "n/a", "n/a", "", "", "", "unsupported in 4D"])
+                writer.writerow([method, len(group), 0, "n/a", "inconclusive", "n/a", "n/a", "", "", "", "unsupported in 4D"])
                 continue
             valid = (len(measured) >= 5 and
-                     all(r["outcome"] == "verified" and r["reducer_status_complete"] is True
+                     all(r["evidence_status"] == "verified"
                          for r in measured))
             values = [r["elapsed_ns"] / 1e6 for r in measured] if valid else []
             complete = sum(r["reducer_status_complete"] is True for r in measured)
-            verified = sum(r["outcome"] == "verified" for r in measured)
+            checked = sum(r["independent_hull_check"] is True for r in measured)
+            status_counts = {status: sum(r["evidence_status"] == status for r in measured)
+                             for status in ("verified", "inconclusive")}
+            evidence = ", ".join(f"{status} {count}/{len(measured)}"
+                                  for status, count in status_counts.items() if count)
             verdict = ("descriptive only; no speedup claim; source limiter not profiled" if valid
                        else "timing withheld: incomplete or failed reducer; no performance comparison")
-            writer.writerow([method, sum(r["warmup"] for r in group), len(measured), f"{verified}/{len(measured)}", f"{complete}/{len(measured)}", f"{statistics.median(r['retained'] for r in measured):g}" if valid else "", f"{statistics.median(values):.6f}" if valid else "", f"{min(values):.6f}" if valid else "", f"{max(values):.6f}" if valid else "", verdict])
+            writer.writerow([method, sum(r["warmup"] for r in group), len(measured),
+                             f"{checked}/{len(measured)}", evidence, f"{complete}/{len(measured)}",
+                             f"{statistics.median(r['retained'] for r in measured):g}" if valid else "",
+                             f"{statistics.median(values):.6f}" if valid else "",
+                             f"{min(values):.6f}" if valid else "",
+                             f"{max(values):.6f}" if valid else "", verdict])
     (args.output_dir / "input-projections.svg").write_text(plot_svg())
     tables = []
     for row in csv.DictReader((args.output_dir / "summary.csv").open()):
         if row["method"] == METHODS[5]:
-            values = [METHOD_LABELS[row["method"]], "—", "unsupported in 4D", "—", "—", "—", "No timing"]
+            values = [METHOD_LABELS[row["method"]], "—", "unsupported in 4D", "inconclusive",
+                      "—", "—", "—", "No timing"]
         else:
             low = row["elapsed_min_ms"]
             high = row["elapsed_max_ms"]
-            values = [METHOD_LABELS[row["method"]], row["independently_verified"], row["reducer_complete"],
+            values = [METHOD_LABELS[row["method"]], row["independent_hull_checks"],
+                      row["reducer_complete"], row["evidence_status"],
                       row["retained_median"] or "—", row["elapsed_median_ms"] or "—",
                       f"{low}–{high}" if low and high else "—",
                       "Descriptive only; no speedup claim" if row["elapsed_median_ms"] else "Withheld: incomplete reducer"]
         tables.append("<tr>" + "".join(f"<td>{html.escape(value)}</td>" for value in values) + "</tr>")
-    headers = "".join(f"<th>{label}</th>" for label in ["Method", "Hull checks", "Complete", "Retained", "Median (ms)", "Range (ms)", "Timing interpretation"])
+    headers = "".join(f"<th>{label}</th>" for label in ["Method", "Hull checks", "Complete", "Evidence", "Retained", "Median (ms)", "Range (ms)", "Timing interpretation"])
     page = f'''<!doctype html>
 <html lang="en">
 <meta charset="utf-8">
@@ -239,9 +259,12 @@ img {{ max-width:100% }}
 code {{ overflow-wrap:anywhere }}
 </style>
 <h1>EXP-02: first 4D hull-ladder cell</h1>
-<p>The workload has five 4-simplex corners and 245 dyadic interior points. Halton bases 2, 3, 5, and 7 deterministically select strictly positive barycentric weights in multiples of 1/8, making interior-point removal certificates exactly representable. Five LP reducers ran with one warmup and five measured calls each. An independent exact-rational validator verifies each removal certificate and its acyclic expansion to the retained source points. This proves equality of the finite input hull and returned hull even when a reducer conservatively retains some redundant points.</p>
+<p>The workload has five 4-simplex corners and 245 dyadic interior points. Halton bases 2, 3, 5, and 7 deterministically select strictly positive barycentric weights in multiples of 1/8, making interior-point removal certificates exactly representable. Five LP reducers ran with one warmup and five measured calls each. An independent exact-rational validator checks each removal certificate and its acyclic expansion to the retained source points. A checked certificate chain is diagnostic evidence when the reducer reports incomplete status; only a complete reducer with a valid chain is labelled verified.</p>
 <p>QuickHull is recorded as unsupported because the registered geometric implementation is 2D-only. The six plotted projections show input points only; red markers identify the 4-simplex corners.</p>
 <figure><img src="input-projections.svg" alt="Input points projected into all six coordinate planes of the four-dimensional simplex"><figcaption>Six coordinate projections of the same 4D input; no projected hull boundary is implied.</figcaption></figure>
+<h2>2D visual companion</h2>
+<p>The same reducer family supports 2D. The existing 2D hull pilot includes a minimal labelled square cloud and hull illustration. It uses a separate fixture from report <code>quickhull-it17-paper-adaptations-20261024-r1</code>.</p>
+<figure><a href="2d-visual-companion.svg"><img src="2d-visual-companion.svg" alt="Existing 2D square-cloud hull illustration from the separate QuickHull pilot"></a><figcaption>Existing 2D companion example; this figure is not part of the 4D measurement. <a href="2d-visual-companion.svg">Open the SVG</a>.</figcaption></figure>
 <div class="table-wrap"><table><thead><tr>{headers}</tr></thead><tbody>{''.join(tables)}</tbody></table></div>
 <p>Measured code commit <code>{source_commit}</code>; binary64 input manifest SHA256 <code>{input_sha256}</code>; LP backend HiGHS 1.11.0. Full method identities and every raw attempt are in <a href="validated-rows.jsonl">validated rows</a>; download the <a href="exp02-it17-hull-4d-simplex-20261028-r1.zip">offline report bundle</a>.</p>
 <h2>Scope limits</h2>
@@ -250,7 +273,7 @@ code {{ overflow-wrap:anywhere }}
 <li>These reducers are implementation variants; A43/A44 are paper-informed adaptations, not faithful ports.</li>
 <li>Workspace creation and independent checking are outside reducer timing. HiGHS is pinned; native solver threading is disabled.</li>
 <li>Timing is descriptive. No comparative speedup is claimed because no source-mapped limiter profile is available.</li>
-<li>Raw JSONL preserves every attempt and unsupported outcome. See <a href="validated-rows.jsonl">validated rows</a> and <a href="summary.csv">CSV</a>.</li>
+<li>Raw JSONL preserves every attempt and unsupported outcome. Incomplete reducer status remains inconclusive even when partial certificates pass exact diagnostics. See <a href="validated-rows.jsonl">validated rows</a> and <a href="summary.csv">CSV</a>.</li>
 </ul>
 </html>'''
 

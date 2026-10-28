@@ -84,6 +84,7 @@ std::unique_ptr<LPWorkspace> workspace(const geometry::PointCloud& cloud) {
 
 struct Outcome {
     std::string outcome{"failed"};
+    std::string diagnostic_code;
     std::optional<bool> reducer_complete;
     long long elapsed_ns{};
     std::size_t retained{}, removed{}, lp_calls{};
@@ -92,25 +93,55 @@ struct Outcome {
 };
 
 Outcome run(const geometry::PointCloud& cloud, Method method) {
-    if (method == Method::quickhull_unsupported)
-        return {"unsupported_dimension", {}, 0, 0, 0, 0, {}, {}};
-    auto lp = workspace(cloud);
-    if (!lp) throw std::runtime_error("HiGHS workspace creation failed");
+    Outcome out;
+    if (method == Method::quickhull_unsupported) {
+        out.outcome = "unsupported_dimension";
+        out.diagnostic_code = "dimension_not_supported";
+        return out;
+    }
+    std::unique_ptr<LPWorkspace> lp;
+    try {
+        lp = workspace(cloud);
+    } catch (...) {
+        out.diagnostic_code = "workspace_creation_exception";
+        return out;
+    }
+    if (!lp) {
+        out.diagnostic_code = "workspace_creation_failed";
+        return out;
+    }
     const auto begin = std::chrono::steady_clock::now();
     geometry::HullReductionResult result;
-    switch (method) {
-    case Method::baseline: result = geometry::reduce_hull(cloud, *lp, {}); break;
-    case Method::basis_reuse: result = geometry::reduce_hull_basis_reuse(cloud, *lp, {}); break;
-    case Method::ordered: result = geometry::reduce_ordered_hull(cloud, *lp, {}); break;
-    case Method::a43: result = geometry::reduce_itis17_a43_hull(cloud, *lp, {}); break;
-    case Method::a44: result = geometry::reduce_itis17_a44_hull(cloud, *lp, {}); break;
-    case Method::quickhull_unsupported: break;
+    try {
+        switch (method) {
+        case Method::baseline: result = geometry::reduce_hull(cloud, *lp, {}); break;
+        case Method::basis_reuse: result = geometry::reduce_hull_basis_reuse(cloud, *lp, {}); break;
+        case Method::ordered: result = geometry::reduce_ordered_hull(cloud, *lp, {}); break;
+        case Method::a43: result = geometry::reduce_itis17_a43_hull(cloud, *lp, {}); break;
+        case Method::a44: result = geometry::reduce_itis17_a44_hull(cloud, *lp, {}); break;
+        case Method::quickhull_unsupported: break;
+        }
+    } catch (...) {
+        const auto end = std::chrono::steady_clock::now();
+        out.elapsed_ns = std::chrono::duration_cast<std::chrono::nanoseconds>(end - begin).count();
+        out.diagnostic_code = "reducer_exception";
+        return out;
     }
     const auto end = std::chrono::steady_clock::now();
-    Outcome out;
     out.elapsed_ns = std::chrono::duration_cast<std::chrono::nanoseconds>(end - begin).count();
     if (!std::holds_alternative<geometry::HullReduction>(result)) {
         out.outcome = "diagnostics";
+        const auto& diagnostics = std::get<Diagnostics>(result);
+        if (diagnostics.empty()) {
+            out.diagnostic_code = "empty_diagnostics";
+        } else {
+            switch (diagnostics.front().code) {
+            case DiagnosticCode::invalid_input: out.diagnostic_code = "invalid_input"; break;
+            case DiagnosticCode::unsupported: out.diagnostic_code = "unsupported"; break;
+            case DiagnosticCode::evidence_mismatch: out.diagnostic_code = "evidence_mismatch"; break;
+            case DiagnosticCode::invalid_claim: out.diagnostic_code = "invalid_claim"; break;
+            }
+        }
         return out;
     }
     const auto& reduction = std::get<geometry::HullReduction>(result);
@@ -137,7 +168,8 @@ void print(const geometry::PointCloud& cloud, Method method, bool warmup, int ro
               << info(method).identity << "\",\"method_version\":\"" << info(method).version
               << "\",\"lp_provider\":\"HiGHS/1.11.0\",\"warmup\":"
               << (warmup ? "true" : "false") << ",\"round\":" << round
-              << ",\"outcome\":\"" << outcome.outcome << "\",\"reducer_status_complete\":";
+              << ",\"outcome\":\"" << outcome.outcome << "\",\"diagnostic_code\":\""
+              << outcome.diagnostic_code << "\",\"reducer_status_complete\":";
     if (outcome.reducer_complete) std::cout << (*outcome.reducer_complete ? "true" : "false");
     else std::cout << "null";
     std::cout << ",\"elapsed_ns\":" << outcome.elapsed_ns << ",\"retained\":" << outcome.retained
