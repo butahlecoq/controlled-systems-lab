@@ -397,7 +397,7 @@
   "scenario_file": "benchmarks/scenarios/env717-sphere-game-pilot-v1.json",
   "scenario_sha256": "73da1f33b61b4acb4875645668f5de07872333f75f40d6f814c8be0c2177197c",
   "schema": "csl.env717-sphere-game-pilot/1",
-  "source_commit": "1b39aa5d9b91c027ab0e2527bce8e1eba8386b0b",
+  "source_commit": "c4db4ef022d8ec76c483d94452fc12869832911c",
   "source_file_blob": "dd8ff3ce718570f05288dc4d8d343a8784ca2327",
   "source_license": "no license declared in repository metadata",
   "source_model": {
@@ -427,7 +427,7 @@
     "z"
   ],
   "timing": {
-    "elapsed_ns": 879451,
+    "elapsed_ns": 1012567,
     "limiter_profile": "not collected; no comparative speed claim",
     "measured_calls": 1,
     "scope": "one finite_action_minimax call; request setup and JSON assembly excluded",
