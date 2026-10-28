@@ -1,0 +1,7 @@
+method,warmups,measured,independently_verified,reducer_complete,retained_median,elapsed_median_ms,elapsed_min_ms,elapsed_max_ms,performance_verdict
+lp-membership-baseline,1,5,5/5,0/5,250,80.024267,79.453591,84.303747,descriptive only; no speedup claim; limiter not source-profiled
+basis-reuse-related-to-A43,1,5,5/5,5/5,250,1.469539,1.462764,1.499432,descriptive only; no speedup claim; limiter not source-profiled
+ordered-membership-related-to-A44,1,5,5/5,0/5,250,80.625254,79.695033,81.543813,descriptive only; no speedup claim; limiter not source-profiled
+A43-certificate-safe-basis-adaptation,1,5,5/5,0/5,250,81.183639,80.926971,83.794810,descriptive only; no speedup claim; limiter not source-profiled
+A44-incremental-LP-farthest-seed,1,5,5/5,0/5,250,135.111486,134.887225,135.302433,descriptive only; no speedup claim; limiter not source-profiled
+geometric-quickhull,6,0,0,n/a,n/a,,,,unsupported in 3D

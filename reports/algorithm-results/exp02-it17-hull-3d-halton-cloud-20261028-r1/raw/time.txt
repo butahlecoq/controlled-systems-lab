@@ -1,0 +1,4 @@
+exit_status=0
+elapsed_seconds=2
+time_limit_seconds=1800
+virtual_memory_limit_kib=12582912

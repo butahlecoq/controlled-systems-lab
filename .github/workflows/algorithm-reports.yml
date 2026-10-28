@@ -35,6 +35,14 @@ jobs:
         run: python -m unittest discover -s tests/reporting -p 'test_*.py'
       - name: Validate frozen issue 3 saved measurement and projections
         run: python scripts/reports/issue3/render_saved.py --bundle reports/algorithm-results/issue3-finite-catalogue-b4632ce76510aa4f --check
+      - name: Build the ITIS17 3D hull pilot driver
+        if: needs.route.outputs.native == 'true'
+        shell: bash
+        run: |
+          cmake -S . -B build/it17-hull-3d-ci -DBUILD_TESTING=OFF -DCMAKE_BUILD_TYPE=Release \
+            -DCSL_BUILD_IT17_HULL_REPORT=ON -DCSL_ENABLE_HIGHS=ON -DCSL_ENABLE_QHULL=OFF
+          cmake --build build/it17-hull-3d-ci --config Release \
+            --target csl_it17_hull_3d_report --parallel 2
       - name: Build and smoke the APP-01 public plan-check driver
         if: needs.route.outputs.native == 'true'
         shell: bash
