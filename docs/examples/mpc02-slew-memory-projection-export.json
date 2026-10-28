@@ -2,7 +2,7 @@
   "schema": "csl.mpc02-analytic-figure-export/1",
   "scenario_id": "mpc02-slew-2d-v1",
   "source_json": "mpc02-slew-analytic-source.json",
-  "source_sha256": "e1c81bd6ee327a8e4d742c4b1694a9144bd6c36cdd2788efb27b30aafaeb3fb9",
+  "source_sha256": "76254ffb4df88fa021aeb448bdc8b89ad61c958681845bb266c67590132624f7",
   "plot": {
     "schema": "csl.saved-geometric-plot/1",
     "title": "MPC-02 exact projection onto the lifted memory coordinates",

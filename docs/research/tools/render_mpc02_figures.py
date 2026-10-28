@@ -17,6 +17,7 @@ ROOT = Path(__file__).resolve().parents[3]
 SOURCE = ROOT / "docs/examples/mpc02-slew-analytic-source.json"
 STYLE = ROOT / "scripts/reports/styles/control-v1.json"
 OUTPUT = ROOT / "docs/examples"
+TEMP_ROOT = ROOT / "build/mpc02-tests"
 
 
 def point(values: list[str]) -> list[float]:
@@ -28,7 +29,8 @@ def render(name: str, title: str, description: str, axes: dict, series: list[dic
     document = {"schema": "csl.saved-geometric-plot/1", "title": title,
                 "description": description, "axes": axes, "aspect": "equal",
                 "series": series}
-    with tempfile.TemporaryDirectory(prefix="mpc02-figure-", dir=ROOT / "build/mpc02-tests") as temp:
+    TEMP_ROOT.mkdir(parents=True, exist_ok=True)
+    with tempfile.TemporaryDirectory(prefix="mpc02-figure-", dir=TEMP_ROOT) as temp:
         generated = Path(temp)
         receipt = geometry_figures.render(document, STYLE, generated)
         for suffix in ("svg", "png"):
@@ -47,7 +49,7 @@ def main() -> None:
     source = json.loads(source_bytes)
     if source.get("schema") != "csl.mpc02-analytic-projection-source/1":
         raise ValueError("unexpected MPC-02 analytic source schema")
-    os.environ.setdefault("MPLCONFIGDIR", str(ROOT / "build/mpc02-tests/mpl-config"))
+    os.environ.setdefault("MPLCONFIGDIR", str(TEMP_ROOT / "mpl-config"))
     projection = source["projection"]
     controls = [point(vertex) for vertex in projection["control_vertices_rational"]]
     states = [point(vertex) for vertex in projection["terminal_state_vertices_rational"]]
