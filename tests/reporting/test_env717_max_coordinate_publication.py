@@ -18,7 +18,9 @@ SPEC.loader.exec_module(stage_module)
 
 class MaxCoordinateGamePublicationTests(unittest.TestCase):
     def test_stages_verified_phase_plane_report_and_offline_archive(self):
-        with tempfile.TemporaryDirectory(dir=ROOT / "build/env717-max-coordinate") as temp:
+        temp_root = ROOT / "build/env717-max-coordinate"
+        temp_root.mkdir(parents=True, exist_ok=True)
+        with tempfile.TemporaryDirectory(dir=temp_root) as temp:
             root = Path(temp)
             site = root / "site"
             site.mkdir()
@@ -40,7 +42,9 @@ class MaxCoordinateGamePublicationTests(unittest.TestCase):
             self.assertIn(f"{report_id}/index.html", (site / "index.html").read_text())
 
     def test_rejects_rehashed_result_that_fails_independent_game_replay(self):
-        with tempfile.TemporaryDirectory(dir=ROOT / "build/env717-max-coordinate") as temp:
+        temp_root = ROOT / "build/env717-max-coordinate"
+        temp_root.mkdir(parents=True, exist_ok=True)
+        with tempfile.TemporaryDirectory(dir=temp_root) as temp:
             source = Path(temp) / "tampered"
             import shutil
             shutil.copytree(stage_module.SOURCE, source)
