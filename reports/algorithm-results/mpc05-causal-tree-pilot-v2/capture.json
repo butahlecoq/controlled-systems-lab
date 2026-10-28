@@ -12,7 +12,7 @@
     "--smoke"
   ],
   "schema": "csl.mpc05-causal-tree-capture/1",
-  "source_commit": "2940efbe8381d961757b4cfe2c387e0ae2f23ec0",
+  "source_commit": "fe289cb6b0df1a1061e90484df5d5dfdb446a44e",
   "source_sha256": {
     "benchmarks/reporting/mpc05/causal_tree_driver.cpp": "1d1ecff81983f8415b90b9434f02b129850792de99638faae84a11e4642bb99d",
     "include/csl/optimization/finite_causal_minimax.hpp": "2b71f6a5029b016444ec72b0cf528043eea83ce202cba4817d76f8d1805b0c18",
