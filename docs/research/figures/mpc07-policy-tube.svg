@@ -1,0 +1,48 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1040 560" role="img" aria-labelledby="title desc">
+<title id="title">Exact two-state example of fixed-plan and causal feedback reachable sets</title>
+<desc id="desc">A position-velocity phase plane shows the stage-one disturbance segment, the terminal parallelogram for a fixed plan, and the smaller terminal rectangle for causal fixed-gain feedback. Text states the exact double-integrator model, bounds, objective and worst-case values.</desc>
+<style>
+text{font:15px system-ui,sans-serif;fill:#172438}.title{font-size:21px;font-weight:700}.sub{font-size:13px;fill:#49566a}.axis{stroke:#39485d;stroke-width:1.5}.grid{stroke:#d5dce6;stroke-width:1}.box{fill:#f7f9fc;stroke:#56657a;stroke-width:2}.fixed{stroke:#7564bd;stroke-width:5;stroke-linecap:round}.feedback{stroke:#168978;stroke-width:7;stroke-linecap:round}.disturbance{stroke:#d78725;stroke-width:6;stroke-linecap:round}.point{fill:#c74b42;stroke:white;stroke-width:2}.arrow{stroke:#526176;stroke-width:1.5;fill:none;marker-end:url(#arrow)}.legend{font-size:14px}
+</style>
+<defs><marker id="arrow" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6" fill="none" stroke="#526176"/></marker></defs>
+<rect width="100%" height="100%" fill="white"/>
+<text x="40" y="38" class="title">Two-state double integrator: fixed plan versus causal feedback</text>
+<text x="40" y="62" class="sub">Exact finite-horizon state tube in position–velocity coordinates (x₁, x₂); not a solver benchmark or recursive-invariance claim.</text>
+<!-- phase plane -->
+<rect x="190" y="105" width="300" height="300" class="box"/>
+<line x1="190" y1="255" x2="490" y2="255" class="grid"/><line x1="340" y1="105" x2="340" y2="405" class="grid"/>
+<line x1="190" y1="405" x2="500" y2="405" class="axis"/><line x1="190" y1="405" x2="190" y2="95" class="axis"/>
+<text x="190" y="425" text-anchor="middle" class="sub">−2</text><text x="340" y="425" text-anchor="middle" class="sub">0</text><text x="490" y="425" text-anchor="middle" class="sub">2</text>
+<text x="174" y="410" text-anchor="end" class="sub">−2</text><text x="174" y="260" text-anchor="end" class="sub">0</text><text x="174" y="111" text-anchor="end" class="sub">2</text>
+<text x="340" y="450" text-anchor="middle">x₁ position</text><text x="125" y="255" text-anchor="middle" transform="rotate(-90 125 255)">x₂ velocity</text>
+<!-- stage-1 disturbed set x=(0,w) -->
+<line x1="340" y1="180" x2="340" y2="330" class="disturbance"/>
+<!-- fixed-plan terminal x=(w0,w0+w1) -->
+<polygon points="265,405 415,255 415,105 265,255" fill="#7564bd" fill-opacity="0.10" stroke="#7564bd" stroke-width="4"/>
+<!-- causal terminal x=(0.5w0,w1) -->
+<polygon points="302.5,330 377.5,330 377.5,180 302.5,180" fill="#168978" fill-opacity="0.16" stroke="#168978" stroke-width="4"/>
+<circle cx="340" cy="255" r="7" class="point"/>
+<text x="350" y="247" class="sub">x₀, z₁, z₂</text>
+<text x="350" y="174" class="sub">stage 1: (0,w₀)</text>
+<text x="196" y="385" class="sub">fixed plan, stage 2</text>
+<text x="380" y="202" class="sub">fixed-gain tube, stage 2</text>
+<!-- legend -->
+<line x1="45" y1="490" x2="85" y2="490" class="disturbance"/><text x="95" y="495" class="legend">reachable set at stage 1</text>
+<line x1="350" y1="490" x2="390" y2="490" class="fixed"/><text x="400" y="495" class="legend">fixed plan u₁ = 0</text>
+<line x1="620" y1="490" x2="660" y2="490" class="feedback"/><text x="670" y="495" class="legend">causal fixed-gain tube at stage 2</text>
+<text x="40" y="535" class="sub">Every state tube lies inside X = [−2,2]²; feedback uses U = [−1,1].</text>
+<!-- analytical facts -->
+<text x="540" y="112" class="title" style="font-size:17px">Model and exact result</text>
+<text x="540" y="145">xₜ₊₁ = A xₜ + B uₜ + E wₜ,   Δt = 1</text>
+<text x="540" y="174">A = [[1,1],[0,1]],  B = [[1/2],[1]],  E = [[0],[1]]</text>
+<text x="540" y="210">x₀ = (0,0),  u₀ = 0,  w₀,w₁ ∈ [−1,1]</text>
+<text x="540" y="239">X = [−2,2]²,  U = [−1,1],  J = x₂,₂²</text>
+<text x="540" y="282" font-weight="700">Fixed plan (M₁₀ = 0)</text>
+<text x="540" y="307">u₁ = 0 ⇒ x₂ = (w₀,w₀+w₁),  min max J = 4</text>
+<text x="540" y="347" font-weight="700">Causal affine / fixed-gain policy</text>
+<text x="540" y="372">u₁ = M₁₀w₀ = −w₀ = −x₁,₂</text>
+<text x="540" y="397">⇒ x₂ = (w₀/2,w₁),  min max J = 1</text>
+<text x="540" y="437" class="sub">At stage 1, full state reveals w₀; u₁ is chosen before w₁.</text>
+<text x="540" y="458" class="sub">For fixed u₁, max |w₀+w₁+u₁|² ≥ 4; u₁ = 0 attains 4.</text>
+<text x="540" y="479" class="sub">Feedback u₁ = −w₀ is feasible; residual w₁ gives the exact value 1.</text>
+</svg>

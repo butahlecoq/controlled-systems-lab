@@ -16,6 +16,10 @@ maps foundational and contemporary MPC methods to the repository's control tasks
 qualifies solver and controller candidates, and links the task-specific issues.
 It distinguishes fixed-plan minimax, causal policies, relaxation bounds, and
 closed-loop experiments. It authorizes no numerical runs.
+The [MPC-07 source audit](mpc07-source-audit.md) pins the affine-disturbance
+feedback and SLS-MPC qualifications, gives an exact two-step double-integrator
+reference, and includes a 2D policy/tube illustration. It records why the
+unlicensed author implementation cannot be copied or ported.
 
 The [ITIS'17 hull-method source audit](exp02-itis17-source-audit-20261027.md)
 records the primary-paper algorithms, the A43/A44 implementation boundaries,
