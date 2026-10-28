@@ -97,4 +97,4 @@ Both candidates omitted the metadata requirement; the selected shape adds it exp
 
 ## Next implementation step
 
-Add the replay-owned evidence type, then update the VIZ-04 v2 codec, v1 decoder adapter, saved fixture, and contract tests.
+Specify and implement an independent residual-producing integration method, then add an encoder round-trip test for measurements computed by that method before closing TEST-22.
