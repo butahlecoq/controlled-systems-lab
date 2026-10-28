@@ -32,6 +32,9 @@ def check_record(record: dict) -> dict:
     assert build["compiler_id"] and build["compiler_version"] and build["configuration"]
     measurement = record["measurement"]
     assert measurement["runs"] == 1 and measurement["warmups"] == 0
+    assert measurement["requested_workers"] == measurement["actual_workers"] == 1
+    assert measurement["requested_native_threads"] == measurement["actual_native_threads"] == 1
+    assert measurement["parallelism"] == "single-threaded synchronous execution"
     assert measurement["errors"] == 0 and measurement["work_completed"]
     assert type(measurement["elapsed_ns"]) is int and measurement["elapsed_ns"] > 0
     assert measurement["performance_assessment"].startswith("inconclusive;")

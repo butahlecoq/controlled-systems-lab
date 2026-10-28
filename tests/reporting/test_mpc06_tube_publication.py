@@ -53,6 +53,8 @@ class Mpc06TubePublicationTests(unittest.TestCase):
         self.assertIn("Exact feasibility evidence", report)
         self.assertIn("One descriptive timing observation", report)
         self.assertIn("range unavailable for a single run", report)
+        self.assertIn("requested/actual native threads: 1/1", report)
+        self.assertIn(f"https://github.com/butahlecoq/controlled-systems-lab/commit/{manifest['source_commit']}", report)
         self.assertIn("cmake --build build/mpc06", report)
         with zipfile.ZipFile(self.site / f"{route}.zip") as archive:
             self.assertIsNone(archive.testzip())

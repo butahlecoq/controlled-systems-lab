@@ -123,8 +123,6 @@ int main() {
         k[0] * unsafe_tube_error[0] + k[1] * unsafe_tube_error[1];
     const bool unsafe_plan_rejected = unsafe_actual_input > input_bound &&
         std::abs(unsafe_nominal_input) > tightened_input;
-    const auto analysis_elapsed_ns = std::chrono::duration_cast<std::chrono::nanoseconds>(
-        std::chrono::steady_clock::now() - analysis_start).count();
 
     std::size_t checked_paths = 0;
     double worst_state_abs = 0.0;
@@ -157,6 +155,8 @@ int main() {
         std::abs(initial_state[0]) <= tightened_state[0] &&
         std::abs(initial_state[1]) <= tightened_state[1] &&
         0.0 <= tightened_input;
+    const auto analysis_elapsed_ns = std::chrono::duration_cast<std::chrono::nanoseconds>(
+        std::chrono::steady_clock::now() - analysis_start).count();
 
     std::cout << std::setprecision(17)
               << "{\"schema\":\"csl.mpc06-nilpotent-tube-pilot/1\","
@@ -202,8 +202,11 @@ int main() {
               << "\"worst_feedback_input_abs\":" << worst_input_abs << "},"
               << "\"objective\":{\"kind\":\"not evaluated\",\"nominal optimum\":\"not claimed\","
               << "\"minimax cost\":\"not claimed\"},"
-              << "\"measurement\":{\"scope\":\"one exact RPI inclusion, support tightening calculation, matched eight-path disturbance replay, and two edge checks; JSON serialization excluded\","
+              << "\"measurement\":{\"scope\":\"one exact RPI inclusion, support tightening calculation, matched eight-path disturbance replay, initial/tightened feasibility checks, and two edge checks; JSON serialization excluded\","
               << "\"elapsed_ns\":" << analysis_elapsed_ns << ",\"runs\":1,\"warmups\":0,"
+              << "\"requested_workers\":1,\"actual_workers\":1,"
+              << "\"requested_native_threads\":1,\"actual_native_threads\":1,"
+              << "\"parallelism\":\"single-threaded synchronous execution\","
               << "\"errors\":0,\"work_completed\":true,"
               << "\"performance_assessment\":\"inconclusive; one descriptive observation, no limiter profile or comparison\"},"
               << "\"approximation_comparison\":\"deferred behind issues 99 and 100\"}\n";
