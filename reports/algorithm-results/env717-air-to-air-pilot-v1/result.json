@@ -58,11 +58,12 @@
   },
   "controller_plan_count": 125,
   "disturbance_sequence_count_per_plan": 125,
-  "driver_sha256": "ec46d9f560db03613ac328c50aa74ad3ae245e48c853354f13de8fb04d7a6aca",
+  "driver_sha256": "0cbc3882808b13291eed058fa60f518a4908aa8999db35e2b9c565ce791195b1",
   "horizon": 3,
   "minimizing_plan_indices": [
     31
   ],
+  "near_optimal_tolerance": 1e-10,
   "objective_value": 185.00504248482895,
   "plans": [
     {
@@ -4567,7 +4568,7 @@
     }
   ],
   "schema": "csl.env717-air-to-air-pilot/1",
-  "source_commit": "eadd97972b7898f45cda9dfc0f9e71c124891f60",
+  "source_commit": "aad8ab73f81e57464d4a20b4cdd8b04fc8f576d6",
   "source_file_blob": "9054c9fcd01e49f3dbfd8b8ee8d12e7365e1d9b5",
   "source_license": "no license declared in repository metadata",
   "source_model": {
@@ -4615,7 +4616,7 @@
     "comparison_claim": false,
     "measured_calls": 1,
     "measured_wall_ns": [
-      28553249
+      26313775
     ],
     "scope": "one finite_action_minimax call; request construction and JSON assembly excluded",
     "warmup_calls": 0

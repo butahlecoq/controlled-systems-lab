@@ -161,20 +161,12 @@ def svg_figure(expected: dict, sets: dict) -> str:
             chunks.append(f'<text x="{tx:.2f}" y="{y0+ph+20}" text-anchor="middle">{xv:.4g}</text>')
             chunks.append(f'<text x="{x0-8}" y="{ty+4:.2f}" text-anchor="end">{yv:.4g}</text>')
         for t, layer in enumerate(sets["forward"]):
-            points = {tuple(round(v, 10) for v in (relative(state)[ix], relative(state)[iy]))
-                      for state in layer.values()}
+            points = {(relative(state)[ix], relative(state)[iy]) for state in layer.values()}
             for xv, yv in points:
                 x, y = xy_values(xv, yv)
                 chunks.append(f'<circle cx="{x:.2f}" cy="{y:.2f}" r="2.4" fill="{colors[t]}" opacity=".42"/>')
-        for t, layer in enumerate(sets["open_loop_winning"]):
-            points = {tuple(round(v, 10) for v in (relative(state)[ix], relative(state)[iy]))
-                      for state in layer}
-            for xv, yv in points:
-                x, y = xy_values(xv, yv)
-                chunks.append(f'<circle cx="{x:.2f}" cy="{y:.2f}" r="3.2" fill="#cab2d6" opacity=".42"/>')
         for t, layer in enumerate(sets["winning"]):
-            points = {tuple(round(v, 10) for v in (relative(state)[ix], relative(state)[iy]))
-                      for state in layer}
+            points = {(relative(state)[ix], relative(state)[iy]) for state in layer}
             for xv, yv in points:
                 x, y = xy_values(xv, yv)
                 chunks.append(f'<circle cx="{x:.2f}" cy="{y:.2f}" r="2.6" fill="#6a3d9a" opacity=".54"/>')
@@ -184,8 +176,7 @@ def svg_figure(expected: dict, sets: dict) -> str:
             chunks.append(f'<circle cx="{x:.2f}" cy="{y:.2f}" r="4" fill="#ff7f00"/>')
     legend = (("R0 initial", colors[0]), ("R1 forward", colors[1]),
               ("R2 forward", colors[2]), ("R3 forward", colors[3]),
-              ("Causal win @ open-loop value", "#cab2d6"),
-              ("Causal win @ feedback value", "#6a3d9a"),
+              ("Feedback win set (same at open-loop value)", "#6a3d9a"),
               ("Selected open-loop worst case", "#ff7f00"))
     for i, (label, color) in enumerate(legend):
         x = 42 + (i % 4) * 280; y = 544 + (i // 4) * 21
@@ -223,10 +214,26 @@ def build_report(executable: Path, output: Path) -> None:
     figure = svg_figure(expected, sets)
     (output / "projections.svg").write_text(figure, encoding="utf-8")
     feedback_gap = abs(expected["value"] - sets["feedback_value"])
-    page = f'''<!doctype html><html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width"><title>AirToAirInterception finite minimax pilot</title><main><h1>AirToAirInterception</h1><p>Three stages at 0.05 seconds each adapt the source 2-second continuous-action RL task to finite action catalogues. Source explicit-Euler dynamics use 10 inner steps per stage. This is not an RL reproduction or a continuous-action solution.</p><p>Fixed open-loop minimax terminal range: {expected['value']:.9g} m (125 plans × 125 disturbance sequences). Causal finite-state feedback minimax terminal range: {sets['feedback_value']:.9g} m (dynamic programming over the exact reachable transition graph). The values coincide within {feedback_gap:.3g} m for this finite adaptation.</p><p>The purple nodes show causal backward-winning states at the feedback minimax value; light purple shows the winning set at the open-loop minimax threshold. Both intersect the forward reachable layers. The orange path is the selected minimizing fixed open-loop plan under a maximizing disturbance sequence. Solver near-optimal tolerance: {actual['near_optimal_tolerance']:.1e}. One timing observation, zero warmups; no performance comparison is claimed.</p><figure><img src="projections.svg" alt="Relative position and velocity projections with forward reachable stages, feedback-winning intersections, and a selected open-loop worst-case path"><figcaption>Horizontal and vertical relative-motion phase planes; forward reachable nodes are colored R0–R3.</figcaption></figure><ul><li><a href="result.json">Complete enumerated result</a></li><li><a href="figure-data.json">Projection data</a></li></ul></main></html>'''
+    source_url = f"https://github.com/imm-rl-lab/optimal_control/blob/{SOURCE_COMMIT}/Environments/AirToAirInterception/AirToAirInterception.py"
+    page = f'''<!doctype html><html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width"><title>AirToAirInterception finite minimax pilot</title><main><h1>AirToAirInterception</h1><p>Three stages at 0.05 seconds each adapt the source 2-second continuous-action RL task to finite action catalogues. Source explicit-Euler dynamics use 10 inner steps per stage. This is not an RL reproduction or a continuous-action solution.</p><p>Fixed open-loop minimax terminal range: {expected['value']:.9g} m (125 plans × 125 disturbance sequences). Causal finite-state feedback minimax terminal range: {sets['feedback_value']:.9g} m (dynamic programming over the exact reachable transition graph). The values coincide within {feedback_gap:.3g} m for this finite adaptation.</p><p>The purple nodes show causal backward-winning states at the feedback minimax value; light purple shows the winning set at the open-loop minimax threshold. Both intersect the forward reachable layers. The orange path is the selected minimizing fixed open-loop plan under a maximizing disturbance sequence. Solver near-optimal tolerance: {actual['near_optimal_tolerance']:.1e}. One timing observation, zero warmups; no performance comparison is claimed.</p><figure><img src="projections.svg" alt="Relative position and velocity projections with forward reachable stages, feedback-winning intersections, and a selected open-loop worst-case path"><figcaption>Horizontal and vertical relative-motion phase planes; forward reachable nodes are colored R0–R3.</figcaption></figure><ul><li><a href="result.json">Complete enumerated result</a></li><li><a href="figure-data.json">Projection data</a></li><li><a href="{source_url}">Pinned upstream environment source</a></li><li>Algorithm source commit: <code>{actual['source_commit']}</code>.</li></ul></main></html>'''
     (output / "index.html").write_text(page, encoding="utf-8")
     (output / "environment.json").write_text(json.dumps({"schema":"csl.env717-air-to-air-environment/1", "source_repository":"https://github.com/imm-rl-lab/optimal_control", "source_repository_commit":SOURCE_COMMIT, "source_file_blob":SOURCE_BLOB, "source_horizon_seconds":2.0, "adapted_horizon_seconds":HORIZON*DT, "adapter":"finite 3-stage minimax with 5-point action catalogues per player; upstream continuous-action task is adapted, not reproduced", "near_optimal_tolerance":actual["near_optimal_tolerance"], "release":"pilot; no performance claim", "algorithm_source_sha256":actual["algorithm_source_sha256"], "platform":platform.platform(), "python":platform.python_version()}, indent=2)+"\n", encoding="utf-8")
-    (output / "README.md").write_text("# AirToAirInterception finite minimax pilot\n\nSee `index.html`. Results were independently replayed against the pinned source Euler step. This is a 3-stage finite-action adaptation, not the source continuous-action RL task.\n", encoding="utf-8")
+    readme = f'''# AirToAirInterception finite minimax pilot
+
+The upstream environment source is pinned to [{SOURCE_COMMIT}]({source_url}) (blob `{SOURCE_BLOB}`). The measured algorithm source commit is `{actual['source_commit']}`. The report independently replays 125 fixed plans against 125 disturbance sequences, and computes a separate causal finite-state feedback value on the exact reachable graph. Both objective values are in `index.html`; full raw outcomes are in `result.json`.
+
+This adapts the upstream 2-second continuous-action task to three 0.05-second stages and finite five-point action catalogues for both players. It is not a reproduction of the upstream RL experiment. The one timing sample is descriptive only and makes no performance claim.
+
+Reproduce from the repository checkout:
+
+```sh
+cmake -S . -B build/env717 -DCMAKE_BUILD_TYPE=Release -DCSL_BUILD_ENV717_REPORT=ON
+cmake --build build/env717 --config Release --target csl_env717_air_to_air
+python3 scripts/reports/env717/check_air_to_air.py build/env717/csl_env717_air_to_air \\
+  --build-report reports/algorithm-results/env717-air-to-air-pilot-v1
+```
+'''
+    (output / "README.md").write_text(readme, encoding="utf-8")
     cpu_model = "unknown"
     cpu_source = "unavailable"
     try:

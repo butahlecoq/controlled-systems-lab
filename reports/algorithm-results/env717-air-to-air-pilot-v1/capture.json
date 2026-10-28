@@ -1,19 +1,20 @@
 {
   "schema": "csl.env717-capture/1",
-  "source_commit": "eadd97972b7898f45cda9dfc0f9e71c124891f60",
-  "driver_sha256": "ec46d9f560db03613ac328c50aa74ad3ae245e48c853354f13de8fb04d7a6aca",
-  "renderer_sha256": "241103c2504fe648c2cb0bc8fe17fe352169b13586436ea9c33b5ee974fb666c",
+  "source_commit": "aad8ab73f81e57464d4a20b4cdd8b04fc8f576d6",
+  "driver_sha256": "0cbc3882808b13291eed058fa60f518a4908aa8999db35e2b9c565ce791195b1",
+  "renderer_sha256": "b5bb8ecabe411202a1935841f7dae9c45bd91c9306d8183642f673fa6e80edec",
   "capture_environment": {
-    "os": "Linux-7.2.5-3-omarchy-x86_64-with-glibc2.44",
-    "processor": "unknown",
-    "processor_identity_source": "platform.processor",
+    "os": "Linux-7.2.8-9-omarchy-x86_64-with-glibc2.44",
+    "processor": "AMD Ryzen 5 3550H with Radeon Vega Mobile Gfx",
+    "processor_identity_source": "/proc/cpuinfo",
+    "architecture": "x86_64",
     "logical_cpus": 8
   },
   "measurement": {
     "warmup_calls": 0,
     "measured_calls": 1,
     "measured_wall_ns": [
-      28553249
+      26313775
     ],
     "limiter": "not profiled; single descriptive observation only",
     "comparison_claim": false

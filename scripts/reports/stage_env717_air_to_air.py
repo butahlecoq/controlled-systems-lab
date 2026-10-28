@@ -20,6 +20,8 @@ spec.loader.exec_module(checker)
 FILES = ("README.md", "capture.json", "environment.json", "figure-data.json",
          "index.html", "projections.svg", "result.json", "SHA256SUMS")
 SOURCE_COMMIT = "f4d76c60f4003f50954174e96eafd8e514bd5441"
+SOURCE_URL = (f"https://github.com/imm-rl-lab/optimal_control/blob/{SOURCE_COMMIT}/"
+              "Environments/AirToAirInterception/AirToAirInterception.py")
 
 
 class LocalLinks(HTMLParser):
@@ -68,13 +70,27 @@ def inputs(source: Path) -> dict[str, bytes]:
     if files["projections.svg"].decode() != checker.svg_figure(expected, derived):
         raise ValueError("saved projections do not match replay geometry")
     capture = json.loads(files["capture.json"])
+    environment = json.loads(files["environment.json"])
     if capture.get("renderer_sha256") != digest(CHECKER.read_bytes()):
         raise ValueError("renderer identity differs")
     if capture.get("source_commit") != result.get("source_commit"):
         raise ValueError("capture source revision differs")
+    host = capture.get("capture_environment")
+    measurement = capture.get("measurement")
+    if (not isinstance(host, dict) or not host.get("processor") or
+            not host.get("processor_identity_source") or not host.get("architecture") or
+            not isinstance(host.get("logical_cpus"), int)):
+        raise ValueError("capture host metadata is incomplete")
+    if (not isinstance(measurement, dict) or measurement.get("warmup_calls") != 0 or
+            measurement.get("measured_calls") != 1 or measurement.get("comparison_claim") is not False):
+        raise ValueError("timing evidence scope differs")
+    if (environment.get("near_optimal_tolerance") != result.get("near_optimal_tolerance") or
+            environment.get("source_horizon_seconds") != 2.0 or
+            environment.get("adapted_horizon_seconds") != checker.HORIZON * checker.DT):
+        raise ValueError("solver tolerance or adaptation metadata differs")
     parser = LocalLinks()
     parser.feed(files["index.html"].decode())
-    if not parser.hrefs or any(link not in files for link in parser.hrefs):
+    if not parser.hrefs or any(link not in files and link != SOURCE_URL for link in parser.hrefs):
         raise ValueError("report has a missing or nonlocal linked asset")
     return files
 
