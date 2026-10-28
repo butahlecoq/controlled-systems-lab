@@ -366,7 +366,8 @@ FAMILIES = {
         "Exhaustively evaluates eight fixed control plans against eight disturbance-vertex histories "
         "per plan, with independently replayed oscillator phase-plane reachability and a worst-case "
         "trajectory. The source 4-second continuous-action task is adapted to three stages; this "
-        "is not a reproduction of the RL run."),
+        "is not a reproduction of the RL run. Timing is one descriptive observation with zero "
+        "warmups; it is not a performance comparison."),
     "syn06-verifier": Family(
         r"syn06-verifier-\d{8}-[0-9a-f]{64}", "verification", "Trajectory verification",
         "Re-checks two literal two-stage integrator witnesses against the original saved input "

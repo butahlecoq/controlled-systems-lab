@@ -96,6 +96,8 @@ class LandingTests(unittest.TestCase):
             "env717-max-coordinate-0123456789abcdefabcd")]
         self.assertEqual(family.group, "synthesis")
         self.assertIn("eight fixed control plans", family.summary)
+        self.assertIn("one descriptive observation", family.summary)
+        self.assertIn("not a performance comparison", family.summary)
 
 
 class AssembledIndexTests(unittest.TestCase):
