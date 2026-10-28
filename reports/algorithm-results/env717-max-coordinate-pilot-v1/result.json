@@ -477,7 +477,7 @@
       "value": -0.191931383789431
     }
   ],
-  "driver_sha256": "06b0d10dcce3a3805258112ff6bf86c61795ea877cc105bbf209d8db15fd98e4",
+  "driver_sha256": "3ed422531cbba07ab0c5abb94f6de50892dfba53e1e0b3832ab5103642a49d9b",
   "environment": {
     "architecture": "x86_64",
     "build_type": "Release",
@@ -492,7 +492,7 @@
   "objective_value": 0.4421402382451977,
   "plan_count": 8,
   "schema": "csl.env717-max-coordinate-pilot/1",
-  "source_commit": "3c39c8f1549c818f6281afb29f52be7a43d8d3e5",
+  "source_commit": "359ef7dc5148accea9c3d05a6bcd81273ac95a8c",
   "source_file_blob": "d509a1457023b14516d2789bd3033dbaa4110017",
   "source_license": "no license declared in repository metadata",
   "source_model": {
@@ -522,10 +522,10 @@
     "z"
   ],
   "timing": {
-    "elapsed_ns": 832793,
+    "elapsed_ns": 554474,
     "limiter_profile": "not collected; no comparative speed claim",
     "measured_calls": 1,
-    "scope": "single interval from first request construction through four minimax calls, plan extraction, and objective combination; JSON assembly and serialization excluded",
+    "scope": "single interval from first request construction through four minimax calls, plan extraction, component JSON assembly, and objective combination; final result-object assembly and serialization excluded",
     "warmup_calls": 0
   }
 }
