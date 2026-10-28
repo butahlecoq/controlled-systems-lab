@@ -171,7 +171,8 @@ FAMILIES = {
         "Repeated ITIS17 dyadic hull pilot",
         "Compares six separately identified hull reducers on two deterministic interior-heavy "
         "2D square clouds. r1 labels A43/A44 as adaptations; r2 adds the k+1 farthest-seeded "
-        "Euclidean A44 interpretation. Failed attempts remain visible and the performance "
+        "Euclidean A44 interpretation; r3 separates exact hull validity from reducer "
+        "classification completeness. Incomplete reductions remain visible and the performance "
         "conclusion is inconclusive."),
     "geo07-generator-sets": Family(
         r"geo07-generator-sets-[0-9a-f]{16,64}", "geometry", "Generator-set evaluation",

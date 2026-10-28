@@ -20,6 +20,7 @@ REPORT_ID = "exp02-it17-dyadic-interior-20261027-r1"
 REPORT_IDS = {
     REPORT_ID,
     "exp02-it17-a44-paper-order-20261027-r2",
+    "exp02-it17-a44-paper-order-20261028-r3",
 }
 
 
@@ -101,8 +102,12 @@ def stage(source: Path, site_root: Path) -> str:
     text = index.read_text(encoding="utf-8")
     if text.count("</ul>") != 1 or report_id in text:
         raise ValueError("site index insertion point differs")
-    title = ("QuickHull and ITIS17 A44 source-aligned rerun" if report_id.endswith("-r2")
-             else "QuickHull and ITIS17 dyadic hull pilot")
+    if report_id.endswith("-r3"):
+        title = "QuickHull and ITIS17 hull output-status pilot"
+    elif report_id.endswith("-r2"):
+        title = "QuickHull and ITIS17 A44 source-aligned rerun"
+    else:
+        title = "QuickHull and ITIS17 dyadic hull pilot"
     link = (
         f'<li><a href="{report_id}/index.html">{title}</a>'
         ' — repeated exploratory 2D comparison on two interior-heavy square clouds'

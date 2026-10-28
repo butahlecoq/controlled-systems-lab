@@ -1,0 +1,18 @@
+A43: V. V. Bulaev and A. F. Shorikov, ITIS'17 PDF source filename
+  Булаев В.В. Шориков А.Ф. ИТИС17.pdf
+  SHA-256 a90a3e404807238886122dfdfc91a5f18697949137a8d9744af7180508de848a
+  Relevant pages 3-7. The report uses a certificate-safe basis-reuse adaptation;
+  it does not implement the paper's per-candidate artificial-basis sequence or
+  largest-norm pivot tie policy.
+
+A44: A. Yu. Goranov and A. F. Shorikov, ITIS'17 PDF source filename
+  Горанов А.Ю. Шориков А.Ф. ИТИС17.pdf
+  SHA-256 493917da7d8ac669a470a978780a2ca269ce9da1b594365f49c6ebd572388fd7
+  Relevant pages 4-7. The report identifies the farthest-first, normalized
+  Euclidean interpretation as A44 v2.0.0; the article's ordering prose has
+  conflicting descriptions.
+
+The source PDFs are not redistributed in this bundle. No matching Pascal
+implementation for A43/A44 was recovered in the repository history or searched
+local archives. The available btulshor.pas implements a different method and is
+not used as a comparator.

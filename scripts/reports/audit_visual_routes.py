@@ -107,6 +107,7 @@ FROZEN_ROUTE_FOLLOW_UP_ISSUES = {
     # The paired synthesis profile is a control-family report and its current
     # readability follow-up belongs to the active control/witness migration.
     "exp02-paired-profiles-20261027-r1": 686,
+    "exp02-it17-a44-paper-order-20261028-r3": 94,
 }
 
 

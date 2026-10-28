@@ -221,6 +221,36 @@ ZIP entry matches, and the live landing page links to the report. This remains
 partial EXP-02 evidence; issue #94 remains open for its paired strategy, full
 workload/resource matrix and comparison-record requirements.
 
+### ITIS17 hull output-status update
+
+The [r3 output-status report](../../reports/algorithm-results/exp02-it17-a44-paper-order-20261028-r3/)
+uses schema version 3 for exploratory hull rows. The `passed` field means
+complete source-index accounting plus independent exact hull verification; it
+does not fail solely because an LP reducer retained unresolved redundant
+points. `reducer_status_complete` records whether an LP reducer returned
+`ReductionStatus::complete`; it does not certify that retained points are all
+extreme vertices. QuickHull has no such status and is marked not applicable.
+This preserves reducer status separately from geometric validity and output
+size.
+
+All 60 measured attempts passed the exact 2D hull checker over 64- and
+256-point exact-dyadic square clouds. The LP baseline, ordered reducer and A43
+adaptation reported incomplete `ReductionStatus` in all 10 attempts each;
+basis reuse and A44 v2 reported complete status. QuickHull has no
+`ReductionStatus`. Median reducer-call times at 64/256 points were 0.142/0.572
+ms for QuickHull, 0.225/0.756 ms for basis reuse, 5.337/25.306 ms for A43,
+7.112/28.176 ms for A44 v2, 10.252/69.935 ms for the baseline, and
+10.302/69.555 ms for ordered LP. Timing excludes workspace creation and
+verification. `perf` was unavailable, and no resource limiter or
+source-function profile was available, so these are fixture-specific
+descriptive values and the performance conclusion remains inconclusive.
+
+The versioned HTML page, raw attempts, summary table, fixture figure, executable
+identity and offline ZIP are staged in the bundle. The deployed URL and live
+hash verification remain pending the main-only Pages deployment for this PR.
+This is still a partial hull-method slice; #94 remains open for its broader
+strategy, workload and representation matrix.
+
 ## EXP-02 paired synthesis profile slice
 
 The [paired T-S02/T-S03 report](../../reports/algorithm-results/exp02-paired-profiles-20261027-r1/)

@@ -1,0 +1,13 @@
+fixture,method,identity,version,measured,passed,failed,timing_summary_qualified,reducer_status_complete,reducer_status_incomplete,reducer_status_not_applicable,retained,median_ns_passed_only,min_ns_passed_only,max_ns_passed_only,lp_calls_median
+dyadic-square-n256,A43-certificate-safe-basis-adaptation,csl.hull.itis17.a43-certified-basis-reuse,1.0.0,5,5,0,True,0,5,0,123,25306168,25129678,25617523,125
+dyadic-square-n256,A44-incremental-LP-farthest-seed,csl.hull.itis17.a44-incremental-lp,2.0.0,5,5,0,True,5,0,0,4,28176314,28083494,28828915,257
+dyadic-square-n256,basis-reuse-related-to-A43,csl.hull.phase-one-basis-bulk,1.0.0,5,5,0,True,5,0,0,125,756386,750728,784392,0
+dyadic-square-n256,geometric-quickhull,csl.geometry.quickhull-2d,1.0.0,5,5,0,True,0,0,5,4,572423,553286,574658,0
+dyadic-square-n256,lp-membership-baseline,csl.hull.lp-membership,1.0.0,5,5,0,True,0,5,0,255,69934537,69811265,74990867,256
+dyadic-square-n256,ordered-membership-related-to-A44,csl.hull.ordered-membership,1.0.0,5,5,0,True,0,5,0,255,69555016,69475047,69711532,256
+dyadic-square-n64,A43-certificate-safe-basis-adaptation,csl.hull.itis17.a43-certified-basis-reuse,1.0.0,5,5,0,True,0,5,0,34,5337164,5217106,5622817,34
+dyadic-square-n64,A44-incremental-LP-farthest-seed,csl.hull.itis17.a44-incremental-lp,2.0.0,5,5,0,True,5,0,0,4,7112192,7072382,7149836,65
+dyadic-square-n64,basis-reuse-related-to-A43,csl.hull.phase-one-basis-bulk,1.0.0,5,5,0,True,5,0,0,34,224751,219442,239068,0
+dyadic-square-n64,geometric-quickhull,csl.geometry.quickhull-2d,1.0.0,5,5,0,True,0,0,5,4,142128,141499,142966,0
+dyadic-square-n64,lp-membership-baseline,csl.hull.lp-membership,1.0.0,5,5,0,True,0,5,0,64,10252136,10240891,10348726,64
+dyadic-square-n64,ordered-membership-related-to-A44,csl.hull.ordered-membership,1.0.0,5,5,0,True,0,5,0,64,10301723,10066635,10810170,64

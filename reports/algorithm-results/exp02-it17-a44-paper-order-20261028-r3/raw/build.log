@@ -1,0 +1,5 @@
+Configure command:
+cmake -S . -B build/it17-status-review -G Ninja -DCMAKE_BUILD_TYPE=Release -DCSL_BUILD_IT17_HULL_REPORT=ON -DCSL_ENABLE_HIGHS=ON -DCSL_ENABLE_QHULL=OFF
+Build command:
+cmake --build build/it17-status-review --target csl_it17_hull_comparison_report --parallel 4
+Pinned HiGHS 1.11.0 configured successfully. The initial clean build completed 287/287 Ninja actions. After the source-identity commit 7c839f41246823300a939562ce239b0bf80282b8, CMake reconfiguration and the 20-action incremental target rebuild completed successfully.

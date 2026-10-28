@@ -1,0 +1,18 @@
+measured_at_local: 2026-10-28T12:59:23+03:00 (n=64 start)
+measured_at_local_n256: 2026-10-28T12:59:26+03:00
+host: Linux x86_64, AMD Ryzen 5 3550H, 8 logical CPUs
+compiler: GCC 16.2.1 (20260810)
+cmake: 3.31.6
+build_type: Release; C++20
+HiGHS: 1.11.0; lp_threads: 1; driver_workers: 1
+pre_run_load_average_n64: 2.25 1.70 1.06
+pre_run_load_average_n256: 2.23 1.71 1.06
+pre_run_available_memory_n64: 4.26 GiB
+pre_run_available_memory_n256: 4.26 GiB
+resource_limiter: not_enforced
+source_commit: 7c839f41246823300a939562ce239b0bf80282b8
+tracked_source_status: clean at measurement start
+measurement_policy: one warmup and five measured repetitions per method and fixture; interleaved method order per round
+measurement_scope: steady_clock around reducer call only; workspace setup and post-timing validation excluded
+profiling: perf executable unavailable; no source-function limiter profile; performance verdict remains inconclusive
+row_schema: csl.it17-hull-paper-adaptation-row/3; QuickHull reducer_status_complete is null because it has no ReductionStatus

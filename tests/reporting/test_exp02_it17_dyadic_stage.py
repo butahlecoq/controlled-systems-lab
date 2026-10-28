@@ -1,6 +1,10 @@
 """The repeated ITIS17 dyadic bundle stages as a safe, navigable Pages report."""
+import csv
 import importlib.util
+import json
 from pathlib import Path
+import shutil
+import subprocess
 import sys
 import tempfile
 import unittest
@@ -16,6 +20,80 @@ spec.loader.exec_module(stage_report)
 
 
 class Exp02IT17DyadicStageTests(unittest.TestCase):
+    def test_summarizer_suppresses_latency_for_failed_or_short_samples(self):
+        source = ROOT / "reports/algorithm-results/exp02-it17-a44-paper-order-20261028-r3"
+        with tempfile.TemporaryDirectory() as temp:
+            copied = Path(temp) / source.name
+            shutil.copytree(source, copied)
+
+            path = copied / "raw/n64.jsonl"
+            rows = [json.loads(line) for line in path.read_text().splitlines()]
+            measured = [row for row in rows if not row["warmup"]]
+            failed_group = measured[0]["method"]
+            short_group = next(row["method"] for row in measured
+                               if row["method"] != failed_group)
+            next(row for row in rows if row["method"] == failed_group and not row["warmup"])["passed"] = False
+            short_row = next(row for row in rows
+                             if row["method"] == short_group and not row["warmup"])
+            rows.remove(short_row)
+            path.write_text("".join(json.dumps(row, separators=(",", ":")) + "\n"
+                                      for row in rows), encoding="utf-8")
+
+            subprocess.run([sys.executable, str(copied / "summarize.py")],
+                           check=True, capture_output=True, text=True)
+
+            with (copied / "summary.csv").open(newline="", encoding="utf-8") as stream:
+                summaries = list(csv.DictReader(stream))
+            failed = next(row for row in summaries
+                          if row["fixture"] == "dyadic-square-n64"
+                          and row["method"] == failed_group)
+            short = next(row for row in summaries
+                         if row["fixture"] == "dyadic-square-n64"
+                         and row["method"] == short_group)
+            for row, measured_count, passed_count, failed_count in (
+                    (failed, "5", "4", "1"), (short, "4", "4", "0")):
+                self.assertEqual(row["measured"], measured_count)
+                self.assertEqual(row["passed"], passed_count)
+                self.assertEqual(row["failed"], failed_count)
+                self.assertEqual(row["median_ns_passed_only"], "")
+                self.assertEqual(row["min_ns_passed_only"], "")
+                self.assertEqual(row["max_ns_passed_only"], "")
+            page = (copied / "index.html").read_text(encoding="utf-8")
+            self.assertNotIn("All 60 measured attempts passed", page)
+
+    def test_output_status_bundle_stages_verified_hulls_and_reducer_status(self):
+        report_id = "exp02-it17-a44-paper-order-20261028-r3"
+        source = ROOT / "reports/algorithm-results" / report_id
+        with tempfile.TemporaryDirectory() as temp:
+            site = Path(temp) / "site"
+            site.mkdir()
+            (site / "index.html").write_text(
+                '<!doctype html><html lang="en"><body><ul></ul></body></html>',
+                encoding="utf-8")
+
+            self.assertEqual(stage_report.stage(source, site), report_id)
+            import landing
+            landing.build(site)
+
+            page = (site / report_id / "index.html").read_text(encoding="utf-8")
+            self.assertIn("output-status pilot", page)
+            self.assertIn("Timing summary", page)
+            self.assertIn("0/5", page)
+            record = json.loads((source / "record.json").read_text(encoding="utf-8"))
+            self.assertIn(record["source_commit"], page)
+            self.assertTrue((site / report_id / "fixture-geometry.svg").is_file())
+            raw = (site / report_id / "raw/n64.jsonl").read_text(encoding="utf-8")
+            self.assertIn('"reducer_status_complete":false', raw)
+            self.assertIn('"reducer_status_complete":null', raw)
+            self.assertIn('"passed":true', raw)
+            self.assertIn(report_id + ".zip", (site / "index.html").read_text(encoding="utf-8"))
+
+            with ZipFile(site / (report_id + ".zip")) as archive:
+                names = set(archive.namelist())
+                self.assertIn(report_id + "/raw/n256.jsonl", names)
+                self.assertIn(report_id + "/fixture-geometry.svg", names)
+                self.assertIn(report_id + "/SHA256SUMS", names)
+
     def test_clean_a44_v2_bundle_stages_with_source_identity_and_figure(self):
         report_id = "exp02-it17-a44-paper-order-20261027-r2"
         source = ROOT / "reports/algorithm-results" / report_id

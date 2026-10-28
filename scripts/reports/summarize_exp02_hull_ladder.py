@@ -88,11 +88,14 @@ def main():
         for method in METHODS:
             trials = [unique[(fixture, method, False, n)] for n in range(1, 8)]
             passed = [r for r in trials if r["passed"]]
+            complete = [r for r in trials if r.get("reduction_complete", r["passed"])]
             times = [r["elapsed_ns"] / 1e6 for r in passed]
             summaries.append({
                 "input_points": size,
                 "method": method,
                 "valid_trials": len(passed),
+                "classification_complete_trials": len(complete),
+                "incomplete_reduction_trials": len(trials) - len(complete),
                 "trials": len(trials),
                 "median_valid_ms": statistics.median(times) if times else "",
                 "min_valid_ms": min(times) if times else "",
