@@ -1,0 +1,35 @@
+{
+  "schema": "csl.mpc02-analytic-projection-source/1",
+  "scenario_id": "mpc02-slew-2d-v1",
+  "model": {
+    "equation": "x1 = x0 + [1,0] u0; x2 = x1 + [0,1] u1",
+    "initial_state": ["0", "0"],
+    "horizon": 2,
+    "control_bounds": ["-1", "1"],
+    "slew_bound": "|u1-u0|<=1/4",
+    "terminal_target": ["1/2", "0"],
+    "objective": "(xT_1-1/2)^2 + xT_2^2"
+  },
+  "projection": {
+    "operation": "exact linear image of the box intersected with the authored slew strip",
+    "control_vertices_rational": [
+      ["-1", "-1"], ["-3/4", "-1"], ["1", "3/4"],
+      ["1", "1"], ["3/4", "1"], ["-1", "-3/4"]
+    ],
+    "terminal_state_vertices_rational": [
+      ["-1", "-1"], ["-3/4", "-1"], ["1", "3/4"],
+      ["1", "1"], ["3/4", "1"], ["-1", "-3/4"]
+    ],
+    "lifted_memory_projection_vertices_rational": [
+      ["-1", "-1"], ["-3/4", "-1"], ["1", "3/4"],
+      ["1", "1"], ["3/4", "1"], ["-1", "-3/4"]
+    ],
+    "stage_box_optimum_control_rational": ["1/2", "0"],
+    "slew_optimum_control_rational": ["3/8", "1/8"],
+    "slew_optimum_terminal_state_rational": ["3/8", "1/8"],
+    "slew_optimum_cost_rational": "1/32",
+    "memory_coordinates": "(p1,p2)=(u0,u1), with p0=0 bookkeeping and no stage-zero rate restriction",
+    "omitted_coordinates": ["all physical states in the memory-plane panel", "p0 in both panels"]
+  },
+  "evidence_scope": "Analytic exact-set projections and exact rational optimizer derivation; no solver trajectory, benchmark, timing, or all-history certificate is reported."
+}

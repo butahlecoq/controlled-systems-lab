@@ -2,7 +2,8 @@
 
 These executable examples use the strict versioned scenario JSON formats and the
 public file loader. The original templates remain `csl.scenario/1`; the EXT-03
-example uses `csl.scenario/2` to author full-history temporal rows. They demonstrate a minimal LTI model, stage-specific state
+example and the MPC-02 comparison tracks use `csl.scenario/2` to author
+full-history temporal rows. They demonstrate a minimal LTI model, stage-specific state
 constraints, an LTV model, and the supported linear, quadratic and residual-norm
 terminal objective forms. The loader validates and publishes problem data; it
 does not run an optimizer or claim that the illustrative histories are optimal.
@@ -14,6 +15,10 @@ does not run an optimizer or claim that the illustrative histories are optimal.
 | `ltv-residual-norm.json` | Scalar two-stage LTV | `(1, 0)` | `(1, 2, 4)` | `||(x - 5, 0)||₂ = 1` at `x = 4` |
 | `double-integrator-generality.json` | Two-state position/velocity double integrator, horizon 3, bounded intermediate states | `(0.5, 0, -0.25)` | `((0,0), (0.25,0.5), (0.75,0.5), (1.125,0.25))` | `(p - 1)² + (v - 0.5)² = 0.078125` at `(p,v)=(1.125,0.25)` |
 | `temporal-slew-integrator.json` | Scalar two-step integrator with the cross-stage bound `|u1-u0| <= 1/4` | `(0, 0)` | `(0, 0, 0)` | `x2² = 0`; the hand-derived optimal control family is `u1=-u0`, `|u0|<=1/8` |
+| `mpc02-unconstrained-2d.json` | Two-state LTV, two-stage MPC-02 fixture without state or input bounds | `(1/2, 0)` | `((0,0), (1/2,0), (1/2,0))` | `0` |
+| `mpc02-stage-box-2d.json` | Same MPC-02 model/objective with independent stagewise inputs in `[-1,1]` | `(1/2, 0)` | `((0,0), (1/2,0), (1/2,0))` | `0` |
+| `mpc02-slew-2d.json` | Same stage-box problem with `|u1-u0| <= 1/4` | `(3/8, 1/8)` | `((0,0), (3/8,0), (3/8,1/8))` | `1/32` |
+| `mpc02-l1-budget-2d.json` | Same stage-box problem with the cross-time budget `|u0|+|u1| <= 1/4` | `(1/4, 0)` | `((0,0), (1/4,0), (1/4,0))` | `1/16` |
 
 The first three templates label their scalar state coordinate `x` and control
 coordinate `u`; both use normalized, dimensionless units. The double-integrator
@@ -86,14 +91,30 @@ optimizer trace or a claim that every registered strategy supports temporal
 constraints. Strategy admission remains responsible for rejecting unsupported
 profiles and representations.
 
+The four `mpc02-*.json` templates form one matched two-state LTV fixture with four
+separate identities: no state/input bounds, stagewise box bounds, a one-step
+slew strip, and a cumulative L1 input budget. The authored model, stage index,
+zero-order hold, dimensionless coordinates and terminal objective are shared.
+Their exact minimizers are derived in the
+[MPC-02 study note](../../docs/research/mpc02-stage-and-temporal-constraints.md).
+Two accompanying figures show the terminal-state projection and lifted memory
+projection for the slew case; both are exact linear images of the authored
+polygon, not solver traces:
+
+![Exact MPC-02 terminal-state projection under a slew constraint](../../docs/examples/mpc02-slew-terminal-state-projection.png)
+
+![Exact MPC-02 projection onto lifted memory coordinates p1=u0 and p2=u1](../../docs/examples/mpc02-slew-memory-projection.png)
+
 [#421]: https://github.com/butahlecoq/controlled-systems-lab/issues/421
 
-The histories and objective values in the table are hand-derived examples used
-as independent loader/model/evaluator oracles. They are not solver output,
-feasibility certificates for any future semantics, or optimality claims. The
-quadratic convention is `0.5 xᵀQx + qᵀx + c`; a residual-norm objective is
-`||Lx - target||₂` and is not squared. Omitted objective offsets default to
-zero.
+The histories and objective values in the first five rows are hand-derived
+examples used as independent loader/model/evaluator oracles; they are not
+solver output or feasibility certificates for future semantics. The MPC-02
+rows give exact unique minimizers of the specific authored strictly convex
+problems, derived from their 2D linear maps and constraints. They are not
+solver results or performance measurements. The quadratic convention is
+`0.5 xᵀQx + qᵀx + c`; a residual-norm objective is `||Lx - target||₂` and is
+not squared. Omitted objective offsets default to zero.
 
 The incomplete archival record `benchmarks/scenarios/b04-historical.json` is
 intentionally separate and non-executable. Do not copy unresolved historical

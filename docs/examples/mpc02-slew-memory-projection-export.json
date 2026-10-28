@@ -1,0 +1,90 @@
+{
+  "schema": "csl.mpc02-analytic-figure-export/1",
+  "scenario_id": "mpc02-slew-2d-v1",
+  "source_json": "mpc02-slew-analytic-source.json",
+  "source_sha256": "76254ffb4df88fa021aeb448bdc8b89ad61c958681845bb266c67590132624f7",
+  "plot": {
+    "schema": "csl.saved-geometric-plot/1",
+    "title": "MPC-02 exact projection onto the lifted memory coordinates",
+    "description": "The memory plane keeps p1=u0 and p2=u1 and omits the physical state coordinates. The stage-box optimum lies outside the slew strip; the red point is the unique analytic slew-constrained minimizer.",
+    "axes": {
+      "x": {
+        "label": "lifted memory p1 = u0 (dimensionless)"
+      },
+      "y": {
+        "label": "lifted memory p2 = u1 (dimensionless)"
+      }
+    },
+    "aspect": "equal",
+    "series": [
+      {
+        "kind": "polygon",
+        "label": "Exact feasible memory projection",
+        "color": "#2367a8",
+        "points": [
+          [
+            -1.0,
+            -1.0
+          ],
+          [
+            -0.75,
+            -1.0
+          ],
+          [
+            1.0,
+            0.75
+          ],
+          [
+            1.0,
+            1.0
+          ],
+          [
+            0.75,
+            1.0
+          ],
+          [
+            -1.0,
+            -0.75
+          ]
+        ],
+        "fill": true,
+        "alpha": 0.18
+      },
+      {
+        "kind": "points",
+        "label": "Stage-box optimum (1/2, 0), slew-infeasible",
+        "color": "#777777",
+        "points": [
+          [
+            0.5,
+            0.0
+          ]
+        ],
+        "size": 48
+      },
+      {
+        "kind": "points",
+        "label": "Unique slew optimum (3/8, 1/8)",
+        "color": "#b23b33",
+        "points": [
+          [
+            0.375,
+            0.125
+          ]
+        ],
+        "size": 48
+      }
+    ]
+  },
+  "renderer_receipt": {
+    "schema": "csl.figure-export/1",
+    "style_id": "csl-control-science-v1",
+    "quantitative_axis_policy": "csl-report-quantitative-v1",
+    "style_sha256": "3d0c2b8360fb03a45fd41841775ac94bc6c57b67de4a4d9b3ba4ac9e8947df1a",
+    "matplotlib": "3.11.2",
+    "files": {
+      "geometry.svg": "caf270ad59c96db2b9af4825a8c8b988d8639d3f0f4b1e0cb39cf2b77fa9e31e",
+      "geometry.png": "ef39e63ce54f4be4b6afd52fa48a5a7930213612f6580e9170650b70f5fbc0eb"
+    }
+  }
+}

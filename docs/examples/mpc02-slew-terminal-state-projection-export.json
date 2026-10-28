@@ -1,0 +1,90 @@
+{
+  "schema": "csl.mpc02-analytic-figure-export/1",
+  "scenario_id": "mpc02-slew-2d-v1",
+  "source_json": "mpc02-slew-analytic-source.json",
+  "source_sha256": "76254ffb4df88fa021aeb448bdc8b89ad61c958681845bb266c67590132624f7",
+  "plot": {
+    "schema": "csl.saved-geometric-plot/1",
+    "title": "MPC-02 exact terminal-state projection under a slew limit",
+    "description": "Exact linear image of the bounded control polygon for scenario mpc02-slew-2d-v1. The target and unique analytic slew-constrained minimizer are marked separately; this is not a solver trace or a sampled trajectory.",
+    "axes": {
+      "x": {
+        "label": "terminal state x1(2) (dimensionless)"
+      },
+      "y": {
+        "label": "terminal state x2(2) (dimensionless)"
+      }
+    },
+    "aspect": "equal",
+    "series": [
+      {
+        "kind": "polygon",
+        "label": "Exact terminal-state projection",
+        "color": "#2367a8",
+        "points": [
+          [
+            -1.0,
+            -1.0
+          ],
+          [
+            -0.75,
+            -1.0
+          ],
+          [
+            1.0,
+            0.75
+          ],
+          [
+            1.0,
+            1.0
+          ],
+          [
+            0.75,
+            1.0
+          ],
+          [
+            -1.0,
+            -0.75
+          ]
+        ],
+        "fill": true,
+        "alpha": 0.18
+      },
+      {
+        "kind": "points",
+        "label": "Objective target (1/2, 0)",
+        "color": "#555555",
+        "points": [
+          [
+            0.5,
+            0.0
+          ]
+        ],
+        "size": 48
+      },
+      {
+        "kind": "points",
+        "label": "Unique slew optimum (3/8, 1/8)",
+        "color": "#b23b33",
+        "points": [
+          [
+            0.375,
+            0.125
+          ]
+        ],
+        "size": 48
+      }
+    ]
+  },
+  "renderer_receipt": {
+    "schema": "csl.figure-export/1",
+    "style_id": "csl-control-science-v1",
+    "quantitative_axis_policy": "csl-report-quantitative-v1",
+    "style_sha256": "3d0c2b8360fb03a45fd41841775ac94bc6c57b67de4a4d9b3ba4ac9e8947df1a",
+    "matplotlib": "3.11.2",
+    "files": {
+      "geometry.svg": "38efc7dc55c19bd29b3e471ecf1bd1269001014495da916d913b9995c4fbd43d",
+      "geometry.png": "079605f6f623a6d459cd862ca2213f3aa0272f46c342e9d3d5af8d6f33a963c8"
+    }
+  }
+}
