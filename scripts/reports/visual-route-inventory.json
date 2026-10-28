@@ -67,6 +67,15 @@
       "disposition": "adopted-shared-quantitative-policy"
     },
     {
+      "source": "scripts/reports/env717/check_max_coordinate.py",
+      "signal_count": 3,
+      "asset_name_literals": [
+        "projections.svg"
+      ],
+      "disposition": "deferred-family-specific-migration",
+      "follow_up_issue": 717
+    },
+    {
       "source": "scripts/reports/env717/check_smoke.py",
       "signal_count": 6,
       "asset_name_literals": [
@@ -609,6 +618,14 @@
       "disposition": "publication-validation-or-frozen-route"
     },
     {
+      "source": "scripts/reports/stage_env717_max_coordinate.py",
+      "signal_count": 4,
+      "asset_name_literals": [
+        "projections.svg"
+      ],
+      "disposition": "publication-validation-or-frozen-route"
+    },
+    {
       "source": "scripts/reports/stage_env717_two_points.py",
       "signal_count": 3,
       "asset_name_literals": [
@@ -1133,6 +1150,16 @@
       "index_sha256": "14882d50e392e3abfd57504c6f9fb175aa73f6ace856a8f20322ffdc9f1220fc",
       "disposition": "deferred: original frozen route-level readability review remains; companion availability is listed separately",
       "follow_up_issue": 669
+    },
+    {
+      "route": "env717-max-coordinate-pilot-v1",
+      "source_bundle": "env717-max-coordinate-pilot-v1",
+      "assets": [
+        "projections.svg"
+      ],
+      "index_sha256": "78963e11bee1db9c5c2551c311fb75711ca24aeb7b7028f072a691380d9c6551",
+      "disposition": "deferred: original frozen route-level readability review remains; companion availability is listed separately",
+      "follow_up_issue": 717
     },
     {
       "route": "env717-simple-control-pilot-v1",

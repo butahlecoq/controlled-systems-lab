@@ -99,7 +99,7 @@ class VisualRouteInventoryTests(unittest.TestCase):
         follow_up_counts={number:sum(entry["follow_up_issue"]==number for entry in deferred)
                           for number in (684,685,686,687,708,717)}
         self.assertEqual(follow_up_counts,
-                         {684:4,685:0,686:18,687:0,708:1,717:4})
+                         {684:4,685:0,686:18,687:0,708:1,717:5})
         self.assertTrue(all(entry["follow_up_issue"] in follow_up_counts for entry in deferred))
         routes={entry["route"]:entry for entry in inventory["frozen_published_routes"]}
         self.assertGreater(len(routes),40)
@@ -118,6 +118,7 @@ class VisualRouteInventoryTests(unittest.TestCase):
         self.assertEqual(routes["app03-zonotope-4522855018fa9b0b"]["follow_up_issue"], 669)
         self.assertEqual(routes["env717-simple-control-pilot-v1"]["follow_up_issue"], 717)
         self.assertEqual(routes["env717-two-points-pilot-v1"]["follow_up_issue"], 717)
+        self.assertEqual(routes["env717-max-coordinate-pilot-v1"]["follow_up_issue"], 717)
         self.assertTrue(any(name.endswith("terminal-projections.svg")
                             for entry in routes.values() for name in entry["assets"]))
         self.assertEqual(inventory["gallery_routes"][0]["route"],"examples/index.html")
