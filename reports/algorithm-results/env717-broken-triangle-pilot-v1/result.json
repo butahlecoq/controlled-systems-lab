@@ -1437,7 +1437,7 @@
   ],
   "rl_notebook_blob": "2ba6b9d73040caf2c98017ecc7bcee3d41c1be8a",
   "schema": "csl.env717-broken-triangle-pilot/1",
-  "source_commit": "304ea89189f5ca8d5fb67fdbc0426a3cdfb803ef",
+  "source_commit": "54eb5ee123f249f1be4ca083ccbd53c0f6b8e793",
   "source_dt": 0.4,
   "source_dynamics": "(t,x,y)'=(1,u+v,v)",
   "source_license": "no license declared in repository metadata",
@@ -1723,7 +1723,7 @@
     "comparison_claim": false,
     "measured_calls": 1,
     "measured_wall_ns": [
-      15854
+      27169
     ],
     "scope": "one finite_causal_minimax solve; state graph construction, reachability, open-loop enumeration and serialization excluded",
     "warmup_calls": 1
