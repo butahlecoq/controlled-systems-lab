@@ -14,6 +14,8 @@ ROOT = Path(__file__).resolve().parents[3]
 SOURCE_ID = "b06-owner-confirmed-7df01ba3af5e4c46"
 CORRECTION_ID = "b06-manifest-correction-v1"
 PUBLIC_SOURCE_ID = "issue6-b06-reference-761bdc6e40b93814f873f105313d1eed4f63711653aa583a16a2ddfbc67c2a82"
+MEASURED_DRIVER_PATH = ROOT / "tests/fixtures/reports/b06-measured-source/b06_finite_minimax.cpp"
+MEASURED_ORACLE_PATH = ROOT / "tests/fixtures/reports/b06-measured-source/b06_exact_oracle.cpp"
 
 
 def digest(data: bytes) -> str:
@@ -24,9 +26,12 @@ def json_bytes(value) -> bytes:
     return (json.dumps(value, ensure_ascii=False, indent=2, sort_keys=True) + "\n").encode()
 
 
-def build() -> Path:
+def build(output: Path | None = None) -> Path:
     source = ROOT / "reports/algorithm-results" / SOURCE_ID
-    output = ROOT / "reports/algorithm-results" / CORRECTION_ID
+    output = output or (ROOT / "reports/algorithm-results" / CORRECTION_ID)
+    output = Path(output)
+    if output.name != CORRECTION_ID:
+        raise SystemExit(f"output directory must be named {CORRECTION_ID}: {output}")
     if output.exists():
         raise SystemExit(f"refusing to overwrite existing correction bundle: {output}")
     checked = __import__("subprocess").run([sys.executable,
@@ -49,22 +54,28 @@ def build() -> Path:
         "terminal-projections.svg": (source / "terminal-projections.svg").read_bytes(),
         "example-2d.html": (source / "example-2d.html").read_bytes(),
     }
-    source_index = (source / "index.html").read_text(encoding="utf-8")
-    source_index = source_index.replace(
-        f"../{SOURCE_ID}.zip", "original-source.zip")
     standalone = (source / "example-2d.html").read_text(encoding="utf-8")
     for name in ("index.html", "scenario.json", "geometry.json", "exact-oracle.json",
                  "raw-runs.jsonl", "records.json"):
         standalone = standalone.replace(f'href="{name}"', f'href="source-report/{name}"')
     files.update({f"source-report/{path.name}": path.read_bytes()
                   for path in sorted(source.iterdir()) if path.is_file()})
-    files["source-report/index.html"] = source_index.encode("utf-8")
-    files["source-report/original-source.zip"] = (source.parent / (SOURCE_ID + ".zip")).read_bytes()
+    files[SOURCE_ID + ".zip"] = (source.parent / (SOURCE_ID + ".zip")).read_bytes()
     files["example-2d.html"] = standalone.encode("utf-8")
     original_manifest_bytes = (source / "manifest.json").read_bytes()
     original_archive_bytes = (source.parent / (SOURCE_ID + ".zip")).read_bytes()
     rows = [json.loads(line) for line in (source / "raw-runs.jsonl").read_text().splitlines()]
     oracle = json.loads((source / "exact-oracle.json").read_text())
+    measured_driver = MEASURED_DRIVER_PATH.read_bytes()
+    measured_oracle = MEASURED_ORACLE_PATH.read_bytes()
+    measured_driver_sha256 = digest(measured_driver)
+    if measured_driver_sha256 != rows[0]["driver_sha256"]:
+        raise SystemExit("preserved measured driver does not match the saved run provenance")
+    measured_oracle_sha256 = digest(measured_oracle)
+    if measured_oracle_sha256 != oracle["oracle_sha256"]:
+        raise SystemExit("preserved exact oracle source does not match the saved oracle provenance")
+    files["measured-source/b06_finite_minimax.cpp"] = measured_driver
+    files["measured-source/b06_exact_oracle.cpp"] = measured_oracle
     correction = {
         "schema": "csl.issue6-b06-manifest-correction/1",
         "correction_id": CORRECTION_ID,
@@ -76,7 +87,9 @@ def build() -> Path:
         "corrected_fixture_sha256": digest(corrected_bytes),
         "measured_source_commit": rows[0]["source_commit"],
         "measured_driver_sha256": rows[0]["driver_sha256"],
+        "measured_driver_snapshot": "measured-source/b06_finite_minimax.cpp",
         "independent_oracle_sha256": oracle["oracle_sha256"],
+        "independent_oracle_source_snapshot": "measured-source/b06_exact_oracle.cpp",
         "defect": {"field": "model.A_row_major", "declared_shape": [4, 4],
                    "captured_entries": 15, "corrected_entries": 16,
                    "corrected_row_major": corrected_a,
@@ -112,7 +125,7 @@ def build() -> Path:
 <p>The original immutable capture remains byte-for-byte unchanged. Its scenario declares a 4×4 matrix but contains 15 entries. The corrected canonical scenario has 16 entries and records the source-supported final row <code>[0, 0, -2, 1]</code>.</p>
 <h2>What the saved measurements represent</h2><p>The measured driver at source commit <code>{rows[0]['source_commit']}</code> hardcodes the complete 4×4 transition matrix. The separate integer oracle uses <code>x4′ = x4 − 2x3</code>, independently confirming the final row. The immutable capture’s only difference from the corrected canonical scenario is the missing zero in the manifest. The evidence supports associating those measurements with the hardcoded model, while retaining the original manifest defect in the record.</p>
 <p>No solver was rerun. Existing solver results retain binary64 numerical assurance and are not newly recertified; this is not a historical reproduction of the paper.</p>
-<h2>Corrected files and provenance</h2><dl><dt>Corrected canonical scenario</dt><dd><a href="corrected-scenario.json">Download corrected-scenario.json</a> · SHA-256 <code>{digest(corrected_bytes)}</code></dd><dt>Machine-readable correction and preservation record</dt><dd><a href="manifest-correction.json">Open manifest-correction.json</a></dd><dt>Original immutable report</dt><dd><a href="source-report/index.html">Original source report</a> · <a href="source-report/original-source.zip">Original capture ZIP</a></dd><dt>Original measurements and source report</dt><dd><a href="source-report/raw-runs.jsonl">Raw runs</a> · <a href="source-report/exact-oracle.json">Independent oracle</a></dd></dl>
+<h2>Corrected files and provenance</h2><dl><dt>Corrected canonical scenario</dt><dd><a href="corrected-scenario.json">Download corrected-scenario.json</a> · SHA-256 <code>{digest(corrected_bytes)}</code></dd><dt>Machine-readable correction and preservation record</dt><dd><a href="manifest-correction.json">Open manifest-correction.json</a></dd><dt>Measured driver source snapshot</dt><dd><a href="measured-source/b06_finite_minimax.cpp">Open the exact driver source</a> · SHA-256 <code>{measured_driver_sha256}</code></dd><dt>Independent oracle source snapshot</dt><dd><a href="measured-source/b06_exact_oracle.cpp">Open the exact oracle source</a> · SHA-256 <code>{measured_oracle_sha256}</code></dd><dt>Original immutable report</dt><dd><a href="source-report/index.html">Original source report</a> · <a href="{SOURCE_ID}.zip">Original capture ZIP</a></dd><dt>Original measurements and source report</dt><dd><a href="source-report/raw-runs.jsonl">Raw runs</a> · <a href="source-report/exact-oracle.json">Independent oracle</a></dd></dl>
 <h2>4D fuel geometry shown in 2D</h2><p>The figures below are the saved projections of the same 4D terminal set; the correction changes the manifest and provenance explanation, not the archived measured vertices.</p><figure><img src="terminal-projections.svg" alt="Saved flow and stock-balance projections of the B06 four-dimensional terminal set"><figcaption>Flow (x1, x3) and stock-balance (x2, x4) projections from the immutable B06 capture. <a href="example-2d.html">Open the standalone example.</a></figcaption></figure>
  </main></body></html>'''.encode()
     files["index.html"] = page

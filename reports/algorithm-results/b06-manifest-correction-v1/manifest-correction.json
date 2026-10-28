@@ -30,7 +30,9 @@
     "field": "model.A_row_major"
   },
   "independent_oracle_sha256": "99b82b0065e7b1fc34cd963e218a0221170fcd3b3b09ab219d64e5c6bde1feaf",
+  "independent_oracle_source_snapshot": "measured-source/b06_exact_oracle.cpp",
   "measured_driver_sha256": "b157f7259a0b0033c289ab327d57d613d43907166f58024114c2271f0652e88f",
+  "measured_driver_snapshot": "measured-source/b06_finite_minimax.cpp",
   "measured_source_commit": "7df01ba3af5e4c46e867e2d737aca56a8f2461af",
   "measurement_decision": {
     "decision": "Existing measurements may be referenced as executions of the hardcoded complete measured model, with the malformed captured manifest disclosed.",

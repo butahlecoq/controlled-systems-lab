@@ -4,7 +4,6 @@ import json
 import hashlib
 import math
 import statistics
-import subprocess
 import sys
 from copy import deepcopy
 from pathlib import Path
@@ -31,14 +30,9 @@ def main() -> int:
         raise SystemExit("missing executable source hashes")
     if hashlib.sha256(fixture).hexdigest() != rows[0]["fixture_sha256"]:
         raise SystemExit("captured scenario differs from the compiled fixture identity")
-    def source_at_capture(relative_path):
-        result = subprocess.run(["git", "-C", str(repo), "show",
-            f"{rows[0]['source_commit']}:{relative_path}"], capture_output=True, check=False)
-        if result.returncode != 0:
-            raise SystemExit(f"measured source commit does not contain {relative_path}")
-        return result.stdout
-    driver = source_at_capture("benchmarks/reporting/issue6/b06_finite_minimax.cpp")
-    oracle_source = source_at_capture("benchmarks/reporting/issue6/b06_exact_oracle.cpp")
+    snapshots = repo / "tests/fixtures/reports/b06-measured-source"
+    driver = (snapshots / "b06_finite_minimax.cpp").read_bytes()
+    oracle_source = (snapshots / "b06_exact_oracle.cpp").read_bytes()
     if hashlib.sha256(driver).hexdigest() != rows[0]["driver_sha256"]:
         raise SystemExit("measured-commit benchmark driver differs from the compiled source identity")
     if hashlib.sha256(oracle_source).hexdigest() != oracle["oracle_sha256"]:

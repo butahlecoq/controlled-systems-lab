@@ -70,6 +70,8 @@ class ControlFiguresTests(unittest.TestCase):
         self.assertEqual([row[0] for row in trajectory["controls"]],[-.3,1,0,0,.3])
         self.assertAlmostEqual(trajectory["states"][-1][1],6.38)
         self.assertEqual(trajectory["source"]["source_files_sha256"]["scenario.json"],fuel.digest(root/"scenario.json"))
+        self.assertEqual(trajectory["source"]["source_files_sha256"]["b06_finite_minimax.cpp"],
+                         fuel.digest(fuel.B06_MEASURED_DRIVER))
         self.assertEqual(len(json.loads((root/"scenario.json").read_text())["model"]["A_row_major"]),15)
         self.assertIn("malformed (15 entries)",trajectory["evidence"])
         vertices=json.loads((root/"geometry.json").read_text())["winner_terminal_vertices"]

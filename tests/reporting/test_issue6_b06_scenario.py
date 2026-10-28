@@ -1,4 +1,6 @@
 import json
+import shutil
+import subprocess
 import sys
 import tempfile
 import unittest
@@ -67,6 +69,16 @@ class B06ScenarioContractTests(unittest.TestCase):
 
     def test_publication_gate_rejects_drift_from_canonical_fixture(self):
         bundle=ROOT/"reports/algorithm-results/b06-manifest-correction-v1"
+        correction=json.loads((bundle/"manifest-correction.json").read_text())
+        source=correction["measured_driver_snapshot"]
+        self.assertEqual(source,"measured-source/b06_finite_minimax.cpp")
+        import hashlib
+        self.assertEqual(hashlib.sha256((bundle/source).read_bytes()).hexdigest(),
+                         correction["measured_driver_sha256"])
+        oracle_source=correction["independent_oracle_source_snapshot"]
+        self.assertEqual(oracle_source,"measured-source/b06_exact_oracle.cpp")
+        self.assertEqual(hashlib.sha256((bundle/oracle_source).read_bytes()).hexdigest(),
+                         correction["independent_oracle_sha256"])
         with tempfile.TemporaryDirectory() as temporary:
             canonical=Path(temporary)/"canonical.json"
             canonical.write_bytes(SCENARIO.read_bytes())
@@ -76,6 +88,40 @@ class B06ScenarioContractTests(unittest.TestCase):
             canonical.write_text(json.dumps(changed))
             with self.assertRaisesRegex(ValueError,"differs from the canonical executable fixture"):
                 correction_publisher.validate_canonical_fixture(bundle,canonical)
+
+    def test_publication_gate_rejects_changed_measured_driver_snapshot(self):
+        source=ROOT/"reports/algorithm-results/b06-manifest-correction-v1"
+        with tempfile.TemporaryDirectory() as temporary:
+            bundle=Path(temporary)/source.name
+            import shutil
+            shutil.copytree(source,bundle)
+            driver=bundle/"measured-source/b06_finite_minimax.cpp"
+            driver.write_bytes(driver.read_bytes()+b"\n")
+            with self.assertRaisesRegex(ValueError,"source file hash mismatch"):
+                correction_publisher.adapt(bundle)
+
+    def test_saved_capture_audit_works_without_repository_history(self):
+        source=ROOT/"reports/algorithm-results/b06-owner-confirmed-7df01ba3af5e4c46"
+        with tempfile.TemporaryDirectory() as temporary:
+            checkout=Path(temporary)/"checkout"
+            (checkout/"scripts/reports/issue6").mkdir(parents=True)
+            (checkout/"tests/fixtures/reports").mkdir(parents=True)
+            (checkout/"benchmarks/scenarios").mkdir(parents=True)
+            (checkout/"reports/algorithm-results").mkdir(parents=True)
+            for name in ("check_capture.py","scenario_contract.py"):
+                shutil.copy2(ROOT/"scripts/reports/issue6"/name,checkout/"scripts/reports/issue6"/name)
+            shutil.copytree(ROOT/"tests/fixtures/reports/b06-measured-source",
+                            checkout/"tests/fixtures/reports/b06-measured-source")
+            shutil.copy2(SCENARIO,checkout/"benchmarks/scenarios"/SCENARIO.name)
+            bundle=checkout/"reports/algorithm-results"/source.name
+            shutil.copytree(source,bundle)
+            for suffix in (".zip",".manifest.sha256"):
+                shutil.copy2(source.parent/(source.name+suffix),bundle.parent/(source.name+suffix))
+            result=subprocess.run([sys.executable,
+                str(checkout/"scripts/reports/issue6/check_capture.py"),str(bundle)],
+                cwd=checkout,capture_output=True,text=True,check=False)
+            self.assertEqual(result.returncode,0,result.stderr)
+            self.assertIn('"status": "passed"',result.stdout)
 
 
 if __name__=="__main__":unittest.main()

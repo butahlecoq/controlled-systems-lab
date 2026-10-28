@@ -571,16 +571,34 @@ class RegisteredKindTests(unittest.TestCase):
             correction=next(item for item in catalogue['reports']
                             if item['report_kind']=='issue6-b06-manifest-correction')
             correction_page=(first/correction['report_id']/'index.html').read_text(encoding='utf-8')
-            self.assertIn(correction['report_id']+'/manifest-correction.json',correction_page)
-            for relative in ('source-report/index.html','source-report/original-source.zip',
+            self.assertIn('href="manifest-correction.json"',correction_page)
+            self.assertIn('measured-source/b06_finite_minimax.cpp',correction_page)
+            self.assertTrue((first/correction['report_id']/'measured-source/b06_finite_minimax.cpp').is_file())
+            self.assertIn('measured-source/b06_exact_oracle.cpp',correction_page)
+            self.assertTrue((first/correction['report_id']/'measured-source/b06_exact_oracle.cpp').is_file())
+            original_zip='b06-owner-confirmed-7df01ba3af5e4c46.zip'
+            for relative in ('source-report/index.html',original_zip,
                              'source-report/raw-runs.jsonl','source-report/exact-oracle.json'):
                 self.assertIn(f'href="{relative}"',correction_page)
             self.assertTrue((first/correction['report_id']/'terminal-projections.svg').is_file())
+            source_bundle=root/'b06-owner-confirmed-7df01ba3af5e4c46'
+            source_manifest=json.loads((source_bundle/'manifest.json').read_text(encoding='utf-8'))
+            correction_source=FIXTURES/'b06-manifest-correction-v1'/'source-report'
+            self.assertEqual((correction_source/'index.html').read_bytes(),
+                             (source_bundle/'index.html').read_bytes())
+            nested_manifest=json.loads((correction_source/'manifest.json').read_text(encoding='utf-8'))
+            for name,digest in nested_manifest['files'].items():
+                self.assertEqual(hashlib.sha256((correction_source/name).read_bytes()).hexdigest(),digest)
+            self.assertEqual(nested_manifest,source_manifest)
             with zipfile.ZipFile(first/(correction['report_id']+'.zip')) as correction_zip:
-                for relative in ('source-report/index.html','source-report/original-source.zip',
+                for relative in ('source-report/index.html',original_zip,
                                  'source-report/raw-runs.jsonl','source-report/exact-oracle.json',
+                                 'measured-source/b06_finite_minimax.cpp',
+                                 'measured-source/b06_exact_oracle.cpp',
                                  'report-envelope.json','publication-manifest.json'):
                     self.assertIn(correction['report_id']+'/'+relative,correction_zip.namelist())
+                self.assertEqual(correction_zip.read(correction['report_id']+'/'+original_zip),
+                                 (root/(source_bundle.name+'.zip')).read_bytes())
             pins=json.loads((root/'legacy-publications.json').read_text(encoding='utf-8'))
             self.assertEqual(registered._digest(pins),site.LEGACY_PINS_SHA256)
             live_anchors={

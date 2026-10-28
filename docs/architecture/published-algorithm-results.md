@@ -352,8 +352,8 @@ companion retains the original scenario, report bytes, hashes, ZIP and public
 report ID, and records why the existing measurements may be associated with
 the hardcoded model while preserving their binary64 numerical-assurance limit.
 It also carries the saved 4D terminal geometry projections into flow and stock
-views for visual context. See the [versioned manifest correction and corrected
-scenario](https://butahlecoq.github.io/controlled-systems-lab/issue6-b06-manifest-correction-847aa3a1ac2e48e9a04ed6582d7e14fcb1d063dafbcfac86869fdd7ed85a2133/index.html).
+views for visual context. The versioned correction route is staged in PR #671;
+its Pages URL is pending main-only deployment and live verification.
 
 The native bundle
 [`b06-owner-confirmed-7df01ba3af5e4c46`](../../reports/algorithm-results/b06-owner-confirmed-7df01ba3af5e4c46/)

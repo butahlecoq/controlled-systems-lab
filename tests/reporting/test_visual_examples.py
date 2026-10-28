@@ -88,7 +88,9 @@ class GalleryTests(unittest.TestCase):
         for report in catalog["reports"]:
             target = self.site / report["report_id"]
             target.mkdir(exist_ok=True)
-            raw_name = "results.jsonl" if report["report_kind"] == "issue6-b07-reference" else "records.json"
+            raw_name = ("results.jsonl" if report["report_kind"] == "issue6-b07-reference" else
+                        "manifest-correction.json" if report["report_kind"] == "issue6-b06-manifest-correction" else
+                        "records.json")
             if not (target / raw_name).exists():
                 (target / raw_name).write_text("{}", encoding="utf-8")
             if not (target / "index.html").exists():

@@ -42,6 +42,12 @@ def adapt(bundle: Path) -> common.PublicationRecord:
         raise ValueError("B06 correction record identity/schema differs")
     if correction.get("original_source_report_id") != SOURCE_ID or correction.get("corrected_fixture_sha256") != hashlib.sha256((bundle / "corrected-scenario.json").read_bytes()).hexdigest():
         raise ValueError("B06 correction record source or scenario hash differs")
+    driver_name = correction.get("measured_driver_snapshot")
+    if driver_name != "measured-source/b06_finite_minimax.cpp" or correction.get("measured_driver_sha256") != hashlib.sha256((bundle / driver_name).read_bytes()).hexdigest():
+        raise ValueError("B06 measured driver snapshot differs from saved run provenance")
+    oracle_name = correction.get("independent_oracle_source_snapshot")
+    if oracle_name != "measured-source/b06_exact_oracle.cpp" or correction.get("independent_oracle_sha256") != hashlib.sha256((bundle / oracle_name).read_bytes()).hexdigest():
+        raise ValueError("B06 exact oracle source snapshot differs from saved oracle provenance")
     payload_sha = common._digest(correction)
     publisher = Path(__file__).read_bytes().replace(b"\r\n", b"\n")
     identity = {"schema": "csl.issue6-b06-correction-publication/1",
