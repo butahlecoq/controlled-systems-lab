@@ -386,35 +386,40 @@ bool measurement_matches_arm(AttemptStatus status,const Json& measurement,const 
     if(spec.strategies.empty())return true;
     const auto schema=measurement.value("schema",std::string{});
     if(schema=="csl.mpc01-comparison-event/1") {
+        const auto json_string_matches=[](const Json& value,std::string_view expected) {
+            return value.is_string()&&std::string_view(value.get_ref<const std::string&>())==expected;
+        };
         if(!exact_fields(measurement,{"schema","strategy","instrumentation","repetition","status","attempt"})||
-            measurement.at("strategy")!=spec.strategies.at(arm)||
-            measurement.at("instrumentation")!=spec.instrumentation.at(arm)||
+            !json_string_matches(measurement.at("strategy"),spec.strategies.at(arm))||
+            !json_string_matches(measurement.at("instrumentation"),spec.instrumentation.at(arm))||
             measurement.at("repetition")!=repetition)return false;
         const auto& native=measurement.at("attempt");
         if(!native.is_object()||native.value("schema",std::string{})!="csl.mpc01-native-attempt/1")return false;
         const auto termination=native.value("termination",std::string{});
         const auto iterations=native.find("solver_iterations");
         if(termination=="completed"&&(iterations==native.end()||!iterations->is_number_unsigned()))return false;
-        if(measurement.at("status")!=(termination=="completed"?"passed":termination))return false;
+        if(!json_string_matches(measurement.at("status"),termination=="completed"?"passed":termination))return false;
         const auto method=native.value("method",std::string{});
         const auto backend=method=="osqp-sparse-qp"?"csl.external.osqp.sparse-qp":
             method=="hpipm-structured-ocp-qp"?"csl.external.hpipm.structured-ocp-qp":"";
+        const auto expected_problem="csl.problem.v1.sha256:"+native.value("input_sha256",std::string{});
         if(std::string(backend).empty()||spec.environment.is_null()||
             spec.strategies.at(arm)!=backend||
-            run.at("problem")!="csl.problem.v1.sha256:"+native.value("input_sha256",std::string{}))return false;
+            !json_string_matches(run.at("problem"),expected_problem))return false;
         const auto& backends=spec.environment.at("build").at("backends");
         const auto backend_key=method=="osqp-sparse-qp"?"osqp":"hpipm";
         const auto& pinned=backends.at(backend_key);
         bool matched_start_mode=false;
         for(const auto& module:run.at("configuration").at("value").at("modules")) {
-            if(module.at("role")!="strategy"||module.at("id")!=backend)continue;
+            if(!json_string_matches(module.at("role"),"strategy")||
+                !json_string_matches(module.at("id"),backend))continue;
             if(module.at("version")!=pinned.at("version")||
-                module.at("pin").at("state")!="available"||
-                module.at("pin").at("value").at("scope")!="source_archive"||
+                !json_string_matches(module.at("pin").at("state"),"available")||
+                !json_string_matches(module.at("pin").at("value").at("scope"),"source_archive")||
                 module.at("pin").at("value").at("sha256")!=pinned.at("archive_sha256"))return false;
             const auto option_matches=[&](std::string_view name,const Json& expected) {
                 for(const auto& option:module.at("options"))
-                    if(option.at("name")==name&&option.at("value")==expected)return true;
+                    if(json_string_matches(option.at("name"),name)&&option.at("value")==expected)return true;
                 return false;
             };
             const auto string_option=[](std::string value) {
@@ -428,8 +433,9 @@ bool measurement_matches_arm(AttemptStatus status,const Json& measurement,const 
                 return Json{{"type","binary64_bits"},{"value",binary64_hex(value)}};
             };
             for(const auto& option:module.at("options"))
-                if(option.at("name")=="start_mode"&&option.at("value").at("type")=="string"&&
-                    option.at("value").at("value")==native.value("start_mode",std::string{}))
+                if(json_string_matches(option.at("name"),"start_mode")&&
+                    json_string_matches(option.at("value").at("type"),"string")&&
+                    json_string_matches(option.at("value").at("value"),native.value("start_mode",std::string{})))
                     matched_start_mode=true;
             const bool osqp=method=="osqp-sparse-qp";
             if(!option_matches("native_defaults",string_option(osqp?"osqp_set_default_settings":"d_ocp_qp_ipm_arg_set_default_BALANCE"))||
