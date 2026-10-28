@@ -35,7 +35,12 @@ class TwoPointsPublicationTests(unittest.TestCase):
         self.temp.cleanup()
 
     def test_stages_verified_content_addressed_report_and_offline_archive(self):
+        legacy_source = self.root / "env717-two-points-pilot-v1"
+        shutil.copytree(ROOT / "reports/algorithm-results/env717-two-points-pilot-v1",
+                        legacy_source)
+        legacy_id = stage_module.stage(legacy_source, self.site)
         report_id = stage_module.stage(self.source, self.site)
+        self.assertNotEqual(legacy_id, report_id)
         self.assertRegex(report_id, r"^env717-two-points-[0-9a-f]{20}$")
         destination = self.site / report_id
         manifest = json.loads((destination / "publication-manifest.json").read_text())
@@ -50,11 +55,30 @@ class TwoPointsPublicationTests(unittest.TestCase):
             self.assertIn(f"{report_id}/projections.svg", archive.namelist())
             self.assertNotIn(f"{report_id}/projections.png", archive.namelist())
             self.assertIn(f"{report_id}/publication-manifest.json", archive.namelist())
-        self.assertIn(f"{report_id}/index.html", (self.site / "index.html").read_text())
+        site_index = (self.site / "index.html").read_text()
+        self.assertIn(f"{legacy_id}/index.html", site_index)
+        self.assertIn(f"{report_id}/index.html", site_index)
+        legacy_redirect = (self.site / stage_module.PUBLISHED_LEGACY_ROUTE / "index.html").read_text()
+        self.assertIn(f"../{legacy_id}/index.html", legacy_redirect)
+        self.assertIn("TwoPointsOnParallelLines differential-game pilot", site_index)
+        self.assertIn("TwoPoints finite-feedback differential-game report", site_index)
         published_svg = (destination / "projections.svg").read_text()
         self.assertIn("Stage 3 terminal reachable set", published_svg)
         self.assertIn("x1 position", published_svg)
         self.assertIn("x3 position", published_svg)
+        self.assertIn("CSL feedback graph forward ∩ winning states", published_svg)
+        self.assertIn("First-admissible feedback selector worst case", published_svg)
+        result = json.loads((self.source / "result.json").read_text())
+        self.assertEqual(result["feedback"]["threshold_denominator"], 4_000_000)
+        terminal_gaps = {((state[0] - state[2]) ** 2)
+                         for state in result["feedback"]["layer_states"][-1]}
+        self.assertEqual(result["feedback"]["candidate_count"], len(terminal_gaps))
+        self.assertGreater(result["feedback"]["solve_count"], 0)
+        self.assertLessEqual(result["feedback"]["solve_count"],
+                             result["feedback"]["candidate_count"])
+        self.assertEqual(len(result["feedback"]["winning"]), 4)
+        self.assertEqual(len(result["feedback"]["admissible_action_codes"]), 3)
+        self.assertIn("finite vertex game", (destination / "index.html").read_text())
         with self.assertRaisesRegex(ValueError, "already exists"):
             stage_module.stage(self.source, self.site)
 

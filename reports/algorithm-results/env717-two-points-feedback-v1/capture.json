@@ -1,0 +1,15 @@
+{
+  "renderer_sha256": "7c7f455d013a149758f38a7902d3280e75bf4d141707689618f88ae889fb93bc",
+  "capture_environment": {
+    "os": "Linux-7.2.5-3-omarchy-x86_64-with-glibc2.44",
+    "processor": "AMD Ryzen 5 3550H with Radeon Vega Mobile Gfx",
+    "processor_identity_source": "/proc/cpuinfo",
+    "logical_cpus": 8,
+    "load_average_before_run": [
+      0.7568359375,
+      0.83837890625,
+      0.67529296875
+    ],
+    "capture_started_unix_ns": 1793145254926792135
+  }
+}

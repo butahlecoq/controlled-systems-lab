@@ -512,3 +512,24 @@ and establish no performance winner or scale claim. No separate limiter profile
 was collected. The 2D plot is an explanatory state-stage projection, not a
 solver trace. Review, catalogue registration, main-only Pages deployment and
 live URL verification remain pending.
+
+## ENV-717 TwoPoints finite-feedback report
+
+The new [TwoPoints feedback bundle](../../reports/algorithm-results/env717-two-points-feedback-v1/)
+keeps the source-attributed fixed-plan minimax record and adds an exact
+scale-2000 finite graph for the three-stage action-before-disturbance vertex
+game. CSL `finite_feedback::solve` selected the minimum terminal squared-gap
+threshold `58,323,769 / 4,000,000` after 23 candidate solves. The independent
+Python checker rebuilds all four stage catalogues, every rectangular transition
+cell (including unsafe padding), threshold minimality, every winning bit and
+admissible action, and the deterministic selector's worst-case path. Its
+comparison against the source's ten binary64 Euler substeps found a maximum
+coordinate discrepancy of `3.552713678800501e-15` under the declared `1e-10`
+tolerance. The open-loop disturbance set remains a convex hull in the fixed-plan
+result; the feedback guarantee applies only to the exact listed disturbance
+vertices. The admissible actions are feasible and are not cost-ranked. This is
+not continuous-state feedback or an RL reproduction. The original
+`env717-two-points-pilot-v1` source bundle is unchanged. Both it and the new
+feedback bundle are staged through distinct content-addressed routes with file
+hashes and offline ZIPs; main-only Pages deployment and live URL/hash checks
+remain pending.
