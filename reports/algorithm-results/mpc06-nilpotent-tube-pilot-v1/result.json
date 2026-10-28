@@ -2,6 +2,11 @@
   "schema": "csl.mpc06-nilpotent-tube-pilot/1",
   "case_id": "double-integrator-nilpotent-tube-v1",
   "scenario_sha256": "a130cf880dd600ac10690a950463b930f9745c4fcf1ab70155149e7ec699f55d",
+  "build": {
+    "compiler_id": "GNU",
+    "compiler_version": "16.2.1",
+    "configuration": "Release"
+  },
   "arithmetic": "IEEE-754 binary64; all fixture coefficients are dyadic and selected transforms are exact",
   "system": {
     "A": [
@@ -114,8 +119,25 @@
     "nominal optimum": "not claimed",
     "minimax cost": "not claimed"
   },
+  "measurement": {
+    "scope": "one exact RPI inclusion, support tightening calculation, matched eight-path disturbance replay, and two edge checks; JSON serialization excluded",
+    "elapsed_ns": 580383,
+    "runs": 1,
+    "warmups": 0,
+    "errors": 0,
+    "work_completed": true,
+    "performance_assessment": "inconclusive; one descriptive observation, no limiter profile or comparison"
+  },
   "approximation_comparison": "deferred behind issues 99 and 100",
-  "source_commit": "5e5d56f4446dea2b49e88f72cb7046c9994c043c",
-  "driver_sha256": "9015159b15566ea91a6e9122c47c6a932f17f67698ad180625bcf0548fef1f80",
-  "checker_sha256": "d01d4bb52e8cbf431b55e9da91c8008d7c00a3c148bc55697243743fa941a7da"
+  "source_commit": "352a006bc899d98c2b5980748a01205eaa9c8673",
+  "driver_sha256": "6ce4f3887ff81b23289f0f217c4b7cb6e99c78073bbbbdff857be35adcc437fc",
+  "checker_sha256": "9414c2cb300811a46cde37ff04ed02806741cd6e2a498bdca5e9e846e7ae4a6e",
+  "capture_environment": {
+    "os": "Linux-7.2.8-9-omarchy-x86_64-with-glibc2.44",
+    "processor": "AMD Ryzen 5 3550H with Radeon Vega Mobile Gfx",
+    "logical_cpus": 8,
+    "compiler_id": "GNU",
+    "compiler_version": "16.2.1",
+    "build_configuration": "Release"
+  }
 }
