@@ -91,6 +91,12 @@ class LandingTests(unittest.TestCase):
         self.assertNotIn("A44 v2", historical.summary)
         self.assertIn("A44 interpretation", current.summary)
 
+    def test_max_coordinate_game_route_has_a_differential_game_description(self):
+        family = landing.FAMILIES[landing.family_for(
+            "env717-max-coordinate-0123456789abcdefabcd")]
+        self.assertEqual(family.group, "synthesis")
+        self.assertIn("eight fixed control plans", family.summary)
+
 
 class AssembledIndexTests(unittest.TestCase):
     """The published landing page is built from the assembled staged index."""
