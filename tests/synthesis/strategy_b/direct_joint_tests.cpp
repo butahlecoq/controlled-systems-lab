@@ -23,6 +23,7 @@
 #include <functional>
 #include <limits>
 #include <string>
+#include <string_view>
 #include <type_traits>
 #include <tuple>
 #include <vector>
@@ -330,12 +331,13 @@ TEST_CASE("temporal coupling prevents the physical-state-only false terminal opt
     CHECK(0.0*0.0==0.0);
 }
 TEST_CASE("MPC-02 registers distinct constraint tracks and direct and memory-lift relations agree") {
-    const std::array<std::tuple<const char*, const char*, Vector, double>,4> scenarios{{
-        {"mpc02-unconstrained-2d.json","mpc02-unconstrained-2d-v1",{.5,0},0},
-        {"mpc02-stage-box-2d.json","mpc02-stage-box-2d-v1",{.5,0},0},
-        {"mpc02-slew-2d.json","mpc02-slew-2d-v1",{.375,.125},1.0/32.0},
-        {"mpc02-l1-budget-2d.json","mpc02-l1-budget-2d-v1",{.25,0},1.0/16.0}}};
-    for(const auto& [file,id,controls,cost]:scenarios) {
+    enum class ScenarioTrack { unconstrained, stage_box, slew, l1_budget };
+    const std::array<std::tuple<const char*, std::string_view, ScenarioTrack, Vector, double>,4> scenarios{{
+        {"mpc02-unconstrained-2d.json","mpc02-unconstrained-2d-v1",ScenarioTrack::unconstrained,{.5,0},0},
+        {"mpc02-stage-box-2d.json","mpc02-stage-box-2d-v1",ScenarioTrack::stage_box,{.5,0},0},
+        {"mpc02-slew-2d.json","mpc02-slew-2d-v1",ScenarioTrack::slew,{.375,.125},1.0/32.0},
+        {"mpc02-l1-budget-2d.json","mpc02-l1-budget-2d-v1",ScenarioTrack::l1_budget,{.25,0},1.0/16.0}}};
+    for(const auto& [file,id,track,controls,cost]:scenarios) {
         const auto loaded=input::load_scenario_file(std::string(CSL_MPC02_SCENARIO_DIR)+"/"+file);
         REQUIRE(std::holds_alternative<input::LoadedScenario>(loaded));
         const auto& scenario=std::get<input::LoadedScenario>(loaded);
@@ -360,18 +362,23 @@ TEST_CASE("MPC-02 registers distinct constraint tracks and direct and memory-lif
             {1e-12,1e-12},{{"mpc02-authored-scenario-oracle"},"1"}));
         CHECK(analytic_cost.original_objective==doctest::Approx(cost).epsilon(1e-12));
 
-        if(id=="mpc02-slew-2d-v1") {
-            CHECK_FALSE(feasible(loaded_joint,
-                flatten_history({{{0,0},{1,0},{1,-1}},{{1},{-1}}})));
-        } else if(id=="mpc02-l1-budget-2d-v1") {
-            CHECK_FALSE(feasible(loaded_joint,
-                flatten_history({{{0,0},{.25,0},{.25,.25}},{{.25},{.25}}})));
-        } else if(id=="mpc02-stage-box-2d-v1") {
-            CHECK_FALSE(feasible(loaded_joint,
-                flatten_history({{{0,0},{2,0},{2,0}},{{2},{0}}})));
-        } else {
-            CHECK(feasible(loaded_joint,
-                flatten_history({{{0,0},{2,0},{2,0}},{{2},{0}}})));
+        switch(track) {
+            case ScenarioTrack::slew:
+                CHECK_FALSE(feasible(loaded_joint,
+                    flatten_history({{{0,0},{1,0},{1,-1}},{{1},{-1}}})));
+                break;
+            case ScenarioTrack::l1_budget:
+                CHECK_FALSE(feasible(loaded_joint,
+                    flatten_history({{{0,0},{.25,0},{.25,.25}},{{.25},{.25}}})));
+                break;
+            case ScenarioTrack::stage_box:
+                CHECK_FALSE(feasible(loaded_joint,
+                    flatten_history({{{0,0},{2,0},{2,0}},{{2},{0}}})));
+                break;
+            case ScenarioTrack::unconstrained:
+                CHECK(feasible(loaded_joint,
+                    flatten_history({{{0,0},{2,0},{2,0}},{{2},{0}}})));
+                break;
         }
     }
 
