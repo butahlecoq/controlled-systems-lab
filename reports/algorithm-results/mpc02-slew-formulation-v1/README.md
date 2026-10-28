@@ -36,7 +36,7 @@ Machine-readable medians, ranges, sample shape, and the inconclusive classificat
 
 ## Reproduction
 
-From a clean checkout at `f32d11b2c19b680086ed324136323f231e5ed8f9` with GCC 16.2.1 and CMake 3.31.6:
+From a clean checkout at `000fbecf8bda2da18b0e312ffb5acc01fa0f1a1c` with GCC 16.2.1 and CMake 3.31.6:
 
 ```sh
 cmake -S benchmarks/reporting/mpc02/runner -B build/mpc02-slew-release \
