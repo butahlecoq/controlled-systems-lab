@@ -346,7 +346,7 @@ def build(site: Path, catalog_path: Path) -> BuildResult:
 
     outputs["control-witness-timing-v1.html"] = (
         '<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">'
-        '<title>Saved control report timings</title><link rel="stylesheet" href="examples.css"></head><body><main>'
+        '<title>Saved control report timings</title><link rel="stylesheet" href="examples.css"></head><body class="control-witness-page"><main>'
         '<p><a href="index.html">← Visual examples</a></p><h1>Saved control report timing figures</h1>' +
         ''.join(timing_cards) + '</main></body></html>').encode()
     timing_entry = {"family": "Control strategy and witness reports", "title": "Saved SYN report timings",
@@ -373,7 +373,7 @@ def build(site: Path, catalog_path: Path) -> BuildResult:
     outputs["control-witness-v1.html"] = (
         '<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">'
         '<title>Control relation projections · Controlled Systems Lab</title><link rel="stylesheet" href="examples.css"></head>'
-        '<body><main><p><a href="index.html">← Visual examples</a></p><h1>Saved control-relation projections</h1>'
+        '<body class="control-witness-page"><main><p><a href="index.html">← Visual examples</a></p><h1>Saved control-relation projections</h1>'
         '<p>These figures read frozen reports and show projections of their five-coordinate state/control relations into the control plane '
         '(u₀,u₁). A projection can omit distinctions present in the full joint relation; each card states what its report establishes.</p>' +
         ''.join(body) + '</main></body></html>').encode()
