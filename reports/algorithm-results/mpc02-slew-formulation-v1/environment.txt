@@ -1,0 +1,17 @@
+Final capture: 2026-10-28, immediately before 10:52 UTC
+Host kernel: Linux 7.2.8-9-omarchy x86_64
+Compiler: GCC 16.2.1 (20260810)
+CMake: 3.31.6
+HiGHS adapter: csl.convex.highs 1.0.0 + HiGHS 1.11.0
+Logical CPUs visible to the process: 8
+CPU affinity during run: CPU 0 (`taskset -c 0`)
+CPU governor observed shortly after the run: schedutil
+Load average observed shortly after the run: 0.59, 1.31, 0.97
+Resource policy inside each solver execution: one worker, one native thread, parallelism one
+Wall-time cap: 30 seconds (`timeout 30s`); no attempt timed out
+Cgroup CPU quota: unlimited (`cpu.max` = `max 100000`)
+Cgroup memory limit: unlimited (`memory.max` = `max`)
+Hardware-counter profiler: unavailable (`perf` not installed)
+GNU `/usr/bin/time -v`: unavailable
+
+No hardware-counter, CPU throttling, or memory-peak profile is available. The run is pinned and time-bounded but this does not establish a performance limiter profile; its timing conclusion is therefore inconclusive.

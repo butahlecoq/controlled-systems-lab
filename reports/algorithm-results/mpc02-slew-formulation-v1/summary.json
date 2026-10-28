@@ -1,0 +1,48 @@
+{
+  "schema": "csl.mpc02-slew-formulation-summary/1",
+  "run_file": "events-r3.jsonl",
+  "source_commit": "f32d11b2c19b680086ed324136323f231e5ed8f9",
+  "scenario_id": "mpc02-slew-2d-v1",
+  "scenario_sha256": "a965a25bbd87792dc2721739c7ed1b6505edc6e83de3cb08322eeed05da0f348",
+  "backend": "csl.convex.highs@1.0.0+highs.1.11.0",
+  "sample": {
+    "warmups_per_side": 1,
+    "alternating_pairs": 7,
+    "workers": 1,
+    "native_threads": 1,
+    "cpu_affinity": [0],
+    "timeout_seconds": 30
+  },
+  "oracle": {
+    "controls": [0.375, 0.125],
+    "objective": 0.03125,
+    "arithmetic": "exact rational"
+  },
+  "result": "inconclusive",
+  "inconclusive_reason": "No hardware-counter or resource-limiter profile; tiny single fixture",
+  "sides": {
+    "direct_full_history": {
+      "variables": 8,
+      "rows": 11,
+      "attempts": 7,
+      "failures": 0,
+      "assembly_ns": {"median": 15086, "min": 14877, "max": 15854},
+      "provider_prepare_and_workspace_ns": {"median": 4749, "min": 3352, "max": 4819},
+      "solve_ns": {"median": 781739, "min": 751567, "max": 808559}
+    },
+    "exact_slew_memory_lift": {
+      "variables": 11,
+      "rows": 18,
+      "attempts": 7,
+      "failures": 0,
+      "assembly_ns": {"median": 18089, "min": 17530, "max": 25422},
+      "provider_prepare_and_workspace_ns": {"median": 4749, "min": 4260, "max": 4819},
+      "solve_ns": {"median": 814915, "min": 798920, "max": 849975}
+    }
+  },
+  "all_attempts": {
+    "initial_failed": {"file": "events.jsonl", "attempts": 16},
+    "successful_precommit": {"file": "events-r2.jsonl", "attempts": 16},
+    "authoritative_successful": {"file": "events-r3.jsonl", "attempts": 16}
+  }
+}
