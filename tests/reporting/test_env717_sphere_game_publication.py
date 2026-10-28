@@ -51,6 +51,12 @@ class SphereGamePublicationTests(unittest.TestCase):
         page = (destination / "index.html").read_text()
         self.assertIn("source reward", page)
         self.assertIn("zero warmups, n=1", page)
+        index = (self.site / "index.html").read_text()
+        for name in ("index.html", "result.json", "projections.svg"):
+            self.assertIn(f'href="{report_id}/{name}"', index)
+            self.assertTrue((self.site / report_id / name).is_file())
+        self.assertIn(f'href="{report_id}.zip"', index)
+        self.assertTrue((self.site / f"{report_id}.zip").is_file())
 
     def test_rejects_result_that_disagrees_with_independent_replay(self):
         result_path = self.source / "result.json"
