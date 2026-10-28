@@ -383,6 +383,7 @@ set_property(DIRECTORY APPEND PROPERTY CMAKE_CONFIGURE_DEPENDS
     ${CMAKE_CURRENT_SOURCE_DIR}/benchmarks/reporting/env717/unequal_game.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/benchmarks/reporting/env717/max_coordinate.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/benchmarks/reporting/env717/air_to_air.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/benchmarks/reporting/env717/sphere_game.cpp
     ${ENV717_LIBRARY_INPUTS})
 file(SHA256 ${CMAKE_CURRENT_SOURCE_DIR}/benchmarks/reporting/env717/simple_control.cpp
     ENV717_DRIVER_SHA256)
@@ -394,6 +395,8 @@ file(SHA256 ${CMAKE_CURRENT_SOURCE_DIR}/benchmarks/reporting/env717/max_coordina
     ENV717_MAX_COORDINATE_DRIVER_SHA256)
 file(SHA256 ${CMAKE_CURRENT_SOURCE_DIR}/benchmarks/reporting/env717/air_to_air.cpp
     ENV717_AIR_DRIVER_SHA256)
+file(SHA256 ${CMAKE_CURRENT_SOURCE_DIR}/benchmarks/reporting/env717/sphere_game.cpp
+    ENV717_SPHERE_GAME_DRIVER_SHA256)
 execute_process(COMMAND git status --porcelain -- src include
     WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
     OUTPUT_VARIABLE ENV717_LIBRARY_DIRTY OUTPUT_STRIP_TRAILING_WHITESPACE
@@ -416,21 +419,25 @@ add_executable(csl_env717_two_points benchmarks/reporting/env717/two_points.cpp)
 add_executable(csl_env717_unequal_game benchmarks/reporting/env717/unequal_game.cpp)
 add_executable(csl_env717_max_coordinate benchmarks/reporting/env717/max_coordinate.cpp)
 add_executable(csl_env717_air_to_air benchmarks/reporting/env717/air_to_air.cpp)
+add_executable(csl_env717_sphere_game benchmarks/reporting/env717/sphere_game.cpp)
 target_link_libraries(csl_env717_simple_control PRIVATE CSL::finite_action_minimax)
 target_link_libraries(csl_env717_two_points PRIVATE CSL::finite_action_minimax CSL::finite_feedback)
 target_link_libraries(csl_env717_unequal_game PRIVATE CSL::finite_action_minimax)
 target_link_libraries(csl_env717_max_coordinate PRIVATE CSL::finite_action_minimax)
 target_link_libraries(csl_env717_air_to_air PRIVATE CSL::finite_action_minimax)
+target_link_libraries(csl_env717_sphere_game PRIVATE CSL::finite_action_minimax)
 target_include_directories(csl_env717_simple_control SYSTEM PRIVATE ${csl_json_SOURCE_DIR}/include)
 target_include_directories(csl_env717_two_points SYSTEM PRIVATE ${csl_json_SOURCE_DIR}/include)
 target_include_directories(csl_env717_unequal_game SYSTEM PRIVATE ${csl_json_SOURCE_DIR}/include)
 target_include_directories(csl_env717_max_coordinate SYSTEM PRIVATE ${csl_json_SOURCE_DIR}/include)
 target_include_directories(csl_env717_air_to_air SYSTEM PRIVATE ${csl_json_SOURCE_DIR}/include)
+target_include_directories(csl_env717_sphere_game SYSTEM PRIVATE ${csl_json_SOURCE_DIR}/include)
 target_compile_features(csl_env717_simple_control PRIVATE cxx_std_20)
 target_compile_features(csl_env717_two_points PRIVATE cxx_std_20)
 target_compile_features(csl_env717_unequal_game PRIVATE cxx_std_20)
 target_compile_features(csl_env717_max_coordinate PRIVATE cxx_std_20)
 target_compile_features(csl_env717_air_to_air PRIVATE cxx_std_20)
+target_compile_features(csl_env717_sphere_game PRIVATE cxx_std_20)
 target_compile_definitions(csl_env717_simple_control PRIVATE
     $<$<CONFIG:Release>:NDEBUG>
     CSL_ENV717_DRIVER_SHA256="${ENV717_DRIVER_SHA256}"
@@ -476,18 +483,29 @@ target_compile_definitions(csl_env717_air_to_air PRIVATE
     CSL_ENV717_ARCHITECTURE="${CMAKE_SYSTEM_PROCESSOR}"
     CSL_ENV717_ALGORITHM_SOURCE_SHA256="${ENV717_ALGORITHM_SOURCE_SHA256}"
     CSL_ENV717_SOURCE_COMMIT="${ENV717_SOURCE_COMMIT}")
+target_compile_definitions(csl_env717_sphere_game PRIVATE
+    $<$<CONFIG:Release>:NDEBUG>
+    CSL_ENV717_SPHERE_DRIVER_SHA256="${ENV717_SPHERE_GAME_DRIVER_SHA256}"
+    CSL_ENV717_SPHERE_COMPILER_ID="${CMAKE_CXX_COMPILER_ID}"
+    CSL_ENV717_SPHERE_COMPILER_VERSION="${CMAKE_CXX_COMPILER_VERSION}"
+    CSL_ENV717_SPHERE_BUILD_TYPE="${CMAKE_BUILD_TYPE}"
+    CSL_ENV717_SPHERE_ARCHITECTURE="${CMAKE_SYSTEM_PROCESSOR}"
+    CSL_ENV717_SPHERE_ALGORITHM_SOURCE_SHA256="${ENV717_ALGORITHM_SOURCE_SHA256}"
+    CSL_ENV717_SPHERE_SOURCE_COMMIT="${ENV717_SOURCE_COMMIT}")
 if(MSVC)
     target_compile_options(csl_env717_simple_control PRIVATE /W4 /WX /permissive-)
     target_compile_options(csl_env717_two_points PRIVATE /W4 /WX /permissive-)
     target_compile_options(csl_env717_unequal_game PRIVATE /W4 /WX /permissive-)
     target_compile_options(csl_env717_max_coordinate PRIVATE /W4 /WX /permissive-)
     target_compile_options(csl_env717_air_to_air PRIVATE /W4 /WX /permissive-)
+    target_compile_options(csl_env717_sphere_game PRIVATE /W4 /WX /permissive-)
 else()
     target_compile_options(csl_env717_simple_control PRIVATE -Wall -Wextra -Wpedantic -Werror)
     target_compile_options(csl_env717_two_points PRIVATE -Wall -Wextra -Wpedantic -Werror)
     target_compile_options(csl_env717_unequal_game PRIVATE -Wall -Wextra -Wpedantic -Werror)
     target_compile_options(csl_env717_max_coordinate PRIVATE -Wall -Wextra -Wpedantic -Werror)
     target_compile_options(csl_env717_air_to_air PRIVATE -Wall -Wextra -Wpedantic -Werror)
+    target_compile_options(csl_env717_sphere_game PRIVATE -Wall -Wextra -Wpedantic -Werror)
 endif()
 if(BUILD_TESTING)
     find_package(Python3 3.11 REQUIRED COMPONENTS Interpreter)
@@ -511,6 +529,10 @@ if(BUILD_TESTING)
         ${CMAKE_CURRENT_SOURCE_DIR}/scripts/reports/env717/check_air_to_air.py
         $<TARGET_FILE:csl_env717_air_to_air>)
     set_tests_properties(env717_air_to_air_smoke PROPERTIES LABELS reporting)
+    add_test(NAME env717_sphere_game_smoke COMMAND Python3::Interpreter
+        ${CMAKE_CURRENT_SOURCE_DIR}/scripts/reports/env717/check_sphere_game.py
+        $<TARGET_FILE:csl_env717_sphere_game>)
+    set_tests_properties(env717_sphere_game_smoke PROPERTIES LABELS reporting)
 endif()
 endif()
 
