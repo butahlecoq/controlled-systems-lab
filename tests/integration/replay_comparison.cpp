@@ -216,10 +216,7 @@ TEST_CASE("4D selected linear witnesses retain separate nonlinear replay and 2D 
     CHECK(std::holds_alternative<problem::ResolvedContent>(legacy_decoded));
     auto available_json = encoded_json;
     auto& future_replay = available_json["witnesses"][0]["replay"];
-    future_replay["integration"] = nullptr;
-    future_replay["status"] = "unavailable";
-    future_replay["original_objective"] = nullptr;
-    future_replay["missing_prerequisites"] = {"plant.integration"};
+    future_replay["integration"] = "integrator.rk4@1";
     future_replay["integration_residual"] = nlohmann::json{
         {"status", "available"}, {"definition", "independent transition defect"},
         {"measurements", nlohmann::json::array({nlohmann::json{
@@ -239,6 +236,10 @@ TEST_CASE("4D selected linear witnesses retain separate nonlinear replay and 2D 
         {{"status", "available"}, {"definition", "invalid exact-map residual"},
             {"measurements", {{{"name", "state_0"}, {"value", 0.0}, {"unit", "kg/s"}}}}};
     CHECK(std::holds_alternative<ar::ArtifactError>(ex::decode_replay_comparison(residual_on_exact_map.dump())));
+    auto residual_without_method = encoded_json;
+    residual_without_method["witnesses"][0]["replay"]["integration"] = nullptr;
+    const auto missing_method_residual = ex::decode_replay_comparison(residual_without_method.dump());
+    CHECK(std::holds_alternative<ar::ArtifactError>(missing_method_residual));
     auto unnamed_unavailable = encoded_json;
     unnamed_unavailable["witnesses"][0]["replay"]["status"] = "unavailable";
     unnamed_unavailable["witnesses"][0]["replay"]["original_objective"] = nullptr;

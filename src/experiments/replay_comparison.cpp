@@ -351,8 +351,16 @@ bool replay_document(const Json& replay, std::size_t state_dimensions,
             !parameter.contains("value") || !finite_number(parameter["value"]) ||
             !parameter.contains("unit") || !parameter["unit"].is_string()) return false;
     if (!replay["initial_state"].is_null() && !finite_vector(replay["initial_state"])) return false;
-    if (version_two && replay["integration"] == "exact_discrete_map" &&
-        replay["integration_residual"]["status"] != "not_applicable") return false;
+    if (version_two) {
+        const auto residual_status = replay["integration_residual"]["status"].get<std::string>();
+        if (replay["integration"].is_null()) {
+            if (residual_status != "unavailable") return false;
+        } else {
+            const auto method = replay["integration"].get<std::string>();
+            if (method.empty() ||
+                (method == "exact_discrete_map") != (residual_status == "not_applicable")) return false;
+        }
+    }
     for (const auto& diagnostic : replay["diagnostics"])
         if (!diagnostic.is_object() || !diagnostic.contains("code") || !diagnostic["code"].is_string() ||
             !diagnostic.contains("field") || !diagnostic["field"].is_string() ||
@@ -374,7 +382,10 @@ bool replay_document(const Json& replay, std::size_t state_dimensions,
             controls.size() == linear_intervals && states.size() == controls.size() + 1 &&
             states.size() == replay["times"].size() && !replay["time_unit"].get<std::string>().empty() &&
             !replay["original_objective"].is_null() && finite_number(replay["original_objective"]) &&
-            replay["missing_prerequisites"].empty() && replay["integration"] == "exact_discrete_map" &&
+            replay["missing_prerequisites"].empty() &&
+            (version_two ? (replay["integration"].is_string() &&
+                !replay["integration"].get<std::string>().empty()) :
+                replay["integration"] == "exact_discrete_map") &&
             replay["control_hold"] == "constant_on_interval";
     if (status == "unavailable" && replay["missing_prerequisites"].empty()) return false;
     return replay["original_objective"].is_null();

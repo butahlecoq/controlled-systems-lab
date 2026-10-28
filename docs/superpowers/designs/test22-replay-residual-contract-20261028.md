@@ -91,6 +91,7 @@ Both candidates omitted the metadata requirement; the selected shape adds it exp
 
 ## Open questions and risks
 
+- TEST-22 remains open for computed nonlinear residual values: the current exact-map method has no integration residual to calculate, and the current tests only exercise the v2 `available` decoder shape.
 - The `available` measurements intentionally preserve producer-defined named quantities. A future numerical method must specify the residual formula and provenance in its `definition`; this contract does not certify the scientific validity of that calculation.
 - Public API and raw-JSON consumers require compatibility review before delivery.
 
