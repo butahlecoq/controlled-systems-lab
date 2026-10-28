@@ -514,7 +514,7 @@
         "native-smoke-projections.svg"
       ],
       "disposition": "deferred-family-specific-migration",
-      "follow_up_issue": 687
+      "follow_up_issue": 686
     },
     {
       "source": "scripts/reports/mpc01/b04_projection_example.py",
@@ -523,7 +523,7 @@
         "b04-reference-trajectory-projections.svg"
       ],
       "disposition": "deferred-family-specific-migration",
-      "follow_up_issue": 687
+      "follow_up_issue": 686
     },
     {
       "source": "scripts/reports/mpc01/summarize_repeated_comparison.py",
@@ -532,7 +532,7 @@
         "b04-repeated-benchmark-projections.svg"
       ],
       "disposition": "deferred-family-specific-migration",
-      "follow_up_issue": 687
+      "follow_up_issue": 686
     },
     {
       "source": "scripts/reports/mpc03/b08_miqcp.py",
