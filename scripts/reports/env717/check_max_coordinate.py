@@ -79,7 +79,24 @@ def verify_record(actual: dict) -> dict:
     assert actual["schema"] == "csl.env717-max-coordinate-pilot/1"
     assert actual["source_repository_commit"] == "f4d76c60f4003f50954174e96eafd8e514bd5441"
     assert actual["source_file_blob"] == "d509a1457023b14516d2789bd3033dbaa4110017"
+    model = actual["source_model"]
+    assert model["initial_state"] == list(INITIAL)
+    assert model["dt_seconds"] == DT and model["horizon_seconds"] == 4.0
+    assert model["inner_euler_steps"] == 100
+    assert model["control_u_bounds"] == [-1.0, 1.0]
+    assert model["disturbance_v_bounds"] == [-1.0, 1.0]
+    assert model["dynamics"] == "time'=1; y'=z+v; z'=-y+u"
+    assert model["reward"] == "max(|y|,|z|) at termination"
+    adaptation = actual["adaptation"]
+    assert adaptation["horizon_steps"] == HORIZON
+    assert math.isclose(adaptation["horizon_seconds"], HORIZON * DT, abs_tol=1e-15)
+    assert adaptation["control_catalogue"] == list(CATALOGUE)
+    assert adaptation["disturbance_catalogue"] == list(CATALOGUE)
+    assert adaptation["information_pattern"] == "fixed open-loop control plan versus full adversarial sequence"
+    assert adaptation["objective_mapping"] == "four signed linear terminal objectives; combine per-plan worst values"
     expected = enumerate_game()
+    assert actual["plan_count"] == len(expected["plans"])
+    assert actual["minimizing_plan_indices"] == expected["minimizing_indices"]
     components = actual["component_results"]
     assert len(components) == len(DIRECTIONS)
     for component, direction in zip(components, DIRECTIONS):
@@ -88,9 +105,14 @@ def verify_record(actual: dict) -> dict:
     for i, scores in enumerate(expected["component_scores"]):
         actual_scores = [components[j]["plans"][i]["worst_signed_coordinate"]
                          for j in range(len(DIRECTIONS))]
+        for j in range(len(DIRECTIONS)):
+            assert components[j]["plans"][i]["controls"] == list(expected["plans"][i]["controls"])
         for value, score in zip(actual_scores, scores):
             assert math.isclose(value, score, abs_tol=1e-11)
         assert math.isclose(max(actual_scores), expected["plans"][i]["worst_reward"], abs_tol=1e-11)
+    for component_index, component in enumerate(components):
+        assert math.isclose(component["value"], min(
+            expected["component_scores"][i][component_index] for i in range(8)), abs_tol=1e-11)
     assert expected["minimizing_indices"]
     assert INITIAL in expected["backward_layers"][0]
     assert math.isclose(actual["objective_value"], expected["optimum"], abs_tol=1e-11)

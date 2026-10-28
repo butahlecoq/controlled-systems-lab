@@ -490,7 +490,7 @@
   "objective_value": 0.4421402382451977,
   "plan_count": 8,
   "schema": "csl.env717-max-coordinate-pilot/1",
-  "source_commit": "d0c2a705c86229f5b9b1f75b27c99f98fdc889b0",
+  "source_commit": "669ae515ae6c2f68be40576c139b28df2d720132",
   "source_file_blob": "d509a1457023b14516d2789bd3033dbaa4110017",
   "source_license": "no license declared in repository metadata",
   "source_model": {
@@ -520,7 +520,7 @@
     "z"
   ],
   "timing": {
-    "elapsed_ns": 800525,
+    "elapsed_ns": 859403,
     "limiter_profile": "not collected; no comparative speed claim",
     "scope": "four finite_action_minimax calls; setup and JSON excluded"
   }
