@@ -119,7 +119,7 @@ Json result() {
             {"build_type", CSL_ENV717_MAX_BUILD_TYPE},
             {"architecture", CSL_ENV717_MAX_ARCHITECTURE}, {"requested_workers", 1},
             {"solver_parallelism", "single-threaded"}}},
-        {"timing", {{"scope", "single interval from first request construction through four minimax calls, plan extraction, and objective combination; JSON assembly and serialization excluded"},
+        {"timing", {{"scope", "single interval from first request construction through four minimax calls, plan extraction, component JSON assembly, and objective combination; final result-object assembly and serialization excluded"},
             {"warmup_calls", 0}, {"measured_calls", 1}, {"elapsed_ns", elapsed},
             {"limiter_profile", "not collected; no comparative speed claim"}}},
         {"driver_sha256", CSL_ENV717_MAX_DRIVER_SHA256},
