@@ -167,6 +167,8 @@ def main() -> None:
     parser.add_argument("--output-dir", type=Path, required=True)
     args = parser.parse_args()
     rows = read_rows(args.raw)
+    source_commit = rows[0]["source_commit"]
+    input_sha256 = rows[0]["input_sha256"]
     args.output_dir.mkdir(parents=True, exist_ok=True)
     (args.output_dir / "validated-rows.jsonl").write_text("".join(json.dumps(row, sort_keys=True) + "\n" for row in rows))
     with (args.output_dir / "summary.csv").open("w", newline="") as stream:
@@ -214,12 +216,14 @@ th {{ background:#eef1f7 }}
 .table-wrap {{ overflow-x:auto }}
 @media(max-width:720px) {{ table {{ min-width:760px }} }}
 img {{ max-width:100% }}
+code {{ overflow-wrap:anywhere }}
 </style>
 <h1>EXP-02: first 3D hull-ladder cell</h1>
 <p>The workload has four tetrahedron corners and 246 dyadic interior points. Halton bases 2, 3, and 5 deterministically select strictly positive barycentric weights in multiples of 1/8, making interior-point removal certificates exactly representable. Five LP reducers ran with one warmup and five measured calls each. An independent exact-rational validator verifies each removal certificate and its acyclic expansion to the retained source points. This proves equality of the finite input hull and returned hull even when a reducer conservatively retains some redundant points.</p>
 <p>QuickHull is recorded as unsupported because the registered geometric implementation is 2D-only. The plotted projections show input points only; red markers identify the tetrahedron corners. The earlier pure Halton cloud retained every point and is preserved in the <a href="../exp02-it17-hull-3d-halton-cloud-20261028-r1/index.html">initial exploratory attempt</a>.</p>
 <figure><img src="input-projections.svg" alt="Input points projected into coordinate planes x1-x2, x1-x3, and x2-x3"><figcaption>Three coordinate projections of the same 3D input; no projected hull boundary is implied.</figcaption></figure>
 <div class="table-wrap"><table><thead><tr>{headers}</tr></thead><tbody>{''.join(tables)}</tbody></table></div>
+<p>Measured code commit <code>{source_commit}</code>; binary64 input manifest SHA256 <code>{input_sha256}</code>; LP backend HiGHS 1.11.0. Full method identities and every raw attempt are in <a href="validated-rows.jsonl">validated rows</a>; download the <a href="exp02-it17-hull-3d-simplex-20261028-r1.zip">offline report bundle</a>.</p>
 <h2>Scope limits</h2>
 <ul>
 <li>One deterministic 250-point fixture; this is the first ladder cell, not the EXP-02 matrix.</li>

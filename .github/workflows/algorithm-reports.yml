@@ -217,6 +217,12 @@ jobs:
                 --source reports/algorithm-results/perf03-ts01-single-process-correlation-20261014 \
                 --site build/report-site
             fi
+            if test -d reports/algorithm-results/exp02-it17-hull-3d-simplex-20261028-r1; then
+              python scripts/reports/exp02_it17_hull3d.py \
+                --primary reports/algorithm-results/exp02-it17-hull-3d-simplex-20261028-r1 \
+                --initial reports/algorithm-results/exp02-it17-hull-3d-halton-cloud-20261028-r1 \
+                --site build/report-site
+            fi
             echo 'has_reports=true' >> "$GITHUB_OUTPUT"
           else
             echo 'No measured catalogue has been committed; publication remains pending.'
