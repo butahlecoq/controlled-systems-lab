@@ -396,6 +396,14 @@ FAMILIES = {
         "The source 8-second continuous-action task is adapted to three stages; the report separates "
         "the open-loop minimax value from its finite-state feedback geometry. One timing observation "
         "is recorded with zero warmups and no performance comparison."),
+    "env717-point-on-plane": Family(
+        r"env717-point-on-plane-[0-9a-f]{20}", "synthesis",
+        "PointOnThePlane finite-action minimax pilot",
+        "Exhaustively evaluates 125 open-loop plans against 125 disturbance histories per plan. "
+        "A source-equation replay independently checks the four-state time-varying Euler map and "
+        "plots finite forward states, backward-winning intersections and a worst-case trajectory "
+        "in the position (x1,x2) and velocity (x3,x4) planes. The continuous-action 4-second source "
+        "task is adapted to three stages; no RL reproduction or performance comparison is claimed."),
     "syn06-verifier": Family(
         r"syn06-verifier-\d{8}-[0-9a-f]{64}", "verification", "Trajectory verification",
         "Re-checks two literal two-stage integrator witnesses against the original saved input "

@@ -1,0 +1,20 @@
+{
+  "schema": "csl.env717-point-on-plane-capture/1",
+  "source_commit": "c26ae1148fc98f39d1ae0b8cf80926b667e6d129",
+  "driver_sha256": "aa0810de52388469ed85649da4b6beb5d30f39a8021ce8c721fe4b6f7555b7cc",
+  "algorithm_source_sha256": "75d9bd0c5f41461b19fa7c8ade2bf3971179ce2461d146f666920539c9560127",
+  "compiler": {
+    "architecture": "x86_64",
+    "build_type": "Release",
+    "compiler": "GNU",
+    "compiler_version": "16.2.1"
+  },
+  "os": "Linux-7.2.8-9-omarchy-x86_64-with-glibc2.44",
+  "python": "3.14.8",
+  "cpu_model": "AMD Ryzen 5 3550H with Radeon Vega Mobile Gfx",
+  "worker_threads": 1,
+  "native_threads": 1,
+  "warmup_calls": 0,
+  "measured_calls": 1,
+  "workspace_reuse": "none"
+}

@@ -107,6 +107,14 @@ class LandingTests(unittest.TestCase):
         self.assertIn("open-loop minimax value", family.summary)
         self.assertIn("no performance comparison", family.summary)
 
+    def test_point_on_plane_route_describes_both_physical_projections(self):
+        family = landing.FAMILIES[landing.family_for(
+            "env717-point-on-plane-0123456789abcdefabcd")]
+        self.assertEqual(family.group, "synthesis")
+        self.assertIn("position (x1,x2)", family.summary)
+        self.assertIn("velocity (x3,x4)", family.summary)
+        self.assertIn("three stages", family.summary)
+
 
 class AssembledIndexTests(unittest.TestCase):
     """The published landing page is built from the assembled staged index."""
