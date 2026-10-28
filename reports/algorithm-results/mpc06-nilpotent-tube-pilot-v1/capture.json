@@ -1,0 +1,29 @@
+{
+  "schema": "csl.mpc06-tube-capture/1",
+  "source_commit": "da5927b3166a0332cf732c4cded88444d3e39c3c",
+  "driver_sha256": "bdd3edb305b46c324baa2ef9e676ff14a1d84274a2c1324b8de58cebeb608c5c",
+  "checker_sha256": "c7b826f048014b6cb1b811800b1c2afa81f8a0d1b673205b783e43ccb85b6d04",
+  "scenario_sha256": "a130cf880dd600ac10690a950463b930f9745c4fcf1ab70155149e7ec699f55d",
+  "capture_environment": {
+    "os": "Linux-7.2.8-9-omarchy-x86_64-with-glibc2.44",
+    "processor": "AMD Ryzen 5 3550H with Radeon Vega Mobile Gfx",
+    "logical_cpus": 8,
+    "compiler_id": "GNU",
+    "compiler_version": "16.2.1",
+    "build_configuration": "Release"
+  },
+  "performance_measurement": {
+    "scope": "one exact RPI inclusion, support tightening calculation, matched eight-path disturbance replay, initial/tightened feasibility checks, and two edge checks; JSON serialization excluded",
+    "elapsed_ns": 352980,
+    "runs": 1,
+    "warmups": 0,
+    "requested_workers": 1,
+    "actual_workers": 1,
+    "requested_native_threads": 1,
+    "actual_native_threads": 1,
+    "parallelism": "single-threaded synchronous execution",
+    "errors": 0,
+    "work_completed": true,
+    "performance_assessment": "inconclusive; one descriptive observation, no limiter profile or comparison"
+  }
+}

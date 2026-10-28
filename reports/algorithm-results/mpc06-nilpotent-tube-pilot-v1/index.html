@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Tube MPC exact feasibility pilot</title>
+<style>
+body{margin:0;background:#111820;color:#f4f1e8;font:16px/1.55 system-ui,sans-serif}
+main{max-width:1100px;margin:auto;padding:2rem}svg{width:100%;height:auto}
+code{overflow-wrap:anywhere}.note{background:#1a252e;border-left:4px solid #e9c46a;padding:.7rem 1rem}
+table{border-collapse:collapse;width:100%;margin:1rem 0}th,td{border:1px solid #53616a;padding:.45rem .65rem;text-align:left}
+th{background:#1a252e}
+</style><main>
+<h1>Exact tube-MPC feasibility pilot</h1>
+<p>This small study tests an affine double integrator with full-state feedback and stagewise additive disturbance. The feedback error matrix is nilpotent of index 2, so the finite tube sum has an exact zero tail.</p>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1020 520" role="img" aria-label="Exact RPI tube and tightened state and input constraints">
+<rect width="100%" height="100%" fill="#111820"/>
+<text x="330" y="35" fill="#f4f1e8" text-anchor="middle" font-family="sans-serif" font-size="20">State plane</text>
+<rect x="98.18" y="13.18" width="463.64" height="463.64" fill="none" stroke="#a8b3bd" stroke-width="2" stroke-dasharray="8 6"/>
+<rect x="127.16" y="71.14" width="405.68" height="347.73" fill="#e9c46a" fill-opacity=".25" stroke="#e9c46a" stroke-width="2"/>
+<polygon points="358.98,245.00 301.02,187.05 301.02,245.00 358.98,302.95" fill="#56b4e9" fill-opacity=".7" stroke="#8bd3f7" stroke-width="3"/>
+<text x="330" y="455" fill="#f4f1e8" text-anchor="middle" font-family="sans-serif">position</text>
+<text x="25" y="250" fill="#f4f1e8" text-anchor="middle" font-family="sans-serif" transform="rotate(-90 25 250)">velocity</text>
+<text x="720" y="55" fill="#f4f1e8" font-family="sans-serif" font-size="20">Input constraint</text>
+<line x1="715.00" y1="220" x2="915.00" y2="220" stroke="#a8b3bd" stroke-width="16"/>
+<line x1="752.50" y1="220" x2="877.50" y2="220" stroke="#e9c46a" stroke-width="16"/>
+<line x1="890.00" y1="150" x2="890.00" y2="290" stroke="#ff6b35" stroke-width="3"/>
+<circle cx="927.50" cy="220" r="8" fill="#ff6b35"/>
+<text x="815.0" y="250" fill="#f4f1e8" text-anchor="middle" font-family="sans-serif">u: U in gray; U⊖KZ in gold</text>
+<text x="890.00" y="130" fill="#ff9b76" text-anchor="middle" font-family="sans-serif">unsafe nominal v=0.75</text>
+<text x="927.50" y="315" fill="#ff9b76" text-anchor="middle" font-family="sans-serif">actual u=1.125</text>
+<g font-family="sans-serif" font-size="14" fill="#f4f1e8">
+<rect x="715" y="350" width="16" height="16" fill="none" stroke="#a8b3bd" stroke-width="2"/><text x="740" y="364">state set X</text>
+<rect x="715" y="380" width="16" height="16" fill="#e9c46a" fill-opacity=".5"/><text x="740" y="394">tightening X⊖Z</text>
+<rect x="715" y="410" width="16" height="16" fill="#56b4e9"/><text x="740" y="424">error tube Z</text>
+</g>
+</svg>
+
+<table><caption>Exact feasibility evidence</caption><thead><tr><th>Quantity</th><th>Result</th><th>Evidence</th></tr></thead><tbody>
+<tr><td>RPI tube</td><td>Z = D ⊕ FD, generators (0,1) and (1,−1), radius 1/8</td><td>Exact H-relation inclusion verifies (A+BK)Z + EW ⊆ Z</td></tr>
+<tr><td>State support and tightening</td><td>hZ(e₁)=0.125; hZ(e₂)=0.25; X⊖Z=[-0.875,0.875] × [-0.75,0.75]</td><td>Exact dyadic generator support</td></tr>
+<tr><td>Input support and tightening</td><td>hKZ=0.375; U⊖KZ=[-0.625,0.625]</td><td>Exact dyadic generator support</td></tr>
+<tr><td>Zero nominal plan</td><td>Initial tube membership and tightened feasibility established</td><td>Independent rational check</td></tr>
+<tr><td>Matched disturbance reference</td><td>8 vertex paths; all safe; worst state coordinate 0.25; worst feedback input 0.375</td><td>Exact rational replay for the same fixed plan and feedback law</td></tr>
+<tr><td>Edge cases</td><td>Empty state tightening detected; unsafe v=0.75 rejected with actual u=1.125</td><td>Exact support values and dyadic witness</td></tr>
+</tbody></table>
+<p class="note">Scope: feasibility and safety only. No objective is evaluated; no nominal optimum, minimax cost, general causal optimum, or terminal invariance is claimed. This is one fixed nilpotent profile with continuous inputs and stagewise independent additive disturbance. No outer representation comparison is included; those comparisons remain gated by #99/#100.</p>
+<h2>One descriptive timing observation</h2>
+<p>352980 ns for one Release analysis call (n=1, no warmups; range unavailable for a single run): one exact RPI inclusion, support tightening calculation, matched eight-path disturbance replay, initial/tightened feasibility checks, and two edge checks; JSON serialization excluded. Build/setup and JSON serialization are excluded, so this is not end-to-end application latency. Requested/actual workers: 1/1; requested/actual native threads: 1/1 (single-threaded synchronous execution). Assessment: inconclusive; the limiter was not profiled, and no comparison or speed claim is made. The result was verified before reporting (errors: 0; completed work: true).</p>
+<p>Build: GNU 16.2.1, Release; host: AMD Ryzen 5 3550H with Radeon Vega Mobile Gfx, Linux-7.2.8-9-omarchy-x86_64-with-glibc2.44, 8 logical CPUs. Source commit: <a href="https://github.com/butahlecoq/controlled-systems-lab/commit/da5927b3166a0332cf732c4cded88444d3e39c3c"><code>da5927b3166a0332cf732c4cded88444d3e39c3c</code></a>. Independent checker SHA-256: <code>c7b826f048014b6cb1b811800b1c2afa81f8a0d1b673205b783e43ccb85b6d04</code>.</p>
+<h2>Reproduce</h2><pre><code>cmake -S . -B build/mpc06 -DCSL_BUILD_MPC06_REPORT=ON -DCMAKE_BUILD_TYPE=Release
+cmake --build build/mpc06 --config Release --target csl_mpc06_tube_pilot
+python3 scripts/reports/mpc06/check_tube.py build/mpc06/csl_mpc06_tube_pilot</code></pre>
+<p><a href="result.json">Saved result</a> · <a href="scenario.json">Complete scenario input</a> · <a href="README.md">Reproduction notes</a> · <a href="figure-data.json">Figure data</a> · <a href="projection.svg">Standalone SVG</a></p>
+</main></html>

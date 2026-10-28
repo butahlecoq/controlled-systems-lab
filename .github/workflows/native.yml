@@ -70,12 +70,12 @@ jobs:
           lane: release-${{ matrix.cc }}
           configuration: Release
           generator: ${{ matrix.generator }}
-          options: ${{ matrix.configure }} -DCMAKE_BUILD_TYPE=Release -DCSL_DEPENDENCY_PROBES=ON
+          options: ${{ matrix.configure }} -DCMAKE_BUILD_TYPE=Release -DCSL_DEPENDENCY_PROBES=ON -DCSL_BUILD_MPC06_REPORT=ON
           clean: ${{ inputs.clean || false }}
       - name: Verify pinned archive reuse and corruption rejection
         run: python -m unittest discover -s tests/cmake -p 'test_dependency_archive.py'
       - name: Configure
-        run: cmake -S . -B tmp/native ${{ matrix.configure }} -DCMAKE_BUILD_TYPE=Release -DCSL_DEPENDENCY_PROBES=ON
+        run: cmake -S . -B tmp/native ${{ matrix.configure }} -DCMAKE_BUILD_TYPE=Release -DCSL_DEPENDENCY_PROBES=ON -DCSL_BUILD_MPC06_REPORT=ON
       - name: Build
         run: cmake --build tmp/native --config Release --parallel 4
       - name: Test source and installed clients plus literal numeric probes

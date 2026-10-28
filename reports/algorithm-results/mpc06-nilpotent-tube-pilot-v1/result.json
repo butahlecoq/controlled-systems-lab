@@ -1,0 +1,148 @@
+{
+  "schema": "csl.mpc06-nilpotent-tube-pilot/1",
+  "case_id": "double-integrator-nilpotent-tube-v1",
+  "scenario_sha256": "a130cf880dd600ac10690a950463b930f9745c4fcf1ab70155149e7ec699f55d",
+  "build": {
+    "compiler_id": "GNU",
+    "compiler_version": "16.2.1",
+    "configuration": "Release"
+  },
+  "arithmetic": "IEEE-754 binary64; all fixture coefficients are dyadic and selected transforms are exact",
+  "system": {
+    "A": [
+      [
+        1,
+        1
+      ],
+      [
+        0,
+        1
+      ]
+    ],
+    "B": [
+      [
+        0
+      ],
+      [
+        1
+      ]
+    ],
+    "E": [
+      [
+        0
+      ],
+      [
+        1
+      ]
+    ],
+    "K": [
+      [
+        -1,
+        -2
+      ]
+    ]
+  },
+  "disturbance_radius": 0.125,
+  "horizon": 3,
+  "nilpotent_index_2_verified": true,
+  "feedback_matrix_matches_A_plus_BK": true,
+  "rpi_inclusion_exactly_verified": true,
+  "rpi_generator_matrix": [
+    [
+      0,
+      1
+    ],
+    [
+      1,
+      -1
+    ]
+  ],
+  "rpi_generator_radius": 0.125,
+  "state_constraints": [
+    [
+      -1,
+      1
+    ],
+    [
+      -1,
+      1
+    ]
+  ],
+  "input_constraints": [
+    -1,
+    1
+  ],
+  "state_tightening_support": [
+    0.125,
+    0.25
+  ],
+  "tightened_state_bounds": [
+    [
+      -0.875,
+      0.875
+    ],
+    [
+      -0.75,
+      0.75
+    ]
+  ],
+  "input_tightening_support": 0.375,
+  "tightened_input_bounds": [
+    -0.625,
+    0.625
+  ],
+  "empty_tightening": false,
+  "empty_tightening_edge_case": {
+    "state_box_bound": 0.2,
+    "empty_verified_by_support": true
+  },
+  "unsafe_nominal_plan_edge_case": {
+    "nominal_input": 0.75,
+    "tube_error": [
+      0.125,
+      -0.25
+    ],
+    "actual_input": 1.125,
+    "rejected_by_tightened_bound_and_exact_input_bound": true
+  },
+  "initial_tube_membership": true,
+  "nominal_plan_tightened_feasible": true,
+  "matched_reference": {
+    "quantifier": "fixed nominal plan, all disturbance vertices",
+    "disturbance_paths_checked": 8,
+    "all_paths_safe": true,
+    "worst_state_coordinate_abs": 0.25,
+    "worst_feedback_input_abs": 0.375
+  },
+  "objective": {
+    "kind": "not evaluated",
+    "nominal optimum": "not claimed",
+    "minimax cost": "not claimed"
+  },
+  "measurement": {
+    "scope": "one exact RPI inclusion, support tightening calculation, matched eight-path disturbance replay, initial/tightened feasibility checks, and two edge checks; JSON serialization excluded",
+    "elapsed_ns": 352980,
+    "runs": 1,
+    "warmups": 0,
+    "requested_workers": 1,
+    "actual_workers": 1,
+    "requested_native_threads": 1,
+    "actual_native_threads": 1,
+    "parallelism": "single-threaded synchronous execution",
+    "errors": 0,
+    "work_completed": true,
+    "performance_assessment": "inconclusive; one descriptive observation, no limiter profile or comparison"
+  },
+  "approximation_comparison": "deferred behind issues 99 and 100",
+  "source_commit": "da5927b3166a0332cf732c4cded88444d3e39c3c",
+  "driver_sha256": "bdd3edb305b46c324baa2ef9e676ff14a1d84274a2c1324b8de58cebeb608c5c",
+  "checker_sha256": "c7b826f048014b6cb1b811800b1c2afa81f8a0d1b673205b783e43ccb85b6d04",
+  "capture_environment": {
+    "os": "Linux-7.2.8-9-omarchy-x86_64-with-glibc2.44",
+    "processor": "AMD Ryzen 5 3550H with Radeon Vega Mobile Gfx",
+    "logical_cpus": 8,
+    "compiler_id": "GNU",
+    "compiler_version": "16.2.1",
+    "build_configuration": "Release"
+  }
+}

@@ -26,6 +26,32 @@ target_compile_options(csl_mpc08_explicit_compare PRIVATE -Wall -Wextra -Wpedant
 endif()
 endif()
 
+if(CSL_BUILD_MPC06_REPORT)
+set(MPC06_SCENARIO_FILE ${CMAKE_CURRENT_SOURCE_DIR}/benchmarks/scenarios/mpc06-nilpotent-tube-v1.json)
+set_property(DIRECTORY APPEND PROPERTY CMAKE_CONFIGURE_DEPENDS ${MPC06_SCENARIO_FILE})
+file(SHA256 ${MPC06_SCENARIO_FILE} MPC06_SCENARIO_SHA256)
+add_executable(csl_mpc06_tube_pilot benchmarks/reporting/mpc06_tube/driver.cpp)
+target_include_directories(csl_mpc06_tube_pilot PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src)
+target_compile_features(csl_mpc06_tube_pilot PRIVATE cxx_std_20)
+target_compile_definitions(csl_mpc06_tube_pilot PRIVATE
+  CSL_MPC06_SCENARIO_SHA256="${MPC06_SCENARIO_SHA256}"
+  CSL_MPC06_COMPILER_ID="${CMAKE_CXX_COMPILER_ID}"
+  CSL_MPC06_COMPILER_VERSION="${CMAKE_CXX_COMPILER_VERSION}"
+  CSL_MPC06_BUILD_CONFIG="$<CONFIG>")
+if(MSVC)
+target_compile_options(csl_mpc06_tube_pilot PRIVATE /W4 /WX /permissive-)
+else()
+target_compile_options(csl_mpc06_tube_pilot PRIVATE -Wall -Wextra -Wpedantic -Werror)
+endif()
+if(BUILD_TESTING)
+find_package(Python3 3.11 REQUIRED COMPONENTS Interpreter)
+add_test(NAME mpc06_tube_pilot_independent_check COMMAND Python3::Interpreter
+  ${CMAKE_CURRENT_SOURCE_DIR}/scripts/reports/mpc06/check_tube.py
+  $<TARGET_FILE:csl_mpc06_tube_pilot>)
+set_tests_properties(mpc06_tube_pilot_independent_check PROPERTIES LABELS reporting)
+endif()
+endif()
+
 if(CSL_BUILD_GEO08_REPORT)
 add_executable(csl_geo08_lazy_report benchmarks/reporting/geo08/driver.cpp)
 target_link_libraries(csl_geo08_lazy_report PRIVATE CSL::lazy_geometry CSL::polyhedral)

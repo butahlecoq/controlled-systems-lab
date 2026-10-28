@@ -104,6 +104,8 @@ FROZEN_ROUTE_FOLLOW_UP_ISSUES = {
 
 
 def migration_issue(source: str) -> int:
+    if "/mpc06/" in source:
+        return MIGRATION_ISSUES["control-strategy-and-witness"]
     if source == "scripts/reports/fuel_reachability_layers.py":
         return 708
     if "/env717/" in source:
