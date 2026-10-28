@@ -204,20 +204,22 @@ def main() -> None:
     page = f'''<!doctype html>
 <html lang="en">
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width">
+<meta name="viewport" content="width=device-width,initial-scale=1">
 <title>EXP-02 3D hull pilot</title>
 <style>
 body {{ font:16px/1.5 system-ui,sans-serif; max-width:1100px; margin:2rem auto; padding:0 1rem; color:#172438 }}
 table {{ border-collapse:collapse; width:100%; font-size:.9rem }}
 th,td {{ border:1px solid #ccd3df; padding:.45rem; text-align:left }}
 th {{ background:#eef1f7 }}
+.table-wrap {{ overflow-x:auto }}
+@media(max-width:720px) {{ table {{ min-width:760px }} }}
 img {{ max-width:100% }}
 </style>
 <h1>EXP-02: first 3D hull-ladder cell</h1>
 <p>The workload has four tetrahedron corners and 246 dyadic interior points. Halton bases 2, 3, and 5 deterministically select strictly positive barycentric weights in multiples of 1/8, making interior-point removal certificates exactly representable. Five LP reducers ran with one warmup and five measured calls each. An independent exact-rational validator verifies each removal certificate and its acyclic expansion to the retained source points. This proves equality of the finite input hull and returned hull even when a reducer conservatively retains some redundant points.</p>
 <p>QuickHull is recorded as unsupported because the registered geometric implementation is 2D-only. The plotted projections show input points only; red markers identify the tetrahedron corners. The earlier pure Halton cloud retained every point and is preserved in the <a href="../exp02-it17-hull-3d-halton-cloud-20261028-r1/index.html">initial exploratory attempt</a>.</p>
 <figure><img src="input-projections.svg" alt="Input points projected into coordinate planes x1-x2, x1-x3, and x2-x3"><figcaption>Three coordinate projections of the same 3D input; no projected hull boundary is implied.</figcaption></figure>
-<table><thead><tr>{headers}</tr></thead><tbody>{''.join(tables)}</tbody></table>
+<div class="table-wrap"><table><thead><tr>{headers}</tr></thead><tbody>{''.join(tables)}</tbody></table></div>
 <h2>Scope limits</h2>
 <ul>
 <li>One deterministic 250-point fixture; this is the first ladder cell, not the EXP-02 matrix.</li>
