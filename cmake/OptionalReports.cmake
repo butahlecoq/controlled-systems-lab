@@ -834,6 +834,14 @@ target_compile_features(csl_it17_hull_comparison_report PRIVATE cxx_std_20)
 target_compile_definitions(csl_it17_hull_comparison_report PRIVATE
   $<$<CONFIG:Release>:NDEBUG> CSL_SOURCE_COMMIT="${IT17_HULL_SOURCE_COMMIT}")
 csl_strict_warnings(csl_it17_hull_comparison_report)
+add_executable(csl_it17_hull_3d_report
+  benchmarks/reporting/it17_hull/hull_3d_driver.cpp)
+target_link_libraries(csl_it17_hull_3d_report PRIVATE
+  CSL::hull CSL::bounded_hull_checker CSL::highs_lp)
+target_compile_features(csl_it17_hull_3d_report PRIVATE cxx_std_20)
+target_compile_definitions(csl_it17_hull_3d_report PRIVATE
+  $<$<CONFIG:Release>:NDEBUG> CSL_SOURCE_COMMIT="${IT17_HULL_SOURCE_COMMIT}")
+csl_strict_warnings(csl_it17_hull_3d_report)
 endif()
 
 if(CSL_BUILD_GEO07_PORT_REPORT)

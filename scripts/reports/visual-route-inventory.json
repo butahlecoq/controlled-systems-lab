@@ -1246,6 +1246,14 @@
       "disposition": "reviewed-static-diagram-exception"
     },
     {
+      "source": "benchmarks/reporting/it17_hull/summarize_3d.py",
+      "signal_count": 3,
+      "asset_name_literals": [
+        "input-projections.svg"
+      ],
+      "disposition": "reviewed-static-diagram-exception"
+    },
+    {
       "source": "benchmarks/reporting/mpc08_explicit/explicit_double_integrator.py",
       "signal_count": 2,
       "asset_name_literals": [
@@ -1511,6 +1519,26 @@
         "halton-square-n1000.svg"
       ],
       "index_sha256": "884e59c57a2a4a18cce40630a37b6c495abbddb3ea8eda4be128262a9ee2ea79",
+      "disposition": "deferred: original frozen route-level readability review remains; companion availability is listed separately",
+      "follow_up_issue": 669
+    },
+    {
+      "route": "exp02-it17-hull-3d-halton-cloud-20261028-r1",
+      "source_bundle": "exp02-it17-hull-3d-halton-cloud-20261028-r1",
+      "assets": [
+        "input-projections.svg"
+      ],
+      "index_sha256": "d399a9e2423277751787fd12ab29b76e84c422903a61a54364a9e66340b21eec",
+      "disposition": "deferred: original frozen route-level readability review remains; companion availability is listed separately",
+      "follow_up_issue": 669
+    },
+    {
+      "route": "exp02-it17-hull-3d-simplex-20261028-r1",
+      "source_bundle": "exp02-it17-hull-3d-simplex-20261028-r1",
+      "assets": [
+        "input-projections.svg"
+      ],
+      "index_sha256": "02ca77a79382b12276690ce0ae8a864a51e4aeb25c72b2a3ea9f61281b54ca82",
       "disposition": "deferred: original frozen route-level readability review remains; companion availability is listed separately",
       "follow_up_issue": 669
     },

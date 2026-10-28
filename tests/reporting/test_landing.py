@@ -82,6 +82,15 @@ class LandingTests(unittest.TestCase):
         self.assertIn("six", family.summary)
         self.assertIn("inconclusive", family.summary)
 
+    def test_it17_3d_pilot_has_a_partial_geometry_family_description(self):
+        for report_id in (
+                "exp02-it17-hull-3d-simplex-20261028-r1",
+                "exp02-it17-hull-3d-halton-cloud-20261028-r1"):
+            family = landing.FAMILIES[landing.family_for(report_id)]
+            self.assertEqual(family.group, "geometry")
+            self.assertIn("Three of five LP reducers completed", family.summary)
+            self.assertIn("no speedup", family.summary)
+
     def test_a44_v2_description_does_not_relabel_the_historical_adaptation_route(self):
         historical = landing.FAMILIES[landing.family_for(
             "quickhull-it17-paper-adaptations-20261024-r1")]

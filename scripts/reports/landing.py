@@ -174,6 +174,12 @@ FAMILIES = {
         "Euclidean A44 interpretation; r3 separates exact hull validity from reducer "
         "classification completeness. Incomplete reductions remain visible and the performance "
         "conclusion is inconclusive."),
+    "exp02-it17-hull-3d": Family(
+        r"exp02-it17-hull-3d-(?:simplex|halton-cloud)-\d{8}-r\d+", "geometry",
+        "ITIS17 three-dimensional hull reducer pilot",
+        "Reports one tetrahedron with exact dyadic interior redundancy plus its preserved initial "
+        "pure-Halton attempt. Three of five LP reducers completed on the informative fixture; "
+        "QuickHull is unsupported in 3D, incomplete outcomes remain visible, and no speedup is claimed."),
     "geo07-generator-sets": Family(
         r"geo07-generator-sets-[0-9a-f]{16,64}", "geometry", "Generator-set evaluation",
         "Evaluates generator-set requests over three bounded public generator-set fixtures, "

@@ -35,6 +35,14 @@ jobs:
         run: python -m unittest discover -s tests/reporting -p 'test_*.py'
       - name: Validate frozen issue 3 saved measurement and projections
         run: python scripts/reports/issue3/render_saved.py --bundle reports/algorithm-results/issue3-finite-catalogue-b4632ce76510aa4f --check
+      - name: Build the ITIS17 3D hull pilot driver
+        if: needs.route.outputs.native == 'true'
+        shell: bash
+        run: |
+          cmake -S . -B build/it17-hull-3d-ci -DBUILD_TESTING=OFF -DCMAKE_BUILD_TYPE=Release \
+            -DCSL_BUILD_IT17_HULL_REPORT=ON -DCSL_ENABLE_HIGHS=ON -DCSL_ENABLE_QHULL=OFF
+          cmake --build build/it17-hull-3d-ci --config Release \
+            --target csl_it17_hull_3d_report --parallel 2
       - name: Build and smoke the APP-01 public plan-check driver
         if: needs.route.outputs.native == 'true'
         shell: bash
@@ -215,6 +223,12 @@ jobs:
             if test -d reports/algorithm-results/perf03-ts01-single-process-correlation-20261014; then
               python scripts/reports/stage_perf03.py \
                 --source reports/algorithm-results/perf03-ts01-single-process-correlation-20261014 \
+                --site build/report-site
+            fi
+            if test -d reports/algorithm-results/exp02-it17-hull-3d-simplex-20261028-r1; then
+              python scripts/reports/exp02_it17_hull3d.py \
+                --primary reports/algorithm-results/exp02-it17-hull-3d-simplex-20261028-r1 \
+                --initial reports/algorithm-results/exp02-it17-hull-3d-halton-cloud-20261028-r1 \
                 --site build/report-site
             fi
             echo 'has_reports=true' >> "$GITHUB_OUTPUT"
