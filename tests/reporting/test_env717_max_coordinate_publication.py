@@ -39,6 +39,9 @@ class MaxCoordinateGamePublicationTests(unittest.TestCase):
             figure = (destination / "projections.svg").read_text()
             self.assertIn("causal feedback-winning nodes at open-loop threshold", figure)
             self.assertIn("fixed-plan worst-case path", figure)
+            page = (destination / "index.html").read_text()
+            self.assertIn("0 warmups, n=1", page)
+            self.assertIn("not a speed comparison", page)
             self.assertIn(f"{report_id}/index.html", (site / "index.html").read_text())
 
     def test_rejects_rehashed_result_that_fails_independent_game_replay(self):

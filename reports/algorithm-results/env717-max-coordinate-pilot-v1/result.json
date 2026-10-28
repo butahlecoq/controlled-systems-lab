@@ -522,7 +522,7 @@
     "z"
   ],
   "timing": {
-    "elapsed_ns": 554474,
+    "elapsed_ns": 757714,
     "limiter_profile": "not collected; no comparative speed claim",
     "measured_calls": 1,
     "scope": "single interval from first request construction through four minimax calls, plan extraction, component JSON assembly, and objective combination; final result-object assembly and serialization excluded",

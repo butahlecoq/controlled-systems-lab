@@ -1,6 +1,6 @@
 {
   "schema": "csl.env717-capture/1",
-  "renderer_sha256": "b117314dafdc82f4423e3ef670777a61dc3c0246169b69b4ccc3d9145c27de2d",
+  "renderer_sha256": "29a968a198ae3572a26345fc613669b212e48843e78dc341438eedf438142056",
   "capture_environment": {
     "os": "Linux-7.2.5-3-omarchy-x86_64-with-glibc2.44",
     "processor": "unavailable",
