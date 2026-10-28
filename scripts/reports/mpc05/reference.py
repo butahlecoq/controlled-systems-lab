@@ -73,6 +73,16 @@ def reference() -> tuple[list[list[tuple[int, ...]]], list[list[Fraction]], list
 
 
 def verify_result(result: dict) -> dict:
+    do_mpc = result.get("do_mpc_baseline", {})
+    if (do_mpc.get("stock_formulation") != "unsupported as a worst-case minimax baseline" or
+            "worst-leaf epigraph" not in do_mpc.get("required_change", "") or
+            "full finite horizon" not in do_mpc.get("required_change", "")):
+        raise ValueError("MPC-05 do-mpc baseline disposition or required formulation change differs")
+    strict = result["strict_gap"]
+    if (strict.get("fixed_plan_value") != 2.0 or
+            strict.get("executed_replanning_value") != 2.0 or
+            strict.get("causal_policy_value") != 1.0):
+        raise ValueError("MPC-05 strict-gap fixture does not preserve the 2/2/1 policy-class values")
     item = result["two_points"]
     if (item.get("source_commit") != SOURCE_COMMIT or item.get("source_blob") != SOURCE_BLOB or
             item.get("action_codes") != list(ACTION_CODES) or
@@ -91,6 +101,42 @@ def verify_result(result: dict) -> dict:
         raise ValueError("TwoPoints Bellman optimal-action table differs from exact finite reference")
     if abs(item["open_loop_fixed_plan_value"] - float(fixed_value)) > 1e-12:
         raise ValueError("TwoPoints fixed-plan value differs from independent enumeration")
+
+    from itertools import product
+
+    def best_fixed_suffix(stage: int, start: tuple[int, ...]) -> tuple[Fraction, tuple[int, ...]]:
+        best = None
+        for plan in product(ACTION_CODES, repeat=3 - stage):
+            worst = Fraction(-1)
+            for history in product(DISTURBANCES, repeat=3 - stage):
+                state = start
+                for action, disturbance in zip(plan, history):
+                    state = step(state, action, disturbance)
+                worst = max(worst, Fraction((state[0] - state[2]) ** 2, SCALE ** 2))
+            candidate = (worst, plan)
+            if best is None or candidate < best:
+                best = candidate
+        if best is None:
+            raise ValueError("TwoPoints remaining-horizon fixed-plan set is empty")
+        return best
+
+    replan_policy = [[ACTION_CODES.index(best_fixed_suffix(t, state)[1][0]) for state in layer]
+                     for t, layer in enumerate(layers[:-1])]
+    if item["executed_replanning_policy"] != replan_policy:
+        raise ValueError("TwoPoints executed fixed-plan re-planning selector differs from exact enumeration")
+    layer_indices = [{state: i for i, state in enumerate(layer)} for layer in layers]
+
+    @lru_cache(None)
+    def replan_value(stage: int, state: tuple[int, ...]) -> Fraction:
+        if stage == 3:
+            return Fraction((state[0] - state[2]) ** 2, SCALE ** 2)
+        action = ACTION_CODES[replan_policy[stage][layer_indices[stage][state]]]
+        return max(replan_value(stage + 1, step(state, action, disturbance))
+                   for disturbance in DISTURBANCES)
+
+    if (replan_value(0, layers[0][0]) != values[0][0] or
+            abs(item["executed_replanning_value"] - float(replan_value(0, layers[0][0]))) > 1e-12):
+        raise ValueError("TwoPoints executed re-planning replay differs from independent exact enumeration")
     tree = item["causal_tree"]
     if tree["status"] != "optimal" or [len(row) for row in tree["policy"]] != [1, 9, 81]:
         raise ValueError("TwoPoints scenario-tree solution or policy shape differs")
@@ -213,9 +259,10 @@ def render_html(result: dict, figure: dict, svg: str) -> str:
 <body><h1>Finite causal minimax on TwoPointsOnParallelLines</h1>
 <p>This report runs the finite-state Bellman solver and an independent complete action–disturbance scenario-tree MILP on a short finite adaptation of an upstream differential-game RL environment. The two panels show the players’ phase planes: <code>(x1,x2)=(position₁,velocity₁)</code> and <code>(x3,x4)=(position₂,velocity₂)</code>.</p>
 <div class="metric"><strong>Fixed-plan value</strong><br>{two['open_loop_fixed_plan_value']:.8f} m²</div>
+<div class="metric"><strong>Executed fixed-plan re-planning</strong><br>{two['executed_replanning_value']:.8f} m²</div>
 <div class="metric"><strong>Causal Bellman / tree value</strong><br>{two['causal_bellman_value']:.8f} m²</div>
 <div class="metric"><strong>Tree evidence</strong><br>{tree['decision_occurrences']} decisions · {tree['leaf_occurrences']} leaves · {tree['nonanticipativity_equalities']} explicit equalities</div>
-<p>The MILP reports incumbent {tree['objective']:.8f}, global bound {tree['global_bound']:.8f}, relative gap {tree['relative_gap']:.3g}; an independent replay gives worst-case cost {tree['replayed_worst_cost']:.8f}. This finite instance has equal fixed-plan and causal values; the separate strict-gap fixture demonstrates a value difference of 2 versus 1.</p>
+<p>The MILP reports incumbent {tree['objective']:.8f}, global bound {tree['global_bound']:.8f}, relative gap {tree['relative_gap']:.3g}; an independent replay gives worst-case cost {tree['replayed_worst_cost']:.8f}. The fixed-plan re-planning selector has policy rows of sizes {[len(row) for row in two['executed_replanning_policy']]}. This finite instance has equal fixed-plan, re-planning and causal values; the separate strict-gap fixture gives fixed-plan 2, executed re-planning 2, and causal 1.</p>
 <h2>Reachability, backward winning sets, and the optimal path</h2>
 <p>The two phase-plane panels overlay forward reachable polytopes by control prefix, the terminal reachable set, robust backward-winning nodes, forward/backward intersections, and a selected worst-case trajectory. The plotted trajectory is independently confirmed to equal the worst-case path under the selected causal minimax policy. These are the same exact finite dynamics and terminal threshold checked by this report.</p>
 {svg}
@@ -225,6 +272,7 @@ def render_html(result: dict, figure: dict, svg: str) -> str:
 <li>Objective: terminal squared position gap. It is monotone-equivalent to the source absolute-gap reward for policy ordering, but this report gives squared-cost units.</li>
 <li>Claims cover only exact full-state observation and the listed finite disturbance catalogue. They do not cover continuous disturbances, state approximation, or the original continuous-control policy.</li>
 <li>The current finite-feedback report is a safety-threshold result. This report separately solves the cost-optimal causal policy.</li></ul>
+<p><strong>do-mpc formulation check:</strong> the stock multi-stage objective is a probability-weighted sum of scenario costs and its robust horizon may stop branching early. To solve this issue’s finite worst-case task, use a full-horizon tree and add a shared epigraph constrained above every terminal leaf cost. This report uses that explicit formulation in HiGHS. No do-mpc runtime or performance comparison was run. See the <a href="https://www.do-mpc.com/en/latest/theory_mpc.html">official multi-stage formulation</a>.</p>
 <p><a href="result.json">Raw result</a> · <a href="figure-data.json">Figure data</a> · <a href="capture.json">Capture metadata</a> · <a href="README.md">Reproduction notes</a></p>
 </body></html>
 '''

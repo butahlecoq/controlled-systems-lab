@@ -19,6 +19,10 @@ def main() -> None:
                                capture_output=True, text=True)
     result = json.loads(completed.stdout)
     assert result["schema"] == "csl.mpc05-causal-tree-pilot/1"
+    baseline = result["do_mpc_baseline"]
+    assert baseline["stock_formulation"] == "unsupported as a worst-case minimax baseline"
+    assert "worst-leaf epigraph" in baseline["required_change"]
+    assert "full finite horizon" in baseline["required_change"]
     module_path = Path(__file__).with_name("reference.py")
     spec = importlib.util.spec_from_file_location("mpc05_reference", module_path)
     reference = importlib.util.module_from_spec(spec)
@@ -44,6 +48,7 @@ def main() -> None:
 
     strict = result["strict_gap"]
     assert strict["fixed_plan_value"] == 2.0
+    assert strict["executed_replanning_value"] == 2.0
     assert strict["bellman_value"] == 1.0
     assert strict["causal_policy_value"] == 1.0
     assert strict["tree"]["status"] == "optimal"
@@ -70,6 +75,7 @@ def main() -> None:
     assert two_points["causal_tree"]["status"] == "optimal"
     assert two_points["causal_tree"]["decision_occurrences"] == 91
     assert two_points["causal_tree"]["leaf_occurrences"] == 729
+    assert [len(row) for row in two_points["executed_replanning_policy"]] == [1, 9, 81]
 
     actions = (-1, 0, 1)
     disturbances = (-1, 0, 1)
@@ -115,6 +121,41 @@ def main() -> None:
     assert fixed_value == causal_value_exact == Fraction(58_323_769, 4_000_000)
     assert abs(two_points["open_loop_fixed_plan_value"] - float(fixed_value)) < 1e-12
     assert abs(two_points["causal_bellman_value"] - float(causal_value_exact)) < 1e-12
+    state_ids = [{state: index for index, state in enumerate(layer)} for layer in layers]
+
+    def best_fixed_suffix(stage: int, start: tuple[int, ...]) -> tuple[Fraction, tuple[int, ...]]:
+        best = None
+        for plan in product(actions, repeat=3 - stage):
+            worst = Fraction(-1)
+            for history in product(disturbances, repeat=3 - stage):
+                state = start
+                for action, disturbance in zip(plan, history):
+                    state = step(state, action, disturbance)
+                worst = max(worst, terminal_cost(state))
+            candidate = (worst, plan)
+            if best is None or candidate < best:
+                best = candidate
+        assert best is not None
+        return best
+
+    replanning_policy = []
+    for stage, layer in enumerate(layers[:-1]):
+        replanning_policy.append([
+            actions.index(best_fixed_suffix(stage, state)[1][0]) for state in layer
+        ])
+
+    @lru_cache(None)
+    def executed_replanning(stage: int, state: tuple[int, ...]) -> Fraction:
+        if stage == 3:
+            return terminal_cost(state)
+        action_index = state_ids[stage][state]
+        action = actions[replanning_policy[stage][action_index]]
+        return max(executed_replanning(stage + 1, step(state, action, disturbance))
+                   for disturbance in disturbances)
+
+    assert two_points["executed_replanning_policy"] == replanning_policy
+    assert executed_replanning(0, layers[0][0]) == causal_value_exact
+    assert abs(two_points["executed_replanning_value"] - float(executed_replanning(0, layers[0][0]))) < 1e-12
     assert abs(two_points["causal_tree"]["objective"] - float(causal_value_exact)) < 1e-8
     assert abs(two_points["causal_tree"]["global_bound"] - float(causal_value_exact)) < 1e-8
     assert abs(two_points["causal_tree"]["replayed_worst_cost"] - float(causal_value_exact)) < 1e-8

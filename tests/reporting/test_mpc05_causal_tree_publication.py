@@ -17,7 +17,7 @@ SPEC.loader.exec_module(stage_report)
 
 class Mpc05PublicationTests(unittest.TestCase):
     def test_report_rerenders_stages_and_downloads_offline(self) -> None:
-        source = ROOT / "reports/algorithm-results/mpc05-causal-tree-pilot-v1"
+        source = ROOT / "reports/algorithm-results/mpc05-causal-tree-pilot-v2"
         with tempfile.TemporaryDirectory(prefix="mpc05-publication-test-") as temporary:
             root = Path(temporary)
             bundle = root / source.name
@@ -39,7 +39,7 @@ class Mpc05PublicationTests(unittest.TestCase):
                 self.assertIn(f"{report_id}/publication-manifest.json", names)
 
     def test_rejects_modified_saved_result(self) -> None:
-        source = ROOT / "reports/algorithm-results/mpc05-causal-tree-pilot-v1"
+        source = ROOT / "reports/algorithm-results/mpc05-causal-tree-pilot-v2"
         with tempfile.TemporaryDirectory(prefix="mpc05-tamper-test-") as temporary:
             bundle = Path(temporary) / source.name
             shutil.copytree(source, bundle)

@@ -92,9 +92,19 @@ double replay_worst(const Game& game, const std::vector<std::vector<int>>& polic
     return worst;
 }
 
-double fixed_plan_value(const Game& game) {
+struct FixedPlan {
+    double value;
+    std::vector<std::size_t> actions;
+};
+
+FixedPlan best_fixed_plan(const Game& game, std::size_t start_stage, std::size_t start_state) {
+    if(start_stage == game.stages.size())
+        return {game.terminal.safe_states[start_state] ? game.terminal.cost[start_state]
+                                                       : std::numeric_limits<double>::infinity(), {}};
+    if(!game.stages[start_stage].safe_states[start_state])
+        return {std::numeric_limits<double>::infinity(), {}};
     double best = std::numeric_limits<double>::infinity();
-    std::vector<std::size_t> plan(game.stages.size());
+    std::vector<std::size_t> plan(game.stages.size() - start_stage);
     std::function<double(std::size_t, std::size_t)> worst_for_plan;
     worst_for_plan = [&](std::size_t stage_index, std::size_t state) {
         if(stage_index == game.stages.size())
@@ -103,23 +113,63 @@ double fixed_plan_value(const Game& game) {
         const auto& stage = game.stages[stage_index];
         if(!stage.safe_states[state]) return std::numeric_limits<double>::infinity();
         double worst = -std::numeric_limits<double>::infinity();
-        for(const StateId next : stage.next_state[state][plan[stage_index]])
+        for(const StateId next : stage.next_state[state][plan[stage_index - start_stage]])
             worst = std::max(worst, worst_for_plan(stage_index + 1, next.value));
         return worst;
     };
+    std::vector<std::size_t> best_plan;
     std::function<void(std::size_t)> enumerate_plans;
     enumerate_plans = [&](std::size_t stage_index) {
         if(stage_index == game.stages.size()) {
-            best = std::min(best, worst_for_plan(0, game.initial_state.value));
+            const double candidate = worst_for_plan(start_stage, start_state);
+            if(candidate < best) {
+                best = candidate;
+                best_plan = plan;
+            }
             return;
         }
         for(std::size_t action = 0; action < game.stages[stage_index].action_count; ++action) {
-            plan[stage_index] = action;
+            plan[stage_index - start_stage] = action;
             enumerate_plans(stage_index + 1);
         }
     };
-    enumerate_plans(0);
-    return best;
+    enumerate_plans(start_stage);
+    return {best, std::move(best_plan)};
+}
+
+double fixed_plan_value(const Game& game) {
+    return best_fixed_plan(game, 0, game.initial_state.value).value;
+}
+
+double executed_replanning_value(const Game& game, std::size_t stage, std::size_t state,
+                                std::map<std::pair<std::size_t, std::size_t>, double>& memo) {
+    if(stage == game.stages.size())
+        return game.terminal.safe_states[state] ? game.terminal.cost[state]
+                                                : std::numeric_limits<double>::infinity();
+    const auto key = std::pair{stage, state};
+    if(const auto found = memo.find(key); found != memo.end()) return found->second;
+    const auto plan = best_fixed_plan(game, stage, state);
+    if(plan.actions.empty() || !std::isfinite(plan.value))
+        return memo[key] = std::numeric_limits<double>::infinity();
+    const auto& stage_model = game.stages[stage];
+    double worst = -std::numeric_limits<double>::infinity();
+    for(const StateId next : stage_model.next_state[state][plan.actions.front()])
+        worst = std::max(worst, executed_replanning_value(game, stage + 1, next.value, memo));
+    return memo[key] = worst;
+}
+
+std::pair<double, std::vector<std::vector<int>>> executed_replanning_policy(const Game& game) {
+    std::vector<std::vector<int>> policy(game.stages.size());
+    for(std::size_t stage = 0; stage < game.stages.size(); ++stage) {
+        policy[stage].resize(game.stages[stage].state_count, -1);
+        for(std::size_t state = 0; state < game.stages[stage].state_count; ++state) {
+            const auto plan = best_fixed_plan(game, stage, state);
+            if(!plan.actions.empty() && std::isfinite(plan.value))
+                policy[stage][state] = static_cast<int>(plan.actions.front());
+        }
+    }
+    std::map<std::pair<std::size_t, std::size_t>, double> memo;
+    return {executed_replanning_value(game, 0, game.initial_state.value, memo), std::move(policy)};
 }
 
 TreeResult solve_tree(const Game& game) {
@@ -346,10 +396,12 @@ json run_two_points() {
     const auto& reference = std::get<Result>(bellman);
     const auto tree = solve_tree(game);
     const double open_loop = fixed_plan_value(game);
+    const auto [replanning_value, replanning_policy] = executed_replanning_policy(game);
     if(!tree.optimal || std::abs(tree.objective - reference.initial().value) > 1e-8 ||
        std::abs(tree.bound - reference.initial().value) > 1e-8 ||
        std::abs(tree.replayed_worst_cost - reference.initial().value) > 1e-8 ||
-       std::abs(open_loop - 14.58094225) > 1e-8)
+       std::abs(open_loop - 14.58094225) > 1e-8 ||
+       std::abs(replanning_value - reference.initial().value) > 1e-8)
         throw std::runtime_error("TwoPoints Bellman/tree/open-loop values disagree with the source-derived finite case");
     json layer_counts = json::array(), states = json::array(), values = json::array();
     json optimal_actions = json::array();
@@ -379,6 +431,7 @@ json run_two_points() {
             {"layer_state_counts", std::move(layer_counts)}, {"layer_states_lattice_scale_2000", states},
             {"bellman_cost_to_go", std::move(values)}, {"bellman_optimal_actions", std::move(optimal_actions)},
             {"open_loop_fixed_plan_value", open_loop}, {"causal_bellman_value", reference.initial().value},
+            {"executed_replanning_value", replanning_value}, {"executed_replanning_policy", replanning_policy},
             {"causal_tree", optimizer_json(tree)}};
 }
 
@@ -397,12 +450,14 @@ json run_strict_gap() {
     const auto& reference = std::get<Result>(bellman);
     const auto tree = solve_tree(game);
     const double fixed_value = fixed_plan_value(game);
+    const auto [replanning_value, replanning_policy] = executed_replanning_policy(game);
     if(!tree.optimal || reference.initial().value != 1.0 || tree.objective != reference.initial().value ||
        tree.bound != reference.initial().value || tree.replayed_worst_cost != reference.initial().value ||
-       fixed_value != 2.0)
+       fixed_value != 2.0 || replanning_value != 2.0)
         throw std::runtime_error("strict-gap Bellman, tree and policy-class values disagree");
     return {{"bellman_value", reference.initial().value}, {"bellman_actions", {0}},
-            {"fixed_plan_value", fixed_value}, {"causal_policy_value", tree.objective},
+            {"fixed_plan_value", fixed_value}, {"executed_replanning_value", replanning_value},
+            {"executed_replanning_policy", replanning_policy}, {"causal_policy_value", tree.objective},
             {"tree", optimizer_json(tree)}};
 }
 
@@ -435,7 +490,11 @@ json run_lookahead() {
 json run() {
     return {{"schema", "csl.mpc05-causal-tree-pilot/1"},
             {"strict_gap", run_strict_gap()}, {"merged_state", run_merged_state()},
-            {"current_disturbance_lookahead", run_lookahead()}, {"two_points", run_two_points()}};
+            {"current_disturbance_lookahead", run_lookahead()}, {"two_points", run_two_points()},
+            {"do_mpc_baseline", { {"stock_formulation", "unsupported as a worst-case minimax baseline"},
+                {"required_change", "replace weighted scenario-sum objective with a worst-leaf epigraph; set robust horizon to the full finite horizon"},
+                {"selected_implementation", "complete explicit HiGHS extensive-form MIP with state-based nonanticipativity equalities"},
+                {"performance_comparison", "not measured"} }} };
 }
 }
 

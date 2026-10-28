@@ -103,6 +103,7 @@ FROZEN_COMPANIONS = {
 FROZEN_ROUTE_FOLLOW_UP_ISSUES = {
     # This report's phase-plane figure is owned and reviewed with MPC-05.
     "mpc05-causal-tree-pilot-v1": 601,
+    "mpc05-causal-tree-pilot-v2": 601,
     # The paired synthesis profile is a control-family report and its current
     # readability follow-up belongs to the active control/witness migration.
     "exp02-paired-profiles-20261027-r1": 686,

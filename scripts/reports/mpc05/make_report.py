@@ -106,7 +106,9 @@ The applied example has three 0.1-second stages, finite controls `{-2.5, 0, 2.5}
 
 The upstream environment uses continuous controls over 10 seconds. This three-stage finite adaptation is not an RL reproduction and does not establish a continuous-control or continuous-disturbance guarantee. The original source code is not copied.
 
-The causal value is `{two['causal_bellman_value']:.8f}` and the open-loop fixed-plan value is `{two['open_loop_fixed_plan_value']:.8f}`. These values coincide for this adaptation. The separate strict-gap fixture demonstrates a finite policy-class difference (fixed-plan value 2, causal value 1). The report includes no runtime or comparative performance claim.
+The causal value is `{two['causal_bellman_value']:.8f}`, the open-loop fixed-plan value is `{two['open_loop_fixed_plan_value']:.8f}`, and the executed fixed-plan re-planning value is `{two['executed_replanning_value']:.8f}`. These values coincide for this adaptation. The separate strict-gap fixture gives fixed-plan 2, executed re-planning 2, and causal value 1. No runtime or comparative performance claim is made.
+
+The stock do-mpc multi-stage formulation is not used as a worst-case baseline: its documented objective is a weighted scenario sum and its robust horizon may truncate branching. A worst-leaf epigraph and full-horizon branching are required for this finite exact comparison. We use an explicit complete HiGHS tree. The report does not claim that a custom do-mpc extension is impossible and does not run a do-mpc performance comparison. The [official formulation](https://www.do-mpc.com/en/latest/theory_mpc.html) also distinguishes finite scenarios from continuous uncertainty guarantees. The existing [adaptive-policy proof audit](../../../docs/research/adaptive-policy-proof-audit.md) exhibits an interior worst disturbance, so finite vertices alone do not certify the continuous case.
 
 Reproduce from the repository root with the recorded CMake Release build:
 

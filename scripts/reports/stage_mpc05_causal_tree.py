@@ -11,7 +11,7 @@ import tempfile
 import zipfile
 
 ROOT = Path(__file__).resolve().parents[2]
-SOURCE = ROOT / "reports/algorithm-results/mpc05-causal-tree-pilot-v1"
+SOURCE = ROOT / "reports/algorithm-results/mpc05-causal-tree-pilot-v2"
 CHECKER_PATH = ROOT / "scripts/reports/mpc05/reference.py"
 spec = importlib.util.spec_from_file_location("mpc05_causal_reference", CHECKER_PATH)
 reference = importlib.util.module_from_spec(spec)
