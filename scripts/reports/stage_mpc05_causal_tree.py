@@ -72,7 +72,7 @@ def stage(source: Path, site: Path) -> str:
     saved_page = generated["index.html"].decode("utf-8")
     footer = (f'<p>Immutable report <code>{route}</code> · '
               '<a href="publication-manifest.json">Publication manifest</a>.</p>')
-    generated["index.html"] = saved_page.replace("</body>", footer + "</body>")
+    generated["index.html"] = saved_page.replace("</body>", footer + "</body>").encode("utf-8")
     generated["SHA256SUMS"] = "".join(
         f"{digest(generated[name])}  {name}\n" for name in sorted(generated)
         if name != "SHA256SUMS").encode("ascii")
