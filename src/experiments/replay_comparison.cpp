@@ -120,6 +120,26 @@ Json replay_json(const simulation::ReplayRecord& replay) {
     Json hold = replay.hold ? Json("constant_on_interval") : Json(nullptr);
     Json initial = replay.declared_initial_state ? Json(*replay.declared_initial_state) : Json(nullptr);
     Json objective = replay.original_objective ? Json(*replay.original_objective) : Json(nullptr);
+    Json residual = std::visit([](const auto& evidence) -> Json {
+        using T = std::decay_t<decltype(evidence)>;
+        if constexpr (std::is_same_v<T, simulation::IntegrationResidualNotApplicable>) {
+            return {{"status", "not_applicable"}};
+        } else if constexpr (std::is_same_v<T, simulation::IntegrationResidualUnavailable>) {
+            const auto reason = evidence.reason == simulation::IntegrationResidualUnavailableReason::legacy_artifact
+                ? "legacy_artifact" : "not_recorded";
+            return {{"status", "unavailable"}, {"reason", reason}};
+        } else {
+            Json measurements = Json::array();
+            for (const auto& item : evidence.measurements)
+                measurements.push_back({{"name", item.name}, {"value", item.value}, {"unit", item.unit}});
+            return {{"status", "available"}, {"definition", evidence.definition},
+                {"measurements", std::move(measurements)}};
+        }
+    }, replay.integration_residual);
+    Json numerical = replay.numerical
+        ? Json{{"absolute_tolerance", replay.numerical->absolute_tolerance},
+            {"relative_tolerance", replay.numerical->relative_tolerance}}
+        : Json(nullptr);
     return {{"status", replay_status(replay.status)},
         {"plant", {{"name", replay.plant.name}, {"version", replay.plant.version}, {"source", replay.plant.source}}},
         {"parameters", std::move(parameters)}, {"initial_state", std::move(initial)},
@@ -127,6 +147,7 @@ Json replay_json(const simulation::ReplayRecord& replay) {
         {"state_units", replay.state_units}, {"control_units", replay.control_units},
         {"objective_name", replay.objective_name}, {"objective_unit", replay.objective_unit},
         {"integration", std::move(integration)}, {"control_hold", std::move(hold)},
+        {"numerical_policy", std::move(numerical)}, {"integration_residual", std::move(residual)},
         {"controls", history_json(replay.controls)}, {"states", history_json(replay.states)},
         {"original_objective", std::move(objective)},
         {"replay_time_ns", std::chrono::duration_cast<std::chrono::nanoseconds>(replay.replay_time).count()},
@@ -155,7 +176,7 @@ Json comparison_json(const ReplayComparison& comparison) {
         controls.push_back(annotation_json(item));
     const auto axis_kind = comparison.state_axis.kind == artifacts::PlotAxis::Kind::stage
         ? "stage" : "physical_time";
-    return {{"schema", "csl.viz04-replay-comparison/1"},
+    return {{"schema", "csl.viz04-replay-comparison/2"},
         {"source_run", {{"run", comparison.source_run.run.value},
             {"content_sha256", problem::hex(comparison.source_run.content_digest)}}},
         {"problem", comparison.problem.value}, {"strategy", comparison.witnesses.empty()
@@ -266,8 +287,39 @@ bool evidence_document(const Json& evidence) {
     return true;
 }
 
+bool numerical_policy_document(const Json& policy) {
+    return policy.is_null() || (policy.is_object() && policy.size() == 2 &&
+        policy.contains("absolute_tolerance") && finite_number(policy["absolute_tolerance"]) &&
+        policy["absolute_tolerance"].get<double>() >= 0.0 &&
+        policy.contains("relative_tolerance") && finite_number(policy["relative_tolerance"]) &&
+        policy["relative_tolerance"].get<double>() >= 0.0);
+}
+
+bool integration_residual_document(const Json& residual) {
+    if (!residual.is_object() || !residual.contains("status") || !residual["status"].is_string()) return false;
+    const auto status = residual["status"].get<std::string>();
+    if (status == "not_applicable") return residual.size() == 1;
+    if (status == "unavailable")
+        return residual.size() == 2 && residual.contains("reason") && residual["reason"].is_string() &&
+            (residual["reason"] == "legacy_artifact" || residual["reason"] == "not_recorded");
+    if (status != "available" || residual.size() != 3 || !residual.contains("definition") ||
+        !residual["definition"].is_string() || residual["definition"].get<std::string>().empty() ||
+        !residual.contains("measurements") || !residual["measurements"].is_array() ||
+        residual["measurements"].empty()) return false;
+    std::set<std::string> names;
+    for (const auto& measurement : residual["measurements"])
+        if (!measurement.is_object() || measurement.size() != 3 ||
+            !measurement.contains("name") || !measurement["name"].is_string() ||
+            measurement["name"].get<std::string>().empty() ||
+            !names.insert(measurement["name"].get<std::string>()).second ||
+            !measurement.contains("value") || !finite_number(measurement["value"]) ||
+            !measurement.contains("unit") || !measurement["unit"].is_string() ||
+            measurement["unit"].get<std::string>().empty()) return false;
+    return true;
+}
+
 bool replay_document(const Json& replay, std::size_t state_dimensions,
-    std::size_t control_dimensions, std::size_t linear_intervals) {
+    std::size_t control_dimensions, std::size_t linear_intervals, bool version_two) {
     if (!replay.is_object() || !replay.contains("status") || !replay["status"].is_string() ||
         !replay.contains("plant") || !replay["plant"].is_object() ||
         !replay.contains("parameters") || !replay["parameters"].is_array() ||
@@ -284,7 +336,11 @@ bool replay_document(const Json& replay, std::size_t state_dimensions,
         !replay.contains("original_objective") || !replay.contains("replay_time_ns") ||
         !replay["replay_time_ns"].is_number_integer() || !replay.contains("missing_prerequisites") ||
         !string_array(replay["missing_prerequisites"]) || !replay.contains("diagnostics") ||
-        !replay["diagnostics"].is_array()) return false;
+        !replay["diagnostics"].is_array() ||
+        (version_two && (!replay.contains("numerical_policy") ||
+            !numerical_policy_document(replay["numerical_policy"]) ||
+            !replay.contains("integration_residual") ||
+            !integration_residual_document(replay["integration_residual"])))) return false;
     if (!replay["replay_time_ns"].is_number_unsigned() &&
         replay["replay_time_ns"].get<std::int64_t>() < 0) return false;
     const auto& plant = replay["plant"];
@@ -295,6 +351,8 @@ bool replay_document(const Json& replay, std::size_t state_dimensions,
             !parameter.contains("value") || !finite_number(parameter["value"]) ||
             !parameter.contains("unit") || !parameter["unit"].is_string()) return false;
     if (!replay["initial_state"].is_null() && !finite_vector(replay["initial_state"])) return false;
+    if (version_two && replay["integration"] == "exact_discrete_map" &&
+        replay["integration_residual"]["status"] != "not_applicable") return false;
     for (const auto& diagnostic : replay["diagnostics"])
         if (!diagnostic.is_object() || !diagnostic.contains("code") || !diagnostic["code"].is_string() ||
             !diagnostic.contains("field") || !diagnostic["field"].is_string() ||
@@ -323,7 +381,10 @@ bool replay_document(const Json& replay, std::size_t state_dimensions,
 }
 
 bool comparison_document(const Json& document) {
-    if (!document.is_object() || document.value("schema", std::string{}) != "csl.viz04-replay-comparison/1" ||
+    const auto schema = document.is_object() && document.contains("schema") && document["schema"].is_string()
+        ? document["schema"].get<std::string>() : std::string{};
+    const bool version_two = schema == "csl.viz04-replay-comparison/2";
+    if (!document.is_object() || (!version_two && schema != "csl.viz04-replay-comparison/1") ||
         !document.contains("source_run") || !document["source_run"].is_object() ||
         !document.contains("problem") || !document["problem"].is_string() || document["problem"].get<std::string>().empty() ||
         !document.contains("strategy") || !document["strategy"].is_string() || document["strategy"].get<std::string>().empty() ||
@@ -366,7 +427,7 @@ bool comparison_document(const Json& document) {
             !finite_number(witness["linear_objective"]) || !witness.contains("linear_evidence") ||
             !evidence_document(witness["linear_evidence"]) || !witness.contains("replay") ||
             !replay_document(witness["replay"], document["state_coordinates"].size(),
-                document["control_coordinates"].size(), witness["linear_controls"].size()) ||
+                document["control_coordinates"].size(), witness["linear_controls"].size(), version_two) ||
             witness["linear_states"].size() != witness["linear_controls"].size() + 1 ||
             witness["linear_states"].size() < 2 ||
             witness["linear_states"].size() != axis["points"].size() ||
@@ -532,7 +593,11 @@ artifacts::ArtifactResult<ReplayTrajectoryPair> project_replay_trajectories(
 artifacts::ArtifactResult<problem::ResolvedContent> encode_replay_comparison(
     const ReplayComparison& comparison, artifacts::EncodeLimits limits) {
     try {
-        const auto text = comparison_json(comparison).dump(2, ' ', false, Json::error_handler_t::strict) + "\n";
+        const auto document = comparison_json(comparison);
+        if (!comparison_document(document))
+            return error(artifacts::ArtifactErrorCode::invalid_input, "replay_comparison",
+                "Comparison does not satisfy the replay artifact schema");
+        const auto text = document.dump(2, ' ', false, Json::error_handler_t::strict) + "\n";
         if (text.size() > limits.bytes)
             return error(artifacts::ArtifactErrorCode::limit, "replay_comparison", "Replay artifact exceeds its byte limit");
         auto content = problem::snapshot_content({reinterpret_cast<const std::byte*>(text.data()), text.size()});
@@ -584,7 +649,7 @@ artifacts::ArtifactResult<problem::ResolvedContent> decode_replay_comparison(
         });
         if (!comparison_document(document))
             return error(artifacts::ArtifactErrorCode::invalid_input, "replay_comparison.schema",
-                "Document does not match csl.viz04-replay-comparison/1");
+                "Document does not match csl.viz04-replay-comparison/1 or /2");
         auto content = problem::snapshot_content({reinterpret_cast<const std::byte*>(text.data()), text.size()});
         if (const auto* failure = std::get_if<Diagnostic>(&content))
             return error(artifacts::ArtifactErrorCode::invalid_input, "replay_comparison", failure->explanation);
