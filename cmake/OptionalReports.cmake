@@ -384,6 +384,7 @@ set_property(DIRECTORY APPEND PROPERTY CMAKE_CONFIGURE_DEPENDS
     ${CMAKE_CURRENT_SOURCE_DIR}/benchmarks/reporting/env717/max_coordinate.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/benchmarks/reporting/env717/air_to_air.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/benchmarks/reporting/env717/sphere_game.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/benchmarks/scenarios/env717-sphere-game-pilot-v1.json
     ${ENV717_LIBRARY_INPUTS})
 file(SHA256 ${CMAKE_CURRENT_SOURCE_DIR}/benchmarks/reporting/env717/simple_control.cpp
     ENV717_DRIVER_SHA256)
@@ -397,6 +398,8 @@ file(SHA256 ${CMAKE_CURRENT_SOURCE_DIR}/benchmarks/reporting/env717/air_to_air.c
     ENV717_AIR_DRIVER_SHA256)
 file(SHA256 ${CMAKE_CURRENT_SOURCE_DIR}/benchmarks/reporting/env717/sphere_game.cpp
     ENV717_SPHERE_GAME_DRIVER_SHA256)
+file(SHA256 ${CMAKE_CURRENT_SOURCE_DIR}/benchmarks/scenarios/env717-sphere-game-pilot-v1.json
+    ENV717_SPHERE_GAME_SCENARIO_SHA256)
 execute_process(COMMAND git status --porcelain -- src include
     WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
     OUTPUT_VARIABLE ENV717_LIBRARY_DIRTY OUTPUT_STRIP_TRAILING_WHITESPACE
@@ -491,7 +494,8 @@ target_compile_definitions(csl_env717_sphere_game PRIVATE
     CSL_ENV717_SPHERE_BUILD_TYPE="${CMAKE_BUILD_TYPE}"
     CSL_ENV717_SPHERE_ARCHITECTURE="${CMAKE_SYSTEM_PROCESSOR}"
     CSL_ENV717_SPHERE_ALGORITHM_SOURCE_SHA256="${ENV717_ALGORITHM_SOURCE_SHA256}"
-    CSL_ENV717_SPHERE_SOURCE_COMMIT="${ENV717_SOURCE_COMMIT}")
+    CSL_ENV717_SPHERE_SOURCE_COMMIT="${ENV717_SOURCE_COMMIT}"
+    CSL_ENV717_SPHERE_SCENARIO_SHA256="${ENV717_SPHERE_GAME_SCENARIO_SHA256}")
 if(MSVC)
     target_compile_options(csl_env717_simple_control PRIVATE /W4 /WX /permissive-)
     target_compile_options(csl_env717_two_points PRIVATE /W4 /WX /permissive-)

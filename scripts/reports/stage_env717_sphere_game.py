@@ -19,7 +19,7 @@ assert spec.loader is not None
 spec.loader.exec_module(checker)
 
 FILES = ("README.md", "capture.json", "figure-data.json", "index.html",
-         "projections.svg", "result.json", "SHA256SUMS")
+         "projections.svg", "result.json", "scenario.json", "SHA256SUMS")
 SOURCE_COMMIT = "f4d76c60f4003f50954174e96eafd8e514bd5441"
 
 
@@ -57,6 +57,8 @@ def _inputs(source: Path) -> tuple[dict[str, bytes], dict]:
         raise ValueError("environment report schema differs")
     if result.get("source_repository_commit") != SOURCE_COMMIT:
         raise ValueError("upstream environment source commit differs")
+    if files["scenario.json"] != checker.SCENARIO.read_bytes():
+        raise ValueError("saved scenario input differs from the versioned fixture")
     for field in ("driver_sha256", "algorithm_source_sha256", "source_commit"):
         value = result.get(field)
         expected_length = 40 if field == "source_commit" else 64
@@ -138,6 +140,9 @@ def stage(source: Path, site_root: Path) -> str:
                 "source_report_id": source.name,
                 "source_repository_commit": SOURCE_COMMIT,
                 "source_commit": result["source_commit"],
+                "scenario_sha256": result["scenario_sha256"],
+                "arithmetic": result["numerics"]["arithmetic"],
+                "numerics": result["numerics"],
                 "result_sha256": _digest(files["result.json"]),
                 "stager_sha256": stager_sha256,
                 "source_files": {name: _digest(content)

@@ -40,17 +40,23 @@ class SphereGamePublicationTests(unittest.TestCase):
         manifest = json.loads((destination / "publication-manifest.json").read_text())
         self.assertEqual(manifest["report_id"], report_id)
         self.assertEqual(manifest["source_repository_commit"], stage_module.SOURCE_COMMIT)
+        self.assertEqual(manifest["scenario_sha256"],
+                         hashlib.sha256((destination / "scenario.json").read_bytes()).hexdigest())
+        self.assertEqual(manifest["numerics"]["independent_replay_absolute_tolerance"], 1e-12)
         for name, digest in manifest["published_files"].items():
             self.assertEqual(hashlib.sha256((destination / name).read_bytes()).hexdigest(), digest)
         with zipfile.ZipFile(self.site / f"{report_id}.zip") as archive:
             self.assertIsNone(archive.testzip())
             self.assertIn(f"{report_id}/projections.svg", archive.namelist())
+            self.assertIn(f"{report_id}/scenario.json", archive.namelist())
         figure = (destination / "projections.svg").read_text()
         self.assertIn("causal feedback-winning nodes at open-loop threshold", figure)
         self.assertIn("fixed-plan worst-case path", figure)
         page = (destination / "index.html").read_text()
         self.assertIn("source reward", page)
         self.assertIn("zero warmups, n=1", page)
+        self.assertIn("Scenario input SHA-256", page)
+        self.assertIn("Scenario input", page)
         index = (self.site / "index.html").read_text()
         for name in ("index.html", "result.json", "projections.svg"):
             self.assertIn(f'href="{report_id}/{name}"', index)

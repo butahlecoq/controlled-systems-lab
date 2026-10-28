@@ -76,6 +76,7 @@ Json result() {
     Json minimizing = Json::array();
     for(const auto index : optimum->minimizing_plan_indices) minimizing.push_back(index);
     return {{"schema", "csl.env717-sphere-game-pilot/1"},
+        {"case_id", "env717-sphere-game-short-horizon-v1"},
         {"source_repository_commit", "f4d76c60f4003f50954174e96eafd8e514bd5441"},
         {"source_file_blob", "dd8ff3ce718570f05288dc4d8d343a8784ca2327"},
         {"source_license", "no license declared in repository metadata"},
@@ -93,6 +94,12 @@ Json result() {
             {"backward_geometry_information_pattern", "causal state-feedback control on the finite reachable graph; separate from the fixed-plan minimax solve"},
             {"backward_geometry_target", "terminal Euclidean norm no greater than the fixed-plan open-loop minimax norm"}}},
         {"algorithm", "csl.finite-action-minimax.numerical"},
+        {"scenario_file", "benchmarks/scenarios/env717-sphere-game-pilot-v1.json"},
+        {"scenario_sha256", CSL_ENV717_SPHERE_SCENARIO_SHA256},
+        {"numerics", {{"arithmetic", "IEEE-754 binary64; explicit-Euler source-step equations; terminal norm evaluated with std::hypot"},
+            {"finite_minimax_near_optimal_absolute_tolerance", 1e-12},
+            {"independent_replay_absolute_tolerance", 1e-12},
+            {"feedback_terminal_threshold_absolute_tolerance", 1e-12}}},
         {"assurance", "numerical; exhaustive over all 27 fixed plans and 27 disturbance sequences per plan"},
         {"environment", {{"compiler_id", CSL_ENV717_SPHERE_COMPILER_ID},
             {"compiler_version", CSL_ENV717_SPHERE_COMPILER_VERSION},

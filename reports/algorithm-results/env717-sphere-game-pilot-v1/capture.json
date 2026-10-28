@@ -1,8 +1,9 @@
 {
   "schema": "csl.env717-capture/1",
-  "renderer_sha256": "00530944605c73102db6385aa078b420e8bf7320bc4a573609e4e7434ef4c6aa",
+  "renderer_sha256": "35f467834b0b011c7ba98d9d3b73354db11da164563963f73da66823db9befa7",
+  "scenario_sha256": "73da1f33b61b4acb4875645668f5de07872333f75f40d6f814c8be0c2177197c",
   "capture_environment": {
-    "os": "Linux-7.2.5-3-omarchy-x86_64-with-glibc2.44",
+    "os": "Linux-7.2.8-9-omarchy-x86_64-with-glibc2.44",
     "processor": "unavailable",
     "processor_identity_source": "Python platform.processor; fallback unavailable",
     "logical_cpus": 8

@@ -20,6 +20,7 @@ U = (-0.25, 0.0, 0.25)
 V = (-0.5, 0.0, 0.5)
 SOURCE_COMMIT = "f4d76c60f4003f50954174e96eafd8e514bd5441"
 SOURCE_BLOB = "dd8ff3ce718570f05288dc4d8d343a8784ca2327"
+SCENARIO = Path(__file__).resolve().parents[3] / "benchmarks/scenarios/env717-sphere-game-pilot-v1.json"
 
 
 def advance(state: tuple[float, ...], u: float, v: float) -> tuple[float, ...]:
@@ -71,6 +72,20 @@ def verify_record(actual: dict) -> dict:
     assert actual["schema"] == "csl.env717-sphere-game-pilot/1"
     assert actual["source_repository_commit"] == SOURCE_COMMIT
     assert actual["source_file_blob"] == SOURCE_BLOB
+    scenario_bytes = SCENARIO.read_bytes()
+    scenario = json.loads(scenario_bytes)
+    assert actual["scenario_file"] == "benchmarks/scenarios/env717-sphere-game-pilot-v1.json"
+    assert actual["scenario_sha256"] == hashlib.sha256(scenario_bytes).hexdigest()
+    assert scenario["schema"] == "csl.env717-sphere-game-input/1"
+    assert scenario["scenario_id"] == actual["case_id"]
+    assert scenario["source"]["commit"] == actual["source_repository_commit"]
+    assert scenario["source"]["blob"] == actual["source_file_blob"]
+    assert scenario["source_model"]["state_order"] == actual["state_order"]
+    for field in ("initial_state", "dt_seconds", "horizon_seconds", "control_u_bounds",
+                  "disturbance_v_bounds", "dynamics", "reward"):
+        assert scenario["source_model"][field] == actual["source_model"][field]
+    assert scenario["adaptation"] == actual["adaptation"]
+    assert scenario["numerics"] == actual["numerics"]
     model = actual["source_model"]
     assert model["initial_state"] == list(INITIAL)
     assert math.isclose(model["dt_seconds"], DT, abs_tol=1e-15)
@@ -134,7 +149,7 @@ def page(result: dict, figure: str, host: dict) -> str:
     upstream = f"https://github.com/imm-rl-lab/optimal_control/blob/{SOURCE_COMMIT}/Environments/SphereGame/SphereGame.py"
     source = f"https://github.com/butahlecoq/controlled-systems-lab/tree/{result['source_commit']}"
     timing = result["timing"]
-    return f'''<!doctype html><html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>SphereGame minimax pilot</title><style>body{{margin:0;background:#111820;color:#f4f1e8;font:16px/1.55 system-ui,sans-serif}}main{{max-width:1100px;margin:auto;padding:2rem}}svg{{width:100%;height:auto}}.note{{border-left:4px solid #f4a261;padding:.7rem 1rem;background:#1a252e}}a{{color:#8bd3f7}}</style><main><h1>SphereGame: reachability and minimax</h1><p>The source reward is the terminal Euclidean norm of (y,z) minus 4. CSL's residual-norm terminal objective represents the norm directly; subtracting 4 preserves the minimax plan and gives the source reward value.</p><div>{figure}</div><p class="note"><strong>Adaptation:</strong> the source uses continuous controls over 8 seconds. This pilot uses three 0.1-second stages and finite catalogues drawn from the source action bounds. The controller commits to an open-loop plan before the disturbance sequence is chosen. This is not a reproduction of the original RL run.</p><p>Minimax norm: {result['objective_value']:.10g}; source reward: {result['source_reward_value']:.10g}. Gold points show a separate causal state-feedback winning set at the fixed-plan minimax threshold; orange is the worst-case path for the selected fixed plan.</p><p>Timing: {timing['elapsed_ns']} ns for one solver call (zero warmups, n=1); request setup and JSON assembly are excluded. This is descriptive only, with no speed comparison.</p><p><a href="result.json">Result JSON</a> · <a href="figure-data.json">Figure data</a> · <a href="capture.json">Capture environment</a> · <a href="projections.svg">Standalone SVG</a></p><p>Upstream source: <a href="{upstream}">SphereGame.py</a> at commit <code>{SOURCE_COMMIT}</code> (blob <code>{SOURCE_BLOB}</code>). CSL source: <a href="{source}"><code>{result['source_commit']}</code></a>. Runtime OS: {html.escape(host['os'])}.</p></main></html>'''
+    return f'''<!doctype html><html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>SphereGame minimax pilot</title><style>body{{margin:0;background:#111820;color:#f4f1e8;font:16px/1.55 system-ui,sans-serif}}main{{max-width:1100px;margin:auto;padding:2rem}}svg{{width:100%;height:auto}}.note{{border-left:4px solid #f4a261;padding:.7rem 1rem;background:#1a252e}}a{{color:#8bd3f7}}</style><main><h1>SphereGame: reachability and minimax</h1><p>The source reward is the terminal Euclidean norm of (y,z) minus 4. CSL's residual-norm terminal objective represents the norm directly; subtracting 4 preserves the minimax plan and gives the source reward value.</p><div>{figure}</div><p class="note"><strong>Adaptation:</strong> the source uses continuous controls over 8 seconds. This pilot uses three 0.1-second stages and finite catalogues drawn from the source action bounds. The controller commits to an open-loop plan before the disturbance sequence is chosen. This is not a reproduction of the original RL run.</p><p>Minimax norm: {result['objective_value']:.10g}; source reward: {result['source_reward_value']:.10g}. Gold points show a separate causal state-feedback winning set at the fixed-plan minimax threshold; orange is the worst-case path for the selected fixed plan.</p><p>Numerics: {html.escape(result['numerics']['arithmetic'])}; absolute decision/replay tolerances are 1e-12. Scenario input SHA-256: <code>{result['scenario_sha256']}</code>.</p><p>Timing: {timing['elapsed_ns']} ns for one solver call (zero warmups, n=1); request setup and JSON assembly are excluded. This is descriptive only, with no speed comparison.</p><p><a href="result.json">Result JSON</a> · <a href="scenario.json">Scenario input</a> · <a href="figure-data.json">Figure data</a> · <a href="capture.json">Capture environment</a> · <a href="projections.svg">Standalone SVG</a></p><p>Upstream source: <a href="{upstream}">SphereGame.py</a> at commit <code>{SOURCE_COMMIT}</code> (blob <code>{SOURCE_BLOB}</code>). CSL source: <a href="{source}"><code>{result['source_commit']}</code></a>. Runtime OS: {html.escape(host['os'])}.</p></main></html>'''
 
 
 def main() -> None:
@@ -146,9 +161,11 @@ def main() -> None:
     derived = verify_record(actual)
     if args.output:
         args.output.mkdir(parents=True, exist_ok=False)
+        scenario_bytes = SCENARIO.read_bytes()
         figure = svg(derived) + "\n"
         files = {
             "result.json": (json.dumps(actual, indent=2) + "\n").encode(),
+            "scenario.json": scenario_bytes,
             "figure-data.json": (json.dumps(derived, indent=2) + "\n").encode(),
             "projections.svg": figure.encode(),
         }
@@ -157,6 +174,7 @@ def main() -> None:
                 "logical_cpus": os.cpu_count() or 0}
         capture = {"schema": "csl.env717-capture/1",
             "renderer_sha256": hashlib.sha256(Path(__file__).read_bytes()).hexdigest(),
+            "scenario_sha256": actual["scenario_sha256"],
             "capture_environment": host}
         files["capture.json"] = (json.dumps(capture, indent=2) + "\n").encode()
         files["index.html"] = page(actual, figure[:-1], host).encode()
@@ -167,7 +185,8 @@ def main() -> None:
             "and finite catalogues `u={-0.25,0,0.25}`, `v={-0.5,0,0.5}`. It is not an RL reproduction.\n\n"
             "The independent checker replays all 27 fixed plans and 27 disturbance sequences per plan. "
             "The phase-plane figure shows forward states, a separate causal feedback winning set, and an "
-            "open-loop worst-case path.\n\n"
+            "open-loop worst-case path. The report records the binary64 arithmetic profile, all 1e-12 "
+            "decision/replay tolerances, and the SHA-256 of the versioned scenario input.\n\n"
             f"Upstream source: [SphereGame.py](https://github.com/imm-rl-lab/optimal_control/blob/{SOURCE_COMMIT}/Environments/SphereGame/SphereGame.py), "
             f"blob `{SOURCE_BLOB}`. No upstream license is declared; this report re-expresses its equations.\n").encode()
         files["SHA256SUMS"] = "".join(
