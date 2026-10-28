@@ -75,6 +75,7 @@ TEST_CASE("two tied linear control sums have different independent nonlinear rep
     CHECK(a.state_units == std::vector<std::string>{"dimensionless"});
     CHECK(a.objective_name == "terminal state");
     CHECK(a.integration == IntegrationMethod::exact_discrete_map);
+    CHECK(std::holds_alternative<IntegrationResidualNotApplicable>(a.integration_residual));
     CHECK(a.hold == ControlHold::constant_on_interval);
     CHECK(a.replay_time >= std::chrono::steady_clock::duration::zero());
 }

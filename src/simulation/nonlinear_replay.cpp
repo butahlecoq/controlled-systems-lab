@@ -27,6 +27,10 @@ ReplayRecord replay(const Plant& plant, std::span<const Vector> controls,
     result.integration = plant.integration;
     result.hold = plant.hold;
     result.numerical = plant.numerical;
+    result.integration_residual = plant.integration == IntegrationMethod::exact_discrete_map
+        ? IntegrationResidualEvidence{IntegrationResidualNotApplicable{}}
+        : IntegrationResidualEvidence{IntegrationResidualUnavailable{
+            IntegrationResidualUnavailableReason::not_recorded}};
     result.controls.assign(controls.begin(), controls.end());
     const auto finish = [&]() -> ReplayRecord {
         result.replay_time = std::chrono::steady_clock::now() - started;
