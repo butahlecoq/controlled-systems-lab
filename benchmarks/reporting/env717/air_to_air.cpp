@@ -140,11 +140,12 @@ FiniteActionMinimaxRequest request() {
 
 Json result_record() {
     const auto input = request();
+    constexpr double near_optimal_tolerance = 1e-10;
     Json u_actions = Json::array(), v_actions = Json::array();
     for(const auto& action : u_catalogue) u_actions.push_back(action);
     for(const auto& action : v_catalogue) v_actions.push_back(action);
     const auto start = std::chrono::steady_clock::now();
-    const auto outcome = finite_action_minimax(input, {125, 125, 1e-10});
+    const auto outcome = finite_action_minimax(input, {125, 125, near_optimal_tolerance});
     const auto stop = std::chrono::steady_clock::now();
     const auto* result = std::get_if<FiniteMinimaxOptimal>(&outcome);
     if(!result) throw std::runtime_error("finite-action minimax did not return an optimum");
@@ -183,6 +184,7 @@ Json result_record() {
             {"objective", "minimize the worst terminal Euclidean separation over the finite disturbance catalogue"}}},
         {"horizon", horizon}, {"controller_plan_count", plans.size()},
         {"disturbance_sequence_count_per_plan", 125}, {"objective_value", result->value},
+        {"near_optimal_tolerance", near_optimal_tolerance},
         {"minimizing_plan_indices", minimizing}, {"plans", plans},
         {"timing", {{"warmup_calls", 0}, {"measured_calls", 1},
             {"measured_wall_ns", {std::chrono::duration_cast<std::chrono::nanoseconds>(stop - start).count()}},

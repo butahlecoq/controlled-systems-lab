@@ -364,9 +364,10 @@ FAMILIES = {
         r"env717-air-to-air-[0-9a-f]{20}", "synthesis",
         "AirToAirInterception finite minimax pilot",
         "Exhaustively evaluates 125 fixed plans against 125 disturbance histories per plan, with "
-        "independent full-state replay, forward reachable projections, causal backward-winning "
-        "layers and a selected worst-case path in relative position-velocity planes. This is a "
-        "three-stage finite-catalogue adaptation, not a reproduction of the RL run."),
+        "independent full-state replay, forward reachable projections, open-loop and causal "
+        "feedback-winning layers, and a selected worst-case path in relative position-velocity "
+        "planes. This is a three-stage finite-catalogue adaptation, not a reproduction of the RL "
+        "run. Timing is one observation with zero warmups; no performance comparison is claimed."),
     "env717-max-coordinate": Family(
         r"env717-max-coordinate-[0-9a-f]{20}", "synthesis",
         "MaxCoordinateGame finite-action differential-game pilot",

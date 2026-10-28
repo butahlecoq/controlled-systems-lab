@@ -54,12 +54,15 @@ def inputs(source: Path) -> dict[str, bytes]:
     expected_data = {"schema":"csl.env717-air-to-air-figure-data/1",
                      "relative_x_position_velocity": {
                          "forward_layers":projected(derived["forward"],0),
-                         "winning_layers":projected(derived["winning"],0)},
+                         "winning_layers":projected(derived["winning"],0),
+                         "open_loop_threshold_winning_layers":projected(derived["open_loop_winning"],0)},
                      "relative_y_position_velocity": {
                          "forward_layers":projected(derived["forward"],2),
-                         "winning_layers":projected(derived["winning"],2)},
+                         "winning_layers":projected(derived["winning"],2),
+                         "open_loop_threshold_winning_layers":projected(derived["open_loop_winning"],2)},
                      "selected_worst_case": [list(checker.relative(s)) for s in expected["trajectory"]],
-                     "winning_threshold": expected["value"]}
+                     "open_loop_value": expected["value"],
+                     "feedback_value": derived["feedback_value"]}
     if json.loads(files["figure-data.json"]) != expected_data:
         raise ValueError("saved geometry does not match independent replay")
     if files["projections.svg"].decode() != checker.svg_figure(expected, derived):

@@ -71,6 +71,7 @@ def verify(actual: dict) -> dict:
     assert len(actual["plans"]) == 125
     assert actual["controller_plan_count"] == 125
     assert actual["disturbance_sequence_count_per_plan"] == 125
+    assert actual["near_optimal_tolerance"] == 1e-10
     assert actual["minimizing_plan_indices"] == expected["minimizing"]
     assert math.isclose(actual["objective_value"], expected["value"], abs_tol=1e-8)
     for saved, (worst, plan, cases) in zip(actual["plans"], expected["plans"]):
@@ -87,7 +88,7 @@ def verify(actual: dict) -> dict:
     return expected
 
 
-def feedback_sets(threshold: float) -> dict:
+def feedback_sets(open_loop_value: float) -> dict:
     """Build finite-state causal winning layers on the exact enumerated graph."""
     layers: list[dict[tuple[float, ...], tuple[float, ...]]] = [{INITIAL: INITIAL}]
     edges: list[dict[tuple[float, ...], dict[int, dict[int, tuple[float, ...]]]]] = []
@@ -100,21 +101,26 @@ def feedback_sets(threshold: float) -> dict:
                 outcomes = {}
                 for vi, v in enumerate(V):
                     nxt = advance(state, u, v)
-                    key = tuple(round(x, 10) for x in nxt)
+                    key = nxt
                     following.setdefault(key, nxt)
                     outcomes[vi] = key
                 actions[ui] = outcomes
             layer_edges[state] = actions
         edges.append(layer_edges)
         layers.append(following)
-    winning: list[set[tuple[float, ...]]] = [set() for _ in range(HORIZON + 1)]
-    winning[-1] = {state for state in layers[-1]
-                   if range_value(state) <= threshold + 1e-8}
+    values: list[dict[tuple[float, ...], float]] = [{} for _ in range(HORIZON + 1)]
+    values[-1] = {state: range_value(state) for state in layers[-1]}
     for t in range(HORIZON - 1, -1, -1):
-        winning[t] = {state for state in layers[t]
-                      if any(all(nxt in winning[t + 1] for nxt in outcomes.values())
-                             for outcomes in edges[t][state].values())}
-    return {"forward": layers, "winning": winning}
+        values[t] = {state: min(max(values[t + 1][nxt] for nxt in outcomes.values())
+                                for outcomes in edges[t][state].values())
+                     for state in layers[t]}
+    feedback_value = values[0][INITIAL]
+    winning = [{state for state in layer if values[t][state] <= feedback_value + 1e-8}
+               for t, layer in enumerate(layers)]
+    open_loop_winning = [{state for state in layer if values[t][state] <= open_loop_value + 1e-8}
+                         for t, layer in enumerate(layers)]
+    return {"forward": layers, "winning": winning, "open_loop_winning": open_loop_winning,
+            "values": values, "feedback_value": feedback_value}
 
 
 def svg_figure(expected: dict, sets: dict) -> str:
@@ -124,7 +130,7 @@ def svg_figure(expected: dict, sets: dict) -> str:
     colors = ("#a6cee3", "#1f78b4", "#33a02c", "#e31a1c")
     chunks = [f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {width} {height}">',
               '<title>AirToAirInterception reachable and winning sets</title>',
-              '<desc>Two relative position versus velocity projections. Points show all forward reachable stages, purple points show causal backward-winning states at the minimax threshold, and the orange polyline shows one selected worst-case trajectory.</desc>',
+              '<desc>Two relative position versus velocity projections. Points show all forward reachable stages, purple points show causal backward-winning states at the feedback minimax value, and the orange polyline shows one selected worst-case trajectory.</desc>',
               '<rect width="100%" height="100%" fill="white"/>',
               '<style>text{font:13px sans-serif}.title{font-size:18px;font-weight:bold}</style>',
               '<text x="580" y="28" text-anchor="middle" class="title">AirToAirInterception: 3-stage finite minimax adaptation</text>']
@@ -160,22 +166,29 @@ def svg_figure(expected: dict, sets: dict) -> str:
             for xv, yv in points:
                 x, y = xy_values(xv, yv)
                 chunks.append(f'<circle cx="{x:.2f}" cy="{y:.2f}" r="2.4" fill="{colors[t]}" opacity=".42"/>')
+        for t, layer in enumerate(sets["open_loop_winning"]):
+            points = {tuple(round(v, 10) for v in (relative(state)[ix], relative(state)[iy]))
+                      for state in layer}
+            for xv, yv in points:
+                x, y = xy_values(xv, yv)
+                chunks.append(f'<circle cx="{x:.2f}" cy="{y:.2f}" r="3.2" fill="#cab2d6" opacity=".42"/>')
         for t, layer in enumerate(sets["winning"]):
             points = {tuple(round(v, 10) for v in (relative(state)[ix], relative(state)[iy]))
                       for state in layer}
             for xv, yv in points:
                 x, y = xy_values(xv, yv)
-                chunks.append(f'<circle cx="{x:.2f}" cy="{y:.2f}" r="2.6" fill="#6a3d9a" opacity=".46"/>')
+                chunks.append(f'<circle cx="{x:.2f}" cy="{y:.2f}" r="2.6" fill="#6a3d9a" opacity=".54"/>')
         pts = [xy(s) for s in expected["trajectory"]]
         chunks.append('<polyline points="' + ' '.join(f'{x:.2f},{y:.2f}' for x,y in pts) + '" fill="none" stroke="#ff7f00" stroke-width="3"/>')
         for x, y in pts:
             chunks.append(f'<circle cx="{x:.2f}" cy="{y:.2f}" r="4" fill="#ff7f00"/>')
     legend = (("R0 initial", colors[0]), ("R1 forward", colors[1]),
               ("R2 forward", colors[2]), ("R3 forward", colors[3]),
-              ("Forward ∩ backward-winning", "#6a3d9a"),
-              ("Selected plan worst-case path", "#ff7f00"))
+              ("Causal win @ open-loop value", "#cab2d6"),
+              ("Causal win @ feedback value", "#6a3d9a"),
+              ("Selected open-loop worst case", "#ff7f00"))
     for i, (label, color) in enumerate(legend):
-        x = 55 + (i % 3) * 365; y = 544 + (i // 3) * 21
+        x = 42 + (i % 4) * 280; y = 544 + (i // 4) * 21
         if color == "#ff7f00":
             chunks.append(f'<path d="M{x-5},{y-4} h10" stroke="{color}" stroke-width="3"/>')
         else:
@@ -197,20 +210,34 @@ def build_report(executable: Path, output: Path) -> None:
     figure_data = {"schema": "csl.env717-air-to-air-figure-data/1",
                    "relative_x_position_velocity": {
                        "forward_layers": projected(sets["forward"], 0),
-                       "winning_layers": projected(sets["winning"], 0)},
+                       "winning_layers": projected(sets["winning"], 0),
+                       "open_loop_threshold_winning_layers": projected(sets["open_loop_winning"], 0)},
                    "relative_y_position_velocity": {
                        "forward_layers": projected(sets["forward"], 2),
-                       "winning_layers": projected(sets["winning"], 2)},
+                       "winning_layers": projected(sets["winning"], 2),
+                       "open_loop_threshold_winning_layers": projected(sets["open_loop_winning"], 2)},
                    "selected_worst_case": [list(relative(s)) for s in expected["trajectory"]],
-                   "winning_threshold": expected["value"]}
+                   "open_loop_value": expected["value"],
+                   "feedback_value": sets["feedback_value"]}
     (output / "figure-data.json").write_text(json.dumps(figure_data, indent=2) + "\n", encoding="utf-8")
     figure = svg_figure(expected, sets)
     (output / "projections.svg").write_text(figure, encoding="utf-8")
-    page = f'''<!doctype html><html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width"><title>AirToAirInterception finite minimax pilot</title><main><h1>AirToAirInterception</h1><p>Three-stage, finite-catalogue open-loop minimax adaptation of the pinned RL environment. Source explicit-Euler dynamics use 10 inner steps per stage. This is not an RL reproduction or a continuous-action solution.</p><p>Initial relative range: {expected['value']:.9g} m minimax terminal range (objective value); 125 fixed control plans × 125 disturbance sequences. One timing observation, zero warmups; no performance comparison is claimed.</p><p>The purple nodes are the causal finite-state backward-winning layers at the open-loop minimax threshold, computed over the exact finite transition graph. The orange path is the selected minimizing fixed plan under a maximizing disturbance sequence.</p><figure><img src="projections.svg" alt="Relative position and velocity projections with forward reachable nodes, backward-winning nodes, and selected worst-case path"><figcaption>Horizontal and vertical relative-motion phase planes. Forward reachable nodes are shaded by stage R0–R3.</figcaption></figure><ul><li><a href="result.json">Complete enumerated result</a></li><li><a href="figure-data.json">Projection data</a></li></ul></main></html>'''
+    feedback_gap = abs(expected["value"] - sets["feedback_value"])
+    page = f'''<!doctype html><html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width"><title>AirToAirInterception finite minimax pilot</title><main><h1>AirToAirInterception</h1><p>Three stages at 0.05 seconds each adapt the source 2-second continuous-action RL task to finite action catalogues. Source explicit-Euler dynamics use 10 inner steps per stage. This is not an RL reproduction or a continuous-action solution.</p><p>Fixed open-loop minimax terminal range: {expected['value']:.9g} m (125 plans × 125 disturbance sequences). Causal finite-state feedback minimax terminal range: {sets['feedback_value']:.9g} m (dynamic programming over the exact reachable transition graph). The values coincide within {feedback_gap:.3g} m for this finite adaptation.</p><p>The purple nodes show causal backward-winning states at the feedback minimax value; light purple shows the winning set at the open-loop minimax threshold. Both intersect the forward reachable layers. The orange path is the selected minimizing fixed open-loop plan under a maximizing disturbance sequence. Solver near-optimal tolerance: {actual['near_optimal_tolerance']:.1e}. One timing observation, zero warmups; no performance comparison is claimed.</p><figure><img src="projections.svg" alt="Relative position and velocity projections with forward reachable stages, feedback-winning intersections, and a selected open-loop worst-case path"><figcaption>Horizontal and vertical relative-motion phase planes; forward reachable nodes are colored R0–R3.</figcaption></figure><ul><li><a href="result.json">Complete enumerated result</a></li><li><a href="figure-data.json">Projection data</a></li></ul></main></html>'''
     (output / "index.html").write_text(page, encoding="utf-8")
-    (output / "environment.json").write_text(json.dumps({"schema":"csl.env717-air-to-air-environment/1", "source_repository":"https://github.com/imm-rl-lab/optimal_control", "source_repository_commit":SOURCE_COMMIT, "source_file_blob":SOURCE_BLOB, "adapter":"finite 3-stage open-loop minimax with 5-point action catalogues per player", "release":"pilot; no performance claim", "algorithm_source_sha256":actual["algorithm_source_sha256"], "platform":platform.platform(), "python":platform.python_version()}, indent=2)+"\n", encoding="utf-8")
+    (output / "environment.json").write_text(json.dumps({"schema":"csl.env717-air-to-air-environment/1", "source_repository":"https://github.com/imm-rl-lab/optimal_control", "source_repository_commit":SOURCE_COMMIT, "source_file_blob":SOURCE_BLOB, "source_horizon_seconds":2.0, "adapted_horizon_seconds":HORIZON*DT, "adapter":"finite 3-stage minimax with 5-point action catalogues per player; upstream continuous-action task is adapted, not reproduced", "near_optimal_tolerance":actual["near_optimal_tolerance"], "release":"pilot; no performance claim", "algorithm_source_sha256":actual["algorithm_source_sha256"], "platform":platform.platform(), "python":platform.python_version()}, indent=2)+"\n", encoding="utf-8")
     (output / "README.md").write_text("# AirToAirInterception finite minimax pilot\n\nSee `index.html`. Results were independently replayed against the pinned source Euler step. This is a 3-stage finite-action adaptation, not the source continuous-action RL task.\n", encoding="utf-8")
-    (output / "capture.json").write_text(json.dumps({"schema":"csl.env717-capture/1", "source_commit":actual["source_commit"], "driver_sha256":actual["driver_sha256"], "renderer_sha256":hashlib.sha256(Path(__file__).read_bytes()).hexdigest(), "capture_environment":{"os":platform.platform(), "processor":platform.processor() or "unknown", "processor_identity_source":"platform.processor", "logical_cpus":os.cpu_count()}, "measurement":{"warmup_calls":0, "measured_calls":1, "measured_wall_ns":actual["timing"]["measured_wall_ns"], "limiter":"not profiled; single descriptive observation only", "comparison_claim":False}}, indent=2)+"\n", encoding="utf-8")
+    cpu_model = "unknown"
+    cpu_source = "unavailable"
+    try:
+        for line in Path("/proc/cpuinfo").read_text(encoding="utf-8").splitlines():
+            if line.lower().startswith(("model name", "hardware")):
+                cpu_model = line.split(":", 1)[1].strip()
+                cpu_source = "/proc/cpuinfo"
+                break
+    except OSError:
+        pass
+    (output / "capture.json").write_text(json.dumps({"schema":"csl.env717-capture/1", "source_commit":actual["source_commit"], "driver_sha256":actual["driver_sha256"], "renderer_sha256":hashlib.sha256(Path(__file__).read_bytes()).hexdigest(), "capture_environment":{"os":platform.platform(), "processor":cpu_model, "processor_identity_source":cpu_source, "architecture":platform.machine(), "logical_cpus":os.cpu_count()}, "measurement":{"warmup_calls":0, "measured_calls":1, "measured_wall_ns":actual["timing"]["measured_wall_ns"], "limiter":"not profiled; single descriptive observation only", "comparison_claim":False}}, indent=2)+"\n", encoding="utf-8")
     sums = []
     for path in sorted(output.iterdir()):
         if path.name != "SHA256SUMS":
