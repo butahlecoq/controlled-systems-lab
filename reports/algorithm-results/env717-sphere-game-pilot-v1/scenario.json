@@ -1,0 +1,43 @@
+{
+  "schema": "csl.env717-sphere-game-input/1",
+  "scenario_id": "env717-sphere-game-short-horizon-v1",
+  "source": {
+    "repository": "https://github.com/imm-rl-lab/optimal_control",
+    "commit": "f4d76c60f4003f50954174e96eafd8e514bd5441",
+    "path": "Environments/SphereGame/SphereGame.py",
+    "blob": "dd8ff3ce718570f05288dc4d8d343a8784ca2327",
+    "license": "no license declared in repository metadata"
+  },
+  "source_model": {
+    "state_order": ["time", "y", "z"],
+    "initial_state": [0.0, 0.0, 0.5],
+    "dt_seconds": 0.1,
+    "horizon_seconds": 8.0,
+    "control_u_bounds": [-0.25, 0.25],
+    "disturbance_v_bounds": [-0.5, 0.5],
+    "dynamics": "time'=1; y'=v; z'=u",
+    "reward": "sqrt(y^2+z^2)-4 at termination"
+  },
+  "adaptation": {
+    "horizon_steps": 3,
+    "horizon_seconds": 0.3,
+    "control_catalogue": [-0.25, 0.0, 0.25],
+    "disturbance_catalogue": [-0.5, 0.0, 0.5],
+    "information_pattern": "fixed open-loop control plan versus full adversarial sequence",
+    "objective": "minimize maximum terminal Euclidean norm; source reward is norm minus 4",
+    "backward_geometry_information_pattern": "causal state-feedback control on the finite reachable graph; separate from the fixed-plan minimax solve",
+    "backward_geometry_target": "terminal Euclidean norm no greater than the fixed-plan open-loop minimax norm"
+  },
+  "numerics": {
+    "arithmetic": "IEEE-754 binary64; explicit-Euler source-step equations; terminal norm evaluated with std::hypot",
+    "finite_minimax_near_optimal_absolute_tolerance": 1e-12,
+    "independent_replay_absolute_tolerance": 1e-12,
+    "feedback_terminal_threshold_absolute_tolerance": 1e-12
+  },
+  "enumeration": {
+    "maximum_plans": 27,
+    "maximum_disturbance_sequences_per_plan": 27,
+    "requested_workers": 1,
+    "native_solver_threads": 1
+  }
+}

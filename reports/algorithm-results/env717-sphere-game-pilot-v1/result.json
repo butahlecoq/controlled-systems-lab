@@ -1,0 +1,436 @@
+{
+  "adaptation": {
+    "backward_geometry_information_pattern": "causal state-feedback control on the finite reachable graph; separate from the fixed-plan minimax solve",
+    "backward_geometry_target": "terminal Euclidean norm no greater than the fixed-plan open-loop minimax norm",
+    "control_catalogue": [
+      -0.25,
+      0.0,
+      0.25
+    ],
+    "disturbance_catalogue": [
+      -0.5,
+      0.0,
+      0.5
+    ],
+    "horizon_seconds": 0.3,
+    "horizon_steps": 3,
+    "information_pattern": "fixed open-loop control plan versus full adversarial sequence",
+    "objective": "minimize maximum terminal Euclidean norm; source reward is norm minus 4"
+  },
+  "algorithm": "csl.finite-action-minimax.numerical",
+  "algorithm_source_sha256": "a222ed777cba81bce2170d96f22b4e5fd9d55aa92ae66413246e97f3c11f03f1",
+  "assurance": "numerical; exhaustive over all 27 fixed plans and 27 disturbance sequences per plan",
+  "case_id": "env717-sphere-game-short-horizon-v1",
+  "driver_sha256": "ff5b8c4ea4d967f1217d308884afcf154882cf2e49fc8d7e1e491f739ffc31d0",
+  "environment": {
+    "architecture": "x86_64",
+    "build_type": "Release",
+    "compiler_id": "GNU",
+    "compiler_version": "16.2.1",
+    "requested_workers": 1,
+    "solver_parallelism": "single-threaded"
+  },
+  "minimizing_plan_indices": [
+    0
+  ],
+  "numerics": {
+    "arithmetic": "IEEE-754 binary64; explicit-Euler source-step equations; terminal norm evaluated with std::hypot",
+    "feedback_terminal_threshold_absolute_tolerance": 1e-12,
+    "finite_minimax_near_optimal_absolute_tolerance": 1e-12,
+    "independent_replay_absolute_tolerance": 1e-12
+  },
+  "objective_value": 0.4506939094329986,
+  "plan_count": 27,
+  "plans": [
+    {
+      "controls": [
+        -0.25,
+        -0.25,
+        -0.25
+      ],
+      "maximizing_terminal_state": [
+        0.30000000000000004,
+        -0.15000000000000002,
+        0.42499999999999993
+      ],
+      "worst_terminal_norm": 0.4506939094329986
+    },
+    {
+      "controls": [
+        -0.25,
+        -0.25,
+        0.0
+      ],
+      "maximizing_terminal_state": [
+        0.30000000000000004,
+        -0.15000000000000002,
+        0.44999999999999996
+      ],
+      "worst_terminal_norm": 0.4743416490252569
+    },
+    {
+      "controls": [
+        -0.25,
+        -0.25,
+        0.25
+      ],
+      "maximizing_terminal_state": [
+        0.30000000000000004,
+        -0.15000000000000002,
+        0.475
+      ],
+      "worst_terminal_norm": 0.49812147112928185
+    },
+    {
+      "controls": [
+        -0.25,
+        0.0,
+        -0.25
+      ],
+      "maximizing_terminal_state": [
+        0.30000000000000004,
+        -0.15000000000000002,
+        0.44999999999999996
+      ],
+      "worst_terminal_norm": 0.4743416490252569
+    },
+    {
+      "controls": [
+        -0.25,
+        0.0,
+        0.0
+      ],
+      "maximizing_terminal_state": [
+        0.30000000000000004,
+        -0.15000000000000002,
+        0.475
+      ],
+      "worst_terminal_norm": 0.49812147112928185
+    },
+    {
+      "controls": [
+        -0.25,
+        0.0,
+        0.25
+      ],
+      "maximizing_terminal_state": [
+        0.30000000000000004,
+        -0.15000000000000002,
+        0.5
+      ],
+      "worst_terminal_norm": 0.5220153254455275
+    },
+    {
+      "controls": [
+        -0.25,
+        0.25,
+        -0.25
+      ],
+      "maximizing_terminal_state": [
+        0.30000000000000004,
+        -0.15000000000000002,
+        0.475
+      ],
+      "worst_terminal_norm": 0.49812147112928185
+    },
+    {
+      "controls": [
+        -0.25,
+        0.25,
+        0.0
+      ],
+      "maximizing_terminal_state": [
+        0.30000000000000004,
+        -0.15000000000000002,
+        0.5
+      ],
+      "worst_terminal_norm": 0.5220153254455275
+    },
+    {
+      "controls": [
+        -0.25,
+        0.25,
+        0.25
+      ],
+      "maximizing_terminal_state": [
+        0.30000000000000004,
+        -0.15000000000000002,
+        0.525
+      ],
+      "worst_terminal_norm": 0.5460082416960389
+    },
+    {
+      "controls": [
+        0.0,
+        -0.25,
+        -0.25
+      ],
+      "maximizing_terminal_state": [
+        0.30000000000000004,
+        -0.15000000000000002,
+        0.44999999999999996
+      ],
+      "worst_terminal_norm": 0.4743416490252569
+    },
+    {
+      "controls": [
+        0.0,
+        -0.25,
+        0.0
+      ],
+      "maximizing_terminal_state": [
+        0.30000000000000004,
+        -0.15000000000000002,
+        0.475
+      ],
+      "worst_terminal_norm": 0.49812147112928185
+    },
+    {
+      "controls": [
+        0.0,
+        -0.25,
+        0.25
+      ],
+      "maximizing_terminal_state": [
+        0.30000000000000004,
+        -0.15000000000000002,
+        0.5
+      ],
+      "worst_terminal_norm": 0.5220153254455275
+    },
+    {
+      "controls": [
+        0.0,
+        0.0,
+        -0.25
+      ],
+      "maximizing_terminal_state": [
+        0.30000000000000004,
+        -0.15000000000000002,
+        0.475
+      ],
+      "worst_terminal_norm": 0.49812147112928185
+    },
+    {
+      "controls": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "maximizing_terminal_state": [
+        0.30000000000000004,
+        -0.15000000000000002,
+        0.5
+      ],
+      "worst_terminal_norm": 0.5220153254455275
+    },
+    {
+      "controls": [
+        0.0,
+        0.0,
+        0.25
+      ],
+      "maximizing_terminal_state": [
+        0.30000000000000004,
+        -0.15000000000000002,
+        0.525
+      ],
+      "worst_terminal_norm": 0.5460082416960389
+    },
+    {
+      "controls": [
+        0.0,
+        0.25,
+        -0.25
+      ],
+      "maximizing_terminal_state": [
+        0.30000000000000004,
+        -0.15000000000000002,
+        0.5
+      ],
+      "worst_terminal_norm": 0.5220153254455275
+    },
+    {
+      "controls": [
+        0.0,
+        0.25,
+        0.0
+      ],
+      "maximizing_terminal_state": [
+        0.30000000000000004,
+        -0.15000000000000002,
+        0.525
+      ],
+      "worst_terminal_norm": 0.5460082416960389
+    },
+    {
+      "controls": [
+        0.0,
+        0.25,
+        0.25
+      ],
+      "maximizing_terminal_state": [
+        0.30000000000000004,
+        -0.15000000000000002,
+        0.55
+      ],
+      "worst_terminal_norm": 0.570087712549569
+    },
+    {
+      "controls": [
+        0.25,
+        -0.25,
+        -0.25
+      ],
+      "maximizing_terminal_state": [
+        0.30000000000000004,
+        -0.15000000000000002,
+        0.475
+      ],
+      "worst_terminal_norm": 0.49812147112928185
+    },
+    {
+      "controls": [
+        0.25,
+        -0.25,
+        0.0
+      ],
+      "maximizing_terminal_state": [
+        0.30000000000000004,
+        -0.15000000000000002,
+        0.5
+      ],
+      "worst_terminal_norm": 0.5220153254455275
+    },
+    {
+      "controls": [
+        0.25,
+        -0.25,
+        0.25
+      ],
+      "maximizing_terminal_state": [
+        0.30000000000000004,
+        -0.15000000000000002,
+        0.525
+      ],
+      "worst_terminal_norm": 0.5460082416960389
+    },
+    {
+      "controls": [
+        0.25,
+        0.0,
+        -0.25
+      ],
+      "maximizing_terminal_state": [
+        0.30000000000000004,
+        -0.15000000000000002,
+        0.5
+      ],
+      "worst_terminal_norm": 0.5220153254455275
+    },
+    {
+      "controls": [
+        0.25,
+        0.0,
+        0.0
+      ],
+      "maximizing_terminal_state": [
+        0.30000000000000004,
+        -0.15000000000000002,
+        0.525
+      ],
+      "worst_terminal_norm": 0.5460082416960389
+    },
+    {
+      "controls": [
+        0.25,
+        0.0,
+        0.25
+      ],
+      "maximizing_terminal_state": [
+        0.30000000000000004,
+        -0.15000000000000002,
+        0.55
+      ],
+      "worst_terminal_norm": 0.570087712549569
+    },
+    {
+      "controls": [
+        0.25,
+        0.25,
+        -0.25
+      ],
+      "maximizing_terminal_state": [
+        0.30000000000000004,
+        -0.15000000000000002,
+        0.525
+      ],
+      "worst_terminal_norm": 0.5460082416960389
+    },
+    {
+      "controls": [
+        0.25,
+        0.25,
+        0.0
+      ],
+      "maximizing_terminal_state": [
+        0.30000000000000004,
+        -0.15000000000000002,
+        0.55
+      ],
+      "worst_terminal_norm": 0.570087712549569
+    },
+    {
+      "controls": [
+        0.25,
+        0.25,
+        0.25
+      ],
+      "maximizing_terminal_state": [
+        0.30000000000000004,
+        -0.15000000000000002,
+        0.5750000000000001
+      ],
+      "worst_terminal_norm": 0.5942432162002357
+    }
+  ],
+  "scenario_file": "benchmarks/scenarios/env717-sphere-game-pilot-v1.json",
+  "scenario_sha256": "73da1f33b61b4acb4875645668f5de07872333f75f40d6f814c8be0c2177197c",
+  "schema": "csl.env717-sphere-game-pilot/1",
+  "source_commit": "c4db4ef022d8ec76c483d94452fc12869832911c",
+  "source_file_blob": "dd8ff3ce718570f05288dc4d8d343a8784ca2327",
+  "source_license": "no license declared in repository metadata",
+  "source_model": {
+    "control_u_bounds": [
+      -0.25,
+      0.25
+    ],
+    "disturbance_v_bounds": [
+      -0.5,
+      0.5
+    ],
+    "dt_seconds": 0.1,
+    "dynamics": "time'=1; y'=v; z'=u",
+    "horizon_seconds": 8.0,
+    "initial_state": [
+      0.0,
+      0.0,
+      0.5
+    ],
+    "reward": "sqrt(y^2+z^2)-4 at termination"
+  },
+  "source_repository_commit": "f4d76c60f4003f50954174e96eafd8e514bd5441",
+  "source_reward_value": -3.5493060905670015,
+  "state_order": [
+    "time",
+    "y",
+    "z"
+  ],
+  "timing": {
+    "elapsed_ns": 1012567,
+    "limiter_profile": "not collected; no comparative speed claim",
+    "measured_calls": 1,
+    "scope": "one finite_action_minimax call; request setup and JSON assembly excluded",
+    "warmup_calls": 0
+  }
+}

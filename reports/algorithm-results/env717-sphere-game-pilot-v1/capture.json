@@ -1,0 +1,11 @@
+{
+  "schema": "csl.env717-capture/1",
+  "renderer_sha256": "878e0328462afc160f09a3c72493c03362c27f8269004c1039047890340f9f97",
+  "scenario_sha256": "73da1f33b61b4acb4875645668f5de07872333f75f40d6f814c8be0c2177197c",
+  "capture_environment": {
+    "os": "Linux-7.2.8-9-omarchy-x86_64-with-glibc2.44",
+    "processor": "unavailable",
+    "processor_identity_source": "Python platform.processor; fallback unavailable",
+    "logical_cpus": 8
+  }
+}
