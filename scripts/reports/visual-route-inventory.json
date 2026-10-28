@@ -506,6 +506,30 @@
       "disposition": "adopted-shared-quantitative-policy"
     },
     {
+      "source": "scripts/reports/mpc05/check_smoke.py",
+      "signal_count": 1,
+      "asset_name_literals": [
+        "projections.svg"
+      ],
+      "disposition": "publication-validation-or-frozen-route"
+    },
+    {
+      "source": "scripts/reports/mpc05/make_report.py",
+      "signal_count": 2,
+      "asset_name_literals": [
+        "projections.svg"
+      ],
+      "disposition": "composes-or-copies-existing-saved-figure"
+    },
+    {
+      "source": "scripts/reports/mpc05/reference.py",
+      "signal_count": 5,
+      "asset_name_literals": [
+        "projections.svg"
+      ],
+      "disposition": "composes-or-copies-existing-saved-figure"
+    },
+    {
       "source": "scripts/reports/mpc06/capture_tube.py",
       "signal_count": 1,
       "asset_name_literals": [
@@ -763,6 +787,14 @@
         "disturbance-tube.svg"
       ],
       "disposition": "composes-or-copies-existing-saved-figure"
+    },
+    {
+      "source": "scripts/reports/stage_mpc05_causal_tree.py",
+      "signal_count": 2,
+      "asset_name_literals": [
+        "projections.svg"
+      ],
+      "disposition": "publication-validation-or-frozen-route"
     },
     {
       "source": "scripts/reports/stage_mpc06_tube.py",
@@ -1726,6 +1758,16 @@
       "disposition": "deferred: original frozen route-level readability review remains; companion availability is listed separately",
       "follow_up_issue": 669,
       "companion_route": "examples/index.html"
+    },
+    {
+      "route": "mpc05-causal-tree-pilot-v1",
+      "source_bundle": "mpc05-causal-tree-pilot-v1",
+      "assets": [
+        "projections.svg"
+      ],
+      "index_sha256": "b84595b264b8db754dfd6dd2ad506270a8d1d00b8b9ee72acfa81f408c145e74",
+      "disposition": "deferred: original frozen route-level readability review remains; companion availability is listed separately",
+      "follow_up_issue": 601
     },
     {
       "route": "mpc06-nilpotent-tube-pilot-v1",
