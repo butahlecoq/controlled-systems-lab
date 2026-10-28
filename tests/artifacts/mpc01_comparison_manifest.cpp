@@ -13,6 +13,8 @@ TEST_CASE("MPC-01 comparison records pass artifact manifest validation") {
     std::size_t records = 0;
     std::string line;
     while (std::getline(input, line)) {
+        // Treat CRLF as JSONL framing; the carriage return is not record content.
+        if (!line.empty() && line.back() == '\r') line.pop_back();
         if (line.empty()) continue;
         const auto decoded = csl::artifacts::decode_recorded_comparison(line);
         if (const auto* error = std::get_if<csl::artifacts::ArtifactError>(&decoded)) {
