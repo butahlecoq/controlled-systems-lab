@@ -82,6 +82,13 @@ class LandingTests(unittest.TestCase):
         self.assertIn("six", family.summary)
         self.assertIn("inconclusive", family.summary)
 
+    def test_it17_250_point_continuation_has_a_geometry_family_description(self):
+        family = landing.FAMILIES[landing.family_for(
+            "exp02-it17-dyadic-250-20261029-r1")]
+        self.assertEqual(family.group, "geometry")
+        self.assertIn("250-point", family.summary)
+        self.assertIn("inconclusive", family.summary)
+
     def test_it17_3d_pilot_has_a_partial_geometry_family_description(self):
         for report_id in (
                 "exp02-it17-hull-3d-simplex-20261028-r1",

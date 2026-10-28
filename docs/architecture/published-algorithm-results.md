@@ -251,6 +251,24 @@ hash verification remain pending the main-only Pages deployment for this PR.
 This is still a partial hull-method slice; #94 remains open for its broader
 strategy, workload and representation matrix.
 
+### 250-point dyadic continuation
+
+The [250-point bundle](../../reports/algorithm-results/exp02-it17-dyadic-250-20261029-r1/)
+adds a single deterministic 2D square cloud to the QuickHull/ITIS17-related
+comparison. Six methods each have one warmup and seven interleaved measured
+calls. All 48 attempts passed accounting, expected-corner retention, and the
+independent bounded exact-binary64 hull check. The result separates hull
+validity from LP reducer completion; the baseline, ordered LP method, and A43
+adaptation retained redundant inputs and reported incomplete status.
+
+The median public-call times range from 0.535 ms for QuickHull and 0.746 ms for
+basis reuse to 67.116 ms for the LP baseline; they are descriptive for this one
+fixture. No source-function profile was available (`perf`/`strace` absent), so
+the comparison remains inconclusive and makes no performance-winner or scale
+claim. The bundle retains the raw checker status/budget, 250-point fixture
+plot, source/build identity, and offline-staging inputs. Pages publication and
+live URL/hash verification remain pending; issue #94 remains open.
+
 ## EXP-02 paired synthesis profile slice
 
 The [paired T-S02/T-S03 report](../../reports/algorithm-results/exp02-paired-profiles-20261027-r1/)

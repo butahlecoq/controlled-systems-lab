@@ -108,6 +108,7 @@ FROZEN_ROUTE_FOLLOW_UP_ISSUES = {
     # readability follow-up belongs to the active control/witness migration.
     "exp02-paired-profiles-20261027-r1": 686,
     "exp02-it17-a44-paper-order-20261028-r3": 94,
+    "exp02-it17-dyadic-250-20261029-r1": 94,
 }
 
 

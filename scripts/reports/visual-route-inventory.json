@@ -870,6 +870,15 @@
       "disposition": "publication-validation-or-frozen-route"
     },
     {
+      "source": "scripts/reports/summarize_exp02_it17_250.py",
+      "signal_count": 3,
+      "asset_name_literals": [
+        "fixture-geometry.svg"
+      ],
+      "disposition": "deferred-family-specific-migration",
+      "follow_up_issue": 687
+    },
+    {
       "source": "scripts/reports/syn01/collect.py",
       "signal_count": 2,
       "asset_name_literals": [
@@ -1508,6 +1517,16 @@
         "fixture-geometry.svg"
       ],
       "index_sha256": "508c9f1f0cf1584261c936f83267c4b8810be4b49fdf7b16162d8f070ce76907",
+      "disposition": "deferred: original frozen route-level readability review remains; companion availability is listed separately",
+      "follow_up_issue": 94
+    },
+    {
+      "route": "exp02-it17-dyadic-250-20261029-r1",
+      "source_bundle": "exp02-it17-dyadic-250-20261029-r1",
+      "assets": [
+        "fixture-geometry.svg"
+      ],
+      "index_sha256": "9cdc3ab5942662dea19f54d55601074286bc5b274d0294e8db4cca49bfa8695d",
       "disposition": "deferred: original frozen route-level readability review remains; companion availability is listed separately",
       "follow_up_issue": 94
     },
