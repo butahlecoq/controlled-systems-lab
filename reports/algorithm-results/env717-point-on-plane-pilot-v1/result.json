@@ -3694,7 +3694,7 @@
     }
   ],
   "schema": "csl.env717-point-on-plane/1",
-  "source_commit": "73fa279deecfd7db9ed910b4fb558e9b47b0b8a1",
+  "source_commit": "c26ae1148fc98f39d1ae0b8cf80926b667e6d129",
   "source_file_blob": "2552484d02afca759ff909aca5e5854686a651c4",
   "source_license": "no license declared in repository metadata",
   "source_model": {
@@ -3925,7 +3925,7 @@
     "comparison_claim": false,
     "measured_calls": 1,
     "measured_wall_ns": [
-      7906096
+      16549859
     ],
     "native_threads_actual": 1,
     "native_threads_requested": 1,
