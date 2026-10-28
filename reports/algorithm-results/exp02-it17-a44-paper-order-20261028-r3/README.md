@@ -64,9 +64,9 @@ are retained for LP removals.
 
 - Source commit: `7c839f41246823300a939562ce239b0bf80282b8`.
 - Release build, GCC 16.2.1, CMake 3.31.6, C++20, HiGHS 1.11.0, one LP thread.
-- AMD Ryzen 5 3550H, Linux x86_64, 8 logical CPUs; pre-run load average `0.76, 1.25, 0.77`; 2.5 GiB available memory.
+- AMD Ryzen 5 3550H, Linux x86_64, 8 logical CPUs; pre-run load averages `2.25, 1.70, 1.06` (64 points) and `2.23, 1.71, 1.06` (256 points); 4.26 GiB available memory.
 - Timing covers the public reducer call. LP workspace creation and output validation are outside the interval.
-- No resource limiter or source-function profile was available. LP call counts are retained but do not establish the precise hot function.
+- No resource limiter was available, and `perf` was not installed for source-function profiling. LP call counts are retained but do not establish the precise hot function.
 
 ## Reproduction
 
