@@ -32,6 +32,7 @@ option(CSL_BUILD_ISSUE6_B09_REPORT "Build the A08 fuel source-revision reference
 option(CSL_BUILD_ISSUE3_VALIDATED_REPORT "Build the validated finite-action minimax report driver" OFF)
 option(CSL_BUILD_ISSUE422_REPORT "Build the paired fixed-plan minimax comparison report driver" OFF)
 option(CSL_BUILD_MPC03_REPORT "Build the open-loop robust minimax MIP/relaxation pilot" OFF)
+option(CSL_BUILD_MPC05_REPORT "Build the causal minimax Bellman/tree comparison report" OFF)
 option(CSL_BUILD_MPC08_REPORT "Build the exact explicit MPC comparison driver" OFF)
 option(CSL_BUILD_MPC06_REPORT "Build the exact nilpotent tube-MPC feasibility pilot" OFF)
 option(CSL_BUILD_EXT04_REPORT "Build the EXT-04 observed replay report driver" OFF)

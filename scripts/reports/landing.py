@@ -86,6 +86,12 @@ FAMILIES = {
         "Solves the four-step L04 displayed-data finite-action minimax model with a shared-selector "
         "MIQCP, checks it against exact rational enumeration, and records a numerical convex-hull "
         "relaxation bound. This is not a historical reproduction or solver-speed comparison."),
+    "mpc05-causal-tree": Family(
+        r"mpc05-causal-tree-[0-9a-f]{20}", "synthesis", "Finite causal minimax scenario-tree comparison",
+        "Compares a dependency-free Bellman solver with an independent HiGHS extensive-form tree on "
+        "finite fixtures and a three-stage TwoPointsOnParallelLines adaptation. The report shows "
+        "forward reachable sets, terminal sets, backward-winning intersections, and a replayed "
+        "worst-case path in both player phase planes; it makes no continuous RL or performance claim."),
     "lp": Family(
         r"lp-\d{8}T\d{6}Z-[0-9a-f]{12,64}", "optimization", "Linear programming reference run",
         "Runs the registered HiGHS linear-programming adapter on five small analytic "

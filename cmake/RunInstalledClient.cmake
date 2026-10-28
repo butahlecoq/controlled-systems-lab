@@ -52,6 +52,7 @@ file(COPY "${CSL_SOURCE_DIR}/tests/installed/plot_data_client.cpp" DESTINATION "
 file(COPY "${CSL_SOURCE_DIR}/tests/installed/plot_request_client.cpp" DESTINATION "${work}/source")
 file(COPY "${CSL_SOURCE_DIR}/tests/installed/input_client.cpp" DESTINATION "${work}/source")
 file(COPY "${CSL_SOURCE_DIR}/tests/installed/continuous_discretization_client.cpp" DESTINATION "${work}/source")
+file(COPY "${CSL_SOURCE_DIR}/tests/installed/finite_causal_minimax_client.cpp" DESTINATION "${work}/source")
 file(COPY "${CSL_SOURCE_DIR}/tests/installed/conversion_client.cpp" DESTINATION "${work}/source")
 file(COPY "${CSL_SOURCE_DIR}/tests/installed/polyhedral_intersection_client.cpp" DESTINATION "${work}/source")
 file(COPY "${CSL_SOURCE_DIR}/tests/installed/hybrid_reachability_client.cpp" DESTINATION "${work}/source")

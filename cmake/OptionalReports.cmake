@@ -350,6 +350,7 @@ else()
 target_compile_options(csl_mpc03_robust_minimax_report PRIVATE -Wall -Wextra -Wpedantic -Werror)
 target_compile_options(csl_mpc03_b08_comparison_record PRIVATE -Wall -Wextra -Wpedantic -Werror)
 endif()
+
 if(BUILD_TESTING)
 find_package(Python3 3.11 REQUIRED COMPONENTS Interpreter)
 add_test(NAME mpc03_report_smoke COMMAND Python3::Interpreter
@@ -362,6 +363,26 @@ add_test(NAME mpc03_b08_comparison_record COMMAND Python3::Interpreter
   ${CMAKE_CURRENT_SOURCE_DIR}/reports/algorithm-results/mpc03-b08-l04-miQCP-v1
   ${CMAKE_CURRENT_SOURCE_DIR}/reports/algorithm-results/mpc03-b08-l04-miQCP-comparison-v1)
 set_tests_properties(mpc03_b08_comparison_record PROPERTIES LABELS reporting)
+endif()
+endif()
+
+if(CSL_BUILD_MPC05_REPORT)
+include(cmake/JsonDependencies.cmake)
+add_executable(csl_mpc05_causal_tree_report benchmarks/reporting/mpc05/causal_tree_driver.cpp)
+target_link_libraries(csl_mpc05_causal_tree_report PRIVATE highs CSL::finite_causal_minimax)
+target_include_directories(csl_mpc05_causal_tree_report SYSTEM PRIVATE ${csl_json_SOURCE_DIR}/include)
+target_compile_features(csl_mpc05_causal_tree_report PRIVATE cxx_std_20)
+if(MSVC)
+target_compile_options(csl_mpc05_causal_tree_report PRIVATE /W4 /WX /permissive-)
+else()
+target_compile_options(csl_mpc05_causal_tree_report PRIVATE -Wall -Wextra -Wpedantic -Werror)
+endif()
+if(BUILD_TESTING)
+find_package(Python3 3.11 REQUIRED COMPONENTS Interpreter)
+add_test(NAME mpc05_causal_tree_report_smoke COMMAND Python3::Interpreter
+  ${CMAKE_CURRENT_SOURCE_DIR}/scripts/reports/mpc05/check_smoke.py
+  $<TARGET_FILE:csl_mpc05_causal_tree_report>)
+set_tests_properties(mpc05_causal_tree_report_smoke PROPERTIES LABELS reporting)
 endif()
 endif()
 
