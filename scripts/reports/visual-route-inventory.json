@@ -1254,6 +1254,14 @@
       "disposition": "reviewed-static-diagram-exception"
     },
     {
+      "source": "benchmarks/reporting/it17_hull/summarize_4d.py",
+      "signal_count": 3,
+      "asset_name_literals": [
+        "input-projections.svg"
+      ],
+      "disposition": "reviewed-static-diagram-exception"
+    },
+    {
       "source": "benchmarks/reporting/mpc08_explicit/explicit_double_integrator.py",
       "signal_count": 2,
       "asset_name_literals": [
@@ -1539,6 +1547,16 @@
         "input-projections.svg"
       ],
       "index_sha256": "02ca77a79382b12276690ce0ae8a864a51e4aeb25c72b2a3ea9f61281b54ca82",
+      "disposition": "deferred: original frozen route-level readability review remains; companion availability is listed separately",
+      "follow_up_issue": 669
+    },
+    {
+      "route": "exp02-it17-hull-4d-simplex-20261028-r1",
+      "source_bundle": "exp02-it17-hull-4d-simplex-20261028-r1",
+      "assets": [
+        "input-projections.svg"
+      ],
+      "index_sha256": "4abb23055a10e8043eea5af4472286a4904d7c35e4b24f2439797545769755d3",
       "disposition": "deferred: original frozen route-level readability review remains; companion availability is listed separately",
       "follow_up_issue": 669
     },

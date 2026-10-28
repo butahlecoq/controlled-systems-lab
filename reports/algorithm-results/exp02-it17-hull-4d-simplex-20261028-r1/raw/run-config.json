@@ -1,0 +1,81 @@
+{
+  "schema": "csl.exp02-hull-4d-run-config/1",
+  "source_commit": "dc23a890c4a7e13ad543f56781cc8ebd9bfea770",
+  "fixture": "exp02-simplex-halton-interior-4d-n250",
+  "ambient_dimension": 4,
+  "point_count": 250,
+  "simplex_vertices": [
+    [
+      0,
+      0,
+      0,
+      0
+    ],
+    [
+      1,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      1,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      1,
+      0
+    ],
+    [
+      0,
+      0,
+      0,
+      1
+    ]
+  ],
+  "interior_points": 245,
+  "halton_bases": [
+    2,
+    3,
+    5,
+    7
+  ],
+  "halton_index_start": 1,
+  "accepted_positive_integer_weights": "w1,w2,w3,w4 in 1..5; sum <= 7; w0=8-sum",
+  "weight_denominator": 8,
+  "methods": [
+    "lp-membership-baseline",
+    "basis-reuse-related-to-A43",
+    "ordered-membership-related-to-A44",
+    "A43-certificate-safe-basis-adaptation",
+    "A44-incremental-LP-farthest-seed",
+    "geometric-quickhull (unsupported in 4D)"
+  ],
+  "warmups_per_lp_method": 1,
+  "measured_repetitions_per_lp_method": 5,
+  "order": "LP method order rotates by one position each measured round; QuickHull emits unsupported status only",
+  "lp_workspace": "fresh HiGHS workspace created before each timed reducer call",
+  "timed_region": "public reducer call only; independent certificate check and serialization are outside",
+  "numerical_policy": {
+    "absolute_tolerance": 1e-08,
+    "relative_tolerance": 1e-08
+  },
+  "native_solver": {
+    "name": "HiGHS",
+    "version": "1.11.0",
+    "threads_requested": 1,
+    "parallel": "off",
+    "presolve": "off",
+    "random_seed": 0
+  },
+  "process_limits": {
+    "suite_wall_timeout_seconds": 1800,
+    "address_space_limit_bytes": 12884901888,
+    "enforcement": "GNU timeout and bash ulimit -v"
+  },
+  "performance_claim": "descriptive measurements only; no speedup claim; no source-mapped limiter profile",
+  "input_sha256": "ab9a5afdf6d63e4189cb999a91b7ea48eb80622dfceb78d977576c1d17050585"
+}

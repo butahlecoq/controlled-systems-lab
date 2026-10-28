@@ -180,6 +180,12 @@ FAMILIES = {
         "Reports one tetrahedron with exact dyadic interior redundancy plus its preserved initial "
         "pure-Halton attempt. Three of five LP reducers completed on the informative fixture; "
         "QuickHull is unsupported in 3D, incomplete outcomes remain visible, and no speedup is claimed."),
+    "exp02-it17-hull-4d": Family(
+        r"exp02-it17-hull-4d-simplex-\d{8}-r\d+", "geometry",
+        "ITIS17 four-dimensional hull reducer pilot",
+        "Reports one 250-point 4-simplex fixture with 245 exactly representable interior points. "
+        "Three of five LP reducers completed; two exact but incomplete outputs have withheld timings, "
+        "QuickHull is unsupported in 4D, and no speedup is claimed."),
     "geo07-generator-sets": Family(
         r"geo07-generator-sets-[0-9a-f]{16,64}", "geometry", "Generator-set evaluation",
         "Evaluates generator-set requests over three bounded public generator-set fixtures, "

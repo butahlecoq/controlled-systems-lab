@@ -5,10 +5,12 @@ from __future__ import annotations
 
 import argparse
 import csv
+import hashlib
 import html
 import json
 import math
 import statistics
+import struct
 from fractions import Fraction
 from pathlib import Path
 
@@ -54,6 +56,16 @@ def fixture_points() -> list[tuple[float, ...]]:
     return points
 
 
+def fixture_sha256(points: list[tuple[float, ...]]) -> str:
+    manifest = bytearray(b"csl.hull-input/binary64-le/1")
+    manifest.extend(struct.pack("<Q", len(points)))
+    for point in points:
+        manifest.extend(struct.pack("<Q", len(point)))
+        for coordinate in point:
+            manifest.extend(struct.pack("<d", coordinate))
+    return hashlib.sha256(manifest).hexdigest()
+
+
 def read_rows(path: Path) -> list[dict]:
     rows = [json.loads(line) for line in path.read_text().splitlines() if line.strip()]
     if not rows:
@@ -62,10 +74,11 @@ def read_rows(path: Path) -> list[dict]:
            row.get("fixture") != "exp02-simplex-halton-interior-4d-n250" or
            row.get("input_points") != 250 for row in rows):
         raise ValueError("schema, dimension, or fixture size mismatch")
+    points = fixture_points()
     commits = {row["source_commit"] for row in rows}
     hashes = {row["input_sha256"] for row in rows}
-    if len(commits) != 1 or len(hashes) != 1:
-        raise ValueError("rows do not share one source commit and input")
+    if len(commits) != 1 or hashes != {fixture_sha256(points)}:
+        raise ValueError("rows do not share the independently hashed source and fixture")
     methods = {row["method"] for row in rows}
     if methods != set(METHODS):
         raise ValueError(f"method coverage mismatch: {sorted(methods)}")
@@ -73,7 +86,6 @@ def read_rows(path: Path) -> list[dict]:
            (row["outcome"] != "unsupported_dimension" or row["elapsed_ns"] != 0)
            for row in rows):
         raise ValueError("4D QuickHull rows must remain unsupported and untimed")
-    points = fixture_points()
     for row in rows:
         if row["method"] == "geometric-quickhull":
             row["independent_hull_check"] = None
@@ -154,6 +166,10 @@ def plot_svg() -> str:
         parts.append(f'<text x="{ox}" y="{oy - 10}">Projection {xlabel}–{ylabel}</text>')
         parts.append(f'<path class="axis" d="M{ox},{oy + plot_h}H{ox + plot_w} M{ox},{oy}V{oy + plot_h}"/>')
         parts.append(f'<text x="{ox + plot_w / 2}" y="{oy + plot_h + 22}" text-anchor="middle">{xlabel}</text>')
+        parts.append(f'<text x="{ox - 10}" y="{oy + plot_h}" text-anchor="end">0</text>')
+        parts.append(f'<text x="{ox - 10}" y="{oy + 7}" text-anchor="end">1</text>')
+        parts.append(f'<text x="{ox - 27}" y="{oy + plot_h / 2}" text-anchor="middle" '
+                     f'transform="rotate(-90 {ox - 27} {oy + plot_h / 2})">{ylabel}</text>')
         parts.append(f'<text x="{ox}" y="{oy + plot_h + 35}">0</text><text x="{ox + plot_w}" y="{oy + plot_h + 35}" text-anchor="end">1</text>')
         for point_id, point in enumerate(pts):
             xx = ox + point[a] * plot_w
