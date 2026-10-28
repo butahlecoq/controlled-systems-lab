@@ -21604,73 +21604,73 @@
       "horizon_seconds": 0.1,
       "horizon_steps": 1,
       "initial_winning": false,
-      "solver_wall_ns": 5169
+      "solver_wall_ns": 5727
     },
     {
       "horizon_seconds": 0.2,
       "horizon_steps": 2,
       "initial_winning": false,
-      "solver_wall_ns": 4749
+      "solver_wall_ns": 4400
     },
     {
       "horizon_seconds": 0.30000000000000004,
       "horizon_steps": 3,
       "initial_winning": false,
-      "solver_wall_ns": 5657
+      "solver_wall_ns": 5867
     },
     {
       "horizon_seconds": 0.4,
       "horizon_steps": 4,
       "initial_winning": false,
-      "solver_wall_ns": 10826
+      "solver_wall_ns": 10895
     },
     {
       "horizon_seconds": 0.5,
       "horizon_steps": 5,
       "initial_winning": false,
-      "solver_wall_ns": 36806
+      "solver_wall_ns": 36598
     },
     {
       "horizon_seconds": 0.6000000000000001,
       "horizon_steps": 6,
       "initial_winning": false,
-      "solver_wall_ns": 57479
+      "solver_wall_ns": 57340
     },
     {
       "horizon_seconds": 0.7000000000000001,
       "horizon_steps": 7,
       "initial_winning": false,
-      "solver_wall_ns": 113144
+      "solver_wall_ns": 114052
     },
     {
       "horizon_seconds": 0.8,
       "horizon_steps": 8,
       "initial_winning": false,
-      "solver_wall_ns": 215043
+      "solver_wall_ns": 175722
     },
     {
       "horizon_seconds": 0.9,
       "horizon_steps": 9,
       "initial_winning": false,
-      "solver_wall_ns": 266306
+      "solver_wall_ns": 237532
     },
     {
       "horizon_seconds": 1.0,
       "horizon_steps": 10,
       "initial_winning": false,
-      "solver_wall_ns": 352352
+      "solver_wall_ns": 380009
     },
     {
       "horizon_seconds": 1.1,
       "horizon_steps": 11,
       "initial_winning": false,
-      "solver_wall_ns": 229500
+      "solver_wall_ns": 215671
     },
     {
       "horizon_seconds": 1.2000000000000002,
       "horizon_steps": 12,
       "initial_winning": true,
-      "solver_wall_ns": 351165
+      "solver_wall_ns": 356682
     }
   ],
   "initial_winning": true,
@@ -21680,7 +21680,7 @@
   "selected_horizon_seconds": 1.2000000000000002,
   "selected_horizon_steps": 12,
   "solver": "csl.reachability.finite_feedback.solve",
-  "source_commit": "e2354605b63894848fac1555abfca1c1189515f1",
+  "source_commit": "2b58617c40cc1451d35350d332be226ab4f01674",
   "source_file_blob": "fd7709a6f8e4196665d36b4ac5d348173599c250",
   "source_license": "no license declared in repository metadata",
   "source_model": {
@@ -21717,21 +21717,21 @@
     "native_threads_actual": 1,
     "native_threads_requested": 1,
     "per_horizon_wall_ns": [
-      5169,
-      4749,
-      5657,
-      10826,
-      36806,
-      57479,
-      113144,
-      215043,
-      266306,
-      352352,
-      229500,
-      351165
+      5727,
+      4400,
+      5867,
+      10895,
+      36598,
+      57340,
+      114052,
+      175722,
+      237532,
+      380009,
+      215671,
+      356682
     ],
     "scope": "finite-feedback solves over candidate horizons; graph construction and serialization excluded",
-    "total_solver_wall_ns": 1648196,
+    "total_solver_wall_ns": 1600495,
     "warmup_calls": 0,
     "worker_threads_actual": 1,
     "worker_threads_requested": 1,

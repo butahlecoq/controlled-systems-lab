@@ -17,3 +17,5 @@ python3 scripts/reports/env717/check_time_sphere.py \
 ```
 
 `result.json` stores the complete finite graph, horizon sweep, winning states and selected path. The solver timings are descriptive and make no performance comparison.
+
+`capture.json` records the host processor identity, operating system, compiler, build, thread settings and measured solver-call count. It uses `unavailable` when the host processor cannot be identified.

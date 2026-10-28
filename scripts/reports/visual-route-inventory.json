@@ -1430,7 +1430,7 @@
       "assets": [
         "reachability.svg"
       ],
-      "index_sha256": "d728f577c8f830871282049d50270d722b103d857c54739d2472fa5a0b0187bd",
+      "index_sha256": "4f6c32f977c999bf4b5663407c0e0e8f1576f292aae5afef30a56e24045a89a4",
       "disposition": "deferred: original frozen route-level readability review remains; companion availability is listed separately",
       "follow_up_issue": 717
     },
