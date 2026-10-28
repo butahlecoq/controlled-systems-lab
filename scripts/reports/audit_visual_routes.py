@@ -26,13 +26,15 @@ COMPOSED_SAVED_ROUTES = {
     "scripts/reports/issue422/build_bundle.py",
     "scripts/reports/stage_mpc03.py",
     "scripts/reports/stage_mpc03_b08.py",
+    "scripts/reports/mpc05/make_report.py",
+    "scripts/reports/mpc05/reference.py",
     "scripts/reports/visual_example_fuel_layers.py",
 }
 FROZEN_DIAGRAM_EXCEPTIONS = {
     "benchmarks/reporting/approximation_pilot/summarize.py",
     "benchmarks/reporting/mpc08_explicit/explicit_double_integrator.py",
 }
-PUBLICATION_EXPORT_ROUTES = {"scripts/reports/render.py"}
+PUBLICATION_EXPORT_ROUTES = {"scripts/reports/render.py", "scripts/reports/mpc05/check_smoke.py"}
 VIZ10_ROLE_REASONS = {
     "benchmarks/reporting/mpc08_explicit/explicit_double_integrator.py":
         "Generates one exact 2D critical-region diagram from the rational fixture, with labelled initial and terminal coordinates; it is not a general plotting path.",
@@ -99,6 +101,9 @@ FROZEN_COMPANIONS = {
     "lotka-volterra-sampled-20261023": "examples/lotka-volterra-sampled-v1.html",
 }
 FROZEN_ROUTE_FOLLOW_UP_ISSUES = {
+    # This report's phase-plane figure is owned and reviewed with MPC-05.
+    "mpc05-causal-tree-pilot-v1": 601,
+    "mpc05-causal-tree-pilot-v2": 601,
     # The paired synthesis profile is a control-family report and its current
     # readability follow-up belongs to the active control/witness migration.
     "exp02-paired-profiles-20261027-r1": 686,

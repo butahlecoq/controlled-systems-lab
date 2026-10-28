@@ -152,6 +152,13 @@ add_test(NAME installed_simulation_client COMMAND installed_simulation_client)
 set_tests_properties(installed_simulation_client PROPERTIES
   PASS_REGULAR_EXPRESSION "Installed simulation client: independent nonlinear terminal 1.5 passed")
 
+add_executable(installed_finite_causal_minimax_client finite_causal_minimax_client.cpp)
+target_link_libraries(installed_finite_causal_minimax_client PRIVATE CSL::finite_causal_minimax)
+set_target_properties(installed_finite_causal_minimax_client PROPERTIES CXX_EXTENSIONS OFF)
+add_test(NAME installed_finite_causal_minimax_client COMMAND installed_finite_causal_minimax_client)
+set_tests_properties(installed_finite_causal_minimax_client PROPERTIES
+  PASS_REGULAR_EXPRESSION "Installed causal minimax client: terminal choice and action passed")
+
 add_executable(installed_finite_feedback_client finite_feedback_client.cpp)
 target_link_libraries(installed_finite_feedback_client PRIVATE CSL::finite_feedback_port)
 set_target_properties(installed_finite_feedback_client PROPERTIES CXX_EXTENSIONS OFF)

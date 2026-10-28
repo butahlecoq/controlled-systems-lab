@@ -43,6 +43,8 @@ csl_add_library(csl_finite_action_minimax STATIC src/optimization/finite_action_
 
 target_link_libraries(csl_finite_action_minimax PUBLIC CSL::fixed_plan_disturbance CSL::worst_case_vertex CSL::artifacts)
 
+csl_add_library(csl_finite_causal_minimax STATIC src/optimization/finite_causal_minimax.cpp)
+
 csl_add_library(csl_validated_finite_action_minimax STATIC
   src/optimization/validated_finite_action_minimax.cpp)
 
@@ -61,4 +63,6 @@ target_link_libraries(csl_finite_action_minimax_port PUBLIC CSL::finite_action_m
 csl_install_headers(optimization)
 
 install(FILES docs/contracts/certificates.md
+  DESTINATION ${CMAKE_INSTALL_DATADIR}/CSL/docs/contracts)
+install(FILES docs/contracts/finite-causal-minimax.md
   DESTINATION ${CMAKE_INSTALL_DATADIR}/CSL/docs/contracts)

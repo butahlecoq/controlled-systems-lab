@@ -86,6 +86,12 @@ FAMILIES = {
         "Solves the four-step L04 displayed-data finite-action minimax model with a shared-selector "
         "MIQCP, checks it against exact rational enumeration, and records a numerical convex-hull "
         "relaxation bound. This is not a historical reproduction or solver-speed comparison."),
+    "mpc05-causal-tree": Family(
+        r"mpc05-causal-tree-[0-9a-f]{20}", "synthesis", "Finite causal minimax scenario-tree comparison",
+        "Compares a dependency-free Bellman solver with an independent HiGHS extensive-form tree on "
+        "finite fixtures and a three-stage TwoPointsOnParallelLines adaptation. The report shows "
+        "forward reachable sets, terminal sets, backward-winning intersections, and a replayed "
+        "worst-case path in both player phase planes; it makes no continuous RL or performance claim."),
     "lp": Family(
         r"lp-\d{8}T\d{6}Z-[0-9a-f]{12,64}", "optimization", "Linear programming reference run",
         "Runs the registered HiGHS linear-programming adapter on five small analytic "
@@ -707,6 +713,22 @@ def build(site: Path) -> None:
             links=(("Full result record", b08 + "/record.json"),
                    ("Raw solver output", b08 + "/solver-output.json"),
                    ("Independent exact oracle", b08 + "/independent-oracle.json"))))
+    for report_dir in sorted(site.glob("mpc05-causal-tree-[0-9a-f]*")):
+        report_id = report_dir.name
+        if (report_dir.is_symlink() or not report_dir.is_dir()
+                or not re.fullmatch(r"mpc05-causal-tree-[0-9a-f]{20}", report_id)
+                or not (report_dir / "index.html").is_file()):
+            continue
+        detailed = [entry for entry in detailed if entry.report_id != report_id]
+        details = recorded(site, report_id)
+        detailed.append(Entry(
+            report_id=report_id,
+            scope=details.get("scope", "Finite Bellman and full scenario-tree comparison on strict-gap and TwoPoints fixtures"),
+            limits=details.get("limits", "Three-stage finite-catalogue adaptation; no continuous RL or performance claim"),
+            commit=details.get("commit", ""),
+            links=(("Full result record", report_id + "/result.json"),
+                   ("Phase-plane data", report_id + "/figure-data.json"),
+                   ("Offline report bundle", report_id + ".zip"))))
     rendered = page(detailed, extras)
     validate(rendered, site)
     index.write_text(rendered, encoding="utf-8")
