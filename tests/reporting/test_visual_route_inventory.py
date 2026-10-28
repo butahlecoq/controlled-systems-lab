@@ -126,7 +126,7 @@ class VisualRouteInventoryTests(unittest.TestCase):
         routes={entry["route"]:entry for entry in inventory["frozen_published_routes"]}
         self.assertGreater(len(routes),40)
         hull_4d=routes["exp02-it17-hull-4d-simplex-20261028-r1"]
-        self.assertEqual(hull_4d["assets"],["input-projections.svg"])
+        self.assertEqual(hull_4d["assets"],["2d-visual-companion.svg", "input-projections.svg"])
         self.assertTrue(hull_4d["index_sha256"])
         self.assertTrue(all(entry["disposition"].startswith("deferred: original frozen route-level readability")
                             for entry in routes.values()))
