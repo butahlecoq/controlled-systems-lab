@@ -551,3 +551,23 @@ not continuous-state feedback or an RL reproduction. The original
 feedback bundle are staged through distinct content-addressed routes with file
 hashes and offline ZIPs; main-only Pages deployment and live URL/hash checks
 remain pending.
+
+## MPC-05 finite causal minimax pilot
+
+The saved [MPC-05 causal tree report](../../reports/algorithm-results/mpc05-causal-tree-pilot-v2/)
+uses algorithm source commit `353518447a5fb6b27bf3cac276485501ca1c8928`.
+An independent exact Python checker reconstructs the finite TwoPoints transition
+graph, re-planning selector, terminal costs, backward-winning layers and plotted
+worst-case path. In the strict-gap fixture, fixed-plan value and the executed
+fixed-plan re-planning selector's worst cost are both `2`, while the causal
+Bellman value is `1`. For TwoPoints, fixed-plan, executed re-planning and causal
+values coincide at `14.58094225`; its HiGHS full-tree model has 91 decision
+occurrences, 729 leaves, an optimal bound matching its incumbent, and an
+independently replayed worst cost. The standalone figure shows forward and
+backward geometry in player phase planes `(x1,x2)` and `(x3,x4)`. This is a
+three-stage finite adaptation of an upstream continuous-control RL task, with
+no continuous-control, continuous-disturbance or performance claim. The stock
+do-mpc multi-stage objective is a weighted scenario sum and its robust horizon
+can truncate branching; the saved report records the required full-horizon
+worst-leaf epigraph change and uses an explicit HiGHS extensive form. PR review,
+main-only Pages publication and live URL/hash verification remain pending.

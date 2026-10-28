@@ -8,6 +8,10 @@ import unittest
 from zipfile import ZipFile
 
 ROOT = Path(__file__).resolve().parents[2]
+LANDING_SPEC = importlib.util.spec_from_file_location("landing", ROOT / "scripts/reports/landing.py")
+landing = importlib.util.module_from_spec(LANDING_SPEC)
+assert LANDING_SPEC.loader is not None
+LANDING_SPEC.loader.exec_module(landing)
 SPEC = importlib.util.spec_from_file_location(
     "stage_mpc05_causal_tree_test", ROOT / "scripts/reports/stage_mpc05_causal_tree.py")
 stage_report = importlib.util.module_from_spec(SPEC)
@@ -24,13 +28,16 @@ class Mpc05PublicationTests(unittest.TestCase):
             shutil.copytree(source, bundle)
             site = root / "site"
             site.mkdir()
-            (site / "index.html").write_text("<!doctype html><body></body>", encoding="utf-8")
+            (site / "index.html").write_text("<!doctype html><ul></ul><body></body>", encoding="utf-8")
 
             report_id = stage_report.stage(bundle, site)
+            landing.build(site)
 
             self.assertRegex(report_id, r"^mpc05-causal-tree-[0-9a-f]{20}$")
             page = (site / "index.html").read_text(encoding="utf-8")
-            self.assertIn(report_id + "/index.html", page)
+            self.assertIn("Finite causal minimax scenario-tree comparison", page)
+            self.assertIn(report_id + "/result.json", page)
+            self.assertIn(report_id + "/figure-data.json", page)
             self.assertIn(report_id + ".zip", page)
             with ZipFile(site / f"{report_id}.zip") as archive:
                 names = archive.namelist()

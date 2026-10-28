@@ -1,0 +1,4 @@
+[1/4] Scanning /home/butahlecoq/.local/share/codex/worktrees/mpc06-tube-mpc-602-20261028/benchmarks/reporting/mpc05/causal_tree_driver.cpp for CXX dependencies
+[2/4] Generating CXX dyndep file CMakeFiles/csl_mpc05_causal_tree_report.dir/CXX.dd
+[3/4] Building CXX object CMakeFiles/csl_mpc05_causal_tree_report.dir/benchmarks/reporting/mpc05/causal_tree_driver.cpp.o
+[4/4] Linking CXX executable csl_mpc05_causal_tree_report

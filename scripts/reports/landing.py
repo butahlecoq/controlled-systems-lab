@@ -713,6 +713,22 @@ def build(site: Path) -> None:
             links=(("Full result record", b08 + "/record.json"),
                    ("Raw solver output", b08 + "/solver-output.json"),
                    ("Independent exact oracle", b08 + "/independent-oracle.json"))))
+    for report_dir in sorted(site.glob("mpc05-causal-tree-[0-9a-f]*")):
+        report_id = report_dir.name
+        if (report_dir.is_symlink() or not report_dir.is_dir()
+                or not re.fullmatch(r"mpc05-causal-tree-[0-9a-f]{20}", report_id)
+                or not (report_dir / "index.html").is_file()):
+            continue
+        detailed = [entry for entry in detailed if entry.report_id != report_id]
+        details = recorded(site, report_id)
+        detailed.append(Entry(
+            report_id=report_id,
+            scope=details.get("scope", "Finite Bellman and full scenario-tree comparison on strict-gap and TwoPoints fixtures"),
+            limits=details.get("limits", "Three-stage finite-catalogue adaptation; no continuous RL or performance claim"),
+            commit=details.get("commit", ""),
+            links=(("Full result record", report_id + "/result.json"),
+                   ("Phase-plane data", report_id + "/figure-data.json"),
+                   ("Offline report bundle", report_id + ".zip"))))
     rendered = page(detailed, extras)
     validate(rendered, site)
     index.write_text(rendered, encoding="utf-8")

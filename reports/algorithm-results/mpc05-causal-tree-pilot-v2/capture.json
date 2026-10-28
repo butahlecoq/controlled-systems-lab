@@ -1,0 +1,28 @@
+{
+  "cmake_build_type": "Release",
+  "compiler": "c++ (GCC) 16.2.1 20260810",
+  "highs_version": "HiGHS 1.11.0",
+  "logical_cpus": 8,
+  "machine": "x86_64",
+  "measurement": "No performance timings collected; this run compares numerical values and policy witnesses.",
+  "platform": "Linux-7.2.8-9-omarchy-x86_64-with-glibc2.44",
+  "report_executable_sha256": "12b63ceaa58f8c22a60a79d512f26bd10be2cf7d9df4a897ff85017924a1bfab",
+  "run": [
+    "/home/butahlecoq/.local/share/codex/worktrees/mpc06-tube-mpc-602-20261028/build/dev/csl_mpc05_causal_tree_report",
+    "--smoke"
+  ],
+  "schema": "csl.mpc05-causal-tree-capture/1",
+  "source_commit": "353518447a5fb6b27bf3cac276485501ca1c8928",
+  "source_sha256": {
+    "benchmarks/reporting/mpc05/causal_tree_driver.cpp": "449d8299e95ed3d079fbb076c41b1316104e7a0561645f33e121f80c57c0e885",
+    "include/csl/optimization/finite_causal_minimax.hpp": "2b71f6a5029b016444ec72b0cf528043eea83ce202cba4817d76f8d1805b0c18",
+    "reports/algorithm-results/env717-two-points-pilot-v1/figure-data.json": "4d90e86ec9231773551094083c347b00b87e70b0ce3a636a1d61c49028533cbc",
+    "reports/algorithm-results/env717-two-points-pilot-v1/projections.svg": "08ada6ec4a41428b92772dd29b65ddaa8f27358f14305b92302e353d35afd643",
+    "scripts/reports/mpc05/check_smoke.py": "59ab596dddd91cb9526574cdb06a18b521d6b6c180c0aed58d8ef60ae748a2cc",
+    "scripts/reports/mpc05/make_report.py": "846f68e65436c6d7b2eea0249d3deb6f9395293fce0e8562359119143b2414a6",
+    "scripts/reports/mpc05/reference.py": "88e6c86584c4b39c2db27d12816b3a6c0eab870fc274fdea53267ddad448cb43",
+    "scripts/reports/stage_mpc05_causal_tree.py": "5e702289c35d086691ea370c3106b9bdb9055608c3ca30c2fd5594ae256eb362",
+    "src/optimization/finite_causal_minimax.cpp": "24eccb73673a514436f0bb425588f3b712150492269a52260a7824769a33de3c"
+  },
+  "working_tree_clean": true
+}

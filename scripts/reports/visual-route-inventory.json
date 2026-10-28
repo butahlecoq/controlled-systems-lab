@@ -1770,6 +1770,16 @@
       "follow_up_issue": 601
     },
     {
+      "route": "mpc05-causal-tree-pilot-v2",
+      "source_bundle": "mpc05-causal-tree-pilot-v2",
+      "assets": [
+        "projections.svg"
+      ],
+      "index_sha256": "372c26c6d7c5cec5e8b093a90d73c37bbeb166b40d999cb8192f809edca135f2",
+      "disposition": "deferred: original frozen route-level readability review remains; companion availability is listed separately",
+      "follow_up_issue": 601
+    },
+    {
       "route": "mpc06-nilpotent-tube-pilot-v1",
       "source_bundle": "mpc06-nilpotent-tube-pilot-v1",
       "assets": [
