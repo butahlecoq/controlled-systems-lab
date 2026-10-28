@@ -224,12 +224,14 @@ workload/resource matrix and comparison-record requirements.
 ### ITIS17 hull output-status update
 
 The [r3 output-status report](../../reports/algorithm-results/exp02-it17-a44-paper-order-20261028-r3/)
-uses source commit `34e101b0319479779dee89c8d0c1658f14ef1247` and adds the
-`reduction_complete` field to the exploratory hull rows. The `passed` field now
-means complete source-index accounting plus independent exact hull verification;
-it no longer fails solely because the reducer retained unresolved redundant
-points. This preserves incomplete classification as a separate outcome and
-allows the report to show both geometry validity and output size.
+uses schema version 3 for exploratory hull rows. The `passed` field means
+complete source-index accounting plus independent exact hull verification; it
+does not fail solely because an LP reducer retained unresolved redundant
+points. `reducer_status_complete` records whether an LP reducer returned
+`ReductionStatus::complete`; it does not certify that retained points are all
+extreme vertices. QuickHull has no such status and is marked not applicable.
+This preserves reducer status separately from geometric validity and output
+size.
 
 All 60 measured attempts passed the exact 2D hull checker over 64- and
 256-point exact-dyadic square clouds. The LP baseline, ordered reducer and A43

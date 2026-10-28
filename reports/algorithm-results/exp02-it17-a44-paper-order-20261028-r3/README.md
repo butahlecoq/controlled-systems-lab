@@ -20,15 +20,15 @@ the same bit-identical input for a size. There is one warmup and five
 interleaved measured attempts for every method and size. Raw rows contain input
 hashes, outcomes, call counts and individual timings.
 
-| Points | Method | Hull verified | Classification complete | Retained | Median reducer call |
+| Points | Method | Hull verified | Reducer status complete | Retained | Median reducer call |
 |---:|---|---:|---:|---:|---:|
-| 64 | QuickHull | 5/5 | 5/5 | 4 | 0.144 ms |
+| 64 | QuickHull | 5/5 | n/a | 4 | 0.144 ms |
 | 64 | LP membership baseline | 5/5 | 0/5 | 64 | 10.424 ms |
 | 64 | Phase-I basis reuse (related to A43) | 5/5 | 5/5 | 34 | 0.226 ms |
 | 64 | Ordered LP membership (related to A44) | 5/5 | 0/5 | 64 | 10.568 ms |
 | 64 | A43 certificate-safe adaptation | 5/5 | 0/5 | 34 | 5.273 ms |
 | 64 | A44 incremental LP adaptation v2 | 5/5 | 5/5 | 4 | 7.191 ms |
-| 256 | QuickHull | 5/5 | 5/5 | 4 | 0.587 ms |
+| 256 | QuickHull | 5/5 | n/a | 4 | 0.587 ms |
 | 256 | LP membership baseline | 5/5 | 0/5 | 255 | 70.204 ms |
 | 256 | Phase-I basis reuse (related to A43) | 5/5 | 5/5 | 125 | 0.769 ms |
 | 256 | Ordered LP membership (related to A44) | 5/5 | 0/5 | 255 | 69.816 ms |
@@ -54,8 +54,11 @@ limit are recorded in [`raw/paper-identities.txt`](raw/paper-identities.txt).
 
 The independent bounded exact 2D source-index checker verifies that the
 retained set covers the full input hull. The result `passed` field records
-accounting plus this hull check. `reduction_complete` independently records the
-reducer status. Exact deletion certificates are retained for LP removals.
+accounting plus this hull check. `reducer_status_complete` records whether an
+LP reducer returned `ReductionStatus::complete`; it does not claim that every
+retained point is an extreme vertex. QuickHull has no `ReductionStatus`, so
+the JSON field is null and the table displays n/a. Exact deletion certificates
+are retained for LP removals.
 
 ## Environment and timing scope
 

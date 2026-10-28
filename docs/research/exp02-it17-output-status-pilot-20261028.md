@@ -20,19 +20,22 @@ once as warmup and five measured times in interleaved order. All 72 rows
 independent exact 2D source-index hull checker.
 
 The independent check establishes equality of the input and retained hulls.
-`reduction_complete` separately preserves the reducer's own classification
-status. A valid result may therefore keep unresolved interior points. The
-retained count remains part of the result-quality evidence.
+`reducer_status_complete` separately preserves the LP reducer's
+`ReductionStatus::complete` value. This status means candidate results were
+completed and correctly bound; it does not prove that every retained point is
+an extreme vertex. A valid result may therefore keep unresolved interior
+points. The retained count remains part of the result-quality evidence.
+QuickHull has no `ReductionStatus`, so its status is not applicable.
 
-| Points | Method | Hull verified | Classification complete | Retained | Median reducer call |
+| Points | Method | Hull verified | Reducer status complete | Retained | Median reducer call |
 |---:|---|---:|---:|---:|---:|
-| 64 | Geometric QuickHull | 5/5 | 5/5 | 4 | 0.144 ms |
+| 64 | Geometric QuickHull | 5/5 | n/a | 4 | 0.144 ms |
 | 64 | LP membership baseline | 5/5 | 0/5 | 64 | 10.424 ms |
 | 64 | Phase-I basis reuse (related to A43) | 5/5 | 5/5 | 34 | 0.226 ms |
 | 64 | Ordered LP membership (related to A44) | 5/5 | 0/5 | 64 | 10.568 ms |
 | 64 | A43 certificate-safe adaptation | 5/5 | 0/5 | 34 | 5.273 ms |
 | 64 | A44 incremental LP adaptation v2 | 5/5 | 5/5 | 4 | 7.191 ms |
-| 256 | Geometric QuickHull | 5/5 | 5/5 | 4 | 0.587 ms |
+| 256 | Geometric QuickHull | 5/5 | n/a | 4 | 0.587 ms |
 | 256 | LP membership baseline | 5/5 | 0/5 | 255 | 70.204 ms |
 | 256 | Phase-I basis reuse (related to A43) | 5/5 | 5/5 | 125 | 0.769 ms |
 | 256 | Ordered LP membership (related to A44) | 5/5 | 0/5 | 255 | 69.816 ms |
