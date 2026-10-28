@@ -8,9 +8,11 @@
 #include <chrono>
 #include <cmath>
 #include <fstream>
+#include <filesystem>
 #include <iomanip>
 #include <iostream>
 #include <memory>
+#include <optional>
 #include <stdexcept>
 #include <string>
 
@@ -19,6 +21,15 @@
 #endif
 #ifndef CSL_SOURCE_COMMIT
 #define CSL_SOURCE_COMMIT "unknown"
+#endif
+#ifndef CSL_BUILD_TYPE
+#define CSL_BUILD_TYPE "unknown"
+#endif
+#ifndef CSL_COMPILER_ID
+#define CSL_COMPILER_ID "unknown"
+#endif
+#ifndef CSL_COMPILER_VERSION
+#define CSL_COMPILER_VERSION "unknown"
 #endif
 
 namespace {
@@ -45,10 +56,11 @@ struct ProgramCase {
     std::string name;
     problem::ResolvedProblem resolved;
     std::vector<std::size_t> control_indices;
-    JointCoordinates coordinates;
+    std::optional<Problem> stage_only_for_lift;
 };
 
 struct TimedResult {
+    std::uint64_t formulation_transform_ns{};
     std::uint64_t assembly_ns{};
     std::uint64_t prepare_create_ns{};
     std::uint64_t solve_ns{};
@@ -63,11 +75,27 @@ std::uint64_t elapsed(Clock::time_point start, Clock::time_point end) {
     return static_cast<std::uint64_t>(std::chrono::duration_cast<std::chrono::nanoseconds>(end - start).count());
 }
 
-TimedResult run_case(const ProgramCase& test_case, const FamilyRequest& request,
+TimedResult run_case(const ProgramCase& test_case,
     const PreparedProvider<ConvexPort>& provider, const ExecutionContext& context,
     const std::vector<double>& expected_controls, double expected_objective) {
+    auto resolved = test_case.resolved;
+    auto control_indices = test_case.control_indices;
+    std::uint64_t formulation_transform_ns = 0;
+    if (test_case.stage_only_for_lift) {
+        const auto transform_start = Clock::now();
+        const auto transformed = take(problem::lift_one_step_slew(*test_case.stage_only_for_lift,
+            {problem::UnconstrainedFirstAction{}, {interval(-0.25, 0.25).as_handle()}}),
+            "exact slew lift construction failed");
+        resolved = take(problem::resolve(transformed.problem,
+            {problem::UncertaintyStructure::stage_product_uncoupled, {}, {}}),
+            "lifted problem resolution failed");
+        control_indices = transformed.coordinates.original_control_to_lifted_memory;
+        formulation_transform_ns = elapsed(transform_start, Clock::now());
+    }
+    const FamilyRequest request{"nominal_open_loop", resolved.identity(),
+        FamilyTarget::candidate_relaxation, context.numerical, Assurance::numerical, {"csl.polyhedron.h"}, {}};
     const auto assembly_start = Clock::now();
-    auto joint = take(synthesis::strategy_b::build_joint_program(test_case.resolved, request),
+    auto joint = take(synthesis::strategy_b::build_joint_program(resolved, request),
         "joint program construction failed");
     const auto assembly_end = Clock::now();
     const auto* convex = std::get_if<ConvexProgram>(&joint.program);
@@ -93,8 +121,8 @@ TimedResult run_case(const ProgramCase& test_case, const FamilyRequest& request,
     if (!primal_check) throw std::runtime_error("independent primal evaluation failed");
 
     Vector controls;
-    controls.reserve(test_case.control_indices.size());
-    for (const auto index : test_case.control_indices) {
+    controls.reserve(control_indices.size());
+    for (const auto index : control_indices) {
         if (index >= result->primal->size()) throw std::runtime_error("control map exceeds returned primal dimension");
         controls.push_back((*result->primal)[index]);
     }
@@ -114,7 +142,7 @@ TimedResult run_case(const ProgramCase& test_case, const FamilyRequest& request,
     if (result->residuals.primal) {
         max_residual = std::max(result->residuals.primal->rows.violation, result->residuals.primal->variables.violation);
     }
-    return {elapsed(assembly_start, assembly_end), elapsed(prepare_start, prepare_end),
+    return {formulation_transform_ns, elapsed(assembly_start, assembly_end), elapsed(prepare_start, prepare_end),
         elapsed(solve_start, solve_end), convex->quadratic_program().variables().size(),
         convex->quadratic_program().rows().size(), std::move(controls), primal_check->original_objective, max_residual};
 }
@@ -127,7 +155,7 @@ ProgramCase make_direct_case(const input::LoadedScenario& scenario) {
     const std::size_t horizon = problem->times.size() - 1;
     const std::size_t first_control = (horizon + 1) * state_width;
     return {"direct_full_history", resolved,
-        {first_control, first_control + 1}, {{2, 1, 0}, horizon}};
+        {first_control, first_control + 1}, {}};
 }
 
 ProgramCase make_lifted_case(const input::LoadedScenario& scenario) {
@@ -136,12 +164,7 @@ ProgramCase make_lifted_case(const input::LoadedScenario& scenario) {
     if (!description) throw std::runtime_error("resolved scenario has no source problem description");
     Problem stage_only = *description;
     stage_only.temporal.reset();
-    const auto transformed = take(problem::lift_one_step_slew(stage_only,
-        {problem::UnconstrainedFirstAction{}, {interval(-0.25, 0.25).as_handle()}}), "exact slew lift construction failed");
-    const auto lifted = take(problem::resolve(transformed.problem,
-        {problem::UncertaintyStructure::stage_product_uncoupled, {}, {}}), "lifted problem resolution failed");
-    return {"exact_slew_memory_lift", lifted, transformed.coordinates.original_control_to_lifted_memory,
-        transformed.coordinates.lifted};
+    return {"exact_slew_memory_lift", resolved, {}, std::move(stage_only)};
 }
 
 std::string quote(const std::string& value) {
@@ -160,7 +183,7 @@ std::string quote(const std::string& value) {
 int main(int argc, char** argv) try {
     using namespace csl;
     if (argc < 2 || argc > 3) {
-        std::cerr << "Usage: mpc02_slew_direct_vs_lift <scenario.json> [events.jsonl]\n";
+        std::cerr << "Usage: mpc02_slew_direct_vs_lift <scenario.json> [new-output-directory]\n";
         return 2;
     }
     const auto loaded = input::load_scenario_file(argv[1]);
@@ -170,10 +193,11 @@ int main(int argc, char** argv) try {
 
     std::ofstream file;
     if (argc == 3) {
-        std::ifstream existing(argv[2], std::ios::binary);
-        if (existing.good()) throw std::runtime_error("event output already exists; choose a fresh path");
-        file.open(argv[2], std::ios::out | std::ios::binary);
-        if (!file) throw std::runtime_error("could not create event output");
+        std::error_code error;
+        const bool created = std::filesystem::create_directory(argv[2], error);
+        if (!created || error) throw std::runtime_error("output directory already exists or cannot be created");
+        file.open(std::filesystem::path(argv[2]) / "events.jsonl", std::ios::out | std::ios::binary);
+        if (!file) throw std::runtime_error("could not create events.jsonl in the new output directory");
     }
     auto emit = [&](const std::string& line) {
         std::cout << line << '\n';
@@ -182,7 +206,6 @@ int main(int argc, char** argv) try {
     };
 
     const auto direct = make_direct_case(*scenario);
-    const auto lifted = make_lifted_case(*scenario);
     const auto source_digest = problem::hex(scenario->source()->content.digest());
     auto registration = take(adapters::convex::make_highs_registration(), "HiGHS convex registration failed");
     const auto provider_id = registration.identity.id;
@@ -198,15 +221,14 @@ int main(int argc, char** argv) try {
     context.numerical = {1e-8, 1e-8};
     context.resources = std::make_shared<const ResourcePolicy>(ResourcePolicy{1, 1, 1, {}});
 
-    const FamilyRequest direct_request{"nominal_open_loop", direct.resolved.identity(),
-        FamilyTarget::candidate_relaxation, context.numerical, Assurance::numerical, {"csl.polyhedron.h"}, {}};
-    const FamilyRequest lifted_request{"nominal_open_loop", lifted.resolved.identity(),
-        FamilyTarget::candidate_relaxation, context.numerical, Assurance::numerical, {"csl.polyhedron.h"}, {}};
+    const auto lifted = make_lifted_case(*scenario);
     constexpr double exact_optimum = 1.0 / 32.0;
     const Vector exact_controls{3.0 / 8.0, 1.0 / 8.0};
 
     emit("{\"schema\":\"csl.mpc02-slew-formulation-measurement/1\",\"event\":\"header\",\"case\":\"mpc02-slew-2d-v1\",\"source_commit\":"
-        + quote(CSL_SOURCE_COMMIT) + ",\"source_sha256\":"
+        + quote(CSL_SOURCE_COMMIT) + ",\"build_type\":" + quote(CSL_BUILD_TYPE)
+        + ",\"compiler_id\":" + quote(CSL_COMPILER_ID) + ",\"compiler_version\":" + quote(CSL_COMPILER_VERSION)
+        + ",\"source_sha256\":"
         + quote(source_digest) + ",\"backend\":" + quote(provider_identity)
         + ",\"backend_claim\":\"same HiGHS QP adapter on direct and exactly lifted joint formulations\",\"units\":\"nanoseconds\",\"resources\":{\"workers\":1,\"native_threads\":1,\"parallelism\":1},\"solver_tolerance\":1e-8,\"exact_oracle\":{\"controls\":[0.375,0.125],\"objective\":0.03125,\"derivation\":\"strictly convex projection of (1/2,0) onto active u0-u1=1/4\"},\"claim_limit\":\"one tiny fixture; numerical solver formulation comparison only; no general speed winner\"}");
 
@@ -219,18 +241,19 @@ int main(int argc, char** argv) try {
             const bool reversed = (std::max(repetition, 0) % 2) != 0;
             const bool use_lift = (side == 0) == reversed;
             const auto& test_case = use_lift ? lifted : direct;
-            const auto& request = use_lift ? lifted_request : direct_request;
             TimedResult observation;
             bool passed = true;
             std::string error;
-            try { observation = run_case(test_case, request, provider, context, exact_controls, exact_optimum); }
+            try { observation = run_case(test_case, provider, context, exact_controls, exact_optimum); }
             catch (const std::exception& exception) { passed = false; error = exception.what(); ++failures; }
             std::ostringstream event;
             event << std::setprecision(17)
                 << "{\"schema\":\"csl.mpc02-slew-formulation-measurement/1\",\"event\":\"attempt\",\"case\":\"mpc02-slew-2d-v1\",\"side\":"
                 << quote(test_case.name) << ",\"pair\":" << (warmup ? 0 : repetition + 1)
                 << ",\"warmup\":" << (warmup ? "true" : "false") << ",\"order_reversed\":" << (reversed ? "true" : "false")
-                << ",\"status\":" << quote(passed ? "passed" : "failed") << ",\"assembly_ns\":" << observation.assembly_ns
+                << ",\"status\":" << quote(passed ? "passed" : "failed")
+                << ",\"formulation_transform_and_resolve_ns\":" << observation.formulation_transform_ns
+                << ",\"assembly_ns\":" << observation.assembly_ns
                 << ",\"provider_prepare_and_workspace_ns\":" << observation.prepare_create_ns << ",\"solve_ns\":" << observation.solve_ns
                 << ",\"variables\":" << observation.variables << ",\"rows\":" << observation.rows << ",\"controls\":[";
             for (std::size_t index = 0; index < observation.controls.size(); ++index) {
