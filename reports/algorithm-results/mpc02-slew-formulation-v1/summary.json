@@ -1,0 +1,51 @@
+{
+  "schema": "csl.mpc02-slew-formulation-summary/1",
+  "run_file": "events-r4.jsonl",
+  "source_commit": "000fbecf8bda2da18b0e312ffb5acc01fa0f1a1c",
+  "scenario_id": "mpc02-slew-2d-v1",
+  "scenario_sha256": "a965a25bbd87792dc2721739c7ed1b6505edc6e83de3cb08322eeed05da0f348",
+  "backend": "csl.convex.highs@1.0.0+highs.1.11.0",
+  "sample": {
+    "warmups_per_side": 1,
+    "alternating_pairs": 7,
+    "workers": 1,
+    "native_threads": 1,
+    "cpu_affinity": [0],
+    "timeout_seconds": 30
+  },
+  "oracle": {
+    "controls": [0.375, 0.125],
+    "objective": 0.03125,
+    "arithmetic": "exact rational"
+  },
+  "result": "inconclusive",
+  "inconclusive_reason": "No hardware-counter or resource-limiter profile; tiny single fixture",
+  "sides": {
+    "direct_full_history": {
+      "variables": 8,
+      "rows": 11,
+      "attempts": 7,
+      "failures": 0,
+      "formulation_transform_and_resolve_ns": {"median": 0, "min": 0, "max": 0},
+      "assembly_ns": {"median": 13340, "min": 12641, "max": 15854},
+      "provider_prepare_and_workspace_ns": {"median": 4749, "min": 4261, "max": 4819},
+      "solve_ns": {"median": 726076, "min": 716507, "max": 734456}
+    },
+    "exact_slew_memory_lift": {
+      "variables": 11,
+      "rows": 18,
+      "attempts": 7,
+      "failures": 0,
+      "formulation_transform_and_resolve_ns": {"median": 49588, "min": 45397, "max": 63906},
+      "assembly_ns": {"median": 15156, "min": 14806, "max": 25353},
+      "provider_prepare_and_workspace_ns": {"median": 4680, "min": 4261, "max": 4889},
+      "solve_ns": {"median": 757993, "min": 746050, "max": 793333}
+    }
+  },
+  "all_attempts": {
+    "initial_failed": {"file": "events.jsonl", "attempts": 16},
+    "successful_precommit": {"file": "events-r2.jsonl", "attempts": 16},
+    "successful_pre-review": {"file": "events-r3.jsonl", "attempts": 16},
+    "authoritative_successful": {"file": "events-r4.jsonl", "attempts": 16}
+  }
+}

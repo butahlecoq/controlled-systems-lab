@@ -1,0 +1,25 @@
+[  1%] Built target csl_quickhull_2d
+[  4%] Built target csl_contracts
+[  5%] Built target csl_numeric
+[  6%] Built target csl_objectives
+[  6%] Built target csl_sets
+[  8%] Built target csl_optimization
+[  9%] Built target csl_model
+[ 11%] Built target csl_convex
+[ 12%] Built target csl_problem
+[ 13%] Built target csl_resolved_core
+[ 15%] Built target csl_verifiers
+[ 83%] Built target highs
+[ 83%] Built target csl_registry
+[ 84%] Built target csl_resolved_problem
+[ 84%] Built target csl_execution
+[ 84%] Built target csl_highs_convex
+[ 87%] Built target csl_input
+[ 88%] Built target csl_verification
+[ 90%] Built target csl_strategy_ts01
+[ 91%] Built target csl_bounded_hull_checker
+[ 97%] Built target csl_artifacts
+[ 98%] Built target csl_strategy_b
+[100%] Building CXX object CMakeFiles/csl_mpc02_slew_measure.dir/SOURCE_ROOT/benchmarks/reporting/mpc02_slew_direct_vs_lift.cpp.o
+[100%] Linking CXX executable csl_mpc02_slew_measure
+[100%] Built target csl_mpc02_slew_measure

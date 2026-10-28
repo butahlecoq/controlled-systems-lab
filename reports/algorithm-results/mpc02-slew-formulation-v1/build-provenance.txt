@@ -1,0 +1,16 @@
+Source checkout
+  commit: 000fbecf8bda2da18b0e312ffb5acc01fa0f1a1c
+  configure-time git status: clean; runner rejects dirty source
+  scenario SHA-256: a965a25bbd87792dc2721739c7ed1b6505edc6e83de3cb08322eeed05da0f348
+
+Build
+  CMake: 3.31.6
+  generator: Unix Makefiles
+  build type: Release
+  compiler: GCC 16.2.1, /usr/bin/g++
+  CMAKE_CXX_FLAGS_RELEASE: -O3 -DNDEBUG
+  target flags and definitions: see flags.make
+  link command: see link.txt
+  configure output: configure.log
+  build output: build.log
+  executable SHA-256: 5613ab9901f89a3837f747d483c517be19ea53b6aaa702c459cfb3bf7ca5d9db

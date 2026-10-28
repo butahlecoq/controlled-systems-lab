@@ -1,0 +1,49 @@
+# MPC-02 direct versus exact slew-memory formulation pilot
+
+Status: exploratory measurement; timing conclusion is inconclusive.
+
+This bundle compares one authored two-stage slew-constrained scenario using two joint formulations and the same Release HiGHS convex adapter. The direct program keeps the full-history slew row. The lifted program removes that row and models the same slew bound with exact one-step input-memory augmentation. It is a formulation-size and solver-call pilot, not a comparison of different optimization algorithms or a general performance result.
+
+## Mathematical check
+
+Both runs solve scenario `mpc02-slew-2d-v1`, SHA-256 `a965a25bbd87792dc2721739c7ed1b6505edc6e83de3cb08322eeed05da0f348`. Its physical objective is
+
+```text
+J(u0,u1) = (u0 - 1/2)^2 + u1^2
+```
+
+subject to `u0,u1 ∈ [-1,1]` and `|u1-u0| ≤ 1/4`. The exact rational optimum is uniquely attained at `(u0,u1)=(3/8,1/8)` with `J=1/32`: this is the projection of `(1/2,0)` onto the active boundary `u0-u1=1/4`. Each successful attempt checks the primal through the numerical program checker and independently checks the recovered physical controls, slew row, and objective against those rational values. All successful attempts returned the same witness and objective with zero reported residual.
+
+## Formulation and timing results
+
+The authoritative run is `events-r4.jsonl`, captured from clean source commit `000fbecf8bda2da18b0e312ffb5acc01fa0f1a1c` with a verified Release build. It has one warmup per side and seven measured alternating pairs. Values below are medians and full ranges across the seven measured attempts; times are nanoseconds.
+
+| Formulation | Lift and resolve | QP variables | QP rows | Assembly | Provider preparation and workspace | Solver call |
+|---|---:|---:|---:|---:|---:|---:|
+| Direct full history | 0 | 8 | 11 | 13,340 (12,641–15,854) | 4,749 (4,261–4,819) | 726,076 (716,507–734,456) |
+| Exact slew-memory lift | 49,588 (45,397–63,906) | 11 | 18 | 15,156 (14,806–25,353) | 4,680 (4,261–4,889) | 757,993 (746,050–793,333) |
+
+The two formulations preserve the same checked physical witness and value. The lifted program has more variables and rows in this case and adds a measured lift/resolve step. Its observed solver-call median is higher in this run, but no speed winner is claimed: the problem is tiny, the sample is short, and no hardware-counter profiler was available. `perf` and GNU `time` are absent; the process had no cgroup CPU or memory quota. The run was pinned to CPU 0, used a 30-second timeout, and passed a one-worker/one-native-thread resource policy. Timing differences remain inconclusive without a usable limiter/profile and larger matched workloads.
+
+Machine-readable medians, ranges, sample shape, and the inconclusive classification are in `summary.json`; environment and limiter availability are in `environment.txt`. `build-provenance.txt`, the CMake configure/build logs, compiler flags, and link command identify the clean Release executable; its SHA-256 is recorded there.
+
+## Attempt retention
+
+- `events.jsonl`: first driver attempt, retained with all 16 failed calls. The builder rejected a non-admitted profile string before timing; no values from these calls are included in the timing table.
+- `events-r2.jsonl`: 16 successful calls from the corrected driver before the measurement code was committed. Retained as a pre-capture run.
+- `events-r3.jsonl`: successful pre-review run. It is superseded because it did not time the lift/resolve conversion or include the hardened build/output provenance.
+- `events-r4.jsonl`: authoritative 16-call run from the committed clean source. It contains two warmups and fourteen successful measured attempts; its header records source commit, Release compiler identity, scenario digest, adapter version, resource settings, and exact oracle.
+
+## Reproduction
+
+From a clean checkout at `000fbecf8bda2da18b0e312ffb5acc01fa0f1a1c` with GCC 16.2.1 and CMake 3.31.6:
+
+```sh
+cmake -S benchmarks/reporting/mpc02/runner -B build/mpc02-slew-release \
+  -DCSL_SOURCE_ROOT="$PWD" -DCMAKE_BUILD_TYPE=Release -DCMAKE_CXX_COMPILER=g++
+cmake --build build/mpc02-slew-release --target csl_mpc02_slew_measure -j2
+taskset -c 0 timeout 30s build/mpc02-slew-release/csl_mpc02_slew_measure \
+  examples/scenarios/mpc02-slew-2d.json /path/to/new-run-directory
+```
+
+The configure step rejects dirty source checkouts and non-Release builds. The executable atomically creates a new output directory and writes `events.jsonl` inside it; use a fresh path for every run. `SHA256SUMS` covers the retained event files and report metadata.
