@@ -67,6 +67,7 @@ are retained for LP removals.
 - AMD Ryzen 5 3550H, Linux x86_64, 8 logical CPUs; pre-run load averages `2.25, 1.70, 1.06` (64 points) and `2.23, 1.71, 1.06` (256 points); 4.26 GiB available memory.
 - Timing covers the public reducer call. LP workspace creation and output validation are outside the interval.
 - No resource limiter was available, and `perf` was not installed for source-function profiling. LP call counts are retained but do not establish the precise hot function.
+- The summarizer publishes latency and LP-call medians only for groups with at least five measured attempts and no failed attempts. Short or failed groups retain all raw outcomes and show no aggregate timing summary.
 
 ## Reproduction
 
