@@ -1054,8 +1054,8 @@
 <text x="617" y="330.0" fill="#f4f1e8" font-family="sans-serif" font-size="14" text-anchor="middle" transform="rotate(-90 617 330.0)">x4 velocity</text>
 <rect x="79" y="583" width="9" height="9" fill="#56b4e9" fill-opacity="0.4" stroke="#56b4e9"/><text x="95" y="592" fill="#d2dce1" font-family="sans-serif" font-size="13">Forward reachable polytopes by stage/control prefix</text>
 <rect x="79" y="607" width="12" height="10" fill="#d9a441" fill-opacity="0.3" stroke="#d9a441" stroke-width="1.5"/><text x="99" y="617" fill="#d2dce1" font-family="sans-serif" font-size="13">Stage 3 terminal reachable set (one projected set per control prefix)</text>
-<circle cx="470" cy="587" r="4" fill="#f4a261"/><text x="482" y="592" fill="#d2dce1" font-family="sans-serif" font-size="13">Fixed-plan forward ∩ backward vertices</text>
-<circle cx="470" cy="611" r="5" fill="none" stroke="#c77dff"/><text x="482" y="616" fill="#d2dce1" font-family="sans-serif" font-size="13">CSL feedback graph forward ∩ winning states</text>
+<circle cx="650" cy="587" r="4" fill="#f4a261"/><text x="662" y="592" fill="#d2dce1" font-family="sans-serif" font-size="13">Fixed-plan forward ∩ backward vertices</text>
+<circle cx="650" cy="611" r="5" fill="none" stroke="#c77dff"/><text x="662" y="616" fill="#d2dce1" font-family="sans-serif" font-size="13">CSL feedback graph forward ∩ winning states</text>
 <line x1="79" y1="638" x2="105" y2="638" stroke="#ff6b35" stroke-width="4"/><text x="115" y="643" fill="#d2dce1" font-family="sans-serif" font-size="13">Open-loop worst-case trajectory</text>
 <line x1="470" y1="638" x2="496" y2="638" stroke="#57d9a3" stroke-width="3" stroke-dasharray="6 3"/><text x="506" y="643" fill="#d2dce1" font-family="sans-serif" font-size="13">First-admissible feedback selector worst case</text>
 <text x="75" y="674" fill="#93a4ae" font-family="sans-serif" font-size="12">Finite vertex graph only; neither trajectory nor winning nodes imply continuous-state feedback or an RL reproduction. Horizon: 0.3 s.</text>
