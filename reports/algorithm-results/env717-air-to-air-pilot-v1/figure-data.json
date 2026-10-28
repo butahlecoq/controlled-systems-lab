@@ -18271,5 +18271,6 @@
     ]
   ],
   "open_loop_value": 185.00504248482892,
+  "winning_set_threshold_tolerance": 1e-08,
   "feedback_value": 185.00504248482892
 }

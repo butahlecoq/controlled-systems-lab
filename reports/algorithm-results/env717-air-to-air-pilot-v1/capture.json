@@ -1,8 +1,8 @@
 {
   "schema": "csl.env717-capture/1",
-  "source_commit": "aad8ab73f81e57464d4a20b4cdd8b04fc8f576d6",
-  "driver_sha256": "0cbc3882808b13291eed058fa60f518a4908aa8999db35e2b9c565ce791195b1",
-  "renderer_sha256": "b5bb8ecabe411202a1935841f7dae9c45bd91c9306d8183642f673fa6e80edec",
+  "source_commit": "2a1a602b9c12817ad8c65673a859d92e86c2d6c0",
+  "driver_sha256": "2b5068ddf525667eb780ad41d4e44adf3c6e5ada54f918ca64f85dae0810d30a",
+  "renderer_sha256": "d489427ec6f9b2f4eee5dfcdc7fb9120b2f683c1395370d95a68c002e9fb721a",
   "capture_environment": {
     "os": "Linux-7.2.8-9-omarchy-x86_64-with-glibc2.44",
     "processor": "AMD Ryzen 5 3550H with Radeon Vega Mobile Gfx",
@@ -11,12 +11,19 @@
     "logical_cpus": 8
   },
   "measurement": {
-    "warmup_calls": 0,
+    "cache_state": "cold process; no prior solver call",
+    "comparison_claim": false,
     "measured_calls": 1,
     "measured_wall_ns": [
-      26313775
+      16599404
     ],
-    "limiter": "not profiled; single descriptive observation only",
-    "comparison_claim": false
+    "native_threads_actual": 1,
+    "native_threads_requested": 1,
+    "scope": "one finite_action_minimax call; request construction and JSON assembly excluded",
+    "warmup_calls": 0,
+    "worker_threads_actual": 1,
+    "worker_threads_requested": 1,
+    "workspace_reuse": "none",
+    "limiter": "not profiled; single descriptive observation only"
   }
 }
