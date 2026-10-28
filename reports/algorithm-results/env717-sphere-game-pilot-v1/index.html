@@ -1,0 +1,96 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>SphereGame minimax pilot</title><style>body{margin:0;background:#111820;color:#f4f1e8;font:16px/1.55 system-ui,sans-serif}main{max-width:1100px;margin:auto;padding:2rem}svg{width:100%;height:auto}.note{border-left:4px solid #f4a261;padding:.7rem 1rem;background:#1a252e}a{color:#8bd3f7}</style><main><h1>SphereGame: reachability and minimax</h1><p>The source reward is the terminal Euclidean norm of (y,z) minus 4. CSL's residual-norm terminal objective represents the norm directly; subtracting 4 preserves the minimax plan and gives the source reward value.</p><div><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 860 620" role="img" aria-label="SphereGame reachable phase-plane sets and minimax trajectory">
+<rect width="100%" height="100%" fill="#111820"/>
+<circle cx="440.00" cy="99.78" r="2.4" fill="#e9c46a" fill-opacity="0.72"/>
+<circle cx="412.83" cy="109.29" r="2.4" fill="#e9c46a" fill-opacity="0.72"/>
+<circle cx="412.83" cy="99.78" r="2.4" fill="#56b4e9" fill-opacity="0.24"/>
+<circle cx="412.83" cy="90.27" r="2.4" fill="#56b4e9" fill-opacity="0.24"/>
+<circle cx="440.00" cy="109.29" r="2.4" fill="#e9c46a" fill-opacity="0.72"/>
+<circle cx="440.00" cy="99.78" r="2.4" fill="#56b4e9" fill-opacity="0.24"/>
+<circle cx="440.00" cy="90.27" r="2.4" fill="#56b4e9" fill-opacity="0.24"/>
+<circle cx="467.17" cy="109.29" r="2.4" fill="#e9c46a" fill-opacity="0.72"/>
+<circle cx="467.17" cy="99.78" r="2.4" fill="#56b4e9" fill-opacity="0.24"/>
+<circle cx="467.17" cy="90.27" r="2.4" fill="#56b4e9" fill-opacity="0.24"/>
+<circle cx="385.65" cy="118.80" r="2.4" fill="#e9c46a" fill-opacity="0.72"/>
+<circle cx="385.65" cy="109.29" r="2.4" fill="#56b4e9" fill-opacity="0.24"/>
+<circle cx="385.65" cy="99.78" r="2.4" fill="#56b4e9" fill-opacity="0.24"/>
+<circle cx="385.65" cy="90.27" r="2.4" fill="#56b4e9" fill-opacity="0.24"/>
+<circle cx="385.65" cy="80.76" r="2.4" fill="#56b4e9" fill-opacity="0.24"/>
+<circle cx="412.83" cy="118.80" r="2.4" fill="#e9c46a" fill-opacity="0.72"/>
+<circle cx="412.83" cy="109.29" r="2.4" fill="#56b4e9" fill-opacity="0.24"/>
+<circle cx="412.83" cy="99.78" r="2.4" fill="#56b4e9" fill-opacity="0.24"/>
+<circle cx="412.83" cy="90.27" r="2.4" fill="#56b4e9" fill-opacity="0.24"/>
+<circle cx="412.83" cy="80.76" r="2.4" fill="#56b4e9" fill-opacity="0.24"/>
+<circle cx="440.00" cy="118.80" r="2.4" fill="#e9c46a" fill-opacity="0.72"/>
+<circle cx="440.00" cy="109.29" r="2.4" fill="#56b4e9" fill-opacity="0.24"/>
+<circle cx="440.00" cy="99.78" r="2.4" fill="#56b4e9" fill-opacity="0.24"/>
+<circle cx="440.00" cy="90.27" r="2.4" fill="#56b4e9" fill-opacity="0.24"/>
+<circle cx="440.00" cy="80.76" r="2.4" fill="#56b4e9" fill-opacity="0.24"/>
+<circle cx="467.17" cy="118.80" r="2.4" fill="#e9c46a" fill-opacity="0.72"/>
+<circle cx="467.17" cy="109.29" r="2.4" fill="#56b4e9" fill-opacity="0.24"/>
+<circle cx="467.17" cy="99.78" r="2.4" fill="#56b4e9" fill-opacity="0.24"/>
+<circle cx="467.17" cy="90.27" r="2.4" fill="#56b4e9" fill-opacity="0.24"/>
+<circle cx="467.17" cy="80.76" r="2.4" fill="#56b4e9" fill-opacity="0.24"/>
+<circle cx="494.35" cy="118.80" r="2.4" fill="#e9c46a" fill-opacity="0.72"/>
+<circle cx="494.35" cy="109.29" r="2.4" fill="#56b4e9" fill-opacity="0.24"/>
+<circle cx="494.35" cy="99.78" r="2.4" fill="#56b4e9" fill-opacity="0.24"/>
+<circle cx="494.35" cy="90.27" r="2.4" fill="#56b4e9" fill-opacity="0.24"/>
+<circle cx="494.35" cy="80.76" r="2.4" fill="#56b4e9" fill-opacity="0.24"/>
+<circle cx="358.48" cy="128.32" r="3.5" fill="#e9c46a" fill-opacity="0.72"/>
+<circle cx="358.48" cy="118.80" r="3.5" fill="#56b4e9" fill-opacity="0.62"/>
+<circle cx="358.48" cy="109.29" r="3.5" fill="#56b4e9" fill-opacity="0.62"/>
+<circle cx="358.48" cy="99.78" r="3.5" fill="#56b4e9" fill-opacity="0.62"/>
+<circle cx="358.48" cy="90.27" r="3.5" fill="#56b4e9" fill-opacity="0.62"/>
+<circle cx="358.48" cy="80.76" r="3.5" fill="#56b4e9" fill-opacity="0.62"/>
+<circle cx="358.48" cy="71.25" r="3.5" fill="#56b4e9" fill-opacity="0.62"/>
+<circle cx="385.65" cy="128.32" r="3.5" fill="#e9c46a" fill-opacity="0.72"/>
+<circle cx="385.65" cy="118.80" r="3.5" fill="#56b4e9" fill-opacity="0.62"/>
+<circle cx="385.65" cy="109.29" r="3.5" fill="#56b4e9" fill-opacity="0.62"/>
+<circle cx="385.65" cy="99.78" r="3.5" fill="#56b4e9" fill-opacity="0.62"/>
+<circle cx="385.65" cy="90.27" r="3.5" fill="#56b4e9" fill-opacity="0.62"/>
+<circle cx="385.65" cy="80.76" r="3.5" fill="#56b4e9" fill-opacity="0.62"/>
+<circle cx="385.65" cy="71.25" r="3.5" fill="#56b4e9" fill-opacity="0.62"/>
+<circle cx="412.83" cy="128.32" r="3.5" fill="#e9c46a" fill-opacity="0.72"/>
+<circle cx="412.83" cy="118.80" r="3.5" fill="#56b4e9" fill-opacity="0.62"/>
+<circle cx="412.83" cy="109.29" r="3.5" fill="#56b4e9" fill-opacity="0.62"/>
+<circle cx="412.83" cy="99.78" r="3.5" fill="#56b4e9" fill-opacity="0.62"/>
+<circle cx="412.83" cy="90.27" r="3.5" fill="#56b4e9" fill-opacity="0.62"/>
+<circle cx="412.83" cy="80.76" r="3.5" fill="#56b4e9" fill-opacity="0.62"/>
+<circle cx="412.83" cy="71.25" r="3.5" fill="#56b4e9" fill-opacity="0.62"/>
+<circle cx="440.00" cy="128.32" r="3.5" fill="#e9c46a" fill-opacity="0.72"/>
+<circle cx="440.00" cy="118.80" r="3.5" fill="#e9c46a" fill-opacity="0.72"/>
+<circle cx="440.00" cy="109.29" r="3.5" fill="#56b4e9" fill-opacity="0.62"/>
+<circle cx="440.00" cy="99.78" r="3.5" fill="#56b4e9" fill-opacity="0.62"/>
+<circle cx="440.00" cy="90.27" r="3.5" fill="#56b4e9" fill-opacity="0.62"/>
+<circle cx="440.00" cy="80.76" r="3.5" fill="#56b4e9" fill-opacity="0.62"/>
+<circle cx="440.00" cy="71.25" r="3.5" fill="#56b4e9" fill-opacity="0.62"/>
+<circle cx="467.17" cy="128.32" r="3.5" fill="#e9c46a" fill-opacity="0.72"/>
+<circle cx="467.17" cy="118.80" r="3.5" fill="#56b4e9" fill-opacity="0.62"/>
+<circle cx="467.17" cy="109.29" r="3.5" fill="#56b4e9" fill-opacity="0.62"/>
+<circle cx="467.17" cy="99.78" r="3.5" fill="#56b4e9" fill-opacity="0.62"/>
+<circle cx="467.17" cy="90.27" r="3.5" fill="#56b4e9" fill-opacity="0.62"/>
+<circle cx="467.17" cy="80.76" r="3.5" fill="#56b4e9" fill-opacity="0.62"/>
+<circle cx="467.17" cy="71.25" r="3.5" fill="#56b4e9" fill-opacity="0.62"/>
+<circle cx="494.35" cy="128.32" r="3.5" fill="#e9c46a" fill-opacity="0.72"/>
+<circle cx="494.35" cy="118.80" r="3.5" fill="#56b4e9" fill-opacity="0.62"/>
+<circle cx="494.35" cy="109.29" r="3.5" fill="#56b4e9" fill-opacity="0.62"/>
+<circle cx="494.35" cy="99.78" r="3.5" fill="#56b4e9" fill-opacity="0.62"/>
+<circle cx="494.35" cy="90.27" r="3.5" fill="#56b4e9" fill-opacity="0.62"/>
+<circle cx="494.35" cy="80.76" r="3.5" fill="#56b4e9" fill-opacity="0.62"/>
+<circle cx="494.35" cy="71.25" r="3.5" fill="#56b4e9" fill-opacity="0.62"/>
+<circle cx="521.52" cy="128.32" r="3.5" fill="#e9c46a" fill-opacity="0.72"/>
+<circle cx="521.52" cy="118.80" r="3.5" fill="#56b4e9" fill-opacity="0.62"/>
+<circle cx="521.52" cy="109.29" r="3.5" fill="#56b4e9" fill-opacity="0.62"/>
+<circle cx="521.52" cy="99.78" r="3.5" fill="#56b4e9" fill-opacity="0.62"/>
+<circle cx="521.52" cy="90.27" r="3.5" fill="#56b4e9" fill-opacity="0.62"/>
+<circle cx="521.52" cy="80.76" r="3.5" fill="#56b4e9" fill-opacity="0.62"/>
+<circle cx="521.52" cy="71.25" r="3.5" fill="#56b4e9" fill-opacity="0.62"/>
+<polyline points="440.00,99.78 412.83,109.29 385.65,118.80 358.48,128.32" fill="none" stroke="#ff6b35" stroke-width="4"/>
+<circle cx="440.00" cy="99.78" r="5" fill="#ff6b35"/>
+<circle cx="412.83" cy="109.29" r="5" fill="#ff6b35"/>
+<circle cx="385.65" cy="118.80" r="5" fill="#ff6b35"/>
+<circle cx="358.48" cy="128.32" r="5" fill="#ff6b35"/>
+<rect x="90" y="45" width="700" height="490" fill="none" stroke="#81909a"/>
+<text x="440.0" y="577" fill="#f4f1e8" font-family="sans-serif" font-size="16" text-anchor="middle">y</text>
+<text x="30" y="290.0" fill="#f4f1e8" font-family="sans-serif" font-size="16" text-anchor="middle" transform="rotate(-90 30 290.0)">z</text>
+<text x="90" y="590" fill="#bac6ce" font-family="sans-serif" font-size="13">Blue: forward states · gold: causal feedback-winning nodes at open-loop threshold · orange: fixed-plan worst-case path</text>
+</svg></div><p class="note"><strong>Adaptation:</strong> the source uses continuous controls over 8 seconds. This pilot uses three 0.1-second stages and finite catalogues drawn from the source action bounds. The controller commits to an open-loop plan before the disturbance sequence is chosen. This is not a reproduction of the original RL run.</p><p>Minimax norm: 0.4506939094; source reward: -3.549306091. Gold points show a separate causal state-feedback winning set at the fixed-plan minimax threshold; orange is the worst-case path for the selected fixed plan.</p><p>Timing: 913740 ns for one solver call (zero warmups, n=1); request setup and JSON assembly are excluded. This is descriptive only, with no speed comparison.</p><p><a href="result.json">Result JSON</a> · <a href="figure-data.json">Figure data</a> · <a href="capture.json">Capture environment</a> · <a href="projections.svg">Standalone SVG</a></p><p>Upstream source: <a href="https://github.com/imm-rl-lab/optimal_control/blob/f4d76c60f4003f50954174e96eafd8e514bd5441/Environments/SphereGame/SphereGame.py">SphereGame.py</a> at commit <code>f4d76c60f4003f50954174e96eafd8e514bd5441</code> (blob <code>dd8ff3ce718570f05288dc4d8d343a8784ca2327</code>). CSL source: <a href="https://github.com/butahlecoq/controlled-systems-lab/tree/b155cbbb8e541277cb52797ddf3f9d4c77bd8984"><code>b155cbbb8e541277cb52797ddf3f9d4c77bd8984</code></a>. Runtime OS: Linux-7.2.5-3-omarchy-x86_64-with-glibc2.44.</p></main></html>

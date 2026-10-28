@@ -1285,7 +1285,7 @@
       "assets": [
         "projections.svg"
       ],
-      "index_sha256": "ca2da0fe57e5514ba4d57a5822d5980cb68b09de2ceca7cd6e844bc517e61291",
+      "index_sha256": "e7076a7a456bc7849c7ba2f3645495bab5c38870a1a91b0e8e07684330e3c0e9",
       "disposition": "deferred: original frozen route-level readability review remains; companion availability is listed separately",
       "follow_up_issue": 717
     },
