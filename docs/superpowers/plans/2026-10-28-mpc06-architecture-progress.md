@@ -33,7 +33,10 @@ Each candidate returns caller usage, a module map, core types and signatures, im
 - A first feasibility-only driver constructs the nilpotent double-integrator profile, derives the fixed zonotope tube and support tightenings, and verifies `(A+BK)Z+EW ⊆ Z` with the existing exact H-relation inclusion engine.
 - An independent Python `Fraction` oracle checks the exact dyadic tube identity, state/input supports, the eight disturbance-vertex paths for the fixed zero nominal plan, an empty-tightening case, and an unsafe nominal-input witness.
 - The first configured Release build and focused CTest pass with HiGHS and Qhull disabled, confirming the feasibility slice has no new solver dependency.
-- A saved-data SVG/HTML renderer shows `Z`, `X⊖Z`, `X`, `U⊖KZ`, and the rejected unsafe input. The rendered preview has been visually inspected. The capture will be refreshed after the source commit is stable.
+- A saved-data SVG/HTML renderer shows `Z`, `X⊖Z`, `X`, `U⊖KZ`, and the rejected unsafe input. The rendered preview has been visually inspected.
+- The result is captured with driver, checker, scenario, and source-commit identities and saved under `reports/algorithm-results/mpc06-nilpotent-tube-pilot-v1`.
+- A dedicated staging adapter now validates saved checksums, replays the exact result, regenerates HTML/SVG from saved data, creates a content-addressed immutable Pages route and offline ZIP, and adds a link after the archive landing page is rendered.
+- The renderer is registered in the visual-route inventory and assigned to control/witness visualization follow-up #686. Publication tests verify the landing link, route manifest hashes, checksums, and ZIP contents.
 
 ## Grounding summary
 
@@ -56,4 +59,4 @@ Before adding the proposed API, inspect the actual exact H relation helper and p
 
 ## Implementation evidence and next gate
 
-The feasibility-only exact profile is implemented in `benchmarks/reporting/mpc06_tube/driver.cpp`; the pinned scenario and independent oracle are `benchmarks/scenarios/mpc06-nilpotent-tube-v1.json` and `scripts/reports/mpc06/check_tube.py`. Focused Release build and CTest pass. Before treating this as a complete #602 slice, add stable source/build capture metadata, freeze the report into the existing Pages flow, and review the final full diff. No optimization or performance comparison has run.
+The feasibility-only exact profile is implemented in `benchmarks/reporting/mpc06_tube/driver.cpp`; the pinned scenario and independent oracle are `benchmarks/scenarios/mpc06-nilpotent-tube-v1.json` and `scripts/reports/mpc06/check_tube.py`. Focused Release build/CTest, publication tests, visual-route inventory test, checksums, and visual inspection pass. Full local site generation was attempted but stopped because the local Python environment lacks report-only `jsonschema`; CI installs `scripts/reports/requirements.txt`. Before treating this as a complete #602 slice, run exact-head CI, post independent review evidence, and verify the deployed URL. No optimization or performance comparison has run.

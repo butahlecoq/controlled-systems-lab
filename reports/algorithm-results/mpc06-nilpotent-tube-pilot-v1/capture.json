@@ -1,0 +1,13 @@
+{
+  "schema": "csl.mpc06-tube-capture/1",
+  "source_commit": "5e5d56f4446dea2b49e88f72cb7046c9994c043c",
+  "driver_sha256": "9015159b15566ea91a6e9122c47c6a932f17f67698ad180625bcf0548fef1f80",
+  "checker_sha256": "d01d4bb52e8cbf431b55e9da91c8008d7c00a3c148bc55697243743fa941a7da",
+  "scenario_sha256": "a130cf880dd600ac10690a950463b930f9745c4fcf1ab70155149e7ec699f55d",
+  "capture_environment": {
+    "os": "Linux-7.2.8-9-omarchy-x86_64-with-glibc2.44",
+    "processor": "unavailable",
+    "logical_cpus": 8
+  },
+  "performance_measurement": "none; this feasibility study makes no timing comparison"
+}

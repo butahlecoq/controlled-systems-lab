@@ -1,0 +1,65 @@
+{
+  "schema": "csl.mpc06-tube-figure-data/1",
+  "sets": {
+    "state_box_X": {
+      "bounds": [
+        [
+          -1.0,
+          1.0
+        ],
+        [
+          -1.0,
+          1.0
+        ]
+      ],
+      "relation": "exact"
+    },
+    "tightened_state_X_minus_Z": {
+      "bounds": [
+        [
+          -0.875,
+          0.875
+        ],
+        [
+          -0.75,
+          0.75
+        ]
+      ],
+      "relation": "exact support tightening"
+    },
+    "error_tube_Z": {
+      "vertices": [
+        [
+          0.125,
+          0.0
+        ],
+        [
+          -0.125,
+          0.25
+        ],
+        [
+          -0.125,
+          0.0
+        ],
+        [
+          0.125,
+          -0.25
+        ]
+      ],
+      "relation": "exact dyadic zonotope"
+    },
+    "input_U": [
+      -1,
+      1
+    ],
+    "tightened_input_U_minus_KZ": [
+      -0.625,
+      0.625
+    ]
+  },
+  "state_support": [
+    0.125,
+    0.25
+  ],
+  "input_support": 0.375
+}

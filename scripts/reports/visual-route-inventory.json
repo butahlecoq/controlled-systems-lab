@@ -489,6 +489,24 @@
       "disposition": "adopted-shared-quantitative-policy"
     },
     {
+      "source": "scripts/reports/mpc06/capture_tube.py",
+      "signal_count": 1,
+      "asset_name_literals": [
+        "projection.svg"
+      ],
+      "disposition": "deferred-family-specific-migration",
+      "follow_up_issue": 686
+    },
+    {
+      "source": "scripts/reports/mpc06/render_tube.py",
+      "signal_count": 3,
+      "asset_name_literals": [
+        "projection.svg"
+      ],
+      "disposition": "deferred-family-specific-migration",
+      "follow_up_issue": 686
+    },
+    {
       "source": "scripts/reports/opt04/render.py",
       "signal_count": 5,
       "asset_name_literals": [
@@ -720,6 +738,14 @@
         "disturbance-tube.svg"
       ],
       "disposition": "composes-or-copies-existing-saved-figure"
+    },
+    {
+      "source": "scripts/reports/stage_mpc06_tube.py",
+      "signal_count": 2,
+      "asset_name_literals": [
+        "projection.svg"
+      ],
+      "disposition": "publication-validation-or-frozen-route"
     },
     {
       "source": "scripts/reports/stage_mpc08.py",
@@ -1614,6 +1640,16 @@
       "disposition": "deferred: original frozen route-level readability review remains; companion availability is listed separately",
       "follow_up_issue": 669,
       "companion_route": "examples/index.html"
+    },
+    {
+      "route": "mpc06-nilpotent-tube-pilot-v1",
+      "source_bundle": "mpc06-nilpotent-tube-pilot-v1",
+      "assets": [
+        "projection.svg"
+      ],
+      "index_sha256": "292a1bccea61e86f62485638f477097bd7f58fcdc068148adcb185dacedc3895",
+      "disposition": "deferred: original frozen route-level readability review remains; companion availability is listed separately",
+      "follow_up_issue": 669
     },
     {
       "route": "mpc08-explicit-pilot-v1",

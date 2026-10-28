@@ -1,0 +1,121 @@
+{
+  "schema": "csl.mpc06-nilpotent-tube-pilot/1",
+  "case_id": "double-integrator-nilpotent-tube-v1",
+  "scenario_sha256": "a130cf880dd600ac10690a950463b930f9745c4fcf1ab70155149e7ec699f55d",
+  "arithmetic": "IEEE-754 binary64; all fixture coefficients are dyadic and selected transforms are exact",
+  "system": {
+    "A": [
+      [
+        1,
+        1
+      ],
+      [
+        0,
+        1
+      ]
+    ],
+    "B": [
+      [
+        0
+      ],
+      [
+        1
+      ]
+    ],
+    "E": [
+      [
+        0
+      ],
+      [
+        1
+      ]
+    ],
+    "K": [
+      [
+        -1,
+        -2
+      ]
+    ]
+  },
+  "disturbance_radius": 0.125,
+  "horizon": 3,
+  "nilpotent_index_2_verified": true,
+  "feedback_matrix_matches_A_plus_BK": true,
+  "rpi_inclusion_exactly_verified": true,
+  "rpi_generator_matrix": [
+    [
+      0,
+      1
+    ],
+    [
+      1,
+      -1
+    ]
+  ],
+  "rpi_generator_radius": 0.125,
+  "state_constraints": [
+    [
+      -1,
+      1
+    ],
+    [
+      -1,
+      1
+    ]
+  ],
+  "input_constraints": [
+    -1,
+    1
+  ],
+  "state_tightening_support": [
+    0.125,
+    0.25
+  ],
+  "tightened_state_bounds": [
+    [
+      -0.875,
+      0.875
+    ],
+    [
+      -0.75,
+      0.75
+    ]
+  ],
+  "input_tightening_support": 0.375,
+  "tightened_input_bounds": [
+    -0.625,
+    0.625
+  ],
+  "empty_tightening": false,
+  "empty_tightening_edge_case": {
+    "state_box_bound": 0.2,
+    "empty_verified_by_support": true
+  },
+  "unsafe_nominal_plan_edge_case": {
+    "nominal_input": 0.75,
+    "tube_error": [
+      0.125,
+      -0.25
+    ],
+    "actual_input": 1.125,
+    "rejected_by_tightened_bound_and_exact_input_bound": true
+  },
+  "initial_tube_membership": true,
+  "nominal_plan_tightened_feasible": true,
+  "matched_reference": {
+    "quantifier": "fixed nominal plan, all disturbance vertices",
+    "disturbance_paths_checked": 8,
+    "all_paths_safe": true,
+    "worst_state_coordinate_abs": 0.25,
+    "worst_feedback_input_abs": 0.375
+  },
+  "objective": {
+    "kind": "not evaluated",
+    "nominal optimum": "not claimed",
+    "minimax cost": "not claimed"
+  },
+  "approximation_comparison": "deferred behind issues 99 and 100",
+  "source_commit": "5e5d56f4446dea2b49e88f72cb7046c9994c043c",
+  "driver_sha256": "9015159b15566ea91a6e9122c47c6a932f17f67698ad180625bcf0548fef1f80",
+  "checker_sha256": "d01d4bb52e8cbf431b55e9da91c8008d7c00a3c148bc55697243743fa941a7da"
+}

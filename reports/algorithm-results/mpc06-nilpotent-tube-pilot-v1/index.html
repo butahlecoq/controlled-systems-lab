@@ -1,0 +1,23 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Tube MPC exact feasibility pilot</title><style>body{margin:0;background:#111820;color:#f4f1e8;font:16px/1.55 system-ui,sans-serif}main{max-width:1100px;margin:auto;padding:2rem}svg{width:100%;height:auto}code{overflow-wrap:anywhere}.note{background:#1a252e;border-left:4px solid #e9c46a;padding:.7rem 1rem}</style><main><h1>Exact tube-MPC feasibility pilot</h1><p>This small study tests an affine double integrator with full-state feedback and stagewise additive disturbance. The feedback error matrix is nilpotent of index 2, so the finite tube sum has an exact zero tail.</p><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1020 520" role="img" aria-label="Exact RPI tube and tightened state and input constraints">
+<rect width="100%" height="100%" fill="#111820"/>
+<text x="330" y="35" fill="#f4f1e8" text-anchor="middle" font-family="sans-serif" font-size="20">State plane</text>
+<rect x="98.18" y="13.18" width="463.64" height="463.64" fill="none" stroke="#a8b3bd" stroke-width="2" stroke-dasharray="8 6"/>
+<rect x="127.16" y="71.14" width="405.68" height="347.73" fill="#e9c46a" fill-opacity=".25" stroke="#e9c46a" stroke-width="2"/>
+<polygon points="358.98,245.00 301.02,187.05 301.02,245.00 358.98,302.95" fill="#56b4e9" fill-opacity=".7" stroke="#8bd3f7" stroke-width="3"/>
+<text x="330" y="455" fill="#f4f1e8" text-anchor="middle" font-family="sans-serif">position</text>
+<text x="25" y="250" fill="#f4f1e8" text-anchor="middle" font-family="sans-serif" transform="rotate(-90 25 250)">velocity</text>
+<text x="720" y="55" fill="#f4f1e8" font-family="sans-serif" font-size="20">Input constraint</text>
+<line x1="715.00" y1="220" x2="915.00" y2="220" stroke="#a8b3bd" stroke-width="16"/>
+<line x1="752.50" y1="220" x2="877.50" y2="220" stroke="#e9c46a" stroke-width="16"/>
+<line x1="890.00" y1="150" x2="890.00" y2="290" stroke="#ff6b35" stroke-width="3"/>
+<circle cx="927.50" cy="220" r="8" fill="#ff6b35"/>
+<text x="815.0" y="250" fill="#f4f1e8" text-anchor="middle" font-family="sans-serif">u: U in gray; U⊖KZ in gold</text>
+<text x="890.00" y="130" fill="#ff9b76" text-anchor="middle" font-family="sans-serif">unsafe nominal v=0.75</text>
+<text x="927.50" y="315" fill="#ff9b76" text-anchor="middle" font-family="sans-serif">actual u=1.125</text>
+<g font-family="sans-serif" font-size="14" fill="#f4f1e8">
+<rect x="715" y="350" width="16" height="16" fill="none" stroke="#a8b3bd" stroke-width="2"/><text x="740" y="364">state set X</text>
+<rect x="715" y="380" width="16" height="16" fill="#e9c46a" fill-opacity=".5"/><text x="740" y="394">tightening X⊖Z</text>
+<rect x="715" y="410" width="16" height="16" fill="#56b4e9"/><text x="740" y="424">error tube Z</text>
+</g>
+</svg>
+<p>Exact H-relation inclusion verifies <code>(A+BK)Z + EW ⊆ Z</code>. The support tightenings are <code>X⊖Z=[-0.875, 0.875] × [-0.75, 0.75]</code> and <code>U⊖KZ=[-0.625, 0.625]</code>. Independent exact dyadic replay checks all 8 disturbance-vertex paths for the zero nominal plan.</p><p class="note">Safety and feasibility only. No nominal optimum, minimax cost, terminal invariance, or approximation comparison is claimed. The orange marker shows an exact unsafe nominal-input witness rejected by tightening.</p><p>Source commit: <code>5e5d56f4446dea2b49e88f72cb7046c9994c043c</code>. Independent checker SHA-256: <code>d01d4bb52e8cbf431b55e9da91c8008d7c00a3c148bc55697243743fa941a7da</code>. Objective: not evaluated. Approximation comparisons remain gated by issues #99 and #100.</p><p><a href="result.json">Saved result</a> · <a href="scenario.json">Scenario input</a> · <a href="figure-data.json">Figure data</a> · <a href="projection.svg">Standalone SVG</a></p></main></html>
