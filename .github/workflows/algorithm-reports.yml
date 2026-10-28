@@ -60,7 +60,7 @@ jobs:
           cmake -S . -B build/mpc05-report-ci -DBUILD_TESTING=ON -DCMAKE_BUILD_TYPE=Release \
             -DCSL_ENABLE_HIGHS=ON -DCSL_ENABLE_QHULL=OFF -DCSL_BUILD_MPC05_REPORT=ON
           cmake --build build/mpc05-report-ci --config Release \
-            --target csl_mpc05_causal_tree_report --parallel 2
+            --target csl_mpc05_causal_tree_report finite_causal_minimax_tests --parallel 2
           ctest --test-dir build/mpc05-report-ci -C Release --output-on-failure \
             -R '^(mpc05_causal_tree_report_smoke|finite_causal_minimax_tests)$'
       - name: Check reviewed catalogue and stage only allowlisted files
