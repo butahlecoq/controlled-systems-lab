@@ -20,6 +20,14 @@ METHODS = [
     "A44-incremental-LP-farthest-seed",
     "geometric-quickhull",
 ]
+METHOD_LABELS = {
+    METHODS[0]: "Baseline LP",
+    METHODS[1]: "Basis reuse (A43-related)",
+    METHODS[2]: "Ordered LP (A44-related)",
+    METHODS[3]: "A43 safe adaptation",
+    METHODS[4]: "A44 incremental adaptation",
+    METHODS[5]: "QuickHull (unsupported)",
+}
 SCHEMA = "csl.exp02-hull-3d-row/1"
 
 
@@ -182,8 +190,17 @@ def main() -> None:
     (args.output_dir / "input-projections.svg").write_text(plot_svg())
     tables = []
     for row in csv.DictReader((args.output_dir / "summary.csv").open()):
-        tables.append("<tr>" + "".join(f"<td>{html.escape(value)}</td>" for value in row.values()) + "</tr>")
-    headers = "".join(f"<th>{html.escape(value)}</th>" for value in next(csv.reader((args.output_dir / "summary.csv").open())))
+        if row["method"] == METHODS[5]:
+            values = [METHOD_LABELS[row["method"]], "—", "unsupported in 3D", "—", "—", "—", "No timing"]
+        else:
+            low = row["elapsed_min_ms"]
+            high = row["elapsed_max_ms"]
+            values = [METHOD_LABELS[row["method"]], row["independently_verified"], row["reducer_complete"],
+                      row["retained_median"] or "—", row["elapsed_median_ms"] or "—",
+                      f"{low}–{high}" if low and high else "—",
+                      "Descriptive only; no speedup claim" if row["elapsed_median_ms"] else "Withheld: incomplete reducer"]
+        tables.append("<tr>" + "".join(f"<td>{html.escape(value)}</td>" for value in values) + "</tr>")
+    headers = "".join(f"<th>{label}</th>" for label in ["Method", "Hull checks", "Complete", "Retained", "Median (ms)", "Range (ms)", "Timing interpretation"])
     page = f'''<!doctype html>
 <html lang="en">
 <meta charset="utf-8">
