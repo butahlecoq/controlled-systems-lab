@@ -4,7 +4,7 @@
 # compile CXX with /usr/bin/g++
 CXX_DEFINES = -DCSL_BUILD_TYPE=\"Release\" -DCSL_COMPILER_ID=\"GNU\" -DCSL_COMPILER_VERSION=\"16.2.1\" -DCSL_SOURCE_COMMIT=\"000fbecf8bda2da18b0e312ffb5acc01fa0f1a1c\" -DNDEBUG
 
-CXX_INCLUDES = -I/home/butahlecoq/.local/share/codex/worktrees/mpc02-slew-measurement-598-20261028/include
+CXX_INCLUDES = -ISOURCE_ROOT/include
 
 CXX_FLAGS = -O3 -DNDEBUG -Wall -Wextra -Wpedantic -Werror
 

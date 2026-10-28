@@ -20,6 +20,6 @@
 [ 91%] Built target csl_bounded_hull_checker
 [ 97%] Built target csl_artifacts
 [ 98%] Built target csl_strategy_b
-[100%] Building CXX object CMakeFiles/csl_mpc02_slew_measure.dir/home/butahlecoq/.local/share/codex/worktrees/mpc02-slew-measurement-598-20261028/benchmarks/reporting/mpc02_slew_direct_vs_lift.cpp.o
+[100%] Building CXX object CMakeFiles/csl_mpc02_slew_measure.dir/SOURCE_ROOT/benchmarks/reporting/mpc02_slew_direct_vs_lift.cpp.o
 [100%] Linking CXX executable csl_mpc02_slew_measure
 [100%] Built target csl_mpc02_slew_measure
