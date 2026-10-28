@@ -51,6 +51,10 @@ def inputs(source: Path) -> dict[str, bytes]:
             capture.get("checker_sha256") != record.get("checker_sha256") or
             capture.get("scenario_sha256") != record.get("scenario_sha256")):
         raise ValueError("MPC-06 capture and result provenance differ")
+    if (capture.get("capture_environment") != record.get("capture_environment") or
+            capture.get("performance_measurement") != record.get("measurement") or
+            record.get("build", {}).get("configuration") != "Release"):
+        raise ValueError("MPC-06 build/performance capture differs")
     if digest(CHECKER_PATH.read_bytes()) != record["checker_sha256"]:
         raise ValueError("MPC-06 checker identity differs")
     checker.check_record(record)
@@ -94,7 +98,9 @@ def stage(source: Path, site: Path) -> str:
         (destination / name).write_bytes(value)
     link = (f'<section><h2>Exact tube-MPC feasibility pilot</h2>'
             f'<p>Nilpotent two-state tube, exact RPI inclusion, support tightenings, and an independent '
-            f'eight-path disturbance reference. <a href="{route}/index.html">Open the report</a> · '
+            f'eight-path disturbance reference. Scope is feasibility/safety only: no objective, minimax cost, '
+            f'general causal optimum, terminal invariance, or approximation comparison is claimed. '
+            f'<a href="{route}/index.html">Open the report</a> · '
             f'<a href="{route}.zip">Download the offline report bundle</a>.</p></section>')
     index.write_text(page.replace("</body>", link + "</body>"), encoding="utf-8")
     with zipfile.ZipFile(archive_path, "w", zipfile.ZIP_DEFLATED) as archive:

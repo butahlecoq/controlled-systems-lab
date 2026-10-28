@@ -2,6 +2,7 @@
 
 #include <algorithm>
 #include <array>
+#include <chrono>
 #include <cmath>
 #include <cstdlib>
 #include <iomanip>
@@ -100,6 +101,7 @@ int main() {
     }};
     const bool nilpotent = f_squared[0][0] == 0.0 && f_squared[0][1] == 0.0 &&
                            f_squared[1][0] == 0.0 && f_squared[1][1] == 0.0;
+    const auto analysis_start = std::chrono::steady_clock::now();
     const bool invariant = prove_rpi();
 
     // Exact support values for the two zonotope generators and their feedback image.
@@ -121,6 +123,8 @@ int main() {
         k[0] * unsafe_tube_error[0] + k[1] * unsafe_tube_error[1];
     const bool unsafe_plan_rejected = unsafe_actual_input > input_bound &&
         std::abs(unsafe_nominal_input) > tightened_input;
+    const auto analysis_elapsed_ns = std::chrono::duration_cast<std::chrono::nanoseconds>(
+        std::chrono::steady_clock::now() - analysis_start).count();
 
     std::size_t checked_paths = 0;
     double worst_state_abs = 0.0;
@@ -158,6 +162,9 @@ int main() {
               << "{\"schema\":\"csl.mpc06-nilpotent-tube-pilot/1\","
               << "\"case_id\":\"double-integrator-nilpotent-tube-v1\","
               << "\"scenario_sha256\":\"" << CSL_MPC06_SCENARIO_SHA256 << "\","
+              << "\"build\":{\"compiler_id\":\"" << CSL_MPC06_COMPILER_ID
+              << "\",\"compiler_version\":\"" << CSL_MPC06_COMPILER_VERSION
+              << "\",\"configuration\":\"" << CSL_MPC06_BUILD_CONFIG << "\"},"
               << "\"arithmetic\":\"IEEE-754 binary64; all fixture coefficients are dyadic and selected transforms are exact\","
               << "\"system\":{\"A\":[[" << a[0][0] << ',' << a[0][1] << "],[" << a[1][0] << ',' << a[1][1]
               << "]],\"B\":[[" << b[0] << "],[" << b[1] << "]],\"E\":[[" << e[0] << "],[" << e[1]
@@ -195,6 +202,10 @@ int main() {
               << "\"worst_feedback_input_abs\":" << worst_input_abs << "},"
               << "\"objective\":{\"kind\":\"not evaluated\",\"nominal optimum\":\"not claimed\","
               << "\"minimax cost\":\"not claimed\"},"
+              << "\"measurement\":{\"scope\":\"one exact RPI inclusion, support tightening calculation, matched eight-path disturbance replay, and two edge checks; JSON serialization excluded\","
+              << "\"elapsed_ns\":" << analysis_elapsed_ns << ",\"runs\":1,\"warmups\":0,"
+              << "\"errors\":0,\"work_completed\":true,"
+              << "\"performance_assessment\":\"inconclusive; one descriptive observation, no limiter profile or comparison\"},"
               << "\"approximation_comparison\":\"deferred behind issues 99 and 100\"}\n";
     return feedback_matches && nilpotent && invariant && !empty_tightening &&
                    edge_tightening_empty && unsafe_plan_rejected && initial_in_tube &&

@@ -28,6 +28,13 @@ def check_record(record: dict) -> dict:
     assert record.get("scenario_sha256") == hashlib.sha256(scenario_bytes).hexdigest()
     assert record["schema"] == "csl.mpc06-nilpotent-tube-pilot/1"
     assert record["case_id"] == "double-integrator-nilpotent-tube-v1"
+    build = record["build"]
+    assert build["compiler_id"] and build["compiler_version"] and build["configuration"]
+    measurement = record["measurement"]
+    assert measurement["runs"] == 1 and measurement["warmups"] == 0
+    assert measurement["errors"] == 0 and measurement["work_completed"]
+    assert type(measurement["elapsed_ns"]) is int and measurement["elapsed_ns"] > 0
+    assert measurement["performance_assessment"].startswith("inconclusive;")
     q = Q
     radius = q(1, 8)
     a = ((q(1), q(1)), (q(0), q(1)))

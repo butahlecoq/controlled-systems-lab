@@ -72,7 +72,42 @@ def render(record_path: Path, out: Path) -> None:
     (out / "projection.svg").write_text(svg, encoding="utf-8")
     source_commit = html.escape(record.get("source_commit", "uncommitted source"))
     checker_hash = html.escape(record.get("checker_sha256", "not captured"))
-    page = f'''<!doctype html><html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Tube MPC exact feasibility pilot</title><style>body{{margin:0;background:#111820;color:#f4f1e8;font:16px/1.55 system-ui,sans-serif}}main{{max-width:1100px;margin:auto;padding:2rem}}svg{{width:100%;height:auto}}code{{overflow-wrap:anywhere}}.note{{background:#1a252e;border-left:4px solid #e9c46a;padding:.7rem 1rem}}</style><main><h1>Exact tube-MPC feasibility pilot</h1><p>This small study tests an affine double integrator with full-state feedback and stagewise additive disturbance. The feedback error matrix is nilpotent of index 2, so the finite tube sum has an exact zero tail.</p>{svg}<p>Exact H-relation inclusion verifies <code>(A+BK)Z + EW ⊆ Z</code>. The support tightenings are <code>X⊖Z=[-{record['tightened_state_bounds'][0][1]}, {record['tightened_state_bounds'][0][1]}] × [-{record['tightened_state_bounds'][1][1]}, {record['tightened_state_bounds'][1][1]}]</code> and <code>U⊖KZ=[{record['tightened_input_bounds'][0]}, {record['tightened_input_bounds'][1]}]</code>. Independent exact dyadic replay checks all {record['matched_reference']['disturbance_paths_checked']} disturbance-vertex paths for the zero nominal plan.</p><p class="note">Safety and feasibility only. No nominal optimum, minimax cost, terminal invariance, or approximation comparison is claimed. The orange marker shows an exact unsafe nominal-input witness rejected by tightening.</p><p>Source commit: <code>{source_commit}</code>. Independent checker SHA-256: <code>{checker_hash}</code>. Objective: not evaluated. Approximation comparisons remain gated by issues #99 and #100.</p><p><a href="result.json">Saved result</a> · <a href="scenario.json">Scenario input</a> · <a href="figure-data.json">Figure data</a> · <a href="projection.svg">Standalone SVG</a></p></main></html>'''
+    build = record["build"]
+    host = record["capture_environment"]
+    measurement = record["measurement"]
+    state_x = record["tightened_state_bounds"][0]
+    state_v = record["tightened_state_bounds"][1]
+    input_u = record["tightened_input_bounds"]
+    page = f'''<!doctype html>
+<html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Tube MPC exact feasibility pilot</title>
+<style>
+body{{margin:0;background:#111820;color:#f4f1e8;font:16px/1.55 system-ui,sans-serif}}
+main{{max-width:1100px;margin:auto;padding:2rem}}svg{{width:100%;height:auto}}
+code{{overflow-wrap:anywhere}}.note{{background:#1a252e;border-left:4px solid #e9c46a;padding:.7rem 1rem}}
+table{{border-collapse:collapse;width:100%;margin:1rem 0}}th,td{{border:1px solid #53616a;padding:.45rem .65rem;text-align:left}}
+th{{background:#1a252e}}
+</style><main>
+<h1>Exact tube-MPC feasibility pilot</h1>
+<p>This small study tests an affine double integrator with full-state feedback and stagewise additive disturbance. The feedback error matrix is nilpotent of index 2, so the finite tube sum has an exact zero tail.</p>
+{svg}
+<table><caption>Exact feasibility evidence</caption><thead><tr><th>Quantity</th><th>Result</th><th>Evidence</th></tr></thead><tbody>
+<tr><td>RPI tube</td><td>Z = D ⊕ FD, generators (0,1) and (1,−1), radius 1/8</td><td>Exact H-relation inclusion verifies (A+BK)Z + EW ⊆ Z</td></tr>
+<tr><td>State support and tightening</td><td>hZ(e₁)={record['state_tightening_support'][0]}; hZ(e₂)={record['state_tightening_support'][1]}; X⊖Z=[{state_x[0]},{state_x[1]}] × [{state_v[0]},{state_v[1]}]</td><td>Exact dyadic generator support</td></tr>
+<tr><td>Input support and tightening</td><td>hKZ={record['input_tightening_support']}; U⊖KZ=[{input_u[0]},{input_u[1]}]</td><td>Exact dyadic generator support</td></tr>
+<tr><td>Zero nominal plan</td><td>Initial tube membership and tightened feasibility established</td><td>Independent rational check</td></tr>
+<tr><td>Matched disturbance reference</td><td>{record['matched_reference']['disturbance_paths_checked']} vertex paths; all safe; worst state coordinate {record['matched_reference']['worst_state_coordinate_abs']}; worst feedback input {record['matched_reference']['worst_feedback_input_abs']}</td><td>Exact rational replay for the same fixed plan and feedback law</td></tr>
+<tr><td>Edge cases</td><td>Empty state tightening detected; unsafe v=0.75 rejected with actual u=1.125</td><td>Exact support values and dyadic witness</td></tr>
+</tbody></table>
+<p class="note">Scope: feasibility and safety only. No objective is evaluated; no nominal optimum, minimax cost, general causal optimum, or terminal invariance is claimed. This is one fixed nilpotent profile with continuous inputs and stagewise independent additive disturbance. No outer representation comparison is included; those comparisons remain gated by #99/#100.</p>
+<h2>One descriptive timing observation</h2>
+<p>{measurement['elapsed_ns']} ns for one {html.escape(build['configuration'])} analysis call (n=1, no warmups; range unavailable for a single run): {html.escape(measurement['scope'])}. Build/setup and JSON serialization are excluded, so this is not end-to-end application latency. Assessment: inconclusive; the limiter was not profiled, and no comparison or speed claim is made. The result was verified before reporting (errors: {measurement['errors']}; completed work: {str(measurement['work_completed']).lower()}).</p>
+<p>Build: {html.escape(build['compiler_id'])} {html.escape(build['compiler_version'])}, {html.escape(build['configuration'])}; host: {html.escape(host['processor'])}, {html.escape(host['os'])}, {host['logical_cpus']} logical CPUs. Source commit: <code>{source_commit}</code>. Independent checker SHA-256: <code>{checker_hash}</code>.</p>
+<h2>Reproduce</h2><pre><code>cmake -S . -B build/mpc06 -DCSL_BUILD_MPC06_REPORT=ON -DCMAKE_BUILD_TYPE=Release
+cmake --build build/mpc06 --config Release --target csl_mpc06_tube_pilot
+python3 scripts/reports/mpc06/check_tube.py build/mpc06/csl_mpc06_tube_pilot</code></pre>
+<p><a href="result.json">Saved result</a> · <a href="scenario.json">Complete scenario input</a> · <a href="README.md">Reproduction notes</a> · <a href="figure-data.json">Figure data</a> · <a href="projection.svg">Standalone SVG</a></p>
+</main></html>'''
     (out / "index.html").write_text(page, encoding="utf-8")
 
 

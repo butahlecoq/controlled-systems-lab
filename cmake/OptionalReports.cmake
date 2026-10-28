@@ -34,7 +34,10 @@ add_executable(csl_mpc06_tube_pilot benchmarks/reporting/mpc06_tube/driver.cpp)
 target_include_directories(csl_mpc06_tube_pilot PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src)
 target_compile_features(csl_mpc06_tube_pilot PRIVATE cxx_std_20)
 target_compile_definitions(csl_mpc06_tube_pilot PRIVATE
-  CSL_MPC06_SCENARIO_SHA256="${MPC06_SCENARIO_SHA256}")
+  CSL_MPC06_SCENARIO_SHA256="${MPC06_SCENARIO_SHA256}"
+  CSL_MPC06_COMPILER_ID="${CMAKE_CXX_COMPILER_ID}"
+  CSL_MPC06_COMPILER_VERSION="${CMAKE_CXX_COMPILER_VERSION}"
+  CSL_MPC06_BUILD_CONFIG="$<CONFIG>")
 if(MSVC)
 target_compile_options(csl_mpc06_tube_pilot PRIVATE /W4 /WX /permissive-)
 else()

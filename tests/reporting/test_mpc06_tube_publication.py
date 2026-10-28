@@ -48,6 +48,12 @@ class Mpc06TubePublicationTests(unittest.TestCase):
         page = (self.site / "index.html").read_text()
         self.assertIn(f'href="{route}/index.html"', page)
         self.assertIn(f'href="{route}.zip"', page)
+        self.assertIn("no objective, minimax cost", page)
+        report = (destination / "index.html").read_text()
+        self.assertIn("Exact feasibility evidence", report)
+        self.assertIn("One descriptive timing observation", report)
+        self.assertIn("range unavailable for a single run", report)
+        self.assertIn("cmake --build build/mpc06", report)
         with zipfile.ZipFile(self.site / f"{route}.zip") as archive:
             self.assertIsNone(archive.testzip())
             self.assertIn(f"{route}/projection.svg", archive.namelist())

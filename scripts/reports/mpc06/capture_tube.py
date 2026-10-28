@@ -24,10 +24,21 @@ def sha256(data: bytes) -> str:
 
 def capture(executable: Path, output: Path) -> None:
     record = json.loads(subprocess.check_output([str(executable.resolve())], text=True))
+    if record.get("build", {}).get("configuration") != "Release":
+        raise ValueError("the published one-run timing must come from a Release build")
     record["source_commit"] = subprocess.check_output(
         ["git", "rev-parse", "HEAD"], cwd=ROOT, text=True).strip()
     record["driver_sha256"] = sha256(DRIVER.read_bytes())
     record["checker_sha256"] = sha256(CHECKER.read_bytes())
+    host = {
+        "os": platform.platform(),
+        "processor": platform.processor() or _linux_cpu_model(),
+        "logical_cpus": __import__("os").cpu_count() or 0,
+        "compiler_id": record["build"]["compiler_id"],
+        "compiler_version": record["build"]["compiler_version"],
+        "build_configuration": record["build"]["configuration"],
+    }
+    record["capture_environment"] = host
     check_record(record)
     output.mkdir(parents=True, exist_ok=True)
     scenario_bytes = SCENARIO.read_bytes()
@@ -39,12 +50,8 @@ def capture(executable: Path, output: Path) -> None:
         "driver_sha256": record["driver_sha256"],
         "checker_sha256": record["checker_sha256"],
         "scenario_sha256": sha256(scenario_bytes),
-        "capture_environment": {
-            "os": platform.platform(),
-            "processor": platform.processor() or "unavailable",
-            "logical_cpus": __import__("os").cpu_count() or 0,
-        },
-        "performance_measurement": "none; this feasibility study makes no timing comparison",
+        "capture_environment": host,
+        "performance_measurement": record["measurement"],
     }
     (output / "capture.json").write_text(json.dumps(capture_record, indent=2) + "\n", encoding="utf-8")
     render(output / "result.json", output)
@@ -56,7 +63,9 @@ def capture(executable: Path, output: Path) -> None:
         "eight disturbance-vertex paths for the fixed zero nominal plan.\n\n"
         "The saved result contains exact support tightenings, initial tube membership, a feasible nominal plan, "
         "an empty-tightening edge case, and an exact unsafe-input witness. Objective values and approximation "
-        "comparisons are not claimed. This is a new synthetic exact study, not a historical reproduction.\n\n"
+        "comparisons are not claimed. One Release analysis timing is included with n=1 and no warmups; the "
+        "assessment is inconclusive, the limiter was not profiled, and there is no performance comparison. "
+        "This is a new synthetic exact study, not a historical reproduction.\n\n"
         "Rebuild with `cmake -S . -B build/mpc06 -DCSL_BUILD_MPC06_REPORT=ON -DCMAKE_BUILD_TYPE=Release`, "
         "then `cmake --build build/mpc06 --target csl_mpc06_tube_pilot`; validate with "
         "`python3 scripts/reports/mpc06/check_tube.py build/mpc06/csl_mpc06_tube_pilot`.\n",
@@ -66,6 +75,15 @@ def capture(executable: Path, output: Path) -> None:
     (output / "SHA256SUMS").write_text(
         "".join(f"{sha256((output / name).read_bytes())}  {name}\n" for name in names),
         encoding="ascii")
+
+
+def _linux_cpu_model() -> str:
+    path = Path("/proc/cpuinfo")
+    if path.is_file():
+        for line in path.read_text(encoding="utf-8", errors="replace").splitlines():
+            if line.startswith(("model name", "Hardware")):
+                return line.partition(":")[2].strip()
+    return "unavailable"
 
 
 if __name__ == "__main__":
