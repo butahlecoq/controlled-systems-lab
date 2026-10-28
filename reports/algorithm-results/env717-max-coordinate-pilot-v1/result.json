@@ -1,5 +1,7 @@
 {
   "adaptation": {
+    "backward_geometry_information_pattern": "causal state-feedback control on the finite reachable graph; separate from the fixed-plan minimax solve",
+    "backward_geometry_target": "terminal max(|y|,|z|) no greater than the fixed-plan open-loop minimax value",
     "control_catalogue": [
       -1.0,
       1.0
@@ -475,7 +477,7 @@
       "value": -0.191931383789431
     }
   ],
-  "driver_sha256": "7d4cce9c748a1493162a5e03c04e5f775ad36c096cfc6a73ba1fe49b7f0d50de",
+  "driver_sha256": "06b0d10dcce3a3805258112ff6bf86c61795ea877cc105bbf209d8db15fd98e4",
   "environment": {
     "architecture": "x86_64",
     "build_type": "Release",
@@ -490,7 +492,7 @@
   "objective_value": 0.4421402382451977,
   "plan_count": 8,
   "schema": "csl.env717-max-coordinate-pilot/1",
-  "source_commit": "669ae515ae6c2f68be40576c139b28df2d720132",
+  "source_commit": "3c39c8f1549c818f6281afb29f52be7a43d8d3e5",
   "source_file_blob": "d509a1457023b14516d2789bd3033dbaa4110017",
   "source_license": "no license declared in repository metadata",
   "source_model": {
@@ -520,8 +522,10 @@
     "z"
   ],
   "timing": {
-    "elapsed_ns": 859403,
+    "elapsed_ns": 832793,
     "limiter_profile": "not collected; no comparative speed claim",
-    "scope": "four finite_action_minimax calls; setup and JSON excluded"
+    "measured_calls": 1,
+    "scope": "single interval from first request construction through four minimax calls, plan extraction, and objective combination; JSON assembly and serialization excluded",
+    "warmup_calls": 0
   }
 }

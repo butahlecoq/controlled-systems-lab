@@ -93,6 +93,8 @@ def verify_record(actual: dict) -> dict:
     assert adaptation["control_catalogue"] == list(CATALOGUE)
     assert adaptation["disturbance_catalogue"] == list(CATALOGUE)
     assert adaptation["information_pattern"] == "fixed open-loop control plan versus full adversarial sequence"
+    assert adaptation["backward_geometry_information_pattern"] == "causal state-feedback control on the finite reachable graph; separate from the fixed-plan minimax solve"
+    assert adaptation["backward_geometry_target"] == "terminal max(|y|,|z|) no greater than the fixed-plan open-loop minimax value"
     assert adaptation["objective_mapping"] == "four signed linear terminal objectives; combine per-plan worst values"
     expected = enumerate_game()
     assert actual["plan_count"] == len(expected["plans"])
@@ -147,7 +149,7 @@ def svg(data: dict) -> str:
     out.extend([f'<rect x="{x0}" y="{y0}" width="{pw}" height="{ph}" fill="none" stroke="#81909a"/>',
         f'<text x="{x0+pw/2}" y="{y0+ph+42}" fill="#f4f1e8" font-family="sans-serif" font-size="16" text-anchor="middle">y</text>',
         f'<text x="30" y="{y0+ph/2}" fill="#f4f1e8" font-family="sans-serif" font-size="16" text-anchor="middle" transform="rotate(-90 30 {y0+ph/2})">z</text>',
-        '<text x="90" y="590" fill="#bac6ce" font-family="sans-serif" font-size="13">Blue: forward reachable states · gold: robust backward-winning intersection · orange: worst-case minimax path</text>', '</svg>'])
+        '<text x="90" y="590" fill="#bac6ce" font-family="sans-serif" font-size="13">Blue: forward states · gold: causal feedback-winning nodes at open-loop threshold · orange: fixed-plan worst-case path</text>', '</svg>'])
     return "\n".join(out)
 
 
@@ -155,7 +157,7 @@ def page(result: dict, figure: str, host: dict) -> str:
     upstream = ("https://github.com/imm-rl-lab/optimal_control/blob/"
         "f4d76c60f4003f50954174e96eafd8e514bd5441/Environments/MaxCoordinateGame/MaxCoordinateGame.py")
     source = f"https://github.com/butahlecoq/controlled-systems-lab/tree/{result['source_commit']}"
-    return f'''<!doctype html><html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>MaxCoordinateGame minimax pilot</title><style>body{{margin:0;background:#111820;color:#f4f1e8;font:16px/1.55 system-ui,sans-serif}}main{{max-width:1100px;margin:auto;padding:2rem}}svg{{width:100%;height:auto}}.note{{border-left:4px solid #f4a261;padding:.7rem 1rem;background:#1a252e}}a{{color:#8bd3f7}}</style><main><h1>MaxCoordinateGame: reachability and minimax</h1><p>CSL finite-action minimax solves the source oscillator on a short finite action catalogue. The source reward max(|y|,|z|) is represented exactly as the maximum of four signed linear terminal objectives; the four component values are combined per fixed control plan before selecting the minimum.</p><div>{figure}</div><p class="note"><strong>Adaptation:</strong> the source uses continuous controls over 4 seconds. This pilot uses three 0.1-second stages, controls and disturbances in {{−1,+1}}, and an open-loop control plan against a full adversarial sequence. It is not a reproduction of the original RL training run. The independent checker replays the source's 100 simultaneous Euler substeps per stage.</p><p>Minimax terminal reward: {result['objective_value']:.10g}. The figure shows the 2D oscillator phase plane (y,z), all forward reachable states, the robust backward-winning intersection, and one worst-case path. <a href="result.json">Result JSON</a> · <a href="figure-data.json">Figure data</a> · <a href="capture.json">Capture environment</a> · <a href="projections.svg">Standalone SVG</a></p><p>Upstream source: <a href="{upstream}">MaxCoordinateGame.py</a> at commit <code>f4d76c60f4003f50954174e96eafd8e514bd5441</code> (blob <code>d509a1457023b14516d2789bd3033dbaa4110017</code>). CSL measured source: <a href="{source}"><code>{result['source_commit']}</code></a>. Runtime OS: {html.escape(host['os'])}.</p></main></html>'''
+    return f'''<!doctype html><html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>MaxCoordinateGame minimax pilot</title><style>body{{margin:0;background:#111820;color:#f4f1e8;font:16px/1.55 system-ui,sans-serif}}main{{max-width:1100px;margin:auto;padding:2rem}}svg{{width:100%;height:auto}}.note{{border-left:4px solid #f4a261;padding:.7rem 1rem;background:#1a252e}}a{{color:#8bd3f7}}</style><main><h1>MaxCoordinateGame: reachability and minimax</h1><p>CSL finite-action minimax solves the source oscillator on a short finite action catalogue. The source reward max(|y|,|z|) is represented exactly as the maximum of four signed linear terminal objectives; the four component values are combined per fixed open-loop control plan before selecting the minimum.</p><div>{figure}</div><p class="note"><strong>Adaptation:</strong> the source uses continuous controls over 4 seconds. This pilot uses three 0.1-second stages, controls and disturbances in {{−1,+1}}, and an open-loop control plan against a full adversarial sequence. It is not a reproduction of the original RL training run. The independent checker replays the source's 100 simultaneous Euler substeps per stage.</p><p>Minimax terminal reward: {result['objective_value']:.10g}. Blue points are forward reachable states. Gold points are a separate causal finite-state feedback winning set computed by backward induction at that open-loop minimax terminal threshold; they are not the fixed-plan policy used to compute the score. Orange shows a worst-case trajectory for the selected fixed open-loop minimax plan. <a href="result.json">Result JSON</a> · <a href="figure-data.json">Figure data</a> · <a href="capture.json">Capture environment</a> · <a href="projections.svg">Standalone SVG</a></p><p>Upstream source: <a href="{upstream}">MaxCoordinateGame.py</a> at commit <code>f4d76c60f4003f50954174e96eafd8e514bd5441</code> (blob <code>d509a1457023b14516d2789bd3033dbaa4110017</code>). CSL measured source: <a href="{source}"><code>{result['source_commit']}</code></a>. Runtime OS: {html.escape(host['os'])}.</p></main></html>'''
 
 
 def main() -> None:
@@ -185,10 +187,10 @@ def main() -> None:
             "Source-attributed finite-game adaptation of the RL oscillator. The source reward is "
             "`max(|y|,|z|)`; the report combines four signed linear terminal objectives per fixed plan. "
             "The source uses continuous controls and a 4 s horizon; this pilot uses three 0.1 s stages "
-            "with catalogues `{-1,+1}`. It is not an RL reproduction.\n\n"
+            "with catalogues `{-1,+1}`. It is not an RL reproduction. The score uses a fixed open-loop plan.\n\n"
             "The independent checker directly replays all 100 explicit-Euler substeps per stage, all "
             "8 fixed plans, and all 8 disturbance sequences per plan. The SVG shows the phase plane, "
-            "forward reachable sets, robust backward-winning intersection, and a worst-case path.\n\n"
+            "forward reachable sets, a separate causal state-feedback backward-winning set at the open-loop score threshold, and a worst-case path for the fixed plan.\n\n"
             "Upstream source: [MaxCoordinateGame.py](https://github.com/imm-rl-lab/optimal_control/blob/"
             "f4d76c60f4003f50954174e96eafd8e514bd5441/Environments/MaxCoordinateGame/MaxCoordinateGame.py), "
             "blob `d509a1457023b14516d2789bd3033dbaa4110017`. No license is declared; this report re-expresses "

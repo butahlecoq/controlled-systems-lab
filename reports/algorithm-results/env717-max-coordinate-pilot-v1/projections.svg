@@ -93,5 +93,5 @@
 <rect x="90" y="45" width="700" height="490" fill="none" stroke="#81909a"/>
 <text x="440.0" y="577" fill="#f4f1e8" font-family="sans-serif" font-size="16" text-anchor="middle">y</text>
 <text x="30" y="290.0" fill="#f4f1e8" font-family="sans-serif" font-size="16" text-anchor="middle" transform="rotate(-90 30 290.0)">z</text>
-<text x="90" y="590" fill="#bac6ce" font-family="sans-serif" font-size="13">Blue: forward reachable states · gold: robust backward-winning intersection · orange: worst-case minimax path</text>
+<text x="90" y="590" fill="#bac6ce" font-family="sans-serif" font-size="13">Blue: forward states · gold: causal feedback-winning nodes at open-loop threshold · orange: fixed-plan worst-case path</text>
 </svg>
