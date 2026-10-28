@@ -76,6 +76,8 @@ class VisualRouteInventoryTests(unittest.TestCase):
                          "shared-quantitative-policy-companion-renderer")
         self.assertEqual(producers["benchmarks/reporting/it17_hull/summarize.py"]["disposition"],
                          "reviewed-static-diagram-exception")
+        self.assertEqual(producers["benchmarks/reporting/it17_hull/summarize_4d.py"]["disposition"],
+                         "reviewed-static-diagram-exception")
         for source in ("scripts/reports/geo02/render.py", "scripts/reports/geo03/build_report.py",
                        "scripts/reports/geo04/render.py", "scripts/reports/geo05/render.py",
                        "scripts/reports/geo07/render_saved.py", "scripts/reports/geo07_dependent/render_saved.py",
@@ -123,6 +125,9 @@ class VisualRouteInventoryTests(unittest.TestCase):
         self.assertTrue(all(entry["follow_up_issue"] in follow_up_counts for entry in deferred))
         routes={entry["route"]:entry for entry in inventory["frozen_published_routes"]}
         self.assertGreater(len(routes),40)
+        hull_4d=routes["exp02-it17-hull-4d-simplex-20261028-r1"]
+        self.assertEqual(hull_4d["assets"],["2d-visual-companion.svg", "input-projections.svg"])
+        self.assertTrue(hull_4d["index_sha256"])
         self.assertTrue(all(entry["disposition"].startswith("deferred: original frozen route-level readability")
                             for entry in routes.values()))
         self.assertTrue(all(entry["follow_up_issue"] ==

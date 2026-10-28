@@ -1,0 +1,7 @@
+method,warmups,measured,independent_hull_checks,evidence_status,reducer_complete,retained_median,elapsed_median_ms,elapsed_min_ms,elapsed_max_ms,performance_verdict
+lp-membership-baseline,1,5,5/5,inconclusive 5/5,0/5,,,,,timing withheld: incomplete or failed reducer; no performance comparison
+basis-reuse-related-to-A43,1,5,5/5,verified 5/5,5/5,5,1.138422,1.126271,1.164125,descriptive only; no speedup claim; source limiter not profiled
+ordered-membership-related-to-A44,1,5,5/5,inconclusive 5/5,0/5,,,,,timing withheld: incomplete or failed reducer; no performance comparison
+A43-certificate-safe-basis-adaptation,1,5,5/5,verified 5/5,5/5,5,1.952011,1.917928,1.958646,descriptive only; no speedup claim; source limiter not profiled
+A44-incremental-LP-farthest-seed,1,5,5/5,verified 5/5,5/5,5,28.387651,28.212977,29.515389,descriptive only; no speedup claim; source limiter not profiled
+geometric-quickhull,6,0,n/a,inconclusive,n/a,n/a,,,,unsupported in 4D
