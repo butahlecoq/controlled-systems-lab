@@ -111,6 +111,7 @@ def stage(primary: Path, initial: Path, site_root: Path) -> str:
         raise ValueError("Pages index insertion point differs or route already exists")
     routes = (
         f'<li><a href="{PRIMARY_ID}/index.html">EXP-02 3D hull reducers: tetrahedron with exact interior redundancy</a>'
+        ' — one deterministic 250-point fixture; three of five LP reducers completed, and no speedup is claimed.'
         f' · <a href="{PRIMARY_ID}/{PRIMARY_ID}.zip">offline bundle</a>'
         f' · <a href="{INITIAL_ID}/index.html">initial pure-Halton attempt</a>'
         f' · <a href="{INITIAL_ID}/{INITIAL_ID}.zip">raw exploratory bundle</a>'
