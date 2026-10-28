@@ -13,6 +13,7 @@ def digest(path): return hashlib.sha256(Path(path).read_bytes()).hexdigest()
 B06_DRIVER_A=[[1,0,0,0],[-2,1,0,0],[0,0,1,0],[0,0,-2,1]]
 B06_DRIVER_B=[0.7,0,-1.0/3.0,0]
 B06_MANIFEST_A_15=["1","0","0","0","-2","1","0","0","0","0","1","0","0","-2","1"]
+B06_MEASURED_DRIVER=Path(__file__).parents[2]/"tests/fixtures/reports/b06-measured-source/b06_finite_minimax.cpp"
 
 
 def convert_b06(root):
@@ -26,7 +27,7 @@ def convert_b06(root):
     points=geometry["winner_terminal_vertices"]
     raw_path=root/"raw-runs.jsonl"
     runs=[json.loads(line) for line in raw_path.read_text().splitlines() if line.strip()]
-    driver_path=Path(__file__).parents[2]/"benchmarks/reporting/issue6/b06_finite_minimax.cpp"
+    driver_path=B06_MEASURED_DRIVER
     if not runs or digest(driver_path)!=runs[0].get("driver_sha256"):
         raise ValueError("B06 source driver does not match the saved run provenance")
     measured=[row["elapsed_ns"] for row in runs if row.get("batch")!=0]

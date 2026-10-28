@@ -54,6 +54,13 @@ speedup, or general scalability claim. The `[-1,1]^2` disturbance set and the
 interpretation of `-10/T` with discrete `T=5` are explicit reference-case
 inputs, not recovered historical run details.
 
+The runner now validates the canonical scenario and constructs its model,
+control catalogue, disturbance box, and objective from that file. Use
+`--validate-only <scenario.json>` to check request construction without calling
+the solver. The versioned [manifest correction companion](../../../reports/algorithm-results/b06-manifest-correction-v1/index.html)
+documents the source-level erratum, keeps the original capture unchanged, and
+includes saved flow and stock projections of its 4D terminal set.
+
 ## B09 A08 source-revision fuel reference
 
 `b09-a08-source-revision-reference-v1` is an independent C++ implementation of

@@ -25,6 +25,7 @@ class PublicationPolicyTests(unittest.TestCase):
                 "b08-displayed-exact", "ext03-temporal-transform", "geo02-affine-sum", "geo03-hv",
                 "geo04-intersection", "geo05-projection-predecessor", "geo06-quickhull",
                 "issue3-finite-catalogue", "issue3-validated-minimax", "issue6-b06-reference",
+                "issue6-b06-manifest-correction",
                 "issue6-b07-reference", "issue6-b09-reference", "opt04-phase-one", "opt05-hull",
                 "opt06-basis-reuse", "opt07-ordered-hull", "opt11-recursive-hull", "opt12-warm-start",
                 "syn-ts01-paired-comparison", "syn01-nominal-forward", "syn02-terminal-minimizers",

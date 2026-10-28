@@ -20,6 +20,7 @@ import geo02_registered_reports as geo02_publication
 import geo05_registered_reports as geo05_publication
 import geo06_registered_reports as geo06_publication
 import b08_exact_registered_reports as b08_publication
+import b06_manifest_correction_registered_reports as b06_correction_publication
 import issue3_registered_reports as issue3_publication
 import issue3_validated_registered_reports as issue3_validated_publication
 import syn01_registered_reports as syn01_publication
@@ -45,6 +46,16 @@ class RegisteredKindTests(unittest.TestCase):
             'evidence_limits': 'Descriptive only'}]}
         html = site.catalogue_index(catalogue)
         self.assertIn('href="' + catalogue['reports'][0]['report_id'] + '/performance.svg"', html)
+
+    def test_b06_correction_catalogue_links_the_erratum_and_saved_projection(self):
+        bundle = FIXTURES / 'b06-manifest-correction-v1'
+        entry = b06_correction_publication.catalogue_entry(bundle)
+        html = site.catalogue_index({'schema': 'csl.algorithm-report-catalog/3',
+                                     'artifact_ref': 'main', 'reports': [entry]})
+        self.assertIn(entry['report_id'] + '/manifest-correction.json', html)
+        self.assertIn(entry['report_id'] + '/corrected-scenario.json', html)
+        self.assertIn(entry['report_id'] + '/terminal-projections.svg', html)
+        self.assertIn(entry['report_id'] + '.zip', html)
 
     def test_b07_publication_links_real_data_and_checks_oracle_associations(self):
         root=FIXTURES
@@ -507,7 +518,7 @@ class RegisteredKindTests(unittest.TestCase):
         root=repo/'reports'/'algorithm-results'
         catalogue=json.loads((root/'catalog.json').read_text(encoding='utf-8'))
         self.assertEqual(catalogue['schema'],'csl.algorithm-report-catalog/3')
-        self.assertEqual({item['report_kind'] for item in catalogue['reports']},{'lp','convex','opt04-phase-one','opt05-hull','opt06-basis-reuse','opt07-ordered-hull','opt11-recursive-hull','geo03-hv','geo04-intersection','geo02-affine-sum','geo05-projection-predecessor','geo06-quickhull','b08-displayed-exact','issue3-finite-catalogue','issue3-validated-minimax','issue6-b06-reference','issue6-b07-reference','issue6-b09-reference','syn01-nominal-forward','syn02-terminal-minimizers','syn07-ts01-analytic','syn04-strategy-b-ts01','syn04-strategy-b-ts02','syn04-strategy-b-ts03','syn03-strategy-a-ts01','syn03-strategy-a-ts02','syn-ts01-paired-comparison','opt12-warm-start','ext03-temporal-transform'})
+        self.assertEqual({item['report_kind'] for item in catalogue['reports']},{'lp','convex','opt04-phase-one','opt05-hull','opt06-basis-reuse','opt07-ordered-hull','opt11-recursive-hull','geo03-hv','geo04-intersection','geo02-affine-sum','geo05-projection-predecessor','geo06-quickhull','b08-displayed-exact','issue3-finite-catalogue','issue3-validated-minimax','issue6-b06-reference','issue6-b06-manifest-correction','issue6-b07-reference','issue6-b09-reference','syn01-nominal-forward','syn02-terminal-minimizers','syn07-ts01-analytic','syn04-strategy-b-ts01','syn04-strategy-b-ts02','syn04-strategy-b-ts03','syn03-strategy-a-ts01','syn03-strategy-a-ts02','syn-ts01-paired-comparison','opt12-warm-start','ext03-temporal-transform'})
         shared={'report_id','report_kind','payload_sha256','source_commit','zip_sha256'}
         for report in catalogue['reports']:
             self.assertTrue(shared <= set(report))
@@ -516,7 +527,7 @@ class RegisteredKindTests(unittest.TestCase):
             self.assertRegex(report['payload_sha256'],r'^[0-9a-f]{64}$')
             self.assertRegex(report['source_commit'],r'^[0-9a-f]{40}$')
             self.assertRegex(report['zip_sha256'],r'^[0-9a-f]{64}$')
-            if report['report_kind'] in ('opt05-hull','opt06-basis-reuse','geo03-hv','geo02-affine-sum','geo05-projection-predecessor','geo06-quickhull','b08-displayed-exact','issue3-finite-catalogue','issue3-validated-minimax','syn01-nominal-forward','syn02-terminal-minimizers','syn-ts01-paired-comparison','opt11-recursive-hull','opt12-warm-start'):
+            if report['report_kind'] in ('opt05-hull','opt06-basis-reuse','geo03-hv','geo02-affine-sum','geo05-projection-predecessor','geo06-quickhull','b08-displayed-exact','issue3-finite-catalogue','issue3-validated-minimax','issue6-b06-manifest-correction','syn01-nominal-forward','syn02-terminal-minimizers','syn-ts01-paired-comparison','opt11-recursive-hull','opt12-warm-start'):
                 self.assertTrue({'measured_scope','evidence_limits'} <= set(report))
                 # Per-kind saved schemas/manifests are validated at the boundary,
                 # then projected into the same catalogue identity contract.
@@ -536,6 +547,8 @@ class RegisteredKindTests(unittest.TestCase):
                     publisher=issue3_publication
                 if report['report_kind']=='issue3-validated-minimax':
                     publisher=issue3_validated_publication
+                if report['report_kind']=='issue6-b06-manifest-correction':
+                    publisher=b06_correction_publication
                 adapted=publisher.adapt(root/report['source_report_id'])
                 self.assertEqual((report['report_id'],report['report_kind'],report['payload_sha256'],report['source_commit']),
                                  (adapted.report_id,adapted.kind,adapted.payload_sha256,adapted.source_commit))
@@ -555,6 +568,37 @@ class RegisteredKindTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as temp:
             first=site.stage(root/'catalog.json',Path(temp)/'stage-a',check=True)
             second=site.stage(root/'catalog.json',Path(temp)/'stage-b',check=True)
+            correction=next(item for item in catalogue['reports']
+                            if item['report_kind']=='issue6-b06-manifest-correction')
+            correction_page=(first/correction['report_id']/'index.html').read_text(encoding='utf-8')
+            self.assertIn('href="manifest-correction.json"',correction_page)
+            self.assertIn('measured-source/b06_finite_minimax.cpp',correction_page)
+            self.assertTrue((first/correction['report_id']/'measured-source/b06_finite_minimax.cpp').is_file())
+            self.assertIn('measured-source/b06_exact_oracle.cpp',correction_page)
+            self.assertTrue((first/correction['report_id']/'measured-source/b06_exact_oracle.cpp').is_file())
+            original_zip='b06-owner-confirmed-7df01ba3af5e4c46.zip'
+            for relative in ('source-report/index.html',original_zip,
+                             'source-report/raw-runs.jsonl','source-report/exact-oracle.json'):
+                self.assertIn(f'href="{relative}"',correction_page)
+            self.assertTrue((first/correction['report_id']/'terminal-projections.svg').is_file())
+            source_bundle=root/'b06-owner-confirmed-7df01ba3af5e4c46'
+            source_manifest=json.loads((source_bundle/'manifest.json').read_text(encoding='utf-8'))
+            correction_source=FIXTURES/'b06-manifest-correction-v1'/'source-report'
+            self.assertEqual((correction_source/'index.html').read_bytes(),
+                             (source_bundle/'index.html').read_bytes())
+            nested_manifest=json.loads((correction_source/'manifest.json').read_text(encoding='utf-8'))
+            for name,digest in nested_manifest['files'].items():
+                self.assertEqual(hashlib.sha256((correction_source/name).read_bytes()).hexdigest(),digest)
+            self.assertEqual(nested_manifest,source_manifest)
+            with zipfile.ZipFile(first/(correction['report_id']+'.zip')) as correction_zip:
+                for relative in ('source-report/index.html',original_zip,
+                                 'source-report/raw-runs.jsonl','source-report/exact-oracle.json',
+                                 'measured-source/b06_finite_minimax.cpp',
+                                 'measured-source/b06_exact_oracle.cpp',
+                                 'report-envelope.json','publication-manifest.json'):
+                    self.assertIn(correction['report_id']+'/'+relative,correction_zip.namelist())
+                self.assertEqual(correction_zip.read(correction['report_id']+'/'+original_zip),
+                                 (root/(source_bundle.name+'.zip')).read_bytes())
             pins=json.loads((root/'legacy-publications.json').read_text(encoding='utf-8'))
             self.assertEqual(registered._digest(pins),site.LEGACY_PINS_SHA256)
             live_anchors={
@@ -574,7 +618,9 @@ class RegisteredKindTests(unittest.TestCase):
             for report in catalogue['reports']:
                 rid=report['report_id']
                 self.assertIn(rid+'/index.html',index)
-                raw_name='results.jsonl' if report['report_kind']=='issue6-b07-reference' else 'records.json'
+                raw_name=('results.jsonl' if report['report_kind']=='issue6-b07-reference' else
+                          'manifest-correction.json' if report['report_kind']=='issue6-b06-manifest-correction' else
+                          'records.json')
                 self.assertIn(rid+'/'+raw_name,index)
                 if report['report_kind']=='issue6-b07-reference':
                     self.assertNotIn(rid+'/records.json',index)

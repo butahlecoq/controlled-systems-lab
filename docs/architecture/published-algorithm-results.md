@@ -339,6 +339,22 @@ verification remain pending.
 
 ## Issue #6 owner-confirmed B06 reference
 
+### Scenario-manifest erratum
+
+The immutable B06 capture at source report
+[`b06-owner-confirmed-7df01ba3af5e4c46`](../../reports/algorithm-results/b06-owner-confirmed-7df01ba3af5e4c46/)
+contains a 15-entry `A_row_major` array despite declaring a 4-by-4 matrix. The
+measured driver at source commit `7df01ba3af5e4c46e867e2d737aca56a8f2461af`
+hardcodes the complete final row `[0, 0, -2, 1]`; the independent integer
+oracle uses `x4_next = x4 - 2*x3`. The corrected canonical scenario inserts the
+source-supported zero at row 4, column 2. No solver was rerun. The correction
+companion retains the original scenario, report bytes, hashes, ZIP and public
+report ID, and records why the existing measurements may be associated with
+the hardcoded model while preserving their binary64 numerical-assurance limit.
+It also carries the saved 4D terminal geometry projections into flow and stock
+views for visual context. The versioned correction route is staged in PR #671;
+its Pages URL is pending main-only deployment and live verification.
+
 The native bundle
 [`b06-owner-confirmed-7df01ba3af5e4c46`](../../reports/algorithm-results/b06-owner-confirmed-7df01ba3af5e4c46/)
 records a five-stage, four-state finite-action minimax reference based on the

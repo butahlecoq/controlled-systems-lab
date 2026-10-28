@@ -206,6 +206,8 @@ def catalogue_index(catalogue):
         links=[] if policy and not policy.raw_json_link else [("Raw JSON",rid+"/records.json")]
         links.append((trial_label,rid+"/"+csv_name))
         if figure_name: links.append(("Figure",rid+"/"+figure_name))
+        if policy:
+            links.extend((label, rid+"/"+name) for label, name in policy.extra_links)
         links.append(("Offline bundle",rid+".zip"))
         links.append(("Repository copy ("+label+")",tree))
         links.append(("Repository bundle",archive))
@@ -299,6 +301,7 @@ def stage(catalog_path,out,check=True,allow_test=False):
                 page_files |= {"source-evidence/" + name for name in item.files}
             if policy.include_parent_archive:
                 page_files.add("../" + rid + ".zip")
+            page_files.update(policy.extra_page_files)
             OfflineHTML(page_files).feed(generated_page)
             for name in policy.extra_html_files:
                 OfflineHTML(page_files).feed((root/source_id/name).read_text(encoding="utf-8"))

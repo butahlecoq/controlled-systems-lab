@@ -334,6 +334,18 @@
       "zip_sha256": "1fb673b081668644c9754c39d3840cadbf0597ee6e1f1a41e92f677be7936e73"
     },
     {
+      "report_id": "issue6-b06-manifest-correction-abbcd7aaf4ce35b7d08d332386516cc16f7b6757d69524beab8ba8244b504e5c",
+      "report_kind": "issue6-b06-manifest-correction",
+      "source_report_id": "b06-manifest-correction-v1",
+      "payload_schema": "csl.issue6-b06-manifest-correction/1",
+      "payload_sha256": "d4b3fcfafbc506c8f7034783ca2f330adf9dda8c38d280301e496c0ba2115659",
+      "native_payload_sha256": "e66e0600697474ecabd103a5f5148902e4acafe99d7e6005e93618bee8c15924",
+      "source_commit": "7df01ba3af5e4c46e867e2d737aca56a8f2461af",
+      "measured_scope": "Versioned manifest correction and source-level audit of the saved B06 five-stage model",
+      "evidence_limits": "No solver rerun. Existing results retain binary64 numerical assurance and are not newly recertified; this is not a historical reproduction.",
+      "zip_sha256": "77740433dd6e1256309489e7aabb8369338a5eab4ebf3cc369a6dd21c0f02e39"
+    },
+    {
       "report_id": "issue6-b07-reference-a394915af10636430cdcd757d95a9d987eaa6c4c0b742bef7ba1aa04638a2cdd",
       "report_kind": "issue6-b07-reference",
       "source_report_id": "b07-owner-approved-eight-case-v1",

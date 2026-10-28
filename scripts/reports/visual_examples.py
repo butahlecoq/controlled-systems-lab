@@ -360,7 +360,9 @@ def algorithm_coverage(catalog, site, gallery_inventory):
             "algorithm coverage refers to an unknown catalog report kind")
     for report in reports:
         route = Path(site) / report["report_id"]
-        raw_name = "results.jsonl" if report["report_kind"] == "issue6-b07-reference" else "records.json"
+        raw_name = ("results.jsonl" if report["report_kind"] == "issue6-b07-reference" else
+                    "manifest-correction.json" if report["report_kind"] == "issue6-b06-manifest-correction" else
+                    "records.json")
         require((route / "index.html").is_file() and (route / raw_name).is_file(),
                 "algorithm coverage catalog report is not staged: " + report["report_id"])
     gallery = {entry["anchor"]: entry for entry in gallery_inventory}
@@ -380,7 +382,9 @@ def algorithm_coverage(catalog, site, gallery_inventory):
             {"report_kind": entry["report_kind"], "report_id": entry["report_id"],
              "page": "../" + entry["report_id"] + "/index.html",
              "raw_record": "../" + entry["report_id"] + "/" +
-                           ("results.jsonl" if entry["report_kind"] == "issue6-b07-reference" else "records.json")}
+                           ("results.jsonl" if entry["report_kind"] == "issue6-b07-reference" else
+                            "manifest-correction.json" if entry["report_kind"] == "issue6-b06-manifest-correction" else
+                            "records.json")}
             for entry in reports if entry["report_kind"] in family["catalog_kinds"]]
         for route in family["report_routes"]:
             target = Path(site) / route
