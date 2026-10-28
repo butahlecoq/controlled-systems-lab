@@ -397,7 +397,11 @@ json run_two_points() {
     const auto tree = solve_tree(game);
     const double open_loop = fixed_plan_value(game);
     const auto [replanning_value, replanning_policy] = executed_replanning_policy(game);
-    if(!tree.optimal || std::abs(tree.objective - reference.initial().value) > 1e-8 ||
+    if(!tree.optimal || !std::isfinite(tree.objective) ||
+       !std::isfinite(tree.bound) || !std::isfinite(tree.replayed_worst_cost) ||
+       !std::isfinite(open_loop) || !std::isfinite(replanning_value) ||
+       !std::isfinite(reference.initial().value) ||
+       std::abs(tree.objective - reference.initial().value) > 1e-8 ||
        std::abs(tree.bound - reference.initial().value) > 1e-8 ||
        std::abs(tree.replayed_worst_cost - reference.initial().value) > 1e-8 ||
        std::abs(open_loop - 14.58094225) > 1e-8 ||
