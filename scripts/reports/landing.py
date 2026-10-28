@@ -404,6 +404,15 @@ FAMILIES = {
         "plots finite forward states, backward-winning intersections and a worst-case trajectory "
         "in the position (x1,x2) and velocity (x3,x4) planes. The continuous-action 4-second source "
         "task is adapted to three stages; no RL reproduction or performance comparison is claimed."),
+    "env717-time-sphere": Family(
+        r"env717-time-sphere-[0-9a-f]{20}", "synthesis",
+        "TimeOptimalSphereGame nominal finite-feedback reachability pilot",
+        "Replays the source's ten explicit-Euler substeps per outer action and exhaustively builds "
+        "the finite state graph for controls {-1,0,1}. A backward finite-feedback sweep finds the "
+        "first horizon whose winning set contains the initial point, with forward states, unit-disk target "
+        "intersections and a selected capture path in the (x1,x2) plane. The source's adversarial "
+        "input is fixed at zero for this nominal reachability slice; it is not the continuous "
+        "two-player RL optimum or a performance comparison."),
     "syn06-verifier": Family(
         r"syn06-verifier-\d{8}-[0-9a-f]{64}", "verification", "Trajectory verification",
         "Re-checks two literal two-stage integrator witnesses against the original saved input "
