@@ -43,7 +43,7 @@ def enumerate_game() -> dict:
             cases.append({"disturbance": disturbance, "states": states,
                           "terminal": states[-1], "norm": score(states[-1])})
         worst = max(case["norm"] for case in cases)
-        maximizers = [case for case in cases if math.isclose(case["norm"], worst, abs_tol=1e-12)]
+        maximizers = [case for case in cases if math.isclose(case["norm"], worst, rel_tol=0.0, abs_tol=1e-12)]
         plans.append({"controls": plan, "worst_norm": worst, "cases": cases,
                       "maximizers": maximizers})
     optimum = min(plan["worst_norm"] for plan in plans)
@@ -88,7 +88,7 @@ def verify_record(actual: dict) -> dict:
     assert scenario["numerics"] == actual["numerics"]
     model = actual["source_model"]
     assert model["initial_state"] == list(INITIAL)
-    assert math.isclose(model["dt_seconds"], DT, abs_tol=1e-15)
+    assert math.isclose(model["dt_seconds"], DT, rel_tol=0.0, abs_tol=1e-15)
     assert model["horizon_seconds"] == 8.0
     assert model["control_u_bounds"] == [-0.25, 0.25]
     assert model["disturbance_v_bounds"] == [-0.5, 0.5]
@@ -96,7 +96,7 @@ def verify_record(actual: dict) -> dict:
     assert model["reward"] == "sqrt(y^2+z^2)-4 at termination"
     adaptation = actual["adaptation"]
     assert adaptation["horizon_steps"] == HORIZON
-    assert math.isclose(adaptation["horizon_seconds"], HORIZON * DT, abs_tol=1e-15)
+    assert math.isclose(adaptation["horizon_seconds"], HORIZON * DT, rel_tol=0.0, abs_tol=1e-15)
     assert adaptation["control_catalogue"] == list(U)
     assert adaptation["disturbance_catalogue"] == list(V)
     assert adaptation["information_pattern"] == "fixed open-loop control plan versus full adversarial sequence"
@@ -104,12 +104,12 @@ def verify_record(actual: dict) -> dict:
     expected = enumerate_game()
     assert actual["plan_count"] == len(expected["plans"]) == 27
     assert actual["minimizing_plan_indices"] == expected["minimizing_indices"]
-    assert math.isclose(actual["objective_value"], expected["optimum"], abs_tol=1e-12)
-    assert math.isclose(actual["source_reward_value"], expected["optimum"] - 4.0, abs_tol=1e-12)
+    assert math.isclose(actual["objective_value"], expected["optimum"], rel_tol=0.0, abs_tol=1e-12)
+    assert math.isclose(actual["source_reward_value"], expected["optimum"] - 4.0, rel_tol=0.0, abs_tol=1e-12)
     assert len(actual["plans"]) == 27
     for actual_plan, expected_plan in zip(actual["plans"], expected["plans"]):
         assert actual_plan["controls"] == list(expected_plan["controls"])
-        assert math.isclose(actual_plan["worst_terminal_norm"], expected_plan["worst_norm"], abs_tol=1e-12)
+        assert math.isclose(actual_plan["worst_terminal_norm"], expected_plan["worst_norm"], rel_tol=0.0, abs_tol=1e-12)
         terminal = tuple(actual_plan["maximizing_terminal_state"])
         assert any(terminal == tuple(case["terminal"]) for case in expected_plan["maximizers"])
     assert INITIAL in expected["backward_layers"][0]
