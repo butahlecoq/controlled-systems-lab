@@ -1,7 +1,7 @@
 {
   "schema": "csl.mpc02-slew-formulation-summary/1",
-  "run_file": "events-r3.jsonl",
-  "source_commit": "f32d11b2c19b680086ed324136323f231e5ed8f9",
+  "run_file": "events-r4.jsonl",
+  "source_commit": "000fbecf8bda2da18b0e312ffb5acc01fa0f1a1c",
   "scenario_id": "mpc02-slew-2d-v1",
   "scenario_sha256": "a965a25bbd87792dc2721739c7ed1b6505edc6e83de3cb08322eeed05da0f348",
   "backend": "csl.convex.highs@1.0.0+highs.1.11.0",
@@ -26,23 +26,26 @@
       "rows": 11,
       "attempts": 7,
       "failures": 0,
-      "assembly_ns": {"median": 15086, "min": 14877, "max": 15854},
-      "provider_prepare_and_workspace_ns": {"median": 4749, "min": 3352, "max": 4819},
-      "solve_ns": {"median": 781739, "min": 751567, "max": 808559}
+      "formulation_transform_and_resolve_ns": {"median": 0, "min": 0, "max": 0},
+      "assembly_ns": {"median": 13340, "min": 12641, "max": 15854},
+      "provider_prepare_and_workspace_ns": {"median": 4749, "min": 4261, "max": 4819},
+      "solve_ns": {"median": 726076, "min": 716507, "max": 734456}
     },
     "exact_slew_memory_lift": {
       "variables": 11,
       "rows": 18,
       "attempts": 7,
       "failures": 0,
-      "assembly_ns": {"median": 18089, "min": 17530, "max": 25422},
-      "provider_prepare_and_workspace_ns": {"median": 4749, "min": 4260, "max": 4819},
-      "solve_ns": {"median": 814915, "min": 798920, "max": 849975}
+      "formulation_transform_and_resolve_ns": {"median": 49588, "min": 45397, "max": 63906},
+      "assembly_ns": {"median": 15156, "min": 14806, "max": 25353},
+      "provider_prepare_and_workspace_ns": {"median": 4680, "min": 4261, "max": 4889},
+      "solve_ns": {"median": 757993, "min": 746050, "max": 793333}
     }
   },
   "all_attempts": {
     "initial_failed": {"file": "events.jsonl", "attempts": 16},
     "successful_precommit": {"file": "events-r2.jsonl", "attempts": 16},
-    "authoritative_successful": {"file": "events-r3.jsonl", "attempts": 16}
+    "successful_pre-review": {"file": "events-r3.jsonl", "attempts": 16},
+    "authoritative_successful": {"file": "events-r4.jsonl", "attempts": 16}
   }
 }
