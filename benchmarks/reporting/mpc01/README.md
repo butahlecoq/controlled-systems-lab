@@ -87,9 +87,12 @@ sentinel values and non-optimal iterates are not presented as solution
 objectives. Non-optimal primal vectors are labelled candidate iterates, not
 feasible trajectories.
 
-Strategy A/B paired outcomes remain outstanding from this external-solver
-comparison; exact feasibility and candidate objective bounds for its optimal
-native attempts are in the r3 bundle. The separate
+One paired Strategy A/B run on T-S01 is saved in
+[`strategy-ab-ts01-summary.md`](../../../docs/research/evidence/mpc01-external-qps-20261026-r3/strategy-ab-ts01-summary.md).
+It verifies both registered strategies on that small analytic fixture, but
+does not cover T-S02, #421, or B04. The broader Strategy A/B matrix remains
+open; exact feasibility and candidate objective bounds for the external
+solvers' optimal attempts are in the r3 bundle. The separate
 `b04-reference-v1/native-smoke-20261026` projection overlays one cold smoke
 trajectory per solver with the exact witness; it is illustrative, not a
 repeated benchmark, and its residual checks are inconclusive. The B04 Pages

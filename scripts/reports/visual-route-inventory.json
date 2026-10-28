@@ -508,6 +508,33 @@
       "disposition": "frozen-renderer-preserved-with-shared-policy-companion"
     },
     {
+      "source": "scripts/reports/mpc01/b04_native_smoke_projection.py",
+      "signal_count": 4,
+      "asset_name_literals": [
+        "native-smoke-projections.svg"
+      ],
+      "disposition": "deferred-family-specific-migration",
+      "follow_up_issue": 687
+    },
+    {
+      "source": "scripts/reports/mpc01/b04_projection_example.py",
+      "signal_count": 3,
+      "asset_name_literals": [
+        "b04-reference-trajectory-projections.svg"
+      ],
+      "disposition": "deferred-family-specific-migration",
+      "follow_up_issue": 687
+    },
+    {
+      "source": "scripts/reports/mpc01/summarize_repeated_comparison.py",
+      "signal_count": 4,
+      "asset_name_literals": [
+        "b04-repeated-benchmark-projections.svg"
+      ],
+      "disposition": "deferred-family-specific-migration",
+      "follow_up_issue": 687
+    },
+    {
       "source": "scripts/reports/mpc03/b08_miqcp.py",
       "signal_count": 4,
       "asset_name_literals": [
@@ -1135,12 +1162,13 @@
     },
     {
       "source": "scripts/reports/visual_examples.py",
-      "signal_count": 56,
+      "signal_count": 57,
       "asset_name_literals": [
         "app01-plan-timing-v1.svg",
         "app02-diamond-v1.svg",
         "app03-zonotope-v1.svg",
         "app04-square-v1.svg",
+        "b04-reference-trajectory-projections.svg",
         "b07-b07-reconstruction-s0-l0-d0.png",
         "control-projection.svg",
         "ellipsoid-2d.svg",
@@ -1185,8 +1213,9 @@
     },
     {
       "source": "scripts/reports/visual_illustrations.py",
-      "signal_count": 8,
+      "signal_count": 10,
       "asset_name_literals": [
+        "b04-reference-trajectory-projections.svg",
         "ext03-slew-memory.svg",
         "geo02-minkowski.svg",
         "geo03-hv-square.svg",

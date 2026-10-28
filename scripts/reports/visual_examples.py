@@ -832,12 +832,6 @@ def build(catalog, site):
         "inputs": projected["inputs"],
         "analytic": projected["analytic"],
     }, indent=2) + "\n"
-    for name, content in outputs.items():
-        require(not (out / name).is_symlink(), "gallery file must not be a symlink")
-        (out / name).write_bytes(content.encode("utf-8"))
-    validate_gallery_inventory(out, gallery_inventory)
-    require(not (out / "examples.css").is_symlink(), "gallery stylesheet must not be a symlink")
-    shutil.copyfile(Path(__file__).with_name("visual_examples.css"), out / "examples.css")
     link = '<p id="visual-examples-link"><a href="examples/index.html">Visual examples: minimal 2D inputs, hull vertices and plots →</a></p>'
     output_files = {name: (content if isinstance(content, bytes) else content.encode("utf-8"))
                     for name, content in outputs.items()}
