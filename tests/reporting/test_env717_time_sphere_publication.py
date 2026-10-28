@@ -44,8 +44,10 @@ class TimeOptimalSpherePublicationTests(unittest.TestCase):
             self.assertEqual(hashlib.sha256((destination / name).read_bytes()).hexdigest(), sha)
         figure = json.loads((destination / "figure-data.json").read_text())
         result = json.loads((destination / "result.json").read_text())
+        capture = json.loads((destination / "capture.json").read_text())
         self.assertEqual(figure["projection_pairs"], [[0, 1]])
         self.assertEqual(figure["target"]["radius"], 1.0)
+        self.assertTrue(capture["host_processor"].strip())
         self.assertTrue(result["initial_winning"])
         self.assertEqual(result["selected_horizon_steps"], 12)
         self.assertTrue(figure["trajectory"])
@@ -56,6 +58,7 @@ class TimeOptimalSpherePublicationTests(unittest.TestCase):
         page = (destination / "index.html").read_text()
         self.assertIn("v=0", page)
         self.assertIn("unit-disk target", page)
+        self.assertIn('href="capture.json"', page)
         self.assertIn(f'href="{report_id}/index.html"', (self.site / "index.html").read_text())
 
     def test_rejects_figure_data_that_differs_from_source_replay(self):

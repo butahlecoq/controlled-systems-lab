@@ -233,8 +233,37 @@ def source_url() -> str:
             "Environments/TimeOptimalSphereGame/TimeOptimalSphereGame.py")
 
 
+def host_processor() -> str:
+    if platform.system() == "Linux":
+        try:
+            for line in Path("/proc/cpuinfo").read_text(encoding="utf-8").splitlines():
+                key, separator, value = line.partition(":")
+                if separator and key.strip() in ("model name", "Hardware") and value.strip():
+                    return value.strip()
+        except OSError:
+            pass
+    elif platform.system() == "Darwin":
+        try:
+            result = subprocess.run(["sysctl", "-n", "machdep.cpu.brand_string"],
+                                    check=True, capture_output=True, text=True, timeout=5)
+            if result.stdout.strip():
+                return result.stdout.strip()
+        except (OSError, subprocess.SubprocessError):
+            pass
+    elif platform.system() == "Windows":
+        try:
+            import winreg
+            key_path = r"HARDWARE\DESCRIPTION\System\CentralProcessor\0"
+            with winreg.OpenKey(winreg.HKEY_LOCAL_MACHINE, key_path) as key:
+                return winreg.QueryValueEx(key, "ProcessorNameString")[0].strip()
+        except (ImportError, OSError):
+            pass
+    processor = platform.processor().strip()
+    return processor if processor and processor != platform.machine() else "unavailable"
+
+
 def report_page(actual: dict, analysis: dict) -> str:
-    return f'''<!doctype html><html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>TimeOptimalSphereGame nominal reachability report</title><style>body{{margin:0;background:#111820;color:#f4f1e8;font:16px/1.55 system-ui,sans-serif}}main{{max-width:1050px;margin:auto;padding:2rem}}img{{width:100%;height:auto}}.note{{border-left:4px solid #f2c14e;padding:.7rem 1rem;background:#1a252e}}a{{color:#8bd3f7}}</style><main><h1>TimeOptimalSphereGame: nominal reachability</h1><p>The pinned source is a two-state point with dynamics x1′=x2+v, x2′=u and a unit-disk target. This pilot freezes the adversarial input at v=0, uses controls u∈{{-1,0,1}}, and computes finite-state backward-winning sets with CSL's finite-feedback reachability solver.</p><p>The initial state first becomes winning within <strong>{analysis['objective_horizon']} outer steps ({analysis['objective_horizon']*DT:.1f} s)</strong>. Replaying the selected policy enters the disk after {analysis['target_inner_steps']} source Euler substeps ({analysis['target_inner_steps']*INNER_DT:.2f} s). The figure overlays forward reachable states, backward-winning intersections, the target disk and one selected feedback trajectory.</p><figure><img src="reachability.svg" alt="Forward reachable state layers, backward-winning intersections, target disk and selected finite-feedback trajectory"><figcaption>Finite action states in the source position–velocity plane.</figcaption></figure><p class="note"><strong>Adaptation:</strong> the source lets a second player choose v∈[-1,1] and asks for minimum time to capture under continuous actions. This pilot fixes v=0 and checks only the three finite control values through 1.2 seconds. It does not reproduce the original two-player RL optimum. The open-loop and feedback notions coincide here only because the opponent action is frozen and the selected trajectory is deterministic.</p><p>The horizon sweep records one solver call per candidate horizon, zero warmups and no performance comparison. The saved record includes all reachable transitions, backward-winning sets, feasible actions, source/compiler identity and checksums.</p><ul><li><a href="result.json">Complete reachability result</a></li><li><a href="figure-data.json">Projection and policy path data</a></li><li><a href="reachability.svg">Standalone SVG figure</a></li><li><a href="README.md">Reproduction and source notes</a></li><li><a href="{source_url()}">Pinned upstream source</a></li></ul><p>Measured CSL source commit: <code>{html.escape(actual['source_commit'])}</code>.</p></main></html>'''
+    return f'''<!doctype html><html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>TimeOptimalSphereGame nominal reachability report</title><style>body{{margin:0;background:#111820;color:#f4f1e8;font:16px/1.55 system-ui,sans-serif}}main{{max-width:1050px;margin:auto;padding:2rem}}img{{width:100%;height:auto}}.note{{border-left:4px solid #f2c14e;padding:.7rem 1rem;background:#1a252e}}a{{color:#8bd3f7}}</style><main><h1>TimeOptimalSphereGame: nominal reachability</h1><p>The pinned source is a two-state point with dynamics x1′=x2+v, x2′=u and a unit-disk target. This pilot freezes the adversarial input at v=0, uses controls u∈{{-1,0,1}}, and computes finite-state backward-winning sets with CSL's finite-feedback reachability solver.</p><p>The initial state first becomes winning within <strong>{analysis['objective_horizon']} outer steps ({analysis['objective_horizon']*DT:.1f} s)</strong>. Replaying the selected policy enters the disk after {analysis['target_inner_steps']} source Euler substeps ({analysis['target_inner_steps']*INNER_DT:.2f} s). The figure overlays forward reachable states, backward-winning intersections, the target disk and one selected feedback trajectory.</p><figure><img src="reachability.svg" alt="Forward reachable state layers, backward-winning intersections, target disk and selected finite-feedback trajectory"><figcaption>Finite action states in the source position–velocity plane.</figcaption></figure><p class="note"><strong>Adaptation:</strong> the source lets a second player choose v∈[-1,1] and asks for minimum time to capture under continuous actions. This pilot fixes v=0 and checks only the three finite control values through 1.2 seconds. It does not reproduce the original two-player RL optimum. The open-loop and feedback notions coincide here only because the opponent action is frozen and the selected trajectory is deterministic.</p><p>The horizon sweep records one solver call per candidate horizon, zero warmups and no performance comparison. The saved record includes all reachable transitions, backward-winning sets, feasible actions, source/compiler identity and checksums.</p><ul><li><a href="result.json">Complete reachability result</a></li><li><a href="figure-data.json">Projection and policy path data</a></li><li><a href="reachability.svg">Standalone SVG figure</a></li><li><a href="capture.json">Capture metadata, including host processor</a></li><li><a href="README.md">Reproduction and source notes</a></li><li><a href="{source_url()}">Pinned upstream source</a></li></ul><p>Measured CSL source commit: <code>{html.escape(actual['source_commit'])}</code>.</p></main></html>'''
 
 
 def write_report(actual: dict, analysis: dict, output: Path) -> None:
@@ -256,6 +285,7 @@ def write_report(actual: dict, analysis: dict, output: Path) -> None:
         "source_commit": actual["source_commit"], "driver_sha256": actual["driver_sha256"],
         "algorithm_source_sha256": actual["algorithm_source_sha256"],
         "compiler": actual["capture_environment"], "os": platform.platform(),
+        "host_processor": host_processor(),
         "python": platform.python_version(), "worker_threads": 1, "native_threads": 1,
         "warmup_calls": 0, "measured_solver_calls": actual["timing"]["measured_solver_calls"]}
     (output / "capture.json").write_text(json.dumps(capture, indent=2) + "\n", encoding="utf-8")
@@ -278,6 +308,8 @@ python3 scripts/reports/env717/check_time_sphere.py \\
 ```
 
 `result.json` stores the complete finite graph, horizon sweep, winning states and selected path. The solver timings are descriptive and make no performance comparison.
+
+`capture.json` records the host processor identity, operating system, compiler, build, thread settings and measured solver-call count. It uses `unavailable` when the host processor cannot be identified.
 '''
     (output / "README.md").write_text(readme, encoding="utf-8")
     checksums = "".join(

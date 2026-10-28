@@ -84,6 +84,8 @@ def _inputs(source: Path) -> tuple[dict[str, bytes], dict, dict]:
             capture.get("driver_sha256") != result["driver_sha256"] or
             capture.get("algorithm_source_sha256") != result["algorithm_source_sha256"]):
         raise ValueError("capture metadata differs from measured result")
+    if not isinstance(capture.get("host_processor"), str) or not capture["host_processor"].strip():
+        raise ValueError("capture metadata must identify the host processor or say unavailable")
     parser = LocalLinks()
     parser.feed(files["index.html"].decode("utf-8"))
     local_links = [href for href in parser.hrefs if not href.startswith("https://")]
