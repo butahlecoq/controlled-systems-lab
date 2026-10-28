@@ -140,6 +140,9 @@ FiniteActionMinimaxRequest request() {
 
 Json result_record() {
     const auto input = request();
+    Json u_actions = Json::array(), v_actions = Json::array();
+    for(const auto& action : u_catalogue) u_actions.push_back(action);
+    for(const auto& action : v_catalogue) v_actions.push_back(action);
     const auto start = std::chrono::steady_clock::now();
     const auto outcome = finite_action_minimax(input, {125, 125, 1e-10});
     const auto stop = std::chrono::steady_clock::now();
@@ -175,7 +178,7 @@ Json result_record() {
             {"u_action_radii", {4.35, 5.0}}, {"v_action_radii", {0.66, 1.0}},
             {"reward", "Euclidean terminal relative position"}}},
         {"adaptation", {{"horizon_steps", horizon}, {"terminal_time_seconds", horizon * dt},
-            {"u_catalogue", u_flat}, {"v_catalogue", v_flat},
+            {"u_catalogue", u_actions}, {"v_catalogue", v_actions},
             {"information_pattern", "open-loop three-action control plan against a full disturbance sequence"},
             {"objective", "minimize the worst terminal Euclidean separation over the finite disturbance catalogue"}}},
         {"horizon", horizon}, {"controller_plan_count", plans.size()},
