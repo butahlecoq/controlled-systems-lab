@@ -392,6 +392,14 @@ FAMILIES = {
         "feedback-winning layers, and a selected worst-case path in relative position-velocity "
         "planes. This is a three-stage finite-catalogue adaptation, not a reproduction of the RL "
         "run. Timing is one observation with zero warmups; no performance comparison is claimed."),
+    "env717-multipoint": Family(
+        r"env717-multipoint-[0-9a-f]{20}", "synthesis",
+        "MultiPointCostGame finite-action minimax pilot",
+        "Compares exhaustive fixed-plan minimax and exact-state causal Bellman values for a "
+        "source-attributed position-velocity environment adaptation. The figure shows all "
+        "forward reachable states and selected worst-case paths. It omits the source checkpoint "
+        "costs, uses four one-second finite-catalogue decisions, and defines no target or backward "
+        "winning set; it is not a reproduction of the RL run."),
     "env717-max-coordinate": Family(
         r"env717-max-coordinate-[0-9a-f]{20}", "synthesis",
         "MaxCoordinateGame finite-action differential-game pilot",

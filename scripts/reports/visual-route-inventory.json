@@ -101,6 +101,15 @@
       "follow_up_issue": 717
     },
     {
+      "source": "scripts/reports/env717/check_multipoint_cost_game.py",
+      "signal_count": 3,
+      "asset_name_literals": [
+        "projections.svg"
+      ],
+      "disposition": "deferred-family-specific-migration",
+      "follow_up_issue": 717
+    },
+    {
       "source": "scripts/reports/env717/check_point_on_plane.py",
       "signal_count": 4,
       "asset_name_literals": [
@@ -731,6 +740,14 @@
     {
       "source": "scripts/reports/stage_env717_max_coordinate.py",
       "signal_count": 4,
+      "asset_name_literals": [
+        "projections.svg"
+      ],
+      "disposition": "publication-validation-or-frozen-route"
+    },
+    {
+      "source": "scripts/reports/stage_env717_multipoint_cost_game.py",
+      "signal_count": 3,
       "asset_name_literals": [
         "projections.svg"
       ],
@@ -1407,6 +1424,16 @@
         "projections.svg"
       ],
       "index_sha256": "6207e4762b5bf59e5b63bd0a9db0b278b7228a8d593a3e1b45c5ca9799f1d647",
+      "disposition": "deferred: original frozen route-level readability review remains; companion availability is listed separately",
+      "follow_up_issue": 717
+    },
+    {
+      "route": "env717-multipoint-cost-game-pilot-v1",
+      "source_bundle": "env717-multipoint-cost-game-pilot-v1",
+      "assets": [
+        "projections.svg"
+      ],
+      "index_sha256": "0bc058dd35bdd14dcb1e242f9424b783b3e3d0ca1c4be7a247a96a0106ced76e",
       "disposition": "deferred: original frozen route-level readability review remains; companion availability is listed separately",
       "follow_up_issue": 717
     },
