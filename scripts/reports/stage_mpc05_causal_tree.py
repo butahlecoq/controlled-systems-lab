@@ -17,7 +17,7 @@ spec = importlib.util.spec_from_file_location("mpc05_causal_reference", CHECKER_
 reference = importlib.util.module_from_spec(spec)
 assert spec.loader is not None
 spec.loader.exec_module(reference)
-FILES = ("README.md", "capture.json", "figure-data.json", "index.html",
+FILES = ("README.md", "build.log", "capture.json", "figure-data.json", "index.html",
          "projections.svg", "result.json", "SHA256SUMS")
 
 
@@ -42,6 +42,8 @@ def inputs(source: Path) -> dict[str, bytes]:
     capture = json.loads(files["capture.json"])
     if capture.get("highs_version") != result["two_points"]["causal_tree"]["solver"]:
         raise ValueError("MPC-05 capture and numerical record solver differ")
+    if not files["build.log"].strip():
+        raise ValueError("MPC-05 saved build log is empty")
     with tempfile.TemporaryDirectory(prefix="mpc05-stage-") as temporary:
         generated = Path(temporary)
         input_path = generated / "result.json"

@@ -35,6 +35,7 @@ class Mpc05PublicationTests(unittest.TestCase):
             with ZipFile(site / f"{report_id}.zip") as archive:
                 names = archive.namelist()
                 self.assertIn(f"{report_id}/projections.svg", names)
+                self.assertIn(f"{report_id}/build.log", names)
                 self.assertIn(f"{report_id}/publication-manifest.json", names)
 
     def test_rejects_modified_saved_result(self) -> None:

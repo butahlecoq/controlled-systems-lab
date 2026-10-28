@@ -6,6 +6,7 @@ import argparse
 import hashlib
 import json
 import platform
+import shutil
 import subprocess
 from pathlib import Path
 
@@ -20,6 +21,7 @@ SOURCES = (
     "scripts/reports/mpc05/check_smoke.py",
     "scripts/reports/mpc05/reference.py",
     "scripts/reports/mpc05/make_report.py",
+    "scripts/reports/stage_mpc05_causal_tree.py",
     "reports/algorithm-results/env717-two-points-pilot-v1/figure-data.json",
     "reports/algorithm-results/env717-two-points-pilot-v1/projections.svg",
 )
@@ -42,6 +44,7 @@ def main() -> None:
     parser.add_argument("--executable", type=Path, required=True)
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--build-dir", type=Path, required=True)
+    parser.add_argument("--build-log", type=Path, required=True)
     args = parser.parse_args()
     executable = args.executable.resolve()
     build_dir = args.build_dir.resolve()
@@ -57,6 +60,9 @@ def main() -> None:
     result_path = output / "result.json"
     result_path.write_text(json.dumps(result, indent=2, sort_keys=True) + "\n", encoding="utf-8")
     reference.render(result_path, output)
+    if not args.build_log.is_file() or args.build_log.stat().st_size == 0:
+        raise SystemExit("a nonempty build log is required for the saved evidence bundle")
+    shutil.copyfile(args.build_log, output / "build.log")
 
     cache_path = build_dir / "CMakeCache.txt"
     cache = cache_path.read_text(encoding="utf-8")
@@ -106,14 +112,15 @@ Reproduce from the repository root with the recorded CMake Release build:
 
 ```sh
 cmake --preset dev -DCSL_BUILD_MPC05_REPORT=ON
-cmake --build build/dev --target csl_mpc05_causal_tree_report
+cmake --build build/dev --target csl_mpc05_causal_tree_report --parallel 2 2>&1 | tee /tmp/mpc05-build.log
 python3 scripts/reports/mpc05/make_report.py \\
   --executable build/dev/csl_mpc05_causal_tree_report \\
   --build-dir build/dev \\
+  --build-log /tmp/mpc05-build.log \\
   --output /tmp/mpc05-causal-tree
 ```
 
-`capture.json` records source fingerprints, compiler, solver version, and host. `result.json` contains raw solver output; `figure-data.json` contains the independently reconstructed finite sets and policy witness; `projections.svg` is the two-panel figure. `index.html` is a standalone readable report.
+`capture.json` records source fingerprints, compiler, solver version, and host. `build.log` records the native driver build. `result.json` contains raw solver output; `figure-data.json` contains the independently reconstructed finite sets and policy witness; `projections.svg` is the two-panel figure. `index.html` is a standalone readable report.
 '''
     (output / "README.md").write_text(readme, encoding="utf-8")
 
