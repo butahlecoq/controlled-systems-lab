@@ -400,6 +400,15 @@ FAMILIES = {
         "forward reachable states and selected worst-case paths. It omits the source checkpoint "
         "costs, uses four one-second finite-catalogue decisions, and defines no target or backward "
         "winning set; it is not a reproduction of the RL run."),
+    "env717-broken-triangle": Family(
+        r"env717-broken-triangle-[0-9a-f]{20}", "synthesis",
+        "BrokenTriangleGame finite minimax and reachability pilot",
+        "Compares exhaustive fixed open-loop plans with a finite observed-state causal Bellman "
+        "policy using the source RL example's initial state, dynamics and terminal polygon. The "
+        "figure overlays forward states, finite robust backward-winning intersections and both "
+        "worst-case paths. Four decisions and two-point action/disturbance catalogues form a finite "
+        "adaptation; no RL training reproduction, continuous boundary or performance comparison "
+        "is claimed."),
     "env717-max-coordinate": Family(
         r"env717-max-coordinate-[0-9a-f]{20}", "synthesis",
         "MaxCoordinateGame finite-action differential-game pilot",

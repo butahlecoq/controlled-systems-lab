@@ -92,6 +92,15 @@
       "follow_up_issue": 717
     },
     {
+      "source": "scripts/reports/env717/check_broken_triangle.py",
+      "signal_count": 6,
+      "asset_name_literals": [
+        "projections.svg"
+      ],
+      "disposition": "deferred-family-specific-migration",
+      "follow_up_issue": 717
+    },
+    {
       "source": "scripts/reports/env717/check_max_coordinate.py",
       "signal_count": 3,
       "asset_name_literals": [
@@ -732,6 +741,14 @@
     {
       "source": "scripts/reports/stage_env717_air_to_air.py",
       "signal_count": 3,
+      "asset_name_literals": [
+        "projections.svg"
+      ],
+      "disposition": "publication-validation-or-frozen-route"
+    },
+    {
+      "source": "scripts/reports/stage_env717_broken_triangle.py",
+      "signal_count": 1,
       "asset_name_literals": [
         "projections.svg"
       ],
@@ -1414,6 +1431,16 @@
         "projections.svg"
       ],
       "index_sha256": "ac82e79ee6eb52ae3ec6ee6514d76ecada58dc61825003adcf2de986c3e44394",
+      "disposition": "deferred: original frozen route-level readability review remains; companion availability is listed separately",
+      "follow_up_issue": 717
+    },
+    {
+      "route": "env717-broken-triangle-pilot-v1",
+      "source_bundle": "env717-broken-triangle-pilot-v1",
+      "assets": [
+        "projections.svg"
+      ],
+      "index_sha256": "c62cef0f1802192d7e68d06780a0b19dd08dba2252acc877bdc72fa787473d3d",
       "disposition": "deferred: original frozen route-level readability review remains; companion availability is listed separately",
       "follow_up_issue": 717
     },
