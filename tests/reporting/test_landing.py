@@ -115,6 +115,15 @@ class LandingTests(unittest.TestCase):
         self.assertIn("velocity (x3,x4)", family.summary)
         self.assertIn("three stages", family.summary)
 
+    def test_time_sphere_route_describes_nominal_target_reachability(self):
+        family = landing.FAMILIES[landing.family_for(
+            "env717-time-sphere-0123456789abcdefabcd")]
+        self.assertEqual(family.group, "synthesis")
+        self.assertIn("unit-disk", family.summary)
+        self.assertIn("backward finite-feedback sweep", family.summary)
+        self.assertIn("fixed at zero", family.summary)
+        self.assertIn("not the continuous two-player RL optimum", family.summary)
+
 
 class AssembledIndexTests(unittest.TestCase):
     """The published landing page is built from the assembled staged index."""

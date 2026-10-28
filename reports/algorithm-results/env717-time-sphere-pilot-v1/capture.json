@@ -1,0 +1,19 @@
+{
+  "schema": "csl.env717-time-sphere-capture/1",
+  "source_commit": "2b58617c40cc1451d35350d332be226ab4f01674",
+  "driver_sha256": "4ff79afafc2ca5f17b56646f2e31f6f4f543c04a219746e6e730a89f7e3b07f7",
+  "algorithm_source_sha256": "75d9bd0c5f41461b19fa7c8ade2bf3971179ce2461d146f666920539c9560127",
+  "compiler": {
+    "architecture": "x86_64",
+    "build_type": "Release",
+    "compiler": "GNU",
+    "compiler_version": "16.2.1"
+  },
+  "os": "Linux-7.2.8-9-omarchy-x86_64-with-glibc2.44",
+  "host_processor": "AMD Ryzen 5 3550H with Radeon Vega Mobile Gfx",
+  "python": "3.14.8",
+  "worker_threads": 1,
+  "native_threads": 1,
+  "warmup_calls": 0,
+  "measured_solver_calls": 12
+}
