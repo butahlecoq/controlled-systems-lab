@@ -365,7 +365,7 @@ FAMILIES = {
         "MaxCoordinateGame finite-action differential-game pilot",
         "Exhaustively evaluates eight fixed control plans against eight disturbance-vertex histories "
         "per plan, with independently replayed oscillator phase-plane reachability and a worst-case "
-        "trajectory. The source 10-second continuous-action task is adapted to three stages; this "
+        "trajectory. The source 4-second continuous-action task is adapted to three stages; this "
         "is not a reproduction of the RL run."),
     "syn06-verifier": Family(
         r"syn06-verifier-\d{8}-[0-9a-f]{64}", "verification", "Trajectory verification",
