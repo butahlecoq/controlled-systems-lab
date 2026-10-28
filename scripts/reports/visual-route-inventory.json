@@ -1436,7 +1436,7 @@
       "assets": [
         "fixture-geometry.svg"
       ],
-      "index_sha256": "19db1aa0b845774676f41a4cd78375fbb565d427838bd7679e3068c8dcdd791c",
+      "index_sha256": "db9b265e09ec9ac29f0035bc1996e16100756b384f5cd07901c3344a6bef2355",
       "disposition": "deferred: original frozen route-level readability review remains; companion availability is listed separately",
       "follow_up_issue": 94
     },
