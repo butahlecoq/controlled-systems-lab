@@ -3,6 +3,7 @@ from __future__ import annotations
 import hashlib
 import importlib.util
 import json
+import os
 from pathlib import Path
 import shutil
 import tempfile
@@ -68,6 +69,22 @@ class PointOnThePlanePublicationTests(unittest.TestCase):
             f"{hashlib.sha256((self.source / name).read_bytes()).hexdigest()}  {name}\n"
             for name in names), encoding="ascii")
         with self.assertRaisesRegex(ValueError, "saved projection data differs"):
+            stage_module._inputs(self.source)
+
+    def test_rejects_report_file_symlinks_even_with_a_matching_checksum(self):
+        outside = self.root / "outside-readme.md"
+        outside.write_text("external content\n", encoding="utf-8")
+        readme = self.source / "README.md"
+        readme.unlink()
+        try:
+            os.symlink(outside, readme)
+        except OSError as error:
+            self.skipTest(f"symlink creation unavailable: {error}")
+        names = [name for name in stage_module.FILES if name != "SHA256SUMS"]
+        (self.source / "SHA256SUMS").write_text("".join(
+            f"{hashlib.sha256((self.source / name).read_bytes()).hexdigest()}  {name}\n"
+            for name in names), encoding="ascii")
+        with self.assertRaisesRegex(ValueError, "regular non-symlink files"):
             stage_module._inputs(self.source)
 
 

@@ -42,6 +42,10 @@ def _inputs(source: Path) -> tuple[dict[str, bytes], dict, dict]:
         raise ValueError("environment report source must be a directory")
     if {path.name for path in source.iterdir()} != set(FILES):
         raise ValueError("environment report file inventory differs")
+    for name in FILES:
+        path = source / name
+        if path.is_symlink() or not path.is_file():
+            raise ValueError("report bundle files must be regular non-symlink files")
     files = {name: (source / name).read_bytes() for name in FILES}
     sums: dict[str, str] = {}
     for line in files["SHA256SUMS"].decode("ascii").splitlines():
