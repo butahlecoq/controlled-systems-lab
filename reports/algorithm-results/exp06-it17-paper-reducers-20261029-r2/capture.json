@@ -1,0 +1,307 @@
+{
+  "build_configuration": {
+    "build_type": "Release",
+    "cmake_generator": "Ninja",
+    "cxx_standard": 20,
+    "lp_provider": "csl.lp.highs@1.1.0+highs.1.11.0",
+    "native_threads": 1,
+    "options": {
+      "CSL_BUILD_EXP06_LP_REDUCERS": true,
+      "CSL_BUILD_EXP06_PILOT": true,
+      "CSL_ENABLE_HIGHS": true,
+      "CSL_ENABLE_QHULL": false
+    }
+  },
+  "checker_controls": {
+    "all_redundant_points_retained": {
+      "budget": {
+        "max_points": 64
+      },
+      "counterexample_index": null,
+      "input_digest": "d3ceea7207af73a9ede56875d53cfae5eab1160c9458617cff0b4a176e53b1fe",
+      "reason": "all input points covered by exact source hull",
+      "scope": "exact represented binary64 2D finite hull",
+      "source_indices": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8
+      ],
+      "status": "verified"
+    },
+    "omitted_corner": {
+      "budget": {
+        "max_points": 64
+      },
+      "counterexample_index": 0,
+      "input_digest": "d3ceea7207af73a9ede56875d53cfae5eab1160c9458617cff0b4a176e53b1fe",
+      "reason": "input point lies outside reported convex hull",
+      "scope": "exact represented binary64 2D finite hull",
+      "source_indices": [
+        1,
+        2,
+        3
+      ],
+      "status": "incorrect"
+    },
+    "schema": "csl.exp06-checker-controls/1"
+  },
+  "created_utc": "2026-10-29T03:01:02Z",
+  "execution_order": [
+    {
+      "method_id": "csl.geometry.a29-a30-python",
+      "repetition": 0
+    },
+    {
+      "method_id": "csl.geometry.quickhull-2d",
+      "repetition": 0
+    },
+    {
+      "method_id": "csl.hull.itis17.a43-certified-basis-reuse",
+      "repetition": 0
+    },
+    {
+      "method_id": "csl.hull.itis17.a43-artificial-basis",
+      "repetition": 0
+    },
+    {
+      "method_id": "csl.hull.itis17.a43-largest-norm-tie",
+      "repetition": 0
+    },
+    {
+      "method_id": "csl.hull.itis17.a44-paper-farthest-incremental-lp",
+      "repetition": 0
+    },
+    {
+      "method_id": "csl.geometry.a29-a30-python",
+      "repetition": 1
+    },
+    {
+      "method_id": "csl.geometry.quickhull-2d",
+      "repetition": 1
+    },
+    {
+      "method_id": "csl.hull.itis17.a43-certified-basis-reuse",
+      "repetition": 1
+    },
+    {
+      "method_id": "csl.hull.itis17.a43-artificial-basis",
+      "repetition": 1
+    },
+    {
+      "method_id": "csl.hull.itis17.a43-largest-norm-tie",
+      "repetition": 1
+    },
+    {
+      "method_id": "csl.hull.itis17.a44-paper-farthest-incremental-lp",
+      "repetition": 1
+    },
+    {
+      "method_id": "csl.hull.itis17.a44-paper-farthest-incremental-lp",
+      "repetition": 2
+    },
+    {
+      "method_id": "csl.hull.itis17.a43-largest-norm-tie",
+      "repetition": 2
+    },
+    {
+      "method_id": "csl.hull.itis17.a43-artificial-basis",
+      "repetition": 2
+    },
+    {
+      "method_id": "csl.hull.itis17.a43-certified-basis-reuse",
+      "repetition": 2
+    },
+    {
+      "method_id": "csl.geometry.quickhull-2d",
+      "repetition": 2
+    },
+    {
+      "method_id": "csl.geometry.a29-a30-python",
+      "repetition": 2
+    },
+    {
+      "method_id": "csl.geometry.a29-a30-python",
+      "repetition": 3
+    },
+    {
+      "method_id": "csl.geometry.quickhull-2d",
+      "repetition": 3
+    },
+    {
+      "method_id": "csl.hull.itis17.a43-certified-basis-reuse",
+      "repetition": 3
+    },
+    {
+      "method_id": "csl.hull.itis17.a43-artificial-basis",
+      "repetition": 3
+    },
+    {
+      "method_id": "csl.hull.itis17.a43-largest-norm-tie",
+      "repetition": 3
+    },
+    {
+      "method_id": "csl.hull.itis17.a44-paper-farthest-incremental-lp",
+      "repetition": 3
+    },
+    {
+      "method_id": "csl.hull.itis17.a44-paper-farthest-incremental-lp",
+      "repetition": 4
+    },
+    {
+      "method_id": "csl.hull.itis17.a43-largest-norm-tie",
+      "repetition": 4
+    },
+    {
+      "method_id": "csl.hull.itis17.a43-artificial-basis",
+      "repetition": 4
+    },
+    {
+      "method_id": "csl.hull.itis17.a43-certified-basis-reuse",
+      "repetition": 4
+    },
+    {
+      "method_id": "csl.geometry.quickhull-2d",
+      "repetition": 4
+    },
+    {
+      "method_id": "csl.geometry.a29-a30-python",
+      "repetition": 4
+    },
+    {
+      "method_id": "csl.geometry.a29-a30-python",
+      "repetition": 5
+    },
+    {
+      "method_id": "csl.geometry.quickhull-2d",
+      "repetition": 5
+    },
+    {
+      "method_id": "csl.hull.itis17.a43-certified-basis-reuse",
+      "repetition": 5
+    },
+    {
+      "method_id": "csl.hull.itis17.a43-artificial-basis",
+      "repetition": 5
+    },
+    {
+      "method_id": "csl.hull.itis17.a43-largest-norm-tie",
+      "repetition": 5
+    },
+    {
+      "method_id": "csl.hull.itis17.a44-paper-farthest-incremental-lp",
+      "repetition": 5
+    }
+  ],
+  "fixture_sha256": "b8cb93474ac342bbe94847efb9f8cca8d0e90be6df53b7eab0d541497d33e9f5",
+  "harness_dirty": false,
+  "harness_sources": [
+    {
+      "path": "scripts/reports/exp06/collect.py",
+      "sha256": "b82dca9daddaa076ae28ec2ea671234165832f0b3e15d0086ae5ed360506843a"
+    },
+    {
+      "path": "scripts/reports/exp06/render_paper_saved.py",
+      "sha256": "e226b5a4252060093640f332d30d0ebba27e356d3f18912ae0e1872625d47921"
+    },
+    {
+      "path": "scripts/reports/exp06/check_source_indices.py",
+      "sha256": "b95f6355ea1b1e2409ddd85a55af68a33daf1e46bbac73213c0020fce51e7cc6"
+    },
+    {
+      "path": "scripts/reports/stage_exp06.py",
+      "sha256": "7d3fe05eaefe93a08dd87d0763fb12c61fbc2975d1e175c9a7c3c263a1e2d400"
+    },
+    {
+      "path": "benchmarks/reporting/exp06/quickhull_run.cpp",
+      "sha256": "e120302a9a38277dde83635572180510ce34e4a8a9f87ec6ec37602c5ec11c12"
+    },
+    {
+      "path": "benchmarks/reporting/exp06/pack_comparison.cpp",
+      "sha256": "6dff6998d3d8fbc8d58ce48ee7f1639ae49045c8863b9ee5b04a8b8dcab0b0e9"
+    },
+    {
+      "path": "src/artifacts/comparison_manifest.cpp",
+      "sha256": "869d44bd12396c6ffad32436d6caa67f4746d545c227472013b193ef55877248"
+    },
+    {
+      "path": "include/csl/artifacts/comparison_manifest.hpp",
+      "sha256": "221262d4cfae5f1b6ae9c2fc77245e24d115c37fe8f42b20a1495c975b8b0eee"
+    },
+    {
+      "path": "benchmarks/reporting/exp06/lp_reducer_run.cpp",
+      "sha256": "ae47ad178c85fdddb152c71d750573a71dda4c2efba1ae4e4023fbd5fb082e6f"
+    },
+    {
+      "path": "src/geometry/a43_paper_reducer.cpp",
+      "sha256": "c74ce1310565e7eef37decd7b22b6a81471462004aeceec8b583b52fc2be7be1"
+    },
+    {
+      "path": "src/geometry/hull/itis17_reducers.cpp",
+      "sha256": "f3a00de8dacb4a71c082aabefcbbf4c4e74a76756011280190aa6bd5c6697361"
+    },
+    {
+      "path": "src/optimization/phase_one/simplex.cpp",
+      "sha256": "fbddf69763541a9dcef2c89f1b362c28e0804680b9fb42e58e944818a93c36e5"
+    },
+    {
+      "path": "docs/research/itis17-paper-reducers-cpp-adaptation.md",
+      "sha256": "07b65d82bac4937a861fe9989295a2ef503eaab4d1145b0a46b77d60fd6d8f0e"
+    }
+  ],
+  "host": {
+    "architecture": "x86_64",
+    "cpu_model": "AMD Ryzen 5 3550H with Radeon Vega Mobile Gfx",
+    "load_average_1m_5m_15m": [
+      0.95947265625,
+      0.9267578125,
+      1.087890625
+    ],
+    "logical_cpus": 8,
+    "observed_process_count": 323,
+    "os": "Linux-7.2.8-9-omarchy-x86_64-with-glibc2.44"
+  },
+  "limiter_profile": {
+    "reason": "different method runtimes and timing intervals do not have a shared source-level limiter profile",
+    "status": "not_collected"
+  },
+  "lp_reducer_executable_sha256": "83d8f41e86f26c0b1d59d350cf15a40f108663554d253f1c66ac1fcfb8a8ff78",
+  "measured_repetitions_per_method": 5,
+  "measurement_order": "alternating methods by repetition",
+  "memory_limit": {
+    "reason": "bounded nine-point fixture; process memory was not measured",
+    "status": "not_enforced"
+  },
+  "method_ids": [
+    "csl.geometry.a29-a30-python",
+    "csl.geometry.quickhull-2d",
+    "csl.hull.itis17.a43-certified-basis-reuse",
+    "csl.hull.itis17.a43-artificial-basis",
+    "csl.hull.itis17.a43-largest-norm-tie",
+    "csl.hull.itis17.a44-paper-farthest-incremental-lp"
+  ],
+  "packer_exit_code": 0,
+  "purpose": "bounded paired geometry pilot",
+  "python_executable_sha256": "375532f83be620283ab780c14ca6bcc5907dc379d2b621de0c5d0a112cf5458b",
+  "quickhull_executable_sha256": "464f9c7a38c2150599d6424463dc1d883c6213138a8a901fa32e6940c4d57498",
+  "request_digest": "91576ea862a32c331c2880589006bbc9fc04c9f4657ad1c28cd8250a324be8dc",
+  "schema": "csl.exp06-capture/1",
+  "source_commit": "b2b7dfa6a2151259cbe1cd3d0e6d99e790661533",
+  "stderr": "",
+  "timeout_seconds": 300,
+  "timing_comparison": "inconclusive: Python/NumPy and C++ timings use different runtimes and intervals",
+  "timing_intervals": {
+    "csl.geometry.a29-a30-python": "perf_counter_ns around the Python port call; excludes exact checker",
+    "csl.geometry.quickhull-2d": "steady_clock around QuickHull call; excludes process startup, JSON intake and exact checker",
+    "csl.hull.itis17.a43-artificial-basis": "steady_clock around public hull-reducer call; excludes process startup, JSON intake and exact checker",
+    "csl.hull.itis17.a43-certified-basis-reuse": "steady_clock around public hull-reducer call; excludes process startup, JSON intake and exact checker",
+    "csl.hull.itis17.a43-largest-norm-tie": "steady_clock around public hull-reducer call; excludes process startup, JSON intake and exact checker",
+    "csl.hull.itis17.a44-paper-farthest-incremental-lp": "steady_clock around public hull-reducer call; excludes process startup, JSON intake and exact checker"
+  },
+  "warmups_per_method": 1
+}

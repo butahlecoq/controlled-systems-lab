@@ -226,8 +226,22 @@ workload/resource matrix and comparison-record requirements.
 The saved six-method bundle is recorded below after exact-head validation.
 The initial r1 capture is retained as superseded evidence; it undercounted A43
 candidate Phase-I solves in `lp_calls` and reused the prior A44 adaptation
-identity. The corrected r2 record will use a separate A44 report identity and
-count all candidate solves plus final rechecks.
+identity. The corrected [r2 bundle](../../reports/algorithm-results/exp06-it17-paper-reducers-20261029-r2/)
+uses `csl.hull.itis17.a44-paper-farthest-incremental-lp@1.0.0` and counts all
+A43 candidate solves plus final rechecks. Source commit is
+`b2b7dfa6a2151259cbe1cd3d0e6d99e790661533`. All 36 attempts (six methods,
+one warmup and five measured runs each) completed, and the saved renderer
+rechecked every result with the exact 2D hull oracle. Median durations and
+ranges in ns were: A29/A30 Python 4,410,858 (3,120,182–4,864,062); QuickHull
+40,020 (15,156–42,394); A43 certified-basis adaptation 2,821,679
+(1,405,357–3,221,662); A43 artificial-basis 3,151,402
+(1,224,885–3,255,676); A43 largest-norm tie 3,154,893
+(1,216,364–3,187,090); A44 paper-farthest incremental LP 4,193,441
+(1,589,250–4,283,676). These intervals differ by implementation/runtime and
+exclude exact checking, so the values are descriptive and do not rank speed.
+The largest-norm tie rule activated once in each attempt; the A43 batch-removal
+counter stayed at zero, so this fixture does not demonstrate that path. The
+bundle preserves r1 unchanged as superseded historical evidence.
 
 ### ITIS17 hull output-status update
 
