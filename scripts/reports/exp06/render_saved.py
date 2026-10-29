@@ -9,6 +9,7 @@ import html
 import io
 import json
 import math
+import statistics
 import sys
 from pathlib import Path
 
@@ -233,7 +234,9 @@ def render_html(capture, wire, manifest, methods, rows, report_id):
     for method_id in METHODS:
         measured = [row for row in methods[method_id] if not row["warmup"] and isinstance(row["duration_ns"], int)]
         timings = ", ".join(f"r{row['repetition']}: {row['duration_ns']} ns" for row in measured)
-        method_rows.append(f"<tr><th>{html.escape(method_id)}</th><td>{len(measured)}</td><td>{html.escape(timings)}</td><td>{sum(row['checker'] == 'verified' for row in methods[method_id])}/{len(methods[method_id])} attempts verified</td></tr>")
+        values = [row["duration_ns"] for row in measured]
+        summary = f"median {statistics.median(values)} ns; range {min(values)}–{max(values)} ns" if values else "no measured duration"
+        method_rows.append(f"<tr><th>{html.escape(method_id)}</th><td>{len(measured)}</td><td>{html.escape(summary)}</td><td>{html.escape(timings)}</td><td>{sum(row['checker'] == 'verified' for row in methods[method_id])}/{len(methods[method_id])} attempts verified</td></tr>")
     body_rows = []
     for row in rows:
         body_rows.append("<tr>" + "".join(f"<td>{html.escape(str(row[key]))}</td>" for key in
@@ -247,7 +250,8 @@ body{{margin:0;background:#191724;color:#e0def4;font:16px/1.55 system-ui,sans-se
 <p>One shared nine-point square fixture, checked with an independent exact binary64 source-hull oracle.</p></header><main>
 <section><h2>Geometry</h2><p>The square corners are the hull. The center and four edge midpoints are redundant. Both methods receive the same canonical input bytes.</p><img src="hulls.svg" alt="Square hull with four extreme corners, a center, four edge midpoints, and both method hull outlines"><p>Input points in source order: <code>{points_text}</code></p></section>
 <section><h2>Recorded attempts</h2><p>{capture['warmups_per_method']} excluded warmup and {capture['measured_repetitions_per_method']} measured repetitions per method. Execution order alternated between methods. Every attempt, including failure statuses, remains in the paired comparison record. Timings are method-local observations. Python/NumPy and C++ runtime measurements have different intervals and are inconclusive for speed comparison.</p>
-<table><thead><tr><th>Method</th><th>Measured repetitions</th><th>Per-repetition duration</th><th>Exact checker</th></tr></thead><tbody>{''.join(method_rows)}</tbody></table>
+<p>A29 timing wraps the Python port call and excludes the checker. QuickHull timing wraps the library call and excludes process startup, JSON intake, and the checker. No common limiter profile was collected. Host: {html.escape(capture['host']['cpu_model'])}, {capture['host']['logical_cpus']} logical CPUs, load averages {html.escape(str(capture['host']['load_average_1m_5m_15m']))}. Memory limits were not enforced.</p>
+<table><thead><tr><th>Method</th><th>Measured repetitions</th><th>Method-local summary</th><th>Per-repetition duration</th><th>Exact checker</th></tr></thead><tbody>{''.join(method_rows)}</tbody></table>
 <h3>Attempt details</h3><table><thead><tr><th>Method</th><th>Repetition</th><th>Warmup</th><th>Status</th><th>Duration ns</th><th>Source indices</th><th>Exact checker</th></tr></thead><tbody>{''.join(body_rows)}</tbody></table></section>
 <section><h2>Scope and provenance</h2><p>Single bounded 2D synthetic fixture; this is an initial algorithm-functionality example, not a general correctness or performance claim. Source commit: <code>{html.escape(capture['source_commit'])}</code>. Report: <code>{report_id}</code>.</p>
 <p><a href="comparison-record.json">Paired comparison record</a> · <a href="capture.json">Capture metadata</a> · <a href="trials.csv">Attempt table</a> · <a href="manifest.json">File hashes</a></p></section>

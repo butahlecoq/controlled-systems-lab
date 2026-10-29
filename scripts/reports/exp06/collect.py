@@ -8,6 +8,7 @@ import hashlib
 import json
 import os
 import platform
+import re
 import subprocess
 import sys
 import time
@@ -92,6 +93,14 @@ def main() -> int:
         "scripts/reports/stage_exp06.py", "benchmarks/reporting/exp06/quickhull_run.cpp",
         "benchmarks/reporting/exp06/pack_comparison.cpp", "src/artifacts/comparison_manifest.cpp",
         "include/csl/artifacts/comparison_manifest.hpp")]
+    load_average = os.getloadavg() if hasattr(os, "getloadavg") else None
+    cpu_model = "unknown"
+    cpu_info = Path("/proc/cpuinfo")
+    if cpu_info.is_file():
+        match = re.search(r"^model name\s*:\s*(.+)$", cpu_info.read_text(errors="replace"), re.M)
+        if match:
+            cpu_model = match.group(1).strip()
+    process_count = len(list(Path("/proc").glob("[0-9]*"))) if Path("/proc").is_dir() else None
     quickhull = args.quickhull.resolve(strict=True)
     packer = args.packer.resolve(strict=True)
     fixture = json.loads(args.fixture.read_text(encoding="utf-8"))
@@ -221,6 +230,10 @@ def main() -> int:
     metadata = {"schema": "csl.exp06-capture/1", "purpose": "bounded paired geometry pilot",
         "source_commit": harness_commit, "harness_dirty": harness_dirty,
         "harness_sources": harness_sources,
+        "host": {"os": platform.platform(), "architecture": platform.machine(),
+            "cpu_model": cpu_model, "logical_cpus": os.cpu_count(),
+            "load_average_1m_5m_15m": list(load_average) if load_average is not None else None,
+            "observed_process_count": process_count},
         "created_utc": dt.datetime.now(dt.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
         "fixture_sha256": manifest_hash, "request_digest": request_digest,
         "warmups_per_method": WARMUPS, "measured_repetitions_per_method": REPETITIONS,
@@ -228,6 +241,9 @@ def main() -> int:
         "timeout_seconds": args.timeout_seconds,
         "memory_limit": {"status": "not_enforced", "reason": "bounded nine-point fixture; process memory was not measured"},
         "timing_comparison": "inconclusive: Python/NumPy and C++ timings use different runtimes and intervals",
+        "timing_intervals": {METHOD_A29: "perf_counter_ns around the Python port call; excludes exact checker",
+            METHOD_QUICKHULL: "steady_clock around QuickHull call; excludes process startup, JSON intake and exact checker"},
+        "limiter_profile": {"status": "not_collected", "reason": "different method runtimes and timing intervals do not have a shared source-level limiter profile"},
         "checker_controls": controls,
         "quickhull_executable_sha256": quickhull_exe_hash, "python_executable_sha256": python_exe_hash,
         "packer_exit_code": packed.returncode, "stderr": packed.stderr}
