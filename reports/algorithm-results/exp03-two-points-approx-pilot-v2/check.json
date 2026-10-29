@@ -1,0 +1,2543 @@
+{
+  "schema": "csl.exp03-two-points-approximation-check/1",
+  "status": "verified",
+  "case_id": "env717-two-points-three-stage-finite-game",
+  "stage": 3,
+  "reference_source_figure_data_sha256": "a65b21edb9c29375b1a851b3a4fc9a8e8ae28b1cee55b8c3952fea8347d26284",
+  "oracle": "complete inclusion against the stored binary64 projected reference, exact rational checks against every scale-2000 lattice point",
+  "results": [
+    {
+      "method": "exact-polytope-quickhull",
+      "status": "verified",
+      "relation": "equivalent",
+      "reference_vertices_checked": 15,
+      "output_size_primitives": 4,
+      "reference_area": 5.000000000000001,
+      "output_area": 5.000000000000001,
+      "area_ratio": 1.0,
+      "area_assurance": "exact_fraction",
+      "exact_lattice_diagnostic": {
+        "reference": "exact rational projections of scale-2000 integer lattice states",
+        "projected_finite_points": 15,
+        "exact_lattice_hull_vertices": 4,
+        "excluded_finite_points": 1,
+        "outer_inclusion": false
+      },
+      "support_diagnostics": [
+        {
+          "direction": [
+            1,
+            0
+          ],
+          "support_gap": 0.0
+        },
+        {
+          "direction": [
+            -1,
+            0
+          ],
+          "support_gap": 0.0
+        },
+        {
+          "direction": [
+            0,
+            1
+          ],
+          "support_gap": 0.0
+        },
+        {
+          "direction": [
+            0,
+            -1
+          ],
+          "support_gap": 0.0
+        },
+        {
+          "direction": [
+            1,
+            1
+          ],
+          "support_gap": 0.0
+        },
+        {
+          "direction": [
+            1,
+            -1
+          ],
+          "support_gap": 0.0
+        },
+        {
+          "direction": [
+            2,
+            1
+          ],
+          "support_gap": 0.0
+        },
+        {
+          "direction": [
+            1,
+            2
+          ],
+          "support_gap": 0.0
+        }
+      ],
+      "elapsed_ns": null,
+      "independent_oracle": "exact dyadic arithmetic over stored binary64 points and output coefficients",
+      "_shape": {
+        "kind": "v_polytope",
+        "vertices": [
+          [
+            3.775,
+            -2.5
+          ],
+          [
+            4.775,
+            -2.5
+          ],
+          [
+            5.225,
+            2.5
+          ],
+          [
+            4.225,
+            2.5
+          ]
+        ]
+      }
+    },
+    {
+      "method": "axis-box",
+      "status": "verified",
+      "relation": "outer",
+      "reference_vertices_checked": 15,
+      "output_size_primitives": 4,
+      "reference_area": 5.000000000000001,
+      "output_area": 7.249999999999998,
+      "area_ratio": 1.4499999999999993,
+      "area_assurance": "exact_fraction",
+      "exact_lattice_diagnostic": {
+        "reference": "exact rational projections of scale-2000 integer lattice states",
+        "projected_finite_points": 15,
+        "exact_lattice_hull_vertices": 4,
+        "excluded_finite_points": 1,
+        "outer_inclusion": false
+      },
+      "support_diagnostics": [
+        {
+          "direction": [
+            1,
+            0
+          ],
+          "support_gap": 0.0
+        },
+        {
+          "direction": [
+            -1,
+            0
+          ],
+          "support_gap": 0.0
+        },
+        {
+          "direction": [
+            0,
+            1
+          ],
+          "support_gap": 0.0
+        },
+        {
+          "direction": [
+            0,
+            -1
+          ],
+          "support_gap": 0.0
+        },
+        {
+          "direction": [
+            1,
+            1
+          ],
+          "support_gap": 0.0
+        },
+        {
+          "direction": [
+            1,
+            -1
+          ],
+          "support_gap": 0.4499999999999993
+        },
+        {
+          "direction": [
+            2,
+            1
+          ],
+          "support_gap": 0.0
+        },
+        {
+          "direction": [
+            1,
+            2
+          ],
+          "support_gap": 0.0
+        }
+      ],
+      "elapsed_ns": null,
+      "independent_oracle": "exact dyadic arithmetic over stored binary64 points and output coefficients",
+      "_shape": {
+        "coordinate_labels": [
+          "position 1",
+          "velocity 1"
+        ],
+        "equality_bounds": [],
+        "equality_rows": [],
+        "inequality_bounds": [
+          5.225,
+          -3.775,
+          2.5,
+          2.5
+        ],
+        "inequality_rows": [
+          [
+            1.0,
+            0.0
+          ],
+          [
+            -1.0,
+            0.0
+          ],
+          [
+            0.0,
+            1.0
+          ],
+          [
+            0.0,
+            -1.0
+          ]
+        ],
+        "kind": "h_polytope"
+      }
+    },
+    {
+      "method": "rotated-parallelotope",
+      "status": "verified",
+      "relation": "outer",
+      "reference_vertices_checked": 15,
+      "output_size_primitives": 4,
+      "reference_area": 5.000000000000001,
+      "output_area": 18.70568181818182,
+      "area_ratio": 3.7411363636363633,
+      "area_assurance": "exact_fraction",
+      "exact_lattice_diagnostic": {
+        "reference": "exact rational projections of scale-2000 integer lattice states",
+        "projected_finite_points": 15,
+        "exact_lattice_hull_vertices": 4,
+        "excluded_finite_points": 1,
+        "outer_inclusion": false
+      },
+      "support_diagnostics": [
+        {
+          "direction": [
+            1,
+            0
+          ],
+          "support_gap": 1.9022727272727273
+        },
+        {
+          "direction": [
+            -1,
+            0
+          ],
+          "support_gap": 1.9022727272727276
+        },
+        {
+          "direction": [
+            0,
+            1
+          ],
+          "support_gap": 1.3409090909090917
+        },
+        {
+          "direction": [
+            0,
+            -1
+          ],
+          "support_gap": 1.3409090909090908
+        },
+        {
+          "direction": [
+            1,
+            1
+          ],
+          "support_gap": 8.881784197001252e-16
+        },
+        {
+          "direction": [
+            1,
+            -1
+          ],
+          "support_gap": 3.6931818181818166
+        },
+        {
+          "direction": [
+            2,
+            1
+          ],
+          "support_gap": 0.0
+        },
+        {
+          "direction": [
+            1,
+            2
+          ],
+          "support_gap": 1.7763568394002505e-15
+        }
+      ],
+      "elapsed_ns": null,
+      "independent_oracle": "exact dyadic arithmetic over stored binary64 points and output coefficients",
+      "_shape": {
+        "coordinate_labels": [
+          "position 1",
+          "velocity 1"
+        ],
+        "equality_bounds": [],
+        "equality_rows": [],
+        "inequality_bounds": [
+          5.975,
+          -3.025,
+          4.590000000000001,
+          0.99
+        ],
+        "inequality_rows": [
+          [
+            1.0,
+            0.3
+          ],
+          [
+            -1.0,
+            -0.3
+          ],
+          [
+            0.4,
+            1.0
+          ],
+          [
+            -0.4,
+            -1.0
+          ]
+        ],
+        "kind": "h_polytope"
+      }
+    },
+    {
+      "method": "directional-ellipsoid",
+      "status": "verified",
+      "relation": "outer",
+      "reference_vertices_checked": 15,
+      "output_size_primitives": 1,
+      "reference_area": 5.000000000000001,
+      "output_area": 29.382816290194093,
+      "area_ratio": 5.876563258038818,
+      "area_assurance": "floating_formula",
+      "exact_lattice_diagnostic": {
+        "reference": "exact rational projections of scale-2000 integer lattice states",
+        "projected_finite_points": 15,
+        "exact_lattice_hull_vertices": 4,
+        "excluded_finite_points": 0,
+        "outer_inclusion": true
+      },
+      "support_diagnostics": [
+        {
+          "direction": [
+            1,
+            0
+          ],
+          "support_gap": 2.0004700481698707
+        },
+        {
+          "direction": [
+            -1,
+            0
+          ],
+          "support_gap": 2.0004700481698703
+        },
+        {
+          "direction": [
+            0,
+            1
+          ],
+          "support_gap": 2.0828574759235217
+        },
+        {
+          "direction": [
+            0,
+            -1
+          ],
+          "support_gap": 2.0828574759235217
+        },
+        {
+          "direction": [
+            1,
+            1
+          ],
+          "support_gap": 0.2208000846161262
+        },
+        {
+          "direction": [
+            1,
+            -1
+          ],
+          "support_gap": 3.932309522681793
+        },
+        {
+          "direction": [
+            2,
+            1
+          ],
+          "support_gap": 0.24533881451725748
+        },
+        {
+          "direction": [
+            1,
+            2
+          ],
+          "support_gap": 1.912018708374763
+        }
+      ],
+      "elapsed_ns": null,
+      "independent_oracle": "exact dyadic arithmetic over stored binary64 points and output coefficients",
+      "_shape": {
+        "center": [
+          4.5,
+          0.0
+        ],
+        "coordinate_labels": [
+          "position 1",
+          "velocity 1"
+        ],
+        "kind": "directional_ellipsoid",
+        "orientation": [
+          [
+            1.0,
+            0.3
+          ],
+          [
+            0.4,
+            1.0
+          ]
+        ],
+        "projected_bounds": [
+          1.475,
+          2.7900000000000005
+        ],
+        "radii": [
+          2.0859650045003155,
+          3.945655839020936
+        ]
+      }
+    },
+    {
+      "method": "zonotope-axis-cover",
+      "status": "verified",
+      "relation": "outer",
+      "reference_vertices_checked": 15,
+      "output_size_primitives": 4,
+      "reference_area": 5.000000000000001,
+      "output_area": 5.000000002328306,
+      "area_ratio": 1.000000000465661,
+      "area_assurance": "exact_fraction",
+      "exact_lattice_diagnostic": {
+        "reference": "exact rational projections of scale-2000 integer lattice states",
+        "projected_finite_points": 15,
+        "exact_lattice_hull_vertices": 4,
+        "excluded_finite_points": 0,
+        "outer_inclusion": true,
+        "padded_source_excluded_points": 0,
+        "padded_source_contains_exact_lattice": true
+      },
+      "support_diagnostics": [
+        {
+          "direction": [
+            1,
+            0
+          ],
+          "support_gap": 1.688027495561073e-10
+        },
+        {
+          "direction": [
+            -1,
+            0
+          ],
+          "support_gap": 1.6880230546689745e-10
+        },
+        {
+          "direction": [
+            0,
+            1
+          ],
+          "support_gap": 5.820766091346741e-10
+        },
+        {
+          "direction": [
+            0,
+            -1
+          ],
+          "support_gap": 5.820766091346741e-10
+        },
+        {
+          "direction": [
+            1,
+            1
+          ],
+          "support_gap": 7.508793586907814e-10
+        },
+        {
+          "direction": [
+            1,
+            -1
+          ],
+          "support_gap": 6.461045032324364e-10
+        },
+        {
+          "direction": [
+            2,
+            1
+          ],
+          "support_gap": 9.196821082468887e-10
+        },
+        {
+          "direction": [
+            1,
+            2
+          ],
+          "support_gap": 1.3329550796470357e-09
+        }
+      ],
+      "elapsed_ns": null,
+      "independent_oracle": "exact dyadic arithmetic over stored binary64 points and output coefficients",
+      "_shape": {
+        "center": [
+          4.5,
+          0.0
+        ],
+        "coordinate_labels": [
+          "position 1",
+          "velocity 1"
+        ],
+        "factors": [
+          "two-points-factor-4",
+          "two-points-factor-0",
+          "two-points-factor-2",
+          "two-points-factor-1"
+        ],
+        "generators": [
+          [
+            0.2250000000523869,
+            0.25000000005820766,
+            0.25000000005820766,
+            0.0
+          ],
+          [
+            2.5000000005820766,
+            0.0,
+            0.0,
+            0.0
+          ]
+        ],
+        "kind": "zonotope"
+      }
+    },
+    {
+      "method": "exact-polytope-quickhull",
+      "status": "verified",
+      "relation": "equivalent",
+      "reference_vertices_checked": 23,
+      "output_size_primitives": 8,
+      "reference_area": 0.016,
+      "output_area": 0.016,
+      "area_ratio": 1.0,
+      "area_assurance": "exact_fraction",
+      "exact_lattice_diagnostic": {
+        "reference": "exact rational projections of scale-2000 integer lattice states",
+        "projected_finite_points": 23,
+        "exact_lattice_hull_vertices": 6,
+        "excluded_finite_points": 2,
+        "outer_inclusion": false
+      },
+      "support_diagnostics": [
+        {
+          "direction": [
+            1,
+            0
+          ],
+          "support_gap": 0.0
+        },
+        {
+          "direction": [
+            -1,
+            0
+          ],
+          "support_gap": 0.0
+        },
+        {
+          "direction": [
+            0,
+            1
+          ],
+          "support_gap": 0.0
+        },
+        {
+          "direction": [
+            0,
+            -1
+          ],
+          "support_gap": 0.0
+        },
+        {
+          "direction": [
+            1,
+            1
+          ],
+          "support_gap": 0.0
+        },
+        {
+          "direction": [
+            1,
+            -1
+          ],
+          "support_gap": 0.0
+        },
+        {
+          "direction": [
+            2,
+            1
+          ],
+          "support_gap": 0.0
+        },
+        {
+          "direction": [
+            1,
+            2
+          ],
+          "support_gap": 0.0
+        }
+      ],
+      "elapsed_ns": null,
+      "independent_oracle": "exact dyadic arithmetic over stored binary64 points and output coefficients",
+      "_shape": {
+        "kind": "v_polytope",
+        "vertices": [
+          [
+            -0.0435,
+            -0.3
+          ],
+          [
+            -0.019,
+            -0.2
+          ],
+          [
+            0.0055,
+            -0.1
+          ],
+          [
+            0.0345,
+            0.1
+          ],
+          [
+            0.0435,
+            0.3
+          ],
+          [
+            0.019,
+            0.2
+          ],
+          [
+            -0.0055,
+            0.1
+          ],
+          [
+            -0.0345,
+            -0.1
+          ]
+        ]
+      }
+    },
+    {
+      "method": "axis-box",
+      "status": "verified",
+      "relation": "outer",
+      "reference_vertices_checked": 23,
+      "output_size_primitives": 4,
+      "reference_area": 0.016,
+      "output_area": 0.052199999999999996,
+      "area_ratio": 3.2624999999999997,
+      "area_assurance": "exact_fraction",
+      "exact_lattice_diagnostic": {
+        "reference": "exact rational projections of scale-2000 integer lattice states",
+        "projected_finite_points": 23,
+        "exact_lattice_hull_vertices": 6,
+        "excluded_finite_points": 2,
+        "outer_inclusion": false
+      },
+      "support_diagnostics": [
+        {
+          "direction": [
+            1,
+            0
+          ],
+          "support_gap": 0.0
+        },
+        {
+          "direction": [
+            -1,
+            0
+          ],
+          "support_gap": 0.0
+        },
+        {
+          "direction": [
+            0,
+            1
+          ],
+          "support_gap": 0.0
+        },
+        {
+          "direction": [
+            0,
+            -1
+          ],
+          "support_gap": 0.0
+        },
+        {
+          "direction": [
+            1,
+            1
+          ],
+          "support_gap": 0.0
+        },
+        {
+          "direction": [
+            1,
+            -1
+          ],
+          "support_gap": 0.08699999999999997
+        },
+        {
+          "direction": [
+            2,
+            1
+          ],
+          "support_gap": 0.0
+        },
+        {
+          "direction": [
+            1,
+            2
+          ],
+          "support_gap": 0.0
+        }
+      ],
+      "elapsed_ns": null,
+      "independent_oracle": "exact dyadic arithmetic over stored binary64 points and output coefficients",
+      "_shape": {
+        "coordinate_labels": [
+          "position 2",
+          "velocity 2"
+        ],
+        "equality_bounds": [],
+        "equality_rows": [],
+        "inequality_bounds": [
+          0.0435,
+          0.0435,
+          0.3,
+          0.3
+        ],
+        "inequality_rows": [
+          [
+            1.0,
+            0.0
+          ],
+          [
+            -1.0,
+            0.0
+          ],
+          [
+            0.0,
+            1.0
+          ],
+          [
+            0.0,
+            -1.0
+          ]
+        ],
+        "kind": "h_polytope"
+      }
+    },
+    {
+      "method": "rotated-parallelotope",
+      "status": "verified",
+      "relation": "outer",
+      "reference_vertices_checked": 23,
+      "output_size_primitives": 4,
+      "reference_area": 0.016,
+      "output_area": 0.19260409090909092,
+      "area_ratio": 12.037755681818183,
+      "area_assurance": "exact_fraction",
+      "exact_lattice_diagnostic": {
+        "reference": "exact rational projections of scale-2000 integer lattice states",
+        "projected_finite_points": 23,
+        "exact_lattice_hull_vertices": 6,
+        "excluded_finite_points": 0,
+        "outer_inclusion": true
+      },
+      "support_diagnostics": [
+        {
+          "direction": [
+            1,
+            0
+          ],
+          "support_gap": 0.21640909090909094
+        },
+        {
+          "direction": [
+            -1,
+            0
+          ],
+          "support_gap": 0.21640909090909094
+        },
+        {
+          "direction": [
+            0,
+            1
+          ],
+          "support_gap": 0.1213636363636364
+        },
+        {
+          "direction": [
+            0,
+            -1
+          ],
+          "support_gap": 0.1213636363636364
+        },
+        {
+          "direction": [
+            1,
+            1
+          ],
+          "support_gap": 5.551115123125783e-17
+        },
+        {
+          "direction": [
+            1,
+            -1
+          ],
+          "support_gap": 0.42477272727272736
+        },
+        {
+          "direction": [
+            2,
+            1
+          ],
+          "support_gap": 0.0
+        },
+        {
+          "direction": [
+            1,
+            2
+          ],
+          "support_gap": 1.1102230246251565e-16
+        }
+      ],
+      "elapsed_ns": null,
+      "independent_oracle": "exact dyadic arithmetic over stored binary64 points and output coefficients",
+      "_shape": {
+        "coordinate_labels": [
+          "position 2",
+          "velocity 2"
+        ],
+        "equality_bounds": [],
+        "equality_rows": [],
+        "inequality_bounds": [
+          0.1335,
+          0.1335,
+          0.3174,
+          0.3174
+        ],
+        "inequality_rows": [
+          [
+            1.0,
+            0.3
+          ],
+          [
+            -1.0,
+            -0.3
+          ],
+          [
+            0.4,
+            1.0
+          ],
+          [
+            -0.4,
+            -1.0
+          ]
+        ],
+        "kind": "h_polytope"
+      }
+    },
+    {
+      "method": "directional-ellipsoid",
+      "status": "verified",
+      "relation": "outer",
+      "reference_vertices_checked": 23,
+      "output_size_primitives": 1,
+      "reference_area": 0.016,
+      "output_area": 0.30254179852567037,
+      "area_ratio": 18.908862407854397,
+      "area_assurance": "floating_formula",
+      "exact_lattice_diagnostic": {
+        "reference": "exact rational projections of scale-2000 integer lattice states",
+        "projected_finite_points": 23,
+        "exact_lattice_hull_vertices": 6,
+        "excluded_finite_points": 0,
+        "outer_inclusion": true
+      },
+      "support_diagnostics": [
+        {
+          "direction": [
+            1,
+            0
+          ],
+          "support_gap": 0.2200241649966661
+        },
+        {
+          "direction": [
+            -1,
+            0
+          ],
+          "support_gap": 0.2200241649966661
+        },
+        {
+          "direction": [
+            0,
+            1
+          ],
+          "support_gap": 0.21724975983521427
+        },
+        {
+          "direction": [
+            0,
+            -1
+          ],
+          "support_gap": 0.21724975983521427
+        },
+        {
+          "direction": [
+            1,
+            1
+          ],
+          "support_gap": 0.03605213113343725
+        },
+        {
+          "direction": [
+            1,
+            -1
+          ],
+          "support_gap": 0.4714593250488794
+        },
+        {
+          "direction": [
+            2,
+            1
+          ],
+          "support_gap": 0.012327306254732884
+        },
+        {
+          "direction": [
+            1,
+            2
+          ],
+          "support_gap": 0.22469887298812563
+        }
+      ],
+      "elapsed_ns": null,
+      "independent_oracle": "exact dyadic arithmetic over stored binary64 points and output coefficients",
+      "_shape": {
+        "center": [
+          0.0,
+          0.0
+        ],
+        "coordinate_labels": [
+          "position 2",
+          "velocity 2"
+        ],
+        "kind": "directional_ellipsoid",
+        "orientation": [
+          [
+            1.0,
+            0.3
+          ],
+          [
+            0.4,
+            1.0
+          ]
+        ],
+        "projected_bounds": [
+          0.1335,
+          0.3174
+        ],
+        "radii": [
+          0.18879751057680821,
+          0.44887138469722043
+        ]
+      }
+    },
+    {
+      "method": "zonotope-axis-cover",
+      "status": "verified",
+      "relation": "outer",
+      "reference_vertices_checked": 23,
+      "output_size_primitives": 4,
+      "reference_area": 0.016,
+      "output_area": 0.016000000007450582,
+      "area_ratio": 1.0000000004656613,
+      "area_assurance": "exact_fraction",
+      "exact_lattice_diagnostic": {
+        "reference": "exact rational projections of scale-2000 integer lattice states",
+        "projected_finite_points": 23,
+        "exact_lattice_hull_vertices": 6,
+        "excluded_finite_points": 0,
+        "outer_inclusion": true,
+        "padded_source_excluded_points": 0,
+        "padded_source_contains_exact_lattice": true
+      },
+      "support_diagnostics": [
+        {
+          "direction": [
+            1,
+            0
+          ],
+          "support_gap": 1.0128134442233261e-11
+        },
+        {
+          "direction": [
+            -1,
+            0
+          ],
+          "support_gap": 1.0128134442233261e-11
+        },
+        {
+          "direction": [
+            0,
+            1
+          ],
+          "support_gap": 6.984923750508187e-11
+        },
+        {
+          "direction": [
+            0,
+            -1
+          ],
+          "support_gap": 6.984923750508187e-11
+        },
+        {
+          "direction": [
+            1,
+            1
+          ],
+          "support_gap": 7.997741358067856e-11
+        },
+        {
+          "direction": [
+            1,
+            -1
+          ],
+          "support_gap": 5.972106142948519e-11
+        },
+        {
+          "direction": [
+            2,
+            1
+          ],
+          "support_gap": 9.010547863397278e-11
+        },
+        {
+          "direction": [
+            1,
+            2
+          ],
+          "support_gap": 1.498265955746092e-10
+        }
+      ],
+      "elapsed_ns": null,
+      "independent_oracle": "exact dyadic arithmetic over stored binary64 points and output coefficients",
+      "_shape": {
+        "center": [
+          0.0,
+          0.0
+        ],
+        "coordinate_labels": [
+          "position 2",
+          "velocity 2"
+        ],
+        "factors": [
+          "two-points-factor-1",
+          "two-points-factor-3",
+          "two-points-factor-5",
+          "two-points-factor-0"
+        ],
+        "generators": [
+          [
+            0.02450000000570435,
+            0.014500000003376045,
+            0.004500000001047738,
+            0.0
+          ],
+          [
+            0.10000000002328308,
+            0.10000000002328308,
+            0.10000000002328308,
+            0.0
+          ]
+        ],
+        "kind": "zonotope"
+      }
+    }
+  ],
+  "finite_minimax_reference": {
+    "objective": "minimum over open-loop controls of worst terminal squared position gap",
+    "information_pattern": "exists full control sequence, for all full disturbance sequences",
+    "value_numerator": 58323769,
+    "value_denominator": 4000000,
+    "value": 14.58094225,
+    "minimizing_control_sequences_codes": [
+      [
+        -1,
+        -1,
+        -1
+      ]
+    ],
+    "achievable_policy_witness": {
+      "control_sequence_codes": [
+        -1,
+        -1,
+        -1
+      ],
+      "control_sequence": [
+        -2.5,
+        -2.5,
+        -2.5
+      ],
+      "worst_disturbance_sequences_codes": [
+        [
+          -1,
+          -1,
+          -1
+        ]
+      ],
+      "selected_worst_disturbance_sequence_codes": [
+        -1,
+        -1,
+        -1
+      ],
+      "selected_worst_disturbance_sequence": [
+        -1.0,
+        -1.0,
+        -1.0
+      ],
+      "state_path_scaled": [
+        [
+          9000,
+          0,
+          0,
+          0
+        ],
+        [
+          8550,
+          -5000,
+          -9,
+          -200
+        ],
+        [
+          8050,
+          -5000,
+          -38,
+          -400
+        ],
+        [
+          7550,
+          -5000,
+          -87,
+          -600
+        ]
+      ],
+      "terminal_gap_numerator": 7637,
+      "terminal_gap_denominator": 2000,
+      "objective_value_numerator": 58323769,
+      "objective_value_denominator": 4000000,
+      "meaning": "realizable open-loop control with its worst finite-catalogue disturbance response"
+    },
+    "enumerated_control_sequences": 27,
+    "enumerated_disturbance_sequences": 27,
+    "arithmetic": "exact integer arithmetic on scale-2000 states"
+  },
+  "objective_bounds": [
+    {
+      "method": "axis-box",
+      "exact_finite_minimax_value": 14.58094225,
+      "arithmetic": "exact fractions; ellipsoid projection uses a rational outward square-root enclosure",
+      "lower_bound": {
+        "status": "inconclusive",
+        "reason": "this method's control-plane output excludes one or more exact finite-game lattice states"
+      },
+      "upper_bound": {
+        "status": "inconclusive",
+        "reason": "this method's disturbance-plane output excludes one or more exact finite-game lattice states"
+      }
+    },
+    {
+      "method": "directional-ellipsoid",
+      "exact_finite_minimax_value": 14.58094225,
+      "arithmetic": "exact fractions; ellipsoid projection uses a rational outward square-root enclosure",
+      "lower_bound": {
+        "status": "verified",
+        "value": 3.3052329057514624,
+        "value_fraction": "17573632443657480932798657004171305354071369/5316911983139663491615228241121378304000000",
+        "basis": "relax all finite control terminal positions to the checked outer x projection; keep the complete exact finite disturbance catalogue",
+        "relaxed_control_position": 1.7745299518301294,
+        "control_outer_x_interval": [
+          1.7745299518301294,
+          7.22547004816987
+        ]
+      },
+      "upper_bound": {
+        "status": "verified",
+        "value": 16.30967743126202,
+        "value_fraction": "138747391000671288120750385709786847002169/8507059173023461586584365185794205286400",
+        "basis": "use an exactly enumerated feasible minimizing control sequence and maximize over the checked outer disturbance x projection",
+        "control_sequence_codes": [
+          -1,
+          -1,
+          -1
+        ],
+        "control_sequence": [
+          -2.5,
+          -2.5,
+          -2.5
+        ],
+        "control_position": 3.775,
+        "disturbance_outer_x_interval": [
+          -0.2635241649966661,
+          0.2635241649966661
+        ],
+        "realizable_policy_witness": {
+          "control_sequence_codes": [
+            -1,
+            -1,
+            -1
+          ],
+          "control_sequence": [
+            -2.5,
+            -2.5,
+            -2.5
+          ],
+          "worst_disturbance_sequences_codes": [
+            [
+              -1,
+              -1,
+              -1
+            ]
+          ],
+          "selected_worst_disturbance_sequence_codes": [
+            -1,
+            -1,
+            -1
+          ],
+          "selected_worst_disturbance_sequence": [
+            -1.0,
+            -1.0,
+            -1.0
+          ],
+          "state_path_scaled": [
+            [
+              9000,
+              0,
+              0,
+              0
+            ],
+            [
+              8550,
+              -5000,
+              -9,
+              -200
+            ],
+            [
+              8050,
+              -5000,
+              -38,
+              -400
+            ],
+            [
+              7550,
+              -5000,
+              -87,
+              -600
+            ]
+          ],
+          "terminal_gap_numerator": 7637,
+          "terminal_gap_denominator": 2000,
+          "objective_value_numerator": 58323769,
+          "objective_value_denominator": 4000000,
+          "meaning": "realizable open-loop control with its worst finite-catalogue disturbance response"
+        }
+      }
+    },
+    {
+      "method": "exact-polytope-quickhull",
+      "exact_finite_minimax_value": 14.58094225,
+      "arithmetic": "exact fractions; ellipsoid projection uses a rational outward square-root enclosure",
+      "lower_bound": {
+        "status": "inconclusive",
+        "reason": "this method's control-plane output excludes one or more exact finite-game lattice states"
+      },
+      "upper_bound": {
+        "status": "inconclusive",
+        "reason": "this method's disturbance-plane output excludes one or more exact finite-game lattice states"
+      }
+    },
+    {
+      "method": "rotated-parallelotope",
+      "exact_finite_minimax_value": 14.58094225,
+      "arithmetic": "exact fractions; ellipsoid projection uses a rational outward square-root enclosure",
+      "lower_bound": {
+        "status": "inconclusive",
+        "reason": "this method's control-plane output excludes one or more exact finite-game lattice states"
+      },
+      "upper_bound": {
+        "status": "verified",
+        "value": 16.280491371900826,
+        "value_fraction": "531094626712757444355277284551924062628993301162533662752799850585169/32621535467252273986923543826340866893214701578098284819797874510400",
+        "basis": "use an exactly enumerated feasible minimizing control sequence and maximize over the checked outer disturbance x projection",
+        "control_sequence_codes": [
+          -1,
+          -1,
+          -1
+        ],
+        "control_sequence": [
+          -2.5,
+          -2.5,
+          -2.5
+        ],
+        "control_position": 3.775,
+        "disturbance_outer_x_interval": [
+          -0.2599090909090909,
+          0.2599090909090909
+        ],
+        "realizable_policy_witness": {
+          "control_sequence_codes": [
+            -1,
+            -1,
+            -1
+          ],
+          "control_sequence": [
+            -2.5,
+            -2.5,
+            -2.5
+          ],
+          "worst_disturbance_sequences_codes": [
+            [
+              -1,
+              -1,
+              -1
+            ]
+          ],
+          "selected_worst_disturbance_sequence_codes": [
+            -1,
+            -1,
+            -1
+          ],
+          "selected_worst_disturbance_sequence": [
+            -1.0,
+            -1.0,
+            -1.0
+          ],
+          "state_path_scaled": [
+            [
+              9000,
+              0,
+              0,
+              0
+            ],
+            [
+              8550,
+              -5000,
+              -9,
+              -200
+            ],
+            [
+              8050,
+              -5000,
+              -38,
+              -400
+            ],
+            [
+              7550,
+              -5000,
+              -87,
+              -600
+            ]
+          ],
+          "terminal_gap_numerator": 7637,
+          "terminal_gap_denominator": 2000,
+          "objective_value_numerator": 58323769,
+          "objective_value_denominator": 4000000,
+          "meaning": "realizable open-loop control with its worst finite-catalogue disturbance response"
+        }
+      }
+    },
+    {
+      "method": "zonotope-axis-cover",
+      "exact_finite_minimax_value": 14.58094225,
+      "arithmetic": "exact fractions; ellipsoid projection uses a rational outward square-root enclosure",
+      "lower_bound": {
+        "status": "verified",
+        "value": 14.580942248710857,
+        "value_fraction": "73934160773885869261742894462815699569/5070602400912917605986812821504000000",
+        "basis": "relax all finite control terminal positions to the checked outer x projection; keep the complete exact finite disturbance catalogue",
+        "relaxed_control_position": 3.7749999998311976,
+        "control_outer_x_interval": [
+          3.7749999998311976,
+          5.225000000168802
+        ]
+      },
+      "upper_bound": {
+        "status": "verified",
+        "value": 14.58094225007735,
+        "value_fraction": "484534916093147890873135094144336908449/33230699894622896822595176507008614400",
+        "basis": "use an exactly enumerated feasible minimizing control sequence and maximize over the checked outer disturbance x projection",
+        "control_sequence_codes": [
+          -1,
+          -1,
+          -1
+        ],
+        "control_sequence": [
+          -2.5,
+          -2.5,
+          -2.5
+        ],
+        "control_position": 3.775,
+        "disturbance_outer_x_interval": [
+          -0.04350000001012813,
+          0.04350000001012813
+        ],
+        "realizable_policy_witness": {
+          "control_sequence_codes": [
+            -1,
+            -1,
+            -1
+          ],
+          "control_sequence": [
+            -2.5,
+            -2.5,
+            -2.5
+          ],
+          "worst_disturbance_sequences_codes": [
+            [
+              -1,
+              -1,
+              -1
+            ]
+          ],
+          "selected_worst_disturbance_sequence_codes": [
+            -1,
+            -1,
+            -1
+          ],
+          "selected_worst_disturbance_sequence": [
+            -1.0,
+            -1.0,
+            -1.0
+          ],
+          "state_path_scaled": [
+            [
+              9000,
+              0,
+              0,
+              0
+            ],
+            [
+              8550,
+              -5000,
+              -9,
+              -200
+            ],
+            [
+              8050,
+              -5000,
+              -38,
+              -400
+            ],
+            [
+              7550,
+              -5000,
+              -87,
+              -600
+            ]
+          ],
+          "terminal_gap_numerator": 7637,
+          "terminal_gap_denominator": 2000,
+          "objective_value_numerator": 58323769,
+          "objective_value_denominator": 4000000,
+          "meaning": "realizable open-loop control with its worst finite-catalogue disturbance response"
+        }
+      }
+    }
+  ],
+  "objective_bounds_scope": "bounds are for the finite open-loop min-control/max-disturbance terminal squared position gap; the state dynamics separate control and disturbance components, and both phase-plane exact-lattice inclusions are checked independently; inconclusive means the approximation is not an outer set for the exact source lattice",
+  "objective_bounds_checks_complete": true,
+  "measurement_call_checks": [
+    {
+      "projection_index": 0,
+      "method": "exact-polytope-quickhull",
+      "phase": "warmup",
+      "status": "verified",
+      "relation": "equivalent",
+      "reference_vertices_checked": 15,
+      "exact_lattice_excluded_points": 1,
+      "exact_lattice_source_excluded_points": null,
+      "elapsed_ns_valid": true,
+      "reason": null,
+      "call_outcome": null
+    },
+    {
+      "projection_index": 0,
+      "method": "axis-box",
+      "phase": "warmup",
+      "status": "verified",
+      "relation": "outer",
+      "reference_vertices_checked": 15,
+      "exact_lattice_excluded_points": 1,
+      "exact_lattice_source_excluded_points": null,
+      "elapsed_ns_valid": true,
+      "reason": null,
+      "call_outcome": null
+    },
+    {
+      "projection_index": 0,
+      "method": "rotated-parallelotope",
+      "phase": "warmup",
+      "status": "verified",
+      "relation": "outer",
+      "reference_vertices_checked": 15,
+      "exact_lattice_excluded_points": 1,
+      "exact_lattice_source_excluded_points": null,
+      "elapsed_ns_valid": true,
+      "reason": null,
+      "call_outcome": null
+    },
+    {
+      "projection_index": 0,
+      "method": "directional-ellipsoid",
+      "phase": "warmup",
+      "status": "verified",
+      "relation": "outer",
+      "reference_vertices_checked": 15,
+      "exact_lattice_excluded_points": 0,
+      "exact_lattice_source_excluded_points": null,
+      "elapsed_ns_valid": true,
+      "reason": null,
+      "call_outcome": null
+    },
+    {
+      "projection_index": 0,
+      "method": "zonotope-axis-cover",
+      "phase": "warmup",
+      "status": "verified",
+      "relation": "outer",
+      "reference_vertices_checked": 15,
+      "exact_lattice_excluded_points": 0,
+      "exact_lattice_source_excluded_points": 0,
+      "elapsed_ns_valid": true,
+      "reason": null,
+      "call_outcome": null
+    },
+    {
+      "projection_index": 0,
+      "method": "exact-polytope-quickhull",
+      "phase": "measured",
+      "status": "verified",
+      "relation": "equivalent",
+      "reference_vertices_checked": 15,
+      "exact_lattice_excluded_points": 1,
+      "exact_lattice_source_excluded_points": null,
+      "elapsed_ns_valid": true,
+      "reason": null,
+      "call_outcome": null
+    },
+    {
+      "projection_index": 0,
+      "method": "axis-box",
+      "phase": "measured",
+      "status": "verified",
+      "relation": "outer",
+      "reference_vertices_checked": 15,
+      "exact_lattice_excluded_points": 1,
+      "exact_lattice_source_excluded_points": null,
+      "elapsed_ns_valid": true,
+      "reason": null,
+      "call_outcome": null
+    },
+    {
+      "projection_index": 0,
+      "method": "rotated-parallelotope",
+      "phase": "measured",
+      "status": "verified",
+      "relation": "outer",
+      "reference_vertices_checked": 15,
+      "exact_lattice_excluded_points": 1,
+      "exact_lattice_source_excluded_points": null,
+      "elapsed_ns_valid": true,
+      "reason": null,
+      "call_outcome": null
+    },
+    {
+      "projection_index": 0,
+      "method": "directional-ellipsoid",
+      "phase": "measured",
+      "status": "verified",
+      "relation": "outer",
+      "reference_vertices_checked": 15,
+      "exact_lattice_excluded_points": 0,
+      "exact_lattice_source_excluded_points": null,
+      "elapsed_ns_valid": true,
+      "reason": null,
+      "call_outcome": null
+    },
+    {
+      "projection_index": 0,
+      "method": "zonotope-axis-cover",
+      "phase": "measured",
+      "status": "verified",
+      "relation": "outer",
+      "reference_vertices_checked": 15,
+      "exact_lattice_excluded_points": 0,
+      "exact_lattice_source_excluded_points": 0,
+      "elapsed_ns_valid": true,
+      "reason": null,
+      "call_outcome": null
+    },
+    {
+      "projection_index": 0,
+      "method": "axis-box",
+      "phase": "measured",
+      "status": "verified",
+      "relation": "outer",
+      "reference_vertices_checked": 15,
+      "exact_lattice_excluded_points": 1,
+      "exact_lattice_source_excluded_points": null,
+      "elapsed_ns_valid": true,
+      "reason": null,
+      "call_outcome": null
+    },
+    {
+      "projection_index": 0,
+      "method": "rotated-parallelotope",
+      "phase": "measured",
+      "status": "verified",
+      "relation": "outer",
+      "reference_vertices_checked": 15,
+      "exact_lattice_excluded_points": 1,
+      "exact_lattice_source_excluded_points": null,
+      "elapsed_ns_valid": true,
+      "reason": null,
+      "call_outcome": null
+    },
+    {
+      "projection_index": 0,
+      "method": "directional-ellipsoid",
+      "phase": "measured",
+      "status": "verified",
+      "relation": "outer",
+      "reference_vertices_checked": 15,
+      "exact_lattice_excluded_points": 0,
+      "exact_lattice_source_excluded_points": null,
+      "elapsed_ns_valid": true,
+      "reason": null,
+      "call_outcome": null
+    },
+    {
+      "projection_index": 0,
+      "method": "zonotope-axis-cover",
+      "phase": "measured",
+      "status": "verified",
+      "relation": "outer",
+      "reference_vertices_checked": 15,
+      "exact_lattice_excluded_points": 0,
+      "exact_lattice_source_excluded_points": 0,
+      "elapsed_ns_valid": true,
+      "reason": null,
+      "call_outcome": null
+    },
+    {
+      "projection_index": 0,
+      "method": "exact-polytope-quickhull",
+      "phase": "measured",
+      "status": "verified",
+      "relation": "equivalent",
+      "reference_vertices_checked": 15,
+      "exact_lattice_excluded_points": 1,
+      "exact_lattice_source_excluded_points": null,
+      "elapsed_ns_valid": true,
+      "reason": null,
+      "call_outcome": null
+    },
+    {
+      "projection_index": 0,
+      "method": "rotated-parallelotope",
+      "phase": "measured",
+      "status": "verified",
+      "relation": "outer",
+      "reference_vertices_checked": 15,
+      "exact_lattice_excluded_points": 1,
+      "exact_lattice_source_excluded_points": null,
+      "elapsed_ns_valid": true,
+      "reason": null,
+      "call_outcome": null
+    },
+    {
+      "projection_index": 0,
+      "method": "directional-ellipsoid",
+      "phase": "measured",
+      "status": "verified",
+      "relation": "outer",
+      "reference_vertices_checked": 15,
+      "exact_lattice_excluded_points": 0,
+      "exact_lattice_source_excluded_points": null,
+      "elapsed_ns_valid": true,
+      "reason": null,
+      "call_outcome": null
+    },
+    {
+      "projection_index": 0,
+      "method": "zonotope-axis-cover",
+      "phase": "measured",
+      "status": "verified",
+      "relation": "outer",
+      "reference_vertices_checked": 15,
+      "exact_lattice_excluded_points": 0,
+      "exact_lattice_source_excluded_points": 0,
+      "elapsed_ns_valid": true,
+      "reason": null,
+      "call_outcome": null
+    },
+    {
+      "projection_index": 0,
+      "method": "exact-polytope-quickhull",
+      "phase": "measured",
+      "status": "verified",
+      "relation": "equivalent",
+      "reference_vertices_checked": 15,
+      "exact_lattice_excluded_points": 1,
+      "exact_lattice_source_excluded_points": null,
+      "elapsed_ns_valid": true,
+      "reason": null,
+      "call_outcome": null
+    },
+    {
+      "projection_index": 0,
+      "method": "axis-box",
+      "phase": "measured",
+      "status": "verified",
+      "relation": "outer",
+      "reference_vertices_checked": 15,
+      "exact_lattice_excluded_points": 1,
+      "exact_lattice_source_excluded_points": null,
+      "elapsed_ns_valid": true,
+      "reason": null,
+      "call_outcome": null
+    },
+    {
+      "projection_index": 0,
+      "method": "directional-ellipsoid",
+      "phase": "measured",
+      "status": "verified",
+      "relation": "outer",
+      "reference_vertices_checked": 15,
+      "exact_lattice_excluded_points": 0,
+      "exact_lattice_source_excluded_points": null,
+      "elapsed_ns_valid": true,
+      "reason": null,
+      "call_outcome": null
+    },
+    {
+      "projection_index": 0,
+      "method": "zonotope-axis-cover",
+      "phase": "measured",
+      "status": "verified",
+      "relation": "outer",
+      "reference_vertices_checked": 15,
+      "exact_lattice_excluded_points": 0,
+      "exact_lattice_source_excluded_points": 0,
+      "elapsed_ns_valid": true,
+      "reason": null,
+      "call_outcome": null
+    },
+    {
+      "projection_index": 0,
+      "method": "exact-polytope-quickhull",
+      "phase": "measured",
+      "status": "verified",
+      "relation": "equivalent",
+      "reference_vertices_checked": 15,
+      "exact_lattice_excluded_points": 1,
+      "exact_lattice_source_excluded_points": null,
+      "elapsed_ns_valid": true,
+      "reason": null,
+      "call_outcome": null
+    },
+    {
+      "projection_index": 0,
+      "method": "axis-box",
+      "phase": "measured",
+      "status": "verified",
+      "relation": "outer",
+      "reference_vertices_checked": 15,
+      "exact_lattice_excluded_points": 1,
+      "exact_lattice_source_excluded_points": null,
+      "elapsed_ns_valid": true,
+      "reason": null,
+      "call_outcome": null
+    },
+    {
+      "projection_index": 0,
+      "method": "rotated-parallelotope",
+      "phase": "measured",
+      "status": "verified",
+      "relation": "outer",
+      "reference_vertices_checked": 15,
+      "exact_lattice_excluded_points": 1,
+      "exact_lattice_source_excluded_points": null,
+      "elapsed_ns_valid": true,
+      "reason": null,
+      "call_outcome": null
+    },
+    {
+      "projection_index": 0,
+      "method": "zonotope-axis-cover",
+      "phase": "measured",
+      "status": "verified",
+      "relation": "outer",
+      "reference_vertices_checked": 15,
+      "exact_lattice_excluded_points": 0,
+      "exact_lattice_source_excluded_points": 0,
+      "elapsed_ns_valid": true,
+      "reason": null,
+      "call_outcome": null
+    },
+    {
+      "projection_index": 0,
+      "method": "exact-polytope-quickhull",
+      "phase": "measured",
+      "status": "verified",
+      "relation": "equivalent",
+      "reference_vertices_checked": 15,
+      "exact_lattice_excluded_points": 1,
+      "exact_lattice_source_excluded_points": null,
+      "elapsed_ns_valid": true,
+      "reason": null,
+      "call_outcome": null
+    },
+    {
+      "projection_index": 0,
+      "method": "axis-box",
+      "phase": "measured",
+      "status": "verified",
+      "relation": "outer",
+      "reference_vertices_checked": 15,
+      "exact_lattice_excluded_points": 1,
+      "exact_lattice_source_excluded_points": null,
+      "elapsed_ns_valid": true,
+      "reason": null,
+      "call_outcome": null
+    },
+    {
+      "projection_index": 0,
+      "method": "rotated-parallelotope",
+      "phase": "measured",
+      "status": "verified",
+      "relation": "outer",
+      "reference_vertices_checked": 15,
+      "exact_lattice_excluded_points": 1,
+      "exact_lattice_source_excluded_points": null,
+      "elapsed_ns_valid": true,
+      "reason": null,
+      "call_outcome": null
+    },
+    {
+      "projection_index": 0,
+      "method": "directional-ellipsoid",
+      "phase": "measured",
+      "status": "verified",
+      "relation": "outer",
+      "reference_vertices_checked": 15,
+      "exact_lattice_excluded_points": 0,
+      "exact_lattice_source_excluded_points": null,
+      "elapsed_ns_valid": true,
+      "reason": null,
+      "call_outcome": null
+    },
+    {
+      "projection_index": 0,
+      "method": "exact-polytope-quickhull",
+      "phase": "measured",
+      "status": "verified",
+      "relation": "equivalent",
+      "reference_vertices_checked": 15,
+      "exact_lattice_excluded_points": 1,
+      "exact_lattice_source_excluded_points": null,
+      "elapsed_ns_valid": true,
+      "reason": null,
+      "call_outcome": null
+    },
+    {
+      "projection_index": 0,
+      "method": "axis-box",
+      "phase": "measured",
+      "status": "verified",
+      "relation": "outer",
+      "reference_vertices_checked": 15,
+      "exact_lattice_excluded_points": 1,
+      "exact_lattice_source_excluded_points": null,
+      "elapsed_ns_valid": true,
+      "reason": null,
+      "call_outcome": null
+    },
+    {
+      "projection_index": 0,
+      "method": "rotated-parallelotope",
+      "phase": "measured",
+      "status": "verified",
+      "relation": "outer",
+      "reference_vertices_checked": 15,
+      "exact_lattice_excluded_points": 1,
+      "exact_lattice_source_excluded_points": null,
+      "elapsed_ns_valid": true,
+      "reason": null,
+      "call_outcome": null
+    },
+    {
+      "projection_index": 0,
+      "method": "directional-ellipsoid",
+      "phase": "measured",
+      "status": "verified",
+      "relation": "outer",
+      "reference_vertices_checked": 15,
+      "exact_lattice_excluded_points": 0,
+      "exact_lattice_source_excluded_points": null,
+      "elapsed_ns_valid": true,
+      "reason": null,
+      "call_outcome": null
+    },
+    {
+      "projection_index": 0,
+      "method": "zonotope-axis-cover",
+      "phase": "measured",
+      "status": "verified",
+      "relation": "outer",
+      "reference_vertices_checked": 15,
+      "exact_lattice_excluded_points": 0,
+      "exact_lattice_source_excluded_points": 0,
+      "elapsed_ns_valid": true,
+      "reason": null,
+      "call_outcome": null
+    },
+    {
+      "projection_index": 0,
+      "method": "axis-box",
+      "phase": "measured",
+      "status": "verified",
+      "relation": "outer",
+      "reference_vertices_checked": 15,
+      "exact_lattice_excluded_points": 1,
+      "exact_lattice_source_excluded_points": null,
+      "elapsed_ns_valid": true,
+      "reason": null,
+      "call_outcome": null
+    },
+    {
+      "projection_index": 0,
+      "method": "rotated-parallelotope",
+      "phase": "measured",
+      "status": "verified",
+      "relation": "outer",
+      "reference_vertices_checked": 15,
+      "exact_lattice_excluded_points": 1,
+      "exact_lattice_source_excluded_points": null,
+      "elapsed_ns_valid": true,
+      "reason": null,
+      "call_outcome": null
+    },
+    {
+      "projection_index": 0,
+      "method": "directional-ellipsoid",
+      "phase": "measured",
+      "status": "verified",
+      "relation": "outer",
+      "reference_vertices_checked": 15,
+      "exact_lattice_excluded_points": 0,
+      "exact_lattice_source_excluded_points": null,
+      "elapsed_ns_valid": true,
+      "reason": null,
+      "call_outcome": null
+    },
+    {
+      "projection_index": 0,
+      "method": "zonotope-axis-cover",
+      "phase": "measured",
+      "status": "verified",
+      "relation": "outer",
+      "reference_vertices_checked": 15,
+      "exact_lattice_excluded_points": 0,
+      "exact_lattice_source_excluded_points": 0,
+      "elapsed_ns_valid": true,
+      "reason": null,
+      "call_outcome": null
+    },
+    {
+      "projection_index": 0,
+      "method": "exact-polytope-quickhull",
+      "phase": "measured",
+      "status": "verified",
+      "relation": "equivalent",
+      "reference_vertices_checked": 15,
+      "exact_lattice_excluded_points": 1,
+      "exact_lattice_source_excluded_points": null,
+      "elapsed_ns_valid": true,
+      "reason": null,
+      "call_outcome": null
+    },
+    {
+      "projection_index": 1,
+      "method": "exact-polytope-quickhull",
+      "phase": "warmup",
+      "status": "verified",
+      "relation": "equivalent",
+      "reference_vertices_checked": 23,
+      "exact_lattice_excluded_points": 2,
+      "exact_lattice_source_excluded_points": null,
+      "elapsed_ns_valid": true,
+      "reason": null,
+      "call_outcome": null
+    },
+    {
+      "projection_index": 1,
+      "method": "axis-box",
+      "phase": "warmup",
+      "status": "verified",
+      "relation": "outer",
+      "reference_vertices_checked": 23,
+      "exact_lattice_excluded_points": 2,
+      "exact_lattice_source_excluded_points": null,
+      "elapsed_ns_valid": true,
+      "reason": null,
+      "call_outcome": null
+    },
+    {
+      "projection_index": 1,
+      "method": "rotated-parallelotope",
+      "phase": "warmup",
+      "status": "verified",
+      "relation": "outer",
+      "reference_vertices_checked": 23,
+      "exact_lattice_excluded_points": 0,
+      "exact_lattice_source_excluded_points": null,
+      "elapsed_ns_valid": true,
+      "reason": null,
+      "call_outcome": null
+    },
+    {
+      "projection_index": 1,
+      "method": "directional-ellipsoid",
+      "phase": "warmup",
+      "status": "verified",
+      "relation": "outer",
+      "reference_vertices_checked": 23,
+      "exact_lattice_excluded_points": 0,
+      "exact_lattice_source_excluded_points": null,
+      "elapsed_ns_valid": true,
+      "reason": null,
+      "call_outcome": null
+    },
+    {
+      "projection_index": 1,
+      "method": "zonotope-axis-cover",
+      "phase": "warmup",
+      "status": "verified",
+      "relation": "outer",
+      "reference_vertices_checked": 23,
+      "exact_lattice_excluded_points": 0,
+      "exact_lattice_source_excluded_points": 0,
+      "elapsed_ns_valid": true,
+      "reason": null,
+      "call_outcome": null
+    },
+    {
+      "projection_index": 1,
+      "method": "exact-polytope-quickhull",
+      "phase": "measured",
+      "status": "verified",
+      "relation": "equivalent",
+      "reference_vertices_checked": 23,
+      "exact_lattice_excluded_points": 2,
+      "exact_lattice_source_excluded_points": null,
+      "elapsed_ns_valid": true,
+      "reason": null,
+      "call_outcome": null
+    },
+    {
+      "projection_index": 1,
+      "method": "axis-box",
+      "phase": "measured",
+      "status": "verified",
+      "relation": "outer",
+      "reference_vertices_checked": 23,
+      "exact_lattice_excluded_points": 2,
+      "exact_lattice_source_excluded_points": null,
+      "elapsed_ns_valid": true,
+      "reason": null,
+      "call_outcome": null
+    },
+    {
+      "projection_index": 1,
+      "method": "rotated-parallelotope",
+      "phase": "measured",
+      "status": "verified",
+      "relation": "outer",
+      "reference_vertices_checked": 23,
+      "exact_lattice_excluded_points": 0,
+      "exact_lattice_source_excluded_points": null,
+      "elapsed_ns_valid": true,
+      "reason": null,
+      "call_outcome": null
+    },
+    {
+      "projection_index": 1,
+      "method": "directional-ellipsoid",
+      "phase": "measured",
+      "status": "verified",
+      "relation": "outer",
+      "reference_vertices_checked": 23,
+      "exact_lattice_excluded_points": 0,
+      "exact_lattice_source_excluded_points": null,
+      "elapsed_ns_valid": true,
+      "reason": null,
+      "call_outcome": null
+    },
+    {
+      "projection_index": 1,
+      "method": "zonotope-axis-cover",
+      "phase": "measured",
+      "status": "verified",
+      "relation": "outer",
+      "reference_vertices_checked": 23,
+      "exact_lattice_excluded_points": 0,
+      "exact_lattice_source_excluded_points": 0,
+      "elapsed_ns_valid": true,
+      "reason": null,
+      "call_outcome": null
+    },
+    {
+      "projection_index": 1,
+      "method": "axis-box",
+      "phase": "measured",
+      "status": "verified",
+      "relation": "outer",
+      "reference_vertices_checked": 23,
+      "exact_lattice_excluded_points": 2,
+      "exact_lattice_source_excluded_points": null,
+      "elapsed_ns_valid": true,
+      "reason": null,
+      "call_outcome": null
+    },
+    {
+      "projection_index": 1,
+      "method": "rotated-parallelotope",
+      "phase": "measured",
+      "status": "verified",
+      "relation": "outer",
+      "reference_vertices_checked": 23,
+      "exact_lattice_excluded_points": 0,
+      "exact_lattice_source_excluded_points": null,
+      "elapsed_ns_valid": true,
+      "reason": null,
+      "call_outcome": null
+    },
+    {
+      "projection_index": 1,
+      "method": "directional-ellipsoid",
+      "phase": "measured",
+      "status": "verified",
+      "relation": "outer",
+      "reference_vertices_checked": 23,
+      "exact_lattice_excluded_points": 0,
+      "exact_lattice_source_excluded_points": null,
+      "elapsed_ns_valid": true,
+      "reason": null,
+      "call_outcome": null
+    },
+    {
+      "projection_index": 1,
+      "method": "zonotope-axis-cover",
+      "phase": "measured",
+      "status": "verified",
+      "relation": "outer",
+      "reference_vertices_checked": 23,
+      "exact_lattice_excluded_points": 0,
+      "exact_lattice_source_excluded_points": 0,
+      "elapsed_ns_valid": true,
+      "reason": null,
+      "call_outcome": null
+    },
+    {
+      "projection_index": 1,
+      "method": "exact-polytope-quickhull",
+      "phase": "measured",
+      "status": "verified",
+      "relation": "equivalent",
+      "reference_vertices_checked": 23,
+      "exact_lattice_excluded_points": 2,
+      "exact_lattice_source_excluded_points": null,
+      "elapsed_ns_valid": true,
+      "reason": null,
+      "call_outcome": null
+    },
+    {
+      "projection_index": 1,
+      "method": "rotated-parallelotope",
+      "phase": "measured",
+      "status": "verified",
+      "relation": "outer",
+      "reference_vertices_checked": 23,
+      "exact_lattice_excluded_points": 0,
+      "exact_lattice_source_excluded_points": null,
+      "elapsed_ns_valid": true,
+      "reason": null,
+      "call_outcome": null
+    },
+    {
+      "projection_index": 1,
+      "method": "directional-ellipsoid",
+      "phase": "measured",
+      "status": "verified",
+      "relation": "outer",
+      "reference_vertices_checked": 23,
+      "exact_lattice_excluded_points": 0,
+      "exact_lattice_source_excluded_points": null,
+      "elapsed_ns_valid": true,
+      "reason": null,
+      "call_outcome": null
+    },
+    {
+      "projection_index": 1,
+      "method": "zonotope-axis-cover",
+      "phase": "measured",
+      "status": "verified",
+      "relation": "outer",
+      "reference_vertices_checked": 23,
+      "exact_lattice_excluded_points": 0,
+      "exact_lattice_source_excluded_points": 0,
+      "elapsed_ns_valid": true,
+      "reason": null,
+      "call_outcome": null
+    },
+    {
+      "projection_index": 1,
+      "method": "exact-polytope-quickhull",
+      "phase": "measured",
+      "status": "verified",
+      "relation": "equivalent",
+      "reference_vertices_checked": 23,
+      "exact_lattice_excluded_points": 2,
+      "exact_lattice_source_excluded_points": null,
+      "elapsed_ns_valid": true,
+      "reason": null,
+      "call_outcome": null
+    },
+    {
+      "projection_index": 1,
+      "method": "axis-box",
+      "phase": "measured",
+      "status": "verified",
+      "relation": "outer",
+      "reference_vertices_checked": 23,
+      "exact_lattice_excluded_points": 2,
+      "exact_lattice_source_excluded_points": null,
+      "elapsed_ns_valid": true,
+      "reason": null,
+      "call_outcome": null
+    },
+    {
+      "projection_index": 1,
+      "method": "directional-ellipsoid",
+      "phase": "measured",
+      "status": "verified",
+      "relation": "outer",
+      "reference_vertices_checked": 23,
+      "exact_lattice_excluded_points": 0,
+      "exact_lattice_source_excluded_points": null,
+      "elapsed_ns_valid": true,
+      "reason": null,
+      "call_outcome": null
+    },
+    {
+      "projection_index": 1,
+      "method": "zonotope-axis-cover",
+      "phase": "measured",
+      "status": "verified",
+      "relation": "outer",
+      "reference_vertices_checked": 23,
+      "exact_lattice_excluded_points": 0,
+      "exact_lattice_source_excluded_points": 0,
+      "elapsed_ns_valid": true,
+      "reason": null,
+      "call_outcome": null
+    },
+    {
+      "projection_index": 1,
+      "method": "exact-polytope-quickhull",
+      "phase": "measured",
+      "status": "verified",
+      "relation": "equivalent",
+      "reference_vertices_checked": 23,
+      "exact_lattice_excluded_points": 2,
+      "exact_lattice_source_excluded_points": null,
+      "elapsed_ns_valid": true,
+      "reason": null,
+      "call_outcome": null
+    },
+    {
+      "projection_index": 1,
+      "method": "axis-box",
+      "phase": "measured",
+      "status": "verified",
+      "relation": "outer",
+      "reference_vertices_checked": 23,
+      "exact_lattice_excluded_points": 2,
+      "exact_lattice_source_excluded_points": null,
+      "elapsed_ns_valid": true,
+      "reason": null,
+      "call_outcome": null
+    },
+    {
+      "projection_index": 1,
+      "method": "rotated-parallelotope",
+      "phase": "measured",
+      "status": "verified",
+      "relation": "outer",
+      "reference_vertices_checked": 23,
+      "exact_lattice_excluded_points": 0,
+      "exact_lattice_source_excluded_points": null,
+      "elapsed_ns_valid": true,
+      "reason": null,
+      "call_outcome": null
+    },
+    {
+      "projection_index": 1,
+      "method": "zonotope-axis-cover",
+      "phase": "measured",
+      "status": "verified",
+      "relation": "outer",
+      "reference_vertices_checked": 23,
+      "exact_lattice_excluded_points": 0,
+      "exact_lattice_source_excluded_points": 0,
+      "elapsed_ns_valid": true,
+      "reason": null,
+      "call_outcome": null
+    },
+    {
+      "projection_index": 1,
+      "method": "exact-polytope-quickhull",
+      "phase": "measured",
+      "status": "verified",
+      "relation": "equivalent",
+      "reference_vertices_checked": 23,
+      "exact_lattice_excluded_points": 2,
+      "exact_lattice_source_excluded_points": null,
+      "elapsed_ns_valid": true,
+      "reason": null,
+      "call_outcome": null
+    },
+    {
+      "projection_index": 1,
+      "method": "axis-box",
+      "phase": "measured",
+      "status": "verified",
+      "relation": "outer",
+      "reference_vertices_checked": 23,
+      "exact_lattice_excluded_points": 2,
+      "exact_lattice_source_excluded_points": null,
+      "elapsed_ns_valid": true,
+      "reason": null,
+      "call_outcome": null
+    },
+    {
+      "projection_index": 1,
+      "method": "rotated-parallelotope",
+      "phase": "measured",
+      "status": "verified",
+      "relation": "outer",
+      "reference_vertices_checked": 23,
+      "exact_lattice_excluded_points": 0,
+      "exact_lattice_source_excluded_points": null,
+      "elapsed_ns_valid": true,
+      "reason": null,
+      "call_outcome": null
+    },
+    {
+      "projection_index": 1,
+      "method": "directional-ellipsoid",
+      "phase": "measured",
+      "status": "verified",
+      "relation": "outer",
+      "reference_vertices_checked": 23,
+      "exact_lattice_excluded_points": 0,
+      "exact_lattice_source_excluded_points": null,
+      "elapsed_ns_valid": true,
+      "reason": null,
+      "call_outcome": null
+    },
+    {
+      "projection_index": 1,
+      "method": "exact-polytope-quickhull",
+      "phase": "measured",
+      "status": "verified",
+      "relation": "equivalent",
+      "reference_vertices_checked": 23,
+      "exact_lattice_excluded_points": 2,
+      "exact_lattice_source_excluded_points": null,
+      "elapsed_ns_valid": true,
+      "reason": null,
+      "call_outcome": null
+    },
+    {
+      "projection_index": 1,
+      "method": "axis-box",
+      "phase": "measured",
+      "status": "verified",
+      "relation": "outer",
+      "reference_vertices_checked": 23,
+      "exact_lattice_excluded_points": 2,
+      "exact_lattice_source_excluded_points": null,
+      "elapsed_ns_valid": true,
+      "reason": null,
+      "call_outcome": null
+    },
+    {
+      "projection_index": 1,
+      "method": "rotated-parallelotope",
+      "phase": "measured",
+      "status": "verified",
+      "relation": "outer",
+      "reference_vertices_checked": 23,
+      "exact_lattice_excluded_points": 0,
+      "exact_lattice_source_excluded_points": null,
+      "elapsed_ns_valid": true,
+      "reason": null,
+      "call_outcome": null
+    },
+    {
+      "projection_index": 1,
+      "method": "directional-ellipsoid",
+      "phase": "measured",
+      "status": "verified",
+      "relation": "outer",
+      "reference_vertices_checked": 23,
+      "exact_lattice_excluded_points": 0,
+      "exact_lattice_source_excluded_points": null,
+      "elapsed_ns_valid": true,
+      "reason": null,
+      "call_outcome": null
+    },
+    {
+      "projection_index": 1,
+      "method": "zonotope-axis-cover",
+      "phase": "measured",
+      "status": "verified",
+      "relation": "outer",
+      "reference_vertices_checked": 23,
+      "exact_lattice_excluded_points": 0,
+      "exact_lattice_source_excluded_points": 0,
+      "elapsed_ns_valid": true,
+      "reason": null,
+      "call_outcome": null
+    },
+    {
+      "projection_index": 1,
+      "method": "axis-box",
+      "phase": "measured",
+      "status": "verified",
+      "relation": "outer",
+      "reference_vertices_checked": 23,
+      "exact_lattice_excluded_points": 2,
+      "exact_lattice_source_excluded_points": null,
+      "elapsed_ns_valid": true,
+      "reason": null,
+      "call_outcome": null
+    },
+    {
+      "projection_index": 1,
+      "method": "rotated-parallelotope",
+      "phase": "measured",
+      "status": "verified",
+      "relation": "outer",
+      "reference_vertices_checked": 23,
+      "exact_lattice_excluded_points": 0,
+      "exact_lattice_source_excluded_points": null,
+      "elapsed_ns_valid": true,
+      "reason": null,
+      "call_outcome": null
+    },
+    {
+      "projection_index": 1,
+      "method": "directional-ellipsoid",
+      "phase": "measured",
+      "status": "verified",
+      "relation": "outer",
+      "reference_vertices_checked": 23,
+      "exact_lattice_excluded_points": 0,
+      "exact_lattice_source_excluded_points": null,
+      "elapsed_ns_valid": true,
+      "reason": null,
+      "call_outcome": null
+    },
+    {
+      "projection_index": 1,
+      "method": "zonotope-axis-cover",
+      "phase": "measured",
+      "status": "verified",
+      "relation": "outer",
+      "reference_vertices_checked": 23,
+      "exact_lattice_excluded_points": 0,
+      "exact_lattice_source_excluded_points": 0,
+      "elapsed_ns_valid": true,
+      "reason": null,
+      "call_outcome": null
+    },
+    {
+      "projection_index": 1,
+      "method": "exact-polytope-quickhull",
+      "phase": "measured",
+      "status": "verified",
+      "relation": "equivalent",
+      "reference_vertices_checked": 23,
+      "exact_lattice_excluded_points": 2,
+      "exact_lattice_source_excluded_points": null,
+      "elapsed_ns_valid": true,
+      "reason": null,
+      "call_outcome": null
+    }
+  ],
+  "measurement_coverage": {
+    "status": "complete",
+    "expected_calls": 80,
+    "observed_calls": 80,
+    "count_mismatches": []
+  }
+}
