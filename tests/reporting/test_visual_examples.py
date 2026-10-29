@@ -81,13 +81,14 @@ class GalleryTests(unittest.TestCase):
             report_id = saved.get("route") or by_source[saved["source_report_id"]]
             target = self.site / report_id
             target.mkdir(exist_ok=True)
-            source_id = saved.get("source_report_id", report_id)
+            source_id = saved.get("source_report_id", saved.get("source_bundle", report_id))
             source = ROOT / "reports/algorithm-results" / source_id
-            if not (target / "records.json").exists():
-                if (source / "records.json").is_file():
-                    shutil.copyfile(source / "records.json", target / "records.json")
+            records_name = saved.get("records", "records.json")
+            if not (target / records_name).exists():
+                if (source / records_name).is_file():
+                    shutil.copyfile(source / records_name, target / records_name)
                 else:
-                    (target / "records.json").write_text("{}", encoding="utf-8")
+                    (target / records_name).write_text("{}", encoding="utf-8")
             if not (target / saved["page"]).exists():
                 (target / saved["page"]).write_text("<html>report fixture</html>", encoding="utf-8")
             if not (target / saved["image"]).exists():
@@ -337,6 +338,9 @@ class GalleryTests(unittest.TestCase):
             self.assertEqual((self.site / rid / "index.html").read_bytes(), content)
         self.assertIn('href="examples/index.html"', (self.site / "index.html").read_text())
         page = (self.site / "examples/index.html").read_text(encoding="utf-8")
+        self.assertIn("TwoPoints reachable sets and approximations", page)
+        self.assertIn("independently scaled with numeric ticks and grids", page)
+        self.assertIn("exp03-two-points-approx-publication-v1/run.json", page)
         self.assertIn('id="b04-native-smoke"', page)
         self.assertIn("B04 reference variant in oxidizer and fuel phase planes", page)
         self.assertIn("(x₁,x₂) and (x₃,x₄)", page)

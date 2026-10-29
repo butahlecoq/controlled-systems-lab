@@ -924,6 +924,14 @@
       "disposition": "publication-validation-or-frozen-route"
     },
     {
+      "source": "scripts/reports/stage_exp03_two_points_approx.py",
+      "signal_count": 2,
+      "asset_name_literals": [
+        "reachability-and-approximations.svg"
+      ],
+      "disposition": "publication-validation-or-frozen-route"
+    },
+    {
       "source": "scripts/reports/stage_exp06.py",
       "signal_count": 3,
       "asset_name_literals": [
@@ -1310,7 +1318,7 @@
     },
     {
       "source": "scripts/reports/visual_examples.py",
-      "signal_count": 60,
+      "signal_count": 61,
       "asset_name_literals": [
         "app01-plan-timing-v1.svg",
         "app02-diamond-v1.svg",
@@ -1352,6 +1360,7 @@
         "polygons.svg",
         "projections-lambda0.svg",
         "projections-lambda1.svg",
+        "reachability-and-approximations.svg",
         "syn01-timing.svg",
         "synthesis-2d.svg",
         "terminal-projections.svg",
