@@ -50,6 +50,7 @@ SOURCE_DISPOSITIONS = (
     SourceDisposition("scripts/reports/viz04/render_saved.py", "saved-plot-renderer", "adopted-shared-quantitative-policy"),
     SourceDisposition("scripts/reports/mpc06/capture_tube.py", "collector-and-plot-renderer", "frozen-renderer-preserved-with-gallery-companion", ("control-witness-companions",)),
     SourceDisposition("scripts/reports/mpc06/render_tube.py", "saved-plot-renderer", "frozen-renderer-preserved-with-gallery-companion", ("control-witness-companions",)),
+    SourceDisposition("scripts/reports/mpc01/summarize_strategy_ab.py", "report-plot-renderer", "frozen-report-plot-preserved-with-gallery-companion", ("control-witness-companions",)),
 )
 
 PROJECTIONS = (
@@ -85,7 +86,12 @@ def strategy_slug(report_id: str) -> str:
 def asset_paths() -> list[str]:
     paths = ["control-witness-v1.html", "control-witness-timing-v1.html",
              "control-witness/mpc06-tube.svg", "control-witness/mpc06-tube.png",
-             "control-witness/mpc06-tube-evidence.json"]
+             "control-witness/mpc06-tube-evidence.json",
+             "control-witness/ts01-strategy-ab.svg", "control-witness/ts01-strategy-ab.png",
+             "control-witness/ts01-strategy-ab-evidence.json",
+             "control-witness/ts01-strategy-ab-events.jsonl",
+             "control-witness/ts01-strategy-ab-environment.json",
+             "control-witness/ts01-strategy-ab-scenario.json"]
     for report_id, *_ in PROJECTIONS:
         stem = "control-witness/" + strategy_slug(report_id)
         paths.extend(stem + suffix for suffix in (".svg", ".png", "-evidence.json"))
@@ -253,6 +259,158 @@ def _mpc06_tube_companion() -> tuple[str, bytes, bytes, bytes]:
     return route_id, figure_svg, figure_png, evidence_bytes
 
 
+def _ts01_strategy_ab_companion() -> dict[str, bytes]:
+    """Replot saved T-S01 selected controls without replaying a strategy."""
+    root = Path(__file__).resolve().parents[2]
+    evidence = root / "docs/research/evidence/mpc01-external-qps-20261026-r3"
+    names = ("strategy-ab-ts01-events.jsonl", "strategy-ab-ts01-stdout.jsonl",
+             "strategy-ab-ts01-environment.json")
+    if evidence.is_symlink() or not evidence.is_dir():
+        raise ValueError("T-S01 Strategy A/B evidence directory is missing or unsafe")
+    paths = {name: evidence / name for name in names}
+    if any(path.is_symlink() or not path.is_file() for path in paths.values()):
+        raise ValueError("T-S01 Strategy A/B evidence file is missing or unsafe")
+    raw = {name: path.read_bytes() for name, path in paths.items()}
+    if raw[names[0]] != raw[names[1]]:
+        raise ValueError("T-S01 Strategy A/B event and stdout evidence differ")
+    scenario_path = root / "examples/scenarios/two-stage-integrator.json"
+    if scenario_path.is_symlink() or not scenario_path.is_file():
+        raise ValueError("T-S01 scenario is missing or unsafe")
+    scenario_bytes = scenario_path.read_bytes()
+    scenario = json.loads(scenario_bytes)
+    environment = json.loads(raw[names[2]])
+    events = [json.loads(line) for line in raw[names[0]].decode("utf-8").splitlines() if line]
+    if len(events) != 17 or events[0].get("event") != "header":
+        raise ValueError("T-S01 Strategy A/B evidence must contain one header and 16 trials")
+    header, trials = events[0], events[1:]
+    scenario_hash = hashlib.sha256(scenario_bytes).hexdigest()
+    if (header.get("schema") != "csl.synthesis.paired-ts01-event/1" or
+            header.get("profile") != "ts01_exact_integrator" or
+            header.get("assurance") != "numerical" or
+            header.get("target") != "exact_optimal_relation" or
+            header.get("representation") != "csl.polyhedron.h" or
+            header.get("scenario_sha256") != scenario_hash or
+            environment.get("scenario_sha256") != scenario_hash or
+            environment.get("scenario") != "examples/scenarios/two-stage-integrator.json"):
+        raise ValueError("T-S01 Strategy A/B evidence is not bound to the saved scenario")
+    if (scenario.get("id") != "two-stage-integrator" or scenario.get("horizon") != 2 or
+            scenario.get("initial_state") != [0] or scenario.get("model") != {"kind": "linear_discrete", "A": [[1]], "B": [[1]]} or
+            scenario.get("controls") != {"kind": "box", "lower": [0], "upper": [1]} or
+            scenario.get("objective") != {"kind": "quadratic", "Q": [[2]], "linear": [-2], "offset": 1}):
+        raise ValueError("T-S01 saved scenario differs from the reviewed two-stage integrator")
+
+    strategies = {"csl.synthesis.reach-back", "csl.synthesis.strategy-b"}
+    selected = {strategy: set() for strategy in strategies}
+    warmups = [row for row in trials if row.get("warmup")]
+    measured = [row for row in trials if not row.get("warmup")]
+    if len(warmups) != 2 or len(measured) != 14:
+        raise ValueError("T-S01 Strategy A/B run must retain one warmup pair and seven measured pairs")
+    measurement = environment.get("measurement", {})
+    if (measurement.get("event_count_including_header") != 17 or
+            measurement.get("warmup_pairs_excluded") != 1 or
+            measurement.get("measured_alternating_pairs") != 7):
+        raise ValueError("T-S01 saved run metadata differs from its event rows")
+    for index, row in enumerate(trials):
+        if (row.get("event") != "trial" or row.get("strategy") not in strategies or
+                row.get("status") != "passed" or row.get("termination") != "completed" or
+                row.get("outcome") != "optimal" or row.get("distinct_witnesses") != 2 or
+                row.get("complete_family_verified") is not True):
+            raise ValueError("T-S01 Strategy A/B saved trial is incomplete or failed")
+        if row.get("repetition") != index // 2 or row.get("order_position") != index % 2:
+            raise ValueError("T-S01 Strategy A/B saved trial order differs")
+        expected_order = ("csl.synthesis.reach-back", "csl.synthesis.strategy-b")
+        if row["repetition"] > 0 and row["repetition"] % 2 == 0:
+            expected_order = tuple(reversed(expected_order))
+        if row["strategy"] != expected_order[row["order_position"]]:
+            raise ValueError("T-S01 Strategy A/B saved trials do not alternate execution order")
+        if not row["warmup"]:
+            if (row["verification_summary"].get("optimality") != "unsupported" or
+                    row["verification_summary"].get("completeness") != "unsupported"):
+                raise ValueError("T-S01 selected-witness check overstates its guarantees")
+        for witness in row.get("witnesses", []):
+            controls = witness.get("controls")
+            if not isinstance(controls, list) or len(controls) != 2 or any(
+                    not isinstance(control, list) or len(control) != 1 for control in controls):
+                raise ValueError("T-S01 selected history has an unexpected shape")
+            point = (float(controls[0][0]), float(controls[1][0]))
+            if (not all(0 <= value <= 1 for value in point) or sum(point) != 1.0 or
+                    witness.get("original_objective") != 0 or witness.get("recomputed_objective") != 0):
+                raise ValueError("T-S01 selected history does not satisfy its exact saved optimum")
+            if not row["warmup"]:
+                if any(witness.get("verification", {}).get(key) != "numerical_pass"
+                       for key in ("bindings", "feasibility", "objective")):
+                    raise ValueError("T-S01 selected history lacks original-data witness checks")
+                selected[row["strategy"]].add(point)
+    if any(len(points) != 2 or sum(
+            row.get("strategy") == strategy and not row.get("warmup") for row in trials) != 7
+           for strategy, points in selected.items()):
+        raise ValueError("T-S01 Strategy A/B measured histories differ from the two saved witnesses")
+
+    point_a = [list(point) for point in sorted(selected["csl.synthesis.reach-back"])]
+    point_b = [list(point) for point in sorted(selected["csl.synthesis.strategy-b"])]
+    geometry = {
+        "schema": "csl.saved-geometric-plot/1",
+        "title": "T-S01 saved Strategy A/B controls and exact optimal family",
+        "description": ("Filled markers and outlined rings are the two distinct selected histories saved by each strategy. "
+                        "Both strategies selected (0,1) and (1,0). The dashed segment is the exact minimizing family "
+                        "u₀+u₁=1 for the two-stage integrator. The axes are dimensionless controls with equal data scaling; "
+                        "this is a control projection, not a state-space reachable set."),
+        "axes": {"x": {"label": "First-stage control u₀"},
+                 "y": {"label": "Second-stage control u₁"}},
+        "aspect": "equal",
+        "series": [
+            {"kind": "path", "label": "Exact minimizing family u₀+u₁=1", "color": "#4b5563",
+             "points": [[0, 1], [1, 0]], "linestyle": "--", "linewidth": 1.5},
+            {"kind": "points", "label": "Strategy A: reach-back selected histories", "color": "#0072b2",
+             "points": point_a, "size": 42},
+            *[{"kind": "circle", "label": f"Strategy B: selected history ({point[0]:g}, {point[1]:g})",
+               "color": "#b23b33", "center": point, "radius": .022, "linewidth": 1.6}
+              for point in point_b],
+        ],
+    }
+    style = Path(__file__).with_name("styles") / "control-v1.json"
+    with tempfile.TemporaryDirectory(prefix="csl-viz09-ts01-") as temporary:
+        generated = Path(temporary)
+        geometry_figures.render(geometry, style, generated)
+        figure_svg = (generated / "geometry.svg").read_bytes()
+        figure_png = (generated / "geometry.png").read_bytes()
+        export = json.loads((generated / "export.json").read_text(encoding="utf-8"))
+    source_script = root / "scripts/reports/mpc01/summarize_strategy_ab.py"
+    if source_script.is_symlink() or not source_script.is_file():
+        raise ValueError("T-S01 source report script is missing or unsafe")
+    plot_data = {"schema": "csl.control-witness-ts01-strategy-ab/1",
+                 "strategies": {"csl.synthesis.reach-back": point_a,
+                                "csl.synthesis.strategy-b": point_b},
+                 "optimal_family": {"relation": "u₀ + u₁ = 1", "vertices": [[0, 1], [1, 0]]},
+                 "controls": {"lower": [0], "upper": [1]}, "horizon_steps": 2,
+                 "axes": {"x": "u₀", "y": "u₁", "units": "dimensionless"},
+                 "aspect": "equal"}
+    evidence = {
+        "schema": "csl.control-witness-ts01-strategy-ab-evidence/1",
+        "scenario_id": scenario["id"], "source_commit": environment["source_commit"],
+        "driver_sha256": environment["source_file_sha256"],
+        "report_renderer_sha256": hashlib.sha256(source_script.read_bytes()).hexdigest(),
+        "scenario_sha256": scenario_hash,
+        "events_sha256": hashlib.sha256(raw[names[0]]).hexdigest(),
+        "stdout_sha256": hashlib.sha256(raw[names[1]]).hexdigest(),
+        "environment_sha256": hashlib.sha256(raw[names[2]]).hexdigest(),
+        "state_dimension": len(scenario["model"]["A"]), "horizon_steps": scenario["horizon"],
+        "objective": scenario["objective"], "plot_data": plot_data,
+        "figure_export": export,
+        "claim_scope": ("presentation of saved selected controls and exact T-S01 minimizer relation; "
+                        "no solver, strategy, benchmark, or geometry query"),
+    }
+    outputs = {
+        "control-witness/ts01-strategy-ab.svg": figure_svg,
+        "control-witness/ts01-strategy-ab.png": figure_png,
+        "control-witness/ts01-strategy-ab-evidence.json": (json.dumps(evidence, indent=2, ensure_ascii=False) + "\n").encode(),
+        "control-witness/ts01-strategy-ab-events.jsonl": raw[names[0]],
+        "control-witness/ts01-strategy-ab-environment.json": raw[names[2]],
+        "control-witness/ts01-strategy-ab-scenario.json": scenario_bytes,
+    }
+    return outputs
+
+
 def build(site: Path, catalog_path: Path) -> BuildResult:
     """Build companions from staged published records only."""
     site = Path(site).resolve(strict=True)
@@ -268,6 +426,7 @@ def build(site: Path, catalog_path: Path) -> BuildResult:
     style = Path(__file__).with_name("styles") / "control-v1.json"
     outputs: dict[str, bytes] = {}
     cards: list[dict] = []
+    outputs.update(_ts01_strategy_ab_companion())
     mpc06_route, mpc06_svg, mpc06_png, mpc06_evidence = _mpc06_tube_companion()
     outputs["control-witness/mpc06-tube.svg"] = mpc06_svg
     outputs["control-witness/mpc06-tube.png"] = mpc06_png
@@ -471,6 +630,25 @@ def build(site: Path, catalog_path: Path) -> BuildResult:
     state_bounds = mpc06_bounds["tightened_state_X_minus_Z"]["bounds"]
     tube_vertices = mpc06_bounds["error_tube_Z"]["vertices"]
     body.append(
+        '<article id="ts01-strategy-ab"><h2>T-S01 · Strategy A/B selected controls</h2>'
+        '<p>The scalar two-stage integrator uses <code>x₀=0</code>, <code>xₜ₊₁=xₜ+uₜ</code>, '
+        '<code>uₜ∈[0,1]</code>, and terminal objective <code>(x₂−1)²</code>. Filled markers show '
+        'the two distinct histories selected by Strategy A (reach-back); red rings show the saved '
+        'histories selected by Strategy B (paired capture). Both selected the histories '
+        '<code>(0,1)</code> and <code>(1,0)</code>. The dashed segment is the exact minimizing family '
+        '<code>u₀+u₁=1</code>. Axes are dimensionless controls plotted with equal data scaling. '
+        'Selected-witness checks passed numerically, while separate optimality and completeness checks '
+        'are unsupported. This is not the full #597 comparison matrix or a performance ranking.</p>'
+        '<figure><a href="control-witness/ts01-strategy-ab.svg"><img src="control-witness/ts01-strategy-ab.svg" '
+        'alt="Strategy A and B selected control histories on the exact line u0 plus u1 equals one, with equal data scaling"></a>'
+        '<figcaption>Numeric ticks and major gridlines follow csl-report-quantitative-v1. '
+        '<a href="control-witness/ts01-strategy-ab.png">Open PNG figure ↗</a></figcaption></figure>'
+        '<p><a href="control-witness/ts01-strategy-ab-events.jsonl">Saved paired events ↗</a> · '
+        '<a href="control-witness/ts01-strategy-ab-environment.json">Run environment metadata ↗</a> · '
+        '<a href="control-witness/ts01-strategy-ab-scenario.json">Scenario input ↗</a> · '
+        '<a href="control-witness/ts01-strategy-ab-evidence.json">Figure data, checks and hashes ↗</a></p></article>')
+
+    body.append(
         '<article id="mpc06-tube"><h2>MPC-06 · exact tube feasibility geometry</h2>'
         '<p>This two-state discrete double-integrator fixture uses a three-step horizon. '
         'The checked feasibility case uses the fixed zero nominal plan and full-state feedback '
@@ -500,14 +678,27 @@ def build(site: Path, catalog_path: Path) -> BuildResult:
         '<body class="control-witness-page"><main><p><a href="index.html">← Visual examples</a></p><h1>Saved control and witness figures</h1>'
         '<p>The first five figures show projections of frozen five-coordinate state/control relations into the control plane '
         '(u₀,u₁); each can omit distinctions present in the full joint relation. The MPC-06 figure re-plots a saved two-state '
-        'feasibility tube. These companions do not run a solver or recompute scientific geometry.</p>' +
+        'feasibility tube. The T-S01 figure shows saved Strategy A/B control histories and an exact analytic minimizer relation. '
+        'These companions do not run a solver or recompute scientific geometry.</p>' +
         ''.join(body) + '</main></body></html>').encode()
+    strategy_ab_entry = {
+        "family": "Control strategy and witness reports",
+        "title": "T-S01 Strategy A/B selected histories and exact minimizer family",
+        "status": "saved-data-companion", "anchor": "ts01-strategy-ab",
+        "page": "control-witness-v1.html#ts01-strategy-ab",
+        "figure": "control-witness/ts01-strategy-ab.svg",
+        "source_page": ("https://github.com/butahlecoq/controlled-systems-lab/blob/"
+                        "bccf2d5a985d7dd8cbfc15f86b2867cf266fbc37/docs/research/evidence/"
+                        "mpc01-external-qps-20261026-r3/strategy-ab-ts01-summary.html"),
+        "raw_record": "control-witness/ts01-strategy-ab-evidence.json",
+    }
     entries = ({"family": "Control strategy and witness reports",
                 "title": "Strategy A/B control relations and MPC-06 tube geometry",
                 "status": "saved-data-companion", "anchor": "control-witness-companions",
                 "page": "control-witness-v1.html", "figure": cards[0]["stem"] + ".svg",
                 "source_page": "../" + cards[0]["route_id"] + "/index.html",
-                "raw_record": "../" + cards[0]["route_id"] + "/records.json"}, timing_entry)
+                "raw_record": "../" + cards[0]["route_id"] + "/records.json"},
+               strategy_ab_entry, timing_entry)
     if set(outputs) != set(asset_paths()):
         missing = sorted(set(asset_paths()) - set(outputs))
         extra = sorted(set(outputs) - set(asset_paths()))

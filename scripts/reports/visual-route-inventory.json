@@ -76,14 +76,16 @@
     },
     {
       "source": "scripts/reports/control_witness_companions.py",
-      "signal_count": 23,
+      "signal_count": 33,
       "asset_name_literals": [
         "geometry.png",
         "geometry.svg",
         "mpc06-tube.png",
         "mpc06-tube.svg",
         "projection.svg",
-        "syn01-timing.svg"
+        "syn01-timing.svg",
+        "ts01-strategy-ab.png",
+        "ts01-strategy-ab.svg"
       ],
       "disposition": "saved-control-witness-gallery-companion-builder"
     },
@@ -597,8 +599,11 @@
       "asset_name_literals": [
         "strategy-ab-ts01-control-plane.svg"
       ],
-      "disposition": "deferred-family-specific-migration",
-      "follow_up_issue": 686
+      "role": "report-plot-renderer",
+      "disposition": "frozen-report-plot-preserved-with-gallery-companion",
+      "companion_ids": [
+        "control-witness-companions"
+      ]
     },
     {
       "source": "scripts/reports/mpc03/b08_miqcp.py",
@@ -1284,7 +1289,7 @@
     },
     {
       "source": "scripts/reports/visual_examples.py",
-      "signal_count": 58,
+      "signal_count": 59,
       "asset_name_literals": [
         "app01-plan-timing-v1.svg",
         "app02-diamond-v1.svg",
@@ -1330,6 +1335,7 @@
         "terminal-projections.svg",
         "trajectory-2d.svg",
         "trajectory.svg",
+        "ts01-strategy-ab.svg",
         "zonotope-2d.svg"
       ],
       "disposition": "gallery-composition-and-route"
@@ -2517,6 +2523,12 @@
         "control-witness/mpc06-tube.svg",
         "control-witness/mpc06-tube.png",
         "control-witness/mpc06-tube-evidence.json",
+        "control-witness/ts01-strategy-ab.svg",
+        "control-witness/ts01-strategy-ab.png",
+        "control-witness/ts01-strategy-ab-evidence.json",
+        "control-witness/ts01-strategy-ab-events.jsonl",
+        "control-witness/ts01-strategy-ab-environment.json",
+        "control-witness/ts01-strategy-ab-scenario.json",
         "control-witness/strategy-a-ts01.svg",
         "control-witness/strategy-a-ts01.png",
         "control-witness/strategy-a-ts01-evidence.json",

@@ -177,9 +177,10 @@ class GalleryTests(unittest.TestCase):
         originals = {report_id: hashlib.sha256((self.site / routes[report_id] / "records.json").read_bytes()).hexdigest()
                      for report_id, *_ in control_witness_companions.PROJECTIONS}
         result = control_witness_companions.build(self.site, self.catalog)
-        self.assertEqual(len(result.gallery_entries), 2)
+        self.assertEqual(len(result.gallery_entries), 3)
         gallery_anchors = {entry["anchor"] for entry in result.gallery_entries}
-        self.assertEqual(gallery_anchors, {"control-witness-companions", "control-witness-timings"})
+        self.assertEqual(gallery_anchors, {"control-witness-companions", "control-witness-timings",
+                                           "ts01-strategy-ab"})
         self.assertTrue(all(set(disposition.companion_ids) <= gallery_anchors
                             for disposition in control_witness_companions.SOURCE_DISPOSITIONS))
         self.assertEqual(len([name for name in result.files if name.startswith("control-witness/strategy-") and name.endswith(".svg")]), 10)
@@ -249,11 +250,37 @@ class GalleryTests(unittest.TestCase):
         self.assertEqual(mpc06_svg.attrib["role"], "img")
         self.assertTrue(any(node.tag.endswith("title") for node in mpc06_svg))
         self.assertTrue(any(node.tag.endswith("desc") for node in mpc06_svg))
+        ts01_source = ROOT / "docs/research/evidence/mpc01-external-qps-20261026-r3"
+        events = (ts01_source / "strategy-ab-ts01-events.jsonl").read_bytes()
+        environment = (ts01_source / "strategy-ab-ts01-environment.json").read_bytes()
+        scenario = (ROOT / "examples/scenarios/two-stage-integrator.json").read_bytes()
+        self.assertEqual(result.files["control-witness/ts01-strategy-ab-events.jsonl"], events)
+        self.assertEqual(result.files["control-witness/ts01-strategy-ab-environment.json"], environment)
+        self.assertEqual(result.files["control-witness/ts01-strategy-ab-scenario.json"], scenario)
+        ts01_evidence = json.loads(result.files["control-witness/ts01-strategy-ab-evidence.json"])
+        self.assertEqual(ts01_evidence["events_sha256"], hashlib.sha256(events).hexdigest())
+        self.assertEqual(ts01_evidence["environment_sha256"], hashlib.sha256(environment).hexdigest())
+        self.assertEqual(ts01_evidence["scenario_sha256"], hashlib.sha256(scenario).hexdigest())
+        self.assertEqual(ts01_evidence["plot_data"]["optimal_family"]["relation"], "u₀ + u₁ = 1")
+        self.assertEqual(ts01_evidence["plot_data"]["strategies"]["csl.synthesis.reach-back"],
+                         [[0, 1], [1, 0]])
+        self.assertEqual(ts01_evidence["plot_data"]["strategies"]["csl.synthesis.strategy-b"],
+                         [[0, 1], [1, 0]])
+        self.assertEqual(ts01_evidence["plot_data"]["axes"],
+                         {"x": "u₀", "y": "u₁", "units": "dimensionless"})
+        self.assertEqual(ts01_evidence["plot_data"]["aspect"], "equal")
+        self.assertIn("no solver, strategy, benchmark, or geometry query", ts01_evidence["claim_scope"])
+        ts01_svg = ET.fromstring(result.files["control-witness/ts01-strategy-ab.svg"])
+        self.assertEqual(ts01_svg.attrib["role"], "img")
+        self.assertTrue(any(node.tag.endswith("title") for node in ts01_svg))
+        self.assertTrue(any(node.tag.endswith("desc") for node in ts01_svg))
+        self.assertTrue(result.files["control-witness/ts01-strategy-ab.png"].startswith(b"\x89PNG\r\n\x1a\n"))
+        self.assertIn("unsupported", result.files["control-witness-v1.html"].decode())
         syn02_evidence = json.loads(result.files["control-witness/syn02-timing-evidence.json"])
         failed = [row for row in syn02_evidence["rows"] if row["label"].startswith("shifted-residual-degenerate")]
         self.assertEqual(len(failed), 3)
         self.assertTrue(all(row["median"] is None and "failed" in row["status"] for row in failed))
-        self.assertEqual(len([name for name in result.files if name.endswith(".svg")]), 15)
+        self.assertEqual(len([name for name in result.files if name.endswith(".svg")]), 16)
         syn06_evidence = json.loads(result.files["control-witness/syn06-timing-evidence.json"])
         self.assertEqual(syn06_evidence["rows"][0]["batch"], 28000)
         self.assertEqual(syn06_evidence["rows"][0]["median"],
