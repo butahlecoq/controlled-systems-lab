@@ -108,8 +108,8 @@ def svg() -> str:
 <text x="720" y="38" font-family="sans-serif" font-size="22" font-weight="700" text-anchor="middle">Full optimal control fiber</text>
 <text x="720" y="65" font-family="sans-serif" font-size="14" text-anchor="middle">initial state (p₀,v₀)=(0,0); u₀+u₁=0</text>
 <line x1="565" y1="280" x2="875" y2="280" stroke="#555"/><line x1="720" y1="115" x2="720" y2="445" stroke="#555"/>
-{line}{points}{selector_point}<text x="{cx+control_scale+12}" y="{cy+control_scale+5}" font-family="sans-serif" font-size="13">(-1,1)</text>
-<text x="{cx-control_scale-62}" y="{cy-control_scale-10}" font-family="sans-serif" font-size="13">(1,-1)</text>
+{line}{points}{selector_point}<text x="{cx+control_scale+12}" y="{cy+control_scale+5}" font-family="sans-serif" font-size="13">(1,-1)</text>
+<text x="{cx-control_scale-62}" y="{cy-control_scale-10}" font-family="sans-serif" font-size="13">(-1,1)</text>
 <text x="885" y="285" font-family="sans-serif" font-size="13">u₀</text><text x="725" y="112" font-family="sans-serif" font-size="13">u₁</text>
 <text x="720" y="505" font-family="sans-serif" font-size="14" text-anchor="middle">Red segment: complete optimizer fiber · gold point: minimum-norm selector</text>
 </svg>\n'''

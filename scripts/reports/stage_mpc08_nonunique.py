@@ -62,7 +62,14 @@ The saved sample uses 15 initial states and 45 histories (each optimal fiber's e
 
 Timing rows are descriptive only. Calls are interleaved with five measured repetitions per query and one warmup per method; no load or limiter profile was captured, so there is no performance-winner claim. Each elapsed interval starts immediately before per-query problem resolution and ends after result verification. For Strategy A/B it includes strategy request construction, provider preparation, workspace creation, execution, and candidate-family membership checking. For the online QP it includes resolution, condensed-program construction, provider selection/preparation, workspace creation, solving, and primal feasibility/value checks. All intervals exclude process startup, CSV parsing, provider-registry construction, JSON output, report rendering, and build time. These paths do different work and are not a performance ranking. See `build-provenance.json` for compiler, dependency, binary, source, input, and result hashes.
 
-Reproduce from the source commit named in `build-provenance.json`:
+The numerical capture was measured from `measurement_source_commit` in
+`build-provenance.json`. `source_commit` names the report source, including a
+post-capture correction to the two endpoint labels in the SVG; the exact
+reference JSON, query CSV, C++ binary, and raw numerical observations are
+unchanged. Their capture-time input hashes are retained under
+`measurement_source_sha256` and `measurement_artifact_sha256`.
+
+Reproduce the report from `source_commit` in `build-provenance.json`:
 
 ```sh
 python3 benchmarks/reporting/mpc08_explicit/explicit_nonunique_double_integrator.py
@@ -88,14 +95,14 @@ def render(record: dict) -> str:
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Nonunique explicit-MPC optimizer fiber · MPC-08</title>
 <style>body{{margin:0;background:#282828;color:#ebdbb2;font:16px/1.55 system-ui,sans-serif}}main{{max-width:1050px;margin:auto;padding:2rem 1rem}}section{{background:#32302f;border:1px solid #504945;border-radius:.6rem;padding:1rem;margin:1rem 0}}a{{color:#8ec07c}}img{{width:100%;height:auto;background:white}}table{{border-collapse:collapse;width:100%}}th,td{{text-align:left;padding:.55rem;border-bottom:1px solid #504945;vertical-align:top}}code{{color:#fabd2f}}.limit{{border-left:3px solid #fabd2f;padding-left:.8rem}}</style></head><body><main>
-<p>MPC-08 · exact rational continuation · source {record['source_commit'][:12]}</p><h1>A nonunique optimal control family</h1>
+<p>MPC-08 · exact rational continuation · report source {record['source_commit'][:12]} · measured source {record['measurement_source_commit'][:12]}</p><h1>A nonunique optimal control family</h1>
 <p>For this two-step double integrator, terminal velocity can be driven to zero from every state in the declared initial domain. The optimizer is a segment for many initial velocities, so one explicit tie-break is only a selector through the full optimal relation.</p>
 <figure><img src="optimal-fiber.svg" alt="Initial-state rectangle colored by the minimum-norm selector, beside the full optimal control segment for zero initial velocity."></figure>
 <section><h2>Exact result</h2><p><code>p_next=p+v</code>, <code>v_next=v+u</code>, <code>u0,u1∈[-1,1]</code>. Over <code>(p0,v0)∈[-3,3]×[-2,2]</code>, the exact minimum of <code>(v0+u0+u1)²</code> is zero.</p><p><code>u0∈[-1,1]∩[-v0-1,-v0+1]</code> and <code>u1=-v0-u0</code> give the complete analytic control fiber. Minimizing <code>u0²+u1²</code> selects <code>u0=u1=-v0/2</code>.</p><p>The figure's left color field encodes the tie-broken first action over the entire initial domain. At <code>(p0,v0)=(0,0)</code>, the right red segment is the whole optimizer fiber and the gold point is its minimum-norm selector.</p></section>
 <section><h2>Current CSL paths</h2><table><thead><tr><th>Path</th><th>Measured calls</th><th>Median</th><th>Range</th><th>Outcome over all 270 calls, including warmups</th></tr></thead><tbody>{table}</tbody></table>
 <p>Each path also had one warmup per query. Elapsed time starts before query-specific problem resolution and ends after result verification. Strategy A/B includes request construction, provider preparation, workspace creation, execution, and candidate-family membership checking. The online QP includes resolution, condensed-program construction, provider selection/preparation, workspace creation, solving, and primal feasibility/value checks. All paths exclude process startup, CSV parsing, registry construction, JSON serialization, rendering, and build time. The paths do different work; no performance winner is claimed.</p>
 <p class="limit">The 45 exact histories are sampled checks. Candidate membership does not establish equality or completeness. Strategy A rejects the rank-deficient QP request; Strategy B leaves its mathematical outcome undetermined. The condensed QP returns one feasible optimal point, not the complete family. Failures and noncompleted statuses remain in the raw records. No limiter or pre-run load was captured, so these descriptive timings do not support a performance-winner claim.</p></section>
-<section><h2>Reproduce and inspect</h2><ul><li><a href="README.md">Methodology and exact commands</a></li><li><a href="explicit-nonunique-double-integrator.json">Exact reference record</a></li><li><a href="explicit-nonunique-queries.csv">Sampled exact histories</a></li><li><a href="csl-nonunique-observations.jsonl">Raw CSL observations</a></li><li><a href="build-provenance.json">Build and hash provenance</a></li><li><a href="manifest.json">Artifact manifest</a></li><li><a href="../{REPORT_ID}.zip">Offline ZIP</a></li><li><a href="https://github.com/butahlecoq/controlled-systems-lab/commit/{record['source_commit']}">Source commit</a></li><li><a href="https://github.com/butahlecoq/controlled-systems-lab/issues/604">Issue #604</a></li></ul></section>
+<section><h2>Reproduce and inspect</h2><ul><li><a href="README.md">Methodology and exact commands</a></li><li><a href="explicit-nonunique-double-integrator.json">Exact reference record</a></li><li><a href="explicit-nonunique-queries.csv">Sampled exact histories</a></li><li><a href="csl-nonunique-observations.jsonl">Raw CSL observations</a></li><li><a href="build-provenance.json">Build and hash provenance</a></li><li><a href="manifest.json">Artifact manifest</a></li><li><a href="../{REPORT_ID}.zip">Offline ZIP</a></li><li><a href="https://github.com/butahlecoq/controlled-systems-lab/commit/{record['source_commit']}">Report source commit</a></li><li><a href="https://github.com/butahlecoq/controlled-systems-lab/commit/{record['measurement_source_commit']}">Measured source commit</a></li><li><a href="https://github.com/butahlecoq/controlled-systems-lab/issues/604">Issue #604</a></li></ul></section>
 </main></body></html>\n'''
 
 
@@ -142,6 +149,7 @@ def package() -> None:
     record = {
         "schema": "csl.mpc08-nonunique-report/1", "report_id": REPORT_ID,
         "source_commit": source_commit,
+        "measurement_source_commit": provenance["measurement_source_commit"],
         "source_url": f"https://github.com/butahlecoq/controlled-systems-lab/tree/{source_commit}/benchmarks/reporting/mpc08_explicit",
         "issue": "https://github.com/butahlecoq/controlled-systems-lab/issues/604",
         "fixture": ref["problem"], "initial_domain_exact": ref["initial_domain_exact"],

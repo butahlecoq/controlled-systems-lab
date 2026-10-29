@@ -14,6 +14,7 @@
     ]
   },
   "issue": "https://github.com/butahlecoq/controlled-systems-lab/issues/604",
+  "measurement_source_commit": "7bea429642b19f81a415299519c95320fe47a878",
   "optimal_value_exact": "0 on X",
   "outcomes": {
     "csl.synthesis.reach-back": {
@@ -43,8 +44,14 @@
   },
   "report_id": "mpc08-explicit-nonunique-v1",
   "schema": "csl.mpc08-nonunique-report/1",
-  "source_commit": "7bea429642b19f81a415299519c95320fe47a878",
-  "source_url": "https://github.com/butahlecoq/controlled-systems-lab/tree/7bea429642b19f81a415299519c95320fe47a878/benchmarks/reporting/mpc08_explicit",
+  "source_commit": "18cb292735a06a959b72ca43a57ff8de8e634460",
+  "source_url": "https://github.com/butahlecoq/controlled-systems-lab/tree/18cb292735a06a959b72ca43a57ff8de8e634460/benchmarks/reporting/mpc08_explicit",
   "state_samples": 15,
-  "tie_break": "minimize u0^2+u1^2 over the optimal fiber; u0=u1=-v0/2"
+  "tie_break": "minimize u0^2+u1^2 over the optimal fiber; u0=u1=-v0/2",
+  "timing_scope": {
+    "all_paths_exclude": "Process startup, CSV parsing, provider-registry construction, JSON serialization, report rendering, and build time.",
+    "common_start_stop": "Starts immediately before per-query problem resolution; stops after result verification.",
+    "online_qp_includes": "Problem resolution, condensed-program construction, provider selection/preparation, workspace creation, solving, and primal feasibility/value checks.",
+    "strategy_a_b_includes": "Problem resolution, strategy request construction, provider preparation, workspace creation, execution, and candidate-family membership checking."
+  }
 }

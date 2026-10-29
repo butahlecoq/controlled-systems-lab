@@ -13,9 +13,16 @@ The analytic reference separately selects the minimum-norm history `u0=u1=-v0/2`
 
 The saved sample uses 15 initial states and 45 histories (each optimal fiber's endpoints and midpoint). Strategy A candidate relations contain all 270 sampled histories across their 45 warmups and 225 measured calls, but all calls stop with an operation rejection because HiGHS reports a nonzero quadratic coefficient at or below its `1e-12` native-removal threshold. Strategy B contains all sampled histories; 252 calls complete and 18 are noncompleted, and every mathematical outcome remains undetermined. The online two-control QP returns a feasible optimal point with value zero on all 270 calls. These checks do not establish equality between either strategy candidate and the analytic full family. The raw observations preserve every status.
 
-Timing rows are descriptive only. Calls are interleaved with five measured repetitions per query and one warmup per method; no load or limiter profile was captured, so there is no performance-winner claim. See `build-provenance.json` for compiler, dependency, binary, source, input, and result hashes.
+Timing rows are descriptive only. Calls are interleaved with five measured repetitions per query and one warmup per method; no load or limiter profile was captured, so there is no performance-winner claim. Each elapsed interval starts immediately before per-query problem resolution and ends after result verification. For Strategy A/B it includes strategy request construction, provider preparation, workspace creation, execution, and candidate-family membership checking. For the online QP it includes resolution, condensed-program construction, provider selection/preparation, workspace creation, solving, and primal feasibility/value checks. All intervals exclude process startup, CSV parsing, provider-registry construction, JSON output, report rendering, and build time. These paths do different work and are not a performance ranking. See `build-provenance.json` for compiler, dependency, binary, source, input, and result hashes.
 
-Reproduce from the source commit named in `build-provenance.json`:
+The numerical capture was measured from `measurement_source_commit` in
+`build-provenance.json`. `source_commit` names the report source, including a
+post-capture correction to the two endpoint labels in the SVG; the exact
+reference JSON, query CSV, C++ binary, and raw numerical observations are
+unchanged. Their capture-time input hashes are retained under
+`measurement_source_sha256` and `measurement_artifact_sha256`.
+
+Reproduce the report from `source_commit` in `build-provenance.json`:
 
 ```sh
 python3 benchmarks/reporting/mpc08_explicit/explicit_nonunique_double_integrator.py
