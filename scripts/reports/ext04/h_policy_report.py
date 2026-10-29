@@ -6,14 +6,67 @@ import argparse
 import csv
 import hashlib
 import html
+import importlib.util
+import io
 import json
+import os
 from pathlib import Path
 import statistics
+import sys
 import zipfile
 
 
 def digest(data: bytes) -> str:
     return hashlib.sha256(data).hexdigest()
+
+
+def helper_directory() -> Path:
+    for candidate in (Path(__file__).parent, Path(__file__).parents[1]):
+        if (candidate / "figure_style.py").is_file():
+            return candidate
+    raise ValueError("the saved quantitative figure policy is missing")
+
+
+def make_figure(out: Path, helper_dir: Path) -> tuple[bytes, bytes]:
+    sys.path.insert(0, str(helper_dir))
+    os.environ.setdefault("MPLCONFIGDIR", str(out.parent / "mpl-config"))
+    import matplotlib
+    if matplotlib.__version__ != "3.11.2":
+        raise ValueError("the report figure requires pinned Matplotlib 3.11.2")
+    matplotlib.use("Agg")
+    import matplotlib.pyplot as plt
+    import figure_style
+    import plot as report_plot
+
+    with matplotlib.rc_context({"font.family":"DejaVu Sans", "font.size":10,
+            "svg.hashsalt":"csl-report-style-v1", "svg.fonttype":"path"}):
+        figure, axes = plt.subplots(1, 2, figsize=(12, 4.8), layout="constrained")
+        try:
+            x = [-1.0, 1.0]
+            error = [-0.1, 0.1]
+            terminal = [0.1, -0.1]
+            axes[0].plot(x, error, color="#147d75", linewidth=2.8,
+                         marker="o", markersize=6)
+            axes[0].set(xlim=(-1.15,1.15), ylim=(-0.12,0.12),
+                xlabel="Initial state x₀", ylabel="Measurement error e",
+                title="Joint H-domain: e = 0.1x₀")
+            axes[1].plot(x, terminal, color="#d77a1f", linewidth=2.8,
+                         marker="o", markersize=6)
+            axes[1].set(xlim=(-1.15,1.15), ylim=(-0.12,0.12),
+                xlabel="Initial state x₀", ylabel="Terminal state x₁",
+                title="Policy image: x₁ = −e")
+            for axis in axes:
+                figure_style.configure_numeric_axis(axis, "both", bins=5)
+            figure.suptitle("Correlated uncertainty and its reachable-state projection")
+            svg = io.StringIO()
+            figure.savefig(svg, format="svg",
+                metadata={"Date":None,"Format":None,"Type":None,"Creator":None})
+            png = io.BytesIO()
+            figure.savefig(png, format="png", dpi=180,
+                metadata={"Software":"CSL report style csl-report-quantitative-v1"})
+            return report_plot.normalize_owned_svg(svg.getvalue()), png.getvalue()
+        finally:
+            plt.close(figure)
 
 
 def render(trials_path: Path, build_log_path: Path, environment_path: Path,
@@ -43,6 +96,9 @@ def render(trials_path: Path, build_log_path: Path, environment_path: Path,
     environment = json.loads(environment_path.read_text(encoding="utf-8"))
     driver = driver_path.read_bytes()
     renderer = Path(__file__).read_bytes()
+    helper_dir = helper_directory()
+    helper_sources = {name: (helper_dir / name).read_bytes()
+                      for name in ("figure_style.py", "plot.py", "report_data.py")}
     build = build_log_path.read_text(encoding="utf-8", errors="replace")
     build = build.replace(str(Path.cwd()), "$SOURCE_ROOT")
     build = build.replace(str(Path.home()), "$HOME")
@@ -55,28 +111,15 @@ def render(trials_path: Path, build_log_path: Path, environment_path: Path,
     (out / "trials.jsonl").write_bytes(raw)
     (out / "driver.cpp").write_bytes(driver)
     (out / "renderer.py").write_bytes(renderer)
+    for name, source in helper_sources.items():
+        (out / name).write_bytes(source)
     (out / "release-build-log.txt").write_bytes(build_bytes)
     (out / "environment.json").write_text(
         json.dumps(environment, indent=2, sort_keys=True) + "\n", encoding="utf-8")
 
-    figure = '''<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 390" role="img" aria-labelledby="title desc">
-<title id="title">Correlated H-domain and terminal state projection</title>
-<desc id="desc">The joint initial-state and observation-error H-set is the line error equals one tenth initial state. Under action minus the observation, the terminal state equals minus the error.</desc>
-<rect width="960" height="390" fill="#fff"/><g font-family="system-ui,sans-serif" fill="#17242d">
-<text x="240" y="30" text-anchor="middle" font-size="19" font-weight="700">Joint H-domain: (x₀, e)</text>
-<text x="720" y="30" text-anchor="middle" font-size="19" font-weight="700">Policy image: (x₀, x₁)</text>
-<g stroke="#667985" stroke-width="1.4" fill="none"><path d="M70 330H420M245 350V60"/><path d="M550 330H900M725 350V60"/></g>
-<g stroke="#a8b5bc" stroke-dasharray="4 5"><path d="M70 260H420M70 190H420M70 120H420M140 60V330M315 60V330"/><path d="M550 260H900M550 190H900M550 120H900M620 60V330M795 60V330"/></g>
-<path d="M70 203.5L420 176.5" stroke="#147d75" stroke-width="8" stroke-linecap="round"/>
-<circle cx="70" cy="203.5" r="7" fill="#147d75"/><circle cx="420" cy="176.5" r="7" fill="#147d75"/>
-<path d="M550 176.5L900 203.5" stroke="#d77a1f" stroke-width="8" stroke-linecap="round"/>
-<circle cx="550" cy="176.5" r="7" fill="#d77a1f"/><circle cx="900" cy="203.5" r="7" fill="#d77a1f"/>
-<text x="245" y="378" text-anchor="middle" font-size="14">initial state x₀ ∈ [−1,1]</text><text x="24" y="190" transform="rotate(-90 24 190)" text-anchor="middle" font-size="14">measurement error e ∈ [−0.1,0.1]</text>
-<text x="725" y="378" text-anchor="middle" font-size="14">initial state x₀ ∈ [−1,1]</text><text x="504" y="190" transform="rotate(-90 504 190)" text-anchor="middle" font-size="14">terminal state x₁ ∈ [−0.1,0.1]</text>
-<text x="245" y="82" text-anchor="middle" font-size="13">correlation retained as an equality</text><text x="725" y="82" text-anchor="middle" font-size="13">action u = −(x₀+e)</text>
-<text x="245" y="350" text-anchor="middle" font-size="12">−1</text><text x="420" y="350" text-anchor="middle" font-size="12">1</text><text x="725" y="350" text-anchor="middle" font-size="12">−1</text><text x="900" y="350" text-anchor="middle" font-size="12">1</text>
-</g></svg>'''
-    (out / "h-domain-2d.svg").write_text(figure, encoding="utf-8")
+    svg, png = make_figure(out, helper_dir)
+    (out / "h-domain-2d.svg").write_bytes(svg)
+    (out / "h-domain-2d.png").write_bytes(png)
     with (out / "summary.csv").open("w", newline="", encoding="utf-8") as stream:
         writer = csv.writer(stream)
         writer.writerow(["round", "batch_calls", "lp_solves_per_call", "elapsed_ns", "ns_per_call", "status"])
@@ -106,6 +149,8 @@ def render(trials_path: Path, build_log_path: Path, environment_path: Path,
         "median_batch_ns": statistics.median(measured), "min_batch_ns": min(measured),
         "max_batch_ns": max(measured), "median_ns_per_call": statistics.median(measured)/100,
         "workspace_reuse": "one HiGHS LP workspace reused sequentially within each process; each evaluator call solves one domain LP and six support dual LPs",
+        "figure": {"style":"csl-report-quantitative-v1", "matplotlib":"3.11.2",
+            "timing_included":False, "axis_policy":"positioned numeric ticks, labels and major grids"},
         "timing_scope": rows[0]["timing_scope"], "environment": environment,
         "performance_conclusion": "Descriptive single-adapter timing only; no comparator, source-mapped limiter profile, speedup, or scalability claim.",
         "evidence_limits": [
@@ -117,6 +162,9 @@ def render(trials_path: Path, build_log_path: Path, environment_path: Path,
         "artifacts": {"driver":"benchmarks/reporting/ext04/h_policy_driver.cpp",
             "driver_sha256":digest(driver), "renderer":"scripts/reports/ext04/h_policy_report.py",
             "renderer_sha256":digest(renderer), "build_log_sha256":digest(build_bytes),
+            "figure_style_sha256":digest(helper_sources["figure_style.py"]),
+            "plot_adapter_sha256":digest(helper_sources["plot.py"]),
+            "report_data_sha256":digest(helper_sources["report_data.py"]),
             "environment_sha256":digest((out/"environment.json").read_bytes())}}
     (out / "records.json").write_text(json.dumps(summary, indent=2, sort_keys=True)+"\n", encoding="utf-8")
     measurements = "".join(f"<tr><td>{r['round']}</td><td>{r['elapsed_ns']/1e6:.3f}</td><td>{r['elapsed_ns']/r['batch']:.1f}</td><td>passed</td></tr>" for r in rows[1:])
@@ -124,12 +172,13 @@ def render(trials_path: Path, build_log_path: Path, environment_path: Path,
     page = f'''<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>EXT-04 joint H-domain policy evaluation</title><style>body{{font:16px system-ui,sans-serif;max-width:980px;margin:2rem auto;padding:0 1rem;line-height:1.5;color:#17242d}}table{{border-collapse:collapse;width:100%;margin:1rem 0}}th,td{{border:1px solid #b7c6ce;padding:.5rem;text-align:left}}th{{background:#e9f0f4}}img{{max-width:100%}}code{{overflow-wrap:anywhere}}</style></head><body>
 <h1>EXT-04 joint H-domain policy evaluation</h1><p><strong>Verdict: descriptive result; performance comparison is inconclusive.</strong> One pinned LP adapter and one fixture were measured. No comparator or source-mapped limiter profile was collected.</p>
 <p>This one-step scalar example preserves a correlation between the initial state and measurement error: <code>e=0.1x₀</code>. The controller uses the pre-decision observation <code>y=x₀+e</code> and applies <code>u=−y</code>, producing <code>x₁=−e</code>. A numerical feasible domain witness, six dual support bounds, and a separate primal counterexample smoke case were checked.</p>
-<figure><img src="h-domain-2d.svg" alt="Correlated joint H-domain and its terminal state projection"><figcaption>Left: the authored joint H-set in initial-state/error coordinates. Right: its image in initial-state/terminal-state coordinates.</figcaption></figure>
+<figure><img src="h-domain-2d.svg" alt="Correlated joint H-domain and its terminal state projection"><figcaption>Left: the authored joint H-set in initial-state/error coordinates. Right: its image in initial-state/terminal-state coordinates. Both numeric axes include positioned tick labels and grid lines; the vertical scale is deliberately distinct from the horizontal scale.</figcaption></figure>
+<p>Figure policy: Matplotlib 3.11.2 and <code>csl-report-quantitative-v1</code>. Plot rendering is excluded from solver timing. <a href="h-domain-2d.png">PNG view</a> · <a href="figure_style.py">tick/grid policy source</a>.</p>
 <h2>Analytic support values</h2><table><thead><tr><th>Constraint</th><th>Maximum activity</th><th>Safety bound</th></tr></thead><tbody>{''.join(f"<tr><td>{r['family']} stage {r['stage']} row {r['row']}</td><td>{r['support_upper_bound']:.8g}</td><td>{r['upper_bound']:.8g}</td></tr>" for r in rows[-1]['result']['constraints'])}</tbody></table>
 <h2>Measurements</h2><p>One excluded 100-call warmup followed by seven measured batches of 100 calls. Median {summary['median_batch_ns']/1e6:.3f} ms per batch ({summary['median_ns_per_call']:.1f} ns/call); range {summary['min_batch_ns']/1e6:.3f}–{summary['max_batch_ns']/1e6:.3f} ms. Each call performed seven LP solves and literal correlation, residual, support-bound, replay-status checks. Fixture creation and JSON serialization were excluded.</p>
 <table><thead><tr><th>Round</th><th>Batch ms</th><th>ns/call</th><th>Outcome</th></tr></thead><tbody>{measurements}</tbody></table><h2>Environment</h2><pre>{safe_env}</pre>
 <h2>Scope and limits</h2><p>These are single-adapter numerical observations on one analytic fixture. The caller-authored H-set is assumed to describe the relevant uncertainty. No validated-arithmetic, policy-synthesis, universal-disturbance, speedup, scalability, or application-load claim is made. The source-mapped performance limiter is unavailable, so performance interpretation is inconclusive.</p>
-<p>Source commit <code>{html.escape(source_commit)}</code>; report ID <code>{report_id}</code>. Bundle: <a href="driver.cpp">driver</a>, <a href="renderer.py">renderer</a>, <a href="records.json">records</a>, <a href="trials.jsonl">raw trials</a>, <a href="summary.csv">CSV</a>, <a href="environment.json">environment</a>, <a href="release-build-log.txt">Release build log</a>, <a href="{report_id}.zip">offline ZIP</a>.</p></body></html>'''
+<p>Source commit <code>{html.escape(source_commit)}</code>; report ID <code>{report_id}</code>. Bundle: <a href="driver.cpp">driver</a>, <a href="renderer.py">renderer</a>, <a href="plot.py">plot adapter</a>, <a href="report_data.py">SVG validator source</a>, <a href="records.json">records</a>, <a href="trials.jsonl">raw trials</a>, <a href="summary.csv">CSV</a>, <a href="environment.json">environment</a>, <a href="release-build-log.txt">Release build log</a>, <a href="{report_id}.zip">offline ZIP</a>.</p></body></html>'''
     (out / "index.html").write_text(page, encoding="utf-8")
     files = sorted(path for path in out.iterdir() if path.is_file())
     (out / "manifest.json").write_text(json.dumps({"schema":"csl.ext04-h-policy-manifest/1",

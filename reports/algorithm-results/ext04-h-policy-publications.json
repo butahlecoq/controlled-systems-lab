@@ -1,0 +1,57 @@
+{
+  "reports": [
+    {
+      "evidence_limits": [
+        "One analytic scalar one-step fixture with a one-dimensional correlated H-polytope.",
+        "The H-set is caller-authored; the report does not prove it encloses a physical disturbance model.",
+        "Floating-point feasibility and dual multipliers are numerical evidence, not validated arithmetic.",
+        "No policy synthesis, existential-initial-state claim, or universal disturbance claim is made.",
+        "One HiGHS backend and one machine; no comparative or application-scale performance claim."
+      ],
+      "files": {
+        "driver.cpp": "59b207f4ed90690b05c8b8be2c2bde0b06b51c228663703b55c5cec665571abb",
+        "environment.json": "98cb34b6e790eb796db892bbea0006a45580fff4a5308c5679059280ceb4a255",
+        "ext04-h-policy-0c0a95116ce4642b.zip": "ae699086fa113df23d4724d0856449d932cd750101777d08da07a8b691bbadbf",
+        "figure_style.py": "c2f7078df95b9d75fe90f0f407023383cae4b58dd688dfa5fa5ac5b9d18664c6",
+        "h-domain-2d.png": "86fba62e398d636cabf1da4a4a1bd67a0d9a56aac70aca2b176b24f933efbcbd",
+        "h-domain-2d.svg": "0d62619c1b39a423efe880e5fe82b77a2cfec00e8019d09b4269ef0e487371cd",
+        "index.html": "d02a7ca7455f433f397406ca19d795e60417a6ac1cec854a1a83bee7f9724428",
+        "manifest.json": "517094b4c0bc0abf2fbab05572606a1a905fe05878d9f889171bf164e65b0c32",
+        "plot.py": "12403aa6d6c425636e7a8f1be11e1664955334267279484b5c672f129afbfa3a",
+        "records.json": "1826477cf70e63b043c057f746e99e8e50054884aee361b7fe5ee5ac9b7ef259",
+        "release-build-log.txt": "882ae27686b6aae8af3afd2b8db72877d7d46dec0cdd7c78a9bc69f5c5bd2581",
+        "renderer.py": "9e0a2800316a1878d4f9369539101b2a9f17a66728aa2efc5a72bd02a01c87b6",
+        "report_data.py": "835a88b239e26a64431f375ddbec1335bbdac5a82e2575a46bd47ac53f618867",
+        "summary.csv": "dc46254d2c507220d79565852f30ec5f5767b7239c4297b1322e45f1fe06e384",
+        "trials.jsonl": "7c51f19ce26a32ad4bbdc58fc3db392070ec4b44f8fc5d30ebe05488d52ef003"
+      },
+      "measured_scope": "Seven verified 100-call batches of joint H-domain affine policy evaluation; six safety rows and seven LP solves per call",
+      "payload_sha256": "1826477cf70e63b043c057f746e99e8e50054884aee361b7fe5ee5ac9b7ef259",
+      "public_files_sha256": {
+        "driver.cpp": "59b207f4ed90690b05c8b8be2c2bde0b06b51c228663703b55c5cec665571abb",
+        "environment.json": "98cb34b6e790eb796db892bbea0006a45580fff4a5308c5679059280ceb4a255",
+        "ext04-h-policy-0c0a95116ce4642b.zip": "ae699086fa113df23d4724d0856449d932cd750101777d08da07a8b691bbadbf",
+        "figure_style.py": "c2f7078df95b9d75fe90f0f407023383cae4b58dd688dfa5fa5ac5b9d18664c6",
+        "h-domain-2d.png": "86fba62e398d636cabf1da4a4a1bd67a0d9a56aac70aca2b176b24f933efbcbd",
+        "h-domain-2d.svg": "0d62619c1b39a423efe880e5fe82b77a2cfec00e8019d09b4269ef0e487371cd",
+        "index.html": "394559ac751d35b750ef0515411b811a5092f59310d41511e64edc7ff291a076",
+        "manifest.json": "517094b4c0bc0abf2fbab05572606a1a905fe05878d9f889171bf164e65b0c32",
+        "plot.py": "12403aa6d6c425636e7a8f1be11e1664955334267279484b5c672f129afbfa3a",
+        "publication-manifest.json": "5f032847757e0ed1e1bd9ecb74a24c7d2c8cc53151e280f15e1bf849acf0b02f",
+        "records.json": "1826477cf70e63b043c057f746e99e8e50054884aee361b7fe5ee5ac9b7ef259",
+        "release-build-log.txt": "882ae27686b6aae8af3afd2b8db72877d7d46dec0cdd7c78a9bc69f5c5bd2581",
+        "renderer.py": "9e0a2800316a1878d4f9369539101b2a9f17a66728aa2efc5a72bd02a01c87b6",
+        "report-envelope.json": "269d7d5edbf64a8494f5a8324f62f997de44200964209fced2e5decd25128521",
+        "report_data.py": "835a88b239e26a64431f375ddbec1335bbdac5a82e2575a46bd47ac53f618867",
+        "summary.csv": "dc46254d2c507220d79565852f30ec5f5767b7239c4297b1322e45f1fe06e384",
+        "trials.jsonl": "7c51f19ce26a32ad4bbdc58fc3db392070ec4b44f8fc5d30ebe05488d52ef003"
+      },
+      "publisher_sha256": "75fbc6124e0ab0e723f3f4ac598c168e17c53e4e7e96c7d48ca854b90491f9b2",
+      "report_id": "ext04-h-policy-0c0a95116ce4642b",
+      "source_commit": "0c0a95116ce4642bd560d8f285b244e104aaa266",
+      "source_report_id": "ext04-h-policy-0c0a95116ce4642b",
+      "zip_sha256": "aaa221a335648655927f8c564bbdabb1081d7213d82041fd9963b8a81d93d2ba"
+    }
+  ],
+  "schema": "csl.ext04-h-policy-publications/1"
+}

@@ -1,0 +1,106 @@
+{
+  "algorithm": "evaluate_h_continuous_policy",
+  "artifacts": {
+    "build_log_sha256": "882ae27686b6aae8af3afd2b8db72877d7d46dec0cdd7c78a9bc69f5c5bd2581",
+    "driver": "benchmarks/reporting/ext04/h_policy_driver.cpp",
+    "driver_sha256": "59b207f4ed90690b05c8b8be2c2bde0b06b51c228663703b55c5cec665571abb",
+    "environment_sha256": "98cb34b6e790eb796db892bbea0006a45580fff4a5308c5679059280ceb4a255",
+    "figure_style_sha256": "c2f7078df95b9d75fe90f0f407023383cae4b58dd688dfa5fa5ac5b9d18664c6",
+    "plot_adapter_sha256": "12403aa6d6c425636e7a8f1be11e1664955334267279484b5c672f129afbfa3a",
+    "renderer": "scripts/reports/ext04/h_policy_report.py",
+    "renderer_sha256": "9e0a2800316a1878d4f9369539101b2a9f17a66728aa2efc5a72bd02a01c87b6",
+    "report_data_sha256": "835a88b239e26a64431f375ddbec1335bbdac5a82e2575a46bd47ac53f618867"
+  },
+  "assurance": "numerical binary64",
+  "backend": "HiGHS LP adapter 1.11.0",
+  "batch_size": 100,
+  "collected_utc": "2026-10-29 14:20:52 UTC",
+  "environment": {
+    "cmake": "3.31.6",
+    "compiler": "GCC 16.2.1 (20260810)",
+    "configuration": "Release, -O3, C++20; warnings enabled and treated as errors for the report driver",
+    "cpu": "AMD Ryzen 5 3550H with Radeon Vega Mobile Gfx",
+    "host_load_at_measurement_start": "load average 3.89, 2.91, 4.01; the clean Release build had just completed",
+    "limiter_profile": "perf is not installed; no source-mapped limiter profile is available",
+    "logical_processors": 8,
+    "lp_backend": "HiGHS 1.11.0, native multithreading disabled",
+    "matplotlib": "3.11.2 (figure rendering only; excluded from solver timing)",
+    "ninja": "1.12.1",
+    "os": "Linux x86_64, kernel 7.2.8-9-omarchy",
+    "outer_workers": 1,
+    "report_figure_style": "csl-report-quantitative-v1"
+  },
+  "evidence_limits": [
+    "One analytic scalar one-step fixture with a one-dimensional correlated H-polytope.",
+    "The H-set is caller-authored; the report does not prove it encloses a physical disturbance model.",
+    "Floating-point feasibility and dual multipliers are numerical evidence, not validated arithmetic.",
+    "No policy synthesis, existential-initial-state claim, or universal disturbance claim is made.",
+    "One HiGHS backend and one machine; no comparative or application-scale performance claim."
+  ],
+  "failures": 0,
+  "figure": {
+    "axis_policy": "positioned numeric ticks, labels and major grids",
+    "matplotlib": "3.11.2",
+    "style": "csl-report-quantitative-v1",
+    "timing_included": false
+  },
+  "fixture": {
+    "dynamics": "x1=x0+u0",
+    "joint_h_domain": "-1<=x0<=1; -0.1<=e<=0.1; e=0.1*x0",
+    "observation": "y=x0+e, available before decision",
+    "policy": "u0=-y",
+    "safety_rows": [
+      {
+        "family": "state",
+        "max_activity": 1.0,
+        "stage": 0,
+        "upper_bound": 1.2
+      },
+      {
+        "family": "state",
+        "max_activity": 1.0,
+        "stage": 0,
+        "upper_bound": 1.2
+      },
+      {
+        "family": "state",
+        "max_activity": 0.1,
+        "stage": 1,
+        "upper_bound": 0.2
+      },
+      {
+        "family": "state",
+        "max_activity": 0.1,
+        "stage": 1,
+        "upper_bound": 0.2
+      },
+      {
+        "family": "action",
+        "max_activity": 1.1,
+        "stage": 0,
+        "upper_bound": 1.2
+      },
+      {
+        "family": "action",
+        "max_activity": 1.1,
+        "stage": 0,
+        "upper_bound": 1.2
+      }
+    ],
+    "terminal_state": "x1=-e=-0.1*x0"
+  },
+  "input_sha256": "712afd230aa5f0b3357defdb228011b44ed6e55f5f237b8b90a440bca0393f72",
+  "max_batch_ns": 76776185,
+  "measured_batches": 7,
+  "median_batch_ns": 76114922,
+  "median_ns_per_call": 761149.22,
+  "min_batch_ns": 75911542,
+  "performance_conclusion": "Descriptive single-adapter timing only; no comparator, source-mapped limiter profile, speedup, or scalability claim.",
+  "report_id": "ext04-h-policy-0c0a95116ce4642b",
+  "schema": "csl.ext04-h-policy-report/1",
+  "source_commit": "0c0a95116ce4642bd560d8f285b244e104aaa266",
+  "successes": 7,
+  "timing_scope": "public H-domain policy evaluator, seven HiGHS LP solves, and literal correlation, dual-residual, support-bound, and status checks; fixture creation and JSON serialization excluded",
+  "warmups_excluded": 1,
+  "workspace_reuse": "one HiGHS LP workspace reused sequentially within each process; each evaluator call solves one domain LP and six support dual LPs"
+}

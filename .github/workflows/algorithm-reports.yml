@@ -96,6 +96,16 @@ jobs:
             --target csl_ext04_affine_synthesis_report --parallel 2
           ctest --test-dir build/ext04-affine-synthesis-ci -C Release --output-on-failure \
             -R '^ext04_affine_synthesis_report_smoke$'
+      - name: Build and smoke the EXT-04 H-domain policy report
+        if: needs.route.outputs.native == 'true'
+        shell: bash
+        run: |
+          cmake -S . -B build/ext04-h-policy-ci -DBUILD_TESTING=ON -DCMAKE_BUILD_TYPE=Release \
+            -DCSL_ENABLE_HIGHS=ON -DCSL_ENABLE_QHULL=OFF -DCSL_BUILD_EXT04_H_POLICY_REPORT=ON
+          cmake --build build/ext04-h-policy-ci --config Release \
+            --target csl_ext04_h_policy_report --parallel 2
+          ctest --test-dir build/ext04-h-policy-ci -C Release --output-on-failure \
+            -R '^ext04_h_policy_report_smoke$'
       - name: Build and check MPC-05 causal minimax report driver
         if: needs.route.outputs.native == 'true' && hashFiles('reports/algorithm-results/mpc05-causal-tree-pilot-v2/result.json') != ''
         shell: bash
@@ -138,6 +148,9 @@ jobs:
             fi
             if test -f reports/algorithm-results/ext04-affine-synthesis-publications.json; then
               python scripts/reports/stage_ext04_affine_synthesis.py --catalog reports/algorithm-results/ext04-affine-synthesis-publications.json --site build/report-site
+            fi
+            if test -f reports/algorithm-results/ext04-h-policy-publications.json; then
+              python scripts/reports/stage_ext04_h_policy.py --catalog reports/algorithm-results/ext04-h-policy-publications.json --site build/report-site
             fi
             if test -f reports/algorithm-results/ext05-publications.json; then
               python scripts/reports/stage_ext05.py --catalog reports/algorithm-results/ext05-publications.json --site build/report-site

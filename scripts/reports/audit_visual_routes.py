@@ -23,6 +23,7 @@ MIGRATION_ISSUES = {
 COMPOSED_SAVED_ROUTES = {
     "scripts/reports/ext03_transform/report.py",
     "scripts/reports/ext04/continuous_report.py",
+    "scripts/reports/ext04/h_policy_report.py",
     "scripts/reports/issue422/build_bundle.py",
     "scripts/reports/stage_mpc03.py",
     "scripts/reports/stage_mpc03_b08.py",

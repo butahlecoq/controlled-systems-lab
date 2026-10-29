@@ -1,0 +1,20 @@
+{
+  "files": {
+    "driver.cpp": "59b207f4ed90690b05c8b8be2c2bde0b06b51c228663703b55c5cec665571abb",
+    "environment.json": "98cb34b6e790eb796db892bbea0006a45580fff4a5308c5679059280ceb4a255",
+    "figure_style.py": "c2f7078df95b9d75fe90f0f407023383cae4b58dd688dfa5fa5ac5b9d18664c6",
+    "h-domain-2d.png": "86fba62e398d636cabf1da4a4a1bd67a0d9a56aac70aca2b176b24f933efbcbd",
+    "h-domain-2d.svg": "0d62619c1b39a423efe880e5fe82b77a2cfec00e8019d09b4269ef0e487371cd",
+    "index.html": "d02a7ca7455f433f397406ca19d795e60417a6ac1cec854a1a83bee7f9724428",
+    "plot.py": "12403aa6d6c425636e7a8f1be11e1664955334267279484b5c672f129afbfa3a",
+    "records.json": "1826477cf70e63b043c057f746e99e8e50054884aee361b7fe5ee5ac9b7ef259",
+    "release-build-log.txt": "882ae27686b6aae8af3afd2b8db72877d7d46dec0cdd7c78a9bc69f5c5bd2581",
+    "renderer.py": "9e0a2800316a1878d4f9369539101b2a9f17a66728aa2efc5a72bd02a01c87b6",
+    "report_data.py": "835a88b239e26a64431f375ddbec1335bbdac5a82e2575a46bd47ac53f618867",
+    "summary.csv": "dc46254d2c507220d79565852f30ec5f5767b7239c4297b1322e45f1fe06e384",
+    "trials.jsonl": "7c51f19ce26a32ad4bbdc58fc3db392070ec4b44f8fc5d30ebe05488d52ef003"
+  },
+  "report_id": "ext04-h-policy-0c0a95116ce4642b",
+  "schema": "csl.ext04-h-policy-manifest/1",
+  "source_commit": "0c0a95116ce4642bd560d8f285b244e104aaa266"
+}

@@ -1,0 +1,15 @@
+{
+  "cmake": "3.31.6",
+  "compiler": "GCC 16.2.1 (20260810)",
+  "configuration": "Release, -O3, C++20; warnings enabled and treated as errors for the report driver",
+  "cpu": "AMD Ryzen 5 3550H with Radeon Vega Mobile Gfx",
+  "host_load_at_measurement_start": "load average 3.89, 2.91, 4.01; the clean Release build had just completed",
+  "limiter_profile": "perf is not installed; no source-mapped limiter profile is available",
+  "logical_processors": 8,
+  "lp_backend": "HiGHS 1.11.0, native multithreading disabled",
+  "matplotlib": "3.11.2 (figure rendering only; excluded from solver timing)",
+  "ninja": "1.12.1",
+  "os": "Linux x86_64, kernel 7.2.8-9-omarchy",
+  "outer_workers": 1,
+  "report_figure_style": "csl-report-quantitative-v1"
+}
