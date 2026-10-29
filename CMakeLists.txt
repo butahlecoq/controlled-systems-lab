@@ -43,6 +43,7 @@ option(CSL_BUILD_EXP04_REPORT "Build the EXP-04 independent plant replay report 
 option(CSL_BUILD_APP02_REPORT "Build the APP-02 box and parallelotope report driver" OFF)
 option(CSL_BUILD_APP03_REPORT "Build the APP-03 zonotope reduction report driver" OFF)
 option(CSL_BUILD_APP04_REPORT "Build the APP-04 ellipsoid report driver" OFF)
+option(CSL_BUILD_EXP03_TWO_POINTS_REPORT "Build the EXP-03 TwoPoints approximation comparison driver" OFF)
 option(CSL_BUILD_EXT05_REPORT "Build the EXT-05 continuous model report driver" OFF)
 option(CSL_BUILD_EXT07_REPORT "Build the EXT-07 hybrid profile report driver" OFF)
 option(CSL_BUILD_OPT10_REPORT "Build the OPT-10 smooth-convex report driver" OFF)

@@ -183,6 +183,13 @@
       "follow_up_issue": 717
     },
     {
+      "source": "scripts/reports/exp03/render_two_points_approximation.py",
+      "signal_count": 1,
+      "asset_name_literals": [],
+      "disposition": "deferred-family-specific-migration",
+      "follow_up_issue": 684
+    },
+    {
       "source": "scripts/reports/exp04/render_saved.py",
       "signal_count": 4,
       "asset_name_literals": [
@@ -1673,6 +1680,16 @@
       "index_sha256": "78309c404a04d45934e4466fc6233251db6dd4e72c40e4daf2bc9a3470be251e",
       "disposition": "deferred: original frozen route-level readability review remains; companion availability is listed separately",
       "follow_up_issue": 686
+    },
+    {
+      "route": "exp03-two-points-approx-pilot-v1",
+      "source_bundle": "exp03-two-points-approx-pilot-v1",
+      "assets": [
+        "reachability-and-approximations.svg"
+      ],
+      "index_sha256": "02f8506eb3f864f74fa9c78917d48ae16450dfb184bbc185ba537185478bd1de",
+      "disposition": "deferred: original frozen route-level readability review remains; companion availability is listed separately",
+      "follow_up_issue": 669
     },
     {
       "route": "exp04-replay-93fe3b87795e1d3a",
