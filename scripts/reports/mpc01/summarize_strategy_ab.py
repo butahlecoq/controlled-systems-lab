@@ -59,7 +59,8 @@ def write_report(output: Path, measured: dict[str, list[dict]], environment: dic
             else:
                 shapes.append(f'<circle cx="{px(u0):.1f}" cy="{py(u1):.1f}" r="11" fill="none" stroke="{colors[strategy]}" stroke-width="3"><title>{title}</title></circle>')
     legend = "".join(
-        f'<p><span style="color:{colors[s]}">●</span> {labels[s]}: {len(points[s])} distinct saved selected histories</p>'
+        f'<p><span style="color:{colors[s]}">{("●" if s == EXPECTED[0] else "◯")}</span> '
+        f'{labels[s]}: {len(points[s])} distinct saved selected histories</p>'
         for s in EXPECTED
     )
     svg = f'''<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 660 610" role="img" aria-labelledby="title desc">
