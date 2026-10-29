@@ -82,6 +82,33 @@ set_tests_properties(mpc06_tube_pilot_independent_check PROPERTIES LABELS report
 endif()
 endif()
 
+
+if(CSL_BUILD_MPC04_REPORT)
+add_executable(csl_mpc04_max_coordinate_replanning
+  benchmarks/reporting/mpc04/max_coordinate_replanning.cpp)
+target_link_libraries(csl_mpc04_max_coordinate_replanning PRIVATE CSL::finite_action_minimax)
+target_include_directories(csl_mpc04_max_coordinate_replanning SYSTEM PRIVATE ${csl_json_SOURCE_DIR}/include)
+target_compile_features(csl_mpc04_max_coordinate_replanning PRIVATE cxx_std_20)
+if(MSVC)
+  target_compile_options(csl_mpc04_max_coordinate_replanning PRIVATE /W4 /WX /permissive-)
+else()
+  target_compile_options(csl_mpc04_max_coordinate_replanning PRIVATE -Wall -Wextra -Wpedantic -Werror)
+endif()
+if(BUILD_TESTING)
+  find_package(Python3 3.11 REQUIRED COMPONENTS Interpreter)
+  set(MPC04_OUTPUT_DIR "${PROJECT_BINARY_DIR}/reports/mpc04-max-coordinate-pilot")
+  add_test(NAME mpc04_native_replanning_pilot COMMAND Python3::Interpreter
+    ${PROJECT_SOURCE_DIR}/scripts/reports/mpc04/max_coordinate_replanning.py
+    --output ${MPC04_OUTPUT_DIR}
+    --native-executable $<TARGET_FILE:csl_mpc04_max_coordinate_replanning>)
+  add_test(NAME mpc04_native_replanning_replay COMMAND Python3::Interpreter
+    ${PROJECT_SOURCE_DIR}/scripts/reports/mpc04/check_max_coordinate.py
+    ${MPC04_OUTPUT_DIR}/result.json)
+  set_tests_properties(mpc04_native_replanning_replay PROPERTIES
+    DEPENDS mpc04_native_replanning_pilot LABELS reporting)
+endif()
+endif()
+
 if(CSL_BUILD_MPC01_REPORT)
 include(cmake/JsonDependencies.cmake)
 include(cmake/Mpc01Dependencies.cmake)

@@ -7,6 +7,7 @@ import itertools
 import json
 import math
 import statistics
+import subprocess
 import time
 from dataclasses import asdict, dataclass
 from pathlib import Path
@@ -333,21 +334,29 @@ def write_svg(path: Path, records: list[dict]) -> None:
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--output", type=Path, required=True)
+    parser.add_argument("--native-executable", type=Path)
     args = parser.parse_args()
     fixture_evidence = check_policy_gap_fixtures()
     fallback_evidence = check_fallback_semantics()
-    rows = []
-    for policy in ("nominal_zero_disturbance", "finite_minimax"):
-        for horizon in (SHRINKING, MOVING):
-            for disturbance in histories():
-                rows.append(run_episode(policy, horizon, tuple(disturbance)))
+    if args.native_executable:
+        native = subprocess.run([str(args.native_executable)], check=True, capture_output=True, text=True)
+        rows = json.loads(native.stdout)["episodes"]
+        implementation = "repository C++ csl.finite_action_minimax adapter"
+    else:
+        rows = []
+        for policy in ("nominal_zero_disturbance", "finite_minimax"):
+            for horizon in (SHRINKING, MOVING):
+                for disturbance in histories():
+                    rows.append(run_episode(policy, horizon, tuple(disturbance)))
+        implementation = "standalone Python reference enumerator"
     grouped: dict[str, list[dict]] = {}
     for row in rows:
         grouped.setdefault(f"{row['policy']}::{row['horizon']}", []).append(row)
     report = {
         "schema": "csl.mpc04.max-coordinate-pilot/1",
         "source": {"repository": "imm-rl-lab/optimal_control", "commit": SOURCE_COMMIT,
-                   "path": SOURCE_PATH, "blob": SOURCE_BLOB, "environment": "MaxCoordinateGame"},
+                   "path": SOURCE_PATH, "blob": SOURCE_BLOB, "environment": "MaxCoordinateGame",
+                   "license_note": "No repository license declared; source equations and parameters are re-expressed; no upstream source code copied"},
         "source_model": {"state_order": ["time", "y", "z"], "initial_state": INITIAL_STATE,
                          "dt_seconds": DT, "inner_euler_steps": INNER_EULER_STEPS,
                          "dynamics": "y'=z+v; z'=-y+u", "terminal_objective": "max(abs(y),abs(z))"},
@@ -360,12 +369,14 @@ def main() -> None:
                        "warm_start": "none; each finite enumeration restarts from its authored plan catalogue",
                        "decision_order": "observe full state; select u; apply current v; advance",
                        "moving_horizon_prediction": "source dynamics continue beyond scored episode endpoint",
-                       "tie_selector": "minimize binary64 objective, then first plan in authored action order on exact equality",
+                       "tie_selector": "first plan in authored action order within 1e-12 absolute objective tolerance",
                        "deadline_ns_per_decision": 50000000,
+                       "deadline_enforcement": "reject a solve that returns after the deadline; current finite_action_minimax call is not interruptible",
                        "fallback": "apply u=0 after timeout/solver failure, count the decision, continue the episode",
                        "stability_scope": "finite episode outcomes only; no recursive feasibility or stability theorem"},
         "objective": {"planning": "terminal squared max-coordinate objective; zero nominal disturbance or finite min-max",
                       "reported": "source terminal max(abs(y),abs(z))"},
+        "algorithm_implementation": implementation,
         "scope": "finite-action, four-step source-derived adaptation; not a reproduction of the continuous-action four-second RL task; finite disturbance histories only",
         "fixtures": fixture_evidence,
         "fallback_fixtures": fallback_evidence,
