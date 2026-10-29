@@ -105,6 +105,15 @@
       "disposition": "saved-control-witness-gallery-companion-builder"
     },
     {
+      "source": "scripts/reports/env717/capture_two_particle_minimax.py",
+      "signal_count": 3,
+      "asset_name_literals": [
+        "projections.svg"
+      ],
+      "disposition": "deferred-family-specific-migration",
+      "follow_up_issue": 717
+    },
+    {
       "source": "scripts/reports/env717/check_air_to_air.py",
       "signal_count": 3,
       "asset_name_literals": [
@@ -928,6 +937,14 @@
       "disposition": "publication-validation-or-frozen-route"
     },
     {
+      "source": "scripts/reports/stage_env717_two_particle_minimax.py",
+      "signal_count": 3,
+      "asset_name_literals": [
+        "projections.svg"
+      ],
+      "disposition": "publication-validation-or-frozen-route"
+    },
+    {
       "source": "scripts/reports/stage_env717_two_points.py",
       "signal_count": 3,
       "asset_name_literals": [
@@ -1711,6 +1728,16 @@
         "reachability.svg"
       ],
       "index_sha256": "4f6c32f977c999bf4b5663407c0e0e8f1576f292aae5afef30a56e24045a89a4",
+      "disposition": "deferred: original frozen route-level readability review remains; companion availability is listed separately",
+      "follow_up_issue": 717
+    },
+    {
+      "route": "env717-two-particle-minimax-v1",
+      "source_bundle": "env717-two-particle-minimax-v1",
+      "assets": [
+        "projections.svg"
+      ],
+      "index_sha256": "0833ec55d5cd067f85913a7196798c553d3304ef8f8516e76acd5b6178d68a88",
       "disposition": "deferred: original frozen route-level readability review remains; companion availability is listed separately",
       "follow_up_issue": 717
     },

@@ -1,0 +1,20 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>TwoParticleGame: finite reachability and minimax</title>
+<style>body{font:16px/1.55 system-ui,sans-serif;max-width:78rem;margin:auto;padding:1.2rem;color:#172033}img{width:100%;height:auto}code{overflow-wrap:anywhere}table{border-collapse:collapse}td,th{border:1px solid #ccd3dc;padding:.4rem .7rem;text-align:left}.note{background:#f4f6f8;padding:.8rem 1rem;border-left:4px solid #55718f}.quiet{color:#536273}</style></head>
+<body><h1>TwoParticleGame: finite reachability and minimax</h1>
+<p>This example applies our finite-feedback reachability and causal minimax solvers to the source-derived two-particle game. The finite game has four physical state coordinates and a short four-stage horizon.</p>
+<figure><img src="projections.svg" alt="Forward graph states, backward-winning intersections, minimax path, and target in position and velocity projections"><figcaption>Projected graph nodes are points, not convex hulls. Each stage color is a different time layer; the red points are states that are both forward reachable and backward winning.</figcaption></figure>
+<h2>Result</h2><table><tbody><tr><th>Forward graph states by stage</th><td>1, 9, 81, 621, 3969</td></tr>
+<tr><th>First robust capture of |x₁−x₂| ≤ 1</th><td>4 decisions (0.8 s)</td></tr>
+<tr><th>Finite causal minimax terminal gap</th><td>0.859899</td></tr>
+<tr><th>Selected minimizing-control / worst-response path</th><td>u=-3, v=-3 → u=-3, v=-3 → u=-3, v=-3 → u=-3, v=-3</td></tr>
+<tr><th>Independent replay</th><td>verified: 4681 states, 6408 transition cells, 5 winning layers</td></tr></tbody></table>
+<h2>Source model and adaptation</h2><p>The source environment uses state <code>(t,x₁,v₁,x₂,v₂)</code>, parameters α=1, m₁=0.1, m₂=1, 0.2-second decisions, and 20 held-action RK4 substeps. Its terminal reward is <code>−|x₁−x₂|</code>; accordingly, u minimizes the terminal gap and v maximizes it. This pilot changes the source initial state from all zeros to <code>(0,2,0,0,0)</code>, truncates the 2-second source horizon to 0.8 seconds, and uses action catalogues <code>[-3, 0, 3]</code>.</p>
+<p class="note">The upstream Markov game supplies both agents' actions at a step. Our finite causal solver gives the disturbance player v the stronger within-stage information pattern: v sees u before responding. State values and policies are for this finite, quantized game; they do not reproduce or estimate the continuous-action RL outcome. The graph rounds each RK4 stage state to a 10⁻⁶ lattice and solves only states reachable from the selected initial point.</p>
+<p>Source: <a href="https://github.com/imm-rl-lab/differential_game_gym/tree/af5f0a2ee498c0edcf88d60f1d6c49a39bd08bc8/Environments/TwoParticleGame">TwoParticleGame at pinned commit</a>, source blob <code>7e7d326f8ff81f7dacc05ac72848eeaac6a03021</code>, licensed Apache-2.0 at that commit. Scenario SHA-256: <code>13049b50f59fb69e36b14276e100f7fa4e9e185578cec0483dea287e5f226696</code>.</p>
+<h2>Reproduction and evidence</h2><p>Build the optional report driver with <code>CSL_BUILD_ENV717_REPORT=ON</code>, run <code>csl_env717_two_particle_minimax</code>, and independently check it with <code>python scripts/reports/env717/check_two_particle_minimax.py DRIVER</code>. The raw result, scenario, independent check, figure data, build identity, and checksums are included with the report files.</p>
+<p class="quiet">This is an illustrative finite game result, not a performance comparison. No speedup or continuous-game guarantee is claimed.</p>
+<p>Capture: <code>2026-10-29T20:45:15+00:00</code>; source commit <code>46ade4f63907c20c8807d14f518be10489b8f4a9</code>; executable SHA-256 <code>ebf550d2f726b5211353adc01ba1a95d264ac5e53cff5f9cd6eb749fefc6ba5d</code>.</p>
+<p><a href="result.json">Raw result</a> · <a href="figure-data.json">Figure data</a> · <a href="check.json">Independent check</a> · <a href="capture.json">Capture metadata</a> · <a href="README.md">Reproduction notes</a></p>
+</body></html>

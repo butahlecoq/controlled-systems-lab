@@ -20,6 +20,8 @@ class VisualRouteInventoryTests(unittest.TestCase):
         self.assertEqual(producers["scripts/reports/env717/check_two_points.py"]["follow_up_issue"],717)
         self.assertEqual(producers["scripts/reports/env717/check_two_points.py"]["asset_name_literals"],
                          ["projections.svg"])
+        self.assertIn("scripts/reports/env717/capture_two_particle_minimax.py", producers)
+        self.assertIn("scripts/reports/stage_env717_two_particle_minimax.py", producers)
         self.assertNotIn("policy.svg", producers["scripts/reports/site.py"]["asset_name_literals"])
         self.assertIn("visual.svg", producers["scripts/reports/ext03_transform/report.py"]["asset_name_literals"])
         self.assertNotIn("csl.report.svg", {
@@ -126,7 +128,7 @@ class VisualRouteInventoryTests(unittest.TestCase):
         follow_up_counts={number:sum(entry["follow_up_issue"]==number for entry in deferred)
                           for number in (684,685,686,687,708,717)}
         self.assertEqual(follow_up_counts,
-                         {684:6,685:0,686:1,687:4,708:1,717:12})
+                         {684:6,685:0,686:1,687:4,708:1,717:13})
         reviewed=[entry for entry in producers.values() if entry.get("role")]
         self.assertEqual(len(reviewed),24)
         self.assertEqual(set(entry["source"] for entry in reviewed),
@@ -156,6 +158,7 @@ class VisualRouteInventoryTests(unittest.TestCase):
         self.assertEqual(routes["env717-sphere-game-pilot-v1"]["follow_up_issue"], 717)
         self.assertEqual(routes["env717-point-on-plane-pilot-v1"]["follow_up_issue"], 717)
         self.assertEqual(routes["env717-time-sphere-pilot-v1"]["follow_up_issue"], 717)
+        self.assertEqual(routes["env717-two-particle-minimax-v1"]["follow_up_issue"], 717)
         self.assertEqual(routes["env717-multipoint-cost-game-pilot-v1"]["follow_up_issue"], 717)
         self.assertTrue(any(name.endswith("terminal-projections.svg")
                             for entry in routes.values() for name in entry["assets"]))
