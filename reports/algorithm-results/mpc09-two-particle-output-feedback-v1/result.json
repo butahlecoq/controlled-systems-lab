@@ -44,7 +44,7 @@
     "observation": "relative position plus error in {-0.2,+0.2}; available before every decision",
     "rows": 864,
     "scenario_id": "mpc09-two-particle-output-feedback-v1",
-    "source_state_adaptation": "The source fifth coordinate is clock time; the stage grid represents it explicitly, leaving four physical plant state coordinates.",
+    "source_state_adaptation": "The source first coordinate (state[0]) is clock time; the stage grid represents it explicitly, leaving source coordinates state[1] through state[4] as the four physical plant state coordinates.",
     "state_order": [
       "position_1",
       "velocity_1",
