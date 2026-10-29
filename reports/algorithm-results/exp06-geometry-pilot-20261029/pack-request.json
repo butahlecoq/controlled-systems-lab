@@ -5,7 +5,7 @@
       "attempts": [
         {
           "measurement": {
-            "duration_ns": 11091787,
+            "duration_ns": 11120772,
             "instrumentation": "disabled",
             "method_id": "csl.geometry.a29-a30-python",
             "repetition": 0,
@@ -62,7 +62,7 @@
               ],
               "status": "verified"
             },
-            "duration_ns": 11091787,
+            "duration_ns": 11120772,
             "indices": [
               0,
               3,
@@ -88,7 +88,7 @@
         },
         {
           "measurement": {
-            "duration_ns": 3361766,
+            "duration_ns": 3360788,
             "instrumentation": "disabled",
             "method_id": "csl.geometry.a29-a30-python",
             "repetition": 1,
@@ -145,7 +145,7 @@
               ],
               "status": "verified"
             },
-            "duration_ns": 3361766,
+            "duration_ns": 3360788,
             "indices": [
               0,
               3,
@@ -171,7 +171,7 @@
         },
         {
           "measurement": {
-            "duration_ns": 3582395,
+            "duration_ns": 3388655,
             "instrumentation": "disabled",
             "method_id": "csl.geometry.a29-a30-python",
             "repetition": 2,
@@ -228,7 +228,7 @@
               ],
               "status": "verified"
             },
-            "duration_ns": 3582395,
+            "duration_ns": 3388655,
             "indices": [
               0,
               3,
@@ -254,7 +254,7 @@
         },
         {
           "measurement": {
-            "duration_ns": 3234234,
+            "duration_ns": 3190444,
             "instrumentation": "disabled",
             "method_id": "csl.geometry.a29-a30-python",
             "repetition": 3,
@@ -311,7 +311,7 @@
               ],
               "status": "verified"
             },
-            "duration_ns": 3234234,
+            "duration_ns": 3190444,
             "indices": [
               0,
               3,
@@ -337,7 +337,7 @@
         },
         {
           "measurement": {
-            "duration_ns": 3360299,
+            "duration_ns": 3370147,
             "instrumentation": "disabled",
             "method_id": "csl.geometry.a29-a30-python",
             "repetition": 4,
@@ -394,7 +394,7 @@
               ],
               "status": "verified"
             },
-            "duration_ns": 3360299,
+            "duration_ns": 3370147,
             "indices": [
               0,
               3,
@@ -420,7 +420,7 @@
         },
         {
           "measurement": {
-            "duration_ns": 3165580,
+            "duration_ns": 3202875,
             "instrumentation": "disabled",
             "method_id": "csl.geometry.a29-a30-python",
             "repetition": 5,
@@ -477,7 +477,7 @@
               ],
               "status": "verified"
             },
-            "duration_ns": 3165580,
+            "duration_ns": 3202875,
             "indices": [
               0,
               3,
@@ -521,7 +521,7 @@
       "attempts": [
         {
           "measurement": {
-            "duration_ns": 54617,
+            "duration_ns": 40508,
             "instrumentation": "disabled",
             "method_id": "csl.geometry.quickhull-2d",
             "repetition": 0,
@@ -532,7 +532,7 @@
           "result": {
             "algorithm": {
               "algorithm_status": "completed",
-              "duration_ns": 54617,
+              "duration_ns": 40508,
               "indices": [
                 0,
                 1,
@@ -562,7 +562,7 @@
               ],
               "status": "verified"
             },
-            "duration_ns": 54617,
+            "duration_ns": 40508,
             "indices": [
               0,
               1,
@@ -588,7 +588,7 @@
         },
         {
           "measurement": {
-            "duration_ns": 37644,
+            "duration_ns": 44280,
             "instrumentation": "disabled",
             "method_id": "csl.geometry.quickhull-2d",
             "repetition": 1,
@@ -599,7 +599,7 @@
           "result": {
             "algorithm": {
               "algorithm_status": "completed",
-              "duration_ns": 37644,
+              "duration_ns": 44280,
               "indices": [
                 0,
                 1,
@@ -629,7 +629,7 @@
               ],
               "status": "verified"
             },
-            "duration_ns": 37644,
+            "duration_ns": 44280,
             "indices": [
               0,
               1,
@@ -655,7 +655,7 @@
         },
         {
           "measurement": {
-            "duration_ns": 40578,
+            "duration_ns": 20603,
             "instrumentation": "disabled",
             "method_id": "csl.geometry.quickhull-2d",
             "repetition": 2,
@@ -666,7 +666,7 @@
           "result": {
             "algorithm": {
               "algorithm_status": "completed",
-              "duration_ns": 40578,
+              "duration_ns": 20603,
               "indices": [
                 0,
                 1,
@@ -696,7 +696,7 @@
               ],
               "status": "verified"
             },
-            "duration_ns": 40578,
+            "duration_ns": 20603,
             "indices": [
               0,
               1,
@@ -722,7 +722,7 @@
         },
         {
           "measurement": {
-            "duration_ns": 44908,
+            "duration_ns": 45327,
             "instrumentation": "disabled",
             "method_id": "csl.geometry.quickhull-2d",
             "repetition": 3,
@@ -733,7 +733,7 @@
           "result": {
             "algorithm": {
               "algorithm_status": "completed",
-              "duration_ns": 44908,
+              "duration_ns": 45327,
               "indices": [
                 0,
                 1,
@@ -763,7 +763,7 @@
               ],
               "status": "verified"
             },
-            "duration_ns": 44908,
+            "duration_ns": 45327,
             "indices": [
               0,
               1,
@@ -789,7 +789,7 @@
         },
         {
           "measurement": {
-            "duration_ns": 40438,
+            "duration_ns": 40020,
             "instrumentation": "disabled",
             "method_id": "csl.geometry.quickhull-2d",
             "repetition": 4,
@@ -800,7 +800,7 @@
           "result": {
             "algorithm": {
               "algorithm_status": "completed",
-              "duration_ns": 40438,
+              "duration_ns": 40020,
               "indices": [
                 0,
                 1,
@@ -830,7 +830,7 @@
               ],
               "status": "verified"
             },
-            "duration_ns": 40438,
+            "duration_ns": 40020,
             "indices": [
               0,
               1,
@@ -856,7 +856,7 @@
         },
         {
           "measurement": {
-            "duration_ns": 45187,
+            "duration_ns": 44839,
             "instrumentation": "disabled",
             "method_id": "csl.geometry.quickhull-2d",
             "repetition": 5,
@@ -867,7 +867,7 @@
           "result": {
             "algorithm": {
               "algorithm_status": "completed",
-              "duration_ns": 45187,
+              "duration_ns": 44839,
               "indices": [
                 0,
                 1,
@@ -897,7 +897,7 @@
               ],
               "status": "verified"
             },
-            "duration_ns": 45187,
+            "duration_ns": 44839,
             "indices": [
               0,
               1,

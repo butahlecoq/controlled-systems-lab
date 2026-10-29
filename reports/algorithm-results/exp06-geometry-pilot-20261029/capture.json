@@ -32,7 +32,7 @@
     },
     "schema": "csl.exp06-checker-controls/1"
   },
-  "created_utc": "2026-10-29T01:10:36Z",
+  "created_utc": "2026-10-29T01:13:00Z",
   "execution_order": [
     {
       "method_id": "csl.geometry.a29-a30-python",
@@ -92,7 +92,7 @@
     },
     {
       "path": "scripts/reports/exp06/render_saved.py",
-      "sha256": "62f1a8153e8b1121174b55af887d231564a392897212c07256069cefc3f49744"
+      "sha256": "6efc6290a59de4ad6e1b4ef55463f41528d3a6fb2754430a76170b0e75f49e59"
     },
     {
       "path": "scripts/reports/stage_exp06.py",
@@ -119,12 +119,12 @@
     "architecture": "x86_64",
     "cpu_model": "AMD Ryzen 5 3550H with Radeon Vega Mobile Gfx",
     "load_average_1m_5m_15m": [
-      0.0849609375,
-      0.515625,
-      0.8779296875
+      0.44189453125,
+      0.4794921875,
+      0.80810546875
     ],
     "logical_cpus": 8,
-    "observed_process_count": 323,
+    "observed_process_count": 324,
     "os": "Linux-7.2.8-9-omarchy-x86_64-with-glibc2.44"
   },
   "limiter_profile": {
@@ -143,7 +143,7 @@
   "quickhull_executable_sha256": "464f9c7a38c2150599d6424463dc1d883c6213138a8a901fa32e6940c4d57498",
   "request_digest": "73065dd39277c3bde0e6afee987a4a4b91cef34480b84a02d09348cc49be2869",
   "schema": "csl.exp06-capture/1",
-  "source_commit": "e2a41db54b0757c7471dcc2993149ff65ab2f067",
+  "source_commit": "f40f4b702bd4edba89443c7626be512df4b1f651",
   "stderr": "",
   "timeout_seconds": 300,
   "timing_comparison": "inconclusive: Python/NumPy and C++ timings use different runtimes and intervals",
