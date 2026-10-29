@@ -80,7 +80,7 @@ The operation receives an `LPWorkspace` because generated requests belong to the
 
 Only a completed solver result with a primal candidate proceeds. Reconstruct the policy, evaluate it with `evaluate_continuous_policy(scope=all_joint_uncertainty)`, and return success only when that independent replay has no violation and no tolerance-band margin. `Assurance::numerical` is retained. A solver's numerical infeasible status is not elevated to a no-policy theorem: the current phase-one adapter does not return an independently checked exact Farkas certificate. Such a case is `AffineSynthesisInconclusive`.
 
-The public call hides coefficient indexing, LP row construction, policy materialization, and full-generator replay. It exposes the solver workspace and finite safety/domain inputs because those are real caller choices. It does not add a generic policy-optimization framework, objective contract, H-representation, or separate trajectory format.
+The synthesis call hides coefficient indexing, LP row construction, policy materialization, and full-generator replay. It exposes the solver workspace and finite safety/domain inputs because those are real caller choices. It does not add a generic policy-optimization framework, objective contract, or separate trajectory format. The policy-evaluation API now has a separate H-domain operation; that does not extend this V-domain synthesis request.
 
 ## Synthesis decision
 
@@ -112,4 +112,12 @@ Candidate 1's finite action catalogue, scenario-tree search, and shared mutable 
 
 ## Implemented slice and remaining scope
 
-The request validation, one-step coefficient-row builder, injected-workspace solve, affine policy materialization and all-generator evaluator check are implemented. Contract tests cover universal success, after-decision rejection, solver infeasibility without a certificate, memory-budget stop and unsupported longer horizon. The result still has numerical assurance, and infeasibility remains inconclusive. The broader issue remains open for existential/all-initial quantifiers, multi-step lifecycle synthesis, partial/noisy scenario separation and universal disturbance/error certificates.
+The request validation, one-step coefficient-row builder, injected-workspace solve, affine policy materialization and all-generator evaluator check are implemented for joint V-domains. Contract tests cover universal success, after-decision rejection, solver infeasibility without a certificate, memory-budget stop and unsupported longer horizon. The result still has numerical assurance, and infeasibility remains inconclusive.
+
+## Joint H-domain policy evaluation
+
+`make_joint_h_uncertainty` accepts one H-represented set whose coordinates jointly contain the initial state, each stage's external inputs, and every scheduled measurement-error coordinate. Inequalities and equalities are retained, so correlations across those coordinate groups stay in the mathematical domain. The constructor checks representation shape and the system coordinate layout; it does not prove that the H-set is nonempty.
+
+`evaluate_h_continuous_policy` first obtains a numerical feasible point for the domain. It then derives each supplied safety-row activity as an affine function of the joint coordinates and constructs the dual LP for its support maximum. A row is within tolerance only when the dual LP supplies a numerically feasible multiplier vector and independent primal evaluation yields an upper bound below the safety limit. If that certificate does not prove safety, a primal support LP searches for a violating point; the point is replayed and retained as a counterexample. An empty-domain report, unbounded support, missing dual witness, or tolerance-band result remains inconclusive. The evaluator returns numerical assurance and makes no validated-arithmetic claim.
+
+The H operation evaluates a caller-authored fixed affine policy; it does not synthesize one. The one-stage synthesis request above still uses the joint V-representation. Robust H-domain synthesis needs a separate coefficient-level dualization contract and tests. Both H evaluation and V synthesis leave EXT-04 open for existential/all-initial quantifiers, multi-stage lifecycle synthesis, partial/noisy scenario separation, and universal disturbance/error certificates beyond the authored domain.

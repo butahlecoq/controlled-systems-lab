@@ -155,10 +155,19 @@ verified against the reviewed artifact hashes (page SHA-256
 report covers the configured sampled replay only and does not establish an
 all-initial-states policy, universal disturbance coverage, or validated
 guarantees. This report does not measure or validate the finite policy-family
-or continuous-policy evaluators. The continuous evaluator covers only the
-joint V-polytope and affine-policy profile described above. General synthesis,
-H-represented joint domains, existential-initial/universal-disturbance
-quantifier alternation, and validated arithmetic remain open work under #68.
+or continuous-policy evaluators. The continuous evaluator supports affine
+policies over an authored joint V-polytope or H-polytope. The H path solves one
+feasibility LP for a numerical domain witness and one support LP for each linear
+state/action safety row. It preserves correlations encoded across initial
+state, external inputs and measurement errors. A satisfied row requires a
+numerically feasible dual multiplier whose independently evaluated objective
+is below the row bound. If that does not establish safety, a feasible primal
+point is replayed and retained when it violates the row. Empty-domain claims,
+unbounded support, missing dual witnesses, and tolerance-band cases remain
+inconclusive.
+Assurance is numerical, not validated. H-domain policy synthesis,
+existential-initial / universal-disturbance quantifier alternation, and
+validated arithmetic remain open work under #68.
 
 The [two-state continuous-policy example](../examples/continuous-policy-2d.html)
 shows a position-velocity rectangle and its terminal image under a
