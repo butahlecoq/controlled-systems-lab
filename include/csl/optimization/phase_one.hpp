@@ -19,6 +19,9 @@ struct Options {
     std::uint64_t pivot_limit{10000};
     std::size_t dense_entry_limit{1048576}, trace_limit{128};
     double pivot_relative_tolerance{1e-12};
+    // Optional priority per structural variable. Only exact equal-price
+    // structural entering candidates consult it; empty keeps Bland ordering.
+    std::vector<double> structural_entering_priorities{};
     // Synchronous post-commit borrow; may be copied. No workspace reentrancy.
     // Captured owners/synchronization are the caller's responsibility.
     std::function<void(const PivotEvent&)> pivot_observer{};
@@ -42,7 +45,7 @@ struct Snapshot {
     SolveStamp solve;
     Termination termination;
     Reason reason;
-    std::uint64_t pivots, degenerate_pivots, factorizations, pricing_passes;
+    std::uint64_t pivots, degenerate_pivots, entering_tie_breaks, factorizations, pricing_passes;
     std::optional<Normalization> normalization;
     std::optional<AuxiliaryState> auxiliary;
     std::vector<PivotEvent> trace;

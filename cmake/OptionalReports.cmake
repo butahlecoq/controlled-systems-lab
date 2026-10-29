@@ -228,12 +228,48 @@ target_compile_options(csl_app02_approximation_report PRIVATE /W4 /WX /permissiv
 else()
 target_compile_options(csl_app02_approximation_report PRIVATE -Wall -Wextra -Wpedantic -Werror)
 endif()
+
 if(BUILD_TESTING)
 find_package(Python3 3.11 REQUIRED COMPONENTS Interpreter)
 add_test(NAME app02_report_smoke COMMAND Python3::Interpreter
   ${CMAKE_CURRENT_SOURCE_DIR}/scripts/reports/app02/check_smoke.py
   $<TARGET_FILE:csl_app02_approximation_report>)
 set_tests_properties(app02_report_smoke PROPERTIES LABELS reporting)
+endif()
+endif()
+
+if(CSL_BUILD_EXP03_TWO_POINTS_REPORT)
+include(cmake/JsonDependencies.cmake)
+set_property(DIRECTORY APPEND PROPERTY CMAKE_CONFIGURE_DEPENDS
+  ${CMAKE_CURRENT_SOURCE_DIR}/benchmarks/reporting/exp03/two_points_approximation.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/scripts/reports/exp03/build_two_points_reference.py
+  ${CMAKE_CURRENT_SOURCE_DIR}/scripts/reports/exp03/check_two_points_approximation.py
+  ${CMAKE_CURRENT_SOURCE_DIR}/scripts/reports/exp03/check_two_points_approximation_smoke.py
+  ${CMAKE_CURRENT_SOURCE_DIR}/scripts/reports/exp03/render_two_points_approximation.py
+  ${CMAKE_CURRENT_SOURCE_DIR}/reports/algorithm-results/env717-two-points-feedback-v1/figure-data.json
+  ${CMAKE_CURRENT_SOURCE_DIR}/reports/algorithm-results/env717-two-points-feedback-v1/result.json)
+add_executable(csl_exp03_two_points_approximation
+  benchmarks/reporting/exp03/two_points_approximation.cpp)
+target_link_libraries(csl_exp03_two_points_approximation PRIVATE
+  CSL::approximation CSL::geometry_generators CSL::polyhedral CSL::quickhull_2d)
+target_include_directories(csl_exp03_two_points_approximation SYSTEM PRIVATE
+  ${csl_json_SOURCE_DIR}/include)
+target_compile_features(csl_exp03_two_points_approximation PRIVATE cxx_std_20)
+if(MSVC)
+target_compile_options(csl_exp03_two_points_approximation PRIVATE /W4 /WX /permissive-)
+else()
+target_compile_options(csl_exp03_two_points_approximation PRIVATE -Wall -Wextra -Wpedantic -Werror)
+endif()
+if(BUILD_TESTING)
+find_package(Python3 3.11 REQUIRED COMPONENTS Interpreter)
+add_test(NAME exp03_two_points_approximation_smoke COMMAND Python3::Interpreter
+  ${CMAKE_CURRENT_SOURCE_DIR}/scripts/reports/exp03/check_two_points_approximation_smoke.py
+  $<TARGET_FILE:csl_exp03_two_points_approximation>
+  ${CMAKE_CURRENT_SOURCE_DIR}/scripts/reports/exp03/build_two_points_reference.py
+  ${CMAKE_CURRENT_SOURCE_DIR}/reports/algorithm-results/env717-two-points-feedback-v1/figure-data.json
+  ${CMAKE_CURRENT_SOURCE_DIR}/reports/algorithm-results/env717-two-points-feedback-v1/result.json
+  ${CMAKE_CURRENT_BINARY_DIR}/exp03-two-points-reference.json)
+set_tests_properties(exp03_two_points_approximation_smoke PROPERTIES LABELS reporting)
 endif()
 endif()
 
@@ -925,6 +961,33 @@ add_executable(csl_geo06_quickhull_report benchmarks/reporting/geo06/quickhull_d
 target_link_libraries(csl_geo06_quickhull_report PRIVATE CSL::quickhull_2d)
 target_compile_features(csl_geo06_quickhull_report PRIVATE cxx_std_20)
 target_compile_definitions(csl_geo06_quickhull_report PRIVATE $<$<CONFIG:Release>:NDEBUG>)
+endif()
+
+if(CSL_BUILD_EXP06_PILOT)
+add_executable(csl_exp06_quickhull benchmarks/reporting/exp06/quickhull_run.cpp)
+target_link_libraries(csl_exp06_quickhull PRIVATE CSL::quickhull_2d)
+target_include_directories(csl_exp06_quickhull SYSTEM PRIVATE ${csl_json_SOURCE_DIR}/single_include)
+target_compile_features(csl_exp06_quickhull PRIVATE cxx_std_20)
+target_compile_definitions(csl_exp06_quickhull PRIVATE $<$<CONFIG:Release>:NDEBUG>)
+csl_strict_warnings(csl_exp06_quickhull)
+
+add_executable(csl_exp06_pack_comparison benchmarks/reporting/exp06/pack_comparison.cpp)
+target_link_libraries(csl_exp06_pack_comparison PRIVATE CSL::artifacts)
+target_include_directories(csl_exp06_pack_comparison SYSTEM PRIVATE ${csl_json_SOURCE_DIR}/single_include)
+target_compile_features(csl_exp06_pack_comparison PRIVATE cxx_std_20)
+csl_strict_warnings(csl_exp06_pack_comparison)
+endif()
+
+if(CSL_BUILD_EXP06_LP_REDUCERS)
+if(NOT CSL_ENABLE_HIGHS)
+  message(FATAL_ERROR "The EXP-06 LP reducer runner requires CSL_ENABLE_HIGHS")
+endif()
+add_executable(csl_exp06_lp_reducer benchmarks/reporting/exp06/lp_reducer_run.cpp)
+target_link_libraries(csl_exp06_lp_reducer PRIVATE CSL::hull CSL::highs_lp)
+target_include_directories(csl_exp06_lp_reducer SYSTEM PRIVATE ${csl_json_SOURCE_DIR}/single_include)
+target_compile_features(csl_exp06_lp_reducer PRIVATE cxx_std_20)
+target_compile_definitions(csl_exp06_lp_reducer PRIVATE $<$<CONFIG:Release>:NDEBUG>)
+csl_strict_warnings(csl_exp06_lp_reducer)
 endif()
 
 if(CSL_BUILD_IT17_HULL_REPORT)

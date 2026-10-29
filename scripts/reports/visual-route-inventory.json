@@ -183,6 +183,13 @@
       "follow_up_issue": 717
     },
     {
+      "source": "scripts/reports/exp03/render_two_points_approximation.py",
+      "signal_count": 1,
+      "asset_name_literals": [],
+      "disposition": "deferred-family-specific-migration",
+      "follow_up_issue": 684
+    },
+    {
       "source": "scripts/reports/exp04/render_saved.py",
       "signal_count": 4,
       "asset_name_literals": [
@@ -190,6 +197,24 @@
       ],
       "disposition": "frozen-renderer-preserved-with-shared-policy-companion",
       "role_and_disposition_reason": "Validates saved EXP-04 records and plots two-state replay paths; the companion retains the physical coordinates and discloses independent unit scales."
+    },
+    {
+      "source": "scripts/reports/exp06/render_paper_saved.py",
+      "signal_count": 6,
+      "asset_name_literals": [
+        "hulls.svg"
+      ],
+      "disposition": "deferred-family-specific-migration",
+      "follow_up_issue": 687
+    },
+    {
+      "source": "scripts/reports/exp06/render_saved.py",
+      "signal_count": 6,
+      "asset_name_literals": [
+        "hulls.svg"
+      ],
+      "disposition": "deferred-family-specific-migration",
+      "follow_up_issue": 687
     },
     {
       "source": "scripts/reports/ext01/render_saved.py",
@@ -844,6 +869,14 @@
       "disposition": "publication-validation-or-frozen-route"
     },
     {
+      "source": "scripts/reports/stage_exp06.py",
+      "signal_count": 3,
+      "asset_name_literals": [
+        "hulls.svg"
+      ],
+      "disposition": "publication-validation-or-frozen-route"
+    },
+    {
       "source": "scripts/reports/stage_ext01.py",
       "signal_count": 1,
       "asset_name_literals": [
@@ -909,6 +942,15 @@
       "disposition": "publication-validation-or-frozen-route"
     },
     {
+      "source": "scripts/reports/stage_mpc08_nonunique.py",
+      "signal_count": 7,
+      "asset_name_literals": [
+        "explicit-nonunique-double-integrator.svg",
+        "optimal-fiber.svg"
+      ],
+      "disposition": "publication-validation-or-frozen-route"
+    },
+    {
       "source": "scripts/reports/stage_projection_figures.py",
       "signal_count": 4,
       "asset_name_literals": [],
@@ -929,6 +971,15 @@
         "latency.svg"
       ],
       "disposition": "publication-validation-or-frozen-route"
+    },
+    {
+      "source": "scripts/reports/summarize_exp02_it17_250.py",
+      "signal_count": 3,
+      "asset_name_literals": [
+        "fixture-geometry.svg"
+      ],
+      "disposition": "deferred-family-specific-migration",
+      "follow_up_issue": 687
     },
     {
       "source": "scripts/reports/syn01/collect.py",
@@ -1333,6 +1384,15 @@
       ],
       "disposition": "reviewed-static-diagram-exception",
       "role_and_disposition_reason": "Generates one exact 2D critical-region diagram from the rational fixture, with labelled initial and terminal coordinates; it is not a general plotting path."
+    },
+    {
+      "source": "benchmarks/reporting/mpc08_explicit/explicit_nonunique_double_integrator.py",
+      "signal_count": 2,
+      "asset_name_literals": [
+        "explicit-nonunique-double-integrator.svg"
+      ],
+      "disposition": "reviewed-static-diagram-exception",
+      "role_and_disposition_reason": "Draws the exact initial-state rectangle and one full two-control optimal fiber with a distinct minimum-norm selector; solver candidates are not presented as complete-family evidence."
     }
   ],
   "frozen_published_routes": [
@@ -1595,6 +1655,16 @@
       "follow_up_issue": 94
     },
     {
+      "route": "exp02-it17-dyadic-250-20261029-r1",
+      "source_bundle": "exp02-it17-dyadic-250-20261029-r1",
+      "assets": [
+        "fixture-geometry.svg"
+      ],
+      "index_sha256": "9cdc3ab5942662dea19f54d55601074286bc5b274d0294e8db4cca49bfa8695d",
+      "disposition": "deferred: original frozen route-level readability review remains; companion availability is listed separately",
+      "follow_up_issue": 94
+    },
+    {
       "route": "exp02-it17-dyadic-interior-20261027-r1",
       "source_bundle": "exp02-it17-dyadic-interior-20261027-r1",
       "assets": [
@@ -1659,6 +1729,16 @@
       "follow_up_issue": 686
     },
     {
+      "route": "exp03-two-points-approx-pilot-v1",
+      "source_bundle": "exp03-two-points-approx-pilot-v1",
+      "assets": [
+        "reachability-and-approximations.svg"
+      ],
+      "index_sha256": "02f8506eb3f864f74fa9c78917d48ae16450dfb184bbc185ba537185478bd1de",
+      "disposition": "deferred: original frozen route-level readability review remains; companion availability is listed separately",
+      "follow_up_issue": 669
+    },
+    {
       "route": "exp04-replay-93fe3b87795e1d3a",
       "source_bundle": "exp04-replay-93fe3b87795e1d3a",
       "assets": [
@@ -1685,6 +1765,46 @@
         "visual.svg"
       ],
       "index_sha256": "c7ce8d2984bd60e3f28909ad2df2846f2e8e34182c9a79e3cfc4409c8432c8ff",
+      "disposition": "deferred: original frozen route-level readability review remains; companion availability is listed separately",
+      "follow_up_issue": 669
+    },
+    {
+      "route": "exp06-geometry-pilot-20261029",
+      "source_bundle": "exp06-geometry-pilot-20261029",
+      "assets": [
+        "hulls.svg"
+      ],
+      "index_sha256": "fd23f6d79bf3fafc8e40d6db5225fb2c24f23836c31607077ee86bb6d60f62bf",
+      "disposition": "deferred: original frozen route-level readability review remains; companion availability is listed separately",
+      "follow_up_issue": 669
+    },
+    {
+      "route": "exp06-it17-paper-reducers-20261029-r1",
+      "source_bundle": "exp06-it17-paper-reducers-20261029-r1",
+      "assets": [
+        "hulls.svg"
+      ],
+      "index_sha256": "7dfe9e30e0dd8701ca7efa7788830f6725fcea3f157aa7bde2ab912ad3216a07",
+      "disposition": "deferred: original frozen route-level readability review remains; companion availability is listed separately",
+      "follow_up_issue": 669
+    },
+    {
+      "route": "exp06-it17-paper-reducers-20261029-r2",
+      "source_bundle": "exp06-it17-paper-reducers-20261029-r2",
+      "assets": [
+        "hulls.svg"
+      ],
+      "index_sha256": "c50f3db60365428fd0236650a79b73f8c0f364e9761e21b165bea0af681aba68",
+      "disposition": "deferred: original frozen route-level readability review remains; companion availability is listed separately",
+      "follow_up_issue": 669
+    },
+    {
+      "route": "exp06-it17-paper-reducers-20261029-r3",
+      "source_bundle": "exp06-it17-paper-reducers-20261029-r3",
+      "assets": [
+        "hulls.svg"
+      ],
+      "index_sha256": "90f53c6504df729183fae07e980841bb799e48f5c321ee5e7b3207dc664d1059",
       "disposition": "deferred: original frozen route-level readability review remains; companion availability is listed separately",
       "follow_up_issue": 669
     },
@@ -1983,6 +2103,17 @@
       "index_sha256": "5765eb200059b87727d505a8351b2137decbed7c760de8b539a019d9861ff106",
       "disposition": "deferred: original frozen route-level readability review remains; companion availability is listed separately",
       "follow_up_issue": 669
+    },
+    {
+      "route": "mpc08-explicit-nonunique-v1",
+      "source_bundle": "mpc08-explicit-nonunique-v1",
+      "assets": [
+        "optimal-fiber.svg"
+      ],
+      "index_sha256": "37746b4db8bddd482ad5b07122fbe50ebc2f21149a00c6926f72e7532c1708fa",
+      "disposition": "deferred: original frozen route-level readability review remains; companion availability is listed separately",
+      "follow_up_issue": 604,
+      "companion_route": "examples/index.html"
     },
     {
       "route": "mpc08-explicit-pilot-v1",

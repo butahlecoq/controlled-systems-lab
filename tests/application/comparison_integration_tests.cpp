@@ -1114,3 +1114,80 @@ TEST_CASE("application composes and verifies paired T-S02 complete families") {
 TEST_CASE("application compares T-S03 families by the analytic relation and verifies each full history") {
     compare_profile("ts03_singular_integrator");
 }
+
+TEST_CASE("external geometry method runs retain provenance in paired comparison records") {
+    namespace ar = artifacts;
+    using Json = nlohmann::json;
+
+    const std::string manifest_text =
+        R"({"points":[[0,0],[0,1],[0.5,0.5],[0.5,0],[1,0],[1,1],[1,0.5],[0,0.5],[0.5,1]],"schema":"csl.geometry-hull-input/1"})";
+    const auto manifest_result = problem::snapshot_content(std::span<const std::byte>{
+        reinterpret_cast<const std::byte*>(manifest_text.data()), manifest_text.size()});
+    REQUIRE(std::holds_alternative<problem::ResolvedContent>(manifest_result));
+    const auto manifest = std::get<problem::ResolvedContent>(manifest_result);
+    const auto manifest_digest = problem::hex(manifest.digest());
+    problem::ContentDigest request_digest{};
+    request_digest.bytes.fill(std::byte{0x0c});
+
+    const auto make_run = [&](const std::string& method_id, char config_char,
+                              const std::string& run_id, const std::string& result) {
+        ar::ExternalMethodRunInput input;
+        input.run = {run_id};
+        input.problem = {"csl.problem.v1.sha256:" + manifest_digest};
+        input.configuration = {"csl.config.v1.sha256:" + std::string(64, config_char)};
+        input.request_digest = request_digest;
+        input.input_manifest_schema = "csl.geometry-hull-input/1";
+        input.input_manifest.assign(manifest.bytes().begin(), manifest.bytes().end());
+        input.method_id = method_id;
+        input.method_version = "1";
+        input.sources = {{method_id + ".cpp", std::string(64, 'e')}};
+        input.runtime = {"C++", method_id, "1", std::string(64, 'f'), "Linux", "x86_64",
+            "GCC", "16.2.1", "Release"};
+        input.status = ar::AttemptStatus::completed;
+        input.result_payload = result;
+        return take_artifact(ar::encode_external_method_run(input), "encode external geometry run");
+    };
+    const auto run_a = make_run("geometry.a29", 'a', "geometry-a29-0", "{\"vertices\":[0,1,2,3]}");
+    const auto run_b = make_run("geometry.modern", 'b', "geometry-modern-0", "{\"vertices\":[0,1,2,3]}");
+
+    const std::string config_a = "csl.config.v1.sha256:" + std::string(64, 'a');
+    const std::string config_b = "csl.config.v1.sha256:" + std::string(64, 'b');
+    const Json spec_json{{"schema", "csl.comparison-spec/2"},
+        {"problem_id", "csl.problem.v1.sha256:" + manifest_digest},
+        {"request_digest", problem::hex(request_digest)}, {"repetitions", 1},
+        {"input_manifest_hash", manifest_digest},
+        {"input_manifest_source", "csl.geometry-hull-input/1"},
+        {"arms", Json::array({
+            Json{{"configuration_id", config_a}, {"strategy", "geometry.a29"}, {"instrumentation", "disabled"}},
+            Json{{"configuration_id", config_b}, {"strategy", "geometry.modern"}, {"instrumentation", "disabled"}}})}};
+    const auto spec_text = spec_json.dump();
+    const auto spec_result = problem::snapshot_content(std::span<const std::byte>{
+        reinterpret_cast<const std::byte*>(spec_text.data()), spec_text.size()});
+    REQUIRE(std::holds_alternative<problem::ResolvedContent>(spec_result));
+    const auto spec = std::get<problem::ResolvedContent>(spec_result);
+    const auto attempt = [](std::uint32_t arm, const std::string& method_id,
+                            const ar::RecordedExternalMethodRunArtifact& run) {
+        const auto event = Json{{"schema", "csl.external-method-event/1"}, {"status", "passed"},
+            {"method_id", method_id}, {"instrumentation", "disabled"}, {"repetition", 0},
+            {"warmup", true}}.dump();
+        return ar::ComparisonAttempt{arm, 0, ar::AttemptStatus::completed,
+            {run.run_id(), run.content().digest()}, run, event};
+    };
+    const std::vector<ar::ComparisonAttempt> attempts{
+        attempt(0, "geometry.a29", run_a), attempt(1, "geometry.modern", run_b)};
+    const auto recorded = take_artifact(ar::encode_recorded_comparison(spec, attempts),
+        "encode external geometry comparison");
+    const auto wire = std::string(reinterpret_cast<const char*>(recorded.content().bytes().data()),
+        recorded.content().bytes().size());
+    const auto restored = take_artifact(ar::decode_recorded_comparison(wire),
+        "decode external geometry comparison");
+    CHECK(restored.content().digest() == recorded.content().digest());
+    CHECK(wire.find("unverified_recorded_data") != std::string::npos);
+    CHECK(wire.find("geometry-hull-input/1") != std::string::npos);
+    CHECK(wire.find(std::string(64, 'f')) != std::string::npos);
+
+    auto wrong_event = attempts;
+    wrong_event[0].measurement_payload =
+        R"({"schema":"csl.external-method-event/1","status":"passed","method_id":"geometry.modern","instrumentation":"disabled","repetition":0,"warmup":true})";
+    CHECK(std::holds_alternative<ar::ArtifactError>(ar::encode_recorded_comparison(spec, wrong_event)));
+}

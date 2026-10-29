@@ -221,6 +221,27 @@ ZIP entry matches, and the live landing page links to the report. This remains
 partial EXP-02 evidence; issue #94 remains open for its paired strategy, full
 workload/resource matrix and comparison-record requirements.
 
+### EXP-06 A43/A44 paper-derived follow-up
+
+The [r3 bundle](../../reports/algorithm-results/exp06-it17-paper-reducers-20261029-r3/)
+uses `csl.hull.itis17.a44-paper-farthest-incremental-lp@1.0.0` and counts all
+A43 candidate solves plus final rechecks. Source commit is
+`1f34503eb3f5d4c3e239076a8d48b2af2e6bf06c`. All 36 attempts (six methods,
+one warmup and five measured runs each) completed, and the saved renderer
+rechecked every result with the exact 2D hull oracle. Median durations and
+ranges in ns were: A29/A30 Python 4,672,975 (3,610,192–5,255,315); QuickHull
+47,423 (36,737–48,051); A43 certified-basis adaptation 2,884,746
+(1,674,806–3,332,710); A43 artificial-basis 3,200,431
+(1,229,565–3,246,386); A43 largest-norm tie 3,152,379
+(1,204,073–3,269,015); A44 paper-farthest incremental LP 4,201,054
+(2,936,707–4,287,727). These intervals differ by implementation/runtime and
+exclude exact checking, so the values are descriptive and do not rank speed.
+The largest-norm tie rule activated once in each attempt; the A43 batch-removal
+counter stayed at zero, so this fixture does not demonstrate that path. The
+initial r1 and corrected r2 bundles remain unchanged as superseded historical
+evidence; r2 used source commit
+`b2b7dfa6a2151259cbe1cd3d0e6d99e790661533`.
+
 ### ITIS17 hull output-status update
 
 The [r3 output-status report](../../reports/algorithm-results/exp02-it17-a44-paper-order-20261028-r3/)
@@ -250,6 +271,24 @@ identity and offline ZIP are staged in the bundle. The deployed URL and live
 hash verification remain pending the main-only Pages deployment for this PR.
 This is still a partial hull-method slice; #94 remains open for its broader
 strategy, workload and representation matrix.
+
+### 250-point dyadic continuation
+
+The [250-point bundle](../../reports/algorithm-results/exp02-it17-dyadic-250-20261029-r1/)
+adds a single deterministic 2D square cloud to the QuickHull/ITIS17-related
+comparison. Six methods each have one warmup and seven interleaved measured
+calls. All 48 attempts passed accounting, expected-corner retention, and the
+independent bounded exact-binary64 hull check. The result separates hull
+validity from LP reducer completion; the baseline, ordered LP method, and A43
+adaptation retained redundant inputs and reported incomplete status.
+
+The median public-call times range from 0.535 ms for QuickHull and 0.746 ms for
+basis reuse to 67.116 ms for the LP baseline; they are descriptive for this one
+fixture. No source-function profile was available (`perf`/`strace` absent), so
+the comparison remains inconclusive and makes no performance-winner or scale
+claim. The bundle retains the raw checker status/budget, 250-point fixture
+plot, source/build identity, and offline-staging inputs. Pages publication and
+live URL/hash verification remain pending; issue #94 remains open.
 
 ## EXP-02 paired synthesis profile slice
 
@@ -581,6 +620,33 @@ not continuous-state feedback or an RL reproduction. The original
 feedback bundle are staged through distinct content-addressed routes with file
 hashes and offline ZIPs; main-only Pages deployment and live URL/hash checks
 remain pending.
+
+## EXP-03 TwoPoints projected approximation pilot
+
+The [EXP-03 pilot bundle](../../reports/algorithm-results/exp03-two-points-approx-pilot-v1/)
+applies the registered exact hull, axis-box, rotated-parallelotope,
+directional-ellipsoid, and zonotope axis-cover methods to the terminal
+projected convex hulls of the existing three-stage TwoPoints finite game. It
+retains the exact integer replay, all 345 terminal states, raw method outputs,
+seven alternating single-call observations per method and projection, and an
+independent dyadic inclusion check for both `(x1,x2)` and `(x3,x4)`. All four
+outer methods contain every binary64 reference vertex in each projection. The
+additional exact rational lattice check records point misses: QuickHull 1/2,
+axis box 1/2, parallelotope 1/0, ellipsoid 0/0, and padded zonotope 0/0 across
+the two planes. Thus the first three methods are not claimed to enclose the
+exact lattice reference. The zonotope area ratio is `1.00000000047` in both
+planes, but it retains all three active generators, so this is not a lossy
+reduction result. The seven single-call timings are observations from one
+host; they are descriptive only and do not support a speed ranking. The
+standalone figure overlays each final projection on the forward game geometry,
+marks backward-winning nodes, and outlines the terminal winning-node hulls,
+alongside both trajectories. It does not separately project the coupled
+terminal target. It makes no 4D inclusion claim and does not yet propagate
+approximations through the reachability or minimax recursions. This pilot
+supplies no inner reachable-set or objective-bound claims; EXP-03 remains open
+for those acceptance items.
+Independent saved-result review, main-only Pages deployment, and live URL and
+hash checks remain pending.
 
 ## MPC-05 finite causal minimax pilot
 

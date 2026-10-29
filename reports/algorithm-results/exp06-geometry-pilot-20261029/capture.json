@@ -1,0 +1,165 @@
+{
+  "checker_controls": {
+    "all_redundant_points_retained": {
+      "budget": {
+        "max_points": 64
+      },
+      "counterexample_index": null,
+      "input_digest": "d3ceea7207af73a9ede56875d53cfae5eab1160c9458617cff0b4a176e53b1fe",
+      "reason": "all input points covered by exact source hull",
+      "scope": "exact represented binary64 2D finite hull",
+      "source_indices": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8
+      ],
+      "status": "verified"
+    },
+    "omitted_corner": {
+      "budget": {
+        "max_points": 64
+      },
+      "counterexample_index": 0,
+      "input_digest": "d3ceea7207af73a9ede56875d53cfae5eab1160c9458617cff0b4a176e53b1fe",
+      "reason": "input point lies outside reported convex hull",
+      "scope": "exact represented binary64 2D finite hull",
+      "source_indices": [
+        1,
+        2,
+        3
+      ],
+      "status": "incorrect"
+    },
+    "schema": "csl.exp06-checker-controls/1"
+  },
+  "created_utc": "2026-10-29T01:21:15Z",
+  "execution_order": [
+    {
+      "method_id": "csl.geometry.a29-a30-python",
+      "repetition": 0
+    },
+    {
+      "method_id": "csl.geometry.quickhull-2d",
+      "repetition": 0
+    },
+    {
+      "method_id": "csl.geometry.a29-a30-python",
+      "repetition": 1
+    },
+    {
+      "method_id": "csl.geometry.quickhull-2d",
+      "repetition": 1
+    },
+    {
+      "method_id": "csl.geometry.quickhull-2d",
+      "repetition": 2
+    },
+    {
+      "method_id": "csl.geometry.a29-a30-python",
+      "repetition": 2
+    },
+    {
+      "method_id": "csl.geometry.a29-a30-python",
+      "repetition": 3
+    },
+    {
+      "method_id": "csl.geometry.quickhull-2d",
+      "repetition": 3
+    },
+    {
+      "method_id": "csl.geometry.quickhull-2d",
+      "repetition": 4
+    },
+    {
+      "method_id": "csl.geometry.a29-a30-python",
+      "repetition": 4
+    },
+    {
+      "method_id": "csl.geometry.a29-a30-python",
+      "repetition": 5
+    },
+    {
+      "method_id": "csl.geometry.quickhull-2d",
+      "repetition": 5
+    }
+  ],
+  "fixture_sha256": "b8cb93474ac342bbe94847efb9f8cca8d0e90be6df53b7eab0d541497d33e9f5",
+  "harness_dirty": false,
+  "harness_sources": [
+    {
+      "path": "scripts/reports/exp06/collect.py",
+      "sha256": "1deabe74c4e6487610ecc1a4ec8c45b99ec5ecd96a671300d96d4ebeb73f4e14"
+    },
+    {
+      "path": "scripts/reports/exp06/render_saved.py",
+      "sha256": "6bcac0472794f1cef50ab1c18cc1c5b3e0370be1d4aa5ef2841dd6a2f29ebc69"
+    },
+    {
+      "path": "scripts/reports/exp06/check_source_indices.py",
+      "sha256": "b95f6355ea1b1e2409ddd85a55af68a33daf1e46bbac73213c0020fce51e7cc6"
+    },
+    {
+      "path": "scripts/reports/stage_exp06.py",
+      "sha256": "6295b5319fbfee8001d21bd22fed571478b1c651c67020ad3eba7dd6590fe99f"
+    },
+    {
+      "path": "benchmarks/reporting/exp06/quickhull_run.cpp",
+      "sha256": "e120302a9a38277dde83635572180510ce34e4a8a9f87ec6ec37602c5ec11c12"
+    },
+    {
+      "path": "benchmarks/reporting/exp06/pack_comparison.cpp",
+      "sha256": "6dff6998d3d8fbc8d58ce48ee7f1639ae49045c8863b9ee5b04a8b8dcab0b0e9"
+    },
+    {
+      "path": "src/artifacts/comparison_manifest.cpp",
+      "sha256": "869d44bd12396c6ffad32436d6caa67f4746d545c227472013b193ef55877248"
+    },
+    {
+      "path": "include/csl/artifacts/comparison_manifest.hpp",
+      "sha256": "221262d4cfae5f1b6ae9c2fc77245e24d115c37fe8f42b20a1495c975b8b0eee"
+    }
+  ],
+  "host": {
+    "architecture": "x86_64",
+    "cpu_model": "AMD Ryzen 5 3550H with Radeon Vega Mobile Gfx",
+    "load_average_1m_5m_15m": [
+      0.3525390625,
+      0.4267578125,
+      0.64892578125
+    ],
+    "logical_cpus": 8,
+    "observed_process_count": 330,
+    "os": "Linux-7.2.8-9-omarchy-x86_64-with-glibc2.44"
+  },
+  "limiter_profile": {
+    "reason": "different method runtimes and timing intervals do not have a shared source-level limiter profile",
+    "status": "not_collected"
+  },
+  "measured_repetitions_per_method": 5,
+  "measurement_order": "alternating methods by repetition",
+  "memory_limit": {
+    "reason": "bounded nine-point fixture; process memory was not measured",
+    "status": "not_enforced"
+  },
+  "packer_exit_code": 0,
+  "purpose": "bounded paired geometry pilot",
+  "python_executable_sha256": "375532f83be620283ab780c14ca6bcc5907dc379d2b621de0c5d0a112cf5458b",
+  "quickhull_executable_sha256": "464f9c7a38c2150599d6424463dc1d883c6213138a8a901fa32e6940c4d57498",
+  "request_digest": "73065dd39277c3bde0e6afee987a4a4b91cef34480b84a02d09348cc49be2869",
+  "schema": "csl.exp06-capture/1",
+  "source_commit": "215ea5609d0d2ecf59627d342b126951b330f872",
+  "stderr": "",
+  "timeout_seconds": 300,
+  "timing_comparison": "inconclusive: Python/NumPy and C++ timings use different runtimes and intervals",
+  "timing_intervals": {
+    "csl.geometry.a29-a30-python": "perf_counter_ns around the Python port call; excludes exact checker",
+    "csl.geometry.quickhull-2d": "steady_clock around QuickHull call; excludes process startup, JSON intake and exact checker"
+  },
+  "warmups_per_method": 1
+}

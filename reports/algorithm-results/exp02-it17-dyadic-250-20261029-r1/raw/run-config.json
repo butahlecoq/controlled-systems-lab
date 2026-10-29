@@ -1,0 +1,17 @@
+{
+  "schema": "csl.it17-hull-paper-adaptation-run-config/1",
+  "report_id": "exp02-it17-dyadic-250-20261029-r1",
+  "source_commit": "9b53f24e9d2e4f1d7c1ec82150589a4bbb50387a",
+  "fixture": "dyadic-square-n250",
+  "input_sha256": "805fb5e027ee97394494ef3d23123e47c86d31e21de53f4a5c239867204d04b3",
+  "command": "csl_it17_hull_comparison_report --dyadic-size 250 --measure 7",
+  "build": "Release, C++20, GCC 16.2.1, CMake 3.31.6, Ninja, HiGHS 1.11.0, CSL_ENABLE_QHULL=OFF, BUILD_TESTING=OFF",
+  "hardware": "AMD Ryzen 5 3550H, 8 logical CPUs",
+  "os": "Linux x86_64, kernel 7.2.8-9-omarchy",
+  "pre_run_load_average": "0.45, 1.14, 0.86",
+  "repetitions": "one warmup and seven interleaved measured calls per method; method order rotates each round",
+  "timed_interval": "public algorithm/reducer call only; workspace setup, checking, and JSON serialization excluded",
+  "checker": "exact represented binary64 finite 2D hull; 5 second wall budget; max 250 points",
+  "limiter_profile": "unavailable: perf and strace are not installed",
+  "binary_sha256": "8101070bfa20959e5b12effa164f42bc748f279fd479b134f04decac0652f04e"
+}

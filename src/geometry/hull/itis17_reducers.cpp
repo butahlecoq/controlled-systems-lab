@@ -169,4 +169,12 @@ registry::Registration<registry::HullReducerPort> make_itis17_a44_hull_reducer_r
         [](const PointCloud&) { return std::make_unique<A44Workspace>(); }};
 }
 
+registry::Registration<registry::HullReducerPort> make_itis17_a44_paper_hull_reducer_registration() {
+    return {{{"csl.hull.itis17.a44-paper-farthest-incremental-lp"}, "1.0.0"},
+        [](const PointCloud&, const registry::Requirements&) -> registry::Capability {
+            return registry::Offer{};
+        },
+        [](const PointCloud&) { return std::make_unique<A44Workspace>(); }};
+}
+
 } // namespace csl::geometry

@@ -1,0 +1,15 @@
+{
+  "report_id": "exp02-it17-dyadic-250-20261029-r1",
+  "schema": "csl.exploratory-comparison-report/1",
+  "source_commit": "9b53f24e9d2e4f1d7c1ec82150589a4bbb50387a",
+  "attempts": 48,
+  "measurement_rows": 48,
+  "method_count": 6,
+  "method_identity": "six separately identified QuickHull and LP reducers",
+  "measured_scope": "one deterministic 250-point 2D dyadic square fixture; one warmup and seven measured attempts per method",
+  "input_sha256": {
+    "dyadic-square-n250": "805fb5e027ee97394494ef3d23123e47c86d31e21de53f4a5c239867204d04b3"
+  },
+  "evidence_limits": "Exploratory single-fixture slice; exact represented-binary64 2D finite-hull checker verified 48/48; no source-function profile because perf and strace are unavailable; workspace setup and output verification are excluded from timings; incomplete reducer outcomes remain separate from hull validity; no winner, scalability, or faithful historical Pascal claim",
+  "visual_example": "fixture-geometry.svg"
+}

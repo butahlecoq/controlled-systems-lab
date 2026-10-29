@@ -82,6 +82,13 @@ class LandingTests(unittest.TestCase):
         self.assertIn("six", family.summary)
         self.assertIn("inconclusive", family.summary)
 
+    def test_it17_250_point_continuation_has_a_geometry_family_description(self):
+        family = landing.FAMILIES[landing.family_for(
+            "exp02-it17-dyadic-250-20261029-r1")]
+        self.assertEqual(family.group, "geometry")
+        self.assertIn("250-point", family.summary)
+        self.assertIn("inconclusive", family.summary)
+
     def test_it17_3d_pilot_has_a_partial_geometry_family_description(self):
         for report_id in (
                 "exp02-it17-hull-3d-simplex-20261028-r1",
@@ -99,6 +106,14 @@ class LandingTests(unittest.TestCase):
         self.assertIn("two exact but incomplete outputs have withheld timings", family.summary)
         self.assertIn("QuickHull is unsupported in 4D", family.summary)
         self.assertIn("no speedup", family.summary)
+
+    def test_exp06_geometry_pilot_has_a_bounded_geometry_description(self):
+        family = landing.FAMILIES[landing.family_for("exp06-73c216869b5ee235")]
+        self.assertEqual(family.group, "geometry")
+        self.assertIn("A29/A30 Python reference", family.summary)
+        self.assertIn("paper-derived A43 tie variants", family.summary)
+        self.assertIn("inconclusive", family.summary)
+        self.assertIn("do not establish a general speedup", family.summary)
 
     def test_a44_v2_description_does_not_relabel_the_historical_adaptation_route(self):
         historical = landing.FAMILIES[landing.family_for(

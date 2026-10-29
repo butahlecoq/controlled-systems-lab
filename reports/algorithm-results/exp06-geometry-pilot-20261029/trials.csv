@@ -1,0 +1,13 @@
+method,repetition,warmup,status,duration_ns,indices,checker,run_id,run_sha256
+csl.geometry.a29-a30-python,0,True,completed,15356121,0:3:1:2,verified,exp06-0-r00,d6588fb4beb7f9f13b3d7ca44a65e23b43f00dbd41e3a3874f1af2458f71c0f1
+csl.geometry.a29-a30-python,1,False,completed,3697635,0:3:1:2,verified,exp06-0-r01,52b2d8dc990c83dd7957410c0bb554fbe749f74167d849c684b34bf8b8d29ec8
+csl.geometry.a29-a30-python,2,False,completed,3662645,0:3:1:2,verified,exp06-0-r02,30964d3c9ec7681c6cb8eb49f70c68e3c26d4edcdba521da4c3e21e662111cb6
+csl.geometry.a29-a30-python,3,False,completed,3501170,0:3:1:2,verified,exp06-0-r03,1ee163a699a76b5fbd68b845f4c6a5bec79be388a5d5bfd204415730571045f8
+csl.geometry.a29-a30-python,4,False,completed,4205805,0:3:1:2,verified,exp06-0-r04,38dc0a18cb4ac833d5ec8c17c1701b1872d4e8ae18998a63e0eebbfb6cf58664
+csl.geometry.a29-a30-python,5,False,completed,3583305,0:3:1:2,verified,exp06-0-r05,8f9c40e263a9111ba326fafaa8b4d8a0ecb7789b424b7b4b436a04dad0f71b08
+csl.geometry.quickhull-2d,0,True,completed,16064,0:1:2:3,verified,exp06-1-r00,12f7cdf5f4085618b37dd565bdbed34dbaaebac8523c5f8fe06ecab35ab41ced
+csl.geometry.quickhull-2d,1,False,completed,21232,0:1:2:3,verified,exp06-1-r01,4a3ce25031d7707f442a4dffb94eb82aba2c8ec4c477b2d44eaab9aa3f69f1e4
+csl.geometry.quickhull-2d,2,False,completed,16902,0:1:2:3,verified,exp06-1-r02,1e5e8645f144848d439e3d645ad52cb8d090126b93d6dd49b7a59d54ebbe751a
+csl.geometry.quickhull-2d,3,False,completed,25562,0:1:2:3,verified,exp06-1-r03,70a70c7f4f6c4726c2242b98cc3229bd2575c302cb201b790dc1b192a1cd8c5c
+csl.geometry.quickhull-2d,4,False,completed,19765,0:1:2:3,verified,exp06-1-r04,ec90cca7b3e997e0aeb76e2c921a166339bb9e20b0aa466ad2d1f563bd0c728f
+csl.geometry.quickhull-2d,5,False,completed,23397,0:1:2:3,verified,exp06-1-r05,c3c5ae28905199754fcca2e079c90b4650feafcd16044a4a22dd922e9304f075

@@ -122,9 +122,43 @@ std::unique_ptr<LPWorkspace> workspace(const geometry::PointCloud& cloud) {
     return adapter.factory(std::get<LinearProgram>(seed));
 }
 
-// A geometrically valid hull may retain unresolved redundant inputs. Keep that
-// independent hull result separate from ReductionStatus::complete in each row.
-bool valid_reduction(const Fixture& fixture, const geometry::HullReduction& result) {
+struct Outcome {
+    bool passed{}; // accounting, expected vertices and independent exact hull check passed
+    std::optional<bool> reducer_status_complete;
+    long long elapsed_ns{};
+    std::size_t retained{}, removed{}, lp_calls{}, basis_solves{}, bulk_removals{},
+                ordered_candidates{};
+    std::size_t a43_final_rechecks{}, a44_incremental_queries{}, a44_final_rechecks{};
+    bool accounting_valid{};
+    bool expected_vertices_retained{};
+    std::optional<geometry::HullCheckRecord> checker;
+};
+
+geometry::HullCheckRecord check_hull(const Fixture& fixture,
+                                     const std::vector<std::size_t>& retained) {
+    const auto digest = geometry::digest_hull_input(fixture.cloud.points);
+    if (!std::holds_alternative<geometry::HullInputDigest>(digest)) {
+        geometry::HullCheckRecord record;
+        record.reason = "input digest could not be computed";
+        record.budget.max_points = fixture.cloud.points.size();
+        return record;
+    }
+    return geometry::check_source_index_hull(fixture.cloud.points,
+        {std::get<geometry::HullInputDigest>(digest), retained},
+        {std::chrono::seconds{5}, fixture.cloud.points.size()});
+}
+
+bool expected_vertices_present(const Fixture& fixture,
+                               const std::vector<std::size_t>& retained) {
+    for (const auto& vertex : fixture.expected_vertices) {
+        if (std::none_of(retained.begin(), retained.end(), [&](std::size_t id) {
+                return id < fixture.cloud.points.size() && fixture.cloud.points[id] == vertex;
+            })) return false;
+    }
+    return true;
+}
+
+bool accounting_valid(const Fixture& fixture, const geometry::HullReduction& result) {
     if (result.retained.empty() || result.retained.size() + result.removed.size() !=
                                    fixture.cloud.points.size()) return false;
     std::set<std::size_t> accounted;
@@ -135,47 +169,10 @@ bool valid_reduction(const Fixture& fixture, const geometry::HullReduction& resu
         if (certificate.removed >= fixture.cloud.points.size() ||
             !accounted.insert(certificate.removed).second ||
             !certificate.evidence.verifier.value.ends_with(
-                "exact-binary64-convex-combination"))
-            return false;
+                "exact-binary64-convex-combination")) return false;
     }
-    if (accounted.size() != fixture.cloud.points.size()) return false;
-    const auto digest = geometry::digest_hull_input(fixture.cloud.points);
-    if (!std::holds_alternative<geometry::HullInputDigest>(digest)) return false;
-    const auto checked = geometry::check_source_index_hull(fixture.cloud.points,
-        {std::get<geometry::HullInputDigest>(digest), result.retained},
-        {std::chrono::seconds{5}, fixture.cloud.points.size()});
-    if (checked.status != geometry::HullCheckStatus::verified) return false;
-    const auto [min_x, max_x] = std::minmax_element(fixture.expected_vertices.begin(),
-        fixture.expected_vertices.end(), [](const Vector& a, const Vector& b) {
-            return a[0] < b[0];
-        });
-    const auto min_y = std::min_element(fixture.expected_vertices.begin(),
-        fixture.expected_vertices.end(), [](const Vector& a, const Vector& b) {
-            return a[1] < b[1];
-        });
-    const auto max_y = std::max_element(fixture.expected_vertices.begin(),
-        fixture.expected_vertices.end(), [](const Vector& a, const Vector& b) {
-            return a[1] < b[1];
-        });
-    for (const auto& point : fixture.cloud.points)
-        if (point[0] < (*min_x)[0] || point[0] > (*max_x)[0] ||
-            point[1] < (*min_y)[1] || point[1] > (*max_y)[1]) return false;
-    for (const auto& vertex : fixture.expected_vertices) {
-        const auto found = std::find_if(result.retained.begin(), result.retained.end(),
-            [&](std::size_t id) { return fixture.cloud.points[id] == vertex; });
-        if (found == result.retained.end()) return false;
-    }
-    return true;
+    return accounted.size() == fixture.cloud.points.size();
 }
-
-struct Outcome {
-    bool passed{}; // complete accounting and independent exact hull check passed
-    std::optional<bool> reducer_status_complete;
-    long long elapsed_ns{};
-    std::size_t retained{}, removed{}, lp_calls{}, basis_solves{}, bulk_removals{},
-                ordered_candidates{};
-    std::size_t a43_final_rechecks{}, a44_incremental_queries{}, a44_final_rechecks{};
-};
 
 Outcome run(const Fixture& fixture, Method method) {
     if (method == Method::quickhull) {
@@ -192,22 +189,24 @@ Outcome run(const Fixture& fixture, Method method) {
         std::sort(coordinates.begin(), coordinates.end());
         auto expected = fixture.expected_vertices;
         std::sort(expected.begin(), expected.end());
-        const auto digest = geometry::digest_hull_input(fixture.cloud.points);
-        const bool checked = std::holds_alternative<geometry::HullInputDigest>(digest) &&
-            geometry::check_source_index_hull(fixture.cloud.points,
-                {std::get<geometry::HullInputDigest>(digest), hull.vertex_indices},
-                {std::chrono::seconds{5}, fixture.cloud.points.size()}).status ==
-                    geometry::HullCheckStatus::verified;
+        const auto checker = check_hull(fixture, hull.vertex_indices);
+        const bool checked = checker.status == geometry::HullCheckStatus::verified;
         if (coordinates != expected || !checked) {
             std::cerr << "quickhull validation failure coordinates=" << coordinates.size()
                       << " expected=" << expected.size() << " checked=" << checked << '\n';
             for (const auto& point : coordinates)
                 std::cerr << " quickhull-point=" << point[0] << ',' << point[1] << '\n';
         }
-        return {coordinates == expected && checked, std::nullopt,
-            std::chrono::duration_cast<std::chrono::nanoseconds>(end-begin).count(),
-            hull.vertex_indices.size(), fixture.cloud.points.size()-hull.vertex_indices.size(),
-            0, 0, 0, 0};
+        Outcome outcome;
+        outcome.passed = coordinates == expected && checked;
+        outcome.elapsed_ns = std::chrono::duration_cast<std::chrono::nanoseconds>(end-begin).count();
+        outcome.retained = hull.vertex_indices.size();
+        outcome.removed = fixture.cloud.points.size()-hull.vertex_indices.size();
+        outcome.accounting_valid = hull.vertex_indices.size() + outcome.removed ==
+                                   fixture.cloud.points.size();
+        outcome.expected_vertices_retained = coordinates == expected;
+        outcome.checker = checker;
+        return outcome;
     }
 
     auto lp = workspace(fixture.cloud);
@@ -229,7 +228,11 @@ Outcome run(const Fixture& fixture, Method method) {
     outcome.elapsed_ns = std::chrono::duration_cast<std::chrono::nanoseconds>(end-begin).count();
     if (!std::holds_alternative<geometry::HullReduction>(result)) return outcome;
     const auto& reduction = std::get<geometry::HullReduction>(result);
-    outcome.passed = valid_reduction(fixture, reduction);
+    outcome.accounting_valid = accounting_valid(fixture, reduction);
+    outcome.expected_vertices_retained = expected_vertices_present(fixture, reduction.retained);
+    outcome.checker = check_hull(fixture, reduction.retained);
+    outcome.passed = outcome.accounting_valid && outcome.expected_vertices_retained &&
+        outcome.checker->status == geometry::HullCheckStatus::verified;
     outcome.reducer_status_complete = reduction.status == geometry::ReductionStatus::complete;
     if (!outcome.passed) {
         std::cerr << "validation failure method=" << info(method).name
@@ -270,7 +273,7 @@ void print(const Fixture& fixture, Method method, bool warmup, int round,
     const auto digest = geometry::digest_hull_input(fixture.cloud.points);
     if (!std::holds_alternative<geometry::HullInputDigest>(digest))
         throw std::runtime_error("input digest could not be computed");
-    std::cout << "{\"schema\":\"csl.it17-hull-paper-adaptation-row/3\",\"source_commit\":\""
+    std::cout << "{\"schema\":\"csl.it17-hull-paper-adaptation-row/4\",\"source_commit\":\""
               << CSL_SOURCE_COMMIT << "\",\"fixture\":\"" << fixture.id
               << "\",\"input_sha256\":\"" << problem::hex(std::get<geometry::HullInputDigest>(digest))
               << "\",\"method\":\"" << info(method).name << "\",\"method_identity\":\""
@@ -292,7 +295,28 @@ void print(const Fixture& fixture, Method method, bool warmup, int round,
               << ",\"ordered_candidates\":" << outcome.ordered_candidates
               << ",\"a43_final_rechecks\":" << outcome.a43_final_rechecks
               << ",\"a44_incremental_queries\":" << outcome.a44_incremental_queries
-              << ",\"a44_final_rechecks\":" << outcome.a44_final_rechecks << "}\n" << std::flush;
+              << ",\"a44_final_rechecks\":" << outcome.a44_final_rechecks
+              << ",\"accounting_valid\":" << (outcome.accounting_valid ? "true" : "false")
+              << ",\"expected_vertices_retained\":"
+              << (outcome.expected_vertices_retained ? "true" : "false")
+              << ",\"checker\":";
+    if (!outcome.checker) {
+        std::cout << "null";
+    } else {
+        const auto& checker = *outcome.checker;
+        const char* status = checker.status == geometry::HullCheckStatus::verified ? "verified" :
+            checker.status == geometry::HullCheckStatus::incorrect ? "incorrect" : "inconclusive";
+        std::cout << "{\"status\":\"" << status << "\",\"elapsed_ns\":"
+                  << checker.elapsed.count() << ",\"budget_wall_ns\":"
+                  << std::chrono::duration_cast<std::chrono::nanoseconds>(checker.budget.wall).count()
+                  << ",\"budget_max_points\":" << checker.budget.max_points
+                  << ",\"evidence_scope\":\"" << checker.evidence_scope
+                  << "\",\"reason\":\"" << checker.reason << "\",\"counterexample_index\":";
+        if (checker.counterexample_index) std::cout << *checker.counterexample_index;
+        else std::cout << "null";
+        std::cout << "}";
+    }
+    std::cout << "}\n" << std::flush;
 }
 
 } // namespace

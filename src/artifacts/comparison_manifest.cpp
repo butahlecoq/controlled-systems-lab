@@ -81,6 +81,8 @@ bool measurement_status_matches(AttemptStatus status, const Json& measurement) {
     return value=="incomplete"&&status==AttemptStatus::incomplete;
 }
 bool status_matches(AttemptStatus status, const Json& run) {
+    if(run.value("schema",std::string{})=="csl.external-method-run/1")
+        return run.at("status")==status_name(status);
     const auto& final=run.at("final");
     const auto kind=final.at("kind").get<std::string>();
     if(kind=="synthesis"||kind=="program"||kind=="finite_minimax") {
@@ -114,6 +116,11 @@ bool input_manifest_attached(const Json& run,const Json& spec) {
     if(spec.value("schema",std::string{})=="csl.comparison-spec/1")return true;
     if(spec.at("input_manifest_source")=="resolved-problem-canonical-bytes")return true;
     const auto expected=spec.at("input_manifest_hash").get<std::string>();
+    if(run.value("schema",std::string{})=="csl.external-method-run/1") {
+        const auto& manifest=run.at("input_manifest");
+        return manifest.at("schema")==spec.at("input_manifest_source")&&
+            manifest.at("sha256")==expected;
+    }
     const auto source=spec.at("input_manifest_source").get<std::string>();
     const auto expected_role=source=="csl.mpc01-canonical-input/1"?"diagnostics":"certificate";
     const auto& attachments=run.at("attachments");
@@ -269,12 +276,14 @@ SpecShape validate_spec(const Json& spec) {
         spec.contains("input_manifest_hash")&&spec.contains("input_manifest_source")&&
         (spec.at("input_manifest_source")=="resolved-problem-canonical-bytes"||
          spec.at("input_manifest_source")=="csl.exp05-finite-minimax-case/1"||
+         spec.at("input_manifest_source")=="csl.geometry-hull-input/1"||
          spec.at("input_manifest_source")=="csl.mpc03-b08-case/1"||
          spec.at("input_manifest_source")=="csl.mpc01-canonical-input/1");
     const bool record_with_environment=schema=="csl.comparison-spec/3"&&spec.size()==8&&spec.contains("arms")&&
         spec.contains("input_manifest_hash")&&spec.contains("input_manifest_source")&&
         (spec.at("input_manifest_source")=="resolved-problem-canonical-bytes"||
          spec.at("input_manifest_source")=="csl.exp05-finite-minimax-case/1"||
+         spec.at("input_manifest_source")=="csl.geometry-hull-input/1"||
          spec.at("input_manifest_source")=="csl.mpc01-canonical-input/1"||
          spec.at("input_manifest_source")=="csl.mpc03-b08-case/1")&&spec.contains("environment");
     if(!legacy&&!record&&!record_with_environment)throw std::invalid_argument("Comparison spec fields do not match supported schema");
@@ -299,6 +308,7 @@ SpecShape validate_spec(const Json& spec) {
     if(record||record_with_environment) {
         if(spec.at("input_manifest_source")!="resolved-problem-canonical-bytes"&&
            spec.at("input_manifest_source")!="csl.exp05-finite-minimax-case/1"&&
+           spec.at("input_manifest_source")!="csl.geometry-hull-input/1"&&
            spec.at("input_manifest_source")!="csl.mpc01-canonical-input/1"&&
            spec.at("input_manifest_source")!="csl.mpc03-b08-case/1")
             throw std::invalid_argument("Comparison input manifest source is unsupported");
@@ -339,6 +349,8 @@ SpecShape validate_spec(const Json& spec) {
 }
 bool arm_matches_run(const Json& run,const SpecShape& spec,std::size_t arm) {
     if(spec.strategies.empty())return true;
+    if(run.value("schema",std::string{})=="csl.external-method-run/1")
+        return run.at("method").at("id")==spec.strategies.at(arm);
     const auto& config=run.at("configuration").at("value");
     return config.at("strategy").at("strategy")==spec.strategies.at(arm) &&
         config.at("collection").at("enabled").get<bool>()==(spec.instrumentation.at(arm)=="enabled");
@@ -478,6 +490,12 @@ bool measurement_matches_arm(AttemptStatus status,const Json& measurement,const 
                 attachment.at("schema")=="csl.mpc01-native-attempt/1"&&attachment.at("content")==encoded)++matches;
         return matches==1;
     }
+    if(schema=="csl.external-method-event/1")
+        return run.value("schema",std::string{})=="csl.external-method-run/1"&&
+            measurement.contains("method_id")&&measurement.at("method_id")==spec.strategies.at(arm)&&
+            measurement.contains("instrumentation")&&measurement.at("instrumentation")==spec.instrumentation.at(arm)&&
+            measurement.contains("repetition")&&measurement.at("repetition").get<std::uint32_t>()==repetition&&
+            measurement.contains("warmup")&&measurement.at("warmup").get<bool>()==(repetition==0);
     if(schema=="csl.exp05-fixed-plan-event/1")
         return measurement.contains("strategy")&&measurement.at("strategy")==spec.strategies.at(arm)&&
             measurement.contains("instrumentation")&&measurement.at("instrumentation")==spec.instrumentation.at(arm)&&
@@ -654,6 +672,168 @@ ArtifactResult<problem::ResolvedContent> own(std::string_view text) {
 }
 }
 
+ArtifactResult<RecordedExternalMethodRunArtifact> encode_external_method_run(
+    const ExternalMethodRunInput& input, EncodeLimits limits) {
+    try {
+        if(input.run.value.empty()||input.problem.value.empty()||input.configuration.value.empty()||
+            input.method_id.empty()||input.method_version.empty()||input.input_manifest_schema.empty()||
+            input.input_manifest.empty()||input.sources.empty()||status_name(input.status).empty())
+            return error(ArtifactErrorCode::invalid_input,"external_run","Required method-run identity is empty");
+        auto manifest=problem::snapshot_content(std::span<const std::byte>(input.input_manifest));
+        if(const auto* failure=std::get_if<Diagnostic>(&manifest))
+            return error(ArtifactErrorCode::invalid_input,"external_run.input_manifest",failure->explanation);
+        const auto manifest_digest=std::get<problem::ResolvedContent>(manifest).digest();
+        const auto expected_problem="csl.problem.v1.sha256:"+problem::hex(manifest_digest);
+        if(input.problem.value!=expected_problem)
+            return error(ArtifactErrorCode::identity,"external_run.problem","Problem identity must hash the attached input manifest");
+        const auto config_prefix=std::string_view{"csl.config.v1.sha256:"};
+        if(!input.configuration.value.starts_with(config_prefix)||input.configuration.value.size()!=config_prefix.size()+64||
+            !std::all_of(input.configuration.value.begin()+static_cast<std::ptrdiff_t>(config_prefix.size()),
+                input.configuration.value.end(),[](unsigned char c){return (c>='0'&&c<='9')||(c>='a'&&c<='f');}))
+            return error(ArtifactErrorCode::invalid_input,"external_run.configuration","Configuration identity is malformed");
+        if(input.sources.size()>64||input.input_manifest.size()>limits.bytes||input.result_payload.size()>limits.bytes)
+            return error(ArtifactErrorCode::limit,"external_run","Method-run payload exceeds capacity");
+        const auto result_json=parse_bounded(input.result_payload,{limits.bytes,1000000,64,std::min<std::uint64_t>(limits.bytes,1024*1024)});
+        if(!result_json.is_object()||result_json.dump()!=input.result_payload)
+            return error(ArtifactErrorCode::invalid_input,"external_run.result_payload","Result payload must be a canonical JSON object");
+        const auto digest_text=[](const problem::ContentDigest& digest){return problem::hex(digest);};
+        auto valid_hash=[](std::string_view value){return value.size()==64&&std::all_of(value.begin(),value.end(),
+            [](unsigned char c){return (c>='0'&&c<='9')||(c>='a'&&c<='f');});};
+        Json sources=Json::array();
+        std::set<std::string> source_paths;
+        for(const auto& source:input.sources) {
+            if(source.path.empty()||!valid_hash(source.sha256)||!source_paths.insert(source.path).second)
+                return error(ArtifactErrorCode::invalid_input,"external_run.method.sources","Source paths must be unique and source hashes valid");
+            sources.push_back({{"path",source.path},{"sha256",source.sha256}});
+        }
+        if(input.deviations_sha256&&!valid_hash(*input.deviations_sha256))
+            return error(ArtifactErrorCode::invalid_input,"external_run.method.deviations_sha256","Deviation hash is malformed");
+        const auto& runtime=input.runtime;
+        if(runtime.language.empty()||runtime.implementation.empty()||runtime.version.empty()||runtime.os.empty()||
+            runtime.architecture.empty()||runtime.compiler.empty()||runtime.compiler_version.empty()||runtime.build_type.empty()||
+            !valid_hash(runtime.executable_sha256))
+            return error(ArtifactErrorCode::invalid_input,"external_run.method.runtime","Runtime identity is incomplete or malformed");
+        std::string manifest_hex;
+        manifest_hex.reserve(input.input_manifest.size()*2);
+        constexpr char digits[]="0123456789abcdef";
+        for(const auto byte:input.input_manifest) {
+            const auto value=std::to_integer<unsigned char>(byte);
+            manifest_hex.push_back(digits[value>>4]);
+            manifest_hex.push_back(digits[value&15]);
+        }
+        Json runtime_json{{"language",runtime.language},{"implementation",runtime.implementation},
+            {"version",runtime.version},{"executable_sha256",runtime.executable_sha256},
+            {"os",runtime.os},{"architecture",runtime.architecture},{"compiler",runtime.compiler},
+            {"compiler_version",runtime.compiler_version},{"build_type",runtime.build_type}};
+        Json method_json{{"id",input.method_id},{"version",input.method_version},{"sources",sources},
+            {"deviations_sha256",input.deviations_sha256?Json(*input.deviations_sha256):Json(nullptr)},
+            {"runtime",std::move(runtime_json)}};
+        Json manifest_json{{"schema",input.input_manifest_schema},
+            {"sha256",problem::hex(manifest_digest)},{"content_hex",manifest_hex}};
+        Json wire{{"schema","csl.external-method-run/1"},
+            {"problem",input.problem.value},
+            {"configuration",{{"id",input.configuration.value}}},
+            {"request_digest",digest_text(input.request_digest)},
+            {"run",input.run.value},
+            {"status",status_name(input.status)},
+            {"method",std::move(method_json)},
+            {"input_manifest",std::move(manifest_json)},
+            {"result",result_json},
+            {"recorded_state","unverified_recorded_data"}};
+        const auto text=wire.dump();
+        if(text.size()>limits.bytes)return error(ArtifactErrorCode::limit,"external_run.bytes","Encoded method run exceeds byte limit");
+        auto content=own(text);
+        if(const auto* failure=std::get_if<ArtifactError>(&content))return *failure;
+        return decode_external_method_run(text,{limits.bytes,1000000,64,std::min<std::uint64_t>(limits.bytes,1024*1024)});
+    } catch(const ArtifactError& failure){return failure;}
+      catch(const std::bad_alloc&){return error(ArtifactErrorCode::allocation,"external_run","Allocation failed");}
+      catch(const std::exception& failure){return error(ArtifactErrorCode::invalid_input,"external_run",failure.what());}
+}
+
+ArtifactResult<RecordedExternalMethodRunArtifact> decode_external_method_run(
+    std::string_view text, DecodeLimits limits) {
+    try {
+        const auto wire=parse_bounded(text,limits);
+        if(!exact_fields(wire,{"schema","problem","configuration","request_digest","run","status",
+            "method","input_manifest","result","recorded_state"})||wire.at("schema")!="csl.external-method-run/1"||
+            wire.dump()!=text||wire.at("recorded_state")!="unverified_recorded_data")
+            return error(ArtifactErrorCode::invalid_input,"external_run","Method-run schema, identity or canonical bytes are invalid");
+        const auto& problem_id=wire.at("problem");
+        const auto& configuration=wire.at("configuration");
+        const auto& request_digest=wire.at("request_digest");
+        const auto& run=wire.at("run");
+        if(!problem_id.is_string()||!configuration.is_object()||!exact_fields(configuration,{"id"})||
+            !configuration.at("id").is_string()||!request_digest.is_string()||!run.is_string()||run.get_ref<const std::string&>().empty())
+            return error(ArtifactErrorCode::invalid_input,"external_run.identity","Method-run identity fields are invalid");
+        auto hash_text=[](const Json& value){
+            if(!value.is_string())return false;
+            const auto& text=value.get_ref<const std::string&>();
+            return text.size()==64&&std::all_of(text.begin(),text.end(),[](unsigned char c){return (c>='0'&&c<='9')||(c>='a'&&c<='f');});
+        };
+        if(!hash_text(request_digest))return error(ArtifactErrorCode::invalid_input,"external_run.request_digest","Request digest is malformed");
+        const auto& config_id=configuration.at("id").get_ref<const std::string&>();
+        constexpr std::string_view config_prefix="csl.config.v1.sha256:";
+        if(!config_id.starts_with(config_prefix)||config_id.size()!=config_prefix.size()+64||
+            !std::all_of(config_id.begin()+static_cast<std::ptrdiff_t>(config_prefix.size()),config_id.end(),
+                [](unsigned char c){return (c>='0'&&c<='9')||(c>='a'&&c<='f');}))
+            return error(ArtifactErrorCode::invalid_input,"external_run.configuration.id","Configuration identity is malformed");
+        const auto parsed_status=parse_status(wire.at("status").get<std::string>());
+        const auto& method=wire.at("method");
+        if(!exact_fields(method,{"id","version","sources","deviations_sha256","runtime"})||
+            !method.at("id").is_string()||method.at("id").get_ref<const std::string&>().empty()||
+            !method.at("version").is_string()||method.at("version").get_ref<const std::string&>().empty()||
+            !method.at("sources").is_array()||method.at("sources").empty()||method.at("sources").size()>64)
+            return error(ArtifactErrorCode::invalid_input,"external_run.method","Method identity is malformed");
+        if(!method.at("deviations_sha256").is_null()&&!hash_text(method.at("deviations_sha256")))
+            return error(ArtifactErrorCode::invalid_input,"external_run.method.deviations_sha256","Deviation hash is malformed");
+        std::set<std::string> source_paths;
+        for(const auto& source:method.at("sources"))
+            if(!exact_fields(source,{"path","sha256"})||!source.at("path").is_string()||
+                source.at("path").get_ref<const std::string&>().empty()||!source_paths.insert(source.at("path").get<std::string>()).second||
+                !hash_text(source.at("sha256")))
+                return error(ArtifactErrorCode::invalid_input,"external_run.method.sources","Source identity is malformed or duplicated");
+        const auto& runtime=method.at("runtime");
+        if(!exact_fields(runtime,{"language","implementation","version","executable_sha256","os","architecture","compiler","compiler_version","build_type"}))
+            return error(ArtifactErrorCode::invalid_input,"external_run.method.runtime","Runtime fields are invalid");
+        for(const auto* field:{"language","implementation","version","os","architecture","compiler","compiler_version","build_type"})
+            if(!runtime.at(field).is_string()||runtime.at(field).get_ref<const std::string&>().empty())
+                return error(ArtifactErrorCode::invalid_input,"external_run.method.runtime","Runtime identity fields must be nonempty strings");
+        if(!hash_text(runtime.at("executable_sha256")))
+            return error(ArtifactErrorCode::invalid_input,"external_run.method.runtime.executable_sha256","Executable hash is malformed");
+        const auto& manifest=wire.at("input_manifest");
+        if(!exact_fields(manifest,{"schema","sha256","content_hex"})||!manifest.at("schema").is_string()||
+            manifest.at("schema").get_ref<const std::string&>().empty()||!hash_text(manifest.at("sha256"))||
+            !manifest.at("content_hex").is_string())
+            return error(ArtifactErrorCode::invalid_input,"external_run.input_manifest","Input manifest fields are invalid");
+        const auto& encoded=manifest.at("content_hex").get_ref<const std::string&>();
+        if(encoded.empty()||encoded.size()%2!=0||encoded.size()/2>limits.bytes)
+            return error(ArtifactErrorCode::limit,"external_run.input_manifest.content_hex","Input manifest content is empty or over capacity");
+        std::vector<std::byte> bytes;
+        bytes.reserve(encoded.size()/2);
+        const auto nibble=[](char c)->int {if(c>='0'&&c<='9')return c-'0';if(c>='a'&&c<='f')return c-'a'+10;return -1;};
+        for(std::size_t i=0;i<encoded.size();i+=2) {
+            const int high=nibble(encoded[i]),low=nibble(encoded[i+1]);
+            if(high<0||low<0)return error(ArtifactErrorCode::invalid_input,"external_run.input_manifest.content_hex","Input manifest content is not lowercase hexadecimal");
+            bytes.push_back(static_cast<std::byte>((high<<4)|low));
+        }
+        auto manifest_content=problem::snapshot_content(std::span<const std::byte>(bytes));
+        if(const auto* failure=std::get_if<Diagnostic>(&manifest_content))
+            return error(ArtifactErrorCode::invalid_input,"external_run.input_manifest",failure->explanation);
+        const auto manifest_digest=std::get<problem::ResolvedContent>(manifest_content).digest();
+        if(problem::hex(manifest_digest)!=manifest.at("sha256").get<std::string>()||
+            problem_id.get<std::string>()!="csl.problem.v1.sha256:"+problem::hex(manifest_digest))
+            return error(ArtifactErrorCode::identity,"external_run.input_manifest","Problem or input digest does not match manifest bytes");
+        if(!wire.at("result").is_object())return error(ArtifactErrorCode::invalid_input,"external_run.result","Result must be an object");
+        auto content=own(text);
+        if(const auto* failure=std::get_if<ArtifactError>(&content))return *failure;
+        auto& owned=std::get<problem::ResolvedContent>(content);
+        return RecordedExternalMethodRunArtifact(owned,{run.get<std::string>()},{problem_id.get<std::string>()},
+            {config_id},parsed_status);
+    } catch(const ArtifactError& failure){return failure;}
+      catch(const std::bad_alloc&){return error(ArtifactErrorCode::allocation,"external_run","Allocation failed");}
+      catch(const std::exception& failure){return error(ArtifactErrorCode::invalid_input,"external_run",failure.what());}
+}
+
 ArtifactResult<RecordedComparisonArtifact> encode_recorded_comparison(
     const problem::ResolvedContent& spec, const std::vector<ComparisonAttempt>& attempts, EncodeLimits limits) {
     try {
@@ -683,21 +863,36 @@ ArtifactResult<RecordedComparisonArtifact> encode_recorded_comparison(
             if (previous && key <= *previous)
                 return error(ArtifactErrorCode::invalid_input, "attempts[" + std::to_string(i) + "]", "Attempts must be uniquely ordered by strategy and repetition");
             previous = key;
-            const auto run_bytes=attempt.run.content().bytes();
+            const auto run_bytes=std::visit([](const auto& run){return run.content().bytes();},attempt.run.value());
             if(run_bytes.size()>limits.bytes-payload_bytes)
                 return error(ArtifactErrorCode::limit, "attempts", "Attempt payloads exceed byte budget");
             payload_bytes+=run_bytes.size();
             const auto run_text = bytes_to_string(run_bytes);
-            auto validated = decode_recorded_run(run_text, validation_limits);
-            if (std::holds_alternative<ArtifactError>(validated))
-                return error(ArtifactErrorCode::reference, "attempts[" + std::to_string(i) + "].run", "Attempt does not contain a valid recorded run");
+            const bool external=std::holds_alternative<RecordedExternalMethodRunArtifact>(attempt.run.value());
+            if(external) {
+                const auto validated=decode_external_method_run(run_text,validation_limits);
+                if(std::holds_alternative<ArtifactError>(validated))
+                    return error(ArtifactErrorCode::reference, "attempts[" + std::to_string(i) + "].run", "Attempt does not contain a valid external method run");
+            } else {
+                const auto validated=decode_recorded_run(run_text,validation_limits);
+                if(std::holds_alternative<ArtifactError>(validated))
+                    return error(ArtifactErrorCode::reference, "attempts[" + std::to_string(i) + "].run", "Attempt does not contain a valid recorded run");
+            }
+            /*
+             * Both run families share the same outer reference fields. The
+             * external form adds source/runtime identity and an input-manifest
+             * payload without claiming to be a controlled-system execution.
+             */
             const auto run_json = parse_bounded(run_text, validation_limits);
+            const auto run_content_digest=std::visit([](const auto& run){return run.content().digest();},attempt.run.value());
+            const auto run_request_digest=external?run_json.at("request_digest").get<std::string>():
+                problem::hex(request_digest(run_json));
             if (run_json.at("run").get<std::string>() != attempt.reference.run.value ||
-                attempt.run.content().digest() != attempt.reference.content_digest ||
+                run_content_digest != attempt.reference.content_digest ||
                 run_json.at("problem").get<std::string>()!=spec_json.at("problem_id").get<std::string>() ||
                 run_json.at("configuration").at("id").get<std::string>()!=
                     spec_shape.configurations.at(attempt.strategy_index) ||
-                problem::hex(request_digest(run_json))!=spec_json.at("request_digest").get<std::string>() ||
+                run_request_digest!=spec_json.at("request_digest").get<std::string>() ||
                 !input_manifest_attached(run_json,spec_json) ||
                 !arm_matches_run(run_json,spec_shape,attempt.strategy_index) ||
                 !status_matches(attempt.reported_status,run_json))
@@ -804,16 +999,27 @@ ArtifactResult<RecordedComparisonArtifact> decode_recorded_comparison(std::strin
             previous = key; (void)parse_status(item.at("reported_status").get<std::string>());
             const auto run_text = item.at("run").get<std::string>();
             if (run_text.size() > limits.bytes) return error(ArtifactErrorCode::limit, "comparison.attempts", "Run record exceeds byte capacity");
-            const auto run_content=decode_recorded_run(run_text,limits);
-            if (std::holds_alternative<ArtifactError>(run_content)) return error(ArtifactErrorCode::reference,"comparison.attempts.run","Invalid recorded run");
+            const auto run_header=parse_bounded(run_text,limits);
+            const bool external=run_header.value("schema",std::string{})=="csl.external-method-run/1";
+            problem::ContentDigest run_content_digest{};
+            if(external) {
+                const auto run_content=decode_external_method_run(run_text,limits);
+                if(std::holds_alternative<ArtifactError>(run_content))return error(ArtifactErrorCode::reference,"comparison.attempts.run","Invalid external method run");
+                run_content_digest=std::get<RecordedExternalMethodRunArtifact>(run_content).content().digest();
+            } else {
+                const auto run_content=decode_recorded_run(run_text,limits);
+                if(std::holds_alternative<ArtifactError>(run_content))return error(ArtifactErrorCode::reference,"comparison.attempts.run","Invalid recorded run");
+                run_content_digest=std::get<RecordedRunArtifact>(run_content).content().digest();
+            }
             const auto run_json=parse_bounded(run_text,limits);
-            const auto& content=std::get<RecordedRunArtifact>(run_content).content();
+            const auto run_request_digest=external?run_json.at("request_digest").get<std::string>():
+                problem::hex(request_digest(run_json));
             if (run_json.at("run").get<std::string>()!=item.at("run_id").get<std::string>() ||
-                problem::hex(content.digest())!=item.at("run_digest").get<std::string>() ||
+                problem::hex(run_content_digest)!=item.at("run_digest").get<std::string>() ||
                 run_json.at("problem").get<std::string>()!=spec.at("problem_id").get<std::string>() ||
                 run_json.at("configuration").at("id").get<std::string>()!=
                     spec_shape.configurations.at(key.first) ||
-                problem::hex(request_digest(run_json))!=spec.at("request_digest").get<std::string>() ||
+                run_request_digest!=spec.at("request_digest").get<std::string>() ||
                 !input_manifest_attached(run_json,spec) ||
                 !arm_matches_run(run_json,spec_shape,key.first) ||
                 !status_matches(parse_status(item.at("reported_status").get<std::string>()),run_json))
@@ -870,5 +1076,41 @@ ArtifactResult<ConfigId> comparison_configuration_id(const RecordedRunArtifact& 
     } catch(const ArtifactError& failure){return failure;}
       catch(const std::bad_alloc&){return error(ArtifactErrorCode::allocation,"comparison.configuration_id","Allocation failed");}
       catch(const std::exception&){return error(ArtifactErrorCode::invalid_input,"comparison.configuration_id","Invalid run configuration");}
+}
+ArtifactResult<problem::ContentDigest> comparison_request_digest(
+    const RecordedExternalMethodRunArtifact& run, DecodeLimits limits) {
+    try {
+        const auto text=bytes_to_string(run.content().bytes());
+        const auto decoded=decode_external_method_run(text,limits);
+        if(const auto* failure=std::get_if<ArtifactError>(&decoded))return *failure;
+        const auto json=parse_bounded(text,limits);
+        const auto& value=json.at("request_digest").get_ref<const std::string&>();
+        problem::ContentDigest digest{};
+        for(std::size_t i=0;i<digest.bytes.size();++i) {
+            const auto digit=[](char c)->unsigned char {return static_cast<unsigned char>(c<='9'?c-'0':c-'a'+10);};
+            digest.bytes[i]=static_cast<std::byte>((digit(value[i*2])<<4)|digit(value[i*2+1]));
+        }
+        return digest;
+    } catch(const ArtifactError& failure){return failure;}
+      catch(const std::bad_alloc&){return error(ArtifactErrorCode::allocation,"comparison.request_digest","Allocation failed");}
+      catch(const std::exception&){return error(ArtifactErrorCode::invalid_input,"comparison.request_digest","Invalid external method run");}
+}
+ArtifactResult<ConfigId> comparison_configuration_id(const RecordedExternalMethodRunArtifact& run, DecodeLimits limits) {
+    try {
+        const auto text=bytes_to_string(run.content().bytes());
+        const auto decoded=decode_external_method_run(text,limits);
+        if(const auto* failure=std::get_if<ArtifactError>(&decoded))return *failure;
+        return std::get<RecordedExternalMethodRunArtifact>(decoded).configuration_id();
+    } catch(const ArtifactError& failure){return failure;}
+      catch(const std::bad_alloc&){return error(ArtifactErrorCode::allocation,"comparison.configuration_id","Allocation failed");}
+      catch(const std::exception&){return error(ArtifactErrorCode::invalid_input,"comparison.configuration_id","Invalid external method run");}
+}
+ArtifactResult<problem::ContentDigest> comparison_request_digest(
+    const ComparisonRunArtifact& run, DecodeLimits limits) {
+    return std::visit([&](const auto& value){return comparison_request_digest(value,limits);},run.value());
+}
+ArtifactResult<ConfigId> comparison_configuration_id(
+    const ComparisonRunArtifact& run, DecodeLimits limits) {
+    return std::visit([&](const auto& value){return comparison_configuration_id(value,limits);},run.value());
 }
 }

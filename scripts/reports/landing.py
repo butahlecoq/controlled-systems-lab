@@ -92,6 +92,13 @@ FAMILIES = {
         "finite fixtures and a three-stage TwoPointsOnParallelLines adaptation. The report shows "
         "forward reachable sets, terminal sets, backward-winning intersections, and a replayed "
         "worst-case path in both player phase planes; it makes no continuous RL or performance claim."),
+    "exp06-geometry-pilot": Family(
+        r"exp06-[0-9a-f]{16}", "geometry", "Bounded exact-hull geometry pilot",
+        "Presents bounded exact-hull comparisons on a nine-point dyadic square. Reports include "
+        "the A29/A30 Python reference, C++ QuickHull, and in the ITIS'17 follow-up, separate safe "
+        "A43, paper-derived A43 tie variants, and a separately identified A44 incremental LP row. An independent exact "
+        "checker validates each returned hull; cross-runtime timing is inconclusive and these "
+        "single-fixture pilots do not establish a general speedup or complete the geometry ladder."),
     "lp": Family(
         r"lp-\d{8}T\d{6}Z-[0-9a-f]{12,64}", "optimization", "Linear programming reference run",
         "Runs the registered HiGHS linear-programming adapter on five small analytic "
@@ -167,13 +174,13 @@ FAMILIES = {
         "small exact 2D clouds. A43 and A44 are paper-informed adaptations, not faithful paper "
         "or Pascal ports; the performance conclusion is inconclusive."),
     "exp02-it17-dyadic": Family(
-        r"exp02-it17-(?:dyadic-interior|a44-paper-order)-\d{8}-r\d+", "geometry",
+        r"exp02-it17-(?:dyadic-interior|a44-paper-order|dyadic-250)-\d{8}-r\d+", "geometry",
         "Repeated ITIS17 dyadic hull pilot",
-        "Compares six separately identified hull reducers on two deterministic interior-heavy "
-        "2D square clouds. r1 labels A43/A44 as adaptations; r2 adds the k+1 farthest-seeded "
-        "Euclidean A44 interpretation; r3 separates exact hull validity from reducer "
-        "classification completeness. Incomplete reductions remain visible and the performance "
-        "conclusion is inconclusive."),
+        "Compares six separately identified hull reducers on deterministic interior-heavy 2D "
+        "square clouds, with one 250-point continuation. r1 labels A43/A44 as adaptations; r2 "
+        "adds the k+1 farthest-seeded Euclidean A44 interpretation; r3 separates exact hull "
+        "validity from reducer classification completeness. Incomplete reductions remain "
+        "visible and the performance conclusion is inconclusive."),
     "exp02-it17-hull-3d": Family(
         r"exp02-it17-hull-3d-(?:simplex|halton-cloud)-\d{8}-r\d+", "geometry",
         "ITIS17 three-dimensional hull reducer pilot",
