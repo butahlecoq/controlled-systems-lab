@@ -575,15 +575,23 @@ TEST_CASE("H-domain memory admission includes retained dual witnesses across saf
 TEST_CASE("H-domain memory admission includes large caller-derived solve identities") {
     const auto system = one_stage_noisy_integrator();
     auto domain = make_correlated_h_domain(system);
-    const std::string long_problem_id(200000, 'p');
-    const std::string long_program_id(200000, 'q');
+    constexpr std::size_t safety_row_count = 100;
+    constexpr std::size_t budget = 16 * 1024 * 1024;
+    const std::string long_problem_id(10000, 'p');
+    const std::string long_program_id(10000, 'q');
+    LinearSafetyConstraints repeated_safety{
+        {safety_row_count, 1, Vector(safety_row_count, 0.0)},
+        Vector(safety_row_count, 1.0)};
     const HContinuousPolicyRequest request{{{long_problem_id}, {long_program_id}},
         domain, cancel_observed_state_policy(system),
-        {{{1,1,{0}}, {1}}, {{0,1,{}}, {}}}, {}, 1e-9};
+        {repeated_safety, {{0,1,{}}, {}}}, {}, 1e-9};
     BoxEnumerationWorkspace lp;
     ExecutionContext context;
     context.resources = std::make_shared<const ResourcePolicy>(
-        ResourcePolicy{1, 1, 1, 1024 * 1024});
+        ResourcePolicy{1, 1, 1, budget});
+    const auto approximate_identity_bytes = long_problem_id.size() + long_program_id.size() + 100;
+    CHECK((2 * safety_row_count + 2) * approximate_identity_bytes < budget);
+    CHECK((12 * safety_row_count + 7) * approximate_identity_bytes > budget);
     const auto result = evaluate_h_continuous_policy(system, request, lp, context);
     REQUIRE(std::holds_alternative<OperationStopped>(result));
     CHECK(std::get<OperationStopped>(result).reason == StopReason::resource_limit);

@@ -687,11 +687,25 @@ HContinuousPolicyResult evaluate_h_continuous_policy(const model::LinearSystem& 
         ? checked_add(*program_prefix_bytes, largest_suffix_bytes) : std::nullopt;
     const auto program_identity_bytes = generated_problem_id_bytes && generated_program_id_bytes
         ? checked_add(*generated_problem_id_bytes, *generated_program_id_bytes) : std::nullopt;
-    const auto result_identity_count = checked_multiply(safety_row_count, 2);
-    const auto retained_identity_count = result_identity_count
-        ? checked_add(*result_identity_count, 2) : std::nullopt;
-    const auto retained_identity_bytes = program_identity_bytes && retained_identity_count
-        ? checked_multiply(*program_identity_bytes, *retained_identity_count) : std::nullopt;
+    const auto support_result_count = checked_multiply(safety_row_count, 2);
+    const auto result_count = support_result_count
+        ? checked_add(*support_result_count, 1) : std::nullopt;
+    // A retained solve result may contain its outcome identity, lower/upper
+    // objective-bound subjects, backend primal/dual residual subjects, and an
+    // independently evaluated primal-check subject. Add the largest fixed
+    // local verifier tags for those residual contexts as well.
+    const auto identity_copies_per_result = checked_multiply(program_identity_bytes.value_or(0), 6);
+    const auto largest_local_verifier_bytes = std::max({
+        std::string("csl.controllers.joint-h-primal").size(),
+        std::string("csl.controllers.joint-h-dual-primal").size(),
+        std::string("csl.controllers.joint-h-primal-support").size()}) + 1;
+    const auto local_verifier_bytes = checked_multiply(largest_local_verifier_bytes, 3);
+    const auto retained_metadata_per_result = identity_copies_per_result && local_verifier_bytes
+        ? checked_add(*identity_copies_per_result, *local_verifier_bytes) : std::nullopt;
+    const auto retained_result_metadata = result_count && retained_metadata_per_result
+        ? checked_multiply(*result_count, *retained_metadata_per_result) : std::nullopt;
+    const auto retained_identity_bytes = retained_result_metadata && program_identity_bytes
+        ? checked_add(*retained_result_metadata, *program_identity_bytes) : std::nullopt;
     const auto evidence_bytes = row_evidence_bytes && evidence_container_bytes
         ? checked_add(*row_evidence_bytes, *evidence_container_bytes) : std::nullopt;
     const auto evidence_and_solutions_bytes = evidence_bytes && retained_solution_bytes
@@ -711,7 +725,9 @@ HContinuousPolicyResult evaluate_h_continuous_policy(const model::LinearSystem& 
         !retained_solution_bytes || !replay_record_bytes ||
         !replay_count || !retained_replay_bytes || !row_suffix_bytes ||
         !generated_problem_id_bytes || !program_prefix_bytes || !generated_program_id_bytes ||
-        !program_identity_bytes || !result_identity_count || !retained_identity_count ||
+        !program_identity_bytes || !support_result_count || !result_count ||
+        !identity_copies_per_result || !local_verifier_bytes ||
+        !retained_metadata_per_result || !retained_result_metadata ||
         !retained_identity_bytes || !evidence_bytes || !row_working_bytes ||
         !row_and_replay_bytes || !result_and_replay_bytes || !total_working_bytes)
         return unsupported("controllers.policy_h.dimensions", "H support working storage extent overflowed.");
