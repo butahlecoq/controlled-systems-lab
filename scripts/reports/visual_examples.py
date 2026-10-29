@@ -721,8 +721,14 @@ def build(catalog, site):
             '<h3>Saved control relations and tube geometry</h3>'
             '<a href="control-witness-v1.html"><img src="control-witness/mpc06-tube.svg" '
             'alt="Saved state box, support-tightened set, and exact RPI error tube on equal numeric axes"></a>'
-            '<p>Five figures plot saved control projections from Strategy A and B; one additional figure shows frozen MPC-06 tube geometry with numeric ticks, a major grid, and equal position–velocity scaling. The companions preserve the original report evidence.</p>'
+            '<p>Five figures plot saved control projections from Strategy A and B. The page also shows frozen MPC-06 tube geometry and the T-S01 Strategy A/B selected control histories with the exact minimizer family. All companions preserve the original report evidence.</p>'
             '<p><a href="control-witness-v1.html">Open the control and tube figures →</a></p></article>' +
+            '<article class="saved-figure" id="ts01-strategy-ab"><p class="eyebrow">Control strategy · Saved-data companion</p>'
+            '<h3>T-S01 Strategy A/B selected controls</h3>'
+            '<a href="control-witness-v1.html#ts01-strategy-ab"><img src="control-witness/ts01-strategy-ab.svg" '
+            'alt="Selected two-stage control histories from Strategy A and B on the exact minimizing line"></a>'
+            '<p>Plots saved selected histories from both strategies and the exact minimizing family for the two-stage integrator. It is a control projection with equal data scaling, not a reachable-set plot or performance ranking.</p>'
+            '<p><a href="control-witness-v1.html#ts01-strategy-ab">Open the T-S01 figure and evidence →</a></p></article>' +
             '<article class="saved-figure" id="control-witness-timings"><p class="eyebrow">Control reports · Saved-data companion</p>'
             '<h3>Saved synthesis and verifier timings</h3>'
             '<a href="control-witness-timing-v1.html"><img src="control-witness/syn01-timing.svg" '
