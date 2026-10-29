@@ -8,12 +8,12 @@ The performance result is **inconclusive**. The capture has no source-function p
 
 | Method | Median call | Range | Reducer complete |
 | --- | ---: | ---: | ---: |
-| Geometric QuickHull | 0.535 ms | 0.528–0.550 ms | n/a |
-| LP membership baseline | 67.116 ms | 67.048–69.669 ms | 0/7 |
-| Phase-I basis reuse (related to A43) | 0.746 ms | 0.729–0.821 ms | 7/7 |
-| Ordered LP membership (related to A44) | 66.358 ms | 66.286–71.224 ms | 0/7 |
-| A43 certificate-safe adaptation | 24.197 ms | 24.064–25.055 ms | 0/7 |
-| A44 incremental LP farthest seed | 27.221 ms | 27.028–27.557 ms | 7/7 |
+| Geometric QuickHull | 0.549 ms | 0.528–0.905 ms | n/a |
+| LP membership baseline | 67.621 ms | 67.237–69.812 ms | 0/7 |
+| Phase-I basis reuse (related to A43) | 0.749 ms | 0.722–0.825 ms | 7/7 |
+| Ordered LP membership (related to A44) | 67.190 ms | 66.785–68.651 ms | 0/7 |
+| A43 certificate-safe adaptation | 24.518 ms | 24.266–25.307 ms | 0/7 |
+| A44 incremental LP farthest seed | 27.472 ms | 27.177–30.603 ms | 7/7 |
 
 The geometric fixture contains the four unit-square corners and 246 unique interior dyadic points generated from seed `0x6d2b79f5`. Every row uses input SHA256 `805fb5e027ee97394494ef3d23123e47c86d31e21de53f4a5c239867204d04b3`. The independent checker reports `verified` for all 48 attempts, with a five-second wall budget and 250-point bound. Exact hull validity is separate from LP reducer completion; incomplete reducers can retain redundant inputs while returning the correct hull.
 
