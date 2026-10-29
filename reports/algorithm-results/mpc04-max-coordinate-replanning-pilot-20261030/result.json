@@ -52,25 +52,25 @@
     "planning": "terminal squared max-coordinate objective; zero nominal disturbance or finite min-max",
     "reported": "source terminal max(abs(y),abs(z))"
   },
-  "algorithm_implementation": "repository C++ csl.finite_action_minimax adapter",
+  "algorithm_implementation": "repository C++ csl.finite_action_minimax adapter; finite fixtures run through shared C++ episode loop",
   "scope": "finite-action, four-step source-derived adaptation; not a reproduction of the continuous-action four-second RL task; finite disturbance histories only",
   "fixtures": {
+    "scalar_two_step": {
+      "executed_replanning_worst": 0,
+      "fixed_plan": 2,
+      "history_costs": {
+        "(-1, 0)": 0,
+        "(1, 0)": 0
+      }
+    },
     "strict_two_step": {
-      "fixed_plan_squared": 2,
-      "executed_replanning_worst_squared": 2,
       "causal_squared": 1,
+      "executed_replanning_worst_squared": 2,
+      "fixed_plan_squared": 2,
       "history_squared": {
         "(-1, 0)": 2,
         "(0, 0)": 1,
         "(1, 0)": 2
-      }
-    },
-    "scalar_two_step": {
-      "fixed_plan": 2,
-      "executed_replanning_worst": 0,
-      "history_costs": {
-        "(-1, 0)": 0,
-        "(1, 0)": 0
       }
     }
   },
@@ -95,73 +95,73 @@
       "mean_terminal_original_objective": 0.20826898385367149,
       "decision_count": 64,
       "per_decision_latency_ns": [
-        667618,
-        228103,
-        90096,
-        55734,
-        478486,
-        173208,
-        81366,
-        39390,
-        444752,
-        178656,
-        80667,
-        38763,
-        456137,
-        176630,
-        79968,
-        38972,
-        395234,
-        210922,
-        94915,
+        913042,
+        301298,
+        135074,
+        85137,
+        704633,
+        322459,
+        131302,
+        62718,
+        730126,
+        294453,
+        131721,
+        61042,
+        742279,
+        307024,
+        135493,
+        64883,
+        750519,
+        317012,
+        133957,
+        63905,
+        749193,
+        328047,
+        146878,
+        69353,
+        793962,
+        313939,
+        131023,
+        58877,
+        670341,
+        275317,
+        146668,
+        58597,
+        654697,
+        332517,
+        124807,
+        59086,
+        697579,
+        278459,
+        125017,
+        58947,
+        474575,
+        150021,
+        68584,
         36807,
-        356682,
-        149741,
-        66489,
-        36807,
-        362479,
-        120966,
-        54966,
-        23397,
-        285373,
-        120757,
-        54965,
-        23397,
-        300599,
-        121385,
-        54686,
-        23676,
-        286211,
-        120617,
-        55245,
-        41975,
-        286142,
-        120617,
-        54407,
-        23397,
-        286211,
-        120477,
-        63835,
-        23467,
-        297805,
-        115658,
-        50147,
+        287189,
+        121036,
+        56782,
         24375,
-        282510,
-        116357,
-        51403,
-        23258,
-        287190,
-        120267,
-        55105,
-        24236,
-        286700,
-        137169,
-        55105,
-        23956
+        312123,
+        118172,
+        52312,
+        22768,
+        304720,
+        168388,
+        84858,
+        23747,
+        280414,
+        119639,
+        51823,
+        23886,
+        281044,
+        120198,
+        65232,
+        24165
       ],
-      "median_decision_latency_ns": 105286.5,
-      "max_decision_latency_ns": 667618
+      "median_decision_latency_ns": 134515.5,
+      "max_decision_latency_ns": 913042
     },
     "nominal_zero_disturbance::moving_fixed_2_stage_lookahead": {
       "episodes": 16,
@@ -173,73 +173,73 @@
       "mean_terminal_original_objective": 0.23415549071467934,
       "decision_count": 64,
       "per_decision_latency_ns": [
-        54826,
-        54896,
-        54267,
-        54197,
-        54756,
-        55245,
-        54197,
-        57899,
-        50915,
-        50495,
-        50635,
-        56223,
-        77105,
-        89746,
-        61810,
-        76966,
-        57620,
-        56711,
-        68724,
-        103435,
-        99594,
-        99176,
-        107626,
-        54686,
-        73893,
-        55245,
-        54267,
-        52521,
-        53988,
-        54476,
-        53429,
-        56641,
-        53918,
-        54407,
-        53429,
-        57131,
-        53988,
-        54337,
-        53918,
-        52452,
-        50496,
-        63277,
         50565,
+        56363,
+        49168,
+        54755,
+        55245,
+        58248,
+        55804,
+        55245,
+        59505,
+        54896,
+        51404,
+        50845,
+        55315,
+        54826,
+        55384,
+        56851,
+        55524,
+        132909,
+        54337,
+        60832,
+        77734,
+        55804,
+        55385,
         52940,
-        53638,
-        53988,
-        53360,
-        56293,
-        50006,
-        50356,
-        53848,
-        56781,
-        53918,
-        58597,
-        67188,
-        60134,
-        59156,
-        62369,
-        59156,
-        61950,
-        64045,
-        64394,
-        50914,
-        54756
+        55384,
+        79690,
+        51194,
+        50775,
+        95334,
+        55175,
+        55804,
+        55245,
+        55175,
+        54756,
+        55384,
+        55384,
+        80039,
+        55384,
+        55315,
+        55315,
+        55314,
+        55035,
+        56153,
+        71379,
+        55734,
+        55664,
+        55385,
+        55385,
+        55803,
+        55315,
+        55524,
+        55804,
+        55874,
+        55873,
+        55944,
+        55385,
+        56852,
+        54895,
+        55804,
+        55454,
+        55175,
+        55244,
+        56083,
+        56083
       ],
-      "median_decision_latency_ns": 54791.0,
-      "max_decision_latency_ns": 107626
+      "median_decision_latency_ns": 55385.0,
+      "max_decision_latency_ns": 132909
     },
     "finite_minimax::shrinking_to_episode_terminal": {
       "episodes": 16,
@@ -251,73 +251,73 @@
       "mean_terminal_original_objective": 0.2592759281449665,
       "decision_count": 64,
       "per_decision_latency_ns": [
-        669084,
-        192274,
-        65371,
-        25771,
-        646037,
-        188153,
-        64254,
-        25073,
-        649040,
-        189061,
-        65791,
-        25772,
-        632417,
-        193252,
-        68795,
-        25352,
-        625503,
+        624734,
+        210084,
+        70051,
+        26191,
+        618728,
         209595,
-        68305,
-        33384,
-        615586,
-        198769,
-        62439,
-        24864,
-        680818,
-        236624,
+        69911,
+        25352,
+        620125,
+        209525,
+        69283,
+        25492,
+        614188,
+        207360,
+        69562,
+        25283,
+        608601,
+        190599,
+        80877,
+        25283,
+        607763,
+        190319,
         68585,
-        25772,
-        646526,
-        207011,
-        68305,
-        25073,
-        626690,
-        209315,
-        68235,
-        24724,
-        622779,
-        205684,
-        69772,
         25353,
-        641915,
-        194719,
-        87233,
-        25911,
-        635002,
-        194649,
-        81016,
-        25702,
-        646734,
-        194998,
-        82204,
-        26260,
-        630951,
-        194649,
-        65372,
-        25143,
-        639541,
-        194789,
+        624595,
+        190668,
+        69283,
+        25283,
+        627598,
+        191367,
+        69283,
+        26121,
+        646735,
+        193462,
+        69423,
+        25632,
+        631928,
+        192763,
+        69563,
+        26120,
+        624944,
+        190878,
+        69143,
+        26121,
+        627249,
+        191995,
+        69143,
+        25701,
+        629764,
+        191646,
+        69632,
+        26191,
+        625852,
+        191227,
         69492,
         25213,
-        651205,
-        194929,
-        69492,
-        25912
+        629763,
+        191297,
+        69143,
+        25702,
+        628157,
+        191646,
+        68933,
+        25213
       ],
-      "median_decision_latency_ns": 137693.0,
-      "max_decision_latency_ns": 680818
+      "median_decision_latency_ns": 135598.0,
+      "max_decision_latency_ns": 646735
     },
     "finite_minimax::moving_fixed_2_stage_lookahead": {
       "episodes": 16,
@@ -329,73 +329,73 @@
       "mean_terminal_original_objective": 0.29006312004471985,
       "decision_count": 64,
       "per_decision_latency_ns": [
-        68654,
-        80668,
-        67956,
-        67607,
-        68794,
-        68165,
-        68305,
-        69702,
-        71868,
-        69492,
-        68306,
-        69563,
-        71658,
-        69702,
-        90584,
-        69632,
-        71588,
-        68584,
-        69214,
-        69772,
-        71448,
-        68794,
-        68585,
-        69492,
+        69074,
+        68166,
+        68095,
+        68655,
+        69144,
+        68025,
+        68026,
+        82623,
+        69493,
+        68515,
+        69143,
         68724,
-        68584,
+        68305,
+        68655,
+        68795,
+        68654,
+        68654,
+        68654,
+        68096,
+        68724,
+        82413,
+        68236,
+        68375,
+        68166,
         69004,
-        82203,
-        66839,
-        67257,
-        69213,
-        69213,
-        71867,
-        69283,
-        69772,
-        69981,
-        71727,
-        68933,
+        68096,
+        68515,
+        68585,
+        68724,
+        69493,
+        69004,
+        68236,
+        69004,
+        80947,
+        68585,
+        68235,
+        69143,
+        68166,
+        68306,
+        68375,
+        68655,
+        68794,
+        68096,
+        69004,
+        68585,
+        68584,
+        80807,
+        68166,
         69073,
-        69283,
-        85416,
-        69143,
-        69632,
-        69353,
-        71937,
-        69214,
-        69492,
-        69283,
-        72007,
-        68584,
-        69423,
-        69143,
-        71937,
-        69004,
-        69353,
-        69563,
-        72496,
+        68585,
+        68445,
+        68724,
+        68655,
+        81226,
+        69074,
+        68794,
+        69074,
+        71099,
+        65861,
+        82134,
         69213,
         68655,
-        69632,
-        71658,
-        68585,
-        71169,
-        69562
+        68655,
+        68305
       ],
-      "median_decision_latency_ns": 69353.0,
-      "max_decision_latency_ns": 90584
+      "median_decision_latency_ns": 68655.0,
+      "max_decision_latency_ns": 82623
     }
   },
   "episodes": [
@@ -419,7 +419,7 @@
             1.0
           ],
           "requested_horizon": 4,
-          "solve_ns": 667618,
+          "solve_ns": 913042,
           "solver_detail": "",
           "status": "solved",
           "step": 0
@@ -440,7 +440,7 @@
             1.0
           ],
           "requested_horizon": 3,
-          "solve_ns": 228103,
+          "solve_ns": 301298,
           "solver_detail": "",
           "status": "solved",
           "step": 1
@@ -460,7 +460,7 @@
             1.0
           ],
           "requested_horizon": 2,
-          "solve_ns": 90096,
+          "solve_ns": 135074,
           "solver_detail": "",
           "status": "solved",
           "step": 2
@@ -479,7 +479,7 @@
             1.0
           ],
           "requested_horizon": 1,
-          "solve_ns": 55734,
+          "solve_ns": 85137,
           "solver_detail": "",
           "status": "solved",
           "step": 3
@@ -549,7 +549,7 @@
             1.0
           ],
           "requested_horizon": 4,
-          "solve_ns": 478486,
+          "solve_ns": 704633,
           "solver_detail": "",
           "status": "solved",
           "step": 0
@@ -570,7 +570,7 @@
             1.0
           ],
           "requested_horizon": 3,
-          "solve_ns": 173208,
+          "solve_ns": 322459,
           "solver_detail": "",
           "status": "solved",
           "step": 1
@@ -590,7 +590,7 @@
             1.0
           ],
           "requested_horizon": 2,
-          "solve_ns": 81366,
+          "solve_ns": 131302,
           "solver_detail": "",
           "status": "solved",
           "step": 2
@@ -609,7 +609,7 @@
             1.0
           ],
           "requested_horizon": 1,
-          "solve_ns": 39390,
+          "solve_ns": 62718,
           "solver_detail": "",
           "status": "solved",
           "step": 3
@@ -679,7 +679,7 @@
             1.0
           ],
           "requested_horizon": 4,
-          "solve_ns": 444752,
+          "solve_ns": 730126,
           "solver_detail": "",
           "status": "solved",
           "step": 0
@@ -700,7 +700,7 @@
             1.0
           ],
           "requested_horizon": 3,
-          "solve_ns": 178656,
+          "solve_ns": 294453,
           "solver_detail": "",
           "status": "solved",
           "step": 1
@@ -720,7 +720,7 @@
             1.0
           ],
           "requested_horizon": 2,
-          "solve_ns": 80667,
+          "solve_ns": 131721,
           "solver_detail": "",
           "status": "solved",
           "step": 2
@@ -739,7 +739,7 @@
             1.0
           ],
           "requested_horizon": 1,
-          "solve_ns": 38763,
+          "solve_ns": 61042,
           "solver_detail": "",
           "status": "solved",
           "step": 3
@@ -809,7 +809,7 @@
             1.0
           ],
           "requested_horizon": 4,
-          "solve_ns": 456137,
+          "solve_ns": 742279,
           "solver_detail": "",
           "status": "solved",
           "step": 0
@@ -830,7 +830,7 @@
             1.0
           ],
           "requested_horizon": 3,
-          "solve_ns": 176630,
+          "solve_ns": 307024,
           "solver_detail": "",
           "status": "solved",
           "step": 1
@@ -850,7 +850,7 @@
             1.0
           ],
           "requested_horizon": 2,
-          "solve_ns": 79968,
+          "solve_ns": 135493,
           "solver_detail": "",
           "status": "solved",
           "step": 2
@@ -869,7 +869,7 @@
             1.0
           ],
           "requested_horizon": 1,
-          "solve_ns": 38972,
+          "solve_ns": 64883,
           "solver_detail": "",
           "status": "solved",
           "step": 3
@@ -939,7 +939,7 @@
             1.0
           ],
           "requested_horizon": 4,
-          "solve_ns": 395234,
+          "solve_ns": 750519,
           "solver_detail": "",
           "status": "solved",
           "step": 0
@@ -960,7 +960,7 @@
             1.0
           ],
           "requested_horizon": 3,
-          "solve_ns": 210922,
+          "solve_ns": 317012,
           "solver_detail": "",
           "status": "solved",
           "step": 1
@@ -980,7 +980,7 @@
             1.0
           ],
           "requested_horizon": 2,
-          "solve_ns": 94915,
+          "solve_ns": 133957,
           "solver_detail": "",
           "status": "solved",
           "step": 2
@@ -999,7 +999,7 @@
             1.0
           ],
           "requested_horizon": 1,
-          "solve_ns": 36807,
+          "solve_ns": 63905,
           "solver_detail": "",
           "status": "solved",
           "step": 3
@@ -1069,7 +1069,7 @@
             1.0
           ],
           "requested_horizon": 4,
-          "solve_ns": 356682,
+          "solve_ns": 749193,
           "solver_detail": "",
           "status": "solved",
           "step": 0
@@ -1090,7 +1090,7 @@
             1.0
           ],
           "requested_horizon": 3,
-          "solve_ns": 149741,
+          "solve_ns": 328047,
           "solver_detail": "",
           "status": "solved",
           "step": 1
@@ -1110,7 +1110,7 @@
             1.0
           ],
           "requested_horizon": 2,
-          "solve_ns": 66489,
+          "solve_ns": 146878,
           "solver_detail": "",
           "status": "solved",
           "step": 2
@@ -1129,7 +1129,7 @@
             1.0
           ],
           "requested_horizon": 1,
-          "solve_ns": 36807,
+          "solve_ns": 69353,
           "solver_detail": "",
           "status": "solved",
           "step": 3
@@ -1199,7 +1199,7 @@
             1.0
           ],
           "requested_horizon": 4,
-          "solve_ns": 362479,
+          "solve_ns": 793962,
           "solver_detail": "",
           "status": "solved",
           "step": 0
@@ -1220,7 +1220,7 @@
             1.0
           ],
           "requested_horizon": 3,
-          "solve_ns": 120966,
+          "solve_ns": 313939,
           "solver_detail": "",
           "status": "solved",
           "step": 1
@@ -1240,7 +1240,7 @@
             1.0
           ],
           "requested_horizon": 2,
-          "solve_ns": 54966,
+          "solve_ns": 131023,
           "solver_detail": "",
           "status": "solved",
           "step": 2
@@ -1259,7 +1259,7 @@
             1.0
           ],
           "requested_horizon": 1,
-          "solve_ns": 23397,
+          "solve_ns": 58877,
           "solver_detail": "",
           "status": "solved",
           "step": 3
@@ -1329,7 +1329,7 @@
             1.0
           ],
           "requested_horizon": 4,
-          "solve_ns": 285373,
+          "solve_ns": 670341,
           "solver_detail": "",
           "status": "solved",
           "step": 0
@@ -1350,7 +1350,7 @@
             1.0
           ],
           "requested_horizon": 3,
-          "solve_ns": 120757,
+          "solve_ns": 275317,
           "solver_detail": "",
           "status": "solved",
           "step": 1
@@ -1370,7 +1370,7 @@
             1.0
           ],
           "requested_horizon": 2,
-          "solve_ns": 54965,
+          "solve_ns": 146668,
           "solver_detail": "",
           "status": "solved",
           "step": 2
@@ -1389,7 +1389,7 @@
             1.0
           ],
           "requested_horizon": 1,
-          "solve_ns": 23397,
+          "solve_ns": 58597,
           "solver_detail": "",
           "status": "solved",
           "step": 3
@@ -1459,7 +1459,7 @@
             1.0
           ],
           "requested_horizon": 4,
-          "solve_ns": 300599,
+          "solve_ns": 654697,
           "solver_detail": "",
           "status": "solved",
           "step": 0
@@ -1480,7 +1480,7 @@
             1.0
           ],
           "requested_horizon": 3,
-          "solve_ns": 121385,
+          "solve_ns": 332517,
           "solver_detail": "",
           "status": "solved",
           "step": 1
@@ -1500,7 +1500,7 @@
             1.0
           ],
           "requested_horizon": 2,
-          "solve_ns": 54686,
+          "solve_ns": 124807,
           "solver_detail": "",
           "status": "solved",
           "step": 2
@@ -1519,7 +1519,7 @@
             1.0
           ],
           "requested_horizon": 1,
-          "solve_ns": 23676,
+          "solve_ns": 59086,
           "solver_detail": "",
           "status": "solved",
           "step": 3
@@ -1589,7 +1589,7 @@
             1.0
           ],
           "requested_horizon": 4,
-          "solve_ns": 286211,
+          "solve_ns": 697579,
           "solver_detail": "",
           "status": "solved",
           "step": 0
@@ -1610,7 +1610,7 @@
             1.0
           ],
           "requested_horizon": 3,
-          "solve_ns": 120617,
+          "solve_ns": 278459,
           "solver_detail": "",
           "status": "solved",
           "step": 1
@@ -1630,7 +1630,7 @@
             1.0
           ],
           "requested_horizon": 2,
-          "solve_ns": 55245,
+          "solve_ns": 125017,
           "solver_detail": "",
           "status": "solved",
           "step": 2
@@ -1649,7 +1649,7 @@
             1.0
           ],
           "requested_horizon": 1,
-          "solve_ns": 41975,
+          "solve_ns": 58947,
           "solver_detail": "",
           "status": "solved",
           "step": 3
@@ -1719,7 +1719,7 @@
             1.0
           ],
           "requested_horizon": 4,
-          "solve_ns": 286142,
+          "solve_ns": 474575,
           "solver_detail": "",
           "status": "solved",
           "step": 0
@@ -1740,7 +1740,7 @@
             1.0
           ],
           "requested_horizon": 3,
-          "solve_ns": 120617,
+          "solve_ns": 150021,
           "solver_detail": "",
           "status": "solved",
           "step": 1
@@ -1760,7 +1760,7 @@
             1.0
           ],
           "requested_horizon": 2,
-          "solve_ns": 54407,
+          "solve_ns": 68584,
           "solver_detail": "",
           "status": "solved",
           "step": 2
@@ -1779,7 +1779,7 @@
             1.0
           ],
           "requested_horizon": 1,
-          "solve_ns": 23397,
+          "solve_ns": 36807,
           "solver_detail": "",
           "status": "solved",
           "step": 3
@@ -1849,7 +1849,7 @@
             1.0
           ],
           "requested_horizon": 4,
-          "solve_ns": 286211,
+          "solve_ns": 287189,
           "solver_detail": "",
           "status": "solved",
           "step": 0
@@ -1870,7 +1870,7 @@
             1.0
           ],
           "requested_horizon": 3,
-          "solve_ns": 120477,
+          "solve_ns": 121036,
           "solver_detail": "",
           "status": "solved",
           "step": 1
@@ -1890,7 +1890,7 @@
             1.0
           ],
           "requested_horizon": 2,
-          "solve_ns": 63835,
+          "solve_ns": 56782,
           "solver_detail": "",
           "status": "solved",
           "step": 2
@@ -1909,7 +1909,7 @@
             1.0
           ],
           "requested_horizon": 1,
-          "solve_ns": 23467,
+          "solve_ns": 24375,
           "solver_detail": "",
           "status": "solved",
           "step": 3
@@ -1979,7 +1979,7 @@
             1.0
           ],
           "requested_horizon": 4,
-          "solve_ns": 297805,
+          "solve_ns": 312123,
           "solver_detail": "",
           "status": "solved",
           "step": 0
@@ -2000,7 +2000,7 @@
             1.0
           ],
           "requested_horizon": 3,
-          "solve_ns": 115658,
+          "solve_ns": 118172,
           "solver_detail": "",
           "status": "solved",
           "step": 1
@@ -2020,7 +2020,7 @@
             1.0
           ],
           "requested_horizon": 2,
-          "solve_ns": 50147,
+          "solve_ns": 52312,
           "solver_detail": "",
           "status": "solved",
           "step": 2
@@ -2039,7 +2039,7 @@
             1.0
           ],
           "requested_horizon": 1,
-          "solve_ns": 24375,
+          "solve_ns": 22768,
           "solver_detail": "",
           "status": "solved",
           "step": 3
@@ -2109,7 +2109,7 @@
             1.0
           ],
           "requested_horizon": 4,
-          "solve_ns": 282510,
+          "solve_ns": 304720,
           "solver_detail": "",
           "status": "solved",
           "step": 0
@@ -2130,7 +2130,7 @@
             1.0
           ],
           "requested_horizon": 3,
-          "solve_ns": 116357,
+          "solve_ns": 168388,
           "solver_detail": "",
           "status": "solved",
           "step": 1
@@ -2150,7 +2150,7 @@
             1.0
           ],
           "requested_horizon": 2,
-          "solve_ns": 51403,
+          "solve_ns": 84858,
           "solver_detail": "",
           "status": "solved",
           "step": 2
@@ -2169,7 +2169,7 @@
             1.0
           ],
           "requested_horizon": 1,
-          "solve_ns": 23258,
+          "solve_ns": 23747,
           "solver_detail": "",
           "status": "solved",
           "step": 3
@@ -2239,7 +2239,7 @@
             1.0
           ],
           "requested_horizon": 4,
-          "solve_ns": 287190,
+          "solve_ns": 280414,
           "solver_detail": "",
           "status": "solved",
           "step": 0
@@ -2260,7 +2260,7 @@
             1.0
           ],
           "requested_horizon": 3,
-          "solve_ns": 120267,
+          "solve_ns": 119639,
           "solver_detail": "",
           "status": "solved",
           "step": 1
@@ -2280,7 +2280,7 @@
             1.0
           ],
           "requested_horizon": 2,
-          "solve_ns": 55105,
+          "solve_ns": 51823,
           "solver_detail": "",
           "status": "solved",
           "step": 2
@@ -2299,7 +2299,7 @@
             1.0
           ],
           "requested_horizon": 1,
-          "solve_ns": 24236,
+          "solve_ns": 23886,
           "solver_detail": "",
           "status": "solved",
           "step": 3
@@ -2369,7 +2369,7 @@
             1.0
           ],
           "requested_horizon": 4,
-          "solve_ns": 286700,
+          "solve_ns": 281044,
           "solver_detail": "",
           "status": "solved",
           "step": 0
@@ -2390,7 +2390,7 @@
             1.0
           ],
           "requested_horizon": 3,
-          "solve_ns": 137169,
+          "solve_ns": 120198,
           "solver_detail": "",
           "status": "solved",
           "step": 1
@@ -2410,7 +2410,7 @@
             1.0
           ],
           "requested_horizon": 2,
-          "solve_ns": 55105,
+          "solve_ns": 65232,
           "solver_detail": "",
           "status": "solved",
           "step": 2
@@ -2429,7 +2429,7 @@
             1.0
           ],
           "requested_horizon": 1,
-          "solve_ns": 23956,
+          "solve_ns": 24165,
           "solver_detail": "",
           "status": "solved",
           "step": 3
@@ -2497,7 +2497,7 @@
             1.0
           ],
           "requested_horizon": 2,
-          "solve_ns": 54826,
+          "solve_ns": 50565,
           "solver_detail": "",
           "status": "solved",
           "step": 0
@@ -2517,7 +2517,7 @@
             1.0
           ],
           "requested_horizon": 2,
-          "solve_ns": 54896,
+          "solve_ns": 56363,
           "solver_detail": "",
           "status": "solved",
           "step": 1
@@ -2537,7 +2537,7 @@
             -1.0
           ],
           "requested_horizon": 2,
-          "solve_ns": 54267,
+          "solve_ns": 49168,
           "solver_detail": "",
           "status": "solved",
           "step": 2
@@ -2557,7 +2557,7 @@
             -1.0
           ],
           "requested_horizon": 2,
-          "solve_ns": 54197,
+          "solve_ns": 54755,
           "solver_detail": "",
           "status": "solved",
           "step": 3
@@ -2625,7 +2625,7 @@
             1.0
           ],
           "requested_horizon": 2,
-          "solve_ns": 54756,
+          "solve_ns": 55245,
           "solver_detail": "",
           "status": "solved",
           "step": 0
@@ -2645,7 +2645,7 @@
             1.0
           ],
           "requested_horizon": 2,
-          "solve_ns": 55245,
+          "solve_ns": 58248,
           "solver_detail": "",
           "status": "solved",
           "step": 1
@@ -2665,7 +2665,7 @@
             -1.0
           ],
           "requested_horizon": 2,
-          "solve_ns": 54197,
+          "solve_ns": 55804,
           "solver_detail": "",
           "status": "solved",
           "step": 2
@@ -2685,7 +2685,7 @@
             -1.0
           ],
           "requested_horizon": 2,
-          "solve_ns": 57899,
+          "solve_ns": 55245,
           "solver_detail": "",
           "status": "solved",
           "step": 3
@@ -2753,7 +2753,7 @@
             1.0
           ],
           "requested_horizon": 2,
-          "solve_ns": 50915,
+          "solve_ns": 59505,
           "solver_detail": "",
           "status": "solved",
           "step": 0
@@ -2773,7 +2773,7 @@
             1.0
           ],
           "requested_horizon": 2,
-          "solve_ns": 50495,
+          "solve_ns": 54896,
           "solver_detail": "",
           "status": "solved",
           "step": 1
@@ -2793,7 +2793,7 @@
             -1.0
           ],
           "requested_horizon": 2,
-          "solve_ns": 50635,
+          "solve_ns": 51404,
           "solver_detail": "",
           "status": "solved",
           "step": 2
@@ -2813,7 +2813,7 @@
             1.0
           ],
           "requested_horizon": 2,
-          "solve_ns": 56223,
+          "solve_ns": 50845,
           "solver_detail": "",
           "status": "solved",
           "step": 3
@@ -2881,7 +2881,7 @@
             1.0
           ],
           "requested_horizon": 2,
-          "solve_ns": 77105,
+          "solve_ns": 55315,
           "solver_detail": "",
           "status": "solved",
           "step": 0
@@ -2901,7 +2901,7 @@
             1.0
           ],
           "requested_horizon": 2,
-          "solve_ns": 89746,
+          "solve_ns": 54826,
           "solver_detail": "",
           "status": "solved",
           "step": 1
@@ -2921,7 +2921,7 @@
             -1.0
           ],
           "requested_horizon": 2,
-          "solve_ns": 61810,
+          "solve_ns": 55384,
           "solver_detail": "",
           "status": "solved",
           "step": 2
@@ -2941,7 +2941,7 @@
             1.0
           ],
           "requested_horizon": 2,
-          "solve_ns": 76966,
+          "solve_ns": 56851,
           "solver_detail": "",
           "status": "solved",
           "step": 3
@@ -3009,7 +3009,7 @@
             1.0
           ],
           "requested_horizon": 2,
-          "solve_ns": 57620,
+          "solve_ns": 55524,
           "solver_detail": "",
           "status": "solved",
           "step": 0
@@ -3029,7 +3029,7 @@
             1.0
           ],
           "requested_horizon": 2,
-          "solve_ns": 56711,
+          "solve_ns": 132909,
           "solver_detail": "",
           "status": "solved",
           "step": 1
@@ -3049,7 +3049,7 @@
             1.0
           ],
           "requested_horizon": 2,
-          "solve_ns": 68724,
+          "solve_ns": 54337,
           "solver_detail": "",
           "status": "solved",
           "step": 2
@@ -3069,7 +3069,7 @@
             1.0
           ],
           "requested_horizon": 2,
-          "solve_ns": 103435,
+          "solve_ns": 60832,
           "solver_detail": "",
           "status": "solved",
           "step": 3
@@ -3137,7 +3137,7 @@
             1.0
           ],
           "requested_horizon": 2,
-          "solve_ns": 99594,
+          "solve_ns": 77734,
           "solver_detail": "",
           "status": "solved",
           "step": 0
@@ -3157,7 +3157,7 @@
             1.0
           ],
           "requested_horizon": 2,
-          "solve_ns": 99176,
+          "solve_ns": 55804,
           "solver_detail": "",
           "status": "solved",
           "step": 1
@@ -3177,7 +3177,7 @@
             1.0
           ],
           "requested_horizon": 2,
-          "solve_ns": 107626,
+          "solve_ns": 55385,
           "solver_detail": "",
           "status": "solved",
           "step": 2
@@ -3197,7 +3197,7 @@
             1.0
           ],
           "requested_horizon": 2,
-          "solve_ns": 54686,
+          "solve_ns": 52940,
           "solver_detail": "",
           "status": "solved",
           "step": 3
@@ -3265,7 +3265,7 @@
             1.0
           ],
           "requested_horizon": 2,
-          "solve_ns": 73893,
+          "solve_ns": 55384,
           "solver_detail": "",
           "status": "solved",
           "step": 0
@@ -3285,7 +3285,7 @@
             1.0
           ],
           "requested_horizon": 2,
-          "solve_ns": 55245,
+          "solve_ns": 79690,
           "solver_detail": "",
           "status": "solved",
           "step": 1
@@ -3305,7 +3305,7 @@
             1.0
           ],
           "requested_horizon": 2,
-          "solve_ns": 54267,
+          "solve_ns": 51194,
           "solver_detail": "",
           "status": "solved",
           "step": 2
@@ -3325,7 +3325,7 @@
             1.0
           ],
           "requested_horizon": 2,
-          "solve_ns": 52521,
+          "solve_ns": 50775,
           "solver_detail": "",
           "status": "solved",
           "step": 3
@@ -3393,7 +3393,7 @@
             1.0
           ],
           "requested_horizon": 2,
-          "solve_ns": 53988,
+          "solve_ns": 95334,
           "solver_detail": "",
           "status": "solved",
           "step": 0
@@ -3413,7 +3413,7 @@
             1.0
           ],
           "requested_horizon": 2,
-          "solve_ns": 54476,
+          "solve_ns": 55175,
           "solver_detail": "",
           "status": "solved",
           "step": 1
@@ -3433,7 +3433,7 @@
             1.0
           ],
           "requested_horizon": 2,
-          "solve_ns": 53429,
+          "solve_ns": 55804,
           "solver_detail": "",
           "status": "solved",
           "step": 2
@@ -3453,7 +3453,7 @@
             1.0
           ],
           "requested_horizon": 2,
-          "solve_ns": 56641,
+          "solve_ns": 55245,
           "solver_detail": "",
           "status": "solved",
           "step": 3
@@ -3521,7 +3521,7 @@
             1.0
           ],
           "requested_horizon": 2,
-          "solve_ns": 53918,
+          "solve_ns": 55175,
           "solver_detail": "",
           "status": "solved",
           "step": 0
@@ -3541,7 +3541,7 @@
             1.0
           ],
           "requested_horizon": 2,
-          "solve_ns": 54407,
+          "solve_ns": 54756,
           "solver_detail": "",
           "status": "solved",
           "step": 1
@@ -3561,7 +3561,7 @@
             1.0
           ],
           "requested_horizon": 2,
-          "solve_ns": 53429,
+          "solve_ns": 55384,
           "solver_detail": "",
           "status": "solved",
           "step": 2
@@ -3581,7 +3581,7 @@
             1.0
           ],
           "requested_horizon": 2,
-          "solve_ns": 57131,
+          "solve_ns": 55384,
           "solver_detail": "",
           "status": "solved",
           "step": 3
@@ -3649,7 +3649,7 @@
             1.0
           ],
           "requested_horizon": 2,
-          "solve_ns": 53988,
+          "solve_ns": 80039,
           "solver_detail": "",
           "status": "solved",
           "step": 0
@@ -3669,7 +3669,7 @@
             1.0
           ],
           "requested_horizon": 2,
-          "solve_ns": 54337,
+          "solve_ns": 55384,
           "solver_detail": "",
           "status": "solved",
           "step": 1
@@ -3689,7 +3689,7 @@
             1.0
           ],
           "requested_horizon": 2,
-          "solve_ns": 53918,
+          "solve_ns": 55315,
           "solver_detail": "",
           "status": "solved",
           "step": 2
@@ -3709,7 +3709,7 @@
             1.0
           ],
           "requested_horizon": 2,
-          "solve_ns": 52452,
+          "solve_ns": 55315,
           "solver_detail": "",
           "status": "solved",
           "step": 3
@@ -3777,7 +3777,7 @@
             1.0
           ],
           "requested_horizon": 2,
-          "solve_ns": 50496,
+          "solve_ns": 55314,
           "solver_detail": "",
           "status": "solved",
           "step": 0
@@ -3797,7 +3797,7 @@
             1.0
           ],
           "requested_horizon": 2,
-          "solve_ns": 63277,
+          "solve_ns": 55035,
           "solver_detail": "",
           "status": "solved",
           "step": 1
@@ -3817,7 +3817,7 @@
             1.0
           ],
           "requested_horizon": 2,
-          "solve_ns": 50565,
+          "solve_ns": 56153,
           "solver_detail": "",
           "status": "solved",
           "step": 2
@@ -3837,7 +3837,7 @@
             1.0
           ],
           "requested_horizon": 2,
-          "solve_ns": 52940,
+          "solve_ns": 71379,
           "solver_detail": "",
           "status": "solved",
           "step": 3
@@ -3905,7 +3905,7 @@
             1.0
           ],
           "requested_horizon": 2,
-          "solve_ns": 53638,
+          "solve_ns": 55734,
           "solver_detail": "",
           "status": "solved",
           "step": 0
@@ -3925,7 +3925,7 @@
             1.0
           ],
           "requested_horizon": 2,
-          "solve_ns": 53988,
+          "solve_ns": 55664,
           "solver_detail": "",
           "status": "solved",
           "step": 1
@@ -3945,7 +3945,7 @@
             1.0
           ],
           "requested_horizon": 2,
-          "solve_ns": 53360,
+          "solve_ns": 55385,
           "solver_detail": "",
           "status": "solved",
           "step": 2
@@ -3965,7 +3965,7 @@
             1.0
           ],
           "requested_horizon": 2,
-          "solve_ns": 56293,
+          "solve_ns": 55385,
           "solver_detail": "",
           "status": "solved",
           "step": 3
@@ -4033,7 +4033,7 @@
             1.0
           ],
           "requested_horizon": 2,
-          "solve_ns": 50006,
+          "solve_ns": 55803,
           "solver_detail": "",
           "status": "solved",
           "step": 0
@@ -4053,7 +4053,7 @@
             1.0
           ],
           "requested_horizon": 2,
-          "solve_ns": 50356,
+          "solve_ns": 55315,
           "solver_detail": "",
           "status": "solved",
           "step": 1
@@ -4073,7 +4073,7 @@
             1.0
           ],
           "requested_horizon": 2,
-          "solve_ns": 53848,
+          "solve_ns": 55524,
           "solver_detail": "",
           "status": "solved",
           "step": 2
@@ -4093,7 +4093,7 @@
             1.0
           ],
           "requested_horizon": 2,
-          "solve_ns": 56781,
+          "solve_ns": 55804,
           "solver_detail": "",
           "status": "solved",
           "step": 3
@@ -4161,7 +4161,7 @@
             1.0
           ],
           "requested_horizon": 2,
-          "solve_ns": 53918,
+          "solve_ns": 55874,
           "solver_detail": "",
           "status": "solved",
           "step": 0
@@ -4181,7 +4181,7 @@
             1.0
           ],
           "requested_horizon": 2,
-          "solve_ns": 58597,
+          "solve_ns": 55873,
           "solver_detail": "",
           "status": "solved",
           "step": 1
@@ -4201,7 +4201,7 @@
             1.0
           ],
           "requested_horizon": 2,
-          "solve_ns": 67188,
+          "solve_ns": 55944,
           "solver_detail": "",
           "status": "solved",
           "step": 2
@@ -4221,7 +4221,7 @@
             1.0
           ],
           "requested_horizon": 2,
-          "solve_ns": 60134,
+          "solve_ns": 55385,
           "solver_detail": "",
           "status": "solved",
           "step": 3
@@ -4289,7 +4289,7 @@
             1.0
           ],
           "requested_horizon": 2,
-          "solve_ns": 59156,
+          "solve_ns": 56852,
           "solver_detail": "",
           "status": "solved",
           "step": 0
@@ -4309,7 +4309,7 @@
             1.0
           ],
           "requested_horizon": 2,
-          "solve_ns": 62369,
+          "solve_ns": 54895,
           "solver_detail": "",
           "status": "solved",
           "step": 1
@@ -4329,7 +4329,7 @@
             1.0
           ],
           "requested_horizon": 2,
-          "solve_ns": 59156,
+          "solve_ns": 55804,
           "solver_detail": "",
           "status": "solved",
           "step": 2
@@ -4349,7 +4349,7 @@
             1.0
           ],
           "requested_horizon": 2,
-          "solve_ns": 61950,
+          "solve_ns": 55454,
           "solver_detail": "",
           "status": "solved",
           "step": 3
@@ -4417,7 +4417,7 @@
             1.0
           ],
           "requested_horizon": 2,
-          "solve_ns": 64045,
+          "solve_ns": 55175,
           "solver_detail": "",
           "status": "solved",
           "step": 0
@@ -4437,7 +4437,7 @@
             1.0
           ],
           "requested_horizon": 2,
-          "solve_ns": 64394,
+          "solve_ns": 55244,
           "solver_detail": "",
           "status": "solved",
           "step": 1
@@ -4457,7 +4457,7 @@
             1.0
           ],
           "requested_horizon": 2,
-          "solve_ns": 50914,
+          "solve_ns": 56083,
           "solver_detail": "",
           "status": "solved",
           "step": 2
@@ -4477,7 +4477,7 @@
             1.0
           ],
           "requested_horizon": 2,
-          "solve_ns": 54756,
+          "solve_ns": 56083,
           "solver_detail": "",
           "status": "solved",
           "step": 3
@@ -4547,7 +4547,7 @@
             1.0
           ],
           "requested_horizon": 4,
-          "solve_ns": 669084,
+          "solve_ns": 624734,
           "solver_detail": "",
           "status": "solved",
           "step": 0
@@ -4568,7 +4568,7 @@
             1.0
           ],
           "requested_horizon": 3,
-          "solve_ns": 192274,
+          "solve_ns": 210084,
           "solver_detail": "",
           "status": "solved",
           "step": 1
@@ -4588,7 +4588,7 @@
             1.0
           ],
           "requested_horizon": 2,
-          "solve_ns": 65371,
+          "solve_ns": 70051,
           "solver_detail": "",
           "status": "solved",
           "step": 2
@@ -4607,7 +4607,7 @@
             1.0
           ],
           "requested_horizon": 1,
-          "solve_ns": 25771,
+          "solve_ns": 26191,
           "solver_detail": "",
           "status": "solved",
           "step": 3
@@ -4677,7 +4677,7 @@
             1.0
           ],
           "requested_horizon": 4,
-          "solve_ns": 646037,
+          "solve_ns": 618728,
           "solver_detail": "",
           "status": "solved",
           "step": 0
@@ -4698,7 +4698,7 @@
             1.0
           ],
           "requested_horizon": 3,
-          "solve_ns": 188153,
+          "solve_ns": 209595,
           "solver_detail": "",
           "status": "solved",
           "step": 1
@@ -4718,7 +4718,7 @@
             1.0
           ],
           "requested_horizon": 2,
-          "solve_ns": 64254,
+          "solve_ns": 69911,
           "solver_detail": "",
           "status": "solved",
           "step": 2
@@ -4737,7 +4737,7 @@
             1.0
           ],
           "requested_horizon": 1,
-          "solve_ns": 25073,
+          "solve_ns": 25352,
           "solver_detail": "",
           "status": "solved",
           "step": 3
@@ -4807,7 +4807,7 @@
             1.0
           ],
           "requested_horizon": 4,
-          "solve_ns": 649040,
+          "solve_ns": 620125,
           "solver_detail": "",
           "status": "solved",
           "step": 0
@@ -4828,7 +4828,7 @@
             1.0
           ],
           "requested_horizon": 3,
-          "solve_ns": 189061,
+          "solve_ns": 209525,
           "solver_detail": "",
           "status": "solved",
           "step": 1
@@ -4848,7 +4848,7 @@
             1.0
           ],
           "requested_horizon": 2,
-          "solve_ns": 65791,
+          "solve_ns": 69283,
           "solver_detail": "",
           "status": "solved",
           "step": 2
@@ -4867,7 +4867,7 @@
             1.0
           ],
           "requested_horizon": 1,
-          "solve_ns": 25772,
+          "solve_ns": 25492,
           "solver_detail": "",
           "status": "solved",
           "step": 3
@@ -4937,7 +4937,7 @@
             1.0
           ],
           "requested_horizon": 4,
-          "solve_ns": 632417,
+          "solve_ns": 614188,
           "solver_detail": "",
           "status": "solved",
           "step": 0
@@ -4958,7 +4958,7 @@
             1.0
           ],
           "requested_horizon": 3,
-          "solve_ns": 193252,
+          "solve_ns": 207360,
           "solver_detail": "",
           "status": "solved",
           "step": 1
@@ -4978,7 +4978,7 @@
             1.0
           ],
           "requested_horizon": 2,
-          "solve_ns": 68795,
+          "solve_ns": 69562,
           "solver_detail": "",
           "status": "solved",
           "step": 2
@@ -4997,7 +4997,7 @@
             1.0
           ],
           "requested_horizon": 1,
-          "solve_ns": 25352,
+          "solve_ns": 25283,
           "solver_detail": "",
           "status": "solved",
           "step": 3
@@ -5067,7 +5067,7 @@
             1.0
           ],
           "requested_horizon": 4,
-          "solve_ns": 625503,
+          "solve_ns": 608601,
           "solver_detail": "",
           "status": "solved",
           "step": 0
@@ -5088,7 +5088,7 @@
             1.0
           ],
           "requested_horizon": 3,
-          "solve_ns": 209595,
+          "solve_ns": 190599,
           "solver_detail": "",
           "status": "solved",
           "step": 1
@@ -5108,7 +5108,7 @@
             1.0
           ],
           "requested_horizon": 2,
-          "solve_ns": 68305,
+          "solve_ns": 80877,
           "solver_detail": "",
           "status": "solved",
           "step": 2
@@ -5127,7 +5127,7 @@
             1.0
           ],
           "requested_horizon": 1,
-          "solve_ns": 33384,
+          "solve_ns": 25283,
           "solver_detail": "",
           "status": "solved",
           "step": 3
@@ -5197,7 +5197,7 @@
             1.0
           ],
           "requested_horizon": 4,
-          "solve_ns": 615586,
+          "solve_ns": 607763,
           "solver_detail": "",
           "status": "solved",
           "step": 0
@@ -5218,7 +5218,7 @@
             1.0
           ],
           "requested_horizon": 3,
-          "solve_ns": 198769,
+          "solve_ns": 190319,
           "solver_detail": "",
           "status": "solved",
           "step": 1
@@ -5238,7 +5238,7 @@
             1.0
           ],
           "requested_horizon": 2,
-          "solve_ns": 62439,
+          "solve_ns": 68585,
           "solver_detail": "",
           "status": "solved",
           "step": 2
@@ -5257,7 +5257,7 @@
             1.0
           ],
           "requested_horizon": 1,
-          "solve_ns": 24864,
+          "solve_ns": 25353,
           "solver_detail": "",
           "status": "solved",
           "step": 3
@@ -5327,7 +5327,7 @@
             1.0
           ],
           "requested_horizon": 4,
-          "solve_ns": 680818,
+          "solve_ns": 624595,
           "solver_detail": "",
           "status": "solved",
           "step": 0
@@ -5348,7 +5348,7 @@
             1.0
           ],
           "requested_horizon": 3,
-          "solve_ns": 236624,
+          "solve_ns": 190668,
           "solver_detail": "",
           "status": "solved",
           "step": 1
@@ -5368,7 +5368,7 @@
             1.0
           ],
           "requested_horizon": 2,
-          "solve_ns": 68585,
+          "solve_ns": 69283,
           "solver_detail": "",
           "status": "solved",
           "step": 2
@@ -5387,7 +5387,7 @@
             1.0
           ],
           "requested_horizon": 1,
-          "solve_ns": 25772,
+          "solve_ns": 25283,
           "solver_detail": "",
           "status": "solved",
           "step": 3
@@ -5457,7 +5457,7 @@
             1.0
           ],
           "requested_horizon": 4,
-          "solve_ns": 646526,
+          "solve_ns": 627598,
           "solver_detail": "",
           "status": "solved",
           "step": 0
@@ -5478,7 +5478,7 @@
             1.0
           ],
           "requested_horizon": 3,
-          "solve_ns": 207011,
+          "solve_ns": 191367,
           "solver_detail": "",
           "status": "solved",
           "step": 1
@@ -5498,7 +5498,7 @@
             1.0
           ],
           "requested_horizon": 2,
-          "solve_ns": 68305,
+          "solve_ns": 69283,
           "solver_detail": "",
           "status": "solved",
           "step": 2
@@ -5517,7 +5517,7 @@
             1.0
           ],
           "requested_horizon": 1,
-          "solve_ns": 25073,
+          "solve_ns": 26121,
           "solver_detail": "",
           "status": "solved",
           "step": 3
@@ -5587,7 +5587,7 @@
             1.0
           ],
           "requested_horizon": 4,
-          "solve_ns": 626690,
+          "solve_ns": 646735,
           "solver_detail": "",
           "status": "solved",
           "step": 0
@@ -5608,7 +5608,7 @@
             1.0
           ],
           "requested_horizon": 3,
-          "solve_ns": 209315,
+          "solve_ns": 193462,
           "solver_detail": "",
           "status": "solved",
           "step": 1
@@ -5628,7 +5628,7 @@
             1.0
           ],
           "requested_horizon": 2,
-          "solve_ns": 68235,
+          "solve_ns": 69423,
           "solver_detail": "",
           "status": "solved",
           "step": 2
@@ -5647,7 +5647,7 @@
             1.0
           ],
           "requested_horizon": 1,
-          "solve_ns": 24724,
+          "solve_ns": 25632,
           "solver_detail": "",
           "status": "solved",
           "step": 3
@@ -5717,7 +5717,7 @@
             1.0
           ],
           "requested_horizon": 4,
-          "solve_ns": 622779,
+          "solve_ns": 631928,
           "solver_detail": "",
           "status": "solved",
           "step": 0
@@ -5738,7 +5738,7 @@
             1.0
           ],
           "requested_horizon": 3,
-          "solve_ns": 205684,
+          "solve_ns": 192763,
           "solver_detail": "",
           "status": "solved",
           "step": 1
@@ -5758,7 +5758,7 @@
             1.0
           ],
           "requested_horizon": 2,
-          "solve_ns": 69772,
+          "solve_ns": 69563,
           "solver_detail": "",
           "status": "solved",
           "step": 2
@@ -5777,7 +5777,7 @@
             1.0
           ],
           "requested_horizon": 1,
-          "solve_ns": 25353,
+          "solve_ns": 26120,
           "solver_detail": "",
           "status": "solved",
           "step": 3
@@ -5847,7 +5847,7 @@
             1.0
           ],
           "requested_horizon": 4,
-          "solve_ns": 641915,
+          "solve_ns": 624944,
           "solver_detail": "",
           "status": "solved",
           "step": 0
@@ -5868,7 +5868,7 @@
             1.0
           ],
           "requested_horizon": 3,
-          "solve_ns": 194719,
+          "solve_ns": 190878,
           "solver_detail": "",
           "status": "solved",
           "step": 1
@@ -5888,7 +5888,7 @@
             1.0
           ],
           "requested_horizon": 2,
-          "solve_ns": 87233,
+          "solve_ns": 69143,
           "solver_detail": "",
           "status": "solved",
           "step": 2
@@ -5907,7 +5907,7 @@
             1.0
           ],
           "requested_horizon": 1,
-          "solve_ns": 25911,
+          "solve_ns": 26121,
           "solver_detail": "",
           "status": "solved",
           "step": 3
@@ -5977,7 +5977,7 @@
             1.0
           ],
           "requested_horizon": 4,
-          "solve_ns": 635002,
+          "solve_ns": 627249,
           "solver_detail": "",
           "status": "solved",
           "step": 0
@@ -5998,7 +5998,7 @@
             1.0
           ],
           "requested_horizon": 3,
-          "solve_ns": 194649,
+          "solve_ns": 191995,
           "solver_detail": "",
           "status": "solved",
           "step": 1
@@ -6018,7 +6018,7 @@
             1.0
           ],
           "requested_horizon": 2,
-          "solve_ns": 81016,
+          "solve_ns": 69143,
           "solver_detail": "",
           "status": "solved",
           "step": 2
@@ -6037,7 +6037,7 @@
             1.0
           ],
           "requested_horizon": 1,
-          "solve_ns": 25702,
+          "solve_ns": 25701,
           "solver_detail": "",
           "status": "solved",
           "step": 3
@@ -6107,7 +6107,7 @@
             1.0
           ],
           "requested_horizon": 4,
-          "solve_ns": 646734,
+          "solve_ns": 629764,
           "solver_detail": "",
           "status": "solved",
           "step": 0
@@ -6128,7 +6128,7 @@
             1.0
           ],
           "requested_horizon": 3,
-          "solve_ns": 194998,
+          "solve_ns": 191646,
           "solver_detail": "",
           "status": "solved",
           "step": 1
@@ -6148,7 +6148,7 @@
             1.0
           ],
           "requested_horizon": 2,
-          "solve_ns": 82204,
+          "solve_ns": 69632,
           "solver_detail": "",
           "status": "solved",
           "step": 2
@@ -6167,7 +6167,7 @@
             1.0
           ],
           "requested_horizon": 1,
-          "solve_ns": 26260,
+          "solve_ns": 26191,
           "solver_detail": "",
           "status": "solved",
           "step": 3
@@ -6237,7 +6237,7 @@
             1.0
           ],
           "requested_horizon": 4,
-          "solve_ns": 630951,
+          "solve_ns": 625852,
           "solver_detail": "",
           "status": "solved",
           "step": 0
@@ -6258,7 +6258,7 @@
             1.0
           ],
           "requested_horizon": 3,
-          "solve_ns": 194649,
+          "solve_ns": 191227,
           "solver_detail": "",
           "status": "solved",
           "step": 1
@@ -6278,7 +6278,7 @@
             1.0
           ],
           "requested_horizon": 2,
-          "solve_ns": 65372,
+          "solve_ns": 69492,
           "solver_detail": "",
           "status": "solved",
           "step": 2
@@ -6297,7 +6297,7 @@
             1.0
           ],
           "requested_horizon": 1,
-          "solve_ns": 25143,
+          "solve_ns": 25213,
           "solver_detail": "",
           "status": "solved",
           "step": 3
@@ -6367,7 +6367,7 @@
             1.0
           ],
           "requested_horizon": 4,
-          "solve_ns": 639541,
+          "solve_ns": 629763,
           "solver_detail": "",
           "status": "solved",
           "step": 0
@@ -6388,7 +6388,7 @@
             1.0
           ],
           "requested_horizon": 3,
-          "solve_ns": 194789,
+          "solve_ns": 191297,
           "solver_detail": "",
           "status": "solved",
           "step": 1
@@ -6408,7 +6408,7 @@
             1.0
           ],
           "requested_horizon": 2,
-          "solve_ns": 69492,
+          "solve_ns": 69143,
           "solver_detail": "",
           "status": "solved",
           "step": 2
@@ -6427,7 +6427,7 @@
             1.0
           ],
           "requested_horizon": 1,
-          "solve_ns": 25213,
+          "solve_ns": 25702,
           "solver_detail": "",
           "status": "solved",
           "step": 3
@@ -6497,7 +6497,7 @@
             1.0
           ],
           "requested_horizon": 4,
-          "solve_ns": 651205,
+          "solve_ns": 628157,
           "solver_detail": "",
           "status": "solved",
           "step": 0
@@ -6518,7 +6518,7 @@
             1.0
           ],
           "requested_horizon": 3,
-          "solve_ns": 194929,
+          "solve_ns": 191646,
           "solver_detail": "",
           "status": "solved",
           "step": 1
@@ -6538,7 +6538,7 @@
             1.0
           ],
           "requested_horizon": 2,
-          "solve_ns": 69492,
+          "solve_ns": 68933,
           "solver_detail": "",
           "status": "solved",
           "step": 2
@@ -6557,7 +6557,7 @@
             1.0
           ],
           "requested_horizon": 1,
-          "solve_ns": 25912,
+          "solve_ns": 25213,
           "solver_detail": "",
           "status": "solved",
           "step": 3
@@ -6625,7 +6625,7 @@
             -1.0
           ],
           "requested_horizon": 2,
-          "solve_ns": 68654,
+          "solve_ns": 69074,
           "solver_detail": "",
           "status": "solved",
           "step": 0
@@ -6645,7 +6645,7 @@
             1.0
           ],
           "requested_horizon": 2,
-          "solve_ns": 80668,
+          "solve_ns": 68166,
           "solver_detail": "",
           "status": "solved",
           "step": 1
@@ -6665,7 +6665,7 @@
             1.0
           ],
           "requested_horizon": 2,
-          "solve_ns": 67956,
+          "solve_ns": 68095,
           "solver_detail": "",
           "status": "solved",
           "step": 2
@@ -6685,7 +6685,7 @@
             1.0
           ],
           "requested_horizon": 2,
-          "solve_ns": 67607,
+          "solve_ns": 68655,
           "solver_detail": "",
           "status": "solved",
           "step": 3
@@ -6753,7 +6753,7 @@
             -1.0
           ],
           "requested_horizon": 2,
-          "solve_ns": 68794,
+          "solve_ns": 69144,
           "solver_detail": "",
           "status": "solved",
           "step": 0
@@ -6773,7 +6773,7 @@
             1.0
           ],
           "requested_horizon": 2,
-          "solve_ns": 68165,
+          "solve_ns": 68025,
           "solver_detail": "",
           "status": "solved",
           "step": 1
@@ -6793,7 +6793,7 @@
             1.0
           ],
           "requested_horizon": 2,
-          "solve_ns": 68305,
+          "solve_ns": 68026,
           "solver_detail": "",
           "status": "solved",
           "step": 2
@@ -6813,7 +6813,7 @@
             1.0
           ],
           "requested_horizon": 2,
-          "solve_ns": 69702,
+          "solve_ns": 82623,
           "solver_detail": "",
           "status": "solved",
           "step": 3
@@ -6881,7 +6881,7 @@
             -1.0
           ],
           "requested_horizon": 2,
-          "solve_ns": 71868,
+          "solve_ns": 69493,
           "solver_detail": "",
           "status": "solved",
           "step": 0
@@ -6901,7 +6901,7 @@
             1.0
           ],
           "requested_horizon": 2,
-          "solve_ns": 69492,
+          "solve_ns": 68515,
           "solver_detail": "",
           "status": "solved",
           "step": 1
@@ -6921,7 +6921,7 @@
             1.0
           ],
           "requested_horizon": 2,
-          "solve_ns": 68306,
+          "solve_ns": 69143,
           "solver_detail": "",
           "status": "solved",
           "step": 2
@@ -6941,7 +6941,7 @@
             1.0
           ],
           "requested_horizon": 2,
-          "solve_ns": 69563,
+          "solve_ns": 68724,
           "solver_detail": "",
           "status": "solved",
           "step": 3
@@ -7009,7 +7009,7 @@
             -1.0
           ],
           "requested_horizon": 2,
-          "solve_ns": 71658,
+          "solve_ns": 68305,
           "solver_detail": "",
           "status": "solved",
           "step": 0
@@ -7029,7 +7029,7 @@
             1.0
           ],
           "requested_horizon": 2,
-          "solve_ns": 69702,
+          "solve_ns": 68655,
           "solver_detail": "",
           "status": "solved",
           "step": 1
@@ -7049,7 +7049,7 @@
             1.0
           ],
           "requested_horizon": 2,
-          "solve_ns": 90584,
+          "solve_ns": 68795,
           "solver_detail": "",
           "status": "solved",
           "step": 2
@@ -7069,7 +7069,7 @@
             1.0
           ],
           "requested_horizon": 2,
-          "solve_ns": 69632,
+          "solve_ns": 68654,
           "solver_detail": "",
           "status": "solved",
           "step": 3
@@ -7137,7 +7137,7 @@
             -1.0
           ],
           "requested_horizon": 2,
-          "solve_ns": 71588,
+          "solve_ns": 68654,
           "solver_detail": "",
           "status": "solved",
           "step": 0
@@ -7157,7 +7157,7 @@
             1.0
           ],
           "requested_horizon": 2,
-          "solve_ns": 68584,
+          "solve_ns": 68654,
           "solver_detail": "",
           "status": "solved",
           "step": 1
@@ -7177,7 +7177,7 @@
             1.0
           ],
           "requested_horizon": 2,
-          "solve_ns": 69214,
+          "solve_ns": 68096,
           "solver_detail": "",
           "status": "solved",
           "step": 2
@@ -7197,7 +7197,7 @@
             1.0
           ],
           "requested_horizon": 2,
-          "solve_ns": 69772,
+          "solve_ns": 68724,
           "solver_detail": "",
           "status": "solved",
           "step": 3
@@ -7265,7 +7265,7 @@
             -1.0
           ],
           "requested_horizon": 2,
-          "solve_ns": 71448,
+          "solve_ns": 82413,
           "solver_detail": "",
           "status": "solved",
           "step": 0
@@ -7285,7 +7285,7 @@
             1.0
           ],
           "requested_horizon": 2,
-          "solve_ns": 68794,
+          "solve_ns": 68236,
           "solver_detail": "",
           "status": "solved",
           "step": 1
@@ -7305,7 +7305,7 @@
             1.0
           ],
           "requested_horizon": 2,
-          "solve_ns": 68585,
+          "solve_ns": 68375,
           "solver_detail": "",
           "status": "solved",
           "step": 2
@@ -7325,7 +7325,7 @@
             1.0
           ],
           "requested_horizon": 2,
-          "solve_ns": 69492,
+          "solve_ns": 68166,
           "solver_detail": "",
           "status": "solved",
           "step": 3
@@ -7393,7 +7393,7 @@
             -1.0
           ],
           "requested_horizon": 2,
-          "solve_ns": 68724,
+          "solve_ns": 69004,
           "solver_detail": "",
           "status": "solved",
           "step": 0
@@ -7413,7 +7413,7 @@
             1.0
           ],
           "requested_horizon": 2,
-          "solve_ns": 68584,
+          "solve_ns": 68096,
           "solver_detail": "",
           "status": "solved",
           "step": 1
@@ -7433,7 +7433,7 @@
             1.0
           ],
           "requested_horizon": 2,
-          "solve_ns": 69004,
+          "solve_ns": 68515,
           "solver_detail": "",
           "status": "solved",
           "step": 2
@@ -7453,7 +7453,7 @@
             1.0
           ],
           "requested_horizon": 2,
-          "solve_ns": 82203,
+          "solve_ns": 68585,
           "solver_detail": "",
           "status": "solved",
           "step": 3
@@ -7521,7 +7521,7 @@
             -1.0
           ],
           "requested_horizon": 2,
-          "solve_ns": 66839,
+          "solve_ns": 68724,
           "solver_detail": "",
           "status": "solved",
           "step": 0
@@ -7541,7 +7541,7 @@
             1.0
           ],
           "requested_horizon": 2,
-          "solve_ns": 67257,
+          "solve_ns": 69493,
           "solver_detail": "",
           "status": "solved",
           "step": 1
@@ -7561,7 +7561,7 @@
             1.0
           ],
           "requested_horizon": 2,
-          "solve_ns": 69213,
+          "solve_ns": 69004,
           "solver_detail": "",
           "status": "solved",
           "step": 2
@@ -7581,7 +7581,7 @@
             1.0
           ],
           "requested_horizon": 2,
-          "solve_ns": 69213,
+          "solve_ns": 68236,
           "solver_detail": "",
           "status": "solved",
           "step": 3
@@ -7649,7 +7649,7 @@
             -1.0
           ],
           "requested_horizon": 2,
-          "solve_ns": 71867,
+          "solve_ns": 69004,
           "solver_detail": "",
           "status": "solved",
           "step": 0
@@ -7669,7 +7669,7 @@
             -1.0
           ],
           "requested_horizon": 2,
-          "solve_ns": 69283,
+          "solve_ns": 80947,
           "solver_detail": "",
           "status": "solved",
           "step": 1
@@ -7689,7 +7689,7 @@
             1.0
           ],
           "requested_horizon": 2,
-          "solve_ns": 69772,
+          "solve_ns": 68585,
           "solver_detail": "",
           "status": "solved",
           "step": 2
@@ -7709,7 +7709,7 @@
             1.0
           ],
           "requested_horizon": 2,
-          "solve_ns": 69981,
+          "solve_ns": 68235,
           "solver_detail": "",
           "status": "solved",
           "step": 3
@@ -7777,7 +7777,7 @@
             -1.0
           ],
           "requested_horizon": 2,
-          "solve_ns": 71727,
+          "solve_ns": 69143,
           "solver_detail": "",
           "status": "solved",
           "step": 0
@@ -7797,7 +7797,7 @@
             -1.0
           ],
           "requested_horizon": 2,
-          "solve_ns": 68933,
+          "solve_ns": 68166,
           "solver_detail": "",
           "status": "solved",
           "step": 1
@@ -7817,7 +7817,7 @@
             1.0
           ],
           "requested_horizon": 2,
-          "solve_ns": 69073,
+          "solve_ns": 68306,
           "solver_detail": "",
           "status": "solved",
           "step": 2
@@ -7837,7 +7837,7 @@
             1.0
           ],
           "requested_horizon": 2,
-          "solve_ns": 69283,
+          "solve_ns": 68375,
           "solver_detail": "",
           "status": "solved",
           "step": 3
@@ -7905,7 +7905,7 @@
             -1.0
           ],
           "requested_horizon": 2,
-          "solve_ns": 85416,
+          "solve_ns": 68655,
           "solver_detail": "",
           "status": "solved",
           "step": 0
@@ -7925,7 +7925,7 @@
             -1.0
           ],
           "requested_horizon": 2,
-          "solve_ns": 69143,
+          "solve_ns": 68794,
           "solver_detail": "",
           "status": "solved",
           "step": 1
@@ -7945,7 +7945,7 @@
             1.0
           ],
           "requested_horizon": 2,
-          "solve_ns": 69632,
+          "solve_ns": 68096,
           "solver_detail": "",
           "status": "solved",
           "step": 2
@@ -7965,7 +7965,7 @@
             1.0
           ],
           "requested_horizon": 2,
-          "solve_ns": 69353,
+          "solve_ns": 69004,
           "solver_detail": "",
           "status": "solved",
           "step": 3
@@ -8033,7 +8033,7 @@
             -1.0
           ],
           "requested_horizon": 2,
-          "solve_ns": 71937,
+          "solve_ns": 68585,
           "solver_detail": "",
           "status": "solved",
           "step": 0
@@ -8053,7 +8053,7 @@
             -1.0
           ],
           "requested_horizon": 2,
-          "solve_ns": 69214,
+          "solve_ns": 68584,
           "solver_detail": "",
           "status": "solved",
           "step": 1
@@ -8073,7 +8073,7 @@
             1.0
           ],
           "requested_horizon": 2,
-          "solve_ns": 69492,
+          "solve_ns": 80807,
           "solver_detail": "",
           "status": "solved",
           "step": 2
@@ -8093,7 +8093,7 @@
             1.0
           ],
           "requested_horizon": 2,
-          "solve_ns": 69283,
+          "solve_ns": 68166,
           "solver_detail": "",
           "status": "solved",
           "step": 3
@@ -8161,7 +8161,7 @@
             -1.0
           ],
           "requested_horizon": 2,
-          "solve_ns": 72007,
+          "solve_ns": 69073,
           "solver_detail": "",
           "status": "solved",
           "step": 0
@@ -8181,7 +8181,7 @@
             -1.0
           ],
           "requested_horizon": 2,
-          "solve_ns": 68584,
+          "solve_ns": 68585,
           "solver_detail": "",
           "status": "solved",
           "step": 1
@@ -8201,7 +8201,7 @@
             1.0
           ],
           "requested_horizon": 2,
-          "solve_ns": 69423,
+          "solve_ns": 68445,
           "solver_detail": "",
           "status": "solved",
           "step": 2
@@ -8221,7 +8221,7 @@
             1.0
           ],
           "requested_horizon": 2,
-          "solve_ns": 69143,
+          "solve_ns": 68724,
           "solver_detail": "",
           "status": "solved",
           "step": 3
@@ -8289,7 +8289,7 @@
             -1.0
           ],
           "requested_horizon": 2,
-          "solve_ns": 71937,
+          "solve_ns": 68655,
           "solver_detail": "",
           "status": "solved",
           "step": 0
@@ -8309,7 +8309,7 @@
             -1.0
           ],
           "requested_horizon": 2,
-          "solve_ns": 69004,
+          "solve_ns": 81226,
           "solver_detail": "",
           "status": "solved",
           "step": 1
@@ -8329,7 +8329,7 @@
             1.0
           ],
           "requested_horizon": 2,
-          "solve_ns": 69353,
+          "solve_ns": 69074,
           "solver_detail": "",
           "status": "solved",
           "step": 2
@@ -8349,7 +8349,7 @@
             1.0
           ],
           "requested_horizon": 2,
-          "solve_ns": 69563,
+          "solve_ns": 68794,
           "solver_detail": "",
           "status": "solved",
           "step": 3
@@ -8417,7 +8417,7 @@
             -1.0
           ],
           "requested_horizon": 2,
-          "solve_ns": 72496,
+          "solve_ns": 69074,
           "solver_detail": "",
           "status": "solved",
           "step": 0
@@ -8437,7 +8437,7 @@
             -1.0
           ],
           "requested_horizon": 2,
-          "solve_ns": 69213,
+          "solve_ns": 71099,
           "solver_detail": "",
           "status": "solved",
           "step": 1
@@ -8457,7 +8457,7 @@
             1.0
           ],
           "requested_horizon": 2,
-          "solve_ns": 68655,
+          "solve_ns": 65861,
           "solver_detail": "",
           "status": "solved",
           "step": 2
@@ -8477,7 +8477,7 @@
             1.0
           ],
           "requested_horizon": 2,
-          "solve_ns": 69632,
+          "solve_ns": 82134,
           "solver_detail": "",
           "status": "solved",
           "step": 3
@@ -8545,7 +8545,7 @@
             -1.0
           ],
           "requested_horizon": 2,
-          "solve_ns": 71658,
+          "solve_ns": 69213,
           "solver_detail": "",
           "status": "solved",
           "step": 0
@@ -8565,7 +8565,7 @@
             -1.0
           ],
           "requested_horizon": 2,
-          "solve_ns": 68585,
+          "solve_ns": 68655,
           "solver_detail": "",
           "status": "solved",
           "step": 1
@@ -8585,7 +8585,7 @@
             1.0
           ],
           "requested_horizon": 2,
-          "solve_ns": 71169,
+          "solve_ns": 68655,
           "solver_detail": "",
           "status": "solved",
           "step": 2
@@ -8605,7 +8605,7 @@
             1.0
           ],
           "requested_horizon": 2,
-          "solve_ns": 69562,
+          "solve_ns": 68305,
           "solver_detail": "",
           "status": "solved",
           "step": 3

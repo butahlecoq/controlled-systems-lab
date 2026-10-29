@@ -1,0 +1,21 @@
+{
+  "source_commit": "bf8ba9346293a322be3083f35e70ac713cbb95fd",
+  "source_worktree_code_clean_at_build": true,
+  "build_dir": "/tmp/csl-mpc04-build-20261030",
+  "configure_command": "cmake -S . -B /tmp/csl-mpc04-build-20261030 -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTING=ON -DCSL_BUILD_MPC04_REPORT=ON -DCSL_ENABLE_HIGHS=OFF -DCSL_ENABLE_QHULL=OFF",
+  "cmake_cache_options": {
+    "BUILD_TESTING": "ON",
+    "CMAKE_BUILD_TYPE": "Release",
+    "CSL_BUILD_MPC04_REPORT": "ON",
+    "CSL_ENABLE_HIGHS": "OFF",
+    "CSL_ENABLE_QHULL": "OFF"
+  },
+  "generator": "Ninja 1.13.2",
+  "cmake": "3.31.6",
+  "compiler": "/usr/bin/c++ (GNU 16.2.1)",
+  "build_command": "cmake --build /tmp/csl-mpc04-build-20261030 --target csl_mpc04_max_coordinate_replanning --clean-first --parallel 4 --verbose",
+  "build_exit_status": 0,
+  "build_log": "build.log",
+  "binary": "/tmp/csl-mpc04-build-20261030/csl_mpc04_max_coordinate_replanning",
+  "binary_sha256": "33d71dfc7fa098f368afd524b05973a6d451a58b939abd48966c4c4262ff29de"
+}

@@ -1,22 +1,25 @@
 {
   "schema": "csl.mpc04-capture/2",
-  "run_id": "mpc04-max-coordinate-20261030-r2",
+  "run_id": "mpc04-max-coordinate-20261030-r3",
   "source": {
     "schema": "csl.mpc04-runtime/2",
-    "source_commit": "55818295fc8db7e660fb354d06cbc41c177180ea",
+    "source_commit": "bf8ba9346293a322be3083f35e70ac713cbb95fd",
     "source_worktree_dirty": false,
-    "driver_sha256": "0f2c84e2d0e2d9df18af8b0b2b1abe729b9d92b6431acf8f0e3c34aff557909d",
-    "report_driver_sha256": "6d330e3ed2bcc4485e4900ece40daa1128027fc9243aaa1dbc7b37d565703fa2",
+    "driver_sha256": "7fc0c0968eea57d2dd96377c8a5d976caf65b1881aad6ba028e238559753c6da",
+    "report_driver_sha256": "8b1feea2ba1b05e2e59afb6e78bf57675303cfb4a85e5d9351ce318ba33dba5e",
     "checker_sha256": "62341aa5a7218fe77332b8f30eed476f13c9ef4a237d759ea9bc533f608b7c57",
-    "binary_sha256": "8338790c346fb82adc17b2392cb31f820303333260915a5929066ea7534501ff",
+    "binary_sha256": "33d71dfc7fa098f368afd524b05973a6d451a58b939abd48966c4c4262ff29de",
     "build": {
       "type": "Release",
       "compiler": "GNU 16.2.1",
       "cmake": "3.31.6",
-      "generator": "Ninja",
+      "generator": "Ninja 1.13.2",
       "ninja": "1.13.2",
       "target": "csl_mpc04_max_coordinate_replanning",
-      "new_dependencies": []
+      "new_dependencies": [],
+      "clean_build": true,
+      "log": "build.log",
+      "config": "build-config.json"
     },
     "runtime": {
       "os": "Linux-7.2.8-9-omarchy-x86_64-with-glibc2.44",
