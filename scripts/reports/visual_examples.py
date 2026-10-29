@@ -32,7 +32,7 @@ CASE_OWNERS = {
 }
 
 SAVED_FIGURES = (
-    dict(route="ext04-affine-synthesis-71ef0bb0b379cee5", image="synthesis-2d.svg", page="index.html",
+    dict(route="ext04-affine-synthesis-7eadf7c7ecbb2bbd", image="synthesis-2d.svg", page="index.html",
          family="Continuous feedback · EXT-04", title="Synthesize a noisy-observation policy",
          alt="Initial state vertices map to terminal states under a synthesized affine action based on noisy x1 observations.",
          summary="One transition and eight vertices of a caller-authored joint initial/error hull. The linked report retains the numerical evidence limits and raw trials."),

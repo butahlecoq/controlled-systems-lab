@@ -1,0 +1,18 @@
+{
+  "files": {
+    "driver.cpp": "55769d80a4d4a1d3b9c01a61b5fa24b279d75c08f90b2b891292ceada9b71540",
+    "environment.json": "85232c2c3df25f70d0921d6a5c233a142ec287c7b268c609c7e4147c6e41887c",
+    "fixture.json": "437af5f7fed4808071d08321389b7ca206c200838a5fa1321dd3a858c2a5c2be",
+    "index.html": "e41b70d3f5bdba4a23b505d33aa7c08f64128ee702b751d8b8e91c594377cf6b",
+    "records.json": "426ba6efd1cc567ff97310d6622e2a40098812ab8afd72c2dc910aff073fbc04",
+    "release-build-log.txt": "bd37e60df3389a6e6252359af09fdf691e86bb3383327649d265d9b6d1f8ece7",
+    "renderer.py": "8eca709c2900236f241fa14b4de7a8b78452cc499b2705e2e2c82755836d4244",
+    "result.json": "8c7904c7a89e32f550bcd9983ab9c700ca7dd717230f9cecd67cc9a0c89637d1",
+    "smoke.txt": "f8408f54f5735a066538b12e34e9b696e670ab23176c7ce54deb646cd04f474e",
+    "summary.csv": "dea0553a6a6bba262eca18ea8cc2a7602bc5d94755ede737ec0a449d1e303adb",
+    "synthesis-2d.svg": "d95181409100165c3d73a543935fe2f1734fcea2a7b893a495be067e6fb319b8",
+    "trials.jsonl": "5a9185965b6543f247e8d0d7c84fb2724e48e9f47aa6b823808450132f3acb6b"
+  },
+  "report_id": "ext04-affine-synthesis-7eadf7c7ecbb2bbd",
+  "schema": "csl.ext04-affine-synthesis-manifest/1"
+}
