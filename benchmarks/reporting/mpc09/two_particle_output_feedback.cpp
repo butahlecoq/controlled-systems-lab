@@ -1,5 +1,6 @@
 #include <nlohmann/json.hpp>
 #include <csl/model/linear_system.hpp>
+#include <csl/controllers/observed_replay.hpp>
 #include <csl/optimization/finite_action_minimax.hpp>
 #include <csl/optimization/objectives.hpp>
 #include <csl/sets/data.hpp>
@@ -11,9 +12,11 @@
 #include <cstddef>
 #include <cstdint>
 #include <functional>
+#include <iomanip>
 #include <iostream>
 #include <limits>
 #include <map>
+#include <sstream>
 #include <set>
 #include <stdexcept>
 #include <string>
@@ -27,7 +30,6 @@ using State = std::array<double, 4>;
 constexpr int horizon = 3;
 constexpr int rk4_steps = 20;
 constexpr double dt = 0.2;
-constexpr double sensor_resolution = 0.1;
 constexpr double residual_bound = 0.25;
 constexpr double capture_radius = 1.0;
 constexpr std::array<double, 3> actions{-3.0, 0.0, 3.0};
@@ -93,17 +95,24 @@ State advance(const AffineStep& map, const State& x, double u, double v) {
 }
 
 double gap(const State& x) { return x[0] - x[2]; }
-double terminal_cost(const State& x) { return std::abs(gap(x)); }
-double sensor(double relative_position, double error) {
-    const double scaled = (relative_position + error) / sensor_resolution;
-    return std::round(scaled) * sensor_resolution;
-}
+double sensor(double relative_position, double error) { return relative_position + error; }
 
-std::string history_key(const std::vector<double>& history, const std::vector<double>& used) {
-    (void)used;
-    std::string key;
-    for(const auto y : history) key += std::to_string(std::llround(y * 10.0)) + ",";
-    return key;
+struct MeasuredSample {
+    std::size_t channel{};
+    std::size_t state_stage{};
+    double value{};
+    std::size_t released_stage{};
+    ObservationTiming released_timing{ObservationTiming::before_decision};
+};
+
+std::string history_key(const std::vector<MeasuredSample>& history, std::size_t decision_stage) {
+    std::ostringstream key;
+    key << std::setprecision(std::numeric_limits<double>::max_digits10);
+    key << decision_stage << '|';
+    for(const auto& sample : history)
+        key << sample.channel << ':' << sample.state_stage << ':' << sample.released_stage << ':'
+            << static_cast<int>(sample.released_timing) << ':' << sample.value << ',';
+    return key.str();
 }
 
 bool same_state(const State& a, const State& b) {
@@ -121,7 +130,7 @@ struct Candidate {
 };
 
 std::vector<Candidate> candidates(const AffineStep& map,
-    const std::vector<double>& history, const std::vector<double>& used_controls) {
+    const std::vector<MeasuredSample>& history, const std::vector<double>& used_controls) {
     std::vector<Candidate> result;
     std::vector<std::size_t> v_indices(used_controls.size());
     const auto visit = [&](const auto& self, std::size_t stage) -> void {
@@ -141,8 +150,9 @@ std::vector<Candidate> candidates(const AffineStep& map,
             }
             double cost = 0.0;
             bool admissible = true;
-            for(std::size_t k = 0; k < history.size(); ++k) {
-                const double residual = history[k] - gap(states[k]);
+            for(const auto& sample : history) {
+                if(sample.state_stage >= states.size()) { admissible = false; break; }
+                const double residual = sample.value - gap(states[sample.state_stage]);
                 cost += residual * residual;
                 admissible = admissible && std::abs(residual) <= residual_bound + 1e-10;
             }
@@ -153,15 +163,27 @@ std::vector<Candidate> candidates(const AffineStep& map,
     return result;
 }
 
+const Candidate& best_candidate(const std::vector<Candidate>& found) {
+    if(found.empty()) throw std::runtime_error("MHE found no prior/disturbance row compatible with the observation history");
+    return *std::min_element(found.begin(), found.end(),
+        [](const Candidate& a, const Candidate& b) {
+            if(std::abs(a.residual_cost - b.residual_cost) > 1e-12)
+                return a.residual_cost < b.residual_cost;
+            if(a.initial_index != b.initial_index) return a.initial_index < b.initial_index;
+            return a.disturbance_indices < b.disturbance_indices;
+        });
+}
+
 std::vector<State> posterior_states(const AffineStep& map,
-    const std::vector<double>& history, const std::vector<double>& used_controls) {
+    const std::vector<MeasuredSample>& history, const std::vector<double>& used_controls) {
     std::vector<State> result;
     for(const auto& candidate : candidates(map, history, used_controls)) {
         bool matches = true;
-        for(std::size_t k = 0; k < history.size(); ++k) {
+        for(const auto& sample : history) {
             bool sample_matches = false;
             for(const auto error : errors) {
-                if(std::abs(sensor(gap(candidate.trajectory[k]), error) - history[k]) <= 1e-12) {
+                if(sample.state_stage < candidate.trajectory.size() &&
+                    std::abs(sensor(gap(candidate.trajectory[sample.state_stage]), error) - sample.value) <= 1e-12) {
                     sample_matches = true;
                     break;
                 }
@@ -182,7 +204,15 @@ std::size_t planning_calls[2]{};
 
 template<class T, class... R>
 T take(std::variant<T, R...> value) {
-    if(!std::holds_alternative<T>(value)) throw std::runtime_error("CSL rejected a finite minimax report input");
+    if(!std::holds_alternative<T>(value)) {
+        const auto detail = std::visit([](const auto& failure) -> std::string {
+            using Failure = std::decay_t<decltype(failure)>;
+            if constexpr(requires { failure.field; failure.explanation; })
+                return failure.field + ": " + failure.explanation;
+            else return "unexpected CSL outcome " + std::string(typeid(Failure).name());
+        }, value);
+        throw std::runtime_error("CSL rejected report input: " + detail);
+    }
     return std::get<T>(std::move(value));
 }
 
@@ -244,9 +274,9 @@ double csl_minimax_first_action(const AffineStep& map, const std::vector<State>&
     return actions.at(feasible->action_indices.front());
 }
 
-double first_action(const AffineStep& map, const std::vector<double>& history,
+double first_action(const AffineStep& map, const std::vector<MeasuredSample>& history,
     const std::vector<double>& used_controls, bool robust) {
-    const auto key = history_key(history, used_controls);
+    const auto key = history_key(history, used_controls.size());
     auto& cache = action_cache[robust ? 1 : 0];
     auto& prior_actions = history_actions[robust ? 1 : 0];
     if(const auto found = cache.find(key); found != cache.end()) {
@@ -261,14 +291,7 @@ double first_action(const AffineStep& map, const std::vector<double>& history,
         current = posterior_states(map, history, used_controls);
         if(current.empty()) throw std::runtime_error("finite posterior is empty for an authored observation history");
     } else {
-        const auto best = std::min_element(found_candidates.begin(), found_candidates.end(),
-            [](const Candidate& a, const Candidate& b) {
-                if(std::abs(a.residual_cost - b.residual_cost) > 1e-12)
-                    return a.residual_cost < b.residual_cost;
-                if(a.initial_index != b.initial_index) return a.initial_index < b.initial_index;
-                return a.disturbance_indices < b.disturbance_indices;
-            });
-        current.push_back(best->state);
+        current.push_back(best_candidate(found_candidates).state);
     }
     const std::size_t remaining = static_cast<std::size_t>(horizon) - used_controls.size();
     const double best_action = csl_minimax_first_action(map, current, remaining, planning_calls[0] + planning_calls[1]);
@@ -276,6 +299,44 @@ double first_action(const AffineStep& map, const std::vector<double>& history,
     prior_actions.emplace(key, used_controls);
     ++planning_calls[robust ? 1 : 0];
     return best_action;
+}
+
+model::LinearSystem make_replay_system(const AffineStep& map,
+    std::optional<std::size_t> sample_one_release_stage = std::nullopt) {
+    Matrix a{4, 4, {}};
+    for(const auto& row : map.a) a.values.insert(a.values.end(), row.begin(), row.end());
+    Matrix b{4, 1, Vector(map.b.begin(), map.b.end())};
+    Matrix e{4, 1, Vector(map.e.begin(), map.e.end())};
+    std::vector<LinearStage> stages(static_cast<std::size_t>(horizon),
+        LinearStage{a, b, e, Vector(map.offset.begin(), map.offset.end())});
+    Dynamics dynamics{{4, 1, 1}, TimeDomain::discrete, std::move(stages)};
+
+    ObservationStage observation{Matrix{1, 4, {1.0, 0.0, -1.0, 0.0}},
+        Matrix{1, 1, {0.0}}, Matrix{1, 1, {0.0}}, Matrix{1, 1, {1.0}}, Vector{0.0}};
+    const auto pre = [](std::size_t stage) {
+        return ObservationPoint{{stage}, ObservationTiming::before_decision};
+    };
+    std::vector<ObservationSample> schedule;
+    schedule.reserve(static_cast<std::size_t>(horizon + 1));
+    for(std::size_t sample = 0; sample <= static_cast<std::size_t>(horizon); ++sample) {
+        const bool delayed = sample_one_release_stage && sample == 1;
+        schedule.push_back({{sample}, delayed ? ObservationPoint{{0}, ObservationTiming::after_decision} : pre(sample),
+            delayed ? pre(*sample_one_release_stage) : pre(sample), std::nullopt});
+    }
+    SystemModel authored{std::move(dynamics), {{std::move(observation), std::move(schedule)}}};
+    std::vector<double> times(static_cast<std::size_t>(horizon + 1));
+    for(std::size_t k = 0; k < times.size(); ++k) times[k] = static_cast<double>(k) * dt;
+    return take(model::snapshot(authored, times));
+}
+
+std::vector<MeasuredSample> measured_history(
+    std::span<const controllers::ReleasedObservation> released) {
+    std::vector<MeasuredSample> history;
+    history.reserve(released.size());
+    for(const auto& sample : released)
+        history.push_back({sample.channel.value, sample.sample.value, sample.value.values.at(0),
+            sample.released_at.stage.value, sample.released_at.timing});
+    return history;
 }
 
 struct RunRow {
@@ -309,44 +370,72 @@ Json evaluate_arm(const AffineStep& map, const std::vector<RunRow>& rows, bool r
     Json runs = Json::array();
     double worst = -1.0;
     std::size_t violations = 0;
+    const auto system = make_replay_system(map);
     for(std::size_t row_id = 0; row_id < rows.size(); ++row_id) {
         const auto& row = rows[row_id];
-        State x = initial_states[row.initial_index];
-        std::vector<double> history, used_controls;
+        controllers::ReplayInputs inputs;
+        inputs.initial_state.assign(initial_states[row.initial_index].begin(), initial_states[row.initial_index].end());
+        for(const auto disturbance : row.disturbances) inputs.external.push_back({disturbance});
+        std::vector<Vector> measurement_errors;
+        for(const auto error : row.errors) measurement_errors.push_back({error});
+        inputs.measurement_errors = {std::move(measurement_errors)};
+
+        std::vector<double> used_controls;
+        std::vector<double> residual_costs;
+        std::vector<std::size_t> posterior_sizes;
+        std::vector<std::vector<State>> posteriors;
+        const auto estimator = [&](StageIndex, std::span<const controllers::ReleasedObservation> released) {
+            const auto history = measured_history(released);
+            const auto found = candidates(map, history, used_controls);
+            const auto& estimate = best_candidate(found);
+            residual_costs.push_back(estimate.residual_cost);
+            auto posterior = posterior_states(map, history, used_controls);
+            posterior_sizes.push_back(posterior.size());
+            posteriors.push_back(std::move(posterior));
+            return Vector(estimate.state.begin(), estimate.state.end());
+        };
+        const auto controller = [&](StageIndex, std::span<const controllers::ReleasedObservation> released,
+            std::span<const double>) {
+            const auto history = measured_history(released);
+            const auto action = first_action(map, history, used_controls, robust);
+            used_controls.push_back(action);
+            return Vector{action};
+        };
+        auto replay = controllers::replay_observed_policy(system, inputs, estimator, controller);
+        auto* record = std::get_if<controllers::ReplayRecord>(&replay);
+        if(!record) throw std::runtime_error("reviewed observed-policy replay rejected an authored MPC-09 row");
+
         Json trace = Json::array();
-        for(int stage = 0; stage <= horizon; ++stage) {
-            const double y = sensor(gap(x), row.errors[static_cast<std::size_t>(stage)]);
-            history.push_back(y);
-            Json point{{"stage", stage}, {"state", x}, {"relative_position", gap(x)},
-                {"observation", y}};
-            if(stage < horizon) {
-                const auto estimates = candidates(map, history, used_controls);
-                const auto estimate = std::min_element(estimates.begin(), estimates.end(),
-                    [](const Candidate& a, const Candidate& b) {
-                        if(std::abs(a.residual_cost - b.residual_cost) > 1e-12)
-                            return a.residual_cost < b.residual_cost;
-                        if(a.initial_index != b.initial_index) return a.initial_index < b.initial_index;
-                        return a.disturbance_indices < b.disturbance_indices;
-                    });
-                const auto posterior = posterior_states(map, history, used_controls);
-                const double u = first_action(map, history, used_controls, robust);
-                point["estimate"] = estimate->state;
-                point["posterior_size"] = posterior.size();
-                point["posterior_states"] = posterior;
-                point["mhe_residual_cost"] = estimate->residual_cost;
-                point["control"] = u;
-                point["disturbance"] = row.disturbances[static_cast<std::size_t>(stage)];
-                used_controls.push_back(u);
-                x = advance(map, x, u, row.disturbances[static_cast<std::size_t>(stage)]);
+        for(std::size_t k = 0; k < record->decisions.size(); ++k) {
+            const auto& decision = record->decisions[k];
+            Json observations = Json::array();
+            for(const auto& sample : decision.available) {
+                observations.push_back({{"channel", sample.channel.value}, {"sample", sample.sample.value},
+                    {"released_stage", sample.released_at.stage.value},
+                    {"released_after_decision", sample.released_at.timing == ObservationTiming::after_decision},
+                    {"value", sample.value.values}});
             }
-            trace.push_back(std::move(point));
+            const auto& state = record->states[k];
+            trace.push_back({{"stage", k}, {"state", state},
+                {"relative_position", state.at(0) - state.at(2)},
+                {"available_observations", std::move(observations)},
+                {"estimate", decision.estimate}, {"posterior_size", posterior_sizes.at(k)},
+                {"posterior_states", posteriors.at(k)}, {"mhe_residual_cost", residual_costs.at(k)},
+                {"action", decision.action.at(0)}, {"disturbance", inputs.external[k].at(0)}});
         }
-        const double cost = terminal_cost(x);
+        Json released_observations = Json::array();
+        for(const auto& sample : record->released)
+            released_observations.push_back({{"channel", sample.channel.value},
+                {"sample", sample.sample.value}, {"released_stage", sample.released_at.stage.value},
+                {"released_after_decision", sample.released_at.timing == ObservationTiming::after_decision},
+                {"value", sample.value.values}});
+        const double cost = std::abs(record->states.back().at(0) - record->states.back().at(2));
         worst = std::max(worst, cost);
         if(cost > capture_radius + 1e-12) ++violations;
         runs.push_back({{"row_id", row_id}, {"initial_index", row.initial_index},
             {"disturbances", row.disturbances}, {"measurement_errors", row.errors},
-            {"trace", std::move(trace)}, {"terminal_gap", cost},
+            {"states", record->states}, {"decisions", std::move(trace)},
+            {"released_observations", std::move(released_observations)}, {"terminal_gap", cost},
             {"terminal_capture", cost <= capture_radius + 1e-12}});
     }
     return {{"label", robust ? "set_based_robust_receding" : "certainty_equivalent_receding"},
@@ -355,51 +444,75 @@ Json evaluate_arm(const AffineStep& map, const std::vector<RunRow>& rows, bool r
         {"runs", std::move(runs)}};
 }
 
+controllers::ReplayRecord timing_replay(const AffineStep& map, std::size_t release_stage) {
+    const auto system = make_replay_system(map, release_stage);
+    controllers::ReplayInputs inputs;
+    inputs.initial_state.assign(initial_states[0].begin(), initial_states[0].end());
+    inputs.external = {{0.0}, {-3.0}, {-3.0}};
+    inputs.measurement_errors = {{{-0.2}, {-0.2}, {0.2}, {-0.2}}};
+    std::vector<double> used_controls;
+    const auto estimator = [&](StageIndex, std::span<const controllers::ReleasedObservation> released) {
+        const auto history = measured_history(released);
+        const auto found = candidates(map, history, used_controls);
+        const auto& estimate = best_candidate(found);
+        return Vector(estimate.state.begin(), estimate.state.end());
+    };
+    const auto controller = [&](StageIndex, std::span<const controllers::ReleasedObservation> released,
+        std::span<const double>) {
+        const auto history = measured_history(released);
+        const auto action = first_action(map, history, used_controls, false);
+        used_controls.push_back(action);
+        return Vector{action};
+    };
+    auto replay = controllers::replay_observed_policy(system, inputs, estimator, controller);
+    auto* record = std::get_if<controllers::ReplayRecord>(&replay);
+    if(!record) throw std::runtime_error("reviewed delayed-measurement replay rejected its fixture");
+    return std::move(*record);
+}
+
+Json record_json(const controllers::ReplayRecord& record) {
+    Json decisions = Json::array();
+    for(const auto& decision : record.decisions) {
+        Json observations = Json::array();
+        for(const auto& sample : decision.available)
+            observations.push_back({{"sample", sample.sample.value}, {"value", sample.value.values},
+                {"released_stage", sample.released_at.stage.value},
+                {"released_after_decision", sample.released_at.timing == ObservationTiming::after_decision}});
+        decisions.push_back({{"stage", decision.stage.value}, {"observations", std::move(observations)},
+            {"estimate", decision.estimate}, {"action", decision.action}});
+    }
+    Json released = Json::array();
+    for(const auto& sample : record.released)
+        released.push_back({{"sample", sample.sample.value}, {"value", sample.value.values},
+            {"released_stage", sample.released_at.stage.value},
+            {"released_after_decision", sample.released_at.timing == ObservationTiming::after_decision}});
+    return {{"states", record.states}, {"decisions", std::move(decisions)},
+        {"released_observations", std::move(released)}};
+}
+
 Json observation_timing_checks(const AffineStep& map) {
-    const std::vector<double> controls{0.0, 0.0};
-    const std::array<double, 2> v_path{-3.0, 3.0};
-    const std::array<double, 2> noise_path{-0.2, 0.2};
-    State truth = initial_states[0];
-    const double y0 = sensor(gap(truth), noise_path[0]);
-    truth = advance(map, truth, controls[0], v_path[0]);
-    const double y1 = sensor(gap(truth), noise_path[1]);
-    truth = advance(map, truth, controls[1], v_path[1]);
-
-    const std::vector<double> at_decision_one{y0};
-    const auto missed_estimate = candidates(map, at_decision_one, {controls[0]});
-    const auto missed_posterior = posterior_states(map, at_decision_one, {controls[0]});
-    if(missed_estimate.empty() || missed_posterior.empty())
-        throw std::runtime_error("missing-observation check discarded every prior hypothesis");
-
-    const std::vector<double> delayed_history{y0, y1};
-    const auto delayed_estimate = candidates(map, delayed_history, controls);
-    const auto delayed_posterior = posterior_states(map, delayed_history, controls);
-    if(delayed_estimate.empty() || delayed_posterior.empty())
-        throw std::runtime_error("delayed-observation check discarded every prior hypothesis");
-
-    const auto failed = candidates(map, {1000.0}, {controls[0]});
-    return {{"schema", "csl.mpc09-observation-timing-check/1"},
-        {"control_history", controls}, {"disturbance_history", v_path},
-        {"noise_history", noise_path},
-        {"released_samples_at_decision_1", Json::array({{{"state_stage", 0}, {"available_stage", 0}, {"value", y0}}})},
-        {"decision_1", {{"sample_at_stage_1", "missed"},
-            {"state_hypothesis_count", missed_estimate.size()},
-            {"posterior_state_count", missed_posterior.size()},
-            {"hidden_state_was_read", false}}},
-        {"released_samples_at_decision_2", Json::array({
-            {{"state_stage", 0}, {"available_stage", 0}, {"value", y0}},
-            {{"state_stage", 1}, {"available_stage", 2}, {"value", y1}}})},
-        {"decision_2", {{"delayed_stage_1_sample_released", true},
-            {"state_hypothesis_count", delayed_estimate.size()},
-            {"posterior_state_count", delayed_posterior.size()},
-            {"estimate", std::min_element(delayed_estimate.begin(), delayed_estimate.end(),
-                [](const Candidate& a, const Candidate& b) {
-                    if(std::abs(a.residual_cost-b.residual_cost)>1e-12) return a.residual_cost<b.residual_cost;
-                    if(a.initial_index!=b.initial_index) return a.initial_index<b.initial_index;
-                    return a.disturbance_indices<b.disturbance_indices;
-                })->state},
-            {"posterior_states", delayed_posterior}}},
-        {"inconsistent_history", {{"status", failed.empty()?"no_compatible_hypothesis":"unexpected_candidate"},
+    const auto delayed = timing_replay(map, 2);
+    const auto missed_until_terminal = timing_replay(map, 3);
+    const auto& decision_stage_one = delayed.decisions.at(1);
+    const auto& decision_stage_two_delayed = delayed.decisions.at(2);
+    const auto& decision_stage_two_missed = missed_until_terminal.decisions.at(2);
+    if(decision_stage_one.available.size() != 1 || decision_stage_two_delayed.available.size() != 3 ||
+        decision_stage_two_missed.available.size() != 2)
+        throw std::runtime_error("missed/delayed replay released a sample at the wrong decision event");
+    if(decision_stage_two_delayed.action == decision_stage_two_missed.action)
+        throw std::runtime_error("delayed sample did not change the later controller action in the fixture");
+    const auto failed = candidates(map, {{0, 0, 1000.0, 0, ObservationTiming::before_decision}}, {});
+    return {{"schema", "csl.mpc09-observation-timing-check/2"},
+        {"disturbances", {0.0, -3.0, -3.0}},
+        {"measurement_errors", {-0.2, -0.2, 0.2, -0.2}},
+        {"delayed_sample_available_at_stage", 2},
+        {"decision_1", record_json(delayed).at("decisions").at(1)},
+        {"decision_2_with_delayed_sample", record_json(delayed).at("decisions").at(2)},
+        {"decision_2_without_sample_until_terminal", record_json(missed_until_terminal).at("decisions").at(2)},
+        {"released_after_terminal", record_json(missed_until_terminal).at("released_observations")},
+        {"later_action_changed_after_sample_release", true},
+        {"states", delayed.states},
+        {"inconsistent_history", {{"status", failed.empty() ? "no_compatible_hypothesis" : "unexpected_candidate"},
             {"candidate_count", failed.size()}}}};
 }
 
@@ -421,8 +534,8 @@ Json run() {
             {"state_order", {"position_1", "velocity_1", "position_2", "velocity_2"}},
             {"initial_states", initial_states}, {"control_catalogue", actions},
             {"disturbance_catalogue", disturbances}, {"measurement_error_catalogue", errors},
-            {"sensor_resolution", sensor_resolution}, {"mhe_residual_bound", residual_bound},
-            {"observation", "relative position plus {-0.2,+0.2}, rounded to 0.1; available before every decision"},
+            {"mhe_residual_bound", residual_bound},
+            {"observation", "relative position plus error in {-0.2,+0.2}; available before every decision"},
             {"initial_quantifier", "universal over two listed initial states"},
             {"disturbance_semantics", "independent adversarial finite catalogue per transition"},
             {"information_pattern", "same ordered observation history and past actions imply the same controller action"},

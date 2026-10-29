@@ -31,7 +31,7 @@ include(cmake/JsonDependencies.cmake)
 add_executable(csl_mpc09_output_feedback_report
   benchmarks/reporting/mpc09/two_particle_output_feedback.cpp)
 target_link_libraries(csl_mpc09_output_feedback_report PRIVATE
-  CSL::finite_action_minimax CSL::model CSL::sets)
+  CSL::finite_action_minimax CSL::controllers CSL::model CSL::sets)
 target_include_directories(csl_mpc09_output_feedback_report SYSTEM PRIVATE
   ${csl_json_SOURCE_DIR}/include)
 target_compile_features(csl_mpc09_output_feedback_report PRIVATE cxx_std_20)

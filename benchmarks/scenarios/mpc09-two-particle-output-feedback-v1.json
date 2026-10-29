@@ -24,13 +24,13 @@
     "control_catalogue": [-3.0, 0.0, 3.0],
     "disturbance_catalogue": [-3.0, 0.0, 3.0],
     "disturbance_semantics": "adversarial, independently selected from the finite catalogue at each stage; it is player 2 control in the source game",
-    "sensor": "before each decision, observe position_1-position_2 plus error in {-0.2,+0.2}, rounded to the nearest 0.1; no velocity is observed",
+    "sensor": "before each decision, observe position_1-position_2 plus error in {-0.2,+0.2}; no velocity is observed",
     "measurement_error_catalogue": [-0.2, 0.2],
-    "sensor_resolution": 0.1,
     "measurement_error_semantics": "independent stage-wise finite catalogue, fixed for each authored row",
     "terminal_capture_set": "abs(position_1-position_2) <= 1.0",
     "information_pattern": "controller sees the complete ordered noisy relative-position history before choosing u; v is selected after u and before the next observation",
-    "state_quantization": "none; propagate the source RK4 map without state rounding"
+    "state_quantization": "none; propagate the source RK4 map without state rounding",
+    "sensor_quantization": "none; the CSL replay API represents the declared additive measurement channel as an affine observation map"
   },
   "estimator": {
     "name": "finite-prior full-history constrained least squares",
@@ -38,7 +38,7 @@
     "window": "all released observations since reset",
     "arrival_cost": 0,
     "process_history": "enumerate every past disturbance-catalogue sequence consistent with the known applied controls",
-    "residual_constraint": "each observation residual must lie in [-0.25,+0.25] to account for bounded noise and sensor rounding",
+    "residual_constraint": "each observation residual must lie in [-0.25,+0.25] for the bounded additive sensor-error catalogue",
     "objective": "sum of squared observation residuals",
     "residual_bound": 0.25,
     "tie_break": "lexicographic initial-state row, then lexicographic disturbance-index sequence",

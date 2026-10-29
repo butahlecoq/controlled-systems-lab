@@ -17,7 +17,6 @@ ACTIONS = (-3.0, 0.0, 3.0)
 DISTURBANCES = ACTIONS
 ERRORS = (-0.2, 0.2)
 INITIAL = ((0.0, 0.0, -0.2, 0.0), (0.0, 0.0, 0.2, 0.0))
-RESOLUTION = 0.1
 RESIDUAL_BOUND = 0.25
 CAPTURE_RADIUS = 1.0
 TOL = 2e-8
@@ -40,21 +39,19 @@ def rk4(x: tuple[float, ...], u: float, v: float) -> tuple[float, ...]:
 
 
 def sensor(x: tuple[float, ...], error: float) -> float:
-    scaled = (x[0] - x[2] + error) / RESOLUTION
-    rounded = math.floor(scaled + 0.5) if scaled >= 0 else math.ceil(scaled - 0.5)
-    return rounded * RESOLUTION
+    return x[0] - x[2] + error
 
 
 def close(a: float, b: float, tolerance: float = TOL) -> bool:
     return math.isclose(float(a), float(b), rel_tol=0, abs_tol=tolerance)
 
 
-def history_key(history: tuple[float, ...]) -> tuple[int, ...]:
-    return tuple(round(y / RESOLUTION) for y in history)
+def history_key(history: tuple[tuple[int, float], ...], decision_stage: int):
+    return decision_stage, tuple((stage, round(y, 12)) for stage, y in history)
 
 
 @functools.lru_cache(maxsize=None)
-def candidate_rows(history: tuple[float, ...], used: tuple[float, ...]):
+def candidate_rows(history: tuple[tuple[int, float], ...], used: tuple[float, ...]):
     result = []
     for initial_id, initial in enumerate(INITIAL):
         for v_ids in itertools.product(range(len(DISTURBANCES)), repeat=len(used)):
@@ -63,7 +60,8 @@ def candidate_rows(history: tuple[float, ...], used: tuple[float, ...]):
             for u, v_id in zip(used, v_ids):
                 x = rk4(x, u, DISTURBANCES[v_id])
                 states.append(x)
-            residuals = tuple(y - (x[0] - x[2]) for y, x in zip(history, states))
+            residuals = tuple(y - (states[state_stage][0] - states[state_stage][2])
+                              for state_stage, y in history)
             if all(abs(r) <= RESIDUAL_BOUND + 1e-10 for r in residuals):
                 result.append({"state": states[-1], "states": states,
                                "initial_id": initial_id, "v_ids": v_ids,
@@ -72,7 +70,7 @@ def candidate_rows(history: tuple[float, ...], used: tuple[float, ...]):
 
 
 @functools.lru_cache(maxsize=None)
-def estimate(history: tuple[float, ...], used: tuple[float, ...]):
+def estimate(history: tuple[tuple[int, float], ...], used: tuple[float, ...]):
     candidates = candidate_rows(history, used)
     if not candidates:
         raise ValueError("no MHE candidate is consistent with a listed row")
@@ -89,12 +87,12 @@ def estimate(history: tuple[float, ...], used: tuple[float, ...]):
 
 
 @functools.lru_cache(maxsize=None)
-def posterior(history: tuple[float, ...], used: tuple[float, ...]):
+def posterior(history: tuple[tuple[int, float], ...], used: tuple[float, ...]):
     current = []
     for candidate in candidate_rows(history, used):
-        if all(any(close(sensor(state, error), y, 1e-12)
+        if all(any(close(sensor(candidate["states"][state_stage], error), y, 1e-12)
                    for error in ERRORS)
-               for state, y in zip(candidate["states"], history)):
+               for state_stage, y in history):
             if not any(all(close(a, b, 1e-10) for a, b in zip(candidate["state"], known))
                        for known in current):
                 current.append(candidate["state"])
@@ -114,7 +112,7 @@ def plan_value(current: tuple[tuple[float, ...], ...], controls: tuple[float, ..
 
 
 @functools.lru_cache(maxsize=None)
-def first_action(history: tuple[float, ...], used: tuple[float, ...], robust: bool):
+def first_action(history: tuple[tuple[int, float], ...], used: tuple[float, ...], robust: bool):
     if robust:
         current = posterior(history, used)
     else:
@@ -202,7 +200,6 @@ def verify(actual: dict) -> dict:
             adaptation.get("control_catalogue") != list(ACTIONS) or
             adaptation.get("disturbance_catalogue") != list(DISTURBANCES) or
             adaptation.get("measurement_error_catalogue") != list(ERRORS) or
-            not close(adaptation.get("sensor_resolution", math.nan), RESOLUTION) or
             not close(adaptation.get("mhe_residual_bound", math.nan), RESIDUAL_BOUND)):
         raise ValueError("controller result differs from the declared finite scenario")
     arms = actual.get("controllers", [])
@@ -226,45 +223,54 @@ def verify(actual: dict) -> dict:
                 raise ValueError("measurement-error sequence differs")
             x = INITIAL[initial_id]
             history, used = [], []
-            trace = run.get("trace", [])
-            if len(trace) != HORIZON + 1:
+            states = run.get("states", [])
+            decisions = run.get("decisions", [])
+            if len(states) != HORIZON + 1 or len(decisions) != HORIZON:
                 raise ValueError("trajectory length differs")
-            for stage, point in enumerate(trace):
-                if point.get("stage") != stage:
+            truth_states = [x]
+            for stage, decision in enumerate(decisions):
+                if not all(close(a, b) for a, b in zip(states[stage], x)):
+                    raise ValueError("state replay differs from the source RK4 step")
+                if decision.get("stage") != stage:
                     raise ValueError("stage ordering differs")
                 y = sensor(x, error_path[stage])
-                if not all(close(a, b) for a, b in zip(point.get("state", ()), x)):
-                    raise ValueError("state replay differs from the source RK4 step")
-                if not close(point.get("observation", math.nan), y):
-                    raise ValueError("sensor replay differs")
-                history.append(y)
-                if stage < HORIZON:
-                    is_robust = arm_id == 1
-                    expected_u = first_action(tuple(history), tuple(used), is_robust)
-                    if not close(point.get("control", math.nan), expected_u):
-                        raise ValueError("reported controller action differs from independent fixed-plan minimax")
-                    key = history_key(tuple(history))
-                    prior = histories_by_arm[arm_id].setdefault(key, expected_u)
-                    if not close(prior, expected_u):
-                        raise ValueError("identical observation histories select different actions")
-                    if not close(point.get("control", math.nan), expected_u):
-                        raise ValueError("saved action differs from the independently verified action")
-                    estimate_state, estimate_candidates = estimate(tuple(history), tuple(used))
-                    if not all(close(a, b) for a, b in zip(point.get("estimate", ()), estimate_state)):
-                        raise ValueError("saved MHE state differs from independent full-history least squares")
-                    expected_mhe = min(c["cost"] for c in estimate_candidates)
-                    if not close(point.get("mhe_residual_cost", math.nan), expected_mhe):
-                        raise ValueError("saved MHE residual objective differs")
-                    posterior_set = posterior(tuple(history), tuple(used))
-                    if point.get("posterior_size") != len(posterior_set):
-                        raise ValueError("saved posterior size differs from independent history filtering")
-                    saved_posterior = point.get("posterior_states", [])
-                    if len(saved_posterior) != len(posterior_set) or any(
-                            not all(close(a, b, 1e-10) for a, b in zip(saved, expected))
-                            for saved, expected in zip(saved_posterior, posterior_set)):
-                        raise ValueError("saved information set differs from independent history filtering")
-                    used.append(expected_u)
-                    x = rk4(x, expected_u, v_path[stage])
+                history.append((stage, y))
+                available = decision.get("available_observations", [])
+                if [sample.get("sample") for sample in available] != list(range(stage + 1)):
+                    raise ValueError("replay API released the wrong observation samples")
+                for sample in available:
+                    sample_id = sample["sample"]
+                    expected_y = sensor(truth_states[sample_id], error_path[sample_id])
+                    if (not close(sample.get("value", [math.nan])[0], expected_y) or
+                            sample.get("released_stage") != sample_id or
+                            sample.get("released_after_decision") is not False):
+                        raise ValueError("released observation differs from independent timing and sensor replay")
+                expected_u = first_action(tuple(history), tuple(used), arm_id == 1)
+                if not close(decision.get("action", math.nan), expected_u):
+                    raise ValueError("reported controller action differs from independent fixed-plan minimax")
+                key = history_key(tuple(history), stage)
+                prior = histories_by_arm[arm_id].setdefault(key, expected_u)
+                if not close(prior, expected_u):
+                    raise ValueError("identical observation histories select different actions")
+                estimate_state, estimate_candidates = estimate(tuple(history), tuple(used))
+                if not all(close(a, b) for a, b in zip(decision.get("estimate", ()), estimate_state)):
+                    raise ValueError("saved MHE state differs from independent full-history least squares")
+                expected_mhe = min(c["cost"] for c in estimate_candidates)
+                if not close(decision.get("mhe_residual_cost", math.nan), expected_mhe):
+                    raise ValueError("saved MHE residual objective differs")
+                posterior_set = posterior(tuple(history), tuple(used))
+                if decision.get("posterior_size") != len(posterior_set):
+                    raise ValueError("saved posterior size differs from independent history filtering")
+                saved_posterior = decision.get("posterior_states", [])
+                if len(saved_posterior) != len(posterior_set) or any(
+                        not all(close(a, b, 1e-10) for a, b in zip(saved, expected))
+                        for saved, expected in zip(saved_posterior, posterior_set)):
+                    raise ValueError("saved information set differs from independent history filtering")
+                used.append(expected_u)
+                x = rk4(x, expected_u, v_path[stage])
+                truth_states.append(x)
+            if not all(close(a, b) for a, b in zip(states[-1], x)):
+                raise ValueError("terminal state differs from source RK4 replay")
             cost = abs(x[0] - x[2])
             if not close(run.get("terminal_gap", math.nan), cost):
                 raise ValueError("terminal cost differs")
@@ -279,35 +285,47 @@ def verify(actual: dict) -> dict:
         if arm.get("rows_evaluated") != expected_rows:
             raise ValueError("row count differs")
     timing = actual.get("observation_timing_checks", {})
-    if timing.get("schema") != "csl.mpc09-observation-timing-check/1":
+    if timing.get("schema") != "csl.mpc09-observation-timing-check/2":
         raise ValueError("missed/delayed observation evidence is missing")
-    controls = (0.0, 0.0)
-    v_path = (-3.0, 3.0)
-    noise_path = (-0.2, 0.2)
     truth0 = INITIAL[0]
-    y0 = sensor(truth0, noise_path[0])
-    truth1 = rk4(truth0, controls[0], v_path[0])
-    y1 = sensor(truth1, noise_path[1])
-    missed = candidate_rows((y0,), (controls[0],))
-    missed_set = posterior((y0,), (controls[0],))
-    delayed = candidate_rows((y0, y1), controls)
-    delayed_set = posterior((y0, y1), controls)
-    if (timing.get("decision_1", {}).get("sample_at_stage_1") != "missed" or
-            timing["decision_1"].get("hidden_state_was_read") is not False or
-            timing["decision_1"].get("state_hypothesis_count") != len(missed) or
-            timing["decision_1"].get("posterior_state_count") != len(missed_set)):
-        raise ValueError("missing observation changed state information or hypothesis counts")
-    released = timing.get("released_samples_at_decision_2", [])
-    if released != [{"state_stage": 0, "available_stage": 0, "value": y0},
-                    {"state_stage": 1, "available_stage": 2, "value": y1}]:
-        raise ValueError("delayed sample release timestamp differs")
-    delay_estimate, delay_candidates = estimate((y0, y1), controls)
-    if (not delayed or timing.get("decision_2", {}).get("delayed_stage_1_sample_released") is not True or
-            timing["decision_2"].get("state_hypothesis_count") != len(delayed) or
-            timing["decision_2"].get("posterior_state_count") != len(delayed_set) or
-            any(not close(a, b) for a, b in zip(timing["decision_2"].get("estimate", ()), delay_estimate)) or
-            len(timing["decision_2"].get("posterior_states", [])) != len(delayed_set)):
-        raise ValueError("delayed observation was not incorporated at its release stage")
+    disturbances = (0.0, -3.0, -3.0)
+    errors = (-0.2, -0.2, 0.2, -0.2)
+    if timing.get("disturbances") != list(disturbances) or timing.get("measurement_errors") != list(errors):
+        raise ValueError("missed/delayed replay inputs differ from the pinned fixture")
+    y0 = sensor(truth0, errors[0])
+    u0 = first_action(((0, y0),), (), False)
+    truth1 = rk4(truth0, u0, disturbances[0])
+    u1 = first_action(((0, y0),), (u0,), False)
+    truth2 = rk4(truth1, u1, disturbances[1])
+    y1 = sensor(truth1, errors[1])
+    y2 = sensor(truth2, errors[2])
+    full_history = ((0, y0), (1, y1), (2, y2))
+    sparse_history = ((0, y0), (2, y2))
+    expected_delayed_action = first_action(full_history, (u0, u1), False)
+    expected_missed_action = first_action(sparse_history, (u0, u1), False)
+    stage_one = timing.get("decision_1", {})
+    with_delayed = timing.get("decision_2_with_delayed_sample", {})
+    without_delayed = timing.get("decision_2_without_sample_until_terminal", {})
+    if ([item.get("sample") for item in stage_one.get("observations", [])] != [0] or
+            stage_one.get("stage") != 1):
+        raise ValueError("sample was not missed at the stage-one decision")
+    if ([item.get("sample") for item in with_delayed.get("observations", [])] != [0, 1, 2] or
+            [item.get("released_stage") for item in with_delayed["observations"]] != [0, 2, 2] or
+            with_delayed.get("stage") != 2 or
+            not close(with_delayed.get("action", [math.nan])[0], expected_delayed_action)):
+        raise ValueError("delayed measurement was not released and used at stage two")
+    if ([item.get("sample") for item in without_delayed.get("observations", [])] != [0, 2] or
+            without_delayed.get("stage") != 2 or
+            not close(without_delayed.get("action", [math.nan])[0], expected_missed_action)):
+        raise ValueError("unreleased delayed measurement affected the stage-two decision")
+    if (expected_delayed_action == expected_missed_action or
+            timing.get("later_action_changed_after_sample_release") is not True):
+        raise ValueError("the released delayed sample did not change the independently checked later action")
+    terminally_delayed = [item for item in timing.get("released_after_terminal", [])
+                          if item.get("sample") == 1]
+    if (len(terminally_delayed) != 1 or terminally_delayed[0].get("released_stage") != HORIZON or
+            terminally_delayed[0].get("released_after_decision") is not False):
+        raise ValueError("sample withheld through stage two was not retained until the terminal release")
     failed = timing.get("inconsistent_history", {})
     if failed.get("status") != "no_compatible_hypothesis" or failed.get("candidate_count") != 0:
         raise ValueError("estimator failure did not report an empty compatible prior")

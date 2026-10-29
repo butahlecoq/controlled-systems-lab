@@ -30,6 +30,9 @@ SOURCE_FILES = (
     "cmake/OptionalReports.cmake",
     "CMakeLists.txt",
     "include/csl/optimization/finite_action_minimax.hpp",
+    "include/csl/controllers/observed_replay.hpp",
+    "src/controllers/observed_replay.cpp",
+    "docs/contracts/information-patterns.md",
     "src/optimization/finite_action_minimax.cpp",
     "benchmarks/reporting/env717/two_particle_minimax.cpp",
     "reports/algorithm-results/env717-two-particle-minimax-v1/projections.svg",
@@ -60,7 +63,6 @@ def validate_scenario(result: dict) -> None:
         "control_catalogue": adaptation["control_catalogue"],
         "disturbance_catalogue": adaptation["disturbance_catalogue"],
         "measurement_error_catalogue": adaptation["measurement_error_catalogue"],
-        "sensor_resolution": adaptation["sensor_resolution"],
         "mhe_residual_bound": scenario["estimator"]["residual_bound"],
     }
     if any((round(actual.get(key), 12) != round(value, 12) if isinstance(value, float)
@@ -117,7 +119,7 @@ def svg_figure(data: dict) -> str:
             actual = [(sx(p["actual_state"][xi]), sy(p["actual_state"][yi])) for p in trace]
             body.append(f'<polyline points="{" ".join(f"{a:.2f},{b:.2f}" for a,b in actual)}" class="{color_class}"/>')
             for p, (px, py) in zip(trace[:-1], actual[:-1]):
-                body.append(f'<circle cx="{px:.2f}" cy="{py:.2f}" r="6" fill="{colors[arm["label"]]}" class="point"><title>stage {p["stage"]}, observed {p["observation"]:.1f}, u={p["control"]:.0f}</title></circle>')
+                body.append(f'<circle cx="{px:.2f}" cy="{py:.2f}" r="6" fill="{colors[arm["label"]]}" class="point"><title>stage {p["stage"]}, observed {p["observation"]:.2f}, u={p["control"]:.0f}</title></circle>')
                 for hidden in p.get("posterior_states", []):
                     body.append(f'<circle cx="{sx(hidden[xi]):.2f}" cy="{sy(hidden[yi]):.2f}" r="8" class="set"/>')
                 estimate_state = p.get("estimate")
@@ -158,11 +160,18 @@ def main() -> None:
     selected = []
     for arm in arms:
         run = arm["runs"][selected_id]
-        selected.append({"label": arm["label"], "terminal_gap": run["terminal_gap"],
-                         "trace": [{"stage": p["stage"], "actual_state": p["state"],
-                                    "estimate": p.get("estimate"), "posterior_states": p.get("posterior_states", []),
-                                    "observation": p["observation"], "control": p.get("control"),
-                                    "disturbance": p.get("disturbance")} for p in run["trace"]]})
+        trace = []
+        for stage, state in enumerate(run["states"]):
+            point = {"stage": stage, "actual_state": state, "estimate": None,
+                     "posterior_states": [], "observation": None, "control": None}
+            if stage < check.HORIZON:
+                decision = run["decisions"][stage]
+                point["estimate"] = decision["estimate"]
+                point["posterior_states"] = decision["posterior_states"]
+                point["observation"] = decision["available_observations"][-1]["value"][0]
+                point["control"] = decision["action"]
+            trace.append(point)
+        selected.append({"label": arm["label"], "terminal_gap": run["terminal_gap"], "trace": trace})
     figure_data = {"schema": "csl.mpc09-output-feedback-figure/1", "row_id": selected_id,
                    "actual_state_stages": list(range(check.HORIZON + 1)), "controllers": selected}
     (output / "figure-data.json").write_text(json.dumps(figure_data, indent=2, sort_keys=True) + "\n", encoding="utf-8")
@@ -199,11 +208,11 @@ def main() -> None:
     ce, robust = arms
     readme = f'''# MPC-09 TwoParticleGame output-feedback pilot
 
-This report adapts the source-attributed `TwoParticleGame` from the RL differential-game repository to an explicit finite output-feedback experiment. It uses the source RK4 flow at 0.2-second decision intervals, two initial states, three control and disturbance values, a noisy quantized relative-position sensor, and a three-stage horizon. The source code is not copied; the pinned source and Apache-2.0 license are recorded in `result.json`.
+This report adapts the source-attributed `TwoParticleGame` from the RL differential-game repository to an explicit finite output-feedback experiment. It uses the source RK4 flow at 0.2-second decision intervals, two initial states, three control and disturbance values, an additive-noise relative-position sensor, and a three-stage horizon. The noisy outputs enter the reviewed CSL affine observation and replay API. The source code is not copied; the pinned source and Apache-2.0 license are recorded in `result.json`.
 
 The certainty-equivalent planner uses a full-history constrained least-squares state hypothesis. The set-based planner retains every state compatible with the complete noisy observation history. Both call CSL `finite_action_minimax`, execute only the first action, and replan after the next reading. The convex hulls used by that planner are exact for its convex terminal gap objective: the maximum is attained at vertices, which are the authored finite states and disturbance endpoints. Their lookahead does not branch on future observations.
 
-The saved run covers {ce['rows_evaluated']} matched rows. The certainty-equivalent worst terminal gap is {ce['worst_terminal_gap']:.9f} ({ce['terminal_capture_violations']} misses of the finite `gap <= 1` target); the set-based worst gap is {robust['worst_terminal_gap']:.9f} ({robust['terminal_capture_violations']} misses). An independent complete finite observation-history dynamic program has worst gap {ref['worst_terminal_gap']:.9f} and optimal first action(s) {ref['optimal_first_actions']}. The verifier also replays each state, measurement, estimate, posterior, action, and terminal outcome.
+The saved run covers {ce['rows_evaluated']} matched rows. The certainty-equivalent worst terminal gap is {ce['worst_terminal_gap']:.9f} ({ce['terminal_capture_violations']} misses of the finite `gap <= 1` target); the set-based receding worst gap is {robust['worst_terminal_gap']:.9f} ({robust['terminal_capture_violations']} misses). An independent complete finite observation-history dynamic program has worst gap {ref['worst_terminal_gap']:.9f} and optimal first action(s) {ref['optimal_first_actions']}. The set-based receding planner uses open-loop future controls and is not the same controller as that feedback-tree reference. The verifier replays each state, released measurement, estimate, posterior, action, and terminal outcome. A separate missed/delayed sample replay shows that releasing a reading at stage two changes the next action from 0 to 3 in its declared finite fixture.
 
 These are finite catalogue results. They do not reproduce the continuous-action RL training task, certify continuous observation noise, or establish global output-feedback optimality. No timing or speed comparison was made. The source differential-game reachability figure with forward and backward sets is available in the [TwoParticleGame minimax report](https://butahlecoq.github.io/controlled-systems-lab/env717-two-particle-minimax-31bb367020af7a94b1a7/).
 
