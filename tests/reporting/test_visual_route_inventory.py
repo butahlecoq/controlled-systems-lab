@@ -73,6 +73,8 @@ class VisualRouteInventoryTests(unittest.TestCase):
                          "reviewed-static-diagram-exception")
         self.assertEqual(producers["scripts/reports/ext03_transform/report.py"]["disposition"],
                          "composes-or-copies-existing-saved-figure")
+        self.assertEqual(producers["scripts/reports/mpc09/make_report.py"]["disposition"],
+                         "composes-or-copies-existing-saved-figure")
         self.assertEqual(producers["scripts/reports/app02/render_saved.py"]["disposition"],
                          "frozen-renderer-preserved-with-shared-policy-companion")
         self.assertEqual(producers["scripts/reports/app03/render_saved.py"]["disposition"],
@@ -136,6 +138,7 @@ class VisualRouteInventoryTests(unittest.TestCase):
         self.assertTrue(all(entry["follow_up_issue"] in follow_up_counts for entry in deferred))
         routes={entry["route"]:entry for entry in inventory["frozen_published_routes"]}
         self.assertGreater(len(routes),40)
+        self.assertEqual(routes["mpc09-two-particle-output-feedback-v1"]["follow_up_issue"],605)
         hull_4d=routes["exp02-it17-hull-4d-simplex-20261028-r1"]
         self.assertEqual(hull_4d["assets"],["2d-visual-companion.svg", "input-projections.svg"])
         self.assertTrue(hull_4d["index_sha256"])
