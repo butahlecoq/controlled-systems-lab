@@ -16,15 +16,15 @@ body{font:16px/1.5 system-ui,sans-serif;max-width:1100px;margin:2rem auto;paddin
 <table>
 <thead><tr><th>Controller</th><th>Horizon</th><th>Episodes</th><th>Median terminal objective</th><th>Worst terminal objective</th><th>Median solve time / decision</th><th>Fallbacks</th></tr></thead>
 <tbody>
-<tr><td>Nominal, zero disturbance</td><td>Shrinking 4→1</td><td>16</td><td>0.15107</td><td>0.50488</td><td>~0.26 ms</td><td>0</td></tr>
-<tr><td>Nominal, zero disturbance</td><td>Moving 2-stage</td><td>16</td><td>0.23826</td><td>0.50488</td><td>~0.15 ms</td><td>0</td></tr>
-<tr><td>Finite minimax</td><td>Shrinking 4→1</td><td>16</td><td>0.26772</td><td>0.50488</td><td>~1.58 ms</td><td>0</td></tr>
-<tr><td>Finite minimax</td><td>Moving 2-stage</td><td>16</td><td>0.26772</td><td>0.54615</td><td>~0.48 ms</td><td>0</td></tr>
+<tr><td>Nominal, zero disturbance</td><td>Shrinking 4→1</td><td>16</td><td>0.15107</td><td>0.50488</td><td>~0.11 ms</td><td>0</td></tr>
+<tr><td>Nominal, zero disturbance</td><td>Moving 2-stage</td><td>16</td><td>0.23826</td><td>0.50488</td><td>~0.055 ms</td><td>0</td></tr>
+<tr><td>Finite minimax</td><td>Shrinking 4→1</td><td>16</td><td>0.26772</td><td>0.50488</td><td>~0.14 ms</td><td>0</td></tr>
+<tr><td>Finite minimax</td><td>Moving 2-stage</td><td>16</td><td>0.26772</td><td>0.54615</td><td>~0.067 ms</td><td>0</td></tr>
 </tbody>
 </table>
-<p>The pinned source is <a href="https://github.com/imm-rl-lab/optimal_control/blob/f4d76c60f4003f50954174e96eafd8e514bd5441/Environments/MaxCoordinateGame/MaxCoordinateGame.py">MaxCoordinateGame.py</a>. Objective values are the source terminal <code>max(|y|,|z|)</code>. The exact stored per-decision latencies and complete episode rows are in <a href="result.json">result.json</a>. Timings are descriptive for this Python finite enumerator; no performance winner is claimed.</p>
+<p>The upstream repository declares no license; this report re-expresses model equations without copying source code. The pinned source is <a href="https://github.com/imm-rl-lab/optimal_control/blob/f4d76c60f4003f50954174e96eafd8e514bd5441/Environments/MaxCoordinateGame/MaxCoordinateGame.py">MaxCoordinateGame.py</a>. Objective values are the source terminal <code>max(|y|,|z|)</code>. The exact stored per-decision latencies and complete episode rows are in <a href="result.json">result.json</a>. Timings are descriptive for one Release collection; no performance winner is claimed.</p>
 <figure><img src="trajectory.svg" alt="All finite episode trajectories in the y-z phase plane and control/disturbance timeline"><figcaption>Solid trajectories use the shrinking episode horizon; dashed trajectories use the moving two-stage horizon. Colors separate nominal and finite minimax controllers. The lower panel summarizes executed controls over histories and shows the scored endpoint.</figcaption></figure>
-<p>This is a standalone Python reference pilot with exhaustive finite-plan enumeration; it is not yet wired to the C++ <code>finite_action_minimax</code> adapter. The raw record and source hashes preserve this distinction.</p>
+<p>The committed run uses the repository's C++ <code>csl.finite_action_minimax</code> implementation. The Python renderer also has an independent finite-enumeration reference mode. Solve timings are from one collection and are descriptive, with no performance winner claim.</p>
 <h2>Evidence</h2>
 <ul>
 <li>Independent checker replays all 256 state transitions, verifies the complete 16-history catalogue for each of four variants, recomputes each chosen plan value, and checks the original terminal score.</li>

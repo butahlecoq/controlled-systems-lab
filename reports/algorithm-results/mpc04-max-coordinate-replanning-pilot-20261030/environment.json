@@ -1,25 +1,39 @@
 {
-  "schema": "csl.mpc04-runtime/1",
-  "source_commit": "9c146d19bbd1f322e816cdc768b072cfa5ca8b59",
+  "schema": "csl.mpc04-runtime/2",
+  "source_commit": "55818295fc8db7e660fb354d06cbc41c177180ea",
   "source_worktree_dirty": false,
-  "driver_sha256": "ff7b51d9e62c8bf80d2fc0a0a141428f6eff61ce3c5ddc9597bf96109853397e",
+  "driver_sha256": "0f2c84e2d0e2d9df18af8b0b2b1abe729b9d92b6431acf8f0e3c34aff557909d",
+  "report_driver_sha256": "6d330e3ed2bcc4485e4900ece40daa1128027fc9243aaa1dbc7b37d565703fa2",
   "checker_sha256": "62341aa5a7218fe77332b8f30eed476f13c9ef4a237d759ea9bc533f608b7c57",
+  "binary_sha256": "8338790c346fb82adc17b2392cb31f820303333260915a5929066ea7534501ff",
+  "build": {
+    "type": "Release",
+    "compiler": "GNU 16.2.1",
+    "cmake": "3.31.6",
+    "generator": "Ninja",
+    "ninja": "1.13.2",
+    "target": "csl_mpc04_max_coordinate_replanning",
+    "new_dependencies": []
+  },
   "runtime": {
     "os": "Linux-7.2.8-9-omarchy-x86_64-with-glibc2.44",
     "architecture": "x86_64",
     "cpu_model": "AMD Ryzen 5 3550H with Radeon Vega Mobile Gfx",
     "logical_cpus": 8,
-    "python": "3.14.8"
+    "python_renderer": "3.14.8"
   },
+  "algorithm": "C++ csl.finite_action_minimax; four signed linear terminal components combined into max(abs(y),abs(z)) per fixed plan",
   "execution": {
     "workers": 1,
     "warmup_runs": 0,
     "full_collection_runs": 1,
-    "native_threads": "not applicable; Python standard library only",
+    "decision_solves": 256,
+    "warm_start": "none; independent exhaustive plan evaluations",
     "random_seed": "not applicable; deterministic finite catalogues"
   },
-  "timing_scope": "Decision solve time covers finite control-plan enumeration, finite disturbance suffix evaluation and tie selection. Episode setup/replay, JSON serialization and SVG/HTML rendering are excluded.",
+  "timing_scope": "Each per-decision solve interval includes request construction, four finite_action_minimax calls (signed y/z components), plan combination and tie selection. Episode state setup, JSON serialization and SVG/HTML rendering are excluded.",
+  "deadline": "50 ms per decision, checked after the native call returns; the current solver call is not interruptible",
   "limiter_profile": "not collected; no speedup or performance-winner claim",
-  "numeric_method": "binary64 arithmetic; independent source replay uses absolute and relative tolerance 2e-12",
-  "implementation_scope": "standalone Python reference pilot; not yet wired to the C++ finite_action_minimax adapter"
+  "numeric_method": "binary64; independent source replay uses absolute and relative tolerance 2e-12",
+  "scope": "Finite action and disturbance catalogues, four-step episode, complete finite disturbance-history enumeration; not a continuous RL reproduction"
 }
