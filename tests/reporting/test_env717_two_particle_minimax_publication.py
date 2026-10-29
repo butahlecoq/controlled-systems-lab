@@ -68,7 +68,11 @@ class TwoParticleMinimaxPublicationTests(unittest.TestCase):
         page = (destination / "index.html").read_text()
         self.assertIn("particle 1's (x₁,x₂) phase plane", page)
         self.assertIn("particle 2's (x₃,x₄) phase plane", page)
+        self.assertIn("First robust capture of |x₁−x₃| ≤ 1", page)
         self.assertIn("projected graph nodes are points, not convex hulls", page)
+        svg = (destination / "projections.svg").read_text()
+        self.assertGreater(svg.rfind('data-role="terminal-target"'),
+                           svg.rfind('data-role="winning-intersection"'))
         with zipfile.ZipFile(self.site / f"{report_id}.zip") as archive:
             self.assertIsNone(archive.testzip())
             self.assertIn(f"{report_id}/projections.svg", archive.namelist())

@@ -92,9 +92,6 @@ def svg_figure(data) -> str:
         y_label = html.escape(projection["y_label"])
         panels.append(f'<text x="{left + plot_width / 2}" y="34" text-anchor="middle" class="title">{title}</text>')
         panels.append(f'<rect x="{left}" y="{top}" width="{plot_width}" height="{plot_height}" class="frame"/>')
-        for point in projection["target_projection"]:
-            x, y = xy(point)
-            panels.append(f'<circle cx="{x:.2f}" cy="{y:.2f}" r="4.0" class="target"/>')
         for layer in projection["layers"]:
             color = colors[layer["stage"] % len(colors)]
             for point in layer["forward"]:
@@ -102,7 +99,10 @@ def svg_figure(data) -> str:
                 panels.append(f'<circle cx="{x:.2f}" cy="{y:.2f}" r="2.7" fill="{color}" opacity="0.82"/>')
             for point in layer["winning_intersection"]:
                 x, y = xy(point)
-                panels.append(f'<circle cx="{x:.2f}" cy="{y:.2f}" r="4.0" fill="none" stroke="#b92e2e" stroke-width="1.25" opacity="0.9"/>')
+                panels.append(f'<circle cx="{x:.2f}" cy="{y:.2f}" r="4.0" fill="none" stroke="#b92e2e" stroke-width="1.25" opacity="0.9" data-role="winning-intersection"/>')
+        for point in projection["target_projection"]:
+            x, y = xy(point)
+            panels.append(f'<circle cx="{x:.2f}" cy="{y:.2f}" r="5.2" class="target" data-role="terminal-target"/>')
         trajectory = [xy(point) for point in projection["minimax_trajectory"]]
         panels.append('<polyline points="' + " ".join(f"{x:.1f},{y:.1f}" for x, y in trajectory) + '" class="path"/>')
         for index, (x, y) in enumerate(trajectory):
@@ -137,11 +137,11 @@ def make_page(result, check, capture):
 <p>This example applies our finite-feedback reachability and causal minimax solvers to the source-derived two-particle game. The finite game has four physical state coordinates and a short four-stage horizon.</p>
 <figure><img src="projections.svg" alt="Forward graph states, backward-winning intersections, projected terminal target states, and minimax path in particle phase planes x1-x2 and x3-x4"><figcaption>Panels show particle 1's (x₁,x₂) phase plane and particle 2's (x₃,x₄) phase plane. Gold points are projections of full states in the terminal target; projected graph nodes are points, not convex hulls. Stage colors distinguish time layers, and red points are both forward reachable and backward winning.</figcaption></figure>
 <h2>Result</h2><table><tbody><tr><th>Forward graph states by stage</th><td>{html.escape(counts)}</td></tr>
-<tr><th>First robust capture of |x₁−x₂| ≤ 1</th><td>{result['first_robust_capture_steps']} decisions ({result['first_robust_capture_steps'] * 0.2:.1f} s)</td></tr>
+<tr><th>First robust capture of |x₁−x₃| ≤ 1</th><td>{result['first_robust_capture_steps']} decisions ({result['first_robust_capture_steps'] * 0.2:.1f} s)</td></tr>
 <tr><th>Finite causal minimax terminal gap</th><td>{result['finite_causal_minimax_terminal_gap']:.6f}</td></tr>
 <tr><th>Selected minimizing-control / worst-response path</th><td>{html.escape(steps)}</td></tr>
 <tr><th>Independent replay</th><td>{check['status']}: {check['forward_states_checked']} states, {check['transition_cells_checked']} transition cells, {check['backward_layers_checked']} winning layers</td></tr></tbody></table>
-<h2>Source model and adaptation</h2><p>The source environment uses state <code>(t,x₁,v₁,x₂,v₂)</code>, parameters α=1, m₁=0.1, m₂=1, 0.2-second decisions, and 20 held-action RK4 substeps. Its terminal reward is <code>−|x₁−x₂|</code>; accordingly, u minimizes the terminal gap and v maximizes it. This pilot changes the source initial state from all zeros to <code>(0,2,0,0,0)</code>, truncates the 2-second source horizon to 0.8 seconds, and uses action catalogues <code>{html.escape(str(result['adaptation']['action_catalogue']))}</code>.</p>
+<h2>Source model and adaptation</h2><p>The source environment uses state <code>(t,position₁,velocity₁,position₂,velocity₂)</code>, parameters α=1, m₁=0.1, m₂=1, 0.2-second decisions, and 20 held-action RK4 substeps. In the plotted coordinates, <code>(x₁,x₂,x₃,x₄)=(position₁,velocity₁,position₂,velocity₂)</code>, so the terminal target is <code>|x₁−x₃|≤1</code>. The source reward is the negative absolute position gap; accordingly, u minimizes that gap and v maximizes it. This pilot changes the source initial state from all zeros to <code>(0,2,0,0,0)</code>, truncates the 2-second source horizon to 0.8 seconds, and uses action catalogues <code>{html.escape(str(result['adaptation']['action_catalogue']))}</code>.</p>
 <p class="note">The upstream Markov game supplies both agents' actions at a step. Our finite causal solver gives the disturbance player v the stronger within-stage information pattern: v sees u before responding. State values and policies are for this finite, quantized game; they do not reproduce or estimate the continuous-action RL outcome. The graph rounds each RK4 stage state to a 10⁻⁶ lattice and solves only states reachable from the selected initial point.</p>
 <p>Source: <a href="https://github.com/imm-rl-lab/differential_game_gym/tree/af5f0a2ee498c0edcf88d60f1d6c49a39bd08bc8/Environments/TwoParticleGame">TwoParticleGame at pinned commit</a>, source blob <code>{result['source']['file_blob']}</code>, licensed Apache-2.0 at that commit. Scenario SHA-256: <code>{result['scenario_sha256']}</code>.</p>
 <h2>Reproduction and evidence</h2><p>Build the optional report driver with <code>CSL_BUILD_ENV717_REPORT=ON</code>, run <code>csl_env717_two_particle_minimax</code>, and independently check it with <code>python scripts/reports/env717/check_two_particle_minimax.py DRIVER</code>. The raw result, scenario, independent check, figure data, build identity, and checksums are included with the report files.</p>
