@@ -116,7 +116,7 @@ TEST_CASE("admitted inner stage point and verified original trajectory yield its
 
 TEST_CASE("an outer reachable enclosure cannot provide an achievable control witness") {
     const auto problem=scalar_problem();
-    const auto reference=interval("outer-reference",2,4);
+    const auto reference=v_interval("outer-reference");
     const auto outer=interval("outer-enclosure",1,5);
     auto request=query(problem,reference,outer);
     request.direction=SetRelation::outer;
