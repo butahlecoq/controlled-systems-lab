@@ -254,7 +254,12 @@ body{{margin:0;background:#191724;color:#e0def4;font:16px/1.55 system-ui,sans-se
 <table><thead><tr><th>Method</th><th>Measured repetitions</th><th>Method-local summary</th><th>Per-repetition duration</th><th>Exact checker</th></tr></thead><tbody>{''.join(method_rows)}</tbody></table>
 <h3>Attempt details</h3><table><thead><tr><th>Method</th><th>Repetition</th><th>Warmup</th><th>Status</th><th>Duration ns</th><th>Source indices</th><th>Exact checker</th></tr></thead><tbody>{''.join(body_rows)}</tbody></table></section>
 <section><h2>Scope and provenance</h2><p>Single bounded 2D synthetic fixture; this is an initial algorithm-functionality example, not a general correctness or performance claim. Source commit: <code>{html.escape(capture['source_commit'])}</code>. Report: <code>{report_id}</code>.</p>
-<p><a href="comparison-record.json">Paired comparison record</a> · <a href="capture.json">Capture metadata</a> · <a href="trials.csv">Attempt table</a> · <a href="manifest.json">File hashes</a></p></section>
+<p><a href="https://github.com/butahlecoq/controlled-systems-lab/commit/{html.escape(capture['source_commit'])}">Exact source commit</a> · <a href="comparison-record.json">Paired comparison record</a> · <a href="fixture/square.json">Input fixture</a> · <a href="capture.json">Capture metadata</a> · <a href="trials.csv">Attempt table</a> · <a href="manifest.json">File hashes</a></p>
+<h3>Reproduce</h3><pre>python3 -m pip install -r tools/legacy-ports/A29/requirements.txt
+cmake -S . -B build/exp06 -DBUILD_TESTING=OFF -DCMAKE_BUILD_TYPE=Release -DCSL_ENABLE_HIGHS=OFF -DCSL_ENABLE_QHULL=OFF -DCSL_BUILD_EXP06_PILOT=ON
+cmake --build build/exp06 --target csl_exp06_quickhull csl_exp06_pack_comparison --parallel 2
+python3 scripts/reports/exp06/collect.py --quickhull build/exp06/csl_exp06_quickhull --packer build/exp06/csl_exp06_pack_comparison --out reports/algorithm-results/exp06-rerun
+python3 scripts/reports/exp06/render_saved.py --bundle reports/algorithm-results/exp06-rerun</pre></section>
 </main><footer>EXP-06 · geometry algorithm pilot · <a href="https://github.com/butahlecoq/controlled-systems-lab/issues/423">Issue #423</a></footer></body></html>'''
 
 
