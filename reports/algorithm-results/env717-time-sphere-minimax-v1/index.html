@@ -1,0 +1,19 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>TimeOptimalSphereGame minimax report</title>
+<style>body{font:16px/1.55 system-ui,sans-serif;max-width:1120px;margin:2rem auto;padding:0 1.2rem;color:#172033}h1,h2{line-height:1.2}figure{margin:1.2rem 0}svg{width:100%;height:auto;border:1px solid #dbe2ea;border-radius:8px}table{border-collapse:collapse}td,th{border-bottom:1px solid #dbe2ea;padding:.45rem .8rem;text-align:left}code{background:#eef2f7;padding:.1rem .3rem}.note{background:#eff6ff;padding:1rem;border-left:4px solid #2563eb}nav a{margin-right:.8rem}</style></head>
+<body><h1>TimeOptimalSphereGame: finite-catalogue minimax reachability</h1>
+<p>This report replays the source's two-player time-to-target task on a finite action catalogue using CSL's finite-feedback reachability and finite-causal minimax solvers.</p>
+<div class="note"><strong>Scope and information pattern.</strong> The upstream model uses continuous actions u,v ∈ [-1,1] and trains u to minimize elapsed time while v maximizes it; both source policies use the current state without receiving the opponent's current action. This pilot discretizes both actions to {-1,0,1} and uses a sequential-response game: v observes u's action before choosing a disturbance. It runs a finite horizon of 35 decisions at 0.1 s per decision. The value and winning set apply to this adapted information pattern, not the source RL game; this is also not a continuous-action guarantee.</div>
+<figure><object data="reachability.svg" type="image/svg+xml" aria-label="Reachability and minimax trajectory figure"></object><figcaption>Each stage is shown in one position–velocity projection. The disturbance sees the controller's current action. The polygons are convex-hull display envelopes; exact finite nodes and winning intersections are available in the figure-data JSON.</figcaption></figure>
+<h2>Result</h2><table><tbody>
+<tr><th>First horizon where the initial state is robustly winning</th><td>35 decisions (3.50 s)</td></tr>
+<tr><th>Finite-causal minimax worst-case target time</th><td>3.43 s (343 source Euler substeps)</td></tr>
+<tr><th>Reachable states in the final layer</th><td>73317</td></tr>
+<tr><th>Winning positions in the initial layer</th><td>1</td></tr>
+<tr><th>Control and disturbance catalogues</th><td><code>{-1, 0, 1}</code> each</td></tr>
+</tbody></table>
+<p>The plotted worst-case path follows a minimax-optimal u action and, at each stage, a v action attaining the largest remaining minimax value. The discrete winning nodes are exact for this finite model; they do not establish a continuous-state winning boundary.</p>
+<h2>Source and reproduction</h2><p><a href="https://github.com/imm-rl-lab/optimal_control/blob/f4d76c60f4003f50954174e96eafd8e514bd5441/Environments/TimeOptimalSphereGame/TimeOptimalSphereGame.py">Pinned upstream environment source</a>; source repository commit <code>f4d76c60f4003f50954174e96eafd8e514bd5441</code>, file blob <code>fd7709a6f8e4196665d36b4ac5d348173599c250</code>. The repository metadata declares no license, so the report re-expresses the equations and does not redistribute source code.</p>
+<nav><a href="result.json">Result JSON</a><a href="figure-data.json">Figure data</a><a href="capture.json">Capture</a><a href="environment.json">Environment</a><a href="README.md">Reproduction notes</a></nav>
+<p>Solver timing is descriptive for this host and run. It is not a comparison or speedup claim.</p></body></html>

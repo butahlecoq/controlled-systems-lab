@@ -178,6 +178,15 @@
       "follow_up_issue": 717
     },
     {
+      "source": "scripts/reports/env717/check_time_sphere_minimax.py",
+      "signal_count": 3,
+      "asset_name_literals": [
+        "reachability.svg"
+      ],
+      "disposition": "deferred-family-specific-migration",
+      "follow_up_issue": 717
+    },
+    {
       "source": "scripts/reports/env717/check_two_points.py",
       "signal_count": 3,
       "asset_name_literals": [
@@ -904,6 +913,14 @@
     },
     {
       "source": "scripts/reports/stage_env717_time_sphere.py",
+      "signal_count": 3,
+      "asset_name_literals": [
+        "reachability.svg"
+      ],
+      "disposition": "publication-validation-or-frozen-route"
+    },
+    {
+      "source": "scripts/reports/stage_env717_time_sphere_minimax.py",
       "signal_count": 3,
       "asset_name_literals": [
         "reachability.svg"
@@ -1674,6 +1691,16 @@
         "projections.svg"
       ],
       "index_sha256": "2c2306a75dfb0dc5e4a644c9b2af317706ef028a40d644ce62a2fece57b98048",
+      "disposition": "deferred: original frozen route-level readability review remains; companion availability is listed separately",
+      "follow_up_issue": 717
+    },
+    {
+      "route": "env717-time-sphere-minimax-v1",
+      "source_bundle": "env717-time-sphere-minimax-v1",
+      "assets": [
+        "reachability.svg"
+      ],
+      "index_sha256": "dccb526b8e5ceaa9d70cccbe4c18b9f04b1d0d3f547276524e925be628e3ef84",
       "disposition": "deferred: original frozen route-level readability review remains; companion availability is listed separately",
       "follow_up_issue": 717
     },
