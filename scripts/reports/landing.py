@@ -92,6 +92,12 @@ FAMILIES = {
         "finite fixtures and a three-stage TwoPointsOnParallelLines adaptation. The report shows "
         "forward reachable sets, terminal sets, backward-winning intersections, and a replayed "
         "worst-case path in both player phase planes; it makes no continuous RL or performance claim."),
+    "mpc09-output-feedback": Family(
+        r"mpc09-output-feedback-[0-9a-f]{20}", "synthesis", "TwoParticleGame output-feedback MPC",
+        "Compares finite-prior certainty-equivalent and set-based receding minimax controllers on a "
+        "noisy-observation adaptation of the RL differential-game environment. Every listed row is "
+        "independently replayed, and a complete finite observation-history minimax reference is "
+        "included. The result is finite-catalogue evidence, not a continuous-noise or RL reproduction."),
     "exp03-two-points-approx-publication": Family(
         r"exp03-two-points-approx-publication-v[12]", "synthesis",
         "TwoPoints finite-action reachability and approximation report",

@@ -29,6 +29,7 @@ COMPOSED_SAVED_ROUTES = {
     "scripts/reports/stage_mpc03_b08.py",
     "scripts/reports/mpc05/make_report.py",
     "scripts/reports/mpc05/reference.py",
+    "scripts/reports/mpc09/make_report.py",
     "scripts/reports/visual_example_fuel_layers.py",
 }
 FROZEN_DIAGRAM_EXCEPTIONS = {
@@ -110,6 +111,7 @@ FROZEN_ROUTE_FOLLOW_UP_ISSUES = {
     # This report's phase-plane figure is owned and reviewed with MPC-05.
     "mpc05-causal-tree-pilot-v1": 601,
     "mpc05-causal-tree-pilot-v2": 601,
+    "mpc09-two-particle-output-feedback-v1": 605,
     # The paired synthesis profile is a control-family report and its current
     # readability follow-up belongs to the active control/witness migration.
     "exp02-paired-profiles-20261027-r1": 686,
@@ -119,6 +121,8 @@ FROZEN_ROUTE_FOLLOW_UP_ISSUES = {
 
 
 def migration_issue(source: str) -> int:
+    if "/mpc09/" in source or source == "scripts/reports/stage_mpc09_output_feedback.py":
+        return 605
     if "/mpc01/" in source:
         return MIGRATION_ISSUES["control-strategy-and-witness"]
     if "/mpc06/" in source:
