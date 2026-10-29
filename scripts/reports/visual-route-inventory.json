@@ -288,6 +288,15 @@
       "disposition": "composes-or-copies-existing-saved-figure"
     },
     {
+      "source": "scripts/reports/ext04/h_policy_report.py",
+      "signal_count": 6,
+      "asset_name_literals": [
+        "h-domain-2d.png",
+        "h-domain-2d.svg"
+      ],
+      "disposition": "composes-or-copies-existing-saved-figure"
+    },
+    {
       "source": "scripts/reports/ext04/render_saved.py",
       "signal_count": 3,
       "asset_name_literals": [
@@ -960,6 +969,15 @@
       "signal_count": 2,
       "asset_name_literals": [
         "example-2d.svg"
+      ],
+      "disposition": "publication-validation-or-frozen-route"
+    },
+    {
+      "source": "scripts/reports/stage_ext04_h_policy.py",
+      "signal_count": 3,
+      "asset_name_literals": [
+        "h-domain-2d.png",
+        "h-domain-2d.svg"
       ],
       "disposition": "publication-validation-or-frozen-route"
     },
@@ -1961,6 +1979,17 @@
         "performance.svg"
       ],
       "index_sha256": "0a33bf830a2e4abe77a4b6f2fede1d29bb25836778e30222cb297afeff621ae3",
+      "disposition": "deferred: original frozen route-level readability review remains; companion availability is listed separately",
+      "follow_up_issue": 669
+    },
+    {
+      "route": "ext04-h-policy-0c0a95116ce4642b",
+      "source_bundle": "ext04-h-policy-0c0a95116ce4642b",
+      "assets": [
+        "h-domain-2d.png",
+        "h-domain-2d.svg"
+      ],
+      "index_sha256": "d02a7ca7455f433f397406ca19d795e60417a6ac1cec854a1a83bee7f9724428",
       "disposition": "deferred: original frozen route-level readability review remains; companion availability is listed separately",
       "follow_up_issue": 669
     },

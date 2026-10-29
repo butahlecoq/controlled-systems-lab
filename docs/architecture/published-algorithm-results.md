@@ -43,6 +43,25 @@ remain pending. The earlier unregistered draft bundle
 is retained as historical evidence and is superseded by this bundle, which
 records each batch's actual generator outcomes and full measurement metadata.
 
+The joint H-domain policy evaluator bundle
+[`ext04-h-policy-0c0a95116ce4642b`](../../reports/algorithm-results/ext04-h-policy-0c0a95116ce4642b/)
+uses source commit `0c0a95116ce4642bd560d8f285b244e104aaa266`. Its analytic
+one-step scalar fixture keeps the initial state and observation error coupled
+by `e=0.1x0`, applies `u=-(x0+e)`, and checks six state/action support bounds
+against their exact values. One excluded 100-call warmup and seven measured
+100-call batches passed with no failures. Median batch duration was 76,114,922
+ns (range 75,911,542–76,776,185 ns), or 761,149 ns per call at the median.
+Each call performs one H-domain feasibility solve and six dual support LP solves;
+the interval includes those calls and literal correlation, dual-residual,
+support-bound and status checks. Fixture setup and JSON serialization are
+excluded. The clean Release build used GCC 16.2.1, CMake 3.31.6, Ninja 1.12.1,
+and HiGHS 1.11.0 on an 8-logical-CPU Ryzen 5 3550H host. The load average was
+3.89/2.91/4.01 after the build; `perf` was unavailable, so a source-mapped
+limiter was not measured. These are descriptive numerical observations for
+one authored H-set and one LP adapter, not a speedup, universal uncertainty
+guarantee, validated-arithmetic result, or policy-synthesis claim. Main-only
+Pages publication and live URL/hash verification remain pending.
+
 The saved [affine-synthesis bundle](../../reports/algorithm-results/ext04-affine-synthesis-7eadf7c7ecbb2bbd/)
 uses source commit `7eadf7c7ecbb2bbdc28683ebcdfc31849f01c133`. It synthesizes
 one affine action from a pre-decision noisy observation for one two-state,

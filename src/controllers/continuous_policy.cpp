@@ -1,5 +1,6 @@
 #include <csl/controllers/continuous_policy.hpp>
 #include <csl/optimization/linear_program.hpp>
+#include <csl/optimization/lp_backend.hpp>
 
 #include <algorithm>
 #include <chrono>
@@ -87,6 +88,133 @@ bool valid_safety(const LinearSafetyConstraints& safety, std::size_t dimension) 
         safety.inequalities.rows == safety.upper_bounds.size() && finite(safety.upper_bounds);
 }
 
+std::variant<LinearProgram, Diagnostic> h_domain_program(
+        const sets::HRepresentation& domain, std::size_t dimension,
+        Vector objective, double offset, ProgramIdentity identity) {
+    const auto inequality_count = domain.inequalities.rows();
+    const auto equality_count = domain.equalities.rows();
+    const auto row_count = equality_count > std::numeric_limits<std::size_t>::max() - inequality_count
+        ? std::optional<std::size_t>{}
+        : std::optional<std::size_t>{inequality_count + equality_count};
+    if (!row_count || domain.inequalities.cols() != dimension ||
+        domain.upper_bounds.size() != inequality_count ||
+        domain.equalities.cols() != dimension ||
+        domain.equality_values.size() != equality_count ||
+        objective.size() != dimension || !finite(objective) || !std::isfinite(offset))
+        return invalid("controllers.joint_h.domain", "H-domain matrix, bounds, or objective dimensions are inconsistent.");
+
+    SparseMatrix constraints{*row_count, dimension, {0}, {}, {}};
+    std::vector<Interval> rows;
+    rows.reserve(*row_count);
+    const auto append_row = [&](const numeric::MatrixView& matrix, std::size_t source_row) {
+        for (std::size_t column = 0; column < dimension; ++column) {
+            const auto value = matrix(source_row, column);
+            if (value != 0.0) {
+                constraints.column_indices.push_back(column);
+                constraints.values.push_back(value);
+            }
+        }
+        constraints.row_offsets.push_back(constraints.values.size());
+    };
+    for (std::size_t row = 0; row < inequality_count; ++row) {
+        append_row(domain.inequalities, row);
+        rows.push_back({std::nullopt, domain.upper_bounds[row]});
+    }
+    for (std::size_t row = 0; row < equality_count; ++row) {
+        append_row(domain.equalities, row);
+        rows.push_back({domain.equality_values[row], domain.equality_values[row]});
+    }
+    std::vector<Interval> variables(dimension, {std::nullopt, std::nullopt});
+    auto result = optimization::make_linear_program({std::move(identity), std::move(objective),
+        offset, std::move(constraints), std::move(variables), std::move(rows)});
+    if (const auto* errors = std::get_if<Diagnostics>(&result))
+        return errors->empty()
+            ? invalid("controllers.joint_h.domain", "Could not construct an LP for the H-domain.")
+            : errors->front();
+    return std::get<LinearProgram>(std::move(result));
+}
+
+std::variant<LinearProgram, Diagnostic> h_dual_support_program(
+        const sets::HRepresentation& domain, std::size_t dimension,
+        std::span<const double> activity_coefficients, double activity_offset,
+        ProgramIdentity identity) {
+    const auto inequality_count = domain.inequalities.rows();
+    const auto equality_count = domain.equalities.rows();
+    const auto variable_count = equality_count > std::numeric_limits<std::size_t>::max() - inequality_count
+        ? std::optional<std::size_t>{}
+        : std::optional<std::size_t>{inequality_count + equality_count};
+    if (!variable_count || domain.inequalities.cols() != dimension ||
+        domain.upper_bounds.size() != inequality_count ||
+        domain.equalities.cols() != dimension ||
+        domain.equality_values.size() != equality_count ||
+        activity_coefficients.size() != dimension || !finite(activity_coefficients) ||
+        !std::isfinite(activity_offset))
+        return invalid("controllers.joint_h.dual", "H-domain matrices, support direction, or bounds are inconsistent.");
+
+    Vector objective;
+    objective.reserve(*variable_count);
+    for (std::size_t row = 0; row < inequality_count; ++row)
+        objective.push_back(domain.upper_bounds[row]);
+    for (std::size_t row = 0; row < equality_count; ++row)
+        objective.push_back(domain.equality_values[row]);
+
+    SparseMatrix constraints{dimension, *variable_count, {0}, {}, {}};
+    std::vector<Interval> rows;
+    rows.reserve(dimension);
+    for (std::size_t coordinate = 0; coordinate < dimension; ++coordinate) {
+        for (std::size_t inequality = 0; inequality < inequality_count; ++inequality) {
+            const auto value = domain.inequalities(inequality, coordinate);
+            if (value != 0.0) {
+                constraints.column_indices.push_back(inequality);
+                constraints.values.push_back(value);
+            }
+        }
+        for (std::size_t equality = 0; equality < equality_count; ++equality) {
+            const auto value = domain.equalities(equality, coordinate);
+            if (value != 0.0) {
+                constraints.column_indices.push_back(inequality_count + equality);
+                constraints.values.push_back(value);
+            }
+        }
+        constraints.row_offsets.push_back(constraints.values.size());
+        rows.push_back({activity_coefficients[coordinate], activity_coefficients[coordinate]});
+    }
+    std::vector<Interval> variables(inequality_count, {0.0, std::nullopt});
+    variables.insert(variables.end(), equality_count, {std::nullopt, std::nullopt});
+    auto result = optimization::make_linear_program({std::move(identity), std::move(objective),
+        activity_offset, std::move(constraints), std::move(variables), std::move(rows)});
+    if (const auto* errors = std::get_if<Diagnostics>(&result))
+        return errors->empty()
+            ? invalid("controllers.joint_h.dual", "Could not construct the H-domain dual support LP.")
+            : errors->front();
+    return std::get<LinearProgram>(std::move(result));
+}
+
+ProgramIdentity subprogram_identity(const ProgramIdentity& base, std::string suffix) {
+    return {{base.problem.value + ".joint-h"}, {base.program.value + "." + std::move(suffix)}};
+}
+
+double safety_activity(const LinearSafetyConstraints& safety, std::size_t row,
+        std::span<const double> point) {
+    double activity = 0.0;
+    for (std::size_t column = 0; column < safety.inequalities.cols; ++column)
+        activity += safety.inequalities.values[row * safety.inequalities.cols + column] * point[column];
+    return activity;
+}
+
+struct PolicySafetyRow {
+    SafetyFamily family;
+    std::size_t stage;
+    std::size_t row;
+    const LinearSafetyConstraints* safety;
+};
+
+double row_activity(const PolicySafetyRow& row, const ReplayRecord& trajectory) {
+    if (row.family == SafetyFamily::state)
+        return safety_activity(*row.safety, row.row, trajectory.states[row.stage]);
+    return safety_activity(*row.safety, row.row, trajectory.decisions[row.stage].action);
+}
+
 struct SynthesisInequality {
     Vector coefficients;
     double upper_bound;
@@ -100,6 +228,89 @@ std::optional<std::size_t> checked_add(std::size_t left, std::size_t right) {
 std::optional<std::size_t> checked_multiply(std::size_t left, std::size_t right) {
     if (left != 0 && right > std::numeric_limits<std::size_t>::max() / left) return std::nullopt;
     return left * right;
+}
+
+std::optional<std::size_t> h_program_storage_bytes(std::size_t rows, std::size_t columns) {
+    const auto nonzeros = checked_multiply(rows, columns);
+    const auto offsets = checked_add(rows, 1);
+    const auto offset_bytes = offsets ? checked_multiply(*offsets, sizeof(std::size_t)) : std::nullopt;
+    const auto entry_bytes = nonzeros
+        ? checked_multiply(*nonzeros, sizeof(std::size_t) + sizeof(double)) : std::nullopt;
+    const auto row_bytes = checked_multiply(rows, sizeof(Interval));
+    const auto column_bytes = checked_multiply(columns, sizeof(Interval) + sizeof(double));
+    if (!offset_bytes || !entry_bytes || !row_bytes || !column_bytes) return std::nullopt;
+    std::size_t total = 0;
+    for (const auto bytes : {*offset_bytes, *entry_bytes, *row_bytes, *column_bytes}) {
+        const auto next = checked_add(total, bytes);
+        if (!next) return std::nullopt;
+        total = *next;
+    }
+    return total;
+}
+
+std::optional<std::size_t> replay_record_storage_bytes(
+        const model::LinearSystem& system, std::size_t joint_dimension) {
+    const auto dimensions = system.dimensions();
+    const auto horizon = system.horizon();
+    const auto stages_with_terminal = checked_add(horizon, 1);
+    if (!stages_with_terminal) return std::nullopt;
+
+    std::size_t observation_samples = 0;
+    std::size_t observation_values = 0;
+    for (std::size_t channel = 0; channel < system.channel_count(); ++channel) {
+        const auto count_result = system.sample_count({channel});
+        if (std::holds_alternative<Diagnostic>(count_result)) return std::nullopt;
+        const auto count = std::get<std::size_t>(count_result);
+        const auto next_samples = checked_add(observation_samples, count);
+        if (!next_samples) return std::nullopt;
+        observation_samples = *next_samples;
+        for (std::size_t sample = 0; sample < count; ++sample) {
+            const auto observation = system.observation({channel}, {sample});
+            if (std::holds_alternative<Diagnostic>(observation)) return std::nullopt;
+            const auto values = std::get<model::ObservationRecord>(observation).maps.state_map.rows();
+            const auto next_values = checked_add(observation_values, values);
+            if (!next_values) return std::nullopt;
+            observation_values = *next_values;
+        }
+    }
+
+    // A released observation may be retained once in the replay and again in
+    // each decision's complete released history.
+    const auto history_records = checked_multiply(horizon, observation_samples);
+    const auto retained_observations = history_records
+        ? checked_add(observation_samples, *history_records) : std::nullopt;
+    const auto observation_value_records = checked_multiply(*stages_with_terminal, observation_values);
+    const auto state_values = checked_multiply(*stages_with_terminal, dimensions.state);
+    const auto decision_values_per_stage = checked_add(dimensions.state, dimensions.control);
+    const auto decision_values = decision_values_per_stage
+        ? checked_multiply(horizon, *decision_values_per_stage) : std::nullopt;
+    if (!retained_observations || !observation_value_records || !state_values || !decision_values)
+        return std::nullopt;
+
+    std::size_t scalar_count = joint_dimension;
+    for (const auto count : {*state_values, *decision_values, *observation_value_records}) {
+        const auto next = checked_add(scalar_count, count);
+        if (!next) return std::nullopt;
+        scalar_count = *next;
+    }
+    const auto scalar_bytes = checked_multiply(scalar_count, sizeof(double));
+    const auto state_headers = checked_multiply(*stages_with_terminal, sizeof(Vector));
+    const auto decision_headers = checked_multiply(horizon, sizeof(DecisionEvidence));
+    const auto observation_headers = checked_multiply(*retained_observations, sizeof(ReleasedObservation));
+    const auto external_headers = checked_multiply(horizon, sizeof(Vector));
+    const auto channel_headers = checked_multiply(system.channel_count(), sizeof(std::vector<Vector>));
+    const auto error_headers = checked_multiply(observation_samples, sizeof(Vector));
+    if (!scalar_bytes || !state_headers || !decision_headers || !observation_headers ||
+        !external_headers || !channel_headers || !error_headers) return std::nullopt;
+
+    std::size_t total = sizeof(ReplayRecord);
+    for (const auto bytes : {*scalar_bytes, *state_headers, *decision_headers,
+            *observation_headers, *external_headers, *channel_headers, *error_headers}) {
+        const auto next = checked_add(total, bytes);
+        if (!next) return std::nullopt;
+        total = *next;
+    }
+    return total;
 }
 
 Diagnostic unsupported(std::string field, std::string message) {
@@ -203,6 +414,26 @@ JointVUncertaintyResult make_joint_v_uncertainty(const model::LinearSystem& syst
                 "Every joint generator must be finite and match the complete initial/input/error coordinate dimension.");
     }
     return JointVUncertainty{std::move(joint_generators), std::move(layout)};
+}
+
+JointHUncertaintyResult make_joint_h_uncertainty(const model::LinearSystem& system,
+        sets::SetData joint_domain) {
+    auto layout_result = joint_layout_for(system);
+    if (const auto* error = std::get_if<Diagnostic>(&layout_result)) return *error;
+    auto layout = std::get<JointUncertaintyLayout>(std::move(layout_result));
+    const auto metadata = joint_domain.metadata();
+    if (!metadata || metadata->set.dimension != layout.total_dimension)
+        return invalid("controllers.joint_h.dimension", "H-domain ambient dimension must match the complete joint uncertainty coordinates.");
+    const auto representation = joint_domain.representation();
+    const auto* h = std::get_if<sets::HRepresentation>(&representation);
+    if (!h)
+        return invalid("controllers.joint_h.representation", "Joint H uncertainty requires an inequality/equality H-representation.");
+    if (h->inequalities.cols() != layout.total_dimension ||
+        h->equalities.cols() != layout.total_dimension ||
+        h->upper_bounds.size() != h->inequalities.rows() ||
+        h->equality_values.size() != h->equalities.rows())
+        return invalid("controllers.joint_h.shape", "H-domain matrices and bounds do not match its ambient dimension.");
+    return JointHUncertainty{std::move(joint_domain), std::move(layout)};
 }
 
 AffineObservationPolicyResult make_affine_observation_policy(const model::LinearSystem& system,
@@ -367,6 +598,378 @@ ContinuousPolicyResult evaluate_continuous_policy(const model::LinearSystem& sys
     }
     if (evidence.feasibility != NumericalFeasibility::violation_found && near_boundary)
         evidence.feasibility = NumericalFeasibility::inconclusive;
+    return evidence;
+}
+
+HContinuousPolicyResult evaluate_h_continuous_policy(const model::LinearSystem& system,
+        const HContinuousPolicyRequest& request, LPWorkspace& lp,
+        const ExecutionContext& context) {
+    if (const auto stopped = stop_requested(context)) return *stopped;
+    if (request.program_namespace.problem.value.empty() || request.program_namespace.program.value.empty())
+        return invalid("controllers.policy_h.program_identity", "H support LPs require a nonempty caller-supplied program namespace.");
+    if (!std::isfinite(request.feasibility_tolerance) || request.feasibility_tolerance < 0.0 ||
+        !std::isfinite(context.numerical.absolute_tolerance) || context.numerical.absolute_tolerance < 0.0 ||
+        !std::isfinite(context.numerical.relative_tolerance) || context.numerical.relative_tolerance < 0.0)
+        return invalid("controllers.policy_h.tolerance", "Feasibility and LP tolerances must be finite and nonnegative.");
+    const auto dimensions = system.dimensions();
+    const auto horizon = system.horizon();
+    const auto expected_layout = joint_layout_for(system);
+    if (const auto* error = std::get_if<Diagnostic>(&expected_layout)) return *error;
+    if (!same_layout(request.domain.layout(), std::get<JointUncertaintyLayout>(expected_layout)) ||
+        request.policy.stages().size() != horizon)
+        return invalid("controllers.policy_h.domain", "H-domain and policy must match the system layout and horizon.");
+    if ((!request.state_safety.empty() && request.state_safety.size() != horizon + 1) ||
+        (!request.action_safety.empty() && request.action_safety.size() != horizon))
+        return invalid("controllers.policy_h.safety", "State safety needs T+1 entries and action safety needs T entries.");
+    for (const auto& safety : request.state_safety)
+        if (!valid_safety(safety, dimensions.state))
+            return invalid("controllers.policy_h.state_safety", "State safety rows must be finite and match the state dimension.");
+    for (const auto& safety : request.action_safety)
+        if (!valid_safety(safety, dimensions.control))
+            return invalid("controllers.policy_h.action_safety", "Action safety rows must be finite and match the control dimension.");
+
+    const auto representation = request.domain.set().representation();
+    const auto* h = std::get_if<sets::HRepresentation>(&representation);
+    if (!h) return invalid("controllers.policy_h.representation", "The joint uncertainty handle is no longer H-represented.");
+    const auto joint_dimension = request.domain.layout().total_dimension;
+    const auto domain_rows = checked_add(h->inequalities.rows(), h->equalities.rows());
+    const auto h_program_bytes = domain_rows ? h_program_storage_bytes(*domain_rows, joint_dimension) : std::nullopt;
+    const auto h_dual_bytes = domain_rows ? h_program_storage_bytes(joint_dimension, *domain_rows) : std::nullopt;
+    if (!h_program_bytes || !h_dual_bytes)
+        return unsupported("controllers.policy_h.dimensions", "H-domain LP storage extent overflowed.");
+    std::size_t safety_row_count = 0;
+    for (const auto& safety : request.state_safety) {
+        const auto next = checked_add(safety_row_count, safety.inequalities.rows);
+        if (!next) return unsupported("controllers.policy_h.dimensions", "H safety row count overflowed.");
+        safety_row_count = *next;
+    }
+    for (const auto& safety : request.action_safety) {
+        const auto next = checked_add(safety_row_count, safety.inequalities.rows);
+        if (!next) return unsupported("controllers.policy_h.dimensions", "H safety row count overflowed.");
+        safety_row_count = *next;
+    }
+    const auto coefficient_count = checked_multiply(safety_row_count, joint_dimension);
+    const auto coefficient_bytes = coefficient_count
+        ? checked_multiply(*coefficient_count, sizeof(double)) : std::nullopt;
+    // Retained evidence can contain one dual primal (domain_rows values), one
+    // counterexample primal and coordinate vector (joint_dimension each), and
+    // a complete replay per safety row. Count these outputs as well as the
+    // generated coefficient/query buffers before the first solve.
+    const auto row_evidence_bytes = checked_multiply(safety_row_count,
+        sizeof(double) + sizeof(PolicySafetyRow) + sizeof(Vector) + sizeof(HPolicyConstraintEvidence));
+    const auto evidence_container_bytes = checked_add(sizeof(HContinuousPolicyEvidence),
+        sizeof(std::vector<PolicySafetyRow>) + sizeof(std::vector<Vector>) +
+        sizeof(std::vector<HPolicyConstraintEvidence>));
+    const auto dual_solution_cells = checked_multiply(safety_row_count, *domain_rows);
+    const auto counterexample_cells_per_row = checked_multiply(joint_dimension, 2);
+    const auto counterexample_solution_cells = counterexample_cells_per_row
+        ? checked_multiply(safety_row_count, *counterexample_cells_per_row) : std::nullopt;
+    const auto domain_solution_cells = checked_multiply(joint_dimension, 2);
+    const auto total_evidence_cells = dual_solution_cells && counterexample_solution_cells && domain_solution_cells
+        ? checked_add(*dual_solution_cells, *counterexample_solution_cells) : std::nullopt;
+    const auto all_solution_cells = total_evidence_cells && domain_solution_cells
+        ? checked_add(*total_evidence_cells, *domain_solution_cells) : std::nullopt;
+    const auto retained_solution_bytes = all_solution_cells
+        ? checked_multiply(*all_solution_cells, sizeof(double)) : std::nullopt;
+    const auto replay_record_bytes = replay_record_storage_bytes(system, joint_dimension);
+    const auto replay_count = checked_add(safety_row_count, 1);
+    const auto retained_replay_bytes = replay_record_bytes && replay_count
+        ? checked_multiply(*replay_record_bytes, *replay_count) : std::nullopt;
+    const auto row_suffix_bytes = checked_add(std::string("action-stage-").size(),
+        std::string("-row-").size() + std::to_string(horizon).size() +
+        std::to_string(safety_row_count).size() + std::string("-primal").size());
+    const auto largest_suffix_bytes = row_suffix_bytes
+        ? std::max(*row_suffix_bytes, std::string("domain-feasibility").size()) : std::size_t{};
+    const auto generated_problem_id_bytes = checked_add(request.program_namespace.problem.value.size(),
+        std::string(".joint-h").size());
+    const auto program_prefix_bytes = checked_add(request.program_namespace.program.value.size(), 1);
+    const auto generated_program_id_bytes = program_prefix_bytes
+        ? checked_add(*program_prefix_bytes, largest_suffix_bytes) : std::nullopt;
+    const auto program_identity_bytes = generated_problem_id_bytes && generated_program_id_bytes
+        ? checked_add(*generated_problem_id_bytes, *generated_program_id_bytes) : std::nullopt;
+    const auto support_result_count = checked_multiply(safety_row_count, 2);
+    const auto result_count = support_result_count
+        ? checked_add(*support_result_count, 1) : std::nullopt;
+    // A retained solve result may contain its outcome identity, lower/upper
+    // objective-bound subjects, backend primal/dual residual subjects, and an
+    // independently evaluated primal-check subject. Add the largest fixed
+    // local verifier tags for those residual contexts as well.
+    const auto identity_copies_per_result = checked_multiply(program_identity_bytes.value_or(0), 6);
+    const auto largest_local_verifier_bytes = std::max({
+        std::string("csl.controllers.joint-h-primal").size(),
+        std::string("csl.controllers.joint-h-dual-primal").size(),
+        std::string("csl.controllers.joint-h-primal-support").size()}) + 1;
+    const auto local_verifier_bytes = checked_multiply(largest_local_verifier_bytes, 3);
+    const auto retained_metadata_per_result = identity_copies_per_result && local_verifier_bytes
+        ? checked_add(*identity_copies_per_result, *local_verifier_bytes) : std::nullopt;
+    const auto retained_result_metadata = result_count && retained_metadata_per_result
+        ? checked_multiply(*result_count, *retained_metadata_per_result) : std::nullopt;
+    const auto retained_identity_bytes = retained_result_metadata && program_identity_bytes
+        ? checked_add(*retained_result_metadata, *program_identity_bytes) : std::nullopt;
+    const auto evidence_bytes = row_evidence_bytes && evidence_container_bytes
+        ? checked_add(*row_evidence_bytes, *evidence_container_bytes) : std::nullopt;
+    const auto evidence_and_solutions_bytes = evidence_bytes && retained_solution_bytes
+        ? checked_add(*evidence_bytes, *retained_solution_bytes) : std::nullopt;
+    const auto row_working_bytes = coefficient_bytes && evidence_and_solutions_bytes
+        ? checked_add(*coefficient_bytes, *evidence_and_solutions_bytes) : std::nullopt;
+    const auto row_and_replay_bytes = row_working_bytes && retained_replay_bytes
+        ? checked_add(*row_working_bytes, *retained_replay_bytes) : std::nullopt;
+    const auto result_and_replay_bytes = row_and_replay_bytes && retained_identity_bytes
+        ? checked_add(*row_and_replay_bytes, *retained_identity_bytes) : std::nullopt;
+    const auto largest_query_bytes = std::max(*h_program_bytes, *h_dual_bytes);
+    const auto total_working_bytes = result_and_replay_bytes
+        ? checked_add(*result_and_replay_bytes, largest_query_bytes) : std::nullopt;
+    if (!coefficient_count || !coefficient_bytes || !row_evidence_bytes ||
+        !dual_solution_cells || !counterexample_solution_cells || !domain_solution_cells ||
+        !all_solution_cells || !evidence_container_bytes || !evidence_and_solutions_bytes ||
+        !retained_solution_bytes || !replay_record_bytes ||
+        !replay_count || !retained_replay_bytes || !row_suffix_bytes ||
+        !generated_problem_id_bytes || !program_prefix_bytes || !generated_program_id_bytes ||
+        !program_identity_bytes || !support_result_count || !result_count ||
+        !identity_copies_per_result || !local_verifier_bytes ||
+        !retained_metadata_per_result || !retained_result_metadata ||
+        !retained_identity_bytes || !evidence_bytes || !row_working_bytes ||
+        !row_and_replay_bytes || !result_and_replay_bytes || !total_working_bytes)
+        return unsupported("controllers.policy_h.dimensions", "H support working storage extent overflowed.");
+    if (context.resources && context.resources->memory_bytes &&
+        *total_working_bytes > *context.resources->memory_bytes)
+        return OperationStopped{StopReason::resource_limit, "H support working data exceed the declared memory budget."};
+    auto feasibility_program = h_domain_program(*h, joint_dimension,
+        Vector(joint_dimension, 0.0), 0.0,
+        subprogram_identity(request.program_namespace, "domain-feasibility"));
+    if (const auto* error = std::get_if<Diagnostic>(&feasibility_program)) return *error;
+
+    HContinuousPolicyEvidence evidence;
+    evidence.feasibility_tolerance = request.feasibility_tolerance;
+    const auto feasible_outcome = lp.solve(std::get<LinearProgram>(feasibility_program), context);
+    if (const auto* unsupported_result = std::get_if<Unsupported>(&feasible_outcome)) {
+        const auto message = unsupported_result->diagnostics.empty()
+            ? "The selected LP provider does not support H-domain feasibility."
+            : unsupported_result->diagnostics.front().explanation;
+        return unsupported("controllers.policy_h.lp", message);
+    }
+    const auto& feasible_solve = std::get<ProgramResult>(feasible_outcome);
+    const auto& feasible_lp = std::get<LinearProgram>(feasibility_program);
+    if (const auto errors = optimization::check_program_result(feasible_solve, feasible_lp, Assurance::numerical);
+        !errors.empty()) return errors.front();
+    if (feasible_solve.termination == Termination::cancelled)
+        return OperationStopped{StopReason::cancelled, feasible_solve.raw_diagnostics};
+    if (feasible_solve.termination == Termination::deadline_expired)
+        return OperationStopped{StopReason::deadline_expired, feasible_solve.raw_diagnostics};
+    if (feasible_solve.termination == Termination::resource_limit)
+        return OperationStopped{StopReason::resource_limit, feasible_solve.raw_diagnostics};
+    if (feasible_solve.termination == Termination::numerical_failure)
+        return OperationStopped{StopReason::numerical_failure, feasible_solve.raw_diagnostics};
+    evidence.domain_feasibility_solve = feasible_solve;
+    if (feasible_solve.termination != Termination::completed ||
+        feasible_solve.outcome.value != MathematicalOutcome::optimal || !feasible_solve.primal) {
+        evidence.feasibility = NumericalFeasibility::inconclusive;
+        return evidence;
+    }
+    const auto feasible_check = optimization::evaluate_primal(feasible_lp, *feasible_solve.primal,
+        context.numerical, { {"csl.controllers.joint-h-primal"}, "1" });
+    if (const auto* errors = std::get_if<Diagnostics>(&feasible_check)) return errors->front();
+    const auto& feasibility_residual = std::get<optimization::PrimalEvaluation>(feasible_check).residuals;
+    evidence.domain_primal_check = feasibility_residual;
+    const auto feasible_tolerance = context.numerical.absolute_tolerance +
+        context.numerical.relative_tolerance * std::max(feasibility_residual.rows.scale,
+            feasibility_residual.variables.scale);
+    if (feasibility_residual.rows.violation > feasible_tolerance ||
+        feasibility_residual.variables.violation > feasible_tolerance) {
+        evidence.feasibility = NumericalFeasibility::inconclusive;
+        return evidence;
+    }
+    feasibility_program = invalid("controllers.policy_h.released_program",
+        "The domain-feasibility LP has been released after its witness check.");
+
+    const auto policy = request.policy;
+    const Estimator estimator = [&policy](StageIndex stage, std::span<const ReleasedObservation> history) {
+        const auto* rule = rule_for(policy, stage);
+        if (!rule) return Vector{};
+        const auto values = history_values(*rule, history);
+        if (!values) return Vector{};
+        auto estimate = multiply(rule->estimate_from_history, *values);
+        for (std::size_t i = 0; i < estimate.size(); ++i) estimate[i] += rule->estimate_offset[i];
+        return estimate;
+    };
+    const Controller controller = [&policy](StageIndex stage,
+            std::span<const ReleasedObservation> history, std::span<const double> estimate) {
+        const auto* rule = rule_for(policy, stage);
+        if (!rule) return Vector{};
+        const auto values = history_values(*rule, history);
+        if (!values) return Vector{};
+        auto action = multiply(rule->action_from_history, *values);
+        const auto estimate_part = multiply(rule->action_from_estimate, estimate);
+        for (std::size_t i = 0; i < action.size(); ++i)
+            action[i] += estimate_part[i] + rule->action_offset[i];
+        return action;
+    };
+    const auto replay = [&](const Vector& point) -> std::variant<ReplayRecord, Diagnostic, OperationStopped> {
+        auto result = replay_observed_policy(system,
+            replay_inputs(request.domain.layout(), point), estimator, controller);
+        if (auto* record = std::get_if<ReplayRecord>(&result)) return std::move(*record);
+        if (auto* diagnostic = std::get_if<Diagnostic>(&result)) return *diagnostic;
+        return std::get<OperationStopped>(std::move(result));
+    };
+    evidence.domain_witness = *feasible_solve.primal;
+    auto witness_trajectory = replay(*evidence.domain_witness);
+    if (const auto* error = std::get_if<Diagnostic>(&witness_trajectory)) return *error;
+    if (const auto* stopped = std::get_if<OperationStopped>(&witness_trajectory)) return *stopped;
+    evidence.domain_witness_trajectory = std::get<ReplayRecord>(std::move(witness_trajectory));
+
+    std::vector<PolicySafetyRow> rows;
+    rows.reserve(safety_row_count);
+    for (std::size_t stage = 0; stage < request.state_safety.size(); ++stage)
+        for (std::size_t row = 0; row < request.state_safety[stage].inequalities.rows; ++row)
+            rows.push_back({SafetyFamily::state, stage, row, &request.state_safety[stage]});
+    for (std::size_t stage = 0; stage < request.action_safety.size(); ++stage)
+        for (std::size_t row = 0; row < request.action_safety[stage].inequalities.rows; ++row)
+            rows.push_back({SafetyFamily::action, stage, row, &request.action_safety[stage]});
+
+    std::vector<double> offsets(rows.size());
+    std::vector<Vector> coefficients(rows.size(), Vector(joint_dimension, 0.0));
+    if (!rows.empty()) {
+        {
+            if (const auto stopped = stop_requested(context)) return *stopped;
+            auto at_zero = replay(Vector(joint_dimension, 0.0));
+            if (const auto* error = std::get_if<Diagnostic>(&at_zero)) return *error;
+            if (const auto* stopped = std::get_if<OperationStopped>(&at_zero)) return *stopped;
+            const auto& zero_record = std::get<ReplayRecord>(at_zero);
+            for (std::size_t row = 0; row < rows.size(); ++row)
+                offsets[row] = row_activity(rows[row], zero_record);
+        }
+        Vector basis(joint_dimension, 0.0);
+        for (std::size_t coordinate = 0; coordinate < joint_dimension; ++coordinate) {
+            if (const auto stopped = stop_requested(context)) return *stopped;
+            basis[coordinate] = 1.0;
+            auto at_basis = replay(basis);
+            basis[coordinate] = 0.0;
+            if (const auto* error = std::get_if<Diagnostic>(&at_basis)) return *error;
+            if (const auto* stopped = std::get_if<OperationStopped>(&at_basis)) return *stopped;
+            const auto& record = std::get<ReplayRecord>(at_basis);
+            for (std::size_t row = 0; row < rows.size(); ++row)
+                coefficients[row][coordinate] = row_activity(rows[row], record) - offsets[row];
+        }
+    }
+
+    bool any_inconclusive = false;
+    bool any_violation = false;
+    evidence.constraints.reserve(rows.size());
+    for (std::size_t index = 0; index < rows.size(); ++index) {
+        if (const auto stopped = stop_requested(context)) return *stopped;
+        const auto& row = rows[index];
+        const auto bound = row.safety->upper_bounds[row.row];
+        const auto row_name = std::string(row.family == SafetyFamily::state ? "state" : "action") +
+            "-stage-" + std::to_string(row.stage) + "-row-" + std::to_string(row.row);
+        auto dual_program = h_dual_support_program(*h, joint_dimension,
+            coefficients[index], offsets[index],
+            subprogram_identity(request.program_namespace, row_name + "-dual"));
+        if (const auto* error = std::get_if<Diagnostic>(&dual_program)) return *error;
+        const auto& dual_lp = std::get<LinearProgram>(dual_program);
+        const auto dual_outcome = lp.solve(dual_lp, context);
+        if (const auto* unsupported_result = std::get_if<Unsupported>(&dual_outcome)) {
+            const auto message = unsupported_result->diagnostics.empty()
+                ? "The selected LP provider does not support the H-domain dual support query."
+                : unsupported_result->diagnostics.front().explanation;
+            return unsupported("controllers.policy_h.lp", message);
+        }
+        const auto& dual_solve = std::get<ProgramResult>(dual_outcome);
+        if (const auto errors = optimization::check_program_result(dual_solve, dual_lp, Assurance::numerical);
+            !errors.empty()) return errors.front();
+        if (dual_solve.termination == Termination::cancelled)
+            return OperationStopped{StopReason::cancelled, dual_solve.raw_diagnostics};
+        if (dual_solve.termination == Termination::deadline_expired)
+            return OperationStopped{StopReason::deadline_expired, dual_solve.raw_diagnostics};
+        if (dual_solve.termination == Termination::resource_limit)
+            return OperationStopped{StopReason::resource_limit, dual_solve.raw_diagnostics};
+        if (dual_solve.termination == Termination::numerical_failure)
+            return OperationStopped{StopReason::numerical_failure, dual_solve.raw_diagnostics};
+        HPolicyConstraintEvidence item{row.family, row.stage, row.row, bound,
+            std::nullopt, std::nullopt, std::nullopt, std::nullopt,
+            std::nullopt, dual_solve, std::nullopt, std::nullopt, std::nullopt};
+
+        bool dual_witness_usable = false;
+        if (dual_solve.termination == Termination::completed &&
+            dual_solve.outcome.value == MathematicalOutcome::optimal && dual_solve.primal) {
+            const auto dual_check = optimization::evaluate_primal(dual_lp, *dual_solve.primal,
+                context.numerical, {{"csl.controllers.joint-h-dual-primal"}, "1"});
+            if (const auto* errors = std::get_if<Diagnostics>(&dual_check)) return errors->front();
+            const auto& residual = std::get<optimization::PrimalEvaluation>(dual_check).residuals;
+            item.dual_primal_check = residual;
+            const auto tolerance = context.numerical.absolute_tolerance +
+                context.numerical.relative_tolerance * std::max(residual.rows.scale, residual.variables.scale);
+            if (residual.rows.violation <= tolerance && residual.variables.violation <= tolerance) {
+                item.maximum_activity_upper_bound = std::get<optimization::PrimalEvaluation>(dual_check).objective;
+                dual_witness_usable = std::isfinite(*item.maximum_activity_upper_bound);
+            }
+        }
+
+        const bool dual_proves_safe = dual_witness_usable && item.maximum_activity_upper_bound &&
+            *item.maximum_activity_upper_bound < bound - request.feasibility_tolerance;
+        if (!dual_proves_safe) {
+            dual_program = invalid("controllers.policy_h.released_dual",
+                "The dual support LP has been released before optional counterexample search.");
+            Vector primal_objective(joint_dimension);
+            for (std::size_t coordinate = 0; coordinate < joint_dimension; ++coordinate)
+                primal_objective[coordinate] = -coefficients[index][coordinate];
+            auto primal_program = h_domain_program(*h, joint_dimension, std::move(primal_objective),
+                -offsets[index], subprogram_identity(request.program_namespace, row_name + "-primal"));
+            if (const auto* error = std::get_if<Diagnostic>(&primal_program)) return *error;
+            const auto& primal_lp = std::get<LinearProgram>(primal_program);
+            const auto primal_outcome = lp.solve(primal_lp, context);
+            if (const auto* unsupported_result = std::get_if<Unsupported>(&primal_outcome)) {
+                item.primal_support_unavailable = unsupported_result->diagnostics.empty()
+                    ? "The selected LP provider does not support primal counterexample search."
+                    : unsupported_result->diagnostics.front().explanation;
+                any_inconclusive = true;
+            } else {
+                const auto& primal_solve = std::get<ProgramResult>(primal_outcome);
+                if (const auto errors = optimization::check_program_result(primal_solve, primal_lp, Assurance::numerical);
+                    !errors.empty()) return errors.front();
+                if (primal_solve.termination == Termination::cancelled)
+                    return OperationStopped{StopReason::cancelled, primal_solve.raw_diagnostics};
+                if (primal_solve.termination == Termination::deadline_expired)
+                    return OperationStopped{StopReason::deadline_expired, primal_solve.raw_diagnostics};
+                if (primal_solve.termination == Termination::resource_limit)
+                    return OperationStopped{StopReason::resource_limit, primal_solve.raw_diagnostics};
+                if (primal_solve.termination == Termination::numerical_failure)
+                    return OperationStopped{StopReason::numerical_failure, primal_solve.raw_diagnostics};
+                item.primal_support_solve = primal_solve;
+                if (primal_solve.termination == Termination::completed && primal_solve.primal &&
+                    primal_solve.outcome.value != MathematicalOutcome::infeasible) {
+                    const auto primal_check = optimization::evaluate_primal(primal_lp, *primal_solve.primal,
+                        context.numerical, {{"csl.controllers.joint-h-primal-support"}, "1"});
+                    if (const auto* errors = std::get_if<Diagnostics>(&primal_check)) return errors->front();
+                    const auto& residual = std::get<optimization::PrimalEvaluation>(primal_check).residuals;
+                    item.primal_support_check = residual;
+                    const auto tolerance = context.numerical.absolute_tolerance +
+                        context.numerical.relative_tolerance * std::max(residual.rows.scale, residual.variables.scale);
+                    if (residual.rows.violation <= tolerance && residual.variables.violation <= tolerance) {
+                        item.joint_coordinates = *primal_solve.primal;
+                        auto candidate_trajectory = replay(*primal_solve.primal);
+                        if (const auto* error = std::get_if<Diagnostic>(&candidate_trajectory)) return *error;
+                        if (const auto* stopped = std::get_if<OperationStopped>(&candidate_trajectory)) return *stopped;
+                        item.trajectory = std::get<ReplayRecord>(std::move(candidate_trajectory));
+                        item.observed_activity = row_activity(row, *item.trajectory);
+                        if (*item.observed_activity > bound + request.feasibility_tolerance) {
+                            any_violation = true;
+                            if (item.maximum_activity_upper_bound &&
+                                *item.maximum_activity_upper_bound + request.feasibility_tolerance < *item.observed_activity)
+                                item.maximum_activity_upper_bound.reset();
+                        }
+                    }
+                }
+                if (!item.observed_activity || *item.observed_activity <= bound + request.feasibility_tolerance)
+                    any_inconclusive = true;
+            }
+        }
+        if (dual_witness_usable && item.maximum_activity_upper_bound &&
+            *item.maximum_activity_upper_bound >= bound - request.feasibility_tolerance)
+            any_inconclusive = true;
+        evidence.constraints.push_back(std::move(item));
+    }
+    evidence.feasibility = any_violation ? NumericalFeasibility::violation_found :
+        any_inconclusive ? NumericalFeasibility::inconclusive : NumericalFeasibility::within_tolerance;
     return evidence;
 }
 

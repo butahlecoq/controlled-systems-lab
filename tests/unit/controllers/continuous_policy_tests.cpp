@@ -3,6 +3,7 @@
 #include <csl/controllers/continuous_policy.hpp>
 #include <csl/optimization/phase_one.hpp>
 
+#include <algorithm>
 #include <limits>
 
 using namespace csl;
@@ -55,6 +56,17 @@ LinearSystem one_stage_noisy_integrator() {
         {{ObservationStage{{1,1,{1}}, {1,1,{0}}, {1,0,{}}, {1,1,{1}}, {0}},
             {{{0}, before(0), before(0), std::nullopt}}}}};
     const auto result = snapshot(authored, Vector{0, 1});
+    REQUIRE(std::holds_alternative<LinearSystem>(result));
+    return std::get<LinearSystem>(result);
+}
+
+LinearSystem long_horizon_integrator(std::size_t horizon) {
+    SystemModel authored{{{1, 1, 0}, TimeDomain::discrete,
+        LinearStage{{1,1,{1}}, {1,1,{0}}, {1,0,{}}, {0}}}, {}};
+    Vector times(horizon + 1);
+    for (std::size_t stage = 0; stage <= horizon; ++stage)
+        times[stage] = static_cast<double>(stage);
+    const auto result = snapshot(authored, times);
     REQUIRE(std::holds_alternative<LinearSystem>(result));
     return std::get<LinearSystem>(result);
 }
@@ -125,6 +137,136 @@ protected:
             {}, {}, "numerical infeasibility without an exact certificate", {}};
     }
 };
+
+class BoxEnumerationWorkspace final : public LPWorkspace {
+public:
+    explicit BoxEnumerationWorkspace(bool return_dual_witness = true)
+        : return_dual_witness_(return_dual_witness) {}
+protected:
+    ProgramOutcome do_solve(const LinearProgram& program, const ExecutionContext&) override {
+        if (program.objective().size() == 5 && program.constraints().rows() == 2) {
+            if (!return_dual_witness_)
+                return ProgramResult{Termination::completed,
+                    {program.identity(), MathematicalOutcome::undetermined, Unestablished{}, {}},
+                    {}, {}, "test fixture withholds the dual witness", {}};
+            std::optional<Vector> best;
+            double best_value = std::numeric_limits<double>::infinity();
+            for (unsigned mask = 0; mask < 16; ++mask) {
+                Vector candidate(5, 0.0);
+                for (unsigned index = 0; index < 4; ++index)
+                    if ((mask & (1U << index)) != 0) candidate[index] = 1.0;
+                bool feasible = true;
+                for (std::size_t row = 0; row < program.constraints().rows(); ++row) {
+                    double activity = 0.0;
+                    for (std::size_t column = 0; column < candidate.size(); ++column)
+                        activity += program.constraints()(row, column) * candidate[column];
+                    const auto& bound = program.rows()[row];
+                    if ((bound.lower && activity < *bound.lower - 1e-12) ||
+                        (bound.upper && activity > *bound.upper + 1e-12)) feasible = false;
+                }
+                if (!feasible) continue;
+                double value = program.offset();
+                for (std::size_t column = 0; column < candidate.size(); ++column)
+                    value += program.objective()[column] * candidate[column];
+                if (value < best_value) { best_value = value; best = std::move(candidate); }
+            }
+            if (!best)
+                return ProgramResult{Termination::completed,
+                    {program.identity(), MathematicalOutcome::infeasible, Unestablished{}, {}},
+                    {}, {}, "test dual enumeration found no feasible multiplier", {}};
+            return ProgramResult{Termination::completed,
+                {program.identity(), MathematicalOutcome::optimal,
+                    SymbolicArgument{"test box dual enumeration", "nonnegative multipliers satisfy every direction equality"}, {}},
+                *best, {}, "test dual enumeration", {}};
+        }
+        if (program.objective().size() != 2)
+            return Unsupported{{{DiagnosticCode::unsupported, "test.lp.dimension", "fixture accepts the joint box and its five-variable dual"}}};
+        std::optional<Vector> best;
+        double best_value = std::numeric_limits<double>::infinity();
+        for (const auto x : {-1.0, 1.0}) for (const auto y : {-0.1, 0.1}) {
+            Vector candidate{x, y};
+            bool feasible = true;
+            for (std::size_t j = 0; j < candidate.size(); ++j) {
+                const auto& bound = program.variables()[j];
+                if ((bound.lower && candidate[j] < *bound.lower) ||
+                    (bound.upper && candidate[j] > *bound.upper)) feasible = false;
+            }
+            for (std::size_t row = 0; row < program.constraints().rows(); ++row) {
+                double activity = 0.0;
+                for (std::size_t column = 0; column < candidate.size(); ++column)
+                    activity += program.constraints()(row, column) * candidate[column];
+                const auto& bound = program.rows()[row];
+                if ((bound.lower && activity < *bound.lower - 1e-12) ||
+                    (bound.upper && activity > *bound.upper + 1e-12)) feasible = false;
+            }
+            if (!feasible) continue;
+            double value = program.offset();
+            for (std::size_t j = 0; j < candidate.size(); ++j)
+                value += program.objective()[j] * candidate[j];
+            if (value < best_value) { best_value = value; best = std::move(candidate); }
+        }
+        if (!best)
+            return ProgramResult{Termination::completed,
+                {program.identity(), MathematicalOutcome::infeasible, Unestablished{}, {}},
+                {}, {}, "test corner enumeration found no feasible vertex", {}};
+        ProgramResult result{Termination::completed,
+            {program.identity(), MathematicalOutcome::optimal,
+                SymbolicArgument{"test box vertices", "linear objective over the correlated line segment"}, {}},
+            *best, {}, "test corner enumeration", {}};
+        return result;
+    }
+private:
+    bool return_dual_witness_;
+};
+
+JointHUncertainty make_correlated_h_domain(const LinearSystem& system) {
+    Matrix inequalities{4, 2, {1,0, -1,0, 0,1, 0,-1}};
+    Vector upper{1,1,0.1,0.1};
+    Matrix equalities{1, 2, {-0.1,1}};
+    Vector equality_values{0};
+    const auto a = numeric::snapshot(inequalities);
+    const auto b = numeric::snapshot_vector(upper);
+    const auto e = numeric::snapshot(equalities);
+    const auto f = numeric::snapshot_vector(equality_values);
+    REQUIRE(std::holds_alternative<numeric::MatrixView>(a));
+    REQUIRE(std::holds_alternative<numeric::VectorView>(b));
+    REQUIRE(std::holds_alternative<numeric::MatrixView>(e));
+    REQUIRE(std::holds_alternative<numeric::VectorView>(f));
+    auto made = sets::make_h({{"correlated-joint-domain"}, 2, {"initial", "measurement-error"}},
+        {std::get<numeric::MatrixView>(a), std::get<numeric::VectorView>(b),
+         std::get<numeric::MatrixView>(e), std::get<numeric::VectorView>(f)});
+    REQUIRE(std::holds_alternative<sets::SetData>(made));
+    auto domain = make_joint_h_uncertainty(system, std::get<sets::SetData>(std::move(made)));
+    REQUIRE(std::holds_alternative<JointHUncertainty>(domain));
+    return std::get<JointHUncertainty>(std::move(domain));
+}
+
+JointHUncertainty make_redundant_h_domain(
+        const LinearSystem& system, std::size_t dimension, std::size_t row_count) {
+    auto inequalities = numeric::snapshot(Matrix{row_count, dimension, Vector(row_count * dimension, 0.0)});
+    auto upper = numeric::snapshot_vector(Vector(row_count, 1.0));
+    auto equalities = numeric::snapshot(Matrix{0, dimension, {}});
+    auto equality_values = numeric::snapshot_vector({});
+    REQUIRE(std::holds_alternative<numeric::MatrixView>(inequalities));
+    REQUIRE(std::holds_alternative<numeric::VectorView>(upper));
+    REQUIRE(std::holds_alternative<numeric::MatrixView>(equalities));
+    REQUIRE(std::holds_alternative<numeric::VectorView>(equality_values));
+    auto made = sets::make_h({{"redundant-h-domain"}, dimension, {}},
+        {std::get<numeric::MatrixView>(inequalities), std::get<numeric::VectorView>(upper),
+         std::get<numeric::MatrixView>(equalities), std::get<numeric::VectorView>(equality_values)});
+    REQUIRE(std::holds_alternative<sets::SetData>(made));
+    auto domain = make_joint_h_uncertainty(system, std::get<sets::SetData>(std::move(made)));
+    REQUIRE(std::holds_alternative<JointHUncertainty>(domain));
+    return std::get<JointHUncertainty>(std::move(domain));
+}
+
+AffineObservationPolicy cancel_observed_state_policy(const LinearSystem& system) {
+    auto policy = make_affine_observation_policy(system, {
+        rule(0, {{{0}, {0}, 0}}, {1,1,{1}}, {0},
+            {1,1,{0}}, {1,1,{-1}}, {0})});
+    REQUIRE(std::holds_alternative<AffineObservationPolicy>(policy));
+    return std::get<AffineObservationPolicy>(std::move(policy));
+}
 }
 
 TEST_CASE("joint V uncertainty keeps correlated coordinates and evaluates released history") {
@@ -332,6 +474,154 @@ TEST_CASE("one-stage affine synthesis finds an observation policy over the whole
         CHECK(std::abs(generator.trajectory.states.back()[0]) < 0.11);
         CHECK(std::abs(generator.trajectory.decisions.front().action[0]) < 1.2);
     }
+}
+
+TEST_CASE("H-domain policy evaluation preserves correlated initial and error coordinates") {
+    const auto system = one_stage_noisy_integrator();
+    auto domain = make_correlated_h_domain(system);
+    CHECK(domain.layout().initial_state.offset == 0);
+    CHECK(domain.layout().errors_by_channel_sample[0][0].offset == 1);
+    const auto safety = std::vector<LinearSafetyConstraints>{
+        {{2,1,{1,-1}}, {1.2,1.2}},
+        {{2,1,{1,-1}}, {0.2,0.2}}};
+    const HContinuousPolicyRequest request{{{"h-policy-test"}, {"correlated-safe"}},
+        domain, cancel_observed_state_policy(system), safety,
+        {{{2,1,{1,-1}}, {1.2,1.2}}}, 1e-9};
+    BoxEnumerationWorkspace lp;
+    const auto result = evaluate_h_continuous_policy(system, request, lp, {});
+    REQUIRE(std::holds_alternative<HContinuousPolicyEvidence>(result));
+    const auto& evidence = std::get<HContinuousPolicyEvidence>(result);
+    CHECK(evidence.assurance == Assurance::numerical);
+    CHECK(evidence.feasibility == NumericalFeasibility::within_tolerance);
+    REQUIRE(evidence.domain_witness.has_value());
+    REQUIRE(evidence.domain_witness_trajectory.has_value());
+    REQUIRE(evidence.constraints.size() == 6);
+    CHECK(evidence.domain_witness_trajectory->inputs.measurement_errors[0][0][0] ==
+        doctest::Approx(0.1 * evidence.domain_witness_trajectory->inputs.initial_state[0]));
+    for (const auto& row : evidence.constraints) {
+        REQUIRE(row.maximum_activity_upper_bound.has_value());
+        REQUIRE(row.dual_primal_check.has_value());
+        CHECK(*row.maximum_activity_upper_bound <= row.upper_bound + request.feasibility_tolerance);
+    }
+}
+
+TEST_CASE("H-domain evaluation reports an explicit safety counterexample") {
+    const auto system = one_stage_noisy_integrator();
+    auto domain = make_correlated_h_domain(system);
+    const HContinuousPolicyRequest request{{{"h-policy-test"}, {"correlated-violation"}},
+        domain, cancel_observed_state_policy(system),
+        {{{2,1,{1,-1}}, {1.2,1.2}}, {{2,1,{1,-1}}, {0.05,0.05}}},
+        {{{2,1,{1,-1}}, {1.2,1.2}}}, 1e-9};
+    BoxEnumerationWorkspace lp;
+    const auto result = evaluate_h_continuous_policy(system, request, lp, {});
+    REQUIRE(std::holds_alternative<HContinuousPolicyEvidence>(result));
+    const auto& evidence = std::get<HContinuousPolicyEvidence>(result);
+    CHECK(evidence.feasibility == NumericalFeasibility::violation_found);
+    CHECK(std::any_of(evidence.constraints.begin(), evidence.constraints.end(), [](const auto& row) {
+        return row.family == SafetyFamily::state && row.stage == 1 && row.observed_activity &&
+            *row.observed_activity > row.upper_bound;
+    }));
+}
+
+TEST_CASE("H-domain safety remains inconclusive without a dual support witness") {
+    const auto system = one_stage_noisy_integrator();
+    auto domain = make_correlated_h_domain(system);
+    const HContinuousPolicyRequest request{{{"h-policy-test"}, {"correlated-unbounded-evidence"}},
+        domain, cancel_observed_state_policy(system),
+        {{{2,1,{1,-1}}, {1.2,1.2}}, {{2,1,{1,-1}}, {0.2,0.2}}},
+        {{{2,1,{1,-1}}, {1.2,1.2}}}, 1e-9};
+    BoxEnumerationWorkspace lp(false);
+    const auto result = evaluate_h_continuous_policy(system, request, lp, {});
+    REQUIRE(std::holds_alternative<HContinuousPolicyEvidence>(result));
+    CHECK(std::get<HContinuousPolicyEvidence>(result).feasibility == NumericalFeasibility::inconclusive);
+}
+
+TEST_CASE("H-domain evaluation observes the caller memory budget before allocating support data") {
+    const auto system = one_stage_noisy_integrator();
+    auto domain = make_correlated_h_domain(system);
+    const HContinuousPolicyRequest request{{{"h-policy-test"}, {"correlated-budget"}},
+        domain, cancel_observed_state_policy(system),
+        {{{2,1,{1,-1}}, {1.2,1.2}}, {{2,1,{1,-1}}, {0.2,0.2}}},
+        {{{2,1,{1,-1}}, {1.2,1.2}}}, 1e-9};
+    BoxEnumerationWorkspace lp;
+    ExecutionContext context;
+    context.resources = std::make_shared<const ResourcePolicy>(ResourcePolicy{1,1,1,1});
+    const auto result = evaluate_h_continuous_policy(system, request, lp, context);
+    REQUIRE(std::holds_alternative<OperationStopped>(result));
+    CHECK(std::get<OperationStopped>(result).reason == StopReason::resource_limit);
+}
+
+TEST_CASE("H-domain memory admission includes retained dual witnesses across safety rows") {
+    const auto system = one_stage_noisy_integrator();
+    constexpr std::size_t domain_row_count = 10000;
+    constexpr std::size_t safety_row_count = 1000;
+    auto domain = make_redundant_h_domain(system, 2, domain_row_count);
+    LinearSafetyConstraints repeated_safety{
+        {safety_row_count, 1, Vector(safety_row_count, 0.0)},
+        Vector(safety_row_count, 1.0)};
+    LinearSafetyConstraints no_rows{{0, 1, {}}, {}};
+    const HContinuousPolicyRequest request{{{"h-policy-test"}, {"retained-dual-memory"}},
+        domain, cancel_observed_state_policy(system), {repeated_safety, no_rows}, {}, 1e-9};
+    BoxEnumerationWorkspace lp;
+    ExecutionContext context;
+    context.resources = std::make_shared<const ResourcePolicy>(
+        ResourcePolicy{1, 1, 1, 16 * 1024 * 1024});
+    CHECK(domain_row_count * safety_row_count * sizeof(double) > *context.resources->memory_bytes);
+    const auto result = evaluate_h_continuous_policy(system, request, lp, context);
+    REQUIRE(std::holds_alternative<OperationStopped>(result));
+    CHECK(std::get<OperationStopped>(result).reason == StopReason::resource_limit);
+}
+
+TEST_CASE("H-domain memory admission includes large caller-derived solve identities") {
+    const auto system = one_stage_noisy_integrator();
+    auto domain = make_correlated_h_domain(system);
+    constexpr std::size_t safety_row_count = 100;
+    constexpr std::size_t budget = 16 * 1024 * 1024;
+    const std::string long_problem_id(10000, 'p');
+    const std::string long_program_id(10000, 'q');
+    LinearSafetyConstraints repeated_safety{
+        {safety_row_count, 1, Vector(safety_row_count, 0.0)},
+        Vector(safety_row_count, 1.0)};
+    const HContinuousPolicyRequest request{{{long_problem_id}, {long_program_id}},
+        domain, cancel_observed_state_policy(system),
+        {repeated_safety, {{0,1,{}}, {}}}, {}, 1e-9};
+    BoxEnumerationWorkspace lp;
+    ExecutionContext context;
+    context.resources = std::make_shared<const ResourcePolicy>(
+        ResourcePolicy{1, 1, 1, budget});
+    const auto approximate_identity_bytes = long_problem_id.size() + long_program_id.size() + 100;
+    CHECK((2 * safety_row_count + 2) * approximate_identity_bytes < budget);
+    CHECK((12 * safety_row_count + 7) * approximate_identity_bytes > budget);
+    const auto result = evaluate_h_continuous_policy(system, request, lp, context);
+    REQUIRE(std::holds_alternative<OperationStopped>(result));
+    CHECK(std::get<OperationStopped>(result).reason == StopReason::resource_limit);
+}
+
+TEST_CASE("H-domain memory admission includes retained replays for a long horizon") {
+    constexpr std::size_t horizon = 10000;
+    const auto system = long_horizon_integrator(horizon);
+    auto domain = make_redundant_h_domain(system, 1, 2);
+    std::vector<AffineStagePolicy> stages;
+    stages.reserve(horizon);
+    for (std::size_t stage = 0; stage < horizon; ++stage)
+        stages.push_back(rule(stage, {}, {1,0,{}}, {0}, {1,0,{}}, {1,1,{0}}, {0}));
+    auto made_policy = make_affine_observation_policy(system, std::move(stages));
+    REQUIRE(std::holds_alternative<AffineObservationPolicy>(made_policy));
+    std::vector<LinearSafetyConstraints> state_safety;
+    state_safety.reserve(horizon + 1);
+    state_safety.push_back({{1,1,{0}}, {1}});
+    for (std::size_t stage = 1; stage <= horizon; ++stage)
+        state_safety.push_back({{0,1,{}}, {}});
+    const HContinuousPolicyRequest request{{{"h-policy-test"}, {"long-replay-memory"}},
+        domain, std::get<AffineObservationPolicy>(std::move(made_policy)),
+        std::move(state_safety), {}, 1e-9};
+    BoxEnumerationWorkspace lp;
+    ExecutionContext context;
+    context.resources = std::make_shared<const ResourcePolicy>(
+        ResourcePolicy{1, 1, 1, 1024 * 1024});
+    const auto result = evaluate_h_continuous_policy(system, request, lp, context);
+    REQUIRE(std::holds_alternative<OperationStopped>(result));
+    CHECK(std::get<OperationStopped>(result).reason == StopReason::resource_limit);
 }
 
 TEST_CASE("one-stage synthesis rejects observations unavailable before the action") {

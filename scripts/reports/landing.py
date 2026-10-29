@@ -349,6 +349,11 @@ FAMILIES = {
         "Synthesizes one affine action from a pre-decision noisy observation over a caller-authored "
         "joint initial-state/error V-hull. Evidence uses numerical binary64 arithmetic, assumes "
         "the supplied hull is complete, and does not prove infeasibility or cost optimality."),
+    "ext04-h-policy": Family(
+        r"ext04-h-policy-[0-9a-f]{16}", "extensions", "Joint H-domain policy evaluation",
+        "Evaluates a caller-supplied affine observation policy over one authored correlated H-domain "
+        "using numerical feasibility and dual support witnesses. The report makes no validated-arithmetic, "
+        "policy-synthesis, or universal-disturbance claim."),
     "ext05-discretization": Family(
         r"ext05-discretization-[0-9a-f]{16}", "extensions", "Continuous-model discretization",
         "Discretizes a continuous double integrator into a discrete model and checks the discrete "
