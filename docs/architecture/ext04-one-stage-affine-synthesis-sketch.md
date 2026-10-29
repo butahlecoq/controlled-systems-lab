@@ -33,8 +33,8 @@ struct OneStageAffineSynthesisRequest {
     ProgramIdentity feasibility_program;
     JointVUncertainty domain;
     std::vector<ObservationComponentRef> action_features;
-    std::vector<LinearSafetyConstraints> state_safety;  // initial and terminal
-    std::vector<LinearSafetyConstraints> action_safety; // one stage
+    std::vector<LinearSafetyConstraints> state_safety;
+    std::vector<LinearSafetyConstraints> action_safety;
     double feasibility_tolerance{1e-9};
 };
 
