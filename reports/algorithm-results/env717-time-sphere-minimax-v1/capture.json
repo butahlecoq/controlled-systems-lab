@@ -1,8 +1,8 @@
 {
   "schema": "csl.capture/1",
-  "captured_at_utc": "2026-10-29T16:09:18.105372+00:00",
-  "source_commit": "05885f579eef1350ec5cc285454a86275a680d6d",
-  "driver_sha256": "9b1214d9ec3e954c644c44d082bca399421cf73648d943b35899921f3fb47f5f",
+  "captured_at_utc": "2026-10-29T16:17:18.909675+00:00",
+  "source_commit": "4abf956016c8f8bb26e26ddbc1b345ed7430a9b9",
+  "driver_sha256": "4045403511f79b954f2ee35a15e62ce8a10e9f2e569f78863ff2c4757fb78bee",
   "algorithm_source_sha256": "14e2237b0947319d494eb95100f56e080552add88c646d867c0a496f3da1ba0c",
   "host_processor": "unavailable",
   "command": "build/env717-time-sphere-minimax/csl_env717_time_sphere_minimax --json",

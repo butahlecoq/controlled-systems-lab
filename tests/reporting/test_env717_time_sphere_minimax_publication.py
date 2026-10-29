@@ -58,7 +58,9 @@ class TimeOptimalSphereMinimaxPublicationTests(unittest.TestCase):
             self.assertIn(f"{report_id}/reachability.svg", archive.namelist())
             self.assertIn(f"{report_id}/figure-data.json", archive.namelist())
         page = (destination / "index.html").read_text()
-        self.assertIn("finite-catalogue adaptation", page)
+        self.assertIn("sequential-response game", page)
+        self.assertIn("not the source RL game", page)
+        self.assertIn("v observes u's action", page)
         self.assertIn("trains u to minimize elapsed time while v maximizes it", page)
         self.assertIn(f'href="{report_id}/index.html"', (self.site / "index.html").read_text())
 
