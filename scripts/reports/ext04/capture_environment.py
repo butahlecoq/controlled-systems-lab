@@ -12,12 +12,13 @@ import subprocess
 
 
 def command_version(*command: str) -> str:
-    result = subprocess.run(command, capture_output=True, text=True)
-    if result.returncode and command[0] in {"cmake", "ninja"} and shutil.which("mise"):
+    if command[0] in {"cmake", "ninja"} and shutil.which("mise"):
         result = subprocess.run(
             ["mise", "exec", "cmake@3.31.6", "ninja@1.12.1", "--", *command],
             check=True, capture_output=True, text=True)
-    elif result.returncode:
+    else:
+        result = subprocess.run(command, capture_output=True, text=True)
+    if result.returncode:
         raise subprocess.CalledProcessError(result.returncode, command,
                                             output=result.stdout, stderr=result.stderr)
     return (result.stdout or result.stderr).splitlines()[0].strip()
