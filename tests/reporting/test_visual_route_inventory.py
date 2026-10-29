@@ -76,6 +76,8 @@ class VisualRouteInventoryTests(unittest.TestCase):
                          "shared-quantitative-policy-companion-renderer")
         self.assertEqual(producers["benchmarks/reporting/it17_hull/summarize.py"]["disposition"],
                          "reviewed-static-diagram-exception")
+        self.assertEqual(producers["benchmarks/reporting/it17_hull/summarize_4d.py"]["disposition"],
+                         "reviewed-static-diagram-exception")
         for source in ("scripts/reports/geo02/render.py", "scripts/reports/geo03/build_report.py",
                        "scripts/reports/geo04/render.py", "scripts/reports/geo05/render.py",
                        "scripts/reports/geo07/render_saved.py", "scripts/reports/geo07_dependent/render_saved.py",
@@ -115,7 +117,7 @@ class VisualRouteInventoryTests(unittest.TestCase):
         follow_up_counts={number:sum(entry["follow_up_issue"]==number for entry in deferred)
                           for number in (684,685,686,687,708,717)}
         self.assertEqual(follow_up_counts,
-                         {684:4,685:0,686:5,687:1,708:1,717:9})
+                         {684:4,685:0,686:5,687:1,708:1,717:11})
         reviewed=[entry for entry in producers.values() if entry.get("role")]
         self.assertEqual(len(reviewed),18)
         self.assertEqual(set(entry["source"] for entry in reviewed),
@@ -123,6 +125,9 @@ class VisualRouteInventoryTests(unittest.TestCase):
         self.assertTrue(all(entry["follow_up_issue"] in follow_up_counts for entry in deferred))
         routes={entry["route"]:entry for entry in inventory["frozen_published_routes"]}
         self.assertGreater(len(routes),40)
+        hull_4d=routes["exp02-it17-hull-4d-simplex-20261028-r1"]
+        self.assertEqual(hull_4d["assets"],["2d-visual-companion.svg", "input-projections.svg"])
+        self.assertTrue(hull_4d["index_sha256"])
         self.assertTrue(all(entry["disposition"].startswith("deferred: original frozen route-level readability")
                             for entry in routes.values()))
         self.assertTrue(all(entry["follow_up_issue"] ==
@@ -142,6 +147,7 @@ class VisualRouteInventoryTests(unittest.TestCase):
         self.assertEqual(routes["env717-sphere-game-pilot-v1"]["follow_up_issue"], 717)
         self.assertEqual(routes["env717-point-on-plane-pilot-v1"]["follow_up_issue"], 717)
         self.assertEqual(routes["env717-time-sphere-pilot-v1"]["follow_up_issue"], 717)
+        self.assertEqual(routes["env717-multipoint-cost-game-pilot-v1"]["follow_up_issue"], 717)
         self.assertTrue(any(name.endswith("terminal-projections.svg")
                             for entry in routes.values() for name in entry["assets"]))
         self.assertEqual(inventory["gallery_routes"][0]["route"],"examples/index.html")

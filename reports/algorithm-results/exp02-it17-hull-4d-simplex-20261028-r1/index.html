@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="en">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>EXP-02 4D hull pilot</title>
+<style>
+body { font:16px/1.5 system-ui,sans-serif; max-width:1100px; margin:2rem auto; padding:0 1rem; color:#172438 }
+table { border-collapse:collapse; width:100%; font-size:.9rem }
+th,td { border:1px solid #ccd4df; padding:.45rem; text-align:left }
+th { background:#eef1f7 }
+.table-wrap { overflow-x:auto }
+@media(max-width:720px) { table { min-width:760px } }
+img { max-width:100% }
+code { overflow-wrap:anywhere }
+</style>
+<h1>EXP-02: first 4D hull-ladder cell</h1>
+<p>The workload has five 4-simplex corners and 245 dyadic interior points. Halton bases 2, 3, 5, and 7 deterministically select strictly positive barycentric weights in multiples of 1/8, making interior-point removal certificates exactly representable. Five LP reducers ran with one warmup and five measured calls each. An independent exact-rational validator checks each removal certificate and its acyclic expansion to the retained source points. A checked certificate chain is diagnostic evidence when the reducer reports incomplete status; only a complete reducer with a valid chain is labelled verified.</p>
+<p>QuickHull is recorded as unsupported because the registered geometric implementation is 2D-only. The six plotted projections show input points only; red markers identify the 4-simplex corners.</p>
+<figure><img src="input-projections.svg" alt="Input points projected into all six coordinate planes of the four-dimensional simplex"><figcaption>Six coordinate projections of the same 4D input; no projected hull boundary is implied.</figcaption></figure>
+<h2>2D visual companion</h2>
+<p>The same reducer family supports 2D. The existing 2D hull pilot includes a minimal labelled square cloud and hull illustration. It uses a separate fixture from report <code>quickhull-it17-paper-adaptations-20261024-r1</code>.</p>
+<figure><a href="2d-visual-companion.svg"><img src="2d-visual-companion.svg" alt="Existing 2D square-cloud hull illustration from the separate QuickHull pilot"></a><figcaption>Existing 2D companion example; this figure is not part of the 4D measurement. <a href="2d-visual-companion.svg">Open the SVG</a>.</figcaption></figure>
+<div class="table-wrap"><table><thead><tr><th>Method</th><th>Hull checks</th><th>Complete</th><th>Evidence</th><th>Retained</th><th>Median (ms)</th><th>Range (ms)</th><th>Timing interpretation</th></tr></thead><tbody><tr><td>Baseline LP</td><td>5/5</td><td>0/5</td><td>inconclusive 5/5</td><td>—</td><td>—</td><td>—</td><td>Withheld: incomplete reducer</td></tr><tr><td>Basis reuse (A43-related)</td><td>5/5</td><td>5/5</td><td>verified 5/5</td><td>5</td><td>1.138422</td><td>1.126271–1.164125</td><td>Descriptive only; no speedup claim</td></tr><tr><td>Ordered LP (A44-related)</td><td>5/5</td><td>0/5</td><td>inconclusive 5/5</td><td>—</td><td>—</td><td>—</td><td>Withheld: incomplete reducer</td></tr><tr><td>A43 safe adaptation</td><td>5/5</td><td>5/5</td><td>verified 5/5</td><td>5</td><td>1.952011</td><td>1.917928–1.958646</td><td>Descriptive only; no speedup claim</td></tr><tr><td>A44 incremental adaptation</td><td>5/5</td><td>5/5</td><td>verified 5/5</td><td>5</td><td>28.387651</td><td>28.212977–29.515389</td><td>Descriptive only; no speedup claim</td></tr><tr><td>QuickHull (unsupported)</td><td>—</td><td>unsupported in 4D</td><td>inconclusive</td><td>—</td><td>—</td><td>—</td><td>No timing</td></tr></tbody></table></div>
+<p>Measured code commit <code>dc23a890c4a7e13ad543f56781cc8ebd9bfea770</code>; binary64 input manifest SHA256 <code>ab9a5afdf6d63e4189cb999a91b7ea48eb80622dfceb78d977576c1d17050585</code>; LP backend HiGHS 1.11.0. Full method identities and every raw attempt are in <a href="validated-rows.jsonl">validated rows</a>; download the <a href="exp02-it17-hull-4d-simplex-20261028-r1.zip">offline report bundle</a>.</p>
+<h2>Scope limits</h2>
+<ul>
+<li>One deterministic 250-point fixture; this is the first ladder cell, not the EXP-02 matrix.</li>
+<li>These reducers are implementation variants; A43/A44 are paper-informed adaptations, not faithful ports.</li>
+<li>Workspace creation and independent checking are outside reducer timing. HiGHS is pinned; native solver threading is disabled.</li>
+<li>Timing is descriptive. No comparative speedup is claimed because no source-mapped limiter profile is available.</li>
+<li>Raw JSONL preserves every attempt and unsupported outcome. Incomplete reducer status remains inconclusive even when partial certificates pass exact diagnostics. See <a href="validated-rows.jsonl">validated rows</a> and <a href="summary.csv">CSV</a>.</li>
+</ul>
+</html>

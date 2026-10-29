@@ -15,7 +15,14 @@ then returns the state at the next time. It is not a continuous ODE integrator.
 `replay` records the complete declaration (including the declared initial
 state), controls, computed states, original
 plant objective and its unit, field-specific diagnostics and a separate
-steady-clock replay duration. A missing declaration or incomplete control
+steady-clock replay duration. It records integration-residual applicability
+separately from the declared numerical policy. The current exact-discrete-map
+method marks the residual not applicable; it does not produce a residual value.
+The VIZ-04 v2 artifact saves named residual measurements with their units when
+available, and serializes the declared absolute and relative tolerances
+separately. These tolerances remain metadata and are not integration error
+bounds. A v1 artifact remains readable; it did not persist residual evidence
+or the numerical policy. A missing declaration or incomplete control
 history returns `unavailable` with named `missing_prerequisites`. Invalid
 numeric inputs, nonfinite transition/objective outputs, callback failures,
 cancellation and deadline exhaustion remain distinct statuses. The execution

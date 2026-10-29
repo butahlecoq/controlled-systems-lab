@@ -91,6 +91,15 @@ class LandingTests(unittest.TestCase):
             self.assertIn("Three of five LP reducers completed", family.summary)
             self.assertIn("no speedup", family.summary)
 
+    def test_it17_4d_pilot_has_a_partial_geometry_family_description(self):
+        family = landing.FAMILIES[landing.family_for(
+            "exp02-it17-hull-4d-simplex-20261028-r1")]
+        self.assertEqual(family.group, "geometry")
+        self.assertIn("245 exactly representable interior points", family.summary)
+        self.assertIn("two exact but incomplete outputs have withheld timings", family.summary)
+        self.assertIn("QuickHull is unsupported in 4D", family.summary)
+        self.assertIn("no speedup", family.summary)
+
     def test_a44_v2_description_does_not_relabel_the_historical_adaptation_route(self):
         historical = landing.FAMILIES[landing.family_for(
             "quickhull-it17-paper-adaptations-20261024-r1")]

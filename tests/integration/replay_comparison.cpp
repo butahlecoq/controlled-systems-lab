@@ -121,6 +121,8 @@ TEST_CASE("4D selected linear witnesses retain separate nonlinear replay and 2D 
             verification::CheckStatus::numerical_pass, verified.completeness,
             verified.validated, verified.residuals};
     }
+    REQUIRE_FALSE(source.plot.paths[0].evidence.residuals.empty());
+    const auto expected_linear_residual = source.plot.paths[0].evidence.residuals.front();
     const ar::RunRecordRef run_ref{source.plot.run, problem::ContentDigest{}};
     const auto associated = ex::associate_replays(source.problem, source.plot, run_ref, source.replays, "kg/s");
     REQUIRE(std::holds_alternative<ex::ReplayComparison>(associated));
@@ -151,6 +153,16 @@ TEST_CASE("4D selected linear witnesses retain separate nonlinear replay and 2D 
         CHECK(saved_example["witnesses"][i]["linear_evidence"]["completeness"] == "unsupported");
         CHECK(saved_example["witnesses"][i]["linear_evidence"]["validated"] == "unsupported");
     }
+    CHECK(saved_example["witnesses"][0]["replay"]["plant"]["version"] == "1");
+    CHECK(saved_example["witnesses"][0]["replay"]["state_units"] ==
+        std::vector<std::string>{"kg/s", "kg", "kg/s", "kg"});
+    CHECK(saved_example["witnesses"][0]["replay"]["control_units"] ==
+        std::vector<std::string>{"kg/s", "kg/s"});
+    CHECK(saved_example["witnesses"][0]["replay"]["integration"] == "exact_discrete_map");
+    CHECK(saved_example["witnesses"][0]["replay"]["numerical_policy"]["absolute_tolerance"] == 1e-12);
+    CHECK(saved_example["witnesses"][0]["replay"]["integration_residual"]["status"] == "not_applicable");
+    CHECK(saved_example["witnesses"][0]["replay"]["control_hold"] == "constant_on_interval");
+    CHECK(saved_example["witnesses"][0]["replay"]["times"] == std::vector<double>{0.0, 1.0, 2.0});
 
     const auto flow = ex::project_replay_trajectories(comparison, {0, 2},
         {ar::CoordinateAnnotation{"flow A", "kg/s", {}, {}},
@@ -175,7 +187,7 @@ TEST_CASE("4D selected linear witnesses retain separate nonlinear replay and 2D 
     REQUIRE(std::holds_alternative<problem::ResolvedContent>(encoded));
     const auto& content = std::get<problem::ResolvedContent>(encoded);
     const std::string wire(reinterpret_cast<const char*>(content.bytes().data()), content.bytes().size());
-    CHECK(wire.find("csl.viz04-replay-comparison/1") != std::string::npos);
+    CHECK(wire.find("csl.viz04-replay-comparison/2") != std::string::npos);
     CHECK(wire.find("linear_objective_convention") != std::string::npos);
     CHECK(wire.find("replay_time_ns") != std::string::npos);
     const auto encoded_json = nlohmann::json::parse(wire);
@@ -183,9 +195,34 @@ TEST_CASE("4D selected linear witnesses retain separate nonlinear replay and 2D 
     CHECK(encoded_json["witnesses"][0]["claims"]["nonlinear_feasibility"] == "not_checked");
     CHECK(encoded_json["witnesses"][0]["claims"]["nonlinear_objective_quality"] == "not_checked");
     CHECK(encoded_json["witnesses"][0]["claims"]["nonlinear_global_optimality"] == "not_checked");
+    CHECK(encoded_json["witnesses"][0]["replay"]["integration_residual"]["status"] == "not_applicable");
+    CHECK(encoded_json["witnesses"][0]["replay"]["numerical_policy"]["relative_tolerance"] == 1e-12);
+    const auto& saved_residual = encoded_json["witnesses"][0]["linear_evidence"]["residuals"][0];
+    CHECK(saved_residual["field"] == expected_linear_residual.field);
+    CHECK(saved_residual["violation"] == expected_linear_residual.measure.violation);
+    CHECK(saved_residual["scale"] == expected_linear_residual.measure.scale);
+    CHECK(saved_residual["tolerance"] == expected_linear_residual.tolerance);
+    CHECK(saved_residual["satisfied"] == expected_linear_residual.satisfied);
     const auto decoded = ex::decode_replay_comparison(wire);
     REQUIRE(std::holds_alternative<problem::ResolvedContent>(decoded));
     CHECK(std::get<problem::ResolvedContent>(decoded).digest() == content.digest());
+    auto legacy_json = encoded_json;
+    legacy_json["schema"] = "csl.viz04-replay-comparison/1";
+    for (auto& witness : legacy_json["witnesses"]) {
+        witness["replay"].erase("numerical_policy");
+        witness["replay"].erase("integration_residual");
+    }
+    const auto legacy_decoded = ex::decode_replay_comparison(legacy_json.dump());
+    CHECK(std::holds_alternative<problem::ResolvedContent>(legacy_decoded));
+    auto available_json = encoded_json;
+    auto& future_replay = available_json["witnesses"][0]["replay"];
+    future_replay["integration"] = "integrator.rk4@1";
+    future_replay["integration_residual"] = nlohmann::json{
+        {"status", "available"}, {"definition", "independent transition defect"},
+        {"measurements", nlohmann::json::array({nlohmann::json{
+            {"name", "state_0"}, {"value", 0.00012}, {"unit", "kg/s"}}})}};
+    const auto available_decoded = ex::decode_replay_comparison(available_json.dump());
+    CHECK(std::holds_alternative<problem::ResolvedContent>(available_decoded));
     const auto limited = ex::decode_replay_comparison(wire, {wire.size(), 1, 64, 1024});
     REQUIRE(std::holds_alternative<ar::ArtifactError>(limited));
     CHECK(std::get<ar::ArtifactError>(limited).code == ar::ArtifactErrorCode::limit);
@@ -194,6 +231,15 @@ TEST_CASE("4D selected linear witnesses retain separate nonlinear replay and 2D 
     const auto malformed = ex::decode_replay_comparison(malformed_json.dump());
     REQUIRE(std::holds_alternative<ar::ArtifactError>(malformed));
     CHECK(std::get<ar::ArtifactError>(malformed).code == ar::ArtifactErrorCode::invalid_input);
+    auto residual_on_exact_map = encoded_json;
+    residual_on_exact_map["witnesses"][0]["replay"]["integration_residual"] =
+        {{"status", "available"}, {"definition", "invalid exact-map residual"},
+            {"measurements", {{{"name", "state_0"}, {"value", 0.0}, {"unit", "kg/s"}}}}};
+    CHECK(std::holds_alternative<ar::ArtifactError>(ex::decode_replay_comparison(residual_on_exact_map.dump())));
+    auto residual_without_method = encoded_json;
+    residual_without_method["witnesses"][0]["replay"]["integration"] = nullptr;
+    const auto missing_method_residual = ex::decode_replay_comparison(residual_without_method.dump());
+    CHECK(std::holds_alternative<ar::ArtifactError>(missing_method_residual));
     auto unnamed_unavailable = encoded_json;
     unnamed_unavailable["witnesses"][0]["replay"]["status"] = "unavailable";
     unnamed_unavailable["witnesses"][0]["replay"]["original_objective"] = nullptr;
@@ -211,6 +257,7 @@ TEST_CASE("replay association refuses swapped control order, mismatched axes and
     const auto wrong_controls = ex::associate_replays(source.problem, source.plot, run_ref, source.replays);
     REQUIRE(std::holds_alternative<ar::ArtifactError>(wrong_controls));
     CHECK(std::get<ar::ArtifactError>(wrong_controls).code == ar::ArtifactErrorCode::reference);
+    CHECK(std::get<ar::ArtifactError>(wrong_controls).path == "witnesses[1].replay.controls");
 
     source = fixture();
     source.plot.state_axis.points = {0.0, 1.0, 3.0};
@@ -225,6 +272,26 @@ TEST_CASE("replay association refuses swapped control order, mismatched axes and
     CHECK(std::holds_alternative<ar::ArtifactError>(invalid_projection));
 }
 
+TEST_CASE("replay association rejects the wrong problem and inconsistent plant identity") {
+    auto source = fixture();
+    const ar::RunRecordRef run_ref{source.plot.run, problem::ContentDigest{}};
+
+    source.problem.id = {"different-linear-problem"};
+    const auto wrong_problem = ex::associate_replays(
+        source.problem, source.plot, run_ref, source.replays);
+    REQUIRE(std::holds_alternative<ar::ArtifactError>(wrong_problem));
+    CHECK(std::get<ar::ArtifactError>(wrong_problem).code == ar::ArtifactErrorCode::identity);
+    CHECK(std::get<ar::ArtifactError>(wrong_problem).path == "problem");
+
+    source = fixture();
+    source.replays[1].plant.version = "2";
+    const auto wrong_plant = ex::associate_replays(
+        source.problem, source.plot, run_ref, source.replays);
+    REQUIRE(std::holds_alternative<ar::ArtifactError>(wrong_plant));
+    CHECK(std::get<ar::ArtifactError>(wrong_plant).code == ar::ArtifactErrorCode::identity);
+    CHECK(std::get<ar::ArtifactError>(wrong_plant).path == "witnesses[1].replay.plant");
+}
+
 TEST_CASE("selected nonzero path ordinals preserve an unavailable replay with its matching control prefix") {
     auto source = fixture();
     source.plot.paths.resize(1);
@@ -237,4 +304,37 @@ TEST_CASE("selected nonzero path ordinals preserve an unavailable replay with it
     CHECK(witness.linear.source_ordinal == 17);
     CHECK(witness.nonlinear.status == sim::ReplayStatus::unavailable);
     CHECK(witness.nonlinear.missing_prerequisites == std::vector<std::string>{"controls.complete_history"});
+}
+
+TEST_CASE("unrestored historical plant parameters keep replay unavailable and unclaimed") {
+    auto source = fixture();
+    source.plot.paths.resize(1);
+    auto unrestored = fuel_toy();
+    unrestored.identity = {"archival-reference", "unrestored", "missing historical plant data fixture"};
+    unrestored.parameters.reset();
+    source.replays = {sim::replay(unrestored, source.plot.paths[0].controls)};
+    const ar::RunRecordRef run_ref{source.plot.run, problem::ContentDigest{}};
+
+    const auto associated = ex::associate_replays(
+        source.problem, source.plot, run_ref, source.replays);
+    REQUIRE(std::holds_alternative<ex::ReplayComparison>(associated));
+    const auto& comparison = std::get<ex::ReplayComparison>(associated);
+    const auto& witness = comparison.witnesses.front();
+    CHECK(witness.nonlinear.status == sim::ReplayStatus::unavailable);
+    CHECK(witness.nonlinear.original_objective == std::nullopt);
+    CHECK(witness.nonlinear.missing_prerequisites == std::vector<std::string>{"plant.parameters"});
+    CHECK(witness.claims.nonlinear_feasibility == verification::CheckStatus::not_checked);
+    CHECK(witness.claims.nonlinear_objective_quality == verification::CheckStatus::not_checked);
+    CHECK(witness.claims.nonlinear_global_optimality == verification::CheckStatus::not_checked);
+
+    const auto encoded = ex::encode_replay_comparison(comparison);
+    REQUIRE(std::holds_alternative<problem::ResolvedContent>(encoded));
+    const auto& content = std::get<problem::ResolvedContent>(encoded);
+    const std::string wire(reinterpret_cast<const char*>(content.bytes().data()), content.bytes().size());
+    const auto document = nlohmann::json::parse(wire);
+    CHECK(document["witnesses"][0]["replay"]["status"] == "unavailable");
+    CHECK(document["witnesses"][0]["replay"]["missing_prerequisites"] ==
+        std::vector<std::string>{"plant.parameters"});
+    CHECK(document["witnesses"][0]["replay"]["original_objective"].is_null());
+    CHECK(document["witnesses"][0]["claims"]["nonlinear_global_optimality"] == "not_checked");
 }

@@ -37,6 +37,12 @@ bool missing(const ReplayRecord& record, const std::string& field) {
     return std::find(record.missing_prerequisites.begin(),
         record.missing_prerequisites.end(), field) != record.missing_prerequisites.end();
 }
+std::vector<double> quadratic_step_oracle(std::span<const double> controls) {
+    std::vector<double> states{0.0};
+    for (const double control : controls)
+        states.push_back(states.back() + control + control * control);
+    return states;
+}
 }
 
 TEST_CASE("two tied linear control sums have different independent nonlinear replay") {
@@ -49,8 +55,12 @@ TEST_CASE("two tied linear control sums have different independent nonlinear rep
     REQUIRE(b.status == ReplayStatus::complete);
     CHECK(first[0][0] + first[1][0] == 1.0);
     CHECK(second[0][0] + second[1][0] == 1.0);
-    CHECK(a.states == std::vector<Vector>{{0.0}, {0.0}, {2.0}});
-    CHECK(b.states == std::vector<Vector>{{0.0}, {0.75}, {1.5}});
+    const auto first_oracle = quadratic_step_oracle(Vector{first[0][0], first[1][0]});
+    const auto second_oracle = quadratic_step_oracle(Vector{second[0][0], second[1][0]});
+    CHECK(first_oracle == std::vector<double>{0.0, 0.0, 2.0});
+    CHECK(second_oracle == std::vector<double>{0.0, 0.75, 1.5});
+    CHECK(a.states == std::vector<Vector>{{first_oracle[0]}, {first_oracle[1]}, {first_oracle[2]}});
+    CHECK(b.states == std::vector<Vector>{{second_oracle[0]}, {second_oracle[1]}, {second_oracle[2]}});
     REQUIRE(a.original_objective.has_value());
     REQUIRE(b.original_objective.has_value());
     CHECK(*a.original_objective == 2.0);
@@ -65,6 +75,7 @@ TEST_CASE("two tied linear control sums have different independent nonlinear rep
     CHECK(a.state_units == std::vector<std::string>{"dimensionless"});
     CHECK(a.objective_name == "terminal state");
     CHECK(a.integration == IntegrationMethod::exact_discrete_map);
+    CHECK(std::holds_alternative<IntegrationResidualNotApplicable>(a.integration_residual));
     CHECK(a.hold == ControlHold::constant_on_interval);
     CHECK(a.replay_time >= std::chrono::steady_clock::duration::zero());
 }
@@ -112,6 +123,12 @@ TEST_CASE("missing independent plant data and incomplete controls name prerequis
     const auto incomplete = replay(plant, one);
     CHECK(incomplete.status == ReplayStatus::unavailable);
     CHECK(missing(incomplete, "controls.complete_history"));
+
+    plant = analytic_toy();
+    plant.hold.reset();
+    const auto unspecified_hold = replay(plant, std::vector<Vector>{{0.0}, {1.0}});
+    CHECK(unspecified_hold.status == ReplayStatus::unavailable);
+    CHECK(missing(unspecified_hold, "plant.control_hold"));
 }
 
 TEST_CASE("invalid numeric inputs and callback failures retain distinct outcomes") {

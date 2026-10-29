@@ -176,7 +176,8 @@ def source_inventory(root: Path) -> list[dict]:
             elif relative.endswith("/control_witness_companions.py"):
                 disposition = "saved-control-witness-gallery-companion-builder"
             elif relative in {"benchmarks/reporting/it17_hull/summarize.py",
-                              "benchmarks/reporting/it17_hull/summarize_3d.py"}:
+                              "benchmarks/reporting/it17_hull/summarize_3d.py",
+                              "benchmarks/reporting/it17_hull/summarize_4d.py"}:
                 disposition = "reviewed-static-diagram-exception"
             elif relative in {"scripts/reports/mpc03/b08_miqcp.py",
                               "scripts/reports/mpc03/b08_report.py"}:

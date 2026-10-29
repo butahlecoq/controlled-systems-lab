@@ -8,6 +8,7 @@
 #include <optional>
 #include <span>
 #include <string>
+#include <variant>
 #include <vector>
 
 namespace csl::simulation {
@@ -42,6 +43,25 @@ struct Plant {
 
 enum class ReplayStatus { complete, unavailable, invalid_input, numerical_failure,
     callback_failure, cancelled, resource_limit };
+
+enum class IntegrationResidualUnavailableReason { legacy_artifact, not_recorded };
+struct IntegrationResidualNotApplicable {};
+struct IntegrationResidualUnavailable {
+    IntegrationResidualUnavailableReason reason{IntegrationResidualUnavailableReason::not_recorded};
+};
+struct IntegrationResidualMeasurement {
+    std::string name;
+    double value{};
+    std::string unit;
+    bool operator==(const IntegrationResidualMeasurement&) const = default;
+};
+struct AvailableIntegrationResidual {
+    std::string definition;
+    std::vector<IntegrationResidualMeasurement> measurements;
+};
+using IntegrationResidualEvidence = std::variant<IntegrationResidualNotApplicable,
+    IntegrationResidualUnavailable, AvailableIntegrationResidual>;
+
 struct ReplayRecord {
     ReplayStatus status{ReplayStatus::unavailable};
     PlantIdentity plant;
@@ -53,6 +73,7 @@ struct ReplayRecord {
     std::optional<IntegrationMethod> integration;
     std::optional<ControlHold> hold;
     std::optional<NumericalPolicy> numerical;
+    IntegrationResidualEvidence integration_residual;
     std::vector<double> times;
     std::vector<Vector> controls, states;
     std::optional<double> original_objective;

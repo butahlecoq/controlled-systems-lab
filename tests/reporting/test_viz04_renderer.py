@@ -1,5 +1,6 @@
 from pathlib import Path
 import importlib.util
+import json
 import tempfile
 import unittest
 
@@ -11,6 +12,21 @@ SPEC.loader.exec_module(render_saved)
 
 
 class Viz04RendererTests(unittest.TestCase):
+    def test_renderer_accepts_legacy_v1_and_current_v2_artifacts(self):
+        current_path = ROOT / "docs/examples/viz04-replay-comparison.json"
+        current = json.loads(current_path.read_text(encoding="utf-8"))
+        self.assertEqual(current["schema"], "csl.viz04-replay-comparison/2")
+        self.assertEqual(render_saved.load(current_path)["schema"], current["schema"])
+
+        current["schema"] = "csl.viz04-replay-comparison/1"
+        for witness in current["witnesses"]:
+            witness["replay"].pop("numerical_policy")
+            witness["replay"].pop("integration_residual")
+        with tempfile.TemporaryDirectory() as temporary:
+            legacy_path = Path(temporary) / "legacy.json"
+            legacy_path.write_text(json.dumps(current), encoding="utf-8")
+            self.assertEqual(render_saved.load(legacy_path)["schema"], current["schema"])
+
     def test_matching_physical_units_get_equal_aspect_and_disclosed_scale(self):
         class Axis:
             def __init__(self):

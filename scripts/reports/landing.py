@@ -180,6 +180,12 @@ FAMILIES = {
         "Reports one tetrahedron with exact dyadic interior redundancy plus its preserved initial "
         "pure-Halton attempt. Three of five LP reducers completed on the informative fixture; "
         "QuickHull is unsupported in 3D, incomplete outcomes remain visible, and no speedup is claimed."),
+    "exp02-it17-hull-4d": Family(
+        r"exp02-it17-hull-4d-simplex-\d{8}-r\d+", "geometry",
+        "ITIS17 four-dimensional hull reducer pilot",
+        "Reports one 250-point 4-simplex fixture with 245 exactly representable interior points. "
+        "Three of five LP reducers completed; two exact but incomplete outputs have withheld timings, "
+        "QuickHull is unsupported in 4D, and no speedup is claimed."),
     "geo07-generator-sets": Family(
         r"geo07-generator-sets-[0-9a-f]{16,64}", "geometry", "Generator-set evaluation",
         "Evaluates generator-set requests over three bounded public generator-set fixtures, "
@@ -386,6 +392,23 @@ FAMILIES = {
         "feedback-winning layers, and a selected worst-case path in relative position-velocity "
         "planes. This is a three-stage finite-catalogue adaptation, not a reproduction of the RL "
         "run. Timing is one observation with zero warmups; no performance comparison is claimed."),
+    "env717-multipoint": Family(
+        r"env717-multipoint-[0-9a-f]{20}", "synthesis",
+        "MultiPointCostGame finite-action minimax pilot",
+        "Compares exhaustive fixed-plan minimax and exact-state causal Bellman values for a "
+        "source-attributed position-velocity environment adaptation. The figure shows all "
+        "forward reachable states and selected worst-case paths. It omits the source checkpoint "
+        "costs, uses four one-second finite-catalogue decisions, and defines no target or backward "
+        "winning set; it is not a reproduction of the RL run."),
+    "env717-broken-triangle": Family(
+        r"env717-broken-triangle-[0-9a-f]{20}", "synthesis",
+        "BrokenTriangleGame finite minimax and reachability pilot",
+        "Compares exhaustive fixed open-loop plans with a finite observed-state causal Bellman "
+        "policy using the source RL example's initial state, dynamics and terminal polygon. The "
+        "figure overlays forward states, finite robust backward-winning intersections and both "
+        "worst-case paths. Four decisions and two-point action/disturbance catalogues form a finite "
+        "adaptation; no RL training reproduction, continuous boundary or performance comparison "
+        "is claimed."),
     "env717-max-coordinate": Family(
         r"env717-max-coordinate-[0-9a-f]{20}", "synthesis",
         "MaxCoordinateGame finite-action differential-game pilot",

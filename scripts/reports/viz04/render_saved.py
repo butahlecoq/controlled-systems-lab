@@ -6,7 +6,7 @@ import json
 from pathlib import Path
 
 
-SCHEMA = "csl.viz04-replay-comparison/1"
+SCHEMAS = {"csl.viz04-replay-comparison/1", "csl.viz04-replay-comparison/2"}
 PAIRS = ((0, 2), (1, 3))
 
 
@@ -19,8 +19,8 @@ def set_coordinate_aspect(axis, x_coord: dict, y_coord: dict) -> str:
 
 def load(path: Path) -> dict:
     value = json.loads(path.read_text(encoding="utf-8"))
-    if value.get("schema") != SCHEMA:
-        raise ValueError(f"expected {SCHEMA}")
+    if value.get("schema") not in SCHEMAS:
+        raise ValueError(f"expected one of {', '.join(sorted(SCHEMAS))}")
     coordinates = value.get("state_coordinates", [])
     witnesses = value.get("witnesses", [])
     if len(coordinates) != 4 or len(witnesses) != 2:

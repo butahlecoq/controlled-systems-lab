@@ -1,0 +1,34 @@
+{
+  "schema": "csl.env717-broken-triangle-environment/1",
+  "source_repository": "https://github.com/imm-rl-lab/optimal_control",
+  "source_repository_commit": "f4d76c60f4003f50954174e96eafd8e514bd5441",
+  "game_file_blob": "91771d55f6f868bb31d871cb0ad8a5d2af521c2a",
+  "rl_notebook_blob": "2ba6b9d73040caf2c98017ecc7bcee3d41c1be8a",
+  "source_license": "no license declared in repository metadata",
+  "state_order": [
+    "time",
+    "x",
+    "y"
+  ],
+  "source_dt": 0.4,
+  "source_horizon": 4,
+  "source_terminal_time": 1.6,
+  "u_catalogue": [
+    -0.25,
+    0.25
+  ],
+  "v_catalogue": [
+    -1.0,
+    1.0
+  ],
+  "source_terminal_reward": "signed distance to terminal polygon M",
+  "adaptation": {
+    "control_information": "fixed open-loop plan versus observed-state causal feedback",
+    "cost": "source signed distance to polygon M; the disturbance maximizes terminal cost",
+    "disturbance_sequences_per_plan": 16,
+    "dt": 0.4,
+    "horizon": 4,
+    "open_loop_plan_count": 16,
+    "reachability": "finite forward state catalog and exact finite-feedback predecessor game; no continuous boundary claim"
+  }
+}

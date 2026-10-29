@@ -1,5 +1,5 @@
 {
-  "schema": "csl.viz04-replay-comparison/1",
+  "schema": "csl.viz04-replay-comparison/2",
   "source_run": {
     "run": "fuel-toy-run",
     "content_sha256": "0000000000000000000000000000000000000000000000000000000000000000"
@@ -70,7 +70,9 @@
         "original_objective": 0.0,
         "replay_time_ns": 0,
         "missing_prerequisites": [],
-        "diagnostics": []
+        "diagnostics": [],
+        "numerical_policy": {"absolute_tolerance": 1e-12, "relative_tolerance": 1e-12},
+        "integration_residual": {"status": "not_applicable"}
       }
     },
     {
@@ -113,7 +115,9 @@
         "original_objective": 1.75,
         "replay_time_ns": 0,
         "missing_prerequisites": [],
-        "diagnostics": []
+        "diagnostics": [],
+        "numerical_policy": {"absolute_tolerance": 1e-12, "relative_tolerance": 1e-12},
+        "integration_residual": {"status": "not_applicable"}
       }
     }
   ]
