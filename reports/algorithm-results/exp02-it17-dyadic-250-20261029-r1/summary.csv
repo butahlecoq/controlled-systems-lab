@@ -1,0 +1,7 @@
+method,attempts,median_ns,min_ns,max_ns,reducer_complete
+geometric-quickhull,7,548675,528351,904519,n/a
+lp-membership-baseline,7,67620823,67237114,69811963,0/7
+basis-reuse-related-to-A43,7,749191,722092,824550,7/7
+ordered-membership-related-to-A44,7,67190251,66784680,68650637,0/7
+A43-certificate-safe-basis-adaptation,7,24518025,24265687,25306955,0/7
+A44-incremental-LP-farthest-seed,7,27472464,27176824,30603461,7/7

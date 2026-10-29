@@ -20,6 +20,33 @@ spec.loader.exec_module(stage_report)
 
 
 class Exp02IT17DyadicStageTests(unittest.TestCase):
+    def test_250_point_bundle_validates_and_stages_its_raw_checks_and_plot(self):
+        report_id = "exp02-it17-dyadic-250-20261029-r1"
+        source = ROOT / "reports/algorithm-results" / report_id
+        rows = [json.loads(line) for line in
+                (source / "raw/raw-rows.jsonl").read_text(encoding="utf-8").splitlines()]
+        self.assertEqual(len(rows), 48)
+        self.assertTrue(all(row["checker"]["status"] == "verified" for row in rows))
+        self.assertTrue(all(row["checker"]["budget_max_points"] == 250 for row in rows))
+        with tempfile.TemporaryDirectory() as temp:
+            site = Path(temp) / "site"
+            site.mkdir()
+            (site / "index.html").write_text(
+                '<!doctype html><html lang="en"><body><ul></ul></body></html>',
+                encoding="utf-8")
+            self.assertEqual(stage_report.stage(source, site), report_id)
+            import landing
+            landing.build(site)
+            self.assertIn("with one 250-point continuation",
+                          (site / "index.html").read_text(encoding="utf-8"))
+            page = (site / report_id / "index.html").read_text(encoding="utf-8")
+            self.assertIn("Performance conclusion: inconclusive", page)
+            self.assertIn("0/7", page)
+            self.assertTrue((site / report_id / "fixture-geometry.svg").is_file())
+            with ZipFile(site / (report_id + ".zip")) as archive:
+                self.assertIn(report_id + "/raw/raw-rows.jsonl", archive.namelist())
+                self.assertIn(report_id + "/SHA256SUMS", archive.namelist())
+
     def test_summarizer_suppresses_latency_for_failed_or_short_samples(self):
         source = ROOT / "reports/algorithm-results/exp02-it17-a44-paper-order-20261028-r3"
         with tempfile.TemporaryDirectory() as temp:

@@ -1,0 +1,3 @@
+Clean Release build command: cmake --build /var/tmp/csl-exp02-itis17-build --target csl_it17_hull_comparison_report --clean-first --parallel 4
+Result: success, 287/287 Ninja steps, elapsed 2m48.294s (user 10m36.025s, system 25.993s).
+Compiler: GCC 16.2.1; one warning in vendored HiGHS HighsSymmetry.cpp about numSetPackingRows potentially uninitialized; build succeeded.

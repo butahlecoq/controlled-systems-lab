@@ -21,6 +21,7 @@ REPORT_IDS = {
     REPORT_ID,
     "exp02-it17-a44-paper-order-20261027-r2",
     "exp02-it17-a44-paper-order-20261028-r3",
+    "exp02-it17-dyadic-250-20261029-r1",
 }
 
 
@@ -55,7 +56,8 @@ def validate_bundle(source: Path) -> None:
         if actual != expected:
             raise ValueError("report bundle file hash mismatch: " + name)
     record = json.loads((source / "record.json").read_text(encoding="utf-8"))
-    if record.get("report_id") != report_id or record.get("attempts") != 72:
+    expected_attempts = 48 if report_id == "exp02-it17-dyadic-250-20261029-r1" else 72
+    if record.get("report_id") != report_id or record.get("attempts") != expected_attempts:
         raise ValueError("report identity or attempt count differs")
     for page in sorted(path for path in source.rglob("*.html") if path.is_file()):
         page_assets = set()
@@ -104,13 +106,19 @@ def stage(source: Path, site_root: Path) -> str:
         raise ValueError("site index insertion point differs")
     if report_id.endswith("-r3"):
         title = "QuickHull and ITIS17 hull output-status pilot"
+    elif report_id == "exp02-it17-dyadic-250-20261029-r1":
+        title = "QuickHull and ITIS17 250-point dyadic hull pilot"
     elif report_id.endswith("-r2"):
         title = "QuickHull and ITIS17 A44 source-aligned rerun"
     else:
         title = "QuickHull and ITIS17 dyadic hull pilot"
+    description = (
+        " — exploratory comparison on one 250-point interior-heavy square cloud"
+        if report_id == "exp02-it17-dyadic-250-20261029-r1" else
+        " — repeated exploratory 2D comparison on two interior-heavy square clouds"
+    )
     link = (
-        f'<li><a href="{report_id}/index.html">{title}</a>'
-        ' — repeated exploratory 2D comparison on two interior-heavy square clouds'
+        f'<li><a href="{report_id}/index.html">{title}</a>{description}'
         f' · <a href="{report_id}/summary.csv">measured table</a>'
         f' · <a href="{report_id}.zip">offline bundle</a></li>'
     )
