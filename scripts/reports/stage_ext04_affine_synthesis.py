@@ -118,7 +118,7 @@ def source_entry(bundle: Path) -> dict:
         if (archive.testzip() is not None or names != expected_archive or
                 any(archive.read(name) != (bundle / name).read_bytes() for name in names)):
             raise ValueError("native offline report ZIP is invalid")
-    site.OfflineHTML(expected - {report_id + ".zip", "manifest.json"}).feed(
+    site.OfflineHTML(expected - {"manifest.json"}).feed(
         (bundle / "index.html").read_text(encoding="utf-8"))
     return {
         "report_id": report_id,

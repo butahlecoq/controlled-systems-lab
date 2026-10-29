@@ -1,0 +1,96 @@
+[1/1] Cleaning all built files...
+Cleaning... 173 files.
+[1/94] Scanning $SOURCE_ROOT/src/contracts/model.cpp for CXX dependencies
+[2/94] Scanning $SOURCE_ROOT/src/contracts/problem.cpp for CXX dependencies
+[3/94] Scanning $SOURCE_ROOT/src/contracts/outcomes.cpp for CXX dependencies
+[4/94] Scanning $SOURCE_ROOT/src/contracts/geometry.cpp for CXX dependencies
+[5/94] Scanning $SOURCE_ROOT/src/contracts/execution.cpp for CXX dependencies
+[6/94] Scanning $SOURCE_ROOT/src/contracts/synthesis.cpp for CXX dependencies
+[7/94] Generating CXX dyndep file CMakeFiles/csl_contracts.dir/CXX.dd
+[8/94] Scanning $SOURCE_ROOT/src/numeric/data.cpp for CXX dependencies
+[9/94] Building CXX object CMakeFiles/csl_contracts.dir/src/contracts/model.cpp.o
+[10/94] Building CXX object CMakeFiles/csl_contracts.dir/src/contracts/problem.cpp.o
+[11/94] Building CXX object CMakeFiles/csl_contracts.dir/src/contracts/outcomes.cpp.o
+[12/94] Building CXX object CMakeFiles/csl_contracts.dir/src/contracts/geometry.cpp.o
+[13/94] Building CXX object CMakeFiles/csl_contracts.dir/src/contracts/execution.cpp.o
+[14/94] Generating CXX dyndep file CMakeFiles/csl_numeric.dir/CXX.dd
+[15/94] Scanning $SOURCE_ROOT/src/optimization/objective_reformulation.cpp for CXX dependencies
+[16/94] Scanning $SOURCE_ROOT/src/sets/data.cpp for CXX dependencies
+[17/94] Building CXX object CMakeFiles/csl_numeric.dir/src/numeric/data.cpp.o
+[18/94] Generating CXX dyndep file CMakeFiles/csl_objectives.dir/CXX.dd
+[19/94] Generating CXX dyndep file CMakeFiles/csl_sets.dir/CXX.dd
+[20/94] Scanning $SOURCE_ROOT/src/model/linear_system.cpp for CXX dependencies
+[21/94] Scanning $SOURCE_ROOT/src/model/discretization/adapter.cpp for CXX dependencies
+[22/94] Scanning $SOURCE_ROOT/src/model/discretization/rk4.cpp for CXX dependencies
+[23/94] Scanning $SOURCE_ROOT/src/model/hybrid_system.cpp for CXX dependencies
+[24/94] Building CXX object CMakeFiles/csl_contracts.dir/src/contracts/synthesis.cpp.o
+[25/94] Linking CXX static library libcsl_contracts.a
+[26/94] Linking CXX static library libcsl_numeric.a
+[27/94] Building CXX object CMakeFiles/csl_sets.dir/src/sets/data.cpp.o
+[28/94] Generating CXX dyndep file CMakeFiles/csl_model.dir/CXX.dd
+[29/94] Scanning $SOURCE_ROOT/src/problem/domains.cpp for CXX dependencies
+[30/94] Scanning $SOURCE_ROOT/src/problem/constraints.cpp for CXX dependencies
+[31/94] Scanning $SOURCE_ROOT/src/problem/initial_information.cpp for CXX dependencies
+[32/94] Linking CXX static library libcsl_sets.a
+[33/94] Building CXX object CMakeFiles/csl_model.dir/src/model/linear_system.cpp.o
+[34/94] Building CXX object CMakeFiles/csl_objectives.dir/src/optimization/objective_reformulation.cpp.o
+[35/94] Linking CXX static library libcsl_objectives.a
+[36/94] Building CXX object CMakeFiles/csl_model.dir/src/model/discretization/adapter.cpp.o
+[37/94] Building CXX object CMakeFiles/csl_model.dir/src/model/discretization/rk4.cpp.o
+[38/94] Generating CXX dyndep file CMakeFiles/csl_problem.dir/CXX.dd
+[39/94] Scanning $SOURCE_ROOT/src/problem/identity.cpp for CXX dependencies
+[40/94] Scanning $SOURCE_ROOT/src/problem/resolved.cpp for CXX dependencies
+[41/94] Scanning $SOURCE_ROOT/src/registry/compiled_verifiers.cpp for CXX dependencies
+[42/94] Scanning $SOURCE_ROOT/src/registry/nominal_linear_exact_verifier.cpp for CXX dependencies
+[43/94] Building CXX object CMakeFiles/csl_problem.dir/src/problem/domains.cpp.o
+[44/94] Building CXX object CMakeFiles/csl_problem.dir/src/problem/constraints.cpp.o
+[45/94] Building CXX object CMakeFiles/csl_model.dir/src/model/hybrid_system.cpp.o
+[46/94] Linking CXX static library libcsl_model.a
+[47/94] Generating CXX dyndep file CMakeFiles/csl_resolved_core.dir/CXX.dd
+[48/94] Scanning $SOURCE_ROOT/src/optimization/linear_program.cpp for CXX dependencies
+[49/94] Scanning $SOURCE_ROOT/src/optimization/lp_backend.cpp for CXX dependencies
+[50/94] Scanning $SOURCE_ROOT/src/optimization/linear_infeasibility_certificate.cpp for CXX dependencies
+[51/94] Scanning $SOURCE_ROOT/src/registry/registry.cpp for CXX dependencies
+[52/94] Generating CXX dyndep file CMakeFiles/csl_verifiers.dir/CXX.dd
+[53/94] Building CXX object CMakeFiles/csl_problem.dir/src/problem/initial_information.cpp.o
+[54/94] Linking CXX static library libcsl_problem.a
+[55/94] Building CXX object CMakeFiles/csl_resolved_core.dir/src/problem/identity.cpp.o
+[56/94] Generating CXX dyndep file CMakeFiles/csl_optimization.dir/CXX.dd
+[57/94] Scanning $SOURCE_ROOT/src/optimization/phase_one/program.cpp for CXX dependencies
+[58/94] Scanning $SOURCE_ROOT/src/optimization/phase_one/simplex.cpp for CXX dependencies
+[59/94] Generating CXX dyndep file CMakeFiles/csl_registry.dir/CXX.dd
+[60/94] Building CXX object CMakeFiles/csl_resolved_core.dir/src/problem/resolved.cpp.o
+[61/94] Building CXX object CMakeFiles/csl_verifiers.dir/src/registry/compiled_verifiers.cpp.o
+[62/94] Linking CXX static library libcsl_resolved_core.a
+[63/94] Scanning $SOURCE_ROOT/src/controllers/observed_replay.cpp for CXX dependencies
+[64/94] Scanning $SOURCE_ROOT/src/controllers/finite_policy.cpp for CXX dependencies
+[65/94] Scanning $SOURCE_ROOT/src/controllers/continuous_policy.cpp for CXX dependencies
+[66/94] Building CXX object CMakeFiles/csl_verifiers.dir/src/registry/nominal_linear_exact_verifier.cpp.o
+[67/94] Building CXX object CMakeFiles/csl_optimization.dir/src/optimization/linear_program.cpp.o
+[68/94] Building CXX object CMakeFiles/csl_optimization.dir/src/optimization/lp_backend.cpp.o
+[69/94] Generating CXX dyndep file CMakeFiles/csl_phase_one.dir/CXX.dd
+[70/94] Building CXX object CMakeFiles/csl_optimization.dir/src/optimization/linear_infeasibility_certificate.cpp.o
+[71/94] Linking CXX static library libcsl_verifiers.a
+[72/94] Generating CXX dyndep file CMakeFiles/csl_controllers.dir/CXX.dd
+[73/94] Scanning $SOURCE_ROOT/benchmarks/reporting/ext04/affine_synthesis_driver.cpp for CXX dependencies
+[74/94] Scanning $SOURCE_ROOT/tests/unit/controllers/finite_policy_tests.cpp for CXX dependencies
+[75/94] Scanning $SOURCE_ROOT/tests/unit/controllers/continuous_policy_tests.cpp for CXX dependencies
+[76/94] Linking CXX static library libcsl_optimization.a
+[77/94] Building CXX object CMakeFiles/csl_phase_one.dir/src/optimization/phase_one/program.cpp.o
+[78/94] Building CXX object CMakeFiles/csl_registry.dir/src/registry/registry.cpp.o
+[79/94] Linking CXX static library libcsl_registry.a
+[80/94] Building CXX object CMakeFiles/csl_controllers.dir/src/controllers/observed_replay.cpp.o
+[81/94] Building CXX object CMakeFiles/csl_controllers.dir/src/controllers/finite_policy.cpp.o
+[82/94] Building CXX object CMakeFiles/csl_phase_one.dir/src/optimization/phase_one/simplex.cpp.o
+[83/94] Generating CXX dyndep file CMakeFiles/csl_ext04_affine_synthesis_report.dir/CXX.dd
+[84/94] Generating CXX dyndep file CMakeFiles/finite_policy_tests.dir/CXX.dd
+[85/94] Generating CXX dyndep file CMakeFiles/continuous_policy_tests.dir/CXX.dd
+[86/94] Linking CXX static library libcsl_phase_one.a
+[87/94] Building CXX object CMakeFiles/csl_controllers.dir/src/controllers/continuous_policy.cpp.o
+[88/94] Linking CXX static library libcsl_controllers.a
+[89/94] Building CXX object CMakeFiles/csl_ext04_affine_synthesis_report.dir/benchmarks/reporting/ext04/affine_synthesis_driver.cpp.o
+[90/94] Building CXX object CMakeFiles/finite_policy_tests.dir/tests/unit/controllers/finite_policy_tests.cpp.o
+[91/94] Linking CXX executable csl_ext04_affine_synthesis_report
+[92/94] Linking CXX executable finite_policy_tests
+[93/94] Building CXX object CMakeFiles/continuous_policy_tests.dir/tests/unit/controllers/continuous_policy_tests.cpp.o
+[94/94] Linking CXX executable continuous_policy_tests

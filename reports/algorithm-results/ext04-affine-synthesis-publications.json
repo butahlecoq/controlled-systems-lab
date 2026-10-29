@@ -1,0 +1,56 @@
+{
+  "reports": [
+    {
+      "evidence_limits": [
+        "One one-transition, two-state analytic fixture with eight authored joint vertices.",
+        "Coverage is universal only over the caller-authored joint V-hull; its completeness is assumed.",
+        "Binary64 LP and replay checks provide numerical evidence, not a validated arithmetic certificate.",
+        "The objective is feasibility only; the returned affine policy is not cost-optimal or unique.",
+        "A numerical infeasible LP status is inconclusive and does not prove that no policy exists.",
+        "Single provider and fixture; timings are descriptive and make no comparison, speedup, or scalability claim."
+      ],
+      "files": {
+        "driver.cpp": "55769d80a4d4a1d3b9c01a61b5fa24b279d75c08f90b2b891292ceada9b71540",
+        "environment.json": "335af629e989fef22c7ff8348dd65d1a654cf99b2d21cc50b6462f1e2a25ae64",
+        "ext04-affine-synthesis-71ef0bb0b379cee5.zip": "6d6d1154bab2bdf9a6d5f74ba16cd4ee9ef79b5ef87c5b4545e688dc2971f667",
+        "fixture.json": "437af5f7fed4808071d08321389b7ca206c200838a5fa1321dd3a858c2a5c2be",
+        "index.html": "a18f58fba05f07a29245793524cdaa64f605ba32e704f2bace56fc1b0d1b7a9b",
+        "manifest.json": "ede17e3fa4179649c7c036a8e1df2e58fda9f832af17681cdb3c41773acf042f",
+        "records.json": "0c8b6ccca4047a4db182ca916f6b464edbba810e1feeb4454fc98d803d77f26c",
+        "release-build-log.txt": "bd37e60df3389a6e6252359af09fdf691e86bb3383327649d265d9b6d1f8ece7",
+        "renderer.py": "8eca709c2900236f241fa14b4de7a8b78452cc499b2705e2e2c82755836d4244",
+        "result.json": "8c7904c7a89e32f550bcd9983ab9c700ca7dd717230f9cecd67cc9a0c89637d1",
+        "smoke.txt": "f8408f54f5735a066538b12e34e9b696e670ab23176c7ce54deb646cd04f474e",
+        "summary.csv": "8d1b323da368945c0eb31f9134824b040f786e9343fbfca76d3af73978ff207f",
+        "synthesis-2d.svg": "d95181409100165c3d73a543935fe2f1734fcea2a7b893a495be067e6fb319b8",
+        "trials.jsonl": "2c20d3a83d0c99e09d1adb3d595131ee0e2ffd67015b73c3fc42229534528326"
+      },
+      "measured_scope": "Seven 100-call batches of one-stage affine policy synthesis with eight joint generators per call",
+      "payload_sha256": "0c8b6ccca4047a4db182ca916f6b464edbba810e1feeb4454fc98d803d77f26c",
+      "public_files_sha256": {
+        "driver.cpp": "55769d80a4d4a1d3b9c01a61b5fa24b279d75c08f90b2b891292ceada9b71540",
+        "environment.json": "335af629e989fef22c7ff8348dd65d1a654cf99b2d21cc50b6462f1e2a25ae64",
+        "ext04-affine-synthesis-71ef0bb0b379cee5.zip": "6d6d1154bab2bdf9a6d5f74ba16cd4ee9ef79b5ef87c5b4545e688dc2971f667",
+        "fixture.json": "437af5f7fed4808071d08321389b7ca206c200838a5fa1321dd3a858c2a5c2be",
+        "index.html": "31d8f48f56d2f4aa72fe970c2607f2dc71685546503cb48a0431f771f505e3a3",
+        "manifest.json": "ede17e3fa4179649c7c036a8e1df2e58fda9f832af17681cdb3c41773acf042f",
+        "publication-manifest.json": "44e4bae21c10af133d83268baf005fcf230f8ef2be49d01651cfa6ade57dbe99",
+        "records.json": "0c8b6ccca4047a4db182ca916f6b464edbba810e1feeb4454fc98d803d77f26c",
+        "release-build-log.txt": "bd37e60df3389a6e6252359af09fdf691e86bb3383327649d265d9b6d1f8ece7",
+        "renderer.py": "8eca709c2900236f241fa14b4de7a8b78452cc499b2705e2e2c82755836d4244",
+        "report-envelope.json": "07497fd2f9f2ac3b827679a50caab3bc1a12e63c33ed2048be192e6f951b93e6",
+        "result.json": "8c7904c7a89e32f550bcd9983ab9c700ca7dd717230f9cecd67cc9a0c89637d1",
+        "smoke.txt": "f8408f54f5735a066538b12e34e9b696e670ab23176c7ce54deb646cd04f474e",
+        "summary.csv": "8d1b323da368945c0eb31f9134824b040f786e9343fbfca76d3af73978ff207f",
+        "synthesis-2d.svg": "d95181409100165c3d73a543935fe2f1734fcea2a7b893a495be067e6fb319b8",
+        "trials.jsonl": "2c20d3a83d0c99e09d1adb3d595131ee0e2ffd67015b73c3fc42229534528326"
+      },
+      "publisher_sha256": "24aec896f9fcc2e93edba65db8ca844fcbf95468d2f277a838180bb89ab3cb2b",
+      "report_id": "ext04-affine-synthesis-71ef0bb0b379cee5",
+      "source_commit": "71ef0bb0b379cee52e0d0d8acb2d005fa32869e9",
+      "source_report_id": "ext04-affine-synthesis-71ef0bb0b379cee5",
+      "zip_sha256": "5897ee2463d4ce0833f4ba9b0923eaf6125e78e8a132f37b71c841c18507cde3"
+    }
+  ],
+  "schema": "csl.ext04-affine-synthesis-publications/1"
+}
