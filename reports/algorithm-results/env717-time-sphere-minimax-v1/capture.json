@@ -1,0 +1,11 @@
+{
+  "schema": "csl.capture/1",
+  "captured_at_utc": "2026-10-29T16:09:18.105372+00:00",
+  "source_commit": "05885f579eef1350ec5cc285454a86275a680d6d",
+  "driver_sha256": "9b1214d9ec3e954c644c44d082bca399421cf73648d943b35899921f3fb47f5f",
+  "algorithm_source_sha256": "14e2237b0947319d494eb95100f56e080552add88c646d867c0a496f3da1ba0c",
+  "host_processor": "unavailable",
+  "command": "build/env717-time-sphere-minimax/csl_env717_time_sphere_minimax --json",
+  "solver_failures": 0,
+  "notes": "One finite-game pilot capture; timings are descriptive and not compared."
+}

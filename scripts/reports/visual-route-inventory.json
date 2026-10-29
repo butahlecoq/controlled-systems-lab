@@ -1695,6 +1695,16 @@
       "follow_up_issue": 717
     },
     {
+      "route": "env717-time-sphere-minimax-v1",
+      "source_bundle": "env717-time-sphere-minimax-v1",
+      "assets": [
+        "reachability.svg"
+      ],
+      "index_sha256": "d47fb2f2b0dbc99fe44622b98f73aa33a7b2282f2bf9ee718f30cfea203b1eb5",
+      "disposition": "deferred: original frozen route-level readability review remains; companion availability is listed separately",
+      "follow_up_issue": 717
+    },
+    {
       "route": "env717-time-sphere-pilot-v1",
       "source_bundle": "env717-time-sphere-pilot-v1",
       "assets": [

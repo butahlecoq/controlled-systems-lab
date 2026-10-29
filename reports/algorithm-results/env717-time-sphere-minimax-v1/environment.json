@@ -1,0 +1,13 @@
+{
+  "schema": "csl.environment-capture/1",
+  "source_repository_commit": "f4d76c60f4003f50954174e96eafd8e514bd5441",
+  "source_file_blob": "fd7709a6f8e4196665d36b4ac5d348173599c250",
+  "algorithm_source_sha256": "14e2237b0947319d494eb95100f56e080552add88c646d867c0a496f3da1ba0c",
+  "compiler": "GNU",
+  "compiler_version": "16.2.1",
+  "build_type": "Release",
+  "architecture": "x86_64",
+  "python": "3.14.8",
+  "platform": "Linux-7.2.8-9-omarchy-x86_64-with-glibc2.44",
+  "host_processor": "unavailable"
+}
