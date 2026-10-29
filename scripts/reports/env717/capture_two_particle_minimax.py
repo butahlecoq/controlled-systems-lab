@@ -102,7 +102,7 @@ def svg_figure(data) -> str:
                 panels.append(f'<circle cx="{x:.2f}" cy="{y:.2f}" r="4.0" fill="none" stroke="#b92e2e" stroke-width="1.25" opacity="0.9" data-role="winning-intersection"/>')
         for point in projection["target_projection"]:
             x, y = xy(point)
-            panels.append(f'<circle cx="{x:.2f}" cy="{y:.2f}" r="5.2" class="target" data-role="terminal-target"/>')
+            panels.append(f'<path d="M {x:.2f} {y - 6:.2f} L {x + 6:.2f} {y:.2f} L {x:.2f} {y + 6:.2f} L {x - 6:.2f} {y:.2f} Z" class="target" data-role="terminal-target"/>')
         trajectory = [xy(point) for point in projection["minimax_trajectory"]]
         panels.append('<polyline points="' + " ".join(f"{x:.1f},{y:.1f}" for x, y in trajectory) + '" class="path"/>')
         for index, (x, y) in enumerate(trajectory):
@@ -115,12 +115,12 @@ def svg_figure(data) -> str:
     legend = ('<g transform="translate(80,584)"><circle cx="0" cy="0" r="4" fill="#5383b5"/><text x="9" y="4">forward graph states (stage colors)</text>'
         '<circle cx="270" cy="0" r="4" fill="none" stroke="#b92e2e" stroke-width="1.25"/><text x="279" y="4">backward-winning ∩ forward states</text>'
         '<line x1="560" y1="0" x2="590" y2="0" class="path"/><text x="600" y="4">selected worst-case minimax path</text>'
-        '<circle cx="920" cy="0" r="4" class="target"/><text x="930" y="4">projected terminal target states</text></g>')
+        '<path d="M 920,-5 L 925,0 L 920,5 L 915,0 Z" class="target"/><text x="930" y="4">projected terminal target states</text></g>')
     return ('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 620" role="img" aria-labelledby="title desc">'
         '<title id="title">TwoParticleGame reachable and winning states</title>'
         '<desc id="desc">Forward finite-state graph nodes, backward-winning intersections, projected terminal target states, and a selected worst-case minimax path in each particle phase plane.</desc>'
         '<rect width="1280" height="620" fill="#fff"/>'
-        '<style>text{font:14px system-ui,sans-serif;fill:#172033}.title{font-size:19px;font-weight:600}.frame{fill:#fff;stroke:#8493a5}.target{fill:#f6d58b;fill-opacity:.9;stroke:#9a6711;stroke-width:1.5}.path{fill:none;stroke:#252e38;stroke-width:3}.path-point{fill:#e4572e;stroke:#fff;stroke-width:1.5}.stage{font-size:11px;font-weight:bold}.tick{font-size:11px;fill:#596779}</style>'
+        '<style>text{font:14px system-ui,sans-serif;fill:#172033}.title{font-size:19px;font-weight:600}.frame{fill:#fff;stroke:#8493a5}.target{fill:none;stroke:#9a6711;stroke-width:1.6}.path{fill:none;stroke:#252e38;stroke-width:3}.path-point{fill:#e4572e;stroke:#fff;stroke-width:1.5}.stage{font-size:11px;font-weight:bold}.tick{font-size:11px;fill:#596779}</style>'
         + ''.join(panels) + legend + '</svg>')
 
 
@@ -135,7 +135,7 @@ def make_page(result, check, capture):
 <style>body{{font:16px/1.55 system-ui,sans-serif;max-width:78rem;margin:auto;padding:1.2rem;color:#172033}}img{{width:100%;height:auto}}code{{overflow-wrap:anywhere}}table{{border-collapse:collapse}}td,th{{border:1px solid #ccd3dc;padding:.4rem .7rem;text-align:left}}.note{{background:#f4f6f8;padding:.8rem 1rem;border-left:4px solid #55718f}}.quiet{{color:#536273}}</style></head>
 <body><h1>TwoParticleGame: finite reachability and minimax</h1>
 <p>This example applies our finite-feedback reachability and causal minimax solvers to the source-derived two-particle game. The finite game has four physical state coordinates and a short four-stage horizon.</p>
-<figure><img src="projections.svg" alt="Forward graph states, backward-winning intersections, projected terminal target states, and minimax path in particle phase planes x1-x2 and x3-x4"><figcaption>Panels show particle 1's (x₁,x₂) phase plane and particle 2's (x₃,x₄) phase plane. Gold points are projections of full states in the terminal target; projected graph nodes are points, not convex hulls. Stage colors distinguish time layers, and red points are both forward reachable and backward winning.</figcaption></figure>
+<figure><img src="projections.svg" alt="Forward graph states, backward-winning intersections, projected terminal target states, and minimax path in particle phase planes x1-x2 and x3-x4"><figcaption>Panels show particle 1's (x₁,x₂) phase plane and particle 2's (x₃,x₄) phase plane. Gold diamonds outline projections of full states in the joint terminal target; projected graph nodes are points, not convex hulls. Stage colors distinguish time layers, and red circles mark states that are both forward reachable and backward winning.</figcaption></figure>
 <h2>Result</h2><table><tbody><tr><th>Forward graph states by stage</th><td>{html.escape(counts)}</td></tr>
 <tr><th>First robust capture of |x₁−x₃| ≤ 1</th><td>{result['first_robust_capture_steps']} decisions ({result['first_robust_capture_steps'] * 0.2:.1f} s)</td></tr>
 <tr><th>Finite causal minimax terminal gap</th><td>{result['finite_causal_minimax_terminal_gap']:.6f}</td></tr>
