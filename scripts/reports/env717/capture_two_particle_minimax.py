@@ -31,8 +31,10 @@ def write_json(path: Path, value) -> None:
 
 def project_layers(result):
     projection_specs = [
-        ("positions", "particle positions", 0, 2, "x₁", "x₂"),
-        ("velocities", "particle velocities", 1, 3, "v₁", "v₂"),
+        ("particle-1-phase-plane", "particle 1 phase plane", 0, 1,
+            "x₁ position", "x₂ velocity"),
+        ("particle-2-phase-plane", "particle 2 phase plane", 2, 3,
+            "x₃ position", "x₄ velocity"),
     ]
     projections = []
     for name, description, x_index, y_index, x_label, y_label in projection_specs:
@@ -48,9 +50,12 @@ def project_layers(result):
             })
         trajectory = [[row["state"][x_index], row["state"][y_index]]
                       for row in result["minimax_trajectory"]]
+        target_states = [state["state"] for state in result["figure_layers"][-1]["forward_states"]
+                         if abs(state["state"][0] - state["state"][2]) <= result["target"]["radius"]]
+        target_projection = [[state[x_index], state[y_index]] for state in target_states]
         projections.append({"name": name, "description": description,
             "x_label": x_label, "y_label": y_label,
-            "target_band": {"predicate": "abs(x₁-x₂) <= 1.0", "active": name == "positions"},
+            "target_projection": target_projection,
             "layers": layers, "minimax_trajectory": trajectory})
     return {"schema": "csl.env717-two-particle-figure/1", "projections": projections,
             "target": result["target"], "state_space": "4D finite quantized graph; points are projected graph states"}
@@ -66,7 +71,7 @@ def svg_figure(data) -> str:
         points = [point for layer in projection["layers"]
                   for group in (layer["forward"], layer["winning_intersection"])
                   for point in group]
-        points += projection["minimax_trajectory"]
+        points += projection["minimax_trajectory"] + projection["target_projection"]
         if not points:
             raise ValueError("projection has no points")
         xmin = min(point[0] for point in points)
@@ -87,26 +92,9 @@ def svg_figure(data) -> str:
         y_label = html.escape(projection["y_label"])
         panels.append(f'<text x="{left + plot_width / 2}" y="34" text-anchor="middle" class="title">{title}</text>')
         panels.append(f'<rect x="{left}" y="{top}" width="{plot_width}" height="{plot_height}" class="frame"/>')
-        if projection["target_band"]["active"]:
-            polygon = [(xmin, ymin), (xmax, ymin), (xmax, ymax), (xmin, ymax)]
-            for constraint in (lambda point: point[1] - point[0] - 1.0,
-                               lambda point: point[0] - point[1] - 1.0):
-                clipped = []
-                for index, current in enumerate(polygon):
-                    previous = polygon[index - 1]
-                    current_value, previous_value = constraint(current), constraint(previous)
-                    current_inside, previous_inside = current_value <= 0, previous_value <= 0
-                    if current_inside != previous_inside:
-                        ratio = previous_value / (previous_value - current_value)
-                        clipped.append((previous[0] + ratio * (current[0] - previous[0]),
-                                        previous[1] + ratio * (current[1] - previous[1])))
-                    if current_inside:
-                        clipped.append(current)
-                polygon = clipped
-            if len(polygon) >= 3:
-                projected = [xy(point) for point in polygon]
-                points_text = " ".join(f"{x:.1f},{y:.1f}" for x, y in projected)
-                panels.append(f'<polygon points="{points_text}" class="target"/>')
+        for point in projection["target_projection"]:
+            x, y = xy(point)
+            panels.append(f'<circle cx="{x:.2f}" cy="{y:.2f}" r="3.2" class="target"/>')
         for layer in projection["layers"]:
             color = colors[layer["stage"] % len(colors)]
             for point in layer["forward"]:
@@ -127,10 +115,10 @@ def svg_figure(data) -> str:
     legend = ('<g transform="translate(80,584)"><circle cx="0" cy="0" r="4" fill="#5383b5"/><text x="9" y="4">forward graph states (stage colors)</text>'
         '<circle cx="270" cy="0" r="4" fill="#b92e2e"/><text x="279" y="4">backward-winning ∩ forward states</text>'
         '<line x1="560" y1="0" x2="590" y2="0" class="path"/><text x="600" y="4">selected worst-case minimax path</text>'
-        '<rect x="910" y="-7" width="20" height="14" class="target"/><text x="937" y="4">terminal target band in position projection</text></g>')
+        '<circle cx="920" cy="0" r="4" class="target"/><text x="930" y="4">projected terminal target states</text></g>')
     return ('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 620" role="img" aria-labelledby="title desc">'
         '<title id="title">TwoParticleGame reachable and winning states</title>'
-        '<desc id="desc">Forward finite-state graph nodes, backward-winning intersections, terminal target, and a selected worst-case minimax path in position and velocity projections.</desc>'
+        '<desc id="desc">Forward finite-state graph nodes, backward-winning intersections, projected terminal target states, and a selected worst-case minimax path in each particle phase plane.</desc>'
         '<rect width="1280" height="620" fill="#fff"/>'
         '<style>text{font:14px system-ui,sans-serif;fill:#172033}.title{font-size:19px;font-weight:600}.frame{fill:#fff;stroke:#8493a5}.target{fill:#f6d58b;fill-opacity:.3;stroke:#d09c38;stroke-dasharray:5 4}.path{fill:none;stroke:#252e38;stroke-width:3}.path-point{fill:#e4572e;stroke:#fff;stroke-width:1.5}.stage{font-size:11px;font-weight:bold}.tick{font-size:11px;fill:#596779}</style>'
         + ''.join(panels) + legend + '</svg>')
@@ -147,7 +135,7 @@ def make_page(result, check, capture):
 <style>body{{font:16px/1.55 system-ui,sans-serif;max-width:78rem;margin:auto;padding:1.2rem;color:#172033}}img{{width:100%;height:auto}}code{{overflow-wrap:anywhere}}table{{border-collapse:collapse}}td,th{{border:1px solid #ccd3dc;padding:.4rem .7rem;text-align:left}}.note{{background:#f4f6f8;padding:.8rem 1rem;border-left:4px solid #55718f}}.quiet{{color:#536273}}</style></head>
 <body><h1>TwoParticleGame: finite reachability and minimax</h1>
 <p>This example applies our finite-feedback reachability and causal minimax solvers to the source-derived two-particle game. The finite game has four physical state coordinates and a short four-stage horizon.</p>
-<figure><img src="projections.svg" alt="Forward graph states, backward-winning intersections, minimax path, and target in position and velocity projections"><figcaption>Projected graph nodes are points, not convex hulls. Each stage color is a different time layer; the red points are states that are both forward reachable and backward winning.</figcaption></figure>
+<figure><img src="projections.svg" alt="Forward graph states, backward-winning intersections, projected terminal target states, and minimax path in particle phase planes x1-x2 and x3-x4"><figcaption>Panels show particle 1's (x₁,x₂) phase plane and particle 2's (x₃,x₄) phase plane. Gold points are projections of full states in the terminal target; projected graph nodes are points, not convex hulls. Stage colors distinguish time layers, and red points are both forward reachable and backward winning.</figcaption></figure>
 <h2>Result</h2><table><tbody><tr><th>Forward graph states by stage</th><td>{html.escape(counts)}</td></tr>
 <tr><th>First robust capture of |x₁−x₂| ≤ 1</th><td>{result['first_robust_capture_steps']} decisions ({result['first_robust_capture_steps'] * 0.2:.1f} s)</td></tr>
 <tr><th>Finite causal minimax terminal gap</th><td>{result['finite_causal_minimax_terminal_gap']:.6f}</td></tr>

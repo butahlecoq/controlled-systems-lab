@@ -107,7 +107,8 @@ def stage(source: Path, site: Path) -> str:
               f'<a href="../{html.escape(report_id)}.zip">Offline report ZIP</a>.</p>')
     generated["index.html"] = page.replace("</body>", footer + "</body>").encode("utf-8")
     generated["SHA256SUMS"] = "".join(
-        f"{digest(content)}  {name}\n" for name, content in sorted(generated.items())) .encode("ascii")
+        f"{digest(content)}  {name}\n" for name, content in sorted(generated.items())
+        if name != "SHA256SUMS").encode("ascii")
     manifest = {"schema": "csl.env717-publication/1", "report_id": report_id,
         "source_report_id": source.name, "source_repository_commit": SOURCE_COMMIT,
         "source_commit": result["source_commit"], "capture_sha256": digest(files["capture.json"]),

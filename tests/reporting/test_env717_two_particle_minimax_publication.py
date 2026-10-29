@@ -42,10 +42,22 @@ class TwoParticleMinimaxPublicationTests(unittest.TestCase):
         self.assertEqual(manifest["report_id"], report_id)
         for name, sha in manifest["published_files"].items():
             self.assertEqual(hashlib.sha256((destination / name).read_bytes()).hexdigest(), sha)
+        checksum_lines = (destination / "SHA256SUMS").read_text().splitlines()
+        checksums = {name: sha for sha, name in
+                     (line.split("  ", 1) for line in checksum_lines)}
+        self.assertNotIn("SHA256SUMS", checksums)
+        self.assertNotIn("publication-manifest.json", checksums)
+        for name, sha in checksums.items():
+            self.assertEqual(hashlib.sha256((destination / name).read_bytes()).hexdigest(), sha)
         figure = json.loads((destination / "figure-data.json").read_text())
         result = json.loads((destination / "result.json").read_text())
         self.assertEqual([projection["name"] for projection in figure["projections"]],
-                         ["positions", "velocities"])
+                         ["particle-1-phase-plane", "particle-2-phase-plane"])
+        self.assertEqual([projection["x_label"] for projection in figure["projections"]],
+                         ["x₁ position", "x₃ position"])
+        self.assertEqual([projection["y_label"] for projection in figure["projections"]],
+                         ["x₂ velocity", "x₄ velocity"])
+        self.assertTrue(all(projection["target_projection"] for projection in figure["projections"]))
         self.assertEqual([projection["layers"][-1]["stage"] for projection in figure["projections"]],
                          [4, 4])
         self.assertEqual(result["graph_state_counts"], [1, 9, 81, 621, 3969])
@@ -53,7 +65,10 @@ class TwoParticleMinimaxPublicationTests(unittest.TestCase):
         self.assertAlmostEqual(result["finite_causal_minimax_terminal_gap"], 0.859899)
         self.assertEqual(len(result["minimax_trajectory"]), 5)
         self.assertIn("stronger within-stage information pattern", (destination / "index.html").read_text())
-        self.assertIn("Projected graph nodes are points, not convex hulls", (destination / "index.html").read_text())
+        page = (destination / "index.html").read_text()
+        self.assertIn("particle 1's (x₁,x₂) phase plane", page)
+        self.assertIn("particle 2's (x₃,x₄) phase plane", page)
+        self.assertIn("Projected graph nodes are points, not convex hulls", page)
         with zipfile.ZipFile(self.site / f"{report_id}.zip") as archive:
             self.assertIsNone(archive.testzip())
             self.assertIn(f"{report_id}/projections.svg", archive.namelist())
