@@ -14,14 +14,14 @@ cmake -S . -B build/ext04-affine-synthesis \
   -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTING=ON \
   -DCSL_BUILD_EXT04_AFFINE_SYNTHESIS_REPORT=ON \
   -DCSL_ENABLE_HIGHS=OFF -DCSL_ENABLE_QHULL=OFF
-python3 scripts/reports/ext04/capture_environment.py before \
-  > build/ext04-affine-synthesis/environment-before.json
 cmake --build build/ext04-affine-synthesis --config Release \
   --target csl_ext04_affine_synthesis_report --parallel 2
 ctest --test-dir build/ext04-affine-synthesis -C Release \
   -R '^ext04_affine_synthesis_report_smoke$' --output-on-failure
 build/ext04-affine-synthesis/csl_ext04_affine_synthesis_report smoke \
   > build/ext04-affine-synthesis/smoke.txt
+python3 scripts/reports/ext04/capture_environment.py before \
+  > build/ext04-affine-synthesis/environment-before.json
 build/ext04-affine-synthesis/csl_ext04_affine_synthesis_report measure \
   > build/ext04-affine-synthesis/trials.jsonl
 python3 scripts/reports/ext04/capture_environment.py after \
