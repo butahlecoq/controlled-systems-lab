@@ -368,8 +368,19 @@ TEST_CASE("one-stage synthesis stops before allocating an LP over its memory bud
     auto request = one_stage_request(system);
     auto lp = phase_one_workspace();
     REQUIRE(lp != nullptr);
+    constexpr std::size_t generated_rows = 4 * (2 + 2 + 2);
+    constexpr std::size_t parameters = 2;
+    constexpr std::size_t columns = 2 * parameters + generated_rows;
+    constexpr std::size_t maximum_nonzeros = generated_rows * (2 * parameters + 1);
+    const auto previously_estimated_bytes = generated_rows * parameters * sizeof(double) +
+        generated_rows * (sizeof(Vector) + sizeof(double)) +
+        maximum_nonzeros * (sizeof(std::size_t) + sizeof(double)) +
+        (generated_rows + 1) * sizeof(std::size_t) +
+        columns * (sizeof(double) + sizeof(Interval)) +
+        generated_rows * sizeof(Interval);
     ExecutionContext context;
-    context.resources = std::make_shared<const ResourcePolicy>(ResourcePolicy{1, 1, 1, 1});
+    context.resources = std::make_shared<const ResourcePolicy>(ResourcePolicy{
+        1, 1, 1, previously_estimated_bytes});
 
     const auto result = synthesize_one_stage_affine_policy(system, request, *lp, context);
     REQUIRE(std::holds_alternative<OperationStopped>(result));

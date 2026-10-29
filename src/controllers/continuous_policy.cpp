@@ -449,12 +449,13 @@ OneStageAffineSynthesisResult synthesize_one_stage_affine_policy(
     const auto variable_bytes = column_count
         ? checked_multiply(*column_count, sizeof(double) + sizeof(Interval)) : std::nullopt;
     const auto constraint_bytes = checked_multiply(*inequality_count, sizeof(Interval));
+    const auto upper_bound_bytes = checked_multiply(*inequality_count, sizeof(double));
     if (!column_count || !maximum_nonzeros || !coefficient_bytes || !row_metadata_bytes || !sparse_entry_bytes ||
-        !offset_bytes || !variable_bytes || !constraint_bytes)
+        !offset_bytes || !variable_bytes || !constraint_bytes || !upper_bound_bytes)
         return unsupported("controllers.synthesis.dimensions", "Feasibility LP storage extent overflowed.");
     std::size_t estimated_bytes = 0;
     for (const auto bytes : {*coefficient_bytes, *row_metadata_bytes, *sparse_entry_bytes, *offset_bytes,
-             *variable_bytes, *constraint_bytes}) {
+             *variable_bytes, *constraint_bytes, *upper_bound_bytes}) {
         const auto total = checked_add(estimated_bytes, bytes);
         if (!total) return unsupported("controllers.synthesis.dimensions", "Feasibility LP storage extent overflowed.");
         estimated_bytes = *total;
