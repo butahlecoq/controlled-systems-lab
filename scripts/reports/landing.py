@@ -92,6 +92,12 @@ FAMILIES = {
         "finite fixtures and a three-stage TwoPointsOnParallelLines adaptation. The report shows "
         "forward reachable sets, terminal sets, backward-winning intersections, and a replayed "
         "worst-case path in both player phase planes; it makes no continuous RL or performance claim."),
+    "exp06-geometry-pilot": Family(
+        r"exp06-[0-9a-f]{16}", "geometry", "Bounded exact-hull geometry pilot",
+        "Compares a Python 3 transcription of the A29 reference with modern C++ QuickHull on one "
+        "exact nine-point dyadic square fixture. An independent exact checker validates both hulls, "
+        "including a missing-corner control; cross-runtime timing is inconclusive and this pilot "
+        "does not complete the broader geometry ladder or establish a speedup."),
     "lp": Family(
         r"lp-\d{8}T\d{6}Z-[0-9a-f]{12,64}", "optimization", "Linear programming reference run",
         "Runs the registered HiGHS linear-programming adapter on five small analytic "
