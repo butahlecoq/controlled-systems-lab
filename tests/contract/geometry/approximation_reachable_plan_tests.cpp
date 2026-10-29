@@ -65,7 +65,7 @@ registry::Registry<registry::ApproximationPort> provider_outcome(const Approxima
     registry::Registry<registry::ApproximationPort> methods;
     auto error=methods.add({{{"fixture.approximation"},"1"},
         [](const ApproximationRequest& q,const registry::Requirements&) -> registry::Capability {
-            registry::Output offer;offer.representation=q.output;offer.relation=SetRelation::inner;
+            registry::Output offer;offer.representation=q.output;offer.relation=q.direction;
             return registry::Offer{offer};
         },
         [result](const ApproximationRequest&) {return std::make_unique<FixedWorkspace>(result);}});
@@ -74,7 +74,7 @@ registry::Registry<registry::ApproximationPort> provider_outcome(const Approxima
 }
 
 registry::Registry<registry::ApproximationPort> provider(const ApproximationRequest& query,SetHandle output) {
-    return provider_outcome(query,OperationResult{output,SetRelation::inner,
+    return provider_outcome(query,OperationResult{output,query.direction,
         {{query.identity,{query.input.id}},GeometryClaimScope::set_relation,Unestablished{},{},{}}});
 }
 
@@ -112,6 +112,25 @@ TEST_CASE("admitted inner stage point and verified original trajectory yield its
     CHECK(report.trajectory->objective==verification::CheckStatus::numerical_pass);
     REQUIRE(report.approximation);
     CHECK(std::holds_alternative<EnclosedApproximation>(*report.approximation));
+}
+
+TEST_CASE("an outer reachable enclosure cannot provide an achievable control witness") {
+    const auto problem=scalar_problem();
+    const auto reference=interval("outer-reference",2,4);
+    const auto outer=interval("outer-enclosure",1,5);
+    auto request=query(problem,reference,outer);
+    request.direction=SetRelation::outer;
+
+    const auto outer_result=run_registered(provider(request,outer),
+        {{"fixture.approximation"},std::nullopt},request,ExecutionContext{});
+    REQUIRE(std::holds_alternative<EnclosedApproximation>(outer_result));
+
+    const auto report=check_inner_state_plan(problem,binding(problem,reference),
+        provider(request,outer),{{"fixture.approximation"},std::nullopt},request,witness(problem));
+    CHECK(report.membership==verification::CheckStatus::invalid_input);
+    CHECK_FALSE(report.approximation);
+    CHECK_FALSE(report.trajectory);
+    CHECK_FALSE(report.numerical_achievable_value);
 }
 
 TEST_CASE("selected stage state membership and ordered coordinate map gate the achievable value") {
