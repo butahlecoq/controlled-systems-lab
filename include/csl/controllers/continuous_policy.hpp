@@ -197,10 +197,12 @@ struct HContinuousPolicyEvidence {
 using HContinuousPolicyResult = std::variant<
     HContinuousPolicyEvidence, Diagnostic, OperationStopped>;
 
-// Numerically checks an affine policy over a joint H-polytope using a dual
-// support LP per safety row and a primal LP when a counterexample is needed.
-// Unbounded support, incomplete solver evidence, and tolerance-band results
-// remain inconclusive.
+// Checks an affine policy over a joint H-polytope using a dual support LP per
+// safety row and a primal LP when a counterexample is needed. Domain points
+// and support witnesses must satisfy the stored H rows exactly as binary64
+// dyadics; the affine activity rows are still derived by numerical replay, so
+// overall assurance remains numerical. Incomplete witnesses and tolerance
+// band results remain inconclusive.
 HContinuousPolicyResult evaluate_h_continuous_policy(
     const model::LinearSystem&, const HContinuousPolicyRequest&,
     LPWorkspace&, const ExecutionContext&);

@@ -219,6 +219,16 @@ private:
     bool return_dual_witness_;
 };
 
+class ZeroPrimalWorkspace final : public LPWorkspace {
+protected:
+    ProgramOutcome do_solve(const LinearProgram& program, const ExecutionContext&) override {
+        return ProgramResult{Termination::completed,
+            {program.identity(), MathematicalOutcome::optimal,
+                SymbolicArgument{"test zero candidate", "the test fixture returns the zero vector"}, {}},
+            Vector(program.objective().size(), 0.0), {}, "test zero candidate", {}};
+    }
+};
+
 JointHUncertainty make_correlated_h_domain(const LinearSystem& system) {
     Matrix inequalities{4, 2, {1,0, -1,0, 0,1, 0,-1}};
     Vector upper{1,1,0.1,0.1};
@@ -532,6 +542,69 @@ TEST_CASE("H-domain safety remains inconclusive without a dual support witness")
         {{{2,1,{1,-1}}, {1.2,1.2}}}, 1e-9};
     BoxEnumerationWorkspace lp(false);
     const auto result = evaluate_h_continuous_policy(system, request, lp, {});
+    REQUIRE(std::holds_alternative<HContinuousPolicyEvidence>(result));
+    CHECK(std::get<HContinuousPolicyEvidence>(result).feasibility == NumericalFeasibility::inconclusive);
+}
+
+TEST_CASE("small nonzero dual residual cannot certify safety on an unbounded H-domain") {
+    const auto system = long_horizon_integrator(1);
+    auto inequalities = numeric::snapshot(Matrix{1, 1, {-1.0}});
+    auto upper = numeric::snapshot_vector(Vector{0.0});
+    auto equalities = numeric::snapshot(Matrix{0, 1, {}});
+    auto equality_values = numeric::snapshot_vector({});
+    REQUIRE(std::holds_alternative<numeric::MatrixView>(inequalities));
+    REQUIRE(std::holds_alternative<numeric::VectorView>(upper));
+    REQUIRE(std::holds_alternative<numeric::MatrixView>(equalities));
+    REQUIRE(std::holds_alternative<numeric::VectorView>(equality_values));
+    auto made = sets::make_h({{"unbounded-joint-domain"}, 1, {"initial-state"}},
+        {std::get<numeric::MatrixView>(inequalities), std::get<numeric::VectorView>(upper),
+         std::get<numeric::MatrixView>(equalities), std::get<numeric::VectorView>(equality_values)});
+    REQUIRE(std::holds_alternative<sets::SetData>(made));
+    auto domain = make_joint_h_uncertainty(system, std::get<sets::SetData>(std::move(made)));
+    REQUIRE(std::holds_alternative<JointHUncertainty>(domain));
+
+    auto policy_result = make_affine_observation_policy(system, {
+        rule(0, {}, {1, 0, {}}, {0.0}, {1, 0, {}}, {1, 1, {0.0}}, {0.0})
+    });
+    REQUIRE(std::holds_alternative<AffineObservationPolicy>(policy_result));
+    const LinearSafetyConstraints terminal_safety{{1, 1, {5e-10}}, {1e-10}};
+    const LinearSafetyConstraints no_initial_rows{{0, 1, {}}, {}};
+    const HContinuousPolicyRequest request{{{"unbounded-h-test"}, {"small-residual"}},
+        std::get<JointHUncertainty>(std::move(domain)),
+        std::get<AffineObservationPolicy>(std::move(policy_result)),
+        {no_initial_rows, terminal_safety}, {}, 0.0};
+    ZeroPrimalWorkspace workspace;
+    const auto result = evaluate_h_continuous_policy(system, request, workspace, {});
+    REQUIRE(std::holds_alternative<HContinuousPolicyEvidence>(result));
+    CHECK(std::get<HContinuousPolicyEvidence>(result).feasibility == NumericalFeasibility::inconclusive);
+}
+
+TEST_CASE("approximate LP point cannot establish a nonempty H-domain") {
+    const auto system = long_horizon_integrator(1);
+    auto inequalities = numeric::snapshot(Matrix{1, 1, {0.0}});
+    auto upper = numeric::snapshot_vector(Vector{-5e-10});
+    auto equalities = numeric::snapshot(Matrix{0, 1, {}});
+    auto equality_values = numeric::snapshot_vector({});
+    REQUIRE(std::holds_alternative<numeric::MatrixView>(inequalities));
+    REQUIRE(std::holds_alternative<numeric::VectorView>(upper));
+    REQUIRE(std::holds_alternative<numeric::MatrixView>(equalities));
+    REQUIRE(std::holds_alternative<numeric::VectorView>(equality_values));
+    auto made = sets::make_h({{"empty-joint-domain"}, 1, {"initial-state"}},
+        {std::get<numeric::MatrixView>(inequalities), std::get<numeric::VectorView>(upper),
+         std::get<numeric::MatrixView>(equalities), std::get<numeric::VectorView>(equality_values)});
+    REQUIRE(std::holds_alternative<sets::SetData>(made));
+    auto domain = make_joint_h_uncertainty(system, std::get<sets::SetData>(std::move(made)));
+    REQUIRE(std::holds_alternative<JointHUncertainty>(domain));
+
+    auto policy_result = make_affine_observation_policy(system, {
+        rule(0, {}, {1, 0, {}}, {0.0}, {1, 0, {}}, {1, 1, {0.0}}, {0.0})
+    });
+    REQUIRE(std::holds_alternative<AffineObservationPolicy>(policy_result));
+    const HContinuousPolicyRequest request{{{"empty-h-test"}, {"near-infeasible-domain"}},
+        std::get<JointHUncertainty>(std::move(domain)),
+        std::get<AffineObservationPolicy>(std::move(policy_result)), {}, {}, 0.0};
+    ZeroPrimalWorkspace workspace;
+    const auto result = evaluate_h_continuous_policy(system, request, workspace, {});
     REQUIRE(std::holds_alternative<HContinuousPolicyEvidence>(result));
     CHECK(std::get<HContinuousPolicyEvidence>(result).feasibility == NumericalFeasibility::inconclusive);
 }
