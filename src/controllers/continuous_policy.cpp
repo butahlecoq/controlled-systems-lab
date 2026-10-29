@@ -2,6 +2,8 @@
 #include <csl/optimization/linear_program.hpp>
 #include <csl/optimization/lp_backend.hpp>
 
+#include "../optimization/exact_dyadic_sum.hpp"
+
 #include <algorithm>
 #include <chrono>
 #include <cmath>
@@ -188,6 +190,72 @@ std::variant<LinearProgram, Diagnostic> h_dual_support_program(
             ? invalid("controllers.joint_h.dual", "Could not construct the H-domain dual support LP.")
             : errors->front();
     return std::get<LinearProgram>(std::move(result));
+}
+
+bool exact_h_feasible(const sets::HRepresentation& domain, std::span<const double> point) {
+    if (point.size() != domain.inequalities.cols() || !finite(point)) return false;
+    for (std::size_t row = 0; row < domain.inequalities.rows(); ++row) {
+        optimization::detail::ExactDyadicSum residual;
+        for (std::size_t column = 0; column < point.size(); ++column)
+            residual.add_product(domain.inequalities(row, column), point[column]);
+        residual.add(domain.upper_bounds[row], true);
+        if (residual.positive()) return false;
+    }
+    for (std::size_t row = 0; row < domain.equalities.rows(); ++row) {
+        optimization::detail::ExactDyadicSum residual;
+        for (std::size_t column = 0; column < point.size(); ++column)
+            residual.add_product(domain.equalities(row, column), point[column]);
+        residual.add(domain.equality_values[row], true);
+        if (!residual.zero()) return false;
+    }
+    return true;
+}
+
+bool exact_h_dual_upper_bound(const sets::HRepresentation& domain,
+        std::span<const double> coefficients, double offset,
+        std::span<const double> multipliers, double strict_upper_bound) {
+    const auto inequality_count = domain.inequalities.rows();
+    const auto equality_count = domain.equalities.rows();
+    if (coefficients.size() != domain.inequalities.cols() ||
+        multipliers.size() != inequality_count + equality_count ||
+        !finite(coefficients) || !finite(multipliers) || !std::isfinite(offset) ||
+        !std::isfinite(strict_upper_bound)) return false;
+    for (std::size_t row = 0; row < inequality_count; ++row)
+        if (multipliers[row] < 0.0) return false;
+
+    for (std::size_t column = 0; column < coefficients.size(); ++column) {
+        optimization::detail::ExactDyadicSum stationarity;
+        for (std::size_t row = 0; row < inequality_count; ++row)
+            stationarity.add_product(domain.inequalities(row, column), multipliers[row]);
+        for (std::size_t row = 0; row < equality_count; ++row)
+            stationarity.add_product(domain.equalities(row, column),
+                multipliers[inequality_count + row]);
+        stationarity.add(coefficients[column], true);
+        if (!stationarity.zero()) return false;
+    }
+
+    optimization::detail::ExactDyadicSum objective_gap;
+    for (std::size_t row = 0; row < inequality_count; ++row)
+        objective_gap.add_product(domain.upper_bounds[row], multipliers[row]);
+    for (std::size_t row = 0; row < equality_count; ++row)
+        objective_gap.add_product(domain.equality_values[row], multipliers[inequality_count + row]);
+    objective_gap.add(offset);
+    objective_gap.add(strict_upper_bound, true);
+    return objective_gap.negative();
+}
+
+bool exact_h_violation(const sets::HRepresentation& domain,
+        std::span<const double> coefficients, double offset,
+        std::span<const double> point, double strict_lower_bound) {
+    if (coefficients.size() != point.size() || !finite(coefficients) ||
+        !std::isfinite(offset) || !std::isfinite(strict_lower_bound) ||
+        !exact_h_feasible(domain, point)) return false;
+    optimization::detail::ExactDyadicSum margin;
+    for (std::size_t column = 0; column < point.size(); ++column)
+        margin.add_product(coefficients[column], point[column]);
+    margin.add(offset);
+    margin.add(strict_lower_bound, true);
+    return margin.positive();
 }
 
 ProgramIdentity subprogram_identity(const ProgramIdentity& base, std::string suffix) {
@@ -719,6 +787,8 @@ HContinuousPolicyResult evaluate_h_continuous_policy(const model::LinearSystem& 
     const auto largest_query_bytes = std::max(*h_program_bytes, *h_dual_bytes);
     const auto total_working_bytes = result_and_replay_bytes
         ? checked_add(*result_and_replay_bytes, largest_query_bytes) : std::nullopt;
+    const auto exact_check_working_bytes = total_working_bytes
+        ? checked_add(*total_working_bytes, std::size_t{4096}) : std::nullopt;
     if (!coefficient_count || !coefficient_bytes || !row_evidence_bytes ||
         !dual_solution_cells || !counterexample_solution_cells || !domain_solution_cells ||
         !all_solution_cells || !evidence_container_bytes || !evidence_and_solutions_bytes ||
@@ -729,10 +799,11 @@ HContinuousPolicyResult evaluate_h_continuous_policy(const model::LinearSystem& 
         !identity_copies_per_result || !local_verifier_bytes ||
         !retained_metadata_per_result || !retained_result_metadata ||
         !retained_identity_bytes || !evidence_bytes || !row_working_bytes ||
-        !row_and_replay_bytes || !result_and_replay_bytes || !total_working_bytes)
+        !row_and_replay_bytes || !result_and_replay_bytes || !total_working_bytes ||
+        !exact_check_working_bytes)
         return unsupported("controllers.policy_h.dimensions", "H support working storage extent overflowed.");
     if (context.resources && context.resources->memory_bytes &&
-        *total_working_bytes > *context.resources->memory_bytes)
+        *exact_check_working_bytes > *context.resources->memory_bytes)
         return OperationStopped{StopReason::resource_limit, "H support working data exceed the declared memory budget."};
     auto feasibility_program = h_domain_program(*h, joint_dimension,
         Vector(joint_dimension, 0.0), 0.0,
@@ -776,6 +847,10 @@ HContinuousPolicyResult evaluate_h_continuous_policy(const model::LinearSystem& 
             feasibility_residual.variables.scale);
     if (feasibility_residual.rows.violation > feasible_tolerance ||
         feasibility_residual.variables.violation > feasible_tolerance) {
+        evidence.feasibility = NumericalFeasibility::inconclusive;
+        return evidence;
+    }
+    if (!exact_h_feasible(*h, *feasible_solve.primal)) {
         evidence.feasibility = NumericalFeasibility::inconclusive;
         return evidence;
     }
@@ -898,14 +973,16 @@ HContinuousPolicyResult evaluate_h_continuous_policy(const model::LinearSystem& 
             item.dual_primal_check = residual;
             const auto tolerance = context.numerical.absolute_tolerance +
                 context.numerical.relative_tolerance * std::max(residual.rows.scale, residual.variables.scale);
-            if (residual.rows.violation <= tolerance && residual.variables.violation <= tolerance) {
-                item.maximum_activity_upper_bound = std::get<optimization::PrimalEvaluation>(dual_check).objective;
-                dual_witness_usable = std::isfinite(*item.maximum_activity_upper_bound);
+            const auto strict_upper_bound = bound - request.feasibility_tolerance;
+            if (residual.rows.violation <= tolerance && residual.variables.violation <= tolerance &&
+                exact_h_dual_upper_bound(*h, coefficients[index], offsets[index],
+                    *dual_solve.primal, strict_upper_bound)) {
+                item.maximum_activity_upper_bound = strict_upper_bound;
+                dual_witness_usable = true;
             }
         }
 
-        const bool dual_proves_safe = dual_witness_usable && item.maximum_activity_upper_bound &&
-            *item.maximum_activity_upper_bound < bound - request.feasibility_tolerance;
+        const bool dual_proves_safe = dual_witness_usable && item.maximum_activity_upper_bound;
         if (!dual_proves_safe) {
             dual_program = invalid("controllers.policy_h.released_dual",
                 "The dual support LP has been released before optional counterexample search.");
@@ -945,17 +1022,20 @@ HContinuousPolicyResult evaluate_h_continuous_policy(const model::LinearSystem& 
                     const auto tolerance = context.numerical.absolute_tolerance +
                         context.numerical.relative_tolerance * std::max(residual.rows.scale, residual.variables.scale);
                     if (residual.rows.violation <= tolerance && residual.variables.violation <= tolerance) {
-                        item.joint_coordinates = *primal_solve.primal;
-                        auto candidate_trajectory = replay(*primal_solve.primal);
-                        if (const auto* error = std::get_if<Diagnostic>(&candidate_trajectory)) return *error;
-                        if (const auto* stopped = std::get_if<OperationStopped>(&candidate_trajectory)) return *stopped;
-                        item.trajectory = std::get<ReplayRecord>(std::move(candidate_trajectory));
-                        item.observed_activity = row_activity(row, *item.trajectory);
-                        if (*item.observed_activity > bound + request.feasibility_tolerance) {
-                            any_violation = true;
-                            if (item.maximum_activity_upper_bound &&
-                                *item.maximum_activity_upper_bound + request.feasibility_tolerance < *item.observed_activity)
-                                item.maximum_activity_upper_bound.reset();
+                        if (exact_h_feasible(*h, *primal_solve.primal)) {
+                            item.joint_coordinates = *primal_solve.primal;
+                            auto candidate_trajectory = replay(*primal_solve.primal);
+                            if (const auto* error = std::get_if<Diagnostic>(&candidate_trajectory)) return *error;
+                            if (const auto* stopped = std::get_if<OperationStopped>(&candidate_trajectory)) return *stopped;
+                            item.trajectory = std::get<ReplayRecord>(std::move(candidate_trajectory));
+                            item.observed_activity = row_activity(row, *item.trajectory);
+                            if (exact_h_violation(*h, coefficients[index], offsets[index],
+                                    *primal_solve.primal, bound + request.feasibility_tolerance)) {
+                                any_violation = true;
+                                if (item.maximum_activity_upper_bound &&
+                                    *item.maximum_activity_upper_bound + request.feasibility_tolerance < *item.observed_activity)
+                                    item.maximum_activity_upper_bound.reset();
+                            }
                         }
                     }
                 }
@@ -963,9 +1043,6 @@ HContinuousPolicyResult evaluate_h_continuous_policy(const model::LinearSystem& 
                     any_inconclusive = true;
             }
         }
-        if (dual_witness_usable && item.maximum_activity_upper_bound &&
-            *item.maximum_activity_upper_bound >= bound - request.feasibility_tolerance)
-            any_inconclusive = true;
         evidence.constraints.push_back(std::move(item));
     }
     evidence.feasibility = any_violation ? NumericalFeasibility::violation_found :

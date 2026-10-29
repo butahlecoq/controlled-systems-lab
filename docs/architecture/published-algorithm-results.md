@@ -61,6 +61,10 @@ limiter was not measured. These are descriptive numerical observations for
 one authored H-set and one LP adapter, not a speedup, universal uncertainty
 guarantee, validated-arithmetic result, or policy-synthesis claim. Main-only
 Pages publication and live URL/hash verification remain pending.
+This bundle is historical relative to PR #785: the exact-witness checks added
+there leave its former safe fixture inconclusive, so no current-source timing
+is claimed and a new status-preserving measurement is pending. The archived
+report, raw trials and ZIP remain unchanged.
 
 The saved [affine-synthesis bundle](../../reports/algorithm-results/ext04-affine-synthesis-7eadf7c7ecbb2bbd/)
 uses source commit `7eadf7c7ecbb2bbdc28683ebcdfc31849f01c133`. It synthesizes

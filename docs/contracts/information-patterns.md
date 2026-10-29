@@ -169,6 +169,14 @@ Assurance is numerical, not validated. H-domain policy synthesis,
 existential-initial / universal-disturbance quantifier alternation, and
 validated arithmetic remain open work under #68.
 
+The H evaluator counts a domain point only when it satisfies the stored H rows
+exactly as binary64 dyadic values. A support multiplier counts as an upper-bound
+witness only when its signs, stationarity equations, and requested strict margin
+also pass exact dyadic checks. A small LP residual alone cannot certify support,
+especially on an unbounded H-domain. The activity coefficients still come from
+ordinary floating-point replay, so overall assurance remains numerical. If an
+exact domain or dual witness is unavailable, the result is inconclusive.
+
 The [two-state continuous-policy example](../examples/continuous-policy-2d.html)
 shows a position-velocity rectangle and its terminal image under a
 position-only affine observation policy. The runnable source is

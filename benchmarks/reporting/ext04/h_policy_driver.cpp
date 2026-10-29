@@ -147,6 +147,23 @@ void verify_violation(const HContinuousPolicyResult& result) {
     throw std::runtime_error("violating H-domain point or trajectory was not retained");
 }
 
+void verify_safe_smoke_is_inconclusive(const HContinuousPolicyResult& result) {
+    if (!std::holds_alternative<HContinuousPolicyEvidence>(result))
+        throw std::runtime_error("H policy evaluation did not return evidence");
+    const auto& evidence = std::get<HContinuousPolicyEvidence>(result);
+    if (evidence.assurance != Assurance::numerical ||
+        evidence.feasibility != NumericalFeasibility::inconclusive ||
+        !evidence.domain_witness || !evidence.domain_witness_trajectory ||
+        evidence.constraints.size() != 6)
+        throw std::runtime_error("H-domain exact-witness outcome differs");
+    const auto& inputs = evidence.domain_witness_trajectory->inputs;
+    const auto x = inputs.initial_state[0];
+    const auto error = inputs.measurement_errors[0][0][0];
+    if (std::abs(error - 0.1 * x) > 1e-8 ||
+        std::abs((*evidence.domain_witness)[1] - 0.1 * (*evidence.domain_witness)[0]) > 1e-8)
+        throw std::runtime_error("correlation was not preserved in the H-domain witness");
+}
+
 } // namespace
 
 int main(int argc, char** argv) try {
@@ -157,9 +174,10 @@ int main(int argc, char** argv) try {
     auto fixture = make_fixture();
     auto workspace = make_workspace();
     if (smoke) {
-        verify_safe(evaluate_h_continuous_policy(fixture.system, fixture.safe_request, *workspace, {}));
+        verify_safe_smoke_is_inconclusive(
+            evaluate_h_continuous_policy(fixture.system, fixture.safe_request, *workspace, {}));
         verify_violation(evaluate_h_continuous_policy(fixture.system, fixture.violation_request, *workspace, {}));
-        std::cout << "H-policy smoke passed: correlated safe bounds and violating replay checked\n";
+        std::cout << "H-policy smoke passed: correlated safe case remains inconclusive and violation replay checked\n";
         return 0;
     }
 
