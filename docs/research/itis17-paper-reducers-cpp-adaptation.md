@@ -57,10 +57,13 @@ up to `n-1` structural columns and `d+1` equality rows, subject to the 1,048,576
 entry capacity and 10,000-pivot per-solve limit. This is `O(dn)` matrix
 storage per candidate and up to `n` backend solves; their runtime depends on
 the selected simplex backend and pivot behavior, so no tighter worst-case
-runtime is claimed. The basis-coordinate checks take up to `O(n^2)` arithmetic
-operations across candidates, followed by a complete membership recheck of
-the retained points. A deletion is accepted only with an exact dyadic convex
-certificate, and the final output must pass that complete recheck. The
+runtime is claimed. Across candidates there can be up to `O(n^2)` basis
+coordinate queries. Each query solves a factored `(d+1)`-dimensional system
+(`O(d^2)` arithmetic for a dense triangular solve, or `O(d)` for an identity
+frame); this excludes the basis factorization work already incurred by the
+simplex solve. A complete membership recheck follows for the retained points.
+A deletion is accepted only with an exact dyadic convex certificate, and the
+final output must pass that complete recheck. The
 largest-norm tie variant adds `O(n)` priority calculations per candidate
 problem; the priority affects only exact computed reduced-cost ties.
 
