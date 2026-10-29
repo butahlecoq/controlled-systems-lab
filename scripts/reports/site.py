@@ -62,6 +62,7 @@ class OfflineHTML(HTMLParser):
             if key in {"href","src","xlink:href"} and value:
                 if value.startswith("#"): continue
                 if re.fullmatch(r"https://github.com/butahlecoq/controlled-systems-lab/commit/[0-9a-f]{40}", value): continue
+                if re.fullmatch(r"https://github.com/butahlecoq/controlled-systems-lab/blob/[0-9a-f]{40}/docs/research/itis17-paper-reducers-cpp-adaptation\.md", value): continue
                 if re.fullmatch(r"https://github.com/butahlecoq/controlled-systems-lab/blob/[0-9a-f]{40}/(?:docs/research/l05-example1-source-dossier\.md|scripts/reports/lotka_volterra_sampled\.py)", value): continue
                 if re.fullmatch(r"https://github.com/butahlecoq/controlled-systems-lab/(?:tree/(?:main|[0-9a-f]{40})/reports/algorithm-results/geo06-[0-9a-f]{16}|blob/(?:main|[0-9a-f]{40})/reports/algorithm-results/geo06-[0-9a-f]{64}\.zip)", value): continue
                 if re.fullmatch(r"https://github.com/butahlecoq/controlled-systems-lab/(?:tree/(?:main|[0-9a-f]{40})/reports/algorithm-results/opt07-[0-9a-f]{16}|blob/(?:main|[0-9a-f]{40})/reports/algorithm-results/opt07-[0-9a-f]{64}\.zip)", value): continue

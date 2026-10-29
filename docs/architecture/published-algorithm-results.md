@@ -221,6 +221,27 @@ ZIP entry matches, and the live landing page links to the report. This remains
 partial EXP-02 evidence; issue #94 remains open for its paired strategy, full
 workload/resource matrix and comparison-record requirements.
 
+### EXP-06 A43/A44 paper-derived follow-up
+
+The [r3 bundle](../../reports/algorithm-results/exp06-it17-paper-reducers-20261029-r3/)
+uses `csl.hull.itis17.a44-paper-farthest-incremental-lp@1.0.0` and counts all
+A43 candidate solves plus final rechecks. Source commit is
+`1f34503eb3f5d4c3e239076a8d48b2af2e6bf06c`. All 36 attempts (six methods,
+one warmup and five measured runs each) completed, and the saved renderer
+rechecked every result with the exact 2D hull oracle. Median durations and
+ranges in ns were: A29/A30 Python 4,672,975 (3,610,192–5,255,315); QuickHull
+47,423 (36,737–48,051); A43 certified-basis adaptation 2,884,746
+(1,674,806–3,332,710); A43 artificial-basis 3,200,431
+(1,229,565–3,246,386); A43 largest-norm tie 3,152,379
+(1,204,073–3,269,015); A44 paper-farthest incremental LP 4,201,054
+(2,936,707–4,287,727). These intervals differ by implementation/runtime and
+exclude exact checking, so the values are descriptive and do not rank speed.
+The largest-norm tie rule activated once in each attempt; the A43 batch-removal
+counter stayed at zero, so this fixture does not demonstrate that path. The
+initial r1 and corrected r2 bundles remain unchanged as superseded historical
+evidence; r2 used source commit
+`b2b7dfa6a2151259cbe1cd3d0e6d99e790661533`.
+
 ### ITIS17 hull output-status update
 
 The [r3 output-status report](../../reports/algorithm-results/exp02-it17-a44-paper-order-20261028-r3/)

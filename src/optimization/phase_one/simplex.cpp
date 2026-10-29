@@ -51,6 +51,15 @@ Diagnostics profile(const LinearProgram& p,const Options& o) {
         return error(DiagnosticCode::unsupported,"phase_one.variables","Variables must have exactly [0,+infinity) bounds");
     for(const auto& r:p.rows()) if(!r.lower || !r.upper || *r.lower!=*r.upper)
         return error(DiagnosticCode::unsupported,"phase_one.rows","Only equality rows are supported");
+    if(!o.structural_entering_priorities.empty()) {
+        if(o.structural_entering_priorities.size()!=p.variables().size())
+            return error(DiagnosticCode::invalid_input,"phase_one.structural_entering_priorities",
+                "Priority count must match the structural variable count");
+        if(std::any_of(o.structural_entering_priorities.begin(),o.structural_entering_priorities.end(),
+                [](double value){return !std::isfinite(value);}))
+            return error(DiagnosticCode::invalid_input,"phase_one.structural_entering_priorities",
+                "Priorities must be finite");
+    }
     if(!estimate(p.rows().size(),p.variables().size(),o))
         return error(DiagnosticCode::unsupported,"phase_one.capacity","Dense profile or checked arithmetic extent exceeded");
     return {};
@@ -77,7 +86,11 @@ class Worker final : public LPWorkspace {
     NumericalPolicy policy_{};
     double eta_{};
     std::size_t m_{},n_{};
-    static constexpr Verifier verifier() {return {{"phase-one-bland.original-residual"},"1"};}
+    Verifier verifier() const {
+        const auto id=options_.structural_entering_priorities.empty()
+            ? "phase-one-bland.original-residual" : "phase-one-priority-tie.original-residual";
+        return {{id},"1"};
+    }
     void poll(const ExecutionContext& c) const {
         if(c.cancellation.stop_requested()) throw Failure{Reason::cancelled};
         if(c.deadline && std::chrono::steady_clock::now()>=*c.deadline) throw Failure{Reason::deadline};
@@ -217,7 +230,8 @@ public:
 };
 ProgramOutcome Worker::do_solve(const LinearProgram& p,const ExecutionContext& c) {
     report_.reset();state_.reset();m_=p.rows().size();n_=p.variables().size();policy_=c.numerical;
-    report_.emplace(Snapshot{last_attempt()->stamp,Termination::numerical_failure,Reason::arithmetic,0,0,0,0,{},{},{},false,0});
+    report_.emplace(Snapshot{last_attempt()->stamp,Termination::numerical_failure,Reason::arithmetic,
+        0,0,0,0,0,{},{},{},false,0});
     ProgramResult answer{Termination::numerical_failure,{p.identity(),MathematicalOutcome::undetermined,Unestablished{},{}},{},{},{},{}};
     auto finish=[&](Reason reason)->ProgramOutcome {
         if(c.cancellation.stop_requested()) reason=Reason::cancelled;
@@ -230,7 +244,9 @@ ProgramOutcome Worker::do_solve(const LinearProgram& p,const ExecutionContext& c
         answer.outcome.value=reason==Reason::feasible?MathematicalOutcome::optimal:
             (reason==Reason::positive_auxiliary_optimum?MathematicalOutcome::infeasible:MathematicalOutcome::undetermined);
         std::ostringstream log;
-        log<<"module=phase-one-bland\nversion=1\nauxiliary=sum-artificial/v1\nactual_threads=1\nreason="<<static_cast<int>(reason)
+        log<<"module="<<(options_.structural_entering_priorities.empty()
+                ? "phase-one-bland" : "phase-one-priority-tie")
+           <<"\nversion=1\nauxiliary=sum-artificial/v1\nactual_threads=1\nreason="<<static_cast<int>(reason)
            <<"\npivots="<<report_->pivots<<"\ndegenerate_pivots="<<report_->degenerate_pivots<<"\nfactorizations="<<report_->factorizations
            <<"\npricing_passes="<<report_->pricing_passes<<"\npivot_limit="<<options_.pivot_limit<<"\ndense_entry_limit="<<options_.dense_entry_limit
            <<"\ntrace_limit="<<options_.trace_limit<<"\npivot_relative_tolerance="<<options_.pivot_relative_tolerance
@@ -287,7 +303,8 @@ ProgramOutcome Worker::do_solve(const LinearProgram& p,const ExecutionContext& c
             report_->auxiliary->dual_equations=dual;
             if(report_->pricing_passes==std::numeric_limits<std::uint64_t>::max()) throw Failure{Reason::capacity};
             ++report_->pricing_passes;
-            std::optional<std::size_t> entering;std::optional<double> minimum;bool negative=false;
+            std::optional<std::size_t> entering;std::optional<double> entering_price;
+            std::optional<double> minimum;bool negative=false;
             for(std::size_t j=0;j<n_+m_;++j) {
                 if(j%64==0) poll(c);
                 if(std::find(s.basis.begin(),s.basis.end(),j)!=s.basis.end()) continue;
@@ -300,7 +317,18 @@ ProgramOutcome Worker::do_solve(const LinearProgram& p,const ExecutionContext& c
                 const double cost=j<n_?0:1,price=cost-sum;finite(price);
                 if(!minimum || price<*minimum) minimum=price;
                 if(price<0) negative=true;
-                if(!entering && price < -threshold(std::max({1.,cost,scale}))) entering=j;
+                if(price < -threshold(std::max({1.,cost,scale}))) {
+                    if(!entering) {entering=j;entering_price=price;}
+                    else if(j<n_ && *entering<n_ && price==*entering_price &&
+                            !options_.structural_entering_priorities.empty() &&
+                            options_.structural_entering_priorities[j]>
+                                options_.structural_entering_priorities[*entering]) {
+                        if(report_->entering_tie_breaks==std::numeric_limits<std::uint64_t>::max())
+                            throw Failure{Reason::capacity};
+                        ++report_->entering_tie_breaks;
+                        entering=j;entering_price=price;
+                    }
+                }
             }
             report_->auxiliary->minimum_reduced_cost=minimum;poll(c);
             if(!entering) {
@@ -345,7 +373,9 @@ ProgramOutcome Worker::do_solve(const LinearProgram& p,const ExecutionContext& c
 RegistrationResult make_registration(Options options) {
     if(!std::isfinite(options.pivot_relative_tolerance) || options.pivot_relative_tolerance<0 || options.pivot_relative_tolerance>=1)
         return error(DiagnosticCode::invalid_input,"phase_one.options.pivot_relative_tolerance","Expected finite value in [0,1)");
-    return registry::Registration<registry::LPPort>{{{"phase-one-bland"},"1"},
+    const auto method_id=options.structural_entering_priorities.empty()
+        ? "phase-one-bland" : "phase-one-priority-tie";
+    return registry::Registration<registry::LPPort>{{{method_id},"1"},
         [options](const LinearProgram& p,const registry::Requirements& r)->registry::Capability {
             if(r.scalar!=registry::Scalar::binary64 || r.output.assurance!=Assurance::numerical)
                 return error(DiagnosticCode::unsupported,"phase_one.arithmetic","Only numerical binary64 is supported");

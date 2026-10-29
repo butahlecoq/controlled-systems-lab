@@ -28,8 +28,8 @@ def sha(data: bytes) -> str:
     return hashlib.sha256(data).hexdigest()
 
 
-def validate_bundle(bundle: Path) -> str:
-    rendered, report_id = report.render(bundle)
+def validate_bundle(bundle: Path, renderer=report) -> str:
+    rendered, report_id = renderer.render(bundle)
     for name, data in rendered.items():
         if (bundle / name).read_bytes() != data:
             raise ValueError("saved EXP-06 renderer differs: " + name)
@@ -51,8 +51,8 @@ def validate_bundle(bundle: Path) -> str:
     return report_id
 
 
-def stage(source: Path, site_dir: Path) -> str:
-    report_id = validate_bundle(source)
+def stage(source: Path, site_dir: Path, renderer=report) -> str:
+    report_id = validate_bundle(source, renderer)
     destination = site_dir / report_id
     if not site_dir.is_dir() or site_dir.is_symlink() or destination.exists():
         raise ValueError("EXP-06 route must be staged into a fresh site directory")
@@ -74,5 +74,15 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--source", type=Path, required=True)
     parser.add_argument("--site", type=Path, required=True)
+    parser.add_argument("--paper-followup", action="store_true",
+        help="validate the expanded A43/A44 method set using render_paper_saved.py")
     args = parser.parse_args()
-    print(stage(args.source, args.site))
+    selected_renderer = report
+    if args.paper_followup:
+        paper_spec = importlib.util.spec_from_file_location(
+            "exp06_paper_saved_renderer", ROOT / "scripts/reports/exp06/render_paper_saved.py")
+        if paper_spec is None or paper_spec.loader is None:
+            raise RuntimeError("paper-followup renderer could not be loaded")
+        selected_renderer = importlib.util.module_from_spec(paper_spec)
+        paper_spec.loader.exec_module(selected_renderer)
+    print(stage(args.source, args.site, selected_renderer))

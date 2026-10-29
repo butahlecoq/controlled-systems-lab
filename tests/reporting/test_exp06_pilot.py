@@ -9,6 +9,7 @@ import unittest
 
 ROOT = Path(__file__).resolve().parents[2]
 BUNDLE = ROOT / "reports/algorithm-results/exp06-geometry-pilot-20261029"
+PAPER_BUNDLE = ROOT / "reports/algorithm-results/exp06-it17-paper-reducers-20261029-r3"
 
 
 def load(name: str, path: Path):
@@ -20,6 +21,7 @@ def load(name: str, path: Path):
 
 
 render = load("exp06_saved_renderer_test", ROOT / "scripts/reports/exp06/render_saved.py")
+paper_render = load("exp06_paper_saved_renderer_test", ROOT / "scripts/reports/exp06/render_paper_saved.py")
 stage = load("exp06_stage_test", ROOT / "scripts/reports/stage_exp06.py")
 source_indices = load("exp06_source_indices_test", ROOT / "scripts/reports/exp06/check_source_indices.py")
 
@@ -64,6 +66,35 @@ class Exp06PilotTest(unittest.TestCase):
             index = (site_dir / "index.html").read_text()
             self.assertIn("2D hull illustration", index)
             self.assertIn("paired record", index)
+
+    def test_paper_followup_record_keeps_distinct_rows_and_tie_evidence(self) -> None:
+        capture, wire, _spec, _manifest, methods, rows = paper_render.read_saved(PAPER_BUNDLE)
+        self.assertEqual(len(capture["method_ids"]), 6)
+        self.assertIn("csl.hull.itis17.a43-certified-basis-reuse", methods)
+        self.assertIn("csl.hull.itis17.a43-artificial-basis", methods)
+        self.assertIn("csl.hull.itis17.a43-largest-norm-tie", methods)
+        self.assertIn("csl.hull.itis17.a44-paper-farthest-incremental-lp", methods)
+        self.assertEqual(len(rows), 36)
+        self.assertTrue(all(row["status"] == "completed" and row["checker"] == "verified" for row in rows))
+        tie_attempts = [json.loads(item["run"])["result"]["algorithm"]["reduction"]["a43_paper_metrics"]
+            for item in wire["attempts"]
+            if json.loads(item["run"])["method"]["id"] == "csl.hull.itis17.a43-largest-norm-tie"]
+        self.assertEqual(len(tie_attempts), 6)
+        self.assertTrue(all(metric["largest_norm_tie_breaks"] > 0 for metric in tie_attempts))
+        self.assertFalse(capture["harness_dirty"])
+
+    def test_paper_followup_renderer_and_stager_verify_saved_bundle(self) -> None:
+        rendered, report_id = paper_render.render(PAPER_BUNDLE)
+        self.assertTrue(report_id.startswith("exp06-"))
+        for name, data in rendered.items():
+            self.assertEqual((PAPER_BUNDLE / name).read_bytes(), data)
+        with tempfile.TemporaryDirectory() as temporary:
+            site_dir = Path(temporary)
+            (site_dir / "index.html").write_text("<!doctype html><html><body><ul></ul></body></html>")
+            staged_id = stage.stage(PAPER_BUNDLE, site_dir, paper_render)
+            self.assertEqual(staged_id, report_id)
+            self.assertTrue((site_dir / report_id / "hulls.svg").is_file())
+            self.assertIn("paper-derived", (site_dir / report_id / "index.html").read_text())
 
 
 if __name__ == "__main__":

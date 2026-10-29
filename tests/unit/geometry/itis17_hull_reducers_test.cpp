@@ -40,10 +40,13 @@ geometry::PointCloud square_cloud() {
 TEST_CASE("ITIS17 reducer registrations preserve distinct method identities") {
     const auto a43 = geometry::make_itis17_a43_hull_reducer_registration();
     const auto a44 = geometry::make_itis17_a44_hull_reducer_registration();
+    const auto paper_a44 = geometry::make_itis17_a44_paper_hull_reducer_registration();
     const auto opt06 = geometry::make_basis_reuse_hull_reducer_registration();
     const auto opt07 = geometry::make_ordered_hull_reducer_registration();
     CHECK(a43.identity.id.value == "csl.hull.itis17.a43-certified-basis-reuse");
     CHECK(a44.identity.id.value == "csl.hull.itis17.a44-incremental-lp");
+    CHECK(paper_a44.identity.id.value == "csl.hull.itis17.a44-paper-farthest-incremental-lp");
+    CHECK(a44.identity.id != paper_a44.identity.id);
     CHECK(a43.identity.id != opt06.identity.id);
     CHECK(a44.identity.id != opt07.identity.id);
 }
@@ -130,5 +133,58 @@ TEST_CASE("A43 certificate-safe basis adaptation rechecks and preserves hull equ
     REQUIRE(std::holds_alternative<geometry::HullInputDigest>(digest));
     CHECK(geometry::check_source_index_hull(cloud.points,
         {std::get<geometry::HullInputDigest>(digest), reduction.retained}).status ==
+        geometry::HullCheckStatus::verified);
+}
+
+TEST_CASE("A43 artificial-basis variants retain only independently certified hulls") {
+    const auto cloud = square_cloud();
+    const auto digest = geometry::digest_hull_input(cloud.points);
+    REQUIRE(std::holds_alternative<geometry::HullInputDigest>(digest));
+    for (const auto rule : {geometry::A43PivotRule::phase_one_order,
+                            geometry::A43PivotRule::largest_norm_tie}) {
+        auto lp = highs_workspace();
+        REQUIRE(lp != nullptr);
+        const auto result = geometry::reduce_itis17_a43_paper_hull(cloud, *lp, {}, rule);
+        REQUIRE(std::holds_alternative<geometry::HullReduction>(result));
+        const auto& reduction = std::get<geometry::HullReduction>(result);
+        REQUIRE(reduction.status == geometry::ReductionStatus::complete);
+        REQUIRE(reduction.itis17_a43_paper.has_value());
+        CHECK(reduction.itis17_a43_paper->candidate_solves > 0);
+        CHECK(reduction.lp_calls == reduction.itis17_a43_paper->candidate_solves +
+              reduction.itis17_a43_paper->final_recheck_calls);
+        CHECK(reduction.itis17_a43_paper->phase_one_pivots > 0);
+        CHECK(reduction.itis17_a43_paper->largest_norm_tie_rule ==
+              (rule == geometry::A43PivotRule::largest_norm_tie));
+        CHECK(geometry::check_source_index_hull(cloud.points,
+            {std::get<geometry::HullInputDigest>(digest), reduction.retained}).status ==
+            geometry::HullCheckStatus::verified);
+        for (const auto& certificate : reduction.removed)
+            CHECK(certificate.evidence.verifier.value.ends_with(
+                "exact-binary64-convex-combination"));
+    }
+
+    const auto standard = geometry::make_itis17_a43_paper_hull_reducer_registration(
+        geometry::A43PivotRule::phase_one_order);
+    const auto tied = geometry::make_itis17_a43_paper_hull_reducer_registration(
+        geometry::A43PivotRule::largest_norm_tie);
+    CHECK(standard.identity.id.value == "csl.hull.itis17.a43-artificial-basis");
+    CHECK(tied.identity.id.value == "csl.hull.itis17.a43-largest-norm-tie");
+    CHECK(standard.identity.id != tied.identity.id);
+
+    const geometry::PointCloud tie_cloud{{"itis17-a43-paper-tie"},
+        {{1,1}, {2,2}, {0,1.5}, {1,0.5}, {3,1}, {1,3}, {-1,0}}};
+    auto tie_lp = highs_workspace();
+    REQUIRE(tie_lp != nullptr);
+    const auto tie_result = geometry::reduce_itis17_a43_paper_hull(tie_cloud, *tie_lp, {},
+        geometry::A43PivotRule::largest_norm_tie);
+    REQUIRE(std::holds_alternative<geometry::HullReduction>(tie_result));
+    const auto& tie_reduction = std::get<geometry::HullReduction>(tie_result);
+    REQUIRE(tie_reduction.itis17_a43_paper.has_value());
+    CHECK(tie_reduction.itis17_a43_paper->candidate_solves > 0);
+    CHECK(tie_reduction.itis17_a43_paper->largest_norm_tie_breaks > 0);
+    const auto tie_digest = geometry::digest_hull_input(tie_cloud.points);
+    REQUIRE(std::holds_alternative<geometry::HullInputDigest>(tie_digest));
+    CHECK(geometry::check_source_index_hull(tie_cloud.points,
+        {std::get<geometry::HullInputDigest>(tie_digest), tie_reduction.retained}).status ==
         geometry::HullCheckStatus::verified);
 }

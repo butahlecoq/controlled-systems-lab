@@ -192,6 +192,15 @@
       "role_and_disposition_reason": "Validates saved EXP-04 records and plots two-state replay paths; the companion retains the physical coordinates and discloses independent unit scales."
     },
     {
+      "source": "scripts/reports/exp06/render_paper_saved.py",
+      "signal_count": 6,
+      "asset_name_literals": [
+        "hulls.svg"
+      ],
+      "disposition": "deferred-family-specific-migration",
+      "follow_up_issue": 687
+    },
+    {
       "source": "scripts/reports/exp06/render_saved.py",
       "signal_count": 6,
       "asset_name_literals": [
@@ -1702,6 +1711,36 @@
         "hulls.svg"
       ],
       "index_sha256": "fd23f6d79bf3fafc8e40d6db5225fb2c24f23836c31607077ee86bb6d60f62bf",
+      "disposition": "deferred: original frozen route-level readability review remains; companion availability is listed separately",
+      "follow_up_issue": 669
+    },
+    {
+      "route": "exp06-it17-paper-reducers-20261029-r1",
+      "source_bundle": "exp06-it17-paper-reducers-20261029-r1",
+      "assets": [
+        "hulls.svg"
+      ],
+      "index_sha256": "7dfe9e30e0dd8701ca7efa7788830f6725fcea3f157aa7bde2ab912ad3216a07",
+      "disposition": "deferred: original frozen route-level readability review remains; companion availability is listed separately",
+      "follow_up_issue": 669
+    },
+    {
+      "route": "exp06-it17-paper-reducers-20261029-r2",
+      "source_bundle": "exp06-it17-paper-reducers-20261029-r2",
+      "assets": [
+        "hulls.svg"
+      ],
+      "index_sha256": "c50f3db60365428fd0236650a79b73f8c0f364e9761e21b165bea0af681aba68",
+      "disposition": "deferred: original frozen route-level readability review remains; companion availability is listed separately",
+      "follow_up_issue": 669
+    },
+    {
+      "route": "exp06-it17-paper-reducers-20261029-r3",
+      "source_bundle": "exp06-it17-paper-reducers-20261029-r3",
+      "assets": [
+        "hulls.svg"
+      ],
+      "index_sha256": "90f53c6504df729183fae07e980841bb799e48f5c321ee5e7b3207dc664d1059",
       "disposition": "deferred: original frozen route-level readability review remains; companion availability is listed separately",
       "follow_up_issue": 669
     },

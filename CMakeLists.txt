@@ -11,6 +11,7 @@ option(CSL_BUILD_GEO04_REPORT "Build the GEO-04 intersection/reduction report dr
 option(CSL_BUILD_GEO05_REPORT "Build the GEO-05 projection/predecessor report driver" OFF)
 option(CSL_BUILD_GEO06_REPORT "Build the GEO-06 QuickHull report driver" OFF)
 option(CSL_BUILD_EXP06_PILOT "Build the EXP-06 paired geometry pilot tools" OFF)
+option(CSL_BUILD_EXP06_LP_REDUCERS "Build the EXP-06 HiGHS-backed LP reducer runner" OFF)
 option(CSL_BUILD_IT17_HULL_REPORT "Build the exploratory ITIS17/QuickHull comparison driver" OFF)
 option(CSL_BUILD_GEO07_PORT_REPORT "Build the GEO-07 registered-port report driver" OFF)
 option(CSL_BUILD_GEO07_DEPENDENT_REPORT "Build the GEO-07 dependent-sum report driver" OFF)
