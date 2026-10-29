@@ -675,14 +675,33 @@ HContinuousPolicyResult evaluate_h_continuous_policy(const model::LinearSystem& 
     const auto replay_count = checked_add(safety_row_count, 1);
     const auto retained_replay_bytes = replay_record_bytes && replay_count
         ? checked_multiply(*replay_record_bytes, *replay_count) : std::nullopt;
+    const auto row_suffix_bytes = checked_add(std::string("action-stage-").size(),
+        std::string("-row-").size() + std::to_string(horizon).size() +
+        std::to_string(safety_row_count).size() + std::string("-primal").size());
+    const auto largest_suffix_bytes = row_suffix_bytes
+        ? std::max(*row_suffix_bytes, std::string("domain-feasibility").size()) : std::size_t{};
+    const auto generated_problem_id_bytes = checked_add(request.program_namespace.problem.value.size(),
+        std::string(".joint-h").size());
+    const auto program_prefix_bytes = checked_add(request.program_namespace.program.value.size(), 1);
+    const auto generated_program_id_bytes = program_prefix_bytes
+        ? checked_add(*program_prefix_bytes, largest_suffix_bytes) : std::nullopt;
+    const auto program_identity_bytes = generated_problem_id_bytes && generated_program_id_bytes
+        ? checked_add(*generated_problem_id_bytes, *generated_program_id_bytes) : std::nullopt;
+    const auto result_identity_count = checked_multiply(safety_row_count, 2);
+    const auto retained_identity_count = result_identity_count
+        ? checked_add(*result_identity_count, 2) : std::nullopt;
+    const auto retained_identity_bytes = program_identity_bytes && retained_identity_count
+        ? checked_multiply(*program_identity_bytes, *retained_identity_count) : std::nullopt;
     const auto evidence_bytes = row_evidence_bytes && evidence_container_bytes
         ? checked_add(*row_evidence_bytes, *evidence_container_bytes) : std::nullopt;
     const auto evidence_and_solutions_bytes = evidence_bytes && retained_solution_bytes
         ? checked_add(*evidence_bytes, *retained_solution_bytes) : std::nullopt;
     const auto row_working_bytes = coefficient_bytes && evidence_and_solutions_bytes
         ? checked_add(*coefficient_bytes, *evidence_and_solutions_bytes) : std::nullopt;
-    const auto result_and_replay_bytes = row_working_bytes && retained_replay_bytes
+    const auto row_and_replay_bytes = row_working_bytes && retained_replay_bytes
         ? checked_add(*row_working_bytes, *retained_replay_bytes) : std::nullopt;
+    const auto result_and_replay_bytes = row_and_replay_bytes && retained_identity_bytes
+        ? checked_add(*row_and_replay_bytes, *retained_identity_bytes) : std::nullopt;
     const auto largest_query_bytes = std::max(*h_program_bytes, *h_dual_bytes);
     const auto total_working_bytes = result_and_replay_bytes
         ? checked_add(*result_and_replay_bytes, largest_query_bytes) : std::nullopt;
@@ -690,8 +709,11 @@ HContinuousPolicyResult evaluate_h_continuous_policy(const model::LinearSystem& 
         !dual_solution_cells || !counterexample_solution_cells || !domain_solution_cells ||
         !all_solution_cells || !evidence_container_bytes || !evidence_and_solutions_bytes ||
         !retained_solution_bytes || !replay_record_bytes ||
-        !replay_count || !retained_replay_bytes || !evidence_bytes ||
-        !row_working_bytes || !result_and_replay_bytes || !total_working_bytes)
+        !replay_count || !retained_replay_bytes || !row_suffix_bytes ||
+        !generated_problem_id_bytes || !program_prefix_bytes || !generated_program_id_bytes ||
+        !program_identity_bytes || !result_identity_count || !retained_identity_count ||
+        !retained_identity_bytes || !evidence_bytes || !row_working_bytes ||
+        !row_and_replay_bytes || !result_and_replay_bytes || !total_working_bytes)
         return unsupported("controllers.policy_h.dimensions", "H support working storage extent overflowed.");
     if (context.resources && context.resources->memory_bytes &&
         *total_working_bytes > *context.resources->memory_bytes)
@@ -791,12 +813,15 @@ HContinuousPolicyResult evaluate_h_continuous_policy(const model::LinearSystem& 
     std::vector<double> offsets(rows.size());
     std::vector<Vector> coefficients(rows.size(), Vector(joint_dimension, 0.0));
     if (!rows.empty()) {
-        if (const auto stopped = stop_requested(context)) return *stopped;
-        auto at_zero = replay(Vector(joint_dimension, 0.0));
-        if (const auto* error = std::get_if<Diagnostic>(&at_zero)) return *error;
-        if (const auto* stopped = std::get_if<OperationStopped>(&at_zero)) return *stopped;
-        const auto& zero_record = std::get<ReplayRecord>(at_zero);
-        for (std::size_t row = 0; row < rows.size(); ++row) offsets[row] = row_activity(rows[row], zero_record);
+        {
+            if (const auto stopped = stop_requested(context)) return *stopped;
+            auto at_zero = replay(Vector(joint_dimension, 0.0));
+            if (const auto* error = std::get_if<Diagnostic>(&at_zero)) return *error;
+            if (const auto* stopped = std::get_if<OperationStopped>(&at_zero)) return *stopped;
+            const auto& zero_record = std::get<ReplayRecord>(at_zero);
+            for (std::size_t row = 0; row < rows.size(); ++row)
+                offsets[row] = row_activity(rows[row], zero_record);
+        }
         Vector basis(joint_dimension, 0.0);
         for (std::size_t coordinate = 0; coordinate < joint_dimension; ++coordinate) {
             if (const auto stopped = stop_requested(context)) return *stopped;

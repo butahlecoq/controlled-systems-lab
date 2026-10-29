@@ -60,6 +60,17 @@ LinearSystem one_stage_noisy_integrator() {
     return std::get<LinearSystem>(result);
 }
 
+LinearSystem long_horizon_integrator(std::size_t horizon) {
+    SystemModel authored{{{1, 1, 0}, TimeDomain::discrete,
+        LinearStage{{1,1,{1}}, {1,1,{0}}, {1,0,{}}, {0}}}, {}};
+    Vector times(horizon + 1);
+    for (std::size_t stage = 0; stage <= horizon; ++stage)
+        times[stage] = static_cast<double>(stage);
+    const auto result = snapshot(authored, times);
+    REQUIRE(std::holds_alternative<LinearSystem>(result));
+    return std::get<LinearSystem>(result);
+}
+
 LinearSystem one_stage_no_sensor_integrator() {
     SystemModel authored{{{1, 1, 0}, TimeDomain::discrete,
         LinearStage{{1,1,{1}}, {1,1,{1}}, {1,0,{}}, {0}}}, {}};
@@ -230,16 +241,17 @@ JointHUncertainty make_correlated_h_domain(const LinearSystem& system) {
     return std::get<JointHUncertainty>(std::move(domain));
 }
 
-JointHUncertainty make_redundant_h_domain(const LinearSystem& system, std::size_t row_count) {
-    auto inequalities = numeric::snapshot(Matrix{row_count, 2, Vector(row_count * 2, 0.0)});
+JointHUncertainty make_redundant_h_domain(
+        const LinearSystem& system, std::size_t dimension, std::size_t row_count) {
+    auto inequalities = numeric::snapshot(Matrix{row_count, dimension, Vector(row_count * dimension, 0.0)});
     auto upper = numeric::snapshot_vector(Vector(row_count, 1.0));
-    auto equalities = numeric::snapshot(Matrix{0, 2, {}});
+    auto equalities = numeric::snapshot(Matrix{0, dimension, {}});
     auto equality_values = numeric::snapshot_vector({});
     REQUIRE(std::holds_alternative<numeric::MatrixView>(inequalities));
     REQUIRE(std::holds_alternative<numeric::VectorView>(upper));
     REQUIRE(std::holds_alternative<numeric::MatrixView>(equalities));
     REQUIRE(std::holds_alternative<numeric::VectorView>(equality_values));
-    auto made = sets::make_h({{"redundant-h-domain"}, 2, {"initial", "measurement-error"}},
+    auto made = sets::make_h({{"redundant-h-domain"}, dimension, {}},
         {std::get<numeric::MatrixView>(inequalities), std::get<numeric::VectorView>(upper),
          std::get<numeric::MatrixView>(equalities), std::get<numeric::VectorView>(equality_values)});
     REQUIRE(std::holds_alternative<sets::SetData>(made));
@@ -543,7 +555,7 @@ TEST_CASE("H-domain memory admission includes retained dual witnesses across saf
     const auto system = one_stage_noisy_integrator();
     constexpr std::size_t domain_row_count = 10000;
     constexpr std::size_t safety_row_count = 1000;
-    auto domain = make_redundant_h_domain(system, domain_row_count);
+    auto domain = make_redundant_h_domain(system, 2, domain_row_count);
     LinearSafetyConstraints repeated_safety{
         {safety_row_count, 1, Vector(safety_row_count, 0.0)},
         Vector(safety_row_count, 1.0)};
@@ -555,6 +567,50 @@ TEST_CASE("H-domain memory admission includes retained dual witnesses across saf
     context.resources = std::make_shared<const ResourcePolicy>(
         ResourcePolicy{1, 1, 1, 16 * 1024 * 1024});
     CHECK(domain_row_count * safety_row_count * sizeof(double) > *context.resources->memory_bytes);
+    const auto result = evaluate_h_continuous_policy(system, request, lp, context);
+    REQUIRE(std::holds_alternative<OperationStopped>(result));
+    CHECK(std::get<OperationStopped>(result).reason == StopReason::resource_limit);
+}
+
+TEST_CASE("H-domain memory admission includes large caller-derived solve identities") {
+    const auto system = one_stage_noisy_integrator();
+    auto domain = make_correlated_h_domain(system);
+    const std::string long_problem_id(200000, 'p');
+    const std::string long_program_id(200000, 'q');
+    const HContinuousPolicyRequest request{{{long_problem_id}, {long_program_id}},
+        domain, cancel_observed_state_policy(system),
+        {{{1,1,{0}}, {1}}, {{0,1,{}}, {}}}, {}, 1e-9};
+    BoxEnumerationWorkspace lp;
+    ExecutionContext context;
+    context.resources = std::make_shared<const ResourcePolicy>(
+        ResourcePolicy{1, 1, 1, 1024 * 1024});
+    const auto result = evaluate_h_continuous_policy(system, request, lp, context);
+    REQUIRE(std::holds_alternative<OperationStopped>(result));
+    CHECK(std::get<OperationStopped>(result).reason == StopReason::resource_limit);
+}
+
+TEST_CASE("H-domain memory admission includes retained replays for a long horizon") {
+    constexpr std::size_t horizon = 10000;
+    const auto system = long_horizon_integrator(horizon);
+    auto domain = make_redundant_h_domain(system, 1, 2);
+    std::vector<AffineStagePolicy> stages;
+    stages.reserve(horizon);
+    for (std::size_t stage = 0; stage < horizon; ++stage)
+        stages.push_back(rule(stage, {}, {1,0,{}}, {0}, {1,0,{}}, {1,1,{0}}, {0}));
+    auto made_policy = make_affine_observation_policy(system, std::move(stages));
+    REQUIRE(std::holds_alternative<AffineObservationPolicy>(made_policy));
+    std::vector<LinearSafetyConstraints> state_safety;
+    state_safety.reserve(horizon + 1);
+    state_safety.push_back({{1,1,{0}}, {1}});
+    for (std::size_t stage = 1; stage <= horizon; ++stage)
+        state_safety.push_back({{0,1,{}}, {}});
+    const HContinuousPolicyRequest request{{{"h-policy-test"}, {"long-replay-memory"}},
+        domain, std::get<AffineObservationPolicy>(std::move(made_policy)),
+        std::move(state_safety), {}, 1e-9};
+    BoxEnumerationWorkspace lp;
+    ExecutionContext context;
+    context.resources = std::make_shared<const ResourcePolicy>(
+        ResourcePolicy{1, 1, 1, 1024 * 1024});
     const auto result = evaluate_h_continuous_policy(system, request, lp, context);
     REQUIRE(std::holds_alternative<OperationStopped>(result));
     CHECK(std::get<OperationStopped>(result).reason == StopReason::resource_limit);
