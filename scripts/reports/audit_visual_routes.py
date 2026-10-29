@@ -29,7 +29,6 @@ COMPOSED_SAVED_ROUTES = {
     "scripts/reports/mpc05/make_report.py",
     "scripts/reports/mpc05/reference.py",
     "scripts/reports/visual_example_fuel_layers.py",
-    "scripts/reports/exp03/render_two_points_approximation.py",
 }
 FROZEN_DIAGRAM_EXCEPTIONS = {
     "benchmarks/reporting/approximation_pilot/summarize.py",
@@ -123,6 +122,8 @@ def migration_issue(source: str) -> int:
     if "/viz04/" in source:
         return MIGRATION_ISSUES["control-strategy-and-witness"]
     if any(token in source for token in ("/app0", "/ext", "/finite_feedback", "/lotka_volterra")):
+        return MIGRATION_ISSUES["approximation-and-extensions"]
+    if "/exp03/" in source:
         return MIGRATION_ISSUES["approximation-and-extensions"]
     if any(token in source for token in ("/geo", "/opt", "/it17_hull")):
         return MIGRATION_ISSUES["geometry-and-optimization"]

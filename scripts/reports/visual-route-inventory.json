@@ -186,7 +186,8 @@
       "source": "scripts/reports/exp03/render_two_points_approximation.py",
       "signal_count": 1,
       "asset_name_literals": [],
-      "disposition": "composes-or-copies-existing-saved-figure"
+      "disposition": "deferred-family-specific-migration",
+      "follow_up_issue": 684
     },
     {
       "source": "scripts/reports/exp04/render_saved.py",
