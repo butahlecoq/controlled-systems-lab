@@ -2081,7 +2081,7 @@
       "assets": [
         "optimal-fiber.svg"
       ],
-      "index_sha256": "11b354fc463e709eb6298c3a8bc996763958ed27447ea05dce1f2d20e4bcfeca",
+      "index_sha256": "37746b4db8bddd482ad5b07122fbe50ebc2f21149a00c6926f72e7532c1708fa",
       "disposition": "deferred: original frozen route-level readability review remains; companion availability is listed separately",
       "follow_up_issue": 604,
       "companion_route": "examples/index.html"

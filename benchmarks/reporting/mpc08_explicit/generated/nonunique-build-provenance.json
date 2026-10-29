@@ -65,7 +65,7 @@
   },
   "report_only_update": "Endpoint labels in the exact reference SVG were corrected after capture. The exact reference JSON, query CSV, C++ source/binary, and raw numerical observations are unchanged; original capture-time hashes are preserved in measurement_source_sha256 and measurement_artifact_sha256.",
   "schema": "csl.mpc08-nonunique-build-provenance/1",
-  "source_commit": "18cb292735a06a959b72ca43a57ff8de8e634460",
+  "source_commit": "cd8b59d3af83b1e801a5500934b2312f2afc39b7",
   "source_sha256": {
     "benchmarks/reporting/mpc08_explicit/explicit_nonunique_double_integrator.py": "0368031796506dc29ec5153f55c3e927092b2b06ddf7b1d9b7daf411db952217",
     "benchmarks/reporting/mpc08_explicit/mpc08_strategy_comparison.cpp": "5610f14d43cfbc60a28346cde3b35e3a7605900f9f8985e1495374219e1b8be6"
