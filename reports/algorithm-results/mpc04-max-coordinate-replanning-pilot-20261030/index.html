@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>MPC-04 MaxCoordinateGame replanning pilot</title>
+<style>
+body{font:16px/1.5 system-ui,sans-serif;max-width:1100px;margin:2rem auto;padding:0 1rem;color:#202124}h1,h2{line-height:1.2}table{border-collapse:collapse;width:100%;margin:1rem 0 2rem}th,td{border:1px solid #bbb;padding:.5rem;text-align:left}th{background:#f0f2f5}figure{margin:1.5rem 0}img{width:100%;height:auto;border:1px solid #ddd}.scope{background:#f5f7fa;padding:1rem;border-left:4px solid #536d9b}code{background:#f1f1f1;padding:.1rem .25rem}
+</style>
+</head>
+<body>
+<h1>MaxCoordinateGame: finite closed-loop MPC comparison</h1>
+<p>Nominal and finite-catalogue minimax controllers repeatedly plan, execute one action, observe the next state, and replan on a source-derived RL environment.</p>
+<div class="scope"><strong>Scope.</strong> Four scored steps, controls and disturbances in <code>{−1,+1}</code>, all 16 complete disturbance histories, and the source 100-substep transition. This is a finite adaptation of the continuous-action four-second RL environment. It establishes results only for this finite catalogue; calculations use binary64 arithmetic with tolerance-based independent replay.</div>
+<h2>Results</h2>
+<table>
+<thead><tr><th>Controller</th><th>Horizon</th><th>Episodes</th><th>Median terminal objective</th><th>Worst terminal objective</th><th>Median solve time / decision</th><th>Fallbacks</th></tr></thead>
+<tbody>
+<tr><td>Nominal, zero disturbance</td><td>Shrinking 4→1</td><td>16</td><td>0.15107</td><td>0.50488</td><td>~0.26 ms</td><td>0</td></tr>
+<tr><td>Nominal, zero disturbance</td><td>Moving 2-stage</td><td>16</td><td>0.23826</td><td>0.50488</td><td>~0.15 ms</td><td>0</td></tr>
+<tr><td>Finite minimax</td><td>Shrinking 4→1</td><td>16</td><td>0.26772</td><td>0.50488</td><td>~1.58 ms</td><td>0</td></tr>
+<tr><td>Finite minimax</td><td>Moving 2-stage</td><td>16</td><td>0.26772</td><td>0.54615</td><td>~0.48 ms</td><td>0</td></tr>
+</tbody>
+</table>
+<p>The pinned source is <a href="https://github.com/imm-rl-lab/optimal_control/blob/f4d76c60f4003f50954174e96eafd8e514bd5441/Environments/MaxCoordinateGame/MaxCoordinateGame.py">MaxCoordinateGame.py</a>. Objective values are the source terminal <code>max(|y|,|z|)</code>. The exact stored per-decision latencies and complete episode rows are in <a href="result.json">result.json</a>. Timings are descriptive for this Python finite enumerator; no performance winner is claimed.</p>
+<figure><img src="trajectory.svg" alt="All finite episode trajectories in the y-z phase plane and control/disturbance timeline"><figcaption>Solid trajectories use the shrinking episode horizon; dashed trajectories use the moving two-stage horizon. Colors separate nominal and finite minimax controllers. The lower panel summarizes executed controls over histories and shows the scored endpoint.</figcaption></figure>
+<p>This is a standalone Python reference pilot with exhaustive finite-plan enumeration; it is not yet wired to the C++ <code>finite_action_minimax</code> adapter. The raw record and source hashes preserve this distinction.</p>
+<h2>Evidence</h2>
+<ul>
+<li>Independent checker replays all 256 state transitions, verifies the complete 16-history catalogue for each of four variants, recomputes each chosen plan value, and checks the original terminal score.</li>
+<li>Forced deadline and solver-failure fixture episodes confirm that the runner applies the explicit zero-control fallback, continues to the episode endpoint, and counts every fallback.</li>
+<li>The driver executes the authored finite policy-gap fixtures and checks fixed-plan/replanning/causal values 2/2/1 and scalar fixed-plan/replanning values 2/0.</li>
+<li>No state constraints are present in this source-derived slice; controls remain in the authored source bounds.</li>
+<li>No recursive-feasibility, stability, continuous-disturbance, or global causal-optimality theorem is claimed.</li>
+</ul>
+<p><a href="README.md">Method and limitations</a> · <a href="SHA256SUMS">File hashes</a> · <a href="mpc04-max-coordinate-replanning-pilot.zip">Download offline bundle</a></p>
+</body>
+</html>

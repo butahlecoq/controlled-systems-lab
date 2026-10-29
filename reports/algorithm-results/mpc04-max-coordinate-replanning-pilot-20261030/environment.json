@@ -1,0 +1,25 @@
+{
+  "schema": "csl.mpc04-runtime/1",
+  "source_commit": "9c146d19bbd1f322e816cdc768b072cfa5ca8b59",
+  "source_worktree_dirty": false,
+  "driver_sha256": "ff7b51d9e62c8bf80d2fc0a0a141428f6eff61ce3c5ddc9597bf96109853397e",
+  "checker_sha256": "62341aa5a7218fe77332b8f30eed476f13c9ef4a237d759ea9bc533f608b7c57",
+  "runtime": {
+    "os": "Linux-7.2.8-9-omarchy-x86_64-with-glibc2.44",
+    "architecture": "x86_64",
+    "cpu_model": "AMD Ryzen 5 3550H with Radeon Vega Mobile Gfx",
+    "logical_cpus": 8,
+    "python": "3.14.8"
+  },
+  "execution": {
+    "workers": 1,
+    "warmup_runs": 0,
+    "full_collection_runs": 1,
+    "native_threads": "not applicable; Python standard library only",
+    "random_seed": "not applicable; deterministic finite catalogues"
+  },
+  "timing_scope": "Decision solve time covers finite control-plan enumeration, finite disturbance suffix evaluation and tie selection. Episode setup/replay, JSON serialization and SVG/HTML rendering are excluded.",
+  "limiter_profile": "not collected; no speedup or performance-winner claim",
+  "numeric_method": "binary64 arithmetic; independent source replay uses absolute and relative tolerance 2e-12",
+  "implementation_scope": "standalone Python reference pilot; not yet wired to the C++ finite_action_minimax adapter"
+}
