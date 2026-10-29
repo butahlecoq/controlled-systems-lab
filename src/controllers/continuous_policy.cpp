@@ -1,6 +1,8 @@
 #include <csl/controllers/continuous_policy.hpp>
+#include <csl/optimization/linear_program.hpp>
 
 #include <algorithm>
+#include <chrono>
 #include <cmath>
 #include <limits>
 #include <numeric>
@@ -85,6 +87,40 @@ bool valid_safety(const LinearSafetyConstraints& safety, std::size_t dimension) 
         safety.inequalities.rows == safety.upper_bounds.size() && finite(safety.upper_bounds);
 }
 
+struct SynthesisInequality {
+    Vector coefficients;
+    double upper_bound;
+};
+
+std::optional<std::size_t> checked_add(std::size_t left, std::size_t right) {
+    if (right > std::numeric_limits<std::size_t>::max() - left) return std::nullopt;
+    return left + right;
+}
+
+std::optional<std::size_t> checked_multiply(std::size_t left, std::size_t right) {
+    if (left != 0 && right > std::numeric_limits<std::size_t>::max() / left) return std::nullopt;
+    return left * right;
+}
+
+Diagnostic unsupported(std::string field, std::string message) {
+    return {DiagnosticCode::unsupported, std::move(field), std::move(message)};
+}
+
+OneStageAffineSynthesisResult inconclusive(AffineSynthesisInconclusiveReason reason,
+        std::optional<AffineObservationPolicy> candidate = {},
+        std::optional<ContinuousPolicyEvidence> evaluation = {},
+        std::optional<ProgramResult> solve = {}) {
+    return AffineSynthesisInconclusive{reason, std::move(candidate), std::move(evaluation), std::move(solve)};
+}
+
+std::optional<OperationStopped> stop_requested(const ExecutionContext& context) {
+    if (context.cancellation.stop_requested())
+        return OperationStopped{StopReason::cancelled, "Cancelled during affine-policy synthesis."};
+    if (context.deadline && std::chrono::steady_clock::now() >= *context.deadline)
+        return OperationStopped{StopReason::deadline_expired, "Deadline expired during affine-policy synthesis."};
+    return std::nullopt;
+}
+
 Vector slacks(const LinearSafetyConstraints& safety, std::span<const double> point) {
     Vector result;
     result.reserve(safety.inequalities.rows);
@@ -97,26 +133,23 @@ Vector slacks(const LinearSafetyConstraints& safety, std::span<const double> poi
     return result;
 }
 
-} // namespace
-
-JointVUncertaintyResult make_joint_v_uncertainty(const model::LinearSystem& system,
-        std::vector<Vector> joint_generators) {
+std::variant<JointUncertaintyLayout, Diagnostic> joint_layout_for(
+        const model::LinearSystem& system) {
     const auto dimensions = system.dimensions();
-    const auto horizon = system.horizon();
     JointUncertaintyLayout layout{0, {0, dimensions.state}, {}, {}};
     layout.total_dimension = dimensions.state;
-    const auto append_slice = [&](std::size_t size, JointUncertaintyLayout& target) -> CoordinateSlice {
-        const auto offset = target.total_dimension;
-        if (size > std::numeric_limits<std::size_t>::max() - offset) return {0, 0};
-        target.total_dimension += size;
-        return {offset, size};
+    const auto append_slice = [&](std::size_t size) -> std::optional<CoordinateSlice> {
+        const auto end = checked_add(layout.total_dimension, size);
+        if (!end) return std::nullopt;
+        const CoordinateSlice slice{layout.total_dimension, size};
+        layout.total_dimension = *end;
+        return slice;
     };
-    layout.external_by_stage.reserve(horizon);
-    for (std::size_t stage = 0; stage < horizon; ++stage) {
-        const auto slice = append_slice(dimensions.external, layout);
-        if (slice.dimension != dimensions.external) return invalid("controllers.joint_uncertainty.dimension",
-            "Joint uncertainty dimension overflowed.");
-        layout.external_by_stage.push_back(slice);
+    layout.external_by_stage.reserve(system.horizon());
+    for (std::size_t stage = 0; stage < system.horizon(); ++stage) {
+        const auto slice = append_slice(dimensions.external);
+        if (!slice) return invalid("controllers.joint_uncertainty.dimension", "Joint uncertainty dimension overflowed.");
+        layout.external_by_stage.push_back(*slice);
     }
     layout.errors_by_channel_sample.resize(system.channel_count());
     for (std::size_t channel = 0; channel < system.channel_count(); ++channel) {
@@ -128,12 +161,40 @@ JointVUncertaintyResult make_joint_v_uncertainty(const model::LinearSystem& syst
             const auto observation = system.observation({channel}, {sample});
             if (const auto* error = std::get_if<Diagnostic>(&observation)) return *error;
             const auto error_dimension = std::get<model::ObservationRecord>(observation).maps.error_map.cols();
-            const auto slice = append_slice(error_dimension, layout);
-            if (slice.dimension != error_dimension) return invalid("controllers.joint_uncertainty.dimension",
-                "Joint uncertainty dimension overflowed.");
-            errors.push_back(slice);
+            const auto slice = append_slice(error_dimension);
+            if (!slice) return invalid("controllers.joint_uncertainty.dimension", "Joint uncertainty dimension overflowed.");
+            errors.push_back(*slice);
         }
     }
+    return layout;
+}
+
+bool same_layout(const JointUncertaintyLayout& left, const JointUncertaintyLayout& right) {
+    const auto same_slices = [](const auto& first, const auto& second) {
+        if (first.size() != second.size()) return false;
+        for (std::size_t index = 0; index < first.size(); ++index)
+            if (first[index].offset != second[index].offset ||
+                first[index].dimension != second[index].dimension) return false;
+        return true;
+    };
+    if (left.total_dimension != right.total_dimension ||
+        left.initial_state.offset != right.initial_state.offset ||
+        left.initial_state.dimension != right.initial_state.dimension ||
+        !same_slices(left.external_by_stage, right.external_by_stage) ||
+        left.errors_by_channel_sample.size() != right.errors_by_channel_sample.size()) return false;
+    for (std::size_t channel = 0; channel < left.errors_by_channel_sample.size(); ++channel)
+        if (!same_slices(left.errors_by_channel_sample[channel], right.errors_by_channel_sample[channel]))
+            return false;
+    return true;
+}
+
+} // namespace
+
+JointVUncertaintyResult make_joint_v_uncertainty(const model::LinearSystem& system,
+        std::vector<Vector> joint_generators) {
+    auto layout_result = joint_layout_for(system);
+    if (const auto* error = std::get_if<Diagnostic>(&layout_result)) return *error;
+    auto layout = std::get<JointUncertaintyLayout>(std::move(layout_result));
     if (joint_generators.empty())
         return invalid("controllers.joint_uncertainty.generators", "Supply at least one generator for the joint uncertainty polytope.");
     for (const auto& generator : joint_generators) {
@@ -195,6 +256,10 @@ ContinuousPolicyResult evaluate_continuous_policy(const model::LinearSystem& sys
         return invalid("controllers.policy.tolerance", "Feasibility tolerance must be finite and nonnegative.");
     const auto horizon = system.horizon();
     const auto dimensions = system.dimensions();
+    const auto expected_layout = joint_layout_for(system);
+    if (const auto* error = std::get_if<Diagnostic>(&expected_layout)) return *error;
+    if (!same_layout(request.domain.layout(), std::get<JointUncertaintyLayout>(expected_layout)))
+        return invalid("controllers.policy.domain", "Joint uncertainty coordinates were authored for a different system layout.");
     if (request.domain.layout().external_by_stage.size() != horizon ||
         request.policy.stages().size() != horizon)
         return invalid("controllers.policy.shape", "Joint domain and policy must match the system horizon.");
@@ -303,6 +368,299 @@ ContinuousPolicyResult evaluate_continuous_policy(const model::LinearSystem& sys
     if (evidence.feasibility != NumericalFeasibility::violation_found && near_boundary)
         evidence.feasibility = NumericalFeasibility::inconclusive;
     return evidence;
+}
+
+OneStageAffineSynthesisResult synthesize_one_stage_affine_policy(
+        const model::LinearSystem& system, const OneStageAffineSynthesisRequest& request,
+        LPWorkspace& lp, const ExecutionContext& context) {
+    if (const auto stopped = stop_requested(context)) return *stopped;
+    if (system.horizon() != 1)
+        return unsupported("controllers.synthesis.horizon", "Affine policy synthesis currently supports exactly one transition.");
+    const auto expected_layout = joint_layout_for(system);
+    if (const auto* error = std::get_if<Diagnostic>(&expected_layout)) return *error;
+    if (!same_layout(request.domain.layout(), std::get<JointUncertaintyLayout>(expected_layout)))
+        return invalid("controllers.synthesis.domain", "Joint uncertainty coordinates were authored for a different system layout.");
+    if (request.feasibility_program.problem.value.empty() || request.feasibility_program.program.value.empty())
+        return invalid("controllers.synthesis.program_identity", "The generated LP requires a nonempty caller-supplied program identity.");
+    if (!std::isfinite(request.feasibility_tolerance) || request.feasibility_tolerance < 0.0)
+        return invalid("controllers.synthesis.tolerance", "Feasibility tolerance must be finite and nonnegative.");
+    if (!std::isfinite(context.numerical.absolute_tolerance) || context.numerical.absolute_tolerance < 0.0 ||
+        !std::isfinite(context.numerical.relative_tolerance) || context.numerical.relative_tolerance < 0.0)
+        return invalid("controllers.synthesis.numerical", "LP tolerances must be finite and nonnegative.");
+    const double synthesis_margin = 4.0 * std::max({request.feasibility_tolerance,
+        context.numerical.absolute_tolerance, context.numerical.relative_tolerance});
+    if (!std::isfinite(synthesis_margin))
+        return invalid("controllers.synthesis.tolerance", "Synthesis margin overflowed.");
+    if (request.action_features.empty())
+        return invalid("controllers.synthesis.features", "At least one before-decision observation component is required.");
+
+    const auto dimensions = system.dimensions();
+    if ((!request.state_safety.empty() && request.state_safety.size() != 2) ||
+        (!request.action_safety.empty() && request.action_safety.size() != 1))
+        return invalid("controllers.synthesis.safety", "One-stage synthesis accepts two state-safety slices and one action-safety slice.");
+    for (const auto& safety : request.state_safety)
+        if (!valid_safety(safety, dimensions.state))
+            return invalid("controllers.synthesis.state_safety", "State rows must be finite and match the model state dimension.");
+    for (const auto& safety : request.action_safety)
+        if (!valid_safety(safety, dimensions.control))
+            return invalid("controllers.synthesis.action_safety", "Action rows must be finite and match the model control dimension.");
+
+    const auto feature_stride = checked_add(request.action_features.size(), 1);
+    const auto parameter_count = feature_stride
+        ? checked_multiply(dimensions.control, *feature_stride) : std::nullopt;
+    const auto estimate_feature_count = checked_multiply(dimensions.state, request.action_features.size());
+    const auto action_feature_count = checked_multiply(dimensions.control, request.action_features.size());
+    const auto action_estimate_count = checked_multiply(dimensions.control, dimensions.state);
+    if (!parameter_count || !estimate_feature_count || !action_feature_count || !action_estimate_count)
+        return unsupported("controllers.synthesis.dimensions", "Policy coefficient extent overflowed.");
+
+    std::size_t rows_per_generator = 0;
+    if (!request.state_safety.empty()) {
+        const auto state_rows = checked_add(request.state_safety.front().inequalities.rows,
+            request.state_safety.back().inequalities.rows);
+        if (!state_rows) return unsupported("controllers.synthesis.dimensions", "Safety row extent overflowed.");
+        rows_per_generator = *state_rows;
+    }
+    if (!request.action_safety.empty()) {
+        const auto rows = checked_add(rows_per_generator,
+            request.action_safety.front().inequalities.rows);
+        if (!rows) return unsupported("controllers.synthesis.dimensions", "Safety row extent overflowed.");
+        rows_per_generator = *rows;
+    }
+    auto inequality_count = checked_multiply(request.domain.generators().size(), rows_per_generator);
+    if (!inequality_count) return unsupported("controllers.synthesis.dimensions", "Generated safety row count overflowed.");
+    if (*inequality_count == 0) inequality_count = 1;
+    const auto doubled_parameters = checked_multiply(*parameter_count, 2);
+    const auto column_count = doubled_parameters
+        ? checked_add(*doubled_parameters, *inequality_count) : std::nullopt;
+    const auto maximum_nonzeros_per_row = doubled_parameters
+        ? checked_add(*doubled_parameters, 1) : std::nullopt;
+    const auto maximum_nonzeros = maximum_nonzeros_per_row
+        ? checked_multiply(*inequality_count, *maximum_nonzeros_per_row) : std::nullopt;
+    const auto dense_coefficients = checked_multiply(*inequality_count, *parameter_count);
+    const auto coefficient_bytes = dense_coefficients
+        ? checked_multiply(*dense_coefficients, sizeof(double)) : std::nullopt;
+    const auto row_metadata_bytes = checked_multiply(*inequality_count, sizeof(SynthesisInequality));
+    const auto sparse_entry_bytes = maximum_nonzeros
+        ? checked_multiply(*maximum_nonzeros, sizeof(std::size_t) + sizeof(double)) : std::nullopt;
+    const auto row_offsets = checked_add(*inequality_count, 1);
+    const auto offset_bytes = row_offsets
+        ? checked_multiply(*row_offsets, sizeof(std::size_t)) : std::nullopt;
+    const auto variable_bytes = column_count
+        ? checked_multiply(*column_count, sizeof(double) + sizeof(Interval)) : std::nullopt;
+    const auto constraint_bytes = checked_multiply(*inequality_count, sizeof(Interval));
+    if (!column_count || !maximum_nonzeros || !coefficient_bytes || !row_metadata_bytes || !sparse_entry_bytes ||
+        !offset_bytes || !variable_bytes || !constraint_bytes)
+        return unsupported("controllers.synthesis.dimensions", "Feasibility LP storage extent overflowed.");
+    std::size_t estimated_bytes = 0;
+    for (const auto bytes : {*coefficient_bytes, *row_metadata_bytes, *sparse_entry_bytes, *offset_bytes,
+             *variable_bytes, *constraint_bytes}) {
+        const auto total = checked_add(estimated_bytes, bytes);
+        if (!total) return unsupported("controllers.synthesis.dimensions", "Feasibility LP storage extent overflowed.");
+        estimated_bytes = *total;
+    }
+    if (context.resources && context.resources->memory_bytes && estimated_bytes > *context.resources->memory_bytes)
+        return OperationStopped{StopReason::resource_limit,
+            "The generated affine-policy feasibility LP exceeds the declared memory budget."};
+
+    AffineStagePolicy placeholder{{0}, request.action_features,
+        Matrix{dimensions.state, request.action_features.size(),
+            Vector(*estimate_feature_count, 0.0)},
+        Vector(dimensions.state, 0.0),
+        Matrix{dimensions.control, request.action_features.size(),
+            Vector(*action_feature_count, 0.0)},
+        Matrix{dimensions.control, dimensions.state,
+            Vector(*action_estimate_count, 0.0)},
+        Vector(dimensions.control, 0.0)};
+    const auto checked_placeholder = make_affine_observation_policy(system, {placeholder});
+    if (const auto* error = std::get_if<Diagnostic>(&checked_placeholder)) return *error;
+
+    const auto dynamics = system.stage({0});
+    if (const auto* error = std::get_if<Diagnostic>(&dynamics)) return *error;
+    const auto& stage = std::get<model::DynamicsStage>(dynamics);
+
+    std::vector<SynthesisInequality> inequalities;
+    inequalities.reserve(*inequality_count);
+    const auto append_inequality = [&](Vector coefficients, double upper_bound) -> bool {
+        if (coefficients.size() != *parameter_count || !finite(coefficients) || !std::isfinite(upper_bound)) return false;
+        inequalities.push_back({std::move(coefficients), upper_bound});
+        return true;
+    };
+
+    const Estimator zero_estimator = [state_dimension = dimensions.state](StageIndex,
+            std::span<const ReleasedObservation>) { return Vector(state_dimension, 0.0); };
+    const Controller zero_controller = [control_dimension = dimensions.control](StageIndex,
+            std::span<const ReleasedObservation>, std::span<const double>) {
+        return Vector(control_dimension, 0.0);
+    };
+
+    for (const auto& generator : request.domain.generators()) {
+        if (const auto stopped = stop_requested(context)) return *stopped;
+        const auto baseline = replay_observed_policy(system,
+            replay_inputs(request.domain.layout(), generator), zero_estimator, zero_controller);
+        if (const auto* error = std::get_if<Diagnostic>(&baseline)) return *error;
+        if (const auto* stopped = std::get_if<OperationStopped>(&baseline)) return *stopped;
+        const auto& record = std::get<ReplayRecord>(baseline);
+        const auto history = history_values(placeholder, record.decisions.front().available);
+        if (!history)
+            return invalid("controllers.synthesis.features", "A requested observation feature was not released before the decision.");
+
+        if (!request.state_safety.empty()) {
+            const auto initial_margins = slacks(request.state_safety.front(), record.states.front());
+            for (const auto margin : initial_margins)
+                if (!append_inequality(Vector(*parameter_count, 0.0), margin - synthesis_margin))
+                    return invalid("controllers.synthesis.state_safety", "Initial-state row arithmetic produced a nonfinite value.");
+        }
+
+        if (!request.action_safety.empty()) {
+            const auto& safety = request.action_safety.front();
+            for (std::size_t row = 0; row < safety.inequalities.rows; ++row) {
+                Vector coefficients(*parameter_count, 0.0);
+                for (std::size_t control = 0; control < dimensions.control; ++control) {
+                    const double factor = safety.inequalities.values[row * dimensions.control + control];
+                    const auto base = control * *feature_stride;
+                    for (std::size_t feature = 0; feature < history->size(); ++feature)
+                        coefficients[base + feature] = factor * (*history)[feature];
+                    coefficients[base + history->size()] = factor;
+                }
+                if (!append_inequality(std::move(coefficients), safety.upper_bounds[row] - synthesis_margin))
+                    return invalid("controllers.synthesis.action_safety", "Action-row coefficient arithmetic produced a nonfinite value.");
+            }
+        }
+
+        if (!request.state_safety.empty()) {
+            const auto& safety = request.state_safety.back();
+            for (std::size_t row = 0; row < safety.inequalities.rows; ++row) {
+                Vector coefficients(*parameter_count, 0.0);
+                Vector input_effect(dimensions.control, 0.0);
+                double fixed = 0.0;
+                for (std::size_t state = 0; state < dimensions.state; ++state) {
+                    const double factor = safety.inequalities.values[row * dimensions.state + state];
+                    fixed += factor * record.states.back()[state];
+                    for (std::size_t control = 0; control < dimensions.control; ++control)
+                        input_effect[control] += factor * stage.B(state, control);
+                }
+                for (std::size_t control = 0; control < dimensions.control; ++control) {
+                    const auto base = control * *feature_stride;
+                    for (std::size_t feature = 0; feature < history->size(); ++feature)
+                        coefficients[base + feature] = input_effect[control] * (*history)[feature];
+                    coefficients[base + history->size()] = input_effect[control];
+                }
+                if (!append_inequality(std::move(coefficients), safety.upper_bounds[row] - fixed - synthesis_margin))
+                    return invalid("controllers.synthesis.state_safety", "Terminal-row coefficient arithmetic produced a nonfinite value.");
+            }
+        }
+    }
+
+    if (inequalities.empty()) inequalities.push_back({Vector(*parameter_count, 0.0), 0.0});
+
+    SparseMatrix matrix{inequalities.size(), *column_count, {0}, {}, {}};
+    Vector upper_bounds;
+    upper_bounds.reserve(inequalities.size());
+    for (std::size_t row = 0; row < inequalities.size(); ++row) {
+        const auto& inequality = inequalities[row];
+        for (std::size_t column = 0; column < *parameter_count; ++column)
+            if (inequality.coefficients[column] != 0.0) {
+                matrix.column_indices.push_back(column);
+                matrix.values.push_back(inequality.coefficients[column]);
+            }
+        for (std::size_t column = 0; column < *parameter_count; ++column)
+            if (inequality.coefficients[column] != 0.0) {
+                matrix.column_indices.push_back(*parameter_count + column);
+                matrix.values.push_back(-inequality.coefficients[column]);
+            }
+        matrix.column_indices.push_back(*doubled_parameters + row);
+        matrix.values.push_back(1.0);
+        matrix.row_offsets.push_back(matrix.values.size());
+        upper_bounds.push_back(inequality.upper_bound);
+    }
+    std::vector<Interval> variables(*column_count, Interval{0.0, std::nullopt});
+    std::vector<Interval> rows;
+    rows.reserve(upper_bounds.size());
+    for (const auto value : upper_bounds) rows.push_back({value, value});
+    auto made_program = optimization::make_linear_program({request.feasibility_program,
+        Vector(*column_count, 0.0), 0.0, std::move(matrix), std::move(variables), std::move(rows)});
+    if (const auto* errors = std::get_if<Diagnostics>(&made_program))
+        return errors->empty() ? unsupported("controllers.synthesis.program", "Could not construct the feasibility LP.") : errors->front();
+    auto program = std::get<LinearProgram>(std::move(made_program));
+
+    if (const auto stopped = stop_requested(context)) return *stopped;
+    const auto outcome = lp.solve(program, context);
+    if (const auto* unsupported_result = std::get_if<Unsupported>(&outcome)) {
+        const auto message = unsupported_result->diagnostics.empty()
+            ? "The selected LP provider does not support the generated feasibility program."
+            : unsupported_result->diagnostics.front().explanation;
+        return unsupported("controllers.synthesis.lp", message);
+    }
+    const auto& solved = std::get<ProgramResult>(outcome);
+    if (solved.outcome.subject != program.identity())
+        return inconclusive(AffineSynthesisInconclusiveReason::malformed_solver_result, {}, {}, solved);
+    if (solved.termination == Termination::cancelled)
+        return OperationStopped{StopReason::cancelled, solved.raw_diagnostics};
+    if (solved.termination == Termination::deadline_expired)
+        return OperationStopped{StopReason::deadline_expired, solved.raw_diagnostics};
+    if (solved.termination == Termination::resource_limit)
+        return OperationStopped{StopReason::resource_limit, solved.raw_diagnostics};
+    if (solved.termination == Termination::numerical_failure)
+        return OperationStopped{StopReason::numerical_failure, solved.raw_diagnostics};
+    if (solved.termination != Termination::completed)
+        return unsupported("controllers.synthesis.lp", "The selected LP provider rejected the generated feasibility request.");
+    if (solved.outcome.value == MathematicalOutcome::infeasible)
+        return inconclusive(AffineSynthesisInconclusiveReason::solver_reported_infeasible_without_certificate, {}, {}, solved);
+    if (solved.outcome.value != MathematicalOutcome::optimal || !solved.primal)
+        return inconclusive(AffineSynthesisInconclusiveReason::solver_did_not_establish_feasibility, {}, {}, solved);
+
+    if (solved.primal->size() != *column_count || !finite(*solved.primal))
+        return inconclusive(AffineSynthesisInconclusiveReason::malformed_solver_result, {}, {}, solved);
+    const auto primal_check = optimization::evaluate_primal(program, *solved.primal,
+        context.numerical, {{"csl.controllers.affine-synthesis.primal"}, "1"});
+    if (std::holds_alternative<Diagnostics>(primal_check))
+        return inconclusive(AffineSynthesisInconclusiveReason::malformed_solver_result, {}, {}, solved);
+    const auto& residuals = std::get<optimization::PrimalEvaluation>(primal_check).residuals;
+    const auto within = [&](ResidualMeasure residual) {
+        return std::isfinite(residual.violation) && std::isfinite(residual.scale) &&
+            residual.violation <= context.numerical.absolute_tolerance +
+                context.numerical.relative_tolerance * residual.scale;
+    };
+    if (!within(residuals.rows) || !within(residuals.variables))
+        return inconclusive(AffineSynthesisInconclusiveReason::malformed_solver_result, {}, {}, solved);
+
+    Matrix action_from_history{dimensions.control, request.action_features.size(),
+        Vector(*action_feature_count, 0.0)};
+    Vector action_offset(dimensions.control, 0.0);
+    for (std::size_t control = 0; control < dimensions.control; ++control) {
+        const auto base = control * *feature_stride;
+        for (std::size_t feature = 0; feature < request.action_features.size(); ++feature)
+            action_from_history.values[control * request.action_features.size() + feature] =
+                (*solved.primal)[base + feature] - (*solved.primal)[*parameter_count + base + feature];
+        action_offset[control] = (*solved.primal)[base + request.action_features.size()] -
+            (*solved.primal)[*parameter_count + base + request.action_features.size()];
+    }
+    AffineStagePolicy rule{{0}, request.action_features,
+        Matrix{dimensions.state, request.action_features.size(),
+            Vector(dimensions.state * request.action_features.size(), 0.0)},
+        Vector(dimensions.state, 0.0), std::move(action_from_history),
+        Matrix{dimensions.control, dimensions.state,
+            Vector(*action_estimate_count, 0.0)}, std::move(action_offset)};
+    auto made_policy = make_affine_observation_policy(system, {std::move(rule)});
+    if (std::holds_alternative<Diagnostic>(made_policy))
+        return inconclusive(AffineSynthesisInconclusiveReason::malformed_solver_result, {}, {}, solved);
+    auto policy = std::get<AffineObservationPolicy>(std::move(made_policy));
+
+    ContinuousPolicyRequest evaluation_request{PolicyCoverage::all_joint_uncertainty,
+        request.domain, policy, request.state_safety, request.action_safety, std::nullopt,
+        request.feasibility_tolerance};
+    auto evaluation = evaluate_continuous_policy(system, evaluation_request);
+    if (const auto* error = std::get_if<Diagnostic>(&evaluation)) return *error;
+    if (const auto* stopped = std::get_if<OperationStopped>(&evaluation)) return *stopped;
+    auto evidence = std::get<ContinuousPolicyEvidence>(std::move(evaluation));
+    if (evidence.feasibility == NumericalFeasibility::violation_found)
+        return inconclusive(AffineSynthesisInconclusiveReason::candidate_violates_safety,
+            std::move(policy), std::move(evidence), solved);
+    if (evidence.feasibility == NumericalFeasibility::inconclusive)
+        return inconclusive(AffineSynthesisInconclusiveReason::candidate_within_tolerance_band,
+            std::move(policy), std::move(evidence), solved);
+    return SynthesizedAffinePolicy{std::move(policy), std::move(evidence), solved};
 }
 
 } // namespace csl::controllers

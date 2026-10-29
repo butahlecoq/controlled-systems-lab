@@ -3,6 +3,8 @@
 #include <csl/controllers/observed_replay.hpp>
 #include <csl/evidence/contracts.hpp>
 #include <csl/model/linear_system.hpp>
+#include <csl/optimization/contracts.hpp>
+#include <csl/execution/contracts.hpp>
 #include <cstddef>
 #include <optional>
 #include <span>
@@ -129,5 +131,47 @@ using ContinuousPolicyResult =
 
 ContinuousPolicyResult evaluate_continuous_policy(
     const model::LinearSystem&, const ContinuousPolicyRequest&);
+
+struct OneStageAffineSynthesisRequest {
+    ProgramIdentity feasibility_program;
+    JointVUncertainty domain;
+    std::vector<ObservationComponentRef> action_features;
+    std::vector<LinearSafetyConstraints> state_safety;
+    std::vector<LinearSafetyConstraints> action_safety;
+    double feasibility_tolerance{1e-9};
+};
+
+enum class AffineSynthesisInconclusiveReason {
+    solver_reported_infeasible_without_certificate,
+    solver_did_not_establish_feasibility,
+    malformed_solver_result,
+    candidate_violates_safety,
+    candidate_within_tolerance_band
+};
+
+struct SynthesizedAffinePolicy {
+    AffineObservationPolicy policy;
+    ContinuousPolicyEvidence evaluation;
+    ProgramResult feasibility_solve;
+};
+
+struct AffineSynthesisInconclusive {
+    AffineSynthesisInconclusiveReason reason;
+    std::optional<AffineObservationPolicy> candidate;
+    std::optional<ContinuousPolicyEvidence> evaluation;
+    std::optional<ProgramResult> feasibility_solve;
+};
+
+using OneStageAffineSynthesisResult = std::variant<
+    SynthesizedAffinePolicy, AffineSynthesisInconclusive,
+    Diagnostic, OperationStopped>;
+
+// Synthesizes an action affine in the named before-decision observations for
+// one transition. A successful result is numerically checked over every point
+// of the authored joint V-hull. LP workspace/provider choice belongs to the
+// caller; a numerical infeasibility status is not a no-policy proof.
+OneStageAffineSynthesisResult synthesize_one_stage_affine_policy(
+    const model::LinearSystem&, const OneStageAffineSynthesisRequest&,
+    LPWorkspace&, const ExecutionContext&);
 
 } // namespace csl::controllers
