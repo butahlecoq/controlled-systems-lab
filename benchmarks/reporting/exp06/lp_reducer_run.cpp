@@ -102,7 +102,7 @@ csl::geometry::HullReductionResult run_method(const std::string& method,
         return reduce_itis17_a43_paper_hull(cloud, lp, {}, A43PivotRule::phase_one_order);
     if (method == "csl.hull.itis17.a43-largest-norm-tie")
         return reduce_itis17_a43_paper_hull(cloud, lp, {}, A43PivotRule::largest_norm_tie);
-    if (method == "csl.hull.itis17.a44-incremental-lp")
+    if (method == "csl.hull.itis17.a44-paper-farthest-incremental-lp")
         return reduce_itis17_a44_hull(cloud, lp, {});
     throw std::invalid_argument("unknown EXP-06 LP reducer identity");
 }

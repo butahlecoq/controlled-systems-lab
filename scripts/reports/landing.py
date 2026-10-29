@@ -96,7 +96,7 @@ FAMILIES = {
         r"exp06-[0-9a-f]{16}", "geometry", "Bounded exact-hull geometry pilot",
         "Presents bounded exact-hull comparisons on a nine-point dyadic square. Reports include "
         "the A29/A30 Python reference, C++ QuickHull, and in the ITIS'17 follow-up, separate safe "
-        "A43, paper-derived A43 tie variants, and A44 incremental LP rows. An independent exact "
+        "A43, paper-derived A43 tie variants, and a separately identified A44 incremental LP row. An independent exact "
         "checker validates each returned hull; cross-runtime timing is inconclusive and these "
         "single-fixture pilots do not establish a general speedup or complete the geometry ladder."),
     "lp": Family(

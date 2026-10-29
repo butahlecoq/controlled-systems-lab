@@ -9,7 +9,7 @@ import unittest
 
 ROOT = Path(__file__).resolve().parents[2]
 BUNDLE = ROOT / "reports/algorithm-results/exp06-geometry-pilot-20261029"
-PAPER_BUNDLE = ROOT / "reports/algorithm-results/exp06-it17-paper-reducers-20261029-r1"
+PAPER_BUNDLE = ROOT / "reports/algorithm-results/exp06-it17-paper-reducers-20261029-r2"
 
 
 def load(name: str, path: Path):
@@ -73,7 +73,7 @@ class Exp06PilotTest(unittest.TestCase):
         self.assertIn("csl.hull.itis17.a43-certified-basis-reuse", methods)
         self.assertIn("csl.hull.itis17.a43-artificial-basis", methods)
         self.assertIn("csl.hull.itis17.a43-largest-norm-tie", methods)
-        self.assertIn("csl.hull.itis17.a44-incremental-lp", methods)
+        self.assertIn("csl.hull.itis17.a44-paper-farthest-incremental-lp", methods)
         self.assertEqual(len(rows), 36)
         self.assertTrue(all(row["status"] == "completed" and row["checker"] == "verified" for row in rows))
         tie_attempts = [json.loads(item["run"])["result"]["algorithm"]["reduction"]["a43_paper_metrics"]

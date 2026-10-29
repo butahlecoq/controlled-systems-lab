@@ -269,6 +269,7 @@ HullReductionResult reduce_itis17_a43_paper_hull(const PointCloud& cloud, LPWork
     if (!std::holds_alternative<HullReduction>(final_result)) return final_result;
     auto reduction = std::get<HullReduction>(std::move(final_result));
     metrics.final_recheck_calls = reduction.lp_calls;
+    reduction.lp_calls += metrics.candidate_solves;
     reduction.attempts.insert(reduction.attempts.begin(), attempts.begin(), attempts.end());
     if (incomplete) reduction.status = ReductionStatus::incomplete;
     reduction.itis17_a43_paper = metrics;

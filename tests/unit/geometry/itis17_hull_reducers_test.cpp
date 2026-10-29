@@ -40,10 +40,13 @@ geometry::PointCloud square_cloud() {
 TEST_CASE("ITIS17 reducer registrations preserve distinct method identities") {
     const auto a43 = geometry::make_itis17_a43_hull_reducer_registration();
     const auto a44 = geometry::make_itis17_a44_hull_reducer_registration();
+    const auto paper_a44 = geometry::make_itis17_a44_paper_hull_reducer_registration();
     const auto opt06 = geometry::make_basis_reuse_hull_reducer_registration();
     const auto opt07 = geometry::make_ordered_hull_reducer_registration();
     CHECK(a43.identity.id.value == "csl.hull.itis17.a43-certified-basis-reuse");
     CHECK(a44.identity.id.value == "csl.hull.itis17.a44-incremental-lp");
+    CHECK(paper_a44.identity.id.value == "csl.hull.itis17.a44-paper-farthest-incremental-lp");
+    CHECK(a44.identity.id != paper_a44.identity.id);
     CHECK(a43.identity.id != opt06.identity.id);
     CHECK(a44.identity.id != opt07.identity.id);
 }
@@ -147,6 +150,8 @@ TEST_CASE("A43 artificial-basis variants retain only independently certified hul
         REQUIRE(reduction.status == geometry::ReductionStatus::complete);
         REQUIRE(reduction.itis17_a43_paper.has_value());
         CHECK(reduction.itis17_a43_paper->candidate_solves > 0);
+        CHECK(reduction.lp_calls == reduction.itis17_a43_paper->candidate_solves +
+              reduction.itis17_a43_paper->final_recheck_calls);
         CHECK(reduction.itis17_a43_paper->phase_one_pivots > 0);
         CHECK(reduction.itis17_a43_paper->largest_norm_tie_rule ==
               (rule == geometry::A43PivotRule::largest_norm_tie));

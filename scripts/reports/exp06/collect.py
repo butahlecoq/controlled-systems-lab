@@ -26,7 +26,7 @@ LP_METHODS = (
     "csl.hull.itis17.a43-certified-basis-reuse",
     "csl.hull.itis17.a43-artificial-basis",
     "csl.hull.itis17.a43-largest-norm-tie",
-    "csl.hull.itis17.a44-incremental-lp",
+    "csl.hull.itis17.a44-paper-farthest-incremental-lp",
 )
 REPETITIONS = 5
 WARMUPS = 1
@@ -136,7 +136,7 @@ def main() -> int:
     if args.lp_reducer:
         harness_sources.extend(identity_file(path) for path in (
             "benchmarks/reporting/exp06/lp_reducer_run.cpp", "src/geometry/a43_paper_reducer.cpp",
-            "src/optimization/phase_one/simplex.cpp",
+            "src/geometry/hull/itis17_reducers.cpp", "src/optimization/phase_one/simplex.cpp",
             "docs/research/itis17-paper-reducers-cpp-adaptation.md"))
     load_average = os.getloadavg() if hasattr(os, "getloadavg") else None
     cpu_model = "unknown"
@@ -195,7 +195,7 @@ def main() -> int:
             identity_file("docs/research/itis17-paper-reducers-cpp-adaptation.md")]
         adaptation_sha256 = file_hash(ROOT / "docs/research/itis17-paper-reducers-cpp-adaptation.md")
         for method_id in LP_METHODS:
-            methods.append({"id": method_id, "version": "2.0.0" if method_id.endswith("a44-incremental-lp") else "1.0.0", "sources": source_lp,
+            methods.append({"id": method_id, "version": "1.0.0", "sources": source_lp,
                 "deviations_sha256": adaptation_sha256, "runtime_base": None, "attempts": []})
     raw_dir = out / "raw-attempts"
     raw_dir.mkdir(parents=True)

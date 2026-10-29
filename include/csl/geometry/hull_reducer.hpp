@@ -224,5 +224,6 @@ registry::Registration<registry::HullReducerPort> make_ordered_hull_reducer_regi
 registry::Registration<registry::HullReducerPort> make_itis17_a43_hull_reducer_registration();
 registry::Registration<registry::HullReducerPort> make_itis17_a43_paper_hull_reducer_registration(A43PivotRule);
 registry::Registration<registry::HullReducerPort> make_itis17_a44_hull_reducer_registration();
+registry::Registration<registry::HullReducerPort> make_itis17_a44_paper_hull_reducer_registration();
 registry::Registration<registry::HullReducerPort> make_grouped_hull_reducer_registration();
 } // namespace csl::geometry
