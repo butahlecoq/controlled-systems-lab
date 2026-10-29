@@ -94,10 +94,11 @@ FAMILIES = {
         "worst-case path in both player phase planes; it makes no continuous RL or performance claim."),
     "exp06-geometry-pilot": Family(
         r"exp06-[0-9a-f]{16}", "geometry", "Bounded exact-hull geometry pilot",
-        "Compares a Python 3 transcription of the A29 reference with modern C++ QuickHull on one "
-        "exact nine-point dyadic square fixture. An independent exact checker validates both hulls, "
-        "including a missing-corner control; cross-runtime timing is inconclusive and this pilot "
-        "does not complete the broader geometry ladder or establish a speedup."),
+        "Presents bounded exact-hull comparisons on a nine-point dyadic square. Reports include "
+        "the A29/A30 Python reference, C++ QuickHull, and in the ITIS'17 follow-up, separate safe "
+        "A43, paper-derived A43 tie variants, and A44 incremental LP rows. An independent exact "
+        "checker validates each returned hull; cross-runtime timing is inconclusive and these "
+        "single-fixture pilots do not establish a general speedup or complete the geometry ladder."),
     "lp": Family(
         r"lp-\d{8}T\d{6}Z-[0-9a-f]{12,64}", "optimization", "Linear programming reference run",
         "Runs the registered HiGHS linear-programming adapter on five small analytic "

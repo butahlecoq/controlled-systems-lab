@@ -221,6 +221,30 @@ ZIP entry matches, and the live landing page links to the report. This remains
 partial EXP-02 evidence; issue #94 remains open for its paired strategy, full
 workload/resource matrix and comparison-record requirements.
 
+### EXP-06 A43/A44 paper-derived follow-up
+
+The saved [six-method bundle](../../reports/algorithm-results/exp06-it17-paper-reducers-20261029-r1/)
+uses source commit `9d01d149f858ba5eed3aab755295a345f9dcc3b4` and one canonical
+nine-point square input. It records the A29/A30 Python reference, QuickHull,
+the existing safe A43 adaptation, candidate-by-candidate A43 with the default
+pivot order, A43 with a separate largest-norm tie rule, and A44 incremental LP.
+One warmup and five alternating measured attempts per method produced 36 saved
+attempts; all completed and passed the independent exact hull oracle. The A43
+largest-norm rule selected an equal reduced-cost tie once per attempt. The
+paper-order A43 run recorded 34 Phase-I pivots and four final-recheck calls;
+A44 recorded six incremental membership and four final-recheck calls. Median
+method-local observations were 9,149,690 ns for the Python port, 40,509 ns for
+QuickHull, 3,139,807 ns for safe A43, 3,171,864 ns for A43 paper-order,
+3,214,118 ns for A43 largest-norm tie, and 4,164,874 ns for A44. These runs
+use different runtimes and timing scopes; they support no speed ranking or
+limiter claim. The A43 source-derived implementation uses CSL Phase-I, exact
+dyadic deletion certificates and a full final recheck; A44 uses the
+farthest-first interpretation of conflicting paper prose. The report links its
+deviation note. No Pascal row is included because no matching Pascal source
+was recovered. This is a bounded functionality pilot, not a historical
+runtime reproduction or the full EXP-02 ladder. Pages deployment and live
+artifact verification remain pending.
+
 ### ITIS17 hull output-status update
 
 The [r3 output-status report](../../reports/algorithm-results/exp02-it17-a44-paper-order-20261028-r3/)

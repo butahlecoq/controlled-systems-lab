@@ -110,9 +110,10 @@ class LandingTests(unittest.TestCase):
     def test_exp06_geometry_pilot_has_a_bounded_geometry_description(self):
         family = landing.FAMILIES[landing.family_for("exp06-73c216869b5ee235")]
         self.assertEqual(family.group, "geometry")
-        self.assertIn("Python 3 transcription", family.summary)
+        self.assertIn("A29/A30 Python reference", family.summary)
+        self.assertIn("paper-derived A43 tie variants", family.summary)
         self.assertIn("inconclusive", family.summary)
-        self.assertIn("does not complete the broader geometry ladder", family.summary)
+        self.assertIn("do not establish a general speedup", family.summary)
 
     def test_a44_v2_description_does_not_relabel_the_historical_adaptation_route(self):
         historical = landing.FAMILIES[landing.family_for(
