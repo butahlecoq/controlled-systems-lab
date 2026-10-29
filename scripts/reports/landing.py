@@ -466,6 +466,16 @@ FAMILIES = {
         "intersections and a selected capture path in the (x1,x2) plane. The source's adversarial "
         "input is fixed at zero for this nominal reachability slice; it is not the continuous "
         "two-player RL optimum or a performance comparison."),
+    "env717-time-sphere-minimax": Family(
+        r"env717-time-sphere-minimax-[0-9a-f]{20}", "synthesis",
+        "TimeOptimalSphereGame adversarial finite-catalogue minimax",
+        "Preserves the source's ten held-action Euler substeps and lets both players choose from "
+        "the finite catalogue {-1,0,1}. Reports the first robust capture horizon and a causal "
+        "minimax capture time, with forward states, backward-winning intersections and a "
+        "worst-case path overlaid in the position–velocity plane. The exact finite nodes are "
+        "available in the figure data; displayed convex-hull envelopes are visual guides only. "
+        "This is an explicit finite-action adaptation, not an RL reproduction or continuous-boundary "
+        "claim."),
     "syn06-verifier": Family(
         r"syn06-verifier-\d{8}-[0-9a-f]{64}", "verification", "Trajectory verification",
         "Re-checks two literal two-stage integrator witnesses against the original saved input "

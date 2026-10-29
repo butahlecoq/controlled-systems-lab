@@ -178,6 +178,15 @@
       "follow_up_issue": 717
     },
     {
+      "source": "scripts/reports/env717/check_time_sphere_minimax.py",
+      "signal_count": 3,
+      "asset_name_literals": [
+        "reachability.svg"
+      ],
+      "disposition": "deferred-family-specific-migration",
+      "follow_up_issue": 717
+    },
+    {
       "source": "scripts/reports/env717/check_two_points.py",
       "signal_count": 3,
       "asset_name_literals": [
@@ -904,6 +913,14 @@
     },
     {
       "source": "scripts/reports/stage_env717_time_sphere.py",
+      "signal_count": 3,
+      "asset_name_literals": [
+        "reachability.svg"
+      ],
+      "disposition": "publication-validation-or-frozen-route"
+    },
+    {
+      "source": "scripts/reports/stage_env717_time_sphere_minimax.py",
       "signal_count": 3,
       "asset_name_literals": [
         "reachability.svg"
