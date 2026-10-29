@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>TwoPoints reachability and approximations · CSL</title>
+  <style>
+    :root { color-scheme: dark; font: 16px/1.55 system-ui, sans-serif; background: #111820; color: #e8edf0; }
+    body { max-width: 1100px; margin: 0 auto; padding: 2rem 1.25rem 4rem; }
+    h1, h2 { color: #f4f1e8; line-height: 1.2; }
+    a { color: #72c7ee; }
+    .figure { overflow-x: auto; background: #111820; }
+    .figure img { display: block; width: 100%; min-width: 760px; height: auto; }
+    .note { border-left: 3px solid #56b4e9; padding: .5rem 1rem; color: #bac6ce; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { text-align: left; border-bottom: 1px solid #35434d; padding: .55rem; }
+    code { color: #d6e6f2; }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>TwoPoints differential-game reachability</h1>
+    <p>Finite three-stage pilot · binary64 projected hulls and outer set approximations</p>
+    <figure class="figure">
+      <img src="reachability-and-approximations.svg"
+           alt="Two state-plane plots showing stagewise forward reachable sets, terminal minimax-threshold and finite-feedback winning-node hull outlines, minimax trajectories, and projected approximation shapes.">
+      <figcaption>Left: point 1 position and velocity (x1,x2). Right: point 2 position and velocity (x3,x4). Dashed orange outlines legacy minimax-threshold target nodes; dotted purple outlines finite-feedback winning nodes. The two hulls overlap in both panels; in the left panel they collapse to one point, and in the right they coincide with the forward hull. Other colored lines compare approximations of the stage-three forward hull.</figcaption>
+    </figure>
+    <p class="note">Each containment result is independently checked in its 2D projection against every binary64 terminal state vertex. Exact integer transitions are followed by binary64 conversion and a native projection; exact rational lattice inclusion is reported separately in the evidence. The plot does not imply a 4D containment guarantee or draw the continuous projection of the coupled terminal gap target; orange outlines show the projected hull of finite terminal nodes meeting its threshold. It shows backward-winning nodes restricted to the forward graph. Ellipse and rotated-parallelotope outlines can exceed the inherited plot limits and are clipped at the panel edge; their area ratios use their complete output shapes.</p>
+
+    <h2>What this compares</h2>
+    <p>The finite game uses three stages, controls <code>{-2.5, 0, 2.5}</code>, and disturbance vertices <code>{-1, 0, 1}</code>. Its terminal layer contains 345 states. We compare the hull of their binary64 projections with QuickHull, an axis box, a rotated parallelotope, a directional ellipsoid, and a zonotope axis cover.</p>
+    <p>The exact rational lattice hull has 4 vertices in (x1,x2) and 6 in (x3,x4); the rounded binary64 hull has 4 and 8. The checker also reports whether each method contains every rational lattice point. Some QuickHull, box, and parallelotope outputs miss points there even though they contain the stored binary64 reference.</p>
+    <p>The approximation methods are outer methods; no continuous convex inner approximation is claimed. An independent exhaustive finite-game oracle checks all 27 control sequences against all 27 disturbance sequences and retains a realizable minimizing control and its worst disturbance response. Objective bounds are emitted only when the relevant phase-plane output contains every exact scale-2000 state.</p>
+    <p>This is a finite-action discretization of a differential-game environment previously used for RL. It does not reproduce the upstream continuous-action 10-second RL experiment. The comparison covers the final projected forward hull; it does not propagate approximations through reachability or minimax recursion.</p>
+
+    <h2>Results</h2>
+    <p>QuickHull returns 4 vertices in (x1,x2) and 8 in (x3,x4), equivalent to the stored binary64 input hull. Every outer method contains all binary64 reference vertices in both projections. The reduced zonotope area ratio is 1.00000000047 in both planes. Three of its six source generators are zero and the four-generator output retains all three active generators, so this is not an active-generator reduction result.</p>
+    <p>Exact finite enumeration gives minimax terminal squared position gap <code>58,323,769 / 4,000,000 = 14.58094225</code>, with control <code>[-2.5,-2.5,-2.5]</code> and worst disturbance <code>[-1,-1,-1]</code>. Checked objective intervals are: ellipsoid <code>[3.3052329057514624, 16.30967743126202]</code>; rotated parallelotope upper bound <code>16.280491371900826</code> (its lower bound is inconclusive); zonotope <code>[14.580942248710857, 14.58094225007735]</code>. QuickHull and axis-box bounds are inconclusive because they omit exact lattice states. The exact fractions, witness path and bound derivations are in <a href="check.json">check.json</a>.</p>
+    <p>Seven alternating single-call measurements per method and projection are included in <a href="run.json">run.json</a>; the independent checker verifies all 80 warmup and timed outputs. Timing scopes differ between the direct QuickHull call and approximation policy calls, and the zonotope input is preconstructed; these are descriptive observations without a speed ranking claim. A source-mapped limiter profile was unavailable. See <a href="README.md">the report notes</a> for medians, ranges, limitations and reproduction steps.</p>
+    <h2>Evidence</h2>
+    <ul>
+      <li><a href="reference.json">Exact finite-game reference reconstruction</a></li>
+      <li><a href="run.json">Raw method results and timings</a></li>
+      <li><a href="check.json">Independent projected inclusion checks</a></li>
+      <li><a href="comparison-record-projection-0.json">Immutable comparison record for (x1,x2)</a></li>
+      <li><a href="comparison-record-projection-1.json">Immutable comparison record for (x3,x4)</a></li>
+      <li><a href="provenance.json">Build, input hashes and measurement conditions</a></li>
+      <li><a href="SHA256SUMS">Bundle checksums</a></li>
+      <li><a href="../env717-two-points-feedback-v1/index.html">Reachability and finite-feedback source report</a></li>
+    </ul>
+  </main>
+</body>
+</html>

@@ -1,0 +1,111 @@
+{
+  "schema": "csl.exp03-two-points-approximation-provenance/1",
+  "case_id": "env717-two-points-three-stage-finite-game",
+  "source_base_commit": "b6054f2417fa343b40114b007a54fbc5aae6cc14",
+  "upstream_repository_commit": "f4d76c60f4003f50954174e96eafd8e514bd5441",
+  "upstream_source_blob": "4e71bed8ceffa1990645fb85e54d6b5b1eeb688d",
+  "source_report_commit": "6aa3510ee8448b9f9994b7e52aeeb6c87ced4842",
+  "inputs": {
+    "figure_data_sha256": "a65b21edb9c29375b1a851b3a4fc9a8e8ae28b1cee55b8c3952fea8347d26284",
+    "source_result_sha256": "c9c382b0469504254f45815904aa99714c08d4ff5f4584c810fd2420ca80f8c4",
+    "source_svg_sha256": "f427ab37ba93cf31e3c70f03dff6414cc1dce77bc5d7a318aef672dadfecf383"
+  },
+  "report_code_sha256": {
+    "benchmarks/reporting/exp03/two_points_approximation.cpp": "0e71262772839e57a60aa36426024bb7a117ae6d220f7429a139530a73b91559",
+    "scripts/reports/exp03/build_two_points_reference.py": "9f9e9fcad055ae4d1426278dc7df731e2204eb8dfb491845add73fe98e6ab604",
+    "scripts/reports/exp03/build_comparison_records.py": "1be1c4ce40dabe0a7ea4a7fe697c5a753557d24796db77cf57b3c868ba0aa511",
+    "scripts/reports/exp03/check_two_points_approximation.py": "d28a500c3499613aa8e8e8969fd53af60cb7eeec3c875f18326999bf8b6fba9a",
+    "scripts/reports/exp03/check_two_points_approximation_smoke.py": "e98e91d52561cf4fead5b97783258581993f69b836a837d2c3a172de0ea7360f",
+    "scripts/reports/exp03/render_two_points_approximation.py": "0a2ae1f10b05d0f8c4e7e490f71fad1db0eca40657880fc88cdb6c2930b25127",
+    "src/geometry/hull/quickhull_2d.cpp": "418c78d24d0814fecc4f3540b64e6d364a2dadbbc1c3136d89b2023397730157",
+    "src/geometry/approximation/box_parallelotope.cpp": "464ac084242562875529dc23fac40ec339c5ba33d1befb9f61277f758dc767fb",
+    "src/geometry/approximation/ellipsoidal.cpp": "192b7702c0d1de4aed9a749d86953f5d6849efffef405c7da971eefb9a61c681",
+    "src/geometry/approximation/zonotope.cpp": "fc389b36b51feff642b9b65c1979ef82d4f2322577dcdcc0f185d166429ede65",
+    "src/geometry/approximation/policy.cpp": "a95faf76eae5881a24db6173634a683dc5e69fe194a383e1b35ed5fa6744e04e",
+    "src/geometry/polyhedral/projection.cpp": "285af382cb1ad8ced04d02d14491ca16e58ca6a426837155224aa39d8e0aa7a8"
+  },
+  "build": {
+    "configuration": "Release",
+    "compiler": "GCC 16.2.1",
+    "cmake": "3.31.6",
+    "python": "3.14.8 for reference/oracle scripts",
+    "operating_system": "Linux 7.2.8-9-omarchy x86_64 GNU/Linux",
+    "cpu": "AMD Ryzen 5 3550H with Radeon Vega Mobile Gfx; 4 cores / 8 logical CPUs",
+    "benchmark_executable_sha256": "43556c4819b8d826bf159a9494399e7f346a36e54b3a179712cea3e7234868c0",
+    "optional_highs_backend": false,
+    "optional_qhull_backend": false,
+    "logical_cpus": 8,
+    "architecture": "x86_64",
+    "compiler_version": "16.2.1"
+  },
+  "measurement": {
+    "date_utc": "2026-10-29",
+    "pre_run_load_average": [
+      2.67,
+      1.66,
+      0.81
+    ],
+    "capture_time_utc": "2026-10-29T19:09:55Z",
+    "warmups_per_method_projection": 1,
+    "measured_calls_per_method_projection": 7,
+    "ordering": "rotating alternating order",
+    "public_call_outcomes": 80,
+    "independently_checked_outputs": 80,
+    "source_mapped_limiter_profile": {
+      "status": "unavailable",
+      "reason": "perf is not installed; no performance ranking claimed"
+    },
+    "memory_limit": {
+      "requested_bytes": 8589934592,
+      "enforced": true,
+      "mechanism": "RLIMIT_AS per process",
+      "observed_peak_rss_bytes": null
+    },
+    "requested_outer_workers": 1,
+    "actual_outer_workers": 1,
+    "requested_native_threads": 1,
+    "actual_native_threads": 1,
+    "actual_native_threads_status": "single-threaded driver; OS thread count not observed",
+    "workspace_policy": {
+      "quickhull": "stateless direct call; no workspace",
+      "registered_approximation": "run_registered prepares a fresh pipeline workspace for each warmup and measured call; no workspace reuse"
+    },
+    "wall_timeout": {
+      "requested_seconds": 300,
+      "enforced": true,
+      "mechanism": "GNU timeout; process-group termination"
+    },
+    "suite_concurrency": 1
+  },
+  "arithmetic_and_oracle": {
+    "finite_state_model": "exact integer lattice recurrence at state_scale=2000",
+    "output_check": "exact dyadic arithmetic over all stored binary64 vertices and representation coefficients",
+    "reference_semantics": "convex hull of enumerated finite-game states, checked separately in each requested 2D projection",
+    "finite_minimax_oracle": "independent exhaustive integer replay of 27 open-loop controls by 27 full disturbance sequences; terminal squared position-gap objective",
+    "objective_bound_oracle": "exact Fraction arithmetic; outer-bound status gated by inclusion of every exact scale-2000 projected state; ellipsoid support rounded outward by exact rational square-root enclosure",
+    "comparison_record": "csl.comparison-record/1; one content-addressed five-method record per phase plane, with eight ordered attempts per method including warmup"
+  },
+  "method_versions": {
+    "exact-polytope-quickhull": {
+      "method_id": "csl.quickhull_2d",
+      "version": "unregistered",
+      "module_code_commit": "b6054f2417fa343b40114b007a54fbc5aae6cc14"
+    },
+    "axis-box": {
+      "method_id": "csl.approximation.box",
+      "version": "1"
+    },
+    "rotated-parallelotope": {
+      "method_id": "csl.approximation.parallelotope",
+      "version": "1"
+    },
+    "directional-ellipsoid": {
+      "method_id": "csl.approximation.ellipsoid.exp03",
+      "version": "1"
+    },
+    "zonotope-axis-cover": {
+      "method_id": "csl.geometry.zonotope.axis-cover",
+      "version": "1.0.0"
+    }
+  }
+}

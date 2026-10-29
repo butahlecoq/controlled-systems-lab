@@ -684,11 +684,19 @@ standalone figure overlays each final projection on the forward game geometry,
 marks backward-winning nodes, and outlines the terminal winning-node hulls,
 alongside both trajectories. It does not separately project the coupled
 terminal target. It makes no 4D inclusion claim and does not yet propagate
-approximations through the reachability or minimax recursions. This pilot
-supplies no inner reachable-set or objective-bound claims; EXP-03 remains open
-for those acceptance items.
-Independent saved-result review, main-only Pages deployment, and live URL and
-hash checks remain pending.
+approximations through the reachability or minimax recursions.
+
+The original v1 bundle is preserved unchanged. The v2 follow-up adds an
+independently enumerated finite open-loop minimax value of `14.58094225`, its
+realizable control/disturbance witness, method-conditioned objective intervals,
+and one immutable `csl.comparison-record/1` per phase plane. Objective bounds
+are verified only when the relevant approximation contains every exact
+scale-2000 source state; otherwise they are explicitly inconclusive. This is
+finite-catalogue evidence, not a continuous convex inner-set or RL equivalence
+claim. The exact value, path and bounds are in
+[`check.json`](../../reports/algorithm-results/exp03-two-points-approx-pilot-v2/check.json);
+paired attempt records are linked from that bundle's README. Independent review,
+main-only Pages deployment and live URL/hash checks for v2 remain pending.
 
 ## MPC-05 finite causal minimax pilot
 

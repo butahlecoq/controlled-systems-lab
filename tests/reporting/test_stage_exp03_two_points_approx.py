@@ -48,6 +48,26 @@ class StageExp03TwoPointsTests(unittest.TestCase):
                          {path.name: hashlib.sha256(path.read_bytes()).hexdigest()
                           for path in source.iterdir() if path.is_file()})
 
+    def test_stages_followup_as_a_distinct_immutable_route(self):
+        source = ROOT / "reports/algorithm-results/exp03-two-points-approx-pilot-v2"
+        check = json.loads((source / "check.json").read_text())
+        self.assertEqual(check["finite_minimax_reference"]["value"], 14.58094225)
+        self.assertTrue(check["objective_bounds_checks_complete"])
+        with tempfile.TemporaryDirectory() as temporary:
+            site = Path(temporary)
+            (site / "index.html").write_text(
+                "<!doctype html><html><body><h1>Reports</h1><ul></ul></body></html>",
+                encoding="utf-8")
+            route = stager.stage(source, site)
+            self.assertEqual(route, "exp03-two-points-approx-publication-v2")
+            published_check = json.loads((site / route / "check.json").read_text())
+            self.assertEqual(published_check["finite_minimax_reference"]["value"], 14.58094225)
+            self.assertEqual(len(json.loads((site / route / "comparison-record-projection-0.json").read_text())["attempts"]), 40)
+            self.assertEqual(len(json.loads((site / route / "comparison-record-projection-1.json").read_text())["attempts"]), 40)
+            landing = (site / "index.html").read_text()
+            self.assertIn(route + "/check.json", landing)
+            self.assertFalse((site / "exp03-two-points-approx-publication-v1").exists())
+
     def test_rejects_corrupted_frozen_bundle(self):
         with tempfile.TemporaryDirectory() as temporary:
             copied = Path(temporary) / stager.SOURCE.name

@@ -98,6 +98,63 @@ def projected_zonotope(stage, coordinates):
     return center_2d, columns, corners
 
 
+def component_outcomes(stage, component):
+    outcomes = []
+    for sequence in itertools.product(CONTROLS, repeat=stage):
+        state = INITIAL
+        for code in sequence:
+            state = advance(state, code if component == "control" else 0,
+                            code if component == "disturbance" else 0)
+        outcomes.append({"codes": list(sequence), "terminal_state_scaled": list(state)})
+    return outcomes
+
+
+def finite_minimax(control_outcomes, disturbance_outcomes, scale):
+    scored = []
+    for control in control_outcomes:
+        control_position = control["terminal_state_scaled"][0]
+        worst = max((control_position - disturbance["terminal_state_scaled"][2]) ** 2
+                    for disturbance in disturbance_outcomes)
+        scored.append((worst, control["codes"]))
+    value = min(value for value, _ in scored)
+    minimizing_codes = [list(codes) for score, codes in scored if score == value]
+    selected_control = minimizing_codes[0]
+    control_position = next(item["terminal_state_scaled"][0] for item in control_outcomes
+                            if item["codes"] == selected_control)
+    worst_disturbances = [item for item in disturbance_outcomes
+                          if (control_position - item["terminal_state_scaled"][2]) ** 2 == value]
+    selected_disturbance = worst_disturbances[0]["codes"]
+    path = [list(INITIAL)]
+    state = INITIAL
+    for control, disturbance in zip(selected_control, selected_disturbance):
+        state = advance(state, control, disturbance)
+        path.append(list(state))
+    return {
+        "objective": "minimum over open-loop controls of worst terminal squared position gap",
+        "information_pattern": "exists full control sequence, for all full disturbance sequences",
+        "value_numerator": value,
+        "value_denominator": scale * scale,
+        "value": value / (scale * scale),
+        "minimizing_control_sequences_codes": minimizing_codes,
+        "achievable_policy_witness": {
+            "control_sequence_codes": selected_control,
+            "control_sequence": [2.5 * code for code in selected_control],
+            "worst_disturbance_sequences_codes": [item["codes"] for item in worst_disturbances],
+            "selected_worst_disturbance_sequence_codes": selected_disturbance,
+            "selected_worst_disturbance_sequence": [float(code) for code in selected_disturbance],
+            "state_path_scaled": path,
+            "terminal_gap_numerator": path[-1][0] - path[-1][2],
+            "terminal_gap_denominator": scale,
+            "objective_value_numerator": value,
+            "objective_value_denominator": scale * scale,
+            "meaning": "realizable open-loop control with its worst finite-catalogue disturbance response",
+        },
+        "enumerated_control_sequences": len(control_outcomes),
+        "enumerated_disturbance_sequences": len(disturbance_outcomes),
+        "arithmetic": "exact integer arithmetic on scale-2000 states",
+    }
+
+
 def build_reference(figure_path: Path, result_path: Path):
     figure_bytes = figure_path.read_bytes()
     figure = json.loads(figure_bytes)
@@ -117,6 +174,12 @@ def build_reference(figure_path: Path, result_path: Path):
         if next_states != stored_layers[stage + 1]:
             raise ValueError(f"saved forward layer {stage + 1} differs from exact replay")
         layers.append(next_states)
+
+    control_outcomes = component_outcomes(len(layers) - 1, "control")
+    disturbance_outcomes = component_outcomes(len(layers) - 1, "disturbance")
+    minimax = finite_minimax(control_outcomes, disturbance_outcomes, SCALE)
+    if float(minimax["value"]) != result["objective_value"]:
+        raise ValueError("independent finite minimax replay differs from the saved objective")
 
     document = {
         "schema": "csl.exp03-two-points-reference/1",
@@ -139,6 +202,9 @@ def build_reference(figure_path: Path, result_path: Path):
                 "the stored binary64 projected nodes; discrete nodes and exact rational "
                 "coordinates remain separately available"
             ),
+            "control_terminal_outcomes": control_outcomes,
+            "disturbance_terminal_outcomes": disturbance_outcomes,
+            "finite_minimax_reference": minimax,
         },
         "projection_pairs": [list(pair) for pair in PROJECTIONS],
         "projection_labels": [list(labels) for labels in LABELS],

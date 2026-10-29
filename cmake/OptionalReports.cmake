@@ -243,6 +243,7 @@ include(cmake/JsonDependencies.cmake)
 set_property(DIRECTORY APPEND PROPERTY CMAKE_CONFIGURE_DEPENDS
   ${CMAKE_CURRENT_SOURCE_DIR}/benchmarks/reporting/exp03/two_points_approximation.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/scripts/reports/exp03/build_two_points_reference.py
+  ${CMAKE_CURRENT_SOURCE_DIR}/scripts/reports/exp03/build_comparison_records.py
   ${CMAKE_CURRENT_SOURCE_DIR}/scripts/reports/exp03/check_two_points_approximation.py
   ${CMAKE_CURRENT_SOURCE_DIR}/scripts/reports/exp03/check_two_points_approximation_smoke.py
   ${CMAKE_CURRENT_SOURCE_DIR}/scripts/reports/exp03/render_two_points_approximation.py

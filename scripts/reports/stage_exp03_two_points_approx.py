@@ -5,15 +5,27 @@ import argparse
 import hashlib
 import json
 from pathlib import Path
+import sys
 
 ROOT = Path(__file__).resolve().parents[2]
 SOURCE = ROOT / "reports/algorithm-results/exp03-two-points-approx-pilot-v1"
-SOURCE_REPORT_ID = "exp03-two-points-approx-pilot-v1"
-REPORT_ID = "exp03-two-points-approx-publication-v1"
-FILES = (
+REPORTS = {
+    "exp03-two-points-approx-pilot-v1": "exp03-two-points-approx-publication-v1",
+    "exp03-two-points-approx-pilot-v2": "exp03-two-points-approx-publication-v2",
+}
+BASE_FILES = (
     "README.md", "check.json", "index.html", "provenance.json",
     "reachability-and-approximations.svg", "reference.json", "run.json",
 )
+V2_RECORDS = ("comparison-record-projection-0.json", "comparison-record-projection-1.json")
+sys.path.insert(0, str(ROOT / "scripts/reports/exp03"))
+from build_comparison_records import validate_record
+
+
+def files_for(source: Path) -> tuple[str, ...]:
+    if source.name == "exp03-two-points-approx-pilot-v2":
+        return (*BASE_FILES, *V2_RECORDS)
+    return BASE_FILES
 
 
 def digest(data: bytes) -> str:
@@ -21,12 +33,13 @@ def digest(data: bytes) -> str:
 
 
 def read_bundle(source: Path) -> dict[str, bytes]:
-    if source.is_symlink() or not source.is_dir() or source.name != SOURCE_REPORT_ID:
+    if source.is_symlink() or not source.is_dir() or source.name not in REPORTS:
         raise ValueError("unexpected EXP-03 source bundle")
+    files_to_read = files_for(source)
     if any((source / name).is_symlink() or not (source / name).is_file()
-           for name in (*FILES, "SHA256SUMS")):
+           for name in (*files_to_read, "SHA256SUMS")):
         raise ValueError("EXP-03 source bundle contains a missing or unsafe file")
-    files = {name: (source / name).read_bytes() for name in FILES}
+    files = {name: (source / name).read_bytes() for name in files_to_read}
     raw_sums = (source / "SHA256SUMS").read_bytes()
     expected = {}
     for line in raw_sums.decode("ascii").splitlines():
@@ -36,7 +49,7 @@ def read_bundle(source: Path) -> dict[str, bytes]:
         expected[name] = sha
     if expected != {name: digest(data) for name, data in files.items()}:
         raise ValueError("EXP-03 saved bundle checksum mismatch")
-    if {path.name for path in source.iterdir()} != set(FILES) | {"SHA256SUMS"}:
+    if {path.name for path in source.iterdir()} != set(files_to_read) | {"SHA256SUMS"}:
         raise ValueError("EXP-03 source inventory differs")
     check = json.loads(files["check.json"])
     run = json.loads(files["run.json"])
@@ -52,6 +65,12 @@ def read_bundle(source: Path) -> dict[str, bytes]:
             reference.get("case_id") != check.get("case_id") or
             provenance.get("schema") != "csl.exp03-two-points-approximation-provenance/1"):
         raise ValueError("EXP-03 evidence identity or saved checker outcome differs")
+    if source.name == "exp03-two-points-approx-pilot-v2":
+        for name in V2_RECORDS:
+            record = json.loads(files[name])
+            validate_record(record)
+            if len(record["attempts"]) != 40:
+                raise ValueError("EXP-03 v2 paired comparison record is missing attempts")
     return files | {"SHA256SUMS": raw_sums}
 
 
@@ -59,12 +78,13 @@ def stage(source: Path, site: Path) -> str:
     files = read_bundle(source)
     if not site.is_dir() or site.is_symlink():
         raise ValueError("Pages site must be a regular directory")
-    destination = site / REPORT_ID
+    report_id = REPORTS[source.name]
+    destination = site / report_id
     if destination.exists() or destination.is_symlink():
         raise ValueError("EXP-03 publication route must be fresh")
     index = site / "index.html"
     html = index.read_text(encoding="utf-8")
-    if html.count("</ul>") != 1 or REPORT_ID in html:
+    if html.count("</ul>") != 1 or report_id in html:
         raise ValueError("Pages landing index insertion point differs")
 
     published = dict(files)
@@ -101,7 +121,7 @@ def stage(source: Path, site: Path) -> str:
         (destination / name).write_bytes(data)
     manifest = {
         "schema": "csl.exp03-two-points-approx-publication/1",
-        "report_id": REPORT_ID,
+        "report_id": report_id,
         "source_report_id": source.name,
         "source_bundle_sha256": digest(files["SHA256SUMS"]),
         "published_files": {name: digest(data) for name, data in sorted(published.items())},
@@ -109,12 +129,16 @@ def stage(source: Path, site: Path) -> str:
     (destination / "publication-manifest.json").write_text(
         json.dumps(manifest, indent=2) + "\n", encoding="utf-8")
     links = (
-        f'<li><a href="{REPORT_ID}/index.html">TwoPoints differential-game reachability and approximation figure</a>'
-        f' · <a href="{REPORT_ID}/reachability-and-approximations.svg">combined phase-plane figure</a>'
-        f' · <a href="{REPORT_ID}/run.json">raw method results</a>'
-        f' · <a href="{REPORT_ID}/check.json">independent inclusion checks</a></li>')
+        f'<li><a href="{report_id}/index.html">TwoPoints differential-game reachability and approximation figure</a>'
+        f' · <a href="{report_id}/reachability-and-approximations.svg">combined phase-plane figure</a>'
+        f' · <a href="{report_id}/run.json">raw method results</a>'
+        f' · <a href="{report_id}/check.json">independent inclusion checks</a>'
+        + (f' · <a href="{report_id}/comparison-record-projection-0.json">(x1,x2) comparison record</a>'
+           f' · <a href="{report_id}/comparison-record-projection-1.json">(x3,x4) comparison record</a>'
+           if source.name == "exp03-two-points-approx-pilot-v2" else "")
+        + "</li>")
     index.write_text(html.replace("</ul>", links + "</ul>"), encoding="utf-8")
-    return REPORT_ID
+    return report_id
 
 
 def main() -> None:

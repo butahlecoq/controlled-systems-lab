@@ -8,6 +8,7 @@ from fractions import Fraction
 import itertools
 import json
 import math
+from math import isqrt
 from pathlib import Path
 
 
@@ -71,6 +72,71 @@ def exact_lattice_points(reference, projection_index, stage):
             for state in layer["finite_states_scaled"]}
 
 
+def verify_finite_minimax(reference):
+    game = reference["finite_game"]
+    scale = game["state_scale"]
+    horizon = game["horizon_steps"]
+    codes = tuple(game["control_codes"])
+    initial = (9_000, 0, 0, 0)
+
+    def terminal(sequence, control_component):
+        state = initial
+        for code in sequence:
+            if control_component:
+                p1, _, p2, v2 = state
+                state = (p1 + state[1] // 100 + 450 * code, 5_000 * code,
+                         p2 + v2 // 10, v2)
+            else:
+                p1, v1, p2, v2 = state
+                state = (p1 + v1 // 100, v1,
+                         p2 + v2 // 10 + 9 * code, v2 + 200 * code)
+        return state
+
+    sequences = list(itertools.product(codes, repeat=horizon))
+    controls = [{"codes": list(sequence), "terminal_state_scaled": list(terminal(sequence, True))}
+                for sequence in sequences]
+    disturbances = [{"codes": list(sequence), "terminal_state_scaled": list(terminal(sequence, False))}
+                    for sequence in sequences]
+    if controls != game["control_terminal_outcomes"] or disturbances != game["disturbance_terminal_outcomes"]:
+        raise ValueError("Stored control/disturbance outcomes differ from independent finite replay")
+    scored = []
+    for control in controls:
+        p1 = control["terminal_state_scaled"][0]
+        worst = max((p1 - disturbance["terminal_state_scaled"][2]) ** 2
+                    for disturbance in disturbances)
+        scored.append((worst, control["codes"]))
+    value = min(score for score, _ in scored)
+    expected_sequences = [sequence for score, sequence in scored if score == value]
+    claim = game["finite_minimax_reference"]
+    if (claim["value_numerator"] != value or claim["value_denominator"] != scale * scale or
+            claim["minimizing_control_sequences_codes"] != expected_sequences):
+        raise ValueError("Saved finite minimax value or minimizing controls differ from exhaustive oracle")
+    selected_control = expected_sequences[0]
+    control_position = next(item["terminal_state_scaled"][0] for item in controls
+                            if item["codes"] == selected_control)
+    worst_sequences = [item["codes"] for item in disturbances
+                       if (control_position - item["terminal_state_scaled"][2]) ** 2 == value]
+    selected_disturbance = worst_sequences[0]
+    state = initial
+    path = [list(initial)]
+    for control, disturbance in zip(selected_control, selected_disturbance):
+        p1, v1, p2, v2 = state
+        state = (p1 + v1 // 100 + 450 * control, 5_000 * control,
+                 p2 + v2 // 10 + 9 * disturbance, v2 + 200 * disturbance)
+        path.append(list(state))
+    witness = claim["achievable_policy_witness"]
+    if (witness.get("control_sequence_codes") != selected_control or
+            witness.get("control_sequence") != [2.5 * code for code in selected_control] or
+            witness.get("worst_disturbance_sequences_codes") != worst_sequences or
+            witness.get("selected_worst_disturbance_sequence_codes") != selected_disturbance or
+            witness.get("state_path_scaled") != path or
+            witness.get("terminal_gap_numerator") != path[-1][0] - path[-1][2] or
+            witness.get("objective_value_numerator") != value or
+            witness.get("objective_value_denominator") != scale * scale):
+        raise ValueError("Stored realizable minimax control/disturbance witness failed exact replay")
+    return claim
+
+
 def h_vertices(shape):
     rows = [[q(value) for value in row] for row in shape["inequality_rows"]]
     bounds = [q(value) for value in shape["inequality_bounds"]]
@@ -126,6 +192,118 @@ def zonotope_vertices(shape):
         points.add(tuple(center[row] + sum(signs[column] * rows[row][column]
                   for column in range(len(signs))) for row in range(2)))
     return hull(points)
+
+
+def ellipsoid_x_bounds(shape, precision_bits=64):
+    center = [q(value) for value in shape["center"]]
+    orientation = [[q(value) for value in row] for row in shape["orientation"]]
+    radii = [q(value) for value in shape["radii"]]
+    determinant = orientation[0][0] * orientation[1][1] - orientation[0][1] * orientation[1][0]
+    if determinant == 0:
+        raise ValueError("Cannot bound x projection of singular ellipsoid orientation")
+    # Solve B^T y=e_x and evaluate sqrt(sum((r_i*y_i)^2)) exactly.
+    y0 = orientation[1][1] / determinant
+    y1 = -orientation[0][1] / determinant
+    squared_radius = (radii[0] * y0) ** 2 + (radii[1] * y1) ** 2
+    if squared_radius < 0:
+        raise ValueError("Ellipsoid x support radius is invalid")
+    scale = 1 << precision_bits
+    scaled_square = squared_radius.numerator * scale * scale // squared_radius.denominator
+    root_floor = isqrt(scaled_square)
+    exact = Fraction(root_floor * root_floor, scale * scale) == squared_radius
+    root_upper = Fraction(root_floor if exact else root_floor + 1, scale)
+    return center[0] - root_upper, center[0] + root_upper
+
+
+def shape_x_bounds(shape):
+    kind = shape["kind"]
+    if kind == "h_polytope":
+        vertices = h_vertices(shape)
+        return min(point[0] for point in vertices), max(point[0] for point in vertices)
+    if kind == "v_polytope":
+        vertices = hull([tuple(q(value) for value in point) for point in shape["vertices"]])
+        if not vertices:
+            raise ValueError("V output has no vertices")
+        return min(point[0] for point in vertices), max(point[0] for point in vertices)
+    if kind == "zonotope":
+        vertices = zonotope_vertices(shape)
+        return min(point[0] for point in vertices), max(point[0] for point in vertices)
+    if kind == "directional_ellipsoid":
+        return ellipsoid_x_bounds(shape)
+    raise ValueError(f"Cannot bound objective from representation: {kind}")
+
+
+def objective_bounds_for_method(method, control_result, disturbance_result, finite_game):
+    control_outer_verified = (control_result.get("status") == "verified" and
+        control_result.get("exact_lattice_diagnostic", {}).get("outer_inclusion") is True)
+    disturbance_outer_verified = (disturbance_result.get("status") == "verified" and
+        disturbance_result.get("exact_lattice_diagnostic", {}).get("outer_inclusion") is True)
+    scale = finite_game["state_scale"]
+    disturbance_positions = [Fraction(item["terminal_state_scaled"][2], scale)
+                             for item in finite_game["disturbance_terminal_outcomes"]]
+    if not disturbance_positions:
+        raise ValueError("No exact finite disturbance outcomes are available")
+    minimum_disturbance = min(disturbance_positions)
+    maximum_disturbance = max(disturbance_positions)
+    reference = finite_game["finite_minimax_reference"]
+    exact_value = Fraction(reference["value_numerator"], reference["value_denominator"])
+    results = {"method": method, "exact_finite_minimax_value": float(exact_value),
+               "arithmetic": "exact fractions; ellipsoid projection uses a rational outward square-root enclosure"}
+
+    if control_outer_verified:
+        control_lower, control_upper = shape_x_bounds(control_result["_shape"])
+        midpoint = (minimum_disturbance + maximum_disturbance) / 2
+        relaxed_control = min(max(midpoint, control_lower), control_upper)
+        relaxed_worst = max(abs(relaxed_control - minimum_disturbance),
+                            abs(relaxed_control - maximum_disturbance))
+        lower = relaxed_worst * relaxed_worst
+        results["lower_bound"] = {
+            "status": "verified" if lower <= exact_value else "incorrect",
+            "value": float(lower), "value_fraction": f"{lower.numerator}/{lower.denominator}",
+            "basis": "relax all finite control terminal positions to the checked outer x projection; keep the complete exact finite disturbance catalogue",
+            "relaxed_control_position": float(relaxed_control),
+            "control_outer_x_interval": [float(control_lower), float(control_upper)],
+        }
+    else:
+        results["lower_bound"] = {
+            "status": "inconclusive",
+            "reason": ("this method's control-plane output excludes one or more exact finite-game lattice states"
+                       if control_result.get("status") == "verified" else
+                       "the control-plane approximation did not pass its independent set check"),
+        }
+
+    if disturbance_outer_verified:
+        _, disturbance_upper = shape_x_bounds(disturbance_result["_shape"])
+        disturbance_lower, _ = shape_x_bounds(disturbance_result["_shape"])
+        minimizing_codes = reference["minimizing_control_sequences_codes"][0]
+        control_outcome = next(item for item in finite_game["control_terminal_outcomes"]
+                               if item["codes"] == minimizing_codes)
+        control_position = Fraction(control_outcome["terminal_state_scaled"][0], scale)
+        worst = max(abs(control_position - disturbance_lower),
+                    abs(control_position - disturbance_upper))
+        upper = worst * worst
+        results["upper_bound"] = {
+            "status": "verified" if upper >= exact_value else "incorrect",
+            "value": float(upper), "value_fraction": f"{upper.numerator}/{upper.denominator}",
+            "basis": "use an exactly enumerated feasible minimizing control sequence and maximize over the checked outer disturbance x projection",
+            "control_sequence_codes": minimizing_codes,
+            "control_sequence": [2.5 * code for code in minimizing_codes],
+            "control_position": float(control_position),
+            "disturbance_outer_x_interval": [float(disturbance_lower), float(disturbance_upper)],
+            "realizable_policy_witness": reference["achievable_policy_witness"],
+        }
+    else:
+        results["upper_bound"] = {
+            "status": "inconclusive",
+            "reason": ("this method's disturbance-plane output excludes one or more exact finite-game lattice states"
+                       if disturbance_result.get("status") == "verified" else
+                       "the disturbance-plane approximation did not pass its independent set check"),
+        }
+    if (results["lower_bound"]["status"] == "verified" and
+            results["upper_bound"]["status"] == "verified" and
+            results["lower_bound"]["value"] > results["upper_bound"]["value"]):
+        raise ValueError(f"{method} objective bounds are inconsistent")
+    return results
 
 
 def output_area(shape, vertices):
@@ -334,6 +512,7 @@ def check(reference, run):
     if len(run["projections"]) != len(expected_pairs):
         raise ValueError("Run omitted a requested projection")
     checked = []
+    checked_by_projection = []
     method_names = {"exact-polytope-quickhull", "axis-box", "rotated-parallelotope",
                     "directional-ellipsoid", "zonotope-axis-cover"}
     for index, projection in enumerate(run["projections"]):
@@ -352,7 +531,12 @@ def check(reference, run):
                             "directional-ellipsoid", "zonotope-axis-cover"}
         if len(names) != len(expected_methods) or set(names) != expected_methods:
             raise ValueError("Comparison output omitted or duplicated a method")
-        checked.extend(checked_attempt(reference, stage, index, item) for item in methods)
+        projection_checks = [checked_attempt(reference, stage, index, item) for item in methods]
+        for check_result, method_result in zip(projection_checks, methods):
+            if check_result.get("status") == "verified":
+                check_result["_shape"] = method_result["result"]["shape"]
+        checked_by_projection.append({item["method"]: item for item in projection_checks})
+        checked.extend(projection_checks)
     if run.get("inner_methods") is None:
         raise ValueError("Run must state whether inner methods were requested")
     measurement_checks = []
@@ -405,11 +589,21 @@ def check(reference, run):
                     })
         if measurement_coverage["count_mismatches"]:
             measurement_coverage["status"] = "incomplete"
+    finite_game = reference["finite_game"]
+    exact_reference = verify_finite_minimax(reference)
+    objective_bounds = [objective_bounds_for_method(
+        method, checked_by_projection[0][method], checked_by_projection[1][method], finite_game)
+        for method in sorted(method_names)]
+    objective_bounds_verified = all(
+        bound["lower_bound"]["status"] in {"verified", "inconclusive"} and
+        bound["upper_bound"]["status"] in {"verified", "inconclusive"}
+        for bound in objective_bounds)
     verification_complete = (
         all(item["status"] == "verified" for item in checked)
         and all(item["status"] == "verified" and item["elapsed_ns_valid"]
                 for item in measurement_checks)
         and measurement_coverage["status"] in {"complete", "not_measured"}
+        and objective_bounds_verified
     )
     return {"schema": "csl.exp03-two-points-approximation-check/1",
         "status": "verified" if verification_complete else "incomplete",
@@ -417,7 +611,16 @@ def check(reference, run):
         "reference_source_figure_data_sha256": run["reference_source_figure_data_sha256"],
         "oracle": ("complete inclusion against the stored binary64 projected reference, "
             "exact rational checks against every scale-2000 lattice point"),
-        "results": checked, "measurement_call_checks": measurement_checks,
+        "results": checked, "finite_minimax_reference": exact_reference,
+        "objective_bounds": objective_bounds,
+        "objective_bounds_scope": (
+            "bounds are for the finite open-loop min-control/max-disturbance terminal squared position gap; "
+            "the state dynamics separate control and disturbance components, and both phase-plane exact-lattice "
+            "inclusions are checked independently; inconclusive means the approximation is not an outer set "
+            "for the exact source lattice"
+        ),
+        "objective_bounds_checks_complete": objective_bounds_verified,
+        "measurement_call_checks": measurement_checks,
         "measurement_coverage": measurement_coverage}
 
 

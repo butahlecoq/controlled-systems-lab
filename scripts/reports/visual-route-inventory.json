@@ -1353,7 +1353,7 @@
     },
     {
       "source": "scripts/reports/visual_examples.py",
-      "signal_count": 61,
+      "signal_count": 62,
       "asset_name_literals": [
         "app01-plan-timing-v1.svg",
         "app02-diamond-v1.svg",
@@ -1855,6 +1855,16 @@
         "reachability-and-approximations.svg"
       ],
       "index_sha256": "02f8506eb3f864f74fa9c78917d48ae16450dfb184bbc185ba537185478bd1de",
+      "disposition": "deferred: original frozen route-level readability review remains; companion availability is listed separately",
+      "follow_up_issue": 669
+    },
+    {
+      "route": "exp03-two-points-approx-pilot-v2",
+      "source_bundle": "exp03-two-points-approx-pilot-v2",
+      "assets": [
+        "reachability-and-approximations.svg"
+      ],
+      "index_sha256": "7a807a13bb907d628082b5e045be6ed61c4c60ed4e49516d56743f87b7833b0f",
       "disposition": "deferred: original frozen route-level readability review remains; companion availability is listed separately",
       "follow_up_issue": 669
     },

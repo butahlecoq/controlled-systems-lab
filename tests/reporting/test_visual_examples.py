@@ -341,6 +341,7 @@ class GalleryTests(unittest.TestCase):
         self.assertIn("TwoPoints reachable sets and approximations", page)
         self.assertIn("independently scaled with numeric ticks and grids", page)
         self.assertIn("exp03-two-points-approx-publication-v1/run.json", page)
+        self.assertIn("exp03-two-points-approx-publication-v2/run.json", page)
         self.assertIn('id="b04-native-smoke"', page)
         self.assertIn("B04 reference variant in oxidizer and fuel phase planes", page)
         self.assertIn("(x₁,x₂) and (x₃,x₄)", page)

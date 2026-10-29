@@ -221,6 +221,11 @@ jobs:
                 --source reports/algorithm-results/exp03-two-points-approx-pilot-v1 \
                 --site build/report-site
             fi
+            if test -d reports/algorithm-results/exp03-two-points-approx-pilot-v2; then
+              python scripts/reports/stage_exp03_two_points_approx.py \
+                --source reports/algorithm-results/exp03-two-points-approx-pilot-v2 \
+                --site build/report-site
+            fi
             if test -d reports/algorithm-results/mpc05-causal-tree-pilot-v2; then
               if test -x build/mpc05-report-ci/csl_mpc05_causal_tree_report; then
                 python scripts/reports/stage_mpc05_causal_tree.py \
