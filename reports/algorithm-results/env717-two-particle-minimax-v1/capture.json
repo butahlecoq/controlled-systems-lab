@@ -1,7 +1,7 @@
 {
   "algorithm_source_sha256": "cac9ea19d95c4fba53351f7b2580015882a63f6725bb5c622529c140f507873a",
   "build_type": "Release",
-  "captured_at_utc": "2026-10-29T20:45:15+00:00",
+  "captured_at_utc": "2026-10-29T20:51:59+00:00",
   "command": "csl_env717_two_particle_minimax",
   "compiler": {
     "architecture": "x86_64",
@@ -10,13 +10,13 @@
     "compiler_version": "16.2.1"
   },
   "driver_source_sha256": "f61615754fb306739797338f3ad2ba251c9e340c45369eb886e935e8ee4195b2",
-  "executable_sha256": "ebf550d2f726b5211353adc01ba1a95d264ac5e53cff5f9cd6eb749fefc6ba5d",
+  "executable_sha256": "0cbc94058816da63b3f77f7cf6683f829fc06ea6e938054c1a74b80a0ebda329",
   "machine": "x86_64",
   "operating_system": "Linux-7.2.8-9-omarchy-x86_64-with-glibc2.44",
   "python": "3.14.8",
   "scenario_sha256": "13049b50f59fb69e36b14276e100f7fa4e9e185578cec0483dea287e5f226696",
   "schema": "csl.env717-two-particle-capture/1",
   "solver_failures": 0,
-  "source_commit": "46ade4f63907c20c8807d14f518be10489b8f4a9",
+  "source_commit": "dfa37472f56ad047543146b1b9240fad53ad1213",
   "timing_claim": "none; report records game values and checked state graph only"
 }

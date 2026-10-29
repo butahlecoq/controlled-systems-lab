@@ -77560,7 +77560,7 @@
     "repository": "https://github.com/imm-rl-lab/differential_game_gym",
     "repository_commit": "af5f0a2ee498c0edcf88d60f1d6c49a39bd08bc8"
   },
-  "source_commit": "46ade4f63907c20c8807d14f518be10489b8f4a9",
+  "source_commit": "dfa37472f56ad047543146b1b9240fad53ad1213",
   "source_model": {
     "alpha": 1.0,
     "control_bounds": [
