@@ -1,0 +1,836 @@
+{
+  "complete_optimal_relation": "u0 in [-1,1] intersect [-v0-1,-v0+1], u1=-v0-u0",
+  "control_domain_exact": {
+    "u0": [
+      "-1",
+      "1"
+    ],
+    "u1": [
+      "-1",
+      "1"
+    ]
+  },
+  "coverage_claim": "Exact symbolic formulas on the full declared rectangle; samples check representative histories only.",
+  "dynamics": {
+    "p_next": "p+v",
+    "v_next": "v+u"
+  },
+  "explicit_tie_break": "minimize u0^2+u1^2 over the optimal fiber; u0=u1=-v0/2",
+  "feasible_initial_set": "X itself; every v0 in [-2,2] can reach v2=0",
+  "history_sample_count": 45,
+  "horizon": 2,
+  "initial_domain_exact": {
+    "p": [
+      "-3",
+      "3"
+    ],
+    "v": [
+      "-2",
+      "2"
+    ]
+  },
+  "objective_exact": "(v0+u0+u1)^2",
+  "optimal_value_exact": "0 on X",
+  "problem": "two-step discrete double integrator, terminal velocity-squared objective",
+  "sampled_histories": [
+    {
+      "fiber_sample": 0,
+      "p_exact": "-3",
+      "query_id": "N001",
+      "terminal_p_exact": "-6",
+      "terminal_v_exact": "0",
+      "u0_exact": "1",
+      "u1_exact": "1",
+      "v_exact": "-2",
+      "value_exact": "0"
+    },
+    {
+      "fiber_sample": 1,
+      "p_exact": "-3",
+      "query_id": "N002",
+      "terminal_p_exact": "-6",
+      "terminal_v_exact": "0",
+      "u0_exact": "1",
+      "u1_exact": "1",
+      "v_exact": "-2",
+      "value_exact": "0"
+    },
+    {
+      "fiber_sample": 2,
+      "p_exact": "-3",
+      "query_id": "N003",
+      "terminal_p_exact": "-6",
+      "terminal_v_exact": "0",
+      "u0_exact": "1",
+      "u1_exact": "1",
+      "v_exact": "-2",
+      "value_exact": "0"
+    },
+    {
+      "fiber_sample": 0,
+      "p_exact": "-3",
+      "query_id": "N004",
+      "terminal_p_exact": "-5",
+      "terminal_v_exact": "0",
+      "u0_exact": "0",
+      "u1_exact": "1",
+      "v_exact": "-1",
+      "value_exact": "0"
+    },
+    {
+      "fiber_sample": 1,
+      "p_exact": "-3",
+      "query_id": "N005",
+      "terminal_p_exact": "-9/2",
+      "terminal_v_exact": "0",
+      "u0_exact": "1/2",
+      "u1_exact": "1/2",
+      "v_exact": "-1",
+      "value_exact": "0"
+    },
+    {
+      "fiber_sample": 2,
+      "p_exact": "-3",
+      "query_id": "N006",
+      "terminal_p_exact": "-4",
+      "terminal_v_exact": "0",
+      "u0_exact": "1",
+      "u1_exact": "0",
+      "v_exact": "-1",
+      "value_exact": "0"
+    },
+    {
+      "fiber_sample": 0,
+      "p_exact": "-3",
+      "query_id": "N007",
+      "terminal_p_exact": "-4",
+      "terminal_v_exact": "0",
+      "u0_exact": "-1",
+      "u1_exact": "1",
+      "v_exact": "0",
+      "value_exact": "0"
+    },
+    {
+      "fiber_sample": 1,
+      "p_exact": "-3",
+      "query_id": "N008",
+      "terminal_p_exact": "-3",
+      "terminal_v_exact": "0",
+      "u0_exact": "0",
+      "u1_exact": "0",
+      "v_exact": "0",
+      "value_exact": "0"
+    },
+    {
+      "fiber_sample": 2,
+      "p_exact": "-3",
+      "query_id": "N009",
+      "terminal_p_exact": "-2",
+      "terminal_v_exact": "0",
+      "u0_exact": "1",
+      "u1_exact": "-1",
+      "v_exact": "0",
+      "value_exact": "0"
+    },
+    {
+      "fiber_sample": 0,
+      "p_exact": "-3",
+      "query_id": "N010",
+      "terminal_p_exact": "-2",
+      "terminal_v_exact": "0",
+      "u0_exact": "-1",
+      "u1_exact": "0",
+      "v_exact": "1",
+      "value_exact": "0"
+    },
+    {
+      "fiber_sample": 1,
+      "p_exact": "-3",
+      "query_id": "N011",
+      "terminal_p_exact": "-3/2",
+      "terminal_v_exact": "0",
+      "u0_exact": "-1/2",
+      "u1_exact": "-1/2",
+      "v_exact": "1",
+      "value_exact": "0"
+    },
+    {
+      "fiber_sample": 2,
+      "p_exact": "-3",
+      "query_id": "N012",
+      "terminal_p_exact": "-1",
+      "terminal_v_exact": "0",
+      "u0_exact": "0",
+      "u1_exact": "-1",
+      "v_exact": "1",
+      "value_exact": "0"
+    },
+    {
+      "fiber_sample": 0,
+      "p_exact": "-3",
+      "query_id": "N013",
+      "terminal_p_exact": "0",
+      "terminal_v_exact": "0",
+      "u0_exact": "-1",
+      "u1_exact": "-1",
+      "v_exact": "2",
+      "value_exact": "0"
+    },
+    {
+      "fiber_sample": 1,
+      "p_exact": "-3",
+      "query_id": "N014",
+      "terminal_p_exact": "0",
+      "terminal_v_exact": "0",
+      "u0_exact": "-1",
+      "u1_exact": "-1",
+      "v_exact": "2",
+      "value_exact": "0"
+    },
+    {
+      "fiber_sample": 2,
+      "p_exact": "-3",
+      "query_id": "N015",
+      "terminal_p_exact": "0",
+      "terminal_v_exact": "0",
+      "u0_exact": "-1",
+      "u1_exact": "-1",
+      "v_exact": "2",
+      "value_exact": "0"
+    },
+    {
+      "fiber_sample": 0,
+      "p_exact": "0",
+      "query_id": "N016",
+      "terminal_p_exact": "-3",
+      "terminal_v_exact": "0",
+      "u0_exact": "1",
+      "u1_exact": "1",
+      "v_exact": "-2",
+      "value_exact": "0"
+    },
+    {
+      "fiber_sample": 1,
+      "p_exact": "0",
+      "query_id": "N017",
+      "terminal_p_exact": "-3",
+      "terminal_v_exact": "0",
+      "u0_exact": "1",
+      "u1_exact": "1",
+      "v_exact": "-2",
+      "value_exact": "0"
+    },
+    {
+      "fiber_sample": 2,
+      "p_exact": "0",
+      "query_id": "N018",
+      "terminal_p_exact": "-3",
+      "terminal_v_exact": "0",
+      "u0_exact": "1",
+      "u1_exact": "1",
+      "v_exact": "-2",
+      "value_exact": "0"
+    },
+    {
+      "fiber_sample": 0,
+      "p_exact": "0",
+      "query_id": "N019",
+      "terminal_p_exact": "-2",
+      "terminal_v_exact": "0",
+      "u0_exact": "0",
+      "u1_exact": "1",
+      "v_exact": "-1",
+      "value_exact": "0"
+    },
+    {
+      "fiber_sample": 1,
+      "p_exact": "0",
+      "query_id": "N020",
+      "terminal_p_exact": "-3/2",
+      "terminal_v_exact": "0",
+      "u0_exact": "1/2",
+      "u1_exact": "1/2",
+      "v_exact": "-1",
+      "value_exact": "0"
+    },
+    {
+      "fiber_sample": 2,
+      "p_exact": "0",
+      "query_id": "N021",
+      "terminal_p_exact": "-1",
+      "terminal_v_exact": "0",
+      "u0_exact": "1",
+      "u1_exact": "0",
+      "v_exact": "-1",
+      "value_exact": "0"
+    },
+    {
+      "fiber_sample": 0,
+      "p_exact": "0",
+      "query_id": "N022",
+      "terminal_p_exact": "-1",
+      "terminal_v_exact": "0",
+      "u0_exact": "-1",
+      "u1_exact": "1",
+      "v_exact": "0",
+      "value_exact": "0"
+    },
+    {
+      "fiber_sample": 1,
+      "p_exact": "0",
+      "query_id": "N023",
+      "terminal_p_exact": "0",
+      "terminal_v_exact": "0",
+      "u0_exact": "0",
+      "u1_exact": "0",
+      "v_exact": "0",
+      "value_exact": "0"
+    },
+    {
+      "fiber_sample": 2,
+      "p_exact": "0",
+      "query_id": "N024",
+      "terminal_p_exact": "1",
+      "terminal_v_exact": "0",
+      "u0_exact": "1",
+      "u1_exact": "-1",
+      "v_exact": "0",
+      "value_exact": "0"
+    },
+    {
+      "fiber_sample": 0,
+      "p_exact": "0",
+      "query_id": "N025",
+      "terminal_p_exact": "1",
+      "terminal_v_exact": "0",
+      "u0_exact": "-1",
+      "u1_exact": "0",
+      "v_exact": "1",
+      "value_exact": "0"
+    },
+    {
+      "fiber_sample": 1,
+      "p_exact": "0",
+      "query_id": "N026",
+      "terminal_p_exact": "3/2",
+      "terminal_v_exact": "0",
+      "u0_exact": "-1/2",
+      "u1_exact": "-1/2",
+      "v_exact": "1",
+      "value_exact": "0"
+    },
+    {
+      "fiber_sample": 2,
+      "p_exact": "0",
+      "query_id": "N027",
+      "terminal_p_exact": "2",
+      "terminal_v_exact": "0",
+      "u0_exact": "0",
+      "u1_exact": "-1",
+      "v_exact": "1",
+      "value_exact": "0"
+    },
+    {
+      "fiber_sample": 0,
+      "p_exact": "0",
+      "query_id": "N028",
+      "terminal_p_exact": "3",
+      "terminal_v_exact": "0",
+      "u0_exact": "-1",
+      "u1_exact": "-1",
+      "v_exact": "2",
+      "value_exact": "0"
+    },
+    {
+      "fiber_sample": 1,
+      "p_exact": "0",
+      "query_id": "N029",
+      "terminal_p_exact": "3",
+      "terminal_v_exact": "0",
+      "u0_exact": "-1",
+      "u1_exact": "-1",
+      "v_exact": "2",
+      "value_exact": "0"
+    },
+    {
+      "fiber_sample": 2,
+      "p_exact": "0",
+      "query_id": "N030",
+      "terminal_p_exact": "3",
+      "terminal_v_exact": "0",
+      "u0_exact": "-1",
+      "u1_exact": "-1",
+      "v_exact": "2",
+      "value_exact": "0"
+    },
+    {
+      "fiber_sample": 0,
+      "p_exact": "3",
+      "query_id": "N031",
+      "terminal_p_exact": "0",
+      "terminal_v_exact": "0",
+      "u0_exact": "1",
+      "u1_exact": "1",
+      "v_exact": "-2",
+      "value_exact": "0"
+    },
+    {
+      "fiber_sample": 1,
+      "p_exact": "3",
+      "query_id": "N032",
+      "terminal_p_exact": "0",
+      "terminal_v_exact": "0",
+      "u0_exact": "1",
+      "u1_exact": "1",
+      "v_exact": "-2",
+      "value_exact": "0"
+    },
+    {
+      "fiber_sample": 2,
+      "p_exact": "3",
+      "query_id": "N033",
+      "terminal_p_exact": "0",
+      "terminal_v_exact": "0",
+      "u0_exact": "1",
+      "u1_exact": "1",
+      "v_exact": "-2",
+      "value_exact": "0"
+    },
+    {
+      "fiber_sample": 0,
+      "p_exact": "3",
+      "query_id": "N034",
+      "terminal_p_exact": "1",
+      "terminal_v_exact": "0",
+      "u0_exact": "0",
+      "u1_exact": "1",
+      "v_exact": "-1",
+      "value_exact": "0"
+    },
+    {
+      "fiber_sample": 1,
+      "p_exact": "3",
+      "query_id": "N035",
+      "terminal_p_exact": "3/2",
+      "terminal_v_exact": "0",
+      "u0_exact": "1/2",
+      "u1_exact": "1/2",
+      "v_exact": "-1",
+      "value_exact": "0"
+    },
+    {
+      "fiber_sample": 2,
+      "p_exact": "3",
+      "query_id": "N036",
+      "terminal_p_exact": "2",
+      "terminal_v_exact": "0",
+      "u0_exact": "1",
+      "u1_exact": "0",
+      "v_exact": "-1",
+      "value_exact": "0"
+    },
+    {
+      "fiber_sample": 0,
+      "p_exact": "3",
+      "query_id": "N037",
+      "terminal_p_exact": "2",
+      "terminal_v_exact": "0",
+      "u0_exact": "-1",
+      "u1_exact": "1",
+      "v_exact": "0",
+      "value_exact": "0"
+    },
+    {
+      "fiber_sample": 1,
+      "p_exact": "3",
+      "query_id": "N038",
+      "terminal_p_exact": "3",
+      "terminal_v_exact": "0",
+      "u0_exact": "0",
+      "u1_exact": "0",
+      "v_exact": "0",
+      "value_exact": "0"
+    },
+    {
+      "fiber_sample": 2,
+      "p_exact": "3",
+      "query_id": "N039",
+      "terminal_p_exact": "4",
+      "terminal_v_exact": "0",
+      "u0_exact": "1",
+      "u1_exact": "-1",
+      "v_exact": "0",
+      "value_exact": "0"
+    },
+    {
+      "fiber_sample": 0,
+      "p_exact": "3",
+      "query_id": "N040",
+      "terminal_p_exact": "4",
+      "terminal_v_exact": "0",
+      "u0_exact": "-1",
+      "u1_exact": "0",
+      "v_exact": "1",
+      "value_exact": "0"
+    },
+    {
+      "fiber_sample": 1,
+      "p_exact": "3",
+      "query_id": "N041",
+      "terminal_p_exact": "9/2",
+      "terminal_v_exact": "0",
+      "u0_exact": "-1/2",
+      "u1_exact": "-1/2",
+      "v_exact": "1",
+      "value_exact": "0"
+    },
+    {
+      "fiber_sample": 2,
+      "p_exact": "3",
+      "query_id": "N042",
+      "terminal_p_exact": "5",
+      "terminal_v_exact": "0",
+      "u0_exact": "0",
+      "u1_exact": "-1",
+      "v_exact": "1",
+      "value_exact": "0"
+    },
+    {
+      "fiber_sample": 0,
+      "p_exact": "3",
+      "query_id": "N043",
+      "terminal_p_exact": "6",
+      "terminal_v_exact": "0",
+      "u0_exact": "-1",
+      "u1_exact": "-1",
+      "v_exact": "2",
+      "value_exact": "0"
+    },
+    {
+      "fiber_sample": 1,
+      "p_exact": "3",
+      "query_id": "N044",
+      "terminal_p_exact": "6",
+      "terminal_v_exact": "0",
+      "u0_exact": "-1",
+      "u1_exact": "-1",
+      "v_exact": "2",
+      "value_exact": "0"
+    },
+    {
+      "fiber_sample": 2,
+      "p_exact": "3",
+      "query_id": "N045",
+      "terminal_p_exact": "6",
+      "terminal_v_exact": "0",
+      "u0_exact": "-1",
+      "u1_exact": "-1",
+      "v_exact": "2",
+      "value_exact": "0"
+    }
+  ],
+  "schema": "csl.mpc08-nonunique-double-integrator/1",
+  "state_sample_count": 15,
+  "states": [
+    {
+      "first_action_set_width_exact": "0",
+      "initial_exact": [
+        "-3",
+        "-2"
+      ],
+      "minimum_norm_selector_exact": [
+        "1",
+        "1"
+      ],
+      "optimal_value_exact": "0",
+      "terminal_exact": [
+        "-6",
+        "0"
+      ],
+      "u0_interval_exact": [
+        "1",
+        "1"
+      ]
+    },
+    {
+      "first_action_set_width_exact": "1",
+      "initial_exact": [
+        "-3",
+        "-1"
+      ],
+      "minimum_norm_selector_exact": [
+        "1/2",
+        "1/2"
+      ],
+      "optimal_value_exact": "0",
+      "terminal_exact": [
+        "-9/2",
+        "0"
+      ],
+      "u0_interval_exact": [
+        "0",
+        "1"
+      ]
+    },
+    {
+      "first_action_set_width_exact": "2",
+      "initial_exact": [
+        "-3",
+        "0"
+      ],
+      "minimum_norm_selector_exact": [
+        "0",
+        "0"
+      ],
+      "optimal_value_exact": "0",
+      "terminal_exact": [
+        "-3",
+        "0"
+      ],
+      "u0_interval_exact": [
+        "-1",
+        "1"
+      ]
+    },
+    {
+      "first_action_set_width_exact": "1",
+      "initial_exact": [
+        "-3",
+        "1"
+      ],
+      "minimum_norm_selector_exact": [
+        "-1/2",
+        "-1/2"
+      ],
+      "optimal_value_exact": "0",
+      "terminal_exact": [
+        "-3/2",
+        "0"
+      ],
+      "u0_interval_exact": [
+        "-1",
+        "0"
+      ]
+    },
+    {
+      "first_action_set_width_exact": "0",
+      "initial_exact": [
+        "-3",
+        "2"
+      ],
+      "minimum_norm_selector_exact": [
+        "-1",
+        "-1"
+      ],
+      "optimal_value_exact": "0",
+      "terminal_exact": [
+        "0",
+        "0"
+      ],
+      "u0_interval_exact": [
+        "-1",
+        "-1"
+      ]
+    },
+    {
+      "first_action_set_width_exact": "0",
+      "initial_exact": [
+        "0",
+        "-2"
+      ],
+      "minimum_norm_selector_exact": [
+        "1",
+        "1"
+      ],
+      "optimal_value_exact": "0",
+      "terminal_exact": [
+        "-3",
+        "0"
+      ],
+      "u0_interval_exact": [
+        "1",
+        "1"
+      ]
+    },
+    {
+      "first_action_set_width_exact": "1",
+      "initial_exact": [
+        "0",
+        "-1"
+      ],
+      "minimum_norm_selector_exact": [
+        "1/2",
+        "1/2"
+      ],
+      "optimal_value_exact": "0",
+      "terminal_exact": [
+        "-3/2",
+        "0"
+      ],
+      "u0_interval_exact": [
+        "0",
+        "1"
+      ]
+    },
+    {
+      "first_action_set_width_exact": "2",
+      "initial_exact": [
+        "0",
+        "0"
+      ],
+      "minimum_norm_selector_exact": [
+        "0",
+        "0"
+      ],
+      "optimal_value_exact": "0",
+      "terminal_exact": [
+        "0",
+        "0"
+      ],
+      "u0_interval_exact": [
+        "-1",
+        "1"
+      ]
+    },
+    {
+      "first_action_set_width_exact": "1",
+      "initial_exact": [
+        "0",
+        "1"
+      ],
+      "minimum_norm_selector_exact": [
+        "-1/2",
+        "-1/2"
+      ],
+      "optimal_value_exact": "0",
+      "terminal_exact": [
+        "3/2",
+        "0"
+      ],
+      "u0_interval_exact": [
+        "-1",
+        "0"
+      ]
+    },
+    {
+      "first_action_set_width_exact": "0",
+      "initial_exact": [
+        "0",
+        "2"
+      ],
+      "minimum_norm_selector_exact": [
+        "-1",
+        "-1"
+      ],
+      "optimal_value_exact": "0",
+      "terminal_exact": [
+        "3",
+        "0"
+      ],
+      "u0_interval_exact": [
+        "-1",
+        "-1"
+      ]
+    },
+    {
+      "first_action_set_width_exact": "0",
+      "initial_exact": [
+        "3",
+        "-2"
+      ],
+      "minimum_norm_selector_exact": [
+        "1",
+        "1"
+      ],
+      "optimal_value_exact": "0",
+      "terminal_exact": [
+        "0",
+        "0"
+      ],
+      "u0_interval_exact": [
+        "1",
+        "1"
+      ]
+    },
+    {
+      "first_action_set_width_exact": "1",
+      "initial_exact": [
+        "3",
+        "-1"
+      ],
+      "minimum_norm_selector_exact": [
+        "1/2",
+        "1/2"
+      ],
+      "optimal_value_exact": "0",
+      "terminal_exact": [
+        "3/2",
+        "0"
+      ],
+      "u0_interval_exact": [
+        "0",
+        "1"
+      ]
+    },
+    {
+      "first_action_set_width_exact": "2",
+      "initial_exact": [
+        "3",
+        "0"
+      ],
+      "minimum_norm_selector_exact": [
+        "0",
+        "0"
+      ],
+      "optimal_value_exact": "0",
+      "terminal_exact": [
+        "3",
+        "0"
+      ],
+      "u0_interval_exact": [
+        "-1",
+        "1"
+      ]
+    },
+    {
+      "first_action_set_width_exact": "1",
+      "initial_exact": [
+        "3",
+        "1"
+      ],
+      "minimum_norm_selector_exact": [
+        "-1/2",
+        "-1/2"
+      ],
+      "optimal_value_exact": "0",
+      "terminal_exact": [
+        "9/2",
+        "0"
+      ],
+      "u0_interval_exact": [
+        "-1",
+        "0"
+      ]
+    },
+    {
+      "first_action_set_width_exact": "0",
+      "initial_exact": [
+        "3",
+        "2"
+      ],
+      "minimum_norm_selector_exact": [
+        "-1",
+        "-1"
+      ],
+      "optimal_value_exact": "0",
+      "terminal_exact": [
+        "6",
+        "0"
+      ],
+      "u0_interval_exact": [
+        "-1",
+        "-1"
+      ]
+    }
+  ]
+}

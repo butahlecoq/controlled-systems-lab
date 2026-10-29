@@ -58,7 +58,8 @@ PreparedProvider<Port> selected(Registration<Port> registration, std::string rep
 
 struct Query {
     std::string id, p_exact, v_exact, u_exact, value_exact;
-    double p{}, v{}, u{}, value{};
+    double p{}, v{}, u{}, u1{}, value{};
+    bool nonunique{};
 };
 
 std::vector<Query> read_queries(const char* path) {
@@ -72,16 +73,22 @@ std::vector<Query> read_queries(const char* path) {
         std::vector<std::string> fields;
         std::string field;
         while (std::getline(row, field, ',')) fields.push_back(field);
-        if (fields.size() != 7) throw std::runtime_error("query CSV row must have seven fields");
-        queries.push_back({fields[0], fields[1], fields[2], fields[3], fields[4],
-                           std::stod(fields[5]), std::stod(fields[6]), 0.0, 0.0});
         const auto parse_rational = [](const std::string& text) {
             const auto slash = text.find('/');
             if (slash == std::string::npos) return std::stod(text);
             return std::stod(text.substr(0, slash)) / std::stod(text.substr(slash + 1));
         };
-        queries.back().u = parse_rational(fields[3]);
-        queries.back().value = parse_rational(fields[4]);
+        if (fields.size() == 7) {
+            queries.push_back({fields[0], fields[1], fields[2], fields[3], fields[4],
+                std::stod(fields[5]), std::stod(fields[6]), parse_rational(fields[3]), 0.0,
+                parse_rational(fields[4]), false});
+        } else if (fields.size() == 10) {
+            queries.push_back({fields[0], fields[1], fields[2], fields[3], fields[5],
+                parse_rational(fields[6]), parse_rational(fields[7]), parse_rational(fields[8]),
+                parse_rational(fields[9]), parse_rational(fields[5]), true});
+        } else {
+            throw std::runtime_error("query CSV row must have seven (unique) or ten (nonunique) fields");
+        }
     }
     if (queries.empty()) throw std::runtime_error("no exact reference queries");
     return queries;
@@ -108,6 +115,15 @@ SetHandle terminal_set() {
 problem::ResolvedProblem resolve(const Query& query) {
     const LinearStage flow{Matrix{2,2,{1,1,0,1}}, Matrix{2,1,{0,1}},
                             Matrix{2,0,{}}, Vector{0,0}};
+    if (query.nonunique) {
+        Problem source{{"mpc08-double-integrator-horizon-2-nonunique"},
+            std::make_shared<const SystemModel>(SystemModel{{{2,1,0}, TimeDomain::discrete, flow}, {}}),
+            {0,1,2}, KnownInitial{{query.p,query.v}}, ContinuousDomain{{input_box(),input_box()}},
+            {UniversalSet{2},UniversalSet{2},UniversalSet{2}}, {}, {}, InformationPattern::nominal_open_loop,
+            QuadraticTerminal{Matrix{2,2,{0,0,0,2}}, Vector{0,0}, 0}};
+        return take(problem::resolve(source,
+            {problem::UncertaintyStructure::stage_product_uncoupled, {}, {}}), "nonunique problem resolution");
+    }
     Problem source{{"mpc08-double-integrator-horizon-1"},
         std::make_shared<const SystemModel>(SystemModel{{{2,1,0}, TimeDomain::discrete, flow}, {}}),
         {0,1}, KnownInitial{{query.p,query.v}}, ContinuousDomain{{input_box()}},
@@ -217,7 +233,10 @@ bool candidate_contains(const SynthesisResult& result, const Query& query,
         if (i) labels += ";";
         labels += metadata->coordinate_labels[i];
     }
-    const Vector point{query.p,query.v,query.p+query.v,query.v+query.u,query.u};
+    const Vector point = query.nonunique
+        ? Vector{query.p,query.v,query.p+query.v,query.v+query.u,
+                 query.p+2*query.v+query.u,query.v+query.u+query.u1,query.u,query.u1}
+        : Vector{query.p,query.v,query.p+query.v,query.v+query.u,query.u};
     if (h->inequalities.cols() != point.size() || h->equalities.cols() != point.size()) return false;
     constexpr double tolerance = 2e-6;
     for (std::size_t r=0; r<h->inequalities.rows(); ++r) {
@@ -267,15 +286,17 @@ void run_one(Providers& providers, const Query& query, bool use_a,
         result_optimal=result.termination==Termination::completed && result.outcome.value==MathematicalOutcome::optimal;
         stop_details=stop_summary(result.stop);
         candidate_member=candidate_contains(result,query,labels,rows,equalities);
-        const auto membership_status=candidate_member?"candidate_contains_analytic_unique_history":
-            (result.family?"candidate_excludes_analytic_unique_history":"no_candidate_family");
+        const auto membership_status=candidate_member?"candidate_contains_analytic_reference_history":
+            (result.family?"candidate_excludes_analytic_reference_history":"no_candidate_family");
         status=result.termination==Termination::completed?membership_status:
             "noncompleted_"+std::string(membership_status);
     } catch (const std::exception& exception) {
         error=exception.what();
     }
     const auto elapsed=std::chrono::duration_cast<std::chrono::nanoseconds>(Clock::now()-started).count();
-    std::cout << "{\"schema\":\"csl.mpc08-explicit-candidate-observation/1\",\"query_id\":\""
+    std::cout << "{\"schema\":\"csl.mpc08-explicit-candidate-observation/1\",\"fixture\":\""
+        << (query.nonunique?"nonunique_horizon_2":"unique_horizon_1") << "\",\"horizon\":"
+        << (query.nonunique?2:1) << ",\"query_id\":\""
         << query.id << "\",\"strategy\":\"" << json_escape(strategy_id) << "\",\"warmup\":"
         << (warmup?"true":"false") << ",\"repetition\":" << repetition
         << ",\"status\":\"" << status << "\",\"termination_optimal\":"
@@ -299,14 +320,22 @@ void run_online_qp(Providers& providers, const Query& query, std::size_t repetit
     std::optional<double> objective_lower, objective_upper;
     try {
         const auto resolved=resolve(query);
-        const double lower=std::max({-1.0,-1.0-query.p-2*query.v,(-1.0-query.p-3*query.v)/2});
-        const double upper=std::min({1.0,1.0-query.p-2*query.v,(1.0-query.p-3*query.v)/2});
-        if (lower>upper) throw std::runtime_error("query is outside the feasible initial domain");
-        const auto program=optimization::make_convex_program({
-            {resolved.identity(),{"mpc08-condensed-online-qp:"+query.id}},
-            QuadraticTerminal{Matrix{1,1,{2.0}},Vector{2*query.v},
-                (query.p+query.v)*(query.p+query.v)+query.v*query.v},
-            SparseMatrix{0,1,{0},{},{}},{{lower,upper}},{},{}});
+        const auto program=[&] {
+          if (query.nonunique) {
+            return optimization::make_convex_program({
+                {resolved.identity(),{"mpc08-nonunique-online-qp:"+query.id}},
+                QuadraticTerminal{Matrix{2,2,{2,2,2,2}},Vector{2*query.v,2*query.v},query.v*query.v},
+                SparseMatrix{0,2,{0},{},{}},{{-1,1},{-1,1}},{},{}});
+          }
+            const double lower=std::max({-1.0,-1.0-query.p-2*query.v,(-1.0-query.p-3*query.v)/2});
+            const double upper=std::min({1.0,1.0-query.p-2*query.v,(1.0-query.p-3*query.v)/2});
+            if (lower>upper) throw std::runtime_error("query is outside the feasible initial domain");
+            return optimization::make_convex_program({
+                {resolved.identity(),{"mpc08-condensed-online-qp:"+query.id}},
+                QuadraticTerminal{Matrix{1,1,{2.0}},Vector{2*query.v},
+                    (query.p+query.v)*(query.p+query.v)+query.v*query.v},
+                SparseMatrix{0,1,{0},{},{}},{{lower,upper}},{},{}});
+        }();
         if (const auto* failure=std::get_if<Diagnostics>(&program)) {
             std::ostringstream message; for (const auto& item:*failure) message<<item.field<<": "<<item.explanation<<"; ";
             throw std::runtime_error(message.str());
@@ -333,19 +362,29 @@ void run_online_qp(Providers& providers, const Query& query, std::size_t repetit
         if (result.objective.lower) objective_lower=result.objective.lower->value;
         if (result.objective.upper) objective_upper=result.objective.upper->value;
         optimal=result.termination==Termination::completed&&result.outcome.value==MathematicalOutcome::optimal&&
-            result.primal.has_value()&&result.primal->size()==1;
-        if (result.primal&&result.primal->size()==1) {
+            result.primal.has_value()&&result.primal->size()==(query.nonunique?2U:1U);
+        if (result.primal&&result.primal->size()==(query.nonunique?2U:1U)) {
             input_value=result.primal->front();
-            objective_at_primal=(query.p+query.v)*(query.p+query.v)+
-                (query.v+input_value)*(query.v+input_value);
-            const bool action_matches=std::abs(input_value-query.u)<=2e-6;
-            const bool value_matches=std::abs(objective_at_primal-query.value)<=2e-6;
-            matches_reference=optimal&&action_matches&&value_matches;
+            if (query.nonunique) {
+                const double u1=result.primal->at(1);
+                const double terminal_v=query.v+input_value+u1;
+                objective_at_primal=terminal_v*terminal_v;
+                matches_reference=optimal&&std::abs(objective_at_primal-query.value)<=2e-6&&
+                    input_value>=-1.0-2e-6&&input_value<=1.0+2e-6&&u1>=-1.0-2e-6&&u1<=1.0+2e-6;
+            } else {
+                objective_at_primal=(query.p+query.v)*(query.p+query.v)+
+                    (query.v+input_value)*(query.v+input_value);
+                const bool action_matches=std::abs(input_value-query.u)<=2e-6;
+                const bool value_matches=std::abs(objective_at_primal-query.value)<=2e-6;
+                matches_reference=optimal&&action_matches&&value_matches;
+            }
         }
         status=matches_reference?"online_qp_matches_exact_reference":"online_qp_result_mismatch";
     } catch (const std::exception& exception) { error=exception.what(); }
     const auto elapsed=std::chrono::duration_cast<std::chrono::nanoseconds>(Clock::now()-started).count();
-    std::cout<<"{\"schema\":\"csl.mpc08-explicit-candidate-observation/1\",\"query_id\":\""
+    std::cout<<"{\"schema\":\"csl.mpc08-explicit-candidate-observation/1\",\"fixture\":\""
+        <<(query.nonunique?"nonunique_horizon_2":"unique_horizon_1")<<"\",\"horizon\":"
+        <<(query.nonunique?2:1)<<",\"query_id\":\""
         <<query.id<<"\",\"strategy\":\"online-condensed-qp\",\"warmup\":"<<(warmup?"true":"false")
         <<",\"repetition\":"<<repetition<<",\"status\":\""<<status<<"\",\"termination_optimal\":"
         <<(optimal?"true":"false")<<",\"family_present\":false,\"termination_code\":"<<termination_code

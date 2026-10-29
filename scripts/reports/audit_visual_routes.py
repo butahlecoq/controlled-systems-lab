@@ -33,11 +33,14 @@ COMPOSED_SAVED_ROUTES = {
 FROZEN_DIAGRAM_EXCEPTIONS = {
     "benchmarks/reporting/approximation_pilot/summarize.py",
     "benchmarks/reporting/mpc08_explicit/explicit_double_integrator.py",
+    "benchmarks/reporting/mpc08_explicit/explicit_nonunique_double_integrator.py",
 }
 PUBLICATION_EXPORT_ROUTES = {"scripts/reports/render.py", "scripts/reports/mpc05/check_smoke.py"}
 VIZ10_ROLE_REASONS = {
     "benchmarks/reporting/mpc08_explicit/explicit_double_integrator.py":
         "Generates one exact 2D critical-region diagram from the rational fixture, with labelled initial and terminal coordinates; it is not a general plotting path.",
+    "benchmarks/reporting/mpc08_explicit/explicit_nonunique_double_integrator.py":
+        "Draws the exact initial-state rectangle and one full two-control optimal fiber with a distinct minimum-norm selector; solver candidates are not presented as complete-family evidence.",
     "benchmarks/reporting/approximation_pilot/summarize.py":
         "Draws a reviewed static fixture diagram from authored input shapes and area formulas; it does not plot a saved run record.",
     "benchmarks/reporting/issue6/b07_render_projection.py":
@@ -93,6 +96,7 @@ FROZEN_COMPANIONS = {
     "app01-plan-20261016-22d406fd": "examples/app01-plan-timing-v1.html",
     "mpc03-open-loop-pilot-v1": "examples/index.html",
     "mpc03-b08-l04-miQCP-v1": "examples/index.html",
+    "mpc08-explicit-nonunique-v1": "examples/index.html",
     "app02-box-8ff979de60ea9d22": "examples/app02-diamond-v1.html",
     "app03-zonotope-4522855018fa9b0b": "examples/app03-zonotope-v1.html",
     "app04-ellipsoid-fd302c34092f8b19": "examples/app04-square-v1.html",
@@ -101,6 +105,7 @@ FROZEN_COMPANIONS = {
     "lotka-volterra-sampled-20261023": "examples/lotka-volterra-sampled-v1.html",
 }
 FROZEN_ROUTE_FOLLOW_UP_ISSUES = {
+    "mpc08-explicit-nonunique-v1": 604,
     # This report's phase-plane figure is owned and reviewed with MPC-05.
     "mpc05-causal-tree-pilot-v1": 601,
     "mpc05-causal-tree-pilot-v2": 601,

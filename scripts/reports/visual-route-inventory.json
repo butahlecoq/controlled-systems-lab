@@ -915,6 +915,15 @@
       "disposition": "publication-validation-or-frozen-route"
     },
     {
+      "source": "scripts/reports/stage_mpc08_nonunique.py",
+      "signal_count": 7,
+      "asset_name_literals": [
+        "explicit-nonunique-double-integrator.svg",
+        "optimal-fiber.svg"
+      ],
+      "disposition": "publication-validation-or-frozen-route"
+    },
+    {
       "source": "scripts/reports/stage_projection_figures.py",
       "signal_count": 4,
       "asset_name_literals": [],
@@ -1346,6 +1355,15 @@
       ],
       "disposition": "reviewed-static-diagram-exception",
       "role_and_disposition_reason": "Generates one exact 2D critical-region diagram from the rational fixture, with labelled initial and terminal coordinates; it is not a general plotting path."
+    },
+    {
+      "source": "benchmarks/reporting/mpc08_explicit/explicit_nonunique_double_integrator.py",
+      "signal_count": 2,
+      "asset_name_literals": [
+        "explicit-nonunique-double-integrator.svg"
+      ],
+      "disposition": "reviewed-static-diagram-exception",
+      "role_and_disposition_reason": "Draws the exact initial-state rectangle and one full two-control optimal fiber with a distinct minimum-norm selector; solver candidates are not presented as complete-family evidence."
     }
   ],
   "frozen_published_routes": [
@@ -2056,6 +2074,17 @@
       "index_sha256": "5765eb200059b87727d505a8351b2137decbed7c760de8b539a019d9861ff106",
       "disposition": "deferred: original frozen route-level readability review remains; companion availability is listed separately",
       "follow_up_issue": 669
+    },
+    {
+      "route": "mpc08-explicit-nonunique-v1",
+      "source_bundle": "mpc08-explicit-nonunique-v1",
+      "assets": [
+        "optimal-fiber.svg"
+      ],
+      "index_sha256": "37746b4db8bddd482ad5b07122fbe50ebc2f21149a00c6926f72e7532c1708fa",
+      "disposition": "deferred: original frozen route-level readability review remains; companion availability is listed separately",
+      "follow_up_issue": 604,
+      "companion_route": "examples/index.html"
     },
     {
       "route": "mpc08-explicit-pilot-v1",
