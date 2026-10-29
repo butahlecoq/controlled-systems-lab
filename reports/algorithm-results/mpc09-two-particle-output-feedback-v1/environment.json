@@ -1,0 +1,8 @@
+{
+  "build_type": "Release",
+  "compiler": "c++ (GCC) 16.2.1 20260810",
+  "logical_cpus": 8,
+  "machine": "x86_64",
+  "measurement": "No timing comparison collected; numerical and policy behavior only.",
+  "platform": "Linux-7.2.8-9-omarchy-x86_64-with-glibc2.44"
+}
