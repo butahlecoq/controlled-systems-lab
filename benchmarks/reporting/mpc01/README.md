@@ -88,7 +88,7 @@ objectives. Non-optimal primal vectors are labelled candidate iterates, not
 feasible trajectories.
 
 One paired Strategy A/B run on T-S01 is saved in
-[`strategy-ab-ts01-summary.md`](../../../docs/research/evidence/mpc01-external-qps-20261026-r3/strategy-ab-ts01-summary.md).
+[`strategy-ab-ts01-summary.md`](../../../docs/research/evidence/mpc01-external-qps-20261026-r3/strategy-ab-ts01-summary.md), its standalone [saved-data HTML report](../../../docs/research/evidence/mpc01-external-qps-20261026-r3/strategy-ab-ts01-summary.html), and the T-S01 [control-plane figure](../../../docs/research/evidence/mpc01-external-qps-20261026-r3/strategy-ab-ts01-control-plane.svg).
 It verifies both registered strategies on that small analytic fixture, but
 does not cover T-S02, #421, or B04. The broader Strategy A/B matrix remains
 open; exact feasibility and candidate objective bounds for the external

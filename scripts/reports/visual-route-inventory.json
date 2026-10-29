@@ -578,6 +578,15 @@
       "follow_up_issue": 686
     },
     {
+      "source": "scripts/reports/mpc01/summarize_strategy_ab.py",
+      "signal_count": 4,
+      "asset_name_literals": [
+        "strategy-ab-ts01-control-plane.svg"
+      ],
+      "disposition": "deferred-family-specific-migration",
+      "follow_up_issue": 686
+    },
+    {
       "source": "scripts/reports/mpc03/b08_miqcp.py",
       "signal_count": 4,
       "asset_name_literals": [

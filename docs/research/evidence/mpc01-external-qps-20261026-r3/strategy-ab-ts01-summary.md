@@ -14,3 +14,16 @@ This functional measurement uses the same exact two-stage integrator equations a
 | `csl.synthesis.strategy-b` | 1.310374 | 1.258761–2.004882 |
 
 The timing interval covers strategy preparation through two witness checks. It excludes process startup, shared scenario/provider setup, JSON serialization, build and rendering. No separate limiter or per-attempt resource-cap profile was collected, so these tiny-case timings support no general performance winner claim.
+
+Saved-data report: [`strategy-ab-ts01-summary.html`](strategy-ab-ts01-summary.html) with the control-plane figure [`strategy-ab-ts01-control-plane.svg`](strategy-ab-ts01-control-plane.svg).
+
+Regenerate the HTML, SVG, and Markdown summary from the retained records:
+
+```sh
+python3 scripts/reports/mpc01/summarize_strategy_ab.py \
+  --events docs/research/evidence/mpc01-external-qps-20261026-r3/strategy-ab-ts01-events.jsonl \
+  --stdout docs/research/evidence/mpc01-external-qps-20261026-r3/strategy-ab-ts01-stdout.jsonl \
+  --scenario examples/scenarios/two-stage-integrator.json \
+  --environment docs/research/evidence/mpc01-external-qps-20261026-r3/strategy-ab-ts01-environment.json \
+  --output docs/research/evidence/mpc01-external-qps-20261026-r3/strategy-ab-ts01-summary.md
+```
