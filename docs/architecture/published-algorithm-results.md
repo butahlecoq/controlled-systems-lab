@@ -621,6 +621,33 @@ feedback bundle are staged through distinct content-addressed routes with file
 hashes and offline ZIPs; main-only Pages deployment and live URL/hash checks
 remain pending.
 
+## EXP-03 TwoPoints projected approximation pilot
+
+The [EXP-03 pilot bundle](../../reports/algorithm-results/exp03-two-points-approx-pilot-v1/)
+applies the registered exact hull, axis-box, rotated-parallelotope,
+directional-ellipsoid, and zonotope axis-cover methods to the terminal
+projected convex hulls of the existing three-stage TwoPoints finite game. It
+retains the exact integer replay, all 345 terminal states, raw method outputs,
+seven alternating single-call observations per method and projection, and an
+independent dyadic inclusion check for both `(x1,x2)` and `(x3,x4)`. All four
+outer methods contain every binary64 reference vertex in each projection. The
+additional exact rational lattice check records point misses: QuickHull 1/2,
+axis box 1/2, parallelotope 1/0, ellipsoid 0/0, and padded zonotope 0/0 across
+the two planes. Thus the first three methods are not claimed to enclose the
+exact lattice reference. The zonotope area ratio is `1.00000000047` in both
+planes, but it retains all three active generators, so this is not a lossy
+reduction result. The seven single-call timings are observations from one
+host; they are descriptive only and do not support a speed ranking. The
+standalone figure overlays each final projection on the forward game geometry,
+marks backward-winning nodes, and outlines the terminal winning-node hulls,
+alongside both trajectories. It does not separately project the coupled
+terminal target. It makes no 4D inclusion claim and does not yet propagate
+approximations through the reachability or minimax recursions. This pilot
+supplies no inner reachable-set or objective-bound claims; EXP-03 remains open
+for those acceptance items.
+Independent saved-result review, main-only Pages deployment, and live URL and
+hash checks remain pending.
+
 ## MPC-05 finite causal minimax pilot
 
 The saved [MPC-05 causal tree report](../../reports/algorithm-results/mpc05-causal-tree-pilot-v2/)

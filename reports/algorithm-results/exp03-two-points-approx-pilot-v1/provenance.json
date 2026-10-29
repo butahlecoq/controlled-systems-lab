@@ -1,0 +1,48 @@
+{
+  "schema": "csl.exp03-two-points-approximation-provenance/1",
+  "case_id": "env717-two-points-three-stage-finite-game",
+  "source_base_commit": "57aeb555434f679156b3cb58fb558d46454bddc8",
+  "upstream_repository_commit": "f4d76c60f4003f50954174e96eafd8e514bd5441",
+  "upstream_source_blob": "4e71bed8ceffa1990645fb85e54d6b5b1eeb688d",
+  "source_report_commit": "6aa3510ee8448b9f9994b7e52aeeb6c87ced4842",
+  "inputs": {
+    "figure_data_sha256": "a65b21edb9c29375b1a851b3a4fc9a8e8ae28b1cee55b8c3952fea8347d26284",
+    "source_result_sha256": "c9c382b0469504254f45815904aa99714c08d4ff5f4584c810fd2420ca80f8c4",
+    "source_svg_sha256": "f427ab37ba93cf31e3c70f03dff6414cc1dce77bc5d7a318aef672dadfecf383"
+  },
+  "report_code_sha256": {
+    "benchmarks/reporting/exp03/two_points_approximation.cpp": "5865ae8fcdf54305c0e3377e6dc481ff23226e646e71d8da9ee94ad40973af90",
+    "scripts/reports/exp03/build_two_points_reference.py": "a59ad92cd2b3449009708b0bb42574fd6601835f6f82b5c40a89b0f30b58989f",
+    "scripts/reports/exp03/check_two_points_approximation.py": "91332ae4ce7c268a243fb324e69a8db27d4322b086325e3b270682d78cdc5d58",
+    "scripts/reports/exp03/render_two_points_approximation.py": "0a2ae1f10b05d0f8c4e7e490f71fad1db0eca40657880fc88cdb6c2930b25127"
+  },
+  "build": {
+    "configuration": "Release",
+    "compiler": "GCC 16.2.1",
+    "cmake": "3.31.6",
+    "python": "3.14.0 for reference/oracle scripts",
+    "operating_system": "Linux 7.2.8-9-omarchy, x86_64",
+    "cpu": "AMD Ryzen 5 3550H with Radeon Vega Mobile Gfx; 4 cores / 8 logical CPUs",
+    "benchmark_executable_sha256": "dc40eef56ac838ce7388f89575f9302a1d6a6c07eba0c3b5a0fc4f1b3969d21d",
+    "optional_highs_backend": false,
+    "optional_qhull_backend": false,
+    "logical_cpus": 8
+  },
+  "measurement": {
+    "date_utc": "2026-10-29",
+    "pre_run_load_average": [0.77, 0.49, 0.53],
+    "capture_time_utc": "2026-10-29T04:48:44Z",
+    "warmups_per_method_projection": 1,
+    "measured_calls_per_method_projection": 7,
+    "ordering": "rotating alternating order",
+    "public_call_outcomes": 80,
+    "independently_checked_outputs": 80,
+    "source_mapped_limiter_profile": "not collected; no speed ranking claimed",
+    "memory_limit": "not enforced for this local descriptive pilot"
+  },
+  "arithmetic_and_oracle": {
+    "finite_state_model": "exact integer lattice recurrence at state_scale=2000",
+    "output_check": "exact dyadic arithmetic over all stored binary64 vertices and representation coefficients",
+    "reference_semantics": "convex hull of enumerated finite-game states, checked separately in each requested 2D projection"
+  }
+}

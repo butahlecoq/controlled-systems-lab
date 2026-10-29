@@ -166,12 +166,48 @@ target_compile_options(csl_app02_approximation_report PRIVATE /W4 /WX /permissiv
 else()
 target_compile_options(csl_app02_approximation_report PRIVATE -Wall -Wextra -Wpedantic -Werror)
 endif()
+
 if(BUILD_TESTING)
 find_package(Python3 3.11 REQUIRED COMPONENTS Interpreter)
 add_test(NAME app02_report_smoke COMMAND Python3::Interpreter
   ${CMAKE_CURRENT_SOURCE_DIR}/scripts/reports/app02/check_smoke.py
   $<TARGET_FILE:csl_app02_approximation_report>)
 set_tests_properties(app02_report_smoke PROPERTIES LABELS reporting)
+endif()
+endif()
+
+if(CSL_BUILD_EXP03_TWO_POINTS_REPORT)
+include(cmake/JsonDependencies.cmake)
+set_property(DIRECTORY APPEND PROPERTY CMAKE_CONFIGURE_DEPENDS
+  ${CMAKE_CURRENT_SOURCE_DIR}/benchmarks/reporting/exp03/two_points_approximation.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/scripts/reports/exp03/build_two_points_reference.py
+  ${CMAKE_CURRENT_SOURCE_DIR}/scripts/reports/exp03/check_two_points_approximation.py
+  ${CMAKE_CURRENT_SOURCE_DIR}/scripts/reports/exp03/check_two_points_approximation_smoke.py
+  ${CMAKE_CURRENT_SOURCE_DIR}/scripts/reports/exp03/render_two_points_approximation.py
+  ${CMAKE_CURRENT_SOURCE_DIR}/reports/algorithm-results/env717-two-points-feedback-v1/figure-data.json
+  ${CMAKE_CURRENT_SOURCE_DIR}/reports/algorithm-results/env717-two-points-feedback-v1/result.json)
+add_executable(csl_exp03_two_points_approximation
+  benchmarks/reporting/exp03/two_points_approximation.cpp)
+target_link_libraries(csl_exp03_two_points_approximation PRIVATE
+  CSL::approximation CSL::geometry_generators CSL::polyhedral CSL::quickhull_2d)
+target_include_directories(csl_exp03_two_points_approximation SYSTEM PRIVATE
+  ${csl_json_SOURCE_DIR}/include)
+target_compile_features(csl_exp03_two_points_approximation PRIVATE cxx_std_20)
+if(MSVC)
+target_compile_options(csl_exp03_two_points_approximation PRIVATE /W4 /WX /permissive-)
+else()
+target_compile_options(csl_exp03_two_points_approximation PRIVATE -Wall -Wextra -Wpedantic -Werror)
+endif()
+if(BUILD_TESTING)
+find_package(Python3 3.11 REQUIRED COMPONENTS Interpreter)
+add_test(NAME exp03_two_points_approximation_smoke COMMAND Python3::Interpreter
+  ${CMAKE_CURRENT_SOURCE_DIR}/scripts/reports/exp03/check_two_points_approximation_smoke.py
+  $<TARGET_FILE:csl_exp03_two_points_approximation>
+  ${CMAKE_CURRENT_SOURCE_DIR}/scripts/reports/exp03/build_two_points_reference.py
+  ${CMAKE_CURRENT_SOURCE_DIR}/reports/algorithm-results/env717-two-points-feedback-v1/figure-data.json
+  ${CMAKE_CURRENT_SOURCE_DIR}/reports/algorithm-results/env717-two-points-feedback-v1/result.json
+  ${CMAKE_CURRENT_BINARY_DIR}/exp03-two-points-reference.json)
+set_tests_properties(exp03_two_points_approximation_smoke PROPERTIES LABELS reporting)
 endif()
 endif()
 
