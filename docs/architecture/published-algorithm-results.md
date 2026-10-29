@@ -223,25 +223,24 @@ workload/resource matrix and comparison-record requirements.
 
 ### EXP-06 A43/A44 paper-derived follow-up
 
-The saved six-method bundle is recorded below after exact-head validation.
-The initial r1 capture is retained as superseded evidence; it undercounted A43
-candidate Phase-I solves in `lp_calls` and reused the prior A44 adaptation
-identity. The corrected [r2 bundle](../../reports/algorithm-results/exp06-it17-paper-reducers-20261029-r2/)
+The [r3 bundle](../../reports/algorithm-results/exp06-it17-paper-reducers-20261029-r3/)
 uses `csl.hull.itis17.a44-paper-farthest-incremental-lp@1.0.0` and counts all
 A43 candidate solves plus final rechecks. Source commit is
-`b2b7dfa6a2151259cbe1cd3d0e6d99e790661533`. All 36 attempts (six methods,
+`1f34503eb3f5d4c3e239076a8d48b2af2e6bf06c`. All 36 attempts (six methods,
 one warmup and five measured runs each) completed, and the saved renderer
 rechecked every result with the exact 2D hull oracle. Median durations and
-ranges in ns were: A29/A30 Python 4,410,858 (3,120,182–4,864,062); QuickHull
-40,020 (15,156–42,394); A43 certified-basis adaptation 2,821,679
-(1,405,357–3,221,662); A43 artificial-basis 3,151,402
-(1,224,885–3,255,676); A43 largest-norm tie 3,154,893
-(1,216,364–3,187,090); A44 paper-farthest incremental LP 4,193,441
-(1,589,250–4,283,676). These intervals differ by implementation/runtime and
+ranges in ns were: A29/A30 Python 4,672,975 (3,610,192–5,255,315); QuickHull
+47,423 (36,737–48,051); A43 certified-basis adaptation 2,884,746
+(1,674,806–3,332,710); A43 artificial-basis 3,200,431
+(1,229,565–3,246,386); A43 largest-norm tie 3,152,379
+(1,204,073–3,269,015); A44 paper-farthest incremental LP 4,201,054
+(2,936,707–4,287,727). These intervals differ by implementation/runtime and
 exclude exact checking, so the values are descriptive and do not rank speed.
 The largest-norm tie rule activated once in each attempt; the A43 batch-removal
 counter stayed at zero, so this fixture does not demonstrate that path. The
-bundle preserves r1 unchanged as superseded historical evidence.
+initial r1 and corrected r2 bundles remain unchanged as superseded historical
+evidence; r2 used source commit
+`b2b7dfa6a2151259cbe1cd3d0e6d99e790661533`.
 
 ### ITIS17 hull output-status update
 
