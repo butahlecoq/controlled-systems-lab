@@ -43,6 +43,23 @@ remain pending. The earlier unregistered draft bundle
 is retained as historical evidence and is superseded by this bundle, which
 records each batch's actual generator outcomes and full measurement metadata.
 
+The saved [affine-synthesis bundle](../../reports/algorithm-results/ext04-affine-synthesis-7f04289dfcdcb074/)
+uses source commit `7f04289dfcdcb0744e9f62010e1df7256a1cf9b4`. It synthesizes
+one affine action from a pre-decision noisy observation for one two-state,
+one-step fixture. The report independently checks all eight vertices of the
+caller-authored joint initial-state/error V-hull against the plant equations,
+action bounds, and terminal bounds. Its result is numerical binary64 feasibility
+evidence; the joint hull's completeness is assumed, infeasibility is
+inconclusive, and the returned policy is not cost-optimal. Seven 100-call batches
+after one excluded warmup had no failures. Median duration was 469,515,913 ns
+per batch (466,759,185–476,573,362 ns), or 4,695,159 ns per call at the median.
+The Release build used GCC 16.2.1, CMake 3.31.6 and Ninja 1.12.1 on an 8-logical-
+CPU Ryzen 5 3550H host; average load was 1.19, 1.43 and 1.19 before the run
+(1/5/15 minutes). HiGHS and Qhull were disabled. This is one adapter and fixture,
+with no comparative performance claim. The report retains the raw batches,
+smoke output, environment capture, build log, figure, renderer source and
+offline ZIP.
+
 ## EXT-07 hybrid profile report
 
 The frozen implementation source is `2965baafa325550ad60ec91d44f5e3f86a832178`.
