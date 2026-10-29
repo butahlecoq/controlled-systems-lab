@@ -13,7 +13,7 @@
   "report_code_sha256": {
     "benchmarks/reporting/exp03/two_points_approximation.cpp": "0e71262772839e57a60aa36426024bb7a117ae6d220f7429a139530a73b91559",
     "scripts/reports/exp03/build_two_points_reference.py": "9f9e9fcad055ae4d1426278dc7df731e2204eb8dfb491845add73fe98e6ab604",
-    "scripts/reports/exp03/build_comparison_records.py": "547442dd7275599792e33cfbddc602e37da8afb0e59d00dcfe7b65b3246c758d",
+    "scripts/reports/exp03/build_comparison_records.py": "1be1c4ce40dabe0a7ea4a7fe697c5a753557d24796db77cf57b3c868ba0aa511",
     "scripts/reports/exp03/check_two_points_approximation.py": "d28a500c3499613aa8e8e8969fd53af60cb7eeec3c875f18326999bf8b6fba9a",
     "scripts/reports/exp03/check_two_points_approximation_smoke.py": "e98e91d52561cf4fead5b97783258581993f69b836a837d2c3a172de0ea7360f",
     "scripts/reports/exp03/render_two_points_approximation.py": "0a2ae1f10b05d0f8c4e7e490f71fad1db0eca40657880fc88cdb6c2930b25127",

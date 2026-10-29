@@ -156,15 +156,16 @@ def build_records(reference: dict, run: dict, check: dict,
                 run_id = f"exp03-p{projection_index}-{method}-r{repetition:02d}"
                 source_hashes = (provenance or {}).get("report_code_sha256", {})
                 binary_hash = (provenance or {}).get("build", {}).get("benchmark_executable_sha256")
+                build = (provenance or {}).get("build", {})
                 runtime = {
-                    "architecture": (provenance or {}).get("build", {}).get("operating_system", "unrecorded"),
-                    "build_type": (provenance or {}).get("build", {}).get("configuration", "unrecorded"),
-                    "compiler": (provenance or {}).get("build", {}).get("compiler", "unrecorded"),
-                    "compiler_version": (provenance or {}).get("build", {}).get("compiler", "unrecorded"),
+                    "architecture": build.get("architecture", "unrecorded"),
+                    "build_type": build.get("configuration", "unrecorded"),
+                    "compiler": build.get("compiler", "unrecorded"),
+                    "compiler_version": build.get("compiler_version", "unrecorded"),
                     "executable_sha256": binary_hash,
                     "implementation": method_id,
                     "language": "C++",
-                    "os": (provenance or {}).get("build", {}).get("operating_system", "unrecorded"),
+                    "os": build.get("operating_system", "unrecorded"),
                     "version": version,
                 }
                 sources = [{"path": path, "sha256": source_hashes[path]}
