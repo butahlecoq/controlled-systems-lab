@@ -114,7 +114,7 @@ def svg(result: dict) -> str:
             'font-family="monospace" font-size="13">' + "".join(elements) + '</g></svg>')
 
 
-def render(trials: Path, build_log: Path, out: Path, source_commit: str,
+def render(trials: Path, smoke: Path, build_log: Path, out: Path, source_commit: str,
            collected_utc: str, environment_file: Path, driver: Path) -> None:
     if not re.fullmatch(r"[0-9a-f]{40}", source_commit):
         raise ValueError("source commit must be a full hexadecimal Git object ID")
@@ -143,9 +143,17 @@ def render(trials: Path, build_log: Path, out: Path, source_commit: str,
     if out.exists():
         raise ValueError("report output already exists")
     result = rows[-1]["result"]
+    smoke_text = smoke.read_text(encoding="utf-8")
+    smoke_json = smoke_text.lstrip()
+    smoke_result, smoke_end = json.JSONDecoder().raw_decode(smoke_json)
+    if smoke_json[smoke_end:].strip() != "affine-synthesis smoke passed":
+        raise ValueError("standalone smoke output differs")
+    check_result(smoke_result)
     environment = json.loads(environment_file.read_text(encoding="utf-8"))
     out.mkdir(parents=True)
     (out / "trials.jsonl").write_bytes(raw)
+    (out / "smoke.txt").write_text(smoke_text, encoding="utf-8")
+    (out / "environment.json").write_bytes(environment_file.read_bytes())
     (out / "fixture.json").write_text(json.dumps(scenario, indent=2, sort_keys=True) + "\n")
     (out / "result.json").write_text(json.dumps(result, indent=2, sort_keys=True) + "\n")
     image = svg(result).encode()
@@ -184,6 +192,7 @@ def render(trials: Path, build_log: Path, out: Path, source_commit: str,
         "median_ns_per_call": med / 100,
         "environment": environment,
         "driver_sha256": sha(driver_bytes),
+        "smoke_sha256": sha(smoke_text.encode()),
         "renderer_sha256": sha(renderer_bytes),
         "release_build_log_sha256": sha(build_bytes),
         "evidence_limits": [
@@ -217,7 +226,7 @@ def render(trials: Path, build_log: Path, out: Path, source_commit: str,
 <table><thead><tr><th>Round</th><th>Batch ms</th><th>ns/call</th></tr></thead><tbody>{table}</tbody></table>
 <h2>Limits</h2><ul><li>The guarantee covers only the caller-authored joint V-hull; completeness of that input is assumed.</li><li>Results use numerical binary64 arithmetic, not validated rounding.</li><li>Numerical solver infeasibility remains inconclusive; it is not a proof that no policy exists.</li><li>One fixture and one provider are measured. No speedup, comparison, or scalability claim is made.</li></ul>
 <h2>Reproduce</h2><p>Build with <code>CSL_BUILD_EXT04_AFFINE_SYNTHESIS_REPORT=ON</code>, run <code>csl_ext04_affine_synthesis_report smoke</code> and then <code>measure</code>. The bundle includes the exact C++ driver, fixture, raw JSONL, saved result, independent renderer, Release build log, and checksums.</p>
-<p>Source commit <a href="https://github.com/butahlecoq/controlled-systems-lab/commit/{html.escape(source_commit)}"><code>{html.escape(source_commit)}</code></a>. <a href="fixture.json">Fixture</a> · <a href="result.json">Result</a> · <a href="trials.jsonl">Raw trials</a> · <a href="summary.csv">CSV</a> · <a href="driver.cpp">Driver</a> · <a href="records.json">Records</a> · <a href="renderer.py">Renderer</a>.</p></body></html>'''
+<p>Source commit <a href="https://github.com/butahlecoq/controlled-systems-lab/commit/{html.escape(source_commit)}"><code>{html.escape(source_commit)}</code></a>. <a href="fixture.json">Fixture</a> · <a href="result.json">Result</a> · <a href="trials.jsonl">Raw trials</a> · <a href="smoke.txt">Smoke output</a> · <a href="summary.csv">CSV</a> · <a href="driver.cpp">Driver</a> · <a href="records.json">Records</a> · <a href="renderer.py">Renderer</a>.</p></body></html>'''
     (out / "index.html").write_text(page, encoding="utf-8")
     files = {path.name: sha(path.read_bytes()) for path in sorted(out.iterdir()) if path.is_file()}
     (out / "manifest.json").write_text(json.dumps({"schema": "csl.ext04-affine-synthesis-manifest/1",
@@ -235,6 +244,7 @@ def render(trials: Path, build_log: Path, out: Path, source_commit: str,
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--trials", type=Path, required=True)
+    parser.add_argument("--smoke", type=Path, required=True)
     parser.add_argument("--build-log", type=Path, required=True)
     parser.add_argument("--out", type=Path, required=True)
     parser.add_argument("--source-commit", required=True)
@@ -242,7 +252,7 @@ def main() -> None:
     parser.add_argument("--environment", type=Path, required=True)
     parser.add_argument("--driver", type=Path, required=True)
     args = parser.parse_args()
-    render(args.trials, args.build_log, args.out, args.source_commit,
+    render(args.trials, args.smoke, args.build_log, args.out, args.source_commit,
         args.collected_utc, args.environment, args.driver)
 
 
