@@ -94,15 +94,15 @@ def svg_figure(data) -> str:
         panels.append(f'<rect x="{left}" y="{top}" width="{plot_width}" height="{plot_height}" class="frame"/>')
         for point in projection["target_projection"]:
             x, y = xy(point)
-            panels.append(f'<circle cx="{x:.2f}" cy="{y:.2f}" r="3.2" class="target"/>')
+            panels.append(f'<circle cx="{x:.2f}" cy="{y:.2f}" r="4.0" class="target"/>')
         for layer in projection["layers"]:
             color = colors[layer["stage"] % len(colors)]
             for point in layer["forward"]:
                 x, y = xy(point)
-                panels.append(f'<circle cx="{x:.2f}" cy="{y:.2f}" r="2.0" fill="{color}" opacity="0.28"/>')
+                panels.append(f'<circle cx="{x:.2f}" cy="{y:.2f}" r="2.7" fill="{color}" opacity="0.82"/>')
             for point in layer["winning_intersection"]:
                 x, y = xy(point)
-                panels.append(f'<circle cx="{x:.2f}" cy="{y:.2f}" r="3.1" fill="#b92e2e" opacity="0.62"/>')
+                panels.append(f'<circle cx="{x:.2f}" cy="{y:.2f}" r="4.0" fill="none" stroke="#b92e2e" stroke-width="1.25" opacity="0.9"/>')
         trajectory = [xy(point) for point in projection["minimax_trajectory"]]
         panels.append('<polyline points="' + " ".join(f"{x:.1f},{y:.1f}" for x, y in trajectory) + '" class="path"/>')
         for index, (x, y) in enumerate(trajectory):
@@ -113,14 +113,14 @@ def svg_figure(data) -> str:
         panels.append(f'<text x="{left}" y="{top + plot_height + 25}" class="tick">{xmin:.3g}</text>')
         panels.append(f'<text x="{left + plot_width}" y="{top + plot_height + 25}" text-anchor="end" class="tick">{xmax:.3g}</text>')
     legend = ('<g transform="translate(80,584)"><circle cx="0" cy="0" r="4" fill="#5383b5"/><text x="9" y="4">forward graph states (stage colors)</text>'
-        '<circle cx="270" cy="0" r="4" fill="#b92e2e"/><text x="279" y="4">backward-winning ∩ forward states</text>'
+        '<circle cx="270" cy="0" r="4" fill="none" stroke="#b92e2e" stroke-width="1.25"/><text x="279" y="4">backward-winning ∩ forward states</text>'
         '<line x1="560" y1="0" x2="590" y2="0" class="path"/><text x="600" y="4">selected worst-case minimax path</text>'
         '<circle cx="920" cy="0" r="4" class="target"/><text x="930" y="4">projected terminal target states</text></g>')
     return ('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 620" role="img" aria-labelledby="title desc">'
         '<title id="title">TwoParticleGame reachable and winning states</title>'
         '<desc id="desc">Forward finite-state graph nodes, backward-winning intersections, projected terminal target states, and a selected worst-case minimax path in each particle phase plane.</desc>'
         '<rect width="1280" height="620" fill="#fff"/>'
-        '<style>text{font:14px system-ui,sans-serif;fill:#172033}.title{font-size:19px;font-weight:600}.frame{fill:#fff;stroke:#8493a5}.target{fill:#f6d58b;fill-opacity:.3;stroke:#d09c38;stroke-dasharray:5 4}.path{fill:none;stroke:#252e38;stroke-width:3}.path-point{fill:#e4572e;stroke:#fff;stroke-width:1.5}.stage{font-size:11px;font-weight:bold}.tick{font-size:11px;fill:#596779}</style>'
+        '<style>text{font:14px system-ui,sans-serif;fill:#172033}.title{font-size:19px;font-weight:600}.frame{fill:#fff;stroke:#8493a5}.target{fill:#f6d58b;fill-opacity:.9;stroke:#9a6711;stroke-width:1.5}.path{fill:none;stroke:#252e38;stroke-width:3}.path-point{fill:#e4572e;stroke:#fff;stroke-width:1.5}.stage{font-size:11px;font-weight:bold}.tick{font-size:11px;fill:#596779}</style>'
         + ''.join(panels) + legend + '</svg>')
 
 
