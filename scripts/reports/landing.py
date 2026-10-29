@@ -92,6 +92,13 @@ FAMILIES = {
         "finite fixtures and a three-stage TwoPointsOnParallelLines adaptation. The report shows "
         "forward reachable sets, terminal sets, backward-winning intersections, and a replayed "
         "worst-case path in both player phase planes; it makes no continuous RL or performance claim."),
+    "exp03-two-points-approx-publication": Family(
+        r"exp03-two-points-approx-publication-v1", "synthesis",
+        "TwoPoints finite-action reachability and approximation report",
+        "Shows stagewise forward reachable geometry, terminal sets, backward-winning intersections, "
+        "open-loop and feedback worst-case paths, and exact/approximate set outlines in both player "
+        "phase planes for the three-stage TwoPointsOnParallelLines adaptation. It is a saved pilot "
+        "visualization, not a reproduction of the continuous-action RL task or a performance claim."),
     "exp06-geometry-pilot": Family(
         r"exp06-[0-9a-f]{16}", "geometry", "Bounded exact-hull geometry pilot",
         "Presents bounded exact-hull comparisons on a nine-point dyadic square. Reports include "

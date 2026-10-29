@@ -71,6 +71,11 @@ SAVED_FIGURES = (
          family="Lotka–Volterra reachability samples", title="A sampled Lotka–Volterra orbit",
          alt="Seeded two-state Lotka–Volterra control samples trace an orbit; local panels show sample hulls.",
          summary="512 deterministic control histories illustrate the discrete recurrence. Dots and sample hulls do not certify the full reachable sets or reproduce the historical figure."),
+    dict(route="exp03-two-points-approx-publication-v1", source_bundle="exp03-two-points-approx-pilot-v1",
+         image="reachability-and-approximations.svg", page="index.html",
+         records="run.json", family="Differential-game reachability", title="TwoPoints reachable sets and approximations",
+         alt="Two player phase planes overlay forward reachable sets, backward-winning nodes, open-loop and feedback worst-case paths, and five terminal projected-set methods.",
+         summary="The panels show player 1 position/velocity (x₁,x₂) and player 2 position/velocity (x₃,x₄), independently scaled with numeric ticks and grids. This is a three-stage finite-action adaptation of the RL game, not its continuous-action 10-second task. The approximation comparison is for terminal 2D projected hulls only; it makes no 4D or recursive-containment claim."),
     dict(route="syn03-nominal-exact-2d-8b94095", image="optimal-face.svg", page="index.html",
          family="Strategy A · nominal linear exact profile", title="A complete 2D optimal face",
          alt="The feasible upper triangle in the unit square and its full optimal diagonal segment from (0,1) to (1,0).",
@@ -270,11 +275,12 @@ def saved_figure_sections(catalog, site):
         image_path = route / entry["image"]
         require(not route.is_symlink() and image_path.is_file() and not image_path.is_symlink(),
                 "missing staged visual figure: " + report_id + "/" + entry["image"])
-        require((route / entry["page"]).is_file() and (route / "records.json").is_file(),
+        records_name = entry.get("records", "records.json")
+        require((route / entry["page"]).is_file() and (route / records_name).is_file(),
                 "saved visual needs a report page and raw records: " + report_id)
         image = f"../{report_id}/{entry['image']}"
         page = f"../{report_id}/{entry['page']}"
-        records = f"../{report_id}/records.json"
+        records = f"../{report_id}/{records_name}"
         cards.append(
             f'<article id="saved-figure-{number}" class="saved-figure"><p class="eyebrow">' + escape(entry["family"]) +
             '</p><h3><a href="' + escape(page, quote=True) + '">' + escape(entry["title"]) +
@@ -284,7 +290,7 @@ def saved_figure_sections(catalog, site):
             '<p><a href="' + escape(page, quote=True) + '">Inputs, answer and reproduction details ↗</a> · '
             '<a href="' + escape(records, quote=True) + '">Raw record ↗</a></p></article>')
         inventory.append({"family": entry["family"], "title": entry["title"], "report_id": report_id,
-                          "figure": entry["image"], "page": entry["page"], "records": "records.json"})
+                          "figure": entry["image"], "page": entry["page"], "records": records_name})
     return ''.join(cards), inventory
 
 
