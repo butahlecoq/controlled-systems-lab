@@ -157,6 +157,15 @@ class LandingTests(unittest.TestCase):
         self.assertIn("fixed at zero", family.summary)
         self.assertIn("not the continuous two-player RL optimum", family.summary)
 
+    def test_two_particle_route_describes_checked_game_projections_and_adaptation(self):
+        family = landing.FAMILIES[landing.family_for(
+            "env717-two-particle-minimax-0123456789abcdefabcd")]
+        self.assertEqual(family.group, "synthesis")
+        self.assertIn("position (x1,x2)", family.summary)
+        self.assertIn("velocity (v1,v2)", family.summary)
+        self.assertIn("stronger within-stage information pattern", family.summary)
+        self.assertIn("not a continuous-action RL reproduction", family.summary)
+
 
 class AssembledIndexTests(unittest.TestCase):
     """The published landing page is built from the assembled staged index."""

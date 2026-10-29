@@ -1,0 +1,49 @@
+{
+  "schema": "csl.env717-two-particle-game-input/1",
+  "scenario_id": "env717-two-particle-game-pilot-v1",
+  "source": {
+    "repository": "https://github.com/imm-rl-lab/differential_game_gym",
+    "commit": "af5f0a2ee498c0edcf88d60f1d6c49a39bd08bc8",
+    "path": "Environments/TwoParticleGame/TwoParticleGame.py",
+    "blob": "7e7d326f8ff81f7dacc05ac72848eeaac6a03021",
+    "license": "Apache-2.0",
+    "license_path": "LICENSE",
+    "license_blob": "261eeb9e9f8b2b4b0d119366dda99c6fd7d35c64"
+  },
+  "source_model": {
+    "state_order": ["time", "x1", "v1", "x2", "v2"],
+    "default_initial_state": [0.0, 0.0, 0.0, 0.0, 0.0],
+    "alpha": 1.0,
+    "m1": 0.1,
+    "m2": 1.0,
+    "dt_seconds": 0.2,
+    "terminal_time_seconds": 2.0,
+    "inner_rk4_steps": 20,
+    "control_u_bounds": [-3.0, 3.0],
+    "disturbance_v_bounds": [-3.0, 3.0],
+    "dynamics": ["time'=1", "x1'=v1", "v1'=-10*v1+10*u", "x2'=v2", "v2'=v"],
+    "terminal_reward": "-abs(x1-x2)"
+  },
+  "adaptation": {
+    "initial_state": [0.0, 2.0, 0.0, 0.0, 0.0],
+    "initial_state_change": "x1 is 2.0 instead of the source default 0.0",
+    "horizon_steps": 4,
+    "horizon_seconds": 0.8,
+    "action_catalogue": [-3.0, 0.0, 3.0],
+    "disturbance_catalogue": [-3.0, 0.0, 3.0],
+    "state_quantization_scale": 1000000,
+    "state_quantization": "round each outer RK4 update to the nearest 1e-6 lattice point",
+    "reachability_target": "abs(x1-x2) <= 1.0 at the terminal stage",
+    "objective_orientation": "u minimizes the terminal absolute position gap (maximizes the source reward); v maximizes the gap",
+    "information_pattern": "finite causal response: u selects from the current state, then v observes u and responds before the next state is observed",
+    "information_pattern_change": "v has within-stage observation of u, which the upstream Markov-game environment does not provide",
+    "interpretation": "source-derived finite game; not a reproduction of the continuous-action RL result"
+  },
+  "numerics": {
+    "propagation": "20-step RK4 with held actions; state rounded once per 0.2-second decision stage",
+    "value": "terminal absolute position gap",
+    "solver_value_tolerance": 1e-12,
+    "requested_workers": 1,
+    "native_solver_threads": 1
+  }
+}

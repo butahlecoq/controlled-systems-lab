@@ -1,0 +1,10 @@
+{
+  "backward_layers_checked": 5,
+  "forward_states_checked": 4681,
+  "minimax_value": 0.859899,
+  "schema": "csl.env717-two-particle-check/1",
+  "status": "verified",
+  "target_horizon": 4,
+  "trajectory_steps_checked": 4,
+  "transition_cells_checked": 6408
+}
