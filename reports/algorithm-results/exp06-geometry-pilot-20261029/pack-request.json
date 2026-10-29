@@ -5,7 +5,7 @@
       "attempts": [
         {
           "measurement": {
-            "duration_ns": 11120772,
+            "duration_ns": 10413764,
             "instrumentation": "disabled",
             "method_id": "csl.geometry.a29-a30-python",
             "repetition": 0,
@@ -50,9 +50,13 @@
               "stage2_scanned": 7
             },
             "checker": {
+              "budget": {
+                "max_points": 64
+              },
               "counterexample_index": null,
               "input_digest": "d3ceea7207af73a9ede56875d53cfae5eab1160c9458617cff0b4a176e53b1fe",
               "reason": "all input points covered by exact source hull",
+              "schema": "csl.exp06-exact-hull-check/1",
               "scope": "exact represented binary64 2D finite hull",
               "source_indices": [
                 0,
@@ -62,7 +66,7 @@
               ],
               "status": "verified"
             },
-            "duration_ns": 11120772,
+            "duration_ns": 10413764,
             "indices": [
               0,
               3,
@@ -88,7 +92,7 @@
         },
         {
           "measurement": {
-            "duration_ns": 3360788,
+            "duration_ns": 4212928,
             "instrumentation": "disabled",
             "method_id": "csl.geometry.a29-a30-python",
             "repetition": 1,
@@ -133,9 +137,13 @@
               "stage2_scanned": 7
             },
             "checker": {
+              "budget": {
+                "max_points": 64
+              },
               "counterexample_index": null,
               "input_digest": "d3ceea7207af73a9ede56875d53cfae5eab1160c9458617cff0b4a176e53b1fe",
               "reason": "all input points covered by exact source hull",
+              "schema": "csl.exp06-exact-hull-check/1",
               "scope": "exact represented binary64 2D finite hull",
               "source_indices": [
                 0,
@@ -145,7 +153,7 @@
               ],
               "status": "verified"
             },
-            "duration_ns": 3360788,
+            "duration_ns": 4212928,
             "indices": [
               0,
               3,
@@ -171,7 +179,7 @@
         },
         {
           "measurement": {
-            "duration_ns": 3388655,
+            "duration_ns": 4184083,
             "instrumentation": "disabled",
             "method_id": "csl.geometry.a29-a30-python",
             "repetition": 2,
@@ -216,9 +224,13 @@
               "stage2_scanned": 7
             },
             "checker": {
+              "budget": {
+                "max_points": 64
+              },
               "counterexample_index": null,
               "input_digest": "d3ceea7207af73a9ede56875d53cfae5eab1160c9458617cff0b4a176e53b1fe",
               "reason": "all input points covered by exact source hull",
+              "schema": "csl.exp06-exact-hull-check/1",
               "scope": "exact represented binary64 2D finite hull",
               "source_indices": [
                 0,
@@ -228,7 +240,7 @@
               ],
               "status": "verified"
             },
-            "duration_ns": 3388655,
+            "duration_ns": 4184083,
             "indices": [
               0,
               3,
@@ -254,7 +266,7 @@
         },
         {
           "measurement": {
-            "duration_ns": 3190444,
+            "duration_ns": 3924551,
             "instrumentation": "disabled",
             "method_id": "csl.geometry.a29-a30-python",
             "repetition": 3,
@@ -299,9 +311,13 @@
               "stage2_scanned": 7
             },
             "checker": {
+              "budget": {
+                "max_points": 64
+              },
               "counterexample_index": null,
               "input_digest": "d3ceea7207af73a9ede56875d53cfae5eab1160c9458617cff0b4a176e53b1fe",
               "reason": "all input points covered by exact source hull",
+              "schema": "csl.exp06-exact-hull-check/1",
               "scope": "exact represented binary64 2D finite hull",
               "source_indices": [
                 0,
@@ -311,7 +327,7 @@
               ],
               "status": "verified"
             },
-            "duration_ns": 3190444,
+            "duration_ns": 3924551,
             "indices": [
               0,
               3,
@@ -337,7 +353,7 @@
         },
         {
           "measurement": {
-            "duration_ns": 3370147,
+            "duration_ns": 4211183,
             "instrumentation": "disabled",
             "method_id": "csl.geometry.a29-a30-python",
             "repetition": 4,
@@ -382,9 +398,13 @@
               "stage2_scanned": 7
             },
             "checker": {
+              "budget": {
+                "max_points": 64
+              },
               "counterexample_index": null,
               "input_digest": "d3ceea7207af73a9ede56875d53cfae5eab1160c9458617cff0b4a176e53b1fe",
               "reason": "all input points covered by exact source hull",
+              "schema": "csl.exp06-exact-hull-check/1",
               "scope": "exact represented binary64 2D finite hull",
               "source_indices": [
                 0,
@@ -394,7 +414,7 @@
               ],
               "status": "verified"
             },
-            "duration_ns": 3370147,
+            "duration_ns": 4211183,
             "indices": [
               0,
               3,
@@ -420,7 +440,7 @@
         },
         {
           "measurement": {
-            "duration_ns": 3202875,
+            "duration_ns": 3890189,
             "instrumentation": "disabled",
             "method_id": "csl.geometry.a29-a30-python",
             "repetition": 5,
@@ -465,9 +485,13 @@
               "stage2_scanned": 7
             },
             "checker": {
+              "budget": {
+                "max_points": 64
+              },
               "counterexample_index": null,
               "input_digest": "d3ceea7207af73a9ede56875d53cfae5eab1160c9458617cff0b4a176e53b1fe",
               "reason": "all input points covered by exact source hull",
+              "schema": "csl.exp06-exact-hull-check/1",
               "scope": "exact represented binary64 2D finite hull",
               "source_indices": [
                 0,
@@ -477,7 +501,7 @@
               ],
               "status": "verified"
             },
-            "duration_ns": 3202875,
+            "duration_ns": 3890189,
             "indices": [
               0,
               3,
@@ -521,7 +545,7 @@
       "attempts": [
         {
           "measurement": {
-            "duration_ns": 40508,
+            "duration_ns": 20394,
             "instrumentation": "disabled",
             "method_id": "csl.geometry.quickhull-2d",
             "repetition": 0,
@@ -532,7 +556,7 @@
           "result": {
             "algorithm": {
               "algorithm_status": "completed",
-              "duration_ns": 40508,
+              "duration_ns": 20394,
               "indices": [
                 0,
                 1,
@@ -550,9 +574,13 @@
               }
             },
             "checker": {
+              "budget": {
+                "max_points": 64
+              },
               "counterexample_index": null,
               "input_digest": "d3ceea7207af73a9ede56875d53cfae5eab1160c9458617cff0b4a176e53b1fe",
               "reason": "all input points covered by exact source hull",
+              "schema": "csl.exp06-exact-hull-check/1",
               "scope": "exact represented binary64 2D finite hull",
               "source_indices": [
                 0,
@@ -562,7 +590,7 @@
               ],
               "status": "verified"
             },
-            "duration_ns": 40508,
+            "duration_ns": 20394,
             "indices": [
               0,
               1,
@@ -588,7 +616,7 @@
         },
         {
           "measurement": {
-            "duration_ns": 44280,
+            "duration_ns": 22908,
             "instrumentation": "disabled",
             "method_id": "csl.geometry.quickhull-2d",
             "repetition": 1,
@@ -599,7 +627,7 @@
           "result": {
             "algorithm": {
               "algorithm_status": "completed",
-              "duration_ns": 44280,
+              "duration_ns": 22908,
               "indices": [
                 0,
                 1,
@@ -617,9 +645,13 @@
               }
             },
             "checker": {
+              "budget": {
+                "max_points": 64
+              },
               "counterexample_index": null,
               "input_digest": "d3ceea7207af73a9ede56875d53cfae5eab1160c9458617cff0b4a176e53b1fe",
               "reason": "all input points covered by exact source hull",
+              "schema": "csl.exp06-exact-hull-check/1",
               "scope": "exact represented binary64 2D finite hull",
               "source_indices": [
                 0,
@@ -629,7 +661,7 @@
               ],
               "status": "verified"
             },
-            "duration_ns": 44280,
+            "duration_ns": 22908,
             "indices": [
               0,
               1,
@@ -684,9 +716,13 @@
               }
             },
             "checker": {
+              "budget": {
+                "max_points": 64
+              },
               "counterexample_index": null,
               "input_digest": "d3ceea7207af73a9ede56875d53cfae5eab1160c9458617cff0b4a176e53b1fe",
               "reason": "all input points covered by exact source hull",
+              "schema": "csl.exp06-exact-hull-check/1",
               "scope": "exact represented binary64 2D finite hull",
               "source_indices": [
                 0,
@@ -722,7 +758,7 @@
         },
         {
           "measurement": {
-            "duration_ns": 45327,
+            "duration_ns": 22489,
             "instrumentation": "disabled",
             "method_id": "csl.geometry.quickhull-2d",
             "repetition": 3,
@@ -733,7 +769,7 @@
           "result": {
             "algorithm": {
               "algorithm_status": "completed",
-              "duration_ns": 45327,
+              "duration_ns": 22489,
               "indices": [
                 0,
                 1,
@@ -751,9 +787,13 @@
               }
             },
             "checker": {
+              "budget": {
+                "max_points": 64
+              },
               "counterexample_index": null,
               "input_digest": "d3ceea7207af73a9ede56875d53cfae5eab1160c9458617cff0b4a176e53b1fe",
               "reason": "all input points covered by exact source hull",
+              "schema": "csl.exp06-exact-hull-check/1",
               "scope": "exact represented binary64 2D finite hull",
               "source_indices": [
                 0,
@@ -763,7 +803,7 @@
               ],
               "status": "verified"
             },
-            "duration_ns": 45327,
+            "duration_ns": 22489,
             "indices": [
               0,
               1,
@@ -789,7 +829,7 @@
         },
         {
           "measurement": {
-            "duration_ns": 40020,
+            "duration_ns": 22280,
             "instrumentation": "disabled",
             "method_id": "csl.geometry.quickhull-2d",
             "repetition": 4,
@@ -800,7 +840,7 @@
           "result": {
             "algorithm": {
               "algorithm_status": "completed",
-              "duration_ns": 40020,
+              "duration_ns": 22280,
               "indices": [
                 0,
                 1,
@@ -818,9 +858,13 @@
               }
             },
             "checker": {
+              "budget": {
+                "max_points": 64
+              },
               "counterexample_index": null,
               "input_digest": "d3ceea7207af73a9ede56875d53cfae5eab1160c9458617cff0b4a176e53b1fe",
               "reason": "all input points covered by exact source hull",
+              "schema": "csl.exp06-exact-hull-check/1",
               "scope": "exact represented binary64 2D finite hull",
               "source_indices": [
                 0,
@@ -830,7 +874,7 @@
               ],
               "status": "verified"
             },
-            "duration_ns": 40020,
+            "duration_ns": 22280,
             "indices": [
               0,
               1,
@@ -856,7 +900,7 @@
         },
         {
           "measurement": {
-            "duration_ns": 44839,
+            "duration_ns": 16553,
             "instrumentation": "disabled",
             "method_id": "csl.geometry.quickhull-2d",
             "repetition": 5,
@@ -867,7 +911,7 @@
           "result": {
             "algorithm": {
               "algorithm_status": "completed",
-              "duration_ns": 44839,
+              "duration_ns": 16553,
               "indices": [
                 0,
                 1,
@@ -885,9 +929,13 @@
               }
             },
             "checker": {
+              "budget": {
+                "max_points": 64
+              },
               "counterexample_index": null,
               "input_digest": "d3ceea7207af73a9ede56875d53cfae5eab1160c9458617cff0b4a176e53b1fe",
               "reason": "all input points covered by exact source hull",
+              "schema": "csl.exp06-exact-hull-check/1",
               "scope": "exact represented binary64 2D finite hull",
               "source_indices": [
                 0,
@@ -897,7 +945,7 @@
               ],
               "status": "verified"
             },
-            "duration_ns": 44839,
+            "duration_ns": 16553,
             "indices": [
               0,
               1,
