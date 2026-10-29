@@ -9,7 +9,7 @@ import unittest
 
 ROOT = Path(__file__).resolve().parents[2]
 BUNDLE = ROOT / "reports/algorithm-results/exp06-geometry-pilot-20261029"
-PAPER_BUNDLE = ROOT / "reports/algorithm-results/exp06-it17-paper-reducers-20261029-r2"
+PAPER_BUNDLE = ROOT / "reports/algorithm-results/exp06-it17-paper-reducers-20261029-r3"
 
 
 def load(name: str, path: Path):
