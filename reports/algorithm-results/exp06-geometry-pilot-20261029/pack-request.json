@@ -1,0 +1,1075 @@
+{
+  "manifest": "{\"coordinate_order\":[\"x\",\"y\"],\"fixture_id\":\"A29-synthetic-square-v1\",\"points\":[[0.0,0.0],[2.0,0.0],[2.0,2.0],[0.0,2.0],[1.0,1.0],[1.0,0.0],[2.0,1.0],[1.0,2.0],[0.0,1.0]],\"schema\":\"csl.geometry-hull-input/1\"}",
+  "methods": [
+    {
+      "attempts": [
+        {
+          "measurement": {
+            "duration_ns": 15356121,
+            "instrumentation": "disabled",
+            "method_id": "csl.geometry.a29-a30-python",
+            "repetition": 0,
+            "schema": "csl.external-method-event/1",
+            "status": "passed",
+            "warmup": true
+          },
+          "result": {
+            "algorithm": {
+              "algorithm": "A29 Python 3 transcription",
+              "algorithm_status": "completed",
+              "final_pivots": 18,
+              "final_scanned": 6,
+              "grouping_executed": false,
+              "helper_calls": 13,
+              "itrt": 36,
+              "output": [
+                [
+                  0.0,
+                  0.0
+                ],
+                [
+                  0.0,
+                  2.0
+                ],
+                [
+                  2.0,
+                  0.0
+                ],
+                [
+                  2.0,
+                  2.0
+                ]
+              ],
+              "reason": "",
+              "source_sha256": {
+                "A29": "663625d206758ad80a56dc0ef9f3ea66cbb18b3d374d46b4fc90c4bf19d95a65",
+                "A30": "5e0f29b0bed8a87f8ec477cb0f3fae55c66f0e3e3b28021c032b9891afa9ea6a"
+              },
+              "stage": "",
+              "stage2_pivots": 18,
+              "stage2_scanned": 7
+            },
+            "checker": {
+              "budget": {
+                "max_points": 64
+              },
+              "counterexample_index": null,
+              "input_digest": "d3ceea7207af73a9ede56875d53cfae5eab1160c9458617cff0b4a176e53b1fe",
+              "reason": "all input points covered by exact source hull",
+              "schema": "csl.exp06-exact-hull-check/1",
+              "scope": "exact represented binary64 2D finite hull",
+              "source_index_check": {
+                "invalid_positions": [],
+                "point_count": 9,
+                "reported_count": 4,
+                "schema": "csl.exp06-source-index-check/1",
+                "status": "verified"
+              },
+              "source_indices": [
+                0,
+                3,
+                1,
+                2
+              ],
+              "status": "verified"
+            },
+            "duration_ns": 15356121,
+            "indices": [
+              0,
+              3,
+              1,
+              2
+            ],
+            "method_id": "csl.geometry.a29-a30-python",
+            "warmup": true
+          },
+          "run_id": "exp06-0-r00",
+          "runtime": {
+            "architecture": "x86_64",
+            "build_type": "interpreted",
+            "compiler": "not-applicable",
+            "compiler_version": "not-applicable",
+            "executable_sha256": "375532f83be620283ab780c14ca6bcc5907dc379d2b621de0c5d0a112cf5458b",
+            "implementation": "CPython",
+            "language": "Python",
+            "os": "Linux-7.2.8-9-omarchy-x86_64-with-glibc2.44",
+            "version": "3.14.8"
+          },
+          "status": "completed"
+        },
+        {
+          "measurement": {
+            "duration_ns": 3697635,
+            "instrumentation": "disabled",
+            "method_id": "csl.geometry.a29-a30-python",
+            "repetition": 1,
+            "schema": "csl.external-method-event/1",
+            "status": "passed",
+            "warmup": false
+          },
+          "result": {
+            "algorithm": {
+              "algorithm": "A29 Python 3 transcription",
+              "algorithm_status": "completed",
+              "final_pivots": 18,
+              "final_scanned": 6,
+              "grouping_executed": false,
+              "helper_calls": 13,
+              "itrt": 36,
+              "output": [
+                [
+                  0.0,
+                  0.0
+                ],
+                [
+                  0.0,
+                  2.0
+                ],
+                [
+                  2.0,
+                  0.0
+                ],
+                [
+                  2.0,
+                  2.0
+                ]
+              ],
+              "reason": "",
+              "source_sha256": {
+                "A29": "663625d206758ad80a56dc0ef9f3ea66cbb18b3d374d46b4fc90c4bf19d95a65",
+                "A30": "5e0f29b0bed8a87f8ec477cb0f3fae55c66f0e3e3b28021c032b9891afa9ea6a"
+              },
+              "stage": "",
+              "stage2_pivots": 18,
+              "stage2_scanned": 7
+            },
+            "checker": {
+              "budget": {
+                "max_points": 64
+              },
+              "counterexample_index": null,
+              "input_digest": "d3ceea7207af73a9ede56875d53cfae5eab1160c9458617cff0b4a176e53b1fe",
+              "reason": "all input points covered by exact source hull",
+              "schema": "csl.exp06-exact-hull-check/1",
+              "scope": "exact represented binary64 2D finite hull",
+              "source_index_check": {
+                "invalid_positions": [],
+                "point_count": 9,
+                "reported_count": 4,
+                "schema": "csl.exp06-source-index-check/1",
+                "status": "verified"
+              },
+              "source_indices": [
+                0,
+                3,
+                1,
+                2
+              ],
+              "status": "verified"
+            },
+            "duration_ns": 3697635,
+            "indices": [
+              0,
+              3,
+              1,
+              2
+            ],
+            "method_id": "csl.geometry.a29-a30-python",
+            "warmup": false
+          },
+          "run_id": "exp06-0-r01",
+          "runtime": {
+            "architecture": "x86_64",
+            "build_type": "interpreted",
+            "compiler": "not-applicable",
+            "compiler_version": "not-applicable",
+            "executable_sha256": "375532f83be620283ab780c14ca6bcc5907dc379d2b621de0c5d0a112cf5458b",
+            "implementation": "CPython",
+            "language": "Python",
+            "os": "Linux-7.2.8-9-omarchy-x86_64-with-glibc2.44",
+            "version": "3.14.8"
+          },
+          "status": "completed"
+        },
+        {
+          "measurement": {
+            "duration_ns": 3662645,
+            "instrumentation": "disabled",
+            "method_id": "csl.geometry.a29-a30-python",
+            "repetition": 2,
+            "schema": "csl.external-method-event/1",
+            "status": "passed",
+            "warmup": false
+          },
+          "result": {
+            "algorithm": {
+              "algorithm": "A29 Python 3 transcription",
+              "algorithm_status": "completed",
+              "final_pivots": 18,
+              "final_scanned": 6,
+              "grouping_executed": false,
+              "helper_calls": 13,
+              "itrt": 36,
+              "output": [
+                [
+                  0.0,
+                  0.0
+                ],
+                [
+                  0.0,
+                  2.0
+                ],
+                [
+                  2.0,
+                  0.0
+                ],
+                [
+                  2.0,
+                  2.0
+                ]
+              ],
+              "reason": "",
+              "source_sha256": {
+                "A29": "663625d206758ad80a56dc0ef9f3ea66cbb18b3d374d46b4fc90c4bf19d95a65",
+                "A30": "5e0f29b0bed8a87f8ec477cb0f3fae55c66f0e3e3b28021c032b9891afa9ea6a"
+              },
+              "stage": "",
+              "stage2_pivots": 18,
+              "stage2_scanned": 7
+            },
+            "checker": {
+              "budget": {
+                "max_points": 64
+              },
+              "counterexample_index": null,
+              "input_digest": "d3ceea7207af73a9ede56875d53cfae5eab1160c9458617cff0b4a176e53b1fe",
+              "reason": "all input points covered by exact source hull",
+              "schema": "csl.exp06-exact-hull-check/1",
+              "scope": "exact represented binary64 2D finite hull",
+              "source_index_check": {
+                "invalid_positions": [],
+                "point_count": 9,
+                "reported_count": 4,
+                "schema": "csl.exp06-source-index-check/1",
+                "status": "verified"
+              },
+              "source_indices": [
+                0,
+                3,
+                1,
+                2
+              ],
+              "status": "verified"
+            },
+            "duration_ns": 3662645,
+            "indices": [
+              0,
+              3,
+              1,
+              2
+            ],
+            "method_id": "csl.geometry.a29-a30-python",
+            "warmup": false
+          },
+          "run_id": "exp06-0-r02",
+          "runtime": {
+            "architecture": "x86_64",
+            "build_type": "interpreted",
+            "compiler": "not-applicable",
+            "compiler_version": "not-applicable",
+            "executable_sha256": "375532f83be620283ab780c14ca6bcc5907dc379d2b621de0c5d0a112cf5458b",
+            "implementation": "CPython",
+            "language": "Python",
+            "os": "Linux-7.2.8-9-omarchy-x86_64-with-glibc2.44",
+            "version": "3.14.8"
+          },
+          "status": "completed"
+        },
+        {
+          "measurement": {
+            "duration_ns": 3501170,
+            "instrumentation": "disabled",
+            "method_id": "csl.geometry.a29-a30-python",
+            "repetition": 3,
+            "schema": "csl.external-method-event/1",
+            "status": "passed",
+            "warmup": false
+          },
+          "result": {
+            "algorithm": {
+              "algorithm": "A29 Python 3 transcription",
+              "algorithm_status": "completed",
+              "final_pivots": 18,
+              "final_scanned": 6,
+              "grouping_executed": false,
+              "helper_calls": 13,
+              "itrt": 36,
+              "output": [
+                [
+                  0.0,
+                  0.0
+                ],
+                [
+                  0.0,
+                  2.0
+                ],
+                [
+                  2.0,
+                  0.0
+                ],
+                [
+                  2.0,
+                  2.0
+                ]
+              ],
+              "reason": "",
+              "source_sha256": {
+                "A29": "663625d206758ad80a56dc0ef9f3ea66cbb18b3d374d46b4fc90c4bf19d95a65",
+                "A30": "5e0f29b0bed8a87f8ec477cb0f3fae55c66f0e3e3b28021c032b9891afa9ea6a"
+              },
+              "stage": "",
+              "stage2_pivots": 18,
+              "stage2_scanned": 7
+            },
+            "checker": {
+              "budget": {
+                "max_points": 64
+              },
+              "counterexample_index": null,
+              "input_digest": "d3ceea7207af73a9ede56875d53cfae5eab1160c9458617cff0b4a176e53b1fe",
+              "reason": "all input points covered by exact source hull",
+              "schema": "csl.exp06-exact-hull-check/1",
+              "scope": "exact represented binary64 2D finite hull",
+              "source_index_check": {
+                "invalid_positions": [],
+                "point_count": 9,
+                "reported_count": 4,
+                "schema": "csl.exp06-source-index-check/1",
+                "status": "verified"
+              },
+              "source_indices": [
+                0,
+                3,
+                1,
+                2
+              ],
+              "status": "verified"
+            },
+            "duration_ns": 3501170,
+            "indices": [
+              0,
+              3,
+              1,
+              2
+            ],
+            "method_id": "csl.geometry.a29-a30-python",
+            "warmup": false
+          },
+          "run_id": "exp06-0-r03",
+          "runtime": {
+            "architecture": "x86_64",
+            "build_type": "interpreted",
+            "compiler": "not-applicable",
+            "compiler_version": "not-applicable",
+            "executable_sha256": "375532f83be620283ab780c14ca6bcc5907dc379d2b621de0c5d0a112cf5458b",
+            "implementation": "CPython",
+            "language": "Python",
+            "os": "Linux-7.2.8-9-omarchy-x86_64-with-glibc2.44",
+            "version": "3.14.8"
+          },
+          "status": "completed"
+        },
+        {
+          "measurement": {
+            "duration_ns": 4205805,
+            "instrumentation": "disabled",
+            "method_id": "csl.geometry.a29-a30-python",
+            "repetition": 4,
+            "schema": "csl.external-method-event/1",
+            "status": "passed",
+            "warmup": false
+          },
+          "result": {
+            "algorithm": {
+              "algorithm": "A29 Python 3 transcription",
+              "algorithm_status": "completed",
+              "final_pivots": 18,
+              "final_scanned": 6,
+              "grouping_executed": false,
+              "helper_calls": 13,
+              "itrt": 36,
+              "output": [
+                [
+                  0.0,
+                  0.0
+                ],
+                [
+                  0.0,
+                  2.0
+                ],
+                [
+                  2.0,
+                  0.0
+                ],
+                [
+                  2.0,
+                  2.0
+                ]
+              ],
+              "reason": "",
+              "source_sha256": {
+                "A29": "663625d206758ad80a56dc0ef9f3ea66cbb18b3d374d46b4fc90c4bf19d95a65",
+                "A30": "5e0f29b0bed8a87f8ec477cb0f3fae55c66f0e3e3b28021c032b9891afa9ea6a"
+              },
+              "stage": "",
+              "stage2_pivots": 18,
+              "stage2_scanned": 7
+            },
+            "checker": {
+              "budget": {
+                "max_points": 64
+              },
+              "counterexample_index": null,
+              "input_digest": "d3ceea7207af73a9ede56875d53cfae5eab1160c9458617cff0b4a176e53b1fe",
+              "reason": "all input points covered by exact source hull",
+              "schema": "csl.exp06-exact-hull-check/1",
+              "scope": "exact represented binary64 2D finite hull",
+              "source_index_check": {
+                "invalid_positions": [],
+                "point_count": 9,
+                "reported_count": 4,
+                "schema": "csl.exp06-source-index-check/1",
+                "status": "verified"
+              },
+              "source_indices": [
+                0,
+                3,
+                1,
+                2
+              ],
+              "status": "verified"
+            },
+            "duration_ns": 4205805,
+            "indices": [
+              0,
+              3,
+              1,
+              2
+            ],
+            "method_id": "csl.geometry.a29-a30-python",
+            "warmup": false
+          },
+          "run_id": "exp06-0-r04",
+          "runtime": {
+            "architecture": "x86_64",
+            "build_type": "interpreted",
+            "compiler": "not-applicable",
+            "compiler_version": "not-applicable",
+            "executable_sha256": "375532f83be620283ab780c14ca6bcc5907dc379d2b621de0c5d0a112cf5458b",
+            "implementation": "CPython",
+            "language": "Python",
+            "os": "Linux-7.2.8-9-omarchy-x86_64-with-glibc2.44",
+            "version": "3.14.8"
+          },
+          "status": "completed"
+        },
+        {
+          "measurement": {
+            "duration_ns": 3583305,
+            "instrumentation": "disabled",
+            "method_id": "csl.geometry.a29-a30-python",
+            "repetition": 5,
+            "schema": "csl.external-method-event/1",
+            "status": "passed",
+            "warmup": false
+          },
+          "result": {
+            "algorithm": {
+              "algorithm": "A29 Python 3 transcription",
+              "algorithm_status": "completed",
+              "final_pivots": 18,
+              "final_scanned": 6,
+              "grouping_executed": false,
+              "helper_calls": 13,
+              "itrt": 36,
+              "output": [
+                [
+                  0.0,
+                  0.0
+                ],
+                [
+                  0.0,
+                  2.0
+                ],
+                [
+                  2.0,
+                  0.0
+                ],
+                [
+                  2.0,
+                  2.0
+                ]
+              ],
+              "reason": "",
+              "source_sha256": {
+                "A29": "663625d206758ad80a56dc0ef9f3ea66cbb18b3d374d46b4fc90c4bf19d95a65",
+                "A30": "5e0f29b0bed8a87f8ec477cb0f3fae55c66f0e3e3b28021c032b9891afa9ea6a"
+              },
+              "stage": "",
+              "stage2_pivots": 18,
+              "stage2_scanned": 7
+            },
+            "checker": {
+              "budget": {
+                "max_points": 64
+              },
+              "counterexample_index": null,
+              "input_digest": "d3ceea7207af73a9ede56875d53cfae5eab1160c9458617cff0b4a176e53b1fe",
+              "reason": "all input points covered by exact source hull",
+              "schema": "csl.exp06-exact-hull-check/1",
+              "scope": "exact represented binary64 2D finite hull",
+              "source_index_check": {
+                "invalid_positions": [],
+                "point_count": 9,
+                "reported_count": 4,
+                "schema": "csl.exp06-source-index-check/1",
+                "status": "verified"
+              },
+              "source_indices": [
+                0,
+                3,
+                1,
+                2
+              ],
+              "status": "verified"
+            },
+            "duration_ns": 3583305,
+            "indices": [
+              0,
+              3,
+              1,
+              2
+            ],
+            "method_id": "csl.geometry.a29-a30-python",
+            "warmup": false
+          },
+          "run_id": "exp06-0-r05",
+          "runtime": {
+            "architecture": "x86_64",
+            "build_type": "interpreted",
+            "compiler": "not-applicable",
+            "compiler_version": "not-applicable",
+            "executable_sha256": "375532f83be620283ab780c14ca6bcc5907dc379d2b621de0c5d0a112cf5458b",
+            "implementation": "CPython",
+            "language": "Python",
+            "os": "Linux-7.2.8-9-omarchy-x86_64-with-glibc2.44",
+            "version": "3.14.8"
+          },
+          "status": "completed"
+        }
+      ],
+      "configuration_id": "csl.config.v1.sha256:76a24187ce9abadebb04e36e3f2ed5eeb67ec7cc810b26f4f1419926f4915be4",
+      "deviations_sha256": "7f94ccc2509c71b172918af9a419dd8b278107450e187e1ef8e0bd15156c2431",
+      "id": "csl.geometry.a29-a30-python",
+      "sources": [
+        {
+          "path": "tools/legacy-ports/A29/port.py",
+          "sha256": "c762b0ebf65e61af63d70700c5fd06602a0f54257c547f7a609a5c0e6817c460"
+        },
+        {
+          "path": "tools/legacy-ports/A29/oracle.py",
+          "sha256": "90d570f4fe65d15e2379999640d5ecafc8eb6643ffd092eea04de42b35e7dd6c"
+        }
+      ],
+      "version": "A29/A30-port-1"
+    },
+    {
+      "attempts": [
+        {
+          "measurement": {
+            "duration_ns": 16064,
+            "instrumentation": "disabled",
+            "method_id": "csl.geometry.quickhull-2d",
+            "repetition": 0,
+            "schema": "csl.external-method-event/1",
+            "status": "passed",
+            "warmup": true
+          },
+          "result": {
+            "algorithm": {
+              "algorithm_status": "completed",
+              "duration_ns": 16064,
+              "indices": [
+                0,
+                1,
+                2,
+                3
+              ],
+              "runtime": {
+                "architecture": "x86_64",
+                "build_type": "Release",
+                "compiler": "16.2.1 20260810",
+                "implementation": "csl.geometry.quickhull-2d",
+                "language": "C++",
+                "os": "Linux",
+                "version": "1"
+              }
+            },
+            "checker": {
+              "budget": {
+                "max_points": 64
+              },
+              "counterexample_index": null,
+              "input_digest": "d3ceea7207af73a9ede56875d53cfae5eab1160c9458617cff0b4a176e53b1fe",
+              "reason": "all input points covered by exact source hull",
+              "schema": "csl.exp06-exact-hull-check/1",
+              "scope": "exact represented binary64 2D finite hull",
+              "source_index_check": {
+                "invalid_positions": [],
+                "point_count": 9,
+                "reported_count": 4,
+                "schema": "csl.exp06-source-index-check/1",
+                "status": "verified"
+              },
+              "source_indices": [
+                0,
+                1,
+                2,
+                3
+              ],
+              "status": "verified"
+            },
+            "duration_ns": 16064,
+            "indices": [
+              0,
+              1,
+              2,
+              3
+            ],
+            "method_id": "csl.geometry.quickhull-2d",
+            "warmup": true
+          },
+          "run_id": "exp06-1-r00",
+          "runtime": {
+            "architecture": "x86_64",
+            "build_type": "Release",
+            "compiler": "GNU-compatible",
+            "compiler_version": "16.2.1 20260810",
+            "executable_sha256": "464f9c7a38c2150599d6424463dc1d883c6213138a8a901fa32e6940c4d57498",
+            "implementation": "csl.geometry.quickhull-2d",
+            "language": "C++",
+            "os": "Linux",
+            "version": "1"
+          },
+          "status": "completed"
+        },
+        {
+          "measurement": {
+            "duration_ns": 21232,
+            "instrumentation": "disabled",
+            "method_id": "csl.geometry.quickhull-2d",
+            "repetition": 1,
+            "schema": "csl.external-method-event/1",
+            "status": "passed",
+            "warmup": false
+          },
+          "result": {
+            "algorithm": {
+              "algorithm_status": "completed",
+              "duration_ns": 21232,
+              "indices": [
+                0,
+                1,
+                2,
+                3
+              ],
+              "runtime": {
+                "architecture": "x86_64",
+                "build_type": "Release",
+                "compiler": "16.2.1 20260810",
+                "implementation": "csl.geometry.quickhull-2d",
+                "language": "C++",
+                "os": "Linux",
+                "version": "1"
+              }
+            },
+            "checker": {
+              "budget": {
+                "max_points": 64
+              },
+              "counterexample_index": null,
+              "input_digest": "d3ceea7207af73a9ede56875d53cfae5eab1160c9458617cff0b4a176e53b1fe",
+              "reason": "all input points covered by exact source hull",
+              "schema": "csl.exp06-exact-hull-check/1",
+              "scope": "exact represented binary64 2D finite hull",
+              "source_index_check": {
+                "invalid_positions": [],
+                "point_count": 9,
+                "reported_count": 4,
+                "schema": "csl.exp06-source-index-check/1",
+                "status": "verified"
+              },
+              "source_indices": [
+                0,
+                1,
+                2,
+                3
+              ],
+              "status": "verified"
+            },
+            "duration_ns": 21232,
+            "indices": [
+              0,
+              1,
+              2,
+              3
+            ],
+            "method_id": "csl.geometry.quickhull-2d",
+            "warmup": false
+          },
+          "run_id": "exp06-1-r01",
+          "runtime": {
+            "architecture": "x86_64",
+            "build_type": "Release",
+            "compiler": "GNU-compatible",
+            "compiler_version": "16.2.1 20260810",
+            "executable_sha256": "464f9c7a38c2150599d6424463dc1d883c6213138a8a901fa32e6940c4d57498",
+            "implementation": "csl.geometry.quickhull-2d",
+            "language": "C++",
+            "os": "Linux",
+            "version": "1"
+          },
+          "status": "completed"
+        },
+        {
+          "measurement": {
+            "duration_ns": 16902,
+            "instrumentation": "disabled",
+            "method_id": "csl.geometry.quickhull-2d",
+            "repetition": 2,
+            "schema": "csl.external-method-event/1",
+            "status": "passed",
+            "warmup": false
+          },
+          "result": {
+            "algorithm": {
+              "algorithm_status": "completed",
+              "duration_ns": 16902,
+              "indices": [
+                0,
+                1,
+                2,
+                3
+              ],
+              "runtime": {
+                "architecture": "x86_64",
+                "build_type": "Release",
+                "compiler": "16.2.1 20260810",
+                "implementation": "csl.geometry.quickhull-2d",
+                "language": "C++",
+                "os": "Linux",
+                "version": "1"
+              }
+            },
+            "checker": {
+              "budget": {
+                "max_points": 64
+              },
+              "counterexample_index": null,
+              "input_digest": "d3ceea7207af73a9ede56875d53cfae5eab1160c9458617cff0b4a176e53b1fe",
+              "reason": "all input points covered by exact source hull",
+              "schema": "csl.exp06-exact-hull-check/1",
+              "scope": "exact represented binary64 2D finite hull",
+              "source_index_check": {
+                "invalid_positions": [],
+                "point_count": 9,
+                "reported_count": 4,
+                "schema": "csl.exp06-source-index-check/1",
+                "status": "verified"
+              },
+              "source_indices": [
+                0,
+                1,
+                2,
+                3
+              ],
+              "status": "verified"
+            },
+            "duration_ns": 16902,
+            "indices": [
+              0,
+              1,
+              2,
+              3
+            ],
+            "method_id": "csl.geometry.quickhull-2d",
+            "warmup": false
+          },
+          "run_id": "exp06-1-r02",
+          "runtime": {
+            "architecture": "x86_64",
+            "build_type": "Release",
+            "compiler": "GNU-compatible",
+            "compiler_version": "16.2.1 20260810",
+            "executable_sha256": "464f9c7a38c2150599d6424463dc1d883c6213138a8a901fa32e6940c4d57498",
+            "implementation": "csl.geometry.quickhull-2d",
+            "language": "C++",
+            "os": "Linux",
+            "version": "1"
+          },
+          "status": "completed"
+        },
+        {
+          "measurement": {
+            "duration_ns": 25562,
+            "instrumentation": "disabled",
+            "method_id": "csl.geometry.quickhull-2d",
+            "repetition": 3,
+            "schema": "csl.external-method-event/1",
+            "status": "passed",
+            "warmup": false
+          },
+          "result": {
+            "algorithm": {
+              "algorithm_status": "completed",
+              "duration_ns": 25562,
+              "indices": [
+                0,
+                1,
+                2,
+                3
+              ],
+              "runtime": {
+                "architecture": "x86_64",
+                "build_type": "Release",
+                "compiler": "16.2.1 20260810",
+                "implementation": "csl.geometry.quickhull-2d",
+                "language": "C++",
+                "os": "Linux",
+                "version": "1"
+              }
+            },
+            "checker": {
+              "budget": {
+                "max_points": 64
+              },
+              "counterexample_index": null,
+              "input_digest": "d3ceea7207af73a9ede56875d53cfae5eab1160c9458617cff0b4a176e53b1fe",
+              "reason": "all input points covered by exact source hull",
+              "schema": "csl.exp06-exact-hull-check/1",
+              "scope": "exact represented binary64 2D finite hull",
+              "source_index_check": {
+                "invalid_positions": [],
+                "point_count": 9,
+                "reported_count": 4,
+                "schema": "csl.exp06-source-index-check/1",
+                "status": "verified"
+              },
+              "source_indices": [
+                0,
+                1,
+                2,
+                3
+              ],
+              "status": "verified"
+            },
+            "duration_ns": 25562,
+            "indices": [
+              0,
+              1,
+              2,
+              3
+            ],
+            "method_id": "csl.geometry.quickhull-2d",
+            "warmup": false
+          },
+          "run_id": "exp06-1-r03",
+          "runtime": {
+            "architecture": "x86_64",
+            "build_type": "Release",
+            "compiler": "GNU-compatible",
+            "compiler_version": "16.2.1 20260810",
+            "executable_sha256": "464f9c7a38c2150599d6424463dc1d883c6213138a8a901fa32e6940c4d57498",
+            "implementation": "csl.geometry.quickhull-2d",
+            "language": "C++",
+            "os": "Linux",
+            "version": "1"
+          },
+          "status": "completed"
+        },
+        {
+          "measurement": {
+            "duration_ns": 19765,
+            "instrumentation": "disabled",
+            "method_id": "csl.geometry.quickhull-2d",
+            "repetition": 4,
+            "schema": "csl.external-method-event/1",
+            "status": "passed",
+            "warmup": false
+          },
+          "result": {
+            "algorithm": {
+              "algorithm_status": "completed",
+              "duration_ns": 19765,
+              "indices": [
+                0,
+                1,
+                2,
+                3
+              ],
+              "runtime": {
+                "architecture": "x86_64",
+                "build_type": "Release",
+                "compiler": "16.2.1 20260810",
+                "implementation": "csl.geometry.quickhull-2d",
+                "language": "C++",
+                "os": "Linux",
+                "version": "1"
+              }
+            },
+            "checker": {
+              "budget": {
+                "max_points": 64
+              },
+              "counterexample_index": null,
+              "input_digest": "d3ceea7207af73a9ede56875d53cfae5eab1160c9458617cff0b4a176e53b1fe",
+              "reason": "all input points covered by exact source hull",
+              "schema": "csl.exp06-exact-hull-check/1",
+              "scope": "exact represented binary64 2D finite hull",
+              "source_index_check": {
+                "invalid_positions": [],
+                "point_count": 9,
+                "reported_count": 4,
+                "schema": "csl.exp06-source-index-check/1",
+                "status": "verified"
+              },
+              "source_indices": [
+                0,
+                1,
+                2,
+                3
+              ],
+              "status": "verified"
+            },
+            "duration_ns": 19765,
+            "indices": [
+              0,
+              1,
+              2,
+              3
+            ],
+            "method_id": "csl.geometry.quickhull-2d",
+            "warmup": false
+          },
+          "run_id": "exp06-1-r04",
+          "runtime": {
+            "architecture": "x86_64",
+            "build_type": "Release",
+            "compiler": "GNU-compatible",
+            "compiler_version": "16.2.1 20260810",
+            "executable_sha256": "464f9c7a38c2150599d6424463dc1d883c6213138a8a901fa32e6940c4d57498",
+            "implementation": "csl.geometry.quickhull-2d",
+            "language": "C++",
+            "os": "Linux",
+            "version": "1"
+          },
+          "status": "completed"
+        },
+        {
+          "measurement": {
+            "duration_ns": 23397,
+            "instrumentation": "disabled",
+            "method_id": "csl.geometry.quickhull-2d",
+            "repetition": 5,
+            "schema": "csl.external-method-event/1",
+            "status": "passed",
+            "warmup": false
+          },
+          "result": {
+            "algorithm": {
+              "algorithm_status": "completed",
+              "duration_ns": 23397,
+              "indices": [
+                0,
+                1,
+                2,
+                3
+              ],
+              "runtime": {
+                "architecture": "x86_64",
+                "build_type": "Release",
+                "compiler": "16.2.1 20260810",
+                "implementation": "csl.geometry.quickhull-2d",
+                "language": "C++",
+                "os": "Linux",
+                "version": "1"
+              }
+            },
+            "checker": {
+              "budget": {
+                "max_points": 64
+              },
+              "counterexample_index": null,
+              "input_digest": "d3ceea7207af73a9ede56875d53cfae5eab1160c9458617cff0b4a176e53b1fe",
+              "reason": "all input points covered by exact source hull",
+              "schema": "csl.exp06-exact-hull-check/1",
+              "scope": "exact represented binary64 2D finite hull",
+              "source_index_check": {
+                "invalid_positions": [],
+                "point_count": 9,
+                "reported_count": 4,
+                "schema": "csl.exp06-source-index-check/1",
+                "status": "verified"
+              },
+              "source_indices": [
+                0,
+                1,
+                2,
+                3
+              ],
+              "status": "verified"
+            },
+            "duration_ns": 23397,
+            "indices": [
+              0,
+              1,
+              2,
+              3
+            ],
+            "method_id": "csl.geometry.quickhull-2d",
+            "warmup": false
+          },
+          "run_id": "exp06-1-r05",
+          "runtime": {
+            "architecture": "x86_64",
+            "build_type": "Release",
+            "compiler": "GNU-compatible",
+            "compiler_version": "16.2.1 20260810",
+            "executable_sha256": "464f9c7a38c2150599d6424463dc1d883c6213138a8a901fa32e6940c4d57498",
+            "implementation": "csl.geometry.quickhull-2d",
+            "language": "C++",
+            "os": "Linux",
+            "version": "1"
+          },
+          "status": "completed"
+        }
+      ],
+      "configuration_id": "csl.config.v1.sha256:c61427fa1964f369b56aa9a2c9154766d83d5baafb9b7c4cb4df389f5aed4d5e",
+      "deviations_sha256": null,
+      "id": "csl.geometry.quickhull-2d",
+      "sources": [
+        {
+          "path": "src/geometry/hull/quickhull_2d.cpp",
+          "sha256": "418c78d24d0814fecc4f3540b64e6d364a2dadbbc1c3136d89b2023397730157"
+        },
+        {
+          "path": "benchmarks/reporting/exp06/quickhull_run.cpp",
+          "sha256": "e120302a9a38277dde83635572180510ce34e4a8a9f87ec6ec37602c5ec11c12"
+        }
+      ],
+      "version": "1"
+    }
+  ],
+  "request_digest": "73065dd39277c3bde0e6afee987a4a4b91cef34480b84a02d09348cc49be2869",
+  "schema": "csl.exp06-pack-request/1"
+}
