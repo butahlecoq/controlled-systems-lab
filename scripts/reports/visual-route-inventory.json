@@ -54,6 +54,19 @@
       "disposition": "shared-quantitative-policy-companion-renderer"
     },
     {
+      "source": "scripts/reports/b04_native_smoke_companion.py",
+      "signal_count": 12,
+      "asset_name_literals": [
+        "b04-native-smoke-projections.png",
+        "b04-native-smoke-projections.svg",
+        "geometry.png",
+        "geometry.svg"
+      ],
+      "role": "saved-plot-renderer",
+      "disposition": "shared-quantitative-policy-companion-renderer",
+      "companion_ids": []
+    },
+    {
       "source": "scripts/reports/b06_manifest_correction_publication_policy.py",
       "signal_count": 3,
       "asset_name_literals": [
@@ -76,8 +89,10 @@
     },
     {
       "source": "scripts/reports/control_witness_companions.py",
-      "signal_count": 33,
+      "signal_count": 35,
       "asset_name_literals": [
+        "b04-native-smoke-projections.png",
+        "b04-native-smoke-projections.svg",
         "geometry.png",
         "geometry.svg",
         "mpc06-tube.png",
@@ -572,8 +587,11 @@
       "asset_name_literals": [
         "native-smoke-projections.svg"
       ],
-      "disposition": "deferred-family-specific-migration",
-      "follow_up_issue": 686
+      "role": "report-plot-renderer",
+      "disposition": "frozen-report-plot-preserved-with-phase-plane-companion",
+      "companion_ids": [
+        "b04-native-smoke"
+      ]
     },
     {
       "source": "scripts/reports/mpc01/b04_projection_example.py",
@@ -581,8 +599,11 @@
       "asset_name_literals": [
         "b04-reference-trajectory-projections.svg"
       ],
-      "disposition": "deferred-family-specific-migration",
-      "follow_up_issue": 686
+      "role": "report-plot-renderer",
+      "disposition": "frozen-report-plot-preserved-with-phase-plane-companion",
+      "companion_ids": [
+        "b04-native-smoke"
+      ]
     },
     {
       "source": "scripts/reports/mpc01/summarize_repeated_comparison.py",
@@ -1289,12 +1310,13 @@
     },
     {
       "source": "scripts/reports/visual_examples.py",
-      "signal_count": 59,
+      "signal_count": 60,
       "asset_name_literals": [
         "app01-plan-timing-v1.svg",
         "app02-diamond-v1.svg",
         "app03-zonotope-v1.svg",
         "app04-square-v1.svg",
+        "b04-native-smoke-projections.svg",
         "b04-reference-trajectory-projections.svg",
         "b07-b07-reconstruction-s0-l0-d0.png",
         "control-projection.svg",
@@ -2520,6 +2542,14 @@
         "viz10/manifest.json",
         "control-witness-v1.html",
         "control-witness-timing-v1.html",
+        "control-witness/b04-native-smoke-projections.svg",
+        "control-witness/b04-native-smoke-projections.png",
+        "control-witness/b04-native-smoke-evidence.json",
+        "control-witness/b04-native-smoke-case.json",
+        "control-witness/b04-native-smoke-reference.json",
+        "control-witness/b04-native-smoke-exact-check.json",
+        "control-witness/b04-native-smoke-attempts.jsonl",
+        "control-witness/b04-native-smoke-manifest.json",
         "control-witness/mpc06-tube.svg",
         "control-witness/mpc06-tube.png",
         "control-witness/mpc06-tube-evidence.json",

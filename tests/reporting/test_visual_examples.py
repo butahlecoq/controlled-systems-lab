@@ -177,10 +177,10 @@ class GalleryTests(unittest.TestCase):
         originals = {report_id: hashlib.sha256((self.site / routes[report_id] / "records.json").read_bytes()).hexdigest()
                      for report_id, *_ in control_witness_companions.PROJECTIONS}
         result = control_witness_companions.build(self.site, self.catalog)
-        self.assertEqual(len(result.gallery_entries), 3)
+        self.assertEqual(len(result.gallery_entries), 4)
         gallery_anchors = {entry["anchor"] for entry in result.gallery_entries}
         self.assertEqual(gallery_anchors, {"control-witness-companions", "control-witness-timings",
-                                           "ts01-strategy-ab"})
+                                           "ts01-strategy-ab", "b04-native-smoke"})
         self.assertTrue(all(set(disposition.companion_ids) <= gallery_anchors
                             for disposition in control_witness_companions.SOURCE_DISPOSITIONS))
         self.assertEqual(len([name for name in result.files if name.startswith("control-witness/strategy-") and name.endswith(".svg")]), 10)
@@ -275,12 +275,44 @@ class GalleryTests(unittest.TestCase):
         self.assertTrue(any(node.tag.endswith("title") for node in ts01_svg))
         self.assertTrue(any(node.tag.endswith("desc") for node in ts01_svg))
         self.assertTrue(result.files["control-witness/ts01-strategy-ab.png"].startswith(b"\x89PNG\r\n\x1a\n"))
+        b04_evidence = json.loads(result.files["control-witness/b04-native-smoke-evidence.json"])
+        self.assertEqual(b04_evidence["projection_data"]["oxidizer"]["axes"],
+                         ["oxidizer_flow", "oxidizer_working_stock"])
+        self.assertEqual(b04_evidence["projection_data"]["fuel"]["axes"],
+                         ["fuel_flow", "fuel_working_stock"])
+        self.assertTrue(all(len(item["points"]) == 17 for projection in b04_evidence["projection_data"].values()
+                            for item in projection["series"]))
+        self.assertIn("trajectory presentation", b04_evidence["claim_scope"])
+        self.assertIn("does not show reachable sets", " ".join(b04_evidence["limitations"]))
+        b04_root = ROOT / "docs/research/evidence/b04-reference-v1"
+        self.assertEqual(result.files["control-witness/b04-native-smoke-case.json"],
+                         (b04_root / "canonical-case.json").read_bytes())
+        self.assertEqual(result.files["control-witness/b04-native-smoke-reference.json"],
+                         (b04_root / "exact-optimal-reference.json").read_bytes())
+        smoke_root = b04_root / "native-smoke-20261026"
+        attempts = (smoke_root / "b04-cold-attempts.jsonl").read_bytes()
+        self.assertEqual(result.files["control-witness/b04-native-smoke-attempts.jsonl"], attempts)
+        self.assertEqual(b04_evidence["attempt_rows_sha256"], hashlib.sha256(attempts).hexdigest())
+        self.assertEqual(b04_evidence["exact_reference_sha256"],
+                         hashlib.sha256((b04_root / "exact-optimal-reference.json").read_bytes()).hexdigest())
+        b04_svg = ET.fromstring(result.files["control-witness/b04-native-smoke-projections.svg"])
+        self.assertEqual(b04_svg.attrib["role"], "img")
+        self.assertTrue(any(node.tag.endswith("title") and "oxidizer and fuel" in node.text for node in b04_svg))
+        self.assertTrue(any(node.tag.endswith("desc") and "independent data scaling" in node.text for node in b04_svg))
+        self.assertTrue(result.files["control-witness/b04-native-smoke-projections.png"].startswith(b"\x89PNG\r\n\x1a\n"))
+        b04_page = result.files["control-witness-v1.html"].decode()
+        self.assertIn("oxidizer flow versus oxidizer working stock", b04_page)
+        self.assertIn("fuel flow versus fuel working stock", b04_page)
+        self.assertIn("Original norm 160.88065394552709", b04_page)
+        self.assertIn("Original norm 160.88245893063822", b04_page)
+        self.assertIn("binary64 evidence inconclusive", b04_page)
+        self.assertIn("not a reachable-set", b04_page)
         self.assertIn("unsupported", result.files["control-witness-v1.html"].decode())
         syn02_evidence = json.loads(result.files["control-witness/syn02-timing-evidence.json"])
         failed = [row for row in syn02_evidence["rows"] if row["label"].startswith("shifted-residual-degenerate")]
         self.assertEqual(len(failed), 3)
         self.assertTrue(all(row["median"] is None and "failed" in row["status"] for row in failed))
-        self.assertEqual(len([name for name in result.files if name.endswith(".svg")]), 16)
+        self.assertEqual(len([name for name in result.files if name.endswith(".svg")]), 17)
         syn06_evidence = json.loads(result.files["control-witness/syn06-timing-evidence.json"])
         self.assertEqual(syn06_evidence["rows"][0]["batch"], 28000)
         self.assertEqual(syn06_evidence["rows"][0]["median"],
@@ -305,6 +337,9 @@ class GalleryTests(unittest.TestCase):
             self.assertEqual((self.site / rid / "index.html").read_bytes(), content)
         self.assertIn('href="examples/index.html"', (self.site / "index.html").read_text())
         page = (self.site / "examples/index.html").read_text(encoding="utf-8")
+        self.assertIn('id="b04-native-smoke"', page)
+        self.assertIn("B04 reference variant in oxidizer and fuel phase planes", page)
+        self.assertIn("(x₁,x₂) and (x₃,x₄)", page)
         last_topic_title = "B06 fuel terminal set: readable 4D-to-2D projections"
         last_anchor = "visual-fuel-b06-viz03"
         self.assertIn(
