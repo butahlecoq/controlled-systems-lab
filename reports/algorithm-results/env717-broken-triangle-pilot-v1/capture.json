@@ -1,0 +1,17 @@
+{
+  "schema": "csl.env717-broken-triangle-capture/1",
+  "source_commit": "54eb5ee123f249f1be4ca083ccbd53c0f6b8e793",
+  "driver_sha256": "091b3dd828c55ef71ff571d5b6223e48f20aed205d2eb05ef99aef9ba3487323",
+  "algorithm_source_sha256": "aa236517173faa54dba53b76e009c1ce1cb7e773d57e979dae1fdb269f351a27",
+  "renderer_sha256": "7d0c1a6f0c7a9c3d67b015076988bb0794b7142153f28cd625f7a2405f1414c5",
+  "capture_environment": {
+    "compiler": "GNU",
+    "compiler_version": "16.2.1",
+    "build_type": "Release",
+    "architecture": "x86_64",
+    "os": "Linux-7.2.8-9-omarchy-x86_64-with-glibc2.44",
+    "python": "3.14.8",
+    "processor": "x86_64",
+    "logical_cpu_count": 8
+  }
+}

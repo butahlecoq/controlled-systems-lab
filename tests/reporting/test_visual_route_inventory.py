@@ -117,7 +117,7 @@ class VisualRouteInventoryTests(unittest.TestCase):
         follow_up_counts={number:sum(entry["follow_up_issue"]==number for entry in deferred)
                           for number in (684,685,686,687,708,717)}
         self.assertEqual(follow_up_counts,
-                         {684:4,685:0,686:2,687:2,708:1,717:9})
+                         {684:4,685:0,686:2,687:2,708:1,717:11})
         reviewed=[entry for entry in producers.values() if entry.get("role")]
         self.assertEqual(len(reviewed),18)
         self.assertEqual(set(entry["source"] for entry in reviewed),
@@ -147,6 +147,7 @@ class VisualRouteInventoryTests(unittest.TestCase):
         self.assertEqual(routes["env717-sphere-game-pilot-v1"]["follow_up_issue"], 717)
         self.assertEqual(routes["env717-point-on-plane-pilot-v1"]["follow_up_issue"], 717)
         self.assertEqual(routes["env717-time-sphere-pilot-v1"]["follow_up_issue"], 717)
+        self.assertEqual(routes["env717-multipoint-cost-game-pilot-v1"]["follow_up_issue"], 717)
         self.assertTrue(any(name.endswith("terminal-projections.svg")
                             for entry in routes.values() for name in entry["assets"]))
         self.assertEqual(inventory["gallery_routes"][0]["route"],"examples/index.html")

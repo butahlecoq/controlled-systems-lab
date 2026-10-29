@@ -132,7 +132,7 @@ Problem make_problem(const Json& source) {
     std::vector<double> times;
     std::vector<AdmissibleSet> states(horizon + 1, UniversalSet{dimension});
     for (std::size_t stage = 0; stage < horizon; ++stage) {
-        controls.emplace_back(interval("fuel-control-" + std::to_string(stage), low, high));
+        controls.emplace_back(interval("control-stage-" + std::to_string(stage), low, high));
         times.push_back(static_cast<double>(stage));
     }
     times.push_back(static_cast<double>(horizon));
@@ -173,7 +173,7 @@ CapturedRequest capture_request(
     for (const auto& stage : tube.stages) {
         ConversionRequest conversion{{tube.problem,
             {source.at("request_id").get<std::string>() + "/capture/stage/" + std::to_string(stage.stage.value) + "/to-v"},
-            {"fuel-stage-v-" + std::to_string(stage.stage.value)}}, stage.marginal.output,
+            {"stage-v-" + std::to_string(stage.stage.value)}}, stage.marginal.output,
             {"csl.polyhedron.v"}, Assurance::numerical};
         auto prepared = dependencies.to_v.prepare(conversion);
         if (const auto* rejected = std::get_if<registry::Rejection>(&prepared)) {
