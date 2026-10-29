@@ -198,7 +198,7 @@ def verify(actual: dict) -> dict:
     adaptation = actual.get("adaptation", {})
     if (adaptation.get("initial_states") != [list(x) for x in INITIAL] or
             adaptation.get("source_state_adaptation") !=
-            "The source fifth coordinate is clock time; the stage grid represents it explicitly, leaving four physical plant state coordinates." or
+            "The source first coordinate (state[0]) is clock time; the stage grid represents it explicitly, leaving source coordinates state[1] through state[4] as the four physical plant state coordinates." or
             adaptation.get("control_catalogue") != list(ACTIONS) or
             adaptation.get("disturbance_catalogue") != list(DISTURBANCES) or
             adaptation.get("measurement_error_catalogue") != list(ERRORS) or
