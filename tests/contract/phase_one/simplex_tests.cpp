@@ -26,8 +26,10 @@ Requirements requirements(bool basis=true) {
 }
 auto prepare(const LinearProgram& p,po::Options options={}) {
     Registry<LPPort> registry;
-    REQUIRE_FALSE(registry.add(accepted(po::make_registration(std::move(options)))).has_value());
-    return accepted(prepare_pipeline(select(registry,{{"phase-one-bland"},{}},p,requirements())));
+    auto registration=accepted(po::make_registration(std::move(options)));
+    const auto method=Method{registration.identity.id,registration.identity.version};
+    REQUIRE_FALSE(registry.add(std::move(registration)).has_value());
+    return accepted(prepare_pipeline(select(registry,method,p,requirements())));
 }
 LinearProgram triangle(Vector b={.25,.25,1},std::string id="interior") {
     return accepted(po::make_program({{"triangle"},{std::move(id)}},{3,3,{0,1,2,5},{1,2,0,1,2},{1,1,1,1,1}},b));
@@ -81,6 +83,26 @@ TEST_CASE("registered triangle gives literal coefficients auxiliary trace and or
     CHECK(std::get<StructuralColumn>(basis.columns[1]).index==2);CHECK(std::get<StructuralColumn>(basis.columns[2]).index==0);
     const auto coords=accepted(w->basis()->coordinates(basis.reference,Vector{.25,.25,1}));
     CHECK(coords.values==Vector{.25,.25,.5});CHECK(check_basis_coordinates(coords,basis,w->last_attempt()).empty());
+}
+TEST_CASE("phase one applies an explicit structural priority only to tied entering columns") {
+    const auto p=accepted(po::make_program({{"tie-priority"},{"two-identical-columns"}},
+        {1,2,{0,2},{0,1},{1,1}},Vector{1}));
+    po::Options options;options.structural_entering_priorities={1,2};
+    auto [workspace]=prepare(p,options).create();
+    const auto result=accepted(workspace->run(context()));
+    REQUIRE(result.primal);CHECK(*result.primal==Vector{0,1});
+    const auto history=report(*workspace);REQUIRE(history.trace.size()==1);
+    CHECK(std::get<po::StructuralVariable>(history.trace[0].entering).column==1);
+    const auto basis=accepted(workspace->basis()->snapshot());REQUIRE(basis.columns.size()==1);
+    CHECK(std::get<StructuralColumn>(basis.columns[0]).index==1);
+
+    po::Options invalid;invalid.structural_entering_priorities={1};
+    Registry<LPPort> registry;
+    auto registration=accepted(po::make_registration(invalid));
+    const auto method=Method{registration.identity.id,registration.identity.version};
+    REQUIRE_FALSE(registry.add(std::move(registration)).has_value());
+    CHECK(std::holds_alternative<Rejection>(prepare_pipeline(
+        select(registry,method,p,requirements()))));
 }
 TEST_CASE("signed triangle has literal degenerate pivot and original row signs") {
     const auto p=accepted(po::make_program({{"signed"},{"triangle"}},

@@ -60,6 +60,17 @@ struct A43ReductionMetrics {
     bool largest_norm_tie_policy_applied{};
 };
 
+struct A43PaperMetrics {
+    // Candidate-by-candidate artificial-basis solves from the paper method.
+    std::size_t candidate_solves{};
+    std::uint64_t phase_one_pivots{};
+    std::uint64_t largest_norm_tie_breaks{};
+    std::size_t basis_coordinate_checks{};
+    std::size_t certified_batch_removals{};
+    std::size_t final_recheck_calls{};
+    bool largest_norm_tie_rule{};
+};
+
 struct A44ReductionMetrics {
     // Deterministic farthest-first order under normalized Euclidean distance
     // from the cloud's bounding-box center. IDs refer to the original cloud.
@@ -132,6 +143,7 @@ struct HullReduction {
     std::optional<RecursiveReductionMetrics> recursive{};
     // Present only for the paper-informed ITIS17 adaptations.
     std::optional<A43ReductionMetrics> itis17_a43{};
+    std::optional<A43PaperMetrics> itis17_a43_paper{};
     std::optional<A44ReductionMetrics> itis17_a44{};
 };
 
@@ -161,6 +173,13 @@ HullReductionResult reduce_ordered_hull(const PointCloud&, LPWorkspace&,
 // largest-norm pivot tie rule.
 HullReductionResult reduce_itis17_a43_hull(const PointCloud&, LPWorkspace&,
                                            const ExecutionContext&);
+
+enum class A43PivotRule { phase_one_order, largest_norm_tie };
+// Candidate-by-candidate A43 artificial-basis adaptation. The largest-norm
+// variant applies the paper's pivot tie rule to structural columns. Every
+// deletion still requires an exact dyadic certificate and a complete recheck.
+HullReductionResult reduce_itis17_a43_paper_hull(const PointCloud&, LPWorkspace&,
+    const ExecutionContext&, A43PivotRule);
 
 // A44 incremental LP membership using the paper's farthest-first reading of
 // its conflicting ordering statements and its k+1 initial candidate set. A
@@ -203,6 +222,7 @@ make_recursive_hull_reducer_registration(registry::Registration<registry::LPPort
 registry::Registration<registry::HullReducerPort> make_lp_hull_reducer_registration();
 registry::Registration<registry::HullReducerPort> make_ordered_hull_reducer_registration();
 registry::Registration<registry::HullReducerPort> make_itis17_a43_hull_reducer_registration();
+registry::Registration<registry::HullReducerPort> make_itis17_a43_paper_hull_reducer_registration(A43PivotRule);
 registry::Registration<registry::HullReducerPort> make_itis17_a44_hull_reducer_registration();
 registry::Registration<registry::HullReducerPort> make_grouped_hull_reducer_registration();
 } // namespace csl::geometry
