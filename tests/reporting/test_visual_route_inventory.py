@@ -117,7 +117,7 @@ class VisualRouteInventoryTests(unittest.TestCase):
         follow_up_counts={number:sum(entry["follow_up_issue"]==number for entry in deferred)
                           for number in (684,685,686,687,708,717)}
         self.assertEqual(follow_up_counts,
-                         {684:5,685:0,686:2,687:4,708:1,717:11})
+                         {684:5,685:0,686:6,687:4,708:1,717:11})
         reviewed=[entry for entry in producers.values() if entry.get("role")]
         self.assertEqual(len(reviewed),18)
         self.assertEqual(set(entry["source"] for entry in reviewed),

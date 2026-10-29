@@ -1,0 +1,96 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 590" role="img" aria-labelledby="title desc">
+<title id="title">B04 reference trajectory projected from four states into two planes</title>
+<desc id="desc">A selected exact optimal trajectory from the separate b04-reference-v1 case. One panel plots oxidizer flow against fuel flow and marks their stage constraints. The other plots the two working stocks. Stage labels mark 0, 4, 8, 12, and 16. This is not historical B04 data.</desc>
+<rect width="1000" height="590" fill="#172019"/>
+<style>svg{background:#172019;font-family:system-ui,sans-serif;color:#dce5d5} text{fill:#dce5d5} .axis{stroke:#a9b7a0;stroke-width:2} .trajectory{fill:none;stroke:#f2b880;stroke-width:3} .point{fill:#f2b880;stroke:#172019;stroke-width:1} .leader{stroke:#dce5d5;stroke-width:1} .feasible{fill:#76966d;fill-opacity:.12;stroke:#b4cda3;stroke-dasharray:6 4;stroke-width:2}</style>
+<text x="500" y="34" text-anchor="middle" font-size="22">Fuel reference trajectory: two projections of the 4D state</text>
+<text x="500" y="59" text-anchor="middle" font-size="13">b04-reference-v1 · exact saved witness · stages 0–16 · not a historical B04 reconstruction</text>
+<text x="280.0" y="88.0" text-anchor="middle" font-size="18">Flow plane</text>
+<path d="M95 460H465 M95 120V460" class="axis"/>
+<rect x="114.8" y="138.2" width="330.4" height="303.6" class="feasible"/>
+<text x="280.0" y="154.0" text-anchor="middle" font-size="12">stage constraints</text>
+<polyline points="396.3,384.6 279.3,283.4 242.1,251.2 242.1,251.2 242.1,251.2 242.1,251.2 242.1,251.2 242.1,251.2 242.1,251.2 242.1,251.2 242.1,251.2 242.1,251.2 242.1,251.2 242.1,251.2 242.1,251.2 242.1,251.2 285.5,288.7" class="trajectory"/>
+<circle cx="396.3" cy="384.6" r="4" class="point"/>
+<path d="M396.3,384.6 L403.5,377.4" class="leader"/>
+<text x="406.3" y="374.6" text-anchor="start" font-size="11">0</text>
+<circle cx="279.3" cy="283.4" r="4" class="point"/>
+<circle cx="242.1" cy="251.2" r="4" class="point"/>
+<circle cx="242.1" cy="251.2" r="4" class="point"/>
+<circle cx="242.1" cy="251.2" r="4" class="point"/>
+<path d="M242.1,251.2 L211.9,230.3" class="leader"/>
+<text x="200.1" y="222.2" text-anchor="end" font-size="11">4</text>
+<circle cx="242.1" cy="251.2" r="4" class="point"/>
+<circle cx="242.1" cy="251.2" r="4" class="point"/>
+<circle cx="242.1" cy="251.2" r="4" class="point"/>
+<circle cx="242.1" cy="251.2" r="4" class="point"/>
+<path d="M242.1,251.2 L211.9,251.2" class="leader"/>
+<text x="200.1" y="251.2" text-anchor="end" font-size="11">8</text>
+<circle cx="242.1" cy="251.2" r="4" class="point"/>
+<circle cx="242.1" cy="251.2" r="4" class="point"/>
+<circle cx="242.1" cy="251.2" r="4" class="point"/>
+<circle cx="242.1" cy="251.2" r="4" class="point"/>
+<path d="M242.1,251.2 L211.9,272.1" class="leader"/>
+<text x="200.1" y="280.2" text-anchor="end" font-size="11">12</text>
+<circle cx="242.1" cy="251.2" r="4" class="point"/>
+<circle cx="242.1" cy="251.2" r="4" class="point"/>
+<circle cx="242.1" cy="251.2" r="4" class="point"/>
+<circle cx="285.5" cy="288.7" r="4" class="point"/>
+<path d="M285.5,288.7 L292.7,299.5" class="leader"/>
+<text x="295.5" y="303.7" text-anchor="start" font-size="11">16</text>
+<text x="280.0" y="508.0" text-anchor="middle" font-size="14">Oxidizer flow (kg/s)</text>
+<text transform="translate(42 290.0) rotate(-90)" text-anchor="middle">Fuel flow (kg/s)</text>
+<text x="95.0" y="480.0" text-anchor="middle" font-size="11">1173.1</text>
+<text x="85.0" y="464.0" text-anchor="end" font-size="11">429.8</text>
+<text x="187.5" y="480.0" text-anchor="middle" font-size="11">1186.6</text>
+<text x="85.0" y="379.0" text-anchor="end" font-size="11">439.9</text>
+<text x="280.0" y="480.0" text-anchor="middle" font-size="11">1200.0</text>
+<text x="85.0" y="294.0" text-anchor="end" font-size="11">450.0</text>
+<text x="372.5" y="480.0" text-anchor="middle" font-size="11">1213.4</text>
+<text x="85.0" y="209.0" text-anchor="end" font-size="11">460.1</text>
+<text x="465.0" y="480.0" text-anchor="middle" font-size="11">1226.9</text>
+<text x="85.0" y="124.0" text-anchor="end" font-size="11">470.2</text>
+<text x="720.0" y="88.0" text-anchor="middle" font-size="18">Working-stock plane</text>
+<path d="M535 460H905 M535 120V460" class="axis"/>
+<polyline points="885.2,138.2 864.2,156.6 843.5,175.4 822.8,194.5 802.2,213.5 781.6,232.5 761.0,251.5 740.4,270.6 719.8,289.6 699.1,308.6 678.5,327.6 657.9,346.7 637.3,365.7 616.7,384.7 596.1,403.7 575.4,422.8 554.8,441.8" class="trajectory"/>
+<circle cx="885.2" cy="138.2" r="4" class="point"/>
+<path d="M885.2,138.2 L892.4,131.0" class="leader"/>
+<text x="895.2" y="128.2" text-anchor="start" font-size="11">0</text>
+<circle cx="864.2" cy="156.6" r="4" class="point"/>
+<circle cx="843.5" cy="175.4" r="4" class="point"/>
+<circle cx="822.8" cy="194.5" r="4" class="point"/>
+<circle cx="802.2" cy="213.5" r="4" class="point"/>
+<path d="M802.2,213.5 L772.0,192.6" class="leader"/>
+<text x="760.2" y="184.5" text-anchor="end" font-size="11">4</text>
+<circle cx="781.6" cy="232.5" r="4" class="point"/>
+<circle cx="761.0" cy="251.5" r="4" class="point"/>
+<circle cx="740.4" cy="270.6" r="4" class="point"/>
+<circle cx="719.8" cy="289.6" r="4" class="point"/>
+<path d="M719.8,289.6 L689.5,289.6" class="leader"/>
+<text x="677.8" y="289.6" text-anchor="end" font-size="11">8</text>
+<circle cx="699.1" cy="308.6" r="4" class="point"/>
+<circle cx="678.5" cy="327.6" r="4" class="point"/>
+<circle cx="657.9" cy="346.7" r="4" class="point"/>
+<circle cx="637.3" cy="365.7" r="4" class="point"/>
+<path d="M637.3,365.7 L607.1,386.6" class="leader"/>
+<text x="595.3" y="394.7" text-anchor="end" font-size="11">12</text>
+<circle cx="616.7" cy="384.7" r="4" class="point"/>
+<circle cx="596.1" cy="403.7" r="4" class="point"/>
+<circle cx="575.4" cy="422.8" r="4" class="point"/>
+<circle cx="554.8" cy="441.8" r="4" class="point"/>
+<path d="M554.8,441.8 L562.0,452.6" class="leader"/>
+<text x="564.8" y="456.8" text-anchor="start" font-size="11">16</text>
+<text x="720.0" y="508.0" text-anchor="middle" font-size="14">Oxidizer working stock (kg)</text>
+<text transform="translate(482 290.0) rotate(-90)" text-anchor="middle">Fuel working stock (kg)</text>
+<text x="535.0" y="480.0" text-anchor="middle" font-size="11">-7301</text>
+<text x="525.0" y="464.0" text-anchor="end" font-size="11">-2758</text>
+<text x="627.5" y="480.0" text-anchor="middle" font-size="11">26194</text>
+<text x="525.0" y="379.0" text-anchor="end" font-size="11">9937</text>
+<text x="720.0" y="480.0" text-anchor="middle" font-size="11">59688</text>
+<text x="525.0" y="294.0" text-anchor="end" font-size="11">22631</text>
+<text x="812.5" y="480.0" text-anchor="middle" font-size="11">93183</text>
+<text x="525.0" y="209.0" text-anchor="end" font-size="11">35326</text>
+<text x="905.0" y="480.0" text-anchor="middle" font-size="11">126677</text>
+<text x="525.0" y="124.0" text-anchor="end" font-size="11">48020</text>
+<text x="500" y="555" text-anchor="middle" font-size="12">State order: oxidizer flow, oxidizer stock, fuel flow, fuel stock. Labels show selected stages.</text>
+<text x="500" y="576" text-anchor="middle" font-size="12">No stock constraints are specified; negative stocks appear in this exact reference witness.</text>
+</svg>

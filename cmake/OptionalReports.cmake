@@ -52,6 +52,68 @@ set_tests_properties(mpc06_tube_pilot_independent_check PROPERTIES LABELS report
 endif()
 endif()
 
+if(CSL_BUILD_MPC01_REPORT)
+include(cmake/JsonDependencies.cmake)
+include(cmake/Mpc01Dependencies.cmake)
+include(cmake/Mpc01Provenance.cmake)
+add_library(csl_mpc01_model STATIC
+  benchmarks/reporting/mpc01/model.cpp
+  benchmarks/reporting/mpc01/fixtures.cpp
+  benchmarks/reporting/mpc01/problem_mapping.cpp)
+target_include_directories(csl_mpc01_model PUBLIC
+  $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/benchmarks/reporting/mpc01>)
+target_compile_features(csl_mpc01_model PUBLIC cxx_std_20)
+target_link_libraries(csl_mpc01_model PUBLIC CSL::input)
+target_include_directories(csl_mpc01_model SYSTEM PRIVATE ${csl_json_SOURCE_DIR}/single_include)
+if(MSVC)
+target_compile_options(csl_mpc01_model PRIVATE /W4 /WX /permissive-)
+else()
+target_compile_options(csl_mpc01_model PRIVATE -Wall -Wextra -Wpedantic -Werror)
+endif()
+set_target_properties(csl_mpc01_model PROPERTIES POSITION_INDEPENDENT_CODE ON)
+add_library(csl_mpc01_evidence STATIC
+  benchmarks/reporting/mpc01/trajectory_evidence.cpp)
+target_include_directories(csl_mpc01_evidence PUBLIC
+  $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/benchmarks/reporting/mpc01>)
+target_compile_features(csl_mpc01_evidence PUBLIC cxx_std_20)
+target_link_libraries(csl_mpc01_evidence PUBLIC csl_mpc01_model)
+if(MSVC)
+target_compile_options(csl_mpc01_evidence PRIVATE /W4 /WX /permissive-)
+else()
+target_compile_options(csl_mpc01_evidence PRIVATE -Wall -Wextra -Wpedantic -Werror)
+endif()
+add_executable(csl_mpc01_report
+  benchmarks/reporting/mpc01/main.cpp
+  benchmarks/reporting/mpc01/environment.cpp
+  benchmarks/reporting/mpc01/osqp_adapter.cpp
+  benchmarks/reporting/mpc01/hpipm_adapter.cpp)
+target_link_libraries(csl_mpc01_report PRIVATE csl_mpc01_model csl_mpc01_evidence
+  csl_mpc01_osqp csl_mpc01_hpipm csl_mpc01_blasfeo CSL::artifacts)
+target_compile_features(csl_mpc01_report PRIVATE cxx_std_20)
+target_include_directories(csl_mpc01_report SYSTEM PRIVATE ${csl_json_SOURCE_DIR}/single_include)
+add_dependencies(csl_mpc01_report csl_mpc01_native_dependencies)
+if(MSVC)
+target_compile_options(csl_mpc01_report PRIVATE /W4 /WX /permissive-)
+else()
+target_compile_options(csl_mpc01_report PRIVATE -Wall -Wextra -Wpedantic -Werror)
+endif()
+csl_mpc01_attach_provenance(csl_mpc01_report)
+if(BUILD_TESTING)
+find_package(Python3 3.11 REQUIRED COMPONENTS Interpreter)
+add_executable(mpc01_model_tests tests/benchmarks/mpc01_model_tests.cpp)
+target_link_libraries(mpc01_model_tests PRIVATE csl_mpc01_model)
+target_compile_features(mpc01_model_tests PRIVATE cxx_std_20)
+add_test(NAME mpc01_model_contract COMMAND mpc01_model_tests
+  ${PROJECT_SOURCE_DIR}/examples/scenarios/double-integrator-generality.json
+  ${PROJECT_SOURCE_DIR}/docs/research/evidence/b04-reference-v1/canonical-case.json)
+set_tests_properties(mpc01_model_contract PROPERTIES LABELS reporting)
+add_test(NAME mpc01_native_smoke COMMAND Python3::Interpreter
+  ${PROJECT_SOURCE_DIR}/scripts/reports/mpc01/check_native_smoke.py
+  $<TARGET_FILE:csl_mpc01_report> ${PROJECT_SOURCE_DIR})
+set_tests_properties(mpc01_native_smoke PROPERTIES LABELS reporting)
+endif()
+endif()
+
 if(CSL_BUILD_GEO08_REPORT)
 add_executable(csl_geo08_lazy_report benchmarks/reporting/geo08/driver.cpp)
 target_link_libraries(csl_geo08_lazy_report PRIVATE CSL::lazy_geometry CSL::polyhedral)

@@ -1,6 +1,7 @@
 """Small, hand-derived analytic geometry examples for the visual gallery."""
 from html import escape
 import json
+from pathlib import Path
 
 
 CASES = (
@@ -70,6 +71,36 @@ CASES = (
         "svg": "phase-one",
     },
     {
+        "id": "mpc01-b04-reference-projection",
+        "family": "Nominal open-loop optimization · MPC-01",
+        "title": "Project a four-state fuel trajectory into two planes",
+        "summary": "One exact optimal witness from the separate b04-reference-v1 case is projected onto oxidizer/fuel flow and working-stock planes. It is not a historical B04 reconstruction or an external-solver comparison.",
+        "figure": "b04-reference-trajectory-projections.svg",
+        "record": "mpc01-b04-reference-projection.json",
+        "kind": "analytic-illustration",
+        "source_path": "docs/research/evidence/b04-reference-v1/canonical-case.json",
+        "source_commit": "23b0d912236386860ad036894af138bf9f78a9db",
+        "source_files": ["docs/research/evidence/b04-reference-v1/canonical-case.json",
+                         "docs/research/evidence/b04-reference-v1/exact-optimal-reference.json",
+                         "docs/research/evidence/b04-reference-v1/exact_check.py",
+                         "docs/research/evidence/b04-reference-v1/exact-check-report.json"],
+        "source_file_labels": ["canonical case JSON", "exact witness JSON"],
+        "source_label": "Pinned input and exact witness",
+        "example_page": "b04-reference-trajectory-projections.html",
+        "inputs": {"case": "b04-reference-v1", "state_dimension": 4, "horizon": 16,
+                   "state_order": ["oxidizer_flow", "oxidizer_working_stock", "fuel_flow", "fuel_working_stock"],
+                   "projections": [["oxidizer_flow", "fuel_flow"], ["oxidizer_working_stock", "fuel_working_stock"]],
+                   "source_case": "docs/research/evidence/b04-reference-v1/canonical-case.json",
+                   "source_witness": "docs/research/evidence/b04-reference-v1/exact-optimal-reference.json"},
+        "answer": {"one_exact_optimal_witness": True, "checked_states": 17,
+                   "method": "exact rational terminal-plane minimization with exact feasibility checks",
+                   "checked_dynamics": "exact rational recurrence", "flow_constraints": "satisfied at stages 0 through 16",
+                   "historical_reproduction": False, "external_solver_comparison": False},
+        "reproduction_command": "python3 scripts/reports/mpc01/b04_projection_example.py",
+        "evidence": "Exact saved b04-reference-v1 witness; renderer checks rational dynamics, control bounds and flow constraints.",
+        "svg": "mpc01-b04-reference-projection",
+    },
+    {
         "id": "issue3-validated-minimax-2d",
         "family": "Validated finite-action minimax · issue #3",
         "title": "Separate a feasible action from a strict violation",
@@ -133,6 +164,9 @@ def _base(title, low, high, shapes, notes=(), xlabel="x", ylabel="y"):
 
 def svg(case):
     kind = case["svg"]
+    if kind == "mpc01-b04-reference-projection":
+        source = Path(__file__).parents[2] / "docs/examples/b04-reference-trajectory-projections.svg"
+        return source.read_bytes().decode("utf-8")
     if kind == "minkowski":
         shape = [_polygon([[0, 0], [3, 0], [2, 1], [0, 2]], -1, 4, "#b4cda3", "#7b9b70")]
         return _base("Minkowski sum A+B", -1, 4, shape, ("A+B", "vertices: (0,0)", "(3,0), (2,1)", "(0,2)"))
@@ -196,13 +230,14 @@ def build(catalog):
             entry.update(report_id=report["report_id"], source_page="../" + report["report_id"] + "/index.html",
                          report_records="../" + report["report_id"] + "/records.json")
         else:
-            entry["source_page"] = "https://github.com/butahlecoq/controlled-systems-lab/blob/main/" + case["source_path"]
+            source_commit = case.get("source_commit", "main")
+            entry["source_page"] = "https://github.com/butahlecoq/controlled-systems-lab/blob/" + source_commit + "/" + case["source_path"]
         rendered.append(entry)
         output[svg_name] = svg(case)
         raw = {"schema": "csl.analytic-visual-example/1", "id": case["id"],
                "kind": case["kind"], "inputs": case["inputs"], "answer": case["answer"],
-               "reproduction_command": "python scripts/reports/visual_examples.py --catalog reports/algorithm-results/catalog.json --site build/report-site",
-               "evidence": "Hand-derived analytic illustration; not a replay or measurement."}
+               "reproduction_command": case.get("reproduction_command", "python scripts/reports/visual_examples.py --catalog reports/algorithm-results/catalog.json --site build/report-site"),
+               "evidence": case.get("evidence", "Hand-derived analytic illustration; not a replay or measurement.")}
         if report:
             raw["related_saved_report"] = {"report_kind": report["report_kind"],
                                             "report_id": report["report_id"],
@@ -227,15 +262,20 @@ def cards(cases):
                       f'Saved {escape(case["report_kind"])} report ↗</a> · '
                       f'<a href="../{escape(case["report_id"], quote=True)}/records.json">Raw report record ↗</a>')
         else:
-            source = f'<a href="{escape(case["source_page"], quote=True)}">Scenario source ↗</a>'
+            source = f'<a href="{escape(case["source_page"], quote=True)}">{escape(case.get("source_label", "Scenario source"))} ↗</a>'
         rendered.append(
             f'<article class="saved-figure" id="visual-{escape(case["id"], quote=True)}">'
-            f'<p class="eyebrow">{escape(case["family"])}</p><h3>{escape(case["title"])}</h3>'
-            f'<img src="{escape(case["figure"], quote=True)}" alt="{escape(case["title"], quote=True)}">'
-            f'<p>{escape(case["summary"])}</p><p><a href="{escape(case["record"], quote=True)}">Exact analytic inputs and answer (JSON) ↗</a> · '
+            f'<p class="eyebrow">{escape(case["family"])}</p><h3>'
+            + (f'<a href="{escape(case["example_page"], quote=True)}">' if "example_page" in case else "")
+            + escape(case["title"])
+            + ("</a>" if "example_page" in case else "") + "</h3>"
+            + (f'<a href="{escape(case["example_page"], quote=True)}">' if "example_page" in case else "")
+            + f'<img src="{escape(case["figure"], quote=True)}" alt="{escape(case["title"], quote=True)}">'
+            + ("</a>" if "example_page" in case else "")
+            + f'<p>{escape(case["summary"])}</p><p><a href="{escape(case["record"], quote=True)}">Exact analytic inputs and answer (JSON) ↗</a> · '
             + source + '</p>'
-            + (f'<p>API source at <a href="https://github.com/butahlecoq/controlled-systems-lab/blob/{escape(case["source_commit"], quote=True)}/{escape(case["source_files"][0], quote=True)}">public header</a> · '
-               f'<a href="https://github.com/butahlecoq/controlled-systems-lab/blob/{escape(case["source_commit"], quote=True)}/{escape(case["source_files"][1], quote=True)}">implementation</a></p>'
+            + (f'<p>Pinned source files: <a href="https://github.com/butahlecoq/controlled-systems-lab/blob/{escape(case["source_commit"], quote=True)}/{escape(case["source_files"][0], quote=True)}">{escape(case.get("source_file_labels", ["public header", "implementation"])[0])}</a> · '
+               f'<a href="https://github.com/butahlecoq/controlled-systems-lab/blob/{escape(case["source_commit"], quote=True)}/{escape(case["source_files"][1], quote=True)}">{escape(case.get("source_file_labels", ["public header", "implementation"])[1])}</a></p>'
                if "source_commit" in case else "")
             + ('<p><a href="issue3-control-walkthrough.html">Open the saved-data end-to-end control walkthrough ↗</a></p>'
                if case["id"] == "issue3-validated-minimax-2d" else "")

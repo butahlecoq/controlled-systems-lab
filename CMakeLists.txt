@@ -49,6 +49,7 @@ option(CSL_BUILD_EXT07_REPORT "Build the EXT-07 hybrid profile report driver" OF
 option(CSL_BUILD_OPT10_REPORT "Build the OPT-10 smooth-convex report driver" OFF)
 option(CSL_BUILD_GEO08_REPORT "Build the GEO-08 lazy geometry report driver" OFF)
 option(CSL_BUILD_FINITE_FEEDBACK_REPORT "Build the issue 5 finite feedback report driver" OFF)
+option(CSL_BUILD_MPC01_REPORT "Build the optional external MPC comparison driver" OFF)
 
 option(CSL_BUILD_REPORTS "Build the non-installed algorithm report driver" OFF)
 option(CSL_ENABLE_HIGHS "Build the native HiGHS LP/convex adapters" ON)

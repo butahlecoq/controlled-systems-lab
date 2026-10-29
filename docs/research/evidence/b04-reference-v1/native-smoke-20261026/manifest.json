@@ -1,0 +1,9 @@
+{
+  "schema": "csl.mpc01-native-smoke-figure/1",
+  "runner_source_commit": "9202df9aca690d9c83c780eb6e255c3f87473fd9",
+  "case_sha256": "bc9e1b804b7878cb0da5c28c030893e1b41e7a2a34cb86b1c0fb8380ec780f6d",
+  "attempts_sha256": "1ce79daf8a56c4dcce86dade4f6a1cb478f380c3ed4480015d84fee901ec2ed0",
+  "attempt_count": 2,
+  "capture": "single native smoke process; one cold attempt per method",
+  "evidence_status": "illustrative; solver residual checks inconclusive; not a repeated benchmark"
+}

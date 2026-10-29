@@ -780,6 +780,13 @@ def build(catalog, site):
             'event.preventDefault();history.pushState(null,"",event.currentTarget.hash);'
             'target.scrollIntoView({behavior:"instant",block:"start"});});</script></body></html>')
     outputs["index.html"] = body
+    fuel_example_dir = Path(__file__).parents[2] / "docs/examples"
+    for filename in ("b04-reference-trajectory-projections.html",
+                     "b04-reference-trajectory-projections.svg"):
+        source = fuel_example_dir / filename
+        require(source.is_file() and not source.is_symlink(),
+                "missing fuel projection example asset: " + filename)
+        outputs[filename] = source.read_text(encoding="utf-8")
     export = [{key: value for key, value in e.items() if key not in {"records_path", "domain"}} for e in examples]
     outputs["minimal-inputs.json"] = json.dumps({"schema": "csl.visual-examples/1", "examples": export}, indent=2) + "\n"
     outputs["visual-coverage.json"] = json.dumps(
@@ -798,6 +805,33 @@ def build(catalog, site):
     outputs.update(ext01_companion)
     outputs.update(app01_companion)
     outputs.update(hybrid_examples.download_records(examples))
+    hybrid = next(example for example in examples if example["kind"] == "hybrid")
+    outputs["two_stage_scalar_family.json"] = json.dumps({
+        "schema": "csl.visual-example/ext07-two-stage-scalar/1",
+        "illustration_only": True,
+        "algorithm_source_commit": hybrid["source"],
+        "oracle_harness_commit": hybrid["harness"],
+        "inputs": hybrid["inputs"],
+        "analytic": hybrid["analytic"],
+    }, indent=2) + "\n"
+    two_parameter = next(example for example in examples if example["kind"] == "two_parameter")
+    outputs["two_parameter_scalar_polytopes.json"] = json.dumps({
+        "schema": "csl.visual-example/ext07-two-parameter-scalar/1",
+        "illustration_only": True,
+        "algorithm_source_commit": two_parameter["source"],
+        "oracle_harness_commit": two_parameter["harness"],
+        "inputs": two_parameter["inputs"],
+        "analytic": {"paths": two_parameter["polygons"], **two_parameter["analytic"]},
+    }, indent=2) + "\n"
+    projected = next(example for example in examples if example["kind"] == "projected_reachability")
+    outputs["projected_hybrid_reachability.json"] = json.dumps({
+        "schema": "csl.visual-example/ext07-projected-hybrid-reachability/1",
+        "illustration_only": True,
+        "algorithm_source_commit": projected["source"],
+        "oracle_harness_commit": projected["harness"],
+        "inputs": projected["inputs"],
+        "analytic": projected["analytic"],
+    }, indent=2) + "\n"
     link = '<p id="visual-examples-link"><a href="examples/index.html">Visual examples: minimal 2D inputs, hull vertices and plots →</a></p>'
     output_files = {name: (content if isinstance(content, bytes) else content.encode("utf-8"))
                     for name, content in outputs.items()}
