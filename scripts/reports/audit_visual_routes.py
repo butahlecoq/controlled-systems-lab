@@ -29,6 +29,7 @@ COMPOSED_SAVED_ROUTES = {
     "scripts/reports/mpc05/make_report.py",
     "scripts/reports/mpc05/reference.py",
     "scripts/reports/visual_example_fuel_layers.py",
+    "scripts/reports/exp03/render_two_points_approximation.py",
 }
 FROZEN_DIAGRAM_EXCEPTIONS = {
     "benchmarks/reporting/approximation_pilot/summarize.py",
