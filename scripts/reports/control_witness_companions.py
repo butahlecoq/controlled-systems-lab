@@ -9,6 +9,7 @@ from pathlib import Path
 import tempfile
 from typing import Literal
 
+import b04_native_smoke_companion
 import geometry_figures
 
 
@@ -51,6 +52,9 @@ SOURCE_DISPOSITIONS = (
     SourceDisposition("scripts/reports/mpc06/capture_tube.py", "collector-and-plot-renderer", "frozen-renderer-preserved-with-gallery-companion", ("control-witness-companions",)),
     SourceDisposition("scripts/reports/mpc06/render_tube.py", "saved-plot-renderer", "frozen-renderer-preserved-with-gallery-companion", ("control-witness-companions",)),
     SourceDisposition("scripts/reports/mpc01/summarize_strategy_ab.py", "report-plot-renderer", "frozen-report-plot-preserved-with-gallery-companion", ("control-witness-companions",)),
+    SourceDisposition("scripts/reports/mpc01/b04_native_smoke_projection.py", "report-plot-renderer", "frozen-report-plot-preserved-with-phase-plane-companion", ("b04-native-smoke",)),
+    SourceDisposition("scripts/reports/mpc01/b04_projection_example.py", "report-plot-renderer", "frozen-report-plot-preserved-with-phase-plane-companion", ("b04-native-smoke",)),
+    SourceDisposition("scripts/reports/b04_native_smoke_companion.py", "saved-plot-renderer", "shared-quantitative-policy-companion-renderer"),
 )
 
 PROJECTIONS = (
@@ -85,6 +89,14 @@ def strategy_slug(report_id: str) -> str:
 
 def asset_paths() -> list[str]:
     paths = ["control-witness-v1.html", "control-witness-timing-v1.html",
+             "control-witness/b04-native-smoke-projections.svg",
+             "control-witness/b04-native-smoke-projections.png",
+             "control-witness/b04-native-smoke-evidence.json",
+             "control-witness/b04-native-smoke-case.json",
+             "control-witness/b04-native-smoke-reference.json",
+             "control-witness/b04-native-smoke-exact-check.json",
+             "control-witness/b04-native-smoke-attempts.jsonl",
+             "control-witness/b04-native-smoke-manifest.json",
              "control-witness/mpc06-tube.svg", "control-witness/mpc06-tube.png",
              "control-witness/mpc06-tube-evidence.json",
              "control-witness/ts01-strategy-ab.svg", "control-witness/ts01-strategy-ab.png",
@@ -427,6 +439,8 @@ def build(site: Path, catalog_path: Path) -> BuildResult:
     outputs: dict[str, bytes] = {}
     cards: list[dict] = []
     outputs.update(_ts01_strategy_ab_companion())
+    b04_files, b04_article, b04_entry = b04_native_smoke_companion.build(style)
+    outputs.update(b04_files)
     mpc06_route, mpc06_svg, mpc06_png, mpc06_evidence = _mpc06_tube_companion()
     outputs["control-witness/mpc06-tube.svg"] = mpc06_svg
     outputs["control-witness/mpc06-tube.png"] = mpc06_png
@@ -609,7 +623,7 @@ def build(site: Path, catalog_path: Path) -> BuildResult:
                     "source_page": "../" + routes[syn01_id] + "/index.html",
                     "raw_record": "../" + routes[syn01_id] + "/records.json"}
 
-    body = []
+    body = [b04_article]
     for card in cards:
         record_link = "../" + card["route_id"] + "/records.json"
         page_link = "../" + card["route_id"] + "/index.html"
@@ -674,11 +688,17 @@ def build(site: Path, catalog_path: Path) -> BuildResult:
         '<a href="control-witness/mpc06-tube-evidence.json">Companion data and hashes ↗</a></p></article>')
     outputs["control-witness-v1.html"] = (
         '<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">'
-        '<title>Saved control figures · Controlled Systems Lab</title><link rel="stylesheet" href="examples.css"></head>'
+        '<title>Saved control figures · Controlled Systems Lab</title><link rel="stylesheet" href="examples.css">'
+        '<style>.control-witness-page #b04-native-smoke th,.control-witness-page #b04-native-smoke td{white-space:normal;vertical-align:top}'
+        '@media print{.control-witness-page #b04-native-smoke{break-inside:auto;page-break-inside:auto}'
+        '.control-witness-page #b04-native-smoke h2{break-after:avoid;page-break-after:avoid}'
+        '.control-witness-page #b04-native-smoke figure{break-inside:avoid;page-break-inside:avoid}'
+        '.control-witness-page #b04-native-smoke .scroll{overflow:visible;margin:.5rem 0}}</style></head>'
         '<body class="control-witness-page"><main><p><a href="index.html">← Visual examples</a></p><h1>Saved control and witness figures</h1>'
         '<p>The first five figures show projections of frozen five-coordinate state/control relations into the control plane '
         '(u₀,u₁); each can omit distinctions present in the full joint relation. The MPC-06 figure re-plots a saved two-state '
         'feasibility tube. The T-S01 figure shows saved Strategy A/B control histories and an exact analytic minimizer relation. '
+        'The B04 companion shows saved oxidizer and fuel phase-plane trajectories from a separate research reference variant. '
         'These companions do not run a solver or recompute scientific geometry.</p>' +
         ''.join(body) + '</main></body></html>').encode()
     strategy_ab_entry = {
@@ -698,7 +718,7 @@ def build(site: Path, catalog_path: Path) -> BuildResult:
                 "page": "control-witness-v1.html", "figure": cards[0]["stem"] + ".svg",
                 "source_page": "../" + cards[0]["route_id"] + "/index.html",
                 "raw_record": "../" + cards[0]["route_id"] + "/records.json"},
-               strategy_ab_entry, timing_entry)
+               strategy_ab_entry, timing_entry, b04_entry)
     if set(outputs) != set(asset_paths()):
         missing = sorted(set(asset_paths()) - set(outputs))
         extra = sorted(set(outputs) - set(asset_paths()))

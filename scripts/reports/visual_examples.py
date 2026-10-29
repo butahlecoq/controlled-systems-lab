@@ -729,6 +729,12 @@ def build(catalog, site):
             'alt="Selected two-stage control histories from Strategy A and B on the exact minimizing line"></a>'
             '<p>Plots saved selected histories from both strategies and the exact minimizing family for the two-stage integrator. It is a control projection with equal data scaling, not a reachable-set plot or performance ranking.</p>'
             '<p><a href="control-witness-v1.html#ts01-strategy-ab">Open the T-S01 figure and evidence →</a></p></article>' +
+            '<article class="saved-figure" id="b04-native-smoke"><p class="eyebrow">Fuel reference · Saved-data companion</p>'
+            '<h3>B04 reference variant in oxidizer and fuel phase planes</h3>'
+            '<a href="control-witness-v1.html#b04-native-smoke"><img src="control-witness/b04-native-smoke-projections.svg" '
+            'alt="Saved exact and native smoke trajectories projected onto oxidizer flow and stock, and fuel flow and stock"></a>'
+            '<p>Uses the within-species projections (x₁,x₂) and (x₃,x₄) you requested. The exact saved witness is shown with one cold attempt per native solver; their residual checks remain inconclusive. This is a trajectory illustration, not a reachable-set plot or historical B04 reconstruction.</p>'
+            '<p><a href="control-witness-v1.html#b04-native-smoke">Open the paired projections and evidence →</a></p></article>' +
             '<article class="saved-figure" id="control-witness-timings"><p class="eyebrow">Control reports · Saved-data companion</p>'
             '<h3>Saved synthesis and verifier timings</h3>'
             '<a href="control-witness-timing-v1.html"><img src="control-witness/syn01-timing.svg" '

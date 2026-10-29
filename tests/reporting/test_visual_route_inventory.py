@@ -60,6 +60,13 @@ class VisualRouteInventoryTests(unittest.TestCase):
             self.assertTrue(producers[source]["role_and_disposition_reason"], source)
         self.assertEqual(producers["scripts/reports/control_figures.py"]["disposition"],
                          "adopted-shared-quantitative-policy")
+        for source in ("scripts/reports/mpc01/b04_native_smoke_projection.py",
+                       "scripts/reports/mpc01/b04_projection_example.py"):
+            self.assertEqual(producers[source]["disposition"],
+                             "frozen-report-plot-preserved-with-phase-plane-companion")
+            self.assertEqual(producers[source]["companion_ids"], ["b04-native-smoke"])
+        self.assertEqual(producers["scripts/reports/b04_native_smoke_companion.py"]["disposition"],
+                         "shared-quantitative-policy-companion-renderer")
         self.assertEqual(producers["scripts/reports/visual_illustrations.py"]["disposition"],
                          "reviewed-static-diagram-exception")
         self.assertEqual(producers["scripts/reports/ext03_transform/report.py"]["disposition"],
@@ -107,6 +114,7 @@ class VisualRouteInventoryTests(unittest.TestCase):
                  "frozen-bundle-composer-preserved-with-saved-timing-companion",
                  "frozen-report-plot-preserved-with-projection-and-timing-companions",
                  "frozen-report-plot-preserved-with-saved-timing-companion",
+                 "frozen-report-plot-preserved-with-phase-plane-companion",
                  "frozen-report-plot-preserved-with-gallery-companion",
                  "regeneration-entrypoint-preserved-gallery-never-invokes-it",
                  "saved-control-witness-gallery-companion-builder",
@@ -118,9 +126,9 @@ class VisualRouteInventoryTests(unittest.TestCase):
         follow_up_counts={number:sum(entry["follow_up_issue"]==number for entry in deferred)
                           for number in (684,685,686,687,708,717)}
         self.assertEqual(follow_up_counts,
-                         {684:6,685:0,686:3,687:4,708:1,717:11})
+                         {684:6,685:0,686:1,687:4,708:1,717:11})
         reviewed=[entry for entry in producers.values() if entry.get("role")]
-        self.assertEqual(len(reviewed),21)
+        self.assertEqual(len(reviewed),24)
         self.assertEqual(set(entry["source"] for entry in reviewed),
                          set(audit_visual_routes.control_witness_companions.source_inventory()))
         self.assertTrue(all(entry["follow_up_issue"] in follow_up_counts for entry in deferred))
