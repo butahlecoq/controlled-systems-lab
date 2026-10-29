@@ -39,6 +39,8 @@ def check(path: Path):
         "(-1, 0)": 2, "(0, 0)": 1, "(1, 0)": 2}
     assert data["fixtures"]["scalar_two_step"]["fixed_plan"] == 2
     assert data["fixtures"]["scalar_two_step"]["executed_replanning_worst"] == 0
+    assert data["fallback_fixtures"]["deadline"] == {"episodes": 16, "fallback_steps": 64}
+    assert data["fallback_fixtures"]["solver_failure"] == {"episodes": 16, "fallback_steps": 64}
     variants = data["variants"]
     assert len(variants) == 4
     episode_index = {}

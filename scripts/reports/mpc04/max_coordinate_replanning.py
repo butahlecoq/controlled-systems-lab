@@ -227,6 +227,29 @@ def check_policy_gap_fixtures() -> dict:
     }
 
 
+def check_fallback_semantics() -> dict:
+    # A zero budget deterministically expires every finite solve at its first plan.
+    deadline_rows = [run_episode("nominal_zero_disturbance", SHRINKING, tuple(history), deadline_ns=0)
+                     for history in histories()]
+    assert all(row["fallback_count"] == EPISODE_STEPS for row in deadline_rows)
+    assert all(all(d["status"] == "deadline_fallback" and d["action"] == 0.0
+                   for d in row["decisions"]) for row in deadline_rows)
+    original_solve = solve
+    def fail_solve(*_args, **_kwargs):
+        raise RuntimeError("injected fixture failure")
+    globals()["solve"] = fail_solve
+    try:
+        failure_rows = [run_episode("finite_minimax", SHRINKING, tuple(history))
+                        for history in histories()]
+    finally:
+        globals()["solve"] = original_solve
+    assert all(row["fallback_count"] == EPISODE_STEPS for row in failure_rows)
+    assert all(all(d["status"] == "solver_failure_fallback" and d["action"] == 0.0
+                   for d in row["decisions"]) for row in failure_rows)
+    return {"deadline": {"episodes": len(deadline_rows), "fallback_steps": sum(r["fallback_count"] for r in deadline_rows)},
+            "solver_failure": {"episodes": len(failure_rows), "fallback_steps": sum(r["fallback_count"] for r in failure_rows)}}
+
+
 def aggregate(rows: list[dict]) -> dict:
     values = [r["terminal_original_objective"] for r in rows]
     times = [d["solve_ns"] for r in rows for d in r["decisions"]]
@@ -312,6 +335,7 @@ def main() -> None:
     parser.add_argument("--output", type=Path, required=True)
     args = parser.parse_args()
     fixture_evidence = check_policy_gap_fixtures()
+    fallback_evidence = check_fallback_semantics()
     rows = []
     for policy in ("nominal_zero_disturbance", "finite_minimax"):
         for horizon in (SHRINKING, MOVING):
@@ -331,6 +355,7 @@ def main() -> None:
                        "disturbances": DISTURBANCES, "history_count": len(list(histories())),
                        "fixed_lookahead": FIXED_LOOKAHEAD,
                        "observation": "exact full state (time,y,z) before each action",
+                       "missing_observation_policy": "unsupported; missing observations do not reveal or reconstruct hidden state",
                        "controller_reset": "fresh stateless policy and initial state per disturbance history",
                        "warm_start": "none; each finite enumeration restarts from its authored plan catalogue",
                        "decision_order": "observe full state; select u; apply current v; advance",
@@ -343,6 +368,7 @@ def main() -> None:
                       "reported": "source terminal max(abs(y),abs(z))"},
         "scope": "finite-action, four-step source-derived adaptation; not a reproduction of the continuous-action four-second RL task; finite disturbance histories only",
         "fixtures": fixture_evidence,
+        "fallback_fixtures": fallback_evidence,
         "variants": {key: aggregate(group) for key, group in grouped.items()},
         "episodes": rows,
     }
