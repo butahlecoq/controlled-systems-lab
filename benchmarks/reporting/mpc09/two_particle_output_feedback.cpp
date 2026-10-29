@@ -532,6 +532,7 @@ Json run() {
         {"adaptation", {{"scenario_id", "mpc09-two-particle-output-feedback-v1"},
             {"horizon_steps", horizon}, {"horizon_seconds", horizon * dt},
             {"state_order", {"position_1", "velocity_1", "position_2", "velocity_2"}},
+            {"source_state_adaptation", "The source fifth coordinate is clock time; the stage grid represents it explicitly, leaving four physical plant state coordinates."},
             {"initial_states", initial_states}, {"control_catalogue", actions},
             {"disturbance_catalogue", disturbances}, {"measurement_error_catalogue", errors},
             {"mhe_residual_bound", residual_bound},

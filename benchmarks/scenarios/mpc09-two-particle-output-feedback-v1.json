@@ -17,6 +17,7 @@
     "source_terminal_cost": "abs(position_1-position_2)"
   },
   "adaptation": {
+    "source_state_adaptation": "The source fifth coordinate is clock time; the stage grid represents it explicitly, leaving four physical plant state coordinates.",
     "initial_states": [[0.0, 0.0, -0.2, 0.0], [0.0, 0.0, 0.2, 0.0]],
     "initial_quantifier": "universal over the two listed states",
     "horizon_steps": 3,
