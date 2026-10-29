@@ -21,6 +21,7 @@ METHOD_A29 = "csl.geometry.a29-a30-python"
 METHOD_QUICKHULL = "csl.geometry.quickhull-2d"
 REPETITIONS = 5
 WARMUPS = 1
+CHECKER_MAX_POINTS = 64
 
 
 def sha256(data: bytes) -> str:
@@ -155,7 +156,7 @@ def main() -> int:
             algorithm = run_a29(points)
             duration = time.perf_counter_ns() - start
             output = algorithm.get("output")
-            quality = check_hull(points, output)
+            quality = check_hull(points, output, max_points=CHECKER_MAX_POINTS)
             indices = quality.get("source_indices") or []
             runtime = runtime_a29
             raw_stdout = canonical({"algorithm": algorithm, "quality": quality}) + "\n"
@@ -169,7 +170,7 @@ def main() -> int:
                                                                   args.timeout_seconds)
             indices = algorithm.get("indices", [])
             output = [points[index] for index in indices if isinstance(index, int) and 0 <= index < len(points)]
-            quality = check_hull(points, output)
+            quality = check_hull(points, output, max_points=CHECKER_MAX_POINTS)
             duration = algorithm.get("duration_ns")
             raw_runtime = algorithm.get("runtime", {})
             runtime = {"language": "C++", "implementation": raw_runtime.get("implementation", METHOD_QUICKHULL),
@@ -185,7 +186,9 @@ def main() -> int:
                                                    quality.get("status", "inconclusive"))
         if duration is None:
             duration = 0
-        result_payload = {"algorithm": algorithm, "checker": quality, "duration_ns": duration,
+        checker_evidence = {**quality, "schema": "csl.exp06-exact-hull-check/1",
+            "budget": {"max_points": CHECKER_MAX_POINTS}}
+        result_payload = {"algorithm": algorithm, "checker": checker_evidence, "duration_ns": duration,
                           "indices": indices, "method_id": method["id"], "warmup": warmup}
         measurement = {"schema": "csl.external-method-event/1", "status": event_status,
             "method_id": method["id"], "instrumentation": "disabled", "repetition": repetition,
@@ -206,8 +209,10 @@ def main() -> int:
 
     controls = {
         "schema": "csl.exp06-checker-controls/1",
-        "omitted_corner": check_hull(points, [points[index] for index in (1, 2, 3)]),
-        "all_redundant_points_retained": check_hull(points, points),
+        "omitted_corner": {**check_hull(points, [points[index] for index in (1, 2, 3)],
+            max_points=CHECKER_MAX_POINTS), "budget": {"max_points": CHECKER_MAX_POINTS}},
+        "all_redundant_points_retained": {**check_hull(points, points,
+            max_points=CHECKER_MAX_POINTS), "budget": {"max_points": CHECKER_MAX_POINTS}},
     }
     if (controls["omitted_corner"]["status"] != "incorrect" or
             controls["all_redundant_points_retained"]["status"] != "verified"):

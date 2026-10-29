@@ -106,8 +106,16 @@ def read_saved(bundle: Path):
         output_points = [points[index] for index in indices]
         sys.path.insert(0, str(PORT_ROOT))
         from oracle import check as exact_check
-        quality = exact_check(points, output_points)
-        if quality != payload.get("checker"):
+        checker_evidence = payload.get("checker", {})
+        budget = checker_evidence.get("budget", {})
+        max_points = budget.get("max_points")
+        if (checker_evidence.get("schema") != "csl.exp06-exact-hull-check/1" or
+                not isinstance(max_points, int) or max_points < len(points) or max_points > 64):
+            raise ValueError("saved checker budget or schema is invalid")
+        quality = exact_check(points, output_points, max_points=max_points)
+        saved_quality = {key: value for key, value in checker_evidence.items()
+                         if key not in ("schema", "budget")}
+        if quality != saved_quality:
             raise ValueError("saved checker result differs from exact source-hull recheck")
         status = item["reported_status"]
         if status != run["status"]:
@@ -145,7 +153,9 @@ def read_saved(bundle: Path):
     controls = capture.get("checker_controls", {})
     if (controls.get("schema") != "csl.exp06-checker-controls/1" or
             controls.get("omitted_corner", {}).get("status") != "incorrect" or
-            controls.get("all_redundant_points_retained", {}).get("status") != "verified"):
+            controls.get("all_redundant_points_retained", {}).get("status") != "verified" or
+            controls.get("omitted_corner", {}).get("budget") != {"max_points": 64} or
+            controls.get("all_redundant_points_retained", {}).get("budget") != {"max_points": 64}):
         raise ValueError("independent checker negative controls are missing or failed")
     expected_runs = 2 * (capture["warmups_per_method"] + capture["measured_repetitions_per_method"])
     if (len(rows) != expected_runs or set(methods) != set(METHODS) or

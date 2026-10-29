@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import importlib.util
+import json
 from pathlib import Path
 import tempfile
 import unittest
@@ -29,6 +30,9 @@ class Exp06PilotTest(unittest.TestCase):
         self.assertEqual(len(rows), 12)
         self.assertEqual(set(methods), set(render.METHODS))
         self.assertTrue(all(row["checker"] == "verified" for row in rows))
+        for attempt in wire["attempts"]:
+            run = json.loads(attempt["run"])
+            self.assertEqual(run["result"]["checker"]["budget"], {"max_points": 64})
         self.assertEqual(capture["checker_controls"]["omitted_corner"]["status"], "incorrect")
         self.assertEqual(capture["checker_controls"]["all_redundant_points_retained"]["status"], "verified")
         self.assertIn("inconclusive", capture["timing_comparison"])
