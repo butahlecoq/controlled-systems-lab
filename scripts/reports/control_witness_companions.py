@@ -238,6 +238,13 @@ def _mpc06_tube_companion() -> tuple[str, bytes, bytes, bytes]:
         "result_sha256": actual["result.json"],
         "figure_data_sha256": actual["figure-data.json"],
         "scenario_sha256": actual["scenario.json"],
+        "profile": {
+            "state_dimension": len(scenario["state_order"]),
+            "state_order": scenario["state_order"],
+            "horizon_steps": scenario["nominal_plan"]["horizon_steps"],
+            "feedback_law": scenario["feedback"]["law"],
+            "feedback_gain": result["system"]["K"],
+        },
         "plot_data": plot_data,
         "figure_export": export,
         "claim_scope": "presentation of frozen saved geometry; no solver or geometry query",
@@ -459,11 +466,17 @@ def build(site: Path, catalog_path: Path) -> BuildResult:
             table_rows + '</tbody></table><p><a href="' + record_link + '">Raw saved record ↗</a> · '
             '<a href="' + page_link + '">Published report ↗</a> · <a href="' + stem + '-evidence.json">Figure evidence JSON ↗</a></p></article>')
     mpc06_bounds = json.loads(mpc06_evidence)["plot_data"]["sets"]
+    mpc06_profile = json.loads(mpc06_evidence)["profile"]
+    state_box_bounds = mpc06_bounds["state_box_X"]["bounds"]
     state_bounds = mpc06_bounds["tightened_state_X_minus_Z"]["bounds"]
     tube_vertices = mpc06_bounds["error_tube_Z"]["vertices"]
     body.append(
         '<article id="mpc06-tube"><h2>MPC-06 · exact tube feasibility geometry</h2>'
-        '<p>This figure re-plots the frozen position–velocity box, support tightening and exact dyadic RPI tube. '
+        '<p>This two-state discrete double-integrator fixture uses a three-step horizon. '
+        'The checked feasibility case uses the fixed zero nominal plan and full-state feedback '
+        '<code>' + html.escape(mpc06_profile["feedback_law"]) + '</code> with '
+        '<code>K=' + html.escape(str(mpc06_profile["feedback_gain"])) + '</code>. '
+        'The figure re-plots the frozen position–velocity box, support tightening and exact dyadic RPI tube. '
         'The source declares no physical units for the state coordinates; equal data scaling is a display choice, '
         'not physical dimensional scaling. The underlying study checks feasibility and safety for one fixed '
         'nilpotent profile; it does not optimize an objective or compute a minimax reachable set.</p>'
@@ -471,12 +484,13 @@ def build(site: Path, catalog_path: Path) -> BuildResult:
         'alt="Saved position-velocity state box, tightened state set, and exact RPI tube on equal numeric axes"></a>'
         '<figcaption>Numeric ticks and major gridlines follow csl-report-quantitative-v1. '
         '<a href="control-witness/mpc06-tube.png">Open PNG figure ↗</a></figcaption></figure>'
+        '<div class="scroll" tabindex="0" role="region" aria-label="MPC-06 saved geometry coordinates">'
         '<table><caption>Exact values retained in the frozen result</caption><thead><tr><th scope="col">Set</th>'
         '<th scope="col">Saved coordinates</th></tr></thead><tbody>'
-        '<tr><th scope="row">State constraint X</th><td>[-1,1] × [-1,1]</td></tr>'
+        '<tr><th scope="row">State constraint X</th><td>' + html.escape(str(state_box_bounds)) + '</td></tr>'
         '<tr><th scope="row">Tightened state set X ⊖ Z</th><td>' + html.escape(str(state_bounds)) + '</td></tr>'
         '<tr><th scope="row">Exact RPI error tube Z</th><td>' + html.escape(str(tube_vertices)) + '</td></tr>'
-        '</tbody></table><p><a href="../' + mpc06_route + '/index.html">Frozen MPC-06 report ↗</a> · '
+        '</tbody></table></div><p><a href="../' + mpc06_route + '/index.html">Frozen MPC-06 report ↗</a> · '
         '<a href="../' + mpc06_route + '/result.json">Saved result ↗</a> · '
         '<a href="../' + mpc06_route + '/figure-data.json">Original saved figure data ↗</a> · '
         '<a href="control-witness/mpc06-tube-evidence.json">Companion data and hashes ↗</a></p></article>')

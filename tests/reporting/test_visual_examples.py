@@ -198,7 +198,10 @@ class GalleryTests(unittest.TestCase):
         self.assertIn("(0,s,1,s,1), 0&lt;=s&lt;=1", page)
         self.assertIn(f"../{self.mpc06_route}/result.json", page)
         self.assertIn("equal data scaling is a display choice", page)
+        self.assertIn("three-step horizon", page)
+        self.assertIn("u=v+K(x-z)", page)
         self.assertIn("does not optimize an objective", page)
+        self.assertIn('role="region" aria-label="MPC-06 saved geometry coordinates"', page)
         examples_dir = self.site / "examples"
         examples_dir.mkdir(exist_ok=True)
         (examples_dir / "index.html").write_text("<html>gallery fixture</html>", encoding="utf-8")
@@ -234,6 +237,11 @@ class GalleryTests(unittest.TestCase):
         self.assertEqual(mpc06_evidence["published_route"], self.mpc06_route)
         self.assertEqual(mpc06_evidence["claim_scope"],
                          "presentation of frozen saved geometry; no solver or geometry query")
+        self.assertEqual(mpc06_evidence["profile"]["state_dimension"], 2)
+        self.assertEqual(mpc06_evidence["profile"]["horizon_steps"], 3)
+        self.assertEqual(mpc06_evidence["profile"]["feedback_law"], "u=v+K(x-z)")
+        self.assertEqual(mpc06_evidence["plot_data"]["sets"]["state_box_X"]["bounds"],
+                         [[-1, 1], [-1, 1]])
         self.assertEqual(mpc06_evidence["plot_data"]["sets"]["error_tube_Z"]["vertices"],
                          [[.125, 0], [-.125, .25], [-.125, 0], [.125, -.25]])
         self.assertTrue(result.files["control-witness/mpc06-tube.png"].startswith(b"\x89PNG\r\n\x1a\n"))
