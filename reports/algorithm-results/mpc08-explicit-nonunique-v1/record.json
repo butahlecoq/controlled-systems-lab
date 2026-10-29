@@ -1,0 +1,50 @@
+{
+  "complete_optimal_relation": "u0 in [-1,1] intersect [-v0-1,-v0+1], u1=-v0-u0",
+  "evidence_limits": "sample membership is not family completeness; Strategy B mathematical outcomes are undetermined; no timing winner; no robust or minimax claim",
+  "fixture": "two-step discrete double integrator, terminal velocity-squared objective",
+  "history_samples": 45,
+  "initial_domain_exact": {
+    "p": [
+      "-3",
+      "3"
+    ],
+    "v": [
+      "-2",
+      "2"
+    ]
+  },
+  "issue": "https://github.com/butahlecoq/controlled-systems-lab/issues/604",
+  "optimal_value_exact": "0 on X",
+  "outcomes": {
+    "csl.synthesis.reach-back": {
+      "calls": 270,
+      "max_elapsed_ns": 6132735,
+      "measured_calls": 225,
+      "median_elapsed_ns": 5023788,
+      "min_elapsed_ns": 4803367,
+      "result": "270 candidates contain samples; all 270 stop at a rejected degenerate QP"
+    },
+    "csl.synthesis.strategy-b": {
+      "calls": 270,
+      "max_elapsed_ns": 1006909,
+      "measured_calls": 225,
+      "median_elapsed_ns": 500556,
+      "min_elapsed_ns": 386085,
+      "result": "270 candidates contain samples; 252 completed, 18 noncompleted; all outcomes undetermined"
+    },
+    "online-condensed-qp": {
+      "calls": 270,
+      "max_elapsed_ns": 469337,
+      "measured_calls": 225,
+      "median_elapsed_ns": 336637,
+      "min_elapsed_ns": 308910,
+      "result": "270 online solves return feasible optimal points with exact value zero"
+    }
+  },
+  "report_id": "mpc08-explicit-nonunique-v1",
+  "schema": "csl.mpc08-nonunique-report/1",
+  "source_commit": "7bea429642b19f81a415299519c95320fe47a878",
+  "source_url": "https://github.com/butahlecoq/controlled-systems-lab/tree/7bea429642b19f81a415299519c95320fe47a878/benchmarks/reporting/mpc08_explicit",
+  "state_samples": 15,
+  "tie_break": "minimize u0^2+u1^2 over the optimal fiber; u0=u1=-v0/2"
+}

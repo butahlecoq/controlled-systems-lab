@@ -1,0 +1,57 @@
+{
+  "schema": "csl.mpc08-nonunique-build-provenance/1",
+  "source_commit": "7bea429642b19f81a415299519c95320fe47a878",
+  "build_source_base_commit": "b23d9c81a17c7a8c628a0efc9bc6529344805ff1",
+  "build_source_identity_note": "The driver and reference files were built before commit 7bea429; their SHA-256 values match the committed files, and no compiled source was edited between capture and commit.",
+  "fixture": "two-step discrete double integrator; nonunique terminal-velocity optimum",
+  "build": {
+    "operating_system": "Omarchy 4.0.6 (Arch Linux family)",
+    "kernel": "Linux 7.2.8-9-omarchy x86_64",
+    "logical_processors": 8,
+    "compiler": "GCC 16.2.1",
+    "cmake": "3.31.6",
+    "ninja": "1.13.2",
+    "build_type": "Release",
+    "highs": "1.11.0",
+    "qhull": "8.0.2",
+    "options": {
+      "CSL_ENABLE_HIGHS": true,
+      "CSL_ENABLE_QHULL": true,
+      "CSL_BUILD_MPC08_REPORT": true,
+      "BUILD_TESTING": false
+    },
+    "command": "cmake -S . -B build/mpc08-nonunique -G Ninja -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTING=OFF -DCSL_ENABLE_HIGHS=ON -DCSL_ENABLE_QHULL=ON -DCSL_BUILD_MPC08_REPORT=ON"
+  },
+  "binary": {
+    "path": "build/mpc08-nonunique/csl_mpc08_explicit_compare",
+    "sha256": "0f6cd65fe4d6d021bd34283697faa5cb4dcf8fe0cff9430ae949de9eb95c2914"
+  },
+  "source_sha256": {
+    "benchmarks/reporting/mpc08_explicit/mpc08_strategy_comparison.cpp": "5610f14d43cfbc60a28346cde3b35e3a7605900f9f8985e1495374219e1b8be6",
+    "benchmarks/reporting/mpc08_explicit/explicit_nonunique_double_integrator.py": "ffd3423353b87c503f5980decefd4642aa9330cc52de4478c53bb72e0fdce6a2"
+  },
+  "measurement": {
+    "initial_states": 15,
+    "optimal_history_samples": 45,
+    "methods": [
+      "csl.synthesis.reach-back",
+      "csl.synthesis.strategy-b",
+      "online-condensed-qp"
+    ],
+    "warmups_per_method": 1,
+    "measured_repetitions_per_method": 5,
+    "calls_per_method": 270,
+    "measured_calls_per_method": 225,
+    "interleaved_order": "A/B/QP, QP/B/A, B/QP/A, repeated for five measured rounds",
+    "resource_limits": "none beyond the host process defaults",
+    "pre_run_load_average": "not captured",
+    "source_profile": "not captured; no limiter attribution",
+    "performance_interpretation": "descriptive only; no performance winner claimed"
+  },
+  "artifact_sha256": {
+    "explicit-nonunique-double-integrator.json": "4426c6c349d4bbe0482b5a6d0556fb6c45ebcc96962b6a6f75bcdee765c14240",
+    "explicit-nonunique-queries.csv": "499a6f998191a585babc8dcaa7decda84ae62f7f91e781e0a0b9ff34dae7222e",
+    "csl-nonunique-observations.jsonl": "e6be5b127f192c2676c7eb557cbae8ef2fd436092fac4710bc3c87a22dcc1257",
+    "explicit-nonunique-double-integrator.svg": "a9f8c347bb75bf01b1fe31fe156a421e0a36bc9c53e230da28266e157410c981"
+  }
+}

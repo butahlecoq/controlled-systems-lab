@@ -2,7 +2,9 @@
 
 This is a bounded pilot for [issue #604](https://github.com/butahlecoq/controlled-systems-lab/issues/604), not a complete comparison-program result. It gives an exact parametric reference for one double-integrator step, separately identifies the invariant terminal set, and records fixed-initial CSL candidate checks and a condensed online-QP baseline.
 
-Saved HTML report and offline bundle: [MPC-08 explicit pilot](../../../reports/algorithm-results/mpc08-explicit-pilot-v1/index.html). Its public Pages route is pending merge and deployment.
+Saved HTML report and offline bundle: [MPC-08 explicit pilot](../../../reports/algorithm-results/mpc08-explicit-pilot-v1/index.html). Its verified public Pages route is [live](https://butahlecoq.github.io/controlled-systems-lab/mpc08-explicit-pilot-v1/).
+
+The nonunique two-step continuation has a separate [versioned report and figure](../../../reports/algorithm-results/mpc08-explicit-nonunique-v1/index.html), raw solver observations, and offline bundle.
 
 The products stay separate: `F` ranges over initial states; `T` is invariant under its named terminal feedback; `u*` and `V1` are explicit functions of one initial state; each CSL run returns a candidate relation for one fixed initial state. A reachable terminal set and a complete joint optimal relation are not inferred from these outputs.
 
@@ -82,7 +84,9 @@ value zero in all 225 measured calls. Its solver-selected controls are checked
 for optimality and feasibility, not equality to the minimum-norm tie-break.
 These are candidate-membership samples and solver observations: they do not
 prove equality of Strategy A/B families with the complete analytic relation.
-The captured times are descriptive and do not support a winner claim.
+The captured times are descriptive and do not support a winner claim. Build,
+binary, source, and input hashes plus unavailable load/profile evidence are in
+`generated/nonunique-build-provenance.json`.
 
 To regenerate and run the nonunique fixture:
 

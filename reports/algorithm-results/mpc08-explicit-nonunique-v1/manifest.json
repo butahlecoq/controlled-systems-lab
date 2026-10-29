@@ -1,0 +1,16 @@
+{
+  "files_sha256": {
+    "README.md": "1335e4f9a04d7a3f9f304f5d19b743c0e11208116ede75bd7e995b5ee7e746b8",
+    "build-provenance.json": "c8b2d67f259ae67fd7905a0e7edc5f1c22cf91e8fe3c5e9b7428670cc5ebcd36",
+    "csl-nonunique-observations.jsonl": "e6be5b127f192c2676c7eb557cbae8ef2fd436092fac4710bc3c87a22dcc1257",
+    "explicit-nonunique-double-integrator.json": "4426c6c349d4bbe0482b5a6d0556fb6c45ebcc96962b6a6f75bcdee765c14240",
+    "explicit-nonunique-queries.csv": "499a6f998191a585babc8dcaa7decda84ae62f7f91e781e0a0b9ff34dae7222e",
+    "explicit_nonunique_double_integrator.py": "ffd3423353b87c503f5980decefd4642aa9330cc52de4478c53bb72e0fdce6a2",
+    "index.html": "11b354fc463e709eb6298c3a8bc996763958ed27447ea05dce1f2d20e4bcfeca",
+    "mpc08_strategy_comparison.cpp": "5610f14d43cfbc60a28346cde3b35e3a7605900f9f8985e1495374219e1b8be6",
+    "optimal-fiber.svg": "a9f8c347bb75bf01b1fe31fe156a421e0a36bc9c53e230da28266e157410c981",
+    "record.json": "1a8f864f64fe60ad1e6eddbc76323bd37b01db9352ef2042315c3ba3abe16ef4"
+  },
+  "report_id": "mpc08-explicit-nonunique-v1",
+  "schema": "csl.mpc08-nonunique-manifest/1"
+}
