@@ -51,6 +51,23 @@ jobs:
             -DCSL_BUILD_IT17_HULL_REPORT=ON -DCSL_ENABLE_HIGHS=ON -DCSL_ENABLE_QHULL=OFF
           cmake --build build/it17-hull-4d-ci --config Release \
             --target csl_it17_hull_4d_report --parallel 2
+      - name: Build and smoke the EXP-06 paired geometry tools
+        if: needs.route.outputs.native == 'true'
+        shell: bash
+        run: |
+          cmake -S . -B build/exp06-pilot-ci -DBUILD_TESTING=OFF -DCMAKE_BUILD_TYPE=Release \
+            -DCSL_ENABLE_HIGHS=OFF -DCSL_ENABLE_QHULL=OFF -DCSL_BUILD_EXP06_PILOT=ON
+          cmake --build build/exp06-pilot-ci --config Release \
+            --target csl_exp06_quickhull csl_exp06_pack_comparison --parallel 2
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          fixture = json.loads(Path('tools/legacy-ports/A29/fixtures/square.json').read_text())
+          fixture['schema'] = 'csl.geometry-hull-input/1'
+          Path('build/exp06-pilot-ci/square.json').write_text(
+              json.dumps(fixture, sort_keys=True, separators=(',', ':')) + '\n')
+          PY
+          build/exp06-pilot-ci/csl_exp06_quickhull --run build/exp06-pilot-ci/square.json
       - name: Build and smoke the APP-01 public plan-check driver
         if: needs.route.outputs.native == 'true'
         shell: bash
@@ -239,6 +256,11 @@ jobs:
             fi
             if test -f reports/algorithm-results/geo08-publications.json; then
               python scripts/reports/stage_geo08.py --catalog reports/algorithm-results/geo08-publications.json --site build/report-site
+            fi
+            if test -d reports/algorithm-results/exp06-geometry-pilot-20261029; then
+              python scripts/reports/stage_exp06.py \
+                --source reports/algorithm-results/exp06-geometry-pilot-20261029 \
+                --site build/report-site
             fi
             if test -f reports/algorithm-results/finite-feedback-publications.json; then
               python scripts/reports/stage_finite_feedback.py --catalog reports/algorithm-results/finite-feedback-publications.json --site build/report-site
