@@ -8,6 +8,8 @@
 #include <cstddef>
 #include <cstdint>
 #include <iostream>
+#include <functional>
+#include <map>
 #include <limits>
 #include <stdexcept>
 #include <string>
@@ -51,7 +53,7 @@ sets::SetData point(std::string id, const State& state) {
         {state[0], state[1], state[2]}});
 }
 
-FiniteActionMinimaxRequest request(const State& initial, std::size_t horizon,
+FiniteActionMinimaxRequest make_request(const State& initial, std::size_t horizon,
                                    bool robust, const std::array<double, 3>& direction,
                                    std::size_t component) {
     const SystemModel authored{{{3, 1, 1}, TimeDomain::discrete,
@@ -105,7 +107,7 @@ SelectedPlan choose_plan(const State& state, std::size_t horizon, bool robust) {
     std::vector<double> combined;
     std::size_t plan_count = 0;
     for(std::size_t component = 0; component < directions.size(); ++component) {
-        auto input = request(state, horizon, robust, directions[component], component);
+        auto input = make_request(state, horizon, robust, directions[component], component);
         const auto limits = FiniteActionMinimaxLimits{
             std::size_t{1} << horizon, 256, tie_tolerance};
         auto outcome = finite_action_minimax(input, limits);
@@ -163,45 +165,194 @@ double source_objective(const State& state) {
     return std::max(std::abs(state[1]), std::abs(state[2]));
 }
 
+template<class StateType, class DisturbanceType, class Choose, class Advance>
+StateType run_closed_loop(StateType state,
+                          const std::vector<DisturbanceType>& disturbance_history,
+                          Choose choose, Advance advance) {
+    for(std::size_t step = 0; step < disturbance_history.size(); ++step) {
+        const auto decision = choose(step, state);
+        state = advance(step, state, decision, disturbance_history[step]);
+    }
+    return state;
+}
+
+struct IntegerFixture {
+    using StateType = std::vector<int>;
+    StateType initial_state;
+    std::vector<std::vector<int>> actions;
+    std::vector<std::vector<int>> disturbances;
+    std::function<StateType(std::size_t, const StateType&, int, int)> transition;
+    std::function<int(const StateType&)> score;
+};
+
+std::vector<std::vector<int>> suffixes(const std::vector<std::vector<int>>& sets,
+                                       std::size_t stage) {
+    std::vector<std::vector<int>> output{{}};
+    for(std::size_t i = stage; i < sets.size(); ++i) {
+        std::vector<std::vector<int>> next;
+        for(const auto& prefix : output) for(const int value : sets[i]) {
+            auto row = prefix; row.push_back(value); next.push_back(std::move(row));
+        }
+        output = std::move(next);
+    }
+    return output;
+}
+
+int fixed_plan_value(const IntegerFixture& game, std::size_t stage,
+                     const IntegerFixture::StateType& initial,
+                     const std::vector<int>& plan) {
+    int worst = std::numeric_limits<int>::min();
+    for(const auto& disturbance_suffix : suffixes(game.disturbances, stage)) {
+        auto state = initial;
+        for(std::size_t offset = 0; offset < plan.size(); ++offset)
+            state = game.transition(stage + offset, state, plan[offset], disturbance_suffix[offset]);
+        worst = std::max(worst, game.score(state));
+    }
+    return worst;
+}
+
+std::pair<int, std::vector<int>> choose_fixture_plan(const IntegerFixture& game,
+        std::size_t stage, const IntegerFixture::StateType& state) {
+    const auto plans = suffixes(game.actions, stage);
+    std::pair<int, std::vector<int>> best{std::numeric_limits<int>::max(), {}};
+    for(const auto& plan : plans) {
+        const auto value = fixed_plan_value(game, stage, state, plan);
+        if(value < best.first || (value == best.first && plan < best.second))
+            best = {value, plan};
+    }
+    return best;
+}
+
+int causal_fixture_value(const IntegerFixture& game, std::size_t stage,
+                         const IntegerFixture::StateType& state) {
+    if(stage == game.actions.size()) return game.score(state);
+    int best = std::numeric_limits<int>::max();
+    for(const int action : game.actions[stage]) {
+        int worst = std::numeric_limits<int>::min();
+        for(const int disturbance : game.disturbances[stage]) {
+            const auto next = game.transition(stage, state, action, disturbance);
+            worst = std::max(worst, causal_fixture_value(game, stage + 1, next));
+        }
+        best = std::min(best, worst);
+    }
+    return best;
+}
+
+std::string history_key(const std::vector<int>& history) {
+    std::string key = "(";
+    for(std::size_t i = 0; i < history.size(); ++i) {
+        if(i != 0) key += ", ";
+        key += std::to_string(history[i]);
+    }
+    return key + ")";
+}
+
+Json check_finite_policy_fixtures() {
+    IntegerFixture strict{
+        {{0, 0}}, {{0, 1}, {-1, 1}}, {{-1, 0, 1}, {0}},
+        [](std::size_t, const std::vector<int>& s, int u, int w) {
+            return std::vector<int>{s[0] + u + w, s[0] + s[1] - w};
+        },
+        [](const std::vector<int>& s) { return s[0] * s[0] + s[1] * s[1]; }};
+    IntegerFixture scalar{
+        {{0}}, {{0}, {-1, 1}}, {{-1, 1}, {0}},
+        [](std::size_t, const std::vector<int>& s, int u, int w) {
+            return std::vector<int>{s[0] + u + w};
+        },
+        [](const std::vector<int>& s) { return std::abs(s[0]); }};
+
+    auto execute = [](const IntegerFixture& game) {
+        std::map<std::vector<int>, int> outcomes;
+        for(const auto& history : suffixes(game.disturbances, 0)) {
+            const auto terminal = run_closed_loop(game.initial_state, history,
+                [&](std::size_t stage, const IntegerFixture::StateType& state) {
+                    return choose_fixture_plan(game, stage, state).second.front();
+                },
+                [&](std::size_t stage, const IntegerFixture::StateType& state,
+                    int action, int disturbance) {
+                    return game.transition(stage, state, action, disturbance);
+                });
+            outcomes.emplace(history, game.score(terminal));
+        }
+        return outcomes;
+    };
+    const auto strict_outcomes = execute(strict);
+    const auto scalar_outcomes = execute(scalar);
+    const auto strict_fixed = choose_fixture_plan(strict, 0, strict.initial_state).first;
+    const auto scalar_fixed = choose_fixture_plan(scalar, 0, scalar.initial_state).first;
+    const auto strict_causal = causal_fixture_value(strict, 0, strict.initial_state);
+    const auto strict_worst = std::max_element(strict_outcomes.begin(), strict_outcomes.end(),
+        [](const auto& a, const auto& b) { return a.second < b.second; })->second;
+    const auto scalar_worst = std::max_element(scalar_outcomes.begin(), scalar_outcomes.end(),
+        [](const auto& a, const auto& b) { return a.second < b.second; })->second;
+    if(strict_fixed != 2 || strict_worst != 2 || strict_causal != 1 ||
+       strict_outcomes.at({-1, 0}) != 2 || strict_outcomes.at({0, 0}) != 1 ||
+       strict_outcomes.at({1, 0}) != 2 || scalar_fixed != 2 || scalar_worst != 0)
+        throw std::runtime_error("closed-loop finite policy-gap fixtures changed");
+    Json strict_histories = Json::object(), scalar_histories = Json::object();
+    for(const auto& [history, value] : strict_outcomes)
+        strict_histories[history_key(history)] = value;
+    for(const auto& [history, value] : scalar_outcomes)
+        scalar_histories[history_key(history)] = value;
+    return {{"strict_two_step", {{"fixed_plan_squared", strict_fixed},
+              {"executed_replanning_worst_squared", strict_worst},
+              {"causal_squared", strict_causal}, {"history_squared", strict_histories}}},
+            {"scalar_two_step", {{"fixed_plan", scalar_fixed},
+              {"executed_replanning_worst", scalar_worst},
+              {"history_costs", scalar_histories}}}};
+}
+
 Json episode(std::string policy, std::string horizon_name,
              const std::array<double, episode_steps>& history) {
-    State state{0.0, 0.2, 0.0};
-    Json states = Json::array({state});
+    State initial{0.0, 0.2, 0.0};
+    Json states = Json::array({initial});
     Json decisions = Json::array();
     std::size_t fallbacks = 0;
-    for(std::size_t step = 0; step < episode_steps; ++step) {
-        const auto horizon = horizon_name == "shrinking_to_episode_terminal"
-            ? episode_steps - step : fixed_lookahead;
-        SelectedPlan plan;
-        std::string status = "solved";
-        std::string solver_detail;
-        try {
-            plan = choose_plan(state, horizon, policy == "finite_minimax");
-        } catch(const std::exception& error) {
-            plan.controls = {0.0};
-            plan.squared_objective = std::numeric_limits<double>::quiet_NaN();
-            status = "solver_failure_fallback";
-            solver_detail = error.what();
-            ++fallbacks;
-        }
-        double action = plan.controls.empty() ? 0.0 : plan.controls.front();
-        if(plan.elapsed_ns > 50'000'000) {
-            action = 0.0;
-            status = "deadline_fallback";
-            solver_detail = "native solve returned after the per-decision deadline; cancellation is unavailable";
-            ++fallbacks;
-        }
-        Json remaining = plan.controls;
-        if(status != "solved") remaining = Json::array();
-        decisions.push_back({{"step", step}, {"observed_state", state},
-            {"action", action}, {"status", status}, {"requested_horizon", horizon},
-            {"effective_horizon", horizon},
-            {"planned_squared_objective", std::isfinite(plan.squared_objective)
-                ? Json(plan.squared_objective) : Json(nullptr)},
-            {"solve_ns", plan.elapsed_ns}, {"remaining_plan", std::move(remaining)},
-            {"solver_detail", solver_detail}, {"fallback", status != "solved"}});
-        state = advance(state, action, history[step]);
-        states.push_back(state);
+    std::vector<double> disturbance_history(history.begin(), history.end());
+    const auto state = run_closed_loop(initial, disturbance_history,
+        [&](std::size_t step, const State& observed) {
+            const auto horizon = horizon_name == "shrinking_to_episode_terminal"
+                ? episode_steps - step : fixed_lookahead;
+            SelectedPlan plan;
+            std::string status = "solved";
+            std::string solver_detail;
+            try {
+                plan = choose_plan(observed, horizon, policy == "finite_minimax");
+            } catch(const std::exception& error) {
+                plan.controls = {0.0};
+                plan.squared_objective = std::numeric_limits<double>::quiet_NaN();
+                status = "solver_failure_fallback";
+                solver_detail = error.what();
+                ++fallbacks;
+            }
+            double action = plan.controls.empty() ? 0.0 : plan.controls.front();
+            if(plan.elapsed_ns > 50'000'000) {
+                action = 0.0;
+                status = "deadline_fallback";
+                solver_detail = "native solve returned after the per-decision deadline; cancellation is unavailable";
+                ++fallbacks;
+            }
+            Json remaining = plan.controls;
+            if(status != "solved") remaining = Json::array();
+            decisions.push_back({{"step", step}, {"observed_state", observed},
+                {"action", action}, {"status", status}, {"requested_horizon", horizon},
+                {"effective_horizon", horizon},
+                {"planned_squared_objective", std::isfinite(plan.squared_objective)
+                    ? Json(plan.squared_objective) : Json(nullptr)},
+                {"solve_ns", plan.elapsed_ns}, {"remaining_plan", std::move(remaining)},
+                {"solver_detail", solver_detail}, {"fallback", status != "solved"}});
+            return action;
+        },
+        [](std::size_t, const State& observed, double action, double disturbance) {
+            return advance(observed, action, disturbance);
+        });
+    // State snapshots are reconstructed from the initial state and each recorded action.
+    states = Json::array({initial});
+    auto replay_state = initial;
+    for(std::size_t i = 0; i < episode_steps; ++i) {
+        replay_state = advance(replay_state,
+            decisions.at(i).at("action").get<double>(), history[i]);
+        states.push_back(replay_state);
     }
     return {{"policy", std::move(policy)}, {"horizon", std::move(horizon_name)},
         {"disturbances", history}, {"states", std::move(states)},
@@ -220,7 +371,8 @@ Json run() {
                     episodes.push_back(episode(policy, horizon, {v0, v1, v2, v3}));
         }
     }
-    return {{"episodes", std::move(episodes)}};
+    return {{"episodes", std::move(episodes)},
+            {"fixtures", check_finite_policy_fixtures()}};
 }
 }
 

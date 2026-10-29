@@ -340,8 +340,12 @@ def main() -> None:
     fallback_evidence = check_fallback_semantics()
     if args.native_executable:
         native = subprocess.run([str(args.native_executable)], check=True, capture_output=True, text=True)
-        rows = json.loads(native.stdout)["episodes"]
-        implementation = "repository C++ csl.finite_action_minimax adapter"
+        native_data = json.loads(native.stdout)
+        rows = native_data["episodes"]
+        if native_data["fixtures"] != fixture_evidence:
+            raise RuntimeError("native closed-loop fixtures disagree with the independent Python reference")
+        fixture_evidence = native_data["fixtures"]
+        implementation = "repository C++ csl.finite_action_minimax adapter; finite fixtures run through shared C++ episode loop"
     else:
         rows = []
         for policy in ("nominal_zero_disturbance", "finite_minimax"):
