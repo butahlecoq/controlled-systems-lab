@@ -718,11 +718,11 @@ def build(catalog, site):
             'The geometry examples use saved 2D coordinates; timing charts show saved medians and observed ranges.</p>'
             '<p><a href="geometry-optimization-v1.html">Open geometry and optimization figures →</a></p></article>' +
             '<article class="saved-figure" id="control-witness-companions"><p class="eyebrow">Control strategy · Saved-data companion</p>'
-            '<h3>Strategy A and B control-relation projections</h3>'
-            '<a href="control-witness-v1.html"><img src="control-witness/strategy-a-ts01.svg" '
-            'alt="Projection of a saved five-coordinate control relation into the u0 and u1 control plane"></a>'
-            '<p>Five figures plot the exact saved control projections from Strategy A and B. A companion page also shows their saved timing observations.</p>'
-            '<p><a href="control-witness-v1.html">Open the control-relation figures →</a></p></article>' +
+            '<h3>Saved control relations and tube geometry</h3>'
+            '<a href="control-witness-v1.html"><img src="control-witness/mpc06-tube.svg" '
+            'alt="Saved state box, support-tightened set, and exact RPI error tube on equal numeric axes"></a>'
+            '<p>Five figures plot saved control projections from Strategy A and B; one additional figure shows frozen MPC-06 tube geometry with numeric ticks, a major grid, and equal position–velocity scaling. The companions preserve the original report evidence.</p>'
+            '<p><a href="control-witness-v1.html">Open the control and tube figures →</a></p></article>' +
             '<article class="saved-figure" id="control-witness-timings"><p class="eyebrow">Control reports · Saved-data companion</p>'
             '<h3>Saved synthesis and verifier timings</h3>'
             '<a href="control-witness-timing-v1.html"><img src="control-witness/syn01-timing.svg" '

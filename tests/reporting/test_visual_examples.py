@@ -16,6 +16,7 @@ sys.path.insert(0, str(ROOT / "scripts/reports"))
 import visual_examples as gallery
 import stage_app01 as app01_reports
 import control_witness_companions
+import stage_mpc06_tube
 import stage_syn03_nominal_exact_example as nominal_exact_example
 
 
@@ -39,6 +40,7 @@ class GalleryTests(unittest.TestCase):
         self.addCleanup(self.temp.cleanup)
         self.site = Path(self.temp.name)
         (self.site / "index.html").write_text("<html><body><h1>Reports</h1><ul></ul></body></html>")
+        self.mpc06_route = stage_mpc06_tube.stage(stage_mpc06_tube.SOURCE, self.site)
         catalog = json.loads(self.catalog.read_text())
         self.catalog_reports = catalog["reports"]
         route_by_source = control_witness_companions.published_routes(self.catalog)
@@ -194,6 +196,12 @@ class GalleryTests(unittest.TestCase):
         page = result.files["control-witness-v1.html"].decode()
         self.assertIn("Projection of the saved five-coordinate joint relation", page)
         self.assertIn("(0,s,1,s,1), 0&lt;=s&lt;=1", page)
+        self.assertIn(f"../{self.mpc06_route}/result.json", page)
+        self.assertIn("equal data scaling is a display choice", page)
+        self.assertIn("three-step horizon", page)
+        self.assertIn("u=v+K(x-z)", page)
+        self.assertIn("does not optimize an objective", page)
+        self.assertIn('role="region" aria-label="MPC-06 saved geometry coordinates"', page)
         examples_dir = self.site / "examples"
         examples_dir.mkdir(exist_ok=True)
         (examples_dir / "index.html").write_text("<html>gallery fixture</html>", encoding="utf-8")
@@ -225,11 +233,27 @@ class GalleryTests(unittest.TestCase):
         self.assertTrue(any(node.tag.endswith("title") for node in svg))
         self.assertTrue(any(node.tag.endswith("desc") for node in svg))
         self.assertTrue(result.files["control-witness/strategy-b-ts03.png"].startswith(b"\x89PNG\r\n\x1a\n"))
+        mpc06_evidence = json.loads(result.files["control-witness/mpc06-tube-evidence.json"])
+        self.assertEqual(mpc06_evidence["published_route"], self.mpc06_route)
+        self.assertEqual(mpc06_evidence["claim_scope"],
+                         "presentation of frozen saved geometry; no solver or geometry query")
+        self.assertEqual(mpc06_evidence["profile"]["state_dimension"], 2)
+        self.assertEqual(mpc06_evidence["profile"]["horizon_steps"], 3)
+        self.assertEqual(mpc06_evidence["profile"]["feedback_law"], "u=v+K(x-z)")
+        self.assertEqual(mpc06_evidence["plot_data"]["sets"]["state_box_X"]["bounds"],
+                         [[-1, 1], [-1, 1]])
+        self.assertEqual(mpc06_evidence["plot_data"]["sets"]["error_tube_Z"]["vertices"],
+                         [[.125, 0], [-.125, .25], [-.125, 0], [.125, -.25]])
+        self.assertTrue(result.files["control-witness/mpc06-tube.png"].startswith(b"\x89PNG\r\n\x1a\n"))
+        mpc06_svg = ET.fromstring(result.files["control-witness/mpc06-tube.svg"])
+        self.assertEqual(mpc06_svg.attrib["role"], "img")
+        self.assertTrue(any(node.tag.endswith("title") for node in mpc06_svg))
+        self.assertTrue(any(node.tag.endswith("desc") for node in mpc06_svg))
         syn02_evidence = json.loads(result.files["control-witness/syn02-timing-evidence.json"])
         failed = [row for row in syn02_evidence["rows"] if row["label"].startswith("shifted-residual-degenerate")]
         self.assertEqual(len(failed), 3)
         self.assertTrue(all(row["median"] is None and "failed" in row["status"] for row in failed))
-        self.assertEqual(len([name for name in result.files if name.endswith(".svg")]), 14)
+        self.assertEqual(len([name for name in result.files if name.endswith(".svg")]), 15)
         syn06_evidence = json.loads(result.files["control-witness/syn06-timing-evidence.json"])
         self.assertEqual(syn06_evidence["rows"][0]["batch"], 28000)
         self.assertEqual(syn06_evidence["rows"][0]["median"],
@@ -284,7 +308,9 @@ class GalleryTests(unittest.TestCase):
         self.assertIn("min-height:0;max-height:min(42vh,24rem);overflow-y:auto", stylesheet)
         self.assertIn("max-height:35vh;overflow-y:auto;overscroll-behavior:contain", stylesheet)
         self.assertIn("@media(max-height:500px) and (min-width:651px)", stylesheet)
-        self.assertNotIn("overflow:visible", stylesheet)
+        self.assertIn(".control-witness-page #mpc06-tube .scroll{overflow:visible", stylesheet)
+        self.assertNotIn("*{overflow:visible", stylesheet)
+        self.assertIn("#mpc06-tube th{background:white;color:#111}", stylesheet)
         self.assertIn("Original point ID", page)
         self.assertIn("explicit analytic constructions", page)
         self.assertIn("duplicate of point 0", page)

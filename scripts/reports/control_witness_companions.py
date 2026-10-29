@@ -48,6 +48,8 @@ SOURCE_DISPOSITIONS = (
     SourceDisposition("scripts/reports/syn_ts01_paired/report.py", "report-plot-renderer", "frozen-report-plot-preserved-with-saved-timing-companion", ("control-witness-timings",)),
     SourceDisposition("scripts/reports/ts01/report.py", "analytic-diagram-renderer", "reviewed-analytic-diagram-preserved"),
     SourceDisposition("scripts/reports/viz04/render_saved.py", "saved-plot-renderer", "adopted-shared-quantitative-policy"),
+    SourceDisposition("scripts/reports/mpc06/capture_tube.py", "collector-and-plot-renderer", "frozen-renderer-preserved-with-gallery-companion", ("control-witness-companions",)),
+    SourceDisposition("scripts/reports/mpc06/render_tube.py", "saved-plot-renderer", "frozen-renderer-preserved-with-gallery-companion", ("control-witness-companions",)),
 )
 
 PROJECTIONS = (
@@ -81,7 +83,9 @@ def strategy_slug(report_id: str) -> str:
 
 
 def asset_paths() -> list[str]:
-    paths = ["control-witness-v1.html", "control-witness-timing-v1.html"]
+    paths = ["control-witness-v1.html", "control-witness-timing-v1.html",
+             "control-witness/mpc06-tube.svg", "control-witness/mpc06-tube.png",
+             "control-witness/mpc06-tube-evidence.json"]
     for report_id, *_ in PROJECTIONS:
         stem = "control-witness/" + strategy_slug(report_id)
         paths.extend(stem + suffix for suffix in (".svg", ".png", "-evidence.json"))
@@ -162,6 +166,93 @@ def _load_record(site: Path, report_id: str, route_id: str) -> tuple[dict, bytes
     return record, raw
 
 
+def _mpc06_tube_companion() -> tuple[str, bytes, bytes, bytes]:
+    """Render only the exact geometry retained in the immutable MPC-06 bundle."""
+    root = Path(__file__).resolve().parents[2]
+    bundle = root / "reports/algorithm-results/mpc06-nilpotent-tube-pilot-v1"
+    expected = {"README.md", "capture.json", "figure-data.json", "index.html",
+                "projection.svg", "result.json", "scenario.json", "SHA256SUMS"}
+    if bundle.is_symlink() or not bundle.is_dir() or {path.name for path in bundle.iterdir()} != expected:
+        raise ValueError("MPC-06 frozen report inventory differs")
+    files = {name: (bundle / name).read_bytes() for name in expected}
+    checksums = {}
+    for line in files["SHA256SUMS"].decode("ascii").splitlines():
+        digest, name = line.split("  ", 1)
+        if name in checksums:
+            raise ValueError("duplicate MPC-06 frozen report checksum")
+        checksums[name] = digest
+    actual = {name: hashlib.sha256(value).hexdigest()
+              for name, value in files.items() if name != "SHA256SUMS"}
+    if checksums != actual:
+        raise ValueError("MPC-06 frozen report checksum mismatch")
+    result = json.loads(files["result.json"])
+    plot_data = json.loads(files["figure-data.json"])
+    scenario = json.loads(files["scenario.json"])
+    if (result.get("schema") != "csl.mpc06-nilpotent-tube-pilot/1" or
+            plot_data.get("schema") != "csl.mpc06-tube-figure-data/1" or
+            scenario.get("scenario_id") != result.get("case_id") or
+            scenario.get("state_order") != ["position", "velocity"]):
+        raise ValueError("MPC-06 saved identities or state order differ")
+
+    # Match stage_mpc06_tube.py's immutable route derivation without staging or
+    # rerunning its solver, checker, or geometry producer.
+    route_identity = {name: hashlib.sha256(value).hexdigest() for name, value in files.items()}
+    route_bytes = json.dumps(route_identity, sort_keys=True, separators=(",", ":")).encode()
+    route_id = "mpc06-tube-" + hashlib.sha256(route_bytes).hexdigest()[:20]
+    sets = plot_data["sets"]
+
+    def rectangle(bounds: list[list[float]]) -> list[list[float]]:
+        (xmin, xmax), (ymin, ymax) = bounds
+        return [[xmin, ymin], [xmax, ymin], [xmax, ymax], [xmin, ymax]]
+
+    document = {
+        "schema": "csl.saved-geometric-plot/1",
+        "title": "MPC-06 exact tube and tightened state constraints",
+        "description": ("Saved exact state box, support-tightened state box and dyadic RPI tube "
+                        "for one position-velocity fixture with no declared physical units. This is a feasibility picture, "
+                        "not an optimized or minimax reachable set."),
+        "axes": {"x": {"label": "Position state x₁ (model coordinate)"},
+                 "y": {"label": "Velocity state x₂ (model coordinate)"}},
+        "aspect": "equal",
+        "series": [
+            {"kind": "polygon", "label": "State constraint X", "color": "#6b7280",
+             "points": rectangle(sets["state_box_X"]["bounds"]), "linestyle": "--"},
+            {"kind": "polygon", "label": "Tightened state set X ⊖ Z", "color": "#d97706",
+             "points": rectangle(sets["tightened_state_X_minus_Z"]["bounds"]),
+             "fill": True, "alpha": .18},
+            {"kind": "polygon", "label": "Exact RPI error tube Z", "color": "#0072b2",
+             "points": sets["error_tube_Z"]["vertices"], "fill": True, "alpha": .42},
+        ],
+    }
+    style = Path(__file__).with_name("styles") / "control-v1.json"
+    with tempfile.TemporaryDirectory(prefix="csl-viz09-mpc06-") as temporary:
+        generated = Path(temporary)
+        geometry_figures.render(document, style, generated)
+        figure_svg = (generated / "geometry.svg").read_bytes()
+        figure_png = (generated / "geometry.png").read_bytes()
+        export = json.loads((generated / "export.json").read_text(encoding="utf-8"))
+    evidence = {
+        "schema": "csl.control-witness-mpc06-tube-companion/1",
+        "source_report": "mpc06-nilpotent-tube-pilot-v1",
+        "published_route": route_id,
+        "result_sha256": actual["result.json"],
+        "figure_data_sha256": actual["figure-data.json"],
+        "scenario_sha256": actual["scenario.json"],
+        "profile": {
+            "state_dimension": len(scenario["state_order"]),
+            "state_order": scenario["state_order"],
+            "horizon_steps": scenario["nominal_plan"]["horizon_steps"],
+            "feedback_law": scenario["feedback"]["law"],
+            "feedback_gain": result["system"]["K"],
+        },
+        "plot_data": plot_data,
+        "figure_export": export,
+        "claim_scope": "presentation of frozen saved geometry; no solver or geometry query",
+    }
+    evidence_bytes = (json.dumps(evidence, indent=2) + "\n").encode()
+    return route_id, figure_svg, figure_png, evidence_bytes
+
+
 def build(site: Path, catalog_path: Path) -> BuildResult:
     """Build companions from staged published records only."""
     site = Path(site).resolve(strict=True)
@@ -177,6 +268,10 @@ def build(site: Path, catalog_path: Path) -> BuildResult:
     style = Path(__file__).with_name("styles") / "control-v1.json"
     outputs: dict[str, bytes] = {}
     cards: list[dict] = []
+    mpc06_route, mpc06_svg, mpc06_png, mpc06_evidence = _mpc06_tube_companion()
+    outputs["control-witness/mpc06-tube.svg"] = mpc06_svg
+    outputs["control-witness/mpc06-tube.png"] = mpc06_png
+    outputs["control-witness/mpc06-tube-evidence.json"] = mpc06_evidence
 
     for report_id, title, expected_relation, points in PROJECTIONS:
         record, record_bytes = load_record(report_id)
@@ -370,15 +465,45 @@ def build(site: Path, catalog_path: Path) -> BuildResult:
             '<table><caption>Exact displayed projection vertices</caption><thead><tr><th>Coordinates</th><th>Meaning</th></tr></thead><tbody>' +
             table_rows + '</tbody></table><p><a href="' + record_link + '">Raw saved record ↗</a> · '
             '<a href="' + page_link + '">Published report ↗</a> · <a href="' + stem + '-evidence.json">Figure evidence JSON ↗</a></p></article>')
+    mpc06_bounds = json.loads(mpc06_evidence)["plot_data"]["sets"]
+    mpc06_profile = json.loads(mpc06_evidence)["profile"]
+    state_box_bounds = mpc06_bounds["state_box_X"]["bounds"]
+    state_bounds = mpc06_bounds["tightened_state_X_minus_Z"]["bounds"]
+    tube_vertices = mpc06_bounds["error_tube_Z"]["vertices"]
+    body.append(
+        '<article id="mpc06-tube"><h2>MPC-06 · exact tube feasibility geometry</h2>'
+        '<p>This two-state discrete double-integrator fixture uses a three-step horizon. '
+        'The checked feasibility case uses the fixed zero nominal plan and full-state feedback '
+        '<code>' + html.escape(mpc06_profile["feedback_law"]) + '</code> with '
+        '<code>K=' + html.escape(str(mpc06_profile["feedback_gain"])) + '</code>. '
+        'The figure re-plots the frozen position–velocity box, support tightening and exact dyadic RPI tube. '
+        'The source declares no physical units for the state coordinates; equal data scaling is a display choice, '
+        'not physical dimensional scaling. The underlying study checks feasibility and safety for one fixed '
+        'nilpotent profile; it does not optimize an objective or compute a minimax reachable set.</p>'
+        '<figure><a href="control-witness/mpc06-tube.svg"><img src="control-witness/mpc06-tube.svg" '
+        'alt="Saved position-velocity state box, tightened state set, and exact RPI tube on equal numeric axes"></a>'
+        '<figcaption>Numeric ticks and major gridlines follow csl-report-quantitative-v1. '
+        '<a href="control-witness/mpc06-tube.png">Open PNG figure ↗</a></figcaption></figure>'
+        '<div class="scroll" tabindex="0" role="region" aria-label="MPC-06 saved geometry coordinates">'
+        '<table><caption>Exact values retained in the frozen result</caption><thead><tr><th scope="col">Set</th>'
+        '<th scope="col">Saved coordinates</th></tr></thead><tbody>'
+        '<tr><th scope="row">State constraint X</th><td>' + html.escape(str(state_box_bounds)) + '</td></tr>'
+        '<tr><th scope="row">Tightened state set X ⊖ Z</th><td>' + html.escape(str(state_bounds)) + '</td></tr>'
+        '<tr><th scope="row">Exact RPI error tube Z</th><td>' + html.escape(str(tube_vertices)) + '</td></tr>'
+        '</tbody></table></div><p><a href="../' + mpc06_route + '/index.html">Frozen MPC-06 report ↗</a> · '
+        '<a href="../' + mpc06_route + '/result.json">Saved result ↗</a> · '
+        '<a href="../' + mpc06_route + '/figure-data.json">Original saved figure data ↗</a> · '
+        '<a href="control-witness/mpc06-tube-evidence.json">Companion data and hashes ↗</a></p></article>')
     outputs["control-witness-v1.html"] = (
         '<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">'
-        '<title>Control relation projections · Controlled Systems Lab</title><link rel="stylesheet" href="examples.css"></head>'
-        '<body class="control-witness-page"><main><p><a href="index.html">← Visual examples</a></p><h1>Saved control-relation projections</h1>'
-        '<p>These figures read frozen reports and show projections of their five-coordinate state/control relations into the control plane '
-        '(u₀,u₁). A projection can omit distinctions present in the full joint relation; each card states what its report establishes.</p>' +
+        '<title>Saved control figures · Controlled Systems Lab</title><link rel="stylesheet" href="examples.css"></head>'
+        '<body class="control-witness-page"><main><p><a href="index.html">← Visual examples</a></p><h1>Saved control and witness figures</h1>'
+        '<p>The first five figures show projections of frozen five-coordinate state/control relations into the control plane '
+        '(u₀,u₁); each can omit distinctions present in the full joint relation. The MPC-06 figure re-plots a saved two-state '
+        'feasibility tube. These companions do not run a solver or recompute scientific geometry.</p>' +
         ''.join(body) + '</main></body></html>').encode()
     entries = ({"family": "Control strategy and witness reports",
-                "title": "Strategy A and B control-relation projections",
+                "title": "Strategy A/B control relations and MPC-06 tube geometry",
                 "status": "saved-data-companion", "anchor": "control-witness-companions",
                 "page": "control-witness-v1.html", "figure": cards[0]["stem"] + ".svg",
                 "source_page": "../" + cards[0]["route_id"] + "/index.html",

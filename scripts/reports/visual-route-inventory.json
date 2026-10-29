@@ -76,8 +76,13 @@
     },
     {
       "source": "scripts/reports/control_witness_companions.py",
-      "signal_count": 13,
+      "signal_count": 23,
       "asset_name_literals": [
+        "geometry.png",
+        "geometry.svg",
+        "mpc06-tube.png",
+        "mpc06-tube.svg",
+        "projection.svg",
         "syn01-timing.svg"
       ],
       "disposition": "saved-control-witness-gallery-companion-builder"
@@ -641,8 +646,11 @@
       "asset_name_literals": [
         "projection.svg"
       ],
-      "disposition": "deferred-family-specific-migration",
-      "follow_up_issue": 686
+      "role": "collector-and-plot-renderer",
+      "disposition": "frozen-renderer-preserved-with-gallery-companion",
+      "companion_ids": [
+        "control-witness-companions"
+      ]
     },
     {
       "source": "scripts/reports/mpc06/render_tube.py",
@@ -650,8 +658,11 @@
       "asset_name_literals": [
         "projection.svg"
       ],
-      "disposition": "deferred-family-specific-migration",
-      "follow_up_issue": 686
+      "role": "saved-plot-renderer",
+      "disposition": "frozen-renderer-preserved-with-gallery-companion",
+      "companion_ids": [
+        "control-witness-companions"
+      ]
     },
     {
       "source": "scripts/reports/opt04/render.py",
@@ -1309,11 +1320,11 @@
         "joint-relation-2d.svg",
         "lazy-2d.svg",
         "lotka-volterra-sampled-v1.svg",
+        "mpc06-tube.svg",
         "optimal-face.svg",
         "polygons.svg",
         "projections-lambda0.svg",
         "projections-lambda1.svg",
-        "strategy-a-ts01.svg",
         "syn01-timing.svg",
         "synthesis-2d.svg",
         "terminal-projections.svg",
@@ -2503,6 +2514,9 @@
         "viz10/manifest.json",
         "control-witness-v1.html",
         "control-witness-timing-v1.html",
+        "control-witness/mpc06-tube.svg",
+        "control-witness/mpc06-tube.png",
+        "control-witness/mpc06-tube-evidence.json",
         "control-witness/strategy-a-ts01.svg",
         "control-witness/strategy-a-ts01.png",
         "control-witness/strategy-a-ts01-evidence.json",
