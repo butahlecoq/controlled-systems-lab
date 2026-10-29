@@ -248,6 +248,71 @@ std::optional<std::size_t> h_program_storage_bytes(std::size_t rows, std::size_t
     return total;
 }
 
+std::optional<std::size_t> replay_record_storage_bytes(
+        const model::LinearSystem& system, std::size_t joint_dimension) {
+    const auto dimensions = system.dimensions();
+    const auto horizon = system.horizon();
+    const auto stages_with_terminal = checked_add(horizon, 1);
+    if (!stages_with_terminal) return std::nullopt;
+
+    std::size_t observation_samples = 0;
+    std::size_t observation_values = 0;
+    for (std::size_t channel = 0; channel < system.channel_count(); ++channel) {
+        const auto count_result = system.sample_count({channel});
+        if (std::holds_alternative<Diagnostic>(count_result)) return std::nullopt;
+        const auto count = std::get<std::size_t>(count_result);
+        const auto next_samples = checked_add(observation_samples, count);
+        if (!next_samples) return std::nullopt;
+        observation_samples = *next_samples;
+        for (std::size_t sample = 0; sample < count; ++sample) {
+            const auto observation = system.observation({channel}, {sample});
+            if (std::holds_alternative<Diagnostic>(observation)) return std::nullopt;
+            const auto values = std::get<model::ObservationRecord>(observation).maps.state_map.rows();
+            const auto next_values = checked_add(observation_values, values);
+            if (!next_values) return std::nullopt;
+            observation_values = *next_values;
+        }
+    }
+
+    // A released observation may be retained once in the replay and again in
+    // each decision's complete released history.
+    const auto history_records = checked_multiply(horizon, observation_samples);
+    const auto retained_observations = history_records
+        ? checked_add(observation_samples, *history_records) : std::nullopt;
+    const auto observation_value_records = checked_multiply(*stages_with_terminal, observation_values);
+    const auto state_values = checked_multiply(*stages_with_terminal, dimensions.state);
+    const auto decision_values_per_stage = checked_add(dimensions.state, dimensions.control);
+    const auto decision_values = decision_values_per_stage
+        ? checked_multiply(horizon, *decision_values_per_stage) : std::nullopt;
+    if (!retained_observations || !observation_value_records || !state_values || !decision_values)
+        return std::nullopt;
+
+    std::size_t scalar_count = joint_dimension;
+    for (const auto count : {*state_values, *decision_values, *observation_value_records}) {
+        const auto next = checked_add(scalar_count, count);
+        if (!next) return std::nullopt;
+        scalar_count = *next;
+    }
+    const auto scalar_bytes = checked_multiply(scalar_count, sizeof(double));
+    const auto state_headers = checked_multiply(*stages_with_terminal, sizeof(Vector));
+    const auto decision_headers = checked_multiply(horizon, sizeof(DecisionEvidence));
+    const auto observation_headers = checked_multiply(*retained_observations, sizeof(ReleasedObservation));
+    const auto external_headers = checked_multiply(horizon, sizeof(Vector));
+    const auto channel_headers = checked_multiply(system.channel_count(), sizeof(std::vector<Vector>));
+    const auto error_headers = checked_multiply(observation_samples, sizeof(Vector));
+    if (!scalar_bytes || !state_headers || !decision_headers || !observation_headers ||
+        !external_headers || !channel_headers || !error_headers) return std::nullopt;
+
+    std::size_t total = sizeof(ReplayRecord);
+    for (const auto bytes : {*scalar_bytes, *state_headers, *decision_headers,
+            *observation_headers, *external_headers, *channel_headers, *error_headers}) {
+        const auto next = checked_add(total, bytes);
+        if (!next) return std::nullopt;
+        total = *next;
+    }
+    return total;
+}
+
 Diagnostic unsupported(std::string field, std::string message) {
     return {DiagnosticCode::unsupported, std::move(field), std::move(message)};
 }
@@ -586,15 +651,47 @@ HContinuousPolicyResult evaluate_h_continuous_policy(const model::LinearSystem& 
     const auto coefficient_count = checked_multiply(safety_row_count, joint_dimension);
     const auto coefficient_bytes = coefficient_count
         ? checked_multiply(*coefficient_count, sizeof(double)) : std::nullopt;
+    // Retained evidence can contain one dual primal (domain_rows values), one
+    // counterexample primal and coordinate vector (joint_dimension each), and
+    // a complete replay per safety row. Count these outputs as well as the
+    // generated coefficient/query buffers before the first solve.
     const auto row_evidence_bytes = checked_multiply(safety_row_count,
-        sizeof(double) + sizeof(PolicySafetyRow) + sizeof(HPolicyConstraintEvidence));
-    const auto row_working_bytes = coefficient_bytes && row_evidence_bytes
-        ? checked_add(*coefficient_bytes, *row_evidence_bytes) : std::nullopt;
+        sizeof(double) + sizeof(PolicySafetyRow) + sizeof(Vector) + sizeof(HPolicyConstraintEvidence));
+    const auto evidence_container_bytes = checked_add(sizeof(HContinuousPolicyEvidence),
+        sizeof(std::vector<PolicySafetyRow>) + sizeof(std::vector<Vector>) +
+        sizeof(std::vector<HPolicyConstraintEvidence>));
+    const auto dual_solution_cells = checked_multiply(safety_row_count, *domain_rows);
+    const auto counterexample_cells_per_row = checked_multiply(joint_dimension, 2);
+    const auto counterexample_solution_cells = counterexample_cells_per_row
+        ? checked_multiply(safety_row_count, *counterexample_cells_per_row) : std::nullopt;
+    const auto domain_solution_cells = checked_multiply(joint_dimension, 2);
+    const auto total_evidence_cells = dual_solution_cells && counterexample_solution_cells && domain_solution_cells
+        ? checked_add(*dual_solution_cells, *counterexample_solution_cells) : std::nullopt;
+    const auto all_solution_cells = total_evidence_cells && domain_solution_cells
+        ? checked_add(*total_evidence_cells, *domain_solution_cells) : std::nullopt;
+    const auto retained_solution_bytes = all_solution_cells
+        ? checked_multiply(*all_solution_cells, sizeof(double)) : std::nullopt;
+    const auto replay_record_bytes = replay_record_storage_bytes(system, joint_dimension);
+    const auto replay_count = checked_add(safety_row_count, 1);
+    const auto retained_replay_bytes = replay_record_bytes && replay_count
+        ? checked_multiply(*replay_record_bytes, *replay_count) : std::nullopt;
+    const auto evidence_bytes = row_evidence_bytes && evidence_container_bytes
+        ? checked_add(*row_evidence_bytes, *evidence_container_bytes) : std::nullopt;
+    const auto evidence_and_solutions_bytes = evidence_bytes && retained_solution_bytes
+        ? checked_add(*evidence_bytes, *retained_solution_bytes) : std::nullopt;
+    const auto row_working_bytes = coefficient_bytes && evidence_and_solutions_bytes
+        ? checked_add(*coefficient_bytes, *evidence_and_solutions_bytes) : std::nullopt;
+    const auto result_and_replay_bytes = row_working_bytes && retained_replay_bytes
+        ? checked_add(*row_working_bytes, *retained_replay_bytes) : std::nullopt;
     const auto largest_query_bytes = std::max(*h_program_bytes, *h_dual_bytes);
-    const auto total_working_bytes = row_working_bytes
-        ? checked_add(*row_working_bytes, largest_query_bytes) : std::nullopt;
+    const auto total_working_bytes = result_and_replay_bytes
+        ? checked_add(*result_and_replay_bytes, largest_query_bytes) : std::nullopt;
     if (!coefficient_count || !coefficient_bytes || !row_evidence_bytes ||
-        !row_working_bytes || !total_working_bytes)
+        !dual_solution_cells || !counterexample_solution_cells || !domain_solution_cells ||
+        !all_solution_cells || !evidence_container_bytes || !evidence_and_solutions_bytes ||
+        !retained_solution_bytes || !replay_record_bytes ||
+        !replay_count || !retained_replay_bytes || !evidence_bytes ||
+        !row_working_bytes || !result_and_replay_bytes || !total_working_bytes)
         return unsupported("controllers.policy_h.dimensions", "H support working storage extent overflowed.");
     if (context.resources && context.resources->memory_bytes &&
         *total_working_bytes > *context.resources->memory_bytes)
