@@ -273,6 +273,11 @@ jobs:
                 --source reports/algorithm-results/env717-time-sphere-minimax-v1 \
                 --site build/report-site
             fi
+            if test -d reports/algorithm-results/env717-two-particle-minimax-v1; then
+              python scripts/reports/stage_env717_two_particle_minimax.py \
+                --source reports/algorithm-results/env717-two-particle-minimax-v1 \
+                --site build/report-site
+            fi
             if test -d reports/algorithm-results/env717-multipoint-cost-game-pilot-v1; then
               python scripts/reports/stage_env717_multipoint_cost_game.py \
                 --source reports/algorithm-results/env717-multipoint-cost-game-pilot-v1 \

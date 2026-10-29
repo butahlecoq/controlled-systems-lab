@@ -478,6 +478,15 @@ FAMILIES = {
         "The adaptation also lets the disturbance observe the controller's current action, unlike "
         "the source state-feedback policies; its value is for this sequential-response game. It is "
         "not an RL reproduction or continuous-boundary claim."),
+    "env717-two-particle-minimax": Family(
+        r"env717-two-particle-minimax-[0-9a-f]{20}", "synthesis",
+        "TwoParticleGame finite reachability and minimax",
+        "Builds the source-derived four-state RK4 game on a quantized finite reachable graph, "
+        "then checks finite-feedback capture and finite causal minimax against independent replay. "
+        "Forward states, backward-winning intersections, and a selected worst-case trajectory are "
+        "shown in position (x1,x2) and velocity (v1,v2) projections. The pilot changes the initial "
+        "state and shortens the horizon; the finite solver gives the disturbance player a stronger "
+        "within-stage information pattern. This is not a continuous-action RL reproduction."),
     "syn06-verifier": Family(
         r"syn06-verifier-\d{8}-[0-9a-f]{64}", "verification", "Trajectory verification",
         "Re-checks two literal two-stage integrator witnesses against the original saved input "
