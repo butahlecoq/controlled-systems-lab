@@ -52,6 +52,47 @@ The Strategy B failure is retained in `generated/csl-candidate-observations.json
 
 These timings are descriptive, not a speedup claim. Strategy A/B return candidate relations and the timing includes problem resolution, strategy preparation, execution, and candidate-membership checking. The condensed QP returns only one input and includes problem resolution, scalar-program construction, backend preparation, execution, and action/value checking. These products do different work. The solver's objective bounds were unavailable, so the reported online value is recomputed independently from its primal input and the analytic dynamics. The exact-rational script measured region construction and verification at 79.3 ms in one run; point location over 191 grid points had a 108.8 ms median across seven rounds (106.1–112.2 ms, or 0.570 ms per query). This Python `Fraction` implementation is not compared with the binary64 C++ timings. A source profiler was unavailable, so the limiting code path is unverified. Load was not isolated or captured for the measured run; no fastest-method verdict is drawn. The C++ run used Release mode, one HiGHS worker, and an eight-core machine.
 
+## Nonunique two-step continuation
+
+The companion exact reference `explicit_nonunique_double_integrator.py` uses
+`p_next=p+v`, `v_next=v+u`, controls in `[-1,1]`, and minimizes terminal
+velocity squared after two steps. For every initial state in
+`[-3,3] × [-2,2]`, the exact minimum is zero and the complete optimal family is
+
+```text
+u0 ∈ [-1,1] ∩ [-v0-1, -v0+1]
+u1 = -v0-u0
+```
+
+The reference separately chooses the minimum-norm selector
+`u0=u1=-v0/2`. Its figure shows the full initial-state rectangle and selector
+color map, then the complete two-control fiber for `(p0,v0)=(0,0)` with the
+selector marked. The JSON keeps the symbolic full-domain formula separate from
+the 15 sampled initial states and 45 endpoint/midpoint control histories.
+
+The C++ runner accepts this ten-column query format as well as the original
+seven-column unique-case format. In the new 225 measured calls per path,
+Strategy A returned a candidate containing every sampled optimal history but
+stopped on the rank-deficient quadratic (`operation_rejected`: HiGHS reported a
+coefficient at or below its native-removal threshold). Strategy B also
+contained every sampled history; 210 calls completed and 15 were noncompleted,
+all with undetermined mathematical outcome. The online two-control QP had an
+optimal status, respected both control bounds, and attained exact-reference
+value zero in all 225 measured calls. Its solver-selected controls are checked
+for optimality and feasibility, not equality to the minimum-norm tie-break.
+These are candidate-membership samples and solver observations: they do not
+prove equality of Strategy A/B families with the complete analytic relation.
+The captured times are descriptive and do not support a winner claim.
+
+To regenerate and run the nonunique fixture:
+
+```sh
+python3 benchmarks/reporting/mpc08_explicit/explicit_nonunique_double_integrator.py
+build/mpc08-nonunique/csl_mpc08_explicit_compare \
+  benchmarks/reporting/mpc08_explicit/generated/explicit-nonunique-queries.csv \
+  > benchmarks/reporting/mpc08_explicit/generated/csl-nonunique-observations.jsonl
+```
+
 The saved region JSON is 14,782 bytes with 34 total polygon edges across nine regions; the SVG is 4,274 bytes. Raw query and candidate-observation data remain alongside them. This is an optional non-installed report target and adds no public API, runtime dependency, or package-release impact.
 
 ## Reproduce
