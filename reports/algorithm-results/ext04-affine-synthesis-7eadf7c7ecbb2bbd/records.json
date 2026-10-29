@@ -1,0 +1,108 @@
+{
+  "algorithm": "synthesize_one_stage_affine_policy",
+  "assurance": "numerical binary64",
+  "batch_size": 100,
+  "collected_utc": "2026-10-29T06:26:26Z",
+  "driver_sha256": "55769d80a4d4a1d3b9c01a61b5fa24b279d75c08f90b2b891292ceada9b71540",
+  "environment": {
+    "architecture": "x86_64",
+    "build_configuration": "Release, C++20, -O3",
+    "cmake": "cmake version 3.31.6",
+    "compiler": "c++ (GCC) 16.2.1 20260810",
+    "cpu": "AMD Ryzen 5 3550H with Radeon Vega Mobile Gfx",
+    "external_solvers": {
+      "HiGHS": false,
+      "Qhull": false
+    },
+    "load_average": [
+      1.615234375,
+      0.990234375,
+      0.90283203125
+    ],
+    "load_average_after_measurement": [
+      1.615234375,
+      0.990234375,
+      0.90283203125
+    ],
+    "load_average_before_measurement": [
+      1.6689453125,
+      0.98974609375,
+      0.90185546875
+    ],
+    "logical_processors": 8,
+    "ninja": "1.12.1",
+    "os": "Linux-7.2.8-9-omarchy-x86_64-with-glibc2.44",
+    "provider": "phase-one LP; one sequential thread"
+  },
+  "evidence_limits": [
+    "One one-transition, two-state analytic fixture with eight authored joint vertices.",
+    "Coverage is universal only over the caller-authored joint V-hull; its completeness is assumed.",
+    "Binary64 LP and replay checks provide numerical evidence, not a validated arithmetic certificate.",
+    "The objective is feasibility only; the returned affine policy is not cost-optimal or unique.",
+    "A numerical infeasible LP status is inconclusive and does not prove that no policy exists.",
+    "Single provider and fixture; timings are descriptive and make no comparison, speedup, or scalability claim."
+  ],
+  "failures": 0,
+  "fixture": {
+    "action_bounds": [
+      -1.101,
+      1.101
+    ],
+    "dynamics": "x_next = [[1,1],[0,1]] x + [[-1],[0]] u",
+    "feasibility_tolerance": 1e-09,
+    "id": "ext04-one-stage-noisy-integrator-v1",
+    "initial_generators": [
+      [
+        -1,
+        -0.05
+      ],
+      [
+        -1,
+        0.05
+      ],
+      [
+        1,
+        -0.05
+      ],
+      [
+        1,
+        0.05
+      ]
+    ],
+    "joint_vertices": 8,
+    "measurement_error_vertices": [
+      -0.1,
+      0.1
+    ],
+    "observation": "y = x1 + e, measured and available before decision 0",
+    "terminal_bounds": {
+      "x1": [
+        -0.16,
+        0.16
+      ],
+      "x2": [
+        -0.051,
+        0.051
+      ]
+    }
+  },
+  "fixture_sha256": "7c11dca327ba7050152063d95913dcf05b987da3bdc83d1a578e200988e55f24",
+  "maximum_batch_ns": 584908799,
+  "measured_batches": 7,
+  "median_batch_ns": 481762806,
+  "median_ns_per_call": 4817628.06,
+  "minimum_batch_ns": 471194618,
+  "performance_conclusion": "descriptive single-adapter measurement; no comparative performance claim",
+  "release_build_log_sha256": "bd37e60df3389a6e6252359af09fdf691e86bb3383327649d265d9b6d1f8ece7",
+  "renderer_sha256": "8eca709c2900236f241fa14b4de7a8b78452cc499b2705e2e2c82755836d4244",
+  "report_id": "ext04-affine-synthesis-7eadf7c7ecbb2bbd",
+  "schema": "csl.ext04-affine-synthesis-report/1",
+  "smoke_sha256": "f8408f54f5735a066538b12e34e9b696e670ab23176c7ce54deb646cd04f474e",
+  "solver": "phase-one-binary64",
+  "source_commit": "7eadf7c7ecbb2bbdc28683ebcdfc31849f01c133",
+  "source_tree_clean_before_measurement": true,
+  "timing_scope": "batch of public one-stage affine policy synthesis calls, injected phase-one LP solves, all-joint evaluator replay, and independent literal dynamics/safety checks; fixture construction, process startup, JSONL serialization and rendering excluded",
+  "warmup_policy": "one excluded 100-call warmup batch followed by seven measured 100-call batches",
+  "warmups_excluded": 1,
+  "workspace_reuse": "one phase-one LP workspace reused across sequential calls; immutable system and joint V-domain reused"
+}

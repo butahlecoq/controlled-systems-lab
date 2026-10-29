@@ -86,6 +86,16 @@ jobs:
             --target csl_env717_simple_control csl_env717_two_points csl_env717_unequal_game csl_env717_max_coordinate csl_env717_air_to_air csl_env717_sphere_game csl_env717_point_on_plane csl_env717_time_sphere csl_env717_multipoint_cost_game csl_env717_broken_triangle --parallel 2
           ctest --test-dir build/env717-report-ci -C Release --output-on-failure \
             -R '^env717_(simple_control|two_points|unequal_game|max_coordinate|air_to_air|sphere_game|point_on_plane|time_sphere|multipoint_cost_game|broken_triangle)_smoke$'
+      - name: Build and smoke the EXT-04 affine synthesis example
+        if: needs.route.outputs.native == 'true'
+        shell: bash
+        run: |
+          cmake -S . -B build/ext04-affine-synthesis-ci -DBUILD_TESTING=ON -DCMAKE_BUILD_TYPE=Release \
+            -DCSL_ENABLE_HIGHS=OFF -DCSL_ENABLE_QHULL=OFF -DCSL_BUILD_EXT04_AFFINE_SYNTHESIS_REPORT=ON
+          cmake --build build/ext04-affine-synthesis-ci --config Release \
+            --target csl_ext04_affine_synthesis_report --parallel 2
+          ctest --test-dir build/ext04-affine-synthesis-ci -C Release --output-on-failure \
+            -R '^ext04_affine_synthesis_report_smoke$'
       - name: Build and check MPC-05 causal minimax report driver
         if: needs.route.outputs.native == 'true' && hashFiles('reports/algorithm-results/mpc05-causal-tree-pilot-v2/result.json') != ''
         shell: bash
@@ -125,6 +135,9 @@ jobs:
             fi
             if test -f reports/algorithm-results/ext04-continuous-publications.json; then
               python scripts/reports/stage_ext04_continuous.py --catalog reports/algorithm-results/ext04-continuous-publications.json --site build/report-site
+            fi
+            if test -f reports/algorithm-results/ext04-affine-synthesis-publications.json; then
+              python scripts/reports/stage_ext04_affine_synthesis.py --catalog reports/algorithm-results/ext04-affine-synthesis-publications.json --site build/report-site
             fi
             if test -f reports/algorithm-results/ext05-publications.json; then
               python scripts/reports/stage_ext05.py --catalog reports/algorithm-results/ext05-publications.json --site build/report-site

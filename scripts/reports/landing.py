@@ -337,6 +337,11 @@ FAMILIES = {
         "retaining each supplied generator's trajectory and safety margin. This is a descriptive "
         "single-adapter measurement; it does not synthesize policies or certify arbitrary "
         "disturbances."),
+    "ext04-affine-synthesis": Family(
+        r"ext04-affine-synthesis-[0-9a-f]{16}", "extensions", "One-stage affine policy synthesis",
+        "Synthesizes one affine action from a pre-decision noisy observation over a caller-authored "
+        "joint initial-state/error V-hull. Evidence uses numerical binary64 arithmetic, assumes "
+        "the supplied hull is complete, and does not prove infeasibility or cost optimality."),
     "ext05-discretization": Family(
         r"ext05-discretization-[0-9a-f]{16}", "extensions", "Continuous-model discretization",
         "Discretizes a continuous double integrator into a discrete model and checks the discrete "

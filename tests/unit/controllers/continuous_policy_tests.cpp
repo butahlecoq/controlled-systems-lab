@@ -1,6 +1,7 @@
 #define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
 #include <doctest/doctest.h>
 #include <csl/controllers/continuous_policy.hpp>
+#include <csl/optimization/phase_one.hpp>
 
 #include <limits>
 
@@ -48,6 +49,24 @@ LinearSystem multi_output_sensor_system() {
     return std::get<LinearSystem>(result);
 }
 
+LinearSystem one_stage_noisy_integrator() {
+    SystemModel authored{{{1, 1, 0}, TimeDomain::discrete,
+        LinearStage{{1,1,{1}}, {1,1,{1}}, {1,0,{}}, {0}}},
+        {{ObservationStage{{1,1,{1}}, {1,1,{0}}, {1,0,{}}, {1,1,{1}}, {0}},
+            {{{0}, before(0), before(0), std::nullopt}}}}};
+    const auto result = snapshot(authored, Vector{0, 1});
+    REQUIRE(std::holds_alternative<LinearSystem>(result));
+    return std::get<LinearSystem>(result);
+}
+
+LinearSystem one_stage_no_sensor_integrator() {
+    SystemModel authored{{{1, 1, 0}, TimeDomain::discrete,
+        LinearStage{{1,1,{1}}, {1,1,{1}}, {1,0,{}}, {0}}}, {}};
+    const auto result = snapshot(authored, Vector{0, 1});
+    REQUIRE(std::holds_alternative<LinearSystem>(result));
+    return std::get<LinearSystem>(result);
+}
+
 AffineStagePolicy rule(std::size_t stage, std::vector<ObservationComponentRef> inputs,
         Matrix estimate, Vector estimate_offset, Matrix action_history,
         Matrix action_estimate, Vector action_offset) {
@@ -70,6 +89,42 @@ JointVUncertainty make_domain(const LinearSystem& system) {
     REQUIRE(std::holds_alternative<JointVUncertainty>(result));
     return std::get<JointVUncertainty>(std::move(result));
 }
+
+JointVUncertainty one_stage_noisy_domain(const LinearSystem& system) {
+    auto result = make_joint_v_uncertainty(system, {
+        {-1.0, -0.1}, {-1.0, 0.1}, {1.0, -0.1}, {1.0, 0.1}
+    });
+    REQUIRE(std::holds_alternative<JointVUncertainty>(result));
+    return std::get<JointVUncertainty>(std::move(result));
+}
+
+OneStageAffineSynthesisRequest one_stage_request(const LinearSystem& system) {
+    const auto domain = system.horizon() == 1
+        ? one_stage_noisy_domain(system) : make_domain(system);
+    return {{{"ext04-one-stage"}, {"noisy-integrator-feasibility"}},
+        domain, {{{0}, {0}, 0}},
+        {{{2,1,{1,-1}}, {1.1,1.1}}, {{2,1,{1,-1}}, {0.11,0.11}}},
+        {{{2,1,{1,-1}}, {1.2,1.2}}}, 1e-8};
+}
+
+std::unique_ptr<LPWorkspace> phase_one_workspace() {
+    auto registered = optimization::phase_one::make_registration();
+    REQUIRE(std::holds_alternative<registry::Registration<registry::LPPort>>(registered));
+    const auto adapter = std::get<registry::Registration<registry::LPPort>>(std::move(registered));
+    auto seed = optimization::make_linear_program({{{"ext04-one-stage"}, {"workspace-seed"}},
+        {0.0}, 0.0, {1,1,{0,1},{0},{1}}, {Interval{0.0, std::nullopt}}, {Interval{0.0, 0.0}}});
+    REQUIRE(std::holds_alternative<LinearProgram>(seed));
+    return adapter.factory(std::get<LinearProgram>(seed));
+}
+
+class ReportInfeasibleWorkspace final : public LPWorkspace {
+protected:
+    ProgramOutcome do_solve(const LinearProgram& program, const ExecutionContext&) override {
+        return ProgramResult{Termination::completed,
+            {program.identity(), MathematicalOutcome::infeasible, Unestablished{}, {}},
+            {}, {}, "numerical infeasibility without an exact certificate", {}};
+    }
+};
 }
 
 TEST_CASE("joint V uncertainty keeps correlated coordinates and evaluates released history") {
@@ -255,4 +310,112 @@ TEST_CASE("joint generators retain initial and cross-stage external correlation"
     CHECK(trajectories[0].trajectory.inputs.external == std::vector<Vector>{{1}, {0}});
     CHECK(trajectories[1].trajectory.inputs.initial_state == Vector{1});
     CHECK(trajectories[1].trajectory.inputs.external == std::vector<Vector>{{0}, {1}});
+}
+
+TEST_CASE("one-stage affine synthesis finds an observation policy over the whole joint V-hull") {
+    const auto system = one_stage_noisy_integrator();
+    auto request = one_stage_request(system);
+    auto lp = phase_one_workspace();
+    REQUIRE(lp != nullptr);
+
+    const auto result = synthesize_one_stage_affine_policy(system, request, *lp, {});
+    REQUIRE(std::holds_alternative<SynthesizedAffinePolicy>(result));
+    const auto& found = std::get<SynthesizedAffinePolicy>(result);
+    CHECK(found.feasibility_solve.termination == Termination::completed);
+    CHECK(found.feasibility_solve.outcome.value == MathematicalOutcome::optimal);
+    CHECK(found.evaluation.scope == PolicyCoverage::all_joint_uncertainty);
+    CHECK(found.evaluation.assurance == Assurance::numerical);
+    CHECK(found.evaluation.feasibility == NumericalFeasibility::within_tolerance);
+    REQUIRE(found.evaluation.trajectories.size() == 4);
+    for (const auto& generator : found.evaluation.trajectories) {
+        REQUIRE(generator.trajectory.states.size() == 2);
+        CHECK(std::abs(generator.trajectory.states.back()[0]) < 0.11);
+        CHECK(std::abs(generator.trajectory.decisions.front().action[0]) < 1.2);
+    }
+}
+
+TEST_CASE("one-stage synthesis rejects observations unavailable before the action") {
+    auto system = one_stage_noisy_integrator();
+    auto authored = SystemModel{{{1, 1, 0}, TimeDomain::discrete,
+        LinearStage{{1,1,{1}}, {1,1,{1}}, {1,0,{}}, {0}}},
+        {{ObservationStage{{1,1,{1}}, {1,1,{0}}, {1,0,{}}, {1,1,{1}}, {0}},
+            {{{0}, after(0), after(0), std::nullopt}}}}};
+    const auto later = snapshot(authored, Vector{0, 1});
+    REQUIRE(std::holds_alternative<LinearSystem>(later));
+    system = std::get<LinearSystem>(later);
+    auto request = one_stage_request(system);
+    auto lp = phase_one_workspace();
+    REQUIRE(lp != nullptr);
+
+    const auto result = synthesize_one_stage_affine_policy(system, request, *lp, {});
+    REQUIRE(std::holds_alternative<Diagnostic>(result));
+    CHECK(std::get<Diagnostic>(result).field == "controllers.policy.nonanticipativity");
+}
+
+TEST_CASE("numerical solver infeasibility is reported as inconclusive without a certificate") {
+    const auto system = one_stage_noisy_integrator();
+    auto request = one_stage_request(system);
+    ReportInfeasibleWorkspace lp;
+
+    const auto result = synthesize_one_stage_affine_policy(system, request, lp, {});
+    REQUIRE(std::holds_alternative<AffineSynthesisInconclusive>(result));
+    CHECK(std::get<AffineSynthesisInconclusive>(result).reason ==
+        AffineSynthesisInconclusiveReason::solver_reported_infeasible_without_certificate);
+}
+
+TEST_CASE("one-stage synthesis stops before allocating an LP over its memory budget") {
+    const auto system = one_stage_noisy_integrator();
+    auto request = one_stage_request(system);
+    auto lp = phase_one_workspace();
+    REQUIRE(lp != nullptr);
+    constexpr std::size_t generated_rows = 4 * (2 + 2 + 2);
+    constexpr std::size_t parameters = 2;
+    constexpr std::size_t columns = 2 * parameters + generated_rows;
+    constexpr std::size_t maximum_nonzeros = generated_rows * (2 * parameters + 1);
+    const auto previously_estimated_bytes = generated_rows * parameters * sizeof(double) +
+        generated_rows * (sizeof(Vector) + sizeof(double)) +
+        maximum_nonzeros * (sizeof(std::size_t) + sizeof(double)) +
+        (generated_rows + 1) * sizeof(std::size_t) +
+        columns * (sizeof(double) + sizeof(Interval)) +
+        generated_rows * sizeof(Interval);
+    ExecutionContext context;
+    context.resources = std::make_shared<const ResourcePolicy>(ResourcePolicy{
+        1, 1, 1, previously_estimated_bytes});
+
+    const auto result = synthesize_one_stage_affine_policy(system, request, *lp, context);
+    REQUIRE(std::holds_alternative<OperationStopped>(result));
+    CHECK(std::get<OperationStopped>(result).reason == StopReason::resource_limit);
+}
+
+TEST_CASE("one-stage affine synthesis rejects longer horizons before building a policy") {
+    const auto system = noisy_delayed_system();
+    auto request = one_stage_request(system);
+    auto lp = phase_one_workspace();
+    REQUIRE(lp != nullptr);
+
+    const auto result = synthesize_one_stage_affine_policy(system, request, *lp, {});
+    REQUIRE(std::holds_alternative<Diagnostic>(result));
+    CHECK(std::get<Diagnostic>(result).code == DiagnosticCode::unsupported);
+    CHECK(std::get<Diagnostic>(result).field == "controllers.synthesis.horizon");
+}
+
+TEST_CASE("one-stage synthesis rejects a joint domain from a different system layout") {
+    const auto sensed_system = one_stage_noisy_integrator();
+    const auto system = one_stage_no_sensor_integrator();
+    auto request = one_stage_request(sensed_system);
+    auto lp = phase_one_workspace();
+    REQUIRE(lp != nullptr);
+
+    const auto result = synthesize_one_stage_affine_policy(system, request, *lp, {});
+    REQUIRE(std::holds_alternative<Diagnostic>(result));
+    CHECK(std::get<Diagnostic>(result).field == "controllers.synthesis.domain");
+
+    auto policy = make_affine_observation_policy(system, {AffineStagePolicy{{0}, {},
+        {1,0,{}}, {0}, {1,0,{}}, {1,1,{0}}, {0}}});
+    REQUIRE(std::holds_alternative<AffineObservationPolicy>(policy));
+    ContinuousPolicyRequest evaluation_request{PolicyCoverage::all_joint_uncertainty,
+        request.domain, std::get<AffineObservationPolicy>(std::move(policy)), {}, {}, std::nullopt, 1e-9};
+    const auto evaluation = evaluate_continuous_policy(system, evaluation_request);
+    REQUIRE(std::holds_alternative<Diagnostic>(evaluation));
+    CHECK(std::get<Diagnostic>(evaluation).field == "controllers.policy.domain");
 }

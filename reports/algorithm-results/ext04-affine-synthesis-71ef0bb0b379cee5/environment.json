@@ -1,0 +1,30 @@
+{
+  "architecture": "x86_64",
+  "build_configuration": "Release, C++20, -O3",
+  "cmake": "cmake version 3.31.6",
+  "compiler": "c++ (GCC) 16.2.1 20260810",
+  "cpu": "AMD Ryzen 5 3550H with Radeon Vega Mobile Gfx",
+  "external_solvers": {
+    "HiGHS": false,
+    "Qhull": false
+  },
+  "load_average": [
+    1.6083984375,
+    0.96240234375,
+    0.95703125
+  ],
+  "load_average_after_measurement": [
+    1.6083984375,
+    0.96240234375,
+    0.95703125
+  ],
+  "load_average_before_measurement": [
+    1.66162109375,
+    0.96142578125,
+    0.95654296875
+  ],
+  "logical_processors": 8,
+  "ninja": "1.12.1",
+  "os": "Linux-7.2.8-9-omarchy-x86_64-with-glibc2.44",
+  "provider": "phase-one LP; one sequential thread"
+}

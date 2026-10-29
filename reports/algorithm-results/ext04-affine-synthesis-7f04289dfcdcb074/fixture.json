@@ -1,0 +1,43 @@
+{
+  "action_bounds": [
+    -1.101,
+    1.101
+  ],
+  "dynamics": "x_next = [[1,1],[0,1]] x + [[-1],[0]] u",
+  "feasibility_tolerance": 1e-09,
+  "id": "ext04-one-stage-noisy-integrator-v1",
+  "initial_generators": [
+    [
+      -1,
+      -0.05
+    ],
+    [
+      -1,
+      0.05
+    ],
+    [
+      1,
+      -0.05
+    ],
+    [
+      1,
+      0.05
+    ]
+  ],
+  "joint_vertices": 8,
+  "measurement_error_vertices": [
+    -0.1,
+    0.1
+  ],
+  "observation": "y = x1 + e, measured and available before decision 0",
+  "terminal_bounds": {
+    "x1": [
+      -0.16,
+      0.16
+    ],
+    "x2": [
+      -0.051,
+      0.051
+    ]
+  }
+}
