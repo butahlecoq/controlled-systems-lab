@@ -14,6 +14,8 @@ import sys
 import time
 from pathlib import Path
 
+from check_source_indices import check as check_source_indices
+
 ROOT = Path(__file__).resolve().parents[3]
 PORT_ROOT = ROOT / "tools/legacy-ports/A29"
 FIXTURE = PORT_ROOT / "fixtures/square.json"
@@ -91,6 +93,7 @@ def main() -> int:
         ["git", "status", "--porcelain=v1"], cwd=ROOT, text=True).strip())
     harness_sources = [identity_file(path) for path in (
         "scripts/reports/exp06/collect.py", "scripts/reports/exp06/render_saved.py",
+        "scripts/reports/exp06/check_source_indices.py",
         "scripts/reports/stage_exp06.py", "benchmarks/reporting/exp06/quickhull_run.cpp",
         "benchmarks/reporting/exp06/pack_comparison.cpp", "src/artifacts/comparison_manifest.cpp",
         "include/csl/artifacts/comparison_manifest.hpp")]
@@ -169,7 +172,10 @@ def main() -> int:
             algorithm, raw_stdout, raw_stderr = execute_quickhull(quickhull, fixture_path,
                                                                   args.timeout_seconds)
             indices = algorithm.get("indices", [])
-            output = [points[index] for index in indices if isinstance(index, int) and 0 <= index < len(points)]
+            index_check = check_source_indices(indices, len(points))
+            output = ([points[index] for index in indices
+                       if type(index) is int and 0 <= index < len(points)]
+                      if isinstance(indices, list) else [])
             quality = check_hull(points, output, max_points=CHECKER_MAX_POINTS)
             duration = algorithm.get("duration_ns")
             raw_runtime = algorithm.get("runtime", {})
@@ -182,12 +188,18 @@ def main() -> int:
             if method["runtime_base"] is None:
                 method["runtime_base"] = runtime
 
+        if method_index == 0:
+            index_check = check_source_indices(indices, len(points))
+
+        quality_status = quality.get("status", "inconclusive")
+        if index_check["status"] != "verified":
+            quality_status = "incorrect"
         attempt_status, event_status = status_for(algorithm.get("algorithm_status", "failed"),
-                                                   quality.get("status", "inconclusive"))
+                                                   quality_status)
         if duration is None:
             duration = 0
         checker_evidence = {**quality, "schema": "csl.exp06-exact-hull-check/1",
-            "budget": {"max_points": CHECKER_MAX_POINTS}}
+            "budget": {"max_points": CHECKER_MAX_POINTS}, "source_index_check": index_check}
         result_payload = {"algorithm": algorithm, "checker": checker_evidence, "duration_ns": duration,
                           "indices": indices, "method_id": method["id"], "warmup": warmup}
         measurement = {"schema": "csl.external-method-event/1", "status": event_status,

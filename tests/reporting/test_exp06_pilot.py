@@ -21,9 +21,19 @@ def load(name: str, path: Path):
 
 render = load("exp06_saved_renderer_test", ROOT / "scripts/reports/exp06/render_saved.py")
 stage = load("exp06_stage_test", ROOT / "scripts/reports/stage_exp06.py")
+source_indices = load("exp06_source_indices_test", ROOT / "scripts/reports/exp06/check_source_indices.py")
 
 
 class Exp06PilotTest(unittest.TestCase):
+    def test_source_index_checker_rejects_an_out_of_range_quickhull_index(self) -> None:
+        self.assertEqual(source_indices.check([0, 1, 9], 9), {
+            "schema": "csl.exp06-source-index-check/1",
+            "status": "incorrect",
+            "point_count": 9,
+            "reported_count": 3,
+            "invalid_positions": [2],
+        })
+
     def test_saved_record_has_two_checked_methods_and_all_attempts(self) -> None:
         capture, wire, _spec, manifest, methods, rows = render.read_saved(BUNDLE)
         self.assertEqual(len(manifest["points"]), 9)
@@ -33,6 +43,7 @@ class Exp06PilotTest(unittest.TestCase):
         for attempt in wire["attempts"]:
             run = json.loads(attempt["run"])
             self.assertEqual(run["result"]["checker"]["budget"], {"max_points": 64})
+            self.assertEqual(run["result"]["checker"]["source_index_check"]["status"], "verified")
         self.assertEqual(capture["checker_controls"]["omitted_corner"]["status"], "incorrect")
         self.assertEqual(capture["checker_controls"]["all_redundant_points_retained"]["status"], "verified")
         self.assertIn("inconclusive", capture["timing_comparison"])

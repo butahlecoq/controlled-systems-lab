@@ -13,6 +13,9 @@ import statistics
 import sys
 from pathlib import Path
 
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from check_source_indices import check as check_source_indices
+
 ROOT = Path(__file__).resolve().parents[3]
 PORT_ROOT = ROOT / "tools/legacy-ports/A29"
 METHODS = ("csl.geometry.a29-a30-python", "csl.geometry.quickhull-2d")
@@ -101,9 +104,10 @@ def read_saved(bundle: Path):
         payload = result
         indices = payload.get("indices", [])
         points = manifest["points"]
-        if any(not isinstance(index, int) or index < 0 or index >= len(points) for index in indices):
-            raise ValueError("method output contains an invalid source index")
-        output_points = [points[index] for index in indices]
+        source_index_check = check_source_indices(indices, len(points))
+        output_points = ([points[index] for index in indices
+                          if type(index) is int and 0 <= index < len(points)]
+                         if isinstance(indices, list) else [])
         sys.path.insert(0, str(PORT_ROOT))
         from oracle import check as exact_check
         checker_evidence = payload.get("checker", {})
@@ -114,9 +118,11 @@ def read_saved(bundle: Path):
             raise ValueError("saved checker budget or schema is invalid")
         quality = exact_check(points, output_points, max_points=max_points)
         saved_quality = {key: value for key, value in checker_evidence.items()
-                         if key not in ("schema", "budget")}
+                         if key not in ("schema", "budget", "source_index_check")}
         if quality != saved_quality:
             raise ValueError("saved checker result differs from exact source-hull recheck")
+        if checker_evidence.get("source_index_check") != source_index_check:
+            raise ValueError("saved source-index check differs from method output")
         status = item["reported_status"]
         if status != run["status"]:
             raise ValueError("attempt status differs from method-run status")
@@ -133,7 +139,8 @@ def read_saved(bundle: Path):
             raise ValueError("saved warmup/repetition identity differs")
         algorithm = payload.get("algorithm", {})
         expected_status = ("completed" if algorithm.get("algorithm_status") == "completed" and
-                           quality["status"] == "verified" else
+                           quality["status"] == "verified" and
+                           source_index_check["status"] == "verified" else
                            "timed_out" if algorithm.get("algorithm_status") == "timed_out" else
                            "incomplete" if algorithm.get("algorithm_status") == "inconclusive" or
                            quality["status"] == "inconclusive" else "failed")
@@ -141,7 +148,8 @@ def read_saved(bundle: Path):
             raise ValueError("attempt terminal status hides its algorithm or checker outcome")
         row = {"method": method_id, "repetition": repetition, "warmup": event["warmup"],
             "status": status, "duration_ns": payload.get("duration_ns"),
-            "indices": ":".join(str(index) for index in indices),
+            "indices": (":".join(str(index) for index in indices) if isinstance(indices, list)
+                        else canonical(indices)),
             "checker": quality["status"], "run_id": run["run"],
             "run_sha256": item["run_digest"]}
         rows.append(row)
