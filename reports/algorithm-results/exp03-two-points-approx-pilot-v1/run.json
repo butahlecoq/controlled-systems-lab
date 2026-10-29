@@ -8,10 +8,20 @@
     }
   ],
   "measurement_policy": {
+    "actual_native_threads": 1,
+    "actual_native_threads_status": "inferred; OS thread count not observed",
+    "actual_outer_workers": 1,
     "measured_repetitions_per_method": 7,
     "method_order": "rotating alternating order",
+    "requested_native_threads": 1,
+    "requested_outer_workers": 1,
+    "thread_evidence": "single-threaded driver; no parallel executor invoked",
     "timed_scope": "native public hull or approximation operation call; input construction and JSON output excluded",
-    "warmup_per_method": 1
+    "warmup_per_method": 1,
+    "workspace_policy": {
+      "quickhull": "stateless direct call; no workspace",
+      "registered_approximation": "run_registered prepares a fresh pipeline workspace for each warmup and measured call; no workspace reuse"
+    }
   },
   "measurements": [
     {
@@ -20,6 +30,8 @@
       "projection_index": 0,
       "result": {
         "direction": "equivalent",
+        "method_id": "csl.quickhull_2d",
+        "method_version": "unregistered",
         "output_vertices": 4,
         "shape": {
           "kind": "v_polytope",
@@ -58,7 +70,7 @@
           "error_bound=unavailable"
         ],
         "method_id": "csl.approximation.box",
-        "method_version": "",
+        "method_version": "1",
         "relation_basis": "v_h_containment",
         "shape": {
           "coordinate_labels": [
@@ -122,7 +134,7 @@
             ]
           ]
         },
-        "method_version": "",
+        "method_version": "1",
         "relation_basis": "v_h_containment",
         "shape": {
           "coordinate_labels": [
@@ -235,6 +247,7 @@
           "No realizable control witness, complete optimal family, validated rounding bound, or global error bound is supplied."
         ],
         "method_id": "csl.geometry.zonotope.axis-cover",
+        "method_version": "1.0.0",
         "relation_basis": "generator_axis_cover",
         "shape": {
           "center": [
@@ -306,13 +319,15 @@
       "status": "completed"
     },
     {
-      "elapsed_ns": 201215,
+      "elapsed_ns": 79620,
       "method": "exact-polytope-quickhull",
       "phase": "measured",
       "projection_index": 0,
       "repetition": 0,
       "result": {
         "direction": "equivalent",
+        "method_id": "csl.quickhull_2d",
+        "method_version": "unregistered",
         "output_vertices": 4,
         "shape": {
           "kind": "v_polytope",
@@ -340,7 +355,7 @@
       "status": "completed"
     },
     {
-      "elapsed_ns": 742000,
+      "elapsed_ns": 284815,
       "method": "axis-box",
       "phase": "measured",
       "projection_index": 0,
@@ -353,7 +368,7 @@
           "error_bound=unavailable"
         ],
         "method_id": "csl.approximation.box",
-        "method_version": "",
+        "method_version": "1",
         "relation_basis": "v_h_containment",
         "shape": {
           "coordinate_labels": [
@@ -394,7 +409,7 @@
       "status": "completed"
     },
     {
-      "elapsed_ns": 1530585,
+      "elapsed_ns": 526957,
       "method": "rotated-parallelotope",
       "phase": "measured",
       "projection_index": 0,
@@ -419,7 +434,7 @@
             ]
           ]
         },
-        "method_version": "",
+        "method_version": "1",
         "relation_basis": "v_h_containment",
         "shape": {
           "coordinate_labels": [
@@ -460,7 +475,7 @@
       "status": "completed"
     },
     {
-      "elapsed_ns": 419051,
+      "elapsed_ns": 259951,
       "method": "directional-ellipsoid",
       "phase": "measured",
       "projection_index": 0,
@@ -522,7 +537,7 @@
       "status": "completed"
     },
     {
-      "elapsed_ns": 18997,
+      "elapsed_ns": 16623,
       "method": "zonotope-axis-cover",
       "phase": "measured",
       "projection_index": 0,
@@ -536,6 +551,7 @@
           "No realizable control witness, complete optimal family, validated rounding bound, or global error bound is supplied."
         ],
         "method_id": "csl.geometry.zonotope.axis-cover",
+        "method_version": "1.0.0",
         "relation_basis": "generator_axis_cover",
         "shape": {
           "center": [
@@ -607,7 +623,7 @@
       "status": "completed"
     },
     {
-      "elapsed_ns": 271336,
+      "elapsed_ns": 276224,
       "method": "axis-box",
       "phase": "measured",
       "projection_index": 0,
@@ -620,7 +636,7 @@
           "error_bound=unavailable"
         ],
         "method_id": "csl.approximation.box",
-        "method_version": "",
+        "method_version": "1",
         "relation_basis": "v_h_containment",
         "shape": {
           "coordinate_labels": [
@@ -661,7 +677,7 @@
       "status": "completed"
     },
     {
-      "elapsed_ns": 502233,
+      "elapsed_ns": 553287,
       "method": "rotated-parallelotope",
       "phase": "measured",
       "projection_index": 0,
@@ -686,7 +702,7 @@
             ]
           ]
         },
-        "method_version": "",
+        "method_version": "1",
         "relation_basis": "v_h_containment",
         "shape": {
           "coordinate_labels": [
@@ -727,7 +743,7 @@
       "status": "completed"
     },
     {
-      "elapsed_ns": 235506,
+      "elapsed_ns": 250942,
       "method": "directional-ellipsoid",
       "phase": "measured",
       "projection_index": 0,
@@ -789,7 +805,7 @@
       "status": "completed"
     },
     {
-      "elapsed_ns": 14038,
+      "elapsed_ns": 15993,
       "method": "zonotope-axis-cover",
       "phase": "measured",
       "projection_index": 0,
@@ -803,6 +819,7 @@
           "No realizable control witness, complete optimal family, validated rounding bound, or global error bound is supplied."
         ],
         "method_id": "csl.geometry.zonotope.axis-cover",
+        "method_version": "1.0.0",
         "relation_basis": "generator_axis_cover",
         "shape": {
           "center": [
@@ -874,13 +891,15 @@
       "status": "completed"
     },
     {
-      "elapsed_ns": 75569,
+      "elapsed_ns": 81156,
       "method": "exact-polytope-quickhull",
       "phase": "measured",
       "projection_index": 0,
       "repetition": 1,
       "result": {
         "direction": "equivalent",
+        "method_id": "csl.quickhull_2d",
+        "method_version": "unregistered",
         "output_vertices": 4,
         "shape": {
           "kind": "v_polytope",
@@ -908,7 +927,7 @@
       "status": "completed"
     },
     {
-      "elapsed_ns": 491757,
+      "elapsed_ns": 534220,
       "method": "rotated-parallelotope",
       "phase": "measured",
       "projection_index": 0,
@@ -933,7 +952,7 @@
             ]
           ]
         },
-        "method_version": "",
+        "method_version": "1",
         "relation_basis": "v_h_containment",
         "shape": {
           "coordinate_labels": [
@@ -974,7 +993,7 @@
       "status": "completed"
     },
     {
-      "elapsed_ns": 226148,
+      "elapsed_ns": 248497,
       "method": "directional-ellipsoid",
       "phase": "measured",
       "projection_index": 0,
@@ -1028,6 +1047,2476 @@
           "radii": [
             2.0859650045003155,
             3.945655839020936
+          ]
+        },
+        "size_budget": 1,
+        "status": "completed"
+      },
+      "status": "completed"
+    },
+    {
+      "elapsed_ns": 15155,
+      "method": "zonotope-axis-cover",
+      "phase": "measured",
+      "projection_index": 0,
+      "repetition": 2,
+      "result": {
+        "direction": "outer",
+        "evidence_assumptions": [
+          "requested_budget=4; input_generators=6; retained_generators=4; output_generators=4",
+          "The input had no factor equalities.",
+          "Omitted FactorId dependencies were relaxed to independent axis factors; retained IDs are unchanged.",
+          "No realizable control witness, complete optimal family, validated rounding bound, or global error bound is supplied."
+        ],
+        "method_id": "csl.geometry.zonotope.axis-cover",
+        "method_version": "1.0.0",
+        "relation_basis": "generator_axis_cover",
+        "shape": {
+          "center": [
+            4.5,
+            0.0
+          ],
+          "coordinate_labels": [
+            "position 1",
+            "velocity 1"
+          ],
+          "factors": [
+            "two-points-factor-4",
+            "two-points-factor-0",
+            "two-points-factor-2",
+            "two-points-factor-1"
+          ],
+          "generators": [
+            [
+              0.2250000000523869,
+              0.25000000005820766,
+              0.25000000005820766,
+              0.0
+            ],
+            [
+              2.5000000005820766,
+              0.0,
+              0.0,
+              0.0
+            ]
+          ],
+          "kind": "zonotope"
+        },
+        "size_budget": 4,
+        "source_zonotope": {
+          "center": [
+            4.5,
+            0.0
+          ],
+          "factors": [
+            "two-points-factor-0",
+            "two-points-factor-1",
+            "two-points-factor-2",
+            "two-points-factor-3",
+            "two-points-factor-4",
+            "two-points-factor-5"
+          ],
+          "generators": [
+            [
+              0.25000000005820766,
+              0.0,
+              0.25000000005820766,
+              0.0,
+              0.2250000000523869,
+              0.0
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              2.5000000005820766,
+              0.0
+            ]
+          ],
+          "outer_padding_factor": 1.0000000002328306
+        },
+        "status": "completed"
+      },
+      "status": "completed"
+    },
+    {
+      "elapsed_ns": 84998,
+      "method": "exact-polytope-quickhull",
+      "phase": "measured",
+      "projection_index": 0,
+      "repetition": 2,
+      "result": {
+        "direction": "equivalent",
+        "method_id": "csl.quickhull_2d",
+        "method_version": "unregistered",
+        "output_vertices": 4,
+        "shape": {
+          "kind": "v_polytope",
+          "vertices": [
+            [
+              3.775,
+              -2.5
+            ],
+            [
+              4.775,
+              -2.5
+            ],
+            [
+              5.225,
+              2.5
+            ],
+            [
+              4.225,
+              2.5
+            ]
+          ]
+        },
+        "status": "completed"
+      },
+      "status": "completed"
+    },
+    {
+      "elapsed_ns": 278529,
+      "method": "axis-box",
+      "phase": "measured",
+      "projection_index": 0,
+      "repetition": 2,
+      "result": {
+        "direction": "outer",
+        "evidence_assumptions": [
+          "orientation_rows=1,0;0,1",
+          "requested_budget=4; input_vertices=15; input_rays=0; output_h_rows=4",
+          "error_bound=unavailable"
+        ],
+        "method_id": "csl.approximation.box",
+        "method_version": "1",
+        "relation_basis": "v_h_containment",
+        "shape": {
+          "coordinate_labels": [
+            "position 1",
+            "velocity 1"
+          ],
+          "equality_bounds": [],
+          "equality_rows": [],
+          "inequality_bounds": [
+            5.225,
+            -3.775,
+            2.5,
+            2.5
+          ],
+          "inequality_rows": [
+            [
+              1.0,
+              0.0
+            ],
+            [
+              -1.0,
+              0.0
+            ],
+            [
+              0.0,
+              1.0
+            ],
+            [
+              0.0,
+              -1.0
+            ]
+          ],
+          "kind": "h_polytope"
+        },
+        "size_budget": 4,
+        "status": "completed"
+      },
+      "status": "completed"
+    },
+    {
+      "elapsed_ns": 243190,
+      "method": "directional-ellipsoid",
+      "phase": "measured",
+      "projection_index": 0,
+      "repetition": 3,
+      "result": {
+        "direction": "outer",
+        "evidence_assumptions": [
+          "input_class=bounded_native_planar_v",
+          "radius_rule=r_i^2 >= 2 m_i^2",
+          "rounding=outward_projected_bounds; error_bound=unavailable"
+        ],
+        "method_id": "csl.approximation.ellipsoid.exp03",
+        "method_parameters": {
+          "orientation": [
+            [
+              1.0,
+              0.3
+            ],
+            [
+              0.4,
+              1.0
+            ]
+          ]
+        },
+        "method_version": "1",
+        "relation_basis": "v_ellipsoid_containment",
+        "shape": {
+          "center": [
+            4.5,
+            0.0
+          ],
+          "coordinate_labels": [
+            "position 1",
+            "velocity 1"
+          ],
+          "kind": "directional_ellipsoid",
+          "orientation": [
+            [
+              1.0,
+              0.3
+            ],
+            [
+              0.4,
+              1.0
+            ]
+          ],
+          "projected_bounds": [
+            1.475,
+            2.7900000000000005
+          ],
+          "radii": [
+            2.0859650045003155,
+            3.945655839020936
+          ]
+        },
+        "size_budget": 1,
+        "status": "completed"
+      },
+      "status": "completed"
+    },
+    {
+      "elapsed_ns": 30521,
+      "method": "zonotope-axis-cover",
+      "phase": "measured",
+      "projection_index": 0,
+      "repetition": 3,
+      "result": {
+        "direction": "outer",
+        "evidence_assumptions": [
+          "requested_budget=4; input_generators=6; retained_generators=4; output_generators=4",
+          "The input had no factor equalities.",
+          "Omitted FactorId dependencies were relaxed to independent axis factors; retained IDs are unchanged.",
+          "No realizable control witness, complete optimal family, validated rounding bound, or global error bound is supplied."
+        ],
+        "method_id": "csl.geometry.zonotope.axis-cover",
+        "method_version": "1.0.0",
+        "relation_basis": "generator_axis_cover",
+        "shape": {
+          "center": [
+            4.5,
+            0.0
+          ],
+          "coordinate_labels": [
+            "position 1",
+            "velocity 1"
+          ],
+          "factors": [
+            "two-points-factor-4",
+            "two-points-factor-0",
+            "two-points-factor-2",
+            "two-points-factor-1"
+          ],
+          "generators": [
+            [
+              0.2250000000523869,
+              0.25000000005820766,
+              0.25000000005820766,
+              0.0
+            ],
+            [
+              2.5000000005820766,
+              0.0,
+              0.0,
+              0.0
+            ]
+          ],
+          "kind": "zonotope"
+        },
+        "size_budget": 4,
+        "source_zonotope": {
+          "center": [
+            4.5,
+            0.0
+          ],
+          "factors": [
+            "two-points-factor-0",
+            "two-points-factor-1",
+            "two-points-factor-2",
+            "two-points-factor-3",
+            "two-points-factor-4",
+            "two-points-factor-5"
+          ],
+          "generators": [
+            [
+              0.25000000005820766,
+              0.0,
+              0.25000000005820766,
+              0.0,
+              0.2250000000523869,
+              0.0
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              2.5000000005820766,
+              0.0
+            ]
+          ],
+          "outer_padding_factor": 1.0000000002328306
+        },
+        "status": "completed"
+      },
+      "status": "completed"
+    },
+    {
+      "elapsed_ns": 82553,
+      "method": "exact-polytope-quickhull",
+      "phase": "measured",
+      "projection_index": 0,
+      "repetition": 3,
+      "result": {
+        "direction": "equivalent",
+        "method_id": "csl.quickhull_2d",
+        "method_version": "unregistered",
+        "output_vertices": 4,
+        "shape": {
+          "kind": "v_polytope",
+          "vertices": [
+            [
+              3.775,
+              -2.5
+            ],
+            [
+              4.775,
+              -2.5
+            ],
+            [
+              5.225,
+              2.5
+            ],
+            [
+              4.225,
+              2.5
+            ]
+          ]
+        },
+        "status": "completed"
+      },
+      "status": "completed"
+    },
+    {
+      "elapsed_ns": 280624,
+      "method": "axis-box",
+      "phase": "measured",
+      "projection_index": 0,
+      "repetition": 3,
+      "result": {
+        "direction": "outer",
+        "evidence_assumptions": [
+          "orientation_rows=1,0;0,1",
+          "requested_budget=4; input_vertices=15; input_rays=0; output_h_rows=4",
+          "error_bound=unavailable"
+        ],
+        "method_id": "csl.approximation.box",
+        "method_version": "1",
+        "relation_basis": "v_h_containment",
+        "shape": {
+          "coordinate_labels": [
+            "position 1",
+            "velocity 1"
+          ],
+          "equality_bounds": [],
+          "equality_rows": [],
+          "inequality_bounds": [
+            5.225,
+            -3.775,
+            2.5,
+            2.5
+          ],
+          "inequality_rows": [
+            [
+              1.0,
+              0.0
+            ],
+            [
+              -1.0,
+              0.0
+            ],
+            [
+              0.0,
+              1.0
+            ],
+            [
+              0.0,
+              -1.0
+            ]
+          ],
+          "kind": "h_polytope"
+        },
+        "size_budget": 4,
+        "status": "completed"
+      },
+      "status": "completed"
+    },
+    {
+      "elapsed_ns": 529331,
+      "method": "rotated-parallelotope",
+      "phase": "measured",
+      "projection_index": 0,
+      "repetition": 3,
+      "result": {
+        "direction": "outer",
+        "evidence_assumptions": [
+          "orientation_rows=1,0.29999999999999999;0.40000000000000002,1",
+          "requested_budget=4; input_vertices=15; input_rays=0; output_h_rows=4",
+          "error_bound=unavailable"
+        ],
+        "method_id": "csl.approximation.parallelotope",
+        "method_parameters": {
+          "orientation": [
+            [
+              1.0,
+              0.3
+            ],
+            [
+              0.4,
+              1.0
+            ]
+          ]
+        },
+        "method_version": "1",
+        "relation_basis": "v_h_containment",
+        "shape": {
+          "coordinate_labels": [
+            "position 1",
+            "velocity 1"
+          ],
+          "equality_bounds": [],
+          "equality_rows": [],
+          "inequality_bounds": [
+            5.975,
+            -3.025,
+            4.590000000000001,
+            0.99
+          ],
+          "inequality_rows": [
+            [
+              1.0,
+              0.3
+            ],
+            [
+              -1.0,
+              -0.3
+            ],
+            [
+              0.4,
+              1.0
+            ],
+            [
+              -0.4,
+              -1.0
+            ]
+          ],
+          "kind": "h_polytope"
+        },
+        "size_budget": 4,
+        "status": "completed"
+      },
+      "status": "completed"
+    },
+    {
+      "elapsed_ns": 28146,
+      "method": "zonotope-axis-cover",
+      "phase": "measured",
+      "projection_index": 0,
+      "repetition": 4,
+      "result": {
+        "direction": "outer",
+        "evidence_assumptions": [
+          "requested_budget=4; input_generators=6; retained_generators=4; output_generators=4",
+          "The input had no factor equalities.",
+          "Omitted FactorId dependencies were relaxed to independent axis factors; retained IDs are unchanged.",
+          "No realizable control witness, complete optimal family, validated rounding bound, or global error bound is supplied."
+        ],
+        "method_id": "csl.geometry.zonotope.axis-cover",
+        "method_version": "1.0.0",
+        "relation_basis": "generator_axis_cover",
+        "shape": {
+          "center": [
+            4.5,
+            0.0
+          ],
+          "coordinate_labels": [
+            "position 1",
+            "velocity 1"
+          ],
+          "factors": [
+            "two-points-factor-4",
+            "two-points-factor-0",
+            "two-points-factor-2",
+            "two-points-factor-1"
+          ],
+          "generators": [
+            [
+              0.2250000000523869,
+              0.25000000005820766,
+              0.25000000005820766,
+              0.0
+            ],
+            [
+              2.5000000005820766,
+              0.0,
+              0.0,
+              0.0
+            ]
+          ],
+          "kind": "zonotope"
+        },
+        "size_budget": 4,
+        "source_zonotope": {
+          "center": [
+            4.5,
+            0.0
+          ],
+          "factors": [
+            "two-points-factor-0",
+            "two-points-factor-1",
+            "two-points-factor-2",
+            "two-points-factor-3",
+            "two-points-factor-4",
+            "two-points-factor-5"
+          ],
+          "generators": [
+            [
+              0.25000000005820766,
+              0.0,
+              0.25000000005820766,
+              0.0,
+              0.2250000000523869,
+              0.0
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              2.5000000005820766,
+              0.0
+            ]
+          ],
+          "outer_padding_factor": 1.0000000002328306
+        },
+        "status": "completed"
+      },
+      "status": "completed"
+    },
+    {
+      "elapsed_ns": 82483,
+      "method": "exact-polytope-quickhull",
+      "phase": "measured",
+      "projection_index": 0,
+      "repetition": 4,
+      "result": {
+        "direction": "equivalent",
+        "method_id": "csl.quickhull_2d",
+        "method_version": "unregistered",
+        "output_vertices": 4,
+        "shape": {
+          "kind": "v_polytope",
+          "vertices": [
+            [
+              3.775,
+              -2.5
+            ],
+            [
+              4.775,
+              -2.5
+            ],
+            [
+              5.225,
+              2.5
+            ],
+            [
+              4.225,
+              2.5
+            ]
+          ]
+        },
+        "status": "completed"
+      },
+      "status": "completed"
+    },
+    {
+      "elapsed_ns": 279926,
+      "method": "axis-box",
+      "phase": "measured",
+      "projection_index": 0,
+      "repetition": 4,
+      "result": {
+        "direction": "outer",
+        "evidence_assumptions": [
+          "orientation_rows=1,0;0,1",
+          "requested_budget=4; input_vertices=15; input_rays=0; output_h_rows=4",
+          "error_bound=unavailable"
+        ],
+        "method_id": "csl.approximation.box",
+        "method_version": "1",
+        "relation_basis": "v_h_containment",
+        "shape": {
+          "coordinate_labels": [
+            "position 1",
+            "velocity 1"
+          ],
+          "equality_bounds": [],
+          "equality_rows": [],
+          "inequality_bounds": [
+            5.225,
+            -3.775,
+            2.5,
+            2.5
+          ],
+          "inequality_rows": [
+            [
+              1.0,
+              0.0
+            ],
+            [
+              -1.0,
+              0.0
+            ],
+            [
+              0.0,
+              1.0
+            ],
+            [
+              0.0,
+              -1.0
+            ]
+          ],
+          "kind": "h_polytope"
+        },
+        "size_budget": 4,
+        "status": "completed"
+      },
+      "status": "completed"
+    },
+    {
+      "elapsed_ns": 519064,
+      "method": "rotated-parallelotope",
+      "phase": "measured",
+      "projection_index": 0,
+      "repetition": 4,
+      "result": {
+        "direction": "outer",
+        "evidence_assumptions": [
+          "orientation_rows=1,0.29999999999999999;0.40000000000000002,1",
+          "requested_budget=4; input_vertices=15; input_rays=0; output_h_rows=4",
+          "error_bound=unavailable"
+        ],
+        "method_id": "csl.approximation.parallelotope",
+        "method_parameters": {
+          "orientation": [
+            [
+              1.0,
+              0.3
+            ],
+            [
+              0.4,
+              1.0
+            ]
+          ]
+        },
+        "method_version": "1",
+        "relation_basis": "v_h_containment",
+        "shape": {
+          "coordinate_labels": [
+            "position 1",
+            "velocity 1"
+          ],
+          "equality_bounds": [],
+          "equality_rows": [],
+          "inequality_bounds": [
+            5.975,
+            -3.025,
+            4.590000000000001,
+            0.99
+          ],
+          "inequality_rows": [
+            [
+              1.0,
+              0.3
+            ],
+            [
+              -1.0,
+              -0.3
+            ],
+            [
+              0.4,
+              1.0
+            ],
+            [
+              -0.4,
+              -1.0
+            ]
+          ],
+          "kind": "h_polytope"
+        },
+        "size_budget": 4,
+        "status": "completed"
+      },
+      "status": "completed"
+    },
+    {
+      "elapsed_ns": 262954,
+      "method": "directional-ellipsoid",
+      "phase": "measured",
+      "projection_index": 0,
+      "repetition": 4,
+      "result": {
+        "direction": "outer",
+        "evidence_assumptions": [
+          "input_class=bounded_native_planar_v",
+          "radius_rule=r_i^2 >= 2 m_i^2",
+          "rounding=outward_projected_bounds; error_bound=unavailable"
+        ],
+        "method_id": "csl.approximation.ellipsoid.exp03",
+        "method_parameters": {
+          "orientation": [
+            [
+              1.0,
+              0.3
+            ],
+            [
+              0.4,
+              1.0
+            ]
+          ]
+        },
+        "method_version": "1",
+        "relation_basis": "v_ellipsoid_containment",
+        "shape": {
+          "center": [
+            4.5,
+            0.0
+          ],
+          "coordinate_labels": [
+            "position 1",
+            "velocity 1"
+          ],
+          "kind": "directional_ellipsoid",
+          "orientation": [
+            [
+              1.0,
+              0.3
+            ],
+            [
+              0.4,
+              1.0
+            ]
+          ],
+          "projected_bounds": [
+            1.475,
+            2.7900000000000005
+          ],
+          "radii": [
+            2.0859650045003155,
+            3.945655839020936
+          ]
+        },
+        "size_budget": 1,
+        "status": "completed"
+      },
+      "status": "completed"
+    },
+    {
+      "elapsed_ns": 77804,
+      "method": "exact-polytope-quickhull",
+      "phase": "measured",
+      "projection_index": 0,
+      "repetition": 5,
+      "result": {
+        "direction": "equivalent",
+        "method_id": "csl.quickhull_2d",
+        "method_version": "unregistered",
+        "output_vertices": 4,
+        "shape": {
+          "kind": "v_polytope",
+          "vertices": [
+            [
+              3.775,
+              -2.5
+            ],
+            [
+              4.775,
+              -2.5
+            ],
+            [
+              5.225,
+              2.5
+            ],
+            [
+              4.225,
+              2.5
+            ]
+          ]
+        },
+        "status": "completed"
+      },
+      "status": "completed"
+    },
+    {
+      "elapsed_ns": 280136,
+      "method": "axis-box",
+      "phase": "measured",
+      "projection_index": 0,
+      "repetition": 5,
+      "result": {
+        "direction": "outer",
+        "evidence_assumptions": [
+          "orientation_rows=1,0;0,1",
+          "requested_budget=4; input_vertices=15; input_rays=0; output_h_rows=4",
+          "error_bound=unavailable"
+        ],
+        "method_id": "csl.approximation.box",
+        "method_version": "1",
+        "relation_basis": "v_h_containment",
+        "shape": {
+          "coordinate_labels": [
+            "position 1",
+            "velocity 1"
+          ],
+          "equality_bounds": [],
+          "equality_rows": [],
+          "inequality_bounds": [
+            5.225,
+            -3.775,
+            2.5,
+            2.5
+          ],
+          "inequality_rows": [
+            [
+              1.0,
+              0.0
+            ],
+            [
+              -1.0,
+              0.0
+            ],
+            [
+              0.0,
+              1.0
+            ],
+            [
+              0.0,
+              -1.0
+            ]
+          ],
+          "kind": "h_polytope"
+        },
+        "size_budget": 4,
+        "status": "completed"
+      },
+      "status": "completed"
+    },
+    {
+      "elapsed_ns": 535408,
+      "method": "rotated-parallelotope",
+      "phase": "measured",
+      "projection_index": 0,
+      "repetition": 5,
+      "result": {
+        "direction": "outer",
+        "evidence_assumptions": [
+          "orientation_rows=1,0.29999999999999999;0.40000000000000002,1",
+          "requested_budget=4; input_vertices=15; input_rays=0; output_h_rows=4",
+          "error_bound=unavailable"
+        ],
+        "method_id": "csl.approximation.parallelotope",
+        "method_parameters": {
+          "orientation": [
+            [
+              1.0,
+              0.3
+            ],
+            [
+              0.4,
+              1.0
+            ]
+          ]
+        },
+        "method_version": "1",
+        "relation_basis": "v_h_containment",
+        "shape": {
+          "coordinate_labels": [
+            "position 1",
+            "velocity 1"
+          ],
+          "equality_bounds": [],
+          "equality_rows": [],
+          "inequality_bounds": [
+            5.975,
+            -3.025,
+            4.590000000000001,
+            0.99
+          ],
+          "inequality_rows": [
+            [
+              1.0,
+              0.3
+            ],
+            [
+              -1.0,
+              -0.3
+            ],
+            [
+              0.4,
+              1.0
+            ],
+            [
+              -0.4,
+              -1.0
+            ]
+          ],
+          "kind": "h_polytope"
+        },
+        "size_budget": 4,
+        "status": "completed"
+      },
+      "status": "completed"
+    },
+    {
+      "elapsed_ns": 250033,
+      "method": "directional-ellipsoid",
+      "phase": "measured",
+      "projection_index": 0,
+      "repetition": 5,
+      "result": {
+        "direction": "outer",
+        "evidence_assumptions": [
+          "input_class=bounded_native_planar_v",
+          "radius_rule=r_i^2 >= 2 m_i^2",
+          "rounding=outward_projected_bounds; error_bound=unavailable"
+        ],
+        "method_id": "csl.approximation.ellipsoid.exp03",
+        "method_parameters": {
+          "orientation": [
+            [
+              1.0,
+              0.3
+            ],
+            [
+              0.4,
+              1.0
+            ]
+          ]
+        },
+        "method_version": "1",
+        "relation_basis": "v_ellipsoid_containment",
+        "shape": {
+          "center": [
+            4.5,
+            0.0
+          ],
+          "coordinate_labels": [
+            "position 1",
+            "velocity 1"
+          ],
+          "kind": "directional_ellipsoid",
+          "orientation": [
+            [
+              1.0,
+              0.3
+            ],
+            [
+              0.4,
+              1.0
+            ]
+          ],
+          "projected_bounds": [
+            1.475,
+            2.7900000000000005
+          ],
+          "radii": [
+            2.0859650045003155,
+            3.945655839020936
+          ]
+        },
+        "size_budget": 1,
+        "status": "completed"
+      },
+      "status": "completed"
+    },
+    {
+      "elapsed_ns": 14807,
+      "method": "zonotope-axis-cover",
+      "phase": "measured",
+      "projection_index": 0,
+      "repetition": 5,
+      "result": {
+        "direction": "outer",
+        "evidence_assumptions": [
+          "requested_budget=4; input_generators=6; retained_generators=4; output_generators=4",
+          "The input had no factor equalities.",
+          "Omitted FactorId dependencies were relaxed to independent axis factors; retained IDs are unchanged.",
+          "No realizable control witness, complete optimal family, validated rounding bound, or global error bound is supplied."
+        ],
+        "method_id": "csl.geometry.zonotope.axis-cover",
+        "method_version": "1.0.0",
+        "relation_basis": "generator_axis_cover",
+        "shape": {
+          "center": [
+            4.5,
+            0.0
+          ],
+          "coordinate_labels": [
+            "position 1",
+            "velocity 1"
+          ],
+          "factors": [
+            "two-points-factor-4",
+            "two-points-factor-0",
+            "two-points-factor-2",
+            "two-points-factor-1"
+          ],
+          "generators": [
+            [
+              0.2250000000523869,
+              0.25000000005820766,
+              0.25000000005820766,
+              0.0
+            ],
+            [
+              2.5000000005820766,
+              0.0,
+              0.0,
+              0.0
+            ]
+          ],
+          "kind": "zonotope"
+        },
+        "size_budget": 4,
+        "source_zonotope": {
+          "center": [
+            4.5,
+            0.0
+          ],
+          "factors": [
+            "two-points-factor-0",
+            "two-points-factor-1",
+            "two-points-factor-2",
+            "two-points-factor-3",
+            "two-points-factor-4",
+            "two-points-factor-5"
+          ],
+          "generators": [
+            [
+              0.25000000005820766,
+              0.0,
+              0.25000000005820766,
+              0.0,
+              0.2250000000523869,
+              0.0
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              2.5000000005820766,
+              0.0
+            ]
+          ],
+          "outer_padding_factor": 1.0000000002328306
+        },
+        "status": "completed"
+      },
+      "status": "completed"
+    },
+    {
+      "elapsed_ns": 279437,
+      "method": "axis-box",
+      "phase": "measured",
+      "projection_index": 0,
+      "repetition": 6,
+      "result": {
+        "direction": "outer",
+        "evidence_assumptions": [
+          "orientation_rows=1,0;0,1",
+          "requested_budget=4; input_vertices=15; input_rays=0; output_h_rows=4",
+          "error_bound=unavailable"
+        ],
+        "method_id": "csl.approximation.box",
+        "method_version": "1",
+        "relation_basis": "v_h_containment",
+        "shape": {
+          "coordinate_labels": [
+            "position 1",
+            "velocity 1"
+          ],
+          "equality_bounds": [],
+          "equality_rows": [],
+          "inequality_bounds": [
+            5.225,
+            -3.775,
+            2.5,
+            2.5
+          ],
+          "inequality_rows": [
+            [
+              1.0,
+              0.0
+            ],
+            [
+              -1.0,
+              0.0
+            ],
+            [
+              0.0,
+              1.0
+            ],
+            [
+              0.0,
+              -1.0
+            ]
+          ],
+          "kind": "h_polytope"
+        },
+        "size_budget": 4,
+        "status": "completed"
+      },
+      "status": "completed"
+    },
+    {
+      "elapsed_ns": 530728,
+      "method": "rotated-parallelotope",
+      "phase": "measured",
+      "projection_index": 0,
+      "repetition": 6,
+      "result": {
+        "direction": "outer",
+        "evidence_assumptions": [
+          "orientation_rows=1,0.29999999999999999;0.40000000000000002,1",
+          "requested_budget=4; input_vertices=15; input_rays=0; output_h_rows=4",
+          "error_bound=unavailable"
+        ],
+        "method_id": "csl.approximation.parallelotope",
+        "method_parameters": {
+          "orientation": [
+            [
+              1.0,
+              0.3
+            ],
+            [
+              0.4,
+              1.0
+            ]
+          ]
+        },
+        "method_version": "1",
+        "relation_basis": "v_h_containment",
+        "shape": {
+          "coordinate_labels": [
+            "position 1",
+            "velocity 1"
+          ],
+          "equality_bounds": [],
+          "equality_rows": [],
+          "inequality_bounds": [
+            5.975,
+            -3.025,
+            4.590000000000001,
+            0.99
+          ],
+          "inequality_rows": [
+            [
+              1.0,
+              0.3
+            ],
+            [
+              -1.0,
+              -0.3
+            ],
+            [
+              0.4,
+              1.0
+            ],
+            [
+              -0.4,
+              -1.0
+            ]
+          ],
+          "kind": "h_polytope"
+        },
+        "size_budget": 4,
+        "status": "completed"
+      },
+      "status": "completed"
+    },
+    {
+      "elapsed_ns": 245843,
+      "method": "directional-ellipsoid",
+      "phase": "measured",
+      "projection_index": 0,
+      "repetition": 6,
+      "result": {
+        "direction": "outer",
+        "evidence_assumptions": [
+          "input_class=bounded_native_planar_v",
+          "radius_rule=r_i^2 >= 2 m_i^2",
+          "rounding=outward_projected_bounds; error_bound=unavailable"
+        ],
+        "method_id": "csl.approximation.ellipsoid.exp03",
+        "method_parameters": {
+          "orientation": [
+            [
+              1.0,
+              0.3
+            ],
+            [
+              0.4,
+              1.0
+            ]
+          ]
+        },
+        "method_version": "1",
+        "relation_basis": "v_ellipsoid_containment",
+        "shape": {
+          "center": [
+            4.5,
+            0.0
+          ],
+          "coordinate_labels": [
+            "position 1",
+            "velocity 1"
+          ],
+          "kind": "directional_ellipsoid",
+          "orientation": [
+            [
+              1.0,
+              0.3
+            ],
+            [
+              0.4,
+              1.0
+            ]
+          ],
+          "projected_bounds": [
+            1.475,
+            2.7900000000000005
+          ],
+          "radii": [
+            2.0859650045003155,
+            3.945655839020936
+          ]
+        },
+        "size_budget": 1,
+        "status": "completed"
+      },
+      "status": "completed"
+    },
+    {
+      "elapsed_ns": 13969,
+      "method": "zonotope-axis-cover",
+      "phase": "measured",
+      "projection_index": 0,
+      "repetition": 6,
+      "result": {
+        "direction": "outer",
+        "evidence_assumptions": [
+          "requested_budget=4; input_generators=6; retained_generators=4; output_generators=4",
+          "The input had no factor equalities.",
+          "Omitted FactorId dependencies were relaxed to independent axis factors; retained IDs are unchanged.",
+          "No realizable control witness, complete optimal family, validated rounding bound, or global error bound is supplied."
+        ],
+        "method_id": "csl.geometry.zonotope.axis-cover",
+        "method_version": "1.0.0",
+        "relation_basis": "generator_axis_cover",
+        "shape": {
+          "center": [
+            4.5,
+            0.0
+          ],
+          "coordinate_labels": [
+            "position 1",
+            "velocity 1"
+          ],
+          "factors": [
+            "two-points-factor-4",
+            "two-points-factor-0",
+            "two-points-factor-2",
+            "two-points-factor-1"
+          ],
+          "generators": [
+            [
+              0.2250000000523869,
+              0.25000000005820766,
+              0.25000000005820766,
+              0.0
+            ],
+            [
+              2.5000000005820766,
+              0.0,
+              0.0,
+              0.0
+            ]
+          ],
+          "kind": "zonotope"
+        },
+        "size_budget": 4,
+        "source_zonotope": {
+          "center": [
+            4.5,
+            0.0
+          ],
+          "factors": [
+            "two-points-factor-0",
+            "two-points-factor-1",
+            "two-points-factor-2",
+            "two-points-factor-3",
+            "two-points-factor-4",
+            "two-points-factor-5"
+          ],
+          "generators": [
+            [
+              0.25000000005820766,
+              0.0,
+              0.25000000005820766,
+              0.0,
+              0.2250000000523869,
+              0.0
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              2.5000000005820766,
+              0.0
+            ]
+          ],
+          "outer_padding_factor": 1.0000000002328306
+        },
+        "status": "completed"
+      },
+      "status": "completed"
+    },
+    {
+      "elapsed_ns": 82344,
+      "method": "exact-polytope-quickhull",
+      "phase": "measured",
+      "projection_index": 0,
+      "repetition": 6,
+      "result": {
+        "direction": "equivalent",
+        "method_id": "csl.quickhull_2d",
+        "method_version": "unregistered",
+        "output_vertices": 4,
+        "shape": {
+          "kind": "v_polytope",
+          "vertices": [
+            [
+              3.775,
+              -2.5
+            ],
+            [
+              4.775,
+              -2.5
+            ],
+            [
+              5.225,
+              2.5
+            ],
+            [
+              4.225,
+              2.5
+            ]
+          ]
+        },
+        "status": "completed"
+      },
+      "status": "completed"
+    },
+    {
+      "method": "exact-polytope-quickhull",
+      "phase": "warmup",
+      "projection_index": 1,
+      "result": {
+        "direction": "equivalent",
+        "method_id": "csl.quickhull_2d",
+        "method_version": "unregistered",
+        "output_vertices": 8,
+        "shape": {
+          "kind": "v_polytope",
+          "vertices": [
+            [
+              -0.0435,
+              -0.3
+            ],
+            [
+              -0.019,
+              -0.2
+            ],
+            [
+              0.0055,
+              -0.1
+            ],
+            [
+              0.0345,
+              0.1
+            ],
+            [
+              0.0435,
+              0.3
+            ],
+            [
+              0.019,
+              0.2
+            ],
+            [
+              -0.0055,
+              0.1
+            ],
+            [
+              -0.0345,
+              -0.1
+            ]
+          ]
+        },
+        "status": "completed"
+      },
+      "status": "completed"
+    },
+    {
+      "method": "axis-box",
+      "phase": "warmup",
+      "projection_index": 1,
+      "result": {
+        "direction": "outer",
+        "evidence_assumptions": [
+          "orientation_rows=1,0;0,1",
+          "requested_budget=4; input_vertices=23; input_rays=0; output_h_rows=4",
+          "error_bound=unavailable"
+        ],
+        "method_id": "csl.approximation.box",
+        "method_version": "1",
+        "relation_basis": "v_h_containment",
+        "shape": {
+          "coordinate_labels": [
+            "position 2",
+            "velocity 2"
+          ],
+          "equality_bounds": [],
+          "equality_rows": [],
+          "inequality_bounds": [
+            0.0435,
+            0.0435,
+            0.3,
+            0.3
+          ],
+          "inequality_rows": [
+            [
+              1.0,
+              0.0
+            ],
+            [
+              -1.0,
+              0.0
+            ],
+            [
+              0.0,
+              1.0
+            ],
+            [
+              0.0,
+              -1.0
+            ]
+          ],
+          "kind": "h_polytope"
+        },
+        "size_budget": 4,
+        "status": "completed"
+      },
+      "status": "completed"
+    },
+    {
+      "method": "rotated-parallelotope",
+      "phase": "warmup",
+      "projection_index": 1,
+      "result": {
+        "direction": "outer",
+        "evidence_assumptions": [
+          "orientation_rows=1,0.29999999999999999;0.40000000000000002,1",
+          "requested_budget=4; input_vertices=23; input_rays=0; output_h_rows=4",
+          "error_bound=unavailable"
+        ],
+        "method_id": "csl.approximation.parallelotope",
+        "method_parameters": {
+          "orientation": [
+            [
+              1.0,
+              0.3
+            ],
+            [
+              0.4,
+              1.0
+            ]
+          ]
+        },
+        "method_version": "1",
+        "relation_basis": "v_h_containment",
+        "shape": {
+          "coordinate_labels": [
+            "position 2",
+            "velocity 2"
+          ],
+          "equality_bounds": [],
+          "equality_rows": [],
+          "inequality_bounds": [
+            0.1335,
+            0.1335,
+            0.3174,
+            0.3174
+          ],
+          "inequality_rows": [
+            [
+              1.0,
+              0.3
+            ],
+            [
+              -1.0,
+              -0.3
+            ],
+            [
+              0.4,
+              1.0
+            ],
+            [
+              -0.4,
+              -1.0
+            ]
+          ],
+          "kind": "h_polytope"
+        },
+        "size_budget": 4,
+        "status": "completed"
+      },
+      "status": "completed"
+    },
+    {
+      "method": "directional-ellipsoid",
+      "phase": "warmup",
+      "projection_index": 1,
+      "result": {
+        "direction": "outer",
+        "evidence_assumptions": [
+          "input_class=bounded_native_planar_v",
+          "radius_rule=r_i^2 >= 2 m_i^2",
+          "rounding=outward_projected_bounds; error_bound=unavailable"
+        ],
+        "method_id": "csl.approximation.ellipsoid.exp03",
+        "method_parameters": {
+          "orientation": [
+            [
+              1.0,
+              0.3
+            ],
+            [
+              0.4,
+              1.0
+            ]
+          ]
+        },
+        "method_version": "1",
+        "relation_basis": "v_ellipsoid_containment",
+        "shape": {
+          "center": [
+            0.0,
+            0.0
+          ],
+          "coordinate_labels": [
+            "position 2",
+            "velocity 2"
+          ],
+          "kind": "directional_ellipsoid",
+          "orientation": [
+            [
+              1.0,
+              0.3
+            ],
+            [
+              0.4,
+              1.0
+            ]
+          ],
+          "projected_bounds": [
+            0.1335,
+            0.3174
+          ],
+          "radii": [
+            0.18879751057680821,
+            0.44887138469722043
+          ]
+        },
+        "size_budget": 1,
+        "status": "completed"
+      },
+      "status": "completed"
+    },
+    {
+      "method": "zonotope-axis-cover",
+      "phase": "warmup",
+      "projection_index": 1,
+      "result": {
+        "direction": "outer",
+        "evidence_assumptions": [
+          "requested_budget=4; input_generators=6; retained_generators=4; output_generators=4",
+          "The input had no factor equalities.",
+          "Omitted FactorId dependencies were relaxed to independent axis factors; retained IDs are unchanged.",
+          "No realizable control witness, complete optimal family, validated rounding bound, or global error bound is supplied."
+        ],
+        "method_id": "csl.geometry.zonotope.axis-cover",
+        "method_version": "1.0.0",
+        "relation_basis": "generator_axis_cover",
+        "shape": {
+          "center": [
+            0.0,
+            0.0
+          ],
+          "coordinate_labels": [
+            "position 2",
+            "velocity 2"
+          ],
+          "factors": [
+            "two-points-factor-1",
+            "two-points-factor-3",
+            "two-points-factor-5",
+            "two-points-factor-0"
+          ],
+          "generators": [
+            [
+              0.02450000000570435,
+              0.014500000003376045,
+              0.004500000001047738,
+              0.0
+            ],
+            [
+              0.10000000002328308,
+              0.10000000002328308,
+              0.10000000002328308,
+              0.0
+            ]
+          ],
+          "kind": "zonotope"
+        },
+        "size_budget": 4,
+        "source_zonotope": {
+          "center": [
+            0.0,
+            0.0
+          ],
+          "factors": [
+            "two-points-factor-0",
+            "two-points-factor-1",
+            "two-points-factor-2",
+            "two-points-factor-3",
+            "two-points-factor-4",
+            "two-points-factor-5"
+          ],
+          "generators": [
+            [
+              0.0,
+              0.02450000000570435,
+              0.0,
+              0.014500000003376045,
+              0.0,
+              0.004500000001047738
+            ],
+            [
+              0.0,
+              0.10000000002328308,
+              0.0,
+              0.10000000002328308,
+              0.0,
+              0.10000000002328308
+            ]
+          ],
+          "outer_padding_factor": 1.0000000002328306
+        },
+        "status": "completed"
+      },
+      "status": "completed"
+    },
+    {
+      "elapsed_ns": 135213,
+      "method": "exact-polytope-quickhull",
+      "phase": "measured",
+      "projection_index": 1,
+      "repetition": 0,
+      "result": {
+        "direction": "equivalent",
+        "method_id": "csl.quickhull_2d",
+        "method_version": "unregistered",
+        "output_vertices": 8,
+        "shape": {
+          "kind": "v_polytope",
+          "vertices": [
+            [
+              -0.0435,
+              -0.3
+            ],
+            [
+              -0.019,
+              -0.2
+            ],
+            [
+              0.0055,
+              -0.1
+            ],
+            [
+              0.0345,
+              0.1
+            ],
+            [
+              0.0435,
+              0.3
+            ],
+            [
+              0.019,
+              0.2
+            ],
+            [
+              -0.0055,
+              0.1
+            ],
+            [
+              -0.0345,
+              -0.1
+            ]
+          ]
+        },
+        "status": "completed"
+      },
+      "status": "completed"
+    },
+    {
+      "elapsed_ns": 578709,
+      "method": "axis-box",
+      "phase": "measured",
+      "projection_index": 1,
+      "repetition": 0,
+      "result": {
+        "direction": "outer",
+        "evidence_assumptions": [
+          "orientation_rows=1,0;0,1",
+          "requested_budget=4; input_vertices=23; input_rays=0; output_h_rows=4",
+          "error_bound=unavailable"
+        ],
+        "method_id": "csl.approximation.box",
+        "method_version": "1",
+        "relation_basis": "v_h_containment",
+        "shape": {
+          "coordinate_labels": [
+            "position 2",
+            "velocity 2"
+          ],
+          "equality_bounds": [],
+          "equality_rows": [],
+          "inequality_bounds": [
+            0.0435,
+            0.0435,
+            0.3,
+            0.3
+          ],
+          "inequality_rows": [
+            [
+              1.0,
+              0.0
+            ],
+            [
+              -1.0,
+              0.0
+            ],
+            [
+              0.0,
+              1.0
+            ],
+            [
+              0.0,
+              -1.0
+            ]
+          ],
+          "kind": "h_polytope"
+        },
+        "size_budget": 4,
+        "status": "completed"
+      },
+      "status": "completed"
+    },
+    {
+      "elapsed_ns": 543649,
+      "method": "rotated-parallelotope",
+      "phase": "measured",
+      "projection_index": 1,
+      "repetition": 0,
+      "result": {
+        "direction": "outer",
+        "evidence_assumptions": [
+          "orientation_rows=1,0.29999999999999999;0.40000000000000002,1",
+          "requested_budget=4; input_vertices=23; input_rays=0; output_h_rows=4",
+          "error_bound=unavailable"
+        ],
+        "method_id": "csl.approximation.parallelotope",
+        "method_parameters": {
+          "orientation": [
+            [
+              1.0,
+              0.3
+            ],
+            [
+              0.4,
+              1.0
+            ]
+          ]
+        },
+        "method_version": "1",
+        "relation_basis": "v_h_containment",
+        "shape": {
+          "coordinate_labels": [
+            "position 2",
+            "velocity 2"
+          ],
+          "equality_bounds": [],
+          "equality_rows": [],
+          "inequality_bounds": [
+            0.1335,
+            0.1335,
+            0.3174,
+            0.3174
+          ],
+          "inequality_rows": [
+            [
+              1.0,
+              0.3
+            ],
+            [
+              -1.0,
+              -0.3
+            ],
+            [
+              0.4,
+              1.0
+            ],
+            [
+              -0.4,
+              -1.0
+            ]
+          ],
+          "kind": "h_polytope"
+        },
+        "size_budget": 4,
+        "status": "completed"
+      },
+      "status": "completed"
+    },
+    {
+      "elapsed_ns": 262815,
+      "method": "directional-ellipsoid",
+      "phase": "measured",
+      "projection_index": 1,
+      "repetition": 0,
+      "result": {
+        "direction": "outer",
+        "evidence_assumptions": [
+          "input_class=bounded_native_planar_v",
+          "radius_rule=r_i^2 >= 2 m_i^2",
+          "rounding=outward_projected_bounds; error_bound=unavailable"
+        ],
+        "method_id": "csl.approximation.ellipsoid.exp03",
+        "method_parameters": {
+          "orientation": [
+            [
+              1.0,
+              0.3
+            ],
+            [
+              0.4,
+              1.0
+            ]
+          ]
+        },
+        "method_version": "1",
+        "relation_basis": "v_ellipsoid_containment",
+        "shape": {
+          "center": [
+            0.0,
+            0.0
+          ],
+          "coordinate_labels": [
+            "position 2",
+            "velocity 2"
+          ],
+          "kind": "directional_ellipsoid",
+          "orientation": [
+            [
+              1.0,
+              0.3
+            ],
+            [
+              0.4,
+              1.0
+            ]
+          ],
+          "projected_bounds": [
+            0.1335,
+            0.3174
+          ],
+          "radii": [
+            0.18879751057680821,
+            0.44887138469722043
+          ]
+        },
+        "size_budget": 1,
+        "status": "completed"
+      },
+      "status": "completed"
+    },
+    {
+      "elapsed_ns": 14457,
+      "method": "zonotope-axis-cover",
+      "phase": "measured",
+      "projection_index": 1,
+      "repetition": 0,
+      "result": {
+        "direction": "outer",
+        "evidence_assumptions": [
+          "requested_budget=4; input_generators=6; retained_generators=4; output_generators=4",
+          "The input had no factor equalities.",
+          "Omitted FactorId dependencies were relaxed to independent axis factors; retained IDs are unchanged.",
+          "No realizable control witness, complete optimal family, validated rounding bound, or global error bound is supplied."
+        ],
+        "method_id": "csl.geometry.zonotope.axis-cover",
+        "method_version": "1.0.0",
+        "relation_basis": "generator_axis_cover",
+        "shape": {
+          "center": [
+            0.0,
+            0.0
+          ],
+          "coordinate_labels": [
+            "position 2",
+            "velocity 2"
+          ],
+          "factors": [
+            "two-points-factor-1",
+            "two-points-factor-3",
+            "two-points-factor-5",
+            "two-points-factor-0"
+          ],
+          "generators": [
+            [
+              0.02450000000570435,
+              0.014500000003376045,
+              0.004500000001047738,
+              0.0
+            ],
+            [
+              0.10000000002328308,
+              0.10000000002328308,
+              0.10000000002328308,
+              0.0
+            ]
+          ],
+          "kind": "zonotope"
+        },
+        "size_budget": 4,
+        "source_zonotope": {
+          "center": [
+            0.0,
+            0.0
+          ],
+          "factors": [
+            "two-points-factor-0",
+            "two-points-factor-1",
+            "two-points-factor-2",
+            "two-points-factor-3",
+            "two-points-factor-4",
+            "two-points-factor-5"
+          ],
+          "generators": [
+            [
+              0.0,
+              0.02450000000570435,
+              0.0,
+              0.014500000003376045,
+              0.0,
+              0.004500000001047738
+            ],
+            [
+              0.0,
+              0.10000000002328308,
+              0.0,
+              0.10000000002328308,
+              0.0,
+              0.10000000002328308
+            ]
+          ],
+          "outer_padding_factor": 1.0000000002328306
+        },
+        "status": "completed"
+      },
+      "status": "completed"
+    },
+    {
+      "elapsed_ns": 512569,
+      "method": "axis-box",
+      "phase": "measured",
+      "projection_index": 1,
+      "repetition": 1,
+      "result": {
+        "direction": "outer",
+        "evidence_assumptions": [
+          "orientation_rows=1,0;0,1",
+          "requested_budget=4; input_vertices=23; input_rays=0; output_h_rows=4",
+          "error_bound=unavailable"
+        ],
+        "method_id": "csl.approximation.box",
+        "method_version": "1",
+        "relation_basis": "v_h_containment",
+        "shape": {
+          "coordinate_labels": [
+            "position 2",
+            "velocity 2"
+          ],
+          "equality_bounds": [],
+          "equality_rows": [],
+          "inequality_bounds": [
+            0.0435,
+            0.0435,
+            0.3,
+            0.3
+          ],
+          "inequality_rows": [
+            [
+              1.0,
+              0.0
+            ],
+            [
+              -1.0,
+              0.0
+            ],
+            [
+              0.0,
+              1.0
+            ],
+            [
+              0.0,
+              -1.0
+            ]
+          ],
+          "kind": "h_polytope"
+        },
+        "size_budget": 4,
+        "status": "completed"
+      },
+      "status": "completed"
+    },
+    {
+      "elapsed_ns": 530798,
+      "method": "rotated-parallelotope",
+      "phase": "measured",
+      "projection_index": 1,
+      "repetition": 1,
+      "result": {
+        "direction": "outer",
+        "evidence_assumptions": [
+          "orientation_rows=1,0.29999999999999999;0.40000000000000002,1",
+          "requested_budget=4; input_vertices=23; input_rays=0; output_h_rows=4",
+          "error_bound=unavailable"
+        ],
+        "method_id": "csl.approximation.parallelotope",
+        "method_parameters": {
+          "orientation": [
+            [
+              1.0,
+              0.3
+            ],
+            [
+              0.4,
+              1.0
+            ]
+          ]
+        },
+        "method_version": "1",
+        "relation_basis": "v_h_containment",
+        "shape": {
+          "coordinate_labels": [
+            "position 2",
+            "velocity 2"
+          ],
+          "equality_bounds": [],
+          "equality_rows": [],
+          "inequality_bounds": [
+            0.1335,
+            0.1335,
+            0.3174,
+            0.3174
+          ],
+          "inequality_rows": [
+            [
+              1.0,
+              0.3
+            ],
+            [
+              -1.0,
+              -0.3
+            ],
+            [
+              0.4,
+              1.0
+            ],
+            [
+              -0.4,
+              -1.0
+            ]
+          ],
+          "kind": "h_polytope"
+        },
+        "size_budget": 4,
+        "status": "completed"
+      },
+      "status": "completed"
+    },
+    {
+      "elapsed_ns": 259253,
+      "method": "directional-ellipsoid",
+      "phase": "measured",
+      "projection_index": 1,
+      "repetition": 1,
+      "result": {
+        "direction": "outer",
+        "evidence_assumptions": [
+          "input_class=bounded_native_planar_v",
+          "radius_rule=r_i^2 >= 2 m_i^2",
+          "rounding=outward_projected_bounds; error_bound=unavailable"
+        ],
+        "method_id": "csl.approximation.ellipsoid.exp03",
+        "method_parameters": {
+          "orientation": [
+            [
+              1.0,
+              0.3
+            ],
+            [
+              0.4,
+              1.0
+            ]
+          ]
+        },
+        "method_version": "1",
+        "relation_basis": "v_ellipsoid_containment",
+        "shape": {
+          "center": [
+            0.0,
+            0.0
+          ],
+          "coordinate_labels": [
+            "position 2",
+            "velocity 2"
+          ],
+          "kind": "directional_ellipsoid",
+          "orientation": [
+            [
+              1.0,
+              0.3
+            ],
+            [
+              0.4,
+              1.0
+            ]
+          ],
+          "projected_bounds": [
+            0.1335,
+            0.3174
+          ],
+          "radii": [
+            0.18879751057680821,
+            0.44887138469722043
+          ]
+        },
+        "size_budget": 1,
+        "status": "completed"
+      },
+      "status": "completed"
+    },
+    {
+      "elapsed_ns": 14736,
+      "method": "zonotope-axis-cover",
+      "phase": "measured",
+      "projection_index": 1,
+      "repetition": 1,
+      "result": {
+        "direction": "outer",
+        "evidence_assumptions": [
+          "requested_budget=4; input_generators=6; retained_generators=4; output_generators=4",
+          "The input had no factor equalities.",
+          "Omitted FactorId dependencies were relaxed to independent axis factors; retained IDs are unchanged.",
+          "No realizable control witness, complete optimal family, validated rounding bound, or global error bound is supplied."
+        ],
+        "method_id": "csl.geometry.zonotope.axis-cover",
+        "method_version": "1.0.0",
+        "relation_basis": "generator_axis_cover",
+        "shape": {
+          "center": [
+            0.0,
+            0.0
+          ],
+          "coordinate_labels": [
+            "position 2",
+            "velocity 2"
+          ],
+          "factors": [
+            "two-points-factor-1",
+            "two-points-factor-3",
+            "two-points-factor-5",
+            "two-points-factor-0"
+          ],
+          "generators": [
+            [
+              0.02450000000570435,
+              0.014500000003376045,
+              0.004500000001047738,
+              0.0
+            ],
+            [
+              0.10000000002328308,
+              0.10000000002328308,
+              0.10000000002328308,
+              0.0
+            ]
+          ],
+          "kind": "zonotope"
+        },
+        "size_budget": 4,
+        "source_zonotope": {
+          "center": [
+            0.0,
+            0.0
+          ],
+          "factors": [
+            "two-points-factor-0",
+            "two-points-factor-1",
+            "two-points-factor-2",
+            "two-points-factor-3",
+            "two-points-factor-4",
+            "two-points-factor-5"
+          ],
+          "generators": [
+            [
+              0.0,
+              0.02450000000570435,
+              0.0,
+              0.014500000003376045,
+              0.0,
+              0.004500000001047738
+            ],
+            [
+              0.0,
+              0.10000000002328308,
+              0.0,
+              0.10000000002328308,
+              0.0,
+              0.10000000002328308
+            ]
+          ],
+          "outer_padding_factor": 1.0000000002328306
+        },
+        "status": "completed"
+      },
+      "status": "completed"
+    },
+    {
+      "elapsed_ns": 152186,
+      "method": "exact-polytope-quickhull",
+      "phase": "measured",
+      "projection_index": 1,
+      "repetition": 1,
+      "result": {
+        "direction": "equivalent",
+        "method_id": "csl.quickhull_2d",
+        "method_version": "unregistered",
+        "output_vertices": 8,
+        "shape": {
+          "kind": "v_polytope",
+          "vertices": [
+            [
+              -0.0435,
+              -0.3
+            ],
+            [
+              -0.019,
+              -0.2
+            ],
+            [
+              0.0055,
+              -0.1
+            ],
+            [
+              0.0345,
+              0.1
+            ],
+            [
+              0.0435,
+              0.3
+            ],
+            [
+              0.019,
+              0.2
+            ],
+            [
+              -0.0055,
+              0.1
+            ],
+            [
+              -0.0345,
+              -0.1
+            ]
+          ]
+        },
+        "status": "completed"
+      },
+      "status": "completed"
+    },
+    {
+      "elapsed_ns": 533312,
+      "method": "rotated-parallelotope",
+      "phase": "measured",
+      "projection_index": 1,
+      "repetition": 2,
+      "result": {
+        "direction": "outer",
+        "evidence_assumptions": [
+          "orientation_rows=1,0.29999999999999999;0.40000000000000002,1",
+          "requested_budget=4; input_vertices=23; input_rays=0; output_h_rows=4",
+          "error_bound=unavailable"
+        ],
+        "method_id": "csl.approximation.parallelotope",
+        "method_parameters": {
+          "orientation": [
+            [
+              1.0,
+              0.3
+            ],
+            [
+              0.4,
+              1.0
+            ]
+          ]
+        },
+        "method_version": "1",
+        "relation_basis": "v_h_containment",
+        "shape": {
+          "coordinate_labels": [
+            "position 2",
+            "velocity 2"
+          ],
+          "equality_bounds": [],
+          "equality_rows": [],
+          "inequality_bounds": [
+            0.1335,
+            0.1335,
+            0.3174,
+            0.3174
+          ],
+          "inequality_rows": [
+            [
+              1.0,
+              0.3
+            ],
+            [
+              -1.0,
+              -0.3
+            ],
+            [
+              0.4,
+              1.0
+            ],
+            [
+              -0.4,
+              -1.0
+            ]
+          ],
+          "kind": "h_polytope"
+        },
+        "size_budget": 4,
+        "status": "completed"
+      },
+      "status": "completed"
+    },
+    {
+      "elapsed_ns": 230129,
+      "method": "directional-ellipsoid",
+      "phase": "measured",
+      "projection_index": 1,
+      "repetition": 2,
+      "result": {
+        "direction": "outer",
+        "evidence_assumptions": [
+          "input_class=bounded_native_planar_v",
+          "radius_rule=r_i^2 >= 2 m_i^2",
+          "rounding=outward_projected_bounds; error_bound=unavailable"
+        ],
+        "method_id": "csl.approximation.ellipsoid.exp03",
+        "method_parameters": {
+          "orientation": [
+            [
+              1.0,
+              0.3
+            ],
+            [
+              0.4,
+              1.0
+            ]
+          ]
+        },
+        "method_version": "1",
+        "relation_basis": "v_ellipsoid_containment",
+        "shape": {
+          "center": [
+            0.0,
+            0.0
+          ],
+          "coordinate_labels": [
+            "position 2",
+            "velocity 2"
+          ],
+          "kind": "directional_ellipsoid",
+          "orientation": [
+            [
+              1.0,
+              0.3
+            ],
+            [
+              0.4,
+              1.0
+            ]
+          ],
+          "projected_bounds": [
+            0.1335,
+            0.3174
+          ],
+          "radii": [
+            0.18879751057680821,
+            0.44887138469722043
           ]
         },
         "size_budget": 1,
@@ -1039,1385 +3528,98 @@
       "elapsed_ns": 13270,
       "method": "zonotope-axis-cover",
       "phase": "measured",
-      "projection_index": 0,
-      "repetition": 2,
-      "result": {
-        "direction": "outer",
-        "evidence_assumptions": [
-          "requested_budget=4; input_generators=6; retained_generators=4; output_generators=4",
-          "The input had no factor equalities.",
-          "Omitted FactorId dependencies were relaxed to independent axis factors; retained IDs are unchanged.",
-          "No realizable control witness, complete optimal family, validated rounding bound, or global error bound is supplied."
-        ],
-        "method_id": "csl.geometry.zonotope.axis-cover",
-        "relation_basis": "generator_axis_cover",
-        "shape": {
-          "center": [
-            4.5,
-            0.0
-          ],
-          "coordinate_labels": [
-            "position 1",
-            "velocity 1"
-          ],
-          "factors": [
-            "two-points-factor-4",
-            "two-points-factor-0",
-            "two-points-factor-2",
-            "two-points-factor-1"
-          ],
-          "generators": [
-            [
-              0.2250000000523869,
-              0.25000000005820766,
-              0.25000000005820766,
-              0.0
-            ],
-            [
-              2.5000000005820766,
-              0.0,
-              0.0,
-              0.0
-            ]
-          ],
-          "kind": "zonotope"
-        },
-        "size_budget": 4,
-        "source_zonotope": {
-          "center": [
-            4.5,
-            0.0
-          ],
-          "factors": [
-            "two-points-factor-0",
-            "two-points-factor-1",
-            "two-points-factor-2",
-            "two-points-factor-3",
-            "two-points-factor-4",
-            "two-points-factor-5"
-          ],
-          "generators": [
-            [
-              0.25000000005820766,
-              0.0,
-              0.25000000005820766,
-              0.0,
-              0.2250000000523869,
-              0.0
-            ],
-            [
-              0.0,
-              0.0,
-              0.0,
-              0.0,
-              2.5000000005820766,
-              0.0
-            ]
-          ],
-          "outer_padding_factor": 1.0000000002328306
-        },
-        "status": "completed"
-      },
-      "status": "completed"
-    },
-    {
-      "elapsed_ns": 74800,
-      "method": "exact-polytope-quickhull",
-      "phase": "measured",
-      "projection_index": 0,
-      "repetition": 2,
-      "result": {
-        "direction": "equivalent",
-        "output_vertices": 4,
-        "shape": {
-          "kind": "v_polytope",
-          "vertices": [
-            [
-              3.775,
-              -2.5
-            ],
-            [
-              4.775,
-              -2.5
-            ],
-            [
-              5.225,
-              2.5
-            ],
-            [
-              4.225,
-              2.5
-            ]
-          ]
-        },
-        "status": "completed"
-      },
-      "status": "completed"
-    },
-    {
-      "elapsed_ns": 256669,
-      "method": "axis-box",
-      "phase": "measured",
-      "projection_index": 0,
-      "repetition": 2,
-      "result": {
-        "direction": "outer",
-        "evidence_assumptions": [
-          "orientation_rows=1,0;0,1",
-          "requested_budget=4; input_vertices=15; input_rays=0; output_h_rows=4",
-          "error_bound=unavailable"
-        ],
-        "method_id": "csl.approximation.box",
-        "method_version": "",
-        "relation_basis": "v_h_containment",
-        "shape": {
-          "coordinate_labels": [
-            "position 1",
-            "velocity 1"
-          ],
-          "equality_bounds": [],
-          "equality_rows": [],
-          "inequality_bounds": [
-            5.225,
-            -3.775,
-            2.5,
-            2.5
-          ],
-          "inequality_rows": [
-            [
-              1.0,
-              0.0
-            ],
-            [
-              -1.0,
-              0.0
-            ],
-            [
-              0.0,
-              1.0
-            ],
-            [
-              0.0,
-              -1.0
-            ]
-          ],
-          "kind": "h_polytope"
-        },
-        "size_budget": 4,
-        "status": "completed"
-      },
-      "status": "completed"
-    },
-    {
-      "elapsed_ns": 225659,
-      "method": "directional-ellipsoid",
-      "phase": "measured",
-      "projection_index": 0,
-      "repetition": 3,
-      "result": {
-        "direction": "outer",
-        "evidence_assumptions": [
-          "input_class=bounded_native_planar_v",
-          "radius_rule=r_i^2 >= 2 m_i^2",
-          "rounding=outward_projected_bounds; error_bound=unavailable"
-        ],
-        "method_id": "csl.approximation.ellipsoid.exp03",
-        "method_parameters": {
-          "orientation": [
-            [
-              1.0,
-              0.3
-            ],
-            [
-              0.4,
-              1.0
-            ]
-          ]
-        },
-        "method_version": "1",
-        "relation_basis": "v_ellipsoid_containment",
-        "shape": {
-          "center": [
-            4.5,
-            0.0
-          ],
-          "coordinate_labels": [
-            "position 1",
-            "velocity 1"
-          ],
-          "kind": "directional_ellipsoid",
-          "orientation": [
-            [
-              1.0,
-              0.3
-            ],
-            [
-              0.4,
-              1.0
-            ]
-          ],
-          "projected_bounds": [
-            1.475,
-            2.7900000000000005
-          ],
-          "radii": [
-            2.0859650045003155,
-            3.945655839020936
-          ]
-        },
-        "size_budget": 1,
-        "status": "completed"
-      },
-      "status": "completed"
-    },
-    {
-      "elapsed_ns": 12292,
-      "method": "zonotope-axis-cover",
-      "phase": "measured",
-      "projection_index": 0,
-      "repetition": 3,
-      "result": {
-        "direction": "outer",
-        "evidence_assumptions": [
-          "requested_budget=4; input_generators=6; retained_generators=4; output_generators=4",
-          "The input had no factor equalities.",
-          "Omitted FactorId dependencies were relaxed to independent axis factors; retained IDs are unchanged.",
-          "No realizable control witness, complete optimal family, validated rounding bound, or global error bound is supplied."
-        ],
-        "method_id": "csl.geometry.zonotope.axis-cover",
-        "relation_basis": "generator_axis_cover",
-        "shape": {
-          "center": [
-            4.5,
-            0.0
-          ],
-          "coordinate_labels": [
-            "position 1",
-            "velocity 1"
-          ],
-          "factors": [
-            "two-points-factor-4",
-            "two-points-factor-0",
-            "two-points-factor-2",
-            "two-points-factor-1"
-          ],
-          "generators": [
-            [
-              0.2250000000523869,
-              0.25000000005820766,
-              0.25000000005820766,
-              0.0
-            ],
-            [
-              2.5000000005820766,
-              0.0,
-              0.0,
-              0.0
-            ]
-          ],
-          "kind": "zonotope"
-        },
-        "size_budget": 4,
-        "source_zonotope": {
-          "center": [
-            4.5,
-            0.0
-          ],
-          "factors": [
-            "two-points-factor-0",
-            "two-points-factor-1",
-            "two-points-factor-2",
-            "two-points-factor-3",
-            "two-points-factor-4",
-            "two-points-factor-5"
-          ],
-          "generators": [
-            [
-              0.25000000005820766,
-              0.0,
-              0.25000000005820766,
-              0.0,
-              0.2250000000523869,
-              0.0
-            ],
-            [
-              0.0,
-              0.0,
-              0.0,
-              0.0,
-              2.5000000005820766,
-              0.0
-            ]
-          ],
-          "outer_padding_factor": 1.0000000002328306
-        },
-        "status": "completed"
-      },
-      "status": "completed"
-    },
-    {
-      "elapsed_ns": 90934,
-      "method": "exact-polytope-quickhull",
-      "phase": "measured",
-      "projection_index": 0,
-      "repetition": 3,
-      "result": {
-        "direction": "equivalent",
-        "output_vertices": 4,
-        "shape": {
-          "kind": "v_polytope",
-          "vertices": [
-            [
-              3.775,
-              -2.5
-            ],
-            [
-              4.775,
-              -2.5
-            ],
-            [
-              5.225,
-              2.5
-            ],
-            [
-              4.225,
-              2.5
-            ]
-          ]
-        },
-        "status": "completed"
-      },
-      "status": "completed"
-    },
-    {
-      "elapsed_ns": 259113,
-      "method": "axis-box",
-      "phase": "measured",
-      "projection_index": 0,
-      "repetition": 3,
-      "result": {
-        "direction": "outer",
-        "evidence_assumptions": [
-          "orientation_rows=1,0;0,1",
-          "requested_budget=4; input_vertices=15; input_rays=0; output_h_rows=4",
-          "error_bound=unavailable"
-        ],
-        "method_id": "csl.approximation.box",
-        "method_version": "",
-        "relation_basis": "v_h_containment",
-        "shape": {
-          "coordinate_labels": [
-            "position 1",
-            "velocity 1"
-          ],
-          "equality_bounds": [],
-          "equality_rows": [],
-          "inequality_bounds": [
-            5.225,
-            -3.775,
-            2.5,
-            2.5
-          ],
-          "inequality_rows": [
-            [
-              1.0,
-              0.0
-            ],
-            [
-              -1.0,
-              0.0
-            ],
-            [
-              0.0,
-              1.0
-            ],
-            [
-              0.0,
-              -1.0
-            ]
-          ],
-          "kind": "h_polytope"
-        },
-        "size_budget": 4,
-        "status": "completed"
-      },
-      "status": "completed"
-    },
-    {
-      "elapsed_ns": 476811,
-      "method": "rotated-parallelotope",
-      "phase": "measured",
-      "projection_index": 0,
-      "repetition": 3,
-      "result": {
-        "direction": "outer",
-        "evidence_assumptions": [
-          "orientation_rows=1,0.29999999999999999;0.40000000000000002,1",
-          "requested_budget=4; input_vertices=15; input_rays=0; output_h_rows=4",
-          "error_bound=unavailable"
-        ],
-        "method_id": "csl.approximation.parallelotope",
-        "method_parameters": {
-          "orientation": [
-            [
-              1.0,
-              0.3
-            ],
-            [
-              0.4,
-              1.0
-            ]
-          ]
-        },
-        "method_version": "",
-        "relation_basis": "v_h_containment",
-        "shape": {
-          "coordinate_labels": [
-            "position 1",
-            "velocity 1"
-          ],
-          "equality_bounds": [],
-          "equality_rows": [],
-          "inequality_bounds": [
-            5.975,
-            -3.025,
-            4.590000000000001,
-            0.99
-          ],
-          "inequality_rows": [
-            [
-              1.0,
-              0.3
-            ],
-            [
-              -1.0,
-              -0.3
-            ],
-            [
-              0.4,
-              1.0
-            ],
-            [
-              -0.4,
-              -1.0
-            ]
-          ],
-          "kind": "h_polytope"
-        },
-        "size_budget": 4,
-        "status": "completed"
-      },
-      "status": "completed"
-    },
-    {
-      "elapsed_ns": 13410,
-      "method": "zonotope-axis-cover",
-      "phase": "measured",
-      "projection_index": 0,
-      "repetition": 4,
-      "result": {
-        "direction": "outer",
-        "evidence_assumptions": [
-          "requested_budget=4; input_generators=6; retained_generators=4; output_generators=4",
-          "The input had no factor equalities.",
-          "Omitted FactorId dependencies were relaxed to independent axis factors; retained IDs are unchanged.",
-          "No realizable control witness, complete optimal family, validated rounding bound, or global error bound is supplied."
-        ],
-        "method_id": "csl.geometry.zonotope.axis-cover",
-        "relation_basis": "generator_axis_cover",
-        "shape": {
-          "center": [
-            4.5,
-            0.0
-          ],
-          "coordinate_labels": [
-            "position 1",
-            "velocity 1"
-          ],
-          "factors": [
-            "two-points-factor-4",
-            "two-points-factor-0",
-            "two-points-factor-2",
-            "two-points-factor-1"
-          ],
-          "generators": [
-            [
-              0.2250000000523869,
-              0.25000000005820766,
-              0.25000000005820766,
-              0.0
-            ],
-            [
-              2.5000000005820766,
-              0.0,
-              0.0,
-              0.0
-            ]
-          ],
-          "kind": "zonotope"
-        },
-        "size_budget": 4,
-        "source_zonotope": {
-          "center": [
-            4.5,
-            0.0
-          ],
-          "factors": [
-            "two-points-factor-0",
-            "two-points-factor-1",
-            "two-points-factor-2",
-            "two-points-factor-3",
-            "two-points-factor-4",
-            "two-points-factor-5"
-          ],
-          "generators": [
-            [
-              0.25000000005820766,
-              0.0,
-              0.25000000005820766,
-              0.0,
-              0.2250000000523869,
-              0.0
-            ],
-            [
-              0.0,
-              0.0,
-              0.0,
-              0.0,
-              2.5000000005820766,
-              0.0
-            ]
-          ],
-          "outer_padding_factor": 1.0000000002328306
-        },
-        "status": "completed"
-      },
-      "status": "completed"
-    },
-    {
-      "elapsed_ns": 74311,
-      "method": "exact-polytope-quickhull",
-      "phase": "measured",
-      "projection_index": 0,
-      "repetition": 4,
-      "result": {
-        "direction": "equivalent",
-        "output_vertices": 4,
-        "shape": {
-          "kind": "v_polytope",
-          "vertices": [
-            [
-              3.775,
-              -2.5
-            ],
-            [
-              4.775,
-              -2.5
-            ],
-            [
-              5.225,
-              2.5
-            ],
-            [
-              4.225,
-              2.5
-            ]
-          ]
-        },
-        "status": "completed"
-      },
-      "status": "completed"
-    },
-    {
-      "elapsed_ns": 269310,
-      "method": "axis-box",
-      "phase": "measured",
-      "projection_index": 0,
-      "repetition": 4,
-      "result": {
-        "direction": "outer",
-        "evidence_assumptions": [
-          "orientation_rows=1,0;0,1",
-          "requested_budget=4; input_vertices=15; input_rays=0; output_h_rows=4",
-          "error_bound=unavailable"
-        ],
-        "method_id": "csl.approximation.box",
-        "method_version": "",
-        "relation_basis": "v_h_containment",
-        "shape": {
-          "coordinate_labels": [
-            "position 1",
-            "velocity 1"
-          ],
-          "equality_bounds": [],
-          "equality_rows": [],
-          "inequality_bounds": [
-            5.225,
-            -3.775,
-            2.5,
-            2.5
-          ],
-          "inequality_rows": [
-            [
-              1.0,
-              0.0
-            ],
-            [
-              -1.0,
-              0.0
-            ],
-            [
-              0.0,
-              1.0
-            ],
-            [
-              0.0,
-              -1.0
-            ]
-          ],
-          "kind": "h_polytope"
-        },
-        "size_budget": 4,
-        "status": "completed"
-      },
-      "status": "completed"
-    },
-    {
-      "elapsed_ns": 481420,
-      "method": "rotated-parallelotope",
-      "phase": "measured",
-      "projection_index": 0,
-      "repetition": 4,
-      "result": {
-        "direction": "outer",
-        "evidence_assumptions": [
-          "orientation_rows=1,0.29999999999999999;0.40000000000000002,1",
-          "requested_budget=4; input_vertices=15; input_rays=0; output_h_rows=4",
-          "error_bound=unavailable"
-        ],
-        "method_id": "csl.approximation.parallelotope",
-        "method_parameters": {
-          "orientation": [
-            [
-              1.0,
-              0.3
-            ],
-            [
-              0.4,
-              1.0
-            ]
-          ]
-        },
-        "method_version": "",
-        "relation_basis": "v_h_containment",
-        "shape": {
-          "coordinate_labels": [
-            "position 1",
-            "velocity 1"
-          ],
-          "equality_bounds": [],
-          "equality_rows": [],
-          "inequality_bounds": [
-            5.975,
-            -3.025,
-            4.590000000000001,
-            0.99
-          ],
-          "inequality_rows": [
-            [
-              1.0,
-              0.3
-            ],
-            [
-              -1.0,
-              -0.3
-            ],
-            [
-              0.4,
-              1.0
-            ],
-            [
-              -0.4,
-              -1.0
-            ]
-          ],
-          "kind": "h_polytope"
-        },
-        "size_budget": 4,
-        "status": "completed"
-      },
-      "status": "completed"
-    },
-    {
-      "elapsed_ns": 227614,
-      "method": "directional-ellipsoid",
-      "phase": "measured",
-      "projection_index": 0,
-      "repetition": 4,
-      "result": {
-        "direction": "outer",
-        "evidence_assumptions": [
-          "input_class=bounded_native_planar_v",
-          "radius_rule=r_i^2 >= 2 m_i^2",
-          "rounding=outward_projected_bounds; error_bound=unavailable"
-        ],
-        "method_id": "csl.approximation.ellipsoid.exp03",
-        "method_parameters": {
-          "orientation": [
-            [
-              1.0,
-              0.3
-            ],
-            [
-              0.4,
-              1.0
-            ]
-          ]
-        },
-        "method_version": "1",
-        "relation_basis": "v_ellipsoid_containment",
-        "shape": {
-          "center": [
-            4.5,
-            0.0
-          ],
-          "coordinate_labels": [
-            "position 1",
-            "velocity 1"
-          ],
-          "kind": "directional_ellipsoid",
-          "orientation": [
-            [
-              1.0,
-              0.3
-            ],
-            [
-              0.4,
-              1.0
-            ]
-          ],
-          "projected_bounds": [
-            1.475,
-            2.7900000000000005
-          ],
-          "radii": [
-            2.0859650045003155,
-            3.945655839020936
-          ]
-        },
-        "size_budget": 1,
-        "status": "completed"
-      },
-      "status": "completed"
-    },
-    {
-      "elapsed_ns": 74382,
-      "method": "exact-polytope-quickhull",
-      "phase": "measured",
-      "projection_index": 0,
-      "repetition": 5,
-      "result": {
-        "direction": "equivalent",
-        "output_vertices": 4,
-        "shape": {
-          "kind": "v_polytope",
-          "vertices": [
-            [
-              3.775,
-              -2.5
-            ],
-            [
-              4.775,
-              -2.5
-            ],
-            [
-              5.225,
-              2.5
-            ],
-            [
-              4.225,
-              2.5
-            ]
-          ]
-        },
-        "status": "completed"
-      },
-      "status": "completed"
-    },
-    {
-      "elapsed_ns": 258765,
-      "method": "axis-box",
-      "phase": "measured",
-      "projection_index": 0,
-      "repetition": 5,
-      "result": {
-        "direction": "outer",
-        "evidence_assumptions": [
-          "orientation_rows=1,0;0,1",
-          "requested_budget=4; input_vertices=15; input_rays=0; output_h_rows=4",
-          "error_bound=unavailable"
-        ],
-        "method_id": "csl.approximation.box",
-        "method_version": "",
-        "relation_basis": "v_h_containment",
-        "shape": {
-          "coordinate_labels": [
-            "position 1",
-            "velocity 1"
-          ],
-          "equality_bounds": [],
-          "equality_rows": [],
-          "inequality_bounds": [
-            5.225,
-            -3.775,
-            2.5,
-            2.5
-          ],
-          "inequality_rows": [
-            [
-              1.0,
-              0.0
-            ],
-            [
-              -1.0,
-              0.0
-            ],
-            [
-              0.0,
-              1.0
-            ],
-            [
-              0.0,
-              -1.0
-            ]
-          ],
-          "kind": "h_polytope"
-        },
-        "size_budget": 4,
-        "status": "completed"
-      },
-      "status": "completed"
-    },
-    {
-      "elapsed_ns": 482328,
-      "method": "rotated-parallelotope",
-      "phase": "measured",
-      "projection_index": 0,
-      "repetition": 5,
-      "result": {
-        "direction": "outer",
-        "evidence_assumptions": [
-          "orientation_rows=1,0.29999999999999999;0.40000000000000002,1",
-          "requested_budget=4; input_vertices=15; input_rays=0; output_h_rows=4",
-          "error_bound=unavailable"
-        ],
-        "method_id": "csl.approximation.parallelotope",
-        "method_parameters": {
-          "orientation": [
-            [
-              1.0,
-              0.3
-            ],
-            [
-              0.4,
-              1.0
-            ]
-          ]
-        },
-        "method_version": "",
-        "relation_basis": "v_h_containment",
-        "shape": {
-          "coordinate_labels": [
-            "position 1",
-            "velocity 1"
-          ],
-          "equality_bounds": [],
-          "equality_rows": [],
-          "inequality_bounds": [
-            5.975,
-            -3.025,
-            4.590000000000001,
-            0.99
-          ],
-          "inequality_rows": [
-            [
-              1.0,
-              0.3
-            ],
-            [
-              -1.0,
-              -0.3
-            ],
-            [
-              0.4,
-              1.0
-            ],
-            [
-              -0.4,
-              -1.0
-            ]
-          ],
-          "kind": "h_polytope"
-        },
-        "size_budget": 4,
-        "status": "completed"
-      },
-      "status": "completed"
-    },
-    {
-      "elapsed_ns": 242351,
-      "method": "directional-ellipsoid",
-      "phase": "measured",
-      "projection_index": 0,
-      "repetition": 5,
-      "result": {
-        "direction": "outer",
-        "evidence_assumptions": [
-          "input_class=bounded_native_planar_v",
-          "radius_rule=r_i^2 >= 2 m_i^2",
-          "rounding=outward_projected_bounds; error_bound=unavailable"
-        ],
-        "method_id": "csl.approximation.ellipsoid.exp03",
-        "method_parameters": {
-          "orientation": [
-            [
-              1.0,
-              0.3
-            ],
-            [
-              0.4,
-              1.0
-            ]
-          ]
-        },
-        "method_version": "1",
-        "relation_basis": "v_ellipsoid_containment",
-        "shape": {
-          "center": [
-            4.5,
-            0.0
-          ],
-          "coordinate_labels": [
-            "position 1",
-            "velocity 1"
-          ],
-          "kind": "directional_ellipsoid",
-          "orientation": [
-            [
-              1.0,
-              0.3
-            ],
-            [
-              0.4,
-              1.0
-            ]
-          ],
-          "projected_bounds": [
-            1.475,
-            2.7900000000000005
-          ],
-          "radii": [
-            2.0859650045003155,
-            3.945655839020936
-          ]
-        },
-        "size_budget": 1,
-        "status": "completed"
-      },
-      "status": "completed"
-    },
-    {
-      "elapsed_ns": 13829,
-      "method": "zonotope-axis-cover",
-      "phase": "measured",
-      "projection_index": 0,
-      "repetition": 5,
-      "result": {
-        "direction": "outer",
-        "evidence_assumptions": [
-          "requested_budget=4; input_generators=6; retained_generators=4; output_generators=4",
-          "The input had no factor equalities.",
-          "Omitted FactorId dependencies were relaxed to independent axis factors; retained IDs are unchanged.",
-          "No realizable control witness, complete optimal family, validated rounding bound, or global error bound is supplied."
-        ],
-        "method_id": "csl.geometry.zonotope.axis-cover",
-        "relation_basis": "generator_axis_cover",
-        "shape": {
-          "center": [
-            4.5,
-            0.0
-          ],
-          "coordinate_labels": [
-            "position 1",
-            "velocity 1"
-          ],
-          "factors": [
-            "two-points-factor-4",
-            "two-points-factor-0",
-            "two-points-factor-2",
-            "two-points-factor-1"
-          ],
-          "generators": [
-            [
-              0.2250000000523869,
-              0.25000000005820766,
-              0.25000000005820766,
-              0.0
-            ],
-            [
-              2.5000000005820766,
-              0.0,
-              0.0,
-              0.0
-            ]
-          ],
-          "kind": "zonotope"
-        },
-        "size_budget": 4,
-        "source_zonotope": {
-          "center": [
-            4.5,
-            0.0
-          ],
-          "factors": [
-            "two-points-factor-0",
-            "two-points-factor-1",
-            "two-points-factor-2",
-            "two-points-factor-3",
-            "two-points-factor-4",
-            "two-points-factor-5"
-          ],
-          "generators": [
-            [
-              0.25000000005820766,
-              0.0,
-              0.25000000005820766,
-              0.0,
-              0.2250000000523869,
-              0.0
-            ],
-            [
-              0.0,
-              0.0,
-              0.0,
-              0.0,
-              2.5000000005820766,
-              0.0
-            ]
-          ],
-          "outer_padding_factor": 1.0000000002328306
-        },
-        "status": "completed"
-      },
-      "status": "completed"
-    },
-    {
-      "elapsed_ns": 254085,
-      "method": "axis-box",
-      "phase": "measured",
-      "projection_index": 0,
-      "repetition": 6,
-      "result": {
-        "direction": "outer",
-        "evidence_assumptions": [
-          "orientation_rows=1,0;0,1",
-          "requested_budget=4; input_vertices=15; input_rays=0; output_h_rows=4",
-          "error_bound=unavailable"
-        ],
-        "method_id": "csl.approximation.box",
-        "method_version": "",
-        "relation_basis": "v_h_containment",
-        "shape": {
-          "coordinate_labels": [
-            "position 1",
-            "velocity 1"
-          ],
-          "equality_bounds": [],
-          "equality_rows": [],
-          "inequality_bounds": [
-            5.225,
-            -3.775,
-            2.5,
-            2.5
-          ],
-          "inequality_rows": [
-            [
-              1.0,
-              0.0
-            ],
-            [
-              -1.0,
-              0.0
-            ],
-            [
-              0.0,
-              1.0
-            ],
-            [
-              0.0,
-              -1.0
-            ]
-          ],
-          "kind": "h_polytope"
-        },
-        "size_budget": 4,
-        "status": "completed"
-      },
-      "status": "completed"
-    },
-    {
-      "elapsed_ns": 482328,
-      "method": "rotated-parallelotope",
-      "phase": "measured",
-      "projection_index": 0,
-      "repetition": 6,
-      "result": {
-        "direction": "outer",
-        "evidence_assumptions": [
-          "orientation_rows=1,0.29999999999999999;0.40000000000000002,1",
-          "requested_budget=4; input_vertices=15; input_rays=0; output_h_rows=4",
-          "error_bound=unavailable"
-        ],
-        "method_id": "csl.approximation.parallelotope",
-        "method_parameters": {
-          "orientation": [
-            [
-              1.0,
-              0.3
-            ],
-            [
-              0.4,
-              1.0
-            ]
-          ]
-        },
-        "method_version": "",
-        "relation_basis": "v_h_containment",
-        "shape": {
-          "coordinate_labels": [
-            "position 1",
-            "velocity 1"
-          ],
-          "equality_bounds": [],
-          "equality_rows": [],
-          "inequality_bounds": [
-            5.975,
-            -3.025,
-            4.590000000000001,
-            0.99
-          ],
-          "inequality_rows": [
-            [
-              1.0,
-              0.3
-            ],
-            [
-              -1.0,
-              -0.3
-            ],
-            [
-              0.4,
-              1.0
-            ],
-            [
-              -0.4,
-              -1.0
-            ]
-          ],
-          "kind": "h_polytope"
-        },
-        "size_budget": 4,
-        "status": "completed"
-      },
-      "status": "completed"
-    },
-    {
-      "elapsed_ns": 241094,
-      "method": "directional-ellipsoid",
-      "phase": "measured",
-      "projection_index": 0,
-      "repetition": 6,
-      "result": {
-        "direction": "outer",
-        "evidence_assumptions": [
-          "input_class=bounded_native_planar_v",
-          "radius_rule=r_i^2 >= 2 m_i^2",
-          "rounding=outward_projected_bounds; error_bound=unavailable"
-        ],
-        "method_id": "csl.approximation.ellipsoid.exp03",
-        "method_parameters": {
-          "orientation": [
-            [
-              1.0,
-              0.3
-            ],
-            [
-              0.4,
-              1.0
-            ]
-          ]
-        },
-        "method_version": "1",
-        "relation_basis": "v_ellipsoid_containment",
-        "shape": {
-          "center": [
-            4.5,
-            0.0
-          ],
-          "coordinate_labels": [
-            "position 1",
-            "velocity 1"
-          ],
-          "kind": "directional_ellipsoid",
-          "orientation": [
-            [
-              1.0,
-              0.3
-            ],
-            [
-              0.4,
-              1.0
-            ]
-          ],
-          "projected_bounds": [
-            1.475,
-            2.7900000000000005
-          ],
-          "radii": [
-            2.0859650045003155,
-            3.945655839020936
-          ]
-        },
-        "size_budget": 1,
-        "status": "completed"
-      },
-      "status": "completed"
-    },
-    {
-      "elapsed_ns": 13061,
-      "method": "zonotope-axis-cover",
-      "phase": "measured",
-      "projection_index": 0,
-      "repetition": 6,
-      "result": {
-        "direction": "outer",
-        "evidence_assumptions": [
-          "requested_budget=4; input_generators=6; retained_generators=4; output_generators=4",
-          "The input had no factor equalities.",
-          "Omitted FactorId dependencies were relaxed to independent axis factors; retained IDs are unchanged.",
-          "No realizable control witness, complete optimal family, validated rounding bound, or global error bound is supplied."
-        ],
-        "method_id": "csl.geometry.zonotope.axis-cover",
-        "relation_basis": "generator_axis_cover",
-        "shape": {
-          "center": [
-            4.5,
-            0.0
-          ],
-          "coordinate_labels": [
-            "position 1",
-            "velocity 1"
-          ],
-          "factors": [
-            "two-points-factor-4",
-            "two-points-factor-0",
-            "two-points-factor-2",
-            "two-points-factor-1"
-          ],
-          "generators": [
-            [
-              0.2250000000523869,
-              0.25000000005820766,
-              0.25000000005820766,
-              0.0
-            ],
-            [
-              2.5000000005820766,
-              0.0,
-              0.0,
-              0.0
-            ]
-          ],
-          "kind": "zonotope"
-        },
-        "size_budget": 4,
-        "source_zonotope": {
-          "center": [
-            4.5,
-            0.0
-          ],
-          "factors": [
-            "two-points-factor-0",
-            "two-points-factor-1",
-            "two-points-factor-2",
-            "two-points-factor-3",
-            "two-points-factor-4",
-            "two-points-factor-5"
-          ],
-          "generators": [
-            [
-              0.25000000005820766,
-              0.0,
-              0.25000000005820766,
-              0.0,
-              0.2250000000523869,
-              0.0
-            ],
-            [
-              0.0,
-              0.0,
-              0.0,
-              0.0,
-              2.5000000005820766,
-              0.0
-            ]
-          ],
-          "outer_padding_factor": 1.0000000002328306
-        },
-        "status": "completed"
-      },
-      "status": "completed"
-    },
-    {
-      "elapsed_ns": 74800,
-      "method": "exact-polytope-quickhull",
-      "phase": "measured",
-      "projection_index": 0,
-      "repetition": 6,
-      "result": {
-        "direction": "equivalent",
-        "output_vertices": 4,
-        "shape": {
-          "kind": "v_polytope",
-          "vertices": [
-            [
-              3.775,
-              -2.5
-            ],
-            [
-              4.775,
-              -2.5
-            ],
-            [
-              5.225,
-              2.5
-            ],
-            [
-              4.225,
-              2.5
-            ]
-          ]
-        },
-        "status": "completed"
-      },
-      "status": "completed"
-    },
-    {
-      "method": "exact-polytope-quickhull",
-      "phase": "warmup",
       "projection_index": 1,
+      "repetition": 2,
+      "result": {
+        "direction": "outer",
+        "evidence_assumptions": [
+          "requested_budget=4; input_generators=6; retained_generators=4; output_generators=4",
+          "The input had no factor equalities.",
+          "Omitted FactorId dependencies were relaxed to independent axis factors; retained IDs are unchanged.",
+          "No realizable control witness, complete optimal family, validated rounding bound, or global error bound is supplied."
+        ],
+        "method_id": "csl.geometry.zonotope.axis-cover",
+        "method_version": "1.0.0",
+        "relation_basis": "generator_axis_cover",
+        "shape": {
+          "center": [
+            0.0,
+            0.0
+          ],
+          "coordinate_labels": [
+            "position 2",
+            "velocity 2"
+          ],
+          "factors": [
+            "two-points-factor-1",
+            "two-points-factor-3",
+            "two-points-factor-5",
+            "two-points-factor-0"
+          ],
+          "generators": [
+            [
+              0.02450000000570435,
+              0.014500000003376045,
+              0.004500000001047738,
+              0.0
+            ],
+            [
+              0.10000000002328308,
+              0.10000000002328308,
+              0.10000000002328308,
+              0.0
+            ]
+          ],
+          "kind": "zonotope"
+        },
+        "size_budget": 4,
+        "source_zonotope": {
+          "center": [
+            0.0,
+            0.0
+          ],
+          "factors": [
+            "two-points-factor-0",
+            "two-points-factor-1",
+            "two-points-factor-2",
+            "two-points-factor-3",
+            "two-points-factor-4",
+            "two-points-factor-5"
+          ],
+          "generators": [
+            [
+              0.0,
+              0.02450000000570435,
+              0.0,
+              0.014500000003376045,
+              0.0,
+              0.004500000001047738
+            ],
+            [
+              0.0,
+              0.10000000002328308,
+              0.0,
+              0.10000000002328308,
+              0.0,
+              0.10000000002328308
+            ]
+          ],
+          "outer_padding_factor": 1.0000000002328306
+        },
+        "status": "completed"
+      },
+      "status": "completed"
+    },
+    {
+      "elapsed_ns": 135353,
+      "method": "exact-polytope-quickhull",
+      "phase": "measured",
+      "projection_index": 1,
+      "repetition": 2,
       "result": {
         "direction": "equivalent",
+        "method_id": "csl.quickhull_2d",
+        "method_version": "unregistered",
         "output_vertices": 8,
         "shape": {
           "kind": "v_polytope",
@@ -2461,9 +3663,11 @@
       "status": "completed"
     },
     {
+      "elapsed_ns": 559642,
       "method": "axis-box",
-      "phase": "warmup",
+      "phase": "measured",
       "projection_index": 1,
+      "repetition": 2,
       "result": {
         "direction": "outer",
         "evidence_assumptions": [
@@ -2472,7 +3676,7 @@
           "error_bound=unavailable"
         ],
         "method_id": "csl.approximation.box",
-        "method_version": "",
+        "method_version": "1",
         "relation_basis": "v_h_containment",
         "shape": {
           "coordinate_labels": [
@@ -2513,1165 +3717,7 @@
       "status": "completed"
     },
     {
-      "method": "rotated-parallelotope",
-      "phase": "warmup",
-      "projection_index": 1,
-      "result": {
-        "direction": "outer",
-        "evidence_assumptions": [
-          "orientation_rows=1,0.29999999999999999;0.40000000000000002,1",
-          "requested_budget=4; input_vertices=23; input_rays=0; output_h_rows=4",
-          "error_bound=unavailable"
-        ],
-        "method_id": "csl.approximation.parallelotope",
-        "method_parameters": {
-          "orientation": [
-            [
-              1.0,
-              0.3
-            ],
-            [
-              0.4,
-              1.0
-            ]
-          ]
-        },
-        "method_version": "",
-        "relation_basis": "v_h_containment",
-        "shape": {
-          "coordinate_labels": [
-            "position 2",
-            "velocity 2"
-          ],
-          "equality_bounds": [],
-          "equality_rows": [],
-          "inequality_bounds": [
-            0.1335,
-            0.1335,
-            0.3174,
-            0.3174
-          ],
-          "inequality_rows": [
-            [
-              1.0,
-              0.3
-            ],
-            [
-              -1.0,
-              -0.3
-            ],
-            [
-              0.4,
-              1.0
-            ],
-            [
-              -0.4,
-              -1.0
-            ]
-          ],
-          "kind": "h_polytope"
-        },
-        "size_budget": 4,
-        "status": "completed"
-      },
-      "status": "completed"
-    },
-    {
-      "method": "directional-ellipsoid",
-      "phase": "warmup",
-      "projection_index": 1,
-      "result": {
-        "direction": "outer",
-        "evidence_assumptions": [
-          "input_class=bounded_native_planar_v",
-          "radius_rule=r_i^2 >= 2 m_i^2",
-          "rounding=outward_projected_bounds; error_bound=unavailable"
-        ],
-        "method_id": "csl.approximation.ellipsoid.exp03",
-        "method_parameters": {
-          "orientation": [
-            [
-              1.0,
-              0.3
-            ],
-            [
-              0.4,
-              1.0
-            ]
-          ]
-        },
-        "method_version": "1",
-        "relation_basis": "v_ellipsoid_containment",
-        "shape": {
-          "center": [
-            0.0,
-            0.0
-          ],
-          "coordinate_labels": [
-            "position 2",
-            "velocity 2"
-          ],
-          "kind": "directional_ellipsoid",
-          "orientation": [
-            [
-              1.0,
-              0.3
-            ],
-            [
-              0.4,
-              1.0
-            ]
-          ],
-          "projected_bounds": [
-            0.1335,
-            0.3174
-          ],
-          "radii": [
-            0.18879751057680821,
-            0.44887138469722043
-          ]
-        },
-        "size_budget": 1,
-        "status": "completed"
-      },
-      "status": "completed"
-    },
-    {
-      "method": "zonotope-axis-cover",
-      "phase": "warmup",
-      "projection_index": 1,
-      "result": {
-        "direction": "outer",
-        "evidence_assumptions": [
-          "requested_budget=4; input_generators=6; retained_generators=4; output_generators=4",
-          "The input had no factor equalities.",
-          "Omitted FactorId dependencies were relaxed to independent axis factors; retained IDs are unchanged.",
-          "No realizable control witness, complete optimal family, validated rounding bound, or global error bound is supplied."
-        ],
-        "method_id": "csl.geometry.zonotope.axis-cover",
-        "relation_basis": "generator_axis_cover",
-        "shape": {
-          "center": [
-            0.0,
-            0.0
-          ],
-          "coordinate_labels": [
-            "position 2",
-            "velocity 2"
-          ],
-          "factors": [
-            "two-points-factor-1",
-            "two-points-factor-3",
-            "two-points-factor-5",
-            "two-points-factor-0"
-          ],
-          "generators": [
-            [
-              0.02450000000570435,
-              0.014500000003376045,
-              0.004500000001047738,
-              0.0
-            ],
-            [
-              0.10000000002328308,
-              0.10000000002328308,
-              0.10000000002328308,
-              0.0
-            ]
-          ],
-          "kind": "zonotope"
-        },
-        "size_budget": 4,
-        "source_zonotope": {
-          "center": [
-            0.0,
-            0.0
-          ],
-          "factors": [
-            "two-points-factor-0",
-            "two-points-factor-1",
-            "two-points-factor-2",
-            "two-points-factor-3",
-            "two-points-factor-4",
-            "two-points-factor-5"
-          ],
-          "generators": [
-            [
-              0.0,
-              0.02450000000570435,
-              0.0,
-              0.014500000003376045,
-              0.0,
-              0.004500000001047738
-            ],
-            [
-              0.0,
-              0.10000000002328308,
-              0.0,
-              0.10000000002328308,
-              0.0,
-              0.10000000002328308
-            ]
-          ],
-          "outer_padding_factor": 1.0000000002328306
-        },
-        "status": "completed"
-      },
-      "status": "completed"
-    },
-    {
-      "elapsed_ns": 159379,
-      "method": "exact-polytope-quickhull",
-      "phase": "measured",
-      "projection_index": 1,
-      "repetition": 0,
-      "result": {
-        "direction": "equivalent",
-        "output_vertices": 8,
-        "shape": {
-          "kind": "v_polytope",
-          "vertices": [
-            [
-              -0.0435,
-              -0.3
-            ],
-            [
-              -0.019,
-              -0.2
-            ],
-            [
-              0.0055,
-              -0.1
-            ],
-            [
-              0.0345,
-              0.1
-            ],
-            [
-              0.0435,
-              0.3
-            ],
-            [
-              0.019,
-              0.2
-            ],
-            [
-              -0.0055,
-              0.1
-            ],
-            [
-              -0.0345,
-              -0.1
-            ]
-          ]
-        },
-        "status": "completed"
-      },
-      "status": "completed"
-    },
-    {
-      "elapsed_ns": 519274,
-      "method": "axis-box",
-      "phase": "measured",
-      "projection_index": 1,
-      "repetition": 0,
-      "result": {
-        "direction": "outer",
-        "evidence_assumptions": [
-          "orientation_rows=1,0;0,1",
-          "requested_budget=4; input_vertices=23; input_rays=0; output_h_rows=4",
-          "error_bound=unavailable"
-        ],
-        "method_id": "csl.approximation.box",
-        "method_version": "",
-        "relation_basis": "v_h_containment",
-        "shape": {
-          "coordinate_labels": [
-            "position 2",
-            "velocity 2"
-          ],
-          "equality_bounds": [],
-          "equality_rows": [],
-          "inequality_bounds": [
-            0.0435,
-            0.0435,
-            0.3,
-            0.3
-          ],
-          "inequality_rows": [
-            [
-              1.0,
-              0.0
-            ],
-            [
-              -1.0,
-              0.0
-            ],
-            [
-              0.0,
-              1.0
-            ],
-            [
-              0.0,
-              -1.0
-            ]
-          ],
-          "kind": "h_polytope"
-        },
-        "size_budget": 4,
-        "status": "completed"
-      },
-      "status": "completed"
-    },
-    {
-      "elapsed_ns": 510474,
-      "method": "rotated-parallelotope",
-      "phase": "measured",
-      "projection_index": 1,
-      "repetition": 0,
-      "result": {
-        "direction": "outer",
-        "evidence_assumptions": [
-          "orientation_rows=1,0.29999999999999999;0.40000000000000002,1",
-          "requested_budget=4; input_vertices=23; input_rays=0; output_h_rows=4",
-          "error_bound=unavailable"
-        ],
-        "method_id": "csl.approximation.parallelotope",
-        "method_parameters": {
-          "orientation": [
-            [
-              1.0,
-              0.3
-            ],
-            [
-              0.4,
-              1.0
-            ]
-          ]
-        },
-        "method_version": "",
-        "relation_basis": "v_h_containment",
-        "shape": {
-          "coordinate_labels": [
-            "position 2",
-            "velocity 2"
-          ],
-          "equality_bounds": [],
-          "equality_rows": [],
-          "inequality_bounds": [
-            0.1335,
-            0.1335,
-            0.3174,
-            0.3174
-          ],
-          "inequality_rows": [
-            [
-              1.0,
-              0.3
-            ],
-            [
-              -1.0,
-              -0.3
-            ],
-            [
-              0.4,
-              1.0
-            ],
-            [
-              -0.4,
-              -1.0
-            ]
-          ],
-          "kind": "h_polytope"
-        },
-        "size_budget": 4,
-        "status": "completed"
-      },
-      "status": "completed"
-    },
-    {
-      "elapsed_ns": 230618,
-      "method": "directional-ellipsoid",
-      "phase": "measured",
-      "projection_index": 1,
-      "repetition": 0,
-      "result": {
-        "direction": "outer",
-        "evidence_assumptions": [
-          "input_class=bounded_native_planar_v",
-          "radius_rule=r_i^2 >= 2 m_i^2",
-          "rounding=outward_projected_bounds; error_bound=unavailable"
-        ],
-        "method_id": "csl.approximation.ellipsoid.exp03",
-        "method_parameters": {
-          "orientation": [
-            [
-              1.0,
-              0.3
-            ],
-            [
-              0.4,
-              1.0
-            ]
-          ]
-        },
-        "method_version": "1",
-        "relation_basis": "v_ellipsoid_containment",
-        "shape": {
-          "center": [
-            0.0,
-            0.0
-          ],
-          "coordinate_labels": [
-            "position 2",
-            "velocity 2"
-          ],
-          "kind": "directional_ellipsoid",
-          "orientation": [
-            [
-              1.0,
-              0.3
-            ],
-            [
-              0.4,
-              1.0
-            ]
-          ],
-          "projected_bounds": [
-            0.1335,
-            0.3174
-          ],
-          "radii": [
-            0.18879751057680821,
-            0.44887138469722043
-          ]
-        },
-        "size_budget": 1,
-        "status": "completed"
-      },
-      "status": "completed"
-    },
-    {
-      "elapsed_ns": 13759,
-      "method": "zonotope-axis-cover",
-      "phase": "measured",
-      "projection_index": 1,
-      "repetition": 0,
-      "result": {
-        "direction": "outer",
-        "evidence_assumptions": [
-          "requested_budget=4; input_generators=6; retained_generators=4; output_generators=4",
-          "The input had no factor equalities.",
-          "Omitted FactorId dependencies were relaxed to independent axis factors; retained IDs are unchanged.",
-          "No realizable control witness, complete optimal family, validated rounding bound, or global error bound is supplied."
-        ],
-        "method_id": "csl.geometry.zonotope.axis-cover",
-        "relation_basis": "generator_axis_cover",
-        "shape": {
-          "center": [
-            0.0,
-            0.0
-          ],
-          "coordinate_labels": [
-            "position 2",
-            "velocity 2"
-          ],
-          "factors": [
-            "two-points-factor-1",
-            "two-points-factor-3",
-            "two-points-factor-5",
-            "two-points-factor-0"
-          ],
-          "generators": [
-            [
-              0.02450000000570435,
-              0.014500000003376045,
-              0.004500000001047738,
-              0.0
-            ],
-            [
-              0.10000000002328308,
-              0.10000000002328308,
-              0.10000000002328308,
-              0.0
-            ]
-          ],
-          "kind": "zonotope"
-        },
-        "size_budget": 4,
-        "source_zonotope": {
-          "center": [
-            0.0,
-            0.0
-          ],
-          "factors": [
-            "two-points-factor-0",
-            "two-points-factor-1",
-            "two-points-factor-2",
-            "two-points-factor-3",
-            "two-points-factor-4",
-            "two-points-factor-5"
-          ],
-          "generators": [
-            [
-              0.0,
-              0.02450000000570435,
-              0.0,
-              0.014500000003376045,
-              0.0,
-              0.004500000001047738
-            ],
-            [
-              0.0,
-              0.10000000002328308,
-              0.0,
-              0.10000000002328308,
-              0.0,
-              0.10000000002328308
-            ]
-          ],
-          "outer_padding_factor": 1.0000000002328306
-        },
-        "status": "completed"
-      },
-      "status": "completed"
-    },
-    {
-      "elapsed_ns": 530100,
-      "method": "axis-box",
-      "phase": "measured",
-      "projection_index": 1,
-      "repetition": 1,
-      "result": {
-        "direction": "outer",
-        "evidence_assumptions": [
-          "orientation_rows=1,0;0,1",
-          "requested_budget=4; input_vertices=23; input_rays=0; output_h_rows=4",
-          "error_bound=unavailable"
-        ],
-        "method_id": "csl.approximation.box",
-        "method_version": "",
-        "relation_basis": "v_h_containment",
-        "shape": {
-          "coordinate_labels": [
-            "position 2",
-            "velocity 2"
-          ],
-          "equality_bounds": [],
-          "equality_rows": [],
-          "inequality_bounds": [
-            0.0435,
-            0.0435,
-            0.3,
-            0.3
-          ],
-          "inequality_rows": [
-            [
-              1.0,
-              0.0
-            ],
-            [
-              -1.0,
-              0.0
-            ],
-            [
-              0.0,
-              1.0
-            ],
-            [
-              0.0,
-              -1.0
-            ]
-          ],
-          "kind": "h_polytope"
-        },
-        "size_budget": 4,
-        "status": "completed"
-      },
-      "status": "completed"
-    },
-    {
-      "elapsed_ns": 497903,
-      "method": "rotated-parallelotope",
-      "phase": "measured",
-      "projection_index": 1,
-      "repetition": 1,
-      "result": {
-        "direction": "outer",
-        "evidence_assumptions": [
-          "orientation_rows=1,0.29999999999999999;0.40000000000000002,1",
-          "requested_budget=4; input_vertices=23; input_rays=0; output_h_rows=4",
-          "error_bound=unavailable"
-        ],
-        "method_id": "csl.approximation.parallelotope",
-        "method_parameters": {
-          "orientation": [
-            [
-              1.0,
-              0.3
-            ],
-            [
-              0.4,
-              1.0
-            ]
-          ]
-        },
-        "method_version": "",
-        "relation_basis": "v_h_containment",
-        "shape": {
-          "coordinate_labels": [
-            "position 2",
-            "velocity 2"
-          ],
-          "equality_bounds": [],
-          "equality_rows": [],
-          "inequality_bounds": [
-            0.1335,
-            0.1335,
-            0.3174,
-            0.3174
-          ],
-          "inequality_rows": [
-            [
-              1.0,
-              0.3
-            ],
-            [
-              -1.0,
-              -0.3
-            ],
-            [
-              0.4,
-              1.0
-            ],
-            [
-              -0.4,
-              -1.0
-            ]
-          ],
-          "kind": "h_polytope"
-        },
-        "size_budget": 4,
-        "status": "completed"
-      },
-      "status": "completed"
-    },
-    {
-      "elapsed_ns": 231386,
-      "method": "directional-ellipsoid",
-      "phase": "measured",
-      "projection_index": 1,
-      "repetition": 1,
-      "result": {
-        "direction": "outer",
-        "evidence_assumptions": [
-          "input_class=bounded_native_planar_v",
-          "radius_rule=r_i^2 >= 2 m_i^2",
-          "rounding=outward_projected_bounds; error_bound=unavailable"
-        ],
-        "method_id": "csl.approximation.ellipsoid.exp03",
-        "method_parameters": {
-          "orientation": [
-            [
-              1.0,
-              0.3
-            ],
-            [
-              0.4,
-              1.0
-            ]
-          ]
-        },
-        "method_version": "1",
-        "relation_basis": "v_ellipsoid_containment",
-        "shape": {
-          "center": [
-            0.0,
-            0.0
-          ],
-          "coordinate_labels": [
-            "position 2",
-            "velocity 2"
-          ],
-          "kind": "directional_ellipsoid",
-          "orientation": [
-            [
-              1.0,
-              0.3
-            ],
-            [
-              0.4,
-              1.0
-            ]
-          ],
-          "projected_bounds": [
-            0.1335,
-            0.3174
-          ],
-          "radii": [
-            0.18879751057680821,
-            0.44887138469722043
-          ]
-        },
-        "size_budget": 1,
-        "status": "completed"
-      },
-      "status": "completed"
-    },
-    {
-      "elapsed_ns": 12851,
-      "method": "zonotope-axis-cover",
-      "phase": "measured",
-      "projection_index": 1,
-      "repetition": 1,
-      "result": {
-        "direction": "outer",
-        "evidence_assumptions": [
-          "requested_budget=4; input_generators=6; retained_generators=4; output_generators=4",
-          "The input had no factor equalities.",
-          "Omitted FactorId dependencies were relaxed to independent axis factors; retained IDs are unchanged.",
-          "No realizable control witness, complete optimal family, validated rounding bound, or global error bound is supplied."
-        ],
-        "method_id": "csl.geometry.zonotope.axis-cover",
-        "relation_basis": "generator_axis_cover",
-        "shape": {
-          "center": [
-            0.0,
-            0.0
-          ],
-          "coordinate_labels": [
-            "position 2",
-            "velocity 2"
-          ],
-          "factors": [
-            "two-points-factor-1",
-            "two-points-factor-3",
-            "two-points-factor-5",
-            "two-points-factor-0"
-          ],
-          "generators": [
-            [
-              0.02450000000570435,
-              0.014500000003376045,
-              0.004500000001047738,
-              0.0
-            ],
-            [
-              0.10000000002328308,
-              0.10000000002328308,
-              0.10000000002328308,
-              0.0
-            ]
-          ],
-          "kind": "zonotope"
-        },
-        "size_budget": 4,
-        "source_zonotope": {
-          "center": [
-            0.0,
-            0.0
-          ],
-          "factors": [
-            "two-points-factor-0",
-            "two-points-factor-1",
-            "two-points-factor-2",
-            "two-points-factor-3",
-            "two-points-factor-4",
-            "two-points-factor-5"
-          ],
-          "generators": [
-            [
-              0.0,
-              0.02450000000570435,
-              0.0,
-              0.014500000003376045,
-              0.0,
-              0.004500000001047738
-            ],
-            [
-              0.0,
-              0.10000000002328308,
-              0.0,
-              0.10000000002328308,
-              0.0,
-              0.10000000002328308
-            ]
-          ],
-          "outer_padding_factor": 1.0000000002328306
-        },
-        "status": "completed"
-      },
-      "status": "completed"
-    },
-    {
-      "elapsed_ns": 152814,
-      "method": "exact-polytope-quickhull",
-      "phase": "measured",
-      "projection_index": 1,
-      "repetition": 1,
-      "result": {
-        "direction": "equivalent",
-        "output_vertices": 8,
-        "shape": {
-          "kind": "v_polytope",
-          "vertices": [
-            [
-              -0.0435,
-              -0.3
-            ],
-            [
-              -0.019,
-              -0.2
-            ],
-            [
-              0.0055,
-              -0.1
-            ],
-            [
-              0.0345,
-              0.1
-            ],
-            [
-              0.0435,
-              0.3
-            ],
-            [
-              0.019,
-              0.2
-            ],
-            [
-              -0.0055,
-              0.1
-            ],
-            [
-              -0.0345,
-              -0.1
-            ]
-          ]
-        },
-        "status": "completed"
-      },
-      "status": "completed"
-    },
-    {
-      "elapsed_ns": 500138,
-      "method": "rotated-parallelotope",
-      "phase": "measured",
-      "projection_index": 1,
-      "repetition": 2,
-      "result": {
-        "direction": "outer",
-        "evidence_assumptions": [
-          "orientation_rows=1,0.29999999999999999;0.40000000000000002,1",
-          "requested_budget=4; input_vertices=23; input_rays=0; output_h_rows=4",
-          "error_bound=unavailable"
-        ],
-        "method_id": "csl.approximation.parallelotope",
-        "method_parameters": {
-          "orientation": [
-            [
-              1.0,
-              0.3
-            ],
-            [
-              0.4,
-              1.0
-            ]
-          ]
-        },
-        "method_version": "",
-        "relation_basis": "v_h_containment",
-        "shape": {
-          "coordinate_labels": [
-            "position 2",
-            "velocity 2"
-          ],
-          "equality_bounds": [],
-          "equality_rows": [],
-          "inequality_bounds": [
-            0.1335,
-            0.1335,
-            0.3174,
-            0.3174
-          ],
-          "inequality_rows": [
-            [
-              1.0,
-              0.3
-            ],
-            [
-              -1.0,
-              -0.3
-            ],
-            [
-              0.4,
-              1.0
-            ],
-            [
-              -0.4,
-              -1.0
-            ]
-          ],
-          "kind": "h_polytope"
-        },
-        "size_budget": 4,
-        "status": "completed"
-      },
-      "status": "completed"
-    },
-    {
-      "elapsed_ns": 229710,
-      "method": "directional-ellipsoid",
-      "phase": "measured",
-      "projection_index": 1,
-      "repetition": 2,
-      "result": {
-        "direction": "outer",
-        "evidence_assumptions": [
-          "input_class=bounded_native_planar_v",
-          "radius_rule=r_i^2 >= 2 m_i^2",
-          "rounding=outward_projected_bounds; error_bound=unavailable"
-        ],
-        "method_id": "csl.approximation.ellipsoid.exp03",
-        "method_parameters": {
-          "orientation": [
-            [
-              1.0,
-              0.3
-            ],
-            [
-              0.4,
-              1.0
-            ]
-          ]
-        },
-        "method_version": "1",
-        "relation_basis": "v_ellipsoid_containment",
-        "shape": {
-          "center": [
-            0.0,
-            0.0
-          ],
-          "coordinate_labels": [
-            "position 2",
-            "velocity 2"
-          ],
-          "kind": "directional_ellipsoid",
-          "orientation": [
-            [
-              1.0,
-              0.3
-            ],
-            [
-              0.4,
-              1.0
-            ]
-          ],
-          "projected_bounds": [
-            0.1335,
-            0.3174
-          ],
-          "radii": [
-            0.18879751057680821,
-            0.44887138469722043
-          ]
-        },
-        "size_budget": 1,
-        "status": "completed"
-      },
-      "status": "completed"
-    },
-    {
-      "elapsed_ns": 12641,
-      "method": "zonotope-axis-cover",
-      "phase": "measured",
-      "projection_index": 1,
-      "repetition": 2,
-      "result": {
-        "direction": "outer",
-        "evidence_assumptions": [
-          "requested_budget=4; input_generators=6; retained_generators=4; output_generators=4",
-          "The input had no factor equalities.",
-          "Omitted FactorId dependencies were relaxed to independent axis factors; retained IDs are unchanged.",
-          "No realizable control witness, complete optimal family, validated rounding bound, or global error bound is supplied."
-        ],
-        "method_id": "csl.geometry.zonotope.axis-cover",
-        "relation_basis": "generator_axis_cover",
-        "shape": {
-          "center": [
-            0.0,
-            0.0
-          ],
-          "coordinate_labels": [
-            "position 2",
-            "velocity 2"
-          ],
-          "factors": [
-            "two-points-factor-1",
-            "two-points-factor-3",
-            "two-points-factor-5",
-            "two-points-factor-0"
-          ],
-          "generators": [
-            [
-              0.02450000000570435,
-              0.014500000003376045,
-              0.004500000001047738,
-              0.0
-            ],
-            [
-              0.10000000002328308,
-              0.10000000002328308,
-              0.10000000002328308,
-              0.0
-            ]
-          ],
-          "kind": "zonotope"
-        },
-        "size_budget": 4,
-        "source_zonotope": {
-          "center": [
-            0.0,
-            0.0
-          ],
-          "factors": [
-            "two-points-factor-0",
-            "two-points-factor-1",
-            "two-points-factor-2",
-            "two-points-factor-3",
-            "two-points-factor-4",
-            "two-points-factor-5"
-          ],
-          "generators": [
-            [
-              0.0,
-              0.02450000000570435,
-              0.0,
-              0.014500000003376045,
-              0.0,
-              0.004500000001047738
-            ],
-            [
-              0.0,
-              0.10000000002328308,
-              0.0,
-              0.10000000002328308,
-              0.0,
-              0.10000000002328308
-            ]
-          ],
-          "outer_padding_factor": 1.0000000002328306
-        },
-        "status": "completed"
-      },
-      "status": "completed"
-    },
-    {
-      "elapsed_ns": 140452,
-      "method": "exact-polytope-quickhull",
-      "phase": "measured",
-      "projection_index": 1,
-      "repetition": 2,
-      "result": {
-        "direction": "equivalent",
-        "output_vertices": 8,
-        "shape": {
-          "kind": "v_polytope",
-          "vertices": [
-            [
-              -0.0435,
-              -0.3
-            ],
-            [
-              -0.019,
-              -0.2
-            ],
-            [
-              0.0055,
-              -0.1
-            ],
-            [
-              0.0345,
-              0.1
-            ],
-            [
-              0.0435,
-              0.3
-            ],
-            [
-              0.019,
-              0.2
-            ],
-            [
-              -0.0055,
-              0.1
-            ],
-            [
-              -0.0345,
-              -0.1
-            ]
-          ]
-        },
-        "status": "completed"
-      },
-      "status": "completed"
-    },
-    {
-      "elapsed_ns": 533313,
-      "method": "axis-box",
-      "phase": "measured",
-      "projection_index": 1,
-      "repetition": 2,
-      "result": {
-        "direction": "outer",
-        "evidence_assumptions": [
-          "orientation_rows=1,0;0,1",
-          "requested_budget=4; input_vertices=23; input_rays=0; output_h_rows=4",
-          "error_bound=unavailable"
-        ],
-        "method_id": "csl.approximation.box",
-        "method_version": "",
-        "relation_basis": "v_h_containment",
-        "shape": {
-          "coordinate_labels": [
-            "position 2",
-            "velocity 2"
-          ],
-          "equality_bounds": [],
-          "equality_rows": [],
-          "inequality_bounds": [
-            0.0435,
-            0.0435,
-            0.3,
-            0.3
-          ],
-          "inequality_rows": [
-            [
-              1.0,
-              0.0
-            ],
-            [
-              -1.0,
-              0.0
-            ],
-            [
-              0.0,
-              1.0
-            ],
-            [
-              0.0,
-              -1.0
-            ]
-          ],
-          "kind": "h_polytope"
-        },
-        "size_budget": 4,
-        "status": "completed"
-      },
-      "status": "completed"
-    },
-    {
-      "elapsed_ns": 229710,
+      "elapsed_ns": 249196,
       "method": "directional-ellipsoid",
       "phase": "measured",
       "projection_index": 1,
@@ -3733,7 +3779,7 @@
       "status": "completed"
     },
     {
-      "elapsed_ns": 12083,
+      "elapsed_ns": 13689,
       "method": "zonotope-axis-cover",
       "phase": "measured",
       "projection_index": 1,
@@ -3747,6 +3793,7 @@
           "No realizable control witness, complete optimal family, validated rounding bound, or global error bound is supplied."
         ],
         "method_id": "csl.geometry.zonotope.axis-cover",
+        "method_version": "1.0.0",
         "relation_basis": "generator_axis_cover",
         "shape": {
           "center": [
@@ -3818,13 +3865,15 @@
       "status": "completed"
     },
     {
-      "elapsed_ns": 139893,
+      "elapsed_ns": 151766,
       "method": "exact-polytope-quickhull",
       "phase": "measured",
       "projection_index": 1,
       "repetition": 3,
       "result": {
         "direction": "equivalent",
+        "method_id": "csl.quickhull_2d",
+        "method_version": "unregistered",
         "output_vertices": 8,
         "shape": {
           "kind": "v_polytope",
@@ -3868,7 +3917,7 @@
       "status": "completed"
     },
     {
-      "elapsed_ns": 536246,
+      "elapsed_ns": 554753,
       "method": "axis-box",
       "phase": "measured",
       "projection_index": 1,
@@ -3881,7 +3930,7 @@
           "error_bound=unavailable"
         ],
         "method_id": "csl.approximation.box",
-        "method_version": "",
+        "method_version": "1",
         "relation_basis": "v_h_containment",
         "shape": {
           "coordinate_labels": [
@@ -3922,7 +3971,7 @@
       "status": "completed"
     },
     {
-      "elapsed_ns": 620056,
+      "elapsed_ns": 499299,
       "method": "rotated-parallelotope",
       "phase": "measured",
       "projection_index": 1,
@@ -3947,7 +3996,7 @@
             ]
           ]
         },
-        "method_version": "",
+        "method_version": "1",
         "relation_basis": "v_h_containment",
         "shape": {
           "coordinate_labels": [
@@ -3988,7 +4037,7 @@
       "status": "completed"
     },
     {
-      "elapsed_ns": 16134,
+      "elapsed_ns": 13340,
       "method": "zonotope-axis-cover",
       "phase": "measured",
       "projection_index": 1,
@@ -4002,6 +4051,7 @@
           "No realizable control witness, complete optimal family, validated rounding bound, or global error bound is supplied."
         ],
         "method_id": "csl.geometry.zonotope.axis-cover",
+        "method_version": "1.0.0",
         "relation_basis": "generator_axis_cover",
         "shape": {
           "center": [
@@ -4073,13 +4123,15 @@
       "status": "completed"
     },
     {
-      "elapsed_ns": 155817,
+      "elapsed_ns": 153163,
       "method": "exact-polytope-quickhull",
       "phase": "measured",
       "projection_index": 1,
       "repetition": 4,
       "result": {
         "direction": "equivalent",
+        "method_id": "csl.quickhull_2d",
+        "method_version": "unregistered",
         "output_vertices": 8,
         "shape": {
           "kind": "v_polytope",
@@ -4123,7 +4175,7 @@
       "status": "completed"
     },
     {
-      "elapsed_ns": 572284,
+      "elapsed_ns": 566627,
       "method": "axis-box",
       "phase": "measured",
       "projection_index": 1,
@@ -4136,7 +4188,7 @@
           "error_bound=unavailable"
         ],
         "method_id": "csl.approximation.box",
-        "method_version": "",
+        "method_version": "1",
         "relation_basis": "v_h_containment",
         "shape": {
           "coordinate_labels": [
@@ -4177,7 +4229,7 @@
       "status": "completed"
     },
     {
-      "elapsed_ns": 516202,
+      "elapsed_ns": 547629,
       "method": "rotated-parallelotope",
       "phase": "measured",
       "projection_index": 1,
@@ -4202,7 +4254,7 @@
             ]
           ]
         },
-        "method_version": "",
+        "method_version": "1",
         "relation_basis": "v_h_containment",
         "shape": {
           "coordinate_labels": [
@@ -4243,7 +4295,7 @@
       "status": "completed"
     },
     {
-      "elapsed_ns": 231386,
+      "elapsed_ns": 230268,
       "method": "directional-ellipsoid",
       "phase": "measured",
       "projection_index": 1,
@@ -4305,13 +4357,15 @@
       "status": "completed"
     },
     {
-      "elapsed_ns": 139963,
+      "elapsed_ns": 134026,
       "method": "exact-polytope-quickhull",
       "phase": "measured",
       "projection_index": 1,
       "repetition": 5,
       "result": {
         "direction": "equivalent",
+        "method_id": "csl.quickhull_2d",
+        "method_version": "unregistered",
         "output_vertices": 8,
         "shape": {
           "kind": "v_polytope",
@@ -4355,7 +4409,7 @@
       "status": "completed"
     },
     {
-      "elapsed_ns": 540576,
+      "elapsed_ns": 551611,
       "method": "axis-box",
       "phase": "measured",
       "projection_index": 1,
@@ -4368,7 +4422,7 @@
           "error_bound=unavailable"
         ],
         "method_id": "csl.approximation.box",
-        "method_version": "",
+        "method_version": "1",
         "relation_basis": "v_h_containment",
         "shape": {
           "coordinate_labels": [
@@ -4409,7 +4463,7 @@
       "status": "completed"
     },
     {
-      "elapsed_ns": 496785,
+      "elapsed_ns": 547770,
       "method": "rotated-parallelotope",
       "phase": "measured",
       "projection_index": 1,
@@ -4434,7 +4488,7 @@
             ]
           ]
         },
-        "method_version": "",
+        "method_version": "1",
         "relation_basis": "v_h_containment",
         "shape": {
           "coordinate_labels": [
@@ -4475,7 +4529,7 @@
       "status": "completed"
     },
     {
-      "elapsed_ns": 246193,
+      "elapsed_ns": 254503,
       "method": "directional-ellipsoid",
       "phase": "measured",
       "projection_index": 1,
@@ -4537,7 +4591,7 @@
       "status": "completed"
     },
     {
-      "elapsed_ns": 13828,
+      "elapsed_ns": 37016,
       "method": "zonotope-axis-cover",
       "phase": "measured",
       "projection_index": 1,
@@ -4551,6 +4605,7 @@
           "No realizable control witness, complete optimal family, validated rounding bound, or global error bound is supplied."
         ],
         "method_id": "csl.geometry.zonotope.axis-cover",
+        "method_version": "1.0.0",
         "relation_basis": "generator_axis_cover",
         "shape": {
           "center": [
@@ -4622,7 +4677,7 @@
       "status": "completed"
     },
     {
-      "elapsed_ns": 521020,
+      "elapsed_ns": 566207,
       "method": "axis-box",
       "phase": "measured",
       "projection_index": 1,
@@ -4635,7 +4690,7 @@
           "error_bound=unavailable"
         ],
         "method_id": "csl.approximation.box",
-        "method_version": "",
+        "method_version": "1",
         "relation_basis": "v_h_containment",
         "shape": {
           "coordinate_labels": [
@@ -4676,7 +4731,7 @@
       "status": "completed"
     },
     {
-      "elapsed_ns": 512569,
+      "elapsed_ns": 550773,
       "method": "rotated-parallelotope",
       "phase": "measured",
       "projection_index": 1,
@@ -4701,7 +4756,7 @@
             ]
           ]
         },
-        "method_version": "",
+        "method_version": "1",
         "relation_basis": "v_h_containment",
         "shape": {
           "coordinate_labels": [
@@ -4742,7 +4797,7 @@
       "status": "completed"
     },
     {
-      "elapsed_ns": 230339,
+      "elapsed_ns": 230897,
       "method": "directional-ellipsoid",
       "phase": "measured",
       "projection_index": 1,
@@ -4804,7 +4859,7 @@
       "status": "completed"
     },
     {
-      "elapsed_ns": 12572,
+      "elapsed_ns": 13758,
       "method": "zonotope-axis-cover",
       "phase": "measured",
       "projection_index": 1,
@@ -4818,6 +4873,7 @@
           "No realizable control witness, complete optimal family, validated rounding bound, or global error bound is supplied."
         ],
         "method_id": "csl.geometry.zonotope.axis-cover",
+        "method_version": "1.0.0",
         "relation_basis": "generator_axis_cover",
         "shape": {
           "center": [
@@ -4889,13 +4945,15 @@
       "status": "completed"
     },
     {
-      "elapsed_ns": 139894,
+      "elapsed_ns": 141290,
       "method": "exact-polytope-quickhull",
       "phase": "measured",
       "projection_index": 1,
       "repetition": 6,
       "result": {
         "direction": "equivalent",
+        "method_id": "csl.quickhull_2d",
+        "method_version": "unregistered",
         "output_vertices": 8,
         "shape": {
           "kind": "v_polytope",
@@ -5017,6 +5075,8 @@
           "method": "exact-polytope-quickhull",
           "result": {
             "direction": "equivalent",
+            "method_id": "csl.quickhull_2d",
+            "method_version": "unregistered",
             "output_vertices": 4,
             "shape": {
               "kind": "v_polytope",
@@ -5052,7 +5112,7 @@
               "error_bound=unavailable"
             ],
             "method_id": "csl.approximation.box",
-            "method_version": "",
+            "method_version": "1",
             "relation_basis": "v_h_containment",
             "shape": {
               "coordinate_labels": [
@@ -5113,7 +5173,7 @@
                 ]
               ]
             },
-            "method_version": "",
+            "method_version": "1",
             "relation_basis": "v_h_containment",
             "shape": {
               "coordinate_labels": [
@@ -5220,6 +5280,7 @@
               "No realizable control witness, complete optimal family, validated rounding bound, or global error bound is supplied."
             ],
             "method_id": "csl.geometry.zonotope.axis-cover",
+            "method_version": "1.0.0",
             "relation_basis": "generator_axis_cover",
             "shape": {
               "center": [
@@ -5290,7 +5351,7 @@
           }
         }
       ],
-      "projection_elapsed_ns": 106858,
+      "projection_elapsed_ns": 55315,
       "projection_evidence": {
         "input_states": 345,
         "labels": [
@@ -5413,6 +5474,8 @@
           "method": "exact-polytope-quickhull",
           "result": {
             "direction": "equivalent",
+            "method_id": "csl.quickhull_2d",
+            "method_version": "unregistered",
             "output_vertices": 8,
             "shape": {
               "kind": "v_polytope",
@@ -5464,7 +5527,7 @@
               "error_bound=unavailable"
             ],
             "method_id": "csl.approximation.box",
-            "method_version": "",
+            "method_version": "1",
             "relation_basis": "v_h_containment",
             "shape": {
               "coordinate_labels": [
@@ -5525,7 +5588,7 @@
                 ]
               ]
             },
-            "method_version": "",
+            "method_version": "1",
             "relation_basis": "v_h_containment",
             "shape": {
               "coordinate_labels": [
@@ -5632,6 +5695,7 @@
               "No realizable control witness, complete optimal family, validated rounding bound, or global error bound is supplied."
             ],
             "method_id": "csl.geometry.zonotope.axis-cover",
+            "method_version": "1.0.0",
             "relation_basis": "generator_axis_cover",
             "shape": {
               "center": [
@@ -5702,7 +5766,7 @@
           }
         }
       ],
-      "projection_elapsed_ns": 20952,
+      "projection_elapsed_ns": 23327,
       "projection_evidence": {
         "input_states": 345,
         "labels": [

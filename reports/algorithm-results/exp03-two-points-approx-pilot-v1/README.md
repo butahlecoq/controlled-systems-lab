@@ -94,16 +94,17 @@ parentheses:
 
 | Method | `(x1,x2)` | `(x3,x4)` |
 | --- | ---: | ---: |
-| Exact QuickHull | 74,800 (74,311–201,215) | 140,452 (139,893–159,379) |
-| Axis box | 259,113 (254,085–742,000) | 533,313 (519,274–572,284) |
-| Rotated parallelotope | 482,328 (476,811–1,530,585) | 510,474 (496,785–620,056) |
-| Directional ellipsoid | 235,506 (225,659–419,051) | 230,618 (229,710–246,193) |
-| Zonotope axis cover | 13,410 (12,292–18,997) | 12,851 (12,083–16,134) |
+| Exact QuickHull | 82,344 (77,804–84,998) | 141,290 (134,026–153,163) |
+| Axis box | 279,926 (276,224–284,815) | 559,642 (512,569–578,709) |
+| Rotated parallelotope | 530,728 (519,064–553,287) | 543,649 (499,299–550,773) |
+| Directional ellipsoid | 250,033 (243,190–262,954) | 249,196 (230,129–262,815) |
+| Zonotope axis cover | 15,993 (13,969–30,521) | 13,758 (13,270–37,016) |
 
-These are short single-call timings on one host, so they remain descriptive
-observations rather than speedup or performance-ranking evidence. The timed
+The run records provider IDs and versions for the registered methods. These are
+short single-call timings on one host, so they remain descriptive observations
+rather than speedup or performance-ranking evidence. The timed
 scope is the public hull/approximation operation; input construction and JSON
-serialization are excluded.
+serialization are excluded. The native driver is sequential; OS thread count is not observed. QuickHull is a stateless direct call, while each registered approximation call prepares a fresh workspace.
 
 ## Reproduce and inspect
 

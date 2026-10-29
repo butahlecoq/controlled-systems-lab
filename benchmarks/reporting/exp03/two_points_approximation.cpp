@@ -273,6 +273,7 @@ Attempt exact_hull(const std::vector<Vector>& points) {
         }
         return std::pair<Json, std::int64_t>{
             {{"status", "completed"}, {"direction", "equivalent"},
+             {"method_id", "csl.quickhull_2d"}, {"method_version", "unregistered"},
              {"shape", {{"kind", "v_polytope"}, {"vertices", std::move(vertices)}}},
              {"output_vertices", hull->vertex_indices.size()}},
             timed ? std::chrono::duration_cast<std::chrono::nanoseconds>(stop - start).count() : 0};
@@ -312,7 +313,7 @@ std::vector<Attempt> methods_for(ProjectedInput& input, const Json& projected_zo
     if (box_methods.add(geometry::approximation::make_box_registration({"exp03-box-output"})))
         throw std::runtime_error("Box registration failed");
     methods.push_back(approximation("axis-box", input.set, std::move(box_methods),
-        {{"csl.approximation.box"}, std::nullopt}, "csl.polyhedron.h", 4));
+        {{"csl.approximation.box"}, "1"}, "csl.polyhedron.h", 4));
 
     const Matrix orientation{2, 2, {1.0, 0.3, 0.4, 1.0}};
     registry::Registry<registry::ApproximationPort> parallelotope_methods;
@@ -320,7 +321,7 @@ std::vector<Attempt> methods_for(ProjectedInput& input, const Json& projected_zo
             {"exp03-parallelotope-output"}, orientation)))
         throw std::runtime_error("Parallelotope registration failed");
     methods.push_back(approximation("rotated-parallelotope", input.set,
-        std::move(parallelotope_methods), {{"csl.approximation.parallelotope"}, std::nullopt},
+        std::move(parallelotope_methods), {{"csl.approximation.parallelotope"}, "1"},
         "csl.polyhedron.h", 4, {{"orientation", matrix_json(orientation)}}));
 
     registry::Registry<registry::ApproximationPort> ellipsoid_methods;
@@ -338,7 +339,7 @@ std::vector<Attempt> methods_for(ProjectedInput& input, const Json& projected_zo
     if (zonotope_methods.add(geometry::approximation::make_axis_cover_registration(
             {"exp03-zonotope-cover-output"})))
         throw std::runtime_error("Zonotope registration failed");
-    const auto zone_method = registry::Method{{"csl.geometry.zonotope.axis-cover"}, std::nullopt};
+    const auto zone_method = registry::Method{{"csl.geometry.zonotope.axis-cover"}, "1.0.0"};
     const ApproximationRequest zone_request{{{"env717-exp03"}, {"zonotope-axis-cover"},
         {"phase-plane-reference"}}, zonotope.as_handle(), {"csl.zonotope"},
         SetRelation::outer, 4, Assurance::numerical};
@@ -356,6 +357,7 @@ std::vector<Attempt> methods_for(ProjectedInput& input, const Json& projected_zo
         const auto stop = std::chrono::steady_clock::now();
         auto zone_description = registered_outcome_description(outcome);
         zone_description["method_id"] = zone_method.id.value;
+        zone_description["method_version"] = zone_method.version.value_or("");
         zone_description["size_budget"] = zone_request.size_budget;
         zone_description["source_zonotope"] = source_description;
         return std::pair<Json, std::int64_t>{zone_description,
@@ -428,7 +430,14 @@ Json run(const Json& reference, bool measure) {
         {"stage", stage}, {"set_meaning", reference.at("finite_game").at("set_meaning")},
         {"measurement_policy", measure ? Json{{"warmup_per_method", 1},
             {"measured_repetitions_per_method", 7}, {"method_order", "rotating alternating order"},
-            {"timed_scope", "native public hull or approximation operation call; input construction and JSON output excluded"}}
+            {"timed_scope", "native public hull or approximation operation call; input construction and JSON output excluded"},
+            {"requested_outer_workers", 1}, {"actual_outer_workers", 1},
+            {"requested_native_threads", 1}, {"actual_native_threads", 1},
+            {"actual_native_threads_status", "inferred; OS thread count not observed"},
+            {"thread_evidence", "single-threaded driver; no parallel executor invoked"},
+            {"workspace_policy", {
+                {"quickhull", "stateless direct call; no workspace"},
+                {"registered_approximation", "run_registered prepares a fresh pipeline workspace for each warmup and measured call; no workspace reuse"}}}}
             : Json{{"status", "smoke-only; no performance measurements"}}},
         {"projections", projection_data}, {"measurements", measurements},
         {"inner_methods", inner_methods}};
