@@ -188,7 +188,7 @@ bool same_layout(const JointUncertaintyLayout& left, const JointUncertaintyLayou
     return true;
 }
 
-} // namespace
+}
 
 JointVUncertaintyResult make_joint_v_uncertainty(const model::LinearSystem& system,
         std::vector<Vector> joint_generators) {

@@ -160,7 +160,7 @@ json fixture_description() {
         {"joint_vertices", 8}};
 }
 
-} // namespace
+}
 
 int main(int argc, char** argv) try {
     if (argc != 2 || (std::string_view(argv[1]) != "smoke" &&

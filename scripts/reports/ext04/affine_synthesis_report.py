@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-"""Render and validate the saved EXT-04 affine-synthesis run."""
 from __future__ import annotations
 
 import argparse
@@ -226,7 +225,7 @@ def render(trials: Path, smoke: Path, build_log: Path, out: Path, source_commit:
 <table><thead><tr><th>Round</th><th>Batch ms</th><th>ns/call</th></tr></thead><tbody>{table}</tbody></table>
 <h2>Limits</h2><ul><li>The guarantee covers only the caller-authored joint V-hull; completeness of that input is assumed.</li><li>Results use numerical binary64 arithmetic, not validated rounding.</li><li>Numerical solver infeasibility remains inconclusive; it is not a proof that no policy exists.</li><li>One fixture and one provider are measured. No speedup, comparison, or scalability claim is made.</li></ul>
 <h2>Reproduce</h2><p>Build with <code>CSL_BUILD_EXT04_AFFINE_SYNTHESIS_REPORT=ON</code>, run <code>csl_ext04_affine_synthesis_report smoke</code> and then <code>measure</code>. The bundle includes the exact C++ driver, fixture, raw JSONL, saved result, independent renderer, Release build log, and checksums.</p>
-<p>Source commit <a href="https://github.com/butahlecoq/controlled-systems-lab/commit/{html.escape(source_commit)}"><code>{html.escape(source_commit)}</code></a>. <a href="fixture.json">Fixture</a> · <a href="result.json">Result</a> · <a href="trials.jsonl">Raw trials</a> · <a href="smoke.txt">Smoke output</a> · <a href="summary.csv">CSV</a> · <a href="driver.cpp">Driver</a> · <a href="records.json">Records</a> · <a href="renderer.py">Renderer</a>.</p></body></html>'''
+<p>Source commit <a href="https://github.com/butahlecoq/controlled-systems-lab/commit/{html.escape(source_commit)}"><code>{html.escape(source_commit)}</code></a>. <a href="fixture.json">Fixture</a> · <a href="result.json">Result</a> · <a href="trials.jsonl">Raw trials</a> · <a href="smoke.txt">Smoke output</a> · <a href="environment.json">Environment</a> · <a href="summary.csv">CSV</a> · <a href="driver.cpp">Driver</a> · <a href="records.json">Records</a> · <a href="renderer.py">Renderer</a> · <a href="{records['report_id']}.zip">Offline ZIP</a>.</p></body></html>'''
     (out / "index.html").write_text(page, encoding="utf-8")
     files = {path.name: sha(path.read_bytes()) for path in sorted(out.iterdir()) if path.is_file()}
     (out / "manifest.json").write_text(json.dumps({"schema": "csl.ext04-affine-synthesis-manifest/1",
@@ -242,7 +241,7 @@ def render(trials: Path, smoke: Path, build_log: Path, out: Path, source_commit:
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description=__doc__)
+    parser = argparse.ArgumentParser(description="Render and validate the saved EXT-04 affine-synthesis run.")
     parser.add_argument("--trials", type=Path, required=True)
     parser.add_argument("--smoke", type=Path, required=True)
     parser.add_argument("--build-log", type=Path, required=True)

@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-"""Capture the host and toolchain around an EXT-04 measurement."""
 from __future__ import annotations
 
 import argparse
@@ -64,7 +63,7 @@ def capture(phase: str, before_path: Path | None) -> dict:
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description=__doc__)
+    parser = argparse.ArgumentParser(description="Capture the host and toolchain around an EXT-04 measurement.")
     parser.add_argument("phase", choices=("before", "after"))
     parser.add_argument("--before", type=Path)
     args = parser.parse_args()
