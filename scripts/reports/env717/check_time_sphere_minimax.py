@@ -179,9 +179,13 @@ def verify(actual: dict) -> dict:
     assert actual["source_model"]["initial_state"] == [2.0, -1.0]
     assert actual["source_model"]["outer_dt_seconds"] == 0.1
     assert actual["source_model"]["inner_euler_steps"] == INNER_STEPS
+    assert actual["source_information_pattern"] == (
+        "both player policies use the current environment state; neither policy receives the opponent's current action")
     assert actual["adaptation"]["control_catalogue"] == list(CATALOGUE)
     assert actual["adaptation"]["disturbance_catalogue"] == list(CATALOGUE)
-    assert actual["adaptation"]["information_pattern"].startswith("u observes the current exact state")
+    assert actual["adaptation"]["information_pattern"].startswith(
+        "sequential response: u selects an action")
+    assert "v's action may depend on u's current action" in actual["adaptation"]["information_pattern_change"]
     layers, destinations = build_graph()
     capture_steps = minimum_capture_steps(layers, destinations)
     first_winning = capture_steps[0][0]
@@ -270,7 +274,7 @@ def svg_figure(analysis: dict) -> str:
         '<desc id="desc">Convex-hull envelopes of each finite forward layer and its backward-winning intersection, the unit-disk target, and a worst-case trajectory under the causal minimax policy.</desc>',
         '<rect width="100%" height="100%" fill="#fbfcfe"/>',
         '<text x="95" y="30" font-family="sans-serif" font-size="21" font-weight="700" fill="#172554">TimeOptimalSphereGame: guaranteed capture under an adversarial input</text>',
-        f'<text x="95" y="52" font-family="sans-serif" font-size="13" fill="#475569">Finite catalogues u,v ∈ {{−1,0,1}} · first robust capture by {analysis["selected_horizon"]} decisions · worst-case {analysis["minimax_time"]:.2f} s</text>',
+        f'<text x="95" y="52" font-family="sans-serif" font-size="13" fill="#475569">Finite catalogues u,v ∈ {{−1,0,1}} · sequential response (v observes u) · capture by {analysis["selected_horizon"]} decisions · worst-case {analysis["minimax_time"]:.2f} s</text>',
         f'<rect x="{left}" y="{top}" width="{plot_w}" height="{plot_h}" fill="#ffffff" stroke="#334155"/>']
     for tick in range(6):
         xv = xmin + xspan * tick / 5
@@ -324,8 +328,8 @@ def report_page(result: dict, analysis: dict) -> str:
 <style>body{{font:16px/1.55 system-ui,sans-serif;max-width:1120px;margin:2rem auto;padding:0 1.2rem;color:#172033}}h1,h2{{line-height:1.2}}figure{{margin:1.2rem 0}}svg{{width:100%;height:auto;border:1px solid #dbe2ea;border-radius:8px}}table{{border-collapse:collapse}}td,th{{border-bottom:1px solid #dbe2ea;padding:.45rem .8rem;text-align:left}}code{{background:#eef2f7;padding:.1rem .3rem}}.note{{background:#eff6ff;padding:1rem;border-left:4px solid #2563eb}}nav a{{margin-right:.8rem}}</style></head>
 <body><h1>TimeOptimalSphereGame: finite-catalogue minimax reachability</h1>
 <p>This report replays the source's two-player time-to-target task on a finite action catalogue using CSL's finite-feedback reachability and finite-causal minimax solvers.</p>
-<div class="note"><strong>Scope.</strong> The upstream model uses continuous actions u,v ∈ [-1,1] and trains u to minimize elapsed time while v maximizes it. This pilot discretizes both actions to {{-1,0,1}} and runs a finite horizon of {result['outer_horizon_steps']} decisions at 0.1 s per decision. It is a finite-catalogue adaptation, not a reproduction of the RL training run or a continuous-game guarantee.</div>
-<figure><object data="reachability.svg" type="image/svg+xml" aria-label="Reachability and minimax trajectory figure"></object><figcaption>Each stage is shown in one position–velocity projection. The polygons are convex-hull display envelopes; exact finite nodes and winning intersections are available in the figure-data JSON.</figcaption></figure>
+<div class="note"><strong>Scope and information pattern.</strong> The upstream model uses continuous actions u,v ∈ [-1,1] and trains u to minimize elapsed time while v maximizes it; both source policies use the current state without receiving the opponent's current action. This pilot discretizes both actions to {{-1,0,1}} and uses a sequential-response game: v observes u's action before choosing a disturbance. It runs a finite horizon of {result['outer_horizon_steps']} decisions at 0.1 s per decision. The value and winning set apply to this adapted information pattern, not the source RL game; this is also not a continuous-action guarantee.</div>
+<figure><object data="reachability.svg" type="image/svg+xml" aria-label="Reachability and minimax trajectory figure"></object><figcaption>Each stage is shown in one position–velocity projection. The disturbance sees the controller's current action. The polygons are convex-hull display envelopes; exact finite nodes and winning intersections are available in the figure-data JSON.</figcaption></figure>
 <h2>Result</h2><table><tbody>
 <tr><th>First horizon where the initial state is robustly winning</th><td>{analysis['selected_horizon']} decisions ({analysis['selected_horizon']*0.1:.2f} s)</td></tr>
 <tr><th>Finite-causal minimax worst-case target time</th><td>{analysis['minimax_time']:.2f} s ({round(analysis['minimax_time']/DT)} source Euler substeps)</td></tr>
@@ -370,7 +374,7 @@ Pinned source: `imm-rl-lab/optimal_control` commit `{SOURCE_COMMIT}`, blob `{SOU
 
 The source state is `[x1 position, x2 velocity]`, initially `(2,-1)`, with inner-Euler dynamics `x1 += 0.01*(x2+v)` and `x2 += 0.01*u`. Each source decision holds u and v for ten inner steps (`dt=0.1`, inner step `0.01`). The target is the closed unit disk. Source reward is elapsed inner-Euler time until the target is entered. The upstream two-agent solver trains u on negative elapsed reward and v on positive elapsed reward, giving the finite pilot its minimizing-u/maximizing-v orientation.
 
-This report discretizes each continuous interval `[-1,1]` to `{{-1,0,1}}`, keeps the source's ten held-action Euler substeps, and uses a 35-decision finite horizon. `finite_feedback` finds the first horizon at which the initial state is robustly winning. `finite_causal_minimax` minimizes the worst-case captured time on the same finite graph. The figure shows every forward finite state cloud and each layer's backward-winning intersection, plus one worst-case path under a minimax-optimal causal policy.
+This report discretizes each continuous interval `[-1,1]` to `{{-1,0,1}}`, keeps the source's ten held-action Euler substeps, and uses a 35-decision finite horizon. The source's two state-feedback policies both use the current environment state and neither receives the other player's current action. This finite adaptation changes that information pattern: u selects first, then v observes u's action before choosing a disturbance. The reported value and winning set belong to this sequential-response game, not to the source RL game's policy information pattern. `finite_feedback` finds the first horizon at which the initial state is robustly winning. `finite_causal_minimax` minimizes the worst-case captured time on the same finite graph. The figure shows every forward finite state cloud and each layer's backward-winning intersection, plus one worst-case path under a minimax-optimal causal policy.
 
 The result is a finite-catalogue adaptation. It does not reproduce RL training, certify a continuous-action policy, or establish a continuous-state winning boundary. Timings are one descriptive host capture with no comparison claim.
 

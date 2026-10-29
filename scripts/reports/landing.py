@@ -474,8 +474,9 @@ FAMILIES = {
         "minimax capture time, with forward states, backward-winning intersections and a "
         "worst-case path overlaid in the position–velocity plane. The exact finite nodes are "
         "available in the figure data; displayed convex-hull envelopes are visual guides only. "
-        "This is an explicit finite-action adaptation, not an RL reproduction or continuous-boundary "
-        "claim."),
+        "The adaptation also lets the disturbance observe the controller's current action, unlike "
+        "the source state-feedback policies; its value is for this sequential-response game. It is "
+        "not an RL reproduction or continuous-boundary claim."),
     "syn06-verifier": Family(
         r"syn06-verifier-\d{8}-[0-9a-f]{64}", "verification", "Trajectory verification",
         "Re-checks two literal two-stage integrator witnesses against the original saved input "
