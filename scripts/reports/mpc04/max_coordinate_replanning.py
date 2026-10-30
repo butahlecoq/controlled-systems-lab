@@ -387,6 +387,13 @@ def host_metadata() -> dict:
 
 def implementation_metadata(executable: Path) -> dict:
     repository = Path(__file__).resolve().parents[3]
+    resolved_executable = executable.resolve()
+    try:
+        executable_location = resolved_executable.relative_to(repository).as_posix()
+        executable_scope = "repository-relative"
+    except ValueError:
+        executable_location = resolved_executable.name
+        executable_scope = "external-basename-only"
     sources = {
         "native_driver": "benchmarks/reporting/mpc04/max_coordinate_replanning.cpp",
         "report_driver": "scripts/reports/mpc04/max_coordinate_replanning.py",
@@ -406,7 +413,8 @@ def implementation_metadata(executable: Path) -> dict:
         "repository": "butahlecoq/controlled-systems-lab",
         "commit": commit,
         "algorithm_sources_dirty": bool(status),
-        "native_executable": str(executable.resolve()),
+        "native_executable": executable_location,
+        "native_executable_path_scope": executable_scope,
         "native_executable_sha256": digest,
         "source_sha256": {key: hashlib.sha256((repository / path).read_bytes()).hexdigest()
                            for key, path in sources.items()},
@@ -519,7 +527,7 @@ def write_html(path: Path, report: dict) -> None:
 <p>The independent checker replays all transitions, recomputes selected-plan values and terminal objectives, verifies the analytic one-step QP fixture, and checks retained HiGHS primal and dual residuals against their declared tolerances. Native failure and deadline fixtures verify zero-control fallback in the C++ episode loop. The finite policy-gap fixtures check fixed-plan/replanning/causal values 2/2/1 and scalar fixed-plan/replanning values 2/0.</p>
 <p>Timings use five alternating process runs and are descriptive; no performance winner is claimed. There is no recursive-feasibility, stability, continuous-disturbance, or globally optimal causal-minimax claim. The upstream source is <a href="https://github.com/{html.escape(source['repository'])}/blob/{html.escape(source['commit'])}/{html.escape(source['path'])}">MaxCoordinateGame.py</a>; its repository declares no license, and this report re-expresses the equations without copying source code.</p>
 <h2>Provenance</h2><p>Implementation commit <code>{html.escape(implementation['commit'])}</code>; executable SHA-256 <code>{html.escape(implementation['native_executable_sha256'])}</code>. Results and all per-decision samples: <a href="result.json">result.json</a>. Build/runtime capture: <a href="capture.json">capture.json</a>, <a href="build-config.json">build-config.json</a>, <a href="build.log">build.log</a>, <a href="environment.json">environment.json</a>.</p>
-<p><a href="README.md">Method and reproduction instructions</a> · <a href="SHA256SUMS">File hashes</a> · <a href="mpc04-max-coordinate-replanning-pilot.zip">Offline bundle</a></p>
+<p><a href="README.md">Method and reproduction instructions</a> · <a href="BUNDLE-SHA256SUMS">Offline payload hashes</a></p>
 </body></html>'''
     path.write_text(page, encoding="utf-8")
 

@@ -42,4 +42,4 @@ python3 -B scripts/reports/mpc04/check_max_coordinate.py \
 
 This report adds private benchmark tooling and an optional target. It adds no public API, installed target, new dependency, or package change; HiGHS is an existing optional dependency and must be enabled for this report target.
 
-Files: [standalone report](index.html), [raw result](result.json), [phase-plane and control plot](trajectory.svg), [offline bundle](mpc04-max-coordinate-replanning-pilot.zip), [checksums](SHA256SUMS).
+Files: [standalone report](index.html), [raw result](result.json), [phase-plane and control plot](trajectory.svg), and [offline payload checksums](BUNDLE-SHA256SUMS). The outer directory also contains `mpc04-max-coordinate-replanning-pilot.zip`; its archive hash is listed in the adjacent `SHA256SUMS` file.

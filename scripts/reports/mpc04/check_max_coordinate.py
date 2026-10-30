@@ -100,6 +100,9 @@ def check(path: Path):
     implementation = data["algorithm_implementation"]
     assert len(implementation["commit"]) == 40
     assert len(implementation["native_executable_sha256"]) == 64
+    assert not Path(implementation["native_executable"]).is_absolute()
+    assert implementation["native_executable_path_scope"] in {
+        "repository-relative", "external-basename-only"}
     assert implementation["algorithm_sources_dirty"] is False
     assert set(implementation["source_sha256"]) == {
         "native_driver", "report_driver", "independent_checker", "cmake_target"}
