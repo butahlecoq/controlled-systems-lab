@@ -806,6 +806,18 @@ def build(catalog, site):
             'alt="Saved exact and native smoke trajectories projected onto oxidizer flow and stock, and fuel flow and stock"></a>'
             '<p>Uses the within-species projections (x₁,x₂) and (x₃,x₄) you requested. The exact saved witness is shown with one cold attempt per native solver; their residual checks remain inconclusive. This is a trajectory illustration, not a reachable-set plot or historical B04 reconstruction.</p>'
             '<p><a href="control-witness-v1.html#b04-native-smoke">Open the paired projections and evidence →</a></p></article>' +
+            '<article class="saved-figure" id="b04-repeated-benchmark"><p class="eyebrow">B04 reference · Saved-data companion</p>'
+            '<h3>Representative repeated-solver trajectories</h3>'
+            '<a href="control-witness-v1.html#b04-repeated-benchmark"><img src="control-witness/b04-repeated-oxidizer.svg" '
+            'alt="Exact B04 witness and representative solver paths in the oxidizer flow and stock plane"></a>'
+            '<p>Two shared-style figures use (x₁,x₂) for oxidizer and (x₃,x₄) for fuel. Each native path is one saved cold repetition selected near its backend’s median solve time; paths are not averages and residual evidence remains inconclusive.</p>'
+            '<p><a href="control-witness-v1.html#b04-repeated-benchmark">Open both projections and evidence →</a></p></article>' +
+            '<article class="saved-figure" id="exp02-paired-family"><p class="eyebrow">Exp-02 · Saved-data companion</p>'
+            '<h3>Complete paired-profile control families</h3>'
+            '<a href="control-witness-v1.html#exp02-ts02-control-family"><img src="control-witness/exp02-ts03-control-family.svg" '
+            'alt="Feasible unit control square with complete optimal edge u1 equals 1"></a>'
+            '<p>Shared-style equal-scale plots show the full control families for the constant-objective T-S02 and singular-integrator T-S03 fixtures, from frozen scenarios and saved paired strategy events.</p>'
+            '<p><a href="control-witness-v1.html#exp02-ts02-control-family">Open both projections and evidence →</a></p></article>' +
             '<article class="saved-figure" id="control-witness-timings"><p class="eyebrow">Control reports · Saved-data companion</p>'
             '<h3>Saved synthesis and verifier timings</h3>'
             '<a href="control-witness-timing-v1.html"><img src="control-witness/syn01-timing.svg" '

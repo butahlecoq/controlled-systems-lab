@@ -89,10 +89,18 @@
     },
     {
       "source": "scripts/reports/control_witness_companions.py",
-      "signal_count": 35,
+      "signal_count": 51,
       "asset_name_literals": [
         "b04-native-smoke-projections.png",
         "b04-native-smoke-projections.svg",
+        "b04-repeated-fuel.png",
+        "b04-repeated-fuel.svg",
+        "b04-repeated-oxidizer.png",
+        "b04-repeated-oxidizer.svg",
+        "exp02-ts02-control-family.png",
+        "exp02-ts02-control-family.svg",
+        "exp02-ts03-control-family.png",
+        "exp02-ts03-control-family.svg",
         "geometry.png",
         "geometry.svg",
         "mpc06-tube.png",
@@ -642,8 +650,11 @@
       "asset_name_literals": [
         "b04-repeated-benchmark-projections.svg"
       ],
-      "disposition": "deferred-family-specific-migration",
-      "follow_up_issue": 686
+      "role": "report-plot-renderer",
+      "disposition": "frozen-repeated-b04-figure-preserved-with-shared-policy-companion",
+      "companion_ids": [
+        "b04-repeated-benchmark"
+      ]
     },
     {
       "source": "scripts/reports/mpc01/summarize_strategy_ab.py",
@@ -1433,7 +1444,7 @@
     },
     {
       "source": "scripts/reports/visual_examples.py",
-      "signal_count": 67,
+      "signal_count": 69,
       "asset_name_literals": [
         "adaptive-ode-replay.svg",
         "app01-plan-timing-v1.svg",
@@ -1442,10 +1453,12 @@
         "app04-square-v1.svg",
         "b04-native-smoke-projections.svg",
         "b04-reference-trajectory-projections.svg",
+        "b04-repeated-oxidizer.svg",
         "b07-b07-reconstruction-s0-l0-d0.png",
         "control-projection.svg",
         "ellipsoid-2d.svg",
         "example-2d.svg",
+        "exp02-ts03-control-family.svg",
         "ext01-b08-timing-v1.svg",
         "ext05-states-v1.svg",
         "feasible-box-2d.svg",
@@ -1946,8 +1959,8 @@
         "ts03_singular_integrator-control-projection.svg"
       ],
       "index_sha256": "78309c404a04d45934e4466fc6233251db6dd4e72c40e4daf2bc9a3470be251e",
-      "disposition": "deferred: original frozen route-level readability review remains; companion availability is listed separately",
-      "follow_up_issue": 686
+      "disposition": "reviewed: frozen control-family report preserved with shared-policy saved-data companion",
+      "companion_route": "examples/control-witness-v1.html#exp02-ts02-control-family"
     },
     {
       "route": "exp03-two-points-approx-pilot-v1",
@@ -2767,6 +2780,25 @@
         "viz10/manifest.json",
         "control-witness-v1.html",
         "control-witness-timing-v1.html",
+        "control-witness/b04-repeated-oxidizer.svg",
+        "control-witness/b04-repeated-oxidizer.png",
+        "control-witness/b04-repeated-fuel.svg",
+        "control-witness/b04-repeated-fuel.png",
+        "control-witness/b04-repeated-evidence.json",
+        "control-witness/b04-repeated-attempts.jsonl",
+        "control-witness/b04-repeated-manifest.json",
+        "control-witness/b04-repeated-case.json",
+        "control-witness/b04-repeated-reference.json",
+        "control-witness/exp02-ts02-control-family.svg",
+        "control-witness/exp02-ts02-control-family.png",
+        "control-witness/exp02-ts02-control-family-evidence.json",
+        "control-witness/exp02-ts02-scenario.json",
+        "control-witness/exp02-ts02-events.jsonl",
+        "control-witness/exp02-ts03-control-family.svg",
+        "control-witness/exp02-ts03-control-family.png",
+        "control-witness/exp02-ts03-control-family-evidence.json",
+        "control-witness/exp02-ts03-scenario.json",
+        "control-witness/exp02-ts03-events.jsonl",
         "control-witness/b04-native-smoke-projections.svg",
         "control-witness/b04-native-smoke-projections.png",
         "control-witness/b04-native-smoke-evidence.json",

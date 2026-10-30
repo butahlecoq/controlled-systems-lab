@@ -67,6 +67,7 @@ VIZ10_ROLE_REASONS = {
         "Generic report exporter validates and copies a supplied saved figure; it does not produce quantitative plot data.",
 }
 SAVED_COMPANION_ROUTES = {
+    "scripts/reports/mpc01/summarize_repeated_comparison.py",
     "scripts/reports/app02/render_saved.py",
     "scripts/reports/app03/render_saved.py",
     "scripts/reports/app04/render_saved.py",
@@ -102,6 +103,7 @@ SAVED_DATA_COMPANION_COLLECTORS = {"scripts/reports/app01/collect.py"}
 SAVED_DATA_COMPANION_RENDERERS = {"scripts/reports/render_adaptive_ode_example.py"}
 FROZEN_COMPANIONS = {
     "app01-plan-20261016-22d406fd": "examples/app01-plan-timing-v1.html",
+    "exp02-paired-profiles-20261027-r1": "examples/control-witness-v1.html#exp02-ts02-control-family",
     "mpc03-open-loop-pilot-v1": "examples/index.html",
     "mpc03-b08-l04-miQCP-v1": "examples/index.html",
     "mpc08-explicit-nonunique-v1": "examples/index.html",
@@ -116,6 +118,10 @@ FROZEN_COMPANIONS = {
     "ext05-discretization-a40ba9647cc023dc": "examples/ext05-states-v1.html",
     "finite-feedback-a6e96fd96c7ac7cc": "examples/finite-feedback-timing-v1.html",
     "lotka-volterra-sampled-20261023": "examples/lotka-volterra-sampled-v1.html",
+}
+FROZEN_REVIEWED_ROUTES = {
+    "exp02-paired-profiles-20261027-r1":
+        "reviewed: frozen control-family report preserved with shared-policy saved-data companion",
 }
 FROZEN_ROUTE_FOLLOW_UP_ISSUES = {
     "mpc04-max-coordinate-replanning-pilot-20261030": 600,
@@ -255,9 +261,11 @@ def frozen_routes(root: Path) -> list[dict]:
         entry = {"route": route, "source_bundle": route,
                  "assets": [path.name for path in figures],
                  "index_sha256": hashlib.sha256(page.read_bytes()).hexdigest(),
-                 "disposition": "deferred: original frozen route-level readability review remains; companion availability is listed separately",
-                 "follow_up_issue": FROZEN_ROUTE_FOLLOW_UP_ISSUES.get(
-                     route, 717 if route.startswith("env717-") else 669)}
+                 "disposition": FROZEN_REVIEWED_ROUTES.get(
+                     route, "deferred: original frozen route-level readability review remains; companion availability is listed separately")}
+        if route not in FROZEN_REVIEWED_ROUTES:
+            entry["follow_up_issue"] = FROZEN_ROUTE_FOLLOW_UP_ISSUES.get(
+                route, 717 if route.startswith("env717-") else 669)
         if route in FROZEN_COMPANIONS:
             entry["companion_route"] = FROZEN_COMPANIONS[route]
         routes.append(entry)

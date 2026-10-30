@@ -191,10 +191,11 @@ class GalleryTests(unittest.TestCase):
         originals = {report_id: hashlib.sha256((self.site / routes[report_id] / "records.json").read_bytes()).hexdigest()
                      for report_id, *_ in control_witness_companions.PROJECTIONS}
         result = control_witness_companions.build(self.site, self.catalog)
-        self.assertEqual(len(result.gallery_entries), 4)
+        self.assertEqual(len(result.gallery_entries), 6)
         gallery_anchors = {entry["anchor"] for entry in result.gallery_entries}
         self.assertEqual(gallery_anchors, {"control-witness-companions", "control-witness-timings",
-                                           "ts01-strategy-ab", "b04-native-smoke"})
+                                           "ts01-strategy-ab", "b04-native-smoke",
+                                           "b04-repeated-benchmark", "exp02-paired-family"})
         self.assertTrue(all(set(disposition.companion_ids) <= gallery_anchors
                             for disposition in control_witness_companions.SOURCE_DISPOSITIONS))
         self.assertEqual(len([name for name in result.files if name.startswith("control-witness/strategy-") and name.endswith(".svg")]), 10)
@@ -217,6 +218,35 @@ class GalleryTests(unittest.TestCase):
         self.assertIn("u=v+K(x-z)", page)
         self.assertIn("does not optimize an objective", page)
         self.assertIn('role="region" aria-label="MPC-06 saved geometry coordinates"', page)
+        self.assertIn('id="exp02-ts02-control-family"', page)
+        self.assertIn('id="b04-repeated-benchmark"', page)
+        self.assertIn("selected by proximity to that backend’s median solve time", page)
+        exp02_svg = ET.fromstring(result.files["control-witness/exp02-ts03-control-family.svg"])
+        exp02_labels = " ".join(node.text or "" for node in exp02_svg.iter())
+        self.assertIn("Complete analytic optimal family", exp02_labels)
+        exp02 = json.loads(result.files["control-witness/exp02-ts03-control-family-evidence.json"])
+        self.assertEqual(exp02["displayed_sets"]["optimal_family"], "u1=1, 0<=u0<=1")
+        self.assertEqual(exp02["assurance"], "exact algebraic fixture derivation; saved algorithm family checks are numerical")
+        self.assertEqual(json.loads(result.files["control-witness/exp02-ts02-control-family-evidence.json"])
+                         ["displayed_sets"]["optimal_family"], "entire feasible square")
+        repeated_b04 = json.loads(result.files["control-witness/b04-repeated-evidence.json"])
+        self.assertEqual(repeated_b04["coordinate_pairs"], {"oxidizer": ["x1", "x2"], "fuel": ["x3", "x4"]})
+        self.assertIn("inconclusive", repeated_b04["evidence_status"])
+        comparison_raw = (ROOT / "docs/research/evidence/mpc01-external-qps-20261026-r3/comparison-records.jsonl").read_bytes()
+        self.assertEqual(repeated_b04["comparison_records_sha256"], hashlib.sha256(comparison_raw).hexdigest())
+        case_raw = (ROOT / "docs/research/evidence/b04-reference-v1/canonical-case.json").read_bytes()
+        case_hash = hashlib.sha256(case_raw).hexdigest()
+        self.assertEqual(repeated_b04["case_sha256"], case_hash)
+        self.assertEqual(repeated_b04["problem_id"], f"csl.problem.v1.sha256:{case_hash}")
+        self.assertEqual(repeated_b04["input_manifest_hash"], case_hash)
+        self.assertEqual(len(repeated_b04["selection"]), 2)
+        self.assertTrue(all(0 <= item["repetition"] < 5 for item in repeated_b04["selection"]))
+        for asset in ("b04-repeated-oxidizer.svg", "b04-repeated-fuel.svg",
+                      "exp02-ts02-control-family.svg", "exp02-ts03-control-family.svg"):
+            svg = ET.fromstring(result.files["control-witness/" + asset])
+            self.assertEqual(svg.attrib["role"], "img")
+            self.assertTrue(any(node.tag.endswith("desc") for node in svg))
+            self.assertTrue(result.files["control-witness/" + asset.replace(".svg", ".png")].startswith(b"\x89PNG\r\n\x1a\n"))
         examples_dir = self.site / "examples"
         examples_dir.mkdir(exist_ok=True)
         (examples_dir / "index.html").write_text("<html>gallery fixture</html>", encoding="utf-8")
@@ -326,13 +356,43 @@ class GalleryTests(unittest.TestCase):
         failed = [row for row in syn02_evidence["rows"] if row["label"].startswith("shifted-residual-degenerate")]
         self.assertEqual(len(failed), 3)
         self.assertTrue(all(row["median"] is None and "failed" in row["status"] for row in failed))
-        self.assertEqual(len([name for name in result.files if name.endswith(".svg")]), 17)
+        self.assertEqual(len([name for name in result.files if name.endswith(".svg")]), 21)
         syn06_evidence = json.loads(result.files["control-witness/syn06-timing-evidence.json"])
         self.assertEqual(syn06_evidence["rows"][0]["batch"], 28000)
         self.assertEqual(syn06_evidence["rows"][0]["median"],
                          syn06_evidence["rows"][0]["saved_median_elapsed_ns"] / 28000)
         repeated = control_witness_companions.build(self.site, self.catalog)
         self.assertEqual(result.files, repeated.files)
+
+    def test_repeated_b04_companion_rejects_comparison_for_another_case(self):
+        evidence_root = ROOT / "docs/research/evidence"
+        repeated = evidence_root / "mpc01-external-qps-20261026-r3"
+        manifest_path = repeated / "figure-manifest.json"
+        records_path = repeated / "comparison-records.jsonl"
+        original_read_bytes = Path.read_bytes
+        manifest = json.loads(manifest_path.read_bytes())
+        records = [json.loads(line) for line in records_path.read_text().splitlines() if line.strip()]
+        record = next(item for item in records if item["comparison_spec_id"] == manifest["comparison_spec_id"])
+        spec = json.loads(record["spec"])
+        spec["problem_id"] = "csl.problem.v1.sha256:" + "0" * 64
+        record["spec"] = json.dumps(spec, sort_keys=True, separators=(",", ":"))
+        changed_records = ("\n".join(json.dumps(item, sort_keys=True, separators=(",", ":"))
+                                      for item in records) + "\n").encode()
+        manifest["records_sha256"] = hashlib.sha256(changed_records).hexdigest()
+        changed_manifest = (json.dumps(manifest, sort_keys=True, separators=(",", ":")) + "\n").encode()
+
+        def read_bytes(path):
+            resolved = path.resolve()
+            if resolved == records_path.resolve():
+                return changed_records
+            if resolved == manifest_path.resolve():
+                return changed_manifest
+            return original_read_bytes(path)
+
+        with patch.object(Path, "read_bytes", read_bytes):
+            with self.assertRaisesRegex(ValueError, "canonical case identity"):
+                control_witness_companions._b04_repeated_companion(
+                    ROOT / "scripts/reports/styles/control-v1.json")
 
     def test_build_preserves_reports_and_has_resolvable_links(self):
         before = {p.relative_to(self.site): hashlib.sha256(p.read_bytes()).hexdigest()
