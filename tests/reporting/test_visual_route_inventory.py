@@ -26,9 +26,11 @@ class VisualRouteInventoryTests(unittest.TestCase):
         self.assertIn("scripts/reports/stage_env717_homicidal_chauffeur.py", producers)
         for source in ("scripts/reports/mpc04/check_max_coordinate.py",
                        "scripts/reports/mpc04/max_coordinate_replanning.py"):
-            self.assertEqual(producers[source]["follow_up_issue"], 687)
+            self.assertEqual(producers[source]["follow_up_issue"], 600)
             self.assertEqual(producers[source]["disposition"],
                              "deferred-family-specific-migration")
+        self.assertEqual(producers["scripts/reports/stage_mpc04_max_coordinate.py"]["disposition"],
+                         "publication-validation-or-frozen-route")
         self.assertNotIn("policy.svg", producers["scripts/reports/site.py"]["asset_name_literals"])
         self.assertIn("visual.svg", producers["scripts/reports/ext03_transform/report.py"]["asset_name_literals"])
         self.assertNotIn("csl.report.svg", {
@@ -135,9 +137,9 @@ class VisualRouteInventoryTests(unittest.TestCase):
                   if entry["disposition"]=="deferred-family-specific-migration"]
         self.assertTrue(deferred)
         follow_up_counts={number:sum(entry["follow_up_issue"]==number for entry in deferred)
-                          for number in (684,685,686,687,708,717)}
+                          for number in (600,684,685,686,687,708,717)}
         self.assertEqual(follow_up_counts,
-                         {684:6,685:0,686:1,687:6,708:1,717:14})
+                         {600:2,684:6,685:0,686:1,687:4,708:1,717:14})
         reviewed=[entry for entry in producers.values() if entry.get("role")]
         self.assertEqual(len(reviewed),24)
         self.assertEqual(set(entry["source"] for entry in reviewed),
@@ -148,6 +150,7 @@ class VisualRouteInventoryTests(unittest.TestCase):
         self.assertEqual(routes["mpc09-two-particle-output-feedback-v1"]["follow_up_issue"],605)
         self.assertEqual(routes["mpc04-max-coordinate-replanning-pilot-20261030"]["assets"],
                          ["trajectory.svg"])
+        self.assertEqual(routes["mpc04-max-coordinate-replanning-pilot-20261030"]["follow_up_issue"], 600)
         hull_4d=routes["exp02-it17-hull-4d-simplex-20261028-r1"]
         self.assertEqual(hull_4d["assets"],["2d-visual-companion.svg", "input-projections.svg"])
         self.assertTrue(hull_4d["index_sha256"])

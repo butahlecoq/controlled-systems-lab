@@ -107,6 +107,7 @@ FROZEN_COMPANIONS = {
     "lotka-volterra-sampled-20261023": "examples/lotka-volterra-sampled-v1.html",
 }
 FROZEN_ROUTE_FOLLOW_UP_ISSUES = {
+    "mpc04-max-coordinate-replanning-pilot-20261030": 600,
     "mpc08-explicit-nonunique-v1": 604,
     # This report's phase-plane figure is owned and reviewed with MPC-05.
     "mpc05-causal-tree-pilot-v1": 601,
@@ -121,6 +122,8 @@ FROZEN_ROUTE_FOLLOW_UP_ISSUES = {
 
 
 def migration_issue(source: str) -> int:
+    if "/mpc04/" in source or source == "scripts/reports/stage_mpc04_max_coordinate.py":
+        return 600
     if "/mpc09/" in source or source == "scripts/reports/stage_mpc09_output_feedback.py":
         return 605
     if "/mpc01/" in source:
