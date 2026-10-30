@@ -32,8 +32,8 @@
     "state_quantization_scale": 1000000,
     "state_quantization": "round each source RK4 outer update to the nearest 1e-6 lattice point",
     "reachability_target": "terminal Euclidean pursuer-evader distance <= 7.8",
-    "objective_orientation": "analysis adaptation: u minimizes terminal separation and v maximizes it; the source returns positive separation but does not specify per-agent payoff signs",
-    "information_pattern": "finite causal response: u chooses from the observed current state; v observes u and responds before the next state is observed",
+    "objective_orientation": "analysis adaptation: pursuer turn rate minimizes terminal Euclidean separation and evader heading maximizes it; source returns positive separation but does not specify per-agent payoff signs",
+    "information_pattern": "finite causal response: pursuer chooses from the current state, then evader observes that turn rate and responds before the next state is observed",
     "interpretation": "source-derived finite game; not a reproduction of the continuous-action RL result"
   },
   "numerics": {
