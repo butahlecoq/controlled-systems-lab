@@ -44,6 +44,11 @@ target_link_libraries(finite_action_histories_tests PRIVATE CSL::finite_action_h
 add_test(NAME finite_action_histories_tests COMMAND finite_action_histories_tests)
 csl_test_target(finite_action_histories_tests synthesis)
 
+add_executable(finite_mixed_branch_tests tests/unit/synthesis/finite_mixed_branch_tests.cpp)
+target_link_libraries(finite_mixed_branch_tests PRIVATE CSL::finite_mixed_branch doctest::doctest)
+add_test(NAME finite_mixed_branch_tests COMMAND finite_mixed_branch_tests)
+csl_test_target(finite_mixed_branch_tests synthesis)
+
 add_executable(control_recovery_public_client tests/installed/control_recovery_client.cpp)
 target_link_libraries(control_recovery_public_client PRIVATE CSL::control_recovery)
 add_test(NAME control_recovery_public_client COMMAND control_recovery_public_client)
