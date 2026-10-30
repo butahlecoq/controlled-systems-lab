@@ -116,6 +116,16 @@ jobs:
             --target csl_mpc05_causal_tree_report finite_causal_minimax_tests --parallel 2
           ctest --test-dir build/mpc05-report-ci -C Release --output-on-failure \
             -R '^(mpc05_causal_tree_report_smoke|finite_causal_minimax_tests)$'
+      - name: Build and check MPC-09 output-feedback report driver
+        if: needs.route.outputs.native == 'true' && hashFiles('reports/algorithm-results/mpc09-two-particle-output-feedback-v1/result.json') != ''
+        shell: bash
+        run: |
+          cmake -S . -B build/mpc09-report-ci -DBUILD_TESTING=ON -DCMAKE_BUILD_TYPE=Release \
+            -DCSL_ENABLE_HIGHS=OFF -DCSL_ENABLE_QHULL=OFF -DCSL_BUILD_MPC09_REPORT=ON
+          cmake --build build/mpc09-report-ci --config Release \
+            --target csl_mpc09_output_feedback_report --parallel 2
+          ctest --test-dir build/mpc09-report-ci -C Release --output-on-failure \
+            -R '^(mpc09_output_feedback_native_check|mpc09_output_feedback_publication)$'
       - name: Check reviewed catalogue and stage only allowlisted files
         id: catalog
         shell: bash
@@ -237,6 +247,11 @@ jobs:
                   --source reports/algorithm-results/mpc05-causal-tree-pilot-v2 \
                   --site build/report-site
               fi
+            fi
+            if test -d reports/algorithm-results/mpc09-two-particle-output-feedback-v1; then
+              python scripts/reports/stage_mpc09_output_feedback.py \
+                --source reports/algorithm-results/mpc09-two-particle-output-feedback-v1 \
+                --site build/report-site
             fi
             if test -d reports/algorithm-results/env717-unequal-game-pilot-v1; then
               python scripts/reports/stage_env717_unequal_game.py \

@@ -1,0 +1,58 @@
+{
+  "schema": "csl.mpc09-two-particle-output-feedback/1",
+  "scenario_id": "mpc09-two-particle-output-feedback-v1",
+  "source": {
+    "repository": "https://github.com/imm-rl-lab/differential_game_gym",
+    "commit": "af5f0a2ee498c0edcf88d60f1d6c49a39bd08bc8",
+    "path": "Environments/TwoParticleGame/TwoParticleGame.py",
+    "blob": "7e7d326f8ff81f7dacc05ac72848eeaac6a03021",
+    "license": "Apache-2.0"
+  },
+  "source_model": {
+    "state_order": ["position_1", "velocity_1", "position_2", "velocity_2"],
+    "continuous_dynamics": ["position_1'=velocity_1", "velocity_1'=-10*velocity_1+10*u", "position_2'=velocity_2", "velocity_2'=v"],
+    "decision_step_seconds": 0.2,
+    "rk4_substeps": 20,
+    "control_and_disturbance_bounds": [-3.0, 3.0],
+    "source_terminal_cost": "abs(position_1-position_2)"
+  },
+  "adaptation": {
+    "source_state_adaptation": "The source first coordinate (state[0]) is clock time; the stage grid represents it explicitly, leaving source coordinates state[1] through state[4] as the four physical plant state coordinates.",
+    "initial_states": [[0.0, 0.0, -0.2, 0.0], [0.0, 0.0, 0.2, 0.0]],
+    "initial_quantifier": "universal over the two listed states",
+    "horizon_steps": 3,
+    "horizon_seconds": 0.6,
+    "control_catalogue": [-3.0, 0.0, 3.0],
+    "disturbance_catalogue": [-3.0, 0.0, 3.0],
+    "disturbance_semantics": "adversarial, independently selected from the finite catalogue at each stage; it is player 2 control in the source game",
+    "sensor": "before each decision, observe position_1-position_2 plus error in {-0.2,+0.2}; no velocity is observed",
+    "measurement_error_catalogue": [-0.2, 0.2],
+    "measurement_error_semantics": "independent stage-wise finite catalogue, fixed for each authored row",
+    "terminal_capture_set": "abs(position_1-position_2) <= 1.0",
+    "information_pattern": "controller sees the complete ordered noisy relative-position history before choosing u; v is selected after u and before the next observation",
+    "state_quantization": "none; propagate the source RK4 map without state rounding",
+    "sensor_quantization": "none; the CSL replay API represents the declared additive measurement channel as an affine observation map"
+  },
+  "estimator": {
+    "name": "finite-prior full-history constrained least squares",
+    "prior": "the two listed initial states with equal zero prior cost",
+    "window": "all released observations since reset",
+    "arrival_cost": 0,
+    "process_history": "enumerate every past disturbance-catalogue sequence consistent with the known applied controls",
+    "residual_constraint": "each observation residual must lie in [-0.25,+0.25] for the bounded additive sensor-error catalogue",
+    "objective": "sum of squared observation residuals",
+    "residual_bound": 0.25,
+    "tie_break": "lexicographic initial-state row, then lexicographic disturbance-index sequence",
+    "guarantee": "finite-catalogue state hypothesis only; no continuous or statistical estimation guarantee"
+  },
+  "controllers": {
+    "certainty_equivalent": "at each observation history, use the MHE state hypothesis as a singleton initial set and solve finite-action minimax over future v sequences; execute the first u and replan",
+    "set_based_robust": "at each observation history, use all current states from compatible finite rows as a V-set, solve finite-action minimax over future v sequences; execute the first u and replan",
+    "causal_reference": "complete finite observation-history minimax dynamic program over the same initial, disturbance, noise, and action catalogues"
+  },
+  "limits": [
+    "The experiment is an explicit finite noisy-observation adaptation of the source RL environment, not a reproduction of its continuous-action training or return.",
+    "The set-based receding planner is robust to its current posterior finite catalogue for each open-loop lookahead; only the separate causal reference branches on future observations.",
+    "All reported universal outcomes cover only the authored finite catalogues and listed initial states."
+  ]
+}

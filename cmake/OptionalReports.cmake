@@ -26,6 +26,36 @@ target_compile_options(csl_mpc08_explicit_compare PRIVATE -Wall -Wextra -Wpedant
 endif()
 endif()
 
+if(CSL_BUILD_MPC09_REPORT)
+include(cmake/JsonDependencies.cmake)
+add_executable(csl_mpc09_output_feedback_report
+  benchmarks/reporting/mpc09/two_particle_output_feedback.cpp)
+target_link_libraries(csl_mpc09_output_feedback_report PRIVATE
+  CSL::finite_action_minimax CSL::controllers CSL::model CSL::sets)
+target_include_directories(csl_mpc09_output_feedback_report SYSTEM PRIVATE
+  ${csl_json_SOURCE_DIR}/include)
+target_compile_features(csl_mpc09_output_feedback_report PRIVATE cxx_std_20)
+if(MSVC)
+target_compile_options(csl_mpc09_output_feedback_report PRIVATE /W4 /WX /permissive-)
+else()
+target_compile_options(csl_mpc09_output_feedback_report PRIVATE -Wall -Wextra -Wpedantic -Werror)
+if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+  # GCC 16 misdiagnoses the inactive vector alternative while copying Dynamics' variant.
+  target_compile_options(csl_mpc09_output_feedback_report PRIVATE -Wno-maybe-uninitialized)
+endif()
+endif()
+if(BUILD_TESTING)
+find_package(Python3 3.11 REQUIRED COMPONENTS Interpreter)
+add_test(NAME mpc09_output_feedback_native_check COMMAND Python3::Interpreter
+  ${CMAKE_CURRENT_SOURCE_DIR}/scripts/reports/mpc09/check_output_feedback.py
+  $<TARGET_FILE:csl_mpc09_output_feedback_report>)
+add_test(NAME mpc09_output_feedback_publication COMMAND Python3::Interpreter
+  ${CMAKE_CURRENT_SOURCE_DIR}/tests/reporting/test_mpc09_output_feedback_publication.py)
+set_tests_properties(mpc09_output_feedback_native_check mpc09_output_feedback_publication
+  PROPERTIES LABELS reporting)
+endif()
+endif()
+
 if(CSL_BUILD_MPC06_REPORT)
 set(MPC06_SCENARIO_FILE ${CMAKE_CURRENT_SOURCE_DIR}/benchmarks/scenarios/mpc06-nilpotent-tube-v1.json)
 set_property(DIRECTORY APPEND PROPERTY CMAKE_CONFIGURE_DEPENDS ${MPC06_SCENARIO_FILE})
