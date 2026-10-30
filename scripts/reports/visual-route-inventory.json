@@ -679,6 +679,24 @@
       "disposition": "adopted-shared-quantitative-policy"
     },
     {
+      "source": "scripts/reports/mpc04/check_max_coordinate.py",
+      "signal_count": 1,
+      "asset_name_literals": [
+        "trajectory.svg"
+      ],
+      "disposition": "deferred-family-specific-migration",
+      "follow_up_issue": 687
+    },
+    {
+      "source": "scripts/reports/mpc04/max_coordinate_replanning.py",
+      "signal_count": 2,
+      "asset_name_literals": [
+        "trajectory.svg"
+      ],
+      "disposition": "deferred-family-specific-migration",
+      "follow_up_issue": 687
+    },
+    {
       "source": "scripts/reports/mpc05/check_smoke.py",
       "signal_count": 1,
       "asset_name_literals": [
@@ -2314,6 +2332,16 @@
       "disposition": "deferred: original frozen route-level readability review remains; companion availability is listed separately",
       "follow_up_issue": 669,
       "companion_route": "examples/index.html"
+    },
+    {
+      "route": "mpc04-max-coordinate-replanning-pilot-20261030",
+      "source_bundle": "mpc04-max-coordinate-replanning-pilot-20261030",
+      "assets": [
+        "trajectory.svg"
+      ],
+      "index_sha256": "578e64e0855d3680a707214d5adedb26383e5c7f5f4357e4fa6484bd0de2eb26",
+      "disposition": "deferred: original frozen route-level readability review remains; companion availability is listed separately",
+      "follow_up_issue": 669
     },
     {
       "route": "mpc05-causal-tree-pilot-v1",
