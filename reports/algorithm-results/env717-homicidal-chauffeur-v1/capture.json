@@ -1,7 +1,7 @@
 {
   "algorithm_source_sha256": "cac9ea19d95c4fba53351f7b2580015882a63f6725bb5c622529c140f507873a",
   "build_type": "Release",
-  "captured_at_utc": "2026-10-30T00:12:45+00:00",
+  "captured_at_utc": "2026-10-30T00:19:05+00:00",
   "command": "csl_env717_homicidal_chauffeur",
   "compiler": {
     "algorithm_source_sha256": "cac9ea19d95c4fba53351f7b2580015882a63f6725bb5c622529c140f507873a",
@@ -9,19 +9,67 @@
     "build_type": "Release",
     "compiler_id": "GNU",
     "compiler_version": "16.2.1",
-    "driver_sha256": "0ea16c123635146aa2fe0cba139db65dfcf7f1e0a38d51453384e5d6b602e15c",
+    "driver_sha256": "f112a0c1e039b38277c62c1176b98b6b3f3de7b3b1b2a2d5340e00b206882beb",
     "native_solver_threads": 1,
     "requested_workers": 1,
-    "source_commit": "461acadcc9cb551153dc6eb82524145ce34a60af"
+    "source_commit": "b9b56f904051e709b9162be97a8e01701aa19a31"
   },
-  "driver_source_sha256": "0ea16c123635146aa2fe0cba139db65dfcf7f1e0a38d51453384e5d6b602e15c",
-  "executable_sha256": "b4c5b2bd2984c1d1e4f105730bc9cc12f9f24eade0cf315cf5f155c1a89a3c78",
+  "driver_source_sha256": "f112a0c1e039b38277c62c1176b98b6b3f3de7b3b1b2a2d5340e00b206882beb",
+  "executable_sha256": "27574f3b57615b430ddf1184e51135f8f123636e937eca31b5810320f2d5de25",
   "machine": "x86_64",
   "operating_system": "Linux-7.2.8-9-omarchy-x86_64-with-glibc2.44",
   "python": "3.14.8",
   "scenario_sha256": "09c37ae48f8c1898b6f9eae0c046750f6b80e252787901fbe197865ae69a5fdb",
   "schema": "csl.env717-homicidal-chauffeur-capture/1",
   "solver_failures": 0,
-  "source_commit": "461acadcc9cb551153dc6eb82524145ce34a60af",
-  "timing_claim": "none; report records finite game values and independently checked graph only"
+  "source_commit": "b9b56f904051e709b9162be97a8e01701aa19a31",
+  "timing": {
+    "boundary": "perf_counter_ns immediately before subprocess.run through process exit and captured stdout/stderr; includes launch, graph construction, solution and JSON output; excludes build, independent replay and report rendering",
+    "durations_ns": [
+      37484516,
+      34832832,
+      37174208,
+      22894911,
+      30315743
+    ],
+    "identical_stdout": true,
+    "maximum_ns": 37484516,
+    "maximum_seconds": 0.037484516,
+    "median_ns": 34832832,
+    "median_seconds": 0.034832832,
+    "method": "single-adapter descriptive runtime; no comparison or speedup claim",
+    "minimum_ns": 22894911,
+    "minimum_seconds": 0.022894911,
+    "repetitions": 5,
+    "run_outputs": [
+      {
+        "duration_ns": 37484516,
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stdout_sha256": "0a5f5bbc7b87822ae99cc3d488680e0527dbf7aace1d7c8c03b239aee8d8f23a"
+      },
+      {
+        "duration_ns": 34832832,
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stdout_sha256": "0a5f5bbc7b87822ae99cc3d488680e0527dbf7aace1d7c8c03b239aee8d8f23a"
+      },
+      {
+        "duration_ns": 37174208,
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stdout_sha256": "0a5f5bbc7b87822ae99cc3d488680e0527dbf7aace1d7c8c03b239aee8d8f23a"
+      },
+      {
+        "duration_ns": 22894911,
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stdout_sha256": "0a5f5bbc7b87822ae99cc3d488680e0527dbf7aace1d7c8c03b239aee8d8f23a"
+      },
+      {
+        "duration_ns": 30315743,
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stdout_sha256": "0a5f5bbc7b87822ae99cc3d488680e0527dbf7aace1d7c8c03b239aee8d8f23a"
+      }
+    ],
+    "sample_policy": "five fresh process launches; one result per process",
+    "solver_failures": 0,
+    "warmups": 0
+  }
 }
