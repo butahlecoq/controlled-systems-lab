@@ -54,8 +54,10 @@ ReplayRecord replay(const Plant& plant, std::span<const Vector> controls,
     prerequisite(plant.integration.has_value(), "plant.integration");
     prerequisite(plant.hold.has_value(), "plant.control_hold");
     const bool adaptive = plant.integration == IntegrationMethod::adaptive_rk4_step_doubling;
-    prerequisite(plant.numerical.has_value() || (adaptive && plant.integration_limits.has_value()),
-        "plant.tolerances");
+    if (adaptive)
+        prerequisite(plant.integration_limits.has_value(), "plant.integration_limits");
+    else
+        prerequisite(plant.numerical.has_value(), "plant.tolerances");
     prerequisite(adaptive ? static_cast<bool>(plant.dynamics) : static_cast<bool>(plant.transition),
         adaptive ? "plant.dynamics" : "plant.transition");
     prerequisite(static_cast<bool>(plant.objective), "plant.objective");

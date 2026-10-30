@@ -393,9 +393,13 @@ bool replay_document(const Json& replay, std::size_t state_dimensions,
         const auto& receipts = replay["integration_receipts"];
         if (method == "exact_discrete_map" && (!replay["integration_limits"].is_null() || !receipts.empty())) return false;
         if (method == "adaptive_rk4_step_doubling") {
-            if (replay["integration_limits"].is_null() || receipts.size() > linear_intervals) return false;
+            const bool has_limits = !replay["integration_limits"].is_null();
+            const auto residual_status = replay["integration_residual"]["status"].get<std::string>();
+            if ((!has_limits && (!receipts.empty() || residual_status != "unavailable" ||
+                    replay["status"] == "complete")) || receipts.size() > linear_intervals) return false;
             std::size_t measurement_index = 0;
             for (std::size_t interval = 0; interval < receipts.size(); ++interval) {
+                if (!has_limits) return false;
                 const auto& receipt = receipts[interval];
                 if (!receipt.is_object() || receipt.size() != 3 ||
                     !receipt.contains("accepted_steps") || !receipt["accepted_steps"].is_number_unsigned() ||

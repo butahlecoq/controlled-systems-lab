@@ -305,6 +305,53 @@ TEST_CASE("4D selected linear witnesses retain separate nonlinear replay and 2D 
     const auto adaptive_decoded = ex::decode_replay_comparison(adaptive_wire);
     REQUIRE(std::holds_alternative<problem::ResolvedContent>(adaptive_decoded));
     CHECK(std::get<problem::ResolvedContent>(adaptive_decoded).digest() == adaptive_content.digest());
+
+    auto limits_unavailable_plant = adaptive_plant;
+    limits_unavailable_plant.integration_limits.reset();
+    source.replays = {sim::replay(limits_unavailable_plant, source.plot.paths[0].controls),
+        sim::replay(limits_unavailable_plant, source.plot.paths[1].controls)};
+    REQUIRE(source.replays[0].status == sim::ReplayStatus::unavailable);
+    CHECK(source.replays[0].missing_prerequisites == std::vector<std::string>{"plant.integration_limits"});
+    auto unavailable_association = ex::associate_replays(source.problem, source.plot,
+        {source.plot.run, problem::ContentDigest{}}, source.replays, "kg/s");
+    REQUIRE(std::holds_alternative<ex::ReplayComparison>(unavailable_association));
+    auto unavailable_encoded = ex::encode_replay_comparison(std::get<ex::ReplayComparison>(unavailable_association));
+    REQUIRE(std::holds_alternative<problem::ResolvedContent>(unavailable_encoded));
+    const auto& unavailable_content = std::get<problem::ResolvedContent>(unavailable_encoded);
+    const std::string unavailable_wire(reinterpret_cast<const char*>(unavailable_content.bytes().data()),
+        unavailable_content.bytes().size());
+    const auto unavailable_json = nlohmann::json::parse(unavailable_wire);
+    CHECK(unavailable_json["witnesses"][0]["replay"]["integration_limits"].is_null());
+    CHECK(unavailable_json["witnesses"][0]["replay"]["missing_prerequisites"] ==
+        std::vector<std::string>{"plant.integration_limits"});
+    const auto unavailable_decoded = ex::decode_replay_comparison(unavailable_wire);
+    REQUIRE(std::holds_alternative<problem::ResolvedContent>(unavailable_decoded));
+    CHECK(std::get<problem::ResolvedContent>(unavailable_decoded).digest() == unavailable_content.digest());
+
+    std::stop_source pre_cancelled;
+    pre_cancelled.request_stop();
+    ExecutionContext cancelled_context;
+    cancelled_context.cancellation = pre_cancelled.get_token();
+    source.replays = {sim::replay(adaptive_plant, source.plot.paths[0].controls, cancelled_context),
+        sim::replay(adaptive_plant, source.plot.paths[1].controls, cancelled_context)};
+    REQUIRE(source.replays[0].status == sim::ReplayStatus::cancelled);
+    CHECK(source.replays[0].integration_limits == std::nullopt);
+    CHECK(source.replays[0].integration_receipts.empty());
+    auto cancelled_association = ex::associate_replays(source.problem, source.plot,
+        {source.plot.run, problem::ContentDigest{}}, source.replays, "kg/s");
+    REQUIRE(std::holds_alternative<ex::ReplayComparison>(cancelled_association));
+    const auto cancelled_encoded = ex::encode_replay_comparison(
+        std::get<ex::ReplayComparison>(cancelled_association));
+    REQUIRE(std::holds_alternative<problem::ResolvedContent>(cancelled_encoded));
+    const auto& cancelled_content = std::get<problem::ResolvedContent>(cancelled_encoded);
+    const std::string cancelled_wire(reinterpret_cast<const char*>(cancelled_content.bytes().data()),
+        cancelled_content.bytes().size());
+    const auto cancelled_json = nlohmann::json::parse(cancelled_wire);
+    CHECK(cancelled_json["witnesses"][0]["replay"]["integration_limits"].is_null());
+    CHECK(cancelled_json["witnesses"][0]["replay"]["integration_receipts"].empty());
+    const auto cancelled_decoded = ex::decode_replay_comparison(cancelled_wire);
+    REQUIRE(std::holds_alternative<problem::ResolvedContent>(cancelled_decoded));
+    CHECK(std::get<problem::ResolvedContent>(cancelled_decoded).digest() == cancelled_content.digest());
 }
 
 TEST_CASE("replay association refuses swapped control order, mismatched axes and bad projections") {
