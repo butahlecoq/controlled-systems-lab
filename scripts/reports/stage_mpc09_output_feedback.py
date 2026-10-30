@@ -10,6 +10,7 @@ import importlib.util
 import json
 from pathlib import Path
 import stat
+import subprocess
 import zipfile
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -35,6 +36,22 @@ FILES = ("README.md", "build.log", "capture.json", "environment.json", "figure-d
 
 def digest(content: bytes) -> str:
     return hashlib.sha256(content).hexdigest()
+
+
+def source_blob(commit: str, name: str) -> bytes:
+    if not isinstance(commit, str) or len(commit) != 40 or any(
+            character not in "0123456789abcdef" for character in commit):
+        raise ValueError("MPC-09 source commit must be a full lowercase Git object ID")
+    path = Path(name)
+    if path.is_absolute() or not name or any(part in {"", ".", ".."} for part in path.parts):
+        raise ValueError("MPC-09 source path must be a normalized repository-relative path")
+    try:
+        return subprocess.run(
+            ["git", "cat-file", "blob", f"{commit}:{path.as_posix()}"],
+            cwd=ROOT, check=True, capture_output=True,
+        ).stdout
+    except subprocess.CalledProcessError as error:
+        raise ValueError(f"MPC-09 captured source is unavailable: {name}") from error
 
 
 def read_bundle(source: Path) -> dict[str, bytes]:
@@ -78,12 +95,13 @@ def validate_bundle(source: Path):
         raise ValueError("MPC-09 build and executable provenance are required")
     if capture.get("working_tree_clean") is not True:
         raise ValueError("MPC-09 capture must identify a clean source tree")
-    if capture.get("scenario_sha256") != digest((ROOT / "benchmarks/scenarios/mpc09-two-particle-output-feedback-v1.json").read_bytes()):
-        raise ValueError("MPC-09 scenario hash differs from the current scenario input")
+    commit = capture.get("source_commit")
+    if capture.get("scenario_sha256") != digest(source_blob(
+            commit, "benchmarks/scenarios/mpc09-two-particle-output-feedback-v1.json")):
+        raise ValueError("MPC-09 scenario hash differs from its captured source commit")
     for name, expected in capture.get("source_sha256", {}).items():
-        path = ROOT / name
-        if not path.is_file() or digest(path.read_bytes()) != expected:
-            raise ValueError(f"MPC-09 source fingerprint differs: {name}")
+        if digest(source_blob(commit, name)) != expected:
+            raise ValueError(f"MPC-09 captured source fingerprint differs: {name}")
     if verification["causal_reference"]["scope"].find("complete finite observation-history") < 0:
         raise ValueError("MPC-09 finite-history reference scope is absent")
     return files, result_data, verification, capture
