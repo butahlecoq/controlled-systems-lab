@@ -1,7 +1,7 @@
 if((CSL_BUILD_GEO02_REPORT OR CSL_BUILD_GEO03_REPORT OR CSL_BUILD_GEO04_REPORT OR
     CSL_BUILD_OPT04_REPORT OR CSL_BUILD_SYN01_REPORT OR CSL_BUILD_MPC03_REPORT OR
     CSL_BUILD_STAGE_PROJECTION_ROUTE OR CSL_BUILD_SYN02_REPORT OR
-    CSL_BUILD_MPC08_REPORT OR
+    CSL_BUILD_MPC04_REPORT OR CSL_BUILD_MPC08_REPORT OR
     CSL_BUILD_REPORTS) AND NOT CSL_ENABLE_HIGHS)
   message(FATAL_ERROR "The selected report requires CSL_ENABLE_HIGHS")
 endif()
@@ -86,7 +86,7 @@ endif()
 if(CSL_BUILD_MPC04_REPORT)
 add_executable(csl_mpc04_max_coordinate_replanning
   benchmarks/reporting/mpc04/max_coordinate_replanning.cpp)
-target_link_libraries(csl_mpc04_max_coordinate_replanning PRIVATE CSL::finite_action_minimax)
+target_link_libraries(csl_mpc04_max_coordinate_replanning PRIVATE CSL::finite_action_minimax CSL::highs_convex)
 target_include_directories(csl_mpc04_max_coordinate_replanning SYSTEM PRIVATE ${csl_json_SOURCE_DIR}/include)
 target_compile_features(csl_mpc04_max_coordinate_replanning PRIVATE cxx_std_20)
 if(MSVC)

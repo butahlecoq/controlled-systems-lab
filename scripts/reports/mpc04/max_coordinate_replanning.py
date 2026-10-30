@@ -1,11 +1,14 @@
 #!/usr/bin/env python3
-"""Finite-catalogue MPC-04 pilot for source-derived MaxCoordinateGame."""
+"""Native finite-action and linear-QP MPC-04 pilots for MaxCoordinateGame."""
 from __future__ import annotations
 
 import argparse
+import hashlib
 import itertools
 import json
 import math
+import os
+import platform
 import statistics
 import subprocess
 import time
@@ -20,6 +23,8 @@ ACTIONS = (-1.0, 1.0)
 DISTURBANCES = (-1.0, 1.0)
 EPISODE_STEPS = 4
 FIXED_LOOKAHEAD = 2
+DEADLINE_NS = 50_000_000
+MEASUREMENT_REPETITIONS = 5
 INITIAL_STATE = (0.0, 0.2, 0.0)  # source order: time, y, z
 DT = 0.1
 INNER_EULER_STEPS = 100
@@ -69,6 +74,12 @@ class Decision:
     effective_horizon: int
     planned_squared_objective: float | None
     solve_ns: int
+    primary_squared_objective: float | None
+    primary_solve_ns: int
+    tie_solve_ns: int
+    solver_status: str
+    provider_id: str
+    provider_version: str
     remaining_plan: tuple[float, ...]
     fallback: bool = False
 
@@ -119,7 +130,10 @@ def run_episode(policy: str, horizon: Horizon, disturbance_history: tuple[float,
         if fallback:
             action = 0.0
         decisions.append(Decision(step, state, action, status, requested,
-                                  effective, value, elapsed, plan, fallback))
+                                  effective, value, elapsed,
+                                  value if value is not None and math.isfinite(value) else None,
+                                  elapsed, 0, status, "python-reference", "",
+                                  plan, fallback))
         # Apply the current disturbance only after the action is committed.
         state = advance(state, action, disturbance)
         states.append(state)
@@ -253,7 +267,11 @@ def check_fallback_semantics() -> dict:
 
 def aggregate(rows: list[dict]) -> dict:
     values = [r["terminal_original_objective"] for r in rows]
-    times = [d["solve_ns"] for r in rows for d in r["decisions"]]
+    timing_rows = [sample for r in rows for d in r["decisions"]
+                   for sample in d["timing_repetitions"]]
+    times = [sample["solve_ns"] for sample in timing_rows]
+    primary_times = [sample["primary_solve_ns"] for sample in timing_rows]
+    tie_times = [sample["tie_solve_ns"] for sample in timing_rows]
     return {
         "episodes": len(rows), "completed_episodes": sum(r["completed"] for r in rows),
         "violations": sum(r["violations"] for r in rows),
@@ -261,20 +279,126 @@ def aggregate(rows: list[dict]) -> dict:
         "worst_terminal_original_objective": max(values),
         "median_terminal_original_objective": statistics.median(values),
         "mean_terminal_original_objective": statistics.mean(values),
-        "decision_count": len(times), "per_decision_latency_ns": times,
+        "decision_count": len(rows) * EPISODE_STEPS,
+        "timing_sample_count": len(times),
+        "per_decision_latency_ns": [d["solve_ns"] for r in rows for d in r["decisions"]],
+        "per_decision_latency_samples_ns": times,
         "median_decision_latency_ns": statistics.median(times),
+        "decision_latency_range_ns": [min(times), max(times)],
+        "median_primary_qp_latency_ns": statistics.median(primary_times),
+        "median_tie_qp_latency_ns": statistics.median(tie_times),
         "max_decision_latency_ns": max(times),
     }
+
+
+def stable_native_payload(data: dict) -> bytes:
+    payload = {key: value for key, value in data.items()
+               if key not in {"controller_order", "qp_metadata"}}
+    payload["episodes"] = []
+    for row in sorted(data["episodes"], key=lambda item: (
+            item["policy"], item["horizon"], tuple(item["disturbances"]))):
+        clean = dict(row)
+        clean["decisions"] = []
+        for decision in row["decisions"]:
+            clean_decision = {key: value for key, value in decision.items()
+                              if key not in {"solve_ns", "primary_solve_ns", "tie_solve_ns"}}
+            clean["decisions"].append(clean_decision)
+        payload["episodes"].append(clean)
+    return json.dumps(payload, sort_keys=True, separators=(",", ":")).encode()
+
+
+def run_native_repetitions(executable: Path) -> tuple[dict, list[dict]]:
+    runs: list[dict] = []
+    for repetition in range(MEASUREMENT_REPETITIONS):
+        reverse = repetition % 2 == 1
+        command = [str(executable)] + (["--reverse-policies"] if reverse else [])
+        started = time.perf_counter_ns()
+        completed = subprocess.run(command, check=True, capture_output=True, text=True)
+        elapsed = time.perf_counter_ns() - started
+        native = json.loads(completed.stdout)
+        stable = stable_native_payload(native)
+        runs.append({"data": native, "stdout": completed.stdout, "elapsed_ns": elapsed,
+                     "reverse": reverse, "stable_sha256": hashlib.sha256(stable).hexdigest(),
+                     "stdout_sha256": hashlib.sha256(completed.stdout.encode()).hexdigest()})
+    stable_hashes = {run["stable_sha256"] for run in runs}
+    if len(stable_hashes) != 1:
+        raise RuntimeError("MPC-04 controller outcomes changed across timing repetitions")
+    reference = runs[0]["data"]
+    by_key = {(row["policy"], row["horizon"], tuple(row["disturbances"])): row
+              for row in reference["episodes"]}
+    for row in reference["episodes"]:
+        for decision in row["decisions"]:
+            decision["timing_repetitions"] = []
+    metadata = []
+    for repetition, run in enumerate(runs):
+        native = run["data"]
+        if native["fixtures"] != reference["fixtures"] or native["qp_analytic_fixture"] != reference["qp_analytic_fixture"]:
+            raise RuntimeError("MPC-04 fixtures changed across timing repetitions")
+        metadata.append({"repetition": repetition + 1, "controller_order": native["controller_order"],
+                         "process_elapsed_ns": run["elapsed_ns"],
+                         "provider_setup_ns": native["qp_metadata"]["provider_setup_ns"],
+                         "stdout_sha256": run["stdout_sha256"],
+                         "stable_outcome_sha256": run["stable_sha256"]})
+        for row in native["episodes"]:
+            key = (row["policy"], row["horizon"], tuple(row["disturbances"]))
+            saved = by_key[key]
+            for expected, actual in zip(saved["decisions"], row["decisions"]):
+                if expected["action"] != actual["action"] or expected["status"] != actual["status"]:
+                    raise RuntimeError("MPC-04 policy outcome changed across timing repetitions")
+                expected["timing_repetitions"].append({
+                    "repetition": repetition + 1, "solve_ns": actual["solve_ns"],
+                    "primary_solve_ns": actual["primary_solve_ns"],
+                    "tie_solve_ns": actual["tie_solve_ns"]})
+    for row in reference["episodes"]:
+        for decision in row["decisions"]:
+            for field in ("solve_ns", "primary_solve_ns", "tie_solve_ns"):
+                decision[field] = int(statistics.median(sample[field]
+                                                       for sample in decision["timing_repetitions"]))
+    reference["measurement_repetitions"] = metadata
+    reference["qp_metadata"]["provider_setup_ns_repetitions"] = [
+        row["provider_setup_ns"] for row in metadata]
+    return reference, metadata
+
+
+def host_metadata() -> dict:
+    cpu_model = "unknown"
+    memory_bytes = None
+    try:
+        for line in Path("/proc/cpuinfo").read_text().splitlines():
+            if line.lower().startswith("model name"):
+                cpu_model = line.split(":", 1)[1].strip()
+                break
+        for line in Path("/proc/meminfo").read_text().splitlines():
+            if line.startswith("MemTotal:"):
+                memory_bytes = int(line.split()[1]) * 1024
+                break
+    except OSError:
+        pass
+    try:
+        load = os.getloadavg()
+    except OSError:
+        load = None
+    return {"os": platform.platform(), "architecture": platform.machine(),
+            "cpu_model": cpu_model, "logical_cpus": os.cpu_count(),
+            "memory_bytes": memory_bytes, "load_average": load,
+            "python_renderer": platform.python_version()}
 
 
 def write_svg(path: Path, records: list[dict]) -> None:
     width, height = 1100, 710
     x0, y0, pw, ph = 90, 90, 900, 370
-    colors = {"nominal_zero_disturbance": "#2878b5", "finite_minimax": "#ce5b31"}
+    colors = {"nominal_zero_disturbance": "#2878b5", "finite_minimax": "#ce5b31",
+              "linear_qp_nominal_linf": "#258779",
+              "linear_qp_finite_history_robust_linf": "#8055a4"}
+    labels = {"nominal_zero_disturbance": "nominal finite action",
+              "finite_minimax": "finite minimax",
+              "linear_qp_nominal_linf": "nominal linear QP",
+              "linear_qp_finite_history_robust_linf": "finite-history robust QP"}
+    policy_order = tuple(colors)
     svg = [f'<svg xmlns="http://www.w3.org/2000/svg" width="{width}" height="{height}" viewBox="0 0 {width} {height}">',
            '<rect width="100%" height="100%" fill="white"/>',
            '<style>text{font-family:Arial,sans-serif;fill:#222}.title{font-size:22px;font-weight:bold}.label{font-size:15px}.small{font-size:11px}.grid{stroke:#ddd}.axis{stroke:#333;stroke-width:1.3}</style>',
-           '<text x="50" y="35" class="title">MaxCoordinateGame: finite closed-loop MPC comparison</text>',
+           '<text x="50" y="35" class="title">MaxCoordinateGame: replanning and QP comparison</text>',
            '<text x="50" y="58" class="small">4 scored steps · 16 complete disturbance histories per variant · source-derived 100-substep map</text>',
            f'<text x="{x0}" y="78" class="label">Phase plane (y,z), all executed history trajectories</text>']
     states = [s for r in records for s in r["states"]]
@@ -292,8 +416,8 @@ def write_svg(path: Path, records: list[dict]) -> None:
             dash = ' stroke-dasharray="5 3"' if row["horizon"] == MOVING.name else ""
             opacity = "0.16" if row["horizon"] == MOVING.name else "0.28"
             svg.append(f'<polyline points="{coords}" fill="none" stroke="{color}" stroke-width="1.3" stroke-opacity="{opacity}"{dash}/>')
-        x_legend = 140 if policy.startswith("nominal") else 440
-        label = "nominal; solid shrinking, dashed moving lookahead" if policy.startswith("nominal") else "finite minimax; solid shrinking, dashed moving lookahead"
+        x_legend = 125 + policy_order.index(policy) * 250
+        label = labels[policy] + "; solid shrinking, dashed moving lookahead"
         svg.append(f'<circle cx="{x_legend}" cy="490" r="4" fill="{color}"/>')
         svg.append(f'<text x="{x_legend+10}" y="494" class="small">{label}</text>')
     svg += [f'<text x="{x0+pw/2}" y="{y0+ph-4}" text-anchor="middle" class="small">y</text>',
@@ -309,7 +433,8 @@ def write_svg(path: Path, records: list[dict]) -> None:
         svg += [f'<line x1="{sx_t(0)}" y1="{y:.1f}" x2="{sx_t(EPISODE_STEPS)}" y2="{y:.1f}" class="grid"/>',
                 f'<text x="{sx_t(0)-10}" y="{y+4:.1f}" text-anchor="end" class="small">{val}</text>']
     for k in range(EPISODE_STEPS):
-        for policy, offset in (("nominal_zero_disturbance", -5), ("finite_minimax", 5)):
+        offsets = (-18, -6, 6, 18)
+        for policy, offset in zip(policy_order, offsets):
             subset = [r for r in records if r["policy"] == policy and r["horizon"] == SHRINKING.name]
             controls = [r["decisions"][k]["action"] for r in subset]
             x = sx_t(k + .5) + offset
@@ -317,7 +442,6 @@ def write_svg(path: Path, records: list[dict]) -> None:
             svg.append(f'<circle cx="{x}" cy="{sy_u(statistics.median(controls)):.1f}" r="4" fill="{colors[policy]}"/>')
         svg.append(f'<text x="{tx+5}" y="{ty+106}" class="small">v</text>')
         # Each catalogue value is shown; duplicate histories are represented by count labels.
-        values = [r["disturbances"][k] for r in records if r["policy"] == "nominal_zero_disturbance" and r["horizon"] == SHRINKING.name]
         x = sx_t(k + .5)
         for disturbance, label, xoff in ((-1.0, "−1 × 8", -18), (1.0, "+1 × 8", 18)):
             cy = ty + (100 if disturbance < 0 else 125)
@@ -334,54 +458,56 @@ def write_svg(path: Path, records: list[dict]) -> None:
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--output", type=Path, required=True)
-    parser.add_argument("--native-executable", type=Path)
+    parser.add_argument("--native-executable", type=Path, required=True)
     args = parser.parse_args()
     fixture_evidence = check_policy_gap_fixtures()
     fallback_evidence = check_fallback_semantics()
-    if args.native_executable:
-        native = subprocess.run([str(args.native_executable)], check=True, capture_output=True, text=True)
-        native_data = json.loads(native.stdout)
-        rows = native_data["episodes"]
-        if native_data["fixtures"] != fixture_evidence:
-            raise RuntimeError("native closed-loop fixtures disagree with the independent Python reference")
-        fixture_evidence = native_data["fixtures"]
-        implementation = "repository C++ csl.finite_action_minimax adapter; finite fixtures run through shared C++ episode loop"
-    else:
-        rows = []
-        for policy in ("nominal_zero_disturbance", "finite_minimax"):
-            for horizon in (SHRINKING, MOVING):
-                for disturbance in histories():
-                    rows.append(run_episode(policy, horizon, tuple(disturbance)))
-        implementation = "standalone Python reference enumerator"
+    native_data, measurement_repetitions = run_native_repetitions(args.native_executable)
+    rows = native_data["episodes"]
+    if native_data["fixtures"] != fixture_evidence:
+        raise RuntimeError("native closed-loop fixtures disagree with the independent Python reference")
+    fixture_evidence = native_data["fixtures"]
+    if native_data["qp_analytic_fixture"]["status"] != "optimal":
+        raise RuntimeError("native analytic QP fixture did not complete optimally")
+    implementation = "repository C++ finite_action_minimax and HiGHS ConvexPort; finite policy-gap fixtures use the shared C++ episode loop"
     grouped: dict[str, list[dict]] = {}
     for row in rows:
         grouped.setdefault(f"{row['policy']}::{row['horizon']}", []).append(row)
     report = {
-        "schema": "csl.mpc04.max-coordinate-pilot/1",
+        "schema": "csl.mpc04.max-coordinate-pilot/2",
         "source": {"repository": "imm-rl-lab/optimal_control", "commit": SOURCE_COMMIT,
                    "path": SOURCE_PATH, "blob": SOURCE_BLOB, "environment": "MaxCoordinateGame",
                    "license_note": "No repository license declared; source equations and parameters are re-expressed; no upstream source code copied"},
         "source_model": {"state_order": ["time", "y", "z"], "initial_state": INITIAL_STATE,
                          "dt_seconds": DT, "inner_euler_steps": INNER_EULER_STEPS,
                          "dynamics": "y'=z+v; z'=-y+u", "terminal_objective": "max(abs(y),abs(z))"},
-        "adaptation": {"episode_steps": EPISODE_STEPS, "controls": ACTIONS,
+        "adaptation": {"episode_steps": EPISODE_STEPS, "finite_action_controls": ACTIONS,
+                       "qp_continuous_control_bounds": [-1.0, 1.0],
                        "disturbances": DISTURBANCES, "history_count": len(list(histories())),
                        "fixed_lookahead": FIXED_LOOKAHEAD,
                        "observation": "exact full state (time,y,z) before each action",
                        "missing_observation_policy": "unsupported; missing observations do not reveal or reconstruct hidden state",
                        "controller_reset": "fresh stateless policy and initial state per disturbance history",
-                       "warm_start": "none; each finite enumeration restarts from its authored plan catalogue",
+                       "warm_start": "none; finite plans restart from the authored catalogue and every QP solve uses a fresh workspace",
                        "decision_order": "observe full state; select u; apply current v; advance",
                        "moving_horizon_prediction": "source dynamics continue beyond scored episode endpoint",
-                       "tie_selector": "first plan in authored action order within 1e-12 absolute objective tolerance",
-                       "deadline_ns_per_decision": 50000000,
-                       "deadline_enforcement": "reject a solve that returns after the deadline; current finite_action_minimax call is not interruptible",
+                       "tie_selector": {"finite_action": "first plan in authored action order within 1e-12 absolute objective tolerance",
+                                        "linear_qp": "secondary minimum-squared-control QP constrained to primary epigraph optimum plus 1e-7"},
+                       "deadline_ns_per_decision": DEADLINE_NS,
+                       "deadline_enforcement": "adapter receives the deadline; late returns are rejected, and native factorization cancellation is cooperative",
                        "fallback": "apply u=0 after timeout/solver failure, count the decision, continue the episode",
                        "stability_scope": "finite episode outcomes only; no recursive feasibility or stability theorem"},
-        "objective": {"planning": "terminal squared max-coordinate objective; zero nominal disturbance or finite min-max",
+        "objective": {"planning": "terminal squared max-coordinate objective; zero nominal disturbance or complete finite-history robust constraint",
                       "reported": "source terminal max(abs(y),abs(z))"},
+        "qp": native_data["qp_metadata"],
+        "qp_analytic_fixture": native_data["qp_analytic_fixture"],
+        "measurement": {"repetitions": MEASUREMENT_REPETITIONS,
+                        "controller_order_alternated": True,
+                        "repetition_records": measurement_repetitions,
+                        "timing_scope": "Each native process runs all policies in an alternating forward/reverse controller order. Decision timing includes planner problem setup and solver calls, not process startup, JSON output, independent replay, or rendering. Provider registration/setup and whole-process elapsed time are recorded separately.",
+                        "host": host_metadata()},
         "algorithm_implementation": implementation,
-        "scope": "finite-action, four-step source-derived adaptation; not a reproduction of the continuous-action four-second RL task; finite disturbance histories only",
+        "scope": "finite-action and continuous-control QP, four-step source-derived adaptation; not a reproduction of the continuous-action four-second RL task; finite disturbance histories only",
         "fixtures": fixture_evidence,
         "fallback_fixtures": fallback_evidence,
         "variants": {key: aggregate(group) for key, group in grouped.items()},
@@ -390,7 +516,8 @@ def main() -> None:
     args.output.mkdir(parents=True, exist_ok=True)
     (args.output / "result.json").write_text(json.dumps(report, indent=2, allow_nan=False), encoding="utf-8")
     write_svg(args.output / "trajectory.svg", rows)
-    summary = {key: {k: v for k, v in value.items() if k != "per_decision_latency_ns"}
+    summary = {key: {k: v for k, v in value.items() if k not in (
+        "per_decision_latency_ns", "per_decision_latency_samples_ns")}
                for key, value in report["variants"].items()}
     print(json.dumps(summary, indent=2))
 

@@ -1,4 +1,7 @@
+#include <csl/adapters/convex/highs.hpp>
 #include <csl/optimization/finite_action_minimax.hpp>
+#include <csl/optimization/convex_backend.hpp>
+#include <csl/registry/provider.hpp>
 #include <nlohmann/json.hpp>
 
 #include <algorithm>
@@ -11,6 +14,9 @@
 #include <functional>
 #include <map>
 #include <limits>
+#include <memory>
+#include <optional>
+#include <sstream>
 #include <stdexcept>
 #include <string>
 #include <variant>
@@ -19,21 +25,42 @@
 namespace {
 using namespace csl;
 using namespace csl::optimization;
+using namespace csl::registry;
 using Json = nlohmann::json;
 using Clock = std::chrono::steady_clock;
 
 constexpr std::size_t episode_steps = 4;
 constexpr std::size_t fixed_lookahead = 2;
 constexpr double dt = 0.1;
+constexpr double qp_tie_tolerance = 1e-7;
+constexpr std::uint64_t deadline_ns = 50'000'000;
 constexpr std::array<double, 2> actions{-1.0, 1.0};
 constexpr std::array<double, 2> disturbances{-1.0, 1.0};
+constexpr std::array<double, 4> discrete_a{
+    0.99505392003313353, 0.099838375271514387,
+    -0.099838375271514387, 0.99505392003313353};
+constexpr std::array<double, 2> discrete_b{0.0049460799668663343, 0.099838375271514443};
+constexpr std::array<double, 2> discrete_e{0.099838375271514443, -0.0049460799668663343};
 using State = std::array<double, 3>;
+
+class DeadlineExceeded : public std::runtime_error {
+public:
+    explicit DeadlineExceeded(const std::string& reason) : std::runtime_error(reason) {}
+};
 
 struct SelectedPlan {
     std::vector<double> controls;
     double squared_objective{};
+    double primary_squared_objective{};
     std::uint64_t elapsed_ns{};
+    std::uint64_t primary_solve_ns{};
+    std::uint64_t tie_solve_ns{};
+    std::string solver_status{"not_run"};
+    std::string provider_id;
+    std::string provider_version;
 };
+
+using ConvexProvider = PreparedProvider<ConvexPort>;
 
 template<class T> T take(std::variant<T, Diagnostic> value) {
     if(const auto* error = std::get_if<Diagnostic>(&value))
@@ -58,10 +85,10 @@ FiniteActionMinimaxRequest make_request(const State& initial, std::size_t horizo
                                    std::size_t component) {
     const SystemModel authored{{{3, 1, 1}, TimeDomain::discrete,
         LinearStage{{3, 3, {1.0, 0.0, 0.0,
-                            0.0, 0.99505392003313353, 0.099838375271514387,
-                            0.0, -0.099838375271514387, 0.99505392003313353}},
-                    {3, 1, {0.0, 0.0049460799668663343, 0.099838375271514443}},
-                    {3, 1, {0.0, 0.099838375271514443, -0.0049460799668663343}},
+                            0.0, discrete_a[0], discrete_a[1],
+                            0.0, discrete_a[2], discrete_a[3]}},
+                    {3, 1, {0.0, discrete_b[0], discrete_b[1]}},
+                    {3, 1, {0.0, discrete_e[0], discrete_e[1]}},
                     {0.1, 0.0, 0.0}}}, {}};
     std::vector<double> times;
     times.reserve(horizon + 1);
@@ -144,8 +171,252 @@ SelectedPlan choose_plan(const State& state, std::size_t horizon, bool robust) {
     const auto elapsed = std::chrono::duration_cast<std::chrono::nanoseconds>(
         Clock::now() - start).count();
     const double nonnegative = std::max(0.0, combined[best]);
-    return {std::move(plan_controls[best]), nonnegative * nonnegative,
-            static_cast<std::uint64_t>(elapsed)};
+    const auto squared = nonnegative * nonnegative;
+    return {std::move(plan_controls[best]), squared, squared,
+            static_cast<std::uint64_t>(elapsed), static_cast<std::uint64_t>(elapsed), 0,
+            "optimal", "csl.finite_action_minimax", ""};
+}
+
+struct TerminalAffine {
+    std::array<double, 2> offset{};
+    std::vector<std::array<double, 2>> controls;
+};
+
+enum class QpDisturbanceMode { nominal_zero, finite_binary };
+
+struct QpPlanRequest {
+    State observed_state;
+    std::size_t remaining_horizon;
+    QpDisturbanceMode disturbance_mode;
+    std::uint64_t serial;
+};
+
+std::vector<std::vector<double>> planning_histories(std::size_t horizon, QpDisturbanceMode mode) {
+    if(mode == QpDisturbanceMode::nominal_zero) return {std::vector<double>(horizon, 0.0)};
+    std::vector<std::vector<double>> histories{{}};
+    for(std::size_t stage = 0; stage < horizon; ++stage) {
+        std::vector<std::vector<double>> next;
+        next.reserve(histories.size() * disturbances.size());
+        for(const auto& prefix : histories) for(const double disturbance : disturbances) {
+            auto history = prefix;
+            history.push_back(disturbance);
+            next.push_back(std::move(history));
+        }
+        histories = std::move(next);
+    }
+    return histories;
+}
+
+TerminalAffine terminal_affine(const State& initial, const std::vector<double>& history) {
+    TerminalAffine terminal{{initial[1], initial[2]}, {}};
+    terminal.controls.reserve(history.size());
+    for(std::size_t stage = 0; stage < history.size(); ++stage) {
+        const auto offset = terminal.offset;
+        terminal.offset = {
+            discrete_a[0] * offset[0] + discrete_a[1] * offset[1] + discrete_e[0] * history[stage],
+            discrete_a[2] * offset[0] + discrete_a[3] * offset[1] + discrete_e[1] * history[stage]};
+        for(auto& column : terminal.controls) {
+            const auto previous = column;
+            column = {discrete_a[0] * previous[0] + discrete_a[1] * previous[1],
+                      discrete_a[2] * previous[0] + discrete_a[3] * previous[1]};
+        }
+        terminal.controls.push_back(discrete_b);
+    }
+    return terminal;
+}
+
+ConvexProvider make_qp_provider() {
+    auto registration_result = adapters::convex::make_highs_registration();
+    auto* registration = std::get_if<Registration<ConvexPort>>(&registration_result);
+    if(!registration) {
+        const auto& diagnostics = std::get<Diagnostics>(registration_result);
+        std::ostringstream message;
+        for(const auto& item : diagnostics) message << item.field << ": " << item.explanation << "; ";
+        throw std::runtime_error("HiGHS convex registration failed: " + message.str());
+    }
+    Registry<ConvexPort> registry;
+    const Method method{registration->identity.id, registration->identity.version};
+    if(registry.add(std::move(*registration))) throw std::runtime_error("HiGHS convex registry rejected registration");
+    Requirements requirements;
+    requirements.output.representation = {"csl.program-result.v1"};
+    auto result = prepare_provider(select_provider(registry, method, requirements));
+    if(const auto* rejected = std::get_if<Rejection>(&result)) {
+        std::ostringstream message;
+        for(const auto& item : rejected->diagnostics) message << item.field << ": " << item.explanation << "; ";
+        throw std::runtime_error("HiGHS convex provider preparation failed: " + message.str());
+    }
+    return std::get<ConvexProvider>(std::move(result));
+}
+
+ConvexProgram make_qp_program(const std::string& id,
+                              const std::vector<TerminalAffine>& scenarios,
+                              std::size_t horizon,
+                              double rho_upper,
+                              bool tie_break) {
+    const auto variables = horizon + 1;
+    std::vector<std::size_t> row_offsets{0}, column_indices;
+    Vector coefficients;
+    std::vector<Interval> rows;
+    rows.reserve(scenarios.size() * 4);
+    for(const auto& scenario : scenarios) {
+        for(std::size_t coordinate = 0; coordinate < 2; ++coordinate) {
+            for(const double sign : {1.0, -1.0}) {
+                for(std::size_t control = 0; control < horizon; ++control) {
+                    const double value = sign * scenario.controls[control][coordinate];
+                    if(value != 0.0) {
+                        column_indices.push_back(control);
+                        coefficients.push_back(value);
+                    }
+                }
+                column_indices.push_back(horizon);
+                coefficients.push_back(-1.0);
+                row_offsets.push_back(coefficients.size());
+                rows.push_back({std::nullopt, -sign * scenario.offset[coordinate]});
+            }
+        }
+    }
+
+    std::vector<Interval> variable_bounds(horizon, {-1.0, 1.0});
+    variable_bounds.push_back({0.0, tie_break ? std::optional<double>{rho_upper} : std::nullopt});
+    Vector q(variables, 0.0);
+    Vector Q(variables * variables, 0.0);
+    if(tie_break) {
+        for(std::size_t control = 0; control < horizon; ++control) Q[control * variables + control] = 2.0;
+    } else {
+        Q[horizon * variables + horizon] = 2.0;
+    }
+    auto result = optimization::make_convex_program({
+        {ProblemId{"mpc04-max-coordinate-replanning"}, ProgramId{id}},
+        QuadraticTerminal{Matrix{variables, variables, std::move(Q)}, std::move(q), 0.0},
+        SparseMatrix{rows.size(), variables, std::move(row_offsets),
+                     std::move(column_indices), std::move(coefficients)},
+        std::move(variable_bounds), std::move(rows), {}});
+    if(const auto* program = std::get_if<ConvexProgram>(&result)) return *program;
+    std::ostringstream message;
+    if(const auto* diagnostics = std::get_if<Diagnostics>(&result)) {
+        for(const auto& item : *diagnostics) message << item.field << ": " << item.explanation << "; ";
+    } else {
+        message << std::get<OperationStopped>(result).diagnostics;
+    }
+    throw std::runtime_error("MPC-04 QP construction failed: " + message.str());
+}
+
+ProgramResult solve_qp_program(const ConvexProvider& provider, const ConvexProgram& program,
+                               Clock::time_point deadline) {
+    auto pipeline_result = provider.prepare(program);
+    if(const auto* rejected = std::get_if<Rejection>(&pipeline_result)) {
+        std::ostringstream message;
+        for(const auto& item : rejected->diagnostics) message << item.field << ": " << item.explanation << "; ";
+        throw std::runtime_error("MPC-04 QP request rejected: " + message.str());
+    }
+    auto pipeline = std::get<PreparedPipeline<ConvexPort>>(std::move(pipeline_result));
+    auto [workspace] = pipeline.create();
+    ExecutionContext context;
+    context.numerical = {1e-8, 1e-8};
+    context.resources = std::make_shared<const ResourcePolicy>(ResourcePolicy{1, 1, 1, {}});
+    context.deadline = deadline;
+    auto outcome = workspace->run(context);
+    if(const auto* unsupported = std::get_if<Unsupported>(&outcome)) {
+        std::ostringstream message;
+        for(const auto& item : unsupported->diagnostics) message << item.field << ": " << item.explanation << "; ";
+        throw std::runtime_error("MPC-04 QP solve unsupported: " + message.str());
+    }
+    auto result = std::get<ProgramResult>(std::move(outcome));
+    if(result.termination == Termination::deadline_expired || result.termination == Termination::resource_limit)
+        throw DeadlineExceeded("HiGHS convex adapter stopped at the MPC-04 decision deadline/resource limit");
+    const auto diagnostics = optimization::check_program_result(result, program, Assurance::numerical);
+    if(!diagnostics.empty()) {
+        std::ostringstream message;
+        for(const auto& item : diagnostics) message << item.field << ": " << item.explanation << "; ";
+        throw std::runtime_error("MPC-04 QP result validation failed: " + message.str());
+    }
+    return result;
+}
+
+SelectedPlan choose_qp_plan(const QpPlanRequest& request, const ConvexProvider& provider) {
+    const auto& state = request.observed_state;
+    const auto horizon = request.remaining_horizon;
+    if(horizon == 0 || horizon > episode_steps) throw std::runtime_error("MPC-04 QP horizon is outside the pilot range");
+    const auto started = Clock::now();
+    const auto deadline = started + std::chrono::nanoseconds(deadline_ns);
+    std::vector<TerminalAffine> scenarios;
+    for(const auto& history : planning_histories(horizon, request.disturbance_mode))
+        scenarios.push_back(terminal_affine(state, history));
+    const auto suffix = std::string(request.disturbance_mode == QpDisturbanceMode::finite_binary ? "robust" : "nominal") +
+        "-h" + std::to_string(horizon) + "-" + std::to_string(request.serial);
+    const auto primary_program = make_qp_program("mpc04-qpm-primary-" + suffix,
+        scenarios, horizon, std::numeric_limits<double>::infinity(), false);
+    const auto primary_started = Clock::now();
+    const auto primary = solve_qp_program(provider, primary_program, deadline);
+    const auto primary_elapsed = std::chrono::duration_cast<std::chrono::nanoseconds>(Clock::now() - primary_started).count();
+    if(primary.termination != Termination::completed || primary.outcome.value != MathematicalOutcome::optimal ||
+       !primary.primal || primary.primal->size() != horizon + 1)
+        throw std::runtime_error("MPC-04 primary QP did not return a completed optimal primal");
+    const double primary_rho = primary.primal->back();
+    if(!std::isfinite(primary_rho) || primary_rho < -1e-8)
+        throw std::runtime_error("MPC-04 primary QP returned an invalid epigraph value");
+    const double primary_squared = std::max(0.0, primary_rho) * std::max(0.0, primary_rho);
+
+    const auto tie_program = make_qp_program("mpc04-qpm-tie-" + suffix,
+        scenarios, horizon, std::max(0.0, primary_rho) + qp_tie_tolerance, true);
+    const auto tie_started = Clock::now();
+    const auto tied = solve_qp_program(provider, tie_program, deadline);
+    const auto tie_elapsed = std::chrono::duration_cast<std::chrono::nanoseconds>(Clock::now() - tie_started).count();
+    if(tied.termination != Termination::completed || tied.outcome.value != MathematicalOutcome::optimal ||
+       !tied.primal || tied.primal->size() != horizon + 1)
+        throw std::runtime_error("MPC-04 tie-break QP did not return a completed optimal primal");
+
+    std::vector<double> controls(tied.primal->begin(), tied.primal->begin() + static_cast<std::ptrdiff_t>(horizon));
+    const double tied_rho = tied.primal->back();
+    if(!std::isfinite(tied_rho) || tied_rho < -1e-8)
+        throw std::runtime_error("MPC-04 tie-break QP returned an invalid epigraph value");
+    double worst_terminal = 0.0;
+    for(const auto& scenario : scenarios) {
+        std::array<double, 2> terminal = scenario.offset;
+        for(std::size_t control = 0; control < horizon; ++control) {
+            terminal[0] += scenario.controls[control][0] * controls[control];
+            terminal[1] += scenario.controls[control][1] * controls[control];
+        }
+        worst_terminal = std::max(worst_terminal, std::max(std::abs(terminal[0]), std::abs(terminal[1])));
+    }
+    for(const double control : controls)
+        if(!std::isfinite(control) || control < -1.0 - 1e-7 || control > 1.0 + 1e-7)
+            throw std::runtime_error("MPC-04 tie-break QP returned a control outside [-1,1]");
+    if(worst_terminal > primary_rho + qp_tie_tolerance + 1e-7)
+        throw std::runtime_error("MPC-04 selected plan exceeds the primary terminal optimum tolerance");
+    if(worst_terminal > tied_rho + 1e-7)
+        throw std::runtime_error("MPC-04 selected plan violates the tie-break epigraph constraints");
+
+    const auto elapsed = std::chrono::duration_cast<std::chrono::nanoseconds>(Clock::now() - started).count();
+    const auto* actual = provider.provenance().actual ? &*provider.provenance().actual : nullptr;
+    return {std::move(controls), worst_terminal * worst_terminal, primary_squared,
+            static_cast<std::uint64_t>(elapsed), static_cast<std::uint64_t>(primary_elapsed),
+            static_cast<std::uint64_t>(tie_elapsed), "optimal", actual ? actual->id.value : "unknown",
+            actual ? actual->version : "unknown"};
+}
+
+Json check_qp_analytic_fixture(const ConvexProvider& provider, std::uint64_t& serial) {
+    const State initial{0.0, 0.1, 0.0};
+    const double y_offset = discrete_a[0] * initial[1] + discrete_a[1] * initial[2];
+    const double z_offset = discrete_a[2] * initial[1] + discrete_a[3] * initial[2];
+    const double crossing = -(y_offset + z_offset) / (discrete_b[0] + discrete_b[1]);
+    const double y_terminal = y_offset + discrete_b[0] * crossing;
+    const double z_terminal = z_offset + discrete_b[1] * crossing;
+    if(crossing < -1.0 || crossing > 1.0 || y_terminal < 0.0 || z_terminal > 0.0 ||
+       std::abs(y_terminal + z_terminal) > 1e-12)
+        throw std::runtime_error("MPC-04 one-step analytic fixture does not have its expected interior optimum");
+    const double expected = std::max(std::abs(y_terminal), std::abs(z_terminal));
+    const auto actual = choose_qp_plan(
+        {initial, 1, QpDisturbanceMode::nominal_zero, serial++}, provider);
+    if(actual.controls.size() != 1 || std::abs(actual.primary_squared_objective - expected * expected) > 2e-6 ||
+       actual.squared_objective > expected * expected + 2.0 * expected * qp_tie_tolerance + 1e-6)
+        throw std::runtime_error("MPC-04 one-step QP does not match the analytic terminal-only optimum");
+    return {{"initial_state", initial}, {"expected_control", crossing},
+            {"expected_terminal_squared_objective", expected * expected},
+            {"selected_control", actual.controls.front()},
+            {"primary_squared_objective", actual.primary_squared_objective},
+            {"selected_squared_objective", actual.squared_objective},
+            {"tie_tolerance", qp_tie_tolerance}, {"status", actual.solver_status}};
 }
 
 State advance(State state, double action, double disturbance) {
@@ -303,7 +574,8 @@ Json check_finite_policy_fixtures() {
 }
 
 Json episode(std::string policy, std::string horizon_name,
-             const std::array<double, episode_steps>& history) {
+             const std::array<double, episode_steps>& history,
+             const ConvexProvider& qp_provider, std::uint64_t& qp_serial) {
     State initial{0.0, 0.2, 0.0};
     Json states = Json::array({initial});
     Json decisions = Json::array();
@@ -314,21 +586,43 @@ Json episode(std::string policy, std::string horizon_name,
             const auto horizon = horizon_name == "shrinking_to_episode_terminal"
                 ? episode_steps - step : fixed_lookahead;
             SelectedPlan plan;
+            const auto decision_started = Clock::now();
             std::string status = "solved";
             std::string solver_detail;
             try {
-                plan = choose_plan(observed, horizon, policy == "finite_minimax");
+                if(policy == "nominal_zero_disturbance" || policy == "finite_minimax") {
+                    plan = choose_plan(observed, horizon, policy == "finite_minimax");
+                } else {
+                    const auto mode = policy == "linear_qp_finite_history_robust_linf"
+                        ? QpDisturbanceMode::finite_binary : QpDisturbanceMode::nominal_zero;
+                    plan = choose_qp_plan({observed, horizon, mode, qp_serial++}, qp_provider);
+                }
+            } catch(const DeadlineExceeded& error) {
+                plan.controls = {0.0};
+                plan.squared_objective = std::numeric_limits<double>::quiet_NaN();
+                plan.primary_squared_objective = std::numeric_limits<double>::quiet_NaN();
+                plan.elapsed_ns = static_cast<std::uint64_t>(
+                    std::chrono::duration_cast<std::chrono::nanoseconds>(Clock::now() - decision_started).count());
+                plan.solver_status = "deadline_expired";
+                status = "deadline_fallback";
+                solver_detail = error.what();
+                ++fallbacks;
             } catch(const std::exception& error) {
                 plan.controls = {0.0};
                 plan.squared_objective = std::numeric_limits<double>::quiet_NaN();
+                plan.primary_squared_objective = std::numeric_limits<double>::quiet_NaN();
+                plan.elapsed_ns = static_cast<std::uint64_t>(
+                    std::chrono::duration_cast<std::chrono::nanoseconds>(Clock::now() - decision_started).count());
+                plan.solver_status = "failed";
                 status = "solver_failure_fallback";
                 solver_detail = error.what();
                 ++fallbacks;
             }
             double action = plan.controls.empty() ? 0.0 : plan.controls.front();
-            if(plan.elapsed_ns > 50'000'000) {
+            if(plan.elapsed_ns > deadline_ns) {
                 action = 0.0;
                 status = "deadline_fallback";
+                plan.solver_status = "deadline_exceeded";
                 solver_detail = "native solve returned after the per-decision deadline; cancellation is unavailable";
                 ++fallbacks;
             }
@@ -339,7 +633,12 @@ Json episode(std::string policy, std::string horizon_name,
                 {"effective_horizon", horizon},
                 {"planned_squared_objective", std::isfinite(plan.squared_objective)
                     ? Json(plan.squared_objective) : Json(nullptr)},
+                {"primary_squared_objective", std::isfinite(plan.primary_squared_objective)
+                    ? Json(plan.primary_squared_objective) : Json(nullptr)},
                 {"solve_ns", plan.elapsed_ns}, {"remaining_plan", std::move(remaining)},
+                {"primary_solve_ns", plan.primary_solve_ns}, {"tie_solve_ns", plan.tie_solve_ns},
+                {"solver_status", plan.solver_status}, {"provider_id", plan.provider_id},
+                {"provider_version", plan.provider_version},
                 {"solver_detail", solver_detail}, {"fallback", status != "solved"}});
             return action;
         },
@@ -361,22 +660,46 @@ Json episode(std::string policy, std::string horizon_name,
         {"fallback_count", fallbacks}, {"violations", 0}, {"completed", true}};
 }
 
-Json run() {
+Json run(bool reverse_policy_order) {
     Json episodes = Json::array();
-    for(const std::string policy : {"nominal_zero_disturbance", "finite_minimax"}) {
+    const auto provider_setup_started = Clock::now();
+    const auto qp_provider = make_qp_provider();
+    const auto provider_setup_ns = static_cast<std::uint64_t>(
+        std::chrono::duration_cast<std::chrono::nanoseconds>(Clock::now() - provider_setup_started).count());
+    std::uint64_t qp_serial = 0;
+    const auto qp_fixture = check_qp_analytic_fixture(qp_provider, qp_serial);
+    std::vector<std::string> policies{"nominal_zero_disturbance", "finite_minimax",
+        "linear_qp_nominal_linf", "linear_qp_finite_history_robust_linf"};
+    if(reverse_policy_order) std::reverse(policies.begin(), policies.end());
+    for(const std::string& policy : policies) {
         for(const std::string horizon : {"shrinking_to_episode_terminal",
                                          "moving_fixed_2_stage_lookahead"}) {
             for(const double v0 : disturbances) for(const double v1 : disturbances)
                 for(const double v2 : disturbances) for(const double v3 : disturbances)
-                    episodes.push_back(episode(policy, horizon, {v0, v1, v2, v3}));
+                    episodes.push_back(episode(policy, horizon, {v0, v1, v2, v3}, qp_provider, qp_serial));
         }
     }
     return {{"episodes", std::move(episodes)},
-            {"fixtures", check_finite_policy_fixtures()}};
+            {"controller_order", policies},
+            {"fixtures", check_finite_policy_fixtures()},
+            {"qp_analytic_fixture", qp_fixture},
+            {"qp_metadata", {{"provider_id", qp_provider.provenance().actual->id.value},
+                {"provider_version", qp_provider.provenance().actual->version},
+                {"provider_setup_ns", provider_setup_ns},
+                {"objective", "terminal squared max-coordinate via scalar epigraph"},
+                {"action_domain", "continuous [-1,1] per stage"},
+                {"tie_tolerance", qp_tie_tolerance},
+                {"tie_selector", "second QP minimizes sum(u_i^2) subject to primary epigraph <= optimum + 1e-7"},
+                {"warm_start", "none; each primary and tie solve uses a fresh workspace"},
+                {"robust_plan_semantics", "one common open-loop control vector constrained against every complete finite disturbance history; execute first action and replan after full-state observation"}}}};
 }
 }
 
-int main() {
-    try { std::cout << run().dump() << '\n'; return 0; }
-    catch(const std::exception& error) { std::cerr << error.what() << '\n'; return 1; }
+int main(int argc, char** argv) {
+    try {
+        if(argc > 2 || (argc == 2 && std::string(argv[1]) != "--reverse-policies"))
+            throw std::runtime_error("usage: csl_mpc04_max_coordinate_replanning [--reverse-policies]");
+        std::cout << run(argc == 2).dump() << '\n';
+        return 0;
+    } catch(const std::exception& error) { std::cerr << error.what() << '\n'; return 1; }
 }
