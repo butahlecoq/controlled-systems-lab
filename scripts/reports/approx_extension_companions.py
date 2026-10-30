@@ -176,7 +176,7 @@ def ext05_companion(record_path: Path, style_path: Path) -> dict[str, bytes]:
     return outputs | {"ext05-states-v1.html": _companion_page(
         "EXT-05 saved state samples", "ext05-states-v1", "ext05-discretization-a40ba9647cc023dc",
         "This companion plots exactly the archived position–velocity states at physical times 0, 1, and 3. It shows only the saved samples: no line between markers or continuous-time trajectory is inferred.",
-        aspect="independent")}
+        axis_context="independent")}
 
 
 def app01_companion(record_path: Path, style_path: Path, publication_report_id: str) -> dict[str, bytes]:
@@ -220,7 +220,7 @@ def app01_companion(record_path: Path, style_path: Path, publication_report_id: 
         "batches of 40,000 checked calls (280,000 calls per fixture). "
         "Exact nanosecond values, trials, configuration, and evidence limits remain in the frozen record. "
         "This is descriptive evidence, not a speed comparison or a performance-winner claim.",
-        aspect="fixture-timing", source_commit=payload["source_commit"])}
+        axis_context="fixture-timing", source_commit=payload["source_commit"])}
 
 
 def ext01_companion(record_path: Path, style_path: Path) -> dict[str, bytes]:
@@ -257,7 +257,7 @@ def ext01_companion(record_path: Path, style_path: Path) -> dict[str, bytes]:
         f"This companion plots the seven saved measured B08 observations from the frozen EXT-01 record. "
         f"Each point is one checked call over 625 plans and 160,000 disturbance histories; the archived median is {median_ms:.3f} ms. "
         "The points are not connected, and the observation does not establish a speedup or performance winner.",
-        aspect="numeric")}
+        axis_context="numeric")}
 
 
 def ext04_observed_replay_companion(record_path: Path, style_path: Path) -> dict[str, bytes]:
@@ -300,7 +300,7 @@ def ext04_observed_replay_companion(record_path: Path, style_path: Path) -> dict
         "EXT-04 observed-replay batch times", "ext04-observed-replay-v1", record["report_id"],
         f"The three saved medians are {medians}. Each point covers 5,000 fully checked replay calls. "
         "These distinct fixtures are not competing methods; the report makes no performance-winner claim.",
-        aspect="batch-timing", source_commit=record["source_commit"],
+        axis_context="batch-timing", source_commit=record["source_commit"],
         image_alt="Seven saved batch durations for each of the partial noisy delayed, post-decision feedthrough, and no-channel replay fixtures.",
         report_route="ext04-observed-replay-eb0b06e560360611d2f2a16fba9b1204e0415b4ba5cd0d5210427c6349963b34")}
 
@@ -470,7 +470,7 @@ def finite_feedback_timing_companion(record_path: Path, style_path: Path) -> dic
         "Finite-feedback saved timings", "finite-feedback-timing-v1", record["report_id"],
         f"The seven-call median durations are {medians}. The vertical lines show each scenario's recorded min-to-max range. "
         "The underlying report states that checked witness cells do not certify the complete action tensor.",
-        aspect="call-timing", source_commit=record["source_commit"],
+        axis_context="call-timing", source_commit=record["source_commit"],
         image_alt="Saved median execution time and min-to-max range for the clipping, branching, empty-action, and nominal scenarios.",
         report_route="finite-feedback-registered-f874133e442eb0fb884b8813a06591cc0f077063ee75ddf627de74656fc11c0f")}
 
@@ -481,7 +481,7 @@ def _require(condition: bool, message: str) -> None:
 
 
 def _companion_page(title: str, stem: str, report_id: str, summary: str,
-                    aspect: str = "equal", source_commit: str | None = None,
+                    axis_context: str = "equal", source_commit: str | None = None,
                     image_alt: str | None = None, report_route: str | None = None) -> bytes:
     title = escape(title)
     summary = escape(summary)
@@ -490,15 +490,15 @@ def _companion_page(title: str, stem: str, report_id: str, summary: str,
     source_link = (f' · <a href="https://github.com/butahlecoq/controlled-systems-lab/commit/'
                    f'{escape(source_commit, quote=True)}">Source commit {escape(source_commit)} ↗</a>'
                    if source_commit else "")
-    if aspect == "equal":
+    if axis_context == "equal":
         scaling = "The plot uses equal x-y scales and preserves the archived fixture values."
-    elif aspect == "numeric":
+    elif axis_context == "numeric":
         scaling = "Round and elapsed time use separate numeric axes; elapsed time is shown in milliseconds per call."
-    elif aspect == "batch-timing":
+    elif axis_context == "batch-timing":
         scaling = "Measured round and duration use separate numeric axes; duration is milliseconds per 5,000-call batch."
-    elif aspect == "call-timing":
+    elif axis_context == "call-timing":
         scaling = "Scenario ordinal and duration use separate numeric axes; duration is microseconds per checked call."
-    elif aspect == "fixture-timing":
+    elif axis_context == "fixture-timing":
         scaling = "Fixture ordinal and median elapsed time use separate numeric axes; elapsed time is per 40,000-call batch in milliseconds."
     else:
         scaling = "Independent coordinate scales are disclosed."

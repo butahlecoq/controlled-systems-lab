@@ -422,6 +422,12 @@ class GalleryTests(unittest.TestCase):
                      "ext05-states-v1", "visual-fuel-b06-viz03"):
             card = page.split(f'id="{stem}"', 1)[1].split("</article>", 1)[0]
             self.assertIn("Saved-data companion", card)
+        for alt in ("Four initial state vertices, the terminal target, and eight saved terminal vertices.",
+                    "Seven measured 5,000-call batch durations for three observation fixtures.",
+                    "The saved one-control feasible relation and its unique terminal minimum.",
+                    "Two saved feasible control regions and their shared complete minimizing face.",
+                    "Median timings and observed ranges for four finite-feedback scenarios."):
+            self.assertIn(f'alt="{alt}"', page)
         self.assertIn("065de5e45d295dfa099e25265c4014c0c46673f8", page)
         self.assertIn("blob/b83b8dc415dbe5811371b8446931ae4c6f3d2e28/reports/algorithm-results/tooling/geo04/polyhedral_intersection_driver.cpp", page)
         parser = Links()

@@ -655,17 +655,22 @@ def build(catalog, site):
         frozen_records / "finite-feedback-a6e96fd96c7ac7cc" / "records.json",
         Path(__file__).parent / "styles/control-v1.json")
     extension_companion_cards = ""
-    for family, title, stem, report_route in (
+    for family, title, stem, report_route, alt in (
             ("Continuous feedback", "EXT-04 robust one-step synthesis", "ext04-affine-synthesis-v1",
-             "ext04-affine-synthesis-7eadf7c7ecbb2bbd"),
+             "ext04-affine-synthesis-7eadf7c7ecbb2bbd",
+             "Four initial state vertices, the terminal target, and eight saved terminal vertices."),
             ("Observed control", "EXT-04 observed-replay batch times", "ext04-observed-replay-v1",
-             "ext04-observed-replay-eb0b06e560360611d2f2a16fba9b1204e0415b4ba5cd0d5210427c6349963b34"),
+             "ext04-observed-replay-eb0b06e560360611d2f2a16fba9b1204e0415b4ba5cd0d5210427c6349963b34",
+             "Seven measured 5,000-call batch durations for three observation fixtures."),
             ("Hybrid reachability", "EXT-07 feasible control relation", "ext07-feasible-relation-v1",
-             "ext07-hybrid-51d9ee2e89d240eb"),
+             "ext07-hybrid-51d9ee2e89d240eb",
+             "The saved one-control feasible relation and its unique terminal minimum."),
             ("Hybrid optimization", "EXT-07 feasible control regions", "ext07-two-control-family-v1",
-             "ext07-hybrid-two-parameter-8ad871b5ea29fc7b"),
+             "ext07-hybrid-two-parameter-8ad871b5ea29fc7b",
+             "Two saved feasible control regions and their shared complete minimizing face."),
             ("Finite-feedback minimax", "Finite-feedback saved timings", "finite-feedback-timing-v1",
-             "finite-feedback-registered-f874133e442eb0fb884b8813a06591cc0f077063ee75ddf627de74656fc11c0f")):
+             "finite-feedback-registered-f874133e442eb0fb884b8813a06591cc0f077063ee75ddf627de74656fc11c0f",
+             "Median timings and observed ranges for four finite-feedback scenarios.")):
         gallery_inventory.append({"family": family, "title": title,
                                   "status": "saved-data-companion", "anchor": stem,
                                   "page": stem + ".html", "figure": stem + ".svg",
@@ -674,7 +679,7 @@ def build(catalog, site):
         extension_companion_cards += (
             f'<article class="saved-figure" id="{stem}"><p class="eyebrow">{escape(family)} · Saved-data companion</p>'
             f'<h3><a href="{stem}.html">{escape(title)}</a></h3>'
-            f'<a href="{stem}.html"><img src="{stem}.svg" alt="Saved quantitative companion plot"></a>'
+            f'<a href="{stem}.html"><img src="{stem}.svg" alt="{escape(alt, quote=True)}"></a>'
             '<p>Replots frozen values with the shared quantitative axes and no solver rerun.</p>'
             f'<p><a href="{stem}.html">Open the saved-data companion →</a> · '
             f'<a href="../{report_route}/records.json">Frozen values ↗</a></p></article>')
