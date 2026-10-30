@@ -8,6 +8,7 @@ from datetime import datetime, timezone
 import hashlib
 import html
 import json
+import os
 from pathlib import Path
 import platform
 import statistics
@@ -25,6 +26,55 @@ DRIVER_SOURCE = ROOT / "benchmarks/reporting/env717/homicidal_chauffeur.cpp"
 
 def digest(data: bytes) -> str:
     return hashlib.sha256(data).hexdigest()
+
+
+def host_metadata():
+    cpu_model = None
+    cpu_source = None
+    try:
+        for line in Path("/proc/cpuinfo").read_text(encoding="utf-8").splitlines():
+            key, separator, value = line.partition(":")
+            if separator and key.strip().lower() in {"model name", "hardware", "processor"} and value.strip():
+                cpu_model, cpu_source = value.strip(), "/proc/cpuinfo"
+                break
+    except OSError:
+        pass
+    if cpu_model is None and platform.processor():
+        cpu_model, cpu_source = platform.processor(), "platform.processor()"
+
+    memory_bytes = None
+    memory_source = None
+    try:
+        for line in Path("/proc/meminfo").read_text(encoding="ascii").splitlines():
+            if line.startswith("MemTotal:"):
+                memory_bytes = int(line.split()[1]) * 1024
+                memory_source = "/proc/meminfo MemTotal"
+                break
+    except (OSError, ValueError, IndexError):
+        pass
+    if memory_bytes is None:
+        try:
+            memory_bytes = os.sysconf("SC_PHYS_PAGES") * os.sysconf("SC_PAGE_SIZE")
+            memory_source = "os.sysconf SC_PHYS_PAGES × SC_PAGE_SIZE"
+        except (AttributeError, OSError, ValueError):
+            pass
+
+    return {
+        "cpu_model": {"value": cpu_model, "source": cpu_source,
+                      "unavailable_reason": None if cpu_model else "host CPU model is not exposed by this platform"},
+        "logical_cpu_count": os.cpu_count(),
+        "total_ram_bytes": {"value": memory_bytes, "source": memory_source,
+                            "unavailable_reason": None if memory_bytes else "physical memory size is not exposed by this platform"},
+    }
+
+
+def load_observation():
+    try:
+        one, five, fifteen = os.getloadavg()
+        return {"averages_1_5_15_minutes": [one, five, fifteen], "unavailable_reason": None}
+    except (AttributeError, OSError):
+        return {"averages_1_5_15_minutes": None,
+                "unavailable_reason": "os.getloadavg is unavailable on this platform"}
 
 
 def convex_hull(points):
@@ -156,6 +206,7 @@ def make_page(result, check, capture):
 <tr><th>Selected pursuer turn-rate / evader heading path</th><td>{html.escape(actions)}</td></tr>
 <tr><th>Independent replay</th><td>{check['status']}: {check['forward_states_checked']} states and {check['transition_cells_checked']} transition cells</td></tr>
 <tr><th>Single-adapter runtime</th><td>{capture['timing']['repetitions']} fresh-process runs; median {capture['timing']['median_seconds']:.6f} s (range {capture['timing']['minimum_seconds']:.6f}–{capture['timing']['maximum_seconds']:.6f} s)</td></tr></tbody></table>
+<p>Host: {html.escape(str(capture['host']['cpu_model']['value'] or 'CPU model unavailable'))}; {capture['host']['logical_cpu_count']} logical CPUs; {html.escape(str(capture['host']['total_ram_bytes']['value'] // (1024**3) if capture['host']['total_ram_bytes']['value'] else 'RAM unavailable'))} GiB RAM; {html.escape(capture['operating_system'])}. Release {html.escape(capture['compiler']['compiler_id'])} {html.escape(capture['compiler']['compiler_version'])}. Load averages before/after the timed runs (1/5/15 min): {html.escape(str(capture['load_before']['averages_1_5_15_minutes']))} / {html.escape(str(capture['load_after']['averages_1_5_15_minutes']))}.</p>
 <h2>Source model and finite adaptation</h2><p>The pinned source state is <code>(time, pursuer_x, pursuer_y, pursuer_heading, evader_x, evader_y)</code>. The pursuer travels at speed 3 with bounded turn rate <code>u ∈ [-1,1]</code>; the evader travels at speed 1 with heading <code>v ∈ [0,2π]</code>. Both use 0.1-second decisions and ten held-action RK4 substeps per decision. The source returns positive terminal Euclidean separation but does not specify separate payoff signs for the two agents.</p>
 <p>This pilot uses the source default initial state, but shortens the horizon from 4.0 seconds to 0.4 seconds and samples the continuous actions as <code>u ∈ {{-1,0,1}}</code> and four cardinal evader headings. The capture set is an explicit analysis choice: terminal separation ≤ 7.8. The finite causal solver lets the evader observe the current pursuer turn rate before responding. The zero-sum interpretation (pursuer minimizes, evader maximizes) is an explicit analysis assumption, as are the finite actions and sequential response. The results describe this quantized finite game and do not reproduce continuous-action RL training or establish continuous-game optimality.</p>
 <p>Source: <a href="https://github.com/imm-rl-lab/differential_game_gym/tree/af5f0a2ee498c0edcf88d60f1d6c49a39bd08bc8/Environments/HomicidalChauffeur">HomicidalChauffeur at pinned commit</a>, source blob <code>{result['source']['file_blob']}</code>, Apache-2.0 at that commit. Scenario SHA-256: <code>{result['scenario_sha256']}</code>.</p>
@@ -168,6 +219,8 @@ def capture(driver: Path, destination: Path):
     if destination.exists():
         raise ValueError("capture destination already exists")
     repetitions = 5
+    host = host_metadata()
+    load_before = load_observation()
     runs = []
     for _ in range(repetitions):
         started = time.perf_counter_ns()
@@ -181,6 +234,7 @@ def capture(driver: Path, destination: Path):
             canonical_stdout = completed.stdout
         elif completed.stdout != canonical_stdout:
             raise ValueError("fresh-process runs produced different result JSON")
+    load_after = load_observation()
     result = json.loads(canonical_stdout)
     check = checker.verify(result)
     scenario = json.loads(SCENARIO.read_text(encoding="utf-8"))
@@ -228,7 +282,8 @@ def capture(driver: Path, destination: Path):
         "algorithm_source_sha256": result["build"]["algorithm_source_sha256"],
         "executable_sha256": digest(driver.read_bytes()), "compiler": result["build"],
         "build_type": result["build"]["build_type"], "operating_system": platform.platform(),
-        "machine": platform.machine(), "python": platform.python_version(),
+        "machine": platform.machine(), "python": platform.python_version(), "host": host,
+        "load_before": load_before, "load_after": load_after,
         "command": "csl_env717_homicidal_chauffeur",
         "timing": timing,
         "solver_failures": 0,

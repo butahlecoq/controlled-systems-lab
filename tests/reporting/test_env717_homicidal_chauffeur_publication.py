@@ -65,12 +65,20 @@ class HomicidalChauffeurPublicationTests(unittest.TestCase):
         self.assertEqual(len(timing["durations_ns"]), 5)
         self.assertEqual(len({run["stdout_sha256"] for run in timing["run_outputs"]}), 1)
         self.assertIn("process exit", timing["boundary"])
+        self.assertTrue(capture["host"]["cpu_model"]["value"] or
+                        capture["host"]["cpu_model"]["unavailable_reason"])
+        self.assertTrue(capture["host"]["total_ram_bytes"]["value"] or
+                        capture["host"]["total_ram_bytes"]["unavailable_reason"])
+        for observation in (capture["load_before"], capture["load_after"]):
+            self.assertTrue(observation["averages_1_5_15_minutes"] or
+                            observation["unavailable_reason"])
         self.assertTrue(all(layer["forward_convex_envelope"] for projection in figure["projections"]
                             for layer in projection["layers"]))
         page = (destination / "index.html").read_text()
         self.assertIn("not exact projections of the five-dimensional reachable sets", page)
         self.assertIn("do not reproduce continuous-action RL training", page)
         self.assertIn("Single-adapter runtime", page)
+        self.assertIn("Host:", page)
         svg = (destination / "projections.svg").read_text()
         self.assertIn('data-role="projected-convex-envelope"', svg)
         self.assertIn('data-role="winning-intersection"', svg)
