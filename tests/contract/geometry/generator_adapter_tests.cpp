@@ -496,6 +496,26 @@ TEST_CASE("bounded explicit zonotope to V conversion has literal vertices and cl
     auto restricted=request;
     restricted.input=constrained.as_handle();
     CHECK(std::holds_alternative<registry::Rejection>(converter.prepare(restricted)));
+
+    const auto infeasible_constrained=generator("infeasible-constrained",{0},{1,1,{1}},{{"q"}},
+        {1,1,{1}},{2});
+    const auto factor_domain=take(sets::factor_polyhedron(infeasible_constrained));
+    const auto factor_h=std::get<sets::HRepresentation>(factor_domain.factors.representation());
+    REQUIRE(factor_h.inequalities.rows()==2);
+    REQUIRE(factor_h.equalities.rows()==1);
+    CHECK(factor_h.upper_bounds[0]==1);
+    CHECK(factor_h.equalities(0,0)==1);
+    CHECK(factor_h.equality_values[0]==2);
+    CHECK(factor_h.upper_bounds[0]<factor_h.equality_values[0]);
+    restricted=request;
+    restricted.input=infeasible_constrained.as_handle();
+    const auto infeasible_conversion=converter.prepare(restricted);
+    const auto* infeasible_rejection=std::get_if<registry::Rejection>(&infeasible_conversion);
+    REQUIRE(infeasible_rejection);
+    REQUIRE(infeasible_rejection->diagnostics.size()==1);
+    CHECK(infeasible_rejection->diagnostics[0].code==DiagnosticCode::unsupported);
+    CHECK(infeasible_rejection->diagnostics[0].field=="generators.convert.equalities");
+
     restricted=request;
     restricted.assurance=Assurance::validated;
     CHECK(std::holds_alternative<registry::Rejection>(converter.prepare(restricted)));
