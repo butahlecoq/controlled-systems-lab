@@ -166,6 +166,14 @@ class LandingTests(unittest.TestCase):
         self.assertIn("stronger within-stage information pattern", family.summary)
         self.assertIn("not a continuous-action RL reproduction", family.summary)
 
+    def test_homicidal_chauffeur_route_discloses_projected_game_adaptations(self):
+        family = landing.FAMILIES[landing.family_for(
+            "env717-homicidal-chauffeur-0123456789abcdefabcd")]
+        self.assertEqual(family.group, "synthesis")
+        self.assertIn("pursuer and evader position planes", family.summary)
+        self.assertIn("zero-sum payoff signs", family.summary)
+        self.assertIn("not a continuous-action RL reproduction", family.summary)
+
 
 class AssembledIndexTests(unittest.TestCase):
     """The published landing page is built from the assembled staged index."""
