@@ -1,0 +1,18 @@
+{
+  "schema": "csl.review05.build-provenance/1",
+  "source_revision": "557813007a7864628a12ed67b43d870d820d315f",
+  "source_worktree_dirty": true,
+  "build_type": "Release",
+  "generator": "Ninja",
+  "cmake_version": "cmake version 3.31.6",
+  "ninja_version": "1.13.2",
+  "cxx_compiler": "c++ (GCC) 16.2.1 20260810",
+  "configure_command": "/home/butahlecoq/.local/share/mise/installs/cmake/3.31.6/cmake-3.31.6-linux-x86_64/bin/cmake -S benchmarks/reporting/review05 -B /home/butahlecoq/.local/share/codex/build/review05-horizon -DCSL_SOURCE_ROOT=/home/butahlecoq/.local/share/codex/worktrees/review05-scalability-95-20261027 -DCMAKE_BUILD_TYPE=Release -G Ninja",
+  "build_command": "ninja -C /home/butahlecoq/.local/share/codex/build/review05-horizon csl_review05_horizon_ladder",
+  "build_log": "build.log",
+  "build_log_sha256": "336f19a746fb592734a26884181b974ec42ead5f1b9b6c9bfa8ec0f96b71684c",
+  "binary_sha256": "e6bfad6ba7f1f638e7afd893fde2725cfdd37eaa2b926395e06e41470cf0b229",
+  "build_warnings": [
+    "One vendored HiGHS 1.11.0 -Wmaybe-uninitialized warning in HighsSymmetry.cpp; build completed successfully."
+  ]
+}
