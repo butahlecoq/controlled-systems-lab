@@ -429,14 +429,14 @@ def write_svg(path: Path, records: list[dict]) -> None:
               "linear_qp_finite_history_robust_linf": "#8055a4"}
     labels = {"nominal_zero_disturbance": "nominal finite action",
               "finite_minimax": "finite minimax",
-              "linear_qp_nominal_linf": "nominal linear QP",
-              "linear_qp_finite_history_robust_linf": "finite-history robust QP"}
+              "linear_qp_nominal_linf": "QP nominal",
+              "linear_qp_finite_history_robust_linf": "QP finite-history robust"}
     policy_order = tuple(colors)
     svg = [f'<svg xmlns="http://www.w3.org/2000/svg" width="{width}" height="{height}" viewBox="0 0 {width} {height}">',
            '<rect width="100%" height="100%" fill="white"/>',
            '<style>text{font-family:Arial,sans-serif;fill:#222}.title{font-size:22px;font-weight:bold}.label{font-size:15px}.small{font-size:11px}.grid{stroke:#ddd}.axis{stroke:#333;stroke-width:1.3}</style>',
            '<text x="50" y="35" class="title">MaxCoordinateGame: replanning and QP comparison</text>',
-           '<text x="50" y="58" class="small">4 scored steps · 16 complete disturbance histories per variant · source-derived 100-substep map</text>',
+           '<text x="50" y="58" class="small">4 scored steps · 16 complete disturbance histories per variant · solid: shrinking horizon; dashed: moving horizon</text>',
            f'<text x="{x0}" y="78" class="label">Phase plane (y,z), all executed history trajectories</text>']
     states = [s for r in records for s in r["states"]]
     ymin, ymax = min(s[1] for s in states), max(s[1] for s in states)
@@ -453,10 +453,11 @@ def write_svg(path: Path, records: list[dict]) -> None:
             dash = ' stroke-dasharray="5 3"' if row["horizon"] == MOVING.name else ""
             opacity = "0.16" if row["horizon"] == MOVING.name else "0.28"
             svg.append(f'<polyline points="{coords}" fill="none" stroke="{color}" stroke-width="1.3" stroke-opacity="{opacity}"{dash}/>')
-        x_legend = 125 + policy_order.index(policy) * 250
-        label = labels[policy] + "; solid shrinking, dashed moving lookahead"
-        svg.append(f'<circle cx="{x_legend}" cy="490" r="4" fill="{color}"/>')
-        svg.append(f'<text x="{x_legend+10}" y="494" class="small">{label}</text>')
+        legend_index = policy_order.index(policy)
+        x_legend = 130 + (legend_index % 2) * 460
+        y_legend = 467 + (legend_index // 2) * 22
+        svg.append(f'<circle cx="{x_legend}" cy="{y_legend-4}" r="4" fill="{color}"/>')
+        svg.append(f'<text x="{x_legend+10}" y="{y_legend}" class="small">{labels[policy]}</text>')
     svg += [f'<text x="{x0+pw/2}" y="{y0+ph-4}" text-anchor="middle" class="small">y</text>',
             f'<text x="{x0+4}" y="{y0+15}" class="small">z</text>']
     # Timeline summaries span all histories for each controller under shrinking horizon.
