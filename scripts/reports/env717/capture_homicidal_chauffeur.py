@@ -28,7 +28,7 @@ def digest(data: bytes) -> str:
 def convex_hull(points):
     points = sorted(set((float(point[0]), float(point[1])) for point in points))
     if len(points) <= 1:
-        return points
+        return [list(point) for point in points]
 
     def cross(origin, a, b):
         return ((a[0] - origin[0]) * (b[1] - origin[1]) -
@@ -44,7 +44,7 @@ def convex_hull(points):
         while len(upper) >= 2 and cross(upper[-2], upper[-1], point) <= 0:
             upper.pop()
         upper.append(point)
-    return lower[:-1] + upper[:-1]
+    return [list(point) for point in lower[:-1] + upper[:-1]]
 
 
 def project_layers(result):
