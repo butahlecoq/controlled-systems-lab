@@ -306,6 +306,32 @@ TEST_CASE("4D selected linear witnesses retain separate nonlinear replay and 2D 
     REQUIRE(std::holds_alternative<problem::ResolvedContent>(adaptive_decoded));
     CHECK(std::get<problem::ResolvedContent>(adaptive_decoded).digest() == adaptive_content.digest());
 
+    auto unsupported_integration_plant = adaptive_plant;
+    unsupported_integration_plant.integration = static_cast<sim::IntegrationMethod>(99);
+    unsupported_integration_plant.numerical = NumericalPolicy{1e-8, 1e-8};
+    unsupported_integration_plant.transition = [](std::span<const double> state,
+        std::span<const double>, std::span<const sim::PlantParameter>, double, double) {
+        return Vector(state.begin(), state.end());
+    };
+    source.replays = {sim::replay(unsupported_integration_plant, source.plot.paths[0].controls),
+        sim::replay(unsupported_integration_plant, source.plot.paths[1].controls)};
+    REQUIRE(source.replays[0].status == sim::ReplayStatus::invalid_input);
+    const auto unsupported_association = ex::associate_replays(source.problem, source.plot,
+        {source.plot.run, problem::ContentDigest{}}, source.replays, "kg/s");
+    REQUIRE(std::holds_alternative<ex::ReplayComparison>(unsupported_association));
+    const auto unsupported_encoded = ex::encode_replay_comparison(
+        std::get<ex::ReplayComparison>(unsupported_association));
+    REQUIRE(std::holds_alternative<problem::ResolvedContent>(unsupported_encoded));
+    const auto& unsupported_content = std::get<problem::ResolvedContent>(unsupported_encoded);
+    const std::string unsupported_wire(reinterpret_cast<const char*>(unsupported_content.bytes().data()),
+        unsupported_content.bytes().size());
+    const auto unsupported_json = nlohmann::json::parse(unsupported_wire);
+    const auto& unsupported_replay = unsupported_json["witnesses"][0]["replay"];
+    CHECK(unsupported_replay["status"] == "invalid_input");
+    CHECK(unsupported_replay["integration"].is_null());
+    CHECK(unsupported_replay["integration_residual"]["status"] == "unavailable");
+    CHECK(std::holds_alternative<problem::ResolvedContent>(ex::decode_replay_comparison(unsupported_wire)));
+
     auto limits_unavailable_plant = adaptive_plant;
     limits_unavailable_plant.integration_limits.reset();
     source.replays = {sim::replay(limits_unavailable_plant, source.plot.paths[0].controls),

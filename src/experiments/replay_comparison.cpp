@@ -117,8 +117,16 @@ Json replay_json(const simulation::ReplayRecord& replay) {
         diagnostics.push_back({{"code", diagnostic_code(item.code)}, {"field", item.field},
             {"explanation", item.explanation}});
     Json integration = nullptr;
-    if (replay.integration) integration = *replay.integration == simulation::IntegrationMethod::exact_discrete_map
-        ? "exact_discrete_map" : "adaptive_rk4_step_doubling";
+    if (replay.integration) {
+        switch (*replay.integration) {
+        case simulation::IntegrationMethod::exact_discrete_map:
+            integration = "exact_discrete_map";
+            break;
+        case simulation::IntegrationMethod::adaptive_rk4_step_doubling:
+            integration = "adaptive_rk4_step_doubling";
+            break;
+        }
+    }
     Json hold = replay.hold ? Json("constant_on_interval") : Json(nullptr);
     Json initial = replay.declared_initial_state ? Json(*replay.declared_initial_state) : Json(nullptr);
     Json objective = replay.original_objective ? Json(*replay.original_objective) : Json(nullptr);
