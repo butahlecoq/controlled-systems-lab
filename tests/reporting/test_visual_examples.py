@@ -191,10 +191,11 @@ class GalleryTests(unittest.TestCase):
         originals = {report_id: hashlib.sha256((self.site / routes[report_id] / "records.json").read_bytes()).hexdigest()
                      for report_id, *_ in control_witness_companions.PROJECTIONS}
         result = control_witness_companions.build(self.site, self.catalog)
-        self.assertEqual(len(result.gallery_entries), 4)
+        self.assertEqual(len(result.gallery_entries), 6)
         gallery_anchors = {entry["anchor"] for entry in result.gallery_entries}
         self.assertEqual(gallery_anchors, {"control-witness-companions", "control-witness-timings",
-                                           "ts01-strategy-ab", "b04-native-smoke"})
+                                           "ts01-strategy-ab", "b04-native-smoke",
+                                           "b04-repeated-benchmark", "exp02-paired-family"})
         self.assertTrue(all(set(disposition.companion_ids) <= gallery_anchors
                             for disposition in control_witness_companions.SOURCE_DISPOSITIONS))
         self.assertEqual(len([name for name in result.files if name.startswith("control-witness/strategy-") and name.endswith(".svg")]), 10)
@@ -217,6 +218,26 @@ class GalleryTests(unittest.TestCase):
         self.assertIn("u=v+K(x-z)", page)
         self.assertIn("does not optimize an objective", page)
         self.assertIn('role="region" aria-label="MPC-06 saved geometry coordinates"', page)
+        self.assertIn('id="exp02-ts02-control-family"', page)
+        self.assertIn('id="b04-repeated-benchmark"', page)
+        self.assertIn("selected by proximity to that backend’s median solve time", page)
+        exp02_svg = ET.fromstring(result.files["control-witness/exp02-ts03-control-family.svg"])
+        exp02_labels = " ".join(node.text or "" for node in exp02_svg.iter())
+        self.assertIn("Complete analytic optimal family", exp02_labels)
+        exp02 = json.loads(result.files["control-witness/exp02-ts03-control-family-evidence.json"])
+        self.assertEqual(exp02["displayed_sets"]["optimal_family"], "u1=1, 0<=u0<=1")
+        self.assertEqual(exp02["assurance"], "exact algebraic fixture derivation; saved algorithm family checks are numerical")
+        self.assertEqual(json.loads(result.files["control-witness/exp02-ts02-control-family-evidence.json"])
+                         ["displayed_sets"]["optimal_family"], "entire feasible square")
+        repeated_b04 = json.loads(result.files["control-witness/b04-repeated-evidence.json"])
+        self.assertEqual(repeated_b04["coordinate_pairs"], {"oxidizer": ["x1", "x2"], "fuel": ["x3", "x4"]})
+        self.assertIn("inconclusive", repeated_b04["evidence_status"])
+        for asset in ("b04-repeated-oxidizer.svg", "b04-repeated-fuel.svg",
+                      "exp02-ts02-control-family.svg", "exp02-ts03-control-family.svg"):
+            svg = ET.fromstring(result.files["control-witness/" + asset])
+            self.assertEqual(svg.attrib["role"], "img")
+            self.assertTrue(any(node.tag.endswith("desc") for node in svg))
+            self.assertTrue(result.files["control-witness/" + asset.replace(".svg", ".png")].startswith(b"\x89PNG\r\n\x1a\n"))
         examples_dir = self.site / "examples"
         examples_dir.mkdir(exist_ok=True)
         (examples_dir / "index.html").write_text("<html>gallery fixture</html>", encoding="utf-8")
@@ -326,7 +347,7 @@ class GalleryTests(unittest.TestCase):
         failed = [row for row in syn02_evidence["rows"] if row["label"].startswith("shifted-residual-degenerate")]
         self.assertEqual(len(failed), 3)
         self.assertTrue(all(row["median"] is None and "failed" in row["status"] for row in failed))
-        self.assertEqual(len([name for name in result.files if name.endswith(".svg")]), 17)
+        self.assertEqual(len([name for name in result.files if name.endswith(".svg")]), 21)
         syn06_evidence = json.loads(result.files["control-witness/syn06-timing-evidence.json"])
         self.assertEqual(syn06_evidence["rows"][0]["batch"], 28000)
         self.assertEqual(syn06_evidence["rows"][0]["median"],

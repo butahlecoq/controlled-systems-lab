@@ -135,6 +135,8 @@ class VisualRouteInventoryTests(unittest.TestCase):
                  "frozen-report-plot-preserved-with-saved-timing-companion",
                  "frozen-report-plot-preserved-with-phase-plane-companion",
                  "frozen-report-plot-preserved-with-gallery-companion",
+                 "frozen-repeated-b04-figure-preserved-with-shared-policy-companion",
+                 "reviewed: frozen control-family report preserved with shared-policy saved-data companion",
                  "regeneration-entrypoint-preserved-gallery-never-invokes-it",
                  "saved-control-witness-gallery-companion-builder",
                  "reviewed-analytic-diagram-preserved",
@@ -146,9 +148,9 @@ class VisualRouteInventoryTests(unittest.TestCase):
         follow_up_counts={number:sum(entry["follow_up_issue"]==number for entry in deferred)
                           for number in (600,684,685,686,687,708,717)}
         self.assertEqual(follow_up_counts,
-                         {600:2,684:0,685:0,686:1,687:4,708:1,717:15})
+                         {600:2,684:0,685:0,686:0,687:4,708:1,717:15})
         reviewed=[entry for entry in producers.values() if entry.get("role")]
-        self.assertEqual(len(reviewed),24)
+        self.assertEqual(len(reviewed),25)
         self.assertEqual(set(entry["source"] for entry in reviewed),
                          set(audit_visual_routes.control_witness_companions.source_inventory()))
         self.assertTrue(all(entry["follow_up_issue"] in follow_up_counts for entry in deferred))
@@ -161,14 +163,18 @@ class VisualRouteInventoryTests(unittest.TestCase):
         hull_4d=routes["exp02-it17-hull-4d-simplex-20261028-r1"]
         self.assertEqual(hull_4d["assets"],["2d-visual-companion.svg", "input-projections.svg"])
         self.assertTrue(hull_4d["index_sha256"])
+        paired=routes["exp02-paired-profiles-20261027-r1"]
+        self.assertIn("reviewed: frozen control-family", paired["disposition"])
+        self.assertEqual(paired["companion_route"],
+                         "examples/control-witness-v1.html#exp02-ts02-control-family")
+        self.assertNotIn("follow_up_issue", paired)
         self.assertTrue(all(entry["disposition"].startswith("deferred: original frozen route-level readability")
-                            for entry in routes.values()))
+                            for entry in routes.values() if entry["route"] != paired["route"]))
         self.assertTrue(all(entry["follow_up_issue"] ==
                             audit_visual_routes.FROZEN_ROUTE_FOLLOW_UP_ISSUES.get(
                                 entry["route"],
                                 717 if entry["route"].startswith("env717-") else 669)
-                            for entry in routes.values()))
-        self.assertEqual(routes["exp02-paired-profiles-20261027-r1"]["follow_up_issue"], 686)
+                            for entry in routes.values() if entry["route"] != paired["route"]))
         self.assertEqual(routes["app03-zonotope-4522855018fa9b0b"]["companion_route"],
                          "examples/app03-zonotope-v1.html")
         self.assertEqual(routes["app01-plan-20261016-22d406fd"]["companion_route"],

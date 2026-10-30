@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+from fractions import Fraction
 import hashlib
 import html
 import json
@@ -54,6 +55,7 @@ SOURCE_DISPOSITIONS = (
     SourceDisposition("scripts/reports/mpc01/summarize_strategy_ab.py", "report-plot-renderer", "frozen-report-plot-preserved-with-gallery-companion", ("control-witness-companions",)),
     SourceDisposition("scripts/reports/mpc01/b04_native_smoke_projection.py", "report-plot-renderer", "frozen-report-plot-preserved-with-phase-plane-companion", ("b04-native-smoke",)),
     SourceDisposition("scripts/reports/mpc01/b04_projection_example.py", "report-plot-renderer", "frozen-report-plot-preserved-with-phase-plane-companion", ("b04-native-smoke",)),
+    SourceDisposition("scripts/reports/mpc01/summarize_repeated_comparison.py", "report-plot-renderer", "frozen-repeated-b04-figure-preserved-with-shared-policy-companion", ("b04-repeated-benchmark",)),
     SourceDisposition("scripts/reports/b04_native_smoke_companion.py", "saved-plot-renderer", "shared-quantitative-policy-companion-renderer"),
 )
 
@@ -89,6 +91,25 @@ def strategy_slug(report_id: str) -> str:
 
 def asset_paths() -> list[str]:
     paths = ["control-witness-v1.html", "control-witness-timing-v1.html",
+             "control-witness/b04-repeated-oxidizer.svg",
+             "control-witness/b04-repeated-oxidizer.png",
+             "control-witness/b04-repeated-fuel.svg",
+             "control-witness/b04-repeated-fuel.png",
+             "control-witness/b04-repeated-evidence.json",
+             "control-witness/b04-repeated-attempts.jsonl",
+             "control-witness/b04-repeated-manifest.json",
+             "control-witness/b04-repeated-case.json",
+             "control-witness/b04-repeated-reference.json",
+             "control-witness/exp02-ts02-control-family.svg",
+             "control-witness/exp02-ts02-control-family.png",
+             "control-witness/exp02-ts02-control-family-evidence.json",
+             "control-witness/exp02-ts02-scenario.json",
+             "control-witness/exp02-ts02-events.jsonl",
+             "control-witness/exp02-ts03-control-family.svg",
+             "control-witness/exp02-ts03-control-family.png",
+             "control-witness/exp02-ts03-control-family-evidence.json",
+             "control-witness/exp02-ts03-scenario.json",
+             "control-witness/exp02-ts03-events.jsonl",
              "control-witness/b04-native-smoke-projections.svg",
              "control-witness/b04-native-smoke-projections.png",
              "control-witness/b04-native-smoke-evidence.json",
@@ -122,6 +143,232 @@ def source_inventory() -> dict[str, SourceDisposition]:
     if len(result) != len(SOURCE_DISPOSITIONS):
         raise ValueError("duplicate VIZ-09 source disposition")
     return result
+
+
+def _exp02_control_family_companion(style: Path) -> tuple[dict[str, bytes], str, dict]:
+    root = Path(__file__).resolve().parents[2]
+    bundle = root / "reports/algorithm-results/exp02-paired-profiles-20261027-r1"
+    sums = {}
+    for line in (bundle / "SHA256SUMS").read_text(encoding="utf-8").splitlines():
+        digest, name = line.split("  ", 1)
+        sums[name] = digest
+    source_names = (
+        "index.html", "render_report.py", "ts02-constant-integrator.json",
+        "raw/ts02_constant_integrator.jsonl", "ts03-singular-integrator.json",
+        "raw/ts03_singular_integrator.jsonl",
+    )
+    raw = {name: (bundle / name).read_bytes() for name in source_names}
+    hashes = {name: hashlib.sha256(value).hexdigest() for name, value in raw.items()}
+    if any(sums.get(name) != value for name, value in hashes.items()):
+        raise ValueError("Exp-02 paired-profile source bytes differ from their frozen checksum manifest")
+    scenarios = {name: json.loads(raw[f"{name}.json"]) for name in (
+        "ts02-constant-integrator", "ts03-singular-integrator")}
+    expected = {
+        "ts02-constant-integrator": {
+            "model": {"kind": "linear_discrete", "A": [[1]], "B": [[1]]},
+            "controls": {"kind": "box", "lower": [0], "upper": [1]},
+            "objective": {"kind": "linear", "coefficients": [0], "offset": 3},
+        },
+        "ts03-singular-integrator": {
+            "model": {"kind": "linear_discrete", "A": [[0]], "B": [[1]]},
+            "controls": {"kind": "box", "lower": [0], "upper": [1]},
+            "objective": {"kind": "quadratic", "Q": [[2]], "linear": [-2], "offset": 1},
+        },
+    }
+    records = {}
+    for scenario_id, properties in expected.items():
+        scenario = scenarios[scenario_id]
+        if (scenario.get("id") != scenario_id or scenario.get("horizon") != 2 or
+                scenario.get("initial_state") != [0] or
+                any(scenario.get(key) != value for key, value in properties.items())):
+            raise ValueError("Exp-02 paired-profile fixture changed: " + scenario_id)
+        event_name = f"raw/{'ts02_constant_integrator' if scenario_id.startswith('ts02') else 'ts03_singular_integrator'}.jsonl"
+        rows = [json.loads(line) for line in raw[event_name].decode().splitlines() if line.strip()]
+        if (len(rows) != 13 or rows[0].get("event") != "header" or
+                rows[0].get("profile") != event_name.removeprefix("raw/").removesuffix(".jsonl")):
+            raise ValueError("Exp-02 paired-profile event identity differs: " + scenario_id)
+        trials = rows[1:]
+        measured = [row for row in trials if row.get("warmup") is False]
+        if (len(trials) != 12 or len(measured) != 10 or
+                any(row.get("event") != "trial" or row.get("status") != "passed" or
+                    row.get("termination") != "completed" or row.get("outcome") != "optimal" or
+                    row.get("complete_family_verified") is not True or row.get("distinct_witnesses") != 2
+                    for row in trials)):
+            raise ValueError("Exp-02 paired-profile saved family evidence is incomplete: " + scenario_id)
+        records[scenario_id] = {"scenario": scenario, "rows": rows,
+                                "event_name": event_name, "measured_trials": len(measured)}
+
+    projections = (
+        ("ts02-constant-integrator", "ts02", "T-S02 · constant objective",
+         "Every feasible control pair is optimal because the saved objective is constant.",
+         [{"kind": "polygon", "label": "Feasible and complete optimal set", "color": "#2367a8",
+           "points": [[0, 0], [1, 0], [1, 1], [0, 1]], "fill": True, "alpha": .18},
+          {"kind": "polygon", "label": "Optimal boundary", "color": "#b23b33",
+           "points": [[0, 0], [1, 0], [1, 1], [0, 1]], "linewidth": 2.3, "linestyle": "--"}]),
+        ("ts03-singular-integrator", "ts03", "T-S03 · singular integrator",
+         "The saved recurrence gives x₂=u₁ and objective (x₂−1)²; u₀ is free and every optimum has u₁=1.",
+         [{"kind": "polygon", "label": "Feasible controls", "color": "#2367a8",
+           "points": [[0, 0], [1, 0], [1, 1], [0, 1]], "fill": True, "alpha": .18},
+          {"kind": "path", "label": "Complete analytic optimal family", "color": "#b23b33",
+           "points": [[0, 1], [1, 1]], "linewidth": 2.6}]),
+    )
+    outputs = {}
+    articles = []
+    for scenario_id, stem_id, title, description, series in projections:
+        item = records[scenario_id]
+        outputs[f"control-witness/exp02-{stem_id}-scenario.json"] = raw[f"{scenario_id}.json"]
+        outputs[f"control-witness/exp02-{stem_id}-events.jsonl"] = raw[item["event_name"]]
+        document = {"schema": "csl.saved-geometric-plot/1", "title": title,
+                    "description": description,
+                    "axes": {"x": {"label": "Control u₀ (dimensionless)"},
+                             "y": {"label": "Control u₁ (dimensionless)"}},
+                    "aspect": "equal", "series": series}
+        with tempfile.TemporaryDirectory(prefix="csl-viz09-exp02-family-") as temporary:
+            generated = Path(temporary)
+            export = geometry_figures.render(document, style, generated)
+            stem = f"control-witness/exp02-{stem_id}-control-family"
+            for suffix in ("svg", "png"):
+                outputs[f"{stem}.{suffix}"] = (generated / f"geometry.{suffix}").read_bytes()
+        evidence = {"schema": "csl.control-witness-exp02-family/1", "scenario_id": scenario_id,
+                    "scenario_sha256": hashes[f"{scenario_id}.json"],
+                    "saved_profile_events_sha256": hashes[item["event_name"]],
+                    "frozen_index_sha256": hashes["index.html"],
+                    "frozen_renderer_sha256": hashes["render_report.py"],
+                    "measured_trials": item["measured_trials"],
+                    "analytic_relation": description,
+                    "displayed_sets": {"feasible_control_square": [[0, 0], [1, 0], [1, 1], [0, 1]],
+                                       "optimal_family": ("entire feasible square" if stem_id == "ts02"
+                                                          else "u1=1, 0<=u0<=1")},
+                    "assurance": "exact algebraic fixture derivation; saved algorithm family checks are numerical",
+                    "claim_scope": "Additive presentation of a frozen report; no algorithm, geometry query, or measurement rerun.",
+                    "figure_export": export}
+        evidence_name = f"control-witness/exp02-{stem_id}-control-family-evidence.json"
+        outputs[evidence_name] = (json.dumps(evidence, indent=2, ensure_ascii=False) + "\n").encode()
+        page_stem = f"control-witness/exp02-{stem_id}-control-family"
+        articles.append(
+            f'<article id="exp02-{stem_id}-control-family"><h2>{html.escape(title)}</h2>'
+            f'<p>{html.escape(description)} Feasible and optimal control sets are projected onto the exact '
+            f'<code>(u₀,u₁)</code> plane with equal axis scaling. The figure is algebraically derived from the '
+            f'frozen scenario; the saved paired strategy runs numerically verified their complete families.</p>'
+            f'<figure><a href="{page_stem}.svg"><img src="{page_stem}.svg" alt="{html.escape(description, quote=True)}"></a>'
+            f'<figcaption>Shared quantitative axis policy; equal data scaling. '
+            f'<a href="{page_stem}.png">Open PNG figure ↗</a></figcaption></figure>'
+            f'<p><a href="control-witness/exp02-{stem_id}-scenario.json">Frozen scenario input ↗</a> · '
+            f'<a href="control-witness/exp02-{stem_id}-events.jsonl">Saved profile events ↗</a> · '
+            f'<a href="{evidence_name}">Figure evidence and hashes ↗</a></p></article>')
+    entry = {"family": "Control strategy and witness reports",
+             "title": "Exp-02 paired-profile optimal control families",
+             "status": "saved-data-companion", "anchor": "exp02-paired-family",
+             "page": "control-witness-v1.html#exp02-paired-family",
+             "figure": "control-witness/exp02-ts02-control-family.svg",
+             "source_page": "control-witness-v1.html",
+             "raw_record": "control-witness/exp02-ts02-control-family-evidence.json"}
+    section = ('<section id="exp02-paired-family"><h2>Exp-02 saved paired-profile control families</h2>' +
+               ''.join(articles) + '</section>')
+    return outputs, section, entry
+
+
+def _b04_repeated_companion(style: Path) -> tuple[dict[str, bytes], str, dict]:
+    root = Path(__file__).resolve().parents[2]
+    evidence_root = root / "docs/research/evidence"
+    repeated = evidence_root / "mpc01-external-qps-20261026-r3"
+    case_path = evidence_root / "b04-reference-v1/canonical-case.json"
+    reference_path = evidence_root / "b04-reference-v1/exact-optimal-reference.json"
+    manifest_raw = (repeated / "figure-manifest.json").read_bytes()
+    selected_raw = (repeated / "b04-representative-cold-attempts.jsonl").read_bytes()
+    case_raw, reference_raw = case_path.read_bytes(), reference_path.read_bytes()
+    manifest = json.loads(manifest_raw)
+    selected = [json.loads(line) for line in selected_raw.decode().splitlines() if line.strip()]
+    case, reference = json.loads(case_raw), json.loads(reference_raw)
+    if (manifest.get("schema") != "csl.mpc01-repeated-benchmark-figure/1" or
+            manifest.get("case_id") != "b04-reference-v1" or
+            manifest.get("selected_attempts_sha256") != hashlib.sha256(selected_raw).hexdigest() or
+            manifest.get("case_sha256") != hashlib.sha256(case_raw).hexdigest() or
+            len(selected) != 2 or {row.get("method") for row in selected} !=
+            {"osqp-sparse-qp", "hpipm-structured-ocp-qp"}):
+        raise ValueError("saved repeated-B04 representative attempts do not match their figure manifest")
+    if (case.get("state_coordinates") != ["oxidizer_flow", "oxidizer_working_stock", "fuel_flow", "fuel_working_stock"] or
+            case.get("state_units") != ["kg/s", "kg", "kg/s", "kg"]):
+        raise ValueError("saved B04 coordinate order or units changed")
+    exact = reference.get("exact_optimal_states_one_solution")
+    if not isinstance(exact, list) or len(exact) != case.get("horizon", -1) + 1 or any(len(row) != 4 for row in exact):
+        raise ValueError("saved B04 exact witness has an unexpected trajectory shape")
+    exact_states = [[float(Fraction(value)) for value in state] for state in exact]
+    if any(row.get("case_id") != case["case_id"] or row.get("start_mode") != "cold" or
+           row.get("termination") != "completed" or row.get("mathematical_outcome") != "optimal" or
+           len(row.get("trajectory", {}).get("states", [])) != case["horizon"] + 1
+           for row in selected):
+        raise ValueError("saved B04 representative path is incomplete or has an unexpected outcome")
+    display = {"exact-reference": "Exact saved witness"}
+    selected_repetitions = {item["method"]: item["repetition"] + 1 for item in manifest["selection"]}
+    display.update({row["method"]: f"{row['method']} · cold rep {selected_repetitions[row['method']]} of 5"
+                    for row in selected})
+    projections = ((0, 1, "oxidizer", "Oxidizer flow x₁ (kg/s)", "Oxidizer working stock x₂ (kg)"),
+                   (2, 3, "fuel", "Fuel flow x₃ (kg/s)", "Fuel working stock x₄ (kg)"))
+    outputs = {
+        "control-witness/b04-repeated-attempts.jsonl": selected_raw,
+        "control-witness/b04-repeated-manifest.json": manifest_raw,
+        "control-witness/b04-repeated-case.json": case_raw,
+        "control-witness/b04-repeated-reference.json": reference_raw,
+    }
+    hashes = {"figure_manifest_sha256": hashlib.sha256(manifest_raw).hexdigest(),
+              "selected_attempts_sha256": hashlib.sha256(selected_raw).hexdigest(),
+              "case_sha256": hashlib.sha256(case_raw).hexdigest(),
+              "exact_reference_sha256": hashlib.sha256(reference_raw).hexdigest()}
+    export_receipts = {}
+    for x, y, slug, x_label, y_label in projections:
+        paths = [{"kind": "path", "label": display["exact-reference"], "color": "#b23b33",
+                  "points": [[state[x], state[y]] for state in exact_states], "linewidth": 1.8}]
+        for row in selected:
+            paths.append({"kind": "path", "label": display[row["method"]],
+                          "color": "#2367a8" if row["method"] == "osqp-sparse-qp" else "#2a7f62",
+                          "points": [[state[x], state[y]] for state in row["trajectory"]["states"]],
+                          "linewidth": 1.8})
+        document = {"schema": "csl.saved-geometric-plot/1",
+                    "title": f"B04 repeated benchmark · {slug} projection",
+                    "description": (f"Exact saved witness and one representative cold trajectory per native solver. "
+                                    "Each solver path was selected from five cold repetitions by proximity to its median solve time; "
+                                    "it is an individual path, not an average. Solver residual evidence remains inconclusive."),
+                    "axes": {"x": {"label": x_label}, "y": {"label": y_label}},
+                    "aspect": "independent", "series": paths}
+        with tempfile.TemporaryDirectory(prefix="csl-viz09-b04-repeat-") as temporary:
+            generated = Path(temporary)
+            receipt = geometry_figures.render(document, style, generated)
+            stem = f"control-witness/b04-repeated-{slug}"
+            for suffix in ("svg", "png"):
+                outputs[f"{stem}.{suffix}"] = (generated / f"geometry.{suffix}").read_bytes()
+        export_receipts[slug] = receipt
+    data = {"schema": "csl.control-witness-b04-repeated/1", "case_id": case["case_id"],
+            "coordinate_pairs": {"oxidizer": ["x1", "x2"], "fuel": ["x3", "x4"]},
+            "selection": manifest["selection"], "path_kind": "representative individual cold paths",
+            "claim_scope": "Three trajectories projected into two 2D planes; no reachable-set or historical B04 claim.",
+            "evidence_status": "native binary64 residual evidence inconclusive",
+            **hashes, "figure_exports": export_receipts}
+    evidence_name = "control-witness/b04-repeated-evidence.json"
+    outputs[evidence_name] = (json.dumps(data, indent=2, ensure_ascii=False) + "\n").encode()
+    articles = []
+    for slug, axis_description in (("oxidizer", "oxidizer flow x₁ versus working stock x₂"),
+                                   ("fuel", "fuel flow x₃ versus working stock x₄")):
+        stem = f"control-witness/b04-repeated-{slug}"
+        articles.append(f'<figure><a href="{stem}.svg"><img src="{stem}.svg" alt="Exact saved B04 witness and representative cold solver paths in the {axis_description} plane"></a>'
+                        f'<figcaption>{axis_description}; unequal units use independent axis scaling. <a href="{stem}.png">Open PNG ↗</a></figcaption></figure>')
+    article = ('<article id="b04-repeated-benchmark"><h2>B04 repeated comparison · representative trajectories</h2>'
+               '<p>The panels show the requested fuel-model views: (x₁,x₂) for oxidizer and (x₃,x₄) for fuel. '
+               'Each solver trajectory is one saved cold repetition selected by proximity to that backend’s median solve time; '
+               'the paths are not averages. The exact witness is separate. Binary64 residual evidence is inconclusive, '
+               'so this is an illustrative trajectory companion, not a reachability-set result or a historical B04 reconstruction.</p>' +
+               ''.join(articles) + '<p><a href="control-witness/b04-repeated-attempts.jsonl">Representative saved attempt rows ↗</a> · '
+               '<a href="control-witness/b04-repeated-reference.json">Exact reference witness ↗</a> · '
+               '<a href="control-witness/b04-repeated-manifest.json">Selection manifest ↗</a> · '
+               '<a href="control-witness/b04-repeated-evidence.json">Figure data and hashes ↗</a></p></article>')
+    entry = {"family": "Control strategy and witness reports",
+             "title": "B04 representative solver trajectories in oxidizer/fuel planes",
+             "status": "saved-data-companion", "anchor": "b04-repeated-benchmark",
+             "page": "control-witness-v1.html#b04-repeated-benchmark",
+             "figure": "control-witness/b04-repeated-oxidizer.svg",
+             "source_page": "control-witness-v1.html",
+             "raw_record": evidence_name}
+    return outputs, article, entry
 
 
 @dataclass(frozen=True)
@@ -439,6 +686,10 @@ def build(site: Path, catalog_path: Path) -> BuildResult:
     outputs: dict[str, bytes] = {}
     cards: list[dict] = []
     outputs.update(_ts01_strategy_ab_companion())
+    exp02_files, exp02_article, exp02_entry = _exp02_control_family_companion(style)
+    outputs.update(exp02_files)
+    b04_repeat_files, b04_repeat_article, b04_repeat_entry = _b04_repeated_companion(style)
+    outputs.update(b04_repeat_files)
     b04_files, b04_article, b04_entry = b04_native_smoke_companion.build(style)
     outputs.update(b04_files)
     mpc06_route, mpc06_svg, mpc06_png, mpc06_evidence = _mpc06_tube_companion()
@@ -623,7 +874,7 @@ def build(site: Path, catalog_path: Path) -> BuildResult:
                     "source_page": "../" + routes[syn01_id] + "/index.html",
                     "raw_record": "../" + routes[syn01_id] + "/records.json"}
 
-    body = [b04_article]
+    body = [b04_article, exp02_article, b04_repeat_article]
     for card in cards:
         record_link = "../" + card["route_id"] + "/records.json"
         page_link = "../" + card["route_id"] + "/index.html"
@@ -698,7 +949,7 @@ def build(site: Path, catalog_path: Path) -> BuildResult:
         '<p>The first five figures show projections of frozen five-coordinate state/control relations into the control plane '
         '(u₀,u₁); each can omit distinctions present in the full joint relation. The MPC-06 figure re-plots a saved two-state '
         'feasibility tube. The T-S01 figure shows saved Strategy A/B control histories and an exact analytic minimizer relation. '
-        'The B04 companion shows saved oxidizer and fuel phase-plane trajectories from a separate research reference variant. '
+        'The Exp-02 and B04 companions replot frozen control-family and representative trajectory evidence. '
         'These companions do not run a solver or recompute scientific geometry.</p>' +
         ''.join(body) + '</main></body></html>').encode()
     strategy_ab_entry = {
@@ -718,7 +969,7 @@ def build(site: Path, catalog_path: Path) -> BuildResult:
                 "page": "control-witness-v1.html", "figure": cards[0]["stem"] + ".svg",
                 "source_page": "../" + cards[0]["route_id"] + "/index.html",
                 "raw_record": "../" + cards[0]["route_id"] + "/records.json"},
-               strategy_ab_entry, timing_entry, b04_entry)
+               strategy_ab_entry, timing_entry, b04_entry, exp02_entry, b04_repeat_entry)
     if set(outputs) != set(asset_paths()):
         missing = sorted(set(asset_paths()) - set(outputs))
         extra = sorted(set(outputs) - set(asset_paths()))
