@@ -214,7 +214,8 @@ bool same_declaration(const simulation::ReplayRecord& a, const simulation::Repla
         a.declared_initial_state == b.declared_initial_state && a.time_unit == b.time_unit &&
         a.times == b.times && a.state_units == b.state_units && a.control_units == b.control_units &&
         a.objective_name == b.objective_name && a.objective_unit == b.objective_unit &&
-        a.integration == b.integration && a.hold == b.hold && a.numerical == b.numerical;
+        a.integration == b.integration && a.hold == b.hold && a.numerical == b.numerical &&
+        a.integration_limits == b.integration_limits;
 }
 
 bool valid_history(const std::vector<Vector>& history, std::size_t dimension) {

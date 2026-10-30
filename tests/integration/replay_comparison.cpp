@@ -43,7 +43,7 @@ sim::Plant fuel_toy() {
 
 ar::PlotEvidence numerical_witness_evidence() {
     return {verification::CheckStatus::numerical_pass, verification::CheckStatus::numerical_pass,
-        verification::CheckStatus::numerical_pass, verification::CheckStatus::numerical_pass,
+        verification::CheckStatus::numerical_pass, verification::CheckStatus::not_checked,
         verification::CheckStatus::numerical_pass, verification::CheckStatus::numerical_pass, {}};
 }
 
@@ -115,10 +115,12 @@ TEST_CASE("4D selected linear witnesses retain separate nonlinear replay and 2D 
         REQUIRE(verified.feasibility == verification::CheckStatus::numerical_pass);
         REQUIRE(verified.objective == verification::CheckStatus::numerical_pass);
         REQUIRE(verified.recomputed_objective == doctest::Approx(0.0));
-        // This objective is a norm, so zero is an exact global lower bound
-        // and both independently verified histories attain it.
+        const bool has_norm_lower_bound = std::holds_alternative<ResidualNormTerminal>(source.problem.objective);
+        const bool attains_norm_lower_bound = has_norm_lower_bound &&
+            verified.recomputed_objective == doctest::Approx(0.0);
         path.evidence = {verified.bindings, verified.feasibility, verified.objective,
-            verification::CheckStatus::numerical_pass, verified.completeness,
+            attains_norm_lower_bound ? verification::CheckStatus::numerical_pass
+                : verification::CheckStatus::not_checked, verified.completeness,
             verified.validated, verified.residuals};
     }
     REQUIRE_FALSE(source.plot.paths[0].evidence.residuals.empty());
@@ -306,6 +308,15 @@ TEST_CASE("4D selected linear witnesses retain separate nonlinear replay and 2D 
     REQUIRE(std::holds_alternative<problem::ResolvedContent>(adaptive_decoded));
     CHECK(std::get<problem::ResolvedContent>(adaptive_decoded).digest() == adaptive_content.digest());
 
+    auto different_limits_plant = adaptive_plant;
+    different_limits_plant.integration_limits = sim::IntegrationLimits{1e-10, 1e-10, 20000};
+    const std::vector<sim::ReplayRecord> mixed_limits_replays{
+        source.replays[0], sim::replay(different_limits_plant, source.plot.paths[1].controls)};
+    const auto mixed_limits = ex::associate_replays(source.problem, source.plot,
+        {source.plot.run, problem::ContentDigest{}}, mixed_limits_replays, "kg/s");
+    REQUIRE(std::holds_alternative<ar::ArtifactError>(mixed_limits));
+    CHECK(std::get<ar::ArtifactError>(mixed_limits).code == ar::ArtifactErrorCode::identity);
+
     auto unsupported_integration_plant = adaptive_plant;
     unsupported_integration_plant.integration = static_cast<sim::IntegrationMethod>(99);
     unsupported_integration_plant.numerical = NumericalPolicy{1e-8, 1e-8};
@@ -354,6 +365,12 @@ TEST_CASE("4D selected linear witnesses retain separate nonlinear replay and 2D 
     REQUIRE(std::holds_alternative<problem::ResolvedContent>(unavailable_decoded));
     CHECK(std::get<problem::ResolvedContent>(unavailable_decoded).digest() == unavailable_content.digest());
 
+    auto missing_dynamics_plant = adaptive_plant;
+    missing_dynamics_plant.dynamics = {};
+    const auto missing_dynamics = sim::replay(missing_dynamics_plant, source.plot.paths[0].controls);
+    CHECK(missing_dynamics.status == sim::ReplayStatus::unavailable);
+    CHECK(missing_dynamics.integration_limits == missing_dynamics_plant.integration_limits);
+
     std::stop_source pre_cancelled;
     pre_cancelled.request_stop();
     ExecutionContext cancelled_context;
@@ -361,7 +378,7 @@ TEST_CASE("4D selected linear witnesses retain separate nonlinear replay and 2D 
     source.replays = {sim::replay(adaptive_plant, source.plot.paths[0].controls, cancelled_context),
         sim::replay(adaptive_plant, source.plot.paths[1].controls, cancelled_context)};
     REQUIRE(source.replays[0].status == sim::ReplayStatus::cancelled);
-    CHECK(source.replays[0].integration_limits == std::nullopt);
+    CHECK(source.replays[0].integration_limits == adaptive_plant.integration_limits);
     CHECK(source.replays[0].integration_receipts.empty());
     auto cancelled_association = ex::associate_replays(source.problem, source.plot,
         {source.plot.run, problem::ContentDigest{}}, source.replays, "kg/s");
@@ -373,7 +390,7 @@ TEST_CASE("4D selected linear witnesses retain separate nonlinear replay and 2D 
     const std::string cancelled_wire(reinterpret_cast<const char*>(cancelled_content.bytes().data()),
         cancelled_content.bytes().size());
     const auto cancelled_json = nlohmann::json::parse(cancelled_wire);
-    CHECK(cancelled_json["witnesses"][0]["replay"]["integration_limits"].is_null());
+    CHECK(cancelled_json["witnesses"][0]["replay"]["integration_limits"]["absolute_tolerance"] == 1e-8);
     CHECK(cancelled_json["witnesses"][0]["replay"]["integration_receipts"].empty());
     const auto cancelled_decoded = ex::decode_replay_comparison(cancelled_wire);
     REQUIRE(std::holds_alternative<problem::ResolvedContent>(cancelled_decoded));

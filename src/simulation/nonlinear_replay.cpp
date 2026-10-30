@@ -28,6 +28,7 @@ ReplayRecord replay(const Plant& plant, std::span<const Vector> controls,
     result.integration = plant.integration;
     result.hold = plant.hold;
     result.numerical = plant.numerical;
+    result.integration_limits = plant.integration_limits;
     result.integration_residual = plant.integration == IntegrationMethod::exact_discrete_map
         ? IntegrationResidualEvidence{IntegrationResidualNotApplicable{}}
         : IntegrationResidualEvidence{IntegrationResidualUnavailable{
@@ -193,7 +194,6 @@ ReplayRecord replay(const Plant& plant, std::span<const Vector> controls,
                         return finish();
                     }
                     const double h = next_time-time;
-                    result.integration_limits = plant.integration_limits;
                     const auto full = rk4(time, h, state);
                     const auto first = rk4(time, half_time-time, state);
                     const auto two_half = rk4(half_time, next_time-half_time, first);
