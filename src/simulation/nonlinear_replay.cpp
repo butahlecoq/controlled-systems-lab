@@ -140,7 +140,6 @@ ReplayRecord replay(const Plant& plant, std::span<const Vector> controls,
                 return finish();
             }
         } else {
-            result.integration_limits = plant.integration_limits;
             const auto& limits = *plant.integration_limits;
             const double start = (*plant.times)[stage], end = (*plant.times)[stage + 1];
             auto derivative = [&](double time, std::span<const double> state) {
@@ -194,6 +193,7 @@ ReplayRecord replay(const Plant& plant, std::span<const Vector> controls,
                         return finish();
                     }
                     const double h = next_time-time;
+                    result.integration_limits = plant.integration_limits;
                     const auto full = rk4(time, h, state);
                     const auto first = rk4(time, half_time-time, state);
                     const auto two_half = rk4(half_time, next_time-half_time, first);
