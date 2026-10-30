@@ -538,6 +538,8 @@ set_property(DIRECTORY APPEND PROPERTY CMAKE_CONFIGURE_DEPENDS
     ${CMAKE_CURRENT_SOURCE_DIR}/benchmarks/reporting/env717/time_sphere.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/benchmarks/reporting/env717/time_sphere_minimax.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/benchmarks/reporting/env717/two_particle_minimax.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/benchmarks/reporting/env717/homicidal_chauffeur.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/benchmarks/scenarios/env717-homicidal-chauffeur-pilot-v1.json
     ${CMAKE_CURRENT_SOURCE_DIR}/benchmarks/scenarios/env717-two-particle-game-pilot-v1.json
     ${CMAKE_CURRENT_SOURCE_DIR}/benchmarks/reporting/env717/multipoint_cost_game.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/benchmarks/reporting/env717/broken_triangle.cpp
@@ -563,6 +565,10 @@ file(SHA256 ${CMAKE_CURRENT_SOURCE_DIR}/benchmarks/reporting/env717/time_sphere_
     ENV717_TIME_SPHERE_MINIMAX_DRIVER_SHA256)
 file(SHA256 ${CMAKE_CURRENT_SOURCE_DIR}/benchmarks/reporting/env717/two_particle_minimax.cpp
     ENV717_TWO_PARTICLE_DRIVER_SHA256)
+file(SHA256 ${CMAKE_CURRENT_SOURCE_DIR}/benchmarks/reporting/env717/homicidal_chauffeur.cpp
+    ENV717_HOMICIDAL_DRIVER_SHA256)
+file(SHA256 ${CMAKE_CURRENT_SOURCE_DIR}/benchmarks/scenarios/env717-homicidal-chauffeur-pilot-v1.json
+    ENV717_HOMICIDAL_SCENARIO_SHA256)
 file(SHA256 ${CMAKE_CURRENT_SOURCE_DIR}/benchmarks/scenarios/env717-two-particle-game-pilot-v1.json
     ENV717_TWO_PARTICLE_SCENARIO_SHA256)
 file(SHA256 ${CMAKE_CURRENT_SOURCE_DIR}/benchmarks/reporting/env717/multipoint_cost_game.cpp
@@ -598,6 +604,7 @@ add_executable(csl_env717_point_on_plane benchmarks/reporting/env717/point_on_pl
 add_executable(csl_env717_time_sphere benchmarks/reporting/env717/time_sphere.cpp)
 add_executable(csl_env717_time_sphere_minimax benchmarks/reporting/env717/time_sphere_minimax.cpp)
 add_executable(csl_env717_two_particle_minimax benchmarks/reporting/env717/two_particle_minimax.cpp)
+add_executable(csl_env717_homicidal_chauffeur benchmarks/reporting/env717/homicidal_chauffeur.cpp)
 add_executable(csl_env717_multipoint_cost_game benchmarks/reporting/env717/multipoint_cost_game.cpp)
 add_executable(csl_env717_broken_triangle benchmarks/reporting/env717/broken_triangle.cpp)
 target_link_libraries(csl_env717_simple_control PRIVATE CSL::finite_action_minimax)
@@ -611,6 +618,8 @@ target_link_libraries(csl_env717_time_sphere PRIVATE CSL::finite_feedback)
 target_link_libraries(csl_env717_time_sphere_minimax PRIVATE
     CSL::finite_feedback CSL::finite_causal_minimax)
 target_link_libraries(csl_env717_two_particle_minimax PRIVATE
+    CSL::finite_feedback CSL::finite_causal_minimax)
+target_link_libraries(csl_env717_homicidal_chauffeur PRIVATE
     CSL::finite_feedback CSL::finite_causal_minimax)
 target_link_libraries(csl_env717_multipoint_cost_game PRIVATE
     CSL::finite_action_minimax CSL::finite_causal_minimax)
@@ -626,6 +635,7 @@ target_include_directories(csl_env717_point_on_plane SYSTEM PRIVATE ${csl_json_S
 target_include_directories(csl_env717_time_sphere SYSTEM PRIVATE ${csl_json_SOURCE_DIR}/include)
 target_include_directories(csl_env717_time_sphere_minimax SYSTEM PRIVATE ${csl_json_SOURCE_DIR}/include)
 target_include_directories(csl_env717_two_particle_minimax SYSTEM PRIVATE ${csl_json_SOURCE_DIR}/include)
+target_include_directories(csl_env717_homicidal_chauffeur SYSTEM PRIVATE ${csl_json_SOURCE_DIR}/include)
 target_include_directories(csl_env717_multipoint_cost_game SYSTEM PRIVATE ${csl_json_SOURCE_DIR}/include)
 target_include_directories(csl_env717_broken_triangle SYSTEM PRIVATE ${csl_json_SOURCE_DIR}/include)
 target_compile_features(csl_env717_simple_control PRIVATE cxx_std_20)
@@ -638,6 +648,7 @@ target_compile_features(csl_env717_point_on_plane PRIVATE cxx_std_20)
 target_compile_features(csl_env717_time_sphere PRIVATE cxx_std_20)
 target_compile_features(csl_env717_time_sphere_minimax PRIVATE cxx_std_20)
 target_compile_features(csl_env717_two_particle_minimax PRIVATE cxx_std_20)
+target_compile_features(csl_env717_homicidal_chauffeur PRIVATE cxx_std_20)
 target_compile_features(csl_env717_multipoint_cost_game PRIVATE cxx_std_20)
 target_compile_features(csl_env717_broken_triangle PRIVATE cxx_std_20)
 target_compile_definitions(csl_env717_simple_control PRIVATE
@@ -732,6 +743,16 @@ target_compile_definitions(csl_env717_two_particle_minimax PRIVATE
     CSL_ENV717_TWO_PARTICLE_ALGORITHM_SHA256="${ENV717_ALGORITHM_SOURCE_SHA256}"
     CSL_ENV717_TWO_PARTICLE_SCENARIO_SHA256="${ENV717_TWO_PARTICLE_SCENARIO_SHA256}"
     CSL_ENV717_TWO_PARTICLE_SOURCE_COMMIT="${ENV717_SOURCE_COMMIT}")
+target_compile_definitions(csl_env717_homicidal_chauffeur PRIVATE
+    $<$<CONFIG:Release>:NDEBUG>
+    CSL_ENV717_HOMICIDAL_DRIVER_SHA256="${ENV717_HOMICIDAL_DRIVER_SHA256}"
+    CSL_ENV717_HOMICIDAL_COMPILER_ID="${CMAKE_CXX_COMPILER_ID}"
+    CSL_ENV717_HOMICIDAL_COMPILER_VERSION="${CMAKE_CXX_COMPILER_VERSION}"
+    CSL_ENV717_HOMICIDAL_BUILD_TYPE="${CMAKE_BUILD_TYPE}"
+    CSL_ENV717_HOMICIDAL_ARCHITECTURE="${CMAKE_SYSTEM_PROCESSOR}"
+    CSL_ENV717_HOMICIDAL_ALGORITHM_SHA256="${ENV717_ALGORITHM_SOURCE_SHA256}"
+    CSL_ENV717_HOMICIDAL_SCENARIO_SHA256="${ENV717_HOMICIDAL_SCENARIO_SHA256}"
+    CSL_ENV717_HOMICIDAL_SOURCE_COMMIT="${ENV717_SOURCE_COMMIT}")
 target_compile_definitions(csl_env717_multipoint_cost_game PRIVATE
     $<$<CONFIG:Release>:NDEBUG>
     CSL_ENV717_MULTIPOINT_DRIVER_SHA256="${ENV717_MULTIPOINT_DRIVER_SHA256}"
@@ -761,6 +782,7 @@ if(MSVC)
     target_compile_options(csl_env717_time_sphere PRIVATE /W4 /WX /permissive-)
     target_compile_options(csl_env717_time_sphere_minimax PRIVATE /W4 /WX /permissive-)
     target_compile_options(csl_env717_two_particle_minimax PRIVATE /W4 /WX /permissive-)
+    target_compile_options(csl_env717_homicidal_chauffeur PRIVATE /W4 /WX /permissive-)
     target_compile_options(csl_env717_multipoint_cost_game PRIVATE /W4 /WX /permissive-)
     target_compile_options(csl_env717_broken_triangle PRIVATE /W4 /WX /permissive-)
 else()
@@ -774,6 +796,7 @@ else()
     target_compile_options(csl_env717_time_sphere PRIVATE -Wall -Wextra -Wpedantic -Werror)
     target_compile_options(csl_env717_time_sphere_minimax PRIVATE -Wall -Wextra -Wpedantic -Werror)
     target_compile_options(csl_env717_two_particle_minimax PRIVATE -Wall -Wextra -Wpedantic -Werror)
+    target_compile_options(csl_env717_homicidal_chauffeur PRIVATE -Wall -Wextra -Wpedantic -Werror)
     target_compile_options(csl_env717_multipoint_cost_game PRIVATE -Wall -Wextra -Wpedantic -Werror)
     target_compile_options(csl_env717_broken_triangle PRIVATE -Wall -Wextra -Wpedantic -Werror)
 endif()
@@ -819,6 +842,10 @@ if(BUILD_TESTING)
         ${CMAKE_CURRENT_SOURCE_DIR}/scripts/reports/env717/check_two_particle_minimax.py
         $<TARGET_FILE:csl_env717_two_particle_minimax>)
     set_tests_properties(env717_two_particle_minimax_smoke PROPERTIES LABELS reporting)
+    add_test(NAME env717_homicidal_chauffeur_smoke COMMAND Python3::Interpreter
+        ${CMAKE_CURRENT_SOURCE_DIR}/scripts/reports/env717/check_homicidal_chauffeur.py
+        $<TARGET_FILE:csl_env717_homicidal_chauffeur>)
+    set_tests_properties(env717_homicidal_chauffeur_smoke PROPERTIES LABELS reporting)
     add_test(NAME env717_multipoint_cost_game_smoke COMMAND Python3::Interpreter
         ${CMAKE_CURRENT_SOURCE_DIR}/scripts/reports/env717/check_multipoint_cost_game.py
         $<TARGET_FILE:csl_env717_multipoint_cost_game>)

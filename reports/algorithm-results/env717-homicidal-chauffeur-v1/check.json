@@ -1,0 +1,10 @@
+{
+  "backward_layers_checked": 5,
+  "finite_causal_minimax_terminal_separation": 7.778040783932288,
+  "first_robust_capture_steps": 4,
+  "forward_states_checked": 2144,
+  "schema": "csl.env717-homicidal-chauffeur-check/1",
+  "status": "verified",
+  "trajectory_steps_checked": 4,
+  "transition_cells_checked": 5928
+}

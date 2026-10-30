@@ -1,0 +1,89 @@
+{
+  "adaptation": {
+    "evader_heading_catalogue_radians": [
+      0.0,
+      1.5707963267948966,
+      3.141592653589793,
+      4.71238898038469
+    ],
+    "horizon_seconds": 0.4,
+    "horizon_steps": 4,
+    "information_pattern": "finite causal response: pursuer chooses from the current state, then evader observes that turn rate and responds before the next state is observed",
+    "initial_state": [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      2.5,
+      7.5
+    ],
+    "interpretation": "source-derived finite game; not a reproduction of the continuous-action RL result",
+    "objective_orientation": "analysis adaptation: pursuer turn rate minimizes terminal Euclidean separation and evader heading maximizes it; source returns positive separation but does not specify per-agent payoff signs",
+    "reachability_target": "terminal Euclidean pursuer-evader distance <= 7.8",
+    "state_quantization": "round each source RK4 outer update to the nearest 1e-6 lattice point",
+    "state_quantization_scale": 1000000,
+    "turn_rate_catalogue": [
+      -1.0,
+      0.0,
+      1.0
+    ]
+  },
+  "numerics": {
+    "native_solver_threads": 1,
+    "propagation": "10-step RK4 with held actions over each 0.1-second decision stage; state rounded once per stage",
+    "requested_workers": 1,
+    "solver_value_tolerance": 1e-12,
+    "value": "terminal Euclidean separation"
+  },
+  "scenario_id": "env717-homicidal-chauffeur-pilot-v1",
+  "schema": "csl.env717-homicidal-chauffeur-input/1",
+  "source": {
+    "blob": "f770a5c81c363ba628c987ee70f84af483c81b10",
+    "commit": "af5f0a2ee498c0edcf88d60f1d6c49a39bd08bc8",
+    "license": "Apache-2.0",
+    "license_blob": "261eeb9e9f8b2b4b0d119366dda99c6fd7d35c64",
+    "license_path": "LICENSE",
+    "path": "Environments/HomicidalChauffeur/HomicidalChauffeur.py",
+    "repository": "https://github.com/imm-rl-lab/differential_game_gym"
+  },
+  "source_model": {
+    "default_initial_state": [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      2.5,
+      7.5
+    ],
+    "dt_seconds": 0.1,
+    "dynamics": [
+      "time'=1",
+      "pursuer_x'=3*cos(heading)",
+      "pursuer_y'=3*sin(heading)",
+      "heading'=u",
+      "evader_x'=cos(v)",
+      "evader_y'=sin(v)"
+    ],
+    "evader_heading_v_bounds": [
+      0.0,
+      6.283185307179586
+    ],
+    "evader_speed": 1.0,
+    "inner_rk4_steps": 10,
+    "pursuer_speed": 3.0,
+    "state_order": [
+      "time",
+      "pursuer_x",
+      "pursuer_y",
+      "pursuer_heading",
+      "evader_x",
+      "evader_y"
+    ],
+    "terminal_reward": "positive euclidean_distance(pursuer_position, evader_position); source code does not encode per-agent payoff signs",
+    "terminal_time_seconds": 4.0,
+    "turn_rate_u_bounds": [
+      -1.0,
+      1.0
+    ]
+  }
+}

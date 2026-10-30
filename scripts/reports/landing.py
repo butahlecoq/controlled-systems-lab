@@ -493,6 +493,16 @@ FAMILIES = {
         "shown in position (x1,x2) and velocity (v1,v2) projections. The pilot changes the initial "
         "state and shortens the horizon; the finite solver gives the disturbance player a stronger "
         "within-stage information pattern. This is not a continuous-action RL reproduction."),
+    "env717-homicidal-chauffeur": Family(
+        r"env717-homicidal-chauffeur-[0-9a-f]{20}", "synthesis",
+        "HomicidalChauffeur finite reachability and minimax",
+        "Applies finite-feedback reachability and causal minimax to a quantized source-derived "
+        "pursuit-evasion game. The figure shows forward states, projected convex envelopes, "
+        "backward-winning intersections and a worst-case path in pursuer and evader position "
+        "planes. Five fresh-process runtime observations describe this adapter on one machine. "
+        "The four-stage action catalogues, capture radius, sequential response and zero-sum payoff "
+        "signs are explicit analysis adaptations; this is not a continuous-action RL reproduction "
+        "or a performance comparison."),
     "syn06-verifier": Family(
         r"syn06-verifier-\d{8}-[0-9a-f]{64}", "verification", "Trajectory verification",
         "Re-checks two literal two-stage integrator witnesses against the original saved input "

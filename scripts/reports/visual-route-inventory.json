@@ -105,6 +105,15 @@
       "disposition": "saved-control-witness-gallery-companion-builder"
     },
     {
+      "source": "scripts/reports/env717/capture_homicidal_chauffeur.py",
+      "signal_count": 3,
+      "asset_name_literals": [
+        "projections.svg"
+      ],
+      "disposition": "deferred-family-specific-migration",
+      "follow_up_issue": 717
+    },
+    {
       "source": "scripts/reports/env717/capture_two_particle_minimax.py",
       "signal_count": 3,
       "asset_name_literals": [
@@ -897,6 +906,14 @@
       "disposition": "publication-validation-or-frozen-route"
     },
     {
+      "source": "scripts/reports/stage_env717_homicidal_chauffeur.py",
+      "signal_count": 3,
+      "asset_name_literals": [
+        "projections.svg"
+      ],
+      "disposition": "publication-validation-or-frozen-route"
+    },
+    {
       "source": "scripts/reports/stage_env717_max_coordinate.py",
       "signal_count": 4,
       "asset_name_literals": [
@@ -1673,6 +1690,16 @@
         "projections.svg"
       ],
       "index_sha256": "c62cef0f1802192d7e68d06780a0b19dd08dba2252acc877bdc72fa787473d3d",
+      "disposition": "deferred: original frozen route-level readability review remains; companion availability is listed separately",
+      "follow_up_issue": 717
+    },
+    {
+      "route": "env717-homicidal-chauffeur-v1",
+      "source_bundle": "env717-homicidal-chauffeur-v1",
+      "assets": [
+        "projections.svg"
+      ],
+      "index_sha256": "fa36870c1e692719d7a4f8390efcd0e31d6150e59cc27a81fc718af12b246023",
       "disposition": "deferred: original frozen route-level readability review remains; companion availability is listed separately",
       "follow_up_issue": 717
     },
