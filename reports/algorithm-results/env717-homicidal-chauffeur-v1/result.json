@@ -36,7 +36,7 @@
     "driver_sha256": "f112a0c1e039b38277c62c1176b98b6b3f3de7b3b1b2a2d5340e00b206882beb",
     "native_solver_threads": 1,
     "requested_workers": 1,
-    "source_commit": "b9b56f904051e709b9162be97a8e01701aa19a31"
+    "source_commit": "7c8fbb45cfafdf7c0ada76a9917c7c4ddf056cbd"
   },
   "capture_horizon_sweep": [
     {

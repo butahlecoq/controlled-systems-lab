@@ -1,7 +1,7 @@
 {
   "algorithm_source_sha256": "cac9ea19d95c4fba53351f7b2580015882a63f6725bb5c622529c140f507873a",
   "build_type": "Release",
-  "captured_at_utc": "2026-10-30T00:19:05+00:00",
+  "captured_at_utc": "2026-10-30T00:23:14+00:00",
   "command": "csl_env717_homicidal_chauffeur",
   "compiler": {
     "algorithm_source_sha256": "cac9ea19d95c4fba53351f7b2580015882a63f6725bb5c622529c140f507873a",
@@ -12,60 +12,89 @@
     "driver_sha256": "f112a0c1e039b38277c62c1176b98b6b3f3de7b3b1b2a2d5340e00b206882beb",
     "native_solver_threads": 1,
     "requested_workers": 1,
-    "source_commit": "b9b56f904051e709b9162be97a8e01701aa19a31"
+    "source_commit": "7c8fbb45cfafdf7c0ada76a9917c7c4ddf056cbd"
   },
   "driver_source_sha256": "f112a0c1e039b38277c62c1176b98b6b3f3de7b3b1b2a2d5340e00b206882beb",
-  "executable_sha256": "27574f3b57615b430ddf1184e51135f8f123636e937eca31b5810320f2d5de25",
+  "executable_sha256": "f9630d6e4948417a533ca7d42f2ed7876f34a6d06860804efef5776105e1abc3",
+  "host": {
+    "cpu_model": {
+      "source": "/proc/cpuinfo",
+      "unavailable_reason": null,
+      "value": "AMD Ryzen 5 3550H with Radeon Vega Mobile Gfx"
+    },
+    "logical_cpu_count": 8,
+    "total_ram_bytes": {
+      "source": "/proc/meminfo MemTotal",
+      "unavailable_reason": null,
+      "value": 8108216320
+    }
+  },
+  "load_after": {
+    "averages_1_5_15_minutes": [
+      0.79248046875,
+      0.470703125,
+      0.33642578125
+    ],
+    "unavailable_reason": null
+  },
+  "load_before": {
+    "averages_1_5_15_minutes": [
+      0.79248046875,
+      0.470703125,
+      0.33642578125
+    ],
+    "unavailable_reason": null
+  },
   "machine": "x86_64",
   "operating_system": "Linux-7.2.8-9-omarchy-x86_64-with-glibc2.44",
   "python": "3.14.8",
   "scenario_sha256": "09c37ae48f8c1898b6f9eae0c046750f6b80e252787901fbe197865ae69a5fdb",
   "schema": "csl.env717-homicidal-chauffeur-capture/1",
   "solver_failures": 0,
-  "source_commit": "b9b56f904051e709b9162be97a8e01701aa19a31",
+  "source_commit": "7c8fbb45cfafdf7c0ada76a9917c7c4ddf056cbd",
   "timing": {
     "boundary": "perf_counter_ns immediately before subprocess.run through process exit and captured stdout/stderr; includes launch, graph construction, solution and JSON output; excludes build, independent replay and report rendering",
     "durations_ns": [
-      37484516,
-      34832832,
-      37174208,
-      22894911,
-      30315743
+      36115687,
+      24426264,
+      23496739,
+      23164432,
+      25437434
     ],
     "identical_stdout": true,
-    "maximum_ns": 37484516,
-    "maximum_seconds": 0.037484516,
-    "median_ns": 34832832,
-    "median_seconds": 0.034832832,
+    "maximum_ns": 36115687,
+    "maximum_seconds": 0.036115687,
+    "median_ns": 24426264,
+    "median_seconds": 0.024426264,
     "method": "single-adapter descriptive runtime; no comparison or speedup claim",
-    "minimum_ns": 22894911,
-    "minimum_seconds": 0.022894911,
+    "minimum_ns": 23164432,
+    "minimum_seconds": 0.023164432,
     "repetitions": 5,
     "run_outputs": [
       {
-        "duration_ns": 37484516,
+        "duration_ns": 36115687,
         "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-        "stdout_sha256": "0a5f5bbc7b87822ae99cc3d488680e0527dbf7aace1d7c8c03b239aee8d8f23a"
+        "stdout_sha256": "5c6a63e6cd7110a7decca6224bf719ffd3d14f8057292813edf4f7c75caad3d8"
       },
       {
-        "duration_ns": 34832832,
+        "duration_ns": 24426264,
         "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-        "stdout_sha256": "0a5f5bbc7b87822ae99cc3d488680e0527dbf7aace1d7c8c03b239aee8d8f23a"
+        "stdout_sha256": "5c6a63e6cd7110a7decca6224bf719ffd3d14f8057292813edf4f7c75caad3d8"
       },
       {
-        "duration_ns": 37174208,
+        "duration_ns": 23496739,
         "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-        "stdout_sha256": "0a5f5bbc7b87822ae99cc3d488680e0527dbf7aace1d7c8c03b239aee8d8f23a"
+        "stdout_sha256": "5c6a63e6cd7110a7decca6224bf719ffd3d14f8057292813edf4f7c75caad3d8"
       },
       {
-        "duration_ns": 22894911,
+        "duration_ns": 23164432,
         "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-        "stdout_sha256": "0a5f5bbc7b87822ae99cc3d488680e0527dbf7aace1d7c8c03b239aee8d8f23a"
+        "stdout_sha256": "5c6a63e6cd7110a7decca6224bf719ffd3d14f8057292813edf4f7c75caad3d8"
       },
       {
-        "duration_ns": 30315743,
+        "duration_ns": 25437434,
         "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-        "stdout_sha256": "0a5f5bbc7b87822ae99cc3d488680e0527dbf7aace1d7c8c03b239aee8d8f23a"
+        "stdout_sha256": "5c6a63e6cd7110a7decca6224bf719ffd3d14f8057292813edf4f7c75caad3d8"
       }
     ],
     "sample_policy": "five fresh process launches; one result per process",
