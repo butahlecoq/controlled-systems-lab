@@ -860,6 +860,14 @@
       "role_and_disposition_reason": "Generic report exporter validates and copies a supplied saved figure; it does not produce quantitative plot data."
     },
     {
+      "source": "scripts/reports/render_adaptive_ode_example.py",
+      "signal_count": 2,
+      "asset_name_literals": [
+        "adaptive-ode-replay.svg"
+      ],
+      "disposition": "analytic-reference-checked-saved-run-renderer"
+    },
+    {
       "source": "scripts/reports/report_data.py",
       "signal_count": 1,
       "asset_name_literals": [],
@@ -1430,8 +1438,9 @@
     },
     {
       "source": "scripts/reports/visual_examples.py",
-      "signal_count": 62,
+      "signal_count": 65,
       "asset_name_literals": [
+        "adaptive-ode-replay.svg",
         "app01-plan-timing-v1.svg",
         "app02-diamond-v1.svg",
         "app03-zonotope-v1.svg",
@@ -2640,6 +2649,10 @@
         "mpc03-b08-l04-miQCP-v1/solver-output.json",
         "mpc03-b08-l04-miQCP-v1/independent-oracle.json",
         "mpc03-b08-l04-miQCP-v1/disturbance-tube.svg",
+        "adaptive-ode-replay.html",
+        "adaptive-ode-replay.csv",
+        "adaptive-ode-replay.svg",
+        "adaptive-ode-replay.json",
         "geometry-optimization-v1.html",
         "geometry-opt/geo02/figure.svg",
         "geometry-opt/geo02/figure.png",

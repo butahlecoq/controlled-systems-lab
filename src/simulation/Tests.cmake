@@ -2,3 +2,7 @@ add_executable(nonlinear_replay_tests tests/unit/simulation/nonlinear_replay_tes
 target_link_libraries(nonlinear_replay_tests PRIVATE CSL::simulation doctest::doctest)
 add_test(NAME nonlinear_replay_tests COMMAND nonlinear_replay_tests)
 csl_test_target(nonlinear_replay_tests simulation)
+add_executable(adaptive_ode_replay_example ${PROJECT_SOURCE_DIR}/examples/adaptive_ode_replay.cpp)
+target_link_libraries(adaptive_ode_replay_example PRIVATE CSL::simulation)
+add_test(NAME adaptive_ode_replay_example COMMAND adaptive_ode_replay_example)
+csl_test_target(adaptive_ode_replay_example simulation)

@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Adaptive RK4 nonlinear replay · Controlled Systems Lab</title>
+  <style>
+    :root{color-scheme:dark;--bg:#172019;--panel:#202b22;--fg:#d1d9cc;--muted:#a9b6a8;--accent:#d9ad68}
+    *{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--fg);font:16px/1.65 system-ui,sans-serif}
+    main{max-width:920px;margin:auto;padding:2rem 1.25rem 4rem}h1,h2{line-height:1.2}h1{font-size:clamp(2rem,5vw,3.2rem)}
+    a{color:var(--accent)}figure{margin:1.5rem 0;background:var(--panel);padding:1rem;border-radius:12px}
+    img{display:block;width:100%;height:auto}pre{overflow:auto;background:#101711;padding:1rem;border-radius:8px;color:#dbe6d5}
+    .note{color:var(--muted)}
+  </style>
+</head>
+<body><main>
+  <p><a href="index.html">Visual examples</a> / Numerical integration</p>
+  <h1>Adaptive RK4 replay of a two-state oscillator</h1>
+  <p>This 2D example integrates <code>x′ = y</code>, <code>y′ = −x</code> from
+    <code>(x,y)=(1,0)</code> through one full period. The blue curve and markers are
+    produced by the CSL adaptive RK4 step-doubling replay. The dashed amber curve is
+    the independent analytic solution <code>(cos t, −sin t)</code>.</p>
+  <figure><img src="adaptive-ode-replay.svg" alt="The adaptive numerical trajectory follows the analytic unit circle in the x-y phase plane.">
+    <figcaption>Phase-plane trajectory. The calculation uses 64 held zero-control intervals;
+      the controls do not enter this oscillator. Local step-doubling estimates are observations,
+      not certified global error bounds.</figcaption></figure>
+  <h2>Reproduce the saved data</h2>
+  <p>The source is <a href="https://github.com/butahlecoq/controlled-systems-lab/blob/main/examples/adaptive_ode_replay.cpp">the installed public-client example</a>.
+    The raw state and analytic-reference rows are available as <a href="adaptive-ode-replay.csv">CSV</a>.</p>
+  <pre><code>cmake -S examples -B build/examples -DCMAKE_PREFIX_PATH=&lt;CSL-install-prefix&gt;
+cmake --build build/examples --target adaptive_ode_replay
+build/examples/adaptive_ode_replay &gt; docs/examples/adaptive-ode-replay.csv
+python3 scripts/reports/render_adaptive_ode_example.py \
+  --record docs/examples/adaptive-ode-replay.csv \
+  --output docs/examples/adaptive-ode-replay.svg</code></pre>
+  <p class="note">This demonstrates a supported numerical replay method. It is not a control optimization,
+    reachable-set boundary, B04 reproduction, or optimality claim. The repository remains pre-release;
+    use a local CSL install built from the reviewed source.</p>
+</main></body></html>

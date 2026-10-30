@@ -522,6 +522,12 @@ def build(catalog, site):
     examples = load_examples(catalog)
     site = Path(site).resolve(strict=True)
     saved_figures, saved_inventory = saved_figure_sections(catalog, site)
+    saved_figures += ('<article class="saved-figure" id="adaptive-ode-rk4"><p class="eyebrow">Numerical integration · Saved example</p>'
+        '<h3><a href="adaptive-ode-replay.html">Adaptive RK4 replay of a two-state oscillator</a></h3>'
+        '<a href="adaptive-ode-replay.html"><img src="adaptive-ode-replay.svg" alt="Adaptive numerical trajectory follows an analytic unit circle in the x-y phase plane"></a>'
+        '<p>The installed CSL replay client integrates a two-state harmonic oscillator and compares its recorded path with the analytic solution.</p>'
+        '<p><a href="adaptive-ode-replay.html">Inputs, answer and reproduction details ↗</a> · '
+        '<a href="adaptive-ode-replay.json">Raw record ↗</a></p></article>')
     fuel_layer_files, fuel_layer_inventory, fuel_layer_card = visual_example_fuel_layers.build(
         Path(__file__).resolve().parents[2])
     saved_figures += fuel_layer_card
@@ -544,12 +550,24 @@ def build(catalog, site):
     require(not out.is_symlink(), "gallery output must not be a symlink")
     outputs = {e["slug"] + ".svg": plot(e) for e in examples}
     outputs.update(analytic_files)
+    adaptive_assets = Path(__file__).parents[2] / "docs/examples"
+    for name in ("adaptive-ode-replay.html", "adaptive-ode-replay.csv",
+                 "adaptive-ode-replay.svg", "adaptive-ode-replay.json"):
+        source = adaptive_assets / name
+        require(source.is_file() and not source.is_symlink(), "missing adaptive ODE example asset: " + name)
+        outputs[name] = source.read_bytes() if source.suffix != ".html" else source.read_text(encoding="utf-8")
     with tempfile.TemporaryDirectory(prefix="csl-gallery-geometry-") as temporary:
         geometry_root = Path(temporary) / "examples"
         _, geometry_inventory, geometry_assets = geometry_opt_companions.build(geometry_root)
         for asset in geometry_assets:
             outputs[asset] = (geometry_root / asset).read_bytes()
     gallery_inventory = []
+    gallery_inventory.append({"family": "Numerical integration",
+        "title": "Adaptive RK4 replay of a two-state oscillator",
+        "status": "saved-data-companion", "anchor": "adaptive-ode-rk4",
+        "page": "adaptive-ode-replay.html", "figure": "adaptive-ode-replay.svg",
+        "source_page": "https://github.com/butahlecoq/controlled-systems-lab/blob/main/examples/adaptive_ode_replay.cpp",
+        "raw_record": "adaptive-ode-replay.json"})
     control_witness = control_witness_companions.build(site, catalog)
     outputs.update(control_witness.files)
     gallery_inventory.extend(control_witness.gallery_entries)

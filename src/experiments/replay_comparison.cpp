@@ -116,7 +116,17 @@ Json replay_json(const simulation::ReplayRecord& replay) {
     for (const auto& item : replay.diagnostics)
         diagnostics.push_back({{"code", diagnostic_code(item.code)}, {"field", item.field},
             {"explanation", item.explanation}});
-    Json integration = replay.integration ? Json("exact_discrete_map") : Json(nullptr);
+    Json integration = nullptr;
+    if (replay.integration) {
+        switch (*replay.integration) {
+        case simulation::IntegrationMethod::exact_discrete_map:
+            integration = "exact_discrete_map";
+            break;
+        case simulation::IntegrationMethod::adaptive_rk4_step_doubling:
+            integration = "adaptive_rk4_step_doubling";
+            break;
+        }
+    }
     Json hold = replay.hold ? Json("constant_on_interval") : Json(nullptr);
     Json initial = replay.declared_initial_state ? Json(*replay.declared_initial_state) : Json(nullptr);
     Json objective = replay.original_objective ? Json(*replay.original_objective) : Json(nullptr);
@@ -140,6 +150,13 @@ Json replay_json(const simulation::ReplayRecord& replay) {
         ? Json{{"absolute_tolerance", replay.numerical->absolute_tolerance},
             {"relative_tolerance", replay.numerical->relative_tolerance}}
         : Json(nullptr);
+    Json limits = replay.integration_limits ? Json{{"absolute_tolerance", replay.integration_limits->absolute_tolerance},
+        {"relative_tolerance", replay.integration_limits->relative_tolerance},
+        {"max_attempts_per_interval", replay.integration_limits->max_attempts_per_interval}} : Json(nullptr);
+    Json receipts = Json::array();
+    for (const auto& item : replay.integration_receipts)
+        receipts.push_back({{"accepted_steps", item.accepted_steps}, {"rejected_steps", item.rejected_steps},
+            {"max_accepted_local_error_estimates", item.max_accepted_local_error_estimates}});
     return {{"status", replay_status(replay.status)},
         {"plant", {{"name", replay.plant.name}, {"version", replay.plant.version}, {"source", replay.plant.source}}},
         {"parameters", std::move(parameters)}, {"initial_state", std::move(initial)},
@@ -147,7 +164,8 @@ Json replay_json(const simulation::ReplayRecord& replay) {
         {"state_units", replay.state_units}, {"control_units", replay.control_units},
         {"objective_name", replay.objective_name}, {"objective_unit", replay.objective_unit},
         {"integration", std::move(integration)}, {"control_hold", std::move(hold)},
-        {"numerical_policy", std::move(numerical)}, {"integration_residual", std::move(residual)},
+        {"numerical_policy", std::move(numerical)}, {"integration_limits", std::move(limits)},
+        {"integration_receipts", std::move(receipts)}, {"integration_residual", std::move(residual)},
         {"controls", history_json(replay.controls)}, {"states", history_json(replay.states)},
         {"original_objective", std::move(objective)},
         {"replay_time_ns", std::chrono::duration_cast<std::chrono::nanoseconds>(replay.replay_time).count()},
@@ -176,7 +194,7 @@ Json comparison_json(const ReplayComparison& comparison) {
         controls.push_back(annotation_json(item));
     const auto axis_kind = comparison.state_axis.kind == artifacts::PlotAxis::Kind::stage
         ? "stage" : "physical_time";
-    return {{"schema", "csl.viz04-replay-comparison/2"},
+    return {{"schema", "csl.viz04-replay-comparison/3"},
         {"source_run", {{"run", comparison.source_run.run.value},
             {"content_sha256", problem::hex(comparison.source_run.content_digest)}}},
         {"problem", comparison.problem.value}, {"strategy", comparison.witnesses.empty()
@@ -318,8 +336,22 @@ bool integration_residual_document(const Json& residual) {
     return true;
 }
 
+bool integration_limits_document(const Json& limits) {
+    if (limits.is_null()) return true;
+    return limits.is_object() && limits.size() == 3 &&
+        limits.contains("absolute_tolerance") && finite_number(limits["absolute_tolerance"]) &&
+        limits["absolute_tolerance"].get<double>() >= 0.0 &&
+        limits.contains("relative_tolerance") && finite_number(limits["relative_tolerance"]) &&
+        limits["relative_tolerance"].get<double>() >= 0.0 &&
+        (limits["absolute_tolerance"].get<double>() > 0.0 ||
+         limits["relative_tolerance"].get<double>() > 0.0) &&
+        limits.contains("max_attempts_per_interval") &&
+        limits["max_attempts_per_interval"].is_number_unsigned() &&
+        limits["max_attempts_per_interval"].get<std::uint64_t>() > 0;
+}
+
 bool replay_document(const Json& replay, std::size_t state_dimensions,
-    std::size_t control_dimensions, std::size_t linear_intervals, bool version_two) {
+    std::size_t control_dimensions, std::size_t linear_intervals, bool version_two, bool version_three) {
     if (!replay.is_object() || !replay.contains("status") || !replay["status"].is_string() ||
         !replay.contains("plant") || !replay["plant"].is_object() ||
         !replay.contains("parameters") || !replay["parameters"].is_array() ||
@@ -340,7 +372,10 @@ bool replay_document(const Json& replay, std::size_t state_dimensions,
         (version_two && (!replay.contains("numerical_policy") ||
             !numerical_policy_document(replay["numerical_policy"]) ||
             !replay.contains("integration_residual") ||
-            !integration_residual_document(replay["integration_residual"])))) return false;
+            !integration_residual_document(replay["integration_residual"]))) ||
+        (version_three && (!replay.contains("integration_limits") ||
+            !integration_limits_document(replay["integration_limits"]) ||
+            !replay.contains("integration_receipts") || !replay["integration_receipts"].is_array()))) return false;
     if (!replay["replay_time_ns"].is_number_unsigned() &&
         replay["replay_time_ns"].get<std::int64_t>() < 0) return false;
     const auto& plant = replay["plant"];
@@ -357,8 +392,48 @@ bool replay_document(const Json& replay, std::size_t state_dimensions,
             if (residual_status != "unavailable") return false;
         } else {
             const auto method = replay["integration"].get<std::string>();
-            if (method.empty() ||
+            if ((method != "exact_discrete_map" && method != "adaptive_rk4_step_doubling") ||
                 (method == "exact_discrete_map") != (residual_status == "not_applicable")) return false;
+        }
+    }
+    if (version_three && replay["integration"].is_string()) {
+        const auto method = replay["integration"].get<std::string>();
+        const auto& receipts = replay["integration_receipts"];
+        if (method == "exact_discrete_map" && (!replay["integration_limits"].is_null() || !receipts.empty())) return false;
+        if (method == "adaptive_rk4_step_doubling") {
+            const bool has_limits = !replay["integration_limits"].is_null();
+            const auto residual_status = replay["integration_residual"]["status"].get<std::string>();
+            if ((!has_limits && (!receipts.empty() || residual_status != "unavailable" ||
+                    replay["status"] == "complete")) || receipts.size() > linear_intervals) return false;
+            std::size_t measurement_index = 0;
+            for (std::size_t interval = 0; interval < receipts.size(); ++interval) {
+                if (!has_limits) return false;
+                const auto& receipt = receipts[interval];
+                if (!receipt.is_object() || receipt.size() != 3 ||
+                    !receipt.contains("accepted_steps") || !receipt["accepted_steps"].is_number_unsigned() ||
+                    !receipt.contains("rejected_steps") || !receipt["rejected_steps"].is_number_unsigned() ||
+                    !receipt.contains("max_accepted_local_error_estimates") ||
+                    !finite_vector(receipt["max_accepted_local_error_estimates"]) ||
+                    receipt["max_accepted_local_error_estimates"].size() != state_dimensions) return false;
+                const auto accepted = receipt["accepted_steps"].get<std::uint64_t>();
+                const auto rejected = receipt["rejected_steps"].get<std::uint64_t>();
+                const auto budget = replay["integration_limits"]["max_attempts_per_interval"].get<std::uint64_t>();
+                if (accepted == 0 || accepted > budget || rejected > budget-accepted) return false;
+                for (std::size_t coordinate = 0; coordinate < state_dimensions; ++coordinate) {
+                    const auto& measurements = replay["integration_residual"]["measurements"];
+                    if (measurement_index >= measurements.size()) return false;
+                    const auto& measurement = measurements[measurement_index++];
+                    const auto expected_name = "interval[" + std::to_string(interval) + "].state[" +
+                        std::to_string(coordinate) + "]";
+                    if (measurement["name"] != expected_name ||
+                        measurement["value"] != receipt["max_accepted_local_error_estimates"][coordinate] ||
+                        measurement["unit"] != replay["state_units"][coordinate]) return false;
+                }
+            }
+            const auto expected_measurements = receipts.size() * state_dimensions;
+            const bool has_estimates = !receipts.empty();
+            if (measurement_index != expected_measurements ||
+                (has_estimates != (replay["integration_residual"]["status"] == "available"))) return false;
         }
     }
     for (const auto& diagnostic : replay["diagnostics"])
@@ -386,6 +461,10 @@ bool replay_document(const Json& replay, std::size_t state_dimensions,
             (version_two ? (replay["integration"].is_string() &&
                 !replay["integration"].get<std::string>().empty()) :
                 replay["integration"] == "exact_discrete_map") &&
+            (!version_three || replay["integration"].get<std::string>() != "adaptive_rk4_step_doubling" ||
+                (replay["integration_receipts"].size() == linear_intervals &&
+                 replay["integration_receipts"].size() == controls.size() &&
+                 replay["integration_residual"]["status"] == "available")) &&
             replay["control_hold"] == "constant_on_interval";
     if (status == "unavailable" && replay["missing_prerequisites"].empty()) return false;
     return replay["original_objective"].is_null();
@@ -394,7 +473,8 @@ bool replay_document(const Json& replay, std::size_t state_dimensions,
 bool comparison_document(const Json& document) {
     const auto schema = document.is_object() && document.contains("schema") && document["schema"].is_string()
         ? document["schema"].get<std::string>() : std::string{};
-    const bool version_two = schema == "csl.viz04-replay-comparison/2";
+    const bool version_three = schema == "csl.viz04-replay-comparison/3";
+    const bool version_two = version_three || schema == "csl.viz04-replay-comparison/2";
     if (!document.is_object() || (!version_two && schema != "csl.viz04-replay-comparison/1") ||
         !document.contains("source_run") || !document["source_run"].is_object() ||
         !document.contains("problem") || !document["problem"].is_string() || document["problem"].get<std::string>().empty() ||
@@ -438,7 +518,7 @@ bool comparison_document(const Json& document) {
             !finite_number(witness["linear_objective"]) || !witness.contains("linear_evidence") ||
             !evidence_document(witness["linear_evidence"]) || !witness.contains("replay") ||
             !replay_document(witness["replay"], document["state_coordinates"].size(),
-                document["control_coordinates"].size(), witness["linear_controls"].size(), version_two) ||
+                document["control_coordinates"].size(), witness["linear_controls"].size(), version_two, version_three) ||
             witness["linear_states"].size() != witness["linear_controls"].size() + 1 ||
             witness["linear_states"].size() < 2 ||
             witness["linear_states"].size() != axis["points"].size() ||
@@ -660,7 +740,7 @@ artifacts::ArtifactResult<problem::ResolvedContent> decode_replay_comparison(
         });
         if (!comparison_document(document))
             return error(artifacts::ArtifactErrorCode::invalid_input, "replay_comparison.schema",
-                "Document does not match csl.viz04-replay-comparison/1 or /2");
+                "Document does not match csl.viz04-replay-comparison/1, /2 or /3");
         auto content = problem::snapshot_content({reinterpret_cast<const std::byte*>(text.data()), text.size()});
         if (const auto* failure = std::get_if<Diagnostic>(&content))
             return error(artifacts::ArtifactErrorCode::invalid_input, "replay_comparison", failure->explanation);

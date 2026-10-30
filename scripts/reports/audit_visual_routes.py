@@ -94,6 +94,7 @@ SAVED_COMPANION_ROUTES = {
     "benchmarks/reporting/issue6/b09_render_projection.py",
 }
 SAVED_DATA_COMPANION_COLLECTORS = {"scripts/reports/app01/collect.py"}
+SAVED_DATA_COMPANION_RENDERERS = {"scripts/reports/render_adaptive_ode_example.py"}
 FROZEN_COMPANIONS = {
     "app01-plan-20261016-22d406fd": "examples/app01-plan-timing-v1.html",
     "mpc03-open-loop-pilot-v1": "examples/index.html",
@@ -154,13 +155,14 @@ def source_inventory(root: Path) -> list[dict]:
     bases = (root / "scripts/reports", root / "benchmarks/reporting")
     for base in bases:
         for path in sorted(base.rglob("*.py")):
-            if path.name == "audit_visual_routes.py" or any(part.startswith("test") for part in path.parts):
+            relative = path.relative_to(root)
+            if path.name == "audit_visual_routes.py" or any(part.startswith("test") for part in relative.parts):
                 continue
             source = path.read_text(encoding="utf-8")
             matches = VISUAL_SIGNAL.findall(source)
-            if not matches:
+            relative = relative.as_posix()
+            if not matches and relative not in reviewed:
                 continue
-            relative = path.relative_to(root).as_posix()
             tree = ast.parse(source, filename=relative)
             assets = sorted({asset for node in ast.walk(tree)
                              if isinstance(node, ast.Constant) and isinstance(node.value, str)
@@ -178,6 +180,8 @@ def source_inventory(root: Path) -> list[dict]:
                 disposition = "composes-or-copies-existing-saved-figure"
             elif relative in SAVED_DATA_COMPANION_COLLECTORS:
                 disposition = "measurement-collector-preserved-with-saved-data-companion"
+            elif relative in SAVED_DATA_COMPANION_RENDERERS:
+                disposition = "analytic-reference-checked-saved-run-renderer"
             elif relative in FROZEN_DIAGRAM_EXCEPTIONS:
                 disposition = "reviewed-static-diagram-exception"
             elif relative in PUBLICATION_EXPORT_ROUTES:
@@ -289,7 +293,8 @@ def build(root: Path = ROOT) -> dict:
                     "mpc03-b08-l04-miQCP-v1/record.json",
                     "mpc03-b08-l04-miQCP-v1/solver-output.json",
                     "mpc03-b08-l04-miQCP-v1/independent-oracle.json",
-                    "mpc03-b08-l04-miQCP-v1/disturbance-tube.svg"] + geometry_companion_assets() +
+                    "mpc03-b08-l04-miQCP-v1/disturbance-tube.svg", "adaptive-ode-replay.html",
+                    "adaptive-ode-replay.csv", "adaptive-ode-replay.svg", "adaptive-ode-replay.json"] + geometry_companion_assets() +
                     viz10_companion_assets() + control_witness_companions.asset_paths(),
                  "disposition": "adopted-shared-quantitative-policy"}],
             "migration_owner": "#669 owns the shared policy; deferred family renderers link to scoped follow-up issues #684–#687, while frozen report bundles remain immutable evidence"}
