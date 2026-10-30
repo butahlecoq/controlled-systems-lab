@@ -188,6 +188,9 @@ bool known_structural_basis(const Json& value) {
     const auto& basis=value.get_ref<const std::string&>();
     return std::find(bases.begin(),bases.end(),basis)!=bases.end();
 }
+bool complete_inclusion_oracle_kind(const Json& value) {
+    return value=="exact_dyadic_all_vertices";
+}
 bool valid_checker_resource(const Json& resource) {
     if(!exact_fields(resource,{"requested","enforced","observed","mechanism","scope","unavailable_reason"})||
         !optional_nonnegative_integer(resource.at("requested"))||
@@ -264,11 +267,13 @@ bool approximation_check_event_matches(const Json& measurement,const Json& run,
     const bool algorithm_completed=algorithm.at("status")=="completed";
     const auto& counterexample=oracle.at("counterexample");
     if(checker_status=="verified")
-        return algorithm_completed&&completed&&oracle.at("independent").get<bool>()&&oracle.at("complete").get<bool>()&&
+        return algorithm_completed&&completed&&complete_inclusion_oracle_kind(oracle.at("kind"))&&
+            oracle.at("independent").get<bool>()&&oracle.at("complete").get<bool>()&&
             oracle.at("sound").get<bool>()&&
             counterexample.is_null();
     if(checker_status=="incorrect")
-        return algorithm_completed&&completed&&oracle.at("independent").get<bool>()&&oracle.at("sound").get<bool>()&&
+        return algorithm_completed&&completed&&complete_inclusion_oracle_kind(oracle.at("kind"))&&
+            oracle.at("independent").get<bool>()&&oracle.at("sound").get<bool>()&&
             valid_counterexample(counterexample,measurement.at("relation").get<std::string>(),
                 measurement.at("input_set_id"),measurement.at("output_set_id"));
     if(checker_status!="inconclusive")return false;

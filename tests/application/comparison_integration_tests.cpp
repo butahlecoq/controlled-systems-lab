@@ -1392,7 +1392,9 @@ TEST_CASE("approximation checker events preserve profile, evidence, resources an
     auto sampled_oracle=verified_pair.first;
     malformed=Json::parse(sampled_oracle.measurement_payload);
     malformed["checker"]["oracle"]["kind"]="sampled_support_directions";
-    malformed["checker"]["oracle"]["independent"]=false;
+    malformed["checker"]["oracle"]["independent"]=true;
+    malformed["checker"]["oracle"]["complete"]=true;
+    malformed["checker"]["oracle"]["sound"]=true;
     sampled_oracle.measurement_payload=malformed.dump();
     const auto bad_sampled_claim=ar::encode_recorded_comparison(spec_for(1),{sampled_oracle});
     CHECK(std::holds_alternative<ar::ArtifactError>(bad_sampled_claim));

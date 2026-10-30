@@ -32,9 +32,12 @@ the source for the supervisor and host-specific enforcement details.
 
 Checker `status` is one of `verified`, `incorrect`, or `inconclusive`.
 `verified` requires a completed, independent, sound, complete inclusion oracle
-with no counterexample. Its `claim` must match the recorded inner or outer
+with a codec-recognized complete-oracle kind and no counterexample. The current
+recognized kind is `exact_dyadic_all_vertices`; new proof kinds require an
+explicit codec update. Its `claim` must match the recorded inner or outer
 relation, and `structural_basis` must name a current `StructuralBasis` value.
-`incorrect` requires a completed independent sound oracle and a concrete point
+`incorrect` requires a completed independent sound recognized inclusion oracle
+and a concrete point
 membership witness in `oracle.counterexample`: `kind` is
 `point_membership`, `point` is a nonempty finite coordinate array, and
 `contained_in` / `excluded_from` name the corresponding sets. For an `outer`
@@ -48,10 +51,12 @@ incomplete evidence remains `inconclusive`. Sampled support and volume results
 must therefore stay inconclusive. The algorithm attempt status remains separate
 from checker outcome.
 
-The comparison artifact codec validates this event shape and preserves it in
-the canonical record. It checks witness shape and set bindings but does not
-validate the scientific truth of the membership claims or an oracle's `sound`
-declaration; that requires an independent code and evidence review.
+Sampled-support and volume kinds are not proof-eligible even if their recorded
+flags say complete and sound; they remain inconclusive. The comparison artifact
+codec validates this event shape and preserves it in the canonical record. It
+checks witness shape and set bindings but does not validate the scientific truth
+of the membership claims or an oracle's `sound` declaration; that requires an
+independent code and evidence review.
 
 ## Ownership
 
