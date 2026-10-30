@@ -8,6 +8,7 @@ Reproduce the paired capture from a clean checkout of that revision:
 cmake -S benchmarks/reporting/obs04 -B build/obs04 \
   -DCMAKE_BUILD_TYPE=Release -DCSL_SOURCE_ROOT="$PWD"
 cmake --build build/obs04 --target csl_obs04_instrumentation_comparison -j4
+mkdir -p reports/algorithm-results/review05-execution-20261030
 build/obs04/csl_obs04_instrumentation_comparison \
   --record reports/algorithm-results/review05-execution-20261030/obs04-current-main-comparison.json
 ```
