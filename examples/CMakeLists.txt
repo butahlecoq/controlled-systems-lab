@@ -120,6 +120,7 @@ csl_example(registered_synthesis_comparison CSL::input CSL::strategy_a CSL::stra
 csl_example(nominal_linear_exact_2d CSL::strategy_a CSL::highs_lp CSL::highs_convex
   CSL::qhull_conversion CSL::affine_sum)
 csl_example(continuous_policy CSL::controllers CSL::model)
+csl_example(adaptive_ode_replay CSL::simulation)
 
 function(example_check name executable argument status output)
   if(NOT TARGET ${executable})
@@ -137,6 +138,8 @@ example_check(convex_original_norm registered_convex "" 0 "original_cost=4.12310
 example_check(resolved_history resolved_scenario "" 0 "states=0,0.25,1 controls=0.25,0.75 original_cost=0")
 example_check(continuous_policy_all_generators continuous_policy "" 0
   "scope=all_joint_uncertainty assurance=numerical generators=4.*initial=0,0 action=0 terminal=0,0.*initial=0,1 action=0 terminal=1,1.*initial=1,0 action=1 terminal=1.5,1.*initial=1,1 action=1 terminal=2.5,2")
+example_check(adaptive_ode_replay adaptive_ode_replay "" 0
+  "schema=csl.example.adaptive-ode-replay/1.*method=adaptive_rk4_step_doubling.*accepted_steps=[0-9]+.*final_state_error=")
 example_check(scenario_cli_valid scenario_cli "--validate-only;${CMAKE_CURRENT_SOURCE_DIR}/scenarios/two-stage-integrator.json" 0
   "validation=valid.*schema=csl.scenario/1.*requested=comparison.*mode=validate_only solvers=not_invoked")
 example_check(scenario_cli_missing scenario_cli "--validate-only;${CMAKE_CURRENT_BINARY_DIR}/no-such-scenario.json" 2

@@ -131,7 +131,8 @@ class VisualRouteInventoryTests(unittest.TestCase):
                  "frozen-report-plot-preserved-with-gallery-companion",
                  "regeneration-entrypoint-preserved-gallery-never-invokes-it",
                  "saved-control-witness-gallery-companion-builder",
-                 "reviewed-analytic-diagram-preserved"}
+                 "reviewed-analytic-diagram-preserved",
+                 "analytic-reference-checked-saved-run-renderer"}
         self.assertTrue(all(entry["disposition"] in allowed for entry in producers.values()))
         deferred=[entry for entry in producers.values()
                   if entry["disposition"]=="deferred-family-specific-migration"]
@@ -182,6 +183,8 @@ class VisualRouteInventoryTests(unittest.TestCase):
         gallery_assets=set(inventory["gallery_routes"][0]["assets"])
         self.assertEqual(gallery_assets,{
             "examples.css", "fuel-b06-viz06.html", "fuel-b06-viz06-source.json",
+            "adaptive-ode-replay.csv", "adaptive-ode-replay.html",
+            "adaptive-ode-replay.json", "adaptive-ode-replay.svg",
             "fuel-b06-viz06-export.json", "fuel-b06-viz03.html", "fuel-b06-viz06-before.svg",
             "fuel-b06-viz06-flow.svg", "fuel-b06-viz06-flow.png",
             "fuel-b06-viz06-stock.svg", "fuel-b06-viz06-stock.png",

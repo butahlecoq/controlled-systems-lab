@@ -157,7 +157,7 @@ file(MAKE_DIRECTORY "${example_source}/scenarios")
 foreach(example_file CMakeLists.txt registered_lp.cpp registered_convex.cpp
     resolved_scenario.cpp scenario_file.cpp backend_substitution.cpp registered_synthesis_comparison.cpp
     nominal_linear_exact_2d.cpp scenario_cli.cpp continuous_policy.cpp
-    scenario_backend_substitution.cpp scenario_backend_artifact_check.cpp)
+    adaptive_ode_replay.cpp scenario_backend_substitution.cpp scenario_backend_artifact_check.cpp)
   file(COPY "${CSL_SOURCE_DIR}/examples/${example_file}" DESTINATION "${example_source}")
 endforeach()
 file(COPY "${CSL_SOURCE_DIR}/examples/scenario_cli_export_check.cmake"

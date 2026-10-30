@@ -2,6 +2,7 @@
 #include <doctest/doctest.h>
 #include <csl/simulation/nonlinear_replay.hpp>
 #include <algorithm>
+#include <cmath>
 #include <limits>
 #include <stdexcept>
 #include <stop_token>
@@ -78,6 +79,35 @@ TEST_CASE("two tied linear control sums have different independent nonlinear rep
     CHECK(std::holds_alternative<IntegrationResidualNotApplicable>(a.integration_residual));
     CHECK(a.hold == ControlHold::constant_on_interval);
     CHECK(a.replay_time >= std::chrono::steady_clock::duration::zero());
+}
+
+TEST_CASE("adaptive RK4 replay records applied limits and independently checkable local estimates") {
+    auto plant = analytic_toy();
+    plant.identity = {"analytic.riccati-ode", "1", "TEST-22 analytic reference x'=1+x^2"};
+    plant.initial_state = Vector{0.0};
+    plant.times = std::vector<double>{0.0, 0.5};
+    plant.integration = IntegrationMethod::adaptive_rk4_step_doubling;
+    plant.numerical.reset();
+    plant.integration_limits = IntegrationLimits{1e-10, 1e-10, 100000};
+    plant.transition = {};
+    plant.dynamics = [](double, std::span<const double> state, std::span<const double>,
+        std::span<const PlantParameter>) { return Vector{1.0 + state[0]*state[0]}; };
+    const auto record = replay(plant, std::vector<Vector>{{0.0}});
+    REQUIRE(record.status == ReplayStatus::complete);
+    REQUIRE(record.states.size() == 2);
+    CHECK(record.states.back()[0] == doctest::Approx(std::tan(0.5)).epsilon(1e-9));
+    CHECK(record.integration_limits == plant.integration_limits);
+    REQUIRE(record.integration_receipts.size() == 1);
+    CHECK(record.integration_receipts[0].accepted_steps > 0);
+    CHECK(record.integration_receipts[0].accepted_steps + record.integration_receipts[0].rejected_steps <=
+        plant.integration_limits->max_attempts_per_interval);
+    const auto* residual = std::get_if<AvailableIntegrationResidual>(&record.integration_residual);
+    REQUIRE(residual != nullptr);
+    CHECK(residual->definition.find("not a certified global error bound") != std::string::npos);
+    REQUIRE(residual->measurements.size() == 1);
+    CHECK(residual->measurements[0].name == "interval[0].state[0]");
+    CHECK(residual->measurements[0].value > 0.0);
+    CHECK(residual->measurements[0].unit == "dimensionless");
 }
 
 TEST_CASE("declared physical intervals and control order determine replay") {

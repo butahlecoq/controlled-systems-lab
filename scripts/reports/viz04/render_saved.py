@@ -6,7 +6,8 @@ import json
 from pathlib import Path
 
 
-SCHEMAS = {"csl.viz04-replay-comparison/1", "csl.viz04-replay-comparison/2"}
+SCHEMAS = {"csl.viz04-replay-comparison/1", "csl.viz04-replay-comparison/2",
+           "csl.viz04-replay-comparison/3"}
 PAIRS = ((0, 2), (1, 3))
 
 
