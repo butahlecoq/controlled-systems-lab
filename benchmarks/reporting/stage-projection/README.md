@@ -23,9 +23,19 @@ never overwritten. The native route batch records missing or failed stages
 explicitly. The full R0–R5 fuel figure uses a separate analytic demonstration
 batch and does not fill or replace the native route's unavailable stages.
 
-The checked-in [v1 demonstration bundle](bundle-v1/README.md)
-contains the generated figures, offline indexes, saved batches, manifest, and
-checksums.
+The checked-in [v2 demonstration bundle](bundle-v2/README.md) contains the
+corrected fuel phase planes alongside the flow/flow and stock/stock views,
+generated figures, offline indexes, saved batches, manifest, and checksums.
+The earlier [v1 bundle](bundle-v1/README.md) is retained unchanged for
+provenance; use v2 for the requested coordinate pairs.
+
+The fuel model is a plant-specific open-loop projection example. For the
+reachability/minimax algorithm showcase from the RL environment suite, see the
+published [TwoPointsOnParallelLines fixed-plan report](https://butahlecoq.github.io/controlled-systems-lab/env717-two-points-33ebdad360671940fb54/index.html)
+and [finite-feedback report](https://butahlecoq.github.io/controlled-systems-lab/env717-two-points-4fbedf73c6f198fd57e2/index.html).
+They plot both player phase planes `(x1,x2)` and `(x3,x4)`, with forward sets,
+backward-winning intersections, and a replayed minimax path. The reports use a
+short finite-catalogue adaptation, not the original continuous-action RL task.
 
 ## Fuel model
 
@@ -44,10 +54,10 @@ are all exposed extreme points. Negative fuel stock values are preserved.
 
 The four requested coordinate views are:
 
+- oxidizer phase plane: flow `x1` against stock `x2`;
+- fuel phase plane: flow `x3` against stock `x4`;
 - flow/flow: oxidizer flow `x1` against fuel flow `x3`;
-- stock/stock: oxidizer stock `x2` against fuel stock `x4`;
-- oxidizer flow `x1` against fuel stock `x4`;
-- oxidizer stock `x2` against fuel flow `x3`.
+- stock/stock: oxidizer stock `x2` against fuel stock `x4`.
 
 The green dashed path is the declared fixed control `u=1` at every stage. It
 is an illustrative trajectory, separate from the reachable-set vertices;

@@ -1,4 +1,4 @@
-# Stage projection demonstration bundle v1
+# Stage projection demonstration bundle
 
 These files are illustrative model demonstrations, not benchmark results or
 claims about optimal control. The fuel example is a 4D affine open-loop system
@@ -9,12 +9,20 @@ rendered offline. A separate native `reachability.nominal_forward` batch records
 the available prefix and explicit unavailable stages. The nonfuel example uses
 the analytic demonstration adapter.
 
+These fuel plots demonstrate configured state projections for a physical plant.
+For a differential-game reachability/minimax example from the RL environment
+suite, see the published [TwoPointsOnParallelLines fixed-plan report](https://butahlecoq.github.io/controlled-systems-lab/env717-two-points-33ebdad360671940fb54/index.html)
+and [finite-feedback report](https://butahlecoq.github.io/controlled-systems-lab/env717-two-points-4fbedf73c6f198fd57e2/index.html).
+Those reports use player phase planes `(x1,x2)` and `(x3,x4)`, and explicitly
+label their short finite-catalogue model as an adaptation of the original
+continuous-action RL environment.
+
 ## Fuel figures
 
-- [Flow/flow: oxidizer flow x1 vs fuel flow x3 (PNG)](fuel-four-state-figures/projection-01-x0-x2.png) · [SVG](fuel-four-state-figures/projection-01-x0-x2.svg)
-- [Stock/stock: oxidizer stock x2 vs fuel stock x4 (PNG)](fuel-four-state-figures/projection-02-x1-x3.png) · [SVG](fuel-four-state-figures/projection-02-x1-x3.svg)
-- [Oxidizer flow x1 vs fuel stock x4 (PNG)](fuel-four-state-figures/projection-03-x0-x3.png) · [SVG](fuel-four-state-figures/projection-03-x0-x3.svg)
-- [Oxidizer stock x2 vs fuel flow x3 (PNG)](fuel-four-state-figures/projection-04-x1-x2.png) · [SVG](fuel-four-state-figures/projection-04-x1-x2.svg)
+- [Oxidizer phase plane: flow x1 vs stock x2 (PNG)](fuel-four-state-figures/projection-01-x0-x1.png) · [SVG](fuel-four-state-figures/projection-01-x0-x1.svg)
+- [Fuel phase plane: flow x3 vs stock x4 (PNG)](fuel-four-state-figures/projection-02-x2-x3.png) · [SVG](fuel-four-state-figures/projection-02-x2-x3.svg)
+- [Flow/flow: oxidizer flow x1 vs fuel flow x3 (PNG)](fuel-four-state-figures/projection-03-x0-x2.png) · [SVG](fuel-four-state-figures/projection-03-x0-x2.svg)
+- [Stock/stock: oxidizer stock x2 vs fuel stock x4 (PNG)](fuel-four-state-figures/projection-04-x1-x3.png) · [SVG](fuel-four-state-figures/projection-04-x1-x3.svg)
 - [Fuel offline HTML index](fuel-four-state-figures/index.html)
 - [Native nominal-forward capture (two available stages; explicit later gaps)](fuel-four-state.nominal-forward.stage-projection-batch.json)
 - [Native route evidence sidecar](fuel-four-state.nominal-forward.stage-projection-batch.json.evidence.json)
