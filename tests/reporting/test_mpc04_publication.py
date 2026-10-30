@@ -33,7 +33,11 @@ class Mpc04PublicationTests(unittest.TestCase):
         self.assertEqual(len(manifest["source_bundle_sha256"]), 10)
         for name, expected in manifest["published_files"].items():
             self.assertEqual(publication.digest((report_dir / name).read_bytes()), expected, name)
+        landing.build(self.site)
         page = (self.site / "index.html").read_text(encoding="utf-8")
+        self.assertIn("MaxCoordinateGame replanning and QP comparison", page)
+        self.assertIn("four-step source-derived MaxCoordinateGame task", page)
+        self.assertIn(manifest["source_commit"], page)
         self.assertIn(f'{route}/index.html', page)
         self.assertIn(f'{route}/trajectory.svg', page)
         with zipfile.ZipFile(self.site / f"{route}.zip") as archive:
