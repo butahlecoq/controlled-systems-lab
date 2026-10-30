@@ -14,6 +14,7 @@ import zipfile
 
 ROOT = Path(__file__).resolve().parents[2]
 SOURCE = ROOT / "reports/algorithm-results/env717-homicidal-chauffeur-v1"
+SCENARIO = ROOT / "benchmarks/scenarios/env717-homicidal-chauffeur-pilot-v1.json"
 CAPTURE_PATH = ROOT / "scripts/reports/env717/capture_homicidal_chauffeur.py"
 CHECKER_PATH = ROOT / "scripts/reports/env717/check_homicidal_chauffeur.py"
 
@@ -78,10 +79,11 @@ def validate_bundle(source: Path):
         raise ValueError("saved SVG differs from checked figure data")
     if capture.make_page(result, check, captured).encode() != files["index.html"]:
         raise ValueError("saved report page differs from result and metadata")
-    if (scenario.get("source", {}).get("commit") != SOURCE_COMMIT or
+    if (scenario != json.loads(SCENARIO.read_text(encoding="utf-8")) or
+            scenario.get("source", {}).get("commit") != SOURCE_COMMIT or
             result.get("source", {}).get("repository_commit") != SOURCE_COMMIT or
-            result.get("scenario_sha256") != digest(files["scenario.json"]) or
-            captured.get("scenario_sha256") != digest(files["scenario.json"])):
+            result.get("scenario_sha256") != digest(SCENARIO.read_bytes()) or
+            captured.get("scenario_sha256") != result.get("scenario_sha256")):
         raise ValueError("source or scenario provenance differs")
     if check.get("status") != "verified" or captured.get("solver_failures") != 0:
         raise ValueError("report lacks successful independent verification")
