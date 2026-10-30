@@ -7,6 +7,7 @@ import hashlib
 import html
 import json
 from pathlib import Path
+import statistics
 import tempfile
 from typing import Literal
 
@@ -175,10 +176,12 @@ def _exp02_control_family_companion(style: Path) -> tuple[dict[str, bytes], str,
             "objective": {"kind": "quadratic", "Q": [[2]], "linear": [-2], "offset": 1},
         },
     }
+    scenario_keys = {"schema", "id", "horizon", "model", "initial_state", "controls", "objective"}
     records = {}
     for scenario_id, properties in expected.items():
         scenario = scenarios[scenario_id]
-        if (scenario.get("id") != scenario_id or scenario.get("horizon") != 2 or
+        if (set(scenario) != scenario_keys or scenario.get("schema") != "csl.scenario/1" or
+                scenario.get("id") != scenario_id or scenario.get("horizon") != 2 or
                 scenario.get("initial_state") != [0] or
                 any(scenario.get(key) != value for key, value in properties.items())):
             raise ValueError("Exp-02 paired-profile fixture changed: " + scenario_id)
@@ -276,17 +279,60 @@ def _b04_repeated_companion(style: Path) -> tuple[dict[str, bytes], str, dict]:
     reference_path = evidence_root / "b04-reference-v1/exact-optimal-reference.json"
     manifest_raw = (repeated / "figure-manifest.json").read_bytes()
     selected_raw = (repeated / "b04-representative-cold-attempts.jsonl").read_bytes()
+    comparison_raw = (repeated / "comparison-records.jsonl").read_bytes()
     case_raw, reference_raw = case_path.read_bytes(), reference_path.read_bytes()
     manifest = json.loads(manifest_raw)
     selected = [json.loads(line) for line in selected_raw.decode().splitlines() if line.strip()]
+    comparison_records = [json.loads(line) for line in comparison_raw.decode().splitlines() if line.strip()]
     case, reference = json.loads(case_raw), json.loads(reference_raw)
     if (manifest.get("schema") != "csl.mpc01-repeated-benchmark-figure/1" or
             manifest.get("case_id") != "b04-reference-v1" or
+            manifest.get("records_sha256") != hashlib.sha256(comparison_raw).hexdigest() or
             manifest.get("selected_attempts_sha256") != hashlib.sha256(selected_raw).hexdigest() or
             manifest.get("case_sha256") != hashlib.sha256(case_raw).hexdigest() or
             len(selected) != 2 or {row.get("method") for row in selected} !=
             {"osqp-sparse-qp", "hpipm-structured-ocp-qp"}):
         raise ValueError("saved repeated-B04 representative attempts do not match their figure manifest")
+    comparison_id = manifest.get("comparison_spec_id")
+    b04_record = None
+    for record in comparison_records:
+        if record.get("comparison_spec_id") == comparison_id:
+            b04_record = record
+            break
+    if b04_record is None:
+        raise ValueError("saved repeated-B04 figure manifest names no canonical comparison record")
+    spec = json.loads(b04_record.get("spec", "{}"))
+    if (spec.get("repetitions") != 5 or len(b04_record.get("attempts", [])) != 20):
+        raise ValueError("saved repeated-B04 comparison does not establish five repetitions per arm")
+    cold_rows = []
+    for attempt in b04_record["attempts"]:
+        event = json.loads(attempt["measurement_payload"])
+        row = event.get("attempt", {})
+        if row.get("case_id") == "b04-reference-v1" and row.get("start_mode") == "cold":
+            cold_rows.append((attempt["repetition_index"], row))
+    by_method: dict[str, list[tuple[int, dict]]] = {}
+    for repetition, row in cold_rows:
+        by_method.setdefault(row["method"], []).append((repetition, row))
+    selection = manifest.get("selection")
+    expected_methods = {"osqp-sparse-qp", "hpipm-structured-ocp-qp"}
+    if (set(by_method) != expected_methods or any(
+            len(rows) != 5 or {rep for rep, _ in rows} != set(range(5))
+            for rows in by_method.values()) or
+            not isinstance(selection, list) or len(selection) != 2 or
+            {item.get("method") for item in selection} != expected_methods):
+        raise ValueError("saved repeated-B04 selection does not cover five cold attempts per backend")
+    selection_by_method = {item["method"]: item for item in selection}
+    selected_by_method = {row["method"]: row for row in selected}
+    for method, rows in by_method.items():
+        item = selection_by_method[method]
+        repetition = item.get("repetition")
+        by_repetition = {rep: row for rep, row in rows}
+        if (not isinstance(repetition, int) or repetition not in by_repetition or
+                item.get("solve_ns") != by_repetition[repetition]["timings_ns"]["solve"] or
+                item.get("median_cold_solve_ns") != statistics.median(
+                    row["timings_ns"]["solve"] for _, row in rows) or
+                selected_by_method[method] != by_repetition[repetition]):
+            raise ValueError("saved repeated-B04 path label differs from its canonical attempt")
     if (case.get("state_coordinates") != ["oxidizer_flow", "oxidizer_working_stock", "fuel_flow", "fuel_working_stock"] or
             case.get("state_units") != ["kg/s", "kg", "kg/s", "kg"]):
         raise ValueError("saved B04 coordinate order or units changed")
@@ -300,7 +346,7 @@ def _b04_repeated_companion(style: Path) -> tuple[dict[str, bytes], str, dict]:
            for row in selected):
         raise ValueError("saved B04 representative path is incomplete or has an unexpected outcome")
     display = {"exact-reference": "Exact saved witness"}
-    selected_repetitions = {item["method"]: item["repetition"] + 1 for item in manifest["selection"]}
+    selected_repetitions = {method: item["repetition"] + 1 for method, item in selection_by_method.items()}
     display.update({row["method"]: f"{row['method']} · cold rep {selected_repetitions[row['method']]} of 5"
                     for row in selected})
     projections = ((0, 1, "oxidizer", "Oxidizer flow x₁ (kg/s)", "Oxidizer working stock x₂ (kg)"),
@@ -312,6 +358,7 @@ def _b04_repeated_companion(style: Path) -> tuple[dict[str, bytes], str, dict]:
         "control-witness/b04-repeated-reference.json": reference_raw,
     }
     hashes = {"figure_manifest_sha256": hashlib.sha256(manifest_raw).hexdigest(),
+              "comparison_records_sha256": hashlib.sha256(comparison_raw).hexdigest(),
               "selected_attempts_sha256": hashlib.sha256(selected_raw).hexdigest(),
               "case_sha256": hashlib.sha256(case_raw).hexdigest(),
               "exact_reference_sha256": hashlib.sha256(reference_raw).hexdigest()}

@@ -232,6 +232,10 @@ class GalleryTests(unittest.TestCase):
         repeated_b04 = json.loads(result.files["control-witness/b04-repeated-evidence.json"])
         self.assertEqual(repeated_b04["coordinate_pairs"], {"oxidizer": ["x1", "x2"], "fuel": ["x3", "x4"]})
         self.assertIn("inconclusive", repeated_b04["evidence_status"])
+        comparison_raw = (ROOT / "docs/research/evidence/mpc01-external-qps-20261026-r3/comparison-records.jsonl").read_bytes()
+        self.assertEqual(repeated_b04["comparison_records_sha256"], hashlib.sha256(comparison_raw).hexdigest())
+        self.assertEqual(len(repeated_b04["selection"]), 2)
+        self.assertTrue(all(0 <= item["repetition"] < 5 for item in repeated_b04["selection"]))
         for asset in ("b04-repeated-oxidizer.svg", "b04-repeated-fuel.svg",
                       "exp02-ts02-control-family.svg", "exp02-ts03-control-family.svg"):
             svg = ET.fromstring(result.files["control-witness/" + asset])
