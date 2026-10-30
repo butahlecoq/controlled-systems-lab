@@ -5,6 +5,7 @@ from pathlib import Path
 import shutil
 import tempfile
 import unittest
+from unittest.mock import patch
 from zipfile import ZipFile
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -20,6 +21,28 @@ LANDING_SPEC.loader.exec_module(landing)
 
 
 class Mpc09PublicationTests(unittest.TestCase):
+    def test_source_fingerprints_remain_bound_to_the_captured_commit(self) -> None:
+        source = ROOT / "reports/algorithm-results/mpc09-two-particle-output-feedback-v1"
+        with tempfile.TemporaryDirectory(prefix="mpc09-source-history-") as temporary:
+            checkout = Path(temporary)
+            shutil.copytree(source, checkout / source.name)
+            scenario = ROOT / "benchmarks/scenarios/mpc09-two-particle-output-feedback-v1.json"
+            scenario_target = checkout / "benchmarks/scenarios/mpc09-two-particle-output-feedback-v1.json"
+            scenario_target.parent.mkdir(parents=True)
+            shutil.copyfile(scenario, scenario_target)
+            workflow = checkout / ".github/workflows/algorithm-reports.yml"
+            workflow.parent.mkdir(parents=True)
+            workflow.write_text("later unrelated workflow edit\n", encoding="utf-8")
+
+            with patch.object(stage_report, "ROOT", checkout), \
+                 patch.object(stage_report.report, "ROOT", checkout):
+                _, _, _, capture = stage_report.validate_bundle(checkout / source.name)
+
+            self.assertEqual(capture["source_commit"], "46da55a5967c0db326b7126ced55654b20bc570d")
+            self.assertEqual(capture["source_sha256"][
+                ".github/workflows/algorithm-reports.yml"],
+                "12e18a9080f7c6485d0628e17efa73d5ab1fc05447020ca36554dd68ef65fc87")
+
     def test_report_rerenders_and_stages_offline_bundle(self) -> None:
         source = ROOT / "reports/algorithm-results/mpc09-two-particle-output-feedback-v1"
         with tempfile.TemporaryDirectory(prefix="mpc09-publication-") as temporary:
