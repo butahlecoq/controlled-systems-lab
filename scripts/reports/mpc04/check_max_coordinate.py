@@ -34,6 +34,18 @@ def close(a, b, tol=2e-12):
     return math.isclose(a, b, rel_tol=tol, abs_tol=tol)
 
 
+def check_solver_residuals(evidence):
+    assert evidence["primal"] is not None and evidence["dual"] is not None
+    for family, names in ((evidence["primal"], ("rows", "variables")),
+                          (evidence["dual"], ("stationarity", "signs", "complementarity"))):
+        assert family["verifier_id"] and family["verifier_version"]
+        for name in names:
+            residual = family[name]
+            assert residual is not None
+            assert residual["violation"] <= (family["absolute_tolerance"]
+                                               + family["relative_tolerance"] * residual["scale"])
+
+
 def terminal_cost(state, controls, disturbance_suffix):
     for action, disturbance in zip(controls, disturbance_suffix):
         state = advance(state, action, disturbance)
@@ -58,11 +70,13 @@ def check_qp_fixture(data):
     assert close(fixture["primary_squared_objective"], expected_cost, 2e-6)
     assert fixture["selected_squared_objective"] <= expected_cost + 2e-6
     assert fixture["tie_tolerance"] == 1e-7 and fixture["status"] == "optimal"
+    for solve in fixture["solver_residuals"].values():
+        check_solver_residuals(solve)
 
 
 def check(path: Path):
     data = json.loads(path.read_text(encoding="utf-8"))
-    assert data["schema"] == "csl.mpc04.max-coordinate-pilot/2"
+    assert data["schema"] == "csl.mpc04.max-coordinate-pilot/3"
     assert data["source"]["environment"] == "MaxCoordinateGame"
     assert data["source"]["commit"] == "f4d76c60f4003f50954174e96eafd8e514bd5441"
     all_histories = set(itertools.product(DISTURBANCES, repeat=T))
@@ -75,7 +89,18 @@ def check(path: Path):
     assert data["fixtures"]["scalar_two_step"]["executed_replanning_worst"] == 0
     assert data["fallback_fixtures"]["deadline"] == {"episodes": 16, "fallback_steps": 64}
     assert data["fallback_fixtures"]["solver_failure"] == {"episodes": 16, "fallback_steps": 64}
+    for kind, status in (("deadline", "deadline_fallback"),
+                         ("solver_failure", "solver_failure_fallback")):
+        fixture = data["native_fallback_fixtures"][kind]
+        assert fixture["completed"] is True
+        assert fixture["fallback_count"] == T and fixture["steps"] == T
+        assert fixture["statuses"] == [status] * T
+        assert fixture["actions"] == [0.0] * T
     qp = data["qp"]
+    implementation = data["algorithm_implementation"]
+    assert len(implementation["commit"]) == 40
+    assert len(implementation["native_executable_sha256"]) == 64
+    assert implementation["native_driver_source"].endswith("max_coordinate_replanning.cpp")
     assert qp["action_domain"] == "continuous [-1,1] per stage"
     assert qp["objective"] == "terminal squared max-coordinate via scalar epigraph"
     assert qp["provider_id"] and qp["provider_version"]
@@ -151,6 +176,8 @@ def check(path: Path):
                         assert decision["provider_id"] == qp["provider_id"]
                         assert decision["provider_version"] == qp["provider_version"]
                         assert decision["primary_squared_objective"] is not None
+                        for solve in decision["solver_residuals"].values():
+                            check_solver_residuals(solve)
                         assert planned <= best + 2e-6
                         primary = math.sqrt(max(0.0, decision["primary_squared_objective"]))
                         assert math.sqrt(planned) <= primary + qp["tie_tolerance"] + 2e-6

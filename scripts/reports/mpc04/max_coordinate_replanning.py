@@ -384,6 +384,26 @@ def host_metadata() -> dict:
             "python_renderer": platform.python_version()}
 
 
+def implementation_metadata(executable: Path) -> dict:
+    repository = Path(__file__).resolve().parents[3]
+    commit = subprocess.check_output(
+        ["git", "-C", str(repository), "rev-parse", "HEAD"], text=True).strip()
+    status = subprocess.check_output(
+        ["git", "-C", str(repository), "status", "--porcelain", "--untracked-files=no"],
+        text=True)
+    digest = hashlib.sha256(executable.resolve().read_bytes()).hexdigest()
+    return {
+        "repository": "butahlecoq/controlled-systems-lab",
+        "commit": commit,
+        "tracked_worktree_dirty": bool(status),
+        "native_executable": str(executable.resolve()),
+        "native_executable_sha256": digest,
+        "native_driver_source": "benchmarks/reporting/mpc04/max_coordinate_replanning.cpp",
+        "report_driver_source": "scripts/reports/mpc04/max_coordinate_replanning.py",
+        "independent_checker_source": "scripts/reports/mpc04/check_max_coordinate.py",
+    }
+
+
 def write_svg(path: Path, records: list[dict]) -> None:
     width, height = 1100, 710
     x0, y0, pw, ph = 90, 90, 900, 370
@@ -469,12 +489,17 @@ def main() -> None:
     fixture_evidence = native_data["fixtures"]
     if native_data["qp_analytic_fixture"]["status"] != "optimal":
         raise RuntimeError("native analytic QP fixture did not complete optimally")
-    implementation = "repository C++ finite_action_minimax and HiGHS ConvexPort; finite policy-gap fixtures use the shared C++ episode loop"
+    native_fallback_fixtures = native_data["native_fallback_fixtures"]
+    for fixture in native_fallback_fixtures.values():
+        if (not fixture["completed"] or fixture["fallback_count"] != EPISODE_STEPS
+                or fixture["steps"] != EPISODE_STEPS or fixture["actions"] != [0.0] * EPISODE_STEPS):
+            raise RuntimeError("native controller fallback fixture did not complete as expected")
+    implementation = implementation_metadata(args.native_executable)
     grouped: dict[str, list[dict]] = {}
     for row in rows:
         grouped.setdefault(f"{row['policy']}::{row['horizon']}", []).append(row)
     report = {
-        "schema": "csl.mpc04.max-coordinate-pilot/2",
+        "schema": "csl.mpc04.max-coordinate-pilot/3",
         "source": {"repository": "imm-rl-lab/optimal_control", "commit": SOURCE_COMMIT,
                    "path": SOURCE_PATH, "blob": SOURCE_BLOB, "environment": "MaxCoordinateGame",
                    "license_note": "No repository license declared; source equations and parameters are re-expressed; no upstream source code copied"},
@@ -510,6 +535,7 @@ def main() -> None:
         "scope": "finite-action and continuous-control QP, four-step source-derived adaptation; not a reproduction of the continuous-action four-second RL task; finite disturbance histories only",
         "fixtures": fixture_evidence,
         "fallback_fixtures": fallback_evidence,
+        "native_fallback_fixtures": native_fallback_fixtures,
         "variants": {key: aggregate(group) for key, group in grouped.items()},
         "episodes": rows,
     }

@@ -58,6 +58,7 @@ struct SelectedPlan {
     std::string solver_status{"not_run"};
     std::string provider_id;
     std::string provider_version;
+    Json solver_residuals{nullptr};
 };
 
 using ConvexProvider = PreparedProvider<ConvexPort>;
@@ -333,6 +334,33 @@ ProgramResult solve_qp_program(const ConvexProvider& provider, const ConvexProgr
     return result;
 }
 
+Json residual_evidence(const ProgramResult& result) {
+    auto measure = [](const ResidualMeasure& value) {
+        return Json{{"violation", value.violation}, {"scale", value.scale}};
+    };
+    Json primal = nullptr;
+    if(result.residuals.primal) {
+        const auto& values = *result.residuals.primal;
+        primal = { {"rows", measure(values.rows)}, {"variables", measure(values.variables)},
+            {"verifier_id", values.context.verifier.id.value},
+            {"verifier_version", values.context.verifier.version},
+            {"absolute_tolerance", values.context.absolute_tolerance},
+            {"relative_tolerance", values.context.relative_tolerance} };
+    }
+    Json dual = nullptr;
+    if(result.residuals.dual) {
+        const auto& values = *result.residuals.dual;
+        dual = { {"stationarity", values.stationarity ? measure(*values.stationarity) : Json(nullptr)},
+            {"signs", values.signs ? measure(*values.signs) : Json(nullptr)},
+            {"complementarity", values.complementarity ? measure(*values.complementarity) : Json(nullptr)},
+            {"verifier_id", values.context.verifier.id.value},
+            {"verifier_version", values.context.verifier.version},
+            {"absolute_tolerance", values.context.absolute_tolerance},
+            {"relative_tolerance", values.context.relative_tolerance} };
+    }
+    return {{"primal", std::move(primal)}, {"dual", std::move(dual)}};
+}
+
 SelectedPlan choose_qp_plan(const QpPlanRequest& request, const ConvexProvider& provider) {
     const auto& state = request.observed_state;
     const auto horizon = request.remaining_horizon;
@@ -389,10 +417,13 @@ SelectedPlan choose_qp_plan(const QpPlanRequest& request, const ConvexProvider& 
 
     const auto elapsed = std::chrono::duration_cast<std::chrono::nanoseconds>(Clock::now() - started).count();
     const auto* actual = provider.provenance().actual ? &*provider.provenance().actual : nullptr;
-    return {std::move(controls), worst_terminal * worst_terminal, primary_squared,
+    SelectedPlan selected{std::move(controls), worst_terminal * worst_terminal, primary_squared,
             static_cast<std::uint64_t>(elapsed), static_cast<std::uint64_t>(primary_elapsed),
             static_cast<std::uint64_t>(tie_elapsed), "optimal", actual ? actual->id.value : "unknown",
             actual ? actual->version : "unknown"};
+    selected.solver_residuals = {{"primary", residual_evidence(primary)},
+                                 {"tie_break", residual_evidence(tied)}};
+    return selected;
 }
 
 Json check_qp_analytic_fixture(const ConvexProvider& provider, std::uint64_t& serial) {
@@ -416,6 +447,7 @@ Json check_qp_analytic_fixture(const ConvexProvider& provider, std::uint64_t& se
             {"selected_control", actual.controls.front()},
             {"primary_squared_objective", actual.primary_squared_objective},
             {"selected_squared_objective", actual.squared_objective},
+            {"solver_residuals", actual.solver_residuals},
             {"tie_tolerance", qp_tie_tolerance}, {"status", actual.solver_status}};
 }
 
@@ -575,7 +607,9 @@ Json check_finite_policy_fixtures() {
 
 Json episode(std::string policy, std::string horizon_name,
              const std::array<double, episode_steps>& history,
-             const ConvexProvider& qp_provider, std::uint64_t& qp_serial) {
+             const ConvexProvider& qp_provider, std::uint64_t& qp_serial,
+             std::uint64_t decision_deadline_ns = deadline_ns,
+             bool inject_solver_failure = false) {
     State initial{0.0, 0.2, 0.0};
     Json states = Json::array({initial});
     Json decisions = Json::array();
@@ -590,6 +624,8 @@ Json episode(std::string policy, std::string horizon_name,
             std::string status = "solved";
             std::string solver_detail;
             try {
+                if(inject_solver_failure)
+                    throw std::runtime_error("injected native solver failure");
                 if(policy == "nominal_zero_disturbance" || policy == "finite_minimax") {
                     plan = choose_plan(observed, horizon, policy == "finite_minimax");
                 } else {
@@ -619,7 +655,7 @@ Json episode(std::string policy, std::string horizon_name,
                 ++fallbacks;
             }
             double action = plan.controls.empty() ? 0.0 : plan.controls.front();
-            if(plan.elapsed_ns > deadline_ns) {
+            if(decision_deadline_ns == 0 || plan.elapsed_ns > decision_deadline_ns) {
                 action = 0.0;
                 status = "deadline_fallback";
                 plan.solver_status = "deadline_exceeded";
@@ -637,6 +673,7 @@ Json episode(std::string policy, std::string horizon_name,
                     ? Json(plan.primary_squared_objective) : Json(nullptr)},
                 {"solve_ns", plan.elapsed_ns}, {"remaining_plan", std::move(remaining)},
                 {"primary_solve_ns", plan.primary_solve_ns}, {"tie_solve_ns", plan.tie_solve_ns},
+                {"solver_residuals", plan.solver_residuals},
                 {"solver_status", plan.solver_status}, {"provider_id", plan.provider_id},
                 {"provider_version", plan.provider_version},
                 {"solver_detail", solver_detail}, {"fallback", status != "solved"}});
@@ -660,6 +697,34 @@ Json episode(std::string policy, std::string horizon_name,
         {"fallback_count", fallbacks}, {"violations", 0}, {"completed", true}};
 }
 
+Json summarize_native_fallback(const Json& row, const std::string& expected_status) {
+    Json actions = Json::array();
+    Json statuses = Json::array();
+    for(const auto& decision : row.at("decisions")) {
+        if(decision.at("status") != expected_status || !decision.at("fallback").get<bool>() ||
+           decision.at("action").get<double>() != 0.0)
+            throw std::runtime_error("native MPC-04 fallback fixture changed");
+        actions.push_back(decision.at("action"));
+        statuses.push_back(decision.at("status"));
+    }
+    if(actions.size() != episode_steps || row.at("fallback_count") != episode_steps ||
+       !row.at("completed").get<bool>())
+        throw std::runtime_error("native MPC-04 fallback episode did not complete as expected");
+    return {{"completed", row.at("completed")}, {"fallback_count", row.at("fallback_count")},
+            {"steps", actions.size()}, {"statuses", std::move(statuses)},
+            {"actions", std::move(actions)}};
+}
+
+Json check_native_fallback_semantics(const ConvexProvider& provider, std::uint64_t& serial) {
+    const std::array<double, episode_steps> history{};
+    const auto deadline_row = episode("linear_qp_nominal_linf", "shrinking_to_episode_terminal",
+        history, provider, serial, 0, false);
+    const auto failure_row = episode("linear_qp_nominal_linf", "shrinking_to_episode_terminal",
+        history, provider, serial, deadline_ns, true);
+    return {{"deadline", summarize_native_fallback(deadline_row, "deadline_fallback")},
+            {"solver_failure", summarize_native_fallback(failure_row, "solver_failure_fallback")}};
+}
+
 Json run(bool reverse_policy_order) {
     Json episodes = Json::array();
     const auto provider_setup_started = Clock::now();
@@ -668,6 +733,7 @@ Json run(bool reverse_policy_order) {
         std::chrono::duration_cast<std::chrono::nanoseconds>(Clock::now() - provider_setup_started).count());
     std::uint64_t qp_serial = 0;
     const auto qp_fixture = check_qp_analytic_fixture(qp_provider, qp_serial);
+    const auto fallback_fixtures = check_native_fallback_semantics(qp_provider, qp_serial);
     std::vector<std::string> policies{"nominal_zero_disturbance", "finite_minimax",
         "linear_qp_nominal_linf", "linear_qp_finite_history_robust_linf"};
     if(reverse_policy_order) std::reverse(policies.begin(), policies.end());
@@ -683,6 +749,7 @@ Json run(bool reverse_policy_order) {
             {"controller_order", policies},
             {"fixtures", check_finite_policy_fixtures()},
             {"qp_analytic_fixture", qp_fixture},
+            {"native_fallback_fixtures", fallback_fixtures},
             {"qp_metadata", {{"provider_id", qp_provider.provenance().actual->id.value},
                 {"provider_version", qp_provider.provenance().actual->version},
                 {"provider_setup_ns", provider_setup_ns},
