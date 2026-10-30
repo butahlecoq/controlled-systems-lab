@@ -51,6 +51,12 @@ class VisualRouteInventoryTests(unittest.TestCase):
                        "scripts/reports/issue4_volterra/render.py", "scripts/reports/issue6/render.py"):
             self.assertEqual(producers[source]["disposition"],
                              "frozen-renderer-preserved-with-shared-policy-companion")
+        for source in ("scripts/reports/ext04/render_saved.py", "scripts/reports/ext07/render_saved.py",
+                       "scripts/reports/ext04/affine_synthesis_report.py",
+                       "scripts/reports/ext07/two_parameter_render_saved.py",
+                       "scripts/reports/finite_feedback/render_saved.py"):
+            self.assertEqual(producers[source]["disposition"],
+                             "frozen-renderer-preserved-with-shared-policy-companion")
         self.assertEqual(producers["benchmarks/reporting/approximation_pilot/summarize.py"]["disposition"],
                          "reviewed-static-diagram-exception")
         self.assertEqual(producers["scripts/reports/issue422/build_bundle.py"]["disposition"],
@@ -140,7 +146,7 @@ class VisualRouteInventoryTests(unittest.TestCase):
         follow_up_counts={number:sum(entry["follow_up_issue"]==number for entry in deferred)
                           for number in (600,684,685,686,687,708,717)}
         self.assertEqual(follow_up_counts,
-                         {600:2,684:6,685:0,686:1,687:4,708:1,717:14})
+                         {600:2,684:0,685:0,686:1,687:4,708:1,717:15})
         reviewed=[entry for entry in producers.values() if entry.get("role")]
         self.assertEqual(len(reviewed),24)
         self.assertEqual(set(entry["source"] for entry in reviewed),
@@ -167,6 +173,16 @@ class VisualRouteInventoryTests(unittest.TestCase):
                          "examples/app03-zonotope-v1.html")
         self.assertEqual(routes["app01-plan-20261016-22d406fd"]["companion_route"],
                          "examples/app01-plan-timing-v1.html")
+        self.assertEqual(routes["ext04-df62c7c6d295e135"]["companion_route"],
+                         "examples/ext04-observed-replay-v1.html")
+        self.assertEqual(routes["ext04-affine-synthesis-7eadf7c7ecbb2bbd"]["companion_route"],
+                         "examples/ext04-affine-synthesis-v1.html")
+        self.assertEqual(routes["ext07-hybrid-51d9ee2e89d240eb"]["companion_route"],
+                         "examples/ext07-feasible-relation-v1.html")
+        self.assertEqual(routes["ext07-hybrid-two-parameter-26f402289a309403"]["companion_route"],
+                         "examples/ext07-two-control-family-v1.html")
+        self.assertEqual(routes["finite-feedback-a6e96fd96c7ac7cc"]["companion_route"],
+                         "examples/finite-feedback-timing-v1.html")
         self.assertEqual(routes["app03-zonotope-4522855018fa9b0b"]["follow_up_issue"], 669)
         self.assertEqual(routes["env717-simple-control-pilot-v1"]["follow_up_issue"], 717)
         self.assertEqual(routes["env717-two-points-pilot-v1"]["follow_up_issue"], 717)
@@ -203,6 +219,16 @@ class VisualRouteInventoryTests(unittest.TestCase):
             "ext05-states-v1-export.json",
             "app01-plan-timing-v1.html", "app01-plan-timing-v1.svg",
             "app01-plan-timing-v1.png", "app01-plan-timing-v1-export.json",
+            "ext04-observed-replay-v1.html", "ext04-observed-replay-v1.svg",
+            "ext04-observed-replay-v1.png", "ext04-observed-replay-v1-export.json",
+            "ext04-affine-synthesis-v1.html", "ext04-affine-synthesis-v1.svg",
+            "ext04-affine-synthesis-v1.png", "ext04-affine-synthesis-v1-export.json",
+            "ext07-feasible-relation-v1.html", "ext07-feasible-relation-v1.svg",
+            "ext07-feasible-relation-v1.png", "ext07-feasible-relation-v1-export.json",
+            "ext07-two-control-family-v1.html", "ext07-two-control-family-v1.svg",
+            "ext07-two-control-family-v1.png", "ext07-two-control-family-v1-export.json",
+            "finite-feedback-timing-v1.html", "finite-feedback-timing-v1.svg",
+            "finite-feedback-timing-v1.png", "finite-feedback-timing-v1-export.json",
             "mpc03-open-loop-pilot-v1/index.html",
             "mpc03-open-loop-pilot-v1/record.json",
             "mpc03-open-loop-pilot-v1/pilot-output.json",

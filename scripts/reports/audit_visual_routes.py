@@ -71,7 +71,12 @@ SAVED_COMPANION_ROUTES = {
     "scripts/reports/app03/render_saved.py",
     "scripts/reports/app04/render_saved.py",
     "scripts/reports/ext01/render_saved.py",
+    "scripts/reports/ext04/render_saved.py",
+    "scripts/reports/ext04/affine_synthesis_report.py",
     "scripts/reports/ext05/render_saved.py",
+    "scripts/reports/ext07/render_saved.py",
+    "scripts/reports/ext07/two_parameter_render_saved.py",
+    "scripts/reports/finite_feedback/render_saved.py",
     "scripts/reports/lotka_volterra_sampled.py",
     "scripts/reports/geo02/render.py",
     "scripts/reports/geo03/build_report.py",
@@ -104,7 +109,12 @@ FROZEN_COMPANIONS = {
     "app03-zonotope-4522855018fa9b0b": "examples/app03-zonotope-v1.html",
     "app04-ellipsoid-fd302c34092f8b19": "examples/app04-square-v1.html",
     "ext01-fixed-plan-20261016-11b7bc74": "examples/ext01-b08-timing-v1.html",
+    "ext04-df62c7c6d295e135": "examples/ext04-observed-replay-v1.html",
+    "ext04-affine-synthesis-7eadf7c7ecbb2bbd": "examples/ext04-affine-synthesis-v1.html",
+    "ext07-hybrid-51d9ee2e89d240eb": "examples/ext07-feasible-relation-v1.html",
+    "ext07-hybrid-two-parameter-26f402289a309403": "examples/ext07-two-control-family-v1.html",
     "ext05-discretization-a40ba9647cc023dc": "examples/ext05-states-v1.html",
+    "finite-feedback-a6e96fd96c7ac7cc": "examples/finite-feedback-timing-v1.html",
     "lotka-volterra-sampled-20261023": "examples/lotka-volterra-sampled-v1.html",
 }
 FROZEN_ROUTE_FOLLOW_UP_ISSUES = {
@@ -139,6 +149,8 @@ def migration_issue(source: str) -> int:
         return MIGRATION_ISSUES["control-strategy-and-witness"]
     if any(token in source for token in ("/app0", "/ext", "/finite_feedback", "/lotka_volterra")):
         return MIGRATION_ISSUES["approximation-and-extensions"]
+    if source == "scripts/reports/exp03/render_two_points_approximation.py":
+        return 717
     if "/exp03/" in source:
         return MIGRATION_ISSUES["approximation-and-extensions"]
     if any(token in source for token in ("/geo", "/opt", "/it17_hull")):
@@ -284,6 +296,16 @@ def build(root: Path = ROOT) -> dict:
                     "ext05-states-v1.png", "ext05-states-v1-export.json",
                     "app01-plan-timing-v1.html", "app01-plan-timing-v1.svg",
                     "app01-plan-timing-v1.png", "app01-plan-timing-v1-export.json",
+                    "ext04-observed-replay-v1.html", "ext04-observed-replay-v1.svg",
+                    "ext04-observed-replay-v1.png", "ext04-observed-replay-v1-export.json",
+                    "ext04-affine-synthesis-v1.html", "ext04-affine-synthesis-v1.svg",
+                    "ext04-affine-synthesis-v1.png", "ext04-affine-synthesis-v1-export.json",
+                    "ext07-feasible-relation-v1.html", "ext07-feasible-relation-v1.svg",
+                    "ext07-feasible-relation-v1.png", "ext07-feasible-relation-v1-export.json",
+                    "ext07-two-control-family-v1.html", "ext07-two-control-family-v1.svg",
+                    "ext07-two-control-family-v1.png", "ext07-two-control-family-v1-export.json",
+                    "finite-feedback-timing-v1.html", "finite-feedback-timing-v1.svg",
+                    "finite-feedback-timing-v1.png", "finite-feedback-timing-v1-export.json",
                     "mpc03-open-loop-pilot-v1/index.html",
                     "mpc03-open-loop-pilot-v1/record.json",
                     "mpc03-open-loop-pilot-v1/pilot-output.json",

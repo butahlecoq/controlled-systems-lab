@@ -236,7 +236,7 @@
       "signal_count": 1,
       "asset_name_literals": [],
       "disposition": "deferred-family-specific-migration",
-      "follow_up_issue": 684
+      "follow_up_issue": 717
     },
     {
       "source": "scripts/reports/exp04/render_saved.py",
@@ -303,8 +303,7 @@
       "asset_name_literals": [
         "synthesis-2d.svg"
       ],
-      "disposition": "deferred-family-specific-migration",
-      "follow_up_issue": 684
+      "disposition": "frozen-renderer-preserved-with-shared-policy-companion"
     },
     {
       "source": "scripts/reports/ext04/continuous_report.py",
@@ -329,8 +328,7 @@
       "asset_name_literals": [
         "performance.svg"
       ],
-      "disposition": "deferred-family-specific-migration",
-      "follow_up_issue": 684
+      "disposition": "frozen-renderer-preserved-with-shared-policy-companion"
     },
     {
       "source": "scripts/reports/ext05/render_saved.py",
@@ -346,8 +344,7 @@
       "asset_name_literals": [
         "joint-relation-2d.svg"
       ],
-      "disposition": "deferred-family-specific-migration",
-      "follow_up_issue": 684
+      "disposition": "frozen-renderer-preserved-with-shared-policy-companion"
     },
     {
       "source": "scripts/reports/ext07/two_parameter_render_saved.py",
@@ -355,8 +352,7 @@
       "asset_name_literals": [
         "feasible-polygons.svg"
       ],
-      "disposition": "deferred-family-specific-migration",
-      "follow_up_issue": 684
+      "disposition": "frozen-renderer-preserved-with-shared-policy-companion"
     },
     {
       "source": "scripts/reports/finite_feedback/render_saved.py",
@@ -364,8 +360,7 @@
       "asset_name_literals": [
         "performance.svg"
       ],
-      "disposition": "deferred-family-specific-migration",
-      "follow_up_issue": 684
+      "disposition": "frozen-renderer-preserved-with-shared-policy-companion"
     },
     {
       "source": "scripts/reports/fuel_reachability_layers.py",
@@ -1438,7 +1433,7 @@
     },
     {
       "source": "scripts/reports/visual_examples.py",
-      "signal_count": 65,
+      "signal_count": 67,
       "asset_name_literals": [
         "adaptive-ode-replay.svg",
         "app01-plan-timing-v1.svg",
@@ -2083,7 +2078,8 @@
       ],
       "index_sha256": "e41b70d3f5bdba4a23b505d33aa7c08f64128ee702b751d8b8e91c594377cf6b",
       "disposition": "deferred: original frozen route-level readability review remains; companion availability is listed separately",
-      "follow_up_issue": 669
+      "follow_up_issue": 669,
+      "companion_route": "examples/ext04-affine-synthesis-v1.html"
     },
     {
       "route": "ext04-affine-synthesis-7f04289dfcdcb074",
@@ -2123,7 +2119,8 @@
       ],
       "index_sha256": "0a33bf830a2e4abe77a4b6f2fede1d29bb25836778e30222cb297afeff621ae3",
       "disposition": "deferred: original frozen route-level readability review remains; companion availability is listed separately",
-      "follow_up_issue": 669
+      "follow_up_issue": 669,
+      "companion_route": "examples/ext04-observed-replay-v1.html"
     },
     {
       "route": "ext04-h-policy-0c0a95116ce4642b",
@@ -2155,7 +2152,8 @@
       ],
       "index_sha256": "9b914e6355ab9b0ca480b3b50712d2d9182f0c81985cc411bf140f8015359496",
       "disposition": "deferred: original frozen route-level readability review remains; companion availability is listed separately",
-      "follow_up_issue": 669
+      "follow_up_issue": 669,
+      "companion_route": "examples/ext07-feasible-relation-v1.html"
     },
     {
       "route": "ext07-hybrid-two-parameter-26f402289a309403",
@@ -2165,7 +2163,8 @@
       ],
       "index_sha256": "d32671ca88301a07fbdc55709deb94c6685545ca4d0e838dd7a85eb08609235a",
       "disposition": "deferred: original frozen route-level readability review remains; companion availability is listed separately",
-      "follow_up_issue": 669
+      "follow_up_issue": 669,
+      "companion_route": "examples/ext07-two-control-family-v1.html"
     },
     {
       "route": "ext07-hybrid-two-parameter-8ad871b5ea29fc7b",
@@ -2195,7 +2194,8 @@
       ],
       "index_sha256": "32b0713ab87d982138f743ddee399e8c62256ee0ef4fcfc956643ecf9b986baf",
       "disposition": "deferred: original frozen route-level readability review remains; companion availability is listed separately",
-      "follow_up_issue": 669
+      "follow_up_issue": 669,
+      "companion_route": "examples/finite-feedback-timing-v1.html"
     },
     {
       "route": "geo02-20261012T235755Z-6b1f504ad3db",
@@ -2639,6 +2639,26 @@
         "app01-plan-timing-v1.svg",
         "app01-plan-timing-v1.png",
         "app01-plan-timing-v1-export.json",
+        "ext04-observed-replay-v1.html",
+        "ext04-observed-replay-v1.svg",
+        "ext04-observed-replay-v1.png",
+        "ext04-observed-replay-v1-export.json",
+        "ext04-affine-synthesis-v1.html",
+        "ext04-affine-synthesis-v1.svg",
+        "ext04-affine-synthesis-v1.png",
+        "ext04-affine-synthesis-v1-export.json",
+        "ext07-feasible-relation-v1.html",
+        "ext07-feasible-relation-v1.svg",
+        "ext07-feasible-relation-v1.png",
+        "ext07-feasible-relation-v1-export.json",
+        "ext07-two-control-family-v1.html",
+        "ext07-two-control-family-v1.svg",
+        "ext07-two-control-family-v1.png",
+        "ext07-two-control-family-v1-export.json",
+        "finite-feedback-timing-v1.html",
+        "finite-feedback-timing-v1.svg",
+        "finite-feedback-timing-v1.png",
+        "finite-feedback-timing-v1-export.json",
         "mpc03-open-loop-pilot-v1/index.html",
         "mpc03-open-loop-pilot-v1/record.json",
         "mpc03-open-loop-pilot-v1/pilot-output.json",
