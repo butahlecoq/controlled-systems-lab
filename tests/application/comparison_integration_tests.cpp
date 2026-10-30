@@ -9,14 +9,21 @@
 #include <csl/artifacts/comparison_manifest.hpp>
 #include <csl/execution/observability.hpp>
 #include <csl/geometry/affine_sum.hpp>
+#include <csl/geometry/approximation.hpp>
+#include <csl/geometry/box_parallelotope.hpp>
 #include <csl/problem/validator.hpp>
+#include <csl/sets/data.hpp>
 #include <csl/synthesis/strategy_a/strategy.hpp>
 #include <csl/synthesis/strategy_b/direct_joint.hpp>
 #include <csl/synthesis/witness_selector.hpp>
 #include <nlohmann/json.hpp>
 
 #include <algorithm>
+#include <array>
+#include <chrono>
 #include <cmath>
+#include <cstdint>
+#include <span>
 #include <type_traits>
 #include <tuple>
 #include <utility>
@@ -1411,4 +1418,147 @@ TEST_CASE("approximation checker events preserve profile, evidence, resources an
     unsupported_incorrect.measurement_payload=malformed.dump();
     const auto bad_incorrect=ar::encode_recorded_comparison(spec_for(1),{unsupported_incorrect});
     CHECK(std::holds_alternative<ar::ArtifactError>(bad_incorrect));
+}
+
+TEST_CASE("a registered approximation and independent vertex oracle survive comparison serialization") {
+    namespace ar = artifacts;
+    namespace approx = geometry::approximation;
+    using Json = nlohmann::json;
+    const std::string input_manifest_text =
+        R"({"schema":"csl.geometry-hull-input/1","points":[[0,0],[2,0],[0,2]]})";
+    const auto manifest_result = problem::snapshot_content(std::span<const std::byte>{
+        reinterpret_cast<const std::byte*>(input_manifest_text.data()), input_manifest_text.size()});
+    const auto manifest = take(manifest_result);
+    const auto manifest_hash = problem::hex(manifest.digest());
+    const auto problem_id = std::string("csl.problem.v1.sha256:") + manifest_hash;
+
+    const Matrix source_points{3,2,{0,0,2,0,0,2}};
+    const auto vertices = numeric::snapshot(source_points);
+    const auto rays = numeric::snapshot(Matrix{0,2,{}});
+    REQUIRE(std::holds_alternative<numeric::MatrixView>(vertices));
+    REQUIRE(std::holds_alternative<numeric::MatrixView>(rays));
+    const auto source = take(sets::make_v({{"source-triangle"},2,{"x","y"}},
+        {std::get<numeric::MatrixView>(vertices),std::get<numeric::MatrixView>(rays)})).as_handle();
+    const ApproximationRequest request{
+        {ProblemId{problem_id},RequestId{"box-request"},ReferenceId{"exact-triangle"}},
+        source,{"csl.polyhedron.h"},SetRelation::outer,4,Assurance::numerical};
+
+    registry::Registry<registry::ApproximationPort> providers;
+    REQUIRE_FALSE(providers.add(approx::make_box_registration({"box-output"})).has_value());
+    const auto algorithm_start = std::chrono::steady_clock::now();
+    const auto outcome = approx::run_registered(providers,{{"csl.approximation.box"},std::nullopt},
+        request,ExecutionContext{});
+    const auto algorithm_elapsed = std::chrono::duration_cast<std::chrono::nanoseconds>(
+        std::chrono::steady_clock::now()-algorithm_start).count();
+    REQUIRE(std::holds_alternative<approx::EnclosedApproximation>(outcome));
+    const auto& enclosed = std::get<approx::EnclosedApproximation>(outcome);
+    CHECK(enclosed.result.relation==SetRelation::outer);
+    CHECK(enclosed.basis==approx::StructuralBasis::v_h_containment);
+
+    const auto output = take(sets::from_handle(enclosed.result.output));
+    const auto representation = output.representation();
+    REQUIRE(std::holds_alternative<sets::HRepresentation>(representation));
+    const auto& h = std::get<sets::HRepresentation>(representation);
+    REQUIRE(h.inequalities.rows()==4);
+    REQUIRE(h.inequalities.cols()==2);
+    REQUIRE(h.upper_bounds.size()==4);
+    const std::array<std::array<int,2>,4> expected_rows{{{1,0},{-1,0},{0,1},{0,-1}}};
+    const std::array<int,4> expected_bounds{{2,0,2,0}};
+    for(std::size_t row=0;row<expected_rows.size();++row) {
+        CHECK(h.inequalities(row,0)==expected_rows[row][0]);
+        CHECK(h.inequalities(row,1)==expected_rows[row][1]);
+        CHECK(h.upper_bounds[row]==expected_bounds[row]);
+    }
+
+    constexpr std::uint64_t checker_budget_ns=5'000'000'000ULL;
+    const auto checker_start = std::chrono::steady_clock::now();
+    // Exact integer arithmetic independently checks all source vertices against
+    // the literal H rows. Convexity then covers their complete triangular hull.
+    const std::array<std::array<int,2>,3> points{{{0,0},{2,0},{0,2}}};
+    bool all_vertices_contained = true;
+    Json h_rows = Json::array();
+    Json h_bounds = Json::array();
+    for (std::size_t row=0; row<h.inequalities.rows(); ++row) {
+        h_rows.push_back(Json::array({static_cast<double>(h.inequalities(row,0)),
+            static_cast<double>(h.inequalities(row,1))}));
+        h_bounds.push_back(static_cast<double>(h.upper_bounds[row]));
+        for (const auto& point : points) {
+            const auto lhs = static_cast<int>(h.inequalities(row,0))*point[0] +
+                static_cast<int>(h.inequalities(row,1))*point[1];
+            if (lhs > static_cast<int>(h.upper_bounds[row])) all_vertices_contained=false;
+        }
+    }
+    REQUIRE(all_vertices_contained);
+    const auto checker_elapsed = static_cast<std::uint64_t>(std::max<std::int64_t>(1,
+        std::chrono::duration_cast<std::chrono::nanoseconds>(
+            std::chrono::steady_clock::now()-checker_start).count()));
+    REQUIRE(checker_elapsed<=checker_budget_ns);
+    const std::string method="csl.approximation.box";
+    const std::string configuration="csl.config.v1.sha256:"+std::string(64,'c');
+    problem::ContentDigest request_digest{};
+    request_digest.bytes.fill(std::byte{0x0d});
+    Json result_payload{{"input_set_id",request.input.id.value},
+        {"output_set_id",enclosed.result.output.id.value},
+        {"request_id",request.identity.request.value},{"status","completed"},
+        {"relation","outer"},{"structural_basis","v_h_containment"},
+        {"output",Json{{"representation","H"},{"inequalities",h_rows},{"upper_bounds",h_bounds}}}};
+    ar::ExternalMethodRunInput run_input;
+    run_input.run={"registered-box-triangle"};
+    run_input.problem={problem_id};
+    run_input.configuration={configuration};
+    run_input.request_digest=request_digest;
+    run_input.input_manifest_schema="csl.geometry-hull-input/1";
+    run_input.input_manifest.assign(manifest.bytes().begin(),manifest.bytes().end());
+    run_input.method_id=method;
+    run_input.method_version="1";
+    run_input.sources={{"src/geometry/approximation/box_parallelotope.cpp",std::string(64,'e')}};
+    run_input.runtime={"C++",method,"1",std::string(64,'f'),"Linux","x86_64","GCC","16.2.1","Release"};
+    run_input.status=ar::AttemptStatus::completed;
+    run_input.result_payload=result_payload.dump();
+    const auto recorded_run=take_artifact(ar::encode_external_method_run(run_input),
+        "encode registered approximation result");
+
+    const auto event=Json{{"schema","csl.approximation-check-event/1"},{"status","passed"},
+        {"strategy",method},{"instrumentation","disabled"},{"repetition",0},{"warmup",true},
+        {"problem_id",problem_id},{"input_set_id",request.input.id.value},
+        {"output_set_id",enclosed.result.output.id.value},{"request_id",request.identity.request.value},
+        {"relation","outer"},{"structural_basis","v_h_containment"},
+        {"algorithm",Json{{"status","completed"},{"elapsed_ns",algorithm_elapsed}}},
+        {"checker",Json{{"profile","comparison"},{"status","verified"},{"outcome","completed"},
+            {"elapsed_ns",checker_elapsed},
+            {"budget",Json{{"default_wall_time_ns",checker_budget_ns},{"wall_time_ns",checker_budget_ns}}},
+            {"resources",Json{
+                {"wall_time",Json{{"requested",checker_budget_ns},{"enforced",nullptr},
+                    {"observed",checker_elapsed},{"mechanism",nullptr},{"scope","test_process"},
+                    {"unavailable_reason",nullptr}}},
+                {"memory_bytes",Json{{"requested",8ULL*1024*1024*1024},{"enforced",nullptr},
+                    {"observed",nullptr},{"mechanism",nullptr},{"scope","shared_comparison_attempt"},
+                    {"unavailable_reason","test uses no memory-isolated checker process"}}}}},
+            {"oracle",Json{{"kind","exact_dyadic_all_vertices"},{"scope","inclusion"},
+                {"claim","outer"},{"independent",true},{"complete",true},{"sound",true},
+                {"counterexample",nullptr}}}}}}.dump();
+
+    const std::string spec_text=Json{{"schema","csl.comparison-spec/2"},{"problem_id",problem_id},
+        {"request_digest",problem::hex(request_digest)},{"repetitions",1},
+        {"input_manifest_hash",manifest_hash},{"input_manifest_source","csl.geometry-hull-input/1"},
+        {"arms",Json::array({Json{{"configuration_id",configuration},{"strategy",method},
+            {"instrumentation","disabled"}}})}}.dump();
+    const auto spec=problem::snapshot_content(std::span<const std::byte>{
+        reinterpret_cast<const std::byte*>(spec_text.data()),spec_text.size()});
+    const auto attempt=ar::ComparisonAttempt{0,0,ar::AttemptStatus::completed,
+        {recorded_run.run_id(),recorded_run.content().digest()},ar::ComparisonRunArtifact{recorded_run},event};
+    const auto comparison=take_artifact(ar::encode_recorded_comparison(take(spec),{attempt}),
+        "encode registered approximation comparison");
+    const auto bytes=comparison.content().bytes();
+    const auto restored=take_artifact(ar::decode_recorded_comparison(std::string_view(
+        reinterpret_cast<const char*>(bytes.data()),bytes.size())),"decode registered approximation comparison");
+    const auto decoded=Json::parse(std::string(reinterpret_cast<const char*>(restored.content().bytes().data()),
+        restored.content().bytes().size()));
+    const auto saved_event=Json::parse(decoded.at("attempts").at(0).at("measurement_payload").get<std::string>());
+    const auto saved_run=Json::parse(decoded.at("attempts").at(0).at("run").get<std::string>());
+    const auto saved_result=saved_run.at("result");
+    CHECK(saved_event.at("checker").at("status")=="verified");
+    CHECK(saved_event.at("structural_basis")==saved_result.at("structural_basis"));
+    CHECK(saved_result.at("output").at("inequalities")==h_rows);
+    CHECK(saved_result.at("output").at("upper_bounds")==h_bounds);
 }
