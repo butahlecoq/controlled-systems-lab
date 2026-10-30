@@ -234,6 +234,11 @@ class GalleryTests(unittest.TestCase):
         self.assertIn("inconclusive", repeated_b04["evidence_status"])
         comparison_raw = (ROOT / "docs/research/evidence/mpc01-external-qps-20261026-r3/comparison-records.jsonl").read_bytes()
         self.assertEqual(repeated_b04["comparison_records_sha256"], hashlib.sha256(comparison_raw).hexdigest())
+        case_raw = (ROOT / "docs/research/evidence/b04-reference-v1/canonical-case.json").read_bytes()
+        case_hash = hashlib.sha256(case_raw).hexdigest()
+        self.assertEqual(repeated_b04["case_sha256"], case_hash)
+        self.assertEqual(repeated_b04["problem_id"], f"csl.problem.v1.sha256:{case_hash}")
+        self.assertEqual(repeated_b04["input_manifest_hash"], case_hash)
         self.assertEqual(len(repeated_b04["selection"]), 2)
         self.assertTrue(all(0 <= item["repetition"] < 5 for item in repeated_b04["selection"]))
         for asset in ("b04-repeated-oxidizer.svg", "b04-repeated-fuel.svg",
@@ -358,6 +363,36 @@ class GalleryTests(unittest.TestCase):
                          syn06_evidence["rows"][0]["saved_median_elapsed_ns"] / 28000)
         repeated = control_witness_companions.build(self.site, self.catalog)
         self.assertEqual(result.files, repeated.files)
+
+    def test_repeated_b04_companion_rejects_comparison_for_another_case(self):
+        evidence_root = ROOT / "docs/research/evidence"
+        repeated = evidence_root / "mpc01-external-qps-20261026-r3"
+        manifest_path = repeated / "figure-manifest.json"
+        records_path = repeated / "comparison-records.jsonl"
+        original_read_bytes = Path.read_bytes
+        manifest = json.loads(manifest_path.read_bytes())
+        records = [json.loads(line) for line in records_path.read_text().splitlines() if line.strip()]
+        record = next(item for item in records if item["comparison_spec_id"] == manifest["comparison_spec_id"])
+        spec = json.loads(record["spec"])
+        spec["problem_id"] = "csl.problem.v1.sha256:" + "0" * 64
+        record["spec"] = json.dumps(spec, sort_keys=True, separators=(",", ":"))
+        changed_records = ("\n".join(json.dumps(item, sort_keys=True, separators=(",", ":"))
+                                      for item in records) + "\n").encode()
+        manifest["records_sha256"] = hashlib.sha256(changed_records).hexdigest()
+        changed_manifest = (json.dumps(manifest, sort_keys=True, separators=(",", ":")) + "\n").encode()
+
+        def read_bytes(path):
+            resolved = path.resolve()
+            if resolved == records_path.resolve():
+                return changed_records
+            if resolved == manifest_path.resolve():
+                return changed_manifest
+            return original_read_bytes(path)
+
+        with patch.object(Path, "read_bytes", read_bytes):
+            with self.assertRaisesRegex(ValueError, "canonical case identity"):
+                control_witness_companions._b04_repeated_companion(
+                    ROOT / "scripts/reports/styles/control-v1.json")
 
     def test_build_preserves_reports_and_has_resolvable_links(self):
         before = {p.relative_to(self.site): hashlib.sha256(p.read_bytes()).hexdigest()

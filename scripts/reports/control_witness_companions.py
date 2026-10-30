@@ -287,6 +287,7 @@ def _b04_repeated_companion(style: Path) -> tuple[dict[str, bytes], str, dict]:
     case, reference = json.loads(case_raw), json.loads(reference_raw)
     if (manifest.get("schema") != "csl.mpc01-repeated-benchmark-figure/1" or
             manifest.get("case_id") != "b04-reference-v1" or
+            case.get("case_id") != manifest.get("case_id") or
             manifest.get("records_sha256") != hashlib.sha256(comparison_raw).hexdigest() or
             manifest.get("selected_attempts_sha256") != hashlib.sha256(selected_raw).hexdigest() or
             manifest.get("case_sha256") != hashlib.sha256(case_raw).hexdigest() or
@@ -302,12 +303,19 @@ def _b04_repeated_companion(style: Path) -> tuple[dict[str, bytes], str, dict]:
     if b04_record is None:
         raise ValueError("saved repeated-B04 figure manifest names no canonical comparison record")
     spec = json.loads(b04_record.get("spec", "{}"))
+    case_hash = hashlib.sha256(case_raw).hexdigest()
+    if (spec.get("problem_id") != f"csl.problem.v1.sha256:{case_hash}" or
+            spec.get("input_manifest_hash") != case_hash):
+        raise ValueError("saved repeated-B04 comparison does not match the canonical case identity")
     if (spec.get("repetitions") != 5 or len(b04_record.get("attempts", [])) != 20):
         raise ValueError("saved repeated-B04 comparison does not establish five repetitions per arm")
     cold_rows = []
     for attempt in b04_record["attempts"]:
         event = json.loads(attempt["measurement_payload"])
         row = event.get("attempt", {})
+        if (row.get("case_id") != case.get("case_id") or
+                row.get("input_sha256") != case_hash):
+            raise ValueError("saved repeated-B04 attempt does not match the canonical case hash")
         if row.get("case_id") == "b04-reference-v1" and row.get("start_mode") == "cold":
             cold_rows.append((attempt["repetition_index"], row))
     by_method: dict[str, list[tuple[int, dict]]] = {}
@@ -386,6 +394,8 @@ def _b04_repeated_companion(style: Path) -> tuple[dict[str, bytes], str, dict]:
                 outputs[f"{stem}.{suffix}"] = (generated / f"geometry.{suffix}").read_bytes()
         export_receipts[slug] = receipt
     data = {"schema": "csl.control-witness-b04-repeated/1", "case_id": case["case_id"],
+            "comparison_spec_id": comparison_id, "problem_id": spec["problem_id"],
+            "input_manifest_hash": spec["input_manifest_hash"],
             "coordinate_pairs": {"oxidizer": ["x1", "x2"], "fuel": ["x3", "x4"]},
             "selection": manifest["selection"], "path_kind": "representative individual cold paths",
             "claim_scope": "Three trajectories projected into two 2D planes; no reachable-set or historical B04 claim.",
