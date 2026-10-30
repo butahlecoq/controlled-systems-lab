@@ -1429,10 +1429,22 @@ TEST_CASE("a registered approximation and independent vertex oracle survive comp
     const auto manifest_result = problem::snapshot_content(std::span<const std::byte>{
         reinterpret_cast<const std::byte*>(input_manifest_text.data()), input_manifest_text.size()});
     const auto manifest = take(manifest_result);
+    const auto input_manifest = Json::parse(input_manifest_text);
+    REQUIRE(input_manifest.at("schema")=="csl.geometry-hull-input/1");
+    const auto manifest_points=input_manifest.at("points");
+    REQUIRE(manifest_points.size()==3);
     const auto manifest_hash = problem::hex(manifest.digest());
     const auto problem_id = std::string("csl.problem.v1.sha256:") + manifest_hash;
 
-    const Matrix source_points{3,2,{0,0,2,0,0,2}};
+    std::vector<double> source_coordinates;
+    for(const auto& point:manifest_points) {
+        REQUIRE(point.size()==2);
+        for(const auto& coordinate:point) {
+            REQUIRE(coordinate.is_number_integer());
+            source_coordinates.push_back(coordinate.get<double>());
+        }
+    }
+    const Matrix source_points{manifest_points.size(),2,std::move(source_coordinates)};
     const auto vertices = numeric::snapshot(source_points);
     const auto rays = numeric::snapshot(Matrix{0,2,{}});
     REQUIRE(std::holds_alternative<numeric::MatrixView>(vertices));
@@ -1474,7 +1486,10 @@ TEST_CASE("a registered approximation and independent vertex oracle survive comp
     const auto checker_start = std::chrono::steady_clock::now();
     // Exact integer arithmetic independently checks all source vertices against
     // the literal H rows. Convexity then covers their complete triangular hull.
-    const std::array<std::array<int,2>,3> points{{{0,0},{2,0},{0,2}}};
+    std::array<std::array<int,2>,3> points{};
+    for(std::size_t vertex=0;vertex<points.size();++vertex)
+        for(std::size_t coordinate=0;coordinate<points[vertex].size();++coordinate)
+            points[vertex][coordinate]=manifest_points.at(vertex).at(coordinate).get<int>();
     bool all_vertices_contained = true;
     Json h_rows = Json::array();
     Json h_bounds = Json::array();
@@ -1557,6 +1572,11 @@ TEST_CASE("a registered approximation and independent vertex oracle survive comp
     const auto saved_event=Json::parse(decoded.at("attempts").at(0).at("measurement_payload").get<std::string>());
     const auto saved_run=Json::parse(decoded.at("attempts").at(0).at("run").get<std::string>());
     const auto saved_result=saved_run.at("result");
+    CHECK(saved_run.at("problem")==problem_id);
+    CHECK(saved_event.at("problem_id")==saved_run.at("problem"));
+    CHECK(saved_event.at("input_set_id")==request.input.id.value);
+    CHECK(saved_event.at("output_set_id")==enclosed.result.output.id.value);
+    CHECK(saved_event.at("request_id")==request.identity.request.value);
     CHECK(saved_event.at("checker").at("status")=="verified");
     CHECK(saved_event.at("structural_basis")==saved_result.at("structural_basis"));
     CHECK(saved_result.at("output").at("inequalities")==h_rows);
