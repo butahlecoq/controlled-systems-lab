@@ -347,6 +347,10 @@ TEST_CASE("4D selected linear witnesses retain separate nonlinear replay and 2D 
     invalid_limits_without_method_replay["integration_receipts"] = nlohmann::json::array();
     CHECK(std::holds_alternative<ar::ArtifactError>(ex::decode_replay_comparison(
         invalid_limits_without_method.dump())));
+    invalid_limits_without_method_replay["integration_limits"] = nullptr;
+    invalid_limits_without_method_replay["integration_receipts"] = {{{"malformed", true}}};
+    CHECK(std::holds_alternative<ar::ArtifactError>(ex::decode_replay_comparison(
+        invalid_limits_without_method.dump())));
 
     auto different_limits_plant = adaptive_plant;
     different_limits_plant.integration_limits = sim::IntegrationLimits{1e-10, 1e-10, 20000};

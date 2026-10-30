@@ -399,7 +399,7 @@ bool replay_document(const Json& replay, std::size_t state_dimensions,
         }
     }
     if (version_three && replay["integration"].is_null() &&
-        !replay["integration_limits"].is_null()) return false;
+        (!replay["integration_limits"].is_null() || !replay["integration_receipts"].empty())) return false;
     if (version_three && replay["integration"].is_string()) {
         const auto method = replay["integration"].get<std::string>();
         const auto& receipts = replay["integration_receipts"];
