@@ -36,6 +36,18 @@ FiniteMixedBranchProblem branch(const problem::ResolvedProblem& problem,
     return std::get<FiniteMixedBranchProblem>(std::move(result));
 }
 
+FiniteMixedBranchCursor cursor(const problem::ResolvedProblem& problem) {
+    auto result = FiniteMixedBranchCursor::prepare(problem);
+    REQUIRE(std::holds_alternative<FiniteMixedBranchCursor>(result));
+    return std::get<FiniteMixedBranchCursor>(std::move(result));
+}
+
+FiniteActionHistory history_of(const FiniteMixedBranchEntry& entry) {
+    if (const auto* prepared = std::get_if<FiniteMixedBranchProblem>(&entry))
+        return prepared->history;
+    return std::get<FailedFiniteMixedBranch>(entry).history;
+}
+
 numeric::MatrixView matrix(Matrix value) {
     auto result = numeric::snapshot(value);
     REQUIRE(std::holds_alternative<numeric::MatrixView>(result));
@@ -137,6 +149,10 @@ TEST_CASE("mixed branch rejects malformed histories and unsupported information 
     auto unsupported = prepare_finite_mixed_branch(feedback, FiniteActionHistory{{0, 2}});
     REQUIRE(std::holds_alternative<Diagnostics>(unsupported));
     CHECK(std::get<Diagnostics>(unsupported).front().code == DiagnosticCode::unsupported);
+    auto unsupported_cursor = FiniteMixedBranchCursor::prepare(feedback);
+    REQUIRE(std::holds_alternative<Diagnostics>(unsupported_cursor));
+    CHECK(std::get<Diagnostics>(unsupported_cursor).front().field ==
+        "finite_mixed_branch.profile");
 }
 
 TEST_CASE("mixed branch rejects non-finite offsets created by finite inputs") {
@@ -154,4 +170,92 @@ TEST_CASE("mixed branch rejects non-finite offsets created by finite inputs") {
     REQUIRE(std::holds_alternative<Diagnostics>(result));
     CHECK(std::get<Diagnostics>(result).front().code == DiagnosticCode::unsupported);
     CHECK(std::get<Diagnostics>(result).front().field == "finite_mixed_branch.affine_offset");
+}
+
+TEST_CASE("mixed branch cursor streams bounded index histories and preserves duplicate identity") {
+    auto branches = cursor(resolved_mixed_problem());
+
+    const auto empty = branches.take_prefix(0);
+    CHECK(empty.entries.empty());
+    CHECK_FALSE(empty.complete);
+
+    const auto first = branches.take_prefix(4);
+    REQUIRE(first.entries.size() == 4);
+    CHECK(first.entries[0].index() == 0);
+    CHECK(history_of(first.entries[0]) == FiniteActionHistory{{0, 0}});
+    CHECK(history_of(first.entries[1]) == FiniteActionHistory{{0, 1}});
+    CHECK(history_of(first.entries[2]) == FiniteActionHistory{{0, 2}});
+    CHECK(history_of(first.entries[3]) == FiniteActionHistory{{1, 0}});
+    CHECK_FALSE(first.complete);
+    const auto& duplicate_zero = std::get<FiniteMixedBranchProblem>(first.entries[0]);
+    const auto& duplicate_one = std::get<FiniteMixedBranchProblem>(first.entries[3]);
+    CHECK(duplicate_zero.coordinates.discrete_controls[0] == Vector{3, 4});
+    CHECK(duplicate_one.coordinates.discrete_controls[0] == Vector{3, 4});
+    CHECK(duplicate_zero.problem.id != duplicate_one.problem.id);
+
+    const auto second = branches.take_prefix(4);
+    REQUIRE(second.entries.size() == 4);
+    CHECK(history_of(second.entries.front()) == FiniteActionHistory{{1, 1}});
+    CHECK(history_of(second.entries.back()) == FiniteActionHistory{{2, 1}});
+    CHECK_FALSE(second.complete);
+
+    const auto last = branches.take_prefix(4);
+    REQUIRE(last.entries.size() == 1);
+    CHECK(history_of(last.entries.front()) == FiniteActionHistory{{2, 2}});
+    CHECK(last.complete);
+
+    const auto terminal = branches.take_prefix(1);
+    CHECK(terminal.entries.empty());
+    CHECK(terminal.complete);
+}
+
+TEST_CASE("mixed branch cursor retains refusals and continues preparing later histories") {
+    auto authored = mixed_problem();
+    auto controls = std::get<MixedDomain>(authored.controls);
+    controls.discrete.catalogue = {{0, -1}, {3, 4}, {0, -1}};
+    authored.controls = std::move(controls);
+    auto model = *authored.model;
+    auto& stages = std::get<std::vector<LinearStage>>(model.dynamics.stages);
+    stages[1].B.values[1] = std::numeric_limits<double>::max();
+    authored.model = std::make_shared<const SystemModel>(std::move(model));
+    const auto resolved = problem::resolve(authored,
+        {problem::UncertaintyStructure::stage_product_uncoupled, {}, {}});
+    REQUIRE(std::holds_alternative<problem::ResolvedProblem>(resolved));
+
+    auto branches = cursor(std::get<problem::ResolvedProblem>(resolved));
+    const auto page = branches.take_prefix(3);
+    REQUIRE(page.entries.size() == 3);
+    CHECK(std::holds_alternative<FiniteMixedBranchProblem>(page.entries[0]));
+    REQUIRE(std::holds_alternative<FailedFiniteMixedBranch>(page.entries[1]));
+    const auto& refusal = std::get<FailedFiniteMixedBranch>(page.entries[1]);
+    CHECK(refusal.history == FiniteActionHistory{{0, 1}});
+    REQUIRE(refusal.diagnostics.size() == 1);
+    CHECK(refusal.diagnostics.front().field == "finite_mixed_branch.affine_offset");
+    CHECK(std::holds_alternative<FiniteMixedBranchProblem>(page.entries[2]));
+    CHECK(history_of(page.entries[2]) == FiniteActionHistory{{0, 2}});
+    CHECK_FALSE(page.complete);
+}
+
+TEST_CASE("zero-horizon mixed branch cursor emits one empty history") {
+    auto authored = mixed_problem();
+    authored.times = {0};
+    auto model = *authored.model;
+    auto& dynamics = model.dynamics;
+    dynamics.stages = std::vector<LinearStage>{};
+    authored.model = std::make_shared<const SystemModel>(std::move(model));
+    auto controls = std::get<MixedDomain>(authored.controls);
+    controls.continuous.stages.clear();
+    authored.controls = std::move(controls);
+    authored.states.resize(1);
+    const auto resolved = problem::resolve(authored,
+        {problem::UncertaintyStructure::stage_product_uncoupled, {}, {}});
+    REQUIRE(std::holds_alternative<problem::ResolvedProblem>(resolved));
+
+    auto branches = cursor(std::get<problem::ResolvedProblem>(resolved));
+    const auto page = branches.take_prefix(1);
+    REQUIRE(page.entries.size() == 1);
+    REQUIRE(std::holds_alternative<FiniteMixedBranchProblem>(page.entries.front()));
+    CHECK(history_of(page.entries.front()) == FiniteActionHistory{{}});
+    CHECK(page.complete);
+    CHECK(branches.take_prefix(1).entries.empty());
 }

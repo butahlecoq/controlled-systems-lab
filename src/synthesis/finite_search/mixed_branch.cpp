@@ -31,6 +31,22 @@ std::optional<std::size_t> joint_dimension(const JointCoordinates& coordinates) 
     return checked_sum(*states, *controls);
 }
 
+std::variant<const MixedDomain*, Diagnostics> validate_profile(const Problem& source) {
+    const auto& model = source.model->dynamics;
+    const auto dimensions = model.dimensions;
+    if (source.information != InformationPattern::nominal_open_loop ||
+        model.time_domain != TimeDomain::discrete || source.temporal || source.external ||
+        dimensions.external != 0 || !source.model->observations.empty() ||
+        !std::holds_alternative<KnownInitial>(source.initial))
+        return unsupported("finite_mixed_branch.profile",
+            "A nominal discrete-time problem with a known initial state and no observations, external inputs, or temporal constraints is required.");
+
+    const auto* mixed = std::get_if<MixedDomain>(&source.controls);
+    if (!mixed)
+        return unsupported("finite_mixed_branch.controls", "A mixed control domain is required.");
+    return mixed;
+}
+
 std::optional<LinearStage> specialize_stage(const LinearStage& source,
     std::span<const double> discrete, std::size_t continuous_dimension) {
     Matrix continuous_input{source.B.rows, continuous_dimension,
@@ -52,6 +68,41 @@ std::optional<LinearStage> specialize_stage(const LinearStage& source,
 }
 }
 
+FiniteMixedBranchCursor::FiniteMixedBranchCursor(problem::ResolvedProblem source,
+        FiniteActionHistoryCursor histories)
+    : source_(std::move(source)), histories_(std::move(histories)) {}
+
+std::variant<FiniteMixedBranchCursor, Diagnostics> FiniteMixedBranchCursor::prepare(
+        const problem::ResolvedProblem& resolved) {
+    const auto source = resolved.description();
+    const auto profile = validate_profile(*source);
+    if (const auto* errors = std::get_if<Diagnostics>(&profile)) return *errors;
+    const auto* mixed = std::get<const MixedDomain*>(profile);
+    auto histories = FiniteActionHistoryCursor::prepare(
+        mixed->discrete, source->times.size() - 1);
+    if (const auto* errors = std::get_if<Diagnostics>(&histories)) return *errors;
+    return FiniteMixedBranchCursor(resolved,
+        std::get<FiniteActionHistoryCursor>(std::move(histories)));
+}
+
+FiniteMixedBranchPrefix FiniteMixedBranchCursor::take_prefix(std::size_t max_branches) {
+    auto trial = histories_;
+    auto page_histories = trial.take_prefix(max_branches);
+    FiniteMixedBranchPrefix page;
+    page.entries.reserve(page_histories.histories.size());
+    for (auto& history : page_histories.histories) {
+        auto prepared = prepare_finite_mixed_branch(source_, history);
+        if (auto* branch = std::get_if<FiniteMixedBranchProblem>(&prepared))
+            page.entries.emplace_back(std::move(*branch));
+        else
+            page.entries.emplace_back(FailedFiniteMixedBranch{
+                std::move(history), std::get<Diagnostics>(std::move(prepared))});
+    }
+    page.complete = page_histories.complete;
+    histories_ = std::move(trial);
+    return page;
+}
+
 FiniteMixedBranchOutcome prepare_finite_mixed_branch(
     const problem::ResolvedProblem& resolved, const FiniteActionHistory& history) {
     const auto source = resolved.description();
@@ -59,16 +110,9 @@ FiniteMixedBranchOutcome prepare_finite_mixed_branch(
     const auto dimensions = model.dimensions;
     const auto horizon = source->times.size() - 1;
 
-    if (source->information != InformationPattern::nominal_open_loop ||
-        model.time_domain != TimeDomain::discrete || source->temporal || source->external ||
-        dimensions.external != 0 || !source->model->observations.empty() ||
-        !std::holds_alternative<KnownInitial>(source->initial))
-        return unsupported("finite_mixed_branch.profile",
-            "A nominal discrete-time problem with a known initial state and no observations, external inputs, or temporal constraints is required.");
-
-    const auto* mixed = std::get_if<MixedDomain>(&source->controls);
-    if (!mixed)
-        return unsupported("finite_mixed_branch.controls", "A mixed control domain is required.");
+    const auto profile = validate_profile(*source);
+    if (const auto* errors = std::get_if<Diagnostics>(&profile)) return *errors;
+    const auto* mixed = std::get<const MixedDomain*>(profile);
     if (history.catalogue_indices.size() != horizon)
         return invalid("finite_mixed_branch.history", "History length must match the problem horizon.");
     for (const auto index : history.catalogue_indices)
