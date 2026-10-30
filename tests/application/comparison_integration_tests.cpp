@@ -1191,3 +1191,224 @@ TEST_CASE("external geometry method runs retain provenance in paired comparison 
         R"({"schema":"csl.external-method-event/1","status":"passed","method_id":"geometry.modern","instrumentation":"disabled","repetition":0,"warmup":true})";
     CHECK(std::holds_alternative<ar::ArtifactError>(ar::encode_recorded_comparison(spec, wrong_event)));
 }
+
+TEST_CASE("approximation checker events preserve profile, evidence, resources and outcomes") {
+    namespace ar = artifacts;
+    using Json = nlohmann::json;
+    const std::string manifest_text=R"({"points":[[0,0],[1,0],[0,1]],"schema":"csl.geometry-hull-input/1"})";
+    const auto resolved=[](const std::string& text) {
+        const auto value=problem::snapshot_content(std::span<const std::byte>{
+            reinterpret_cast<const std::byte*>(text.data()),text.size()});
+        if(const auto* failure=std::get_if<Diagnostic>(&value))throw std::runtime_error(failure->explanation);
+        return std::get<problem::ResolvedContent>(value);
+    };
+    const auto manifest=resolved(manifest_text);
+    const auto manifest_digest=problem::hex(manifest.digest());
+    problem::ContentDigest request_digest{};
+    request_digest.bytes.fill(std::byte{0x0d});
+    const std::string method="csl.approximation.box";
+    const std::string config="csl.config.v1.sha256:"+std::string(64,'c');
+    const std::string problem_id="csl.problem.v1.sha256:"+manifest_digest;
+    const auto spec_for=[&](std::uint32_t repetitions) {
+        const Json value{{"schema","csl.comparison-spec/2"},{"problem_id",problem_id},
+            {"request_digest",problem::hex(request_digest)},{"repetitions",repetitions},
+            {"input_manifest_hash",manifest_digest},{"input_manifest_source","csl.geometry-hull-input/1"},
+            {"arms",Json::array({Json{{"configuration_id",config},{"strategy",method},
+                {"instrumentation","disabled"}}})}};
+        const auto text=value.dump();
+        return resolved(text);
+    };
+    const auto run_for=[&](std::string run_id,ar::AttemptStatus status=ar::AttemptStatus::completed) {
+        ar::ExternalMethodRunInput input;
+        input.run={std::move(run_id)};
+        input.problem={problem_id};
+        input.configuration={config};
+        input.request_digest=request_digest;
+        input.input_manifest_schema="csl.geometry-hull-input/1";
+        input.input_manifest.assign(manifest.bytes().begin(),manifest.bytes().end());
+        input.method_id=method;
+        input.method_version="1";
+        input.sources={{"approximation.cpp",std::string(64,'e')}};
+        input.runtime={"C++",method,"1",std::string(64,'f'),"Linux","x86_64","GCC","16.2.1","Release"};
+        input.status=status;
+        const auto result_status=status==ar::AttemptStatus::completed?"completed":"failed";
+        input.result_payload=Json{{"input_set_id","source-stage-3"},{"output_set_id","box-output"},
+            {"request_id","approximation-request-7"},{"status",result_status}}.dump();
+        return take_artifact(ar::encode_external_method_run(input),"checker method run");
+    };
+    const auto resource=[](Json requested,Json enforced,Json observed,std::string mechanism,
+                           std::string scope,std::string unavailable) {
+        return Json{{"requested",std::move(requested)},{"enforced",std::move(enforced)},
+            {"observed",std::move(observed)},{"mechanism",mechanism.empty()?Json(nullptr):Json(mechanism)},
+            {"scope",scope.empty()?Json(nullptr):Json(scope)},
+            {"unavailable_reason",unavailable.empty()?Json(nullptr):Json(unavailable)}};
+    };
+    const auto event_for=[&](std::string profile,std::string checker_status,std::string outcome,
+        std::uint32_t repetition=0,std::string algorithm_status="completed") {
+        const std::uint64_t default_wall=profile=="comparison"?5'000'000'000ULL:30'000'000'000ULL;
+        const std::uint64_t wall_budget=default_wall+1'000'000'000ULL;
+        const std::uint64_t attempt_memory=profile=="comparison"?8ULL*1024*1024*1024:12ULL*1024*1024*1024;
+        const bool complete=checker_status!="inconclusive";
+        const bool incorrect=checker_status=="incorrect";
+        const auto checker_elapsed=outcome=="timed_out"?wall_budget:2'300'000ULL;
+        const Json counterexample=incorrect?Json{{"kind","point_membership"},
+            {"point",Json::array({0.25,0.25})},{"contained_in","source-stage-3"},
+            {"excluded_from","box-output"}}:Json(nullptr);
+        Json value{{"schema","csl.approximation-check-event/1"},
+            {"status",algorithm_status=="completed"?"passed":algorithm_status},
+            {"strategy",method},{"instrumentation","disabled"},{"repetition",repetition},
+            {"warmup",repetition==0},{"problem_id",problem_id},{"input_set_id","source-stage-3"},
+            {"output_set_id","box-output"},{"request_id","approximation-request-7"},
+            {"relation","outer"},{"structural_basis","v_h_containment"},
+            {"algorithm",Json{{"status",algorithm_status},{"elapsed_ns",1'200'000}}},
+            {"checker",Json{{"profile",profile},{"status",checker_status},{"outcome",outcome},
+                {"elapsed_ns",checker_elapsed},
+                {"budget",Json{{"default_wall_time_ns",default_wall},{"wall_time_ns",wall_budget}}},
+                {"resources",Json{
+                    {"wall_time",resource(wall_budget,wall_budget,checker_elapsed,"process_tree_deadline","checker_process_tree","")},
+                    {"memory_bytes",resource(attempt_memory,Json(nullptr),Json(nullptr),"",
+                        "shared_comparison_attempt",
+                        "this is the shared per-attempt request; checker-local enforcement and observation are not separately attributed")}}},
+                {"oracle",Json{{"kind","exact_dyadic_all_vertices"},{"scope","inclusion"},
+                    {"claim","outer"},
+                    {"independent",true},{"complete",complete},{"sound",complete},
+                    {"counterexample",counterexample}}}}}};
+        return value.dump();
+    };
+    const auto attempt_for=[&](std::uint32_t repetition,std::string checker_status,
+        std::string outcome,std::string profile="comparison",std::string algorithm_status="completed") {
+        const auto attempt_status=algorithm_status=="completed"?
+            ar::AttemptStatus::completed:ar::AttemptStatus::failed;
+        auto run=run_for("approximation-check-"+std::to_string(repetition),attempt_status);
+        auto measurement=event_for(std::move(profile),std::move(checker_status),std::move(outcome),
+            repetition,algorithm_status);
+        return std::pair{ar::ComparisonAttempt{0,repetition,attempt_status,
+            {run.run_id(),run.content().digest()},ar::ComparisonRunArtifact{run},std::move(measurement)},run};
+    };
+
+    for(const auto& [profile,default_budget]:std::vector<std::pair<std::string,std::uint64_t>>{
+        {"comparison",5'000'000'000ULL},{"local_exploration",30'000'000'000ULL}}) {
+        auto attempt_pair=attempt_for(0,"verified","completed",profile);
+        auto attempt=std::move(attempt_pair.first);
+        const auto spec=spec_for(1);
+        const auto bundle=take_artifact(ar::encode_recorded_comparison(spec,{attempt}),
+            "encode approximation checker profile");
+        const auto wire=std::string(reinterpret_cast<const char*>(bundle.content().bytes().data()),
+            bundle.content().bytes().size());
+        const auto restored=take_artifact(ar::decode_recorded_comparison(wire),"decode checker profile");
+        const auto decoded=Json::parse(std::string(reinterpret_cast<const char*>(restored.content().bytes().data()),
+            restored.content().bytes().size()));
+        const auto measurement=Json::parse(decoded.at("attempts").at(0).at("measurement_payload").get<std::string>());
+        CHECK(measurement.at("checker").at("profile")==profile);
+        CHECK(measurement.at("checker").at("budget").at("default_wall_time_ns")==default_budget);
+        CHECK(measurement.at("checker").at("budget").at("wall_time_ns")==default_budget+1'000'000'000ULL);
+        CHECK(measurement.at("algorithm").at("elapsed_ns")==1'200'000);
+        CHECK(measurement.at("checker").at("elapsed_ns")==2'300'000);
+        CHECK(measurement.at("input_set_id")=="source-stage-3");
+        CHECK(measurement.at("request_id")=="approximation-request-7");
+        CHECK(measurement.at("structural_basis")=="v_h_containment");
+        CHECK(measurement.at("checker").at("resources").at("memory_bytes").at("enforced").is_null());
+        CHECK(measurement.at("checker").at("resources").at("memory_bytes").at("requested")==
+            (profile=="comparison"?8ULL*1024*1024*1024:12ULL*1024*1024*1024));
+        CHECK(measurement.at("checker").at("resources").at("memory_bytes").at("scope")==
+            "shared_comparison_attempt");
+        CHECK_FALSE(measurement.at("checker").at("resources").at("memory_bytes").at("unavailable_reason").is_null());
+    }
+
+    auto incorrect_pair=attempt_for(0,"incorrect","completed");
+    const auto incorrect_bundle=take_artifact(ar::encode_recorded_comparison(spec_for(1),
+        {incorrect_pair.first}),"encode concrete counterexample");
+    const auto incorrect_wire=std::string(reinterpret_cast<const char*>(incorrect_bundle.content().bytes().data()),
+        incorrect_bundle.content().bytes().size());
+    const auto incorrect_record=take_artifact(ar::decode_recorded_comparison(incorrect_wire),
+        "decode concrete counterexample");
+    const auto incorrect_json=Json::parse(std::string(reinterpret_cast<const char*>(
+        incorrect_record.content().bytes().data()),incorrect_record.content().bytes().size()));
+    const auto incorrect_payload=Json::parse(
+        incorrect_json.at("attempts").at(0).at("measurement_payload").get<std::string>());
+    CHECK(incorrect_payload.at("checker").at("oracle").at("counterexample").at("kind")=="point_membership");
+    CHECK(incorrect_payload.at("checker").at("oracle").at("counterexample").at("contained_in")=="source-stage-3");
+    auto wrong_membership=incorrect_pair.first;
+    auto malformed=Json::parse(wrong_membership.measurement_payload);
+    malformed["checker"]["oracle"]["counterexample"]["contained_in"]="box-output";
+    wrong_membership.measurement_payload=malformed.dump();
+    CHECK(std::holds_alternative<ar::ArtifactError>(ar::encode_recorded_comparison(
+        spec_for(1),{wrong_membership})));
+
+    auto base_pair=attempt_for(0,"inconclusive","timed_out");
+    auto base=std::move(base_pair.first);
+    std::vector<ar::ComparisonAttempt> outcomes;
+    outcomes.push_back(base);
+    for(const auto& [status,outcome]:std::vector<std::pair<std::string,std::string>>{
+        {"inconclusive","refused"},{"inconclusive","resource_limited"},{"inconclusive","incomplete"}}) {
+        auto attempt_pair=attempt_for(static_cast<std::uint32_t>(outcomes.size()),status,outcome);
+        outcomes.push_back(std::move(attempt_pair.first));
+    }
+    const auto outcomes_spec=spec_for(static_cast<std::uint32_t>(outcomes.size()));
+    const auto outcomes_bundle=take_artifact(ar::encode_recorded_comparison(outcomes_spec,outcomes),
+        "encode checker terminal outcomes");
+    const auto outcomes_wire=std::string(reinterpret_cast<const char*>(outcomes_bundle.content().bytes().data()),
+        outcomes_bundle.content().bytes().size());
+    const auto decoded_outcomes=take_artifact(ar::decode_recorded_comparison(outcomes_wire),
+        "decode checker terminal outcomes");
+    const auto outcomes_json=Json::parse(std::string(reinterpret_cast<const char*>(
+        decoded_outcomes.content().bytes().data()),decoded_outcomes.content().bytes().size()));
+    const std::vector<std::string> expected_outcomes{"timed_out","refused","resource_limited","incomplete"};
+    for(std::size_t i=0;i<expected_outcomes.size();++i) {
+        const auto payload=outcomes_json.at("attempts").at(i).at("measurement_payload").get<std::string>();
+        const auto measurement=Json::parse(payload);
+        CHECK(measurement.at("checker").at("outcome")==expected_outcomes[i]);
+    }
+
+    auto verified_pair=attempt_for(0,"verified","completed");
+    auto false_verified=verified_pair.first;
+    malformed=Json::parse(false_verified.measurement_payload);
+    malformed["checker"]["oracle"]["complete"]=false;
+    false_verified.measurement_payload=malformed.dump();
+    const auto bad_verified=ar::encode_recorded_comparison(spec_for(1),{false_verified});
+    CHECK(std::holds_alternative<ar::ArtifactError>(bad_verified));
+    auto failed_algorithm=attempt_for(0,"verified","completed","comparison","failed");
+    CHECK(std::holds_alternative<ar::ArtifactError>(ar::encode_recorded_comparison(
+        spec_for(1),{failed_algorithm.first})));
+    auto missing_enforcement=base;
+    malformed=Json::parse(missing_enforcement.measurement_payload);
+    malformed["checker"]["resources"]["wall_time"]["enforced"]=1;
+    malformed["checker"]["resources"]["wall_time"]["mechanism"]=nullptr;
+    missing_enforcement.measurement_payload=malformed.dump();
+    const auto bad_resource=ar::encode_recorded_comparison(spec_for(1),{missing_enforcement});
+    CHECK(std::holds_alternative<ar::ArtifactError>(bad_resource));
+    auto mismatched_time=base;
+    malformed=Json::parse(mismatched_time.measurement_payload);
+    malformed["checker"]["resources"]["wall_time"]["observed"]=7;
+    mismatched_time.measurement_payload=malformed.dump();
+    CHECK(std::holds_alternative<ar::ArtifactError>(ar::encode_recorded_comparison(
+        spec_for(1),{mismatched_time})));
+    auto mismatched_identity=verified_pair.first;
+    malformed=Json::parse(mismatched_identity.measurement_payload);
+    malformed["request_id"]="different-operation-request";
+    mismatched_identity.measurement_payload=malformed.dump();
+    const auto bad_identity=ar::encode_recorded_comparison(spec_for(1),{mismatched_identity});
+    CHECK(std::holds_alternative<ar::ArtifactError>(bad_identity));
+    auto sampled_oracle=verified_pair.first;
+    malformed=Json::parse(sampled_oracle.measurement_payload);
+    malformed["checker"]["oracle"]["kind"]="sampled_support_directions";
+    malformed["checker"]["oracle"]["independent"]=true;
+    malformed["checker"]["oracle"]["complete"]=true;
+    malformed["checker"]["oracle"]["sound"]=true;
+    sampled_oracle.measurement_payload=malformed.dump();
+    const auto bad_sampled_claim=ar::encode_recorded_comparison(spec_for(1),{sampled_oracle});
+    CHECK(std::holds_alternative<ar::ArtifactError>(bad_sampled_claim));
+    auto mismatched_basis=verified_pair.first;
+    malformed=Json::parse(mismatched_basis.measurement_payload);
+    malformed["structural_basis"]="made_up_proof";
+    mismatched_basis.measurement_payload=malformed.dump();
+    const auto bad_basis=ar::encode_recorded_comparison(spec_for(1),{mismatched_basis});
+    CHECK(std::holds_alternative<ar::ArtifactError>(bad_basis));
+    auto unsupported_incorrect=verified_pair.first;
+    malformed=Json::parse(unsupported_incorrect.measurement_payload);
+    malformed["checker"]["status"]="incorrect";
+    malformed["checker"]["oracle"]["counterexample"]=nullptr;
+    unsupported_incorrect.measurement_payload=malformed.dump();
+    const auto bad_incorrect=ar::encode_recorded_comparison(spec_for(1),{unsupported_incorrect});
+    CHECK(std::holds_alternative<ar::ArtifactError>(bad_incorrect));
+}
