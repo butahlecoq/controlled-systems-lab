@@ -98,6 +98,14 @@ FAMILIES = {
         "noisy-observation adaptation of the RL differential-game environment. Every listed row is "
         "independently replayed, and a complete finite observation-history minimax reference is "
         "included. The result is finite-catalogue evidence, not a continuous-noise or RL reproduction."),
+    "mpc04-max-coordinate-replanning": Family(
+        r"mpc04-max-coordinate-replanning-[0-9a-f]{20}", "synthesis",
+        "MaxCoordinateGame replanning and QP comparison",
+        "Compares finite-action replanning and nominal/finite-history robust linear QP MPC on a "
+        "four-step source-derived MaxCoordinateGame task. The report includes every finite binary "
+        "disturbance history, independently replayed episodes, a labelled phase plane and decision "
+        "timeline. It is a short adaptation, not an RL reproduction; finite-episode evidence does "
+        "not prove stability, recursive feasibility, or globally optimal causal minimax control."),
     "exp03-two-points-approx-publication": Family(
         r"exp03-two-points-approx-publication-v[12]", "synthesis",
         "TwoPoints finite-action reachability and approximation report",

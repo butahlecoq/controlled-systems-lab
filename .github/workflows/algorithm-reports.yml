@@ -97,6 +97,16 @@ jobs:
             --target csl_ext04_affine_synthesis_report --parallel 2
           ctest --test-dir build/ext04-affine-synthesis-ci -C Release --output-on-failure \
             -R '^ext04_affine_synthesis_report_smoke$'
+      - name: Build and verify the MPC-04 closed-loop QP comparison
+        if: needs.route.outputs.native == 'true'
+        shell: bash
+        run: |
+          cmake -S . -B build/mpc04-report-ci -DBUILD_TESTING=ON -DCMAKE_BUILD_TYPE=Release \
+            -DCSL_ENABLE_HIGHS=ON -DCSL_ENABLE_QHULL=OFF -DCSL_BUILD_MPC04_REPORT=ON
+          cmake --build build/mpc04-report-ci --config Release \
+            --target csl_mpc04_max_coordinate_replanning --parallel 2
+          ctest --test-dir build/mpc04-report-ci -C Release --output-on-failure \
+            -R '^mpc04_native_replanning_(pilot|replay)$'
       - name: Build and smoke the EXT-04 H-domain policy report
         if: needs.route.outputs.native == 'true'
         shell: bash
@@ -252,6 +262,11 @@ jobs:
             if test -d reports/algorithm-results/mpc09-two-particle-output-feedback-v1; then
               python scripts/reports/stage_mpc09_output_feedback.py \
                 --source reports/algorithm-results/mpc09-two-particle-output-feedback-v1 \
+                --site build/report-site
+            fi
+            if test -d reports/algorithm-results/mpc04-max-coordinate-replanning-pilot-20261030; then
+              python scripts/reports/stage_mpc04_max_coordinate.py \
+                --source reports/algorithm-results/mpc04-max-coordinate-replanning-pilot-20261030 \
                 --site build/report-site
             fi
             if test -d reports/algorithm-results/env717-unequal-game-pilot-v1; then

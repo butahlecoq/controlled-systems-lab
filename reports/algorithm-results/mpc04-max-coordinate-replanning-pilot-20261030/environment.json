@@ -1,0 +1,59 @@
+{
+  "schema": "csl.mpc04-runtime/4",
+  "report_code_commit": "715a8f5ed4a296c8d7e7f08af59051d9bbab9554",
+  "native_build_commit": "96e85a00",
+  "algorithm_sources_dirty": false,
+  "source_sha256": {
+    "native_driver": "e26b69146e214cfef71f88d9b7a809c009b6ee5cb2f0fb84b5e4ca4ce5f8c208",
+    "report_driver": "b1e48a64fb4005d00ac1b7cb57fd5eb7ccff6c57fe2118b200e41fa1fc92e036",
+    "independent_checker": "2730daf0dea278bd875921846a35b26b4d06b52d07fd80e8a0656ae709b9e930",
+    "cmake_target": "3e76116912b42ae0868c015130858896306ed922ffdefd4b367afbf97b393fe5"
+  },
+  "binary_sha256": "2a83a6a9635faa251f07a7511d81afc3de4771fc51fac0679e5be6b8facc09f7",
+  "native_executable": "build/mpc04-qpm/csl_mpc04_max_coordinate_replanning",
+  "native_executable_path_scope": "repository-relative",
+  "build": {
+    "type": "Release",
+    "compiler": "c++ (GCC) 16.2.1 20260810",
+    "cmake": "cmake version 3.31.6",
+    "generator": "Unix Makefiles",
+    "make": "GNU Make",
+    "target": "csl_mpc04_max_coordinate_replanning",
+    "new_dependencies": [],
+    "clean_first_build": true,
+    "algorithm_sources_clean_at_build": true,
+    "native_build_commit": "96e85a00",
+    "native_driver_sha256": "e26b69146e214cfef71f88d9b7a809c009b6ee5cb2f0fb84b5e4ca4ce5f8c208",
+    "log": "build.log",
+    "config": "build-config.json"
+  },
+  "runtime": {
+    "os": "Linux-7.2.8-9-omarchy-x86_64-with-glibc2.44",
+    "architecture": "x86_64",
+    "cpu_model": "AMD Ryzen 5 3550H with Radeon Vega Mobile Gfx",
+    "logical_cpus": 8,
+    "memory_bytes": 8108216320,
+    "load_average": [
+      0.25341796875,
+      2.2509765625,
+      2.13037109375
+    ],
+    "python_renderer": "3.14.8"
+  },
+  "algorithm": "CSL finite_action_minimax plus HiGHS ConvexPort linear QP MPC",
+  "execution": {
+    "workers": 1,
+    "warmup_runs": 0,
+    "full_collection_runs": 5,
+    "episodes_per_process": 128,
+    "decision_solves_per_process": 512,
+    "total_timed_decision_solves": 2560,
+    "warm_start": "none; fresh provider workspace for each QP solve",
+    "random_seed": "not applicable; deterministic finite catalogues"
+  },
+  "timing_scope": "Each native process runs all policies in an alternating forward/reverse controller order. Decision timing includes planner problem setup and solver calls, not process startup, JSON output, independent replay, or rendering. Provider registration/setup and whole-process elapsed time are recorded separately.",
+  "deadline": "50 ms per decision; stop status and late-return fallback are retained; solver cancellation is cooperative",
+  "limiter_profile": "not collected; no speedup or performance-winner claim",
+  "numeric_method": "binary64; exact finite catalogues and independent source replay with tolerance checks; HiGHS residual tolerances retained per QP solve",
+  "scope": "finite-action and continuous-control QP, four-step source-derived adaptation; not a reproduction of the continuous-action four-second RL task; finite disturbance histories only"
+}

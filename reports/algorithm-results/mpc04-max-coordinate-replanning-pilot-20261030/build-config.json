@@ -1,0 +1,26 @@
+{
+  "native_build_commit": "96e85a00",
+  "report_code_commit": "715a8f5ed4a296c8d7e7f08af59051d9bbab9554",
+  "algorithm_sources_clean_at_build": true,
+  "build_dir": "build/mpc04-qpm",
+  "configure_command": "cmake -S . -B build/mpc04-qpm -DBUILD_TESTING=ON -DCMAKE_BUILD_TYPE=Release -DCSL_ENABLE_HIGHS=ON -DCSL_ENABLE_QHULL=OFF -DCSL_BUILD_MPC04_REPORT=ON",
+  "cmake_cache_options": {
+    "BUILD_TESTING": "ON",
+    "CMAKE_BUILD_TYPE": "Release",
+    "CSL_BUILD_MPC04_REPORT": "ON",
+    "CSL_ENABLE_HIGHS": "ON",
+    "CSL_ENABLE_QHULL": "OFF"
+  },
+  "generator": "Unix Makefiles",
+  "cmake": "cmake version 3.31.6",
+  "compiler": "c++ (GCC) 16.2.1 20260810",
+  "build_command": "cmake --build build/mpc04-qpm --config Release --target csl_mpc04_max_coordinate_replanning --clean-first --parallel 6 --verbose",
+  "build_exit_status": 0,
+  "build_log": "build.log",
+  "binary": "build/mpc04-qpm/csl_mpc04_max_coordinate_replanning",
+  "binary_sha256": "2a83a6a9635faa251f07a7511d81afc3de4771fc51fac0679e5be6b8facc09f7",
+  "path_normalization": {
+    "$REPO_ROOT": "captured source/build root",
+    "$CMAKE_INSTALL": "CMake installation prefix"
+  }
+}
