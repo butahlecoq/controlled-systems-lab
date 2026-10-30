@@ -214,7 +214,8 @@ bool same_declaration(const simulation::ReplayRecord& a, const simulation::Repla
         a.declared_initial_state == b.declared_initial_state && a.time_unit == b.time_unit &&
         a.times == b.times && a.state_units == b.state_units && a.control_units == b.control_units &&
         a.objective_name == b.objective_name && a.objective_unit == b.objective_unit &&
-        a.integration == b.integration && a.hold == b.hold && a.numerical == b.numerical;
+        a.integration == b.integration && a.hold == b.hold && a.numerical == b.numerical &&
+        a.integration_limits == b.integration_limits;
 }
 
 bool valid_history(const std::vector<Vector>& history, std::size_t dimension) {
@@ -336,17 +337,18 @@ bool integration_residual_document(const Json& residual) {
     return true;
 }
 
-bool integration_limits_document(const Json& limits) {
+bool integration_limits_document(const Json& limits, bool allow_invalid) {
     if (limits.is_null()) return true;
-    return limits.is_object() && limits.size() == 3 &&
-        limits.contains("absolute_tolerance") && finite_number(limits["absolute_tolerance"]) &&
-        limits["absolute_tolerance"].get<double>() >= 0.0 &&
-        limits.contains("relative_tolerance") && finite_number(limits["relative_tolerance"]) &&
-        limits["relative_tolerance"].get<double>() >= 0.0 &&
-        (limits["absolute_tolerance"].get<double>() > 0.0 ||
-         limits["relative_tolerance"].get<double>() > 0.0) &&
-        limits.contains("max_attempts_per_interval") &&
-        limits["max_attempts_per_interval"].is_number_unsigned() &&
+    if (!limits.is_object() || limits.size() != 3 ||
+        !limits.contains("absolute_tolerance") || !finite_number(limits["absolute_tolerance"]) ||
+        limits["absolute_tolerance"].get<double>() < 0.0 ||
+        !limits.contains("relative_tolerance") || !finite_number(limits["relative_tolerance"]) ||
+        limits["relative_tolerance"].get<double>() < 0.0 ||
+        !limits.contains("max_attempts_per_interval") ||
+        !limits["max_attempts_per_interval"].is_number_unsigned()) return false;
+    if (allow_invalid) return true;
+    return (limits["absolute_tolerance"].get<double>() > 0.0 ||
+        limits["relative_tolerance"].get<double>() > 0.0) &&
         limits["max_attempts_per_interval"].get<std::uint64_t>() > 0;
 }
 
@@ -374,7 +376,7 @@ bool replay_document(const Json& replay, std::size_t state_dimensions,
             !replay.contains("integration_residual") ||
             !integration_residual_document(replay["integration_residual"]))) ||
         (version_three && (!replay.contains("integration_limits") ||
-            !integration_limits_document(replay["integration_limits"]) ||
+            !integration_limits_document(replay["integration_limits"], replay["status"] == "invalid_input") ||
             !replay.contains("integration_receipts") || !replay["integration_receipts"].is_array()))) return false;
     if (!replay["replay_time_ns"].is_number_unsigned() &&
         replay["replay_time_ns"].get<std::int64_t>() < 0) return false;
@@ -396,6 +398,8 @@ bool replay_document(const Json& replay, std::size_t state_dimensions,
                 (method == "exact_discrete_map") != (residual_status == "not_applicable")) return false;
         }
     }
+    if (version_three && replay["integration"].is_null() &&
+        (!replay["integration_limits"].is_null() || !replay["integration_receipts"].empty())) return false;
     if (version_three && replay["integration"].is_string()) {
         const auto method = replay["integration"].get<std::string>();
         const auto& receipts = replay["integration_receipts"];

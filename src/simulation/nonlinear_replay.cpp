@@ -28,6 +28,8 @@ ReplayRecord replay(const Plant& plant, std::span<const Vector> controls,
     result.integration = plant.integration;
     result.hold = plant.hold;
     result.numerical = plant.numerical;
+    if (plant.integration == IntegrationMethod::adaptive_rk4_step_doubling)
+        result.integration_limits = plant.integration_limits;
     result.integration_residual = plant.integration == IntegrationMethod::exact_discrete_map
         ? IntegrationResidualEvidence{IntegrationResidualNotApplicable{}}
         : IntegrationResidualEvidence{IntegrationResidualUnavailable{
@@ -75,6 +77,8 @@ ReplayRecord replay(const Plant& plant, std::span<const Vector> controls,
         return invalid("plant.times", "At least one physical transition interval is required.");
     if (plant.integration != IntegrationMethod::exact_discrete_map && !adaptive)
         return invalid("plant.integration", "The declared integration method is unsupported.");
+    if (!adaptive && plant.integration_limits)
+        return invalid("plant.integration_limits", "Exact-map replay does not use adaptive integration limits.");
     if (plant.hold != ControlHold::constant_on_interval)
         return invalid("plant.control_hold", "Only one constant control per interval is supported.");
     if (plant.numerical && (!finite_nonnegative(plant.numerical->absolute_tolerance)
@@ -193,7 +197,6 @@ ReplayRecord replay(const Plant& plant, std::span<const Vector> controls,
                         return finish();
                     }
                     const double h = next_time-time;
-                    result.integration_limits = plant.integration_limits;
                     const auto full = rk4(time, h, state);
                     const auto first = rk4(time, half_time-time, state);
                     const auto two_half = rk4(half_time, next_time-half_time, first);
