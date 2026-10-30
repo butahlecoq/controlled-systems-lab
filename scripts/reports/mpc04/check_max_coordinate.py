@@ -213,7 +213,8 @@ def check(path: Path):
             max(stats["per_decision_latency_samples_ns"])]
     svg = path.with_name("trajectory.svg").read_text(encoding="utf-8")
     for token in ("Phase plane (y,z)", "Control and applied disturbance", "scored endpoint",
-                  "nominal linear QP", "finite-history robust QP"):
+                  "nominal finite action", "finite minimax", "QP nominal",
+                  "QP finite-history robust", "solid: shrinking horizon; dashed: moving horizon"):
         assert token in svg
     print("MPC-04 replay passed: 128 episodes, 512 transitions, 8 variants; all 16 histories each.")
 
