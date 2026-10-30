@@ -1,7 +1,8 @@
 {
-  "source_commit": "5acb5ee1a75d34518d92cbc97f13f22398945c6f",
+  "native_build_commit": "96e85a00",
+  "report_code_commit": "acdc0a31f60d450f43cf8f4b1f82b9425a0488cd",
   "algorithm_sources_clean_at_build": true,
-  "build_dir": "/home/butahlecoq/.local/share/codex/worktrees/mpc04-replanning-20261030/build/mpc04-qpm",
+  "build_dir": "build/mpc04-qpm",
   "configure_command": "cmake -S . -B build/mpc04-qpm -DBUILD_TESTING=ON -DCMAKE_BUILD_TYPE=Release -DCSL_ENABLE_HIGHS=ON -DCSL_ENABLE_QHULL=OFF -DCSL_BUILD_MPC04_REPORT=ON",
   "cmake_cache_options": {
     "BUILD_TESTING": "ON",
@@ -16,6 +17,10 @@
   "build_command": "cmake --build build/mpc04-qpm --config Release --target csl_mpc04_max_coordinate_replanning --clean-first --parallel 6 --verbose",
   "build_exit_status": 0,
   "build_log": "build.log",
-  "binary": "/home/butahlecoq/.local/share/codex/worktrees/mpc04-replanning-20261030/build/mpc04-qpm/csl_mpc04_max_coordinate_replanning",
-  "binary_sha256": "2a83a6a9635faa251f07a7511d81afc3de4771fc51fac0679e5be6b8facc09f7"
+  "binary": "build/mpc04-qpm/csl_mpc04_max_coordinate_replanning",
+  "binary_sha256": "2a83a6a9635faa251f07a7511d81afc3de4771fc51fac0679e5be6b8facc09f7",
+  "path_normalization": {
+    "$REPO_ROOT": "captured source/build root",
+    "$CMAKE_INSTALL": "CMake installation prefix"
+  }
 }

@@ -1,17 +1,20 @@
 {
-  "schema": "csl.mpc04-capture/3",
-  "run_id": "mpc04-max-coordinate-20261030-r4",
+  "schema": "csl.mpc04-capture/4",
+  "run_id": "mpc04-max-coordinate-20261030-r5",
   "source": {
-    "schema": "csl.mpc04-runtime/3",
-    "source_commit": "5acb5ee1a75d34518d92cbc97f13f22398945c6f",
+    "schema": "csl.mpc04-runtime/4",
+    "report_code_commit": "acdc0a31f60d450f43cf8f4b1f82b9425a0488cd",
+    "native_build_commit": "96e85a00",
     "algorithm_sources_dirty": false,
     "source_sha256": {
       "native_driver": "e26b69146e214cfef71f88d9b7a809c009b6ee5cb2f0fb84b5e4ca4ce5f8c208",
-      "report_driver": "800db4157f82c4e1f5788d02e98ba34c11570f7e28cf69e77cc2c346858f9aae",
-      "independent_checker": "516e7ce1dbc005eeeb397011c0e4691636d1ccb878cccfea11aef4adf96600df",
+      "report_driver": "724dfe37d271cf799802c79492cc4de9cb12fa2a98315e84859a058d4c04fe32",
+      "independent_checker": "2d8338fc304150de0ad94ac37f97941463a581b21ac3502d68e4b8c320759c2a",
       "cmake_target": "3e76116912b42ae0868c015130858896306ed922ffdefd4b367afbf97b393fe5"
     },
     "binary_sha256": "2a83a6a9635faa251f07a7511d81afc3de4771fc51fac0679e5be6b8facc09f7",
+    "native_executable": "build/mpc04-qpm/csl_mpc04_max_coordinate_replanning",
+    "native_executable_path_scope": "repository-relative",
     "build": {
       "type": "Release",
       "compiler": "c++ (GCC) 16.2.1 20260810",
@@ -22,6 +25,8 @@
       "new_dependencies": [],
       "clean_first_build": true,
       "algorithm_sources_clean_at_build": true,
+      "native_build_commit": "96e85a00",
+      "native_driver_sha256": "e26b69146e214cfef71f88d9b7a809c009b6ee5cb2f0fb84b5e4ca4ce5f8c208",
       "log": "build.log",
       "config": "build-config.json"
     },
@@ -32,9 +37,9 @@
       "logical_cpus": 8,
       "memory_bytes": 8108216320,
       "load_average": [
-        3.6103515625,
-        4.1552734375,
-        2.57421875
+        0.25341796875,
+        2.2509765625,
+        2.13037109375
       ],
       "python_renderer": "3.14.8"
     },
