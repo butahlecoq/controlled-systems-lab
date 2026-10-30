@@ -1,6 +1,7 @@
 #include <csl/artifacts/comparison_manifest.hpp>
 #include <nlohmann/json.hpp>
 #include <algorithm>
+#include <array>
 #include <bit>
 #include <charconv>
 #include <cctype>
@@ -157,6 +158,124 @@ bool exact_fields(const Json& value, std::initializer_list<std::string_view> fie
     if(!value.is_object()||value.size()!=fields.size())return false;
     return std::all_of(fields.begin(),fields.end(),[&](const auto field){return value.contains(field);});
 }
+bool nonnegative_integer(const Json& value) {
+    if(value.is_number_unsigned())return true;
+    return value.is_number_integer()&&value.get<std::int64_t>()>=0;
+}
+bool optional_nonnegative_integer(const Json& value) {
+    return value.is_null()||nonnegative_integer(value);
+}
+bool nonempty_string(const Json& value) {
+    return value.is_string()&&!value.get_ref<const std::string&>().empty();
+}
+bool valid_counterexample(const Json& witness,std::string_view relation,
+    const Json& input_set,const Json& output_set) {
+    if(!exact_fields(witness,{"kind","point","contained_in","excluded_from"})||
+        witness.at("kind")!="point_membership"||!witness.at("point").is_array()||
+        witness.at("point").empty())return false;
+    for(const auto& coordinate:witness.at("point"))
+        if(!coordinate.is_number()||!std::isfinite(coordinate.get<double>()))return false;
+    const auto& contained=relation=="outer"?input_set:output_set;
+    const auto& excluded=relation=="outer"?output_set:input_set;
+    return witness.at("contained_in")==contained&&witness.at("excluded_from")==excluded;
+}
+bool known_structural_basis(const Json& value) {
+    if(!value.is_string())return false;
+    static constexpr std::array<std::string_view,9> bases{
+        "identical_set","empty_subset","universal_superset","h_constraint_containment",
+        "h_point_containment","v_h_containment","h_v_containment","generator_axis_cover",
+        "v_ellipsoid_containment"};
+    const auto& basis=value.get_ref<const std::string&>();
+    return std::find(bases.begin(),bases.end(),basis)!=bases.end();
+}
+bool valid_checker_resource(const Json& resource) {
+    if(!exact_fields(resource,{"requested","enforced","observed","mechanism","scope","unavailable_reason"})||
+        !optional_nonnegative_integer(resource.at("requested"))||
+        !optional_nonnegative_integer(resource.at("enforced"))||
+        !optional_nonnegative_integer(resource.at("observed")))return false;
+    const auto& mechanism=resource.at("mechanism");
+    const auto& scope=resource.at("scope");
+    const auto& unavailable=resource.at("unavailable_reason");
+    if((!mechanism.is_null()&&!nonempty_string(mechanism))||
+        (!scope.is_null()&&!nonempty_string(scope))||
+        (!unavailable.is_null()&&!nonempty_string(unavailable)))return false;
+    if(!resource.at("enforced").is_null()&&(!nonempty_string(mechanism)||!nonempty_string(scope)))return false;
+    if(resource.at("observed").is_null()!=nonempty_string(unavailable))return false;
+    if(resource.at("requested").is_null()&&!resource.at("enforced").is_null())return false;
+    return true;
+}
+bool approximation_check_event_matches(const Json& measurement,const Json& run,
+    const SpecShape& spec,std::size_t arm,std::uint32_t repetition) {
+    if(!exact_fields(measurement,{"schema","status","strategy","instrumentation","repetition","warmup",
+        "problem_id","input_set_id","output_set_id","request_id","relation","structural_basis",
+        "algorithm","checker"})||
+        measurement.at("schema")!="csl.approximation-check-event/1"||
+        measurement.at("strategy")!=spec.strategies.at(arm)||
+        measurement.at("instrumentation")!=spec.instrumentation.at(arm)||
+        measurement.at("repetition")!=repetition||measurement.at("warmup")!=(repetition==0)||
+        !nonempty_string(measurement.at("problem_id"))||
+        measurement.at("problem_id")!=run.at("problem")||
+        !nonempty_string(measurement.at("input_set_id"))||
+        !nonempty_string(measurement.at("output_set_id"))||
+        !nonempty_string(measurement.at("request_id"))||
+        !known_structural_basis(measurement.at("structural_basis"))||
+        !run.at("result").is_object()||
+        !run.at("result").contains("input_set_id")||
+        run.at("result").at("input_set_id")!=measurement.at("input_set_id")||
+        !run.at("result").contains("output_set_id")||
+        run.at("result").at("output_set_id")!=measurement.at("output_set_id")||
+        !run.at("result").contains("request_id")||
+        run.at("result").at("request_id")!=measurement.at("request_id")||
+        (measurement.at("relation")!="inner"&&measurement.at("relation")!="outer"))return false;
+
+    const auto& algorithm=measurement.at("algorithm");
+    if(!exact_fields(algorithm,{"status","elapsed_ns"})||
+        !nonempty_string(algorithm.at("status"))||
+        algorithm.at("status")!=status_name(parse_status(algorithm.at("status").get<std::string>()))||
+        algorithm.at("status")!=(measurement.at("status")=="passed"?"completed":measurement.at("status"))||
+        !optional_nonnegative_integer(algorithm.at("elapsed_ns")))return false;
+    const auto& checker=measurement.at("checker");
+    if(!exact_fields(checker,{"profile","status","outcome","elapsed_ns","budget","resources","oracle"})||
+        (checker.at("profile")!="comparison"&&checker.at("profile")!="local_exploration")||
+        !optional_nonnegative_integer(checker.at("elapsed_ns")))return false;
+    const auto expected_default=checker.at("profile")=="comparison"?5'000'000'000ULL:30'000'000'000ULL;
+    const auto& budget=checker.at("budget");
+    if(!exact_fields(budget,{"default_wall_time_ns","wall_time_ns"})||
+        !nonnegative_integer(budget.at("wall_time_ns"))||
+        budget.at("default_wall_time_ns")!=expected_default)return false;
+    const auto& resources=checker.at("resources");
+    if(!exact_fields(resources,{"wall_time","memory_bytes"})||
+        !valid_checker_resource(resources.at("wall_time"))||
+        !valid_checker_resource(resources.at("memory_bytes")))return false;
+    const auto& wall_time=resources.at("wall_time");
+    if(wall_time.at("requested")!=budget.at("wall_time_ns")||
+        (!checker.at("elapsed_ns").is_null()&&!wall_time.at("observed").is_null()&&
+            checker.at("elapsed_ns")!=wall_time.at("observed")))return false;
+
+    const auto& oracle=checker.at("oracle");
+    if(!exact_fields(oracle,{"kind","scope","claim","independent","complete","sound","counterexample"})||
+        !nonempty_string(oracle.at("kind"))||oracle.at("scope")!="inclusion"||
+        oracle.at("claim")!=measurement.at("relation")||
+        !oracle.at("independent").is_boolean()||!oracle.at("complete").is_boolean()||
+        !oracle.at("sound").is_boolean())return false;
+    const auto checker_status=checker.at("status").get<std::string>();
+    const auto outcome=checker.at("outcome").get<std::string>();
+    const bool completed=outcome=="completed";
+    const bool algorithm_completed=algorithm.at("status")=="completed";
+    const auto& counterexample=oracle.at("counterexample");
+    if(checker_status=="verified")
+        return algorithm_completed&&completed&&oracle.at("independent").get<bool>()&&oracle.at("complete").get<bool>()&&
+            oracle.at("sound").get<bool>()&&
+            counterexample.is_null();
+    if(checker_status=="incorrect")
+        return algorithm_completed&&completed&&oracle.at("independent").get<bool>()&&oracle.at("sound").get<bool>()&&
+            valid_counterexample(counterexample,measurement.at("relation").get<std::string>(),
+                measurement.at("input_set_id"),measurement.at("output_set_id"));
+    if(checker_status!="inconclusive")return false;
+    return counterexample.is_null()&&(outcome=="completed"||outcome=="refused"||outcome=="unsupported"||
+        outcome=="timed_out"||outcome=="cancelled"||outcome=="resource_limited"||outcome=="incomplete");
+}
+
 bool valid_sha256(const Json& value) {
     if(!value.is_string())return false;
     const auto& text=value.get_ref<const std::string&>();
@@ -397,6 +516,9 @@ bool measurement_matches_arm(AttemptStatus status,const Json& measurement,const 
     if(!measurement_status_matches(status,measurement))return false;
     if(spec.strategies.empty())return true;
     const auto schema=measurement.value("schema",std::string{});
+    if(schema=="csl.approximation-check-event/1")
+        return run.value("schema",std::string{})=="csl.external-method-run/1"&&
+            approximation_check_event_matches(measurement,run,spec,arm,repetition);
     if(schema=="csl.mpc01-comparison-event/1") {
         const auto json_string_matches=[](const Json& value,std::string_view expected) {
             return value.is_string()&&std::string_view(value.get_ref<const std::string&>())==expected;
