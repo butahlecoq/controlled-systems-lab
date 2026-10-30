@@ -16,6 +16,8 @@ TURN_RATES = (-1.0, 0.0, 1.0)
 EVADER_HEADINGS = (0.0, math.pi / 2.0, math.pi, 3.0 * math.pi / 2.0)
 INITIAL = (0, 0, 0, 2_500_000, 7_500_000)
 TARGET_RADIUS = 7.8
+SOURCE_STATE_ORDER = ["time", "pursuer_x", "pursuer_y", "pursuer_heading",
+                      "evader_x", "evader_y"]
 
 
 def round_ticks(value: float) -> int:
@@ -133,8 +135,18 @@ def verify(actual):
             "Apache-2.0" not in source.get("license", "")):
         raise ValueError("pinned source identity or license differs")
     adaptation = actual.get("adaptation", {})
-    if adaptation.get("state_quantization_scale") != SCALE or adaptation.get("target_radius") != TARGET_RADIUS:
+    if (adaptation.get("state_quantization_scale") != SCALE or
+            adaptation.get("target_radius") != TARGET_RADIUS or
+            adaptation.get("horizon_steps") != HORIZON or
+            adaptation.get("turn_rate_catalogue") != list(TURN_RATES) or
+            adaptation.get("evader_heading_catalogue_radians") != list(EVADER_HEADINGS) or
+            adaptation.get("initial_state") != [0.0, 0.0, 0.0, 0.0, 2.5, 7.5]):
         raise ValueError("finite lattice or reachability target differs")
+    if (actual.get("source_state_order") != SOURCE_STATE_ORDER or
+            actual.get("projection_labels") != {
+                "pursuer": ["pursuer x position", "pursuer y position"],
+                "evader": ["evader x position", "evader y position"]}):
+        raise ValueError("source or physical state ordering differs")
     if adaptation.get("information_pattern") != (
             "finite causal response: pursuer chooses from the current state, then evader observes that turn rate and responds before the next state is observed"):
         raise ValueError("finite game information pattern is missing")
@@ -151,11 +163,21 @@ def verify(actual):
     for stage, (observed, states) in enumerate(zip(figure_layers, layers)):
         if observed.get("stage") != stage:
             raise ValueError("figure stage labels are out of order")
-        if [item.get("ticks") for item in observed.get("forward_states", [])] != [list(s) for s in states]:
+        if not close(observed.get("time_seconds"), stage * DT):
+            raise ValueError("figure layer time differs from stage")
+        forward = observed.get("forward_states", [])
+        if [item.get("ticks") for item in forward] != [list(s) for s in states]:
             raise ValueError(f"forward state set differs at stage {stage}")
+        for item, state in zip(forward, states):
+            if item.get("state") != [value / SCALE for value in state]:
+                raise ValueError(f"forward state coordinates differ at stage {stage}")
         expected_winning = [list(state) for state in states if state in winning[stage]]
-        if [item.get("ticks") for item in observed.get("backward_winning_intersection", [])] != expected_winning:
+        winning_items = observed.get("backward_winning_intersection", [])
+        if [item.get("ticks") for item in winning_items] != expected_winning:
             raise ValueError(f"backward-winning intersection differs at stage {stage}")
+        for item, state in zip(winning_items, (state for state in states if state in winning[stage])):
+            if item.get("state") != [value / SCALE for value in state]:
+                raise ValueError(f"backward-winning coordinates differ at stage {stage}")
     expected_capture = []
     first_capture = -1
     for steps in range(1, HORIZON + 1):
@@ -179,6 +201,9 @@ def verify(actual):
         for key in ("stage", "state_ticks", "turn_rate", "evader_heading"):
             if observed.get(key) != expected.get(key):
                 raise ValueError(f"minimax path differs at {key}")
+        if (observed.get("state") != expected["state"] or
+                not close(observed.get("time_seconds"), expected["time_seconds"])):
+            raise ValueError("minimax path coordinates or time differ")
         if not close(observed.get("minimax_value"), expected["minimax_value"]):
             raise ValueError("minimax path value differs")
     if not close(values[0][INITIAL], 7.778040783932288, 1e-9):

@@ -499,9 +499,10 @@ FAMILIES = {
         "Applies finite-feedback reachability and causal minimax to a quantized source-derived "
         "pursuit-evasion game. The figure shows forward states, projected convex envelopes, "
         "backward-winning intersections and a worst-case path in pursuer and evader position "
-        "planes. The four-stage action catalogues, capture radius, sequential response and zero-sum "
-        "payoff signs are explicit analysis adaptations; this is not a continuous-action RL "
-        "reproduction or a performance comparison."),
+        "planes. Five fresh-process runtime observations describe this adapter on one machine. "
+        "The four-stage action catalogues, capture radius, sequential response and zero-sum payoff "
+        "signs are explicit analysis adaptations; this is not a continuous-action RL reproduction "
+        "or a performance comparison."),
     "syn06-verifier": Family(
         r"syn06-verifier-\d{8}-[0-9a-f]{64}", "verification", "Trajectory verification",
         "Re-checks two literal two-stage integrator witnesses against the original saved input "

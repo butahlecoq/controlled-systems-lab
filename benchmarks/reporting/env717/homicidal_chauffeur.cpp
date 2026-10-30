@@ -42,7 +42,6 @@ struct TransitionRow { Destinations destination{}; };
 struct Graph {
     std::vector<std::vector<State>> layers;
     std::vector<std::vector<TransitionRow>> next;
-    std::vector<std::map<State, std::size_t>> index;
 };
 
 DoubleState derivative(const DoubleState& state, double turn_rate, double evader_heading) {
@@ -80,9 +79,7 @@ Graph build_graph() {
     Graph graph;
     graph.layers.resize(static_cast<std::size_t>(horizon + 1));
     graph.next.resize(static_cast<std::size_t>(horizon));
-    graph.index.resize(static_cast<std::size_t>(horizon + 1));
     graph.layers[0].push_back({0, 0, 0, 2'500'000, 7'500'000});
-    graph.index[0].emplace(graph.layers[0][0], 0);
     for(int stage = 0; stage < horizon; ++stage) {
         std::set<State> candidates;
         for(const auto& state : graph.layers[static_cast<std::size_t>(stage)])
@@ -91,7 +88,7 @@ Graph build_graph() {
                     candidates.insert(advance_source(state, control, disturbance));
         auto& next_layer = graph.layers[static_cast<std::size_t>(stage + 1)];
         next_layer.assign(candidates.begin(), candidates.end());
-        auto& next_index = graph.index[static_cast<std::size_t>(stage + 1)];
+        std::map<State, std::size_t> next_index;
         for(std::size_t i = 0; i < next_layer.size(); ++i) next_index.emplace(next_layer[i], i);
         auto& rows = graph.next[static_cast<std::size_t>(stage)];
         rows.resize(graph.layers[static_cast<std::size_t>(stage)].size());

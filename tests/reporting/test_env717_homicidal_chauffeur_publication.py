@@ -48,6 +48,7 @@ class HomicidalChauffeurPublicationTests(unittest.TestCase):
         for name, sha in checksums.items():
             self.assertEqual(hashlib.sha256((destination / name).read_bytes()).hexdigest(), sha)
         result = json.loads((destination / "result.json").read_text())
+        capture = json.loads((destination / "capture.json").read_text())
         figure = json.loads((destination / "figure-data.json").read_text())
         self.assertEqual([projection["name"] for projection in figure["projections"]],
                          ["pursuer-position-plane", "evader-position-plane"])
@@ -56,11 +57,20 @@ class HomicidalChauffeurPublicationTests(unittest.TestCase):
         self.assertEqual(result["first_robust_capture_steps"], 4)
         self.assertAlmostEqual(result["finite_causal_minimax_terminal_separation"],
                                7.778040783932288)
+        timing = capture["timing"]
+        self.assertEqual(timing["repetitions"], 5)
+        self.assertEqual(timing["warmups"], 0)
+        self.assertEqual(timing["solver_failures"], 0)
+        self.assertTrue(timing["identical_stdout"])
+        self.assertEqual(len(timing["durations_ns"]), 5)
+        self.assertEqual(len({run["stdout_sha256"] for run in timing["run_outputs"]}), 1)
+        self.assertIn("process exit", timing["boundary"])
         self.assertTrue(all(layer["forward_convex_envelope"] for projection in figure["projections"]
                             for layer in projection["layers"]))
         page = (destination / "index.html").read_text()
         self.assertIn("not exact projections of the five-dimensional reachable sets", page)
         self.assertIn("do not reproduce continuous-action RL training", page)
+        self.assertIn("Single-adapter runtime", page)
         svg = (destination / "projections.svg").read_text()
         self.assertIn('data-role="projected-convex-envelope"', svg)
         self.assertIn('data-role="winning-intersection"', svg)
@@ -71,6 +81,8 @@ class HomicidalChauffeurPublicationTests(unittest.TestCase):
             self.assertIn(f"{report_id}/figure-data.json", archive.namelist())
         self.assertIn(f'href="{report_id}/index.html"',
                       (self.site / "index.html").read_text())
+        self.assertIn("five fresh-process runtime observations",
+                      manifest["measured_scope"])
 
     def test_rejects_modified_result(self):
         result = self.source / "result.json"

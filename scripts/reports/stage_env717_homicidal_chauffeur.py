@@ -118,9 +118,10 @@ def stage(source: Path, site: Path) -> str:
     manifest = {"schema": "csl.env717-publication/1", "report_id": report_id,
         "source_report_id": source.name, "source_repository_commit": SOURCE_COMMIT,
         "source_commit": captured["source_commit"], "stager_sha256": identity["stager_sha256"],
-        "measured_scope": "Four 0.1-second stages; complete finite reachable graph, terminal capture sweep, and causal minimax value with independent replay; no timing result.",
+        "measured_scope": "Four 0.1-second stages; complete finite reachable graph, terminal capture sweep, causal minimax value with independent replay, and five fresh-process runtime observations for the single adapter.",
         "evidence_limits": ["Finite action catalogues and a quantized lattice only.",
             "The zero-sum payoff signs and sequential response are analysis assumptions because the source environment does not assign per-agent payoff signs.",
+            "Runtime is descriptive for one adapter and machine; it is not a comparison or speedup claim.",
             "No continuous-action RL reproduction or continuous-game optimality claim."],
         "source_files": identity["source_files"],
         "published_files": {name: digest(content) for name, content in sorted(generated.items())}}

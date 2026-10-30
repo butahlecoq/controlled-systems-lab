@@ -10,8 +10,10 @@ import html
 import json
 from pathlib import Path
 import platform
+import statistics
 import subprocess
 import sys
+import time
 
 ROOT = Path(__file__).resolve().parents[3]
 sys.path.insert(0, str(Path(__file__).resolve().parent))
@@ -152,20 +154,34 @@ def make_page(result, check, capture):
 <tr><th>First robust terminal capture (distance ≤ 7.8)</th><td>{result['first_robust_capture_steps']} decisions ({result['first_robust_capture_steps'] * 0.1:.1f} s)</td></tr>
 <tr><th>Finite causal minimax terminal separation</th><td>{result['finite_causal_minimax_terminal_separation']:.9f}</td></tr>
 <tr><th>Selected pursuer turn-rate / evader heading path</th><td>{html.escape(actions)}</td></tr>
-<tr><th>Independent replay</th><td>{check['status']}: {check['forward_states_checked']} states and {check['transition_cells_checked']} transition cells</td></tr></tbody></table>
+<tr><th>Independent replay</th><td>{check['status']}: {check['forward_states_checked']} states and {check['transition_cells_checked']} transition cells</td></tr>
+<tr><th>Single-adapter runtime</th><td>{capture['timing']['repetitions']} fresh-process runs; median {capture['timing']['median_seconds']:.6f} s (range {capture['timing']['minimum_seconds']:.6f}–{capture['timing']['maximum_seconds']:.6f} s)</td></tr></tbody></table>
 <h2>Source model and finite adaptation</h2><p>The pinned source state is <code>(time, pursuer_x, pursuer_y, pursuer_heading, evader_x, evader_y)</code>. The pursuer travels at speed 3 with bounded turn rate <code>u ∈ [-1,1]</code>; the evader travels at speed 1 with heading <code>v ∈ [0,2π]</code>. Both use 0.1-second decisions and ten held-action RK4 substeps per decision. The source returns positive terminal Euclidean separation but does not specify separate payoff signs for the two agents.</p>
 <p>This pilot uses the source default initial state, but shortens the horizon from 4.0 seconds to 0.4 seconds and samples the continuous actions as <code>u ∈ {{-1,0,1}}</code> and four cardinal evader headings. The capture set is an explicit analysis choice: terminal separation ≤ 7.8. The finite causal solver lets the evader observe the current pursuer turn rate before responding. The zero-sum interpretation (pursuer minimizes, evader maximizes) is an explicit analysis assumption, as are the finite actions and sequential response. The results describe this quantized finite game and do not reproduce continuous-action RL training or establish continuous-game optimality.</p>
 <p>Source: <a href="https://github.com/imm-rl-lab/differential_game_gym/tree/af5f0a2ee498c0edcf88d60f1d6c49a39bd08bc8/Environments/HomicidalChauffeur">HomicidalChauffeur at pinned commit</a>, source blob <code>{result['source']['file_blob']}</code>, Apache-2.0 at that commit. Scenario SHA-256: <code>{result['scenario_sha256']}</code>.</p>
 <h2>Reproduction and saved evidence</h2><p>Configure with <code>cmake -S . -B build/report -DCSL_BUILD_ENV717_REPORT=ON -DCMAKE_BUILD_TYPE=Release</code>, build <code>csl_env717_homicidal_chauffeur</code>, then run <code>python scripts/reports/env717/capture_homicidal_chauffeur.py build/report/csl_env717_homicidal_chauffeur --output reports/algorithm-results/env717-homicidal-chauffeur-v1</code>. The checker independently rebuilds all RK4 transitions, verifies each reachable layer, recomputes backward winning sets and finite minimax values, and checks the selected worst-case trajectory.</p>
-<p class="quiet">No runtime or performance comparison was measured. <a href="result.json">Raw result</a> · <a href="figure-data.json">Figure data</a> · <a href="check.json">Independent check</a> · <a href="capture.json">Capture metadata</a> · <a href="README.md">Reproduction notes</a>.</p>
+<p class="quiet">Runtime is descriptive for this single adapter and machine; there is no performance comparison or speedup claim. <a href="result.json">Raw result</a> · <a href="figure-data.json">Figure data</a> · <a href="check.json">Independent check</a> · <a href="capture.json">Capture metadata</a> · <a href="README.md">Reproduction notes</a>.</p>
 </body></html>'''
 
 
 def capture(driver: Path, destination: Path):
     if destination.exists():
         raise ValueError("capture destination already exists")
-    completed = subprocess.run([str(driver)], capture_output=True, text=True, timeout=120, check=True)
-    result = json.loads(completed.stdout)
+    repetitions = 5
+    runs = []
+    for _ in range(repetitions):
+        started = time.perf_counter_ns()
+        completed = subprocess.run([str(driver)], capture_output=True, text=True,
+                                   timeout=120, check=True)
+        elapsed = time.perf_counter_ns() - started
+        output = completed.stdout.encode("utf-8")
+        runs.append({"duration_ns": elapsed, "stdout_sha256": digest(output),
+                     "stderr_sha256": digest(completed.stderr.encode("utf-8"))})
+        if len(runs) == 1:
+            canonical_stdout = completed.stdout
+        elif completed.stdout != canonical_stdout:
+            raise ValueError("fresh-process runs produced different result JSON")
+    result = json.loads(canonical_stdout)
     check = checker.verify(result)
     scenario = json.loads(SCENARIO.read_text(encoding="utf-8"))
     if result["scenario_sha256"] != digest(SCENARIO.read_bytes()):
@@ -188,6 +204,22 @@ def capture(driver: Path, destination: Path):
     if result["build"]["source_commit"] != head:
         raise ValueError("capture must use the current committed source head")
     destination.mkdir(parents=True)
+    durations = [run["duration_ns"] for run in runs]
+    timing = {
+        "method": "single-adapter descriptive runtime; no comparison or speedup claim",
+        "repetitions": repetitions, "warmups": 0,
+        "sample_policy": "five fresh process launches; one result per process",
+        "boundary": "perf_counter_ns immediately before subprocess.run through process exit and captured stdout/stderr; includes launch, graph construction, solution and JSON output; excludes build, independent replay and report rendering",
+        "durations_ns": durations,
+        "median_ns": int(statistics.median(durations)),
+        "minimum_ns": min(durations), "maximum_ns": max(durations),
+        "median_seconds": statistics.median(durations) / 1e9,
+        "minimum_seconds": min(durations) / 1e9,
+        "maximum_seconds": max(durations) / 1e9,
+        "run_outputs": runs,
+        "identical_stdout": True,
+        "solver_failures": 0,
+    }
     capture_record = {
         "schema": "csl.env717-homicidal-chauffeur-capture/1",
         "captured_at_utc": datetime.now(timezone.utc).isoformat(timespec="seconds"),
@@ -198,7 +230,7 @@ def capture(driver: Path, destination: Path):
         "build_type": result["build"]["build_type"], "operating_system": platform.platform(),
         "machine": platform.machine(), "python": platform.python_version(),
         "command": "csl_env717_homicidal_chauffeur",
-        "timing_claim": "none; report records finite game values and independently checked graph only",
+        "timing": timing,
         "solver_failures": 0,
     }
     figure = project_layers(result)
@@ -216,7 +248,7 @@ This source-attributed report applies CSL finite-feedback reachability and causa
 
 Reproduce with `cmake -S . -B build/report -DCSL_BUILD_ENV717_REPORT=ON -DCMAKE_BUILD_TYPE=Release`, `cmake --build build/report --target csl_env717_homicidal_chauffeur`, then `python scripts/reports/env717/capture_homicidal_chauffeur.py build/report/csl_env717_homicidal_chauffeur --output reports/algorithm-results/env717-homicidal-chauffeur-v1`.
 
-The independent checker reconstructs all quantized RK4 transitions, forward reachable states, backward capture sets, finite minimax values and the selected worst-case path. The zero-sum signs are an analysis assumption because the source returns positive separation without assigning separate payoffs. The plotted polygons are convex envelopes of projected graph states and are visual guides, not exact projected reachable sets. No timing or performance comparison is reported.
+The independent checker reconstructs all quantized RK4 transitions, forward reachable states, backward capture sets, finite minimax values and the selected worst-case path. The zero-sum signs are an analysis assumption because the source returns positive separation without assigning separate payoffs. The plotted polygons are convex envelopes of projected graph states and are visual guides, not exact projected reachable sets. Capture records five fresh-process runtime observations for this adapter, including process startup and graph construction but excluding build, replay, and rendering. It makes no performance comparison or speedup claim.
 """,
     }
     for name, content in files.items():
