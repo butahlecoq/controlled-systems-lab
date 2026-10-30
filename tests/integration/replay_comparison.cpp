@@ -137,6 +137,13 @@ TEST_CASE("4D selected linear witnesses retain separate nonlinear replay and 2D 
     CHECK(comparison.witnesses[0].linear.evidence.optimality == verification::CheckStatus::numerical_pass);
     CHECK(comparison.linear_objective_unit == std::optional<std::string>{"kg/s"});
 
+    auto exact_map_with_adaptive_limits = fuel_toy();
+    exact_map_with_adaptive_limits.integration_limits = sim::IntegrationLimits{1e-8, 1e-8, 10000};
+    const auto invalid_exact_map = sim::replay(exact_map_with_adaptive_limits,
+        source.plot.paths[0].controls);
+    CHECK(invalid_exact_map.status == sim::ReplayStatus::invalid_input);
+    CHECK(invalid_exact_map.integration_limits == std::nullopt);
+
     std::ifstream fixture_file(CSL_VIZ04_REPLAY_FIXTURE);
     REQUIRE(fixture_file.good());
     const auto saved_example = nlohmann::json::parse(fixture_file);
