@@ -1,0 +1,424 @@
+{
+  "content_sha256": "ac52ef2b227ec6b691273a9ef93d7b02078e85cb9376c996459b31083c05ffa2",
+  "problem_id": "csl.problem.v1.sha256:8b99cd1f8781f5e54da45aeafd7a2ea611ff80487f37ce40dad1859e07d97f57",
+  "request_id": "fuel-four-state-stage-projections-v1",
+  "route_id": "reachability.nominal_forward",
+  "run_id": "fuel-four-state-box-control-demo-v1",
+  "schema": "csl.nominal-forward-stage-evidence/1",
+  "source_sha256": "f66613c4da547075a263a87bc4f1670abb5c920b81fdcea8541303c95fd79b9e",
+  "stage_sources": [
+    {
+      "h_to_v_evidence": {
+        "assumptions": [
+          "explicit equality null-space reduction",
+          "zero-dimensional case; Qhull not used"
+        ],
+        "error_bound": null,
+        "reference": {
+          "ideal_output": "stage-v-0",
+          "inputs": [
+            "nominal-forward/86:csl.problem.v1.sha256:8b99cd1f8781f5e54da45aeafd7a2ea611ff80487f37ce40dad1859e07d97f5736:fuel-four-state-stage-projections-v10/project/output"
+          ],
+          "problem": "csl.problem.v1.sha256:8b99cd1f8781f5e54da45aeafd7a2ea611ff80487f37ce40dad1859e07d97f57",
+          "request": "fuel-four-state-stage-projections-v1/capture/stage/0/to-v"
+        },
+        "scope": "set_relation",
+        "support": {
+          "absolute_tolerance": 1e-08,
+          "kind": "numerical_check",
+          "max_residual": 0.0,
+          "relative_tolerance": 1e-08,
+          "verifier": "csl.conversion.qhull.numeric-audit"
+        }
+      },
+      "h_to_v_set_id": "conversion:fuel-four-state-stage-projections-v1/capture/stage/0/to-v:stage-v-0",
+      "marginal_evidence": {
+        "assumptions": [
+          "ordered selected coordinates retained; affine dimension is not inferred",
+          "binary64 equality substitution and Fourier--Motzkin elimination; set-relation support remains unestablished; no exact arithmetic, inclusion, coverage or error-bound certificate",
+          "H materialization preserves equalities; V materialization preserves every ray including zero images",
+          "selected affine-image, sum, conversion and projection evidence retained separately; authored aggregate recurrence and compiled recovery-factor support remain unestablished",
+          "stage marginal only; no optimality or joint-history completeness claim"
+        ],
+        "error_bound": null,
+        "reference": {
+          "ideal_output": "nominal-forward/86:csl.problem.v1.sha256:8b99cd1f8781f5e54da45aeafd7a2ea611ff80487f37ce40dad1859e07d97f5736:fuel-four-state-stage-projections-v10/reachable",
+          "inputs": [
+            "nominal-forward/86:csl.problem.v1.sha256:8b99cd1f8781f5e54da45aeafd7a2ea611ff80487f37ce40dad1859e07d97f5736:fuel-four-state-stage-projections-v10/initial",
+            "nominal-forward/86:csl.problem.v1.sha256:8b99cd1f8781f5e54da45aeafd7a2ea611ff80487f37ce40dad1859e07d97f5736:fuel-four-state-stage-projections-v10/state-constraint"
+          ],
+          "problem": "csl.problem.v1.sha256:8b99cd1f8781f5e54da45aeafd7a2ea611ff80487f37ce40dad1859e07d97f57",
+          "request": "nominal-forward/86:csl.problem.v1.sha256:8b99cd1f8781f5e54da45aeafd7a2ea611ff80487f37ce40dad1859e07d97f5736:fuel-four-state-stage-projections-v10/stage"
+        },
+        "scope": "set_relation",
+        "support": {
+          "kind": "unestablished"
+        }
+      },
+      "marginal_set_id": "nominal-forward/86:csl.problem.v1.sha256:8b99cd1f8781f5e54da45aeafd7a2ea611ff80487f37ce40dad1859e07d97f5736:fuel-four-state-stage-projections-v10/project/output",
+      "operation_lineage": [
+        {
+          "assumptions": [
+            "ordered selected coordinates retained; affine dimension is not inferred",
+            "binary64 equality substitution and Fourier--Motzkin elimination; set-relation support remains unestablished; no exact arithmetic, inclusion, coverage or error-bound certificate",
+            "H materialization preserves equalities; V materialization preserves every ray including zero images"
+          ],
+          "error_bound": null,
+          "reference": {
+            "ideal_output": "nominal-forward/86:csl.problem.v1.sha256:8b99cd1f8781f5e54da45aeafd7a2ea611ff80487f37ce40dad1859e07d97f5736:fuel-four-state-stage-projections-v10/project/output",
+            "inputs": [
+              "nominal-forward/86:csl.problem.v1.sha256:8b99cd1f8781f5e54da45aeafd7a2ea611ff80487f37ce40dad1859e07d97f5736:fuel-four-state-stage-projections-v10/joint"
+            ],
+            "problem": "csl.problem.v1.sha256:8b99cd1f8781f5e54da45aeafd7a2ea611ff80487f37ce40dad1859e07d97f57",
+            "request": "nominal-forward/86:csl.problem.v1.sha256:8b99cd1f8781f5e54da45aeafd7a2ea611ff80487f37ce40dad1859e07d97f5736:fuel-four-state-stage-projections-v10/project"
+          },
+          "scope": "set_relation",
+          "support": {
+            "kind": "unestablished"
+          }
+        },
+        {
+          "assumptions": [
+            "ordered selected coordinates retained; affine dimension is not inferred",
+            "binary64 equality substitution and Fourier--Motzkin elimination; set-relation support remains unestablished; no exact arithmetic, inclusion, coverage or error-bound certificate",
+            "H materialization preserves equalities; V materialization preserves every ray including zero images"
+          ],
+          "error_bound": null,
+          "reference": {
+            "ideal_output": "nominal-forward/86:csl.problem.v1.sha256:8b99cd1f8781f5e54da45aeafd7a2ea611ff80487f37ce40dad1859e07d97f5736:fuel-four-state-stage-projections-v10/feasibility/output",
+            "inputs": [
+              "nominal-forward/86:csl.problem.v1.sha256:8b99cd1f8781f5e54da45aeafd7a2ea611ff80487f37ce40dad1859e07d97f5736:fuel-four-state-stage-projections-v10/joint"
+            ],
+            "problem": "csl.problem.v1.sha256:8b99cd1f8781f5e54da45aeafd7a2ea611ff80487f37ce40dad1859e07d97f57",
+            "request": "nominal-forward/86:csl.problem.v1.sha256:8b99cd1f8781f5e54da45aeafd7a2ea611ff80487f37ce40dad1859e07d97f5736:fuel-four-state-stage-projections-v10/feasibility"
+          },
+          "scope": "set_relation",
+          "support": {
+            "kind": "unestablished"
+          }
+        }
+      ],
+      "providers": [
+        {
+          "actual_module": "csl.geometry.polyhedral-projection",
+          "actual_version": "1.0.0",
+          "port": "geometry",
+          "request": "nominal-forward/86:csl.problem.v1.sha256:8b99cd1f8781f5e54da45aeafd7a2ea611ff80487f37ce40dad1859e07d97f5736:fuel-four-state-stage-projections-v10/project",
+          "requested_module": "csl.geometry.polyhedral-projection",
+          "requested_version": "1.0.0"
+        },
+        {
+          "actual_module": "csl.geometry.polyhedral-projection",
+          "actual_version": "1.0.0",
+          "port": "geometry",
+          "request": "nominal-forward/86:csl.problem.v1.sha256:8b99cd1f8781f5e54da45aeafd7a2ea611ff80487f37ce40dad1859e07d97f5736:fuel-four-state-stage-projections-v10/feasibility",
+          "requested_module": "csl.geometry.polyhedral-projection",
+          "requested_version": "1.0.0"
+        }
+      ],
+      "stage": 0
+    },
+    {
+      "h_to_v_evidence": {
+        "assumptions": [
+          "explicit equality null-space reduction",
+          "one-dimensional interval endpoints from reduced inequalities",
+          "LP feasibility and coordinate-boundedness prerequisites",
+          "numerical evidence only"
+        ],
+        "error_bound": null,
+        "reference": {
+          "ideal_output": "stage-v-1",
+          "inputs": [
+            "nominal-forward/86:csl.problem.v1.sha256:8b99cd1f8781f5e54da45aeafd7a2ea611ff80487f37ce40dad1859e07d97f5736:fuel-four-state-stage-projections-v11/project/output"
+          ],
+          "problem": "csl.problem.v1.sha256:8b99cd1f8781f5e54da45aeafd7a2ea611ff80487f37ce40dad1859e07d97f57",
+          "request": "fuel-four-state-stage-projections-v1/capture/stage/1/to-v"
+        },
+        "scope": "set_relation",
+        "support": {
+          "absolute_tolerance": 1e-08,
+          "kind": "numerical_check",
+          "max_residual": 7.105427357601002e-15,
+          "relative_tolerance": 1e-08,
+          "verifier": "csl.conversion.qhull.numeric-audit"
+        }
+      },
+      "h_to_v_set_id": "conversion:fuel-four-state-stage-projections-v1/capture/stage/1/to-v:stage-v-1",
+      "marginal_evidence": {
+        "assumptions": [
+          "ordered selected coordinates retained; affine dimension is not inferred",
+          "binary64 equality substitution and Fourier--Motzkin elimination; set-relation support remains unestablished; no exact arithmetic, inclusion, coverage or error-bound certificate",
+          "H materialization preserves equalities; V materialization preserves every ray including zero images",
+          "selected affine-image, sum, conversion and projection evidence retained separately; authored aggregate recurrence and compiled recovery-factor support remain unestablished",
+          "stage marginal only; no optimality or joint-history completeness claim"
+        ],
+        "error_bound": null,
+        "reference": {
+          "ideal_output": "nominal-forward/86:csl.problem.v1.sha256:8b99cd1f8781f5e54da45aeafd7a2ea611ff80487f37ce40dad1859e07d97f5736:fuel-four-state-stage-projections-v11/reachable",
+          "inputs": [
+            "nominal-forward/86:csl.problem.v1.sha256:8b99cd1f8781f5e54da45aeafd7a2ea611ff80487f37ce40dad1859e07d97f5736:fuel-four-state-stage-projections-v10/project/output",
+            "control-stage-0",
+            "nominal-forward/86:csl.problem.v1.sha256:8b99cd1f8781f5e54da45aeafd7a2ea611ff80487f37ce40dad1859e07d97f5736:fuel-four-state-stage-projections-v11/state-constraint"
+          ],
+          "problem": "csl.problem.v1.sha256:8b99cd1f8781f5e54da45aeafd7a2ea611ff80487f37ce40dad1859e07d97f57",
+          "request": "nominal-forward/86:csl.problem.v1.sha256:8b99cd1f8781f5e54da45aeafd7a2ea611ff80487f37ce40dad1859e07d97f5736:fuel-four-state-stage-projections-v11/stage"
+        },
+        "scope": "set_relation",
+        "support": {
+          "kind": "unestablished"
+        }
+      },
+      "marginal_set_id": "nominal-forward/86:csl.problem.v1.sha256:8b99cd1f8781f5e54da45aeafd7a2ea611ff80487f37ce40dad1859e07d97f5736:fuel-four-state-stage-projections-v11/project/output",
+      "operation_lineage": [
+        {
+          "assumptions": [
+            "binary64 affine and sum arithmetic; caller tolerance screens reduction evidence but cannot authorize deletion",
+            "reducer retained indices applied only after exact binary64 convex-combination checks for every removal and complete acyclic dependency and partition validation",
+            "NumericalCheck.max_residual records the maximum attempted reducer reconstruction residual in binary64; it is not an output error bound and does not authorize candidate removal",
+            "numerical equivalent relation is an algorithm claim, not exact equality or validated inclusion for the intended real-valued model",
+            "no independently checked global H/V coverage bound is available for every converted operand; no operation error bound is reported",
+            "finite and mixed action catalogues are not accepted by this SetHandle operation",
+            "selected hull reducer: csl.hull.lp-membership@1.0.0",
+            "selected LP provider: csl.lp.highs@1.1.0+highs.1.11.0",
+            "selected H-to-V converter: csl.conversion.qhull@1.0.0+qhull.8.0.2",
+            "explicit equality null-space reduction",
+            "zero-dimensional case; Qhull not used",
+            "H-to-V conversion evidence is numerical and conditional on the selected converter"
+          ],
+          "error_bound": null,
+          "reference": {
+            "ideal_output": "nominal-forward/86:csl.problem.v1.sha256:8b99cd1f8781f5e54da45aeafd7a2ea611ff80487f37ce40dad1859e07d97f5736:fuel-four-state-stage-projections-v11/affine-state/output",
+            "inputs": [
+              "nominal-forward/86:csl.problem.v1.sha256:8b99cd1f8781f5e54da45aeafd7a2ea611ff80487f37ce40dad1859e07d97f5736:fuel-four-state-stage-projections-v10/project/output"
+            ],
+            "problem": "csl.problem.v1.sha256:8b99cd1f8781f5e54da45aeafd7a2ea611ff80487f37ce40dad1859e07d97f57",
+            "request": "nominal-forward/86:csl.problem.v1.sha256:8b99cd1f8781f5e54da45aeafd7a2ea611ff80487f37ce40dad1859e07d97f5736:fuel-four-state-stage-projections-v11/affine-state"
+          },
+          "scope": "set_relation",
+          "support": {
+            "absolute_tolerance": 1e-08,
+            "kind": "numerical_check",
+            "max_residual": 0.0,
+            "relative_tolerance": 1e-08,
+            "verifier": "csl.geometry.affine-sum"
+          }
+        },
+        {
+          "assumptions": [
+            "binary64 affine and sum arithmetic; caller tolerance screens reduction evidence but cannot authorize deletion",
+            "reducer retained indices applied only after exact binary64 convex-combination checks for every removal and complete acyclic dependency and partition validation",
+            "NumericalCheck.max_residual records the maximum attempted reducer reconstruction residual in binary64; it is not an output error bound and does not authorize candidate removal",
+            "numerical equivalent relation is an algorithm claim, not exact equality or validated inclusion for the intended real-valued model",
+            "published L-infinity error bound composes exact represented-dyadic candidate generation with direct V inputs or independently checked ambient-one/axis-aligned-box H/V coverage; exact deletion preserves the generated hull",
+            "finite and mixed action catalogues are not accepted by this SetHandle operation",
+            "selected hull reducer: csl.hull.lp-membership@1.0.0",
+            "selected LP provider: csl.lp.highs@1.1.0+highs.1.11.0",
+            "selected H-to-V converter: csl.conversion.qhull@1.0.0+qhull.8.0.2",
+            "explicit equality null-space reduction",
+            "one-dimensional interval endpoints from reduced inequalities",
+            "LP feasibility and coordinate-boundedness prerequisites",
+            "numerical evidence only",
+            "global ambient-one H/V coverage checked against exact stored binary64 H rows",
+            "H-to-V conversion evidence is numerical and conditional on the selected converter",
+            "H/V coverage was independently checked against exact stored-dyadic ambient-one or supported axis-aligned box rows"
+          ],
+          "error_bound": {
+            "bound": 0.0,
+            "metric": "csl.geometry.metric.l-infinity",
+            "units": "maximum absolute output-coordinate units; empty-to-empty distance is defined as zero"
+          },
+          "reference": {
+            "ideal_output": "nominal-forward/86:csl.problem.v1.sha256:8b99cd1f8781f5e54da45aeafd7a2ea611ff80487f37ce40dad1859e07d97f5736:fuel-four-state-stage-projections-v11/affine-control/output",
+            "inputs": [
+              "nominal-forward/86:csl.problem.v1.sha256:8b99cd1f8781f5e54da45aeafd7a2ea611ff80487f37ce40dad1859e07d97f5736:fuel-four-state-stage-projections-v11/unnamed-control"
+            ],
+            "problem": "csl.problem.v1.sha256:8b99cd1f8781f5e54da45aeafd7a2ea611ff80487f37ce40dad1859e07d97f57",
+            "request": "nominal-forward/86:csl.problem.v1.sha256:8b99cd1f8781f5e54da45aeafd7a2ea611ff80487f37ce40dad1859e07d97f5736:fuel-four-state-stage-projections-v11/affine-control"
+          },
+          "scope": "set_relation",
+          "support": {
+            "absolute_tolerance": 1e-08,
+            "kind": "numerical_check",
+            "max_residual": 0.0,
+            "relative_tolerance": 1e-08,
+            "verifier": "csl.geometry.affine-sum"
+          }
+        },
+        {
+          "assumptions": [
+            "binary64 affine and sum arithmetic; caller tolerance screens reduction evidence but cannot authorize deletion",
+            "reducer retained indices applied only after exact binary64 convex-combination checks for every removal and complete acyclic dependency and partition validation",
+            "NumericalCheck.max_residual records the maximum attempted reducer reconstruction residual in binary64; it is not an output error bound and does not authorize candidate removal",
+            "numerical equivalent relation is an algorithm claim, not exact equality or validated inclusion for the intended real-valued model",
+            "published L-infinity error bound composes exact represented-dyadic candidate generation with direct V inputs or independently checked ambient-one/axis-aligned-box H/V coverage; exact deletion preserves the generated hull",
+            "finite and mixed action catalogues are not accepted by this SetHandle operation",
+            "selected hull reducer: csl.hull.lp-membership@1.0.0",
+            "selected LP provider: csl.lp.highs@1.1.0+highs.1.11.0",
+            "selected H-to-V converter: csl.conversion.qhull@1.0.0+qhull.8.0.2"
+          ],
+          "error_bound": {
+            "bound": 1.1657341758564144e-15,
+            "metric": "csl.geometry.metric.l-infinity",
+            "units": "maximum absolute output-coordinate units; empty-to-empty distance is defined as zero"
+          },
+          "reference": {
+            "ideal_output": "nominal-forward/86:csl.problem.v1.sha256:8b99cd1f8781f5e54da45aeafd7a2ea611ff80487f37ce40dad1859e07d97f5736:fuel-four-state-stage-projections-v11/sum/output",
+            "inputs": [
+              "nominal-forward/86:csl.problem.v1.sha256:8b99cd1f8781f5e54da45aeafd7a2ea611ff80487f37ce40dad1859e07d97f5736:fuel-four-state-stage-projections-v11/affine-state/output",
+              "nominal-forward/86:csl.problem.v1.sha256:8b99cd1f8781f5e54da45aeafd7a2ea611ff80487f37ce40dad1859e07d97f5736:fuel-four-state-stage-projections-v11/affine-control/output"
+            ],
+            "problem": "csl.problem.v1.sha256:8b99cd1f8781f5e54da45aeafd7a2ea611ff80487f37ce40dad1859e07d97f57",
+            "request": "nominal-forward/86:csl.problem.v1.sha256:8b99cd1f8781f5e54da45aeafd7a2ea611ff80487f37ce40dad1859e07d97f5736:fuel-four-state-stage-projections-v11/sum"
+          },
+          "scope": "set_relation",
+          "support": {
+            "absolute_tolerance": 1e-08,
+            "kind": "numerical_check",
+            "max_residual": 0.0,
+            "relative_tolerance": 1e-08,
+            "verifier": "csl.geometry.affine-sum"
+          }
+        },
+        {
+          "assumptions": [
+            "affine rank from binary64 SVD; ambiguous small singular values rejected",
+            "Qhull 8.0.2 Qx facet enumeration in affine coordinates",
+            "source vertices checked against output H constraints",
+            "numerical evidence only; finite samples do not prove global containment"
+          ],
+          "error_bound": null,
+          "reference": {
+            "ideal_output": "nominal-forward/86:csl.problem.v1.sha256:8b99cd1f8781f5e54da45aeafd7a2ea611ff80487f37ce40dad1859e07d97f5736:fuel-four-state-stage-projections-v11/to-h/output",
+            "inputs": [
+              "nominal-forward/86:csl.problem.v1.sha256:8b99cd1f8781f5e54da45aeafd7a2ea611ff80487f37ce40dad1859e07d97f5736:fuel-four-state-stage-projections-v11/sum/output"
+            ],
+            "problem": "csl.problem.v1.sha256:8b99cd1f8781f5e54da45aeafd7a2ea611ff80487f37ce40dad1859e07d97f57",
+            "request": "nominal-forward/86:csl.problem.v1.sha256:8b99cd1f8781f5e54da45aeafd7a2ea611ff80487f37ce40dad1859e07d97f5736:fuel-four-state-stage-projections-v11/to-h"
+          },
+          "scope": "set_relation",
+          "support": {
+            "absolute_tolerance": 1e-08,
+            "kind": "numerical_check",
+            "max_residual": 0.0,
+            "relative_tolerance": 1e-08,
+            "verifier": "csl.conversion.qhull.numeric-audit"
+          }
+        },
+        {
+          "assumptions": [
+            "ordered selected coordinates retained; affine dimension is not inferred",
+            "binary64 equality substitution and Fourier--Motzkin elimination; set-relation support remains unestablished; no exact arithmetic, inclusion, coverage or error-bound certificate",
+            "H materialization preserves equalities; V materialization preserves every ray including zero images"
+          ],
+          "error_bound": null,
+          "reference": {
+            "ideal_output": "nominal-forward/86:csl.problem.v1.sha256:8b99cd1f8781f5e54da45aeafd7a2ea611ff80487f37ce40dad1859e07d97f5736:fuel-four-state-stage-projections-v11/project/output",
+            "inputs": [
+              "nominal-forward/86:csl.problem.v1.sha256:8b99cd1f8781f5e54da45aeafd7a2ea611ff80487f37ce40dad1859e07d97f5736:fuel-four-state-stage-projections-v11/intersection"
+            ],
+            "problem": "csl.problem.v1.sha256:8b99cd1f8781f5e54da45aeafd7a2ea611ff80487f37ce40dad1859e07d97f57",
+            "request": "nominal-forward/86:csl.problem.v1.sha256:8b99cd1f8781f5e54da45aeafd7a2ea611ff80487f37ce40dad1859e07d97f5736:fuel-four-state-stage-projections-v11/project"
+          },
+          "scope": "set_relation",
+          "support": {
+            "kind": "unestablished"
+          }
+        },
+        {
+          "assumptions": [
+            "ordered selected coordinates retained; affine dimension is not inferred",
+            "binary64 equality substitution and Fourier--Motzkin elimination; set-relation support remains unestablished; no exact arithmetic, inclusion, coverage or error-bound certificate",
+            "H materialization preserves equalities; V materialization preserves every ray including zero images"
+          ],
+          "error_bound": null,
+          "reference": {
+            "ideal_output": "nominal-forward/86:csl.problem.v1.sha256:8b99cd1f8781f5e54da45aeafd7a2ea611ff80487f37ce40dad1859e07d97f5736:fuel-four-state-stage-projections-v11/feasibility/output",
+            "inputs": [
+              "nominal-forward/86:csl.problem.v1.sha256:8b99cd1f8781f5e54da45aeafd7a2ea611ff80487f37ce40dad1859e07d97f5736:fuel-four-state-stage-projections-v11/intersection"
+            ],
+            "problem": "csl.problem.v1.sha256:8b99cd1f8781f5e54da45aeafd7a2ea611ff80487f37ce40dad1859e07d97f57",
+            "request": "nominal-forward/86:csl.problem.v1.sha256:8b99cd1f8781f5e54da45aeafd7a2ea611ff80487f37ce40dad1859e07d97f5736:fuel-four-state-stage-projections-v11/feasibility"
+          },
+          "scope": "set_relation",
+          "support": {
+            "kind": "unestablished"
+          }
+        }
+      ],
+      "providers": [
+        {
+          "actual_module": "csl.geometry.affine-sum",
+          "actual_version": "1.0.0",
+          "port": "geometry",
+          "request": "nominal-forward/86:csl.problem.v1.sha256:8b99cd1f8781f5e54da45aeafd7a2ea611ff80487f37ce40dad1859e07d97f5736:fuel-four-state-stage-projections-v11/affine-state",
+          "requested_module": "csl.geometry.affine-sum",
+          "requested_version": "1.0.0"
+        },
+        {
+          "actual_module": "csl.geometry.affine-sum",
+          "actual_version": "1.0.0",
+          "port": "geometry",
+          "request": "nominal-forward/86:csl.problem.v1.sha256:8b99cd1f8781f5e54da45aeafd7a2ea611ff80487f37ce40dad1859e07d97f5736:fuel-four-state-stage-projections-v11/affine-control",
+          "requested_module": "csl.geometry.affine-sum",
+          "requested_version": "1.0.0"
+        },
+        {
+          "actual_module": "csl.geometry.affine-sum",
+          "actual_version": "1.0.0",
+          "port": "geometry",
+          "request": "nominal-forward/86:csl.problem.v1.sha256:8b99cd1f8781f5e54da45aeafd7a2ea611ff80487f37ce40dad1859e07d97f5736:fuel-four-state-stage-projections-v11/sum",
+          "requested_module": "csl.geometry.affine-sum",
+          "requested_version": "1.0.0"
+        },
+        {
+          "actual_module": "csl.conversion.qhull",
+          "actual_version": "1.0.0+qhull.8.0.2",
+          "port": "conversion",
+          "request": "nominal-forward/86:csl.problem.v1.sha256:8b99cd1f8781f5e54da45aeafd7a2ea611ff80487f37ce40dad1859e07d97f5736:fuel-four-state-stage-projections-v11/to-h",
+          "requested_module": "csl.conversion.qhull",
+          "requested_version": "1.0.0+qhull.8.0.2"
+        },
+        {
+          "actual_module": "csl.geometry.polyhedral-projection",
+          "actual_version": "1.0.0",
+          "port": "geometry",
+          "request": "nominal-forward/86:csl.problem.v1.sha256:8b99cd1f8781f5e54da45aeafd7a2ea611ff80487f37ce40dad1859e07d97f5736:fuel-four-state-stage-projections-v11/project",
+          "requested_module": "csl.geometry.polyhedral-projection",
+          "requested_version": "1.0.0"
+        },
+        {
+          "actual_module": "csl.geometry.polyhedral-projection",
+          "actual_version": "1.0.0",
+          "port": "geometry",
+          "request": "nominal-forward/86:csl.problem.v1.sha256:8b99cd1f8781f5e54da45aeafd7a2ea611ff80487f37ce40dad1859e07d97f5736:fuel-four-state-stage-projections-v11/feasibility",
+          "requested_module": "csl.geometry.polyhedral-projection",
+          "requested_version": "1.0.0"
+        }
+      ],
+      "stage": 1
+    }
+  ],
+  "unavailable_stages": [
+    {
+      "explanation": "conversion.affine_rank: Affine rank is numerically ambiguous at binary64 precision.; ",
+      "kind": "unsupported",
+      "stage": 2
+    },
+    {
+      "explanation": "not executed after nominal_forward stopped at R2",
+      "kind": "missing",
+      "stage": 3
+    },
+    {
+      "explanation": "not executed after nominal_forward stopped at R2",
+      "kind": "missing",
+      "stage": 4
+    },
+    {
+      "explanation": "not executed after nominal_forward stopped at R2",
+      "kind": "missing",
+      "stage": 5
+    }
+  ]
+}

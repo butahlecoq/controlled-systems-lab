@@ -35,7 +35,7 @@ class StageProjectionDemoTests(unittest.TestCase):
 
     def test_fuel_demo_contains_all_four_ordered_pairs_at_every_stage(self):
         batch = self.make_batch("fuel-four-state")
-        self.assertEqual(batch["requested_pairs"], [[0, 2], [1, 3], [0, 3], [1, 2]])
+        self.assertEqual(batch["requested_pairs"], [[0, 1], [2, 3], [0, 2], [1, 3]])
         self.assertEqual(batch["stage_axis"]["points"], [0.0, 1.0, 2.0, 3.0, 4.0, 5.0])
         self.assertEqual(len(batch["records"]), 6 * 4)
         final_stock_rows = [row for row in batch["records"]
@@ -43,9 +43,11 @@ class StageProjectionDemoTests(unittest.TestCase):
         self.assertTrue(any(point[1] < 0 for point in final_stock_rows[0]["outcome"]["components"][0]["vertices"]))
         self.assertEqual(len(batch["trajectory_series"]), 4)
         self.assertTrue(all("not optimized" in item["evidence"] for item in batch["trajectory_series"]))
-        initial_stock = batch["records"][1]["outcome"]["components"][0]["vertices"]
-        self.assertEqual(initial_stock, [[302.0, 207.0]])
-        first_flow_points = batch["records"][4]["outcome"]["components"][0]["vertices"]
+        initial_oxidizer = batch["records"][0]["outcome"]["components"][0]["vertices"]
+        initial_fuel = batch["records"][1]["outcome"]["components"][0]["vertices"]
+        self.assertEqual(initial_oxidizer, [[29.31, 302.0]])
+        self.assertEqual(initial_fuel, [[20.354, 207.0]])
+        first_flow_points = batch["records"][6]["outcome"]["components"][0]["vertices"]
         rounded = {(round(point[0], 6), round(point[1], 6)) for point in first_flow_points}
         self.assertEqual(rounded, {(28.61, 20.687333), (30.01, 20.020667)})
 
@@ -109,20 +111,34 @@ class StageProjectionDemoTests(unittest.TestCase):
         self.assertEqual(DEMOS.EXECUTABLE_SUFFIX, ".exe" if os.name == "nt" else "")
 
     def test_checked_in_bundle_uses_portable_paths_and_current_file_hashes(self):
-        bundle = ROOT / "benchmarks/reporting/stage-projection/bundle-v1"
-        for index in bundle.glob("*-figures/index.html"):
-            html = index.read_text()
-            self.assertIn("Output directory: <code class=\"path\">this bundle directory</code>", html)
-            self.assertNotIn("bundle-v1-check", html)
-            receipt = json.loads((index.parent / "render-manifest.json").read_text())
-            self.assertEqual(receipt["output_directory"], ".")
-            self.assertEqual(receipt["files"]["index.html"], hashlib.sha256(index.read_bytes()).hexdigest())
+        root = ROOT / "benchmarks/reporting/stage-projection"
+        for version in ("bundle-v1", "bundle-v2"):
+            bundle = root / version
+            for index in bundle.glob("*-figures/index.html"):
+                html = index.read_text()
+                self.assertIn("Output directory: <code class=\"path\">this bundle directory</code>", html)
+                self.assertNotIn(f"{version}-check", html)
+                receipt = json.loads((index.parent / "render-manifest.json").read_text())
+                self.assertEqual(receipt["output_directory"], ".")
+                self.assertEqual(receipt["files"]["index.html"], hashlib.sha256(index.read_bytes()).hexdigest())
+            manifest = json.loads((bundle / "manifest.json").read_text())
+            artifacts = {item["path"]: item["sha256"] for item in manifest["artifacts"]}
+            sums = {path: digest for digest, path in
+                    (line.split("  ", 1) for line in (bundle / "SHA256SUMS").read_text().splitlines())}
+            for relative, digest in artifacts.items():
+                self.assertEqual(hashlib.sha256((bundle / relative).read_bytes()).hexdigest(), digest)
+                self.assertEqual(sums[relative], digest)
+        v2 = json.loads((root / "bundle-v2/fuel-four-state.stage-projection-batch.json").read_text())
+        self.assertEqual(v2["requested_pairs"], [[0, 1], [2, 3], [0, 2], [1, 3]])
+        names = {path.name for path in (root / "bundle-v2/fuel-four-state-figures").glob("*.png")}
+        self.assertEqual(names, {"projection-01-x0-x1.png", "projection-02-x2-x3.png",
+                                 "projection-03-x0-x2.png", "projection-04-x1-x3.png"})
 
     def test_native_route_bundle_preserves_source_and_conversion_evidence(self):
         source = DEMOS.EXAMPLES / "fuel-four-state.json"
         source_data = json.loads(source.read_text())
         expected_source = hashlib.sha256(source.read_bytes()).hexdigest()
-        bundle = ROOT / "benchmarks/reporting/stage-projection/bundle-v1"
+        bundle = ROOT / "benchmarks/reporting/stage-projection/bundle-v2"
         path = bundle / "fuel-four-state.nominal-forward.stage-projection-batch.json.evidence.json"
         evidence = json.loads(path.read_text())
         digest = evidence.pop("content_sha256")
