@@ -9,14 +9,23 @@ import html
 import importlib.util
 import json
 from pathlib import Path
+import re
 import stat
 import subprocess
+import tempfile
 import zipfile
 
 ROOT = Path(__file__).resolve().parents[2]
+GIT_ROOT = ROOT
+SOURCE_REPOSITORY_URL = "https://github.com/butahlecoq/controlled-systems-lab.git"
 SOURCE = ROOT / "reports/algorithm-results/mpc09-two-particle-output-feedback-v1"
 CHECKER_PATH = ROOT / "scripts/reports/mpc09/check_output_feedback.py"
 REPORT_PATH = ROOT / "scripts/reports/mpc09/make_report.py"
+REQUIRED_SOURCE_FINGERPRINTS = (
+    "benchmarks/scenarios/mpc09-two-particle-output-feedback-v1.json",
+    "benchmarks/reporting/mpc09/two_particle_output_feedback.cpp",
+    "scripts/reports/mpc09/check_output_feedback.py",
+)
 
 
 def load_module(name: str, path: Path):
@@ -38,20 +47,36 @@ def digest(content: bytes) -> str:
     return hashlib.sha256(content).hexdigest()
 
 
-def source_blob(commit: str, name: str) -> bytes:
-    if not isinstance(commit, str) or len(commit) != 40 or any(
-            character not in "0123456789abcdef" for character in commit):
-        raise ValueError("MPC-09 source commit must be a full lowercase Git object ID")
-    path = Path(name)
-    if path.is_absolute() or not name or any(part in {"", ".", ".."} for part in path.parts):
-        raise ValueError("MPC-09 source path must be a normalized repository-relative path")
+def verify_source_fingerprints(commit: str, fingerprints: dict[str, str]) -> None:
+    repository = GIT_ROOT
+    exists = subprocess.run(
+        ["git", "-C", str(repository), "cat-file", "-e", f"{commit}^{{commit}}"],
+        capture_output=True, check=False)
+    temporary = None
+    if exists.returncode != 0:
+        temporary = tempfile.TemporaryDirectory(prefix="mpc09-source-commit-")
+        repository = Path(temporary.name) / "repository.git"
+        initialized = subprocess.run(["git", "init", "--bare", str(repository)],
+                                     capture_output=True, check=False)
+        fetched = subprocess.run(
+            ["git", "-C", str(repository), "fetch", "--quiet", "--no-tags", "--depth=1",
+             SOURCE_REPOSITORY_URL, commit], capture_output=True, check=False)
+        if initialized.returncode != 0 or fetched.returncode != 0:
+            if temporary is not None:
+                temporary.cleanup()
+            raise ValueError("MPC-09 captured source commit is unavailable for fingerprint verification")
     try:
-        return subprocess.run(
-            ["git", "cat-file", "blob", f"{commit}:{path.as_posix()}"],
-            cwd=ROOT, check=True, capture_output=True,
-        ).stdout
-    except subprocess.CalledProcessError as error:
-        raise ValueError(f"MPC-09 captured source is unavailable: {name}") from error
+        for name, expected in fingerprints.items():
+            blob = subprocess.run(
+                ["git", "-C", str(repository), "cat-file", "blob", f"{commit}:{name}"],
+                capture_output=True, check=False)
+            if blob.returncode != 0:
+                raise ValueError(f"MPC-09 captured source is absent at source_commit: {name}")
+            if digest(blob.stdout) != expected:
+                raise ValueError(f"MPC-09 captured source fingerprint differs at source_commit: {name}")
+    finally:
+        if temporary is not None:
+            temporary.cleanup()
 
 
 def read_bundle(source: Path) -> dict[str, bytes]:
@@ -95,13 +120,26 @@ def validate_bundle(source: Path):
         raise ValueError("MPC-09 build and executable provenance are required")
     if capture.get("working_tree_clean") is not True:
         raise ValueError("MPC-09 capture must identify a clean source tree")
-    commit = capture.get("source_commit")
-    if capture.get("scenario_sha256") != digest(source_blob(
-            commit, "benchmarks/scenarios/mpc09-two-particle-output-feedback-v1.json")):
-        raise ValueError("MPC-09 scenario hash differs from its captured source commit")
-    for name, expected in capture.get("source_sha256", {}).items():
-        if digest(source_blob(commit, name)) != expected:
-            raise ValueError(f"MPC-09 captured source fingerprint differs: {name}")
+    # Historical source hashes describe source_commit, not the later staging checkout.
+    source_hashes = capture.get("source_sha256")
+    if (not isinstance(capture.get("source_commit"), str) or
+            re.fullmatch(r"[0-9a-f]{40}", capture["source_commit"]) is None or
+            not isinstance(source_hashes, dict) or not source_hashes):
+        raise ValueError("MPC-09 source commit and fingerprints are required")
+    if not set(REQUIRED_SOURCE_FINGERPRINTS).issubset(source_hashes):
+        raise ValueError("MPC-09 source fingerprints omit required model inputs")
+    for name, fingerprint in source_hashes.items():
+        if not isinstance(name, str) or not isinstance(fingerprint, str):
+            raise ValueError("MPC-09 source fingerprint inventory is malformed")
+        path = Path(name)
+        if (path.is_absolute() or ".." in path.parts or path.as_posix() != name or
+                re.fullmatch(r"[0-9a-f]{64}", fingerprint) is None):
+            raise ValueError("MPC-09 source fingerprint inventory is malformed")
+    if capture.get("scenario_sha256") != digest((ROOT / "benchmarks/scenarios/mpc09-two-particle-output-feedback-v1.json").read_bytes()):
+        raise ValueError("MPC-09 scenario hash differs from the current scenario input")
+    if source_hashes[REQUIRED_SOURCE_FINGERPRINTS[0]] != capture["scenario_sha256"]:
+        raise ValueError("MPC-09 captured scenario fingerprint differs")
+    verify_source_fingerprints(capture["source_commit"], source_hashes)
     if verification["causal_reference"]["scope"].find("complete finite observation-history") < 0:
         raise ValueError("MPC-09 finite-history reference scope is absent")
     return files, result_data, verification, capture

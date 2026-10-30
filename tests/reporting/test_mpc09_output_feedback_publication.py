@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import importlib.util
+import json
 from pathlib import Path
 import shutil
 import tempfile
@@ -42,6 +43,27 @@ class Mpc09PublicationTests(unittest.TestCase):
             self.assertEqual(capture["source_sha256"][
                 ".github/workflows/algorithm-reports.yml"],
                 "12e18a9080f7c6485d0628e17efa73d5ab1fc05447020ca36554dd68ef65fc87")
+
+    def test_rejects_forged_historical_source_fingerprint(self) -> None:
+        source = ROOT / "reports/algorithm-results/mpc09-two-particle-output-feedback-v1"
+        with tempfile.TemporaryDirectory(prefix="mpc09-source-tamper-") as temporary:
+            bundle = Path(temporary) / source.name
+            shutil.copytree(source, bundle)
+            capture_path = bundle / "capture.json"
+            capture = json.loads(capture_path.read_text(encoding="utf-8"))
+            capture["source_sha256"][
+                "benchmarks/reporting/mpc09/two_particle_output_feedback.cpp"] = "0" * 64
+            capture_path.write_text(json.dumps(capture, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+            sums_path = bundle / "SHA256SUMS"
+            sums = {}
+            for line in sums_path.read_text(encoding="ascii").splitlines():
+                _, name = line.split("  ", 1)
+                sums[name] = stage_report.digest((bundle / name).read_bytes())
+            sums_path.write_text("".join(f"{value}  {name}\n" for name, value in sorted(sums.items())),
+                                 encoding="ascii")
+
+            with self.assertRaisesRegex(ValueError, "captured source fingerprint differs at source_commit"):
+                stage_report.validate_bundle(bundle)
 
     def test_report_rerenders_and_stages_offline_bundle(self) -> None:
         source = ROOT / "reports/algorithm-results/mpc09-two-particle-output-feedback-v1"
