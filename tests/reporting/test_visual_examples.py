@@ -402,6 +402,8 @@ class GalleryTests(unittest.TestCase):
         self.assertIn('href="issue3-control-walkthrough.html"', page)
         self.assertIn("End-to-end walkthrough", page)
         self.assertIn('href="lotka-volterra-sampled-v1.html"', page)
+        self.assertIn('id="adaptive-ode-rk4"', page)
+        self.assertIn('href="adaptive-ode-replay.svg"', page)
         self.assertIn("Cards marked “Saved-data companion” are generated into this gallery from frozen records", page)
         for stem in ("saved-figure-lotka-quantitative", "app02-diamond-v1", "app04-square-v1",
                      "ext05-states-v1", "visual-fuel-b06-viz03"):
@@ -415,7 +417,7 @@ class GalleryTests(unittest.TestCase):
             if not urlsplit(link).scheme and not link.startswith("#"):
                 self.assertTrue((self.site / "examples" / link.split("#")[0]).is_file(), link)
         figures = list((self.site / "examples").glob("*.svg"))
-        self.assertEqual(len(figures), len(self.examples) + len(gallery.visual_illustrations.CASES) + 17)
+        self.assertEqual(len(figures), len(self.examples) + len(gallery.visual_illustrations.CASES) + 18)
         for figure in figures:
             if figure.name == "fuel-b06-viz06-before.svg":
                 self.assertEqual(hashlib.sha256(figure.read_bytes()).hexdigest(),
