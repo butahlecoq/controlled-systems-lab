@@ -32,11 +32,14 @@ def host_metadata():
     cpu_model = None
     cpu_source = None
     try:
+        cpu_fields = {}
         for line in Path("/proc/cpuinfo").read_text(encoding="utf-8").splitlines():
             key, separator, value = line.partition(":")
-            if separator and key.strip().lower() in {"model name", "hardware", "processor"} and value.strip():
-                cpu_model, cpu_source = value.strip(), "/proc/cpuinfo"
-                break
+            if separator and key.strip().lower() in {"model name", "hardware"} and value.strip():
+                cpu_fields[key.strip().lower()] = value.strip()
+        cpu_model = cpu_fields.get("model name") or cpu_fields.get("hardware")
+        if cpu_model:
+            cpu_source = "/proc/cpuinfo"
     except OSError:
         pass
     if cpu_model is None and platform.processor():
