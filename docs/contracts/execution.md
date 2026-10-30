@@ -63,6 +63,13 @@ enforcement return unsupported. This is neither a native-thread audit nor a
 throughput or speedup claim. `CallStopSupport` is also a retained adapter
 declaration, not an executor certification of interruptibility.
 
+Each batch uses a fresh backend-thread observation for its own
+`EnforcementReport::observed_backend_threads`. If the caller supplies an
+`ExecutionContext::backend_thread_observation`, the executor merges the current
+batch maximum into it after the workers join. The supplied observer is therefore
+a cumulative sink; reusing it across batches cannot carry an earlier maximum
+into a later batch's report.
+
 With finite `memory_bytes`, every task needs a byte reservation. Credits are
 reserved before its factory and retained through invocation and complete
 workspace destruction. A reservation larger than the entire cap is skipped

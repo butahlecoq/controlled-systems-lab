@@ -88,6 +88,15 @@ bookkeeping. With this sample count and process-wide scope, the profile does
 not identify a unique limiter. It is exploratory evidence, not a per-strategy
 timing comparison; see the [raw gprof bundle](../../reports/algorithm-results/review05-execution-20261030/gprof-whole-process/README.md).
 
+An independent source audit of `main` at `d9e0f90285919828d7713855e8441a6be1b6f4ec`
+found that reusing a caller-supplied backend-thread observation could carry a
+previous batch's maximum into a later `BatchResult`. The current #95 PR gives
+adapters a fresh observer for every batch and merges its maximum into the
+caller-owned aggregate only after workers join. A regression case reuses one
+aggregate across batches reporting maxima 5 and 1; the corresponding results
+now report 5 and 1 while the aggregate retains 5. `execution_tests` passes on
+the fix branch.
+
 ## REVIEW-05 disposition
 
 The ownership, resource-policy and batch-isolation portions have current source/test evidence. The focused execution and batch suites passed with and without ThreadSanitizer. There are now two fresh, equal-scope timing points for both strategies, but they vary neither state dimension nor horizon, constraint count, representation size or output size.
