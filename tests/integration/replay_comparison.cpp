@@ -143,6 +143,13 @@ TEST_CASE("4D selected linear witnesses retain separate nonlinear replay and 2D 
         source.plot.paths[0].controls);
     CHECK(invalid_exact_map.status == sim::ReplayStatus::invalid_input);
     CHECK(invalid_exact_map.integration_limits == std::nullopt);
+    auto invalid_exact_map_replays = source.replays;
+    invalid_exact_map_replays[0] = invalid_exact_map;
+    const auto invalid_exact_map_association = ex::associate_replays(source.problem, source.plot,
+        {source.plot.run, problem::ContentDigest{}}, invalid_exact_map_replays, "kg/s");
+    REQUIRE(std::holds_alternative<ex::ReplayComparison>(invalid_exact_map_association));
+    CHECK(std::holds_alternative<problem::ResolvedContent>(ex::encode_replay_comparison(
+        std::get<ex::ReplayComparison>(invalid_exact_map_association))));
 
     std::ifstream fixture_file(CSL_VIZ04_REPLAY_FIXTURE);
     REQUIRE(fixture_file.good());
