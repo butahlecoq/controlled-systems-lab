@@ -60,7 +60,7 @@ class HomicidalChauffeurPublicationTests(unittest.TestCase):
                             for layer in projection["layers"]))
         page = (destination / "index.html").read_text()
         self.assertIn("not exact projections of the five-dimensional reachable sets", page)
-        self.assertIn("does not reproduce continuous-action RL training", page)
+        self.assertIn("do not reproduce continuous-action RL training", page)
         svg = (destination / "projections.svg").read_text()
         self.assertIn('data-role="projected-convex-envelope"', svg)
         self.assertIn('data-role="winning-intersection"', svg)
