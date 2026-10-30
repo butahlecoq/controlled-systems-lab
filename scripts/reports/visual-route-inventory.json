@@ -689,7 +689,7 @@
     },
     {
       "source": "scripts/reports/mpc04/max_coordinate_replanning.py",
-      "signal_count": 2,
+      "signal_count": 3,
       "asset_name_literals": [
         "trajectory.svg"
       ],
@@ -2339,7 +2339,7 @@
       "assets": [
         "trajectory.svg"
       ],
-      "index_sha256": "578e64e0855d3680a707214d5adedb26383e5c7f5f4357e4fa6484bd0de2eb26",
+      "index_sha256": "dde9a116c2b3f440125b934540e05f673cb666ba9a75358cb0f1200cd2341aed",
       "disposition": "deferred: original frozen route-level readability review remains; companion availability is listed separately",
       "follow_up_issue": 669
     },
