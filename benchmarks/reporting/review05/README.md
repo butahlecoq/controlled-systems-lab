@@ -13,7 +13,10 @@ The exact minimum is 0, attained by the all-zero history. This pilot times only
 recorded separately. It performs one excluded warmup pair and six alternating
 measured pairs per horizon. Each strategy process has POSIX CPU, address-space,
 and wall-clock limits. Attempts, stdout/stderr, copied fixtures, hashes,
-environment, exact checks, and summaries are preserved in the output bundle.
+environment, actual backend thread observations (or explicit null where
+unavailable), exact checks, and summaries are preserved in the output bundle.
+The manifest records host RAM, requested driver/backend widths, and per-process
+CPU, address-space, and wall-clock enforcement.
 
 ## Build and run
 

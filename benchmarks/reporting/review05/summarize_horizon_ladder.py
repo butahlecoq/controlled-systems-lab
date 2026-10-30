@@ -6,7 +6,7 @@ from __future__ import annotations
 import argparse
 import json
 import statistics
-from collections import defaultdict
+from collections import Counter, defaultdict
 from pathlib import Path
 
 
@@ -24,10 +24,17 @@ def main() -> int:
         rows = [row for row in attempts if row.get("horizon") == horizon and not row.get("warmup")]
         paired_times: dict[int, dict[str, int]] = defaultdict(dict)
         completed_times: dict[str, list[int]] = defaultdict(list)
+        backend_thread_counts: dict[str, list[int]] = defaultdict(list)
+        backend_thread_unavailable: dict[str, int] = defaultdict(int)
         for row in rows:
             result = row.get("result") or {}
             if row.get("process_status") == "completed" and isinstance(result.get("strategy_run_ns"), int):
                 completed_times[row["strategy"]].append(result["strategy_run_ns"])
+                observed_threads = result.get("observed_backend_threads")
+                if isinstance(observed_threads, int):
+                    backend_thread_counts[row["strategy"]].append(observed_threads)
+                else:
+                    backend_thread_unavailable[row["strategy"]] += 1
             check = checks.get(row.get("attempt_id"), {})
             if row.get("process_status") == "completed" and check.get("status") == "verified":
                 if isinstance(result.get("strategy_run_ns"), int) and result["strategy_run_ns"] >= 0:
@@ -51,6 +58,10 @@ def main() -> int:
                 "median_completed_run_ns_including_inconclusive": statistics.median(completed) if completed else None,
                 "min_completed_run_ns_including_inconclusive": min(completed) if completed else None,
                 "max_completed_run_ns_including_inconclusive": max(completed) if completed else None,
+                "observed_backend_thread_counts": {
+                    str(threads): count for threads, count in sorted(Counter(backend_thread_counts.get(strategy, [])).items())
+                },
+                "observed_backend_thread_unavailable_rows": backend_thread_unavailable.get(strategy, 0),
             }
         summaries.append({
             "horizon": horizon,

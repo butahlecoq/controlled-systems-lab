@@ -77,6 +77,10 @@ def check_attempt(attempt: dict[str, object], expected_hash: str) -> tuple[str, 
             raise ValueError("result horizon or fixture hash mismatch")
         if result.get("strategy") != attempt.get("strategy") or result.get("strategy") not in STRATEGIES:
             raise ValueError("strategy identity mismatch")
+        observed_threads = result.get("observed_backend_threads", "missing")
+        if observed_threads == "missing" or (observed_threads is not None and
+                (not isinstance(observed_threads, int) or isinstance(observed_threads, bool) or observed_threads < 1)):
+            raise ValueError("observed backend thread count must be a positive integer or explicit null")
         if result.get("target") != "candidate_relaxation" or result.get("assurance") != "numerical":
             raise ValueError("unexpected claim scope")
         if result.get("termination") != "completed":

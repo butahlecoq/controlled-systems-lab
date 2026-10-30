@@ -219,6 +219,7 @@ int main(int argc, char** argv) try {
     ExecutionContext context;
     context.numerical = family.numerical;
     context.resources = std::make_shared<const ResourcePolicy>(ResourcePolicy{1, 1, 1, {}});
+    context.backend_thread_observation = std::make_shared<execution::BackendThreadObservation>();
 
     const auto started = std::chrono::steady_clock::now();
     const auto outcome = workspace->run(context);
@@ -233,7 +234,10 @@ int main(int argc, char** argv) try {
         << ",\"strategy\":" << quoted(strategy_id)
         << ",\"strategy_version\":" << quoted(prepared.provenance().front().actual->version)
         << ",\"target\":\"candidate_relaxation\",\"assurance\":\"numerical\",\"representation\":\"csl.polyhedron.h\""
-        << ",\"solver_threads_requested\":1,\"strategy_run_ns\":" << elapsed;
+        << ",\"solver_threads_requested\":1,\"observed_backend_threads\":";
+    if (const auto observed = context.backend_thread_observation->maximum()) std::cout << *observed;
+    else std::cout << "null";
+    std::cout << ",\"strategy_run_ns\":" << elapsed;
 
     if (const auto* unsupported = std::get_if<Unsupported>(&outcome)) {
         std::cout << ",\"termination\":\"unsupported\",\"diagnostics\":[";

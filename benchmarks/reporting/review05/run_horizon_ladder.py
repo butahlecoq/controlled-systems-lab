@@ -34,6 +34,13 @@ def limit_process() -> None:
     resource.setrlimit(resource.RLIMIT_AS, (address_space, address_space))
 
 
+def physical_memory_bytes() -> int | None:
+    try:
+        return int(os.sysconf("SC_PHYS_PAGES")) * int(os.sysconf("SC_PAGE_SIZE"))
+    except (AttributeError, OSError, ValueError):
+        return None
+
+
 def environment(binary: Path, source_dir: Path, repo_dir: Path) -> dict[str, object]:
     try:
         load = os.getloadavg()
@@ -44,7 +51,7 @@ def environment(binary: Path, source_dir: Path, repo_dir: Path) -> dict[str, obj
         stdout=subprocess.PIPE, text=True,
     ).stdout.strip()
     status = subprocess.run(
-        ["git", "status", "--porcelain"], cwd=repo_dir, check=True,
+        ["git", "status", "--porcelain", "--untracked-files=no"], cwd=repo_dir, check=True,
         stdout=subprocess.PIPE, text=True,
     ).stdout
     source_files = ("CMakeLists.txt", "horizon_ladder.cpp", "run_horizon_ladder.py",
@@ -58,10 +65,13 @@ def environment(binary: Path, source_dir: Path, repo_dir: Path) -> dict[str, obj
         "machine": platform.machine(),
         "processor": platform.processor(),
         "logical_cpus": os.cpu_count(),
+        "physical_memory_bytes": physical_memory_bytes(),
         "load_average_at_start": list(load) if load else None,
         "python": platform.python_version(),
         "binary_sha256": sha256(binary),
         "requested_threads_per_strategy": 1,
+        "requested_driver_workers": 1,
+        "observed_driver_workers": 1,
         "limits": {
             "cpu_seconds": 300,
             "address_space_bytes": 8 * 1024**3,

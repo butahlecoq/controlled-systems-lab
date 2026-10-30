@@ -1,5 +1,9 @@
 # REVIEW-05 HORIZON-01 scalar horizon ladder
 
+> **Exploratory capture:** this first run was built from a dirty worktree before
+> the benchmark harness was committed. It is preserved for provenance and is
+> superseded by the clean committed-source rerun linked from the PR.
+
 This is a bounded analytic pilot for the scalability report. It runs both
 nominal strategies on the same scalar integrator at horizons 2, 4, and 8:
 

@@ -77,10 +77,12 @@ It does not claim that a returned candidate relation is the complete feasible or
 <h2>Run environment</h2>
 <p>Host: <code>{escape(str(env.get('host')))}</code>; platform: <code>{escape(str(env.get('platform')))}</code>;
 architecture: <code>{escape(str(env.get('machine')))}</code>; logical CPUs: <code>{escape(str(env.get('logical_cpus')))}</code>;
+physical memory: <code>{escape(str(env.get('physical_memory_bytes')))} bytes</code>;
 binary SHA-256: <code>{escape(str(env.get('binary_sha256')))}</code>; source revision: <code>{escape(str(env.get('source_revision')))}</code>.</p>
 <p>Build: {escape(str(build.get('build_type')))} with {escape(str(build.get('cxx_compiler')))},
 CMake {escape(str(build.get('cmake_version')))}, Ninja {escape(str(build.get('ninja_version')))}.
 See <a href="build-provenance.json">build provenance</a> and the full <a href="build.log">build log</a>.</p>
+<p>Each process requested one backend thread and used one driver worker. Observed backend scheduler widths and explicit unavailable counts are in <a href="summary.json">summary.json</a>.</p>
 <p>Attempt checks: <span class="counts">{''.join(f'<span>{escape(k)}: {v}</span>' for k,v in statuses.items())}</span></p>
 <p>Measurement source hashes: <code>{sources}</code></p>
 <p>Fixture inputs: <a href="inputs/horizon01-t02.json">T=2</a>, <a href="inputs/horizon01-t04.json">T=4</a>,
