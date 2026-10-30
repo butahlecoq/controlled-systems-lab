@@ -403,7 +403,7 @@ class GalleryTests(unittest.TestCase):
         self.assertIn("End-to-end walkthrough", page)
         self.assertIn('href="lotka-volterra-sampled-v1.html"', page)
         self.assertIn('id="adaptive-ode-rk4"', page)
-        self.assertIn('href="adaptive-ode-replay.svg"', page)
+        self.assertIn('src="adaptive-ode-replay.svg"', page)
         self.assertIn("Cards marked “Saved-data companion” are generated into this gallery from frozen records", page)
         for stem in ("saved-figure-lotka-quantitative", "app02-diamond-v1", "app04-square-v1",
                      "ext05-states-v1", "visual-fuel-b06-viz03"):
