@@ -66,6 +66,19 @@ class GalleryTests(unittest.TestCase):
         shutil.copyfile(ROOT / "reports/algorithm-results/ext01-fixed-plan-20261016-11b7bc74/records.json",
                         ext01 / "records.json")
         (ext01 / "index.html").write_text("<html><body>Reviewed EXT-01 report</body></html>")
+        for source_id, public_id in (
+                ("ext04-df62c7c6d295e135",
+                 "ext04-observed-replay-eb0b06e560360611d2f2a16fba9b1204e0415b4ba5cd0d5210427c6349963b34"),
+                ("ext07-hybrid-51d9ee2e89d240eb", "ext07-hybrid-51d9ee2e89d240eb"),
+                ("ext07-hybrid-two-parameter-26f402289a309403", "ext07-hybrid-two-parameter-8ad871b5ea29fc7b"),
+                ("finite-feedback-a6e96fd96c7ac7cc",
+                 "finite-feedback-registered-f874133e442eb0fb884b8813a06591cc0f077063ee75ddf627de74656fc11c0f")):
+            target = self.site / public_id
+            target.mkdir(exist_ok=True)
+            source = ROOT / "reports/algorithm-results" / source_id
+            if not (target / "records.json").exists():
+                shutil.copyfile(source / "records.json", target / "records.json")
+            (target / "index.html").write_text("<html><body>Reviewed saved report</body></html>")
         app01_catalogue = ROOT / "reports/algorithm-results/app01-publications.json"
         self.app01_report_id = app01_reports.stage(app01_catalogue, self.site)
         self.app01_source_id = "app01-plan-20261016-22d406fd"
@@ -409,6 +422,12 @@ class GalleryTests(unittest.TestCase):
                      "ext05-states-v1", "visual-fuel-b06-viz03"):
             card = page.split(f'id="{stem}"', 1)[1].split("</article>", 1)[0]
             self.assertIn("Saved-data companion", card)
+        for alt in ("Four initial state vertices, the terminal target, and eight saved terminal vertices.",
+                    "Seven measured 5,000-call batch durations for three observation fixtures.",
+                    "The saved one-control feasible relation and its unique terminal minimum.",
+                    "Two saved feasible control regions and their shared complete minimizing face.",
+                    "Median timings and observed ranges for four finite-feedback scenarios."):
+            self.assertIn(f'alt="{alt}"', page)
         self.assertIn("065de5e45d295dfa099e25265c4014c0c46673f8", page)
         self.assertIn("blob/b83b8dc415dbe5811371b8446931ae4c6f3d2e28/reports/algorithm-results/tooling/geo04/polyhedral_intersection_driver.cpp", page)
         parser = Links()
@@ -417,7 +436,7 @@ class GalleryTests(unittest.TestCase):
             if not urlsplit(link).scheme and not link.startswith("#"):
                 self.assertTrue((self.site / "examples" / link.split("#")[0]).is_file(), link)
         figures = list((self.site / "examples").glob("*.svg"))
-        self.assertEqual(len(figures), len(self.examples) + len(gallery.visual_illustrations.CASES) + 18)
+        self.assertEqual(len(figures), len(self.examples) + len(gallery.visual_illustrations.CASES) + 23)
         for figure in figures:
             if figure.name == "fuel-b06-viz06-before.svg":
                 self.assertEqual(hashlib.sha256(figure.read_bytes()).hexdigest(),
@@ -465,7 +484,12 @@ class GalleryTests(unittest.TestCase):
                                    ("app03-zonotope-v1", "input zonotope · saved generators"),
                                    ("ext05-states-v1", "saved states at t = 0, 1, 3"),
                                    ("ext01-b08-timing-v1", "saved B08 calls"),
-                                   ("app01-plan-timing-v1", "Three markers show archived fixture medians")):
+                                   ("app01-plan-timing-v1", "Three markers show archived fixture medians"),
+                                   ("ext04-affine-synthesis-v1", "The pale rectangle is the authored initial state set"),
+                                   ("ext04-observed-replay-v1", "Each marker is one of seven saved 5,000-call batches"),
+                                   ("ext07-feasible-relation-v1", "The feasible relation is x1=u0 over the saved transition guard"),
+                                   ("ext07-two-control-family-v1", "The dashed outer square is the enter-full path"),
+                                   ("finite-feedback-timing-v1", "Each median marker and vertical range line summarizes seven saved checked calls")):
             companion_page = (self.site / "examples" / (stem + ".html")).read_text()
             self.assertIn("csl-report-quantitative-v1", companion_page)
             self.assertIn("Frozen values", companion_page)
@@ -482,6 +506,11 @@ class GalleryTests(unittest.TestCase):
         ext01_page = (self.site / "examples/ext01-b08-timing-v1.html").read_text()
         self.assertIn("does not establish a speedup or performance winner", ext01_page)
         self.assertIn("Round and elapsed time use separate numeric axes", ext01_page)
+        ext04_page = (self.site / "examples/ext04-observed-replay-v1.html").read_text()
+        self.assertIn("milliseconds per 5,000-call batch", ext04_page)
+        finite_feedback_page = (self.site / "examples/finite-feedback-timing-v1.html").read_text()
+        self.assertIn("microseconds per checked call", finite_feedback_page)
+        self.assertIn("Scenario ordinal", finite_feedback_page)
         ext01_svg = ET.parse(self.site / "examples/ext01-b08-timing-v1.svg").getroot()
         ext01_description = ext01_svg.find("{http://www.w3.org/2000/svg}desc")
         self.assertIn("Seven markers show saved full-catalogue timing observations",

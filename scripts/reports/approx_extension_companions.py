@@ -176,7 +176,7 @@ def ext05_companion(record_path: Path, style_path: Path) -> dict[str, bytes]:
     return outputs | {"ext05-states-v1.html": _companion_page(
         "EXT-05 saved state samples", "ext05-states-v1", "ext05-discretization-a40ba9647cc023dc",
         "This companion plots exactly the archived position–velocity states at physical times 0, 1, and 3. It shows only the saved samples: no line between markers or continuous-time trajectory is inferred.",
-        aspect="independent")}
+        axis_context="independent")}
 
 
 def app01_companion(record_path: Path, style_path: Path, publication_report_id: str) -> dict[str, bytes]:
@@ -220,7 +220,7 @@ def app01_companion(record_path: Path, style_path: Path, publication_report_id: 
         "batches of 40,000 checked calls (280,000 calls per fixture). "
         "Exact nanosecond values, trials, configuration, and evidence limits remain in the frozen record. "
         "This is descriptive evidence, not a speed comparison or a performance-winner claim.",
-        aspect="fixture-timing", source_commit=payload["source_commit"])}
+        axis_context="fixture-timing", source_commit=payload["source_commit"])}
 
 
 def ext01_companion(record_path: Path, style_path: Path) -> dict[str, bytes]:
@@ -257,7 +257,222 @@ def ext01_companion(record_path: Path, style_path: Path) -> dict[str, bytes]:
         f"This companion plots the seven saved measured B08 observations from the frozen EXT-01 record. "
         f"Each point is one checked call over 625 plans and 160,000 disturbance histories; the archived median is {median_ms:.3f} ms. "
         "The points are not connected, and the observation does not establish a speedup or performance winner.",
-        aspect="numeric")}
+        axis_context="numeric")}
+
+
+def ext04_observed_replay_companion(record_path: Path, style_path: Path) -> dict[str, bytes]:
+    """Plot the frozen EXT-04 measured batch observations."""
+    record = json.loads(Path(record_path).read_text(encoding="utf-8"))
+    expected = ("partial_noisy_delayed", "post_feedthrough", "no_channel")
+    rows = record.get("rows", [])
+    measured = [row for row in rows if row.get("warmup") is False]
+    _require(record.get("schema") == "csl.ext04-replay-records/1" and
+             record.get("report_id") == "ext04-df62c7c6d295e135" and
+             len(rows) == 24 and len(measured) == 21 and
+             all(record["summary"][name]["successes"] == 7 and
+                 record["summary"][name]["failures"] == 0 for name in expected) and
+             {row.get("fixture") for row in measured} == set(expected) and
+             all(row.get("status") == "passed" and row.get("batch") == 5000 and
+                 row.get("checked_calls") == 5000 and 0 <= row.get("round", -1) <= 6
+                 for row in measured),
+             "EXT-04 saved replay observations changed")
+    colors = {"partial_noisy_delayed": "#0072B2", "post_feedthrough": "#D55E00",
+              "no_channel": "#009E73"}
+    labels = {"partial_noisy_delayed": "partial noisy delayed", "post_feedthrough": "post-decision feedthrough",
+              "no_channel": "no observation channel"}
+    series = [{"kind": "points", "label": labels[name], "color": colors[name],
+               "points": [[row["round"] + 1, row["elapsed_ns"] / 1_000_000]
+                          for row in measured if row["fixture"] == name],
+               "size": 40, "alpha": .85} for name in expected]
+    document = {"schema": "csl.saved-geometric-plot/1",
+                "title": "EXT-04 saved observed-replay batch times",
+                "description": ("Each marker is one of seven saved 5,000-call batches for a fixed observation fixture. "
+                                "The three series are distinct workloads, not competing methods. The plot reads archived "
+                                "durations and does not rerun the replay."),
+                "aspect": "independent",
+                "axes": {"x": {"label": "measured round"},
+                         "y": {"label": "duration (ms per 5,000 checked calls)"}},
+                "series": series}
+    outputs = _render_companion(document, style_path, "ext04-observed-replay-v1")
+    medians = "; ".join(f"{labels[name]} {record['summary'][name]['median_batch_ns'] / 1_000_000:.3f} ms"
+                         for name in expected)
+    return outputs | {"ext04-observed-replay-v1.html": _companion_page(
+        "EXT-04 observed-replay batch times", "ext04-observed-replay-v1", record["report_id"],
+        f"The three saved medians are {medians}. Each point covers 5,000 fully checked replay calls. "
+        "These distinct fixtures are not competing methods; the report makes no performance-winner claim.",
+        axis_context="batch-timing", source_commit=record["source_commit"],
+        image_alt="Seven saved batch durations for each of the partial noisy delayed, post-decision feedthrough, and no-channel replay fixtures.",
+        report_route="ext04-observed-replay-eb0b06e560360611d2f2a16fba9b1204e0415b4ba5cd0d5210427c6349963b34")}
+
+
+def ext04_affine_synthesis_companion(bundle: Path, style_path: Path) -> dict[str, bytes]:
+    """Plot the frozen initial/terminal vertices and target box for the EXT-04 policy fixture."""
+    bundle = Path(bundle)
+    record = json.loads((bundle / "records.json").read_text(encoding="utf-8"))
+    result = json.loads((bundle / "result.json").read_text(encoding="utf-8"))
+    fixture = record.get("fixture", {})
+    initial = sorted({tuple(row.get("initial", ())) for row in result.get("generators", [])})
+    terminal = [row.get("terminal") for row in result.get("generators", [])]
+    target = fixture.get("terminal_bounds", {})
+    _require(record.get("schema") == "csl.ext04-affine-synthesis-report/1" and
+             record.get("report_id") == "ext04-affine-synthesis-7eadf7c7ecbb2bbd" and
+             fixture.get("id") == "ext04-one-stage-noisy-integrator-v1" and
+             fixture.get("initial_generators") == [[-1, -.05], [-1, .05], [1, -.05], [1, .05]] and
+             result.get("coverage") == "all_joint_uncertainty" and
+             result.get("feasibility") == "within_tolerance" and
+             result.get("solver_outcome") == "optimal" and len(result.get("generators", [])) == 8 and
+             initial == [(-1.0, -.05), (-1.0, .05), (1.0, -.05), (1.0, .05)] and
+             all(isinstance(point, list) and len(point) == 2 for point in terminal) and
+             all(target["x1"][0] - 1e-12 <= point[0] <= target["x1"][1] + 1e-12 and
+                 target["x2"][0] - 1e-12 <= point[1] <= target["x2"][1] + 1e-12
+                 for point in terminal),
+             "EXT-04 affine-synthesis saved vertices or target changed")
+    document = {"schema": "csl.saved-geometric-plot/1",
+                "title": "EXT-04 saved robust one-step state vertices",
+                "description": ("The pale rectangle is the authored initial state set, the dashed rectangle is the terminal target, "
+                                "and each marker is one of eight saved initial/noise generator terminal states under the synthesized policy. "
+                                "The plot reads saved replay outcomes; it does not rerun policy synthesis."),
+                "aspect": "independent",
+                "axes": {"x": {"label": "state x₁"}, "y": {"label": "state x₂"}},
+                "series": [
+                    {"kind": "polygon", "label": "initial state set", "color": "#0072B2",
+                     "fill": True, "alpha": .10,
+                     "points": [[-1, -.05], [1, -.05], [1, .05], [-1, .05]]},
+                    {"kind": "polygon", "label": "terminal target", "color": "#D55E00",
+                     "linestyle": "--", "fill": True, "alpha": .10,
+                     "points": [[target["x1"][0], target["x2"][0]],
+                                [target["x1"][1], target["x2"][0]],
+                                [target["x1"][1], target["x2"][1]],
+                                [target["x1"][0], target["x2"][1]]]},
+                    {"kind": "points", "label": "eight saved terminal vertices", "color": "#009E73",
+                     "points": terminal, "size": 44, "alpha": .95},
+                ]}
+    outputs = _render_companion(document, style_path, "ext04-affine-synthesis-v1")
+    return outputs | {"ext04-affine-synthesis-v1.html": _companion_page(
+        "EXT-04 robust one-step synthesis", "ext04-affine-synthesis-v1", record["report_id"],
+        "The saved numerical policy maps all eight authored initial/noise generator pairs into the one-step terminal target. "
+        "The source report states that coverage applies to this caller-authored joint hull and is not a validated arithmetic certificate.",
+        source_commit=record["source_commit"],
+        image_alt="Four initial state vertices, a small terminal target rectangle, and eight saved terminal vertices inside the target.",
+        report_route=record["report_id"])}
+
+
+def ext07_hybrid_relation_companion(record_path: Path, style_path: Path) -> dict[str, bytes]:
+    """Plot the saved one-control EXT-07 feasible relation and its minimum."""
+    record = json.loads(Path(record_path).read_text(encoding="utf-8"))
+    scenario = record.get("scenario", {})
+    _require(record.get("schema") == "csl.ext07-hybrid-profile-report/1" and
+             record.get("report_id") == "ext07-hybrid-51d9ee2e89d240eb" and
+             scenario.get("control_interval") == [0, 1] and
+             scenario.get("transition_guard") == [0, .5] and
+             record.get("analytic", {}).get("feasible_relation") ==
+             "x0=0, x_pre1=u0, x1=u0, 0<=u0<=0.5" and
+             record["analytic"].get("optimal_family") == "x0=u0=x_pre1=x1=0",
+             "EXT-07 saved hybrid relation or analytic answer changed")
+    interval = scenario["transition_guard"]
+    document = {"schema": "csl.saved-geometric-plot/1",
+                "title": "EXT-07 saved feasible control relation",
+                "description": ("The feasible relation is x1=u0 over the saved transition guard from zero to one half. "
+                                "The marker at the origin is the unique minimum of the terminal state. This is the analytic "
+                                "one-step fixture, not a sampled trajectory."),
+                "aspect": "equal",
+                "axes": {"x": {"label": "control u₀"}, "y": {"label": "terminal state x₁"}},
+                "series": [
+                    {"kind": "path", "label": "feasible relation x₁ = u₀", "color": "#0072B2",
+                     "points": [[interval[0], interval[0]], [interval[1], interval[1]]]},
+                    {"kind": "points", "label": "unique terminal minimum", "color": "#D55E00",
+                     "points": [[0, 0]], "size": 58, "alpha": 1},
+                ]}
+    outputs = _render_companion(document, style_path, "ext07-feasible-relation-v1")
+    return outputs | {"ext07-feasible-relation-v1.html": _companion_page(
+        "EXT-07 feasible control relation", "ext07-feasible-relation-v1", record["report_id"],
+        "The saved fixture gives x₁=u₀ on 0≤u₀≤0.5. The terminal objective is x₁, so the unique minimum is the origin.",
+        source_commit=record["source_commit"],
+        image_alt="The feasible line x1 equals control u0 from zero to one half, with its unique minimum marked at the origin.",
+        report_route=record["report_id"])}
+
+
+def ext07_two_parameter_companion(record_path: Path, style_path: Path) -> dict[str, bytes]:
+    """Plot the frozen EXT-07 feasible control polygons and tied minimizing face."""
+    record = json.loads(Path(record_path).read_text(encoding="utf-8"))
+    scenario = record.get("scenario", {})
+    analytic = record.get("analytic", {})
+    paths = analytic.get("paths", {})
+    _require(record.get("schema") == "csl.ext07-hybrid-two-parameter-report/1" and
+             record.get("report_id") == "ext07-hybrid-two-parameter-26f402289a309403" and
+             scenario.get("controls") == {"u0": [0, 1], "u1": [0, 1]} and
+             {edge.get("id"): edge.get("guard") for edge in scenario.get("edges", [])} ==
+             {"enter-half": "0 <= x_pre1 <= 0.5", "enter-full": "universal", "finish": "universal"} and
+             analytic.get("global_minimum") == 0 and
+             analytic.get("tied_paths") == ["enter-half", "enter-full"] and
+             paths.get("enter-half", {}).get("feasible_parameter_set") == "(u0,u1) in [0,0.5] x [0,1]" and
+             paths.get("enter-full", {}).get("feasible_parameter_set") == "(u0,u1) in [0,1] x [0,1]",
+             "EXT-07 saved two-control regions or minimizing family changed")
+    document = {"schema": "csl.saved-geometric-plot/1",
+                "title": "EXT-07 feasible control regions and minimizing family",
+                "description": ("The dashed outer square is the enter-full path and the half-width rectangle is the enter-half path. "
+                                "Both paths share the full minimizing face u0=0 with u1 from zero to one. Polygon boundaries come "
+                                "from the archived control bounds and guard, not solver samples."),
+                "aspect": "equal",
+                "axes": {"x": {"label": "stage 0 control u₀"}, "y": {"label": "stage 1 control u₁"}},
+                "series": [
+                    {"kind": "polygon", "label": "enter-full feasible square", "color": "#0072B2",
+                     "linestyle": "--", "fill": True, "alpha": .08,
+                     "points": [[0, 0], [1, 0], [1, 1], [0, 1]]},
+                    {"kind": "polygon", "label": "enter-half feasible rectangle", "color": "#009E73",
+                     "fill": True, "alpha": .16,
+                     "points": [[0, 0], [.5, 0], [.5, 1], [0, 1]]},
+                    {"kind": "path", "label": "complete tied minimizing face", "color": "#D55E00",
+                     "linewidth": 3, "points": [[0, 0], [0, 1]]},
+                ]}
+    outputs = _render_companion(document, style_path, "ext07-two-control-family-v1")
+    return outputs | {"ext07-two-control-family-v1.html": _companion_page(
+        "EXT-07 feasible control regions", "ext07-two-control-family-v1", record["report_id"],
+        "The archived enter-full path allows [0,1]². The enter-half path allows [0,0.5]×[0,1]. Both retain the complete minimizing face u₀=0, 0≤u₁≤1.",
+        source_commit=record["source_commit"],
+        image_alt="The enter-full unit square contains the enter-half rectangle. Both share the complete minimizing line u0 equals zero, with u1 from zero to one.",
+        report_route="ext07-hybrid-two-parameter-8ad871b5ea29fc7b")}
+
+
+def finite_feedback_timing_companion(record_path: Path, style_path: Path) -> dict[str, bytes]:
+    """Plot saved finite-feedback median execution times and observed ranges."""
+    record = json.loads(Path(record_path).read_text(encoding="utf-8"))
+    expected = ("clipping", "branching", "empty-action", "nominal")
+    summary = record.get("summary", [])
+    _require(record.get("schema") == "csl.finite-feedback-records/2" and
+             record.get("report_id") == "finite-feedback-a6e96fd96c7ac7cc" and
+             [row.get("scenario") for row in summary] == list(expected) and
+             all(row.get("attempts") == row.get("matches") == 7 and row.get("failures") == 0 and
+                 row.get("min_ns", 0) <= row.get("median_ns", -1) <= row.get("max_ns", 0)
+                 for row in summary),
+             "finite-feedback saved timing summary changed")
+    colors = ("#0072B2", "#D55E00", "#009E73", "#6A4C93")
+    series = []
+    for ordinal, (name, row, color) in enumerate(zip(expected, summary, colors), start=1):
+        series.append({"kind": "path", "label": name + " observed range", "color": color,
+                       "points": [[ordinal, row["min_ns"] / 1000],
+                                  [ordinal, row["max_ns"] / 1000]]})
+        series.append({"kind": "points", "label": name + " median", "color": color,
+                       "points": [[ordinal, row["median_ns"] / 1000]], "size": 50, "alpha": 1})
+    document = {"schema": "csl.saved-geometric-plot/1",
+                "title": "Finite-feedback saved execution times",
+                "description": ("Each median marker and vertical range line summarizes seven saved checked calls for one scenario. "
+                                "The x-axis uses scenario ordinals: one clipping, two branching, three empty action, four nominal. "
+                                "These are descriptive timings from one adapter, not a comparison."),
+                "aspect": "independent",
+                "axes": {"x": {"label": "scenario ordinal"},
+                         "y": {"label": "duration (μs per checked call)"}},
+                "series": series}
+    outputs = _render_companion(document, style_path, "finite-feedback-timing-v1")
+    medians = "; ".join(f"{row['scenario']} {row['median_ns'] / 1000:g} μs"
+                         for row in summary)
+    return outputs | {"finite-feedback-timing-v1.html": _companion_page(
+        "Finite-feedback saved timings", "finite-feedback-timing-v1", record["report_id"],
+        f"The seven-call median durations are {medians}. The vertical lines show each scenario's recorded min-to-max range. "
+        "The underlying report states that checked witness cells do not certify the complete action tensor.",
+        axis_context="call-timing", source_commit=record["source_commit"],
+        image_alt="Saved median execution time and min-to-max range for the clipping, branching, empty-action, and nominal scenarios.",
+        report_route="finite-feedback-registered-f874133e442eb0fb884b8813a06591cc0f077063ee75ddf627de74656fc11c0f")}
 
 
 def _require(condition: bool, message: str) -> None:
@@ -266,32 +481,38 @@ def _require(condition: bool, message: str) -> None:
 
 
 def _companion_page(title: str, stem: str, report_id: str, summary: str,
-                    aspect: str = "equal", source_commit: str | None = None) -> bytes:
+                    axis_context: str = "equal", source_commit: str | None = None,
+                    image_alt: str | None = None, report_route: str | None = None) -> bytes:
     title = escape(title)
     summary = escape(summary)
     report_id = escape(report_id, quote=True)
+    report_route = escape(report_route or report_id, quote=True)
     source_link = (f' · <a href="https://github.com/butahlecoq/controlled-systems-lab/commit/'
                    f'{escape(source_commit, quote=True)}">Source commit {escape(source_commit)} ↗</a>'
                    if source_commit else "")
-    if aspect == "equal":
+    if axis_context == "equal":
         scaling = "The plot uses equal x-y scales and preserves the archived fixture values."
-    elif aspect == "numeric":
+    elif axis_context == "numeric":
         scaling = "Round and elapsed time use separate numeric axes; elapsed time is shown in milliseconds per call."
-    elif aspect == "fixture-timing":
+    elif axis_context == "batch-timing":
+        scaling = "Measured round and duration use separate numeric axes; duration is milliseconds per 5,000-call batch."
+    elif axis_context == "call-timing":
+        scaling = "Scenario ordinal and duration use separate numeric axes; duration is microseconds per checked call."
+    elif axis_context == "fixture-timing":
         scaling = "Fixture ordinal and median elapsed time use separate numeric axes; elapsed time is per 40,000-call batch in milliseconds."
     else:
-        scaling = "Independent coordinate scales are disclosed; the saved state coordinates use different physical meanings."
+        scaling = "Independent coordinate scales are disclosed."
     return ('<!doctype html><html lang="en"><head><meta charset="utf-8">'
             '<meta name="viewport" content="width=device-width,initial-scale=1">'
             f'<title>{title} · shared axis policy</title><link rel="stylesheet" href="examples.css"></head><body>'
             '<main><p><a href="index.html#saved-report-figures">← Reviewed report figures</a></p>'
             '<p class="eyebrow">Saved-data companion · shared quantitative axes</p>'
             f'<h1>{title}</h1><p>{summary}</p>'
-            f'<figure><img src="{stem}.svg" alt="{title}; saved values on labelled numeric axes">'
+            f'<figure><img src="{stem}.svg" alt="{escape(image_alt or (title + "; saved values on labelled numeric axes"), quote=True)}">'
             '<figcaption>Numeric ticks and major grids follow the shared csl-report-quantitative-v1 policy. '
             + escape(scaling) + '</figcaption></figure>'
-            f'<p><a href="{stem}.png">Standalone PNG</a> · <a href="../{report_id}/records.json">Frozen values ↗</a> · '
-            f'<a href="../{report_id}/index.html">Original report ↗</a>{source_link}</p></main></body></html>').encode()
+            f'<p><a href="{stem}.png">Standalone PNG</a> · <a href="../{report_route}/records.json">Frozen values ↗</a> · '
+            f'<a href="../{report_route}/index.html">Original report ↗</a>{source_link}</p></main></body></html>').encode()
 
 
 def lotka_volterra_companion(record_path: Path, style_path: Path) -> dict[str, bytes]:

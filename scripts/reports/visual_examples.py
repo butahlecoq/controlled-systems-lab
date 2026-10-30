@@ -641,6 +641,48 @@ def build(catalog, site):
                               "raw_record": "../" + lotka_route + "/records.json"})
     lotka_companion = approx_extension_companions.lotka_volterra_companion(
         site / lotka_route / "records.json", Path(__file__).parent / "styles/control-v1.json")
+    frozen_records = Path(__file__).resolve().parents[2] / "reports/algorithm-results"
+    ext04_companion = approx_extension_companions.ext04_observed_replay_companion(
+        frozen_records / "ext04-df62c7c6d295e135" / "records.json", Path(__file__).parent / "styles/control-v1.json")
+    ext04_affine_synthesis_companion = approx_extension_companions.ext04_affine_synthesis_companion(
+        frozen_records / "ext04-affine-synthesis-7eadf7c7ecbb2bbd", Path(__file__).parent / "styles/control-v1.json")
+    ext07_relation_companion = approx_extension_companions.ext07_hybrid_relation_companion(
+        frozen_records / "ext07-hybrid-51d9ee2e89d240eb" / "records.json", Path(__file__).parent / "styles/control-v1.json")
+    ext07_two_parameter_companion = approx_extension_companions.ext07_two_parameter_companion(
+        frozen_records / "ext07-hybrid-two-parameter-26f402289a309403" / "records.json",
+        Path(__file__).parent / "styles/control-v1.json")
+    finite_feedback_companion = approx_extension_companions.finite_feedback_timing_companion(
+        frozen_records / "finite-feedback-a6e96fd96c7ac7cc" / "records.json",
+        Path(__file__).parent / "styles/control-v1.json")
+    extension_companion_cards = ""
+    for family, title, stem, report_route, alt in (
+            ("Continuous feedback", "EXT-04 robust one-step synthesis", "ext04-affine-synthesis-v1",
+             "ext04-affine-synthesis-7eadf7c7ecbb2bbd",
+             "Four initial state vertices, the terminal target, and eight saved terminal vertices."),
+            ("Observed control", "EXT-04 observed-replay batch times", "ext04-observed-replay-v1",
+             "ext04-observed-replay-eb0b06e560360611d2f2a16fba9b1204e0415b4ba5cd0d5210427c6349963b34",
+             "Seven measured 5,000-call batch durations for three observation fixtures."),
+            ("Hybrid reachability", "EXT-07 feasible control relation", "ext07-feasible-relation-v1",
+             "ext07-hybrid-51d9ee2e89d240eb",
+             "The saved one-control feasible relation and its unique terminal minimum."),
+            ("Hybrid optimization", "EXT-07 feasible control regions", "ext07-two-control-family-v1",
+             "ext07-hybrid-two-parameter-8ad871b5ea29fc7b",
+             "Two saved feasible control regions and their shared complete minimizing face."),
+            ("Finite-feedback minimax", "Finite-feedback saved timings", "finite-feedback-timing-v1",
+             "finite-feedback-registered-f874133e442eb0fb884b8813a06591cc0f077063ee75ddf627de74656fc11c0f",
+             "Median timings and observed ranges for four finite-feedback scenarios.")):
+        gallery_inventory.append({"family": family, "title": title,
+                                  "status": "saved-data-companion", "anchor": stem,
+                                  "page": stem + ".html", "figure": stem + ".svg",
+                                  "source_page": "../" + report_route + "/index.html",
+                                  "raw_record": "../" + report_route + "/records.json"})
+        extension_companion_cards += (
+            f'<article class="saved-figure" id="{stem}"><p class="eyebrow">{escape(family)} · Saved-data companion</p>'
+            f'<h3><a href="{stem}.html">{escape(title)}</a></h3>'
+            f'<a href="{stem}.html"><img src="{stem}.svg" alt="{escape(alt, quote=True)}"></a>'
+            '<p>Replots frozen values with the shared quantitative axes and no solver rerun.</p>'
+            f'<p><a href="{stem}.html">Open the saved-data companion →</a> · '
+            f'<a href="../{report_route}/records.json">Frozen values ↗</a></p></article>')
     app02_companion = approx_extension_companions.app02_companion(
         site / "app02-box-8ff979de60ea9d22" / "records.json", Path(__file__).parent / "styles/control-v1.json")
     app03_companion = approx_extension_companions.app03_companion(
@@ -808,6 +850,7 @@ def build(catalog, site):
             'alt="Three archived APP-01 median timings on numeric axes, one for each saved fixture"></a>'
             '<p>Plots archived medians for valid, invalid, and empty-inner fixtures. Each point summarizes seven batches of 40,000 checks; it does not claim a performance winner.</p>'
             '<p><a href="app01-plan-timing-v1.html">Open the saved-data companion →</a></p></article>' +
+            extension_companion_cards +
             f'<article class="saved-figure" id="{fuel_anchor}"><p class="eyebrow">Fuel minimax reference · Saved-data companion</p>'
             f'<h3>{escape(fuel_entry["title"])}</h3>'
             f'<p>{escape("Readable, versioned SVG and PNG projections of the saved 4D B06 terminal set, with exact values, units, target, evidence limits and reproduction commands.")}</p>'
@@ -843,6 +886,11 @@ def build(catalog, site):
     outputs["issue3-control-walkthrough.svg"] = workflow_figure
     outputs["issue3-control-walkthrough.html"] = workflow_page
     outputs.update(lotka_companion)
+    outputs.update(ext04_companion)
+    outputs.update(ext04_affine_synthesis_companion)
+    outputs.update(ext07_relation_companion)
+    outputs.update(ext07_two_parameter_companion)
+    outputs.update(finite_feedback_companion)
     outputs.update(app02_companion)
     outputs.update(app03_companion)
     outputs.update(app04_companion)
