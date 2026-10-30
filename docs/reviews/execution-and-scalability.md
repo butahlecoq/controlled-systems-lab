@@ -54,10 +54,44 @@ The paired enabled-minus-disabled median was +3.400 ms for reach-back (range +2.
 
 The [summary JSON](../../reports/algorithm-results/review05-execution-20261027/summary.json), raw stdout events, run record and [build/runtime manifest](../../reports/algorithm-results/review05-execution-20261027/environment.json) preserve the measurements and provenance. The fixture is still only a two-stage scalar problem whose exact relation has five coordinates, four inequality rows and four equality rows. These numbers are current-build descriptive data, not a multi-axis scaling curve or a general strategy winner claim.
 
+## Current-main replication and exploratory function profile
+
+On 2026-10-30, the same T-S01 pair was rerun from clean `main` revision
+`210bbe39377be3131f537d65d4f0857c6b4c3462`. Its immutable comparison record
+marks the source clean, binds the source and binary hashes, and records all 32
+attempts. One warmup and seven measured attempts ran for each strategy with
+instrumentation disabled and enabled. All attempts passed the analytic
+complete-family check and returned two distinct verified witnesses.
+
+| Strategy | Collection | Median run time | Range | Median process peak RSS |
+| --- | --- | ---: | ---: | ---: |
+| Reach-back | Disabled | 5.061 ms | 4.895–6.927 ms | 13.15 MiB |
+| Reach-back | Enabled | 8.511 ms | 8.366–8.783 ms | 13.15 MiB |
+| Strategy B | Disabled | 0.840 ms | 0.822–0.913 ms | 13.30 MiB |
+| Strategy B | Enabled | 1.098 ms | 1.038–1.123 ms | 13.30 MiB |
+
+The eight-logical-CPU Ryzen 5 3550H host had a recorded load average of
+2.12/1.37/0.74 before capture. Treat this as one descriptive replication; it
+does not establish a stable performance ranking or overhead outside this
+fixture. Full provenance and raw data are in the [current execution evidence
+bundle](../../reports/algorithm-results/review05-execution-20261030/).
+
+The host has no `perf` executable. To collect source-attributed context anyway,
+the OBS-04 driver was extended to allow checked repeated calls without perf
+FIFOs and to label that output `whole_process` with `perf_controlled: false`.
+Separate gprof Release runs checked 500 reach-back calls and 2,000 Strategy B
+calls. Their profiles contain only 48 and 38 samples, respectively, at 10 ms
+resolution, and include process startup, workspace setup, verification and
+shutdown. HiGHS option/model lifecycle and solver functions dominate the
+sampled lists; reach-back also shows numeric matrix snapshots and forward-child
+bookkeeping. With this sample count and process-wide scope, the profile does
+not identify a unique limiter. It is exploratory evidence, not a per-strategy
+timing comparison; see the [raw gprof bundle](../../reports/algorithm-results/review05-execution-20261030/gprof-whole-process/README.md).
+
 ## REVIEW-05 disposition
 
-The ownership, resource-policy and batch-isolation portions have current source/test evidence. The focused execution and batch suites passed with and without ThreadSanitizer. There is now a fresh, equal-scope timing point for both strategies, but it varies neither state dimension nor horizon, constraint count, representation size or output size.
+The ownership, resource-policy and batch-isolation portions have current source/test evidence. The focused execution and batch suites passed with and without ThreadSanitizer. There are now two fresh, equal-scope timing points for both strategies, but they vary neither state dimension nor horizon, constraint count, representation size or output size.
 
-The general scenario runner does not currently give a second usable sweep: its tested two-state horizon-3 profile rejects reach-back at the convex adapter's matrix-removal threshold (documented in `examples/scenarios/README.md`), while the scalar general-profile smoke has no selected, verified witnesses. I did not use either as a fair speed comparison. No fresh multi-axis paired sweep or current-build source-level limiter profile is claimed here.
+The general scenario runner does not currently give a second usable sweep: its tested two-state horizon-3 profile rejects reach-back at the convex adapter's matrix-removal threshold (documented in `examples/scenarios/README.md`), while the scalar general-profile smoke has no selected, verified witnesses. I did not use either as a fair speed comparison. No fresh multi-axis paired sweep is claimed here. The current-build gprof run is process-wide and too low-resolution to support a unique-limiter claim.
 
 **Status: partial; keep #95 open.** Required remaining evidence is a compatible workload ladder that both general strategies complete with equal independently verified output scope, plus representation/output growth and phase/resource observations at those sizes. Native thread enforcement and hard heap limits remain unsupported contracts, not defects newly discovered by this review. An independent review of this report and the exact source revision is still required before sign-off.

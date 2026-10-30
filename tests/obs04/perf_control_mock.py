@@ -99,6 +99,25 @@ def main() -> int:
         if rejected.returncode == 0 or rejected.stdout or diagnostic not in rejected.stderr:
             raise RuntimeError(f"malformed profile arguments were accepted or started work: {arguments}")
 
+    no_control_environment = {
+        key: value for key, value in os.environ.items()
+        if key not in {"CSL_PERF_CONTROL_FIFO", "CSL_PERF_ACK_FIFO"}
+    }
+    whole_process = subprocess.run(
+        [str(binary), "--profile-strategy", "reach-back", "--profile-calls", "1"],
+        env=no_control_environment, capture_output=True, text=True, timeout=45,
+    )
+    if whole_process.returncode != 0:
+        raise RuntimeError(f"whole-process profile mode failed: {whole_process.stderr}")
+    whole_process_events = [json.loads(line) for line in whole_process.stdout.splitlines()
+                            if line.startswith("{")]
+    if not whole_process_events or whole_process_events[-1].get("sample_scope") != "whole_process":
+        raise RuntimeError("driver did not identify the unbounded whole-process profile scope")
+    if whole_process_events[-1].get("perf_controlled") is not False:
+        raise RuntimeError("driver claimed perf control without configured FIFOs")
+    if whole_process_events[-1].get("acknowledged_commands") != 0:
+        raise RuntimeError("driver reported acknowledgements without configured FIFOs")
+
     passed, commands = run(binary, acknowledgement=b"ack\n")
     if passed.returncode != 0:
         raise RuntimeError(f"acknowledged mock capture failed: {passed.stderr}")
@@ -132,6 +151,7 @@ def main() -> int:
     if "perf" not in missing.stderr.lower() and "acknowledgement" not in missing.stderr.lower():
         raise RuntimeError(f"missing-ack failure was not reported clearly: {missing.stderr}")
     print("OBS-04 CLI checks passed: malformed/duplicate profile arguments rejected before profile setup")
+    print("OBS-04 whole-process profile mode passed: scope and absent perf control reported accurately")
     print("OBS-04 perf control mock passed: enable/disable acknowledged; missing ack rejected")
     return 0
 

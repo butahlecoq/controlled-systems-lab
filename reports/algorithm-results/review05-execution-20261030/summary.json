@@ -1,0 +1,78 @@
+{
+  "schema": "csl.review05-execution-summary/1",
+  "date": "2026-10-30",
+  "fixture": "T-S01 / two-stage scalar integrator",
+  "source_revision": "210bbe39377be3131f537d65d4f0857c6b4c3462",
+  "source_tree_sha256": "f1566cdb83c836a4f9aa96a3f8652f7a3fe5b40bd95f1df16e0270847dfd2a4e",
+  "source_dirty": false,
+  "comparison_spec_id": "b9e81319449abccc7df519b89fee1b2f7602703992335aa22a4dadb49b72ce09",
+  "comparison_run_id": "9c854b2e85762d80088db6976f57d489713e74bfa6ad4574dcc776b2e5e91523",
+  "attempts_total": 32,
+  "attempts_failed": 0,
+  "attempts_measured": 28,
+  "analytic_complete_family_verified_all": true,
+  "requested_and_distinct_witnesses_each_attempt": 2,
+  "paired_timing_groups": [
+    {
+      "strategy": "csl.synthesis.reach-back",
+      "instrumentation": "disabled",
+      "measured_repetitions": 7,
+      "median_strategy_run_ns": 5061158,
+      "min_strategy_run_ns": 4895353,
+      "max_strategy_run_ns": 6927472,
+      "median_process_peak_rss_bytes": 13787136
+    },
+    {
+      "strategy": "csl.synthesis.reach-back",
+      "instrumentation": "enabled",
+      "measured_repetitions": 7,
+      "median_strategy_run_ns": 8511065,
+      "min_strategy_run_ns": 8366003,
+      "max_strategy_run_ns": 8783309,
+      "median_process_peak_rss_bytes": 13787136
+    },
+    {
+      "strategy": "csl.synthesis.strategy-b",
+      "instrumentation": "disabled",
+      "measured_repetitions": 7,
+      "median_strategy_run_ns": 840476,
+      "min_strategy_run_ns": 822178,
+      "max_strategy_run_ns": 913391,
+      "median_process_peak_rss_bytes": 13942784
+    },
+    {
+      "strategy": "csl.synthesis.strategy-b",
+      "instrumentation": "enabled",
+      "measured_repetitions": 7,
+      "median_strategy_run_ns": 1097913,
+      "min_strategy_run_ns": 1038269,
+      "max_strategy_run_ns": 1122707,
+      "median_process_peak_rss_bytes": 13942784
+    }
+  ],
+  "gprof_profiles": [
+    {
+      "strategy": "csl.synthesis.reach-back",
+      "calls": 500,
+      "passed": 500,
+      "sample_scope": "whole_process",
+      "sample_resolution_seconds": 0.01,
+      "sampled_seconds": 0.48,
+      "binary_sha256": "a3ba854e4a18cb060bb2e8c35694e8b6b972c9dc108d6a3432657bbedac5e35f",
+      "profile": "gprof-whole-process/reach-back.gprof.txt",
+      "raw": "gprof-whole-process/reach-back.gmon.615549"
+    },
+    {
+      "strategy": "csl.synthesis.strategy-b",
+      "calls": 2000,
+      "passed": 2000,
+      "sample_scope": "whole_process",
+      "sample_resolution_seconds": 0.01,
+      "sampled_seconds": 0.38,
+      "binary_sha256": "a3ba854e4a18cb060bb2e8c35694e8b6b972c9dc108d6a3432657bbedac5e35f",
+      "profile": "gprof-whole-process/direct-joint.gprof.txt",
+      "raw": "gprof-whole-process/direct-joint.gmon.615552"
+    }
+  ],
+  "claim_limit": "single tiny fixture; no multi-axis scalability curve, no general speedup/winner, and whole-process gprof is too low-resolution to identify a unique limiter"
+}

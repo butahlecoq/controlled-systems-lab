@@ -1579,8 +1579,7 @@ std::optional<TrialRecord> trial(const application::PreparedComparison& prepared
 
 void profile_calls(const application::PreparedComparison& prepared, std::size_t strategy_index,
     std::size_t calls, const Signature& expected, PerfControl& perf_control) {
-    if (!perf_control.configured())
-        throw std::runtime_error("Profile mode requires acknowledged perf control and acknowledgement FIFOs");
+    const bool perf_controlled = perf_control.configured();
     std::size_t passed = 0;
     for (std::size_t repetition = 0; repetition < calls; ++repetition) {
         auto workspaces = prepared.create();
@@ -1605,7 +1604,9 @@ void profile_calls(const application::PreparedComparison& prepared, std::size_t 
         << (strategy_index == 0 ? "csl.synthesis.reach-back" : "csl.synthesis.strategy-b")
         << "\",\"calls\":" << calls << ",\"passed\":" << passed
         << ",\"analytic_family_checked\":true,\"complete_family_verified\":true"
-        << ",\"sample_scope\":\"acknowledged_perf_control_window\",\"perf_controlled\":true,\"acknowledged_commands\":"
+        << ",\"sample_scope\":\"" << (perf_controlled ? "acknowledged_perf_control_window" : "whole_process")
+        << "\",\"perf_controlled\":" << (perf_controlled ? "true" : "false")
+        << ",\"acknowledged_commands\":"
         << perf_control.acknowledged_commands() << "}\n";
 }
 }
