@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import argparse
 import hashlib
+import html
 import itertools
 import json
 import math
@@ -386,21 +387,29 @@ def host_metadata() -> dict:
 
 def implementation_metadata(executable: Path) -> dict:
     repository = Path(__file__).resolve().parents[3]
+    sources = {
+        "native_driver": "benchmarks/reporting/mpc04/max_coordinate_replanning.cpp",
+        "report_driver": "scripts/reports/mpc04/max_coordinate_replanning.py",
+        "independent_checker": "scripts/reports/mpc04/check_max_coordinate.py",
+        "cmake_target": "cmake/OptionalReports.cmake",
+    }
     commit = subprocess.check_output(
         ["git", "-C", str(repository), "rev-parse", "HEAD"], text=True).strip()
     status = subprocess.check_output(
-        ["git", "-C", str(repository), "status", "--porcelain", "--untracked-files=no"],
+        ["git", "-C", str(repository), "status", "--porcelain", "--untracked-files=all",
+         "--", "benchmarks/reporting/mpc04/max_coordinate_replanning.cpp",
+         "scripts/reports/mpc04/max_coordinate_replanning.py",
+         "scripts/reports/mpc04/check_max_coordinate.py", "cmake/OptionalReports.cmake"],
         text=True)
     digest = hashlib.sha256(executable.resolve().read_bytes()).hexdigest()
     return {
         "repository": "butahlecoq/controlled-systems-lab",
         "commit": commit,
-        "tracked_worktree_dirty": bool(status),
+        "algorithm_sources_dirty": bool(status),
         "native_executable": str(executable.resolve()),
         "native_executable_sha256": digest,
-        "native_driver_source": "benchmarks/reporting/mpc04/max_coordinate_replanning.cpp",
-        "report_driver_source": "scripts/reports/mpc04/max_coordinate_replanning.py",
-        "independent_checker_source": "scripts/reports/mpc04/check_max_coordinate.py",
+        "source_sha256": {key: hashlib.sha256((repository / path).read_bytes()).hexdigest()
+                           for key, path in sources.items()},
     }
 
 
@@ -475,6 +484,46 @@ def write_svg(path: Path, records: list[dict]) -> None:
     path.write_text('\n'.join(svg), encoding='utf-8')
 
 
+def write_html(path: Path, report: dict) -> None:
+    labels = {
+        "nominal_zero_disturbance": "Nominal finite action",
+        "finite_minimax": "Finite minimax",
+        "linear_qp_nominal_linf": "Nominal linear QP",
+        "linear_qp_finite_history_robust_linf": "Finite-history robust QP",
+    }
+    horizon_labels = {
+        "shrinking_to_episode_terminal": "Shrinking 4→1",
+        "moving_fixed_2_stage_lookahead": "Moving 2-stage",
+    }
+    rows = []
+    for key, values in report["variants"].items():
+        policy, horizon = key.split("::", 1)
+        rows.append("<tr>" + "".join(f"<td>{html.escape(str(value))}</td>" for value in (
+            labels[policy], horizon_labels[horizon], values["episodes"],
+            f'{values["median_terminal_original_objective"]:.8g}',
+            f'{values["worst_terminal_original_objective"]:.8g}',
+            f'{values["median_decision_latency_ns"] / 1e6:.4g} ms',
+            values["fallback_steps"])) + "</tr>")
+    source = report["source"]
+    implementation = report["algorithm_implementation"]
+    page = f'''<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>MPC-04 MaxCoordinateGame closed-loop pilot</title>
+<style>body{{font:16px/1.5 system-ui,sans-serif;max-width:1120px;margin:2rem auto;padding:0 1rem;color:#202124}}h1,h2{{line-height:1.2}}table{{border-collapse:collapse;width:100%;margin:1rem 0 2rem}}th,td{{border:1px solid #bbb;padding:.5rem;text-align:left}}th{{background:#f0f2f5}}figure{{margin:1.5rem 0}}img{{width:100%;height:auto;border:1px solid #ddd}}.scope{{background:#f5f7fa;padding:1rem;border-left:4px solid #536d9b}}code{{background:#f1f1f1;padding:.1rem .25rem}}</style></head><body>
+<h1>MaxCoordinateGame: closed-loop MPC comparison</h1>
+<p>Four controllers repeatedly observe the full state, select a control, apply the current disturbance, and replan. The source-derived model is <code>y'=z+v</code>, <code>z'=-y+u</code> with terminal objective <code>max(|y|,|z|)</code>.</p>
+<div class="scope"><strong>Scope.</strong> Four scored steps, 16 complete binary disturbance histories per controller/horizon, 128 episodes, and 512 transitions. This finite-action and continuous-control QP pilot is not a reproduction of the source's continuous-action four-second RL task. Disturbance statements cover only the enumerated histories.</div>
+<h2>Results</h2><table><thead><tr><th>Controller</th><th>Horizon</th><th>Episodes</th><th>Median terminal objective</th><th>Worst terminal objective</th><th>Median solve time / decision</th><th>Fallbacks</th></tr></thead><tbody>{''.join(rows)}</tbody></table>
+<p>The nominal and finite-minimax controllers use discrete controls <code>{{−1,+1}}</code>. The QP controllers use continuous controls in <code>[-1,1]</code> and minimize the same terminal squared max-coordinate objective. Robust plans use one common open-loop control vector over every suffix, followed by replanning; they are not an in-horizon feedback tree. These different action domains do not establish a same-domain optimality comparison.</p>
+<figure><img src="trajectory.svg" alt="Executed episode trajectories in the y-z plane and a control and disturbance timeline"><figcaption>Executed reachable trajectories and control/disturbance timeline for all four controllers and both horizon definitions.</figcaption></figure>
+<p>The independent checker replays all transitions, recomputes selected-plan values and terminal objectives, verifies the analytic one-step QP fixture, and checks retained HiGHS primal and dual residuals against their declared tolerances. Native failure and deadline fixtures verify zero-control fallback in the C++ episode loop. The finite policy-gap fixtures check fixed-plan/replanning/causal values 2/2/1 and scalar fixed-plan/replanning values 2/0.</p>
+<p>Timings use five alternating process runs and are descriptive; no performance winner is claimed. There is no recursive-feasibility, stability, continuous-disturbance, or globally optimal causal-minimax claim. The upstream source is <a href="https://github.com/{html.escape(source['repository'])}/blob/{html.escape(source['commit'])}/{html.escape(source['path'])}">MaxCoordinateGame.py</a>; its repository declares no license, and this report re-expresses the equations without copying source code.</p>
+<h2>Provenance</h2><p>Implementation commit <code>{html.escape(implementation['commit'])}</code>; executable SHA-256 <code>{html.escape(implementation['native_executable_sha256'])}</code>. Results and all per-decision samples: <a href="result.json">result.json</a>. Build/runtime capture: <a href="capture.json">capture.json</a>, <a href="build-config.json">build-config.json</a>, <a href="build.log">build.log</a>, <a href="environment.json">environment.json</a>.</p>
+<p><a href="README.md">Method and reproduction instructions</a> · <a href="SHA256SUMS">File hashes</a> · <a href="mpc04-max-coordinate-replanning-pilot.zip">Offline bundle</a></p>
+</body></html>'''
+    path.write_text(page, encoding="utf-8")
+
+
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--output", type=Path, required=True)
@@ -542,6 +591,7 @@ def main() -> None:
     args.output.mkdir(parents=True, exist_ok=True)
     (args.output / "result.json").write_text(json.dumps(report, indent=2, allow_nan=False), encoding="utf-8")
     write_svg(args.output / "trajectory.svg", rows)
+    write_html(args.output / "index.html", report)
     summary = {key: {k: v for k, v in value.items() if k not in (
         "per_decision_latency_ns", "per_decision_latency_samples_ns")}
                for key, value in report["variants"].items()}

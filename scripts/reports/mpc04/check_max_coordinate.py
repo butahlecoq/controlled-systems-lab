@@ -100,7 +100,10 @@ def check(path: Path):
     implementation = data["algorithm_implementation"]
     assert len(implementation["commit"]) == 40
     assert len(implementation["native_executable_sha256"]) == 64
-    assert implementation["native_driver_source"].endswith("max_coordinate_replanning.cpp")
+    assert implementation["algorithm_sources_dirty"] is False
+    assert set(implementation["source_sha256"]) == {
+        "native_driver", "report_driver", "independent_checker", "cmake_target"}
+    assert all(len(digest) == 64 for digest in implementation["source_sha256"].values())
     assert qp["action_domain"] == "continuous [-1,1] per stage"
     assert qp["objective"] == "terminal squared max-coordinate via scalar epigraph"
     assert qp["provider_id"] and qp["provider_version"]
