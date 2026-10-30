@@ -1,20 +1,24 @@
 {
-  "schema": "csl.mpc04-runtime/2",
-  "source_commit": "bf8ba9346293a322be3083f35e70ac713cbb95fd",
-  "source_worktree_dirty": false,
-  "driver_sha256": "7fc0c0968eea57d2dd96377c8a5d976caf65b1881aad6ba028e238559753c6da",
-  "report_driver_sha256": "8b1feea2ba1b05e2e59afb6e78bf57675303cfb4a85e5d9351ce318ba33dba5e",
-  "checker_sha256": "62341aa5a7218fe77332b8f30eed476f13c9ef4a237d759ea9bc533f608b7c57",
-  "binary_sha256": "33d71dfc7fa098f368afd524b05973a6d451a58b939abd48966c4c4262ff29de",
+  "schema": "csl.mpc04-runtime/3",
+  "source_commit": "5acb5ee1a75d34518d92cbc97f13f22398945c6f",
+  "algorithm_sources_dirty": false,
+  "source_sha256": {
+    "native_driver": "e26b69146e214cfef71f88d9b7a809c009b6ee5cb2f0fb84b5e4ca4ce5f8c208",
+    "report_driver": "800db4157f82c4e1f5788d02e98ba34c11570f7e28cf69e77cc2c346858f9aae",
+    "independent_checker": "516e7ce1dbc005eeeb397011c0e4691636d1ccb878cccfea11aef4adf96600df",
+    "cmake_target": "3e76116912b42ae0868c015130858896306ed922ffdefd4b367afbf97b393fe5"
+  },
+  "binary_sha256": "2a83a6a9635faa251f07a7511d81afc3de4771fc51fac0679e5be6b8facc09f7",
   "build": {
     "type": "Release",
-    "compiler": "GNU 16.2.1",
-    "cmake": "3.31.6",
-    "generator": "Ninja",
-    "ninja": "1.13.2",
+    "compiler": "c++ (GCC) 16.2.1 20260810",
+    "cmake": "cmake version 3.31.6",
+    "generator": "Unix Makefiles",
+    "make": "GNU Make",
     "target": "csl_mpc04_max_coordinate_replanning",
     "new_dependencies": [],
-    "clean_build": true,
+    "clean_first_build": true,
+    "algorithm_sources_clean_at_build": true,
     "log": "build.log",
     "config": "build-config.json"
   },
@@ -23,20 +27,28 @@
     "architecture": "x86_64",
     "cpu_model": "AMD Ryzen 5 3550H with Radeon Vega Mobile Gfx",
     "logical_cpus": 8,
+    "memory_bytes": 8108216320,
+    "load_average": [
+      3.6103515625,
+      4.1552734375,
+      2.57421875
+    ],
     "python_renderer": "3.14.8"
   },
-  "algorithm": "C++ csl.finite_action_minimax; four signed linear terminal components combined into max(abs(y),abs(z)) per fixed plan",
+  "algorithm": "CSL finite_action_minimax plus HiGHS ConvexPort linear QP MPC",
   "execution": {
     "workers": 1,
     "warmup_runs": 0,
-    "full_collection_runs": 1,
-    "decision_solves": 256,
-    "warm_start": "none; independent exhaustive plan evaluations",
+    "full_collection_runs": 5,
+    "episodes_per_process": 128,
+    "decision_solves_per_process": 512,
+    "total_timed_decision_solves": 2560,
+    "warm_start": "none; fresh provider workspace for each QP solve",
     "random_seed": "not applicable; deterministic finite catalogues"
   },
-  "timing_scope": "Each per-decision solve interval includes request construction, four finite_action_minimax calls (signed y/z components), plan combination and tie selection. Episode state setup, JSON serialization and SVG/HTML rendering are excluded.",
-  "deadline": "50 ms per decision, checked after the native call returns; the current solver call is not interruptible",
+  "timing_scope": "Each native process runs all policies in an alternating forward/reverse controller order. Decision timing includes planner problem setup and solver calls, not process startup, JSON output, independent replay, or rendering. Provider registration/setup and whole-process elapsed time are recorded separately.",
+  "deadline": "50 ms per decision; stop status and late-return fallback are retained; solver cancellation is cooperative",
   "limiter_profile": "not collected; no speedup or performance-winner claim",
-  "numeric_method": "binary64; independent source replay uses absolute and relative tolerance 2e-12",
-  "scope": "Finite action and disturbance catalogues, four-step episode, complete finite disturbance-history enumeration; not a continuous RL reproduction"
+  "numeric_method": "binary64; exact finite catalogues and independent source replay with tolerance checks; HiGHS residual tolerances retained per QP solve",
+  "scope": "finite-action and continuous-control QP, four-step source-derived adaptation; not a reproduction of the continuous-action four-second RL task; finite disturbance histories only"
 }

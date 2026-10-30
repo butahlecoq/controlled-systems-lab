@@ -1,21 +1,21 @@
 {
-  "source_commit": "bf8ba9346293a322be3083f35e70ac713cbb95fd",
-  "source_worktree_code_clean_at_build": true,
-  "build_dir": "/tmp/csl-mpc04-build-20261030",
-  "configure_command": "cmake -S . -B /tmp/csl-mpc04-build-20261030 -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTING=ON -DCSL_BUILD_MPC04_REPORT=ON -DCSL_ENABLE_HIGHS=OFF -DCSL_ENABLE_QHULL=OFF",
+  "source_commit": "5acb5ee1a75d34518d92cbc97f13f22398945c6f",
+  "algorithm_sources_clean_at_build": true,
+  "build_dir": "/home/butahlecoq/.local/share/codex/worktrees/mpc04-replanning-20261030/build/mpc04-qpm",
+  "configure_command": "cmake -S . -B build/mpc04-qpm -DBUILD_TESTING=ON -DCMAKE_BUILD_TYPE=Release -DCSL_ENABLE_HIGHS=ON -DCSL_ENABLE_QHULL=OFF -DCSL_BUILD_MPC04_REPORT=ON",
   "cmake_cache_options": {
     "BUILD_TESTING": "ON",
     "CMAKE_BUILD_TYPE": "Release",
     "CSL_BUILD_MPC04_REPORT": "ON",
-    "CSL_ENABLE_HIGHS": "OFF",
+    "CSL_ENABLE_HIGHS": "ON",
     "CSL_ENABLE_QHULL": "OFF"
   },
-  "generator": "Ninja 1.13.2",
-  "cmake": "3.31.6",
-  "compiler": "/usr/bin/c++ (GNU 16.2.1)",
-  "build_command": "cmake --build /tmp/csl-mpc04-build-20261030 --target csl_mpc04_max_coordinate_replanning --clean-first --parallel 4 --verbose",
+  "generator": "Unix Makefiles",
+  "cmake": "cmake version 3.31.6",
+  "compiler": "c++ (GCC) 16.2.1 20260810",
+  "build_command": "cmake --build build/mpc04-qpm --config Release --target csl_mpc04_max_coordinate_replanning --clean-first --parallel 6 --verbose",
   "build_exit_status": 0,
   "build_log": "build.log",
-  "binary": "/tmp/csl-mpc04-build-20261030/csl_mpc04_max_coordinate_replanning",
-  "binary_sha256": "33d71dfc7fa098f368afd524b05973a6d451a58b939abd48966c4c4262ff29de"
+  "binary": "/home/butahlecoq/.local/share/codex/worktrees/mpc04-replanning-20261030/build/mpc04-qpm/csl_mpc04_max_coordinate_replanning",
+  "binary_sha256": "2a83a6a9635faa251f07a7511d81afc3de4771fc51fac0679e5be6b8facc09f7"
 }

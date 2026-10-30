@@ -1,19 +1,34 @@
-# MPC-04 MaxCoordinateGame finite replanning pilot
+# MPC-04 MaxCoordinateGame closed-loop pilot
 
-This pilot applies the repository's C++ `csl.finite_action_minimax` algorithm as nominal and finite-catalogue minimax receding-horizon controllers on the source-derived `MaxCoordinateGame` environment from `imm-rl-lab/optimal_control/Environments`. The C++ driver calls the algorithm at each observation; the Python wrapper saves the records and renders the report.
+This report compares two repository finite-action planners with two linear QP MPC controllers on the source-derived `MaxCoordinateGame` differential-game environment. Each controller observes the full state, selects a control, then the current disturbance is applied. The controller replans at the next observation. Every run starts from the same initial state with no controller memory or warm start.
 
-No license is declared for the upstream repository; this report re-expresses its equations and parameters without copying source code. The pinned source is [`MaxCoordinateGame.py`](https://github.com/imm-rl-lab/optimal_control/blob/f4d76c60f4003f50954174e96eafd8e514bd5441/Environments/MaxCoordinateGame/MaxCoordinateGame.py). The source dynamics use state `(time, y, z)`, initial state `(0, 0.2, 0)`, held controls and disturbances in `[-1, 1]`, and terminal objective `max(|y|, |z|)`. Each reported step replays the source's 100 explicit-Euler substeps at `dt=0.1`. The benchmark adaptation scores a four-step episode, with control catalogue `{-1, +1}` and disturbance catalogue `{-1, +1}`. It exhausts all 16 full disturbance histories for each policy and horizon.
+The upstream source is [`MaxCoordinateGame.py`](https://github.com/imm-rl-lab/optimal_control/blob/f4d76c60f4003f50954174e96eafd8e514bd5441/Environments/MaxCoordinateGame/MaxCoordinateGame.py). Its state is `(time, y, z)`, dynamics are `y'=z+v`, `z'=-y+u`, the initial state is `(0, 0.2, 0)`, and its terminal objective is `max(|y|,|z|)`. The report re-expresses those equations and parameters; it does not copy upstream source code. The upstream repository declares no license.
 
-The nominal controller calls `finite_action_minimax` against a singleton zero disturbance. The robust controller passes the authored finite disturbance set to the same library algorithm. Each decision compares four signed linear terminal objectives and combines their per-plan worst values to minimize the source `max(|y|,|z|)` objective. The nominal controller plans against zero disturbance. The robust controller minimizes the worst terminal squared objective over every finite disturbance suffix. Both choose controls before the current disturbance is applied, replan from the observed full state, use authored action order for objective differences within a 1e-12 absolute tie tolerance, start with no controller memory, and apply `u=0` after a deadline or solver failure. The deadline is checked after each native solve returns; the current adapter does not interrupt an in-flight solve. The moving horizon uses two prediction stages at every decision and continues the source dynamics beyond the scored episode endpoint. The shrinking horizon uses `4, 3, 2, 1` stages and optimizes the scored endpoint. All reported episode scores use the original unsquared objective.
+## Compared controllers
 
-This is a short finite-catalogue adaptation, not a reproduction of the source's continuous-action four-second RL task. Results cover the authored disturbance catalogue only. The finite history and plan enumeration uses binary64 arithmetic and tolerance-based replay checks; it is not an exact-arithmetic certificate. The model has no additional state safety constraints, so constraint violations are always zero by construction. The experiment reports descriptive per-decision timings; it does not establish a speed winner, continuous-disturbance bound, recursive feasibility, stability, or globally optimal causal minimax policy. It compares the repository finite-action minimax adapter with a zero-disturbance nominal plan; the standard linear QP-MPC arm requested by MPC-04 remains outstanding, so this pilot does not complete that comparison.
+| Controller | Control set | Disturbance model | Plan and terminal objective |
+|---|---|---|---|
+| Nominal finite action | `{-1,+1}` | Zero disturbance | Exhaustive remaining-plan minimization of terminal `max(|y|,|z|)^2` |
+| Finite minimax | `{-1,+1}` | Finite set `{-1,+1}` | One common open-loop plan minimizes the worst terminal squared objective over every suffix |
+| Nominal linear QP | Continuous `[-1,1]` | Zero disturbance | HiGHS QP minimizes the same terminal squared max-coordinate objective through a scalar epigraph |
+| Finite-history robust QP | Continuous `[-1,1]` | Finite set `{-1,+1}` | One common open-loop plan is constrained against every complete finite disturbance suffix and minimizes the same terminal objective |
 
-## Run and check
+Each controller is run with a shrinking horizon (`4,3,2,1`, ending at the scored terminal time) and a moving two-stage horizon. The moving horizon continues the source dynamics beyond the episode endpoint. The continuous QP and discrete-action controllers have different control domains; their result rows are not a same-domain optimality comparison. The robust QP is a finite-history open-loop plan followed by replanning, not an in-horizon scenario-tree feedback policy.
+
+The benchmark scores 16 complete four-step disturbance histories per controller and horizon: 128 episodes and 512 transitions. It runs five fresh native processes with controller order alternated forward/reverse. The independent checker replays the source's 100 explicit-Euler substeps, recomputes selected-plan objectives and episode outcomes, checks the analytic one-step QP solution, and verifies the recorded HiGHS primal/dual residuals against their stated tolerances. Native deadline and solver-failure fixtures exercise the same C++ episode loop and check zero-control fallback, fallback counts, and continued execution. The two authored policy-gap fixtures run through the actual finite replanning loop.
+
+The SVG shows executed histories in the `(y,z)` phase plane and the corresponding control/disturbance timeline. It is a state-space/control plot for this three-state source model; the separate four-state fuel/environment visualizations use the `(x1,x2)` oxidizer and `(x3,x4)` fuel projections.
+
+## Evidence limits
+
+This is a finite-action and continuous-control QP adaptation of a source RL environment, not a reproduction of its continuous-action four-second RL experiment. Disturbance guarantees cover only the enumerated binary histories. Arithmetic and replay checks use binary64 with explicit tolerances. There are no state safety constraints in this slice. The report establishes finite-episode outcomes only; it makes no continuous-disturbance, globally optimal causal minimax, recursive-feasibility, stability, scalability, speedup, or performance-winner claim. Timing is descriptive. A source-mapped limiter profile was unavailable, so performance interpretation is inconclusive.
+
+## Reproduce
 
 ```bash
 cmake -S . -B build/mpc04 -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTING=ON \
-  -DCSL_BUILD_MPC04_REPORT=ON -DCSL_ENABLE_HIGHS=OFF -DCSL_ENABLE_QHULL=OFF
-cmake --build build/mpc04 --target csl_mpc04_max_coordinate_replanning
+  -DCSL_BUILD_MPC04_REPORT=ON -DCSL_ENABLE_HIGHS=ON -DCSL_ENABLE_QHULL=OFF
+cmake --build build/mpc04 --target csl_mpc04_max_coordinate_replanning --parallel 2
 python3 -B scripts/reports/mpc04/max_coordinate_replanning.py \
   --output reports/algorithm-results/mpc04-max-coordinate-replanning-pilot-20261030 \
   --native-executable build/mpc04/csl_mpc04_max_coordinate_replanning
@@ -21,15 +36,10 @@ python3 -B scripts/reports/mpc04/check_max_coordinate.py \
   reports/algorithm-results/mpc04-max-coordinate-replanning-pilot-20261030/result.json
 ```
 
-The saved result is generated through the C++ `csl.finite_action_minimax` adapter. The Python driver also includes a standalone finite-enumeration reference mode for independent comparison. The driver also forces deadline and solver-failure cases through the episode runner; each test confirms zero-control fallback, continued episode execution, and fallback counting. The driver also executes the two exact policy-gap fixtures from `docs/research/finite-policy-class-reference.md` through its actual remaining-plan/replanning loop before writing the report.
+## Captured build and release impact
 
-## Captured build evidence
+`capture.json`, `environment.json`, `build-config.json`, and `build.log` identify the source commit, report/checker and native driver, executable SHA-256, Release toolchain, HiGHS provider, host, configuration, and timing scope. `result.json` also records the implementation commit and executable hash. Per-decision solve samples and the five process repetitions are retained in the result. The latency interval includes planner problem construction and solve calls; process startup, provider setup, JSON output, replay, and rendering are separately recorded or excluded as stated in the data.
 
-`build.log` records the clean verbose Release rebuild of source commit `bf8ba9346293a322be3083f35e70ac713cbb95fd`. `build-config.json` records the exact CMake options, toolchain, binary path, and SHA-256. The native report and independent replay both passed after the rebuild. The per-decision timings in `result.json` come from this native binary; each is one observation within the same collection, not a performance ranking.
+This report adds private benchmark tooling and an optional target. It adds no public API, installed target, new dependency, or package change; HiGHS is an existing optional dependency and must be enabled for this report target.
 
-## Release impact
-
-The driver and checker are private report tooling. They add no product API, build dependency, installed target, or package change. The report renderer uses Python standard-library modules only. The controller build links the existing `CSL::finite_action_minimax` target; no new dependency is introduced.
-
-
-Offline bundle: [mpc04-max-coordinate-replanning-pilot.zip](mpc04-max-coordinate-replanning-pilot.zip).
+Files: [standalone report](index.html), [raw result](result.json), [phase-plane and control plot](trajectory.svg), [offline bundle](mpc04-max-coordinate-replanning-pilot.zip), [checksums](SHA256SUMS).

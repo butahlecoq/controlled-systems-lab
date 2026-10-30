@@ -1,38 +1,15 @@
 <!doctype html>
-<html lang="en">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>MPC-04 MaxCoordinateGame replanning pilot</title>
-<style>
-body{font:16px/1.5 system-ui,sans-serif;max-width:1100px;margin:2rem auto;padding:0 1rem;color:#202124}h1,h2{line-height:1.2}table{border-collapse:collapse;width:100%;margin:1rem 0 2rem}th,td{border:1px solid #bbb;padding:.5rem;text-align:left}th{background:#f0f2f5}figure{margin:1.5rem 0}img{width:100%;height:auto;border:1px solid #ddd}.scope{background:#f5f7fa;padding:1rem;border-left:4px solid #536d9b}code{background:#f1f1f1;padding:.1rem .25rem}
-</style>
-</head>
-<body>
-<h1>MaxCoordinateGame: finite closed-loop MPC comparison</h1>
-<p>Nominal and finite-catalogue minimax controllers repeatedly plan, execute one action, observe the next state, and replan on a source-derived RL environment.</p>
-<div class="scope"><strong>Scope.</strong> Four scored steps, controls and disturbances in <code>{−1,+1}</code>, all 16 complete disturbance histories, and the source 100-substep transition. This is a finite adaptation of the continuous-action four-second RL environment. It establishes results only for this finite catalogue; calculations use binary64 arithmetic with tolerance-based independent replay.</div>
-<h2>Results</h2>
-<table>
-<thead><tr><th>Controller</th><th>Horizon</th><th>Episodes</th><th>Median terminal objective</th><th>Worst terminal objective</th><th>Median solve time / decision</th><th>Fallbacks</th></tr></thead>
-<tbody>
-<tr><td>Nominal, zero disturbance</td><td>Shrinking 4→1</td><td>16</td><td>0.15107</td><td>0.50488</td><td>~0.11 ms</td><td>0</td></tr>
-<tr><td>Nominal, zero disturbance</td><td>Moving 2-stage</td><td>16</td><td>0.23826</td><td>0.50488</td><td>~0.055 ms</td><td>0</td></tr>
-<tr><td>Finite minimax</td><td>Shrinking 4→1</td><td>16</td><td>0.26772</td><td>0.50488</td><td>~0.14 ms</td><td>0</td></tr>
-<tr><td>Finite minimax</td><td>Moving 2-stage</td><td>16</td><td>0.26772</td><td>0.54615</td><td>~0.067 ms</td><td>0</td></tr>
-</tbody>
-</table>
-<p>The upstream repository declares no license; this report re-expresses model equations without copying source code. The pinned source is <a href="https://github.com/imm-rl-lab/optimal_control/blob/f4d76c60f4003f50954174e96eafd8e514bd5441/Environments/MaxCoordinateGame/MaxCoordinateGame.py">MaxCoordinateGame.py</a>. Objective values are the source terminal <code>max(|y|,|z|)</code>. The exact stored per-decision latencies and complete episode rows are in <a href="result.json">result.json</a>. Timings are descriptive for one Release collection; no performance winner is claimed.</p>
-<figure><img src="trajectory.svg" alt="All finite episode trajectories in the y-z phase plane and control/disturbance timeline"><figcaption>Solid trajectories use the shrinking episode horizon; dashed trajectories use the moving two-stage horizon. Colors separate nominal and finite minimax controllers. The lower panel summarizes executed controls over histories and shows the scored endpoint.</figcaption></figure>
-<p>The committed run uses the repository's C++ <code>csl.finite_action_minimax</code> implementation. The Python renderer also has an independent finite-enumeration reference mode. Solve timings are from one collection and are descriptive, with no performance winner claim.</p>
-<h2>Evidence</h2>
-<ul>
-<li>Independent checker replays all 256 state transitions, verifies the complete 16-history catalogue for each of four variants, recomputes each chosen plan value, and checks the original terminal score.</li>
-<li>Forced deadline and solver-failure fixture episodes confirm that the runner applies the explicit zero-control fallback, continues to the episode endpoint, and counts every fallback.</li>
-<li>The driver executes the authored finite policy-gap fixtures and checks fixed-plan/replanning/causal values 2/2/1 and scalar fixed-plan/replanning values 2/0.</li>
-<li>No state constraints are present in this source-derived slice; controls remain in the authored source bounds.</li>
-<li>No recursive-feasibility, stability, continuous-disturbance, or global causal-optimality theorem is claimed.</li>
-</ul>
-<p><a href="README.md">Method and limitations</a> · <a href="SHA256SUMS">File hashes</a> · <a href="mpc04-max-coordinate-replanning-pilot.zip">Download offline bundle</a></p>
-</body>
-</html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>MPC-04 MaxCoordinateGame closed-loop pilot</title>
+<style>body{font:16px/1.5 system-ui,sans-serif;max-width:1120px;margin:2rem auto;padding:0 1rem;color:#202124}h1,h2{line-height:1.2}table{border-collapse:collapse;width:100%;margin:1rem 0 2rem}th,td{border:1px solid #bbb;padding:.5rem;text-align:left}th{background:#f0f2f5}figure{margin:1.5rem 0}img{width:100%;height:auto;border:1px solid #ddd}.scope{background:#f5f7fa;padding:1rem;border-left:4px solid #536d9b}code{background:#f1f1f1;padding:.1rem .25rem}</style></head><body>
+<h1>MaxCoordinateGame: closed-loop MPC comparison</h1>
+<p>Four controllers repeatedly observe the full state, select a control, apply the current disturbance, and replan. The source-derived model is <code>y'=z+v</code>, <code>z'=-y+u</code> with terminal objective <code>max(|y|,|z|)</code>.</p>
+<div class="scope"><strong>Scope.</strong> Four scored steps, 16 complete binary disturbance histories per controller/horizon, 128 episodes, and 512 transitions. This finite-action and continuous-control QP pilot is not a reproduction of the source's continuous-action four-second RL task. Disturbance statements cover only the enumerated histories.</div>
+<h2>Results</h2><table><thead><tr><th>Controller</th><th>Horizon</th><th>Episodes</th><th>Median terminal objective</th><th>Worst terminal objective</th><th>Median solve time / decision</th><th>Fallbacks</th></tr></thead><tbody><tr><td>Nominal finite action</td><td>Shrinking 4→1</td><td>16</td><td>0.15107183</td><td>0.5048826</td><td>0.1192 ms</td><td>0</td></tr><tr><td>Nominal finite action</td><td>Moving 2-stage</td><td>16</td><td>0.23826322</td><td>0.5048826</td><td>0.05636 ms</td><td>0</td></tr><tr><td>Finite minimax</td><td>Shrinking 4→1</td><td>16</td><td>0.26771858</td><td>0.5048826</td><td>0.1392 ms</td><td>0</td></tr><tr><td>Finite minimax</td><td>Moving 2-stage</td><td>16</td><td>0.26771858</td><td>0.54615006</td><td>0.07096 ms</td><td>0</td></tr><tr><td>Nominal linear QP</td><td>Shrinking 4→1</td><td>16</td><td>0.2252695</td><td>0.50359582</td><td>0.811 ms</td><td>0</td></tr><tr><td>Nominal linear QP</td><td>Moving 2-stage</td><td>16</td><td>0.25239922</td><td>0.50254521</td><td>0.807 ms</td><td>0</td></tr><tr><td>Finite-history robust QP</td><td>Shrinking 4→1</td><td>16</td><td>0.28395102</td><td>0.4974054</td><td>0.881 ms</td><td>0</td></tr><tr><td>Finite-history robust QP</td><td>Moving 2-stage</td><td>16</td><td>0.34320689</td><td>0.54614901</td><td>0.8341 ms</td><td>0</td></tr></tbody></table>
+<p>The nominal and finite-minimax controllers use discrete controls <code>{−1,+1}</code>. The QP controllers use continuous controls in <code>[-1,1]</code> and minimize the same terminal squared max-coordinate objective. Robust plans use one common open-loop control vector over every suffix, followed by replanning; they are not an in-horizon feedback tree. These different action domains do not establish a same-domain optimality comparison.</p>
+<figure><img src="trajectory.svg" alt="Executed episode trajectories in the y-z plane and a control and disturbance timeline"><figcaption>Executed reachable trajectories and control/disturbance timeline for all four controllers and both horizon definitions.</figcaption></figure>
+<p>The independent checker replays all transitions, recomputes selected-plan values and terminal objectives, verifies the analytic one-step QP fixture, and checks retained HiGHS primal and dual residuals against their declared tolerances. Native failure and deadline fixtures verify zero-control fallback in the C++ episode loop. The finite policy-gap fixtures check fixed-plan/replanning/causal values 2/2/1 and scalar fixed-plan/replanning values 2/0.</p>
+<p>Timings use five alternating process runs and are descriptive; no performance winner is claimed. There is no recursive-feasibility, stability, continuous-disturbance, or globally optimal causal-minimax claim. The upstream source is <a href="https://github.com/imm-rl-lab/optimal_control/blob/f4d76c60f4003f50954174e96eafd8e514bd5441/Environments/MaxCoordinateGame/MaxCoordinateGame.py">MaxCoordinateGame.py</a>; its repository declares no license, and this report re-expresses the equations without copying source code.</p>
+<h2>Provenance</h2><p>Implementation commit <code>5acb5ee1a75d34518d92cbc97f13f22398945c6f</code>; executable SHA-256 <code>2a83a6a9635faa251f07a7511d81afc3de4771fc51fac0679e5be6b8facc09f7</code>. Results and all per-decision samples: <a href="result.json">result.json</a>. Build/runtime capture: <a href="capture.json">capture.json</a>, <a href="build-config.json">build-config.json</a>, <a href="build.log">build.log</a>, <a href="environment.json">environment.json</a>.</p>
+<p><a href="README.md">Method and reproduction instructions</a> · <a href="SHA256SUMS">File hashes</a> · <a href="mpc04-max-coordinate-replanning-pilot.zip">Offline bundle</a></p>
+</body></html>

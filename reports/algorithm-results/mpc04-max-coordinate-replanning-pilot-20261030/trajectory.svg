@@ -1,7 +1,7 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="1100" height="710" viewBox="0 0 1100 710">
 <rect width="100%" height="100%" fill="white"/>
 <style>text{font-family:Arial,sans-serif;fill:#222}.title{font-size:22px;font-weight:bold}.label{font-size:15px}.small{font-size:11px}.grid{stroke:#ddd}.axis{stroke:#333;stroke-width:1.3}</style>
-<text x="50" y="35" class="title">MaxCoordinateGame: finite closed-loop MPC comparison</text>
+<text x="50" y="35" class="title">MaxCoordinateGame: replanning and QP comparison</text>
 <text x="50" y="58" class="small">4 scored steps · 16 complete disturbance histories per variant · source-derived 100-substep map</text>
 <text x="90" y="78" class="label">Phase plane (y,z), all executed history trajectories</text>
 <line x1="140" y1="425" x2="990" y2="425" class="axis"/>
@@ -38,8 +38,8 @@
 <polyline points="621.59,208.66 711.27,253.19 788.61,300.85 662.14,347.63 723.95,321.71" fill="none" stroke="#2878b5" stroke-width="1.3" stroke-opacity="0.16" stroke-dasharray="5 3"/>
 <polyline points="621.59,208.66 711.27,253.19 788.61,300.85 852.84,351.16 722.06,328.81" fill="none" stroke="#2878b5" stroke-width="1.3" stroke-opacity="0.16" stroke-dasharray="5 3"/>
 <polyline points="621.59,208.66 711.27,253.19 788.61,300.85 852.84,351.16 912.76,332.34" fill="none" stroke="#2878b5" stroke-width="1.3" stroke-opacity="0.16" stroke-dasharray="5 3"/>
-<circle cx="140" cy="490" r="4" fill="#2878b5"/>
-<text x="150" y="494" class="small">nominal; solid shrinking, dashed moving lookahead</text>
+<circle cx="125" cy="490" r="4" fill="#2878b5"/>
+<text x="135" y="494" class="small">nominal finite action; solid shrinking, dashed moving lookahead</text>
 <polyline points="621.59,208.66 520.57,249.66 409.10,286.69 297.74,248.10 197.24,205.54" fill="none" stroke="#ce5b31" stroke-width="1.3" stroke-opacity="0.28"/>
 <polyline points="621.59,208.66 520.57,249.66 409.10,286.69 297.74,248.10 387.94,209.07" fill="none" stroke="#ce5b31" stroke-width="1.3" stroke-opacity="0.28"/>
 <polyline points="621.59,208.66 520.57,249.66 409.10,286.69 488.44,251.63 386.05,216.17" fill="none" stroke="#ce5b31" stroke-width="1.3" stroke-opacity="0.28"/>
@@ -72,8 +72,76 @@
 <polyline points="621.59,208.66 711.27,253.19 788.61,300.85 662.14,347.63 723.95,321.71" fill="none" stroke="#ce5b31" stroke-width="1.3" stroke-opacity="0.16" stroke-dasharray="5 3"/>
 <polyline points="621.59,208.66 711.27,253.19 788.61,300.85 852.84,351.16 712.62,400.09" fill="none" stroke="#ce5b31" stroke-width="1.3" stroke-opacity="0.16" stroke-dasharray="5 3"/>
 <polyline points="621.59,208.66 711.27,253.19 788.61,300.85 852.84,351.16 903.31,403.62" fill="none" stroke="#ce5b31" stroke-width="1.3" stroke-opacity="0.16" stroke-dasharray="5 3"/>
-<circle cx="440" cy="490" r="4" fill="#ce5b31"/>
-<text x="450" y="494" class="small">finite minimax; solid shrinking, dashed moving lookahead</text>
+<circle cx="375" cy="490" r="4" fill="#ce5b31"/>
+<text x="385" y="494" class="small">finite minimax; solid shrinking, dashed moving lookahead</text>
+<polyline points="621.59,208.66 520.57,249.66 409.10,286.69 297.74,248.10 197.24,205.54" fill="none" stroke="#258779" stroke-width="1.3" stroke-opacity="0.28"/>
+<polyline points="621.59,208.66 520.57,249.66 409.10,286.69 297.74,248.10 387.94,209.07" fill="none" stroke="#258779" stroke-width="1.3" stroke-opacity="0.28"/>
+<polyline points="621.59,208.66 520.57,249.66 409.10,286.69 488.44,251.63 384.82,225.43" fill="none" stroke="#258779" stroke-width="1.3" stroke-opacity="0.28"/>
+<polyline points="621.59,208.66 520.57,249.66 409.10,286.69 488.44,251.63 575.52,228.96" fill="none" stroke="#258779" stroke-width="1.3" stroke-opacity="0.28"/>
+<polyline points="621.59,208.66 520.57,249.66 599.80,290.22 482.91,286.19 371.32,250.36" fill="none" stroke="#258779" stroke-width="1.3" stroke-opacity="0.28"/>
+<polyline points="621.59,208.66 520.57,249.66 599.80,290.22 482.91,286.19 562.02,253.89" fill="none" stroke="#258779" stroke-width="1.3" stroke-opacity="0.28"/>
+<polyline points="621.59,208.66 520.57,249.66 599.80,290.22 673.61,289.72 556.35,289.54" fill="none" stroke="#258779" stroke-width="1.3" stroke-opacity="0.28"/>
+<polyline points="621.59,208.66 520.57,249.66 599.80,290.22 673.61,289.72 747.04,293.07" fill="none" stroke="#258779" stroke-width="1.3" stroke-opacity="0.28"/>
+<polyline points="621.59,208.66 711.27,253.19 597.91,297.32 480.18,285.35 368.82,249.42" fill="none" stroke="#258779" stroke-width="1.3" stroke-opacity="0.28"/>
+<polyline points="621.59,208.66 711.27,253.19 597.91,297.32 480.18,285.35 559.52,252.95" fill="none" stroke="#258779" stroke-width="1.3" stroke-opacity="0.28"/>
+<polyline points="621.59,208.66 711.27,253.19 597.91,297.32 670.87,288.89 553.85,288.61" fill="none" stroke="#258779" stroke-width="1.3" stroke-opacity="0.28"/>
+<polyline points="621.59,208.66 711.27,253.19 597.91,297.32 670.87,288.89 744.54,292.14" fill="none" stroke="#258779" stroke-width="1.3" stroke-opacity="0.28"/>
+<polyline points="621.59,208.66 711.27,253.19 788.61,300.85 662.99,341.23 535.81,311.84" fill="none" stroke="#258779" stroke-width="1.3" stroke-opacity="0.28"/>
+<polyline points="621.59,208.66 711.27,253.19 788.61,300.85 662.99,341.23 726.50,315.37" fill="none" stroke="#258779" stroke-width="1.3" stroke-opacity="0.28"/>
+<polyline points="621.59,208.66 711.27,253.19 788.61,300.85 853.69,344.76 720.83,351.03" fill="none" stroke="#258779" stroke-width="1.3" stroke-opacity="0.28"/>
+<polyline points="621.59,208.66 711.27,253.19 788.61,300.85 853.69,344.76 911.53,354.56" fill="none" stroke="#258779" stroke-width="1.3" stroke-opacity="0.28"/>
+<polyline points="621.59,208.66 520.57,249.66 412.04,264.53 306.58,226.16 211.90,184.04" fill="none" stroke="#258779" stroke-width="1.3" stroke-opacity="0.16" stroke-dasharray="5 3"/>
+<polyline points="621.59,208.66 520.57,249.66 412.04,264.53 306.58,226.16 402.60,187.57" fill="none" stroke="#258779" stroke-width="1.3" stroke-opacity="0.16" stroke-dasharray="5 3"/>
+<polyline points="621.59,208.66 520.57,249.66 412.04,264.53 497.28,229.69 392.25,258.48" fill="none" stroke="#258779" stroke-width="1.3" stroke-opacity="0.16" stroke-dasharray="5 3"/>
+<polyline points="621.59,208.66 520.57,249.66 412.04,264.53 497.28,229.69 582.95,262.01" fill="none" stroke="#258779" stroke-width="1.3" stroke-opacity="0.16" stroke-dasharray="5 3"/>
+<polyline points="621.59,208.66 520.57,249.66 602.74,268.06 488.62,287.93 376.36,253.63" fill="none" stroke="#258779" stroke-width="1.3" stroke-opacity="0.16" stroke-dasharray="5 3"/>
+<polyline points="621.59,208.66 520.57,249.66 602.74,268.06 488.62,287.93 567.05,257.16" fill="none" stroke="#258779" stroke-width="1.3" stroke-opacity="0.16" stroke-dasharray="5 3"/>
+<polyline points="621.59,208.66 520.57,249.66 602.74,268.06 679.31,291.47 559.17,309.50" fill="none" stroke="#258779" stroke-width="1.3" stroke-opacity="0.16" stroke-dasharray="5 3"/>
+<polyline points="621.59,208.66 520.57,249.66 602.74,268.06 679.31,291.47 749.86,313.03" fill="none" stroke="#258779" stroke-width="1.3" stroke-opacity="0.16" stroke-dasharray="5 3"/>
+<polyline points="621.59,208.66 711.27,253.19 597.91,297.32 480.18,285.36 368.58,251.25" fill="none" stroke="#258779" stroke-width="1.3" stroke-opacity="0.16" stroke-dasharray="5 3"/>
+<polyline points="621.59,208.66 711.27,253.19 597.91,297.32 480.18,285.36 559.28,254.78" fill="none" stroke="#258779" stroke-width="1.3" stroke-opacity="0.16" stroke-dasharray="5 3"/>
+<polyline points="621.59,208.66 711.27,253.19 597.91,297.32 670.87,288.89 551.39,307.12" fill="none" stroke="#258779" stroke-width="1.3" stroke-opacity="0.16" stroke-dasharray="5 3"/>
+<polyline points="621.59,208.66 711.27,253.19 597.91,297.32 670.87,288.89 742.09,310.65" fill="none" stroke="#258779" stroke-width="1.3" stroke-opacity="0.16" stroke-dasharray="5 3"/>
+<polyline points="621.59,208.66 711.27,253.19 788.61,300.85 662.99,341.23 535.81,311.84" fill="none" stroke="#258779" stroke-width="1.3" stroke-opacity="0.16" stroke-dasharray="5 3"/>
+<polyline points="621.59,208.66 711.27,253.19 788.61,300.85 662.99,341.23 726.51,315.37" fill="none" stroke="#258779" stroke-width="1.3" stroke-opacity="0.16" stroke-dasharray="5 3"/>
+<polyline points="621.59,208.66 711.27,253.19 788.61,300.85 853.69,344.76 719.83,358.60" fill="none" stroke="#258779" stroke-width="1.3" stroke-opacity="0.16" stroke-dasharray="5 3"/>
+<polyline points="621.59,208.66 711.27,253.19 788.61,300.85 853.69,344.76 910.53,362.13" fill="none" stroke="#258779" stroke-width="1.3" stroke-opacity="0.16" stroke-dasharray="5 3"/>
+<circle cx="625" cy="490" r="4" fill="#258779"/>
+<text x="635" y="494" class="small">nominal linear QP; solid shrinking, dashed moving lookahead</text>
+<polyline points="621.59,208.66 520.57,249.66 409.10,286.69 297.74,248.10 197.24,205.54" fill="none" stroke="#8055a4" stroke-width="1.3" stroke-opacity="0.28"/>
+<polyline points="621.59,208.66 520.57,249.66 409.10,286.69 297.74,248.10 387.94,209.07" fill="none" stroke="#8055a4" stroke-width="1.3" stroke-opacity="0.28"/>
+<polyline points="621.59,208.66 520.57,249.66 409.10,286.69 488.44,251.63 380.55,257.71" fill="none" stroke="#8055a4" stroke-width="1.3" stroke-opacity="0.28"/>
+<polyline points="621.59,208.66 520.57,249.66 409.10,286.69 488.44,251.63 571.24,261.24" fill="none" stroke="#8055a4" stroke-width="1.3" stroke-opacity="0.28"/>
+<polyline points="621.59,208.66 520.57,249.66 599.80,290.22 477.11,330.01 353.84,293.74" fill="none" stroke="#8055a4" stroke-width="1.3" stroke-opacity="0.28"/>
+<polyline points="621.59,208.66 520.57,249.66 599.80,290.22 477.11,330.01 544.53,297.27" fill="none" stroke="#8055a4" stroke-width="1.3" stroke-opacity="0.28"/>
+<polyline points="621.59,208.66 520.57,249.66 599.80,290.22 667.80,333.54 540.89,317.64" fill="none" stroke="#8055a4" stroke-width="1.3" stroke-opacity="0.28"/>
+<polyline points="621.59,208.66 520.57,249.66 599.80,290.22 667.80,333.54 731.59,321.17" fill="none" stroke="#8055a4" stroke-width="1.3" stroke-opacity="0.28"/>
+<polyline points="621.59,208.66 711.27,253.19 597.91,297.32 473.33,337.00 348.22,300.56" fill="none" stroke="#8055a4" stroke-width="1.3" stroke-opacity="0.28"/>
+<polyline points="621.59,208.66 711.27,253.19 597.91,297.32 473.33,337.00 538.91,304.09" fill="none" stroke="#8055a4" stroke-width="1.3" stroke-opacity="0.28"/>
+<polyline points="621.59,208.66 711.27,253.19 597.91,297.32 664.03,340.53 536.39,315.96" fill="none" stroke="#8055a4" stroke-width="1.3" stroke-opacity="0.28"/>
+<polyline points="621.59,208.66 711.27,253.19 597.91,297.32 664.03,340.53 727.09,319.49" fill="none" stroke="#8055a4" stroke-width="1.3" stroke-opacity="0.28"/>
+<polyline points="621.59,208.66 711.27,253.19 788.61,300.85 662.14,347.63 533.25,318.18" fill="none" stroke="#8055a4" stroke-width="1.3" stroke-opacity="0.28"/>
+<polyline points="621.59,208.66 711.27,253.19 788.61,300.85 662.14,347.63 723.95,321.71" fill="none" stroke="#8055a4" stroke-width="1.3" stroke-opacity="0.28"/>
+<polyline points="621.59,208.66 711.27,253.19 788.61,300.85 852.84,351.16 714.92,382.69" fill="none" stroke="#8055a4" stroke-width="1.3" stroke-opacity="0.28"/>
+<polyline points="621.59,208.66 711.27,253.19 788.61,300.85 852.84,351.16 905.62,386.22" fill="none" stroke="#8055a4" stroke-width="1.3" stroke-opacity="0.28"/>
+<polyline points="621.59,208.66 520.57,249.66 409.10,286.69 297.74,248.10 197.24,205.54" fill="none" stroke="#8055a4" stroke-width="1.3" stroke-opacity="0.16" stroke-dasharray="5 3"/>
+<polyline points="621.59,208.66 520.57,249.66 409.10,286.69 297.74,248.10 387.94,209.07" fill="none" stroke="#8055a4" stroke-width="1.3" stroke-opacity="0.16" stroke-dasharray="5 3"/>
+<polyline points="621.59,208.66 520.57,249.66 409.10,286.69 488.44,251.63 376.60,287.45" fill="none" stroke="#8055a4" stroke-width="1.3" stroke-opacity="0.16" stroke-dasharray="5 3"/>
+<polyline points="621.59,208.66 520.57,249.66 409.10,286.69 488.44,251.63 567.30,290.98" fill="none" stroke="#8055a4" stroke-width="1.3" stroke-opacity="0.16" stroke-dasharray="5 3"/>
+<polyline points="621.59,208.66 520.57,249.66 599.80,290.22 477.11,330.01 353.84,293.74" fill="none" stroke="#8055a4" stroke-width="1.3" stroke-opacity="0.16" stroke-dasharray="5 3"/>
+<polyline points="621.59,208.66 520.57,249.66 599.80,290.22 477.11,330.01 544.54,297.27" fill="none" stroke="#8055a4" stroke-width="1.3" stroke-opacity="0.16" stroke-dasharray="5 3"/>
+<polyline points="621.59,208.66 520.57,249.66 599.80,290.22 667.80,333.54 535.21,360.49" fill="none" stroke="#8055a4" stroke-width="1.3" stroke-opacity="0.16" stroke-dasharray="5 3"/>
+<polyline points="621.59,208.66 520.57,249.66 599.80,290.22 667.80,333.54 725.91,364.02" fill="none" stroke="#8055a4" stroke-width="1.3" stroke-opacity="0.16" stroke-dasharray="5 3"/>
+<polyline points="621.59,208.66 711.27,253.19 597.91,297.32 473.33,337.00 348.22,300.56" fill="none" stroke="#8055a4" stroke-width="1.3" stroke-opacity="0.16" stroke-dasharray="5 3"/>
+<polyline points="621.59,208.66 711.27,253.19 597.91,297.32 473.33,337.00 538.91,304.09" fill="none" stroke="#8055a4" stroke-width="1.3" stroke-opacity="0.16" stroke-dasharray="5 3"/>
+<polyline points="621.59,208.66 711.27,253.19 597.91,297.32 664.03,340.53 530.68,359.10" fill="none" stroke="#8055a4" stroke-width="1.3" stroke-opacity="0.16" stroke-dasharray="5 3"/>
+<polyline points="621.59,208.66 711.27,253.19 597.91,297.32 664.03,340.53 721.37,362.63" fill="none" stroke="#8055a4" stroke-width="1.3" stroke-opacity="0.16" stroke-dasharray="5 3"/>
+<polyline points="621.59,208.66 711.27,253.19 788.61,300.85 662.14,347.63 527.94,358.26" fill="none" stroke="#8055a4" stroke-width="1.3" stroke-opacity="0.16" stroke-dasharray="5 3"/>
+<polyline points="621.59,208.66 711.27,253.19 788.61,300.85 662.14,347.63 718.64,361.80" fill="none" stroke="#8055a4" stroke-width="1.3" stroke-opacity="0.16" stroke-dasharray="5 3"/>
+<polyline points="621.59,208.66 711.27,253.19 788.61,300.85 852.84,351.16 712.62,400.09" fill="none" stroke="#8055a4" stroke-width="1.3" stroke-opacity="0.16" stroke-dasharray="5 3"/>
+<polyline points="621.59,208.66 711.27,253.19 788.61,300.85 852.84,351.16 903.31,403.62" fill="none" stroke="#8055a4" stroke-width="1.3" stroke-opacity="0.16" stroke-dasharray="5 3"/>
+<circle cx="875" cy="490" r="4" fill="#8055a4"/>
+<text x="885" y="494" class="small">finite-history robust QP; solid shrinking, dashed moving lookahead</text>
 <text x="540.0" y="456" text-anchor="middle" class="small">y</text>
 <text x="94" y="105" class="small">z</text>
 <text x="90" y="525" class="label">Control and applied disturbance by step (all 16 histories)</text>
@@ -84,37 +152,53 @@
 <text x="155.0" y="586.0" text-anchor="end" class="small">0</text>
 <line x1="165.0" y1="553.0" x2="945.0" y2="553.0" class="grid"/>
 <text x="155.0" y="557.0" text-anchor="end" class="small">1</text>
-<line x1="257.5" y1="611.0" x2="257.5" y2="611.0" stroke="#2878b5" stroke-width="7" stroke-opacity="0.6"/>
-<circle cx="257.5" cy="611.0" r="4" fill="#2878b5"/>
-<line x1="267.5" y1="611.0" x2="267.5" y2="611.0" stroke="#ce5b31" stroke-width="7" stroke-opacity="0.6"/>
-<circle cx="267.5" cy="611.0" r="4" fill="#ce5b31"/>
+<line x1="244.5" y1="611.0" x2="244.5" y2="611.0" stroke="#2878b5" stroke-width="7" stroke-opacity="0.6"/>
+<circle cx="244.5" cy="611.0" r="4" fill="#2878b5"/>
+<line x1="256.5" y1="611.0" x2="256.5" y2="611.0" stroke="#ce5b31" stroke-width="7" stroke-opacity="0.6"/>
+<circle cx="256.5" cy="611.0" r="4" fill="#ce5b31"/>
+<line x1="268.5" y1="611.0" x2="268.5" y2="611.0" stroke="#258779" stroke-width="7" stroke-opacity="0.6"/>
+<circle cx="268.5" cy="611.0" r="4" fill="#258779"/>
+<line x1="280.5" y1="611.0" x2="280.5" y2="611.0" stroke="#8055a4" stroke-width="7" stroke-opacity="0.6"/>
+<circle cx="280.5" cy="611.0" r="4" fill="#8055a4"/>
 <text x="95" y="641" class="small">v</text>
 <circle cx="244.5" cy="635" r="4" fill="#555"/>
 <text x="244.5" y="649" text-anchor="middle" class="small">−1 × 8</text>
 <circle cx="280.5" cy="660" r="4" fill="#555"/>
 <text x="280.5" y="674" text-anchor="middle" class="small">+1 × 8</text>
-<line x1="452.5" y1="611.0" x2="452.5" y2="611.0" stroke="#2878b5" stroke-width="7" stroke-opacity="0.6"/>
-<circle cx="452.5" cy="611.0" r="4" fill="#2878b5"/>
-<line x1="462.5" y1="611.0" x2="462.5" y2="611.0" stroke="#ce5b31" stroke-width="7" stroke-opacity="0.6"/>
-<circle cx="462.5" cy="611.0" r="4" fill="#ce5b31"/>
+<line x1="439.5" y1="611.0" x2="439.5" y2="611.0" stroke="#2878b5" stroke-width="7" stroke-opacity="0.6"/>
+<circle cx="439.5" cy="611.0" r="4" fill="#2878b5"/>
+<line x1="451.5" y1="611.0" x2="451.5" y2="611.0" stroke="#ce5b31" stroke-width="7" stroke-opacity="0.6"/>
+<circle cx="451.5" cy="611.0" r="4" fill="#ce5b31"/>
+<line x1="463.5" y1="611.0" x2="463.5" y2="611.0" stroke="#258779" stroke-width="7" stroke-opacity="0.6"/>
+<circle cx="463.5" cy="611.0" r="4" fill="#258779"/>
+<line x1="475.5" y1="611.0" x2="475.5" y2="611.0" stroke="#8055a4" stroke-width="7" stroke-opacity="0.6"/>
+<circle cx="475.5" cy="611.0" r="4" fill="#8055a4"/>
 <text x="95" y="641" class="small">v</text>
 <circle cx="439.5" cy="635" r="4" fill="#555"/>
 <text x="439.5" y="649" text-anchor="middle" class="small">−1 × 8</text>
 <circle cx="475.5" cy="660" r="4" fill="#555"/>
 <text x="475.5" y="674" text-anchor="middle" class="small">+1 × 8</text>
-<line x1="647.5" y1="611.0" x2="647.5" y2="553.0" stroke="#2878b5" stroke-width="7" stroke-opacity="0.6"/>
-<circle cx="647.5" cy="553.0" r="4" fill="#2878b5"/>
-<line x1="657.5" y1="611.0" x2="657.5" y2="553.0" stroke="#ce5b31" stroke-width="7" stroke-opacity="0.6"/>
-<circle cx="657.5" cy="611.0" r="4" fill="#ce5b31"/>
+<line x1="634.5" y1="611.0" x2="634.5" y2="553.0" stroke="#2878b5" stroke-width="7" stroke-opacity="0.6"/>
+<circle cx="634.5" cy="553.0" r="4" fill="#2878b5"/>
+<line x1="646.5" y1="611.0" x2="646.5" y2="553.0" stroke="#ce5b31" stroke-width="7" stroke-opacity="0.6"/>
+<circle cx="646.5" cy="611.0" r="4" fill="#ce5b31"/>
+<line x1="658.5" y1="605.8" x2="658.5" y2="553.0" stroke="#258779" stroke-width="7" stroke-opacity="0.6"/>
+<circle cx="658.5" cy="572.2" r="4" fill="#258779"/>
+<line x1="670.5" y1="611.0" x2="670.5" y2="553.0" stroke="#8055a4" stroke-width="7" stroke-opacity="0.6"/>
+<circle cx="670.5" cy="611.0" r="4" fill="#8055a4"/>
 <text x="95" y="641" class="small">v</text>
 <circle cx="634.5" cy="635" r="4" fill="#555"/>
 <text x="634.5" y="649" text-anchor="middle" class="small">−1 × 8</text>
 <circle cx="670.5" cy="660" r="4" fill="#555"/>
 <text x="670.5" y="674" text-anchor="middle" class="small">+1 × 8</text>
-<line x1="842.5" y1="553.0" x2="842.5" y2="553.0" stroke="#2878b5" stroke-width="7" stroke-opacity="0.6"/>
-<circle cx="842.5" cy="553.0" r="4" fill="#2878b5"/>
-<line x1="852.5" y1="553.0" x2="852.5" y2="553.0" stroke="#ce5b31" stroke-width="7" stroke-opacity="0.6"/>
-<circle cx="852.5" cy="553.0" r="4" fill="#ce5b31"/>
+<line x1="829.5" y1="553.0" x2="829.5" y2="553.0" stroke="#2878b5" stroke-width="7" stroke-opacity="0.6"/>
+<circle cx="829.5" cy="553.0" r="4" fill="#2878b5"/>
+<line x1="841.5" y1="553.0" x2="841.5" y2="553.0" stroke="#ce5b31" stroke-width="7" stroke-opacity="0.6"/>
+<circle cx="841.5" cy="553.0" r="4" fill="#ce5b31"/>
+<line x1="853.5" y1="576.2" x2="853.5" y2="553.0" stroke="#258779" stroke-width="7" stroke-opacity="0.6"/>
+<circle cx="853.5" cy="556.8" r="4" fill="#258779"/>
+<line x1="865.5" y1="596.8" x2="865.5" y2="553.0" stroke="#8055a4" stroke-width="7" stroke-opacity="0.6"/>
+<circle cx="865.5" cy="554.9" r="4" fill="#8055a4"/>
 <text x="95" y="641" class="small">v</text>
 <circle cx="829.5" cy="635" r="4" fill="#555"/>
 <text x="829.5" y="649" text-anchor="middle" class="small">−1 × 8</text>
