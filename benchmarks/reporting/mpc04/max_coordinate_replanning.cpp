@@ -84,13 +84,14 @@ sets::SetData point(std::string id, const State& state) {
 FiniteActionMinimaxRequest make_request(const State& initial, std::size_t horizon,
                                    bool robust, const std::array<double, 3>& direction,
                                    std::size_t component) {
-    const SystemModel authored{{{3, 1, 1}, TimeDomain::discrete,
-        LinearStage{{3, 3, {1.0, 0.0, 0.0,
-                            0.0, discrete_a[0], discrete_a[1],
-                            0.0, discrete_a[2], discrete_a[3]}},
-                    {3, 1, {0.0, discrete_b[0], discrete_b[1]}},
-                    {3, 1, {0.0, discrete_e[0], discrete_e[1]}},
-                    {0.1, 0.0, 0.0}}}, {}};
+    Matrix transition{3, 3, {1.0, 0.0, 0.0,
+        0.0, discrete_a[0], discrete_a[1],
+        0.0, discrete_a[2], discrete_a[3]}};
+    Matrix control{3, 1, {0.0, discrete_b[0], discrete_b[1]}};
+    Matrix external{3, 1, {0.0, discrete_e[0], discrete_e[1]}};
+    Vector offset{0.1, 0.0, 0.0};
+    LinearStage stage{std::move(transition), std::move(control), std::move(external), std::move(offset)};
+    const SystemModel authored{{{3, 1, 1}, TimeDomain::discrete, std::move(stage)}, {}};
     std::vector<double> times;
     times.reserve(horizon + 1);
     for(std::size_t i = 0; i <= horizon; ++i)
