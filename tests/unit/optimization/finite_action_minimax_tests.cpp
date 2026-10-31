@@ -83,7 +83,11 @@ TEST_CASE("near-optimal tolerance does not turn numerical near-ties into exact t
     const auto& tolerant_result=std::get<FiniteMinimaxOptimal>(tolerant);
     CHECK(tolerant_result.value==exact_result.value);
     CHECK(tolerant_result.minimizing_plan_indices==std::vector<std::size_t>{0,1});
-    CHECK(std::get<FinitePlanFeasible>(tolerant_result.plans[1]).worst_value>tolerant_result.value);
+    REQUIRE(tolerant_result.plans.size()==2);
+    const auto& near_optimal=std::get<FinitePlanFeasible>(tolerant_result.plans[1]);
+    CHECK(near_optimal.action_indices==std::vector<std::size_t>{1});
+    CHECK(near_optimal.worst_value>tolerant_result.value);
+    CHECK(near_optimal.worst_value-tolerant_result.value<=1e-7);
 }
 
 TEST_CASE("independent exhaustive oracle checks every tied robust finite plan") {
