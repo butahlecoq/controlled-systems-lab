@@ -259,3 +259,66 @@ TEST_CASE("zero-horizon mixed branch cursor emits one empty history") {
     CHECK(page.complete);
     CHECK(branches.take_prefix(1).entries.empty());
 }
+
+TEST_CASE("mixed branch portfolio preserves every globally minimal history tie") {
+    const auto source = resolved_mixed_problem();
+    std::vector<FiniteMixedBranchEvaluation> evaluations{
+        {branch(source, {0, 0}), 2.0},
+        {branch(source, {0, 1}), 1.0},
+        {branch(source, {1, 0}), 1.0 + 5e-13},
+        {branch(source, {2, 2}), 3.0}};
+
+    const auto selected = select_finite_mixed_branch_portfolio(
+        std::move(evaluations), true, 1e-12);
+    REQUIRE(std::holds_alternative<FiniteMixedBranchPortfolio>(selected));
+    const auto& portfolio = std::get<FiniteMixedBranchPortfolio>(selected);
+    CHECK(portfolio.complete);
+    REQUIRE(portfolio.optimum.has_value());
+    CHECK(*portfolio.optimum == doctest::Approx(1.0));
+    REQUIRE(portfolio.optimal_evaluation_indices == std::vector<std::size_t>{1, 2});
+    CHECK(std::get<FiniteMixedBranchProblem>(portfolio.evaluations[1].branch).history ==
+        FiniteActionHistory{{0, 1}});
+    CHECK(std::get<FiniteMixedBranchProblem>(portfolio.evaluations[2].branch).history ==
+        FiniteActionHistory{{1, 0}});
+}
+
+TEST_CASE("mixed branch portfolio keeps preparation refusals and incomplete enumeration explicit") {
+    const auto source = resolved_mixed_problem();
+    auto refused = FailedFiniteMixedBranch{
+        FiniteActionHistory{{2, 1}},
+        Diagnostics{{DiagnosticCode::unsupported, "finite_mixed_branch.profile", "test refusal"}}};
+    std::vector<FiniteMixedBranchEvaluation> evaluations{
+        {branch(source, {0, 0}), 4.0}, {std::move(refused), std::nullopt},
+        {branch(source, {0, 2}), 2.0}};
+
+    const auto selected = select_finite_mixed_branch_portfolio(
+        std::move(evaluations), false, 0.0);
+    REQUIRE(std::holds_alternative<FiniteMixedBranchPortfolio>(selected));
+    const auto& portfolio = std::get<FiniteMixedBranchPortfolio>(selected);
+    CHECK_FALSE(portfolio.complete);
+    REQUIRE(portfolio.optimum.has_value());
+    CHECK(*portfolio.optimum == doctest::Approx(2.0));
+    CHECK(portfolio.optimal_evaluation_indices == std::vector<std::size_t>{2});
+    REQUIRE(std::holds_alternative<FailedFiniteMixedBranch>(portfolio.evaluations[1].branch));
+    CHECK_FALSE(portfolio.evaluations[1].objective.has_value());
+}
+
+TEST_CASE("mixed branch portfolio rejects missing, non-finite and invalid objective inputs") {
+    const auto source = resolved_mixed_problem();
+    const auto prepared = branch(source, {0, 0});
+
+    auto missing = select_finite_mixed_branch_portfolio(
+        std::vector<FiniteMixedBranchEvaluation>{{prepared, std::nullopt}}, true, 0.0);
+    REQUIRE(std::holds_alternative<Diagnostics>(missing));
+    CHECK(std::get<Diagnostics>(missing).front().code == DiagnosticCode::invalid_input);
+
+    auto nonfinite = select_finite_mixed_branch_portfolio(
+        std::vector<FiniteMixedBranchEvaluation>{{prepared, std::numeric_limits<double>::quiet_NaN()}},
+        true, 0.0);
+    REQUIRE(std::holds_alternative<Diagnostics>(nonfinite));
+    CHECK(std::get<Diagnostics>(nonfinite).front().code == DiagnosticCode::invalid_input);
+
+    auto tolerance = select_finite_mixed_branch_portfolio({}, true, -1.0);
+    REQUIRE(std::holds_alternative<Diagnostics>(tolerance));
+    CHECK(std::get<Diagnostics>(tolerance).front().code == DiagnosticCode::invalid_input);
+}
