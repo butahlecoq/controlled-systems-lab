@@ -17,6 +17,11 @@ target_link_libraries(fixed_plan_disturbance_tests PRIVATE CSL::fixed_plan_distu
 add_test(NAME fixed_plan_disturbance_tests COMMAND fixed_plan_disturbance_tests)
 csl_test_target(fixed_plan_disturbance_tests reachability)
 
+add_executable(finite_plan_box_tests tests/unit/reachability/finite_plan_box_tests.cpp)
+target_link_libraries(finite_plan_box_tests PRIVATE CSL::finite_plan_box doctest::doctest)
+add_test(NAME finite_plan_box_tests COMMAND finite_plan_box_tests)
+csl_test_target(finite_plan_box_tests reachability)
+
 add_executable(finite_feedback_tests tests/unit/reachability/finite_feedback_tests.cpp)
 target_link_libraries(finite_feedback_tests PRIVATE CSL::finite_feedback doctest::doctest)
 add_test(NAME finite_feedback_tests COMMAND finite_feedback_tests)
