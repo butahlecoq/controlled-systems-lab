@@ -6,6 +6,55 @@
 using namespace csl;
 using namespace csl::optimization;
 
+namespace {
+template<class T> T take_box(std::variant<T, Diagnostic> result) {
+    REQUIRE(std::holds_alternative<T>(result));
+    return std::get<T>(std::move(result));
+}
+
+sets::SetData box_fixture_vertices(std::string id, Matrix points) {
+    return take_box(sets::make_v({{std::move(id)}, 1, {"x"}},
+        {take_box(numeric::snapshot(std::move(points))),
+         take_box(numeric::snapshot(Matrix{0,1,{}}))}));
+}
+
+FiniteActionMinimaxRequest analytic_box_request() {
+    const SystemModel authored{{{1,1,1}, TimeDomain::discrete,
+        LinearStage{{1,1,{1}}, {1,1,{1}}, {1,1,{1}}, {0}}}, {}};
+    const auto system = take_box(model::snapshot(authored, Vector{0,1}));
+    const auto initial = take_box(sets::make_singleton({{"analytic-initial"},1,{"x"}},
+        take_box(numeric::snapshot_vector(Vector{0}))));
+    const auto disturbance = box_fixture_vertices("analytic-disturbance", Matrix{2,1,{-1,1}});
+    std::vector<sets::SetData> safe;
+    for(std::size_t stage = 0; stage <= 1; ++stage)
+        safe.push_back(take_box(sets::make_universal({{"analytic-safe" + std::to_string(stage)},1,{"x"}})));
+    const auto objective = std::get<Objective>(snapshot(QuadraticTerminal{{1,1,{2}}, {0}, 0}));
+    return {{"analytic-scalar-minimax"}, {"analytic-scalar-minimax-run"}, system, initial,
+        {1, {{-1}, {0}, {1}}}, {disturbance}, std::move(safe), objective};
+}
+}
+
+TEST_CASE("analytic scalar minimax selects and exactly replays the known zero-control optimum") {
+    const auto input = analytic_box_request();
+    const auto approximate = finite_action_box_minimax(input, {3,2,2,2});
+    REQUIRE(std::holds_alternative<FiniteActionBoxMinimaxResult>(approximate));
+    const auto& result = std::get<FiniteActionBoxMinimaxResult>(approximate);
+    REQUIRE(result.plan_scores.size() == 3);
+    CHECK(std::abs(result.plan_scores[0].terminal_box_maximum - 4) < 1e-12);
+    CHECK(std::abs(result.plan_scores[1].terminal_box_maximum - 1) < 1e-12);
+    CHECK(std::abs(result.plan_scores[2].terminal_box_maximum - 4) < 1e-12);
+    CHECK(result.selected_action_indices == std::vector<std::size_t>{1});
+    CHECK(std::abs(result.selected_box_score - 1) < 1e-12);
+    CHECK(result.selected_replay_value == 1);
+    REQUIRE(result.replayed_worst_path.size() == 2);
+    CHECK(result.replayed_worst_path.front() == Vector{0});
+    CHECK(std::abs(result.replayed_worst_path.back()[0]) == 1);
+
+    const auto exact = finite_action_minimax(input, {3,2,0});
+    REQUIRE(std::holds_alternative<FiniteMinimaxOptimal>(exact));
+    CHECK(std::get<FiniteMinimaxOptimal>(exact).value == 1);
+}
+
 TEST_CASE("box-scored plan is replayed through the exact finite disturbance catalogues") {
     const auto request = csl::issue824::fixture::two_points_request("box-minimax-test");
     const auto approximate = finite_action_box_minimax(request, {27,27,27,16});
