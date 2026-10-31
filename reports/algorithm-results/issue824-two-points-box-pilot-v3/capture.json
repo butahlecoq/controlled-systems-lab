@@ -1,0 +1,36 @@
+{
+  "build": {
+    "compiler": "/usr/bin/c++",
+    "compiler_version": "c++ (GCC) 16.2.1 20260810",
+    "configuration": "Release",
+    "directory": "/home/butahlecoq/.local/share/codex/worktrees/issue824-approx-control-20261101/build/dev",
+    "generator": "Ninja",
+    "highs": "ON",
+    "qhull": "ON"
+  },
+  "exact_geometry_reference": {
+    "figure_data_sha256": "0a9995d4a2648ee9e13e93128063ac1978392349a2c2ecbee6aa5c659d3362d7",
+    "report_id": "mpc05-causal-tree-pilot-v2"
+  },
+  "host": {
+    "machine": "x86_64",
+    "release": "7.2.8-9-omarchy",
+    "system": "Linux"
+  },
+  "schema": "csl.issue824-two-points-box-capture/1",
+  "source_commit": "06c03012ac3900d4f62f9b01798f173eb0d76fa8",
+  "source_files_sha256": {
+    "benchmarks/reporting/exp824/two_points_box.cpp": "430cc0606b22bc575ff8573f5e903b8c0c2f61f4cadf14006780a334093c4e32",
+    "benchmarks/reporting/exp824/two_points_fixture.hpp": "63ea125705437636a8689ca1a37d1df71c4be1ee04f751d2b226ab1c8145c8ec",
+    "include/csl/optimization/finite_action_box_minimax.hpp": "8a64bfc9a3654b2cecca61be60967246ee3a0fe05e2d12b194dc1f97d49cdd86",
+    "include/csl/reachability/finite_plan_box.hpp": "c0868b52ac494d2ccf7cb8c60af9c569e8bbeb728a9b0581ca76c08e0bb8810b",
+    "scripts/reports/exp824/check_two_points_box.py": "6728ac5996b2a346acf75e7ff6366571066965c08713ab6bdab5edac9668187b",
+    "scripts/reports/exp824/make_report.py": "48d6b8c0449e3a83e13ccf2313a2f5bde50db5d83a21ca3c28b341b1d5e5874e",
+    "src/optimization/finite_action_box_minimax.cpp": "3a483058c1ebe299930b8a386700d742e50014855a444d46566aa55d944e4f1b",
+    "src/optimization/finite_action_minimax.cpp": "958913ead8bbb935a49b30c4f9564d39c42b09a46f03492fe2327920272cca1f",
+    "src/optimization/finite_action_plans.hpp": "8ca3f1f52f947b6f9a556725d610b608676ddb568efb70b469bb81cc0c51be3b",
+    "src/reachability/finite_plan_box.cpp": "45df26937aafd54d313bf3b03f40fdc05352167943ade2d2beeb038249592eba"
+  },
+  "source_status_before_report_generation": [],
+  "source_tree_clean_before_report_generation": true
+}

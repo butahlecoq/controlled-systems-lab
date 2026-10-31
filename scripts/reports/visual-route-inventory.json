@@ -2375,6 +2375,16 @@
       "follow_up_issue": 669
     },
     {
+      "route": "issue824-two-points-box-pilot-v3",
+      "source_bundle": "issue824-two-points-box-pilot-v3",
+      "assets": [
+        "projections.svg"
+      ],
+      "index_sha256": "0995a3886750b668d062e61f34918fb1fbf0593f05cee0efa97e11f5cd722f6e",
+      "disposition": "deferred: original frozen route-level readability review remains; companion availability is listed separately",
+      "follow_up_issue": 669
+    },
+    {
       "route": "lotka-volterra-sampled-20261023",
       "source_bundle": "lotka-volterra-sampled-20261023",
       "assets": [
