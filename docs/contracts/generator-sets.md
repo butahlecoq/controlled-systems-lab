@@ -61,6 +61,21 @@ The V payload has ambient coordinate labels but cannot carry factor identity.
 Constrained conversion, intersection and output shapes outside these narrow
 closures are unsupported.
 
+### Constrained-generator recovery boundary
+
+The current adapter has no constrained-zonotope recovery procedure. This is a
+deliberate capability boundary, including for an infeasible constrained
+generator: `ConversionPort` rejects the request with an `unsupported`
+`generators.convert.equalities` diagnostic before producing an ambient V set,
+recovery witness, trajectory or achievable objective. The contradiction is
+still represented exactly in the factor-domain H rows, so callers that need an
+infeasibility proof must use a future dedicated factor-feasibility operation;
+they must not reinterpret this adapter rejection as a proof of the physical
+problem's infeasibility. The contract test at
+`tests/contract/geometry/generator_adapter_tests.cpp` checks both the
+contradictory factor rows and this explicit rejection. This profile remains
+unsupported until a separately reviewed recovery operation is implemented.
+
 The formulas and conversion are equivalent in real-set algebra. Coefficients
 are stored and computed in binary64, so arithmetic can round. Input nonfinite
 values, malformed shapes/IDs and nonfinite results are rejected; these checks
