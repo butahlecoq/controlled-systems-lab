@@ -1,0 +1,18 @@
+{
+  "schema": "csl.scenario/1",
+  "id": "review05-constraint01-n1-t2-r2",
+  "horizon": 2,
+  "model": {"kind": "linear_discrete", "A": [[1]], "B": [[1]]},
+  "initial_state": [0],
+  "controls": {"kind": "box", "lower": [0], "upper": [1]},
+  "states": {
+    "kind": "stages",
+    "values": [
+      {"kind": "polyhedron_h", "H": [[1], [-1]], "h": [2, 2], "E": {"rows": 0, "cols": 1, "values": []}, "e": []},
+      {"kind": "polyhedron_h", "H": [[1], [-1]], "h": [2, 2], "E": {"rows": 0, "cols": 1, "values": []}, "e": []},
+      {"kind": "polyhedron_h", "H": [[1], [-1]], "h": [2, 2], "E": {"rows": 0, "cols": 1, "values": []}, "e": []}
+    ]
+  },
+  "objective": {"kind": "linear", "coefficients": [1]},
+  "metadata": {"state_labels": ["x1"], "control_labels": ["u1"], "state_units": ["dimensionless"], "control_units": ["dimensionless"]}
+}

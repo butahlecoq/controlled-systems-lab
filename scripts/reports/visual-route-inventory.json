@@ -2602,6 +2602,16 @@
       "follow_up_issue": 669
     },
     {
+      "route": "review05-resources-20261101",
+      "source_bundle": "review05-resources-20261101",
+      "assets": [
+        "constraint-geometry.svg"
+      ],
+      "index_sha256": "1cd89763b356c9917d8d8acdddc2c0a13d606f8aefd29d636059572438493e06",
+      "disposition": "deferred: original frozen route-level readability review remains; companion availability is listed separately",
+      "follow_up_issue": 669
+    },
+    {
       "route": "syn-ts01-paired-20261014-b7f1ac0",
       "source_bundle": "syn-ts01-paired-20261014-b7f1ac0",
       "assets": [

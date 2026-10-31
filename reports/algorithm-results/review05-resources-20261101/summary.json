@@ -1,0 +1,154 @@
+{
+  "schema": "csl.review05.constraint-summary/1",
+  "claim": "descriptive fixed-n, fixed-horizon measurements while authored redundant state H-row count grows; the exact fixture oracle establishes the unique zero optimum only for these three finite scenarios; no winner, speedup, general completeness, memory, phase, or complexity claim",
+  "timed_region": "SynthesisWorkspace::run, steady_clock nanoseconds",
+  "cases": [
+    {
+      "case": "r2",
+      "state_dimension": 1,
+      "control_dimension": 1,
+      "horizon": 2,
+      "state_rows_per_stage": 2,
+      "stages": 3,
+      "authored_state_rows_total": 6,
+      "verified_measured_attempts": 12,
+      "verified_paired_repetitions": 6,
+      "paired_repetitions": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6
+      ],
+      "strategies": {
+        "csl.synthesis.reach-back": {
+          "verified_measured_rows": 6,
+          "median_ns": 5249567.5,
+          "min_ns": 5118999,
+          "max_ns": 11095586,
+          "median_child_cpu_seconds": 0.0094405,
+          "median_peak_rss_kib": 13556.0,
+          "representation_shape": {
+            "joint_coordinates": 5,
+            "inequality_rows": 14,
+            "equality_rows": 4,
+            "nonzero_h_coefficients": 22
+          }
+        },
+        "csl.synthesis.strategy-b": {
+          "verified_measured_rows": 6,
+          "median_ns": 741442.0,
+          "min_ns": 674883,
+          "max_ns": 771195,
+          "median_child_cpu_seconds": 0.0051979999999999995,
+          "median_peak_rss_kib": 13556.0,
+          "representation_shape": {
+            "joint_coordinates": 5,
+            "inequality_rows": 10,
+            "equality_rows": 4,
+            "nonzero_h_coefficients": 18
+          }
+        }
+      }
+    },
+    {
+      "case": "r4",
+      "state_dimension": 1,
+      "control_dimension": 1,
+      "horizon": 2,
+      "state_rows_per_stage": 4,
+      "stages": 3,
+      "authored_state_rows_total": 12,
+      "verified_measured_attempts": 12,
+      "verified_paired_repetitions": 6,
+      "paired_repetitions": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6
+      ],
+      "strategies": {
+        "csl.synthesis.reach-back": {
+          "verified_measured_rows": 6,
+          "median_ns": 5724703.0,
+          "min_ns": 5177666,
+          "max_ns": 13147334,
+          "median_child_cpu_seconds": 0.0115765,
+          "median_peak_rss_kib": 13556.0,
+          "representation_shape": {
+            "joint_coordinates": 5,
+            "inequality_rows": 22,
+            "equality_rows": 4,
+            "nonzero_h_coefficients": 30
+          }
+        },
+        "csl.synthesis.strategy-b": {
+          "verified_measured_rows": 6,
+          "median_ns": 693007.0,
+          "min_ns": 681309,
+          "max_ns": 738299,
+          "median_child_cpu_seconds": 0.004914,
+          "median_peak_rss_kib": 13556.0,
+          "representation_shape": {
+            "joint_coordinates": 5,
+            "inequality_rows": 16,
+            "equality_rows": 4,
+            "nonzero_h_coefficients": 24
+          }
+        }
+      }
+    },
+    {
+      "case": "r8",
+      "state_dimension": 1,
+      "control_dimension": 1,
+      "horizon": 2,
+      "state_rows_per_stage": 8,
+      "stages": 3,
+      "authored_state_rows_total": 24,
+      "verified_measured_attempts": 12,
+      "verified_paired_repetitions": 6,
+      "paired_repetitions": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6
+      ],
+      "strategies": {
+        "csl.synthesis.reach-back": {
+          "verified_measured_rows": 6,
+          "median_ns": 5674486.5,
+          "min_ns": 5338302,
+          "max_ns": 12894925,
+          "median_child_cpu_seconds": 0.009966,
+          "median_peak_rss_kib": 13556.0,
+          "representation_shape": {
+            "joint_coordinates": 5,
+            "inequality_rows": 38,
+            "equality_rows": 4,
+            "nonzero_h_coefficients": 46
+          }
+        },
+        "csl.synthesis.strategy-b": {
+          "verified_measured_rows": 6,
+          "median_ns": 738160.0,
+          "min_ns": 712039,
+          "max_ns": 876237,
+          "median_child_cpu_seconds": 0.004888,
+          "median_peak_rss_kib": 13556.0,
+          "representation_shape": {
+            "joint_coordinates": 5,
+            "inequality_rows": 28,
+            "equality_rows": 4,
+            "nonzero_h_coefficients": 36
+          }
+        }
+      }
+    }
+  ]
+}
