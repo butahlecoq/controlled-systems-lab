@@ -41,10 +41,10 @@ FixedPlanRequest two_points_request() {
 
 FixedPlanRequest planar_box_request() {
     SystemModel authored{{{2,1,2}, TimeDomain::discrete,
-        LinearStage{{2,2,{1,0,0,1}}, {2,1,{0,0}}, {2,2,{0,0,0,0}}, {0,0}}}, {}};
+        LinearStage{{2,2,{2,0,0,1}}, {2,1,{0,0}}, {2,2,{0,0,0,0}}, {0,0}}}, {}};
     const auto system = take(model::snapshot(authored, Vector{0,1}));
     const auto initial = vertices("planar-initial", 2,
-        Matrix{4,2,{-1,-2, 1,-2, 1,2, -1,2}});
+        Matrix{4,2,{-1,-1, 1,-1, 1,1, -1,1}});
     const auto disturbance = take(sets::make_singleton({{"planar-disturbance"},2,{}},
         take(numeric::snapshot_vector(Vector{0,0}))));
     return {system, initial, {{0}}, {disturbance},

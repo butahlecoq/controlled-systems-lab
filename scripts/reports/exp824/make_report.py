@@ -106,7 +106,7 @@ def projected_zonotope(stage: dict, xcoord: int, ycoord: int) -> list[tuple[floa
         point[0] += 2 * vector[0]
         point[1] += 2 * vector[1]
         vertices.append(tuple(point))
-    for vector in reversed(segments):
+    for vector in segments:
         point[0] -= 2 * vector[0]
         point[1] -= 2 * vector[1]
         vertices.append(tuple(point))

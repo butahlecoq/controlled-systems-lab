@@ -1,4 +1,5 @@
 from pathlib import Path
+import json
 import sys
 import shutil
 import tempfile
@@ -7,6 +8,8 @@ import unittest
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / "scripts/reports"))
 import stage_issue824_zonotope as publisher
+sys.path.insert(0, str(ROOT / "scripts/reports/exp824"))
+import make_report
 
 
 class Issue824ZonotopePublicationTests(unittest.TestCase):
@@ -35,6 +38,22 @@ class Issue824ZonotopePublicationTests(unittest.TestCase):
                 stream.write(b" ")
             with self.assertRaisesRegex(ValueError, "checksum mismatch"):
                 publisher.verified_bundle(changed)
+
+    def test_planar_projection_contains_all_four_rectangle_corners(self):
+        source = ROOT / "reports/algorithm-results/issue824-two-points-zonotope-pilot-v2/result.json"
+        result = json.loads(source.read_text(encoding="utf-8"))
+        stage = result["planar_example"]["stages"][1]
+        polygon = make_report.projected_zonotope(stage, 0, 1)
+        self.assertEqual(len(polygon), 4)
+        xs, ys = [point[0] for point in polygon], [point[1] for point in polygon]
+        self.assertLessEqual(min(xs), -2.0)
+        self.assertGreaterEqual(max(xs), 2.0)
+        self.assertLessEqual(min(ys), -1.0)
+        self.assertGreaterEqual(max(ys), 1.0)
+        area = abs(sum(polygon[index][0] * polygon[(index + 1) % 4][1] -
+                       polygon[index][1] * polygon[(index + 1) % 4][0]
+                       for index in range(4))) / 2
+        self.assertGreaterEqual(area, 8.0)
 
 
 if __name__ == "__main__":
