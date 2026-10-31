@@ -17,6 +17,12 @@ at least one nonzero recession ray. Zero-image rays are retained for bounded
 geometry. Point, segment and polygon distinguish numerical affine dimensions
 zero, one and two using the shared binary64 determinant predicate. Multiple components
 remain separate so renderers do not fill the gaps by convexifying them.
+An optional component `role` labels a saved overlay such as `forward`,
+`backward_winning`, or `intersection`; it does not merge those overlays into a
+single mathematical relation. Renderers should preserve the label and keep
+finite winning nodes distinct from continuous set boundaries.
+An optional `branch_id` binds a component to a source branch (for example, a
+control prefix) so a renderer cannot silently collapse branch-local geometry.
 Redundant V vertices are preserved, including duplicate point vertices and
 interior collinear segment vertices; readers validate affine dimension rather
 than requiring a minimal vertex list. Stage and physical-time axes are

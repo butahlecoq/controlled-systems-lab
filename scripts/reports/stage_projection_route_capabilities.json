@@ -94,12 +94,12 @@
     {
       "route_id": "env717.two_points.published",
       "source": "reports/algorithm-results/env717-two-points-feedback-v1/figure-data.json",
-      "adapter_status": "published source-bound all-stage report; not connected to generic stage-projection batch capture or renderer",
+      "adapter_status": "connected saved-data adapter to csl.stage-projection-batch/1 and the shared offline renderer",
       "capability": "finite_game_forward_backward_layers",
       "stages": "R0 through R3; fixed-plan disturbance-history geometry and finite-feedback graph layers",
       "state_geometry": "fixed-plan forward polytopes are kept separate by control prefix; finite-feedback forward, winning, and intersection layers are discrete graph nodes",
       "evidence": "immutable ENV-717 report bundles with result, figure data, capture provenance, and checksums",
-      "limitations": ["three-stage finite-action adaptation of the continuous-action 10-second RL environment", "finite-game results do not establish continuous-action or continuous-disturbance guarantees", "fixed-plan minimax and finite-feedback outputs have different information patterns and objectives", "bespoke published figures exist, but this route is not yet rendered by the shared stage-projection workflow"]
+      "limitations": ["three-stage finite-action adaptation of the continuous-action 10-second RL environment", "finite-game results do not establish continuous-action or continuous-disturbance guarantees", "fixed-plan minimax and finite-feedback outputs have different information patterns and objectives", "the adapter preserves finite winning nodes as labelled point components; it does not infer continuous predecessor boundaries", "the source report remains immutable and the adapter performs no solver or geometry execution"]
     },
     {
       "route_id": "synthesis.strategy_b.direct_joint",
