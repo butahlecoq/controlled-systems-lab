@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>HORIZON-01 scalar horizon pilot</title>
+<style>
+:root{color-scheme:light dark;font:16px/1.55 system-ui,sans-serif}body{max-width:1080px;margin:2rem auto;padding:0 1rem}
+h1,h2{line-height:1.2}.scope{border-left:5px solid #b57900;padding:.75rem 1rem;background:color-mix(in srgb,#b57900 12%,transparent)}
+table{border-collapse:collapse;width:100%;margin:1rem 0}th,td{border:1px solid #888;padding:.55rem;text-align:left}th{background:color-mix(in srgb,#888 18%,transparent)}
+code{overflow-wrap:anywhere}.counts{display:flex;gap:1rem;flex-wrap:wrap}.counts span{padding:.4rem .7rem;border:1px solid #888;border-radius:.4rem}
+</style></head><body>
+<h1>HORIZON-01: scalar integrator horizon pilot</h1>
+<p>This report records a synthetic scalar integrator run at horizons 2, 4, and 8.
+Each horizon has one excluded warmup pair and six measured alternating pairs. The timed interval is
+<code>SynthesisWorkspace::run()</code>; process launch and setup are excluded.</p>
+<p class="scope"><strong>Evidence limit:</strong> these are descriptive invocation timings, not a performance ranking.
+Strategy B passed the fixture-specific analytic check. Strategy A completed but did not expose a recordable
+candidate relation or objective bound, so its checks are inconclusive. No measured pair passed for both strategies.
+No speedup, scalability, or complete-family claim follows from these results.</p>
+<h2>Results</h2>
+<table><thead><tr><th scope="col">Horizon</th><th scope="col">Reach-back median*</th><th scope="col">Reach-back range*</th>
+<th scope="col">Strategy B median*</th><th scope="col">Strategy B range*</th><th scope="col">Verified attempts</th><th scope="col">Verified pairs</th></tr></thead>
+<tbody><tr><th scope="row">T=2</th><td>5.395 ms</td><td>5.248 ms – 5.850 ms</td><td>0.709 ms</td><td>0.663 ms – 0.793 ms</td><td>6/12</td><td>0/6</td></tr><tr><th scope="row">T=4</th><td>11.196 ms</td><td>10.851 ms – 11.740 ms</td><td>0.710 ms</td><td>0.696 ms – 0.771 ms</td><td>6/12</td><td>0/6</td></tr><tr><th scope="row">T=8</th><td>23.745 ms</td><td>22.324 ms – 38.370 ms</td><td>0.763 ms</td><td>0.757 ms – 0.776 ms</td><td>6/12</td><td>0/6</td></tr></tbody></table>
+<p>* Median and range include all six completed measured calls for that method, including inconclusive calls.
+They are not pair-qualified performance estimates. Raw records are available in <a href="attempts.jsonl">attempts.jsonl</a>;
+independent result checks are in <a href="checks.jsonl">checks.jsonl</a>, with per-horizon details in <a href="summary.json">summary.json</a>.</p>
+<h2>Analytic fixture</h2>
+<pre><code>x[t+1] = x[t] + u[t], x[0] = 0, 0 &lt;= u[t] &lt;= 1; minimize x[T].</code></pre>
+<p>Because <code>x[T] = sum(u[t])</code>, the exact optimal value is 0, attained by the all-zero history.
+The checker verifies required initial, transition, and control-bound rows and the zero witness where a relation is exposed.
+It does not claim that a returned candidate relation is the complete feasible or optimal family.</p>
+<h2>Run environment</h2>
+<p>Host: <code>omarchy</code>; platform: <code>Linux-7.2.8-9-omarchy-x86_64-with-glibc2.44</code>;
+architecture: <code>x86_64</code>; logical CPUs: <code>8</code>;
+binary SHA-256: <code>e6bfad6ba7f1f638e7afd893fde2725cfdd37eaa2b926395e06e41470cf0b229</code>; source revision: <code>557813007a7864628a12ed67b43d870d820d315f</code>.</p>
+<p>Build: Release with c++ (GCC) 16.2.1 20260810,
+CMake cmake version 3.31.6, Ninja 1.13.2.
+See <a href="build-provenance.json">build provenance</a> and the full <a href="build.log">build log</a>.</p>
+<p>Attempt checks: <span class="counts"><span>verified: 21</span><span>inconclusive: 21</span><span>incorrect: 0</span><span>unavailable: 0</span></span></p>
+<p>Measurement source hashes: <code>CMakeLists.txt: 8b36fe3278ebb773a45d8eaa2d0638fb095e4aa7726cec1afcaf90f1ef0bcbc5 check_horizon_ladder.py: 7135f14d576547e37971ebbccc08ff7979cbcf8a830377be3f13ef99b0d480a2 horizon_ladder.cpp: 9bbeb0944e8df1c51ab584aee2404f78805d96f2a15a929ab28f69bd10c30bd1 run_horizon_ladder.py: c248da4448e462dc5ce2960a43824ad698fb49d58b9996ca270ba0201ad6e6e3 summarize_horizon_ladder.py: 7964ba4a558e54559bb70e88dc318ca692b5b01d273e71c1687cf3a498607ff2</code></p>
+<p>Fixture inputs: <a href="inputs/horizon01-t02.json">T=2</a>, <a href="inputs/horizon01-t04.json">T=4</a>,
+<a href="inputs/horizon01-t08.json">T=8</a>. See the <a href="README.md">benchmark instructions</a> for rebuild and replay commands.</p>
+</body></html>

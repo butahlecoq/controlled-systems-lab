@@ -1,0 +1,112 @@
+{
+  "schema": "csl.review05.horizon-summary/1",
+  "claim": "descriptive timings for one synthetic scalar-integrator fixture; no winner, speedup, family-completeness, or scalability claim",
+  "timed_region": "SynthesisWorkspace::run, steady_clock nanoseconds",
+  "horizons": [
+    {
+      "horizon": 2,
+      "measured_attempts": 12,
+      "verified_attempts": 6,
+      "verified_paired_repetitions": 0,
+      "process_statuses": {
+        "completed": 12
+      },
+      "strategies": {
+        "csl.synthesis.reach-back": {
+          "verified_rows_within_measured_pairs": 0,
+          "median_strategy_run_ns_within_verified_pairs": null,
+          "completed_timing_rows_including_inconclusive": 6,
+          "median_completed_run_ns_including_inconclusive": 8503103.0,
+          "min_completed_run_ns_including_inconclusive": 5953894,
+          "max_completed_run_ns_including_inconclusive": 12684552,
+          "observed_backend_thread_counts": {
+            "1": 6
+          },
+          "observed_backend_thread_unavailable_rows": 0
+        },
+        "csl.synthesis.strategy-b": {
+          "verified_rows_within_measured_pairs": 0,
+          "median_strategy_run_ns_within_verified_pairs": null,
+          "completed_timing_rows_including_inconclusive": 6,
+          "median_completed_run_ns_including_inconclusive": 1114862.5,
+          "min_completed_run_ns_including_inconclusive": 711115,
+          "max_completed_run_ns_including_inconclusive": 1527758,
+          "observed_backend_thread_counts": {
+            "1": 6
+          },
+          "observed_backend_thread_unavailable_rows": 0
+        }
+      }
+    },
+    {
+      "horizon": 4,
+      "measured_attempts": 12,
+      "verified_attempts": 6,
+      "verified_paired_repetitions": 0,
+      "process_statuses": {
+        "completed": 12
+      },
+      "strategies": {
+        "csl.synthesis.reach-back": {
+          "verified_rows_within_measured_pairs": 0,
+          "median_strategy_run_ns_within_verified_pairs": null,
+          "completed_timing_rows_including_inconclusive": 6,
+          "median_completed_run_ns_including_inconclusive": 14880229.0,
+          "min_completed_run_ns_including_inconclusive": 10682368,
+          "max_completed_run_ns_including_inconclusive": 19918549,
+          "observed_backend_thread_counts": {
+            "1": 6
+          },
+          "observed_backend_thread_unavailable_rows": 0
+        },
+        "csl.synthesis.strategy-b": {
+          "verified_rows_within_measured_pairs": 0,
+          "median_strategy_run_ns_within_verified_pairs": null,
+          "completed_timing_rows_including_inconclusive": 6,
+          "median_completed_run_ns_including_inconclusive": 977800.5,
+          "min_completed_run_ns_including_inconclusive": 770410,
+          "max_completed_run_ns_including_inconclusive": 1816618,
+          "observed_backend_thread_counts": {
+            "1": 6
+          },
+          "observed_backend_thread_unavailable_rows": 0
+        }
+      }
+    },
+    {
+      "horizon": 8,
+      "measured_attempts": 12,
+      "verified_attempts": 6,
+      "verified_paired_repetitions": 0,
+      "process_statuses": {
+        "completed": 12
+      },
+      "strategies": {
+        "csl.synthesis.reach-back": {
+          "verified_rows_within_measured_pairs": 0,
+          "median_strategy_run_ns_within_verified_pairs": null,
+          "completed_timing_rows_including_inconclusive": 6,
+          "median_completed_run_ns_including_inconclusive": 26599377.0,
+          "min_completed_run_ns_including_inconclusive": 22613901,
+          "max_completed_run_ns_including_inconclusive": 32163806,
+          "observed_backend_thread_counts": {
+            "1": 6
+          },
+          "observed_backend_thread_unavailable_rows": 0
+        },
+        "csl.synthesis.strategy-b": {
+          "verified_rows_within_measured_pairs": 0,
+          "median_strategy_run_ns_within_verified_pairs": null,
+          "completed_timing_rows_including_inconclusive": 6,
+          "median_completed_run_ns_including_inconclusive": 903490.5,
+          "min_completed_run_ns_including_inconclusive": 778022,
+          "max_completed_run_ns_including_inconclusive": 2011543,
+          "observed_backend_thread_counts": {
+            "1": 6
+          },
+          "observed_backend_thread_unavailable_rows": 0
+        }
+      }
+    }
+  ]
+}

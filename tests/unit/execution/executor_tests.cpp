@@ -195,6 +195,23 @@ TEST_CASE("backend scheduler observations aggregate to the maximum within one ba
     CHECK(result.enforcement.observed_backend_threads==5);
     CHECK(observations->maximum()==5);
 }
+TEST_CASE("reusing a caller backend observation does not leak a prior batch maximum") {
+    auto e=executor();
+    auto observations=std::make_shared<ex::BackendThreadObservation>();
+    auto ctx=context(*e);ctx.backend_thread_observation=observations;
+    std::vector<LPTask> first_tasks{
+        task("first-narrow",3,std::make_shared<Counts>(),[](const ExecutionContext& c){c.backend_thread_observation->record(2);}),
+        task("first-wide",-2,std::make_shared<Counts>(),[](const ExecutionContext& c){c.backend_thread_observation->record(5);})};
+    const auto first=run(*e,first_tasks,ctx,ex::Mode::bounded_parallel);
+    CHECK(first.enforcement.observed_backend_threads==5);
+    CHECK(observations->maximum()==5);
+
+    std::vector<LPTask> second_tasks{
+        task("second-only",3,std::make_shared<Counts>(),[](const ExecutionContext& c){c.backend_thread_observation->record(1);})};
+    const auto second=run(*e,second_tasks,ctx);
+    CHECK(second.enforcement.observed_backend_threads==1);
+    CHECK(observations->maximum()==5);
+}
 TEST_CASE("reservation credits serialize six plus six under ten and skip eleven") {
     auto e=executor({2,2,1,10});auto counts=std::make_shared<Counts>();
     std::vector<LPTask> tasks{task("a",3,counts),task("b",-2,counts),task("oversize",0,counts,{},{},use(11))};

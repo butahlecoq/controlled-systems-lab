@@ -1,0 +1,88 @@
+{
+  "schema": "csl.review05.horizon-summary/1",
+  "claim": "descriptive timings for one synthetic scalar-integrator fixture; no winner, speedup, family-completeness, or scalability claim",
+  "timed_region": "SynthesisWorkspace::run, steady_clock nanoseconds",
+  "horizons": [
+    {
+      "horizon": 2,
+      "measured_attempts": 12,
+      "verified_attempts": 6,
+      "verified_paired_repetitions": 0,
+      "process_statuses": {
+        "completed": 12
+      },
+      "strategies": {
+        "csl.synthesis.reach-back": {
+          "verified_rows_within_measured_pairs": 0,
+          "median_strategy_run_ns_within_verified_pairs": null,
+          "completed_timing_rows_including_inconclusive": 6,
+          "median_completed_run_ns_including_inconclusive": 5395245.5,
+          "min_completed_run_ns_including_inconclusive": 5248089,
+          "max_completed_run_ns_including_inconclusive": 5849640
+        },
+        "csl.synthesis.strategy-b": {
+          "verified_rows_within_measured_pairs": 0,
+          "median_strategy_run_ns_within_verified_pairs": null,
+          "completed_timing_rows_including_inconclusive": 6,
+          "median_completed_run_ns_including_inconclusive": 709283.5,
+          "min_completed_run_ns_including_inconclusive": 663083,
+          "max_completed_run_ns_including_inconclusive": 792710
+        }
+      }
+    },
+    {
+      "horizon": 4,
+      "measured_attempts": 12,
+      "verified_attempts": 6,
+      "verified_paired_repetitions": 0,
+      "process_statuses": {
+        "completed": 12
+      },
+      "strategies": {
+        "csl.synthesis.reach-back": {
+          "verified_rows_within_measured_pairs": 0,
+          "median_strategy_run_ns_within_verified_pairs": null,
+          "completed_timing_rows_including_inconclusive": 6,
+          "median_completed_run_ns_including_inconclusive": 11195683.0,
+          "min_completed_run_ns_including_inconclusive": 10851326,
+          "max_completed_run_ns_including_inconclusive": 11740208
+        },
+        "csl.synthesis.strategy-b": {
+          "verified_rows_within_measured_pairs": 0,
+          "median_strategy_run_ns_within_verified_pairs": null,
+          "completed_timing_rows_including_inconclusive": 6,
+          "median_completed_run_ns_including_inconclusive": 709702.0,
+          "min_completed_run_ns_including_inconclusive": 696467,
+          "max_completed_run_ns_including_inconclusive": 770710
+        }
+      }
+    },
+    {
+      "horizon": 8,
+      "measured_attempts": 12,
+      "verified_attempts": 6,
+      "verified_paired_repetitions": 0,
+      "process_statuses": {
+        "completed": 12
+      },
+      "strategies": {
+        "csl.synthesis.reach-back": {
+          "verified_rows_within_measured_pairs": 0,
+          "median_strategy_run_ns_within_verified_pairs": null,
+          "completed_timing_rows_including_inconclusive": 6,
+          "median_completed_run_ns_including_inconclusive": 23744628.5,
+          "min_completed_run_ns_including_inconclusive": 22323618,
+          "max_completed_run_ns_including_inconclusive": 38370021
+        },
+        "csl.synthesis.strategy-b": {
+          "verified_rows_within_measured_pairs": 0,
+          "median_strategy_run_ns_within_verified_pairs": null,
+          "completed_timing_rows_including_inconclusive": 6,
+          "median_completed_run_ns_including_inconclusive": 762817.0,
+          "min_completed_run_ns_including_inconclusive": 756532,
+          "max_completed_run_ns_including_inconclusive": 775598
+        }
+      }
+    }
+  ]
+}

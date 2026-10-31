@@ -384,9 +384,9 @@ calls and retained 486 samples. Both report zero lost samples. These counts are
 not a performance comparison and do not establish a unique limiter. Their
 original metadata and raw files remain unchanged and explicitly approximate.
 
-The current profile driver requires both `CSL_PERF_CONTROL_FIFO` and
-`CSL_PERF_ACK_FIFO`. It waits for either `ack\n` or the observed `ack\n\0`
-frame after each enable/disable command,
+When both `CSL_PERF_CONTROL_FIFO` and `CSL_PERF_ACK_FIFO` are configured, the
+profile driver waits for either `ack\n` or the observed `ack\n\0` frame after
+each enable/disable command,
 with a five-second bound, and fails a capture if perf exits, rejects the command,
 or does not acknowledge. Profile output marks the sample scope as
 `acknowledged_perf_control_window` and records the number of acknowledgements.
@@ -394,8 +394,12 @@ Workspace creation occurs before the enable command and outcome checking after
 the disable acknowledgement, so those phases are outside the window. The window
 includes the small FIFO command/acknowledgement work around each `StrategyPort::run`;
 it is not an exact instruction-only measurement of the call.
-Invoke it separately with `--profile-strategy reach-back|direct-joint` and
-`--profile-calls N`; it performs a warmup and the requested number of profiled
+When the FIFOs are absent, the same CLI can run repeated strategy calls for a
+process-wide profiler such as gprof. Its JSON reports `sample_scope` as
+`whole_process`, `perf_controlled` as false, and zero acknowledged commands;
+those samples include startup, workspace creation, outcome verification and
+reporting. Invoke it with `--profile-strategy reach-back|direct-joint` and
+`--profile-calls N`; it performs the requested number of checked strategy
 calls, then exits without comparison-record capture. The normal comparison run
 (optionally `--record <path>`) does not control `perf`. Acknowledgements improve
 control-boundary synchronization but do not make the small T-S01 workload

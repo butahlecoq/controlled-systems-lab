@@ -1,0 +1,128 @@
+{
+  "schema": "csl.review05-execution-environment/1",
+  "date": "2026-10-30",
+  "host": {
+    "os": "Omarchy Linux",
+    "kernel": "7.2.8-9-omarchy",
+    "architecture": "x86_64",
+    "cpu": "AMD Ryzen 5 3550H with Radeon Vega Mobile Gfx",
+    "logical_cpus": 8,
+    "load_average_before_capture": [
+      2.12,
+      1.37,
+      0.74
+    ]
+  },
+  "current_main_comparison": {
+    "build": {
+      "architecture": "x86_64",
+      "backends": {
+        "highs": {
+          "archive_sha256": "2b44b074cf41439325ce4d0bbdac2d51379f56faf17ba15320a410d3c1f07275",
+          "version": "1.11.0"
+        },
+        "qhull": {
+          "archive_sha256": "8774e9a12c70b0180b95d6b0b563c5aa4bea8d5960c15e18ae3b6d2521d64f8b",
+          "version": "8.0.2"
+        }
+      },
+      "build_type": "Release",
+      "c_flags_sha256": "8f44ef538aa91da7e6028b12b55c087bdb9fcff73c11775ae66ec7ad4f8e4a0a",
+      "compiler_id": "GNU",
+      "compiler_version": "16.2.1",
+      "cxx_flags_sha256": "8f44ef538aa91da7e6028b12b55c087bdb9fcff73c11775ae66ec7ad4f8e4a0a",
+      "cxx_standard": "20",
+      "executable_link_flags_sha256": "41b805ea7ac014e23556e98bb374702a08344268f92489a02f0880849394a1e4",
+      "generator": "Unix Makefiles",
+      "schema": "csl.obs04-build/1",
+      "source_dirty": false,
+      "source_revision": "210bbe39377be3131f537d65d4f0857c6b4c3462",
+      "source_snapshot_method": "git-head-tracked-diff-untracked-content-sha256/1",
+      "source_tree_sha256": "f1566cdb83c836a4f9aa96a3f8652f7a3fe5b40bd95f1df16e0270847dfd2a4e",
+      "target_flags_sha256": "137fa626ddb339b09fd7e4265e02b6f989ecb6260f3a2ac896e1af340f9b8815"
+    },
+    "execution": {
+      "cache_policy": "one warm-up repetition per arm; operating-system caches are not flushed",
+      "observed_backend_threads": {
+        "status": "available",
+        "value": 1
+      },
+      "observed_driver_workers": 1,
+      "requested_backend_threads": 1,
+      "requested_workers": 1,
+      "seed_policy": {
+        "kind": "not_applicable",
+        "reason": "fixed analytic fixture uses no random generator"
+      },
+      "tolerances": {
+        "absolute": 1e-08,
+        "relative": 1e-08
+      },
+      "warmup_repetitions": 1,
+      "workspace_policy": "fresh-workspace-per-attempt"
+    },
+    "runtime": {
+      "architecture": "x86_64",
+      "binary_sha256": {
+        "status": "available",
+        "value": "d214af2b6f63cd1a4ec673f29049b706f9ff2c9657dc7a399874700f7677f187"
+      },
+      "cpu_model": {
+        "status": "available",
+        "value": "AMD Ryzen 5 3550H with Radeon Vega Mobile Gfx"
+      },
+      "kernel": {
+        "status": "available",
+        "value": "7.2.8-9-omarchy"
+      },
+      "logical_cpus": {
+        "status": "available",
+        "value": 8
+      },
+      "os_family": "Linux",
+      "os_version": {
+        "status": "available",
+        "value": "Omarchy"
+      },
+      "schema": "csl.obs04-runtime/1"
+    },
+    "schema": "csl.obs04-environment/1"
+  },
+  "comparison_driver_sha256": "d214af2b6f63cd1a4ec673f29049b706f9ff2c9657dc7a399874700f7677f187",
+  "profile_build": {
+    "source_revision": "210bbe39377be3131f537d65d4f0857c6b4c3462",
+    "source_dirty": true,
+    "source_tree_sha256": "7dbfd5311952ec55742a6ef347d234e38c051c117f1cc0643bc2c1dc0fce4220",
+    "source_note": "same tracked main revision; benchmark artifacts were present during profile build configuration",
+    "compiler": "GCC 16.2.1",
+    "cmake": "3.31.6",
+    "gprof": "GNU gprof 2.47",
+    "build_type": "Release",
+    "c_flags": "-O3 -DNDEBUG -pg",
+    "cxx_flags": "-O3 -DNDEBUG -pg",
+    "executable_link_flags": "-pg",
+    "profile_binary_sha256": "a3ba854e4a18cb060bb2e8c35694e8b6b972c9dc108d6a3432657bbedac5e35f",
+    "backend_versions": {
+      "HiGHS": "1.11.0",
+      "Qhull": "8.0.2"
+    },
+    "system_perf_available": false
+  },
+  "fixture": {
+    "name": "T-S01",
+    "state_dimension": 1,
+    "horizon": 2,
+    "control_interval": [
+      0,
+      1
+    ],
+    "objective": "(x[2]-1)^2",
+    "tolerances": {
+      "absolute": 1e-08,
+      "relative": 1e-08
+    },
+    "workers": 1,
+    "backend_threads": 1,
+    "workspace": "fresh per attempt"
+  }
+}

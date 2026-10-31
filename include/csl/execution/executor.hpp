@@ -151,9 +151,8 @@ public:
                 diagnostics.push_back({DiagnosticCode::invalid_input,field+".id","task IDs must be unique within a batch"});
         }
         if (!diagnostics.empty()) return diagnostics;
-        auto backend_thread_observation=context.backend_thread_observation;
-        if(!backend_thread_observation)
-            backend_thread_observation=std::make_shared<BackendThreadObservation>();
+        const auto caller_backend_thread_observation=context.backend_thread_observation;
+        auto backend_thread_observation=std::make_shared<BackendThreadObservation>();
         ExecutionContext frozen=context;
         frozen.backend_thread_observation=backend_thread_observation;
         BatchResult<Port> result{frozen.run_id,resources_,frozen.numerical,mode,{},{},{},{}};
@@ -182,6 +181,8 @@ public:
         result.timing=summary.timing;
         result.enforcement=summary.enforcement;
         result.enforcement.observed_backend_threads=backend_thread_observation->maximum();
+        if(caller_backend_thread_observation && result.enforcement.observed_backend_threads)
+            caller_backend_thread_observation->record(*result.enforcement.observed_backend_threads);
         result.launch_failure=summary.launch_failure;
         return result;
     }

@@ -16,7 +16,7 @@ struct NumericalPolicy { double absolute_tolerance, relative_tolerance; bool ope
 namespace execution::observability { class TimingCollector; }
 namespace execution {
 // Thread-safe maximum scheduler width reported by native adapters during one
-// execution scope. The executor creates it when absent and shares it with nested work.
+// execution scope.
 class BackendThreadObservation {
     std::atomic<std::size_t> maximum_{};
 public:
@@ -38,7 +38,8 @@ struct ExecutionContext {
     NumericalPolicy numerical{1e-8,1e-8};
     std::string run_id;
     std::shared_ptr<execution::observability::TimingCollector> timing{};
-    // Shared by an executor and any nested native adapters in this run.
+    // Optional caller-owned aggregate sink. The executor gives adapters a fresh
+    // per-batch observer and merges its maximum into this sink after the batch.
     std::shared_ptr<execution::BackendThreadObservation> backend_thread_observation{};
 };
 class ExclusiveWorkspace {

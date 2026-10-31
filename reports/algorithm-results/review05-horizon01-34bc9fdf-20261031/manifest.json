@@ -1,0 +1,67 @@
+{
+  "schema": "csl.review05.horizon-manifest/1",
+  "track": "new-comparison",
+  "fixture": "HORIZON-01-scalar-integrator",
+  "scenario_sha256": {
+    "2": "056032df5c8a30e376e00c5a0743606211486a0e268b209919ba771bc2efeb76",
+    "4": "ba86e625b4a6daae09d3db8400551e23277400b20fdd78893c9fc9b9c98b2dd3",
+    "8": "af2b5471d85111d2225b5abf579c3b367bce18765763b567be0bc598290c73d4"
+  },
+  "environment": {
+    "source_revision": "34bc9fdf437d6eaa63f28c579acc6c82f506ede5",
+    "source_worktree_dirty": false,
+    "measurement_source_sha256": {
+      "CMakeLists.txt": "8b36fe3278ebb773a45d8eaa2d0638fb095e4aa7726cec1afcaf90f1ef0bcbc5",
+      "horizon_ladder.cpp": "ac0934c6ad930b8897bc842caf9a850fcfd838daf746ba61b4965f406b16e9da",
+      "run_horizon_ladder.py": "63730f025a4e8a8b8f3ffc77b0bb0fac4a314bbbd0285ac91bd41d00e745900a",
+      "check_horizon_ladder.py": "68fb7008fce96b1c2b17ec87dd5c672822311809cb683019f93d6c7ffc6b0a0f",
+      "summarize_horizon_ladder.py": "4ac820d78b550fdf905752cb9b01a2bbecd9b456b12a1ed0fc0340b1cf843567"
+    },
+    "host": "omarchy",
+    "platform": "Linux-7.2.8-9-omarchy-x86_64-with-glibc2.44",
+    "machine": "x86_64",
+    "processor": "",
+    "logical_cpus": 8,
+    "physical_memory_bytes": 8108216320,
+    "load_average_at_start": [
+      10.03076171875,
+      9.50146484375,
+      5.30615234375
+    ],
+    "python": "3.14.8",
+    "binary_sha256": "d8b35dc41c8393f364fd2af7837a42b650c1dfa7730b55f856ea7877142629ae",
+    "requested_threads_per_strategy": 1,
+    "requested_driver_workers": 1,
+    "observed_driver_workers": 1,
+    "limits": {
+      "cpu_seconds": 300,
+      "address_space_bytes": 8589934592,
+      "mechanism": "POSIX RLIMIT_CPU and RLIMIT_AS on each strategy process",
+      "process_timeout_seconds": 300,
+      "scope": "single strategy process",
+      "enforced": true
+    }
+  },
+  "schedule": {
+    "warmup_pairs_per_horizon": 1,
+    "measured_pairs_per_horizon": 6,
+    "alternation": "AB,BA,AB,BA,AB,BA per horizon",
+    "horizon_order": "rotates by repetition index across 2,4,8",
+    "timed_region": "C++ steady_clock around SynthesisWorkspace::run only",
+    "process_startup_and_setup": "excluded from strategy_run_ns; process_wall_ns retained separately"
+  },
+  "report_source_sha256": {
+    "render_horizon_ladder.py": "14f4f5663d672bbd883a4f6064738e7a7f38c4462006f57ef42aa7bc433efbd1"
+  },
+  "execution": {
+    "numerical_tolerance": {
+      "absolute": 1e-08,
+      "relative": 1e-08
+    },
+    "seed_policy": {
+      "kind": "not_applicable",
+      "reason": "deterministic linear fixture with no random generator"
+    },
+    "workspace_policy": "fresh process and strategy workspace per attempt; one excluded warmup pair per horizon; operating-system caches not flushed"
+  }
+}
