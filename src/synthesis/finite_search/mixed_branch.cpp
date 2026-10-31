@@ -253,4 +253,35 @@ FiniteMixedBranchRelationOutcome lift_finite_mixed_branch_relation(
     return std::get<sets::SetData>(std::move(lifted));
 }
 
+FiniteMixedBranchPortfolioOutcome select_finite_mixed_branch_portfolio(
+    std::vector<FiniteMixedBranchEvaluation> evaluations, bool enumeration_complete,
+    double near_optimal_tolerance) {
+    if (!std::isfinite(near_optimal_tolerance) || near_optimal_tolerance < 0.0)
+        return invalid("finite_mixed_branch.near_optimal_tolerance",
+            "Near-optimal tolerance must be finite and non-negative.");
+
+    std::optional<double> optimum;
+    for (const auto& evaluation : evaluations) {
+        const bool prepared = std::holds_alternative<FiniteMixedBranchProblem>(evaluation.branch);
+        if (prepared != evaluation.objective.has_value())
+            return invalid("finite_mixed_branch.objective",
+                prepared ? "Every prepared branch requires an objective value."
+                          : "A refused branch must not carry an objective value.");
+        if (!evaluation.objective) continue;
+        if (!std::isfinite(*evaluation.objective))
+            return invalid("finite_mixed_branch.objective", "Branch objective must be finite.");
+        if (!optimum || *evaluation.objective < *optimum) optimum = *evaluation.objective;
+    }
+
+    FiniteMixedBranchPortfolio result{std::move(evaluations), {}, optimum, enumeration_complete};
+    if (optimum) {
+        for (std::size_t index = 0; index < result.evaluations.size(); ++index) {
+            const auto& objective = result.evaluations[index].objective;
+            if (objective && *objective <= *optimum + near_optimal_tolerance)
+                result.optimal_evaluation_indices.push_back(index);
+        }
+    }
+    return result;
+}
+
 } // namespace csl::synthesis

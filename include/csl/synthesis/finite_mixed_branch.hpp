@@ -5,6 +5,7 @@
 #include <csl/sets/data.hpp>
 
 #include <cstddef>
+#include <optional>
 #include <variant>
 #include <vector>
 
@@ -38,6 +39,25 @@ struct FiniteMixedBranchPrefix {
     bool complete{}; // All catalogue-index histories were emitted, not all branches feasible.
 };
 
+// One evaluated branch preserves either its prepared branch and objective or
+// the original preparation refusal. A missing objective is valid only for a
+// refused branch; it must never be interpreted as a zero-cost candidate.
+struct FiniteMixedBranchEvaluation {
+    FiniteMixedBranchEntry branch;
+    std::optional<double> objective;
+};
+
+struct FiniteMixedBranchPortfolio {
+    std::vector<FiniteMixedBranchEvaluation> evaluations;
+    // These minima are over the supplied evaluations. They are globally
+    // minimal only when complete is true; otherwise unseen histories may win.
+    std::vector<std::size_t> optimal_evaluation_indices;
+    std::optional<double> optimum;
+    bool complete{}; // The input covers every catalogue-index history.
+};
+
+using FiniteMixedBranchPortfolioOutcome = std::variant<FiniteMixedBranchPortfolio, Diagnostics>;
+
 // Streams prepared branches in catalogue-index order without materializing the full product.
 class FiniteMixedBranchCursor {
     problem::ResolvedProblem source_;
@@ -63,5 +83,14 @@ FiniteMixedBranchOutcome prepare_finite_mixed_branch(
 // canonical joint coordinates and fixes every discrete control coordinate.
 FiniteMixedBranchRelationOutcome lift_finite_mixed_branch_relation(
     const FiniteMixedBranchProblem&, const sets::SetData&);
+
+// Selects every minimal evaluated branch within the caller's tolerance,
+// without reordering catalogue histories or dropping refusals. The result is
+// a global minimum only when enumeration_complete is true.
+// The selector does not solve a branch, infer a continuous family, or treat a
+// convex relaxation as a discrete candidate.
+FiniteMixedBranchPortfolioOutcome select_finite_mixed_branch_portfolio(
+    std::vector<FiniteMixedBranchEvaluation>, bool enumeration_complete,
+    double near_optimal_tolerance);
 
 } // namespace csl::synthesis
