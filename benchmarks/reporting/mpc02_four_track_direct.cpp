@@ -56,6 +56,8 @@ struct MeasurementObservation {
     std::size_t variables{};
     std::size_t rows{};
     double max_residual{};
+    std::vector<double> controls;
+    double objective{};
 };
 
 std::uint64_t elapsed(Clock::time_point start, Clock::time_point end) {
@@ -110,9 +112,13 @@ MeasurementObservation run_direct(const input::LoadedScenario& scenario, const T
     const auto first_control = (horizon + 1) * state_width;
     if (first_control + track.controls.size() > result->primal->size())
         throw std::runtime_error("control coordinate map exceeds primal dimension");
-    for (std::size_t i = 0; i < track.controls.size(); ++i)
+    std::vector<double> controls;
+    controls.reserve(track.controls.size());
+    for (std::size_t i = 0; i < track.controls.size(); ++i) {
+        controls.push_back((*result->primal)[first_control + i]);
         if (std::abs((*result->primal)[first_control + i] - track.controls[i]) > 2e-7)
             throw std::runtime_error("numerical witness disagrees with exact oracle");
+    }
     if (std::abs(check->original_objective - track.objective) > 2e-7)
         throw std::runtime_error("numerical objective disagrees with exact oracle");
     double residual = 0.0;
@@ -121,7 +127,8 @@ MeasurementObservation run_direct(const input::LoadedScenario& scenario, const T
             result->residuals.primal->variables.violation);
     return {elapsed(assembly_start, assembly_end), elapsed(prepare_start, prepare_end),
         elapsed(solve_start, solve_end), convex->quadratic_program().variables().size(),
-        convex->quadratic_program().rows().size(), residual};
+        convex->quadratic_program().rows().size(), residual, std::move(controls),
+        check->original_objective};
 }
 
 } // namespace
@@ -195,7 +202,13 @@ int main(int argc, char** argv) try {
                 << ",\"assembly_ns\":" << observation.assembly_ns << ",\"provider_prepare_and_workspace_ns\":"
                 << observation.prepare_ns << ",\"solve_ns\":" << observation.solve_ns
                 << ",\"variables\":" << observation.variables << ",\"rows\":" << observation.rows
-                << ",\"max_residual\":" << observation.max_residual << ",\"error\":" << quote(failure) << '}';
+                << ",\"max_residual\":" << observation.max_residual << ",\"controls\":[";
+            for (std::size_t i = 0; i < observation.controls.size(); ++i) {
+                if (i) event << ',';
+                event << observation.controls[i];
+            }
+            event << "],\"objective\":" << observation.objective
+                << ",\"error\":" << quote(failure) << '}';
             emit(event.str());
         }
     }

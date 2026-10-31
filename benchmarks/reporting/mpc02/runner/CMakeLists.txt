@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.31)
-project(CSLMPC02FourTrackMeasurement LANGUAGES C CXX)
+project(CSLMPC02Measurement LANGUAGES C CXX)
 
 if(NOT DEFINED CSL_SOURCE_ROOT)
   message(FATAL_ERROR "CSL_SOURCE_ROOT must name the pinned clean solver checkout")
@@ -26,6 +26,14 @@ execute_process(
   OUTPUT_VARIABLE CSL_SOURCE_COMMIT
   OUTPUT_STRIP_TRAILING_WHITESPACE
   COMMAND_ERROR_IS_FATAL ANY)
+add_executable(csl_mpc02_slew_measure "${CMAKE_CURRENT_LIST_DIR}/../../mpc02_slew_direct_vs_lift.cpp")
+target_link_libraries(csl_mpc02_slew_measure PRIVATE CSL::input CSL::strategy_b CSL::highs_convex)
+target_compile_features(csl_mpc02_slew_measure PRIVATE cxx_std_20)
+target_compile_definitions(csl_mpc02_slew_measure PRIVATE NDEBUG
+  CSL_SOURCE_COMMIT="${CSL_SOURCE_COMMIT}"
+  CSL_BUILD_TYPE="${CMAKE_BUILD_TYPE}"
+  CSL_COMPILER_ID="${CMAKE_CXX_COMPILER_ID}"
+  CSL_COMPILER_VERSION="${CMAKE_CXX_COMPILER_VERSION}")
 add_executable(csl_mpc02_four_track_measure "${CMAKE_CURRENT_LIST_DIR}/../../mpc02_four_track_direct.cpp")
 target_link_libraries(csl_mpc02_four_track_measure PRIVATE CSL::input CSL::strategy_b CSL::highs_convex)
 target_compile_features(csl_mpc02_four_track_measure PRIVATE cxx_std_20)
