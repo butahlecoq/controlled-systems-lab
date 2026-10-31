@@ -121,10 +121,34 @@ aggregate across batches reporting maxima 5 and 1; the corresponding results
 now report 5 and 1 while the aggregate retains 5. `execution_tests` passes on
 the fix branch.
 
+## 2026-10-31 gprof profile-matrix diagnostic
+
+To get a source-attributed signal from the current exact-profile matrix, I built
+`csl_review05_profile_matrix` at source commit
+`be94be8923a576d6f7cb9b527d818b3469cd0606` with GCC 16.2.1 Release flags
+`-O3 -DNDEBUG -pg`, then profiled the existing T-S01/T-S02/T-S03 schedules
+with GNU gprof 2.47. All measured attempts passed the registered complete-family
+and two-witness checks: 7/7 pairs for T-S01 and 5/5 for each of T-S02 and
+T-S03. All three profiled processes exited zero without timing out.
+
+The call-graph samples are too sparse to locate a limiter: T-S01 and T-S02
+accumulated about 0.02 seconds at 0.01-second sampling resolution, while T-S03
+accumulated no timer samples. The sampled HiGHS factor-solve and KKT-check
+entries in T-S01 are only two coarse ticks and include setup and repeated calls;
+they do not identify a strategy bottleneck. T-S02 also has too few samples, and
+T-S03 supports call-count inspection only. The `-pg` durations are not
+performance measurements and were not used in timing summaries.
+
+Raw gmon data, per-process receipts, JSONL output, checker results, complete
+gprof reports and SHA-256 hashes are retained in the [2026-10-31 diagnostic
+bundle](../../reports/algorithm-results/review05-gprof-diagnostic-20261031/README.md).
+This repeats the same one-state, one-control, two-step fixtures and therefore
+does not close the matched size/output-growth gap.
+
 ## REVIEW-05 disposition
 
 The ownership, resource-policy and batch-isolation portions have current source/test evidence. The focused execution and batch suites passed with and without ThreadSanitizer; the fresh instrumented run also includes timing, HiGHS, and Qhull targets. There are now two fresh, equal-scope timing points for both strategies, but they vary neither state dimension nor horizon, constraint count, representation size or output size.
 
-The general scenario runner does not currently give a second usable sweep: its tested two-state horizon-3 profile rejects reach-back at the convex adapter's matrix-removal threshold (documented in `examples/scenarios/README.md`), while the scalar general-profile smoke has no selected, verified witnesses. I did not use either as a fair speed comparison. No fresh multi-axis paired sweep is claimed here. The current-build gprof run is process-wide and too low-resolution to support a unique-limiter claim.
+The general scenario runner does not currently give a second usable sweep: its tested two-state horizon-3 profile rejects reach-back at the convex adapter's matrix-removal threshold (documented in `examples/scenarios/README.md`), while the scalar general-profile smoke has no selected, verified witnesses. I did not use either as a fair speed comparison. No fresh multi-axis paired sweep is claimed here. The current-build gprof runs are too low-resolution to support a unique-limiter claim.
 
 **Status: partial; keep #95 open.** Required remaining evidence is a compatible workload ladder that both general strategies complete with equal independently verified output scope, plus representation/output growth and phase/resource observations at those sizes. Native thread enforcement and hard heap limits remain unsupported contracts, not defects newly discovered by this review. An independent review of this report and the exact source revision is still required before sign-off.
