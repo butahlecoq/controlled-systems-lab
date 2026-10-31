@@ -1,0 +1,290 @@
+{
+  "profiles": {
+    "ts01_exact_integrator": {
+      "elapsed_wall_seconds": 0.09055929398164153,
+      "executable_sha256": "c1b471b8092bf270ff306e27c6daf59a6b1f65a26e2cedc187d5b26f91a02b2e",
+      "host": {
+        "load_average_after": [
+          0.490234375,
+          1.791015625,
+          1.2197265625
+        ],
+        "load_average_before": [
+          0.490234375,
+          1.791015625,
+          1.2197265625
+        ],
+        "logical_cpus": 8,
+        "machine": "x86_64",
+        "platform": "Linux-7.2.8-9-omarchy-x86_64-with-glibc2.44",
+        "processor": ""
+      },
+      "measured_pairs": 7,
+      "order_by_repetition": [
+        [
+          "csl.synthesis.reach-back",
+          "csl.synthesis.strategy-b"
+        ],
+        [
+          "csl.synthesis.strategy-b",
+          "csl.synthesis.reach-back"
+        ],
+        [
+          "csl.synthesis.reach-back",
+          "csl.synthesis.strategy-b"
+        ],
+        [
+          "csl.synthesis.strategy-b",
+          "csl.synthesis.reach-back"
+        ],
+        [
+          "csl.synthesis.reach-back",
+          "csl.synthesis.strategy-b"
+        ],
+        [
+          "csl.synthesis.strategy-b",
+          "csl.synthesis.reach-back"
+        ],
+        [
+          "csl.synthesis.reach-back",
+          "csl.synthesis.strategy-b"
+        ]
+      ],
+      "process_exit_code": 0,
+      "scenario_sha256": "bbeb83947627a197d71dd380dbaa5cfae12e22cd6d79b12e66ef08275b2c390a",
+      "schema": "csl.synthesis.paired-ts01-event/1",
+      "strategies": {
+        "csl.synthesis.reach-back": {
+          "attempts": 7,
+          "complete_verified_outputs": 7,
+          "end_to_end_strategy_ns": {
+            "max": 8355800,
+            "median": 6439272,
+            "min": 6278776
+          },
+          "family_construction_ns": {
+            "max": 7472581,
+            "median": 5749096,
+            "min": 5639095
+          },
+          "retained_statuses": [
+            "passed",
+            "passed",
+            "passed",
+            "passed",
+            "passed",
+            "passed",
+            "passed"
+          ]
+        },
+        "csl.synthesis.strategy-b": {
+          "attempts": 7,
+          "complete_verified_outputs": 7,
+          "end_to_end_strategy_ns": {
+            "max": 2011024,
+            "median": 1562919,
+            "min": 1530792
+          },
+          "family_construction_ns": {
+            "max": 1318473,
+            "median": 954318,
+            "min": 906686
+          },
+          "retained_statuses": [
+            "passed",
+            "passed",
+            "passed",
+            "passed",
+            "passed",
+            "passed",
+            "passed"
+          ]
+        }
+      },
+      "timed_out": false
+    },
+    "ts02_constant_integrator": {
+      "elapsed_wall_seconds": 0.06288309299270622,
+      "executable_sha256": "c1b471b8092bf270ff306e27c6daf59a6b1f65a26e2cedc187d5b26f91a02b2e",
+      "host": {
+        "load_average_after": [
+          0.490234375,
+          1.791015625,
+          1.2197265625
+        ],
+        "load_average_before": [
+          0.490234375,
+          1.791015625,
+          1.2197265625
+        ],
+        "logical_cpus": 8,
+        "machine": "x86_64",
+        "platform": "Linux-7.2.8-9-omarchy-x86_64-with-glibc2.44",
+        "processor": ""
+      },
+      "measured_pairs": 5,
+      "order_by_repetition": [
+        [
+          "csl.synthesis.reach-back",
+          "csl.synthesis.strategy-b"
+        ],
+        [
+          "csl.synthesis.strategy-b",
+          "csl.synthesis.reach-back"
+        ],
+        [
+          "csl.synthesis.reach-back",
+          "csl.synthesis.strategy-b"
+        ],
+        [
+          "csl.synthesis.strategy-b",
+          "csl.synthesis.reach-back"
+        ],
+        [
+          "csl.synthesis.reach-back",
+          "csl.synthesis.strategy-b"
+        ]
+      ],
+      "process_exit_code": 0,
+      "scenario_sha256": "00686f585934738530be0c890baa29dc049fa810b2f8fa8f083191da59c2dedb",
+      "schema": "csl.synthesis.paired-family-event/1",
+      "strategies": {
+        "csl.synthesis.reach-back": {
+          "attempts": 5,
+          "complete_verified_outputs": 5,
+          "end_to_end_strategy_ns": {
+            "max": 6281710,
+            "median": 5986139,
+            "min": 5943885
+          },
+          "family_construction_ns": {
+            "max": 5590974,
+            "median": 5333328,
+            "min": 5318382
+          },
+          "retained_statuses": [
+            "passed",
+            "passed",
+            "passed",
+            "passed",
+            "passed"
+          ]
+        },
+        "csl.synthesis.strategy-b": {
+          "attempts": 5,
+          "complete_verified_outputs": 5,
+          "end_to_end_strategy_ns": {
+            "max": 666639,
+            "median": 655814,
+            "min": 650367
+          },
+          "family_construction_ns": {
+            "max": 62020,
+            "median": 53988,
+            "min": 48819
+          },
+          "retained_statuses": [
+            "passed",
+            "passed",
+            "passed",
+            "passed",
+            "passed"
+          ]
+        }
+      },
+      "timed_out": false
+    },
+    "ts03_singular_integrator": {
+      "elapsed_wall_seconds": 0.06777488000807352,
+      "executable_sha256": "c1b471b8092bf270ff306e27c6daf59a6b1f65a26e2cedc187d5b26f91a02b2e",
+      "host": {
+        "load_average_after": [
+          0.490234375,
+          1.791015625,
+          1.2197265625
+        ],
+        "load_average_before": [
+          0.490234375,
+          1.791015625,
+          1.2197265625
+        ],
+        "logical_cpus": 8,
+        "machine": "x86_64",
+        "platform": "Linux-7.2.8-9-omarchy-x86_64-with-glibc2.44",
+        "processor": ""
+      },
+      "measured_pairs": 5,
+      "order_by_repetition": [
+        [
+          "csl.synthesis.reach-back",
+          "csl.synthesis.strategy-b"
+        ],
+        [
+          "csl.synthesis.strategy-b",
+          "csl.synthesis.reach-back"
+        ],
+        [
+          "csl.synthesis.reach-back",
+          "csl.synthesis.strategy-b"
+        ],
+        [
+          "csl.synthesis.strategy-b",
+          "csl.synthesis.reach-back"
+        ],
+        [
+          "csl.synthesis.reach-back",
+          "csl.synthesis.strategy-b"
+        ]
+      ],
+      "process_exit_code": 0,
+      "scenario_sha256": "c63dd94a45b22a557879fbda83dd49938cde9aa4fa24b5f5fc4e2cf0204397d2",
+      "schema": "csl.synthesis.paired-family-event/1",
+      "strategies": {
+        "csl.synthesis.reach-back": {
+          "attempts": 5,
+          "complete_verified_outputs": 5,
+          "end_to_end_strategy_ns": {
+            "max": 5768302,
+            "median": 5558777,
+            "min": 5538593
+          },
+          "family_construction_ns": {
+            "max": 5082806,
+            "median": 4938792,
+            "min": 4905128
+          },
+          "retained_statuses": [
+            "passed",
+            "passed",
+            "passed",
+            "passed",
+            "passed"
+          ]
+        },
+        "csl.synthesis.strategy-b": {
+          "attempts": 5,
+          "complete_verified_outputs": 5,
+          "end_to_end_strategy_ns": {
+            "max": 1568856,
+            "median": 1538545,
+            "min": 1474500
+          },
+          "family_construction_ns": {
+            "max": 944261,
+            "median": 927778,
+            "min": 880426
+          },
+          "retained_statuses": [
+            "passed",
+            "passed",
+            "passed",
+            "passed",
+            "passed"
+          ]
+        }
+      },
+      "timed_out": false
+    }
+  },
+  "schema": "csl.review05.profile-matrix-check/1"
+}
