@@ -85,6 +85,60 @@ class Mpc02FourTrackIndependentOracleTests(unittest.TestCase):
             [(None, Fraction(1, 4))] * 4,
         )
 
+    def test_intermediate_violation_is_not_hidden_by_physical_endpoint(self) -> None:
+        """A physical-state-only recurrence admits a history rejected by slew."""
+        # x0=0, x1=x0+u0, x2=x1+u1; require x1=1 and |u1-u0| <= 1/4.
+        u0 = Fraction(1)  # x1=1 fixes the first control exactly.
+        admissible_u1 = (Fraction(3, 4), Fraction(1))
+        terminal_interval = (u0 + admissible_u1[0], u0 + admissible_u1[1])
+        self.assertEqual(terminal_interval, (Fraction(7, 4), Fraction(2)))
+
+        # Dropping the remembered u0 and propagating with an independent [-1,1]
+        # second-stage domain falsely admits the same endpoint x2=0.
+        falsely_admitted = (u0, Fraction(-1))
+        self.assertEqual(sum(falsely_admitted), Fraction(0))
+        self.assertGreater(abs(falsely_admitted[1] - falsely_admitted[0]), Fraction(1, 4))
+
+    def test_incompatible_initial_memory_makes_first_slew_step_infeasible(self) -> None:
+        # A declared previous command p0=2 is incompatible with u0 in [-1,1]
+        # when |u0-p0| <= 1/4.  This is a constraint contradiction, not a
+        # solver failure and not permission to silently drop the first row.
+        p0 = Fraction(2)
+        control_lower, control_upper = Fraction(-1), Fraction(1)
+        slew = Fraction(1, 4)
+        compatible_lower = max(control_lower, p0 - slew)
+        compatible_upper = min(control_upper, p0 + slew)
+        self.assertGreater(compatible_lower, compatible_upper)
+
+    def test_temporal_rows_can_make_the_complete_history_empty(self) -> None:
+        # The box alone permits every pair in [-1,1]^2.  These are literal rows
+        # in x0,...,xT,u0,u1 order: u0 <= -3 and -u0 <= 2 (u0 >= -2).
+        # No complete history can satisfy them; endpoint projection must not
+        # manufacture a witness.
+        lower, upper = Fraction(-1), Fraction(1)
+        history_upper = Fraction(-3)
+        history_lower = Fraction(-2)
+        rows = [
+            [0, 0, 0, 0, 0, 0, 1, 0],
+            [0, 0, 0, 0, 0, 0, -1, 0],
+        ]
+        upper_bounds = [history_upper, Fraction(2)]
+        self.assertEqual(len(rows), 2)
+        self.assertEqual([row[6:] for row in rows], [[1, 0], [-1, 0]])
+        self.assertEqual(upper_bounds, [Fraction(-3), Fraction(2)])
+        self.assertLess(history_upper, lower)
+        self.assertLess(history_upper, history_lower)
+        self.assertLess(min(upper, history_upper), max(lower, history_lower))
+
+    def test_slew_memory_projection_reconstructs_original_controls(self) -> None:
+        p0 = Fraction(1, 8)
+        increments = (Fraction(1, 4), Fraction(-1, 4))
+        memory = (p0, p0 + increments[0])
+        recovered = (memory[0] + increments[0], memory[1] + increments[1])
+        self.assertEqual(recovered, (Fraction(3, 8), Fraction(1, 8)))
+        self.assertEqual(abs(recovered[0] - p0), Fraction(1, 4))
+        self.assertEqual(abs(recovered[1] - recovered[0]), Fraction(1, 4))
+
 
 if __name__ == "__main__":
     unittest.main()
