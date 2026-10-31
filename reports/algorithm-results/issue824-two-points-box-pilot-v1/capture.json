@@ -1,0 +1,35 @@
+{
+  "build": {
+    "compiler": "/usr/bin/c++",
+    "compiler_version": "c++ (GCC) 16.2.1 20260810",
+    "configuration": "Release",
+    "directory": "/home/butahlecoq/.local/share/codex/worktrees/issue824-approx-control-20261101/build/dev",
+    "generator": "Ninja",
+    "highs": "ON",
+    "qhull": "ON"
+  },
+  "exact_geometry_reference": {
+    "figure_data_sha256": "0a9995d4a2648ee9e13e93128063ac1978392349a2c2ecbee6aa5c659d3362d7",
+    "report_id": "mpc05-causal-tree-pilot-v2"
+  },
+  "host": {
+    "machine": "x86_64",
+    "release": "7.2.8-9-omarchy",
+    "system": "Linux"
+  },
+  "schema": "csl.issue824-two-points-box-capture/1",
+  "source_commit": "fd76367c1c6643bf5d603d6f2278874a7fbe2f48",
+  "source_files_sha256": {
+    "benchmarks/reporting/exp824/two_points_box.cpp": "db7e0f772124e1652868fe602ed505f5384f0c21b63b1aed33b748e51b4a7119",
+    "include/csl/optimization/finite_action_box_minimax.hpp": "6934b8ce0e7918bbab43ee4cd0a64d8e0a96fe543e9f14d0fc2903882f8fb8b5",
+    "include/csl/reachability/finite_plan_box.hpp": "bbfb681d5b6e61b2f751bba601eb9224afd5f5553155e93e69f6a48548002652",
+    "scripts/reports/exp824/check_two_points_box.py": "6728ac5996b2a346acf75e7ff6366571066965c08713ab6bdab5edac9668187b",
+    "scripts/reports/exp824/make_report.py": "3f587fbf48bc7c9bd6420ac80bac24b4292f47e44868d405b1e0b98ff661ac67",
+    "src/optimization/finite_action_box_minimax.cpp": "b8d010f6d46f59b79937fcc75bd89296fd033f610341e17ada723e4eadd79b0d",
+    "src/optimization/finite_action_minimax.cpp": "958913ead8bbb935a49b30c4f9564d39c42b09a46f03492fe2327920272cca1f",
+    "src/optimization/finite_action_plans.hpp": "8ca3f1f52f947b6f9a556725d610b608676ddb568efb70b469bb81cc0c51be3b",
+    "src/reachability/finite_plan_box.cpp": "45df26937aafd54d313bf3b03f40fdc05352167943ade2d2beeb038249592eba"
+  },
+  "source_status_before_report_generation": [],
+  "source_tree_clean_before_report_generation": true
+}
