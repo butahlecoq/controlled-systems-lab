@@ -57,6 +57,13 @@ class Mpc02FourTrackIndependentOracleTests(unittest.TestCase):
                     self.assertTrue(all(lower <= value <= upper for value in control))
 
                 if scenario_id == "mpc02-slew-2d-v1":
+                    self.assertEqual(scenario["temporal"]["rows"],
+                                     [[0, 0, 0, 0, 0, 0, -1, 1]])
+                    self.assertEqual(
+                        [(row["lower"], fraction(row["upper"]))
+                         for row in scenario["temporal"]["bounds"]],
+                        [(Fraction(-1, 4), Fraction(1, 4))],
+                    )
                     self.assertEqual(abs(control[1] - control[0]), Fraction(1, 4))
                 elif scenario_id == "mpc02-l1-budget-2d-v1":
                     self.assertEqual(abs(control[0]) + abs(control[1]), Fraction(1, 4))
