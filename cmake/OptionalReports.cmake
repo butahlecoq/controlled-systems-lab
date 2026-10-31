@@ -533,12 +533,33 @@ target_compile_options(csl_mpc05_causal_tree_report PRIVATE /W4 /WX /permissive-
 else()
 target_compile_options(csl_mpc05_causal_tree_report PRIVATE -Wall -Wextra -Wpedantic -Werror)
 endif()
+
 if(BUILD_TESTING)
 find_package(Python3 3.11 REQUIRED COMPONENTS Interpreter)
 add_test(NAME mpc05_causal_tree_report_smoke COMMAND Python3::Interpreter
   ${CMAKE_CURRENT_SOURCE_DIR}/scripts/reports/mpc05/check_smoke.py
   $<TARGET_FILE:csl_mpc05_causal_tree_report>)
 set_tests_properties(mpc05_causal_tree_report_smoke PROPERTIES LABELS reporting)
+endif()
+endif()
+
+if(CSL_BUILD_ISSUE824_BOX_REPORT)
+include(cmake/JsonDependencies.cmake)
+add_executable(csl_issue824_box_minimax_report benchmarks/reporting/exp824/two_points_box.cpp)
+target_link_libraries(csl_issue824_box_minimax_report PRIVATE CSL::finite_action_box_minimax CSL::finite_action_minimax)
+target_include_directories(csl_issue824_box_minimax_report SYSTEM PRIVATE ${csl_json_SOURCE_DIR}/include)
+target_compile_features(csl_issue824_box_minimax_report PRIVATE cxx_std_20)
+if(MSVC)
+target_compile_options(csl_issue824_box_minimax_report PRIVATE /W4 /WX /permissive-)
+else()
+target_compile_options(csl_issue824_box_minimax_report PRIVATE -Wall -Wextra -Wpedantic -Werror)
+endif()
+if(BUILD_TESTING)
+find_package(Python3 3.11 REQUIRED COMPONENTS Interpreter)
+add_test(NAME issue824_box_minimax_report_smoke COMMAND Python3::Interpreter
+  ${CMAKE_CURRENT_SOURCE_DIR}/scripts/reports/exp824/check_smoke.py
+  $<TARGET_FILE:csl_issue824_box_minimax_report>)
+set_tests_properties(issue824_box_minimax_report_smoke PROPERTIES LABELS reporting)
 endif()
 endif()
 

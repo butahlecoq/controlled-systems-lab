@@ -274,6 +274,15 @@
       "follow_up_issue": 687
     },
     {
+      "source": "scripts/reports/exp824/make_report.py",
+      "signal_count": 3,
+      "asset_name_literals": [
+        "projections.svg"
+      ],
+      "disposition": "deferred-family-specific-migration",
+      "follow_up_issue": 687
+    },
+    {
       "source": "scripts/reports/ext01/render_saved.py",
       "signal_count": 3,
       "asset_name_literals": [
@@ -2342,6 +2351,46 @@
         "error-box.svg"
       ],
       "index_sha256": "9ae62adb575c44a4da216c5fbf2d396375f6965c742c5ca2dddb06d644b4a3d1",
+      "disposition": "deferred: original frozen route-level readability review remains; companion availability is listed separately",
+      "follow_up_issue": 669
+    },
+    {
+      "route": "issue824-two-points-box-pilot-v1",
+      "source_bundle": "issue824-two-points-box-pilot-v1",
+      "assets": [
+        "projections.svg"
+      ],
+      "index_sha256": "0995a3886750b668d062e61f34918fb1fbf0593f05cee0efa97e11f5cd722f6e",
+      "disposition": "deferred: original frozen route-level readability review remains; companion availability is listed separately",
+      "follow_up_issue": 669
+    },
+    {
+      "route": "issue824-two-points-box-pilot-v2",
+      "source_bundle": "issue824-two-points-box-pilot-v2",
+      "assets": [
+        "projections.svg"
+      ],
+      "index_sha256": "0995a3886750b668d062e61f34918fb1fbf0593f05cee0efa97e11f5cd722f6e",
+      "disposition": "deferred: original frozen route-level readability review remains; companion availability is listed separately",
+      "follow_up_issue": 669
+    },
+    {
+      "route": "issue824-two-points-box-pilot-v3",
+      "source_bundle": "issue824-two-points-box-pilot-v3",
+      "assets": [
+        "projections.svg"
+      ],
+      "index_sha256": "0995a3886750b668d062e61f34918fb1fbf0593f05cee0efa97e11f5cd722f6e",
+      "disposition": "deferred: original frozen route-level readability review remains; companion availability is listed separately",
+      "follow_up_issue": 669
+    },
+    {
+      "route": "issue824-two-points-box-pilot-v4",
+      "source_bundle": "issue824-two-points-box-pilot-v4",
+      "assets": [
+        "projections.svg"
+      ],
+      "index_sha256": "0995a3886750b668d062e61f34918fb1fbf0593f05cee0efa97e11f5cd722f6e",
       "disposition": "deferred: original frozen route-level readability review remains; companion availability is listed separately",
       "follow_up_issue": 669
     },

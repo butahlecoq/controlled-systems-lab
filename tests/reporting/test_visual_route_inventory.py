@@ -24,6 +24,7 @@ class VisualRouteInventoryTests(unittest.TestCase):
         self.assertIn("scripts/reports/stage_env717_two_particle_minimax.py", producers)
         self.assertIn("scripts/reports/env717/capture_homicidal_chauffeur.py", producers)
         self.assertIn("scripts/reports/stage_env717_homicidal_chauffeur.py", producers)
+        self.assertEqual(producers["scripts/reports/exp824/make_report.py"]["follow_up_issue"], 687)
         for source in ("scripts/reports/mpc04/check_max_coordinate.py",
                        "scripts/reports/mpc04/max_coordinate_replanning.py"):
             self.assertEqual(producers[source]["follow_up_issue"], 600)
@@ -148,7 +149,7 @@ class VisualRouteInventoryTests(unittest.TestCase):
         follow_up_counts={number:sum(entry["follow_up_issue"]==number for entry in deferred)
                           for number in (600,684,685,686,687,708,717)}
         self.assertEqual(follow_up_counts,
-                         {600:2,684:0,685:0,686:0,687:4,708:1,717:15})
+                         {600:2,684:0,685:0,686:0,687:5,708:1,717:15})
         reviewed=[entry for entry in producers.values() if entry.get("role")]
         self.assertEqual(len(reviewed),25)
         self.assertEqual(set(entry["source"] for entry in reviewed),
@@ -156,6 +157,9 @@ class VisualRouteInventoryTests(unittest.TestCase):
         self.assertTrue(all(entry["follow_up_issue"] in follow_up_counts for entry in deferred))
         routes={entry["route"]:entry for entry in inventory["frozen_published_routes"]}
         self.assertGreater(len(routes),40)
+        self.assertEqual(routes["issue824-two-points-box-pilot-v2"]["assets"], ["projections.svg"])
+        self.assertEqual(routes["issue824-two-points-box-pilot-v3"]["assets"], ["projections.svg"])
+        self.assertEqual(routes["issue824-two-points-box-pilot-v4"]["assets"], ["projections.svg"])
         self.assertEqual(routes["mpc09-two-particle-output-feedback-v1"]["follow_up_issue"],605)
         self.assertEqual(routes["mpc04-max-coordinate-replanning-pilot-20261030"]["assets"],
                          ["trajectory.svg"])

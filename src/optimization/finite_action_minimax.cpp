@@ -1,5 +1,6 @@
 #include <csl/optimization/finite_action_minimax.hpp>
 #include <csl/execution/timing_collector.hpp>
+#include "finite_action_plans.hpp"
 #include <algorithm>
 
 #include <cmath>
@@ -169,9 +170,9 @@ FiniteActionMinimaxOutcome finite_action_minimax(
     validation.close(Termination::completed);
     std::vector<FinitePlanRecord> records;
     records.reserve(plan_count);
-    std::vector<std::size_t> choices(horizon);
     double minimum=std::numeric_limits<double>::infinity();
     for(std::size_t plan_index=0;plan_index<plan_count;++plan_index) {
+        const auto choices=detail::action_plan_indices(plan_index,request.actions.catalogue.size(),horizon);
         const FiniteMinimaxPlanTimingSpans* spans=timing_spans&&plan_index<timing_spans->plans.size()?
             &timing_spans->plans[plan_index]:nullptr;
         PlannedPhase plan_setup{context,spans?std::optional{spans->plan_setup}:std::nullopt,&finalize};
@@ -223,10 +224,6 @@ FiniteActionMinimaxOutcome finite_action_minimax(
             records.emplace_back(FinitePlanFeasible{choices,value.value,value.maximizer,
                 value.evaluated_vertices,terminal});
             record_timing.close(Termination::completed);
-        }
-        for(std::size_t stage=horizon;stage>0;--stage) {
-            if(++choices[stage-1]<request.actions.catalogue.size()) break;
-            choices[stage-1]=0;
         }
     }
     PlannedPhase result_selection{context,timing_spans?std::optional{timing_spans->result_selection}:std::nullopt,&finalize};
