@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Capture matched fixed-dimension state-constraint-row runs."""
 from __future__ import annotations
-import argparse, hashlib, json, os, platform, shutil, subprocess, time
+import argparse, datetime, hashlib, json, os, platform, shutil, subprocess, time
 from pathlib import Path
 
 STRATEGIES = ("csl.synthesis.reach-back", "csl.synthesis.strategy-b")
@@ -134,6 +134,12 @@ def main() -> int:
                     stream.write(json.dumps(row, separators=(",", ":"), allow_nan=False) + "\n")
                     stream.flush()
                     os.fsync(stream.fileno())
+    try:
+        manifest["environment"]["load_average_at_end"] = list(os.getloadavg())
+    except (AttributeError, OSError):
+        manifest["environment"]["load_average_at_end"] = None
+    manifest["environment"]["capture_completed_at_utc"] = datetime.datetime.now(datetime.timezone.utc).isoformat()
+    (output / "manifest.json").write_text(json.dumps(manifest, indent=2) + "\n")
     return 0
 
 if __name__ == "__main__":
