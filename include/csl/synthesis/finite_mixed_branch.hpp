@@ -45,6 +45,9 @@ struct FiniteMixedBranchPrefix {
 struct FiniteMixedBranchEvaluation {
     FiniteMixedBranchEntry branch;
     std::optional<double> objective;
+    // The branch's full continuous solution relation, in continuous-subproblem
+    // joint coordinates. It stays attached to its catalogue-index history.
+    std::optional<sets::SetData> continuous_relation;
 };
 
 struct FiniteMixedBranchPortfolio {
@@ -53,6 +56,9 @@ struct FiniteMixedBranchPortfolio {
     // minimal only when complete is true; otherwise unseen histories may win.
     std::vector<std::size_t> optimal_evaluation_indices;
     std::optional<double> optimum;
+    // True when every tolerance-selected branch has a relation payload. This
+    // does not certify family validity, objective optimality, or completeness.
+    bool all_selected_relations_present{};
     bool complete{}; // The input covers every catalogue-index history.
 };
 

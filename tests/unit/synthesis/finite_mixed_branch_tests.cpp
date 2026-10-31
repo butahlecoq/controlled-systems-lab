@@ -42,6 +42,12 @@ FiniteMixedBranchCursor cursor(const problem::ResolvedProblem& problem) {
     return std::get<FiniteMixedBranchCursor>(std::move(result));
 }
 
+sets::SetData relation(std::string id, std::size_t dimension) {
+    auto result = sets::make_universal({SetId{std::move(id)}, dimension, {}});
+    REQUIRE(std::holds_alternative<sets::SetData>(result));
+    return std::get<sets::SetData>(std::move(result));
+}
+
 FiniteActionHistory history_of(const FiniteMixedBranchEntry& entry) {
     if (const auto* prepared = std::get_if<FiniteMixedBranchProblem>(&entry))
         return prepared->history;
@@ -280,6 +286,50 @@ TEST_CASE("mixed branch portfolio preserves every globally minimal history tie")
         FiniteActionHistory{{0, 1}});
     CHECK(std::get<FiniteMixedBranchProblem>(portfolio.evaluations[2].branch).history ==
         FiniteActionHistory{{1, 0}});
+}
+
+TEST_CASE("mixed branch portfolio keeps each tied continuous relation attached to its history") {
+    const auto source = resolved_mixed_problem();
+    std::vector<FiniteMixedBranchEvaluation> evaluations{
+        {branch(source, {0, 1}), 1.0, relation("continuous-family-a", 5)},
+        {branch(source, {1, 0}), 1.0, relation("continuous-family-b", 5)}};
+
+    const auto selected = select_finite_mixed_branch_portfolio(std::move(evaluations), true, 0.0);
+    REQUIRE(std::holds_alternative<FiniteMixedBranchPortfolio>(selected));
+    const auto& portfolio = std::get<FiniteMixedBranchPortfolio>(selected);
+    CHECK(portfolio.complete);
+    CHECK(portfolio.all_selected_relations_present);
+    REQUIRE(portfolio.optimal_evaluation_indices == std::vector<std::size_t>{0, 1});
+    REQUIRE(portfolio.evaluations[0].continuous_relation.has_value());
+    REQUIRE(portfolio.evaluations[1].continuous_relation.has_value());
+    CHECK(portfolio.evaluations[0].continuous_relation->metadata()->id.value == "continuous-family-a");
+    CHECK(portfolio.evaluations[1].continuous_relation->metadata()->id.value == "continuous-family-b");
+    CHECK(std::get<FiniteMixedBranchProblem>(portfolio.evaluations[0].branch).history ==
+        FiniteActionHistory{{0, 1}});
+    CHECK(std::get<FiniteMixedBranchProblem>(portfolio.evaluations[1].branch).history ==
+        FiniteActionHistory{{1, 0}});
+}
+
+TEST_CASE("mixed branch portfolio reports missing continuous relations without dropping ties") {
+    const auto source = resolved_mixed_problem();
+    std::vector<FiniteMixedBranchEvaluation> evaluations{
+        {branch(source, {0, 1}), 1.0, relation("continuous-family-a", 5)},
+        {branch(source, {1, 0}), 1.0, std::nullopt}};
+
+    const auto selected = select_finite_mixed_branch_portfolio(std::move(evaluations), true, 0.0);
+    REQUIRE(std::holds_alternative<FiniteMixedBranchPortfolio>(selected));
+    const auto& portfolio = std::get<FiniteMixedBranchPortfolio>(selected);
+    CHECK_FALSE(portfolio.all_selected_relations_present);
+    CHECK(portfolio.optimal_evaluation_indices == std::vector<std::size_t>{0, 1});
+}
+
+TEST_CASE("mixed branch portfolio rejects a relation in the wrong branch coordinates") {
+    const auto source = resolved_mixed_problem();
+    auto result = select_finite_mixed_branch_portfolio(
+        std::vector<FiniteMixedBranchEvaluation>{
+            {branch(source, {0, 1}), 1.0, relation("wrong-dimension", 4)}}, true, 0.0);
+    REQUIRE(std::holds_alternative<Diagnostics>(result));
+    CHECK(std::get<Diagnostics>(result).front().field == "finite_mixed_branch.relation");
 }
 
 TEST_CASE("mixed branch portfolio keeps preparation refusals and incomplete enumeration explicit") {
