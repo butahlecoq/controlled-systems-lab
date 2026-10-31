@@ -1,0 +1,35 @@
+{
+  "schema": "csl.review05.build-provenance/1",
+  "build_source_revision_at_compile": "6f58ec02158533c833e78823463034b0eae537cd",
+  "build_worktree_dirty_at_compile": true,
+  "compiled_source_commit_after_reviewable_capture": "cd5d88bb3784102e5f16165d80f973aed5590a1b",
+  "compile_inputs_match_committed_source": true,
+  "compiled_input_sha256": {
+    "CMakeLists.txt": "ca8983cc20e8b7e493c233940b51b14ec0162b4e9c7bd0df57ddb7b3291fe3d9",
+    "dimension_ladder.cpp": "ad94feb5dd56e722420a777b677c77f3fc42989a4a1e4309ff40eabdd5bc3039"
+  },
+  "source_commit_at_capture": "0f0e20e72ab3f00ee6d9604b8b52fff3f3e57f7d",
+  "source_worktree_dirty_at_capture": false,
+  "measurement_source_sha256": {
+    "CMakeLists.txt": "ca8983cc20e8b7e493c233940b51b14ec0162b4e9c7bd0df57ddb7b3291fe3d9",
+    "dimension_ladder.cpp": "ad94feb5dd56e722420a777b677c77f3fc42989a4a1e4309ff40eabdd5bc3039",
+    "run_constraint_ladder.py": "7815f340eb8faf73bb77ecd2cf106243657fb883eb0d65a1ece73a9fbf9b9066",
+    "check_constraint_ladder.py": "d4ede31c619e78cc7863a767cf122b3050071ef6411b6d60c1184ac1cc6b8c18",
+    "summarize_constraint_ladder.py": "27c3ae08d33b7fdc16b913445a9ea8c755bcbc49a50a2d68723c05d2dcea8e7e",
+    "render_constraint_ladder.py": "53dfe651f717759474e349a4b707c19f5a9f7eb9e1903c0aadc8d10669ad8e71"
+  },
+  "configure_command": "cmake -S benchmarks/reporting/review05 -B /home/butahlecoq/.local/share/codex/build/review05-constraint-20261031 -DCSL_SOURCE_ROOT=<isolated-worktree> -DCMAKE_BUILD_TYPE=Release -G Ninja",
+  "build_command": "ninja -C /home/butahlecoq/.local/share/codex/build/review05-constraint-20261031 csl_review05_dimension_ladder",
+  "build_type": "Release (-O3 -DNDEBUG)",
+  "cxx_compiler": "GCC 16.2.1",
+  "cmake_version": "3.31.6",
+  "ninja_version": "1.13.2",
+  "build_result": "completed; 419/419 steps",
+  "full_build_log_retained": true,
+  "binary_sha256": "1402593776b7c0c60655430fb25f5ee12852c06f0a00d229ea43eabc4db18e9b",
+  "dependency_versions": {
+    "HiGHS": "1.11.0",
+    "Qhull": "repository-pinned source"
+  },
+  "limitations": "The clean Release build compiled before the implementation commit. The tracked worktree was dirty at compile, but CMakeLists.txt and dimension_ladder.cpp SHA-256 values match commit cd5d88bb3784102e5f16165d80f973aed5590a1b exactly. Capture source files and scenario inputs were committed and clean at capture. A malformed-JSON preflight capture is retained under diagnostics and excluded from the accepted 42-attempt run."
+}

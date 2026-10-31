@@ -147,11 +147,12 @@ void bound_json(std::ostream& out, const std::optional<ObjectiveBound>& bound) {
 
 int main(int argc, char** argv) try {
     using namespace csl;
-    if (argc != 3) {
-        std::cerr << "usage: csl_review05_dimension_ladder <scenario.json> <csl.synthesis.reach-back|csl.synthesis.strategy-b>\n";
+    if (argc != 3 && argc != 4) {
+        std::cerr << "usage: csl_review05_dimension_ladder <scenario.json> <csl.synthesis.reach-back|csl.synthesis.strategy-b> [fixture-id]\n";
         return 2;
     }
     const std::string_view strategy_id = argv[2];
+    const std::string_view fixture_id = argc == 4 ? argv[3] : "DIMENSION-01-vector-integrator";
     if (strategy_id != "csl.synthesis.reach-back" && strategy_id != "csl.synthesis.strategy-b")
         throw std::invalid_argument("unrecognized strategy ID");
 
@@ -230,7 +231,7 @@ int main(int argc, char** argv) try {
 
     std::cout.imbue(std::locale::classic());
     std::cout << std::setprecision(std::numeric_limits<double>::max_digits10);
-    std::cout << "{\"schema\":\"csl.review05.dimension-attempt/1\",\"fixture\":\"DIMENSION-01-vector-integrator\",\"horizon\":" << horizon
+    std::cout << "{\"schema\":\"csl.review05.dimension-attempt/1\",\"fixture\":" << quoted(fixture_id) << ",\"horizon\":" << horizon
         << ",\"problem_id\":" << quoted(resolved.identity().value)
         << ",\"scenario_sha256\":" << quoted(problem::hex(scenario.source()->content.digest()))
         << ",\"strategy\":" << quoted(strategy_id)

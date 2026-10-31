@@ -85,3 +85,38 @@ python3 benchmarks/reporting/review05/summarize_dimension_ladder.py \
 python3 benchmarks/reporting/review05/render_dimension_ladder.py \
   --bundle /tmp/csl-review05-dimension-results
 ```
+
+## CONSTRAINT-01 authored state-row ladder
+
+This slice holds the scalar integrator, dimension (1), horizon (2), initial
+state, control box and objective fixed. It increases the authored state H-row
+count from 2 to 4 to 8 per stage. Added inequalities are strictly redundant
+over the common interval `[-2,2]`. One warmup and six alternating measured
+pairs are retained per fixture, including failed or inconclusive results.
+
+Build the driver in a clean Release tree, then capture, check and render:
+
+```sh
+cmake -S benchmarks/reporting/review05 \
+  -B /tmp/csl-review05-constraint-build \
+  -DCSL_SOURCE_ROOT="$PWD" -DCMAKE_BUILD_TYPE=Release -G Ninja
+ninja -C /tmp/csl-review05-constraint-build csl_review05_dimension_ladder
+python3 benchmarks/reporting/review05/run_constraint_ladder.py \
+  --driver /tmp/csl-review05-constraint-build/csl_review05_dimension_ladder \
+  --scenarios benchmarks/reporting/review05/scenarios \
+  --output /tmp/csl-review05-constraint-results
+python3 benchmarks/reporting/review05/check_constraint_ladder.py \
+  --bundle /tmp/csl-review05-constraint-results
+python3 benchmarks/reporting/review05/summarize_constraint_ladder.py \
+  --bundle /tmp/csl-review05-constraint-results
+python3 benchmarks/reporting/review05/render_constraint_ladder.py \
+  --bundle /tmp/csl-review05-constraint-results
+```
+
+The exact fixture oracle verifies the common plant and constraints, attained
+zero objective and feasibility of the zero history. It proves the unique
+zero optimum only for these three fixtures; it does not establish general
+candidate-family completeness. The timed region is only
+`SynthesisWorkspace::run()`. This slice does not measure allocated memory or
+internal phases, identify a source-level limiter, or support a speedup or
+complexity claim.

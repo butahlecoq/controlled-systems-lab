@@ -104,6 +104,7 @@ SAVED_DATA_COMPANION_RENDERERS = {
     "scripts/reports/render_adaptive_ode_example.py",
     "benchmarks/reporting/review05/render_profile_matrix.py",
     "benchmarks/reporting/review05/render_dimension_ladder.py",
+    "benchmarks/reporting/review05/render_constraint_ladder.py",
 }
 FROZEN_COMPANIONS = {
     "app01-plan-20261016-22d406fd": "examples/app01-plan-timing-v1.html",
