@@ -99,7 +99,7 @@
       "stages": "R0 through R3; fixed-plan disturbance-history geometry and finite-feedback graph layers",
       "state_geometry": "fixed-plan forward polytopes are kept separate by control prefix; finite-feedback forward, winning, and intersection layers are discrete graph nodes",
       "evidence": "immutable ENV-717 report bundles with result, figure data, capture provenance, and checksums",
-      "limitations": ["three-stage finite-action adaptation of the continuous-action 10-second RL environment", "finite-game results do not establish continuous-action or continuous-disturbance guarantees", "fixed-plan minimax and finite-feedback outputs have different information patterns and objectives", "bespoke published figures exist, but this route is not yet rendered by the shared stage-projection workflow", "follow-up: #708"]
+      "limitations": ["three-stage finite-action adaptation of the continuous-action 10-second RL environment", "finite-game results do not establish continuous-action or continuous-disturbance guarantees", "fixed-plan minimax and finite-feedback outputs have different information patterns and objectives", "bespoke published figures exist, but this route is not yet rendered by the shared stage-projection workflow"]
     },
     {
       "route_id": "synthesis.strategy_b.direct_joint",
