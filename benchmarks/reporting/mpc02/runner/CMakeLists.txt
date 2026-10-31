@@ -43,7 +43,9 @@ target_compile_definitions(csl_mpc02_four_track_measure PRIVATE NDEBUG
   CSL_COMPILER_ID="${CMAKE_CXX_COMPILER_ID}"
   CSL_COMPILER_VERSION="${CMAKE_CXX_COMPILER_VERSION}")
 if(MSVC)
+  target_compile_options(csl_mpc02_slew_measure PRIVATE /W4 /WX /permissive-)
   target_compile_options(csl_mpc02_four_track_measure PRIVATE /W4 /WX /permissive-)
 else()
+  target_compile_options(csl_mpc02_slew_measure PRIVATE -Wall -Wextra -Wpedantic -Werror)
   target_compile_options(csl_mpc02_four_track_measure PRIVATE -Wall -Wextra -Wpedantic -Werror)
 endif()
