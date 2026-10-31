@@ -278,12 +278,16 @@ ArtifactResult<std::string> encode_stage_projection_batch_json(
                         return error(ArtifactErrorCode::identity, "records.outcome.materialization",
                             "2D materialization must be an evidence-bound equivalent V view of the captured projection");
                 }
+                if (success->materialization && success->materialization_failure)
+                    return error(ArtifactErrorCode::identity, "records.outcome.materialization",
+                        "A record cannot have both successful and failed materialization");
                 source_ids = Json::array();
                 Json components = Json::array(), projection_evidence = Json::array();
                 std::vector<std::string> component_ids;
-                std::vector<SetHandle> component_sets{
-                    success->materialization ? success->materialization->relation :
-                        success->projection.projected_relation};
+                std::vector<SetHandle> component_sets;
+                if (!success->materialization_failure)
+                    component_sets.push_back(success->materialization ? success->materialization->relation :
+                        success->projection.projected_relation);
                 for (const auto& component : success->additional_components) component_sets.push_back(component);
                 for (const auto& component : component_sets) {
                     if (component.id.value.empty() ||
@@ -303,6 +307,16 @@ ArtifactResult<std::string> encode_stage_projection_batch_json(
                     {"provider", {{"id", success->projection.provider.actual->id.value}, {"version", success->projection.provider.actual->version}}},
                     {"evidence", std::move(projection_evidence)},
                     {"components", std::move(components)}};
+                if (success->materialization_failure) {
+                    const auto& failure = *success->materialization_failure;
+                    if (failure.explanation.empty() || (failure.kind != "rejected" && failure.kind != "unsupported" && failure.kind != "stopped"))
+                        return error(ArtifactErrorCode::invalid_input, "records.outcome.materialization_failure",
+                            "Materialization failure requires a supported kind and explanation");
+                    outcome["materialization_failure"] = {{"kind", failure.kind}, {"explanation", failure.explanation}};
+                    if (failure.provider && failure.provider->actual)
+                        outcome["materialization_failure"]["provider"] = {
+                            {"id", failure.provider->actual->id.value}, {"version", failure.provider->actual->version}};
+                }
                 if (success->error_bound) {
                     if (!std::isfinite(success->error_bound->bound) || success->error_bound->bound < 0.0 ||
                         success->error_bound->metric.value.empty())

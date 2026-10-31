@@ -27,9 +27,16 @@ struct StageProjectionSuccess {
         registry::Provenance provider;
         SetRelation relation_claim{SetRelation::equivalent};
     };
+    struct MaterializationFailure {
+        std::string kind;
+        std::string explanation;
+        std::optional<registry::Provenance> provider;
+    };
     // Optional equivalent finite-point representation used by saved figures.
     // The projection itself remains the original 2D relation and evidence.
     std::optional<Materialization> materialization;
+    // A failed optional figure conversion does not invalidate the projection.
+    std::optional<MaterializationFailure> materialization_failure;
 };
 
 using StageProjectionOutcome = std::variant<StageProjectionSuccess, StageProjectionUnavailable,

@@ -252,14 +252,30 @@ void materialize_projected_outputs(artifacts::StageProjectionBatchCapture& batch
         if (const auto* rejected = std::get_if<registry::Rejection>(&prepared)) {
             const auto detail = rejected->diagnostics.empty()
                 ? std::string("no rejection detail") : rejected->diagnostics.front().explanation;
-            throw std::runtime_error("2D projection materialization rejected: " + detail);
+            success->materialization_failure = artifacts::StageProjectionSuccess::MaterializationFailure{
+                "rejected", detail, std::nullopt};
+            continue;
         }
         auto pipeline = std::get<registry::PreparedPipeline<registry::ConversionPort>>(std::move(prepared));
         const auto provenance = pipeline.provenance().front();
         auto [workspace] = pipeline.create();
         auto output = workspace->run(context);
         const auto* converted = std::get_if<OperationResult>(&output);
-        if (!converted) throw std::runtime_error("2D projection H-to-V materialization failed");
+        if (!converted) {
+            if (const auto* unsupported = std::get_if<Unsupported>(&output)) {
+                std::string detail;
+                for (const auto& diagnostic : unsupported->diagnostics)
+                    detail += diagnostic.field + ": " + diagnostic.explanation + "; ";
+                success->materialization_failure = artifacts::StageProjectionSuccess::MaterializationFailure{
+                    "unsupported", detail.empty() ? "No diagnostic was supplied." : detail, provenance};
+            } else if (const auto* stopped = std::get_if<OperationStopped>(&output)) {
+                success->materialization_failure = artifacts::StageProjectionSuccess::MaterializationFailure{
+                    "stopped", stopped->diagnostics.empty() ? "Conversion stopped." : stopped->diagnostics, provenance};
+            } else {
+                throw std::runtime_error("2D projection H-to-V materializer returned an unexpected outcome");
+            }
+            continue;
+        }
         if (converted->relation != SetRelation::equivalent || converted->output.metadata.dimension != 2 ||
                 converted->output.metadata.representation.value != "csl.polyhedron.v")
             throw std::runtime_error("2D projection materializer changed the relation or representation");

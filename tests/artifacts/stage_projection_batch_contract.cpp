@@ -104,6 +104,18 @@ TEST_CASE("stage projection batch JSON binds source identity and retains 2D geom
     CHECK(json.find("\"kind\": \"polygon\"") != std::string::npos);
     CHECK(json.find("\"kind\": \"segment\"") != std::string::npos);
     CHECK(json.find("\"kind\": \"point\"") != std::string::npos);
+
+    auto partial_batch = std::get<ar::StageProjectionBatchCapture>(capture);
+    auto& first_success = std::get<ar::StageProjectionSuccess>(partial_batch.records.front().outcome);
+    first_success.materialization_failure = ar::StageProjectionSuccess::MaterializationFailure{
+        "stopped", "converter resource limit", std::nullopt};
+    const auto partial = ar::encode_stage_projection_batch_json(identity,
+        partial_batch);
+    REQUIRE(std::holds_alternative<std::string>(partial));
+    const auto partial_json = nlohmann::json::parse(std::get<std::string>(partial));
+    CHECK(partial_json["records"][0]["outcome"]["status"] == "success");
+    CHECK(partial_json["records"][0]["outcome"]["materialization_failure"]["kind"] == "stopped");
+    CHECK(partial_json["records"][0]["outcome"]["components"].empty());
 }
 
 TEST_CASE("stage projection batch JSON rejects reordered pairs and bad source hashes") {
