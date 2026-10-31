@@ -2569,7 +2569,7 @@
       "assets": [
         "state-space-illustration.svg"
       ],
-      "index_sha256": "0f2fdf8500c8d0824c072df903180c1d7143cc8797690506ed3a4b4dea3a0fc4",
+      "index_sha256": "69f538a4c59d499614781d73641d2174ae2fa23df7b6bef904bb063bcdb2d4e1",
       "disposition": "deferred: original frozen route-level readability review remains; companion availability is listed separately",
       "follow_up_issue": 669
     },

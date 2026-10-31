@@ -35,9 +35,9 @@
       "CMakeLists.txt": "ca8983cc20e8b7e493c233940b51b14ec0162b4e9c7bd0df57ddb7b3291fe3d9",
       "dimension_ladder.cpp": "4bfa9615ab08a9213b4a8f529b4369f54858c66b465dc7416b7a535fece410a2",
       "run_dimension_ladder.py": "44191f19bc59500d593d4173853885d2c2c0aacd7ba5946248c5c0734345e203",
-      "check_dimension_ladder.py": "d1953686cc92a5a5eed815f9d8cbdaf82b2b3f42892746ed6009bcd6c078c489",
+      "check_dimension_ladder.py": "a724a60ff941fdb69e7cf9af05efa639eca2f3b1d46bfaadb8ccabc630eadfd0",
       "summarize_dimension_ladder.py": "b43113be0010c87902a475e65bd085b8a409bc954e85fc9af102ac9124b3e4e4",
-      "render_dimension_ladder.py": "5d50644f729856cbd4cd5f74aeed1948b163d66d144353b81e590538731f07d2"
+      "render_dimension_ladder.py": "9a6bcecf5325f314a059dbec0cdb0e747f95963595631a68f594cf19e0b3e4cf"
     },
     "host": "omarchy",
     "platform": "Linux-7.2.8-9-omarchy-x86_64-with-glibc2.44",
@@ -61,8 +61,8 @@
       "enforced": true,
       "mechanism": "POSIX RLIMIT_CPU and RLIMIT_AS"
     },
-    "report_renderer_revision": "3799a8d7939cbae5c5a8392f20e80cdbf23b3b78",
-    "checker_revision": "7bb86a90fbcfd1c0172908b355b73eccb9ea2f2e"
+    "report_renderer_revision": "8730de0e777359e40be2db2e9841e7dbe6baaadf",
+    "checker_revision": "8730de0e777359e40be2db2e9841e7dbe6baaadf"
   },
   "schedule": {
     "warmup_pairs_per_case": 1,
