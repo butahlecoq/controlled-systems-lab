@@ -2395,6 +2395,16 @@
       "follow_up_issue": 669
     },
     {
+      "route": "issue824-two-points-zonotope-pilot-v1",
+      "source_bundle": "issue824-two-points-zonotope-pilot-v1",
+      "assets": [
+        "projections.svg"
+      ],
+      "index_sha256": "412cd5fdedb03025eafaae7f9741df0d0f3407382ecd35105d26cb5ae12928f8",
+      "disposition": "deferred: original frozen route-level readability review remains; companion availability is listed separately",
+      "follow_up_issue": 669
+    },
+    {
       "route": "lotka-volterra-sampled-20261023",
       "source_bundle": "lotka-volterra-sampled-20261023",
       "assets": [
