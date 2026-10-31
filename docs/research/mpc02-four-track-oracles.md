@@ -1,9 +1,11 @@
 # MPC-02 four-track exact oracle
 
 This note records the small rational oracle shared by the four authored MPC-02
-scenario tracks. It is an independent mathematical reference for the direct
-joint-program tests; it is not a timing result and does not replace the saved
-paired measurement bundle for the slew case.
+scenario tracks in [issue #598](https://github.com/butahlecoq/controlled-systems-lab/issues/598).
+It is an independent mathematical reference for the [direct joint-program
+tests](../../tests/synthesis/strategy_b/direct_joint_tests.cpp); it is not a
+timing result and does not replace the saved paired measurement bundle for the
+slew case.
 
 ## Common model
 
@@ -26,10 +28,10 @@ objective is the squared Euclidean distance to that point.
 
 | Scenario | Additional admissibility | Exact minimizer | Exact objective |
 | --- | --- | --- | --- |
-| `mpc02-unconstrained-2d-v1` | no input rows | `(1/2, 0)` | `0` |
-| `mpc02-stage-box-2d-v1` | `|u0|, |u1| ≤ 1` | `(1/2, 0)` | `0` |
-| `mpc02-slew-2d-v1` | `|u1-u0| ≤ 1/4` | `(3/8, 1/8)` | `1/32` |
-| `mpc02-l1-budget-2d-v1` | `|u0|+|u1| ≤ 1/4` | `(1/4, 0)` | `1/16` |
+| [`mpc02-unconstrained-2d-v1`](../../examples/scenarios/mpc02-unconstrained-2d.json) | no input rows | `(1/2, 0)` | `0` |
+| [`mpc02-stage-box-2d-v1`](../../examples/scenarios/mpc02-stage-box-2d.json) | `|u0|, |u1| ≤ 1` | `(1/2, 0)` | `0` |
+| [`mpc02-slew-2d-v1`](../../examples/scenarios/mpc02-slew-2d.json) | `|u1-u0| ≤ 1/4` | `(3/8, 1/8)` | `1/32` |
+| [`mpc02-l1-budget-2d-v1`](../../examples/scenarios/mpc02-l1-budget-2d.json) | `|u0|+|u1| ≤ 1/4` | `(1/4, 0)` | `1/16` |
 
 The slew result is the orthogonal projection of `(1/2,0)` onto the active
 line `u0-u1=1/4`. For the budget track, the four authored rows are the two
