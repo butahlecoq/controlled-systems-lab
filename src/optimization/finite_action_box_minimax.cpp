@@ -255,7 +255,10 @@ FiniteActionBoxMinimaxOutcome finite_action_box_minimax(
     const auto& replayed = std::get<Replay>(witness);
     const auto scale = std::max({1.0, std::abs(realized.value), std::abs(replayed.value)});
     const auto tolerance = context.numerical.absolute_tolerance + context.numerical.relative_tolerance * scale;
-    if(std::abs(realized.value - replayed.value) > tolerance || replayed.terminal != realized.maximizer)
+    // Multiple terminal states can attain the same maximum. The exact catalogue
+    // scan and recursive replay may choose different tied witnesses, so compare
+    // their objective values rather than requiring identical state vectors.
+    if(std::abs(realized.value - replayed.value) > tolerance)
         return OperationStopped{StopReason::numerical_failure, "Full-history witness does not match terminal catalogue scoring."};
     return FiniteActionBoxMinimaxResult{request.problem, request.request, std::move(scores), selected_choices,
         minimum, replayed.value, replayed.terminal, replayed.disturbance_indices,
