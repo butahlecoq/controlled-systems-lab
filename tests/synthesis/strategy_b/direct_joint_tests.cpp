@@ -489,6 +489,37 @@ TEST_CASE("MPC-02 registers distinct constraint tracks and direct and memory-lif
     CHECK(direct_cost.original_objective==doctest::Approx(1.0/32.0).epsilon(1e-12));
     CHECK(lifted_cost.original_objective==doctest::Approx(direct_cost.original_objective).epsilon(1e-12));
 }
+TEST_CASE("multiple authored temporal rows retain independent history constraints") {
+    auto input=integrator(LinearTerminal{{0},0});
+    SparseMatrix temporal_map{2,5,{0,2,4},{3,4,3,4},{1,1,1,-1}};
+    input.temporal=TemporalConstraints{std::move(temporal_map),{{1,1},{0.5,0.5}}};
+    const auto p=resolve(input);
+    const auto q=accepted(build_joint_program(p,request(p)));
+
+    // The first row fixes u0+u1=1 and the second fixes u0-u1=1/2.
+    // Both rows are cross-time constraints; neither is recoverable from
+    // independent stage boxes alone.
+    const Vector both_rows{0,0.75,1,0.75,0.25};
+    const Vector first_only{0,0.5,1,0.5,0.5};
+    const Vector second_only{0,1,1,1,0};
+    CHECK(feasible(q,both_rows));
+    CHECK_FALSE(feasible(q,first_only));
+    CHECK_FALSE(feasible(q,second_only));
+
+    REQUIRE(q.rows.size()==9);
+    CHECK(q.rows[7].source==RowSource::temporal);
+    CHECK(q.rows[7].source_row==0);
+    CHECK(q.rows[8].source==RowSource::temporal);
+    CHECK(q.rows[8].source_row==1);
+    CHECK(q.bounds[7].lower==1);
+    CHECK(q.bounds[7].upper==1);
+    CHECK(q.bounds[8].lower==0.5);
+    CHECK(q.bounds[8].upper==0.5);
+    CHECK(q.constraints.column_indices[q.constraints.row_offsets[7]]==3);
+    CHECK(q.constraints.column_indices[q.constraints.row_offsets[7]+1]==4);
+    CHECK(q.constraints.column_indices[q.constraints.row_offsets[8]]==3);
+    CHECK(q.constraints.column_indices[q.constraints.row_offsets[8]+1]==4);
+}
 bool feasible(const JointProgram& p,const Vector& x) {
     for(std::size_t i=0;i<p.constraints.rows;++i) {
         double v=0;for(auto j=p.constraints.row_offsets[i];j<p.constraints.row_offsets[i+1];++j)
