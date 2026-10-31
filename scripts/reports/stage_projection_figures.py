@@ -140,7 +140,9 @@ def _render_pair(batch: dict, pair_index: int, stage_rows: list[dict], trajector
                         continue
                     description_parts.append(f"ray {ray_index + 1} direction {ray}")
                 role = component.get("role")
-                role_text = f" ({role} overlay)" if role else ""
+                role_label = {"forward": "forward", "backward_winning": "backward-winning",
+                              "intersection": "forward ∩ backward"}.get(role, role)
+                role_text = f" ({role_label} overlay)" if role_label else ""
                 branch_text = f", branch {component['branch_id']}" if component.get("branch_id") else ""
                 description_parts.append(
                     f"component {component['component_id']}{role_text}{branch_text}: {component['kind']}, "
