@@ -92,8 +92,13 @@ class StageProjectionDemoTests(unittest.TestCase):
         self.assertEqual(routes["issue6.b06-finite-action-minimax"]["capability"], "terminal_set_only")
         self.assertEqual(routes["simulation.replay"]["capability"], "trajectory_only")
         self.assertIn("explicit gaps", routes["reachability.nominal_forward"]["adapter_status"])
+        two_points = routes["env717.two_points.published"]
+        self.assertEqual(two_points["capability"], "finite_game_forward_backward_layers")
+        self.assertIn("not connected", two_points["adapter_status"])
+        self.assertIn("continuous-action", " ".join(two_points["limitations"]))
         self.assertEqual(set(routes), {
             "demo.affine-box-reachability",
+            "env717.two_points.published",
             "issue6.b06-finite-action-minimax",
             "issue6.b09-nonlinear-replay",
             "reachability.nominal_forward",
@@ -106,6 +111,36 @@ class StageProjectionDemoTests(unittest.TestCase):
             "synthesis.hybrid_projected_reachability",
             "simulation.replay",
         })
+
+    def test_two_points_capability_matches_published_source_bound_stage_data(self):
+        root = ROOT / "reports/algorithm-results"
+        pilot = root / "env717-two-points-pilot-v1"
+        feedback = root / "env717-two-points-feedback-v1"
+        for bundle in (pilot, feedback):
+            sums = {}
+            for line in (bundle / "SHA256SUMS").read_text().splitlines():
+                digest, filename = line.split("  ", 1)
+                sums[filename] = digest
+            for filename, digest in sums.items():
+                self.assertEqual(hashlib.sha256((bundle / filename).read_bytes()).hexdigest(), digest)
+
+        pilot_result = json.loads((pilot / "result.json").read_text())
+        feedback_result = json.loads((feedback / "result.json").read_text())
+        pilot_data = json.loads((pilot / "figure-data.json").read_text())
+        feedback_data = json.loads((feedback / "figure-data.json").read_text())
+        self.assertEqual(pilot_result["schema"], "csl.env717-two-points-pilot/1")
+        self.assertEqual(feedback_result["schema"], "csl.env717-two-points-feedback/1")
+        self.assertEqual(feedback_result["state_order"],
+                         ["position_1", "velocity_1", "position_2", "velocity_2"])
+        self.assertEqual(feedback_result["adaptation"]["horizon_steps"], 3)
+        self.assertEqual(feedback_result["adaptation"]["terminal_time_seconds"], 0.3)
+        self.assertEqual(pilot_result["source_model"]["source_horizon_seconds"], 10.0)
+        for key in ("forward_layers", "robust_backward_layers", "forward_groups", "trajectory"):
+            self.assertEqual(len(pilot_data[key]), 4, key)
+        for key in ("feedback_forward_layers", "feedback_backward_layers", "feedback_trajectory"):
+            self.assertEqual(len(feedback_data[key]), 4, key)
+        self.assertEqual(pilot_data["intersection_semantics"],
+                         "finite-catalogue state nodes in both forward layer and robust backward winning set")
 
     def test_native_route_default_executable_uses_platform_suffix(self):
         self.assertEqual(DEMOS.EXECUTABLE_SUFFIX, ".exe" if os.name == "nt" else "")
