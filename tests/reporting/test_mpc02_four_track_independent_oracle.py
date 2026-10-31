@@ -40,8 +40,14 @@ class Mpc02FourTrackIndependentOracleTests(unittest.TestCase):
                 self.assertEqual(scenario["initial_state"], [0, 0])
                 self.assertEqual(scenario["horizon"], 2)
                 stages = scenario["model"]["stages"]
+                self.assertEqual(stages[0]["A"], [[1, 0], [0, 1]])
+                self.assertEqual(stages[1]["A"], [[1, 0], [0, 1]])
                 self.assertEqual(stages[0]["B"], [[1], [0]])
                 self.assertEqual(stages[1]["B"], [[0], [1]])
+                objective_spec = scenario["objective"]
+                self.assertEqual(objective_spec["Q"], [[2, 0], [0, 2]])
+                self.assertEqual(objective_spec["linear"], [-1, 0])
+                self.assertEqual(fraction(objective_spec["offset"]), Fraction(1, 4))
 
                 control, objective = self.expected[scenario_id]
                 self.assertEqual(cost(control), objective)
