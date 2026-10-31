@@ -57,6 +57,14 @@ def main() -> int:
                 "median_ns": statistics.median(values) if values else None,
                 "min_ns": min(values) if values else None,
                 "max_ns": max(values) if values else None,
+                "median_child_cpu_seconds": statistics.median(
+                    [row["resource_receipt"]["child_cpu_seconds"] for rows in measured.values()
+                     for row in rows if row["strategy"] == strategy and
+                     checks[row["attempt_id"]]["status"] == "verified"]) if values else None,
+                "median_peak_rss_kib": statistics.median(
+                    [row["resource_receipt"]["peak_rss_kib"] for rows in measured.values()
+                     for row in rows if row["strategy"] == strategy and
+                     checks[row["attempt_id"]]["status"] == "verified"]) if values else None,
                 "representation_shape": fixed_shape}
         summary["cases"].append({
             "case": key, "state_dimension": 1, "control_dimension": 1, "horizon": 2,

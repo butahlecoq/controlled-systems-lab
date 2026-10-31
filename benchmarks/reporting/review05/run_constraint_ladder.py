@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Capture matched fixed-dimension state-constraint-row runs."""
 from __future__ import annotations
-import argparse, datetime, hashlib, json, os, platform, shutil, subprocess, time
+import argparse, datetime, hashlib, json, os, platform, selectors, shutil, subprocess, time
 from pathlib import Path
 
 STRATEGIES = ("csl.synthesis.reach-back", "csl.synthesis.strategy-b")
@@ -16,6 +16,59 @@ def limit_process() -> None:
     resource.setrlimit(resource.RLIMIT_CPU, (300, 300))
     cap = 8 * 1024**3
     resource.setrlimit(resource.RLIMIT_AS, (cap, cap))
+
+def run_with_usage(command: list[str]) -> tuple[bytes, bytes, int | None, dict[str, float | int | str]]:
+    """Run one bounded child and collect its wait4 CPU/RSS receipt."""
+    import resource
+    stdout_read, stdout_write = os.pipe()
+    stderr_read, stderr_write = os.pipe()
+    pid = os.fork()
+    if pid == 0:
+        try:
+            os.close(stdout_read)
+            os.close(stderr_read)
+            os.dup2(stdout_write, 1)
+            os.dup2(stderr_write, 2)
+            os.close(stdout_write)
+            os.close(stderr_write)
+            limit_process()
+            os.execv(command[0], command)
+        except BaseException as error:
+            os.write(2, f"child launch failed: {error}\n".encode())
+            os._exit(127)
+    os.close(stdout_write)
+    os.close(stderr_write)
+    selector = selectors.DefaultSelector()
+    selector.register(stdout_read, selectors.EVENT_READ, "stdout")
+    selector.register(stderr_read, selectors.EVENT_READ, "stderr")
+    buffers = {"stdout": bytearray(), "stderr": bytearray()}
+    descriptors = {"stdout": stdout_read, "stderr": stderr_read}
+    deadline = time.monotonic() + 300
+    timed_out = False
+    while selector.get_map():
+        remaining = deadline - time.monotonic()
+        if remaining <= 0:
+            timed_out = True
+            try:
+                os.kill(pid, 9)
+            except ProcessLookupError:
+                pass
+            remaining = 1
+        for key, _ in selector.select(min(remaining, 0.25)):
+            data = os.read(key.fd, 65536)
+            if data:
+                buffers[key.data].extend(data)
+            else:
+                selector.unregister(key.fd)
+                os.close(key.fd)
+    _, status, usage = os.wait4(pid, 0)
+    receipt = {"user_cpu_seconds": usage.ru_utime, "system_cpu_seconds": usage.ru_stime,
+               "child_cpu_seconds": usage.ru_utime + usage.ru_stime,
+               "peak_rss_kib": usage.ru_maxrss,
+               "receipt_source": "POSIX wait4(RUSAGE_CHILDREN) for this isolated child",
+               "timed_out": timed_out}
+    code = None if timed_out else os.waitstatus_to_exitcode(status)
+    return bytes(buffers["stdout"]), bytes(buffers["stderr"]), code, receipt
 
 def main() -> int:
     parser = argparse.ArgumentParser()
@@ -96,19 +149,13 @@ def main() -> int:
                 command = [str(driver), str(paths[key]), strategy, FIXTURE]
                 start = time.monotonic_ns()
                 try:
-                    process = subprocess.run(command, check=False, stdout=subprocess.PIPE,
-                                             stderr=subprocess.PIPE, timeout=300,
-                                             preexec_fn=limit_process)
+                    stdout, stderr, code, resource_receipt = run_with_usage(command)
                     wall = time.monotonic_ns() - start
-                    stdout, stderr, code = process.stdout, process.stderr, process.returncode
-                    status = "completed" if code == 0 else "failed"
-                except subprocess.TimeoutExpired as error:
-                    wall = time.monotonic_ns() - start
-                    stdout, stderr, code = error.stdout or b"", error.stderr or b"", None
-                    status = "timed_out"
+                    status = "timed_out" if resource_receipt["timed_out"] else ("completed" if code == 0 else "failed")
                 except Exception as error:
                     wall = time.monotonic_ns() - start
                     stdout, stderr, code = b"", str(error).encode(), None
+                    resource_receipt = {"receipt_source": "child wrapper failed"}
                     status = "failed_to_launch"
                 stdout_path = output / "raw" / f"{attempt_id}.stdout"
                 stderr_path = output / "raw" / f"{attempt_id}.stderr"
@@ -129,6 +176,7 @@ def main() -> int:
                        "stdout_sha256": sha(stdout_path),
                        "stderr_path": str(stderr_path.relative_to(output)),
                        "stderr_sha256": sha(stderr_path), "parse_error": parse_error,
+                       "resource_receipt": resource_receipt,
                        "result": result}
                 with attempts_path.open("a", encoding="utf-8") as stream:
                     stream.write(json.dumps(row, separators=(",", ":"), allow_nan=False) + "\n")
