@@ -59,3 +59,29 @@ scalar and has no supported 2D state-set visual example.
 Keep source, raw attempts, checks, and summary together when retaining a run.
 The runner refuses a non-empty output directory so separate captures cannot
 overwrite each other's evidence.
+
+## DIMENSION-01 vector pilot
+
+The follow-up pilot crosses state/control dimensions 1 and 2 with horizons 2
+and 4. Each stage has an explicit `[-T,T]^n` state box, controls are in
+`[0,1]^n`, the initial state is zero, and the objective minimizes the sum of
+terminal coordinates. Both strategy relations are checked against exact
+rational plant, control, state-box, and terminal-objective rows before a timing
+pair is reported. Strategy refusals and incomplete pairs remain in the saved
+records. This fixture-specific oracle does not infer general family
+completeness.
+
+Build `csl_review05_dimension_ladder` in a clean Release tree, then run:
+
+```sh
+python3 benchmarks/reporting/review05/run_dimension_ladder.py \
+  --driver /tmp/csl-review05-dimension-build/csl_review05_dimension_ladder \
+  --scenarios benchmarks/reporting/review05/scenarios \
+  --output /tmp/csl-review05-dimension-results
+python3 benchmarks/reporting/review05/check_dimension_ladder.py \
+  --bundle /tmp/csl-review05-dimension-results
+python3 benchmarks/reporting/review05/summarize_dimension_ladder.py \
+  --bundle /tmp/csl-review05-dimension-results
+python3 benchmarks/reporting/review05/render_dimension_ladder.py \
+  --bundle /tmp/csl-review05-dimension-results
+```
