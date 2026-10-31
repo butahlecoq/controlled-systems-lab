@@ -1,0 +1,16 @@
+Source revision: fd7641e6f106202eae4b5ebdf9ecc874ade0f63e
+Source worktree status before build: clean
+CMake: 3.31.6 (/home/butahlecoq/.local/share/mise/installs/cmake/3.31.6/cmake-3.31.6-linux-x86_64/bin/cmake)
+Generator: Ninja
+Compiler: /usr/bin/c++ (GCC 16.2.1)
+Ninja: 1.13.2
+CMAKE_BUILD_TYPE=RelWithDebInfo
+BUILD_TESTING=ON
+CSL_ENABLE_HIGHS=ON
+CSL_ENABLE_QHULL=ON
+CSL_DEPENDENCY_PROBES=OFF
+CMAKE_C_FLAGS=-fsanitize=thread -fno-omit-frame-pointer
+CMAKE_CXX_FLAGS=-fsanitize=thread -fno-omit-frame-pointer
+CMAKE_EXE_LINKER_FLAGS=-fsanitize=thread
+Host: Linux 7.2.8-9-omarchy x86_64; AMD Ryzen 5 3550H; 8 logical CPUs; RAM 8108216320 bytes
+Build directory: /home/butahlecoq/.local/share/codex/build/review05-tsan-highs-20261031

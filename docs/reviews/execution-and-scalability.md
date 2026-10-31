@@ -88,6 +88,30 @@ bookkeeping. With this sample count and process-wide scope, the profile does
 not identify a unique limiter. It is exploratory evidence, not a per-strategy
 timing comparison; see the [raw gprof bundle](../../reports/algorithm-results/review05-execution-20261030/gprof-whole-process/README.md).
 
+## Ownership and native-adapter race audit
+
+The static ownership inventory and focused TSan evidence are in the
+[ownership audit bundle](../../reports/algorithm-results/review05-ownership-tsan-20261031/README.md), captured from clean committed source
+`fd7641e6f106202eae4b5ebdf9ecc874ade0f63e` on 2026-10-31. The inventory covers
+lazy support/materialization caches, immutable lazy payloads, executor and
+timing state, HiGHS LP and convex workspaces, callback lifetime, test-only LP
+hooks, and Qhull's native context and diagnostic streams. The inspected native
+solver/conversion paths use per-workspace or per-call state; this does not
+assert whole-library thread safety.
+
+A GCC ThreadSanitizer build with HiGHS and Qhull enabled ran
+`execution_tests`, `batch_runner_tests`, `timing_collector_tests`,
+`highs_lp_tests`, `highs_convex_tests`, `hv_conversion_tests`, and
+`quickhull_2d_lp_test`. All 7 passed with `TSAN_OPTIONS=halt_on_error=1` and no
+race report. The LP and Qhull suites include concurrent independent native
+workspace/call paths. The exact logs, build flags, host metadata, and scope
+limits are retained in the bundle. These dynamic tests cover only executed
+paths and do not prove general race freedom.
+
+The initial build attempt filled the small `/tmp` tmpfs while GCC wrote
+temporary assembly. The successful retry placed `TMPDIR` under `/home`; the
+source revision, sanitizer flags, and enabled native adapters were unchanged.
+
 An independent source audit of `main` at `d9e0f90285919828d7713855e8441a6be1b6f4ec`
 found that reusing a caller-supplied backend-thread observation could carry a
 previous batch's maximum into a later `BatchResult`. The current #95 PR gives
@@ -99,7 +123,7 @@ the fix branch.
 
 ## REVIEW-05 disposition
 
-The ownership, resource-policy and batch-isolation portions have current source/test evidence. The focused execution and batch suites passed with and without ThreadSanitizer. There are now two fresh, equal-scope timing points for both strategies, but they vary neither state dimension nor horizon, constraint count, representation size or output size.
+The ownership, resource-policy and batch-isolation portions have current source/test evidence. The focused execution and batch suites passed with and without ThreadSanitizer; the fresh instrumented run also includes timing, HiGHS, and Qhull targets. There are now two fresh, equal-scope timing points for both strategies, but they vary neither state dimension nor horizon, constraint count, representation size or output size.
 
 The general scenario runner does not currently give a second usable sweep: its tested two-state horizon-3 profile rejects reach-back at the convex adapter's matrix-removal threshold (documented in `examples/scenarios/README.md`), while the scalar general-profile smoke has no selected, verified witnesses. I did not use either as a fair speed comparison. No fresh multi-axis paired sweep is claimed here. The current-build gprof run is process-wide and too low-resolution to support a unique-limiter claim.
 

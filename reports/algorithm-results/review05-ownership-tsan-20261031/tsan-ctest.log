@@ -1,0 +1,27 @@
+Internal ctest changing into directory: /home/butahlecoq/.local/share/codex/build/review05-tsan-highs-20261031
+Test project /home/butahlecoq/.local/share/codex/build/review05-tsan-highs-20261031
+    Start  51: quickhull_2d_lp_test
+1/7 Test  #51: quickhull_2d_lp_test .............   Passed    0.05 sec
+    Start 111: execution_tests
+2/7 Test #111: execution_tests ..................   Passed    0.06 sec
+    Start 113: timing_collector_tests
+3/7 Test #113: timing_collector_tests ...........   Passed    0.26 sec
+    Start 126: highs_convex_tests
+4/7 Test #126: highs_convex_tests ...............   Passed    0.18 sec
+    Start 130: highs_lp_tests
+5/7 Test #130: highs_lp_tests ...................   Passed    0.18 sec
+    Start 133: hv_conversion_tests
+6/7 Test #133: hv_conversion_tests ..............   Passed    0.50 sec
+    Start 137: batch_runner_tests
+7/7 Test #137: batch_runner_tests ...............   Passed    0.34 sec
+
+100% tests passed, 0 tests failed out of 7
+
+Label Time Summary:
+adapters       =   0.36 sec*proc (2 tests)
+artifacts      =   0.26 sec*proc (1 test)
+execution      =   0.06 sec*proc (1 test)
+experiments    =   0.34 sec*proc (1 test)
+geometry       =   0.54 sec*proc (2 tests)
+
+Total Test time (real) =   1.58 sec
