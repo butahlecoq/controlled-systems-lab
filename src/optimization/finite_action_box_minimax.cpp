@@ -102,7 +102,7 @@ ReplayOutcome replay_all(const reachability::FixedPlanRequest& request, const Ob
     std::vector<Vector> path;
     std::optional<Unsupported> failure;
     std::optional<OperationStopped> stopped;
-    std::function<void(std::size_t,const Vector&)> visit = [&](std::size_t stage, const Vector& state) {
+    std::function<void(std::size_t,Vector)> visit = [&](std::size_t stage, Vector state) {
         if(failure || stopped) return;
         if(context.cancellation.stop_requested()) {
             stopped = OperationStopped{StopReason::cancelled, "Worst-case witness replay cancelled."};

@@ -264,7 +264,7 @@ cmake --build build/dev --target csl_issue824_box_minimax_report --parallel 4
 python3 scripts/reports/exp824/make_report.py \\
   --executable build/dev/csl_issue824_box_minimax_report \\
   --build-dir build/dev \\
-  --output reports/algorithm-results/issue824-two-points-box-pilot-v3
+  --output reports/algorithm-results/issue824-two-points-box-pilot-v4
 ```
 
 Run the independent smoke check with:

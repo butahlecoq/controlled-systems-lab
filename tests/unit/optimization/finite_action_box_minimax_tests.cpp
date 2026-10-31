@@ -58,6 +58,11 @@ TEST_CASE("analytic scalar minimax selects and exactly replays the known zero-co
 TEST_CASE("box-scored plan is replayed through the exact finite disturbance catalogues") {
     const auto request = csl::issue824::fixture::two_points_request("box-minimax-test");
     const auto approximate = finite_action_box_minimax(request, {27,27,27,16});
+    if(const auto* unsupported = std::get_if<Unsupported>(&approximate))
+        CHECK_MESSAGE(false, unsupported->diagnostics.front().field << ": " <<
+            unsupported->diagnostics.front().explanation);
+    if(const auto* stopped = std::get_if<OperationStopped>(&approximate))
+        CHECK_MESSAGE(false, "stopped: " << stopped->diagnostics);
     REQUIRE(std::holds_alternative<FiniteActionBoxMinimaxResult>(approximate));
     const auto& result = std::get<FiniteActionBoxMinimaxResult>(approximate);
     REQUIRE(result.plan_scores.size() == 27);
