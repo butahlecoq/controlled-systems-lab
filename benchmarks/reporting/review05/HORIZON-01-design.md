@@ -95,12 +95,14 @@ The checker is intentionally narrower than Candidate 2's proposed general Fourie
 
 ### Current pilot result
 
-The clean Release build and 42-process capture are retained alongside this design. Across all three horizons, Strategy B's six measured attempts per horizon passed the fixture-specific analytic check. Strategy A's six measured attempts per horizon completed without a recordable H relation or objective bound and are marked inconclusive. No measured pair is fully verified, so the individual run durations are descriptive invocation timings only; they do not support a winner, speedup, or relative-performance claim.
+The exploratory capture is retained separately in `reports/algorithm-results/review05-horizon01-20261030/`. A clean Release rebuild and 42-process capture from committed source `34bc9fdf437d6eaa63f28c579acc6c82f506ede5` are retained in `reports/algorithm-results/review05-horizon01-34bc9fdf-20261031/`. Across all three horizons, Strategy B's six measured attempts per horizon passed the fixture-specific analytic check. Strategy A's six measured attempts per horizon completed without a recordable H relation or objective bound and are marked inconclusive. No measured pair is fully verified, so the individual run durations are descriptive invocation timings only; they do not support a winner, speedup, or relative-performance claim.
+
+The clean run began with host load averages 10.03, 9.50, and 5.31 on 8 logical CPUs. AB/BA order was balanced, but observed ranges are wide and `perf`/`pidstat` were unavailable, so the runtime limiter is not identified and the measurements are not suitable for performance conclusions.
 
 | Horizon | Reach-back median (range), all completed attempts | Strategy B median (range), all completed attempts | Verified pairs |
 |---:|---:|---:|---:|
-| 2 | 5.395 ms (5.248–5.850 ms) | 0.709 ms (0.663–0.793 ms) | 0/6 |
-| 4 | 11.196 ms (10.851–11.740 ms) | 0.710 ms (0.696–0.771 ms) | 0/6 |
-| 8 | 23.745 ms (22.324–38.370 ms) | 0.763 ms (0.757–0.776 ms) | 0/6 |
+| 2 | 8.503 ms (5.954–12.685 ms) | 1.115 ms (0.711–1.528 ms) | 0/6 |
+| 4 | 14.880 ms (10.682–19.919 ms) | 0.978 ms (0.770–1.817 ms) | 0/6 |
+| 8 | 26.599 ms (22.614–32.164 ms) | 0.903 ms (0.778–2.012 ms) | 0/6 |
 
 The timing medians include the inconclusive Strategy A calls. The missing Strategy A evidence is itself a useful limitation to carry into the broader #95 comparison work.
