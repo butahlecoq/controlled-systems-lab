@@ -1,6 +1,6 @@
 # REVIEW-05 HORIZON-01 clean committed-source capture
 
-This bundle was built and captured from clean source commit `34bc9fdf437d6eaa63f28c579acc6c82f506ede5`. The earlier exploratory run is preserved in `review05-horizon01-20261030/` and is not overwritten.
+This bundle was built and captured from clean source commit `34bc9fdf437d6eaa63f28c579acc6c82f506ede5`. The earlier exploratory run is preserved in `../review05-horizon01-20261030/` and is not overwritten.
 
 The run covers the synthetic scalar integrator at horizons 2, 4, and 8. It performs one excluded warmup pair and six alternating measured pairs per horizon. The timed region is `SynthesisWorkspace::run()`; process setup and launch are recorded separately. The 42 attempts all completed; each process requested one backend thread and observed width one. The independent checker marked 21 Strategy B outputs verified and 21 reach-back outputs inconclusive. There were zero verified paired repetitions at every horizon. Therefore the durations below are descriptive only; they do not support a ranking, speedup, or scalability claim. The checker verifies the fixture-specific analytic optimum where the required candidate rows are present; it does not establish completeness of a candidate family.
 
