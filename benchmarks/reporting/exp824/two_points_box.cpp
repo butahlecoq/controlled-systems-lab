@@ -1,5 +1,6 @@
 #include <csl/optimization/finite_action_box_minimax.hpp>
 #include <csl/optimization/finite_action_minimax.hpp>
+#include "two_points_fixture.hpp"
 #include <nlohmann/json.hpp>
 
 #include <array>
@@ -10,39 +11,6 @@ namespace {
 using namespace csl;
 using namespace csl::optimization;
 using Json = nlohmann::json;
-
-template<class T> T take(std::variant<T, Diagnostic> value) {
-    if(const auto* error = std::get_if<Diagnostic>(&value))
-        throw std::runtime_error(error->field + ": " + error->explanation);
-    return std::get<T>(std::move(value));
-}
-
-sets::SetData vertices(std::string id, std::size_t dimension, Matrix points) {
-    return take(sets::make_v({{std::move(id)}, dimension, {}},
-        {take(numeric::snapshot(std::move(points))),
-         take(numeric::snapshot(Matrix{0,dimension,{}}))}));
-}
-
-FiniteActionMinimaxRequest request() {
-    constexpr std::size_t horizon = 3;
-    const SystemModel source_model{{{4,1,1}, TimeDomain::discrete,
-        LinearStage{{4,4,{1.0,0.01,0.0,0.0, 0.0,0.0,0.0,0.0,
-                          0.0,0.0,1.0,0.1, 0.0,0.0,0.0,1.0}},
-                    {4,1,{0.09,1.0,0.0,0.0}}, {4,1,{0.0,0.0,0.0045,0.1}},
-                    {0.0,0.0,0.0,0.0}}}, {}};
-    const auto system = take(model::snapshot(source_model, Vector{0.0,0.1,0.2,0.3}));
-    std::vector<sets::SetData> disturbances(horizon,
-        vertices("disturbances", 1, Matrix{3,1,{-1.0,0.0,1.0}}));
-    std::vector<sets::SetData> safe;
-    for(std::size_t stage = 0; stage <= horizon; ++stage)
-        safe.push_back(take(sets::make_universal({{"unconstrained-" + std::to_string(stage)},4,{}})));
-    const auto objective = std::get<Objective>(snapshot(QuadraticTerminal{
-        {4,4,{2.0,0.0,-2.0,0.0, 0.0,0.0,0.0,0.0,
-              -2.0,0.0,2.0,0.0, 0.0,0.0,0.0,0.0}}, {0.0,0.0,0.0,0.0}, 0.0}));
-    return {{"env717-two-points-short-horizon-v1"}, {"issue824-two-points-box-v1"}, system,
-        vertices("initial", 4, Matrix{1,4,{4.5,0.0,0.0,0.0}}),
-        {1,{{-2.5},{0.0},{2.5}}}, std::move(disturbances), std::move(safe), objective};
-}
 
 Json matrix_vertices(const sets::SetData& set) {
     Json result = Json::array();
@@ -58,7 +26,7 @@ Json matrix_vertices(const sets::SetData& set) {
 }
 
 Json run() {
-    const auto input = request();
+    const auto input = csl::issue824::fixture::two_points_request("issue824-two-points-box-v1");
     const auto approximate = finite_action_box_minimax(input, {27,27,27,16});
     const auto* selected = std::get_if<FiniteActionBoxMinimaxResult>(&approximate);
     if(!selected) throw std::runtime_error("box minimax did not complete successfully");

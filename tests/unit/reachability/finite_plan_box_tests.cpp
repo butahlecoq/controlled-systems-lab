@@ -1,6 +1,7 @@
 #define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
 #include <doctest/doctest.h>
 #include <csl/reachability/finite_plan_box.hpp>
+#include <two_points_fixture.hpp>
 
 using namespace csl;
 using namespace csl::reachability;
@@ -26,20 +27,9 @@ FixedPlanRequest request() {
         {universal("s0"), universal("s1"), universal("s2")}, {"box-test"}};
 }
 FixedPlanRequest two_points_request() {
-    constexpr std::size_t horizon = 3;
-    const SystemModel authored{{{4,1,1}, TimeDomain::discrete,
-        LinearStage{{4,4,{1.0,0.01,0.0,0.0, 0.0,0.0,0.0,0.0,
-                          0.0,0.0,1.0,0.1, 0.0,0.0,0.0,1.0}},
-                    {4,1,{0.09,1.0,0.0,0.0}}, {4,1,{0.0,0.0,0.0045,0.1}},
-                    {0.0,0.0,0.0,0.0}}}, {}};
-    const auto system = take(model::snapshot(authored, Vector{0.0,0.1,0.2,0.3}));
-    std::vector<sets::SetData> disturbances(horizon,
-        vertices("d", 1, Matrix{3,1,{-1.0,0.0,1.0}}));
-    std::vector<sets::SetData> safe;
-    for(std::size_t stage = 0; stage <= horizon; ++stage)
-        safe.push_back(take(sets::make_universal({{"safe" + std::to_string(stage)},4,{}})));
-    return {system, vertices("initial", 4, Matrix{1,4,{4.5,0.0,0.0,0.0}}),
-        {{-2.5},{-2.5},{-2.5}}, std::move(disturbances), std::move(safe), {"two-points-plan"}};
+    const auto full = csl::issue824::fixture::two_points_request("two-points-plan");
+    return {full.system, full.initial, {{-2.5},{-2.5},{-2.5}},
+        full.disturbances, full.admissible_states, {"two-points-plan"}};
 }
 }
 

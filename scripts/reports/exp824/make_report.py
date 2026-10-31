@@ -22,6 +22,7 @@ SOURCE_FILES = (
     "src/optimization/finite_action_plans.hpp",
     "src/optimization/finite_action_minimax.cpp",
     "benchmarks/reporting/exp824/two_points_box.cpp",
+    "benchmarks/reporting/exp824/two_points_fixture.hpp",
     "scripts/reports/exp824/check_two_points_box.py",
     "scripts/reports/exp824/make_report.py",
 )

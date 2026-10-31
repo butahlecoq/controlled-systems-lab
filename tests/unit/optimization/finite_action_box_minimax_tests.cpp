@@ -1,46 +1,13 @@
 #define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
 #include <doctest/doctest.h>
 #include <csl/optimization/finite_action_box_minimax.hpp>
+#include <two_points_fixture.hpp>
 
 using namespace csl;
 using namespace csl::optimization;
 
-namespace {
-template<class T> T take(std::variant<T, Diagnostic> result) {
-    REQUIRE(std::holds_alternative<T>(result));
-    return std::get<T>(std::move(result));
-}
-sets::SetData vertices(std::string id, std::size_t dimension, Matrix points) {
-    return take(sets::make_v({{std::move(id)}, dimension, {}},
-        {take(numeric::snapshot(points)), take(numeric::snapshot(Matrix{0,dimension,{}}))}));
-}
-sets::SetData universal(std::string id, std::size_t dimension) {
-    return take(sets::make_universal({{std::move(id)}, dimension, {}}));
-}
-FiniteActionMinimaxRequest two_points_request() {
-    constexpr std::size_t horizon = 3;
-    const SystemModel authored{{{4,1,1}, TimeDomain::discrete,
-        LinearStage{{4,4,{1.0,0.01,0.0,0.0, 0.0,0.0,0.0,0.0,
-                          0.0,0.0,1.0,0.1, 0.0,0.0,0.0,1.0}},
-                    {4,1,{0.09,1.0,0.0,0.0}}, {4,1,{0.0,0.0,0.0045,0.1}},
-                    {0.0,0.0,0.0,0.0}}}, {}};
-    const auto system = take(model::snapshot(authored, Vector{0.0,0.1,0.2,0.3}));
-    std::vector<sets::SetData> disturbances(horizon,
-        vertices("d", 1, Matrix{3,1,{-1.0,0.0,1.0}}));
-    std::vector<sets::SetData> safe;
-    for(std::size_t stage = 0; stage <= horizon; ++stage)
-        safe.push_back(universal("safe" + std::to_string(stage), 4));
-    const auto objective = std::get<Objective>(snapshot(QuadraticTerminal{
-        {4,4,{2.0,0.0,-2.0,0.0, 0.0,0.0,0.0,0.0,
-              -2.0,0.0,2.0,0.0, 0.0,0.0,0.0,0.0}}, {0.0,0.0,0.0,0.0}, 0.0}));
-    return {{"env717-two-points-short-horizon-v1"}, {"box-minimax-test"}, system,
-        vertices("initial", 4, Matrix{1,4,{4.5,0.0,0.0,0.0}}),
-        {1,{{-2.5},{0.0},{2.5}}}, std::move(disturbances), std::move(safe), objective};
-}
-}
-
 TEST_CASE("box-scored plan is replayed through the exact finite disturbance catalogues") {
-    const auto request = two_points_request();
+    const auto request = csl::issue824::fixture::two_points_request("box-minimax-test");
     const auto approximate = finite_action_box_minimax(request, {27,27,27,16});
     REQUIRE(std::holds_alternative<FiniteActionBoxMinimaxResult>(approximate));
     const auto& result = std::get<FiniteActionBoxMinimaxResult>(approximate);
@@ -68,4 +35,12 @@ TEST_CASE("box-scored plan is replayed through the exact finite disturbance cata
     const auto& exact_result = std::get<FiniteMinimaxOptimal>(exact);
     CHECK(result.selected_replay_value >= exact_result.value);
     CHECK(result.selected_box_score >= result.selected_replay_value);
+}
+
+TEST_CASE("box minimax enforces the separate full-history replay budget") {
+    const auto request = csl::issue824::fixture::two_points_request("box-budget-test");
+    const auto result = finite_action_box_minimax(request, {27,27,0,16});
+    REQUIRE(std::holds_alternative<Unsupported>(result));
+    CHECK(std::get<Unsupported>(result).diagnostics[0].field ==
+        "finite_box_minimax.replay.capacity");
 }

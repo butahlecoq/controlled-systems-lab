@@ -6,6 +6,12 @@ The exact finite minimax value is `14.58094225`. The box-selected plan is `[-2.5
 
 The box maximum is a numerical diagnostic over terminal box corners. This pilot does not claim validated objective bounds, continuous RL reproduction, feedback optimality, or support for ellipsoids, parallelotopes, and zonotopes. No performance measurement was collected. The figure combines this run's boxes and replay with exact forward/backward geometry from the separate MPC-05 finite adaptation report.
 
+## Supported representation and cost
+
+The implementation accepts bounded V-representation or singleton initial/disturbance sets and universal state constraints. For state dimension `n`, control dimension `m`, disturbance dimension `q`, horizon `H`, `A` actions per stage, and `P=A^H` plans, interval propagation costs `O(H n(n+m+q))` per plan. The terminal score enumerates `2^n` box corners and evaluates the objective at each; for quadratic objectives each evaluation costs `O(n^2)`. The selected plan is replayed over `R=|I|∏|D_k|` initial/disturbance histories at `O(R H n(n+m+q))` arithmetic cost. Overall work is `O(P[Hn(n+m+q)+2^n C_obj]+RHn(n+m+q))`, where `C_obj` is the cost of one objective evaluation.
+
+Memory is `O(PH + Hn + 2^n n + K H n + ∑|D_k|q)` for saved plan scores, stage boxes, terminal corners, exact replay stages, and disturbance catalogues, where `K` is the per-stage exact-point limit. The witness search retains only one path of length `H`; its history-count limit `R` bounds work rather than stored histories. Explicit caller limits bound plan count, exact points per stage, full replay histories, and terminal corners. Both action-plan and corner enumeration are exponential in horizon and state dimension, respectively; the four-state, three-stage example does not establish practical scaling beyond this fixture.
+
 ## Reproduce
 
 From the repository root, configure and build the Release report driver:

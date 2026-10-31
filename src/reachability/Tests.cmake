@@ -18,6 +18,7 @@ add_test(NAME fixed_plan_disturbance_tests COMMAND fixed_plan_disturbance_tests)
 csl_test_target(fixed_plan_disturbance_tests reachability)
 
 add_executable(finite_plan_box_tests tests/unit/reachability/finite_plan_box_tests.cpp)
+target_include_directories(finite_plan_box_tests PRIVATE ${PROJECT_SOURCE_DIR}/benchmarks/reporting/exp824)
 target_link_libraries(finite_plan_box_tests PRIVATE CSL::finite_plan_box doctest::doctest)
 add_test(NAME finite_plan_box_tests COMMAND finite_plan_box_tests)
 csl_test_target(finite_plan_box_tests reachability)

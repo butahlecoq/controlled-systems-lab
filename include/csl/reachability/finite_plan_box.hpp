@@ -22,6 +22,10 @@ using FinitePlanBoxOutcome = std::variant<FinitePlanBoxTrace, Unsupported,
 // Stagewise interval enclosure for a fixed open-loop control sequence.
 // Supports bounded V/singleton initial and disturbance sets and universal
 // state constraints. This is a numerical outer enclosure, not a full optimizer.
+// For state dimension n and horizon H, propagation costs O(H n(n+q+m))
+// arithmetic for external dimension q and control dimension m; it stores
+// O(Hn + sum_k |D_k|q) values, where D_k are disturbance vertices. It keeps
+// one box per stage regardless of the represented trajectory count.
 FinitePlanBoxOutcome finite_plan_box(const FixedPlanRequest& request,
     const ExecutionContext& context = {});
 

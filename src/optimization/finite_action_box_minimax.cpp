@@ -23,6 +23,8 @@ std::variant<sets::SetData, Unsupported> terminal_box(const reachability::BoxSta
     const auto count = std::size_t{1} << dimension;
     if(count > corner_limit)
         return unsupported("finite_box_minimax.corners", "Terminal box corner count exceeds caller limit.");
+    if(dimension != 0 && count > std::numeric_limits<std::size_t>::max() / dimension)
+        return unsupported("finite_box_minimax.capacity", "Terminal corner storage size overflows.");
     Matrix corners{count, dimension, Vector(count * dimension)};
     for(std::size_t mask = 0; mask < count; ++mask)
         for(std::size_t coordinate = 0; coordinate < dimension; ++coordinate)
@@ -82,6 +84,8 @@ ReplayOutcome replay_all(const reachability::FixedPlanRequest& request, const Ob
     std::vector<std::vector<Vector>> disturbances;
     disturbances.reserve(request.disturbances.size());
     std::size_t total = initial.size();
+    if(total > point_limit)
+        return unsupported("finite_box_minimax.replay.capacity", "Initial replay count exceeds caller limit.");
     for(const auto& set : request.disturbances) {
         auto rows = catalogue(set, "finite_box_minimax.replay.disturbance");
         if(const auto* error = std::get_if<Unsupported>(&rows)) return *error;
