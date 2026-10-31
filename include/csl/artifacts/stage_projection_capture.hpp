@@ -31,6 +31,7 @@ struct StageProjectionSuccess {
         std::string kind;
         std::string explanation;
         std::optional<registry::Provenance> provider;
+        std::optional<StopReason> stop_reason;
     };
     // Optional equivalent finite-point representation used by saved figures.
     // The projection itself remains the original 2D relation and evidence.

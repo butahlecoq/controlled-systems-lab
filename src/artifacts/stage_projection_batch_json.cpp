@@ -312,7 +312,12 @@ ArtifactResult<std::string> encode_stage_projection_batch_json(
                     if (failure.explanation.empty() || (failure.kind != "rejected" && failure.kind != "unsupported" && failure.kind != "stopped"))
                         return error(ArtifactErrorCode::invalid_input, "records.outcome.materialization_failure",
                             "Materialization failure requires a supported kind and explanation");
+                    if ((failure.kind == "stopped") != failure.stop_reason.has_value())
+                        return error(ArtifactErrorCode::reference, "records.outcome.materialization_failure.stop_reason",
+                            "Only stopped materializations must carry a stop reason");
                     outcome["materialization_failure"] = {{"kind", failure.kind}, {"explanation", failure.explanation}};
+                    if (failure.stop_reason)
+                        outcome["materialization_failure"]["stop_reason"] = stop_reason(*failure.stop_reason);
                     if (failure.provider && failure.provider->actual)
                         outcome["materialization_failure"]["provider"] = {
                             {"id", failure.provider->actual->id.value}, {"version", failure.provider->actual->version}};

@@ -253,7 +253,7 @@ void materialize_projected_outputs(artifacts::StageProjectionBatchCapture& batch
             const auto detail = rejected->diagnostics.empty()
                 ? std::string("no rejection detail") : rejected->diagnostics.front().explanation;
             success->materialization_failure = artifacts::StageProjectionSuccess::MaterializationFailure{
-                "rejected", detail, std::nullopt};
+                "rejected", detail, rejected->provenance, std::nullopt};
             continue;
         }
         auto pipeline = std::get<registry::PreparedPipeline<registry::ConversionPort>>(std::move(prepared));
@@ -267,10 +267,11 @@ void materialize_projected_outputs(artifacts::StageProjectionBatchCapture& batch
                 for (const auto& diagnostic : unsupported->diagnostics)
                     detail += diagnostic.field + ": " + diagnostic.explanation + "; ";
                 success->materialization_failure = artifacts::StageProjectionSuccess::MaterializationFailure{
-                    "unsupported", detail.empty() ? "No diagnostic was supplied." : detail, provenance};
+                    "unsupported", detail.empty() ? "No diagnostic was supplied." : detail, provenance, std::nullopt};
             } else if (const auto* stopped = std::get_if<OperationStopped>(&output)) {
                 success->materialization_failure = artifacts::StageProjectionSuccess::MaterializationFailure{
-                    "stopped", stopped->diagnostics.empty() ? "Conversion stopped." : stopped->diagnostics, provenance};
+                    "stopped", stopped->diagnostics.empty() ? "Conversion stopped." : stopped->diagnostics,
+                    provenance, stopped->reason};
             } else {
                 throw std::runtime_error("2D projection H-to-V materializer returned an unexpected outcome");
             }

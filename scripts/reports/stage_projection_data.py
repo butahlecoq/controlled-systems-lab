@@ -106,6 +106,9 @@ def loads_stage_projection_batch(
                 (time is None or time != stage_points[row["stage"]])):
             raise ProjectionBatchError(f"records[{i}] time does not match its stage axis")
         outcome = row["outcome"]
+        materialization_failure = outcome.get("materialization_failure")
+        if materialization_failure and materialization_failure["kind"] == "stopped" and not materialization_failure.get("stop_reason"):
+            raise ProjectionBatchError(f"records[{i}] stopped materialization must retain its stop reason")
         if outcome.get("status") == "success":
             evidence_ids = []
             for item in outcome["evidence"]:

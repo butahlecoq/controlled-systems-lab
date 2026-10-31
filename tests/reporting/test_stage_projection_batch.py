@@ -210,6 +210,7 @@ class StageProjectionBatchTests(unittest.TestCase):
         outcome["components"] = []
         outcome["materialization_failure"] = {
             "kind": "stopped", "explanation": "converter resource limit",
+            "stop_reason": "resource_limit",
             "provider": {"id": "conversion.test", "version": "1"},
         }
         reseal(document)
@@ -219,6 +220,7 @@ class StageProjectionBatchTests(unittest.TestCase):
         self.assertEqual(outcome["components"], [])
         self.assertEqual(outcome["evidence"][0]["ideal_output_id"], "output-0")
         self.assertEqual(outcome["materialization_failure"]["kind"], "stopped")
+        self.assertEqual(outcome["materialization_failure"]["stop_reason"], "resource_limit")
 
 
 if __name__ == "__main__":
