@@ -1,0 +1,22 @@
+{
+  "schema": "csl.review05.build-provenance/1",
+  "source_revision": "8e508fc1db88ada9f36821ad59fc7eaf5a15f6d0",
+  "source_worktree_dirty": false,
+  "configure_command": "cmake -S benchmarks/reporting/review05 -B /home/butahlecoq/.local/share/codex/build/review05-horizon-growth-20261031 -DCSL_SOURCE_ROOT=/home/butahlecoq/.local/share/codex/worktrees/review05-size-growth-20261031 -DCMAKE_BUILD_TYPE=Release -G Ninja",
+  "build_command": "ninja -C /home/butahlecoq/.local/share/codex/build/review05-horizon-growth-20261031 csl_review05_horizon_ladder",
+  "build_type": "Release (-O3 -DNDEBUG)",
+  "cxx_compiler": "GCC 16.2.1",
+  "cmake_version": "3.31.6",
+  "ninja_version": "1.13.2",
+  "build_result": "completed; 419/419 build steps",
+  "build_log": "not retained; build completion and versions recorded here",
+  "build_warning": "Upstream HiGHS HighsSymmetry.cpp warning: numSetPackingRows may be used uninitialized; build completed successfully.",
+  "binary": "/home/butahlecoq/.local/share/codex/build/review05-horizon-growth-20261031/csl_review05_horizon_ladder",
+  "binary_sha256": "a39618ae842fd19cf4e1b521c8457b1fcf567d72f2fe8baa43c6f59e69b2ccac",
+  "dependency_versions": {
+    "HiGHS": "1.11.0",
+    "Qhull": "pinned repository dependency"
+  },
+  "report_renderer_revision": "38173e132e37d8f0713571669dd63cc7c3cc74e3",
+  "report_renderer_sha256": "87074dd8d0e1238c6b360902030394a165e8146096ee377349bab2f570844fd8"
+}
