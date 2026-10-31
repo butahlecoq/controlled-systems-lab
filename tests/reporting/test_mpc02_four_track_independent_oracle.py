@@ -111,12 +111,21 @@ class Mpc02FourTrackIndependentOracleTests(unittest.TestCase):
         self.assertGreater(compatible_lower, compatible_upper)
 
     def test_temporal_rows_can_make_the_complete_history_empty(self) -> None:
-        # The box alone permits every pair in [-1,1]^2.  The two exact history
-        # rows below require u0 <= -3 and u0 >= -2, so no complete history can
-        # satisfy them; endpoint projection must not manufacture a witness.
+        # The box alone permits every pair in [-1,1]^2.  These are literal rows
+        # in x0,...,xT,u0,u1 order: u0 <= -3 and -u0 <= 2 (u0 >= -2).
+        # No complete history can satisfy them; endpoint projection must not
+        # manufacture a witness.
         lower, upper = Fraction(-1), Fraction(1)
         history_upper = Fraction(-3)
         history_lower = Fraction(-2)
+        rows = [
+            [0, 0, 0, 0, 0, 0, 1, 0],
+            [0, 0, 0, 0, 0, 0, -1, 0],
+        ]
+        upper_bounds = [history_upper, Fraction(2)]
+        self.assertEqual(len(rows), 2)
+        self.assertEqual([row[6:] for row in rows], [[1, 0], [-1, 0]])
+        self.assertEqual(upper_bounds, [Fraction(-3), Fraction(2)])
         self.assertLess(history_upper, lower)
         self.assertLess(history_upper, history_lower)
         self.assertLess(min(upper, history_upper), max(lower, history_lower))
