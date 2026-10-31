@@ -488,6 +488,61 @@ TEST_CASE("MPC-02 registers distinct constraint tracks and direct and memory-lif
         lifted_optimum,{1e-12,1e-12},{{"mpc02-analytic-oracle"},"1"}));
     CHECK(direct_cost.original_objective==doctest::Approx(1.0/32.0).epsilon(1e-12));
     CHECK(lifted_cost.original_objective==doctest::Approx(direct_cost.original_objective).epsilon(1e-12));
+
+}
+TEST_CASE("MPC-02 direct and memory-lift agree with authored slew oracle on a control grid") {
+    auto authored=mpc02_two_state_integrator();
+    authored.temporal=TemporalConstraints{{1,8,{0,2},{6,7},{-1,1}},{{-.25,.25}}};
+    const auto direct_problem=resolve(authored);
+    const auto direct_joint=accepted(build_joint_program(direct_problem,request(direct_problem)));
+    const auto stagewise=mpc02_two_state_integrator();
+    const auto slew=problem::lift_one_step_slew(stagewise,
+        {problem::UnconstrainedFirstAction{}, {bounded_interval(-.25,.25).as_handle()}});
+    REQUIRE(std::holds_alternative<problem::SlewMemoryLift>(slew));
+    const auto& lift=std::get<problem::SlewMemoryLift>(slew);
+    const auto lifted_problem=resolve(lift.problem);
+    const auto lifted_joint=accepted(build_joint_program(lifted_problem,request(lifted_problem)));
+
+    const auto flatten=[](const std::vector<Vector>& states,const std::vector<Vector>& controls) {
+        Vector result;
+        for(const auto& state:states) result.insert(result.end(),state.begin(),state.end());
+        for(const auto& control:controls) result.insert(result.end(),control.begin(),control.end());
+        return result;
+    };
+    // Independent 5x5 oracle compares each program with the authored box and
+    // slew equations, then compares objectives for every feasible history.
+    const std::vector<double> grid{-0.5,-0.25,0.0,0.25,0.5};
+    std::size_t tested=0, feasible_points=0;
+    for(const double grid_u0:grid) for(const double grid_u1:grid) {
+        const problem::ControlHistory history{
+            {{0,0},{grid_u0,0},{grid_u0,grid_u1}},{{grid_u0},{grid_u1}}};
+        const auto direct_coordinates=flatten(history.states,history.controls);
+        const auto lifted_history=problem::lift_history(lift.coordinates,history);
+        REQUIRE(std::holds_alternative<problem::LiftedControlHistory>(lifted_history));
+        const auto& mapped=std::get<problem::LiftedControlHistory>(lifted_history);
+        const auto lifted_coordinates=flatten(mapped.augmented_states,mapped.increments);
+        const bool direct_is_feasible=feasible(direct_joint,direct_coordinates);
+        const bool lifted_is_feasible=feasible(lifted_joint,lifted_coordinates);
+        const bool authored_is_feasible=std::abs(grid_u0)<=1.0 && std::abs(grid_u1)<=1.0
+            && std::abs(grid_u1-grid_u0)<=0.25;
+        CHECK(direct_is_feasible==authored_is_feasible);
+        CHECK(lifted_is_feasible==authored_is_feasible);
+        CHECK(direct_is_feasible==lifted_is_feasible);
+        if(direct_is_feasible) {
+            ++feasible_points;
+            const auto direct_grid_cost=accepted(optimization::evaluate_primal(
+                std::get<ConvexProgram>(direct_joint.program),direct_coordinates,
+                {1e-12,1e-12},{{"mpc02-grid-oracle"},"1"}));
+            const auto lifted_grid_cost=accepted(optimization::evaluate_primal(
+                std::get<ConvexProgram>(lifted_joint.program),lifted_coordinates,
+                {1e-12,1e-12},{{"mpc02-grid-oracle"},"1"}));
+            CHECK(lifted_grid_cost.original_objective==
+                doctest::Approx(direct_grid_cost.original_objective).epsilon(1e-12));
+        }
+        ++tested;
+    }
+    CHECK(tested==25);
+    CHECK(feasible_points==13);
 }
 TEST_CASE("multiple authored temporal rows retain independent history constraints") {
     auto input=integrator(LinearTerminal{{0},0});
