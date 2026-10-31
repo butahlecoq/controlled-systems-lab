@@ -26,5 +26,20 @@ with zero reported solver residual. Timings are nanoseconds from one host and
 include no CPU/RSS quota or hardware-counter profile; retain them as a baseline
 for later matched comparisons, not as an optimization conclusion.
 
+Reproduce from a clean checkout (the runner also builds the preserved slew
+measurement target):
+
+```sh
+cmake -S benchmarks/reporting/mpc02/runner -B build/mpc02-four-track \
+  -DCMAKE_BUILD_TYPE=Release -DCSL_SOURCE_ROOT="$PWD"
+cmake --build build/mpc02-four-track --parallel 4
+build/mpc02-four-track/csl_mpc02_four_track_measure \
+  reports/algorithm-results/mpc02-four-track-direct-v1 \
+  examples/scenarios/mpc02-unconstrained-2d.json \
+  examples/scenarios/mpc02-stage-box-2d.json \
+  examples/scenarios/mpc02-slew-2d.json \
+  examples/scenarios/mpc02-l1-budget-2d.json
+```
+
 The raw event stream is [`events.jsonl`](events.jsonl), with SHA-256
 `eebeef0ed8da0ea5895c3494acd5c9812df8fb39c2ad798ddcc1bd5d113cab2b`.
