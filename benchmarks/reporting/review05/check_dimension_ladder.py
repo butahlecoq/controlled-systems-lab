@@ -37,6 +37,17 @@ def required(n,t):
             le.add(canon(row(width,{state(k,c):-1},t),False))
     return width,eq,le
 
+def expected_fixture(n,t):
+    identity=[[int(i==j) for j in range(n)] for i in range(n)]
+    box={'kind':'box','lower':[-t]*n,'upper':[t]*n}
+    return {'schema':'csl.scenario/1','id':f'review05-dimension01-n{n}-t{t}','horizon':t,
+            'model':{'kind':'linear_discrete','A':identity,'B':identity},'initial_state':[0]*n,
+            'controls':{'kind':'box','lower':[0]*n,'upper':[1]*n},
+            'states':{'kind':'stages','values':[box for _ in range(t+1)]},
+            'objective':{'kind':'linear','coefficients':[1]*n},
+            'metadata':{'state_labels':[f'x{i+1}' for i in range(n)],'control_labels':[f'u{i+1}' for i in range(n)],
+                        'state_units':['dimensionless']*n,'control_units':['dimensionless']*n}}
+
 def check(attempt,expected_hash):
     try:
         n,t=CASES[attempt['case']]; result=attempt['result']
@@ -77,8 +88,10 @@ def main():
     m=json.loads((b/'manifest.json').read_text()); records=[json.loads(x) for x in (b/'attempts.jsonl').read_text().splitlines() if x]
     if m.get('schema')!='csl.review05.dimension-manifest/1': p.error('wrong manifest schema')
     for key in CASES:
-        path=b/'inputs'/f'dimension01-{key.replace("n","n").replace("-t","-t")}.json'
+        path=b/'inputs'/f'dimension01-{key}.json'
+        n,t=CASES[key]
         if not path.is_file() or sha(path)!=m['cases'][key]['scenario_sha256']: p.error(f'fixture hash mismatch: {key}')
+        if json.loads(path.read_text())!=expected_fixture(n,t): p.error(f'fixture content differs from exact oracle: {key}')
     expected={(key,r,pos) for key in CASES for r in range(7) for pos in (0,1)}
     observed={(x.get('case'),x.get('repetition'),x.get('order_position')) for x in records}
     if len(records)!=56 or observed!=expected or len({x.get('attempt_id') for x in records})!=56: p.error('incomplete 56-attempt schedule')
