@@ -36,6 +36,10 @@ SOURCE_FILES = (
     "tests/unit/reachability/finite_plan_zonotope_tests.cpp",
     "scripts/reports/exp824/check_two_points_box.py",
     "scripts/reports/exp824/make_report.py",
+    "scripts/reports/stage_issue824_zonotope.py",
+    "scripts/reports/visual_examples.py",
+    "tests/reporting/test_issue824_zonotope_publication.py",
+    ".github/workflows/algorithm-reports.yml",
 )
 COLORS = ("#458588", "#689d6a", "#d79921", "#b16286")
 
@@ -234,6 +238,51 @@ def svg_figure(result: dict, check: dict, mpc_figure: dict) -> str:
     return "\n".join(out) + "\n"
 
 
+def planar_svg(result: dict) -> str:
+    example = result["planar_example"]
+    width, height = 760, 500
+    left, right, top, bottom = 88, 716, 72, 410
+
+    def project(point):
+        return (left + (point[0] + 2.5) / 5.0 * (right - left),
+                bottom - (point[1] + 1.5) / 3.0 * (bottom - top))
+
+    def path(points):
+        coords = [project(point) for point in points]
+        return "M " + " L ".join(f"{x:.2f} {y:.2f}" for x, y in coords) + " Z"
+
+    initial = example["initial_vertices"]
+    reachable = example["exact_reachable_vertices"]
+    zone = projected_zonotope(example["stages"][1], 0, 1)
+    out = [f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {width} {height}" role="img" aria-labelledby="title desc">',
+           '<title id="title">Planar zonotope propagation for a diagonal linear map</title>',
+           '<desc id="desc">The square [-1,1] squared maps under diag(2,1) to the exact rectangle [-2,2] by [-1,1], enclosed by the saved zonotope propagation result.</desc>',
+           '<rect width="100%" height="100%" fill="#fbf1c7"/>',
+           '<text x="380" y="30" text-anchor="middle" font-family="sans-serif" font-size="20" fill="#282828">A 2D linear image enclosed by zonotope propagation</text>']
+    for tick in (-2, -1, 0, 1, 2):
+        x, _ = project((tick, 0))
+        out.extend((f'<line x1="{x:.2f}" y1="{top}" x2="{x:.2f}" y2="{bottom}" stroke="#d5c4a1"/>',
+                    f'<text x="{x:.2f}" y="{bottom+22}" text-anchor="middle" font-family="sans-serif" font-size="12" fill="#504945">{tick}</text>'))
+    for tick in (-1, 0, 1):
+        _, y = project((0, tick))
+        out.extend((f'<line x1="{left}" y1="{y:.2f}" x2="{right}" y2="{y:.2f}" stroke="#d5c4a1"/>',
+                    f'<text x="{left-14}" y="{y+4:.2f}" text-anchor="end" font-family="sans-serif" font-size="12" fill="#504945">{tick}</text>'))
+    out.extend((f'<path d="{path(zone)}" fill="#458588" fill-opacity="0.24" stroke="#076678" stroke-width="3"/>',
+                f'<path d="{path(initial)}" fill="#d5c4a1" fill-opacity="0.38" stroke="#665c54" stroke-width="2" stroke-dasharray="7 4"/>'))
+    for point in reachable:
+        x, y = project(point)
+        out.append(f'<circle cx="{x:.2f}" cy="{y:.2f}" r="5" fill="#282828" stroke="#fbf1c7" stroke-width="1"/>')
+    out.extend((f'<text x="{(left+right)/2}" y="{bottom+54}" text-anchor="middle" font-family="sans-serif" font-size="14" fill="#282828">x₁</text>',
+                f'<text x="24" y="{(top+bottom)/2}" transform="rotate(-90 24 {(top+bottom)/2})" text-anchor="middle" font-family="sans-serif" font-size="14" fill="#282828">x₂</text>',
+                '<rect x="92" y="456" width="20" height="12" fill="#d5c4a1" fill-opacity="0.38" stroke="#665c54" stroke-dasharray="5 3"/>',
+                '<text x="118" y="467" font-family="sans-serif" font-size="12" fill="#282828">Initial square</text>',
+                '<rect x="300" y="456" width="20" height="12" fill="#458588" fill-opacity="0.24" stroke="#076678" stroke-width="2"/>',
+                '<text x="326" y="467" font-family="sans-serif" font-size="12" fill="#282828">Propagated outer zonotope</text>',
+                '<circle cx="575" cy="462" r="5" fill="#282828"/><text x="588" y="467" font-family="sans-serif" font-size="12" fill="#282828">Exact reachable corners</text>',
+                '</svg>'))
+    return "\n".join(out) + "\n"
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--executable", type=Path, required=True)
@@ -289,19 +338,36 @@ def main() -> None:
               "geometry":source_figure["reachability_geometry"],
               "exact_check":check,
               "box_stages":result["box_method"]["stages"],
-              "zonotope_stages":result["zonotope_method"]["stages"]}
+              "zonotope_stages":result["zonotope_method"]["stages"],
+              "planar_example":result["planar_example"]}
     (output / "figure-data.json").write_text(json.dumps(figure, indent=2, sort_keys=True) + "\n", encoding="utf-8")
     svg = svg_figure(result, check, source_figure)
     (output / "projections.svg").write_text(svg, encoding="utf-8")
+    planar_figure = planar_svg(result)
+    (output / "planar-example.svg").write_text(planar_figure, encoding="utf-8")
     exact_value = result["exact_reference"]["finite_minimax_value"]
     approx_value = result["box_method"]["full_catalogue_replay_value"]
+    planar_html = f'''<!doctype html><html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width"><title>Planar zonotope propagation example · Issue 824</title>
+<style>body{{max-width:960px;margin:2rem auto;padding:0 1rem;background:#fbf1c7;color:#282828;font:16px/1.55 system-ui}}h1,h2{{color:#3c3836}}svg{{width:100%;height:auto}}code,pre{{background:#f9f5d7;padding:.15rem .3rem}}a{{color:#076678}}</style>
+<h1>A planar linear image enclosed by zonotope propagation</h1><p>This supported two-state example starts with the square <code>[-1,1] × [-1,1]</code>, applies one stage <code>x⁺ = diag(2,1)x</code>, with zero control and zero disturbance, and uses universal safe sets. The output set is the axis-aligned rectangle <code>[-2,2] × [-1,1]</code>.</p>
+{planar_figure}<p><strong>Checked result:</strong> the independently reconstructed four exact image vertices are <code>{result['planar_example']['exact_reachable_vertices']}</code>. The saved propagation trace has center <code>{result['planar_example']['stages'][1]['center']}</code> and outward-rounded coordinate generator radii at least <code>[2,1]</code>. Its axis-aligned generators form an outer rectangle containing all exact image vertices. This inclusion check applies to this simple planar fixture; the four-state TwoPoints trace has only coordinate-bound checks and no full-dimensional membership proof.</p>
+<h2>Complete minimal input</h2><pre>State dimension: 2; one discrete stage from t=0 to t=1
+A = [[2, 0], [0, 1]]; B = [[0], [0]]; E = [[0, 0], [0, 0]]; offset = [0, 0]
+Initial vertices: {result['planar_example']['initial_vertices']}
+Control: [0]; disturbance: singleton [0, 0]; safe sets: universal</pre>
+<h2>Reproduce</h2><pre>cmake --preset dev -DCSL_BUILD_ISSUE824_BOX_REPORT=ON
+cmake --build build/dev --target csl_issue824_box_minimax_report --parallel 4
+python3 scripts/reports/exp824/make_report.py --executable build/dev/csl_issue824_box_minimax_report \\
+  --build-dir build/dev --output reports/algorithm-results/issue824-two-points-zonotope-pilot-v2</pre>
+<p>Algorithm source commit: <a href="https://github.com/butahlecoq/controlled-systems-lab/commit/{commit}"><code>{commit}</code></a>. See the <a href="result.json">raw saved result</a>, <a href="check.json">independent checker record</a>, <a href="README.md">complete report and limits</a>, <a href="https://github.com/butahlecoq/controlled-systems-lab/blob/{commit}/src/reachability/finite_plan_zonotope.cpp">propagation source</a>, and <a href="https://github.com/butahlecoq/controlled-systems-lab/blob/{commit}/tests/unit/reachability/finite_plan_zonotope_tests.cpp">analytic fixture test</a>.</p></html>'''
+    (output / "planar-example.html").write_text(planar_html, encoding="utf-8")
     html_page = f'''<!doctype html><html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width"><title>Issue 824 · TwoPoints box and zonotope pilot</title>
 <style>body{{max-width:1200px;margin:2rem auto;padding:0 1rem;background:#fbf1c7;color:#282828;font:16px/1.5 system-ui}}h1,h2{{color:#3c3836}}.metric{{display:inline-block;margin:.4rem 1rem .4rem 0;padding:.7rem;background:#f9f5d7;border:1px solid #d5c4a1;border-radius:6px}}svg{{width:100%;height:auto}}code{{background:#f9f5d7;padding:.1rem .3rem}}a{{color:#076678}}</style>
 <h1>TwoPointsOnParallelLines: stagewise approximation pilot</h1><p>This is a three-stage finite adaptation of the source differential-game environment. It compares the box-selected fixed-plan minimax run with an outer zonotope recurrence of that same plan and the exact finite-catalog reference. The upstream continuous-action RL problem is not reproduced.</p>
 <p><span class="metric">Exact finite minimax: <b>{exact_value:.8f}</b></span><span class="metric">Box-selected plan replay: <b>{approx_value:.8f}</b></span><span class="metric">Box terminal score: <b>{result['box_method']['terminal_box_maximum']:.8f}</b></span></p>
 {svg}
-<h2>Evidence and limits</h2><p>The independent checker reconstructs the exact rational finite game, verifies every selected-plan state is within the recorded box and within the zonotope coordinate bounds, and replays all disturbance histories to check the worst-case witness. The coordinate checks do not prove full four-dimensional zonotope membership. A separate analytic planar box fixture provides complete inclusion evidence for the axis-aligned case. The box objective score is diagnostic, not a validated global optimality certificate. The figure also overlays exact forward hulls, backward-winning nodes, and intersections from the pinned MPC-05 geometry report.</p>
-<p><a href="result.json">Raw result</a> · <a href="check.json">Independent check</a> · <a href="figure-data.json">Figure data</a></p></html>'''
+<h2>Evidence and limits</h2><p>The independent checker reconstructs the exact rational finite game, verifies every selected-plan state is within the recorded box and within the zonotope coordinate bounds, and replays all disturbance histories to check the worst-case witness. The coordinate checks do not prove full four-dimensional zonotope membership. A separate <a href="planar-example.html">complete planar zonotope example</a> checks all exact vertices of an axis-aligned linear image. The box objective score is diagnostic, not a validated global optimality certificate. The figure also overlays exact forward hulls, backward-winning nodes, and intersections from the pinned MPC-05 geometry report.</p>
+<p><a href="result.json">Raw result</a> · <a href="check.json">Independent check</a> · <a href="figure-data.json">Figure data</a> · <a href="planar-example.html">Supported 2D example</a></p></html>'''
     (output / "index.html").write_text(html_page, encoding="utf-8")
     readme = f'''# EXP-824 TwoPoints box and zonotope pilot
 
@@ -309,7 +375,7 @@ This exploratory bundle compares a stagewise four-dimensional interval-box fixed
 
 The exact finite minimax value is `{exact_value:.8f}`. The box-selected plan is `{result['box_method']['selected_controls']}`; its full-catalogue replay is `{approx_value:.8f}`, and its terminal box maximum is `{result['box_method']['terminal_box_maximum']:.14f}`. The zonotope recurrence propagates that same fixed plan and records center and generator matrices at all four state stages. The independent checker verifies every exact finite-catalogue state lies within the zonotope coordinate bounds; it does not certify full zonotope membership in four dimensions.
 
-The box maximum is a numerical diagnostic over terminal box corners. The zonotope recurrence includes outward rounding slack and is a numerical outer enclosure. A separate analytic planar box test provides a complete inclusion check for that axis-aligned case. This pilot does not claim validated objective bounds, continuous RL reproduction, zonotope-based minimax selection, feedback optimality, or ellipsoid and non-box parallelotope propagation. No performance measurement was collected. The figure combines this run's box and zonotope projections and replay with exact forward/backward geometry from the separate MPC-05 finite adaptation report.
+The box maximum is a numerical diagnostic over terminal box corners. The zonotope recurrence includes outward rounding slack and is a numerical outer enclosure. The companion planar example checks complete inclusion for a two-dimensional axis-aligned image. This pilot does not claim validated objective bounds, continuous RL reproduction, zonotope-based minimax selection, feedback optimality, or ellipsoid and non-box parallelotope propagation. No performance measurement was collected. The figure combines this run's box and zonotope projections and replay with exact forward/backward geometry from the separate MPC-05 finite adaptation report.
 
 ## Supported representation and cost
 
@@ -327,7 +393,7 @@ cmake --build build/dev --target csl_issue824_box_minimax_report --parallel 4
 python3 scripts/reports/exp824/make_report.py \\
   --executable build/dev/csl_issue824_box_minimax_report \\
   --build-dir build/dev \\
-  --output reports/algorithm-results/issue824-two-points-zonotope-pilot-v1
+  --output reports/algorithm-results/issue824-two-points-zonotope-pilot-v2
 ```
 
 Run the independent smoke check with:
@@ -336,9 +402,9 @@ Run the independent smoke check with:
 ctest --test-dir build/dev -R '^issue824_box_minimax_report_smoke$' --output-on-failure
 ```
 
-`capture.json` identifies the solver source commit, source hashes, build profile, and exact geometry reference. `check.json` records independent rational transitions, objective replay, and stage coordinate checks. `result.json` stores every finite-plan score, the selected plan's worst-case disturbance path, and the zonotope stage generators. `projections.svg` shows exact reachable and backward-winning sets, intersections, boxes, true zonotope projections, and trajectories in both player phase planes `(x1,x2)` and `(x3,x4)`.
+`capture.json` identifies the solver source commit, source hashes, build profile, and exact geometry reference. `check.json` records independent rational transitions, objective replay, and stage coordinate checks. `result.json` stores every finite-plan score, the selected plan's worst-case disturbance path, the TwoPoints zonotope stages, and the planar fixture. `projections.svg` shows exact reachable and backward-winning sets, intersections, boxes, true zonotope projections, and trajectories in both player phase planes `(x1,x2)` and `(x3,x4)`. `planar-example.svg` and `planar-example.html` provide the complete supported 2D example and analytic inclusion check.
 
-This pilot is not the complete acceptance scope of issue #824. Publication through the site and a live URL check remain pending.
+This pilot is not the complete acceptance scope of issue #824. The report workflow stages the versioned bundle and its 2D companion in the published Pages gallery; check the PR and issue discussion for the verified live URL after main-only deployment.
 '''
     (output / "README.md").write_text(readme, encoding="utf-8")
     manifest = {path.name: hashlib.sha256(path.read_bytes()).hexdigest()

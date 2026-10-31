@@ -26,6 +26,34 @@ Json matrix_vertices(const sets::SetData& set) {
     return result;
 }
 
+reachability::FixedPlanRequest planar_zonotope_request() {
+    using csl::issue824::fixture::take;
+    const SystemModel authored{{{2,1,2}, TimeDomain::discrete,
+        LinearStage{{2,2,{2.0,0.0,0.0,1.0}}, {2,1,{0.0,0.0}},
+            {2,2,{0.0,0.0,0.0,0.0}}, {0.0,0.0}}}, {}};
+    const auto system = take(model::snapshot(authored, Vector{0.0,1.0}));
+    const auto initial = csl::issue824::fixture::vertices("planar-zonotope-initial", 2,
+        Matrix{4,2,{-1.0,-1.0, 1.0,-1.0, 1.0,1.0, -1.0,1.0}});
+    const auto disturbance = take(sets::make_singleton({{"planar-zonotope-zero-disturbance"},2,{}},
+        take(numeric::snapshot_vector(Vector{0.0,0.0}))));
+    const auto safe_initial = take(sets::make_universal({{"planar-zonotope-safe-initial"},2,{}}));
+    const auto safe_terminal = take(sets::make_universal({{"planar-zonotope-safe-terminal"},2,{}}));
+    return {system, initial, {{0.0}}, {disturbance}, {safe_initial, safe_terminal},
+        {"issue824-planar-zonotope-example"}};
+}
+
+Json zonotope_stages_json(const reachability::FinitePlanZonotopeTrace& trace) {
+    Json stages = Json::array();
+    for(const auto& stage : trace.stages) {
+        Json factors = Json::array();
+        for(const auto& factor : stage.factors) factors.push_back(factor.value);
+        stages.push_back({{"center",stage.center},
+            {"generators",{{"rows",stage.generators.rows},{"cols",stage.generators.cols},
+                {"values",stage.generators.values}}}, {"factors",std::move(factors)}});
+    }
+    return stages;
+}
+
 Json run() {
     const auto input = csl::issue824::fixture::two_points_request("issue824-two-points-box-v1");
     const auto approximate = finite_action_box_minimax(input, {27,27,27,16});
@@ -40,6 +68,10 @@ Json run() {
     const auto zonotope = reachability::finite_plan_zonotope(zone_request, {64});
     const auto* zonotope_trace = std::get_if<reachability::FinitePlanZonotopeTrace>(&zonotope);
     if(!zonotope_trace) throw std::runtime_error("zonotope propagation did not complete successfully");
+    const auto planar_request = planar_zonotope_request();
+    const auto planar_outcome = reachability::finite_plan_zonotope(planar_request, {64});
+    const auto* planar_trace = std::get_if<reachability::FinitePlanZonotopeTrace>(&planar_outcome);
+    if(!planar_trace) throw std::runtime_error("planar zonotope example did not complete successfully");
     const auto exact = finite_action_minimax(input, {27,27,0.0});
     const auto* reference = std::get_if<FiniteMinimaxOptimal>(&exact);
     if(!reference) throw std::runtime_error("exact finite minimax did not complete successfully");
@@ -50,14 +82,6 @@ Json run() {
     Json boxes = Json::array();
     for(const auto& stage : selected->selected_box_trace.stages)
         boxes.push_back({{"lower",stage.lower},{"upper",stage.upper}});
-    Json zonotope_stages = Json::array();
-    for(const auto& stage : zonotope_trace->stages) {
-        Json stage_factors = Json::array();
-        for(const auto& factor : stage.factors) stage_factors.push_back(factor.value);
-        zonotope_stages.push_back({{"center",stage.center},
-            {"generators",{{"rows",stage.generators.rows},{"cols",stage.generators.cols},
-                {"values",stage.generators.values}}}, {"factors",std::move(stage_factors)}});
-    }
     Json plan_scores = Json::array();
     for(const auto& plan : selected->plan_scores)
         plan_scores.push_back({{"action_indices",plan.action_indices},
@@ -87,7 +111,12 @@ Json run() {
         {"zonotope_method",{{"status","numerical outer zonotope recurrence"},
             {"plan_source","same box-selected fixed open-loop plan"},
             {"relation","outer"}, {"max_generators_per_stage",64},
-            {"stages",std::move(zonotope_stages)}}},
+            {"stages",zonotope_stages_json(*zonotope_trace)}}},
+        {"planar_example",{{"relation","outer"},
+            {"dynamics","x_next = diag(2,1) * x"},
+            {"initial_vertices",matrix_vertices(planar_request.initial)},
+            {"exact_reachable_vertices",{{-2.0,-1.0},{2.0,-1.0},{2.0,1.0},{-2.0,1.0}}},
+            {"stages",zonotope_stages_json(*planar_trace)}}},
         {"exact_reference",{{"finite_minimax_value",reference->value},
             {"selected_action_indices",exact_plan.action_indices},
             {"terminal_vertices",matrix_vertices(exact_plan.terminal)},
