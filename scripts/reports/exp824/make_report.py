@@ -383,6 +383,8 @@ The implementation accepts bounded V-representation or singleton initial/disturb
 
 Memory is `O(PH + Hn + 2^n n + K H n + ∑|D_k|q)` for saved plan scores, stage boxes, terminal corners, exact replay stages, and disturbance catalogues, where `K` is the per-stage exact-point limit. The witness search retains one path of length `H`; its history-count limit `R` bounds work rather than stored histories. Explicit caller limits bound plan count, exact points per stage, full replay histories, and terminal corners. Both action-plan and corner enumeration are exponential in horizon and state dimension, respectively; this four-state, three-stage example does not establish practical scaling beyond this fixture.
 
+The zonotope recurrence itself keeps `G_k` state generators, `W_k` disturbance generators, and adds at most `n` outward-rounding generators at each `n`-state stage. One step costs `O(n²G_k + nqW_k + n(n+m+q))` arithmetic operations and stores `O(n(G_k+W_k+n))` generator values; the full trace stores `O(HnK)` values under the caller's per-stage generator cap `K`. No generator reduction is performed: a stage that would exceed `K` returns `Unsupported`. These are operation-count estimates, not measured performance claims.
+
 ## Reproduce
 
 From the repository root, configure and build the Release report driver:
