@@ -1,0 +1,543 @@
+{
+  "adaptation": {
+    "control_catalogue": [
+      -2.5,
+      0.0,
+      2.5
+    ],
+    "disturbance_catalogue": [
+      -1.0,
+      0.0,
+      1.0
+    ],
+    "guarantee_scope": "finite catalogs and this discrete adaptation; not continuous RL",
+    "horizon_steps": 3,
+    "information_pattern": "open-loop fixed plan, then finite disturbance history",
+    "initial_state": [
+      4.5,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "objective": "minimize worst terminal squared position gap",
+    "state_order": [
+      "x1",
+      "x2",
+      "x3",
+      "x4"
+    ],
+    "step_seconds": 0.1
+  },
+  "box_method": {
+    "all_plan_scores": [
+      {
+        "action_indices": [
+          0,
+          0,
+          0
+        ],
+        "terminal_box_maximum": 14.580942250000078
+      },
+      {
+        "action_indices": [
+          0,
+          0,
+          1
+        ],
+        "terminal_box_maximum": 16.349892250000085
+      },
+      {
+        "action_indices": [
+          0,
+          0,
+          2
+        ],
+        "terminal_box_maximum": 18.22009225000009
+      },
+      {
+        "action_indices": [
+          0,
+          1,
+          0
+        ],
+        "terminal_box_maximum": 16.55269225000009
+      },
+      {
+        "action_indices": [
+          0,
+          1,
+          1
+        ],
+        "terminal_box_maximum": 18.43414225000009
+      },
+      {
+        "action_indices": [
+          0,
+          1,
+          2
+        ],
+        "terminal_box_maximum": 20.416842250000094
+      },
+      {
+        "action_indices": [
+          0,
+          2,
+          0
+        ],
+        "terminal_box_maximum": 18.649442250000092
+      },
+      {
+        "action_indices": [
+          0,
+          2,
+          1
+        ],
+        "terminal_box_maximum": 20.643392250000097
+      },
+      {
+        "action_indices": [
+          0,
+          2,
+          2
+        ],
+        "terminal_box_maximum": 22.738592250000096
+      },
+      {
+        "action_indices": [
+          1,
+          0,
+          0
+        ],
+        "terminal_box_maximum": 16.55269225000009
+      },
+      {
+        "action_indices": [
+          1,
+          0,
+          1
+        ],
+        "terminal_box_maximum": 18.43414225000009
+      },
+      {
+        "action_indices": [
+          1,
+          0,
+          2
+        ],
+        "terminal_box_maximum": 20.416842250000094
+      },
+      {
+        "action_indices": [
+          1,
+          1,
+          0
+        ],
+        "terminal_box_maximum": 18.649442250000092
+      },
+      {
+        "action_indices": [
+          1,
+          1,
+          1
+        ],
+        "terminal_box_maximum": 20.643392250000097
+      },
+      {
+        "action_indices": [
+          1,
+          1,
+          2
+        ],
+        "terminal_box_maximum": 22.738592250000096
+      },
+      {
+        "action_indices": [
+          1,
+          2,
+          0
+        ],
+        "terminal_box_maximum": 20.871192250000103
+      },
+      {
+        "action_indices": [
+          1,
+          2,
+          1
+        ],
+        "terminal_box_maximum": 22.977642250000102
+      },
+      {
+        "action_indices": [
+          1,
+          2,
+          2
+        ],
+        "terminal_box_maximum": 25.185342250000105
+      },
+      {
+        "action_indices": [
+          2,
+          0,
+          0
+        ],
+        "terminal_box_maximum": 18.649442250000092
+      },
+      {
+        "action_indices": [
+          2,
+          0,
+          1
+        ],
+        "terminal_box_maximum": 20.643392250000097
+      },
+      {
+        "action_indices": [
+          2,
+          0,
+          2
+        ],
+        "terminal_box_maximum": 22.738592250000096
+      },
+      {
+        "action_indices": [
+          2,
+          1,
+          0
+        ],
+        "terminal_box_maximum": 20.871192250000103
+      },
+      {
+        "action_indices": [
+          2,
+          1,
+          1
+        ],
+        "terminal_box_maximum": 22.977642250000102
+      },
+      {
+        "action_indices": [
+          2,
+          1,
+          2
+        ],
+        "terminal_box_maximum": 25.185342250000105
+      },
+      {
+        "action_indices": [
+          2,
+          2,
+          0
+        ],
+        "terminal_box_maximum": 23.217942250000107
+      },
+      {
+        "action_indices": [
+          2,
+          2,
+          1
+        ],
+        "terminal_box_maximum": 25.43689225000011
+      },
+      {
+        "action_indices": [
+          2,
+          2,
+          2
+        ],
+        "terminal_box_maximum": 27.757092250000106
+      }
+    ],
+    "full_catalogue_replay_value": 14.58094225,
+    "selected_action_indices": [
+      0,
+      0,
+      0
+    ],
+    "selected_controls": [
+      -2.5,
+      -2.5,
+      -2.5
+    ],
+    "stages": [
+      {
+        "lower": [
+          4.5,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "upper": [
+          4.5,
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      {
+        "lower": [
+          4.274999999999997,
+          -2.500000000000001,
+          -0.004500000000000001,
+          -0.10000000000000003
+        ],
+        "upper": [
+          4.275000000000004,
+          -2.499999999999999,
+          0.004500000000000001,
+          0.10000000000000003
+        ]
+      },
+      {
+        "lower": [
+          4.024999999999993,
+          -2.500000000000001,
+          -0.019000000000000017,
+          -0.20000000000000012
+        ],
+        "upper": [
+          4.0250000000000075,
+          -2.499999999999999,
+          0.019000000000000017,
+          0.20000000000000012
+        ]
+      },
+      {
+        "lower": [
+          3.7749999999999906,
+          -2.500000000000001,
+          -0.04350000000000006,
+          -0.30000000000000027
+        ],
+        "upper": [
+          3.77500000000001,
+          -2.499999999999999,
+          0.04350000000000006,
+          0.30000000000000027
+        ]
+      }
+    ],
+    "status": "numerical outer interval box",
+    "terminal_box_maximum": 14.580942250000078,
+    "worst_case_path": [
+      [
+        4.5,
+        0.0,
+        0.0,
+        0.0
+      ],
+      [
+        4.275,
+        -2.5,
+        -0.0045,
+        -0.1
+      ],
+      [
+        4.025,
+        -2.5,
+        -0.019000000000000003,
+        -0.2
+      ],
+      [
+        3.775,
+        -2.5,
+        -0.043500000000000004,
+        -0.30000000000000004
+      ]
+    ],
+    "worst_disturbance_indices": [
+      0,
+      0,
+      0
+    ],
+    "worst_disturbances": [
+      [
+        -1.0
+      ],
+      [
+        -1.0
+      ],
+      [
+        -1.0
+      ]
+    ]
+  },
+  "environment": "TwoPointsOnParallelLines",
+  "exact_reference": {
+    "assurance": "numerical exhaustive finite-catalog reference",
+    "finite_minimax_value": 14.58094225,
+    "selected_action_indices": [
+      0,
+      0,
+      0
+    ],
+    "terminal_vertices": [
+      [
+        3.775,
+        -2.5,
+        -0.043500000000000004,
+        -0.30000000000000004
+      ],
+      [
+        3.775,
+        -2.5,
+        -0.03900000000000001,
+        -0.2
+      ],
+      [
+        3.775,
+        -2.5,
+        -0.03450000000000001,
+        -0.1
+      ],
+      [
+        3.775,
+        -2.5,
+        -0.029000000000000005,
+        -0.2
+      ],
+      [
+        3.775,
+        -2.5,
+        -0.024500000000000004,
+        -0.1
+      ],
+      [
+        3.775,
+        -2.5,
+        -0.020000000000000004,
+        0.0
+      ],
+      [
+        3.775,
+        -2.5,
+        -0.014500000000000002,
+        -0.1
+      ],
+      [
+        3.775,
+        -2.5,
+        -0.010000000000000002,
+        0.0
+      ],
+      [
+        3.775,
+        -2.5,
+        -0.005500000000000002,
+        0.1
+      ],
+      [
+        3.775,
+        -2.5,
+        -0.019000000000000003,
+        -0.2
+      ],
+      [
+        3.775,
+        -2.5,
+        -0.014500000000000002,
+        -0.1
+      ],
+      [
+        3.775,
+        -2.5,
+        -0.010000000000000002,
+        0.0
+      ],
+      [
+        3.775,
+        -2.5,
+        -0.0045,
+        -0.1
+      ],
+      [
+        3.775,
+        -2.5,
+        0.0,
+        0.0
+      ],
+      [
+        3.775,
+        -2.5,
+        0.0045,
+        0.1
+      ],
+      [
+        3.775,
+        -2.5,
+        0.010000000000000002,
+        0.0
+      ],
+      [
+        3.775,
+        -2.5,
+        0.014500000000000002,
+        0.1
+      ],
+      [
+        3.775,
+        -2.5,
+        0.019000000000000003,
+        0.2
+      ],
+      [
+        3.775,
+        -2.5,
+        0.005500000000000002,
+        -0.1
+      ],
+      [
+        3.775,
+        -2.5,
+        0.010000000000000002,
+        0.0
+      ],
+      [
+        3.775,
+        -2.5,
+        0.014500000000000002,
+        0.1
+      ],
+      [
+        3.775,
+        -2.5,
+        0.020000000000000004,
+        0.0
+      ],
+      [
+        3.775,
+        -2.5,
+        0.024500000000000004,
+        0.1
+      ],
+      [
+        3.775,
+        -2.5,
+        0.029000000000000005,
+        0.2
+      ],
+      [
+        3.775,
+        -2.5,
+        0.03450000000000001,
+        0.1
+      ],
+      [
+        3.775,
+        -2.5,
+        0.03900000000000001,
+        0.2
+      ],
+      [
+        3.775,
+        -2.5,
+        0.043500000000000004,
+        0.30000000000000004
+      ]
+    ]
+  },
+  "schema": "csl.issue824-two-points-box-minimax/1",
+  "source_identity": {
+    "commit": "f4d76c60f4003f50954174e96eafd8e514bd5441",
+    "repository": "optimal_control/Environments"
+  }
+}
