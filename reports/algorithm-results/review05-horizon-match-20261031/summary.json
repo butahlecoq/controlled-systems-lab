@@ -1,0 +1,172 @@
+{
+  "schema": "csl.review05.horizon-summary/1",
+  "claim": "matched descriptive timings for a scalar-integrator horizon and candidate-relation growth pilot; the independent analytic checker verifies the emitted relation equals the unique optimum history for these fixtures only; no general completeness, winner, speedup, or complexity claim",
+  "timed_region": "SynthesisWorkspace::run, steady_clock nanoseconds",
+  "horizons": [
+    {
+      "horizon": 2,
+      "measured_attempts": 12,
+      "verified_attempts": 12,
+      "verified_paired_repetitions": 6,
+      "process_statuses": {
+        "completed": 12
+      },
+      "strategies": {
+        "csl.synthesis.reach-back": {
+          "verified_rows_within_measured_pairs": 6,
+          "median_strategy_run_ns_within_verified_pairs": 5271292.0,
+          "min_strategy_run_ns_within_verified_pairs": 5223276,
+          "max_strategy_run_ns_within_verified_pairs": 11188763,
+          "completed_timing_rows_including_inconclusive": 6,
+          "median_completed_run_ns_including_inconclusive": 5271292.0,
+          "min_completed_run_ns_including_inconclusive": 5223276,
+          "max_completed_run_ns_including_inconclusive": 11188763,
+          "verified_representation_shapes": [
+            {
+              "joint_coordinates": 5,
+              "inequality_rows": 6,
+              "equality_rows": 4,
+              "nonzero_h_coefficients": 14
+            }
+          ],
+          "observed_backend_thread_counts": {
+            "1": 6
+          },
+          "observed_backend_thread_unavailable_rows": 0
+        },
+        "csl.synthesis.strategy-b": {
+          "verified_rows_within_measured_pairs": 6,
+          "median_strategy_run_ns_within_verified_pairs": 658261.5,
+          "min_strategy_run_ns_within_verified_pairs": 645131,
+          "max_strategy_run_ns_within_verified_pairs": 682426,
+          "completed_timing_rows_including_inconclusive": 6,
+          "median_completed_run_ns_including_inconclusive": 658261.5,
+          "min_completed_run_ns_including_inconclusive": 645131,
+          "max_completed_run_ns_including_inconclusive": 682426,
+          "verified_representation_shapes": [
+            {
+              "joint_coordinates": 5,
+              "inequality_rows": 4,
+              "equality_rows": 4,
+              "nonzero_h_coefficients": 12
+            }
+          ],
+          "observed_backend_thread_counts": {
+            "1": 6
+          },
+          "observed_backend_thread_unavailable_rows": 0
+        }
+      }
+    },
+    {
+      "horizon": 4,
+      "measured_attempts": 12,
+      "verified_attempts": 12,
+      "verified_paired_repetitions": 6,
+      "process_statuses": {
+        "completed": 12
+      },
+      "strategies": {
+        "csl.synthesis.reach-back": {
+          "verified_rows_within_measured_pairs": 6,
+          "median_strategy_run_ns_within_verified_pairs": 10855896.0,
+          "min_strategy_run_ns_within_verified_pairs": 10700846,
+          "max_strategy_run_ns_within_verified_pairs": 11094057,
+          "completed_timing_rows_including_inconclusive": 6,
+          "median_completed_run_ns_including_inconclusive": 10855896.0,
+          "min_completed_run_ns_including_inconclusive": 10700846,
+          "max_completed_run_ns_including_inconclusive": 11094057,
+          "verified_representation_shapes": [
+            {
+              "joint_coordinates": 9,
+              "inequality_rows": 10,
+              "equality_rows": 6,
+              "nonzero_h_coefficients": 24
+            }
+          ],
+          "observed_backend_thread_counts": {
+            "1": 6
+          },
+          "observed_backend_thread_unavailable_rows": 0
+        },
+        "csl.synthesis.strategy-b": {
+          "verified_rows_within_measured_pairs": 6,
+          "median_strategy_run_ns_within_verified_pairs": 716718.5,
+          "min_strategy_run_ns_within_verified_pairs": 671741,
+          "max_strategy_run_ns_within_verified_pairs": 806675,
+          "completed_timing_rows_including_inconclusive": 6,
+          "median_completed_run_ns_including_inconclusive": 716718.5,
+          "min_completed_run_ns_including_inconclusive": 671741,
+          "max_completed_run_ns_including_inconclusive": 806675,
+          "verified_representation_shapes": [
+            {
+              "joint_coordinates": 9,
+              "inequality_rows": 8,
+              "equality_rows": 6,
+              "nonzero_h_coefficients": 22
+            }
+          ],
+          "observed_backend_thread_counts": {
+            "1": 6
+          },
+          "observed_backend_thread_unavailable_rows": 0
+        }
+      }
+    },
+    {
+      "horizon": 8,
+      "measured_attempts": 12,
+      "verified_attempts": 12,
+      "verified_paired_repetitions": 6,
+      "process_statuses": {
+        "completed": 12
+      },
+      "strategies": {
+        "csl.synthesis.reach-back": {
+          "verified_rows_within_measured_pairs": 6,
+          "median_strategy_run_ns_within_verified_pairs": 22908603.5,
+          "min_strategy_run_ns_within_verified_pairs": 22350148,
+          "max_strategy_run_ns_within_verified_pairs": 23155566,
+          "completed_timing_rows_including_inconclusive": 6,
+          "median_completed_run_ns_including_inconclusive": 22908603.5,
+          "min_completed_run_ns_including_inconclusive": 22350148,
+          "max_completed_run_ns_including_inconclusive": 23155566,
+          "verified_representation_shapes": [
+            {
+              "joint_coordinates": 17,
+              "inequality_rows": 18,
+              "equality_rows": 10,
+              "nonzero_h_coefficients": 44
+            }
+          ],
+          "observed_backend_thread_counts": {
+            "1": 6
+          },
+          "observed_backend_thread_unavailable_rows": 0
+        },
+        "csl.synthesis.strategy-b": {
+          "verified_rows_within_measured_pairs": 6,
+          "median_strategy_run_ns_within_verified_pairs": 741548.0,
+          "min_strategy_run_ns_within_verified_pairs": 724541,
+          "max_strategy_run_ns_within_verified_pairs": 765259,
+          "completed_timing_rows_including_inconclusive": 6,
+          "median_completed_run_ns_including_inconclusive": 741548.0,
+          "min_completed_run_ns_including_inconclusive": 724541,
+          "max_completed_run_ns_including_inconclusive": 765259,
+          "verified_representation_shapes": [
+            {
+              "joint_coordinates": 17,
+              "inequality_rows": 16,
+              "equality_rows": 10,
+              "nonzero_h_coefficients": 42
+            }
+          ],
+          "observed_backend_thread_counts": {
+            "1": 6
+          },
+          "observed_backend_thread_unavailable_rows": 0
+        }
+      }
+    }
+  ]
+}

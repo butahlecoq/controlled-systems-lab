@@ -94,8 +94,8 @@ def check_attempt(attempt: dict[str, object], expected_hash: str) -> tuple[str, 
             return "inconclusive", ["strategy completed without a recordable candidate H-relation"]
         if not isinstance(relation, dict) or relation.get("dimension") != 2 * horizon + 1:
             raise ValueError("candidate H-relation has wrong dimension")
-        if result.get("objective_lower") not in (None, 0) or result.get("objective_upper") != 0:
-            raise ValueError("available objective bounds do not match analytic optimum 0")
+        if result.get("objective_lower") not in (None, 0) or result.get("objective_upper") not in (None, 0):
+            raise ValueError("available objective bounds contradict analytic optimum 0")
         labels = relation.get("labels")
         if not isinstance(labels, list) or not all(isinstance(label, str) for label in labels):
             raise ValueError("joint-history labels are unavailable")
@@ -117,6 +117,13 @@ def check_attempt(attempt: dict[str, object], expected_hash: str) -> tuple[str, 
             raise ValueError("required initial-state/dynamics equalities are missing")
         if not ineq_expected <= observed_ineq:
             raise ValueError("required 0<=u<=1 inequalities are missing")
+        terminal_dimension = 2 * horizon + 1
+        terminal_inequality = [0] * (terminal_dimension + 1)
+        terminal_inequality[horizon] = 1  # x[T] <= 0
+        terminal_equality = list(terminal_inequality)
+        if (canonical(terminal_inequality, False) not in observed_ineq and
+                canonical(terminal_equality, True) not in observed_eq):
+            return "inconclusive", ["candidate relation does not encode the analytic terminal optimum level x[T] <= 0"]
         zero = [0] * relation["dimension"]
         for row, rhs in zip(inequalities, upper_bounds):
             if sum(rational(a) * b for a, b in zip(row, zero)) > rational(rhs):
@@ -125,14 +132,17 @@ def check_attempt(attempt: dict[str, object], expected_hash: str) -> tuple[str, 
             if sum(rational(a) * b for a, b in zip(row, zero)) != rational(rhs):
                 raise ValueError("analytic zero history violates a candidate equality")
         incumbents = result.get("incumbents")
-        if not isinstance(incumbents, list) or not any(
-            item.get("states") == [[0]] * (horizon + 1)
-            and item.get("controls") == [[0]] * horizon
-            and item.get("original_objective") == 0
-            for item in incumbents if isinstance(item, dict)
+        if not isinstance(incumbents, list):
+            raise ValueError("incumbent list is malformed")
+        if any(
+            not isinstance(item, dict) or
+            item.get("states") != [[0]] * (horizon + 1) or
+            item.get("controls") != [[0]] * horizon or
+            item.get("original_objective") != 0
+            for item in incumbents
         ):
-            raise ValueError("analytic zero-history incumbent is absent")
-        reasons.append("literal analytic optimum and required H rows verified; no family completeness claim")
+            raise ValueError("a strategy incumbent disagrees with the analytic zero-history witness")
+        reasons.append("required plant/control rows and terminal optimum level verified; together they force the unique zero history, which satisfies every candidate row")
         return "verified", reasons
     except (KeyError, TypeError, ValueError, ZeroDivisionError, OverflowError) as error:
         return "incorrect", [str(error)]

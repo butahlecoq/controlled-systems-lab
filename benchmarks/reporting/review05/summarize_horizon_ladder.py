@@ -51,13 +51,35 @@ def main() -> int:
         for strategy in sorted(set(by_strategy) | set(completed_times)):
             values = by_strategy.get(strategy, [])
             completed = completed_times.get(strategy, [])
+            shapes: set[tuple[int, int, int, int]] = set()
+            for row in rows:
+                if row.get("strategy") != strategy or row.get("process_status") != "completed":
+                    continue
+                result = row.get("result") or {}
+                if checks.get(row.get("attempt_id"), {}).get("status") != "verified":
+                    continue
+                relation = result.get("candidate_relation")
+                if not isinstance(relation, dict):
+                    continue
+                inequalities = relation.get("inequalities", [])
+                equalities = relation.get("equalities", [])
+                nonzeros = sum(value != 0 for matrix in (inequalities, equalities)
+                               for relation_row in matrix for value in relation_row)
+                shapes.add((relation["dimension"], len(inequalities), len(equalities), nonzeros))
             strategy_stats[strategy] = {
                 "verified_rows_within_measured_pairs": len(values),
                 "median_strategy_run_ns_within_verified_pairs": statistics.median(values) if values else None,
+                "min_strategy_run_ns_within_verified_pairs": min(values) if values else None,
+                "max_strategy_run_ns_within_verified_pairs": max(values) if values else None,
                 "completed_timing_rows_including_inconclusive": len(completed),
                 "median_completed_run_ns_including_inconclusive": statistics.median(completed) if completed else None,
                 "min_completed_run_ns_including_inconclusive": min(completed) if completed else None,
                 "max_completed_run_ns_including_inconclusive": max(completed) if completed else None,
+                "verified_representation_shapes": [
+                    {"joint_coordinates": dimension, "inequality_rows": inequalities,
+                     "equality_rows": equalities, "nonzero_h_coefficients": nonzeros}
+                    for dimension, inequalities, equalities, nonzeros in sorted(shapes)
+                ],
                 "observed_backend_thread_counts": {
                     str(threads): count for threads, count in sorted(Counter(backend_thread_counts.get(strategy, [])).items())
                 },
@@ -79,7 +101,7 @@ def main() -> int:
         })
     output = {
         "schema": "csl.review05.horizon-summary/1",
-        "claim": "descriptive timings for one synthetic scalar-integrator fixture; no winner, speedup, family-completeness, or scalability claim",
+        "claim": "matched descriptive timings for a scalar-integrator horizon and candidate-relation growth pilot; the independent analytic checker verifies the emitted relation equals the unique optimum history for these fixtures only; no general completeness, winner, speedup, or complexity claim",
         "timed_region": "SynthesisWorkspace::run, steady_clock nanoseconds",
         "horizons": summaries,
     }

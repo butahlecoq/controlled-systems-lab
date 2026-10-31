@@ -39,14 +39,22 @@ python3 benchmarks/reporting/review05/render_horizon_ladder.py \
   --bundle /tmp/csl-review05-horizon-results
 ```
 
-The checker verifies fixture hashes and dimensions, analytic zero objective and
-incumbent, and the required initial-state, dynamics, and control-bound rows in
-each candidate H-relation. Candidate relations can have different semantics;
-this check does not claim either candidate is the complete feasible or optimal
-history family. The result is numerical evidence for this one synthetic scalar
-fixture. It does not establish a winner, speedup, algorithm scalability,
-validated arithmetic, or historical reproduction. The fixture has one state,
-so it has no 2D visual example.
+The checker verifies fixture hashes and dimensions, the required
+initial-state/dynamics/control rows, the analytic terminal level `x[T] <= 0`,
+and that every emitted H row contains the shared all-zero history. For this
+fixture, those exact rational checks prove each candidate relation is the
+singleton optimal-history set: `x[T] = sum(u[t])` and `u[t] >= 0` force every
+control and state to zero. This is an independent fixture-specific oracle; it
+does not establish general candidate-family completeness or validated
+arithmetic. Timing summaries use only measured repetitions where both sides
+pass this oracle; failures and inconclusive rows remain in the raw record.
+
+The ladder varies horizon, relation coordinates, row counts, and nonzero H
+coefficients while keeping the state and control dimensions at one. These are
+coefficient counts, not allocated-byte measurements. It does not vary state
+dimension or add a separate per-stage constraint-count axis. It does not establish a winner,
+speedup, general complexity bound, or historical reproduction. The fixture is
+scalar and has no supported 2D state-set visual example.
 
 Keep source, raw attempts, checks, and summary together when retaining a run.
 The runner refuses a non-empty output directory so separate captures cannot
