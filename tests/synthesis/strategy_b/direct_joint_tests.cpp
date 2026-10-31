@@ -520,6 +520,30 @@ TEST_CASE("multiple authored temporal rows retain independent history constraint
     CHECK(q.constraints.column_indices[q.constraints.row_offsets[8]]==3);
     CHECK(q.constraints.column_indices[q.constraints.row_offsets[8]+1]==4);
 }
+TEST_CASE("independent grid oracle agrees with both authored temporal rows") {
+    auto input=integrator(LinearTerminal{{0},0});
+    SparseMatrix temporal_map{2,5,{0,2,4},{3,4,3,4},{1,1,1,-1}};
+    input.temporal=TemporalConstraints{std::move(temporal_map),{{1,1},{0.5,0.5}}};
+    const auto p=resolve(input);
+    const auto q=accepted(build_joint_program(p,request(p)));
+
+    // Enumerate a finite control grid independently of the assembled program.
+    // The state coordinates are filled from the integrator recurrence, while
+    // admissibility is decided only from the authored temporal equations.
+    const std::vector<double> grid{0,.25,.5,.75,1};
+    std::size_t expected_count=0, observed_count=0;
+    for(const double u0:grid) for(const double u1:grid) {
+        const bool expected=std::abs(u0+u1-1.0)<=1e-12
+            && std::abs(u0-u1-.5)<=1e-12;
+        const Vector history{0,u0,u0+u1,u0,u1};
+        const bool observed=feasible(q,history);
+        CHECK(observed==expected);
+        expected_count+=expected ? 1 : 0;
+        observed_count+=observed ? 1 : 0;
+    }
+    CHECK(expected_count==1);
+    CHECK(observed_count==expected_count);
+}
 bool feasible(const JointProgram& p,const Vector& x) {
     for(std::size_t i=0;i<p.constraints.rows;++i) {
         double v=0;for(auto j=p.constraints.row_offsets[i];j<p.constraints.row_offsets[i+1];++j)
