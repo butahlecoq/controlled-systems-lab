@@ -1,0 +1,142 @@
+{
+  "schema": "csl.review05.constraint-summary/1",
+  "claim": "descriptive fixed-n, fixed-horizon measurements while authored redundant state H-row count grows; the exact fixture oracle establishes the unique zero optimum only for these three finite scenarios; no winner, speedup, general completeness, memory, phase, or complexity claim",
+  "timed_region": "SynthesisWorkspace::run, steady_clock nanoseconds",
+  "cases": [
+    {
+      "case": "r2",
+      "state_dimension": 1,
+      "control_dimension": 1,
+      "horizon": 2,
+      "state_rows_per_stage": 2,
+      "stages": 3,
+      "authored_state_rows_total": 6,
+      "verified_measured_attempts": 12,
+      "verified_paired_repetitions": 6,
+      "paired_repetitions": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6
+      ],
+      "strategies": {
+        "csl.synthesis.reach-back": {
+          "verified_measured_rows": 6,
+          "median_ns": 9950714.0,
+          "min_ns": 5491453,
+          "max_ns": 10446591,
+          "representation_shape": {
+            "joint_coordinates": 5,
+            "inequality_rows": 14,
+            "equality_rows": 4,
+            "nonzero_h_coefficients": 22
+          }
+        },
+        "csl.synthesis.strategy-b": {
+          "verified_measured_rows": 6,
+          "median_ns": 1635870.0,
+          "min_ns": 848578,
+          "max_ns": 1757779,
+          "representation_shape": {
+            "joint_coordinates": 5,
+            "inequality_rows": 10,
+            "equality_rows": 4,
+            "nonzero_h_coefficients": 18
+          }
+        }
+      }
+    },
+    {
+      "case": "r4",
+      "state_dimension": 1,
+      "control_dimension": 1,
+      "horizon": 2,
+      "state_rows_per_stage": 4,
+      "stages": 3,
+      "authored_state_rows_total": 12,
+      "verified_measured_attempts": 12,
+      "verified_paired_repetitions": 6,
+      "paired_repetitions": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6
+      ],
+      "strategies": {
+        "csl.synthesis.reach-back": {
+          "verified_measured_rows": 6,
+          "median_ns": 10142325.0,
+          "min_ns": 5303369,
+          "max_ns": 14184455,
+          "representation_shape": {
+            "joint_coordinates": 5,
+            "inequality_rows": 22,
+            "equality_rows": 4,
+            "nonzero_h_coefficients": 30
+          }
+        },
+        "csl.synthesis.strategy-b": {
+          "verified_measured_rows": 6,
+          "median_ns": 1687029.5,
+          "min_ns": 1670268,
+          "max_ns": 1758827,
+          "representation_shape": {
+            "joint_coordinates": 5,
+            "inequality_rows": 16,
+            "equality_rows": 4,
+            "nonzero_h_coefficients": 24
+          }
+        }
+      }
+    },
+    {
+      "case": "r8",
+      "state_dimension": 1,
+      "control_dimension": 1,
+      "horizon": 2,
+      "state_rows_per_stage": 8,
+      "stages": 3,
+      "authored_state_rows_total": 24,
+      "verified_measured_attempts": 12,
+      "verified_paired_repetitions": 6,
+      "paired_repetitions": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6
+      ],
+      "strategies": {
+        "csl.synthesis.reach-back": {
+          "verified_measured_rows": 6,
+          "median_ns": 10378983.5,
+          "min_ns": 9032573,
+          "max_ns": 10987306,
+          "representation_shape": {
+            "joint_coordinates": 5,
+            "inequality_rows": 38,
+            "equality_rows": 4,
+            "nonzero_h_coefficients": 46
+          }
+        },
+        "csl.synthesis.strategy-b": {
+          "verified_measured_rows": 6,
+          "median_ns": 1127840.5,
+          "min_ns": 747866,
+          "max_ns": 1783690,
+          "representation_shape": {
+            "joint_coordinates": 5,
+            "inequality_rows": 28,
+            "equality_rows": 4,
+            "nonzero_h_coefficients": 36
+          }
+        }
+      }
+    }
+  ]
+}
