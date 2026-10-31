@@ -24,8 +24,8 @@ The clearest reachability/minimax figure is the
 it uses the physical coordinates `(x1,x2)` and `(x3,x4)` as the two player
 position–velocity planes and retains forward layers, backward-winning
 intersections, and an independently replayed worst-case trajectory. The
-separate `TwoPoints` feedback bundle is linked from the report and records the
-causal finite-state reachability result.
+separate [`TwoPoints` feedback bundle](../../reports/algorithm-results/env717-two-points-feedback-v1/README.md)
+records the causal finite-state reachability result.
 
 `SimpleControlProblem`, `TwoParticleGame`, and the time-sphere nominal pilot
 are retained in the archive as additional control/replay examples, but are not
