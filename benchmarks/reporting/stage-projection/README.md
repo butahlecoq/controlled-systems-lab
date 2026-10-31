@@ -37,6 +37,32 @@ They plot both player phase planes `(x1,x2)` and `(x3,x4)`, with forward sets,
 backward-winning intersections, and a replayed minimax path. The reports use a
 short finite-catalogue adaptation, not the original continuous-action RL task.
 
+The same saved-data renderer can consume the feedback report directly:
+
+```sh
+python3 scripts/reports/env717/adapt_two_points_stage_projection.py \
+  reports/algorithm-results/env717-two-points-feedback-v1/figure-data.json \
+  /tmp/env717-two-points-stage-batch.json
+python3 - <<'PY'
+from pathlib import Path
+from scripts.reports.stage_projection_figures import render_batch
+from scripts.reports.env717.adapt_two_points_stage_projection import build_batch
+
+source = Path("reports/algorithm-results/env717-two-points-feedback-v1/figure-data.json")
+_, identity = build_batch(source)
+render_batch(Path("/tmp/env717-two-points-stage-batch.json"),
+             Path("/tmp/env717-two-points-stage-figures"),
+             expected_identity=identity,
+             style_path=Path("scripts/reports/styles/control-v1.json"))
+PY
+```
+
+The adapter preserves one forward hull per saved control prefix, finite
+backward-winning nodes and their forward/intersection nodes as labelled
+components. It reads the immutable
+source record only; it does not rerun the game or turn finite nodes into a
+continuous predecessor boundary.
+
 ## Fuel model
 
 `examples/fuel-four-state.json` runs a four-state affine model using the

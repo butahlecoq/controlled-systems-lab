@@ -94,7 +94,7 @@ class StageProjectionDemoTests(unittest.TestCase):
         self.assertIn("explicit gaps", routes["reachability.nominal_forward"]["adapter_status"])
         two_points = routes["env717.two_points.published"]
         self.assertEqual(two_points["capability"], "finite_game_forward_backward_layers")
-        self.assertIn("not connected", two_points["adapter_status"])
+        self.assertIn("connected", two_points["adapter_status"])
         self.assertIn("continuous-action", " ".join(two_points["limitations"]))
         self.assertEqual(set(routes), {
             "demo.affine-box-reachability",

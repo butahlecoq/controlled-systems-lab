@@ -119,10 +119,17 @@ def _render_pair(batch: dict, pair_index: int, stage_rows: list[dict], trajector
                 if vertices:
                     stage_x.extend(float(point[0]) for point in vertices)
                     stage_y.extend(float(point[1]) for point in vertices)
+                    role = component.get("role")
+                    label_prefix = {"forward": "forward", "backward_winning": "backward-winning",
+                                    "intersection": "forward ∩ backward"}.get(role, role)
+                    label = f"{label_prefix} · " if label_prefix else ""
+                    branch = component.get("branch_id")
+                    if branch:
+                        label += f"{branch} · "
                     ax.scatter([point[0] for point in vertices], [point[1] for point in vertices],
                                s=style["point_size"] * 1.7, alpha=.9, color=color,
                                edgecolors=BACKGROUND, linewidths=.35,
-                               label=f"{component['component_id']} · V generators")
+                               label=f"{label}{component['component_id']} · V generators")
                 rays = component.get("rays", [])
                 for ray_index, ray in enumerate(rays):
                     if component["kind"] == "empty":
@@ -132,8 +139,11 @@ def _render_pair(batch: dict, pair_index: int, stage_rows: list[dict], trajector
                     if ray[0] == 0 and ray[1] == 0:
                         continue
                     description_parts.append(f"ray {ray_index + 1} direction {ray}")
+                role = component.get("role")
+                role_text = f" ({role} overlay)" if role else ""
+                branch_text = f", branch {component['branch_id']}" if component.get("branch_id") else ""
                 description_parts.append(
-                    f"component {component['component_id']}: {component['kind']}, "
+                    f"component {component['component_id']}{role_text}{branch_text}: {component['kind']}, "
                     f"{len(vertices)} stored V generators, {len(rays)} rays")
         else:
             explanation = outcome.get("explanation", "No geometric boundary is available.")
