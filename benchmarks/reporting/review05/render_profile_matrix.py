@@ -132,7 +132,9 @@ scenario/provider setup, serialization, build, and rendering.</p>
 <p>Across these tiny profiles, Strategy B has the lower median in each case. The performance conclusion remains
 <strong>inconclusive</strong>: five or seven pairs per profile and no source-attributed limiter profile do not support a
 general ranking. The spread and phase data are in <a href="checks.json">checks.json</a>; complete attempts are in
-<a href="raw/">raw event records</a>.</p>
+<a href="raw/ts01_exact_integrator.jsonl">T-S01 JSONL</a>,
+<a href="raw/ts02_constant_integrator.jsonl">T-S02 JSONL</a>, and
+<a href="raw/ts03_singular_integrator.jsonl">T-S03 JSONL</a>.</p>
 <h2>Optimal control histories</h2><p>Both axes are control values: horizontal <code>u₀</code>, vertical <code>u₁</code>.
 These are analytic projections of the complete profiles, not reachable-state plots.</p>
 <img src="optimal-control-histories.svg" alt="Optimal histories in the u0-u1 control plane: a segment, square, and terminal edge">
