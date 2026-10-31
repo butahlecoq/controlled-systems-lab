@@ -270,8 +270,15 @@ int main(int argc, char** argv) try {
             << ",\"horizon\":" << coordinates.horizon << '}';
     } else std::cout << "null";
     std::cout << ",\"candidate_relation\":";
-    const sets::SetData* relation = candidate && candidate->relation.payload ?
-        candidate->relation.payload->h_relation_for_recording() : nullptr;
+    const sets::SetData* relation = nullptr;
+    if (candidate && candidate->relation.payload) {
+        relation = candidate->relation.payload->h_relation_for_recording();
+        if (!relation) {
+            const auto* reach_back = dynamic_cast<const synthesis::strategy_a::CandidateHistory*>(
+                candidate->relation.payload.get());
+            if (reach_back) relation = &reach_back->history.relation;
+        }
+    }
     if (relation) h_relation_json(std::cout, *relation);
     else std::cout << "null";
     std::cout << ",\"incumbents\":[";

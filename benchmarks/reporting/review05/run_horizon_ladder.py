@@ -55,7 +55,8 @@ def environment(binary: Path, source_dir: Path, repo_dir: Path) -> dict[str, obj
         stdout=subprocess.PIPE, text=True,
     ).stdout
     source_files = ("CMakeLists.txt", "horizon_ladder.cpp", "run_horizon_ladder.py",
-                    "check_horizon_ladder.py", "summarize_horizon_ladder.py")
+                    "check_horizon_ladder.py", "summarize_horizon_ladder.py",
+                    "render_horizon_ladder.py")
     return {
         "source_revision": revision,
         "source_worktree_dirty": bool(status),
