@@ -285,7 +285,7 @@ FiniteMixedBranchPortfolioOutcome select_finite_mixed_branch_portfolio(
     }
 
     FiniteMixedBranchPortfolio result{
-        std::move(evaluations), {}, optimum, false, enumeration_complete};
+        std::move(evaluations), {}, optimum, enumeration_complete, false};
     if (optimum) {
         for (std::size_t index = 0; index < result.evaluations.size(); ++index) {
             const auto& evaluation = result.evaluations[index];

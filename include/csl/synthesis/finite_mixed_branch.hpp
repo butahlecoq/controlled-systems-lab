@@ -56,10 +56,10 @@ struct FiniteMixedBranchPortfolio {
     // minimal only when complete is true; otherwise unseen histories may win.
     std::vector<std::size_t> optimal_evaluation_indices;
     std::optional<double> optimum;
+    bool complete{}; // The input covers every catalogue-index history.
     // True when every tolerance-selected branch has a relation payload. This
     // does not certify family validity, objective optimality, or completeness.
     bool all_selected_relations_present{};
-    bool complete{}; // The input covers every catalogue-index history.
 };
 
 using FiniteMixedBranchPortfolioOutcome = std::variant<FiniteMixedBranchPortfolio, Diagnostics>;
