@@ -93,7 +93,7 @@ physical memory: <code>{escape(str(env.get('physical_memory_bytes')))} bytes</co
 binary SHA-256: <code>{escape(str(env.get('binary_sha256')))}</code>; source revision: <code>{escape(str(env.get('source_revision')))}</code>.</p>
 <p>Build: {escape(str(build.get('build_type')))} with {escape(str(build.get('cxx_compiler')))},
 CMake {escape(str(build.get('cmake_version')))}, Ninja {escape(str(build.get('ninja_version')))}.
-See <a href="build-provenance.json">build provenance</a> and the full <a href="build.log">build log</a>.</p>
+See <a href="build-provenance.json">build provenance</a>.</p>
 <p>Each process requested one backend thread and used one driver worker. Observed backend scheduler widths and explicit unavailable counts are in <a href="summary.json">summary.json</a>.</p>
 <p>Attempt checks: <span class="counts">{''.join(f'<span>{escape(k)}: {v}</span>' for k,v in statuses.items())}</span></p>
 <p>Measurement source hashes: <code>{sources}</code></p>
