@@ -15,12 +15,13 @@ with ordinary Release measurements.
 - Process limits: 300 seconds CPU, 8 GiB address space, 300 seconds wall time
 - Host: Linux x86_64, 8 logical CPUs
 - gprof data: the three `gmon/capture.*` files in `gmon-data.zip`, emitted using `GMON_OUT_PREFIX`
+- Profile-to-gmon and raw-receipt mapping: `gmon-map.json`
 - Raw events and process receipts: `raw-gmon/`
 - Independent family/witness checks: `checks.json`
 
 The paired correctness checker passed all measured attempts: T-S01 7/7,
-T-S02 5/5, and T-S03 5/5 per strategy. All six profile processes exited zero
-without timing out.
+T-S02 5/5, and T-S03 5/5 per strategy. All three profiled processes exited
+zero without timing out.
 
 ## Result
 

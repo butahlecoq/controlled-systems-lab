@@ -129,7 +129,7 @@ To get a source-attributed signal from the current exact-profile matrix, I built
 `-O3 -DNDEBUG -pg`, then profiled the existing T-S01/T-S02/T-S03 schedules
 with GNU gprof 2.47. All measured attempts passed the registered complete-family
 and two-witness checks: 7/7 pairs for T-S01 and 5/5 for each of T-S02 and
-T-S03. All six profile processes exited zero without timing out.
+T-S03. All three profiled processes exited zero without timing out.
 
 The call-graph samples are too sparse to locate a limiter: T-S01 and T-S02
 accumulated about 0.02 seconds at 0.01-second sampling resolution, while T-S03

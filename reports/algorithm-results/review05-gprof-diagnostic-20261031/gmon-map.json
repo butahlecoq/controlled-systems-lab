@@ -1,0 +1,25 @@
+{
+  "schema": "csl.review05.gprof-map/1",
+  "source_commit": "be94be8923a576d6f7cb9b527d818b3469cd0606",
+  "executable_sha256": "c1b471b8092bf270ff306e27c6daf59a6b1f65a26e2cedc187d5b26f91a02b2e",
+  "profiles": [
+    {
+      "profile": "ts01_exact_integrator",
+      "process_receipt": "raw-gmon/ts01_exact_integrator.process.json",
+      "gmon_file": "gmon/capture.786438",
+      "gprof_report": "gprof-ts01.txt"
+    },
+    {
+      "profile": "ts02_constant_integrator",
+      "process_receipt": "raw-gmon/ts02_constant_integrator.process.json",
+      "gmon_file": "gmon/capture.786441",
+      "gprof_report": "gprof-ts02.txt"
+    },
+    {
+      "profile": "ts03_singular_integrator",
+      "process_receipt": "raw-gmon/ts03_singular_integrator.process.json",
+      "gmon_file": "gmon/capture.786443",
+      "gprof_report": "gprof-ts03.txt"
+    }
+  ]
+}
