@@ -21,6 +21,15 @@ struct StageProjectionSuccess {
     PlotSetProjection projection;
     std::optional<GeometryErrorBound> error_bound;
     std::vector<SetHandle> additional_components;
+    struct Materialization {
+        SetHandle relation;
+        GeometryEvidence evidence;
+        registry::Provenance provider;
+        SetRelation relation_claim{SetRelation::equivalent};
+    };
+    // Optional equivalent finite-point representation used by saved figures.
+    // The projection itself remains the original 2D relation and evidence.
+    std::optional<Materialization> materialization;
 };
 
 using StageProjectionOutcome = std::variant<StageProjectionSuccess, StageProjectionUnavailable,

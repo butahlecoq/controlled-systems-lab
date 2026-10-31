@@ -56,9 +56,12 @@ def main() -> None:
                 or evidence["route_id"] != source["route_id"]
                 or evidence["source_sha256"] != source_hash
                 or len(evidence["stage_sources"]) != 2
-                or not all("marginal_evidence" in stage and "h_to_v_evidence" in stage
+                or not all("marginal_evidence" in stage and "capture_source_evidence" in stage
+                           and "marginal_representation" in stage
                            and stage["providers"] for stage in evidence["stage_sources"])):
             raise SystemExit(f"native route evidence sidecar is incomplete or mismatched for {stem}")
+        if any("h_to_v" in stage for stage in evidence["stage_sources"]):
+            raise SystemExit(f"native route materialized a full-dimensional stage marginal for {stem}")
         statuses = {(record["pair_index"], record["stage"]): record["outcome"]["status"]
                     for record in batch["records"]}
         pairs = len(source["coordinate_pairs"])
@@ -66,6 +69,28 @@ def main() -> None:
                     for pair in range(pairs) for stage in range(source["dynamics"]["horizon"] + 1)}
         if statuses != expected:
             raise SystemExit(f"stage outcomes differ for {stem}: {statuses}")
+        marginal_ids = {stage["stage"]: stage["marginal_set_id"]
+                        for stage in evidence["stage_sources"]}
+        if any(stage["capture_source_evidence"]["reference"]["ideal_output"] !=
+               stage["marginal_set_id"] for stage in evidence["stage_sources"]):
+            raise SystemExit(f"capture source evidence is not bound to the original marginal for {stem}")
+        if any(tuple(record["source_set_ids"]) != (marginal_ids[record["stage"]],)
+               for record in batch["records"] if record["outcome"]["status"] == "success"):
+            raise SystemExit(f"capture did not project original marginal sets directly for {stem}")
+        for record in batch["records"]:
+            if record["outcome"]["status"] != "success":
+                continue
+            evidence_chain = record["outcome"]["evidence"]
+            components = record["outcome"]["components"]
+            if len(evidence_chain) != 2 or len(components) != 1:
+                raise SystemExit(f"projected H set and 2D V materialization were not both retained for {stem}")
+            projection_evidence, materialization_evidence = evidence_chain
+            if (projection_evidence["input_set_ids"] != [marginal_ids[record["stage"]]]
+                    or materialization_evidence["input_set_ids"] != [projection_evidence["ideal_output_id"]]
+                    or materialization_evidence["ideal_output_id"] != components[0]["component_id"]
+                    or not materialization_evidence.get("provider", {}).get("id")
+                    or not materialization_evidence["provider"].get("version")):
+                raise SystemExit(f"2D materialization evidence is not linked to the source projection for {stem}")
         failure_details = [record["outcome"].get("explanation", "") for record in batch["records"]
                            if record["stage"] == 2]
         later_details = [record["outcome"].get("explanation", "") for record in batch["records"]

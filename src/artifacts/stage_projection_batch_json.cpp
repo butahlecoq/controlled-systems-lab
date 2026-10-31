@@ -79,7 +79,21 @@ Json evidence(const PlotSetProjection& projection) {
         {"ideal_output_id", projection.reference.identity.ideal_output.value},
         {"scope", "set_relation"},
         {"input_set_ids", [&] { Json ids = Json::array(); for (const auto& id : projection.reference.inputs) ids.push_back(id.value); return ids; }()},
-        {"support", support(projection.support)}, {"assumptions", std::move(assumptions)}};
+        {"support", support(projection.support)}, {"assumptions", std::move(assumptions)},
+        {"provider", {{"id", projection.provider.actual->id.value},
+            {"version", projection.provider.actual->version}}}};
+}
+Json evidence(const StageProjectionSuccess::Materialization& materialization) {
+    const auto& item = materialization.evidence;
+    Json inputs = Json::array();
+    for (const auto& id : item.reference.inputs) inputs.push_back(id.value);
+    auto assumptions = item.assumptions;
+    return {{"request_id", item.reference.identity.request.value},
+        {"ideal_output_id", item.reference.identity.ideal_output.value},
+        {"scope", "set_relation"}, {"input_set_ids", std::move(inputs)},
+        {"support", support(item.support)}, {"assumptions", std::move(assumptions)},
+        {"provider", {{"id", materialization.provider.actual->id.value},
+            {"version", materialization.provider.actual->version}}}};
 }
 Json failure_cause(const StageProjectionFailure& failure) {
     return std::visit([](const auto& cause) -> Json {
@@ -251,10 +265,25 @@ ArtifactResult<std::string> encode_stage_projection_batch_json(
                     return error(ArtifactErrorCode::identity, "records.outcome", "Projection identity does not match batch");
                 if (!success->projection.provider.actual)
                     return error(ArtifactErrorCode::identity, "records.outcome.provider", "Successful projection has no actual provider identity");
+                if (success->materialization) {
+                    const auto& materialization = *success->materialization;
+                    if (!materialization.provider.actual || materialization.relation.metadata.dimension != 2 ||
+                            materialization.relation.metadata.representation.value != "csl.polyhedron.v" ||
+                            materialization.relation_claim != SetRelation::equivalent ||
+                            materialization.evidence.scope != GeometryClaimScope::set_relation ||
+                            materialization.evidence.reference.identity.problem != batch.problem ||
+                            materialization.evidence.reference.inputs !=
+                                std::vector<SetId>{success->projection.projected_relation.id} ||
+                            materialization.evidence.reference.identity.ideal_output.value != materialization.relation.id.value)
+                        return error(ArtifactErrorCode::identity, "records.outcome.materialization",
+                            "2D materialization must be an evidence-bound equivalent V view of the captured projection");
+                }
                 source_ids = Json::array();
                 Json components = Json::array(), projection_evidence = Json::array();
                 std::vector<std::string> component_ids;
-                std::vector<SetHandle> component_sets{success->projection.projected_relation};
+                std::vector<SetHandle> component_sets{
+                    success->materialization ? success->materialization->relation :
+                        success->projection.projected_relation};
                 for (const auto& component : success->additional_components) component_sets.push_back(component);
                 for (const auto& component : component_sets) {
                     if (component.id.value.empty() ||
@@ -266,6 +295,8 @@ ArtifactResult<std::string> encode_stage_projection_batch_json(
                     components.push_back(std::get<Json>(std::move(shape)));
                 }
                 projection_evidence.push_back(evidence(success->projection));
+                if (success->materialization)
+                    projection_evidence.push_back(evidence(*success->materialization));
                 for (const auto& input : success->projection.reference.inputs) source_ids.push_back(input.value);
                 outcome = {{"status", "success"}, {"relation", relation(success->projection.relation)},
                     {"assurance", assurance(batch.requested_assurance)},
