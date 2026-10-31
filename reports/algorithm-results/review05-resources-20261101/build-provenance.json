@@ -1,0 +1,21 @@
+{
+  "schema": "csl.review05.resource-build-provenance/1",
+  "binary_sha256": "1402593776b7c0c60655430fb25f5ee12852c06f0a00d229ea43eabc4db18e9b",
+  "binary_build_directory": "/home/butahlecoq/.local/share/codex/build/review05-constraint-20261031",
+  "binary_build_type": "Release (-O3 -DNDEBUG)",
+  "binary_compiler": "GCC 16.2.1",
+  "binary_source_cmake_and_driver_match_commit": "cd5d88bb3784102e5f16165d80f973aed5590a1b",
+  "binary_source_worktree_was_dirty_at_compile": true,
+  "capture_source_commit": "cc4fc2f4af16a1ef854eb9304cb73757e028dd5d",
+  "capture_source_worktree_dirty": false,
+  "capture_source_sha256": {
+    "CMakeLists.txt": "ca8983cc20e8b7e493c233940b51b14ec0162b4e9c7bd0df57ddb7b3291fe3d9",
+    "dimension_ladder.cpp": "ad94feb5dd56e722420a777b677c77f3fc42989a4a1e4309ff40eabdd5bc3039",
+    "run_constraint_ladder.py": "6f57ab2f1335a3670b07cd204b91873fe81ece0e2ac10463f499e9ca0b267934",
+    "check_constraint_ladder.py": "e76e5cee6a10ede97cf91bb4c4b66e86b162119187ec95d2b373af33971d3e26",
+    "summarize_constraint_ladder.py": "3974da50943233216b77229a9196cb90acccdb4525e1d1bc30e8d7fa221444ff8",
+    "render_constraint_ladder.py": "84f13ae97690a4f717e3e7f774f5f1d974fcd1177f4087104452d19c7474fc8e"
+  },
+  "resource_receipt": "POSIX fork/exec/wait4 with RUSAGE_CHILDREN; child user/system CPU and peak RSS",
+  "limitations": "The existing Release binary predates the resource-wrapper-only capture commit; solver source and executable are unchanged. No internal source-mapped phase or perf profile is available."
+}

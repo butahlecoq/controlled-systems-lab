@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Exact fixture and emitted-relation checks for CONSTRAINT-01."""
 from __future__ import annotations
-import argparse, hashlib, json
+import argparse, hashlib, json, math
 from fractions import Fraction
 from pathlib import Path
 
@@ -82,6 +82,19 @@ def verify_attempt(attempt: dict[str, object], expected_hash: str) -> tuple[str,
         result = attempt["result"]
         if attempt.get("process_status") != "completed" or not isinstance(result, dict):
             return "unavailable", ["process did not complete with parseable JSON"]
+        receipt = attempt.get("resource_receipt")
+        if not isinstance(receipt, dict) or receipt.get("receipt_source") != "POSIX wait4(RUSAGE_CHILDREN) for this isolated child":
+            raise ValueError("missing per-process wait4 resource receipt")
+        for field in ("user_cpu_seconds", "system_cpu_seconds", "child_cpu_seconds", "peak_rss_kib"):
+            if (not isinstance(receipt.get(field), (int, float)) or
+                    not math.isfinite(receipt[field]) or receipt[field] < 0):
+                raise ValueError(f"invalid resource receipt field: {field}")
+        if not math.isclose(receipt["child_cpu_seconds"],
+                            receipt["user_cpu_seconds"] + receipt["system_cpu_seconds"],
+                            rel_tol=1e-12, abs_tol=1e-12):
+            raise ValueError("resource receipt CPU total is inconsistent")
+        if receipt.get("timed_out") is not False:
+            raise ValueError("completed attempt has timed-out resource receipt")
         count = CASES[str(attempt["case"])]
         if attempt.get("state_rows_per_stage") != count or attempt.get("authored_state_rows_total") != 3 * count:
             raise ValueError("attempt row count differs from the fixed fixture case")

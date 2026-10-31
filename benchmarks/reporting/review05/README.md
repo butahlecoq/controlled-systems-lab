@@ -120,3 +120,9 @@ candidate-family completeness. The timed region is only
 `SynthesisWorkspace::run()`. This slice does not measure allocated memory or
 internal phases, identify a source-level limiter, or support a speedup or
 complexity claim.
+
+The resource follow-up uses a POSIX `fork`/`exec`/`wait4` wrapper around each
+isolated strategy process. It records child user CPU, system CPU and peak RSS
+for every attempt while retaining the same exact output checker. These process
+receipts cover the whole child and are separate from the solver-only timing;
+they are descriptive and are not added to it.
