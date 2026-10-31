@@ -1,0 +1,18 @@
+Source commit during capture: 809c83d6f7d353e54b354dd7af4381a95534bf26
+Capture harness changes: benchmarks/reporting/review05/CMakeLists.txt,
+  capture_profile_matrix.py, and check_profile_matrix.py (committed in this PR).
+Build project: benchmarks/reporting/review05 (add_subdirectory of CSL source)
+CMake: 3.31.6
+Generator: Ninja 1.13.2
+Compiler: /usr/bin/c++ (GCC 16.2.1)
+Configuration: Release (-O3 -DNDEBUG), C++20, BUILD_TESTING=OFF
+CSL_ENABLE_HIGHS=ON
+CSL_ENABLE_QHULL=ON
+CSL_DEPENDENCY_PROBES=OFF
+HiGHS: pinned 1.11.0
+Qhull: pinned 8.0.2
+Executable: /home/butahlecoq/.local/share/codex/build/review05-profile-matrix-driver-20261031/csl_review05_profile_matrix
+Executable SHA-256: 75b1e4a58352d5ec26c70dc3ff2eb1627222b97e113426728d40a67046b412f4
+Host: Linux x86_64; AMD Ryzen 5 3550H; 8 logical CPUs; RAM 8108216320 bytes
+Load average before build: 1.97, 1.01, 1.42
+Load average at capture: 3.225, 4.437, 3.140

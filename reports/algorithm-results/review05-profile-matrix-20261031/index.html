@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>REVIEW-05 exact-profile matrix</title>
+<style>
+body{margin:0;background:#0b1020;color:#e2e8f0;font:16px/1.6 system-ui,sans-serif}
+main{max-width:1120px;margin:auto;padding:2rem}h1,h2{line-height:1.2}a{color:#7dd3fc}
+.scope{border-left:4px solid #fbbf24;background:#171d30;padding:.8rem 1rem}
+img{width:100%;height:auto;border-radius:12px;background:#0f172a}table{border-collapse:collapse;width:100%;font-variant-numeric:tabular-nums}
+th,td{border-bottom:1px solid #334155;padding:.55rem;text-align:left}code{color:#fde68a}
+small{color:#94a3b8}li{margin:.35rem 0}
+</style></head><body><main>
+<p>REVIEW-05 · paired synthesis profiles</p><h1>Three exact integrator profiles</h1>
+<p class="scope"><strong>Scope.</strong> Each profile has one scalar state, one scalar control, and a two-step horizon.
+This matrix changes the objective and optimal-family shape; it does not vary problem dimension or horizon.
+Every measured attempt returned a registry-verified complete family and two distinct witnesses that passed original-problem
+binding, feasibility, and objective checks. Assurance is numerical.</p>
+<h2>End-to-end timings</h2><p>The interval includes strategy preparation, workspace creation, family construction and registered
+verification, selection of two distinct histories, and original-problem witness checks. It excludes process startup, shared
+scenario/provider setup, serialization, build, and rendering.</p>
+<img src="paired-timings.svg" alt="Median end-to-end strategy times with observed minimum-to-maximum ranges">
+<table><thead><tr><th>Profile</th><th>Reach-back</th><th>Strategy B</th><th>Optimal control-history set</th></tr></thead>
+<tbody><tr><th scope="row">T-S01 exact integrator</th><td>5.644 ms (5.360–5.842)</td><td>1.343 ms (1.277–2.249)</td><td>Segment</td></tr><tr><th scope="row">T-S02 constant objective</th><td>5.104 ms (5.029–5.217)</td><td>0.538 ms (0.515–0.603)</td><td>Full control square</td></tr><tr><th scope="row">T-S03 singular objective</th><td>4.792 ms (4.712–5.307)</td><td>1.265 ms (1.217–1.287)</td><td>Terminal edge</td></tr></tbody></table>
+<p>Across these tiny profiles, Strategy B has the lower median in each case. The performance conclusion remains
+<strong>inconclusive</strong>: five or seven pairs per profile and no source-attributed limiter profile do not support a
+general ranking. The spread and phase data are in <a href="checks.json">checks.json</a>; complete attempts are in
+<a href="raw/">raw event records</a>.</p>
+<h2>Optimal control histories</h2><p>Both axes are control values: horizontal <code>u₀</code>, vertical <code>u₁</code>.
+These are analytic projections of the complete profiles, not reachable-state plots.</p>
+<img src="optimal-control-histories.svg" alt="Optimal histories in the u0-u1 control plane: a segment, square, and terminal edge">
+<p>The canonical H relations have five joint coordinates. Source declarations specify respectively 4 inequality and 4 equality
+rows (10 nonzeros) for T-S01, 4 and 3 rows (11 nonzeros) for T-S02, and 2 and 4 rows (7 nonzeros) for T-S03. These are
+static canonical sizes, not measured allocation or matrix-byte counts. All three fixtures have the same state/control dimension
+and horizon, so they are not an output-growth sweep.</p>
+<h2>Method and limits</h2><ul>
+<li>T-S01: quadratic terminal objective; optimal control histories form <code>u₀+u₁=1</code>.</li>
+<li>T-S02: constant objective; every control pair in <code>[0,1]²</code> is optimal.</li>
+<li>T-S03: singular terminal objective; <code>u₁=1</code> while <code>u₀</code> remains free.</li>
+<li>One excluded warmup pair per profile; 7 measured pairs for T-S01 and 5 for each remaining profile. Side order alternates within each profile.</li>
+<li>One backend thread; per-process 300-second CPU and wall limits and 8 GiB address-space limit. All processes completed under 0.1 seconds.</li>
+<li>No profiler or internal LP/convex call counters were collected. The measured medians are descriptive and do not establish
+scalability or a general strategy winner.</li></ul>
+<p>Source commit <code>809c83d6f7d353e54b354dd7af4381a95534bf26</code>; build and host details are in
+<a href="build-configuration.txt">build-configuration.txt</a>. Reproduction:
+<code>benchmarks/reporting/review05/capture_profile_matrix.py</code> followed by
+<code>benchmarks/reporting/review05/check_profile_matrix.py</code>.</p>
+<small>This report is a partial #95 scalability evidence slice. General matched horizon/dimension workloads, runtime output growth,
+and source-attributed limiter evidence remain outstanding.</small>
+</main></body></html>
