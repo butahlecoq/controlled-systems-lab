@@ -97,6 +97,7 @@ def main():
     if len(records)!=56 or observed!=expected or len({x.get('attempt_id') for x in records})!=56: p.error('incomplete 56-attempt schedule')
     order=('csl.synthesis.reach-back','csl.synthesis.strategy-b')
     for row in records:
+        if row.get('warmup') is not (row.get('repetition')==0): p.error('warmup flag must be true exactly for repetition zero')
         n,t=CASES[row['case']]; first=(row['repetition']+n+t//2)%2
         if row.get('strategy')!=order[(first+row['order_position'])%2]: p.error('strategy order violates alternating schedule')
     checks=[]

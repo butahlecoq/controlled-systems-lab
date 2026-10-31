@@ -20,10 +20,7 @@ def main():
   side=k*unit; y=oy-side
   svg.append(f'<rect x="{ox}" y="{y}" width="{side}" height="{side}" fill="{COLORS[k]}" fill-opacity="0.12" stroke="{COLORS[k]}" stroke-width="2"/>')
   svg.append(f'<text x="{ox+side-46}" y="{y+17}" font-family="sans-serif" font-size="12" fill="{COLORS[k]}">R{k}</text>')
- svg.append(f'<circle cx="{ox}" cy="{oy}" r="6" fill="#111827"/><text x="{ox+12}" y="{oy-12}" font-family="sans-serif" font-size="12">G₀…G₄ = Rₖ∩Gₖ = {"(0,0)"}</text>')
- for k in range(5):
-  x=ox+k*size/4
-  svg.append(f'<circle cx="{x}" cy="{oy}" r="3" fill="#111827"/>')
+ svg.append(f'<circle cx="{ox}" cy="{oy}" r="6" fill="#111827"/><text x="{ox+12}" y="{oy-12}" font-family="sans-serif" font-size="12">G₀…G₄, Rₖ∩Gₖ, x₀…x₄ = (0,0)</text>')
  for k in range(5):
   svg.append(f'<text x="{ox+size+35}" y="{45+k*22}" font-family="sans-serif" font-size="12" fill="{COLORS[k]}">R{k}: [0,{k}]²</text>')
  svg.append('<text x="30" y="405" font-family="sans-serif" font-size="12" fill="#475569">Analytic geometry from A=I, B=I, 0≤u≤1. Forward/backward layers are explanatory, not saved strategy iterates.</text></svg>')
