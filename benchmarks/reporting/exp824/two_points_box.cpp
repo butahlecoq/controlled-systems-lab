@@ -1,5 +1,6 @@
 #include <csl/optimization/finite_action_box_minimax.hpp>
 #include <csl/optimization/finite_action_minimax.hpp>
+#include <csl/reachability/finite_plan_zonotope.hpp>
 #include "two_points_fixture.hpp"
 #include <nlohmann/json.hpp>
 
@@ -30,23 +31,40 @@ Json run() {
     const auto approximate = finite_action_box_minimax(input, {27,27,27,16});
     const auto* selected = std::get_if<FiniteActionBoxMinimaxResult>(&approximate);
     if(!selected) throw std::runtime_error("box minimax did not complete successfully");
+    std::vector<Vector> selected_control_plan;
+    selected_control_plan.reserve(selected->selected_action_indices.size());
+    for(const auto index : selected->selected_action_indices)
+        selected_control_plan.push_back(input.actions.catalogue.at(index));
+    reachability::FixedPlanRequest zone_request{input.system, input.initial, selected_control_plan,
+        input.disturbances, input.admissible_states, {"issue824-zonotope-shared-plan"}};
+    const auto zonotope = reachability::finite_plan_zonotope(zone_request, {64});
+    const auto* zonotope_trace = std::get_if<reachability::FinitePlanZonotopeTrace>(&zonotope);
+    if(!zonotope_trace) throw std::runtime_error("zonotope propagation did not complete successfully");
     const auto exact = finite_action_minimax(input, {27,27,0.0});
     const auto* reference = std::get_if<FiniteMinimaxOptimal>(&exact);
     if(!reference) throw std::runtime_error("exact finite minimax did not complete successfully");
 
     Json selected_controls = Json::array();
-    constexpr std::array<double,3> actions{-2.5,0.0,2.5};
-    for(const auto index : selected->selected_action_indices) selected_controls.push_back(actions.at(index));
+    for(const auto index : selected->selected_action_indices)
+        selected_controls.push_back(input.actions.catalogue.at(index).front());
     Json boxes = Json::array();
     for(const auto& stage : selected->selected_box_trace.stages)
         boxes.push_back({{"lower",stage.lower},{"upper",stage.upper}});
+    Json zonotope_stages = Json::array();
+    for(const auto& stage : zonotope_trace->stages) {
+        Json stage_factors = Json::array();
+        for(const auto& factor : stage.factors) stage_factors.push_back(factor.value);
+        zonotope_stages.push_back({{"center",stage.center},
+            {"generators",{{"rows",stage.generators.rows},{"cols",stage.generators.cols},
+                {"values",stage.generators.values}}}, {"factors",std::move(stage_factors)}});
+    }
     Json plan_scores = Json::array();
     for(const auto& plan : selected->plan_scores)
         plan_scores.push_back({{"action_indices",plan.action_indices},
             {"terminal_box_maximum",plan.terminal_box_maximum}});
     const auto exact_plan_index = reference->minimizing_plan_indices.front();
     const auto& exact_plan = std::get<FinitePlanFeasible>(reference->plans[exact_plan_index]);
-    return {{"schema","csl.issue824-two-points-box-minimax/1"},
+    return {{"schema","csl.issue824-two-points-box-minimax/2"},
         {"environment","TwoPointsOnParallelLines"},
         {"source_identity",{{"repository","optimal_control/Environments"},
             {"commit","f4d76c60f4003f50954174e96eafd8e514bd5441"}}},
@@ -66,6 +84,10 @@ Json run() {
             {"worst_disturbances",selected->replayed_worst_disturbance_values},
             {"worst_case_path",selected->replayed_worst_path}, {"stages",boxes},
             {"all_plan_scores",plan_scores}}},
+        {"zonotope_method",{{"status","numerical outer zonotope recurrence"},
+            {"plan_source","same box-selected fixed open-loop plan"},
+            {"relation","outer"}, {"max_generators_per_stage",64},
+            {"stages",std::move(zonotope_stages)}}},
         {"exact_reference",{{"finite_minimax_value",reference->value},
             {"selected_action_indices",exact_plan.action_indices},
             {"terminal_vertices",matrix_vertices(exact_plan.terminal)},

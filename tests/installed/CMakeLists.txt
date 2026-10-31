@@ -356,6 +356,11 @@ set_tests_properties(installed_nominal_forward_client PROPERTIES
 
 
 endif()
+
+add_executable(installed_finite_plan_zonotope_client finite_plan_zonotope_client.cpp)
+target_link_libraries(installed_finite_plan_zonotope_client PRIVATE CSL::finite_plan_zonotope)
+set_target_properties(installed_finite_plan_zonotope_client PROPERTIES CXX_EXTENSIONS OFF)
+add_test(NAME installed_finite_plan_zonotope_client COMMAND installed_finite_plan_zonotope_client)
 add_executable(installed_ts01_evidence_client ts01_evidence_client.cpp)
 target_link_libraries(installed_ts01_evidence_client PRIVATE CSL::strategy_ts01)
 set_target_properties(installed_ts01_evidence_client PROPERTIES CXX_EXTENSIONS OFF)

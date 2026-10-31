@@ -59,6 +59,7 @@ file(COPY "${CSL_SOURCE_DIR}/tests/installed/polyhedral_intersection_client.cpp"
 file(COPY "${CSL_SOURCE_DIR}/tests/installed/hybrid_reachability_client.cpp" DESTINATION "${work}/source")
 file(COPY "${CSL_SOURCE_DIR}/tests/installed/projection_predecessor_client.cpp" DESTINATION "${work}/source")
 file(COPY "${CSL_SOURCE_DIR}/tests/installed/nominal_forward_client.cpp" DESTINATION "${work}/source")
+file(COPY "${CSL_SOURCE_DIR}/tests/installed/finite_plan_zonotope_client.cpp" DESTINATION "${work}/source")
 file(COPY "${CSL_SOURCE_DIR}/tests/installed/ts01_evidence_client.cpp" DESTINATION "${work}/source")
 file(COPY "${CSL_SOURCE_DIR}/tests/installed/ts01_issuer_forge_client.cpp" DESTINATION "${work}/source")
 file(COPY "${CSL_SOURCE_DIR}/tests/installed/ts01_callback_forge_client.cpp" DESTINATION "${work}/source")

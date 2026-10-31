@@ -29,6 +29,7 @@
 #include <csl/geometry/polyhedral_projection.hpp>
 #include <csl/reachability/nominal_predecessor.hpp>
 #include <csl/reachability/finite_plan_box.hpp>
+#include <csl/reachability/finite_plan_zonotope.hpp>
 
 #include <iostream>
 #include <stdexcept>

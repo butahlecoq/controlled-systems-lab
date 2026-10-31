@@ -23,7 +23,7 @@ def close(left: float, right: float, tol: float = 2e-10) -> bool:
 
 def main(path: Path) -> dict:
     result = json.loads(path.read_text(encoding="utf-8"))
-    if result.get("schema") != "csl.issue824-two-points-box-minimax/1":
+    if result.get("schema") != "csl.issue824-two-points-box-minimax/2":
         raise ValueError("unexpected EXP-824 report schema")
     if result.get("environment") != "TwoPointsOnParallelLines":
         raise ValueError("report must identify the source environment")
@@ -52,6 +52,36 @@ def main(path: Path) -> dict:
             point = [coordinate / SCALE for coordinate in state]
             if any(lower[j] > point[j] or upper[j] < point[j] for j in range(4)):
                 raise ValueError(f"stage {stage} box misses an exact finite-game state")
+
+    zonotope = result["zonotope_method"]
+    if zonotope.get("relation") != "outer" or len(zonotope.get("stages", [])) != 4:
+        raise ValueError("zonotope trace must identify an outer relation at every stage")
+    generator_limit = zonotope.get("max_generators_per_stage")
+    if not isinstance(generator_limit, int) or generator_limit < 0:
+        raise ValueError("zonotope generator budget is missing or invalid")
+    for stage, states in enumerate(exact_stages):
+        current = zonotope["stages"][stage]
+        center = current["center"]
+        matrix = current["generators"]
+        factors = current["factors"]
+        if (len(center) != 4 or matrix.get("rows") != 4 or
+                matrix.get("cols") != len(factors) or
+                len(matrix.get("values", [])) != 4 * len(factors)):
+            raise ValueError(f"stage {stage} zonotope dimensions are inconsistent")
+        if len(factors) > generator_limit:
+            raise ValueError(f"stage {stage} exceeds its declared generator budget")
+        exact_center = [Fraction.from_float(value) for value in center]
+        exact_generators = [Fraction.from_float(value) for value in matrix["values"]]
+        for state in states:
+            for coordinate in range(4):
+                radius = sum((abs(exact_generators[coordinate * len(factors) + column])
+                              for column in range(len(factors))), Fraction(0))
+                lower = exact_center[coordinate] - radius
+                upper = exact_center[coordinate] + radius
+                point = Fraction(state[coordinate], SCALE)
+                if point < lower or point > upper:
+                    raise ValueError(
+                        f"stage {stage} zonotope coordinate bounds miss an exact state coordinate")
 
     disturbance_indices = box["worst_disturbance_indices"]
     disturbance_values = box["worst_disturbances"]
@@ -117,7 +147,7 @@ def main(path: Path) -> dict:
         raise ValueError("selected feasible plan cannot improve on the exhaustive exact optimum")
 
     return {
-        "schema": "csl.issue824-two-points-box-check/1",
+        "schema": "csl.issue824-two-points-box-check/2",
         "status": "verified",
         "scope": "stored binary64 discrete model coefficients and the declared finite catalogs",
         "independent_source": "scripts/reports/mpc05/reference.py exact integer transitions and rational objective",
@@ -129,6 +159,8 @@ def main(path: Path) -> dict:
         "exact_reference_state_path": [[v / SCALE for v in item] for item in exact_path],
         "stage_state_counts": [len(states) for states in exact_stages],
         "stage_box_inclusion": "every exact finite-catalog state checked at every stage",
+        "stage_zonotope_coordinate_bounds":
+            "every exact finite-catalog state coordinate checked against exact dyadic center +/- sum(abs(generators)); not a full zonotope membership proof",
         "objective_bound_status": "diagnostic numerical maximum on outer boxes; not a validated bound",
     }
 
