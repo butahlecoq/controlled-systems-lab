@@ -1,0 +1,42 @@
+{
+  "captured_at_utc": "2026-10-31T10:41:07.005199+00:00",
+  "command": [
+    "/home/butahlecoq/.local/share/codex/build/review05-profile-matrix-driver-20261031/csl_review05_profile_matrix",
+    "--measure-profile",
+    "ts02_constant_integrator",
+    "/home/butahlecoq/.local/share/codex/worktrees/review05-next-ladder-20261031/reports/algorithm-results/exp02-paired-profiles-20261027-r1/ts02-constant-integrator.json",
+    "/home/butahlecoq/.local/share/codex/worktrees/review05-next-ladder-20261031/reports/algorithm-results/review05-profile-matrix-20261031/raw/ts02_constant_integrator.jsonl"
+  ],
+  "elapsed_wall_seconds": 0.04442848498001695,
+  "executable_sha256": "75b1e4a58352d5ec26c70dc3ff2eb1627222b97e113426728d40a67046b412f4",
+  "exit_code": 0,
+  "host": {
+    "load_average_after": [
+      3.22509765625,
+      4.4365234375,
+      3.1396484375
+    ],
+    "load_average_before": [
+      3.22509765625,
+      4.4365234375,
+      3.1396484375
+    ],
+    "logical_cpus": 8,
+    "machine": "x86_64",
+    "platform": "Linux-7.2.8-9-omarchy-x86_64-with-glibc2.44",
+    "processor": ""
+  },
+  "measured_pairs": 5,
+  "profile": "ts02_constant_integrator",
+  "resource_limits": {
+    "address_space_bytes": 8589934592,
+    "cpu_seconds_hard": 305,
+    "cpu_seconds_soft": 300,
+    "scope": "whole profile process, including one warmup and all measured pairs",
+    "wall_timeout_seconds": 300
+  },
+  "scenario_sha256": "00686f585934738530be0c890baa29dc049fa810b2f8fa8f083191da59c2dedb",
+  "source_commit": "809c83d6f7d353e54b354dd7af4381a95534bf26",
+  "timed_out": false,
+  "working_directory": "/home/butahlecoq/.local/share/codex/worktrees/review05-next-ladder-20261031"
+}

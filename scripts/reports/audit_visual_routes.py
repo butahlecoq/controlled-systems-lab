@@ -100,7 +100,10 @@ SAVED_COMPANION_ROUTES = {
     "benchmarks/reporting/issue6/b09_render_projection.py",
 }
 SAVED_DATA_COMPANION_COLLECTORS = {"scripts/reports/app01/collect.py"}
-SAVED_DATA_COMPANION_RENDERERS = {"scripts/reports/render_adaptive_ode_example.py"}
+SAVED_DATA_COMPANION_RENDERERS = {
+    "scripts/reports/render_adaptive_ode_example.py",
+    "benchmarks/reporting/review05/render_profile_matrix.py",
+}
 FROZEN_COMPANIONS = {
     "app01-plan-20261016-22d406fd": "examples/app01-plan-timing-v1.html",
     "exp02-paired-profiles-20261027-r1": "examples/control-witness-v1.html#exp02-ts02-control-family",

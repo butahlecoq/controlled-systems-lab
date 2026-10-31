@@ -1,0 +1,32 @@
+-- HIGHS version: 1.11.0
+-- Git hash: n/a
+-- Build C++ library: ON
+-- Build C++ library: OFF
+-- Build Fortran: OFF
+-- Build CSharp: OFF
+-- Build Python: OFF
+-- Build all tests: OFF
+-- ZLIB: OFF
+-- Build pdlp with GPU: OFF
+-- Use FindCUDAConf: OFF
+-- Build type: Release
+-- Found long size: 8
+-- Found long long size: 8
+-- Found int64_t size: 8
+-- Found unsigned long size: 8
+-- Found unsigned long long size: 8
+-- Found uint64_t size: 8
+-- Found int * size: 8
+-- IPO / LTO supported by compiler: YES
+-- IPO / LTO: disabled by default when building a static library; set CMAKE_INTERPROCEDURAL_OPTIMIZATION=ON to enable
+-- Default multithreading: disabled
+-- FAST_BUILD set to on.
+-- Build examples: OFF
+-- Build C++ example: OFF
+-- Build CSharp example: OFF
+-- Build dotnet package: OFF
+-- No CSharp support
+-- .Net: Use .Net Framework 2.1 support: ON
+-- Configuring done (0.9s)
+-- Generating done (0.2s)
+-- Build files have been written to: /home/butahlecoq/.local/share/codex/build/review05-profile-matrix-driver-20261031
