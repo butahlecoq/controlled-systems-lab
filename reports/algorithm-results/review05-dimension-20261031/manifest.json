@@ -1,0 +1,74 @@
+{
+  "schema": "csl.review05.dimension-manifest/1",
+  "track": "new-comparison",
+  "fixture": "DIMENSION-01-vector-integrator",
+  "cases": {
+    "n1-t2": {
+      "state_dimension": 1,
+      "control_dimension": 1,
+      "horizon": 2,
+      "scenario_sha256": "63e5e4fac79ae6e88245f0ba8c76378fcc68e155c53f8708fa99f7595417bb43"
+    },
+    "n1-t4": {
+      "state_dimension": 1,
+      "control_dimension": 1,
+      "horizon": 4,
+      "scenario_sha256": "e875706d54d8b25d52ea1416b003838fa4d3dd3d0f6bedcffc669866cf76dbd4"
+    },
+    "n2-t2": {
+      "state_dimension": 2,
+      "control_dimension": 2,
+      "horizon": 2,
+      "scenario_sha256": "d4a6f884d32684e3ef7d2d73735b1e29b72dad8285df1ccdbec44e78b50644f3"
+    },
+    "n2-t4": {
+      "state_dimension": 2,
+      "control_dimension": 2,
+      "horizon": 4,
+      "scenario_sha256": "6a438bc65e02dc3c7696d7ff85c405ecc78eeb2a7c1e30b06926faf3e9a148c6"
+    }
+  },
+  "environment": {
+    "source_revision": "521068b76d1c5021bd738093e3c54baa1da2414b",
+    "source_worktree_dirty": false,
+    "measurement_source_sha256": {
+      "CMakeLists.txt": "ca8983cc20e8b7e493c233940b51b14ec0162b4e9c7bd0df57ddb7b3291fe3d9",
+      "dimension_ladder.cpp": "4bfa9615ab08a9213b4a8f529b4369f54858c66b465dc7416b7a535fece410a2",
+      "run_dimension_ladder.py": "44191f19bc59500d593d4173853885d2c2c0aacd7ba5946248c5c0734345e203",
+      "check_dimension_ladder.py": "d1953686cc92a5a5eed815f9d8cbdaf82b2b3f42892746ed6009bcd6c078c489",
+      "summarize_dimension_ladder.py": "b43113be0010c87902a475e65bd085b8a409bc954e85fc9af102ac9124b3e4e4",
+      "render_dimension_ladder.py": "5d50644f729856cbd4cd5f74aeed1948b163d66d144353b81e590538731f07d2"
+    },
+    "host": "omarchy",
+    "platform": "Linux-7.2.8-9-omarchy-x86_64-with-glibc2.44",
+    "machine": "x86_64",
+    "logical_cpus": 8,
+    "physical_memory_bytes": 8108216320,
+    "python": "3.14.8",
+    "load_average_at_start": [
+      2.51806640625,
+      5.23486328125,
+      2.95947265625
+    ],
+    "binary_sha256": "af9a69fb746f8e978deec4615e6d04ceea1f74eaefd0770383aa55f916bdd513",
+    "requested_threads_per_strategy": 1,
+    "requested_driver_workers": 1,
+    "limits": {
+      "cpu_seconds": 300,
+      "address_space_bytes": 8589934592,
+      "process_timeout_seconds": 300,
+      "scope": "one strategy process",
+      "enforced": true,
+      "mechanism": "POSIX RLIMIT_CPU and RLIMIT_AS"
+    },
+    "report_renderer_revision": "3799a8d7939cbae5c5a8392f20e80cdbf23b3b78",
+    "checker_revision": "7bb86a90fbcfd1c0172908b355b73eccb9ea2f2e"
+  },
+  "schedule": {
+    "warmup_pairs_per_case": 1,
+    "measured_pairs_per_case": 6,
+    "order": "alternating AB/BA; case order rotates by repetition",
+    "timed_region": "steady_clock around SynthesisWorkspace::run only",
+    "startup_setup": "excluded from strategy_run_ns; process wall time retained"
+  }
+}

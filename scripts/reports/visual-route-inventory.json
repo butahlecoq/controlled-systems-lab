@@ -1599,6 +1599,15 @@
       "role_and_disposition_reason": "Draws the exact initial-state rectangle and one full two-control optimal fiber with a distinct minimum-norm selector; solver candidates are not presented as complete-family evidence."
     },
     {
+      "source": "benchmarks/reporting/review05/render_dimension_ladder.py",
+      "signal_count": 5,
+      "asset_name_literals": [
+        "state-space-illustration.svg"
+      ],
+      "disposition": "deferred-family-specific-migration",
+      "follow_up_issue": 687
+    },
+    {
       "source": "benchmarks/reporting/review05/render_profile_matrix.py",
       "signal_count": 6,
       "asset_name_literals": [
@@ -2551,6 +2560,16 @@
         "performance.svg"
       ],
       "index_sha256": "e3d54618560811b3d66f837d6a63645695bbfbaaa76275fd7442f3a65da21f83",
+      "disposition": "deferred: original frozen route-level readability review remains; companion availability is listed separately",
+      "follow_up_issue": 669
+    },
+    {
+      "route": "review05-dimension-20261031",
+      "source_bundle": "review05-dimension-20261031",
+      "assets": [
+        "state-space-illustration.svg"
+      ],
+      "index_sha256": "0f2fdf8500c8d0824c072df903180c1d7143cc8797690506ed3a4b4dea3a0fc4",
       "disposition": "deferred: original frozen route-level readability review remains; companion availability is listed separately",
       "follow_up_issue": 669
     },

@@ -1,0 +1,27 @@
+{
+  "schema": "csl.review05.build-provenance/1",
+  "build_source_revision_at_compile": "9c8faf66116244632b1bd5922abc93d485b95bc6",
+  "build_worktree_dirty_at_compile": true,
+  "compiled_source_commit_after_reviewable_capture": "521068b76d1c5021bd738093e3c54baa1da2414b",
+  "compile_inputs_match_committed_source": true,
+  "source_commit_at_capture": "521068b76d1c5021bd738093e3c54baa1da2414b",
+  "source_worktree_dirty_at_capture": false,
+  "report_renderer_revision": "3799a8d7939cbae5c5a8392f20e80cdbf23b3b78",
+  "report_renderer_sha256": "5d50644f729856cbd4cd5f74aeed1948b163d66d144353b81e590538731f07d2",
+  "configure_command": "cmake -S benchmarks/reporting/review05 -B /home/butahlecoq/.local/share/codex/build/review05-dimension-ladder-20261031 -DCSL_SOURCE_ROOT=/home/butahlecoq/.local/share/codex/worktrees/review05-size-growth-20261031 -DCMAKE_BUILD_TYPE=Release -G Ninja",
+  "build_command": "ninja -C /home/butahlecoq/.local/share/codex/build/review05-dimension-ladder-20261031 csl_review05_dimension_ladder",
+  "build_type": "Release (-O3 -DNDEBUG)",
+  "cxx_compiler": "GCC 16.2.1",
+  "cmake_version": "3.31.6",
+  "ninja_version": "1.13.2",
+  "build_result": "completed; 419/419 steps",
+  "full_build_log_retained": false,
+  "binary_sha256": "af9a69fb746f8e978deec4615e6d04ceea1f74eaefd0770383aa55f916bdd513",
+  "dependency_versions": {
+    "HiGHS": "1.11.0",
+    "Qhull": "repository-pinned source"
+  },
+  "limitations": "The build completed before the working source was committed. The compiled CMakeLists.txt and dimension_ladder.cpp contents match commit 521068b76d1c5021bd738093e3c54baa1da2414b; their content hashes are in manifest.json. Build logs were not retained.",
+  "checker_revision": "7bb86a90fbcfd1c0172908b355b73eccb9ea2f2e",
+  "checker_sha256": "d1953686cc92a5a5eed815f9d8cbdaf82b2b3f42892746ed6009bcd6c078c489"
+}

@@ -1,0 +1,133 @@
+{
+  "schema": "csl.review05.dimension-summary/1",
+  "claim": "matched descriptive timings for a 1D/2D vector-integrator ladder at horizons 2 and 4; the exact fixture oracle proves only the unique zero optimum on these cases; no general completeness, winner, speedup, or complexity claim",
+  "timed_region": "SynthesisWorkspace::run, steady_clock nanoseconds",
+  "cases": [
+    {
+      "case": "n1-t2",
+      "state_dimension": 1,
+      "control_dimension": 1,
+      "horizon": 2,
+      "verified_measured_attempts": 12,
+      "verified_paired_repetitions": 6,
+      "strategies": {
+        "csl.synthesis.reach-back": {
+          "verified_rows_in_pairs": 6,
+          "median_ns": 5284310.5,
+          "min_ns": 5255745,
+          "max_ns": 5583863,
+          "representation_shape": {
+            "joint_coordinates": 5,
+            "inequality_rows": 14,
+            "equality_rows": 4,
+            "nonzero_h_coefficients": 22
+          }
+        },
+        "csl.synthesis.strategy-b": {
+          "verified_rows_in_pairs": 6,
+          "median_ns": 690142.5,
+          "min_ns": 684940,
+          "max_ns": 755410,
+          "representation_shape": {
+            "joint_coordinates": 5,
+            "inequality_rows": 10,
+            "equality_rows": 4,
+            "nonzero_h_coefficients": 18
+          }
+        }
+      }
+    },
+    {
+      "case": "n1-t4",
+      "state_dimension": 1,
+      "control_dimension": 1,
+      "horizon": 4,
+      "verified_measured_attempts": 12,
+      "verified_paired_repetitions": 6,
+      "strategies": {
+        "csl.synthesis.reach-back": {
+          "verified_rows_in_pairs": 6,
+          "median_ns": 11069562.5,
+          "min_ns": 10856719,
+          "max_ns": 16172738,
+          "representation_shape": {
+            "joint_coordinates": 9,
+            "inequality_rows": 22,
+            "equality_rows": 6,
+            "nonzero_h_coefficients": 36
+          }
+        },
+        "csl.synthesis.strategy-b": {
+          "verified_rows_in_pairs": 6,
+          "median_ns": 738020.0,
+          "min_ns": 716369,
+          "max_ns": 962980,
+          "representation_shape": {
+            "joint_coordinates": 9,
+            "inequality_rows": 18,
+            "equality_rows": 6,
+            "nonzero_h_coefficients": 32
+          }
+        }
+      }
+    },
+    {
+      "case": "n2-t2",
+      "state_dimension": 2,
+      "control_dimension": 2,
+      "horizon": 2,
+      "verified_measured_attempts": 12,
+      "verified_paired_repetitions": 6,
+      "strategies": {
+        "csl.synthesis.reach-back": {
+          "verified_rows_in_pairs": 6,
+          "median_ns": 12037711.0,
+          "min_ns": 11747344,
+          "max_ns": 18077188,
+          "representation_shape": {
+            "joint_coordinates": 10,
+            "inequality_rows": 28,
+            "equality_rows": 7,
+            "nonzero_h_coefficients": 44
+          }
+        },
+        "csl.synthesis.strategy-b": {
+          "verified_rows_in_pairs": 6,
+          "median_ns": 755725.0,
+          "min_ns": 737531,
+          "max_ns": 812192,
+          "representation_shape": {
+            "joint_coordinates": 10,
+            "inequality_rows": 20,
+            "equality_rows": 7,
+            "nonzero_h_coefficients": 36
+          }
+        }
+      }
+    },
+    {
+      "case": "n2-t4",
+      "state_dimension": 2,
+      "control_dimension": 2,
+      "horizon": 4,
+      "verified_measured_attempts": 6,
+      "verified_paired_repetitions": 0,
+      "strategies": {
+        "csl.synthesis.reach-back": {
+          "verified_rows_in_pairs": 0,
+          "median_ns": null,
+          "min_ns": null,
+          "max_ns": null,
+          "representation_shape": null
+        },
+        "csl.synthesis.strategy-b": {
+          "verified_rows_in_pairs": 0,
+          "median_ns": null,
+          "min_ns": null,
+          "max_ns": null,
+          "representation_shape": null
+        }
+      }
+    }
+  ]
+}
