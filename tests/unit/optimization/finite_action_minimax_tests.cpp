@@ -90,6 +90,20 @@ TEST_CASE("near-optimal tolerance does not turn numerical near-ties into exact t
     CHECK(near_optimal.worst_value-tolerant_result.value<=1e-7);
 }
 
+TEST_CASE("near-optimal tolerance never retains a rejected finite plan") {
+    const auto outcome=finite_action_minimax(request({0,1},2),{2,2,100});
+    REQUIRE(std::holds_alternative<FiniteMinimaxOptimal>(outcome));
+    const auto& result=std::get<FiniteMinimaxOptimal>(outcome);
+    CHECK(result.minimizing_plan_indices==std::vector<std::size_t>{0});
+    REQUIRE(result.plans.size()==2);
+    CHECK(std::holds_alternative<FinitePlanFeasible>(result.plans[0]));
+    REQUIRE(std::holds_alternative<FinitePlanRejected>(result.plans[1]));
+    const auto& rejected=std::get<FinitePlanRejected>(result.plans[1]);
+    CHECK(rejected.action_indices==std::vector<std::size_t>{1});
+    CHECK(rejected.stage==1);
+    CHECK(rejected.violating_successor==Vector{3});
+}
+
 TEST_CASE("independent exhaustive oracle checks every tied robust finite plan") {
     const Vector catalogue{0,0,1};
     auto input=request(catalogue,10);
