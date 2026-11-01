@@ -1,0 +1,62 @@
+{
+  "build": {
+    "compiler": "/usr/bin/c++",
+    "compiler_version": "c++ (GCC) 16.2.1 20260810",
+    "configuration": "Release",
+    "directory": "/home/butahlecoq/.local/share/codex/worktrees/issue824-zonotope-selection-20261101/build/core",
+    "generator": "Ninja",
+    "highs": "OFF",
+    "qhull": "OFF"
+  },
+  "exact_geometry_reference": {
+    "figure_data_sha256": "0a9995d4a2648ee9e13e93128063ac1978392349a2c2ecbee6aa5c659d3362d7",
+    "report_id": "mpc05-causal-tree-pilot-v2"
+  },
+  "host": {
+    "machine": "x86_64",
+    "release": "7.2.8-9-omarchy",
+    "system": "Linux"
+  },
+  "schema": "csl.issue824-two-points-zonotope-minimax-capture/1",
+  "source_commit": "cbfcc30952059eef27e9b085ceff79c6dade97a9",
+  "source_files_sha256": {
+    ".github/workflows/algorithm-reports.yml": "9e71b82dbe5397410294069c9b8d964eecd859bc8315dc8eda63e66c5eeb6e0b",
+    "CMakeLists.txt": "dffff6b904aace15c7d1a22094fa8d29292b77924fba61f0ce5f8f0211e15188",
+    "benchmarks/reporting/exp824/two_points_fixture.hpp": "63ea125705437636a8689ca1a37d1df71c4be1ee04f751d2b226ab1c8145c8ec",
+    "benchmarks/reporting/exp824/two_points_zonotope_minimax.cpp": "cd307c9e311fbecce224937948fa9174f76b70a4eb230b2cdcb17fcb510ec6a4",
+    "cmake/OptionalReports.cmake": "ac14320b2eee4d03f0a3d218108c5dbdff51411450018739829b3ce45b46b809",
+    "cmake/RunInstalledClient.cmake": "5392d126067178d721e2f2fa4c13caf22010bbb4a0d223cb4bb93016f275521a",
+    "docs/architecture/issue824-zonotope-minimax-selection.md": "ea3da544992c3b57d10d7d63612a5dbea4f390835083ecc054b063b32460cb11",
+    "include/csl/optimization/finite_action_zonotope_minimax.hpp": "3208cc5e537eeb1cd641450f2b17bf32fc7d5604ad847a2f27f374ff7644b224",
+    "include/csl/reachability/finite_plan_zonotope.hpp": "d79183519fda2ef6205aea295ae7400d94324b5d0b413e623b884a5cc910923b",
+    "scripts/reports/audit_visual_routes.py": "c3aafd00a6fd2c070c37043aedb62b9d9529cde7a891830d6294254d27edcc25",
+    "scripts/reports/exp824/check_two_points_box.py": "68aaf049d7c312eb7ca623d09164334ffa544f251caa8c83c3bef19fd320ddb8",
+    "scripts/reports/exp824/check_zonotope_minimax.py": "c918f5199481baf7a0cb327a2a3e82cf4ca3bb346569ce7c7c0f10f0aa227950",
+    "scripts/reports/exp824/check_zonotope_minimax_smoke.py": "704be8f2bf55f34884304f89b0b1550fed2a1b442cb321c18ee980ea046339c4",
+    "scripts/reports/exp824/make_report.py": "447b9d76ccf39a05017d36cce06f9bfd40f8dffd1d88fce0e87bf2751a9fd59b",
+    "scripts/reports/exp824/make_zonotope_minimax_report.py": "9144ca08c7d72813a052fc59c57f9fecd3c07bfabcf4e07c355b535c8a574fc1",
+    "scripts/reports/report_source_identity.py": "e1d5d08e60c96f56bb8507482a39f942b77b6de58e77fa6d727c0a271e11fc21",
+    "scripts/reports/stage_issue824_zonotope.py": "d0a77cb67ba0a974ea09062d8882d6545ed70af88cd388267b77f4fcd2968214",
+    "scripts/reports/stage_issue824_zonotope_minimax.py": "3bba62d79376c724f4671952ab4d8ef64e1c221bcd9a3f20c22483056afe8051",
+    "scripts/reports/visual_examples.py": "1ca2ee3dcbc36cd90941ee7bdcc408b220b3cef43744745103da271aa8e3ae79",
+    "src/optimization/Module.cmake": "16460701f889684fd0eac85e1cd79372d54d9ffa8798f6dbd683b81046e940e9",
+    "src/optimization/Tests.cmake": "b862b0aa65a0c86617174f57d847508c978dbaf56c1707453c3f25d185e0a9bd",
+    "src/optimization/finite_action_box_minimax.cpp": "ae08a2de1de023765ae6a80b22cce7e6c39ee772acc451a86282e2e6c68435a9",
+    "src/optimization/finite_action_plans.hpp": "8ca3f1f52f947b6f9a556725d610b608676ddb568efb70b469bb81cc0c51be3b",
+    "src/optimization/finite_action_replay.cpp": "b4dfbf3ee0323cd11a3e97c11114e5daa16b5d0096bc21cc84f27ed77675f918",
+    "src/optimization/finite_action_replay.hpp": "f1c1a675ca0a27f9e8e3929587650ee07bcf096b6f1f6f0546a088715ff3640e",
+    "src/optimization/finite_action_zonotope_minimax.cpp": "34cf6d83641139f7800291f4a85dcc1e3d47593bffdc339869f1413ae22601d7",
+    "src/reachability/Module.cmake": "fd3ec08951eba06ce57d0c96bd172dfcdfc0c98e41745551c0f6d42109a5d1fc",
+    "src/reachability/Tests.cmake": "0d5b0e376ce3ab4fbffc0d4ddfb21bebb29599a68b0df2f5a7911d6d00ba5ad5",
+    "src/reachability/finite_plan_zonotope.cpp": "21216c26fb1b87c152f20443bafb67e476504a853e76797a73c12a4f9f8bec46",
+    "tests/contract/public_headers_client.cpp": "d0cc57634cb0f3c1e8a5775edc0b9ebc4416bda9966f1768c8770b2cf309e53e",
+    "tests/installed/CMakeLists.txt": "e93ac3262f173958f80f954a34a4a7b91124c12d2d0f7e80648aa2643bda41d0",
+    "tests/installed/finite_action_zonotope_minimax_client.cpp": "afd2405400c9056614c3c504111e146cf54a8466cdfc47506ebb03659c0f9c55",
+    "tests/reporting/test_issue824_zonotope_minimax_publication.py": "9ed14a3e64428423f78e64c5d6d330f6fa2c46057649e44794a901990d99e767",
+    "tests/reporting/test_issue824_zonotope_publication.py": "308f57a565d13f349c1bf5f7983e11d55279283f250bf6083cd3fc2d0640c1af",
+    "tests/reporting/test_visual_route_inventory.py": "7330e0a0ed35ce71a7528402f2b0122e673b71cbadd9bbbe6aa0b7414bac1f6b",
+    "tests/unit/optimization/finite_action_zonotope_minimax_tests.cpp": "b310434b4b55f5329187f789891246a716da98701bf3795cb8eaed8049526463"
+  },
+  "source_status_before_report_generation": [],
+  "source_tree_clean_before_report_generation": true
+}
