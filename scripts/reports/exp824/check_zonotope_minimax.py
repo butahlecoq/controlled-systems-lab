@@ -97,6 +97,16 @@ def solve_square(matrix: list[list[Fraction]], vector: list[Fraction]) -> list[F
     return [row[-1] for row in work]
 
 
+def is_exact_finite_binary64(value: object) -> bool:
+    if not isinstance(value, (int, float)) or isinstance(value, bool):
+        return False
+    try:
+        converted = float(value)
+    except (OverflowError, ValueError):
+        return False
+    return math.isfinite(converted) and (not isinstance(value, int) or int(converted) == value)
+
+
 def prepare_exact_zonotope_membership(stage: dict):
     """Prepare exact dyadic facet inequalities once for a stage's zonotope."""
     from itertools import combinations
@@ -116,9 +126,8 @@ def prepare_exact_zonotope_membership(stage: dict):
             len(factors) != count):
         raise ValueError("zonotope center, factors, and generator matrix dimensions differ")
     center_values = stage["center"]
-    if any(not isinstance(value, (int, float)) or isinstance(value, bool) or
-           not math.isfinite(value) for value in center_values + values):
-        raise ValueError("zonotope center and generators must be finite numbers")
+    if any(not is_exact_finite_binary64(value) for value in center_values + values):
+        raise ValueError("zonotope center and generators must be exact finite binary64 values")
     center = [Fraction.from_float(float(value)) for value in center_values]
     count = matrix["cols"]
     generators = [[Fraction.from_float(float(values[row * count + column]))
@@ -236,6 +245,16 @@ def check_membership_fixtures() -> None:
         pass
     else:
         raise ValueError("exact zonotope checker accepted a factor/generator dimension mismatch")
+
+    for invalid_center in ([9007199254740993], [10 ** 309]):
+        invalid = {"center": invalid_center, "factors": [],
+                   "generators": {"rows": 1, "cols": 0, "values": []}}
+        try:
+            prepare_exact_zonotope_membership(invalid)
+        except ValueError:
+            pass
+        else:
+            raise ValueError("exact zonotope checker accepted an integer altered by binary64 conversion")
 
 
 def check_parallelotope_trace(method: dict, actions: tuple[int, ...]) -> None:
