@@ -2513,7 +2513,7 @@
         "planar-example.svg",
         "projections.svg"
       ],
-      "index_sha256": "9893c97abfa2285d77563899753a5a7ece2276fc2c01bb004176ea6fd0ccecfe",
+      "index_sha256": "e92b4f8476e5dceb69e816df244016882da7e01f328c8c3599356a434a2a3d0d",
       "disposition": "deferred: original frozen route-level readability review remains; companion availability is listed separately",
       "follow_up_issue": 824
     },
@@ -2556,7 +2556,7 @@
         "planar-example.svg",
         "projections.svg"
       ],
-      "index_sha256": "beb02e866e4e124755aff174a4a89f94b2f2a94ccff099e716986a9228cba8f0",
+      "index_sha256": "9ce5cd54fa3948f9199161f56c0db1b918c10aa60a82dd6c0403025e43f08112",
       "disposition": "deferred: original frozen route-level readability review remains; companion availability is listed separately",
       "follow_up_issue": 824
     },

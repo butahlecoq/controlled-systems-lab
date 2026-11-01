@@ -18,14 +18,14 @@
   "host": {
     "cpu_model": "AMD Ryzen 5 3550H with Radeon Vega Mobile Gfx",
     "load_average_after_timing": [
-      0.5361328125,
-      0.79541015625,
-      0.8642578125
+      0.818359375,
+      0.74609375,
+      0.81884765625
     ],
     "load_average_before_timing": [
-      0.5361328125,
-      0.79541015625,
-      0.8642578125
+      0.818359375,
+      0.74609375,
+      0.81884765625
     ],
     "logical_cpu_count": 8,
     "machine": "x86_64",
@@ -33,7 +33,7 @@
     "system": "Linux"
   },
   "schema": "csl.issue824-two-points-ellipsoid-minimax-capture/1",
-  "source_commit": "ad00d017f03244e08e565faea68366c0984a6dc1",
+  "source_commit": "3b2e1dae23470738a6d44d712676bcafeb7d526d",
   "source_files_sha256": {
     ".github/workflows/algorithm-reports.yml": "c7413bf67078c1d93dc7ac9d464a95706cc85cf01ca15d8a83a78a3c1f26e6d5",
     "CMakeLists.txt": "808bf0897f403170824c630a5ed0c2e956556938389d244a74c448176c890e7d",
@@ -52,7 +52,7 @@
     "scripts/reports/exp824/check_ellipsoid_minimax.py": "e0933186663ca5d3f25bd230d54ee6c8a09620c5a139e0a67c466deb23eb907b",
     "scripts/reports/exp824/check_ellipsoid_minimax_smoke.py": "429dedf0a3d6046c6a1e54a00c358229210a203f71c044183a4164bb38332397",
     "scripts/reports/exp824/check_two_points_box.py": "68aaf049d7c312eb7ca623d09164334ffa544f251caa8c83c3bef19fd320ddb8",
-    "scripts/reports/exp824/check_zonotope_minimax.py": "072db1815fdd45924b6125dc46e405034c012c4092f1aade0d897b0e9e7bccb3",
+    "scripts/reports/exp824/check_zonotope_minimax.py": "2c602df24ba0a23f2dfdffc57dcd80b363ef8acaf1d12343dcf9fe9f1e88ae6b",
     "scripts/reports/exp824/check_zonotope_minimax_smoke.py": "f5423299fcb6212a5b9f4cbb5ce3c4a7012d4c5dd7a95f4139569dc583cb8cc4",
     "scripts/reports/exp824/make_ellipsoid_minimax_report.py": "6ba978970523b24a258173defd6b693b5a0cdd3baef2a5808091670359f230d5",
     "scripts/reports/exp824/make_report.py": "ba65404fe326f6bf16aaefe3e25d5a6ed9ad61885bdaed97bf68117e1562662e",
