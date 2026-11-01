@@ -1,9 +1,9 @@
 trial,warmup,elapsed_ns,history_count,retained_relation_rows,retained_relation_scalars,retained_numeric_bytes,status,optimum
-0,True,9103257,3,63,411,3288,complete,0
-1,False,7830878,3,63,411,3288,complete,0
-2,False,7991305,3,63,411,3288,complete,0
-3,False,8105985,3,63,411,3288,complete,0
-4,False,7909171,3,63,411,3288,complete,0
-5,False,7805176,3,63,411,3288,complete,0
-6,False,7866637,3,63,411,3288,complete,0
-7,False,8038029,3,63,411,3288,complete,0
+0,True,9809879,3,63,411,3288,complete,0
+1,False,8937342,3,63,411,3288,complete,0
+2,False,8376440,3,63,411,3288,complete,0
+3,False,8363379,3,63,411,3288,complete,0
+4,False,7964581,3,63,411,3288,complete,0
+5,False,8002995,3,63,411,3288,complete,0
+6,False,7745417,3,63,411,3288,complete,0
+7,False,7789208,3,63,411,3288,complete,0
