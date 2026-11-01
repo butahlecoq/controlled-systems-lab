@@ -70,12 +70,16 @@ def main() -> None:
     run = subprocess.run([str(executable)], check=True, capture_output=True, text=True)
     native = json.loads(run.stdout)
     check = check_nominal.check(native)
+    measurement_host = {"system": platform.system(), "release": platform.release(),
+        "machine": platform.machine(), "python": platform.python_version(),
+        "logical_processors": os.cpu_count(),
+        "load_average_1_5_15_before_measurement": list(os.getloadavg()) if hasattr(os, "getloadavg") else None}
     measured = subprocess.run([str(executable), "--measure"], check=True,
         capture_output=True, text=True)
     measurement = json.loads(measured.stdout)
     if measurement["failures"] != 0 or measurement["completed_calls"] != 70:
         raise RuntimeError("nominal measurement did not complete all 70 measured calls")
-    durations = [batch["duration_ns"] / batch["calls"] for batch in measurement["batches"]]
+    durations = [batch["api_duration_ns"] / batch["calls"] for batch in measurement["batches"]]
     reference_result_path = REFERENCE / "result.json"
     reference_check_path = REFERENCE / "check.json"
     reference_figure_path = REFERENCE / "figure-data.json"
@@ -102,6 +106,10 @@ def main() -> None:
     compiler = cache_value(cache, "CMAKE_CXX_COMPILER") or "unavailable"
     compiler_output = subprocess.run([compiler, "--version"], check=False,
         capture_output=True, text=True).stdout.splitlines()
+    try:
+        build_reference = build_dir.resolve().relative_to(ROOT.resolve()).as_posix()
+    except ValueError:
+        build_reference = "external"
     result = {
         "schema": "csl.issue824-two-points-nominal-bundle/1",
         "source_commit": git_commit,
@@ -132,15 +140,12 @@ def main() -> None:
         "source_worktree_clean": not bool(git_status),
         "source_status": git_status,
         "source_files_sha256": {name: sha256(ROOT / name) for name in SOURCE_FILES},
-        "build": {"directory": str(build_dir),
+        "build": {"directory": build_reference,
             "configuration": cache_value(cache, "CMAKE_BUILD_TYPE"),
             "compiler": compiler, "compiler_version": compiler_output[0] if compiler_output else "unavailable",
             "generator": cache_value(cache, "CMAKE_GENERATOR"),
             "cxx_flags_release": cache_value(cache, "CMAKE_CXX_FLAGS_RELEASE")},
-        "host": {"system": platform.system(), "release": platform.release(),
-            "machine": platform.machine(), "python": platform.python_version(),
-            "logical_processors": os.cpu_count(),
-            "load_average_1_5_15": list(os.getloadavg()) if hasattr(os, "getloadavg") else None},
+        "host": measurement_host,
     }
     figure = {"schema": "csl.issue824-two-points-nominal-figure/1",
         "geometry_report_id": "mpc05-causal-tree-pilot-v2",
@@ -156,6 +161,7 @@ def main() -> None:
 
     rows = "".join(
         f'<tr><td>{track["representation"]}</td><td>{track["candidate_score"]:.12f}</td>'
+        f'<td>{"finite-catalog minimum (binary64)" if track["objective_bound_direction"] == "finite_catalogue_minimum_under_binary64" else "none certified"}</td>'
         f'<td>{track["replay"]["terminal_objective"]:.12f}</td>'
         f'<td>{", ".join(map(str, track["attempts"][track["selected_attempt"]]["action_indices"]))}</td></tr>'
         for track in native["nominal_tracks"])
@@ -167,9 +173,9 @@ def main() -> None:
 <p>This finite three-stage adaptation of the differential-game RL environment uses state <code>(x1,x2,x3,x4)=(position₁,velocity₁,position₂,velocity₂)</code>, initial state <code>(4.5,0,0,0)</code>, and controls <code>{{-2.5,0,2.5}}</code>. Classic nominal control fixes the opponent input to <code>v=+1</code> at every stage. It is not a reproduction of the source continuous-action, 10-second RL task.</p>
 <p>The exact nominal finite-catalog objective is <b>{nominal_value:.8f}</b>. The separately computed exact finite minimax value is <b>{minimax_value:.8f}</b>, under opponent disturbances <code>{{-1,0,+1}}</code> at each stage. These use different disturbance semantics and are not a direct performance or robustness comparison.</p>
 <img src="projections.svg" alt="Forward and backward game geometry and approximation projections in both player phase planes, with nominal and minimax trajectories">
-<table><caption>All 27 nominal control plans were scored in each track</caption><thead><tr><th>Track</th><th>Candidate score</th><th>Selected replay objective</th><th>Selected action indices</th></tr></thead><tbody>{rows}</tbody></table>
-<p>The exact track scores the deterministic terminal objective. Approximation tracks rank the same plans using numerical outer-enclosure scores, then separately replay the selected action sequence from the authored state and fixed opponent inputs. The independent checker uses exact rational arithmetic to reconstruct all nominal plans, verify all five score tables and selected traces, and recompute all 27×27 finite minimax histories.</p>
-<p>One excluded warmup followed by seven batches of ten API calls measured all five nominal tracks at once. Median call time was {statistics.median(durations) / 1e6:.3f} ms (range {min(durations) / 1e6:.3f}–{max(durations) / 1e6:.3f} ms; 70 measured calls, zero failures). Timing covers the native nominal comparison API and its five representation tracks; fixture setup, finite-minimax reference, serialization, independent checking, build, and rendering are excluded. This is descriptive for one fixture and host. No limiter profile or comparative performance claim is made.</p>
+<table><caption>All 27 nominal control plans were scored in each track</caption><thead><tr><th>Track</th><th>Candidate score</th><th>Objective-bound evidence</th><th>Selected replay objective</th><th>Selected action indices</th></tr></thead><tbody>{rows}</tbody></table>
+<p>The exact track selects the lowest numerical deterministic objective among the enumerated finite catalog; this is a numerical finite-catalog result, not a validated real-arithmetic certificate. Approximation tracks rank plans using floating-point outer-enclosure scores. These scores are ranking estimates only: they provide no certified lower or upper objective bound. Each selected action sequence is separately replayed from the authored state and fixed opponent inputs. The independent checker uses exact rational arithmetic to reconstruct all nominal plans, verify all five score tables and selected traces, and recompute all 27×27 finite minimax histories.</p>
+<p>One excluded warmup followed by seven batches of ten API calls measured all five nominal tracks at once. Median call time was {statistics.median(durations) / 1e6:.3f} ms (range {min(durations) / 1e6:.3f}–{max(durations) / 1e6:.3f} ms; 70 measured calls, zero failures). Each timer surrounds one native nominal API call, including all five tracks and selected-path replays; caller status checks and score consumption happen after timing. Fixture setup, finite-minimax reference, serialization, independent checking, build, and rendering are excluded. This is descriptive for one fixture and host. No limiter profile or comparative performance claim is made.</p>
 <p>The figure overlays the nominal trajectory on saved minimax forward/backward sets, intersections, outer approximations, and selected minimax paths in <code>(x1,x2)</code> and <code>(x3,x4)</code>. <a href="result.json">Raw result</a> · <a href="check.json">Independent check</a> · <a href="capture.json">Source/build capture</a> · <a href="figure-data.json">Figure data</a> · <a href="README.md">Reproduction and limits</a></p></html>'''
     (output / "index.html").write_text(page, encoding="utf-8")
     readme = f'''# Issue 824 classic nominal TwoPoints pilot
@@ -178,7 +184,7 @@ This report adds a distinct classic nominal open-loop comparison to the existing
 
 The separate exact finite minimax reference has value `{minimax_value:.8f}` with the opponent selecting from `{-1,0,+1}` at each stage. These values use different opponent information and disturbance assumptions. They are shown as adjacent context, not as directly comparable claims.
 
-The source task uses continuous actions and a 10-second horizon. This is an explicit three-stage adaptation. The objective is squared terminal position gap, monotone-equivalent for minimizers to the source negative absolute-gap reward. All values and approximation scores are numerical, not validated arithmetic certificates.
+The source task uses continuous actions and a 10-second horizon. This is an explicit three-stage adaptation. The objective is squared terminal position gap, monotone-equivalent for minimizers to the source negative absolute-gap reward. All values are numerical, not validated arithmetic certificates. Approximation scores are ranking estimates only and establish no certified lower or upper bound on the objective; the saved selected replay is a feasible finite-catalog witness.
 
 The two-panel figure uses player phase planes `(x1,x2)` and `(x3,x4)`. It overlays the nominal replay on the prior report's forward/backward game geometry, intersections, representation projections, and finite minimax trajectories. The geometry is identified by its frozen report hashes in `result.json`.
 
@@ -194,7 +200,7 @@ python3 scripts/reports/exp824/check_nominal.py \\
   reports/algorithm-results/issue824-two-points-nominal-v1/result.json
 ```
 
-One warmup and seven batches of ten calls record descriptive end-to-end API timings for all five nominal tracks together. The interval excludes fixture construction, the separate minimax reference, serialization, independent checking, build and rendering. The report makes no speedup, scalability or bottleneck claim; no separate limiter profile was performed.
+One warmup and seven batches of ten calls record descriptive API timings for all five nominal tracks together. Caller-side status checks and score consumption occur after each timed interval. The interval excludes fixture construction, the separate minimax reference, serialization, independent checking, build and rendering. The report makes no speedup, scalability or bottleneck claim; no separate limiter profile was performed.
 '''
     (output / "README.md").write_text(readme, encoding="utf-8")
     sums = {path.name: hashlib.sha256(path.read_bytes()).hexdigest()

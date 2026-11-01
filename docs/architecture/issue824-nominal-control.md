@@ -35,7 +35,7 @@ The public request carries the explicit initial point, finite control catalogue,
 
 The outcome contains five canonical `NominalProfileResult` rows: exact polytope, box, zonotope, parallelotope, and ellipsoid. Each row distinguishes a selected candidate, no scored candidate, unsupported operation, or stopped operation. A selected row contains the plan-attempt table, search coverage, selected index, candidate score and score kind, deterministic `NominalTrajectory`, and a type-specific selected trace. Attempts preserve scored, rejected, unscored and stopped outcomes where the underlying selector exposes them. The API returns top-level `Unsupported` or `OperationStopped` for request-level failures.
 
-Exact scores are deterministic objective values. Approximation scores are numerical outer-enclosure estimates. Selected replay values are always recomputed from the authored initial state and nominal disturbance vectors. These three quantities remain separate from the finite minimax result.
+The exact track selects a deterministic finite-catalog minimum under binary64 evaluation; it is not a validated real-arithmetic certificate. Approximation scores are floating-point outer-enclosure ranking estimates only. They establish no certified lower or upper objective bound. Selected replay values are always recomputed from the authored initial state and nominal disturbance vectors. These three quantities remain separate from the finite minimax result.
 
 The function validates dimensions, finite values, horizon alignment, objective support, and plan limits at the boundary. It converts the authored point and disturbance vectors to singleton V sets only when it calls the existing fixed-plan propagators. The original vectors remain the input to nominal replay.
 
@@ -47,7 +47,7 @@ The report checker independently reconstructs every plan's nominal stage states 
 
 The nominal disturbance is the source-adaptation opponent action `v=+1` at each stage, so both phase-plane paths are visible. The saved figure uses `(x1,x2)` and `(x3,x4)` and overlays the nominal trajectory on the existing minimax reachable/backward geometry and intersections. The nominal algorithm itself does not compute backward-winning sets; the figure identifies those as minimax evidence.
 
-The native driver also records one excluded warmup and seven batches of ten serial API calls. The interval covers `finite_action_nominal` for all five tracks, including result construction and the selected-path replays. Fixture construction, the separate minimax reference, serialization, the independent checker, build, and rendering are outside the timed region. The independent checker runs on the saved untimed result; each measured call checks complete coverage and consumes every track score. The timing is a descriptive single-adapter observation. No competing implementation is timed, no speedup or scalability claim is made, and a separate limiter profile was not available (`perf` and `strace` are absent on the host).
+The native driver also records one excluded warmup and seven batches of ten serial API calls. Each timer surrounds `finite_action_nominal` for all five tracks, including result construction and selected-path replays. Caller status/coverage checks and score consumption happen after each timed interval. Fixture construction, the separate minimax reference, serialization, the independent checker, build, and rendering are outside the timed region. The independent checker runs on the saved untimed result. The timing is a descriptive single-adapter observation. No competing implementation is timed, no speedup or scalability claim is made, and a separate limiter profile was not available (`perf` and `strace` are absent on the host).
 
 ## Interface depth and ownership
 
@@ -84,7 +84,7 @@ The cross-judge was skipped. The configured runner and judge pools contain only 
 ## Tradeoffs accepted
 
 - The result exposes a trace variant so callers can verify every representation's actual output. This keeps evidence inspectable and couples the variant to the five public trace types.
-- Approximate profiles select from numerical outer-enclosure scores. Their selected nominal replay is a feasible finite-catalog witness, not proof of global optimality.
+- Approximate profiles select from floating-point enclosure ranking estimates. Those scores establish no certified lower or upper objective bound. Their selected nominal replay is a feasible finite-catalog witness, not proof of global optimality.
 - The five-profile comparison runs all tracks together. A caller that needs one representation still pays for the full comparison, which prevents a report from silently omitting a required track.
 - The initial fixture is deterministic and point-valued. The four approximation profiles test degenerate-set handling here; they do not demonstrate approximation quality on nontrivial uncertainty.
 

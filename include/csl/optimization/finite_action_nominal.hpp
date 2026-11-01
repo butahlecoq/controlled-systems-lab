@@ -29,7 +29,12 @@ struct FiniteActionNominalLimits {
 };
 
 enum class NominalRepresentation { exact_polytope, box, zonotope, parallelotope, ellipsoid };
-enum class NominalScoreKind { exact_deterministic_objective, numerical_outer_enclosure_estimate };
+enum class NominalScoreKind {
+    exact_deterministic_objective,
+    // Floating-point enclosure-derived ranking score; no certified objective
+    // bound is established in either direction.
+    numerical_outer_enclosure_estimate
+};
 enum class NominalSearchCoverage { complete, incomplete, stopped };
 
 struct NominalPlanScored {

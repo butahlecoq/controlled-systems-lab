@@ -105,11 +105,15 @@ def check(record: dict) -> dict:
     nominal_scores = []
     for track in record["nominal_tracks"]:
         assert track["coverage"] == "complete"
+        expected_bound = ("finite_catalogue_minimum_under_binary64"
+                          if track["representation"] == "exact_polytope" else "none_certified")
+        assert track["objective_bound_direction"] == expected_bound
         assert len(track["attempts"]) == len(plans)
         assert len(track["trace"]["stages"]) == 4
         scores = []
         for plan, attempt in zip(plans, track["attempts"]):
             assert attempt["status"] == "scored"
+            assert attempt["objective_bound_direction"] == expected_bound
             assert tuple(attempt["action_indices"]) == plan
             expected = objective(replay(plan, (NOMINAL_DISTURBANCE,) * 3)[-1])
             assert close(attempt["candidate_score"], expected), (track["representation"], plan, attempt, str(expected))

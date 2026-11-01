@@ -4,6 +4,7 @@
 
 #include <iostream>
 #include <chrono>
+#include <cstdint>
 #include <stdexcept>
 #include <string>
 #include <type_traits>
@@ -71,7 +72,9 @@ Json attempt_json(const NominalPlanAttempt& attempt) {
             return {{"status", "scored"}, {"action_indices", value.action_indices},
                 {"candidate_score", value.candidate_score},
                 {"score_kind", value.score_kind == NominalScoreKind::exact_deterministic_objective ?
-                    "exact_deterministic_objective" : "numerical_outer_enclosure_estimate"}};
+                    "exact_deterministic_objective" : "numerical_outer_enclosure_estimate"},
+                {"objective_bound_direction", value.score_kind == NominalScoreKind::exact_deterministic_objective ?
+                    "finite_catalogue_minimum_under_binary64" : "none_certified"}};
         else if constexpr(std::is_same_v<T, NominalPlanRejected>)
             return {{"status", "rejected"}, {"action_indices", value.action_indices},
                 {"stage", value.stage}, {"violating_state", value.violating_state}};
@@ -101,6 +104,8 @@ Json track_json(const NominalProfileResult& track) {
         {"candidate_score", selected->candidate_score},
         {"score_kind", selected->score_kind == NominalScoreKind::exact_deterministic_objective ?
             "exact_deterministic_objective" : "numerical_outer_enclosure_estimate"},
+        {"objective_bound_direction", selected->score_kind == NominalScoreKind::exact_deterministic_objective ?
+            "finite_catalogue_minimum_under_binary64" : "none_certified"},
         {"replay", {{"states", selected->replay.states},
             {"controls", selected->replay.controls},
             {"disturbances", selected->replay.disturbances},
@@ -173,9 +178,12 @@ Json measure() {
     }
     Json batches = Json::array();
     for(std::size_t batch = 0; batch < measured_batches; ++batch) {
-        const auto start = std::chrono::steady_clock::now();
+        std::int64_t elapsed_ns = 0;
         for(std::size_t call = 0; call < calls_per_batch; ++call) {
+            const auto start = std::chrono::steady_clock::now();
             const auto outcome = finite_action_nominal(request, limits);
+            const auto stop = std::chrono::steady_clock::now();
+            elapsed_ns += std::chrono::duration_cast<std::chrono::nanoseconds>(stop - start).count();
             const auto* result = std::get_if<FiniteActionNominalResult>(&outcome);
             if(!result || result->tracks.size() != 5)
                 throw std::runtime_error("measured nominal call did not complete all five tracks");
@@ -187,10 +195,8 @@ Json measure() {
                 checksum += selected->candidate_score;
             }
         }
-        const auto stop = std::chrono::steady_clock::now();
-        const auto elapsed = std::chrono::duration_cast<std::chrono::nanoseconds>(stop - start).count();
         batches.push_back({{"batch", batch + 1}, {"calls", calls_per_batch},
-            {"duration_ns", elapsed}, {"failures", 0}});
+            {"api_duration_ns", elapsed_ns}, {"failures", 0}});
     }
     return {{"schema", "csl.issue824-nominal-measurement/1"},
         {"scope", "finite_action_nominal API call for all five tracks; fixture construction, minimax reference, serialization, independent checker, build and rendering excluded"},

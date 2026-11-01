@@ -19,7 +19,7 @@ assert measurement["schema"] == "csl.issue824-nominal-measurement/1"
 assert measurement["warmup_calls"] == 1
 assert measurement["completed_calls"] == 70 and measurement["failures"] == 0
 assert len(measurement["batches"]) == 7
-assert all(batch["calls"] == 10 and batch["duration_ns"] > 0 and batch["failures"] == 0
+assert all(batch["calls"] == 10 and batch["api_duration_ns"] > 0 and batch["failures"] == 0
            for batch in measurement["batches"])
 assert measurement["completed_tracks_consumed"] == 355
 print(f"issue824 nominal independent check passed: {result['nominal_tracks_checked']} tracks, "

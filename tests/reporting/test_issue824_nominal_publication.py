@@ -24,13 +24,17 @@ class Issue824NominalPublicationTest(unittest.TestCase):
         self.assertEqual(measurement["completed_calls"], 70)
         self.assertEqual(measurement["failures"], 0)
         self.assertEqual(len(measurement["batches"]), 7)
+        self.assertTrue(all(batch["api_duration_ns"] > 0 for batch in measurement["batches"]))
         self.assertEqual(measurement["limiter_profile"]["performed"], False)
         self.assertLessEqual(measurement["min_ns_per_call"], measurement["median_ns_per_call"])
         self.assertLessEqual(measurement["median_ns_per_call"], measurement["max_ns_per_call"])
         self.assertEqual(capture["build"]["configuration"], "Release")
         self.assertGreater(capture["host"]["logical_processors"], 0)
+        self.assertIn("load_average_1_5_15_before_measurement", capture["host"])
+        self.assertFalse(Path(capture["build"]["directory"]).is_absolute())
         page = (bundle / "index.html").read_text(encoding="utf-8")
         self.assertIn("70 measured calls, zero failures", page)
+        self.assertIn("no certified lower or upper objective bound", page)
         self.assertIn("No limiter profile or comparative performance claim", page)
 
     def test_verified_bundle_stages_with_exact_inventory(self) -> None:
