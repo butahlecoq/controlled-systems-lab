@@ -32,21 +32,180 @@ def exact_states(action_indices: tuple[int, ...]) -> list[set[tuple[int, ...]]]:
     return states
 
 
-def trace_stage_contains_coordinates(stage: dict, states: set[tuple[int, ...]], scale: int) -> None:
+def determinant(matrix: list[list[Fraction]]) -> Fraction:
+    if not matrix:
+        return Fraction(1)
+    work = [row[:] for row in matrix]
+    result = Fraction(1)
+    for column in range(len(work)):
+        pivot = next((row for row in range(column, len(work)) if work[row][column]), None)
+        if pivot is None:
+            return Fraction(0)
+        if pivot != column:
+            work[pivot], work[column] = work[column], work[pivot]
+            result = -result
+        value = work[column][column]
+        result *= value
+        for row in range(column + 1, len(work)):
+            factor = work[row][column] / value
+            for index in range(column + 1, len(work)):
+                work[row][index] -= factor * work[column][index]
+    return result
+
+
+def matrix_rank(matrix: list[list[Fraction]]) -> int:
+    if not matrix:
+        return 0
+    work = [row[:] for row in matrix]
+    rows, columns = len(work), len(work[0])
+    rank = 0
+    for column in range(columns):
+        pivot = next((row for row in range(rank, rows) if work[row][column]), None)
+        if pivot is None:
+            continue
+        work[pivot], work[rank] = work[rank], work[pivot]
+        divisor = work[rank][column]
+        for index in range(column, columns):
+            work[rank][index] /= divisor
+        for row in range(rows):
+            if row == rank:
+                continue
+            factor = work[row][column]
+            if factor:
+                for index in range(column, columns):
+                    work[row][index] -= factor * work[rank][index]
+        rank += 1
+        if rank == rows:
+            break
+    return rank
+
+
+def solve_square(matrix: list[list[Fraction]], vector: list[Fraction]) -> list[Fraction]:
+    work = [row[:] + [value] for row, value in zip(matrix, vector)]
+    size = len(work)
+    for column in range(size):
+        pivot = next((row for row in range(column, size) if work[row][column]), None)
+        if pivot is None:
+            raise ValueError("selected zonotope basis is singular")
+        work[pivot], work[column] = work[column], work[pivot]
+        divisor = work[column][column]
+        work[column] = [value / divisor for value in work[column]]
+        for row in range(size):
+            if row != column:
+                factor = work[row][column]
+                work[row] = [left - factor * right for left, right in zip(work[row], work[column])]
+    return [row[-1] for row in work]
+
+
+def prepare_exact_zonotope_membership(stage: dict):
+    """Prepare exact dyadic facet inequalities once for a stage's zonotope."""
+    from itertools import combinations
+
     center = [Fraction.from_float(value) for value in stage["center"]]
     matrix = stage["generators"]
-    generators = matrix["cols"]
-    if (len(center) != matrix["rows"] or len(stage["factors"]) != generators or
-            len(matrix["values"]) != matrix["rows"] * generators):
-        raise ValueError("zonotope stage dimensions differ")
-    values = [Fraction.from_float(value) for value in matrix["values"]]
+    count = matrix["cols"]
+    generators = [[Fraction.from_float(matrix["values"][row * count + column])
+                   for column in range(count)] for row in range(matrix["rows"])]
+    basis_columns: list[int] = []
+    current_rank = 0
+    for column in range(count):
+        candidate = basis_columns + [column]
+        candidate_matrix = [[generators[row][index] for index in candidate]
+                            for row in range(matrix["rows"])]
+        rank_now = matrix_rank(candidate_matrix)
+        if rank_now > current_rank:
+            basis_columns.append(column)
+            current_rank = rank_now
+    rank = current_rank
+    if rank == 0:
+        return lambda point: list(point) == center
+
+    basis = [[generators[row][column] for column in basis_columns]
+             for row in range(matrix["rows"])]
+    pivot_rows = next((rows for rows in combinations(range(matrix["rows"]), rank)
+                       if determinant([[basis[row][column] for column in range(rank)]
+                                       for row in rows]) != 0), None)
+    if pivot_rows is None:
+        raise ValueError("could not select independent zonotope coordinates")
+    basis_square = [[basis[row][column] for column in range(rank)] for row in pivot_rows]
+
+    def coordinates(vector: list[Fraction]) -> list[Fraction] | None:
+        values = solve_square(basis_square, [vector[row] for row in pivot_rows])
+        if any(sum((basis[row][column] * values[column] for column in range(rank)), Fraction(0))
+               != vector[row] for row in range(matrix["rows"])):
+            return None
+        return values
+
+    reduced_generators = [coordinates([generators[row][column]
+                                       for row in range(matrix["rows"])])
+                          for column in range(count)]
+    if any(value is None for value in reduced_generators):
+        raise ValueError("zonotope generator escaped its exact span")
+    reduced = [value for value in reduced_generators if value is not None]
+
+    # Every facet normal is orthogonal to r-1 independent generators in the
+    # exact affine span. These inequalities characterize the zonotope.
+    facets: list[tuple[list[Fraction], Fraction]] = []
+    for selected in combinations(range(count), rank - 1):
+        columns = [reduced[index] for index in selected]
+        normal = []
+        for row in range(rank):
+            minor = [[columns[column][other] for column in range(rank - 1)]
+                     for other in range(rank) if other != row]
+            normal.append(((-1) ** row) * determinant(minor))
+        if all(value == 0 for value in normal):
+            continue
+        support = sum((abs(sum((normal[row] * reduced[column][row]
+                               for row in range(rank)), Fraction(0)))
+                       for column in range(count)), Fraction(0))
+        facets.append((normal, support))
+
+    def contains(point: list[Fraction]) -> bool:
+        displacement = [value - origin for value, origin in zip(point, center)]
+        target = coordinates(displacement)
+        if target is None:
+            return False
+        return all(abs(sum((normal[row] * target[row] for row in range(rank)), Fraction(0))) <= support
+                   for normal, support in facets)
+
+    return contains
+
+
+def trace_stage_contains_exact_zonotope(stage: dict, states: set[tuple[int, ...]], scale: int) -> None:
+    contains = prepare_exact_zonotope_membership(stage)
     for state in states:
-        for row, coordinate in enumerate(state):
-            radius = sum((abs(values[row * generators + column])
-                          for column in range(generators)), Fraction(0))
-            point = Fraction(coordinate, scale)
-            if not center[row] - radius <= point <= center[row] + radius:
-                raise ValueError("an exact state coordinate falls outside its zonotope coordinate bounds")
+        point = [Fraction(coordinate, scale) for coordinate in state]
+        if not contains(point):
+            raise ValueError("an exact finite-history state is outside the full zonotope")
+
+
+def check_membership_fixtures() -> None:
+    sheared = {
+        "center": [0.0, 0.0, 0.0, 0.0],
+        "generators": {"rows": 4, "cols": 2, "values": [1.0, 1.0, 0.0, 1.0,
+                                                              0.0, 0.0, 0.0, 0.0]},
+    }
+    contains_sheared = prepare_exact_zonotope_membership(sheared)
+    if not contains_sheared([Fraction(1, 2), Fraction(1, 2), Fraction(0), Fraction(0)]):
+        raise ValueError("exact zonotope checker rejected an interior point in a rank-two zonotope")
+    if contains_sheared([Fraction(-1), Fraction(1), Fraction(0), Fraction(0)]):
+        raise ValueError("exact zonotope checker accepted a point inside the bounding box but outside the zonotope")
+    if contains_sheared([Fraction(0), Fraction(0), Fraction(0), Fraction(1)]):
+        raise ValueError("exact zonotope checker ignored the lower-dimensional affine span")
+
+    segment = {"center": [0.0, 0.0],
+               "generators": {"rows": 2, "cols": 1, "values": [1.0, 0.0]}}
+    contains_segment = prepare_exact_zonotope_membership(segment)
+    if not contains_segment([Fraction(1, 2), Fraction(0)]) or contains_segment(
+            [Fraction(1, 2), Fraction(1, 100)]):
+        raise ValueError("exact zonotope checker mishandled a rank-one set")
+
+    point = {"center": [0.25, -0.5],
+             "generators": {"rows": 2, "cols": 0, "values": []}}
+    contains_point = prepare_exact_zonotope_membership(point)
+    if not contains_point([Fraction(1, 4), Fraction(-1, 2)]) or contains_point(
+            [Fraction(1, 4), Fraction(-1, 2) + Fraction(1, 1000)]):
+        raise ValueError("exact zonotope checker mishandled a singleton")
 
 
 def check_parallelotope_trace(method: dict, actions: tuple[int, ...]) -> None:
@@ -169,6 +328,7 @@ def checked_planar_inclusion(example: dict) -> None:
 
 
 def main(path: Path) -> dict:
+    check_membership_fixtures()
     result = json.loads(path.read_text(encoding="utf-8"))
     if result.get("schema") != "csl.issue824-two-points-zonotope-minimax/1":
         raise ValueError("unexpected issue824 zonotope minimax schema")
@@ -201,7 +361,7 @@ def main(path: Path) -> dict:
         for stage_index, (stage, states) in enumerate(zip(stages, state_layers)):
             if stage["generators"]["rows"] != 4:
                 raise ValueError("TwoPoints candidate changed the four-state dimension")
-            trace_stage_contains_coordinates(stage, states, SCALE)
+            trace_stage_contains_exact_zonotope(stage, states, SCALE)
         terminal = stages[-1]
         candidate, corner_count = factor_corner_score(terminal, lambda point: (point[0] - point[2]) ** 2)
         if (attempt["terminal_generators"] != terminal["generators"]["cols"] or
@@ -333,7 +493,7 @@ def main(path: Path) -> dict:
         "candidate_search": "all 27 plans received a complete numerical factor-corner score",
         "candidate_score_evidence": "independently recomputed on every stored terminal factor corner; not a validated objective bound",
         "selected_plan_replay": "exact rational transition and every disturbance history checked",
-        "stage_zonotope_relation": "all exact state coordinates checked against dyadic center +/- sum(abs(generators)); not full four-dimensional membership",
+        "stage_zonotope_relation": "all exact finite-history states checked against every exact facet inequality in each stored dyadic zonotope, including its affine span",
         "stage_parallelotope_relation": "all exact finite-history states independently transformed into the fixed frame and checked in four-dimensional coordinate bounds",
         "planar_zonotope_inclusion": "all finite terminal points checked inside axis-aligned zonotopes for all three plans; complete finite-set inclusion in this 2D fixture",
         "planar_exact_minimax_value": planar["exact_finite_minimax_value"],
