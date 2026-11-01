@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import argparse
 import hashlib
+from html import escape
 import json
 from pathlib import Path
 import shutil
@@ -76,7 +77,11 @@ def stage(catalog: Path, site: Path) -> str:
     route = (f'<li><a href="{REPORT_ID}/index.html">EXT-02 finite/mixed branch portfolio</a>'
              f' · <a href="{REPORT_ID}/figure.svg">2D branch geometry</a>'
              f' · <a href="{REPORT_ID}/measurement.json">saved measurements</a>'
-             f' · <a href="{REPORT_ID}/{REPORT_ID}.zip">offline ZIP</a></li>')
+             f' · <a href="{REPORT_ID}/{REPORT_ID}.zip">offline ZIP</a>'
+             '<p class="card-scope"><strong>What was measured.</strong> '
+             + escape(expected["measured_scope"]) + '</p><details><summary>Evidence limits</summary><p>'
+             + escape(expected["evidence_limits"]) + '</p></details><p class="card-provenance">'
+             'source commit<code>' + escape(expected["source_commit"]) + '</code></p></li>')
     destination.mkdir()
     for name, content in files.items():
         (destination / name).write_bytes(content)

@@ -11,6 +11,9 @@ import unittest
 
 
 ROOT = Path(__file__).resolve().parents[2]
+sys.path.insert(0, str(ROOT / "scripts/reports"))
+import landing
+
 RENDERER = ROOT / "scripts/reports/ext02/render_saved.py"
 STAGER_PATH = ROOT / "scripts/reports/stage_ext02.py"
 COLLECTOR_PATH = ROOT / "scripts/reports/ext02/collect.py"
@@ -125,8 +128,9 @@ class Ext02ReportTests(unittest.TestCase):
             stager.BUNDLE = bundle
             try:
                 catalog = root / "ext02-publications.json"
+                catalog_entry = stager.catalog_entry(bundle)
                 catalog.write_text(json.dumps({"schema": "csl.ext02-publications/1",
-                    "reports": [stager.catalog_entry(bundle)]}), encoding="utf-8")
+                    "reports": [catalog_entry]}), encoding="utf-8")
                 site = root / "site"
                 site.mkdir()
                 (site / "index.html").write_text("<html><body><ul></ul></body></html>",
@@ -135,7 +139,13 @@ class Ext02ReportTests(unittest.TestCase):
                 route = site / stager.REPORT_ID
                 self.assertEqual((route / "figure.svg").read_bytes(), contents["figure.svg"])
                 self.assertEqual((route / f"{stager.REPORT_ID}.zip").read_bytes(), b"zip fixture")
-                self.assertIn(stager.REPORT_ID + "/index.html", (site / "index.html").read_text())
+                staged_index = (site / "index.html").read_text()
+                self.assertIn(stager.REPORT_ID + "/index.html", staged_index)
+                entries, _ = landing.parse_index(staged_index)
+                self.assertEqual(len(entries), 1)
+                self.assertEqual(entries[0].scope, catalog_entry["measured_scope"])
+                self.assertEqual(entries[0].limits, catalog_entry["evidence_limits"])
+                self.assertEqual(entries[0].commit, catalog_entry["source_commit"])
             finally:
                 stager.BUNDLE = original_bundle
 
