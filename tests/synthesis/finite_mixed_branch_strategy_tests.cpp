@@ -155,17 +155,26 @@ registry::StrategyRegistration stopping_strategy(std::shared_ptr<std::stop_sourc
     return registration;
 }
 
-problem::ResolvedProblem mixed_linear_tie_problem() {
+problem::ResolvedProblem mixed_linear_tie_problem(std::size_t horizon = 1) {
     const auto controls = take(sets::make_h({{"mixed-continuous-interval"}, 1, {"u"}},
         {matrix({2, 1, {1, -1}}), vector({1, 1}), matrix({0, 1, {}}), vector({})}));
     const auto terminal = take(sets::make_h({{"mixed-terminal-halfline"}, 1, {"x1"}},
         {matrix({1, 1, {-1}}), vector({0}), matrix({0, 1, {}}), vector({})}));
+    std::vector<double> times;
+    for(std::size_t stage = 0; stage <= horizon; ++stage)
+        times.push_back(static_cast<double>(stage));
+    std::vector<AdmissibleSet> continuous_stages(horizon, controls.as_handle());
+    std::vector<AdmissibleSet> admissible_states{
+        interval("mixed-initial-state", 0.0, 0.0, "x1")};
+    for(std::size_t stage = 0; stage < horizon; ++stage)
+        admissible_states.push_back(terminal.as_handle());
     Problem source{{"mixed-linear-tie"},
         std::make_shared<const SystemModel>(SystemModel{{{1, 2, 0}, TimeDomain::discrete,
             LinearStage{{1, 1, {0}}, {1, 2, {1, 1}}, {1, 0, {}}, {0}}}, {}}),
-        {0, 1}, KnownInitial{{0}},
-        MixedDomain{ContinuousDomain{{controls.as_handle()}}, FiniteDomain{1, {{-1}, {1}, {-1}}}},
-        {interval("mixed-initial-state", 0.0, 0.0, "x1"), terminal.as_handle()}, {}, {},
+        std::move(times), KnownInitial{{0}},
+        MixedDomain{ContinuousDomain{std::move(continuous_stages)},
+            FiniteDomain{1, {{-1}, {1}, {-1}}}},
+        std::move(admissible_states), {}, {},
         InformationPattern::nominal_open_loop, LinearTerminal{{1}, 0}};
     auto resolved = problem::resolve(source,
         {problem::UncertaintyStructure::stage_product_uncoupled, {}, {}});
@@ -261,8 +270,8 @@ TEST_CASE("mixed branch solve runs registered continuous solvers and retains ver
     CHECK_FALSE(scalar_bounded.portfolio.complete);
 }
 
-TEST_CASE("finite mixed branch enumeration agrees with an independent MILP on a tied affine fixture") {
-    const auto source = mixed_linear_tie_problem();
+TEST_CASE("two-stage mixed branch enumeration agrees with a one-hot MILP") {
+    const auto source = mixed_linear_tie_problem(2);
     ExactLinearStrategyFixture strategy_fixture;
     FiniteMixedBranchSolveRequest request;
     request.strategy.strategy = {"csl.synthesis.reach-back"};
@@ -273,8 +282,8 @@ TEST_CASE("finite mixed branch enumeration agrees with an independent MILP on a 
     request.family.assurance = Assurance::numerical;
     request.family.representation = {"csl.polyhedron.h"};
     request.resolution = {problem::UncertaintyStructure::stage_product_uncoupled, {}, {}};
-    request.branches_per_page = 3;
-    request.limits.max_branch_evaluations = 3;
+    request.branches_per_page = 9;
+    request.limits.max_branch_evaluations = 9;
     ExecutionContext context;
     context.numerical = request.family.numerical;
     context.resources = std::make_shared<const ResourcePolicy>(ResourcePolicy{1, 1, 1, {}});
@@ -286,31 +295,31 @@ TEST_CASE("finite mixed branch enumeration agrees with an independent MILP on a 
     REQUIRE(portfolio.complete);
     REQUIRE(portfolio.optimum.has_value());
     CHECK(*portfolio.optimum == doctest::Approx(0.0));
-    REQUIRE(portfolio.optimal_evaluation_indices == std::vector<std::size_t>{0, 1, 2});
+    REQUIRE(portfolio.evaluations.size() == 9);
+    REQUIRE(portfolio.optimal_evaluation_indices ==
+        std::vector<std::size_t>{0, 1, 2, 3, 4, 5, 6, 7, 8});
 
-    // Independent one-step MIP: choose one catalogue entry, one bounded
-    // continuous input, enforce the affine transition and terminal halfspace.
-    // The action values {-1, +1, -1} are represented by distinct binaries so
-    // both equal-valued catalogue branches remain identifiable.
+    // Independent two-stage MIP: one continuous input and one catalogue choice
+    // at each stage, with the same affine dynamics and state halfspaces.
     HighsLp lp;
-    lp.num_col_ = 5; // u, z[0..2], terminal state
-    lp.num_row_ = 2;
+    lp.num_col_ = 10; // u[0..1], z[0][0..2], z[1][0..2], x[1..2]
+    lp.num_row_ = 4;
     lp.sense_ = ObjSense::kMinimize;
-    lp.col_cost_ = {0.0, 0.0, 0.0, 0.0, 1.0};
-    lp.col_lower_ = {-1.0, 0.0, 0.0, 0.0, 0.0};
-    lp.col_upper_ = {1.0, 1.0, 1.0, 1.0, kHighsInf};
-    lp.row_lower_ = {1.0, 0.0};
-    lp.row_upper_ = {1.0, 0.0};
+    lp.col_cost_ = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0};
+    lp.col_lower_ = {-1.0, -1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
+    lp.col_upper_ = {1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, kHighsInf, kHighsInf};
+    lp.row_lower_ = {1.0, 1.0, 0.0, 0.0};
+    lp.row_upper_ = {1.0, 1.0, 0.0, 0.0};
     lp.a_matrix_.format_ = MatrixFormat::kRowwise;
-    lp.a_matrix_.start_ = {0, 3, 8};
-    lp.a_matrix_.index_ = {1, 2, 3, 0, 1, 2, 3, 4};
-    lp.a_matrix_.value_ = {1.0, 1.0, 1.0, -1.0, 1.0, -1.0, 1.0, 1.0};
+    lp.a_matrix_.start_ = {0, 3, 6, 11, 16};
+    lp.a_matrix_.index_ = {2, 3, 4, 5, 6, 7, 0, 2, 3, 4, 8, 1, 5, 6, 7, 9};
+    lp.a_matrix_.value_ = {1.0, 1.0, 1.0, 1.0, 1.0, 1.0,
+        -1.0, 1.0, -1.0, 1.0, 1.0, -1.0, 1.0, -1.0, 1.0, 1.0};
     lp.a_matrix_.num_row_ = lp.num_row_;
     lp.a_matrix_.num_col_ = lp.num_col_;
-    lp.integrality_.assign(5, HighsVarType::kContinuous);
-    lp.integrality_[1] = HighsVarType::kInteger;
-    lp.integrality_[2] = HighsVarType::kInteger;
-    lp.integrality_[3] = HighsVarType::kInteger;
+    lp.integrality_.assign(10, HighsVarType::kContinuous);
+    for(std::size_t action = 2; action < 8; ++action)
+        lp.integrality_[action] = HighsVarType::kInteger;
 
     Highs mip;
     REQUIRE(mip.setOptionValue("output_flag", false) == HighsStatus::kOk);
@@ -320,28 +329,46 @@ TEST_CASE("finite mixed branch enumeration agrees with an independent MILP on a 
     REQUIRE(mip.run() == HighsStatus::kOk);
     REQUIRE(mip.getModelStatus() == HighsModelStatus::kOptimal);
     const auto& mip_solution = mip.getSolution().col_value;
-    REQUIRE(mip_solution.size() == 5);
+    REQUIRE(mip_solution.size() == 10);
     const auto& mip_info = mip.getInfo();
     CHECK(mip_info.objective_function_value == doctest::Approx(*portfolio.optimum));
     CHECK(mip_info.mip_dual_bound == doctest::Approx(*portfolio.optimum));
     CHECK(mip_info.mip_gap == doctest::Approx(0.0));
-    CHECK(mip_solution[1] + mip_solution[2] + mip_solution[3] == doctest::Approx(1.0));
-    for (std::size_t action = 1; action < 4; ++action)
+    CHECK(mip_solution[2] + mip_solution[3] + mip_solution[4] == doctest::Approx(1.0));
+    CHECK(mip_solution[5] + mip_solution[6] + mip_solution[7] == doctest::Approx(1.0));
+    for (std::size_t action = 2; action < 8; ++action)
         CHECK(std::min(std::abs(mip_solution[action]),
             std::abs(mip_solution[action] - 1.0)) == doctest::Approx(0.0));
 
-    std::size_t selected_catalogue_index = 0;
-    for (std::size_t action = 1; action < 3; ++action)
-        if (mip_solution[action + 1] > mip_solution[selected_catalogue_index + 1])
-            selected_catalogue_index = action;
-    CHECK(mip_solution[selected_catalogue_index + 1] == doctest::Approx(1.0));
+    std::array<std::size_t, 2> selected_catalogue_indices{};
+    for (std::size_t action = 1; action < 3; ++action) {
+        if (mip_solution[action + 2] > mip_solution[selected_catalogue_indices[0] + 2])
+            selected_catalogue_indices[0] = action;
+        if (mip_solution[action + 5] > mip_solution[selected_catalogue_indices[1] + 5])
+            selected_catalogue_indices[1] = action;
+    }
+    CHECK(mip_solution[selected_catalogue_indices[0] + 2] == doctest::Approx(1.0));
+    CHECK(mip_solution[selected_catalogue_indices[1] + 5] == doctest::Approx(1.0));
+    const std::vector<std::size_t> selected_history{
+        selected_catalogue_indices[0], selected_catalogue_indices[1]};
+    const auto selected_branch = std::find_if(portfolio.evaluations.begin(),
+        portfolio.evaluations.end(), [&](const FiniteMixedBranchEvaluation& evaluation) {
+            const auto* branch = std::get_if<FiniteMixedBranchProblem>(&evaluation.branch);
+            return branch && branch->history.catalogue_indices == selected_history;
+        });
+    REQUIRE(selected_branch != portfolio.evaluations.end());
+    const auto selected_evaluation_index = static_cast<std::size_t>(
+        selected_branch - portfolio.evaluations.begin());
     CHECK(std::find(portfolio.optimal_evaluation_indices.begin(),
-        portfolio.optimal_evaluation_indices.end(), selected_catalogue_index) !=
+        portfolio.optimal_evaluation_indices.end(), selected_evaluation_index) !=
         portfolio.optimal_evaluation_indices.end());
     const std::array<double, 3> action_values{-1.0, 1.0, -1.0};
-    const double replayed_terminal = mip_solution[0] + action_values[selected_catalogue_index];
-    CHECK(replayed_terminal == doctest::Approx(mip_solution[4]));
-    CHECK(mip_solution[4] >= -1e-9);
+    const double replayed_first_state = mip_solution[0] + action_values[selected_catalogue_indices[0]];
+    const double replayed_terminal = mip_solution[1] + action_values[selected_catalogue_indices[1]];
+    CHECK(replayed_first_state == doctest::Approx(mip_solution[8]));
+    CHECK(replayed_terminal == doctest::Approx(mip_solution[9]));
+    CHECK(mip_solution[8] >= -1e-9);
+    CHECK(mip_solution[9] >= -1e-9);
 }
 
 TEST_CASE("finite-only affine enumeration agrees with a one-hot MILP and preserves duplicate branches") {
