@@ -1,7 +1,8 @@
 from pathlib import Path
 import json
-import sys
 import shutil
+import subprocess
+import sys
 import tempfile
 import unittest
 
@@ -37,6 +38,26 @@ class Issue824ZonotopePublicationTests(unittest.TestCase):
             with (changed / "result.json").open("ab") as stream:
                 stream.write(b" ")
             with self.assertRaisesRegex(ValueError, "checksum mismatch"):
+                publisher.verified_bundle(changed)
+
+    def test_captured_source_identity_rejects_tree_objects(self):
+        source = ROOT / "reports/algorithm-results/issue824-two-points-zonotope-pilot-v2"
+        with tempfile.TemporaryDirectory() as temporary:
+            changed = Path(temporary) / "changed"
+            shutil.copytree(source, changed)
+            capture_path = changed / "capture.json"
+            capture = json.loads(capture_path.read_text(encoding="utf-8"))
+            tree = subprocess.run(["git", "-C", str(ROOT), "show",
+                f"{capture['source_commit']}:scripts"], check=True,
+                capture_output=True).stdout
+            capture["source_files_sha256"] = {"scripts": publisher.digest(tree)}
+            capture_path.write_text(json.dumps(capture, indent=2) + "\n", encoding="utf-8")
+            sums = {name: publisher.digest((changed / name).read_bytes())
+                    for name in publisher.FILES if name != "SHA256SUMS"}
+            (changed / "SHA256SUMS").write_text(
+                "".join(f"{checksum}  {name}\n" for name, checksum in sums.items()),
+                encoding="ascii")
+            with self.assertRaisesRegex(ValueError, "unavailable as a blob: scripts"):
                 publisher.verified_bundle(changed)
 
     def test_planar_projection_contains_all_four_rectangle_corners(self):
