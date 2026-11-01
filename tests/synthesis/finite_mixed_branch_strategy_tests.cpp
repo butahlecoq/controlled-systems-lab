@@ -346,7 +346,7 @@ TEST_CASE("finite mixed branch enumeration agrees with an independent MILP on a 
 
 TEST_CASE("finite-only affine enumeration agrees with a one-hot MILP and preserves duplicate branches") {
     LinearStage finite_stage;
-    finite_stage.A = {1, 1, {0}};
+    finite_stage.A = {1, 1, {1}};
     finite_stage.B = {1, 1, {1}};
     finite_stage.E = {1, 1, {0}};
     finite_stage.offset = {0};
@@ -354,16 +354,16 @@ TEST_CASE("finite-only affine enumeration agrees with a one-hot MILP and preserv
     authored.dynamics.dimensions = {1, 1, 1};
     authored.dynamics.time_domain = TimeDomain::discrete;
     authored.dynamics.stages = std::move(finite_stage);
-    const auto system = take(model::snapshot(authored, Vector{0, 1}));
+    const auto system = take(model::snapshot(authored, Vector{0, 1, 2}));
     const auto safe = interval("finite-only-safe", -2, 2, "x");
     const auto safe_data = take(sets::from_handle(safe));
     csl::optimization::FiniteActionNominalRequest request{{"finite-only-affine"},
-        {"finite-only-milp"}, system, {0}, {1, {{-1}, {1}, {-1}}}, {{0}},
-        {safe_data, safe_data},
+        {"finite-only-milp"}, system, {0}, {1, {{-1}, {1}, {-1}}}, {{0}, {0}},
+        {safe_data, safe_data, safe_data},
         std::get<csl::optimization::Objective>(
             csl::optimization::snapshot(LinearTerminal{{1}, 0}))};
 
-    const auto enumerated = csl::optimization::finite_action_nominal(request, {3, 3, 100, 10, 0.0});
+    const auto enumerated = csl::optimization::finite_action_nominal(request, {9, 3, 100, 10, 0.0});
     REQUIRE(std::holds_alternative<csl::optimization::FiniteActionNominalResult>(enumerated));
     const auto& result = std::get<csl::optimization::FiniteActionNominalResult>(enumerated);
     REQUIRE(result.tracks.size() == 5);
@@ -372,41 +372,42 @@ TEST_CASE("finite-only affine enumeration agrees with a one-hot MILP and preserv
     REQUIRE(std::holds_alternative<csl::optimization::NominalTrackSelected>(exact_track.outcome));
     const auto& reference = std::get<csl::optimization::NominalTrackSelected>(exact_track.outcome);
     REQUIRE(reference.coverage == csl::optimization::NominalSearchCoverage::complete);
-    CHECK(reference.candidate_score == doctest::Approx(-1.0));
-    CHECK(reference.replay.terminal_objective == doctest::Approx(-1.0));
-    REQUIRE(reference.attempts.size() == 3);
-    std::vector<std::size_t> minimizing_catalogue_indices;
+    CHECK(reference.candidate_score == doctest::Approx(-2.0));
+    CHECK(reference.replay.terminal_objective == doctest::Approx(-2.0));
+    REQUIRE(reference.attempts.size() == 9);
+    std::vector<std::vector<std::size_t>> minimizing_catalogue_histories;
     for(std::size_t index = 0; index < reference.attempts.size(); ++index) {
         const auto* scored = std::get_if<csl::optimization::NominalPlanScored>(
             &reference.attempts[index]);
         REQUIRE(scored != nullptr);
         CHECK(scored->score_kind == csl::optimization::NominalScoreKind::exact_deterministic_objective);
-        if(scored->candidate_score == doctest::Approx(-1.0))
-            minimizing_catalogue_indices.push_back(scored->action_indices.front());
+        if(scored->candidate_score == doctest::Approx(-2.0))
+            minimizing_catalogue_histories.push_back(scored->action_indices);
     }
-    CHECK(minimizing_catalogue_indices == std::vector<std::size_t>{0, 2});
+    CHECK(minimizing_catalogue_histories == std::vector<std::vector<std::size_t>>{
+        {0, 0}, {0, 2}, {2, 0}, {2, 2}});
 
-    // Independent MILP for x[1] = -z[0] + z[1] - z[2], sum(z) = 1.
-    // The identical -1 catalogue entries retain different binary identities.
+    // Independent two-stage MILP for x[k + 1] = x[k] + u[k] and one-hot
+    // catalogue actions {-1, +1, -1}; identical values keep distinct indices.
     HighsLp lp;
-    lp.num_col_ = 4; // z[0..2], terminal state
-    lp.num_row_ = 2;
+    lp.num_col_ = 8; // z[stage 0][0..2], z[stage 1][0..2], x[1..2]
+    lp.num_row_ = 4;
     lp.sense_ = ObjSense::kMinimize;
-    lp.col_cost_ = {0.0, 0.0, 0.0, 1.0};
-    lp.col_lower_ = {0.0, 0.0, 0.0, -2.0};
-    lp.col_upper_ = {1.0, 1.0, 1.0, 2.0};
-    lp.row_lower_ = {1.0, 0.0};
-    lp.row_upper_ = {1.0, 0.0};
+    lp.col_cost_ = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0};
+    lp.col_lower_ = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, -2.0, -2.0};
+    lp.col_upper_ = {1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 2.0, 2.0};
+    lp.row_lower_ = {1.0, 1.0, 0.0, 0.0};
+    lp.row_upper_ = {1.0, 1.0, 0.0, 0.0};
     lp.a_matrix_.format_ = MatrixFormat::kRowwise;
-    lp.a_matrix_.start_ = {0, 3, 7};
-    lp.a_matrix_.index_ = {0, 1, 2, 0, 1, 2, 3};
-    lp.a_matrix_.value_ = {1.0, 1.0, 1.0, 1.0, -1.0, 1.0, 1.0};
+    lp.a_matrix_.start_ = {0, 3, 6, 10, 15};
+    lp.a_matrix_.index_ = {0, 1, 2, 3, 4, 5, 0, 1, 2, 6, 3, 4, 5, 6, 7};
+    lp.a_matrix_.value_ = {1.0, 1.0, 1.0, 1.0, 1.0, 1.0,
+        1.0, -1.0, 1.0, 1.0, 1.0, -1.0, 1.0, -1.0, 1.0};
     lp.a_matrix_.num_row_ = lp.num_row_;
     lp.a_matrix_.num_col_ = lp.num_col_;
-    lp.integrality_.assign(4, HighsVarType::kContinuous);
-    lp.integrality_[0] = HighsVarType::kInteger;
-    lp.integrality_[1] = HighsVarType::kInteger;
-    lp.integrality_[2] = HighsVarType::kInteger;
+    lp.integrality_.assign(8, HighsVarType::kContinuous);
+    for(std::size_t action = 0; action < 6; ++action)
+        lp.integrality_[action] = HighsVarType::kInteger;
 
     Highs mip;
     REQUIRE(mip.setOptionValue("output_flag", false) == HighsStatus::kOk);
@@ -416,22 +417,29 @@ TEST_CASE("finite-only affine enumeration agrees with a one-hot MILP and preserv
     REQUIRE(mip.run() == HighsStatus::kOk);
     REQUIRE(mip.getModelStatus() == HighsModelStatus::kOptimal);
     const auto& solution = mip.getSolution().col_value;
-    REQUIRE(solution.size() == 4);
+    REQUIRE(solution.size() == 8);
     const auto& info = mip.getInfo();
     CHECK(info.objective_function_value == doctest::Approx(reference.candidate_score));
     CHECK(info.mip_dual_bound == doctest::Approx(reference.candidate_score));
     CHECK(info.mip_gap == doctest::Approx(0.0));
     CHECK(solution[0] + solution[1] + solution[2] == doctest::Approx(1.0));
-    for(std::size_t action = 0; action < 3; ++action)
+    CHECK(solution[3] + solution[4] + solution[5] == doctest::Approx(1.0));
+    for(std::size_t action = 0; action < 6; ++action)
         CHECK(std::min(std::abs(solution[action]),
             std::abs(solution[action] - 1.0)) == doctest::Approx(0.0));
-    std::size_t selected = 0;
-    for(std::size_t action = 1; action < 3; ++action)
-        if(solution[action] > solution[selected]) selected = action;
-    CHECK(std::find(minimizing_catalogue_indices.begin(),
-        minimizing_catalogue_indices.end(), selected) != minimizing_catalogue_indices.end());
+    std::array<std::size_t, 2> selected{};
+    for(std::size_t action = 1; action < 3; ++action) {
+        if(solution[action] > solution[selected[0]]) selected[0] = action;
+        if(solution[action + 3] > solution[selected[1] + 3]) selected[1] = action;
+    }
+    const std::vector<std::size_t> selected_history{selected[0], selected[1]};
+    CHECK(std::find(minimizing_catalogue_histories.begin(),
+        minimizing_catalogue_histories.end(), selected_history) != minimizing_catalogue_histories.end());
     const std::array<double, 3> actions{-1.0, 1.0, -1.0};
-    CHECK(actions[selected] == doctest::Approx(solution[3]));
+    const double replayed_first_state = actions[selected[0]];
+    const double replayed_terminal = replayed_first_state + actions[selected[1]];
+    CHECK(replayed_first_state == doctest::Approx(solution[6]));
+    CHECK(replayed_terminal == doctest::Approx(solution[7]));
 }
 
 TEST_CASE("mixed branch solve propagates cancellation and deadline after starting branch work") {
