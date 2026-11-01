@@ -46,8 +46,10 @@ csl_add_library(csl_finite_action_histories STATIC src/synthesis/finite_search/a
 target_link_libraries(csl_finite_action_histories PUBLIC CSL::problem)
 install(FILES docs/contracts/finite-action-histories.md
   DESTINATION ${CMAKE_INSTALL_DATADIR}/CSL/docs/contracts)
+install(FILES docs/contracts/finite-mixed-branch-portfolios.md
+  DESTINATION ${CMAKE_INSTALL_DATADIR}/CSL/docs/contracts)
 
 csl_add_library(csl_finite_mixed_branch STATIC src/synthesis/finite_search/mixed_branch.cpp)
-target_link_libraries(csl_finite_mixed_branch PUBLIC CSL::finite_action_histories CSL::resolved_core)
+target_link_libraries(csl_finite_mixed_branch PUBLIC CSL::finite_action_histories CSL::resolved_core CSL::registry)
 
 csl_install_headers(synthesis)
