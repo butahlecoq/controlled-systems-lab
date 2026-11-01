@@ -45,10 +45,18 @@ add_test(NAME finite_action_histories_tests COMMAND finite_action_histories_test
 csl_test_target(finite_action_histories_tests synthesis)
 
 add_executable(finite_mixed_branch_tests tests/unit/synthesis/finite_mixed_branch_tests.cpp)
-target_link_libraries(finite_mixed_branch_tests PRIVATE CSL::finite_mixed_branch CSL::strategy_a
-  CSL::affine_sum CSL::qhull_conversion CSL::highs_lp CSL::highs_convex doctest::doctest)
+target_link_libraries(finite_mixed_branch_tests PRIVATE CSL::finite_mixed_branch doctest::doctest)
 add_test(NAME finite_mixed_branch_tests COMMAND finite_mixed_branch_tests)
 csl_test_target(finite_mixed_branch_tests synthesis)
+
+if(TARGET CSL::highs_convex AND TARGET CSL::highs_lp AND TARGET CSL::qhull_conversion)
+  add_executable(finite_mixed_branch_strategy_tests
+    tests/synthesis/finite_mixed_branch_strategy_tests.cpp)
+  target_link_libraries(finite_mixed_branch_strategy_tests PRIVATE CSL::finite_mixed_branch
+    CSL::strategy_a CSL::affine_sum CSL::qhull_conversion CSL::highs_lp CSL::highs_convex doctest::doctest)
+  add_test(NAME finite_mixed_branch_strategy_tests COMMAND finite_mixed_branch_strategy_tests)
+  csl_test_target(finite_mixed_branch_strategy_tests synthesis)
+endif()
 
 add_executable(finite_mixed_branch_public_client tests/installed/finite_mixed_branch_client.cpp)
 target_link_libraries(finite_mixed_branch_public_client PRIVATE CSL::finite_mixed_branch)
