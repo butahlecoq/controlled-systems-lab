@@ -28,6 +28,7 @@
       -0.3
     ]
   ],
+  "performance_claim": "descriptive timings only; no winner or speedup claim",
   "planar_exact_minimax_value": 1.0,
   "planar_zonotope_inclusion": "all finite terminal points checked inside axis-aligned zonotopes for all three plans; complete finite-set inclusion in this 2D fixture",
   "schema": "csl.issue824-two-points-zonotope-minimax-check/1",
@@ -61,5 +62,6 @@
     ]
   ],
   "stage_zonotope_relation": "all exact state coordinates checked against dyadic center +/- sum(abs(generators)); not full four-dimensional membership",
-  "status": "verified"
+  "status": "verified",
+  "timing_status": "21 completed raw samples across three methods; returned values match independently checked outcomes"
 }
