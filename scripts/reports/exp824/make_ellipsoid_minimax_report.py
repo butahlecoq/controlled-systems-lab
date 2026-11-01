@@ -50,6 +50,7 @@ SOURCE_FILES = (
     "tests/unit/optimization/finite_action_zonotope_minimax_tests.cpp",
     "tests/installed/finite_action_zonotope_minimax_client.cpp",
     "tests/installed/finite_plan_ellipsoid_client.cpp",
+    "tests/installed/finite_action_ellipsoid_minimax_client.cpp",
     "tests/installed/CMakeLists.txt",
     "tests/contract/public_headers_client.cpp",
     "scripts/reports/exp824/check_two_points_box.py",
