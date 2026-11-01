@@ -110,10 +110,10 @@ TEST_CASE("candidate search cancellation retains a stopped attempt and incomplet
 
 TEST_CASE("deadline after completed candidates retains scored rows before the stopped plan") {
     auto request = analytic_request();
-    request.actions.catalogue.assign(100000, Vector{0.0});
+    request.actions.catalogue.assign(500000, Vector{0.0});
     ExecutionContext context;
     context.deadline = std::chrono::steady_clock::now() + std::chrono::seconds(1);
-    const auto answer = finite_action_zonotope_minimax(request, {100000,2,2,4,16}, context);
+    const auto answer = finite_action_zonotope_minimax(request, {500000,2,2,4,16}, context);
     REQUIRE(std::holds_alternative<FiniteActionZonotopeMinimaxResult>(answer));
     const auto& result = std::get<FiniteActionZonotopeMinimaxResult>(answer);
     CHECK(result.candidate_search == CandidateSearchCoverage::incomplete);
