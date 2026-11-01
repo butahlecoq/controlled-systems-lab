@@ -108,22 +108,19 @@ TEST_CASE("candidate search cancellation retains a stopped attempt and incomplet
     CHECK(stopped.outcome.reason == StopReason::cancelled);
 }
 
-TEST_CASE("deadline after completed candidates retains scored rows before the stopped plan") {
+TEST_CASE("candidate-attempt limit retains scored rows before the stopped plan") {
     auto request = analytic_request();
-    request.actions.catalogue.assign(500000, Vector{0.0});
-    ExecutionContext context;
-    context.deadline = std::chrono::steady_clock::now() + std::chrono::seconds(1);
-    const auto answer = finite_action_zonotope_minimax(request, {500000,2,2,4,16}, context);
+    const auto answer = finite_action_zonotope_minimax(request, {3,2,2,4,16,1});
     REQUIRE(std::holds_alternative<FiniteActionZonotopeMinimaxResult>(answer));
     const auto& result = std::get<FiniteActionZonotopeMinimaxResult>(answer);
     CHECK(result.candidate_search == CandidateSearchCoverage::incomplete);
-    REQUIRE(result.plan_attempts.size() > 1);
+    REQUIRE(result.plan_attempts.size() == 2);
     CHECK(std::holds_alternative<ZonotopePlanScored>(result.plan_attempts.front()));
     REQUIRE(std::holds_alternative<ZonotopePlanStopped>(result.plan_attempts.back()));
     const auto stopped_index = result.plan_attempts.size() - 1;
     const auto& stopped = std::get<ZonotopeCandidateSearchStopped>(result.selection);
     CHECK(stopped.candidate_attempt_index == stopped_index);
-    CHECK(stopped.outcome.reason == StopReason::deadline_expired);
+    CHECK(stopped.outcome.reason == StopReason::resource_limit);
     CHECK(std::get<ZonotopePlanStopped>(result.plan_attempts.back()).action_indices ==
         std::vector<std::size_t>{stopped_index});
 }

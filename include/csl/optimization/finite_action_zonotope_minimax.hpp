@@ -3,6 +3,8 @@
 #include <csl/optimization/finite_action_minimax.hpp>
 #include <csl/reachability/finite_plan_zonotope.hpp>
 
+#include <limits>
+
 namespace csl::optimization {
 
 struct FiniteActionZonotopeMinimaxLimits {
@@ -11,6 +13,7 @@ struct FiniteActionZonotopeMinimaxLimits {
     std::size_t max_replay_histories;
     std::size_t max_generators_per_stage;
     std::size_t max_factor_corners;
+    std::size_t max_candidate_attempts{std::numeric_limits<std::size_t>::max()};
 };
 
 struct ZonotopeCandidateScore {
@@ -86,8 +89,8 @@ using FiniteActionZonotopeMinimaxOutcome = std::variant<FiniteActionZonotopeMini
 // Ranks fixed open-loop plans by numerical maxima over all terminal zonotope
 // factor corners, then exactly replays only the selected plan over the finite
 // catalogues. Candidate scores are not validated objective bounds or a claim
-// that the selector found a globally minimax plan. A stop during candidate
-// search returns completed rows and a stopped row for the interrupted/next plan.
+// that the selector found a globally minimax plan. A deadline, cancellation or
+// candidate-attempt limit returns completed rows and a typed stopped row.
 FiniteActionZonotopeMinimaxOutcome finite_action_zonotope_minimax(
     const FiniteActionMinimaxRequest& request, FiniteActionZonotopeMinimaxLimits limits,
     const ExecutionContext& context = {});

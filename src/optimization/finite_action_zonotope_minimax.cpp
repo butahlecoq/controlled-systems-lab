@@ -95,6 +95,9 @@ FiniteActionZonotopeMinimaxOutcome finite_action_zonotope_minimax(
     for(std::size_t plan_index = 0; plan_index < plan_count; ++plan_index) {
         const auto choices = detail::action_plan_indices(plan_index,
             request.actions.catalogue.size(), horizon);
+        if(plan_index >= limits.max_candidate_attempts)
+            return stop_search(choices, plan_index,
+                {StopReason::resource_limit, "Zonotope candidate-attempt limit reached before this plan."});
         if(context.cancellation.stop_requested())
             return stop_search(choices, plan_index,
                 {StopReason::cancelled, "Zonotope finite minimax cancelled before this plan."});

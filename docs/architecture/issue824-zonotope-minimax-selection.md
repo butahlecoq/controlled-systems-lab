@@ -11,7 +11,7 @@ const auto outcome = finite_action_zonotope_minimax(request,
     {27, 27, 27, 64, 1u << 16});
 ```
 
-The limits are ordered as maximum action plans, points per replay stage, replay histories, generators per zonotope stage, and terminal factor corners. A result contains one scored or unscored row per action plan, the selected row when any candidate scored, and a separate selected-plan replay outcome. A complete candidate-score search means that every action plan received a score. It does not mean that the candidate scores are validated bounds or that the selected plan is globally minimax optimal.
+The first five limits are maximum action plans, points per replay stage, replay histories, generators per zonotope stage, and terminal factor corners. The optional sixth limit caps candidate attempts and defaults to the largest representable value. If it stops enumeration, the result retains completed rows and appends a typed resource-limit row for the next plan. A result otherwise contains one scored or unscored row per attempted action plan, the selected row when any candidate scored, and a separate selected-plan replay outcome. A complete candidate-score search means that every action plan received a score. It does not mean that the candidate scores are validated bounds or that the selected plan is globally minimax optimal.
 
 ## Shape
 
@@ -24,6 +24,7 @@ struct FiniteActionZonotopeMinimaxLimits {
     std::size_t max_replay_histories;
     std::size_t max_generators_per_stage;
     std::size_t max_factor_corners;
+    std::size_t max_candidate_attempts{std::numeric_limits<std::size_t>::max()};
 };
 
 struct ZonotopeCandidateScore {
@@ -106,7 +107,7 @@ FiniteActionZonotopeMinimaxOutcome finite_action_zonotope_minimax(
 
 The optimizer module owns action-plan enumeration, candidate coverage, score comparison, and selected-plan replay. The reachability module remains responsible for the one-plan zonotope trace. A private replay helper owns the existing recursive worst-history search so the box and zonotope selectors use the same witness logic. Exact finite-catalogue propagation still runs separately to check safe sets and provide the complete terminal V catalogue.
 
-The selector returns a result when candidate attempts finish, even when individual plans are unsupported or selected replay is refused. If cancellation or a deadline stops candidate search, the result retains completed rows, adds a typed stopped row for the interrupted/next plan, marks coverage incomplete, and records the stopped selection outcome. Request-wide validation failures remain `Unsupported`; stops before any candidate attempt can begin remain top-level `OperationStopped`.
+The selector returns a result when candidate attempts finish, even when individual plans are unsupported or selected replay is refused. If cancellation, a deadline, or the candidate-attempt limit stops search, the result retains completed rows, adds a typed stopped row for the interrupted/next plan, marks coverage incomplete, and records the stopped selection outcome. Request-wide validation failures remain `Unsupported`; context stops before any candidate attempt can begin remain top-level `OperationStopped`.
 
 ## Synthesis decision
 
