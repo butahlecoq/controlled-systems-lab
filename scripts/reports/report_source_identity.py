@@ -7,7 +7,8 @@ import subprocess
 
 
 def source_hashes_match_commit(root: Path, commit: str, expected: dict[str, str]) -> bool:
-    if not re.fullmatch(r"[0-9a-f]{40}|[0-9a-f]{64}", commit):
+    if (not re.fullmatch(r"[0-9a-f]{40}|[0-9a-f]{64}", commit) or
+            not isinstance(expected, dict) or not expected):
         return False
     commit_type = subprocess.run(["git", "-C", str(root), "cat-file", "-t", commit],
         check=False, capture_output=True)
@@ -19,12 +20,24 @@ def source_hashes_match_commit(root: Path, commit: str, expected: dict[str, str]
             return False
         if not re.fullmatch(r"[0-9a-f]{64}", expected_hash):
             return False
-        object_name = f"{commit}:{path.as_posix()}"
-        object_type = subprocess.run(["git", "-C", str(root), "cat-file", "-t", object_name],
-            check=False, capture_output=True)
-        if object_type.returncode != 0 or object_type.stdout.strip() != b"blob":
+        tree_entry = subprocess.run(["git", "-C", str(root), "ls-tree", "-rz", commit,
+            "--", f":(literal){path.as_posix()}"], check=False, capture_output=True)
+        if tree_entry.returncode != 0:
             return False
-        completed = subprocess.run(["git", "-C", str(root), "cat-file", "blob", object_name],
+        matching = []
+        for entry in tree_entry.stdout.split(b"\0"):
+            if not entry:
+                continue
+            metadata, separator, entry_path = entry.partition(b"\t")
+            fields = metadata.split()
+            if separator and entry_path == path.as_posix().encode() and len(fields) == 3:
+                matching.append(fields)
+        if len(matching) != 1:
+            return False
+        mode, object_type, object_id = matching[0]
+        if mode not in (b"100644", b"100755") or object_type != b"blob":
+            return False
+        completed = subprocess.run(["git", "-C", str(root), "cat-file", "blob", object_id.decode("ascii")],
             check=False, capture_output=True)
         if completed.returncode != 0:
             return False
