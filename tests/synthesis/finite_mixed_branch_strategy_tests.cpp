@@ -299,6 +299,17 @@ TEST_CASE("two-stage mixed branch enumeration agrees with a one-hot MILP") {
     REQUIRE(portfolio.evaluations.size() == 9);
     REQUIRE(portfolio.optimal_evaluation_indices ==
         std::vector<std::size_t>{0, 1, 2, 3, 4, 5, 6, 7, 8});
+    const std::vector<std::vector<std::size_t>> expected_histories{
+        {0, 0}, {0, 1}, {0, 2}, {1, 0}, {1, 1}, {1, 2}, {2, 0}, {2, 1}, {2, 2}};
+    REQUIRE(portfolio.evaluations.size() == expected_histories.size());
+    for(std::size_t index = 0; index < portfolio.evaluations.size(); ++index) {
+        const auto& evaluation = portfolio.evaluations[index];
+        const auto* branch = std::get_if<FiniteMixedBranchProblem>(&evaluation.branch);
+        REQUIRE(branch != nullptr);
+        CHECK(branch->history.catalogue_indices == expected_histories[index]);
+        REQUIRE(evaluation.objective.has_value());
+        CHECK(*evaluation.objective == doctest::Approx(*portfolio.optimum));
+    }
 
     // Independent two-stage MIP: x[k + 1] = x[k] + u[k] + d[z[k]], with
     // one continuous input and one catalogue choice at each stage.
