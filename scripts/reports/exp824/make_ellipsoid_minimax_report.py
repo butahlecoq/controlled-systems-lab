@@ -69,7 +69,6 @@ SOURCE_FILES = (
     "tests/reporting/test_issue824_zonotope_publication.py",
     "tests/reporting/test_issue824_zonotope_minimax_publication.py",
     "tests/reporting/test_issue824_ellipsoid_minimax_publication.py",
-    "tests/reporting/test_visual_route_inventory.py",
     "tests/reporting/test_issue824_ellipsoid_minimax_publication.py",
     ".github/workflows/algorithm-reports.yml",
     "docs/architecture/issue824-zonotope-minimax-selection.md",

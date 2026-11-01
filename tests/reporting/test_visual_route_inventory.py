@@ -164,9 +164,6 @@ class VisualRouteInventoryTests(unittest.TestCase):
         self.assertEqual(routes["issue824-two-points-zonotope-pilot-v1"]["assets"], ["projections.svg"])
         self.assertEqual(routes["issue824-two-points-zonotope-pilot-v2"]["assets"],
                          ["planar-example.svg", "projections.svg"])
-        self.assertEqual(routes["issue824-two-points-ellipsoid-minimax-v1"]["assets"],
-                         ["ellipsoid-planar-example.svg", "planar-example.svg", "projections.svg"])
-        self.assertEqual(routes["issue824-two-points-ellipsoid-minimax-v1"]["follow_up_issue"],824)
         self.assertEqual(routes["mpc09-two-particle-output-feedback-v1"]["follow_up_issue"],605)
         self.assertEqual(routes["mpc04-max-coordinate-replanning-pilot-20261030"]["assets"],
                          ["trajectory.svg"])

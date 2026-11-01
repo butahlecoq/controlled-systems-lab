@@ -20,6 +20,9 @@ MIGRATION_ISSUES = {
     "control-strategy-and-witness": 686,
     "historical-and-benchmarks": 687,
 }
+FOLLOW_UP_ISSUE_OVERRIDES = {
+    "scripts/reports/exp824/make_ellipsoid_minimax_report.py": 824,
+}
 COMPOSED_SAVED_ROUTES = {
     "scripts/reports/ext03_transform/report.py",
     "scripts/reports/ext04/continuous_report.py",
@@ -250,7 +253,8 @@ def source_inventory(root: Path) -> list[dict]:
                             "asset_name_literals": assets, "disposition": disposition,
                             **({"role_and_disposition_reason": VIZ10_ROLE_REASONS[relative]}
                                if relative in VIZ10_ROLE_REASONS else {}),
-                            **({"follow_up_issue": migration_issue(relative)}
+                            **({"follow_up_issue": FOLLOW_UP_ISSUE_OVERRIDES.get(
+                                    relative, migration_issue(relative))}
                                if disposition == "deferred-family-specific-migration" else {})})
     missing = set(reviewed) - found
     if missing:
