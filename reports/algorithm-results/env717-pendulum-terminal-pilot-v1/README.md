@@ -24,15 +24,15 @@ The phase-plane plot shows every affine forward-reachable point for the finite
 catalogue, the selected affine prediction, its nonlinear replay and the best
 source-map finite-catalogue replay.
 
-The Release CLI call took a median `6453882.0` ns
-(3121864–7318105 ns)
+The Release CLI call took a median `3241259.0` ns
+(3118511–3917572 ns)
 over 28 calls in
 4 capture block(s), with one excluded warmup per block. Block summaries:
-block 1: median 6.609 ms, range 3.923–7.233 ms; block 2: median 3.226 ms, range 3.122–3.378 ms; block 3: median 6.498 ms, range 6.391–6.632 ms; block 4: median 7.011 ms, range 3.493–7.318 ms. Each interval includes process launch, affine-plan
+block 1: median 3.198 ms, range 3.123–3.666 ms; block 2: median 3.202 ms, range 3.126–3.536 ms; block 3: median 3.226 ms, range 3.119–3.918 ms; block 4: median 3.554 ms, range 3.312–3.732 ms. Each interval includes process launch, affine-plan
 enumeration and JSON serialization/capture; it excludes the Python oracle and
-report rendering. The block medians vary substantially, so these are descriptive
-observations and support no performance conclusion or speedup claim. The CPU limiter is
-unestablished because `perf` and `strace` were unavailable. The capture used
+report rendering. These observations are descriptive for this fixture and make
+no performance conclusion or speedup claim. The CPU limiter is unestablished
+because `perf` and `strace` were unavailable. The capture used
 AMD Ryzen 5 3550H with Radeon Vega Mobile Gfx on
 Linux-7.2.8-9-omarchy-x86_64-with-glibc2.44 with
 GNU 16.2.1 in Release mode.

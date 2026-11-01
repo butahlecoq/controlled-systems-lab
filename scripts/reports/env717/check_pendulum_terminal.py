@@ -72,7 +72,7 @@ def linearized_layers() -> list[list[list[float]]]:
     return layers
 
 
-def capture_runtime(executable: Path, repetitions: int = 7) -> tuple[dict, dict]:
+def capture_runtime(executable: Path, blocks_count: int = 4, repetitions: int = 7) -> tuple[dict, dict]:
     def load_average() -> list[float] | None:
         try:
             return list(os.getloadavg())
@@ -90,36 +90,42 @@ def capture_runtime(executable: Path, repetitions: int = 7) -> tuple[dict, dict]
             raise ValueError("timed native call did not enumerate the complete catalogue")
         return elapsed, observed
 
-    capture_started = time.time_ns()
-    before = load_average()
-    invoke()
-    samples = [invoke()[0] for _ in range(repetitions)]
-    after = load_average()
-    block = {
-        "started_unix_ns": capture_started,
-        "warmups": 1,
-        "measured_calls": repetitions,
-        "successful_calls": repetitions,
-        "failed_calls": 0,
-        "durations_ns": samples,
-        "median_ns": statistics.median(samples),
-        "minimum_ns": min(samples),
-        "maximum_ns": max(samples),
-        "load_average_before": before,
-        "load_average_after": after,
-    }
+    blocks = []
+    for _ in range(blocks_count):
+        capture_started = time.time_ns()
+        before = load_average()
+        invoke()
+        samples = [invoke()[0] for _ in range(repetitions)]
+        after = load_average()
+        blocks.append({
+            "started_unix_ns": capture_started,
+            "warmups": 1,
+            "measured_calls": repetitions,
+            "successful_calls": repetitions,
+            "failed_calls": 0,
+            "durations_ns": samples,
+            "median_ns": statistics.median(samples),
+            "minimum_ns": min(samples),
+            "maximum_ns": max(samples),
+            "load_average_before": before,
+            "load_average_after": after,
+        })
+    capture_started = blocks[0]["started_unix_ns"]
+    before = blocks[0]["load_average_before"]
+    after = blocks[-1]["load_average_after"]
+    all_samples = [duration for block in blocks for duration in block["durations_ns"]]
     measurement = {
         "schema": "csl.env717-runtime-measurement/1",
         "scope": "one Release CLI invocation: process launch, 81-plan affine solver enumeration, and JSON serialization/capture; excludes Python oracle, report rendering, and plotting",
-        "warmups": 1,
-        "measured_calls": repetitions,
-        "successful_calls": repetitions,
+        "warmups": blocks_count,
+        "measured_calls": len(all_samples),
+        "successful_calls": len(all_samples),
         "failed_calls": 0,
-        "durations_ns": samples,
-        "median_ns": statistics.median(samples),
-        "minimum_ns": min(samples),
-        "maximum_ns": max(samples),
-        "capture_blocks": [block],
+        "durations_ns": all_samples,
+        "median_ns": statistics.median(all_samples),
+        "minimum_ns": min(all_samples),
+        "maximum_ns": max(all_samples),
+        "capture_blocks": blocks,
         "limiter": "not established; perf and strace are unavailable in the capture environment",
         "comparison": "single-adapter descriptive timing; no comparator or speedup claim",
     }
@@ -130,6 +136,11 @@ def capture_runtime(executable: Path, repetitions: int = 7) -> tuple[dict, dict]
         "load_average_before": before,
         "load_average_after": after,
         "capture_started_unix_ns": capture_started,
+        "capture_blocks": [{
+            "started_unix_ns": block["started_unix_ns"],
+            "load_average_before": block["load_average_before"],
+            "load_average_after": block["load_average_after"],
+        } for block in blocks],
     }
     return measurement, environment
 
@@ -397,9 +408,9 @@ over {record['runtime_measurement']['measured_calls']} calls in
 {len(blocks)} capture block(s), with one excluded warmup per block. Block summaries:
 {block_summaries}. Each interval includes process launch, affine-plan
 enumeration and JSON serialization/capture; it excludes the Python oracle and
-report rendering. The block medians vary substantially, so these are descriptive
-observations and support no performance conclusion or speedup claim. The CPU limiter is
-unestablished because `perf` and `strace` were unavailable. The capture used
+report rendering. These observations are descriptive for this fixture and make
+no performance conclusion or speedup claim. The CPU limiter is unestablished
+because `perf` and `strace` were unavailable. The capture used
 {record['capture_environment']['processor']} on
 {record['capture_environment']['os']} with
 {record['compiler']['id']} {record['compiler']['version']} in Release mode.
