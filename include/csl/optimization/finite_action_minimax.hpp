@@ -9,6 +9,8 @@
 
 namespace csl::optimization {
 
+enum class CandidateSearchCoverage { complete, incomplete };
+
 // Stage-invariant ordered action catalogue; indices distinguish duplicate rows.
 struct FiniteActionMinimaxRequest {
     ProblemId problem;

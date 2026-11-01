@@ -27,11 +27,15 @@ typed unsupported or stopped outcomes on invalid dimensions, non-finite values,
 overflow, unsupported set forms, or configured work limits. Do not accept rays,
 H representations, empty sets, or claim predecessor/feedback support.
 
-The first integration is propagation of the selected fixed plan from the
-existing finite TwoPoints minimax selector. Keep its exact finite-history
-replay and objective separate. Validate enclosure inclusion using an
-independently reconstructed low-dimensional fixture with exact dyadic
-arithmetic; report the four-dimensional trace as an outer enclosure only.
+The minimax integration enumerates fixed plans and ranks each by evaluating
+the convex terminal objective at all 16 corners of its four-dimensional frame
+box. The candidate score is numerical and does not certify a bound. It is
+separate from exact finite-history replay of the selected plan. The caller
+limits plan enumeration, stage point counts, replay histories, and candidate
+attempts; incomplete searches and refused plans remain typed outcomes.
+Validate enclosure inclusion using an independently reconstructed fixture
+with exact dyadic arithmetic; report the four-dimensional trace as an outer
+enclosure only.
 
 ## Alternatives
 

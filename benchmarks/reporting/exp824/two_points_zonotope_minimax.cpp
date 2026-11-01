@@ -1,6 +1,7 @@
 #include <csl/optimization/finite_action_box_minimax.hpp>
 #include <csl/optimization/finite_action_minimax.hpp>
 #include <csl/optimization/finite_action_zonotope_minimax.hpp>
+#include <csl/optimization/finite_action_parallelotope_minimax.hpp>
 #include <csl/reachability/finite_plan_zonotope.hpp>
 #include <csl/reachability/finite_plan_parallelotope.hpp>
 #include "two_points_fixture.hpp"
@@ -95,6 +96,27 @@ Json attempts_json(const FiniteActionZonotopeMinimaxResult& result) {
     return attempts;
 }
 
+Json parallelotope_attempts_json(const FiniteActionParallelotopeMinimaxResult& result) {
+    Json attempts = Json::array();
+    for(const auto& attempt : result.plan_attempts) {
+        if(const auto* scored = std::get_if<ParallelotopePlanScored>(&attempt))
+            attempts.push_back({{"status", "scored"}, {"action_indices", scored->action_indices},
+                {"candidate_score", scored->score.terminal_frame_box_corner_maximum},
+                {"corners_evaluated", scored->score.corners_evaluated},
+                {"stages", parallelotope_trace_json(scored->score.trace)}});
+        else if(const auto* unscored = std::get_if<ParallelotopePlanUnscored>(&attempt))
+            attempts.push_back({{"status", "unscored"}, {"action_indices", unscored->action_indices},
+                {"diagnostics", diagnostics_json(unscored->outcome)}});
+        else {
+            const auto& stopped = std::get<ParallelotopePlanStopped>(attempt);
+            attempts.push_back({{"status", "stopped"}, {"action_indices", stopped.action_indices},
+                {"stop_reason", stop_reason_name(stopped.outcome.reason)},
+                {"diagnostics", stopped.outcome.diagnostics}});
+        }
+    }
+    return attempts;
+}
+
 reachability::FixedPlanRequest planar_zonotope_request() {
     using csl::issue824::fixture::take;
     const SystemModel authored{{{2, 1, 1}, TimeDomain::discrete,
@@ -176,15 +198,25 @@ double run_timed_method(std::size_t method, const FiniteActionMinimaxRequest& in
     if(!result) throw std::runtime_error("timed zonotope selector did not complete");
     if(result->candidate_search != CandidateSearchCoverage::complete || result->plan_attempts.size() != 27)
         throw std::runtime_error("timed zonotope selector did not score all 27 plans");
-    const auto* selected = std::get_if<ZonotopePlanSelected>(&result->selection);
-    if(!selected) throw std::runtime_error("timed zonotope selector did not replay its selected plan");
+    if(method == 2) {
+        const auto* selected = std::get_if<ZonotopePlanSelected>(&result->selection);
+        if(!selected) throw std::runtime_error("timed zonotope selector did not replay its selected plan");
+        return selected->replay.worst_value;
+    }
+    const auto parallelotope = finite_action_parallelotope_minimax(input, {27, 27, 27});
+    const auto* parallel_result = std::get_if<FiniteActionParallelotopeMinimaxResult>(&parallelotope);
+    if(!parallel_result || parallel_result->candidate_search != CandidateSearchCoverage::complete ||
+       parallel_result->plan_attempts.size() != 27)
+        throw std::runtime_error("timed parallelotope selector did not score all 27 plans");
+    const auto* selected = std::get_if<ParallelotopePlanSelected>(&parallel_result->selection);
+    if(!selected) throw std::runtime_error("timed parallelotope selector did not replay its selected plan");
     return selected->replay.worst_value;
 }
 
 Json timing_json(const FiniteActionMinimaxRequest& input) {
     constexpr std::size_t repetitions = 7;
-    constexpr std::array<std::string_view, 3> names{
-        "exact_finite_minimax", "outer_box_selector", "zonotope_selector"};
+    constexpr std::array<std::string_view, 4> names{
+        "exact_finite_minimax", "outer_box_selector", "zonotope_selector", "parallelotope_selector"};
     for(std::size_t method = 0; method < names.size(); ++method)
         if(!std::isfinite(run_timed_method(method, input)))
             throw std::runtime_error("a timed warmup returned a non-finite value");
@@ -215,7 +247,7 @@ Json timing_json(const FiniteActionMinimaxRequest& input) {
     }
     return {{"schema", "csl.issue824-zonotope-minimax-timing/1"},
         {"warmup_runs_per_method", 1}, {"measurement_repetitions_per_method", repetitions},
-        {"order_policy", "three methods rotate order across each repetition"},
+        {"order_policy", "four methods rotate order across each repetition"},
         {"interval", "complete public algorithm call; request construction and JSON serialization excluded"},
         {"input_policy", "one immutable request reused; fixture setup is outside timing"},
         {"warm_state_policy", "one excluded warmup per method; no algorithm workspace reused"},
@@ -244,17 +276,15 @@ Json run() {
     const auto* selected = std::get_if<ZonotopePlanSelected>(&zonotope_result->selection);
     if(!selected) throw std::runtime_error("zonotope minimax did not replay a selected candidate");
 
-    std::vector<Vector> parallelotope_controls;
-    const auto& selected_actions = std::get<ZonotopePlanScored>(
-        zonotope_result->plan_attempts[selected->candidate_attempt_index]).action_indices;
-    for(const auto index : selected_actions)
-        parallelotope_controls.push_back(input.actions.catalogue.at(index));
-    reachability::FixedPlanRequest parallelotope_request{input.system, input.initial,
-        std::move(parallelotope_controls), input.disturbances, input.admissible_states,
-        {"issue824-parallelotope-selected-plan"}};
-    const auto parallelotope = reachability::finite_plan_parallelotope(parallelotope_request);
-    const auto* parallelotope_trace = std::get_if<reachability::FinitePlanParallelotopeTrace>(&parallelotope);
-    if(!parallelotope_trace) throw std::runtime_error("parallelotope propagation did not complete");
+    const auto parallelotope = finite_action_parallelotope_minimax(input, {27, 27, 27});
+    const auto* parallelotope_result = std::get_if<FiniteActionParallelotopeMinimaxResult>(&parallelotope);
+    if(!parallelotope_result || parallelotope_result->candidate_search != CandidateSearchCoverage::complete ||
+       parallelotope_result->plan_attempts.size() != 27)
+        throw std::runtime_error("parallelotope minimax candidate search was incomplete");
+    const auto* parallelotope_selected = std::get_if<ParallelotopePlanSelected>(&parallelotope_result->selection);
+    if(!parallelotope_selected) throw std::runtime_error("parallelotope minimax did not replay a selected candidate");
+    const auto& parallelotope_scored = std::get<ParallelotopePlanScored>(
+        parallelotope_result->plan_attempts[parallelotope_selected->candidate_attempt_index]);
 
     std::vector<Vector> box_controls;
     for(const auto index : box_result->selected_action_indices)
@@ -311,9 +341,20 @@ Json run() {
             {"plan_source", "box-selected fixed open-loop plan"}, {"relation", "outer"},
             {"max_generators_per_stage", 64}, {"stages", trace_json(*box_zone_trace)}}},
         {"parallelotope_method", {{"status", "numerical outer fixed-frame parallelotope recurrence"},
-            {"plan_source", "zonotope-selected fixed open-loop plan"}, {"relation", "outer"},
+            {"plan_source", "parallelotope-selected fixed open-loop plan"}, {"relation", "outer"},
             {"coordinate_frame", "x = Q y; Q is a fixed unit-upper-triangular dyadic shear"},
-            {"stages", parallelotope_trace_json(*parallelotope_trace)}}},
+            {"stages", parallelotope_trace_json(parallelotope_scored.score.trace)}}},
+        {"parallelotope_minimax_method", {{"status", "numerical frame-box-corner candidate scoring"},
+            {"candidate_search_coverage", "complete"}, {"corners_evaluated_per_candidate", 16},
+            {"plan_attempts", parallelotope_attempts_json(*parallelotope_result)},
+            {"selected_candidate_attempt_index", parallelotope_selected->candidate_attempt_index},
+            {"selected_action_indices", parallelotope_scored.action_indices},
+            {"selected_candidate_score", parallelotope_scored.score.terminal_frame_box_corner_maximum},
+            {"selected_replay", {{"worst_value", parallelotope_selected->replay.worst_value},
+                {"worst_terminal_state", parallelotope_selected->replay.worst_terminal_state},
+                {"disturbance_indices", parallelotope_selected->replay.disturbance_indices},
+                {"disturbances", parallelotope_selected->replay.disturbances},
+                {"path", parallelotope_selected->replay.path}}}}},
         {"zonotope_minimax_method", {{"status", "numerical factor-corner candidate scoring"},
             {"candidate_search_coverage", "complete"}, {"max_generators_per_stage", 64},
             {"max_factor_corners", 32768}, {"plan_attempts", attempts_json(*zonotope_result)},

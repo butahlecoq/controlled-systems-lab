@@ -27,10 +27,13 @@ SOURCE_FILES = (
     "cmake/OptionalReports.cmake",
     "cmake/RunInstalledClient.cmake",
     "include/csl/optimization/finite_action_zonotope_minimax.hpp",
+    "include/csl/optimization/finite_action_parallelotope_minimax.hpp",
+    "include/csl/optimization/finite_action_minimax.hpp",
     "src/optimization/finite_action_box_minimax.cpp",
     "src/optimization/finite_action_replay.cpp",
     "src/optimization/finite_action_replay.hpp",
     "src/optimization/finite_action_zonotope_minimax.cpp",
+    "src/optimization/finite_action_parallelotope_minimax.cpp",
     "src/optimization/finite_action_plans.hpp",
     "src/optimization/Module.cmake",
     "src/optimization/Tests.cmake",
@@ -44,8 +47,11 @@ SOURCE_FILES = (
     "benchmarks/reporting/exp824/two_points_fixture.hpp",
     "benchmarks/reporting/exp824/two_points_zonotope_minimax.cpp",
     "tests/unit/optimization/finite_action_zonotope_minimax_tests.cpp",
+    "tests/unit/optimization/finite_action_parallelotope_minimax_tests.cpp",
     "tests/installed/finite_action_zonotope_minimax_client.cpp",
+    "tests/installed/finite_action_parallelotope_minimax_client.cpp",
     "tests/installed/CMakeLists.txt",
+    "tests/contract/public_headers_client.cpp",
     "tests/contract/public_headers_client.cpp",
     "scripts/reports/exp824/check_two_points_box.py",
     "scripts/reports/exp824/check_zonotope_minimax.py",
@@ -64,6 +70,7 @@ SOURCE_FILES = (
     ".github/workflows/algorithm-reports.yml",
     "docs/architecture/issue824-zonotope-minimax-selection.md",
     "docs/architecture/issue824-parallelotope-propagation.md",
+    "docs/architecture/issue824-parallelotope-minimax-selection.md",
 )
 COLORS = ("#458588", "#689d6a", "#d79921")
 
@@ -206,6 +213,7 @@ def main() -> None:
         "box_stages": result["box_method"]["stages"],
         "box_selected_zonotope_stages": result["zonotope_method"]["stages"],
         "parallelotope_method": result["parallelotope_method"],
+        "parallelotope_candidate_plans": result["parallelotope_minimax_method"]["plan_attempts"],
         "zonotope_candidate_plans": result["zonotope_minimax_method"]["plan_attempts"],
         "planar_selector_example": result["planar_selector_example"]}
     (output / "figure-data.json").write_text(json.dumps(figure, indent=2, sort_keys=True) + "\n", encoding="utf-8")
@@ -217,6 +225,9 @@ def main() -> None:
     box_value = result["box_method"]["full_catalogue_replay_value"]
     zonotope_value = selected["selected_replay"]["worst_value"]
     candidate_value = selected["selected_candidate_score"]
+    parallel_selected = result["parallelotope_minimax_method"]
+    parallel_value = parallel_selected["selected_replay"]["worst_value"]
+    parallel_score = parallel_selected["selected_candidate_score"]
     timing = result["timing"]
     timing_rows = "".join(
         f'<tr><td>{row["method"].replace("_", " ")}</td><td>{row["repetitions"]}</td>'
@@ -233,27 +244,27 @@ def main() -> None:
     (output / "planar-example.html").write_text(planar_html, encoding="utf-8")
     html_page = f'''<!doctype html><html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width"><title>Issue 824 · Zonotope minimax candidate selection</title>
 <style>body{{max-width:1280px;margin:2rem auto;padding:0 1rem;background:#fbf1c7;color:#282828;font:16px/1.5 system-ui}}h1,h2{{color:#3c3836}}.metric{{display:inline-block;margin:.4rem 1rem .4rem 0;padding:.7rem;background:#f9f5d7;border:1px solid #d5c4a1;border-radius:6px}}svg{{width:100%;height:auto}}a{{color:#076678}}</style>
-<h1>TwoPointsOnParallelLines: outer-set candidate selection</h1><p>This is a three-stage finite-catalog adaptation of the source differential-game environment. The selector ranks each fixed open-loop plan by its terminal zonotope factor-corner score, then replays only the selected plan through every finite disturbance history. A fixed-frame parallelotope trace propagates the selected plan and is checked against every exact finite-history state. It does not reproduce the upstream continuous-action RL problem.</p>
-<p><span class="metric">Exact finite minimax: <b>{exact_value:.8f}</b></span><span class="metric">Box-selected replay: <b>{box_value:.8f}</b></span><span class="metric">Zonotope-selected replay: <b>{zonotope_value:.8f}</b></span><span class="metric">Selected zonotope candidate score: <b>{candidate_value:.8f}</b></span></p>
+<h1>TwoPointsOnParallelLines: outer-set candidate selection</h1><p>This is a three-stage finite-catalog adaptation of the source differential-game environment. The zonotope and fixed-frame parallelotope selectors rank every fixed open-loop plan by terminal enclosure-corner scores, then replay their selected plans through every finite disturbance history. These numerical candidate scores are not validated bounds. The report does not reproduce the upstream continuous-action RL problem.</p>
+<p><span class="metric">Exact finite minimax: <b>{exact_value:.8f}</b></span><span class="metric">Box-selected replay: <b>{box_value:.8f}</b></span><span class="metric">Zonotope-selected replay: <b>{zonotope_value:.8f}</b></span><span class="metric">Zonotope candidate score: <b>{candidate_value:.8f}</b></span><span class="metric">Parallelotope-selected replay: <b>{parallel_value:.8f}</b></span><span class="metric">Parallelotope candidate score: <b>{parallel_score:.8f}</b></span></p>
 {shared.svg_figure(result, check, mpc_figure)}
 <h2>Descriptive API-call timings</h2><p>One excluded warmup and seven order-rotated repetitions per method. Times cover the complete algorithm call; request setup and JSON serialization are excluded. These descriptive timings do not establish a performance winner or speedup. No separate limiter profile was collected.</p><table><thead><tr><th>Method</th><th>Runs</th><th>Median (ns)</th><th>Range (ns)</th></tr></thead><tbody>{timing_rows}</tbody></table>
-<h2>Evidence and limits</h2><p>The independent checker reconstructs the exact finite game, verifies all 27 candidate score rows by evaluating their stored terminal factor corners, checks the selected plan's exact worst disturbance history, and transforms every finite-history state into the fixed parallelotope frame at each stage. The parallelotope orientation is fixed and is not optimized. Zonotope coordinate checks do not prove full four-dimensional zonotope membership, and candidate scores are not validated objective bounds. The separate two-dimensional example checks complete inclusion of all finite terminal points in each axis-aligned zonotope.</p>
-<p>The figure shows exact forward reachable sets, robust backward-winning states, their intersections, the box-selected and zonotope-selected outer set projections, and exact replay paths in both player phase planes. The fixed-plan policies use finite catalogs only; they make no continuous feedback optimality claim. The zonotope calls evaluate 884,736 factor corners each (27 plans × 32,768 corners). `perf` and `strace` were unavailable, so this is a known work count, not a profiler-confirmed CPU bottleneck.</p>
+<h2>Evidence and limits</h2><p>The independent checker reconstructs the exact finite game, verifies all 27 zonotope and parallelotope candidate rows by evaluating their stored terminal corners, checks both selected plans' exact worst disturbance histories, and transforms every finite-history state into the fixed parallelotope frame at each stage. The parallelotope orientation is fixed and is not optimized. Zonotope coordinate checks do not prove full four-dimensional zonotope membership, and candidate scores are not validated objective bounds. The separate two-dimensional example checks complete inclusion of all finite terminal points in each axis-aligned zonotope.</p>
+<p>The figure shows exact forward reachable sets, robust backward-winning states, their intersections, the box-selected and zonotope-selected outer set projections, the parallelotope selector's chosen outer set, and exact replay paths in both player phase planes. The fixed-plan policies use finite catalogs only; they make no continuous feedback optimality claim. The zonotope calls evaluate 884,736 factor corners each (27 plans × 32,768 corners); parallelotope scoring evaluates 432 corners in total (27 plans × 16). `perf` and `strace` were unavailable, so these are known work counts, not profiler-confirmed CPU bottlenecks.</p>
 <p><a href="result.json">Raw scores, traces and timing samples</a> · <a href="check.json">Independent check</a> · <a href="capture.json">Build and host capture</a> · <a href="figure-data.json">Figure data</a> · <a href="planar-example.html">Complete planar selector example</a> · <a href="{commit_link}">Source commit</a></p></html>'''
     (output / "index.html").write_text(html_page, encoding="utf-8")
     readme = f'''# Issue 824 TwoPoints zonotope minimax pilot
 
-This bundle compares exact finite-catalog fixed-plan minimax, the existing outer-box selector, candidate selection using stagewise outer zonotopes, and a fixed-frame stagewise parallelotope trace on the three-stage `TwoPointsOnParallelLines` adaptation. The model has state `(x1,x2,x3,x4)`, initial state `(4.5,0,0,0)`, controls `(-2.5,0,2.5)`, disturbances `(-1,0,1)`, and terminal squared position gap.
+This bundle compares exact finite-catalog fixed-plan minimax, the outer-box selector, stagewise zonotope candidate selection, and stagewise fixed-frame parallelotope candidate selection on the three-stage `TwoPointsOnParallelLines` adaptation. The model has state `(x1,x2,x3,x4)`, initial state `(4.5,0,0,0)`, controls `(-2.5,0,2.5)`, disturbances `(-1,0,1)`, and terminal squared position gap.
 
-The exact finite minimax value is `{exact_value:.8f}`. The box-selected plan replay is `{box_value:.8f}`. The zonotope-selected plan replay is `{zonotope_value:.8f}`. The selected terminal zonotope's numerical factor-corner candidate score is `{candidate_value:.14f}`. The selector scored all 27 fixed plans. It evaluates every one of the 32,768 terminal factor corners for each plan under the explicit caller limit.
+The exact finite minimax value is `{exact_value:.8f}`. The box-selected plan replay is `{box_value:.8f}`. The zonotope-selected plan replay is `{zonotope_value:.8f}`. The selected terminal zonotope's numerical factor-corner candidate score is `{candidate_value:.14f}`. The parallelotope-selected plan replay is `{parallel_value:.8f}` with frame-box corner score `{parallel_score:.14f}`. Both approximation selectors scored all 27 fixed plans.
 
-Candidate scores are numerical maxima over stored binary64 factor corners. They are not validated objective bounds. The selected finite plan has a separate exact finite-catalog replay score and worst-history witness. The checker reconstructs every exact state with integer transitions and rational costs. In four dimensions it checks every state coordinate against each candidate zonotope's coordinate bounds. It does not prove full four-dimensional zonotope membership. The planar companion has axis-aligned generators; its complete finite terminal-set inclusion follows from the independently checked coordinate bounds.
+Candidate scores are numerical maxima over stored binary64 enclosure corners. They are not validated objective bounds. Each selected finite plan has a separate exact finite-catalog replay score and worst-history witness. The checker reconstructs every exact state with integer transitions and rational costs. In four dimensions it checks every state coordinate against each candidate zonotope's coordinate bounds and transforms every exact state into each parallelotope candidate's frame bounds. It does not prove full four-dimensional zonotope membership.
 
 This is a fixed open-loop finite-catalog comparison. The fixed-frame parallelotope is a selected orientation, not an orientation optimizer. The report does not claim global minimax optimizer completeness, continuous-action RL reproduction, feedback optimality, ellipsoid support, or a performance winner/speedup. The stagewise geometry figure also overlays exact forward/backward sets and intersections from the separate MPC-05 finite adaptation report.
 
 ## Descriptive timings
 
-The result contains one excluded warmup and seven order-rotated API-call measurements per method, including raw per-repetition durations and returned values. Fixture/request construction and JSON serialization are outside the measured interval; no algorithm workspace is reused. The same immutable request is used for all arms. The timing driver is single-threaded and deterministic, uses binary64 with the default absolute and relative tolerances of `1e-8`, and has no random seed. Timings are descriptive for this host and build only; no performance winner is claimed. `perf` and `strace` were unavailable, so the 884,736 factor-corner evaluations per zonotope call are reported as a known work count rather than a profiler-confirmed CPU limiter.
+The result contains one excluded warmup and seven order-rotated API-call measurements per method, including raw per-repetition durations and returned values. Fixture/request construction and JSON serialization are outside the measured interval; no algorithm workspace is reused. The same immutable request is used for all arms. The timing driver is single-threaded and deterministic, uses binary64 with the default absolute and relative tolerances of `1e-8`, and has no random seed. Timings are descriptive for this host and build only; no performance winner is claimed. `perf` and `strace` were unavailable, so corner counts are known work counts rather than profiler-confirmed CPU limiters.
 
 | Method | Median (ns) | Range (ns) |
 | --- | ---: | ---: |
