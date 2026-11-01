@@ -267,18 +267,36 @@ FiniteMixedBranchPortfolioOutcome select_finite_mixed_branch_portfolio(
             return invalid("finite_mixed_branch.objective",
                 prepared ? "Every prepared branch requires an objective value."
                           : "A refused branch must not carry an objective value.");
+        if (!prepared && evaluation.continuous_relation)
+            return invalid("finite_mixed_branch.relation",
+                "A refused branch must not carry a continuous solution relation.");
+        if (evaluation.continuous_relation) {
+            const auto& mixed_branch = std::get<FiniteMixedBranchProblem>(evaluation.branch);
+            const auto expected_dimension = joint_dimension(mixed_branch.coordinates.continuous_subproblem);
+            const auto metadata = evaluation.continuous_relation->metadata();
+            if (!expected_dimension || !metadata || metadata->set.dimension != *expected_dimension)
+                return invalid("finite_mixed_branch.relation",
+                    "A continuous solution relation must use the branch's joint coordinates.");
+        }
         if (!evaluation.objective) continue;
         if (!std::isfinite(*evaluation.objective))
             return invalid("finite_mixed_branch.objective", "Branch objective must be finite.");
         if (!optimum || *evaluation.objective < *optimum) optimum = *evaluation.objective;
     }
 
-    FiniteMixedBranchPortfolio result{std::move(evaluations), {}, optimum, enumeration_complete};
+    FiniteMixedBranchPortfolio result{
+        std::move(evaluations), {}, optimum, enumeration_complete, false};
     if (optimum) {
         for (std::size_t index = 0; index < result.evaluations.size(); ++index) {
-            const auto& objective = result.evaluations[index].objective;
-            if (objective && *objective <= *optimum + near_optimal_tolerance)
+            const auto& evaluation = result.evaluations[index];
+            if (evaluation.objective && *evaluation.objective <= *optimum + near_optimal_tolerance) {
                 result.optimal_evaluation_indices.push_back(index);
+                if (result.optimal_evaluation_indices.size() == 1)
+                    result.all_selected_relations_present = evaluation.continuous_relation.has_value();
+                else
+                    result.all_selected_relations_present = result.all_selected_relations_present &&
+                        evaluation.continuous_relation.has_value();
+            }
         }
     }
     return result;
