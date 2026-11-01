@@ -628,8 +628,9 @@ FiniteMixedBranchSolveOutcome solve_finite_mixed_branch_portfolio(
     if (!std::isfinite(effective_tie_tolerance))
         return invalid("finite_mixed_branch.effective_tie_tolerance",
             "Branch bound uncertainty and requested tie tolerance overflow binary64.");
+    const bool portfolio_enumeration_complete = history_enumeration_complete && !stop.has_value();
     auto portfolio_outcome = select_finite_mixed_branch_portfolio(std::move(evaluations),
-        history_enumeration_complete,
+        portfolio_enumeration_complete,
         effective_tie_tolerance);
     if (const auto* errors = std::get_if<Diagnostics>(&portfolio_outcome)) return *errors;
     return FiniteMixedBranchSolveResult{std::get<FiniteMixedBranchPortfolio>(std::move(portfolio_outcome)),

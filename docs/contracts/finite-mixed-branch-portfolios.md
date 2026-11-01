@@ -12,9 +12,12 @@ family, and an H relation lifted into the original joint coordinates with the
 discrete controls fixed. Duplicate catalogue values remain distinct histories.
 Preparation, admission, solve, objective-bound, verification, and relation-lift
 failures remain in the ordered evaluations. A partial or stopped search never
-claims a complete optimum. `enumeration_complete` reports whether all histories
-were emitted; `complete` additionally requires a valid objective for every
-history. A stop outcome retains all results completed before the stop.
+claims a complete optimum. `history_enumeration_complete` reports whether the
+cursor emitted every history, including stopped attempts. The portfolio's
+`enumeration_complete` is true only if every history was evaluated without a
+budget, cancellation, or deadline stop; `complete` additionally requires a
+valid objective for every history. A stop outcome retains all results completed
+before the stop.
 
 `FiniteMixedBranchLimits` bounds the aggregate retained output, not just one
 cursor page. Defaults allow 256 evaluated histories, 100,000 combined rows

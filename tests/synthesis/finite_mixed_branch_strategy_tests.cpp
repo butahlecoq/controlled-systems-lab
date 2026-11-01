@@ -178,7 +178,8 @@ TEST_CASE("mixed branch solve runs registered continuous solvers and retains ver
     REQUIRE(bounded.stop.has_value());
     CHECK(bounded.stop->reason == StopReason::resource_limit);
     CHECK(bounded.portfolio.evaluations.size() == 3);
-    CHECK(bounded.portfolio.enumeration_complete);
+    CHECK(bounded.history_enumeration_complete);
+    CHECK_FALSE(bounded.portfolio.enumeration_complete);
     CHECK_FALSE(bounded.portfolio.complete);
     CHECK_FALSE(bounded.every_branch_solved);
     CHECK(bounded.portfolio.all_selected_relations_present);
@@ -233,7 +234,7 @@ TEST_CASE("mixed branch solve propagates cancellation and deadline after startin
     REQUIRE(cancelled.stop.has_value());
     CHECK(cancelled.stop->reason == StopReason::cancelled);
     CHECK(cancelled.history_enumeration_complete);
-    CHECK(cancelled.portfolio.enumeration_complete);
+    CHECK_FALSE(cancelled.portfolio.enumeration_complete);
     CHECK_FALSE(cancelled.portfolio.complete);
     CHECK_FALSE(cancelled.portfolio.evaluations.empty());
 
@@ -246,7 +247,7 @@ TEST_CASE("mixed branch solve propagates cancellation and deadline after startin
     REQUIRE(deadline.stop.has_value());
     CHECK(deadline.stop->reason == StopReason::deadline_expired);
     CHECK(deadline.history_enumeration_complete);
-    CHECK(deadline.portfolio.enumeration_complete);
+    CHECK_FALSE(deadline.portfolio.enumeration_complete);
     CHECK_FALSE(deadline.portfolio.complete);
     CHECK_FALSE(deadline.portfolio.evaluations.empty());
 }

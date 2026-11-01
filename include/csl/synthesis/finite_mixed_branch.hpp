@@ -74,7 +74,7 @@ struct FiniteMixedBranchPortfolio {
     // minimal only when complete is true; otherwise unseen histories may win.
     std::vector<std::size_t> optimal_evaluation_indices;
     std::optional<double> optimum;
-    bool enumeration_complete{}; // Every catalogue-index history was emitted.
+    bool enumeration_complete{}; // Every history was evaluated without an execution stop.
     bool complete{}; // Enumeration completed and every history has a valid objective.
     // True when every tolerance-selected branch has a relation payload. This
     // does not certify family validity, objective optimality, or completeness.
@@ -103,7 +103,7 @@ struct FiniteMixedBranchSolveRequest {
 
 struct FiniteMixedBranchSolveResult {
     FiniteMixedBranchPortfolio portfolio;
-    bool history_enumeration_complete{};
+    bool history_enumeration_complete{}; // Cursor emitted every history, including stopped attempts.
     bool every_branch_solved{};
     double effective_tie_tolerance{};
     std::optional<OperationStopped> stop;
