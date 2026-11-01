@@ -17,45 +17,45 @@
   "measurement": {
     "batches": [
       {
+        "api_duration_ns": 195751414,
         "batch": 1,
         "calls": 10,
-        "duration_ns": 188460958,
         "failures": 0
       },
       {
+        "api_duration_ns": 207521716,
         "batch": 2,
         "calls": 10,
-        "duration_ns": 190398510,
         "failures": 0
       },
       {
+        "api_duration_ns": 205853543,
         "batch": 3,
         "calls": 10,
-        "duration_ns": 189416534,
         "failures": 0
       },
       {
+        "api_duration_ns": 264734604,
         "batch": 4,
         "calls": 10,
-        "duration_ns": 190288649,
         "failures": 0
       },
       {
+        "api_duration_ns": 229732465,
         "batch": 5,
         "calls": 10,
-        "duration_ns": 190465489,
         "failures": 0
       },
       {
+        "api_duration_ns": 227769280,
         "batch": 6,
         "calls": 10,
-        "duration_ns": 188695138,
         "failures": 0
       },
       {
+        "api_duration_ns": 197839472,
         "batch": 7,
         "calls": 10,
-        "duration_ns": 194975245,
         "failures": 0
       }
     ],
@@ -68,19 +68,19 @@
       "performed": false,
       "reason": "No profiler or syscall trace was collected; this descriptive single-adapter measurement makes no bottleneck or performance-winner claim."
     },
-    "max_ns_per_call": 19497524.5,
+    "max_ns_per_call": 26473460.4,
     "measured_batches": 7,
-    "median_ns_per_call": 19028864.9,
-    "min_ns_per_call": 18846095.8,
+    "median_ns_per_call": 20752171.6,
+    "min_ns_per_call": 19575141.4,
     "parallelism": "one process; sequential measured calls; no overlapping benchmark jobs",
     "per_call_batch_ns": [
-      18846095.8,
-      19039851.0,
-      18941653.4,
-      19028864.9,
-      19046548.9,
-      18869513.8,
-      19497524.5
+      19575141.4,
+      20752171.6,
+      20585354.3,
+      26473460.4,
+      22973246.5,
+      22776928.0,
+      19783947.2
     ],
     "schema": "csl.issue824-nominal-measurement/1",
     "scope": "finite_action_nominal API call for all five tracks; fixture construction, minimax reference, serialization, independent checker, build and rendering excluded",
@@ -160,6 +160,7 @@
               0
             ],
             "candidate_score": 13.92409225,
+            "objective_bound_direction": "finite_catalogue_objective_under_binary64",
             "score_kind": "exact_deterministic_objective",
             "status": "scored"
           },
@@ -170,6 +171,7 @@
               1
             ],
             "candidate_score": 15.65389225,
+            "objective_bound_direction": "finite_catalogue_objective_under_binary64",
             "score_kind": "exact_deterministic_objective",
             "status": "scored"
           },
@@ -180,6 +182,7 @@
               2
             ],
             "candidate_score": 17.484942249999996,
+            "objective_bound_direction": "finite_catalogue_objective_under_binary64",
             "score_kind": "exact_deterministic_objective",
             "status": "scored"
           },
@@ -190,6 +193,7 @@
               0
             ],
             "candidate_score": 15.852342250000001,
+            "objective_bound_direction": "finite_catalogue_objective_under_binary64",
             "score_kind": "exact_deterministic_objective",
             "status": "scored"
           },
@@ -200,6 +204,7 @@
               1
             ],
             "candidate_score": 17.69464225,
+            "objective_bound_direction": "finite_catalogue_objective_under_binary64",
             "score_kind": "exact_deterministic_objective",
             "status": "scored"
           },
@@ -210,6 +215,7 @@
               2
             ],
             "candidate_score": 19.63819225,
+            "objective_bound_direction": "finite_catalogue_objective_under_binary64",
             "score_kind": "exact_deterministic_objective",
             "status": "scored"
           },
@@ -220,6 +226,7 @@
               0
             ],
             "candidate_score": 17.90559225,
+            "objective_bound_direction": "finite_catalogue_objective_under_binary64",
             "score_kind": "exact_deterministic_objective",
             "status": "scored"
           },
@@ -230,6 +237,7 @@
               1
             ],
             "candidate_score": 19.86039225,
+            "objective_bound_direction": "finite_catalogue_objective_under_binary64",
             "score_kind": "exact_deterministic_objective",
             "status": "scored"
           },
@@ -240,6 +248,7 @@
               2
             ],
             "candidate_score": 21.916442249999996,
+            "objective_bound_direction": "finite_catalogue_objective_under_binary64",
             "score_kind": "exact_deterministic_objective",
             "status": "scored"
           },
@@ -250,6 +259,7 @@
               0
             ],
             "candidate_score": 15.852342250000001,
+            "objective_bound_direction": "finite_catalogue_objective_under_binary64",
             "score_kind": "exact_deterministic_objective",
             "status": "scored"
           },
@@ -260,6 +270,7 @@
               1
             ],
             "candidate_score": 17.69464225,
+            "objective_bound_direction": "finite_catalogue_objective_under_binary64",
             "score_kind": "exact_deterministic_objective",
             "status": "scored"
           },
@@ -270,6 +281,7 @@
               2
             ],
             "candidate_score": 19.63819225,
+            "objective_bound_direction": "finite_catalogue_objective_under_binary64",
             "score_kind": "exact_deterministic_objective",
             "status": "scored"
           },
@@ -280,6 +292,7 @@
               0
             ],
             "candidate_score": 17.90559225,
+            "objective_bound_direction": "finite_catalogue_objective_under_binary64",
             "score_kind": "exact_deterministic_objective",
             "status": "scored"
           },
@@ -290,6 +303,7 @@
               1
             ],
             "candidate_score": 19.86039225,
+            "objective_bound_direction": "finite_catalogue_objective_under_binary64",
             "score_kind": "exact_deterministic_objective",
             "status": "scored"
           },
@@ -300,6 +314,7 @@
               2
             ],
             "candidate_score": 21.916442249999996,
+            "objective_bound_direction": "finite_catalogue_objective_under_binary64",
             "score_kind": "exact_deterministic_objective",
             "status": "scored"
           },
@@ -310,6 +325,7 @@
               0
             ],
             "candidate_score": 20.083842250000004,
+            "objective_bound_direction": "finite_catalogue_objective_under_binary64",
             "score_kind": "exact_deterministic_objective",
             "status": "scored"
           },
@@ -320,6 +336,7 @@
               1
             ],
             "candidate_score": 22.15114225,
+            "objective_bound_direction": "finite_catalogue_objective_under_binary64",
             "score_kind": "exact_deterministic_objective",
             "status": "scored"
           },
@@ -330,6 +347,7 @@
               2
             ],
             "candidate_score": 24.31969225,
+            "objective_bound_direction": "finite_catalogue_objective_under_binary64",
             "score_kind": "exact_deterministic_objective",
             "status": "scored"
           },
@@ -340,6 +358,7 @@
               0
             ],
             "candidate_score": 17.90559225,
+            "objective_bound_direction": "finite_catalogue_objective_under_binary64",
             "score_kind": "exact_deterministic_objective",
             "status": "scored"
           },
@@ -350,6 +369,7 @@
               1
             ],
             "candidate_score": 19.86039225,
+            "objective_bound_direction": "finite_catalogue_objective_under_binary64",
             "score_kind": "exact_deterministic_objective",
             "status": "scored"
           },
@@ -360,6 +380,7 @@
               2
             ],
             "candidate_score": 21.916442249999996,
+            "objective_bound_direction": "finite_catalogue_objective_under_binary64",
             "score_kind": "exact_deterministic_objective",
             "status": "scored"
           },
@@ -370,6 +391,7 @@
               0
             ],
             "candidate_score": 20.083842250000004,
+            "objective_bound_direction": "finite_catalogue_objective_under_binary64",
             "score_kind": "exact_deterministic_objective",
             "status": "scored"
           },
@@ -380,6 +402,7 @@
               1
             ],
             "candidate_score": 22.15114225,
+            "objective_bound_direction": "finite_catalogue_objective_under_binary64",
             "score_kind": "exact_deterministic_objective",
             "status": "scored"
           },
@@ -390,6 +413,7 @@
               2
             ],
             "candidate_score": 24.31969225,
+            "objective_bound_direction": "finite_catalogue_objective_under_binary64",
             "score_kind": "exact_deterministic_objective",
             "status": "scored"
           },
@@ -400,6 +424,7 @@
               0
             ],
             "candidate_score": 22.387092250000006,
+            "objective_bound_direction": "finite_catalogue_objective_under_binary64",
             "score_kind": "exact_deterministic_objective",
             "status": "scored"
           },
@@ -410,6 +435,7 @@
               1
             ],
             "candidate_score": 24.56689225,
+            "objective_bound_direction": "finite_catalogue_objective_under_binary64",
             "score_kind": "exact_deterministic_objective",
             "status": "scored"
           },
@@ -420,12 +446,14 @@
               2
             ],
             "candidate_score": 26.84794225,
+            "objective_bound_direction": "finite_catalogue_objective_under_binary64",
             "score_kind": "exact_deterministic_objective",
             "status": "scored"
           }
         ],
         "candidate_score": 13.92409225,
         "coverage": "complete",
+        "objective_bound_direction": "finite_catalogue_minimum_under_binary64",
         "replay": {
           "controls": [
             [
@@ -528,6 +556,7 @@
               0
             ],
             "candidate_score": 13.924092250000076,
+            "objective_bound_direction": "none_certified",
             "score_kind": "numerical_outer_enclosure_estimate",
             "status": "scored"
           },
@@ -538,6 +567,7 @@
               1
             ],
             "candidate_score": 15.653892250000085,
+            "objective_bound_direction": "none_certified",
             "score_kind": "numerical_outer_enclosure_estimate",
             "status": "scored"
           },
@@ -548,6 +578,7 @@
               2
             ],
             "candidate_score": 17.48494225000009,
+            "objective_bound_direction": "none_certified",
             "score_kind": "numerical_outer_enclosure_estimate",
             "status": "scored"
           },
@@ -558,6 +589,7 @@
               0
             ],
             "candidate_score": 15.852342250000087,
+            "objective_bound_direction": "none_certified",
             "score_kind": "numerical_outer_enclosure_estimate",
             "status": "scored"
           },
@@ -568,6 +600,7 @@
               1
             ],
             "candidate_score": 17.69464225000009,
+            "objective_bound_direction": "none_certified",
             "score_kind": "numerical_outer_enclosure_estimate",
             "status": "scored"
           },
@@ -578,6 +611,7 @@
               2
             ],
             "candidate_score": 19.638192250000092,
+            "objective_bound_direction": "none_certified",
             "score_kind": "numerical_outer_enclosure_estimate",
             "status": "scored"
           },
@@ -588,6 +622,7 @@
               0
             ],
             "candidate_score": 17.905592250000094,
+            "objective_bound_direction": "none_certified",
             "score_kind": "numerical_outer_enclosure_estimate",
             "status": "scored"
           },
@@ -598,6 +633,7 @@
               1
             ],
             "candidate_score": 19.860392250000096,
+            "objective_bound_direction": "none_certified",
             "score_kind": "numerical_outer_enclosure_estimate",
             "status": "scored"
           },
@@ -608,6 +644,7 @@
               2
             ],
             "candidate_score": 21.916442250000095,
+            "objective_bound_direction": "none_certified",
             "score_kind": "numerical_outer_enclosure_estimate",
             "status": "scored"
           },
@@ -618,6 +655,7 @@
               0
             ],
             "candidate_score": 15.852342250000087,
+            "objective_bound_direction": "none_certified",
             "score_kind": "numerical_outer_enclosure_estimate",
             "status": "scored"
           },
@@ -628,6 +666,7 @@
               1
             ],
             "candidate_score": 17.69464225000009,
+            "objective_bound_direction": "none_certified",
             "score_kind": "numerical_outer_enclosure_estimate",
             "status": "scored"
           },
@@ -638,6 +677,7 @@
               2
             ],
             "candidate_score": 19.638192250000092,
+            "objective_bound_direction": "none_certified",
             "score_kind": "numerical_outer_enclosure_estimate",
             "status": "scored"
           },
@@ -648,6 +688,7 @@
               0
             ],
             "candidate_score": 17.905592250000094,
+            "objective_bound_direction": "none_certified",
             "score_kind": "numerical_outer_enclosure_estimate",
             "status": "scored"
           },
@@ -658,6 +699,7 @@
               1
             ],
             "candidate_score": 19.860392250000096,
+            "objective_bound_direction": "none_certified",
             "score_kind": "numerical_outer_enclosure_estimate",
             "status": "scored"
           },
@@ -668,6 +710,7 @@
               2
             ],
             "candidate_score": 21.916442250000095,
+            "objective_bound_direction": "none_certified",
             "score_kind": "numerical_outer_enclosure_estimate",
             "status": "scored"
           },
@@ -678,6 +721,7 @@
               0
             ],
             "candidate_score": 20.0838422500001,
+            "objective_bound_direction": "none_certified",
             "score_kind": "numerical_outer_enclosure_estimate",
             "status": "scored"
           },
@@ -688,6 +732,7 @@
               1
             ],
             "candidate_score": 22.1511422500001,
+            "objective_bound_direction": "none_certified",
             "score_kind": "numerical_outer_enclosure_estimate",
             "status": "scored"
           },
@@ -698,6 +743,7 @@
               2
             ],
             "candidate_score": 24.319692250000102,
+            "objective_bound_direction": "none_certified",
             "score_kind": "numerical_outer_enclosure_estimate",
             "status": "scored"
           },
@@ -708,6 +754,7 @@
               0
             ],
             "candidate_score": 17.905592250000094,
+            "objective_bound_direction": "none_certified",
             "score_kind": "numerical_outer_enclosure_estimate",
             "status": "scored"
           },
@@ -718,6 +765,7 @@
               1
             ],
             "candidate_score": 19.860392250000096,
+            "objective_bound_direction": "none_certified",
             "score_kind": "numerical_outer_enclosure_estimate",
             "status": "scored"
           },
@@ -728,6 +776,7 @@
               2
             ],
             "candidate_score": 21.916442250000095,
+            "objective_bound_direction": "none_certified",
             "score_kind": "numerical_outer_enclosure_estimate",
             "status": "scored"
           },
@@ -738,6 +787,7 @@
               0
             ],
             "candidate_score": 20.0838422500001,
+            "objective_bound_direction": "none_certified",
             "score_kind": "numerical_outer_enclosure_estimate",
             "status": "scored"
           },
@@ -748,6 +798,7 @@
               1
             ],
             "candidate_score": 22.1511422500001,
+            "objective_bound_direction": "none_certified",
             "score_kind": "numerical_outer_enclosure_estimate",
             "status": "scored"
           },
@@ -758,6 +809,7 @@
               2
             ],
             "candidate_score": 24.319692250000102,
+            "objective_bound_direction": "none_certified",
             "score_kind": "numerical_outer_enclosure_estimate",
             "status": "scored"
           },
@@ -768,6 +820,7 @@
               0
             ],
             "candidate_score": 22.387092250000105,
+            "objective_bound_direction": "none_certified",
             "score_kind": "numerical_outer_enclosure_estimate",
             "status": "scored"
           },
@@ -778,6 +831,7 @@
               1
             ],
             "candidate_score": 24.566892250000105,
+            "objective_bound_direction": "none_certified",
             "score_kind": "numerical_outer_enclosure_estimate",
             "status": "scored"
           },
@@ -788,12 +842,14 @@
               2
             ],
             "candidate_score": 26.847942250000106,
+            "objective_bound_direction": "none_certified",
             "score_kind": "numerical_outer_enclosure_estimate",
             "status": "scored"
           }
         ],
         "candidate_score": 13.924092250000076,
         "coverage": "complete",
+        "objective_bound_direction": "none_certified",
         "replay": {
           "controls": [
             [
@@ -919,6 +975,7 @@
               0
             ],
             "candidate_score": 13.924092250000049,
+            "objective_bound_direction": "none_certified",
             "score_kind": "numerical_outer_enclosure_estimate",
             "status": "scored"
           },
@@ -929,6 +986,7 @@
               1
             ],
             "candidate_score": 15.65389225000005,
+            "objective_bound_direction": "none_certified",
             "score_kind": "numerical_outer_enclosure_estimate",
             "status": "scored"
           },
@@ -939,6 +997,7 @@
               2
             ],
             "candidate_score": 17.484942250000056,
+            "objective_bound_direction": "none_certified",
             "score_kind": "numerical_outer_enclosure_estimate",
             "status": "scored"
           },
@@ -949,6 +1008,7 @@
               0
             ],
             "candidate_score": 15.852342250000044,
+            "objective_bound_direction": "none_certified",
             "score_kind": "numerical_outer_enclosure_estimate",
             "status": "scored"
           },
@@ -959,6 +1019,7 @@
               1
             ],
             "candidate_score": 17.694642250000037,
+            "objective_bound_direction": "none_certified",
             "score_kind": "numerical_outer_enclosure_estimate",
             "status": "scored"
           },
@@ -969,6 +1030,7 @@
               2
             ],
             "candidate_score": 19.638192250000046,
+            "objective_bound_direction": "none_certified",
             "score_kind": "numerical_outer_enclosure_estimate",
             "status": "scored"
           },
@@ -979,6 +1041,7 @@
               0
             ],
             "candidate_score": 17.905592250000062,
+            "objective_bound_direction": "none_certified",
             "score_kind": "numerical_outer_enclosure_estimate",
             "status": "scored"
           },
@@ -989,6 +1052,7 @@
               1
             ],
             "candidate_score": 19.860392250000057,
+            "objective_bound_direction": "none_certified",
             "score_kind": "numerical_outer_enclosure_estimate",
             "status": "scored"
           },
@@ -999,6 +1063,7 @@
               2
             ],
             "candidate_score": 21.916442250000063,
+            "objective_bound_direction": "none_certified",
             "score_kind": "numerical_outer_enclosure_estimate",
             "status": "scored"
           },
@@ -1009,6 +1074,7 @@
               0
             ],
             "candidate_score": 15.852342250000044,
+            "objective_bound_direction": "none_certified",
             "score_kind": "numerical_outer_enclosure_estimate",
             "status": "scored"
           },
@@ -1019,6 +1085,7 @@
               1
             ],
             "candidate_score": 17.694642250000037,
+            "objective_bound_direction": "none_certified",
             "score_kind": "numerical_outer_enclosure_estimate",
             "status": "scored"
           },
@@ -1029,6 +1096,7 @@
               2
             ],
             "candidate_score": 19.638192250000046,
+            "objective_bound_direction": "none_certified",
             "score_kind": "numerical_outer_enclosure_estimate",
             "status": "scored"
           },
@@ -1039,6 +1107,7 @@
               0
             ],
             "candidate_score": 17.905592250000034,
+            "objective_bound_direction": "none_certified",
             "score_kind": "numerical_outer_enclosure_estimate",
             "status": "scored"
           },
@@ -1049,6 +1118,7 @@
               1
             ],
             "candidate_score": 19.860392250000025,
+            "objective_bound_direction": "none_certified",
             "score_kind": "numerical_outer_enclosure_estimate",
             "status": "scored"
           },
@@ -1059,6 +1129,7 @@
               2
             ],
             "candidate_score": 21.91644225000003,
+            "objective_bound_direction": "none_certified",
             "score_kind": "numerical_outer_enclosure_estimate",
             "status": "scored"
           },
@@ -1069,6 +1140,7 @@
               0
             ],
             "candidate_score": 20.083842250000053,
+            "objective_bound_direction": "none_certified",
             "score_kind": "numerical_outer_enclosure_estimate",
             "status": "scored"
           },
@@ -1079,6 +1151,7 @@
               1
             ],
             "candidate_score": 22.151142250000042,
+            "objective_bound_direction": "none_certified",
             "score_kind": "numerical_outer_enclosure_estimate",
             "status": "scored"
           },
@@ -1089,6 +1162,7 @@
               2
             ],
             "candidate_score": 24.31969225000005,
+            "objective_bound_direction": "none_certified",
             "score_kind": "numerical_outer_enclosure_estimate",
             "status": "scored"
           },
@@ -1099,6 +1173,7 @@
               0
             ],
             "candidate_score": 17.905592250000062,
+            "objective_bound_direction": "none_certified",
             "score_kind": "numerical_outer_enclosure_estimate",
             "status": "scored"
           },
@@ -1109,6 +1184,7 @@
               1
             ],
             "candidate_score": 19.860392250000057,
+            "objective_bound_direction": "none_certified",
             "score_kind": "numerical_outer_enclosure_estimate",
             "status": "scored"
           },
@@ -1119,6 +1195,7 @@
               2
             ],
             "candidate_score": 21.916442250000063,
+            "objective_bound_direction": "none_certified",
             "score_kind": "numerical_outer_enclosure_estimate",
             "status": "scored"
           },
@@ -1129,6 +1206,7 @@
               0
             ],
             "candidate_score": 20.083842250000053,
+            "objective_bound_direction": "none_certified",
             "score_kind": "numerical_outer_enclosure_estimate",
             "status": "scored"
           },
@@ -1139,6 +1217,7 @@
               1
             ],
             "candidate_score": 22.151142250000042,
+            "objective_bound_direction": "none_certified",
             "score_kind": "numerical_outer_enclosure_estimate",
             "status": "scored"
           },
@@ -1149,6 +1228,7 @@
               2
             ],
             "candidate_score": 24.31969225000005,
+            "objective_bound_direction": "none_certified",
             "score_kind": "numerical_outer_enclosure_estimate",
             "status": "scored"
           },
@@ -1159,6 +1239,7 @@
               0
             ],
             "candidate_score": 22.387092250000073,
+            "objective_bound_direction": "none_certified",
             "score_kind": "numerical_outer_enclosure_estimate",
             "status": "scored"
           },
@@ -1169,6 +1250,7 @@
               1
             ],
             "candidate_score": 24.566892250000063,
+            "objective_bound_direction": "none_certified",
             "score_kind": "numerical_outer_enclosure_estimate",
             "status": "scored"
           },
@@ -1179,12 +1261,14 @@
               2
             ],
             "candidate_score": 26.84794225000007,
+            "objective_bound_direction": "none_certified",
             "score_kind": "numerical_outer_enclosure_estimate",
             "status": "scored"
           }
         ],
         "candidate_score": 13.924092250000049,
         "coverage": "complete",
+        "objective_bound_direction": "none_certified",
         "replay": {
           "controls": [
             [
@@ -1436,6 +1520,7 @@
               0
             ],
             "candidate_score": 13.924092250000488,
+            "objective_bound_direction": "none_certified",
             "score_kind": "numerical_outer_enclosure_estimate",
             "status": "scored"
           },
@@ -1446,6 +1531,7 @@
               1
             ],
             "candidate_score": 15.65389225000049,
+            "objective_bound_direction": "none_certified",
             "score_kind": "numerical_outer_enclosure_estimate",
             "status": "scored"
           },
@@ -1456,6 +1542,7 @@
               2
             ],
             "candidate_score": 17.48494225000055,
+            "objective_bound_direction": "none_certified",
             "score_kind": "numerical_outer_enclosure_estimate",
             "status": "scored"
           },
@@ -1466,6 +1553,7 @@
               0
             ],
             "candidate_score": 15.852342250000467,
+            "objective_bound_direction": "none_certified",
             "score_kind": "numerical_outer_enclosure_estimate",
             "status": "scored"
           },
@@ -1476,6 +1564,7 @@
               1
             ],
             "candidate_score": 17.69464225000045,
+            "objective_bound_direction": "none_certified",
             "score_kind": "numerical_outer_enclosure_estimate",
             "status": "scored"
           },
@@ -1486,6 +1575,7 @@
               2
             ],
             "candidate_score": 19.63819225000051,
+            "objective_bound_direction": "none_certified",
             "score_kind": "numerical_outer_enclosure_estimate",
             "status": "scored"
           },
@@ -1496,6 +1586,7 @@
               0
             ],
             "candidate_score": 17.905592250000538,
+            "objective_bound_direction": "none_certified",
             "score_kind": "numerical_outer_enclosure_estimate",
             "status": "scored"
           },
@@ -1506,6 +1597,7 @@
               1
             ],
             "candidate_score": 19.860392250000526,
+            "objective_bound_direction": "none_certified",
             "score_kind": "numerical_outer_enclosure_estimate",
             "status": "scored"
           },
@@ -1516,6 +1608,7 @@
               2
             ],
             "candidate_score": 21.91644225000059,
+            "objective_bound_direction": "none_certified",
             "score_kind": "numerical_outer_enclosure_estimate",
             "status": "scored"
           },
@@ -1526,6 +1619,7 @@
               0
             ],
             "candidate_score": 15.852342250000467,
+            "objective_bound_direction": "none_certified",
             "score_kind": "numerical_outer_enclosure_estimate",
             "status": "scored"
           },
@@ -1536,6 +1630,7 @@
               1
             ],
             "candidate_score": 17.69464225000046,
+            "objective_bound_direction": "none_certified",
             "score_kind": "numerical_outer_enclosure_estimate",
             "status": "scored"
           },
@@ -1546,6 +1641,7 @@
               2
             ],
             "candidate_score": 19.63819225000052,
+            "objective_bound_direction": "none_certified",
             "score_kind": "numerical_outer_enclosure_estimate",
             "status": "scored"
           },
@@ -1556,6 +1652,7 @@
               0
             ],
             "candidate_score": 17.905592250000417,
+            "objective_bound_direction": "none_certified",
             "score_kind": "numerical_outer_enclosure_estimate",
             "status": "scored"
           },
@@ -1566,6 +1663,7 @@
               1
             ],
             "candidate_score": 19.860392250000398,
+            "objective_bound_direction": "none_certified",
             "score_kind": "numerical_outer_enclosure_estimate",
             "status": "scored"
           },
@@ -1576,6 +1674,7 @@
               2
             ],
             "candidate_score": 21.916442250000458,
+            "objective_bound_direction": "none_certified",
             "score_kind": "numerical_outer_enclosure_estimate",
             "status": "scored"
           },
@@ -1586,6 +1685,7 @@
               0
             ],
             "candidate_score": 20.083842250000508,
+            "objective_bound_direction": "none_certified",
             "score_kind": "numerical_outer_enclosure_estimate",
             "status": "scored"
           },
@@ -1596,6 +1696,7 @@
               1
             ],
             "candidate_score": 22.15114225000049,
+            "objective_bound_direction": "none_certified",
             "score_kind": "numerical_outer_enclosure_estimate",
             "status": "scored"
           },
@@ -1606,6 +1707,7 @@
               2
             ],
             "candidate_score": 24.31969225000055,
+            "objective_bound_direction": "none_certified",
             "score_kind": "numerical_outer_enclosure_estimate",
             "status": "scored"
           },
@@ -1616,6 +1718,7 @@
               0
             ],
             "candidate_score": 17.905592250000552,
+            "objective_bound_direction": "none_certified",
             "score_kind": "numerical_outer_enclosure_estimate",
             "status": "scored"
           },
@@ -1626,6 +1729,7 @@
               1
             ],
             "candidate_score": 19.86039225000054,
+            "objective_bound_direction": "none_certified",
             "score_kind": "numerical_outer_enclosure_estimate",
             "status": "scored"
           },
@@ -1636,6 +1740,7 @@
               2
             ],
             "candidate_score": 21.916442250000607,
+            "objective_bound_direction": "none_certified",
             "score_kind": "numerical_outer_enclosure_estimate",
             "status": "scored"
           },
@@ -1646,6 +1751,7 @@
               0
             ],
             "candidate_score": 20.08384225000049,
+            "objective_bound_direction": "none_certified",
             "score_kind": "numerical_outer_enclosure_estimate",
             "status": "scored"
           },
@@ -1656,6 +1762,7 @@
               1
             ],
             "candidate_score": 22.15114225000048,
+            "objective_bound_direction": "none_certified",
             "score_kind": "numerical_outer_enclosure_estimate",
             "status": "scored"
           },
@@ -1666,6 +1773,7 @@
               2
             ],
             "candidate_score": 24.31969225000055,
+            "objective_bound_direction": "none_certified",
             "score_kind": "numerical_outer_enclosure_estimate",
             "status": "scored"
           },
@@ -1676,6 +1784,7 @@
               0
             ],
             "candidate_score": 22.387092250000588,
+            "objective_bound_direction": "none_certified",
             "score_kind": "numerical_outer_enclosure_estimate",
             "status": "scored"
           },
@@ -1686,6 +1795,7 @@
               1
             ],
             "candidate_score": 24.566892250000567,
+            "objective_bound_direction": "none_certified",
             "score_kind": "numerical_outer_enclosure_estimate",
             "status": "scored"
           },
@@ -1696,12 +1806,14 @@
               2
             ],
             "candidate_score": 26.847942250000635,
+            "objective_bound_direction": "none_certified",
             "score_kind": "numerical_outer_enclosure_estimate",
             "status": "scored"
           }
         ],
         "candidate_score": 13.924092250000488,
         "coverage": "complete",
+        "objective_bound_direction": "none_certified",
         "replay": {
           "controls": [
             [
@@ -1849,6 +1961,7 @@
               0
             ],
             "candidate_score": 13.924092250000715,
+            "objective_bound_direction": "none_certified",
             "score_kind": "numerical_outer_enclosure_estimate",
             "status": "scored"
           },
@@ -1859,6 +1972,7 @@
               1
             ],
             "candidate_score": 15.653892250000787,
+            "objective_bound_direction": "none_certified",
             "score_kind": "numerical_outer_enclosure_estimate",
             "status": "scored"
           },
@@ -1869,6 +1983,7 @@
               2
             ],
             "candidate_score": 17.48494225000082,
+            "objective_bound_direction": "none_certified",
             "score_kind": "numerical_outer_enclosure_estimate",
             "status": "scored"
           },
@@ -1879,6 +1994,7 @@
               0
             ],
             "candidate_score": 15.852342250000794,
+            "objective_bound_direction": "none_certified",
             "score_kind": "numerical_outer_enclosure_estimate",
             "status": "scored"
           },
@@ -1889,6 +2005,7 @@
               1
             ],
             "candidate_score": 17.69464225000084,
+            "objective_bound_direction": "none_certified",
             "score_kind": "numerical_outer_enclosure_estimate",
             "status": "scored"
           },
@@ -1899,6 +2016,7 @@
               2
             ],
             "candidate_score": 19.63819225000088,
+            "objective_bound_direction": "none_certified",
             "score_kind": "numerical_outer_enclosure_estimate",
             "status": "scored"
           },
@@ -1909,6 +2027,7 @@
               0
             ],
             "candidate_score": 17.905592250000844,
+            "objective_bound_direction": "none_certified",
             "score_kind": "numerical_outer_enclosure_estimate",
             "status": "scored"
           },
@@ -1919,6 +2038,7 @@
               1
             ],
             "candidate_score": 19.86039225000089,
+            "objective_bound_direction": "none_certified",
             "score_kind": "numerical_outer_enclosure_estimate",
             "status": "scored"
           },
@@ -1929,6 +2049,7 @@
               2
             ],
             "candidate_score": 21.916442250000927,
+            "objective_bound_direction": "none_certified",
             "score_kind": "numerical_outer_enclosure_estimate",
             "status": "scored"
           },
@@ -1939,6 +2060,7 @@
               0
             ],
             "candidate_score": 15.852342250000794,
+            "objective_bound_direction": "none_certified",
             "score_kind": "numerical_outer_enclosure_estimate",
             "status": "scored"
           },
@@ -1949,6 +2071,7 @@
               1
             ],
             "candidate_score": 17.69464225000084,
+            "objective_bound_direction": "none_certified",
             "score_kind": "numerical_outer_enclosure_estimate",
             "status": "scored"
           },
@@ -1959,6 +2082,7 @@
               2
             ],
             "candidate_score": 19.63819225000088,
+            "objective_bound_direction": "none_certified",
             "score_kind": "numerical_outer_enclosure_estimate",
             "status": "scored"
           },
@@ -1969,6 +2093,7 @@
               0
             ],
             "candidate_score": 17.905592250000844,
+            "objective_bound_direction": "none_certified",
             "score_kind": "numerical_outer_enclosure_estimate",
             "status": "scored"
           },
@@ -1979,6 +2104,7 @@
               1
             ],
             "candidate_score": 19.86039225000089,
+            "objective_bound_direction": "none_certified",
             "score_kind": "numerical_outer_enclosure_estimate",
             "status": "scored"
           },
@@ -1989,6 +2115,7 @@
               2
             ],
             "candidate_score": 21.916442250000927,
+            "objective_bound_direction": "none_certified",
             "score_kind": "numerical_outer_enclosure_estimate",
             "status": "scored"
           },
@@ -1999,6 +2126,7 @@
               0
             ],
             "candidate_score": 20.083842250000895,
+            "objective_bound_direction": "none_certified",
             "score_kind": "numerical_outer_enclosure_estimate",
             "status": "scored"
           },
@@ -2009,6 +2137,7 @@
               1
             ],
             "candidate_score": 22.151142250000937,
+            "objective_bound_direction": "none_certified",
             "score_kind": "numerical_outer_enclosure_estimate",
             "status": "scored"
           },
@@ -2019,6 +2148,7 @@
               2
             ],
             "candidate_score": 24.31969225000098,
+            "objective_bound_direction": "none_certified",
             "score_kind": "numerical_outer_enclosure_estimate",
             "status": "scored"
           },
@@ -2029,6 +2159,7 @@
               0
             ],
             "candidate_score": 17.905592250000844,
+            "objective_bound_direction": "none_certified",
             "score_kind": "numerical_outer_enclosure_estimate",
             "status": "scored"
           },
@@ -2039,6 +2170,7 @@
               1
             ],
             "candidate_score": 19.86039225000089,
+            "objective_bound_direction": "none_certified",
             "score_kind": "numerical_outer_enclosure_estimate",
             "status": "scored"
           },
@@ -2049,6 +2181,7 @@
               2
             ],
             "candidate_score": 21.916442250000927,
+            "objective_bound_direction": "none_certified",
             "score_kind": "numerical_outer_enclosure_estimate",
             "status": "scored"
           },
@@ -2059,6 +2192,7 @@
               0
             ],
             "candidate_score": 20.083842250000895,
+            "objective_bound_direction": "none_certified",
             "score_kind": "numerical_outer_enclosure_estimate",
             "status": "scored"
           },
@@ -2069,6 +2203,7 @@
               1
             ],
             "candidate_score": 22.151142250000937,
+            "objective_bound_direction": "none_certified",
             "score_kind": "numerical_outer_enclosure_estimate",
             "status": "scored"
           },
@@ -2079,6 +2214,7 @@
               2
             ],
             "candidate_score": 24.31969225000098,
+            "objective_bound_direction": "none_certified",
             "score_kind": "numerical_outer_enclosure_estimate",
             "status": "scored"
           },
@@ -2089,6 +2225,7 @@
               0
             ],
             "candidate_score": 22.387092250000947,
+            "objective_bound_direction": "none_certified",
             "score_kind": "numerical_outer_enclosure_estimate",
             "status": "scored"
           },
@@ -2099,6 +2236,7 @@
               1
             ],
             "candidate_score": 24.566892250000986,
+            "objective_bound_direction": "none_certified",
             "score_kind": "numerical_outer_enclosure_estimate",
             "status": "scored"
           },
@@ -2109,12 +2247,14 @@
               2
             ],
             "candidate_score": 26.847942250001026,
+            "objective_bound_direction": "none_certified",
             "score_kind": "numerical_outer_enclosure_estimate",
             "status": "scored"
           }
         ],
         "candidate_score": 13.924092250000715,
         "coverage": "complete",
+        "objective_bound_direction": "none_certified",
         "replay": {
           "controls": [
             [
@@ -2239,6 +2379,6 @@
     }
   },
   "schema": "csl.issue824-two-points-nominal-bundle/1",
-  "source_commit": "afe94c7a2e55ecaf39f880d31cbf5c32b096e4b3",
+  "source_commit": "76e2f9024ef9553c99636a1f638959af44a47bbf",
   "source_worktree_clean": true
 }

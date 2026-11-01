@@ -4,7 +4,7 @@ This report adds a distinct classic nominal open-loop comparison to the existing
 
 The separate exact finite minimax reference has value `14.58094225` with the opponent selecting from `(-1, 0, 1)` at each stage. These values use different opponent information and disturbance assumptions. They are shown as adjacent context, not as directly comparable claims.
 
-The source task uses continuous actions and a 10-second horizon. This is an explicit three-stage adaptation. The objective is squared terminal position gap, monotone-equivalent for minimizers to the source negative absolute-gap reward. All values and approximation scores are numerical, not validated arithmetic certificates.
+The source task uses continuous actions and a 10-second horizon. This is an explicit three-stage adaptation. The objective is squared terminal position gap, monotone-equivalent for minimizers to the source negative absolute-gap reward. All values are numerical, not validated arithmetic certificates. Approximation scores are ranking estimates only and establish no certified lower or upper bound on the objective; the saved selected replay is a feasible finite-catalog witness.
 
 The two-panel figure uses player phase planes `(x1,x2)` and `(x3,x4)`. It overlays the nominal replay on the prior report's forward/backward game geometry, intersections, representation projections, and finite minimax trajectories. The geometry is identified by its frozen report hashes in `result.json`.
 
@@ -20,4 +20,4 @@ python3 scripts/reports/exp824/check_nominal.py \
   reports/algorithm-results/issue824-two-points-nominal-v1/result.json
 ```
 
-One warmup and seven batches of ten calls record descriptive end-to-end API timings for all five nominal tracks together. The interval excludes fixture construction, the separate minimax reference, serialization, independent checking, build and rendering. The report makes no speedup, scalability or bottleneck claim; no separate limiter profile was performed.
+One warmup and seven batches of ten calls record descriptive API timings for all five nominal tracks together. Caller-side status checks and score consumption occur after each timed interval. The interval excludes fixture construction, the separate minimax reference, serialization, independent checking, build and rendering. The report makes no speedup, scalability or bottleneck claim; no separate limiter profile was performed.
