@@ -156,6 +156,9 @@ def svg_figure(result: dict, check: dict, mpc_figure: dict) -> str:
         "Exact finite minimax replay": (check["exact_reference_state_path"], "#076678", ""),
         "Box selected plan replay": (check["selected_plan_state_path"], "#af3a03", "9 5"),
     }
+    if "nominal_method" in result:
+        trajectories["Classic nominal replay (fixed v=+1)"] = (
+            result["nominal_method"]["replay"]["states"], "#cc241d", "7 3")
     if "zonotope_minimax_method" in result:
         selection = result["zonotope_minimax_method"]
         selected_trace = selection["plan_attempts"][selection["selected_candidate_attempt_index"]]["stages"]
@@ -178,6 +181,9 @@ def svg_figure(result: dict, check: dict, mpc_figure: dict) -> str:
            '<rect width="100%" height="100%" fill="#fbf1c7"/>',
            '<text x="720" y="38" text-anchor="middle" font-family="sans-serif" font-size="23" font-weight="700" fill="#282828">TwoPointsOnParallelLines · 3-stage finite adaptation</text>',
            '<text x="720" y="67" text-anchor="middle" font-family="sans-serif" font-size="14" fill="#504945">Exact finite-game geometry and stagewise 4D outer boxes, zonotopes, parallelotopes and ellipsoids in each player&apos;s phase plane</text>']
+    if "nominal_method" in result:
+        out[1] = '<title id="title">TwoPoints minimax geometry with classic nominal trajectory</title>'
+        out[2] = '<desc id="desc">Two player phase-plane plots show exact forward sets, finite backward-winning states, intersections, stagewise outer approximations and minimax trajectories. A classic nominal trajectory with fixed opponent input is overlaid.</desc>'
 
     for panel_index, ((xcoord, ycoord, title, xlabel, ylabel), (left, top, plot_width, plot_height)) in enumerate(zip(panels, panel_boxes)):
         points_for_bounds = []
@@ -301,6 +307,8 @@ def svg_figure(result: dict, check: dict, mpc_figure: dict) -> str:
     if "ellipsoid_minimax_method" in result:
         legend.append(("Ellipsoid-selected plan ellipsoid", "#d79921", "dash"))
         legend.append(("Ellipsoid-selected plan replay", "#d79921", "line-dash"))
+    if "nominal_method" in result:
+        legend.append(("Classic nominal replay (fixed v=+1)", "#cc241d", "line-dash"))
     x_positions = (50, 400, 750, 1100)
     for index, (label, color, kind) in enumerate(legend):
         x = x_positions[index % len(x_positions)]

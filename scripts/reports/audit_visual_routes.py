@@ -24,6 +24,7 @@ FOLLOW_UP_ISSUE_OVERRIDES = {
     "scripts/reports/exp824/make_ellipsoid_minimax_report.py": 824,
 }
 COMPOSED_SAVED_ROUTES = {
+    "scripts/reports/exp824/make_nominal_report.py",
     "scripts/reports/ext03_transform/report.py",
     "scripts/reports/ext04/continuous_report.py",
     "scripts/reports/ext04/h_policy_report.py",
@@ -132,6 +133,7 @@ FROZEN_REVIEWED_ROUTES = {
         "reviewed: frozen control-family report preserved with shared-policy saved-data companion",
 }
 FROZEN_ROUTE_FOLLOW_UP_ISSUES = {
+    "issue824-two-points-nominal-v1": 824,
     "issue824-two-points-zonotope-minimax-v1": 824,
     "issue824-two-points-parallelotope-pilot-v1": 824,
     "issue824-two-points-ellipsoid-minimax-v1": 824,

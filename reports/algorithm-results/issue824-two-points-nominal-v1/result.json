@@ -1,0 +1,2384 @@
+{
+  "figure": {
+    "description": "Existing forward/backward/intersection and approximation geometry in both player phase planes, with the classic nominal trajectory overlaid.",
+    "file": "projections.svg"
+  },
+  "independent_check": {
+    "checked_trace_stages_per_track": 4,
+    "finite_minimax_disturbance_histories_per_plan": 27,
+    "finite_minimax_exact_value": 14.58094225,
+    "finite_minimax_plans_checked": 27,
+    "nominal_action_plans_checked_per_track": 27,
+    "nominal_exact_objective": 13.92409225,
+    "nominal_tracks_checked": 5,
+    "schema": "csl.issue824-two-points-nominal-check/1",
+    "status": "passed"
+  },
+  "measurement": {
+    "batches": [
+      {
+        "api_duration_ns": 195751414,
+        "batch": 1,
+        "calls": 10,
+        "failures": 0
+      },
+      {
+        "api_duration_ns": 207521716,
+        "batch": 2,
+        "calls": 10,
+        "failures": 0
+      },
+      {
+        "api_duration_ns": 205853543,
+        "batch": 3,
+        "calls": 10,
+        "failures": 0
+      },
+      {
+        "api_duration_ns": 264734604,
+        "batch": 4,
+        "calls": 10,
+        "failures": 0
+      },
+      {
+        "api_duration_ns": 229732465,
+        "batch": 5,
+        "calls": 10,
+        "failures": 0
+      },
+      {
+        "api_duration_ns": 227769280,
+        "batch": 6,
+        "calls": 10,
+        "failures": 0
+      },
+      {
+        "api_duration_ns": 197839472,
+        "batch": 7,
+        "calls": 10,
+        "failures": 0
+      }
+    ],
+    "calls_per_batch": 10,
+    "candidate_score_checksum": 4943.052748750086,
+    "completed_calls": 70,
+    "completed_tracks_consumed": 355,
+    "failures": 0,
+    "limiter_profile": {
+      "performed": false,
+      "reason": "No profiler or syscall trace was collected; this descriptive single-adapter measurement makes no bottleneck or performance-winner claim."
+    },
+    "max_ns_per_call": 26473460.4,
+    "measured_batches": 7,
+    "median_ns_per_call": 20752171.6,
+    "min_ns_per_call": 19575141.4,
+    "parallelism": "one process; sequential measured calls; no overlapping benchmark jobs",
+    "per_call_batch_ns": [
+      19575141.4,
+      20752171.6,
+      20585354.3,
+      26473460.4,
+      22973246.5,
+      22776928.0,
+      19783947.2
+    ],
+    "schema": "csl.issue824-nominal-measurement/1",
+    "scope": "finite_action_nominal API call for all five tracks; fixture construction, minimax reference, serialization, independent checker, build and rendering excluded",
+    "warmup_calls": 1
+  },
+  "minimax_reference": {
+    "check_sha256": "de83bc310ef967ca2eb2f272daa79a446be543fed9714c3a2b680b8df545a827",
+    "exact_finite_minimax_value": 14.58094225,
+    "figure_data_sha256": "46b2e74dcc81eddacf99baa28a84515576cae2c3ffd5e32fa6f470140c5bef9d",
+    "geometry_figure_data_sha256": "0a9995d4a2648ee9e13e93128063ac1978392349a2c2ecbee6aa5c659d3362d7",
+    "geometry_report_id": "mpc05-causal-tree-pilot-v2",
+    "report_id": "issue824-two-points-ellipsoid-minimax-v1",
+    "result_sha256": "b617fdf7a0da7d8f2bd926bdd24ca2014c22f612bab501b9b3aa6c1878ee20a5"
+  },
+  "nominal_result": {
+    "adaptation": {
+      "control_catalogue": [
+        -2.5,
+        0.0,
+        2.5
+      ],
+      "horizon_steps": 3,
+      "initial_state": [
+        4.5,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "minimax_disturbance_catalogue": [
+        -1.0,
+        0.0,
+        1.0
+      ],
+      "nominal_opponent_input": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "objective": "terminal squared position gap",
+      "source_scope": "finite-catalogue short-horizon adaptation; not the continuous 10-second RL task",
+      "state_order": [
+        "x1_position_1",
+        "x2_velocity_1",
+        "x3_position_2",
+        "x4_velocity_2"
+      ],
+      "step_seconds": 0.1
+    },
+    "assurance": "numerical",
+    "environment": "TwoPointsOnParallelLines",
+    "exact_finite_minimax": {
+      "selected_action_indices": [
+        0,
+        0,
+        0
+      ],
+      "selected_controls": [
+        [
+          -2.5
+        ],
+        [
+          -2.5
+        ],
+        [
+          -2.5
+        ]
+      ],
+      "value": 14.58094225
+    },
+    "nominal_tracks": [
+      {
+        "attempts": [
+          {
+            "action_indices": [
+              0,
+              0,
+              0
+            ],
+            "candidate_score": 13.92409225,
+            "objective_bound_direction": "finite_catalogue_objective_under_binary64",
+            "score_kind": "exact_deterministic_objective",
+            "status": "scored"
+          },
+          {
+            "action_indices": [
+              0,
+              0,
+              1
+            ],
+            "candidate_score": 15.65389225,
+            "objective_bound_direction": "finite_catalogue_objective_under_binary64",
+            "score_kind": "exact_deterministic_objective",
+            "status": "scored"
+          },
+          {
+            "action_indices": [
+              0,
+              0,
+              2
+            ],
+            "candidate_score": 17.484942249999996,
+            "objective_bound_direction": "finite_catalogue_objective_under_binary64",
+            "score_kind": "exact_deterministic_objective",
+            "status": "scored"
+          },
+          {
+            "action_indices": [
+              0,
+              1,
+              0
+            ],
+            "candidate_score": 15.852342250000001,
+            "objective_bound_direction": "finite_catalogue_objective_under_binary64",
+            "score_kind": "exact_deterministic_objective",
+            "status": "scored"
+          },
+          {
+            "action_indices": [
+              0,
+              1,
+              1
+            ],
+            "candidate_score": 17.69464225,
+            "objective_bound_direction": "finite_catalogue_objective_under_binary64",
+            "score_kind": "exact_deterministic_objective",
+            "status": "scored"
+          },
+          {
+            "action_indices": [
+              0,
+              1,
+              2
+            ],
+            "candidate_score": 19.63819225,
+            "objective_bound_direction": "finite_catalogue_objective_under_binary64",
+            "score_kind": "exact_deterministic_objective",
+            "status": "scored"
+          },
+          {
+            "action_indices": [
+              0,
+              2,
+              0
+            ],
+            "candidate_score": 17.90559225,
+            "objective_bound_direction": "finite_catalogue_objective_under_binary64",
+            "score_kind": "exact_deterministic_objective",
+            "status": "scored"
+          },
+          {
+            "action_indices": [
+              0,
+              2,
+              1
+            ],
+            "candidate_score": 19.86039225,
+            "objective_bound_direction": "finite_catalogue_objective_under_binary64",
+            "score_kind": "exact_deterministic_objective",
+            "status": "scored"
+          },
+          {
+            "action_indices": [
+              0,
+              2,
+              2
+            ],
+            "candidate_score": 21.916442249999996,
+            "objective_bound_direction": "finite_catalogue_objective_under_binary64",
+            "score_kind": "exact_deterministic_objective",
+            "status": "scored"
+          },
+          {
+            "action_indices": [
+              1,
+              0,
+              0
+            ],
+            "candidate_score": 15.852342250000001,
+            "objective_bound_direction": "finite_catalogue_objective_under_binary64",
+            "score_kind": "exact_deterministic_objective",
+            "status": "scored"
+          },
+          {
+            "action_indices": [
+              1,
+              0,
+              1
+            ],
+            "candidate_score": 17.69464225,
+            "objective_bound_direction": "finite_catalogue_objective_under_binary64",
+            "score_kind": "exact_deterministic_objective",
+            "status": "scored"
+          },
+          {
+            "action_indices": [
+              1,
+              0,
+              2
+            ],
+            "candidate_score": 19.63819225,
+            "objective_bound_direction": "finite_catalogue_objective_under_binary64",
+            "score_kind": "exact_deterministic_objective",
+            "status": "scored"
+          },
+          {
+            "action_indices": [
+              1,
+              1,
+              0
+            ],
+            "candidate_score": 17.90559225,
+            "objective_bound_direction": "finite_catalogue_objective_under_binary64",
+            "score_kind": "exact_deterministic_objective",
+            "status": "scored"
+          },
+          {
+            "action_indices": [
+              1,
+              1,
+              1
+            ],
+            "candidate_score": 19.86039225,
+            "objective_bound_direction": "finite_catalogue_objective_under_binary64",
+            "score_kind": "exact_deterministic_objective",
+            "status": "scored"
+          },
+          {
+            "action_indices": [
+              1,
+              1,
+              2
+            ],
+            "candidate_score": 21.916442249999996,
+            "objective_bound_direction": "finite_catalogue_objective_under_binary64",
+            "score_kind": "exact_deterministic_objective",
+            "status": "scored"
+          },
+          {
+            "action_indices": [
+              1,
+              2,
+              0
+            ],
+            "candidate_score": 20.083842250000004,
+            "objective_bound_direction": "finite_catalogue_objective_under_binary64",
+            "score_kind": "exact_deterministic_objective",
+            "status": "scored"
+          },
+          {
+            "action_indices": [
+              1,
+              2,
+              1
+            ],
+            "candidate_score": 22.15114225,
+            "objective_bound_direction": "finite_catalogue_objective_under_binary64",
+            "score_kind": "exact_deterministic_objective",
+            "status": "scored"
+          },
+          {
+            "action_indices": [
+              1,
+              2,
+              2
+            ],
+            "candidate_score": 24.31969225,
+            "objective_bound_direction": "finite_catalogue_objective_under_binary64",
+            "score_kind": "exact_deterministic_objective",
+            "status": "scored"
+          },
+          {
+            "action_indices": [
+              2,
+              0,
+              0
+            ],
+            "candidate_score": 17.90559225,
+            "objective_bound_direction": "finite_catalogue_objective_under_binary64",
+            "score_kind": "exact_deterministic_objective",
+            "status": "scored"
+          },
+          {
+            "action_indices": [
+              2,
+              0,
+              1
+            ],
+            "candidate_score": 19.86039225,
+            "objective_bound_direction": "finite_catalogue_objective_under_binary64",
+            "score_kind": "exact_deterministic_objective",
+            "status": "scored"
+          },
+          {
+            "action_indices": [
+              2,
+              0,
+              2
+            ],
+            "candidate_score": 21.916442249999996,
+            "objective_bound_direction": "finite_catalogue_objective_under_binary64",
+            "score_kind": "exact_deterministic_objective",
+            "status": "scored"
+          },
+          {
+            "action_indices": [
+              2,
+              1,
+              0
+            ],
+            "candidate_score": 20.083842250000004,
+            "objective_bound_direction": "finite_catalogue_objective_under_binary64",
+            "score_kind": "exact_deterministic_objective",
+            "status": "scored"
+          },
+          {
+            "action_indices": [
+              2,
+              1,
+              1
+            ],
+            "candidate_score": 22.15114225,
+            "objective_bound_direction": "finite_catalogue_objective_under_binary64",
+            "score_kind": "exact_deterministic_objective",
+            "status": "scored"
+          },
+          {
+            "action_indices": [
+              2,
+              1,
+              2
+            ],
+            "candidate_score": 24.31969225,
+            "objective_bound_direction": "finite_catalogue_objective_under_binary64",
+            "score_kind": "exact_deterministic_objective",
+            "status": "scored"
+          },
+          {
+            "action_indices": [
+              2,
+              2,
+              0
+            ],
+            "candidate_score": 22.387092250000006,
+            "objective_bound_direction": "finite_catalogue_objective_under_binary64",
+            "score_kind": "exact_deterministic_objective",
+            "status": "scored"
+          },
+          {
+            "action_indices": [
+              2,
+              2,
+              1
+            ],
+            "candidate_score": 24.56689225,
+            "objective_bound_direction": "finite_catalogue_objective_under_binary64",
+            "score_kind": "exact_deterministic_objective",
+            "status": "scored"
+          },
+          {
+            "action_indices": [
+              2,
+              2,
+              2
+            ],
+            "candidate_score": 26.84794225,
+            "objective_bound_direction": "finite_catalogue_objective_under_binary64",
+            "score_kind": "exact_deterministic_objective",
+            "status": "scored"
+          }
+        ],
+        "candidate_score": 13.92409225,
+        "coverage": "complete",
+        "objective_bound_direction": "finite_catalogue_minimum_under_binary64",
+        "replay": {
+          "controls": [
+            [
+              -2.5
+            ],
+            [
+              -2.5
+            ],
+            [
+              -2.5
+            ]
+          ],
+          "disturbances": [
+            [
+              1.0
+            ],
+            [
+              1.0
+            ],
+            [
+              1.0
+            ]
+          ],
+          "states": [
+            [
+              4.5,
+              0.0,
+              0.0,
+              0.0
+            ],
+            [
+              4.275,
+              -2.5,
+              0.0045,
+              0.1
+            ],
+            [
+              4.025,
+              -2.5,
+              0.019000000000000003,
+              0.2
+            ],
+            [
+              3.775,
+              -2.5,
+              0.043500000000000004,
+              0.30000000000000004
+            ]
+          ],
+          "terminal_objective": 13.92409225
+        },
+        "representation": "exact_polytope",
+        "score_kind": "exact_deterministic_objective",
+        "selected_attempt": 0,
+        "trace": {
+          "representation": "exact_polytope",
+          "stages": [
+            {
+              "vertices": []
+            },
+            {
+              "vertices": [
+                [
+                  4.275,
+                  -2.5,
+                  0.0045,
+                  0.1
+                ]
+              ]
+            },
+            {
+              "vertices": [
+                [
+                  4.025,
+                  -2.5,
+                  0.019000000000000003,
+                  0.2
+                ]
+              ]
+            },
+            {
+              "vertices": [
+                [
+                  3.775,
+                  -2.5,
+                  0.043500000000000004,
+                  0.30000000000000004
+                ]
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "attempts": [
+          {
+            "action_indices": [
+              0,
+              0,
+              0
+            ],
+            "candidate_score": 13.924092250000076,
+            "objective_bound_direction": "none_certified",
+            "score_kind": "numerical_outer_enclosure_estimate",
+            "status": "scored"
+          },
+          {
+            "action_indices": [
+              0,
+              0,
+              1
+            ],
+            "candidate_score": 15.653892250000085,
+            "objective_bound_direction": "none_certified",
+            "score_kind": "numerical_outer_enclosure_estimate",
+            "status": "scored"
+          },
+          {
+            "action_indices": [
+              0,
+              0,
+              2
+            ],
+            "candidate_score": 17.48494225000009,
+            "objective_bound_direction": "none_certified",
+            "score_kind": "numerical_outer_enclosure_estimate",
+            "status": "scored"
+          },
+          {
+            "action_indices": [
+              0,
+              1,
+              0
+            ],
+            "candidate_score": 15.852342250000087,
+            "objective_bound_direction": "none_certified",
+            "score_kind": "numerical_outer_enclosure_estimate",
+            "status": "scored"
+          },
+          {
+            "action_indices": [
+              0,
+              1,
+              1
+            ],
+            "candidate_score": 17.69464225000009,
+            "objective_bound_direction": "none_certified",
+            "score_kind": "numerical_outer_enclosure_estimate",
+            "status": "scored"
+          },
+          {
+            "action_indices": [
+              0,
+              1,
+              2
+            ],
+            "candidate_score": 19.638192250000092,
+            "objective_bound_direction": "none_certified",
+            "score_kind": "numerical_outer_enclosure_estimate",
+            "status": "scored"
+          },
+          {
+            "action_indices": [
+              0,
+              2,
+              0
+            ],
+            "candidate_score": 17.905592250000094,
+            "objective_bound_direction": "none_certified",
+            "score_kind": "numerical_outer_enclosure_estimate",
+            "status": "scored"
+          },
+          {
+            "action_indices": [
+              0,
+              2,
+              1
+            ],
+            "candidate_score": 19.860392250000096,
+            "objective_bound_direction": "none_certified",
+            "score_kind": "numerical_outer_enclosure_estimate",
+            "status": "scored"
+          },
+          {
+            "action_indices": [
+              0,
+              2,
+              2
+            ],
+            "candidate_score": 21.916442250000095,
+            "objective_bound_direction": "none_certified",
+            "score_kind": "numerical_outer_enclosure_estimate",
+            "status": "scored"
+          },
+          {
+            "action_indices": [
+              1,
+              0,
+              0
+            ],
+            "candidate_score": 15.852342250000087,
+            "objective_bound_direction": "none_certified",
+            "score_kind": "numerical_outer_enclosure_estimate",
+            "status": "scored"
+          },
+          {
+            "action_indices": [
+              1,
+              0,
+              1
+            ],
+            "candidate_score": 17.69464225000009,
+            "objective_bound_direction": "none_certified",
+            "score_kind": "numerical_outer_enclosure_estimate",
+            "status": "scored"
+          },
+          {
+            "action_indices": [
+              1,
+              0,
+              2
+            ],
+            "candidate_score": 19.638192250000092,
+            "objective_bound_direction": "none_certified",
+            "score_kind": "numerical_outer_enclosure_estimate",
+            "status": "scored"
+          },
+          {
+            "action_indices": [
+              1,
+              1,
+              0
+            ],
+            "candidate_score": 17.905592250000094,
+            "objective_bound_direction": "none_certified",
+            "score_kind": "numerical_outer_enclosure_estimate",
+            "status": "scored"
+          },
+          {
+            "action_indices": [
+              1,
+              1,
+              1
+            ],
+            "candidate_score": 19.860392250000096,
+            "objective_bound_direction": "none_certified",
+            "score_kind": "numerical_outer_enclosure_estimate",
+            "status": "scored"
+          },
+          {
+            "action_indices": [
+              1,
+              1,
+              2
+            ],
+            "candidate_score": 21.916442250000095,
+            "objective_bound_direction": "none_certified",
+            "score_kind": "numerical_outer_enclosure_estimate",
+            "status": "scored"
+          },
+          {
+            "action_indices": [
+              1,
+              2,
+              0
+            ],
+            "candidate_score": 20.0838422500001,
+            "objective_bound_direction": "none_certified",
+            "score_kind": "numerical_outer_enclosure_estimate",
+            "status": "scored"
+          },
+          {
+            "action_indices": [
+              1,
+              2,
+              1
+            ],
+            "candidate_score": 22.1511422500001,
+            "objective_bound_direction": "none_certified",
+            "score_kind": "numerical_outer_enclosure_estimate",
+            "status": "scored"
+          },
+          {
+            "action_indices": [
+              1,
+              2,
+              2
+            ],
+            "candidate_score": 24.319692250000102,
+            "objective_bound_direction": "none_certified",
+            "score_kind": "numerical_outer_enclosure_estimate",
+            "status": "scored"
+          },
+          {
+            "action_indices": [
+              2,
+              0,
+              0
+            ],
+            "candidate_score": 17.905592250000094,
+            "objective_bound_direction": "none_certified",
+            "score_kind": "numerical_outer_enclosure_estimate",
+            "status": "scored"
+          },
+          {
+            "action_indices": [
+              2,
+              0,
+              1
+            ],
+            "candidate_score": 19.860392250000096,
+            "objective_bound_direction": "none_certified",
+            "score_kind": "numerical_outer_enclosure_estimate",
+            "status": "scored"
+          },
+          {
+            "action_indices": [
+              2,
+              0,
+              2
+            ],
+            "candidate_score": 21.916442250000095,
+            "objective_bound_direction": "none_certified",
+            "score_kind": "numerical_outer_enclosure_estimate",
+            "status": "scored"
+          },
+          {
+            "action_indices": [
+              2,
+              1,
+              0
+            ],
+            "candidate_score": 20.0838422500001,
+            "objective_bound_direction": "none_certified",
+            "score_kind": "numerical_outer_enclosure_estimate",
+            "status": "scored"
+          },
+          {
+            "action_indices": [
+              2,
+              1,
+              1
+            ],
+            "candidate_score": 22.1511422500001,
+            "objective_bound_direction": "none_certified",
+            "score_kind": "numerical_outer_enclosure_estimate",
+            "status": "scored"
+          },
+          {
+            "action_indices": [
+              2,
+              1,
+              2
+            ],
+            "candidate_score": 24.319692250000102,
+            "objective_bound_direction": "none_certified",
+            "score_kind": "numerical_outer_enclosure_estimate",
+            "status": "scored"
+          },
+          {
+            "action_indices": [
+              2,
+              2,
+              0
+            ],
+            "candidate_score": 22.387092250000105,
+            "objective_bound_direction": "none_certified",
+            "score_kind": "numerical_outer_enclosure_estimate",
+            "status": "scored"
+          },
+          {
+            "action_indices": [
+              2,
+              2,
+              1
+            ],
+            "candidate_score": 24.566892250000105,
+            "objective_bound_direction": "none_certified",
+            "score_kind": "numerical_outer_enclosure_estimate",
+            "status": "scored"
+          },
+          {
+            "action_indices": [
+              2,
+              2,
+              2
+            ],
+            "candidate_score": 26.847942250000106,
+            "objective_bound_direction": "none_certified",
+            "score_kind": "numerical_outer_enclosure_estimate",
+            "status": "scored"
+          }
+        ],
+        "candidate_score": 13.924092250000076,
+        "coverage": "complete",
+        "objective_bound_direction": "none_certified",
+        "replay": {
+          "controls": [
+            [
+              -2.5
+            ],
+            [
+              -2.5
+            ],
+            [
+              -2.5
+            ]
+          ],
+          "disturbances": [
+            [
+              1.0
+            ],
+            [
+              1.0
+            ],
+            [
+              1.0
+            ]
+          ],
+          "states": [
+            [
+              4.5,
+              0.0,
+              0.0,
+              0.0
+            ],
+            [
+              4.275,
+              -2.5,
+              0.0045,
+              0.1
+            ],
+            [
+              4.025,
+              -2.5,
+              0.019000000000000003,
+              0.2
+            ],
+            [
+              3.775,
+              -2.5,
+              0.043500000000000004,
+              0.30000000000000004
+            ]
+          ],
+          "terminal_objective": 13.92409225
+        },
+        "representation": "box",
+        "score_kind": "numerical_outer_enclosure_estimate",
+        "selected_attempt": 0,
+        "trace": {
+          "representation": "box",
+          "stages": [
+            {
+              "lower": [
+                4.5,
+                0.0,
+                0.0,
+                0.0
+              ],
+              "upper": [
+                4.5,
+                0.0,
+                0.0,
+                0.0
+              ]
+            },
+            {
+              "lower": [
+                4.274999999999997,
+                -2.500000000000001,
+                0.004499999999999998,
+                0.09999999999999998
+              ],
+              "upper": [
+                4.275000000000004,
+                -2.499999999999999,
+                0.004500000000000001,
+                0.10000000000000003
+              ]
+            },
+            {
+              "lower": [
+                4.024999999999993,
+                -2.500000000000001,
+                0.018999999999999986,
+                0.1999999999999999
+              ],
+              "upper": [
+                4.0250000000000075,
+                -2.499999999999999,
+                0.019000000000000017,
+                0.20000000000000012
+              ]
+            },
+            {
+              "lower": [
+                3.7749999999999906,
+                -2.500000000000001,
+                0.04349999999999994,
+                0.29999999999999977
+              ],
+              "upper": [
+                3.77500000000001,
+                -2.499999999999999,
+                0.04350000000000006,
+                0.30000000000000027
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "attempts": [
+          {
+            "action_indices": [
+              0,
+              0,
+              0
+            ],
+            "candidate_score": 13.924092250000049,
+            "objective_bound_direction": "none_certified",
+            "score_kind": "numerical_outer_enclosure_estimate",
+            "status": "scored"
+          },
+          {
+            "action_indices": [
+              0,
+              0,
+              1
+            ],
+            "candidate_score": 15.65389225000005,
+            "objective_bound_direction": "none_certified",
+            "score_kind": "numerical_outer_enclosure_estimate",
+            "status": "scored"
+          },
+          {
+            "action_indices": [
+              0,
+              0,
+              2
+            ],
+            "candidate_score": 17.484942250000056,
+            "objective_bound_direction": "none_certified",
+            "score_kind": "numerical_outer_enclosure_estimate",
+            "status": "scored"
+          },
+          {
+            "action_indices": [
+              0,
+              1,
+              0
+            ],
+            "candidate_score": 15.852342250000044,
+            "objective_bound_direction": "none_certified",
+            "score_kind": "numerical_outer_enclosure_estimate",
+            "status": "scored"
+          },
+          {
+            "action_indices": [
+              0,
+              1,
+              1
+            ],
+            "candidate_score": 17.694642250000037,
+            "objective_bound_direction": "none_certified",
+            "score_kind": "numerical_outer_enclosure_estimate",
+            "status": "scored"
+          },
+          {
+            "action_indices": [
+              0,
+              1,
+              2
+            ],
+            "candidate_score": 19.638192250000046,
+            "objective_bound_direction": "none_certified",
+            "score_kind": "numerical_outer_enclosure_estimate",
+            "status": "scored"
+          },
+          {
+            "action_indices": [
+              0,
+              2,
+              0
+            ],
+            "candidate_score": 17.905592250000062,
+            "objective_bound_direction": "none_certified",
+            "score_kind": "numerical_outer_enclosure_estimate",
+            "status": "scored"
+          },
+          {
+            "action_indices": [
+              0,
+              2,
+              1
+            ],
+            "candidate_score": 19.860392250000057,
+            "objective_bound_direction": "none_certified",
+            "score_kind": "numerical_outer_enclosure_estimate",
+            "status": "scored"
+          },
+          {
+            "action_indices": [
+              0,
+              2,
+              2
+            ],
+            "candidate_score": 21.916442250000063,
+            "objective_bound_direction": "none_certified",
+            "score_kind": "numerical_outer_enclosure_estimate",
+            "status": "scored"
+          },
+          {
+            "action_indices": [
+              1,
+              0,
+              0
+            ],
+            "candidate_score": 15.852342250000044,
+            "objective_bound_direction": "none_certified",
+            "score_kind": "numerical_outer_enclosure_estimate",
+            "status": "scored"
+          },
+          {
+            "action_indices": [
+              1,
+              0,
+              1
+            ],
+            "candidate_score": 17.694642250000037,
+            "objective_bound_direction": "none_certified",
+            "score_kind": "numerical_outer_enclosure_estimate",
+            "status": "scored"
+          },
+          {
+            "action_indices": [
+              1,
+              0,
+              2
+            ],
+            "candidate_score": 19.638192250000046,
+            "objective_bound_direction": "none_certified",
+            "score_kind": "numerical_outer_enclosure_estimate",
+            "status": "scored"
+          },
+          {
+            "action_indices": [
+              1,
+              1,
+              0
+            ],
+            "candidate_score": 17.905592250000034,
+            "objective_bound_direction": "none_certified",
+            "score_kind": "numerical_outer_enclosure_estimate",
+            "status": "scored"
+          },
+          {
+            "action_indices": [
+              1,
+              1,
+              1
+            ],
+            "candidate_score": 19.860392250000025,
+            "objective_bound_direction": "none_certified",
+            "score_kind": "numerical_outer_enclosure_estimate",
+            "status": "scored"
+          },
+          {
+            "action_indices": [
+              1,
+              1,
+              2
+            ],
+            "candidate_score": 21.91644225000003,
+            "objective_bound_direction": "none_certified",
+            "score_kind": "numerical_outer_enclosure_estimate",
+            "status": "scored"
+          },
+          {
+            "action_indices": [
+              1,
+              2,
+              0
+            ],
+            "candidate_score": 20.083842250000053,
+            "objective_bound_direction": "none_certified",
+            "score_kind": "numerical_outer_enclosure_estimate",
+            "status": "scored"
+          },
+          {
+            "action_indices": [
+              1,
+              2,
+              1
+            ],
+            "candidate_score": 22.151142250000042,
+            "objective_bound_direction": "none_certified",
+            "score_kind": "numerical_outer_enclosure_estimate",
+            "status": "scored"
+          },
+          {
+            "action_indices": [
+              1,
+              2,
+              2
+            ],
+            "candidate_score": 24.31969225000005,
+            "objective_bound_direction": "none_certified",
+            "score_kind": "numerical_outer_enclosure_estimate",
+            "status": "scored"
+          },
+          {
+            "action_indices": [
+              2,
+              0,
+              0
+            ],
+            "candidate_score": 17.905592250000062,
+            "objective_bound_direction": "none_certified",
+            "score_kind": "numerical_outer_enclosure_estimate",
+            "status": "scored"
+          },
+          {
+            "action_indices": [
+              2,
+              0,
+              1
+            ],
+            "candidate_score": 19.860392250000057,
+            "objective_bound_direction": "none_certified",
+            "score_kind": "numerical_outer_enclosure_estimate",
+            "status": "scored"
+          },
+          {
+            "action_indices": [
+              2,
+              0,
+              2
+            ],
+            "candidate_score": 21.916442250000063,
+            "objective_bound_direction": "none_certified",
+            "score_kind": "numerical_outer_enclosure_estimate",
+            "status": "scored"
+          },
+          {
+            "action_indices": [
+              2,
+              1,
+              0
+            ],
+            "candidate_score": 20.083842250000053,
+            "objective_bound_direction": "none_certified",
+            "score_kind": "numerical_outer_enclosure_estimate",
+            "status": "scored"
+          },
+          {
+            "action_indices": [
+              2,
+              1,
+              1
+            ],
+            "candidate_score": 22.151142250000042,
+            "objective_bound_direction": "none_certified",
+            "score_kind": "numerical_outer_enclosure_estimate",
+            "status": "scored"
+          },
+          {
+            "action_indices": [
+              2,
+              1,
+              2
+            ],
+            "candidate_score": 24.31969225000005,
+            "objective_bound_direction": "none_certified",
+            "score_kind": "numerical_outer_enclosure_estimate",
+            "status": "scored"
+          },
+          {
+            "action_indices": [
+              2,
+              2,
+              0
+            ],
+            "candidate_score": 22.387092250000073,
+            "objective_bound_direction": "none_certified",
+            "score_kind": "numerical_outer_enclosure_estimate",
+            "status": "scored"
+          },
+          {
+            "action_indices": [
+              2,
+              2,
+              1
+            ],
+            "candidate_score": 24.566892250000063,
+            "objective_bound_direction": "none_certified",
+            "score_kind": "numerical_outer_enclosure_estimate",
+            "status": "scored"
+          },
+          {
+            "action_indices": [
+              2,
+              2,
+              2
+            ],
+            "candidate_score": 26.84794225000007,
+            "objective_bound_direction": "none_certified",
+            "score_kind": "numerical_outer_enclosure_estimate",
+            "status": "scored"
+          }
+        ],
+        "candidate_score": 13.924092250000049,
+        "coverage": "complete",
+        "objective_bound_direction": "none_certified",
+        "replay": {
+          "controls": [
+            [
+              -2.5
+            ],
+            [
+              -2.5
+            ],
+            [
+              -2.5
+            ]
+          ],
+          "disturbances": [
+            [
+              1.0
+            ],
+            [
+              1.0
+            ],
+            [
+              1.0
+            ]
+          ],
+          "states": [
+            [
+              4.5,
+              0.0,
+              0.0,
+              0.0
+            ],
+            [
+              4.275,
+              -2.5,
+              0.0045,
+              0.1
+            ],
+            [
+              4.025,
+              -2.5,
+              0.019000000000000003,
+              0.2
+            ],
+            [
+              3.775,
+              -2.5,
+              0.043500000000000004,
+              0.30000000000000004
+            ]
+          ],
+          "terminal_objective": 13.92409225
+        },
+        "representation": "zonotope",
+        "score_kind": "numerical_outer_enclosure_estimate",
+        "selected_attempt": 0,
+        "trace": {
+          "representation": "zonotope",
+          "stages": [
+            {
+              "center": [
+                4.5,
+                0.0,
+                0.0,
+                0.0
+              ],
+              "factors": [],
+              "generators": {
+                "cols": 0,
+                "rows": 4,
+                "values": []
+              }
+            },
+            {
+              "center": [
+                4.275,
+                -2.5,
+                0.0045,
+                0.1
+              ],
+              "factors": [
+                "roundoff/0/0",
+                "roundoff/0/1",
+                "roundoff/0/2",
+                "roundoff/0/3"
+              ],
+              "generators": {
+                "cols": 4,
+                "rows": 4,
+                "values": [
+                  1.776356839400251e-15,
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  4.440892098500627e-16,
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  8.673617379884037e-19,
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  1.387778780781446e-17
+                ]
+              }
+            },
+            {
+              "center": [
+                4.025,
+                -2.5,
+                0.019000000000000003,
+                0.2
+              ],
+              "factors": [
+                "roundoff/0/0",
+                "roundoff/0/1",
+                "roundoff/0/2",
+                "roundoff/0/3",
+                "roundoff/1/0",
+                "roundoff/1/1",
+                "roundoff/1/2",
+                "roundoff/1/3"
+              ],
+              "generators": {
+                "cols": 8,
+                "rows": 4,
+                "values": [
+                  1.776356839400251e-15,
+                  4.440892098500627e-18,
+                  0.0,
+                  0.0,
+                  2.664535259100378e-15,
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  4.440892098500631e-16,
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  8.673617379884037e-19,
+                  1.3877787807814461e-18,
+                  0.0,
+                  0.0,
+                  1.040834085586085e-17,
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  1.387778780781446e-17,
+                  0.0,
+                  0.0,
+                  0.0,
+                  5.551115123125789e-17
+                ]
+              }
+            },
+            {
+              "center": [
+                3.7750000000000004,
+                -2.5,
+                0.04350000000000001,
+                0.30000000000000004
+              ],
+              "factors": [
+                "roundoff/0/0",
+                "roundoff/0/1",
+                "roundoff/0/2",
+                "roundoff/0/3",
+                "roundoff/1/0",
+                "roundoff/1/1",
+                "roundoff/1/2",
+                "roundoff/1/3",
+                "roundoff/2/0",
+                "roundoff/2/1",
+                "roundoff/2/2",
+                "roundoff/2/3"
+              ],
+              "generators": {
+                "cols": 12,
+                "rows": 4,
+                "values": [
+                  1.776356839400251e-15,
+                  4.440892098500627e-18,
+                  0.0,
+                  0.0,
+                  2.664535259100378e-15,
+                  4.440892098500631e-18,
+                  0.0,
+                  0.0,
+                  1.776356839400255e-15,
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  4.440892098500635e-16,
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  8.673617379884037e-19,
+                  2.7755575615628923e-18,
+                  0.0,
+                  0.0,
+                  1.040834085586085e-17,
+                  5.551115123125789e-18,
+                  0.0,
+                  0.0,
+                  2.775557561562897e-17,
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  1.387778780781446e-17,
+                  0.0,
+                  0.0,
+                  0.0,
+                  5.551115123125789e-17,
+                  0.0,
+                  0.0,
+                  0.0,
+                  1.110223024625159e-16
+                ]
+              }
+            }
+          ]
+        }
+      },
+      {
+        "attempts": [
+          {
+            "action_indices": [
+              0,
+              0,
+              0
+            ],
+            "candidate_score": 13.924092250000488,
+            "objective_bound_direction": "none_certified",
+            "score_kind": "numerical_outer_enclosure_estimate",
+            "status": "scored"
+          },
+          {
+            "action_indices": [
+              0,
+              0,
+              1
+            ],
+            "candidate_score": 15.65389225000049,
+            "objective_bound_direction": "none_certified",
+            "score_kind": "numerical_outer_enclosure_estimate",
+            "status": "scored"
+          },
+          {
+            "action_indices": [
+              0,
+              0,
+              2
+            ],
+            "candidate_score": 17.48494225000055,
+            "objective_bound_direction": "none_certified",
+            "score_kind": "numerical_outer_enclosure_estimate",
+            "status": "scored"
+          },
+          {
+            "action_indices": [
+              0,
+              1,
+              0
+            ],
+            "candidate_score": 15.852342250000467,
+            "objective_bound_direction": "none_certified",
+            "score_kind": "numerical_outer_enclosure_estimate",
+            "status": "scored"
+          },
+          {
+            "action_indices": [
+              0,
+              1,
+              1
+            ],
+            "candidate_score": 17.69464225000045,
+            "objective_bound_direction": "none_certified",
+            "score_kind": "numerical_outer_enclosure_estimate",
+            "status": "scored"
+          },
+          {
+            "action_indices": [
+              0,
+              1,
+              2
+            ],
+            "candidate_score": 19.63819225000051,
+            "objective_bound_direction": "none_certified",
+            "score_kind": "numerical_outer_enclosure_estimate",
+            "status": "scored"
+          },
+          {
+            "action_indices": [
+              0,
+              2,
+              0
+            ],
+            "candidate_score": 17.905592250000538,
+            "objective_bound_direction": "none_certified",
+            "score_kind": "numerical_outer_enclosure_estimate",
+            "status": "scored"
+          },
+          {
+            "action_indices": [
+              0,
+              2,
+              1
+            ],
+            "candidate_score": 19.860392250000526,
+            "objective_bound_direction": "none_certified",
+            "score_kind": "numerical_outer_enclosure_estimate",
+            "status": "scored"
+          },
+          {
+            "action_indices": [
+              0,
+              2,
+              2
+            ],
+            "candidate_score": 21.91644225000059,
+            "objective_bound_direction": "none_certified",
+            "score_kind": "numerical_outer_enclosure_estimate",
+            "status": "scored"
+          },
+          {
+            "action_indices": [
+              1,
+              0,
+              0
+            ],
+            "candidate_score": 15.852342250000467,
+            "objective_bound_direction": "none_certified",
+            "score_kind": "numerical_outer_enclosure_estimate",
+            "status": "scored"
+          },
+          {
+            "action_indices": [
+              1,
+              0,
+              1
+            ],
+            "candidate_score": 17.69464225000046,
+            "objective_bound_direction": "none_certified",
+            "score_kind": "numerical_outer_enclosure_estimate",
+            "status": "scored"
+          },
+          {
+            "action_indices": [
+              1,
+              0,
+              2
+            ],
+            "candidate_score": 19.63819225000052,
+            "objective_bound_direction": "none_certified",
+            "score_kind": "numerical_outer_enclosure_estimate",
+            "status": "scored"
+          },
+          {
+            "action_indices": [
+              1,
+              1,
+              0
+            ],
+            "candidate_score": 17.905592250000417,
+            "objective_bound_direction": "none_certified",
+            "score_kind": "numerical_outer_enclosure_estimate",
+            "status": "scored"
+          },
+          {
+            "action_indices": [
+              1,
+              1,
+              1
+            ],
+            "candidate_score": 19.860392250000398,
+            "objective_bound_direction": "none_certified",
+            "score_kind": "numerical_outer_enclosure_estimate",
+            "status": "scored"
+          },
+          {
+            "action_indices": [
+              1,
+              1,
+              2
+            ],
+            "candidate_score": 21.916442250000458,
+            "objective_bound_direction": "none_certified",
+            "score_kind": "numerical_outer_enclosure_estimate",
+            "status": "scored"
+          },
+          {
+            "action_indices": [
+              1,
+              2,
+              0
+            ],
+            "candidate_score": 20.083842250000508,
+            "objective_bound_direction": "none_certified",
+            "score_kind": "numerical_outer_enclosure_estimate",
+            "status": "scored"
+          },
+          {
+            "action_indices": [
+              1,
+              2,
+              1
+            ],
+            "candidate_score": 22.15114225000049,
+            "objective_bound_direction": "none_certified",
+            "score_kind": "numerical_outer_enclosure_estimate",
+            "status": "scored"
+          },
+          {
+            "action_indices": [
+              1,
+              2,
+              2
+            ],
+            "candidate_score": 24.31969225000055,
+            "objective_bound_direction": "none_certified",
+            "score_kind": "numerical_outer_enclosure_estimate",
+            "status": "scored"
+          },
+          {
+            "action_indices": [
+              2,
+              0,
+              0
+            ],
+            "candidate_score": 17.905592250000552,
+            "objective_bound_direction": "none_certified",
+            "score_kind": "numerical_outer_enclosure_estimate",
+            "status": "scored"
+          },
+          {
+            "action_indices": [
+              2,
+              0,
+              1
+            ],
+            "candidate_score": 19.86039225000054,
+            "objective_bound_direction": "none_certified",
+            "score_kind": "numerical_outer_enclosure_estimate",
+            "status": "scored"
+          },
+          {
+            "action_indices": [
+              2,
+              0,
+              2
+            ],
+            "candidate_score": 21.916442250000607,
+            "objective_bound_direction": "none_certified",
+            "score_kind": "numerical_outer_enclosure_estimate",
+            "status": "scored"
+          },
+          {
+            "action_indices": [
+              2,
+              1,
+              0
+            ],
+            "candidate_score": 20.08384225000049,
+            "objective_bound_direction": "none_certified",
+            "score_kind": "numerical_outer_enclosure_estimate",
+            "status": "scored"
+          },
+          {
+            "action_indices": [
+              2,
+              1,
+              1
+            ],
+            "candidate_score": 22.15114225000048,
+            "objective_bound_direction": "none_certified",
+            "score_kind": "numerical_outer_enclosure_estimate",
+            "status": "scored"
+          },
+          {
+            "action_indices": [
+              2,
+              1,
+              2
+            ],
+            "candidate_score": 24.31969225000055,
+            "objective_bound_direction": "none_certified",
+            "score_kind": "numerical_outer_enclosure_estimate",
+            "status": "scored"
+          },
+          {
+            "action_indices": [
+              2,
+              2,
+              0
+            ],
+            "candidate_score": 22.387092250000588,
+            "objective_bound_direction": "none_certified",
+            "score_kind": "numerical_outer_enclosure_estimate",
+            "status": "scored"
+          },
+          {
+            "action_indices": [
+              2,
+              2,
+              1
+            ],
+            "candidate_score": 24.566892250000567,
+            "objective_bound_direction": "none_certified",
+            "score_kind": "numerical_outer_enclosure_estimate",
+            "status": "scored"
+          },
+          {
+            "action_indices": [
+              2,
+              2,
+              2
+            ],
+            "candidate_score": 26.847942250000635,
+            "objective_bound_direction": "none_certified",
+            "score_kind": "numerical_outer_enclosure_estimate",
+            "status": "scored"
+          }
+        ],
+        "candidate_score": 13.924092250000488,
+        "coverage": "complete",
+        "objective_bound_direction": "none_certified",
+        "replay": {
+          "controls": [
+            [
+              -2.5
+            ],
+            [
+              -2.5
+            ],
+            [
+              -2.5
+            ]
+          ],
+          "disturbances": [
+            [
+              1.0
+            ],
+            [
+              1.0
+            ],
+            [
+              1.0
+            ]
+          ],
+          "states": [
+            [
+              4.5,
+              0.0,
+              0.0,
+              0.0
+            ],
+            [
+              4.275,
+              -2.5,
+              0.0045,
+              0.1
+            ],
+            [
+              4.025,
+              -2.5,
+              0.019000000000000003,
+              0.2
+            ],
+            [
+              3.775,
+              -2.5,
+              0.043500000000000004,
+              0.30000000000000004
+            ]
+          ],
+          "terminal_objective": 13.92409225
+        },
+        "representation": "parallelotope",
+        "score_kind": "numerical_outer_enclosure_estimate",
+        "selected_attempt": 0,
+        "trace": {
+          "frame": {
+            "cols": 4,
+            "rows": 4,
+            "values": [
+              1.0,
+              1.0,
+              0.0,
+              0.0,
+              0.0,
+              1.0,
+              1.0,
+              0.0,
+              0.0,
+              0.0,
+              1.0,
+              1.0,
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ]
+          },
+          "representation": "parallelotope",
+          "stages": [
+            {
+              "lower": [
+                4.499999999999996,
+                -3e-323,
+                -2e-323,
+                -1e-323
+              ],
+              "upper": [
+                4.500000000000004,
+                3e-323,
+                2e-323,
+                1e-323
+              ]
+            },
+            {
+              "lower": [
+                6.679499999999984,
+                -2.4045000000000036,
+                -0.09550000000000006,
+                0.09999999999999995
+              ],
+              "upper": [
+                6.679500000000018,
+                -2.404499999999998,
+                -0.09549999999999995,
+                0.10000000000000006
+              ]
+            },
+            {
+              "lower": [
+                6.343999999999962,
+                -2.319000000000004,
+                -0.18100000000000036,
+                0.19999999999999982
+              ],
+              "upper": [
+                6.344000000000039,
+                -2.3189999999999977,
+                -0.18099999999999963,
+                0.20000000000000023
+              ]
+            },
+            {
+              "lower": [
+                6.018499999999942,
+                -2.2435000000000045,
+                -0.25650000000000095,
+                0.29999999999999954
+              ],
+              "upper": [
+                6.018500000000061,
+                -2.243499999999997,
+                -0.25649999999999906,
+                0.30000000000000054
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "attempts": [
+          {
+            "action_indices": [
+              0,
+              0,
+              0
+            ],
+            "candidate_score": 13.924092250000715,
+            "objective_bound_direction": "none_certified",
+            "score_kind": "numerical_outer_enclosure_estimate",
+            "status": "scored"
+          },
+          {
+            "action_indices": [
+              0,
+              0,
+              1
+            ],
+            "candidate_score": 15.653892250000787,
+            "objective_bound_direction": "none_certified",
+            "score_kind": "numerical_outer_enclosure_estimate",
+            "status": "scored"
+          },
+          {
+            "action_indices": [
+              0,
+              0,
+              2
+            ],
+            "candidate_score": 17.48494225000082,
+            "objective_bound_direction": "none_certified",
+            "score_kind": "numerical_outer_enclosure_estimate",
+            "status": "scored"
+          },
+          {
+            "action_indices": [
+              0,
+              1,
+              0
+            ],
+            "candidate_score": 15.852342250000794,
+            "objective_bound_direction": "none_certified",
+            "score_kind": "numerical_outer_enclosure_estimate",
+            "status": "scored"
+          },
+          {
+            "action_indices": [
+              0,
+              1,
+              1
+            ],
+            "candidate_score": 17.69464225000084,
+            "objective_bound_direction": "none_certified",
+            "score_kind": "numerical_outer_enclosure_estimate",
+            "status": "scored"
+          },
+          {
+            "action_indices": [
+              0,
+              1,
+              2
+            ],
+            "candidate_score": 19.63819225000088,
+            "objective_bound_direction": "none_certified",
+            "score_kind": "numerical_outer_enclosure_estimate",
+            "status": "scored"
+          },
+          {
+            "action_indices": [
+              0,
+              2,
+              0
+            ],
+            "candidate_score": 17.905592250000844,
+            "objective_bound_direction": "none_certified",
+            "score_kind": "numerical_outer_enclosure_estimate",
+            "status": "scored"
+          },
+          {
+            "action_indices": [
+              0,
+              2,
+              1
+            ],
+            "candidate_score": 19.86039225000089,
+            "objective_bound_direction": "none_certified",
+            "score_kind": "numerical_outer_enclosure_estimate",
+            "status": "scored"
+          },
+          {
+            "action_indices": [
+              0,
+              2,
+              2
+            ],
+            "candidate_score": 21.916442250000927,
+            "objective_bound_direction": "none_certified",
+            "score_kind": "numerical_outer_enclosure_estimate",
+            "status": "scored"
+          },
+          {
+            "action_indices": [
+              1,
+              0,
+              0
+            ],
+            "candidate_score": 15.852342250000794,
+            "objective_bound_direction": "none_certified",
+            "score_kind": "numerical_outer_enclosure_estimate",
+            "status": "scored"
+          },
+          {
+            "action_indices": [
+              1,
+              0,
+              1
+            ],
+            "candidate_score": 17.69464225000084,
+            "objective_bound_direction": "none_certified",
+            "score_kind": "numerical_outer_enclosure_estimate",
+            "status": "scored"
+          },
+          {
+            "action_indices": [
+              1,
+              0,
+              2
+            ],
+            "candidate_score": 19.63819225000088,
+            "objective_bound_direction": "none_certified",
+            "score_kind": "numerical_outer_enclosure_estimate",
+            "status": "scored"
+          },
+          {
+            "action_indices": [
+              1,
+              1,
+              0
+            ],
+            "candidate_score": 17.905592250000844,
+            "objective_bound_direction": "none_certified",
+            "score_kind": "numerical_outer_enclosure_estimate",
+            "status": "scored"
+          },
+          {
+            "action_indices": [
+              1,
+              1,
+              1
+            ],
+            "candidate_score": 19.86039225000089,
+            "objective_bound_direction": "none_certified",
+            "score_kind": "numerical_outer_enclosure_estimate",
+            "status": "scored"
+          },
+          {
+            "action_indices": [
+              1,
+              1,
+              2
+            ],
+            "candidate_score": 21.916442250000927,
+            "objective_bound_direction": "none_certified",
+            "score_kind": "numerical_outer_enclosure_estimate",
+            "status": "scored"
+          },
+          {
+            "action_indices": [
+              1,
+              2,
+              0
+            ],
+            "candidate_score": 20.083842250000895,
+            "objective_bound_direction": "none_certified",
+            "score_kind": "numerical_outer_enclosure_estimate",
+            "status": "scored"
+          },
+          {
+            "action_indices": [
+              1,
+              2,
+              1
+            ],
+            "candidate_score": 22.151142250000937,
+            "objective_bound_direction": "none_certified",
+            "score_kind": "numerical_outer_enclosure_estimate",
+            "status": "scored"
+          },
+          {
+            "action_indices": [
+              1,
+              2,
+              2
+            ],
+            "candidate_score": 24.31969225000098,
+            "objective_bound_direction": "none_certified",
+            "score_kind": "numerical_outer_enclosure_estimate",
+            "status": "scored"
+          },
+          {
+            "action_indices": [
+              2,
+              0,
+              0
+            ],
+            "candidate_score": 17.905592250000844,
+            "objective_bound_direction": "none_certified",
+            "score_kind": "numerical_outer_enclosure_estimate",
+            "status": "scored"
+          },
+          {
+            "action_indices": [
+              2,
+              0,
+              1
+            ],
+            "candidate_score": 19.86039225000089,
+            "objective_bound_direction": "none_certified",
+            "score_kind": "numerical_outer_enclosure_estimate",
+            "status": "scored"
+          },
+          {
+            "action_indices": [
+              2,
+              0,
+              2
+            ],
+            "candidate_score": 21.916442250000927,
+            "objective_bound_direction": "none_certified",
+            "score_kind": "numerical_outer_enclosure_estimate",
+            "status": "scored"
+          },
+          {
+            "action_indices": [
+              2,
+              1,
+              0
+            ],
+            "candidate_score": 20.083842250000895,
+            "objective_bound_direction": "none_certified",
+            "score_kind": "numerical_outer_enclosure_estimate",
+            "status": "scored"
+          },
+          {
+            "action_indices": [
+              2,
+              1,
+              1
+            ],
+            "candidate_score": 22.151142250000937,
+            "objective_bound_direction": "none_certified",
+            "score_kind": "numerical_outer_enclosure_estimate",
+            "status": "scored"
+          },
+          {
+            "action_indices": [
+              2,
+              1,
+              2
+            ],
+            "candidate_score": 24.31969225000098,
+            "objective_bound_direction": "none_certified",
+            "score_kind": "numerical_outer_enclosure_estimate",
+            "status": "scored"
+          },
+          {
+            "action_indices": [
+              2,
+              2,
+              0
+            ],
+            "candidate_score": 22.387092250000947,
+            "objective_bound_direction": "none_certified",
+            "score_kind": "numerical_outer_enclosure_estimate",
+            "status": "scored"
+          },
+          {
+            "action_indices": [
+              2,
+              2,
+              1
+            ],
+            "candidate_score": 24.566892250000986,
+            "objective_bound_direction": "none_certified",
+            "score_kind": "numerical_outer_enclosure_estimate",
+            "status": "scored"
+          },
+          {
+            "action_indices": [
+              2,
+              2,
+              2
+            ],
+            "candidate_score": 26.847942250001026,
+            "objective_bound_direction": "none_certified",
+            "score_kind": "numerical_outer_enclosure_estimate",
+            "status": "scored"
+          }
+        ],
+        "candidate_score": 13.924092250000715,
+        "coverage": "complete",
+        "objective_bound_direction": "none_certified",
+        "replay": {
+          "controls": [
+            [
+              -2.5
+            ],
+            [
+              -2.5
+            ],
+            [
+              -2.5
+            ]
+          ],
+          "disturbances": [
+            [
+              1.0
+            ],
+            [
+              1.0
+            ],
+            [
+              1.0
+            ]
+          ],
+          "states": [
+            [
+              4.5,
+              0.0,
+              0.0,
+              0.0
+            ],
+            [
+              4.275,
+              -2.5,
+              0.0045,
+              0.1
+            ],
+            [
+              4.025,
+              -2.5,
+              0.019000000000000003,
+              0.2
+            ],
+            [
+              3.775,
+              -2.5,
+              0.043500000000000004,
+              0.30000000000000004
+            ]
+          ],
+          "terminal_objective": 13.92409225
+        },
+        "representation": "ellipsoid",
+        "score_kind": "numerical_outer_enclosure_estimate",
+        "selected_attempt": 0,
+        "trace": {
+          "representation": "ellipsoid",
+          "stages": [
+            {
+              "center": [
+                4.5,
+                0.0,
+                0.0,
+                0.0
+              ],
+              "radii": [
+                1.5e-323,
+                1.5e-323,
+                1.5e-323,
+                1.5e-323
+              ]
+            },
+            {
+              "center": [
+                4.275,
+                -2.5,
+                0.0045,
+                0.1
+              ],
+              "radii": [
+                1.421085471520201e-14,
+                3.5527136788005025e-15,
+                5.204170427930423e-18,
+                8.326672684688677e-17
+              ]
+            },
+            {
+              "center": [
+                4.025,
+                -2.5,
+                0.019000000000000003,
+                0.2
+              ],
+              "radii": [
+                4.2632564145606024e-14,
+                3.5527136788005025e-15,
+                4.857225732735061e-17,
+                3.885780586188049e-16
+              ]
+            },
+            {
+              "center": [
+                3.775000000000001,
+                -2.5,
+                0.04350000000000001,
+                0.30000000000000004
+              ],
+              "radii": [
+                9.503509090791343e-14,
+                3.5527136788005025e-15,
+                2.220446049250314e-16,
+                1.2212453270876726e-15
+              ]
+            }
+          ]
+        }
+      }
+    ],
+    "schema": "csl.issue824-two-points-nominal/1",
+    "source_identity": {
+      "commit": "f4d76c60f4003f50954174e96eafd8e514bd5441",
+      "repository": "imm-rl-lab/optimal_control/Environments"
+    }
+  },
+  "schema": "csl.issue824-two-points-nominal-bundle/1",
+  "source_commit": "76e2f9024ef9553c99636a1f638959af44a47bbf",
+  "source_worktree_clean": true
+}

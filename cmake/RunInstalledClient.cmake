@@ -63,6 +63,7 @@ file(COPY "${CSL_SOURCE_DIR}/tests/installed/finite_plan_zonotope_client.cpp" DE
 file(COPY "${CSL_SOURCE_DIR}/tests/installed/finite_plan_parallelotope_client.cpp" DESTINATION "${work}/source")
 file(COPY "${CSL_SOURCE_DIR}/tests/installed/finite_plan_ellipsoid_client.cpp" DESTINATION "${work}/source")
 file(COPY "${CSL_SOURCE_DIR}/tests/installed/finite_action_ellipsoid_minimax_client.cpp" DESTINATION "${work}/source")
+file(COPY "${CSL_SOURCE_DIR}/tests/installed/finite_action_nominal_client.cpp" DESTINATION "${work}/source")
 file(COPY "${CSL_SOURCE_DIR}/tests/installed/finite_action_zonotope_minimax_client.cpp" DESTINATION "${work}/source")
 file(COPY "${CSL_SOURCE_DIR}/tests/installed/finite_action_parallelotope_minimax_client.cpp" DESTINATION "${work}/source")
 file(COPY "${CSL_SOURCE_DIR}/tests/installed/ts01_evidence_client.cpp" DESTINATION "${work}/source")

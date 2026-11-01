@@ -115,6 +115,12 @@ SAVED_FIGURES = (
          title="Enclose a planar linear image with an ellipsoid",
          alt="The square [-1,1] by [-1,1] maps under diag(2,1) to a rectangle enclosed by a stagewise outer ellipse.",
          summary="The minimal two-state example is generated from the saved report record, with exact-rational corner membership checked independently. The separate four-state TwoPoints selection is finite-catalogue and its ellipsoid scores are numerical candidate estimates, not validated objective bounds."),
+    dict(route="issue824-two-points-nominal-v1", image="projections.svg",
+         page="index.html", records="result.json",
+         family="Classic nominal · Finite minimax",
+         title="Compare nominal and minimax control on TwoPoints",
+         alt="Two player phase planes show reachable sets, backward-winning intersections and representation projections, overlaid with the fixed-input nominal and finite minimax trajectories.",
+         summary="Five set-representation tracks score all 27 nominal action plans under the declared opponent signal v=+1. An independent rational checker also verifies the separate 27-by-27 finite minimax reference. The upstream continuous-action RL task is not reproduced."),
 )
 
 
