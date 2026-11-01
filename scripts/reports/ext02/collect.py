@@ -44,6 +44,31 @@ def cache_value(cache: str, key: str) -> str | None:
     return None
 
 
+def validate_scenario(scenario: dict) -> None:
+    expected = {
+        "schema": "csl.ext02-analytic-scenario/1",
+        "id": "ext02-two-state-mixed-analytic-v1",
+        "time_domain": "discrete", "times": [0, 1], "state_dimension": 2,
+        "control_order": ["continuous", "discrete"],
+        "continuous_control": {"dimension": 1, "lower": [-1], "upper": [1]},
+        "discrete_control": {"dimension": 1, "catalogue": [[-1], [0], [1]],
+                              "identity": "catalogue index"},
+        "dynamics": {"x_next_equals_Ax_plus_Bu": True, "A_row_major": [0, 0, 0, 0],
+                     "B_row_major": [1, 1, 0, 1], "offset": [0, 0]},
+        "initial_state": [0, 0], "terminal_constraint": {"x1_greater_or_equal": 0},
+        "objective": "minimize terminal x1",
+        "analytic_oracle": {"history_count": 3, "optimal_objective": 0,
+            "terminal_state_by_catalogue_index": [[0, -1], [0, 0], [0, 1]],
+            "continuous_control_by_catalogue_index": [1, 0, -1],
+            "all_three_histories_tie": True},
+        "assurance": "numerical; independently checked against this analytic one-step solution",
+        "limits": "two-dimensional state, one-stage horizon; not a general complexity or scalability claim",
+    }
+    for key, value in expected.items():
+        if scenario.get(key) != value:
+            raise ValueError(f"scenario manifest differs from the analytic driver fixture at {key}")
+
+
 def process_capture(command: list[str]) -> dict:
     process = subprocess.Popen(command, cwd=ROOT, stdout=subprocess.PIPE,
                                stderr=subprocess.PIPE)
@@ -76,6 +101,9 @@ def main() -> None:
     if len(sys.argv) != 3:
         raise SystemExit("usage: collect.py RELEASE_EXECUTABLE OUTPUT_DIRECTORY")
     executable = Path(sys.argv[1]).resolve(strict=True)
+    expected_executable = (ROOT / "build/highs/csl_ext02_portfolio_report").resolve(strict=True)
+    if executable != expected_executable:
+        raise ValueError("executable is not the configured EXT-02 Release target")
     output = Path(sys.argv[2]).resolve()
     output.mkdir(parents=True, exist_ok=False)
     status = git("status", "--porcelain", "--untracked-files=all")
@@ -83,9 +111,17 @@ def main() -> None:
         raise ValueError("source tree must be clean before capture")
     source_commit = git("rev-parse", "HEAD")
     scenario = SCENARIO.read_bytes()
+    scenario_data = json.loads(scenario)
+    validate_scenario(scenario_data)
     if not BUILD_CACHE.is_file():
         raise ValueError("Release CMake cache absent; build the highs report preset first")
     cache = BUILD_CACHE.read_text(encoding="utf-8", errors="replace")
+    required_build = {"CMAKE_BUILD_TYPE": "Release", "CSL_ENABLE_HIGHS": "ON",
+                      "CSL_ENABLE_QHULL": "ON", "CSL_BUILD_EXT02_REPORT": "ON"}
+    for key, expected in required_build.items():
+        actual = cache_value(cache, key)
+        if actual not in (expected, "TRUE" if expected == "ON" else expected):
+            raise ValueError(f"Release build cache {key} expected {expected}, received {actual}")
     compiler = cache_value(cache, "CMAKE_CXX_COMPILER")
     compiler_version = (subprocess.check_output([compiler, "--version"], text=True).splitlines()[0]
                         if compiler else None)
@@ -94,6 +130,13 @@ def main() -> None:
     cmake_version = subprocess.check_output([cmake, "--version"], text=True).splitlines()[0]
     ninja_version = subprocess.check_output([ninja, "--version"], text=True).strip()
     load_before = Path("/proc/loadavg").read_text().split()[:3] if Path("/proc/loadavg").is_file() else None
+    provenance = process_capture([str(executable), "--provenance"])
+    if provenance["return_code"] != 0 or provenance["stderr"]:
+        raise ValueError("report executable provenance query failed")
+    provenance_data = json.loads(provenance["stdout"])
+    if (provenance_data != {"schema": "csl.ext02-provenance/1",
+            "source_commit": source_commit, "scenario_sha256": digest(scenario)}):
+        raise ValueError("executable source/input identity differs from the clean source and scenario")
     capture = process_capture([str(executable), "--measure", "7"])
     (output / "raw.jsonl").write_bytes(capture["stdout"])
     (output / "stderr.txt").write_bytes(capture["stderr"])

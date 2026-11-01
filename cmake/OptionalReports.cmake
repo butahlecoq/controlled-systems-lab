@@ -1220,9 +1220,23 @@ endif()
 endif()
 
 if(CSL_BUILD_EXT02_REPORT)
+find_package(Git REQUIRED)
+execute_process(COMMAND "${GIT_EXECUTABLE}" rev-parse HEAD
+  WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
+  OUTPUT_VARIABLE EXT02_CAPTURE_SOURCE_COMMIT
+  OUTPUT_STRIP_TRAILING_WHITESPACE
+  RESULT_VARIABLE EXT02_GIT_RESULT)
+if(NOT EXT02_GIT_RESULT EQUAL 0)
+  message(FATAL_ERROR "Could not bind EXT-02 report executable to the current source commit")
+endif()
+file(SHA256 "${CMAKE_CURRENT_SOURCE_DIR}/benchmarks/scenarios/ext02-analytic-two-state-mixed-v1.json"
+  EXT02_CAPTURE_SCENARIO_SHA256)
 add_executable(csl_ext02_portfolio_report benchmarks/reporting/ext02/portfolio_driver.cpp)
 target_compile_features(csl_ext02_portfolio_report PRIVATE cxx_std_20)
-target_compile_definitions(csl_ext02_portfolio_report PRIVATE $<$<CONFIG:Release>:NDEBUG>)
+target_compile_definitions(csl_ext02_portfolio_report PRIVATE $<$<CONFIG:Release>:NDEBUG>
+  "CSL_EXT02_CAPTURE_SOURCE_COMMIT=\"${EXT02_CAPTURE_SOURCE_COMMIT}\"")
+target_compile_definitions(csl_ext02_portfolio_report PRIVATE
+  "CSL_EXT02_CAPTURE_SCENARIO_SHA256=\"${EXT02_CAPTURE_SCENARIO_SHA256}\"")
 target_link_libraries(csl_ext02_portfolio_report PRIVATE CSL::finite_mixed_branch
   CSL::strategy_a CSL::affine_sum CSL::qhull_conversion CSL::highs_lp CSL::highs_convex)
 if(BUILD_TESTING)

@@ -514,11 +514,29 @@ FiniteMixedBranchSolveOutcome solve_finite_mixed_branch_portfolio(
             }
             auto result = std::get<SynthesisResult>(std::move(solve_outcome));
             if (result.termination != Termination::completed) {
-                if (result.termination == Termination::resource_limit) {
+                std::optional<StopReason> stop_reason;
+                switch (result.termination) {
+                case Termination::cancelled: stop_reason = StopReason::cancelled; break;
+                case Termination::deadline_expired: stop_reason = StopReason::deadline_expired; break;
+                case Termination::resource_limit: stop_reason = StopReason::resource_limit; break;
+                case Termination::numerical_failure: stop_reason = StopReason::numerical_failure; break;
+                default: break;
+                }
+                if (stop_reason) {
                     every_branch_solved = false;
-                    stop = OperationStopped{StopReason::resource_limit,
-                        "A finite mixed-branch family reached its pre-allocation materialization budget."};
-                    refuse(unsupported("finite_mixed_branch.resource_limit", stop->diagnostics));
+                    std::string explanation = "A branch solver stopped with status " +
+                        std::to_string(static_cast<int>(result.termination)) + ".";
+                    std::visit([&](const auto& evidence) {
+                        if constexpr (requires { evidence.stop.diagnostics; })
+                            explanation += " " + evidence.stop.diagnostics;
+                        else if constexpr (requires { evidence.diagnostics; })
+                            for (const auto& diagnostic : evidence.diagnostics)
+                                explanation += " " + diagnostic.field + ": " + diagnostic.explanation;
+                    }, result.stop);
+                    stop = OperationStopped{*stop_reason, std::move(explanation)};
+                    const auto field = *stop_reason == StopReason::resource_limit
+                        ? "finite_mixed_branch.resource_limit" : "finite_mixed_branch.stopped";
+                    refuse(unsupported(field, stop->diagnostics));
                     continue;
                 }
                 std::string reason = "A branch solver terminated with status " +
@@ -601,7 +619,7 @@ FiniteMixedBranchSolveOutcome solve_finite_mixed_branch_portfolio(
         }
         if (page.entries.empty() && !page.complete)
             return invalid("finite_mixed_branch.cursor", "The branch cursor made no progress.");
-        history_enumeration_complete = page.complete;
+        history_enumeration_complete = page.complete && !stop.has_value();
         if (stop) break;
     }
 

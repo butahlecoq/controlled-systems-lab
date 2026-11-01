@@ -237,6 +237,13 @@ void run(std::size_t repetitions, bool smoke) {
 
 int main(int argc, char** argv) {
     try {
+        if (argc == 2 && std::string(argv[1]) == "--provenance") {
+            std::cout << "{\"schema\":\"csl.ext02-provenance/1\",\"source_commit\":\""
+                      << CSL_EXT02_CAPTURE_SOURCE_COMMIT
+                      << "\",\"scenario_sha256\":\"" << CSL_EXT02_CAPTURE_SCENARIO_SHA256
+                      << "\"}\n";
+            return 0;
+        }
         if (argc == 2 && std::string(argv[1]) == "--smoke") run(0, true);
         else if (argc == 3 && std::string(argv[1]) == "--measure")
             run(static_cast<std::size_t>(std::stoull(argv[2])), false);

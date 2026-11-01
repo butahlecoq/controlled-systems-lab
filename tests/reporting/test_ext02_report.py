@@ -13,6 +13,7 @@ import unittest
 ROOT = Path(__file__).resolve().parents[2]
 RENDERER = ROOT / "scripts/reports/ext02/render_saved.py"
 STAGER_PATH = ROOT / "scripts/reports/stage_ext02.py"
+COLLECTOR_PATH = ROOT / "scripts/reports/ext02/collect.py"
 
 
 def load_stager():
@@ -23,7 +24,24 @@ def load_stager():
     return module
 
 
+def load_collector():
+    spec = importlib.util.spec_from_file_location("csl_ext02_test_collector", COLLECTOR_PATH)
+    module = importlib.util.module_from_spec(spec)
+    assert spec.loader is not None
+    spec.loader.exec_module(module)
+    return module
+
+
 class Ext02ReportTests(unittest.TestCase):
+    def test_collector_checks_scenario_manifest_against_driver_fixture(self) -> None:
+        collector = load_collector()
+        scenario = json.loads((ROOT / "benchmarks/scenarios/ext02-analytic-two-state-mixed-v1.json")
+                              .read_text(encoding="utf-8"))
+        collector.validate_scenario(scenario)
+        scenario["dynamics"]["B_row_major"] = [1, 0, 0, 1]
+        with self.assertRaisesRegex(ValueError, "dynamics"):
+            collector.validate_scenario(scenario)
+
     def test_saved_renderer_preserves_trials_and_derives_terminal_plot(self) -> None:
         branches = [
             {"catalogue_index": 0, "discrete_value": -1, "objective": 0,
