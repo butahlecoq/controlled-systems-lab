@@ -7816,6 +7816,7 @@
         -0.3
       ]
     ],
+    "performance_claim": "descriptive timings only; no winner or speedup claim",
     "planar_exact_minimax_value": 1.0,
     "planar_zonotope_inclusion": "all finite terminal points checked inside axis-aligned zonotopes for all three plans; complete finite-set inclusion in this 2D fixture",
     "schema": "csl.issue824-two-points-zonotope-minimax-check/1",
@@ -7849,7 +7850,8 @@
       ]
     ],
     "stage_zonotope_relation": "all exact state coordinates checked against dyadic center +/- sum(abs(generators)); not full four-dimensional membership",
-    "status": "verified"
+    "status": "verified",
+    "timing_status": "21 completed raw samples across three methods; returned values match independently checked outcomes"
   },
   "planar_selector_example": {
     "candidate_search_coverage": "complete",
@@ -8073,6 +8075,221 @@
   },
   "schema": "csl.issue824-two-points-zonotope-minimax-figure/1",
   "source_geometry_report": "mpc05-causal-tree-pilot-v2",
+  "timing": {
+    "absolute_tolerance": 1e-08,
+    "arithmetic": "binary64",
+    "input_policy": "one immutable request reused; fixture setup is outside timing",
+    "interval": "complete public algorithm call; request construction and JSON serialization excluded",
+    "limiter_profile": "not collected: perf and strace are unavailable; descriptive timing only",
+    "measurement_repetitions_per_method": 7,
+    "order_policy": "three methods rotate order across each repetition",
+    "relative_tolerance": 1e-08,
+    "samples": [
+      {
+        "elapsed_ns": 361152,
+        "method": "exact_finite_minimax",
+        "order_in_repetition": 0,
+        "repetition": 0,
+        "returned_value": 14.58094225,
+        "status": "completed"
+      },
+      {
+        "elapsed_ns": 171811,
+        "method": "outer_box_selector",
+        "order_in_repetition": 1,
+        "repetition": 0,
+        "returned_value": 14.58094225,
+        "status": "completed"
+      },
+      {
+        "elapsed_ns": 145252242,
+        "method": "zonotope_selector",
+        "order_in_repetition": 2,
+        "repetition": 0,
+        "returned_value": 14.58094225,
+        "status": "completed"
+      },
+      {
+        "elapsed_ns": 171113,
+        "method": "outer_box_selector",
+        "order_in_repetition": 0,
+        "repetition": 1,
+        "returned_value": 14.58094225,
+        "status": "completed"
+      },
+      {
+        "elapsed_ns": 145169061,
+        "method": "zonotope_selector",
+        "order_in_repetition": 1,
+        "repetition": 1,
+        "returned_value": 14.58094225,
+        "status": "completed"
+      },
+      {
+        "elapsed_ns": 346485,
+        "method": "exact_finite_minimax",
+        "order_in_repetition": 2,
+        "repetition": 1,
+        "returned_value": 14.58094225,
+        "status": "completed"
+      },
+      {
+        "elapsed_ns": 145443749,
+        "method": "zonotope_selector",
+        "order_in_repetition": 0,
+        "repetition": 2,
+        "returned_value": 14.58094225,
+        "status": "completed"
+      },
+      {
+        "elapsed_ns": 405293,
+        "method": "exact_finite_minimax",
+        "order_in_repetition": 1,
+        "repetition": 2,
+        "returned_value": 14.58094225,
+        "status": "completed"
+      },
+      {
+        "elapsed_ns": 171951,
+        "method": "outer_box_selector",
+        "order_in_repetition": 2,
+        "repetition": 2,
+        "returned_value": 14.58094225,
+        "status": "completed"
+      },
+      {
+        "elapsed_ns": 343692,
+        "method": "exact_finite_minimax",
+        "order_in_repetition": 0,
+        "repetition": 3,
+        "returned_value": 14.58094225,
+        "status": "completed"
+      },
+      {
+        "elapsed_ns": 163221,
+        "method": "outer_box_selector",
+        "order_in_repetition": 1,
+        "repetition": 3,
+        "returned_value": 14.58094225,
+        "status": "completed"
+      },
+      {
+        "elapsed_ns": 145708868,
+        "method": "zonotope_selector",
+        "order_in_repetition": 2,
+        "repetition": 3,
+        "returned_value": 14.58094225,
+        "status": "completed"
+      },
+      {
+        "elapsed_ns": 171113,
+        "method": "outer_box_selector",
+        "order_in_repetition": 0,
+        "repetition": 4,
+        "returned_value": 14.58094225,
+        "status": "completed"
+      },
+      {
+        "elapsed_ns": 145694411,
+        "method": "zonotope_selector",
+        "order_in_repetition": 1,
+        "repetition": 4,
+        "returned_value": 14.58094225,
+        "status": "completed"
+      },
+      {
+        "elapsed_ns": 343482,
+        "method": "exact_finite_minimax",
+        "order_in_repetition": 2,
+        "repetition": 4,
+        "returned_value": 14.58094225,
+        "status": "completed"
+      },
+      {
+        "elapsed_ns": 145766558,
+        "method": "zonotope_selector",
+        "order_in_repetition": 0,
+        "repetition": 5,
+        "returned_value": 14.58094225,
+        "status": "completed"
+      },
+      {
+        "elapsed_ns": 358848,
+        "method": "exact_finite_minimax",
+        "order_in_repetition": 1,
+        "repetition": 5,
+        "returned_value": 14.58094225,
+        "status": "completed"
+      },
+      {
+        "elapsed_ns": 171322,
+        "method": "outer_box_selector",
+        "order_in_repetition": 2,
+        "repetition": 5,
+        "returned_value": 14.58094225,
+        "status": "completed"
+      },
+      {
+        "elapsed_ns": 339502,
+        "method": "exact_finite_minimax",
+        "order_in_repetition": 0,
+        "repetition": 6,
+        "returned_value": 14.58094225,
+        "status": "completed"
+      },
+      {
+        "elapsed_ns": 160287,
+        "method": "outer_box_selector",
+        "order_in_repetition": 1,
+        "repetition": 6,
+        "returned_value": 14.58094225,
+        "status": "completed"
+      },
+      {
+        "elapsed_ns": 152274075,
+        "method": "zonotope_selector",
+        "order_in_repetition": 2,
+        "repetition": 6,
+        "returned_value": 14.58094225,
+        "status": "completed"
+      }
+    ],
+    "schema": "csl.issue824-zonotope-minimax-timing/1",
+    "seed": "none; deterministic finite catalogues",
+    "summaries": [
+      {
+        "failures": 0,
+        "maximum_ns": 405293,
+        "median_ns": 346485,
+        "method": "exact_finite_minimax",
+        "minimum_ns": 339502,
+        "repetitions": 7
+      },
+      {
+        "failures": 0,
+        "maximum_ns": 171951,
+        "median_ns": 171113,
+        "method": "outer_box_selector",
+        "minimum_ns": 160287,
+        "repetitions": 7
+      },
+      {
+        "failures": 0,
+        "maximum_ns": 152274075,
+        "median_ns": 145694411,
+        "method": "zonotope_selector",
+        "minimum_ns": 145169061,
+        "repetitions": 7
+      }
+    ],
+    "warm_state_policy": "one excluded warmup per method; no algorithm workspace reused",
+    "warmup_runs_per_method": 1,
+    "workers": {
+      "actual": 1,
+      "native_threads": 1,
+      "requested": 1
+    }
+  },
   "zonotope_candidate_plans": [
     {
       "action_indices": [
