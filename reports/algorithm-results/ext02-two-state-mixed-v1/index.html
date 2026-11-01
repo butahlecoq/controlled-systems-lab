@@ -7,8 +7,8 @@
 <figure><img src="figure.svg" alt="Terminal state points for the three optimal catalogue branches in the terminal x1-x2 plane"><figcaption>Figure generated from the saved branch records. Each point is a terminal state in one branch’s optimal family.</figcaption></figure>
 <h2>Recorded solve profile</h2><table><tbody>
 <tr><th>Measured calls</th><td>7</td></tr>
-<tr><th>Median API interval</th><td>7819228 ns</td></tr>
-<tr><th>Range</th><td>7795412–8569261 ns</td></tr>
+<tr><th>Median API interval</th><td>7906668 ns</td></tr>
+<tr><th>Range</th><td>7868046–12665002 ns</td></tr>
 <tr><th>Horizon / catalogue / solved histories</th><td>1 / 3 / 3</td></tr>
 <tr><th>Retained relation rows</th><td>63</td></tr>
 <tr><th>Retained numeric scalars / bytes</th><td>411 / 3288 bytes</td></tr>
@@ -18,7 +18,7 @@
 </tbody></table>
 <h2>Measurement scope</h2><p>one solve_finite_mixed_branch_portfolio API call; excludes process startup, registry/scenario construction, JSON serialization and rendering. Process RSS is sampled separately and includes process startup, warmup and the measured calls; its sampling interval and limitation are recorded in <code>measurement.json</code>.</p>
 <div class="limits"><h2>Assurance and limits</h2><p>Binary64 numerical assurance. The branch completeness evidence is the registered strategy’s verified complete-family result for this admitted profile; it is not validated arithmetic. The single one-stage fixture describes only this workload. It is not a comparative benchmark, a speedup claim, a hard memory limit, or evidence of asymptotic scalability. Numeric-byte accounting covers H-matrix coefficients and right-hand sides only, excluding object and vector overhead, solver workspace, transient branch materialization and allocator slack.</p></div>
-<h2>Inputs and reproduction</h2><p>Scenario: <a href="https://github.com/butahlecoq/controlled-systems-lab/blob/c2420622106540e4ef713c02b8e2ec9154514cdc/benchmarks/scenarios/ext02-analytic-two-state-mixed-v1.json"><code>benchmarks/scenarios/ext02-analytic-two-state-mixed-v1.json</code></a>. Source commit: <a href="https://github.com/butahlecoq/controlled-systems-lab/commit/c2420622106540e4ef713c02b8e2ec9154514cdc"><code>c2420622106540e4ef713c02b8e2ec9154514cdc</code></a>. Scenario SHA-256: <code>533ef62feaf01aef883cbeb9b758f7fa225df4cd3b2ba453ef43f141dbc30145</code>. Executable SHA-256: <code>7afa3c333b6eba5e8ac7e533939b75e03cbcd3903cc7cec878ee2140cf342e12</code>.</p>
+<h2>Inputs and reproduction</h2><p>Scenario: <a href="https://github.com/butahlecoq/controlled-systems-lab/blob/d5473a7a8ae335b4bb3ec3c29c6222c1ac1df124/benchmarks/scenarios/ext02-analytic-two-state-mixed-v1.json"><code>benchmarks/scenarios/ext02-analytic-two-state-mixed-v1.json</code></a>. Source commit: <a href="https://github.com/butahlecoq/controlled-systems-lab/commit/d5473a7a8ae335b4bb3ec3c29c6222c1ac1df124"><code>d5473a7a8ae335b4bb3ec3c29c6222c1ac1df124</code></a>. Scenario SHA-256: <code>533ef62feaf01aef883cbeb9b758f7fa225df4cd3b2ba453ef43f141dbc30145</code>. Executable SHA-256: <code>40530407f74b110f4f4f4ff39b1199992868d5c65468a08df015061adf0cb586</code>.</p>
 <pre><code>cmake --preset highs -DCSL_ENABLE_QHULL=ON -DCSL_BUILD_EXT02_REPORT=ON
 cmake --build --preset highs --target csl_ext02_portfolio_report
 ctest --test-dir build/highs -R '^ext02_portfolio_report_smoke$' --output-on-failure

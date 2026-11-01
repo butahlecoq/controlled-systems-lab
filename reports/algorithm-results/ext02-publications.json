@@ -1,14 +1,14 @@
 {
+  "schema": "csl.ext02-publications/1",
   "reports": [
     {
-      "evidence_limits": "One binary64 fixture; no comparator, performance winner, hard RSS bound, or general scalability claim",
-      "measured_scope": "Seven solve calls on one analytic two-state, one-stage mixed-control fixture",
-      "measurement_sha256": "5cc44de82c89ff8dca92d96cc11001f9f043a61f2f52aa02c7a4cf8cecc5866e",
       "report_id": "ext02-two-state-mixed-v1",
+      "source_commit": "d5473a7a8ae335b4bb3ec3c29c6222c1ac1df124",
       "scenario_sha256": "533ef62feaf01aef883cbeb9b758f7fa225df4cd3b2ba453ef43f141dbc30145",
-      "source_commit": "c2420622106540e4ef713c02b8e2ec9154514cdc",
-      "zip_sha256": "0ab21a600b9200f270a86ae5e0b538b920bb3b0097a89cc4b993c75fd67f6971"
+      "measurement_sha256": "be173b1e049e0f72a43e3192e30c3421d8a9d556edcfe00646fc7fc928ed2e3a",
+      "zip_sha256": "b7084aea7ddd44c3d48e553e240ab7b0e057a7b939e9093e64af71226fd244e6",
+      "measured_scope": "Seven solve calls on one analytic two-state, one-stage mixed-control fixture",
+      "evidence_limits": "One binary64 fixture; no comparator, performance winner, hard RSS bound, or general scalability claim"
     }
-  ],
-  "schema": "csl.ext02-publications/1"
+  ]
 }

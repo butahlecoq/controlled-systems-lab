@@ -136,13 +136,13 @@ publication and live URL/hash verification remain pending.
 ## EXT-02 finite/mixed branch portfolio report
 
 The saved [EXT-02 analytic portfolio bundle](../../reports/algorithm-results/ext02-two-state-mixed-v1/)
-uses source commit `c2420622106540e4ef713c02b8e2ec9154514cdc` and scenario SHA-256
+uses source commit `d5473a7a8ae335b4bb3ec3c29c6222c1ac1df124` and scenario SHA-256
 `533ef62feaf01aef883cbeb9b758f7fa225df4cd3b2ba453ef43f141dbc30145`. Its
 one-stage, two-state nominal open-loop fixture enumerates three discrete-control
 rows and solves one bounded continuous control for each. All three complete
 branch families attain terminal objective zero at `(x1,x2)=(0,-1),(0,0),(0,1)`;
 all seven measured calls match that analytic answer. The API interval median is
-7,819,228 ns (range 7,795,412–8,569,261 ns). It includes the portfolio solve,
+7,906,668 ns (range 7,868,046–12,665,002 ns). It includes the portfolio solve,
 branch solves, family verification and selection, but excludes process startup,
 registry/scenario construction, JSON serialization and rendering. The saved
 rows retain 63 H-relation rows and 411 numeric scalars (3,288 coefficient/RHS
@@ -150,10 +150,10 @@ bytes); this structural count excludes object overhead, transients, solver
 workspace and allocator slack.
 
 The Release capture used GCC 16.2.1, CMake 3.31.6 and Ninja 1.13.2 on an
-8-logical-CPU Ryzen 5 3550H host. Load averages before capture were 0.50, 0.71
-and 1.73 (1/5/15 minutes). Sampled whole-process RSS reached 10,223,616 bytes;
+8-logical-CPU Ryzen 5 3550H host. Load averages before capture were 0.40, 0.59
+and 1.40 (1/5/15 minutes). Sampled whole-process RSS reached 10,350,592 bytes;
 this 2 ms sampling is not a peak-memory guarantee. `perf` was unavailable, so
-the source-mapped limiter profile is missing. These observations describe one
+the source-mapped limiter profile is unavailable. These observations describe one
 analytic fixture only; they are not a comparison, performance winner, hard
 memory bound, or scalability claim. The custom publication catalog stages the
 bundle and its figure in the Pages workflow; deployment and live-byte
