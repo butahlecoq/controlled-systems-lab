@@ -18,14 +18,14 @@
   "host": {
     "cpu_model": "AMD Ryzen 5 3550H with Radeon Vega Mobile Gfx",
     "load_average_after_timing": [
-      0.400390625,
-      0.345703125,
-      0.48876953125
+      1.04638671875,
+      0.52880859375,
+      0.537109375
     ],
     "load_average_before_timing": [
-      0.34814453125,
-      0.33447265625,
-      0.48583984375
+      1.04638671875,
+      0.52880859375,
+      0.537109375
     ],
     "logical_cpu_count": 8,
     "machine": "x86_64",
@@ -33,7 +33,7 @@
     "system": "Linux"
   },
   "schema": "csl.issue824-two-points-zonotope-minimax-capture/1",
-  "source_commit": "6e83db5ec15669fc4ebe25f822d0689266ada780",
+  "source_commit": "34f0f05e67c7420c17ca31ad4f80e6e29df0828f",
   "source_files_sha256": {
     ".github/workflows/algorithm-reports.yml": "9e71b82dbe5397410294069c9b8d964eecd859bc8315dc8eda63e66c5eeb6e0b",
     "CMakeLists.txt": "dffff6b904aace15c7d1a22094fa8d29292b77924fba61f0ce5f8f0211e15188",
