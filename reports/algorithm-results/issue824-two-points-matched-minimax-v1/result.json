@@ -57,7 +57,7 @@
   ],
   "samples": [
     {
-      "elapsed_ns": 447691,
+      "elapsed_ns": 369319,
       "method": "exact_polytope",
       "order_in_repetition": 1,
       "outcome": {
@@ -74,7 +74,7 @@
       "repetition": 1
     },
     {
-      "elapsed_ns": 212042,
+      "elapsed_ns": 181307,
       "method": "box",
       "order_in_repetition": 2,
       "outcome": {
@@ -91,7 +91,7 @@
       "repetition": 1
     },
     {
-      "elapsed_ns": 151108083,
+      "elapsed_ns": 151912852,
       "method": "zonotope",
       "order_in_repetition": 3,
       "outcome": {
@@ -108,7 +108,7 @@
       "repetition": 1
     },
     {
-      "elapsed_ns": 705200,
+      "elapsed_ns": 702949,
       "method": "parallelotope",
       "order_in_repetition": 4,
       "outcome": {
@@ -125,7 +125,7 @@
       "repetition": 1
     },
     {
-      "elapsed_ns": 219516,
+      "elapsed_ns": 213783,
       "method": "ellipsoid",
       "order_in_repetition": 5,
       "outcome": {
@@ -142,7 +142,7 @@
       "repetition": 1
     },
     {
-      "elapsed_ns": 182778,
+      "elapsed_ns": 177046,
       "method": "box",
       "order_in_repetition": 1,
       "outcome": {
@@ -159,7 +159,7 @@
       "repetition": 2
     },
     {
-      "elapsed_ns": 150207114,
+      "elapsed_ns": 151314105,
       "method": "zonotope",
       "order_in_repetition": 2,
       "outcome": {
@@ -176,7 +176,7 @@
       "repetition": 2
     },
     {
-      "elapsed_ns": 703943,
+      "elapsed_ns": 705254,
       "method": "parallelotope",
       "order_in_repetition": 3,
       "outcome": {
@@ -193,7 +193,7 @@
       "repetition": 2
     },
     {
-      "elapsed_ns": 218188,
+      "elapsed_ns": 212457,
       "method": "ellipsoid",
       "order_in_repetition": 4,
       "outcome": {
@@ -210,7 +210,7 @@
       "repetition": 2
     },
     {
-      "elapsed_ns": 441195,
+      "elapsed_ns": 363801,
       "method": "exact_polytope",
       "order_in_repetition": 5,
       "outcome": {
@@ -227,7 +227,7 @@
       "repetition": 2
     },
     {
-      "elapsed_ns": 155835584,
+      "elapsed_ns": 152185372,
       "method": "zonotope",
       "order_in_repetition": 1,
       "outcome": {
@@ -244,7 +244,7 @@
       "repetition": 3
     },
     {
-      "elapsed_ns": 703244,
+      "elapsed_ns": 687095,
       "method": "parallelotope",
       "order_in_repetition": 2,
       "outcome": {
@@ -261,7 +261,7 @@
       "repetition": 3
     },
     {
-      "elapsed_ns": 218118,
+      "elapsed_ns": 230615,
       "method": "ellipsoid",
       "order_in_repetition": 3,
       "outcome": {
@@ -278,7 +278,7 @@
       "repetition": 3
     },
     {
-      "elapsed_ns": 437703,
+      "elapsed_ns": 348715,
       "method": "exact_polytope",
       "order_in_repetition": 4,
       "outcome": {
@@ -295,7 +295,7 @@
       "repetition": 3
     },
     {
-      "elapsed_ns": 188854,
+      "elapsed_ns": 178444,
       "method": "box",
       "order_in_repetition": 5,
       "outcome": {
@@ -312,7 +312,7 @@
       "repetition": 3
     },
     {
-      "elapsed_ns": 689695,
+      "elapsed_ns": 691495,
       "method": "parallelotope",
       "order_in_repetition": 1,
       "outcome": {
@@ -329,7 +329,7 @@
       "repetition": 4
     },
     {
-      "elapsed_ns": 210226,
+      "elapsed_ns": 205681,
       "method": "ellipsoid",
       "order_in_repetition": 2,
       "outcome": {
@@ -346,7 +346,7 @@
       "repetition": 4
     },
     {
-      "elapsed_ns": 412560,
+      "elapsed_ns": 345224,
       "method": "exact_polytope",
       "order_in_repetition": 3,
       "outcome": {
@@ -363,7 +363,7 @@
       "repetition": 4
     },
     {
-      "elapsed_ns": 189064,
+      "elapsed_ns": 184031,
       "method": "box",
       "order_in_repetition": 4,
       "outcome": {
@@ -380,7 +380,7 @@
       "repetition": 4
     },
     {
-      "elapsed_ns": 148573846,
+      "elapsed_ns": 152705477,
       "method": "zonotope",
       "order_in_repetition": 5,
       "outcome": {
@@ -397,7 +397,7 @@
       "repetition": 4
     },
     {
-      "elapsed_ns": 223775,
+      "elapsed_ns": 234316,
       "method": "ellipsoid",
       "order_in_repetition": 1,
       "outcome": {
@@ -414,7 +414,7 @@
       "repetition": 5
     },
     {
-      "elapsed_ns": 444338,
+      "elapsed_ns": 360169,
       "method": "exact_polytope",
       "order_in_repetition": 2,
       "outcome": {
@@ -431,7 +431,7 @@
       "repetition": 5
     },
     {
-      "elapsed_ns": 213578,
+      "elapsed_ns": 182355,
       "method": "box",
       "order_in_repetition": 3,
       "outcome": {
@@ -448,7 +448,7 @@
       "repetition": 5
     },
     {
-      "elapsed_ns": 152770475,
+      "elapsed_ns": 151578035,
       "method": "zonotope",
       "order_in_repetition": 4,
       "outcome": {
@@ -465,7 +465,7 @@
       "repetition": 5
     },
     {
-      "elapsed_ns": 686203,
+      "elapsed_ns": 687444,
       "method": "parallelotope",
       "order_in_repetition": 5,
       "outcome": {
@@ -486,46 +486,46 @@
   "summaries": [
     {
       "failures": 0,
-      "maximum_ns": 447691,
-      "median_ns": 441195,
+      "maximum_ns": 369319,
+      "median_ns": 360169,
       "method": "exact_polytope",
-      "minimum_ns": 412560,
+      "minimum_ns": 345224,
       "requested_repetitions": 5,
       "successful_repetitions": 5
     },
     {
       "failures": 0,
-      "maximum_ns": 213578,
-      "median_ns": 189064,
+      "maximum_ns": 184031,
+      "median_ns": 181307,
       "method": "box",
-      "minimum_ns": 182778,
+      "minimum_ns": 177046,
       "requested_repetitions": 5,
       "successful_repetitions": 5
     },
     {
       "failures": 0,
-      "maximum_ns": 155835584,
-      "median_ns": 151108083,
+      "maximum_ns": 152705477,
+      "median_ns": 151912852,
       "method": "zonotope",
-      "minimum_ns": 148573846,
+      "minimum_ns": 151314105,
       "requested_repetitions": 5,
       "successful_repetitions": 5
     },
     {
       "failures": 0,
-      "maximum_ns": 705200,
-      "median_ns": 703244,
+      "maximum_ns": 705254,
+      "median_ns": 691495,
       "method": "parallelotope",
-      "minimum_ns": 686203,
+      "minimum_ns": 687095,
       "requested_repetitions": 5,
       "successful_repetitions": 5
     },
     {
       "failures": 0,
-      "maximum_ns": 223775,
-      "median_ns": 218188,
+      "maximum_ns": 234316,
+      "median_ns": 213783,
       "method": "ellipsoid",
-      "minimum_ns": 210226,
+      "minimum_ns": 205681,
       "requested_repetitions": 5,
       "successful_repetitions": 5
     }

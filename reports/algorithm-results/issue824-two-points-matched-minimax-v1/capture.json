@@ -14,14 +14,14 @@
   "host": {
     "cpu_model": "AMD Ryzen 5 3550H with Radeon Vega Mobile Gfx",
     "load_average_after_e2e": [
-      0.78857421875,
-      1.32177734375,
-      1.140625
+      0.36474609375,
+      0.54541015625,
+      0.8095703125
     ],
     "load_average_before_e2e": [
-      0.77001953125,
-      1.32763671875,
-      1.1416015625
+      0.30908203125,
+      0.53759765625,
+      0.80810546875
     ],
     "logical_cpu_count": 8,
     "machine": "x86_64",
@@ -46,21 +46,38 @@
     "highs": "ON",
     "qhull": "ON"
   },
+  "resource_accounting": {
+    "enforced_limits": {
+      "algorithm_wall_time": false,
+      "process_tree_memory": false
+    },
+    "observation_reason": "No process-tree resource sampler or cap supervisor was used for these saved runs.",
+    "observed": {
+      "per_call_wall_time": "recorded in result.json",
+      "process_tree_peak_memory_bytes": null,
+      "process_tree_wall_time": null
+    },
+    "policy": "uncapped local exploratory run",
+    "requested_limits": {
+      "algorithm_wall_time_seconds": null,
+      "process_tree_memory_bytes": null
+    }
+  },
   "schema": "csl.issue824.matched-minimax-capture/1",
-  "source_commit": "a6c2d7de67a057adce32d48843e301ccd3393491",
+  "source_commit": "fb3ea1b0e35180df1ff1cb64a5d5ffea47a1e54b",
   "source_files_sha256": {
     "CMakeLists.txt": "ffb346c1cb3785439ec397b72d92cf6898eb25633320fc06f69baf27c8f48ba3",
     "benchmarks/reporting/exp824/two_points_fixture.hpp": "63ea125705437636a8689ca1a37d1df71c4be1ee04f751d2b226ab1c8145c8ec",
     "benchmarks/reporting/exp824/two_points_matched_minimax.cpp": "9fdd00fea35afc564c4b94d702f1c162d8936e92327602e06c54463a9c2e5048",
-    "cmake/OptionalReports.cmake": "0b2743eb4995c1ef5ec91012a0f4634e616701236f40e95ea94228061a7b0bf0",
+    "cmake/OptionalReports.cmake": "fa588f2c8ec0e36d970e12dec3258da1ad47d121f3d05549f23974bb955f18e5",
     "include/csl/optimization/finite_action_box_minimax.hpp": "15e569c195f3f916366c7934e6a152a8ec92195d2ef7cd2537201a794ffe96c4",
     "include/csl/optimization/finite_action_ellipsoid_minimax.hpp": "78a5974e5dd4dffed486bf26bebebf6376fa6a525e8fbca1aa35010bc2123f5e",
     "include/csl/optimization/finite_action_minimax.hpp": "b9a49e16fe75cae04474aa14cb0e49c7e4d98052b33921e95b43f0e156b5afc0",
     "include/csl/optimization/finite_action_parallelotope_minimax.hpp": "e3002536cab1c3216293f7f70fd08bcb308addde53b58029b57898edb8296b3f",
     "include/csl/optimization/finite_action_zonotope_minimax.hpp": "f541ddbfbe4469589efb4a6996dc4ea4f174f7477d53b6e1cd60dd838ed51302",
-    "scripts/reports/exp824/check_matched_minimax.py": "6a3a7af22cb23f7532829eb797f68df666c126ef6a647b0f0f1299c52ba85a40",
+    "scripts/reports/exp824/check_matched_minimax.py": "d3ef28b9bb644a1bd7fb757245826dae13a0ddb634ac14b10bbca9cf117138c9",
     "scripts/reports/exp824/check_matched_minimax_smoke.py": "0f4e5e53b232a28356384518c5c565345aaa5b16948e5081e4c2d1c196a356c8",
-    "scripts/reports/exp824/make_matched_minimax_report.py": "37ad7120ffda6028416f170562968aeb593a44052aece44b879543307fad3d24",
+    "scripts/reports/exp824/make_matched_minimax_report.py": "a74307bdc04f443e5e3147fcd55cf2548f232cf107940a18fdbfdcabf80e191e",
     "src/optimization/finite_action_box_minimax.cpp": "eb5b62873712f6ad2cf80634338e902d9ddfcfc4a7d0fba12367ae652be18d76",
     "src/optimization/finite_action_ellipsoid_minimax.cpp": "e6e60b0ea3500d7e641b958ee7ed31fddac89bff22660fe5fdd721b1e2a9c989",
     "src/optimization/finite_action_minimax.cpp": "958913ead8bbb935a49b30c4f9564d39c42b09a46f03492fe2327920272cca1f",

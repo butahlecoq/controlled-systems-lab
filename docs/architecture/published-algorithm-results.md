@@ -737,12 +737,12 @@ finite-catalog minimax value `14.58094225` for the selected plan. The numerical
 enclosure scores remain ranking estimates; they are not certified objective
 bounds or proof of approximate optimizer-family completeness.
 
-On the captured Ryzen 5 3550H host, median public-call times were 0.441 ms
-(exact), 0.189 ms (box), 151.108 ms (zonotope), 0.703 ms (parallelotope), and
-0.218 ms (ellipsoid). A separate GNU gprof profile attributes 63.2% of sampled
+On the captured Ryzen 5 3550H host, median public-call times were 0.360 ms
+(exact), 0.181 ms (box), 151.913 ms (zonotope), 0.691 ms (parallelotope), and
+0.214 ms (ellipsoid). A separate GNU gprof profile attributes 63.2% of sampled
 zonotope self CPU to terminal `score_corners`; the profile uses 10 ms sampling
 and one fixture. Five separate solver/check/serialization/hash trials took
-median 1.003 s (range 0.985–1.159 s). These results are descriptive for one
+median 0.992 s (range 0.970–1.011 s). These results are descriptive for one
 four-state, three-stage finite adaptation; they make no general speed ranking
 or continuous-action RL claim. The report reuses the reviewed two-player phase
 plane plots and preserves their source bundles. The profile and end-to-end

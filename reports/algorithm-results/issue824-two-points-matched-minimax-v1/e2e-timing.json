@@ -1,103 +1,108 @@
 {
-  "median_ns": 1002633096,
+  "median_ns": 992047436,
   "path_scope": "Release solver run, exact rational check, serialization and hash verification",
   "range_ns": [
-    984883599,
-    1158917624
+    970455764,
+    1010859132
   ],
   "schema": "csl.issue824.matched-minimax-e2e/1",
   "trials": [
     {
-      "check_sha256": "a77195ca8dc3f252cdd51be540dd72fbc448486ae297317038d644f7003559a0",
-      "elapsed_ns": 993913661,
+      "check_sha256": "03784364c8555abf9c7afacd30aeadc934b90a40fb76d8a09ab290337cd48f09",
+      "elapsed_ns": 992047436,
+      "failed_attempts": [],
       "failures": 0,
       "load_average_after": [
-        0.77001953125,
-        1.32763671875,
-        1.1416015625
+        0.30908203125,
+        0.53759765625,
+        0.80810546875
       ],
       "load_average_before": [
-        0.77001953125,
-        1.32763671875,
-        1.1416015625
+        0.30908203125,
+        0.53759765625,
+        0.80810546875
       ],
-      "result_sha256": "7f983512b3cbc5d189fd7b0e132598b068d0f0c84cc56ab498c58571e7ac22f6",
+      "result_sha256": "13b60b9abe18eba2be4f1dde776c48cacacc0932427d64399c1c85286a0203dd",
       "sample_count": 25,
       "status": "completed",
       "trial": 1
     },
     {
-      "check_sha256": "a77195ca8dc3f252cdd51be540dd72fbc448486ae297317038d644f7003559a0",
-      "elapsed_ns": 1010941693,
+      "check_sha256": "03784364c8555abf9c7afacd30aeadc934b90a40fb76d8a09ab290337cd48f09",
+      "elapsed_ns": 1010859132,
+      "failed_attempts": [],
       "failures": 0,
       "load_average_after": [
-        0.77001953125,
-        1.32763671875,
-        1.1416015625
+        0.36474609375,
+        0.54541015625,
+        0.8095703125
       ],
       "load_average_before": [
-        0.77001953125,
-        1.32763671875,
-        1.1416015625
+        0.30908203125,
+        0.53759765625,
+        0.80810546875
       ],
-      "result_sha256": "4021adc38675ebe797c0a3c41595dc88d981e8157d7efa7d118581a2e7a0edd5",
+      "result_sha256": "247a9917579a0fdf34d185956bd27f5f6c84e8e6b30f538cbb782836f3de5e88",
       "sample_count": 25,
       "status": "completed",
       "trial": 2
     },
     {
-      "check_sha256": "a77195ca8dc3f252cdd51be540dd72fbc448486ae297317038d644f7003559a0",
-      "elapsed_ns": 1158917624,
+      "check_sha256": "03784364c8555abf9c7afacd30aeadc934b90a40fb76d8a09ab290337cd48f09",
+      "elapsed_ns": 979968240,
+      "failed_attempts": [],
       "failures": 0,
       "load_average_after": [
-        0.78857421875,
-        1.32177734375,
-        1.140625
+        0.36474609375,
+        0.54541015625,
+        0.8095703125
       ],
       "load_average_before": [
-        0.77001953125,
-        1.32763671875,
-        1.1416015625
+        0.36474609375,
+        0.54541015625,
+        0.8095703125
       ],
-      "result_sha256": "eeaa7b24df171756e2deb78fd673c55ccd6f49924670e5873b665f84fab9a960",
+      "result_sha256": "52aff027a31f99b4aa4c624d93e1b204da09fe719910dd1f69d8f5fdd067b31c",
       "sample_count": 25,
       "status": "completed",
       "trial": 3
     },
     {
-      "check_sha256": "a77195ca8dc3f252cdd51be540dd72fbc448486ae297317038d644f7003559a0",
-      "elapsed_ns": 1002633096,
+      "check_sha256": "03784364c8555abf9c7afacd30aeadc934b90a40fb76d8a09ab290337cd48f09",
+      "elapsed_ns": 1004931527,
+      "failed_attempts": [],
       "failures": 0,
       "load_average_after": [
-        0.78857421875,
-        1.32177734375,
-        1.140625
+        0.36474609375,
+        0.54541015625,
+        0.8095703125
       ],
       "load_average_before": [
-        0.78857421875,
-        1.32177734375,
-        1.140625
+        0.36474609375,
+        0.54541015625,
+        0.8095703125
       ],
-      "result_sha256": "3f835291633eb169054d91f99337132e7153be5eee6d14ef04b4aefa2b352093",
+      "result_sha256": "33e915b7f7d185edab657dd5fd83e8b047cd40b8e6be5816771fe86a3cd070d9",
       "sample_count": 25,
       "status": "completed",
       "trial": 4
     },
     {
-      "check_sha256": "a77195ca8dc3f252cdd51be540dd72fbc448486ae297317038d644f7003559a0",
-      "elapsed_ns": 984883599,
+      "check_sha256": "03784364c8555abf9c7afacd30aeadc934b90a40fb76d8a09ab290337cd48f09",
+      "elapsed_ns": 970455764,
+      "failed_attempts": [],
       "failures": 0,
       "load_average_after": [
-        0.78857421875,
-        1.32177734375,
-        1.140625
+        0.36474609375,
+        0.54541015625,
+        0.8095703125
       ],
       "load_average_before": [
-        0.78857421875,
-        1.32177734375,
-        1.140625
+        0.36474609375,
+        0.54541015625,
+        0.8095703125
       ],
-      "result_sha256": "1459d6429dc639ae538f14db9062e3b491b8d1fe0852b113d0761313a1dcb187",
+      "result_sha256": "ff606b151a4ac6ff5735519e5b86003e849d8438fec208539f91fdd1b294edd1",
       "sample_count": 25,
       "status": "completed",
       "trial": 5

@@ -1,12 +1,22 @@
 {
+  "attempts_expected": 25,
+  "attempts_observed": 25,
   "control_plan_count": 27,
   "disturbance_histories_per_plan": 27,
   "exact_finite_minimax_value": 14.58094225,
   "exact_search_complete": "verified across all 27 control plans",
+  "failed_attempts": [],
   "failures": 0,
   "measurement_samples_verified": 25,
+  "missing_attempts_by_method": {
+    "box": 0,
+    "ellipsoid": 0,
+    "exact_polytope": 0,
+    "parallelotope": 0,
+    "zonotope": 0
+  },
   "oracle": "exact Fraction replay of every control plan and all 27 disturbance histories",
   "schema": "csl.issue824.matched-minimax-check/1",
-  "selected_plan_full_history_replay": "verified for all 25 timed outcomes",
+  "selected_plan_full_history_replay": "verified for all 25 completed timed outcomes",
   "status": "verified"
 }
