@@ -18,14 +18,14 @@
   "host": {
     "cpu_model": "AMD Ryzen 5 3550H with Radeon Vega Mobile Gfx",
     "load_average_after_timing": [
-      0.82666015625,
-      0.89697265625,
-      0.8212890625
+      0.03369140625,
+      0.31103515625,
+      0.55908203125
     ],
     "load_average_before_timing": [
-      0.8115234375,
-      0.89501953125,
-      0.8203125
+      0.03369140625,
+      0.31103515625,
+      0.55908203125
     ],
     "logical_cpu_count": 8,
     "machine": "x86_64",
@@ -33,7 +33,7 @@
     "system": "Linux"
   },
   "schema": "csl.issue824-two-points-zonotope-minimax-capture/1",
-  "source_commit": "fa68864caed88e425b746d9bce96d00bfa3970d2",
+  "source_commit": "dea9095d3e5b21b428be09be52b66738e27ea003",
   "source_files_sha256": {
     ".github/workflows/algorithm-reports.yml": "392224d5272b808f4b472a030c10ecd3ce7a20c83de5536bfb7e22e85135a9ce",
     "CMakeLists.txt": "dffff6b904aace15c7d1a22094fa8d29292b77924fba61f0ce5f8f0211e15188",
@@ -54,8 +54,9 @@
     "scripts/reports/exp824/check_zonotope_minimax.py": "a49772c266134d0475f18aa1c4232e90dd9bab2842670f764259ccb307dad74b",
     "scripts/reports/exp824/check_zonotope_minimax_smoke.py": "f5423299fcb6212a5b9f4cbb5ce3c4a7012d4c5dd7a95f4139569dc583cb8cc4",
     "scripts/reports/exp824/make_report.py": "3c2f34468ea052d388c8e7ecede453b3c5931756d3e92396121dd076bc4b1946",
-    "scripts/reports/exp824/make_zonotope_minimax_report.py": "e5ee062ad89a38cce60010c9b012a89f354955d22d9e07249460f4498da1143f",
+    "scripts/reports/exp824/make_zonotope_minimax_report.py": "7c6d88a8e4a610e0586784ac69825f9a964775193eafca08d90ac7fe88b000e0",
     "scripts/reports/report_source_identity.py": "96ecdb9666334b800e2eb2e2620bd8c5f427b0a87dae4a034084322cbabe5f31",
+    "scripts/reports/requirements.txt": "026c78a297f555c0549eb74a6cf55d13b42784632a7e75977f2f189a7e16c9c6",
     "scripts/reports/stage_issue824_zonotope.py": "d0a77cb67ba0a974ea09062d8882d6545ed70af88cd388267b77f4fcd2968214",
     "scripts/reports/stage_issue824_zonotope_minimax.py": "3bba62d79376c724f4671952ab4d8ef64e1c221bcd9a3f20c22483056afe8051",
     "scripts/reports/visual_examples.py": "1ca2ee3dcbc36cd90941ee7bdcc408b220b3cef43744745103da271aa8e3ae79",
@@ -73,7 +74,7 @@
     "src/reachability/finite_plan_zonotope.cpp": "21216c26fb1b87c152f20443bafb67e476504a853e76797a73c12a4f9f8bec46",
     "tests/contract/public_headers_client.cpp": "2e5ba572c1d6d687cdc7396e2c018081f6652561640f5e934390e66c6be0c389",
     "tests/installed/CMakeLists.txt": "d66764c90eadce1030f9db344136475626c3925738de38b1cf701646321e5050",
-    "tests/installed/finite_action_parallelotope_minimax_client.cpp": "283c0a6858c5262ae7850134f1503baed6d278ebd3db0a6dc54e1a38f631e8b1",
+    "tests/installed/finite_action_parallelotope_minimax_client.cpp": "aeb7c00d9a74c501c7740b8d2ce93c9c024fad054e43fe5e05246e1780895e4c",
     "tests/installed/finite_action_zonotope_minimax_client.cpp": "b01c0a2b3eee61dc4bc294e89d665ac20348d0512cdd4c3492896f2da3bcfcfa",
     "tests/installed/finite_plan_parallelotope_client.cpp": "d92b499a3f55a610556b4dc7bf3dbc343d394ab35dafe4ac1de16223ed4d1896",
     "tests/reporting/test_issue824_zonotope_minimax_publication.py": "9ed14a3e64428423f78e64c5d6d330f6fa2c46057649e44794a901990d99e767",

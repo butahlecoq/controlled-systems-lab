@@ -14,10 +14,10 @@ The result contains one excluded warmup and seven order-rotated API-call measure
 
 | Method | Median (ns) | Range (ns) |
 | --- | ---: | ---: |
-| exact_finite_minimax | 350,118 | 347,743–360,384 |
-| outer_box_selector | 174,675 | 170,554–192,693 |
-| zonotope_selector | 151,780,493 | 149,424,586–154,967,028 |
-| parallelotope_selector | 151,918,779 | 150,554,210–154,390,134 |
+| exact_finite_minimax | 353,190 | 347,394–367,368 |
+| outer_box_selector | 172,928 | 168,389–191,298 |
+| zonotope_selector | 151,917,299 | 149,908,716–152,154,622 |
+| parallelotope_selector | 151,964,303 | 151,574,027–153,732,212 |
 
 
 `capture.json` records host CPU/model/load, OS, Release compiler and flags, build generator and optional backend settings. The source commit is recorded separately from this measurement commit.
