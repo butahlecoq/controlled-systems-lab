@@ -44,3 +44,42 @@ def source_hashes_match_commit(root: Path, commit: str, expected: dict[str, str]
         if hashlib.sha256(completed.stdout).hexdigest() != expected_hash:
             return False
     return True
+
+
+def source_hashes_match_commit_or_checkout(root: Path, commit: str, expected: dict[str, str]) -> bool:
+    """Verify captured files against the pinned commit, or its exact checkout contents.
+
+    A squash merge can discard the captured commit object even though the archived
+    report's source files are unchanged on the target branch. In that case the
+    checkout itself is the only available source of provenance, so accept it only
+    when every captured relative path is a regular, non-symlink file under root and
+    every SHA-256 digest matches. If the commit object exists, keep the stricter
+    commit-tree check and never fall back after a mismatch.
+    """
+    if (not re.fullmatch(r"[0-9a-f]{40}|[0-9a-f]{64}", commit) or
+            not isinstance(expected, dict) or not expected):
+        return False
+    commit_type = subprocess.run(["git", "-C", str(root), "cat-file", "-t", commit],
+        check=False, capture_output=True)
+    if commit_type.returncode == 0:
+        return source_hashes_match_commit(root, commit, expected)
+
+    resolved_root = root.resolve()
+    for name, expected_hash in expected.items():
+        path = PurePosixPath(name)
+        if (path.is_absolute() or not path.parts or
+                any(part in ("", ".", "..") for part in path.parts) or
+                "\\" in name or not re.fullmatch(r"[0-9a-f]{64}", expected_hash)):
+            return False
+        candidate = root.joinpath(*path.parts)
+        ancestors = [candidate, *candidate.parents]
+        if any(item.is_symlink() for item in ancestors if item != root) or not candidate.is_file():
+            return False
+        try:
+            resolved = candidate.resolve(strict=True)
+            resolved.relative_to(resolved_root)
+        except (OSError, ValueError):
+            return False
+        if not resolved.is_file() or hashlib.sha256(resolved.read_bytes()).hexdigest() != expected_hash:
+            return False
+    return True
