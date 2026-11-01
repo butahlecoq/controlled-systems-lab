@@ -1,0 +1,11 @@
+{
+  "checked_trace_stages_per_track": 4,
+  "finite_minimax_disturbance_histories_per_plan": 27,
+  "finite_minimax_exact_value": 14.58094225,
+  "finite_minimax_plans_checked": 27,
+  "nominal_action_plans_checked_per_track": 27,
+  "nominal_exact_objective": 13.92409225,
+  "nominal_tracks_checked": 5,
+  "schema": "csl.issue824-two-points-nominal-check/1",
+  "status": "passed"
+}

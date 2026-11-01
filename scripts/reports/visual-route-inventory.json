@@ -295,6 +295,14 @@
       "follow_up_issue": 824
     },
     {
+      "source": "scripts/reports/exp824/make_nominal_report.py",
+      "signal_count": 3,
+      "asset_name_literals": [
+        "projections.svg"
+      ],
+      "disposition": "composes-or-copies-existing-saved-figure"
+    },
+    {
       "source": "scripts/reports/exp824/make_report.py",
       "signal_count": 6,
       "asset_name_literals": [
@@ -1133,6 +1141,14 @@
       "disposition": "publication-validation-or-frozen-route"
     },
     {
+      "source": "scripts/reports/stage_issue824_nominal.py",
+      "signal_count": 2,
+      "asset_name_literals": [
+        "projections.svg"
+      ],
+      "disposition": "publication-validation-or-frozen-route"
+    },
+    {
       "source": "scripts/reports/stage_issue824_zonotope.py",
       "signal_count": 2,
       "asset_name_literals": [
@@ -1522,7 +1538,7 @@
     },
     {
       "source": "scripts/reports/visual_examples.py",
-      "signal_count": 72,
+      "signal_count": 73,
       "asset_name_literals": [
         "adaptive-ode-replay.svg",
         "app01-plan-timing-v1.svg",
@@ -1569,6 +1585,7 @@
         "polygons.svg",
         "projections-lambda0.svg",
         "projections-lambda1.svg",
+        "projections.svg",
         "reachability-and-approximations.svg",
         "syn01-timing.svg",
         "synthesis-2d.svg",
@@ -2485,6 +2502,16 @@
         "projections.svg"
       ],
       "index_sha256": "810b6a9030165d0771f510e6525032ffb93830d4bf34b9f26dec387c6e12fe45",
+      "disposition": "deferred: original frozen route-level readability review remains; companion availability is listed separately",
+      "follow_up_issue": 824
+    },
+    {
+      "route": "issue824-two-points-nominal-v1",
+      "source_bundle": "issue824-two-points-nominal-v1",
+      "assets": [
+        "projections.svg"
+      ],
+      "index_sha256": "e9960137e732c679881750bf5279d2d49d4ccda1c76d1906ae3efe9f7f2232b1",
       "disposition": "deferred: original frozen route-level readability review remains; companion availability is listed separately",
       "follow_up_issue": 824
     },

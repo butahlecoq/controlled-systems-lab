@@ -1,0 +1,50 @@
+{
+  "build": {
+    "compiler": "/usr/bin/c++",
+    "compiler_version": "c++ (GCC) 16.2.1 20260810",
+    "configuration": "Release",
+    "cxx_flags_release": "-O3 -DNDEBUG",
+    "directory": "/home/butahlecoq/.local/share/codex/worktrees/issue824-nominal-20261102/build/dev",
+    "generator": "Ninja"
+  },
+  "host": {
+    "load_average_1_5_15": [
+      0.3154296875,
+      1.9951171875,
+      2.58349609375
+    ],
+    "logical_processors": 8,
+    "machine": "x86_64",
+    "python": "3.14.8",
+    "release": "7.2.8-9-omarchy",
+    "system": "Linux"
+  },
+  "schema": "csl.issue824-two-points-nominal-capture/1",
+  "source_commit": "afe94c7a2e55ecaf39f880d31cbf5c32b096e4b3",
+  "source_files_sha256": {
+    ".github/workflows/algorithm-reports.yml": "adf1b9b4a341f6ff48ab197a6fc655a7406f52203dbb296f2fffe6f3357c323e",
+    "CMakeLists.txt": "808bf0897f403170824c630a5ed0c2e956556938389d244a74c448176c890e7d",
+    "benchmarks/reporting/exp824/two_points_fixture.hpp": "63ea125705437636a8689ca1a37d1df71c4be1ee04f751d2b226ab1c8145c8ec",
+    "benchmarks/reporting/exp824/two_points_nominal.cpp": "1df38b30137d5da83427f1e2de93164d3af1b975d4e88c60055568b40ab43779",
+    "cmake/OptionalReports.cmake": "041460926dee5517b1f4fa15bbb2ff6f0a0124493f0a460326ae53181cf93c9e",
+    "cmake/RunInstalledClient.cmake": "a22a96b8ee76b0efe84d9872d6240fb2dc1ba6276001043175f79fd2a8b50aac",
+    "docs/architecture/issue824-nominal-control.md": "01561f9203b9b485286e3db35124c2284aa98cfda654c941595dea6ad305baa6",
+    "include/csl/optimization/finite_action_nominal.hpp": "007002c47a8c2f02f663cf4b4f96edd9d2f992c24327183d7e8fa1009a353b80",
+    "scripts/reports/audit_visual_routes.py": "31556aed02d4ebf60b8d1e104c71c36aebca13713a730fd24b7f0a0c931a6371",
+    "scripts/reports/exp824/check_nominal.py": "81e0275f82e85cc9f47a210f7c0c27218bec29a0e3e43a1be5ead0829d159e60",
+    "scripts/reports/exp824/check_nominal_smoke.py": "f9870f6e6df1cfff68c7207b257fd25fab5b8812c9c503a64fc3ef43a1eb0593",
+    "scripts/reports/exp824/make_nominal_report.py": "e863881b905567abea53a91e4e93e179caf17318a289f13580866982ff8227c4",
+    "scripts/reports/exp824/make_report.py": "ba65404fe326f6bf16aaefe3e25d5a6ed9ad61885bdaed97bf68117e1562662e",
+    "scripts/reports/stage_issue824_nominal.py": "eacaf82958b6b77bf66f9a794dea57c6b6e05a172906f33336d5a2480fafdb2e",
+    "scripts/reports/visual_examples.py": "c9cd33bbbc1cfe64ba87e18db4f84ca3362d480a1de9cf28105b0ef5bfce1ac2",
+    "src/optimization/Module.cmake": "de95649f4fb5600c2f751bd1dd02c3a979167bd7b7e091129680df604d66564c",
+    "src/optimization/Tests.cmake": "ced23c70d4689fd1412f459fbe29155f24f892b5a701b0bed8ac304f473355dc",
+    "src/optimization/finite_action_nominal.cpp": "713e19cd0e9e0e9de9891a88c8f04f5e2d5be194c1d64601628b3d9328581dd2",
+    "tests/installed/CMakeLists.txt": "411ff974c08c4b85630321cccc415e7042439029cd9268bd922b40dc9970e36a",
+    "tests/installed/finite_action_nominal_client.cpp": "8eaae43be28744fafd7bb162937175e3a94dafb1f6afde7f1e43a0e3cbf4b7fc",
+    "tests/reporting/test_issue824_nominal_publication.py": "73b121d9ff27d741a58b5b43f6406729b6c1c739b614414a99a3340aaa8256e4",
+    "tests/unit/optimization/finite_action_nominal_tests.cpp": "0a0ee8bc94a46cd8b675e1988cfd224f921119bd4102c8b1074a0abf594d50aa"
+  },
+  "source_status": [],
+  "source_worktree_clean": true
+}
