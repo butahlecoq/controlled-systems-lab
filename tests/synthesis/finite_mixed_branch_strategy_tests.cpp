@@ -1,16 +1,20 @@
 #define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
 #include <doctest/doctest.h>
 
+#include <Highs.h>
 #include <csl/adapters/convex/highs.hpp>
 #include <csl/adapters/lp/highs.hpp>
 #include <csl/adapters/polyhedral/qhull.hpp>
 #include <csl/geometry/affine_sum.hpp>
+#include <csl/optimization/finite_action_nominal.hpp>
 #include <csl/synthesis/finite_mixed_branch.hpp>
 #include <csl/synthesis/strategy_a/nominal_linear_exact_profile.hpp>
 #include <csl/synthesis/strategy_a/strategy.hpp>
 
+#include <algorithm>
 #include <array>
 #include <chrono>
+#include <cmath>
 #include <stop_token>
 #include <string>
 #include <thread>
@@ -255,6 +259,172 @@ TEST_CASE("mixed branch solve runs registered continuous solvers and retains ver
     CHECK(scalar_bounded.retained_relation_scalars <=
         scalar_bounded_request.limits.max_retained_relation_scalars);
     CHECK_FALSE(scalar_bounded.portfolio.complete);
+}
+
+TEST_CASE("finite mixed branch enumeration agrees with an independent MILP on a tied affine fixture") {
+    const auto source = mixed_linear_tie_problem();
+    ExactLinearStrategyFixture strategy_fixture;
+    FiniteMixedBranchSolveRequest request;
+    request.strategy.strategy = {"csl.synthesis.reach-back"};
+    request.strategy.representation = {"csl.polyhedron.h"};
+    request.family.profile = synthesis::strategy_a::nominal_linear_exact_profile;
+    request.family.objective = source.identity();
+    request.family.target = FamilyTarget::exact_optimal_relation;
+    request.family.assurance = Assurance::numerical;
+    request.family.representation = {"csl.polyhedron.h"};
+    request.resolution = {problem::UncertaintyStructure::stage_product_uncoupled, {}, {}};
+    request.branches_per_page = 3;
+    request.limits.max_branch_evaluations = 3;
+    ExecutionContext context;
+    context.numerical = request.family.numerical;
+    context.resources = std::make_shared<const ResourcePolicy>(ResourcePolicy{1, 1, 1, {}});
+
+    const auto enumerated = solve_finite_mixed_branch_portfolio(
+        source, strategy_fixture.strategies, request, context);
+    REQUIRE(std::holds_alternative<FiniteMixedBranchSolveResult>(enumerated));
+    const auto& portfolio = std::get<FiniteMixedBranchSolveResult>(enumerated).portfolio;
+    REQUIRE(portfolio.complete);
+    REQUIRE(portfolio.optimum.has_value());
+    CHECK(*portfolio.optimum == doctest::Approx(0.0));
+    REQUIRE(portfolio.optimal_evaluation_indices == std::vector<std::size_t>{0, 1, 2});
+
+    // Independent one-step MIP: choose one catalogue entry, one bounded
+    // continuous input, enforce the affine transition and terminal halfspace.
+    // The action values {-1, +1, -1} are represented by distinct binaries so
+    // both equal-valued catalogue branches remain identifiable.
+    HighsLp lp;
+    lp.num_col_ = 5; // u, z[0..2], terminal state
+    lp.num_row_ = 2;
+    lp.sense_ = ObjSense::kMinimize;
+    lp.col_cost_ = {0.0, 0.0, 0.0, 0.0, 1.0};
+    lp.col_lower_ = {-1.0, 0.0, 0.0, 0.0, 0.0};
+    lp.col_upper_ = {1.0, 1.0, 1.0, 1.0, kHighsInf};
+    lp.row_lower_ = {1.0, 0.0};
+    lp.row_upper_ = {1.0, 0.0};
+    lp.a_matrix_.format_ = MatrixFormat::kRowwise;
+    lp.a_matrix_.start_ = {0, 3, 8};
+    lp.a_matrix_.index_ = {1, 2, 3, 0, 1, 2, 3, 4};
+    lp.a_matrix_.value_ = {1.0, 1.0, 1.0, -1.0, 1.0, -1.0, 1.0, 1.0};
+    lp.a_matrix_.num_row_ = lp.num_row_;
+    lp.a_matrix_.num_col_ = lp.num_col_;
+    lp.integrality_.assign(5, HighsVarType::kContinuous);
+    lp.integrality_[1] = HighsVarType::kInteger;
+    lp.integrality_[2] = HighsVarType::kInteger;
+    lp.integrality_[3] = HighsVarType::kInteger;
+
+    Highs mip;
+    REQUIRE(mip.setOptionValue("output_flag", false) == HighsStatus::kOk);
+    REQUIRE(mip.setOptionValue("threads", 1) == HighsStatus::kOk);
+    REQUIRE(mip.setOptionValue("mip_rel_gap", 0.0) == HighsStatus::kOk);
+    REQUIRE(mip.passModel(lp) == HighsStatus::kOk);
+    REQUIRE(mip.run() == HighsStatus::kOk);
+    REQUIRE(mip.getModelStatus() == HighsModelStatus::kOptimal);
+    const auto& mip_solution = mip.getSolution().col_value;
+    REQUIRE(mip_solution.size() == 5);
+    const auto& mip_info = mip.getInfo();
+    CHECK(mip_info.objective_function_value == doctest::Approx(*portfolio.optimum));
+    CHECK(mip_info.mip_dual_bound == doctest::Approx(*portfolio.optimum));
+    CHECK(mip_info.mip_gap == doctest::Approx(0.0));
+    CHECK(mip_solution[1] + mip_solution[2] + mip_solution[3] == doctest::Approx(1.0));
+    for (std::size_t action = 1; action < 4; ++action)
+        CHECK(std::min(std::abs(mip_solution[action]),
+            std::abs(mip_solution[action] - 1.0)) == doctest::Approx(0.0));
+
+    std::size_t selected_catalogue_index = 0;
+    for (std::size_t action = 1; action < 3; ++action)
+        if (mip_solution[action + 1] > mip_solution[selected_catalogue_index + 1])
+            selected_catalogue_index = action;
+    CHECK(mip_solution[selected_catalogue_index + 1] == doctest::Approx(1.0));
+    CHECK(std::find(portfolio.optimal_evaluation_indices.begin(),
+        portfolio.optimal_evaluation_indices.end(), selected_catalogue_index) !=
+        portfolio.optimal_evaluation_indices.end());
+    const std::array<double, 3> action_values{-1.0, 1.0, -1.0};
+    const double replayed_terminal = mip_solution[0] + action_values[selected_catalogue_index];
+    CHECK(replayed_terminal == doctest::Approx(mip_solution[4]));
+    CHECK(mip_solution[4] >= -1e-9);
+}
+
+TEST_CASE("finite-only affine enumeration agrees with a one-hot MILP and preserves duplicate branches") {
+    const SystemModel authored{{{1, 1, 1}, TimeDomain::discrete,
+        LinearStage{{1, 1, {0}}, {1, 1, {1}}, {1, 1, {0}}, {0}}}, {}};
+    const auto system = take(model::snapshot(authored, Vector{0, 1}));
+    const auto safe = interval("finite-only-safe", -2, 2, "x");
+    const auto safe_data = take(sets::from_handle(safe));
+    csl::optimization::FiniteActionNominalRequest request{{"finite-only-affine"},
+        {"finite-only-milp"}, system, {0}, {1, {{-1}, {1}, {-1}}}, {{0}},
+        {safe_data, safe_data},
+        std::get<csl::optimization::Objective>(
+            csl::optimization::snapshot(LinearTerminal{{1}, 0}))};
+
+    const auto enumerated = csl::optimization::finite_action_nominal(request, {3, 3, 100, 10, 0.0});
+    REQUIRE(std::holds_alternative<csl::optimization::FiniteActionNominalResult>(enumerated));
+    const auto& result = std::get<csl::optimization::FiniteActionNominalResult>(enumerated);
+    REQUIRE(result.tracks.size() == 5);
+    const auto& exact_track = result.tracks.front();
+    REQUIRE(exact_track.representation == csl::optimization::NominalRepresentation::exact_polytope);
+    REQUIRE(std::holds_alternative<csl::optimization::NominalTrackSelected>(exact_track.outcome));
+    const auto& reference = std::get<csl::optimization::NominalTrackSelected>(exact_track.outcome);
+    REQUIRE(reference.coverage == csl::optimization::NominalSearchCoverage::complete);
+    CHECK(reference.candidate_score == doctest::Approx(-1.0));
+    CHECK(reference.replay.terminal_objective == doctest::Approx(-1.0));
+    REQUIRE(reference.attempts.size() == 3);
+    std::vector<std::size_t> minimizing_catalogue_indices;
+    for(std::size_t index = 0; index < reference.attempts.size(); ++index) {
+        const auto* scored = std::get_if<csl::optimization::NominalPlanScored>(
+            &reference.attempts[index]);
+        REQUIRE(scored != nullptr);
+        CHECK(scored->score_kind == csl::optimization::NominalScoreKind::exact_deterministic_objective);
+        if(scored->candidate_score == doctest::Approx(-1.0))
+            minimizing_catalogue_indices.push_back(scored->action_indices.front());
+    }
+    CHECK(minimizing_catalogue_indices == std::vector<std::size_t>{0, 2});
+
+    // Independent MILP for x[1] = -z[0] + z[1] - z[2], sum(z) = 1.
+    // The identical -1 catalogue entries retain different binary identities.
+    HighsLp lp;
+    lp.num_col_ = 4; // z[0..2], terminal state
+    lp.num_row_ = 2;
+    lp.sense_ = ObjSense::kMinimize;
+    lp.col_cost_ = {0.0, 0.0, 0.0, 1.0};
+    lp.col_lower_ = {0.0, 0.0, 0.0, -2.0};
+    lp.col_upper_ = {1.0, 1.0, 1.0, 2.0};
+    lp.row_lower_ = {1.0, 0.0};
+    lp.row_upper_ = {1.0, 0.0};
+    lp.a_matrix_.format_ = MatrixFormat::kRowwise;
+    lp.a_matrix_.start_ = {0, 3, 7};
+    lp.a_matrix_.index_ = {0, 1, 2, 0, 1, 2, 3};
+    lp.a_matrix_.value_ = {1.0, 1.0, 1.0, 1.0, -1.0, 1.0, 1.0};
+    lp.a_matrix_.num_row_ = lp.num_row_;
+    lp.a_matrix_.num_col_ = lp.num_col_;
+    lp.integrality_.assign(4, HighsVarType::kContinuous);
+    lp.integrality_[0] = HighsVarType::kInteger;
+    lp.integrality_[1] = HighsVarType::kInteger;
+    lp.integrality_[2] = HighsVarType::kInteger;
+
+    Highs mip;
+    REQUIRE(mip.setOptionValue("output_flag", false) == HighsStatus::kOk);
+    REQUIRE(mip.setOptionValue("threads", 1) == HighsStatus::kOk);
+    REQUIRE(mip.setOptionValue("mip_rel_gap", 0.0) == HighsStatus::kOk);
+    REQUIRE(mip.passModel(lp) == HighsStatus::kOk);
+    REQUIRE(mip.run() == HighsStatus::kOk);
+    REQUIRE(mip.getModelStatus() == HighsModelStatus::kOptimal);
+    const auto& solution = mip.getSolution().col_value;
+    REQUIRE(solution.size() == 4);
+    const auto& info = mip.getInfo();
+    CHECK(info.objective_function_value == doctest::Approx(reference.candidate_score));
+    CHECK(info.mip_dual_bound == doctest::Approx(reference.candidate_score));
+    CHECK(info.mip_gap == doctest::Approx(0.0));
+    CHECK(solution[0] + solution[1] + solution[2] == doctest::Approx(1.0));
+    for(std::size_t action = 0; action < 3; ++action)
+        CHECK(std::min(std::abs(solution[action]),
+            std::abs(solution[action] - 1.0)) == doctest::Approx(0.0));
+    std::size_t selected = 0;
+    for(std::size_t action = 1; action < 3; ++action)
+        if(solution[action] > solution[selected]) selected = action;
+    CHECK(std::find(minimizing_catalogue_indices.begin(),
+        minimizing_catalogue_indices.end(), selected) != minimizing_catalogue_indices.end());
+    const std::array<double, 3> actions{-1.0, 1.0, -1.0};
+    CHECK(actions[selected] == doctest::Approx(solution[3]));
 }
 
 TEST_CASE("mixed branch solve propagates cancellation and deadline after starting branch work") {
