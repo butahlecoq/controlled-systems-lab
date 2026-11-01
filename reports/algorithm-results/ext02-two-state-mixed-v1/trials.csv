@@ -1,0 +1,9 @@
+trial,warmup,elapsed_ns,history_count,retained_relation_rows,retained_relation_scalars,retained_numeric_bytes,status,optimum
+0,True,23906344,3,63,411,3288,complete,0
+1,False,12665002,3,63,411,3288,complete,0
+2,False,7906668,3,63,411,3288,complete,0
+3,False,8587907,3,63,411,3288,complete,0
+4,False,7873773,3,63,411,3288,complete,0
+5,False,7903455,3,63,411,3288,complete,0
+6,False,7868046,3,63,411,3288,complete,0
+7,False,8624854,3,63,411,3288,complete,0

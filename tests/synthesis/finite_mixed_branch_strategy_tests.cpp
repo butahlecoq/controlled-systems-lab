@@ -10,7 +10,10 @@
 #include <csl/synthesis/strategy_a/strategy.hpp>
 
 #include <array>
+#include <chrono>
+#include <stop_token>
 #include <string>
+#include <thread>
 
 using namespace csl;
 using namespace csl::synthesis;
@@ -94,6 +97,60 @@ struct ExactLinearStrategyFixture {
     }
 };
 
+class StopInsideStrategyWorkspace final : public SynthesisWorkspace {
+    std::shared_ptr<std::stop_source> cancellation_;
+    Termination termination_;
+public:
+    StopInsideStrategyWorkspace(std::shared_ptr<std::stop_source> cancellation,
+        Termination termination)
+        : cancellation_(std::move(cancellation)), termination_(termination) {}
+
+    SynthesisResult solve(const problem::ResolvedProblem& problem, const FamilyRequest&,
+        const ExecutionContext& context) override {
+        StopReason reason = termination_ == Termination::deadline_expired
+            ? StopReason::deadline_expired : StopReason::cancelled;
+        if (reason == StopReason::cancelled) {
+            cancellation_->request_stop();
+        } else if (context.deadline) {
+            std::this_thread::sleep_until(*context.deadline);
+        }
+        SynthesisResult result;
+        result.termination = termination_;
+        result.outcome = {problem.identity(), MathematicalOutcome::undetermined,
+            Unestablished{}, {}};
+        RequestProvenance provenance{{"finite-mixed-branch-stop-test"}, "strategy",
+            {"csl.synthesis.reach-back"}, std::string{"1"},
+            ModuleId{"csl.synthesis.reach-back"}, std::string{"1"}};
+        result.stop = ScopedOperationStopped{
+            OperationStopped{reason, "Synthetic strategy stopped during its branch solve."},
+            std::move(provenance), {}};
+        return result;
+    }
+};
+
+registry::StrategyRegistration stopping_strategy(std::shared_ptr<std::stop_source> cancellation,
+    Termination termination) {
+    registry::StrategyRegistration registration;
+    registration.identity = {{"csl.synthesis.reach-back"}, "1"};
+    registration.capabilities = [](const registry::StrategyRequest&,
+        const registry::Requirements& requirements) -> registry::Capability {
+        return registry::Offer{requirements.output};
+    };
+    registration.complete_family_verifier = {
+        {"csl.verifier.strategy-a.nominal-linear-exact"}, "1"};
+    registration.planner = [cancellation = std::move(cancellation), termination](
+        const registry::StrategyRequest&, const registry::Requirements&)
+        -> std::variant<registry::StrategyPlan, registry::Rejection> {
+        auto checked = registry::check_pipeline();
+        return registry::compose_strategy(std::get<registry::CheckedPipeline<>>(
+            std::move(checked)), [cancellation, termination](auto,
+            const registry::StrategyRequest&, const registry::Requirements&) {
+                return std::make_unique<StopInsideStrategyWorkspace>(cancellation, termination);
+            });
+    };
+    return registration;
+}
+
 problem::ResolvedProblem mixed_linear_tie_problem() {
     const auto controls = take(sets::make_h({{"mixed-continuous-interval"}, 1, {"u"}},
         {matrix({2, 1, {1, -1}}), vector({1, 1}), matrix({0, 1, {}}), vector({})}));
@@ -126,6 +183,7 @@ TEST_CASE("mixed branch solve runs registered continuous solvers and retains ver
     request.family.representation = {"csl.polyhedron.h"};
     request.resolution = {problem::UncertaintyStructure::stage_product_uncoupled, {}, {}};
     request.branches_per_page = 2;
+    request.limits.max_branch_evaluations = 3;
     ExecutionContext context;
     context.numerical = request.family.numerical;
     context.resources = std::make_shared<const ResourcePolicy>(ResourcePolicy{1, 1, 1, {}});
@@ -145,6 +203,8 @@ TEST_CASE("mixed branch solve runs registered continuous solvers and retains ver
     CHECK(*solved.portfolio.optimum == doctest::Approx(0.0));
     REQUIRE(solved.portfolio.optimal_evaluation_indices == std::vector<std::size_t>{0, 1, 2});
     CHECK(solved.portfolio.all_selected_relations_present);
+    CHECK(solved.retained_relation_rows > 0);
+    CHECK(solved.retained_relation_scalars > 0);
     for (std::size_t index = 0; index < solved.portfolio.evaluations.size(); ++index) {
         const auto& evaluation = solved.portfolio.evaluations[index];
         REQUIRE(std::holds_alternative<FiniteMixedBranchProblem>(evaluation.branch));
@@ -161,4 +221,118 @@ TEST_CASE("mixed branch solve runs registered continuous solvers and retains ver
         const std::array<double, 3> expected_discrete{-1.0, 1.0, -1.0};
         CHECK(h.equality_values[discrete_row] == expected_discrete[index]);
     }
+
+    auto bounded_request = request;
+    bounded_request.branches_per_page = 3;
+    bounded_request.limits.max_retained_relation_rows = solved.retained_relation_rows - 1;
+    const auto bounded_outcome = solve_finite_mixed_branch_portfolio(
+        source, strategy_fixture.strategies, bounded_request, context);
+    REQUIRE(std::holds_alternative<FiniteMixedBranchSolveResult>(bounded_outcome));
+    const auto& bounded = std::get<FiniteMixedBranchSolveResult>(bounded_outcome);
+    REQUIRE(bounded.stop.has_value());
+    CHECK(bounded.stop->reason == StopReason::resource_limit);
+    CHECK(bounded.portfolio.evaluations.size() == 3);
+    CHECK(bounded.history_enumeration_complete);
+    CHECK_FALSE(bounded.portfolio.enumeration_complete);
+    CHECK_FALSE(bounded.portfolio.complete);
+    CHECK_FALSE(bounded.every_branch_solved);
+    CHECK(bounded.portfolio.all_selected_relations_present);
+    CHECK(bounded.retained_relation_rows <= bounded_request.limits.max_retained_relation_rows);
+    CHECK(bounded.retained_relation_scalars <= bounded_request.limits.max_retained_relation_scalars);
+    CHECK(std::holds_alternative<FailedFiniteMixedBranch>(bounded.portfolio.evaluations.back().branch));
+    const auto& refusal = std::get<FailedFiniteMixedBranch>(bounded.portfolio.evaluations.back().branch);
+    REQUIRE_FALSE(refusal.diagnostics.empty());
+    CHECK(refusal.diagnostics.front().field == "finite_mixed_branch.resource_limit");
+
+    auto scalar_bounded_request = request;
+    scalar_bounded_request.limits.max_retained_relation_scalars = solved.retained_relation_scalars - 1;
+    const auto scalar_bounded_outcome = solve_finite_mixed_branch_portfolio(
+        source, strategy_fixture.strategies, scalar_bounded_request, context);
+    REQUIRE(std::holds_alternative<FiniteMixedBranchSolveResult>(scalar_bounded_outcome));
+    const auto& scalar_bounded = std::get<FiniteMixedBranchSolveResult>(scalar_bounded_outcome);
+    REQUIRE(scalar_bounded.stop.has_value());
+    CHECK(scalar_bounded.stop->reason == StopReason::resource_limit);
+    CHECK(scalar_bounded.retained_relation_scalars <=
+        scalar_bounded_request.limits.max_retained_relation_scalars);
+    CHECK_FALSE(scalar_bounded.portfolio.complete);
+}
+
+TEST_CASE("mixed branch solve propagates cancellation and deadline after starting branch work") {
+    const auto source = mixed_linear_tie_problem();
+    FiniteMixedBranchSolveRequest request;
+    request.strategy.strategy = {"csl.synthesis.reach-back"};
+    request.strategy.representation = {"csl.polyhedron.h"};
+    request.family.profile = synthesis::strategy_a::nominal_linear_exact_profile;
+    request.family.objective = source.identity();
+    request.family.target = FamilyTarget::exact_optimal_relation;
+    request.family.assurance = Assurance::numerical;
+    request.family.representation = {"csl.polyhedron.h"};
+    request.resolution = {problem::UncertaintyStructure::stage_product_uncoupled, {}, {}};
+    request.branches_per_page = 3;
+    ExecutionContext context;
+    context.numerical = request.family.numerical;
+    context.resources = std::make_shared<const ResourcePolicy>(ResourcePolicy{1, 1, 1, {}});
+
+    auto cancellation = std::make_shared<std::stop_source>();
+    registry::StrategyRegistry cancellation_strategy;
+    REQUIRE_FALSE(cancellation_strategy.add(stopping_strategy(
+        cancellation, Termination::cancelled)).has_value());
+    context.cancellation = cancellation->get_token();
+    const auto cancelled_outcome = solve_finite_mixed_branch_portfolio(
+        source, cancellation_strategy, request, context);
+    REQUIRE(std::holds_alternative<FiniteMixedBranchSolveResult>(cancelled_outcome));
+    const auto& cancelled = std::get<FiniteMixedBranchSolveResult>(cancelled_outcome);
+    REQUIRE(cancelled.stop.has_value());
+    CHECK(cancelled.stop->reason == StopReason::cancelled);
+    CHECK(cancelled.history_enumeration_complete);
+    CHECK_FALSE(cancelled.portfolio.enumeration_complete);
+    CHECK_FALSE(cancelled.portfolio.complete);
+    CHECK_FALSE(cancelled.portfolio.evaluations.empty());
+
+    registry::StrategyRegistry deadline_strategy;
+    REQUIRE_FALSE(deadline_strategy.add(stopping_strategy(
+        std::make_shared<std::stop_source>(), Termination::deadline_expired)).has_value());
+    context.cancellation = {};
+    context.deadline = std::chrono::steady_clock::now() + std::chrono::milliseconds(250);
+    const auto deadline_outcome = solve_finite_mixed_branch_portfolio(
+        source, deadline_strategy, request, context);
+    REQUIRE(std::holds_alternative<FiniteMixedBranchSolveResult>(deadline_outcome));
+    const auto& deadline = std::get<FiniteMixedBranchSolveResult>(deadline_outcome);
+    REQUIRE(deadline.stop.has_value());
+    CHECK(deadline.stop->reason == StopReason::deadline_expired);
+    CHECK(deadline.history_enumeration_complete);
+    CHECK_FALSE(deadline.portfolio.enumeration_complete);
+    CHECK_FALSE(deadline.portfolio.complete);
+    CHECK_FALSE(deadline.portfolio.evaluations.empty());
+}
+
+TEST_CASE("mixed branch solve stops at the aggregate branch evaluation limit") {
+    const auto source = mixed_linear_tie_problem();
+    ExactLinearStrategyFixture strategy_fixture;
+    FiniteMixedBranchSolveRequest request;
+    request.strategy.strategy = {"csl.synthesis.reach-back"};
+    request.strategy.representation = {"csl.polyhedron.h"};
+    request.family.profile = synthesis::strategy_a::nominal_linear_exact_profile;
+    request.family.objective = source.identity();
+    request.family.target = FamilyTarget::exact_optimal_relation;
+    request.family.assurance = Assurance::numerical;
+    request.family.representation = {"csl.polyhedron.h"};
+    request.resolution = {problem::UncertaintyStructure::stage_product_uncoupled, {}, {}};
+    request.branches_per_page = 3;
+    request.limits.max_branch_evaluations = 2;
+    ExecutionContext context;
+    context.numerical = request.family.numerical;
+
+    const auto outcome = solve_finite_mixed_branch_portfolio(
+        source, strategy_fixture.strategies, request, context);
+    REQUIRE(std::holds_alternative<FiniteMixedBranchSolveResult>(outcome));
+    const auto& result = std::get<FiniteMixedBranchSolveResult>(outcome);
+    REQUIRE(result.stop.has_value());
+    CHECK(result.stop->reason == StopReason::resource_limit);
+    CHECK(result.portfolio.evaluations.size() == 2);
+    CHECK_FALSE(result.history_enumeration_complete);
+    CHECK_FALSE(result.portfolio.complete);
+    CHECK_FALSE(result.every_branch_solved);
+    REQUIRE(result.portfolio.optimal_evaluation_indices == std::vector<std::size_t>{0, 1});
+    CHECK(result.portfolio.all_selected_relations_present);
 }

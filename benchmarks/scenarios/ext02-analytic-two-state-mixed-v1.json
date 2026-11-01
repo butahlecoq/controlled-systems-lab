@@ -1,0 +1,29 @@
+{
+  "schema": "csl.ext02-analytic-scenario/1",
+  "id": "ext02-two-state-mixed-analytic-v1",
+  "time_domain": "discrete",
+  "times": [0, 1],
+  "state_dimension": 2,
+  "control_order": ["continuous", "discrete"],
+  "continuous_control": {"dimension": 1, "lower": [-1], "upper": [1]},
+  "discrete_control": {"dimension": 1, "catalogue": [[-1], [0], [1]], "identity": "catalogue index"},
+  "dynamics": {
+    "x_next_equals_Ax_plus_Bu": true,
+    "A_row_major": [0, 0, 0, 0],
+    "B_row_major": [1, 1, 0, 1],
+    "offset": [0, 0]
+  },
+  "initial_state": [0, 0],
+  "terminal_constraint": {"x1_greater_or_equal": 0},
+  "objective": "minimize terminal x1",
+  "information_pattern": "nominal open-loop; enumerate one discrete catalogue row and solve its continuous subproblem",
+  "analytic_oracle": {
+    "history_count": 3,
+    "optimal_objective": 0,
+    "terminal_state_by_catalogue_index": [[0, -1], [0, 0], [0, 1]],
+    "continuous_control_by_catalogue_index": [1, 0, -1],
+    "all_three_histories_tie": true
+  },
+  "assurance": "numerical; independently checked against this analytic one-step solution",
+  "limits": "two-dimensional state, one-stage horizon; not a general complexity or scalability claim"
+}

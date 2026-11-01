@@ -26,6 +26,7 @@ option(CSL_BUILD_STAGE_PROJECTION_ROUTE "Build the private stage-projection nomi
 option(CSL_BUILD_SYN02_REPORT "Build the SYN-02 terminal minimizer measurement driver" OFF)
 option(CSL_BUILD_SYN07_REPORT "Build the T-S01 exact-family measurement driver" OFF)
 option(CSL_BUILD_EXT01_REPORT "Build the EXT-01 fixed-plan numerical report driver" OFF)
+option(CSL_BUILD_EXT02_REPORT "Build the EXT-02 finite/mixed branch portfolio report driver" OFF)
 option(CSL_BUILD_ISSUE3_REPORT "Build the finite-action minimax numerical report driver" OFF)
 option(CSL_BUILD_ENV717_REPORT "Build source-attributed ENV-717 environment report drivers" OFF)
 option(CSL_BUILD_ISSUE6_B06_REPORT "Build the owner-confirmed B06 finite-action reference driver" OFF)

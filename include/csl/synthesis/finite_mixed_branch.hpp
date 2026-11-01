@@ -74,7 +74,7 @@ struct FiniteMixedBranchPortfolio {
     // minimal only when complete is true; otherwise unseen histories may win.
     std::vector<std::size_t> optimal_evaluation_indices;
     std::optional<double> optimum;
-    bool enumeration_complete{}; // Every catalogue-index history was emitted.
+    bool enumeration_complete{}; // Every history was evaluated without an execution stop.
     bool complete{}; // Enumeration completed and every history has a valid objective.
     // True when every tolerance-selected branch has a relation payload. This
     // does not certify family validity, objective optimality, or completeness.
@@ -83,20 +83,32 @@ struct FiniteMixedBranchPortfolio {
 
 using FiniteMixedBranchPortfolioOutcome = std::variant<FiniteMixedBranchPortfolio, Diagnostics>;
 
+struct FiniteMixedBranchLimits {
+    // Bounds the retained attempt/evaluation vector, not just one cursor page.
+    std::size_t max_branch_evaluations{256};
+    // Bounds both the continuous and source-coordinate H relations retained per run.
+    std::size_t max_retained_relation_rows{100'000};
+    // Counts dense matrix values and right-hand-side values in both relations.
+    std::size_t max_retained_relation_scalars{10'000'000};
+};
+
 struct FiniteMixedBranchSolveRequest {
     StrategyConfiguration strategy;
     FamilyRequest family;
     problem::ResolutionContext resolution;
     std::size_t branches_per_page{64};
     double near_optimal_tolerance{};
+    FiniteMixedBranchLimits limits{};
 };
 
 struct FiniteMixedBranchSolveResult {
     FiniteMixedBranchPortfolio portfolio;
-    bool history_enumeration_complete{};
+    bool history_enumeration_complete{}; // Cursor emitted every history, including stopped attempts.
     bool every_branch_solved{};
     double effective_tie_tolerance{};
     std::optional<OperationStopped> stop;
+    std::size_t retained_relation_rows{};
+    std::size_t retained_relation_scalars{};
 };
 
 using FiniteMixedBranchSolveOutcome = std::variant<FiniteMixedBranchSolveResult, Diagnostics>;

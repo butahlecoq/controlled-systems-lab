@@ -71,6 +71,11 @@ GROUPS = (
 # Report family -> description. The pattern matches the whole published route,
 # so a new route shape has to be registered here on purpose.
 FAMILIES = {
+    "ext02-two-state-mixed": Family(
+        r"ext02-two-state-mixed-v1", "extensions", "EXT-02 finite/mixed branch portfolio",
+        "Reports one analytic two-state portfolio fixture with finite and mixed-control branches, "
+        "aggregate branch limits, and stop-status propagation. Its saved measurements describe this "
+        "single case and do not establish a general performance comparison."),
     "mpc08-explicit-pilot": Family(
         r"mpc08-explicit-pilot-v1", "synthesis", "Explicit MPC feasible domain and critical regions",
         "Presents an exact rational one-step double-integrator fixture with its feasible initial-state "

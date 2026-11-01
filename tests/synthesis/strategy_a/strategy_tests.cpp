@@ -1138,12 +1138,19 @@ TEST_CASE("nominal linear exact verifier rejects a claimed optimum for an unboun
     REQUIRE(verifier);
     CHECK_FALSE(verifier->verify(frozen,proposal).empty());
 }
-TEST_CASE("nominal linear exact profile rejects an unreviewed materialization cap") {
+TEST_CASE("nominal linear exact profile enforces a supported relation row cap") {
     auto query=nominal_linear_exact_request(nominal_linear_exact_integrator());
-    query.family.materialization_limit=1;
-    const auto admitted=admit(query);
-    REQUIRE(std::holds_alternative<Rejection>(admitted));
-    CHECK_FALSE(std::get<Rejection>(admitted).diagnostics.empty());
+    query.family.materialization_limit=64;
+    const auto result=run(query);
+    CHECK(result.termination==Termination::completed);
+    REQUIRE(result.family);
+    CHECK(result.family->registry_verified());
+    const auto& complete=std::get<CompleteOptimalFamily>(result.family->outcome());
+    REQUIRE(complete.relation.payload);
+    const auto* relation=complete.relation.payload->h_relation_for_recording();
+    REQUIRE(relation);
+    const auto h=std::get<sets::HRepresentation>(relation->representation());
+    CHECK(h.inequalities.rows()+h.equalities.rows()<=*query.family.materialization_limit);
 }
 TEST_CASE("nominal linear exact profile rejects a horizon exceeding its variable-width cap") {
     const auto query=nominal_linear_exact_request(nominal_linear_exact_over_stage_cap());

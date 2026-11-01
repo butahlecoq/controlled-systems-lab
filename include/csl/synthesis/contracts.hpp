@@ -37,6 +37,8 @@ struct FamilyRequest {
     NumericalPolicy numerical{1e-8,1e-8};
     Assurance assurance{Assurance::numerical};
     RepresentationId representation;
+    // Maximum H-relation rows the selected family producer may materialize.
+    // Producers that cannot enforce this before allocation must reject it.
     std::optional<std::size_t> materialization_limit;
     bool operator==(const FamilyRequest&) const = default;
 };

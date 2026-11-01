@@ -719,6 +719,26 @@ def build(catalog, site):
             '<p>Replots frozen values with the shared quantitative axes and no solver rerun.</p>'
             f'<p><a href="{stem}.html">Open the saved-data companion →</a> · '
             f'<a href="../{report_route}/records.json">Frozen values ↗</a></p></article>')
+    ext02_card = ""
+    ext02_route = site / "ext02-two-state-mixed-v1"
+    if (ext02_route / "index.html").is_file() and (ext02_route / "figure.svg").is_file():
+        ext02_anchor = "ext02-portfolio-v1"
+        ext02_entry = {"family": "Finite/mixed-control portfolio",
+                       "title": "EXT-02 analytic branch portfolio",
+                       "status": "saved-data-companion", "anchor": ext02_anchor,
+                       "page": "../ext02-two-state-mixed-v1/index.html",
+                       "figure": "../ext02-two-state-mixed-v1/figure.svg",
+                       "source_page": "../ext02-two-state-mixed-v1/index.html",
+                       "raw_record": "../ext02-two-state-mixed-v1/measurement.json"}
+        gallery_inventory.append(ext02_entry)
+        ext02_card = (
+            f'<article class="saved-figure" id="{ext02_anchor}"><p class="eyebrow">'
+            'Finite/mixed-control portfolio · Saved-data companion</p>'
+            f'<h3><a href="{ext02_entry["page"]}">{escape(ext02_entry["title"])}</a></h3>'
+            f'<a href="{ext02_entry["page"]}"><img src="{ext02_entry["figure"]}" '
+            'alt="Three optimal finite-catalogue branches at their terminal states"></a>'
+            '<p>One analytic nominal fixture; the saved report records all branch outcomes and measurement limits.</p>'
+            f'<p><a href="{ext02_entry["page"]}">Open the saved EXT-02 report →</a></p></article>')
     app02_companion = approx_extension_companions.app02_companion(
         site / "app02-box-8ff979de60ea9d22" / "records.json", Path(__file__).parent / "styles/control-v1.json")
     app03_companion = approx_extension_companions.app03_companion(
@@ -898,7 +918,7 @@ def build(catalog, site):
             'alt="Three archived APP-01 median timings on numeric axes, one for each saved fixture"></a>'
             '<p>Plots archived medians for valid, invalid, and empty-inner fixtures. Each point summarizes seven batches of 40,000 checks; it does not claim a performance winner.</p>'
             '<p><a href="app01-plan-timing-v1.html">Open the saved-data companion →</a></p></article>' +
-            extension_companion_cards +
+            extension_companion_cards + ext02_card +
             f'<article class="saved-figure" id="{fuel_anchor}"><p class="eyebrow">Fuel minimax reference · Saved-data companion</p>'
             f'<h3>{escape(fuel_entry["title"])}</h3>'
             f'<p>{escape("Readable, versioned SVG and PNG projections of the saved 4D B06 terminal set, with exact values, units, target, evidence limits and reproduction commands.")}</p>'

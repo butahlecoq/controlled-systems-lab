@@ -331,6 +331,14 @@
       "disposition": "frozen-renderer-preserved-with-shared-policy-companion"
     },
     {
+      "source": "scripts/reports/ext02/render_saved.py",
+      "signal_count": 4,
+      "asset_name_literals": [
+        "figure.svg"
+      ],
+      "disposition": "analytic-reference-checked-saved-run-renderer"
+    },
+    {
       "source": "scripts/reports/ext03_transform/registered_reports.py",
       "signal_count": 2,
       "asset_name_literals": [
@@ -1106,6 +1114,14 @@
       "disposition": "publication-validation-or-frozen-route"
     },
     {
+      "source": "scripts/reports/stage_ext02.py",
+      "signal_count": 2,
+      "asset_name_literals": [
+        "figure.svg"
+      ],
+      "disposition": "publication-validation-or-frozen-route"
+    },
+    {
       "source": "scripts/reports/stage_ext04_affine_synthesis.py",
       "signal_count": 1,
       "asset_name_literals": [
@@ -1538,7 +1554,7 @@
     },
     {
       "source": "scripts/reports/visual_examples.py",
-      "signal_count": 75,
+      "signal_count": 77,
       "asset_name_literals": [
         "adaptive-ode-replay.svg",
         "app01-plan-timing-v1.svg",
@@ -1557,6 +1573,7 @@
         "ext01-b08-timing-v1.svg",
         "ext05-states-v1.svg",
         "feasible-box-2d.svg",
+        "figure.svg",
         "fuel-b06-flow-projection.png",
         "fuel-b06-flow-projection.svg",
         "fuel-b06-stock-projection.png",
@@ -2195,6 +2212,16 @@
       "disposition": "deferred: original frozen route-level readability review remains; companion availability is listed separately",
       "follow_up_issue": 669,
       "companion_route": "examples/ext01-b08-timing-v1.html"
+    },
+    {
+      "route": "ext02-two-state-mixed-v1",
+      "source_bundle": "ext02-two-state-mixed-v1",
+      "assets": [
+        "figure.svg"
+      ],
+      "index_sha256": "e66fb7b33f4a2f449aa50dda1e170e1334c2e901aeda5b7f30d6a6fda36fbc9d",
+      "disposition": "deferred: original frozen route-level readability review remains; companion availability is listed separately",
+      "follow_up_issue": 669
     },
     {
       "route": "ext03-transform-20261024-a3a3af9",

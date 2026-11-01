@@ -4,6 +4,7 @@
 #include <csl/synthesis/finite_mixed_branch.hpp>
 #include <csl/synthesis/strategy_a/nominal_linear_exact_profile.hpp>
 
+#include <chrono>
 #include <limits>
 #include <string>
 
@@ -520,6 +521,32 @@ TEST_CASE("mixed branch solve reports pre-cancellation without claiming complete
     CHECK_FALSE(result.portfolio.complete);
     CHECK(result.portfolio.evaluations.empty());
     CHECK_FALSE(result.portfolio.optimum.has_value());
+}
+
+TEST_CASE("mixed branch solve reports an expired deadline without claiming completeness") {
+    const auto source = mixed_linear_tie_problem();
+    registry::StrategyRegistry no_strategies;
+    FiniteMixedBranchSolveRequest request;
+    request.strategy.representation = {"csl.polyhedron.h"};
+    request.family.profile = strategy_a::nominal_linear_exact_profile;
+    request.family.objective = source.identity();
+    request.family.target = FamilyTarget::exact_optimal_relation;
+    request.family.assurance = Assurance::numerical;
+    request.family.representation = {"csl.polyhedron.h"};
+    request.resolution = {problem::UncertaintyStructure::stage_product_uncoupled, {}, {}};
+    request.branches_per_page = 2;
+    ExecutionContext context;
+    context.numerical = request.family.numerical;
+    context.deadline = std::chrono::steady_clock::time_point::min();
+
+    const auto outcome = solve_finite_mixed_branch_portfolio(source, no_strategies, request, context);
+    REQUIRE(std::holds_alternative<FiniteMixedBranchSolveResult>(outcome));
+    const auto& result = std::get<FiniteMixedBranchSolveResult>(outcome);
+    REQUIRE(result.stop.has_value());
+    CHECK(result.stop->reason == StopReason::deadline_expired);
+    CHECK_FALSE(result.history_enumeration_complete);
+    CHECK_FALSE(result.portfolio.complete);
+    CHECK(result.portfolio.evaluations.empty());
 }
 
 TEST_CASE("mixed branch portfolio keeps preparation refusals and incomplete enumeration explicit") {
