@@ -514,9 +514,10 @@ FAMILIES = {
     "env717-pendulum-terminal": Family(
         r"env717-pendulum-terminal-[0-9a-f]{20}", "synthesis",
         "PendulumTerminal finite-action pilot",
-        "A source-attributed local affine finite-action pilot with an independently replayed nonlinear "
-        "trajectory. The report distinguishes the affine-model selection from the best candidate "
-        "under source-map replay."),
+        "A source-attributed four-step finite-action pilot using a local affine model and an independently "
+        "replayed nonlinear trajectory. It distinguishes affine-model selection from the best candidate "
+        "under source-map replay; it does not establish continuous-action or full-horizon optimality and "
+        "makes no performance-comparison claim."),
     "syn06-verifier": Family(
         r"syn06-verifier-\d{8}-[0-9a-f]{64}", "verification", "Trajectory verification",
         "Re-checks two literal two-stage integrator witnesses against the original saved input "
