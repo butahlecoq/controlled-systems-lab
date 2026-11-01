@@ -144,6 +144,8 @@ FROZEN_ROUTE_FOLLOW_UP_ISSUES = {
 
 
 def migration_issue(source: str) -> int:
+    if source == "scripts/reports/exp824/make_zonotope_minimax_report.py":
+        return 824
     if "/mpc04/" in source or source == "scripts/reports/stage_mpc04_max_coordinate.py":
         return 600
     if "/mpc09/" in source or source == "scripts/reports/stage_mpc09_output_feedback.py":

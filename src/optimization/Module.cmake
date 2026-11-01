@@ -43,8 +43,14 @@ csl_add_library(csl_finite_action_minimax STATIC src/optimization/finite_action_
 
 target_link_libraries(csl_finite_action_minimax PUBLIC CSL::fixed_plan_disturbance CSL::worst_case_vertex CSL::artifacts)
 
+csl_add_library(csl_finite_action_replay STATIC src/optimization/finite_action_replay.cpp)
+target_link_libraries(csl_finite_action_replay PUBLIC CSL::fixed_plan_disturbance CSL::worst_case_vertex)
+
 csl_add_library(csl_finite_action_box_minimax STATIC src/optimization/finite_action_box_minimax.cpp)
-target_link_libraries(csl_finite_action_box_minimax PUBLIC CSL::finite_action_minimax CSL::finite_plan_box CSL::worst_case_vertex)
+target_link_libraries(csl_finite_action_box_minimax PUBLIC CSL::finite_action_minimax CSL::finite_plan_box CSL::worst_case_vertex CSL::finite_action_replay)
+
+csl_add_library(csl_finite_action_zonotope_minimax STATIC src/optimization/finite_action_zonotope_minimax.cpp)
+target_link_libraries(csl_finite_action_zonotope_minimax PUBLIC CSL::finite_action_minimax CSL::finite_plan_zonotope CSL::finite_action_replay)
 
 csl_add_library(csl_finite_causal_minimax STATIC src/optimization/finite_causal_minimax.cpp)
 

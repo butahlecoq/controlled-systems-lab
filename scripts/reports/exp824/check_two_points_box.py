@@ -57,7 +57,7 @@ def verify_planar_example(example: dict) -> None:
             raise ValueError("planar zonotope misses an exact reachable vertex")
 
 
-def main(path: Path) -> dict:
+def main(path: Path, *, check_planar_example: bool = True) -> dict:
     result = json.loads(path.read_text(encoding="utf-8"))
     if result.get("schema") != "csl.issue824-two-points-box-minimax/2":
         raise ValueError("unexpected EXP-824 report schema")
@@ -119,8 +119,8 @@ def main(path: Path) -> dict:
                     raise ValueError(
                         f"stage {stage} zonotope coordinate bounds miss an exact state coordinate")
 
-    planar_example = result["planar_example"]
-    verify_planar_example(planar_example)
+    if check_planar_example:
+        verify_planar_example(result["planar_example"])
 
     disturbance_indices = box["worst_disturbance_indices"]
     disturbance_values = box["worst_disturbances"]

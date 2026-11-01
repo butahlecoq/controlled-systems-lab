@@ -137,6 +137,16 @@ jobs:
             --target csl_mpc09_output_feedback_report --parallel 2
           ctest --test-dir build/mpc09-report-ci -C Release --output-on-failure \
             -R '^(mpc09_output_feedback_native_check|mpc09_output_feedback_publication)$'
+      - name: Build and smoke the issue 824 zonotope minimax selector
+        if: needs.route.outputs.native == 'true'
+        shell: bash
+        run: |
+          cmake -S . -B build/issue824-zonotope-minimax-ci -DBUILD_TESTING=ON -DCMAKE_BUILD_TYPE=Release \
+            -DCSL_ENABLE_HIGHS=OFF -DCSL_ENABLE_QHULL=OFF -DCSL_BUILD_ISSUE824_ZONOTOPE_MINIMAX_REPORT=ON
+          cmake --build build/issue824-zonotope-minimax-ci --config Release \
+            --target finite_action_box_minimax_tests finite_action_zonotope_minimax_tests csl_issue824_zonotope_minimax_report --parallel 2
+          ctest --test-dir build/issue824-zonotope-minimax-ci -C Release --output-on-failure \
+            -R '^(finite_action_box_minimax_tests|finite_action_zonotope_minimax_tests|issue824_zonotope_minimax_report_smoke)$'
       - name: Check reviewed catalogue and stage only allowlisted files
         id: catalog
         shell: bash
@@ -376,6 +386,9 @@ jobs:
       - name: Stage the issue 824 zonotope report and planar companion
         if: steps.catalog.outputs.has_reports == 'true' && hashFiles('reports/algorithm-results/issue824-two-points-zonotope-pilot-v2/result.json') != ''
         run: python scripts/reports/stage_issue824_zonotope.py --source reports/algorithm-results/issue824-two-points-zonotope-pilot-v2 --site build/report-site
+      - name: Stage the issue 824 zonotope minimax report
+        if: steps.catalog.outputs.has_reports == 'true' && hashFiles('reports/algorithm-results/issue824-two-points-zonotope-minimax-v1/result.json') != ''
+        run: python scripts/reports/stage_issue824_zonotope_minimax.py --source reports/algorithm-results/issue824-two-points-zonotope-minimax-v1 --site build/report-site
       - name: Stage minimal 2D visual examples from reviewed saved results
         if: steps.catalog.outputs.has_reports == 'true'
         run: python scripts/reports/visual_examples.py --catalog reports/algorithm-results/catalog.json --site build/report-site
