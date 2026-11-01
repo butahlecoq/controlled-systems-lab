@@ -1,5 +1,6 @@
 #include <csl/synthesis/finite_mixed_branch.hpp>
 
+#include <algorithm>
 #include <cmath>
 #include <limits>
 #include <string>
@@ -284,8 +285,11 @@ FiniteMixedBranchPortfolioOutcome select_finite_mixed_branch_portfolio(
         if (!optimum || *evaluation.objective < *optimum) optimum = *evaluation.objective;
     }
 
+    const bool every_history_evaluated = std::all_of(evaluations.begin(), evaluations.end(),
+        [](const auto& evaluation) { return evaluation.objective.has_value(); });
     FiniteMixedBranchPortfolio result{
-        std::move(evaluations), {}, optimum, enumeration_complete, false};
+        std::move(evaluations), {}, optimum, enumeration_complete,
+        enumeration_complete && every_history_evaluated, false};
     if (optimum) {
         for (std::size_t index = 0; index < result.evaluations.size(); ++index) {
             const auto& evaluation = result.evaluations[index];
@@ -300,6 +304,185 @@ FiniteMixedBranchPortfolioOutcome select_finite_mixed_branch_portfolio(
         }
     }
     return result;
+}
+
+FiniteMixedBranchSolveOutcome solve_finite_mixed_branch_portfolio(
+    const problem::ResolvedProblem& source, const registry::StrategyRegistry& strategies,
+    const FiniteMixedBranchSolveRequest& request, const ExecutionContext& context) {
+    if (request.branches_per_page == 0)
+        return invalid("finite_mixed_branch.page_size", "Branch page size must be positive.");
+    if (!std::isfinite(request.near_optimal_tolerance) || request.near_optimal_tolerance < 0.0)
+        return invalid("finite_mixed_branch.near_optimal_tolerance",
+            "Near-optimal tolerance must be finite and non-negative.");
+    if (request.family.target != FamilyTarget::exact_optimal_relation ||
+        request.family.assurance != Assurance::numerical ||
+        request.family.representation.value != "csl.polyhedron.h")
+        return unsupported("finite_mixed_branch.family",
+            "The initial solve path requires registry-verified numerical complete H-represented branch families.");
+    if (request.strategy.representation != request.family.representation)
+        return invalid("finite_mixed_branch.strategy.representation",
+            "Strategy and family output representations must match.");
+    if (!(request.family.numerical == context.numerical))
+        return invalid("finite_mixed_branch.numerical",
+            "ExecutionContext and branch family numerical policies must match.");
+
+    auto cursor_outcome = FiniteMixedBranchCursor::prepare(source);
+    if (const auto* errors = std::get_if<Diagnostics>(&cursor_outcome)) return *errors;
+    auto cursor = std::get<FiniteMixedBranchCursor>(std::move(cursor_outcome));
+    std::vector<FiniteMixedBranchEvaluation> evaluations;
+    bool history_enumeration_complete = false;
+    bool every_branch_solved = true;
+    double maximum_branch_objective_width = 0.0;
+    std::optional<OperationStopped> stop;
+    registry::Requirements requirements;
+    requirements.output.representation = request.family.representation;
+    requirements.output.assurance = request.family.assurance;
+    requirements.output.family = request.family.target;
+    requirements.output.completeness = registry::Completeness::established;
+
+    while (!history_enumeration_complete) {
+        if (context.cancellation.stop_requested()) {
+            stop = OperationStopped{StopReason::cancelled, "Mixed-branch solve cancelled."};
+            every_branch_solved = false;
+            break;
+        }
+        if (context.deadline && std::chrono::steady_clock::now() >= *context.deadline) {
+            stop = OperationStopped{StopReason::deadline_expired, "Mixed-branch solve deadline expired."};
+            every_branch_solved = false;
+            break;
+        }
+        auto page = cursor.take_prefix(request.branches_per_page);
+        for (std::size_t entry_index = 0; entry_index < page.entries.size(); ++entry_index) {
+            auto& entry = page.entries[entry_index];
+            if (stop || context.cancellation.stop_requested() ||
+                (context.deadline && std::chrono::steady_clock::now() >= *context.deadline)) {
+                if (!stop)
+                    stop = OperationStopped{context.cancellation.stop_requested() ? StopReason::cancelled :
+                        StopReason::deadline_expired, "Mixed-branch solve stopped before this branch."};
+                every_branch_solved = false;
+                const auto reason = unsupported("finite_mixed_branch.stopped", stop->diagnostics);
+                for (std::size_t pending = entry_index; pending < page.entries.size(); ++pending) {
+                    FiniteActionHistory history;
+                    std::visit([&](const auto& branch_entry) { history = branch_entry.history; },
+                        page.entries[pending]);
+                    evaluations.emplace_back(FailedFiniteMixedBranch{std::move(history), reason},
+                        std::nullopt);
+                }
+                break;
+            }
+            if (auto* refusal = std::get_if<FailedFiniteMixedBranch>(&entry)) {
+                every_branch_solved = false;
+                evaluations.emplace_back(std::move(*refusal), std::nullopt);
+                continue;
+            }
+
+            auto branch = std::get<FiniteMixedBranchProblem>(std::move(entry));
+            auto refuse = [&](Diagnostics diagnostics) {
+                every_branch_solved = false;
+                evaluations.emplace_back(FailedFiniteMixedBranch{branch.history, std::move(diagnostics)},
+                    std::nullopt);
+            };
+            auto resolved_outcome = problem::resolve(branch.problem, request.resolution);
+            if (const auto* diagnostic = std::get_if<Diagnostic>(&resolved_outcome)) {
+                refuse({*diagnostic});
+                continue;
+            }
+            if (std::holds_alternative<OperationStopped>(resolved_outcome)) {
+                every_branch_solved = false;
+                stop = std::get<OperationStopped>(std::move(resolved_outcome));
+                refuse(unsupported("finite_mixed_branch.resolve_stopped", stop->diagnostics));
+                continue;
+            }
+            auto branch_problem = std::get<problem::ResolvedProblem>(std::move(resolved_outcome));
+            auto family_request = request.family;
+            family_request.objective = branch_problem.identity();
+            registry::StrategyRequest strategy_request{branch_problem, request.strategy,
+                std::move(family_request), {}, {}};
+            auto prepared_outcome = strategies.prepare(strategy_request, requirements);
+            if (const auto* rejection = std::get_if<registry::Rejection>(&prepared_outcome)) {
+                refuse(rejection->diagnostics);
+                continue;
+            }
+            auto workspace = std::get<registry::PreparedStrategy>(std::move(prepared_outcome)).create();
+            auto solve_outcome = workspace->run(context);
+            if (const auto* unsupported_result = std::get_if<Unsupported>(&solve_outcome)) {
+                refuse(unsupported_result->diagnostics);
+                continue;
+            }
+            auto result = std::get<SynthesisResult>(std::move(solve_outcome));
+            if (result.termination != Termination::completed) {
+                std::string reason = "A branch solver terminated with status " +
+                    std::to_string(static_cast<int>(result.termination)) + ".";
+                std::visit([&](const auto& stop) {
+                    if constexpr (requires { stop.diagnostics; }) {
+                        for (const auto& diagnostic : stop.diagnostics)
+                            reason += " " + diagnostic.field + ": " + diagnostic.explanation;
+                    } else if constexpr (requires { stop.stop.diagnostics; }) {
+                        reason += " " + stop.stop.diagnostics;
+                    }
+                }, result.stop);
+                refuse(unsupported("finite_mixed_branch.termination",
+                    std::move(reason)));
+                continue;
+            }
+            if (!result.family) {
+                refuse(unsupported("finite_mixed_branch.family_verification",
+                    "A completed branch solve returned no published family."));
+                continue;
+            }
+            if (!result.family->registry_verified() ||
+                !std::holds_alternative<CompleteOptimalFamily>(result.family->outcome()) ||
+                result.family->identity().problem != branch_problem.identity()) {
+                refuse(unsupported("finite_mixed_branch.family_verification",
+                    "A branch family is unverified, incomplete, or bound to a different problem identity."));
+                continue;
+            }
+            const auto& complete = std::get<CompleteOptimalFamily>(result.family->outcome());
+            const auto lower = complete.optimum.bounds.lower;
+            const auto upper = complete.optimum.bounds.upper;
+            if (!lower || !upper || !std::isfinite(lower->value) || !std::isfinite(upper->value) ||
+                lower->value > upper->value ||
+                upper->value - lower->value > request.family.numerical.absolute_tolerance +
+                    request.family.numerical.relative_tolerance *
+                        std::max(std::abs(lower->value), std::abs(upper->value))) {
+                refuse(unsupported("finite_mixed_branch.objective_bounds",
+                    "A branch optimum is not resolved tightly enough to rank finite catalogue histories."));
+                continue;
+            }
+            maximum_branch_objective_width = std::max(maximum_branch_objective_width,
+                upper->value - lower->value);
+            const auto* relation = complete.relation.payload
+                ? complete.relation.payload->h_relation_for_recording() : nullptr;
+            if (!relation) {
+                refuse(unsupported("finite_mixed_branch.relation",
+                    "The verified branch family has no exportable H relation for source-coordinate lifting."));
+                continue;
+            }
+            auto lifted = lift_finite_mixed_branch_relation(branch, *relation);
+            if (const auto* errors = std::get_if<Diagnostics>(&lifted)) {
+                refuse(*errors);
+                continue;
+            }
+            evaluations.emplace_back(std::move(branch), lower->value, *relation,
+                std::move(result.family), std::get<sets::SetData>(std::move(lifted)));
+        }
+        if (page.entries.empty() && !page.complete)
+            return invalid("finite_mixed_branch.cursor", "The branch cursor made no progress.");
+        history_enumeration_complete = page.complete;
+        if (stop) break;
+    }
+
+    const double effective_tie_tolerance = request.near_optimal_tolerance +
+        maximum_branch_objective_width;
+    if (!std::isfinite(effective_tie_tolerance))
+        return invalid("finite_mixed_branch.effective_tie_tolerance",
+            "Branch bound uncertainty and requested tie tolerance overflow binary64.");
+    auto portfolio_outcome = select_finite_mixed_branch_portfolio(std::move(evaluations),
+        history_enumeration_complete,
+        effective_tie_tolerance);
+    if (const auto* errors = std::get_if<Diagnostics>(&portfolio_outcome)) return *errors;
+    return FiniteMixedBranchSolveResult{std::get<FiniteMixedBranchPortfolio>(std::move(portfolio_outcome)),
+        history_enumeration_complete, every_branch_solved, effective_tie_tolerance, std::move(stop)};
 }
 
 } // namespace csl::synthesis

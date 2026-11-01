@@ -2,6 +2,7 @@
 #include <doctest/doctest.h>
 
 #include <csl/synthesis/finite_mixed_branch.hpp>
+#include <csl/synthesis/strategy_a/nominal_linear_exact_profile.hpp>
 
 #include <limits>
 #include <string>
@@ -28,6 +29,41 @@ problem::ResolvedProblem resolved_mixed_problem() {
         {problem::UncertaintyStructure::stage_product_uncoupled, {}, {}});
     REQUIRE(std::holds_alternative<problem::ResolvedProblem>(result));
     return std::get<problem::ResolvedProblem>(std::move(result));
+}
+
+template<class T, class... Errors>
+T take(std::variant<T, Errors...> value) {
+    REQUIRE(std::holds_alternative<T>(value));
+    return std::get<T>(std::move(value));
+}
+
+numeric::MatrixView matrix(Matrix value);
+numeric::VectorView vector(Vector value);
+SetHandle interval(std::string id, double lo, double hi, std::string label = "x") {
+    auto result = sets::make_h({{std::move(id)}, 1, {std::move(label)}},
+        {matrix({2, 1, {1, -1}}), vector({hi, -lo}),
+         matrix({0, 1, {}}), vector({})});
+    REQUIRE(std::holds_alternative<sets::SetData>(result));
+    return std::get<sets::SetData>(std::move(result)).as_handle();
+}
+
+problem::ResolvedProblem mixed_linear_tie_problem() {
+    const auto controls = take(sets::make_h({{"mixed-continuous-interval"}, 1, {"u"}},
+        {matrix({2, 1, {1, -1}}), vector({1, 1}), matrix({0, 1, {}}), vector({})}));
+    const auto terminal = take(sets::make_h({{"mixed-terminal-halfline"}, 1, {"x1"}},
+        {matrix({1, 1, {-1}}), vector({0}), matrix({0, 1, {}}), vector({})}));
+    Problem source{{"mixed-linear-tie"},
+        std::make_shared<const SystemModel>(SystemModel{{{1, 2, 0}, TimeDomain::discrete,
+            LinearStage{{1, 1, {0}}, {1, 2, {1, 1}}, {1, 0, {}}, {0}}}, {}}),
+        {0, 1}, KnownInitial{{0}},
+        MixedDomain{ContinuousDomain{{controls.as_handle()}}, FiniteDomain{1, {{-1}, {1}, {-1}}}},
+        {interval("mixed-initial-state", 0.0, 0.0, "x1"), terminal.as_handle()}, {}, {},
+        InformationPattern::nominal_open_loop,
+        LinearTerminal{{1}, 0}};
+    auto resolved = problem::resolve(source,
+        {problem::UncertaintyStructure::stage_product_uncoupled, {}, {}});
+    REQUIRE(std::holds_alternative<problem::ResolvedProblem>(resolved));
+    return std::get<problem::ResolvedProblem>(std::move(resolved));
 }
 
 FiniteMixedBranchProblem branch(const problem::ResolvedProblem& problem,
@@ -429,6 +465,63 @@ TEST_CASE("independent one-step oracle retains every tied catalogue branch and i
     }
 }
 
+TEST_CASE("mixed branch solve retains strategy refusals and does not claim a global optimum") {
+    const auto source = mixed_linear_tie_problem();
+    registry::StrategyRegistry no_strategies;
+    FiniteMixedBranchSolveRequest request;
+    request.strategy.strategy = {"missing.strategy"};
+    request.strategy.representation = {"csl.polyhedron.h"};
+    request.family.profile = strategy_a::nominal_linear_exact_profile;
+    request.family.objective = source.identity();
+    request.family.target = FamilyTarget::exact_optimal_relation;
+    request.family.assurance = Assurance::numerical;
+    request.family.representation = {"csl.polyhedron.h"};
+    request.resolution = {problem::UncertaintyStructure::stage_product_uncoupled, {}, {}};
+    ExecutionContext context;
+    context.numerical = request.family.numerical;
+
+    const auto outcome = solve_finite_mixed_branch_portfolio(source, no_strategies, request, context);
+    REQUIRE(std::holds_alternative<FiniteMixedBranchSolveResult>(outcome));
+    const auto& result = std::get<FiniteMixedBranchSolveResult>(outcome);
+    CHECK(result.history_enumeration_complete);
+    CHECK_FALSE(result.every_branch_solved);
+    CHECK(result.portfolio.enumeration_complete);
+    CHECK_FALSE(result.portfolio.complete);
+    CHECK_FALSE(result.portfolio.optimum.has_value());
+    REQUIRE(result.portfolio.evaluations.size() == 3);
+    for (const auto& evaluation : result.portfolio.evaluations)
+        CHECK(std::holds_alternative<FailedFiniteMixedBranch>(evaluation.branch));
+}
+
+TEST_CASE("mixed branch solve reports pre-cancellation without claiming completeness") {
+    const auto source = mixed_linear_tie_problem();
+    registry::StrategyRegistry no_strategies;
+    FiniteMixedBranchSolveRequest request;
+    request.strategy.representation = {"csl.polyhedron.h"};
+    request.family.profile = strategy_a::nominal_linear_exact_profile;
+    request.family.objective = source.identity();
+    request.family.target = FamilyTarget::exact_optimal_relation;
+    request.family.assurance = Assurance::numerical;
+    request.family.representation = {"csl.polyhedron.h"};
+    request.resolution = {problem::UncertaintyStructure::stage_product_uncoupled, {}, {}};
+    request.branches_per_page = 2;
+    std::stop_source cancellation;
+    cancellation.request_stop();
+    ExecutionContext context;
+    context.numerical = request.family.numerical;
+    context.cancellation = cancellation.get_token();
+
+    const auto outcome = solve_finite_mixed_branch_portfolio(source, no_strategies, request, context);
+    REQUIRE(std::holds_alternative<FiniteMixedBranchSolveResult>(outcome));
+    const auto& result = std::get<FiniteMixedBranchSolveResult>(outcome);
+    REQUIRE(result.stop.has_value());
+    CHECK(result.stop->reason == StopReason::cancelled);
+    CHECK_FALSE(result.history_enumeration_complete);
+    CHECK_FALSE(result.portfolio.complete);
+    CHECK(result.portfolio.evaluations.empty());
+    CHECK_FALSE(result.portfolio.optimum.has_value());
+}
+
 TEST_CASE("mixed branch portfolio keeps preparation refusals and incomplete enumeration explicit") {
     const auto source = resolved_mixed_problem();
     auto refused = FailedFiniteMixedBranch{
@@ -448,6 +541,20 @@ TEST_CASE("mixed branch portfolio keeps preparation refusals and incomplete enum
     CHECK(portfolio.optimal_evaluation_indices == std::vector<std::size_t>{2});
     REQUIRE(std::holds_alternative<FailedFiniteMixedBranch>(portfolio.evaluations[1].branch));
     CHECK_FALSE(portfolio.evaluations[1].objective.has_value());
+}
+
+TEST_CASE("complete history enumeration with a refused branch is not a complete optimum") {
+    const auto source = resolved_mixed_problem();
+    auto refused = FailedFiniteMixedBranch{FiniteActionHistory{{2, 1}},
+        Diagnostics{{DiagnosticCode::unsupported, "branch", "solver unavailable"}}};
+    const auto outcome = select_finite_mixed_branch_portfolio({
+        {branch(source, {0, 0}), 4.0}, {std::move(refused), std::nullopt},
+        {branch(source, {0, 2}), 2.0}}, true, 0.0);
+    REQUIRE(std::holds_alternative<FiniteMixedBranchPortfolio>(outcome));
+    const auto& portfolio = std::get<FiniteMixedBranchPortfolio>(outcome);
+    CHECK(portfolio.enumeration_complete);
+    CHECK_FALSE(portfolio.complete);
+    CHECK(portfolio.optimum == 2.0);
 }
 
 TEST_CASE("mixed branch portfolio rejects missing, non-finite and invalid objective inputs") {

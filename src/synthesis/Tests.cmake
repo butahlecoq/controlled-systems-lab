@@ -49,6 +49,21 @@ target_link_libraries(finite_mixed_branch_tests PRIVATE CSL::finite_mixed_branch
 add_test(NAME finite_mixed_branch_tests COMMAND finite_mixed_branch_tests)
 csl_test_target(finite_mixed_branch_tests synthesis)
 
+if(TARGET CSL::highs_convex AND TARGET CSL::highs_lp AND TARGET CSL::qhull_conversion)
+  add_executable(finite_mixed_branch_strategy_tests
+    tests/synthesis/finite_mixed_branch_strategy_tests.cpp)
+  target_link_libraries(finite_mixed_branch_strategy_tests PRIVATE CSL::finite_mixed_branch
+    CSL::strategy_a CSL::affine_sum CSL::qhull_conversion CSL::highs_lp CSL::highs_convex doctest::doctest)
+  add_test(NAME finite_mixed_branch_strategy_tests COMMAND finite_mixed_branch_strategy_tests)
+  csl_strict_warnings(finite_mixed_branch_strategy_tests)
+  csl_test_target(finite_mixed_branch_strategy_tests synthesis)
+endif()
+
+add_executable(finite_mixed_branch_public_client tests/installed/finite_mixed_branch_client.cpp)
+target_link_libraries(finite_mixed_branch_public_client PRIVATE CSL::finite_mixed_branch)
+add_test(NAME finite_mixed_branch_public_client COMMAND finite_mixed_branch_public_client)
+csl_test_target(finite_mixed_branch_public_client synthesis)
+
 add_executable(control_recovery_public_client tests/installed/control_recovery_client.cpp)
 target_link_libraries(control_recovery_public_client PRIVATE CSL::control_recovery)
 add_test(NAME control_recovery_public_client COMMAND control_recovery_public_client)
