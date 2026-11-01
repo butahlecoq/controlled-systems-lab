@@ -414,9 +414,15 @@ jobs:
       - name: Stage the issue 824 zonotope minimax report
         if: steps.catalog.outputs.has_reports == 'true' && hashFiles('reports/algorithm-results/issue824-two-points-zonotope-minimax-v1/result.json') != ''
         run: python scripts/reports/stage_issue824_zonotope_minimax.py --source reports/algorithm-results/issue824-two-points-zonotope-minimax-v1 --site build/report-site
+      - name: Stage the issue 824 zonotope minimax v2 report
+        if: steps.catalog.outputs.has_reports == 'true' && hashFiles('reports/algorithm-results/issue824-two-points-zonotope-minimax-v2/result.json') != ''
+        run: python scripts/reports/stage_issue824_zonotope_minimax.py --source reports/algorithm-results/issue824-two-points-zonotope-minimax-v2 --site build/report-site
       - name: Stage the issue 824 ellipsoid minimax report
         if: steps.catalog.outputs.has_reports == 'true' && hashFiles('reports/algorithm-results/issue824-two-points-ellipsoid-minimax-v1/result.json') != ''
         run: python scripts/reports/stage_issue824_ellipsoid_minimax.py --source reports/algorithm-results/issue824-two-points-ellipsoid-minimax-v1 --site build/report-site
+      - name: Stage the issue 824 ellipsoid minimax v2 report
+        if: steps.catalog.outputs.has_reports == 'true' && hashFiles('reports/algorithm-results/issue824-two-points-ellipsoid-minimax-v2/result.json') != ''
+        run: python scripts/reports/stage_issue824_ellipsoid_minimax.py --source reports/algorithm-results/issue824-two-points-ellipsoid-minimax-v2 --site build/report-site
       - name: Stage the issue 824 nominal comparison report
         if: steps.catalog.outputs.has_reports == 'true' && hashFiles('reports/algorithm-results/issue824-two-points-nominal-v1/result.json') != ''
         run: python scripts/reports/stage_issue824_nominal.py --source reports/algorithm-results/issue824-two-points-nominal-v1 --site build/report-site

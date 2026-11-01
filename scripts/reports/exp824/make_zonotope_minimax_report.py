@@ -282,7 +282,7 @@ cmake --preset dev -DCSL_BUILD_ISSUE824_ZONOTOPE_MINIMAX_REPORT=ON
 cmake --build build/dev --target csl_issue824_zonotope_minimax_report --parallel 4
 python3 scripts/reports/exp824/make_zonotope_minimax_report.py \\
   build/dev/csl_issue824_zonotope_minimax_report build/dev \\
-  reports/algorithm-results/issue824-two-points-zonotope-minimax-v1
+  reports/algorithm-results/issue824-two-points-zonotope-minimax-v2
 ```
 
 Run the driver and its functional smoke check with:
@@ -291,7 +291,7 @@ Run the driver and its functional smoke check with:
 ctest --test-dir build/dev -R '^issue824_zonotope_minimax_report_smoke$' --output-on-failure
 ```
 
-`capture.json` records the clean source commit, source hashes, Release compiler, and exact geometry reference. `result.json` stores all candidate scores and traces, the selected plan replay, the box baseline, the exact reference, and the 2D fixture. `check.json` preserves the exact replay checks and the limits of the 4D zonotope evidence. `projections.svg` shows both player phase planes. `planar-example.html` includes the minimal input, all candidate scores, the selected witness, and its independently checked 2D inclusion.
+`capture.json` records the clean source commit, source hashes, Release compiler, and exact geometry reference. `result.json` stores all candidate scores and traces, the selected plan replay, the box baseline, the exact reference, and the 2D fixture. `check.json` verifies exact finite-state membership in every stored 4D zonotope and preserves the limits of the objective-score evidence. `projections.svg` shows both player phase planes. `planar-example.html` includes the minimal input, all candidate scores, the selected witness, and its independently checked 2D inclusion.
 '''
     (output / "README.md").write_text(readme, encoding="utf-8")
     checksums = {path.name: hashlib.sha256(path.read_bytes()).hexdigest()

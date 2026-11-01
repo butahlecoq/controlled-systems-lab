@@ -13,6 +13,7 @@ import report_source_identity
 ROOT = Path(__file__).resolve().parents[2]
 SOURCE = ROOT / "reports/algorithm-results/issue824-two-points-zonotope-minimax-v1"
 ROUTE = "issue824-two-points-zonotope-minimax-v1"
+ROUTES = {ROUTE, "issue824-two-points-zonotope-minimax-v2"}
 FILES = ("README.md", "capture.json", "check.json", "figure-data.json", "index.html",
          "planar-example.html", "planar-example.svg", "projections.svg", "result.json", "SHA256SUMS")
 
@@ -52,14 +53,21 @@ def verified_bundle(source: Path) -> dict[str, bytes]:
 
 def stage(source: Path, site: Path) -> str:
     files = verified_bundle(source)
+    route = source.name
+    if route not in ROUTES:
+        raise ValueError("unknown issue #824 zonotope minimax report version")
+    check = json.loads(files["check.json"])
+    if route.endswith("-v2") and "every exact facet inequality" not in check.get(
+            "stage_zonotope_relation", ""):
+        raise ValueError("issue #824 zonotope v2 lacks exact full-set inclusion evidence")
     site = site.resolve(strict=True)
-    destination = site / ROUTE
+    destination = site / route
     if destination.exists() or destination.is_symlink():
         raise ValueError("issue #824 zonotope minimax Pages route already exists")
     destination.mkdir()
     for name, content in files.items():
         (destination / name).write_bytes(content)
-    return ROUTE
+    return route
 
 
 def main() -> None:
