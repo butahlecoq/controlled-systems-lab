@@ -10,6 +10,7 @@ import math
 import os
 from pathlib import Path
 import platform
+import re
 import shutil
 import statistics
 import subprocess
@@ -283,6 +284,48 @@ def run_driver(executable: Path) -> dict:
         raise ValueError("native report driver output is not JSON") from error
 
 
+def profile_trial(executable: Path) -> dict:
+    timer = next((Path(candidate) for candidate in ("/usr/bin/time", "/bin/time")
+                  if Path(candidate).is_file()), None)
+    profiler_tools = {name: shutil.which(name) for name in ("perf", "strace", "pidstat")}
+    if timer is None:
+        return {"status": "unavailable", "reason": "GNU time was not found",
+                "other_profiler_tools": profiler_tools}
+    completed = subprocess.run([str(timer), "-v", str(executable)], capture_output=True, text=True)
+    if completed.returncode != 0:
+        raise RuntimeError(f"excluded limiter-profile run failed: {completed.stderr.strip()}")
+    result = json.loads(completed.stdout)
+    summary = result["finite_catalogue_optimum"]
+    if summary.get("plan_count") != PLAN_COUNT or not isinstance(summary.get("elapsed_ns"), int):
+        raise ValueError("excluded profile run did not complete the finite catalogue")
+    details = completed.stderr
+
+    def field(pattern: str) -> str | None:
+        match = re.search(pattern, details, re.MULTILINE)
+        return match.group(1).strip() if match else None
+
+    cpu_percent_text = field(r"Percent of CPU this job got:\s*(.+)")
+    cpu_percent = float(cpu_percent_text.rstrip("%")) if cpu_percent_text else None
+    user_seconds_text = field(r"User time \(seconds\):\s*(.+)")
+    system_seconds_text = field(r"System time \(seconds\):\s*(.+)")
+    rss_text = field(r"Maximum resident set size \(kbytes\):\s*(.+)")
+    user_seconds = float(user_seconds_text) if user_seconds_text else None
+    system_seconds = float(system_seconds_text) if system_seconds_text else None
+    cpu_to_solver_ratio = ((user_seconds + system_seconds) / (summary["elapsed_ns"] / 1e9)
+                           if user_seconds is not None and system_seconds is not None
+                           and summary["elapsed_ns"] > 0 else None)
+    return {"status": "complete", "command": f"{timer} -v <native-driver>",
+            "excluded_from_reported_samples": True,
+            "finite_catalogue_plan_count": summary["plan_count"],
+            "solver_elapsed_ns": summary["elapsed_ns"],
+            "user_cpu_seconds": user_seconds, "system_cpu_seconds": system_seconds,
+            "whole_process_cpu_percent": cpu_percent,
+            "maximum_resident_set_size_kib": int(rss_text) if rss_text else None,
+            "process_cpu_to_solver_time_ratio": cpu_to_solver_ratio,
+            "other_profiler_tools": profiler_tools,
+            "interpretation": "The timed solver phase is exhaustive CPU enumeration; single-process CPU use and process CPU time are the available limiter evidence. perf, strace and pidstat availability is recorded separately."}
+
+
 def capture(executable: Path, oracle_result: dict, blocks_count: int = 4,
             repetitions: int = 7) -> tuple[dict, dict]:
     def load_average() -> list[float] | None:
@@ -292,6 +335,7 @@ def capture(executable: Path, oracle_result: dict, blocks_count: int = 4,
             return None
 
     blocks = []
+    limiter_profile = profile_trial(executable)
     for block_id in range(blocks_count):
         start_ns = time.time_ns()
         before = load_average()
@@ -337,7 +381,8 @@ def capture(executable: Path, oracle_result: dict, blocks_count: int = 4,
                   "median_ns": statistics.median(all_samples),
                   "minimum_ns": min(all_samples), "maximum_ns": max(all_samples),
                   "blocks": blocks,
-                  "limitation": "single implementation descriptive runtime only; no competing algorithm, end-to-end user latency comparison, or performance winner"}
+                  "limitation": "single implementation descriptive runtime only; no competing algorithm, end-to-end user latency comparison, or performance winner",
+                  "limiter_profile": limiter_profile}
     environment = {"captured_at_utc": datetime.now(timezone.utc).isoformat(),
                    "platform": platform.platform(), "python": sys.version,
                    "logical_cpu_count": os.cpu_count(), "load_average": load_average(),
@@ -433,7 +478,7 @@ The re-expressed continuous analytic feedback reference has objective `{continuo
 
 Sampling that policy once per outer step and holding it over the ten source Euler substeps gives objective `{sampled['objective']:.12f}`. Exhaustive enumeration of all `{finite['plan_count']:,}` finite action sequences gives catalogue minimum `{finite['objective']:.12f}`, controls `{finite['selected_controls']}`, and terminal state `({finite['terminal_state'][0]:.10f}, {finite['terminal_state'][1]:.10f})`. A separate exact-integer dynamic program over the finite state graph verifies the catalogue result.
 
-The phase-plane plot shows position `x` against velocity `v`; the three curves use different solution tracks and are not an algorithm ranking on a matched guarantee. The retained runtime is the native exhaustive finite-catalogue solver call only: median `{measurement['median_ns']:,} ns` across `{measurement['successful_calls']}` sequential calls (range `{measurement['minimum_ns']:,}–{measurement['maximum_ns']:,} ns`). It is descriptive for this one implementation; no competing solver, end-to-end latency, or performance winner is claimed.
+The phase-plane plot shows position `x` against velocity `v`; the three curves use different solution tracks and are not an algorithm ranking on a matched guarantee. The retained runtime is the native exhaustive finite-catalogue solver call only: median `{measurement['median_ns']:,} ns` across `{measurement['successful_calls']}` sequential calls (range `{measurement['minimum_ns']:,}–{measurement['maximum_ns']:,} ns`). An excluded `/usr/bin/time -v` run records process CPU share and memory as limiter evidence; see `capture.json`. It is descriptive for this one implementation; no competing solver, end-to-end latency, or performance winner is claimed.
 
 ## Provenance and reproduction
 
