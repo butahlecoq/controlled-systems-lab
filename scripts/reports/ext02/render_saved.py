@@ -80,6 +80,9 @@ python3 scripts/reports/ext02/render_saved.py build/highs/ext02-evidence/measure
     csv_path = record_path.parent / "trials.csv"
     if csv_path.is_file():
         (output / "trials.csv").write_bytes(csv_path.read_bytes())
+    stderr_path = record_path.parent / "stderr.txt"
+    if stderr_path.is_file():
+        (output / "stderr.txt").write_bytes(stderr_path.read_bytes())
     (output / "README.md").write_text(
         "# EXT-02 report bundle\n\nStandalone HTML and figure are rendered from `measurement.json`; "
         "raw JSONL and CSV preserve all attempts. The bytes field counts numeric coefficients and RHS "

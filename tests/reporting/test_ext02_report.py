@@ -54,6 +54,7 @@ class Ext02ReportTests(unittest.TestCase):
             measurement.write_text(json.dumps(record), encoding="utf-8")
             (source / "raw.jsonl").write_text("{}\n", encoding="utf-8")
             (source / "trials.csv").write_text("trial,warmup\n0,true\n", encoding="utf-8")
+            (source / "stderr.txt").write_text("", encoding="utf-8")
             output = temporary_path / "rendered"
             subprocess.run([sys.executable, str(RENDERER), str(measurement), str(output)], check=True)
             page = (output / "index.html").read_text(encoding="utf-8")
@@ -64,6 +65,7 @@ class Ext02ReportTests(unittest.TestCase):
             self.assertIn('cx="240.0" cy="340.0"', svg)
             self.assertIn('cx="240.0" cy="120.0"', svg)
             self.assertEqual((output / "raw.jsonl").read_text(), "{}\n")
+            self.assertEqual((output / "stderr.txt").read_text(), "")
             sums = (output / "SHA256SUMS").read_text().splitlines()
             for row in sums:
                 checksum, name = row.split("  ", 1)
