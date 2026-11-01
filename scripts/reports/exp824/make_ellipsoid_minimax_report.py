@@ -310,7 +310,7 @@ cmake --preset dev -DCSL_BUILD_ISSUE824_ELLIPSOID_MINIMAX_REPORT=ON
 cmake --build build/dev --target csl_issue824_ellipsoid_minimax_report --parallel 4
 python3 scripts/reports/exp824/make_ellipsoid_minimax_report.py \\
   build/dev/csl_issue824_ellipsoid_minimax_report build/dev \\
-  reports/algorithm-results/issue824-two-points-ellipsoid-minimax-v1
+  reports/algorithm-results/issue824-two-points-ellipsoid-minimax-v2
 ```
 
 Run the driver and its functional smoke check with:
