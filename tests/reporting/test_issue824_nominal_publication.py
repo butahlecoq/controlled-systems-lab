@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import importlib.util
+import json
 from pathlib import Path
 import tempfile
 import unittest
@@ -14,6 +15,24 @@ SPEC.loader.exec_module(STAGER)
 
 
 class Issue824NominalPublicationTest(unittest.TestCase):
+    def test_bundle_keeps_the_descriptive_measurement_scope(self) -> None:
+        bundle = ROOT / "reports/algorithm-results/issue824-two-points-nominal-v1"
+        result = json.loads((bundle / "result.json").read_text(encoding="utf-8"))
+        capture = json.loads((bundle / "capture.json").read_text(encoding="utf-8"))
+        measurement = result["measurement"]
+        self.assertEqual(measurement["warmup_calls"], 1)
+        self.assertEqual(measurement["completed_calls"], 70)
+        self.assertEqual(measurement["failures"], 0)
+        self.assertEqual(len(measurement["batches"]), 7)
+        self.assertEqual(measurement["limiter_profile"]["performed"], False)
+        self.assertLessEqual(measurement["min_ns_per_call"], measurement["median_ns_per_call"])
+        self.assertLessEqual(measurement["median_ns_per_call"], measurement["max_ns_per_call"])
+        self.assertEqual(capture["build"]["configuration"], "Release")
+        self.assertGreater(capture["host"]["logical_processors"], 0)
+        page = (bundle / "index.html").read_text(encoding="utf-8")
+        self.assertIn("70 measured calls, zero failures", page)
+        self.assertIn("No limiter profile or comparative performance claim", page)
+
     def test_verified_bundle_stages_with_exact_inventory(self) -> None:
         bundle = ROOT / "reports/algorithm-results/issue824-two-points-nominal-v1"
         files = STAGER.verified_bundle(bundle)
