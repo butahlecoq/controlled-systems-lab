@@ -1147,6 +1147,14 @@
       "disposition": "publication-validation-or-frozen-route"
     },
     {
+      "source": "scripts/reports/stage_issue824_box_minimax.py",
+      "signal_count": 2,
+      "asset_name_literals": [
+        "projections.svg"
+      ],
+      "disposition": "publication-validation-or-frozen-route"
+    },
+    {
       "source": "scripts/reports/stage_issue824_ellipsoid_minimax.py",
       "signal_count": 3,
       "asset_name_literals": [
@@ -1554,7 +1562,7 @@
     },
     {
       "source": "scripts/reports/visual_examples.py",
-      "signal_count": 77,
+      "signal_count": 78,
       "asset_name_literals": [
         "adaptive-ode-replay.svg",
         "app01-plan-timing-v1.svg",
