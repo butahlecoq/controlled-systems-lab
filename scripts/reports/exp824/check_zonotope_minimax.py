@@ -101,10 +101,27 @@ def prepare_exact_zonotope_membership(stage: dict):
     """Prepare exact dyadic facet inequalities once for a stage's zonotope."""
     from itertools import combinations
 
-    center = [Fraction.from_float(value) for value in stage["center"]]
-    matrix = stage["generators"]
+    if not isinstance(stage, dict) or not isinstance(stage.get("center"), list):
+        raise ValueError("zonotope stage center is missing or malformed")
+    matrix = stage.get("generators")
+    if not isinstance(matrix, dict):
+        raise ValueError("zonotope generator matrix is missing or malformed")
+    rows, count = matrix.get("rows"), matrix.get("cols")
+    values = matrix.get("values")
+    factors = stage.get("factors")
+    if (not isinstance(rows, int) or isinstance(rows, bool) or rows < 0 or
+            not isinstance(count, int) or isinstance(count, bool) or count < 0 or
+            len(stage["center"]) != rows or not isinstance(values, list) or
+            len(values) != rows * count or not isinstance(factors, list) or
+            len(factors) != count):
+        raise ValueError("zonotope center, factors, and generator matrix dimensions differ")
+    center_values = stage["center"]
+    if any(not isinstance(value, (int, float)) or isinstance(value, bool) or
+           not math.isfinite(value) for value in center_values + values):
+        raise ValueError("zonotope center and generators must be finite numbers")
+    center = [Fraction.from_float(float(value)) for value in center_values]
     count = matrix["cols"]
-    generators = [[Fraction.from_float(matrix["values"][row * count + column])
+    generators = [[Fraction.from_float(float(values[row * count + column]))
                    for column in range(count)] for row in range(matrix["rows"])]
     basis_columns: list[int] = []
     current_rank = 0
@@ -161,6 +178,8 @@ def prepare_exact_zonotope_membership(stage: dict):
         facets.append((normal, support))
 
     def contains(point: list[Fraction]) -> bool:
+        if len(point) != rows:
+            raise ValueError("point dimension differs from the zonotope")
         displacement = [value - origin for value, origin in zip(point, center)]
         target = coordinates(displacement)
         if target is None:
@@ -182,6 +201,7 @@ def trace_stage_contains_exact_zonotope(stage: dict, states: set[tuple[int, ...]
 def check_membership_fixtures() -> None:
     sheared = {
         "center": [0.0, 0.0, 0.0, 0.0],
+        "factors": [0.0, 0.0],
         "generators": {"rows": 4, "cols": 2, "values": [1.0, 1.0, 0.0, 1.0,
                                                               0.0, 0.0, 0.0, 0.0]},
     }
@@ -194,6 +214,7 @@ def check_membership_fixtures() -> None:
         raise ValueError("exact zonotope checker ignored the lower-dimensional affine span")
 
     segment = {"center": [0.0, 0.0],
+               "factors": [0.0],
                "generators": {"rows": 2, "cols": 1, "values": [1.0, 0.0]}}
     contains_segment = prepare_exact_zonotope_membership(segment)
     if not contains_segment([Fraction(1, 2), Fraction(0)]) or contains_segment(
@@ -201,11 +222,20 @@ def check_membership_fixtures() -> None:
         raise ValueError("exact zonotope checker mishandled a rank-one set")
 
     point = {"center": [0.25, -0.5],
+             "factors": [],
              "generators": {"rows": 2, "cols": 0, "values": []}}
     contains_point = prepare_exact_zonotope_membership(point)
     if not contains_point([Fraction(1, 4), Fraction(-1, 2)]) or contains_point(
             [Fraction(1, 4), Fraction(-1, 2) + Fraction(1, 1000)]):
         raise ValueError("exact zonotope checker mishandled a singleton")
+
+    malformed = dict(sheared, factors=[0.0])
+    try:
+        prepare_exact_zonotope_membership(malformed)
+    except ValueError:
+        pass
+    else:
+        raise ValueError("exact zonotope checker accepted a factor/generator dimension mismatch")
 
 
 def check_parallelotope_trace(method: dict, actions: tuple[int, ...]) -> None:
