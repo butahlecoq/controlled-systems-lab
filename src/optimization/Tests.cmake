@@ -105,6 +105,12 @@ target_link_libraries(finite_action_ellipsoid_minimax_tests PRIVATE CSL::finite_
 add_test(NAME finite_action_ellipsoid_minimax_tests COMMAND finite_action_ellipsoid_minimax_tests)
 csl_test_target(finite_action_ellipsoid_minimax_tests optimization)
 
+add_executable(finite_action_nominal_tests tests/unit/optimization/finite_action_nominal_tests.cpp)
+target_include_directories(finite_action_nominal_tests PRIVATE ${PROJECT_SOURCE_DIR}/benchmarks/reporting/exp824)
+target_link_libraries(finite_action_nominal_tests PRIVATE CSL::finite_action_nominal doctest::doctest)
+add_test(NAME finite_action_nominal_tests COMMAND finite_action_nominal_tests)
+csl_test_target(finite_action_nominal_tests optimization)
+
 add_executable(finite_causal_minimax_tests tests/unit/optimization/finite_causal_minimax_tests.cpp)
 target_link_libraries(finite_causal_minimax_tests PRIVATE CSL::finite_causal_minimax doctest::doctest)
 add_test(NAME finite_causal_minimax_tests COMMAND finite_causal_minimax_tests)
