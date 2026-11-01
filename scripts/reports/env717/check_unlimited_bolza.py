@@ -10,7 +10,10 @@ import math
 import os
 from pathlib import Path
 import platform
-import re
+try:
+    import resource
+except ImportError:  # pragma: no cover - Windows Python
+    resource = None
 import shutil
 import statistics
 import subprocess
@@ -263,6 +266,41 @@ def verify(result: dict) -> dict:
     if saved_finite["replayed_terminal_state"] != saved_finite["terminal_state"]:
         for actual, expected in zip(saved_finite["replayed_terminal_state"], saved_finite["terminal_state"]):
             close(actual, expected, "finite replay endpoint", 1e-11)
+    measurement = result.get("runtime_measurement")
+    if measurement is not None:
+        if measurement.get("schema") != "csl.env717-runtime-measurement/1":
+            raise ValueError("runtime measurement schema differs")
+        durations = measurement.get("duration_ns", [])
+        blocks = measurement.get("blocks", [])
+        if (measurement.get("measured_blocks") != 4 or
+                measurement.get("calls_per_block") != 7 or
+                measurement.get("warmups_per_block") != 1 or
+                measurement.get("successful_calls") != 28 or
+                measurement.get("failed_calls") != 0 or
+                measurement.get("all_calls_match_independent_finite_plan") is not True or
+                len(durations) != 28 or len(blocks) != 4 or
+                any(not isinstance(value, int) or value <= 0 for value in durations)):
+            raise ValueError("runtime measurement call protocol is incomplete")
+        if (measurement.get("minimum_ns") != min(durations) or
+                measurement.get("maximum_ns") != max(durations) or
+                measurement.get("median_ns") != statistics.median(durations)):
+            raise ValueError("runtime measurement summary differs from raw samples")
+        for index, block in enumerate(blocks, start=1):
+            block_durations = block.get("durations_ns", [])
+            if (block.get("block") != index or block.get("warmups") != 1 or
+                    block.get("measured_calls") != 7 or block.get("successful_calls") != 7 or
+                    block.get("failed_calls") != 0 or len(block_durations) != 7 or
+                    any(not isinstance(value, int) or value <= 0 for value in block_durations)):
+                raise ValueError(f"runtime measurement block {index} is incomplete")
+        profile = measurement.get("limiter_profile", {})
+        if profile.get("status") == "complete":
+            if (profile.get("excluded_from_reported_samples") is not True or
+                    profile.get("finite_catalogue_plan_count") != PLAN_COUNT or
+                    profile.get("solver_elapsed_ns", 0) <= 0 or
+                    profile.get("whole_process_cpu_percent", 0) <= 0):
+                raise ValueError("excluded limiter profile is incomplete")
+        elif profile.get("status") != "unavailable":
+            raise ValueError("limiter profile has an unknown status")
     if len(saved_continuous["trajectory"]) != 101 or len(saved_sampled["trajectory"]) != 11:
         raise ValueError("trajectory sample count differs")
     if len(saved_finite["trajectory"]) != 11:
@@ -285,42 +323,32 @@ def run_driver(executable: Path) -> dict:
 
 
 def profile_trial(executable: Path) -> dict:
-    timer = next((Path(candidate) for candidate in ("/usr/bin/time", "/bin/time")
-                  if Path(candidate).is_file()), None)
     profiler_tools = {name: shutil.which(name) for name in ("perf", "strace", "pidstat")}
-    if timer is None:
-        return {"status": "unavailable", "reason": "GNU time was not found",
+    if resource is None:
+        return {"status": "unavailable", "reason": "child-process resource accounting is unavailable",
                 "other_profiler_tools": profiler_tools}
-    completed = subprocess.run([str(timer), "-v", str(executable)], capture_output=True, text=True)
-    if completed.returncode != 0:
-        raise RuntimeError(f"excluded limiter-profile run failed: {completed.stderr.strip()}")
-    result = json.loads(completed.stdout)
+    before = resource.getrusage(resource.RUSAGE_CHILDREN)
+    started = time.perf_counter_ns()
+    result = run_driver(executable)
+    wall_ns = time.perf_counter_ns() - started
+    after = resource.getrusage(resource.RUSAGE_CHILDREN)
     summary = result["finite_catalogue_optimum"]
     if summary.get("plan_count") != PLAN_COUNT or not isinstance(summary.get("elapsed_ns"), int):
         raise ValueError("excluded profile run did not complete the finite catalogue")
-    details = completed.stderr
-
-    def field(pattern: str) -> str | None:
-        match = re.search(pattern, details, re.MULTILINE)
-        return match.group(1).strip() if match else None
-
-    cpu_percent_text = field(r"Percent of CPU this job got:\s*(.+)")
-    cpu_percent = float(cpu_percent_text.rstrip("%")) if cpu_percent_text else None
-    user_seconds_text = field(r"User time \(seconds\):\s*(.+)")
-    system_seconds_text = field(r"System time \(seconds\):\s*(.+)")
-    rss_text = field(r"Maximum resident set size \(kbytes\):\s*(.+)")
-    user_seconds = float(user_seconds_text) if user_seconds_text else None
-    system_seconds = float(system_seconds_text) if system_seconds_text else None
+    user_seconds = after.ru_utime - before.ru_utime
+    system_seconds = after.ru_stime - before.ru_stime
+    cpu_percent = 100.0 * (user_seconds + system_seconds) / (wall_ns / 1e9)
     cpu_to_solver_ratio = ((user_seconds + system_seconds) / (summary["elapsed_ns"] / 1e9)
-                           if user_seconds is not None and system_seconds is not None
-                           and summary["elapsed_ns"] > 0 else None)
-    return {"status": "complete", "command": f"{timer} -v <native-driver>",
+                           if summary["elapsed_ns"] > 0 else None)
+    return {"status": "complete", "command": "Python subprocess wall clock plus resource.getrusage(RUSAGE_CHILDREN)",
             "excluded_from_reported_samples": True,
             "finite_catalogue_plan_count": summary["plan_count"],
             "solver_elapsed_ns": summary["elapsed_ns"],
+            "whole_process_wall_ns": wall_ns,
             "user_cpu_seconds": user_seconds, "system_cpu_seconds": system_seconds,
             "whole_process_cpu_percent": cpu_percent,
-            "maximum_resident_set_size_kib": int(rss_text) if rss_text else None,
+            "maximum_resident_set_size": after.ru_maxrss,
+            "maximum_resident_set_size_unit": "KiB" if platform.system() == "Linux" else "platform-specific resource units",
             "process_cpu_to_solver_time_ratio": cpu_to_solver_ratio,
             "other_profiler_tools": profiler_tools,
             "interpretation": "The timed solver phase is exhaustive CPU enumeration; single-process CPU use and process CPU time are the available limiter evidence. perf, strace and pidstat availability is recorded separately."}
@@ -462,6 +490,13 @@ def make_readme(result: dict, measurement: dict) -> str:
     continuous = result["continuous_analytic_reference"]
     sampled = result["sampled_analytic_feedback_replay"]
     finite = result["finite_catalogue_optimum"]
+    profile = measurement["limiter_profile"]
+    if profile["status"] == "complete":
+        profile_text = (f"The excluded child-process profile recorded {profile['whole_process_cpu_percent']:.1f}% CPU use, "
+                        f"{profile['maximum_resident_set_size']} {profile['maximum_resident_set_size_unit']} maximum RSS, "
+                        "and no available perf/strace/pidstat profiler; details are in `capture.json`.")
+    else:
+        profile_text = "Child-process CPU profiling was unavailable; this is recorded in `capture.json`. No limiter-based performance conclusion is claimed."
     return f"""# Unlimited Bolza Problem: analytic reference and finite catalogue
 
 This report re-expresses the upstream double-integrator equations and analytic feedback basis. It does not copy upstream source code. The pinned source has no declared license. The main differential-game reachability example remains [TwoPointsOnParallelLines](https://butahlecoq.github.io/controlled-systems-lab/env717-two-points-33ebdad360671940fb54/index.html).
@@ -478,7 +513,7 @@ The re-expressed continuous analytic feedback reference has objective `{continuo
 
 Sampling that policy once per outer step and holding it over the ten source Euler substeps gives objective `{sampled['objective']:.12f}`. Exhaustive enumeration of all `{finite['plan_count']:,}` finite action sequences gives catalogue minimum `{finite['objective']:.12f}`, controls `{finite['selected_controls']}`, and terminal state `({finite['terminal_state'][0]:.10f}, {finite['terminal_state'][1]:.10f})`. A separate exact-integer dynamic program over the finite state graph verifies the catalogue result.
 
-The phase-plane plot shows position `x` against velocity `v`; the three curves use different solution tracks and are not an algorithm ranking on a matched guarantee. The retained runtime is the native exhaustive finite-catalogue solver call only: median `{measurement['median_ns']:,} ns` across `{measurement['successful_calls']}` sequential calls (range `{measurement['minimum_ns']:,}–{measurement['maximum_ns']:,} ns`). An excluded `/usr/bin/time -v` run records process CPU share and memory as limiter evidence; see `capture.json`. It is descriptive for this one implementation; no competing solver, end-to-end latency, or performance winner is claimed.
+The phase-plane plot shows position `x` against velocity `v`; the three curves use different solution tracks and are not an algorithm ranking on a matched guarantee. The retained runtime is the native exhaustive finite-catalogue solver call only: median `{measurement['median_ns']:,} ns` across `{measurement['successful_calls']}` sequential calls (range `{measurement['minimum_ns']:,}–{measurement['maximum_ns']:,} ns`). {profile_text} It is descriptive for this one implementation; no competing solver, end-to-end latency, or performance winner is claimed.
 
 ## Provenance and reproduction
 
