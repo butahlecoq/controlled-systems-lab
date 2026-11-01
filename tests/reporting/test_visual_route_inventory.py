@@ -151,7 +151,7 @@ class VisualRouteInventoryTests(unittest.TestCase):
         follow_up_counts={number:sum(entry["follow_up_issue"]==number for entry in deferred)
                           for number in (600,684,685,686,687,708,717,824)}
         self.assertEqual(follow_up_counts,
-                         {600:2,684:0,685:0,686:0,687:5,708:1,717:16,824:2})
+                         {600:2,684:0,685:0,686:0,687:6,708:1,717:16,824:2})
         self.assertEqual(producers["scripts/reports/env717/check_pendulum_terminal.py"]["follow_up_issue"], 717)
         reviewed=[entry for entry in producers.values() if entry.get("role")]
         self.assertEqual(len(reviewed),25)

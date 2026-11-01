@@ -106,6 +106,8 @@ class GalleryTests(unittest.TestCase):
                 (target / saved["page"]).write_text("<html>report fixture</html>", encoding="utf-8")
             if not (target / saved["image"]).exists():
                 shutil.copyfile(source / saved["image"], target / saved["image"])
+            if saved.get("check") and not (target / saved["check"]).exists():
+                shutil.copyfile(source / saved["check"], target / saved["check"])
         for case in gallery.visual_illustrations.CASES:
             if "report_kind" not in case:
                 continue
