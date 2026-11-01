@@ -88,6 +88,26 @@ TEST_CASE("replay history refusal retains candidate scores and its selected atte
         CHECK(std::holds_alternative<ZonotopePlanScored>(attempt));
 }
 
+TEST_CASE("candidate search cancellation retains a stopped attempt and incomplete coverage") {
+    std::stop_source cancellation;
+    cancellation.request_stop();
+    ExecutionContext context;
+    context.cancellation = cancellation.get_token();
+    const auto answer = finite_action_zonotope_minimax(analytic_request(), {3,2,2,4,16}, context);
+    REQUIRE(std::holds_alternative<FiniteActionZonotopeMinimaxResult>(answer));
+    const auto& result = std::get<FiniteActionZonotopeMinimaxResult>(answer);
+    CHECK(result.candidate_search == CandidateSearchCoverage::incomplete);
+    REQUIRE(result.plan_attempts.size() == 1);
+    REQUIRE(std::holds_alternative<ZonotopePlanStopped>(result.plan_attempts.front()));
+    const auto& attempt = std::get<ZonotopePlanStopped>(result.plan_attempts.front());
+    CHECK(attempt.action_indices == std::vector<std::size_t>{0});
+    CHECK(attempt.outcome.reason == StopReason::cancelled);
+    REQUIRE(std::holds_alternative<ZonotopeCandidateSearchStopped>(result.selection));
+    const auto& stopped = std::get<ZonotopeCandidateSearchStopped>(result.selection);
+    CHECK(stopped.candidate_attempt_index == 0);
+    CHECK(stopped.outcome.reason == StopReason::cancelled);
+}
+
 TEST_CASE("pinned TwoPoints selected plan is replayed over the full finite disturbance histories") {
     const auto request = csl::issue824::fixture::two_points_request("zonotope-minimax-test");
     const auto answer = finite_action_zonotope_minimax(request, {27,27,27,64,32768});

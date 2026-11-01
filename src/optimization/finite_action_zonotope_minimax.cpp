@@ -85,13 +85,22 @@ FiniteActionZonotopeMinimaxOutcome finite_action_zonotope_minimax(
     std::size_t selected_index = 0;
     double minimum = std::numeric_limits<double>::infinity();
     bool has_scored = false;
+    const auto stop_search = [&](const std::vector<std::size_t>& choices,
+        std::size_t plan_index, OperationStopped stopped) -> FiniteActionZonotopeMinimaxOutcome {
+        attempts.emplace_back(ZonotopePlanStopped{choices, stopped});
+        return FiniteActionZonotopeMinimaxResult{request.problem, request.request,
+            std::move(attempts), CandidateSearchCoverage::incomplete,
+            ZonotopeCandidateSearchStopped{plan_index, std::move(stopped)}, Assurance::numerical};
+    };
     for(std::size_t plan_index = 0; plan_index < plan_count; ++plan_index) {
-        if(context.cancellation.stop_requested())
-            return OperationStopped{StopReason::cancelled, "Zonotope finite minimax cancelled."};
-        if(context.deadline && std::chrono::steady_clock::now() >= *context.deadline)
-            return OperationStopped{StopReason::deadline_expired, "Zonotope finite minimax deadline expired."};
         const auto choices = detail::action_plan_indices(plan_index,
             request.actions.catalogue.size(), horizon);
+        if(context.cancellation.stop_requested())
+            return stop_search(choices, plan_index,
+                {StopReason::cancelled, "Zonotope finite minimax cancelled before this plan."});
+        if(context.deadline && std::chrono::steady_clock::now() >= *context.deadline)
+            return stop_search(choices, plan_index,
+                {StopReason::deadline_expired, "Zonotope finite minimax deadline expired before this plan."});
         std::vector<Vector> controls;
         controls.reserve(horizon);
         for(const auto choice : choices) controls.push_back(request.actions.catalogue[choice]);
@@ -100,7 +109,8 @@ FiniteActionZonotopeMinimaxOutcome finite_action_zonotope_minimax(
             {request.request.value + "/zonotope-plan/" + std::to_string(plan_index)}};
         auto propagated = reachability::finite_plan_zonotope(plan,
             {limits.max_generators_per_stage}, context);
-        if(const auto* stop = std::get_if<OperationStopped>(&propagated)) return *stop;
+        if(const auto* stop = std::get_if<OperationStopped>(&propagated))
+            return stop_search(choices, plan_index, *stop);
         if(const auto* error = std::get_if<Unsupported>(&propagated)) {
             attempts.emplace_back(ZonotopePlanUnscored{choices, *error});
             complete = false;
@@ -109,7 +119,8 @@ FiniteActionZonotopeMinimaxOutcome finite_action_zonotope_minimax(
         auto trace = std::get<reachability::FinitePlanZonotopeTrace>(std::move(propagated));
         auto scored = score_corners(trace.stages.back(), request.objective,
             limits.max_factor_corners, context);
-        if(const auto* stop = std::get_if<OperationStopped>(&scored)) return *stop;
+        if(const auto* stop = std::get_if<OperationStopped>(&scored))
+            return stop_search(choices, plan_index, *stop);
         if(const auto* error = std::get_if<Unsupported>(&scored)) {
             attempts.emplace_back(ZonotopePlanUnscored{choices, *error});
             complete = false;

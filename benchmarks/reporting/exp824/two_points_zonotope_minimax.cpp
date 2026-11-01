@@ -5,8 +5,13 @@
 #include "two_points_fixture.hpp"
 #include <nlohmann/json.hpp>
 
+#include <algorithm>
+#include <array>
+#include <chrono>
+#include <cstdint>
 #include <iostream>
 #include <stdexcept>
+#include <string_view>
 
 namespace {
 using namespace csl;
@@ -46,6 +51,16 @@ Json diagnostics_json(const Unsupported& outcome) {
     return diagnostics;
 }
 
+const char* stop_reason_name(StopReason reason) {
+    switch(reason) {
+    case StopReason::cancelled: return "cancelled";
+    case StopReason::deadline_expired: return "deadline_expired";
+    case StopReason::resource_limit: return "resource_limit";
+    case StopReason::numerical_failure: return "numerical_failure";
+    }
+    return "unknown";
+}
+
 Json attempts_json(const FiniteActionZonotopeMinimaxResult& result) {
     Json attempts = Json::array();
     for(const auto& attempt : result.plan_attempts) {
@@ -56,11 +71,16 @@ Json attempts_json(const FiniteActionZonotopeMinimaxResult& result) {
                 {"terminal_generators", scored->score.terminal_generators},
                 {"factor_corners_evaluated", scored->score.factor_corners_evaluated},
                 {"stages", trace_json(scored->score.trace)}});
-        } else {
-            const auto& unscored = std::get<ZonotopePlanUnscored>(attempt);
+        } else if(const auto* unscored = std::get_if<ZonotopePlanUnscored>(&attempt)) {
             attempts.push_back({{"status", "unscored"},
-                {"action_indices", unscored.action_indices},
-                {"diagnostics", diagnostics_json(unscored.outcome)}});
+                {"action_indices", unscored->action_indices},
+                {"diagnostics", diagnostics_json(unscored->outcome)}});
+        } else {
+            const auto& stopped = std::get<ZonotopePlanStopped>(attempt);
+            attempts.push_back({{"status", "stopped"},
+                {"action_indices", stopped.action_indices},
+                {"stop_reason", stop_reason_name(stopped.outcome.reason)},
+                {"diagnostics", stopped.outcome.diagnostics}});
         }
     }
     return attempts;
@@ -129,8 +149,77 @@ Json planar_selector_json() {
         {"exact_finite_minimax_value", reference->value}};
 }
 
+double run_timed_method(std::size_t method, const FiniteActionMinimaxRequest& input) {
+    if(method == 0) {
+        const auto exact = finite_action_minimax(input, {27, 27, 0.0});
+        const auto* result = std::get_if<FiniteMinimaxOptimal>(&exact);
+        if(!result) throw std::runtime_error("timed exact finite minimax did not complete");
+        return result->value;
+    }
+    if(method == 1) {
+        const auto box = finite_action_box_minimax(input, {27, 27, 27, 16});
+        const auto* result = std::get_if<FiniteActionBoxMinimaxResult>(&box);
+        if(!result) throw std::runtime_error("timed box selector did not complete");
+        return result->selected_replay_value;
+    }
+    const auto zonotope = finite_action_zonotope_minimax(input, {27, 27, 27, 64, 32768});
+    const auto* result = std::get_if<FiniteActionZonotopeMinimaxResult>(&zonotope);
+    if(!result) throw std::runtime_error("timed zonotope selector did not complete");
+    if(result->candidate_search != CandidateSearchCoverage::complete || result->plan_attempts.size() != 27)
+        throw std::runtime_error("timed zonotope selector did not score all 27 plans");
+    const auto* selected = std::get_if<ZonotopePlanSelected>(&result->selection);
+    if(!selected) throw std::runtime_error("timed zonotope selector did not replay its selected plan");
+    return selected->replay.worst_value;
+}
+
+Json timing_json(const FiniteActionMinimaxRequest& input) {
+    constexpr std::size_t repetitions = 7;
+    constexpr std::array<std::string_view, 3> names{
+        "exact_finite_minimax", "outer_box_selector", "zonotope_selector"};
+    for(std::size_t method = 0; method < names.size(); ++method)
+        if(!std::isfinite(run_timed_method(method, input)))
+            throw std::runtime_error("a timed warmup returned a non-finite value");
+
+    Json samples = Json::array();
+    std::array<std::vector<std::int64_t>, names.size()> durations;
+    for(std::size_t repetition = 0; repetition < repetitions; ++repetition) {
+        for(std::size_t offset = 0; offset < names.size(); ++offset) {
+            const auto method = (repetition + offset) % names.size();
+            const auto start = std::chrono::steady_clock::now();
+            const auto value = run_timed_method(method, input);
+            const auto stop = std::chrono::steady_clock::now();
+            const auto elapsed = std::chrono::duration_cast<std::chrono::nanoseconds>(stop - start).count();
+            durations[method].push_back(elapsed);
+            samples.push_back({{"repetition", repetition}, {"order_in_repetition", offset},
+                {"method", names[method]}, {"elapsed_ns", elapsed}, {"returned_value", value},
+                {"status", "completed"}});
+        }
+    }
+
+    Json summaries = Json::array();
+    for(std::size_t method = 0; method < names.size(); ++method) {
+        auto sorted = durations[method];
+        std::sort(sorted.begin(), sorted.end());
+        summaries.push_back({{"method", names[method]}, {"repetitions", repetitions},
+            {"failures", 0}, {"minimum_ns", sorted.front()},
+            {"median_ns", sorted[sorted.size() / 2]}, {"maximum_ns", sorted.back()}});
+    }
+    return {{"schema", "csl.issue824-zonotope-minimax-timing/1"},
+        {"warmup_runs_per_method", 1}, {"measurement_repetitions_per_method", repetitions},
+        {"order_policy", "three methods rotate order across each repetition"},
+        {"interval", "complete public algorithm call; request construction and JSON serialization excluded"},
+        {"input_policy", "one immutable request reused; fixture setup is outside timing"},
+        {"warm_state_policy", "one excluded warmup per method; no algorithm workspace reused"},
+        {"arithmetic", "binary64"}, {"absolute_tolerance", 1e-8},
+        {"relative_tolerance", 1e-8}, {"seed", "none; deterministic finite catalogues"},
+        {"workers", {{"requested", 1}, {"actual", 1}, {"native_threads", 1}}},
+        {"limiter_profile", "not collected: perf and strace are unavailable; descriptive timing only"},
+        {"summaries", std::move(summaries)}, {"samples", std::move(samples)}};
+}
+
 Json run() {
     const auto input = csl::issue824::fixture::two_points_request("issue824-two-points-zonotope-minimax-v1");
+    const auto timing = timing_json(input);
     const auto exact = finite_action_minimax(input, {27, 27, 0.0});
     const auto* exact_result = std::get_if<FiniteMinimaxOptimal>(&exact);
     if(!exact_result) throw std::runtime_error("exact finite minimax did not complete");
@@ -171,6 +260,7 @@ Json run() {
     }
 
     return {{"schema", "csl.issue824-two-points-zonotope-minimax/1"},
+        {"timing", timing},
         {"environment", "TwoPointsOnParallelLines"},
         {"source_identity", {{"repository", "optimal_control/Environments"},
             {"commit", "f4d76c60f4003f50954174e96eafd8e514bd5441"}}},

@@ -30,7 +30,13 @@ struct ZonotopePlanUnscored {
     Unsupported outcome;
 };
 
-using FiniteActionZonotopePlanAttempt = std::variant<ZonotopePlanScored, ZonotopePlanUnscored>;
+struct ZonotopePlanStopped {
+    std::vector<std::size_t> action_indices;
+    OperationStopped outcome;
+};
+
+using FiniteActionZonotopePlanAttempt = std::variant<ZonotopePlanScored,
+    ZonotopePlanUnscored, ZonotopePlanStopped>;
 
 enum class CandidateSearchCoverage { complete, incomplete };
 
@@ -55,10 +61,15 @@ struct ZonotopePlanReplayStopped {
     std::size_t candidate_attempt_index;
     OperationStopped outcome;
 };
+struct ZonotopeCandidateSearchStopped {
+    std::size_t candidate_attempt_index;
+    OperationStopped outcome;
+};
 struct ZonotopeNoScoredCandidate {};
 
 using FiniteActionZonotopeSelectionOutcome = std::variant<ZonotopePlanSelected,
-    ZonotopePlanReplayRefused, ZonotopePlanReplayStopped, ZonotopeNoScoredCandidate>;
+    ZonotopePlanReplayRefused, ZonotopePlanReplayStopped,
+    ZonotopeCandidateSearchStopped, ZonotopeNoScoredCandidate>;
 
 struct FiniteActionZonotopeMinimaxResult {
     ProblemId problem;
@@ -75,7 +86,8 @@ using FiniteActionZonotopeMinimaxOutcome = std::variant<FiniteActionZonotopeMini
 // Ranks fixed open-loop plans by numerical maxima over all terminal zonotope
 // factor corners, then exactly replays only the selected plan over the finite
 // catalogues. Candidate scores are not validated objective bounds or a claim
-// that the selector found a globally minimax plan.
+// that the selector found a globally minimax plan. A stop during candidate
+// search returns completed rows and a stopped row for the interrupted/next plan.
 FiniteActionZonotopeMinimaxOutcome finite_action_zonotope_minimax(
     const FiniteActionMinimaxRequest& request, FiniteActionZonotopeMinimaxLimits limits,
     const ExecutionContext& context = {});

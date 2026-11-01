@@ -35,6 +35,13 @@ def main() -> None:
         raise ValueError("planar selector fixture did not score each control")
     if planar["selected_replay_value"] != planar["exact_finite_minimax_value"]:
         raise ValueError("planar selected replay differs from the exhaustive finite optimum")
+    timing = result["timing"]
+    if (timing.get("measurement_repetitions_per_method") != 7 or
+            timing.get("warmup_runs_per_method") != 1 or len(timing.get("samples", [])) != 21):
+        raise ValueError("report driver did not collect the declared raw timing samples")
+    if any(sample.get("status") != "completed" or sample.get("elapsed_ns", 0) <= 0
+           for sample in timing["samples"]):
+        raise ValueError("report driver recorded a failed or empty timing sample")
 
 
 if __name__ == "__main__":
