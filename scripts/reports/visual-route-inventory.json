@@ -1554,7 +1554,7 @@
     },
     {
       "source": "scripts/reports/visual_examples.py",
-      "signal_count": 75,
+      "signal_count": 77,
       "asset_name_literals": [
         "adaptive-ode-replay.svg",
         "app01-plan-timing-v1.svg",
