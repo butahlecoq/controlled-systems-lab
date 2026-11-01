@@ -1,0 +1,605 @@
+{
+  "fixture": {
+    "control_catalogue": [
+      -2.5,
+      0.0,
+      2.5
+    ],
+    "discrete_state_map": [
+      "x1_next=x1+0.01*x2+0.09*u",
+      "x2_next=u",
+      "x3_next=x3+0.1*x4+0.0045*v",
+      "x4_next=x4+0.1*v"
+    ],
+    "disturbance_catalogue": [
+      -1.0,
+      0.0,
+      1.0
+    ],
+    "environment": "TwoPointsOnParallelLines",
+    "horizon_steps": 3,
+    "information_pattern": "open-loop control plan, then all finite disturbance histories",
+    "initial_state": [
+      4.5,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "objective": "minimum worst-case terminal squared position gap",
+    "scope": "finite-catalog adaptation; not the upstream continuous-action 10-second RL task",
+    "source_commit": "f4d76c60f4003f50954174e96eafd8e514bd5441",
+    "source_repository": "imm-rl-lab/optimal_control/Environments",
+    "state_order": [
+      "x1",
+      "x2",
+      "x3",
+      "x4"
+    ],
+    "step_seconds": 0.1
+  },
+  "measurement": {
+    "arithmetic": "binary64",
+    "assertion": "all 27 control plans scored; approximate selected plans replayed over all 27 disturbance histories",
+    "excluded": "request construction, fixture construction, JSON serialization, build, and independent check",
+    "order": "five methods rotate order across five rounds",
+    "repetitions_per_method": 5,
+    "seed": "none; deterministic finite catalogs",
+    "timed_region": "complete public algorithm call and scalar/vector witness extraction",
+    "warmups_per_method": 1,
+    "workers": 1
+  },
+  "methods": [
+    "exact_polytope",
+    "box",
+    "zonotope",
+    "parallelotope",
+    "ellipsoid"
+  ],
+  "samples": [
+    {
+      "elapsed_ns": 447691,
+      "method": "exact_polytope",
+      "order_in_repetition": 1,
+      "outcome": {
+        "candidate_plans": 27,
+        "replayed_worst_value": 14.58094225,
+        "reported_optimum": 14.58094225,
+        "selected_action_indices": [
+          0,
+          0,
+          0
+        ],
+        "status": "completed"
+      },
+      "repetition": 1
+    },
+    {
+      "elapsed_ns": 212042,
+      "method": "box",
+      "order_in_repetition": 2,
+      "outcome": {
+        "candidate_plans": 27,
+        "candidate_score": 14.580942250000078,
+        "replayed_worst_value": 14.58094225,
+        "selected_action_indices": [
+          0,
+          0,
+          0
+        ],
+        "status": "completed"
+      },
+      "repetition": 1
+    },
+    {
+      "elapsed_ns": 151108083,
+      "method": "zonotope",
+      "order_in_repetition": 3,
+      "outcome": {
+        "candidate_plans": 27,
+        "candidate_score": 14.58094225000005,
+        "replayed_worst_value": 14.58094225,
+        "selected_action_indices": [
+          0,
+          0,
+          0
+        ],
+        "status": "completed"
+      },
+      "repetition": 1
+    },
+    {
+      "elapsed_ns": 705200,
+      "method": "parallelotope",
+      "order_in_repetition": 4,
+      "outcome": {
+        "candidate_plans": 27,
+        "candidate_score": 31.622964964900813,
+        "replayed_worst_value": 14.58094225,
+        "selected_action_indices": [
+          0,
+          0,
+          0
+        ],
+        "status": "completed"
+      },
+      "repetition": 1
+    },
+    {
+      "elapsed_ns": 219516,
+      "method": "ellipsoid",
+      "order_in_repetition": 5,
+      "outcome": {
+        "candidate_plans": 27,
+        "candidate_score": 15.554597695479202,
+        "replayed_worst_value": 14.58094225,
+        "selected_action_indices": [
+          0,
+          0,
+          0
+        ],
+        "status": "completed"
+      },
+      "repetition": 1
+    },
+    {
+      "elapsed_ns": 182778,
+      "method": "box",
+      "order_in_repetition": 1,
+      "outcome": {
+        "candidate_plans": 27,
+        "candidate_score": 14.580942250000078,
+        "replayed_worst_value": 14.58094225,
+        "selected_action_indices": [
+          0,
+          0,
+          0
+        ],
+        "status": "completed"
+      },
+      "repetition": 2
+    },
+    {
+      "elapsed_ns": 150207114,
+      "method": "zonotope",
+      "order_in_repetition": 2,
+      "outcome": {
+        "candidate_plans": 27,
+        "candidate_score": 14.58094225000005,
+        "replayed_worst_value": 14.58094225,
+        "selected_action_indices": [
+          0,
+          0,
+          0
+        ],
+        "status": "completed"
+      },
+      "repetition": 2
+    },
+    {
+      "elapsed_ns": 703943,
+      "method": "parallelotope",
+      "order_in_repetition": 3,
+      "outcome": {
+        "candidate_plans": 27,
+        "candidate_score": 31.622964964900813,
+        "replayed_worst_value": 14.58094225,
+        "selected_action_indices": [
+          0,
+          0,
+          0
+        ],
+        "status": "completed"
+      },
+      "repetition": 2
+    },
+    {
+      "elapsed_ns": 218188,
+      "method": "ellipsoid",
+      "order_in_repetition": 4,
+      "outcome": {
+        "candidate_plans": 27,
+        "candidate_score": 15.554597695479202,
+        "replayed_worst_value": 14.58094225,
+        "selected_action_indices": [
+          0,
+          0,
+          0
+        ],
+        "status": "completed"
+      },
+      "repetition": 2
+    },
+    {
+      "elapsed_ns": 441195,
+      "method": "exact_polytope",
+      "order_in_repetition": 5,
+      "outcome": {
+        "candidate_plans": 27,
+        "replayed_worst_value": 14.58094225,
+        "reported_optimum": 14.58094225,
+        "selected_action_indices": [
+          0,
+          0,
+          0
+        ],
+        "status": "completed"
+      },
+      "repetition": 2
+    },
+    {
+      "elapsed_ns": 155835584,
+      "method": "zonotope",
+      "order_in_repetition": 1,
+      "outcome": {
+        "candidate_plans": 27,
+        "candidate_score": 14.58094225000005,
+        "replayed_worst_value": 14.58094225,
+        "selected_action_indices": [
+          0,
+          0,
+          0
+        ],
+        "status": "completed"
+      },
+      "repetition": 3
+    },
+    {
+      "elapsed_ns": 703244,
+      "method": "parallelotope",
+      "order_in_repetition": 2,
+      "outcome": {
+        "candidate_plans": 27,
+        "candidate_score": 31.622964964900813,
+        "replayed_worst_value": 14.58094225,
+        "selected_action_indices": [
+          0,
+          0,
+          0
+        ],
+        "status": "completed"
+      },
+      "repetition": 3
+    },
+    {
+      "elapsed_ns": 218118,
+      "method": "ellipsoid",
+      "order_in_repetition": 3,
+      "outcome": {
+        "candidate_plans": 27,
+        "candidate_score": 15.554597695479202,
+        "replayed_worst_value": 14.58094225,
+        "selected_action_indices": [
+          0,
+          0,
+          0
+        ],
+        "status": "completed"
+      },
+      "repetition": 3
+    },
+    {
+      "elapsed_ns": 437703,
+      "method": "exact_polytope",
+      "order_in_repetition": 4,
+      "outcome": {
+        "candidate_plans": 27,
+        "replayed_worst_value": 14.58094225,
+        "reported_optimum": 14.58094225,
+        "selected_action_indices": [
+          0,
+          0,
+          0
+        ],
+        "status": "completed"
+      },
+      "repetition": 3
+    },
+    {
+      "elapsed_ns": 188854,
+      "method": "box",
+      "order_in_repetition": 5,
+      "outcome": {
+        "candidate_plans": 27,
+        "candidate_score": 14.580942250000078,
+        "replayed_worst_value": 14.58094225,
+        "selected_action_indices": [
+          0,
+          0,
+          0
+        ],
+        "status": "completed"
+      },
+      "repetition": 3
+    },
+    {
+      "elapsed_ns": 689695,
+      "method": "parallelotope",
+      "order_in_repetition": 1,
+      "outcome": {
+        "candidate_plans": 27,
+        "candidate_score": 31.622964964900813,
+        "replayed_worst_value": 14.58094225,
+        "selected_action_indices": [
+          0,
+          0,
+          0
+        ],
+        "status": "completed"
+      },
+      "repetition": 4
+    },
+    {
+      "elapsed_ns": 210226,
+      "method": "ellipsoid",
+      "order_in_repetition": 2,
+      "outcome": {
+        "candidate_plans": 27,
+        "candidate_score": 15.554597695479202,
+        "replayed_worst_value": 14.58094225,
+        "selected_action_indices": [
+          0,
+          0,
+          0
+        ],
+        "status": "completed"
+      },
+      "repetition": 4
+    },
+    {
+      "elapsed_ns": 412560,
+      "method": "exact_polytope",
+      "order_in_repetition": 3,
+      "outcome": {
+        "candidate_plans": 27,
+        "replayed_worst_value": 14.58094225,
+        "reported_optimum": 14.58094225,
+        "selected_action_indices": [
+          0,
+          0,
+          0
+        ],
+        "status": "completed"
+      },
+      "repetition": 4
+    },
+    {
+      "elapsed_ns": 189064,
+      "method": "box",
+      "order_in_repetition": 4,
+      "outcome": {
+        "candidate_plans": 27,
+        "candidate_score": 14.580942250000078,
+        "replayed_worst_value": 14.58094225,
+        "selected_action_indices": [
+          0,
+          0,
+          0
+        ],
+        "status": "completed"
+      },
+      "repetition": 4
+    },
+    {
+      "elapsed_ns": 148573846,
+      "method": "zonotope",
+      "order_in_repetition": 5,
+      "outcome": {
+        "candidate_plans": 27,
+        "candidate_score": 14.58094225000005,
+        "replayed_worst_value": 14.58094225,
+        "selected_action_indices": [
+          0,
+          0,
+          0
+        ],
+        "status": "completed"
+      },
+      "repetition": 4
+    },
+    {
+      "elapsed_ns": 223775,
+      "method": "ellipsoid",
+      "order_in_repetition": 1,
+      "outcome": {
+        "candidate_plans": 27,
+        "candidate_score": 15.554597695479202,
+        "replayed_worst_value": 14.58094225,
+        "selected_action_indices": [
+          0,
+          0,
+          0
+        ],
+        "status": "completed"
+      },
+      "repetition": 5
+    },
+    {
+      "elapsed_ns": 444338,
+      "method": "exact_polytope",
+      "order_in_repetition": 2,
+      "outcome": {
+        "candidate_plans": 27,
+        "replayed_worst_value": 14.58094225,
+        "reported_optimum": 14.58094225,
+        "selected_action_indices": [
+          0,
+          0,
+          0
+        ],
+        "status": "completed"
+      },
+      "repetition": 5
+    },
+    {
+      "elapsed_ns": 213578,
+      "method": "box",
+      "order_in_repetition": 3,
+      "outcome": {
+        "candidate_plans": 27,
+        "candidate_score": 14.580942250000078,
+        "replayed_worst_value": 14.58094225,
+        "selected_action_indices": [
+          0,
+          0,
+          0
+        ],
+        "status": "completed"
+      },
+      "repetition": 5
+    },
+    {
+      "elapsed_ns": 152770475,
+      "method": "zonotope",
+      "order_in_repetition": 4,
+      "outcome": {
+        "candidate_plans": 27,
+        "candidate_score": 14.58094225000005,
+        "replayed_worst_value": 14.58094225,
+        "selected_action_indices": [
+          0,
+          0,
+          0
+        ],
+        "status": "completed"
+      },
+      "repetition": 5
+    },
+    {
+      "elapsed_ns": 686203,
+      "method": "parallelotope",
+      "order_in_repetition": 5,
+      "outcome": {
+        "candidate_plans": 27,
+        "candidate_score": 31.622964964900813,
+        "replayed_worst_value": 14.58094225,
+        "selected_action_indices": [
+          0,
+          0,
+          0
+        ],
+        "status": "completed"
+      },
+      "repetition": 5
+    }
+  ],
+  "schema": "csl.issue824.matched-minimax-benchmark/1",
+  "summaries": [
+    {
+      "failures": 0,
+      "maximum_ns": 447691,
+      "median_ns": 441195,
+      "method": "exact_polytope",
+      "minimum_ns": 412560,
+      "requested_repetitions": 5,
+      "successful_repetitions": 5
+    },
+    {
+      "failures": 0,
+      "maximum_ns": 213578,
+      "median_ns": 189064,
+      "method": "box",
+      "minimum_ns": 182778,
+      "requested_repetitions": 5,
+      "successful_repetitions": 5
+    },
+    {
+      "failures": 0,
+      "maximum_ns": 155835584,
+      "median_ns": 151108083,
+      "method": "zonotope",
+      "minimum_ns": 148573846,
+      "requested_repetitions": 5,
+      "successful_repetitions": 5
+    },
+    {
+      "failures": 0,
+      "maximum_ns": 705200,
+      "median_ns": 703244,
+      "method": "parallelotope",
+      "minimum_ns": 686203,
+      "requested_repetitions": 5,
+      "successful_repetitions": 5
+    },
+    {
+      "failures": 0,
+      "maximum_ns": 223775,
+      "median_ns": 218188,
+      "method": "ellipsoid",
+      "minimum_ns": 210226,
+      "requested_repetitions": 5,
+      "successful_repetitions": 5
+    }
+  ],
+  "warmups": [
+    {
+      "method": "exact_polytope",
+      "outcome": {
+        "candidate_plans": 27,
+        "replayed_worst_value": 14.58094225,
+        "reported_optimum": 14.58094225,
+        "selected_action_indices": [
+          0,
+          0,
+          0
+        ],
+        "status": "completed"
+      }
+    },
+    {
+      "method": "box",
+      "outcome": {
+        "candidate_plans": 27,
+        "candidate_score": 14.580942250000078,
+        "replayed_worst_value": 14.58094225,
+        "selected_action_indices": [
+          0,
+          0,
+          0
+        ],
+        "status": "completed"
+      }
+    },
+    {
+      "method": "zonotope",
+      "outcome": {
+        "candidate_plans": 27,
+        "candidate_score": 14.58094225000005,
+        "replayed_worst_value": 14.58094225,
+        "selected_action_indices": [
+          0,
+          0,
+          0
+        ],
+        "status": "completed"
+      }
+    },
+    {
+      "method": "parallelotope",
+      "outcome": {
+        "candidate_plans": 27,
+        "candidate_score": 31.622964964900813,
+        "replayed_worst_value": 14.58094225,
+        "selected_action_indices": [
+          0,
+          0,
+          0
+        ],
+        "status": "completed"
+      }
+    },
+    {
+      "method": "ellipsoid",
+      "outcome": {
+        "candidate_plans": 27,
+        "candidate_score": 15.554597695479202,
+        "replayed_worst_value": 14.58094225,
+        "selected_action_indices": [
+          0,
+          0,
+          0
+        ],
+        "status": "completed"
+      }
+    }
+  ]
+}

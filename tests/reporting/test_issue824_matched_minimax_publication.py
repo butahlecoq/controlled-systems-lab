@@ -1,0 +1,63 @@
+from __future__ import annotations
+
+import importlib.util
+import json
+from pathlib import Path
+import shutil
+import tempfile
+import unittest
+
+ROOT = Path(__file__).resolve().parents[2]
+STAGER_PATH = ROOT / "scripts/reports/stage_issue824_matched_minimax.py"
+SPEC = importlib.util.spec_from_file_location("issue824_matched_stage", STAGER_PATH)
+assert SPEC is not None and SPEC.loader is not None
+STAGER = importlib.util.module_from_spec(SPEC)
+SPEC.loader.exec_module(STAGER)
+BUNDLE = ROOT / "reports/algorithm-results/issue824-two-points-matched-minimax-v1"
+
+
+class Issue824MatchedMinimaxPublicationTest(unittest.TestCase):
+    def test_bundle_has_five_matched_verified_tracks(self) -> None:
+        files = STAGER.verified_bundle(BUNDLE)
+        result = json.loads(files["result.json"])
+        check = json.loads(files["check.json"])
+        capture = json.loads(files["capture.json"])
+        self.assertEqual(result["methods"], ["exact_polytope", "box", "zonotope", "parallelotope", "ellipsoid"])
+        self.assertEqual(check["status"], "verified")
+        self.assertEqual(check["measurement_samples_verified"], 25)
+        self.assertEqual(check["exact_finite_minimax_value"], 14.58094225)
+        self.assertTrue(capture["source_tree_clean_before_report_generation"])
+        self.assertEqual(len(json.loads(files["e2e-timing.json"])["trials"]), 5)
+
+    def test_stages_exact_inventory_and_phase_plane_figures(self) -> None:
+        files = STAGER.verified_bundle(BUNDLE)
+        with tempfile.TemporaryDirectory() as temporary:
+            site = Path(temporary)
+            self.assertEqual(STAGER.stage(BUNDLE, site), BUNDLE.name)
+            staged = site / BUNDLE.name
+            self.assertEqual({path.name for path in staged.iterdir()}, set(files))
+            for name in ("geometry-reference-ellipsoid.svg", "geometry-reference-parallelotope.svg"):
+                self.assertEqual((staged / name).read_bytes(), files[name])
+
+    def test_rejects_corrupt_measurement_bundle(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary:
+            copied = Path(temporary) / BUNDLE.name
+            shutil.copytree(BUNDLE, copied)
+            (copied / "result.json").write_text("{}\n", encoding="utf-8")
+            with self.assertRaisesRegex(ValueError, "checksum mismatch"):
+                STAGER.verified_bundle(copied)
+
+    def test_does_not_overwrite_an_existing_route(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary:
+            site = Path(temporary)
+            route = site / BUNDLE.name
+            route.mkdir()
+            authored = route / "keep.txt"
+            authored.write_text("authored", encoding="utf-8")
+            with self.assertRaisesRegex(ValueError, "already exists"):
+                STAGER.stage(BUNDLE, site)
+            self.assertEqual(authored.read_text(encoding="utf-8"), "authored")
+
+
+if __name__ == "__main__":
+    unittest.main()

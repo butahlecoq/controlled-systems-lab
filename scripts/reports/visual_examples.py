@@ -145,6 +145,12 @@ SAVED_FIGURES = (
          title="Profile the combined nominal comparison path",
          alt="Two player phase planes show reachable sets, backward-winning intersections and representation projections, overlaid with the fixed-input nominal and finite minimax trajectories.",
          summary="Five end-to-end report trials and a separate gprof limiter profile are recorded. The profile describes a combined five-track API call and makes no per-representation winner or speedup claim."),
+    dict(route="issue824-two-points-matched-minimax-v1", image="geometry-reference-ellipsoid.svg",
+         page="index.html", records="result.json",
+         family="Fixed-plan minimax · Matched set representations",
+         title="Compare five minimax set tracks on TwoPoints",
+         alt="The two player phase planes show forward and backward reachable geometry, intersections, and replayed finite-game paths.",
+         summary="Five matched Release tracks (exact polytope, box, zonotope, fixed-frame parallelotope, ellipsoid) each score all 27 plans and replay the selected plan over 27 disturbance histories. A rational checker verifies all measured outcomes. This three-stage finite adaptation is not the upstream continuous-action RL task; timings are fixture-specific and make no general winner claim."),
 )
 
 

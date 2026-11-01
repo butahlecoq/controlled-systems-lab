@@ -627,7 +627,11 @@ if(BUILD_TESTING)
     COMMAND Python3::Interpreter
       ${CMAKE_CURRENT_SOURCE_DIR}/scripts/reports/exp824/check_matched_minimax_smoke.py
       $<TARGET_FILE:csl_issue824_matched_minimax_report>)
-  set_tests_properties(issue824_matched_minimax_report_smoke PROPERTIES LABELS reporting)
+  add_test(NAME issue824_matched_minimax_publication
+    COMMAND Python3::Interpreter
+      ${CMAKE_CURRENT_SOURCE_DIR}/tests/reporting/test_issue824_matched_minimax_publication.py)
+  set_tests_properties(issue824_matched_minimax_report_smoke issue824_matched_minimax_publication
+    PROPERTIES LABELS reporting)
 endif()
 endif()
 

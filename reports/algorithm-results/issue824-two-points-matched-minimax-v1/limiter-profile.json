@@ -1,0 +1,38 @@
+{
+  "driver_output": "profile calls completed: 10, checksum: 145.809",
+  "hotspots": [
+    {
+      "calls": 270,
+      "cumulative_seconds": 0.79,
+      "function": "csl::optimization::(anonymous namespace)::score_corners(csl::reachability::FinitePlanZonotopeTrace::Stage const&, csl::optimization::Objective const&, unsigned long, csl::ExecutionContext const&)",
+      "ms_per_call": 2.93,
+      "sampled_self_percent": 63.2,
+      "self_seconds": 0.79
+    },
+    {
+      "calls": 141677530,
+      "cumulative_seconds": 1.07,
+      "function": "csl::numeric::MatrixView::operator()(unsigned long, unsigned long) const",
+      "ms_per_call": 0.0,
+      "sampled_self_percent": 22.4,
+      "self_seconds": 0.28
+    },
+    {
+      "calls": 8847900,
+      "cumulative_seconds": 1.18,
+      "function": "csl::optimization::evaluate(csl::optimization::Objective const&, std::span<double const, 18446744073709551615ul>)",
+      "ms_per_call": 0.0,
+      "sampled_self_percent": 8.8,
+      "self_seconds": 0.11
+    }
+  ],
+  "interpretation": "The corner-scoring path dominates this single three-stage fixture; sampling is separate and excluded from Release timings.",
+  "method": "zonotope",
+  "profile_build_flags": "Release -O3 -DNDEBUG -pg; all CSL libraries and driver instrumented",
+  "profile_calls": 10,
+  "profiler": "GNU gprof 2.47",
+  "sample_interval_ms": 10,
+  "sampled_total_seconds": 1.52,
+  "schema": "csl.issue824.matched-minimax-limiter/1",
+  "zonotope_call_inclusive_sample_percent": 99.2
+}

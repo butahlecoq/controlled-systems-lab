@@ -141,6 +141,7 @@ FROZEN_ROUTE_FOLLOW_UP_ISSUES = {
     "issue824-two-points-parallelotope-pilot-v1": 824,
     "issue824-two-points-ellipsoid-minimax-v1": 824,
     "issue824-two-points-ellipsoid-minimax-v2": 824,
+    "issue824-two-points-matched-minimax-v1": 824,
     "mpc04-max-coordinate-replanning-pilot-20261030": 600,
     "mpc08-explicit-nonunique-v1": 604,
     # This report's phase-plane figure is owned and reviewed with MPC-05.
