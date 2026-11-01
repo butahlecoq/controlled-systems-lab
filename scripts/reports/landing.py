@@ -511,6 +511,12 @@ FAMILIES = {
         "The four-stage action catalogues, capture radius, sequential response and zero-sum payoff "
         "signs are explicit analysis adaptations; this is not a continuous-action RL reproduction "
         "or a performance comparison."),
+    "env717-pendulum-terminal": Family(
+        r"env717-pendulum-terminal-[0-9a-f]{20}", "synthesis",
+        "PendulumTerminal finite-action pilot",
+        "A source-attributed local affine finite-action pilot with an independently replayed nonlinear "
+        "trajectory. The report distinguishes the affine-model selection from the best candidate "
+        "under source-map replay."),
     "syn06-verifier": Family(
         r"syn06-verifier-\d{8}-[0-9a-f]{64}", "verification", "Trajectory verification",
         "Re-checks two literal two-stage integrator witnesses against the original saved input "
