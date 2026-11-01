@@ -41,6 +41,10 @@ class Ext02ReportTests(unittest.TestCase):
         scenario["dynamics"]["B_row_major"] = [1, 0, 0, 1]
         with self.assertRaisesRegex(ValueError, "dynamics"):
             collector.validate_scenario(scenario)
+        scenario["dynamics"]["B_row_major"] = [1, 1, 0, 1]
+        scenario["information_pattern"] = "closed-loop feedback"
+        with self.assertRaisesRegex(ValueError, "information_pattern"):
+            collector.validate_scenario(scenario)
 
     def test_saved_renderer_preserves_trials_and_derives_terminal_plot(self) -> None:
         branches = [

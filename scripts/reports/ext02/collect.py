@@ -49,6 +49,7 @@ def validate_scenario(scenario: dict) -> None:
         "schema": "csl.ext02-analytic-scenario/1",
         "id": "ext02-two-state-mixed-analytic-v1",
         "time_domain": "discrete", "times": [0, 1], "state_dimension": 2,
+        "information_pattern": "nominal open-loop; enumerate one discrete catalogue row and solve its continuous subproblem",
         "control_order": ["continuous", "discrete"],
         "continuous_control": {"dimension": 1, "lower": [-1], "upper": [1]},
         "discrete_control": {"dimension": 1, "catalogue": [[-1], [0], [1]],
