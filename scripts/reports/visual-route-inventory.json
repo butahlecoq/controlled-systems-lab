@@ -2431,7 +2431,7 @@
         "planar-example.svg",
         "projections.svg"
       ],
-      "index_sha256": "d48be02e6ce538e3bd6a9e8cf2b24c6ef4d659f60a118ad7602a7469441e3c41",
+      "index_sha256": "5d4745d53cae0aae8081bc03090e23d412345bb4be4746cfbca118d48493fa28",
       "disposition": "deferred: original frozen route-level readability review remains; companion availability is listed separately",
       "follow_up_issue": 824
     },
