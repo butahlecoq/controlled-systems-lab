@@ -29,6 +29,8 @@
 #include <csl/geometry/polyhedral_projection.hpp>
 #include <csl/reachability/nominal_predecessor.hpp>
 #include <csl/reachability/finite_plan_box.hpp>
+#include <csl/reachability/finite_plan_ellipsoid.hpp>
+#include <csl/optimization/finite_action_ellipsoid_minimax.hpp>
 #include <csl/reachability/finite_plan_zonotope.hpp>
 #include <csl/reachability/finite_plan_parallelotope.hpp>
 #include <csl/optimization/finite_action_parallelotope_minimax.hpp>

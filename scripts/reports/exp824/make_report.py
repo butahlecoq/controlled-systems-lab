@@ -136,6 +136,13 @@ def projected_parallelotope(method: dict, stage_index: int,
                        center[ycoord] + sum(sign*g[1] for sign, g in zip(signs, generators))))
     return hull(points)
 
+def projected_ellipsoid(stage: dict, xcoord: int, ycoord: int,
+                        samples: int = 96) -> list[tuple[float, float]]:
+    center, radii = stage["center"], stage["radii"]
+    return [(center[xcoord] + radii[xcoord] * math.cos(2 * math.pi * index / samples),
+             center[ycoord] + radii[ycoord] * math.sin(2 * math.pi * index / samples))
+            for index in range(samples)]
+
 
 def svg_figure(result: dict, check: dict, mpc_figure: dict) -> str:
     geometry = mpc_figure["reachability_geometry"]
@@ -144,6 +151,7 @@ def svg_figure(result: dict, check: dict, mpc_figure: dict) -> str:
     boxes = result["box_method"]["stages"]
     zonotope_tracks = [(result["zonotope_method"]["stages"], "#458588")]
     parallelotope_method = result.get("parallelotope_method")
+    ellipsoid_tracks = []
     trajectories = {
         "Exact finite minimax replay": (check["exact_reference_state_path"], "#076678", ""),
         "Box selected plan replay": (check["selected_plan_state_path"], "#af3a03", "9 5"),
@@ -154,16 +162,22 @@ def svg_figure(result: dict, check: dict, mpc_figure: dict) -> str:
         zonotope_tracks.append((selected_trace, "#b16286"))
         trajectories["Zonotope-selected plan replay"] = (
             selection["selected_replay"]["path"], "#b16286", "2 4")
+    if "ellipsoid_minimax_method" in result:
+        selection = result["ellipsoid_minimax_method"]
+        selected_trace = selection["plan_attempts"][selection["selected_candidate_attempt_index"]]["stages"]
+        ellipsoid_tracks.append((selected_trace, "#d79921"))
+        trajectories["Ellipsoid-selected plan replay"] = (
+            selection["selected_replay"]["path"], "#d79921", "4 3")
     panels = ((0, 1, "Player 1 phase plane", "x1 position (m)", "x2 velocity (m/s)"),
               (2, 3, "Player 2 phase plane", "x3 position (m)", "x4 velocity (m/s)"))
     width, height = 1440, 820
     panel_boxes = ((68, 118, 620, 540), (752, 118, 620, 540))
     out = [f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {width} {height}" role="img" aria-labelledby="title desc">',
-           '<title id="title">TwoPoints stagewise outer boxes, zonotopes, and minimax geometry</title>',
-           '<desc id="desc">Two player phase-plane plots show exact forward sets, finite backward-winning states, intersections, stagewise interval boxes and actual zonotope projections, plus replayed minimax trajectories.</desc>',
+           '<title id="title">TwoPoints stagewise outer boxes, zonotopes, ellipsoids, and minimax geometry</title>',
+           '<desc id="desc">Two player phase-plane plots show exact forward sets, finite backward-winning states, intersections, stagewise interval boxes, zonotope and ellipsoid projections, plus replayed minimax trajectories.</desc>',
            '<rect width="100%" height="100%" fill="#fbf1c7"/>',
            '<text x="720" y="38" text-anchor="middle" font-family="sans-serif" font-size="23" font-weight="700" fill="#282828">TwoPointsOnParallelLines · 3-stage finite adaptation</text>',
-           '<text x="720" y="67" text-anchor="middle" font-family="sans-serif" font-size="14" fill="#504945">Exact finite-game geometry and stagewise 4D outer boxes, zonotopes, and parallelotopes in each player&apos;s phase plane</text>']
+           '<text x="720" y="67" text-anchor="middle" font-family="sans-serif" font-size="14" fill="#504945">Exact finite-game geometry and stagewise 4D outer boxes, zonotopes, parallelotopes and ellipsoids in each player&apos;s phase plane</text>']
 
     for panel_index, ((xcoord, ycoord, title, xlabel, ylabel), (left, top, plot_width, plot_height)) in enumerate(zip(panels, panel_boxes)):
         points_for_bounds = []
@@ -178,6 +192,12 @@ def svg_figure(result: dict, check: dict, mpc_figure: dict) -> str:
         if parallelotope_method:
             for stage_index in range(len(parallelotope_method["stages"]["stages"])):
                 points_for_bounds.extend(projected_parallelotope(parallelotope_method, stage_index, xcoord, ycoord))
+        for stages, _ in ellipsoid_tracks:
+            for stage in stages:
+                points_for_bounds.extend(((stage["center"][xcoord] - stage["radii"][xcoord],
+                                           stage["center"][ycoord] - stage["radii"][ycoord]),
+                                          (stage["center"][xcoord] + stage["radii"][xcoord],
+                                           stage["center"][ycoord] + stage["radii"][ycoord])))
         for path, _, _ in trajectories.values():
             points_for_bounds.extend((state[xcoord], state[ycoord]) for state in path)
         xmin = min(point[0] for point in points_for_bounds)
@@ -244,6 +264,12 @@ def svg_figure(result: dict, check: dict, mpc_figure: dict) -> str:
                     path_string=" ".join(("M" if index==0 else "L")+
                         f" {xy(point)[0]:.2f} {xy(point)[1]:.2f}" for index,point in enumerate(boundary))+" Z"
                     out.append(f'<path d="{path_string}" fill="#d3869b" fill-opacity="0.10" stroke="#8f3f71" stroke-width="2" stroke-dasharray="3 3"/>')
+        for stages, color in ellipsoid_tracks:
+            for stage in stages:
+                boundary = projected_ellipsoid(stage, xcoord, ycoord)
+                path_string = " ".join(("M" if index == 0 else "L") +
+                    f" {xy(point)[0]:.2f} {xy(point)[1]:.2f}" for index, point in enumerate(boundary)) + " Z"
+                out.append(f'<path d="{path_string}" fill="{color}" fill-opacity="0.08" stroke="{color}" stroke-width="2" stroke-dasharray="2 3"/>')
 
         for stage_index, stage in enumerate(boxes):
             p1 = xy((stage["lower"][xcoord], stage["lower"][ycoord]))
@@ -272,6 +298,9 @@ def svg_figure(result: dict, check: dict, mpc_figure: dict) -> str:
         legend.append(("Zonotope-selected plan replay", "#b16286", "line-dash"))
     if parallelotope_method:
         legend.insert(5,("Fixed-frame outer parallelotope", "#8f3f71", "fill"))
+    if "ellipsoid_minimax_method" in result:
+        legend.append(("Ellipsoid-selected plan ellipsoid", "#d79921", "dash"))
+        legend.append(("Ellipsoid-selected plan replay", "#d79921", "line-dash"))
     x_positions = (50, 400, 750, 1100)
     for index, (label, color, kind) in enumerate(legend):
         x = x_positions[index % len(x_positions)]

@@ -109,6 +109,12 @@ SAVED_FIGURES = (
          title="Choose a fixed control by zonotope factor-corner scores",
          alt="Three planar fixed-control candidates show their finite terminal points, outer zonotopes, numerical factor-corner scores, and the selected plan's worst-history replay.",
          summary="A one-stage two-state fixture scores every terminal factor corner for three fixed controls, then replays the selected control over every finite disturbance. All finite terminal points lie in the checked axis-aligned zonotopes; the score remains numerical candidate evidence."),
+    dict(route="issue824-two-points-ellipsoid-minimax-v1", image="ellipsoid-planar-example.svg",
+         page="ellipsoid-planar-example.html", records="result.json",
+         family="Fixed-plan minimax · Ellipsoid candidates",
+         title="Enclose a planar linear image with an ellipsoid",
+         alt="The square [-1,1] by [-1,1] maps under diag(2,1) to a rectangle enclosed by a stagewise outer ellipse.",
+         summary="The minimal two-state example is generated from the saved report record, with exact-rational corner membership checked independently. The separate four-state TwoPoints selection is finite-catalogue and its ellipsoid scores are numerical candidate estimates, not validated objective bounds."),
 )
 
 

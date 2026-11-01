@@ -54,6 +54,8 @@ target_link_libraries(csl_finite_action_zonotope_minimax PUBLIC CSL::finite_acti
 
 csl_add_library(csl_finite_action_parallelotope_minimax STATIC src/optimization/finite_action_parallelotope_minimax.cpp)
 target_link_libraries(csl_finite_action_parallelotope_minimax PUBLIC CSL::finite_action_minimax CSL::finite_plan_parallelotope CSL::finite_action_replay)
+csl_add_library(csl_finite_action_ellipsoid_minimax STATIC src/optimization/finite_action_ellipsoid_minimax.cpp)
+target_link_libraries(csl_finite_action_ellipsoid_minimax PUBLIC CSL::finite_action_minimax CSL::finite_plan_ellipsoid CSL::finite_action_replay)
 
 csl_add_library(csl_finite_causal_minimax STATIC src/optimization/finite_causal_minimax.cpp)
 
