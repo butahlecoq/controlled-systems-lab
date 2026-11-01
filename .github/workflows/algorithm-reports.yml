@@ -84,9 +84,9 @@ jobs:
           cmake -S . -B build/env717-report-ci -DBUILD_TESTING=ON -DCMAKE_BUILD_TYPE=Release \
             -DCSL_ENABLE_HIGHS=OFF -DCSL_ENABLE_QHULL=OFF -DCSL_BUILD_ENV717_REPORT=ON
           cmake --build build/env717-report-ci --config Release \
-            --target csl_env717_simple_control csl_env717_two_points csl_env717_unequal_game csl_env717_max_coordinate csl_env717_air_to_air csl_env717_sphere_game csl_env717_point_on_plane csl_env717_time_sphere csl_env717_time_sphere_minimax csl_env717_two_particle_minimax csl_env717_homicidal_chauffeur csl_env717_multipoint_cost_game csl_env717_broken_triangle --parallel 2
+            --target csl_env717_simple_control csl_env717_two_points csl_env717_unequal_game csl_env717_max_coordinate csl_env717_air_to_air csl_env717_sphere_game csl_env717_point_on_plane csl_env717_time_sphere csl_env717_time_sphere_minimax csl_env717_two_particle_minimax csl_env717_homicidal_chauffeur csl_env717_multipoint_cost_game csl_env717_broken_triangle csl_env717_pendulum_terminal --parallel 2
           ctest --test-dir build/env717-report-ci -C Release --output-on-failure \
-            -R '^env717_(simple_control|two_points|unequal_game|max_coordinate|air_to_air|sphere_game|point_on_plane|time_sphere|time_sphere_minimax|two_particle_minimax|homicidal_chauffeur|multipoint_cost_game|broken_triangle)_smoke$'
+            -R '^env717_(simple_control|two_points|unequal_game|max_coordinate|air_to_air|sphere_game|point_on_plane|time_sphere|time_sphere_minimax|two_particle_minimax|homicidal_chauffeur|multipoint_cost_game|broken_triangle|pendulum_terminal)_smoke$'
       - name: Build and smoke the EXT-04 affine synthesis example
         if: needs.route.outputs.native == 'true'
         shell: bash
@@ -332,6 +332,11 @@ jobs:
             if test -d reports/algorithm-results/env717-broken-triangle-pilot-v1; then
               python scripts/reports/stage_env717_broken_triangle.py \
                 --source reports/algorithm-results/env717-broken-triangle-pilot-v1 \
+                --site build/report-site
+            fi
+            if test -d reports/algorithm-results/env717-pendulum-terminal-pilot-v1; then
+              python scripts/reports/stage_env717_pendulum_terminal.py \
+                --source reports/algorithm-results/env717-pendulum-terminal-pilot-v1 \
                 --site build/report-site
             fi
             if test -f reports/algorithm-results/exp04-publications.json; then
