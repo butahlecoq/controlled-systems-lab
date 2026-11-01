@@ -107,8 +107,9 @@ TEST_CASE("stage projection batch JSON binds source identity and retains 2D geom
 
     auto partial_batch = std::get<ar::StageProjectionBatchCapture>(capture);
     auto& first_success = std::get<ar::StageProjectionSuccess>(partial_batch.records.front().outcome);
-    first_success.materialization_failure = ar::StageProjectionSuccess::MaterializationFailure{
-        "stopped", "converter resource limit", std::nullopt, StopReason::resource_limit};
+    first_success.materialization_outcome = ar::StageProjectionSuccess::MaterializationFailure{
+        ar::StageProjectionSuccess::MaterializationFailure::Kind::stopped,
+        "converter resource limit", std::nullopt, StopReason::resource_limit};
     const auto partial = ar::encode_stage_projection_batch_json(identity,
         partial_batch);
     REQUIRE(std::holds_alternative<std::string>(partial));
@@ -160,7 +161,7 @@ TEST_CASE("stage projection batch records and binds optional 2D materialization 
     materialization.evidence.support = Unestablished{};
     materialization.evidence.assumptions = {"equivalent 2D view"};
     materialization.provider = success.projection.provider;
-    success.materialization = materialization;
+    success.materialization_outcome = materialization;
 
     ar::StageProjectionBatchIdentity identity{{"run"}, "route", "record/1", std::string(64, 'a'),
         request.state_coordinates, {{0, 2}}, {ar::PlotAxis::Kind::stage, {0.0}, {}, {}}, {}};
@@ -173,7 +174,8 @@ TEST_CASE("stage projection batch records and binds optional 2D materialization 
     CHECK(evidence[1]["ideal_output_id"] == projection.id.value);
     CHECK(evidence[1]["provider"]["id"] == success.projection.provider.actual->id.value);
 
-    success.materialization->evidence.reference.inputs = {{"wrong-input"}};
+    std::get<ar::StageProjectionSuccess::Materialization>(success.materialization_outcome)
+        .evidence.reference.inputs = {{"wrong-input"}};
     const auto rejected = ar::encode_stage_projection_batch_json(identity, batch);
     REQUIRE(std::holds_alternative<ar::ArtifactError>(rejected));
     CHECK(std::get<ar::ArtifactError>(rejected).path == "records.outcome.materialization");

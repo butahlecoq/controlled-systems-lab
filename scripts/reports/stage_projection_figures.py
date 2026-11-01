@@ -104,6 +104,19 @@ def _render_pair(batch: dict, pair_index: int, stage_rows: list[dict], trajector
         outcome_label = outcome.get("kind", outcome.get("relation", "geometry"))
         description_parts = [f"{stage_label}: {outcome['status']} / {outcome_label}"]
         if outcome["status"] == "success":
+            materialization_failure = outcome.get("materialization_failure")
+            if materialization_failure:
+                failure_kind = materialization_failure["kind"]
+                ax.set_title(f"{stage_label} · V MATERIALIZATION {failure_kind.upper()}",
+                             color=FOREGROUND, fontsize=style["font_size"] - 1)
+                details = materialization_failure["explanation"]
+                if materialization_failure.get("stop_reason"):
+                    details += f" ({materialization_failure['stop_reason']})"
+                ax.text(.02, .98, f"V conversion {failure_kind}: {details}",
+                        transform=ax.transAxes, ha="left", va="top", wrap=True,
+                        color=FOREGROUND, fontsize=style["font_size"] - 2,
+                        bbox={"facecolor": BACKGROUND, "edgecolor": MUTED, "alpha": .9})
+                description_parts.append(f"V materialization {failure_kind}: {details}")
             evidence_scopes = ", ".join(item["scope"] for item in outcome["evidence"])
             provider = outcome["provider"]
             description_parts.append(

@@ -222,6 +222,13 @@ class StageProjectionBatchTests(unittest.TestCase):
         self.assertEqual(outcome["materialization_failure"]["kind"], "stopped")
         self.assertEqual(outcome["materialization_failure"]["stop_reason"], "resource_limit")
 
+    def test_rejects_empty_success_without_materialization_failure(self):
+        document = fixture()
+        document["records"][0]["outcome"]["components"] = []
+        reseal(document)
+        with self.assertRaisesRegex(data.ProjectionBatchError, "materialization_failure"):
+            self.read(document)
+
 
 if __name__ == "__main__":
     unittest.main()
