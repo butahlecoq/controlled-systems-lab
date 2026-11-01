@@ -59,6 +59,41 @@ class ReportSourceIdentityTests(unittest.TestCase):
             self.assertFalse(report_source_identity.source_hashes_match_commit(
                 root, commit, {"source-link.py": target_text_hash}))
 
+    def test_accepts_exact_checkout_hashes_when_captured_commit_is_unavailable(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            subprocess.run(["git", "init", "--quiet", str(root)], check=True)
+            source = root / "source.py"
+            source.write_text("value = 1\n", encoding="utf-8")
+            expected = {"source.py": hashlib.sha256(source.read_bytes()).hexdigest()}
+            missing_commit = "f" * 40
+            self.assertFalse(report_source_identity.source_hashes_match_commit(
+                root, missing_commit, expected))
+            self.assertTrue(report_source_identity.source_hashes_match_commit_or_checkout(
+                root, missing_commit, expected))
+
+    def test_unavailable_commit_fallback_rejects_changed_file(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            subprocess.run(["git", "init", "--quiet", str(root)], check=True)
+            source = root / "source.py"
+            source.write_text("value = 1\n", encoding="utf-8")
+            expected = {"source.py": hashlib.sha256(source.read_bytes()).hexdigest()}
+            source.write_text("value = 2\n", encoding="utf-8")
+            self.assertFalse(report_source_identity.source_hashes_match_commit_or_checkout(
+                root, "f" * 40, expected))
+
+    def test_unavailable_commit_fallback_rejects_symlink(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            subprocess.run(["git", "init", "--quiet", str(root)], check=True)
+            source = root / "source.py"
+            source.write_text("value = 1\n", encoding="utf-8")
+            (root / "source-link.py").symlink_to("source.py")
+            expected = {"source-link.py": hashlib.sha256(source.read_bytes()).hexdigest()}
+            self.assertFalse(report_source_identity.source_hashes_match_commit_or_checkout(
+                root, "f" * 40, expected))
+
 
 if __name__ == "__main__":
     unittest.main()

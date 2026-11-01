@@ -60,7 +60,7 @@ def verified_bundle(source: Path) -> dict[str, bytes]:
         raise ValueError("issue #824 matched minimax evidence is incomplete")
     if check_matched_minimax.check(result) != check:
         raise ValueError("issue #824 matched minimax rational checker result differs")
-    if not report_source_identity.source_hashes_match_commit(
+    if not report_source_identity.source_hashes_match_commit_or_checkout(
             ROOT, capture.get("source_commit", ""), capture.get("source_files_sha256", {})):
         raise ValueError("issue #824 matched minimax source differs from its captured commit")
     for key, figure in (("ellipsoid", "geometry-reference-ellipsoid.svg"),
