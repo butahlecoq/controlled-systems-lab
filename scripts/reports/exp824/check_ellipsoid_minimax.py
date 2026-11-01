@@ -13,6 +13,7 @@ import tempfile
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "mpc05"))
 import reference as two_points_reference
 import check_two_points_box
+import check_zonotope_minimax
 
 SCALE = two_points_reference.SCALE
 ACTION_CODES = two_points_reference.ACTION_CODES
@@ -30,23 +31,6 @@ def exact_states(action_indices: tuple[int, ...]) -> list[set[tuple[int, ...]]]:
                        for state in states[-1] for disturbance in DISTURBANCES}
         states.append(next_states)
     return states
-
-
-def trace_stage_contains_coordinates(stage: dict, states: set[tuple[int, ...]], scale: int) -> None:
-    center = [Fraction.from_float(value) for value in stage["center"]]
-    matrix = stage["generators"]
-    generators = matrix["cols"]
-    if (len(center) != matrix["rows"] or len(stage["factors"]) != generators or
-            len(matrix["values"]) != matrix["rows"] * generators):
-        raise ValueError("zonotope stage dimensions differ")
-    values = [Fraction.from_float(value) for value in matrix["values"]]
-    for state in states:
-        for row, coordinate in enumerate(state):
-            radius = sum((abs(values[row * generators + column])
-                          for column in range(generators)), Fraction(0))
-            point = Fraction(coordinate, scale)
-            if not center[row] - radius <= point <= center[row] + radius:
-                raise ValueError("an exact state coordinate falls outside its zonotope coordinate bounds")
 
 
 def factor_corner_score(stage: dict, objective) -> tuple[float, int]:
@@ -143,6 +127,7 @@ def checked_planar_inclusion(example: dict) -> None:
 
 
 def main(path: Path) -> dict:
+    check_zonotope_minimax.check_membership_fixtures()
     result = json.loads(path.read_text(encoding="utf-8"))
     if result.get("schema") != "csl.issue824-two-points-ellipsoid-minimax/1":
         raise ValueError("unexpected issue824 ellipsoid minimax schema")
@@ -175,7 +160,7 @@ def main(path: Path) -> dict:
         for stage_index, (stage, states) in enumerate(zip(stages, state_layers)):
             if stage["generators"]["rows"] != 4:
                 raise ValueError("TwoPoints candidate changed the four-state dimension")
-            trace_stage_contains_coordinates(stage, states, SCALE)
+            check_zonotope_minimax.trace_stage_contains_exact_zonotope(stage, states, SCALE)
         terminal = stages[-1]
         candidate, corner_count = factor_corner_score(terminal, lambda point: (point[0] - point[2]) ** 2)
         if (attempt["terminal_generators"] != terminal["generators"]["cols"] or
@@ -335,7 +320,7 @@ def main(path: Path) -> dict:
         "candidate_search": "all 27 plans received a complete numerical factor-corner score",
         "candidate_score_evidence": "independently recomputed on every stored terminal factor corner; not a validated objective bound",
         "selected_plan_replay": "exact rational transition and every disturbance history checked",
-        "stage_zonotope_relation": "all exact state coordinates checked against dyadic center +/- sum(abs(generators)); not full four-dimensional membership",
+        "stage_zonotope_relation": "all exact finite-history states checked against every exact facet inequality in each stored dyadic zonotope, including its affine span",
         "stage_ellipsoid_relation": "Fraction-based full four-dimensional membership for every exact finite-history state at every stage and plan",
         "planar_zonotope_inclusion": "all finite terminal points checked inside axis-aligned zonotopes for all three plans; complete finite-set inclusion in this 2D fixture",
         "planar_exact_minimax_value": planar["exact_finite_minimax_value"],

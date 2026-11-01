@@ -49,9 +49,26 @@ class Issue824ZonotopeMinimaxPublicationTests(unittest.TestCase):
             with self.assertRaisesRegex(ValueError, "checksum mismatch"):
                 publisher.verified_bundle(changed)
 
+    def test_v2_bundle_records_exact_full_zonotope_membership(self):
+        source = ROOT / "reports/algorithm-results/issue824-two-points-zonotope-minimax-v2"
+        files = publisher.verified_bundle(source)
+        check = json.loads(files["check.json"])
+        self.assertIn("every exact facet inequality", check["stage_zonotope_relation"])
+        with tempfile.TemporaryDirectory() as temporary:
+            site = Path(temporary)
+            self.assertEqual(publisher.stage(source, site), source.name)
+            self.assertEqual({item.name for item in (site / source.name).iterdir()}, set(publisher.FILES))
+
     def test_gallery_card_links_the_live_minimax_bundle(self):
         entry = next(row for row in visual_examples.SAVED_FIGURES
                      if row.get("route") == publisher.ROUTE)
+        self.assertEqual(entry["records"], "result.json")
+        self.assertEqual(entry["page"], "planar-example.html")
+        self.assertEqual(entry["image"], "planar-example.svg")
+
+    def test_v2_gallery_card_links_the_exact_membership_report(self):
+        entry = next(row for row in visual_examples.SAVED_FIGURES
+                     if row.get("route") == "issue824-two-points-zonotope-minimax-v2")
         self.assertEqual(entry["records"], "result.json")
         self.assertEqual(entry["page"], "planar-example.html")
         self.assertEqual(entry["image"], "planar-example.svg")

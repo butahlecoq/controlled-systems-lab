@@ -2533,6 +2533,18 @@
       "follow_up_issue": 824
     },
     {
+      "route": "issue824-two-points-ellipsoid-minimax-v2",
+      "source_bundle": "issue824-two-points-ellipsoid-minimax-v2",
+      "assets": [
+        "ellipsoid-planar-example.svg",
+        "planar-example.svg",
+        "projections.svg"
+      ],
+      "index_sha256": "e92b4f8476e5dceb69e816df244016882da7e01f328c8c3599356a434a2a3d0d",
+      "disposition": "deferred: original frozen route-level readability review remains; companion availability is listed separately",
+      "follow_up_issue": 824
+    },
+    {
       "route": "issue824-two-points-nominal-v1",
       "source_bundle": "issue824-two-points-nominal-v1",
       "assets": [
@@ -2561,6 +2573,17 @@
         "projections.svg"
       ],
       "index_sha256": "f0b5c5b9961aa1099da4ecf410a8e2e5198cd5c8bb26ccf55bc24f5d63deec25",
+      "disposition": "deferred: original frozen route-level readability review remains; companion availability is listed separately",
+      "follow_up_issue": 824
+    },
+    {
+      "route": "issue824-two-points-zonotope-minimax-v2",
+      "source_bundle": "issue824-two-points-zonotope-minimax-v2",
+      "assets": [
+        "planar-example.svg",
+        "projections.svg"
+      ],
+      "index_sha256": "9ce5cd54fa3948f9199161f56c0db1b918c10aa60a82dd6c0403025e43f08112",
       "disposition": "deferred: original frozen route-level readability review remains; companion availability is listed separately",
       "follow_up_issue": 824
     },
