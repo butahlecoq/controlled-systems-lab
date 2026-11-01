@@ -20,6 +20,9 @@ MIGRATION_ISSUES = {
     "control-strategy-and-witness": 686,
     "historical-and-benchmarks": 687,
 }
+FOLLOW_UP_ISSUE_OVERRIDES = {
+    "scripts/reports/exp824/make_ellipsoid_minimax_report.py": 824,
+}
 COMPOSED_SAVED_ROUTES = {
     "scripts/reports/ext03_transform/report.py",
     "scripts/reports/ext04/continuous_report.py",
@@ -131,6 +134,7 @@ FROZEN_REVIEWED_ROUTES = {
 FROZEN_ROUTE_FOLLOW_UP_ISSUES = {
     "issue824-two-points-zonotope-minimax-v1": 824,
     "issue824-two-points-parallelotope-pilot-v1": 824,
+    "issue824-two-points-ellipsoid-minimax-v1": 824,
     "mpc04-max-coordinate-replanning-pilot-20261030": 600,
     "mpc08-explicit-nonunique-v1": 604,
     # This report's phase-plane figure is owned and reviewed with MPC-05.
@@ -249,7 +253,8 @@ def source_inventory(root: Path) -> list[dict]:
                             "asset_name_literals": assets, "disposition": disposition,
                             **({"role_and_disposition_reason": VIZ10_ROLE_REASONS[relative]}
                                if relative in VIZ10_ROLE_REASONS else {}),
-                            **({"follow_up_issue": migration_issue(relative)}
+                            **({"follow_up_issue": FOLLOW_UP_ISSUE_OVERRIDES.get(
+                                    relative, migration_issue(relative))}
                                if disposition == "deferred-family-specific-migration" else {})})
     missing = set(reviewed) - found
     if missing:

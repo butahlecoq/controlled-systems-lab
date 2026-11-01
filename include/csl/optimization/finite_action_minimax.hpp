@@ -9,6 +9,7 @@
 
 namespace csl::optimization {
 
+// Complete means every declared action plan received a usable candidate score.
 enum class CandidateSearchCoverage { complete, incomplete };
 
 // Stage-invariant ordered action catalogue; indices distinguish duplicate rows.
