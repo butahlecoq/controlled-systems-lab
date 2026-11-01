@@ -92,7 +92,7 @@ def main() -> None:
     cmake = cache_value(cache, "CMAKE_COMMAND")
     ninja = cache_value(cache, "CMAKE_MAKE_PROGRAM")
     cmake_version = subprocess.check_output([cmake, "--version"], text=True).splitlines()[0]
-    ninja_version = subprocess.check_output([str(Path(ninja).resolve(strict=True)), "--version"], text=True).strip()
+    ninja_version = subprocess.check_output([ninja, "--version"], text=True).strip()
     load_before = Path("/proc/loadavg").read_text().split()[:3] if Path("/proc/loadavg").is_file() else None
     capture = process_capture([str(executable), "--measure", "7"])
     (output / "raw.jsonl").write_bytes(capture["stdout"])
@@ -139,7 +139,7 @@ def main() -> None:
                    "process_rss_scope": "sampled whole report process every 2 ms; includes process startup and all eight trials; not an allocation peak guarantee"}
     build = {"cache_sha256": digest(BUILD_CACHE.read_bytes()),
              "compiler_path": compiler,
-             "cmake_path": cmake, "ninja_path": str(Path(ninja).resolve(strict=True)),
+             "cmake_path": cmake, "ninja_path": ninja,
              "highs_enabled": cache_value(cache, "CSL_ENABLE_HIGHS"),
              "qhull_enabled": cache_value(cache, "CSL_ENABLE_QHULL"),
              "report_enabled": cache_value(cache, "CSL_BUILD_EXT02_REPORT")}
