@@ -4,6 +4,7 @@
 #include <csl/synthesis/finite_mixed_branch.hpp>
 
 #include <limits>
+#include <string>
 
 using namespace csl;
 using namespace csl::synthesis;
@@ -64,6 +65,27 @@ numeric::VectorView vector(Vector value) {
     auto result = numeric::snapshot_vector(value);
     REQUIRE(std::holds_alternative<numeric::VectorView>(result));
     return std::get<numeric::VectorView>(std::move(result));
+}
+
+Problem one_step_tied_mixed_problem() {
+    return {{"mixed-tied-families"},
+        std::make_shared<const SystemModel>(SystemModel{{{1, 2, 0}, TimeDomain::discrete,
+            std::vector<LinearStage>{
+                {{1, 1, {0}}, {1, 2, {0, 1}}, {1, 0, {}}, {0}}}}, {}}),
+        {0, 1}, KnownInitial{{0}},
+        MixedDomain{ContinuousDomain{{UniversalSet{1}}},
+                    FiniteDomain{1, {{-1}, {0}, {1}, {0}}}},
+        {UniversalSet{1}, UniversalSet{1}}, {}, {},
+        InformationPattern::nominal_open_loop,
+        QuadraticTerminal{{1, 1, {2}}, {0}, 0}};
+}
+
+sets::SetData analytic_branch_family(std::string id, double terminal_state) {
+    auto result = sets::make_h({SetId{std::move(id)}, 3, {}},
+        {matrix({0, 3, {}}), vector({}),
+         matrix({2, 3, {1, 0, 0, 0, 1, 0}}), vector({0, terminal_state})});
+    REQUIRE(std::holds_alternative<sets::SetData>(result));
+    return std::get<sets::SetData>(std::move(result));
 }
 }
 
@@ -330,6 +352,81 @@ TEST_CASE("mixed branch portfolio rejects a relation in the wrong branch coordin
             {branch(source, {0, 1}), 1.0, relation("wrong-dimension", 4)}}, true, 0.0);
     REQUIRE(std::holds_alternative<Diagnostics>(result));
     CHECK(std::get<Diagnostics>(result).front().field == "finite_mixed_branch.relation");
+}
+
+TEST_CASE("independent one-step oracle retains every tied catalogue branch and its continuous family") {
+    const auto resolved = problem::resolve(one_step_tied_mixed_problem(),
+        {problem::UncertaintyStructure::stage_product_uncoupled, {}, {}});
+    REQUIRE(std::holds_alternative<problem::ResolvedProblem>(resolved));
+    const auto& source = std::get<problem::ResolvedProblem>(resolved);
+    const auto description = source.description();
+    const auto& source_mixed = std::get<MixedDomain>(description->controls);
+
+    auto branches = cursor(source);
+    const auto page = branches.take_prefix(8);
+    REQUIRE(page.entries.size() == 4);
+    CHECK(page.complete);
+
+    std::vector<FiniteMixedBranchEvaluation> evaluations;
+    std::vector<std::size_t> oracle_minimizers;
+    double oracle_minimum = std::numeric_limits<double>::infinity();
+    for (std::size_t row = 0; row < page.entries.size(); ++row) {
+        REQUIRE(std::holds_alternative<FiniteMixedBranchProblem>(page.entries[row]));
+        const auto& prepared = std::get<FiniteMixedBranchProblem>(page.entries[row]);
+        const FiniteActionHistory expected_history{{row}};
+        CHECK(prepared.history == expected_history);
+
+        // Independent scalar oracle: x1 = d because A = B_cont = 0, B_disc = 1;
+        // the terminal cost is x1^2, and every continuous control is therefore optimal.
+        const double discrete = source_mixed.discrete.catalogue[row][0];
+        const double terminal_state = discrete;
+        const double objective = terminal_state * terminal_state;
+        if (objective < oracle_minimum) {
+            oracle_minimum = objective;
+            oracle_minimizers.clear();
+        }
+        if (objective == oracle_minimum) oracle_minimizers.push_back(row);
+
+        evaluations.push_back({prepared, objective,
+            analytic_branch_family("oracle-history-" + std::to_string(row), terminal_state)});
+    }
+
+    const auto selected = select_finite_mixed_branch_portfolio(
+        std::move(evaluations), page.complete, 0.0);
+    REQUIRE(std::holds_alternative<FiniteMixedBranchPortfolio>(selected));
+    const auto& portfolio = std::get<FiniteMixedBranchPortfolio>(selected);
+    CHECK(portfolio.complete);
+    REQUIRE(portfolio.optimum.has_value());
+    CHECK(*portfolio.optimum == oracle_minimum);
+    CHECK(portfolio.optimal_evaluation_indices == oracle_minimizers);
+    CHECK(portfolio.optimal_evaluation_indices == std::vector<std::size_t>{1, 3});
+    CHECK(portfolio.all_selected_relations_present);
+
+    for (const auto index : oracle_minimizers) {
+        const auto& evaluation = portfolio.evaluations[index];
+        const auto& selected_branch = std::get<FiniteMixedBranchProblem>(evaluation.branch);
+        CHECK(selected_branch.history == FiniteActionHistory{{index}});
+        REQUIRE(evaluation.continuous_relation.has_value());
+        CHECK(evaluation.continuous_relation->metadata()->set.dimension == 3);
+
+        const auto lifted = lift_finite_mixed_branch_relation(
+            selected_branch, *evaluation.continuous_relation);
+        REQUIRE(std::holds_alternative<sets::SetData>(lifted));
+        const auto& source_relation = std::get<sets::SetData>(lifted);
+        CHECK(source_relation.metadata()->set.dimension == 4);
+        const auto h = std::get<sets::HRepresentation>(source_relation.representation());
+        REQUIRE(h.inequalities.rows() == 0);
+        REQUIRE(h.equalities.rows() == 3);
+        CHECK(h.equalities(0, 0) == 1);
+        CHECK(h.equalities(1, 1) == 1);
+        CHECK(h.equalities(2, 3) == 1);
+        CHECK(h.equalities(0, 2) == 0);
+        CHECK(h.equalities(1, 2) == 0);
+        CHECK(h.equalities(2, 2) == 0);
+        CHECK(h.equality_values[0] == 0);
+        CHECK(h.equality_values[1] == 0);
+        CHECK(h.equality_values[2] == 0);
+    }
 }
 
 TEST_CASE("mixed branch portfolio keeps preparation refusals and incomplete enumeration explicit") {
