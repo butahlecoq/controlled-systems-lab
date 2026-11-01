@@ -133,6 +133,32 @@ continuous-family oracle coverage and resource-scale evidence remain open
 EXT-07 acceptance items. Main-only Pages
 publication and live URL/hash verification remain pending.
 
+## EXT-02 finite/mixed branch portfolio report
+
+The saved [EXT-02 analytic portfolio bundle](../../reports/algorithm-results/ext02-two-state-mixed-v1/)
+uses source commit `a17a1a9a3f9c6d579c96788361456ab48e727db1` and scenario SHA-256
+`533ef62feaf01aef883cbeb9b758f7fa225df4cd3b2ba453ef43f141dbc30145`. Its
+one-stage, two-state nominal open-loop fixture enumerates three discrete-control
+rows and solves one bounded continuous control for each. All three complete
+branch families attain terminal objective zero at `(x1,x2)=(0,-1),(0,0),(0,1)`;
+all seven measured calls match that analytic answer. The API interval median is
+7,909,171 ns (range 7,805,176–8,105,985 ns). It includes the portfolio solve,
+branch solves, family verification and selection, but excludes process startup,
+registry/scenario construction, JSON serialization and rendering. The saved
+rows retain 63 H-relation rows and 411 numeric scalars (3,288 coefficient/RHS
+bytes); this structural count excludes object overhead, transients, solver
+workspace and allocator slack.
+
+The Release capture used GCC 16.2.1, CMake 3.31.6 and Ninja 1.13.2 on an
+8-logical-CPU Ryzen 5 3550H host. Load averages before capture were 0.09, 2.68
+and 4.31 (1/5/15 minutes). Sampled whole-process RSS reached 10,055,680 bytes;
+this 2 ms sampling is not a peak-memory guarantee. `perf` was unavailable, so
+the source-mapped limiter profile is missing. These observations describe one
+analytic fixture only; they are not a comparison, performance winner, hard
+memory bound, or scalability claim. The custom publication catalog stages the
+bundle and its figure in the Pages workflow; deployment and live-byte
+verification remain publication gates.
+
 ## OPT-07 ordered hull membership report
 
 The reviewed native bundle

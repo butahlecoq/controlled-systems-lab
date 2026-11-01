@@ -1,0 +1,358 @@
+{
+  "build": {
+    "cache_sha256": "1a72635e60696ff7db08ec82a776f6adb52419ae06d6a5086671b8a4cded2b59",
+    "cmake_path": "/home/butahlecoq/.local/share/mise/installs/cmake/3.31.6/cmake-3.31.6-linux-x86_64/bin/cmake",
+    "compiler_path": "/usr/bin/c++",
+    "highs_enabled": "TRUE",
+    "ninja_path": "/home/butahlecoq/.local/share/mise/shims/ninja",
+    "qhull_enabled": "ON",
+    "report_enabled": "ON"
+  },
+  "environment": {
+    "build_type": "Release",
+    "cmake": "cmake version 3.31.6",
+    "compiler": "c++ (GCC) 16.2.1 20260810",
+    "cpu_model": "AMD Ryzen 5 3550H with Radeon Vega Mobile Gfx",
+    "load_average_before_capture": [
+      "0.09",
+      "2.68",
+      "4.31"
+    ],
+    "logical_cpu_count": 8,
+    "native_threads": 1,
+    "ninja": "1.13.2",
+    "os": "Linux-7.2.8-9-omarchy-x86_64-with-glibc2.44",
+    "process_rss_scope": "sampled whole report process every 2 ms; includes process startup and all eight trials; not an allocation peak guarantee",
+    "python": "3.14.8"
+  },
+  "executable_sha256": "592efd4a999fcf49aef8b7f38db8bec54f23c51338409c48ceecdc273961fe8f",
+  "process": {
+    "max_sampled_process_rss_bytes": 10055680,
+    "process_wall_ns": 67265875,
+    "return_code": 0,
+    "rss_samples_bytes": [
+      1908736,
+      9715712,
+      9965568,
+      10014720,
+      10014720,
+      10027008,
+      10027008,
+      10031104,
+      10043392,
+      10051584,
+      10051584,
+      10051584,
+      10051584,
+      10051584,
+      10051584,
+      10051584,
+      10051584,
+      10051584,
+      10051584,
+      10051584,
+      10051584,
+      10051584,
+      10051584,
+      10051584,
+      10051584,
+      10051584,
+      10055680,
+      10055680,
+      10055680,
+      10055680
+    ]
+  },
+  "scenario": "benchmarks/scenarios/ext02-analytic-two-state-mixed-v1.json",
+  "scenario_sha256": "533ef62feaf01aef883cbeb9b758f7fa225df4cd3b2ba453ef43f141dbc30145",
+  "schema": "csl.ext02-portfolio-record/1",
+  "source_commit": "a17a1a9a3f9c6d579c96788361456ab48e727db1",
+  "summary": {
+    "catalogue_size": 3,
+    "failures": 0,
+    "history_count": 3,
+    "horizon": 1,
+    "maximum_elapsed_ns": 8105985,
+    "median_elapsed_ns": 7909171,
+    "minimum_elapsed_ns": 7805176,
+    "retained_numeric_bytes": 3288,
+    "retained_relation_rows": 63,
+    "retained_relation_scalars": 411,
+    "timed_interval": "one solve_finite_mixed_branch_portfolio API call; excludes process startup, registry/scenario construction, JSON serialization and rendering",
+    "trials": 7
+  },
+  "trials": [
+    {
+      "branches": [
+        {
+          "catalogue_index": 0,
+          "complete_family_verified": true,
+          "discrete_value": -1,
+          "objective": 0
+        },
+        {
+          "catalogue_index": 1,
+          "complete_family_verified": true,
+          "discrete_value": 0,
+          "objective": 0
+        },
+        {
+          "catalogue_index": 2,
+          "complete_family_verified": true,
+          "discrete_value": 1,
+          "objective": 0
+        }
+      ],
+      "catalogue_size": 3,
+      "elapsed_ns": 9103257,
+      "history_count": 3,
+      "horizon": 1,
+      "optimum": 0,
+      "retained_numeric_bytes": 3288,
+      "retained_relation_rows": 63,
+      "retained_relation_scalars": 411,
+      "schema": "csl.ext02-portfolio-trial/1",
+      "status": "complete",
+      "trial": 0,
+      "warmup": true
+    },
+    {
+      "branches": [
+        {
+          "catalogue_index": 0,
+          "complete_family_verified": true,
+          "discrete_value": -1,
+          "objective": 0
+        },
+        {
+          "catalogue_index": 1,
+          "complete_family_verified": true,
+          "discrete_value": 0,
+          "objective": 0
+        },
+        {
+          "catalogue_index": 2,
+          "complete_family_verified": true,
+          "discrete_value": 1,
+          "objective": 0
+        }
+      ],
+      "catalogue_size": 3,
+      "elapsed_ns": 7830878,
+      "history_count": 3,
+      "horizon": 1,
+      "optimum": 0,
+      "retained_numeric_bytes": 3288,
+      "retained_relation_rows": 63,
+      "retained_relation_scalars": 411,
+      "schema": "csl.ext02-portfolio-trial/1",
+      "status": "complete",
+      "trial": 1,
+      "warmup": false
+    },
+    {
+      "branches": [
+        {
+          "catalogue_index": 0,
+          "complete_family_verified": true,
+          "discrete_value": -1,
+          "objective": 0
+        },
+        {
+          "catalogue_index": 1,
+          "complete_family_verified": true,
+          "discrete_value": 0,
+          "objective": 0
+        },
+        {
+          "catalogue_index": 2,
+          "complete_family_verified": true,
+          "discrete_value": 1,
+          "objective": 0
+        }
+      ],
+      "catalogue_size": 3,
+      "elapsed_ns": 7991305,
+      "history_count": 3,
+      "horizon": 1,
+      "optimum": 0,
+      "retained_numeric_bytes": 3288,
+      "retained_relation_rows": 63,
+      "retained_relation_scalars": 411,
+      "schema": "csl.ext02-portfolio-trial/1",
+      "status": "complete",
+      "trial": 2,
+      "warmup": false
+    },
+    {
+      "branches": [
+        {
+          "catalogue_index": 0,
+          "complete_family_verified": true,
+          "discrete_value": -1,
+          "objective": 0
+        },
+        {
+          "catalogue_index": 1,
+          "complete_family_verified": true,
+          "discrete_value": 0,
+          "objective": 0
+        },
+        {
+          "catalogue_index": 2,
+          "complete_family_verified": true,
+          "discrete_value": 1,
+          "objective": 0
+        }
+      ],
+      "catalogue_size": 3,
+      "elapsed_ns": 8105985,
+      "history_count": 3,
+      "horizon": 1,
+      "optimum": 0,
+      "retained_numeric_bytes": 3288,
+      "retained_relation_rows": 63,
+      "retained_relation_scalars": 411,
+      "schema": "csl.ext02-portfolio-trial/1",
+      "status": "complete",
+      "trial": 3,
+      "warmup": false
+    },
+    {
+      "branches": [
+        {
+          "catalogue_index": 0,
+          "complete_family_verified": true,
+          "discrete_value": -1,
+          "objective": 0
+        },
+        {
+          "catalogue_index": 1,
+          "complete_family_verified": true,
+          "discrete_value": 0,
+          "objective": 0
+        },
+        {
+          "catalogue_index": 2,
+          "complete_family_verified": true,
+          "discrete_value": 1,
+          "objective": 0
+        }
+      ],
+      "catalogue_size": 3,
+      "elapsed_ns": 7909171,
+      "history_count": 3,
+      "horizon": 1,
+      "optimum": 0,
+      "retained_numeric_bytes": 3288,
+      "retained_relation_rows": 63,
+      "retained_relation_scalars": 411,
+      "schema": "csl.ext02-portfolio-trial/1",
+      "status": "complete",
+      "trial": 4,
+      "warmup": false
+    },
+    {
+      "branches": [
+        {
+          "catalogue_index": 0,
+          "complete_family_verified": true,
+          "discrete_value": -1,
+          "objective": 0
+        },
+        {
+          "catalogue_index": 1,
+          "complete_family_verified": true,
+          "discrete_value": 0,
+          "objective": 0
+        },
+        {
+          "catalogue_index": 2,
+          "complete_family_verified": true,
+          "discrete_value": 1,
+          "objective": 0
+        }
+      ],
+      "catalogue_size": 3,
+      "elapsed_ns": 7805176,
+      "history_count": 3,
+      "horizon": 1,
+      "optimum": 0,
+      "retained_numeric_bytes": 3288,
+      "retained_relation_rows": 63,
+      "retained_relation_scalars": 411,
+      "schema": "csl.ext02-portfolio-trial/1",
+      "status": "complete",
+      "trial": 5,
+      "warmup": false
+    },
+    {
+      "branches": [
+        {
+          "catalogue_index": 0,
+          "complete_family_verified": true,
+          "discrete_value": -1,
+          "objective": 0
+        },
+        {
+          "catalogue_index": 1,
+          "complete_family_verified": true,
+          "discrete_value": 0,
+          "objective": 0
+        },
+        {
+          "catalogue_index": 2,
+          "complete_family_verified": true,
+          "discrete_value": 1,
+          "objective": 0
+        }
+      ],
+      "catalogue_size": 3,
+      "elapsed_ns": 7866637,
+      "history_count": 3,
+      "horizon": 1,
+      "optimum": 0,
+      "retained_numeric_bytes": 3288,
+      "retained_relation_rows": 63,
+      "retained_relation_scalars": 411,
+      "schema": "csl.ext02-portfolio-trial/1",
+      "status": "complete",
+      "trial": 6,
+      "warmup": false
+    },
+    {
+      "branches": [
+        {
+          "catalogue_index": 0,
+          "complete_family_verified": true,
+          "discrete_value": -1,
+          "objective": 0
+        },
+        {
+          "catalogue_index": 1,
+          "complete_family_verified": true,
+          "discrete_value": 0,
+          "objective": 0
+        },
+        {
+          "catalogue_index": 2,
+          "complete_family_verified": true,
+          "discrete_value": 1,
+          "objective": 0
+        }
+      ],
+      "catalogue_size": 3,
+      "elapsed_ns": 8038029,
+      "history_count": 3,
+      "horizon": 1,
+      "optimum": 0,
+      "retained_numeric_bytes": 3288,
+      "retained_relation_rows": 63,
+      "retained_relation_scalars": 411,
+      "schema": "csl.ext02-portfolio-trial/1",
+      "status": "complete",
+      "trial": 7,
+      "warmup": false
+    }
+  ]
+}

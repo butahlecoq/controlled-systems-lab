@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>EXT-02 finite/mixed branch portfolio</title>
+<style>body{font:16px/1.5 system-ui,sans-serif;max-width:960px;margin:2rem auto;padding:0 1rem;color:#18212b}table{border-collapse:collapse}td,th{border:1px solid #b7c3cc;padding:.4rem .7rem;text-align:left}figure{margin:2rem 0}figure img{max-width:100%;height:auto}.limits{background:#f3f6f8;padding:1rem}</style></head>
+<body><h1>EXT-02 finite/mixed-control branch portfolio</h1>
+<p>This versioned report runs a one-stage nominal open-loop problem with a two-dimensional state, one bounded continuous control and a three-row finite control catalogue. Every catalogue-index history is solved independently through the registered reach-back strategy. The verified complete branch families all attain terminal objective zero.</p>
+<figure><img src="figure.svg" alt="Terminal state points for the three optimal catalogue branches in the terminal x1-x2 plane"><figcaption>Figure generated from the saved branch records. Each point is a terminal state in one branch’s optimal family.</figcaption></figure>
+<h2>Recorded solve profile</h2><table><tbody>
+<tr><th>Measured calls</th><td>7</td></tr>
+<tr><th>Median API interval</th><td>7909171 ns</td></tr>
+<tr><th>Range</th><td>7805176–8105985 ns</td></tr>
+<tr><th>Horizon / catalogue / solved histories</th><td>1 / 3 / 3</td></tr>
+<tr><th>Retained relation rows</th><td>63</td></tr>
+<tr><th>Retained numeric scalars / bytes</th><td>411 / 3288 bytes</td></tr>
+<tr><th>Failures</th><td>0</td></tr></tbody></table>
+<h2>Branch results</h2><table><thead><tr><th>Catalogue index</th><th>Discrete value</th><th>Objective</th><th>Complete-family evidence</th></tr></thead><tbody>
+<tr><td>0</td><td>-1</td><td>0</td><td>registry-verified complete family</td></tr><tr><td>1</td><td>0</td><td>0</td><td>registry-verified complete family</td></tr><tr><td>2</td><td>1</td><td>0</td><td>registry-verified complete family</td></tr>
+</tbody></table>
+<h2>Measurement scope</h2><p>one solve_finite_mixed_branch_portfolio API call; excludes process startup, registry/scenario construction, JSON serialization and rendering. Process RSS is sampled separately and includes process startup, warmup and the measured calls; its sampling interval and limitation are recorded in <code>measurement.json</code>.</p>
+<div class="limits"><h2>Assurance and limits</h2><p>Binary64 numerical assurance. The branch completeness evidence is the registered strategy’s verified complete-family result for this admitted profile; it is not validated arithmetic. The single one-stage fixture describes only this workload. It is not a comparative benchmark, a speedup claim, a hard memory limit, or evidence of asymptotic scalability. Numeric-byte accounting covers H-matrix coefficients and right-hand sides only, excluding object and vector overhead, solver workspace, transient branch materialization and allocator slack.</p></div>
+<h2>Inputs and reproduction</h2><p>Scenario: <a href="https://github.com/butahlecoq/controlled-systems-lab/blob/a17a1a9a3f9c6d579c96788361456ab48e727db1/benchmarks/scenarios/ext02-analytic-two-state-mixed-v1.json"><code>benchmarks/scenarios/ext02-analytic-two-state-mixed-v1.json</code></a>. Source commit: <a href="https://github.com/butahlecoq/controlled-systems-lab/commit/a17a1a9a3f9c6d579c96788361456ab48e727db1"><code>a17a1a9a3f9c6d579c96788361456ab48e727db1</code></a>. Scenario SHA-256: <code>533ef62feaf01aef883cbeb9b758f7fa225df4cd3b2ba453ef43f141dbc30145</code>. Executable SHA-256: <code>592efd4a999fcf49aef8b7f38db8bec54f23c51338409c48ceecdc273961fe8f</code>.</p>
+<pre><code>cmake --preset highs -DCSL_ENABLE_QHULL=ON -DCSL_BUILD_EXT02_REPORT=ON
+cmake --build --preset highs --target csl_ext02_portfolio_report
+ctest --test-dir build/highs -R '^ext02_portfolio_report_smoke$' --output-on-failure
+python3 scripts/reports/ext02/collect.py build/highs/csl_ext02_portfolio_report build/highs/ext02-evidence
+python3 scripts/reports/ext02/render_saved.py build/highs/ext02-evidence/measurement.json reports/algorithm-results/ext02-two-state-mixed-v1</code></pre>
+<p>Raw records: <a href="measurement.json">JSON</a>; <a href="raw.jsonl">JSONL</a>; <a href="trials.csv">CSV</a>; <a href="figure.svg">SVG figure</a>.</p></body></html>
