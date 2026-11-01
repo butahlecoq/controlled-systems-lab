@@ -4,15 +4,21 @@ import importlib.util
 import json
 from pathlib import Path
 import shutil
+import sys
 import tempfile
 import unittest
 
 ROOT = Path(__file__).resolve().parents[2]
+sys.path.insert(0, str(ROOT / "scripts/reports"))
 STAGER_PATH = ROOT / "scripts/reports/stage_issue824_matched_minimax.py"
 SPEC = importlib.util.spec_from_file_location("issue824_matched_stage", STAGER_PATH)
 assert SPEC is not None and SPEC.loader is not None
 STAGER = importlib.util.module_from_spec(SPEC)
 SPEC.loader.exec_module(STAGER)
+VISUAL_SPEC = importlib.util.spec_from_file_location("issue824_visual_examples", ROOT / "scripts/reports/visual_examples.py")
+assert VISUAL_SPEC is not None and VISUAL_SPEC.loader is not None
+VISUAL = importlib.util.module_from_spec(VISUAL_SPEC)
+VISUAL_SPEC.loader.exec_module(VISUAL)
 BUNDLE = ROOT / "reports/algorithm-results/issue824-two-points-matched-minimax-v1"
 
 
@@ -62,6 +68,28 @@ class Issue824MatchedMinimaxPublicationTest(unittest.TestCase):
         self.assertEqual(check["measurement_samples_verified"], 24)
         self.assertEqual(check["failed_attempts"], [failed])
         self.assertEqual(check["missing_attempts_by_method"][failed["method"]], 0)
+
+    def test_gallery_discloses_incomplete_checker_status(self) -> None:
+        result = json.loads((BUNDLE / "result.json").read_text(encoding="utf-8"))
+        failed = result["samples"][0]
+        failed["status"] = "failed"
+        failed["error"] = "synthetic captured selector failure"
+        failed.pop("outcome")
+        check = STAGER.check_matched_minimax.check(result)
+        original_figures = VISUAL.SAVED_FIGURES
+        VISUAL.SAVED_FIGURES = (original_figures[-1],)
+        try:
+            with tempfile.TemporaryDirectory() as temporary:
+                site = Path(temporary)
+                STAGER.stage(BUNDLE, site)
+                route = site / BUNDLE.name
+                (route / "check.json").write_text(json.dumps(check), encoding="utf-8")
+                cards, _ = VISUAL.saved_figure_sections(ROOT / "reports/algorithm-results/catalog.json", site)
+                self.assertIn("Incomplete evidence", cards)
+                self.assertIn("24 completed outcomes checked across 25/25 attempts", cards)
+                self.assertNotIn("each score all 27 plans", cards)
+        finally:
+            VISUAL.SAVED_FIGURES = original_figures
 
     def test_does_not_overwrite_an_existing_route(self) -> None:
         with tempfile.TemporaryDirectory() as temporary:

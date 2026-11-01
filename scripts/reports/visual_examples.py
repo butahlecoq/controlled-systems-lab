@@ -146,7 +146,7 @@ SAVED_FIGURES = (
          alt="Two player phase planes show reachable sets, backward-winning intersections and representation projections, overlaid with the fixed-input nominal and finite minimax trajectories.",
          summary="Five end-to-end report trials and a separate gprof limiter profile are recorded. The profile describes a combined five-track API call and makes no per-representation winner or speedup claim."),
     dict(route="issue824-two-points-matched-minimax-v1", image="geometry-reference-ellipsoid.svg",
-         page="index.html", records="result.json",
+         page="index.html", records="result.json", check="check.json",
          family="Fixed-plan minimax · Matched set representations",
          title="Compare five minimax set tracks on TwoPoints",
          alt="The two player phase planes show forward and backward reachable geometry, intersections, and replayed finite-game paths.",
@@ -337,6 +337,28 @@ def saved_figure_sections(catalog, site):
         records_name = entry.get("records", "records.json")
         require((route / entry["page"]).is_file() and (route / records_name).is_file(),
                 "saved visual needs a report page and raw records: " + report_id)
+        summary = entry.get("summary", "Figure from the immutable saved report; no solver was rerun for this gallery.")
+        check_name = entry.get("check")
+        if check_name:
+            check_path = route / check_name
+            require(check_path.is_file() and not check_path.is_symlink(),
+                    "saved visual needs its independent check record: " + report_id + "/" + check_name)
+            check = json.loads(check_path.read_text(encoding="utf-8"))
+            require(check.get("schema") == "csl.issue824.matched-minimax-check/1" and
+                    check.get("status") in ("verified", "incomplete"),
+                    "saved visual has an unknown independent-check status: " + report_id)
+            if check["status"] == "incomplete":
+                observed = check.get("attempts_observed", 0)
+                expected = check.get("attempts_expected", 25)
+                verified = check.get("measurement_samples_verified", 0)
+                failures = check.get("failures", 0)
+                summary = (f"Incomplete evidence: {verified} completed outcomes checked across "
+                    f"{observed}/{expected} attempts; {failures} failed calls are retained in the report. "
+                    "Only completed outcomes were verified. See the linked records for details.")
+            else:
+                require(check.get("failures") == 0 and
+                        check.get("measurement_samples_verified") == check.get("attempts_expected"),
+                        "verified gallery entry has incomplete counts: " + report_id)
         image = f"../{report_id}/{entry['image']}"
         page = f"../{report_id}/{entry['page']}"
         records = f"../{report_id}/{records_name}"
@@ -345,11 +367,14 @@ def saved_figure_sections(catalog, site):
             '</p><h3><a href="' + escape(page, quote=True) + '">' + escape(entry["title"]) +
             '</a></h3><a href="' + escape(page, quote=True) + '"><img src="' +
             escape(image, quote=True) + '" alt="' + escape(entry["alt"], quote=True) +
-            '"></a><p>' + escape(entry.get("summary", "Figure from the immutable saved report; no solver was rerun for this gallery.")) + '</p>'
+            '"></a><p>' + escape(summary) + '</p>'
             '<p><a href="' + escape(page, quote=True) + '">Inputs, answer and reproduction details ↗</a> · '
             '<a href="' + escape(records, quote=True) + '">Raw record ↗</a></p></article>')
-        inventory.append({"family": entry["family"], "title": entry["title"], "report_id": report_id,
-                          "figure": entry["image"], "page": entry["page"], "records": records_name})
+        inventory_item = {"family": entry["family"], "title": entry["title"], "report_id": report_id,
+                          "figure": entry["image"], "page": entry["page"], "records": records_name}
+        if check_name:
+            inventory_item["check"] = check_name
+        inventory.append(inventory_item)
     return ''.join(cards), inventory
 
 
