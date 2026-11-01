@@ -1,7 +1,8 @@
 from pathlib import Path
 import json
-import sys
 import shutil
+import subprocess
+import sys
 import tempfile
 import unittest
 
@@ -10,6 +11,19 @@ sys.path.insert(0, str(ROOT / "scripts/reports"))
 import stage_issue824_zonotope as publisher
 sys.path.insert(0, str(ROOT / "scripts/reports/exp824"))
 import make_report
+
+
+def reseal_capture(source: Path, changed: Path, update_capture) -> None:
+    shutil.copytree(source, changed)
+    capture_path = changed / "capture.json"
+    capture = json.loads(capture_path.read_text(encoding="utf-8"))
+    update_capture(capture)
+    capture_path.write_text(json.dumps(capture, indent=2) + "\n", encoding="utf-8")
+    sums = {name: publisher.digest((changed / name).read_bytes())
+            for name in publisher.FILES if name != "SHA256SUMS"}
+    (changed / "SHA256SUMS").write_text(
+        "".join(f"{checksum}  {name}\n" for name, checksum in sums.items()),
+        encoding="ascii")
 
 
 class Issue824ZonotopePublicationTests(unittest.TestCase):
@@ -37,6 +51,36 @@ class Issue824ZonotopePublicationTests(unittest.TestCase):
             with (changed / "result.json").open("ab") as stream:
                 stream.write(b" ")
             with self.assertRaisesRegex(ValueError, "checksum mismatch"):
+                publisher.verified_bundle(changed)
+
+    def test_captured_source_identity_rejects_tree_objects(self):
+        source = ROOT / "reports/algorithm-results/issue824-two-points-zonotope-pilot-v2"
+        with tempfile.TemporaryDirectory() as temporary:
+            changed = Path(temporary) / "changed"
+
+            def use_tree_path(capture):
+                tree = subprocess.run(["git", "-C", str(ROOT), "show",
+                    f"{capture['source_commit']}:scripts"], check=True,
+                    capture_output=True).stdout
+                capture["source_files_sha256"] = {"scripts": publisher.digest(tree)}
+
+            reseal_capture(source, changed, use_tree_path)
+            with self.assertRaisesRegex(ValueError, "source files do not match"):
+                publisher.verified_bundle(changed)
+
+    def test_captured_source_identity_rejects_tree_commit_objects(self):
+        source = ROOT / "reports/algorithm-results/issue824-two-points-zonotope-pilot-v2"
+        with tempfile.TemporaryDirectory() as temporary:
+            changed = Path(temporary) / "changed"
+
+            def use_tree_commit(capture):
+                tree = subprocess.run(["git", "-C", str(ROOT), "rev-parse",
+                    f"{capture['source_commit']}^{{tree}}"], check=True,
+                    capture_output=True).stdout.decode("ascii").strip()
+                capture["source_commit"] = tree
+
+            reseal_capture(source, changed, use_tree_commit)
+            with self.assertRaisesRegex(ValueError, "source files do not match"):
                 publisher.verified_bundle(changed)
 
     def test_planar_projection_contains_all_four_rectangle_corners(self):

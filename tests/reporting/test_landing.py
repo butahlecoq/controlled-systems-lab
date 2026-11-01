@@ -132,6 +132,15 @@ class LandingTests(unittest.TestCase):
         self.assertIn("one descriptive observation", family.summary)
         self.assertIn("not a performance comparison", family.summary)
 
+    def test_pendulum_terminal_route_discloses_finite_scope_and_claim_limits(self):
+        family = landing.FAMILIES[landing.family_for(
+            "env717-pendulum-terminal-0123456789abcdefabcd")]
+        self.assertEqual(family.group, "synthesis")
+        self.assertIn("81 four-step finite-action plans", family.summary)
+        self.assertIn("nonlinear source map", family.summary)
+        self.assertIn("does not establish continuous-action or full-horizon optimality", family.summary)
+        self.assertIn("no performance-comparison claim", family.summary)
+
     def test_sphere_game_route_has_a_differential_game_description(self):
         family = landing.FAMILIES[landing.family_for(
             "env717-sphere-game-0123456789abcdefabcd")]

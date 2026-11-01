@@ -167,6 +167,16 @@
       "follow_up_issue": 717
     },
     {
+      "source": "scripts/reports/env717/check_pendulum_terminal.py",
+      "signal_count": 7,
+      "asset_name_literals": [
+        "projection.png",
+        "projection.svg"
+      ],
+      "disposition": "deferred-family-specific-migration",
+      "follow_up_issue": 717
+    },
+    {
       "source": "scripts/reports/env717/check_point_on_plane.py",
       "signal_count": 4,
       "asset_name_literals": [
@@ -978,6 +988,15 @@
       "signal_count": 3,
       "asset_name_literals": [
         "projections.svg"
+      ],
+      "disposition": "publication-validation-or-frozen-route"
+    },
+    {
+      "source": "scripts/reports/stage_env717_pendulum_terminal.py",
+      "signal_count": 4,
+      "asset_name_literals": [
+        "projection.png",
+        "projection.svg"
       ],
       "disposition": "publication-validation-or-frozen-route"
     },
@@ -1828,6 +1847,17 @@
         "projections.svg"
       ],
       "index_sha256": "0bc058dd35bdd14dcb1e242f9424b783b3e3d0ca1c4be7a247a96a0106ced76e",
+      "disposition": "deferred: original frozen route-level readability review remains; companion availability is listed separately",
+      "follow_up_issue": 717
+    },
+    {
+      "route": "env717-pendulum-terminal-pilot-v1",
+      "source_bundle": "env717-pendulum-terminal-pilot-v1",
+      "assets": [
+        "projection.png",
+        "projection.svg"
+      ],
+      "index_sha256": "8ca53327c72413ce87936c1473d6f85389525abe39241d7de9b7b1714e9f3dca",
       "disposition": "deferred: original frozen route-level readability review remains; companion availability is listed separately",
       "follow_up_issue": 717
     },

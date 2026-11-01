@@ -1,0 +1,70 @@
+{
+  "os": "Linux-7.2.8-9-omarchy-x86_64-with-glibc2.44",
+  "processor": "AMD Ryzen 5 3550H with Radeon Vega Mobile Gfx",
+  "logical_cpus": 8,
+  "load_average_before": [
+    0.37744140625,
+    0.3291015625,
+    0.5166015625
+  ],
+  "load_average_after": [
+    0.37744140625,
+    0.3291015625,
+    0.5166015625
+  ],
+  "capture_started_unix_ns": 1793501507824771505,
+  "capture_blocks": [
+    {
+      "started_unix_ns": 1793501507824771505,
+      "load_average_before": [
+        0.37744140625,
+        0.3291015625,
+        0.5166015625
+      ],
+      "load_average_after": [
+        0.37744140625,
+        0.3291015625,
+        0.5166015625
+      ]
+    },
+    {
+      "started_unix_ns": 1793501507868441487,
+      "load_average_before": [
+        0.37744140625,
+        0.3291015625,
+        0.5166015625
+      ],
+      "load_average_after": [
+        0.37744140625,
+        0.3291015625,
+        0.5166015625
+      ]
+    },
+    {
+      "started_unix_ns": 1793501507912817781,
+      "load_average_before": [
+        0.37744140625,
+        0.3291015625,
+        0.5166015625
+      ],
+      "load_average_after": [
+        0.37744140625,
+        0.3291015625,
+        0.5166015625
+      ]
+    },
+    {
+      "started_unix_ns": 1793501507963168632,
+      "load_average_before": [
+        0.37744140625,
+        0.3291015625,
+        0.5166015625
+      ],
+      "load_average_after": [
+        0.37744140625,
+        0.3291015625,
+        0.5166015625
+      ]
+    }
+  ]
+}
