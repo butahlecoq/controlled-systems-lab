@@ -7,6 +7,7 @@
 #include "../../registry/compiled_verifiers.hpp"
 #include "../../registry/strategy_a_lineage.hpp"
 #include <algorithm>
+#include <limits>
 #include <new>
 #include <utility>
 
@@ -33,8 +34,8 @@ Diagnostics capabilities(const problem::ResolvedProblem& problem,const FamilyReq
         return unsupported("strategy_a.assurance","Only unestablished binary64 candidate construction is supported.");
     if(family.representation.value!="csl.polyhedron.h")
         return unsupported("strategy_a.representation","Canonical joint native H output required.");
-    if(family.materialization_limit)
-        return unsupported("strategy_a.capacity","Family materialization-limit semantics have not been reviewed; no limit is silently ignored.");
+    if(family.materialization_limit && !exact_nominal)
+        return unsupported("strategy_a.capacity","Family row limits are supported only by the compiled nominal exact-H profile.");
     const auto source=problem.description();
     if(source->temporal && source->temporal->joint_map.rows!=0)
         return unsupported("strategy_a.temporal","Nonempty temporal constraints require a coupled-history implementation.");
@@ -385,12 +386,18 @@ public:
                 if(!exact_bounds)return result;
                 auto exact_relation=registry::detail::strategy_a_nominal_linear_exact_optimal_relation(
                     problem,{{"strategy-a/nominal-linear-exact-optimal-face"}},
-                    history.relation.metadata()->coordinate_labels);
-                if(!exact_relation)return result;
+                    history.relation.metadata()->coordinate_labels,
+                    request.materialization_limit.value_or(
+                        std::numeric_limits<std::size_t>::max()));
+                if(const auto* stopped=std::get_if<OperationStopped>(&exact_relation)) {
+                    stop(result,local({"strategy-a/family-materialization"}),*stopped);
+                    return result;
+                }
                 const ObjectiveBound lower{exact_bounds->first,claim};
                 const ObjectiveBound upper{exact_bounds->second,claim};
                 const OptimumEvidence proposed_optimum{claim,{lower,upper}};
-                auto payload=std::make_shared<const NominalExactHRelation>(std::move(*exact_relation));
+                auto payload=std::make_shared<const NominalExactHRelation>(
+                    std::get<sets::SetData>(std::move(exact_relation)));
                 CompleteOptimalFamily family{{exact_candidate_coordinates,request.representation,payload},
                     proposed_optimum,
                     {proposal_identity,RegisteredCompletenessEvidence{{"csl.verifier.strategy-a.nominal-linear-exact"},"1",

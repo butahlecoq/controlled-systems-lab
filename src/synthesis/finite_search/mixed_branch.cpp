@@ -443,6 +443,47 @@ FiniteMixedBranchSolveOutcome solve_finite_mixed_branch_portfolio(
                 evaluations.emplace_back(FailedFiniteMixedBranch{branch.history, std::move(diagnostics)},
                     std::nullopt);
             };
+            const auto source_width = joint_dimension(branch.coordinates.source);
+            const auto branch_width = joint_dimension(branch.coordinates.continuous_subproblem);
+            const auto discrete_dimension = branch.coordinates.source.dimensions.control -
+                branch.coordinates.continuous_subproblem.dimensions.control;
+            const auto fixed_rows = checked_product(branch.coordinates.source.horizon, discrete_dimension);
+            if (!source_width || !branch_width || !fixed_rows) {
+                refuse(unsupported("finite_mixed_branch.capacity",
+                    "Branch relation dimensions overflow aggregate budget accounting."));
+                continue;
+            }
+            const auto remaining_rows = request.limits.max_retained_relation_rows -
+                retained_relation_rows;
+            const auto remaining_scalars = request.limits.max_retained_relation_scalars -
+                retained_relation_scalars;
+            const auto fixed_scalar_width = checked_sum(*source_width, 1);
+            const auto fixed_scalars = fixed_scalar_width
+                ? checked_product(*fixed_rows, *fixed_scalar_width) : std::nullopt;
+            const auto branch_row_scalars = checked_sum(*branch_width, 1);
+            const auto lifted_row_scalars = checked_sum(*source_width, 1);
+            const auto per_row_scalars = branch_row_scalars && lifted_row_scalars
+                ? checked_sum(*branch_row_scalars, *lifted_row_scalars) : std::nullopt;
+            if (!fixed_scalars || !per_row_scalars) {
+                refuse(unsupported("finite_mixed_branch.capacity",
+                    "Per-branch relation size overflows aggregate budget accounting."));
+                continue;
+            }
+            const auto max_rows_by_rows = remaining_rows > *fixed_rows
+                ? (remaining_rows - *fixed_rows) / 2 : 0;
+            const auto max_rows_by_scalars = remaining_scalars > *fixed_scalars
+                ? (remaining_scalars - *fixed_scalars) / *per_row_scalars : 0;
+            auto branch_relation_limit = std::min(max_rows_by_rows, max_rows_by_scalars);
+            if (request.family.materialization_limit)
+                branch_relation_limit = std::min(branch_relation_limit,
+                    *request.family.materialization_limit);
+            if (branch_relation_limit == 0) {
+                every_branch_solved = false;
+                stop = OperationStopped{StopReason::resource_limit,
+                    "Aggregate relation budget cannot admit a bounded branch family before materialization."};
+                refuse(unsupported("finite_mixed_branch.resource_limit", stop->diagnostics));
+                continue;
+            }
             auto resolved_outcome = problem::resolve(branch.problem, request.resolution);
             if (const auto* diagnostic = std::get_if<Diagnostic>(&resolved_outcome)) {
                 refuse({*diagnostic});
@@ -456,6 +497,7 @@ FiniteMixedBranchSolveOutcome solve_finite_mixed_branch_portfolio(
             }
             auto branch_problem = std::get<problem::ResolvedProblem>(std::move(resolved_outcome));
             auto family_request = request.family;
+            family_request.materialization_limit = branch_relation_limit;
             family_request.objective = branch_problem.identity();
             registry::StrategyRequest strategy_request{branch_problem, request.strategy,
                 std::move(family_request), {}, {}};
@@ -472,6 +514,13 @@ FiniteMixedBranchSolveOutcome solve_finite_mixed_branch_portfolio(
             }
             auto result = std::get<SynthesisResult>(std::move(solve_outcome));
             if (result.termination != Termination::completed) {
+                if (result.termination == Termination::resource_limit) {
+                    every_branch_solved = false;
+                    stop = OperationStopped{StopReason::resource_limit,
+                        "A finite mixed-branch family reached its pre-allocation materialization budget."};
+                    refuse(unsupported("finite_mixed_branch.resource_limit", stop->diagnostics));
+                    continue;
+                }
                 std::string reason = "A branch solver terminated with status " +
                     std::to_string(static_cast<int>(result.termination)) + ".";
                 std::visit([&](const auto& stop) {
@@ -522,15 +571,6 @@ FiniteMixedBranchSolveOutcome solve_finite_mixed_branch_portfolio(
             const auto continuous_storage = relation_storage(*relation);
             const auto relation_representation = relation->representation();
             const auto* continuous_h = std::get_if<sets::HRepresentation>(&relation_representation);
-            const auto source_width = joint_dimension(branch.coordinates.source);
-            const auto discrete_dimension = branch.coordinates.source.dimensions.control -
-                branch.coordinates.continuous_subproblem.dimensions.control;
-            const auto fixed_rows = checked_product(branch.coordinates.source.horizon, discrete_dimension);
-            if (!source_width || !fixed_rows) {
-                refuse(unsupported("finite_mixed_branch.capacity",
-                    "Branch relation dimensions overflow aggregate budget accounting."));
-                continue;
-            }
             const auto source_storage = continuous_h
                 ? lifted_relation_storage(*continuous_h, *source_width, *fixed_rows)
                 : std::nullopt;
@@ -541,10 +581,6 @@ FiniteMixedBranchSolveOutcome solve_finite_mixed_branch_portfolio(
             }
             const auto total_rows = checked_sum(continuous_storage->rows, source_storage->rows);
             const auto total_scalars = checked_sum(continuous_storage->scalars, source_storage->scalars);
-            const auto remaining_rows = request.limits.max_retained_relation_rows -
-                retained_relation_rows;
-            const auto remaining_scalars = request.limits.max_retained_relation_scalars -
-                retained_relation_scalars;
             if (!total_rows || !total_scalars || *total_rows > remaining_rows ||
                 *total_scalars > remaining_scalars) {
                 every_branch_solved = false;

@@ -36,7 +36,9 @@ using Providers = registry::CheckedProviders<registry::GeometryPort,
 // H conversion, LP, convex. Borrows checked registrations until strategy prepare
 // snapshots them; thereafter registries can be destroyed. No local registry.
 // First profile: nominal_open_loop, candidate_relaxation, numerical, native H.
-// Exact/partial claims and caller materialization limits are unsupported until
-// coverage and capacity semantics are reviewed. Singular A needs no inverse.
+// Exact/partial claims remain unsupported outside the compiled nominal
+// exact-H profile. That profile enforces caller row caps before relation-row
+// allocation; other profile materialization caps are refused. Singular A needs
+// no inverse.
 registry::StrategyRegistration make_registration(Providers);
 } // namespace csl::synthesis::strategy_a

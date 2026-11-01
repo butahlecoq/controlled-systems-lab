@@ -419,7 +419,8 @@ bool strategy_a_nominal_linear_exact_profile_valid(const problem::ResolvedProble
     const FamilyRequest& family, const RepresentationId& representation) {
     if (family.profile != synthesis::strategy_a::nominal_linear_exact_profile ||
         family.target != FamilyTarget::exact_optimal_relation || family.assurance != Assurance::numerical ||
-        representation.value != "csl.polyhedron.h" || family.materialization_limit) return false;
+        representation.value != "csl.polyhedron.h" ||
+        (family.materialization_limit && *family.materialization_limit == 0)) return false;
     const auto source = problem.description();
     const auto model = problem.model();
     const auto dimensions = model.dimensions();
@@ -460,27 +461,37 @@ std::optional<std::pair<double, double>> strategy_a_nominal_linear_exact_optimum
     return rational_to_outward_doubles(optimum.value, exact_h::default_max_integer_bits);
 }
 
-std::optional<sets::SetData> strategy_a_nominal_linear_exact_optimal_relation(
-    const problem::ResolvedProblem& problem, SetId id, std::vector<std::string> labels) {
+std::variant<sets::SetData, OperationStopped> strategy_a_nominal_linear_exact_optimal_relation(
+    const problem::ResolvedProblem& problem, SetId id, std::vector<std::string> labels,
+    std::size_t max_relation_rows) {
     exact_h::Limits limits;
+    limits.max_rows = std::min(limits.max_rows, max_relation_rows);
     std::vector<exact_h::Row> rows;
     std::vector<double> objective;
     const auto built = reconstruct(problem, limits, rows, objective);
-    if (built.state != CheckState::established) return {};
+    if (built.state != CheckState::established)
+        return OperationStopped{StopReason::resource_limit,
+            "Nominal exact-H family construction exhausted its row or arithmetic budget: " + built.reason};
     const auto coefficients = problem.objective().coefficients();
     const auto& linear = std::get<optimization::LinearCoefficients>(coefficients);
     const auto optimum = exact_h::minimize_linear(rows, objective.size(), objective, linear.offset, limits);
     if (optimum.state != exact_h::LinearMinimumState::minimum || !optimum.attained ||
-        !append_objective_face(objective, linear.offset, optimum.value, limits, rows)) return {};
+        !append_objective_face(objective, linear.offset, optimum.value, limits, rows))
+        return OperationStopped{StopReason::resource_limit,
+            "Nominal exact-H optimum-face construction exhausted its row or arithmetic budget."};
     constexpr std::size_t max_binary64_search_steps = 63;
     if (objective.size() == std::numeric_limits<std::size_t>::max() ||
         rows.size() > limits.max_operations / max_binary64_search_steps / (objective.size() + 1))
-        return {};
+        return OperationStopped{StopReason::resource_limit,
+            "Nominal exact-H family construction exhausted its arithmetic operation budget."};
 
     std::vector<double> inequalities;
     std::vector<double> upper_bounds;
     std::vector<double> equalities;
     std::vector<double> equality_values;
+    if (objective.size() && rows.size() > std::numeric_limits<std::size_t>::max() / objective.size())
+        return OperationStopped{StopReason::resource_limit,
+            "Nominal exact-H relation scalar count overflows the materialization budget."};
     inequalities.reserve(rows.size() * objective.size());
     upper_bounds.reserve(rows.size());
     auto opposites = [](const exact_h::Integer& lhs, const exact_h::Integer& rhs) {
@@ -494,7 +505,9 @@ std::optional<sets::SetData> strategy_a_nominal_linear_exact_optimal_relation(
     };
     for (std::size_t row_index = 0; row_index < rows.size(); ++row_index) {
         const auto& row = rows[row_index];
-        if (row.strict || row.coefficients.size() != objective.size()) return {};
+        if (row.strict || row.coefficients.size() != objective.size())
+            return OperationStopped{StopReason::numerical_failure,
+                "Nominal exact-H relation contains a malformed dyadic row."};
         const bool paired_equality = row_index + 1 < rows.size() && !rows[row_index + 1].strict &&
             rows[row_index + 1].coefficients.size() == objective.size() &&
             opposites(row.bound, rows[row_index + 1].bound) &&
@@ -504,11 +517,15 @@ std::optional<sets::SetData> strategy_a_nominal_linear_exact_optimal_relation(
         auto& target_bounds = paired_equality ? equality_values : upper_bounds;
         for (const auto& coefficient : row.coefficients) {
             double value{};
-            if (!as_exact_double(coefficient, value)) return {};
+            if (!as_exact_double(coefficient, value))
+                return OperationStopped{StopReason::resource_limit,
+                    "Nominal exact-H coefficient exceeds the binary64 materialization budget."};
             target.push_back(value);
         }
         double bound{};
-        if (!as_exact_double(row.bound, bound)) return {};
+        if (!as_exact_double(row.bound, bound))
+            return OperationStopped{StopReason::resource_limit,
+                "Nominal exact-H bound exceeds the binary64 materialization budget."};
         target_bounds.push_back(bound);
         if (paired_equality) {
             ++row_index;
@@ -523,13 +540,17 @@ std::optional<sets::SetData> strategy_a_nominal_linear_exact_optimal_relation(
     if (!std::holds_alternative<numeric::MatrixView>(inequality_matrix) ||
         !std::holds_alternative<numeric::VectorView>(upper_vector) ||
         !std::holds_alternative<numeric::MatrixView>(equality_matrix) ||
-        !std::holds_alternative<numeric::VectorView>(equality_vector)) return {};
+        !std::holds_alternative<numeric::VectorView>(equality_vector))
+        return OperationStopped{StopReason::resource_limit,
+            "Nominal exact-H relation buffer allocation exceeded the materialization budget."};
     auto made = sets::make_h({std::move(id), objective.size(), std::move(labels)},
         {std::get<numeric::MatrixView>(std::move(inequality_matrix)),
          std::get<numeric::VectorView>(std::move(upper_vector)),
          std::get<numeric::MatrixView>(std::move(equality_matrix)),
          std::get<numeric::VectorView>(std::move(equality_vector))});
-    if (!std::holds_alternative<sets::SetData>(made)) return {};
+    if (!std::holds_alternative<sets::SetData>(made))
+        return OperationStopped{StopReason::resource_limit,
+            "Nominal exact-H relation construction exceeded the materialization budget."};
     return std::get<sets::SetData>(std::move(made));
 }
 
