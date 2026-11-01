@@ -55,6 +55,7 @@ if(TARGET CSL::highs_convex AND TARGET CSL::highs_lp AND TARGET CSL::qhull_conve
   target_link_libraries(finite_mixed_branch_strategy_tests PRIVATE CSL::finite_mixed_branch
     CSL::strategy_a CSL::affine_sum CSL::qhull_conversion CSL::highs_lp CSL::highs_convex doctest::doctest)
   add_test(NAME finite_mixed_branch_strategy_tests COMMAND finite_mixed_branch_strategy_tests)
+  csl_strict_warnings(finite_mixed_branch_strategy_tests)
   csl_test_target(finite_mixed_branch_strategy_tests synthesis)
 endif()
 
