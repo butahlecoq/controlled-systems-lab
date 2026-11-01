@@ -24,6 +24,8 @@ class VisualRouteInventoryTests(unittest.TestCase):
         self.assertIn("scripts/reports/stage_env717_two_particle_minimax.py", producers)
         self.assertIn("scripts/reports/env717/capture_homicidal_chauffeur.py", producers)
         self.assertIn("scripts/reports/stage_env717_homicidal_chauffeur.py", producers)
+        self.assertEqual(producers["scripts/reports/ext02/render_saved.py"]["disposition"],
+                         "analytic-reference-checked-saved-run-renderer")
         self.assertEqual(producers["scripts/reports/exp824/make_report.py"]["follow_up_issue"], 687)
         for source in ("scripts/reports/mpc04/check_max_coordinate.py",
                        "scripts/reports/mpc04/max_coordinate_replanning.py"):

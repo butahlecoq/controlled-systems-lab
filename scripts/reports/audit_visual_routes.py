@@ -106,6 +106,7 @@ SAVED_COMPANION_ROUTES = {
 SAVED_DATA_COMPANION_COLLECTORS = {"scripts/reports/app01/collect.py"}
 SAVED_DATA_COMPANION_RENDERERS = {
     "scripts/reports/render_adaptive_ode_example.py",
+    "scripts/reports/ext02/render_saved.py",
     "benchmarks/reporting/review05/render_profile_matrix.py",
     "benchmarks/reporting/review05/render_dimension_ladder.py",
     "benchmarks/reporting/review05/render_constraint_ladder.py",
