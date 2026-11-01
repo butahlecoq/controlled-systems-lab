@@ -2477,6 +2477,18 @@
       "follow_up_issue": 669
     },
     {
+      "route": "issue824-two-points-ellipsoid-minimax-v1",
+      "source_bundle": "issue824-two-points-ellipsoid-minimax-v1",
+      "assets": [
+        "ellipsoid-planar-example.svg",
+        "planar-example.svg",
+        "projections.svg"
+      ],
+      "index_sha256": "641f7280ea6d873e0b1e5ea4d759649530ab325923befc6be1e482ba17345d86",
+      "disposition": "deferred: original frozen route-level readability review remains; companion availability is listed separately",
+      "follow_up_issue": 824
+    },
+    {
       "route": "issue824-two-points-parallelotope-pilot-v1",
       "source_bundle": "issue824-two-points-parallelotope-pilot-v1",
       "assets": [
