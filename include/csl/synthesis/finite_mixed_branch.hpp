@@ -83,12 +83,22 @@ struct FiniteMixedBranchPortfolio {
 
 using FiniteMixedBranchPortfolioOutcome = std::variant<FiniteMixedBranchPortfolio, Diagnostics>;
 
+struct FiniteMixedBranchLimits {
+    // Bounds the retained attempt/evaluation vector, not just one cursor page.
+    std::size_t max_branch_evaluations{256};
+    // Bounds both the continuous and source-coordinate H relations retained per run.
+    std::size_t max_retained_relation_rows{100'000};
+    // Counts dense matrix values and right-hand-side values in both relations.
+    std::size_t max_retained_relation_scalars{10'000'000};
+};
+
 struct FiniteMixedBranchSolveRequest {
     StrategyConfiguration strategy;
     FamilyRequest family;
     problem::ResolutionContext resolution;
     std::size_t branches_per_page{64};
     double near_optimal_tolerance{};
+    FiniteMixedBranchLimits limits{};
 };
 
 struct FiniteMixedBranchSolveResult {
@@ -97,6 +107,8 @@ struct FiniteMixedBranchSolveResult {
     bool every_branch_solved{};
     double effective_tie_tolerance{};
     std::optional<OperationStopped> stop;
+    std::size_t retained_relation_rows{};
+    std::size_t retained_relation_scalars{};
 };
 
 using FiniteMixedBranchSolveOutcome = std::variant<FiniteMixedBranchSolveResult, Diagnostics>;

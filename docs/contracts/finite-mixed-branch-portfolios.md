@@ -16,6 +16,23 @@ claims a complete optimum. `enumeration_complete` reports whether all histories
 were emitted; `complete` additionally requires a valid objective for every
 history. A stop outcome retains all results completed before the stop.
 
+`FiniteMixedBranchLimits` bounds the aggregate retained output, not just one
+cursor page. Defaults allow 256 evaluated histories, 100,000 combined rows
+across retained continuous/source H-relations, and 10,000,000 stored numeric
+matrix/right-hand-side scalars across those relations. Reaching a limit returns
+`StopReason::resource_limit`, preserves earlier outcomes, and leaves the
+portfolio incomplete. If every history was emitted but a branch relation could
+not be retained, enumeration may be complete while the solved portfolio is
+still incomplete. The result reports retained row and scalar counts.
+
+These are structural accounting limits, not a native heap/RSS limit. A selected
+strategy may transiently materialize one branch family before its returned H
+relation is charged against the aggregate budget. Per-branch
+`FamilyRequest::materialization_limit` remains part of the selected strategy
+request; strategies that do not support it refuse the branch instead of
+silently ignoring it. Cancellation/deadline still bound work cooperatively, and
+no claim of hard process-memory enforcement follows.
+
 The effective tie tolerance is the requested tolerance plus the largest
 branch-optimum interval width. Branches within that distance of the minimum
 reported lower bound are retained; wider numerical intervals can therefore
