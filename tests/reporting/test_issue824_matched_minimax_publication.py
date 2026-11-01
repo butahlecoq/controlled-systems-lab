@@ -27,6 +27,9 @@ class Issue824MatchedMinimaxPublicationTest(unittest.TestCase):
         self.assertEqual(check["measurement_samples_verified"], 25)
         self.assertEqual(check["exact_finite_minimax_value"], 14.58094225)
         self.assertTrue(capture["source_tree_clean_before_report_generation"])
+        self.assertEqual(capture["resource_accounting"]["policy"], "uncapped local exploratory run")
+        self.assertEqual(capture["resource_accounting"]["enforced_limits"], {
+            "algorithm_wall_time": False, "process_tree_memory": False})
         self.assertEqual(len(json.loads(files["e2e-timing.json"])["trials"]), 5)
 
     def test_stages_exact_inventory_and_phase_plane_figures(self) -> None:
@@ -46,6 +49,19 @@ class Issue824MatchedMinimaxPublicationTest(unittest.TestCase):
             (copied / "result.json").write_text("{}\n", encoding="utf-8")
             with self.assertRaisesRegex(ValueError, "checksum mismatch"):
                 STAGER.verified_bundle(copied)
+
+    def test_preserves_failed_attempt_as_incomplete_evidence(self) -> None:
+        result = json.loads((BUNDLE / "result.json").read_text(encoding="utf-8"))
+        failed = result["samples"][0]
+        failed["status"] = "failed"
+        failed["error"] = "synthetic captured selector failure"
+        failed.pop("outcome")
+        check = STAGER.check_matched_minimax.check(result)
+        self.assertEqual(check["status"], "incomplete")
+        self.assertEqual(check["failures"], 1)
+        self.assertEqual(check["measurement_samples_verified"], 24)
+        self.assertEqual(check["failed_attempts"], [failed])
+        self.assertEqual(check["missing_attempts_by_method"][failed["method"]], 0)
 
     def test_does_not_overwrite_an_existing_route(self) -> None:
         with tempfile.TemporaryDirectory() as temporary:

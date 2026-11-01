@@ -86,12 +86,17 @@ def render(result: dict[str, Any], check: dict[str, Any], e2e: list[dict[str, An
     rows = []
     for summary in result["summaries"]:
         method = summary["method"]
+        if summary["successful_repetitions"]:
+            median = f"{summary['median_ns'] / 1e6:.3f} ms"
+            timing_range = (f"{summary['minimum_ns'] / 1e6:.3f}–"
+                f"{summary['maximum_ns'] / 1e6:.3f} ms")
+        else:
+            median = timing_range = "not available"
         rows.append(
             f"<tr><td>{html.escape(METHOD_LABELS[method])}</td>"
             f"<td>{summary['successful_repetitions']}/5</td>"
-            f"<td>{summary.get('median_ns', 0) / 1e6:.3f} ms</td>"
-            f"<td>{summary.get('minimum_ns', 0) / 1e6:.3f}–{summary.get('maximum_ns', 0) / 1e6:.3f} ms</td>"
-            "<td>27 plans; full-history replay</td></tr>")
+            f"<td>{median}</td><td>{timing_range}</td>"
+            f"<td>{summary['failures']} failed attempts; completed outcomes checked against all 27 histories</td></tr>")
     end_to_end_ns = [row["elapsed_ns"] for row in e2e]
     end_to_end_sorted = sorted(end_to_end_ns)
     e2e_median = end_to_end_sorted[len(end_to_end_sorted) // 2] / 1e9
@@ -100,35 +105,39 @@ def render(result: dict[str, Any], check: dict[str, Any], e2e: list[dict[str, An
 <style>body{{max-width:1100px;margin:2rem auto;padding:0 1rem;background:#fbf1c7;color:#282828;font:16px/1.55 system-ui}}h1,h2{{color:#3c3836}}a{{color:#076678}}table{{border-collapse:collapse;width:100%}}th,td{{border:1px solid #bdae93;padding:.45rem .65rem;text-align:left}}img{{max-width:100%;height:auto;border:1px solid #d5c4a1;background:#fff}}.note{{background:#f9f5d7;border-left:4px solid #d79921;padding:.7rem 1rem}}.grid{{display:grid;grid-template-columns:repeat(auto-fit,minmax(420px,1fr));gap:1rem}}code{{background:#f9f5d7;padding:.1rem .3rem}}</style>
 <h1>Five matched tracks on TwoPointsOnParallelLines</h1>
 <p>This is a finite-catalog adaptation of the upstream differential game, not a reproduction of its continuous-action 10-second RL task. The state order is <code>(x1,x2,x3,x4)</code>; there are three stages, controls <code>{-2.5,0,2.5}</code>, disturbances <code>{-1,0,1}</code>, initial state <code>(4.5,0,0,0)</code>, and terminal squared player-position gap. Re-expressing the pinned source's ten Euler substeps gives <code>x1'=x1+0.01x2+0.09u</code>, <code>x2'=u</code>, <code>x3'=x3+0.1x4+0.0045v</code>, <code>x4'=x4+0.1v</code>; in particular, damping in the first player's velocity equation resets its velocity to the current input each outer step.</p>
-<p>The methods use identical inputs and each scores all 27 fixed control plans. Every selected approximate plan is replayed across all 27 disturbance histories. An independent exact rational checker verified all 25 timed outcomes and the exact finite minimax optimum, <code>{check['exact_finite_minimax_value']:.8f}</code>.</p>
+<p>The methods use identical inputs and each attempts to score all 27 fixed control plans. Every completed selected plan is replayed across all 27 disturbance histories. An independent exact rational checker verified {check['measurement_samples_verified']} completed timed outcomes and the exact finite minimax optimum, <code>{check['exact_finite_minimax_value']:.8f}</code>. Measurement status: <code>{html.escape(check['status'])}</code>; {check['failures']} failed attempts are retained in the raw run record.</p>
 <h2>Release call timings</h2><table><thead><tr><th>Track</th><th>Runs</th><th>Median</th><th>Range</th><th>Work checked</th></tr></thead><tbody>{''.join(rows)}</tbody></table>
-<p class="note">These are descriptive times for one four-state, three-stage fixture. The methods use different candidate scoring rules: approximate enclosure corner/support scores are numerical ranking estimates, not certified objective bounds. The replay values are feasible finite-catalog witnesses, not proof that an approximate selector found the global minimizer. The timing table does not establish a general winner.</p>
+<p class="note">This local run was uncapped: no process-tree wall-time or memory limit was requested or enforced, and process-tree peak memory was not observed. The methods use different candidate scoring rules: approximate enclosure corner/support scores are numerical ranking estimates, not certified objective bounds. The replay values are feasible finite-catalog witnesses, not proof that an approximate selector found the global minimizer. The timing table does not establish a general winner.</p>
 <h2>Limiter profile</h2><p>A separate instrumented Release profile ran {limiter['profile_calls']} zonotope calls. GNU gprof sampled {limiter['sampled_total_seconds']:.2f} s; <code>score_corners</code> accounted for {score_profile['sampled_self_percent']:.2f}% of sampled self CPU ({score_profile['self_seconds']:.2f} s). This identifies the dominant work in this zonotope fixture; the profile build is excluded from the timing table. Its 10 ms sample resolution and single fixture limit the conclusion.</p>
 <h2>Report-generation path</h2><p>Five separate Release report-data generation, rational checking, serialization and checksum trials had median {e2e_median:.3f} s (range {e2e_range}).</p>
 <h2>Reachability geometry</h2><p>These saved projections show the two requested player phase planes: <code>(x1,x2)</code> and <code>(x3,x4)</code>, with stage-labelled forward/backward geometry, intersections and replayed paths. The tracks are split across two checked source result bundles; both use the same frozen geometry reference and finite-game fixture.</p>
 <div class="grid"><figure><img src="geometry-reference-ellipsoid.svg" alt="TwoPoints player phase-plane reachable sets and selected paths"><figcaption>Ellipsoid comparison geometry; <a href="../issue824-two-points-ellipsoid-minimax-v2/index.html">saved result bundle</a>.</figcaption></figure><figure><img src="geometry-reference-parallelotope.svg" alt="TwoPoints player phase-plane geometry with parallelotope sets"><figcaption>Parallelotope comparison geometry; <a href="../issue824-two-points-zonotope-minimax-v2/index.html">saved result bundle</a>.</figcaption></figure></div>
 <p><a href="result.json">Raw run record</a> · <a href="check.json">Independent check</a> · <a href="limiter-profile.json">Limiter profile</a> · <a href="README.md">Reproduction notes</a> · <a href="https://github.com/butahlecoq/controlled-systems-lab/commit/{commit}">source commit</a></p>
 </html>'''
-    summaries = "\n".join(
-        f"| {METHOD_LABELS[row['method']]} | {row['successful_repetitions']}/5 | "
-        f"{row.get('median_ns', 0) / 1e6:.3f} ms | "
-        f"{row.get('minimum_ns', 0) / 1e6:.3f}–{row.get('maximum_ns', 0) / 1e6:.3f} ms |"
-        for row in result["summaries"])
+    def markdown_summary(row: dict[str, Any]) -> str:
+        if row["successful_repetitions"]:
+            median = f"{row['median_ns'] / 1e6:.3f} ms"
+            span = f"{row['minimum_ns'] / 1e6:.3f}–{row['maximum_ns'] / 1e6:.3f} ms"
+        else:
+            median = span = "not available"
+        return (f"| {METHOD_LABELS[row['method']]} | {row['successful_repetitions']}/5 "
+            f"(failures: {row['failures']}) | {median} | {span} |")
+    summaries = "\n".join(markdown_summary(row) for row in result["summaries"])
     readme = f'''# Matched TwoPoints fixed-plan minimax run
 
 This report compares the exact finite-polytope search and outer box, zonotope, fixed-frame parallelotope, and axis-aligned ellipsoid selectors on the pinned `TwoPointsOnParallelLines` source adaptation. It uses state `(x1,x2,x3,x4)`, initial `(4.5,0,0,0)`, horizon 3, control catalog `{-2.5,0,2.5}`, disturbance catalog `{-1,0,1}`, and terminal squared position gap. Re-expressing the pinned source's ten Euler substeps gives `x1'=x1+0.01x2+0.09u`, `x2'=u`, `x3'=x3+0.1x4+0.0045v`, and `x4'=x4+0.1v`; first-player damping resets its velocity to the selected input each outer step.
 
-All methods received the same immutable request. Each scored all 27 action plans, and every selected plan was replayed across all 27 disturbance histories. Independent rational enumeration verified the exact minimax value and each replay. Approximation scores are numerical ranking estimates; no objective bound or global optimizer-family completeness is claimed.
+All methods received the same immutable request and attempted to score all 27 action plans. Completed selected plans were replayed across all 27 disturbance histories. Independent rational enumeration verifies completed replays and the exact minimax value. Any failed method call remains in `result.json`; the independent check is marked `incomplete` when one or more attempts fail or are absent. Approximation scores are numerical ranking estimates; no objective bound or global optimizer-family completeness is claimed.
 
 ## Timings
 
-Release build, one warmup and five order-rotated measurements per method. The timed interval covers the public call and extraction/checking of its selected result. Fixture construction, serialization, independent rational checking, and plotting are excluded.
+Release build, one warmup and five order-rotated attempts per method. The timed interval covers the public call and extraction/checking of its selected result. Fixture construction, serialization, independent rational checking, and plotting are excluded. Failed calls retain their elapsed duration and error detail and are not silently dropped.
 
 | Track | Runs | Median | Range |
 | --- | ---: | ---: | ---: |
 {summaries}
 
-The differences describe this one small fixture only. The methods do not use the same candidate-score representation, so these numbers do not establish a general performance winner. The zonotope limiter profile is separate from the reported timing build and identifies `score_corners` as the main sampled CPU path for this workload. Profiling used GNU gprof 2.47, Release `-O3 -DNDEBUG -pg`, ten calls, and 10 ms sampling. See `limiter-profile.json`.
+The differences describe this one small fixture only. The methods do not use the same candidate-score representation, so these numbers do not establish a general performance winner. The run was uncapped: no process-tree wall or memory limit was requested or enforced, and process-tree peak memory was not observed. The zonotope limiter profile is separate from the reported timing build and identifies `score_corners` as the main sampled CPU path for this workload. Profiling used GNU gprof 2.47, Release `-O3 -DNDEBUG -pg`, ten calls, and 10 ms sampling. See `limiter-profile.json`.
 
 Five end-to-end report-data trials (solver run, exact rational checker, JSON serialization and SHA-256 verification) took median {e2e_median:.3f} s, range {e2e_range}. Raw trials and output hashes are in `e2e-timing.json`.
 
@@ -174,6 +183,7 @@ def make_files(executable: Path, build_dir: Path, limiter_json: dict[str, Any],
         e2e.append({"trial": trial, "elapsed_ns": elapsed, "status": "completed",
             "result_sha256": sha(result_bytes), "check_sha256": sha(check_bytes),
             "sample_count": len(result["samples"]), "failures": check["failures"],
+            "failed_attempts": check["failed_attempts"],
             "load_average_before": trial_load_before, "load_average_after": os.getloadavg()})
         if chosen is None:
             chosen = (result, check)
@@ -213,6 +223,13 @@ def make_files(executable: Path, build_dir: Path, limiter_json: dict[str, Any],
             "highs": cache_value(cache_text, "CSL_ENABLE_HIGHS"),
             "qhull": cache_value(cache_text, "CSL_ENABLE_QHULL")},
         "limiter_profile_build": profile_build,
+        "resource_accounting": {
+            "policy": "uncapped local exploratory run",
+            "requested_limits": {"algorithm_wall_time_seconds": None, "process_tree_memory_bytes": None},
+            "enforced_limits": {"algorithm_wall_time": False, "process_tree_memory": False},
+            "observed": {"per_call_wall_time": "recorded in result.json", "process_tree_wall_time": None,
+                "process_tree_peak_memory_bytes": None},
+            "observation_reason": "No process-tree resource sampler or cap supervisor was used for these saved runs."},
         "host": {"system": platform.system(), "release": platform.release(),
             "machine": platform.machine(), "cpu_model": cpu_model(),
             "logical_cpu_count": os.cpu_count(), "load_average_before_e2e": load_before_e2e,

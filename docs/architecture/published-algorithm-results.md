@@ -746,7 +746,10 @@ median 1.003 s (range 0.985–1.159 s). These results are descriptive for one
 four-state, three-stage finite adaptation; they make no general speed ranking
 or continuous-action RL claim. The report reuses the reviewed two-player phase
 plane plots and preserves their source bundles. The profile and end-to-end
-records are separate from algorithm call timings.
+records are separate from algorithm call timings. This local exploratory run
+was uncapped: it requested/enforced no process-tree wall or memory cap, and it
+did not observe process-tree peak memory. Failed per-call attempts are retained
+in the result and make the check status incomplete rather than disappearing.
 
 ## MPC-05 finite causal minimax pilot
 

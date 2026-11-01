@@ -37,20 +37,27 @@ def check(record: dict[str, Any]) -> dict[str, Any]:
         raise ValueError("unexpected matched minimax result schema")
     if tuple(record.get("methods", ())) != METHODS:
         raise ValueError("the matched result must contain all five representation tracks")
-    if len(record.get("samples", [])) != 25:
-        raise ValueError("expected five rotated measurements for each of five methods")
+    samples = record.get("samples", [])
+    if not isinstance(samples, list) or len(samples) > 25:
+        raise ValueError("measurement samples must be a list with at most 25 rows")
     oracle: list[tuple[F, tuple[int, ...]]] = []
     for plan in product(range(3), repeat=3):
         value, _ = replay(plan)
         oracle.append((value, plan))
     optimum = min(value for value, _ in oracle)
     method_rows = {name: [] for name in METHODS}
-    for sample in record["samples"]:
+    failed_rows = []
+    for sample in samples:
         method = sample.get("method")
         if method not in method_rows or sample.get("elapsed_ns", 0) <= 0:
             raise ValueError("measurement row is missing its method or positive duration")
-        if sample.get("outcome", {}).get("status") != "completed":
-            raise ValueError(f"{method} attempt failed: {sample.get('error', sample)}")
+        if sample.get("status") == "failed":
+            if not isinstance(sample.get("error"), str) or not sample["error"]:
+                raise ValueError(f"{method} failed attempt lacks its error detail")
+            failed_rows.append(sample)
+            continue
+        if sample.get("status", "completed") != "completed" or sample.get("outcome", {}).get("status") != "completed":
+            raise ValueError(f"{method} attempt has an unsupported status")
         outcome = sample["outcome"]
         if outcome.get("candidate_plans") != 27:
             raise ValueError(f"{method} did not score all 27 plans")
@@ -68,13 +75,18 @@ def check(record: dict[str, Any]) -> dict[str, Any]:
             if replay_value != optimum:
                 raise ValueError("exact selected plan is not a rational minimizer")
         method_rows[method].append(sample)
-    for method, samples in method_rows.items():
-        if len(samples) != 5:
-            raise ValueError(f"{method} has {len(samples)} measurements, expected five")
-    return {"schema": "csl.issue824.matched-minimax-check/1", "status": "verified",
+    missing_methods = {method: 5 - len(rows) - sum(row["method"] == method for row in failed_rows)
+        for method, rows in method_rows.items()}
+    if any(value < 0 for value in missing_methods.values()):
+        raise ValueError("a method has more than five recorded attempts")
+    complete = len(samples) == 25 and not failed_rows and all(value == 0 for value in missing_methods.values())
+    return {"schema": "csl.issue824.matched-minimax-check/1", "status": "verified" if complete else "incomplete",
         "oracle": "exact Fraction replay of every control plan and all 27 disturbance histories",
         "control_plan_count": len(oracle), "disturbance_histories_per_plan": 27,
         "exact_finite_minimax_value": float(optimum),
         "measurement_samples_verified": sum(map(len, method_rows.values())),
-        "failures": 0, "selected_plan_full_history_replay": "verified for all 25 timed outcomes",
+        "attempts_expected": 25, "attempts_observed": len(samples),
+        "failures": len(failed_rows), "failed_attempts": failed_rows,
+        "missing_attempts_by_method": missing_methods,
+        "selected_plan_full_history_replay": f"verified for all {sum(map(len, method_rows.values()))} completed timed outcomes",
         "exact_search_complete": "verified across all 27 control plans"}

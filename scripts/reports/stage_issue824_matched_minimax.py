@@ -41,15 +41,22 @@ def verified_bundle(source: Path) -> dict[str, bytes]:
     result = json.loads(files["result.json"])
     e2e = json.loads(files["e2e-timing.json"])
     profile = json.loads(files["limiter-profile.json"])
+    resource = capture.get("resource_accounting", {})
     if (capture.get("source_tree_clean_before_report_generation") is not True or
             result.get("schema") != "csl.issue824.matched-minimax-benchmark/1" or
-            check.get("status") != "verified" or result.get("check") not in (None, check) or
+            check.get("status") not in ("verified", "incomplete") or result.get("check") not in (None, check) or
+            check.get("attempts_observed") != len(result.get("samples", [])) or
+            check.get("measurement_samples_verified", 0) + check.get("failures", -1) != check.get("attempts_observed") or
             e2e.get("schema") != "csl.issue824.matched-minimax-e2e/1" or
             len(e2e.get("trials", [])) != 5 or any(
-                row.get("status") != "completed" or row.get("failures") != 0 or
-                row.get("sample_count") != 25 for row in e2e["trials"]) or
+                row.get("status") != "completed" or row.get("failures", -1) < 0 or
+                row.get("sample_count") != 25 or len(row.get("failed_attempts", [])) != row.get("failures")
+                for row in e2e["trials"]) or
             profile.get("schema") != "csl.issue824.matched-minimax-limiter/1" or
-            profile.get("method") != "zonotope"):
+            profile.get("method") != "zonotope" or
+            resource.get("policy") != "uncapped local exploratory run" or
+            resource.get("enforced_limits") != {"algorithm_wall_time": False, "process_tree_memory": False} or
+            resource.get("observed", {}).get("process_tree_peak_memory_bytes") is not None):
         raise ValueError("issue #824 matched minimax evidence is incomplete")
     if check_matched_minimax.check(result) != check:
         raise ValueError("issue #824 matched minimax rational checker result differs")
@@ -63,7 +70,7 @@ def verified_bundle(source: Path) -> dict[str, bytes]:
     page = files["index.html"].decode("utf-8")
     if ("(x1,x2)" not in page or "(x3,x4)" not in page or
             "upstream differential game" not in page or "continuous-action 10-second RL task" not in page or
-            "does not establish a general winner" not in page):
+            "does not establish a general winner" not in page or "uncapped" not in page):
         raise ValueError("issue #824 matched minimax page omits its projections or evidence limits")
     return files
 
