@@ -18,14 +18,14 @@
   "host": {
     "cpu_model": "AMD Ryzen 5 3550H with Radeon Vega Mobile Gfx",
     "load_average_after_timing": [
-      0.84521484375,
-      0.94384765625,
-      1.5751953125
+      0.470703125,
+      0.75927734375,
+      1.41357421875
     ],
     "load_average_before_timing": [
-      0.84521484375,
-      0.94384765625,
-      1.5751953125
+      0.470703125,
+      0.75927734375,
+      1.41357421875
     ],
     "logical_cpu_count": 8,
     "machine": "x86_64",
@@ -33,7 +33,7 @@
     "system": "Linux"
   },
   "schema": "csl.issue824-two-points-zonotope-minimax-capture/1",
-  "source_commit": "d3827037ba824bb0c65a665bfee2a62f92cd1214",
+  "source_commit": "505e0e27260b830e48e5b08df6a8799339d7122d",
   "source_files_sha256": {
     ".github/workflows/algorithm-reports.yml": "9e71b82dbe5397410294069c9b8d964eecd859bc8315dc8eda63e66c5eeb6e0b",
     "CMakeLists.txt": "dffff6b904aace15c7d1a22094fa8d29292b77924fba61f0ce5f8f0211e15188",
@@ -70,7 +70,7 @@
     "tests/reporting/test_issue824_zonotope_minimax_publication.py": "9ed14a3e64428423f78e64c5d6d330f6fa2c46057649e44794a901990d99e767",
     "tests/reporting/test_issue824_zonotope_publication.py": "308f57a565d13f349c1bf5f7983e11d55279283f250bf6083cd3fc2d0640c1af",
     "tests/reporting/test_visual_route_inventory.py": "7330e0a0ed35ce71a7528402f2b0122e673b71cbadd9bbbe6aa0b7414bac1f6b",
-    "tests/unit/optimization/finite_action_zonotope_minimax_tests.cpp": "f6d0e1da0f9aac9adf65a163373bbc8f4f975aa2b6df469173c44aba8d881b27"
+    "tests/unit/optimization/finite_action_zonotope_minimax_tests.cpp": "1e5726acf37802ea1271612becd4a891e1f53faec59491274af16868951fb718"
   },
   "source_status_before_report_generation": [],
   "source_tree_clean_before_report_generation": true
