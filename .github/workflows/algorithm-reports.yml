@@ -166,7 +166,7 @@ jobs:
           cmake --build build/issue824-matched-minimax-ci --config Release \
             --target csl_issue824_matched_minimax_report --parallel 2
           ctest --test-dir build/issue824-matched-minimax-ci -C Release --output-on-failure \
-            -R '^issue824_matched_minimax_report_smoke$'
+            -R '^issue824_matched_minimax_(report_smoke|publication)$'
       - name: Build and independently check the issue 824 nominal comparison
         if: needs.route.outputs.native == 'true'
         shell: bash
