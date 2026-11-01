@@ -1,0 +1,7 @@
+{
+  "os": "Linux-7.2.8-9-omarchy-x86_64-with-glibc2.44",
+  "processor": "AMD Ryzen 5 3550H with Radeon Vega Mobile Gfx",
+  "logical_cpus": 8,
+  "capture_started_unix_ns": 1793500860132406006,
+  "note": "environment context only; no runtime comparison was measured"
+}

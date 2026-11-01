@@ -1,0 +1,186 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1080 760" role="img" aria-labelledby="title desc">
+<title id="title">PendulumTerminal affine reachability and nonlinear replay</title>
+<desc id="desc">Four-stage finite-action reachability in angle and angular velocity, with the local affine plan and the independently enumerated nonlinear source-map plan.</desc>
+<rect width="100%" height="100%" fill="#111820"/>
+<text x="110" y="38" fill="#f4f1e8" font-size="25" font-family="sans-serif">PendulumTerminal · four-step finite-action pilot</text>
+<text x="110" y="62" fill="#aab7c2" font-size="14" font-family="sans-serif">Projection: θ (rad) × θ̇ (rad/s) · source-map replay uses the declared semi-implicit Euler step</text>
+<line x1="110.00" y1="86" x2="110.00" y2="620" stroke="#293844"/>
+<line x1="110" y1="86.00" x2="1020" y2="86.00" stroke="#293844"/>
+<text x="110.00" y="644" text-anchor="middle" fill="#c5d0d8" font-size="12" font-family="sans-serif">-0.041</text>
+<text x="98" y="90.00" text-anchor="end" fill="#c5d0d8" font-size="12" font-family="sans-serif">2.347</text>
+<line x1="292.00" y1="86" x2="292.00" y2="620" stroke="#293844"/>
+<line x1="110" y1="192.80" x2="1020" y2="192.80" stroke="#293844"/>
+<text x="292.00" y="644" text-anchor="middle" fill="#c5d0d8" font-size="12" font-family="sans-serif">0.077</text>
+<text x="98" y="196.80" text-anchor="end" fill="#c5d0d8" font-size="12" font-family="sans-serif">1.737</text>
+<line x1="474.00" y1="86" x2="474.00" y2="620" stroke="#293844"/>
+<line x1="110" y1="299.60" x2="1020" y2="299.60" stroke="#293844"/>
+<text x="474.00" y="644" text-anchor="middle" fill="#c5d0d8" font-size="12" font-family="sans-serif">0.195</text>
+<text x="98" y="303.60" text-anchor="end" fill="#c5d0d8" font-size="12" font-family="sans-serif">1.127</text>
+<line x1="656.00" y1="86" x2="656.00" y2="620" stroke="#293844"/>
+<line x1="110" y1="406.40" x2="1020" y2="406.40" stroke="#293844"/>
+<text x="656.00" y="644" text-anchor="middle" fill="#c5d0d8" font-size="12" font-family="sans-serif">0.313</text>
+<text x="98" y="410.40" text-anchor="end" fill="#c5d0d8" font-size="12" font-family="sans-serif">0.517</text>
+<line x1="838.00" y1="86" x2="838.00" y2="620" stroke="#293844"/>
+<line x1="110" y1="513.20" x2="1020" y2="513.20" stroke="#293844"/>
+<text x="838.00" y="644" text-anchor="middle" fill="#c5d0d8" font-size="12" font-family="sans-serif">0.431</text>
+<text x="98" y="517.20" text-anchor="end" fill="#c5d0d8" font-size="12" font-family="sans-serif">-0.093</text>
+<line x1="1020.00" y1="86" x2="1020.00" y2="620" stroke="#293844"/>
+<line x1="110" y1="620.00" x2="1020" y2="620.00" stroke="#293844"/>
+<text x="1020.00" y="644" text-anchor="middle" fill="#c5d0d8" font-size="12" font-family="sans-serif">0.548</text>
+<text x="98" y="624.00" text-anchor="end" fill="#c5d0d8" font-size="12" font-family="sans-serif">-0.704</text>
+<line x1="110" y1="620" x2="1020" y2="620" stroke="#d8e1e8"/>
+<line x1="110" y1="86" x2="110" y2="620" stroke="#d8e1e8"/>
+<text x="565.0" y="672" text-anchor="middle" fill="#f4f1e8" font-size="16" font-family="sans-serif">θ (rad)</text>
+<text x="28" y="353.0" transform="rotate(-90 28 353.0)" text-anchor="middle" fill="#f4f1e8" font-size="16" font-family="sans-serif">θ̇ (rad/s)</text>
+<circle cx="559.05" cy="496.86" r="3.1" fill="#80a7bd" opacity="0.44"/>
+<circle cx="550.36" cy="516.55" r="3.1" fill="#86b8c7" opacity="0.44"/>
+<circle cx="573.54" cy="464.04" r="3.1" fill="#86b8c7" opacity="0.44"/>
+<circle cx="596.71" cy="411.53" r="3.1" fill="#86b8c7" opacity="0.44"/>
+<circle cx="532.65" cy="536.98" r="3.1" fill="#9ec9c6" opacity="0.44"/>
+<circle cx="555.83" cy="484.47" r="3.1" fill="#9ec9c6" opacity="0.44"/>
+<circle cx="579.00" cy="431.96" r="3.1" fill="#9ec9c6" opacity="0.44"/>
+<circle cx="579.87" cy="482.50" r="3.1" fill="#9ec9c6" opacity="0.44"/>
+<circle cx="603.05" cy="429.99" r="3.1" fill="#9ec9c6" opacity="0.44"/>
+<circle cx="626.23" cy="377.48" r="3.1" fill="#9ec9c6" opacity="0.44"/>
+<circle cx="627.10" cy="428.02" r="3.1" fill="#9ec9c6" opacity="0.44"/>
+<circle cx="650.27" cy="375.51" r="3.1" fill="#9ec9c6" opacity="0.44"/>
+<circle cx="673.45" cy="323.00" r="3.1" fill="#9ec9c6" opacity="0.44"/>
+<circle cx="505.26" cy="558.91" r="3.1" fill="#dfb86b" opacity="0.44"/>
+<circle cx="528.44" cy="506.40" r="3.1" fill="#dfb86b" opacity="0.44"/>
+<circle cx="551.61" cy="453.89" r="3.1" fill="#dfb86b" opacity="0.44"/>
+<circle cx="552.48" cy="504.43" r="3.1" fill="#dfb86b" opacity="0.44"/>
+<circle cx="575.66" cy="451.92" r="3.1" fill="#dfb86b" opacity="0.44"/>
+<circle cx="598.84" cy="399.42" r="3.1" fill="#dfb86b" opacity="0.44"/>
+<circle cx="599.71" cy="449.96" r="3.1" fill="#dfb86b" opacity="0.44"/>
+<circle cx="622.88" cy="397.45" r="3.1" fill="#dfb86b" opacity="0.44"/>
+<circle cx="646.06" cy="344.94" r="3.1" fill="#dfb86b" opacity="0.44"/>
+<circle cx="578.30" cy="500.42" r="3.1" fill="#dfb86b" opacity="0.44"/>
+<circle cx="601.48" cy="447.91" r="3.1" fill="#dfb86b" opacity="0.44"/>
+<circle cx="624.65" cy="395.40" r="3.1" fill="#dfb86b" opacity="0.44"/>
+<circle cx="625.52" cy="445.94" r="3.1" fill="#dfb86b" opacity="0.44"/>
+<circle cx="648.70" cy="393.43" r="3.1" fill="#dfb86b" opacity="0.44"/>
+<circle cx="671.88" cy="340.93" r="3.1" fill="#dfb86b" opacity="0.44"/>
+<circle cx="672.75" cy="391.47" r="3.1" fill="#dfb86b" opacity="0.44"/>
+<circle cx="695.93" cy="338.96" r="3.1" fill="#dfb86b" opacity="0.44"/>
+<circle cx="719.10" cy="286.45" r="3.1" fill="#dfb86b" opacity="0.44"/>
+<circle cx="651.34" cy="441.93" r="3.1" fill="#dfb86b" opacity="0.44"/>
+<circle cx="674.52" cy="389.42" r="3.1" fill="#dfb86b" opacity="0.44"/>
+<circle cx="697.70" cy="336.91" r="3.1" fill="#dfb86b" opacity="0.44"/>
+<circle cx="698.57" cy="387.45" r="3.1" fill="#dfb86b" opacity="0.44"/>
+<circle cx="721.74" cy="334.94" r="3.1" fill="#dfb86b" opacity="0.44"/>
+<circle cx="744.92" cy="282.44" r="3.1" fill="#dfb86b" opacity="0.44"/>
+<circle cx="745.79" cy="332.98" r="3.1" fill="#dfb86b" opacity="0.44"/>
+<circle cx="768.97" cy="280.47" r="3.1" fill="#dfb86b" opacity="0.44"/>
+<circle cx="792.14" cy="227.96" r="3.1" fill="#dfb86b" opacity="0.44"/>
+<circle cx="467.16" cy="583.17" r="3.8" fill="#f4a261" opacity="0.44"/>
+<circle cx="490.34" cy="530.66" r="3.8" fill="#f4a261" opacity="0.44"/>
+<circle cx="513.51" cy="478.15" r="3.8" fill="#f4a261" opacity="0.44"/>
+<circle cx="514.38" cy="528.69" r="3.8" fill="#f4a261" opacity="0.44"/>
+<circle cx="537.56" cy="476.19" r="3.8" fill="#f4a261" opacity="0.44"/>
+<circle cx="560.74" cy="423.68" r="3.8" fill="#f4a261" opacity="0.44"/>
+<circle cx="561.61" cy="474.22" r="3.8" fill="#f4a261" opacity="0.44"/>
+<circle cx="584.78" cy="421.71" r="3.8" fill="#f4a261" opacity="0.44"/>
+<circle cx="607.96" cy="369.20" r="3.8" fill="#f4a261" opacity="0.44"/>
+<circle cx="540.20" cy="524.68" r="3.8" fill="#f4a261" opacity="0.44"/>
+<circle cx="563.38" cy="472.17" r="3.8" fill="#f4a261" opacity="0.44"/>
+<circle cx="586.56" cy="419.66" r="3.8" fill="#f4a261" opacity="0.44"/>
+<circle cx="587.42" cy="470.20" r="3.8" fill="#f4a261" opacity="0.44"/>
+<circle cx="610.60" cy="417.70" r="3.8" fill="#f4a261" opacity="0.44"/>
+<circle cx="633.78" cy="365.19" r="3.8" fill="#f4a261" opacity="0.44"/>
+<circle cx="634.65" cy="415.73" r="3.8" fill="#f4a261" opacity="0.44"/>
+<circle cx="657.83" cy="363.22" r="3.8" fill="#f4a261" opacity="0.44"/>
+<circle cx="681.00" cy="310.71" r="3.8" fill="#f4a261" opacity="0.44"/>
+<circle cx="613.24" cy="466.19" r="3.8" fill="#f4a261" opacity="0.44"/>
+<circle cx="636.42" cy="413.68" r="3.8" fill="#f4a261" opacity="0.44"/>
+<circle cx="659.60" cy="361.17" r="3.8" fill="#f4a261" opacity="0.44"/>
+<circle cx="660.47" cy="411.71" r="3.8" fill="#f4a261" opacity="0.44"/>
+<circle cx="683.64" cy="359.21" r="3.8" fill="#f4a261" opacity="0.44"/>
+<circle cx="706.82" cy="306.70" r="3.8" fill="#f4a261" opacity="0.44"/>
+<circle cx="707.69" cy="357.24" r="3.8" fill="#f4a261" opacity="0.44"/>
+<circle cx="730.87" cy="304.73" r="3.8" fill="#f4a261" opacity="0.44"/>
+<circle cx="754.05" cy="252.22" r="3.8" fill="#f4a261" opacity="0.44"/>
+<circle cx="568.76" cy="518.48" r="3.8" fill="#f4a261" opacity="0.44"/>
+<circle cx="591.93" cy="465.97" r="3.8" fill="#f4a261" opacity="0.44"/>
+<circle cx="615.11" cy="413.46" r="3.8" fill="#f4a261" opacity="0.44"/>
+<circle cx="615.98" cy="464.00" r="3.8" fill="#f4a261" opacity="0.44"/>
+<circle cx="639.16" cy="411.49" r="3.8" fill="#f4a261" opacity="0.44"/>
+<circle cx="662.34" cy="358.98" r="3.8" fill="#f4a261" opacity="0.44"/>
+<circle cx="663.21" cy="409.52" r="3.8" fill="#f4a261" opacity="0.44"/>
+<circle cx="686.38" cy="357.01" r="3.8" fill="#f4a261" opacity="0.44"/>
+<circle cx="709.56" cy="304.50" r="3.8" fill="#f4a261" opacity="0.44"/>
+<circle cx="641.80" cy="459.99" r="3.8" fill="#f4a261" opacity="0.44"/>
+<circle cx="664.98" cy="407.48" r="3.8" fill="#f4a261" opacity="0.44"/>
+<circle cx="688.15" cy="354.97" r="3.8" fill="#f4a261" opacity="0.44"/>
+<circle cx="689.02" cy="405.51" r="3.8" fill="#f4a261" opacity="0.44"/>
+<circle cx="712.20" cy="353.00" r="3.8" fill="#f4a261" opacity="0.44"/>
+<circle cx="735.38" cy="300.49" r="3.8" fill="#f4a261" opacity="0.44"/>
+<circle cx="736.25" cy="351.03" r="3.8" fill="#f4a261" opacity="0.44"/>
+<circle cx="759.42" cy="298.52" r="3.8" fill="#f4a261" opacity="0.44"/>
+<circle cx="782.60" cy="246.01" r="3.8" fill="#f4a261" opacity="0.44"/>
+<circle cx="714.84" cy="401.50" r="3.8" fill="#f4a261" opacity="0.44"/>
+<circle cx="738.02" cy="348.99" r="3.8" fill="#f4a261" opacity="0.44"/>
+<circle cx="761.20" cy="296.48" r="3.8" fill="#f4a261" opacity="0.44"/>
+<circle cx="762.06" cy="347.02" r="3.8" fill="#f4a261" opacity="0.44"/>
+<circle cx="785.24" cy="294.51" r="3.8" fill="#f4a261" opacity="0.44"/>
+<circle cx="808.42" cy="242.00" r="3.8" fill="#f4a261" opacity="0.44"/>
+<circle cx="809.29" cy="292.54" r="3.8" fill="#f4a261" opacity="0.44"/>
+<circle cx="832.47" cy="240.03" r="3.8" fill="#f4a261" opacity="0.44"/>
+<circle cx="855.64" cy="187.52" r="3.8" fill="#f4a261" opacity="0.44"/>
+<circle cx="670.36" cy="453.78" r="3.8" fill="#f4a261" opacity="0.44"/>
+<circle cx="693.53" cy="401.27" r="3.8" fill="#f4a261" opacity="0.44"/>
+<circle cx="716.71" cy="348.76" r="3.8" fill="#f4a261" opacity="0.44"/>
+<circle cx="717.58" cy="399.30" r="3.8" fill="#f4a261" opacity="0.44"/>
+<circle cx="740.76" cy="346.79" r="3.8" fill="#f4a261" opacity="0.44"/>
+<circle cx="763.93" cy="294.29" r="3.8" fill="#f4a261" opacity="0.44"/>
+<circle cx="764.80" cy="344.83" r="3.8" fill="#f4a261" opacity="0.44"/>
+<circle cx="787.98" cy="292.32" r="3.8" fill="#f4a261" opacity="0.44"/>
+<circle cx="811.16" cy="239.81" r="3.8" fill="#f4a261" opacity="0.44"/>
+<circle cx="743.40" cy="395.29" r="3.8" fill="#f4a261" opacity="0.44"/>
+<circle cx="766.57" cy="342.78" r="3.8" fill="#f4a261" opacity="0.44"/>
+<circle cx="789.75" cy="290.27" r="3.8" fill="#f4a261" opacity="0.44"/>
+<circle cx="790.62" cy="340.81" r="3.8" fill="#f4a261" opacity="0.44"/>
+<circle cx="813.80" cy="288.30" r="3.8" fill="#f4a261" opacity="0.44"/>
+<circle cx="836.98" cy="235.80" r="3.8" fill="#f4a261" opacity="0.44"/>
+<circle cx="837.84" cy="286.34" r="3.8" fill="#f4a261" opacity="0.44"/>
+<circle cx="861.02" cy="233.83" r="3.8" fill="#f4a261" opacity="0.44"/>
+<circle cx="884.20" cy="181.32" r="3.8" fill="#f4a261" opacity="0.44"/>
+<circle cx="816.44" cy="336.80" r="3.8" fill="#f4a261" opacity="0.44"/>
+<circle cx="839.62" cy="284.29" r="3.8" fill="#f4a261" opacity="0.44"/>
+<circle cx="862.79" cy="231.78" r="3.8" fill="#f4a261" opacity="0.44"/>
+<circle cx="863.66" cy="282.32" r="3.8" fill="#f4a261" opacity="0.44"/>
+<circle cx="886.84" cy="229.81" r="3.8" fill="#f4a261" opacity="0.44"/>
+<circle cx="910.02" cy="177.31" r="3.8" fill="#f4a261" opacity="0.44"/>
+<circle cx="910.89" cy="227.85" r="3.8" fill="#f4a261" opacity="0.44"/>
+<circle cx="934.06" cy="175.34" r="3.8" fill="#f4a261" opacity="0.44"/>
+<circle cx="957.24" cy="122.83" r="3.8" fill="#f4a261" opacity="0.44"/>
+<polyline points="559.05,496.86 550.36,516.55 532.65,536.98 505.26,558.91 490.34,530.66" fill="none" stroke="#f4a261" stroke-width="2.3" stroke-dasharray="4 4"/>
+<circle cx="559.05" cy="496.86" r="4.5" fill="#f4a261"/>
+<circle cx="550.36" cy="516.55" r="4.5" fill="#f4a261"/>
+<circle cx="532.65" cy="536.98" r="4.5" fill="#f4a261"/>
+<circle cx="505.26" cy="558.91" r="4.5" fill="#f4a261"/>
+<circle cx="490.34" cy="530.66" r="4.5" fill="#f4a261"/>
+<polyline points="559.05,496.86 550.21,516.89 532.20,537.65 504.38,559.90 488.89,531.94" fill="none" stroke="#69b7e3" stroke-width="3.2"/>
+<circle cx="559.05" cy="496.86" r="4.5" fill="#69b7e3"/>
+<circle cx="550.21" cy="516.89" r="4.5" fill="#69b7e3"/>
+<circle cx="532.20" cy="537.65" r="4.5" fill="#69b7e3"/>
+<circle cx="504.38" cy="559.90" r="4.5" fill="#69b7e3"/>
+<circle cx="488.89" cy="531.94" r="4.5" fill="#69b7e3"/>
+<polyline points="559.05,496.86 550.21,516.89 532.20,537.65 527.55,507.39 536.10,477.51" fill="none" stroke="#84d69b" stroke-width="3.0" stroke-dasharray="8 4"/>
+<circle cx="559.05" cy="496.86" r="4.5" fill="#84d69b"/>
+<circle cx="550.21" cy="516.89" r="4.5" fill="#84d69b"/>
+<circle cx="532.20" cy="537.65" r="4.5" fill="#84d69b"/>
+<circle cx="527.55" cy="507.39" r="4.5" fill="#84d69b"/>
+<circle cx="536.10" cy="477.51" r="4.5" fill="#84d69b"/>
+<path d="M 165.76 489.86 L 179.76 503.86 M 165.76 503.86 L 179.76 489.86" stroke="#fa6e59" stroke-width="3"/>
+<line x1="110" y1="680" x2="126" y2="680" stroke="#80a7bd" stroke-width="3"/>
+<text x="133" y="684" fill="#d2dce1" font-size="13" font-family="sans-serif">Affine-model forward reachable states</text>
+<line x1="110" y1="708" x2="126" y2="708" stroke="#f4a261" stroke-width="3"/>
+<text x="133" y="712" fill="#d2dce1" font-size="13" font-family="sans-serif">Surrogate prediction for selected plan</text>
+<line x1="430" y1="680" x2="446" y2="680" stroke="#69b7e3" stroke-width="3"/>
+<text x="453" y="684" fill="#d2dce1" font-size="13" font-family="sans-serif">Selected plan replayed on nonlinear source map</text>
+<line x1="430" y1="708" x2="446" y2="708" stroke="#84d69b" stroke-width="3"/>
+<text x="453" y="712" fill="#d2dce1" font-size="13" font-family="sans-serif">Best source-map plan in the same finite catalogue</text>
+<path d="M750 674 l12 12 M750 686 l12 -12" stroke="#fa6e59" stroke-width="3"/>
+<text x="773" y="684" fill="#d2dce1" font-size="13" font-family="sans-serif">Target origin (visual reference only)</text>
+<text x="110" y="746" fill="#93a4ae" font-size="12" font-family="sans-serif">Local affine reachability is exhaustive for the finite action catalogue; nonlinear curves are source-map replays.</text>
+</svg>
