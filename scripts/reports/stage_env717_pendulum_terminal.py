@@ -40,8 +40,11 @@ def _digest(data: bytes) -> str:
 def _inputs(source: Path) -> tuple[dict[str, bytes], dict]:
     if source.is_symlink() or not source.is_dir():
         raise ValueError("environment report source must be a directory")
-    if {path.name for path in source.iterdir()} != set(FILES):
+    entries = tuple(source.iterdir())
+    if {path.name for path in entries} != set(FILES):
         raise ValueError("environment report source inventory differs")
+    if any(path.is_symlink() or not path.is_file() for path in entries):
+        raise ValueError("environment report entries must be regular files")
     files = {name: (source / name).read_bytes() for name in FILES}
     sums: dict[str, str] = {}
     for line in files["SHA256SUMS"].decode("ascii").splitlines():
@@ -65,7 +68,13 @@ def _inputs(source: Path) -> tuple[dict[str, bytes], dict]:
         if (not isinstance(value, str) or len(value) != expected_length or
                 any(character not in "0123456789abcdef" for character in value)):
             raise ValueError(f"environment report provenance field is invalid: {field}")
-    checker.verify(result)
+    checker.verify(result, require_saved_oracle=True)
+    if files["README.md"] != checker.readme(result).encode("utf-8"):
+        raise ValueError("environment report README differs from its saved result")
+    if files["projection.svg"] != (checker.svg_plot(result) + "\n").encode("utf-8"):
+        raise ValueError("environment report SVG differs from its saved result")
+    if files["index.html"] != checker.html_page(result, include_png=True).encode("utf-8"):
+        raise ValueError("environment report HTML differs from its saved result")
 
     parser = LocalLinks()
     parser.feed(files["index.html"].decode("utf-8"))

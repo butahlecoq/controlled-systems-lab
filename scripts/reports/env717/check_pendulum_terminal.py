@@ -9,6 +9,7 @@ import os
 from pathlib import Path
 import platform
 import shutil
+import statistics
 import subprocess
 import sys
 import time
@@ -71,7 +72,69 @@ def linearized_layers() -> list[list[list[float]]]:
     return layers
 
 
-def verify(record: dict) -> dict:
+def capture_runtime(executable: Path, repetitions: int = 7) -> tuple[dict, dict]:
+    def load_average() -> list[float] | None:
+        try:
+            return list(os.getloadavg())
+        except (AttributeError, OSError):
+            return None
+
+    def invoke() -> tuple[int, dict]:
+        started = time.perf_counter_ns()
+        completed = subprocess.run([str(executable)], capture_output=True, text=True)
+        elapsed = time.perf_counter_ns() - started
+        if completed.returncode != 0:
+            raise RuntimeError(f"native report driver failed: {completed.stderr.strip()}")
+        observed = verify(json.loads(completed.stdout))
+        if observed.get("plan_count") != len(ACTIONS) ** HORIZON:
+            raise ValueError("timed native call did not enumerate the complete catalogue")
+        return elapsed, observed
+
+    capture_started = time.time_ns()
+    before = load_average()
+    invoke()
+    samples = [invoke()[0] for _ in range(repetitions)]
+    after = load_average()
+    block = {
+        "started_unix_ns": capture_started,
+        "warmups": 1,
+        "measured_calls": repetitions,
+        "successful_calls": repetitions,
+        "failed_calls": 0,
+        "durations_ns": samples,
+        "median_ns": statistics.median(samples),
+        "minimum_ns": min(samples),
+        "maximum_ns": max(samples),
+        "load_average_before": before,
+        "load_average_after": after,
+    }
+    measurement = {
+        "schema": "csl.env717-runtime-measurement/1",
+        "scope": "one Release CLI invocation: process launch, 81-plan affine solver enumeration, and JSON serialization/capture; excludes Python oracle, report rendering, and plotting",
+        "warmups": 1,
+        "measured_calls": repetitions,
+        "successful_calls": repetitions,
+        "failed_calls": 0,
+        "durations_ns": samples,
+        "median_ns": statistics.median(samples),
+        "minimum_ns": min(samples),
+        "maximum_ns": max(samples),
+        "capture_blocks": [block],
+        "limiter": "not established; perf and strace are unavailable in the capture environment",
+        "comparison": "single-adapter descriptive timing; no comparator or speedup claim",
+    }
+    environment = {
+        "os": platform.platform(),
+        "processor": platform.processor(),
+        "logical_cpus": os.cpu_count(),
+        "load_average_before": before,
+        "load_average_after": after,
+        "capture_started_unix_ns": capture_started,
+    }
+    return measurement, environment
+
+
+def verify(record: dict, *, require_saved_oracle: bool = False) -> dict:
     if record.get("schema") != "csl.env717-pendulum-terminal-pilot/1":
         raise ValueError("unexpected result schema")
     if record.get("source_repository_commit") != SOURCE_COMMIT:
@@ -141,7 +204,7 @@ def verify(record: dict) -> dict:
     gap = selected[0] - source_optimum
     if gap < -1e-12:
         raise ValueError("candidate source cost is below the independent catalogue minimum")
-    record["independent_source_catalogue_oracle"] = {
+    expected_oracle = {
         "method": "exhaustive source-map replay over every fixed four-action sequence",
         "plan_count": len(source_rows),
         "objective": "sum of PendulumTerminal.step per-step costs before each transition",
@@ -150,7 +213,7 @@ def verify(record: dict) -> dict:
         "minimizing_actions": list(reference[2]),
         "minimizing_trajectory_time_theta_theta_dot": reference[3],
     }
-    record["linearized_plan_source_replay"] = {
+    expected_replay = {
         "action_indices": list(selected[1]),
         "actions": list(selected[2]),
         "source_accumulated_cost": selected[0],
@@ -158,7 +221,55 @@ def verify(record: dict) -> dict:
         "relative_gap": gap / source_optimum if source_optimum else 0.0,
         "trajectory_time_theta_theta_dot": selected[3],
     }
-    record["linearized_reachable_layers_theta_theta_dot"] = linearized_layers()
+    expected_layers = linearized_layers()
+    if require_saved_oracle:
+        expected_fields = {
+            "independent_source_catalogue_oracle": expected_oracle,
+            "linearized_plan_source_replay": expected_replay,
+            "linearized_reachable_layers_theta_theta_dot": expected_layers,
+        }
+        for field, expected in expected_fields.items():
+            if record.get(field) != expected:
+                raise ValueError(f"saved report evidence disagrees with independent replay: {field}")
+    record["independent_source_catalogue_oracle"] = expected_oracle
+    record["linearized_plan_source_replay"] = expected_replay
+    record["linearized_reachable_layers_theta_theta_dot"] = expected_layers
+    if "runtime_measurement" in record:
+        timing = record["runtime_measurement"]
+        if not isinstance(timing, dict):
+            raise ValueError("runtime measurement must be an object")
+        samples = timing.get("durations_ns")
+        if not isinstance(samples, list) or not samples:
+            raise ValueError("runtime measurement must contain at least one sample")
+        if (timing.get("schema") != "csl.env717-runtime-measurement/1" or
+                len(samples) != timing.get("measured_calls") or
+                timing.get("successful_calls") != len(samples) or timing.get("failed_calls") != 0 or
+                any(not isinstance(value, int) or value <= 0 for value in samples) or
+                timing.get("minimum_ns") != min(samples) or
+                timing.get("maximum_ns") != max(samples) or
+                timing.get("median_ns") != statistics.median(samples)):
+            raise ValueError("runtime measurement summary does not match its raw observations")
+        blocks = timing.get("capture_blocks")
+        if not isinstance(blocks, list) or not blocks:
+            raise ValueError("runtime measurement must retain its capture blocks")
+        block_samples = []
+        for block in blocks:
+            values = block.get("durations_ns") if isinstance(block, dict) else None
+            if (not isinstance(values, list) or not values or
+                    block.get("warmups") != 1 or
+                    block.get("measured_calls") != len(values) or
+                    block.get("successful_calls") != len(values) or
+                    block.get("failed_calls") != 0 or
+                    block.get("minimum_ns") != min(values) or
+                    block.get("maximum_ns") != max(values) or
+                    block.get("median_ns") != statistics.median(values) or
+                    any(not isinstance(value, int) or value <= 0 for value in values)):
+                raise ValueError("runtime capture block summary does not match its raw observations")
+            block_samples.extend(values)
+        if block_samples != samples:
+            raise ValueError("runtime capture blocks do not match the accepted raw observations")
+        if timing.get("warmups") != len(blocks):
+            raise ValueError("runtime measurement warmup count differs from its capture blocks")
     return record
 
 
@@ -249,6 +360,11 @@ def svg_plot(record: dict) -> str:
 def readme(record: dict) -> str:
     selected = record["linearized_plan_source_replay"]
     reference = record["independent_source_catalogue_oracle"]
+    blocks = record["runtime_measurement"]["capture_blocks"]
+    block_summaries = "; ".join(
+        f"block {index}: median {block['median_ns'] / 1e6:.3f} ms, "
+        f"range {block['minimum_ns'] / 1e6:.3f}–{block['maximum_ns'] / 1e6:.3f} ms"
+        for index, block in enumerate(blocks, 1))
     return f'''# PendulumTerminal local-linear finite-action pilot
 
 The source is pinned to [{SOURCE_COMMIT}]({record['source_url']}) and blob
@@ -273,8 +389,20 @@ pilot only. It is not a continuous-action or full-horizon optimality result.
 
 The phase-plane plot shows every affine forward-reachable point for the finite
 catalogue, the selected affine prediction, its nonlinear replay and the best
-source-map finite-catalogue replay. No runtime or performance comparison is
-reported.
+source-map finite-catalogue replay.
+
+The Release CLI call took a median `{record['runtime_measurement']['median_ns']}` ns
+({record['runtime_measurement']['minimum_ns']}–{record['runtime_measurement']['maximum_ns']} ns)
+over {record['runtime_measurement']['measured_calls']} calls in
+{len(blocks)} capture block(s), with one excluded warmup per block. Block summaries:
+{block_summaries}. Each interval includes process launch, affine-plan
+enumeration and JSON serialization/capture; it excludes the Python oracle and
+report rendering. The block medians vary substantially, so these are descriptive
+observations and support no performance conclusion or speedup claim. The CPU limiter is
+unestablished because `perf` and `strace` were unavailable. The capture used
+{record['capture_environment']['processor']} on
+{record['capture_environment']['os']} with
+{record['compiler']['id']} {record['compiler']['version']} in Release mode.
 
 Reproduce from a clean checkout:
 
@@ -292,21 +420,40 @@ The current source commit is `{record['source_commit']}`.
 '''
 
 
+def html_page(record: dict, include_png: bool = True) -> str:
+    selected = record["linearized_plan_source_replay"]
+    reference = record["independent_source_catalogue_oracle"]
+    png_link = ' · <a href="projection.png">PNG</a>' if include_png else ""
+    return f'''<!doctype html>
+<html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>PendulumTerminal local-linear control pilot</title>
+<style>body{{margin:0;background:#111820;color:#f4f1e8;font:16px/1.55 system-ui,sans-serif}}main{{max-width:1120px;margin:auto;padding:2rem}}a{{color:#8bd3f7}}.plot{{width:100%;height:auto}}.note{{border-left:4px solid #f4a261;padding:.7rem 1rem;background:#1a252e}}code{{overflow-wrap:anywhere}}table{{border-collapse:collapse}}td,th{{padding:.35rem .7rem;border-bottom:1px solid #34434d;text-align:left}}</style>
+<main><h1>PendulumTerminal: local-linear finite-action pilot</h1>
+<p>The current finite-action solver exhausts all 81 four-step plans on a two-state affine model linearized at the upright equilibrium. An independent exhaustive enumeration then evaluates every plan using the pinned source environment's nonlinear semi-implicit Euler map and source running cost.</p>
+<figure><img class="plot" src="projection.svg" alt="Angle and angular velocity projection showing affine forward reachable states, the selected plan's prediction and nonlinear replay, the source-map best finite-catalog plan, and the origin reference"><figcaption>Forward reachable points are exact for the declared affine pilot and finite action catalogue. Replay curves use the source nonlinear update.</figcaption></figure>
+<table><tr><th>Result</th><th>Value</th></tr><tr><td>Linearized terminal objective</td><td>{record['linearized_objective_value']:.12g}</td></tr><tr><td>Selected action sequence</td><td>{selected['actions']}</td></tr><tr><td>Source running cost of selected sequence</td><td>{selected['source_accumulated_cost']:.12g}</td></tr><tr><td>Best source running cost in the same finite catalogue</td><td>{reference['minimum_cost']:.12g}</td></tr><tr><td>Cost gap from source finite-catalog optimum</td><td>{selected['source_cost_gap_from_finite_catalogue_optimum']:.12g} ({100*selected['relative_gap']:.4g}%)</td></tr><tr><td>Source-map catalogue minimizers</td><td>{reference['minimizing_actions']}</td></tr><tr><td>Release CLI duration ({record['runtime_measurement']['measured_calls']} calls)</td><td>{record['runtime_measurement']['median_ns'] / 1e6:.3f} ms median ({record['runtime_measurement']['minimum_ns'] / 1e6:.3f}–{record['runtime_measurement']['maximum_ns'] / 1e6:.3f} ms)</td></tr></table>
+<p class="note"><strong>Scope:</strong> the upstream environment randomizes its reset state and runs for 5 seconds. This pilot fixes the initial state to (θ, θ̇) = (0.25 rad, 0 rad/s) and uses four 0.05-second steps. The planner minimizes a terminal quadratic on the local affine model; the source objective is a running cost. The selected action is replayed and compared with an independent exhaustive source-map oracle over the same 81 finite action sequences. These values do not establish continuous-action or full-horizon optimality.</p>
+<p>Source: <a href="{record['source_url']}">PendulumTerminal.py</a>, commit <code>{record['source_repository_commit']}</code>, blob <code>{record['source_file_blob']}</code>. CSL source commit: <code>{record['source_commit']}</code>. Method: <code>{record['algorithm']}</code>; assurance is exhaustive only for the declared affine surrogate catalogue.</p>
+<p><a href="result.json">Raw result and oracle record</a> · <a href="environment.json">Capture environment</a> · <a href="README.md">Reproduction steps and timing notes</a> · <a href="projection.svg">Standalone SVG</a>{png_link}</p>
+<p>Timing covers process launch, affine-plan enumeration and JSON serialization/capture; it excludes the Python oracle and rendering. It is descriptive for this single fixture and has no comparator or speedup claim. The CPU limiter is unestablished.</p>
+<p>Reproduction commands and raw timing observations are in <a href="README.md">README.md</a>.</p></main></html>'''
+
+
 def render(executable: Path, output: Path | None) -> None:
     raw = json.loads(subprocess.check_output([str(executable)], text=True))
     record = verify(raw)
     if output is None:
         return
     output.mkdir(parents=True, exist_ok=True)
+    timing, measured_environment = capture_runtime(executable)
     processor = platform.processor()
     if not processor and Path("/proc/cpuinfo").is_file():
         for line in Path("/proc/cpuinfo").read_text(encoding="utf-8").splitlines():
             if line.lower().startswith("model name") and ":" in line:
                 processor = line.split(":", 1)[1].strip()
                 break
-    host = {"os": platform.platform(), "processor": processor,
-            "logical_cpus": os.cpu_count(), "capture_started_unix_ns": time.time_ns(),
-            "note": "environment context only; no runtime comparison was measured"}
+    host = {**measured_environment, "processor": processor}
+    record["runtime_measurement"] = timing
     record["capture_environment"] = host
     record["renderer_sha256"] = hashlib.sha256(Path(__file__).read_bytes()).hexdigest()
     (output / "README.md").write_text(readme(record), encoding="utf-8")
@@ -318,22 +465,7 @@ def render(executable: Path, output: Path | None) -> None:
     if converter:
         subprocess.run([converter, "--output", str(output / "projection.png"),
                         str(output / "projection.svg")], check=True)
-    png_link = ' · <a href="projection.png">PNG</a>' if converter else ""
-    selected = record["linearized_plan_source_replay"]
-    reference = record["independent_source_catalogue_oracle"]
-    page = f'''<!doctype html>
-<html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>PendulumTerminal local-linear control pilot</title>
-<style>body{{margin:0;background:#111820;color:#f4f1e8;font:16px/1.55 system-ui,sans-serif}}main{{max-width:1120px;margin:auto;padding:2rem}}a{{color:#8bd3f7}}.plot{{width:100%;height:auto}}.note{{border-left:4px solid #f4a261;padding:.7rem 1rem;background:#1a252e}}code{{overflow-wrap:anywhere}}table{{border-collapse:collapse}}td,th{{padding:.35rem .7rem;border-bottom:1px solid #34434d;text-align:left}}</style>
-<main><h1>PendulumTerminal: local-linear finite-action pilot</h1>
-<p>The current finite-action solver exhausts all 81 four-step plans on a two-state affine model linearized at the upright equilibrium. An independent exhaustive enumeration then evaluates every plan using the pinned source environment's nonlinear semi-implicit Euler map and source running cost.</p>
-<figure><img class="plot" src="projection.svg" alt="Angle and angular velocity projection showing affine forward reachable states, the selected plan's prediction and nonlinear replay, the source-map best finite-catalog plan, and the origin reference"><figcaption>Forward reachable points are exact for the declared affine pilot and finite action catalogue. Replay curves use the source nonlinear update.</figcaption></figure>
-<table><tr><th>Result</th><th>Value</th></tr><tr><td>Linearized terminal objective</td><td>{record['linearized_objective_value']:.12g}</td></tr><tr><td>Selected action sequence</td><td>{selected['actions']}</td></tr><tr><td>Source running cost of selected sequence</td><td>{selected['source_accumulated_cost']:.12g}</td></tr><tr><td>Best source running cost in the same finite catalogue</td><td>{reference['minimum_cost']:.12g}</td></tr><tr><td>Cost gap from source finite-catalog optimum</td><td>{selected['source_cost_gap_from_finite_catalogue_optimum']:.12g} ({100*selected['relative_gap']:.4g}%)</td></tr><tr><td>Source-map catalogue minimizers</td><td>{reference['minimizing_actions']}</td></tr></table>
-<p class="note"><strong>Scope:</strong> the upstream environment randomizes its reset state and runs for 5 seconds. This pilot fixes the initial state to (θ, θ̇) = (0.25 rad, 0 rad/s) and uses four 0.05-second steps. The planner minimizes a terminal quadratic on the local affine model; the source objective is a running cost. The selected action is replayed and compared with an independent exhaustive source-map oracle over the same 81 finite action sequences. These values do not establish continuous-action or full-horizon optimality.</p>
-<p>Source: <a href="{record['source_url']}">PendulumTerminal.py</a>, commit <code>{record['source_repository_commit']}</code>, blob <code>{record['source_file_blob']}</code>. CSL source commit: <code>{record['source_commit']}</code>. Method: <code>{record['algorithm']}</code>; assurance is exhaustive only for the declared affine surrogate catalogue.</p>
-<p><a href="result.json">Raw result and oracle record</a> · <a href="environment.json">Capture environment</a> · <a href="projection.svg">Standalone SVG</a>{png_link}</p>
-<p>Reproduce with the command recorded in the repository's ENV-717 issue and <code>scripts/reports/env717/check_pendulum_terminal.py</code>. This pilot contains no timing comparison.</p></main></html>'''
-    (output / "index.html").write_text(page, encoding="utf-8")
+    (output / "index.html").write_text(html_page(record, converter is not None), encoding="utf-8")
     files = sorted(path for path in output.iterdir() if path.is_file() and path.name != "SHA256SUMS")
     sums = "".join(f"{hashlib.sha256(path.read_bytes()).hexdigest()}  {path.name}\n" for path in files)
     (output / "SHA256SUMS").write_text(sums, encoding="utf-8")

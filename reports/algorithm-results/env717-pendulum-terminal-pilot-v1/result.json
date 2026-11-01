@@ -3737,12 +3737,236 @@
       ]
     ]
   ],
+  "runtime_measurement": {
+    "schema": "csl.env717-runtime-measurement/1",
+    "scope": "one Release CLI invocation: process launch, 81-plan affine solver enumeration, and JSON serialization/capture; excludes Python oracle, report rendering, and plotting",
+    "warmups": 4,
+    "measured_calls": 28,
+    "successful_calls": 28,
+    "failed_calls": 0,
+    "durations_ns": [
+      6648043,
+      6609420,
+      7232969,
+      4538397,
+      3923090,
+      6809028,
+      6577153,
+      3304012,
+      3160976,
+      3121864,
+      3124727,
+      3314069,
+      3225859,
+      3378253,
+      6497743,
+      6581623,
+      6466244,
+      6631630,
+      6498580,
+      6391373,
+      6441520,
+      7079526,
+      7318105,
+      7010591,
+      7221584,
+      4418688,
+      3492515,
+      3510185
+    ],
+    "median_ns": 6453882.0,
+    "minimum_ns": 3121864,
+    "maximum_ns": 7318105,
+    "capture_blocks": [
+      {
+        "started_unix_ns": 1793501195723302378,
+        "warmups": 1,
+        "measured_calls": 7,
+        "successful_calls": 7,
+        "failed_calls": 0,
+        "durations_ns": [
+          6648043,
+          6609420,
+          7232969,
+          4538397,
+          3923090,
+          6809028,
+          6577153
+        ],
+        "median_ns": 6609420,
+        "minimum_ns": 3923090,
+        "maximum_ns": 7232969,
+        "load_average_before": [
+          0.607421875,
+          0.4130859375,
+          0.61865234375
+        ],
+        "load_average_after": [
+          0.607421875,
+          0.4130859375,
+          0.61865234375
+        ]
+      },
+      {
+        "started_unix_ns": 1793501239587901685,
+        "warmups": 1,
+        "measured_calls": 7,
+        "successful_calls": 7,
+        "failed_calls": 0,
+        "durations_ns": [
+          3304012,
+          3160976,
+          3121864,
+          3124727,
+          3314069,
+          3225859,
+          3378253
+        ],
+        "median_ns": 3225859,
+        "minimum_ns": 3121864,
+        "maximum_ns": 3378253,
+        "load_average_before": [
+          0.4404296875,
+          0.3994140625,
+          0.60498046875
+        ],
+        "load_average_after": [
+          0.4404296875,
+          0.3994140625,
+          0.60498046875
+        ]
+      },
+      {
+        "started_unix_ns": 1793501295061709078,
+        "warmups": 1,
+        "measured_calls": 7,
+        "successful_calls": 7,
+        "failed_calls": 0,
+        "durations_ns": [
+          6497743,
+          6581623,
+          6466244,
+          6631630,
+          6498580,
+          6391373,
+          6441520
+        ],
+        "median_ns": 6497743,
+        "minimum_ns": 6391373,
+        "maximum_ns": 6631630,
+        "load_average_before": [
+          0.20849609375,
+          0.3447265625,
+          0.5732421875
+        ],
+        "load_average_after": [
+          0.20849609375,
+          0.3447265625,
+          0.5732421875
+        ]
+      },
+      {
+        "started_unix_ns": 1793501363946200160,
+        "warmups": 1,
+        "measured_calls": 7,
+        "successful_calls": 7,
+        "failed_calls": 0,
+        "durations_ns": [
+          7079526,
+          7318105,
+          7010591,
+          7221584,
+          4418688,
+          3492515,
+          3510185
+        ],
+        "median_ns": 7010591,
+        "minimum_ns": 3492515,
+        "maximum_ns": 7318105,
+        "load_average_before": [
+          0.13916015625,
+          0.298828125,
+          0.5380859375
+        ],
+        "load_average_after": [
+          0.13916015625,
+          0.298828125,
+          0.5380859375
+        ]
+      }
+    ],
+    "limiter": "not established; perf and strace are unavailable in the capture environment",
+    "comparison": "single-adapter descriptive timing; no comparator or speedup claim"
+  },
   "capture_environment": {
     "os": "Linux-7.2.8-9-omarchy-x86_64-with-glibc2.44",
     "processor": "AMD Ryzen 5 3550H with Radeon Vega Mobile Gfx",
     "logical_cpus": 8,
-    "capture_started_unix_ns": 1793500860132406006,
-    "note": "environment context only; no runtime comparison was measured"
+    "load_average_before": [
+      0.13916015625,
+      0.298828125,
+      0.5380859375
+    ],
+    "load_average_after": [
+      0.13916015625,
+      0.298828125,
+      0.5380859375
+    ],
+    "capture_started_unix_ns": 1793501195723302378,
+    "capture_blocks": [
+      {
+        "started_unix_ns": 1793501195723302378,
+        "load_average_before": [
+          0.607421875,
+          0.4130859375,
+          0.61865234375
+        ],
+        "load_average_after": [
+          0.607421875,
+          0.4130859375,
+          0.61865234375
+        ]
+      },
+      {
+        "started_unix_ns": 1793501239587901685,
+        "load_average_before": [
+          0.4404296875,
+          0.3994140625,
+          0.60498046875
+        ],
+        "load_average_after": [
+          0.4404296875,
+          0.3994140625,
+          0.60498046875
+        ]
+      },
+      {
+        "started_unix_ns": 1793501295061709078,
+        "load_average_before": [
+          0.20849609375,
+          0.3447265625,
+          0.5732421875
+        ],
+        "load_average_after": [
+          0.20849609375,
+          0.3447265625,
+          0.5732421875
+        ]
+      },
+      {
+        "started_unix_ns": 1793501363946200160,
+        "load_average_before": [
+          0.13916015625,
+          0.298828125,
+          0.5380859375
+        ],
+        "load_average_after": [
+          0.13916015625,
+          0.298828125,
+          0.5380859375
+        ]
+      }
+    ]
   },
-  "renderer_sha256": "7df9eb6fe8932dfb9a74b1fec273d57f6c5621ce6402028e3dec077c755a76ef"
+  "renderer_sha256": "8c48c861e5b4ce929df20ef7df8fa5a6198fda4638c58fd83fc2034df44c9f78"
 }
