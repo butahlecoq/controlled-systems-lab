@@ -35,7 +35,7 @@ TEST_CASE("ellipsoid selector retains point-budget refusals instead of dropping 
   const auto result = finite_action_ellipsoid_minimax(request("budget"), {27, 2, 27});
   REQUIRE(std::holds_alternative<FiniteActionEllipsoidMinimaxResult>(result));
   const auto& selection = std::get<FiniteActionEllipsoidMinimaxResult>(result);
-  CHECK(selection.candidate_search == CandidateSearchCoverage::complete);
+  CHECK(selection.candidate_search == CandidateSearchCoverage::incomplete);
   REQUIRE(selection.plan_attempts.size() == 27);
   for (const auto& attempt : selection.plan_attempts) {
     REQUIRE(std::holds_alternative<EllipsoidPlanUnscored>(attempt));

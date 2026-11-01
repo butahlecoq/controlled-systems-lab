@@ -178,7 +178,10 @@ FiniteActionEllipsoidMinimaxOutcome finite_action_ellipsoid_minimax(
     }
   }
 
-  const bool complete = attempts.size() == plan_count;
+  const bool complete = attempts.size() == plan_count &&
+      std::all_of(attempts.begin(), attempts.end(), [](const auto& attempt) {
+        return std::holds_alternative<EllipsoidPlanScored>(attempt);
+      });
   const auto coverage = complete ? CandidateSearchCoverage::complete
                                  : CandidateSearchCoverage::incomplete;
   if (!has_scored)
