@@ -414,6 +414,9 @@ jobs:
       - name: Stage the issue 824 zonotope report and planar companion
         if: steps.catalog.outputs.has_reports == 'true' && hashFiles('reports/algorithm-results/issue824-two-points-zonotope-pilot-v2/result.json') != ''
         run: python scripts/reports/stage_issue824_zonotope.py --source reports/algorithm-results/issue824-two-points-zonotope-pilot-v2 --site build/report-site
+      - name: Stage the issue 824 box minimax report
+        if: steps.catalog.outputs.has_reports == 'true' && hashFiles('reports/algorithm-results/issue824-two-points-box-pilot-v4/result.json') != ''
+        run: python scripts/reports/stage_issue824_box_minimax.py --source reports/algorithm-results/issue824-two-points-box-pilot-v4 --site build/report-site
       - name: Stage the issue 824 zonotope minimax report
         if: steps.catalog.outputs.has_reports == 'true' && hashFiles('reports/algorithm-results/issue824-two-points-zonotope-minimax-v1/result.json') != ''
         run: python scripts/reports/stage_issue824_zonotope_minimax.py --source reports/algorithm-results/issue824-two-points-zonotope-minimax-v1 --site build/report-site
