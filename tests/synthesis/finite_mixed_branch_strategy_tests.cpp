@@ -155,7 +155,8 @@ registry::StrategyRegistration stopping_strategy(std::shared_ptr<std::stop_sourc
     return registration;
 }
 
-problem::ResolvedProblem mixed_linear_tie_problem(std::size_t horizon = 1) {
+problem::ResolvedProblem mixed_linear_tie_problem(std::size_t horizon = 1,
+    double state_coefficient = 0.0) {
     const auto controls = take(sets::make_h({{"mixed-continuous-interval"}, 1, {"u"}},
         {matrix({2, 1, {1, -1}}), vector({1, 1}), matrix({0, 1, {}}), vector({})}));
     const auto terminal = take(sets::make_h({{"mixed-terminal-halfline"}, 1, {"x1"}},
@@ -170,7 +171,7 @@ problem::ResolvedProblem mixed_linear_tie_problem(std::size_t horizon = 1) {
         admissible_states.push_back(terminal.as_handle());
     Problem source{{"mixed-linear-tie"},
         std::make_shared<const SystemModel>(SystemModel{{{1, 2, 0}, TimeDomain::discrete,
-            LinearStage{{1, 1, {0}}, {1, 2, {1, 1}}, {1, 0, {}}, {0}}}, {}}),
+            LinearStage{{1, 1, {state_coefficient}}, {1, 2, {1, 1}}, {1, 0, {}}, {0}}}, {}}),
         std::move(times), KnownInitial{{0}},
         MixedDomain{ContinuousDomain{std::move(continuous_stages)},
             FiniteDomain{1, {{-1}, {1}, {-1}}}},
@@ -271,7 +272,7 @@ TEST_CASE("mixed branch solve runs registered continuous solvers and retains ver
 }
 
 TEST_CASE("two-stage mixed branch enumeration agrees with a one-hot MILP") {
-    const auto source = mixed_linear_tie_problem(2);
+    const auto source = mixed_linear_tie_problem(2, 1.0);
     ExactLinearStrategyFixture strategy_fixture;
     FiniteMixedBranchSolveRequest request;
     request.strategy.strategy = {"csl.synthesis.reach-back"};
@@ -299,8 +300,8 @@ TEST_CASE("two-stage mixed branch enumeration agrees with a one-hot MILP") {
     REQUIRE(portfolio.optimal_evaluation_indices ==
         std::vector<std::size_t>{0, 1, 2, 3, 4, 5, 6, 7, 8});
 
-    // Independent two-stage MIP: one continuous input and one catalogue choice
-    // at each stage, with the same affine dynamics and state halfspaces.
+    // Independent two-stage MIP: x[k + 1] = x[k] + u[k] + d[z[k]], with
+    // one continuous input and one catalogue choice at each stage.
     HighsLp lp;
     lp.num_col_ = 10; // u[0..1], z[0][0..2], z[1][0..2], x[1..2]
     lp.num_row_ = 4;
@@ -311,10 +312,10 @@ TEST_CASE("two-stage mixed branch enumeration agrees with a one-hot MILP") {
     lp.row_lower_ = {1.0, 1.0, 0.0, 0.0};
     lp.row_upper_ = {1.0, 1.0, 0.0, 0.0};
     lp.a_matrix_.format_ = MatrixFormat::kRowwise;
-    lp.a_matrix_.start_ = {0, 3, 6, 11, 16};
-    lp.a_matrix_.index_ = {2, 3, 4, 5, 6, 7, 0, 2, 3, 4, 8, 1, 5, 6, 7, 9};
+    lp.a_matrix_.start_ = {0, 3, 6, 11, 17};
+    lp.a_matrix_.index_ = {2, 3, 4, 5, 6, 7, 0, 2, 3, 4, 8, 1, 5, 6, 7, 8, 9};
     lp.a_matrix_.value_ = {1.0, 1.0, 1.0, 1.0, 1.0, 1.0,
-        -1.0, 1.0, -1.0, 1.0, 1.0, -1.0, 1.0, -1.0, 1.0, 1.0};
+        -1.0, 1.0, -1.0, 1.0, 1.0, -1.0, 1.0, -1.0, 1.0, -1.0, 1.0};
     lp.a_matrix_.num_row_ = lp.num_row_;
     lp.a_matrix_.num_col_ = lp.num_col_;
     lp.integrality_.assign(10, HighsVarType::kContinuous);
@@ -364,7 +365,8 @@ TEST_CASE("two-stage mixed branch enumeration agrees with a one-hot MILP") {
         portfolio.optimal_evaluation_indices.end());
     const std::array<double, 3> action_values{-1.0, 1.0, -1.0};
     const double replayed_first_state = mip_solution[0] + action_values[selected_catalogue_indices[0]];
-    const double replayed_terminal = mip_solution[1] + action_values[selected_catalogue_indices[1]];
+    const double replayed_terminal = mip_solution[8] + mip_solution[1] +
+        action_values[selected_catalogue_indices[1]];
     CHECK(replayed_first_state == doctest::Approx(mip_solution[8]));
     CHECK(replayed_terminal == doctest::Approx(mip_solution[9]));
     CHECK(mip_solution[8] >= -1e-9);
