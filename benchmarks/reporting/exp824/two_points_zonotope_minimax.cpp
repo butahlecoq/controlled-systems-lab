@@ -2,6 +2,7 @@
 #include <csl/optimization/finite_action_minimax.hpp>
 #include <csl/optimization/finite_action_zonotope_minimax.hpp>
 #include <csl/reachability/finite_plan_zonotope.hpp>
+#include <csl/reachability/finite_plan_parallelotope.hpp>
 #include "two_points_fixture.hpp"
 #include <nlohmann/json.hpp>
 
@@ -42,6 +43,14 @@ Json trace_json(const reachability::FinitePlanZonotopeTrace& trace) {
             {"factors", std::move(factors)}});
     }
     return stages;
+}
+
+Json parallelotope_trace_json(const reachability::FinitePlanParallelotopeTrace& trace) {
+    Json stages = Json::array();
+    for(const auto& stage : trace.stages)
+        stages.push_back({{"lower", stage.lower}, {"upper", stage.upper}});
+    return {{"frame", {{"rows", trace.frame.rows}, {"cols", trace.frame.cols},
+        {"values", trace.frame.values}}}, {"stages", std::move(stages)}};
 }
 
 Json diagnostics_json(const Unsupported& outcome) {
@@ -235,6 +244,18 @@ Json run() {
     const auto* selected = std::get_if<ZonotopePlanSelected>(&zonotope_result->selection);
     if(!selected) throw std::runtime_error("zonotope minimax did not replay a selected candidate");
 
+    std::vector<Vector> parallelotope_controls;
+    const auto& selected_actions = std::get<ZonotopePlanScored>(
+        zonotope_result->plan_attempts[selected->candidate_attempt_index]).action_indices;
+    for(const auto index : selected_actions)
+        parallelotope_controls.push_back(input.actions.catalogue.at(index));
+    reachability::FixedPlanRequest parallelotope_request{input.system, input.initial,
+        std::move(parallelotope_controls), input.disturbances, input.admissible_states,
+        {"issue824-parallelotope-selected-plan"}};
+    const auto parallelotope = reachability::finite_plan_parallelotope(parallelotope_request);
+    const auto* parallelotope_trace = std::get_if<reachability::FinitePlanParallelotopeTrace>(&parallelotope);
+    if(!parallelotope_trace) throw std::runtime_error("parallelotope propagation did not complete");
+
     std::vector<Vector> box_controls;
     for(const auto index : box_result->selected_action_indices)
         box_controls.push_back(input.actions.catalogue.at(index));
@@ -289,6 +310,10 @@ Json run() {
         {"zonotope_method", {{"status", "numerical outer zonotope recurrence"},
             {"plan_source", "box-selected fixed open-loop plan"}, {"relation", "outer"},
             {"max_generators_per_stage", 64}, {"stages", trace_json(*box_zone_trace)}}},
+        {"parallelotope_method", {{"status", "numerical outer fixed-frame parallelotope recurrence"},
+            {"plan_source", "zonotope-selected fixed open-loop plan"}, {"relation", "outer"},
+            {"coordinate_frame", "x = Q y; Q is a fixed unit-upper-triangular dyadic shear"},
+            {"stages", parallelotope_trace_json(*parallelotope_trace)}}},
         {"zonotope_minimax_method", {{"status", "numerical factor-corner candidate scoring"},
             {"candidate_search_coverage", "complete"}, {"max_generators_per_stage", 64},
             {"max_factor_corners", 32768}, {"plan_attempts", attempts_json(*zonotope_result)},

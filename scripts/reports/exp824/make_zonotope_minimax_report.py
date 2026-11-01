@@ -36,6 +36,9 @@ SOURCE_FILES = (
     "src/optimization/Tests.cmake",
     "include/csl/reachability/finite_plan_zonotope.hpp",
     "src/reachability/finite_plan_zonotope.cpp",
+    "include/csl/reachability/finite_plan_parallelotope.hpp",
+    "src/reachability/finite_plan_parallelotope.cpp",
+    "tests/installed/finite_plan_parallelotope_client.cpp",
     "src/reachability/Module.cmake",
     "src/reachability/Tests.cmake",
     "benchmarks/reporting/exp824/two_points_fixture.hpp",
@@ -47,6 +50,7 @@ SOURCE_FILES = (
     "scripts/reports/exp824/check_two_points_box.py",
     "scripts/reports/exp824/check_zonotope_minimax.py",
     "scripts/reports/exp824/make_report.py",
+        "tests/unit/reachability/finite_plan_parallelotope_tests.cpp",
     "scripts/reports/exp824/make_zonotope_minimax_report.py",
     "scripts/reports/exp824/check_zonotope_minimax_smoke.py",
     "scripts/reports/audit_visual_routes.py",
@@ -59,6 +63,7 @@ SOURCE_FILES = (
     "tests/reporting/test_visual_route_inventory.py",
     ".github/workflows/algorithm-reports.yml",
     "docs/architecture/issue824-zonotope-minimax-selection.md",
+    "docs/architecture/issue824-parallelotope-propagation.md",
 )
 COLORS = ("#458588", "#689d6a", "#d79921")
 
@@ -200,6 +205,7 @@ def main() -> None:
         "timing": result["timing"],
         "box_stages": result["box_method"]["stages"],
         "box_selected_zonotope_stages": result["zonotope_method"]["stages"],
+        "parallelotope_method": result["parallelotope_method"],
         "zonotope_candidate_plans": result["zonotope_minimax_method"]["plan_attempts"],
         "planar_selector_example": result["planar_selector_example"]}
     (output / "figure-data.json").write_text(json.dumps(figure, indent=2, sort_keys=True) + "\n", encoding="utf-8")
@@ -227,23 +233,23 @@ def main() -> None:
     (output / "planar-example.html").write_text(planar_html, encoding="utf-8")
     html_page = f'''<!doctype html><html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width"><title>Issue 824 · Zonotope minimax candidate selection</title>
 <style>body{{max-width:1280px;margin:2rem auto;padding:0 1rem;background:#fbf1c7;color:#282828;font:16px/1.5 system-ui}}h1,h2{{color:#3c3836}}.metric{{display:inline-block;margin:.4rem 1rem .4rem 0;padding:.7rem;background:#f9f5d7;border:1px solid #d5c4a1;border-radius:6px}}svg{{width:100%;height:auto}}a{{color:#076678}}</style>
-<h1>TwoPointsOnParallelLines: zonotope candidate selection</h1><p>This is a three-stage finite-catalog adaptation of the source differential-game environment. The selector ranks each fixed open-loop plan by its terminal zonotope factor-corner score, then replays only the selected plan through every finite disturbance history. It does not reproduce the upstream continuous-action RL problem.</p>
+<h1>TwoPointsOnParallelLines: outer-set candidate selection</h1><p>This is a three-stage finite-catalog adaptation of the source differential-game environment. The selector ranks each fixed open-loop plan by its terminal zonotope factor-corner score, then replays only the selected plan through every finite disturbance history. A fixed-frame parallelotope trace propagates the selected plan and is checked against every exact finite-history state. It does not reproduce the upstream continuous-action RL problem.</p>
 <p><span class="metric">Exact finite minimax: <b>{exact_value:.8f}</b></span><span class="metric">Box-selected replay: <b>{box_value:.8f}</b></span><span class="metric">Zonotope-selected replay: <b>{zonotope_value:.8f}</b></span><span class="metric">Selected zonotope candidate score: <b>{candidate_value:.8f}</b></span></p>
 {shared.svg_figure(result, check, mpc_figure)}
 <h2>Descriptive API-call timings</h2><p>One excluded warmup and seven order-rotated repetitions per method. Times cover the complete algorithm call; request setup and JSON serialization are excluded. These descriptive timings do not establish a performance winner or speedup. No separate limiter profile was collected.</p><table><thead><tr><th>Method</th><th>Runs</th><th>Median (ns)</th><th>Range (ns)</th></tr></thead><tbody>{timing_rows}</tbody></table>
-<h2>Evidence and limits</h2><p>The independent checker reconstructs the exact finite game, verifies all 27 candidate score rows by evaluating their stored terminal factor corners, and checks the selected plan's exact worst disturbance history. It checks four-dimensional zonotope coordinate bounds at every stage. Those checks do not prove full four-dimensional zonotope membership or a validated objective upper bound. The separate two-dimensional example checks complete inclusion of all finite terminal points in each axis-aligned zonotope.</p>
+<h2>Evidence and limits</h2><p>The independent checker reconstructs the exact finite game, verifies all 27 candidate score rows by evaluating their stored terminal factor corners, checks the selected plan's exact worst disturbance history, and transforms every finite-history state into the fixed parallelotope frame at each stage. The parallelotope orientation is fixed and is not optimized. Zonotope coordinate checks do not prove full four-dimensional zonotope membership, and candidate scores are not validated objective bounds. The separate two-dimensional example checks complete inclusion of all finite terminal points in each axis-aligned zonotope.</p>
 <p>The figure shows exact forward reachable sets, robust backward-winning states, their intersections, the box-selected and zonotope-selected outer set projections, and exact replay paths in both player phase planes. The fixed-plan policies use finite catalogs only; they make no continuous feedback optimality claim. The zonotope calls evaluate 884,736 factor corners each (27 plans × 32,768 corners). `perf` and `strace` were unavailable, so this is a known work count, not a profiler-confirmed CPU bottleneck.</p>
 <p><a href="result.json">Raw scores, traces and timing samples</a> · <a href="check.json">Independent check</a> · <a href="capture.json">Build and host capture</a> · <a href="figure-data.json">Figure data</a> · <a href="planar-example.html">Complete planar selector example</a> · <a href="{commit_link}">Source commit</a></p></html>'''
     (output / "index.html").write_text(html_page, encoding="utf-8")
     readme = f'''# Issue 824 TwoPoints zonotope minimax pilot
 
-This bundle compares exact finite-catalog fixed-plan minimax, the existing outer-box selector, and candidate selection using stagewise outer zonotopes on the three-stage `TwoPointsOnParallelLines` adaptation. The model has state `(x1,x2,x3,x4)`, initial state `(4.5,0,0,0)`, controls `(-2.5,0,2.5)`, disturbances `(-1,0,1)`, and terminal squared position gap.
+This bundle compares exact finite-catalog fixed-plan minimax, the existing outer-box selector, candidate selection using stagewise outer zonotopes, and a fixed-frame stagewise parallelotope trace on the three-stage `TwoPointsOnParallelLines` adaptation. The model has state `(x1,x2,x3,x4)`, initial state `(4.5,0,0,0)`, controls `(-2.5,0,2.5)`, disturbances `(-1,0,1)`, and terminal squared position gap.
 
 The exact finite minimax value is `{exact_value:.8f}`. The box-selected plan replay is `{box_value:.8f}`. The zonotope-selected plan replay is `{zonotope_value:.8f}`. The selected terminal zonotope's numerical factor-corner candidate score is `{candidate_value:.14f}`. The selector scored all 27 fixed plans. It evaluates every one of the 32,768 terminal factor corners for each plan under the explicit caller limit.
 
 Candidate scores are numerical maxima over stored binary64 factor corners. They are not validated objective bounds. The selected finite plan has a separate exact finite-catalog replay score and worst-history witness. The checker reconstructs every exact state with integer transitions and rational costs. In four dimensions it checks every state coordinate against each candidate zonotope's coordinate bounds. It does not prove full four-dimensional zonotope membership. The planar companion has axis-aligned generators; its complete finite terminal-set inclusion follows from the independently checked coordinate bounds.
 
-This is a fixed open-loop finite-catalog comparison. It does not claim global minimax optimizer completeness, continuous-action RL reproduction, feedback optimality, parallelotope or ellipsoid support, or a performance winner/speedup. The stagewise geometry figure also overlays exact forward/backward sets and intersections from the separate MPC-05 finite adaptation report.
+This is a fixed open-loop finite-catalog comparison. The fixed-frame parallelotope is a selected orientation, not an orientation optimizer. The report does not claim global minimax optimizer completeness, continuous-action RL reproduction, feedback optimality, ellipsoid support, or a performance winner/speedup. The stagewise geometry figure also overlays exact forward/backward sets and intersections from the separate MPC-05 finite adaptation report.
 
 ## Descriptive timings
 

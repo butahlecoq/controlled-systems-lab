@@ -49,6 +49,30 @@ def trace_stage_contains_coordinates(stage: dict, states: set[tuple[int, ...]], 
                 raise ValueError("an exact state coordinate falls outside its zonotope coordinate bounds")
 
 
+def check_parallelotope_trace(method: dict, actions: tuple[int, ...]) -> None:
+    trace=method["stages"]
+    expected_frame=[[1,1,0,0],[0,1,1,0],[0,0,1,1],[0,0,0,1]]
+    frame=trace["frame"]
+    if frame["rows"]!=4 or frame["cols"]!=4 or frame["values"]!=[x for row in expected_frame for x in row]:
+        raise ValueError("parallelotope frame differs from the declared fixed shear")
+    inverse=[[1,-1,1,-1],[0,1,-1,1],[0,0,1,-1],[0,0,0,1]]
+    stages=trace["stages"]
+    state_layers=exact_states(actions)
+    if len(stages)!=len(state_layers):
+        raise ValueError("parallelotope trace omits a stage")
+    for stage,states in zip(stages,state_layers):
+        lower=[Fraction.from_float(x) for x in stage["lower"]]
+        upper=[Fraction.from_float(x) for x in stage["upper"]]
+        if len(lower)!=4 or len(upper)!=4:
+            raise ValueError("parallelotope coordinate dimension differs from four")
+        for state in states:
+            for row in range(4):
+                y=sum((inverse[row][col]*Fraction(coordinate,SCALE)
+                       for col,coordinate in enumerate(state)),Fraction(0))
+                if not lower[row]<=y<=upper[row]:
+                    raise ValueError("an exact finite-history state is outside the 4D parallelotope")
+
+
 def factor_corner_score(stage: dict, objective) -> tuple[float, int]:
     center = stage["center"]
     matrix = stage["generators"]
@@ -152,6 +176,10 @@ def main(path: Path) -> dict:
     selected_attempt = attempts[selected_index]
     if selected_attempt["action_indices"] != method["selected_action_indices"]:
         raise ValueError("selected plan indices differ from the scored candidate row")
+    parallelotope=result["parallelotope_method"]
+    if parallelotope.get("relation")!="outer" or parallelotope.get("status")!="numerical outer fixed-frame parallelotope recurrence":
+        raise ValueError("parallelotope relation/status metadata changed")
+    check_parallelotope_trace(parallelotope,tuple(method["selected_action_indices"]))
 
     replay = method["selected_replay"]
     action_indices = tuple(method["selected_action_indices"])
@@ -239,6 +267,7 @@ def main(path: Path) -> dict:
         "candidate_score_evidence": "independently recomputed on every stored terminal factor corner; not a validated objective bound",
         "selected_plan_replay": "exact rational transition and every disturbance history checked",
         "stage_zonotope_relation": "all exact state coordinates checked against dyadic center +/- sum(abs(generators)); not full four-dimensional membership",
+        "stage_parallelotope_relation": "all exact finite-history states independently transformed into the fixed frame and checked in four-dimensional coordinate bounds",
         "planar_zonotope_inclusion": "all finite terminal points checked inside axis-aligned zonotopes for all three plans; complete finite-set inclusion in this 2D fixture",
         "planar_exact_minimax_value": planar["exact_finite_minimax_value"],
         "timing_status": "21 completed raw samples across three methods; returned values match independently checked outcomes",

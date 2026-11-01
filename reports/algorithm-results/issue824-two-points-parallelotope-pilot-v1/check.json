@@ -1,0 +1,68 @@
+{
+  "candidate_score_evidence": "independently recomputed on every stored terminal factor corner; not a validated objective bound",
+  "candidate_search": "all 27 plans received a complete numerical factor-corner score",
+  "exact_minimax_value": 14.58094225,
+  "exact_reference_state_path": [
+    [
+      4.5,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      4.275,
+      -2.5,
+      -0.0045,
+      -0.1
+    ],
+    [
+      4.025,
+      -2.5,
+      -0.019,
+      -0.2
+    ],
+    [
+      3.775,
+      -2.5,
+      -0.0435,
+      -0.3
+    ]
+  ],
+  "performance_claim": "descriptive timings only; no winner or speedup claim",
+  "planar_exact_minimax_value": 1.0,
+  "planar_zonotope_inclusion": "all finite terminal points checked inside axis-aligned zonotopes for all three plans; complete finite-set inclusion in this 2D fixture",
+  "schema": "csl.issue824-two-points-zonotope-minimax-check/1",
+  "scope": "stored binary64 adaptation and declared finite catalogs",
+  "selected_plan_replay": "exact rational transition and every disturbance history checked",
+  "selected_plan_replay_value": 14.58094225,
+  "selected_plan_state_path": [
+    [
+      4.5,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      4.275,
+      -2.5,
+      -0.0045,
+      -0.1
+    ],
+    [
+      4.025,
+      -2.5,
+      -0.019,
+      -0.2
+    ],
+    [
+      3.775,
+      -2.5,
+      -0.0435,
+      -0.3
+    ]
+  ],
+  "stage_parallelotope_relation": "all exact finite-history states independently transformed into the fixed frame and checked in four-dimensional coordinate bounds",
+  "stage_zonotope_relation": "all exact state coordinates checked against dyadic center +/- sum(abs(generators)); not full four-dimensional membership",
+  "status": "verified",
+  "timing_status": "21 completed raw samples across three methods; returned values match independently checked outcomes"
+}
