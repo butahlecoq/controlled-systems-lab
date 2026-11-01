@@ -18,14 +18,14 @@
   "host": {
     "cpu_model": "AMD Ryzen 5 3550H with Radeon Vega Mobile Gfx",
     "load_average_after_timing": [
-      0.67822265625,
-      0.7392578125,
-      1.310546875
+      0.400390625,
+      0.345703125,
+      0.48876953125
     ],
     "load_average_before_timing": [
-      0.64990234375,
-      0.734375,
-      1.3125
+      0.34814453125,
+      0.33447265625,
+      0.48583984375
     ],
     "logical_cpu_count": 8,
     "machine": "x86_64",
@@ -33,7 +33,7 @@
     "system": "Linux"
   },
   "schema": "csl.issue824-two-points-zonotope-minimax-capture/1",
-  "source_commit": "63450d662995c59484ba8ca23d56e2097adabf60",
+  "source_commit": "6e83db5ec15669fc4ebe25f822d0689266ada780",
   "source_files_sha256": {
     ".github/workflows/algorithm-reports.yml": "9e71b82dbe5397410294069c9b8d964eecd859bc8315dc8eda63e66c5eeb6e0b",
     "CMakeLists.txt": "dffff6b904aace15c7d1a22094fa8d29292b77924fba61f0ce5f8f0211e15188",
@@ -41,8 +41,8 @@
     "benchmarks/reporting/exp824/two_points_zonotope_minimax.cpp": "1498ab6d34ab757ce4765e78677d4d87d05c7a31e0cfec97e456739304d36b75",
     "cmake/OptionalReports.cmake": "ac14320b2eee4d03f0a3d218108c5dbdff51411450018739829b3ce45b46b809",
     "cmake/RunInstalledClient.cmake": "5392d126067178d721e2f2fa4c13caf22010bbb4a0d223cb4bb93016f275521a",
-    "docs/architecture/issue824-zonotope-minimax-selection.md": "541e91f694f297f9f06a10862ff2e6ec2a459ea0facaf1bed5e1b42851885bf4",
-    "include/csl/optimization/finite_action_zonotope_minimax.hpp": "e0359c2b7152b2735da3b29c8bb38acf5b2a8fca2c2cb1187250519125fcd828",
+    "docs/architecture/issue824-zonotope-minimax-selection.md": "1b079059c314fdf70a48c9549bd1befa9494ef2c0c1c3c564fa50d4191ba7fb0",
+    "include/csl/optimization/finite_action_zonotope_minimax.hpp": "111420e284f9ed974c6bc386c421c9d1dc049c44c8bf940b5965de3b94b5b843",
     "include/csl/reachability/finite_plan_zonotope.hpp": "d79183519fda2ef6205aea295ae7400d94324b5d0b413e623b884a5cc910923b",
     "scripts/reports/audit_visual_routes.py": "c3aafd00a6fd2c070c37043aedb62b9d9529cde7a891830d6294254d27edcc25",
     "scripts/reports/exp824/check_two_points_box.py": "68aaf049d7c312eb7ca623d09164334ffa544f251caa8c83c3bef19fd320ddb8",
@@ -60,7 +60,7 @@
     "src/optimization/finite_action_plans.hpp": "8ca3f1f52f947b6f9a556725d610b608676ddb568efb70b469bb81cc0c51be3b",
     "src/optimization/finite_action_replay.cpp": "b4dfbf3ee0323cd11a3e97c11114e5daa16b5d0096bc21cc84f27ed77675f918",
     "src/optimization/finite_action_replay.hpp": "f1c1a675ca0a27f9e8e3929587650ee07bcf096b6f1f6f0546a088715ff3640e",
-    "src/optimization/finite_action_zonotope_minimax.cpp": "7f40ebbd16101d0c778ddee8978f13b11ef8fe6d1069f197e66ba86403147315",
+    "src/optimization/finite_action_zonotope_minimax.cpp": "275ad3c53d2da9e82e46c97d6828fcb7e1bb66c8c92a0bb90e6a6f9cea8a00ec",
     "src/reachability/Module.cmake": "fd3ec08951eba06ce57d0c96bd172dfcdfc0c98e41745551c0f6d42109a5d1fc",
     "src/reachability/Tests.cmake": "0d5b0e376ce3ab4fbffc0d4ddfb21bebb29599a68b0df2f5a7911d6d00ba5ad5",
     "src/reachability/finite_plan_zonotope.cpp": "21216c26fb1b87c152f20443bafb67e476504a853e76797a73c12a4f9f8bec46",
@@ -70,7 +70,7 @@
     "tests/reporting/test_issue824_zonotope_minimax_publication.py": "9ed14a3e64428423f78e64c5d6d330f6fa2c46057649e44794a901990d99e767",
     "tests/reporting/test_issue824_zonotope_publication.py": "308f57a565d13f349c1bf5f7983e11d55279283f250bf6083cd3fc2d0640c1af",
     "tests/reporting/test_visual_route_inventory.py": "7330e0a0ed35ce71a7528402f2b0122e673b71cbadd9bbbe6aa0b7414bac1f6b",
-    "tests/unit/optimization/finite_action_zonotope_minimax_tests.cpp": "1d0d2ea338d6206aa096bf106c9a9754421ef3310efcbe7eed80a8bf4db53ae8"
+    "tests/unit/optimization/finite_action_zonotope_minimax_tests.cpp": "50b324c2dc2d8b4da5e5fdb4ae42b270f3eae688a05a5e64d8fb224eae957f9d"
   },
   "source_status_before_report_generation": [],
   "source_tree_clean_before_report_generation": true
