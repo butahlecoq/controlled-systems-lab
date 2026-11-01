@@ -83,6 +83,39 @@ TEST_CASE("slew memory lift maps a feasible history both ways and retains absolu
     CHECK(std::get<Diagnostic>(rejected_initial).field=="problem.temporal_lift.history.initial_memory");
 }
 
+TEST_CASE("slew lift agrees with an exhaustive short-history feasibility oracle") {
+    const auto original=integrator();
+    const SlewMemoryRequest request{RateLimitedFirstAction{{.25},box(-.25,.25).as_handle()},
+        {box(-.25,.25).as_handle()}};
+    const auto lifted=accepted(lift_one_step_slew(original,request));
+    const Vector catalogue{-.5,-.25,0,.25,.5};
+    std::size_t feasible_count=0;
+    for (const double first : catalogue) for (const double second : catalogue) {
+        // The first command is within .25 of the authored initial memory .25;
+        // the next command is within .25 of its predecessor. Absolute bounds
+        // also require both commands to lie in [-.25,.25].
+        const bool oracle_feasible=std::abs(first)<=.25 && std::abs(first-.25)<=.25 &&
+            std::abs(second)<=.25 && std::abs(second-first)<=.25;
+        const ControlHistory history{{{0},{first},{first+second}},{{first},{second}}};
+        const auto lifted_history=accepted_lift(lift_history(lifted.coordinates,history));
+        const auto recovered=accepted(recover_history(lifted.coordinates,lifted_history,1e-12,1e-12));
+        CHECK(recovered.controls==history.controls);
+        const auto& z0=lifted_history.augmented_states[0];
+        const auto& z1=lifted_history.augmented_states[1];
+        const auto& z2=lifted_history.augmented_states[2];
+        const auto& du0=lifted_history.increments[0];
+        const auto& du1=lifted_history.increments[1];
+        const bool lift_feasible=std::abs(z0[1]-.25)<=1e-12 && std::abs(z1[1])<=.25 &&
+            std::abs(z2[1])<=.25 &&
+            std::abs(du0[0])<=.25 &&
+            std::abs(du1[0])<=.25 && std::abs(z1[1]-z1[0])<=1e-12 &&
+            std::abs(z2[1]-second)<=1e-12 && std::abs(z2[1]-z1[1]-du1[0])<=1e-12;
+        CHECK(lift_feasible==oracle_feasible);
+        feasible_count+=oracle_feasible;
+    }
+    CHECK(feasible_count==5);
+}
+
 TEST_CASE("no initial slew selects zero bookkeeping memory and leaves the first command unrestricted") {
     auto source=integrator();source.controls=ContinuousDomain{{box(-2,2).as_handle(),box(-2,2).as_handle()}};
     const auto lifted=accepted(lift_one_step_slew(source,

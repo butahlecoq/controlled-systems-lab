@@ -59,6 +59,25 @@ TEST_CASE("continuous affine forcing and singular generator stay explicit") {
     CHECK(stage.E.rows==1);CHECK(stage.E.cols==0);
 }
 
+TEST_CASE("scalar growth with held control matches its independent exact ZOH solution") {
+    // For xdot = 2x + u and constant u over h, x(h) = exp(2h)x(0)
+    // + ((exp(2h)-1)/2)u. The command is held over the full interval.
+    constexpr double h=0.3;
+    ContinuousAffineModel input{{1,1,0},{0,h},HoldConvention::zero_order_hold,
+        LinearStage{{1,1,{2}},{1,1,{1}},{1,0,{}},{0}}};
+    IntegrationOptions options;options.absolute_tolerance=1e-8;options.relative_tolerance=1e-8;
+    const auto result=discretize(input,options);
+    const auto converted=take<DiscretizedModel>(result);
+    const auto& stage=std::get<std::vector<LinearStage>>(converted.model.dynamics.stages).at(0);
+    const double growth=std::exp(2*h);
+    check_near(stage.A.values[0],growth,3e-8);
+    check_near(stage.B.values[0],(growth-1)/2,3e-8);
+    const auto discrete=take<LinearSystem>(snapshot(converted.model,converted.times));
+    constexpr double x0=1.25,u=-0.7;
+    check_near(take<Vector>(discrete.step({0},Vector{x0},Vector{u},{}))[0],
+        growth*x0+(growth-1)/2*u,3e-8);
+}
+
 TEST_CASE("external input is held across the physical interval") {
     ContinuousAffineModel input{{1,0,1},{2,5},HoldConvention::zero_order_hold,
         LinearStage{{1,1,{0}},{1,0,{}},{1,1,{2}},{1}}};
