@@ -1,0 +1,286 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width"><title>Issue 824 · Zonotope minimax candidate selection</title>
+<style>body{max-width:1280px;margin:2rem auto;padding:0 1rem;background:#fbf1c7;color:#282828;font:16px/1.5 system-ui}h1,h2{color:#3c3836}.metric{display:inline-block;margin:.4rem 1rem .4rem 0;padding:.7rem;background:#f9f5d7;border:1px solid #d5c4a1;border-radius:6px}svg{width:100%;height:auto}a{color:#076678}</style>
+<h1>TwoPointsOnParallelLines: outer-set candidate selection</h1><p>This is a three-stage finite-catalog adaptation of the source differential-game environment. The zonotope and fixed-frame parallelotope selectors rank every fixed open-loop plan by terminal enclosure-corner scores, then replay their selected plans through every finite disturbance history. These numerical candidate scores are not validated bounds. The report does not reproduce the upstream continuous-action RL problem.</p>
+<p><span class="metric">Exact finite minimax: <b>14.58094225</b></span><span class="metric">Box-selected replay: <b>14.58094225</b></span><span class="metric">Zonotope-selected replay: <b>14.58094225</b></span><span class="metric">Zonotope candidate score: <b>14.58094225</b></span><span class="metric">Parallelotope-selected replay: <b>14.58094225</b></span><span class="metric">Parallelotope candidate score: <b>31.62296496</b></span></p>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 820" role="img" aria-labelledby="title desc">
+<title id="title">TwoPoints stagewise outer boxes, zonotopes, ellipsoids, and minimax geometry</title>
+<desc id="desc">Two player phase-plane plots show exact forward sets, finite backward-winning states, intersections, stagewise interval boxes, zonotope and ellipsoid projections, plus replayed minimax trajectories.</desc>
+<rect width="100%" height="100%" fill="#fbf1c7"/>
+<text x="720" y="38" text-anchor="middle" font-family="sans-serif" font-size="23" font-weight="700" fill="#282828">TwoPointsOnParallelLines · 3-stage finite adaptation</text>
+<text x="720" y="67" text-anchor="middle" font-family="sans-serif" font-size="14" fill="#504945">Exact finite-game geometry and stagewise 4D outer boxes, zonotopes, parallelotopes and ellipsoids in each player&apos;s phase plane</text>
+<text x="378.0" y="92" text-anchor="middle" font-family="sans-serif" font-size="18" font-weight="700" fill="#282828">Player 1 phase plane</text>
+<rect x="68" y="118" width="620" height="540" fill="#f9f5d7" stroke="#665c54"/>
+<path d="M 68.00 118 V 658 M 68 118.00 H 688" stroke="#d5c4a1" stroke-width="1"/>
+<text x="68.00" y="676" text-anchor="middle" font-family="sans-serif" font-size="11" fill="#665c54">2.33</text>
+<text x="60" y="122.00" text-anchor="end" font-family="sans-serif" font-size="11" fill="#665c54">3.06</text>
+<path d="M 223.00 118 V 658 M 68 253.00 H 688" stroke="#d5c4a1" stroke-width="1"/>
+<text x="223.00" y="676" text-anchor="middle" font-family="sans-serif" font-size="11" fill="#665c54">3.11</text>
+<text x="60" y="257.00" text-anchor="end" font-family="sans-serif" font-size="11" fill="#665c54">1.37</text>
+<path d="M 378.00 118 V 658 M 68 388.00 H 688" stroke="#d5c4a1" stroke-width="1"/>
+<text x="378.00" y="676" text-anchor="middle" font-family="sans-serif" font-size="11" fill="#665c54">3.88</text>
+<text x="60" y="392.00" text-anchor="end" font-family="sans-serif" font-size="11" fill="#665c54">-0.317</text>
+<path d="M 533.00 118 V 658 M 68 523.00 H 688" stroke="#d5c4a1" stroke-width="1"/>
+<text x="533.00" y="676" text-anchor="middle" font-family="sans-serif" font-size="11" fill="#665c54">4.66</text>
+<text x="60" y="527.00" text-anchor="end" font-family="sans-serif" font-size="11" fill="#665c54">-2.01</text>
+<path d="M 688.00 118 V 658 M 68 658.00 H 688" stroke="#d5c4a1" stroke-width="1"/>
+<text x="688.00" y="676" text-anchor="middle" font-family="sans-serif" font-size="11" fill="#665c54">5.44</text>
+<text x="60" y="662.00" text-anchor="end" font-family="sans-serif" font-size="11" fill="#665c54">-3.7</text>
+<text x="378.0" y="701" text-anchor="middle" font-family="sans-serif" font-size="13" fill="#282828">x1 position (m)</text>
+<text transform="translate(20 388.0) rotate(-90)" text-anchor="middle" font-family="sans-serif" font-size="13" fill="#282828">x2 velocity (m/s)</text>
+<circle cx="500.76" cy="362.72" r="4" fill="#458588"/>
+<circle cx="455.92" cy="562.43" r="4" fill="#689d6a"/>
+<path d="M 406.09 562.43 L 505.74 562.43 L 595.42 163.00 L 495.77 163.00 Z" fill="#d79921" fill-opacity="0.10" stroke="#d79921" stroke-width="1.4"/>
+<path d="M 356.27 562.43 L 555.56 562.43 L 645.24 163.00 L 445.95 163.00 Z" fill="#b16286" fill-opacity="0.10" stroke="#b16286" stroke-width="1.4"/>
+<circle cx="500.76" cy="362.72" r="2.2" fill="#8f3f71" fill-opacity="0.42"/>
+<circle cx="500.76" cy="362.72" r="4.2" fill="#282828" stroke="#fbf1c7" stroke-width="1"/>
+<circle cx="455.92" cy="562.43" r="2.2" fill="#8f3f71" fill-opacity="0.42"/>
+<circle cx="455.92" cy="562.43" r="2.2" fill="#8f3f71" fill-opacity="0.42"/>
+<circle cx="455.92" cy="562.43" r="2.2" fill="#8f3f71" fill-opacity="0.42"/>
+<circle cx="455.92" cy="562.43" r="4.2" fill="#282828" stroke="#fbf1c7" stroke-width="1"/>
+<circle cx="455.92" cy="562.43" r="4.2" fill="#282828" stroke="#fbf1c7" stroke-width="1"/>
+<circle cx="455.92" cy="562.43" r="4.2" fill="#282828" stroke="#fbf1c7" stroke-width="1"/>
+<circle cx="406.09" cy="562.43" r="2.2" fill="#8f3f71" fill-opacity="0.42"/>
+<circle cx="406.09" cy="562.43" r="2.2" fill="#8f3f71" fill-opacity="0.42"/>
+<circle cx="406.09" cy="562.43" r="2.2" fill="#8f3f71" fill-opacity="0.42"/>
+<circle cx="406.09" cy="562.43" r="2.2" fill="#8f3f71" fill-opacity="0.42"/>
+<circle cx="406.09" cy="562.43" r="2.2" fill="#8f3f71" fill-opacity="0.42"/>
+<circle cx="406.09" cy="562.43" r="2.2" fill="#8f3f71" fill-opacity="0.42"/>
+<circle cx="406.09" cy="562.43" r="2.2" fill="#8f3f71" fill-opacity="0.42"/>
+<circle cx="406.09" cy="562.43" r="2.2" fill="#8f3f71" fill-opacity="0.42"/>
+<circle cx="406.09" cy="562.43" r="2.2" fill="#8f3f71" fill-opacity="0.42"/>
+<circle cx="406.09" cy="562.43" r="4.2" fill="#282828" stroke="#fbf1c7" stroke-width="1"/>
+<circle cx="406.09" cy="562.43" r="4.2" fill="#282828" stroke="#fbf1c7" stroke-width="1"/>
+<circle cx="406.09" cy="562.43" r="4.2" fill="#282828" stroke="#fbf1c7" stroke-width="1"/>
+<circle cx="406.09" cy="562.43" r="4.2" fill="#282828" stroke="#fbf1c7" stroke-width="1"/>
+<circle cx="406.09" cy="562.43" r="4.2" fill="#282828" stroke="#fbf1c7" stroke-width="1"/>
+<circle cx="406.09" cy="562.43" r="4.2" fill="#282828" stroke="#fbf1c7" stroke-width="1"/>
+<circle cx="406.09" cy="562.43" r="4.2" fill="#282828" stroke="#fbf1c7" stroke-width="1"/>
+<circle cx="406.09" cy="562.43" r="4.2" fill="#282828" stroke="#fbf1c7" stroke-width="1"/>
+<circle cx="406.09" cy="562.43" r="4.2" fill="#282828" stroke="#fbf1c7" stroke-width="1"/>
+<circle cx="356.27" cy="562.43" r="2.2" fill="#8f3f71" fill-opacity="0.42"/>
+<circle cx="356.27" cy="562.43" r="2.2" fill="#8f3f71" fill-opacity="0.42"/>
+<circle cx="356.27" cy="562.43" r="2.2" fill="#8f3f71" fill-opacity="0.42"/>
+<circle cx="356.27" cy="562.43" r="2.2" fill="#8f3f71" fill-opacity="0.42"/>
+<circle cx="356.27" cy="562.43" r="2.2" fill="#8f3f71" fill-opacity="0.42"/>
+<circle cx="356.27" cy="562.43" r="2.2" fill="#8f3f71" fill-opacity="0.42"/>
+<circle cx="356.27" cy="562.43" r="2.2" fill="#8f3f71" fill-opacity="0.42"/>
+<circle cx="356.27" cy="562.43" r="2.2" fill="#8f3f71" fill-opacity="0.42"/>
+<circle cx="356.27" cy="562.43" r="2.2" fill="#8f3f71" fill-opacity="0.42"/>
+<circle cx="356.27" cy="562.43" r="2.2" fill="#8f3f71" fill-opacity="0.42"/>
+<circle cx="356.27" cy="562.43" r="2.2" fill="#8f3f71" fill-opacity="0.42"/>
+<circle cx="356.27" cy="562.43" r="2.2" fill="#8f3f71" fill-opacity="0.42"/>
+<circle cx="356.27" cy="562.43" r="2.2" fill="#8f3f71" fill-opacity="0.42"/>
+<circle cx="356.27" cy="562.43" r="2.2" fill="#8f3f71" fill-opacity="0.42"/>
+<circle cx="356.27" cy="562.43" r="2.2" fill="#8f3f71" fill-opacity="0.42"/>
+<circle cx="356.27" cy="562.43" r="2.2" fill="#8f3f71" fill-opacity="0.42"/>
+<circle cx="356.27" cy="562.43" r="2.2" fill="#8f3f71" fill-opacity="0.42"/>
+<circle cx="356.27" cy="562.43" r="2.2" fill="#8f3f71" fill-opacity="0.42"/>
+<circle cx="356.27" cy="562.43" r="2.2" fill="#8f3f71" fill-opacity="0.42"/>
+<circle cx="356.27" cy="562.43" r="2.2" fill="#8f3f71" fill-opacity="0.42"/>
+<circle cx="356.27" cy="562.43" r="2.2" fill="#8f3f71" fill-opacity="0.42"/>
+<circle cx="356.27" cy="562.43" r="2.2" fill="#8f3f71" fill-opacity="0.42"/>
+<circle cx="356.27" cy="562.43" r="2.2" fill="#8f3f71" fill-opacity="0.42"/>
+<circle cx="356.27" cy="562.43" r="4.2" fill="#282828" stroke="#fbf1c7" stroke-width="1"/>
+<circle cx="356.27" cy="562.43" r="4.2" fill="#282828" stroke="#fbf1c7" stroke-width="1"/>
+<circle cx="356.27" cy="562.43" r="4.2" fill="#282828" stroke="#fbf1c7" stroke-width="1"/>
+<circle cx="356.27" cy="562.43" r="4.2" fill="#282828" stroke="#fbf1c7" stroke-width="1"/>
+<circle cx="356.27" cy="562.43" r="4.2" fill="#282828" stroke="#fbf1c7" stroke-width="1"/>
+<circle cx="356.27" cy="562.43" r="4.2" fill="#282828" stroke="#fbf1c7" stroke-width="1"/>
+<circle cx="356.27" cy="562.43" r="4.2" fill="#282828" stroke="#fbf1c7" stroke-width="1"/>
+<circle cx="356.27" cy="562.43" r="4.2" fill="#282828" stroke="#fbf1c7" stroke-width="1"/>
+<circle cx="356.27" cy="562.43" r="4.2" fill="#282828" stroke="#fbf1c7" stroke-width="1"/>
+<circle cx="356.27" cy="562.43" r="4.2" fill="#282828" stroke="#fbf1c7" stroke-width="1"/>
+<circle cx="356.27" cy="562.43" r="4.2" fill="#282828" stroke="#fbf1c7" stroke-width="1"/>
+<circle cx="356.27" cy="562.43" r="4.2" fill="#282828" stroke="#fbf1c7" stroke-width="1"/>
+<circle cx="356.27" cy="562.43" r="4.2" fill="#282828" stroke="#fbf1c7" stroke-width="1"/>
+<circle cx="356.27" cy="562.43" r="4.2" fill="#282828" stroke="#fbf1c7" stroke-width="1"/>
+<circle cx="356.27" cy="562.43" r="4.2" fill="#282828" stroke="#fbf1c7" stroke-width="1"/>
+<circle cx="356.27" cy="562.43" r="4.2" fill="#282828" stroke="#fbf1c7" stroke-width="1"/>
+<circle cx="356.27" cy="562.43" r="4.2" fill="#282828" stroke="#fbf1c7" stroke-width="1"/>
+<circle cx="356.27" cy="562.43" r="4.2" fill="#282828" stroke="#fbf1c7" stroke-width="1"/>
+<circle cx="356.27" cy="562.43" r="4.2" fill="#282828" stroke="#fbf1c7" stroke-width="1"/>
+<circle cx="356.27" cy="562.43" r="4.2" fill="#282828" stroke="#fbf1c7" stroke-width="1"/>
+<circle cx="356.27" cy="562.43" r="4.2" fill="#282828" stroke="#fbf1c7" stroke-width="1"/>
+<circle cx="356.27" cy="562.43" r="4.2" fill="#282828" stroke="#fbf1c7" stroke-width="1"/>
+<circle cx="356.27" cy="562.43" r="4.2" fill="#282828" stroke="#fbf1c7" stroke-width="1"/>
+<circle cx="500.76" cy="362.72" r="3" fill="#458588"/>
+<path d="M 455.92 562.43 L 455.92 562.43 L 455.92 562.43 L 455.92 562.43 Z" fill="#458588" fill-opacity="0.10" stroke="#458588" stroke-width="2"/>
+<path d="M 406.09 562.43 L 406.09 562.43 L 406.09 562.43 L 406.09 562.43 Z" fill="#458588" fill-opacity="0.10" stroke="#458588" stroke-width="2"/>
+<path d="M 356.27 562.43 L 356.27 562.43 L 356.27 562.43 L 356.27 562.43 Z" fill="#458588" fill-opacity="0.10" stroke="#458588" stroke-width="2"/>
+<circle cx="500.76" cy="362.72" r="3" fill="#b16286"/>
+<path d="M 455.92 562.43 L 455.92 562.43 L 455.92 562.43 L 455.92 562.43 Z" fill="#b16286" fill-opacity="0.10" stroke="#b16286" stroke-width="2"/>
+<path d="M 406.09 562.43 L 406.09 562.43 L 406.09 562.43 L 406.09 562.43 Z" fill="#b16286" fill-opacity="0.10" stroke="#b16286" stroke-width="2"/>
+<path d="M 356.27 562.43 L 356.27 562.43 L 356.27 562.43 L 356.27 562.43 Z" fill="#b16286" fill-opacity="0.10" stroke="#b16286" stroke-width="2"/>
+<path d="M 417.85 577.69 L 455.92 577.69 L 493.98 562.43 L 493.98 547.17 L 455.92 547.17 L 417.85 562.43 Z" fill="#d3869b" fill-opacity="0.10" stroke="#8f3f71" stroke-width="2" stroke-dasharray="3 3"/>
+<path d="M 287.53 594.55 L 444.54 594.55 L 524.65 562.43 L 524.65 530.32 L 367.65 530.32 L 287.53 562.43 Z" fill="#d3869b" fill-opacity="0.10" stroke="#8f3f71" stroke-width="2" stroke-dasharray="3 3"/>
+<path d="M 110.76 613.00 L 475.63 613.00 L 601.78 562.43 L 601.78 511.86 L 236.91 511.86 L 110.76 562.43 Z" fill="#d3869b" fill-opacity="0.10" stroke="#8f3f71" stroke-width="2" stroke-dasharray="3 3"/>
+<rect x="500.76" y="362.72" width="1.00" height="1.00" fill="#fe8019" fill-opacity="0.08" stroke="#af3a03" stroke-width="2" stroke-dasharray="7 4"/>
+<rect x="455.92" y="562.43" width="1.00" height="1.00" fill="#fe8019" fill-opacity="0.08" stroke="#af3a03" stroke-width="2" stroke-dasharray="7 4"/>
+<rect x="406.09" y="562.43" width="1.00" height="1.00" fill="#fe8019" fill-opacity="0.08" stroke="#af3a03" stroke-width="2" stroke-dasharray="7 4"/>
+<rect x="356.27" y="562.43" width="1.00" height="1.00" fill="#fe8019" fill-opacity="0.08" stroke="#af3a03" stroke-width="2" stroke-dasharray="7 4"/>
+<path d="M 500.76 362.72 L 455.92 562.43 L 406.09 562.43 L 356.27 562.43" fill="none" stroke="#076678" stroke-width="3"/>
+<circle cx="500.76" cy="362.72" r="3.4" fill="#076678"/>
+<circle cx="455.92" cy="562.43" r="3.4" fill="#076678"/>
+<circle cx="406.09" cy="562.43" r="3.4" fill="#076678"/>
+<circle cx="356.27" cy="562.43" r="3.4" fill="#076678"/>
+<path d="M 500.76 362.72 L 455.92 562.43 L 406.09 562.43 L 356.27 562.43" fill="none" stroke="#af3a03" stroke-width="3" stroke-dasharray="9 5"/>
+<circle cx="500.76" cy="362.72" r="3.4" fill="#af3a03"/>
+<circle cx="455.92" cy="562.43" r="3.4" fill="#af3a03"/>
+<circle cx="406.09" cy="562.43" r="3.4" fill="#af3a03"/>
+<circle cx="356.27" cy="562.43" r="3.4" fill="#af3a03"/>
+<path d="M 500.76 362.72 L 455.92 562.43 L 406.09 562.43 L 356.27 562.43" fill="none" stroke="#b16286" stroke-width="3" stroke-dasharray="2 4"/>
+<circle cx="500.76" cy="362.72" r="3.4" fill="#b16286"/>
+<circle cx="455.92" cy="562.43" r="3.4" fill="#b16286"/>
+<circle cx="406.09" cy="562.43" r="3.4" fill="#b16286"/>
+<circle cx="356.27" cy="562.43" r="3.4" fill="#b16286"/>
+<text x="1062.0" y="92" text-anchor="middle" font-family="sans-serif" font-size="18" font-weight="700" fill="#282828">Player 2 phase plane</text>
+<rect x="752" y="118" width="620" height="540" fill="#f9f5d7" stroke="#665c54"/>
+<path d="M 752.00 118 V 658 M 752 118.00 H 1372" stroke="#d5c4a1" stroke-width="1"/>
+<text x="752.00" y="676" text-anchor="middle" font-family="sans-serif" font-size="11" fill="#665c54">-0.715</text>
+<text x="744" y="122.00" text-anchor="end" font-family="sans-serif" font-size="11" fill="#665c54">0.36</text>
+<path d="M 907.00 118 V 658 M 752 253.00 H 1372" stroke="#d5c4a1" stroke-width="1"/>
+<text x="907.00" y="676" text-anchor="middle" font-family="sans-serif" font-size="11" fill="#665c54">-0.358</text>
+<text x="744" y="257.00" text-anchor="end" font-family="sans-serif" font-size="11" fill="#665c54">0.18</text>
+<path d="M 1062.00 118 V 658 M 752 388.00 H 1372" stroke="#d5c4a1" stroke-width="1"/>
+<text x="1062.00" y="676" text-anchor="middle" font-family="sans-serif" font-size="11" fill="#665c54">0</text>
+<text x="744" y="392.00" text-anchor="end" font-family="sans-serif" font-size="11" fill="#665c54">0</text>
+<path d="M 1217.00 118 V 658 M 752 523.00 H 1372" stroke="#d5c4a1" stroke-width="1"/>
+<text x="1217.00" y="676" text-anchor="middle" font-family="sans-serif" font-size="11" fill="#665c54">0.358</text>
+<text x="744" y="527.00" text-anchor="end" font-family="sans-serif" font-size="11" fill="#665c54">-0.18</text>
+<path d="M 1372.00 118 V 658 M 752 658.00 H 1372" stroke="#d5c4a1" stroke-width="1"/>
+<text x="1372.00" y="676" text-anchor="middle" font-family="sans-serif" font-size="11" fill="#665c54">0.715</text>
+<text x="744" y="662.00" text-anchor="end" font-family="sans-serif" font-size="11" fill="#665c54">-0.36</text>
+<text x="1062.0" y="701" text-anchor="middle" font-family="sans-serif" font-size="13" fill="#282828">x3 position (m)</text>
+<text transform="translate(704 388.0) rotate(-90)" text-anchor="middle" font-family="sans-serif" font-size="13" fill="#282828">x4 velocity (m/s)</text>
+<circle cx="1062.00" cy="388.00" r="4" fill="#458588"/>
+<circle cx="1060.05" cy="463.00" r="4" fill="#689d6a"/>
+<path d="M 1053.76 538.00 L 1066.33 388.00 L 1068.29 313.00 L 1070.24 238.00 L 1057.67 388.00 L 1055.71 463.00 Z" fill="#d79921" fill-opacity="0.10" stroke="#d79921" stroke-width="1.4"/>
+<path d="M 1043.14 613.00 L 1053.76 538.00 L 1064.38 463.00 L 1076.96 313.00 L 1080.86 163.00 L 1070.24 238.00 L 1059.62 313.00 L 1047.04 463.00 Z" fill="#b16286" fill-opacity="0.10" stroke="#b16286" stroke-width="1.4"/>
+<circle cx="1062.00" cy="388.00" r="2.2" fill="#8f3f71" fill-opacity="0.42"/>
+<circle cx="1062.00" cy="388.00" r="4.2" fill="#282828" stroke="#fbf1c7" stroke-width="1"/>
+<circle cx="1060.05" cy="463.00" r="2.2" fill="#8f3f71" fill-opacity="0.42"/>
+<circle cx="1062.00" cy="388.00" r="2.2" fill="#8f3f71" fill-opacity="0.42"/>
+<circle cx="1063.95" cy="313.00" r="2.2" fill="#8f3f71" fill-opacity="0.42"/>
+<circle cx="1060.05" cy="463.00" r="4.2" fill="#282828" stroke="#fbf1c7" stroke-width="1"/>
+<circle cx="1063.95" cy="313.00" r="4.2" fill="#282828" stroke="#fbf1c7" stroke-width="1"/>
+<circle cx="1062.00" cy="388.00" r="4.2" fill="#282828" stroke="#fbf1c7" stroke-width="1"/>
+<circle cx="1053.76" cy="538.00" r="2.2" fill="#8f3f71" fill-opacity="0.42"/>
+<circle cx="1055.71" cy="463.00" r="2.2" fill="#8f3f71" fill-opacity="0.42"/>
+<circle cx="1057.67" cy="388.00" r="2.2" fill="#8f3f71" fill-opacity="0.42"/>
+<circle cx="1060.05" cy="463.00" r="2.2" fill="#8f3f71" fill-opacity="0.42"/>
+<circle cx="1062.00" cy="388.00" r="2.2" fill="#8f3f71" fill-opacity="0.42"/>
+<circle cx="1063.95" cy="313.00" r="2.2" fill="#8f3f71" fill-opacity="0.42"/>
+<circle cx="1066.33" cy="388.00" r="2.2" fill="#8f3f71" fill-opacity="0.42"/>
+<circle cx="1068.29" cy="313.00" r="2.2" fill="#8f3f71" fill-opacity="0.42"/>
+<circle cx="1070.24" cy="238.00" r="2.2" fill="#8f3f71" fill-opacity="0.42"/>
+<circle cx="1057.67" cy="388.00" r="4.2" fill="#282828" stroke="#fbf1c7" stroke-width="1"/>
+<circle cx="1055.71" cy="463.00" r="4.2" fill="#282828" stroke="#fbf1c7" stroke-width="1"/>
+<circle cx="1063.95" cy="313.00" r="4.2" fill="#282828" stroke="#fbf1c7" stroke-width="1"/>
+<circle cx="1068.29" cy="313.00" r="4.2" fill="#282828" stroke="#fbf1c7" stroke-width="1"/>
+<circle cx="1070.24" cy="238.00" r="4.2" fill="#282828" stroke="#fbf1c7" stroke-width="1"/>
+<circle cx="1053.76" cy="538.00" r="4.2" fill="#282828" stroke="#fbf1c7" stroke-width="1"/>
+<circle cx="1060.05" cy="463.00" r="4.2" fill="#282828" stroke="#fbf1c7" stroke-width="1"/>
+<circle cx="1066.33" cy="388.00" r="4.2" fill="#282828" stroke="#fbf1c7" stroke-width="1"/>
+<circle cx="1062.00" cy="388.00" r="4.2" fill="#282828" stroke="#fbf1c7" stroke-width="1"/>
+<circle cx="1043.14" cy="613.00" r="2.2" fill="#8f3f71" fill-opacity="0.42"/>
+<circle cx="1045.09" cy="538.00" r="2.2" fill="#8f3f71" fill-opacity="0.42"/>
+<circle cx="1047.04" cy="463.00" r="2.2" fill="#8f3f71" fill-opacity="0.42"/>
+<circle cx="1049.43" cy="538.00" r="2.2" fill="#8f3f71" fill-opacity="0.42"/>
+<circle cx="1051.38" cy="463.00" r="2.2" fill="#8f3f71" fill-opacity="0.42"/>
+<circle cx="1053.33" cy="388.00" r="2.2" fill="#8f3f71" fill-opacity="0.42"/>
+<circle cx="1053.76" cy="538.00" r="2.2" fill="#8f3f71" fill-opacity="0.42"/>
+<circle cx="1055.71" cy="463.00" r="2.2" fill="#8f3f71" fill-opacity="0.42"/>
+<circle cx="1057.67" cy="388.00" r="2.2" fill="#8f3f71" fill-opacity="0.42"/>
+<circle cx="1059.62" cy="313.00" r="2.2" fill="#8f3f71" fill-opacity="0.42"/>
+<circle cx="1060.05" cy="463.00" r="2.2" fill="#8f3f71" fill-opacity="0.42"/>
+<circle cx="1062.00" cy="388.00" r="2.2" fill="#8f3f71" fill-opacity="0.42"/>
+<circle cx="1063.95" cy="313.00" r="2.2" fill="#8f3f71" fill-opacity="0.42"/>
+<circle cx="1064.38" cy="463.00" r="2.2" fill="#8f3f71" fill-opacity="0.42"/>
+<circle cx="1066.33" cy="388.00" r="2.2" fill="#8f3f71" fill-opacity="0.42"/>
+<circle cx="1068.29" cy="313.00" r="2.2" fill="#8f3f71" fill-opacity="0.42"/>
+<circle cx="1070.24" cy="238.00" r="2.2" fill="#8f3f71" fill-opacity="0.42"/>
+<circle cx="1070.67" cy="388.00" r="2.2" fill="#8f3f71" fill-opacity="0.42"/>
+<circle cx="1072.62" cy="313.00" r="2.2" fill="#8f3f71" fill-opacity="0.42"/>
+<circle cx="1074.57" cy="238.00" r="2.2" fill="#8f3f71" fill-opacity="0.42"/>
+<circle cx="1076.96" cy="313.00" r="2.2" fill="#8f3f71" fill-opacity="0.42"/>
+<circle cx="1078.91" cy="238.00" r="2.2" fill="#8f3f71" fill-opacity="0.42"/>
+<circle cx="1080.86" cy="163.00" r="2.2" fill="#8f3f71" fill-opacity="0.42"/>
+<circle cx="1063.95" cy="313.00" r="4.2" fill="#282828" stroke="#fbf1c7" stroke-width="1"/>
+<circle cx="1060.05" cy="463.00" r="4.2" fill="#282828" stroke="#fbf1c7" stroke-width="1"/>
+<circle cx="1057.67" cy="388.00" r="4.2" fill="#282828" stroke="#fbf1c7" stroke-width="1"/>
+<circle cx="1051.38" cy="463.00" r="4.2" fill="#282828" stroke="#fbf1c7" stroke-width="1"/>
+<circle cx="1074.57" cy="238.00" r="4.2" fill="#282828" stroke="#fbf1c7" stroke-width="1"/>
+<circle cx="1068.29" cy="313.00" r="4.2" fill="#282828" stroke="#fbf1c7" stroke-width="1"/>
+<circle cx="1070.67" cy="388.00" r="4.2" fill="#282828" stroke="#fbf1c7" stroke-width="1"/>
+<circle cx="1053.76" cy="538.00" r="4.2" fill="#282828" stroke="#fbf1c7" stroke-width="1"/>
+<circle cx="1064.38" cy="463.00" r="4.2" fill="#282828" stroke="#fbf1c7" stroke-width="1"/>
+<circle cx="1043.14" cy="613.00" r="4.2" fill="#282828" stroke="#fbf1c7" stroke-width="1"/>
+<circle cx="1078.91" cy="238.00" r="4.2" fill="#282828" stroke="#fbf1c7" stroke-width="1"/>
+<circle cx="1080.86" cy="163.00" r="4.2" fill="#282828" stroke="#fbf1c7" stroke-width="1"/>
+<circle cx="1076.96" cy="313.00" r="4.2" fill="#282828" stroke="#fbf1c7" stroke-width="1"/>
+<circle cx="1059.62" cy="313.00" r="4.2" fill="#282828" stroke="#fbf1c7" stroke-width="1"/>
+<circle cx="1062.00" cy="388.00" r="4.2" fill="#282828" stroke="#fbf1c7" stroke-width="1"/>
+<circle cx="1045.09" cy="538.00" r="4.2" fill="#282828" stroke="#fbf1c7" stroke-width="1"/>
+<circle cx="1055.71" cy="463.00" r="4.2" fill="#282828" stroke="#fbf1c7" stroke-width="1"/>
+<circle cx="1047.04" cy="463.00" r="4.2" fill="#282828" stroke="#fbf1c7" stroke-width="1"/>
+<circle cx="1072.62" cy="313.00" r="4.2" fill="#282828" stroke="#fbf1c7" stroke-width="1"/>
+<circle cx="1070.24" cy="238.00" r="4.2" fill="#282828" stroke="#fbf1c7" stroke-width="1"/>
+<circle cx="1053.33" cy="388.00" r="4.2" fill="#282828" stroke="#fbf1c7" stroke-width="1"/>
+<circle cx="1049.43" cy="538.00" r="4.2" fill="#282828" stroke="#fbf1c7" stroke-width="1"/>
+<circle cx="1066.33" cy="388.00" r="4.2" fill="#282828" stroke="#fbf1c7" stroke-width="1"/>
+<circle cx="1062.00" cy="388.00" r="3" fill="#458588"/>
+<path d="M 1060.05 463.00 L 1060.05 463.00 L 1063.95 313.00 L 1063.95 313.00 L 1063.95 313.00 L 1060.05 463.00 Z" fill="#458588" fill-opacity="0.10" stroke="#458588" stroke-width="2"/>
+<path d="M 1053.76 538.00 L 1053.76 538.00 L 1066.33 388.00 L 1066.33 388.00 L 1070.24 238.00 L 1070.24 238.00 L 1070.24 238.00 L 1057.67 388.00 L 1057.67 388.00 L 1053.76 538.00 Z" fill="#458588" fill-opacity="0.10" stroke="#458588" stroke-width="2"/>
+<path d="M 1043.14 613.00 L 1043.14 613.00 L 1064.38 463.00 L 1076.96 313.00 L 1076.96 313.00 L 1080.86 163.00 L 1080.86 163.00 L 1080.86 163.00 L 1059.62 313.00 L 1047.04 463.00 L 1047.04 463.00 L 1043.14 613.00 Z" fill="#458588" fill-opacity="0.10" stroke="#458588" stroke-width="2"/>
+<circle cx="1062.00" cy="388.00" r="3" fill="#b16286"/>
+<path d="M 1060.05 463.00 L 1060.05 463.00 L 1063.95 313.00 L 1063.95 313.00 L 1063.95 313.00 L 1060.05 463.00 Z" fill="#b16286" fill-opacity="0.10" stroke="#b16286" stroke-width="2"/>
+<path d="M 1053.76 538.00 L 1053.76 538.00 L 1066.33 388.00 L 1066.33 388.00 L 1070.24 238.00 L 1070.24 238.00 L 1070.24 238.00 L 1057.67 388.00 L 1057.67 388.00 L 1053.76 538.00 Z" fill="#b16286" fill-opacity="0.10" stroke="#b16286" stroke-width="2"/>
+<path d="M 1043.14 613.00 L 1043.14 613.00 L 1064.38 463.00 L 1076.96 313.00 L 1076.96 313.00 L 1080.86 163.00 L 1080.86 163.00 L 1080.86 163.00 L 1059.62 313.00 L 1047.04 463.00 L 1047.04 463.00 L 1043.14 613.00 Z" fill="#b16286" fill-opacity="0.10" stroke="#b16286" stroke-width="2"/>
+<path d="M 977.25 463.00 L 1060.05 463.00 L 1146.75 313.00 L 1063.95 313.00 Z" fill="#d3869b" fill-opacity="0.10" stroke="#8f3f71" stroke-width="2" stroke-dasharray="3 3"/>
+<path d="M 888.17 538.00 L 1062.43 538.00 L 1235.83 238.00 L 1061.57 238.00 Z" fill="#d3869b" fill-opacity="0.10" stroke="#8f3f71" stroke-width="2" stroke-dasharray="3 3"/>
+<path d="M 794.76 613.00 L 1069.15 613.00 L 1329.24 163.00 L 1054.85 163.00 Z" fill="#d3869b" fill-opacity="0.10" stroke="#8f3f71" stroke-width="2" stroke-dasharray="3 3"/>
+<rect x="1062.00" y="388.00" width="1.00" height="1.00" fill="#fe8019" fill-opacity="0.08" stroke="#af3a03" stroke-width="2" stroke-dasharray="7 4"/>
+<rect x="1060.05" y="313.00" width="3.90" height="150.00" fill="#fe8019" fill-opacity="0.08" stroke="#af3a03" stroke-width="2" stroke-dasharray="7 4"/>
+<rect x="1053.76" y="238.00" width="16.47" height="300.00" fill="#fe8019" fill-opacity="0.08" stroke="#af3a03" stroke-width="2" stroke-dasharray="7 4"/>
+<rect x="1043.14" y="163.00" width="37.71" height="450.00" fill="#fe8019" fill-opacity="0.08" stroke="#af3a03" stroke-width="2" stroke-dasharray="7 4"/>
+<path d="M 1062.00 388.00 L 1060.05 463.00 L 1053.76 538.00 L 1043.14 613.00" fill="none" stroke="#076678" stroke-width="3"/>
+<circle cx="1062.00" cy="388.00" r="3.4" fill="#076678"/>
+<circle cx="1060.05" cy="463.00" r="3.4" fill="#076678"/>
+<circle cx="1053.76" cy="538.00" r="3.4" fill="#076678"/>
+<circle cx="1043.14" cy="613.00" r="3.4" fill="#076678"/>
+<path d="M 1062.00 388.00 L 1060.05 463.00 L 1053.76 538.00 L 1043.14 613.00" fill="none" stroke="#af3a03" stroke-width="3" stroke-dasharray="9 5"/>
+<circle cx="1062.00" cy="388.00" r="3.4" fill="#af3a03"/>
+<circle cx="1060.05" cy="463.00" r="3.4" fill="#af3a03"/>
+<circle cx="1053.76" cy="538.00" r="3.4" fill="#af3a03"/>
+<circle cx="1043.14" cy="613.00" r="3.4" fill="#af3a03"/>
+<path d="M 1062.00 388.00 L 1060.05 463.00 L 1053.76 538.00 L 1043.14 613.00" fill="none" stroke="#b16286" stroke-width="3" stroke-dasharray="2 4"/>
+<circle cx="1062.00" cy="388.00" r="3.4" fill="#b16286"/>
+<circle cx="1060.05" cy="463.00" r="3.4" fill="#b16286"/>
+<circle cx="1053.76" cy="538.00" r="3.4" fill="#b16286"/>
+<circle cx="1043.14" cy="613.00" r="3.4" fill="#b16286"/>
+<path d="M 40 730 H 60" stroke="#689d6a" stroke-width="3" fill="#689d6a"/>
+<text x="64" y="734" font-family="sans-serif" font-size="11" fill="#282828">Exact forward reachable hulls</text>
+<circle cx="400" cy="730" r="5" fill="#8f3f71"/>
+<text x="414" y="734" font-family="sans-serif" font-size="11" fill="#282828">Robust backward-winning states</text>
+<circle cx="750" cy="730" r="5" fill="#282828"/>
+<text x="764" y="734" font-family="sans-serif" font-size="11" fill="#282828">Forward/backward intersection</text>
+<path d="M 1090 730 H 1110" stroke="#af3a03" stroke-width="3" fill="none" stroke-dasharray="6 4"/>
+<text x="1114" y="734" font-family="sans-serif" font-size="11" fill="#282828">Stagewise outer interval box</text>
+<path d="M 40 758 H 60" stroke="#458588" stroke-width="3" fill="#458588"/>
+<text x="64" y="762" font-family="sans-serif" font-size="11" fill="#282828">Stagewise outer zonotope projection</text>
+<path d="M 390 758 H 410" stroke="#8f3f71" stroke-width="3" fill="#8f3f71"/>
+<text x="414" y="762" font-family="sans-serif" font-size="11" fill="#282828">Fixed-frame outer parallelotope</text>
+<path d="M 740 758 H 760" stroke="#b16286" stroke-width="3" fill="#b16286"/>
+<text x="764" y="762" font-family="sans-serif" font-size="11" fill="#282828">Zonotope-selected plan zonotope</text>
+<path d="M 1090 758 H 1110" stroke="#076678" stroke-width="3" fill="none"/>
+<text x="1114" y="762" font-family="sans-serif" font-size="11" fill="#282828">Exact finite minimax replay</text>
+<path d="M 40 786 H 60" stroke="#af3a03" stroke-width="3" fill="none" stroke-dasharray="6 4"/>
+<text x="64" y="790" font-family="sans-serif" font-size="11" fill="#282828">Box-selected plan replay</text>
+<path d="M 390 786 H 410" stroke="#b16286" stroke-width="3" fill="none" stroke-dasharray="6 4"/>
+<text x="414" y="790" font-family="sans-serif" font-size="11" fill="#282828">Zonotope-selected plan replay</text>
+</svg>
+
+<h2>Descriptive API-call timings</h2><p>One excluded warmup and seven order-rotated repetitions per method. Times cover the complete algorithm call; request setup and JSON serialization are excluded. These descriptive timings do not establish a performance winner or speedup. No separate limiter profile was collected.</p><table><thead><tr><th>Method</th><th>Runs</th><th>Median (ns)</th><th>Range (ns)</th></tr></thead><tbody><tr><td>exact finite minimax</td><td>7</td><td>358,149</td><td>347,952–375,888</td></tr><tr><td>outer box selector</td><td>7</td><td>171,951</td><td>170,275–187,944</td></tr><tr><td>zonotope selector</td><td>7</td><td>152,146,112</td><td>150,726,716–176,368,785</td></tr><tr><td>parallelotope selector</td><td>7</td><td>152,575,848</td><td>151,538,767–153,454,179</td></tr></tbody></table>
+<h2>Evidence and limits</h2><p>The independent checker reconstructs the exact finite game, verifies all 27 zonotope and parallelotope candidate rows by evaluating their stored terminal corners, checks every finite-history state against all exact facet inequalities of each dyadic zonotope at every stage, checks both selected plans' exact worst disturbance histories, and transforms every finite-history state into the fixed parallelotope frame at each stage. The parallelotope orientation is fixed and is not optimized. Candidate scores are not validated objective bounds. The separate two-dimensional example checks complete inclusion of all finite terminal points in each axis-aligned zonotope.</p>
+<p>The figure shows exact forward reachable sets, robust backward-winning states, their intersections, the box-selected and zonotope-selected outer set projections, the parallelotope selector's chosen outer set, and exact replay paths in both player phase planes. The fixed-plan policies use finite catalogs only; they make no continuous feedback optimality claim. The zonotope calls evaluate 884,736 factor corners each (27 plans × 32,768 corners); parallelotope scoring evaluates 432 corners in total (27 plans × 16). `perf` and `strace` were unavailable, so these are known work counts, not profiler-confirmed CPU bottlenecks.</p>
+<p><a href="result.json">Raw scores, traces and timing samples</a> · <a href="check.json">Independent check</a> · <a href="capture.json">Build and host capture</a> · <a href="figure-data.json">Figure data</a> · <a href="planar-example.html">Complete planar selector example</a> · <a href="https://github.com/butahlecoq/controlled-systems-lab/commit/1895094ea1d6076d48e5176e8731f1925665ea52">Source commit</a></p></html>
