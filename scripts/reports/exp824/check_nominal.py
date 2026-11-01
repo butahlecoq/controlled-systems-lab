@@ -113,7 +113,9 @@ def check(record: dict) -> dict:
         scores = []
         for plan, attempt in zip(plans, track["attempts"]):
             assert attempt["status"] == "scored"
-            assert attempt["objective_bound_direction"] == expected_bound
+            expected_attempt_evidence = ("finite_catalogue_objective_under_binary64"
+                if track["representation"] == "exact_polytope" else "none_certified")
+            assert attempt["objective_bound_direction"] == expected_attempt_evidence
             assert tuple(attempt["action_indices"]) == plan
             expected = objective(replay(plan, (NOMINAL_DISTURBANCE,) * 3)[-1])
             assert close(attempt["candidate_score"], expected), (track["representation"], plan, attempt, str(expected))

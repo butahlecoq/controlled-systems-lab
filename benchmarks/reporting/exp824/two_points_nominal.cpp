@@ -74,7 +74,7 @@ Json attempt_json(const NominalPlanAttempt& attempt) {
                 {"score_kind", value.score_kind == NominalScoreKind::exact_deterministic_objective ?
                     "exact_deterministic_objective" : "numerical_outer_enclosure_estimate"},
                 {"objective_bound_direction", value.score_kind == NominalScoreKind::exact_deterministic_objective ?
-                    "finite_catalogue_minimum_under_binary64" : "none_certified"}};
+                    "finite_catalogue_objective_under_binary64" : "none_certified"}};
         else if constexpr(std::is_same_v<T, NominalPlanRejected>)
             return {{"status", "rejected"}, {"action_indices", value.action_indices},
                 {"stage", value.stage}, {"violating_state", value.violating_state}};
