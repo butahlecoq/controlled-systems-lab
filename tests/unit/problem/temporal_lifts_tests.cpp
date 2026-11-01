@@ -5,6 +5,8 @@
 #include <csl/problem/temporal_lifts.hpp>
 #include <csl/sets/data.hpp>
 
+#include <cmath>
+
 using namespace csl;
 using namespace csl::problem;
 
@@ -25,6 +27,26 @@ sets::SetData box(double lower,double upper) {
     auto equalities=std::get<numeric::MatrixView>(numeric::snapshot(Matrix{0,1,{}}));
     auto values=std::get<numeric::VectorView>(numeric::snapshot_vector(Vector{}));
     return std::get<sets::SetData>(sets::make_h({{"interval"},1,{"u"}},{h,bounds,equalities,values}));
+}
+bool contains(const AdmissibleSet& set,const Vector& point) {
+    const auto* handle=std::get_if<SetHandle>(&set);
+    if(!handle)return false;
+    const auto imported=sets::from_handle(*handle);
+    if(!std::holds_alternative<sets::SetData>(imported))return false;
+    const auto representation=std::get<sets::SetData>(imported).representation();
+    const auto* h=std::get_if<sets::HRepresentation>(&representation);
+    if(!h)return false;
+    for(std::size_t row=0;row<h->inequalities.rows();++row) {
+        double value=0;
+        for(std::size_t col=0;col<point.size();++col)value+=h->inequalities(row,col)*point[col];
+        if(value>h->upper_bounds[row]+1e-12)return false;
+    }
+    for(std::size_t row=0;row<h->equalities.rows();++row) {
+        double value=0;
+        for(std::size_t col=0;col<point.size();++col)value+=h->equalities(row,col)*point[col];
+        if(std::abs(value-h->equality_values[row])>1e-12)return false;
+    }
+    return true;
 }
 Problem integrator() {
     const auto controls=box(-1,1).as_handle();
@@ -91,29 +113,28 @@ TEST_CASE("slew lift agrees with an exhaustive short-history feasibility oracle"
     const Vector catalogue{-.5,-.25,0,.25,.5};
     std::size_t feasible_count=0;
     for (const double first : catalogue) for (const double second : catalogue) {
-        // The first command is within .25 of the authored initial memory .25;
-        // the next command is within .25 of its predecessor. Absolute bounds
-        // also require both commands to lie in [-.25,.25].
-        const bool oracle_feasible=std::abs(first)<=.25 && std::abs(first-.25)<=.25 &&
-            std::abs(second)<=.25 && std::abs(second-first)<=.25;
+        // The first increment is within .25 of authored memory .25; the next
+        // increment is within .25 of its predecessor. Absolute controls stay
+        // in the source domain [-1,1].
+        const bool oracle_feasible=std::abs(first)<=1 && std::abs(first-.25)<=.25 &&
+            std::abs(second)<=1 && std::abs(second-first)<=.25;
         const ControlHistory history{{{0},{first},{first+second}},{{first},{second}}};
         const auto lifted_history=accepted_lift(lift_history(lifted.coordinates,history));
         const auto recovered=accepted(recover_history(lifted.coordinates,lifted_history,1e-12,1e-12));
         CHECK(recovered.controls==history.controls);
-        const auto& z0=lifted_history.augmented_states[0];
-        const auto& z1=lifted_history.augmented_states[1];
-        const auto& z2=lifted_history.augmented_states[2];
-        const auto& du0=lifted_history.increments[0];
-        const auto& du1=lifted_history.increments[1];
-        const bool lift_feasible=std::abs(z0[1]-.25)<=1e-12 && std::abs(z1[1])<=.25 &&
-            std::abs(z2[1])<=.25 &&
-            std::abs(du0[0])<=.25 &&
-            std::abs(du1[0])<=.25 && std::abs(z1[1]-z1[0])<=1e-12 &&
-            std::abs(z2[1]-second)<=1e-12 && std::abs(z2[1]-z1[1]-du1[0])<=1e-12;
+        const auto system=accepted(model::snapshot(*lifted.problem.model,lifted.problem.times));
+        auto augmented=std::get<KnownInitial>(lifted.problem.initial).point;
+        bool lift_feasible=contains(lifted.problem.states[0],augmented);
+        const auto& lifted_controls=std::get<ContinuousDomain>(lifted.problem.controls).stages;
+        for(std::size_t stage=0;stage<lifted_controls.size();++stage) {
+            lift_feasible=lift_feasible && contains(lifted_controls[stage],lifted_history.increments[stage]);
+            augmented=accepted(system.step({stage},augmented,lifted_history.increments[stage],{}));
+            lift_feasible=lift_feasible && contains(lifted.problem.states[stage+1],augmented);
+        }
         CHECK(lift_feasible==oracle_feasible);
         feasible_count+=oracle_feasible;
     }
-    CHECK(feasible_count==5);
+    CHECK(feasible_count==8);
 }
 
 TEST_CASE("no initial slew selects zero bookkeeping memory and leaves the first command unrestricted") {
