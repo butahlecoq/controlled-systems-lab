@@ -619,7 +619,7 @@ FiniteMixedBranchSolveOutcome solve_finite_mixed_branch_portfolio(
         }
         if (page.entries.empty() && !page.complete)
             return invalid("finite_mixed_branch.cursor", "The branch cursor made no progress.");
-        history_enumeration_complete = page.complete && !stop.has_value();
+        history_enumeration_complete = page.complete;
         if (stop) break;
     }
 
