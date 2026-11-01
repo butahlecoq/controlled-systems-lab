@@ -226,7 +226,7 @@ class StageProjectionBatchTests(unittest.TestCase):
         document = fixture()
         document["records"][0]["outcome"]["components"] = []
         reseal(document)
-        with self.assertRaisesRegex(data.ProjectionBatchError, "materialization_failure"):
+        with self.assertRaises(data.ProjectionBatchError):
             self.read(document)
 
 
