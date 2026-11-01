@@ -1,0 +1,165 @@
+{
+  "host": {
+    "logical_processors": 8,
+    "machine": "x86_64",
+    "python": "3.14.8",
+    "release": "7.2.8-9-omarchy",
+    "system": "Linux"
+  },
+  "runs": [
+    {
+      "api_median_ns_per_call": 20172573.0,
+      "api_range_ns_per_call": [
+        19930484.5,
+        20393101.4
+      ],
+      "api_timed_region_ns": 1410073510,
+      "calls": 70,
+      "candidate_score_checksum": 4943.052748750086,
+      "checker_status": "passed",
+      "child_system_seconds": 0.129049,
+      "child_user_seconds": 1.761328,
+      "failures": 0,
+      "load_average_after": [
+        1.1064453125,
+        1.54248046875,
+        1.01904296875
+      ],
+      "load_average_before": [
+        1.1064453125,
+        1.54248046875,
+        1.01904296875
+      ],
+      "manifest_files_checked": 7,
+      "nominal_report_id": "62f65dcbe2a56a209f997ca54f6ad26167c91043",
+      "trial": 1,
+      "wall_ns": 1916090192
+    },
+    {
+      "api_median_ns_per_call": 19805868.2,
+      "api_range_ns_per_call": [
+        19702637.1,
+        20732855.0
+      ],
+      "api_timed_region_ns": 1395331531,
+      "calls": 70,
+      "candidate_score_checksum": 4943.052748750086,
+      "checker_status": "passed",
+      "child_system_seconds": 0.12512199999999998,
+      "child_user_seconds": 1.728407,
+      "failures": 0,
+      "load_average_after": [
+        1.09765625,
+        1.533203125,
+        1.0185546875
+      ],
+      "load_average_before": [
+        1.1064453125,
+        1.54248046875,
+        1.01904296875
+      ],
+      "manifest_files_checked": 7,
+      "nominal_report_id": "62f65dcbe2a56a209f997ca54f6ad26167c91043",
+      "trial": 2,
+      "wall_ns": 1832372659
+    },
+    {
+      "api_median_ns_per_call": 19770571.6,
+      "api_range_ns_per_call": [
+        19714510.4,
+        19856342.5
+      ],
+      "api_timed_region_ns": 1384372039,
+      "calls": 70,
+      "candidate_score_checksum": 4943.052748750086,
+      "checker_status": "passed",
+      "child_system_seconds": 0.10048000000000001,
+      "child_user_seconds": 1.7156259999999999,
+      "failures": 0,
+      "load_average_after": [
+        1.09765625,
+        1.533203125,
+        1.0185546875
+      ],
+      "load_average_before": [
+        1.09765625,
+        1.533203125,
+        1.0185546875
+      ],
+      "manifest_files_checked": 7,
+      "nominal_report_id": "62f65dcbe2a56a209f997ca54f6ad26167c91043",
+      "trial": 3,
+      "wall_ns": 1792139165
+    },
+    {
+      "api_median_ns_per_call": 21005708.8,
+      "api_range_ns_per_call": [
+        20958084.6,
+        21384146.8
+      ],
+      "api_timed_region_ns": 1474121629,
+      "calls": 70,
+      "candidate_score_checksum": 4943.052748750086,
+      "checker_status": "passed",
+      "child_system_seconds": 0.126411,
+      "child_user_seconds": 1.830152,
+      "failures": 0,
+      "load_average_after": [
+        1.09765625,
+        1.533203125,
+        1.0185546875
+      ],
+      "load_average_before": [
+        1.09765625,
+        1.533203125,
+        1.0185546875
+      ],
+      "manifest_files_checked": 7,
+      "nominal_report_id": "62f65dcbe2a56a209f997ca54f6ad26167c91043",
+      "trial": 4,
+      "wall_ns": 1931045122
+    },
+    {
+      "api_median_ns_per_call": 20104018.9,
+      "api_range_ns_per_call": [
+        20038361.9,
+        20892001.3
+      ],
+      "api_timed_region_ns": 1418583548,
+      "calls": 70,
+      "candidate_score_checksum": 4943.052748750086,
+      "checker_status": "passed",
+      "child_system_seconds": 0.09607299999999996,
+      "child_user_seconds": 1.7669180000000004,
+      "failures": 0,
+      "load_average_after": [
+        1.08935546875,
+        1.52392578125,
+        1.01806640625
+      ],
+      "load_average_before": [
+        1.09765625,
+        1.533203125,
+        1.0185546875
+      ],
+      "manifest_files_checked": 7,
+      "nominal_report_id": "62f65dcbe2a56a209f997ca54f6ad26167c91043",
+      "trial": 5,
+      "wall_ns": 1839629897
+    }
+  ],
+  "schema": "csl.issue824-nominal-report-e2e/1",
+  "scope": "make_nominal_report.py plus independent exact checker and SHA256SUMS verification; CMake build excluded",
+  "summary": {
+    "all_checks_passed": true,
+    "all_score_checksums_match": true,
+    "median_api_share": 0.7633802090928045,
+    "median_api_timed_region_ns": 1410073510,
+    "median_wall_ns": 1839629897,
+    "run_count": 5,
+    "wall_range_ns": [
+      1792139165,
+      1931045122
+    ]
+  }
+}

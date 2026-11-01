@@ -139,6 +139,12 @@ SAVED_FIGURES = (
          title="Compare nominal and minimax control on TwoPoints",
          alt="Two player phase planes show reachable sets, backward-winning intersections and representation projections, overlaid with the fixed-input nominal and finite minimax trajectories.",
          summary="Five set-representation tracks score all 27 nominal action plans under the declared opponent signal v=+1. An independent rational checker also verifies the separate 27-by-27 finite minimax reference. The upstream continuous-action RL task is not reproduced."),
+    dict(route="issue824-two-points-nominal-v2", image="projections.svg",
+         page="index.html", records="result.json",
+         family="Classic nominal · Finite minimax",
+         title="Profile the combined nominal comparison path",
+         alt="Two player phase planes show reachable sets, backward-winning intersections and representation projections, overlaid with the fixed-input nominal and finite minimax trajectories.",
+         summary="Five end-to-end report trials and a separate gprof limiter profile are recorded. The profile describes a combined five-track API call and makes no per-representation winner or speedup claim."),
 )
 
 

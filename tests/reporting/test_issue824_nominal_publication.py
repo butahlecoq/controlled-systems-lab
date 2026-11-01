@@ -59,6 +59,21 @@ class Issue824NominalPublicationTest(unittest.TestCase):
                 STAGER.stage(bundle, site)
             self.assertEqual(sentinel.read_text(encoding="utf-8"), "authored")
 
+    def test_v2_limiter_report_preserves_raw_evidence_and_stages(self) -> None:
+        bundle = ROOT / "reports/algorithm-results/issue824-two-points-nominal-v2"
+        result = json.loads((bundle / "result.json").read_text(encoding="utf-8"))
+        profile = result["measurement"]["limiter_profile"]
+        self.assertTrue(profile["performed"])
+        self.assertEqual(profile["total_profiled_calls"], 350)
+        self.assertFalse(profile["timings_used_as_performance_evidence"])
+        self.assertEqual(result["measurement"]["end_to_end_report_generation"]["run_count"], 5)
+        self.assertTrue((bundle / "limiter-profile-raw.tar.gz").is_file())
+        files = STAGER.verified_bundle(bundle)
+        with tempfile.TemporaryDirectory() as temporary:
+            site = Path(temporary)
+            self.assertEqual(STAGER.stage(bundle, site), bundle.name)
+            self.assertEqual({path.name for path in (site / bundle.name).iterdir()}, set(files))
+
 
 if __name__ == "__main__":
     unittest.main()
