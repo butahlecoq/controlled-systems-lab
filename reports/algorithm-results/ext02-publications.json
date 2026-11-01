@@ -3,11 +3,11 @@
     {
       "evidence_limits": "One binary64 fixture; no comparator, performance winner, hard RSS bound, or general scalability claim",
       "measured_scope": "Seven solve calls on one analytic two-state, one-stage mixed-control fixture",
-      "measurement_sha256": "012cf81db2a88e5786b3cd918ef38364659742f588a52a6d376d4fefa0da941f",
+      "measurement_sha256": "5cc44de82c89ff8dca92d96cc11001f9f043a61f2f52aa02c7a4cf8cecc5866e",
       "report_id": "ext02-two-state-mixed-v1",
       "scenario_sha256": "533ef62feaf01aef883cbeb9b758f7fa225df4cd3b2ba453ef43f141dbc30145",
-      "source_commit": "d2cff8147acb00b46271b7427232105b1e1fe85c",
-      "zip_sha256": "cd6957346923c12d7b2c02ba0b1404d7307f74839793c9cd5b7f6b437e2cabe1"
+      "source_commit": "c2420622106540e4ef713c02b8e2ec9154514cdc",
+      "zip_sha256": "0ab21a600b9200f270a86ae5e0b538b920bb3b0097a89cc4b993c75fd67f6971"
     }
   ],
   "schema": "csl.ext02-publications/1"
