@@ -65,7 +65,7 @@ class Issue824ZonotopePublicationTests(unittest.TestCase):
                 capture["source_files_sha256"] = {"scripts": publisher.digest(tree)}
 
             reseal_capture(source, changed, use_tree_path)
-            with self.assertRaisesRegex(ValueError, "unavailable as a blob: scripts"):
+            with self.assertRaisesRegex(ValueError, "source files do not match"):
                 publisher.verified_bundle(changed)
 
     def test_captured_source_identity_rejects_tree_commit_objects(self):
@@ -80,7 +80,7 @@ class Issue824ZonotopePublicationTests(unittest.TestCase):
                 capture["source_commit"] = tree
 
             reseal_capture(source, changed, use_tree_commit)
-            with self.assertRaisesRegex(ValueError, "does not name a commit"):
+            with self.assertRaisesRegex(ValueError, "source files do not match"):
                 publisher.verified_bundle(changed)
 
     def test_planar_projection_contains_all_four_rectangle_corners(self):
