@@ -62,6 +62,7 @@ realizable feedback policy or a predecessor guarantee.
 ## Source records
 
 - [Classic nominal record](../../reports/algorithm-results/issue824-two-points-nominal-v1/result.json)
+- [Classic nominal limiter and end-to-end evidence](../../reports/algorithm-results/issue824-two-points-nominal-v2/README.md)
 - [Fixed-plan box record](../../reports/algorithm-results/issue824-two-points-box-pilot-v4/result.json)
 - [Fixed-plan zonotope/parallelotope record](../../reports/algorithm-results/issue824-two-points-zonotope-minimax-v2/result.json)
 - [Fixed-plan ellipsoid record](../../reports/algorithm-results/issue824-two-points-ellipsoid-minimax-v2/result.json)

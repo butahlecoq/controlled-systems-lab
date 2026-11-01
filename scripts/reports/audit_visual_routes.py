@@ -135,6 +135,7 @@ FROZEN_REVIEWED_ROUTES = {
 }
 FROZEN_ROUTE_FOLLOW_UP_ISSUES = {
     "issue824-two-points-nominal-v1": 824,
+    "issue824-two-points-nominal-v2": 824,
     "issue824-two-points-zonotope-minimax-v1": 824,
     "issue824-two-points-zonotope-minimax-v2": 824,
     "issue824-two-points-parallelotope-pilot-v1": 824,

@@ -1,0 +1,166 @@
+{
+  "build": {
+    "compiler": "/usr/bin/c++",
+    "compiler_version": "c++ (GCC) 16.2.1 20260810",
+    "configuration": "Release",
+    "cxx_flags_release": "-O3 -DNDEBUG",
+    "directory": "build/dev",
+    "generator": "Ninja"
+  },
+  "end_to_end_capture": {
+    "host": {
+      "logical_processors": 8,
+      "machine": "x86_64",
+      "python": "3.14.8",
+      "release": "7.2.8-9-omarchy",
+      "system": "Linux"
+    },
+    "load_averages_before_after_each_trial": [
+      {
+        "after": [
+          1.1064453125,
+          1.54248046875,
+          1.01904296875
+        ],
+        "before": [
+          1.1064453125,
+          1.54248046875,
+          1.01904296875
+        ]
+      },
+      {
+        "after": [
+          1.09765625,
+          1.533203125,
+          1.0185546875
+        ],
+        "before": [
+          1.1064453125,
+          1.54248046875,
+          1.01904296875
+        ]
+      },
+      {
+        "after": [
+          1.09765625,
+          1.533203125,
+          1.0185546875
+        ],
+        "before": [
+          1.09765625,
+          1.533203125,
+          1.0185546875
+        ]
+      },
+      {
+        "after": [
+          1.09765625,
+          1.533203125,
+          1.0185546875
+        ],
+        "before": [
+          1.09765625,
+          1.533203125,
+          1.0185546875
+        ]
+      },
+      {
+        "after": [
+          1.08935546875,
+          1.52392578125,
+          1.01806640625
+        ],
+        "before": [
+          1.09765625,
+          1.533203125,
+          1.0185546875
+        ]
+      }
+    ],
+    "trials": 5
+  },
+  "host": {
+    "load_average_1_5_15_before_measurement": [
+      0.6298828125,
+      0.912109375,
+      1.888671875
+    ],
+    "logical_processors": 8,
+    "machine": "x86_64",
+    "python": "3.14.8",
+    "release": "7.2.8-9-omarchy",
+    "system": "Linux"
+  },
+  "profiler": {
+    "build_flags": "Release -O3 -DNDEBUG -pg -fno-omit-frame-pointer",
+    "caveats": [
+      "Profiler timings are excluded from wall-time summaries.",
+      "Sampling resolution is 10 ms.",
+      "One three-stage fixture and a combined API call do not support per-representation rankings."
+    ],
+    "failures": 0,
+    "measured_calls_per_run": 70,
+    "merged_top_self_cpu_samples": [
+      {
+        "calls": 9585,
+        "cumulative_seconds": 3.01,
+        "function": "csl::optimization::(anonymous namespace)::score_corners(csl::reachability::FinitePlanZonotopeTrace::Stage const&, csl::optimization::Objective const&, unsigned long, csl::ExecutionContext const&)",
+        "seconds_per_call_self": 0.0,
+        "seconds_per_call_total": 0.0,
+        "self_percent": 54.23,
+        "self_seconds": 3.01
+      },
+      {
+        "calls": 645163200,
+        "cumulative_seconds": 4.39,
+        "function": "csl::numeric::MatrixView::operator()(unsigned long, unsigned long) const",
+        "seconds_per_call_self": 0.0,
+        "seconds_per_call_total": 0.0,
+        "self_percent": 24.86,
+        "self_seconds": 1.38
+      },
+      {
+        "calls": 39590665,
+        "cumulative_seconds": 5.19,
+        "function": "csl::optimization::evaluate(csl::optimization::Objective const&, std::span<double const, 18446744073709551615ul>)",
+        "seconds_per_call_self": 0.0,
+        "seconds_per_call_total": 0.0,
+        "self_percent": 14.41,
+        "self_seconds": 0.8
+      }
+    ],
+    "profile_runs": 5,
+    "profiler": "GNU gprof 2.47",
+    "sampling_interval_seconds": 0.01,
+    "schema": "csl.issue824-nominal-limiter-profile/1",
+    "warmup_calls_per_run": 1
+  },
+  "schema": "csl.issue824-two-points-nominal-capture/1",
+  "source_commit": "62f65dcbe2a56a209f997ca54f6ad26167c91043",
+  "source_files_sha256": {
+    ".github/workflows/algorithm-reports.yml": "1a5a1cf3c7b72650b7545e39befcb6d98316f62b9d238240381ea969c5df89b8",
+    "CMakeLists.txt": "ea0c9547e4071dbdbc2611096f64a201d83ecc99fd5d997e952d229c267085de",
+    "benchmarks/reporting/exp824/two_points_fixture.hpp": "63ea125705437636a8689ca1a37d1df71c4be1ee04f751d2b226ab1c8145c8ec",
+    "benchmarks/reporting/exp824/two_points_nominal.cpp": "92cafdd25770877f325f649e3fef5032e40d16cb08c679c77a927ee9d9a05d50",
+    "cmake/OptionalReports.cmake": "0f8c745ab8844599973441242d0161195d1e91f13518170464a2819e27d29004",
+    "cmake/RunInstalledClient.cmake": "a22a96b8ee76b0efe84d9872d6240fb2dc1ba6276001043175f79fd2a8b50aac",
+    "docs/architecture/issue824-nominal-control.md": "8efa61a0754be0d902280d480288306e6a8ca4d764c2ebe62f0bf11a1bac2e33",
+    "include/csl/optimization/finite_action_nominal.hpp": "3e50eaf6de6e4a1ecc4a6b97825ec962d3be38d71d8f74697e2aa29d5a42c0ca",
+    "scripts/reports/audit_visual_routes.py": "77292d7f736dcc86787e4e8bfb7febc7869d5685442b8ec61215f652c77faa0f",
+    "scripts/reports/exp824/check_nominal.py": "ed8774b3a20153b768e55f7940aea26b6dc4748183de5b5eb97a4d795e2f2d44",
+    "scripts/reports/exp824/check_nominal_smoke.py": "89017e5b8df00542ff82af0a684dbd94d93064b065ce433b2a7123b9c82cba8e",
+    "scripts/reports/exp824/make_nominal_report.py": "334c35fcef2b8b2321aed18389a630493093e7677074964f301e6b1437c6f63e",
+    "scripts/reports/exp824/make_report.py": "ba65404fe326f6bf16aaefe3e25d5a6ed9ad61885bdaed97bf68117e1562662e",
+    "scripts/reports/stage_issue824_nominal.py": "eacaf82958b6b77bf66f9a794dea57c6b6e05a172906f33336d5a2480fafdb2e",
+    "scripts/reports/visual_examples.py": "875dd8cae524d8f86a098518bd1605269f4f68006a3aaca9907ee499b9f4f2db",
+    "src/optimization/Module.cmake": "de95649f4fb5600c2f751bd1dd02c3a979167bd7b7e091129680df604d66564c",
+    "src/optimization/Tests.cmake": "ced23c70d4689fd1412f459fbe29155f24f892b5a701b0bed8ac304f473355dc",
+    "src/optimization/finite_action_nominal.cpp": "61439ff6ed70f14c5b30a57f192f74ff66f58be2e26a347d9523273e90a67ca4",
+    "tests/installed/CMakeLists.txt": "411ff974c08c4b85630321cccc415e7042439029cd9268bd922b40dc9970e36a",
+    "tests/installed/finite_action_nominal_client.cpp": "8eaae43be28744fafd7bb162937175e3a94dafb1f6afde7f1e43a0e3cbf4b7fc",
+    "tests/reporting/test_issue824_nominal_publication.py": "8559131c3a840bdb4562ee45fc911ceaf8b9b3d39bf83ad436de8c5a638c8b4c",
+    "tests/unit/optimization/finite_action_nominal_tests.cpp": "a20ca71b0db68382b6574d432e9a7a8539ba58434c207fb84111e0bd8e0b7cc9"
+  },
+  "source_status": [],
+  "source_worktree_clean": true
+}

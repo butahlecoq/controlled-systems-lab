@@ -1562,7 +1562,7 @@
     },
     {
       "source": "scripts/reports/visual_examples.py",
-      "signal_count": 78,
+      "signal_count": 79,
       "asset_name_literals": [
         "adaptive-ode-replay.svg",
         "app01-plan-timing-v1.svg",
@@ -2559,6 +2559,16 @@
         "projections.svg"
       ],
       "index_sha256": "0feb35d9b2ade7311a6131c76cdda18655c24fece27453b6788070ce3c6fb24d",
+      "disposition": "deferred: original frozen route-level readability review remains; companion availability is listed separately",
+      "follow_up_issue": 824
+    },
+    {
+      "route": "issue824-two-points-nominal-v2",
+      "source_bundle": "issue824-two-points-nominal-v2",
+      "assets": [
+        "projections.svg"
+      ],
+      "index_sha256": "6b2a83bb5dd7465afbba5c392b9b6c851daaec48953cd8bb4dec74085109b239",
       "disposition": "deferred: original frozen route-level readability review remains; companion availability is listed separately",
       "follow_up_issue": 824
     },

@@ -1,0 +1,44 @@
+{
+  "build_flags": "Release -O3 -DNDEBUG -pg -fno-omit-frame-pointer",
+  "caveats": [
+    "Profiler timings are excluded from wall-time summaries.",
+    "Sampling resolution is 10 ms.",
+    "One three-stage fixture and a combined API call do not support per-representation rankings."
+  ],
+  "failures": 0,
+  "measured_calls_per_run": 70,
+  "merged_top_self_cpu_samples": [
+    {
+      "calls": 9585,
+      "cumulative_seconds": 3.01,
+      "function": "csl::optimization::(anonymous namespace)::score_corners(csl::reachability::FinitePlanZonotopeTrace::Stage const&, csl::optimization::Objective const&, unsigned long, csl::ExecutionContext const&)",
+      "seconds_per_call_self": 0.0,
+      "seconds_per_call_total": 0.0,
+      "self_percent": 54.23,
+      "self_seconds": 3.01
+    },
+    {
+      "calls": 645163200,
+      "cumulative_seconds": 4.39,
+      "function": "csl::numeric::MatrixView::operator()(unsigned long, unsigned long) const",
+      "seconds_per_call_self": 0.0,
+      "seconds_per_call_total": 0.0,
+      "self_percent": 24.86,
+      "self_seconds": 1.38
+    },
+    {
+      "calls": 39590665,
+      "cumulative_seconds": 5.19,
+      "function": "csl::optimization::evaluate(csl::optimization::Objective const&, std::span<double const, 18446744073709551615ul>)",
+      "seconds_per_call_self": 0.0,
+      "seconds_per_call_total": 0.0,
+      "self_percent": 14.41,
+      "self_seconds": 0.8
+    }
+  ],
+  "profile_runs": 5,
+  "profiler": "GNU gprof 2.47",
+  "sampling_interval_seconds": 0.01,
+  "schema": "csl.issue824-nominal-limiter-profile/1",
+  "warmup_calls_per_run": 1
+}

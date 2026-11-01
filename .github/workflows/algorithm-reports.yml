@@ -432,6 +432,9 @@ jobs:
       - name: Stage the issue 824 nominal comparison report
         if: steps.catalog.outputs.has_reports == 'true' && hashFiles('reports/algorithm-results/issue824-two-points-nominal-v1/result.json') != ''
         run: python scripts/reports/stage_issue824_nominal.py --source reports/algorithm-results/issue824-two-points-nominal-v1 --site build/report-site
+      - name: Stage the issue 824 nominal comparison limiter report
+        if: steps.catalog.outputs.has_reports == 'true' && hashFiles('reports/algorithm-results/issue824-two-points-nominal-v2/result.json') != ''
+        run: python scripts/reports/stage_issue824_nominal.py --source reports/algorithm-results/issue824-two-points-nominal-v2 --site build/report-site
       - name: Stage minimal 2D visual examples from reviewed saved results
         if: steps.catalog.outputs.has_reports == 'true'
         run: python scripts/reports/visual_examples.py --catalog reports/algorithm-results/catalog.json --site build/report-site
