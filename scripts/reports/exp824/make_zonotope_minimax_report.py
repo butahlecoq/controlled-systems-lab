@@ -59,6 +59,7 @@ SOURCE_FILES = (
         "tests/unit/reachability/finite_plan_parallelotope_tests.cpp",
     "scripts/reports/exp824/make_zonotope_minimax_report.py",
     "scripts/reports/exp824/check_zonotope_minimax_smoke.py",
+    "scripts/reports/requirements.txt",
     "scripts/reports/audit_visual_routes.py",
     "scripts/reports/report_source_identity.py",
     "scripts/reports/stage_issue824_zonotope.py",
