@@ -41,8 +41,6 @@ struct ZonotopePlanStopped {
 using FiniteActionZonotopePlanAttempt = std::variant<ZonotopePlanScored,
     ZonotopePlanUnscored, ZonotopePlanStopped>;
 
-enum class CandidateSearchCoverage { complete, incomplete };
-
 struct FiniteActionZonotopeReplay {
     double worst_value;
     Vector worst_terminal_state;

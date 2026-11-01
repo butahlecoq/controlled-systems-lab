@@ -1,0 +1,82 @@
+{
+  "build": {
+    "compiler": "/usr/bin/c++",
+    "compiler_version": "c++ (GCC) 16.2.1 20260810",
+    "configuration": "Release",
+    "cxx_flags": "",
+    "cxx_flags_release": "-O3 -DNDEBUG",
+    "cxx_standard": "C++20",
+    "directory": "/home/butahlecoq/.local/share/codex/worktrees/issue824-stagewise-20261102/build/dev",
+    "generator": "Ninja",
+    "highs": "ON",
+    "qhull": "ON"
+  },
+  "exact_geometry_reference": {
+    "figure_data_sha256": "0a9995d4a2648ee9e13e93128063ac1978392349a2c2ecbee6aa5c659d3362d7",
+    "report_id": "mpc05-causal-tree-pilot-v2"
+  },
+  "host": {
+    "cpu_model": "AMD Ryzen 5 3550H with Radeon Vega Mobile Gfx",
+    "load_average_after_timing": [
+      1.92138671875,
+      1.46142578125,
+      0.99560546875
+    ],
+    "load_average_before_timing": [
+      1.92138671875,
+      1.46142578125,
+      0.99560546875
+    ],
+    "logical_cpu_count": 8,
+    "machine": "x86_64",
+    "release": "7.2.8-9-omarchy",
+    "system": "Linux"
+  },
+  "schema": "csl.issue824-two-points-zonotope-minimax-capture/1",
+  "source_commit": "f71fc0d4953b5eb7cbbcc99020f029ba872c56e6",
+  "source_files_sha256": {
+    ".github/workflows/algorithm-reports.yml": "392224d5272b808f4b472a030c10ecd3ce7a20c83de5536bfb7e22e85135a9ce",
+    "CMakeLists.txt": "dffff6b904aace15c7d1a22094fa8d29292b77924fba61f0ce5f8f0211e15188",
+    "benchmarks/reporting/exp824/two_points_fixture.hpp": "63ea125705437636a8689ca1a37d1df71c4be1ee04f751d2b226ab1c8145c8ec",
+    "benchmarks/reporting/exp824/two_points_zonotope_minimax.cpp": "013b7898a908296abe6589484c76f17ac0794f3c9218278751924592c6fe0af3",
+    "cmake/OptionalReports.cmake": "912b4f9e4c54e4d0b026f2efe21ea22bceb1b56328ab7a41cc9706a38b2ffa21",
+    "cmake/RunInstalledClient.cmake": "5392d126067178d721e2f2fa4c13caf22010bbb4a0d223cb4bb93016f275521a",
+    "docs/architecture/issue824-parallelotope-propagation.md": "7063c773e96eaccbcf5186c3ec1f3d28841afe923d58710888ca50a2b3b0ff95",
+    "docs/architecture/issue824-zonotope-minimax-selection.md": "1b079059c314fdf70a48c9549bd1befa9494ef2c0c1c3c564fa50d4191ba7fb0",
+    "include/csl/optimization/finite_action_zonotope_minimax.hpp": "111420e284f9ed974c6bc386c421c9d1dc049c44c8bf940b5965de3b94b5b843",
+    "include/csl/reachability/finite_plan_parallelotope.hpp": "ea22bb95d1ddd3e436cb8e2ff883f0893c4c9452c62b084a046e0f48d5041b84",
+    "include/csl/reachability/finite_plan_zonotope.hpp": "d79183519fda2ef6205aea295ae7400d94324b5d0b413e623b884a5cc910923b",
+    "scripts/reports/audit_visual_routes.py": "e65bbac56ea95997829f9428af67ecee645d816d7f0aeedc8a4c1c9096665d84",
+    "scripts/reports/exp824/check_two_points_box.py": "68aaf049d7c312eb7ca623d09164334ffa544f251caa8c83c3bef19fd320ddb8",
+    "scripts/reports/exp824/check_zonotope_minimax.py": "f0f01e308c0c31ec035fe38afa64fcfd44e7e44b1a0913277fd42f86a832a652",
+    "scripts/reports/exp824/check_zonotope_minimax_smoke.py": "8f6eeff73d905c2766db06d3cb79ef80305871f4a27ea6b2644101e0e627cdb1",
+    "scripts/reports/exp824/make_report.py": "3c2f34468ea052d388c8e7ecede453b3c5931756d3e92396121dd076bc4b1946",
+    "scripts/reports/exp824/make_zonotope_minimax_report.py": "ed264ac86a621cf25be2896e3158d933d678636262e9a95845f950c9323ede10",
+    "scripts/reports/report_source_identity.py": "96ecdb9666334b800e2eb2e2620bd8c5f427b0a87dae4a034084322cbabe5f31",
+    "scripts/reports/stage_issue824_zonotope.py": "d0a77cb67ba0a974ea09062d8882d6545ed70af88cd388267b77f4fcd2968214",
+    "scripts/reports/stage_issue824_zonotope_minimax.py": "3bba62d79376c724f4671952ab4d8ef64e1c221bcd9a3f20c22483056afe8051",
+    "scripts/reports/visual_examples.py": "1ca2ee3dcbc36cd90941ee7bdcc408b220b3cef43744745103da271aa8e3ae79",
+    "src/optimization/Module.cmake": "16460701f889684fd0eac85e1cd79372d54d9ffa8798f6dbd683b81046e940e9",
+    "src/optimization/Tests.cmake": "b862b0aa65a0c86617174f57d847508c978dbaf56c1707453c3f25d185e0a9bd",
+    "src/optimization/finite_action_box_minimax.cpp": "ae08a2de1de023765ae6a80b22cce7e6c39ee772acc451a86282e2e6c68435a9",
+    "src/optimization/finite_action_plans.hpp": "8ca3f1f52f947b6f9a556725d610b608676ddb568efb70b469bb81cc0c51be3b",
+    "src/optimization/finite_action_replay.cpp": "b4dfbf3ee0323cd11a3e97c11114e5daa16b5d0096bc21cc84f27ed77675f918",
+    "src/optimization/finite_action_replay.hpp": "f1c1a675ca0a27f9e8e3929587650ee07bcf096b6f1f6f0546a088715ff3640e",
+    "src/optimization/finite_action_zonotope_minimax.cpp": "e6879f61859a4d32e7a5c93f4adfc9e9ca42b2e26d33a2b75379a39e405d30e5",
+    "src/reachability/Module.cmake": "bbe8b6480b329a23e16b550dd48735fa9e0184db511129094822b8cadb083ce3",
+    "src/reachability/Tests.cmake": "cf4a4829815c9eb7f5edb60ecf4b9cee200a0306ee07ed7b5ab47863b1424d70",
+    "src/reachability/finite_plan_parallelotope.cpp": "e47397dfed284fc5ccd52a03ea6dca9f8937203777706ce6d9b3b1bf27b91974",
+    "src/reachability/finite_plan_zonotope.cpp": "21216c26fb1b87c152f20443bafb67e476504a853e76797a73c12a4f9f8bec46",
+    "tests/contract/public_headers_client.cpp": "939c81d6a2c1cbbe7fd309cf13cd3daf8f7a1ba54aeba3a9384e76a547bdfdae",
+    "tests/installed/CMakeLists.txt": "dbf784cb75ee4a6f4c2168195632d853d720d5e8d968443ffaed3a835a4436b4",
+    "tests/installed/finite_action_zonotope_minimax_client.cpp": "b01c0a2b3eee61dc4bc294e89d665ac20348d0512cdd4c3492896f2da3bcfcfa",
+    "tests/installed/finite_plan_parallelotope_client.cpp": "d92b499a3f55a610556b4dc7bf3dbc343d394ab35dafe4ac1de16223ed4d1896",
+    "tests/reporting/test_issue824_zonotope_minimax_publication.py": "9ed14a3e64428423f78e64c5d6d330f6fa2c46057649e44794a901990d99e767",
+    "tests/reporting/test_issue824_zonotope_publication.py": "8b6e5eca0bbb149cf34eea1e3606a70db26dec7fed18af431956c71cdf457fb4",
+    "tests/reporting/test_visual_route_inventory.py": "98b4ebb0c05816e8d1a2bc08330ef1f40256552ff0f56c4a14b4f1b656ad8e34",
+    "tests/unit/optimization/finite_action_zonotope_minimax_tests.cpp": "41ea2b9c584088b460690965ff20a0c5bc8a1d8edf8f02b39aec9bc7f5b454a9",
+    "tests/unit/reachability/finite_plan_parallelotope_tests.cpp": "bf1a34e06c2dffa4512853bfbe2f6ecbdb3e821da05c72bf923eb5f6450798d2"
+  },
+  "source_status_before_report_generation": [],
+  "source_tree_clean_before_report_generation": true
+}

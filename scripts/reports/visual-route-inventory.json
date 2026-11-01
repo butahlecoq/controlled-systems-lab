@@ -2455,13 +2455,24 @@
       "follow_up_issue": 669
     },
     {
+      "route": "issue824-two-points-parallelotope-pilot-v1",
+      "source_bundle": "issue824-two-points-parallelotope-pilot-v1",
+      "assets": [
+        "planar-example.svg",
+        "projections.svg"
+      ],
+      "index_sha256": "4c6a582a69f11d2c570cc81529c87e32d317bf8713bdac944507629fde10ed7d",
+      "disposition": "deferred: original frozen route-level readability review remains; companion availability is listed separately",
+      "follow_up_issue": 824
+    },
+    {
       "route": "issue824-two-points-zonotope-minimax-v1",
       "source_bundle": "issue824-two-points-zonotope-minimax-v1",
       "assets": [
         "planar-example.svg",
         "projections.svg"
       ],
-      "index_sha256": "93c233e6015b9417d2dc45b05c6a2fdda4648dedc342c721419600fbfbed0b7b",
+      "index_sha256": "f0b5c5b9961aa1099da4ecf410a8e2e5198cd5c8bb26ccf55bc24f5d63deec25",
       "disposition": "deferred: original frozen route-level readability review remains; companion availability is listed separately",
       "follow_up_issue": 824
     },

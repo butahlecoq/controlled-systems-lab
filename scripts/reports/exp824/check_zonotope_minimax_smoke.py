@@ -30,6 +30,19 @@ def main() -> None:
     replay = method["selected_replay"]
     if not math.isfinite(replay["worst_value"]) or len(replay["path"]) != 4:
         raise ValueError("selected finite-catalogue replay is incomplete")
+    parallelotope = result["parallelotope_minimax_method"]
+    parallel_attempts = parallelotope["plan_attempts"]
+    if parallelotope.get("candidate_search_coverage") != "complete" or len(parallel_attempts) != 27:
+        raise ValueError("parallelotope selector did not score all 27 fixed plans")
+    if any(attempt.get("status") != "scored" or attempt.get("corners_evaluated") != 16
+           for attempt in parallel_attempts):
+        raise ValueError("parallelotope candidate table is incomplete")
+    parallel_selected_index = parallelotope["selected_candidate_attempt_index"]
+    if parallel_attempts[parallel_selected_index]["action_indices"] != parallelotope["selected_action_indices"]:
+        raise ValueError("parallelotope selected attempt and action sequence differ")
+    parallel_replay = parallelotope["selected_replay"]
+    if not math.isfinite(parallel_replay["worst_value"]) or len(parallel_replay["path"]) != 4:
+        raise ValueError("parallelotope selected finite-catalogue replay is incomplete")
     planar = result["planar_selector_example"]
     if planar.get("candidate_search_coverage") != "complete" or len(planar["plans"]) != 3:
         raise ValueError("planar selector fixture did not score each control")
@@ -37,7 +50,7 @@ def main() -> None:
         raise ValueError("planar selected replay differs from the exhaustive finite optimum")
     timing = result["timing"]
     if (timing.get("measurement_repetitions_per_method") != 7 or
-            timing.get("warmup_runs_per_method") != 1 or len(timing.get("samples", [])) != 21):
+            timing.get("warmup_runs_per_method") != 1 or len(timing.get("samples", [])) != 28):
         raise ValueError("report driver did not collect the declared raw timing samples")
     if any(sample.get("status") != "completed" or sample.get("elapsed_ns", 0) <= 0
            for sample in timing["samples"]):

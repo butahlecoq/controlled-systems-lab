@@ -28,6 +28,8 @@
       -0.3
     ]
   ],
+  "parallelotope_candidate_score_evidence": "all 27 scores independently recomputed on all 16 frame-box corners; not a validated objective bound",
+  "parallelotope_selected_plan_replay": "exact rational transition and every disturbance history checked",
   "performance_claim": "descriptive timings only; no winner or speedup claim",
   "planar_exact_minimax_value": 1.0,
   "planar_zonotope_inclusion": "all finite terminal points checked inside axis-aligned zonotopes for all three plans; complete finite-set inclusion in this 2D fixture",
@@ -61,7 +63,8 @@
       -0.3
     ]
   ],
+  "stage_parallelotope_relation": "all exact finite-history states independently transformed into the fixed frame and checked in four-dimensional coordinate bounds",
   "stage_zonotope_relation": "all exact state coordinates checked against dyadic center +/- sum(abs(generators)); not full four-dimensional membership",
   "status": "verified",
-  "timing_status": "21 completed raw samples across three methods; returned values match independently checked outcomes"
+  "timing_status": "28 completed raw samples across four methods; returned values match independently checked outcomes"
 }

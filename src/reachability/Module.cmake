@@ -15,6 +15,9 @@ target_link_libraries(csl_finite_plan_box PUBLIC CSL::fixed_plan_disturbance)
 csl_add_library(csl_finite_plan_zonotope STATIC src/reachability/finite_plan_zonotope.cpp)
 target_link_libraries(csl_finite_plan_zonotope PUBLIC CSL::fixed_plan_disturbance CSL::sets)
 
+csl_add_library(csl_finite_plan_parallelotope STATIC src/reachability/finite_plan_parallelotope.cpp)
+target_link_libraries(csl_finite_plan_parallelotope PUBLIC CSL::fixed_plan_disturbance CSL::sets)
+
 csl_add_library(csl_finite_feedback STATIC src/reachability/finite_feedback.cpp)
 
 csl_add_library(csl_finite_feedback_port STATIC src/reachability/finite_feedback_port.cpp)

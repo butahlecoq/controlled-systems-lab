@@ -49,6 +49,30 @@ def trace_stage_contains_coordinates(stage: dict, states: set[tuple[int, ...]], 
                 raise ValueError("an exact state coordinate falls outside its zonotope coordinate bounds")
 
 
+def check_parallelotope_trace(method: dict, actions: tuple[int, ...]) -> None:
+    trace=method["stages"]
+    expected_frame=[[1,1,0,0],[0,1,1,0],[0,0,1,1],[0,0,0,1]]
+    frame=trace["frame"]
+    if frame["rows"]!=4 or frame["cols"]!=4 or frame["values"]!=[x for row in expected_frame for x in row]:
+        raise ValueError("parallelotope frame differs from the declared fixed shear")
+    inverse=[[1,-1,1,-1],[0,1,-1,1],[0,0,1,-1],[0,0,0,1]]
+    stages=trace["stages"]
+    state_layers=exact_states(actions)
+    if len(stages)!=len(state_layers):
+        raise ValueError("parallelotope trace omits a stage")
+    for stage,states in zip(stages,state_layers):
+        lower=[Fraction.from_float(x) for x in stage["lower"]]
+        upper=[Fraction.from_float(x) for x in stage["upper"]]
+        if len(lower)!=4 or len(upper)!=4:
+            raise ValueError("parallelotope coordinate dimension differs from four")
+        for state in states:
+            for row in range(4):
+                y=sum((inverse[row][col]*Fraction(coordinate,SCALE)
+                       for col,coordinate in enumerate(state)),Fraction(0))
+                if not lower[row]<=y<=upper[row]:
+                    raise ValueError("an exact finite-history state is outside the 4D parallelotope")
+
+
 def factor_corner_score(stage: dict, objective) -> tuple[float, int]:
     center = stage["center"]
     matrix = stage["generators"]
@@ -61,6 +85,48 @@ def factor_corner_score(stage: dict, objective) -> tuple[float, int]:
                 point[row] += sign * matrix["values"][row * count + column]
         maximum = max(maximum, objective(point))
     return maximum, 1 << count
+
+
+def parallelotope_corner_score(trace: dict) -> tuple[float, int]:
+    frame = trace["frame"]
+    if frame["rows"] != 4 or frame["cols"] != 4:
+        raise ValueError("parallelotope candidate frame is not four dimensional")
+    q = frame["values"]
+    terminal = trace["stages"][-1]
+    maximum = -math.inf
+    for mask in range(16):
+        y = [terminal["upper"][i] if mask & (1 << i) else terminal["lower"][i] for i in range(4)]
+        x = [sum(q[row * 4 + col] * y[col] for col in range(4)) for row in range(4)]
+        maximum = max(maximum, (x[0] - x[2]) ** 2)
+    return maximum, 16
+
+
+def check_exact_replay(replay: dict, actions: tuple[int, ...]) -> Fraction:
+    history_indices = replay["disturbance_indices"]
+    if len(actions) != 3 or len(history_indices) != 3 or any(i not in range(3) for i in history_indices):
+        raise ValueError("selected replay omits a stage or uses an invalid disturbance")
+    state = (9000, 0, 0, 0)
+    path = [state]
+    for action, disturbance_index in zip(actions, history_indices):
+        state = two_points_reference.step(state, ACTION_CODES[action], DISTURBANCES[disturbance_index])
+        path.append(state)
+    expected_path = [[coordinate / SCALE for coordinate in row] for row in path]
+    if len(replay["path"]) != len(expected_path) or any(
+            not close(actual, expected) for actual_row, expected_row in zip(replay["path"], expected_path)
+            for actual, expected in zip(actual_row, expected_row)):
+        raise ValueError("selected replay path differs from the exact rational transition")
+    value = Fraction((state[0] - state[2]) ** 2, SCALE ** 2)
+    if not close(replay["worst_value"], float(value)):
+        raise ValueError("selected replay objective differs from its exact terminal state")
+    worst = Fraction(-1)
+    for history in product(DISTURBANCES, repeat=3):
+        terminal = (9000, 0, 0, 0)
+        for action, disturbance in zip(actions, history):
+            terminal = two_points_reference.step(terminal, ACTION_CODES[action], disturbance)
+        worst = max(worst, Fraction((terminal[0] - terminal[2]) ** 2, SCALE ** 2))
+    if value != worst:
+        raise ValueError("selected witness is not worst case over all disturbance histories")
+    return value
 
 
 def checked_planar_inclusion(example: dict) -> None:
@@ -152,6 +218,34 @@ def main(path: Path) -> dict:
     selected_attempt = attempts[selected_index]
     if selected_attempt["action_indices"] != method["selected_action_indices"]:
         raise ValueError("selected plan indices differ from the scored candidate row")
+    parallelotope=result["parallelotope_method"]
+    if parallelotope.get("relation")!="outer" or parallelotope.get("status")!="numerical outer fixed-frame parallelotope recurrence":
+        raise ValueError("parallelotope relation/status metadata changed")
+    parallel_method=result["parallelotope_minimax_method"]
+    parallel_attempts=parallel_method["plan_attempts"]
+    if parallel_method.get("candidate_search_coverage")!="complete" or len(parallel_attempts)!=len(expected_plans):
+        raise ValueError("parallelotope candidate search omitted fixed plans")
+    parallel_scores=[]
+    for attempt,actions in zip(parallel_attempts,expected_plans):
+        if attempt.get("status")!="scored" or attempt.get("action_indices")!=list(actions):
+            raise ValueError("parallelotope attempts are incomplete or reordered")
+        trace=attempt["stages"]
+        check_parallelotope_trace({"stages":trace},actions)
+        score,corners=parallelotope_corner_score(trace)
+        if attempt.get("corners_evaluated")!=corners or not close(attempt["candidate_score"],score):
+            raise ValueError("parallelotope score differs from exhaustive frame-box corner evaluation")
+        parallel_scores.append(score)
+    parallel_index=parallel_method["selected_candidate_attempt_index"]
+    if not 0<=parallel_index<len(parallel_attempts) or parallel_index!=min(
+            range(len(parallel_scores)),key=parallel_scores.__getitem__):
+        raise ValueError("parallelotope selector did not choose the stable first minimum candidate")
+    parallel_actions=tuple(parallel_method["selected_action_indices"])
+    if parallel_attempts[parallel_index]["action_indices"]!=list(parallel_actions):
+        raise ValueError("parallelotope selected index and action sequence differ")
+    if parallelotope.get("plan_source")!="parallelotope-selected fixed open-loop plan":
+        raise ValueError("parallelotope trace does not show the selector's selected plan")
+    check_parallelotope_trace(parallelotope,parallel_actions)
+    parallel_replay_value=check_exact_replay(parallel_method["selected_replay"],parallel_actions)
 
     replay = method["selected_replay"]
     action_indices = tuple(method["selected_action_indices"])
@@ -192,11 +286,12 @@ def main(path: Path) -> dict:
     planar = result["planar_selector_example"]
     checked_planar_inclusion(planar)
     timing = result["timing"]
-    method_names = ("exact_finite_minimax", "outer_box_selector", "zonotope_selector")
+    method_names = ("exact_finite_minimax", "outer_box_selector", "zonotope_selector", "parallelotope_selector")
     expected_values = {
         method_names[0]: result["exact_reference"]["finite_minimax_value"],
         method_names[1]: result["box_method"]["full_catalogue_replay_value"],
         method_names[2]: replay["worst_value"],
+        method_names[3]: float(parallel_replay_value),
     }
     repetitions = timing.get("measurement_repetitions_per_method")
     if (timing.get("schema") != "csl.issue824-zonotope-minimax-timing/1" or
@@ -239,9 +334,12 @@ def main(path: Path) -> dict:
         "candidate_score_evidence": "independently recomputed on every stored terminal factor corner; not a validated objective bound",
         "selected_plan_replay": "exact rational transition and every disturbance history checked",
         "stage_zonotope_relation": "all exact state coordinates checked against dyadic center +/- sum(abs(generators)); not full four-dimensional membership",
+        "stage_parallelotope_relation": "all exact finite-history states independently transformed into the fixed frame and checked in four-dimensional coordinate bounds",
         "planar_zonotope_inclusion": "all finite terminal points checked inside axis-aligned zonotopes for all three plans; complete finite-set inclusion in this 2D fixture",
         "planar_exact_minimax_value": planar["exact_finite_minimax_value"],
-        "timing_status": "21 completed raw samples across three methods; returned values match independently checked outcomes",
+        "parallelotope_candidate_score_evidence": "all 27 scores independently recomputed on all 16 frame-box corners; not a validated objective bound",
+        "parallelotope_selected_plan_replay": "exact rational transition and every disturbance history checked",
+        "timing_status": "28 completed raw samples across four methods; returned values match independently checked outcomes",
         "performance_claim": "descriptive timings only; no winner or speedup claim",
     }
 

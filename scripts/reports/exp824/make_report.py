@@ -5,6 +5,7 @@ from __future__ import annotations
 import argparse
 import hashlib
 import html
+import itertools
 import json
 import math
 import platform
@@ -20,6 +21,10 @@ SOURCE_FILES = (
     "src/reachability/finite_plan_box.cpp",
     "include/csl/reachability/finite_plan_zonotope.hpp",
     "src/reachability/finite_plan_zonotope.cpp",
+    "include/csl/reachability/finite_plan_parallelotope.hpp",
+    "src/reachability/finite_plan_parallelotope.cpp",
+    "tests/unit/reachability/finite_plan_parallelotope_tests.cpp",
+    "tests/installed/finite_plan_parallelotope_client.cpp",
     "src/reachability/Module.cmake",
     "src/reachability/Tests.cmake",
     "cmake/OptionalReports.cmake",
@@ -113,12 +118,32 @@ def projected_zonotope(stage: dict, xcoord: int, ycoord: int) -> list[tuple[floa
     return hull(vertices)
 
 
+def projected_parallelotope(method: dict, stage_index: int,
+                            xcoord: int, ycoord: int) -> list[tuple[float, float]]:
+    trace=method["stages"]
+    stage = trace["stages"][stage_index]
+    frame = trace["frame"]
+    n = frame["rows"]
+    q = frame["values"]
+    center_y = [(lo + hi) / 2 for lo, hi in zip(stage["lower"], stage["upper"])]
+    radius_y = [(hi - lo) / 2 for lo, hi in zip(stage["lower"], stage["upper"])]
+    center = [sum(q[row*n+col] * center_y[col] for col in range(n)) for row in range(n)]
+    generators = [(q[xcoord*n+col] * radius_y[col], q[ycoord*n+col] * radius_y[col])
+                  for col in range(n)]
+    points = []
+    for signs in itertools.product((-1, 1), repeat=n):
+        points.append((center[xcoord] + sum(sign*g[0] for sign, g in zip(signs, generators)),
+                       center[ycoord] + sum(sign*g[1] for sign, g in zip(signs, generators))))
+    return hull(points)
+
+
 def svg_figure(result: dict, check: dict, mpc_figure: dict) -> str:
     geometry = mpc_figure["reachability_geometry"]
     forward = geometry["forward_layers"]
     backward = geometry["robust_backward_layers"]
     boxes = result["box_method"]["stages"]
     zonotope_tracks = [(result["zonotope_method"]["stages"], "#458588")]
+    parallelotope_method = result.get("parallelotope_method")
     trajectories = {
         "Exact finite minimax replay": (check["exact_reference_state_path"], "#076678", ""),
         "Box selected plan replay": (check["selected_plan_state_path"], "#af3a03", "9 5"),
@@ -138,7 +163,7 @@ def svg_figure(result: dict, check: dict, mpc_figure: dict) -> str:
            '<desc id="desc">Two player phase-plane plots show exact forward sets, finite backward-winning states, intersections, stagewise interval boxes and actual zonotope projections, plus replayed minimax trajectories.</desc>',
            '<rect width="100%" height="100%" fill="#fbf1c7"/>',
            '<text x="720" y="38" text-anchor="middle" font-family="sans-serif" font-size="23" font-weight="700" fill="#282828">TwoPointsOnParallelLines · 3-stage finite adaptation</text>',
-           '<text x="720" y="67" text-anchor="middle" font-family="sans-serif" font-size="14" fill="#504945">Exact finite-game geometry and stagewise 4D outer boxes/zonotopes projected into each player&apos;s phase plane</text>']
+           '<text x="720" y="67" text-anchor="middle" font-family="sans-serif" font-size="14" fill="#504945">Exact finite-game geometry and stagewise 4D outer boxes, zonotopes, and parallelotopes in each player&apos;s phase plane</text>']
 
     for panel_index, ((xcoord, ycoord, title, xlabel, ylabel), (left, top, plot_width, plot_height)) in enumerate(zip(panels, panel_boxes)):
         points_for_bounds = []
@@ -150,6 +175,9 @@ def svg_figure(result: dict, check: dict, mpc_figure: dict) -> str:
         for stages, _ in zonotope_tracks:
             for stage in stages:
                 points_for_bounds.extend(zonotope_box(stage, xcoord, ycoord))
+        if parallelotope_method:
+            for stage_index in range(len(parallelotope_method["stages"]["stages"])):
+                points_for_bounds.extend(projected_parallelotope(parallelotope_method, stage_index, xcoord, ycoord))
         for path, _, _ in trajectories.values():
             points_for_bounds.extend((state[xcoord], state[ycoord]) for state in path)
         xmin = min(point[0] for point in points_for_bounds)
@@ -209,6 +237,14 @@ def svg_figure(result: dict, check: dict, mpc_figure: dict) -> str:
                     px, py = xy(boundary[0])
                     out.append(f'<circle cx="{px:.2f}" cy="{py:.2f}" r="3" fill="{color}"/>')
 
+        if parallelotope_method:
+            for stage_index in range(len(parallelotope_method["stages"]["stages"])):
+                boundary=projected_parallelotope(parallelotope_method,stage_index,xcoord,ycoord)
+                if len(boundary)>=3:
+                    path_string=" ".join(("M" if index==0 else "L")+
+                        f" {xy(point)[0]:.2f} {xy(point)[1]:.2f}" for index,point in enumerate(boundary))+" Z"
+                    out.append(f'<path d="{path_string}" fill="#d3869b" fill-opacity="0.10" stroke="#8f3f71" stroke-width="2" stroke-dasharray="3 3"/>')
+
         for stage_index, stage in enumerate(boxes):
             p1 = xy((stage["lower"][xcoord], stage["lower"][ycoord]))
             p2 = xy((stage["upper"][xcoord], stage["upper"][ycoord]))
@@ -234,6 +270,8 @@ def svg_figure(result: dict, check: dict, mpc_figure: dict) -> str:
     if "zonotope_minimax_method" in result:
         legend.insert(5, ("Zonotope-selected plan zonotope", "#b16286", "fill"))
         legend.append(("Zonotope-selected plan replay", "#b16286", "line-dash"))
+    if parallelotope_method:
+        legend.insert(5,("Fixed-frame outer parallelotope", "#8f3f71", "fill"))
     x_positions = (50, 400, 750, 1100)
     for index, (label, color, kind) in enumerate(legend):
         x = x_positions[index % len(x_positions)]

@@ -30,6 +30,8 @@
 #include <csl/reachability/nominal_predecessor.hpp>
 #include <csl/reachability/finite_plan_box.hpp>
 #include <csl/reachability/finite_plan_zonotope.hpp>
+#include <csl/reachability/finite_plan_parallelotope.hpp>
+#include <csl/optimization/finite_action_parallelotope_minimax.hpp>
 
 #include <iostream>
 #include <stdexcept>
@@ -43,6 +45,9 @@ static_assert(std::is_same_v<csl::optimization::LPDataResult<LinearProgram>,
     std::variant<LinearProgram, Diagnostics>>);
 static_assert(std::is_same_v<csl::optimization::Result<csl::optimization::Objective>,
     std::variant<csl::optimization::Objective, Diagnostic, OperationStopped>>);
+static_assert(std::is_same_v<csl::optimization::FiniteActionParallelotopeMinimaxOutcome,
+    std::variant<csl::optimization::FiniteActionParallelotopeMinimaxResult,
+        csl::Unsupported, csl::OperationStopped>>);
 
 namespace {
 template<class T> T accepted(Result<T> result) {
