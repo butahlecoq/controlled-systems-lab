@@ -31,6 +31,7 @@ TEST_CASE(
   const auto exact = fixed_plan_disturbance(request, 27);
   REQUIRE(std::holds_alternative<FixedPlanReachable>(exact));
   const auto &trace = std::get<FinitePlanParallelotopeTrace>(enclosure);
+  CHECK(trace.relation == SetRelation::outer);
   const auto &stages = std::get<FixedPlanReachable>(exact).stages;
   REQUIRE(trace.frame.rows == 4);
   REQUIRE(trace.frame.cols == 4);

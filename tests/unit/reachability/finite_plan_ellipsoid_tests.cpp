@@ -51,6 +51,7 @@ TEST_CASE("stagewise ellipsoids contain the exact finite TwoPoints history sets"
   const auto exact = fixed_plan_disturbance(request, 27);
   REQUIRE(std::holds_alternative<FixedPlanReachable>(exact));
   const auto& ellipsoids = std::get<FinitePlanEllipsoidTrace>(enclosed);
+  CHECK(ellipsoids.relation == SetRelation::outer);
   const auto& stages = std::get<FixedPlanReachable>(exact).stages;
   REQUIRE(ellipsoids.stages.size() == stages.size());
   for (std::size_t stage = 0; stage < stages.size(); ++stage) {

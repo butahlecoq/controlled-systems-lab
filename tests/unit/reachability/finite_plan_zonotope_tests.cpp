@@ -68,6 +68,7 @@ TEST_CASE("scalar zonotope propagation encloses every exact finite disturbance h
     const auto result = finite_plan_zonotope(input, {64});
     REQUIRE(std::holds_alternative<FinitePlanZonotopeTrace>(result));
     const auto& trace = std::get<FinitePlanZonotopeTrace>(result);
+    CHECK(trace.relation == SetRelation::outer);
     const auto exact = fixed_plan_disturbance(input, 16);
     REQUIRE(std::holds_alternative<FixedPlanReachable>(exact));
     const auto& stages = std::get<FixedPlanReachable>(exact).stages;
