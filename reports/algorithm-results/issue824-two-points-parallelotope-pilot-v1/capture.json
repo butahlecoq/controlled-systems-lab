@@ -18,14 +18,14 @@
   "host": {
     "cpu_model": "AMD Ryzen 5 3550H with Radeon Vega Mobile Gfx",
     "load_average_after_timing": [
-      0.703125,
-      1.0087890625,
-      0.83251953125
+      1.92138671875,
+      1.46142578125,
+      0.99560546875
     ],
     "load_average_before_timing": [
-      0.703125,
-      1.0087890625,
-      0.83251953125
+      1.92138671875,
+      1.46142578125,
+      0.99560546875
     ],
     "logical_cpu_count": 8,
     "machine": "x86_64",
@@ -33,7 +33,7 @@
     "system": "Linux"
   },
   "schema": "csl.issue824-two-points-zonotope-minimax-capture/1",
-  "source_commit": "a9479a554c6cb39f8c07600d1e9eed335274ce63",
+  "source_commit": "f71fc0d4953b5eb7cbbcc99020f029ba872c56e6",
   "source_files_sha256": {
     ".github/workflows/algorithm-reports.yml": "392224d5272b808f4b472a030c10ecd3ce7a20c83de5536bfb7e22e85135a9ce",
     "CMakeLists.txt": "dffff6b904aace15c7d1a22094fa8d29292b77924fba61f0ce5f8f0211e15188",
@@ -46,7 +46,7 @@
     "include/csl/optimization/finite_action_zonotope_minimax.hpp": "111420e284f9ed974c6bc386c421c9d1dc049c44c8bf940b5965de3b94b5b843",
     "include/csl/reachability/finite_plan_parallelotope.hpp": "ea22bb95d1ddd3e436cb8e2ff883f0893c4c9452c62b084a046e0f48d5041b84",
     "include/csl/reachability/finite_plan_zonotope.hpp": "d79183519fda2ef6205aea295ae7400d94324b5d0b413e623b884a5cc910923b",
-    "scripts/reports/audit_visual_routes.py": "c3aafd00a6fd2c070c37043aedb62b9d9529cde7a891830d6294254d27edcc25",
+    "scripts/reports/audit_visual_routes.py": "e65bbac56ea95997829f9428af67ecee645d816d7f0aeedc8a4c1c9096665d84",
     "scripts/reports/exp824/check_two_points_box.py": "68aaf049d7c312eb7ca623d09164334ffa544f251caa8c83c3bef19fd320ddb8",
     "scripts/reports/exp824/check_zonotope_minimax.py": "f0f01e308c0c31ec035fe38afa64fcfd44e7e44b1a0913277fd42f86a832a652",
     "scripts/reports/exp824/check_zonotope_minimax_smoke.py": "8f6eeff73d905c2766db06d3cb79ef80305871f4a27ea6b2644101e0e627cdb1",
@@ -77,21 +77,6 @@
     "tests/unit/optimization/finite_action_zonotope_minimax_tests.cpp": "41ea2b9c584088b460690965ff20a0c5bc8a1d8edf8f02b39aec9bc7f5b454a9",
     "tests/unit/reachability/finite_plan_parallelotope_tests.cpp": "bf1a34e06c2dffa4512853bfbe2f6ecbdb3e821da05c72bf923eb5f6450798d2"
   },
-  "source_status_before_report_generation": [
-    " M benchmarks/reporting/exp824/two_points_zonotope_minimax.cpp",
-    " M cmake/OptionalReports.cmake",
-    " M scripts/reports/exp824/check_zonotope_minimax.py",
-    " M scripts/reports/exp824/make_report.py",
-    " M scripts/reports/exp824/make_zonotope_minimax_report.py",
-    " M src/reachability/Module.cmake",
-    " M src/reachability/Tests.cmake",
-    " M tests/contract/public_headers_client.cpp",
-    " M tests/installed/CMakeLists.txt",
-    "?? docs/architecture/issue824-parallelotope-propagation.md",
-    "?? include/csl/reachability/finite_plan_parallelotope.hpp",
-    "?? src/reachability/finite_plan_parallelotope.cpp",
-    "?? tests/installed/finite_plan_parallelotope_client.cpp",
-    "?? tests/unit/reachability/finite_plan_parallelotope_tests.cpp"
-  ],
-  "source_tree_clean_before_report_generation": false
+  "source_status_before_report_generation": [],
+  "source_tree_clean_before_report_generation": true
 }
