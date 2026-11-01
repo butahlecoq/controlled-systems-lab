@@ -6,6 +6,10 @@ import hashlib
 import json
 from pathlib import Path
 import shutil
+import sys
+
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+import report_source_identity
 
 ROOT = Path(__file__).resolve().parents[2]
 SOURCE = ROOT / "reports/algorithm-results/issue824-two-points-zonotope-pilot-v2"
@@ -38,10 +42,9 @@ def verified_bundle(source: Path) -> dict[str, bytes]:
             check.get("status") != "verified" or
             not check.get("planar_zonotope_inclusion")):
         raise ValueError("issue #824 report lacks a clean capture or verified planar inclusion")
-    for name, expected in capture["source_files_sha256"].items():
-        path = ROOT / name
-        if not path.is_file() or digest(path.read_bytes()) != expected:
-            raise ValueError("issue #824 source identity differs: " + name)
+    if not report_source_identity.source_hashes_match_commit(
+            ROOT, capture.get("source_commit", ""), capture.get("source_files_sha256", {})):
+        raise ValueError("issue #824 source files do not match the captured source commit")
     planar = files["planar-example.html"].decode("utf-8")
     if "Complete minimal input" not in planar or "Exact reachable corners" not in planar:
         raise ValueError("issue #824 planar example omits its inputs or checked answer")

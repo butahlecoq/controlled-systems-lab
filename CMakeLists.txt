@@ -36,6 +36,7 @@ option(CSL_BUILD_ISSUE422_REPORT "Build the paired fixed-plan minimax comparison
 option(CSL_BUILD_MPC03_REPORT "Build the open-loop robust minimax MIP/relaxation pilot" OFF)
 option(CSL_BUILD_MPC05_REPORT "Build the causal minimax Bellman/tree comparison report" OFF)
 option(CSL_BUILD_ISSUE824_BOX_REPORT "Build the issue 824 box-approximated minimax report driver" OFF)
+option(CSL_BUILD_ISSUE824_ZONOTOPE_MINIMAX_REPORT "Build the issue 824 zonotope candidate-selection report driver" OFF)
 option(CSL_BUILD_MPC08_REPORT "Build the exact explicit MPC comparison driver" OFF)
 option(CSL_BUILD_MPC09_REPORT "Build the finite output-feedback MPC report driver" OFF)
 option(CSL_BUILD_MPC06_REPORT "Build the exact nilpotent tube-MPC feasibility pilot" OFF)

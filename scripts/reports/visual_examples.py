@@ -103,6 +103,12 @@ SAVED_FIGURES = (
          title="A planar linear image enclosed by zonotope propagation",
          alt="The square [-1,1] by [-1,1] maps under diag(2,1) to an axis-aligned rectangle; all four exact reachable corners lie in the saved outer zonotope.",
          summary="A one-stage two-state fixture shows the propagated zonotope, all input vertices, exact image corners, reproduction command and source commit. Inclusion is complete for this axis-aligned fixture; the separate four-state TwoPoints projection has coordinate-bound checks only."),
+    dict(route="issue824-two-points-zonotope-minimax-v1", image="planar-example.svg",
+         page="planar-example.html", records="result.json",
+         family="Fixed-plan minimax · Zonotope candidates",
+         title="Choose a fixed control by zonotope factor-corner scores",
+         alt="Three planar fixed-control candidates show their finite terminal points, outer zonotopes, numerical factor-corner scores, and the selected plan's worst-history replay.",
+         summary="A one-stage two-state fixture scores every terminal factor corner for three fixed controls, then replays the selected control over every finite disturbance. All finite terminal points lie in the checked axis-aligned zonotopes; the score remains numerical candidate evidence."),
 )
 
 

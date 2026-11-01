@@ -118,14 +118,20 @@ def svg_figure(result: dict, check: dict, mpc_figure: dict) -> str:
     forward = geometry["forward_layers"]
     backward = geometry["robust_backward_layers"]
     boxes = result["box_method"]["stages"]
-    zonotopes = result["zonotope_method"]["stages"]
+    zonotope_tracks = [(result["zonotope_method"]["stages"], "#458588")]
     trajectories = {
         "Exact finite minimax replay": (check["exact_reference_state_path"], "#076678", ""),
         "Box selected plan replay": (check["selected_plan_state_path"], "#af3a03", "9 5"),
     }
+    if "zonotope_minimax_method" in result:
+        selection = result["zonotope_minimax_method"]
+        selected_trace = selection["plan_attempts"][selection["selected_candidate_attempt_index"]]["stages"]
+        zonotope_tracks.append((selected_trace, "#b16286"))
+        trajectories["Zonotope-selected plan replay"] = (
+            selection["selected_replay"]["path"], "#b16286", "2 4")
     panels = ((0, 1, "Player 1 phase plane", "x1 position (m)", "x2 velocity (m/s)"),
               (2, 3, "Player 2 phase plane", "x3 position (m)", "x4 velocity (m/s)"))
-    width, height = 1440, 790
+    width, height = 1440, 820
     panel_boxes = ((68, 118, 620, 540), (752, 118, 620, 540))
     out = [f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {width} {height}" role="img" aria-labelledby="title desc">',
            '<title id="title">TwoPoints stagewise outer boxes, zonotopes, and minimax geometry</title>',
@@ -141,8 +147,9 @@ def svg_figure(result: dict, check: dict, mpc_figure: dict) -> str:
         for stage in boxes:
             points_for_bounds.extend(((stage["lower"][xcoord], stage["lower"][ycoord]),
                                       (stage["upper"][xcoord], stage["upper"][ycoord])))
-        for stage in zonotopes:
-            points_for_bounds.extend(zonotope_box(stage, xcoord, ycoord))
+        for stages, _ in zonotope_tracks:
+            for stage in stages:
+                points_for_bounds.extend(zonotope_box(stage, xcoord, ycoord))
         for path, _, _ in trajectories.values():
             points_for_bounds.extend((state[xcoord], state[ycoord]) for state in path)
         xmin = min(point[0] for point in points_for_bounds)
@@ -191,15 +198,16 @@ def svg_figure(result: dict, check: dict, mpc_figure: dict) -> str:
                 px, py = xy((state[xcoord], state[ycoord]))
                 out.append(f'<circle cx="{px:.2f}" cy="{py:.2f}" r="4.2" fill="#282828" stroke="#fbf1c7" stroke-width="1"/>')
 
-        for stage_index, stage in enumerate(zonotopes):
-            boundary = projected_zonotope(stage, xcoord, ycoord)
-            if len(boundary) >= 3:
-                path_string = " ".join(("M" if index == 0 else "L") +
-                    f" {xy(point)[0]:.2f} {xy(point)[1]:.2f}" for index, point in enumerate(boundary)) + " Z"
-                out.append(f'<path d="{path_string}" fill="#458588" fill-opacity="0.10" stroke="#458588" stroke-width="2"/>')
-            elif boundary:
-                px, py = xy(boundary[0])
-                out.append(f'<circle cx="{px:.2f}" cy="{py:.2f}" r="3" fill="#458588"/>')
+        for stages, color in zonotope_tracks:
+            for stage in stages:
+                boundary = projected_zonotope(stage, xcoord, ycoord)
+                if len(boundary) >= 3:
+                    path_string = " ".join(("M" if index == 0 else "L") +
+                        f" {xy(point)[0]:.2f} {xy(point)[1]:.2f}" for index, point in enumerate(boundary)) + " Z"
+                    out.append(f'<path d="{path_string}" fill="{color}" fill-opacity="0.10" stroke="{color}" stroke-width="2"/>')
+                elif boundary:
+                    px, py = xy(boundary[0])
+                    out.append(f'<circle cx="{px:.2f}" cy="{py:.2f}" r="3" fill="{color}"/>')
 
         for stage_index, stage in enumerate(boxes):
             p1 = xy((stage["lower"][xcoord], stage["lower"][ycoord]))
@@ -223,6 +231,9 @@ def svg_figure(result: dict, check: dict, mpc_figure: dict) -> str:
               ("Stagewise outer zonotope projection", "#458588", "fill"),
               ("Exact finite minimax replay", "#076678", "line"),
               ("Box-selected plan replay", "#af3a03", "line-dash")]
+    if "zonotope_minimax_method" in result:
+        legend.insert(5, ("Zonotope-selected plan zonotope", "#b16286", "fill"))
+        legend.append(("Zonotope-selected plan replay", "#b16286", "line-dash"))
     x_positions = (50, 400, 750, 1100)
     for index, (label, color, kind) in enumerate(legend):
         x = x_positions[index % len(x_positions)]
