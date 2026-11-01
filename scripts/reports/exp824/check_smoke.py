@@ -19,9 +19,9 @@ def main() -> None:
         result = json.loads(completed.stdout)
         record.write_text(json.dumps(result), encoding="utf-8")
         checked = check_two_points_box.main(record)
-        if checked["status"] != "verified":
+        if checked["status"] != "verified" or not checked["stage_zonotope_coordinate_bounds"].startswith("every exact finite-catalog state coordinate checked"):
             raise SystemExit("EXP-824 independent finite-game check did not pass")
-    print("EXP-824 box minimax finite-game replay and stage enclosure passed")
+    print("EXP-824 box minimax replay, stage enclosure and zonotope coordinate checks passed")
 
 
 if __name__ == "__main__":

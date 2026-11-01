@@ -1,0 +1,48 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width"><title>Planar zonotope propagation example · Issue 824</title>
+<style>body{max-width:960px;margin:2rem auto;padding:0 1rem;background:#fbf1c7;color:#282828;font:16px/1.55 system-ui}h1,h2{color:#3c3836}svg{width:100%;height:auto}code,pre{background:#f9f5d7;padding:.15rem .3rem}a{color:#076678}</style>
+<h1>A planar linear image enclosed by zonotope propagation</h1><p>This supported two-state example starts with the square <code>[-1,1] × [-1,1]</code>, applies one stage <code>x⁺ = diag(2,1)x</code>, with zero control and zero disturbance, and uses universal safe sets. The output set is the axis-aligned rectangle <code>[-2,2] × [-1,1]</code>.</p>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 500" role="img" aria-labelledby="title desc">
+<title id="title">Planar zonotope propagation for a diagonal linear map</title>
+<desc id="desc">The square [-1,1] squared maps under diag(2,1) to the exact rectangle [-2,2] by [-1,1], enclosed by the saved zonotope propagation result.</desc>
+<rect width="100%" height="100%" fill="#fbf1c7"/>
+<text x="380" y="30" text-anchor="middle" font-family="sans-serif" font-size="20" fill="#282828">A 2D linear image enclosed by zonotope propagation</text>
+<line x1="150.80" y1="72" x2="150.80" y2="410" stroke="#d5c4a1"/>
+<text x="150.80" y="432" text-anchor="middle" font-family="sans-serif" font-size="12" fill="#504945">-2</text>
+<line x1="276.40" y1="72" x2="276.40" y2="410" stroke="#d5c4a1"/>
+<text x="276.40" y="432" text-anchor="middle" font-family="sans-serif" font-size="12" fill="#504945">-1</text>
+<line x1="402.00" y1="72" x2="402.00" y2="410" stroke="#d5c4a1"/>
+<text x="402.00" y="432" text-anchor="middle" font-family="sans-serif" font-size="12" fill="#504945">0</text>
+<line x1="527.60" y1="72" x2="527.60" y2="410" stroke="#d5c4a1"/>
+<text x="527.60" y="432" text-anchor="middle" font-family="sans-serif" font-size="12" fill="#504945">1</text>
+<line x1="653.20" y1="72" x2="653.20" y2="410" stroke="#d5c4a1"/>
+<text x="653.20" y="432" text-anchor="middle" font-family="sans-serif" font-size="12" fill="#504945">2</text>
+<line x1="88" y1="353.67" x2="716" y2="353.67" stroke="#d5c4a1"/>
+<text x="74" y="357.67" text-anchor="end" font-family="sans-serif" font-size="12" fill="#504945">-1</text>
+<line x1="88" y1="241.00" x2="716" y2="241.00" stroke="#d5c4a1"/>
+<text x="74" y="245.00" text-anchor="end" font-family="sans-serif" font-size="12" fill="#504945">0</text>
+<line x1="88" y1="128.33" x2="716" y2="128.33" stroke="#d5c4a1"/>
+<text x="74" y="132.33" text-anchor="end" font-family="sans-serif" font-size="12" fill="#504945">1</text>
+<path d="M 150.80 353.67 L 653.20 353.67 L 653.20 128.33 L 150.80 128.33 Z" fill="#458588" fill-opacity="0.24" stroke="#076678" stroke-width="3"/>
+<path d="M 276.40 353.67 L 527.60 353.67 L 527.60 128.33 L 276.40 128.33 Z" fill="#d5c4a1" fill-opacity="0.38" stroke="#665c54" stroke-width="2" stroke-dasharray="7 4"/>
+<circle cx="150.80" cy="353.67" r="5" fill="#282828" stroke="#fbf1c7" stroke-width="1"/>
+<circle cx="653.20" cy="353.67" r="5" fill="#282828" stroke="#fbf1c7" stroke-width="1"/>
+<circle cx="653.20" cy="128.33" r="5" fill="#282828" stroke="#fbf1c7" stroke-width="1"/>
+<circle cx="150.80" cy="128.33" r="5" fill="#282828" stroke="#fbf1c7" stroke-width="1"/>
+<text x="402.0" y="464" text-anchor="middle" font-family="sans-serif" font-size="14" fill="#282828">x₁</text>
+<text x="24" y="241.0" transform="rotate(-90 24 241.0)" text-anchor="middle" font-family="sans-serif" font-size="14" fill="#282828">x₂</text>
+<rect x="92" y="456" width="20" height="12" fill="#d5c4a1" fill-opacity="0.38" stroke="#665c54" stroke-dasharray="5 3"/>
+<text x="118" y="467" font-family="sans-serif" font-size="12" fill="#282828">Initial square</text>
+<rect x="300" y="456" width="20" height="12" fill="#458588" fill-opacity="0.24" stroke="#076678" stroke-width="2"/>
+<text x="326" y="467" font-family="sans-serif" font-size="12" fill="#282828">Propagated outer zonotope</text>
+<circle cx="575" cy="462" r="5" fill="#282828"/><text x="588" y="467" font-family="sans-serif" font-size="12" fill="#282828">Exact reachable corners</text>
+</svg>
+<p><strong>Checked result:</strong> the independently reconstructed four exact image vertices are <code>[[-2.0, -1.0], [2.0, -1.0], [2.0, 1.0], [-2.0, 1.0]]</code>. The saved propagation trace has center <code>[0.0, 0.0]</code> and outward-rounded coordinate generator radii at least <code>[2,1]</code>. Its axis-aligned generators form an outer rectangle containing all exact image vertices. This inclusion check applies to this simple planar fixture; the four-state TwoPoints trace has only coordinate-bound checks and no full-dimensional membership proof.</p>
+<h2>Complete minimal input</h2><pre>State dimension: 2; one discrete stage from t=0 to t=1
+A = [[2, 0], [0, 1]]; B = [[0], [0]]; E = [[0, 0], [0, 0]]; offset = [0, 0]
+Initial vertices: [[-1.0, -1.0], [1.0, -1.0], [1.0, 1.0], [-1.0, 1.0]]
+Control: [0]; disturbance: singleton [0, 0]; safe sets: universal</pre>
+<h2>Reproduce</h2><pre>cmake --preset dev -DCSL_BUILD_ISSUE824_BOX_REPORT=ON
+cmake --build build/dev --target csl_issue824_box_minimax_report --parallel 4
+python3 scripts/reports/exp824/make_report.py --executable build/dev/csl_issue824_box_minimax_report \
+  --build-dir build/dev --output reports/algorithm-results/issue824-two-points-zonotope-pilot-v2</pre>
+<p>Algorithm source commit: <a href="https://github.com/butahlecoq/controlled-systems-lab/commit/20f44923e2f69d621b56cb0147b01d6cf2721d1d"><code>20f44923e2f69d621b56cb0147b01d6cf2721d1d</code></a>. See the <a href="result.json">raw saved result</a>, <a href="check.json">independent checker record</a>, <a href="README.md">complete report and limits</a>, <a href="https://github.com/butahlecoq/controlled-systems-lab/blob/20f44923e2f69d621b56cb0147b01d6cf2721d1d/src/reachability/finite_plan_zonotope.cpp">propagation source</a>, and <a href="https://github.com/butahlecoq/controlled-systems-lab/blob/20f44923e2f69d621b56cb0147b01d6cf2721d1d/tests/unit/reachability/finite_plan_zonotope_tests.cpp">analytic fixture test</a>.</p></html>

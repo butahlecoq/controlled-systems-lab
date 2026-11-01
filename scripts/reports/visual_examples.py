@@ -97,6 +97,12 @@ SAVED_FIGURES = (
          page="index.html", family="Fuel minimax reference", title="B09 fuel reachable set: lambda = 1",
          alt="The four-state fuel model's terminal reachable set projected into flow and stock coordinates for the coupled objective, with open-loop and receding-horizon replay paths.",
          summary="The shaded polygons project the uncertain four-dimensional terminal set into oxidizer/fuel flow and stock planes. Red and blue paths are separate nonlinear replays; they are not set boundaries or globally optimal feedback claims."),
+    dict(route="issue824-two-points-zonotope-pilot-v2", image="planar-example.svg",
+         page="planar-example.html", records="result.json",
+         family="Finite-horizon reachability · Zonotopes",
+         title="A planar linear image enclosed by zonotope propagation",
+         alt="The square [-1,1] by [-1,1] maps under diag(2,1) to an axis-aligned rectangle; all four exact reachable corners lie in the saved outer zonotope.",
+         summary="A one-stage two-state fixture shows the propagated zonotope, all input vertices, exact image corners, reproduction command and source commit. Inclusion is complete for this axis-aligned fixture; the separate four-state TwoPoints projection has coordinate-bound checks only."),
 )
 
 

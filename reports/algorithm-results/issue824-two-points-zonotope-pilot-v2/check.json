@@ -1,0 +1,80 @@
+{
+  "exact_finite_minimax_value": 14.58094225,
+  "exact_reference_state_path": [
+    [
+      4.5,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      4.275,
+      -2.5,
+      -0.0045,
+      -0.1
+    ],
+    [
+      4.025,
+      -2.5,
+      -0.019,
+      -0.2
+    ],
+    [
+      3.775,
+      -2.5,
+      -0.0435,
+      -0.3
+    ]
+  ],
+  "independent_source": "scripts/reports/mpc05/reference.py exact integer transitions and rational objective",
+  "objective_bound_status": "diagnostic numerical maximum on outer boxes; not a validated bound",
+  "planar_zonotope_inclusion": "complete inclusion for the axis-aligned 2D fixture: exact linear-image vertices lie in the checked zonotope, whose axis-aligned generators form an outer rectangle",
+  "schema": "csl.issue824-two-points-box-check/2",
+  "scope": "stored binary64 discrete model coefficients and the declared finite catalogs",
+  "selected_plan_action_codes": [
+    -1,
+    -1,
+    -1
+  ],
+  "selected_plan_disturbance_codes": [
+    -1,
+    -1,
+    -1
+  ],
+  "selected_plan_replay_value": 14.58094225,
+  "selected_plan_state_path": [
+    [
+      4.5,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      4.275,
+      -2.5,
+      -0.0045,
+      -0.1
+    ],
+    [
+      4.025,
+      -2.5,
+      -0.019,
+      -0.2
+    ],
+    [
+      3.775,
+      -2.5,
+      -0.0435,
+      -0.3
+    ]
+  ],
+  "stage_box_inclusion": "every exact finite-catalog state checked at every stage",
+  "stage_state_counts": [
+    1,
+    3,
+    9,
+    23
+  ],
+  "stage_zonotope_coordinate_bounds": "every exact finite-catalog state coordinate checked against exact dyadic center +/- sum(abs(generators)); not a full zonotope membership proof",
+  "status": "verified"
+}

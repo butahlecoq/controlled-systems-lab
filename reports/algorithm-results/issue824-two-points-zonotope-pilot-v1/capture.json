@@ -1,0 +1,46 @@
+{
+  "build": {
+    "compiler": "/usr/bin/c++",
+    "compiler_version": "c++ (GCC) 16.2.1 20260810",
+    "configuration": "Release",
+    "directory": "/home/butahlecoq/.local/share/codex/worktrees/issue824-representations-20261101/build/dev",
+    "generator": "Ninja",
+    "highs": "ON",
+    "qhull": "ON"
+  },
+  "exact_geometry_reference": {
+    "figure_data_sha256": "0a9995d4a2648ee9e13e93128063ac1978392349a2c2ecbee6aa5c659d3362d7",
+    "report_id": "mpc05-causal-tree-pilot-v2"
+  },
+  "host": {
+    "machine": "x86_64",
+    "release": "7.2.8-9-omarchy",
+    "system": "Linux"
+  },
+  "schema": "csl.issue824-two-points-box-capture/2",
+  "source_commit": "61c077fad3ce5a1f896b44d7b9e0df2f7da189d7",
+  "source_files_sha256": {
+    "benchmarks/reporting/exp824/two_points_box.cpp": "ad3b3bd62442b74809134a9851a13a28209d87fc077a872fd9478ae01aabafaf",
+    "benchmarks/reporting/exp824/two_points_fixture.hpp": "63ea125705437636a8689ca1a37d1df71c4be1ee04f751d2b226ab1c8145c8ec",
+    "cmake/OptionalReports.cmake": "dea43ee329f9a72724cf8798f1046e570f6946438f138876a949ce6116388878",
+    "cmake/RunInstalledClient.cmake": "19e6b0dd2df522a613e2e3e73eaeab9ab15f25d87b3b0940e4e404b8d1d80d93",
+    "include/csl/optimization/finite_action_box_minimax.hpp": "8a64bfc9a3654b2cecca61be60967246ee3a0fe05e2d12b194dc1f97d49cdd86",
+    "include/csl/reachability/finite_plan_box.hpp": "c0868b52ac494d2ccf7cb8c60af9c569e8bbeb728a9b0581ca76c08e0bb8810b",
+    "include/csl/reachability/finite_plan_zonotope.hpp": "d79183519fda2ef6205aea295ae7400d94324b5d0b413e623b884a5cc910923b",
+    "scripts/reports/exp824/check_two_points_box.py": "ef2e58662797d713313822305a4760ced9a66e7ab0a0e3f5f53f82b81ba6a12c",
+    "scripts/reports/exp824/make_report.py": "2c214b8ff2bf72cf209618cfab92de8478451b75ab4e7e69ac5babbbf87560fb",
+    "src/optimization/finite_action_box_minimax.cpp": "4575e43894f8a92597d1014aa157bb93699eb170c6f8fe64bbc99351ffa7bd67",
+    "src/optimization/finite_action_minimax.cpp": "958913ead8bbb935a49b30c4f9564d39c42b09a46f03492fe2327920272cca1f",
+    "src/optimization/finite_action_plans.hpp": "8ca3f1f52f947b6f9a556725d610b608676ddb568efb70b469bb81cc0c51be3b",
+    "src/reachability/Module.cmake": "fd3ec08951eba06ce57d0c96bd172dfcdfc0c98e41745551c0f6d42109a5d1fc",
+    "src/reachability/Tests.cmake": "0d5b0e376ce3ab4fbffc0d4ddfb21bebb29599a68b0df2f5a7911d6d00ba5ad5",
+    "src/reachability/finite_plan_box.cpp": "45df26937aafd54d313bf3b03f40fdc05352167943ade2d2beeb038249592eba",
+    "src/reachability/finite_plan_zonotope.cpp": "21216c26fb1b87c152f20443bafb67e476504a853e76797a73c12a4f9f8bec46",
+    "tests/contract/public_headers_client.cpp": "d0cc57634cb0f3c1e8a5775edc0b9ebc4416bda9966f1768c8770b2cf309e53e",
+    "tests/installed/CMakeLists.txt": "3ee6a4d33193dd335267f9eba86c74423075a736ffe404da1186fe1c11d16e11",
+    "tests/installed/finite_plan_zonotope_client.cpp": "2de94db432d2ae3b305375c693fc885f26f49ffe7e770d65c7f3f18d73a48a11",
+    "tests/unit/reachability/finite_plan_zonotope_tests.cpp": "5039ec65ddd0f97ec99520bb0f000d1ccf27998c40b45eadd918e6448029bbe0"
+  },
+  "source_status_before_report_generation": [],
+  "source_tree_clean_before_report_generation": true
+}

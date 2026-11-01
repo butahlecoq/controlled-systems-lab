@@ -23,6 +23,12 @@ target_link_libraries(finite_plan_box_tests PRIVATE CSL::finite_plan_box doctest
 add_test(NAME finite_plan_box_tests COMMAND finite_plan_box_tests)
 csl_test_target(finite_plan_box_tests reachability)
 
+add_executable(finite_plan_zonotope_tests tests/unit/reachability/finite_plan_zonotope_tests.cpp)
+target_include_directories(finite_plan_zonotope_tests PRIVATE ${PROJECT_SOURCE_DIR}/benchmarks/reporting/exp824)
+target_link_libraries(finite_plan_zonotope_tests PRIVATE CSL::finite_plan_zonotope CSL::fixed_plan_disturbance doctest::doctest)
+add_test(NAME finite_plan_zonotope_tests COMMAND finite_plan_zonotope_tests)
+csl_test_target(finite_plan_zonotope_tests reachability)
+
 add_executable(finite_feedback_tests tests/unit/reachability/finite_feedback_tests.cpp)
 target_link_libraries(finite_feedback_tests PRIVATE CSL::finite_feedback doctest::doctest)
 add_test(NAME finite_feedback_tests COMMAND finite_feedback_tests)
