@@ -97,6 +97,60 @@ struct ExactLinearStrategyFixture {
     }
 };
 
+class StopInsideStrategyWorkspace final : public SynthesisWorkspace {
+    std::shared_ptr<std::stop_source> cancellation_;
+    Termination termination_;
+public:
+    StopInsideStrategyWorkspace(std::shared_ptr<std::stop_source> cancellation,
+        Termination termination)
+        : cancellation_(std::move(cancellation)), termination_(termination) {}
+
+    SynthesisResult solve(const problem::ResolvedProblem& problem, const FamilyRequest&,
+        const ExecutionContext& context) override {
+        StopReason reason = termination_ == Termination::deadline_expired
+            ? StopReason::deadline_expired : StopReason::cancelled;
+        if (reason == StopReason::cancelled) {
+            cancellation_->request_stop();
+        } else if (context.deadline) {
+            std::this_thread::sleep_until(*context.deadline);
+        }
+        SynthesisResult result;
+        result.termination = termination_;
+        result.outcome = {problem.identity(), MathematicalOutcome::undetermined,
+            Unestablished{}, {}};
+        RequestProvenance provenance{{"finite-mixed-branch-stop-test"}, "strategy",
+            {"csl.synthesis.reach-back"}, std::string{"1"},
+            ModuleId{"csl.synthesis.reach-back"}, std::string{"1"}};
+        result.stop = ScopedOperationStopped{
+            OperationStopped{reason, "Synthetic strategy stopped during its branch solve."},
+            std::move(provenance), {}};
+        return result;
+    }
+};
+
+registry::StrategyRegistration stopping_strategy(std::shared_ptr<std::stop_source> cancellation,
+    Termination termination) {
+    registry::StrategyRegistration registration;
+    registration.identity = {{"csl.synthesis.reach-back"}, "1"};
+    registration.capabilities = [](const registry::StrategyRequest&,
+        const registry::Requirements& requirements) -> registry::Capability {
+        return registry::Offer{requirements.output};
+    };
+    registration.complete_family_verifier = {
+        {"csl.verifier.strategy-a.nominal-linear-exact"}, "1"};
+    registration.planner = [cancellation = std::move(cancellation), termination](
+        const registry::StrategyRequest&, const registry::Requirements&)
+        -> std::variant<registry::StrategyPlan, registry::Rejection> {
+        auto checked = registry::check_pipeline();
+        return registry::compose_strategy(std::get<registry::CheckedPipeline<>>(
+            std::move(checked)), [cancellation, termination](auto,
+            const registry::StrategyRequest&, const registry::Requirements&) {
+                return std::make_unique<StopInsideStrategyWorkspace>(cancellation, termination);
+            });
+    };
+    return registration;
+}
+
 problem::ResolvedProblem mixed_linear_tie_problem() {
     const auto controls = take(sets::make_h({{"mixed-continuous-interval"}, 1, {"u"}},
         {matrix({2, 1, {1, -1}}), vector({1, 1}), matrix({0, 1, {}}), vector({})}));
@@ -205,7 +259,6 @@ TEST_CASE("mixed branch solve runs registered continuous solvers and retains ver
 
 TEST_CASE("mixed branch solve propagates cancellation and deadline after starting branch work") {
     const auto source = mixed_linear_tie_problem();
-    ExactLinearStrategyFixture strategy_fixture;
     FiniteMixedBranchSolveRequest request;
     request.strategy.strategy = {"csl.synthesis.reach-back"};
     request.strategy.representation = {"csl.polyhedron.h"};
@@ -220,15 +273,13 @@ TEST_CASE("mixed branch solve propagates cancellation and deadline after startin
     context.numerical = request.family.numerical;
     context.resources = std::make_shared<const ResourcePolicy>(ResourcePolicy{1, 1, 1, {}});
 
-    std::stop_source cancellation;
-    context.cancellation = cancellation.get_token();
-    std::jthread cancel_after_start([&] {
-        std::this_thread::sleep_for(std::chrono::milliseconds(1));
-        cancellation.request_stop();
-    });
+    auto cancellation = std::make_shared<std::stop_source>();
+    registry::StrategyRegistry cancellation_strategy;
+    REQUIRE_FALSE(cancellation_strategy.add(stopping_strategy(
+        cancellation, Termination::cancelled)).has_value());
+    context.cancellation = cancellation->get_token();
     const auto cancelled_outcome = solve_finite_mixed_branch_portfolio(
-        source, strategy_fixture.strategies, request, context);
-    cancel_after_start.join();
+        source, cancellation_strategy, request, context);
     REQUIRE(std::holds_alternative<FiniteMixedBranchSolveResult>(cancelled_outcome));
     const auto& cancelled = std::get<FiniteMixedBranchSolveResult>(cancelled_outcome);
     REQUIRE(cancelled.stop.has_value());
@@ -238,10 +289,13 @@ TEST_CASE("mixed branch solve propagates cancellation and deadline after startin
     CHECK_FALSE(cancelled.portfolio.complete);
     CHECK_FALSE(cancelled.portfolio.evaluations.empty());
 
+    registry::StrategyRegistry deadline_strategy;
+    REQUIRE_FALSE(deadline_strategy.add(stopping_strategy(
+        std::make_shared<std::stop_source>(), Termination::deadline_expired)).has_value());
     context.cancellation = {};
-    context.deadline = std::chrono::steady_clock::now() + std::chrono::milliseconds(1);
+    context.deadline = std::chrono::steady_clock::now() + std::chrono::milliseconds(250);
     const auto deadline_outcome = solve_finite_mixed_branch_portfolio(
-        source, strategy_fixture.strategies, request, context);
+        source, deadline_strategy, request, context);
     REQUIRE(std::holds_alternative<FiniteMixedBranchSolveResult>(deadline_outcome));
     const auto& deadline = std::get<FiniteMixedBranchSolveResult>(deadline_outcome);
     REQUIRE(deadline.stop.has_value());
