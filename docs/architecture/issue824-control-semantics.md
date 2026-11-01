@@ -35,13 +35,24 @@ performance ranking follows from these objective values.
 
 ## Representation support boundary
 
-| State-set track | Fixed-plan nominal/minimax | Cost-optimal causal feedback | Status represented by current evidence |
-| --- | --- | --- | --- |
-| Exact finite catalogue / transition graph | Supported on the pinned finite catalogues | Supported for exact full-state observation by the finite causal Bellman/tree profile | The causal solver consumes a finite state graph; this does not establish a generic polytope predecessor algorithm or a continuous-game guarantee |
-| Box | Fixed-plan selector and selected-plan replay | Unsupported | No box predecessor or policy propagation is implemented in this comparison |
-| Parallelotope | Fixed-plan selector and selected-plan replay | Unsupported | Current fixed-frame recurrence is explicitly open-loop only |
-| Zonotope | Fixed-plan selector and selected-plan replay | Unsupported | Current recurrence does not produce a causal policy or predecessor relation |
-| Ellipsoid | Fixed-plan selector and selected-plan replay | Unsupported | Current selector scores fixed plans; it does not synthesize feedback |
+| State-set track | Forward propagation and relation | Predecessor / feedback support | Fixed-plan control result | Independent inclusion evidence and limits |
+| --- | --- | --- | --- | --- |
+| Exact finite catalogue / transition graph | Exact for the pinned finite transition graph and declared catalogues | Cost-optimal full-state policy on that graph in the finite causal Bellman/tree profile; no general set-predecessor API | Complete finite-catalog nominal and fixed-plan minimax searches | Exact integer transitions and rational objectives cover the enumerated finite graph; this is not a continuous-game or generic polytope predecessor guarantee |
+| Box | Stagewise numerical outer interval box | Unsupported | Fixed-plan nominal and minimax candidate selectors; selected plans are replayed separately | For the selected plan, the checker reconstructs every distinct finite-history state at every stage and checks its coordinates against the recorded box. This evidence is specific to the stored binary64 fixture; box-corner scores are not validated objective bounds |
+| Parallelotope | Stagewise numerical outer enclosure in the pinned fixed four-state frame | Unsupported | Fixed-plan nominal and minimax candidate selectors; selected plans are replayed separately | The checker transforms each exact finite-history state into the fixed frame and checks all four frame-coordinate bounds for every scored plan. No orientation optimization is performed |
+| Zonotope | Stagewise numerical outer zonotope | Unsupported | Fixed-plan nominal and minimax candidate selectors; selected plans are replayed separately | The v2 checker interprets stored binary64 centers and generators as exact dyadic rationals, checks every facet inequality including lower-dimensional affine spans, and covers every finite-history state for every plan. Candidate scores remain unvalidated estimates |
+| Ellipsoid | Stagewise numerical outer axis-aligned ellipsoid | Unsupported | Fixed-plan nominal and minimax candidate selectors; selected plans are replayed separately | The v2 checker uses exact rational membership checks for every finite-history state, stage, and candidate plan. Candidate support scores remain unvalidated estimates |
+
+Here “outer” describes the declared propagation direction for the numerical
+recurrence. Inclusion evidence is limited to the pinned finite fixture and
+stored binary64 inputs; it is not a validated-arithmetic guarantee for
+arbitrary inputs. Failed or budget-stopped selector attempts remain explicit
+rows in the zonotope, parallelotope, ellipsoid, and nominal result models and
+make search coverage incomplete. The box minimax result now follows the same
+contract with a `FiniteActionBoxPlanAttempt` sum type and a separate selection
+outcome; request-wide validation failures remain top-level `Unsupported` or
+`OperationStopped`. A selected-plan replay is a feasible witness, not proof
+that an approximate selector found the globally optimal plan.
 
 The finite-state threshold policy is a separate exact-graph result; it must
 not be described as a closed-loop version of the box, parallelotope, zonotope,

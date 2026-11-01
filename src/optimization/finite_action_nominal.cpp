@@ -215,24 +215,41 @@ NominalTrackOutcome box_track(const FiniteActionNominalRequest& nominal,
         return NominalTrackStopped{{}, NominalSearchCoverage::stopped, *stop};
     const auto& result = std::get<FiniteActionBoxMinimaxResult>(outcome);
     std::vector<NominalPlanAttempt> attempts;
-    attempts.reserve(result.plan_scores.size());
-    for(const auto& score : result.plan_scores)
-        attempts.emplace_back(NominalPlanScored{score.action_indices,
-            score.terminal_box_maximum, NominalScoreKind::numerical_outer_enclosure_estimate});
-    const auto coverage = attempts.size() == expected_plan_count(request) ?
-        NominalSearchCoverage::complete : NominalSearchCoverage::incomplete;
-    const auto selected = std::find_if(result.plan_scores.begin(), result.plan_scores.end(),
-        [&](const BoxPlanScore& score) { return score.action_indices == result.selected_action_indices; });
-    if(selected == result.plan_scores.end())
-        return NominalTrackUnsupported{std::move(attempts), coverage,
-            unsupported("finite_nominal.box.selection", "Box selector did not return a scored plan.")};
-    const auto selected_index = static_cast<std::size_t>(selected - result.plan_scores.begin());
-    auto selection = select_and_replay(nominal,
-        std::move(attempts), coverage, selected_index, result.selected_box_score,
-        NominalScoreKind::numerical_outer_enclosure_estimate, result.selected_box_trace, context);
-    if(auto* selected_outcome = std::get_if<NominalTrackSelected>(&selection)) return *selected_outcome;
-    if(auto* error = std::get_if<NominalTrackUnsupported>(&selection)) return *error;
-    return std::get<NominalTrackStopped>(std::move(selection));
+    attempts.reserve(result.plan_attempts.size());
+    for(const auto& attempt : result.plan_attempts) {
+        if(const auto* scored = std::get_if<BoxPlanScored>(&attempt))
+            attempts.emplace_back(NominalPlanScored{scored->action_indices,
+                scored->terminal_box_maximum,
+                NominalScoreKind::numerical_outer_enclosure_estimate});
+        else if(const auto* unscored = std::get_if<BoxPlanUnscored>(&attempt))
+            attempts.emplace_back(NominalPlanUnscored{unscored->action_indices, unscored->reason});
+        else {
+            const auto& stopped = std::get<BoxPlanStopped>(attempt);
+            attempts.emplace_back(NominalPlanStopped{stopped.action_indices, stopped.reason});
+        }
+    }
+    const auto coverage = coverage_from(result.candidate_search);
+    if(const auto* selected = std::get_if<BoxPlanSelected>(&result.selection)) {
+        if(selected->candidate_attempt_index >= result.plan_attempts.size())
+            return NominalTrackUnsupported{std::move(attempts), coverage,
+                unsupported("finite_nominal.box.selection", "Selected box attempt index is outside the attempt table.")};
+        const auto* scored = std::get_if<BoxPlanScored>(
+            &result.plan_attempts[selected->candidate_attempt_index]);
+        if(!scored)
+            return NominalTrackUnsupported{std::move(attempts), coverage,
+                unsupported("finite_nominal.box.selection", "Selected box attempt has no candidate score.")};
+        auto selection = select_and_replay(nominal, std::move(attempts), coverage,
+            selected->candidate_attempt_index, scored->terminal_box_maximum,
+            NominalScoreKind::numerical_outer_enclosure_estimate, scored->trace, context);
+        if(auto* selected_outcome = std::get_if<NominalTrackSelected>(&selection)) return *selected_outcome;
+        if(auto* error = std::get_if<NominalTrackUnsupported>(&selection)) return *error;
+        return std::get<NominalTrackStopped>(std::move(selection));
+    }
+    if(const auto* refused = std::get_if<BoxPlanReplayRefused>(&result.selection))
+        return NominalTrackUnsupported{std::move(attempts), coverage, refused->reason};
+    if(const auto* stopped = std::get_if<BoxPlanReplayStopped>(&result.selection))
+        return NominalTrackStopped{std::move(attempts), NominalSearchCoverage::stopped, stopped->reason};
+    return NominalTrackNoScoredCandidate{std::move(attempts), coverage};
 }
 
 NominalTrackOutcome zonotope_track(const FiniteActionNominalRequest& nominal,

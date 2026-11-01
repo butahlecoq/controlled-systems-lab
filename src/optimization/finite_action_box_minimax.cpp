@@ -6,6 +6,7 @@
 #include <algorithm>
 #include <cmath>
 #include <limits>
+#include <optional>
 
 namespace csl::optimization {
 namespace {
@@ -67,16 +68,20 @@ FiniteActionBoxMinimaxOutcome finite_action_box_minimax(
        request.disturbances.size() != horizon || request.admissible_states.size() != horizon + 1)
         return unsupported("finite_box_minimax.dimensions", "Objective, catalogue or stage dimensions differ from the model.");
 
-    std::vector<BoxPlanScore> scores;
-    scores.reserve(plan_count);
-    std::size_t selected_index = 0;
+    std::vector<FiniteActionBoxPlanAttempt> attempts;
+    attempts.reserve(plan_count);
+    std::optional<std::size_t> selected_index;
     double minimum = std::numeric_limits<double>::infinity();
-    reachability::FinitePlanBoxTrace selected_trace;
+    bool search_stopped = false;
     for(std::size_t plan_index = 0; plan_index < plan_count; ++plan_index) {
-        if(context.cancellation.stop_requested())
-            return OperationStopped{StopReason::cancelled, "Approximate finite minimax cancelled."};
         const auto choices = detail::action_plan_indices(plan_index,
             request.actions.catalogue.size(), horizon);
+        if(context.cancellation.stop_requested()) {
+            attempts.emplace_back(BoxPlanStopped{choices,
+                {StopReason::cancelled, "Approximate finite minimax cancelled."}});
+            search_stopped = true;
+            break;
+        }
         std::vector<Vector> controls;
         controls.reserve(horizon);
         for(const auto choice : choices) controls.push_back(request.actions.catalogue[choice]);
@@ -84,27 +89,56 @@ FiniteActionBoxMinimaxOutcome finite_action_box_minimax(
             request.disturbances, request.admissible_states,
             {request.request.value + "/box-plan/" + std::to_string(plan_index)}};
         auto propagated = reachability::finite_plan_box(plan, context);
-        if(const auto* error = std::get_if<Unsupported>(&propagated)) return *error;
-        if(const auto* stop = std::get_if<OperationStopped>(&propagated)) return *stop;
-        auto corners = terminal_box(std::get<reachability::FinitePlanBoxTrace>(propagated).stages.back(),
-            limits.max_box_corners);
-        if(const auto* error = std::get_if<Unsupported>(&corners)) return *error;
+        if(const auto* error = std::get_if<Unsupported>(&propagated)) {
+            attempts.emplace_back(BoxPlanUnscored{choices, *error});
+            continue;
+        }
+        if(const auto* stop = std::get_if<OperationStopped>(&propagated)) {
+            attempts.emplace_back(BoxPlanStopped{choices, *stop});
+            search_stopped = true;
+            break;
+        }
+        auto trace = std::get<reachability::FinitePlanBoxTrace>(std::move(propagated));
+        auto corners = terminal_box(trace.stages.back(), limits.max_box_corners);
+        if(const auto* error = std::get_if<Unsupported>(&corners)) {
+            attempts.emplace_back(BoxPlanUnscored{choices, *error});
+            continue;
+        }
         const auto score = worst_case_vertex(std::get<sets::SetData>(corners), request.objective,
             limits.max_box_corners, context);
-        if(const auto* error = std::get_if<Unsupported>(&score)) return *error;
-        if(const auto* stop = std::get_if<OperationStopped>(&score)) return *stop;
-        if(std::holds_alternative<WorstCaseEmpty>(score))
-            return unsupported("finite_box_minimax.empty", "An empty terminal box cannot be scored.");
+        if(const auto* error = std::get_if<Unsupported>(&score)) {
+            attempts.emplace_back(BoxPlanUnscored{choices, *error});
+            continue;
+        }
+        if(const auto* stop = std::get_if<OperationStopped>(&score)) {
+            attempts.emplace_back(BoxPlanStopped{choices, *stop});
+            search_stopped = true;
+            break;
+        }
+        if(std::holds_alternative<WorstCaseEmpty>(score)) {
+            attempts.emplace_back(BoxPlanUnscored{choices,
+                unsupported("finite_box_minimax.empty", "An empty terminal box cannot be scored.")});
+            continue;
+        }
         const auto value = std::get<WorstCaseValue>(score).value;
-        scores.push_back({choices, value});
+        const auto attempt_index = attempts.size();
+        attempts.emplace_back(BoxPlanScored{choices, value, std::move(trace)});
         if(value < minimum) {
             minimum = value;
-            selected_index = plan_index;
-            selected_trace = std::get<reachability::FinitePlanBoxTrace>(std::move(propagated));
+            selected_index = attempt_index;
         }
     }
 
-    const auto selected_choices = scores[selected_index].action_indices;
+    const auto coverage = !search_stopped && attempts.size() == plan_count &&
+        std::all_of(attempts.begin(), attempts.end(), [](const auto& attempt) {
+            return std::holds_alternative<BoxPlanScored>(attempt);
+        }) ? CandidateSearchCoverage::complete : CandidateSearchCoverage::incomplete;
+    if(!selected_index)
+        return FiniteActionBoxMinimaxResult{request.problem, request.request,
+            std::move(attempts), CandidateSearchCoverage::incomplete,
+            BoxNoScoredCandidate{}, Assurance::numerical};
+
+    const auto selected_choices = std::get<BoxPlanScored>(attempts[*selected_index]).action_indices;
     std::vector<Vector> controls;
     controls.reserve(horizon);
     for(const auto choice : selected_choices) controls.push_back(request.actions.catalogue[choice]);
@@ -113,11 +147,18 @@ FiniteActionBoxMinimaxOutcome finite_action_box_minimax(
         {request.request.value + "/box-selected-replay"}};
     const auto replay = detail::replay_finite_action_plan(replay_request, request.objective,
         limits.max_points_per_stage, limits.max_replay_histories, "finite_box_minimax", context);
-    if(const auto* error = std::get_if<Unsupported>(&replay)) return *error;
-    if(const auto* stop = std::get_if<OperationStopped>(&replay)) return *stop;
+    if(const auto* error = std::get_if<Unsupported>(&replay))
+        return FiniteActionBoxMinimaxResult{request.problem, request.request,
+            std::move(attempts), coverage, BoxPlanReplayRefused{*selected_index, *error},
+            Assurance::numerical};
+    if(const auto* stop = std::get_if<OperationStopped>(&replay))
+        return FiniteActionBoxMinimaxResult{request.problem, request.request,
+            std::move(attempts), coverage, BoxPlanReplayStopped{*selected_index, *stop},
+            Assurance::numerical};
     const auto& replayed = std::get<detail::FiniteActionReplay>(replay);
-    return FiniteActionBoxMinimaxResult{request.problem, request.request, std::move(scores), selected_choices,
-        minimum, replayed.value, replayed.terminal_state, replayed.disturbance_indices,
-        replayed.disturbances, replayed.path, replayed.terminal_catalogue, std::move(selected_trace), Assurance::numerical};
+    return FiniteActionBoxMinimaxResult{request.problem, request.request, std::move(attempts),
+        coverage, BoxPlanSelected{*selected_index, {replayed.value, replayed.terminal_state,
+            replayed.disturbance_indices, replayed.disturbances, replayed.path,
+            replayed.terminal_catalogue}}, Assurance::numerical};
 }
 } // namespace csl::optimization

@@ -190,8 +190,11 @@ double run_timed_method(std::size_t method, const FiniteActionMinimaxRequest& in
     if(method == 1) {
         const auto box = finite_action_box_minimax(input, {27, 27, 27, 16});
         const auto* result = std::get_if<FiniteActionBoxMinimaxResult>(&box);
-        if(!result) throw std::runtime_error("timed box selector did not complete");
-        return result->selected_replay_value;
+        if(!result || result->candidate_search != CandidateSearchCoverage::complete)
+            throw std::runtime_error("timed box selector did not score every plan");
+        const auto* selected = std::get_if<BoxPlanSelected>(&result->selection);
+        if(!selected) throw std::runtime_error("timed box selector did not replay its selected plan");
+        return selected->replay.worst_value;
     }
     const auto zonotope = finite_action_zonotope_minimax(input, {27, 27, 27, 64, 32768});
     const auto* result = std::get_if<FiniteActionZonotopeMinimaxResult>(&zonotope);
@@ -266,7 +269,14 @@ Json run() {
     if(!exact_result) throw std::runtime_error("exact finite minimax did not complete");
     const auto box = finite_action_box_minimax(input, {27, 27, 27, 16});
     const auto* box_result = std::get_if<FiniteActionBoxMinimaxResult>(&box);
-    if(!box_result) throw std::runtime_error("box minimax did not complete");
+    if(!box_result || box_result->candidate_search != CandidateSearchCoverage::complete ||
+       box_result->plan_attempts.size() != 27)
+        throw std::runtime_error("box minimax candidate search was incomplete");
+    const auto* box_selected = std::get_if<BoxPlanSelected>(&box_result->selection);
+    if(!box_selected) throw std::runtime_error("box minimax did not replay a selected plan");
+    const auto& box_scored = std::get<BoxPlanScored>(
+        box_result->plan_attempts.at(box_selected->candidate_attempt_index));
+    const auto& box_replay = box_selected->replay;
     const auto zonotope = finite_action_zonotope_minimax(input, {27, 27, 27, 64, 32768});
     const auto* zonotope_result = std::get_if<FiniteActionZonotopeMinimaxResult>(&zonotope);
     if(!zonotope_result) throw std::runtime_error("zonotope minimax did not return a result");
@@ -287,7 +297,7 @@ Json run() {
         parallelotope_result->plan_attempts[parallelotope_selected->candidate_attempt_index]);
 
     std::vector<Vector> box_controls;
-    for(const auto index : box_result->selected_action_indices)
+    for(const auto index : box_scored.action_indices)
         box_controls.push_back(input.actions.catalogue.at(index));
     reachability::FixedPlanRequest box_zone_request{input.system, input.initial, std::move(box_controls),
         input.disturbances, input.admissible_states, {"issue824-zonotope-box-selected-plan"}};
@@ -296,11 +306,25 @@ Json run() {
     if(!box_zone_trace) throw std::runtime_error("box-selected plan zonotope did not complete");
 
     Json box_scores = Json::array();
-    for(const auto& score : box_result->plan_scores)
-        box_scores.push_back({{"action_indices", score.action_indices},
-            {"terminal_box_maximum", score.terminal_box_maximum}});
+    Json box_attempts = Json::array();
+    for(const auto& attempt : box_result->plan_attempts) {
+        if(const auto* scored = std::get_if<BoxPlanScored>(&attempt)) {
+            box_scores.push_back({{"action_indices", scored->action_indices},
+                {"terminal_box_maximum", scored->terminal_box_maximum}});
+            box_attempts.push_back({{"status","scored"}, {"action_indices",scored->action_indices},
+                {"terminal_box_maximum",scored->terminal_box_maximum}});
+        } else if(const auto* unscored = std::get_if<BoxPlanUnscored>(&attempt)) {
+            const auto& diagnostic = unscored->reason.diagnostics.front();
+            box_attempts.push_back({{"status","unsupported"}, {"action_indices",unscored->action_indices},
+                {"field",diagnostic.field}, {"reason",diagnostic.explanation}});
+        } else {
+            const auto& stopped = std::get<BoxPlanStopped>(attempt);
+            box_attempts.push_back({{"status","stopped"}, {"action_indices",stopped.action_indices},
+                {"reason",stopped.reason.diagnostics}});
+        }
+    }
     Json box_stages = Json::array();
-    for(const auto& stage : box_result->selected_box_trace.stages)
+    for(const auto& stage : box_scored.trace.stages)
         box_stages.push_back({{"lower", stage.lower}, {"upper", stage.upper}});
     Json exact_controls = Json::array();
     Json exact_action_indices = Json::array();
@@ -326,17 +350,20 @@ Json run() {
             {"selected_action_indices", std::move(exact_action_indices)},
             {"selected_controls", exact_controls}}},
         {"box_method", {{"status", "numerical outer interval box"},
-            {"selected_action_indices", box_result->selected_action_indices},
+            {"candidate_search_coverage","complete"},
+            {"selected_candidate_attempt_index",box_selected->candidate_attempt_index},
+            {"selected_action_indices", box_scored.action_indices},
             {"selected_controls", [&] { Json values = Json::array();
-                for(const auto index : box_result->selected_action_indices)
+                for(const auto index : box_scored.action_indices)
                     values.push_back(input.actions.catalogue[index].front());
                 return values; }()},
-            {"terminal_box_maximum", box_result->selected_box_score},
-            {"full_catalogue_replay_value", box_result->selected_replay_value},
-            {"worst_disturbance_indices", box_result->replayed_worst_disturbance_indices},
-            {"worst_disturbances", box_result->replayed_worst_disturbance_values},
-            {"worst_case_path", box_result->replayed_worst_path},
-            {"stages", std::move(box_stages)}, {"all_plan_scores", std::move(box_scores)}}},
+            {"terminal_box_maximum", box_scored.terminal_box_maximum},
+            {"full_catalogue_replay_value", box_replay.worst_value},
+            {"worst_disturbance_indices", box_replay.disturbance_indices},
+            {"worst_disturbances", box_replay.disturbances},
+            {"worst_case_path", box_replay.path},
+            {"stages", std::move(box_stages)}, {"all_plan_scores", std::move(box_scores)},
+            {"plan_attempts", std::move(box_attempts)}}},
         {"zonotope_method", {{"status", "numerical outer zonotope recurrence"},
             {"plan_source", "box-selected fixed open-loop plan"}, {"relation", "outer"},
             {"max_generators_per_stage", 64}, {"stages", trace_json(*box_zone_trace)}}},

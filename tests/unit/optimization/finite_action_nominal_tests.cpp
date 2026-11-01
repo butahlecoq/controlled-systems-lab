@@ -8,6 +8,13 @@
 using namespace csl;
 using namespace csl::optimization;
 
+namespace {
+template<class T> T take_nominal(std::variant<T, Diagnostic> result) {
+    REQUIRE(std::holds_alternative<T>(result));
+    return std::get<T>(std::move(result));
+}
+}
+
 TEST_CASE("nominal finite-plan comparison keeps exact and enclosure scores distinct") {
     const auto source = csl::issue824::fixture::two_points_request("nominal-test-source");
     FiniteActionNominalRequest request{
@@ -47,4 +54,28 @@ TEST_CASE("nominal finite-plan comparison keeps exact and enclosure scores disti
             CHECK(selected.score_kind == NominalScoreKind::numerical_outer_enclosure_estimate);
         }
     }
+}
+
+TEST_CASE("nominal box track preserves a scored plan before a later stopped plan") {
+    const SystemModel authored{{{1,1,1}, TimeDomain::discrete,
+        LinearStage{{1,1,{1}}, {1,1,{1e308}}, {1,1,{0}}, {0}}}, {}};
+    const auto system = take_nominal(model::snapshot(authored, Vector{0,1}));
+    const auto safe = take_nominal(sets::make_universal({{"nominal-overflow-safe"},1,{"x"}}));
+    const auto objective = std::get<Objective>(snapshot(LinearTerminal{{1}, 0}));
+    FiniteActionNominalRequest request{
+        {"nominal-box-partial"}, {"nominal-box-partial-run"}, system, {0},
+        {1, {{0}, {10}}}, {{0}}, {safe, safe}, objective};
+    const auto outcome = finite_action_nominal(request, {2, 4, 2, 8, 0.0});
+    REQUIRE(std::holds_alternative<FiniteActionNominalResult>(outcome));
+    const auto& result = std::get<FiniteActionNominalResult>(outcome);
+    REQUIRE(result.tracks.size() == 5);
+    const auto& box = result.tracks[1].outcome;
+    const auto* selected = std::get_if<NominalTrackSelected>(&box);
+    REQUIRE(selected);
+    CHECK(selected->coverage == NominalSearchCoverage::incomplete);
+    REQUIRE(selected->attempts.size() == 2);
+    CHECK(std::holds_alternative<NominalPlanScored>(selected->attempts[0]));
+    CHECK(std::holds_alternative<NominalPlanStopped>(selected->attempts[1]));
+    CHECK(selected->selected_attempt == 0);
+    CHECK(selected->replay.terminal_objective == 0.0);
 }
