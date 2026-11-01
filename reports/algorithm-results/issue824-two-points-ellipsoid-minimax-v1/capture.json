@@ -18,14 +18,14 @@
   "host": {
     "cpu_model": "AMD Ryzen 5 3550H with Radeon Vega Mobile Gfx",
     "load_average_after_timing": [
-      3.48876953125,
-      3.70556640625,
-      2.5966796875
+      0.751953125,
+      2.0830078125,
+      2.1650390625
     ],
     "load_average_before_timing": [
-      3.48876953125,
-      3.70556640625,
-      2.5966796875
+      0.72998046875,
+      2.1015625,
+      2.17138671875
     ],
     "logical_cpu_count": 8,
     "machine": "x86_64",
@@ -33,7 +33,7 @@
     "system": "Linux"
   },
   "schema": "csl.issue824-two-points-ellipsoid-minimax-capture/1",
-  "source_commit": "5e941182e0bdc9629969a0b167c5e9410573aceb",
+  "source_commit": "1de9c12d372ff6673fda754bb7cdf45ce3366180",
   "source_files_sha256": {
     ".github/workflows/algorithm-reports.yml": "231a696791efe970c6722bfb2a08ebf47c8be4b37fec5816c4755611fa9ccd9a",
     "CMakeLists.txt": "e416db2bfafdef08fd16399bcb013b37ff4ce9d3d11795a8a4752744dc4c048b",
@@ -44,7 +44,7 @@
     "docs/architecture/issue824-ellipsoid-minimax-selection.md": "e96f563faff26e5b4bfdb035c5238563b82b7b69e3f55a624afdba318336eb5e",
     "docs/architecture/issue824-zonotope-minimax-selection.md": "1b079059c314fdf70a48c9549bd1befa9494ef2c0c1c3c564fa50d4191ba7fb0",
     "include/csl/optimization/finite_action_ellipsoid_minimax.hpp": "78a5974e5dd4dffed486bf26bebebf6376fa6a525e8fbca1aa35010bc2123f5e",
-    "include/csl/optimization/finite_action_minimax.hpp": "305a37c2be9c2f76827513343e3d6f0fdb385d61fff8f51069c89e418205ec4c",
+    "include/csl/optimization/finite_action_minimax.hpp": "b9a49e16fe75cae04474aa14cb0e49c7e4d98052b33921e95b43f0e156b5afc0",
     "include/csl/optimization/finite_action_zonotope_minimax.hpp": "f541ddbfbe4469589efb4a6996dc4ea4f174f7477d53b6e1cd60dd838ed51302",
     "include/csl/reachability/finite_plan_ellipsoid.hpp": "338fdb72894677c23ce4f999a021a4171b129040ff847e795536b202c863ab3c",
     "include/csl/reachability/finite_plan_zonotope.hpp": "d79183519fda2ef6205aea295ae7400d94324b5d0b413e623b884a5cc910923b",
@@ -65,7 +65,7 @@
     "src/optimization/Module.cmake": "46551ccce6a9c64559f6ff82215a6de4140c73adb6050d47b7543b9bbe4bed10",
     "src/optimization/Tests.cmake": "e09cb95b1f9822a270ec68416ec61aa39bad088bc61e07863fec1ef7516658d3",
     "src/optimization/finite_action_box_minimax.cpp": "ae08a2de1de023765ae6a80b22cce7e6c39ee772acc451a86282e2e6c68435a9",
-    "src/optimization/finite_action_ellipsoid_minimax.cpp": "ee2407ecfc6bcc4afcb483c7c95b890bae1f2bb919d2baf3c93e07df777239f1",
+    "src/optimization/finite_action_ellipsoid_minimax.cpp": "e6e60b0ea3500d7e641b958ee7ed31fddac89bff22660fe5fdd721b1e2a9c989",
     "src/optimization/finite_action_plans.hpp": "8ca3f1f52f947b6f9a556725d610b608676ddb568efb70b469bb81cc0c51be3b",
     "src/optimization/finite_action_replay.cpp": "b4dfbf3ee0323cd11a3e97c11114e5daa16b5d0096bc21cc84f27ed77675f918",
     "src/optimization/finite_action_replay.hpp": "f1c1a675ca0a27f9e8e3929587650ee07bcf096b6f1f6f0546a088715ff3640e",
@@ -82,7 +82,7 @@
     "tests/reporting/test_issue824_ellipsoid_minimax_publication.py": "ce5e4f83661217b274354c6c360693b5405d16288ce454bf767a3defed7bb45e",
     "tests/reporting/test_issue824_zonotope_minimax_publication.py": "9ed14a3e64428423f78e64c5d6d330f6fa2c46057649e44794a901990d99e767",
     "tests/reporting/test_issue824_zonotope_publication.py": "8b6e5eca0bbb149cf34eea1e3606a70db26dec7fed18af431956c71cdf457fb4",
-    "tests/unit/optimization/finite_action_ellipsoid_minimax_tests.cpp": "ba1492d90704c5eb977f9895a4317a3ef3009b0f50f856e37843fe9223cc730f",
+    "tests/unit/optimization/finite_action_ellipsoid_minimax_tests.cpp": "87351560ff8352fd9fa142267d749f604c119ff61d7d3decb8482759cd88ee52",
     "tests/unit/optimization/finite_action_zonotope_minimax_tests.cpp": "41ea2b9c584088b460690965ff20a0c5bc8a1d8edf8f02b39aec9bc7f5b454a9",
     "tests/unit/reachability/finite_plan_ellipsoid_tests.cpp": "fecb1d6d2224c68ab9cc618861890d9b5bfb8c1285f77864ec477d98f45829e6"
   },
