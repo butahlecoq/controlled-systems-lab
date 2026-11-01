@@ -204,6 +204,31 @@ class StageProjectionBatchTests(unittest.TestCase):
         loaded = self.read(document)
         self.assertEqual(loaded["records"][0]["outcome"]["diagnostics"][0]["field"], "geometry")
 
+    def test_preserves_projection_when_optional_materialization_fails(self):
+        document = fixture()
+        outcome = document["records"][0]["outcome"]
+        outcome["components"] = []
+        outcome["materialization_failure"] = {
+            "kind": "stopped", "explanation": "converter resource limit",
+            "stop_reason": "resource_limit",
+            "provider": {"id": "conversion.test", "version": "1"},
+        }
+        reseal(document)
+        loaded = self.read(document)
+        outcome = loaded["records"][0]["outcome"]
+        self.assertEqual(outcome["status"], "success")
+        self.assertEqual(outcome["components"], [])
+        self.assertEqual(outcome["evidence"][0]["ideal_output_id"], "output-0")
+        self.assertEqual(outcome["materialization_failure"]["kind"], "stopped")
+        self.assertEqual(outcome["materialization_failure"]["stop_reason"], "resource_limit")
+
+    def test_rejects_empty_success_without_materialization_failure(self):
+        document = fixture()
+        document["records"][0]["outcome"]["components"] = []
+        reseal(document)
+        with self.assertRaises(data.ProjectionBatchError):
+            self.read(document)
+
 
 if __name__ == "__main__":
     unittest.main()

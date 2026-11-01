@@ -97,11 +97,11 @@ RouteDependencies dependencies() {
         selected(hull, ""), selected(lp, "csl.program-result.v1"),
         selected(converter, "csl.polyhedron.v")}, {std::nullopt, {}});
     auto capture_projection = geometry::polyhedral::make_projection_registration(
-        {geometry::polyhedral::ProjectionOutput::v, std::nullopt});
+        {geometry::polyhedral::ProjectionOutput::h, std::nullopt});
     return {{selected(std::move(projection), "csl.polyhedron.h"),
         selected(std::move(affine), "csl.polyhedron.v"),
         selected(converter, "csl.polyhedron.h")},
-        selected(std::move(capture_projection), "csl.polyhedron.v"),
+        selected(std::move(capture_projection), "csl.polyhedron.h"),
         selected(std::move(converter), "csl.polyhedron.v")};
 }
 
@@ -153,8 +153,7 @@ struct CapturedRequest {
 
 CapturedRequest capture_request(
         const Json& source, const reachability::ForwardTube& tube,
-        const reachability::ForwardFailure* failure, const RouteDependencies& dependencies,
-        const ExecutionContext& context) {
+        const reachability::ForwardFailure* failure) {
     namespace ar = artifacts;
     std::vector<ar::CoordinateAnnotation> coordinates;
     const auto& names = source.at("state_names");
@@ -162,30 +161,13 @@ CapturedRequest capture_request(
     for (std::size_t i = 0; i < names.size(); ++i)
         coordinates.push_back({names.at(i).get<std::string>(), units.at(i).get<std::string>(), {}, {}});
     std::vector<ar::StageCoordinatePair> pairs;
-    std::vector<std::array<std::size_t, 2>> ordinals;
     for (const auto& pair : source.at("coordinate_pairs")) {
         const auto first = pair.at(0).get<std::size_t>(), second = pair.at(1).get<std::size_t>();
         pairs.push_back({ar::CoordinateOrdinal{first}, ar::CoordinateOrdinal{second}});
-        ordinals.push_back({first, second});
     }
     std::vector<ar::StageProjectionInput> stages;
     Json stage_sources = Json::array();
     for (const auto& stage : tube.stages) {
-        ConversionRequest conversion{{tube.problem,
-            {source.at("request_id").get<std::string>() + "/capture/stage/" + std::to_string(stage.stage.value) + "/to-v"},
-            {"stage-v-" + std::to_string(stage.stage.value)}}, stage.marginal.output,
-            {"csl.polyhedron.v"}, Assurance::numerical};
-        auto prepared = dependencies.to_v.prepare(conversion);
-        if (const auto* rejected = std::get_if<registry::Rejection>(&prepared)) {
-            const auto detail = rejected->diagnostics.empty()
-                ? std::string("no rejection detail") : rejected->diagnostics.front().explanation;
-            throw std::runtime_error("route marginal conversion rejected: " + detail);
-        }
-        auto pipeline = std::get<registry::PreparedPipeline<registry::ConversionPort>>(std::move(prepared)).create();
-        auto converted = std::get<0>(pipeline)->run(context);
-        const auto* converted_result = std::get_if<OperationResult>(&converted);
-        if (!converted_result) throw std::runtime_error("route marginal H-to-V conversion failed");
-        auto data = take(sets::from_handle(converted_result->output));
         Json providers = Json::array();
         for (const auto& provider : stage.providers)
             providers.push_back({{"request", provider.request.value}, {"port", provider.port},
@@ -195,29 +177,25 @@ CapturedRequest capture_request(
                 {"actual_version", provider.actual_version ? Json(*provider.actual_version) : Json(nullptr)}});
         stage_sources.push_back({{"stage", stage.stage.value}, {"marginal_set_id", stage.marginal.output.id.value},
             {"marginal_evidence", evidence_json(stage.marginal.evidence)},
-            {"h_to_v_set_id", data.metadata()->id.value},
-            {"h_to_v_evidence", evidence_json(converted_result->evidence)},
+            {"marginal_representation", stage.marginal.output.metadata.representation.value},
             {"operation_lineage", [&] { Json values = Json::array(); for (const auto& item : stage.operation_lineage) values.push_back(evidence_json(item)); return values; }()},
             {"providers", std::move(providers)}});
         ar::StageProjectionSet relation;
-        relation.relation = converted_result->output;
+        // Keep the original high-dimensional H marginal. The projection port
+        // can materialize just the requested 2D output; converting this whole
+        // set to V first can enumerate many irrelevant vertices.
+        relation.relation = stage.marginal.output;
         relation.owner = ar::PlotSourceOwner{tube.problem,
-            std::variant<SetId, FamilyIdentity>{std::in_place_type<SetId>, data.metadata()->id}};
+            std::variant<SetId, FamilyIdentity>{std::in_place_type<SetId>, stage.marginal.output.id}};
         relation.relation_coordinates.resize(coordinates.size());
         for (std::size_t i = 0; i < coordinates.size(); ++i) relation.relation_coordinates[i] = i;
-        auto evidence = converted_result->evidence;
-        evidence.reference.identity.ideal_output = {data.metadata()->id.value};
-        evidence.assumptions.push_back("source is the nominal_forward marginal " + stage.marginal.output.id.value);
-        evidence.assumptions.push_back("capture adapter binds H-to-V conversion evidence to its returned set identifier");
-        evidence.assumptions.insert(evidence.assumptions.end(), stage.marginal.evidence.assumptions.begin(),
-            stage.marginal.evidence.assumptions.end());
-        for (const auto& provider : stage.providers) {
-            if (provider.actual_module && provider.actual_version)
-                evidence.assumptions.push_back("nominal_forward provider=" + provider.actual_module->value +
-                    " version=" + *provider.actual_version);
-        }
+        auto source_evidence = stage.marginal.evidence;
+        source_evidence.reference.identity.ideal_output = {stage.marginal.output.id.value};
+        source_evidence.assumptions.push_back(
+            "capture adapter binds nominal_forward set-relation evidence to the returned marginal handle");
+        stage_sources.back()["capture_source_evidence"] = evidence_json(source_evidence);
         relation.evidence.push_back(ar::StageProjectionSourceEvidence{
-            stage.stage, data.metadata()->id, std::move(evidence)});
+            stage.stage, stage.marginal.output.id, std::move(source_evidence)});
         stages.push_back({stage.stage, static_cast<double>(stage.stage.value), std::move(relation)});
     }
     for (std::size_t stage = tube.stages.size(); stage <= source.at("dynamics").at("horizon").get<std::size_t>(); ++stage) {
@@ -256,6 +234,66 @@ CapturedRequest capture_request(
         std::move(coordinates), std::move(pairs), std::move(stages),
         SetRelation::equivalent, Assurance::numerical}, std::move(source_evidence)};
 }
+
+void materialize_projected_outputs(artifacts::StageProjectionBatchCapture& batch,
+        const registry::PreparedProvider<registry::ConversionPort>& provider,
+        const ExecutionContext& context) {
+    for (auto& record : batch.records) {
+        auto* success = std::get_if<artifacts::StageProjectionSuccess>(&record.outcome);
+        if (!success) continue;
+        const auto& projected = success->projection.projected_relation;
+        if (projected.metadata.dimension != 2 || projected.metadata.representation.value != "csl.polyhedron.h")
+            throw std::runtime_error("capture projection must remain a two-dimensional H set before materialization");
+        const auto suffix = "/materialize/pair/" + std::to_string(record.pair.first) + "-" +
+            std::to_string(record.pair.second) + "/stage/" + std::to_string(record.stage.value);
+        ConversionRequest request{{batch.problem, {batch.request.value + suffix},
+            {"stage-projection-v" + suffix}}, projected, {"csl.polyhedron.v"}, Assurance::numerical};
+        auto prepared = provider.prepare(request);
+        if (const auto* rejected = std::get_if<registry::Rejection>(&prepared)) {
+            const auto detail = rejected->diagnostics.empty()
+                ? std::string("no rejection detail") : rejected->diagnostics.front().explanation;
+            success->materialization_outcome = artifacts::StageProjectionSuccess::MaterializationFailure{
+                artifacts::StageProjectionSuccess::MaterializationFailure::Kind::rejected,
+                detail, rejected->provenance, std::nullopt};
+            continue;
+        }
+        auto pipeline = std::get<registry::PreparedPipeline<registry::ConversionPort>>(std::move(prepared));
+        const auto provenance = pipeline.provenance().front();
+        auto [workspace] = pipeline.create();
+        auto output = workspace->run(context);
+        const auto* converted = std::get_if<OperationResult>(&output);
+        if (!converted) {
+            if (const auto* unsupported = std::get_if<Unsupported>(&output)) {
+                std::string detail;
+                for (const auto& diagnostic : unsupported->diagnostics)
+                    detail += diagnostic.field + ": " + diagnostic.explanation + "; ";
+                success->materialization_outcome = artifacts::StageProjectionSuccess::MaterializationFailure{
+                    artifacts::StageProjectionSuccess::MaterializationFailure::Kind::unsupported,
+                    detail.empty() ? "No diagnostic was supplied." : detail, provenance, std::nullopt};
+            } else if (const auto* stopped = std::get_if<OperationStopped>(&output)) {
+                success->materialization_outcome = artifacts::StageProjectionSuccess::MaterializationFailure{
+                    artifacts::StageProjectionSuccess::MaterializationFailure::Kind::stopped,
+                    stopped->diagnostics.empty() ? "Conversion stopped." : stopped->diagnostics,
+                    provenance, stopped->reason};
+            } else {
+                throw std::runtime_error("2D projection H-to-V materializer returned an unexpected outcome");
+            }
+            continue;
+        }
+        if (converted->relation != SetRelation::equivalent || converted->output.metadata.dimension != 2 ||
+                converted->output.metadata.representation.value != "csl.polyhedron.v")
+            throw std::runtime_error("2D projection materializer changed the relation or representation");
+        if (const auto errors = check_geometry_evidence(converted->evidence, request); !errors.empty())
+            throw std::runtime_error("2D projection materializer returned mismatched evidence: " +
+                errors.front().explanation);
+        auto materialization_evidence = converted->evidence;
+        materialization_evidence.reference.identity.ideal_output = {converted->output.id.value};
+        materialization_evidence.assumptions.push_back(
+            "capture adapter binds the checked materialization request to its returned 2D set handle");
+        success->materialization_outcome = artifacts::StageProjectionSuccess::Materialization{
+            converted->output, std::move(materialization_evidence), provenance, converted->relation};
+    }
+}
 }
 
 int main(int argc, char** argv) {
@@ -278,11 +316,11 @@ int main(int argc, char** argv) {
         const auto* failure = std::get_if<csl::reachability::ForwardFailure>(&outcome);
         if (failure) tube = &failure->prefix;
         if (!tube) throw std::runtime_error("nominal_forward returned an empty initial or later stage");
-        auto captured_request = capture_request(source, *tube, failure, route_dependencies, context);
+        auto captured_request = capture_request(source, *tube, failure);
         auto& request = captured_request.request;
-        const auto projection = csl::artifacts::capture_stage_projections(request,
+        auto projection = csl::artifacts::capture_stage_projections(request,
             route_dependencies.capture_projection, context);
-        const auto* captured = std::get_if<csl::artifacts::StageProjectionBatchCapture>(&projection);
+        auto* captured = std::get_if<csl::artifacts::StageProjectionBatchCapture>(&projection);
         if (!captured) {
             if (const auto* error = std::get_if<csl::artifacts::ArtifactError>(&projection))
                 throw std::runtime_error("stage projection capture failed at " + error->path + ": " + error->message);
@@ -294,6 +332,7 @@ int main(int argc, char** argv) {
             }
             throw std::runtime_error("stage projection capture stopped");
         }
+        materialize_projected_outputs(*captured, route_dependencies.to_v, context);
         std::vector<double> stages;
         for (const auto& stage : request.stages) stages.push_back(static_cast<double>(stage.stage.value));
         csl::artifacts::StageProjectionBatchIdentity identity{

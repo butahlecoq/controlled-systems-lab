@@ -5,6 +5,7 @@
 #include <csl/geometry/polyhedral_projection.hpp>
 #include <csl/numeric/data.hpp>
 #include <csl/sets/data.hpp>
+#include <nlohmann/json.hpp>
 
 #include <fstream>
 
@@ -103,6 +104,20 @@ TEST_CASE("stage projection batch JSON binds source identity and retains 2D geom
     CHECK(json.find("\"kind\": \"polygon\"") != std::string::npos);
     CHECK(json.find("\"kind\": \"segment\"") != std::string::npos);
     CHECK(json.find("\"kind\": \"point\"") != std::string::npos);
+
+    auto partial_batch = std::get<ar::StageProjectionBatchCapture>(capture);
+    auto& first_success = std::get<ar::StageProjectionSuccess>(partial_batch.records.front().outcome);
+    first_success.materialization_outcome = ar::StageProjectionSuccess::MaterializationFailure{
+        ar::StageProjectionSuccess::MaterializationFailure::Kind::stopped,
+        "converter resource limit", std::nullopt, StopReason::resource_limit};
+    const auto partial = ar::encode_stage_projection_batch_json(identity,
+        partial_batch);
+    REQUIRE(std::holds_alternative<std::string>(partial));
+    const auto partial_json = nlohmann::json::parse(std::get<std::string>(partial));
+    CHECK(partial_json["records"][0]["outcome"]["status"] == "success");
+    CHECK(partial_json["records"][0]["outcome"]["materialization_failure"]["kind"] == "stopped");
+    CHECK(partial_json["records"][0]["outcome"]["materialization_failure"]["stop_reason"] == "resource_limit");
+    CHECK(partial_json["records"][0]["outcome"]["components"].empty());
 }
 
 TEST_CASE("stage projection batch JSON rejects reordered pairs and bad source hashes") {
@@ -122,4 +137,46 @@ TEST_CASE("stage projection batch JSON rejects reordered pairs and bad source ha
     encoded = ar::encode_stage_projection_batch_json(identity, empty);
     REQUIRE(std::holds_alternative<ar::ArtifactError>(encoded));
     CHECK(std::get<ar::ArtifactError>(encoded).path == "identity");
+}
+
+TEST_CASE("stage projection batch records and binds optional 2D materialization evidence") {
+    const auto set = cube();
+    auto source = projection_source(set);
+    source.owner.problem = {"materialization"};
+    ar::StageProjectionCaptureRequest request{{"materialization"}, {"stage-batch"},
+        {{"x", {}, {}, {}}, {"y", {}, {}, {}}, {"z", {}, {}, {}}},
+        {{{ar::CoordinateOrdinal{0}, ar::CoordinateOrdinal{2}}}},
+        {{{0}, 0.0, source}}, SetRelation::equivalent, Assurance::numerical};
+    auto captured = ar::capture_stage_projections(request, provider());
+    REQUIRE(std::holds_alternative<ar::StageProjectionBatchCapture>(captured));
+    auto batch = std::get<ar::StageProjectionBatchCapture>(std::move(captured));
+    auto& success = std::get<ar::StageProjectionSuccess>(batch.records.front().outcome);
+    const auto& projection = success.projection.projected_relation;
+    ar::StageProjectionSuccess::Materialization materialization;
+    materialization.relation = projection;
+    materialization.evidence.reference.identity = {
+        batch.problem, {"stage-batch/materialize"}, {projection.id.value}};
+    materialization.evidence.reference.inputs = {projection.id};
+    materialization.evidence.scope = GeometryClaimScope::set_relation;
+    materialization.evidence.support = Unestablished{};
+    materialization.evidence.assumptions = {"equivalent 2D view"};
+    materialization.provider = success.projection.provider;
+    success.materialization_outcome = materialization;
+
+    ar::StageProjectionBatchIdentity identity{{"run"}, "route", "record/1", std::string(64, 'a'),
+        request.state_coordinates, {{0, 2}}, {ar::PlotAxis::Kind::stage, {0.0}, {}, {}}, {}};
+    const auto encoded = ar::encode_stage_projection_batch_json(identity, batch);
+    REQUIRE(std::holds_alternative<std::string>(encoded));
+    const auto document = nlohmann::json::parse(std::get<std::string>(encoded));
+    const auto& evidence = document["records"][0]["outcome"]["evidence"];
+    REQUIRE(evidence.size() == 2);
+    CHECK(evidence[1]["input_set_ids"] == nlohmann::json::array({projection.id.value}));
+    CHECK(evidence[1]["ideal_output_id"] == projection.id.value);
+    CHECK(evidence[1]["provider"]["id"] == success.projection.provider.actual->id.value);
+
+    std::get<ar::StageProjectionSuccess::Materialization>(success.materialization_outcome)
+        .evidence.reference.inputs = {{"wrong-input"}};
+    const auto rejected = ar::encode_stage_projection_batch_json(identity, batch);
+    REQUIRE(std::holds_alternative<ar::ArtifactError>(rejected));
+    CHECK(std::get<ar::ArtifactError>(rejected).path == "records.outcome.materialization");
 }

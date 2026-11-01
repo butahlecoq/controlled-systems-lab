@@ -1,6 +1,6 @@
 {
   "assurance": "numerical",
-  "content_sha256": "d9ca413b41dd2fd4a904bd2005150219702907c101d1f3836c8dd5e474b12a06",
+  "content_sha256": "f2bdfa60c5362c0b2c5161a8a6de5a669a5e13a5b01c2dfbb83aea92baa4728b",
   "coordinates": [
     {
       "id": "x0",
@@ -81,6 +81,10 @@
             "input_set_ids": [
               "cube"
             ],
+            "provider": {
+              "id": "csl.geometry.polyhedral-projection",
+              "version": "1.0.0"
+            },
             "request_id": "stage-batch/pair/0/stage/0",
             "scope": "set_relation",
             "support": {
@@ -141,6 +145,10 @@
             "input_set_ids": [
               "line"
             ],
+            "provider": {
+              "id": "csl.geometry.polyhedral-projection",
+              "version": "1.0.0"
+            },
             "request_id": "stage-batch/pair/0/stage/1",
             "scope": "set_relation",
             "support": {
@@ -206,6 +214,10 @@
             "input_set_ids": [
               "point"
             ],
+            "provider": {
+              "id": "csl.geometry.polyhedral-projection",
+              "version": "1.0.0"
+            },
             "request_id": "stage-batch/pair/0/stage/2",
             "scope": "set_relation",
             "support": {
@@ -258,6 +270,10 @@
             "input_set_ids": [
               "empty"
             ],
+            "provider": {
+              "id": "csl.geometry.polyhedral-projection",
+              "version": "1.0.0"
+            },
             "request_id": "stage-batch/pair/0/stage/3",
             "scope": "set_relation",
             "support": {

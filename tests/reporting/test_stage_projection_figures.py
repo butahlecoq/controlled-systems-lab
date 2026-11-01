@@ -89,6 +89,27 @@ class StageProjectionFiguresTests(unittest.TestCase):
             svg = next(output.glob("*.svg")).read_text(encoding="utf-8")
             self.assertIn("ray 1 direction", svg)
 
+    def test_optional_materialization_failure_is_visible_with_projection_success(self):
+        batch = self.load_fixture()
+        outcome = batch["records"][0]["outcome"]
+        outcome["components"] = []
+        outcome["materialization_failure"] = {
+            "kind": "stopped", "explanation": "converter resource limit",
+            "stop_reason": "resource_limit",
+        }
+        batch = data.loads_stage_projection_batch(
+            data.dumps_stage_projection_batch(batch, **IDENTITY), **IDENTITY)
+        with tempfile.TemporaryDirectory() as temporary:
+            output = Path(temporary) / "rendered"
+            rendered = self.render(batch, output)
+            self.assertIn("V materialization stopped", rendered[0]["description"])
+            self.assertIn("converter resource limit (resource_limit)", rendered[0]["description"])
+            svg_root = ET.parse(output / rendered[0]["svg"]).getroot()
+            visible_text = " ".join(node.text or "" for node in svg_root.iter()
+                                     if node.tag.endswith("}text"))
+            self.assertIn("V MATERIALIZATION STOPPED", visible_text)
+            self.assertIn("converter resource limit", visible_text)
+
     def test_coordinate_order_and_negative_values_are_preserved(self):
         trajectory = {"coordinate_ids": ["x0", "x2"], "points": [[-4.0, 3.0], [2.0, -1.0]]}
         self.assertEqual(_trajectory_points(trajectory, "x2", "x0"), [[3.0, -4.0], [-1.0, 2.0]])
