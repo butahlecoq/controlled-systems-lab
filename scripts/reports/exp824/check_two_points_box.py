@@ -73,6 +73,19 @@ def main(path: Path, *, check_planar_example: bool = True) -> dict:
         raise ValueError("selected control values do not match the finite catalogue indices")
     if len(box["stages"]) != 4 or len(box["all_plan_scores"]) != 27:
         raise ValueError("stage trace or exhaustive control-plan score table is incomplete")
+    if "plan_attempts" in box:
+        attempts = box["plan_attempts"]
+        if (box.get("candidate_search_coverage") != "complete" or len(attempts) != 27 or
+                any(row.get("status") != "scored" for row in attempts)):
+            raise ValueError("saved box attempt table does not preserve complete candidate coverage")
+        for attempt, score in zip(attempts, box["all_plan_scores"], strict=True):
+            if (attempt.get("action_indices") != score.get("action_indices") or
+                    not close(attempt.get("terminal_box_maximum"), score.get("terminal_box_maximum"))):
+                raise ValueError("saved box attempt row disagrees with its candidate score")
+        selected_attempt = box.get("selected_candidate_attempt_index")
+        if (not isinstance(selected_attempt, int) or not 0 <= selected_attempt < len(attempts) or
+                attempts[selected_attempt].get("action_indices") != selected_indices):
+            raise ValueError("saved box selection does not refer to its scored attempt")
 
     exact_stages: list[set[tuple[int, ...]]] = [{layers[0][0]}]
     for stage, action in enumerate(controls):

@@ -57,11 +57,18 @@ Json zonotope_stages_json(const reachability::FinitePlanZonotopeTrace& trace) {
 Json run() {
     const auto input = csl::issue824::fixture::two_points_request("issue824-two-points-box-v1");
     const auto approximate = finite_action_box_minimax(input, {27,27,27,16});
-    const auto* selected = std::get_if<FiniteActionBoxMinimaxResult>(&approximate);
-    if(!selected) throw std::runtime_error("box minimax did not complete successfully");
+    const auto* result = std::get_if<FiniteActionBoxMinimaxResult>(&approximate);
+    if(!result || result->candidate_search != CandidateSearchCoverage::complete ||
+       result->plan_attempts.size() != 27)
+        throw std::runtime_error("box minimax candidate search was incomplete");
+    const auto* selection = std::get_if<BoxPlanSelected>(&result->selection);
+    if(!selection) throw std::runtime_error("box minimax did not replay a selected plan");
+    const auto& selected = std::get<BoxPlanScored>(
+        result->plan_attempts.at(selection->candidate_attempt_index));
+    const auto& replay = selection->replay;
     std::vector<Vector> selected_control_plan;
-    selected_control_plan.reserve(selected->selected_action_indices.size());
-    for(const auto index : selected->selected_action_indices)
+    selected_control_plan.reserve(selected.action_indices.size());
+    for(const auto index : selected.action_indices)
         selected_control_plan.push_back(input.actions.catalogue.at(index));
     reachability::FixedPlanRequest zone_request{input.system, input.initial, selected_control_plan,
         input.disturbances, input.admissible_states, {"issue824-zonotope-shared-plan"}};
@@ -77,15 +84,29 @@ Json run() {
     if(!reference) throw std::runtime_error("exact finite minimax did not complete successfully");
 
     Json selected_controls = Json::array();
-    for(const auto index : selected->selected_action_indices)
+    for(const auto index : selected.action_indices)
         selected_controls.push_back(input.actions.catalogue.at(index).front());
     Json boxes = Json::array();
-    for(const auto& stage : selected->selected_box_trace.stages)
+    for(const auto& stage : selected.trace.stages)
         boxes.push_back({{"lower",stage.lower},{"upper",stage.upper}});
     Json plan_scores = Json::array();
-    for(const auto& plan : selected->plan_scores)
-        plan_scores.push_back({{"action_indices",plan.action_indices},
-            {"terminal_box_maximum",plan.terminal_box_maximum}});
+    Json plan_attempts = Json::array();
+    for(const auto& attempt : result->plan_attempts) {
+        if(const auto* scored = std::get_if<BoxPlanScored>(&attempt)) {
+            plan_scores.push_back({{"action_indices",scored->action_indices},
+                {"terminal_box_maximum",scored->terminal_box_maximum}});
+            plan_attempts.push_back({{"status","scored"}, {"action_indices",scored->action_indices},
+                {"terminal_box_maximum",scored->terminal_box_maximum}});
+        } else if(const auto* unscored = std::get_if<BoxPlanUnscored>(&attempt)) {
+            const auto& diagnostic = unscored->reason.diagnostics.front();
+            plan_attempts.push_back({{"status","unsupported"}, {"action_indices",unscored->action_indices},
+                {"field",diagnostic.field}, {"reason",diagnostic.explanation}});
+        } else {
+            const auto& stopped = std::get<BoxPlanStopped>(attempt);
+            plan_attempts.push_back({{"status","stopped"}, {"action_indices",stopped.action_indices},
+                {"reason",stopped.reason.diagnostics}});
+        }
+    }
     const auto exact_plan_index = reference->minimizing_plan_indices.front();
     const auto& exact_plan = std::get<FinitePlanFeasible>(reference->plans[exact_plan_index]);
     return {{"schema","csl.issue824-two-points-box-minimax/2"},
@@ -100,14 +121,15 @@ Json run() {
             {"objective","minimize worst terminal squared position gap"},
             {"guarantee_scope","finite catalogs and this discrete adaptation; not continuous RL"}}},
         {"box_method",{{"status","numerical outer interval box"},
-            {"selected_action_indices",selected->selected_action_indices},
+            {"candidate_search_coverage","complete"}, {"selected_candidate_attempt_index",selection->candidate_attempt_index},
+            {"selected_action_indices",selected.action_indices},
             {"selected_controls",selected_controls},
-            {"terminal_box_maximum",selected->selected_box_score},
-            {"full_catalogue_replay_value",selected->selected_replay_value},
-            {"worst_disturbance_indices",selected->replayed_worst_disturbance_indices},
-            {"worst_disturbances",selected->replayed_worst_disturbance_values},
-            {"worst_case_path",selected->replayed_worst_path}, {"stages",boxes},
-            {"all_plan_scores",plan_scores}}},
+            {"terminal_box_maximum",selected.terminal_box_maximum},
+            {"full_catalogue_replay_value",replay.worst_value},
+            {"worst_disturbance_indices",replay.disturbance_indices},
+            {"worst_disturbances",replay.disturbances},
+            {"worst_case_path",replay.path}, {"stages",boxes},
+            {"all_plan_scores",plan_scores}, {"plan_attempts",plan_attempts}}},
         {"zonotope_method",{{"status","numerical outer zonotope recurrence"},
             {"plan_source","same box-selected fixed open-loop plan"},
             {"relation","outer"}, {"max_generators_per_stage",64},
