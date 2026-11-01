@@ -1,6 +1,4 @@
 #!/usr/bin/env python3
-"""Independently check and render the PendulumTerminal local-linear pilot."""
-
 from __future__ import annotations
 
 import hashlib

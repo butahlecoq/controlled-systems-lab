@@ -1,4 +1,3 @@
-"""Stage the PendulumTerminal pilot as an immutable Pages report."""
 from __future__ import annotations
 
 import argparse
@@ -148,7 +147,7 @@ def stage(source: Path, site_root: Path) -> str:
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description=__doc__)
+    parser = argparse.ArgumentParser()
     parser.add_argument("--source", type=Path, default=SOURCE)
     parser.add_argument("--site", type=Path, required=True)
     args = parser.parse_args()
