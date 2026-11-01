@@ -724,6 +724,33 @@ claim. The exact value, path and bounds are in
 paired attempt records are linked from that bundle's README. Independent review,
 main-only Pages deployment and live URL/hash checks for v2 remain pending.
 
+## Issue 824 matched TwoPoints fixed-plan minimax
+
+The [matched minimax bundle](../../reports/algorithm-results/issue824-two-points-matched-minimax-v1/)
+measures the same three-stage TwoPoints finite-game input through exact
+finite-catalog minimax, outer box, zonotope, fixed-frame parallelotope, and
+axis-aligned ellipsoid selectors. It records five order-rotated Release calls
+per method after one warmup. An independent rational checker enumerates all 27
+control plans and 27 disturbance histories per plan and verifies each of the
+25 timed selected-plan replays. All runs completed and returned the exact
+finite-catalog minimax value `14.58094225` for the selected plan. The numerical
+enclosure scores remain ranking estimates; they are not certified objective
+bounds or proof of approximate optimizer-family completeness.
+
+On the captured Ryzen 5 3550H host, median public-call times were 0.360 ms
+(exact), 0.181 ms (box), 151.913 ms (zonotope), 0.691 ms (parallelotope), and
+0.214 ms (ellipsoid). A separate GNU gprof profile attributes 63.2% of sampled
+zonotope self CPU to terminal `score_corners`; the profile uses 10 ms sampling
+and one fixture. Five separate solver/check/serialization/hash trials took
+median 0.992 s (range 0.970–1.011 s). These results are descriptive for one
+four-state, three-stage finite adaptation; they make no general speed ranking
+or continuous-action RL claim. The report reuses the reviewed two-player phase
+plane plots and preserves their source bundles. The profile and end-to-end
+records are separate from algorithm call timings. This local exploratory run
+was uncapped: it requested/enforced no process-tree wall or memory cap, and it
+did not observe process-tree peak memory. Failed per-call attempts are retained
+in the result and make the check status incomplete rather than disappearing.
+
 ## MPC-05 finite causal minimax pilot
 
 The saved [MPC-05 causal tree report](../../reports/algorithm-results/mpc05-causal-tree-pilot-v2/)
