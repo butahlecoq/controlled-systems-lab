@@ -43,8 +43,13 @@ struct ZonotopePlanUnscored {
     Unsupported outcome;
 };
 
+struct ZonotopePlanStopped {
+    std::vector<std::size_t> action_indices;
+    OperationStopped outcome;
+};
+
 using FiniteActionZonotopePlanAttempt =
-    std::variant<ZonotopePlanScored, ZonotopePlanUnscored>;
+    std::variant<ZonotopePlanScored, ZonotopePlanUnscored, ZonotopePlanStopped>;
 
 enum class CandidateSearchCoverage { complete, incomplete };
 
@@ -69,10 +74,15 @@ struct ZonotopePlanReplayStopped {
     std::size_t candidate_attempt_index;
     OperationStopped outcome;
 };
+struct ZonotopeCandidateSearchStopped {
+    std::size_t candidate_attempt_index;
+    OperationStopped outcome;
+};
 struct ZonotopeNoScoredCandidate {};
 
 using FiniteActionZonotopeSelectionOutcome = std::variant<ZonotopePlanSelected,
-    ZonotopePlanReplayRefused, ZonotopePlanReplayStopped, ZonotopeNoScoredCandidate>;
+    ZonotopePlanReplayRefused, ZonotopePlanReplayStopped,
+    ZonotopeCandidateSearchStopped, ZonotopeNoScoredCandidate>;
 
 struct FiniteActionZonotopeMinimaxResult {
     ProblemId problem;
@@ -96,7 +106,7 @@ FiniteActionZonotopeMinimaxOutcome finite_action_zonotope_minimax(
 
 The optimizer module owns action-plan enumeration, candidate coverage, score comparison, and selected-plan replay. The reachability module remains responsible for the one-plan zonotope trace. A private replay helper owns the existing recursive worst-history search so the box and zonotope selectors use the same witness logic. Exact finite-catalogue propagation still runs separately to check safe sets and provide the complete terminal V catalogue.
 
-The selector returns a successful result when candidate attempts finish, even when individual plans are unsupported or selected replay is refused. Those outcomes remain in typed fields alongside the candidate rows. Request-wide validation failures remain `Unsupported`; cancellation or deadline expiry during propagation or scoring remains `OperationStopped`.
+The selector returns a result when candidate attempts finish, even when individual plans are unsupported or selected replay is refused. If cancellation or a deadline stops candidate search, the result retains completed rows, adds a typed stopped row for the interrupted/next plan, marks coverage incomplete, and records the stopped selection outcome. Request-wide validation failures remain `Unsupported`; stops before any candidate attempt can begin remain top-level `OperationStopped`.
 
 ## Synthesis decision
 
@@ -121,4 +131,4 @@ The factor-corner count grows exponentially with the terminal generator count. T
 
 ## Implementation status
 
-The selector, shared finite-history replay helper, analytic fixture, and pinned TwoPoints tests are implemented. The report driver checks all 27 candidates and emits projections in both player phase planes. Focused optimizer, installed-client, report-smoke, and independent exact-check evidence is collected separately; this increment makes no performance claim.
+The selector, shared finite-history replay helper, analytic fixture, and pinned TwoPoints tests are implemented. The report driver checks all 27 candidates and emits projections in both player phase planes. Focused optimizer, installed-client, report-smoke, and independent exact-check evidence is collected separately. Any descriptive timing in the pilot is reported without a winner or speedup claim.

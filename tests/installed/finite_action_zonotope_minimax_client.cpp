@@ -9,8 +9,8 @@ using ZonotopeMinimax = FiniteActionZonotopeMinimaxOutcome (*) (
     const FiniteActionMinimaxRequest&, FiniteActionZonotopeMinimaxLimits,
     const ExecutionContext&);
 static_assert(std::is_same_v<decltype(&finite_action_zonotope_minimax), ZonotopeMinimax>);
-static_assert(std::variant_size_v<FiniteActionZonotopeSelectionOutcome> == 4);
-static_assert(std::variant_size_v<FiniteActionZonotopePlanAttempt> == 2);
+static_assert(std::variant_size_v<FiniteActionZonotopeSelectionOutcome> == 5);
+static_assert(std::variant_size_v<FiniteActionZonotopePlanAttempt> == 3);
 
 int main() {
     auto operation = &finite_action_zonotope_minimax;

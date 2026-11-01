@@ -5,6 +5,7 @@ from __future__ import annotations
 import hashlib
 import importlib.util
 import json
+import os
 import platform
 import subprocess
 import sys
@@ -64,6 +65,15 @@ COLORS = ("#458588", "#689d6a", "#d79921")
 
 def sha256(path: Path) -> str:
     return hashlib.sha256(path.read_bytes()).hexdigest()
+
+
+def cpu_model() -> str:
+    cpu_info = Path("/proc/cpuinfo")
+    if cpu_info.is_file():
+        for line in cpu_info.read_text(encoding="utf-8").splitlines():
+            if line.lower().startswith(("model name", "hardware")):
+                return line.partition(":")[2].strip()
+    return platform.processor() or "unavailable"
 
 
 def cache_value(cache: str, key: str) -> str | None:
@@ -142,6 +152,7 @@ def main() -> None:
     output = output.resolve()
     if output.exists() and any(output.iterdir()):
         raise SystemExit(f"refusing to overwrite nonempty output directory: {output}")
+    load_before_timing = os.getloadavg() if hasattr(os, "getloadavg") else None
     completed = subprocess.run([str(executable)], check=True, capture_output=True, text=True)
     result = json.loads(completed.stdout)
     cache = (build_dir / "CMakeCache.txt").read_text(encoding="utf-8")
@@ -163,12 +174,18 @@ def main() -> None:
             "figure_data_sha256": sha256(MPC05_FIGURE)},
         "build": {"directory": str(build_dir),
             "configuration": cache_value(cache, "CMAKE_BUILD_TYPE"),
+            "cxx_standard": "C++20",
             "compiler": compiler, "compiler_version": compiler_version,
             "generator": cache_value(cache, "CMAKE_GENERATOR"),
+            "cxx_flags": cache_value(cache, "CMAKE_CXX_FLAGS"),
+            "cxx_flags_release": cache_value(cache, "CMAKE_CXX_FLAGS_RELEASE"),
             "highs": cache_value(cache, "CSL_ENABLE_HIGHS"),
             "qhull": cache_value(cache, "CSL_ENABLE_QHULL")},
         "host": {"system": platform.system(), "release": platform.release(),
-            "machine": platform.machine()},
+            "machine": platform.machine(), "cpu_model": cpu_model(),
+            "logical_cpu_count": os.cpu_count(),
+            "load_average_before_timing": load_before_timing,
+            "load_average_after_timing": os.getloadavg() if hasattr(os, "getloadavg") else None},
     }
     output.mkdir(parents=True, exist_ok=True)
     (output / "capture.json").write_text(json.dumps(capture, indent=2, sort_keys=True) + "\n", encoding="utf-8")
@@ -180,6 +197,7 @@ def main() -> None:
         "source_geometry_report": "mpc05-causal-tree-pilot-v2",
         "geometry": mpc_figure["reachability_geometry"],
         "independent_check": check,
+        "timing": result["timing"],
         "box_stages": result["box_method"]["stages"],
         "box_selected_zonotope_stages": result["zonotope_method"]["stages"],
         "zonotope_candidate_plans": result["zonotope_minimax_method"]["plan_attempts"],
@@ -193,6 +211,11 @@ def main() -> None:
     box_value = result["box_method"]["full_catalogue_replay_value"]
     zonotope_value = selected["selected_replay"]["worst_value"]
     candidate_value = selected["selected_candidate_score"]
+    timing = result["timing"]
+    timing_rows = "".join(
+        f'<tr><td>{row["method"].replace("_", " ")}</td><td>{row["repetitions"]}</td>'
+        f'<td>{row["median_ns"]:,}</td><td>{row["minimum_ns"]:,}–{row["maximum_ns"]:,}</td></tr>'
+        for row in timing["summaries"])
     commit_link = f"https://github.com/butahlecoq/controlled-systems-lab/commit/{commit}"
     planar_html = f'''<!doctype html><html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width"><title>Issue 824 · Planar zonotope minimax selection</title>
 <style>body{{max-width:980px;margin:2rem auto;padding:0 1rem;background:#fbf1c7;color:#282828;font:16px/1.5 system-ui}}h1,h2{{color:#3c3836}}svg{{width:100%;height:auto}}code{{background:#f9f5d7;padding:.1rem .3rem}}a{{color:#076678}}table{{border-collapse:collapse}}th,td{{border:1px solid #bdae93;padding:.4rem .7rem;text-align:left}}</style>
@@ -207,9 +230,10 @@ def main() -> None:
 <h1>TwoPointsOnParallelLines: zonotope candidate selection</h1><p>This is a three-stage finite-catalog adaptation of the source differential-game environment. The selector ranks each fixed open-loop plan by its terminal zonotope factor-corner score, then replays only the selected plan through every finite disturbance history. It does not reproduce the upstream continuous-action RL problem.</p>
 <p><span class="metric">Exact finite minimax: <b>{exact_value:.8f}</b></span><span class="metric">Box-selected replay: <b>{box_value:.8f}</b></span><span class="metric">Zonotope-selected replay: <b>{zonotope_value:.8f}</b></span><span class="metric">Selected zonotope candidate score: <b>{candidate_value:.8f}</b></span></p>
 {shared.svg_figure(result, check, mpc_figure)}
+<h2>Descriptive API-call timings</h2><p>One excluded warmup and seven order-rotated repetitions per method. Times cover the complete algorithm call; request setup and JSON serialization are excluded. These descriptive timings do not establish a performance winner or speedup. No separate limiter profile was collected.</p><table><thead><tr><th>Method</th><th>Runs</th><th>Median (ns)</th><th>Range (ns)</th></tr></thead><tbody>{timing_rows}</tbody></table>
 <h2>Evidence and limits</h2><p>The independent checker reconstructs the exact finite game, verifies all 27 candidate score rows by evaluating their stored terminal factor corners, and checks the selected plan's exact worst disturbance history. It checks four-dimensional zonotope coordinate bounds at every stage. Those checks do not prove full four-dimensional zonotope membership or a validated objective upper bound. The separate two-dimensional example checks complete inclusion of all finite terminal points in each axis-aligned zonotope.</p>
-<p>The figure shows exact forward reachable sets, robust backward-winning states, their intersections, the box-selected and zonotope-selected outer set projections, and exact replay paths in both player phase planes. The fixed-plan policies use finite catalogs only; they make no continuous feedback optimality claim. No performance timing was collected.</p>
-<p><a href="result.json">Raw scores and traces</a> · <a href="check.json">Independent check</a> · <a href="figure-data.json">Figure data</a> · <a href="planar-example.html">Complete planar selector example</a> · <a href="{commit_link}">Source commit</a></p></html>'''
+<p>The figure shows exact forward reachable sets, robust backward-winning states, their intersections, the box-selected and zonotope-selected outer set projections, and exact replay paths in both player phase planes. The fixed-plan policies use finite catalogs only; they make no continuous feedback optimality claim. The zonotope calls evaluate 884,736 factor corners each (27 plans × 32,768 corners). `perf` and `strace` were unavailable, so this is a known work count, not a profiler-confirmed CPU bottleneck.</p>
+<p><a href="result.json">Raw scores, traces and timing samples</a> · <a href="check.json">Independent check</a> · <a href="capture.json">Build and host capture</a> · <a href="figure-data.json">Figure data</a> · <a href="planar-example.html">Complete planar selector example</a> · <a href="{commit_link}">Source commit</a></p></html>'''
     (output / "index.html").write_text(html_page, encoding="utf-8")
     readme = f'''# Issue 824 TwoPoints zonotope minimax pilot
 
@@ -219,7 +243,17 @@ The exact finite minimax value is `{exact_value:.8f}`. The box-selected plan rep
 
 Candidate scores are numerical maxima over stored binary64 factor corners. They are not validated objective bounds. The selected finite plan has a separate exact finite-catalog replay score and worst-history witness. The checker reconstructs every exact state with integer transitions and rational costs. In four dimensions it checks every state coordinate against each candidate zonotope's coordinate bounds. It does not prove full four-dimensional zonotope membership. The planar companion has axis-aligned generators; its complete finite terminal-set inclusion follows from the independently checked coordinate bounds.
 
-This is a fixed open-loop finite-catalog comparison. It does not claim global minimax optimizer completeness, continuous-action RL reproduction, feedback optimality, parallelotope or ellipsoid support, or performance results. The stagewise geometry figure also overlays exact forward/backward sets and intersections from the separate MPC-05 finite adaptation report.
+This is a fixed open-loop finite-catalog comparison. It does not claim global minimax optimizer completeness, continuous-action RL reproduction, feedback optimality, parallelotope or ellipsoid support, or a performance winner/speedup. The stagewise geometry figure also overlays exact forward/backward sets and intersections from the separate MPC-05 finite adaptation report.
+
+## Descriptive timings
+
+The result contains one excluded warmup and seven order-rotated API-call measurements per method, including raw per-repetition durations and returned values. Fixture/request construction and JSON serialization are outside the measured interval; no algorithm workspace is reused. The same immutable request is used for all arms. The timing driver is single-threaded and deterministic, uses binary64 with the default absolute and relative tolerances of `1e-8`, and has no random seed. Timings are descriptive for this host and build only; no performance winner is claimed. `perf` and `strace` were unavailable, so the 884,736 factor-corner evaluations per zonotope call are reported as a known work count rather than a profiler-confirmed CPU limiter.
+
+| Method | Median (ns) | Range (ns) |
+| --- | ---: | ---: |
+{''.join(f'| {row["method"]} | {row["median_ns"]:,} | {row["minimum_ns"]:,}–{row["maximum_ns"]:,} |\n' for row in timing["summaries"])}
+
+`capture.json` records host CPU/model/load, OS, Release compiler and flags, build generator and optional backend settings. The source commit is recorded separately from this measurement commit.
 
 ## Reproduce
 

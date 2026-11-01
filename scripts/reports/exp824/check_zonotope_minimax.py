@@ -191,6 +191,42 @@ def main(path: Path) -> dict:
 
     planar = result["planar_selector_example"]
     checked_planar_inclusion(planar)
+    timing = result["timing"]
+    method_names = ("exact_finite_minimax", "outer_box_selector", "zonotope_selector")
+    expected_values = {
+        method_names[0]: result["exact_reference"]["finite_minimax_value"],
+        method_names[1]: result["box_method"]["full_catalogue_replay_value"],
+        method_names[2]: replay["worst_value"],
+    }
+    repetitions = timing.get("measurement_repetitions_per_method")
+    if (timing.get("schema") != "csl.issue824-zonotope-minimax-timing/1" or
+            timing.get("warmup_runs_per_method") != 1 or repetitions != 7):
+        raise ValueError("timing record does not have the declared warmup and repetition profile")
+    samples = timing.get("samples", [])
+    if len(samples) != repetitions * len(method_names):
+        raise ValueError("timing record omits a method/repetition sample")
+    durations = {method: [] for method in method_names}
+    for sample in samples:
+        repetition = sample["repetition"]
+        offset = sample["order_in_repetition"]
+        expected_method = method_names[(repetition + offset) % len(method_names)]
+        method = sample["method"]
+        if (method != expected_method or sample.get("status") != "completed" or
+                sample.get("elapsed_ns", 0) <= 0 or
+                not close(sample["returned_value"], expected_values[method])):
+            raise ValueError("timed method order, work status or returned value is invalid")
+        durations[method].append(sample["elapsed_ns"])
+    summaries = {row["method"]: row for row in timing.get("summaries", [])}
+    if set(summaries) != set(method_names):
+        raise ValueError("timing summaries omit or duplicate a method")
+    for method, values in durations.items():
+        ordered = sorted(values)
+        summary = summaries[method]
+        if (len(values) != repetitions or summary.get("repetitions") != repetitions or
+                summary.get("failures") != 0 or summary.get("minimum_ns") != ordered[0] or
+                summary.get("median_ns") != ordered[len(ordered) // 2] or
+                summary.get("maximum_ns") != ordered[-1]):
+            raise ValueError("timing summary differs from its raw samples")
     return {
         "schema": "csl.issue824-two-points-zonotope-minimax-check/1",
         "status": "verified",
@@ -205,6 +241,8 @@ def main(path: Path) -> dict:
         "stage_zonotope_relation": "all exact state coordinates checked against dyadic center +/- sum(abs(generators)); not full four-dimensional membership",
         "planar_zonotope_inclusion": "all finite terminal points checked inside axis-aligned zonotopes for all three plans; complete finite-set inclusion in this 2D fixture",
         "planar_exact_minimax_value": planar["exact_finite_minimax_value"],
+        "timing_status": "21 completed raw samples across three methods; returned values match independently checked outcomes",
+        "performance_claim": "descriptive timings only; no winner or speedup claim",
     }
 
 
