@@ -345,8 +345,15 @@ TEST_CASE("finite mixed branch enumeration agrees with an independent MILP on a 
 }
 
 TEST_CASE("finite-only affine enumeration agrees with a one-hot MILP and preserves duplicate branches") {
-    const SystemModel authored{{{1, 1, 1}, TimeDomain::discrete,
-        LinearStage{{1, 1, {0}}, {1, 1, {1}}, {1, 1, {0}}, {0}}}, {}};
+    LinearStage finite_stage;
+    finite_stage.A = {1, 1, {0}};
+    finite_stage.B = {1, 1, {1}};
+    finite_stage.E = {1, 1, {0}};
+    finite_stage.offset = {0};
+    SystemModel authored;
+    authored.dynamics.dimensions = {1, 1, 1};
+    authored.dynamics.time_domain = TimeDomain::discrete;
+    authored.dynamics.stages = std::move(finite_stage);
     const auto system = take(model::snapshot(authored, Vector{0, 1}));
     const auto safe = interval("finite-only-safe", -2, 2, "x");
     const auto safe_data = take(sets::from_handle(safe));
