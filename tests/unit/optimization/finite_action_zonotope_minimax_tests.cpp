@@ -3,6 +3,8 @@
 #include <csl/optimization/finite_action_zonotope_minimax.hpp>
 #include <two_points_fixture.hpp>
 
+#include <limits>
+
 using namespace csl;
 using namespace csl::optimization;
 
@@ -123,6 +125,39 @@ TEST_CASE("candidate-attempt limit retains scored rows before the stopped plan")
     CHECK(stopped.outcome.reason == StopReason::resource_limit);
     CHECK(std::get<ZonotopePlanStopped>(result.plan_attempts.back()).action_indices ==
         std::vector<std::size_t>{stopped_index});
+}
+
+TEST_CASE("candidate-attempt limit avoids reserving the full large catalog") {
+    constexpr std::size_t horizon = std::numeric_limits<std::size_t>::digits - 1;
+    const SystemModel authored{{{1,1,1}, TimeDomain::discrete,
+        LinearStage{{1,1,{1}}, {1,1,{0}}, {1,1,{0}}, {0}}}, {}};
+    Vector times(horizon + 1);
+    for(std::size_t stage = 0; stage <= horizon; ++stage)
+        times[stage] = static_cast<double>(stage);
+    const auto system = take_zono(model::snapshot(authored, times));
+    const auto initial = take_zono(sets::make_singleton({{"large-catalog-initial"},1,{"x"}},
+        take_zono(numeric::snapshot_vector(Vector{0}))));
+    std::vector<sets::SetData> disturbances;
+    std::vector<sets::SetData> safe;
+    for(std::size_t stage = 0; stage < horizon; ++stage)
+        disturbances.push_back(scalar_vertices("large-catalog-disturbance", Matrix{1,1,{0}}));
+    for(std::size_t stage = 0; stage <= horizon; ++stage)
+        safe.push_back(take_zono(sets::make_universal({{"large-catalog-safe"},1,{"x"}})));
+    const auto objective = std::get<Objective>(snapshot(QuadraticTerminal{{1,1,{1}}, {0}, 0}));
+    const FiniteActionMinimaxRequest request{{"large-catalog"}, {"capped-search"}, system,
+        initial, {1, {{0}, {1}}}, std::move(disturbances), std::move(safe), objective};
+    const auto answer = finite_action_zonotope_minimax(request,
+        {std::numeric_limits<std::size_t>::max(), 1, 1, 1, 1, 1});
+    REQUIRE(std::holds_alternative<FiniteActionZonotopeMinimaxResult>(answer));
+    const auto& result = std::get<FiniteActionZonotopeMinimaxResult>(answer);
+    CHECK(result.candidate_search == CandidateSearchCoverage::incomplete);
+    REQUIRE(result.plan_attempts.size() == 2);
+    REQUIRE(std::holds_alternative<ZonotopePlanUnscored>(result.plan_attempts.front()));
+    CHECK(std::get<ZonotopePlanUnscored>(result.plan_attempts.front()).outcome.diagnostics.front().field ==
+        "finite_plan_zonotope.generators.limit");
+    REQUIRE(std::holds_alternative<ZonotopePlanStopped>(result.plan_attempts.back()));
+    CHECK(std::get<ZonotopePlanStopped>(result.plan_attempts.back()).outcome.reason ==
+        StopReason::resource_limit);
 }
 
 TEST_CASE("pinned TwoPoints selected plan is replayed over the full finite disturbance histories") {

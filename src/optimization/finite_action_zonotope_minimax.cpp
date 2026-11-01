@@ -80,7 +80,11 @@ FiniteActionZonotopeMinimaxOutcome finite_action_zonotope_minimax(
         return unsupported("finite_zonotope_minimax.dimensions", "Objective, catalogue or stage dimensions differ from the model.");
 
     std::vector<FiniteActionZonotopePlanAttempt> attempts;
-    attempts.reserve(plan_count);
+    // Preserve one additional typed row for the stopped plan after the cap.
+    const auto attempt_capacity = limits.max_candidate_attempts < plan_count
+        ? limits.max_candidate_attempts + 1
+        : plan_count;
+    attempts.reserve(attempt_capacity);
     bool complete = true;
     std::size_t selected_index = 0;
     double minimum = std::numeric_limits<double>::infinity();
