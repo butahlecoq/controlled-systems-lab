@@ -621,7 +621,7 @@ def verify_bundle(directory: Path) -> None:
 
 def main() -> int:
     parser = argparse.ArgumentParser(description="Check and capture the UnlimitedBolza report")
-    parser.add_argument("executable", type=Path)
+    parser.add_argument("executable", type=Path, nargs="?")
     parser.add_argument("--output", type=Path)
     parser.add_argument("--verify-bundle", type=Path)
     args = parser.parse_args()
@@ -629,6 +629,8 @@ def main() -> int:
         verify_bundle(args.verify_bundle)
         print(f"verified {args.verify_bundle}")
         return 0
+    if args.executable is None:
+        parser.error("executable is required unless --verify-bundle is supplied")
     if args.output:
         create_bundle(args.executable.resolve(), args.output)
         verify_bundle(args.output)
