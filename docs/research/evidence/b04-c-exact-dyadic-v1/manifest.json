@@ -4,12 +4,14 @@
     "python docs/research/tools/finalize_b04_c_exact_fiber.py"
   ],
   "evidence_files": {
-    "README.md": "a6b4dc67956b21ab86b4a4c0cc7952476b290ac61ffad32b3b3a7a9caa169e06",
+    "README.md": "12c0718f25b3d98ada40c1185bccc189a1cf7b5179c6bc58aaa3460c0613a32b",
+    "index.html": "2d73c2e6ed139b2d32e3f6e077ec3ba2f68abb06de5807bc719be198be22ad30",
     "record.json": "2b23edc697fd46dc96bbb0e107ca7cbad175683b5ffd06b945331903350b1fd5",
     "tests.txt": "fefced0e4c00caa01562d951a605d188f0c0e10d9e6062cbc0a93b0c08533c8e",
     "trajectory.svg": "1a83e9475c5269c738f93502a2f43255a39789e7116fb5638c963b15d417cd82",
     "verification.json": "984cd4583f1eddc94edddfe9762cbd2365b0b8766990180a10f082d7f27e6b40"
   },
+  "publication_scope": "English HTML report and Pages route generated from the checked record; numerical source commit remains the record source_commit.",
   "scenario_id": "B04-c-exact-dyadic-20261102",
   "schema": "csl.b04-c-exact-dyadic-manifest/1",
   "source_commit": "88d5ab3fdfa68a5b4cf39480ab6d1929799f44a0",
@@ -17,8 +19,10 @@
     "docs/research/tools/b04_c_exact_profile.py": "b6fd583415edab3ae3502c7ebc07ca9cdee1ea03b231481761f1283074460f14",
     "docs/research/tools/build_b04_c_exact_fiber.py": "06e57e365d227c1eb46c7978d2910fbf19f1fcaca6c6b5952370e8c95e397bb4",
     "docs/research/tools/check_b04_c_exact_fiber.py": "b8cef983cf510d221421dc690ad39ded5d921cc3d26d3ff5147a917198c0401c",
-    "docs/research/tools/finalize_b04_c_exact_fiber.py": "52322b92f5660b89c96572cd17c3f76c004d1569cd6c40eb0fcf1d2775bbecbf",
+    "docs/research/tools/finalize_b04_c_exact_fiber.py": "722268331474cdd7a4f159e9b26ef28b96369f77673c469e41d1b9e0d9b3219d",
     "docs/research/tools/render_b04_c_exact_fiber.py": "df26e072af028ffaded1bf79f8dfb517ce180e0937d1dfb88852d35711cab8a3",
+    "docs/research/tools/render_b04_c_exact_fiber_report.py": "57394a98dc319dc2d9f99119a4007885e75dac9273b2cb14de08301ddc053c30",
+    "docs/research/tools/stage_b04_c_exact_fiber.py": "3044a7d68ae1673479f14dc07e33eb84dae8e9fd9246ae667c596de2348ed9b0",
     "tests/reporting/test_b04_c_exact_fiber.py": "3bb95c9cdc9c155daff45882edf1cce3316cbf2e69e69f3d47159baeb7febe95"
   },
   "verification": {

@@ -1,0 +1,24 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>B04-C corrected-track optimum and history fiber</title>
+<style>
+:root{color-scheme:dark;--bg:#101923;--panel:#172431;--ink:#edf4f8;--muted:#b0c0cc;--line:#324656;--accent:#74d0ee}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.6 system-ui,sans-serif}
+main{max-width:1100px;margin:auto;padding:clamp(1rem,4vw,3rem)}h1,h2{line-height:1.2}h1{font-size:clamp(2rem,5vw,3.5rem);max-width:18ch}h2{margin-top:2.5rem}p,li{max-width:78ch}a{color:var(--accent)}.lede{font-size:1.15rem;color:var(--muted)}.card{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:1rem 1.25rem;margin:1rem 0}figure{margin:1.5rem 0}figure img{display:block;width:100%;height:auto;border:1px solid var(--line);border-radius:8px}figcaption,.muted{color:var(--muted)}table{border-collapse:collapse;width:100%;max-width:850px}th,td{text-align:left;border-bottom:1px solid var(--line);padding:.55rem .7rem}code{overflow-wrap:anywhere}
+</style></head><body><main>
+<p class="muted">Corrected-track numerical result · exact represented-dyadic profile</p>
+<h1>B04-C optimum and complete optimal-history fiber</h1>
+<p class="lede">A source-qualified verification of the owner-authorized corrected-track model. It checks the represented binary64 inputs exactly and keeps the historical B04 question separate.</p>
+<div class="card"><strong>Result.</strong> The globally optimal objective is approximately <code>30.89913603001440</code>. The full optimal family is a 16-dimensional exact H-polytope with an affine lift into 82 joint state/control coordinates. Its terminal set is a singleton. within pre-registered confirmation band.</div>
+<figure><img src="trajectory.svg" alt="A certified representative optimal trajectory in the oxidizer and fuel phase planes, with the initial state and rounded published terminal point marked."><figcaption>One certified representative full history in the requested (x1,x2) oxidizer and (x3,x4) fuel projections. Other optimal controls may produce different intermediate trajectories.</figcaption></figure>
+<h2>What was checked</h2>
+<ul><li>Sixteen exact stage transitions and all 100 hard control and phase inequalities.</li><li>An exactly feasible zero-multiplier KKT witness with zero gradient in all sixteen controls, proving global optimality for this convex represented-dyadic profile.</li><li>The rounded published terminal point is reachable inside its coordinate-wise rounding box; exact plane residuals are retained separately from the optimum proof.</li><li>The complete control-space optimal fiber and its affine lift to the full joint history; the induced terminal state is unique.</li></ul>
+<h2>Model and evidence boundary</h2>
+<p>Inputs that enter through binary64 are treated as the exact dyadic values represented by their bits, following ADR 0003. The source variant is <code>B04-c-exact-dyadic-20261102</code>, based on A39/A01/A40. It is neither <code>B04-historical</code> nor <code>b04-reference-v1</code>, and makes no historical reproduction claim. The unresolved A40 unit convention remains open.</p>
+<p>The confirmation band is preserved at <code>|J* - 30.899| &lt;= 0.0005</code>. The published rounded linear value is 30.899; the four nonlinear table rows remain 368.45, 41.855, 65.874 and 7.922. This corrected-track result does not explain or reproduce those nonlinear rows.</p>
+<p>The optimal relation is represented by an exact 16D H-polytope and the saved affine state lift. This page plots one member only; it does not suggest that the displayed curve covers every optimal history. Membership and reconstruction are supported for the declared control and joint-history coordinates; other geometric projections are not claimed.</p>
+<h2>Reproduce and inspect</h2>
+<p>The builder and independent checker are in the repository at the captured source commit. Run <code>python docs/research/tools/build_b04_c_exact_fiber.py</code>, then <code>python docs/research/tools/finalize_b04_c_exact_fiber.py</code>. The finalizer rebuilds the record, checks the proof, renders both phase planes and validates the bundle.</p>
+<ul><li><a href="record.json">Machine-readable exact record</a></li><li><a href="verification.json">Independent verification result</a></li><li><a href="README.md">Full profile notes and assumptions</a></li><li><a href="manifest.json">Evidence manifest and source hashes</a></li></ul>
+<p class="muted">This is a fixed-profile research result. It does not by itself establish a production Strategy A prepared-request verification path or extend Strategy B coverage.</p>
+</main></body></html>

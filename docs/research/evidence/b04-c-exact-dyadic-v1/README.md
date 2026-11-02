@@ -12,6 +12,8 @@ The full optimal history family is encoded as a 16-dimensional H-polytope: all 1
 
 The SVG plots one certified representative history in both `(x1,x2)` oxidizer and `(x3,x4)` fuel phase planes. It does not imply that every optimal history has this intermediate trajectory; the entire family is represented by the H-polytope and lift.
 
+The English [HTML report](index.html) summarizes the frozen result and links to its raw record, independent verification output, source notes, and evidence manifest. The report is generated from the checked record and staged as a discoverable Pages example.
+
 ## Reproduce and check
 
 From the repository root, run:
