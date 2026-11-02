@@ -240,7 +240,11 @@ def report_page(result, data, svg):
 {''.join(f'<tr><td>{state[0]:.4f}</td><td>{state[1]:.8f}</td><td>{state[2]:.8f}</td><td>{state[3]:.8f}</td></tr>' for state in [ [0,0,0,0], *plan['stage_states'] ])}
 </tbody></table>
 <h2>Reproduce and inspect</h2>
-<p>Build <code>csl_env717_dubins_car</code> with <code>CSL_BUILD_ENV717_REPORT=ON</code>, then run <code>scripts/reports/env717/check_dubins_car.py</code> with the executable. The checker independently replays every finite plan.</p>
+<p>From the repository root, configure and build the standalone report project:</p>
+<pre><code>cmake -S benchmarks/reporting/env717/dubins-car-build -B build/env717-dubins-car -DBUILD_TESTING=ON -DCMAKE_BUILD_TYPE=Release
+cmake --build build/env717-dubins-car --config Release --target csl_env717_dubins_car
+python3 scripts/reports/env717/check_dubins_car.py build/env717-dubins-car/csl_env717_dubins_car</code></pre>
+<p>The checker independently replays every finite plan.</p>
 <ul><li><a href="result.json">Raw result record</a></li><li><a href="figure-data.json">Projection and trajectory data</a></li><li><a href="projections.svg">SVG figure</a></li><li><a href="README.md">Report notes and limits</a></li></ul>
 <p>Source commit: <code>{result['source_commit']}</code>. Driver SHA-256: <code>{result['driver_sha256']}</code>.</p></main></body></html>'''
 

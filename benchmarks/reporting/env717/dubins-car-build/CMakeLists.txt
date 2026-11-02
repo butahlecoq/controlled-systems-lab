@@ -1,5 +1,6 @@
 cmake_minimum_required(VERSION 3.31)
 project(Env717DubinsCar LANGUAGES CXX)
+set(CMAKE_CXX_EXTENSIONS OFF)
 
 include(CTest)
 include(FetchContent)
@@ -14,6 +15,7 @@ FetchContent_Declare(csl_json
 FetchContent_MakeAvailable(csl_json)
 
 set(DRIVER "${CSL_ROOT}/benchmarks/reporting/env717/dubins_car.cpp")
+set_property(DIRECTORY APPEND PROPERTY CMAKE_CONFIGURE_DEPENDS "${DRIVER}")
 file(SHA256 "${DRIVER}" DRIVER_SHA256)
 execute_process(COMMAND git rev-parse HEAD
   WORKING_DIRECTORY "${CSL_ROOT}"
