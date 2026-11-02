@@ -505,6 +505,14 @@ FAMILIES = {
         "This is an exact minimum only over the stated finite action catalogue and horizon; it "
         "does not claim continuous-action or full-horizon optimality, minimax control, or a "
         "performance comparison."),
+    "env717-cartpole": Family(
+        r"env717-cartpole-[0-9a-f]{20}", "synthesis",
+        "CartPole finite open-loop control pilot",
+        "Pins the upstream CartPole-v1 notebook and adopts Gym v0.21.0 because the upstream "
+        "solver expects the legacy reset/step API; the upstream does not pin Gym. Exhaustively "
+        "evaluates 16,384 left/right action plans for 14 steps from the zero state and shows "
+        "cart and pole state-plane projections. This is not a learned policy, minimax result, "
+        "or solution of the original 500-step task."),
     "env717-time-sphere": Family(
         r"env717-time-sphere-[0-9a-f]{20}", "synthesis",
         "TimeOptimalSphereGame nominal finite-feedback reachability pilot",

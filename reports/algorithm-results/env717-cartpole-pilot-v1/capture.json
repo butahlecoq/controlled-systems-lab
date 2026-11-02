@@ -1,0 +1,183 @@
+{
+  "source_commit": "de660710bc7f2322a3797934c430b33cb3e7a7d0",
+  "driver_sha256": "15042bd5c1d1878053b3f7e4521ce0bf115dbb9a8b83d0c066b76bad19cff662",
+  "build": {
+    "architecture": "x86_64",
+    "build_type": "Release",
+    "compiler": "GNU",
+    "compiler_version": "16.2.1"
+  },
+  "capture_kind": "source-equation finite-action enumeration and descriptive single-host timing; no Gym installation or RL training run",
+  "performance": {
+    "maximum_elapsed_ns": 7177432,
+    "measured_repetitions": 9,
+    "median_elapsed_ns": 6667028,
+    "metric": "finite_catalogue_enumeration_elapsed",
+    "minimum_elapsed_ns": 6645097,
+    "raw_elapsed_ns": [
+      6646285,
+      6863353,
+      6666888,
+      6652361,
+      6676316,
+      6687212,
+      7177432,
+      6667028,
+      6645097
+    ],
+    "scope": "steady_clock interval around allocation, dynamics propagation, termination checks, and reward evaluation for all 16384 plans; excludes JSON construction and serialization",
+    "timing_clock": "std::chrono::steady_clock",
+    "unit": "ns",
+    "warmup_repetitions": 5,
+    "worker_threads": 1
+  },
+  "report_generation_sha256": "b47d5bada93118b01c6030efe721432ea99b96688120abf2d8a00dd959996d3b",
+  "limiter_profile_sha256": "dfb321266b92420d4cb12b6ee42bf3e39d5aba81c48b9e84b0512a1d46c5431f",
+  "report_generation": {
+    "schema": "csl.env717-cartpole-report-generation/1",
+    "metric": "full_report_collection_elapsed",
+    "unit": "ns",
+    "clock": "time.perf_counter_ns",
+    "measured_runs": 5,
+    "warmup_runs": 1,
+    "failed_runs": 0,
+    "warmup_elapsed_ns": [
+      1589868637
+    ],
+    "raw_elapsed_ns": [
+      1590887911,
+      1537526619,
+      1572747698,
+      1562570913,
+      1564748723
+    ],
+    "minimum_elapsed_ns": 1537526619,
+    "maximum_elapsed_ns": 1590887911,
+    "median_elapsed_ns": 1564748723,
+    "scope": "native executable collection (5 warmups plus 9 measured enumerations), independent exhaustive Python replay, figure generation, report serialization and writes; excludes CMake configuration/build, report staging and ZIP generation",
+    "process_statuses": [
+      {
+        "kind": "warmup",
+        "index": 0,
+        "status": "completed",
+        "elapsed_ns": 1589868637,
+        "error": null
+      },
+      {
+        "kind": "measured",
+        "index": 0,
+        "status": "completed",
+        "elapsed_ns": 1590887911,
+        "error": null
+      },
+      {
+        "kind": "measured",
+        "index": 1,
+        "status": "completed",
+        "elapsed_ns": 1537526619,
+        "error": null
+      },
+      {
+        "kind": "measured",
+        "index": 2,
+        "status": "completed",
+        "elapsed_ns": 1572747698,
+        "error": null
+      },
+      {
+        "kind": "measured",
+        "index": 3,
+        "status": "completed",
+        "elapsed_ns": 1562570913,
+        "error": null
+      },
+      {
+        "kind": "measured",
+        "index": 4,
+        "status": "completed",
+        "elapsed_ns": 1564748723,
+        "error": null
+      }
+    ],
+    "checker_sha256": "8bb6f512ffcebafbf63eeb187fdc2916e869af3ed6a36ad06623ef8efcc5510e",
+    "runner_sha256": "16a0593e17ac7b0f1f9ecd57d421f52b55865ae2e0a1b804abe744b7581aa01a",
+    "driver_sha256": "15042bd5c1d1878053b3f7e4521ce0bf115dbb9a8b83d0c066b76bad19cff662",
+    "python": "3.14.8",
+    "host_logical_cpu_count": 8
+  },
+  "limiter_profile": {
+    "schema": "csl.env717-cartpole-limiter-profile/1",
+    "tool": "GNU gprof 2.47",
+    "tool_version": "GNU gprof (GNU Binutils) 2.47",
+    "diagnostic_only": true,
+    "build_type": "Release",
+    "build_flags": [
+      "-O3",
+      "-DNDEBUG",
+      "-pg",
+      "-fno-inline"
+    ],
+    "profile_binary_sha256": "85d30185ce1d453f52f241f02a0028ccab7de9506987eb60bc21cbb700094bdb",
+    "source_commit": "de660710bc7f2322a3797934c430b33cb3e7a7d0",
+    "driver_sha256": "15042bd5c1d1878053b3f7e4521ce0bf115dbb9a8b83d0c066b76bad19cff662",
+    "call_arc_use": "excluded because gprof call counts disagree with independently verified transition counts",
+    "runs": [
+      {
+        "run": 1,
+        "top_function": "advance_state",
+        "advance_state_self_percent": 75.81,
+        "cumulative_seconds": 1.41,
+        "advance_state_self_seconds": 1.41,
+        "sample_period_ms": 10,
+        "repetitions": 300,
+        "transition_count": 221728,
+        "median_elapsed_ns": 26584850,
+        "gmon_sha256": "528de2105498e90b8001e01bbe3a45030d8394f3cb3b5ff6983a21c918c0a6f2",
+        "flat_profile_sha256": "3212f51bf8a67f2ac43b0eb809ec2706aca51c2ca8b4160f494773ad135c60e1",
+        "flat_profile_excerpt": [
+          "Flat profile:",
+          "",
+          "Each sample counts as 0.01 seconds.",
+          "  %   cumulative   self              self     total           ",
+          " time   seconds   seconds    calls   s/call   s/call  name    ",
+          " 75.81      1.41     1.41 78764568     0.00     0.00  (anonymous namespace)::advance_state(std::array<double, 4ul> const&, unsigned char)",
+          "  9.14      1.58     0.17  4997120     0.00     0.00  (anonymous namespace)::evaluate(unsigned long)",
+          "  4.30      1.66     0.08                             _init",
+          "  2.69      1.71     0.05 67627040     0.00     0.00  std::array<double, 2ul>::operator[](unsigned long) const [clone .constprop.0]",
+          "  1.61      1.74     0.03 135270464     0.00     0.00  std::array<double, 4ul>::operator[](unsigned long) const [clone .constprop.3]",
+          "  1.61      1.77     0.03 67643424     0.00     0.00  std::array<double, 4ul>::operator[](unsigned long) const [clone .constprop.0]",
+          "  1.08      1.79     0.02 135270464     0.00     0.00  std::array<double, 4ul>::operator[](unsigned long) const [clone .constprop.1]"
+        ],
+        "flat_profile_top_row": "75.81      1.41     1.41 78764568     0.00     0.00  (anonymous namespace)::advance_state(std::array<double, 4ul> const&, unsigned char)"
+      },
+      {
+        "run": 2,
+        "top_function": "advance_state",
+        "advance_state_self_percent": 77.65,
+        "cumulative_seconds": 1.39,
+        "advance_state_self_seconds": 1.39,
+        "sample_period_ms": 10,
+        "repetitions": 300,
+        "transition_count": 221728,
+        "median_elapsed_ns": 26587644,
+        "gmon_sha256": "c2c3261fdcc4353092f2a700bb7672f5ef1acd32bfed42dc8bb268aac95858ce",
+        "flat_profile_sha256": "6876a890ab619370b3451f27ff4c0ebd35533af85a4a87f4dd37e9a1f14c537d",
+        "flat_profile_excerpt": [
+          "Flat profile:",
+          "",
+          "Each sample counts as 0.01 seconds.",
+          "  %   cumulative   self              self     total           ",
+          " time   seconds   seconds    calls   s/call   s/call  name    ",
+          " 77.65      1.39     1.39 78764619     0.00     0.00  (anonymous namespace)::advance_state(std::array<double, 4ul> const&, unsigned char)",
+          "  6.70      1.51     0.12                             _init",
+          "  6.15      1.62     0.11  4997120     0.00     0.00  (anonymous namespace)::evaluate(unsigned long)",
+          "  2.79      1.67     0.05  4202449     0.00     0.00  nlohmann::json_abi_v3_11_3::basic_json<std::map, std::vector, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >, bool, long, unsigned long, double, std::allocator, nlohmann::json_abi_v3_11_3::adl_serializer, std::vector<unsigned char, std::allocator<unsigned char> >, void>::json_value::destroy(nlohmann::json_abi_v3_11_3::detail::value_t)",
+          "  1.68      1.70     0.03 135270464     0.00     0.00  std::array<double, 4ul>::operator[](unsigned long) const [clone .constprop.1]",
+          "  1.12      1.72     0.02 137586720     0.00     0.00  std::array<unsigned char, 14ul>::operator[](unsigned long)",
+          "  1.12      1.74     0.02 67627040     0.00     0.00  std::array<double, 2ul>::operator[](unsigned long) const [clone .constprop.0]"
+        ],
+        "flat_profile_top_row": "77.65      1.39     1.39 78764619     0.00     0.00  (anonymous namespace)::advance_state(std::array<double, 4ul> const&, unsigned char)"
+      }
+    ]
+  }
+}
