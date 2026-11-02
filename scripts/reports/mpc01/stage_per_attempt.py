@@ -2,9 +2,12 @@
 from __future__ import annotations
 
 import argparse
+import hashlib
 import html
 from pathlib import Path
+import re
 import shutil
+from urllib.parse import urldefrag, urlparse
 
 ROOT = Path(__file__).resolve().parents[3]
 REPORT_ID = "mpc01-per-attempt-20261103-r3"
@@ -53,15 +56,61 @@ th,td{{border-bottom:1px solid #526174;padding:.45rem .6rem;text-align:left}}img
 def stage(site: Path) -> Path:
     if SOURCE.is_symlink() or not SOURCE.is_dir() or site.is_symlink() or not site.is_dir():
         raise ValueError("evidence source and built site directory are required")
+    landing = site / "index.html"
+    if landing.is_symlink() or not landing.is_file():
+        raise ValueError("built Pages site must have a root index.html")
     dest = site / REPORT_ID
     if dest.exists() or dest.is_symlink():
         raise ValueError("report route must be fresh")
     shutil.copytree(SOURCE, dest, symlinks=False)
     (dest / "index.html").write_text(page(), encoding="utf-8")
+    source_page = landing.read_text(encoding="utf-8")
+    if 'id="mpc01-per-attempt-link"' in source_page:
+        raise ValueError("MPC-01 landing link already exists")
+    link = (f'<p id="mpc01-per-attempt-link"><a href="{REPORT_ID}/index.html">'
+            'MPC-01 per-attempt OSQP and HPIPM capture →</a></p>')
+    updated, count = re.subn(r"(<body\b[^>]*>)", lambda match: match.group(1) + link,
+                             source_page, count=1, flags=re.IGNORECASE)
+    if count != 1:
+        raise ValueError("built Pages root index.html has no body element")
+    landing.write_text(updated, encoding="utf-8")
     return dest
+
+
+def validate(site: Path) -> None:
+    route = site / REPORT_ID
+    landing = site / "index.html"
+    if site.is_symlink() or not site.is_dir() or route.is_symlink() or not route.is_dir():
+        raise ValueError("staged Pages site and MPC-01 route are required")
+    if landing.is_symlink() or not landing.is_file() or not (route / "index.html").is_file():
+        raise ValueError("staged Pages landing or MPC-01 report is missing")
+    landing_html = landing.read_text(encoding="utf-8")
+    if f'href="{REPORT_ID}/index.html"' not in landing_html:
+        raise ValueError("MPC-01 report link is missing from the Pages landing page")
+    for line in (route / "SHA256SUMS").read_text(encoding="utf-8").splitlines():
+        digest, name = line.split("  ", 1)
+        path = route / name
+        if path.is_symlink() or not path.is_file() or hashlib.sha256(path.read_bytes()).hexdigest() != digest:
+            raise ValueError("MPC-01 source-bundle checksum mismatch: " + name)
+    report_html = (route / "index.html").read_text(encoding="utf-8")
+    if "not a closed-loop MPC run" not in report_html or "TwoPoints environment report" not in report_html:
+        raise ValueError("MPC-01 report scope statement differs")
+    for href in re.findall(r'href="([^"]+)"', report_html):
+        parsed = urlparse(href)
+        if parsed.scheme or parsed.netloc:
+            continue
+        target = (route / urldefrag(parsed.path)[0]).resolve()
+        if not target.is_relative_to(site.resolve()) or not target.is_file():
+            raise ValueError("MPC-01 report links to a missing or escaping file: " + href)
 
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--site", type=Path, required=True)
-    print(stage(parser.parse_args().site).as_posix())
+    parser.add_argument("--check", action="store_true", help="validate an already augmented Pages site")
+    args = parser.parse_args()
+    if args.check:
+        validate(args.site)
+        print(REPORT_ID)
+    else:
+        print(stage(args.site).as_posix())
