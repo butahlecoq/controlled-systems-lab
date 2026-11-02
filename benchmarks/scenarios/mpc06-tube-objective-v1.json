@@ -1,0 +1,35 @@
+{
+  "schema": "csl.mpc06-tube-objective-input/1",
+  "scenario_id": "double-integrator-tube-objective-v1",
+  "track": "new-comparison analytic objective extension",
+  "base_scenario_id": "double-integrator-nilpotent-tube-v1",
+  "dynamics": {
+    "A": [["1", "1"], ["0", "1"]],
+    "B": [["0"], ["1"]],
+    "E": [["0"], ["1"]],
+    "disturbance_bounds": ["-1/8", "1/8"],
+    "disturbance_semantics": "independent stagewise additive disturbance; observed after each control is applied"
+  },
+  "feedback": {
+    "K": [["-1", "-2"]],
+    "law": "u_t = v_t + K (x_t-z_t)",
+    "information_pattern": "full state x_t observed before control u_t; no future disturbance observed"
+  },
+  "initial": {"actual_state": ["0", "0"], "nominal_state": ["0", "0"]},
+  "nominal_plan": {"horizon_steps": 3, "controls": ["0", "0", "0"]},
+  "constraints": {"state_box": [["-1", "1"], ["-1", "1"]], "input_interval": ["-1", "1"]},
+  "objective": {
+    "kind": "finite-horizon quadratic actual closed-loop cost",
+    "stage_state_weight": [["1", "0"], ["0", "1"]],
+    "stage_input_weight": [["1"]],
+    "terminal_state_weight": [["1", "0"], ["0", "1"]],
+    "formula": "sum(t=0..T-1, x_t^T I x_t + u_t^2) + x_T^T I x_T",
+    "nominal_surrogate": "same formula evaluated on z_t and v_t",
+    "claim_boundary": "evaluates one fixed nominal plan and one fixed ancillary feedback gain; does not optimize K or v and is not a minimax-optimality claim"
+  },
+  "arithmetic": "all model, policy, cost, and disturbance values are exact rational numbers",
+  "references": {
+    "base_report": "reports/algorithm-results/mpc06-nilpotent-tube-pilot-v1",
+    "base_result_schema": "csl.mpc06-nilpotent-tube-pilot/1"
+  }
+}

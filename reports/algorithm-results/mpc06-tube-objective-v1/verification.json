@@ -1,0 +1,16 @@
+{
+  "checked": {
+    "all_vertex_safety_constraints": "passed",
+    "base_rpi_and_feasibility_evidence": "verified in the independently checked base record",
+    "disturbance_vertex_count": 8,
+    "exact_continuous_box_worst_cost": "3/8",
+    "nominal_surrogate_cost": "0",
+    "objective_record_sha256": "971974717bb647eab908c2dcde7cf591bcd6d477b58b863dbe54b8cd21eb7e0a",
+    "scenario_sha256": "ddf94484acddc19ae8788bd018f0eaab5a35d38c5bd74d04982c8ccb5cd869a3",
+    "worst_witness_count": 2
+  },
+  "checker": "independent exact Fraction recurrence and vertex enumeration",
+  "proof_scope": "For this fixed zero nominal plan, fixed K, horizon, and rational box, the cost is convex quadratic in the complete disturbance vector; exact vertex enumeration establishes its maximum over the continuous box. This does not optimize the plan or gain.",
+  "schema": "csl.mpc06-tube-objective-check/1",
+  "status": "verified"
+}
