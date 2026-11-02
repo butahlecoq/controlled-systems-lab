@@ -116,7 +116,8 @@ def verify(result):
         for saved_state, replayed_state in zip(row["stage_states"], stages):
             if len(saved_state) != 4 or any(not close(a, b) for a, b in zip(saved_state, replayed_state)):
                 raise ValueError("independent Euler stage replay differs")
-        if any(not close(a, b) for a, b in zip(row["terminal_state"], terminal)):
+        if (len(row["terminal_state"]) != 4 or
+                any(not close(a, b) for a, b in zip(row["terminal_state"], terminal))):
             raise ValueError("independent terminal state replay differs")
         if not close(row["terminal_loss"], value):
             raise ValueError("independent terminal objective replay differs")

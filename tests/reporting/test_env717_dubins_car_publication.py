@@ -68,6 +68,18 @@ class DubinsCarPublicationTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "independent finite-plan replay rejected result"):
             stage_module._inputs(self.source)
 
+    def test_rejects_a_truncated_terminal_state_even_when_checksums_are_rewritten(self):
+        result_path = self.source / "result.json"
+        result = json.loads(result_path.read_text())
+        result["plans"][0]["terminal_state"] = []
+        result_path.write_text(json.dumps(result, indent=2) + "\n")
+        names = [name for name in stage_module.FILES if name != "SHA256SUMS"]
+        (self.source / "SHA256SUMS").write_text("".join(
+            f"{hashlib.sha256((self.source / name).read_bytes()).hexdigest()}  {name}\n"
+            for name in names), encoding="ascii")
+        with self.assertRaisesRegex(ValueError, "independent finite-plan replay rejected result"):
+            stage_module._inputs(self.source)
+
     def test_rejects_report_file_symlinks_even_with_matching_checksums(self):
         outside = self.root / "outside-readme.md"
         outside.write_text("outside bundle\n", encoding="utf-8")
