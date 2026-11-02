@@ -43,6 +43,6 @@ endif()
 if(BUILD_TESTING)
   add_test(NAME env717_vanderpol_smoke
     COMMAND Python3::Interpreter "${CSL_ROOT}/scripts/reports/env717/check_vanderpol.py"
-      "$<TARGET_FILE:csl_env717_vanderpol>")
+      "$<TARGET_FILE:csl_env717_vanderpol>" --repetitions 1)
   set_tests_properties(env717_vanderpol_smoke PROPERTIES LABELS reporting)
 endif()

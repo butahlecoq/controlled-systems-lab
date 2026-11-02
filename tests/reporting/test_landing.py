@@ -177,6 +177,7 @@ class LandingTests(unittest.TestCase):
             "env717-vanderpol-0123456789abcdefabcd")]
         self.assertEqual(family.group, "synthesis")
         self.assertIn("243 five-block control plans", family.summary)
+        self.assertIn("111 source steps (about 11.1 seconds)", family.summary)
         self.assertIn("raises NameError", family.summary)
         self.assertIn("not a direct run", family.summary)
 

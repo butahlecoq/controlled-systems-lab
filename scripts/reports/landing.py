@@ -489,7 +489,9 @@ FAMILIES = {
         r"env717-vanderpol-[0-9a-f]{20}", "synthesis",
         "Van der Pol finite open-loop control pilot",
         "Replays the pinned three-state Van der Pol equations with ten explicit-Euler substeps "
-        "per source action and exhaustively evaluates 243 five-block control plans over 11 seconds. "
+        "per source action and exhaustively evaluates 243 five-block control plans over 111 source "
+        "steps (about 11.1 seconds): repeated binary64 additions leave time just below the strict "
+        "11-second source horizon after 110 steps. "
         "The phase-plane figure includes each stage's finite endpoint cloud and the selected path. "
         "The upstream step() currently raises NameError after updating its state; this report "
         "independently re-expresses the recorded equations and reward, so it is not a direct run "

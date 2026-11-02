@@ -7,6 +7,7 @@ import html
 import itertools
 import json
 import math
+import os
 import platform
 import subprocess
 from pathlib import Path
@@ -20,16 +21,19 @@ SOURCE_URL = f"https://github.com/imm-rl-lab/optimal_control/blob/{SOURCE_COMMIT
 NOTEBOOK_URL = f"https://github.com/imm-rl-lab/optimal_control/blob/{SOURCE_COMMIT}/{NOTEBOOK_PATH}"
 ACTIONS = (-1.0, 0.0, 1.0)
 STAGES = 5
-STEPS_PER_STAGE = 22
+STEPS_PER_STAGE = (22, 22, 22, 22, 23)
+STAGE_ENDS = tuple(sum(STEPS_PER_STAGE[:index + 1]) for index in range(STAGES))
+TOTAL_SOURCE_STEPS = sum(STEPS_PER_STAGE)
 OUTER_DT = 0.1
 INNER_STEPS = 10
 INNER_DT = OUTER_DT / INNER_STEPS
 TERMINAL_TIME = 11.0
+WARMUP_REPETITIONS = 5
 EXPECTED_FIELDS = {
     "schema", "scenario_id", "reference_variant", "source_repository_commit", "source_file", "source_file_blob",
     "source_notebook", "source_notebook_blob", "source_license", "state_order", "source_parameters", "adaptation",
     "source_execution_status", "assumptions", "objective_value", "minimizing_plan_indices", "driver_sha256",
-    "source_commit", "capture_environment", "plans",
+    "source_commit", "capture_environment", "performance", "plans",
 }
 
 
@@ -50,13 +54,14 @@ def replay(indices):
     trajectory = [state]
     stage_states = []
     running_cost = 0.0
+    completed = 0
     for stage, index in enumerate(indices):
         control = ACTIONS[index]
-        for local_step in range(STEPS_PER_STAGE):
+        for _ in range(STEPS_PER_STAGE[stage]):
             state = advance(state, control)
             trajectory.append(state)
-            completed = stage * STEPS_PER_STAGE + local_step + 1
-            if completed < STAGES * STEPS_PER_STAGE:
+            completed += 1
+            if completed < TOTAL_SOURCE_STEPS:
                 running_cost += 0.05 * control * control * OUTER_DT
         stage_states.append(state)
     terminal_cost = state[1] * state[1] + state[2] * state[2]
@@ -83,7 +88,7 @@ def verify(result):
     if (result["source_execution_status"] != "step() raises NameError after state mutation because its return tuple references undefined _" or
             result["assumptions"] != [
                 "the recorded derivative and reward equations define the intended transition despite the source return error",
-                "one control from {-1,0,1} is held for 22 source steps in each of five report-level macro stages",
+                "one control from {-1,0,1} is held for 22 source steps in each of the first four report-level macro stages and 23 in the last, matching the pinned source's strict binary64 horizon check",
                 "the final source step uses terminal cost instead of the nonterminal running penalty"]):
         raise ValueError("source-variant assumptions or execution defect differ")
     if result["state_order"] != ["time", "position", "velocity"]:
@@ -98,20 +103,42 @@ def verify(result):
         "dynamics": "time'=1; position'=velocity; velocity'=(1-position^2)*velocity-position+u",
         "running_cost": "0.05*u^2*dt for each nonterminal source step",
         "terminal_cost": "position^2+velocity^2",
+        "source_horizon_behavior": "after 1100 repeated binary64 additions of 0.01, time is 10.99999999999981 and remains below 11; the strict post-step test terminates after 111 outer steps at time 11.099999999999808",
         "source_execution_note": "upstream step mutates state then raises NameError because return value _ is undefined; this pilot independently re-expresses the recorded equations",
     }:
         raise ValueError("source task parameters or disclosed source defect differ")
     adaptation = result["adaptation"]
     if (adaptation != {
         "macro_stages": STAGES,
-        "source_steps_per_macro_stage": STEPS_PER_STAGE,
-        "total_source_steps": STAGES * STEPS_PER_STAGE,
+        "source_steps_per_macro_stage": list(STEPS_PER_STAGE),
+        "total_source_steps": TOTAL_SOURCE_STEPS,
         "finite_control_catalogue": list(ACTIONS),
         "plan_count": len(ACTIONS) ** STAGES,
-        "semantics": "one open-loop control selected per 2.2-second macro stage; all finite plans are enumerated",
+        "semantics": "one open-loop control per macro stage; the first four hold for 22 source steps and the last for 23 to follow the source's strict binary64 horizon check; all finite plans are enumerated",
         "claim_boundary": "minimum of this finite open-loop catalogue only; not the continuous-action optimum",
     }):
         raise ValueError("finite-action adaptation differs")
+    performance = result["performance"]
+    raw_ns = performance.get("raw_elapsed_ns")
+    if (performance.get("metric") != "finite_catalogue_enumeration_elapsed" or
+            performance.get("unit") != "ns" or
+            performance.get("scope") != "steady_clock interval around allocation, propagation, and objective evaluation for all 243 plans; excludes JSON construction and serialization" or
+            performance.get("worker_threads") != 1 or
+            performance.get("warmup_repetitions") != WARMUP_REPETITIONS or
+            not isinstance(performance.get("measured_repetitions"), int) or
+            not 1 <= performance["measured_repetitions"] <= 1000 or
+            not isinstance(raw_ns, list) or len(raw_ns) != performance["measured_repetitions"] or
+            any(not isinstance(value, int) or value <= 0 for value in raw_ns) or
+            performance.get("timing_clock") != "std::chrono::steady_clock"):
+        raise ValueError("performance record metadata is invalid")
+    sorted_ns = sorted(raw_ns)
+    median_ns = sorted_ns[len(sorted_ns) // 2] if len(sorted_ns) % 2 else (
+        sorted_ns[len(sorted_ns) // 2 - 1] +
+        (sorted_ns[len(sorted_ns) // 2] - sorted_ns[len(sorted_ns) // 2 - 1]) // 2)
+    if (performance.get("median_elapsed_ns") != median_ns or
+            performance.get("minimum_elapsed_ns") != sorted_ns[0] or
+            performance.get("maximum_elapsed_ns") != sorted_ns[-1]):
+        raise ValueError("performance summary differs from raw repetitions")
     if len(result["plans"]) != len(ACTIONS) ** STAGES:
         raise ValueError("finite plan count differs")
     expected_rows = []
@@ -168,7 +195,7 @@ def figure_data(analysis):
 
 
 def svg_figure(data):
-    width, height = 1120, 690
+    width, height = 1180, 715
     left, top, plot_w, plot_h = 610, 52, 530, 475
     flat = [point for cloud in data["stage_clouds"] for point in cloud]
     flat += [[state[1], state[2]] for state in data["trajectory"]]
@@ -187,7 +214,7 @@ def svg_figure(data):
         '<desc id="desc">Position-velocity phase plane with endpoint clouds from each control stage and the selected finite-catalogue trajectory; lower charts show position and velocity over time.</desc>',
         '<rect width="100%" height="100%" fill="#101a23"/>',
         '<defs><marker id="timeArrow" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto" markerUnits="userSpaceOnUse"><path d="M0,0 L0,6 L7,3 z" fill="#fff4d2"/></marker></defs>',
-        '<text x="560" y="28" fill="#f4f1e8" font-family="sans-serif" font-size="20" text-anchor="middle">Van der Pol · finite open-loop catalogue</text>',
+        '<text x="590" y="28" fill="#f4f1e8" font-family="sans-serif" font-size="20" text-anchor="middle">Van der Pol · finite open-loop catalogue</text>',
         f'<rect x="{left}" y="{top}" width="{plot_w}" height="{plot_h}" fill="#18232c" stroke="#53616c"/>']
     for tick in range(6):
         x = xlo + tick * (xhi - xlo) / 5
@@ -204,11 +231,12 @@ def svg_figure(data):
     trajectory = data["trajectory"]
     points = " ".join(f'{sx(state[1]):.2f},{sy(state[2]):.2f}' for state in trajectory)
     parts.append(f'<polyline points="{points}" fill="none" stroke="#fff4d2" stroke-width="2.4" stroke-linejoin="round"/>')
-    for stage in range(STAGES + 1):
-        state = trajectory[stage * STEPS_PER_STAGE]
+    for stage, boundary in enumerate((0, *STAGE_ENDS)):
+        state = trajectory[boundary]
         parts.append(f'<circle cx="{sx(state[1]):.2f}" cy="{sy(state[2]):.2f}" r="5" fill="{colors[min(stage, STAGES - 1)]}" stroke="#101a23" stroke-width="1.5"/>')
     for stage in range(STAGES):
-        index = stage * STEPS_PER_STAGE + STEPS_PER_STAGE // 2
+        stage_start = 0 if stage == 0 else STAGE_ENDS[stage - 1]
+        index = stage_start + STEPS_PER_STAGE[stage] // 2
         start, end = trajectory[index - 1], trajectory[index + 1]
         parts.append(f'<line x1="{sx(start[1]):.2f}" y1="{sy(start[2]):.2f}" x2="{sx(end[1]):.2f}" y2="{sy(end[2]):.2f}" stroke="#fff4d2" stroke-width="1.7" marker-end="url(#timeArrow)"/>')
     parts.extend([
@@ -243,7 +271,7 @@ def svg_figure(data):
             f'<rect x="{tx0}" y="{y0}" width="{tx1 - tx0}" height="{chart_h}" fill="#18232c" stroke="#53616c"/>',
             f'<polyline points="{points}" fill="none" stroke="{color}" stroke-width="2"/>',
             f'<text x="{tx0}" y="{y0 + chart_h + 13}" fill="#bdc8cf" font-size="10">0</text>',
-            f'<text x="{tx1}" y="{y0 + chart_h + 13}" fill="#bdc8cf" font-size="10" text-anchor="end">11 s</text>'])
+            f'<text x="{tx1}" y="{y0 + chart_h + 13}" fill="#bdc8cf" font-size="10" text-anchor="end">{times[-1]:.1f} s</text>'])
     parts.append('</svg>')
     return "\n".join(parts)
 
@@ -253,21 +281,22 @@ def report_page(result, data, svg):
     return f'''<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Van der Pol finite-action pilot</title><style>body{{margin:0;background:#101a23;color:#edf2f5;font:16px/1.55 system-ui,sans-serif}}main{{max-width:1160px;margin:auto;padding:24px}}a{{color:#8bd3f7}}svg{{width:100%;height:auto}}.note{{padding:12px;border-left:4px solid #f2c14e;background:#18232c}}code{{overflow-wrap:anywhere}}table{{border-collapse:collapse}}th,td{{border:1px solid #53616c;padding:8px;text-align:left}}</style></head><body><main>
 <h1>Van der Pol finite-action pilot</h1>
-<p>This report re-expresses the pinned <a href="{SOURCE_URL}">upstream Van der Pol equations</a> and <a href="{NOTEBOOK_URL}">task notebook</a> at commit <code>{SOURCE_COMMIT}</code>. The state is time, position, and velocity. Each 0.1-second source action uses ten explicit-Euler substeps.</p>
+<p>This report re-expresses the pinned <a href="{SOURCE_URL}">upstream Van der Pol equations</a> and <a href="{NOTEBOOK_URL}">task notebook</a> at commit <code>{SOURCE_COMMIT}</code>. The state is time, position, and velocity. Each 0.1-second source action uses ten explicit-Euler substeps. Because repeated binary64 addition leaves time just below 11 after 1,100 increments of 0.01, the strict source horizon test needs a 111th action and reaches about 11.1 seconds.</p>
 <div class="note"><strong>Source limitation:</strong> the upstream <code>step()</code> mutates state and then raises <code>NameError</code> because its return tuple references undefined <code>_</code>. This report independently replays the documented update equations and reward; it does not claim to run the broken Python environment.</div>
-<div class="note"><strong>Adaptation:</strong> the source has continuous scalar controls. This pilot enumerates five open-loop macro controls chosen from <code>{list(ACTIONS)}</code>, held for 22 source steps each. The minimum is over all 243 plans only; it is not a continuous-action optimum, minimax value, or performance comparison.</div>
+<div class="note"><strong>Adaptation:</strong> the source has continuous scalar controls. This pilot enumerates five open-loop macro controls chosen from <code>{list(ACTIONS)}</code>, held for 22, 22, 22, 22, and 23 source steps. The minimum is over all 243 plans only; it is not a continuous-action optimum or minimax value.</div>
 <h2>Position–velocity phase plane and selected path</h2>{svg}
 <h2>Finite-catalogue result</h2><p>Minimum objective: <strong>{result['objective_value']:.12g}</strong>. Selected catalogue row: {data['selected_plan_index']}; controls: <code>{html.escape(json.dumps(data['controls']))}</code>.</p>
+<h2>Measured enumeration time</h2><p>{result['performance']['measured_repetitions']} Release repetitions after {result['performance']['warmup_repetitions']} warm-ups: median <strong>{result['performance']['median_elapsed_ns'] / 1e6:.6f} ms</strong>, range {result['performance']['minimum_elapsed_ns'] / 1e6:.6f}–{result['performance']['maximum_elapsed_ns'] / 1e6:.6f} ms. Timing covers allocation, propagation, and objective evaluation for all 243 plans; JSON construction and serialization are excluded. This descriptive single-host result makes no comparison or speedup claim. No source-mapped profiler was available for this small pilot.</p>
 <table><thead><tr><th>t</th><th>position</th><th>velocity</th></tr></thead><tbody>{''.join(f'<tr><td>{state[0]:.3f}</td><td>{state[1]:.9f}</td><td>{state[2]:.9f}</td></tr>' for state in [data['trajectory'][0], *[result['plans'][data['selected_plan_index']]['stage_states'][i] for i in range(STAGES)]])}</tbody></table>
 <h2>Source and reproduce</h2><p>Scenario: <code>{result['scenario_id']}</code>. Upstream source blob: <code>{SOURCE_BLOB}</code>; notebook blob: <code>{NOTEBOOK_BLOB}</code>. No license is declared in the upstream repository. The notebook's CCEM score of -0.82 is a learning result, not a verified optimum; it labels the true value unknown, so this report does not use it as an oracle.</p>
 <pre><code>cmake -S benchmarks/reporting/env717/vanderpol-build -B build/env717-vanderpol -DBUILD_TESTING=ON -DCMAKE_BUILD_TYPE=Release
 cmake --build build/env717-vanderpol --config Release --target csl_env717_vanderpol
-python3 scripts/reports/env717/check_vanderpol.py build/env717-vanderpol/csl_env717_vanderpol --output reports/algorithm-results/env717-vanderpol-pilot-v1</code></pre>
+python3 scripts/reports/env717/check_vanderpol.py build/env717-vanderpol/csl_env717_vanderpol --repetitions 9 --output reports/algorithm-results/env717-vanderpol-pilot-v1</code></pre>
 <p>{html.escape(source_bug)}</p><ul><li><a href="result.json">Result data</a></li><li><a href="figure-data.json">Figure data</a></li><li><a href="projections.svg">SVG figure</a></li><li><a href="README.md">Report notes</a></li></ul></main></body></html>'''
 
 
-def read_result(executable):
-    completed = subprocess.run([str(executable)], check=True, capture_output=True, text=True)
+def read_result(executable, repetitions):
+    completed = subprocess.run([str(executable), "--measure", str(repetitions)], check=True, capture_output=True, text=True)
     return json.loads(completed.stdout)
 
 
@@ -281,11 +310,14 @@ def write_bundle(result, output):
         "source_repository_commit": SOURCE_COMMIT, "source_file_blob": SOURCE_BLOB,
         "source_notebook_blob": NOTEBOOK_BLOB,
         "driver_sha256": result["driver_sha256"], "compiler": result["capture_environment"],
-        "platform": platform.platform(), "python": platform.python_version(),
+        "platform": platform.platform(), "machine": platform.machine(),
+        "processor": platform.processor(), "logical_cpu_count": os.cpu_count(),
+        "python": platform.python_version(),
         "arithmetic": "IEEE-754 binary64"}
     capture = {"source_commit": result["source_commit"], "driver_sha256": result["driver_sha256"],
         "compiler": result["capture_environment"],
-        "capture_kind": "finite-catalogue equation replay; upstream step() defect disclosed; no performance claim"}
+        "capture_kind": "finite-catalogue equation replay and descriptive runtime measurement; upstream step() defect disclosed; no comparative claim",
+        "performance": result["performance"]}
     selected = result["plans"][data["selected_plan_index"]]
     readme = f'''# Van der Pol finite-action pilot
 
@@ -303,17 +335,21 @@ The notebook lists a CCEM learning value of `-0.82` and says the true value is u
 
 ## Finite adaptation
 
-The source control is continuous. This report uses five macro stages of 22 source steps each, with one constant action per stage from `{json.dumps(ACTIONS)}`. It enumerates all 243 open-loop plans. The minimum is `{result['objective_value']:.12g}` at plan row `{data['selected_plan_index']}`, controls `{selected['controls']}`. This is a finite-catalogue result only, not the continuous-action optimum or a performance comparison.
+The source control is continuous. The source's strict horizon comparison remains true after 1,100 binary64 additions of 0.01, so it takes 111 source steps to pass 11 seconds. This report uses five macro stages of 22, 22, 22, 22, and 23 source steps, with one constant action per stage from `{json.dumps(ACTIONS)}`. It enumerates all 243 open-loop plans. The minimum is `{result['objective_value']:.12g}` at plan row `{data['selected_plan_index']}`, controls `{selected['controls']}`. This is a finite-catalogue result only, not the continuous-action optimum or a performance comparison.
+
+## Measured enumeration time
+
+The Release driver had {result['performance']['warmup_repetitions']} warm-ups and {result['performance']['measured_repetitions']} measured repetitions. Median {result['performance']['median_elapsed_ns'] / 1e6:.6f} ms (range {result['performance']['minimum_elapsed_ns'] / 1e6:.6f}–{result['performance']['maximum_elapsed_ns'] / 1e6:.6f} ms). Timing covers allocation, propagation, and objective evaluation for all 243 plans, excluding JSON construction and serialization. These descriptive measurements are not a cross-algorithm comparison or speedup claim. No source-mapped profiler was available for this small pilot.
 
 ## Reproduce
 
 ```sh
 cmake -S benchmarks/reporting/env717/vanderpol-build -B build/env717-vanderpol -DBUILD_TESTING=ON -DCMAKE_BUILD_TYPE=Release
 cmake --build build/env717-vanderpol --config Release --target csl_env717_vanderpol
-python3 scripts/reports/env717/check_vanderpol.py build/env717-vanderpol/csl_env717_vanderpol --output reports/algorithm-results/env717-vanderpol-pilot-v1
+python3 scripts/reports/env717/check_vanderpol.py build/env717-vanderpol/csl_env717_vanderpol --repetitions 9 --output reports/algorithm-results/env717-vanderpol-pilot-v1
 ```
 
-The Python checker independently enumerates and replays every finite plan. No timing or algorithm-performance claim is made.
+The Python checker independently enumerates and replays every finite plan. The report contains descriptive enumeration timings but makes no algorithm-comparison or speedup claim.
 '''
     files = {"README.md": readme.encode(),
         "capture.json": (json.dumps(capture, indent=2) + "\n").encode(),
@@ -334,13 +370,16 @@ def main():
     parser.add_argument("executable", type=Path, nargs="?")
     parser.add_argument("--result", type=Path)
     parser.add_argument("--output", type=Path)
+    parser.add_argument("--repetitions", type=int, default=9)
     args = parser.parse_args()
+    if not 1 <= args.repetitions <= 1000:
+        parser.error("--repetitions must be in 1..1000")
     if args.result and args.executable:
         parser.error("choose either an executable or --result")
     if args.result:
         result = json.loads(args.result.read_text(encoding="utf-8"))
     elif args.executable:
-        result = read_result(args.executable)
+        result = read_result(args.executable, args.repetitions)
     else:
         parser.error("provide an executable or --result")
     analysis = verify(result)
