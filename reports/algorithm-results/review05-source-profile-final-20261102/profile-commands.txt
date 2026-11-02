@@ -1,0 +1,12 @@
+# Run from the repository root after setting DRIVER to the matching profiled executable.
+gprof --brief --no-graph --flat-profile "$DRIVER" \
+  reports/algorithm-results/review05-source-profile-final-20261102/gmon/g00-p0-reach-back.* \
+  reports/algorithm-results/review05-source-profile-final-20261102/gmon/g01-p1-reach-back.* \
+  reports/algorithm-results/review05-source-profile-final-20261102/gmon/g02-p0-reach-back.* \
+  > reports/algorithm-results/review05-source-profile-final-20261102/gprof-flat-reach-back.txt
+
+gprof --brief --no-graph --flat-profile "$DRIVER" \
+  reports/algorithm-results/review05-source-profile-final-20261102/gmon/g00-p1-strategy-b.* \
+  reports/algorithm-results/review05-source-profile-final-20261102/gmon/g01-p0-strategy-b.* \
+  reports/algorithm-results/review05-source-profile-final-20261102/gmon/g02-p1-strategy-b.* \
+  > reports/algorithm-results/review05-source-profile-final-20261102/gprof-flat-strategy-b.txt

@@ -1,0 +1,17 @@
+{
+  "schema": "csl.review05.source-profile-build-provenance/1",
+  "source_revision": "24dd0072ca865106204107ca6862150e2fea00d4",
+  "build_type": "Release",
+  "compiler": "GCC 16.2.1 20260810",
+  "cmake": "3.31.6",
+  "generator": "Ninja 1.13.2",
+  "highs": "1.11.0",
+  "profiler": "GNU gprof (GNU Binutils) 2.47",
+  "platform": "Linux x86_64, kernel 7.2.8-9-omarchy, glibc 2.44",
+  "cpu": "AMD Ryzen 5 3550H, 8 logical CPUs",
+  "release_compile_flags": "-O3 -DNDEBUG -g",
+  "profile_driver_compile_and_link_flags": "-pg",
+  "profiled_driver_sha256": "805443cd169b74491fab39c54ba64f923774af3988445f87397d47fec3a29bce",
+  "scenario_sha256": "af2b5471d85111d2225b5abf579c3b367bce18765763b567be0bc598290c73d4",
+  "note": "Only the profile driver is gprof-instrumented. Dependencies are Release optimized with debug symbols. The instrumented run is diagnostic and is not used for timing comparisons."
+}
