@@ -18,7 +18,7 @@
     "cxx_flags_sha256": "4dd59be449eea44ea9b80469a10392d694a053e017b50b00a65198b9c3010c60",
     "cxx_standard": "20",
     "executable_link_flags_sha256": "36a9e7f1c95b82ffb99743e0c5c4ce95d83c9a430aac59f84ef3cbfab6145068",
-    "generator": "Unix Makefiles",
+    "generator": "Ninja",
     "schema": "csl.obs04-build/1",
     "source_dirty": false,
     "source_revision": "2977b95bab581a343c2daba02459f96014e893b0",
@@ -37,7 +37,7 @@
     "requested_workers": 1,
     "seed_policy": {
       "kind": "not_applicable",
-      "reason": "The fixed T-S01 fixture uses no random generator."
+      "reason": "The fixed T-S02 constant-integrator fixture uses no random generator."
     },
     "tolerances": {
       "absolute": 1e-08,

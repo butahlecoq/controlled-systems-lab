@@ -7,6 +7,7 @@ import argparse
 import hashlib
 import html
 import json
+import os
 import statistics
 from pathlib import Path
 
@@ -128,6 +129,14 @@ def main() -> None:
         timing[strategy] = (statistics.median(values), min(values), max(values))
     scenario_hash = digest(args.scenario)
     event_hash = digest(args.events)
+    build_provenance = environment["binary_build_provenance"]
+    repository_root = Path(__file__).resolve().parents[3]
+    build_note_href = html.escape(os.path.relpath(
+        repository_root / build_provenance["build_note"]["path"], output.parent))
+    process_record_href = html.escape(os.path.relpath(
+        repository_root / build_provenance["process_record"]["path"], output.parent))
+    checksum_href = html.escape(os.path.relpath(
+        repository_root / build_provenance["checksum_manifest"]["path"], output.parent))
     record_resource_bound = all(
         json.loads(run["run"])["result"]["raw_output"].get("resource_profile_json") ==
         profile_bytes.decode("utf-8")
@@ -143,7 +152,8 @@ def main() -> None:
 <h2>Descriptive timing</h2><table><thead><tr><th>Strategy</th><th>Median end-to-end (ms)</th><th>Range (ms)</th></tr></thead><tbody>{''.join(f'<tr><th>{html.escape(LABELS[s])}</th><td>{timing[s][0]/1e6:.6f}</td><td>{timing[s][1]/1e6:.6f}–{timing[s][2]/1e6:.6f}</td></tr>' for s in EXPECTED)}</tbody></table>
 <p>Timing covers strategy preparation through two original-problem witness checks. It excludes process startup, shared setup, serialization, build, and rendering. This tiny constant-objective case is not evidence for a general performance winner.</p>
 <h2>Resource profile and provenance</h2><p>The whole capture process tree ran with a 2 GiB cgroup-v2 memory cap, swap disabled, and a 300-second suite-level watchdog. It completed in {profile['elapsed_wall_time_ns']/1e9:.6f} s with peak process-tree memory {profile['observed']['process_tree_peak_memory_bytes']} bytes and zero OOM/limit events. The wall limit applies to the full invocation, not individually restarted trials; this profile is below the default per-attempt 8 GiB cap and does not satisfy that per-attempt timeout contract.</p>
-<ul><li>Source commit: <code>{html.escape(environment['source_commit'])}</code></li><li>Scenario SHA-256: <code>{scenario_hash}</code></li><li>Events SHA-256: <code>{event_hash}</code></li><li><a href="strategy-ab-ts02-environment.json">Capture environment</a> · <a href="strategy-ab-ts02-csl-environment.json">Codec environment</a> · <a href="resource-profile.json">Resource profile</a></li><li><a href="strategy-ab-ts02-events.jsonl">Raw events</a> · <a href="strategy-ab-ts02-stdout.jsonl">Raw stdout</a> · <a href="scenario.json">Scenario</a></li><li><a href="strategy-ab-ts02-comparison-record.json">Canonical comparison record</a> with the exact profile bytes embedded in each attempt</li><li><a href="capture-supervisor.py">Capture supervisor</a></li></ul>
+<p>Binary source revision <code>{html.escape(build_provenance['source_revision'])}</code> is tied to the exact executable SHA-256 by the retained earlier T-S02 build note and process record; the report checksum file pins both. The T-S02 capture executable hash matches that archived binary. The execution worktree commit records the launch directory only, and its captured dynamic-dependency list contains no CSL, HiGHS, or Qhull shared library.</p>
+<ul><li>Source commit: <code>{html.escape(environment['source_commit'])}</code></li><li>Launch worktree commit: <code>{html.escape(environment['execution_worktree_commit'])}</code> (working directory only)</li><li>Executable SHA-256: <code>{html.escape(environment['executable_sha256'])}</code></li><li>Scenario SHA-256: <code>{scenario_hash}</code></li><li>Events SHA-256: <code>{event_hash}</code></li><li><a href="strategy-ab-ts02-environment.json">Capture environment</a> · <a href="strategy-ab-ts02-csl-environment.json">Codec environment</a> · <a href="resource-profile.json">Resource profile</a> · <a href="binary-dynamic-dependencies.txt">Dynamic dependencies</a></li><li>Archived build provenance: <a href="{build_note_href}">build note</a> · <a href="{process_record_href}">process record</a> · <a href="{checksum_href}">checksums</a></li><li><a href="strategy-ab-ts02-events.jsonl">Raw events</a> · <a href="strategy-ab-ts02-stdout.jsonl">Raw stdout</a> · <a href="scenario.json">Scenario</a></li><li><a href="strategy-ab-ts02-comparison-record.json">Canonical comparison record</a> with the exact profile bytes embedded in each attempt</li><li><a href="capture-supervisor.py">Capture supervisor</a></li></ul>
 <p class="note">This is a limited T-S02 functional comparison slice for #597. It does not complete the broader MPC-01 matrix, external solver comparison, default per-attempt limiter profile, or general ranking.</p></body></html>'''
     output.write_text(report, encoding="utf-8")
 
@@ -151,6 +161,7 @@ def main() -> None:
         "# Resource-limited saved Strategy A/B T-S02 capture", "",
         "T-S02 is the two-stage scalar integrator with `x0=0`, `x[t+1]=x[t]+u[t]`, `u[t] in [0,1]`, and constant objective `J=3`. Every feasible control pair is therefore an exact minimizer; this fixture checks family plumbing and witness replay, not optimization difficulty.", "",
         f"- Source commit: `{environment['source_commit']}`.", f"- Scenario SHA-256: `{scenario_hash}`.", f"- Event/stdout SHA-256: `{event_hash}`.",
+        f"- Source revision `{build_provenance['source_revision']}` and executable SHA-256 `{build_provenance['executable_sha256']}` are cross-bound by the retained EXP-02 T-S02 build note/process record and its checksum file. The launch worktree commit `{environment['execution_worktree_commit']}` identifies the runtime working directory only; it is not represented as the source used to build the binary.",
         "- One excluded warmup pair; five measured alternating pairs; all 12 trials passed.",
         "- Each result marked its profile-specific family complete and returned two distinct histories. Original-model bindings, feasibility, and objective checks passed; separate proof fields for optimality and completeness remain unsupported.",
         "- The exact minimizer set is the full unit square. Both strategies returned the same two corner witnesses.", "",

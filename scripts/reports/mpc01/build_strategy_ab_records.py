@@ -56,6 +56,40 @@ def build_record(events_path: Path, scenario_path: Path, environment_path: Path,
     codec_environment = json.loads(codec_environment_text)
     if codec_environment.get("schema") != "csl.obs04-environment/1":
         raise ValueError("codec environment must use csl.obs04-environment/1")
+    build_provenance = environment.get("binary_build_provenance")
+    if build_provenance is not None:
+        if (build_provenance.get("schema") != "csl.binary-build-provenance/1" or
+                build_provenance.get("source_revision") != environment.get("source_commit") or
+                build_provenance.get("executable_sha256") != environment.get("executable_sha256") or
+                build_provenance.get("source_tree_sha256") != codec_environment["build"].get("source_tree_sha256")):
+            raise ValueError("binary build provenance does not bind the capture source and executable")
+        repository_root = Path(__file__).resolve().parents[3]
+        provenance_files: dict[str, Path] = {}
+        for key in ("build_note", "process_record", "checksum_manifest", "dynamic_dependencies"):
+            relative = Path(build_provenance[key]["path"])
+            if relative.is_absolute() or ".." in relative.parts:
+                raise ValueError("binary build provenance path must stay within the repository")
+            resolved = (repository_root / relative).resolve()
+            if not resolved.is_relative_to(repository_root):
+                raise ValueError("binary build provenance path escapes the repository")
+            if sha256(resolved.read_bytes()) != build_provenance[key]["sha256"]:
+                raise ValueError(f"binary build provenance digest mismatch: {key}")
+            provenance_files[key] = resolved
+        build_note = provenance_files["build_note"].read_text(encoding="utf-8")
+        process_record = json.loads(provenance_files["process_record"].read_text(encoding="utf-8"))
+        checksum_rows = {}
+        for line in provenance_files["checksum_manifest"].read_text(encoding="utf-8").splitlines():
+            expected, path = line.split(maxsplit=1)
+            checksum_rows[path.strip()] = expected
+        if (build_provenance["source_revision"] not in build_note or
+                build_provenance["executable_sha256"] not in build_note or
+                process_record.get("executable_sha256") != build_provenance["executable_sha256"] or
+                checksum_rows.get(build_provenance["build_note"]["checksum_key"]) != build_provenance["build_note"]["sha256"] or
+                checksum_rows.get(build_provenance["process_record"]["checksum_key"]) != build_provenance["process_record"]["sha256"]):
+            raise ValueError("archived build note/process record do not attest the pinned executable and source")
+        dynamic_dependencies = provenance_files["dynamic_dependencies"].read_text(encoding="utf-8").lower()
+        if any(name in dynamic_dependencies for name in ("libcsl", "libhighs", "libqhull")):
+            raise ValueError("capture executable unexpectedly loads a project/backend shared library")
     scenario_bytes = scenario_path.read_bytes()
     scenario_hash = sha256(scenario_bytes)
     events_hash = sha256(events_path.read_bytes())

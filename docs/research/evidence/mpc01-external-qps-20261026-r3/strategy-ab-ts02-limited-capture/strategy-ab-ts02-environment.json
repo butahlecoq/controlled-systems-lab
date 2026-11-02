@@ -49,5 +49,31 @@
   "source_commit": "2977b95bab581a343c2daba02459f96014e893b0",
   "source_dirty_before_run": false,
   "source_file": "examples/registered_synthesis_comparison.cpp",
-  "source_file_sha256": "39883c67fcf82b7709ddd9ca60ad47b9b06cfc5dcfe6efffed7324712c52c6ee"
+  "source_file_sha256": "39883c67fcf82b7709ddd9ca60ad47b9b06cfc5dcfe6efffed7324712c52c6ee",
+  "binary_build_provenance": {
+    "schema": "csl.binary-build-provenance/1",
+    "source_revision": "2977b95bab581a343c2daba02459f96014e893b0",
+    "source_tree_sha256": "a30469b2bf0717de8c48d5d025c043a4000e9578e3f60db2c6e2eca7dd9cc748",
+    "executable_sha256": "300863246730c863d12ddd95090a5d0e0350a3389fb39019dc4e29e6e9274384",
+    "relationship": "The capture launch directory was a clean worktree at execution_worktree_commit. The launched executable has the same SHA-256 as the executable in this archived T-S02 Release record. The archived note binds that executable hash to source_revision; execution_worktree_commit identifies only the launch-directory checkout.",
+    "build_note": {
+      "path": "reports/algorithm-results/exp02-paired-profiles-20261027-r1/README.md",
+      "sha256": "d85125b47b0b10a0fb519fd653e35979bc32f4ef77ad8cc2c8ea75e79780c4aa",
+      "checksum_key": "README.md"
+    },
+    "process_record": {
+      "path": "reports/algorithm-results/exp02-paired-profiles-20261027-r1/raw/ts02_constant_integrator.process.json",
+      "sha256": "5ebb5e3f63be145ae7b7fdcd6b2a89750ce9ae7c6f2fe2199b3d0e594ecef4e0",
+      "checksum_key": "raw/ts02_constant_integrator.process.json"
+    },
+    "checksum_manifest": {
+      "path": "reports/algorithm-results/exp02-paired-profiles-20261027-r1/SHA256SUMS",
+      "sha256": "067428e5c8f8a11985954d175360d2bdd1a0bd2d8c2ce3324ef629b6f084eb62"
+    },
+    "dynamic_dependencies": {
+      "path": "docs/research/evidence/mpc01-external-qps-20261026-r3/strategy-ab-ts02-limited-capture/binary-dynamic-dependencies.txt",
+      "sha256": "312c9dc738d59b8addebc51e0ca8e6a95e6a09296d791e6f49a3cdd5f93c181c"
+    }
+  },
+  "execution_worktree_role": "Launch directory only. Binary source is bound separately by binary_build_provenance; the executable does not load CSL, HiGHS, or Qhull shared libraries from this worktree."
 }
