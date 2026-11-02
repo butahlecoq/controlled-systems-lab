@@ -1869,6 +1869,8 @@ TEST_CASE("Strategy A timing retains a stopped root and leaves unentered phases 
 TEST_CASE("registered Strategy A publishes the compiled B04-C exact optimal family") {
     auto query=request(b04_c_exact_profile_problem());
     query.family.profile=synthesis::b04_c::exact_family_profile;
+    query.family.target=FamilyTarget::exact_optimal_relation;
+    query.family.assurance=Assurance::numerical;
     query.family.representation={synthesis::b04_c::exact_family_representation};
     query.configuration.representation=query.family.representation;
     const auto result=run(query);
