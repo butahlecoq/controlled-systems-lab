@@ -58,6 +58,15 @@ not imply that all systems with these dimensions or counts are admitted. The
 full accepted operation, objective, assurance, and resource limits remain
 adapter-specific and are checked by preflight.
 
+Each built path and its verification record retain an ordered operation trace.
+The trace identifies the mode or transition, stage, composer implementation
+and version, joint-variable count, rows added and cumulative rows, and
+cumulative coefficient-matrix elements. The
+`exact singleton hybrid verifier independently retains every tied edge path`
+test checks this evidence for every path, including guard and reset identity
+and the structural counters. These counts describe relation construction;
+provider CPU, memory, and thread consumption remain unmeasured.
+
 ## Implementation-domain limits
 
 - `JointHReachabilityAdapter` and `JointHDirectTrajectoryAdapter` preserve the

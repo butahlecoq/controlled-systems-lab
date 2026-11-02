@@ -2218,10 +2218,39 @@ TEST_CASE("exact singleton hybrid verifier independently retains every tied edge
             programs[i].relation_limits.max_matrix_elements);
         REQUIRE(report.branches[i].relation_operations.size()==programs[i].relation_operations.size());
         CHECK_FALSE(report.branches[i].relation_operations.empty());
-        CHECK(report.branches[i].relation_operations.front().implementation_id==
-            programs[i].relation_operations.front().implementation_id);
-        CHECK(report.branches[i].relation_operations.front().cumulative_rows==
-            programs[i].relation_operations.front().cumulative_rows);
+        std::size_t prior_rows=0;
+        bool saw_guard=false;
+        bool saw_reset=false;
+        for(std::size_t operation_index=0;
+            operation_index<programs[i].relation_operations.size();++operation_index) {
+            const auto& program_operation=programs[i].relation_operations[operation_index];
+            const auto& report_operation=report.branches[i].relation_operations[operation_index];
+            CHECK(report_operation.operation==program_operation.operation);
+            CHECK(report_operation.stage==program_operation.stage);
+            CHECK(report_operation.mode==program_operation.mode);
+            CHECK(report_operation.edge==program_operation.edge);
+            CHECK(report_operation.implementation_id==
+                "csl.model.hybrid.joint-h-composer");
+            CHECK(report_operation.implementation_version=="1");
+            CHECK(report_operation.joint_variables==5);
+            CHECK(report_operation.cumulative_rows>=prior_rows);
+            CHECK(report_operation.rows_added==report_operation.cumulative_rows-prior_rows);
+            CHECK(report_operation.cumulative_matrix_elements==
+                report_operation.cumulative_rows*report_operation.joint_variables);
+            prior_rows=report_operation.cumulative_rows;
+            if(report_operation.operation==model::HybridRelationOperationKind::transition_guard) {
+                saw_guard=true;
+                REQUIRE(report_operation.edge.has_value());
+                CHECK(report_operation.edge->value==programs[i].path.edges.front().value);
+            }
+            if(report_operation.operation==model::HybridRelationOperationKind::reset_relation) {
+                saw_reset=true;
+                REQUIRE(report_operation.edge.has_value());
+                CHECK(report_operation.edge->value==programs[i].path.edges.front().value);
+            }
+        }
+        CHECK(saw_guard);
+        CHECK(saw_reset);
     }
     REQUIRE(report.branches[0].candidate_providers.size()==1);
     CHECK(report.branches[0].candidate_providers[0].actual->id.value=="fixture.lp");
