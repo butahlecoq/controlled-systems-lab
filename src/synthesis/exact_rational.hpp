@@ -274,16 +274,11 @@ inline bool multiply(const Rational& lhs, const Rational& rhs,
     return normalize(result, budget);
 }
 
-inline bool equal(const Rational& lhs, const Rational& rhs,
-                  bool& result, Budget& budget) {
+inline bool compare(const Rational& lhs, const Rational& rhs,
+                    int& order, Budget& budget) {
     using namespace exact_h::exact_detail;
     if (!charge(budget) || !valid(lhs, budget) || !valid(rhs, budget))
         return false;
-    if (lhs.denominator == rhs.denominator &&
-        lhs.binary_exponent == rhs.binary_exponent) {
-        result = exact_h::exact_detail::compare(lhs.numerator, rhs.numerator) == 0;
-        return true;
-    }
     Integer left, right;
     if (!exact_h::exact_detail::multiply(lhs.numerator, rhs.denominator,
             budget.max_integer_bits, left) ||
@@ -295,10 +290,28 @@ inline bool equal(const Rational& lhs, const Rational& rhs,
         static_cast<std::int64_t>(lhs.binary_exponent) - exponent);
     const auto rhs_shift = static_cast<std::size_t>(
         static_cast<std::int64_t>(rhs.binary_exponent) - exponent);
-    if (!shift_left(left, lhs_shift, budget.max_integer_bits) ||
+    if (lhs_shift > budget.max_integer_bits || rhs_shift > budget.max_integer_bits ||
+        !shift_left(left, lhs_shift, budget.max_integer_bits) ||
         !shift_left(right, rhs_shift, budget.max_integer_bits))
         return false;
-    result = exact_h::exact_detail::compare(left, right) == 0;
+    order = exact_h::exact_detail::compare(left, right);
+    return true;
+}
+
+inline bool equal(const Rational& lhs, const Rational& rhs,
+                  bool& result, Budget& budget) {
+    using namespace exact_h::exact_detail;
+    if (!charge(budget) || !valid(lhs, budget) || !valid(rhs, budget))
+        return false;
+    if (lhs.denominator == rhs.denominator &&
+        lhs.binary_exponent == rhs.binary_exponent) {
+        result = exact_h::exact_detail::compare(lhs.numerator, rhs.numerator) == 0;
+        return true;
+    }
+    int order{};
+    if (!compare(lhs, rhs, order, budget))
+        return false;
+    result = order == 0;
     return true;
 }
 

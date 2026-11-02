@@ -27,6 +27,9 @@ TEST_CASE("rational arithmetic preserves odd denominators and dyadic exponents")
     REQUIRE(make_fraction(5, 6, five_sixths, budget));
     REQUIRE(add(one_third, half, mixed, budget));
     CHECK(same(mixed, five_sixths, budget));
+    int order{};
+    REQUIRE(compare(one_third, half, order, budget));
+    CHECK(order < 0);
 }
 
 TEST_CASE("rational construction canonicalizes signs and powers of two") {
