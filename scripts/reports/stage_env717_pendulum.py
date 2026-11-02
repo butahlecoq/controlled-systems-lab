@@ -13,7 +13,7 @@ SOURCE = ROOT / "reports/algorithm-results/env717-pendulum-pilot-v1"
 CHECKER = ROOT / "scripts/reports/env717/check_pendulum.py"
 FILES = ("README.md", "capture.json", "figure-data.json", "index.html",
          "phase-plane.svg", "result.json", "SHA256SUMS")
-SOURCE_COMMIT = "f4d76c60f4003f50954174e96eafd8e514bd5441"
+UPSTREAM_SOURCE_COMMIT = "f4d76c60f4003f50954174e96eafd8e514bd5441"
 
 
 def digest(data: bytes) -> str:
@@ -50,7 +50,7 @@ def stage(source: Path, site: Path) -> str:
     if not site.is_dir() or source.name != "env717-pendulum-pilot-v1":
         raise ValueError("unknown Pendulum report source or Pages directory")
     files = verified_bundle(source)
-    identity = {"source_repository_commit": SOURCE_COMMIT,
+    identity = {"source_repository_commit": UPSTREAM_SOURCE_COMMIT,
                 "result_sha256": digest(files["result.json"]),
                 "stager_sha256": digest(Path(__file__).read_bytes()),
                 "source_files": {name: digest(data) for name, data in sorted(files.items())}}

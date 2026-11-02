@@ -103,7 +103,8 @@ Json trajectory_json(const Plan& plan) {
     State state = initial_state;
     Json rows = Json::array();
     rows.push_back({{"step", 0}, {"time_seconds", 0.0},
-        {"theta_rad", state[0]}, {"theta_dot_rad_s", state[1]}, {"action_torque_nm", 0.0}});
+        {"theta_rad", state[0]}, {"theta_dot_rad_s", state[1]},
+        {"action_torque_nm", actions[plan[0]]}});
     for (std::size_t stage = 0; stage < horizon; ++stage) {
         const double action = actions[plan[stage]];
         state = advance(state, action);

@@ -166,7 +166,7 @@ def verify(result: dict) -> dict:
     if len(optimum.get("trajectory", [])) != HORIZON + 1:
         raise ValueError("finite replay trajectory length differs")
     for actual, expected_row in zip(optimum["trajectory"], expected_replay["trajectory"]):
-        for key in ("time_seconds", "theta_rad", "theta_dot_rad_s"):
+        for key in ("time_seconds", "theta_rad", "theta_dot_rad_s", "action_torque_nm"):
             close(actual[key], expected_row[key], f"finite trajectory {key}")
 
     baseline = replay((0.0,) * HORIZON)
@@ -309,7 +309,7 @@ The native Release enumerator reports median `{timing['median_elapsed_ns'] / 1e6
 - Upstream environment notebook: {SOURCE_URL}/Pendulum.ipynb (blob `{UPSTREAM_NOTEBOOK_BLOB}`).
 - Adopted Gym source: {GYM_SOURCE_URL} (blob `{GYM_SOURCE_BLOB}`); registry: {GYM_REGISTRY_URL} (blob `{GYM_REGISTRY_BLOB}`).
 - Upstream Gym license at this commit: MIT. The upstream `optimal_control` repository has no declared license; this report re-expresses equations and copies no source implementation.
-- Build and run: `cmake -S benchmarks/reporting/env717/pendulum-build -B build/env717-pendulum -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTING=ON`, `cmake --build build/env717-pendulum --target csl_env717_pendulum --parallel 2`, then `python3 scripts/reports/env717/check_pendulum.py build/env717-pendulum/csl_env717_pendulum --output reports/algorithm-results/env717-pendulum-gym-pilot-v1`.
+- Build and run: `cmake -S benchmarks/reporting/env717/pendulum-build -B build/env717-pendulum -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTING=ON`, `cmake --build build/env717-pendulum --target csl_env717_pendulum --parallel 2`, then `python3 scripts/reports/env717/check_pendulum.py build/env717-pendulum/csl_env717_pendulum --output reports/algorithm-results/env717-pendulum-pilot-v1`.
 - The complete raw record, independently replayed optimum and checksums are saved with this report.
 '''
 

@@ -33,14 +33,18 @@ class PendulumPublicationTests(unittest.TestCase):
             report = site / route_id
             manifest = json.loads((report / "publication-manifest.json").read_text())
             self.assertEqual(manifest["report_id"], route_id)
-            self.assertEqual(manifest["source_repository_commit"], publication.SOURCE_COMMIT)
+            self.assertEqual(manifest["source_repository_commit"], publication.UPSTREAM_SOURCE_COMMIT)
             for name, expected in manifest["published_files"].items():
                 self.assertEqual(hashlib.sha256((report / name).read_bytes()).hexdigest(), expected)
             result = json.loads((report / "result.json").read_text())
             self.assertEqual(result["search"]["complete_plan_count"], 5**10)
             self.assertEqual(len(result["finite_catalogue_optimum"]["trajectory"]), 11)
+            self.assertEqual(
+                result["finite_catalogue_optimum"]["trajectory"][0]["action_torque_nm"],
+                result["finite_catalogue_optimum"]["selected_actions_torque_nm"][0])
             self.assertEqual(result["runtime_measurement"]["measured_repetitions"], 7)
             self.assertIn("only over this catalogue and horizon", (report / "index.html").read_text())
+            self.assertIn("env717-pendulum-pilot-v1", (report / "README.md").read_text())
             with zipfile.ZipFile(site / f"{route_id}.zip") as archive:
                 self.assertIsNone(archive.testzip())
                 self.assertIn(f"{route_id}/phase-plane.svg", archive.namelist())
