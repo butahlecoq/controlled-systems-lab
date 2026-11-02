@@ -29,6 +29,11 @@ def main() -> int:
     args = parser.parse_args()
     bundle = args.bundle.resolve(strict=True)
     manifest = json.loads((bundle / "manifest.json").read_text(encoding="utf-8"))
+    source_root = Path(__file__).resolve().parent
+    for name, expected_hash in manifest.get("measurement_source_sha256", {}).items():
+        source_file = source_root / name
+        if not source_file.is_file() or sha256(source_file) != expected_hash:
+            parser.error(f"measurement source hash mismatch: {name}")
     attempts = read_jsonl(bundle / "attempts.jsonl")
     processes = read_jsonl(bundle / "processes.jsonl")
     captured_checks = read_jsonl(bundle / "checks.jsonl")

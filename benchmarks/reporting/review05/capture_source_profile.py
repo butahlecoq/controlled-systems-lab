@@ -63,7 +63,7 @@ def main() -> int:
     input_copy.write_bytes(scenario.read_bytes())
     scenario_hash = sha256(input_copy)
     source_files = ("CMakeLists.txt", "horizon_ladder.cpp", "capture_source_profile.py",
-                    "check_horizon_ladder.py")
+                    "verify_source_profile.py", "check_horizon_ladder.py")
     source_root = Path(__file__).resolve().parent
     source_status = subprocess.check_output(
         ["git", "status", "--porcelain", "--untracked-files=no"], cwd=repository, text=True)

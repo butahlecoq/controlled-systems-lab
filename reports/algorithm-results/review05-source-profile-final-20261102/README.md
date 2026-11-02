@@ -90,9 +90,10 @@ symbols against the exact instrumented executable.
 
 ## Reproduction
 
-From the repository root, set `BUILD` to a disposable directory on a filesystem
-with adequate temporary space. The repository's normal CMake shim may require
-the installed CMake 3.31.6 binary.
+From the repository root, set `BUILD` to a disposable directory and `OUTPUT`
+to a new, empty directory on filesystems with adequate temporary space. The
+capture tool refuses to overwrite a populated output directory. The repository's
+normal CMake shim may require the installed CMake 3.31.6 binary.
 
 ```sh
 cmake -S benchmarks/reporting/review05 -B "$BUILD" \
@@ -105,12 +106,14 @@ cmake --build "$BUILD" --target csl_review05_horizon_ladder --parallel 4
 python3 benchmarks/reporting/review05/capture_source_profile.py \
   --driver "$BUILD/csl_review05_horizon_ladder" \
   --scenario benchmarks/reporting/review05/scenarios/horizon01-t08.json \
-  --output reports/algorithm-results/review05-source-profile-final-20261102 \
+  --output "$OUTPUT" \
   --process-groups 3 --repeats-per-process 1000
 python3 benchmarks/reporting/review05/verify_source_profile.py \
-  --bundle reports/algorithm-results/review05-source-profile-final-20261102
+  --bundle "$OUTPUT"
 ```
 
-To regenerate the flat profiles, run the recorded `profile-commands.txt` after
-substituting the driver path from `build-provenance.json`. `SHA256SUMS` covers
+The verifier checks the recorded hashes of all measurement source files against
+the checked-out sources. To regenerate the flat profiles, run the recorded
+`profile-commands.txt` with `DRIVER="$BUILD/csl_review05_horizon_ladder"`.
+`SHA256SUMS` covers
 the retained attempt records, raw outputs, raw profile files, and reports.
