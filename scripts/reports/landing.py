@@ -505,6 +505,10 @@ FAMILIES = {
         "This is an exact minimum only over the stated finite action catalogue and horizon; it "
         "does not claim continuous-action or full-horizon optimality, minimax control, or a "
         "performance comparison."),
+    "env717-earth-orbit": Family(
+        r"env717-earth-orbit-[0-9a-f]{20}", "synthesis",
+        "EarthOrbitalMotion finite-catalog control pilot",
+        "Replays the pinned five-state orbital equations over the original 20-stage, 2000-second horizon and exhaustively evaluates 729 open-loop plans with three piecewise-constant control blocks. The report plots radius against angular rate and independently replays every plan. Its 7000 km initial orbit and finite action catalog are authored adaptations; it does not establish continuous-action or feedback optimality. The Release timing is descriptive for this single finite catalog."),
     "env717-cartpole": Family(
         r"env717-cartpole-[0-9a-f]{20}", "synthesis",
         "CartPole finite open-loop control pilot",

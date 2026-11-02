@@ -1,0 +1,520 @@
+{
+  "coordinates": [
+    "radius_km",
+    "angular_rate_rad_s"
+  ],
+  "schema": "csl.env717-earth-orbit-figure/1",
+  "selected_plan_index": 0,
+  "selected_trajectory": [
+    {
+      "angle_rad": 0.0,
+      "angular_rate_rad_s": 0.0010780614796240577,
+      "control": [
+        -0.5,
+        -0.5
+      ],
+      "radial_velocity_km_s": 0.0,
+      "radius_km": 7000.0,
+      "stage": 0,
+      "time_seconds": 0.0
+    },
+    {
+      "angle_rad": 0.10779954578876426,
+      "angular_rate_rad_s": 0.001077935113011049,
+      "control": [
+        -0.5,
+        -0.5
+      ],
+      "radial_velocity_km_s": -0.0011057621737361927,
+      "radius_km": 6999.946457054252,
+      "stage": 1,
+      "time_seconds": 100.0
+    },
+    {
+      "angle_rad": 0.2155882632800494,
+      "angular_rate_rad_s": 0.0010778459524456215,
+      "control": [
+        -0.5,
+        -0.5
+      ],
+      "radial_velocity_km_s": -0.0024140756491726986,
+      "radius_km": 6999.772093268942,
+      "stage": 2,
+      "time_seconds": 200.0
+    },
+    {
+      "angle_rad": 0.3233701772323666,
+      "angular_rate_rad_s": 0.0010778000040414266,
+      "control": [
+        -0.5,
+        -0.5
+      ],
+      "radial_velocity_km_s": -0.003909761369004493,
+      "radius_km": 6999.4573937927225,
+      "stage": 3,
+      "time_seconds": 300.0
+    },
+    {
+      "angle_rad": 0.4311498888629166,
+      "angular_rate_rad_s": 0.0010778027804093072,
+      "control": [
+        -0.5,
+        -0.5
+      ],
+      "radial_velocity_km_s": -0.005575491685561986,
+      "radius_km": 6998.9844706720205,
+      "stage": 4,
+      "time_seconds": 400.0
+    },
+    {
+      "angle_rad": 0.5389325234612834,
+      "angular_rate_rad_s": 0.001077859240938223,
+      "control": [
+        -0.5,
+        -0.5
+      ],
+      "radial_velocity_km_s": -0.007391988368359787,
+      "radius_km": 6998.337267982206,
+      "stage": 5,
+      "time_seconds": 500.0
+    },
+    {
+      "angle_rad": 0.6467236723382014,
+      "angular_rate_rad_s": 0.001077973738279037,
+      "control": [
+        -0.5,
+        -0.5
+      ],
+      "radial_velocity_km_s": -0.00933824015218494,
+      "radius_km": 6997.501746161589,
+      "stage": 6,
+      "time_seconds": 600.0
+    },
+    {
+      "angle_rad": 0.7545293297475637,
+      "angular_rate_rad_s": 0.0010781499713781587,
+      "control": [
+        -0.5,
+        -0.5
+      ],
+      "radial_velocity_km_s": -0.01139173747608277,
+      "radius_km": 6996.466043711297,
+      "stage": 7,
+      "time_seconds": 700.0
+    },
+    {
+      "angle_rad": 0.8623558254515056,
+      "angular_rate_rad_s": 0.0010783909453490434,
+      "control": [
+        -0.5,
+        -0.5
+      ],
+      "radial_velocity_km_s": -0.013528722032193196,
+      "radius_km": 6995.220614660875,
+      "stage": 8,
+      "time_seconds": 800.0
+    },
+    {
+      "angle_rad": 0.9702097536246468,
+      "angular_rate_rad_s": 0.0010786989384198112,
+      "control": [
+        -0.5,
+        -0.5
+      ],
+      "radial_velocity_km_s": -0.015724448726009026,
+      "radius_km": 6993.758340438346,
+      "stage": 9,
+      "time_seconds": 900.0
+    },
+    {
+      "angle_rad": 1.0780978988152556,
+      "angular_rate_rad_s": 0.0010790754761539042,
+      "control": [
+        -0.5,
+        -0.5
+      ],
+      "radial_velocity_km_s": -0.017953457639399664,
+      "radius_km": 6992.074615024029,
+      "stage": 10,
+      "time_seconds": 1000.0
+    },
+    {
+      "angle_rad": 1.1860271596990482,
+      "angular_rate_rad_s": 0.0010795213131068134,
+      "control": [
+        -0.5,
+        -0.5
+      ],
+      "radial_velocity_km_s": -0.020189853578716287,
+      "radius_km": 6990.167402508606,
+      "stage": 11,
+      "time_seconds": 1100.0
+    },
+    {
+      "angle_rad": 1.2940044713761858,
+      "angular_rate_rad_s": 0.001080036422053579,
+      "control": [
+        -0.5,
+        -0.5
+      ],
+      "radial_velocity_km_s": -0.02240759077748084,
+      "radius_km": 6988.037266418313,
+      "stage": 12,
+      "time_seconds": 1200.0
+    },
+    {
+      "angle_rad": 1.4020367269742438,
+      "angular_rate_rad_s": 0.0010806199908971535,
+      "control": [
+        -0.5,
+        -0.5
+      ],
+      "radial_velocity_km_s": -0.02458076030282898,
+      "radius_km": 6985.687370414155,
+      "stage": 13,
+      "time_seconds": 1300.0
+    },
+    {
+      "angle_rad": 1.5101306993297685,
+      "angular_rate_rad_s": 0.0010812704273444112,
+      "control": [
+        -0.5,
+        -0.5
+      ],
+      "radial_velocity_km_s": -0.026683877684962297,
+      "radius_km": 6983.123450218489,
+      "stage": 14,
+      "time_seconds": 1400.0
+    },
+    {
+      "angle_rad": 1.6182929635285404,
+      "angular_rate_rad_s": 0.0010819853714122488,
+      "control": [
+        -0.5,
+        -0.5
+      ],
+      "radial_velocity_km_s": -0.028692168248567178,
+      "radius_km": 6980.353756872384,
+      "stage": 15,
+      "time_seconds": 1500.0
+    },
+    {
+      "angle_rad": 1.7265298210895093,
+      "angular_rate_rad_s": 0.0010827617157983028,
+      "control": [
+        -0.5,
+        -0.5
+      ],
+      "radial_velocity_km_s": -0.03058184757570631,
+      "radius_km": 6977.388971681587,
+      "stage": 16,
+      "time_seconds": 1600.0
+    },
+    {
+      "angle_rad": 1.8348472265792257,
+      "angular_rate_rad_s": 0.0010835956341169746,
+      "control": [
+        -0.5,
+        -0.5
+      ],
+      "radial_velocity_km_s": -0.03233039447354814,
+      "radius_km": 6974.242093468836,
+      "stage": 17,
+      "time_seconds": 1700.0
+    },
+    {
+      "angle_rad": 1.9432507174416234,
+      "angular_rate_rad_s": 0.0010844826169594155,
+      "control": [
+        -0.5,
+        -0.5
+      ],
+      "radial_velocity_km_s": -0.03391681376194783,
+      "radius_km": 6970.928299015801,
+      "stage": 18,
+      "time_seconds": 1800.0
+    },
+    {
+      "angle_rad": 2.0517453478213428,
+      "angular_rate_rad_s": 0.0010854175156841139,
+      "control": [
+        -0.5,
+        -0.5
+      ],
+      "radial_velocity_km_s": -0.03532188614095616,
+      "radius_km": 6967.464777849256,
+      "stage": 19,
+      "time_seconds": 1900.0
+    },
+    {
+      "angle_rad": 2.1603356271464143,
+      "angular_rate_rad_s": 0.0010863945937812061,
+      "control": [
+        -0.5,
+        -0.5
+      ],
+      "radial_velocity_km_s": -0.03652840235390102,
+      "radius_km": 6963.870542802296,
+      "stage": 20,
+      "time_seconds": 2000.0
+    }
+  ],
+  "target": {
+    "angular_rate_rad_s": 0.0011015823082230797,
+    "radius_km": 6900.0
+  },
+  "zero_control_trajectory": [
+    {
+      "angle_rad": 0.0,
+      "angular_rate_rad_s": 0.0010780614796240577,
+      "control": [
+        0.0,
+        0.0
+      ],
+      "radial_velocity_km_s": 0.0,
+      "radius_km": 7000.0,
+      "stage": 0,
+      "time_seconds": 0.0
+    },
+    {
+      "angle_rad": 0.1078061479624057,
+      "angular_rate_rad_s": 0.0010780614796240577,
+      "control": [
+        0.0,
+        0.0
+      ],
+      "radial_velocity_km_s": -1.734723475976807e-16,
+      "radius_km": 7000.0,
+      "stage": 1,
+      "time_seconds": 100.0
+    },
+    {
+      "angle_rad": 0.2156122959248111,
+      "angular_rate_rad_s": 0.0010780614796240577,
+      "control": [
+        0.0,
+        0.0
+      ],
+      "radial_velocity_km_s": -3.469446951953614e-16,
+      "radius_km": 7000.0,
+      "stage": 2,
+      "time_seconds": 200.0
+    },
+    {
+      "angle_rad": 0.3234184438872184,
+      "angular_rate_rad_s": 0.0010780614796240577,
+      "control": [
+        0.0,
+        0.0
+      ],
+      "radial_velocity_km_s": -5.204170427930421e-16,
+      "radius_km": 7000.0,
+      "stage": 3,
+      "time_seconds": 300.0
+    },
+    {
+      "angle_rad": 0.4312245918496266,
+      "angular_rate_rad_s": 0.0010780614796240577,
+      "control": [
+        0.0,
+        0.0
+      ],
+      "radial_velocity_km_s": -6.938893903907228e-16,
+      "radius_km": 7000.0,
+      "stage": 4,
+      "time_seconds": 400.0
+    },
+    {
+      "angle_rad": 0.5390307398120348,
+      "angular_rate_rad_s": 0.0010780614796240577,
+      "control": [
+        0.0,
+        0.0
+      ],
+      "radial_velocity_km_s": -8.673617379884035e-16,
+      "radius_km": 7000.0,
+      "stage": 5,
+      "time_seconds": 500.0
+    },
+    {
+      "angle_rad": 0.6468368877744429,
+      "angular_rate_rad_s": 0.0010780614796240577,
+      "control": [
+        0.0,
+        0.0
+      ],
+      "radial_velocity_km_s": -1.0408340855860843e-15,
+      "radius_km": 7000.0,
+      "stage": 6,
+      "time_seconds": 600.0
+    },
+    {
+      "angle_rad": 0.7546430357368511,
+      "angular_rate_rad_s": 0.0010780614796240577,
+      "control": [
+        0.0,
+        0.0
+      ],
+      "radial_velocity_km_s": -1.214306433183765e-15,
+      "radius_km": 7000.0,
+      "stage": 7,
+      "time_seconds": 700.0
+    },
+    {
+      "angle_rad": 0.8624491836992593,
+      "angular_rate_rad_s": 0.0010780614796240577,
+      "control": [
+        0.0,
+        0.0
+      ],
+      "radial_velocity_km_s": -1.3877787807814457e-15,
+      "radius_km": 7000.0,
+      "stage": 8,
+      "time_seconds": 800.0
+    },
+    {
+      "angle_rad": 0.9702553316616674,
+      "angular_rate_rad_s": 0.0010780614796240577,
+      "control": [
+        0.0,
+        0.0
+      ],
+      "radial_velocity_km_s": -1.5612511283791264e-15,
+      "radius_km": 7000.0,
+      "stage": 9,
+      "time_seconds": 900.0
+    },
+    {
+      "angle_rad": 1.0780614796240675,
+      "angular_rate_rad_s": 0.0010780614796240577,
+      "control": [
+        0.0,
+        0.0
+      ],
+      "radial_velocity_km_s": -1.734723475976807e-15,
+      "radius_km": 7000.0,
+      "stage": 10,
+      "time_seconds": 1000.0
+    },
+    {
+      "angle_rad": 1.1858676275864646,
+      "angular_rate_rad_s": 0.0010780614796240577,
+      "control": [
+        0.0,
+        0.0
+      ],
+      "radial_velocity_km_s": -1.908195823574488e-15,
+      "radius_km": 7000.0,
+      "stage": 11,
+      "time_seconds": 1100.0
+    },
+    {
+      "angle_rad": 1.2936737755488616,
+      "angular_rate_rad_s": 0.0010780614796240577,
+      "control": [
+        0.0,
+        0.0
+      ],
+      "radial_velocity_km_s": -2.0816681711721685e-15,
+      "radius_km": 7000.0,
+      "stage": 12,
+      "time_seconds": 1200.0
+    },
+    {
+      "angle_rad": 1.4014799235112587,
+      "angular_rate_rad_s": 0.0010780614796240577,
+      "control": [
+        0.0,
+        0.0
+      ],
+      "radial_velocity_km_s": -2.2551405187698492e-15,
+      "radius_km": 7000.0,
+      "stage": 13,
+      "time_seconds": 1300.0
+    },
+    {
+      "angle_rad": 1.5092860714736558,
+      "angular_rate_rad_s": 0.0010780614796240577,
+      "control": [
+        0.0,
+        0.0
+      ],
+      "radial_velocity_km_s": -2.42861286636753e-15,
+      "radius_km": 7000.0,
+      "stage": 14,
+      "time_seconds": 1400.0
+    },
+    {
+      "angle_rad": 1.6170922194360529,
+      "angular_rate_rad_s": 0.0010780614796240577,
+      "control": [
+        0.0,
+        0.0
+      ],
+      "radial_velocity_km_s": -2.6020852139652106e-15,
+      "radius_km": 7000.0,
+      "stage": 15,
+      "time_seconds": 1500.0
+    },
+    {
+      "angle_rad": 1.72489836739845,
+      "angular_rate_rad_s": 0.0010780614796240577,
+      "control": [
+        0.0,
+        0.0
+      ],
+      "radial_velocity_km_s": -2.7755575615628914e-15,
+      "radius_km": 7000.0,
+      "stage": 16,
+      "time_seconds": 1600.0
+    },
+    {
+      "angle_rad": 1.832704515360847,
+      "angular_rate_rad_s": 0.0010780614796240577,
+      "control": [
+        0.0,
+        0.0
+      ],
+      "radial_velocity_km_s": -2.949029909160572e-15,
+      "radius_km": 7000.0,
+      "stage": 17,
+      "time_seconds": 1700.0
+    },
+    {
+      "angle_rad": 1.940510663323244,
+      "angular_rate_rad_s": 0.0010780614796240577,
+      "control": [
+        0.0,
+        0.0
+      ],
+      "radial_velocity_km_s": -3.1225022567582528e-15,
+      "radius_km": 7000.0,
+      "stage": 18,
+      "time_seconds": 1800.0
+    },
+    {
+      "angle_rad": 2.048316811285651,
+      "angular_rate_rad_s": 0.0010780614796240577,
+      "control": [
+        0.0,
+        0.0
+      ],
+      "radial_velocity_km_s": -3.2959746043559335e-15,
+      "radius_km": 7000.0,
+      "stage": 19,
+      "time_seconds": 1900.0
+    },
+    {
+      "angle_rad": 2.15612295924807,
+      "angular_rate_rad_s": 0.0010780614796240577,
+      "control": [
+        0.0,
+        0.0
+      ],
+      "radial_velocity_km_s": -3.469446951953614e-15,
+      "radius_km": 7000.0,
+      "stage": 20,
+      "time_seconds": 2000.0
+    }
+  ]
+}

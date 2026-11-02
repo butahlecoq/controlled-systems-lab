@@ -167,6 +167,15 @@
       "follow_up_issue": 717
     },
     {
+      "source": "scripts/reports/env717/check_earth_orbit.py",
+      "signal_count": 6,
+      "asset_name_literals": [
+        "orbit-phase-plane.svg"
+      ],
+      "disposition": "deferred-family-specific-migration",
+      "follow_up_issue": 717
+    },
+    {
       "source": "scripts/reports/env717/check_max_coordinate.py",
       "signal_count": 3,
       "asset_name_literals": [
@@ -1063,6 +1072,14 @@
       "signal_count": 3,
       "asset_name_literals": [
         "projections.svg"
+      ],
+      "disposition": "publication-validation-or-frozen-route"
+    },
+    {
+      "source": "scripts/reports/stage_env717_earth_orbit.py",
+      "signal_count": 2,
+      "asset_name_literals": [
+        "orbit-phase-plane.svg"
       ],
       "disposition": "publication-validation-or-frozen-route"
     },
@@ -2008,6 +2025,16 @@
         "projections.svg"
       ],
       "index_sha256": "22883509fc6b4c139ad311638ba5a4468b2eddbe1f63c8b71c285cd1270e9ff0",
+      "disposition": "deferred: original frozen route-level readability review remains; companion availability is listed separately",
+      "follow_up_issue": 717
+    },
+    {
+      "route": "env717-earth-orbit-pilot-v1",
+      "source_bundle": "env717-earth-orbit-pilot-v1",
+      "assets": [
+        "orbit-phase-plane.svg"
+      ],
+      "index_sha256": "9f947be38478ccf9afcf322ac5d286d646480907ac2f5b99d7d69712c720896d",
       "disposition": "deferred: original frozen route-level readability review remains; companion availability is listed separately",
       "follow_up_issue": 717
     },

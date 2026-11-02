@@ -1,0 +1,50 @@
+{
+  "build": {
+    "architecture": "x86_64",
+    "compiler_id": "GNU",
+    "compiler_version": "16.2.1",
+    "configuration": "Release",
+    "library_source_commit": "085d9d66c3a4c0e1bad5a3014273f2d7d069924d"
+  },
+  "captured_at_utc": "2026-11-02T09:48:05.610698+00:00",
+  "host": {
+    "cpu_model": "AMD Ryzen 5 3550H with Radeon Vega Mobile Gfx",
+    "logical_cpu_count": 8,
+    "machine": "x86_64",
+    "os": "Linux-7.2.8-9-omarchy-x86_64-with-glibc2.44",
+    "python": "3.14.8 (main, Oct  2 2026, 10:23:31) [GCC 16.2.1 20260810]"
+  },
+  "limiter_profile": {
+    "available": true,
+    "cpu_utilization_percent": 99.83782645217087,
+    "measured_searches": 1,
+    "run_type": "separate, unreported profiling probe",
+    "system_cpu_seconds": 0.004000999999999998,
+    "user_cpu_seconds": 0.182025,
+    "wall_seconds": 0.18632817501202226,
+    "warmups": 2
+  },
+  "measurement": {
+    "actual_workers": 1,
+    "failed_plans": 0,
+    "median_ms": 56.700655,
+    "range_ms": [
+      56.646319,
+      56.948523
+    ],
+    "raw_repetitions_ns": [
+      56646319,
+      56712110,
+      56948523,
+      56818828,
+      56692064,
+      56700655,
+      56677608
+    ],
+    "repetitions": 7,
+    "requested_workers": 1,
+    "timed_region": "complete 729-plan decode, RK4 propagation and scoring; excludes JSON export, independent replay and rendering",
+    "warmups": 2
+  },
+  "schema": "csl.env717-earth-orbit-capture/1"
+}
