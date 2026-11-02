@@ -5,17 +5,21 @@ import sys
 
 
 ROOT = Path(__file__).resolve().parents[2]
-MATH_ROOTS = (
-    "include/csl/geometry",
-    "include/csl/model",
-    "include/csl/reachability",
-    "include/csl/simulation",
-    "include/csl/synthesis",
-    "src/geometry",
-    "src/model",
-    "src/reachability",
-    "src/simulation",
-    "src/synthesis",
+MATH_MODULES = (
+    "controllers",
+    "geometry",
+    "model",
+    "optimization",
+    "problem",
+    "reachability",
+    "sets",
+    "simulation",
+    "synthesis",
+)
+MATH_ROOTS = tuple(
+    root
+    for module in MATH_MODULES
+    for root in (f"include/csl/{module}", f"src/{module}")
 )
 PRESENTATION_INCLUDE = re.compile(
     r"#\s*include\s*[<\"]csl/(?:visualization/|artifacts/"
