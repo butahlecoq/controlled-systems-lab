@@ -14,7 +14,7 @@
   "scope": "exact finite-horizon actual cost of one fixed nominal plan plus one fixed full-state tube feedback law; no timing or optimality claim",
   "source_commit": "da5927b3166a0332cf732c4cded88444d3e39c3c",
   "source_files": {
-    ".github/workflows/algorithm-reports.yml": "c749f8cd80424f3167a6d3034d7d9710b81734bf6dd305ba08349a85debd5c6a",
+    ".github/workflows/algorithm-reports.yml": "fe15f485c84d29fdf3fdce6ca7fbeebdb21841d3158eb4f7a0ed4b9458bcf61d",
     "benchmarks/scenarios/mpc06-nilpotent-tube-v1.json": "a130cf880dd600ac10690a950463b930f9745c4fcf1ab70155149e7ec699f55d",
     "benchmarks/scenarios/mpc06-tube-objective-v1.json": "ddf94484acddc19ae8788bd018f0eaab5a35d38c5bd74d04982c8ccb5cd869a3",
     "reports/algorithm-results/mpc06-nilpotent-tube-pilot-v1/result.json": "398d15d20b6d0be15693dd52cdc14e1a537c9d35f44f7e071b3aec7eefd38900",

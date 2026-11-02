@@ -36,6 +36,13 @@ jobs:
           git fetch --no-tags origin refs/pull/849/head
       - name: Install report-only validation and plotting tools
         run: python -m pip install --cache-dir build/report-pip-cache -r scripts/reports/requirements.txt
+      - name: Rebuild and independently check the MPC-06 tube objective report
+        if: needs.route.outputs.native == 'true' && hashFiles('reports/algorithm-results/mpc06-tube-objective-v1/result.json') != ''
+        run: |
+          python scripts/reports/mpc06/test_tube_objective.py
+          python scripts/reports/mpc06/build_tube_objective.py
+          python scripts/reports/mpc06/check_tube_objective.py
+          (cd reports/algorithm-results/mpc06-tube-objective-v1 && sha256sum -c SHA256SUMS)
       - name: Validate literal records, safe export and real pinned plotting pipeline
         env:
           MPLCONFIGDIR: ${{ github.workspace }}/build/report-mpl-config
