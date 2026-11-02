@@ -161,7 +161,9 @@ TEST_CASE("B04-C exact family is admitted by the compiled verifier against a pre
         {identity,RegisteredCompletenessEvidence{{"csl.verifier.strategy-a.b04-c-exact-dyadic"},"1",
             "B04-C-exact-dyadic-complete-family-v1"}},Assurance::numerical};
     CompleteFamilyProposal proposal{identity,std::move(family)};
-    auto verifier=registry::detail::make_b04_c_exact_family_verifier();
+    auto verifier=registry::detail::find_compiled_verifier(
+        {"csl.verifier.strategy-a.b04-c-exact-dyadic"},"1");
+    REQUIRE(verifier);
     CHECK(verifier->verify(request,proposal).empty());
 
     auto tampered=proposal;

@@ -221,7 +221,7 @@ bool append_feasible_rows(Payload& family, const std::array<br::AffineState, br:
     }
     Rational upper_state, lower_state;
     for (std::size_t stage = 0; stage <= br::horizon; ++stage) {
-        for (const auto [coordinate, low, high] :
+        for (const auto& [coordinate, low, high] :
                 {std::tuple<std::size_t, std::int64_t, std::int64_t>{0,1176,1224},
                  {2,432,468}}) {
             br::LinearRow upper, lower;
