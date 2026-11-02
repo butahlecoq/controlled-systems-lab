@@ -59,7 +59,7 @@ class CartPolePublicationTests(unittest.TestCase):
         self.assertTrue(profile["diagnostic_only"])
         page = (destination / "index.html").read_text()
         self.assertIn("not a learned policy", page)
-        self.assertIn("not the original 500-step task", page)
+        self.assertIn("a solution of the original 500-step RL task", page)
         self.assertIn("Cart position–velocity plane", page)
         self.assertIn("Pole angle–angular velocity plane", page)
         self.assertIn("Full report collection median", page)
