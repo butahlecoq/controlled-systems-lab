@@ -1,11 +1,34 @@
 {
-  "source_commit": "786a30f52e62e3ad4e276ea4a45ce66c21d5b09c",
-  "driver_sha256": "07dfd0c374f174b7f1411d6ee4753cf7c00b7495f4d827331a8fa94d4272eec1",
+  "source_commit": "2dbe6a1c0e159fa3cfb39e5e1d1d104d32e8963f",
+  "driver_sha256": "924e4fec59b887ffe80edd5def4c87d8e38bc73c0277a7f525962b5f2c4dc142",
   "compiler": {
     "architecture": "x86_64",
     "build_type": "Release",
     "compiler": "GNU",
     "compiler_version": "16.2.1"
   },
-  "capture_kind": "finite-catalogue equation replay; upstream step() defect disclosed; no performance claim"
+  "capture_kind": "finite-catalogue equation replay and descriptive runtime measurement; upstream step() defect disclosed; no comparative claim",
+  "performance": {
+    "maximum_elapsed_ns": 1286557,
+    "measured_repetitions": 9,
+    "median_elapsed_ns": 1270423,
+    "metric": "finite_catalogue_enumeration_elapsed",
+    "minimum_elapsed_ns": 1267491,
+    "raw_elapsed_ns": [
+      1283554,
+      1267700,
+      1270423,
+      1286557,
+      1267491,
+      1271053,
+      1284323,
+      1270145,
+      1267630
+    ],
+    "scope": "steady_clock interval around allocation, propagation, and objective evaluation for all 243 plans; excludes JSON construction and serialization",
+    "timing_clock": "std::chrono::steady_clock",
+    "unit": "ns",
+    "warmup_repetitions": 5,
+    "worker_threads": 1
+  }
 }

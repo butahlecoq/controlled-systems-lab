@@ -4,7 +4,7 @@
   "source_repository_commit": "f4d76c60f4003f50954174e96eafd8e514bd5441",
   "source_file_blob": "4380ec05c9d100d8b4c1cf0b931a111bc5d419db",
   "source_notebook_blob": "c1295c110edf68003f93991e531b072af13e5c8f",
-  "driver_sha256": "07dfd0c374f174b7f1411d6ee4753cf7c00b7495f4d827331a8fa94d4272eec1",
+  "driver_sha256": "924e4fec59b887ffe80edd5def4c87d8e38bc73c0277a7f525962b5f2c4dc142",
   "compiler": {
     "architecture": "x86_64",
     "build_type": "Release",
@@ -12,6 +12,9 @@
     "compiler_version": "16.2.1"
   },
   "platform": "Linux-7.2.8-9-omarchy-x86_64-with-glibc2.44",
+  "machine": "x86_64",
+  "processor": "",
+  "logical_cpu_count": 8,
   "python": "3.14.8",
   "arithmetic": "IEEE-754 binary64"
 }
