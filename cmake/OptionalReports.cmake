@@ -690,6 +690,7 @@ set_property(DIRECTORY APPEND PROPERTY CMAKE_CONFIGURE_DEPENDS
     ${CMAKE_CURRENT_SOURCE_DIR}/benchmarks/reporting/env717/multipoint_cost_game.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/benchmarks/reporting/env717/broken_triangle.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/benchmarks/reporting/env717/pendulum_terminal.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/benchmarks/reporting/env717/earth_orbit.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/benchmarks/scenarios/env717-sphere-game-pilot-v1.json
     ${ENV717_LIBRARY_INPUTS})
 file(SHA256 ${CMAKE_CURRENT_SOURCE_DIR}/benchmarks/reporting/env717/simple_control.cpp
@@ -724,6 +725,8 @@ file(SHA256 ${CMAKE_CURRENT_SOURCE_DIR}/benchmarks/reporting/env717/broken_trian
     ENV717_BROKEN_DRIVER_SHA256)
 file(SHA256 ${CMAKE_CURRENT_SOURCE_DIR}/benchmarks/reporting/env717/pendulum_terminal.cpp
     ENV717_PENDULUM_DRIVER_SHA256)
+file(SHA256 ${CMAKE_CURRENT_SOURCE_DIR}/benchmarks/reporting/env717/earth_orbit.cpp
+    ENV717_EARTH_ORBIT_DRIVER_SHA256)
 file(SHA256 ${CMAKE_CURRENT_SOURCE_DIR}/benchmarks/scenarios/env717-sphere-game-pilot-v1.json
     ENV717_SPHERE_GAME_SCENARIO_SHA256)
 execute_process(COMMAND git status --porcelain -- src include
@@ -757,6 +760,7 @@ add_executable(csl_env717_homicidal_chauffeur benchmarks/reporting/env717/homici
 add_executable(csl_env717_multipoint_cost_game benchmarks/reporting/env717/multipoint_cost_game.cpp)
 add_executable(csl_env717_broken_triangle benchmarks/reporting/env717/broken_triangle.cpp)
 add_executable(csl_env717_pendulum_terminal benchmarks/reporting/env717/pendulum_terminal.cpp)
+add_executable(csl_env717_earth_orbit benchmarks/reporting/env717/earth_orbit.cpp)
 target_link_libraries(csl_env717_simple_control PRIVATE CSL::finite_action_minimax)
 target_link_libraries(csl_env717_two_points PRIVATE CSL::finite_action_minimax CSL::finite_feedback)
 target_link_libraries(csl_env717_unequal_game PRIVATE CSL::finite_action_minimax)
@@ -790,6 +794,7 @@ target_include_directories(csl_env717_homicidal_chauffeur SYSTEM PRIVATE ${csl_j
 target_include_directories(csl_env717_multipoint_cost_game SYSTEM PRIVATE ${csl_json_SOURCE_DIR}/include)
 target_include_directories(csl_env717_broken_triangle SYSTEM PRIVATE ${csl_json_SOURCE_DIR}/include)
 target_include_directories(csl_env717_pendulum_terminal SYSTEM PRIVATE ${csl_json_SOURCE_DIR}/include)
+target_include_directories(csl_env717_earth_orbit SYSTEM PRIVATE ${csl_json_SOURCE_DIR}/include)
 target_compile_features(csl_env717_simple_control PRIVATE cxx_std_20)
 target_compile_features(csl_env717_two_points PRIVATE cxx_std_20)
 target_compile_features(csl_env717_unequal_game PRIVATE cxx_std_20)
@@ -804,6 +809,29 @@ target_compile_features(csl_env717_homicidal_chauffeur PRIVATE cxx_std_20)
 target_compile_features(csl_env717_multipoint_cost_game PRIVATE cxx_std_20)
 target_compile_features(csl_env717_broken_triangle PRIVATE cxx_std_20)
 target_compile_features(csl_env717_pendulum_terminal PRIVATE cxx_std_20)
+target_compile_features(csl_env717_earth_orbit PRIVATE cxx_std_20)
+target_compile_definitions(csl_env717_earth_orbit PRIVATE
+    $<$<CONFIG:Release>:NDEBUG>
+    CSL_ENV717_DRIVER_SHA256="${ENV717_EARTH_ORBIT_DRIVER_SHA256}"
+    CSL_ENV717_SOURCE_COMMIT="${ENV717_SOURCE_COMMIT}"
+    CSL_ENV717_COMPILER_ID="${CMAKE_CXX_COMPILER_ID}"
+    CSL_ENV717_COMPILER_VERSION="${CMAKE_CXX_COMPILER_VERSION}"
+    CSL_ENV717_BUILD_TYPE="$<CONFIG>"
+    CSL_ENV717_ARCHITECTURE="${CMAKE_SYSTEM_PROCESSOR}"
+    CSL_ENV717_ALGORITHM_SOURCE_SHA256="${ENV717_ALGORITHM_SOURCE_SHA256}")
+if(MSVC)
+    target_compile_options(csl_env717_earth_orbit PRIVATE /W4 /WX /permissive-)
+else()
+    target_compile_options(csl_env717_earth_orbit PRIVATE -Wall -Wextra -Wpedantic -Werror)
+endif()
+if(BUILD_TESTING)
+    find_package(Python3 3.11 REQUIRED COMPONENTS Interpreter)
+    add_test(NAME env717_earth_orbit_smoke
+        COMMAND Python3::Interpreter
+            ${CMAKE_CURRENT_SOURCE_DIR}/scripts/reports/env717/check_earth_orbit.py
+            $<TARGET_FILE:csl_env717_earth_orbit> --repetitions 1)
+    set_tests_properties(env717_earth_orbit_smoke PROPERTIES LABELS reporting)
+endif()
 target_compile_definitions(csl_env717_simple_control PRIVATE
     $<$<CONFIG:Release>:NDEBUG>
     CSL_ENV717_DRIVER_SHA256="${ENV717_DRIVER_SHA256}"
