@@ -64,3 +64,14 @@ TEST_CASE("rational conversion rejects nonfinite binary64 inputs") {
     Rational value;
     CHECK_FALSE(from_binary64(std::numeric_limits<double>::infinity(), value, budget));
 }
+
+TEST_CASE("rational parser handles large exact witnesses and rejects malformed input") {
+    Budget budget;
+    Rational parsed, expected;
+    REQUIRE(parse("-22372732538527557968995655584885504649887873368947295001505132908576311772305610948689388831835602767915142538822180404220637/65742268634831342597332464158599530180018681724968804273528997972883832204336594969293002728400911316448736602407117160185856",
+        parsed, budget));
+    CHECK(parsed.numerator.negative);
+    CHECK_FALSE(parse("1//2", expected, budget));
+    CHECK_FALSE(parse("1/0", expected, budget));
+    CHECK_FALSE(parse("1/-3", expected, budget));
+}

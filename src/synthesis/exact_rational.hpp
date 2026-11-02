@@ -10,6 +10,7 @@
 #include <cstddef>
 #include <cstdint>
 #include <limits>
+#include <string_view>
 
 namespace csl::synthesis::detail::exact_rational {
 
@@ -113,6 +114,48 @@ inline bool divide_exact(Integer& value, const Integer& divisor,
     quotient.negative = negative;
     value = std::move(quotient);
     return true;
+}
+
+inline bool normalize(Rational& value, Budget& budget);
+
+inline bool parse_integer(std::string_view text, Integer& result, Budget& budget) {
+    using namespace exact_h::exact_detail;
+    if (text.empty())
+        return false;
+    const bool negative = text.front() == '-';
+    if (negative)
+        text.remove_prefix(1);
+    if (text.empty())
+        return false;
+    result = {};
+    for (const char digit : text) {
+        if (digit < '0' || digit > '9' || !charge(budget))
+            return false;
+        Integer scaled;
+        if (!exact_h::exact_detail::multiply(result, from_u64(10),
+                budget.max_integer_bits, scaled) ||
+            !add(scaled, from_u64(static_cast<std::uint64_t>(digit - '0')),
+                 budget.max_integer_bits))
+            return false;
+        result = std::move(scaled);
+    }
+    result.negative = negative && !is_zero(result);
+    return observe(budget, result);
+}
+
+inline bool parse(std::string_view text, Rational& result, Budget& budget) {
+    const auto slash = text.find('/');
+    if (slash == std::string_view::npos ||
+        text.find('/', slash + 1) != std::string_view::npos)
+        return false;
+    if (!charge(budget) ||
+        !parse_integer(text.substr(0, slash), result.numerator, budget) ||
+        !parse_integer(text.substr(slash + 1), result.denominator, budget))
+        return false;
+    if (result.denominator.negative)
+        return false;
+    result.binary_exponent = 0;
+    return normalize(result, budget);
 }
 
 inline bool normalize(Rational& value, Budget& budget) {
