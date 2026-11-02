@@ -17,6 +17,16 @@ from typing import Any
 
 STRATEGIES = ("csl.synthesis.reach-back", "csl.synthesis.strategy-b")
 MANIFEST_SCHEMA = "csl.mpc01-strategy-ab-input/1"
+EVENT_STATUS_BY_TERMINATION = {
+    "completed": "passed",
+    "refused": "refused",
+    "unsupported": "unsupported",
+    "failed": "failed",
+    "timed_out": "timed_out",
+    "resource_limited": "resource_limited",
+    "cancelled": "cancelled",
+    "incomplete": "incomplete",
+}
 
 
 def canonical(value: Any) -> str:
@@ -115,7 +125,8 @@ def build_record(events_path: Path, scenario_path: Path, environment_path: Path,
         raise ValueError("source must have been clean for a canonical comparison record")
     if set(row.get("strategy") for row in attempts) != set(STRATEGIES):
         raise ValueError("capture must include both registered Strategy A and Strategy B")
-    if any(row.get("schema") != header["schema"] or row.get("status") not in {"passed", "incomplete", "failed"}
+    if any(row.get("schema") != header["schema"] or
+           row.get("status") != EVENT_STATUS_BY_TERMINATION.get(row.get("termination"))
            for row in attempts):
         raise ValueError("trial rows do not match the declared event schema/status vocabulary")
 
@@ -230,16 +241,8 @@ def build_record(events_path: Path, scenario_path: Path, environment_path: Path,
     for arm_index, (strategy, config_text, config_id) in enumerate(configs):
         for repetition in repetitions:
             row = paired[repetition][strategy]
-            reported_status = {
-                "completed": "completed",
-                "refused": "refused",
-                "unsupported": "unsupported",
-                "timed_out": "timed_out",
-                "resource_limited": "resource_limited",
-                "cancelled": "cancelled",
-                "failed": "failed",
-                "incomplete": "incomplete",
-            }.get(row["termination"], "failed" if row["status"] == "failed" else "incomplete")
+            reported_status = ("completed" if row["termination"] == "completed"
+                               else row["termination"])
             run_id = f"mpc01-strategy-ab-{header['profile']}-arm-{arm_index}-r-{repetition:02d}"
             result = {
                 "schema": "csl.mpc01-strategy-ab-attempt/1",
