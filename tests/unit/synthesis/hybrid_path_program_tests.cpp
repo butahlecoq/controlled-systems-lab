@@ -2229,6 +2229,11 @@ TEST_CASE("exact singleton hybrid verifier independently retains every tied edge
             CHECK(report_operation.stage==program_operation.stage);
             CHECK(report_operation.mode==program_operation.mode);
             CHECK(report_operation.edge==program_operation.edge);
+            CHECK(report_operation.joint_variables==program_operation.joint_variables);
+            CHECK(report_operation.rows_added==program_operation.rows_added);
+            CHECK(report_operation.cumulative_rows==program_operation.cumulative_rows);
+            CHECK(report_operation.cumulative_matrix_elements==
+                program_operation.cumulative_matrix_elements);
             CHECK(report_operation.implementation_id==
                 "csl.model.hybrid.joint-h-composer");
             CHECK(report_operation.implementation_version=="1");
