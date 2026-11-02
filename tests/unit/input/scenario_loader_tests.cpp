@@ -6,12 +6,15 @@
 #include <cmath>
 #include <algorithm>
 #include <tuple>
+#include <filesystem>
+#include <fstream>
 using namespace csl;
 using namespace csl::input;
 namespace {
 LoadResult load(std::string_view text, const LoadOptions& options = {}) {
     return load_scenario(std::as_bytes(std::span(text.data(),text.size())),options);
 }
+
 template<class T,class... R> T accepted(std::variant<R...> value) {
     REQUIRE(std::holds_alternative<T>(value));
     return std::get<T>(std::move(value));
@@ -24,6 +27,60 @@ std::string replace(std::string input,std::string_view from,std::string_view to)
     const auto at=input.find(from);REQUIRE(at!=std::string::npos);
     input.replace(at,from.size(),to);return input;
 }
+}
+TEST_CASE("external matrices are bounded local files with verified raw hashes") {
+    const auto dir=std::filesystem::temp_directory_path()/"csl-external-matrix-tests";
+    std::filesystem::remove_all(dir);std::filesystem::create_directories(dir);
+    const auto cleanup=[&]{std::filesystem::remove_all(dir);};
+    const auto scenario_dir=dir/"scenarios";std::filesystem::create_directories(scenario_dir);
+    const auto scenario_path=scenario_dir/"scenario.json", data_path=scenario_dir/"matrix.json";
+    const std::string raw="[2]";
+    {std::ofstream out(data_path,std::ios::binary);out<<raw;}
+    const auto bytes=std::as_bytes(std::span(raw.data(),raw.size()));
+    const auto content=problem::snapshot_content(bytes);
+    REQUIRE(std::holds_alternative<problem::ResolvedContent>(content));
+    const auto digest=problem::hex(std::get<problem::ResolvedContent>(content).digest());
+    auto authored=replace(std::string(minimal),"\"A\":[[1]]","\"A\":{\"kind\":\"external\",\"uri\":\"matrix.json\",\"sha256\":\""+digest+"\",\"rows\":1,\"cols\":1,\"layout\":\"row_major\"}");
+    {std::ofstream out(scenario_path);out<<authored;}
+    auto loaded=accepted<LoadedScenario>(load_scenario_file(scenario_path));
+    CHECK(loaded.problem().identity()!=accepted<LoadedScenario>(load(minimal)).problem().identity());
+    REQUIRE(loaded.source()->external_data.size()==1);
+    CHECK(loaded.source()->external_data[0].uri=="matrix.json");
+    CHECK(loaded.source()->external_data[0].digest==std::get<problem::ResolvedContent>(content).digest());
+    CHECK(loaded.source()->external_data[0].byte_count==raw.size());
+    const auto alias_path=scenario_dir/"matrix-copy.json";{std::ofstream out(alias_path,std::ios::binary);out<<raw;}
+    auto alias_text=replace(authored,"matrix.json","matrix-copy.json");alias_text.pop_back();alias_text+=",\"run\":{\"seed\":42}}";
+    {std::ofstream out(scenario_path);out<<alias_text;}
+    const auto alias=accepted<LoadedScenario>(load_scenario_file(scenario_path));
+    CHECK(alias.problem().identity()==loaded.problem().identity());
+    CHECK(alias.source()->content.digest()!=loaded.source()->content.digest());
+
+    auto mismatch=replace(authored,digest,std::string(64,'0'));
+    {std::ofstream out(scenario_path);out<<mismatch;}
+    auto rejected=accepted<InputFailure>(load_scenario_file(scenario_path));
+    CHECK(rejected.path=="/model/A/sha256");
+    auto escape=replace(authored,"matrix.json","../matrix.json");
+    {std::ofstream out(scenario_path);out<<escape;}
+    rejected=accepted<InputFailure>(load_scenario_file(scenario_path));CHECK(rejected.path=="/model/A/uri");
+    const auto outside=dir/"outside.json";{std::ofstream out(outside);out<<raw;}
+    std::error_code symlink_error;std::filesystem::create_symlink(outside,scenario_dir/"escape.json",symlink_error);
+    if(!symlink_error) {
+        auto symlink=replace(authored,"matrix.json","escape.json");{std::ofstream out(scenario_path);out<<symlink;}
+        rejected=accepted<InputFailure>(load_scenario_file(scenario_path));CHECK(rejected.path=="/model/A/uri");
+    }
+    auto absolute=replace(authored,"matrix.json",data_path.string());
+    {std::ofstream out(scenario_path);out<<absolute;}
+    rejected=accepted<InputFailure>(load_scenario_file(scenario_path));CHECK(rejected.path=="/model/A/uri");
+    auto in_memory=accepted<UnsupportedInput>(load(authored));CHECK(in_memory.path=="/model/A");
+    auto network=replace(authored,"matrix.json","https://example.invalid/matrix.json");
+    {std::ofstream out(scenario_path);out<<network;}
+    auto unsupported=accepted<UnsupportedInput>(load_scenario_file(scenario_path));CHECK(unsupported.path=="/model/A/uri");
+    std::string big="["+std::string(1000,' ')+"2]";
+    {std::ofstream out(data_path,std::ios::binary);out<<big;}
+    {std::ofstream out(scenario_path);out<<authored;}
+    LoadOptions options;options.limits.input_bytes=authored.size()+1;
+    rejected=accepted<InputFailure>(load_scenario_file(scenario_path,options));CHECK(rejected.category==InputCategory::limit);
+    cleanup();
 }
 TEST_CASE("explicit nominal profile equals omission while malformed values never fall back") {
     auto omitted=accepted<LoadedScenario>(load(minimal));

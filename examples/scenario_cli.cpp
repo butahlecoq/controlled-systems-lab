@@ -435,6 +435,8 @@ int persist(const input::LoadedScenario& scenario, const problem::ResolvedProble
     scenario_source.defaults.reserve(defaults->size());
     for (const auto& value : *defaults)
         scenario_source.defaults.push_back({value.path, value.meaning, value.authored});
+    for (const auto& value : source->external_data)
+        scenario_source.external_data.push_back({value.uri, value.digest, value.byte_count});
 
     std::vector<std::string> encoded(execution.methods.size());
     for (std::size_t index = 0; index < execution.methods.size(); ++index) {

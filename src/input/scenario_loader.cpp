@@ -1,4 +1,6 @@
 #include "scenario_json.hpp"
+#include <fstream>
+#include <array>
 #include <csl/sets/data.hpp>
 #include <algorithm>
 #include <chrono>
@@ -43,10 +45,12 @@ std::string kind(const Json& value,const std::string& path,const char* category,
 }
 class Reader {
     const LoadOptions& options_;
-    std::size_t coefficients_{},expanded_{},objects_{};
+    const std::filesystem::path& location_;
+    std::size_t coefficients_{},expanded_{},objects_{},external_bytes_{};
 public:
     std::vector<DefaultRecord> defaults;
-    explicit Reader(const LoadOptions& o):options_(o) {}
+    std::vector<SourceProvenance::ExternalData> external_data;
+    explicit Reader(const LoadOptions& o,const std::filesystem::path& location):options_(o),location_(location) {}
     std::size_t product(std::size_t a,std::size_t b,const std::string& path) const {
         if(b && a>std::numeric_limits<std::size_t>::max()/b) fail(path,"extent product overflow","representable extent",InputCategory::limit);
         return a*b;
@@ -82,13 +86,41 @@ public:
         if(v.is_object()) {
             if(v.contains("kind") && v["kind"]=="external") {
                 object(v,path,{"kind","uri","sha256","rows","cols","layout"});
-                (void)string(member(v,"uri",path),child(path,"uri"));
+                const auto uri=string(member(v,"uri",path),child(path,"uri"));
                 const auto hash=string(member(v,"sha256",path),child(path,"sha256"));
                 if(hash.size()!=64 || !std::all_of(hash.begin(),hash.end(),[](char c){return (c>='0' && c<='9') || (c>='a' && c<='f');}))
                     fail(child(path,"sha256"),"invalid digest spelling","64 lowercase hexadecimal characters");
-                (void)count(member(v,"rows",path),child(path,"rows"));(void)count(member(v,"cols",path),child(path,"cols"));
+                rows=dimension(count(member(v,"rows",path),child(path,"rows")),child(path,"rows"));
+                cols=dimension(count(member(v,"cols",path),child(path,"cols")),child(path,"cols"));
+                const auto entries=product(rows,cols,path);
+                if(entries>options_.limits.matrix_coefficients-coefficients_) fail(path,"matrix coefficient quota exceeded","bounded input coefficients",InputCategory::limit);
                 if(string(member(v,"layout",path),child(path,"layout"))!="row_major") fail(child(path,"layout"),"unknown layout","row_major");
-                throw UnsupportedInput{"external matrix",path,"external descriptor","inline matrix data; external matrix IO is not supported in v1"};
+                if(location_.empty()) throw UnsupportedInput{"external matrix",path,"in-memory descriptor","load_scenario_file with a relative local URI"};
+                if(uri.find(':')!=std::string::npos) throw UnsupportedInput{"network external matrix",child(path,"uri"),uri,"relative local file path; network IO is unsupported"};
+                if(uri.find('\\')!=std::string::npos) fail(child(path,"uri"),uri,"relative slash-separated local file path");
+                const std::filesystem::path relative(uri);
+                if(relative.empty() || relative.is_absolute() || relative.has_root_name() || relative.has_root_directory()) fail(child(path,"uri"),uri,"relative local file path within the scenario directory");
+                for(const auto& part:relative) if(part=="..") fail(child(path,"uri"),uri,"path without traversal");
+                std::error_code ec;const auto scenario_directory=location_.parent_path().empty()?std::filesystem::path{"."}:location_.parent_path();
+                const auto base=std::filesystem::weakly_canonical(scenario_directory,ec);
+                if(ec) fail(child(path,"uri"),"unresolvable scenario directory","local readable directory",InputCategory::io);
+                const auto target=std::filesystem::canonical(base/relative,ec);
+                if(ec) fail(child(path,"uri"),"unreadable external file","readable local file",InputCategory::io);
+                auto bi=base.begin(),ti=target.begin();for(;bi!=base.end() && ti!=target.end() && *bi==*ti;++bi,++ti){}
+                if(bi!=base.end()) fail(child(path,"uri"),uri,"resolved path within scenario directory");
+                if(!std::filesystem::is_regular_file(target,ec) || ec) fail(child(path,"uri"),"not a regular file","bounded local file",InputCategory::io);
+                std::ifstream stream(target,std::ios::binary);if(!stream) fail(child(path,"uri"),uri,"readable local file",InputCategory::io);
+                std::vector<std::byte> raw;std::array<char,4096> chunk{};
+                while(stream) {poll(options_);const auto budget=options_.limits.input_bytes-external_bytes_;const auto remaining=budget-raw.size()+1;stream.read(chunk.data(),static_cast<std::streamsize>(std::min(remaining,chunk.size())));const auto got=static_cast<std::size_t>(stream.gcount());if(got>budget-raw.size()) fail(child(path,"uri"),"external byte quota exceeded","bounded aggregate external bytes",InputCategory::limit);for(std::size_t i=0;i<got;++i)raw.push_back(static_cast<std::byte>(static_cast<unsigned char>(chunk[i])));}
+                if(!stream.eof() || stream.bad()) fail(child(path,"uri"),"read_failed","complete readable external file",InputCategory::io);
+                external_bytes_+=raw.size();
+                problem::ContentDigest expected{};for(std::size_t i=0;i<32;++i){const auto cv=[](char c){return c<='9'?c-'0':c-'a'+10;};expected.bytes[i]=static_cast<std::byte>(cv(hash[i*2])*16+cv(hash[i*2+1]));}
+                auto owned=problem::snapshot_content(raw,expected);if(!std::holds_alternative<problem::ResolvedContent>(owned)) fail(child(path,"sha256"),"digest mismatch","sha256 of external raw bytes");
+                external_data.push_back({uri,expected,raw.size()});
+                const auto parsed=parse(raw,options_);if(!parsed.is_array()) fail(path,parsed.type_name(),"flat row-major JSON numeric array");
+                if(parsed.size()!=product(rows,cols,path)) fail(path,"wrong external value count","rows*cols numeric values");
+                Json flattened=Json::object({{"rows",rows},{"cols",cols},{"values",parsed}});
+                return matrix(flattened,path);
             }
             object(v,path,{"rows","cols","values"});
             rows=dimension(count(member(v,"rows",path),child(path,"rows")),child(path,"rows"));
@@ -364,7 +396,7 @@ LoadedScenario translate(const Json& root,std::span<const std::byte> bytes,const
                          const std::filesystem::path& location,LoadPhaseTimings* timings) {
     if(timings) timings->translation_entered=true;
     PhaseTimer translation_timer{timings?&timings->translation_ns:nullptr};
-    Reader r(options);
+    Reader r(options,location);
     const auto schema=string(member(root,"schema",""),"/schema");
     const bool version_one=schema=="csl.scenario/1",version_two=schema=="csl.scenario/2";
     if(!version_one && !version_two) fail("/schema","unknown version","csl.scenario/1 or csl.scenario/2",InputCategory::schema);
@@ -413,7 +445,7 @@ LoadedScenario translate(const Json& root,std::span<const std::byte> bytes,const
     }();
     poll(options);
     return Access::scenario({std::move(resolved),std::move(run),std::move(r.defaults),std::move(metadata),
-        {std::move(source),location,schema,version_one?"csl.scenario-defaults/1":"csl.scenario-defaults/2",options.objective_policy}});
+        {std::move(source),location,schema,version_one?"csl.scenario-defaults/1":"csl.scenario-defaults/2",options.objective_policy,std::move(r.external_data)}});
 }
 }
 LoadResult load_bytes(std::span<const std::byte> bytes,const LoadOptions& options,const std::filesystem::path& location,
@@ -441,7 +473,7 @@ LoadResult load_bytes(std::span<const std::byte> bytes,const LoadOptions& option
             record.unresolved.reserve(unresolved.size());
             for(std::size_t i=0;i<unresolved.size();++i) record.unresolved.push_back(string(unresolved[i],child("/unresolved",std::to_string(i))));
             auto source=canonical<problem::ResolvedContent>(problem::snapshot_content(bytes),"");poll(options);
-            return Access::historical({std::move(record),{std::move(source),location,"B04-historical/1","none",options.objective_policy}});
+            return Access::historical({std::move(record),{std::move(source),location,"B04-historical/1","none",options.objective_policy,{}}});
         }
         return translate(root,bytes,options,location,timings);
     }

@@ -55,6 +55,8 @@ struct SourceProvenance {
     std::filesystem::path location;
     std::string schema, defaults_revision;
     optimization::ObjectivePolicy publication_policy;
+    struct ExternalData { std::string uri; problem::ContentDigest digest; std::size_t byte_count; };
+    std::vector<ExternalData> external_data;
 };
 struct HistoricalRecord {
     std::string id, restoration_status, execution_gate;
