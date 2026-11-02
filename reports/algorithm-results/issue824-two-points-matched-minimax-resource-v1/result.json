@@ -57,7 +57,7 @@
   ],
   "samples": [
     {
-      "elapsed_ns": 349626,
+      "elapsed_ns": 358917,
       "method": "exact_polytope",
       "order_in_repetition": 1,
       "outcome": {
@@ -74,7 +74,7 @@
       "repetition": 1
     },
     {
-      "elapsed_ns": 180471,
+      "elapsed_ns": 180122,
       "method": "box",
       "order_in_repetition": 2,
       "outcome": {
@@ -91,7 +91,7 @@
       "repetition": 1
     },
     {
-      "elapsed_ns": 150909806,
+      "elapsed_ns": 151344250,
       "method": "zonotope",
       "order_in_repetition": 3,
       "outcome": {
@@ -108,7 +108,7 @@
       "repetition": 1
     },
     {
-      "elapsed_ns": 712523,
+      "elapsed_ns": 705053,
       "method": "parallelotope",
       "order_in_repetition": 4,
       "outcome": {
@@ -125,7 +125,7 @@
       "repetition": 1
     },
     {
-      "elapsed_ns": 213715,
+      "elapsed_ns": 213157,
       "method": "ellipsoid",
       "order_in_repetition": 5,
       "outcome": {
@@ -142,7 +142,7 @@
       "repetition": 1
     },
     {
-      "elapsed_ns": 177048,
+      "elapsed_ns": 195068,
       "method": "box",
       "order_in_repetition": 1,
       "outcome": {
@@ -159,7 +159,7 @@
       "repetition": 2
     },
     {
-      "elapsed_ns": 148559290,
+      "elapsed_ns": 150779161,
       "method": "zonotope",
       "order_in_repetition": 2,
       "outcome": {
@@ -176,7 +176,7 @@
       "repetition": 2
     },
     {
-      "elapsed_ns": 730473,
+      "elapsed_ns": 711687,
       "method": "parallelotope",
       "order_in_repetition": 3,
       "outcome": {
@@ -193,7 +193,7 @@
       "repetition": 2
     },
     {
-      "elapsed_ns": 212249,
+      "elapsed_ns": 230338,
       "method": "ellipsoid",
       "order_in_repetition": 4,
       "outcome": {
@@ -210,7 +210,7 @@
       "repetition": 2
     },
     {
-      "elapsed_ns": 362966,
+      "elapsed_ns": 361990,
       "method": "exact_polytope",
       "order_in_repetition": 5,
       "outcome": {
@@ -227,7 +227,7 @@
       "repetition": 2
     },
     {
-      "elapsed_ns": 148062786,
+      "elapsed_ns": 148900348,
       "method": "zonotope",
       "order_in_repetition": 1,
       "outcome": {
@@ -244,7 +244,7 @@
       "repetition": 3
     },
     {
-      "elapsed_ns": 704840,
+      "elapsed_ns": 722582,
       "method": "parallelotope",
       "order_in_repetition": 2,
       "outcome": {
@@ -261,7 +261,7 @@
       "repetition": 3
     },
     {
-      "elapsed_ns": 211550,
+      "elapsed_ns": 229430,
       "method": "ellipsoid",
       "order_in_repetition": 3,
       "outcome": {
@@ -278,7 +278,7 @@
       "repetition": 3
     },
     {
-      "elapsed_ns": 359754,
+      "elapsed_ns": 347602,
       "method": "exact_polytope",
       "order_in_repetition": 4,
       "outcome": {
@@ -295,7 +295,7 @@
       "repetition": 3
     },
     {
-      "elapsed_ns": 172788,
+      "elapsed_ns": 179074,
       "method": "box",
       "order_in_repetition": 5,
       "outcome": {
@@ -312,7 +312,7 @@
       "repetition": 3
     },
     {
-      "elapsed_ns": 673412,
+      "elapsed_ns": 691433,
       "method": "parallelotope",
       "order_in_repetition": 1,
       "outcome": {
@@ -329,7 +329,7 @@
       "repetition": 4
     },
     {
-      "elapsed_ns": 224750,
+      "elapsed_ns": 205055,
       "method": "ellipsoid",
       "order_in_repetition": 2,
       "outcome": {
@@ -346,7 +346,7 @@
       "repetition": 4
     },
     {
-      "elapsed_ns": 342713,
+      "elapsed_ns": 346065,
       "method": "exact_polytope",
       "order_in_repetition": 3,
       "outcome": {
@@ -363,7 +363,7 @@
       "repetition": 4
     },
     {
-      "elapsed_ns": 169854,
+      "elapsed_ns": 189480,
       "method": "box",
       "order_in_repetition": 4,
       "outcome": {
@@ -380,7 +380,7 @@
       "repetition": 4
     },
     {
-      "elapsed_ns": 149293045,
+      "elapsed_ns": 149296560,
       "method": "zonotope",
       "order_in_repetition": 5,
       "outcome": {
@@ -397,7 +397,7 @@
       "repetition": 4
     },
     {
-      "elapsed_ns": 229499,
+      "elapsed_ns": 218046,
       "method": "ellipsoid",
       "order_in_repetition": 1,
       "outcome": {
@@ -431,7 +431,7 @@
       "repetition": 5
     },
     {
-      "elapsed_ns": 177119,
+      "elapsed_ns": 198979,
       "method": "box",
       "order_in_repetition": 3,
       "outcome": {
@@ -448,7 +448,7 @@
       "repetition": 5
     },
     {
-      "elapsed_ns": 149148963,
+      "elapsed_ns": 148942882,
       "method": "zonotope",
       "order_in_repetition": 4,
       "outcome": {
@@ -465,7 +465,7 @@
       "repetition": 5
     },
     {
-      "elapsed_ns": 708752,
+      "elapsed_ns": 689268,
       "method": "parallelotope",
       "order_in_repetition": 5,
       "outcome": {
@@ -486,46 +486,46 @@
   "summaries": [
     {
       "failures": 0,
-      "maximum_ns": 362966,
+      "maximum_ns": 361990,
       "median_ns": 352561,
       "method": "exact_polytope",
-      "minimum_ns": 342713,
+      "minimum_ns": 346065,
       "requested_repetitions": 5,
       "successful_repetitions": 5
     },
     {
       "failures": 0,
-      "maximum_ns": 180471,
-      "median_ns": 177048,
+      "maximum_ns": 198979,
+      "median_ns": 189480,
       "method": "box",
-      "minimum_ns": 169854,
+      "minimum_ns": 179074,
       "requested_repetitions": 5,
       "successful_repetitions": 5
     },
     {
       "failures": 0,
-      "maximum_ns": 150909806,
-      "median_ns": 149148963,
+      "maximum_ns": 151344250,
+      "median_ns": 149296560,
       "method": "zonotope",
-      "minimum_ns": 148062786,
+      "minimum_ns": 148900348,
       "requested_repetitions": 5,
       "successful_repetitions": 5
     },
     {
       "failures": 0,
-      "maximum_ns": 730473,
-      "median_ns": 708752,
+      "maximum_ns": 722582,
+      "median_ns": 705053,
       "method": "parallelotope",
-      "minimum_ns": 673412,
+      "minimum_ns": 689268,
       "requested_repetitions": 5,
       "successful_repetitions": 5
     },
     {
       "failures": 0,
-      "maximum_ns": 229499,
-      "median_ns": 213715,
+      "maximum_ns": 230338,
+      "median_ns": 218046,
       "method": "ellipsoid",
-      "minimum_ns": 211550,
+      "minimum_ns": 205055,
       "requested_repetitions": 5,
       "successful_repetitions": 5
     }

@@ -2598,7 +2598,7 @@
         "geometry-reference-ellipsoid.svg",
         "geometry-reference-parallelotope.svg"
       ],
-      "index_sha256": "9206fe7b25539a999d4573266bf0be89fc4b6959e5e96a4065e31cbf7a16b85c",
+      "index_sha256": "d779cc3904c8ed65e35fd6b5afa7ce53f86330d46c50bc11fcb898da01b44ba4",
       "disposition": "deferred: original frozen route-level readability review remains; companion availability is listed separately",
       "follow_up_issue": 824
     },

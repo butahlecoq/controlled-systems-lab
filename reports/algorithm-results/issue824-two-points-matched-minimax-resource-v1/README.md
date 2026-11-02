@@ -10,15 +10,15 @@ Release build, one warmup and five order-rotated attempts per method. The timed 
 
 | Track | Runs | Median | Range |
 | --- | ---: | ---: | ---: |
-| Exact finite polytope | 5/5 (failures: 0) | 0.353 ms | 0.343–0.363 ms |
-| Outer box | 5/5 (failures: 0) | 0.177 ms | 0.170–0.180 ms |
-| Outer zonotope | 5/5 (failures: 0) | 149.149 ms | 148.063–150.910 ms |
-| Fixed-frame parallelotope | 5/5 (failures: 0) | 0.709 ms | 0.673–0.730 ms |
-| Axis-aligned ellipsoid | 5/5 (failures: 0) | 0.214 ms | 0.212–0.229 ms |
+| Exact finite polytope | 5/5 (failures: 0) | 0.353 ms | 0.346–0.362 ms |
+| Outer box | 5/5 (failures: 0) | 0.189 ms | 0.179–0.199 ms |
+| Outer zonotope | 5/5 (failures: 0) | 149.297 ms | 148.900–151.344 ms |
+| Fixed-frame parallelotope | 5/5 (failures: 0) | 0.705 ms | 0.689–0.723 ms |
+| Axis-aligned ellipsoid | 5/5 (failures: 0) | 0.218 ms | 0.205–0.230 ms |
 
-The differences describe this one small fixture only. The methods do not use the same candidate-score representation, so these numbers do not establish a general performance winner. The complete capture ran in one supervised process tree under a 300-second wall limit and an 8 GiB cgroup-v2 memory limit, with one concurrent job. The report-generation command completed in 5.147 s and the cgroup recorded a peak of 25.0 MiB, with no timeout or OOM events. These shared limits cover all repeated calls and checking in the report capture, so the total run must fit inside each per-attempt cap; the cap is not reset between calls. The separate zonotope limiter profile is reused from the immutable v1 bundle: it identifies `score_corners` as the main sampled CPU path. That profile used GNU gprof 2.47, Release `-O3 -DNDEBUG -pg`, ten calls, and 10 ms sampling. See `limiter-profile.json` and `resource-profile.json`.
+The differences describe this one small fixture only. The methods do not use the same candidate-score representation, so these numbers do not establish a general performance winner. The complete capture ran in one supervised process tree under a 300-second wall limit and an 8 GiB cgroup-v2 memory limit, with one concurrent job. The report-generation command completed in 5.123 s and the cgroup recorded a peak of 26.6 MiB, with no timeout or OOM events. These shared limits cover all repeated calls and checking in the report capture, so the total run must fit inside each per-attempt cap; the cap is not reset between calls. The separate zonotope limiter profile is reused from the immutable v1 bundle: it identifies `score_corners` as the main sampled CPU path. That profile used GNU gprof 2.47, Release `-O3 -DNDEBUG -pg`, ten calls, and 10 ms sampling. See `limiter-profile.json` and `resource-profile.json`.
 
-Five end-to-end report-data trials (solver run, exact rational checker, JSON serialization and SHA-256 verification) took median 0.996 s, range 0.984–1.021 s. Raw trials and output hashes are in `e2e-timing.json`.
+Five end-to-end report-data trials (solver run, exact rational checker, JSON serialization and SHA-256 verification) took median 0.993 s, range 0.980–1.009 s. Raw trials and output hashes are in `e2e-timing.json`.
 
 The two phase-plane SVGs reuse the independently checked geometry figures from the [ellipsoid v2 bundle](../issue824-two-points-ellipsoid-minimax-v2/index.html) and [zonotope/parallelotope v2 bundle](../issue824-two-points-zonotope-minimax-v2/index.html). Those source records preserve forward/backward sets, intersections, selected plan replays and the finite RL adaptation limits.
 

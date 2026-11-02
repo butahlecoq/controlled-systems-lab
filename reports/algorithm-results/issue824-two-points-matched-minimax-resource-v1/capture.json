@@ -14,14 +14,14 @@
   "host": {
     "cpu_model": "AMD Ryzen 5 3550H with Radeon Vega Mobile Gfx",
     "load_average_after_e2e": [
-      0.21826171875,
-      0.634765625,
-      0.65087890625
+      0.33642578125,
+      0.3955078125,
+      0.53076171875
     ],
     "load_average_before_e2e": [
-      0.14990234375,
-      0.62841796875,
-      0.64892578125
+      0.2783203125,
+      0.38525390625,
+      0.52783203125
     ],
     "logical_cpu_count": 8,
     "machine": "x86_64",
@@ -49,7 +49,7 @@
   },
   "resource_accounting": {
     "enforced_limits": {
-      "memory_cgroup": "/sys/fs/cgroup/user.slice/user-1000.slice/user@1000.service/app.slice/run-p1335873-i1322738.scope",
+      "memory_cgroup": "/sys/fs/cgroup/user.slice/user-1000.slice/user@1000.service/app.slice/run-p1340278-i1344440.scope",
       "memory_max_bytes": 8589934592,
       "memory_mechanism": "systemd user scope on Linux cgroup v2, memory.max",
       "memory_swap_max_bytes": 0,
@@ -68,8 +68,8 @@
         "oom_group_kill 0",
         "sock_throttled 0"
       ],
-      "process_tree_peak_memory_bytes": 26214400,
-      "process_tree_wall_time_ns": 5146524803,
+      "process_tree_peak_memory_bytes": 27865088,
+      "process_tree_wall_time_ns": 5123228629,
       "timed_out": false
     },
     "policy": "comparison-program-default-enforced",
@@ -81,12 +81,12 @@
     "scope": "five order-rotated Release repetitions per method, warmups, five end-to-end solver/check/serialization trials; build excluded"
   },
   "schema": "csl.issue824.matched-minimax-capture/2",
-  "source_commit": "a5b9b8fa1aa4a6e9038c7fb0c889dc40a514ed57",
+  "source_commit": "afcde4d2e9eea3fcaa1ae1a2fdd6b9109187e729",
   "source_files_sha256": {
     "CMakeLists.txt": "ffb346c1cb3785439ec397b72d92cf6898eb25633320fc06f69baf27c8f48ba3",
     "benchmarks/reporting/exp824/two_points_fixture.hpp": "63ea125705437636a8689ca1a37d1df71c4be1ee04f751d2b226ab1c8145c8ec",
     "benchmarks/reporting/exp824/two_points_matched_minimax.cpp": "9fdd00fea35afc564c4b94d702f1c162d8936e92327602e06c54463a9c2e5048",
-    "cmake/OptionalReports.cmake": "329bf604f48f753b2e1267edc118d32f60a45ffde2e50573ae9a13a8109f31c4",
+    "cmake/OptionalReports.cmake": "fa588f2c8ec0e36d970e12dec3258da1ad47d121f3d05549f23974bb955f18e5",
     "include/csl/optimization/finite_action_box_minimax.hpp": "15e569c195f3f916366c7934e6a152a8ec92195d2ef7cd2537201a794ffe96c4",
     "include/csl/optimization/finite_action_ellipsoid_minimax.hpp": "78a5974e5dd4dffed486bf26bebebf6376fa6a525e8fbca1aa35010bc2123f5e",
     "include/csl/optimization/finite_action_minimax.hpp": "b9a49e16fe75cae04474aa14cb0e49c7e4d98052b33921e95b43f0e156b5afc0",
