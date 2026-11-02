@@ -6,7 +6,7 @@ This extends the source-attribution diagnostic to the existing HORIZON-01
 scalar integrator fixtures at T=2, 4, and 8. It asks whether the profiled
 functions change enough with joint-relation size to identify one optimization
 target. They do not: reach-back samples remain spread across HiGHS lifecycle,
-LP, geometry, and exact-check functions, while Strategy B has only 24, 24, and
+LP, geometry, and exact-check functions, while Strategy B has only 31, 31, and
 47 sampled 10 ms ticks. No symbol approaches the predeclared 15% threshold.
 
 This remains a low-resolution diagnostic. It makes no speed, ranking, scaling,
