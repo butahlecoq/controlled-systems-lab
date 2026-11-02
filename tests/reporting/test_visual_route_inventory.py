@@ -20,6 +20,9 @@ class VisualRouteInventoryTests(unittest.TestCase):
         self.assertEqual(producers["scripts/reports/env717/check_two_points.py"]["follow_up_issue"],717)
         self.assertEqual(producers["scripts/reports/env717/check_two_points.py"]["asset_name_literals"],
                          ["projections.svg"])
+        self.assertEqual(producers["scripts/reports/env717/check_vanderpol.py"]["follow_up_issue"],717)
+        self.assertEqual(producers["scripts/reports/stage_env717_vanderpol.py"]["disposition"],
+                         "publication-validation-or-frozen-route")
         self.assertIn("scripts/reports/env717/capture_two_particle_minimax.py", producers)
         self.assertIn("scripts/reports/stage_env717_two_particle_minimax.py", producers)
         self.assertIn("scripts/reports/env717/capture_homicidal_chauffeur.py", producers)
@@ -151,7 +154,7 @@ class VisualRouteInventoryTests(unittest.TestCase):
         follow_up_counts={number:sum(entry["follow_up_issue"]==number for entry in deferred)
                           for number in (600,684,685,686,687,708,717,824)}
         self.assertEqual(follow_up_counts,
-                         {600:2,684:0,685:0,686:0,687:6,708:1,717:17,824:2})
+                     {600:2,684:0,685:0,686:0,687:6,708:1,717:18,824:2})
         self.assertEqual(producers["scripts/reports/env717/check_pendulum_terminal.py"]["follow_up_issue"], 717)
         reviewed=[entry for entry in producers.values() if entry.get("role")]
         self.assertEqual(len(reviewed),25)

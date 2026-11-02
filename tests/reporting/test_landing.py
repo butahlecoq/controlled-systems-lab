@@ -172,6 +172,15 @@ class LandingTests(unittest.TestCase):
         self.assertIn("not a continuous-action optimum", family.summary)
         self.assertIn("no minimax or performance comparison claim", family.summary)
 
+    def test_vanderpol_route_discloses_source_defect_and_finite_catalogue_scope(self):
+        family = landing.FAMILIES[landing.family_for(
+            "env717-vanderpol-0123456789abcdefabcd")]
+        self.assertEqual(family.group, "synthesis")
+        self.assertIn("243 five-block control plans", family.summary)
+        self.assertIn("111 source steps (about 11.1 seconds)", family.summary)
+        self.assertIn("raises NameError", family.summary)
+        self.assertIn("not a direct run", family.summary)
+
     def test_time_sphere_route_describes_nominal_target_reachability(self):
         family = landing.FAMILIES[landing.family_for(
             "env717-time-sphere-0123456789abcdefabcd")]

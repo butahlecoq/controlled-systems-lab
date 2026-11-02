@@ -34,3 +34,18 @@ counted as members of the nine-environment differential-game list above.
 Every listed report is a finite, explicitly scoped adaptation. The finite
 catalogues, shortened horizons, information pattern, and any state
 discretization remain part of each report's evidence boundary.
+
+## Additional nonlinear control pilots
+
+These are single-controller examples from the same upstream environment suite,
+not differential games:
+
+| Environment | Saved report | Scope |
+| --- | --- | --- |
+| `DubinsCar_Terminal` | [report](../../reports/algorithm-results/env717-dubins-car-pilot-v1/README.md) | finite open-loop terminal-control catalogue |
+| `PendulumTerminal` | [report](../../reports/algorithm-results/env717-pendulum-terminal-pilot-v1/README.md) | finite-action terminal-control pilot |
+| `VanDerPol` | [report](../../reports/algorithm-results/env717-vanderpol-pilot-v1/README.md) | equation-replayed finite-action oscillator pilot; upstream `step()` raises `NameError` |
+
+The Van der Pol artifact is not a direct execution of the upstream class: it
+re-expresses the pinned equations because the source's return tuple references
+an undefined variable. Its source note and report state this limitation.
