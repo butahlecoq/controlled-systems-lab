@@ -770,6 +770,7 @@
       "source": "scripts/reports/mpc01/b04_native_smoke_projection.py",
       "signal_count": 4,
       "asset_name_literals": [
+        "b04-repeated-projections.svg",
         "native-smoke-projections.svg"
       ],
       "role": "report-plot-renderer",
@@ -789,6 +790,14 @@
       "companion_ids": [
         "b04-native-smoke"
       ]
+    },
+    {
+      "source": "scripts/reports/mpc01/summarize_per_attempt.py",
+      "signal_count": 2,
+      "asset_name_literals": [
+        "b04-repeated-projections.svg"
+      ],
+      "disposition": "composes-or-copies-existing-saved-figure"
     },
     {
       "source": "scripts/reports/mpc01/summarize_repeated_comparison.py",
