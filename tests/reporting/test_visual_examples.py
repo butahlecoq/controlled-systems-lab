@@ -646,7 +646,8 @@ class GalleryTests(unittest.TestCase):
         architecture = (ROOT / coverage["source"]).read_text(encoding="utf-8")
         self.assertTrue(all(module in architecture for family in coverage["families"] for module in family["modules"]))
         catalog_kinds = {report["report_kind"] for report in json.loads(self.catalog.read_text())["reports"]}
-        mapped_kinds = {kind for family in coverage["families"] for kind in family["catalog_kinds"]}
+        mapped_kinds = ({kind for family in coverage["families"] for kind in family["catalog_kinds"]} |
+                        set(coverage.get("evidence_only_kinds", {})))
         self.assertEqual(mapped_kinds, catalog_kinds)
         visual_coverage = json.loads((self.site / "examples/visual-coverage.json").read_text())
         visual_anchors = {entry["anchor"] for entry in visual_coverage["entries"]}
