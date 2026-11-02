@@ -691,12 +691,14 @@ def build(catalog, site):
     gallery_inventory.extend(analytic_inventory)
     gallery_inventory.extend(fuel_layer_inventory)
     mpc01_route = "mpc01-per-attempt-20261103-r3"
-    gallery_inventory.append({"family": "MPC solver comparison", "title": "MPC-01 per-attempt OSQP and HPIPM capture",
-                              "status": "saved-report-figure", "anchor": "mpc01-per-attempt-r3",
-                              "page": "index.html#saved-report-figures",
-                              "figure": "../" + mpc01_route + "/b04-repeated-projections.svg",
-                              "source_page": "../" + mpc01_route + "/index.html",
-                              "raw_record": "../" + mpc01_route + "/summary.json"})
+    has_mpc01_report = (site / mpc01_route / "index.html").is_file()
+    if has_mpc01_report:
+        gallery_inventory.append({"family": "MPC solver comparison", "title": "MPC-01 per-attempt OSQP and HPIPM capture",
+                                  "status": "saved-report-figure", "anchor": "mpc01-per-attempt-r3",
+                                  "page": "index.html#saved-report-figures",
+                                  "figure": "../" + mpc01_route + "/b04-repeated-projections.svg",
+                                  "source_page": "../" + mpc01_route + "/index.html",
+                                  "raw_record": "../" + mpc01_route + "/summary.json"})
     geometry_first = geometry_inventory[0]
     gallery_inventory.append({"family": "Geometry and optimization",
                               "title": "Readable geometry and timing figures",
@@ -758,6 +760,13 @@ def build(catalog, site):
         frozen_records / "finite-feedback-a6e96fd96c7ac7cc" / "records.json",
         Path(__file__).parent / "styles/control-v1.json")
     extension_companion_cards = ""
+    mpc01_card = ('<article class="saved-figure" id="mpc01-per-attempt-r3"><p class="eyebrow">MPC solver comparison · Saved-data report</p>'
+                  '<h3>MPC-01 per-attempt OSQP and HPIPM capture</h3>'
+                  '<a href="../mpc01-per-attempt-20261103-r3/index.html"><img src="../mpc01-per-attempt-20261103-r3/b04-repeated-projections.svg" '
+                  'alt="Exact reference and representative solver trajectories in oxidizer and fuel state projections"></a>'
+                  '<p>Five cold and warm-if-available repetitions on seven open-loop prediction fixtures. The B04 trajectories are a solver-result illustration, not a differential-game reachability result or a general solver ranking.</p>'
+                  '<p><a href="../mpc01-per-attempt-20261103-r3/index.html">Open the complete capture and evidence →</a></p></article>'
+                  if has_mpc01_report else "")
     for family, title, stem, report_route, alt in (
             ("Continuous feedback", "EXT-04 robust one-step synthesis", "ext04-affine-synthesis-v1",
              "ext04-affine-synthesis-7eadf7c7ecbb2bbd",
@@ -907,12 +916,7 @@ def build(catalog, site):
             'Cards marked “Saved-data companion” are generated into this gallery from frozen records; they do not change those reports. '
             'Open a report for exact inputs, answers, reproduction commands, provenance and evidence limits.</p>'
             '<div class="saved-grid">' + saved_figures +
-            '<article class="saved-figure" id="mpc01-per-attempt-r3"><p class="eyebrow">MPC solver comparison · Saved-data report</p>'
-            '<h3>MPC-01 per-attempt OSQP and HPIPM capture</h3>'
-            '<a href="../mpc01-per-attempt-20261103-r3/index.html"><img src="../mpc01-per-attempt-20261103-r3/b04-repeated-projections.svg" '
-            'alt="Exact reference and representative solver trajectories in oxidizer and fuel state projections"></a>'
-            '<p>Five cold and warm-if-available repetitions on seven open-loop prediction fixtures. The B04 trajectories are a solver-result illustration, not a differential-game reachability result or a general solver ranking.</p>'
-            '<p><a href="../mpc01-per-attempt-20261103-r3/index.html">Open the complete capture and evidence →</a></p></article>' +
+            mpc01_card +
             '<article class="saved-figure" id="geometry-optimization-companions"><p class="eyebrow">Geometry and optimization · Saved-data companion</p>'
             '<h3>Readable geometry and timing figures</h3><p>Eleven companions replot frozen report records with the shared quantitative axis policy. '
             'The geometry examples use saved 2D coordinates; timing charts show saved medians and observed ranges.</p>'
