@@ -477,6 +477,14 @@ FAMILIES = {
         "plots finite forward states, backward-winning intersections and a worst-case trajectory "
         "in the position (x1,x2) and velocity (x3,x4) planes. The continuous-action 4-second source "
         "task is adapted to three stages; no RL reproduction or performance comparison is claimed."),
+    "env717-dubins-car": Family(
+        r"env717-dubins-car-[0-9a-f]{20}", "synthesis",
+        "DubinsCar finite open-loop control pilot",
+        "Replays the pinned nonlinear four-state Euler model and exhaustively evaluates 125 "
+        "three-block control plans over its full terminal horizon. The figure shows finite "
+        "forward x-y layers, heading, and the selected trajectory. Each action is held for 21 "
+        "source steps, so the exact finite-catalogue minimum is not a continuous-action optimum; "
+        "the report makes no minimax or performance comparison claim."),
     "env717-time-sphere": Family(
         r"env717-time-sphere-[0-9a-f]{20}", "synthesis",
         "TimeOptimalSphereGame nominal finite-feedback reachability pilot",

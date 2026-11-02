@@ -163,6 +163,15 @@ class LandingTests(unittest.TestCase):
         self.assertIn("velocity (x3,x4)", family.summary)
         self.assertIn("three stages", family.summary)
 
+    def test_dubins_car_route_discloses_nonlinear_finite_catalogue_scope(self):
+        family = landing.FAMILIES[landing.family_for(
+            "env717-dubins-car-0123456789abcdefabcd")]
+        self.assertEqual(family.group, "synthesis")
+        self.assertIn("125 three-block control plans", family.summary)
+        self.assertIn("full terminal horizon", family.summary)
+        self.assertIn("not a continuous-action optimum", family.summary)
+        self.assertIn("no minimax or performance comparison claim", family.summary)
+
     def test_time_sphere_route_describes_nominal_target_reachability(self):
         family = landing.FAMILIES[landing.family_for(
             "env717-time-sphere-0123456789abcdefabcd")]
