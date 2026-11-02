@@ -26,10 +26,14 @@ def extract_pages_site(downloaded: Path, destination: Path) -> Path:
             directories: set[PurePosixPath] = set()
             for member in members:
                 path = PurePosixPath(member.name)
-                if path.is_absolute() or ".." in path.parts or not path.parts:
+                if path.is_absolute() or ".." in path.parts:
                     raise ValueError(f"unsafe Pages artifact path: {member.name!r}")
                 if not (member.isdir() or member.isfile()):
                     raise ValueError(f"unsupported Pages artifact entry: {member.name!r}")
+                if not path.parts:
+                    if member.isdir():
+                        continue
+                    raise ValueError(f"unsafe Pages artifact root entry: {member.name!r}")
                 parents = set(path.parents) - {PurePosixPath(".")}
                 if parents & files:
                     raise ValueError(f"Pages artifact member is nested under a file: {member.name!r}")

@@ -42,6 +42,7 @@ class PagesArtifactExtractionTests(unittest.TestCase):
 
     def test_extracts_regular_site_files_and_directories(self):
         site, _ = self._extract([
+            (self._directory("./"), None),
             (regular("index.html", b"<html></html>")),
             (self._directory("examples/"), None),
             (regular("examples/index.html", b"<html>examples</html>")),
@@ -75,7 +76,7 @@ class PagesArtifactExtractionTests(unittest.TestCase):
         symlink = tarfile.TarInfo("link")
         symlink.type = tarfile.SYMTYPE
         symlink.linkname = "../escape"
-        for member in ((absolute, b"x"), (symlink, None)):
+        for member in ((absolute, b"x"), (symlink, None), regular(".", b"x")):
             with self.subTest(member=member[0].name):
                 with self.assertRaises(ValueError):
                     self._extract([member])
