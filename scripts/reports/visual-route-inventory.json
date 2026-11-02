@@ -2100,6 +2100,16 @@
       "follow_up_issue": 717
     },
     {
+      "route": "env717-vanderpol-pilot-v1",
+      "source_bundle": "env717-vanderpol-pilot-v1",
+      "assets": [
+        "projections.svg"
+      ],
+      "index_sha256": "3790b8fecaf83ad2fe73bf99f83ec26cb8ad2cac783e78766923037275328d48",
+      "disposition": "deferred: original frozen route-level readability review remains; companion availability is listed separately",
+      "follow_up_issue": 717
+    },
+    {
       "route": "exp02-it17-a44-paper-order-20261027-r1",
       "source_bundle": "exp02-it17-a44-paper-order-20261027-r1",
       "assets": [

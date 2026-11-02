@@ -21,6 +21,10 @@ feedback and SLS-MPC qualifications, gives an exact two-step double-integrator
 reference, and includes a 2D policy/tube illustration. It records why the
 unlicensed author implementation cannot be copied or ported.
 
+The [ENV-717 Van der Pol source note](env717-vanderpol-source-notes.md) pins the
+upstream class and notebook, records its `NameError` defect and unknown true
+learning value, and scopes the equation-replayed finite-action reference.
+
 The [ITIS'17 hull-method source audit](exp02-itis17-source-audit-20261027.md)
 records the primary-paper algorithms, the A43/A44 implementation boundaries,
 paper hashes, and the completed search for matching Pascal sources.

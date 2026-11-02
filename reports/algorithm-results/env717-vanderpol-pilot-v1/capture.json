@@ -1,0 +1,11 @@
+{
+  "source_commit": "786a30f52e62e3ad4e276ea4a45ce66c21d5b09c",
+  "driver_sha256": "07dfd0c374f174b7f1411d6ee4753cf7c00b7495f4d827331a8fa94d4272eec1",
+  "compiler": {
+    "architecture": "x86_64",
+    "build_type": "Release",
+    "compiler": "GNU",
+    "compiler_version": "16.2.1"
+  },
+  "capture_kind": "finite-catalogue equation replay; upstream step() defect disclosed; no performance claim"
+}
