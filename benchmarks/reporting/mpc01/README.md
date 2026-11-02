@@ -97,3 +97,18 @@ solvers' optimal attempts are in the r3 bundle. The separate
 trajectory per solver with the exact witness; it is illustrative, not a
 repeated benchmark, and its residual checks are inconclusive. The B04 Pages
 example remains the exact-witness illustration.
+
+Package the saved Strategy A/B attempts as a canonical comparison record:
+
+```sh
+python3 scripts/reports/mpc01/build_strategy_ab_records.py \
+  --events docs/research/evidence/mpc01-external-qps-20261026-r3/strategy-ab-ts01-events.jsonl \
+  --scenario examples/scenarios/two-stage-integrator.json \
+  --environment docs/research/evidence/mpc01-external-qps-20261026-r3/strategy-ab-ts01-environment.json \
+  --codec-environment docs/research/evidence/mpc01-external-qps-20261026-r3/strategy-ab-ts01-csl-environment.json \
+  --output docs/research/evidence/mpc01-external-qps-20261026-r3/strategy-ab-ts01-comparison-record.json
+```
+
+The record keeps the saved event lines, including warmups, in source order by
+strategy and repetition. The capture has no enforced resource cap, so its
+timings remain descriptive.
