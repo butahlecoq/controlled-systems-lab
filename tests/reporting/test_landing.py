@@ -31,7 +31,7 @@ class LandingTests(unittest.TestCase):
         self.assertIn("<title>CSL algorithm reports</title>", self.page)
         self.assertEqual(self.page.count("<body>"), 1)
         self.assertEqual(self.page.count("</ul>"), 1)
-        self.assertIn("<h1>Algorithm reports</h1>", self.page)
+        self.assertIn("<h1>Algorithm reports and research evidence</h1>", self.page)
         self.assertIn("How to read this archive", self.page)
         published = {landing.FAMILIES[landing.family_for(report["report_id"])].group
                      for report in self.catalogue["reports"]}
