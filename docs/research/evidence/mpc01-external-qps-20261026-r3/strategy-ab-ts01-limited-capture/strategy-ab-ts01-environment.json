@@ -1,0 +1,54 @@
+{
+  "build": {
+    "cmake_generator": "Unix Makefiles",
+    "compiler": "GNU 16.2.1",
+    "flags": "-O3 -DNDEBUG",
+    "highs": "1.11.0",
+    "qhull": "8.0.2",
+    "type": "Release"
+  },
+  "executable": "/var/tmp/csl-mpc01-strategy-ab/examples/registered_synthesis_comparison",
+  "executable_sha256": "02cd6bfb4e51e565cbf58cd2322adca4765f9c9dc6144f8429eda57575a9046b",
+  "execution_worktree_clean_before_run": true,
+  "execution_worktree_commit": "23c1697b0defe65ba3f7ee136af44c808024d99e",
+  "host": {
+    "cpu": "AMD Ryzen 5 3550H with Radeon Vega Mobile Gfx",
+    "kernel": "7.2.8-9-omarchy",
+    "load_average_after_capture": [
+      0.26904296875,
+      0.21484375,
+      0.2392578125
+    ],
+    "load_average_before_capture": [
+      0.26904296875,
+      0.21484375,
+      0.2392578125
+    ],
+    "logical_cpus": 8,
+    "os": "Linux Omarchy"
+  },
+  "measurement": {
+    "capture_supervisor": "capture-supervisor.py",
+    "capture_supervisor_sha256": "d60fc333d94bec8f4462105362dff11acc843dc0ab3f59bed47f4f0c645ea77f",
+    "command": "/var/tmp/csl-mpc01-strategy-ab/examples/registered_synthesis_comparison --measure examples/scenarios/two-stage-integrator.json strategy-ab-ts01-events.jsonl",
+    "cpu_time_or_peak_memory_profiled": true,
+    "event_count_including_header": 17,
+    "measured_alternating_pairs": 7,
+    "memory_cap_bytes": null,
+    "per_attempt_wall_time_cap": null,
+    "process_tree_memory_cap_bytes": 2147483648,
+    "process_tree_memory_swap_max_bytes": 0,
+    "process_tree_timeout_scope": "one complete strategy A/B capture process group; applies to the suite invocation, not individually restarted trials",
+    "process_tree_wall_time_cap_seconds": 300,
+    "resource_profile": "resource-profile.json",
+    "resource_profile_sha256": "2c9c2df0be0493df61b7980d47d8930aeaea30e688ffd5ef3468d41793e661bf",
+    "supervision_command": "systemd-run --user --scope --quiet -p MemoryMax=2147483648 -p MemorySwapMax=0 python3 capture-supervisor.py",
+    "warmup_pairs_excluded": 1
+  },
+  "scenario": "examples/scenarios/two-stage-integrator.json",
+  "scenario_sha256": "bbeb83947627a197d71dd380dbaa5cfae12e22cd6d79b12e66ef08275b2c390a",
+  "source_commit": "ce7cc08f585fd80f5e63d30becf5ef4054fd879e",
+  "source_dirty_before_run": false,
+  "source_file": "examples/registered_synthesis_comparison.cpp",
+  "source_file_sha256": "ecde95451db3809d4054c3a7c02801fb5eb46cd6b26af976110824a6730c7513"
+}

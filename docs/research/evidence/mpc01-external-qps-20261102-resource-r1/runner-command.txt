@@ -1,0 +1,1 @@
+/usr/bin/taskset -c 0 /home/butahlecoq/.local/share/codex/build/mpc01-external-capture-20261102/csl_mpc01_report examples/scenarios/double-integrator-generality.json docs/research/evidence/b04-reference-v1/canonical-case.json --repetitions 5 --records /home/butahlecoq/.local/share/codex/captures/mpc01-resource-20261102/comparison-records.jsonl

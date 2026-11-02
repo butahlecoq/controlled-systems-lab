@@ -1,0 +1,37 @@
+{
+  "schema": "csl.scenario/1",
+  "id": "double-integrator-generality",
+  "horizon": 3,
+  "times": [0, 1, 2, 3],
+  "model": {
+    "kind": "linear_discrete",
+    "A": [[1, 1], [0, 1]],
+    "B": [[0.5], [1]]
+  },
+  "initial_state": [0, 0],
+  "controls": { "kind": "box", "lower": [-1], "upper": [1] },
+  "states": {
+    "kind": "stages",
+    "values": [
+      { "kind": "singleton", "point": [0, 0] },
+      { "kind": "box", "lower": [0, -1], "upper": [0.5, 1] },
+      { "kind": "box", "lower": [0, -1], "upper": [1.5, 1] },
+      { "kind": "universal" }
+    ]
+  },
+  "objective": {
+    "kind": "quadratic",
+    "Q": [[2, 0], [0, 2]],
+    "linear": [-2, -1],
+    "offset": 1.25
+  },
+  "metadata": {
+    "title": "Two-state double-integrator generality example",
+    "description": "A three-transition position/velocity model with box acceleration and intermediate-state constraints.",
+    "time_unit": "s",
+    "state_labels": ["position", "velocity"],
+    "control_labels": ["acceleration"],
+    "state_units": ["m", "m/s"],
+    "control_units": ["m/s^2"]
+  }
+}

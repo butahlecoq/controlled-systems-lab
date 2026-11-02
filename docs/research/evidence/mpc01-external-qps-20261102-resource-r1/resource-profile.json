@@ -1,0 +1,87 @@
+{
+  "command": [
+    "/usr/bin/taskset",
+    "-c",
+    "0",
+    "/home/butahlecoq/.local/share/codex/build/mpc01-external-capture-20261102/csl_mpc01_report",
+    "examples/scenarios/double-integrator-generality.json",
+    "docs/research/evidence/b04-reference-v1/canonical-case.json",
+    "--repetitions",
+    "5",
+    "--records",
+    "/home/butahlecoq/.local/share/codex/captures/mpc01-resource-20261102/comparison-records.jsonl"
+  ],
+  "comparison_spec_environment_memory": "unlimited (the runner does not ingest an external cgroup profile)",
+  "elapsed_wall_time_ns": 1702668091,
+  "enforced_limits": {
+    "cpu_affinity": "CPU 0",
+    "memory_max_bytes": 8589934592,
+    "memory_mechanism": "systemd user scope on Linux cgroup v2, memory.max",
+    "memory_swap_max_bytes": 0,
+    "process_tree_memory": true,
+    "process_tree_wall_time": true,
+    "wall_mechanism": "Python watchdog; SIGTERM then SIGKILL to supervised process group"
+  },
+  "host": {
+    "load_average_after": [
+      0.841796875,
+      1.537109375,
+      1.3125
+    ],
+    "load_average_before": [
+      0.841796875,
+      1.537109375,
+      1.3125
+    ],
+    "logical_cpu_count": 8,
+    "machine": "x86_64",
+    "release": "7.2.8-9-omarchy",
+    "system": "Linux"
+  },
+  "interpretation": "The cgroup limit applied to this single serial suite process tree and therefore bounded every sequential solver call; the 300-second wall watchdog applied to the whole suite, not each attempt. Do not use this capture as per-attempt timeout evidence.",
+  "measurement_counts": {
+    "attempt_rows": 140,
+    "status_counts": {
+      "passed": 140
+    },
+    "termination_counts": {
+      "completed": 140
+    }
+  },
+  "observed": {
+    "cpu_stat": [
+      "usage_usec 1728121",
+      "user_usec 1218727",
+      "system_usec 509394",
+      "nice_usec 0",
+      "core_sched.force_idle_usec 0"
+    ],
+    "exit_code": 0,
+    "memory_events": [
+      "low 0",
+      "high 0",
+      "max 0",
+      "oom 0",
+      "oom_kill 0",
+      "oom_group_kill 0",
+      "sock_throttled 0"
+    ],
+    "process_tree_peak_memory_bytes": 24743936,
+    "timed_out": false
+  },
+  "profile": "enforced-cgroup-v2-process-tree",
+  "record_file_sha256": "88acdb74bda3a7d25904b975454fffedd69c05669737a14be7abddfd5d44ced6",
+  "requested_limits": {
+    "maximum_concurrent_jobs": 1,
+    "process_tree_memory_bytes": 8589934592,
+    "process_tree_wall_time_seconds": 300,
+    "solver_threads": 1
+  },
+  "runner_stdout_sha256": "c0bf8454ab138da267c7fa680b259c1343b138aeab23b863f8d27e3b12dcbdb4",
+  "schema": "csl.mpc01-resource-profile/2",
+  "status": "completed",
+  "systemd_scope_invocation_id": "176db5be7c534affbbf14902635c9f7c",
+  "systemd_scope_note": "CPUAccounting=yes was requested but systemd 262 deprecated and ignored that property; cpu.stat remains available through cgroup v2.",
+  "systemd_scope_unit": "run-p1550887-i1543575.scope",
+  "timeout_scope": "entire seven-fixture capture invocation; solver attempts are sequential and each is retained in the native event stream"
+}

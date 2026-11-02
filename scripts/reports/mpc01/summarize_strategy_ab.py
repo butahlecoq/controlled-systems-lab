@@ -6,6 +6,8 @@ import hashlib
 import json
 import html
 import statistics
+import os
+import shlex
 from collections import defaultdict
 from pathlib import Path
 
@@ -23,7 +25,8 @@ def digest(path: Path) -> str:
 
 
 def write_report(output: Path, measured: dict[str, list[dict]], environment: dict,
-                 scenario: Path, events: Path, stdout: Path) -> None:
+                 scenario: Path, events: Path, stdout: Path,
+                 resource_profile: dict | None = None) -> None:
     svg_path = output.with_name("strategy-ab-ts01-control-plane.svg")
     report_path = output.with_suffix(".html")
     points = {strategy: [] for strategy in EXPECTED}
@@ -88,6 +91,21 @@ def write_report(output: Path, measured: dict[str, list[dict]], environment: dic
     scenario_hash = digest(scenario)
     event_hash = digest(events)
     stdout_hash = digest(stdout)
+    scenario_href = html.escape(os.path.relpath(scenario, output.parent))
+    if resource_profile is None:
+        resource_note = "No separate limiter or per-attempt resource-cap profile was collected; these values do not support a general performance-winner claim."
+        resource_link = ""
+    else:
+        limits = resource_profile["enforced_limits"]
+        observed = resource_profile["observed"]
+        resource_note = (
+            f"The full capture process tree completed under a {limits['memory_max_bytes']} byte cgroup-v2 memory cap "
+            f"with swap disabled and a {resource_profile['requested_limits']['process_tree_wall_time_seconds']} second suite-level wall cap. "
+            "The wall cap covers the whole capture invocation, not each trial separately. "
+            f"Observed peak process-tree memory was {observed['process_tree_peak_memory_bytes']} bytes; no OOM or timeout occurred. "
+            "This constrained-host profile is not the comparison-program default per-attempt profile, and timings support no general winner claim."
+        )
+        resource_link = '<li>Enforced capture resource profile: <a href="resource-profile.json">JSON</a></li>'
     report = f'''<!doctype html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>MPC-01 T-S01 Strategy A/B result</title>
@@ -97,8 +115,8 @@ def write_report(output: Path, measured: dict[str, list[dict]], environment: dic
 <figure><img src="{html.escape(svg_path.name)}" alt="Control histories on the exact optimal family in the u0-u1 plane"><figcaption>The dashed segment is the exact minimizing relation. Markers are selected control histories saved for each strategy; a ring around a filled marker shows both strategies selected that same history.</figcaption>{legend}</figure>
 <h2>Saved run</h2><p>One warmup pair was excluded; seven measured pairs alternated execution order. All 16 trials completed successfully. Each strategy selected two distinct histories with zero original and recomputed objective; original-data feasibility and objective checks passed numerically. These witness checks do not establish separate optimality or completeness proofs.</p>
 <h2>Descriptive timing</h2><table><thead><tr><th>Strategy</th><th>Median end-to-end (ms)</th><th>Range (ms)</th></tr></thead><tbody>{''.join(timing_rows)}</tbody></table>
-<p>The interval covers strategy preparation through two witness checks. It excludes process startup, shared scenario/provider setup, JSON serialization, build and rendering. No separate limiter or per-attempt resource-cap profile was collected; these values do not support a general performance-winner claim.</p>
-<h2>Reproducibility</h2><ul><li>Source commit: <code>{source_commit}</code></li><li>Scenario SHA-256: <code>{scenario_hash}</code></li><li>Event and stdout SHA-256: <code>{event_hash}</code> / <code>{stdout_hash}</code></li><li>Environment: <a href="strategy-ab-ts01-environment.json">saved environment metadata</a></li><li>Raw records: <a href="strategy-ab-ts01-events.jsonl">event JSONL</a> · <a href="strategy-ab-ts01-stdout.jsonl">stdout JSONL</a></li><li>Scenario input: <a href="../../../../{html.escape(environment['scenario'])}">scenario JSON</a></li></ul>
+<p>The interval covers strategy preparation through two witness checks. It excludes process startup, shared scenario/provider setup, JSON serialization, build and rendering. {resource_note}</p>
+<h2>Reproducibility</h2><ul><li>Source commit: <code>{source_commit}</code></li><li>Scenario SHA-256: <code>{scenario_hash}</code></li><li>Event and stdout SHA-256: <code>{event_hash}</code> / <code>{stdout_hash}</code></li><li>Environment: <a href="strategy-ab-ts01-environment.json">saved environment metadata</a></li><li>Raw records: <a href="strategy-ab-ts01-events.jsonl">event JSONL</a> · <a href="strategy-ab-ts01-stdout.jsonl">stdout JSONL</a></li>{resource_link}<li>Scenario input: <a href="{scenario_href}">scenario JSON</a></li></ul>
 <p class="note">This is one registered-strategy functional comparison, not a general performance ranking or the full #597 matrix. The separate OSQP/HPIPM solve-phase measurements use different timing boundaries.</p>
 </body></html>'''
     report_path.write_text(report, encoding="utf-8")
@@ -110,6 +128,7 @@ def main() -> None:
     parser.add_argument("--stdout", type=Path, required=True)
     parser.add_argument("--scenario", type=Path, required=True)
     parser.add_argument("--environment", type=Path, required=True)
+    parser.add_argument("--resource-profile", type=Path)
     parser.add_argument("--output", type=Path, required=True)
     args = parser.parse_args()
 
@@ -171,9 +190,29 @@ def main() -> None:
     for strategy in EXPECTED:
         values = [row["timings_ns"]["end_to_end_strategy"]["value"] for row in measured[strategy]]
         lines.append(f"| `{strategy}` | {statistics.median(values) / 1e6:.6f} | {min(values) / 1e6:.6f}–{max(values) / 1e6:.6f} |")
+    resource_profile = None
+    if args.resource_profile:
+        resource_profile = json.loads(args.resource_profile.read_text(encoding="utf-8"))
+        if resource_profile.get("schema") != "csl.mpc01-resource-profile/1" or resource_profile.get("status") != "completed":
+            raise ValueError("resource profile is not a completed MPC-01 capture")
+        enforced = resource_profile["enforced_limits"]
+        observed = resource_profile["observed"]
+        if (enforced.get("process_tree_wall_time") is not True or
+                enforced.get("process_tree_memory") is not True or
+                observed.get("timed_out") is not False or observed.get("exit_code") != 0 or
+                enforced.get("memory_swap_max_bytes") != 0 or
+                any(line.rsplit(" ", 1)[-1] != "0" for line in observed["memory_events"]
+                    if line.startswith(("max ", "oom ", "oom_kill ", "oom_group_kill ")))):
+            raise ValueError("resource-limited capture did not complete cleanly under its declared caps")
+        if json.loads(args.environment.read_text(encoding="utf-8"))["measurement"]["resource_profile_sha256"] != digest(args.resource_profile):
+            raise ValueError("environment does not bind the supplied resource profile")
+        lines[0] = "# Resource-limited saved Strategy A/B T-S01 capture"
     lines.extend([
         "",
-        "The timing interval covers strategy preparation through two witness checks. It excludes process startup, shared scenario/provider setup, JSON serialization, build and rendering. No separate limiter or per-attempt resource-cap profile was collected, so these tiny-case timings support no general performance winner claim.",
+        ("The timing interval covers strategy preparation through two witness checks. It excludes process startup, shared scenario/provider setup, JSON serialization, build and rendering. " +
+         ("No separate limiter or per-attempt resource-cap profile was collected, so these tiny-case timings support no general performance winner claim."
+          if resource_profile is None else
+          f"The full capture process tree completed under a {resource_profile['enforced_limits']['memory_max_bytes']} byte cgroup-v2 memory cap with swap disabled and a {resource_profile['requested_limits']['process_tree_wall_time_seconds']} second suite-level wall cap. The wall cap covers the whole capture invocation, not each trial separately. Observed peak process-tree memory was {resource_profile['observed']['process_tree_peak_memory_bytes']} bytes; no OOM or timeout occurred. This constrained-host profile is not the comparison-program default per-attempt profile and supports no general performance winner claim.")),
         "",
         "Saved-data report: [`strategy-ab-ts01-summary.html`](strategy-ab-ts01-summary.html) with the control-plane figure [`strategy-ab-ts01-control-plane.svg`](strategy-ab-ts01-control-plane.svg).",
         "",
@@ -181,17 +220,18 @@ def main() -> None:
         "",
         "```sh",
         "python3 scripts/reports/mpc01/summarize_strategy_ab.py \\",
-        "  --events docs/research/evidence/mpc01-external-qps-20261026-r3/strategy-ab-ts01-events.jsonl \\",
-        "  --stdout docs/research/evidence/mpc01-external-qps-20261026-r3/strategy-ab-ts01-stdout.jsonl \\",
-        "  --scenario examples/scenarios/two-stage-integrator.json \\",
-        "  --environment docs/research/evidence/mpc01-external-qps-20261026-r3/strategy-ab-ts01-environment.json \\",
-        "  --output docs/research/evidence/mpc01-external-qps-20261026-r3/strategy-ab-ts01-summary.md",
+        f"  --events {shlex.quote(str(args.events))} \\",
+        f"  --stdout {shlex.quote(str(args.stdout))} \\",
+        f"  --scenario {shlex.quote(str(args.scenario))} \\",
+        f"  --environment {shlex.quote(str(args.environment))} \\",
+        *([f"  --resource-profile {shlex.quote(str(args.resource_profile))} \\"] if args.resource_profile else []),
+        f"  --output {shlex.quote(str(args.output))}",
         "```",
         "",
     ])
     args.output.write_text("\n".join(lines), encoding="utf-8")
     write_report(args.output, measured, json.loads(args.environment.read_text()),
-                 args.scenario, args.events, args.stdout)
+                 args.scenario, args.events, args.stdout, resource_profile)
 
 
 if __name__ == "__main__":

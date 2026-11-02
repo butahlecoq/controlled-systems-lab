@@ -1,0 +1,58 @@
+{
+  "command": [
+    "/home/butahlecoq/.local/share/codex/worktrees/mpc06-tube-mpc-602-20261028/build/dev/installed-consumer/examples-build/registered_synthesis_comparison",
+    "--measure-profile",
+    "ts02_constant_integrator",
+    "/home/butahlecoq/.local/share/codex/worktrees/mpc01-canonical-pair-20261102/docs/research/evidence/mpc01-external-qps-20261026-r3/strategy-ab-ts02-limited-capture/scenario.json",
+    "/var/tmp/csl-mpc01-limited-ts02-20261102/strategy-ab-ts02-limited-events.jsonl"
+  ],
+  "elapsed_wall_time_ns": 60324138,
+  "enforced_limits": {
+    "memory_max_bytes": 2147483648,
+    "memory_mechanism": "systemd user scope on Linux cgroup v2, memory.max",
+    "memory_swap_max_bytes": 0,
+    "process_tree_memory": true,
+    "process_tree_wall_time": true,
+    "wall_mechanism": "Python watchdog; SIGTERM then SIGKILL to supervised process group"
+  },
+  "host": {
+    "load_average_after": [
+      1.63916015625,
+      0.7666015625,
+      0.4501953125
+    ],
+    "load_average_before": [
+      1.63916015625,
+      0.7666015625,
+      0.4501953125
+    ],
+    "logical_cpu_count": 8,
+    "machine": "x86_64",
+    "release": "7.2.8-9-omarchy",
+    "system": "Linux"
+  },
+  "observed": {
+    "exit_code": 0,
+    "memory_current_bytes": 18694144,
+    "memory_events": [
+      "low 0",
+      "high 0",
+      "max 0",
+      "oom 0",
+      "oom_kill 0",
+      "oom_group_kill 0",
+      "sock_throttled 0"
+    ],
+    "process_tree_peak_memory_bytes": 19841024,
+    "timed_out": false
+  },
+  "profile": "local-host-constrained-process-tree",
+  "requested_limits": {
+    "maximum_concurrent_jobs": 1,
+    "process_tree_memory_bytes": 2147483648,
+    "process_tree_wall_time_seconds": 300
+  },
+  "schema": "csl.mpc01-resource-profile/1",
+  "status": "completed",
+  "timeout_scope": "one complete strategy A/B capture process group; applies to the suite invocation, not individually restarted trials"
+}

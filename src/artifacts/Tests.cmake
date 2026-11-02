@@ -20,7 +20,10 @@ csl_test_target(run_statistics_contract artifacts)
 add_executable(mpc01_comparison_manifest_tests tests/artifacts/mpc01_comparison_manifest.cpp)
 target_link_libraries(mpc01_comparison_manifest_tests PRIVATE CSL::artifacts doctest::doctest)
 target_compile_definitions(mpc01_comparison_manifest_tests PRIVATE
-  CSL_MPC01_COMPARISON_RECORDS_FILE="${PROJECT_SOURCE_DIR}/docs/research/evidence/mpc01-external-qps-20261026-r3/comparison-records.jsonl")
+  CSL_MPC01_COMPARISON_RECORDS_FILE="${PROJECT_SOURCE_DIR}/docs/research/evidence/mpc01-external-qps-20261026-r3/comparison-records.jsonl"
+  CSL_MPC01_STRATEGY_AB_RECORD_FILE="${PROJECT_SOURCE_DIR}/docs/research/evidence/mpc01-external-qps-20261026-r3/strategy-ab-ts01-comparison-record.json"
+  CSL_MPC01_LIMITED_STRATEGY_AB_RECORD_FILE="${PROJECT_SOURCE_DIR}/docs/research/evidence/mpc01-external-qps-20261026-r3/strategy-ab-ts01-limited-capture/strategy-ab-ts01-comparison-record.json"
+  CSL_MPC01_TS02_LIMITED_STRATEGY_AB_RECORD_FILE="${PROJECT_SOURCE_DIR}/docs/research/evidence/mpc01-external-qps-20261026-r3/strategy-ab-ts02-limited-capture/strategy-ab-ts02-comparison-record.json")
 add_test(NAME mpc01_comparison_manifest_tests COMMAND mpc01_comparison_manifest_tests)
 csl_test_target(mpc01_comparison_manifest_tests artifacts)
 

@@ -1,0 +1,7 @@
+Solver capture:
+systemd-run --user --scope --collect --property=MemoryMax=8G --property=MemorySwapMax=0 --property=CPUAccounting=yes /usr/bin/python3 capture-supervisor.py
+
+Independent checker:
+systemd-run --user --scope --collect --property=MemoryMax=8G --property=MemorySwapMax=0 /usr/bin/python3 checker-supervisor.py
+
+On systemd 262, CPUAccounting=yes is deprecated and ignored; cgroup-v2 cpu.stat was read directly.

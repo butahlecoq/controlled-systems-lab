@@ -1,0 +1,39 @@
+{
+  "backend_pins": {
+    "blasfeo": {
+      "archive_sha256": "d2454027985a907f6fedb0c6a14e0e7825e586968309b38f7f02146db70770da",
+      "version": "d6251233923c9b475fe894fb729fb63ab693e301"
+    },
+    "hpipm": {
+      "archive_sha256": "97278f7c10a72387c574488701a1e85626df7f3fa3aea190ba41d1368a83aa4b",
+      "version": "e3a56c1caddd7f12d125d84f337b9a9e5c186271"
+    },
+    "osqp": {
+      "archive_sha256": "dd6a1c2e7e921485697d5e7cdeeb043c712526c395b3700601f51d472a7d8e48",
+      "version": "1.0.0"
+    }
+  },
+  "build_type": "Release",
+  "c_flags_sha256": "4dd59be449eea44ea9b80469a10392d694a053e017b50b00a65198b9c3010c60",
+  "cmake_version": "3.31.6",
+  "compile_flags": "-O3 -DNDEBUG -std=c++20 -Wall -Wextra -Wpedantic -Werror",
+  "compile_flags_sha256": "4dd59be449eea44ea9b80469a10392d694a053e017b50b00a65198b9c3010c60",
+  "compiler_id": "GNU",
+  "compiler_version": "16.2.1",
+  "cxx_standard": "C++20",
+  "executable_sha256": "ca392a4abbcf68cd0c65ee3d4fd2a4841a9157b0893bcfc2e3f8366269f4e821",
+  "generator": "Ninja",
+  "inputs": {
+    "b04_case_sha256": "bc9e1b804b7878cb0da5c28c030893e1b41e7a2a34cb86b1c0fb8380ec780f6d",
+    "b04_reference_sha256": "8b7fa718c473a765aae0fc912548cb32f1206d96e67b5b8df61377955c58c7ba",
+    "double_integrator_421_sha256": "b2398f6e84046bd196b885b6e37d1b4e1df877b5e809ec32ee6c3cab8846836a"
+  },
+  "link_flags_sha256": "36a9e7f1c95b82ffb99743e0c5c4ce95d83c9a430aac59f84ef3cbfab6145068",
+  "ninja_version": "1.13.2",
+  "schema": "csl.mpc01-build-identity/1",
+  "source_clean": true,
+  "source_revision": "8d123f95d925cc7ee515088d0930c3a7b99eec10",
+  "source_snapshot_method": "git-head-tracked-diff-untracked-content-excluding-run-output-sha256/2",
+  "source_tree_sha256": "a5e3d6f7d0c8e14849ff77b87dc64ad345d3c5123b61a55f43d8190668999522",
+  "target_flags_sha256": "69c85656de1b7362719e9f3d173994d1424590add2006988b3161803338620be"
+}

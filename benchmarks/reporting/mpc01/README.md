@@ -97,3 +97,33 @@ solvers' optimal attempts are in the r3 bundle. The separate
 trajectory per solver with the exact witness; it is illustrative, not a
 repeated benchmark, and its residual checks are inconclusive. The B04 Pages
 example remains the exact-witness illustration.
+
+Package the saved Strategy A/B attempts as a canonical comparison record:
+
+```sh
+python3 scripts/reports/mpc01/build_strategy_ab_records.py \
+  --events docs/research/evidence/mpc01-external-qps-20261026-r3/strategy-ab-ts01-events.jsonl \
+  --scenario examples/scenarios/two-stage-integrator.json \
+  --environment docs/research/evidence/mpc01-external-qps-20261026-r3/strategy-ab-ts01-environment.json \
+  --codec-environment docs/research/evidence/mpc01-external-qps-20261026-r3/strategy-ab-ts01-csl-environment.json \
+  --output docs/research/evidence/mpc01-external-qps-20261026-r3/strategy-ab-ts01-comparison-record.json
+```
+
+The record keeps the saved event lines, including warmups, in source order by
+strategy and repetition. The capture has no enforced resource cap, so its
+timings remain descriptive.
+
+A second T-S01 capture is retained in
+[`strategy-ab-ts01-limited-capture/`](../../../docs/research/evidence/mpc01-external-qps-20261026-r3/strategy-ab-ts01-limited-capture/).
+Its [HTML report](../../../docs/research/evidence/mpc01-external-qps-20261026-r3/strategy-ab-ts01-limited-capture/strategy-ab-ts01-summary.html)
+shows both strategies in the control plane; the [resource profile](../../../docs/research/evidence/mpc01-external-qps-20261026-r3/strategy-ab-ts01-limited-capture/resource-profile.json)
+and [canonical comparison record](../../../docs/research/evidence/mpc01-external-qps-20261026-r3/strategy-ab-ts01-limited-capture/strategy-ab-ts01-comparison-record.json)
+retain the process-tree cap and all 16 attempts. The [capture supervisor](../../../docs/research/evidence/mpc01-external-qps-20261026-r3/strategy-ab-ts01-limited-capture/capture-supervisor.py)
+records its exact process-group watchdog behavior. The capture completed in
+67.224 ms, peaked at 10,018,816 bytes under a 2 GiB cgroup-v2 memory cap, used
+no swap, and recorded no memory-limit events. Seven measured pairs passed per
+strategy. Their descriptive end-to-end medians were 5.322090 ms for reach-back
+(range 5.254692–5.786888 ms) and 1.281738 ms for Strategy B (range
+1.266303–1.402075 ms). This lower-cap profile uses a suite-level 300-second
+wall limit, not a per-trial deadline; it is not the comparison-program default
+profile and supports no general performance-winner claim.

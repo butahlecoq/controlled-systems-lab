@@ -1,0 +1,2 @@
+Usage: registered_synthesis_comparison <two-stage-integrator.json> [results.json]
+   or: registered_synthesis_comparison --measure <two-stage-integrator.json> [events.jsonl]

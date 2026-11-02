@@ -1199,6 +1199,76 @@ TEST_CASE("external geometry method runs retain provenance in paired comparison 
     CHECK(std::holds_alternative<ar::ArtifactError>(ar::encode_recorded_comparison(spec, wrong_event)));
 }
 
+TEST_CASE("MPC Strategy A/B input manifests retain scenario and capture identity") {
+    namespace ar = artifacts;
+    using Json = nlohmann::json;
+
+    const std::string manifest_text =
+        R"({"profile":"ts01_exact_integrator","scenario_sha256":"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa","schema":"csl.mpc01-strategy-ab-input/1","resolved_problem_id":"csl.problem.v1.sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"})";
+    const auto manifest_result = problem::snapshot_content(std::span<const std::byte>{
+        reinterpret_cast<const std::byte*>(manifest_text.data()), manifest_text.size()});
+    REQUIRE(std::holds_alternative<problem::ResolvedContent>(manifest_result));
+    const auto manifest = std::get<problem::ResolvedContent>(manifest_result);
+    const auto manifest_digest = problem::hex(manifest.digest());
+    problem::ContentDigest request_digest{};
+    request_digest.bytes.fill(std::byte{0x1a});
+
+    const auto make_run = [&](const std::string& strategy, char config_char, const std::string& run_id) {
+        ar::ExternalMethodRunInput input;
+        input.run = {run_id};
+        input.problem = {"csl.problem.v1.sha256:" + manifest_digest};
+        input.configuration = {"csl.config.v1.sha256:" + std::string(64, config_char)};
+        input.request_digest = request_digest;
+        input.input_manifest_schema = "csl.mpc01-strategy-ab-input/1";
+        input.input_manifest.assign(manifest.bytes().begin(), manifest.bytes().end());
+        input.method_id = strategy;
+        input.method_version = "1";
+        input.sources = {{"examples/registered_synthesis_comparison.cpp", std::string(64, 'c')}};
+        input.runtime = {"C++", "registered-synthesis-strategy", "GNU 16.2.1",
+            std::string(64, 'd'), "Linux", "x86_64", "GNU", "16.2.1", "Release"};
+        input.status = ar::AttemptStatus::completed;
+        input.result_payload = R"({"schema":"csl.mpc01-strategy-ab-attempt/1"})";
+        return take_artifact(ar::encode_external_method_run(input), "encode MPC Strategy A/B run");
+    };
+    const auto strategy_a = std::string("csl.synthesis.reach-back");
+    const auto strategy_b = std::string("csl.synthesis.strategy-b");
+    const auto run_a = make_run(strategy_a, 'a', "mpc01-strategy-a-r0");
+    const auto run_b = make_run(strategy_b, 'b', "mpc01-strategy-b-r0");
+    const Json spec_json{{"schema", "csl.comparison-spec/2"},
+        {"problem_id", "csl.problem.v1.sha256:" + manifest_digest},
+        {"request_digest", problem::hex(request_digest)}, {"repetitions", 1},
+        {"input_manifest_hash", manifest_digest},
+        {"input_manifest_source", "csl.mpc01-strategy-ab-input/1"},
+        {"arms", Json::array({
+            Json{{"configuration_id", "csl.config.v1.sha256:" + std::string(64, 'a')},
+                {"strategy", strategy_a}, {"instrumentation", "disabled"}},
+            Json{{"configuration_id", "csl.config.v1.sha256:" + std::string(64, 'b')},
+                {"strategy", strategy_b}, {"instrumentation", "disabled"}}})}};
+    const auto spec_text = spec_json.dump();
+    const auto spec_result = problem::snapshot_content(std::span<const std::byte>{
+        reinterpret_cast<const std::byte*>(spec_text.data()), spec_text.size()});
+    REQUIRE(std::holds_alternative<problem::ResolvedContent>(spec_result));
+    const auto spec = std::get<problem::ResolvedContent>(spec_result);
+    const auto attempt = [](std::uint32_t arm, const std::string& strategy,
+                            const ar::RecordedExternalMethodRunArtifact& run) {
+        const auto event = Json{{"schema", "csl.external-method-event/1"}, {"status", "passed"},
+            {"method_id", strategy}, {"instrumentation", "disabled"}, {"repetition", 0},
+            {"warmup", true}}.dump();
+        return ar::ComparisonAttempt{arm, 0, ar::AttemptStatus::completed,
+            {run.run_id(), run.content().digest()}, run, event};
+    };
+    const std::vector<ar::ComparisonAttempt> attempts{
+        attempt(0, strategy_a, run_a), attempt(1, strategy_b, run_b)};
+    const auto record = take_artifact(ar::encode_recorded_comparison(spec, attempts),
+        "encode MPC Strategy A/B comparison");
+    const auto wire = std::string(reinterpret_cast<const char*>(record.content().bytes().data()),
+        record.content().bytes().size());
+    const auto restored = take_artifact(ar::decode_recorded_comparison(wire),
+        "decode MPC Strategy A/B comparison");
+    CHECK(restored.content().digest() == record.content().digest());
+    CHECK(wire.find("csl.mpc01-strategy-ab-input/1") != std::string::npos);
+}
+
 TEST_CASE("approximation checker events preserve profile, evidence, resources and outcomes") {
     namespace ar = artifacts;
     using Json = nlohmann::json;
