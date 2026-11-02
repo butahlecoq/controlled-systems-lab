@@ -5,9 +5,11 @@ on:
     paths:
       - .github/workflows/mpc01-per-attempt-pages-augmentation.yml
       - scripts/reports/mpc01/stage_per_attempt.py
+      - scripts/reports/mpc01/augment_pages.py
       - scripts/reports/mpc01/summarize_per_attempt.py
       - docs/research/evidence/mpc01-per-attempt-20261103-r3/**
       - tests/reporting/test_mpc01_per_attempt_publication.py
+      - tests/reporting/test_mpc01_pages_augmentation.py
   workflow_run:
     workflows: [Algorithm report records and site]
     types: [completed]
@@ -32,6 +34,7 @@ jobs:
         run: |
           python scripts/reports/mpc01/summarize_per_attempt.py --bundle docs/research/evidence/mpc01-per-attempt-20261103-r3
           (cd docs/research/evidence/mpc01-per-attempt-20261103-r3 && sha256sum -c SHA256SUMS)
+          python -m unittest tests.reporting.test_mpc01_pages_augmentation
       - name: Stage and verify the augmented site route
         run: |
           mkdir -p build/report-site/examples
@@ -112,31 +115,7 @@ jobs:
 
       - name: Safely extract the Pages site
         if: steps.artifact.outputs.found == 'true'
-        run: |
-          python - <<'PY'
-          from pathlib import Path, PurePosixPath
-          import tarfile
-
-          downloaded = Path('build/pages-download')
-          candidates = list(downloaded.iterdir())
-          if len(candidates) != 1 or candidates[0].name != 'artifact.tar' or not candidates[0].is_file():
-              raise SystemExit('Pages download does not contain exactly artifact.tar')
-          destination = Path('build/report-site')
-          destination.mkdir(parents=True, exist_ok=False)
-          with tarfile.open(candidates[0], 'r:') as archive:
-              members = archive.getmembers()
-              if not members:
-                  raise SystemExit('Pages artifact is empty')
-              for member in members:
-                  path = PurePosixPath(member.name)
-                  if path.is_absolute() or '..' in path.parts:
-                      raise SystemExit(f'unsafe Pages artifact path: {member.name!r}')
-                  if not (member.isdir() or member.isfile()):
-                      raise SystemExit(f'unsupported Pages artifact entry: {member.name!r}')
-              archive.extractall(destination, filter='data')
-          if not (destination / 'index.html').is_file():
-              raise SystemExit('upstream Pages artifact has no root index.html')
-          PY
+        run: python scripts/reports/mpc01/augment_pages.py --download build/pages-download --destination build/report-site
 
       - name: Stage and verify the per-attempt route
         if: steps.artifact.outputs.found == 'true'
