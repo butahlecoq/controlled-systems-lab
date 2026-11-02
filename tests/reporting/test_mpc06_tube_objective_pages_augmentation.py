@@ -11,7 +11,7 @@ import unittest
 
 ROOT = Path(__file__).resolve().parents[2]
 WORKFLOW = ROOT / ".github/workflows/mpc06-tube-objective-pages-augmentation.yml"
-REPORT = Path("reports/algorithm-results/mpc06-tube-objective-v1/record.json")
+REPORT = Path("reports/algorithm-results/mpc06-tube-objective-v1/result.json")
 VERIFIER = Path("tests/reporting/test_mpc06_tube_objective.py")
 
 
@@ -36,8 +36,9 @@ def scope_step() -> str:
 
 
 class Mpc06TubeObjectivePagesAugmentationTests(unittest.TestCase):
-    def run_scope(self, root: Path) -> tuple[subprocess.CompletedProcess[str], str]:
-        output = root / "workflow-output.txt"
+    def run_scope(self, root: Path, output: Path | None = None) -> tuple[subprocess.CompletedProcess[str], str]:
+        if output is None:
+            output = root / "workflow-output.txt"
         environment = os.environ.copy()
         environment["GITHUB_OUTPUT"] = str(output)
         result = subprocess.run(
@@ -66,6 +67,12 @@ class Mpc06TubeObjectivePagesAugmentationTests(unittest.TestCase):
             (root / VERIFIER).parent.mkdir(parents=True)
             (root / VERIFIER).touch()
             result, output = self.run_scope(root)
+            self.assertEqual(result.returncode, 0, result.stderr)
+            self.assertIn("eligible=true", output)
+
+    def test_current_source_revision_is_eligible(self):
+        with tempfile.TemporaryDirectory(prefix="mpc06-current-source-") as temporary:
+            result, output = self.run_scope(ROOT, Path(temporary) / "workflow-output.txt")
             self.assertEqual(result.returncode, 0, result.stderr)
             self.assertIn("eligible=true", output)
 

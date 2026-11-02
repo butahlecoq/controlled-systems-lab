@@ -36,7 +36,7 @@ jobs:
       - name: Detect MPC-06 report source in the triggering revision
         id: scope
         run: |
-          if [[ ! -f reports/algorithm-results/mpc06-tube-objective-v1/record.json ]]; then
+          if [[ ! -f reports/algorithm-results/mpc06-tube-objective-v1/result.json ]]; then
             echo 'eligible=false' >> "$GITHUB_OUTPUT"
             echo 'This upstream revision predates the MPC-06 tube objective report; skipping augmentation.'
           elif [[ ! -f tests/reporting/test_mpc06_tube_objective.py ]]; then
