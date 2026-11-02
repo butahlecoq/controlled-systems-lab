@@ -11,7 +11,7 @@ This is a new comparison on the frozen `b04-reference-v1` article-derived input 
 - Execution alternated which backend ran first on each repetition. Each backend used a fresh workspace for the cold attempt, then a separate fresh workspace seeded from that repetition's cold result when available. Warm fallback remains explicit.
 - Reported phases are formulation, setup, warm-start, solve and extraction. This excludes post-run independent proof work; the available binary64 residual diagnostics remain inconclusive.
 - No acados or Strategy A/B paired comparison is included. These records do not support a control-strategy or overall solver winner claim.
-- See `comparison-records.jsonl` for the canonical, self-contained archives; `runner-attempts.jsonl` preserves the runner's stdout rows.
+- See `comparison-records.jsonl` for the canonical, self-contained archives; `runner.stdout.jsonl` preserves the runner's stdout attempt rows.
 
 ## B04 reference case: phase timing, microseconds
 
