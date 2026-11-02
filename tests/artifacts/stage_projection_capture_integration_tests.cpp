@@ -156,7 +156,7 @@ TEST_CASE("nonfuel planar geometry preserves named coordinate order against an i
     relation.relation_coordinates = {1, 0};
     ar::StageProjectionCaptureRequest input{
         {"planar-integrator"}, {"planar-named-pair"},
-        {{"east", "m", {}, {}}, {"north", "m", {}, {}}},
+        {{"east", "km", {}, {}}, {"north", "m", {}, {}}},
         {{{ar::CoordinateName{"north"}, ar::CoordinateName{"east"}}}},
         {{{0}, 0.0, std::move(relation)}}, SetRelation::equivalent, Assurance::numerical};
 
@@ -169,7 +169,7 @@ TEST_CASE("nonfuel planar geometry preserves named coordinate order against an i
     CHECK(projection.coordinates[0].label == "north");
     CHECK(projection.coordinates[0].unit == "m");
     CHECK(projection.coordinates[1].label == "east");
-    CHECK(projection.coordinates[1].unit == "m");
+    CHECK(projection.coordinates[1].unit == "km");
     const std::vector<Point> expected{{0, 0}, {0, 2}, {3, 2}, {3, 0}};
     CHECK(hull(projected_vertices(projection.projected_relation)) == hull(expected));
 }
@@ -188,7 +188,7 @@ TEST_CASE("three-state nonfuel simplex uses declared names and reordered relatio
     relation.relation_coordinates = {2, 0, 1};
     ar::StageProjectionCaptureRequest input{
         {"spatial-integrator"}, {"spatial-named-pair"},
-        {{"altitude", "m", {}, {}}, {"east", "m", {}, {}}, {"north", "m", {}, {}}},
+        {{"altitude", "m", {}, {}}, {"east", "km", {}, {}}, {"north", "deg", {}, {}}},
         {{{ar::CoordinateName{"east"}, ar::CoordinateName{"north"}}}},
         {{{0}, 0.0, std::move(relation)}}, SetRelation::equivalent, Assurance::numerical};
 
@@ -199,9 +199,9 @@ TEST_CASE("three-state nonfuel simplex uses declared names and reordered relatio
     REQUIRE(std::holds_alternative<ar::StageProjectionSuccess>(batch.records[0].outcome));
     const auto& projection = std::get<ar::StageProjectionSuccess>(batch.records[0].outcome).projection;
     CHECK(projection.coordinates[0].label == "east");
-    CHECK(projection.coordinates[0].unit == "m");
+    CHECK(projection.coordinates[0].unit == "km");
     CHECK(projection.coordinates[1].label == "north");
-    CHECK(projection.coordinates[1].unit == "m");
+    CHECK(projection.coordinates[1].unit == "deg");
     const std::vector<Point> expected{{0, 0}, {2, 0}, {0, 3}, {0, 0}};
     CHECK(hull(projected_vertices(projection.projected_relation)) == hull(expected));
 }

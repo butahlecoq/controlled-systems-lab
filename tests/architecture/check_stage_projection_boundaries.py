@@ -16,6 +16,7 @@ MATH_MODULES = (
     "sets",
     "simulation",
     "synthesis",
+    "verification",
 )
 MATH_ROOTS = tuple(
     root
