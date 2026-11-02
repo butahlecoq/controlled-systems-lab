@@ -1,0 +1,35 @@
+Flat profile:
+
+Each sample counts as 0.01 seconds.
+  %   cumulative   self              self     total
+ time   seconds   seconds    calls  ms/call  ms/call  name
+ 34.52      0.58     0.58   673000     0.00     0.00  QDLDL_Ltsolve
+ 22.02      0.95     0.37   673000     0.00     0.00  QDLDL_Lsolve
+ 11.90      1.15     0.20   673000     0.00     0.00  solve_linsys_qdldl
+  2.98      1.20     0.05  2029160     0.00     0.00  OSQPVectorf_ew_prod
+  2.98      1.25     0.05  2019000     0.00     0.00  OSQPVectorf_add_scaled
+  2.98      1.30     0.05  1346000     0.00     0.00  OSQPVectorf_add_scaled3
+  2.98      1.35     0.05   673000     0.00     0.00  OSQPVectorf_ew_bound_vec
+  1.19      1.37     0.02   727400     0.00     0.00  OSQPVectorf_plus
+  1.19      1.39     0.02   700200     0.00     0.00  OSQPVectorf_minus
+  1.19      1.41     0.02   673000     0.00     0.00  QDLDL_solve
+  1.19      1.43     0.02   543080     0.00     0.00  blasfeo_dvecnrm_inf
+  1.19      1.45     0.02    41560     0.00     0.00  d_ocp_qp_fact_solve_kkt_step
+  1.19      1.47     0.02    27400     0.00     0.00  OSQPVectorf_round_to_zero
+  1.19      1.49     0.02      280     0.07     5.46  osqp_solve
+  0.60      1.50     0.01   700760     0.00     0.00  osqp_toc
+  0.60      1.51     0.01   683300     0.00     0.00  blasfeo_dvecex_sp
+  0.60      1.52     0.01   673000     0.00     0.00  update_y
+  0.60      1.53     0.01   673000     0.00     0.00  update_z
+  0.60      1.54     0.01   503840     0.00     0.00  blasfeo_hp_ddot
+  0.60      1.55     0.01   413600     0.00     0.00  kernel_dgemv_t_4_lib4
+  0.60      1.56     0.01   279100     0.00     0.00  kernel_dgemm_nt_4x4_lib4
+  0.60      1.57     0.01   189280     0.00     0.00  OSQPVectorf_scaled_norm_inf
+  0.60      1.58     0.01   141140     0.00     0.00  blasfeo_hp_dtrsv_lnn_mn
+  0.60      1.59     0.01   125480     0.00     0.00  OSQPVectorf_norm_inf
+  0.60      1.60     0.01    55200     0.00     0.00  OSQPVectorf_dot_prod_signed
+  0.60      1.61     0.01    27600     0.00     0.00  OSQPVectorf_project_polar_reccone
+  0.60      1.62     0.01    27380     0.00     0.00  csc_Axpy
+  0.60      1.63     0.01    22680     0.00     0.00  void std::__insertion_sort<__gnu_cxx::__normal_iterator<(anonymous namespace)::CapturedAttempt*, std::vector<(anonymous namespace)::CapturedAttempt, std::allocator<(anonymous namespace)::CapturedAttempt> > >, (anonymous namespace)::comparison_record(csl::mpc01::MpcCase const&, std::vector<(anonymous namespace)::CapturedAttempt, std::allocator<(anonymous namespace)::CapturedAttempt> >, std::basic_string_view<char, std::char_traits<char> >, bool, unsigned int)::{lambda(auto:1 const&, auto:2 const&)#1}>(__gnu_cxx::__normal_iterator<(anonymous namespace)::CapturedAttempt*, std::vector<(anonymous namespace)::CapturedAttempt, std::allocator<(anonymous namespace)::CapturedAttempt> > >, __gnu_cxx::__normal_iterator<(anonymous namespace)::CapturedAttempt*, std::vector<(anonymous namespace)::CapturedAttempt, std::allocator<(anonymous namespace)::CapturedAttempt> > >, (anonymous namespace)::comparison_record(csl::mpc01::MpcCase const&, std::vector<(anonymous namespace)::CapturedAttempt, std::allocator<(anonymous namespace)::CapturedAttempt> >, std::basic_string_view<char, std::char_traits<char> >, bool, unsigned int)::{lambda(auto:1 const&, auto:2 const&)#1})
+  0.60      1.64     0.01     5600     0.00     0.00  csc_lmult_diag
+  0.60      1.65     0.01     5600     0.00     0.00  csc_rmult_diag

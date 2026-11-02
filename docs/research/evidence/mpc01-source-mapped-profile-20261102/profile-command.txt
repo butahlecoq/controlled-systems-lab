@@ -1,0 +1,29 @@
+Source commit: dd3b260b847325bc5821b70fea7cbe812fbdacfe
+
+Configure a diagnostic-only instrumented build:
+
+cmake -S . -B <profile-build> -G Ninja \
+  -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTING=ON \
+  -DCSL_BUILD_MPC01_REPORT=ON -DCSL_ENABLE_HIGHS=OFF -DCSL_ENABLE_QHULL=OFF \
+  -DCMAKE_C_FLAGS_RELEASE='-O3 -DNDEBUG -g -pg -fno-omit-frame-pointer' \
+  -DCMAKE_CXX_FLAGS_RELEASE='-O3 -DNDEBUG -g -pg -fno-omit-frame-pointer' \
+  -DCMAKE_EXE_LINKER_FLAGS_RELEASE='-pg'
+
+cmake --build <profile-build> --target csl_mpc01_native_dependencies --parallel 4
+TMPDIR=<profile-build>/tmp cmake --build <profile-build> --target csl_mpc01_report --parallel 4
+
+Run from a fresh output directory. The command uses one CPU, a 300-second
+process-tree watchdog, and an 8 GiB no-swap cgroup-v2 memory cap:
+
+systemd-run --user --scope --quiet -p MemoryMax=8G -p MemorySwapMax=0 \
+  /usr/bin/timeout 300 /usr/bin/taskset -c 0 \
+  <profile-build>/csl_mpc01_report \
+  examples/scenarios/double-integrator-generality.json \
+  docs/research/evidence/b04-reference-v1/canonical-case.json \
+  --repetitions 20 > diagnostic-attempts.jsonl 2> profile.stderr.log
+
+gprof <profile-build>/csl_mpc01_report gmon.out > gprof.txt
+
+The diagnostic output contains instrumentation-distorted solve timings. Use it
+only to inspect call counts and source-mapped CPU samples, never as a benchmark
+record.
