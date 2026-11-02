@@ -1,0 +1,75 @@
+{
+  "build": {
+    "architecture": "x86_64",
+    "backends": {
+      "highs": {
+        "archive_sha256": "2b44b074cf41439325ce4d0bbdac2d51379f56faf17ba15320a410d3c1f07275",
+        "version": "1.11.0"
+      },
+      "qhull": {
+        "archive_sha256": "8774e9a12c70b0180b95d6b0b563c5aa4bea8d5960c15e18ae3b6d2521d64f8b",
+        "version": "8.0.2"
+      }
+    },
+    "build_type": "Release",
+    "c_flags_sha256": "4dd59be449eea44ea9b80469a10392d694a053e017b50b00a65198b9c3010c60",
+    "compiler_id": "GNU",
+    "compiler_version": "16.2.1",
+    "cxx_flags_sha256": "4dd59be449eea44ea9b80469a10392d694a053e017b50b00a65198b9c3010c60",
+    "cxx_standard": "20",
+    "executable_link_flags_sha256": "36a9e7f1c95b82ffb99743e0c5c4ce95d83c9a430aac59f84ef3cbfab6145068",
+    "generator": "Unix Makefiles",
+    "schema": "csl.obs04-build/1",
+    "source_dirty": false,
+    "source_revision": "ce7cc08f585fd80f5e63d30becf5ef4054fd879e",
+    "source_snapshot_method": "git-head-tracked-diff-untracked-content-excluding-run-output-sha256/2",
+    "source_tree_sha256": "7a971bd67de48b54a9053b23c7e116e7f35108188b37dadbe512dc5d9b10e5b1",
+    "target_flags_sha256": "69c85656de1b7362719e9f3d173994d1424590add2006988b3161803338620be"
+  },
+  "execution": {
+    "cache_policy": "One excluded A-then-B warmup pair; seven measured pairs alternate A/B then B/A. Both members of every pair share this immutable resolved problem and provider registries.",
+    "observed_backend_threads": {
+      "reason": "The driver does not query effective HiGHS thread count.",
+      "status": "unavailable"
+    },
+    "observed_driver_workers": 1,
+    "requested_backend_threads": 1,
+    "requested_workers": 1,
+    "seed_policy": {
+      "kind": "not_applicable",
+      "reason": "The fixed T-S01 fixture uses no random generator."
+    },
+    "tolerances": {
+      "absolute": 1e-08,
+      "relative": 1e-08
+    },
+    "warmup_repetitions": 1,
+    "workspace_policy": "fresh-workspace-per-attempt"
+  },
+  "runtime": {
+    "architecture": "x86_64",
+    "binary_sha256": {
+      "status": "available",
+      "value": "02cd6bfb4e51e565cbf58cd2322adca4765f9c9dc6144f8429eda57575a9046b"
+    },
+    "cpu_model": {
+      "status": "available",
+      "value": "AMD Ryzen 5 3550H"
+    },
+    "kernel": {
+      "status": "available",
+      "value": "7.2.8-9-omarchy"
+    },
+    "logical_cpus": {
+      "status": "available",
+      "value": 8
+    },
+    "os_family": "Linux",
+    "os_version": {
+      "reason": "The saved capture metadata records Linux Omarchy but not the PRETTY_NAME value.",
+      "status": "unavailable"
+    },
+    "schema": "csl.obs04-runtime/1"
+  },
+  "schema": "csl.obs04-environment/1"
+}

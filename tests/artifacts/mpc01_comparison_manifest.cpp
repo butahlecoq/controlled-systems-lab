@@ -29,8 +29,8 @@ TEST_CASE("MPC-01 comparison records pass artifact manifest validation") {
     CHECK(records == 7);
 }
 
-TEST_CASE("MPC-01 Strategy A/B record passes the artifact codec") {
-    std::ifstream input(CSL_MPC01_STRATEGY_AB_RECORD_FILE, std::ios::binary);
+void check_strategy_ab_record(const char* path) {
+    std::ifstream input(path, std::ios::binary);
     REQUIRE(input.good());
     const std::string wire{std::istreambuf_iterator<char>{input}, std::istreambuf_iterator<char>{}};
     CHECK_FALSE(input.bad());
@@ -42,4 +42,12 @@ TEST_CASE("MPC-01 Strategy A/B record passes the artifact codec") {
         FAIL("MPC-01 Strategy A/B comparison rejected at " << error->path << ": " << error->message);
     }
     CHECK(std::holds_alternative<csl::artifacts::RecordedComparisonArtifact>(decoded));
+}
+
+TEST_CASE("MPC-01 Strategy A/B record passes the artifact codec") {
+    check_strategy_ab_record(CSL_MPC01_STRATEGY_AB_RECORD_FILE);
+}
+
+TEST_CASE("MPC-01 resource-limited Strategy A/B record passes the artifact codec") {
+    check_strategy_ab_record(CSL_MPC01_LIMITED_STRATEGY_AB_RECORD_FILE);
 }
