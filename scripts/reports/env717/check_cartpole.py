@@ -237,7 +237,7 @@ def _bounds(values, threshold=None):
 
 
 def svg_figure(data):
-    width, height = 1280, 690
+    width, height = 1280, 740
     panel = {"width": 570, "height": 490, "top": 102, "bottom": 592}
     specifications = [
         {"x_index": 0, "y_index": 1, "x_label": "Cart position x (m)",
@@ -297,9 +297,9 @@ def svg_figure(data):
         parts.append(f'<polyline points="{points}" fill="none" stroke="#ffd166" stroke-width="3" stroke-linejoin="round"/>')
         for x, y in trajectory:
             parts.append(f'<circle cx="{x:.2f}" cy="{y:.2f}" r="3.2" fill="#ffd166" stroke="#101a23" stroke-width="1"/>')
-    parts.extend(['<circle cx="398" cy="644" r="4" fill="#63b4e6" opacity="0.8"/><text x="410" y="649" fill="#d9e1e6" font-family="sans-serif" font-size="13">reachable finite-action prefixes</text>',
-        '<path d="M 701 640 l 8 8 m -8 0 l 8 -8" stroke="#ff6b6b" stroke-width="1.5"/><text x="716" y="649" fill="#d9e1e6" font-family="sans-serif" font-size="13">first terminating state</text>',
-        '<path d="M 1004 644 h 35" stroke="#ffd166" stroke-width="3"/><text x="1046" y="649" fill="#d9e1e6" font-family="sans-serif" font-size="13">selected maximizing trajectory</text>',
+    parts.extend(['<circle cx="398" cy="692" r="4" fill="#63b4e6" opacity="0.8"/><text x="410" y="697" fill="#d9e1e6" font-family="sans-serif" font-size="13">reachable finite-action prefixes</text>',
+        '<path d="M 701 688 l 8 8 m -8 0 l 8 -8" stroke="#ff6b6b" stroke-width="1.5"/><text x="716" y="697" fill="#d9e1e6" font-family="sans-serif" font-size="13">first terminating state</text>',
+        '<path d="M 1004 692 h 35" stroke="#ffd166" stroke-width="3"/><text x="1046" y="697" fill="#d9e1e6" font-family="sans-serif" font-size="13">selected maximizing trajectory</text>',
         '</svg>'])
     return "\n".join(parts)
 
