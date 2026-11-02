@@ -37,13 +37,23 @@ def main() -> int:
     attempts = read_jsonl(bundle / "attempts.jsonl")
     processes = read_jsonl(bundle / "processes.jsonl")
     captured_checks = read_jsonl(bundle / "checks.jsonl")
-    scenario = bundle / "horizon01-t08.json"
-    if sha256(scenario) != manifest.get("scenario_sha256"):
-        parser.error("pinned T=8 scenario hash mismatch")
+    scenario = bundle / str(manifest.get("scenario_file", "horizon01-t08.json"))
+    horizon = manifest.get("horizon")
+    pinned = {
+        2: ("horizon01-t02.json", "056032df5c8a30e376e00c5a0743606211486a0e268b209919ba771bc2efeb76"),
+        4: ("horizon01-t04.json", "ba86e625b4a6daae09d3db8400551e23277400b20fdd78893c9fc9b9c98b2dd3"),
+        8: ("horizon01-t08.json", "af2b5471d85111d2225b5abf579c3b367bce18765763b567be0bc598290c73d4"),
+    }
+    if horizon not in pinned or (scenario.name, sha256(scenario)) != pinned[horizon]:
+        parser.error("captured input is not one of the pinned HORIZON-01 fixtures")
+    if manifest.get("scenario_sha256") != pinned[horizon][1]:
+        parser.error("manifest scenario hash differs from the pinned HORIZON-01 fixture")
 
     by_process = {str(item["process_id"]): item for item in processes}
     if len(by_process) != len(processes):
         parser.error("duplicate process identities")
+    if len(processes) != int(manifest["process_groups"]) * 2:
+        parser.error("process count differs from the two-strategy group schedule")
     for process in processes:
         expected_strategy = ("csl.synthesis.reach-back" if process["group"] % 2 == process["order_position"]
                              else "csl.synthesis.strategy-b")
@@ -67,12 +77,17 @@ def main() -> int:
             output_cache[process_id] = [json.loads(line) for line in stdout.read_text(encoding="utf-8").splitlines()]
         except json.JSONDecodeError as error:
             parser.error(f"invalid output in {process_id}: {error}")
+        if len(output_cache[process_id]) != process.get("expected_results"):
+            parser.error(f"raw output lines differ from manifest count: {process_id}")
 
     for attempt in attempts:
         process_id = str(attempt.get("process_id"))
         output_index = attempt.get("output_line")
         if process_id not in output_cache or not isinstance(output_index, int):
             parser.error(f"attempt has no retained process/output: {attempt.get('attempt_id')}")
+        process = by_process[process_id]
+        if attempt.get("strategy") != process.get("strategy"):
+            parser.error(f"attempt strategy differs from its process: {attempt.get('attempt_id')}")
         lines = output_cache[process_id]
         if output_index < 0 or output_index >= len(lines):
             parser.error(f"attempt output index is invalid: {attempt.get('attempt_id')}")
@@ -87,6 +102,8 @@ def main() -> int:
                        "strategy": attempt.get("strategy"), "status": status, "reasons": reasons})
 
     expected = int(manifest["repetitions_per_strategy"]) * 2
+    if any(attempt.get("horizon") != manifest.get("horizon") for attempt in attempts):
+        parser.error("attempt horizon differs from captured fixture horizon")
     if len(attempts) != expected or len(checks) != expected:
         parser.error(f"attempt count {len(attempts)} differs from expected {expected}")
     captured_by_id = {str(check.get("attempt_id")): check for check in captured_checks}

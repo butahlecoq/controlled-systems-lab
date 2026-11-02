@@ -1,0 +1,78 @@
+{
+  "schema": "csl.review05.source-profile-matrix-summary/1",
+  "claim": "flat gprof samples are source-attribution diagnostics, not performance timings",
+  "profiles": [
+    {
+      "horizon": 2,
+      "strategy": "reach-back",
+      "sample_interval_seconds": 0.01,
+      "sampled_cpu_seconds": 3.71,
+      "sampled_ticks": 371,
+      "largest_function_share_percent": 4.58,
+      "leading_rows": [
+        "std::_Function_handler<void (int&), Highs::callSolveQp()::{lambda(int&)#1}>::_M_manager(std::_Any_data&, std::_Any_data const&, std::_Manager_operation)"
+      ],
+      "function_rows_with_samples": 214
+    },
+    {
+      "horizon": 2,
+      "strategy": "strategy-b",
+      "sample_interval_seconds": 0.01,
+      "sampled_cpu_seconds": 0.31,
+      "sampled_ticks": 31,
+      "largest_function_share_percent": 6.45,
+      "leading_rows": [
+        "OptionRecordString::~OptionRecordString()"
+      ],
+      "function_rows_with_samples": 30
+    },
+    {
+      "horizon": 4,
+      "strategy": "reach-back",
+      "sample_interval_seconds": 0.01,
+      "sampled_cpu_seconds": 9.55,
+      "sampled_ticks": 955,
+      "largest_function_share_percent": 4.92,
+      "leading_rows": [
+        "std::_Function_handler<void (int&), Highs::callSolveQp()::{lambda(int&)#1}>::_M_manager(std::_Any_data&, std::_Any_data const&, std::_Manager_operation)"
+      ],
+      "function_rows_with_samples": 351
+    },
+    {
+      "horizon": 4,
+      "strategy": "strategy-b",
+      "sample_interval_seconds": 0.01,
+      "sampled_cpu_seconds": 0.31,
+      "sampled_ticks": 31,
+      "largest_function_share_percent": 6.45,
+      "leading_rows": [
+        "_init"
+      ],
+      "function_rows_with_samples": 30
+    },
+    {
+      "horizon": 8,
+      "strategy": "reach-back",
+      "sample_interval_seconds": 0.01,
+      "sampled_cpu_seconds": 20.05,
+      "sampled_ticks": 2005,
+      "largest_function_share_percent": 4.89,
+      "leading_rows": [
+        "OptionRecordString::~OptionRecordString()"
+      ],
+      "function_rows_with_samples": 453
+    },
+    {
+      "horizon": 8,
+      "strategy": "strategy-b",
+      "sample_interval_seconds": 0.01,
+      "sampled_cpu_seconds": 0.47,
+      "sampled_ticks": 47,
+      "largest_function_share_percent": 6.38,
+      "leading_rows": [
+        "HFactor::ftranL(HVectorBase<double>&, double, HighsTimerClock*) const"
+      ],
+      "function_rows_with_samples": 42
+    }
+  ]
+}
