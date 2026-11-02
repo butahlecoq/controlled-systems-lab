@@ -1,3 +1,9 @@
+add_executable(exact_rational_tests tests/unit/synthesis/exact_rational_tests.cpp)
+target_include_directories(exact_rational_tests PRIVATE ${PROJECT_SOURCE_DIR}/src)
+target_link_libraries(exact_rational_tests PRIVATE doctest::doctest)
+add_test(NAME exact_rational_tests COMMAND exact_rational_tests)
+csl_test_target(exact_rational_tests synthesis)
+
 if(TARGET CSL::highs_convex AND TARGET CSL::highs_lp)
   add_executable(terminal_minimizers_tests tests/unit/synthesis/terminal_minimizers_tests.cpp)
   target_link_libraries(terminal_minimizers_tests PRIVATE CSL::terminal_minimizers CSL::highs_lp CSL::highs_convex doctest::doctest)
