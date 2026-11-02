@@ -103,6 +103,29 @@ def main() -> None:
     readme = readme.replace("# Matched TwoPoints fixed-plan minimax run", "# Resource-limited matched TwoPoints fixed-plan minimax run")
     readme = readme.replace("reports/algorithm-results/{BUNDLE}", f"reports/algorithm-results/{RESOURCE_BUNDLE}")
     readme = readme.replace("See `limiter-profile.json`.", "See `limiter-profile.json` and `resource-profile.json`.")
+    reproduce = '''## Reproduce
+
+```sh
+cmake --preset dev -DCSL_BUILD_ISSUE824_MATCHED_MINIMAX_REPORT=ON
+cmake --build build/dev --target csl_issue824_matched_minimax_report --parallel 4
+systemd-run --user --scope --property=MemoryMax=8G --property=MemorySwapMax=0 --quiet \\
+  python3 scripts/reports/exp824/run_limited_capture.py \\
+  --resource-output build/issue824-resource-profile.json \\
+  --capture-dir build/issue824-resource-raw \\
+  --publish-output reports/algorithm-results/issue824-two-points-matched-minimax-resource-v1 -- \\
+  python3 scripts/reports/exp824/make_matched_minimax_report.py \\
+  build/dev/csl_issue824_matched_minimax_report build/dev build/issue824-resource-raw \\
+  --limiter-profile reports/algorithm-results/issue824-two-points-matched-minimax-v1/limiter-profile.json \\
+  --profile-build build/dev
+```
+
+The reproduction command uses the enforced Linux cgroup-v2 profile. The separate
+zonotope gprof artifact is bound to the immutable v1 bundle; the report records
+its binary and profile hashes rather than silently relabeling it as a new run.
+'''
+    start = readme.index("## Reproduce\n")
+    end = readme.index("The input follows pinned upstream", start)
+    readme = readme[:start] + reproduce + "\n" + readme[end:]
     files["README.md"] = readme.encode()
 
     page = files["index.html"].decode("utf-8")
