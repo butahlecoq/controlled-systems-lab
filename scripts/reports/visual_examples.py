@@ -85,6 +85,11 @@ SAVED_FIGURES = (
          family="Strategy A · nominal linear exact profile", title="A complete 2D optimal face",
          alt="The feasible upper triangle in the unit square and its full optimal diagonal segment from (0,1) to (1,0).",
          summary="The installed Strategy A example returned objective 1 and a registry-verified complete face x+y=1, 0<=x,y<=1. The page retains inputs, raw result and the numerical assurance limits."),
+    dict(source_report_id="b04-c-exact-dyadic-v1",
+         image="trajectory.svg", page="index.html", records="record.json",
+         family="B04-C research evidence", title="B04-C corrected-track mathematical dossier",
+         alt="One representative sixteen-stage B04-C history in oxidizer and fuel phase-plane projections, with initial state and published rounded terminal point.",
+         summary="An external Python exact-arithmetic audit records the represented-dyadic optimum and a derived 16D history fiber. The compiled Strategy A verifier has not admitted this as a complete family; the plotted curve is one representative, and no historical reproduction claim is made."),
     dict(source_report_id="b06-owner-confirmed-7df01ba3af5e4c46", image="terminal-projections.svg",
          page="index.html", family="Fuel minimax reference", title="B06 fuel terminal set: two projections",
          alt="Numerical projections of the four-state terminal reachable set onto flow and stock-balance coordinates; the stock target is outside the projected set.",
@@ -455,13 +460,19 @@ def algorithm_coverage(catalog, site, gallery_inventory):
             "algorithm coverage was built from an unexpected report catalog")
     kinds = {entry["report_kind"] for entry in reports}
     mapped_kinds = {kind for family in result["families"] for kind in family["catalog_kinds"]}
-    require(kinds <= mapped_kinds, "algorithm coverage omits catalog report kinds: " +
-            ", ".join(sorted(kinds - mapped_kinds)))
+    evidence_only = result.get("evidence_only_kinds", {})
+    require(isinstance(evidence_only, dict) and all(isinstance(key, str) and isinstance(value, str) and value
+            for key, value in evidence_only.items()), "invalid evidence-only catalog kinds")
+    require(not (mapped_kinds & set(evidence_only)), "catalog kind cannot be both algorithm and research evidence")
+    covered_kinds = mapped_kinds | set(evidence_only)
+    require(kinds <= covered_kinds, "algorithm coverage omits catalog report kinds: " +
+            ", ".join(sorted(kinds - covered_kinds)))
     require(all(kind in kinds for family in result["families"] for kind in family["catalog_kinds"]),
             "algorithm coverage refers to an unknown catalog report kind")
     for report in reports:
         route = Path(site) / report["report_id"]
-        raw_name = ("results.jsonl" if report["report_kind"] == "issue6-b07-reference" else
+        raw_name = ("record.json" if report["report_kind"] in evidence_only else
+                    "results.jsonl" if report["report_kind"] == "issue6-b07-reference" else
                     "manifest-correction.json" if report["report_kind"] == "issue6-b06-manifest-correction" else
                     "records.json")
         require((route / "index.html").is_file() and (route / raw_name).is_file(),

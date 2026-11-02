@@ -368,6 +368,18 @@
       "measured_scope": "Four-stage A08 finite-action minimax case: 6,561 plans per objective; seven alternating measured Release calls per objective, each after one process warmup",
       "evidence_limits": "Source-revision reference, not a historical reproduction; finite action catalog only; binary64 numerical assurance; replay trajectories are examples, not a global causal optimality claim; single-adapter timings without a source-mapped limiter profile.",
       "zip_sha256": "87282505affa761f49e048497a7d3822b61125ee430f2b8f8f308587055df358"
+    },
+    {
+      "report_id": "b04-c-research-dossier-2098beafda3f7bcaa0a5cdf34f0dd4f199840157b891afd0236225dfba63c333",
+      "report_kind": "b04-c-research-dossier",
+      "source_report_id": "b04-c-exact-dyadic-v1",
+      "payload_schema": "csl.b04-c-exact-dyadic-fiber/1",
+      "payload_sha256": "a8eb1fff6fafbf1cf766b1ea54799fa61cb75d62fc90ad1ef75fd6437a925d6d",
+      "native_payload_sha256": "a8eb1fff6fafbf1cf766b1ea54799fa61cb75d62fc90ad1ef75fd6437a925d6d",
+      "source_commit": "88d5ab3fdfa68a5b4cf39480ab6d1929799f44a0",
+      "measured_scope": "External exact mathematical audit of the owner-authorized corrected-track B04-C profile",
+      "evidence_limits": "Research evidence only: no compiled verifier or prepared Strategy A result; does not satisfy the registered complete-family requirement; not a historical reproduction; A40 unit scaling remains unresolved",
+      "zip_sha256": "df82d8c011885e366acc67825c235537c751f935ca9f41278e8e7f33c907d680"
     }
   ]
 }

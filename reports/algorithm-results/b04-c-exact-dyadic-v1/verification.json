@@ -1,0 +1,19 @@
+{
+  "acceptance_band": "within pre-registered confirmation band",
+  "control_rows": 100,
+  "exact_kkt_feasibility": "passed",
+  "exact_kkt_stationarity": "passed",
+  "exact_squared_objective": "134792964490469961681008566967861998260941996956836948004424628590858889811682628563706396950310844701862942110602939062700114344274164943/141180446875723591465657315200138569642072615338886940487516042400593177062388632384555785480060342240371815283928361540319322400882688",
+  "global_optimality": "proved for the represented-dyadic convex profile",
+  "model_inputs": "exact dyadic replay passed",
+  "optimal_control_family": "exact 16D H-polytope terminal fiber with independently reconstructed 84D affine lift",
+  "published_rounding_box_reachability": "passed",
+  "scenario_id": "B04-c-exact-dyadic-20261102",
+  "schema": "csl.b04-c-exact-dyadic-fiber-check/1",
+  "terminal_residual_rank": 2,
+  "terminal_residual_rank_pivot_rows": [
+    0,
+    1
+  ],
+  "terminal_set": "singleton"
+}

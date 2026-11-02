@@ -6,6 +6,6 @@ test_rejects_a_perturbed_optimal_control_witness (tests.reporting.test_b04_c_exa
 test_two_phase_plane_figure_is_well_formed_and_labeled (tests.reporting.test_b04_c_exact_fiber.B04CExactFiberTests.test_two_phase_plane_figure_is_well_formed_and_labeled) ... ok
 
 ----------------------------------------------------------------------
-Ran 6 tests in 0.137s
+Ran 6 tests in 0.136s
 
 OK

@@ -1,6 +1,6 @@
 # B04-C exact dyadic mathematical dossier
 
-This is a research dossier checked by an independent Python exact-arithmetic tool. It is not a registered Strategy A result: the profile has not passed the compiled verifier and prepared-request boundary required by ADR 0003 and issue #8. The HTML report and figure remain issue evidence and are not staged in the algorithm-results catalog or Pages until that boundary is implemented.
+This is a research dossier checked by an independent Python exact-arithmetic tool. It is not a registered Strategy A result: the profile has not passed the compiled verifier and prepared-request boundary required by ADR 0003 and issue #8. The report index lists it in a separate Research Evidence section; that entry does not admit it as a compiled algorithm result or satisfy #531.
 
 Scenario `B04-c-exact-dyadic-20261102` is the authorized corrected-track case from issue #531. It uses the saved A39/A01/A40 coefficient family; the sixteen-stage execution is the issue's corrected-track scenario, not a recovered historical T16 generator. Source artifact identities are retained in the record. It is separate from `B04-historical` and `b04-reference-v1`; it makes no reproduction claim.
 
@@ -12,9 +12,9 @@ The reported objective is approximately `30.8991360300144`, inside the pre-regis
 
 The Python checker reconstructs a mathematical set of minimizing histories as a 16-dimensional control H-polytope with exact terminal-state equalities and an affine lift to the 84-coordinate joint history `(x0,...,x16,u0,...,u15)`. This is research evidence only: it is not a compiled, registry-verified family payload, and the repository does not expose its membership or projection queries as a supported API.
 
-The SVG plots one certified representative history in both `(x1,x2)` oxidizer and `(x3,x4)` fuel phase planes. It does not imply that every optimal history has this intermediate trajectory; the entire family is represented by the H-polytope and lift.
+The SVG plots one representative history in both `(x1,x2)` oxidizer and `(x3,x4)` fuel phase planes. It does not imply that every minimizing history has these intermediate states. The family is described in this research record, but is not published as a registered family.
 
-The English [HTML report](index.html) summarizes the research audit and links to its raw record, independent verification output, source notes, and evidence manifest. It is retained in this evidence bundle and is not a discoverable Pages result route while compiled-verifier admission is outstanding.
+The English [HTML report](index.html) summarizes the research audit and links to its raw record, independent verification output, source notes, and evidence manifest. The report index provides a research-only Pages route while compiled-verifier admission remains outstanding.
 
 ## Reproduce and check
 

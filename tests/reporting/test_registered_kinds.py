@@ -20,6 +20,7 @@ import geo02_registered_reports as geo02_publication
 import geo05_registered_reports as geo05_publication
 import geo06_registered_reports as geo06_publication
 import b08_exact_registered_reports as b08_publication
+import b04_c_exact_registered_reports as b04_research_publication
 import b06_manifest_correction_registered_reports as b06_correction_publication
 import issue3_registered_reports as issue3_publication
 import issue3_validated_registered_reports as issue3_validated_publication
@@ -37,6 +38,23 @@ FIXTURES = Path(__file__).resolve().parents[2] / 'reports' / 'algorithm-results'
 
 
 class RegisteredKindTests(unittest.TestCase):
+    def test_b04_catalogue_entry_is_research_only_and_uses_exact_saved_bundle(self):
+        catalogue = json.loads((FIXTURES / 'catalog.json').read_text(encoding='utf-8'))
+        rows = [row for row in catalogue['reports'] if row.get('report_kind') == 'b04-c-research-dossier']
+        self.assertEqual(len(rows), 1)
+        row = rows[0]
+        bundle = FIXTURES / row['source_report_id']
+        adapted = b04_research_publication.adapt(bundle)
+        self.assertEqual((row['report_id'], row['payload_sha256'], row['source_commit']),
+                         (adapted.report_id, adapted.payload_sha256, adapted.source_commit))
+        self.assertIn('does not satisfy the registered complete-family requirement', adapted.evidence_limits)
+        page = b04_research_publication.render_page(bundle, adapted)
+        self.assertIn('does not satisfy #531 or #8', page)
+        self.assertIn('research-only report is listed separately from compiled algorithm results', page)
+        coverage = json.loads((FIXTURES.parents[1] / 'scripts' / 'reports' /
+                               'algorithm_visual_coverage.json').read_text(encoding='utf-8'))
+        self.assertIn('b04-c-research-dossier', coverage['evidence_only_kinds'])
+
     def test_opt04_catalogue_row_links_the_published_performance_figure(self):
         catalogue = {'schema': 'csl.algorithm-report-catalog/3', 'artifact_ref': 'main', 'reports': [{
             'report_id': 'opt04-20261013T000000Z-' + 'a' * 64,
@@ -518,7 +536,7 @@ class RegisteredKindTests(unittest.TestCase):
         root=repo/'reports'/'algorithm-results'
         catalogue=json.loads((root/'catalog.json').read_text(encoding='utf-8'))
         self.assertEqual(catalogue['schema'],'csl.algorithm-report-catalog/3')
-        self.assertEqual({item['report_kind'] for item in catalogue['reports']},{'lp','convex','opt04-phase-one','opt05-hull','opt06-basis-reuse','opt07-ordered-hull','opt11-recursive-hull','geo03-hv','geo04-intersection','geo02-affine-sum','geo05-projection-predecessor','geo06-quickhull','b08-displayed-exact','issue3-finite-catalogue','issue3-validated-minimax','issue6-b06-reference','issue6-b06-manifest-correction','issue6-b07-reference','issue6-b09-reference','syn01-nominal-forward','syn02-terminal-minimizers','syn07-ts01-analytic','syn04-strategy-b-ts01','syn04-strategy-b-ts02','syn04-strategy-b-ts03','syn03-strategy-a-ts01','syn03-strategy-a-ts02','syn-ts01-paired-comparison','opt12-warm-start','ext03-temporal-transform'})
+        self.assertEqual({item['report_kind'] for item in catalogue['reports']},{'lp','convex','opt04-phase-one','opt05-hull','opt06-basis-reuse','opt07-ordered-hull','opt11-recursive-hull','geo03-hv','geo04-intersection','geo02-affine-sum','geo05-projection-predecessor','geo06-quickhull','b08-displayed-exact','issue3-finite-catalogue','issue3-validated-minimax','issue6-b06-reference','issue6-b06-manifest-correction','issue6-b07-reference','issue6-b09-reference','syn01-nominal-forward','syn02-terminal-minimizers','syn07-ts01-analytic','syn04-strategy-b-ts01','syn04-strategy-b-ts02','syn04-strategy-b-ts03','syn03-strategy-a-ts01','syn03-strategy-a-ts02','syn-ts01-paired-comparison','opt12-warm-start','ext03-temporal-transform','b04-c-research-dossier'})
         shared={'report_id','report_kind','payload_sha256','source_commit','zip_sha256'}
         for report in catalogue['reports']:
             self.assertTrue(shared <= set(report))
@@ -527,7 +545,7 @@ class RegisteredKindTests(unittest.TestCase):
             self.assertRegex(report['payload_sha256'],r'^[0-9a-f]{64}$')
             self.assertRegex(report['source_commit'],r'^[0-9a-f]{40}$')
             self.assertRegex(report['zip_sha256'],r'^[0-9a-f]{64}$')
-            if report['report_kind'] in ('opt05-hull','opt06-basis-reuse','geo03-hv','geo02-affine-sum','geo05-projection-predecessor','geo06-quickhull','b08-displayed-exact','issue3-finite-catalogue','issue3-validated-minimax','issue6-b06-manifest-correction','syn01-nominal-forward','syn02-terminal-minimizers','syn-ts01-paired-comparison','opt11-recursive-hull','opt12-warm-start'):
+            if report['report_kind'] in ('opt05-hull','opt06-basis-reuse','geo03-hv','geo02-affine-sum','geo05-projection-predecessor','geo06-quickhull','b08-displayed-exact','issue3-finite-catalogue','issue3-validated-minimax','issue6-b06-manifest-correction','syn01-nominal-forward','syn02-terminal-minimizers','syn-ts01-paired-comparison','opt11-recursive-hull','opt12-warm-start','b04-c-research-dossier'):
                 self.assertTrue({'measured_scope','evidence_limits'} <= set(report))
                 # Per-kind saved schemas/manifests are validated at the boundary,
                 # then projected into the same catalogue identity contract.
@@ -549,6 +567,8 @@ class RegisteredKindTests(unittest.TestCase):
                     publisher=issue3_validated_publication
                 if report['report_kind']=='issue6-b06-manifest-correction':
                     publisher=b06_correction_publication
+                if report['report_kind']=='b04-c-research-dossier':
+                    publisher=b04_research_publication
                 adapted=publisher.adapt(root/report['source_report_id'])
                 self.assertEqual((report['report_id'],report['report_kind'],report['payload_sha256'],report['source_commit']),
                                  (adapted.report_id,adapted.kind,adapted.payload_sha256,adapted.source_commit))
