@@ -5,7 +5,7 @@
   ],
   "evidence_files": {
     "README.md": "a7b6cab9a4b3682dcd18a9fb0d29c59f91a2e767c2bf834bd8885fba0b9ba09e",
-    "index.html": "6ea8d3a53e0d2d9c102410bce7b6278f86efe955a143c9e2990c103d23254b0f",
+    "index.html": "a230a5ca5689a705316567268fe4e9deb48c997ce04a1b99bbd3bd56ac3e1977",
     "record.json": "2b23edc697fd46dc96bbb0e107ca7cbad175683b5ffd06b945331903350b1fd5",
     "tests.txt": "9bed42c88e37137ddbefe59234bcd12c1629fd02da276d8be092d681b974c9c1",
     "trajectory.svg": "1a83e9475c5269c738f93502a2f43255a39789e7116fb5638c963b15d417cd82",
@@ -23,7 +23,7 @@
     "docs/research/tools/check_b04_c_exact_fiber.py": "b8cef983cf510d221421dc690ad39ded5d921cc3d26d3ff5147a917198c0401c",
     "docs/research/tools/finalize_b04_c_exact_fiber.py": "b6ea85fe3835344f6ec17ec003e0dbf6ccd501f035212ea54879a2c2f9e0367d",
     "docs/research/tools/render_b04_c_exact_fiber.py": "df26e072af028ffaded1bf79f8dfb517ce180e0937d1dfb88852d35711cab8a3",
-    "docs/research/tools/render_b04_c_exact_fiber_report.py": "01d65a0a8ce80c8f1118668bf76b371b54a773d2f60e9b02e173ffe8358922c7",
+    "docs/research/tools/render_b04_c_exact_fiber_report.py": "5e5035f5c99980c6620ebb55894a8d9ca5e368bccdce226899b067af67f5606b",
     "scripts/reports/algorithm_visual_coverage.json": "577d4c93bad6bb36d6f2c103568293e61d5057b5de2b6c0a04c6f6ffa9daf953",
     "scripts/reports/b04_c_exact_publication_policy.py": "f9239fbeffb4b43524f8a400419b7115dcf6b07395d3d92d828d3741314f2354",
     "scripts/reports/b04_c_exact_registered_reports.py": "e23f86f8d809c5aa8596c0ca596479d3c0a267d347c28c1a3d514779593e572b",

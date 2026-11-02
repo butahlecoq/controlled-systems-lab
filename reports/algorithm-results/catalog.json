@@ -370,7 +370,7 @@
       "zip_sha256": "87282505affa761f49e048497a7d3822b61125ee430f2b8f8f308587055df358"
     },
     {
-      "report_id": "b04-c-research-dossier-2098beafda3f7bcaa0a5cdf34f0dd4f199840157b891afd0236225dfba63c333",
+      "report_id": "b04-c-research-dossier-136072ca382fa30ef8a9bed7afc1cec708aac0e1aadac743847f9c73867e612f",
       "report_kind": "b04-c-research-dossier",
       "source_report_id": "b04-c-exact-dyadic-v1",
       "payload_schema": "csl.b04-c-exact-dyadic-fiber/1",
@@ -379,7 +379,7 @@
       "source_commit": "88d5ab3fdfa68a5b4cf39480ab6d1929799f44a0",
       "measured_scope": "External exact mathematical audit of the owner-authorized corrected-track B04-C profile",
       "evidence_limits": "Research evidence only: no compiled verifier or prepared Strategy A result; does not satisfy the registered complete-family requirement; not a historical reproduction; A40 unit scaling remains unresolved",
-      "zip_sha256": "df82d8c011885e366acc67825c235537c751f935ca9f41278e8e7f33c907d680"
+      "zip_sha256": "eb522d351c62a937a0c929c4fa8011adb77a365b964960d779848ae92c5da6a8"
     }
   ]
 }
