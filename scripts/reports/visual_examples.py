@@ -696,7 +696,7 @@ def build(catalog, site):
                               "page": "index.html#saved-report-figures",
                               "figure": "../" + mpc01_route + "/b04-repeated-projections.svg",
                               "source_page": "../" + mpc01_route + "/index.html",
-                              "raw_record": "../" + mpc01_route + "/comparison-records.jsonl"})
+                              "raw_record": "../" + mpc01_route + "/summary.json"})
     geometry_first = geometry_inventory[0]
     gallery_inventory.append({"family": "Geometry and optimization",
                               "title": "Readable geometry and timing figures",
