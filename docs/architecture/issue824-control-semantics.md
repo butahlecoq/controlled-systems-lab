@@ -52,7 +52,9 @@ performance ranking follows from these objective values.
 Here “outer” describes the declared propagation direction for the numerical
 recurrence. Inclusion evidence is limited to the pinned finite fixture and
 stored binary64 inputs; it is not a validated-arithmetic guarantee for
-arbitrary inputs. Failed or budget-stopped selector attempts remain explicit
+arbitrary inputs. Each public `FinitePlan*Trace` exposes this direction as a
+compile-time `relation` value of `SetRelation::outer`, without adding per-object
+storage. Failed or budget-stopped selector attempts remain explicit
 rows in the zonotope, parallelotope, ellipsoid, and nominal result models and
 make search coverage incomplete. The box minimax result now follows the same
 contract with a `FiniteActionBoxPlanAttempt` sum type and a separate selection

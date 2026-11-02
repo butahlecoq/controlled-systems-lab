@@ -1,10 +1,12 @@
 #pragma once
 
+#include <csl/geometry/contracts.hpp>
 #include <csl/reachability/fixed_plan_disturbance.hpp>
 
 namespace csl::reachability {
 
 struct FinitePlanEllipsoidTrace {
+  static constexpr SetRelation relation = SetRelation::outer;
   struct Stage {
     Vector center;
     // Semiaxes of an axis-aligned ellipsoid. Its coordinate projections are

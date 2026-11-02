@@ -1,5 +1,6 @@
 #pragma once
 
+#include <csl/geometry/contracts.hpp>
 #include <csl/reachability/fixed_plan_disturbance.hpp>
 
 namespace csl::reachability {
@@ -10,6 +11,7 @@ struct ParallelotopeStage {
 };
 
 struct FinitePlanParallelotopeTrace {
+  static constexpr SetRelation relation = SetRelation::outer;
   // x = frame * y; each coordinate box in y is one physical parallelotope.
   Matrix frame;
   std::vector<ParallelotopeStage> stages;

@@ -37,6 +37,7 @@ TEST_CASE("fixed-plan interval boxes enclose every disturbance-history successor
     const auto result = finite_plan_box(request());
     REQUIRE(std::holds_alternative<FinitePlanBoxTrace>(result));
     const auto& trace = std::get<FinitePlanBoxTrace>(result);
+    CHECK(trace.relation == SetRelation::outer);
     REQUIRE(trace.stages.size() == 3);
     CHECK(trace.stages[0].lower[0] <= 0.0);
     CHECK(trace.stages[0].upper[0] >= 1.0);
@@ -63,6 +64,7 @@ TEST_CASE("stagewise four-state boxes enclose the pinned TwoPoints finite-game r
     const auto exact = fixed_plan_disturbance(input, 27);
     REQUIRE(std::holds_alternative<FixedPlanReachable>(exact));
     const auto& enclosure = std::get<FinitePlanBoxTrace>(boxed);
+    CHECK(enclosure.relation == SetRelation::outer);
     const auto& tube = std::get<FixedPlanReachable>(exact);
     REQUIRE(enclosure.stages.size() == tube.stages.size());
     for(std::size_t stage = 0; stage < tube.stages.size(); ++stage) {

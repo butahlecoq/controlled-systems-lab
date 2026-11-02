@@ -1,11 +1,13 @@
 #pragma once
 
+#include <csl/geometry/contracts.hpp>
 #include <csl/reachability/fixed_plan_disturbance.hpp>
 #include <csl/sets/generator_sets.hpp>
 
 namespace csl::reachability {
 
 struct FinitePlanZonotopeTrace {
+    static constexpr SetRelation relation = SetRelation::outer;
     // Every stage is an outer zonotope for the reachable states of this fixed
     // open-loop plan. Generator factors are independent between stages.
     struct Stage {
