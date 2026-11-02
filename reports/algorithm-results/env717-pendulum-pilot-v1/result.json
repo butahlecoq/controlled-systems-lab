@@ -38,7 +38,7 @@
     ],
     "trajectory": [
       {
-        "action_torque_nm": 0.0,
+        "action_torque_nm": -2.0,
         "step": 0,
         "theta_dot_rad_s": 0.0,
         "theta_rad": 1.5,
@@ -141,25 +141,25 @@
     "build_type": "Release",
     "compiler_id": "GNU",
     "compiler_version": "16.2.1",
-    "driver_sha256": "a6777434396ed9ad08e6cc4191f764a853fc9bcb2cda455d4f8c7eb4fb359ff1",
-    "source_commit": "27ef340dfabfe00a83a1b48f1ec6b992ce509822"
+    "driver_sha256": "37cc2ccf5059e841c659d8d5ac82374a5a76e15af184f29c0de33a31cee64214",
+    "source_commit": "f03d53f0df62d591417a7587de7dfc4fa6aac494"
   },
   "runtime_measurement": {
     "comparison": "single-adapter descriptive measurement; no comparator or speedup claim",
     "failed_repetitions": 0,
-    "maximum_elapsed_ns": 2524790245,
+    "maximum_elapsed_ns": 2517125881,
     "measured_repetitions": 7,
-    "median_elapsed_ns": 2509631373,
+    "median_elapsed_ns": 2498552101,
     "metric": "finite_catalogue_enumeration_elapsed",
-    "minimum_elapsed_ns": 2497666701,
+    "minimum_elapsed_ns": 2488719985,
     "raw_elapsed_ns": [
-      2497666701,
-      2524790245,
-      2511479103,
-      2501434881,
-      2509631373,
-      2523997339,
-      2509612659
+      2490108108,
+      2505767721,
+      2503261149,
+      2491979665,
+      2498552101,
+      2488719985,
+      2517125881
     ],
     "schema": "csl.env717-runtime-measurement/1",
     "scope": "steady_clock interval for decoding and evaluating every fixed 10-action plan over the source dynamics; excludes JSON generation, Python replay, plotting, and report writes",

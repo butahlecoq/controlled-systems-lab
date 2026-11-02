@@ -1,9 +1,9 @@
 {
   "capture_scope": "source-equation finite-action enumeration; no Gym package install or RL training run",
-  "captured_at_utc": "2026-11-02T07:48:32.746456+00:00",
+  "captured_at_utc": "2026-11-02T07:59:52.980634+00:00",
   "environment": {
     "arithmetic": "IEEE-754 binary64",
-    "driver_sha256": "a6777434396ed9ad08e6cc4191f764a853fc9bcb2cda455d4f8c7eb4fb359ff1",
+    "driver_sha256": "37cc2ccf5059e841c659d8d5ac82374a5a76e15af184f29c0de33a31cee64214",
     "logical_cpu_count": 8,
     "machine": "x86_64",
     "platform": "Linux-7.2.8-9-omarchy-x86_64-with-glibc2.44",
@@ -11,24 +11,24 @@
     "python": "3.14.8",
     "simulator_commit": "c755d5c35a25ab118746e2ba885894ff66fb8c43",
     "simulator_source_blob": "10ced4d43d218fbf0bb344b3bbc006fcaa7f8362",
-    "source_commit": "27ef340dfabfe00a83a1b48f1ec6b992ce509822"
+    "source_commit": "f03d53f0df62d591417a7587de7dfc4fa6aac494"
   },
   "runtime_measurement": {
     "comparison": "single-adapter descriptive measurement; no comparator or speedup claim",
     "failed_repetitions": 0,
-    "maximum_elapsed_ns": 2524790245,
+    "maximum_elapsed_ns": 2517125881,
     "measured_repetitions": 7,
-    "median_elapsed_ns": 2509631373,
+    "median_elapsed_ns": 2498552101,
     "metric": "finite_catalogue_enumeration_elapsed",
-    "minimum_elapsed_ns": 2497666701,
+    "minimum_elapsed_ns": 2488719985,
     "raw_elapsed_ns": [
-      2497666701,
-      2524790245,
-      2511479103,
-      2501434881,
-      2509631373,
-      2523997339,
-      2509612659
+      2490108108,
+      2505767721,
+      2503261149,
+      2491979665,
+      2498552101,
+      2488719985,
+      2517125881
     ],
     "schema": "csl.env717-runtime-measurement/1",
     "scope": "steady_clock interval for decoding and evaluating every fixed 10-action plan over the source dynamics; excludes JSON generation, Python replay, plotting, and report writes",
