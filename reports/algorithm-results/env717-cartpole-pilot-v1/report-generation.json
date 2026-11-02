@@ -1,0 +1,72 @@
+{
+  "schema": "csl.env717-cartpole-report-generation/1",
+  "metric": "full_report_collection_elapsed",
+  "unit": "ns",
+  "clock": "time.perf_counter_ns",
+  "measured_runs": 5,
+  "warmup_runs": 1,
+  "failed_runs": 0,
+  "warmup_elapsed_ns": [
+    1589868637
+  ],
+  "raw_elapsed_ns": [
+    1590887911,
+    1537526619,
+    1572747698,
+    1562570913,
+    1564748723
+  ],
+  "minimum_elapsed_ns": 1537526619,
+  "maximum_elapsed_ns": 1590887911,
+  "median_elapsed_ns": 1564748723,
+  "scope": "native executable collection (5 warmups plus 9 measured enumerations), independent exhaustive Python replay, figure generation, report serialization and writes; excludes CMake configuration/build, report staging and ZIP generation",
+  "process_statuses": [
+    {
+      "kind": "warmup",
+      "index": 0,
+      "status": "completed",
+      "elapsed_ns": 1589868637,
+      "error": null
+    },
+    {
+      "kind": "measured",
+      "index": 0,
+      "status": "completed",
+      "elapsed_ns": 1590887911,
+      "error": null
+    },
+    {
+      "kind": "measured",
+      "index": 1,
+      "status": "completed",
+      "elapsed_ns": 1537526619,
+      "error": null
+    },
+    {
+      "kind": "measured",
+      "index": 2,
+      "status": "completed",
+      "elapsed_ns": 1572747698,
+      "error": null
+    },
+    {
+      "kind": "measured",
+      "index": 3,
+      "status": "completed",
+      "elapsed_ns": 1562570913,
+      "error": null
+    },
+    {
+      "kind": "measured",
+      "index": 4,
+      "status": "completed",
+      "elapsed_ns": 1564748723,
+      "error": null
+    }
+  ],
+  "checker_sha256": "8bb6f512ffcebafbf63eeb187fdc2916e869af3ed6a36ad06623ef8efcc5510e",
+  "runner_sha256": "16a0593e17ac7b0f1f9ecd57d421f52b55865ae2e0a1b804abe744b7581aa01a",
+  "driver_sha256": "15042bd5c1d1878053b3f7e4521ce0bf115dbb9a8b83d0c066b76bad19cff662",
+  "python": "3.14.8",
+  "host_logical_cpu_count": 8
+}
