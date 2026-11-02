@@ -85,7 +85,7 @@ SAVED_FIGURES = (
          family="Strategy A · nominal linear exact profile", title="A complete 2D optimal face",
          alt="The feasible upper triangle in the unit square and its full optimal diagonal segment from (0,1) to (1,0).",
          summary="The installed Strategy A example returned objective 1 and a registry-verified complete face x+y=1, 0<=x,y<=1. The page retains inputs, raw result and the numerical assurance limits."),
-    dict(route="b04-c-exact-dyadic-v1",
+    dict(source_report_id="b04-c-exact-dyadic-v1",
          image="trajectory.svg", page="index.html", records="record.json",
          family="B04-C corrected-track control", title="B04-C exact optimum and optimal-history fiber",
          alt="One certified sixteen-stage B04-C history in oxidizer and fuel phase-plane projections, with initial state and published rounded terminal point.",

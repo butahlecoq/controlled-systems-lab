@@ -5,19 +5,23 @@ import html
 import json
 from pathlib import Path
 
-from check_b04_c_exact_fiber import DEFAULT_RECORD, check
+try:
+    from .check_b04_c_exact_fiber import DEFAULT_RECORD, check
+except ImportError:
+    from check_b04_c_exact_fiber import DEFAULT_RECORD, check
 
 ROOT = Path(__file__).resolve().parents[3]
 BUNDLE = ROOT / "docs/research/evidence/b04-c-exact-dyadic-v1"
 
 
-def render() -> str:
-    verification = check(DEFAULT_RECORD)
-    record = json.loads(DEFAULT_RECORD.read_text(encoding="utf-8"))
+def render(record_path: Path = DEFAULT_RECORD) -> str:
+    verification = check(record_path)
+    record = json.loads(record_path.read_text(encoding="utf-8"))
     optimum = record["optimality"]
     objective = float(optimum["objective_approximation"])
     family = record["optimal_family"]
-    history_dimension = len(family["joint_coordinate_order"])
+    state_dimension = len(family["affine_lift"][0]["offset"])
+    history_dimension = len(family["affine_lift"]) * state_dimension + len(family["latent_variables"])
     return f"""<!doctype html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>B04-C corrected-track optimum and history fiber</title>
@@ -38,7 +42,7 @@ main{{max-width:1100px;margin:auto;padding:clamp(1rem,4vw,3rem)}}h1,h2{{line-hei
 <p>The confirmation band is preserved at <code>|J* - 30.899| &lt;= 0.0005</code>. The published rounded linear value is 30.899; the four nonlinear table rows remain 368.45, 41.855, 65.874 and 7.922. This corrected-track result does not explain or reproduce those nonlinear rows.</p>
 <p>The optimal relation is represented by an exact 16D H-polytope and the saved affine state lift. This page plots one member only; it does not suggest that the displayed curve covers every optimal history. Membership and reconstruction are supported for the declared control and joint-history coordinates; other geometric projections are not claimed.</p>
 <h2>Reproduce and inspect</h2>
-<p>The builder and independent checker are in the repository at the captured source commit. Run <code>python docs/research/tools/build_b04_c_exact_fiber.py</code>, then <code>python docs/research/tools/finalize_b04_c_exact_fiber.py</code>. The finalizer rebuilds the record, checks the proof, renders both phase planes and validates the bundle.</p>
+<p>The builder and independent checker are available at the captured <a href="https://github.com/butahlecoq/controlled-systems-lab/commit/{html.escape(record["source_commit"], quote=True)}">source commit</a>. Run <code>python docs/research/tools/build_b04_c_exact_fiber.py</code>, then <code>python docs/research/tools/finalize_b04_c_exact_fiber.py</code>. The finalizer rebuilds the record, checks the proof, renders both phase planes and validates the bundle.</p>
 <ul><li><a href="record.json">Machine-readable exact record</a></li><li><a href="verification.json">Independent verification result</a></li><li><a href="README.md">Full profile notes and assumptions</a></li><li><a href="manifest.json">Evidence manifest and source hashes</a></li></ul>
 <p class="muted">This is a fixed-profile research result. It does not by itself establish a production Strategy A prepared-request verification path or extend Strategy B coverage.</p>
 </main></body></html>

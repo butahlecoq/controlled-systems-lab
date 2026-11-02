@@ -1,0 +1,56 @@
+{
+  "commands": [
+    "python docs/research/tools/build_b04_c_exact_fiber.py",
+    "python docs/research/tools/finalize_b04_c_exact_fiber.py"
+  ],
+  "evidence_files": {
+    "README.md": "12c0718f25b3d98ada40c1185bccc189a1cf7b5179c6bc58aaa3460c0613a32b",
+    "index.html": "a8b5ec3c427491901e16e841e6b7355c4905418cfb95c34d0e128214a28b56b0",
+    "record.json": "2b23edc697fd46dc96bbb0e107ca7cbad175683b5ffd06b945331903350b1fd5",
+    "tests.txt": "fefced0e4c00caa01562d951a605d188f0c0e10d9e6062cbc0a93b0c08533c8e",
+    "trajectory.svg": "1a83e9475c5269c738f93502a2f43255a39789e7116fb5638c963b15d417cd82",
+    "verification.json": "984cd4583f1eddc94edddfe9762cbd2365b0b8766990180a10f082d7f27e6b40"
+  },
+  "publication_scope": "English HTML report registered in the schema-v3 publication catalogue, with a discoverable Pages example and a verified source commit link.",
+  "scenario_id": "B04-c-exact-dyadic-20261102",
+  "schema": "csl.b04-c-exact-dyadic-manifest/1",
+  "source_commit": "88d5ab3fdfa68a5b4cf39480ab6d1929799f44a0",
+  "source_files": {
+    ".github/workflows/algorithm-reports.yml": "59bd27ad1accaab07c9455c5da3fa14379ac3f85656918a93cc8a84107e4fbd1",
+    "docs/research/tools/b04_c_exact_profile.py": "b6fd583415edab3ae3502c7ebc07ca9cdee1ea03b231481761f1283074460f14",
+    "docs/research/tools/build_b04_c_exact_fiber.py": "06e57e365d227c1eb46c7978d2910fbf19f1fcaca6c6b5952370e8c95e397bb4",
+    "docs/research/tools/check_b04_c_exact_fiber.py": "b8cef983cf510d221421dc690ad39ded5d921cc3d26d3ff5147a917198c0401c",
+    "docs/research/tools/finalize_b04_c_exact_fiber.py": "4f2ce6a3c647df653096aefd4c14f986f5ca5ae965cb189c871526e7da3329ea",
+    "docs/research/tools/render_b04_c_exact_fiber.py": "df26e072af028ffaded1bf79f8dfb517ce180e0937d1dfb88852d35711cab8a3",
+    "docs/research/tools/render_b04_c_exact_fiber_report.py": "187075d396503e5a868da61a2ccd5945acc60c7f0c172f23f9296c0205889f86",
+    "scripts/reports/b04_c_exact_publication_policy.py": "58da37818b98f75c330e9c1395af2452e61334224017cc58c480bb6d54f6c289",
+    "scripts/reports/b04_c_exact_registered_reports.py": "5a52327461b3585ce23eab56a9f55f50f886e340ccf435b3e1bc19a1f9c0085f",
+    "scripts/reports/landing.py": "a78cd0fb9f075a02830e6273ef76cc6329fe63b51d2d843a4aa0ef7677571f3f",
+    "scripts/reports/publication_policy.py": "cf5b78f346caaa7db222afa734cce4d8de31c014955e1d7ce536fdf0c22ea1bd",
+    "scripts/reports/registered_reports.py": "9d52af81c1d5c8756773056ac66bf5836e54d39cf73985036f3d03bf2792b3f6",
+    "scripts/reports/report_data.py": "930d0ad199b934b15a0a436bf518b9dae7287b2264bbc44ad0de7eed3a9d1a2f",
+    "scripts/reports/schema3_publication_policies.py": "64143d67b83a320a6d53f0d2e6eeafc0ba6a842a5c6a424652050d1dd66e54ef",
+    "scripts/reports/site.py": "0ad048e3cdfd0ceca48f53d21c2c9e804d0b1a3291bdf1e89826658bdf13a2b4",
+    "scripts/reports/visual_examples.py": "1d5eb9b10e79cabf9628f0a0fd3341fe6d80918879a475a21cc8f5ffeb9d8b1d",
+    "tests/reporting/test_b04_c_exact_fiber.py": "3bb95c9cdc9c155daff45882edf1cce3316cbf2e69e69f3d47159baeb7febe95"
+  },
+  "verification": {
+    "acceptance_band": "within pre-registered confirmation band",
+    "control_rows": 100,
+    "exact_kkt_feasibility": "passed",
+    "exact_kkt_stationarity": "passed",
+    "exact_squared_objective": "134792964490469961681008566967861998260941996956836948004424628590858889811682628563706396950310844701862942110602939062700114344274164943/141180446875723591465657315200138569642072615338886940487516042400593177062388632384555785480060342240371815283928361540319322400882688",
+    "global_optimality": "proved for the represented-dyadic convex profile",
+    "model_inputs": "exact dyadic replay passed",
+    "optimal_control_family": "exact 16D H-polytope terminal fiber with independently reconstructed 84D affine lift",
+    "published_rounding_box_reachability": "passed",
+    "scenario_id": "B04-c-exact-dyadic-20261102",
+    "schema": "csl.b04-c-exact-dyadic-fiber-check/1",
+    "terminal_residual_rank": 2,
+    "terminal_residual_rank_pivot_rows": [
+      0,
+      1
+    ],
+    "terminal_set": "singleton"
+  }
+}

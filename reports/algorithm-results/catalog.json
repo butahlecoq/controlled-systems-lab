@@ -368,6 +368,18 @@
       "measured_scope": "Four-stage A08 finite-action minimax case: 6,561 plans per objective; seven alternating measured Release calls per objective, each after one process warmup",
       "evidence_limits": "Source-revision reference, not a historical reproduction; finite action catalog only; binary64 numerical assurance; replay trajectories are examples, not a global causal optimality claim; single-adapter timings without a source-mapped limiter profile.",
       "zip_sha256": "87282505affa761f49e048497a7d3822b61125ee430f2b8f8f308587055df358"
+    },
+    {
+      "report_id": "b04-c-exact-dyadic-71f869fe0c722feafbaf77db048bf9f415e8d0b58d0a16424429c2cd368df146",
+      "payload_sha256": "a8eb1fff6fafbf1cf766b1ea54799fa61cb75d62fc90ad1ef75fd6437a925d6d",
+      "source_commit": "88d5ab3fdfa68a5b4cf39480ab6d1929799f44a0",
+      "zip_sha256": "2936ce3222dba17f04b3d570b14bf28a262725baa0a6fa4366904412d094871a",
+      "report_kind": "b04-c-exact-fiber",
+      "measured_scope": "Exact corrected-track B04-C optimum and complete control-history fiber",
+      "evidence_limits": "Owner-authorized represented-dyadic corrected track; not a historical reproduction; A40 unit scaling remains unresolved; fixed-profile dossier does not yet establish the registered compiled #8 strategy boundary",
+      "payload_schema": "csl.b04-c-exact-dyadic-fiber/1",
+      "native_payload_sha256": "a8eb1fff6fafbf1cf766b1ea54799fa61cb75d62fc90ad1ef75fd6437a925d6d",
+      "source_report_id": "b04-c-exact-dyadic-v1"
     }
   ]
 }

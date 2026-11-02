@@ -329,6 +329,11 @@ FAMILIES = {
         "and checks the selected plan. The printed rounded model is used as printed; the "
         "historical 67.12 value, the unrounded arrays and the nonlinear plant remain "
         "unresolved."),
+    "b04-c-exact-dyadic": Family(
+        r"b04-c-exact-dyadic-[0-9a-f]{64}", "synthesis", "B04-C corrected-track exact optimum",
+        "An exact represented-dyadic corrected-track result with a 16-dimensional optimal control "
+        "fiber and an affine lift to the joint history. It is a source-qualified case, not a "
+        "historical reproduction, and does not yet pass through the registered compiled #8 strategy boundary."),
     "app01-plan": Family(
         r"app01-plan-\d{8}-[0-9a-f]{64}", "extensions", "State-plan check and trajectory verification",
         "Runs the registered inner state-plan check and then verifies the produced trajectory "
