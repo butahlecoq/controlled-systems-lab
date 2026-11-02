@@ -485,6 +485,15 @@ FAMILIES = {
         "forward x-y layers, heading, and the selected trajectory. Each action is held for 21 "
         "source steps, so the exact finite-catalogue minimum is not a continuous-action optimum; "
         "the report makes no minimax or performance comparison claim."),
+    "env717-vanderpol": Family(
+        r"env717-vanderpol-[0-9a-f]{20}", "synthesis",
+        "Van der Pol finite open-loop control pilot",
+        "Replays the pinned three-state Van der Pol equations with ten explicit-Euler substeps "
+        "per source action and exhaustively evaluates 243 five-block control plans over 11 seconds. "
+        "The phase-plane figure includes each stage's finite endpoint cloud and the selected path. "
+        "The upstream step() currently raises NameError after updating its state; this report "
+        "independently re-expresses the recorded equations and reward, so it is not a direct run "
+        "of that class or a continuous-action optimum."),
     "env717-time-sphere": Family(
         r"env717-time-sphere-[0-9a-f]{20}", "synthesis",
         "TimeOptimalSphereGame nominal finite-feedback reachability pilot",
