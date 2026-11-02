@@ -149,6 +149,15 @@
       "follow_up_issue": 717
     },
     {
+      "source": "scripts/reports/env717/check_cartpole.py",
+      "signal_count": 3,
+      "asset_name_literals": [
+        "projections.svg"
+      ],
+      "disposition": "deferred-family-specific-migration",
+      "follow_up_issue": 717
+    },
+    {
       "source": "scripts/reports/env717/check_dubins_car.py",
       "signal_count": 3,
       "asset_name_literals": [
@@ -1027,6 +1036,14 @@
     {
       "source": "scripts/reports/stage_env717_broken_triangle.py",
       "signal_count": 1,
+      "asset_name_literals": [
+        "projections.svg"
+      ],
+      "disposition": "publication-validation-or-frozen-route"
+    },
+    {
+      "source": "scripts/reports/stage_env717_cartpole.py",
+      "signal_count": 3,
       "asset_name_literals": [
         "projections.svg"
       ],
@@ -1954,6 +1971,16 @@
         "projections.svg"
       ],
       "index_sha256": "c62cef0f1802192d7e68d06780a0b19dd08dba2252acc877bdc72fa787473d3d",
+      "disposition": "deferred: original frozen route-level readability review remains; companion availability is listed separately",
+      "follow_up_issue": 717
+    },
+    {
+      "route": "env717-cartpole-pilot-v1",
+      "source_bundle": "env717-cartpole-pilot-v1",
+      "assets": [
+        "projections.svg"
+      ],
+      "index_sha256": "0173e0a57d9a2efe732bb6ef1b69a70b097170fc6ade5692be84043224fb23cf",
       "disposition": "deferred: original frozen route-level readability review remains; companion availability is listed separately",
       "follow_up_issue": 717
     },

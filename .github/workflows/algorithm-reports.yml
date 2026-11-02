@@ -93,6 +93,9 @@ jobs:
           cmake -S benchmarks/reporting/env717/vanderpol-build -B build/env717-vanderpol-ci -DBUILD_TESTING=ON -DCMAKE_BUILD_TYPE=Release
           cmake --build build/env717-vanderpol-ci --config Release --target csl_env717_vanderpol --parallel 2
           ctest --test-dir build/env717-vanderpol-ci -C Release --output-on-failure -R '^env717_vanderpol_smoke$'
+          cmake -S benchmarks/reporting/env717/cartpole-build -B build/env717-cartpole-ci -DBUILD_TESTING=ON -DCMAKE_BUILD_TYPE=Release
+          cmake --build build/env717-cartpole-ci --config Release --target csl_env717_cartpole --parallel 2
+          ctest --test-dir build/env717-cartpole-ci -C Release --output-on-failure -R '^env717_cartpole_smoke$'
       - name: Build and smoke the EXT-04 affine synthesis example
         if: needs.route.outputs.native == 'true'
         shell: bash
@@ -351,6 +354,11 @@ jobs:
             if test -d reports/algorithm-results/env717-vanderpol-pilot-v1; then
               python scripts/reports/stage_env717_vanderpol.py \
                 --source reports/algorithm-results/env717-vanderpol-pilot-v1 \
+                --site build/report-site
+            fi
+            if test -d reports/algorithm-results/env717-cartpole-pilot-v1; then
+              python scripts/reports/stage_env717_cartpole.py \
+                --source reports/algorithm-results/env717-cartpole-pilot-v1 \
                 --site build/report-site
             fi
             if test -d reports/algorithm-results/env717-time-sphere-pilot-v1; then

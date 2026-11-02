@@ -181,6 +181,15 @@ class LandingTests(unittest.TestCase):
         self.assertIn("raises NameError", family.summary)
         self.assertIn("not a direct run", family.summary)
 
+    def test_cartpole_route_discloses_adopted_simulator_and_finite_scope(self):
+        family = landing.FAMILIES[landing.family_for(
+            "env717-cartpole-0123456789abcdefabcd")]
+        self.assertEqual(family.group, "synthesis")
+        self.assertIn("Gym v0.21.0", family.summary)
+        self.assertIn("does not pin Gym", family.summary)
+        self.assertIn("16,384 left/right action plans", family.summary)
+        self.assertIn("not a learned policy, minimax result", family.summary)
+
     def test_time_sphere_route_describes_nominal_target_reachability(self):
         family = landing.FAMILIES[landing.family_for(
             "env717-time-sphere-0123456789abcdefabcd")]
