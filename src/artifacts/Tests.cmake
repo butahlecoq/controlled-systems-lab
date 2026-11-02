@@ -63,6 +63,10 @@ target_link_libraries(stage_projection_capture_integration_tests PRIVATE CSL::ar
 add_test(NAME stage_projection_capture_integration_tests COMMAND stage_projection_capture_integration_tests)
 csl_test_target(stage_projection_capture_integration_tests artifacts)
 
+add_test(NAME stage_projection_architecture_boundary
+  COMMAND ${Python3_EXECUTABLE} ${PROJECT_SOURCE_DIR}/tests/architecture/check_stage_projection_boundaries.py)
+set_tests_properties(stage_projection_architecture_boundary PROPERTIES LABELS artifacts)
+
 add_executable(stage_projection_batch_contract tests/artifacts/stage_projection_batch_contract.cpp)
 target_link_libraries(stage_projection_batch_contract PRIVATE CSL::artifacts CSL::polyhedral doctest::doctest)
 target_compile_definitions(stage_projection_batch_contract PRIVATE CSL_STAGE_PROJECTION_BATCH_FIXTURE="${CMAKE_CURRENT_SOURCE_DIR}/tests/artifacts/fixtures/stage-projection-batch-v1.json")
