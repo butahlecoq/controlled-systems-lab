@@ -43,6 +43,15 @@ def build_record(events_path: Path, scenario_path: Path, environment_path: Path,
     events = read_jsonl(events_path)
     environment_text = environment_path.read_text(encoding="utf-8")
     environment = json.loads(environment_text)
+    resource_profile_text = None
+    resource_profile_name = environment.get("measurement", {}).get("resource_profile")
+    if resource_profile_name is not None:
+        resource_profile_path = environment_path.parent / resource_profile_name
+        resource_profile_text = resource_profile_path.read_text(encoding="utf-8")
+        if sha256(resource_profile_text.encode("utf-8")) != environment["measurement"].get("resource_profile_sha256"):
+            raise ValueError("capture environment resource-profile digest mismatch")
+        if json.loads(resource_profile_text).get("schema") != "csl.mpc01-resource-profile/1":
+            raise ValueError("unsupported MPC-01 resource-profile schema")
     codec_environment_text = codec_environment_path.read_text(encoding="utf-8")
     codec_environment = json.loads(codec_environment_text)
     if codec_environment.get("schema") != "csl.obs04-environment/1":
@@ -202,6 +211,7 @@ def build_record(events_path: Path, scenario_path: Path, environment_path: Path,
                 "schema": "csl.mpc01-strategy-ab-attempt/1",
                 "event_json": row["_source_line"],
                 "capture_environment_json": environment_text,
+                "resource_profile_json": resource_profile_text,
                 "request_json": canonical(request),
                 "configuration_json": config_text,
             }
@@ -276,6 +286,15 @@ def validate_record(record: dict[str, Any]) -> None:
         run = json.loads(run_text)
         event_text = attempt["measurement_payload"]
         event = json.loads(event_text)
+        raw_output = run["result"]["raw_output"]
+        capture_environment = json.loads(raw_output["capture_environment_json"])
+        resource_profile_text = raw_output["resource_profile_json"]
+        if resource_profile_text is None:
+            if "resource_profile" in capture_environment.get("measurement", {}):
+                raise ValueError(f"attempt {index} omits its declared resource profile")
+        elif (sha256(resource_profile_text.encode("utf-8")) !=
+              capture_environment["measurement"].get("resource_profile_sha256")):
+            raise ValueError(f"attempt {index} resource-profile binding mismatch")
         if (attempt["arm_index"] != arm or attempt["repetition_index"] != repetition or
                 attempt["reported_status"] != run["status"] or attempt["run_id"] != run["run"] or
                 sha256(run_text.encode("utf-8")) != attempt["run_digest"] or
