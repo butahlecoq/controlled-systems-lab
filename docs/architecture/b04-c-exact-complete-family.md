@@ -2,7 +2,7 @@
 
 ## Problem
 
-B04-C has an external exact-arithmetic dossier, but it has not passed Strategy A's compiled verifier and prepared-request boundary. Its optimal history relation contains non-dyadic rational equalities, while the existing public H-set and exact-H builders accept binary64 data. Converting the equalities to doubles would change the family. The admitted profile also has 16 controls and 84 canonical joint coordinates, so it cannot use the current nominal exact-H profile unchanged. The verifier must establish the objective optimum and full relation coverage as separate claims, then bind both to the frozen Strategy A request before publication.
+B04-C has an external exact-arithmetic dossier and a profile-specific compiled verifier integrated with Strategy A's prepared-request boundary. Exact non-dyadic rational equalities define its optimal history relation, while the existing public H-set and exact-H builders accept binary64 data; converting the equalities to doubles would change the family. The admitted profile has 16 controls and 84 canonical joint coordinates, so it uses a separate exact payload. The verifier establishes objective optimality and full relation coverage as separate claims, then binds both to the frozen Strategy A request before publication. Exact-head CI, review, and publication evidence remain delivery gates for the current change.
 
 ## Usage (caller's view)
 
@@ -94,7 +94,7 @@ Candidate A's sketch needs two corrections before implementation: represent the 
 - We accept only whole-history membership initially in exchange for a truthful 84D relation contract with bounded implementation scope.
 - We accept canonical reconstruction in the verifier in exchange for not trusting producer-supplied coverage data.
 - We accept versioned arithmetic caps in exchange for deterministic refusal before unbounded exact work.
-- We accept that the external Python dossier remains research evidence until a compiled Strategy A proposal passes this verifier.
+- We accept that the external Python dossier remains research evidence; the registered Strategy A result is established by the compiled verifier and its prepared-request path.
 
 ## Alternatives considered
 
@@ -102,12 +102,12 @@ Candidate A's sketch needs two corrections before implementation: represent the 
 - **Convert the relation to the current binary64 H representation.** This would permit reuse of generic geometry tooling but rounds the non-dyadic fiber and can change the set; it is invalid as proof authority.
 - **Publish only the 16-control polytope and omit the lift.** This would leave the claimed `JointRelation` coordinates uncheckable and would not establish membership of complete state/control histories.
 
-## Open questions and risks
+## Remaining verification and future research
 
 - Are the proposed row, bit-growth, operation and byte caps sufficient on every supported compiler, and what checked fixture should freeze them?
-- Does the existing family serialization contract allow the opaque exact-rational payload, or does a separate versioned payload schema need to precede registered publication?
-- Which independently implemented exact checker should validate the compiled verifier's full relation reconstruction without treating the existing Python dossier as authority?
+- Exact-head CI and independent review must pass before the implementation is treated as delivery complete.
+- A separate independently implemented checker could strengthen future assurance, but the external Python dossier is not used as authority by the compiled verifier.
 
-## Next implementation step
+## Next delivery step
 
-Implement the private canonical B04-C model reconstruction and exact terminal-fiber representation, then connect it to Strategy A's real prepare, proposal-check and post-verification publication flow.
+Complete exact-head validation and refresh any saved publication evidence from the registered Strategy A path. Keep the external dossier categorized as research evidence.

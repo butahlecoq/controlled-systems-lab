@@ -480,6 +480,14 @@
             },
             "target": {
               "$ref": "#/$defs/vector"
+            },
+            "weights": {
+              "type": "array",
+              "maxItems": 256,
+              "items": {
+                "type": "number",
+                "minimum": 0
+              }
             }
           },
           "required": [
