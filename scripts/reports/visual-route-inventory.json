@@ -792,6 +792,14 @@
       ]
     },
     {
+      "source": "scripts/reports/mpc01/stage_per_attempt.py",
+      "signal_count": 1,
+      "asset_name_literals": [
+        "b04-repeated-projections.svg"
+      ],
+      "disposition": "publication-validation-or-frozen-route"
+    },
+    {
       "source": "scripts/reports/mpc01/summarize_per_attempt.py",
       "signal_count": 2,
       "asset_name_literals": [
@@ -1760,7 +1768,7 @@
     },
     {
       "source": "scripts/reports/visual_examples.py",
-      "signal_count": 82,
+      "signal_count": 84,
       "asset_name_literals": [
         "adaptive-ode-replay.svg",
         "app01-plan-timing-v1.svg",
@@ -1770,6 +1778,7 @@
         "b04-native-smoke-projections.svg",
         "b04-reference-trajectory-projections.svg",
         "b04-repeated-oxidizer.svg",
+        "b04-repeated-projections.svg",
         "b07-b07-reconstruction-s0-l0-d0.png",
         "control-projection.svg",
         "ellipsoid-2d.svg",
