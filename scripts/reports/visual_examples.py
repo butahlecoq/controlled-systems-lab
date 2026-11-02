@@ -151,6 +151,12 @@ SAVED_FIGURES = (
          title="Compare five minimax set tracks on TwoPoints",
          alt="The two player phase planes show forward and backward reachable geometry, intersections, and replayed finite-game paths.",
          summary="Five matched Release tracks (exact polytope, box, zonotope, fixed-frame parallelotope, ellipsoid) each score all 27 plans and replay the selected plan over 27 disturbance histories. A rational checker verifies all measured outcomes. This three-stage finite adaptation is not the upstream continuous-action RL task; timings are fixture-specific and make no general winner claim."),
+    dict(route="issue824-two-points-matched-minimax-resource-v1", image="geometry-reference-ellipsoid.svg",
+         page="index.html", records="result.json", check="check.json",
+         family="Fixed-plan minimax · Resource-limited comparison",
+         title="Compare five minimax set tracks under shared resource limits",
+         alt="The two player phase planes show saved forward and backward reachable geometry, intersections, and replayed finite-game paths.",
+         summary="Five order-rotated Release repetitions per method ran inside an enforced 300-second and 8 GiB process-tree profile. The report records cgroup peak memory, exact-rational replay checks, and the separate zonotope limiter profile. This finite adaptation makes no general winner claim."),
 )
 
 

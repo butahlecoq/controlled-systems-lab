@@ -41,7 +41,10 @@ FROZEN_DIAGRAM_EXCEPTIONS = {
     "benchmarks/reporting/mpc08_explicit/explicit_double_integrator.py",
     "benchmarks/reporting/mpc08_explicit/explicit_nonunique_double_integrator.py",
 }
-PUBLICATION_EXPORT_ROUTES = {"scripts/reports/render.py", "scripts/reports/mpc05/check_smoke.py"}
+PUBLICATION_EXPORT_ROUTES = {
+    "scripts/reports/render.py", "scripts/reports/mpc05/check_smoke.py",
+    "scripts/reports/exp824/finalize_limited_report.py",
+}
 VIZ10_ROLE_REASONS = {
     "benchmarks/reporting/mpc08_explicit/explicit_double_integrator.py":
         "Generates one exact 2D critical-region diagram from the rational fixture, with labelled initial and terminal coordinates; it is not a general plotting path.",
@@ -142,6 +145,7 @@ FROZEN_ROUTE_FOLLOW_UP_ISSUES = {
     "issue824-two-points-ellipsoid-minimax-v1": 824,
     "issue824-two-points-ellipsoid-minimax-v2": 824,
     "issue824-two-points-matched-minimax-v1": 824,
+    "issue824-two-points-matched-minimax-resource-v1": 824,
     "mpc04-max-coordinate-replanning-pilot-20261030": 600,
     "mpc08-explicit-nonunique-v1": 604,
     # This report's phase-plane figure is owned and reviewed with MPC-05.

@@ -448,6 +448,12 @@ jobs:
       - name: Stage the matched issue 824 minimax comparison
         if: steps.catalog.outputs.has_reports == 'true' && hashFiles('reports/algorithm-results/issue824-two-points-matched-minimax-v1/result.json') != ''
         run: python scripts/reports/stage_issue824_matched_minimax.py --source reports/algorithm-results/issue824-two-points-matched-minimax-v1 --site build/report-site
+      - name: Stage the resource-limited issue 824 minimax comparison
+        if: steps.catalog.outputs.has_reports == 'true' && hashFiles('reports/algorithm-results/issue824-two-points-matched-minimax-resource-v1/result.json') != ''
+        run: python scripts/reports/stage_issue824_limited_minimax.py --source reports/algorithm-results/issue824-two-points-matched-minimax-resource-v1 --site build/report-site
+      - name: Validate the resource-limited issue 824 publication bundle
+        if: steps.catalog.outputs.has_reports == 'true' && hashFiles('reports/algorithm-results/issue824-two-points-matched-minimax-resource-v1/result.json') != ''
+        run: python tests/reporting/test_issue824_limited_minimax_publication.py
       - name: Stage minimal 2D visual examples from reviewed saved results
         if: steps.catalog.outputs.has_reports == 'true'
         run: python scripts/reports/visual_examples.py --catalog reports/algorithm-results/catalog.json --site build/report-site

@@ -750,6 +750,11 @@ records are separate from algorithm call timings. This local exploratory run
 was uncapped: it requested/enforced no process-tree wall or memory cap, and it
 did not observe process-tree peak memory. Failed per-call attempts are retained
 in the result and make the check status incomplete rather than disappearing.
+The separately versioned [resource-limited companion](../../reports/algorithm-results/issue824-two-points-matched-minimax-resource-v1/)
+repeats the same five-track capture under one enforced 300-second process-tree
+wall cap and 8 GiB cgroup-v2 memory cap, and records the observed memory peak.
+The original uncapped bundle remains unchanged. The companion reuses its
+separate zonotope limiter profile and makes no general speed ranking.
 
 ## MPC-05 finite causal minimax pilot
 
