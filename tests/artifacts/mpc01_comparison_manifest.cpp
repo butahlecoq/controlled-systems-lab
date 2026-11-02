@@ -51,3 +51,7 @@ TEST_CASE("MPC-01 Strategy A/B record passes the artifact codec") {
 TEST_CASE("MPC-01 resource-limited Strategy A/B record passes the artifact codec") {
     check_strategy_ab_record(CSL_MPC01_LIMITED_STRATEGY_AB_RECORD_FILE);
 }
+
+TEST_CASE("MPC-01 resource-limited T-S02 Strategy A/B record passes the artifact codec") {
+    check_strategy_ab_record(CSL_MPC01_TS02_LIMITED_STRATEGY_AB_RECORD_FILE);
+}

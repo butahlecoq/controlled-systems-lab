@@ -1,0 +1,53 @@
+{
+  "build": {
+    "cmake_generator": "Ninja",
+    "compiler": "GNU 16.2.1",
+    "flags": "-O3 -DNDEBUG",
+    "highs": "1.11.0",
+    "qhull": "8.0.2",
+    "type": "Release"
+  },
+  "executable": "/home/butahlecoq/.local/share/codex/worktrees/mpc06-tube-mpc-602-20261028/build/dev/installed-consumer/examples-build/registered_synthesis_comparison",
+  "executable_sha256": "300863246730c863d12ddd95090a5d0e0350a3389fb39019dc4e29e6e9274384",
+  "execution_worktree_clean_before_run": true,
+  "execution_worktree_commit": "d7174701fab37e73675900afeb9091a12794b308",
+  "host": {
+    "cpu": "AMD Ryzen 5 3550H with Radeon Vega Mobile Gfx",
+    "kernel": "7.2.8-9-omarchy",
+    "load_average_after_capture": [
+      1.63916015625,
+      0.7666015625,
+      0.4501953125
+    ],
+    "load_average_before_capture": [
+      1.63916015625,
+      0.7666015625,
+      0.4501953125
+    ],
+    "logical_cpus": 8,
+    "os": "Linux Omarchy 4.0.6"
+  },
+  "measurement": {
+    "capture_supervisor": "capture-supervisor.py",
+    "capture_supervisor_sha256": "c54e2cda08b2de973190724f9bd63cd47969303e23c4943b6f632055e8368b67",
+    "command": "registered_synthesis_comparison --measure-profile ts02_constant_integrator scenario.json strategy-ab-ts02-events.jsonl",
+    "cpu_time_or_peak_memory_profiled": true,
+    "event_count_including_header": 13,
+    "measured_alternating_pairs": 5,
+    "memory_cap_bytes": null,
+    "per_attempt_wall_time_cap": null,
+    "process_tree_memory_cap_bytes": 2147483648,
+    "process_tree_memory_swap_max_bytes": 0,
+    "process_tree_timeout_scope": "one complete strategy A/B capture process group; applies to the suite invocation, not individually restarted trials",
+    "process_tree_wall_time_cap_seconds": 300,
+    "resource_profile": "resource-profile.json",
+    "resource_profile_sha256": "c9c6589a62b127debcf8769d49d6491d79d5c7269d9d49d6e375b04f597002f1",
+    "warmup_pairs_excluded": 1
+  },
+  "scenario": "docs/research/evidence/mpc01-external-qps-20261026-r3/strategy-ab-ts02-limited-capture/scenario.json",
+  "scenario_sha256": "b9bb051c52b6763ceee7a6f7f423fbefd94bea86a0045693b6627a0a0da69ab9",
+  "source_commit": "2977b95bab581a343c2daba02459f96014e893b0",
+  "source_dirty_before_run": false,
+  "source_file": "examples/registered_synthesis_comparison.cpp",
+  "source_file_sha256": "39883c67fcf82b7709ddd9ca60ad47b9b06cfc5dcfe6efffed7324712c52c6ee"
+}
