@@ -147,6 +147,14 @@ class LandingTests(unittest.TestCase):
         self.assertIn("does not establish continuous-action or full-horizon optimality", family.summary)
         self.assertIn("no performance-comparison claim", family.summary)
 
+    def test_unlimited_bolza_route_discloses_the_finite_adaptation_boundary(self):
+        family = landing.FAMILIES[landing.family_for(
+            "env717-unlimited-bolza-0123456789abcdefabcd")]
+        self.assertEqual(family.group, "synthesis")
+        self.assertIn("analytic reference", family.summary)
+        self.assertIn("exhaustive five-action finite-catalogue minimum", family.summary)
+        self.assertIn("not the original unbounded continuous-action RL result", family.summary)
+
     def test_sphere_game_route_has_a_differential_game_description(self):
         family = landing.FAMILIES[landing.family_for(
             "env717-sphere-game-0123456789abcdefabcd")]

@@ -1,0 +1,201 @@
+{
+  "environment": {
+    "captured_at_utc": "2026-11-01T18:01:28.414238+00:00",
+    "executable": "/home/butahlecoq/.local/share/codex/worktrees/env717-unlimited-bolza-20261101/build/env717-unlimited-bolza/csl_env717_unlimited_bolza",
+    "load_average": [
+      0.4423828125,
+      0.35205078125,
+      0.41162109375
+    ],
+    "logical_cpu_count": 8,
+    "platform": "Linux-7.2.8-9-omarchy-x86_64-with-glibc2.44",
+    "python": "3.14.8 (main, Oct  2 2026, 10:23:31) [GCC 16.2.1 20260810]"
+  },
+  "measurement": {
+    "all_calls_match_independent_finite_plan": true,
+    "blocks": [
+      {
+        "block": 1,
+        "durations_ns": [
+          113685932,
+          105502570,
+          106373777,
+          105022339,
+          104784178,
+          104348854,
+          104770909
+        ],
+        "failed_calls": 0,
+        "load_average_after": [
+          0.3935546875,
+          0.3408203125,
+          0.408203125
+        ],
+        "load_average_before": [
+          0.3935546875,
+          0.3408203125,
+          0.408203125
+        ],
+        "maximum_ns": 113685932,
+        "measured_calls": 7,
+        "median_ns": 105022339,
+        "minimum_ns": 104348854,
+        "started_unix_ns": 1793556084922164473,
+        "successful_calls": 7,
+        "warmups": 1
+      },
+      {
+        "block": 2,
+        "durations_ns": [
+          105152245,
+          104920789,
+          105050974,
+          104842426,
+          104843893,
+          104577237,
+          105008650
+        ],
+        "failed_calls": 0,
+        "load_average_after": [
+          0.3935546875,
+          0.3408203125,
+          0.408203125
+        ],
+        "load_average_before": [
+          0.3935546875,
+          0.3408203125,
+          0.408203125
+        ],
+        "maximum_ns": 105152245,
+        "measured_calls": 7,
+        "median_ns": 104920789,
+        "minimum_ns": 104577237,
+        "started_unix_ns": 1793556085804936401,
+        "successful_calls": 7,
+        "warmups": 1
+      },
+      {
+        "block": 3,
+        "durations_ns": [
+          105143584,
+          104869246,
+          104788439,
+          104922745,
+          104795772,
+          104997196,
+          104856674
+        ],
+        "failed_calls": 0,
+        "load_average_after": [
+          0.3935546875,
+          0.3408203125,
+          0.408203125
+        ],
+        "load_average_before": [
+          0.3935546875,
+          0.3408203125,
+          0.408203125
+        ],
+        "maximum_ns": 105143584,
+        "measured_calls": 7,
+        "median_ns": 104869246,
+        "minimum_ns": 104788439,
+        "started_unix_ns": 1793556086675397320,
+        "successful_calls": 7,
+        "warmups": 1
+      },
+      {
+        "block": 4,
+        "durations_ns": [
+          104720064,
+          104731657,
+          104904516,
+          104766927,
+          104636883,
+          104881259,
+          104835303
+        ],
+        "failed_calls": 0,
+        "load_average_after": [
+          0.4423828125,
+          0.35205078125,
+          0.41162109375
+        ],
+        "load_average_before": [
+          0.3935546875,
+          0.3408203125,
+          0.408203125
+        ],
+        "maximum_ns": 104904516,
+        "measured_calls": 7,
+        "median_ns": 104766927,
+        "minimum_ns": 104636883,
+        "started_unix_ns": 1793556087545074405,
+        "successful_calls": 7,
+        "warmups": 1
+      }
+    ],
+    "calls_per_block": 7,
+    "duration_ns": [
+      113685932,
+      105502570,
+      106373777,
+      105022339,
+      104784178,
+      104348854,
+      104770909,
+      105152245,
+      104920789,
+      105050974,
+      104842426,
+      104843893,
+      104577237,
+      105008650,
+      105143584,
+      104869246,
+      104788439,
+      104922745,
+      104795772,
+      104997196,
+      104856674,
+      104720064,
+      104731657,
+      104904516,
+      104766927,
+      104636883,
+      104881259,
+      104835303
+    ],
+    "failed_calls": 0,
+    "limitation": "single implementation descriptive runtime only; no competing algorithm, end-to-end user latency comparison, or performance winner",
+    "limiter_profile": {
+      "command": "Python subprocess wall clock plus resource.getrusage(RUSAGE_CHILDREN)",
+      "excluded_from_reported_samples": true,
+      "finite_catalogue_plan_count": 9765625,
+      "interpretation": "The timed solver phase is exhaustive CPU enumeration; single-process CPU use and process CPU time are the available limiter evidence. perf, strace and pidstat availability is recorded separately.",
+      "maximum_resident_set_size": 26052,
+      "maximum_resident_set_size_unit": "KiB",
+      "other_profiler_tools": {
+        "perf": null,
+        "pidstat": null,
+        "strace": null
+      },
+      "process_cpu_to_solver_time_ratio": 1.0418508829425996,
+      "solver_elapsed_ns": 114895521,
+      "status": "complete",
+      "system_cpu_seconds": 0.002992999999999999,
+      "user_cpu_seconds": 0.116711,
+      "whole_process_cpu_percent": 98.994430479924,
+      "whole_process_wall_ns": 120919934
+    },
+    "maximum_ns": 113685932,
+    "measured_blocks": 4,
+    "median_ns": 104862960.0,
+    "minimum_ns": 104348854,
+    "parallelism": "single executable process; sequential calls; one worker thread",
+    "schema": "csl.env717-runtime-measurement/1",
+    "scope": "one native exhaustive finite-catalogue solve over 5^10=9,765,625 plans; excludes analytic reference, Python oracle, JSON serialization, report rendering and build",
+    "successful_calls": 28,
+    "warmups_per_block": 1
+  }
+}

@@ -415,6 +415,11 @@ jobs:
                 --source reports/algorithm-results/env717-earth-orbit-pilot-v1 \
                 --site build/report-site
             fi
+            if test -d reports/algorithm-results/env717-unlimited-bolza-pilot-v1; then
+              python scripts/reports/stage_env717_unlimited_bolza.py \
+                --source reports/algorithm-results/env717-unlimited-bolza-pilot-v1 \
+                --site build/report-site
+            fi
             if test -f reports/algorithm-results/exp04-publications.json; then
               python scripts/reports/stage_exp04.py --catalog reports/algorithm-results/exp04-publications.json --site build/report-site
             fi

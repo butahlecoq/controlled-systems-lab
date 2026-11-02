@@ -31,6 +31,18 @@ records the causal finite-state reachability result.
 are retained in the archive as additional control/replay examples, but are not
 counted as members of the nine-environment differential-game list above.
 
+## Supplementary source-suite control reports
+
+| Environment | Saved report | Scope |
+| --- | --- | --- |
+| `PendulumTerminal` | [report](../../reports/algorithm-results/env717-pendulum-terminal-pilot-v1/README.md) | finite catalogue, local affine selection, nonlinear source-map replay |
+| `UnlimitedBolzaProblem` | [report](../../reports/algorithm-results/env717-unlimited-bolza-pilot-v1/README.md) | analytic double-integrator reference and exact finite-catalogue search |
+
+These single-controller reports supplement the game examples. The Bolza result
+uses an authored nonzero initial state and bounded finite action catalogue;
+it does not solve the source's unbounded-control problem. The differential-game
+reachability/minimax showcase remains `TwoPointsOnParallelLines` above.
+
 Every listed report is a finite, explicitly scoped adaptation. The finite
 catalogues, shortened horizons, information pattern, and any state
 discretization remain part of each report's evidence boundary.
