@@ -101,8 +101,9 @@ An external matrix descriptor has exactly kind=external, string uri, 64 lowercas
 hexadecimal sha256, unsigned rows/cols and layout=row_major. `load_scenario_file`
 supports a relative local path resolved against the scenario file's directory.
 Absolute paths, `..` traversal and symlinks resolving outside that directory are
-rejected. The external file is read with the configured input byte cap and
-cancellation polling. Its SHA256 is checked against the raw bytes before strict
+rejected. The scenario document and all referenced files share one configured
+aggregate input byte cap; external-file reads poll cancellation. Each external
+file's SHA256 is checked against its raw bytes before strict
 JSON parsing; the JSON value must be a flat array of exactly rows*cols finite
 numbers in row-major order. In-memory `load_scenario` and network URIs remain
 unsupported. The source provenance and run artifact retain each URI, raw byte
@@ -184,7 +185,8 @@ Cancellation is polled before IO, each file chunk, parser node, translation
 expansion and after publication work. Calls into canonical factories are
 synchronous; cancellation is cooperative, not hard interruption. File failures
 distinguish not_found, unreadable and read_failed; parser failures remain parser
-failures. No network or external matrix IO occurs.
+failures. No network IO occurs; external matrix IO is limited to the bounded
+local-file path above.
 
 A separate archival branch recognizes schema_version1, id B04-historical,
 executable=false and restoration_status=incomplete_and_inconsistent. It requires

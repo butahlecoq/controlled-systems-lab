@@ -46,11 +46,12 @@ std::string kind(const Json& value,const std::string& path,const char* category,
 class Reader {
     const LoadOptions& options_;
     const std::filesystem::path& location_;
-    std::size_t coefficients_{},expanded_{},objects_{},external_bytes_{};
+    std::size_t coefficients_{},expanded_{},objects_{},input_bytes_used_{};
 public:
     std::vector<DefaultRecord> defaults;
     std::vector<SourceProvenance::ExternalData> external_data;
-    explicit Reader(const LoadOptions& o,const std::filesystem::path& location):options_(o),location_(location) {}
+    explicit Reader(const LoadOptions& o,const std::filesystem::path& location,std::size_t source_bytes)
+        :options_(o),location_(location),input_bytes_used_(source_bytes) {}
     std::size_t product(std::size_t a,std::size_t b,const std::string& path) const {
         if(b && a>std::numeric_limits<std::size_t>::max()/b) fail(path,"extent product overflow","representable extent",InputCategory::limit);
         return a*b;
@@ -111,9 +112,9 @@ public:
                 if(!std::filesystem::is_regular_file(target,ec) || ec) fail(child(path,"uri"),"not a regular file","bounded local file",InputCategory::io);
                 std::ifstream stream(target,std::ios::binary);if(!stream) fail(child(path,"uri"),uri,"readable local file",InputCategory::io);
                 std::vector<std::byte> raw;std::array<char,4096> chunk{};
-                while(stream) {poll(options_);const auto budget=options_.limits.input_bytes-external_bytes_;const auto remaining=budget-raw.size()+1;stream.read(chunk.data(),static_cast<std::streamsize>(std::min(remaining,chunk.size())));const auto got=static_cast<std::size_t>(stream.gcount());if(got>budget-raw.size()) fail(child(path,"uri"),"external byte quota exceeded","bounded aggregate external bytes",InputCategory::limit);for(std::size_t i=0;i<got;++i)raw.push_back(static_cast<std::byte>(static_cast<unsigned char>(chunk[i])));}
+                while(stream) {poll(options_);const auto budget=options_.limits.input_bytes-input_bytes_used_;const auto remaining=budget-raw.size()+1;stream.read(chunk.data(),static_cast<std::streamsize>(std::min(remaining,chunk.size())));const auto got=static_cast<std::size_t>(stream.gcount());if(got>budget-raw.size()) fail(child(path,"uri"),"input byte quota exceeded","scenario and external files within the aggregate byte cap",InputCategory::limit);for(std::size_t i=0;i<got;++i)raw.push_back(static_cast<std::byte>(static_cast<unsigned char>(chunk[i])));}
                 if(!stream.eof() || stream.bad()) fail(child(path,"uri"),"read_failed","complete readable external file",InputCategory::io);
-                external_bytes_+=raw.size();
+                input_bytes_used_+=raw.size();
                 problem::ContentDigest expected{};for(std::size_t i=0;i<32;++i){const auto cv=[](char c){return c<='9'?c-'0':c-'a'+10;};expected.bytes[i]=static_cast<std::byte>(cv(hash[i*2])*16+cv(hash[i*2+1]));}
                 auto owned=problem::snapshot_content(raw,expected);if(!std::holds_alternative<problem::ResolvedContent>(owned)) fail(child(path,"sha256"),"digest mismatch","sha256 of external raw bytes");
                 external_data.push_back({uri,expected,raw.size()});
@@ -396,7 +397,7 @@ LoadedScenario translate(const Json& root,std::span<const std::byte> bytes,const
                          const std::filesystem::path& location,LoadPhaseTimings* timings) {
     if(timings) timings->translation_entered=true;
     PhaseTimer translation_timer{timings?&timings->translation_ns:nullptr};
-    Reader r(options,location);
+    Reader r(options,location,bytes.size());
     const auto schema=string(member(root,"schema",""),"/schema");
     const bool version_one=schema=="csl.scenario/1",version_two=schema=="csl.scenario/2";
     if(!version_one && !version_two) fail("/schema","unknown version","csl.scenario/1 or csl.scenario/2",InputCategory::schema);

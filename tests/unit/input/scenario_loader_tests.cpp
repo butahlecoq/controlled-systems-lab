@@ -75,6 +75,11 @@ TEST_CASE("external matrices are bounded local files with verified raw hashes") 
     auto network=replace(authored,"matrix.json","https://example.invalid/matrix.json");
     {std::ofstream out(scenario_path);out<<network;}
     auto unsupported=accepted<UnsupportedInput>(load_scenario_file(scenario_path));CHECK(unsupported.path=="/model/A/uri");
+    {std::ofstream out(scenario_path);out<<authored;}
+    LoadOptions exact_cap;exact_cap.limits.input_bytes=authored.size()+raw.size();
+    CHECK(std::holds_alternative<LoadedScenario>(load_scenario_file(scenario_path,exact_cap)));
+    LoadOptions aggregate_over;aggregate_over.limits.input_bytes=authored.size()+raw.size()-1;
+    rejected=accepted<InputFailure>(load_scenario_file(scenario_path,aggregate_over));CHECK(rejected.category==InputCategory::limit);
     std::string big="["+std::string(1000,' ')+"2]";
     {std::ofstream out(data_path,std::ios::binary);out<<big;}
     {std::ofstream out(scenario_path);out<<authored;}
