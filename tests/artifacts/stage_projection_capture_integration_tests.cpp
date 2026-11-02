@@ -142,3 +142,62 @@ TEST_CASE("four-state correlated geometry matches an independent oracle in all o
         CHECK(hull(projected_vertices(projection.projected_relation)) == hull(std::move(expected)));
     }
 }
+
+TEST_CASE("nonfuel planar geometry preserves named coordinate order against an independent oracle") {
+    // The relation stores north then east, while the state schema declares east then north.
+    Matrix vertices{4, 2, {0, 0, 0, 2, 3, 2, 3, 0}};
+    Matrix rays{0, 2, {}};
+    const auto source = take(sets::make_v({{"planar-integrator"}, 2, {"north", "east"}},
+        {take(numeric::snapshot(vertices)), take(numeric::snapshot(rays))}));
+
+    ar::StageProjectionSet relation;
+    relation.relation = source.as_handle();
+    relation.owner = {{"planar-integrator"}, source.metadata()->id};
+    relation.relation_coordinates = {1, 0};
+    ar::StageProjectionCaptureRequest input{
+        {"planar-integrator"}, {"planar-named-pair"},
+        {{"east", "m", {}, {}}, {"north", "m", {}, {}}},
+        {{{ar::CoordinateName{"north"}, ar::CoordinateName{"east"}}}},
+        {{{0}, 0.0, std::move(relation)}}, SetRelation::equivalent, Assurance::numerical};
+
+    const auto captured = ar::capture_stage_projections(input, projection_provider());
+    REQUIRE(std::holds_alternative<ar::StageProjectionBatchCapture>(captured));
+    const auto& batch = std::get<ar::StageProjectionBatchCapture>(captured);
+    REQUIRE(batch.records.size() == 1);
+    REQUIRE(std::holds_alternative<ar::StageProjectionSuccess>(batch.records[0].outcome));
+    const auto& projection = std::get<ar::StageProjectionSuccess>(batch.records[0].outcome).projection;
+    CHECK(projection.coordinates[0].label == "north");
+    CHECK(projection.coordinates[1].label == "east");
+    const std::vector<Point> expected{{0, 0}, {0, 2}, {3, 2}, {3, 0}};
+    CHECK(hull(projected_vertices(projection.projected_relation)) == hull(expected));
+}
+
+TEST_CASE("three-state nonfuel simplex uses declared names and reordered relation columns") {
+    // The relation stores east, north, altitude; the state schema declares altitude,
+    // east, north. This exercises a non-four-dimensional model and schema mapping.
+    Matrix vertices{4, 3, {0, 0, 1, 2, 0, 1, 0, 3, 1, 0, 0, 4}};
+    Matrix rays{0, 3, {}};
+    const auto source = take(sets::make_v({{"spatial-integrator"}, 3, {"east", "north", "altitude"}},
+        {take(numeric::snapshot(vertices)), take(numeric::snapshot(rays))}));
+
+    ar::StageProjectionSet relation;
+    relation.relation = source.as_handle();
+    relation.owner = {{"spatial-integrator"}, source.metadata()->id};
+    relation.relation_coordinates = {2, 0, 1};
+    ar::StageProjectionCaptureRequest input{
+        {"spatial-integrator"}, {"spatial-named-pair"},
+        {{"altitude", "m", {}, {}}, {"east", "m", {}, {}}, {"north", "m", {}, {}}},
+        {{{ar::CoordinateName{"east"}, ar::CoordinateName{"north"}}}},
+        {{{0}, 0.0, std::move(relation)}}, SetRelation::equivalent, Assurance::numerical};
+
+    const auto captured = ar::capture_stage_projections(input, projection_provider());
+    REQUIRE(std::holds_alternative<ar::StageProjectionBatchCapture>(captured));
+    const auto& batch = std::get<ar::StageProjectionBatchCapture>(captured);
+    REQUIRE(batch.records.size() == 1);
+    REQUIRE(std::holds_alternative<ar::StageProjectionSuccess>(batch.records[0].outcome));
+    const auto& projection = std::get<ar::StageProjectionSuccess>(batch.records[0].outcome).projection;
+    CHECK(projection.coordinates[0].label == "east");
+    CHECK(projection.coordinates[1].label == "north");
+    const std::vector<Point> expected{{0, 0}, {2, 0}, {0, 3}, {0, 0}};
+    CHECK(hull(projected_vertices(projection.projected_relation)) == hull(expected));
+}
