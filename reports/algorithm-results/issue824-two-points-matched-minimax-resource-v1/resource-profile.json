@@ -1,0 +1,63 @@
+{
+  "command": [
+    "python3",
+    "scripts/reports/exp824/make_matched_minimax_report.py",
+    "build/dev/csl_issue824_matched_minimax_report",
+    "build/dev",
+    "build/issue824-limited-raw-final2",
+    "--limiter-profile",
+    "reports/algorithm-results/issue824-two-points-matched-minimax-v1/limiter-profile.json",
+    "--profile-build",
+    "build/dev"
+  ],
+  "elapsed_wall_time_ns": 5146524803,
+  "enforced_limits": {
+    "memory_cgroup": "/sys/fs/cgroup/user.slice/user-1000.slice/user@1000.service/app.slice/run-p1335873-i1322738.scope",
+    "memory_max_bytes": 8589934592,
+    "memory_mechanism": "systemd user scope on Linux cgroup v2, memory.max",
+    "memory_swap_max_bytes": 0,
+    "process_tree_memory": true,
+    "process_tree_wall_time": true,
+    "wall_mechanism": "Python watchdog; SIGTERM then SIGKILL to supervised process group"
+  },
+  "host": {
+    "load_average_after": [
+      0.21826171875,
+      0.634765625,
+      0.65087890625
+    ],
+    "load_average_before": [
+      0.14990234375,
+      0.62841796875,
+      0.64892578125
+    ],
+    "logical_cpu_count": 8,
+    "machine": "x86_64",
+    "release": "7.2.8-9-omarchy",
+    "system": "Linux"
+  },
+  "measurement_scope": "five order-rotated Release repetitions per method, warmups, five end-to-end solver/check/serialization trials; build excluded",
+  "observed": {
+    "exit_code": 0,
+    "memory_events": [
+      "low 0",
+      "high 0",
+      "max 0",
+      "oom 0",
+      "oom_kill 0",
+      "oom_group_kill 0",
+      "sock_throttled 0"
+    ],
+    "process_tree_peak_memory_bytes": 26214400,
+    "timed_out": false
+  },
+  "profile": "comparison-program-default-enforced",
+  "requested_limits": {
+    "maximum_concurrent_jobs": 1,
+    "process_tree_memory_bytes": 8589934592,
+    "process_tree_wall_time_seconds": 300
+  },
+  "schema": "csl.issue824.resource-profile/1",
+  "started_monotonic_ns": 372641928147197,
+  "status": "completed"
+}

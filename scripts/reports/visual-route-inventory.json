@@ -284,6 +284,16 @@
       "follow_up_issue": 687
     },
     {
+      "source": "scripts/reports/exp824/finalize_limited_report.py",
+      "signal_count": 2,
+      "asset_name_literals": [
+        "geometry-reference-ellipsoid.svg",
+        "geometry-reference-parallelotope.svg"
+      ],
+      "disposition": "deferred-family-specific-migration",
+      "follow_up_issue": 687
+    },
+    {
       "source": "scripts/reports/exp824/make_ellipsoid_minimax_report.py",
       "signal_count": 6,
       "asset_name_literals": [
@@ -1176,6 +1186,15 @@
       "disposition": "publication-validation-or-frozen-route"
     },
     {
+      "source": "scripts/reports/stage_issue824_limited_minimax.py",
+      "signal_count": 4,
+      "asset_name_literals": [
+        "geometry-reference-ellipsoid.svg",
+        "geometry-reference-parallelotope.svg"
+      ],
+      "disposition": "publication-validation-or-frozen-route"
+    },
+    {
       "source": "scripts/reports/stage_issue824_matched_minimax.py",
       "signal_count": 4,
       "asset_name_literals": [
@@ -1582,7 +1601,7 @@
     },
     {
       "source": "scripts/reports/visual_examples.py",
-      "signal_count": 80,
+      "signal_count": 81,
       "asset_name_literals": [
         "adaptive-ode-replay.svg",
         "app01-plan-timing-v1.svg",
@@ -2570,6 +2589,17 @@
         "projections.svg"
       ],
       "index_sha256": "e92b4f8476e5dceb69e816df244016882da7e01f328c8c3599356a434a2a3d0d",
+      "disposition": "deferred: original frozen route-level readability review remains; companion availability is listed separately",
+      "follow_up_issue": 824
+    },
+    {
+      "route": "issue824-two-points-matched-minimax-resource-v1",
+      "source_bundle": "issue824-two-points-matched-minimax-resource-v1",
+      "assets": [
+        "geometry-reference-ellipsoid.svg",
+        "geometry-reference-parallelotope.svg"
+      ],
+      "index_sha256": "9206fe7b25539a999d4573266bf0be89fc4b6959e5e96a4065e31cbf7a16b85c",
       "disposition": "deferred: original frozen route-level readability review remains; companion availability is listed separately",
       "follow_up_issue": 824
     },

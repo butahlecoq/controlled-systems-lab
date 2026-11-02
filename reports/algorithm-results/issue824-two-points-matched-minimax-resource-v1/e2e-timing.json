@@ -1,0 +1,111 @@
+{
+  "median_ns": 996221488,
+  "path_scope": "Release solver run, exact rational check, serialization and hash verification",
+  "range_ns": [
+    984479433,
+    1020651837
+  ],
+  "schema": "csl.issue824.matched-minimax-e2e/1",
+  "trials": [
+    {
+      "check_sha256": "03784364c8555abf9c7afacd30aeadc934b90a40fb76d8a09ab290337cd48f09",
+      "elapsed_ns": 984479433,
+      "failed_attempts": [],
+      "failures": 0,
+      "load_average_after": [
+        0.14990234375,
+        0.62841796875,
+        0.64892578125
+      ],
+      "load_average_before": [
+        0.14990234375,
+        0.62841796875,
+        0.64892578125
+      ],
+      "result_sha256": "4fe02a64fc7126ca243ecc7926ed85081c54326c7e6ed602a9b4a01efce7c8d4",
+      "sample_count": 25,
+      "status": "completed",
+      "trial": 1
+    },
+    {
+      "check_sha256": "03784364c8555abf9c7afacd30aeadc934b90a40fb76d8a09ab290337cd48f09",
+      "elapsed_ns": 1020651837,
+      "failed_attempts": [],
+      "failures": 0,
+      "load_average_after": [
+        0.14990234375,
+        0.62841796875,
+        0.64892578125
+      ],
+      "load_average_before": [
+        0.14990234375,
+        0.62841796875,
+        0.64892578125
+      ],
+      "result_sha256": "747134f57cb99f95291dbafae15795907b1ce3bb14a81b275337b0b7f2f369bc",
+      "sample_count": 25,
+      "status": "completed",
+      "trial": 2
+    },
+    {
+      "check_sha256": "03784364c8555abf9c7afacd30aeadc934b90a40fb76d8a09ab290337cd48f09",
+      "elapsed_ns": 996221488,
+      "failed_attempts": [],
+      "failures": 0,
+      "load_average_after": [
+        0.21826171875,
+        0.634765625,
+        0.65087890625
+      ],
+      "load_average_before": [
+        0.14990234375,
+        0.62841796875,
+        0.64892578125
+      ],
+      "result_sha256": "b6a8e2559c210338a040a8557b8c408ec52db7045ffe688422738179878db760",
+      "sample_count": 25,
+      "status": "completed",
+      "trial": 3
+    },
+    {
+      "check_sha256": "03784364c8555abf9c7afacd30aeadc934b90a40fb76d8a09ab290337cd48f09",
+      "elapsed_ns": 987691053,
+      "failed_attempts": [],
+      "failures": 0,
+      "load_average_after": [
+        0.21826171875,
+        0.634765625,
+        0.65087890625
+      ],
+      "load_average_before": [
+        0.21826171875,
+        0.634765625,
+        0.65087890625
+      ],
+      "result_sha256": "5781aa03868aa25241ebbda2bc0a6cf7e8c65be921486ee0ced5dd51cf70a937",
+      "sample_count": 25,
+      "status": "completed",
+      "trial": 4
+    },
+    {
+      "check_sha256": "03784364c8555abf9c7afacd30aeadc934b90a40fb76d8a09ab290337cd48f09",
+      "elapsed_ns": 1003473292,
+      "failed_attempts": [],
+      "failures": 0,
+      "load_average_after": [
+        0.21826171875,
+        0.634765625,
+        0.65087890625
+      ],
+      "load_average_before": [
+        0.21826171875,
+        0.634765625,
+        0.65087890625
+      ],
+      "result_sha256": "03196c2975e5c20910538fb978b57104d5de827aed1e95edb7410d8ee12508f0",
+      "sample_count": 25,
+      "status": "completed",
+      "trial": 5
+    }
+  ]
+}

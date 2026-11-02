@@ -4,6 +4,7 @@ import importlib.util
 import json
 from pathlib import Path
 import shutil
+import sys
 import tempfile
 import unittest
 
@@ -13,6 +14,11 @@ SPEC = importlib.util.spec_from_file_location("issue824_limited_stage", STAGER_P
 assert SPEC is not None and SPEC.loader is not None
 STAGER = importlib.util.module_from_spec(SPEC)
 SPEC.loader.exec_module(STAGER)
+sys.path.insert(0, str(ROOT / "scripts/reports"))
+VISUAL_SPEC = importlib.util.spec_from_file_location("issue824_limited_visual_examples", ROOT / "scripts/reports/visual_examples.py")
+assert VISUAL_SPEC is not None and VISUAL_SPEC.loader is not None
+VISUAL = importlib.util.module_from_spec(VISUAL_SPEC)
+VISUAL_SPEC.loader.exec_module(VISUAL)
 BUNDLE = ROOT / "reports/algorithm-results/issue824-two-points-matched-minimax-resource-v1"
 
 
@@ -40,6 +46,20 @@ class Issue824LimitedMinimaxPublicationTest(unittest.TestCase):
             self.assertEqual({path.name for path in staged.iterdir()}, set(files))
             for name in files:
                 self.assertEqual((staged / name).read_bytes(), files[name])
+
+    def test_gallery_includes_resource_limited_route(self) -> None:
+        original_figures = VISUAL.SAVED_FIGURES
+        VISUAL.SAVED_FIGURES = tuple(
+            example for example in original_figures if example.get("route") == BUNDLE.name)
+        try:
+            with tempfile.TemporaryDirectory() as temporary:
+                site = Path(temporary)
+                STAGER.stage(BUNDLE, site)
+                cards, _ = VISUAL.saved_figure_sections(ROOT / "reports/algorithm-results/catalog.json", site)
+                self.assertIn("Compare five minimax set tracks under shared resource limits", cards)
+                self.assertIn("8 GiB process-tree profile", cards)
+        finally:
+            VISUAL.SAVED_FIGURES = original_figures
 
     def test_rejects_corrupt_resource_profile(self) -> None:
         with tempfile.TemporaryDirectory() as temporary:

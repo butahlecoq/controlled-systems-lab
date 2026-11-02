@@ -77,7 +77,8 @@ class Issue824MatchedMinimaxPublicationTest(unittest.TestCase):
         failed.pop("outcome")
         check = STAGER.check_matched_minimax.check(result)
         original_figures = VISUAL.SAVED_FIGURES
-        VISUAL.SAVED_FIGURES = (original_figures[-1],)
+        VISUAL.SAVED_FIGURES = tuple(
+            example for example in original_figures if example.get("route") == BUNDLE.name)
         try:
             with tempfile.TemporaryDirectory() as temporary:
                 site = Path(temporary)
