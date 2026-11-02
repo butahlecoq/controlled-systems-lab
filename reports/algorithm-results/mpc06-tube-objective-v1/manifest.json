@@ -1,0 +1,29 @@
+{
+  "files": {
+    "README.md": "93505934d1c29927594ae29e73b5fed2f483ce4daf426f3e7e00fe20e00e7c61",
+    "base-result.json": "398d15d20b6d0be15693dd52cdc14e1a537c9d35f44f7e071b3aec7eefd38900",
+    "base-scenario.json": "a130cf880dd600ac10690a950463b930f9745c4fcf1ab70155149e7ec699f55d",
+    "index.html": "229f79d63ec68fb960002e9823b5e0ebf2a70a7f4c1c2024b88e95b5aea2a838",
+    "result.json": "971974717bb647eab908c2dcde7cf591bcd6d477b58b863dbe54b8cd21eb7e0a",
+    "scenario.json": "ddf94484acddc19ae8788bd018f0eaab5a35d38c5bd74d04982c8ccb5cd869a3",
+    "trajectory.svg": "abba4dadc96e57077bf13dc9e1bf83cd3b7c49351c2d3713e41a15464f50b47c",
+    "verification.json": "12620e30e468941b7bb1e4343dbdd542bf1c8d54e02c725a96a036940118d0b3"
+  },
+  "report_id": "mpc06-tube-objective-v1",
+  "schema": "csl.mpc06-tube-objective-manifest/1",
+  "scope": "exact finite-horizon actual cost of one fixed nominal plan plus one fixed full-state tube feedback law; no timing or optimality claim",
+  "source_commit": "da5927b3166a0332cf732c4cded88444d3e39c3c",
+  "source_files": {
+    ".github/workflows/algorithm-reports.yml": "c749f8cd80424f3167a6d3034d7d9710b81734bf6dd305ba08349a85debd5c6a",
+    "benchmarks/scenarios/mpc06-nilpotent-tube-v1.json": "a130cf880dd600ac10690a950463b930f9745c4fcf1ab70155149e7ec699f55d",
+    "benchmarks/scenarios/mpc06-tube-objective-v1.json": "ddf94484acddc19ae8788bd018f0eaab5a35d38c5bd74d04982c8ccb5cd869a3",
+    "reports/algorithm-results/mpc06-nilpotent-tube-pilot-v1/result.json": "398d15d20b6d0be15693dd52cdc14e1a537c9d35f44f7e071b3aec7eefd38900",
+    "scripts/reports/mpc06/build_tube_objective.py": "d1ae329139b896971e4b0bd7628e1dab9c870a5e9b33da84ddd39b7bb59b9a9c",
+    "scripts/reports/mpc06/check_tube.py": "c7b826f048014b6cb1b811800b1c2afa81f8a0d1b673205b783e43ccb85b6d04",
+    "scripts/reports/mpc06/check_tube_objective.py": "d9bb1969351db0d6500f63ea0f3e412574def20a3078f23fe1fe281be0b7d513",
+    "scripts/reports/mpc06/render_tube_objective.py": "44c274edbefafca3d319b448ca80f4f8ddc7bd18db3f39fc2fc5bb32efc84feb",
+    "scripts/reports/mpc06/test_tube_objective.py": "9975705fdee6675aacdca9ca3834ed74a86e93e4ade49638eecec3c64f1f198c",
+    "scripts/reports/mpc06/tube_objective.py": "f113e6776ed33ef871a093846129fce13795b9ee00194159272e31bf3b170127",
+    "scripts/reports/stage_mpc06_tube_objective.py": "78986f7cf3430a8b73c597ff0db5fe98948aa9b52afd4640f4879da72cdbd6b2"
+  }
+}

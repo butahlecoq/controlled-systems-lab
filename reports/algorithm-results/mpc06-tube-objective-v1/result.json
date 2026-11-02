@@ -1,0 +1,604 @@
+{
+  "base_case_id": "double-integrator-nilpotent-tube-v1",
+  "case_id": "double-integrator-tube-objective-v1",
+  "coverage": {
+    "all_vertex_paths_satisfy_state_and_input_constraints": true,
+    "disturbance_vertices_checked": 8,
+    "expected_vertices": 8,
+    "stagewise_disturbance_box": [
+      "-1/8",
+      "1/8"
+    ]
+  },
+  "limitations": [
+    "one fixed zero nominal plan and one fixed ancillary gain; neither was optimized",
+    "the exact worst-case cost is a policy-specific finite-horizon value, not a fixed-plan minimax value or a globally optimal causal value",
+    "no terminal invariance or asymptotic stability claim is made",
+    "approximation comparisons remain gated by issues 99 and 100",
+    "the feedback policy assumes exact full-state observation before each input"
+  ],
+  "measurement": {
+    "performed": false,
+    "reason": "exact rational enumeration, not a timing experiment"
+  },
+  "objective": {
+    "continuous_box_maximum_argument": "The cost is a convex quadratic in the complete disturbance vector because it is a sum of squared affine state and input coordinates. A convex function on a compact box attains a maximum at some vertex; exact enumeration of all 2^T vertices therefore gives the exact maximum over the continuous disturbance box.",
+    "cost_gap": "3/8",
+    "formula": "sum(t=0..T-1, x_t^T I x_t + u_t^2) + x_T^T I x_T",
+    "nominal_surrogate_cost": "0",
+    "nominal_surrogate_formula": "same sum evaluated on z_t and v_t",
+    "worst_case_actual_cost": "3/8",
+    "worst_case_witness_count": 2,
+    "worst_case_witnesses": [
+      [
+        "-1/8",
+        "1/8",
+        "-1/8"
+      ],
+      [
+        "1/8",
+        "-1/8",
+        "1/8"
+      ]
+    ]
+  },
+  "policy_semantics": {
+    "is_minimax_optimum": false,
+    "optimized_variables": [],
+    "quantifier": "one fixed nominal sequence; at each stage the controller observes x_t and applies u_t=v_t+K(x_t-z_t); all stagewise disturbance sequences are then covered"
+  },
+  "schema": "csl.mpc06-tube-objective-result/1",
+  "source_commit": "da5927b3166a0332cf732c4cded88444d3e39c3c",
+  "source_identity": {
+    "base_result_sha256": "398d15d20b6d0be15693dd52cdc14e1a537c9d35f44f7e071b3aec7eefd38900",
+    "base_scenario_sha256": "a130cf880dd600ac10690a950463b930f9745c4fcf1ab70155149e7ec699f55d",
+    "driver_sha256": "bdd3edb305b46c324baa2ef9e676ff14a1d84274a2c1324b8de58cebeb608c5c",
+    "objective_scenario_sha256": "ddf94484acddc19ae8788bd018f0eaab5a35d38c5bd74d04982c8ccb5cd869a3"
+  },
+  "vertex_paths": [
+    {
+      "actual_cost": "1/8",
+      "controls": [
+        "0",
+        "1/4",
+        "1/8"
+      ],
+      "disturbances": [
+        "-1/8",
+        "-1/8",
+        "-1/8"
+      ],
+      "nominal_states": [
+        [
+          "0",
+          "0"
+        ],
+        [
+          "0",
+          "0"
+        ],
+        [
+          "0",
+          "0"
+        ],
+        [
+          "0",
+          "0"
+        ]
+      ],
+      "nominal_surrogate_cost": "0",
+      "stage_costs": [
+        {
+          "input": "0",
+          "state": "0",
+          "total": "0"
+        },
+        {
+          "input": "1/16",
+          "state": "1/64",
+          "total": "5/64"
+        },
+        {
+          "input": "1/64",
+          "state": "1/64",
+          "total": "1/32"
+        }
+      ],
+      "states": [
+        [
+          "0",
+          "0"
+        ],
+        [
+          "0",
+          "-1/8"
+        ],
+        [
+          "-1/8",
+          "0"
+        ],
+        [
+          "-1/8",
+          "0"
+        ]
+      ],
+      "terminal_cost": "1/64"
+    },
+    {
+      "actual_cost": "3/16",
+      "controls": [
+        "0",
+        "1/4",
+        "1/8"
+      ],
+      "disturbances": [
+        "-1/8",
+        "-1/8",
+        "1/8"
+      ],
+      "nominal_states": [
+        [
+          "0",
+          "0"
+        ],
+        [
+          "0",
+          "0"
+        ],
+        [
+          "0",
+          "0"
+        ],
+        [
+          "0",
+          "0"
+        ]
+      ],
+      "nominal_surrogate_cost": "0",
+      "stage_costs": [
+        {
+          "input": "0",
+          "state": "0",
+          "total": "0"
+        },
+        {
+          "input": "1/16",
+          "state": "1/64",
+          "total": "5/64"
+        },
+        {
+          "input": "1/64",
+          "state": "1/64",
+          "total": "1/32"
+        }
+      ],
+      "states": [
+        [
+          "0",
+          "0"
+        ],
+        [
+          "0",
+          "-1/8"
+        ],
+        [
+          "-1/8",
+          "0"
+        ],
+        [
+          "-1/8",
+          "1/4"
+        ]
+      ],
+      "terminal_cost": "5/64"
+    },
+    {
+      "actual_cost": "3/8",
+      "controls": [
+        "0",
+        "1/4",
+        "-3/8"
+      ],
+      "disturbances": [
+        "-1/8",
+        "1/8",
+        "-1/8"
+      ],
+      "nominal_states": [
+        [
+          "0",
+          "0"
+        ],
+        [
+          "0",
+          "0"
+        ],
+        [
+          "0",
+          "0"
+        ],
+        [
+          "0",
+          "0"
+        ]
+      ],
+      "nominal_surrogate_cost": "0",
+      "stage_costs": [
+        {
+          "input": "0",
+          "state": "0",
+          "total": "0"
+        },
+        {
+          "input": "1/16",
+          "state": "1/64",
+          "total": "5/64"
+        },
+        {
+          "input": "9/64",
+          "state": "5/64",
+          "total": "7/32"
+        }
+      ],
+      "states": [
+        [
+          "0",
+          "0"
+        ],
+        [
+          "0",
+          "-1/8"
+        ],
+        [
+          "-1/8",
+          "1/4"
+        ],
+        [
+          "1/8",
+          "-1/4"
+        ]
+      ],
+      "terminal_cost": "5/64"
+    },
+    {
+      "actual_cost": "5/16",
+      "controls": [
+        "0",
+        "1/4",
+        "-3/8"
+      ],
+      "disturbances": [
+        "-1/8",
+        "1/8",
+        "1/8"
+      ],
+      "nominal_states": [
+        [
+          "0",
+          "0"
+        ],
+        [
+          "0",
+          "0"
+        ],
+        [
+          "0",
+          "0"
+        ],
+        [
+          "0",
+          "0"
+        ]
+      ],
+      "nominal_surrogate_cost": "0",
+      "stage_costs": [
+        {
+          "input": "0",
+          "state": "0",
+          "total": "0"
+        },
+        {
+          "input": "1/16",
+          "state": "1/64",
+          "total": "5/64"
+        },
+        {
+          "input": "9/64",
+          "state": "5/64",
+          "total": "7/32"
+        }
+      ],
+      "states": [
+        [
+          "0",
+          "0"
+        ],
+        [
+          "0",
+          "-1/8"
+        ],
+        [
+          "-1/8",
+          "1/4"
+        ],
+        [
+          "1/8",
+          "0"
+        ]
+      ],
+      "terminal_cost": "1/64"
+    },
+    {
+      "actual_cost": "5/16",
+      "controls": [
+        "0",
+        "-1/4",
+        "3/8"
+      ],
+      "disturbances": [
+        "1/8",
+        "-1/8",
+        "-1/8"
+      ],
+      "nominal_states": [
+        [
+          "0",
+          "0"
+        ],
+        [
+          "0",
+          "0"
+        ],
+        [
+          "0",
+          "0"
+        ],
+        [
+          "0",
+          "0"
+        ]
+      ],
+      "nominal_surrogate_cost": "0",
+      "stage_costs": [
+        {
+          "input": "0",
+          "state": "0",
+          "total": "0"
+        },
+        {
+          "input": "1/16",
+          "state": "1/64",
+          "total": "5/64"
+        },
+        {
+          "input": "9/64",
+          "state": "5/64",
+          "total": "7/32"
+        }
+      ],
+      "states": [
+        [
+          "0",
+          "0"
+        ],
+        [
+          "0",
+          "1/8"
+        ],
+        [
+          "1/8",
+          "-1/4"
+        ],
+        [
+          "-1/8",
+          "0"
+        ]
+      ],
+      "terminal_cost": "1/64"
+    },
+    {
+      "actual_cost": "3/8",
+      "controls": [
+        "0",
+        "-1/4",
+        "3/8"
+      ],
+      "disturbances": [
+        "1/8",
+        "-1/8",
+        "1/8"
+      ],
+      "nominal_states": [
+        [
+          "0",
+          "0"
+        ],
+        [
+          "0",
+          "0"
+        ],
+        [
+          "0",
+          "0"
+        ],
+        [
+          "0",
+          "0"
+        ]
+      ],
+      "nominal_surrogate_cost": "0",
+      "stage_costs": [
+        {
+          "input": "0",
+          "state": "0",
+          "total": "0"
+        },
+        {
+          "input": "1/16",
+          "state": "1/64",
+          "total": "5/64"
+        },
+        {
+          "input": "9/64",
+          "state": "5/64",
+          "total": "7/32"
+        }
+      ],
+      "states": [
+        [
+          "0",
+          "0"
+        ],
+        [
+          "0",
+          "1/8"
+        ],
+        [
+          "1/8",
+          "-1/4"
+        ],
+        [
+          "-1/8",
+          "1/4"
+        ]
+      ],
+      "terminal_cost": "5/64"
+    },
+    {
+      "actual_cost": "3/16",
+      "controls": [
+        "0",
+        "-1/4",
+        "-1/8"
+      ],
+      "disturbances": [
+        "1/8",
+        "1/8",
+        "-1/8"
+      ],
+      "nominal_states": [
+        [
+          "0",
+          "0"
+        ],
+        [
+          "0",
+          "0"
+        ],
+        [
+          "0",
+          "0"
+        ],
+        [
+          "0",
+          "0"
+        ]
+      ],
+      "nominal_surrogate_cost": "0",
+      "stage_costs": [
+        {
+          "input": "0",
+          "state": "0",
+          "total": "0"
+        },
+        {
+          "input": "1/16",
+          "state": "1/64",
+          "total": "5/64"
+        },
+        {
+          "input": "1/64",
+          "state": "1/64",
+          "total": "1/32"
+        }
+      ],
+      "states": [
+        [
+          "0",
+          "0"
+        ],
+        [
+          "0",
+          "1/8"
+        ],
+        [
+          "1/8",
+          "0"
+        ],
+        [
+          "1/8",
+          "-1/4"
+        ]
+      ],
+      "terminal_cost": "5/64"
+    },
+    {
+      "actual_cost": "1/8",
+      "controls": [
+        "0",
+        "-1/4",
+        "-1/8"
+      ],
+      "disturbances": [
+        "1/8",
+        "1/8",
+        "1/8"
+      ],
+      "nominal_states": [
+        [
+          "0",
+          "0"
+        ],
+        [
+          "0",
+          "0"
+        ],
+        [
+          "0",
+          "0"
+        ],
+        [
+          "0",
+          "0"
+        ]
+      ],
+      "nominal_surrogate_cost": "0",
+      "stage_costs": [
+        {
+          "input": "0",
+          "state": "0",
+          "total": "0"
+        },
+        {
+          "input": "1/16",
+          "state": "1/64",
+          "total": "5/64"
+        },
+        {
+          "input": "1/64",
+          "state": "1/64",
+          "total": "1/32"
+        }
+      ],
+      "states": [
+        [
+          "0",
+          "0"
+        ],
+        [
+          "0",
+          "1/8"
+        ],
+        [
+          "1/8",
+          "0"
+        ],
+        [
+          "1/8",
+          "0"
+        ]
+      ],
+      "terminal_cost": "1/64"
+    }
+  ]
+}
