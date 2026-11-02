@@ -1,0 +1,12 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Pendulum-v0 finite-action pilot</title>
+<style>body{margin:0;background:#101820;color:#edf3f6;font:16px/1.5 system-ui,sans-serif}main{max-width:1120px;margin:auto;padding:24px}figure{margin:24px 0}img{width:100%;height:auto;border:1px solid #344653}table{border-collapse:collapse;width:100%}th,td{padding:10px;text-align:left;border-bottom:1px solid #40515d}a{color:#9fd5ff}code{overflow-wrap:anywhere}</style></head>
+<body><main><h1>Pendulum-v0: finite-action control pilot</h1>
+<p>This source-attributed report re-expresses the Gym v0.21.0 Pendulum equations and scores a short fixed open-loop catalogue. It is an authored initial-state and action-catalogue adaptation, not the continuous-action, full-horizon Gym task.</p>
+<figure><img src="phase-plane.svg" alt="Angle versus angular velocity trajectories for the selected finite action plan and zero-torque baseline"><figcaption>Unwrapped angle versus angular velocity; circles mark initial and terminal states.</figcaption></figure>
+<table><thead><tr><th>Track</th><th>Accumulated cost</th><th>Terminal (theta, theta dot)</th></tr></thead><tbody><tr><th>Finite catalogue optimum</th><td>41.0593572770</td><td>(2.680070, 4.118594)</td></tr><tr><th>Zero torque</th><td>60.1957934030</td><td>(3.358145, 5.677359)</td></tr></tbody></table>
+<p>Finite scope: 9,765,625 open-loop plans, 10 steps of 0.05 s, torque catalogue [-2.0, -1.0, 0.0, 1.0, 2.0] N·m, authored initial state [1.5, 0.0]. The search is exhaustive only over this catalogue and horizon.</p>
+<p>Upstream notebook: <a href="https://github.com/imm-rl-lab/optimal_control/tree/f4d76c60f4003f50954174e96eafd8e514bd5441/Environments/Pendulum">pinned `optimal_control` source</a> (blob <code>db58eb7779d84a3a5032288734d61f6d6dcdba09</code>). Adopted simulator sources: <a href="https://github.com/openai/gym/blob/c755d5c35a25ab118746e2ba885894ff66fb8c43/gym/envs/classic_control/pendulum.py">Pendulum dynamics</a> and <a href="https://github.com/openai/gym/blob/c755d5c35a25ab118746e2ba885894ff66fb8c43/gym/envs/__init__.py">Gym registry</a>; both are pinned to Gym v0.21.0 commit <code>c755d5c35a25ab118746e2ba885894ff66fb8c43</code>. Raw record and figure data are included beside this page.</p>
+<p>Reproduction: build the optional <code>csl_env717_pendulum</code> report driver and run <code>python3 scripts/reports/env717/check_pendulum.py &lt;driver&gt; --output &lt;new-directory&gt;</code>.</p>
+</main></body></html>
