@@ -5028,7 +5028,7 @@
     }
   ],
   "schema": "csl.env717-dubins-car/1",
-  "source_commit": "c75a63204349e29d91b585751c3cd621bf8161c6",
+  "source_commit": "3f7337e8b66bf10bdc973ff5844e0311a3e3c42d",
   "source_file": "Environments/DubinsCar/DubinsCar_Terminal.py",
   "source_file_blob": "98c7cda22d81248a25e22374e144ce8d605c45c2",
   "source_license": "no license declared in upstream repository metadata",
