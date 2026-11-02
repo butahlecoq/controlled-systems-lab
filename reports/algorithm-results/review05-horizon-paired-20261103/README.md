@@ -32,7 +32,7 @@ From the repository root, set `BUILD` to an empty Release build directory and
 captured build.
 
 ```sh
-cmake -S benchmarks/reporting/review05 -B "$BUILD" \
+mise exec cmake@3.31.6 -- cmake -S benchmarks/reporting/review05 -B "$BUILD" \
   -DCSL_SOURCE_ROOT="$PWD" -DCMAKE_BUILD_TYPE=Release -G Ninja
 ninja -C "$BUILD" -j4 csl_review05_horizon_ladder
 python3 benchmarks/reporting/review05/run_horizon_ladder.py \
