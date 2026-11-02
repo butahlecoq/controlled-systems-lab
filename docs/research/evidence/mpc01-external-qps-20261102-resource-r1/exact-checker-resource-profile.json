@@ -1,0 +1,40 @@
+{
+  "command": [
+    "/usr/bin/python3",
+    "/home/butahlecoq/.local/share/codex/worktrees/mpc01-external-capture-20261102/scripts/reports/mpc01/verify_saved_exact_optimality.py",
+    "--attempts",
+    "/home/butahlecoq/.local/share/codex/captures/mpc01-resource-20261102/runner.stdout.jsonl",
+    "--records",
+    "/home/butahlecoq/.local/share/codex/captures/mpc01-resource-20261102/comparison-records.jsonl",
+    "--double-integrator",
+    "/home/butahlecoq/.local/share/codex/worktrees/mpc01-external-capture-20261102/examples/scenarios/double-integrator-generality.json",
+    "--b04-case",
+    "/home/butahlecoq/.local/share/codex/worktrees/mpc01-external-capture-20261102/docs/research/evidence/b04-reference-v1/canonical-case.json",
+    "--b04-reference",
+    "/home/butahlecoq/.local/share/codex/worktrees/mpc01-external-capture-20261102/docs/research/evidence/b04-reference-v1/exact-optimal-reference.json",
+    "--output",
+    "/home/butahlecoq/.local/share/codex/captures/mpc01-resource-20261102/exact-candidate-checks.jsonl"
+  ],
+  "elapsed_wall_time_ns": 137986814,
+  "exit_code": 0,
+  "memory_events": [
+    "low 0",
+    "high 0",
+    "max 0",
+    "oom 0",
+    "oom_kill 0",
+    "oom_group_kill 0",
+    "sock_throttled 0"
+  ],
+  "memory_max_bytes": 8589934592,
+  "memory_mechanism": "systemd user scope on Linux cgroup v2, memory.max",
+  "memory_swap_max_bytes": 0,
+  "peak_process_tree_memory_bytes": 21962752,
+  "schema": "csl.mpc01-checker-resource-profile/1",
+  "status": "completed",
+  "systemd_scope_invocation_id": "136b5c6a44fd48b085f7f4f02ac2b6487f",
+  "systemd_scope_unit": "run-p1551049-i1531527.scope",
+  "timeout_seconds": 5,
+  "verified_candidates": 90,
+  "wall_mechanism": "Python watchdog; SIGTERM then SIGKILL to checker process group"
+}

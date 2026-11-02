@@ -1,0 +1,24 @@
+{
+  "attempt_rows": 140,
+  "attempts_per_case_record": [
+    20,
+    20,
+    20,
+    20,
+    20,
+    20,
+    20
+  ],
+  "case_records": 7,
+  "elapsed_wall_time_ns": 1702668091,
+  "process_tree_peak_memory_bytes": 24743936,
+  "record_file_sha256": "88acdb74bda3a7d25904b975454fffedd69c05669737a14be7abddfd5d44ced6",
+  "runner_stdout_sha256": "c0bf8454ab138da267c7fa680b259c1343b138aeab23b863f8d27e3b12dcbdb4",
+  "status": "completed",
+  "status_counts": {
+    "passed": 140
+  },
+  "termination_counts": {
+    "completed": 140
+  }
+}
