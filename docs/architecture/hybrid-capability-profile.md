@@ -79,3 +79,6 @@ adapter-specific and are checked by preflight.
 
 The implementation issue remains open for broader adapter/resource evidence,
 operation admission, continuous-family coverage, and capability validation.
+The two current saved-report routes and their manifest-listed files and ZIPs
+were verified against the live main-only Pages site on 2026-11-02; details are
+recorded in [published algorithm results](published-algorithm-results.md#ext-07-hybrid-profile-report).

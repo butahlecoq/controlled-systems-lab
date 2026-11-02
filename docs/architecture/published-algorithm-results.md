@@ -130,8 +130,14 @@ verifier. The current bundle retains nonempty sanitized Release build output,
 a standalone feasible-set plot, raw rows, and an offline ZIP. The one-parameter
 verifier is not measured by either two-control bundle. Broader independent
 continuous-family oracle coverage and resource-scale evidence remain open
-EXT-07 acceptance items. Main-only Pages
-publication and live URL/hash verification remain pending.
+EXT-07 acceptance items. Main-only Pages publication is live at
+[`ext07-hybrid-51d9ee2e89d240eb`](https://butahlecoq.github.io/controlled-systems-lab/ext07-hybrid-51d9ee2e89d240eb/index.html)
+and
+[`ext07-hybrid-two-parameter-8ad871b5ea29fc7b`](https://butahlecoq.github.io/controlled-systems-lab/ext07-hybrid-two-parameter-8ad871b5ea29fc7b/index.html).
+On 2026-11-02, both routes returned HTTP 200, the home page linked both IDs,
+all 16 manifest-listed files in each route matched their recorded SHA-256, and
+each published offline ZIP matched its repository copy. This verifies these
+two frozen bundles only; it does not resolve the remaining EXT-07 evidence gaps.
 
 ## EXT-02 finite/mixed branch portfolio report
 
