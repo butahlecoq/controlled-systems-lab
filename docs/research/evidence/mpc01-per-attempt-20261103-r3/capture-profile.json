@@ -1,0 +1,32 @@
+{
+  "attempt_count": 140,
+  "attempt_memory_limit_bytes": 8589934592,
+  "attempt_memory_swap_limit_bytes": 0,
+  "attempt_scope": "one fixture, solver, start mode and repetition per transient systemd scope",
+  "attempt_wall_limit_seconds": 300,
+  "finished_at": "2026-11-02T21:40:41.248634+00:00",
+  "host": {
+    "cpu_model": "AMD Ryzen 5 3550H with Radeon Vega Mobile Gfx",
+    "hardware_metadata_collected_at": "2026-11-02T21:41:29.256231+00:00",
+    "kernel_release": "7.2.8-9-omarchy",
+    "load_average_after": [
+      0.73974609375,
+      0.7470703125,
+      0.91796875
+    ],
+    "load_average_before": [
+      0.4814453125,
+      0.70556640625,
+      0.91015625
+    ],
+    "logical_cpu_count": 8,
+    "machine": "x86_64",
+    "physical_memory_total_bytes": 8108216320,
+    "platform": "linux",
+    "system": "Linux"
+  },
+  "maximum_concurrent_jobs": 1,
+  "schema": "csl.mpc01-per-attempt-capture-profile/1",
+  "solver_threads": 1,
+  "started_at": "2026-11-02T21:40:14.512292+00:00"
+}

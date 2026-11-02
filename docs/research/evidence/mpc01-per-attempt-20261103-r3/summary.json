@@ -1,0 +1,26 @@
+{
+  "attempts": 140,
+  "completed": 140,
+  "failed": 0,
+  "fixtures": [
+    "ts01",
+    "ts02",
+    "ts03-singular",
+    "infeasible",
+    "unbounded",
+    "double-integrator-421",
+    "b04-reference-v1"
+  ],
+  "methods": [
+    "osqp-sparse-qp",
+    "hpipm-structured-ocp-qp"
+  ],
+  "repetitions": 5,
+  "resource_limited": 0,
+  "schema": "csl.mpc01-resource-attempt-summary/1",
+  "start_modes": [
+    "cold",
+    "warm_if_available"
+  ],
+  "timed_out": 0
+}
